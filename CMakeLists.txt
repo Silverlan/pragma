@@ -197,6 +197,9 @@ search_lib_recursive_ext(DEPENDENCY_LUASYSTEM_LIBRARY luasystem)
 set(DEPENDENCY_MATHUTIL_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/mathutil/include CACHE PATH "Path to include directory.")
 search_lib_recursive_ext(DEPENDENCY_MATHUTIL_LIBRARY mathutil)
 
+set(DEPENDENCY_UTIL_UNICODE_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_unicode/include CACHE PATH "Path to include directory.")
+search_lib_recursive_ext(DEPENDENCY_UTIL_UNICODE_LIBRARY util_unicode)
+
 set(DEPENDENCY_SHAREDUTILS_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/sharedutils/include CACHE PATH "Path to include directory.")
 search_lib_recursive_ext(DEPENDENCY_SHAREDUTILS_LIBRARY sharedutils)
 search_lib_recursive(DEPENDENCY_SHAREDUTILS_LIBRARY_STATIC external_libs/sharedutils-static/${BINARY_PRAGMA_DIR} sharedutils-static STATIC)
@@ -361,6 +364,9 @@ endif()
 
 set(DEPENDENCY_CPPBEZIERFIT_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/cppbezierfit/include CACHE PATH "Path to include directory.")
 search_lib_recursive(DEPENDENCY_CPPBEZIERFIT_LIBRARY third_party_libs/cppbezierfit/${BINARY_PRAGMA_DIR} cppbezierfit STATIC)
+
+search_lib_recursive(DEPENDENCY_VKV_PARSER_LIBRARY third_party_libs/vkvparser/${BINARY_PRAGMA_DIR} KVParser)
+set(DEPENDENCY_VKV_PARSER_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/vkvparser/include CACHE PATH "Path to include directory.")
 
 set(DEPENDENCY_SPDLOG_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/spdlog/include CACHE PATH "Path to include directory.")
 search_lib_recursive(DEPENDENCY_SPDLOG_LIBRARY third_party_libs/spdlog/${BINARY_PRAGMA_DIR} spdlog$<$<CONFIG:Debug>:d>)
@@ -784,6 +790,11 @@ register_third_party_library(cppbezierfit)
 set_target_folder(cppbezierfit third_party_libs)
 #
 
+# VKVParser
+register_third_party_library(vkvparser)
+set_target_folder(KVParser third_party_libs)
+#
+
 # spdlog
 set(SPDLOG_BUILD_SHARED ON CACHE BOOL ON FORCE)
 set(SPDLOG_BUILD_PIC ON CACHE BOOL ON FORCE)
@@ -1067,18 +1078,18 @@ add_dependencies(util_pad zip)
 # add_dependencies(util_archive bsa)
 
 add_dependencies(util_image mathutil vfilesystem sharedutils png)
-add_dependencies(materialsystem datasystem util_image png VTFLib13 util_source2 util_udm)
+add_dependencies(materialsystem KVParser datasystem util_image png VTFLib13 util_source2 util_udm)
 add_dependencies(mathutil sharedutils-static)
 add_dependencies(sharedutils mathutil)
 add_dependencies(vfilesystem sharedutils)
 add_dependencies(datasystem vfilesystem)
 add_dependencies(luasystem vfilesystem luabind)
-add_dependencies(materialsystem datasystem util_image png VTFLib13 util_source2)
 add_dependencies(iglfw glfw)
 add_dependencies(iglfw vfilesystem)
 add_dependencies(prosper vfilesystem iglfw util_image util_udm muparserx lz4)
 
 add_dependencies(cmaterialsystem materialsystem util_image prosper VTFLib13)
+add_dependencies(util_formatted_text util_unicode)
 add_dependencies(wgui cmaterialsystem util_formatted_text)
 
 add_dependencies(util_sound vfilesystem mpaheader ogg vorbis vorbisfile)
@@ -1092,7 +1103,7 @@ if(WIN32)
 add_dependencies(util_zip 7zpp)
 endif()
 
-add_dependencies(shared materialsystem util_zip wms_shared util_pragma_doc luasystem networkmanager muparserx libz2 bzip2 clip2tri-static clipper-static poly2tri-static util_udm panima util_bsp util_smdmodel util_source_script rectangle_bin_pack Recast Detour util_pad noise-static noiseutils-static ogg vorbis vorbisfile cppbezierfit spdlog fmt)
+add_dependencies(shared materialsystem util_zip wms_shared util_pragma_doc luasystem networkmanager muparserx libz2 bzip2 clip2tri-static clipper-static poly2tri-static util_udm panima util_bsp util_smdmodel util_source_script rectangle_bin_pack Recast Detour util_pad noise-static noiseutils-static ogg vorbis vorbisfile cppbezierfit spdlog fmt util_unicode)
 add_dependencies(ishared util_udm shared)
 add_dependencies(iclient ishared client)
 add_dependencies(iserver ishared server)
@@ -1181,6 +1192,7 @@ pragma_install(util_image "${BINARY_OUTPUT_DIR}")
 pragma_install(util_sound "${BINARY_OUTPUT_DIR}")
 pragma_install(vfilesystem "${BINARY_OUTPUT_DIR}")
 pragma_install(wgui "${BINARY_OUTPUT_DIR}")
+pragma_install(util_unicode "${BINARY_OUTPUT_DIR}")
 
 message("Custom install targets: ${PRAGMA_INSTALL_CUSTOM_TARGETS}")
 add_custom_target(pragma-install
@@ -1307,8 +1319,9 @@ pragma_install_lib("${DEPENDENCY_LIBZIP_LIBRARY}" "${BINARY_OUTPUT_DIR}")
 pragma_install_lib("${DEPENDENCY_LPNG_LIBRARY}" "${BINARY_OUTPUT_DIR}")
 pragma_install_lib("${DEPENDENCY_SPDLOG_LIBRARY}" "${BINARY_OUTPUT_DIR}")
 pragma_install_lib("${DEPENDENCY_MPAHEADER_LIBRARY}" "${BINARY_OUTPUT_DIR}")
+pragma_install_lib("${DEPENDENCY_VKV_PARSER_LIBRARY}" "${BINARY_OUTPUT_DIR}")
 if(WIN32)
-pragma_install_lib_c("${DEPENDENCY_ZLIB_LIBRARY}" zlib1 "${BINARY_OUTPUT_DIR}")
+	pragma_install_lib_c("${DEPENDENCY_ZLIB_LIBRARY}" zlib1 "${BINARY_OUTPUT_DIR}")
 else()
     pragma_install_lib("${DEPENDENCY_ZLIB_LIBRARY}" "${BINARY_OUTPUT_DIR}")
 endif()
@@ -1325,6 +1338,8 @@ function(pragma_install_file FILE_PATH INSTALL_PATH)
 	)
 endfunction(pragma_install_file)
 
+pragma_install_file("${DEPENDENCY_ICU_ICUUC_BINARY}" "${BINARY_OUTPUT_DIR}")
+pragma_install_file("${DEPENDENCY_ICU_ICUDT_BINARY}" "${BINARY_OUTPUT_DIR}")
 
 function(pragma_install_program FILE_PATH INSTALL_PATH)
     if("${FILE_PATH}" STREQUAL "")

@@ -1,173 +1,3 @@
-"onyx"
-{
-	$float ior 1.572
-}
-"bouncy"
-{
-	$float friction 0.8
-	$float restitution 1.1
-	"pbr"
-	{
-		$float metalness 0.208
-		$float roughness 0.804
-	}
-}
-"skin_01"
-{
-	"pbr"
-	{
-		"subsurface_scattering"
-		{
-			$srgba color [111,58,33,255]
-			$vec3 scatter_color [0.367000,0.137000,0.068000]
-			$vec3 radius_mm [3.670000,1.370000,0.680000]
-			$float factor 0.01
-		}
-	}
-}
-"gravel"
-{
-	$float friction 0.6
-	$float restitution 0.1
-	"pbr"
-	{
-		$float metalness 0.263
-		$float roughness 0.659
-	}
-	$string footsteps "fx.fst_gravel"
-	"audio"
-	{
-		$float low_frequency_absorption 0.6
-		$float mid_frequency_absorption 0.7
-		$float high_frequency_absorption 0.8
-		$float scattering 0.05
-		$float low_frequency_transmission 0.031
-		$float mid_frequency_transmission 0.012
-		$float high_frequency_transmission 0.008
-	}
-}
-"brick"
-{
-	$float friction 0.8
-	$float restitution 0.13
-	"pbr"
-	{
-		$float metalness 0.216
-		$float roughness 0.757
-	}
-	$string footsteps "fx.fst_rock"
-	$string impact_soft "fx.phys_impact_rock_soft"
-	$string impact_hard "fx.phys_impact_rock_soft"
-	"audio"
-	{
-		$float low_frequency_absorption 0.03
-		$float mid_frequency_absorption 0.04
-		$float high_frequency_absorption 0.07
-		$float scattering 0.05
-		$float low_frequency_transmission 0.015
-		$float mid_frequency_transmission 0.015
-		$float high_frequency_transmission 0.015
-	}
-}
-"potato"
-{
-	"pbr"
-	{
-		"subsurface_scattering"
-		{
-			$srgba color [195,156,54,255]
-			$vec3 scatter_color [0.714000,0.361000,0.102000]
-			$vec3 radius_mm [14.270000,7.230000,2.040000]
-			$float factor 0.02
-		}
-	}
-}
-"soundproof"
-{
-	"audio"
-	{
-		$float low_frequency_absorption 1
-		$float mid_frequency_absorption 1
-		$float high_frequency_absorption 1
-		$float scattering 0
-		$float low_frequency_transmission 0
-		$float mid_frequency_transmission 0
-		$float high_frequency_transmission 0
-	}
-}
-"carpet"
-{
-	$float friction 0.6
-	$float restitution 0.2
-	"pbr"
-	{
-		$float metalness 0
-		$float roughness 0.5
-	}
-	$string footsteps "fx.fst_carpet"
-	"audio"
-	{
-		$float low_frequency_absorption 0.24
-		$float mid_frequency_absorption 0.69
-		$float high_frequency_absorption 0.73
-		$float scattering 0.05
-		$float low_frequency_transmission 0.02
-		$float mid_frequency_transmission 0.005
-		$float high_frequency_transmission 0.003
-	}
-}
-"ceramic"
-{
-	$float friction 0.4
-	"pbr"
-	{
-		$float metalness 0.365
-		$float roughness 0.51
-	}
-	"audio"
-	{
-		$float low_frequency_absorption 0.01
-		$float mid_frequency_absorption 0.02
-		$float high_frequency_absorption 0.02
-		$float scattering 0.05
-		$float low_frequency_transmission 0.06
-		$float mid_frequency_transmission 0.044
-		$float high_frequency_transmission 0.011
-	}
-}
-"glass"
-{
-	$float ior 1.67
-	"audio"
-	{
-		$float low_frequency_absorption 0.06
-		$float mid_frequency_absorption 0.03
-		$float high_frequency_absorption 0.02
-		$float scattering 0.05
-		$float low_frequency_transmission 0.06
-		$float mid_frequency_transmission 0.044
-		$float high_frequency_transmission 0.011
-	}
-	$float friction 0.19
-	$float restitution 0.65
-	"pbr"
-	{
-		$float metalness 0
-		$float roughness 0
-	}
-	$string footsteps "fx.fst_glass"
-}
-"cloth"
-{
-	$float friction 0.65
-	$float restitution 0.8
-	"pbr"
-	{
-		$float metalness 0
-		$float roughness 0.5
-	}
-	$string footsteps "fx.fst_carpet"
-}
 "acrylic_glass"
 {
 	$float ior 1.491
@@ -176,289 +6,25 @@
 {
 	$float ior 1.5485
 }
-"concrete"
+"air"
 {
-	$float friction 0.8
-	$float restitution 0.53
-	"pbr"
-	{
-		$float metalness 0.263
-		$float roughness 0.659
-	}
-	$string footsteps "fx.fst_concrete"
-	$string surface_type "tarmac"
-	"audio"
-	{
-		$float low_frequency_absorption 0.05
-		$float mid_frequency_absorption 0.07
-		$float high_frequency_absorption 0.08
-		$float scattering 0.05
-		$float low_frequency_transmission 0.015
-		$float mid_frequency_transmission 0.002
-		$float high_frequency_transmission 0.001
-	}
-}
-"quartz"
-{
-	$float ior 1.55
-}
-"dirt"
-{
-	$float friction 0.3
-	$float restitution 0
-	"pbr"
-	{
-		$float metalness 0.22
-		$float roughness 0.725
-	}
-	$string footsteps "fx.fst_dirt"
-}
-"marble"
-{
-	"pbr"
-	{
-		"subsurface_scattering"
-		{
-			$srgba color [212,202,192,255]
-			$vec3 scatter_color [0.851000,0.557000,0.395000]
-			$vec3 radius_mm [8.510000,5.570000,3.950000]
-			$float factor 0.01
-		}
-	}
-}
-"amber"
-{
-	$float ior 1.55
-}
-"grass"
-{
-	$float friction 0.25
-	$float restitution 0
-	"pbr"
-	{
-		$float metalness 0
-		$float roughness 0.4
-	}
-	$string footsteps "fx.fst_grass"
-}
-"ketchup"
-{
-	"pbr"
-	{
-		"subsurface_scattering"
-		{
-			$srgba color [42,2,1,255]
-			$vec3 scatter_color [0.476000,0.058000,0.039000]
-			$vec3 radius_mm [4.760000,0.580000,0.390000]
-			$float factor 0.01
-		}
-	}
+	$float ior 1
 }
 "alcohol"
 {
 	$float ior 1.36
 }
-"ice"
+"aluminum"
 {
-	$float ior 1.31
-	$float friction 0.05
-	$float restitution 0.5
-	"pbr"
-	{
-		$float metalness 0
-		$float roughness 0
-	}
-	$string footsteps "fx.fst_glass"
+	$float ior 1.415
 }
-"metal"
+"amber"
 {
-	$float friction 0.65
-	$float restitution 0.1
-	"pbr"
-	{
-		$float metalness 1
-		$float roughness 0.5
-	}
-	$string footsteps "fx.fst_metal"
-	"audio"
-	{
-		$float low_frequency_absorption 0.2
-		$float mid_frequency_absorption 0.07
-		$float high_frequency_absorption 0.06
-		$float scattering 0.05
-		$float low_frequency_transmission 0.2
-		$float mid_frequency_transmission 0.025
-		$float high_frequency_transmission 0.01
-	}
+	$float ior 1.55
 }
-"light_glass"
+"amethyst"
 {
-	$float ior 1.45
-}
-"plant"
-{
-	$float friction 0.45
-	$float restitution 0.23
-	"pbr"
-	{
-		$float metalness 0
-		$float roughness 0.4
-	}
-	$string footsteps "fx.fst_wood"
-	$string impact_soft "fx.phys_impact_wood_soft"
-	$string impact_hard "fx.phys_impact_wood_soft"
-}
-"snow_hard"
-{
-	$float friction 0.18
-	$float restitution 0.3
-	"pbr"
-	{
-		$float metalness 0
-		$float roughness 0.4
-	}
-	$string footsteps "fx.fst_snow_hard"
-}
-"snow"
-{
-	$float friction 0.14
-	$float restitution 0.1
-	"pbr"
-	{
-		$float metalness 0
-		$float roughness 0.4
-	}
-	$string footsteps "fx.fst_snow"
-}
-"plaster"
-{
-	$float friction 0.8
-	"pbr"
-	{
-		$float metalness 0.263
-		$float roughness 0.659
-	}
-	"audio"
-	{
-		$float low_frequency_absorption 0.12
-		$float mid_frequency_absorption 0.06
-		$float high_frequency_absorption 0.04
-		$float scattering 0.05
-		$float low_frequency_transmission 0.056
-		$float mid_frequency_transmission 0.056
-		$float high_frequency_transmission 0.004
-	}
-}
-"plastic"
-{
-	$float friction 0.85
-	$float restitution 0.74
-	"pbr"
-	{
-		$float metalness 0.263
-		$float roughness 0.5
-	}
-}
-"crown_glass"
-{
-	$float ior 1.51
-}
-"rock"
-{
-	$float friction 0.8
-	$float restitution 0.13
-	"pbr"
-	{
-		$float metalness 0.192
-		$float roughness 0.753
-	}
-	$string footsteps "fx.fst_rock"
-	$string impact_soft "fx.phys_impact_rock_soft"
-	$string impact_hard "fx.phys_impact_rock_soft"
-	"audio"
-	{
-		$float low_frequency_absorption 0.13
-		$float mid_frequency_absorption 0.2
-		$float high_frequency_absorption 0.24
-		$float scattering 0.05
-		$float low_frequency_transmission 0.015
-		$float mid_frequency_transmission 0.002
-		$float high_frequency_transmission 0.001
-	}
-}
-"asphalt"
-{
-	$float ior 1.635
-}
-"slippery"
-{
-	$float friction 0.03
-	$float restitution 0.4
-	"pbr"
-	{
-		$float metalness 0
-		$float roughness 0
-	}
-}
-"clear_plastic"
-{
-	$float ior 1.4
-}
-"water"
-{
-	$float ior 1.333
-	$string impact_effect "watersplash"
-	$float density 1000
-	$float friction 0.8
-	$float restitution 0
-	$string footsteps "fx.fst_water"
-	$string impact_bullet "fx.phys_impact_water_soft"
-	$string impact_soft "fx.phys_impact_water_soft"
-	$string impact_hard "fx.phys_impact_water_hard"
-	"pbr"
-	{
-		$float metalness 0
-		$float roughness 0
-	}
-	$float linear_drag_coefficient 2
-	$float wave_propagation 0.02
-	$float torque_drag_coefficient 6
-	$float wave_stiffness 0.0001
-}
-"wood"
-{
-	$float friction 0.4
-	$float restitution 0.68
-	"pbr"
-	{
-		$float metalness 0.322
-		$float roughness 0.686
-	}
-	$string footsteps "fx.fst_wood"
-	$string impact_soft "fx.phys_impact_wood_soft"
-	$string impact_hard "fx.phys_impact_wood_soft"
-	"audio"
-	{
-		$float low_frequency_absorption 0.11
-		$float mid_frequency_absorption 0.07
-		$float high_frequency_absorption 0.06
-		$float scattering 0.05
-		$float low_frequency_transmission 0.07
-		$float mid_frequency_transmission 0.014
-		$float high_frequency_transmission 0.005
-	}
-}
-"flesh"
-{
-	"pbr"
-	{
-		$float metalness 0
-		$float roughness 0.65
-	}
-}
-"ruby"
-{
-	$float ior 2.0895
+	$float ior 1.5485
 }
 "apple"
 {
@@ -467,10 +33,103 @@
 		"subsurface_scattering"
 		{
 			$srgba color [216,214,135,255]
-			$vec3 scatter_color [0.696000,0.640000,0.190000]
-			$vec3 radius_mm [6.960000,6.400000,1.900000]
 			$float factor 0.01
+			$vec3 radius_mm [6.96,6.4,1.9]
+			$vec3 scatter_color [0.696,0.64,0.19]
 		}
+	}
+}
+"asphalt"
+{
+	$float ior 1.635
+}
+"beer"
+{
+	$float ior 1.345
+}
+"benzene"
+{
+	$float ior 1.501
+}
+"bouncy"
+{
+	$float friction 0.8
+	"pbr"
+	{
+		$float metalness 0.208
+		$float roughness 0.804
+	}
+	$float restitution 1.1
+}
+"brick"
+{
+	"audio"
+	{
+		$float high_frequency_absorption 0.07
+		$float high_frequency_transmission 0.015
+		$float low_frequency_absorption 0.03
+		$float low_frequency_transmission 0.015
+		$float mid_frequency_absorption 0.04
+		$float mid_frequency_transmission 0.015
+		$float scattering 0.05
+	}
+	$string footsteps "fx.fst_rock"
+	$float friction 0.8
+	$string impact_hard "fx.phys_impact_rock_soft"
+	$string impact_soft "fx.phys_impact_rock_soft"
+	"pbr"
+	{
+		$float metalness 0.216
+		$float roughness 0.757
+	}
+	$float restitution 0.13
+}
+"bronze"
+{
+	$float ior 1.18
+}
+"bubble"
+{
+	$float ior 1.1
+}
+"carpet"
+{
+	"audio"
+	{
+		$float high_frequency_absorption 0.73
+		$float high_frequency_transmission 0.003
+		$float low_frequency_absorption 0.24
+		$float low_frequency_transmission 0.02
+		$float mid_frequency_absorption 0.69
+		$float mid_frequency_transmission 0.005
+		$float scattering 0.05
+	}
+	$string footsteps "fx.fst_carpet"
+	$float friction 0.6
+	"pbr"
+	{
+		$float metalness 0
+		$float roughness 0.5
+	}
+	$float restitution 0.2
+}
+"ceramic"
+{
+	"audio"
+	{
+		$float high_frequency_absorption 0.02
+		$float high_frequency_transmission 0.011
+		$float low_frequency_absorption 0.01
+		$float low_frequency_transmission 0.06
+		$float mid_frequency_absorption 0.02
+		$float mid_frequency_transmission 0.044
+		$float scattering 0.05
+	}
+	$float friction 0.4
+	"pbr"
+	{
+		$float metalness 0.365
+		$float roughness 0.51
 	}
 }
 "chicken_01"
@@ -480,9 +139,9 @@
 		"subsurface_scattering"
 		{
 			$srgba color [80,40,32,255]
-			$vec3 scatter_color [0.578000,0.195000,0.087000]
-			$vec3 radius_mm [11.610000,3.880000,1.750000]
 			$float factor 0.02
+			$vec3 radius_mm [11.61,3.88,1.75]
+			$vec3 scatter_color [0.578,0.195,0.087]
 		}
 	}
 }
@@ -493,23 +152,52 @@
 		"subsurface_scattering"
 		{
 			$srgba color [82,41,28,255]
-			$vec3 scatter_color [0.944000,0.335000,0.179000]
-			$vec3 radius_mm [9.440000,3.350000,1.790000]
 			$float factor 0.01
+			$vec3 radius_mm [9.44,3.35,1.79]
+			$vec3 scatter_color [0.944,0.335,0.179]
 		}
 	}
 }
-"iron"
+"clear_plastic"
 {
-	$float ior 2.95
+	$float ior 1.4
 }
-"standard_glass"
+"cloth"
 {
-	$float ior 1.52
+	$string footsteps "fx.fst_carpet"
+	$float friction 0.65
+	"pbr"
+	{
+		$float metalness 0
+		$float roughness 0.5
+	}
+	$float restitution 0.8
 }
-"sapphire"
+"concrete"
 {
-	$float ior 1.76
+	"audio"
+	{
+		$float high_frequency_absorption 0.08
+		$float high_frequency_transmission 0.001
+		$float low_frequency_absorption 0.05
+		$float low_frequency_transmission 0.015
+		$float mid_frequency_absorption 0.07
+		$float mid_frequency_transmission 0.002
+		$float scattering 0.05
+	}
+	$string footsteps "fx.fst_concrete"
+	$float friction 0.8
+	"pbr"
+	{
+		$float metalness 0.263
+		$float roughness 0.659
+	}
+	$float restitution 0.53
+	$string surface_type "tarmac"
+}
+"copper"
+{
+	$float ior 1.765
 }
 "cream"
 {
@@ -518,154 +206,207 @@
 		"subsurface_scattering"
 		{
 			$srgba color [216,214,135,255]
-			$vec3 scatter_color [0.753000,0.234000,0.127000]
-			$vec3 radius_mm [15.030000,4.660000,2.540000]
 			$float factor 0.02
+			$vec3 radius_mm [15.03,4.66,2.54]
+			$vec3 scatter_color [0.753,0.234,0.127]
 		}
 	}
 }
-"skin_02"
+"crown_glass"
 {
-	"pbr"
-	{
-		"subsurface_scattering"
-		{
-			$srgba color [159,110,87,255]
-			$vec3 scatter_color [0.482000,0.169000,0.109000]
-			$vec3 radius_mm [4.820000,1.690000,1.090000]
-			$float factor 0.01
-		}
-	}
-}
-"topaz"
-{
-	$float ior 1.6235
-}
-"diamond"
-{
-	$float ior 2.479
-}
-"skim_milk"
-{
-	"pbr"
-	{
-		"subsurface_scattering"
-		{
-			$srgba color [208,207,174,255]
-			$vec3 scatter_color [0.921000,0.522000,0.175000]
-			$vec3 radius_mm [18.420000,10.440000,3.500000]
-			$float factor 0.02
-		}
-	}
+	$float ior 1.51
 }
 "crystal"
 {
 	$float ior 1.87
 }
-"whole_milk"
+"diamond"
 {
+	$float ior 2.479
+}
+"dirt"
+{
+	$string footsteps "fx.fst_dirt"
+	$float friction 0.3
 	"pbr"
 	{
-		"subsurface_scattering"
-		{
-			$srgba color [232,225,194,255]
-			$vec3 scatter_color [0.545000,0.329000,0.125000]
-			$vec3 radius_mm [10.900000,6.580000,2.510000]
-			$float factor 0.02
-		}
+		$float metalness 0.22
+		$float roughness 0.725
 	}
-}
-"air"
-{
-	$float ior 1
-}
-"bubble"
-{
-	$float ior 1.1
-}
-"jade"
-{
-	$float ior 1.67
-}
-"titanium"
-{
-	$float ior 1.325
-}
-"liquid_methane"
-{
-	$float ior 1.15
-}
-"heavy_glass"
-{
-	$float ior 1.65
-}
-"flint_glass"
-{
-	$float ior 1.613
-}
-"obsidian"
-{
-	$float ior 1.495
-}
-"benzene"
-{
-	$float ior 1.501
-}
-"jasper"
-{
-	$float ior 1.54
-}
-"amethyst"
-{
-	$float ior 1.5485
-}
-"salt"
-{
-	$float ior 1.544
-}
-"sugar"
-{
-	$float ior 1.56
+	$float restitution 0
 }
 "emerald"
 {
 	$float ior 1.579
 }
-"aluminum"
-{
-	$float ior 1.415
-}
-"beer"
-{
-	$float ior 1.345
-}
-"bronze"
-{
-	$float ior 1.18
-}
-"copper"
-{
-	$float ior 1.765
-}
 "eye_lens"
 {
 	$float ior 1.41
+}
+"flesh"
+{
+	"pbr"
+	{
+		$float metalness 0
+		$float roughness 0.65
+	}
+}
+"flint_glass"
+{
+	$float ior 1.613
+}
+"glass"
+{
+	"audio"
+	{
+		$float high_frequency_absorption 0.02
+		$float high_frequency_transmission 0.011
+		$float low_frequency_absorption 0.06
+		$float low_frequency_transmission 0.06
+		$float mid_frequency_absorption 0.03
+		$float mid_frequency_transmission 0.044
+		$float scattering 0.05
+	}
+	$string footsteps "fx.fst_glass"
+	$float friction 0.19
+	$float ior 1.67
+	"pbr"
+	{
+		$float metalness 0
+		$float roughness 0
+	}
+	$float restitution 0.65
 }
 "gold"
 {
 	$float ior 0.47
 }
+"grass"
+{
+	$string footsteps "fx.fst_grass"
+	$float friction 0.25
+	"pbr"
+	{
+		$float metalness 0
+		$float roughness 0.4
+	}
+	$float restitution 0
+}
+"gravel"
+{
+	"audio"
+	{
+		$float high_frequency_absorption 0.8
+		$float high_frequency_transmission 0.008
+		$float low_frequency_absorption 0.6
+		$float low_frequency_transmission 0.031
+		$float mid_frequency_absorption 0.7
+		$float mid_frequency_transmission 0.012
+		$float scattering 0.05
+	}
+	$string footsteps "fx.fst_gravel"
+	$float friction 0.6
+	"pbr"
+	{
+		$float metalness 0.263
+		$float roughness 0.659
+	}
+	$float restitution 0.1
+}
+"heavy_glass"
+{
+	$float ior 1.65
+}
+"ice"
+{
+	$string footsteps "fx.fst_glass"
+	$float friction 0.05
+	$float ior 1.31
+	"pbr"
+	{
+		$float metalness 0
+		$float roughness 0
+	}
+	$float restitution 0.5
+}
+"iron"
+{
+	$float ior 2.95
+}
 "ivory"
 {
 	$float ior 1.54
+}
+"jade"
+{
+	$float ior 1.67
+}
+"jasper"
+{
+	$float ior 1.54
+}
+"ketchup"
+{
+	"pbr"
+	{
+		"subsurface_scattering"
+		{
+			$srgba color [42,2,1,255]
+			$float factor 0.01
+			$vec3 radius_mm [4.76,0.58,0.39]
+			$vec3 scatter_color [0.476,0.058,0.039]
+		}
+	}
 }
 "lead"
 {
 	$float ior 2.01
 }
+"light_glass"
+{
+	$float ior 1.45
+}
+"liquid_methane"
+{
+	$float ior 1.15
+}
+"marble"
+{
+	"pbr"
+	{
+		"subsurface_scattering"
+		{
+			$srgba color [212,202,192,255]
+			$float factor 0.01
+			$vec3 radius_mm [8.51,5.57,3.95]
+			$vec3 scatter_color [0.851,0.557,0.395]
+		}
+	}
+}
 "mercury"
 {
 	$float ior 1.62
+}
+"metal"
+{
+	"audio"
+	{
+		$float high_frequency_absorption 0.06
+		$float high_frequency_transmission 0.01
+		$float low_frequency_absorption 0.2
+		$float low_frequency_transmission 0.2
+		$float mid_frequency_absorption 0.07
+		$float mid_frequency_transmission 0.025
+		$float scattering 0.05
+	}
+	$string footsteps "fx.fst_metal"
+	$float friction 0.65
+	"pbr"
+	{
+		$float metalness 1
+		$float roughness 0.5
+	}
+	$float restitution 0.1
 }
 "milk"
 {
@@ -679,11 +420,270 @@
 {
 	$float ior 1.53
 }
+"obsidian"
+{
+	$float ior 1.495
+}
+"onyx"
+{
+	$float ior 1.572
+}
 "pearl"
 {
 	$float ior 1.61
 }
+"plant"
+{
+	$string footsteps "fx.fst_wood"
+	$float friction 0.45
+	$string impact_hard "fx.phys_impact_wood_soft"
+	$string impact_soft "fx.phys_impact_wood_soft"
+	"pbr"
+	{
+		$float metalness 0
+		$float roughness 0.4
+	}
+	$float restitution 0.23
+}
+"plaster"
+{
+	"audio"
+	{
+		$float high_frequency_absorption 0.04
+		$float high_frequency_transmission 0.004
+		$float low_frequency_absorption 0.12
+		$float low_frequency_transmission 0.056
+		$float mid_frequency_absorption 0.06
+		$float mid_frequency_transmission 0.056
+		$float scattering 0.05
+	}
+	$float friction 0.8
+	"pbr"
+	{
+		$float metalness 0.263
+		$float roughness 0.659
+	}
+}
+"plastic"
+{
+	$float friction 0.85
+	"pbr"
+	{
+		$float metalness 0.263
+		$float roughness 0.5
+	}
+	$float restitution 0.74
+}
+"potato"
+{
+	"pbr"
+	{
+		"subsurface_scattering"
+		{
+			$srgba color [195,156,54,255]
+			$float factor 0.02
+			$vec3 radius_mm [14.27,7.23,2.04]
+			$vec3 scatter_color [0.714,0.361,0.102]
+		}
+	}
+}
+"quartz"
+{
+	$float ior 1.55
+}
+"rock"
+{
+	"audio"
+	{
+		$float high_frequency_absorption 0.24
+		$float high_frequency_transmission 0.001
+		$float low_frequency_absorption 0.13
+		$float low_frequency_transmission 0.015
+		$float mid_frequency_absorption 0.2
+		$float mid_frequency_transmission 0.002
+		$float scattering 0.05
+	}
+	$string footsteps "fx.fst_rock"
+	$float friction 0.8
+	$string impact_hard "fx.phys_impact_rock_soft"
+	$string impact_soft "fx.phys_impact_rock_soft"
+	"pbr"
+	{
+		$float metalness 0.192
+		$float roughness 0.753
+	}
+	$float restitution 0.13
+}
+"ruby"
+{
+	$float ior 2.0895
+}
+"salt"
+{
+	$float ior 1.544
+}
+"sapphire"
+{
+	$float ior 1.76
+}
+"skim_milk"
+{
+	"pbr"
+	{
+		"subsurface_scattering"
+		{
+			$srgba color [208,207,174,255]
+			$float factor 0.02
+			$vec3 radius_mm [18.42,10.44,3.5]
+			$vec3 scatter_color [0.921,0.522,0.175]
+		}
+	}
+}
+"skin_01"
+{
+	"pbr"
+	{
+		"subsurface_scattering"
+		{
+			$srgba color [111,58,33,255]
+			$float factor 0.01
+			$vec3 radius_mm [3.67,1.37,0.68]
+			$vec3 scatter_color [0.367,0.137,0.068]
+		}
+	}
+}
+"skin_02"
+{
+	"pbr"
+	{
+		"subsurface_scattering"
+		{
+			$srgba color [159,110,87,255]
+			$float factor 0.01
+			$vec3 radius_mm [4.82,1.69,1.09]
+			$vec3 scatter_color [0.482,0.169,0.109]
+		}
+	}
+}
+"slippery"
+{
+	$float friction 0.03
+	"pbr"
+	{
+		$float metalness 0
+		$float roughness 0
+	}
+	$float restitution 0.4
+}
+"snow"
+{
+	$string footsteps "fx.fst_snow"
+	$float friction 0.14
+	"pbr"
+	{
+		$float metalness 0
+		$float roughness 0.4
+	}
+	$float restitution 0.1
+}
+"snow_hard"
+{
+	$string footsteps "fx.fst_snow_hard"
+	$float friction 0.18
+	"pbr"
+	{
+		$float metalness 0
+		$float roughness 0.4
+	}
+	$float restitution 0.3
+}
+"soundproof"
+{
+	"audio"
+	{
+		$float high_frequency_absorption 1
+		$float high_frequency_transmission 0
+		$float low_frequency_absorption 1
+		$float low_frequency_transmission 0
+		$float mid_frequency_absorption 1
+		$float mid_frequency_transmission 0
+		$float scattering 0
+	}
+}
+"standard_glass"
+{
+	$float ior 1.52
+}
+"sugar"
+{
+	$float ior 1.56
+}
 "teflon"
 {
 	$float ior 1.365
+}
+"titanium"
+{
+	$float ior 1.325
+}
+"topaz"
+{
+	$float ior 1.6235
+}
+"water"
+{
+	$float density 1000
+	$string footsteps "fx.fst_water"
+	$float friction 0.8
+	$string impact_bullet "fx.phys_impact_water_soft"
+	$string impact_effect "watersplash"
+	$string impact_hard "fx.phys_impact_water_hard"
+	$string impact_soft "fx.phys_impact_water_soft"
+	$float ior 1.333
+	$float linear_drag_coefficient 2
+	"pbr"
+	{
+		$float metalness 0
+		$float roughness 0
+	}
+	$float restitution 0
+	$float torque_drag_coefficient 6
+	$float wave_propagation 0.02
+	$float wave_stiffness 0.0001
+}
+"whole_milk"
+{
+	"pbr"
+	{
+		"subsurface_scattering"
+		{
+			$srgba color [232,225,194,255]
+			$float factor 0.02
+			$vec3 radius_mm [10.9,6.58,2.51]
+			$vec3 scatter_color [0.545,0.329,0.125]
+		}
+	}
+}
+"wood"
+{
+	"audio"
+	{
+		$float high_frequency_absorption 0.06
+		$float high_frequency_transmission 0.005
+		$float low_frequency_absorption 0.11
+		$float low_frequency_transmission 0.07
+		$float mid_frequency_absorption 0.07
+		$float mid_frequency_transmission 0.014
+		$float scattering 0.05
+	}
+	$string footsteps "fx.fst_wood"
+	$float friction 0.4
+	$string impact_hard "fx.phys_impact_wood_soft"
+	$string impact_soft "fx.phys_impact_wood_soft"
+	"pbr"
+	{
+		$float metalness 0.322
+		$float roughness 0.686
+	}
+	$float restitution 0.68
 }

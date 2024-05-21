@@ -506,6 +506,11 @@ void CModelComponent::SetRenderMeshesDirty() { umath::set_flag(m_stateFlags, Sta
 
 void CModelComponent::OnModelChanged(const std::shared_ptr<Model> &model)
 {
+	auto &ent = GetEntity();
+	auto pRenderComponent = ent.GetComponent<CRenderComponent>();
+	if(pRenderComponent.valid())
+		pRenderComponent->SetRenderBufferDirty();
+
 	m_lod = 0;
 
 	m_lodRenderMeshes.clear();

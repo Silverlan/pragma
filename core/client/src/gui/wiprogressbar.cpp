@@ -12,6 +12,7 @@
 #include <sharedutils/util.h>
 #include <mathutil/umath.h>
 #include <sharedutils/property/util_property_color.hpp>
+#include <util_unicode.hpp>
 
 LINK_WGUI_TO_CLASS(WIProgressBar, WIProgressBar);
 

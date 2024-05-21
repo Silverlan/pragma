@@ -103,6 +103,7 @@ namespace prosper {
 };
 namespace util {
 	struct DrawSceneInfo;
+	class Utf8String;
 };
 #pragma warning(push)
 #pragma warning(disable : 4251)
@@ -261,6 +262,8 @@ class DLLCLIENT CGame : public Game {
 	Bool ScrollInput(Vector2 offset);
 	void OnFilesDropped(std::vector<std::string> &files);
 	bool OnWindowShouldClose(prosper::Window &window);
+	void OnPreedit(prosper::Window &window, const util::Utf8String &preeditString, const std::vector<int> &blockSizes, int focusedBlock, int caret);
+	void OnIMEStatusChanged(prosper::Window &window, bool imeEnabled);
 
 	// Game
 	void Think();

@@ -230,6 +230,8 @@ void BaseAnimatedComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
 	if(!mdl)
 		return;
 	auto &skeleton = mdl->GetSkeleton();
+	auto relRef = Frame::Create(mdl->GetReference());
+	relRef->Localize(skeleton);
 	auto &bones = skeleton.GetBones();
 	ReserveMembers(bones.size() * 3);
 	std::function<void(const pragma::animation::Bone &, const std::string &)> fAddBone = nullptr;
@@ -243,6 +245,9 @@ void BaseAnimatedComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
 			parentMetaData = std::make_shared<ents::ParentTypeMetaData>();
 			parentMetaData->parentProperty = parentPathName;
 		}
+
+		umath::ScaledTransform defaultPose;
+		relRef->GetBonePose(bone.ID, defaultPose);
 
 		auto posePathName = "bone/" + lname + "/pose";
 		auto posPathName = "bone/" + lname + "/position";
@@ -284,6 +289,7 @@ void BaseAnimatedComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
 		memberInfoPos.SetName("bone/" + lname + "/position");
 		memberInfoPos.type = ents::EntityMemberType::Vector3;
 		memberInfoPos.userIndex = bone.ID;
+		memberInfoPos.SetDefault<Vector3>(defaultPose.GetOrigin());
 		memberInfoPos.AddTypeMetaData(coordMetaData);
 		memberInfoPos.AddTypeMetaData(poseComponentMetaData);
 		if(parentMetaData)
@@ -301,6 +307,7 @@ void BaseAnimatedComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
 		memberInfoRot.SetName("bone/" + lname + "/rotation");
 		memberInfoRot.type = ents::EntityMemberType::Quaternion;
 		memberInfoRot.userIndex = bone.ID;
+		memberInfoRot.SetDefault<Quat>(defaultPose.GetRotation());
 		memberInfoRot.AddTypeMetaData(coordMetaData);
 		memberInfoRot.AddTypeMetaData(poseComponentMetaData);
 		if(parentMetaData)
@@ -317,6 +324,7 @@ void BaseAnimatedComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
 		auto memberInfoScale = memberInfoPos;
 		memberInfoScale.SetName("bone/" + lname + "/scale");
 		memberInfoScale.userIndex = bone.ID;
+		memberInfoScale.SetDefault<Vector3>(defaultPose.GetScale());
 		memberInfoScale.AddTypeMetaData(coordMetaData);
 		memberInfoScale.AddTypeMetaData(poseMetaData);
 		if(parentMetaData)

@@ -607,15 +607,16 @@ bool Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffers(
 			    return cmdBuf.RecordSetLineWidth(recordState.GetArgument<float>(0));
 		    },
 		    std::move(util::make_vector<PcbArg>(make_pcb_arg(lineWidth, udm::Type::Float))));
-      });
-    defPcb.def(
-                "RecordClearImage", +[](prosper::util::PreparedCommandBuffer &pcb, prosper::IImage &img, const Color &color) {
-                    pcb.PushCommand([&img, color](const prosper::util::PreparedCommandBufferRecordState &recordState) -> bool {
-                        auto &cmdBuf = recordState.commandBuffer;
-                        auto vCol = color.ToVector4();
-                        return cmdBuf.RecordClearImage(img, prosper::ImageLayout::TransferDstOptimal, std::array<float, 4> {vCol[0], vCol[1], vCol[2], vCol[3]});
-                    });
-                });
+	  });
+	defPcb.def(
+	  "RecordClearImage", +[](prosper::util::PreparedCommandBuffer &pcb, prosper::IImage &img, const Color &color) -> bool {
+		  pcb.PushCommand([&img, color](const prosper::util::PreparedCommandBufferRecordState &recordState) -> bool {
+			  auto &cmdBuf = recordState.commandBuffer;
+			  auto vCol = color.ToVector4();
+			  return cmdBuf.RecordClearImage(img, prosper::ImageLayout::TransferDstOptimal, std::array<float, 4> {vCol[0], vCol[1], vCol[2], vCol[3]});
+		  });
+		  return true;
+	  });
 	defPcb.def(
 	  "RecordCommands", +[](prosper::util::PreparedCommandBuffer &pcb, prosper::ICommandBuffer &cmd) -> bool { return pcb.RecordCommands(cmd, {}, {}); });
 	defPcb.def_readonly("enableDrawArgs", &prosper::util::PreparedCommandBuffer::enableDrawArgs);

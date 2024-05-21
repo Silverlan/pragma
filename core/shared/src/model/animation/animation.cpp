@@ -1230,20 +1230,6 @@ std::shared_ptr<panima::Animation> pragma::animation::Animation::ToPanimaAnimati
 				}
 			}
 
-			if(values.size() == 1 && refPoseRel) {
-				// If there is only one value, we may be able to skip the channel altogether, if it is the same as from the reference pose
-				auto boneId = skel.LookupBone(boneName);
-				umath::ScaledTransform pose;
-				if(refPoseRel->GetBonePose(boneId, pose)) {
-					auto val = getPoseValue(pose);
-					auto &v0 = values[0];
-					if(uvec::cmp<Vector3>(v0, val)) {
-						times.erase(times.begin());
-						values.erase(values.begin());
-					}
-				}
-			}
-
 			if(times.empty())
 				return nullptr;
 
@@ -1271,6 +1257,43 @@ std::shared_ptr<panima::Animation> pragma::animation::Animation::ToPanimaAnimati
 				valueArray.Resize(quatValues.size());
 				memcpy(valueArray.GetValuePtr(0), quatValues.data(), util::size_of_container(quatValues));
 			}
+
+			channel->Optimize();
+
+			if(channel->GetValueCount() == 1 && refPoseRel) {
+				// If there is only one value, we may be able to skip the channel altogether, if it is the same as from the reference pose
+				auto boneId = skel.LookupBone(boneName);
+				umath::ScaledTransform pose;
+				if(refPoseRel->GetBonePose(boneId, pose)) {
+					switch(eComponent) {
+					case PoseComponent::Position:
+						{
+							auto &val = pose.GetOrigin();
+							auto &channelVal = channel->GetValue<Vector3>(0);
+							if(uvec::is_equal<Vector3>(channelVal, val))
+								return nullptr;
+							break;
+						}
+					case PoseComponent::Rotation:
+						{
+							auto &val = pose.GetRotation();
+							auto &channelVal = channel->GetValue<Quat>(0);
+							if(uvec::is_equal<Quat>(channelVal, val))
+								return nullptr;
+							break;
+						}
+					case PoseComponent::Scale:
+						{
+							auto &val = pose.GetScale();
+							auto &channelVal = channel->GetValue<Vector3>(0);
+							if(uvec::is_equal<Vector3>(channelVal, val))
+								return nullptr;
+							break;
+						}
+					}
+				}
+			}
+
 			return channel;
 		};
 

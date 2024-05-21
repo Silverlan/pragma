@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.28)
 
 set(INCLUDE_DIRS)
 function(add_include_dir IDENTIFIER)
@@ -47,6 +47,7 @@ function(link_external_library IDENTIFIER)
 endfunction(link_external_library)
 
 macro(link_generic_module_libraries)
+	add_include_dir(glm)
 	link_external_library(sharedutils)
 	link_external_library(mathutil)
 	link_external_library(vfilesystem)
@@ -60,6 +61,7 @@ macro(link_generic_module_libraries)
 	link_external_library(ishared)
 	link_external_library(util_udm)
 	link_external_library(spdlog)
+	link_external_library(lz4)
 
 	add_include_dir(boost)
 endmacro(link_generic_module_libraries)
@@ -179,3 +181,29 @@ function(register_pragma_module IDENTIFIER)
 	endif()
 	set_target_properties(${PROJ_NAME} PROPERTIES ${TARGET_PROPERTIES})
 endfunction(register_pragma_module)
+
+function(add_pragma_module IDENTIFIER)
+	add_library(${PROJ_NAME} SHARED)
+
+	foreach(def IN LISTS DEFINITIONS)
+		add_definitions(-D${def})
+	endforeach(def)
+
+	if(WIN32)
+		target_compile_options(${PROJ_NAME} PRIVATE /wd4251)
+	endif()
+
+	foreach(LIB IN LISTS LIBRARIES)
+		target_link_libraries(${PROJ_NAME} ${${LIB}})
+	endforeach(LIB)
+
+	target_include_directories(${PROJ_NAME} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/include)
+	target_include_directories(${PROJ_NAME} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/src)
+
+	foreach(INCLUDE_PATH IN LISTS INCLUDE_DIRS)
+		target_include_directories(${PROJ_NAME} PRIVATE ${${INCLUDE_PATH}})
+	endforeach(INCLUDE_PATH)
+
+	set(TARGET_PROPERTIES LINKER_LANGUAGE CXX)
+	set_target_properties(${PROJ_NAME} PROPERTIES ${TARGET_PROPERTIES})
+endfunction(add_pragma_module)

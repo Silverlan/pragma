@@ -19,7 +19,6 @@
 #include <fsys/ifile.hpp>
 #include <udm.hpp>
 
-std::shared_ptr<pragma::animation::Animation> Lua::Animation::Create(lua_State *l) { return pragma::animation::Animation::Create(); }
 void Lua::Animation::Load(lua_State *l, LFile &f)
 {
 	auto fptr = f.GetHandle();

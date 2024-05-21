@@ -10,6 +10,7 @@
 #include "pragma/entities/entity_component_manager.hpp"
 #include "pragma/entities/entity_component_system.hpp"
 #include "pragma/entities/components/base_generic_component.hpp"
+#include "pragma/entities/components/base_entity_component_member_register.hpp"
 #include <unordered_set>
 
 using namespace pragma;
@@ -211,6 +212,13 @@ void BaseEntityComponentSystem::RemoveComponent(pragma::BaseEntityComponent &com
 			if(g_systemsScheduledForCleanup.size() == g_systemsScheduledForCleanup.capacity())
 				g_systemsScheduledForCleanup.reserve(g_systemsScheduledForCleanup.size() * 1.5 + 100);
 			g_systemsScheduledForCleanup.push_back(this);
+		}
+	}
+	auto *reg = dynamic_cast<pragma::DynamicMemberRegister *>(&component);
+	if(reg) {
+		if(!reg->GetMembers().empty()) {
+			reg->ClearMembers();
+			component.OnMembersChanged();
 		}
 	}
 	component.OnRemove();

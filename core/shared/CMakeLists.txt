@@ -26,6 +26,7 @@ link_external_library(panima)
 link_external_library(cppbezierfit)
 link_external_library(spdlog)
 link_external_library(fmt)
+link_external_library(util_unicode)
 
 add_external_library(luajit)
 add_external_library(luabind)
@@ -53,18 +54,6 @@ set(PRECOMPILED_HEADER "stdafx_shared")
 
 if(WIN32)
 	add_compile_options(/bigobj)
-endif()
-
-
-
-if(MSVC)
-	option(CONFIG_BUILD_WITH_LAD "Build with Lua documentation system?" OFF)
-endif()
-
-if(${CONFIG_BUILD_WITH_LAD})
-    add_definitions(-DENABLE_LAD)
-	add_definitions(-DENABLE_PDB_MANAGER)
-	link_external_library(dia)
 endif()
 
 if(${CONFIG_BUILD_WITH_VTUNE_SUPPORT})

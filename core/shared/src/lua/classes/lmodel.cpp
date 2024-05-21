@@ -375,6 +375,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 			  return {};
 		  return poses;
 	  });
+	classDef.def("GetMetaRigBoneParentId", &::Model::GetMetaRigBoneParentId);
 	classDef.def("GetTextureGroupCount", &Lua::Model::GetTextureGroupCount);
 	classDef.def("GetTextureGroups", &Lua::Model::GetTextureGroups);
 	classDef.def("GetTextureGroup", &Lua::Model::GetTextureGroup);
@@ -877,6 +878,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	// Animation
 	auto classDefAnimation = luabind::class_<pragma::animation::Animation>("Animation")
 	                           .def("ToPanimaAnimation", &::pragma::animation::Animation::ToPanimaAnimation)
+	                           .def("ToPanimaAnimation", &::pragma::animation::Animation::ToPanimaAnimation, luabind::default_parameter_policy<3, static_cast<const ::Frame *>(nullptr)> {})
 	                           .def("GetFrame", &Lua::Animation::GetFrame)
 	                           .def("GetBoneList", &Lua::Animation::GetBoneList)
 	                           .def("GetActivity", &pragma::animation::Animation::GetActivity)
@@ -946,9 +948,14 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 		                           else
 			                           Lua::PushBool(l, result);
 	                           }));
-	classDefAnimation.scope[luabind::def("Create", &Lua::Animation::Create), luabind::def("Load", &Lua::Animation::Load), luabind::def("RegisterActivity", &Lua::Animation::RegisterActivityEnum), luabind::def("RegisterEvent", &Lua::Animation::RegisterEventEnum),
-	  luabind::def("GetActivityEnums", &Lua::Animation::GetActivityEnums), luabind::def("GetEventEnums", &Lua::Animation::GetEventEnums), luabind::def("GetActivityEnumName", &Lua::Animation::GetActivityEnumName), luabind::def("GetEventEnumName", &Lua::Animation::GetEventEnumName),
-	  luabind::def("FindActivityId", &Lua::Animation::FindActivityId), luabind::def("FindEventId", &Lua::Animation::FindEventId), classDefFrame];
+
+	classDefAnimation.scope[luabind::def("Create", static_cast<std::shared_ptr<::pragma::animation::Animation> (*)()>(&::pragma::animation::Animation::Create)),
+	  luabind::def("Create", static_cast<std::shared_ptr<::pragma::animation::Animation> (*)(const ::pragma::animation::Animation &, ::pragma::animation::Animation::ShareMode)>(&::pragma::animation::Animation::Create)),
+	  luabind::def("Create", static_cast<std::shared_ptr<::pragma::animation::Animation> (*)(const ::pragma::animation::Animation &, ::pragma::animation::Animation::ShareMode)>(&::pragma::animation::Animation::Create),
+	    luabind::default_parameter_policy<2, ::pragma::animation::Animation::ShareMode::None> {})];
+	classDefAnimation.scope[luabind::def("Load", &Lua::Animation::Load), luabind::def("RegisterActivity", &Lua::Animation::RegisterActivityEnum), luabind::def("RegisterEvent", &Lua::Animation::RegisterEventEnum), luabind::def("GetActivityEnums", &Lua::Animation::GetActivityEnums),
+	  luabind::def("GetEventEnums", &Lua::Animation::GetEventEnums), luabind::def("GetActivityEnumName", &Lua::Animation::GetActivityEnumName), luabind::def("GetEventEnumName", &Lua::Animation::GetEventEnumName), luabind::def("FindActivityId", &Lua::Animation::FindActivityId),
+	  luabind::def("FindEventId", &Lua::Animation::FindEventId), classDefFrame];
 	classDefAnimation.scope[luabind::def("Load", static_cast<void (*)(lua_State *, udm::AssetData &)>([](lua_State *l, udm::AssetData &assetData) {
 		std::string err;
 		auto anim = pragma::animation::Animation::Load(assetData, err);
@@ -1259,6 +1266,8 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	classDefVertexAnimation.scope[classDefMeshVertexAnimation];
 
 	auto classDefSkeleton = luabind::class_<pragma::animation::Skeleton>("Skeleton");
+	classDefSkeleton.scope[luabind::def(
+	  "create", +[]() { return std::make_shared<pragma::animation::Skeleton>(); })];
 	classDefSkeleton.def(
 	  "DebugPrint", +[](const pragma::animation::Skeleton &skeleton) {
 		  std::stringstream ss;

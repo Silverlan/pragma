@@ -34,13 +34,15 @@ static void get_global_bone_transforms(const pragma::animation::Animation *optAn
 
 			auto &bone = pair.second;
 			assert(bone->ID == pair.first);
-			auto &pos = *frame.GetBonePosition(idx);
-			auto &rot = *frame.GetBoneOrientation(idx);
-			uvec::rotate(&pos, rotParent);
-			pos += posParent;
-			rot = rotParent * rot;
+			auto *pos = frame.GetBonePosition(idx);
+			auto *rot = frame.GetBoneOrientation(idx);
+			if(pos && rot) {
+				uvec::rotate(pos, rotParent);
+				*pos += posParent;
+				*rot = rotParent * (*rot);
 
-			fGetGlobalBoneTransforms(frame, bone->children, pos, rot);
+				fGetGlobalBoneTransforms(frame, bone->children, *pos, *rot);
+			}
 		}
 	};
 	fGetGlobalBoneTransforms(frame, skeleton.GetRootBones(), {}, uquat::identity());

@@ -1768,6 +1768,24 @@ bool Model::GenerateStandardMetaRigReferenceBonePoses(std::vector<umath::ScaledT
 	GenerateStandardMetaRigReferenceBonePoses(*m_metaRig, *m_skeleton, *m_reference, outPoses);
 	return true;
 }
+std::optional<pragma::animation::MetaRigBoneType> Model::GetMetaRigBoneParentId(pragma::animation::MetaRigBoneType type) const
+{
+	if(!m_metaRig)
+		return {};
+	auto parentId = pragma::animation::get_meta_rig_bone_parent_type(type);
+	if(parentId == pragma::animation::MetaRigBoneType::Spine3) {
+		for(auto candidate : {pragma::animation::MetaRigBoneType::Spine3, pragma::animation::MetaRigBoneType::Spine2, pragma::animation::MetaRigBoneType::Spine1, pragma::animation::MetaRigBoneType::Spine}) {
+			auto *bone = m_metaRig->GetBone(candidate);
+			if(!bone)
+				continue;
+			parentId = candidate;
+			break;
+		}
+	}
+	if(!parentId || !m_metaRig->GetBone(*parentId))
+		return {};
+	return parentId;
+}
 std::optional<umath::ScaledTransform> Model::GetMetaRigReferencePose(pragma::animation::MetaRigBoneType type) const
 {
 	auto &metaRig = GetMetaRig();

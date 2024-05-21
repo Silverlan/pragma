@@ -11,6 +11,7 @@
 #include <wgui/types/wicontextmenu.hpp>
 #include <wgui/types/witext.h>
 #include <mathutil/umath_geometry.hpp>
+#include <util_unicode.hpp>
 
 LINK_WGUI_TO_CLASS(WICommandLineEntry, WICommandLineEntry);
 

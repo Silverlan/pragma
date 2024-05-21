@@ -10,6 +10,7 @@
 
 #include "pragma/clientdefinitions.h"
 #include <pragma/lua/ldefinitions.h>
+#include <pragma/util/font_set.hpp>
 
 class FontInfo;
 class LFile;

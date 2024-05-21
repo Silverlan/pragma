@@ -13,8 +13,8 @@
 #include <string>
 
 #define ENGINE_VERSION_MAJOR 1
-#define ENGINE_VERSION_MINOR 2
-#define ENGINE_VERSION_REVISION 2
+#define ENGINE_VERSION_MINOR 3
+#define ENGINE_VERSION_REVISION 0
 
 namespace util {
 	struct DLLSHUTIL Version;

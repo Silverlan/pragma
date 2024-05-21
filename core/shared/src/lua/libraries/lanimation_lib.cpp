@@ -50,8 +50,17 @@ static void reorder(udm::Array &v, std::vector<size_t> const &order)
 	}
 }
 
-static std::optional<uint32_t> set_channel_time(lua_State *l, panima::Channel &channel, uint32_t valueIndex, float time, bool resort)
+static std::optional<uint32_t> set_channel_time(lua_State *l, panima::Channel &channel, uint32_t valueIndex, float time, bool resort, bool removeExisting)
 {
+	if(removeExisting) {
+		auto existingIndex = channel.FindValueIndex(time);
+		if(existingIndex && *existingIndex != valueIndex) {
+			// Make sure the new timestamp isn't already occupied
+			channel.RemoveValueAtIndex(*existingIndex);
+			if(valueIndex > *existingIndex)
+				--valueIndex;
+		}
+	}
 	if(!resort) {
 		auto r = Lua::udm::set_array_value(l, channel.GetTimesArray(), valueIndex, luabind::object {l, time});
 		channel.Update();
@@ -292,6 +301,7 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	cdChannel.def("Update", &panima::Channel::Update);
 	cdChannel.def("GetTimeFrame", static_cast<panima::TimeFrame &(panima::Channel::*)()>(&panima::Channel::GetTimeFrame));
 	cdChannel.def("SetTimeFrame", &panima::Channel::SetTimeFrame);
+	cdChannel.def("Optimize", &panima::Channel::Optimize);
 	cdChannel.def("GetValueType", &panima::Channel::GetValueType);
 	cdChannel.def("SetValueType", &panima::Channel::SetValueType);
 	cdChannel.def("MergeValues", &panima::Channel::MergeValues);
@@ -321,11 +331,14 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	cdChannel.def("Load", &panima::Channel::Load);
 	cdChannel.def("InsertSample", &panima::Channel::InsertSample);
 	cdChannel.def("ScaleTimeInRange", &panima::Channel::ScaleTimeInRange);
+	cdChannel.def("ScaleTimeInRange", &panima::Channel::ScaleTimeInRange, luabind::default_parameter_policy<6, true> {});
 	cdChannel.def("ShiftTimeInRange", &panima::Channel::ShiftTimeInRange);
+	cdChannel.def("ShiftTimeInRange", &panima::Channel::ShiftTimeInRange, luabind::default_parameter_policy<5, true> {});
 	cdChannel.def("TransformGlobal", &panima::Channel::TransformGlobal);
 	cdChannel.def("ClearAnimationData", &panima::Channel::ClearAnimationData);
 	cdChannel.def("ClearRange", &panima::Channel::ClearRange);
 	cdChannel.def("ClearRange", &panima::Channel::ClearRange, luabind::default_parameter_policy<4, true> {});
+	cdChannel.def("ResolveDuplicates", &panima::Channel::ResolveDuplicates);
 	cdChannel.def(
 	  "RemoveValue", +[](lua_State *l, panima::Channel &channel, uint32_t idx) -> bool {
 		  auto &times = channel.GetTimesArray();
@@ -339,7 +352,12 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	  });
 	cdChannel.def(
 	  "SetTime", +[](lua_State *l, panima::Channel &channel, uint32_t idx, float time) -> bool {
-		  auto r = set_channel_time(l, channel, idx, time, false);
+		  auto r = set_channel_time(l, channel, idx, time, false, true);
+		  return r.has_value();
+	  });
+	cdChannel.def(
+	  "SetTime", +[](lua_State *l, panima::Channel &channel, uint32_t idx, float time, bool resort) -> bool {
+		  auto r = set_channel_time(l, channel, idx, time, resort, true);
 		  return r.has_value();
 	  });
 	cdChannel.def("SetTime", &set_channel_time);
@@ -356,7 +374,7 @@ void Lua::animation::register_library(Lua::Interface &lua)
 		  auto udmData = data->GetAssetData().GetData();
 		  channel.Save(udmData);
 		  std::stringstream ss;
-		  data->ToAscii(ss, ::udm::AsciiSaveFlags::DontCompressLz4Arrays);
+		  data->ToAscii(ss, ::udm::AsciiSaveFlags::Default | :: udm::AsciiSaveFlags::DontCompressLz4Arrays);
 		  Con::cout << ss.str() << Con::endl;
 	  });
 	cdChannel.def(
@@ -560,6 +578,12 @@ void Lua::animation::register_library(Lua::Interface &lua)
 			  channel.GetDataInRange<TValue>(tStart, tEnd, times, values);
 			  return luabind::object {l, std::pair<std::vector<float>, std::vector<TValue>> {std::move(times), std::move(values)}};
 		  });
+	  });
+	cdChannel.def(
+	  "GetTimesInRange", +[](lua_State *l, panima::Channel &channel, float tStart, float tEnd) -> std::vector<float> {
+		  std::vector<float> times;
+		  channel.GetTimesInRange(tStart, tEnd, times);
+		  return times;
 	  });
 	cdChannel.def(
 	  "SortValues", +[](lua_State *l, panima::Channel &channel) {

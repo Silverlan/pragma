@@ -30,9 +30,6 @@ parser.add_argument("--with-vr", type=str2bool, nargs='?', const=True, default=F
 parser.add_argument("--with-networking", type=str2bool, nargs='?', const=True, default=False, help="Include networking module(s) for multiplayer support.")
 parser.add_argument("--with-common-entities", type=str2bool, nargs='?', const=True, default=True, help="Include addons with support for common entity types.")
 parser.add_argument("--with-lua-debugger", type=str2bool, nargs='?', const=True, default=False, help="Include Lua-debugger support.")
-parser.add_argument("--with-lua-doc-generator", type=str2bool, nargs='?', const=True, default=False, help="Include Lua documentation generator. Requires the --dia-include-path and --dia-library-path options.")
-parser.add_argument('--dia-include-path', help='The include path to the Debug Interface Access SDK (required for Lua doc generator).', default='')
-parser.add_argument('--dia-library-path', help='The path to the "diaguids.lib" library of Debug Interface Access SDK (required for Lua doc generator).', default='')
 parser.add_argument('--vtune-include-path', help='The include path to the VTune profiler (required for CPU profiling).', default='')
 parser.add_argument('--vtune-library-path', help='The path to the "libittnotify" library of the VTune profiler (required for CPU profiling).', default='')
 parser.add_argument("--build", type=str2bool, nargs='?', const=True, default=True, help="Build Pragma after configurating and generating build files.")
@@ -101,9 +98,6 @@ with_vr = args["with_vr"]
 with_networking = args["with_networking"]
 with_common_entities = args["with_common_entities"]
 with_lua_debugger = args["with_lua_debugger"]
-with_lua_doc_generator = args["with_lua_doc_generator"]
-dia_include_path = args["dia_include_path"]
-dia_library_path = args["dia_library_path"]
 vtune_include_path = args["vtune_include_path"]
 vtune_library_path = args["vtune_library_path"]
 build = args["build"]
@@ -126,10 +120,6 @@ print("Inputs:")
 if platform == "linux":
 	print("cxx_compiler: " +cxx_compiler)
 	print("c_compiler: " +c_compiler)
-
-	if with_lua_doc_generator:
-		with_lua_doc_generator = 0
-		print_warning("Lua documentation generator is only supported on Windows! --with-lua-doc-generator flag will be ignored.")
 
 print("generator: " +generator)
 #if platform == "win32":
@@ -351,6 +341,34 @@ if platform == "win32":
 	zlib_conf_root = normalize_path(os.getcwd())
 cp("zconf.h","../")
 os.chdir("../..")
+
+########## icu ##########
+# Download
+os.chdir(deps_dir)
+icu_root = os.getcwd() +"/icu"
+if not Path(icu_root).is_dir():
+	print_msg("icu not found. Downloading...")
+	mkpath(icu_root)
+	os.chdir(icu_root)
+	base_url = "https://github.com/unicode-org/icu/releases/download/release-75-1/"
+	if platform == "win32":
+		http_extract(base_url +"icu4c-75_1-Win64-MSVC2022.zip")
+	else:
+		http_extract(base_url +"icu4c-75_1-Ubuntu22.04-x64.tgz",format="tar.gz")
+if platform == "win32":
+	cmake_args += [
+		"-DDEPENDENCY_ICU_INCLUDE=" +icu_root +"/include/",
+		"-DDEPENDENCY_ICU_ICUUC_LIBRARY=" +icu_root +"/lib64/icuuc.lib",
+		"-DDEPENDENCY_ICU_ICUUC_BINARY=" +icu_root +"/bin64/icuuc75.dll",
+		"-DDEPENDENCY_ICU_ICUDT_BINARY=" +icu_root +"/bin64/icudt75.dll"
+	]
+else:
+	cmake_args += [
+		"-DDEPENDENCY_ICU_INCLUDE=" +icu_root +"/icu/usr/local/include/",
+		"-DDEPENDENCY_ICU_ICUUC_LIBRARY=" +icu_root +"/icu/usr/local/lib/libicuuc.so",
+		"-DDEPENDENCY_ICU_ICUUC_BINARY=" +icu_root +"/icu/usr/local/lib/libicuuc.so",
+		"-DDEPENDENCY_ICU_ICUDT_BINARY=" +icu_root +"/icu/usr/local/lib/libicudata.so"
+	]
 
 ########## boost ##########
 # Download
@@ -685,6 +703,7 @@ def execbuildscript(filepath):
 	#	l["vcvars"] = "vcvars"
 
 	if platform == "win32":
+		l["determine_vs_installation_path"] = determine_vs_installation_path
 		l["determine_vsdevcmd_path"] = determine_vsdevcmd_path
 
 	execfile(filepath,g,l)
@@ -725,7 +744,7 @@ execfile(scripts_dir +"/user_modules.py",g,l)
 if with_essential_client_modules:
 	add_pragma_module(
 		name="pr_prosper_vulkan",
-		commitSha="7c797f46ee391359874c48693d46ea0e93f6056f",
+		commitSha="4e1f498386511a1370b4da1d1f466d7784b03cba",
 		repositoryUrl="https://github.com/Silverlan/pr_prosper_vulkan.git"
 	)
 
@@ -748,7 +767,7 @@ if with_pfm:
 	if with_core_pfm_modules or with_all_pfm_modules:
 		add_pragma_module(
 			name="pr_curl",
-			commitSha="025c6d150ba88031f1b7b9a1bcc387b746e1ac89",
+			commitSha="d49b477d77310737fd5f88d49e35b7db58f9718c",
 			repositoryUrl="https://github.com/Silverlan/pr_curl.git"
 		)
 		add_pragma_module(
@@ -764,12 +783,12 @@ if with_pfm:
 		)
 		add_pragma_module(
 			name="pr_unirender",
-			commitSha="778553ad1116aba968d89c9407ee9e71088daff0",
+			commitSha="6cea10b5bd03ecd17ed61321688ef66e7cfe67f2",
 			repositoryUrl="https://github.com/Silverlan/pr_cycles.git"
 		)
 		add_pragma_module(
 			name="pr_curl",
-			commitSha="025c6d150ba88031f1b7b9a1bcc387b746e1ac89",
+			commitSha="d49b477d77310737fd5f88d49e35b7db58f9718c",
 			repositoryUrl="https://github.com/Silverlan/pr_curl.git"
 		)
 		add_pragma_module(
@@ -793,7 +812,7 @@ if with_pfm:
 			repositoryUrl="https://github.com/Silverlan/pr_opencv.git"
 		)
 
-if with_lua_doc_generator or with_pfm:
+if with_pfm:
 	add_pragma_module(
 		name="pr_git",
 		commitSha="84d7c32",
@@ -803,7 +822,7 @@ if with_lua_doc_generator or with_pfm:
 if with_vr:
 	add_pragma_module(
 		name="pr_openvr",
-		commitSha="008773c",
+		commitSha="08310f8c6cff3efc4bbdbc24d941c56c1d5fa892",
 		repositoryUrl="https://github.com/Silverlan/pr_openvr.git"
 	)
 
@@ -914,16 +933,6 @@ cmake_args.append("-DPME_EXTERNAL_LIB_LOCATION=" +external_libs_dir)
 cmake_args.append("-DPME_EXTERNAL_LIB_BIN_LOCATION=" +external_libs_bin_dir)
 cmake_args.append("-DPME_THIRD_PARTY_LIB_LOCATION=" +third_party_libs_dir)
 
-
-if with_lua_doc_generator:
-	if len(dia_include_path) > 0 and len(dia_library_path) > 0:
-		print_msg("Lua documentation generator is enabled!")
-		cmake_args += ["-DCONFIG_BUILD_WITH_LAD=1"]
-		cmake_args += ["-DDEPENDENCY_DIA_INCLUDE=" +dia_include_path]
-		cmake_args += ["-DDEPENDENCY_DIA_LIBRARY=" +dia_library_path]
-	else:
-		raise argparse.ArgumentError(None,"Both the --dia-include-path and --dia-library-path options have to be specified to enable Lua documentation generator support!")
-
 if len(vtune_include_path) > 0 or len(vtune_library_path) > 0:
 	if len(vtune_include_path) > 0 and len(vtune_library_path) > 0:
 		print_msg("VTune profiler support is enabled!")
@@ -1028,7 +1037,7 @@ def download_addon(name,addonName,url,commitId=None):
 curDir = os.getcwd()
 if not skip_repository_updates:
 	if with_pfm:
-		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","41b208b79f6bd3b8ac74cc7ac1514f0e351e1c48")
+		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","dd8334da633ab0f2cd73c418b1cf2a771c582ec5")
 		download_addon("model editor","tool_model_editor","https://github.com/Silverlan/pragma_model_editor.git","56d46dacb398fa7540e794359eaf1081c9df1edd")
 
 	if with_vr:
@@ -1037,7 +1046,7 @@ if not skip_repository_updates:
 	if with_pfm:
 		download_addon("PFM Living Room Demo","pfm_demo_living_room","https://github.com/Silverlan/pfm_demo_living_room.git","4cbecad4a2d6f502b6d9709178883678101f7e2c")
 		download_addon("PFM Bedroom Demo","pfm_demo_bedroom","https://github.com/Silverlan/pfm_demo_bedroom.git","0fed1d5b54a25c3ded2ce906e7da80ca8dd2fb0d")
-		download_addon("PFM Tutorials","pfm_tutorials","https://github.com/Silverlan/pfm_tutorials.git","494aba78be98caf34249e3c7cb3e43477634c272")
+		download_addon("PFM Tutorials","pfm_tutorials","https://github.com/Silverlan/pfm_tutorials.git","49928e6db5ae661e20568718f834e29483cf5e5c")
 
 	if with_common_entities:
 		download_addon("HL","pragma_hl","https://github.com/Silverlan/pragma_hl.git","f652b19")

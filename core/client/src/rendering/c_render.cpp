@@ -192,7 +192,7 @@ static void print_component_properties(const pragma::ComponentMemberInfo &member
 	auto &metaData = memberInfo.GetMetaData();
 	if(metaData) {
 		std::stringstream ss;
-		metaData->ToAscii(udm::AsciiSaveFlags::DontCompressLz4Arrays, ss, name);
+		metaData->ToAscii(udm::AsciiSaveFlags::Default | udm::AsciiSaveFlags::DontCompressLz4Arrays, ss, name);
 		Con::cout << "Meta Data:" << Con::endl;
 		Con::cout << ss.str() << Con::endl;
 		Con::cout << Con::endl;

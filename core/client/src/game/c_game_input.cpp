@@ -9,9 +9,11 @@
 #include <pragma/lua/luacallback.h>
 #include "luasystem.h"
 #include <pragma/lua/luafunction_call.h>
+#include <pragma/lua/converters/vector_converter_t.hpp>
 #include <sharedutils/util_file.h>
 #include <sharedutils/scope_guard.h>
 #include <prosper_window.hpp>
+#include <util_unicode.hpp>
 Bool CGame::RawMouseInput(GLFW::MouseButton button, GLFW::KeyState state, GLFW::Modifier mods)
 {
 	if(m_inputCallbackHandler.CallLuaEvents<int, int, int>("OnMouseInput", static_cast<int>(button), static_cast<int>(state), static_cast<int>(mods)) == util::EventReply::Handled)
@@ -80,6 +82,11 @@ bool CGame::OnWindowShouldClose(prosper::Window &window)
 	CallLuaCallbacks<bool, prosper::Window *>("OnWindowShouldClose", &ret, &window);
 	return ret;
 }
+void CGame::OnPreedit(prosper::Window &window, const util::Utf8String &preeditString, const std::vector<int> &blockSizes, int focusedBlock, int caret)
+{
+	CallLuaCallbacks<void, prosper::Window *, std::string, std::vector<int>, int, int>("OnPreedit", &window, preeditString.cpp_str(), blockSizes, focusedBlock, caret);
+}
+void CGame::OnIMEStatusChanged(prosper::Window &window, bool imeEnabled) { CallLuaCallbacks<void, prosper::Window *, bool>("OnIMEStatusChanged", &window, imeEnabled); }
 void CGame::OnFilesDropped(std::vector<std::string> &files)
 {
 	m_droppedFiles.reserve(files.size());

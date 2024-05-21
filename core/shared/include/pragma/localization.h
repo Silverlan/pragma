@@ -13,7 +13,7 @@
 #include <vector>
 #include <optional>
 #include <unordered_map>
-#include <sharedutils/util_utf8.hpp>
+#include <util_unicode.hpp>
 
 class Locale;
 struct DLLNETWORK Localization {

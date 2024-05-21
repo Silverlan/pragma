@@ -9,7 +9,6 @@
 #define __WICONSOLE_HPP__
 
 #include "pragma/clientdefinitions.h"
-#include <sharedutils/util_utf8.hpp>
 #include <wgui/wibase.h>
 #include <queue>
 #include <string_view>
@@ -18,6 +17,9 @@ class WITextEntry;
 class WICommandLineEntry;
 class WIFrame;
 class WISnapArea;
+namespace util {
+	class Utf8String;
+};
 class DLLCLIENT WIConsole : public WIBase {
   public:
 	static WIConsole *Open();

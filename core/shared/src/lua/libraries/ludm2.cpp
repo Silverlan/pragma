@@ -866,7 +866,7 @@ void register_property_methods(TClassDef &classDef)
 		    if(!el)
 			    return {};
 		    std::stringstream ss;
-		    el->ToAscii(::udm::AsciiSaveFlags::DontCompressLz4Arrays, ss);
+		    el->ToAscii(::udm::AsciiSaveFlags::Default | ::udm::AsciiSaveFlags::DontCompressLz4Arrays, ss);
 		    return luabind::object {l, ss.str()};
 	    })
 	  .def(
@@ -1314,13 +1314,13 @@ void Lua::udm::register_types(Lua::Interface &lua, luabind::module_ &modUdm)
 	cdProp.def(
 	  "ToAscii", +[](lua_State *l, ::udm::Property &prop, const std::string &propName, const std::string &prefix) -> std::string {
 		  std::stringstream ss;
-		  prop.ToAscii(::udm::AsciiSaveFlags::None, ss, propName, prefix);
+		  prop.ToAscii(::udm::AsciiSaveFlags::Default, ss, propName, prefix);
 		  return ss.str();
 	  });
 	cdProp.def(
 	  "ToAscii", +[](lua_State *l, ::udm::Property &prop, const std::string &propName) -> std::string {
 		  std::stringstream ss;
-		  prop.ToAscii(::udm::AsciiSaveFlags::None, ss, propName);
+		  prop.ToAscii(::udm::AsciiSaveFlags::Default, ss, propName);
 		  return ss.str();
 	  });
 	cdProp.def(

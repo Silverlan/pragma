@@ -20,7 +20,6 @@ namespace Lua {
 		DLLNETWORK void PushAnimationEvent(lua_State *l, const AnimationEvent &ev);
 		DLLNETWORK void GetAnimationEventArguments(lua_State *l, int32_t tArgs, std::vector<std::string> &args);
 
-		DLLNETWORK std::shared_ptr<pragma::animation::Animation> Create(lua_State *l);
 		DLLNETWORK void Load(lua_State *l, LFile &f);
 		DLLNETWORK uint32_t RegisterActivityEnum(lua_State *l, const std::string &name);
 		DLLNETWORK uint32_t RegisterEventEnum(lua_State *l, const std::string &name);

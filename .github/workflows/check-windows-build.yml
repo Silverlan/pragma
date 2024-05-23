@@ -2,7 +2,7 @@ name: Check Windows Build
 on:
   push:
     branches-ignore:
-      - master
+      - main
 
 concurrency:
   group: check-build-win-${{ github.ref }}

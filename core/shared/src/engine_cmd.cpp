@@ -26,10 +26,9 @@
 #include <sharedutils/util_path.hpp>
 #include <unordered_set>
 #include <udm.hpp>
+#include <util_pragma_doc.hpp>
 
 #undef CreateFile
-
-import util_pragma_doc;
 
 static std::optional<std::string> udm_convert(const std::string &fileName)
 {

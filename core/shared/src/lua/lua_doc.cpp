@@ -14,8 +14,7 @@
 #include <pragma/engine.h>
 #include <sharedutils/util_string.h>
 #include <udm.hpp>
-
-import util_pragma_doc;
+#include <util_pragma_doc.hpp>
 
 extern DLLNETWORK Engine *engine;
 

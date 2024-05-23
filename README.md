@@ -48,7 +48,7 @@ Please consider creating a [binary module](https://github.com/Silverlan/pragma#m
 Build Requirements
 ------
 - ~60 GiB of disk space
-- CMake 3.21.4 or newer
+- CMake 3.28.3 or newer
 - Python 3.9.5 or newer, with NumPy
 
 ###### Windows

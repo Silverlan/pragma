@@ -257,7 +257,7 @@ if platform == "linux":
 			
 			# Required for Pragma core
 			"apt install build-essential",
-			"add-apt-repository ppa:savoury1/llvm-defaults-14",
+			# "add-apt-repository ppa:savoury1/llvm-defaults-14",
 			"apt update",
 			"apt install clang-18",
 			"apt-get install clang-tools-18", # Required for C++20 Modules
@@ -280,13 +280,19 @@ if platform == "linux":
 			# Required for Cycles
 			"apt-get install subversion",
 			"apt-get install meson", # epoxy
+			
+			# CMake
+			"apt-get install cmake"
 
 			# Required for Curl
 			"apt-get install libssl-dev",
 			"apt install libssh2-1",
+			
+			# Curl
+			"apt-get install curl zip unzip tar",
 
 			# Required for OIIO
-			"apt-get install python3-distutils",
+			# "apt-get install python3-distutils",
 
 			#install freetype for linking. X server frontends (Gnome, KDE etc) already include it somewhere down the line. Also install pkg-config for easy export of flags.
 			"apt-get install pkg-config libfreetype-dev",

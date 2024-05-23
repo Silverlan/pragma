@@ -1337,8 +1337,8 @@ function(pragma_install_file FILE_PATH INSTALL_PATH)
 	)
 endfunction(pragma_install_file)
 
-pragma_install_file("${DEPENDENCY_ICU_ICUUC_BINARY}" "${BINARY_OUTPUT_DIR}")
-pragma_install_file("${DEPENDENCY_ICU_ICUDT_BINARY}" "${BINARY_OUTPUT_DIR}")
+pragma_install_lib("${DEPENDENCY_ICU_ICUUC_BINARY}" "${BINARY_OUTPUT_DIR}")
+pragma_install_lib("${DEPENDENCY_ICU_ICUDT_BINARY}" "${BINARY_OUTPUT_DIR}")
 
 function(pragma_install_program FILE_PATH INSTALL_PATH)
     if("${FILE_PATH}" STREQUAL "")

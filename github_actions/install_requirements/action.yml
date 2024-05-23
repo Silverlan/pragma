@@ -15,7 +15,7 @@ runs:
     # Required for CUDA
     - name: Set up GCC 11
       shell: bash
-      if: ${{ inputs.with_cuda == '1' }}
+      if: ${{ inputs.with_cuda == '1' && runner.os == 'Linux' }}
       run: |
         sudo apt-get update
         sudo apt-get install -y software-properties-common

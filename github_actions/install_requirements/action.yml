@@ -19,6 +19,12 @@ runs:
       with:
         cuda: '11.7.0'
     # TODO: Install OptiX
+
+    - name: Install numpy
+      shell: bash
+      id: install-numpy
+      run: |
+        pip install numpy --break-system-packages
   
     - name: Maximize build space
       if: runner.os == 'Linux'

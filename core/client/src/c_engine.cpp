@@ -65,6 +65,7 @@
 #include <pragma/asset/util_asset.hpp>
 #include <prosper_window.hpp>
 #include <fsys/ifile.hpp>
+#include <pragma/util/font_set.hpp>
 #ifdef _WIN32
 
 #include <dwmapi.h>
@@ -458,8 +459,10 @@ void CEngine::KeyboardInput(prosper::Window &window, GLFW::Key key, int scanCode
 		}
 	}
 	if(key == GLFW::Key::GraveAccent) {
-		if(state == GLFW::KeyState::Press)
-			ToggleConsole();
+		if(mods == GLFW::Modifier::None) {
+			if(state == GLFW::KeyState::Press)
+				ToggleConsole();
+		}
 		return;
 	}
 	auto buttonState = state;
@@ -526,6 +529,19 @@ bool CEngine::OnWindowShouldClose(prosper::Window &window)
 		return true;
 	return client->OnWindowShouldClose(window);
 }
+void CEngine::OnPreedit(prosper::Window &window, const util::Utf8String &preeditString, const std::vector<int> &blockSizes, int focusedBlock, int caret)
+{
+	if(client == nullptr)
+		return;
+	client->OnPreedit(window, preeditString, blockSizes, focusedBlock, caret);
+}
+void CEngine::OnIMEStatusChanged(prosper::Window &window, bool imeEnabled)
+{
+	if(client == nullptr)
+		return;
+	WGUI::GetInstance().HandleIMEStatusChanged(window, imeEnabled);
+	client->OnIMEStatusChanged(window, imeEnabled);
+}
 bool CEngine::IsWindowFocused() const { return umath::is_flag_set(m_stateFlags, StateFlags::WindowFocused); }
 
 void CEngine::SetAssetMultiThreadedLoadingEnabled(bool enabled)
@@ -578,7 +594,7 @@ bool CEngine::Initialize(int argc, char *argv[])
 
 	// Initialize Window context
 	try {
-		InitializeRenderAPI();
+        InitializeRenderAPI();
 	}
 	catch(const std::runtime_error &err) {
 		spdlog::error("Unable to initialize graphics API: {}", err.what());
@@ -873,7 +889,7 @@ const FontSet &CEngine::GetDefaultFontSet() const
 const FontSet *CEngine::FindFontSet(const std::string &name) const
 {
 	auto it = m_fontSets.find(name);
-	return (it != m_fontSets.end()) ? &it->second : nullptr;
+	return (it != m_fontSets.end()) ? it->second.get() : nullptr;
 }
 void CEngine::LoadFontSets()
 {
@@ -911,7 +927,7 @@ void CEngine::LoadFontSets()
 							fontSet.fileData.push_back(fileData);
 						}
 					}
-					m_fontSets[dir] = std::move(fontSet);
+					m_fontSets[dir] = std::make_unique<FontSet>(std::move(fontSet));
 				}
 			}
 		}
@@ -1064,6 +1080,20 @@ void CEngine::InitializeWindowInputCallbacks(prosper::Window &window)
 	window->SetFocusCallback([this, &window](GLFW::Window &glfwWindow, bool bFocused) mutable { OnWindowFocusChanged(window, bFocused); });
 	window->SetDropCallback([this, &window](GLFW::Window &glfwWindow, std::vector<std::string> &files) mutable { OnFilesDropped(window, files); });
 	window->SetOnShouldCloseCallback([this, &window](GLFW::Window &glfwWindow) -> bool { return OnWindowShouldClose(window); });
+	window->SetPreeditCallback([this, &window](GLFW::Window &glfwWindow, int preedit_count, unsigned int *preedit_string, int block_count, int *block_sizes, int focused_block, int caret) {
+		std::vector<int32_t> istr;
+		istr.resize(preedit_count);
+		for(auto i = decltype(preedit_count) {0u}; i < preedit_count; ++i)
+			istr[i] = static_cast<int32_t>(preedit_string[i]);
+		util::Utf8String preeditString {istr.data(), istr.size()};
+
+		std::vector<int32_t> blockSizes;
+		blockSizes.reserve(block_count);
+		for(auto i = decltype(block_count) {0u}; i < block_count; ++i)
+			blockSizes.push_back(block_sizes[i]);
+		OnPreedit(window, preeditString, blockSizes, focused_block, caret);
+	});
+	window->SetIMEStatusCallback([this, &window](GLFW::Window &glfwWindow) { OnIMEStatusChanged(window, glfwWindow.IsIMEEnabled()); });
 }
 void CEngine::OnWindowResized(prosper::Window &window, Vector2i size)
 {

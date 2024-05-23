@@ -80,9 +80,9 @@ const Mat4 &CShadowCSMComponent::GetStaticPendingViewProjectionMatrix(uint32_t l
 
 std::shared_ptr<prosper::IFramebuffer> CShadowCSMComponent::GetFramebuffer(pragma::CLightComponent::ShadowMapType smType, uint32_t layer) const
 {
-	auto &set = m_textureSets.at(umath::to_integral(smType));
-	assert(layer < set.framebuffers.size());
+    auto &set = m_textureSets.at(umath::to_integral(smType));
 	auto *fb = set.renderTarget->GetFramebuffer(layer);
+    assert (fb!=nullptr);
 	return fb ? fb->shared_from_this() : nullptr;
 }
 

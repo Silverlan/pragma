@@ -13,6 +13,10 @@ concurrency:
 permissions:
   contents: write
 
+env:
+  # See https://github.com/git-lfs/git-lfs/issues/5749
+  GIT_CLONE_PROTECTION_ACTIVE: 'false'
+
 jobs:
   build:
     name: Build - ${{ matrix.config.os }}
@@ -36,6 +40,20 @@ jobs:
         uses: Silverlan/pragma/github_actions/setup@master
         with:
           clone_url: "https://github.com/${{ github.repository }}.git"
+
+      - name: Clone pr_source repo
+        uses: GuillaumeFalourd/clone-github-repo-action@main
+        with:
+          owner: 'Slaweknowy'
+          branch: master
+          repository: 'pr_source'
+          submodule: true
+          access-token: ${{ secrets.PR_SOURCE_REPO_TOKEN }}
+      
+      - name: Move repo to target location
+        run: |
+            mv pr_source/ pr_mount_external/ |
+            mv pr_mount_external ./pragma/modules/
 
       # We need the latest Windows SDK
       - uses: GuillaumeFalourd/setup-windows10-sdk-action@v1.11

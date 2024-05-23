@@ -10,7 +10,6 @@
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/gui/witransformable.h"
-#include <sharedutils/util_utf8.hpp>
 
 class DLLCLIENT WIFrame : public WITransformable {
   public:
@@ -21,7 +20,7 @@ class DLLCLIENT WIFrame : public WITransformable {
 	WIBase *GetContents();
 	using WITransformable::SetSize;
 	void SetTitle(std::string title);
-	util::Utf8String GetTitle() const;
+	const util::Utf8String &GetTitle() const;
 	void SetCloseButtonEnabled(bool b);
 	void SetDetachButtonEnabled(bool b);
 	virtual util::EventReply MouseCallback(GLFW::MouseButton button, GLFW::KeyState state, GLFW::Modifier mods) override;

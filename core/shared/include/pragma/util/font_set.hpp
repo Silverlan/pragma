@@ -14,9 +14,16 @@
 #include <optional>
 #include <string_view>
 #include <vector>
-#include <sharedutils/util_utf8.hpp>
+#include <util_unicode.hpp>
 
-enum class FontSetFlag : uint8_t { None = 0, Bold = 1, Italic = Bold << 1u, Mono = Italic << 1u, Serif = Mono << 1u, Sans = Serif << 1u };
+enum class FontSetFlag : uint8_t {
+	None = 0,
+	Bold = 1,
+	Italic = Bold << 1u,
+	Mono = Italic << 1u,
+	Serif = Mono << 1u,
+	Sans = Serif << 1u,
+};
 struct DLLNETWORK FontSetFileData {
 	FontSetFlag flags = FontSetFlag::None;
 	std::string fileName;

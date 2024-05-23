@@ -9,6 +9,7 @@
 #include "pragma/lua/custom_constructor.hpp"
 #include "pragma/util/util_thread_pool.hpp"
 
+
 pragma::ThreadPool::ThreadPool(uint32_t threadCount) : ThreadPool {threadCount, ""} {}
 pragma::ThreadPool::ThreadPool(uint32_t threadCount, const std::string &name, const std::string &baseName) : m_pool {static_cast<int>(threadCount)}
 {

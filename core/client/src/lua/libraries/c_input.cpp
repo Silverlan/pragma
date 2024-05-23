@@ -74,9 +74,22 @@ void ClientState::OnFilesDropped(std::vector<std::string> &files)
 }
 bool ClientState::OnWindowShouldClose(prosper::Window &window)
 {
-
 	auto *game = GetGameState();
 	if(game == nullptr)
 		return false;
 	return game->OnWindowShouldClose(window);
+}
+void ClientState::OnPreedit(prosper::Window &window, const util::Utf8String &preeditString, const std::vector<int> &blockSizes, int focusedBlock, int caret)
+{
+	auto *game = GetGameState();
+	if(game == nullptr)
+		return;
+	game->OnPreedit(window, preeditString, blockSizes, focusedBlock, caret);
+}
+void ClientState::OnIMEStatusChanged(prosper::Window &window, bool imeEnabled)
+{
+	auto *game = GetGameState();
+	if(game == nullptr)
+		return;
+	game->OnIMEStatusChanged(window, imeEnabled);
 }

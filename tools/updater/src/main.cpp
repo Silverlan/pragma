@@ -80,6 +80,7 @@ int main(int argc, char *argv[])
 #ifdef _WIN32
 	deleteFromUpdateFiles(std::string {"bin"} + pathSeparator + "updater.exe");
 #else
+    //This shouldn't be the case here, as we can still replace an file during self-run.
 	deleteFromUpdateFiles(std::string {"bin"} + pathSeparator + "updater");
 #endif
 

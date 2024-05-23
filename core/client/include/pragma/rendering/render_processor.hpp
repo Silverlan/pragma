@@ -61,9 +61,9 @@ namespace pragma::rendering {
 		void SetClipPlane(const std::optional<Vector4> &clipPlane) { m_clipPlane = clipPlane; }
 
 		inline prosper::ICommandBuffer &GetCommandBuffer() const { return m_cmdBuffer; }
-		inline prosper::IShaderPipelineLayout &GetCurrentPipelineLayout() const { return *m_currentPipelineLayout; }
-		inline CBaseEntity &GetCurrentEntity() const;
-		inline const pragma::CSceneComponent &GetCurrentScene() const;
+        inline prosper::IShaderPipelineLayout &GetCurrentPipelineLayout() const { return *m_currentPipelineLayout; }
+        CBaseEntity &GetCurrentEntity() const;
+        const pragma::CSceneComponent &GetCurrentScene() const;
 		PassType GetPassType() const { return m_passType; }
 	  private:
 		bool RecordBindScene(const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, const pragma::ShaderGameWorld &referenceShader, bool view);

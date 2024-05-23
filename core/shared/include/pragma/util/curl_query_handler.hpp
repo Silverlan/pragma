@@ -40,7 +40,7 @@ namespace pragma {
 		static bool (*s_fIsComplete)(void *);
 		static void (*s_fSetErrorHandler)(void *, const std::function<void(uint32_t)> &);
 		static void (*s_fSendRequest)(void *, const std::string &, const std::unordered_map<std::string, std::string> &, const std::function<void(int32_t, const std::string &)> &, const std::function<void(int64_t, int64_t, int64_t, int64_t)> &);
-		static std::string (*s_fCodeToString)(int32_t);
+		static std::string (*s_fCodeToString)(int32_t,std::string&);
 		static bool (*s_fIsErrorCode)(int32_t);
 	};
 };

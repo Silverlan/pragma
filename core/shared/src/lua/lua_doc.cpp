@@ -11,9 +11,11 @@
 #include "pragma/console/util_console_color.hpp"
 #include "pragma/console/conout.h"
 #include <pragma/util/util_game.hpp>
+#include <pragma/engine.h>
 #include <sharedutils/util_string.h>
-#include <util_pragma_doc.hpp>
 #include <udm.hpp>
+
+import util_pragma_doc;
 
 extern DLLNETWORK Engine *engine;
 

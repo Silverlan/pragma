@@ -11,12 +11,17 @@
 #include <iostream>
 #ifdef _WIN32
 #include <windows.h>
+#elif defined(__linux__)
+#include <unistd.h>
+#include <fcntl.h>
+#include <termios.h>
+#include <cstdio>
 #endif
 
 DebugConsole::DebugConsole() : _cinbuf(0), _coutbuf(0), _cerrbuf(0) {}
 
 DebugConsole::~DebugConsole() {}
-
+//TODO: Linux: Reroute pts to different terminal.
 void DebugConsole::open()
 {
 #ifdef _WIN32
@@ -74,10 +79,11 @@ void DebugConsole::open()
 	}
 
 #else
-	// this will barf out everything.
-	this->_cinbuf = std::cin.rdbuf();
-	this->_coutbuf = std::cout.rdbuf();
-	this->_cerrbuf = std::cerr.rdbuf();
+    int flags = fcntl(0, F_GETFL, 0);
+    fcntl(0, F_SETFL, flags | O_NONBLOCK);
+    //this->_cinbuf = std::cin.rdbuf();
+    //this->_coutbuf = std::cout.rdbuf();
+    //this->_cerrbuf = std::cerr.rdbuf();
 #endif
 }
 
@@ -99,7 +105,14 @@ void DebugConsole::close()
 	fclose(stderr);
 	FreeConsole();
 #else
-	std::cout.rdbuf(this->_coutbuf);
-	std::cerr.rdbuf(this->_cerrbuf);
+    int flags = fcntl(0, F_GETFL, 0);
+    fcntl(0, F_SETFL, flags & ~O_NONBLOCK);
+	//see https://stackoverflow.com/questions/55602283/how-to-write-data-to-stdin-to-be-consumed-by-a-separate-thread-waiting-on-input for details
+    //std::cout.rdbuf(this->_coutbuf);
+    //ssstd::cerr.rdbuf(this->_cerrbuf);
+	//fwrite("\n", 1, 1, stdin);
+	//std::cin.putback('\n'); //This actually does not work.
+	//We have to fiddle with the owning pts directly.
+
 #endif
 }

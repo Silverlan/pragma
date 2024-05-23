@@ -43,6 +43,11 @@
 #include <util_zip.h>
 #include <fsys/filesystem.h>
 
+#ifdef __linux__
+#include <pthread.h>
+#include <fcntl.h>
+#endif
+
 const pragma::IServerState &Engine::GetServerStateInterface() const
 {
 	if(m_libServer == nullptr) {
@@ -93,7 +98,6 @@ ConVarHandle Engine::GetConVarHandle(std::string scvar)
 }
 
 DLLNETWORK Engine *engine = NULL;
-
 extern std::optional<std::string> g_lpLogFile;
 extern util::LogSeverity g_lpLogLevelCon;
 extern util::LogSeverity g_lpLogLevelFile;
@@ -113,6 +117,16 @@ Engine::Engine(int, char *[]) : CVarHandler(), m_logFile(nullptr), m_tickRate(En
 
 	m_lastTick = static_cast<long long>(m_ctTick());
 	engine = this;
+
+#ifdef __linux__
+    //setup fork handler
+    //The fork will dupe the process id, and by extension the std streams. Disable async stdin to children.
+    pthread_atfork(nullptr,nullptr,[](){
+		//child, after fork.
+    int flags = fcntl(0, F_GETFL, 0);
+    fcntl(0, F_SETFL, flags & ~O_NONBLOCK);
+    });
+#endif
 
 	// Link package system to file system
 	m_padPackageManager = upad::link_to_file_system();

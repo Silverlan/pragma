@@ -19,6 +19,7 @@
 #include <pragma/engine_info.hpp>
 #include <pragma/lua/lua_error_handling.hpp>
 #include <pragma/localization.h>
+#include <util_unicode.hpp>
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;

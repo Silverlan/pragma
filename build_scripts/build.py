@@ -13,8 +13,8 @@ parser = argparse.ArgumentParser(description='Pragma build script', allow_abbrev
 
 # See https://stackoverflow.com/a/43357954/1879228 for boolean args
 if platform == "linux":
-	parser.add_argument('--c-compiler', help='The C-compiler to use.', default='clang-15')
-	parser.add_argument('--cxx-compiler', help='The C++-compiler to use.', default='clang++-15')
+	parser.add_argument('--c-compiler', help='The C-compiler to use.', default='clang-18')
+	parser.add_argument('--cxx-compiler', help='The C++-compiler to use.', default='clang++-18')
 	defaultGenerator = "Ninja Multi-Config"
 else:
 	defaultGenerator = "Visual Studio 17 2022"
@@ -254,12 +254,13 @@ if platform == "linux":
 		commands = [
 			# Required for the build script
 			"apt-get install python3",
-
+			
 			# Required for Pragma core
 			"apt install build-essential",
 			"add-apt-repository ppa:savoury1/llvm-defaults-14",
 			"apt update",
-			"apt install clang-15",
+			"apt install clang-18",
+			"apt-get install clang-tools-18", # Required for C++20 Modules
 			"apt install libstdc++-12-dev",
 			"apt install libstdc++6",
 			"apt-get install patchelf",
@@ -443,7 +444,7 @@ else:
 	with open(luajit_build_script_wrapper, 'w') as file:
 		file.write("call \""+vcvars_path +"\" -arch=amd64 -host_arch=amd64\n") #TODO: allow arm64 to be usable by this.
 		file.write("call \""+luajit_build_script +"\"\n")
-    
+	
 	subprocess.check_call( [luajit_build_script_wrapper] )
 	#subprocess.run([devcmd_path+" -no_logo & msvcbuild.bat"],check=True)    
 	lua_jit_lib = normalize_path(root +"/third_party_libs/luajit/src/lua51.lib")

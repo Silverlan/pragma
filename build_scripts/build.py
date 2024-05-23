@@ -407,13 +407,13 @@ ZLIB_LIBPATH = normalize_path(zlib_lib_path)
 if platform == "linux":
     #do we even need static build?
 	subprocess.run([boost_root +"/bootstrap.sh"],check=True,shell=True)
-	subprocess.run(["./b2","cxxflags=-fPIC","cflags=-fPIC","address-model=64","stage","variant=release","link=shared","runtime-link=shared","-j3"],check=True,shell=True)
-	subprocess.run(["./b2","cxxflags=-fPIC","cflags=-fPIC","address-model=64","stage","variant=release","link=static","runtime-link=shared","-j3"],check=True,shell=True)
+	subprocess.run(["./b2","cxxflags=-fPIC","cflags=-fPIC","linkflags=-fPIC","address-model=64","stage","variant=release","link=shared","runtime-link=shared","-j3"],check=True,shell=True)
+	subprocess.run(["./b2","cxxflags=-fPIC","cflags=-fPIC","linkflags=-fPIC","address-model=64","stage","variant=release","link=static","runtime-link=shared","-j3"],check=True,shell=True)
 
 	print_msg("Building boost zlib libraries...")
-	subprocess.run(["./b2","cxxflags=-fPIC","cflags=-fPIC","address-model=64","stage","variant=release","link=shared","runtime-link=shared","--with-iostreams","-sZLIB_SOURCE=" +ZLIB_SOURCE,"-sZLIB_INCLUDE=" +ZLIB_INCLUDE,"-sZLIB_LIBPATH=" +ZLIB_LIBPATH],check=True,shell=True)
+	subprocess.run(["./b2","cxxflags=-fPIC","cflags=-fPIC","linkflags=-fPIC","address-model=64","stage","variant=release","link=shared","runtime-link=shared","--with-iostreams","-sZLIB_SOURCE=" +ZLIB_SOURCE,"-sZLIB_INCLUDE=" +ZLIB_INCLUDE,"-sZLIB_LIBPATH=" +ZLIB_LIBPATH],check=True,shell=True)
     
-	subprocess.run(["./b2","cxxflags=-fPIC","cflags=-fPIC","address-model=64","stage","variant=release","link=static","runtime-link=shared","--with-iostreams","-sZLIB_SOURCE=" +ZLIB_SOURCE,"-sZLIB_INCLUDE=" +ZLIB_INCLUDE,"-sZLIB_LIBPATH=" +ZLIB_LIBPATH],check=True,shell=True)
+	subprocess.run(["./b2","cxxflags=-fPIC","cflags=-fPIC","linkflags=-fPIC","address-model=64","stage","variant=release","link=static","runtime-link=shared","--with-iostreams","-sZLIB_SOURCE=" +ZLIB_SOURCE,"-sZLIB_INCLUDE=" +ZLIB_INCLUDE,"-sZLIB_LIBPATH=" +ZLIB_LIBPATH],check=True,shell=True)
 else:
 	mkdir("build",cd=True)
 

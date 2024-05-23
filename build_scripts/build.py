@@ -282,7 +282,7 @@ if platform == "linux":
 			"apt-get install meson", # epoxy
 			
 			# CMake
-			"apt-get install cmake"
+			"apt-get install cmake",
 
 			# Required for Curl
 			"apt-get install libssl-dev",

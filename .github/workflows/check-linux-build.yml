@@ -2,7 +2,7 @@ name: Check Linux Build
 on:
   push:
     branches-ignore:
-      - master
+      - main
 
 concurrency:
   group: check-build-lin-${{ github.ref }}

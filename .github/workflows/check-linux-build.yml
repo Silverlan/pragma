@@ -24,7 +24,7 @@ jobs:
             name: "Ubuntu 24.04"
     steps:
       - name: Setup Pragma
-        uses: Silverlan/pragma/github_actions/setup@master
+        uses: Silverlan/pragma/github_actions/setup@main
         with:
           branch: ${{ github.ref_name }}
           clone_url: "https://github.com/${{ github.repository }}.git"

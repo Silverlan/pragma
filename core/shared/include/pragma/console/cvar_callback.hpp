@@ -9,7 +9,6 @@
 
 #include "pragma/networkdefinitions.h"
 #include <functional>
-#include <udm_types.hpp>
 #include <sharedutils/functioncallback.h>
 
 enum class Type : uint8_t;

@@ -20,15 +20,8 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - os: ubuntu-22.04
-            name: "Ubuntu GCC-11"
-            artifact: "ubuntu_gcc.7z"
-            build_type: "RelWithDebInfo"
-            cc: "clang-14"
-            cxx: "clang++-14"
-            archiver: "7z a"
-            generators: "Unix Makefiles"
-            build_dir: 'build'
+          - os: ubuntu-24.04
+            name: "Ubuntu 24.04"
     steps:
       - name: Setup Pragma
         uses: Silverlan/pragma/github_actions/setup@master

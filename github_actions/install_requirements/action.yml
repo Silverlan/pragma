@@ -12,6 +12,21 @@ runs:
       with:
         name: "pragma > install_requirements"
   
+    # Required for CUDA
+    - name: Set up GCC 11
+      shell: bash
+      if: ${{ inputs.with_cuda == '1' }}
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y software-properties-common
+        sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+        sudo apt-get update
+        sudo apt-get install -y gcc-11 g++-11
+        sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 60
+        sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-11 60
+        sudo update-alternatives --set gcc /usr/bin/gcc-11
+        sudo update-alternatives --set g++ /usr/bin/g++-11
+
     # For Cycles
     - name: Install Cuda
       uses: Jimver/cuda-toolkit@v0.2.10

@@ -433,7 +433,7 @@ if platform == "linux":
 	subprocess.run(["make"],check=True)
 else:
 	#devcmd_path = determine_vsdevcmd_path(deps_dir)
-	#os.chdir(root +"/third_party_libs/luajit/src")
+	os.chdir(root +"/third_party_libs/luajit/src")
 	vcvars_path = determine_vsdevcmd_path(deps_dir)
 	luajit_build_script = root+"/third_party_libs/luajit/src/msvcbuild.bat"
 	luajit_build_script_wrapper = os.path.join(deps_dir,"luajit_build","build_luajit.bat")
@@ -442,8 +442,8 @@ else:
 	print("Writing '" +luajit_build_script_wrapper +"'...")
 	with open(luajit_build_script_wrapper, 'w') as file:
 		file.write("call \""+vcvars_path +"\" -arch=amd64 -host_arch=amd64\n") #TODO: allow arm64 to be usable by this.
-		file.write("cd \""+root+"/third_party_libs/luajit/src\"\n")
 		file.write("call \""+luajit_build_script +"\"\n")
+    
 	subprocess.check_call( [luajit_build_script_wrapper] )
 	#subprocess.run([devcmd_path+" -no_logo & msvcbuild.bat"],check=True)    
 	lua_jit_lib = normalize_path(root +"/third_party_libs/luajit/src/lua51.lib")

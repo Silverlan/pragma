@@ -868,6 +868,7 @@ for module in module_info:
 			if moduleUrl:
 				get_submodule(moduleName,moduleUrl,commitId,branch)
 
+	os.chdir(moduleDir)
 	scriptPath = moduleDir +"build_scripts/setup.py"
 	if Path(scriptPath).is_file():
 		print_msg("Executing module setup script...")

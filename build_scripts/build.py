@@ -212,6 +212,8 @@ def execscript(filepath):
 		"install_directory": install_directory,
 		"verbose": verbose,
 
+		"no_libssl": no_libssl,
+
 		"root": root,
 		"build_dir": build_dir,
 		"deps_dir": deps_dir,
@@ -841,7 +843,7 @@ if with_vr:
 if with_networking:
 	add_pragma_module(
 		name="pr_steam_networking_sockets",
-		commitSha="d1127f8c981be69448a68b4d4b7665a6e5df6cf4",
+		commitSha="c76bb55fdbd736f0d3992d44f2c867a365920aa5",
 		repositoryUrl="https://github.com/Silverlan/pr_steam_networking_sockets.git",
 		skipBuildTarget=True
 	)

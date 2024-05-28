@@ -244,6 +244,7 @@ def execscript(filepath):
 		l["cxx_compiler"] = cxx_compiler
 		l["no_confirm"] = no_confirm
 		l["no_sudo"] = no_sudo
+		l["no_libssl"] = no_libssl
 
 	execfile(filepath,g,l)
 
@@ -841,7 +842,7 @@ if with_vr:
 if with_networking:
 	add_pragma_module(
 		name="pr_steam_networking_sockets",
-		commitSha="d1127f8c981be69448a68b4d4b7665a6e5df6cf4",
+		commitSha="c76bb55fdbd736f0d3992d44f2c867a365920aa5",
 		repositoryUrl="https://github.com/Silverlan/pr_steam_networking_sockets.git",
 		skipBuildTarget=True
 	)

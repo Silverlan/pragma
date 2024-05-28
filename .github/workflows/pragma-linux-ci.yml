@@ -90,6 +90,7 @@ jobs:
         shell: bash
         if: always()
         run: |
+          sudo apt install tree
           curDir=$(pwd)
 
           if [ -d "pragma/build" ]; then

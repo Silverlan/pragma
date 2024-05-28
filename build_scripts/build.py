@@ -254,6 +254,11 @@ if platform == "linux":
 		commands = [
 			# Required for the build script
 			"apt-get install python3",
+
+			# Required for Curl
+			# This has to be executed before "apt update", otherwise
+			# it will cause the GitHub runner to restart
+			"apt-get install libssl-dev",
 			
 			# Required for Pragma core
 			"apt install build-essential",
@@ -283,10 +288,6 @@ if platform == "linux":
 			
 			# CMake
 			"apt-get install cmake",
-
-			# Required for Curl
-			"apt-get install libssl-dev",
-			"apt install libssh2-1",
 			
 			# Curl
 			"apt-get install curl zip unzip tar",

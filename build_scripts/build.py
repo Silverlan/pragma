@@ -48,6 +48,7 @@ parser.add_argument("--skip-repository-updates", type=str2bool, nargs='?', const
 if platform == "linux":
 	parser.add_argument("--no-sudo", type=str2bool, nargs='?', const=True, default=False, help="Will not run sudo commands. System packages will have to be installed manually.")
 	parser.add_argument("--no-confirm", type=str2bool, nargs='?', const=True, default=False, help="Disable any interaction with user (suitable for automated run).")
+	parser.add_argument("--no-libssl", type=str2bool, nargs='?', const=True, default=False, help="Disable the installation of the libssl-dev package.")
 args,unknown = parser.parse_known_args()
 args = vars(args)
 input_args = args
@@ -86,6 +87,7 @@ if platform == "linux":
 	cxx_compiler = args["cxx_compiler"]
 	no_sudo = args["no_sudo"]
 	no_confirm = args["no_confirm"]
+	no_libssl = args["no_libssl"]
 generator = args["generator"]
 #if platform == "win32":
 #	vcvars = args["vcvars
@@ -142,6 +144,7 @@ print("install_directory: " +install_directory)
 if platform == "linux":
 	print("no_sudo: " +str(no_sudo))
 	print("no_confirm: " +str(no_confirm))
+	print("no_libssl: " +str(no_libssl))
 print("cmake_args: " +', '.join(additional_cmake_args))
 print("modules: " +', '.join(modules))
 
@@ -254,11 +257,6 @@ if platform == "linux":
 		commands = [
 			# Required for the build script
 			"apt-get install python3",
-
-			# Required for Curl
-			# This has to be executed before "apt update", otherwise
-			# it will cause the GitHub runner to restart
-			"apt-get install libssl-dev",
 			
 			# Required for Pragma core
 			"apt install build-essential",
@@ -302,6 +300,12 @@ if platform == "linux":
 			# Ninja
 			"apt-get install ninja-build"
 		]
+
+		if not no_libssl:
+			# Required for Curl
+			# On a Ubuntu 24.04 GitHub runner this will currently cause a build failure, see https://github.com/actions/runner-images/issues/9937
+			# The --no-libssl option is a workaround until that issue has been resolved.
+			commands.append("apt-get install libssl-dev")
 
 		install_system_packages(commands, no_confirm)
 

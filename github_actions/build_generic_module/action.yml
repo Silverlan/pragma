@@ -87,7 +87,7 @@ runs:
       id: build-pragma
       uses: Silverlan/pragma/github_actions/build@main
       with:
-        build-args: '--with-lua-debugger=0 --with-common-modules=0 --with-essential-client-modules=0 --cmake-arg=${{ steps.set-cmake-args.outputs.cmake-args }} ${{ steps.set-cmake-args.outputs.build-args }}'
+        build-args: '--with-lua-debugger=0 --no-libssl --with-common-modules=0 --with-essential-client-modules=0 --cmake-arg=${{ steps.set-cmake-args.outputs.cmake-args }} ${{ steps.set-cmake-args.outputs.build-args }}'
 
     - name: Set Output Variables
       shell: bash

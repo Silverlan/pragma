@@ -11,6 +11,14 @@ runs:
     - uses: Silverlan/common_actions/action_start@main
       with:
         name: "pragma > install_requirements"
+
+    # This is a temporary fix for https://github.com/actions/runner-images/issues/9937
+    # We have to install libssl-dev before "apt-get update" is called, otherwise the workflow will fail
+    - name: Install libssl-dev
+      shell: bash
+      if: ${{ runner.os == 'Linux' }}
+      run: |
+        sudo apt-get install libssl-dev
   
     # Required for CUDA
     - name: Set up GCC 11

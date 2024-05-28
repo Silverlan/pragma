@@ -709,6 +709,7 @@ def execbuildscript(filepath):
 		l["cxx_compiler"] = cxx_compiler
 		l["no_confirm"] = no_confirm
 		l["no_sudo"] = no_sudo
+		l["no_libssl"] = no_libssl
 		l["install_system_packages"] = install_system_packages
 	#	l["harfbuzz_include_dir"] = harfbuzz_include_dir
 	#	l["harfbuzz_lib"] = harfbuzz_lib
@@ -842,7 +843,7 @@ if with_vr:
 if with_networking:
 	add_pragma_module(
 		name="pr_steam_networking_sockets",
-		commitSha="c76bb55fdbd736f0d3992d44f2c867a365920aa5",
+		commitSha="6919ac9a85f29f34e21257f7aaeec95710f82631",
 		repositoryUrl="https://github.com/Silverlan/pr_steam_networking_sockets.git",
 		skipBuildTarget=True
 	)

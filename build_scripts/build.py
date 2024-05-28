@@ -212,8 +212,6 @@ def execscript(filepath):
 		"install_directory": install_directory,
 		"verbose": verbose,
 
-		"no_libssl": no_libssl,
-
 		"root": root,
 		"build_dir": build_dir,
 		"deps_dir": deps_dir,
@@ -246,6 +244,7 @@ def execscript(filepath):
 		l["cxx_compiler"] = cxx_compiler
 		l["no_confirm"] = no_confirm
 		l["no_sudo"] = no_sudo
+		l["no_libssl"] = no_libssl
 
 	execfile(filepath,g,l)
 

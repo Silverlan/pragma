@@ -37,6 +37,10 @@ bool EntityIteratorData::ShouldPass(BaseEntity &ent, std::size_t index) const
 
 BaseEntityIterator::BaseEntityIterator(const std::shared_ptr<EntityIteratorData> &itData, bool bEndIterator) : m_iteratorData(itData)
 {
+	if(!m_iteratorData) {
+		m_currentIndex = 0;
+		return;
+	}
 	if(bEndIterator == true)
 		m_currentIndex = m_iteratorData->entities->Size();
 	else {
@@ -45,10 +49,12 @@ BaseEntityIterator::BaseEntityIterator(const std::shared_ptr<EntityIteratorData>
 			++(*this);
 	}
 }
-bool BaseEntityIterator::ShouldPass(BaseEntity &ent, std::size_t index) const { return m_iteratorData->ShouldPass(ent, index); }
-std::size_t BaseEntityIterator::GetCount() const { return m_iteratorData->GetCount(); }
+bool BaseEntityIterator::ShouldPass(BaseEntity &ent, std::size_t index) const { return m_iteratorData ? m_iteratorData->ShouldPass(ent, index) : false; }
+std::size_t BaseEntityIterator::GetCount() const { return m_iteratorData ? m_iteratorData->GetCount() : 0; }
 BaseEntityIterator &BaseEntityIterator::operator++()
 {
+	if(!m_iteratorData)
+		return *this;
 	auto numEnts = m_iteratorData->entities->Size();
 	while((m_currentIndex = umath::min(m_currentIndex + 1u, numEnts)) < numEnts) {
 		auto *ent = m_iteratorData->entities->At(m_currentIndex);
@@ -64,8 +70,13 @@ BaseEntityIterator BaseEntityIterator::operator++(int)
 	return r;
 }
 BaseEntity *BaseEntityIterator::operator*() { return operator->(); }
-BaseEntity *BaseEntityIterator::operator->() { return m_iteratorData->entities->At(m_currentIndex); }
-bool BaseEntityIterator::operator==(const BaseEntityIterator &other) { return m_iteratorData->entities.get() == other.m_iteratorData->entities.get() && m_currentIndex == other.m_currentIndex; }
+BaseEntity *BaseEntityIterator::operator->() { return m_iteratorData ? m_iteratorData->entities->At(m_currentIndex) : nullptr; }
+bool BaseEntityIterator::operator==(const BaseEntityIterator &other)
+{
+	if(!m_iteratorData)
+		return false;
+	return m_iteratorData->entities.get() == other.m_iteratorData->entities.get() && m_currentIndex == other.m_currentIndex;
+}
 bool BaseEntityIterator::operator!=(const BaseEntityIterator &other) { return !operator==(other); }
 
 /////////////////
@@ -102,23 +113,29 @@ EntityIterator::EntityIterator(Game &game, const std::string &componentName, Fil
 	if(filterFlags != FilterFlags::None)
 		AttachFilter<EntityIteratorFilterFlags>(filterFlags);
 }
-std::size_t EntityIterator::GetCount() const { return m_iteratorData->GetCount(); }
+std::size_t EntityIterator::GetCount() const { return m_iteratorData ? m_iteratorData->GetCount() : 0; }
 BaseEntityIterator EntityIterator::begin() const { return BaseEntityIterator {m_iteratorData, false}; }
 BaseEntityIterator EntityIterator::end() const { return BaseEntityIterator {m_iteratorData, true}; }
 void EntityIterator::SetBaseComponentType(pragma::ComponentId componentId)
 {
+	if(!m_iteratorData)
+		return;
 	std::size_t count;
 	auto &components = m_iteratorData->game.GetEntityComponentManager().GetComponents(componentId, count);
 	m_iteratorData->entities = std::make_unique<ComponentContainer>(components, count);
 }
 void EntityIterator::SetBaseComponentType(std::type_index typeIndex)
 {
+	if(!m_iteratorData)
+		return;
 	auto componentId = pragma::INVALID_COMPONENT_ID;
 	m_iteratorData->game.GetEntityComponentManager().GetComponentId(typeIndex, componentId);
 	SetBaseComponentType(componentId);
 }
 void EntityIterator::SetBaseComponentType(const std::string &componentName)
 {
+	if(!m_iteratorData)
+		return;
 	auto &componentManager = m_iteratorData->game.GetEntityComponentManager();
 	auto componentId = pragma::INVALID_COMPONENT_ID;
 	componentManager.GetComponentTypeId(componentName, componentId);

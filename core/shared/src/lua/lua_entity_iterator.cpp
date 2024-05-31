@@ -132,6 +132,8 @@ LuaBaseEntityComponentIterator LuaBaseEntityComponentIterator::operator++(int) {
 std::pair<BaseEntity *, pragma::BaseEntityComponent *> LuaBaseEntityComponentIterator::operator*()
 {
 	auto *data = m_iterator.GetIteratorData();
+	if(!data)
+		return {};
 	auto *c = static_cast<ComponentContainer *>(data->entities.get())->components[m_iterator.GetCurrentIndex()];
 	if(!c)
 		return {nullptr, nullptr};

@@ -1479,6 +1479,8 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 		return luabind::object {l, *flags};
 	}));
 	def.def("SetLayeredAnimationFlags", &pragma::BaseAnimatedComponent::SetLayeredAnimationFlags);
+	def.def("SetPostAnimationUpdateEnabled", &pragma::BaseAnimatedComponent::SetPostAnimationUpdateEnabled);
+	def.def("IsPostAnimationUpdateEnabled", &pragma::BaseAnimatedComponent::IsPostAnimationUpdateEnabled);
 	def.def("GetMetaBoneId", &pragma::BaseAnimatedComponent::GetMetaBoneId);
 	def.def(
 	  "GetMetaBonePose", +[](pragma::BaseAnimatedComponent &animC, animation::MetaRigBoneType boneType, umath::CoordinateSpace space) -> std::optional<umath::ScaledTransform> {

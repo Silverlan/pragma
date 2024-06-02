@@ -212,6 +212,8 @@ def execscript(filepath):
 		"install_directory": install_directory,
 		"verbose": verbose,
 
+		"no_libssl": no_libssl,
+
 		"root": root,
 		"build_dir": build_dir,
 		"deps_dir": deps_dir,
@@ -244,7 +246,6 @@ def execscript(filepath):
 		l["cxx_compiler"] = cxx_compiler
 		l["no_confirm"] = no_confirm
 		l["no_sudo"] = no_sudo
-		l["no_libssl"] = no_libssl
 
 	execfile(filepath,g,l)
 
@@ -1051,11 +1052,11 @@ def download_addon(name,addonName,url,commitId=None):
 curDir = os.getcwd()
 if not skip_repository_updates:
 	if with_pfm:
-		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","dd8334da633ab0f2cd73c418b1cf2a771c582ec5")
+		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","1b4fa03f9a11b8bd12bca2912408d9dfb429be20")
 		download_addon("model editor","tool_model_editor","https://github.com/Silverlan/pragma_model_editor.git","56d46dacb398fa7540e794359eaf1081c9df1edd")
 
 	if with_vr:
-		download_addon("VR","virtual_reality","https://github.com/Silverlan/PragmaVR.git","7bc4692d17ce9d024fb38676e2283f6e1e6bef23")
+		download_addon("VR","virtual_reality","https://github.com/Silverlan/PragmaVR.git","96d815c56680ce250c77b21b3bee7ee8d993a186")
 
 	if with_pfm:
 		download_addon("PFM Living Room Demo","pfm_demo_living_room","https://github.com/Silverlan/pfm_demo_living_room.git","4cbecad4a2d6f502b6d9709178883678101f7e2c")

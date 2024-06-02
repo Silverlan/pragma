@@ -44,6 +44,7 @@ runs:
     # TODO: Install OptiX
 
     - name: Set PIP_BREAK_SYSTEM_PACKAGES env variable
+      shell: bash
       run: echo "PIP_BREAK_SYSTEM_PACKAGES=1" >> $GITHUB_ENV
 
     - name: Install numpy

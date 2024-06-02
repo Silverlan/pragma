@@ -12,13 +12,12 @@ runs:
       with:
         name: "pragma > install_requirements"
 
-    # This is a temporary fix for https://github.com/actions/runner-images/issues/9937
-    # We have to install libssl-dev before "apt-get update" is called, otherwise the workflow will fail
-    - name: Install libssl-dev
+    # This is a temporary fix until https://github.com/actions/runner-images/pull/9956 has been merged
+    - name: Purge needrestart
       shell: bash
       if: ${{ runner.os == 'Linux' }}
       run: |
-        sudo apt-get install libssl-dev
+        sudo apt-get purge needrestart
   
     # Required for CUDA
     - name: Set up GCC 11
@@ -43,11 +42,15 @@ runs:
         cuda: '11.7.0'
     # TODO: Install OptiX
 
+    - name: Set PIP_BREAK_SYSTEM_PACKAGES env variable
+      shell: bash
+      run: echo "PIP_BREAK_SYSTEM_PACKAGES=1" >> $GITHUB_ENV
+
     - name: Install numpy
       shell: bash
       id: install-numpy
       run: |
-        pip install numpy --break-system-packages
+        pip install numpy
   
     - name: Maximize build space
       if: runner.os == 'Linux'

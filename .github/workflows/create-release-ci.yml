@@ -171,7 +171,7 @@ jobs:
           prerelease: false
 
       - name: Publish Windows Release
-        uses: pyTooling/Actions/releaser/composite@main
+        uses: Silverlan/Releaser/releaser/composite@main
         with:
           tag: "v${{ steps.determine-version.outputs.version }}"
           rm: true
@@ -179,14 +179,14 @@ jobs:
           files: ${{ steps.windows-version.outputs.filename }}
             
       - name: Publish Linux Release
-        uses: pyTooling/Actions/releaser/composite@main
+        uses: Silverlan/Releaser/releaser/composite@main
         with:
           tag: "v${{ steps.determine-version.outputs.version }}"
           token: ${{ secrets.GITHUB_TOKEN }}
           files: ${{ steps.linux-version.outputs.filename }}
             
       - name: Publish PDB Files
-        uses: pyTooling/Actions/releaser/composite@main
+        uses: Silverlan/Releaser/releaser/composite@main
         with:
           tag: "v${{ steps.determine-version.outputs.version }}"
           token: ${{ secrets.GITHUB_TOKEN }}

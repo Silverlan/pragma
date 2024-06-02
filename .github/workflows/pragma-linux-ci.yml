@@ -73,7 +73,7 @@ jobs:
           prerelease: true
 
       - name: Update nightly release
-        uses: pyTooling/Actions/releaser/composite@main
+        uses: Silverlan/Releaser/releaser/composite@main
         with:
           tag: nightly
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -90,6 +90,7 @@ jobs:
         shell: bash
         if: always()
         run: |
+          sudo apt install tree
           curDir=$(pwd)
 
           if [ -d "pragma/build" ]; then

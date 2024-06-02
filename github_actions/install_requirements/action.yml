@@ -12,13 +12,12 @@ runs:
       with:
         name: "pragma > install_requirements"
 
-    # This is a temporary fix for https://github.com/actions/runner-images/issues/9937
-    # We have to install libssl-dev before "apt-get update" is called, otherwise the workflow will fail
-    - name: Install libssl-dev
+    # This is a temporary fix until https://github.com/actions/runner-images/pull/9956 has been merged
+    - name: Purge needrestart
       shell: bash
       if: ${{ runner.os == 'Linux' }}
       run: |
-        sudo apt-get install libssl-dev
+        sudo apt-get purge needrestart
   
     # Required for CUDA
     - name: Set up GCC 11

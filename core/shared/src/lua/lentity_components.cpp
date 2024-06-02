@@ -532,6 +532,7 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defAnimated2.def("UpdateAnimationChannelSubmitters", &pragma::PanimaComponent::UpdateAnimationChannelSubmitters);
 	defAnimated2.def("ClearAnimationManagers", &pragma::PanimaComponent::ClearAnimationManagers);
 	defAnimated2.def("AddAnimationManager", &pragma::PanimaComponent::AddAnimationManager);
+	defAnimated2.def("AddAnimationManager", &pragma::PanimaComponent::AddAnimationManager, luabind::default_parameter_policy<3, int32_t {0}> {});
 	defAnimated2.def("RemoveAnimationManager", static_cast<void (pragma::PanimaComponent::*)(const panima::AnimationManager &)>(&pragma::PanimaComponent::RemoveAnimationManager));
 	defAnimated2.def("RemoveAnimationManager", static_cast<void (pragma::PanimaComponent::*)(const std::string_view &)>(&pragma::PanimaComponent::RemoveAnimationManager));
 	defAnimated2.def(

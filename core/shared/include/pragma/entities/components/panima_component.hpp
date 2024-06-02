@@ -41,7 +41,7 @@ namespace pragma {
 
 		std::vector<std::pair<std::string, panima::PAnimationManager>> &GetAnimationManagers() { return m_animationManagers; }
 		const std::vector<std::pair<std::string, panima::PAnimationManager>> &GetAnimationManagers() const { return const_cast<PanimaComponent *>(this)->GetAnimationManagers(); }
-		panima::PAnimationManager AddAnimationManager(std::string name);
+		panima::PAnimationManager AddAnimationManager(std::string name, int32_t priority = 0);
 		panima::PAnimationManager GetAnimationManager(std::string name);
 		void RemoveAnimationManager(const panima::AnimationManager &player);
 		void RemoveAnimationManager(const std::string_view &name);

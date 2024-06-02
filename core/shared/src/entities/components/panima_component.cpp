@@ -75,7 +75,7 @@ panima::PAnimationManager PanimaComponent::GetAnimationManager(std::string name)
 	auto it = FindAnimationManager(name);
 	return (it != m_animationManagers.end()) ? it->second : nullptr;
 }
-panima::PAnimationManager PanimaComponent::AddAnimationManager(std::string name)
+panima::PAnimationManager PanimaComponent::AddAnimationManager(std::string name, int32_t priority)
 {
 	auto it = FindAnimationManager(name);
 	if(it != m_animationManagers.end())
@@ -95,6 +95,7 @@ panima::PAnimationManager PanimaComponent::AddAnimationManager(std::string name)
 	};
 	auto r = player;
 	m_animationManagers.push_back(std::make_pair<std::string, panima::PAnimationManager>(std::move(name), std::move(player)));
+	std::sort(m_animationManagers.begin(), m_animationManagers.end(), [](const std::pair<std::string, panima::PAnimationManager> &a, const std::pair<std::string, panima::PAnimationManager> &b) { return a.second->GetPriority() < b.second->GetPriority(); });
 	return r;
 }
 void PanimaComponent::RemoveAnimationManager(const std::string_view &name)

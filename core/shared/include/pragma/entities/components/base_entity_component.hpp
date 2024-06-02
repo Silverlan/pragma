@@ -136,6 +136,9 @@ namespace pragma {
 		std::optional<ComponentMemberIndex> GetMemberIndex(const std::string &name) const;
 		virtual const ComponentMemberInfo *GetMemberInfo(ComponentMemberIndex idx) const;
 
+		void SetPropertyAnimated(const std::string &property, bool animated);
+		bool IsPropertyAnimated(const std::string &property);
+
 		bool GetTransformMemberPos(ComponentMemberIndex idx, umath::CoordinateSpace space, Vector3 &outPos) const;
 		bool GetTransformMemberRot(ComponentMemberIndex idx, umath::CoordinateSpace space, Quat &outRot) const;
 		bool GetTransformMemberScale(ComponentMemberIndex idx, umath::CoordinateSpace space, Vector3 &outScale) const;

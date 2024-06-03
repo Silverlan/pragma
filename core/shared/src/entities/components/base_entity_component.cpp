@@ -168,7 +168,7 @@ void BaseEntityComponent::SetPropertyAnimated(const std::string &property, bool 
 						memberInfo->getterFunction(*memberInfo, *this, &value);
 
 						auto channel = anim->AddChannel(targetPath, udm::type_to_enum<T>());
-						channel->AddValue<T>(0.f, value);
+						channel->template AddValue<T>(0.f, value);
 						panimaC->PlayAnimation(*baseManager, *anim);
 					}
 				});

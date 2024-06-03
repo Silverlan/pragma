@@ -48,7 +48,6 @@ parser.add_argument("--skip-repository-updates", type=str2bool, nargs='?', const
 if platform == "linux":
 	parser.add_argument("--no-sudo", type=str2bool, nargs='?', const=True, default=False, help="Will not run sudo commands. System packages will have to be installed manually.")
 	parser.add_argument("--no-confirm", type=str2bool, nargs='?', const=True, default=False, help="Disable any interaction with user (suitable for automated run).")
-	parser.add_argument("--no-libssl", type=str2bool, nargs='?', const=True, default=False, help="Disable the installation of the libssl-dev package.")
 args,unknown = parser.parse_known_args()
 args = vars(args)
 input_args = args
@@ -87,7 +86,6 @@ if platform == "linux":
 	cxx_compiler = args["cxx_compiler"]
 	no_sudo = args["no_sudo"]
 	no_confirm = args["no_confirm"]
-	no_libssl = args["no_libssl"]
 generator = args["generator"]
 #if platform == "win32":
 #	vcvars = args["vcvars
@@ -144,7 +142,6 @@ print("install_directory: " +install_directory)
 if platform == "linux":
 	print("no_sudo: " +str(no_sudo))
 	print("no_confirm: " +str(no_confirm))
-	print("no_libssl: " +str(no_libssl))
 print("cmake_args: " +', '.join(additional_cmake_args))
 print("modules: " +', '.join(modules))
 
@@ -211,8 +208,6 @@ def execscript(filepath):
 		"deps_directory": deps_directory,
 		"install_directory": install_directory,
 		"verbose": verbose,
-
-		"no_libssl": no_libssl,
 
 		"root": root,
 		"build_dir": build_dir,
@@ -288,6 +283,9 @@ if platform == "linux":
 			
 			# CMake
 			"apt-get install cmake",
+
+			# Required for Curl
+			"apt-get install libssl-dev",
 			
 			# Curl
 			"apt-get install curl zip unzip tar",
@@ -298,17 +296,9 @@ if platform == "linux":
 			#install freetype for linking. X server frontends (Gnome, KDE etc) already include it somewhere down the line. Also install pkg-config for easy export of flags.
 			"apt-get install pkg-config libfreetype-dev",
 
-
 			# Ninja
 			"apt-get install ninja-build"
 		]
-
-		if not no_libssl:
-			# Required for Curl
-			# On a Ubuntu 24.04 GitHub runner this will currently cause a build failure, see https://github.com/actions/runner-images/issues/9937
-			# The --no-libssl option is a workaround until that issue has been resolved.
-			commands.append("apt-get install libssl-dev")
-
 		install_system_packages(commands, no_confirm)
 
 module_list = []
@@ -710,7 +700,6 @@ def execbuildscript(filepath):
 		l["cxx_compiler"] = cxx_compiler
 		l["no_confirm"] = no_confirm
 		l["no_sudo"] = no_sudo
-		l["no_libssl"] = no_libssl
 		l["install_system_packages"] = install_system_packages
 	#	l["harfbuzz_include_dir"] = harfbuzz_include_dir
 	#	l["harfbuzz_lib"] = harfbuzz_lib
@@ -844,7 +833,7 @@ if with_vr:
 if with_networking:
 	add_pragma_module(
 		name="pr_steam_networking_sockets",
-		commitSha="6919ac9a85f29f34e21257f7aaeec95710f82631",
+		commitSha="311e721c1160d631461c5860d70575ffe79208ef",
 		repositoryUrl="https://github.com/Silverlan/pr_steam_networking_sockets.git",
 		skipBuildTarget=True
 	)

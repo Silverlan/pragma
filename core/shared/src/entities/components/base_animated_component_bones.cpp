@@ -139,10 +139,9 @@ bool BaseAnimatedComponent::SetBonePose(animation::BoneId boneId, const Vector3 
 		}
 	case umath::CoordinateSpace::World:
 		{
-			auto t = GetEntity().GetPose().GetInverse();
 			umath::ScaledTransform relPose {optPos ? *optPos : uvec::ORIGIN, optRot ? *optRot : uquat::identity(), optScale ? *optScale : uvec::IDENTITY_SCALE};
-			relPose = t.GetInverse() * relPose;
-			return SetBonePose(boneId, optPos ? &relPose.GetOrigin() : nullptr, optRot ? &relPose.GetRotation() : nullptr, optScale ? &relPose.GetScale() : nullptr, umath::CoordinateSpace::Local);
+			relPose = GetEntity().GetPose().GetInverse() * relPose;
+			return SetBonePose(boneId, optPos ? &relPose.GetOrigin() : nullptr, optRot ? &relPose.GetRotation() : nullptr, optScale ? &relPose.GetScale() : nullptr, umath::CoordinateSpace::Object);
 		}
 	default:
 		return false;

@@ -69,6 +69,42 @@ end
 
 function util.rig.determine_head_bones(mdl)
 	local skeleton = mdl:GetSkeleton()
+	local function getHeadBones(headBoneId)
+		local headBones = {}
+		local function iterate_hierarchy(bone, head)
+			if head then
+				headBones[bone:GetID()] = true
+			end
+			for boneId, child in pairs(bone:GetChildren()) do
+				local isHead = (head or boneId == headBoneId)
+				iterate_hierarchy(child, isHead)
+			end
+		end
+		for boneId, bone in pairs(skeleton:GetRootBones()) do
+			iterate_hierarchy(bone, false)
+		end
+		return headBones
+	end
+	local metaRig = mdl:GetMetaRig()
+	if metaRig ~= nil then
+		local boneHead = metaRig:GetBone(game.Model.MetaRig.BONE_TYPE_HEAD)
+		if boneHead ~= nil then
+			local bone = skeleton:GetBone(boneHead.boneId)
+			local headParentBoneId
+			if headParentBoneId == nil then
+				local parent = bone:GetParent()
+				if parent ~= nil then
+					headParentBoneId = parent:GetID()
+				end
+			end
+			return {
+				headBounds = { boneHead.min, boneHead.max },
+				headBoneId = boneHead.boneId,
+				headParentBoneId = headParentBoneId,
+				headBones = getHeadBones(boneHead.boneId),
+			}
+		end
+	end
 
 	local headBoneId
 	local headParentBoneId
@@ -148,23 +184,10 @@ function util.rig.determine_head_bones(mdl)
 
 	min, max = mdl:GetHitboxBounds(headBoneId)
 
-	local headBones = {}
-	local function iterate_hierarchy(bone, head)
-		if head then
-			headBones[bone:GetID()] = true
-		end
-		for boneId, child in pairs(bone:GetChildren()) do
-			local isHead = (head or boneId == headBoneId)
-			iterate_hierarchy(child, isHead)
-		end
-	end
-	for boneId, bone in pairs(skeleton:GetRootBones()) do
-		iterate_hierarchy(bone, false)
-	end
 	return {
 		headBounds = { min, max },
 		headBoneId = headBoneId,
 		headParentBoneId = headParentBoneId,
-		headBones = headBones,
+		headBones = getHeadBones(headBoneId),
 	}
 end

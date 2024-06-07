@@ -100,8 +100,18 @@ namespace pragma::animation {
 		RightWing,
 		RightWingMiddle,
 		RightWingTip,
-		Count,
 
+		LeftBreastBase,
+		LeftBreastMiddle,
+		LeftBreastTip,
+
+		RightBreastBase,
+		RightBreastMiddle,
+		RightBreastTip,
+
+		Count,
+		StandardStart = 0,
+		StandardEnd = RightLittleFinger3,
 		Invalid = std::numeric_limits<uint8_t>::max(),
 	};
 	constexpr MetaRigBoneType META_RIG_ROOT_BONE_TYPE = MetaRigBoneType::Hips;
@@ -368,8 +378,20 @@ constexpr const char *pragma::animation::get_meta_rig_bone_type_name(MetaRigBone
 		return "right_wing_middle";
 	case MetaRigBoneType::RightWingTip:
 		return "right_wing_tip";
+	case MetaRigBoneType::LeftBreastBase:
+		return "left_breast_base";
+	case MetaRigBoneType::LeftBreastMiddle:
+		return "left_breast_middle";
+	case MetaRigBoneType::LeftBreastTip:
+		return "left_breast_tip";
+	case MetaRigBoneType::RightBreastBase:
+		return "right_breast_base";
+	case MetaRigBoneType::RightBreastMiddle:
+		return "right_breast_middle";
+	case MetaRigBoneType::RightBreastTip:
+		return "right_breast_tip";
 	}
-	static_assert(umath::to_integral(MetaRigBoneType::Count) == 68, "Update this list when new types are added!");
+	static_assert(umath::to_integral(MetaRigBoneType::Count) == 74, "Update this list when new types are added!");
 	return nullptr;
 }
 
@@ -378,143 +400,155 @@ constexpr std::optional<pragma::animation::MetaRigBoneType> pragma::animation::g
 	using namespace ustring::string_switch_ci;
 	switch(ustring::string_switch_ci::hash(boneType)) {
 	case "head"_:
-		return pragma::animation::MetaRigBoneType::Head;
+		return MetaRigBoneType::Head;
 	case "neck"_:
-		return pragma::animation::MetaRigBoneType::Neck;
+		return MetaRigBoneType::Neck;
 	case "jaw"_:
-		return pragma::animation::MetaRigBoneType::Jaw;
+		return MetaRigBoneType::Jaw;
 	case "left_upper_arm"_:
-		return pragma::animation::MetaRigBoneType::LeftUpperArm;
+		return MetaRigBoneType::LeftUpperArm;
 	case "left_lower_arm"_:
-		return pragma::animation::MetaRigBoneType::LeftLowerArm;
+		return MetaRigBoneType::LeftLowerArm;
 	case "left_hand"_:
-		return pragma::animation::MetaRigBoneType::LeftHand;
+		return MetaRigBoneType::LeftHand;
 	case "right_upper_arm"_:
-		return pragma::animation::MetaRigBoneType::RightUpperArm;
+		return MetaRigBoneType::RightUpperArm;
 	case "right_lower_arm"_:
-		return pragma::animation::MetaRigBoneType::RightLowerArm;
+		return MetaRigBoneType::RightLowerArm;
 	case "right_hand"_:
-		return pragma::animation::MetaRigBoneType::RightHand;
+		return MetaRigBoneType::RightHand;
 	case "left_upper_leg"_:
-		return pragma::animation::MetaRigBoneType::LeftUpperLeg;
+		return MetaRigBoneType::LeftUpperLeg;
 	case "left_lower_leg"_:
-		return pragma::animation::MetaRigBoneType::LeftLowerLeg;
+		return MetaRigBoneType::LeftLowerLeg;
 	case "left_foot"_:
-		return pragma::animation::MetaRigBoneType::LeftFoot;
+		return MetaRigBoneType::LeftFoot;
 	case "left_toe"_:
-		return pragma::animation::MetaRigBoneType::LeftToe;
+		return MetaRigBoneType::LeftToe;
 	case "right_upper_leg"_:
-		return pragma::animation::MetaRigBoneType::RightUpperLeg;
+		return MetaRigBoneType::RightUpperLeg;
 	case "right_lower_leg"_:
-		return pragma::animation::MetaRigBoneType::RightLowerLeg;
+		return MetaRigBoneType::RightLowerLeg;
 	case "right_foot"_:
-		return pragma::animation::MetaRigBoneType::RightFoot;
+		return MetaRigBoneType::RightFoot;
 	case "right_toe"_:
-		return pragma::animation::MetaRigBoneType::RightToe;
+		return MetaRigBoneType::RightToe;
 	case "spine"_:
-		return pragma::animation::MetaRigBoneType::Spine;
+		return MetaRigBoneType::Spine;
 	case "spine1"_:
-		return pragma::animation::MetaRigBoneType::Spine1;
+		return MetaRigBoneType::Spine1;
 	case "spine2"_:
-		return pragma::animation::MetaRigBoneType::Spine2;
+		return MetaRigBoneType::Spine2;
 	case "spine3"_:
-		return pragma::animation::MetaRigBoneType::Spine3;
+		return MetaRigBoneType::Spine3;
 	case "pelvis"_:
-		return pragma::animation::MetaRigBoneType::Pelvis;
+		return MetaRigBoneType::Pelvis;
 	case "hips"_:
-		return pragma::animation::MetaRigBoneType::Hips;
+		return MetaRigBoneType::Hips;
 	case "left_thumb1"_:
-		return pragma::animation::MetaRigBoneType::LeftThumb1;
+		return MetaRigBoneType::LeftThumb1;
 	case "left_thumb2"_:
-		return pragma::animation::MetaRigBoneType::LeftThumb2;
+		return MetaRigBoneType::LeftThumb2;
 	case "left_thumb3"_:
-		return pragma::animation::MetaRigBoneType::LeftThumb3;
+		return MetaRigBoneType::LeftThumb3;
 	case "left_index_finger1"_:
-		return pragma::animation::MetaRigBoneType::LeftIndexFinger1;
+		return MetaRigBoneType::LeftIndexFinger1;
 	case "left_index_finger2"_:
-		return pragma::animation::MetaRigBoneType::LeftIndexFinger2;
+		return MetaRigBoneType::LeftIndexFinger2;
 	case "left_index_finger3"_:
-		return pragma::animation::MetaRigBoneType::LeftIndexFinger3;
+		return MetaRigBoneType::LeftIndexFinger3;
 	case "left_middle_finger1"_:
-		return pragma::animation::MetaRigBoneType::LeftMiddleFinger1;
+		return MetaRigBoneType::LeftMiddleFinger1;
 	case "left_middle_finger2"_:
-		return pragma::animation::MetaRigBoneType::LeftMiddleFinger2;
+		return MetaRigBoneType::LeftMiddleFinger2;
 	case "left_middle_finger3"_:
-		return pragma::animation::MetaRigBoneType::LeftMiddleFinger3;
+		return MetaRigBoneType::LeftMiddleFinger3;
 	case "left_ring_finger1"_:
-		return pragma::animation::MetaRigBoneType::LeftRingFinger1;
+		return MetaRigBoneType::LeftRingFinger1;
 	case "left_ring_finger2"_:
-		return pragma::animation::MetaRigBoneType::LeftRingFinger2;
+		return MetaRigBoneType::LeftRingFinger2;
 	case "left_ring_finger3"_:
-		return pragma::animation::MetaRigBoneType::LeftRingFinger3;
+		return MetaRigBoneType::LeftRingFinger3;
 	case "left_little_finger1"_:
-		return pragma::animation::MetaRigBoneType::LeftLittleFinger1;
+		return MetaRigBoneType::LeftLittleFinger1;
 	case "left_little_finger2"_:
-		return pragma::animation::MetaRigBoneType::LeftLittleFinger2;
+		return MetaRigBoneType::LeftLittleFinger2;
 	case "left_little_finger3"_:
-		return pragma::animation::MetaRigBoneType::LeftLittleFinger3;
+		return MetaRigBoneType::LeftLittleFinger3;
 	case "right_thumb1"_:
-		return pragma::animation::MetaRigBoneType::RightThumb1;
+		return MetaRigBoneType::RightThumb1;
 	case "right_thumb2"_:
-		return pragma::animation::MetaRigBoneType::RightThumb2;
+		return MetaRigBoneType::RightThumb2;
 	case "right_thumb3"_:
-		return pragma::animation::MetaRigBoneType::RightThumb3;
+		return MetaRigBoneType::RightThumb3;
 	case "right_index_finger1"_:
-		return pragma::animation::MetaRigBoneType::RightIndexFinger1;
+		return MetaRigBoneType::RightIndexFinger1;
 	case "right_index_finger2"_:
-		return pragma::animation::MetaRigBoneType::RightIndexFinger2;
+		return MetaRigBoneType::RightIndexFinger2;
 	case "right_index_finger3"_:
-		return pragma::animation::MetaRigBoneType::RightIndexFinger3;
+		return MetaRigBoneType::RightIndexFinger3;
 	case "right_middle_finger1"_:
-		return pragma::animation::MetaRigBoneType::RightMiddleFinger1;
+		return MetaRigBoneType::RightMiddleFinger1;
 	case "right_middle_finger2"_:
-		return pragma::animation::MetaRigBoneType::RightMiddleFinger2;
+		return MetaRigBoneType::RightMiddleFinger2;
 	case "right_middle_finger3"_:
-		return pragma::animation::MetaRigBoneType::RightMiddleFinger3;
+		return MetaRigBoneType::RightMiddleFinger3;
 	case "right_ring_finger1"_:
-		return pragma::animation::MetaRigBoneType::RightRingFinger1;
+		return MetaRigBoneType::RightRingFinger1;
 	case "right_ring_finger2"_:
-		return pragma::animation::MetaRigBoneType::RightRingFinger2;
+		return MetaRigBoneType::RightRingFinger2;
 	case "right_ring_finger3"_:
-		return pragma::animation::MetaRigBoneType::RightRingFinger3;
+		return MetaRigBoneType::RightRingFinger3;
 	case "right_little_finger1"_:
-		return pragma::animation::MetaRigBoneType::RightLittleFinger1;
+		return MetaRigBoneType::RightLittleFinger1;
 	case "right_little_finger2"_:
-		return pragma::animation::MetaRigBoneType::RightLittleFinger2;
+		return MetaRigBoneType::RightLittleFinger2;
 	case "right_little_finger3"_:
-		return pragma::animation::MetaRigBoneType::RightLittleFinger3;
+		return MetaRigBoneType::RightLittleFinger3;
 	case "tail_base"_:
-		return pragma::animation::MetaRigBoneType::TailBase;
+		return MetaRigBoneType::TailBase;
 	case "tail_middle"_:
-		return pragma::animation::MetaRigBoneType::TailMiddle;
+		return MetaRigBoneType::TailMiddle;
 	case "tail_middle1"_:
-		return pragma::animation::MetaRigBoneType::TailMiddle1;
+		return MetaRigBoneType::TailMiddle1;
 	case "tail_tip"_:
-		return pragma::animation::MetaRigBoneType::TailTip;
+		return MetaRigBoneType::TailTip;
 	case "left_ear"_:
-		return pragma::animation::MetaRigBoneType::LeftEar;
+		return MetaRigBoneType::LeftEar;
 	case "right_ear"_:
-		return pragma::animation::MetaRigBoneType::RightEar;
+		return MetaRigBoneType::RightEar;
 	case "left_eye"_:
-		return pragma::animation::MetaRigBoneType::LeftEye;
+		return MetaRigBoneType::LeftEye;
 	case "right_eye"_:
-		return pragma::animation::MetaRigBoneType::RightEye;
+		return MetaRigBoneType::RightEye;
 	case "center_eye"_:
-		return pragma::animation::MetaRigBoneType::CenterEye;
+		return MetaRigBoneType::CenterEye;
 	case "left_wing"_:
-		return pragma::animation::MetaRigBoneType::LeftWing;
+		return MetaRigBoneType::LeftWing;
 	case "left_wing_middle"_:
-		return pragma::animation::MetaRigBoneType::LeftWingMiddle;
+		return MetaRigBoneType::LeftWingMiddle;
 	case "left_wing_tip"_:
-		return pragma::animation::MetaRigBoneType::LeftWingTip;
+		return MetaRigBoneType::LeftWingTip;
 	case "right_wing"_:
-		return pragma::animation::MetaRigBoneType::RightWing;
+		return MetaRigBoneType::RightWing;
 	case "right_wing_middle"_:
-		return pragma::animation::MetaRigBoneType::RightWingMiddle;
+		return MetaRigBoneType::RightWingMiddle;
 	case "right_wing_tip"_:
-		return pragma::animation::MetaRigBoneType::RightWingTip;
+		return MetaRigBoneType::RightWingTip;
+	case "left_breast_base"_:
+		return MetaRigBoneType::LeftBreastBase;
+	case "left_breast_middle"_:
+		return MetaRigBoneType::LeftBreastMiddle;
+	case "left_breast_tip"_:
+		return MetaRigBoneType::LeftBreastTip;
+	case "right_breast_base"_:
+		return MetaRigBoneType::RightBreastBase;
+	case "right_breast_middle"_:
+		return MetaRigBoneType::RightBreastMiddle;
+	case "right_breast_tip"_:
+		return MetaRigBoneType::RightBreastTip;
 	}
-	static_assert(umath::to_integral(MetaRigBoneType::Count) == 68, "Update this list when new types are added!");
+	static_assert(umath::to_integral(MetaRigBoneType::Count) == 74, "Update this list when new types are added!");
 	return {};
 }
 
@@ -675,6 +709,9 @@ constexpr std::optional<pragma::animation::BoneSide> pragma::animation::get_meta
 	case MetaRigBoneType::LeftWing:
 	case MetaRigBoneType::LeftWingMiddle:
 	case MetaRigBoneType::LeftWingTip:
+	case MetaRigBoneType::LeftBreastBase:
+	case MetaRigBoneType::LeftBreastMiddle:
+	case MetaRigBoneType::LeftBreastTip:
 		return pragma::animation::BoneSide::Left;
 	case MetaRigBoneType::RightEar:
 	case MetaRigBoneType::RightEye:
@@ -703,9 +740,12 @@ constexpr std::optional<pragma::animation::BoneSide> pragma::animation::get_meta
 	case MetaRigBoneType::RightWing:
 	case MetaRigBoneType::RightWingMiddle:
 	case MetaRigBoneType::RightWingTip:
+	case MetaRigBoneType::RightBreastBase:
+	case MetaRigBoneType::RightBreastMiddle:
+	case MetaRigBoneType::RightBreastTip:
 		return pragma::animation::BoneSide::Right;
 	}
-	static_assert(umath::to_integral(MetaRigBoneType::Count) == 68, "Update this list when new types are added!");
+	static_assert(umath::to_integral(MetaRigBoneType::Count) == 74, "Update this list when new types are added!");
 	return {};
 }
 
@@ -845,8 +885,20 @@ constexpr std::optional<pragma::animation::MetaRigBoneType> pragma::animation::g
 		return MetaRigBoneType::RightWing;
 	case MetaRigBoneType::RightWingTip:
 		return MetaRigBoneType::RightWingMiddle;
+	case MetaRigBoneType::LeftBreastTip:
+		return MetaRigBoneType::LeftBreastMiddle;
+	case MetaRigBoneType::LeftBreastMiddle:
+		return MetaRigBoneType::LeftBreastBase;
+	case MetaRigBoneType::LeftBreastBase:
+		return MetaRigBoneType::Spine3;
+	case MetaRigBoneType::RightBreastTip:
+		return MetaRigBoneType::RightBreastMiddle;
+	case MetaRigBoneType::RightBreastMiddle:
+		return MetaRigBoneType::RightBreastBase;
+	case MetaRigBoneType::RightBreastBase:
+		return MetaRigBoneType::Spine3;
 	}
-	static_assert(umath::to_integral(MetaRigBoneType::Count) == 68, "Update this list when new types are added!");
+	static_assert(umath::to_integral(MetaRigBoneType::Count) == 74, "Update this list when new types are added!");
 	return {};
 }
 

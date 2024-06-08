@@ -102,7 +102,7 @@ uint16_t BaseHealthComponent::GetHealth() const { return *m_health; }
 uint16_t BaseHealthComponent::GetMaxHealth() const { return *m_maxHealth; }
 void BaseHealthComponent::SetHealth(uint16_t health)
 {
-	if(health == *m_health)
+    if(*m_health == health) //had to switch order of compared values, otherwise we got an error of ambiguity of operator==
 		return;
 	unsigned short old = *m_health;
 	*m_health = health;

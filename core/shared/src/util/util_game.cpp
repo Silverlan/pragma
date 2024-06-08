@@ -256,7 +256,7 @@ std::optional<std::string> util::convert_udm_file_to_ascii(const std::string &fi
 	outFileName += '.' + ext;
 	auto res = true;
 	try {
-		res = udmData->SaveAscii(outFileName, udm::AsciiSaveFlags::IncludeHeader | udm::AsciiSaveFlags::DontCompressLz4Arrays);
+		res = udmData->SaveAscii(outFileName, ::udm::AsciiSaveFlags ::Default | udm::AsciiSaveFlags::IncludeHeader | udm::AsciiSaveFlags::DontCompressLz4Arrays);
 	}
 	catch(const udm::Exception &e) {
 		outErr = "Unable to save UDM data: " + std::string {e.what()};

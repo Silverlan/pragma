@@ -10,9 +10,15 @@
 #include "pragma/entities/entity_component_manager.hpp"
 #include "pragma/entities/components/basetoggle.h"
 #include "pragma/entities/components/base_generic_component.hpp"
+#include "pragma/entities/components/panima_component.hpp"
 #include "pragma/entities/components/origin_component.hpp"
 #include "pragma/entities/entity_component_system_t.hpp"
+#include "pragma/entities/entity_component_manager_t.hpp"
 #include "pragma/logging.hpp"
+#include <panima/animation_manager.hpp>
+#include <panima/player.hpp>
+#include <panima/animation.hpp>
+#include <panima/channel.hpp>
 #include <sharedutils/datastream.h>
 #include <udm.hpp>
 
@@ -87,6 +93,87 @@ void BaseEntityComponent::Log(const std::string &msg, LogSeverity severity) cons
 	case LogSeverity::Critical:
 		logger.critical(msg);
 		break;
+	}
+}
+
+bool BaseEntityComponent::IsPropertyAnimated(const std::string &property)
+{
+	auto &ent = GetEntity();
+	auto panimaC = ent.GetComponent<PanimaComponent>();
+	auto memberIdx = GetMemberIndex(property);
+	auto *info = GetComponentInfo();
+	if(panimaC.expired() || !info || !memberIdx)
+		return false;
+	std::string componentName {info->name.str};
+	std::string targetPath = "ec/" + componentName + "/" + property;
+	for(auto &[name, manager] : panimaC->GetAnimationManagers()) {
+		auto &player = manager->GetPlayer();
+		auto *anim = player.GetAnimation();
+		if(!anim)
+			continue;
+		if(anim->FindChannel(targetPath))
+			return true;
+	}
+	return false;
+}
+void BaseEntityComponent::SetPropertyAnimated(const std::string &property, bool animated)
+{
+	auto &ent = GetEntity();
+	auto panimaC = ent.AddComponent<PanimaComponent>();
+	auto memberIdx = GetMemberIndex(property);
+	auto *info = GetComponentInfo();
+	if(panimaC.expired() || !info || !memberIdx)
+		return;
+	if(!animated && !panimaC->GetAnimationManager("base"))
+		return;
+	std::string componentName {info->name.str};
+	std::string targetPath = "ec/" + componentName + "/" + property;
+	// We want the base manager to run before all others (so that it can be overwritten)
+	constexpr int32_t priority = -10'000;
+	auto baseManager = panimaC->AddAnimationManager("base", priority);
+	if(!animated) {
+		auto &player = baseManager->GetPlayer();
+		auto *anim = const_cast<panima::Animation *>(player.GetAnimation());
+		if(anim)
+			anim->RemoveChannel(targetPath);
+		return;
+	}
+
+	auto hasChannel = false;
+	for(auto &[name, manager] : panimaC->GetAnimationManagers()) {
+		auto &player = manager->GetPlayer();
+		auto *anim = const_cast<panima::Animation *>(player.GetAnimation());
+		if(!anim)
+			continue;
+		auto *channel = anim->FindChannel(targetPath);
+		if(channel) {
+			hasChannel = true;
+			break;
+		}
+	}
+	if(hasChannel == false) {
+		auto &player = baseManager->GetPlayer();
+		if(!player.GetAnimation()) {
+			auto anim = std::make_shared<panima::Animation>();
+			panimaC->PlayAnimation(*baseManager, *anim);
+		}
+		auto *anim = const_cast<panima::Animation *>(player.GetAnimation());
+		if(anim) {
+			auto *memberInfo = GetMemberInfo(*memberIdx);
+			if(memberInfo && pragma::is_animatable_type(memberInfo->type)) {
+				udm::visit_ng(static_cast<udm::Type>(memberInfo->type), [this, anim, &panimaC, &baseManager, &targetPath, memberInfo](auto tag) {
+					using T = typename decltype(tag)::type;
+					if constexpr(pragma::is_animatable_type_v<T>) {
+						T value;
+						memberInfo->getterFunction(*memberInfo, *this, &value);
+
+						auto channel = anim->AddChannel(targetPath, udm::type_to_enum<T>());
+						channel->template AddValue<T>(0.f, value);
+						panimaC->PlayAnimation(*baseManager, *anim);
+					}
+				});
+			}
+		}
 	}
 }
 void BaseEntityComponent::OnMembersChanged()

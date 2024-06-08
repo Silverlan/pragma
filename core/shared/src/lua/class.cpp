@@ -15,6 +15,7 @@
 #include "pragma/lua/classes/lquaternion.h"
 #include "pragma/lua/libraries/ltimer.h"
 #include "pragma/lua/policies/default_parameter_policy.hpp"
+#include "pragma/lua/types/nil_type.hpp"
 #include <pragma/util/matrices.h>
 #include "pragma/physics/physobj.h"
 #include "pragma/lua/classes/lphysobj.h"
@@ -1702,6 +1703,8 @@ void Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
 		  return *s_entIterator;
 	  },
 	  luabind::return_stl_iterator {})];
+	modEnts[luabind::def(
+	  "citerator", +[](lua_State *l, Lua::nil_type) -> LuaEntityComponentIterator & { return citerator(l, pragma::INVALID_COMPONENT_ID); }, luabind::return_stl_iterator {})];
 	modEnts[luabind::def("citerator", static_cast<LuaEntityComponentIterator &(*)(lua_State *, pragma::ComponentId)>(&citerator), luabind::return_stl_iterator {})];
 	modEnts[luabind::def("citerator", static_cast<LuaEntityComponentIterator &(*)(lua_State *, pragma::ComponentId, const Lua::var<EntityIterator::FilterFlags, Lua::tb<LuaEntityIteratorFilterBase>> &)>(&citerator), luabind::return_stl_iterator {})];
 	modEnts[luabind::def("citerator", static_cast<LuaEntityComponentIterator &(*)(lua_State *, pragma::ComponentId, EntityIterator::FilterFlags, const Lua::tb<LuaEntityIteratorFilterBase> &)>(&citerator), luabind::return_stl_iterator {})];

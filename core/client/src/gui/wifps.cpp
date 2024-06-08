@@ -8,6 +8,7 @@
 #include "stdafx_client.h"
 #include "pragma/gui/wifps.h"
 #include <wgui/types/witext.h>
+#include <util_unicode.hpp>
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;

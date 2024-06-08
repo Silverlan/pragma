@@ -582,6 +582,17 @@ static std::string to_string(lua_State *l, int i)
 	return val;
 }
 
+template<size_t N>
+void log_with_args(const pragma::BaseEntityComponent &component, const char *msg, spdlog::level::level_enum logLevel, lua_State *l, int32_t argOffset)
+{
+	std::array<std::string, N> args;
+	for(size_t i = 0; i < args.size(); ++i)
+		args[i] = to_string(l, argOffset + (i + 1));
+
+	auto log = [&](const auto &...elements) { component.Log(logLevel, fmt::vformat(msg, fmt::make_format_args(elements...))); };
+	std::apply(log, args);
+}
+
 static int log(lua_State *l, spdlog::level::level_enum logLevel)
 {
 	auto &component = Lua::Check<pragma::BaseEntityComponent>(l, 1);
@@ -593,42 +604,55 @@ static int log(lua_State *l, spdlog::level::level_enum logLevel)
 		component.Log(logLevel, std::string {msg});
 		break;
 	case 1:
-		component.Log(logLevel, fmt::vformat(msg, fmt::make_format_args(to_string(l, argOffset + 1))));
-		break;
+		{
+			log_with_args<1>(component, msg, logLevel, l, argOffset);
+			break;
+		}
 	case 2:
-		component.Log(logLevel, fmt::vformat(msg, fmt::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2))));
-		break;
+		{
+			log_with_args<2>(component, msg, logLevel, l, argOffset);
+			break;
+		}
 	case 3:
-		component.Log(logLevel, fmt::vformat(msg, fmt::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3))));
-		break;
+		{
+			log_with_args<3>(component, msg, logLevel, l, argOffset);
+			break;
+		}
 	case 4:
-		component.Log(logLevel, fmt::vformat(msg, fmt::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4))));
-		break;
+		{
+			log_with_args<4>(component, msg, logLevel, l, argOffset);
+			break;
+		}
 	case 5:
-		component.Log(logLevel, fmt::vformat(msg, fmt::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4), to_string(l, argOffset + 5))));
-		break;
+		{
+			log_with_args<5>(component, msg, logLevel, l, argOffset);
+			break;
+		}
 	case 6:
-		component.Log(logLevel, fmt::vformat(msg, fmt::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4), to_string(l, argOffset + 5), to_string(l, argOffset + 6))));
-		break;
+		{
+			log_with_args<6>(component, msg, logLevel, l, argOffset);
+			break;
+		}
 	case 7:
-		component.Log(logLevel, fmt::vformat(msg, fmt::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4), to_string(l, argOffset + 5), to_string(l, argOffset + 6), to_string(l, argOffset + 7))));
-		break;
+		{
+			log_with_args<7>(component, msg, logLevel, l, argOffset);
+			break;
+		}
 	case 8:
-		component.Log(logLevel,
-		  fmt::vformat(msg, fmt::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4), to_string(l, argOffset + 5), to_string(l, argOffset + 6), to_string(l, argOffset + 7), to_string(l, argOffset + 8))));
-		break;
+		{
+			log_with_args<8>(component, msg, logLevel, l, argOffset);
+			break;
+		}
 	case 9:
-		component.Log(logLevel,
-		  fmt::vformat(msg,
-		    fmt::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4), to_string(l, argOffset + 5), to_string(l, argOffset + 6), to_string(l, argOffset + 7), to_string(l, argOffset + 8),
-		      to_string(l, argOffset + 9))));
-		break;
+		{
+			log_with_args<9>(component, msg, logLevel, l, argOffset);
+			break;
+		}
 	case 10:
-		component.Log(logLevel,
-		  fmt::vformat(msg,
-		    fmt::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4), to_string(l, argOffset + 5), to_string(l, argOffset + 6), to_string(l, argOffset + 7), to_string(l, argOffset + 8),
-		      to_string(l, argOffset + 9), to_string(l, argOffset + 10))));
-		break;
+		{
+			log_with_args<10>(component, msg, logLevel, l, argOffset);
+			break;
+		}
 	default:
 		component.Log(logLevel, std::string {msg});
 		break;
@@ -901,6 +925,8 @@ void pragma::lua::register_entity_component_classes(lua_State *l, luabind::modul
 	}));
 	entityComponentDef.def("Log", static_cast<void (pragma::BaseEntityComponent::*)(const std::string &, pragma::BaseEntityComponent::LogSeverity) const>(&pragma::BaseEntityComponent::Log));
 	entityComponentDef.def("Log", static_cast<void (pragma::BaseEntityComponent::*)(const std::string &, pragma::BaseEntityComponent::LogSeverity) const>(&pragma::BaseEntityComponent::Log), luabind::default_parameter_policy<3, pragma::BaseEntityComponent::LogSeverity::Warning> {});
+	entityComponentDef.def("SetPropertyAnimated", &pragma::BaseEntityComponent::SetPropertyAnimated);
+	entityComponentDef.def("IsPropertyAnimated", &pragma::BaseEntityComponent::IsPropertyAnimated);
 	entityComponentDef.add_static_constant("FREGISTER_NONE", umath::to_integral(pragma::ComponentFlags::None));
 	entityComponentDef.add_static_constant("FREGISTER_BIT_NETWORKED", umath::to_integral(pragma::ComponentFlags::Networked));
 
@@ -1479,6 +1505,8 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 		return luabind::object {l, *flags};
 	}));
 	def.def("SetLayeredAnimationFlags", &pragma::BaseAnimatedComponent::SetLayeredAnimationFlags);
+	def.def("SetPostAnimationUpdateEnabled", &pragma::BaseAnimatedComponent::SetPostAnimationUpdateEnabled);
+	def.def("IsPostAnimationUpdateEnabled", &pragma::BaseAnimatedComponent::IsPostAnimationUpdateEnabled);
 	def.def("GetMetaBoneId", &pragma::BaseAnimatedComponent::GetMetaBoneId);
 	def.def(
 	  "GetMetaBonePose", +[](pragma::BaseAnimatedComponent &animC, animation::MetaRigBoneType boneType, umath::CoordinateSpace space) -> std::optional<umath::ScaledTransform> {

@@ -23,6 +23,8 @@ runs:
         if [[ "$RUNNER_OS" == "Windows" ]]; then
           # Install tree command
           choco install tree
+        else
+          sudo apt install tree
         fi
           
         curDir=$(pwd)

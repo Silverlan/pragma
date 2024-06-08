@@ -399,14 +399,17 @@ void pragma::BaseLuaBaseEntityComponent::SetDynamicMemberValue(ComponentMemberIn
 template<typename T>
 bool pragma::BaseLuaBaseEntityComponent::GetDynamicMemberValue(ComponentMemberIndex memberIndex, T &outValue, ents::EntityMemberType &outType)
 {
-	auto *anyVal = GetDynamicMemberValue(memberIndex, outType);
-	if(!anyVal)
-		return false;
-	udm::visit(pragma::ents::member_type_to_udm_type(outType), [anyVal, &outValue](auto tag) {
-		using TMember = typename decltype(tag)::type;
-		if constexpr(udm::is_udm_type<T>() && udm::is_udm_type<TMember>() && is_valid_component_property_type_v<TMember> && udm::is_convertible<TMember, T>())
-			outValue = udm::convert<TMember, T>(std::any_cast<TMember>(*anyVal));
-	});
+    auto *anyVal = GetDynamicMemberValue(memberIndex, outType);
+    if(!anyVal)
+        return false;
+    return udm::visit(pragma::ents::member_type_to_udm_type(outType), [anyVal, &outValue](auto tag) {
+        using TMember = typename decltype(tag)::type;
+        if constexpr(udm::is_udm_type<T>() && udm::is_udm_type<TMember>() && is_valid_component_property_type_v<TMember> && udm::is_convertible<TMember, T>()) {
+            outValue = udm::convert<TMember, T>(std::any_cast<TMember>(*anyVal));
+            return true;
+        }
+        return false;
+    });
 }
 
 #endif

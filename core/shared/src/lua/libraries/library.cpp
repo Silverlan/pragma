@@ -1215,6 +1215,17 @@ static std::string to_string(lua_State *l, int i)
 	return val;
 }
 
+template<size_t N>
+void log_with_args(spdlog::logger &logger, const char *msg, spdlog::level::level_enum logLevel, lua_State *l, int32_t argOffset)
+{
+	std::array<std::string, N> args;
+	for(size_t i = 0; i < args.size(); ++i)
+		args[i] = to_string(l, argOffset + (i + 1));
+
+	auto log = [&](const auto &...elements) { logger.log(logLevel, fmt::vformat(msg, fmt::make_format_args(elements...))); };
+	std::apply(log, args);
+}
+
 static int log(lua_State *l, spdlog::level::level_enum logLevel)
 {
 	auto &logger = Lua::Check<spdlog::logger>(l, 1);
@@ -1226,41 +1237,34 @@ static int log(lua_State *l, spdlog::level::level_enum logLevel)
 		logger.log(logLevel, std::string {msg});
 		break;
 	case 1:
-		logger.log(logLevel, fmt::vformat(msg, fmt::make_format_args(to_string(l, argOffset + 1))));
+		log_with_args<1>(logger, msg, logLevel, l, argOffset);
 		break;
 	case 2:
-		logger.log(logLevel, fmt::vformat(msg, fmt::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2))));
+		log_with_args<2>(logger, msg, logLevel, l, argOffset);
 		break;
 	case 3:
-		logger.log(logLevel, fmt::vformat(msg, fmt::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3))));
+		log_with_args<3>(logger, msg, logLevel, l, argOffset);
 		break;
 	case 4:
-		logger.log(logLevel, fmt::vformat(msg, fmt::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4))));
+		log_with_args<4>(logger, msg, logLevel, l, argOffset);
 		break;
 	case 5:
-		logger.log(logLevel, fmt::vformat(msg, fmt::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4), to_string(l, argOffset + 5))));
+		log_with_args<5>(logger, msg, logLevel, l, argOffset);
 		break;
 	case 6:
-		logger.log(logLevel, fmt::vformat(msg, fmt::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4), to_string(l, argOffset + 5), to_string(l, argOffset + 6))));
+		log_with_args<6>(logger, msg, logLevel, l, argOffset);
 		break;
 	case 7:
-		logger.log(logLevel, fmt::vformat(msg, fmt::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4), to_string(l, argOffset + 5), to_string(l, argOffset + 6), to_string(l, argOffset + 7))));
+		log_with_args<7>(logger, msg, logLevel, l, argOffset);
 		break;
 	case 8:
-		logger.log(logLevel,
-		  fmt::vformat(msg, fmt::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4), to_string(l, argOffset + 5), to_string(l, argOffset + 6), to_string(l, argOffset + 7), to_string(l, argOffset + 8))));
+		log_with_args<8>(logger, msg, logLevel, l, argOffset);
 		break;
 	case 9:
-		logger.log(logLevel,
-		  fmt::vformat(msg,
-		    fmt::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4), to_string(l, argOffset + 5), to_string(l, argOffset + 6), to_string(l, argOffset + 7), to_string(l, argOffset + 8),
-		      to_string(l, argOffset + 9))));
+		log_with_args<9>(logger, msg, logLevel, l, argOffset);
 		break;
 	case 10:
-		logger.log(logLevel,
-		  fmt::vformat(msg,
-		    fmt::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4), to_string(l, argOffset + 5), to_string(l, argOffset + 6), to_string(l, argOffset + 7), to_string(l, argOffset + 8),
-		      to_string(l, argOffset + 9), to_string(l, argOffset + 10))));
+		log_with_args<10>(logger, msg, logLevel, l, argOffset);
 		break;
 	default:
 		logger.log(logLevel, std::string {msg});
@@ -1379,6 +1383,14 @@ void Game::RegisterLuaLibraries()
 		  absPath.MakeRelative(util::get_program_path());
 		  return luabind::object {l, absPath.GetString()};
 	  })),
+	  luabind::def(
+	    "make_relative",
+	    +[](const std::string &path, const std::string &rootPath) -> std::
+	                                                                string {
+		                                                                util::Path p {path};
+		                                                                p.MakeRelative(rootPath);
+		                                                                return p.GetString();
+	                                                                }),
 	  luabind::def("read", Lua::file::Read), luabind::def("write", Lua::file::Write), luabind::def("get_canonicalized_path", Lua::file::GetCanonicalizedPath), luabind::def("get_file_path", ufile::get_path_from_filename), luabind::def("get_file_name", ufile::get_file_from_filename),
 	  luabind::def("get_file_extension", static_cast<luabind::object (*)(lua_State *, const std::string &, const std::vector<std::string> &)>(Lua::file::GetFileExtension)),
 	  luabind::def("get_file_extension", static_cast<luabind::object (*)(lua_State *, const std::string &)>(Lua::file::GetFileExtension)), luabind::def("get_size", FileManager::GetFileSize),
@@ -1765,6 +1777,5 @@ void Game::RegisterLuaLibraries()
 	    {"FORMAT_DEFAULT", umath::to_integral(std::regex_constants::format_default)}, {"FORMAT_SED", umath::to_integral(std::regex_constants::format_sed)}, {"FORMAT_NO_COPY", umath::to_integral(std::regex_constants::format_no_copy)},
 	    {"FORMAT_FIRST_ONLY", umath::to_integral(std::regex_constants::format_first_only)}});
 	Lua::physenv::register_library(GetLuaInterface());
-	Lua::doc::register_library(GetLuaInterface());
 	Lua::animation::register_library(GetLuaInterface());
 }

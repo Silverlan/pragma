@@ -260,5 +260,5 @@ bool pragma::rendering::ShaderProcessor::RecordDraw(CModelSubMesh &mesh, pragma:
 	}
 	return m_curShader->OnRecordDrawMesh(*this, mesh) && m_cmdBuffer.RecordDrawIndexed(mesh.GetIndexCount(), instanceCount);
 }
-inline CBaseEntity &pragma::rendering::ShaderProcessor::GetCurrentEntity() const { return static_cast<CBaseEntity &>(m_modelC->GetEntity()); }
-inline const pragma::CSceneComponent &pragma::rendering::ShaderProcessor::GetCurrentScene() const { return *m_sceneC; }
+CBaseEntity &pragma::rendering::ShaderProcessor::GetCurrentEntity() const { return static_cast<CBaseEntity &>(m_modelC->GetEntity()); }
+const pragma::CSceneComponent &pragma::rendering::ShaderProcessor::GetCurrentScene() const { return *m_sceneC; }

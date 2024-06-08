@@ -8,6 +8,10 @@
 #ifndef __LUA_DOC_HPP__
 #define __LUA_DOC_HPP__
 
+#include "pragma/networkdefinitions.h"
+#include <string>
+#include <vector>
+
 #ifdef _WIN32
 #define ENABLE_LAD 1
 #endif

@@ -26,6 +26,23 @@ int main(int argc, char *argv[])
 		return EXIT_FAILURE;
 	std::string fileName = argv[1];
 
+	auto saveFlags = udm::AsciiSaveFlags::IncludeHeader;
+	if(argc > 2) {
+		auto launchParams = util::get_launch_parameters(argc, argv);
+		auto itFileName = launchParams.find("-file");
+		if(itFileName != launchParams.end())
+			fileName = itFileName->second;
+		auto checkOption = [&saveFlags, &launchParams](const std::string &name, udm::AsciiSaveFlags flag) {
+			auto it = launchParams.find("-" + name);
+			if(it == launchParams.end())
+				return;
+			auto val = util::to_boolean(it->second);
+			umath::set_flag(saveFlags, flag, val);
+		};
+		checkOption("uncompressed", udm::AsciiSaveFlags::DontCompressLz4Arrays);
+		checkOption("include_header", udm::AsciiSaveFlags::IncludeHeader);
+	}
+
 	auto rootPath = ufile::get_path_from_filename(fileName);
 	filemanager::set_absolute_root_path(rootPath);
 
@@ -76,7 +93,7 @@ int main(int argc, char *argv[])
 	auto success = false;
 	switch(targetFormatType) {
 	case udm::FormatType::Ascii:
-		success = udmData->SaveAscii(newFileName);
+		success = udmData->SaveAscii(newFileName, saveFlags);
 		break;
 	case udm::FormatType::Binary:
 		success = udmData->Save(newFileName);

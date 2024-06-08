@@ -14,7 +14,6 @@
 #include "pragma/rendering/c_render_context.hpp"
 #include "pragma/rendering/c_sci_gpu_timer_manager.hpp"
 #include "pragma/input/c_keybind.h"
-#include "pragma/util/font_set.hpp"
 #include <sharedutils/util_clock.hpp>
 #include <unordered_map>
 
@@ -32,8 +31,12 @@ namespace prosper {
 	class TimerQuery;
 	class IQueryPool;
 };
+namespace util {
+	class Utf8String;
+};
 struct InputBindingLayer;
 struct CoreInputBindingLayer;
+struct FontSet;
 #pragma warning(push)
 #pragma warning(disable : 4251)
 class DLLCLIENT CEngine : public Engine, public pragma::RenderContext {
@@ -169,6 +172,8 @@ class DLLCLIENT CEngine : public Engine, public pragma::RenderContext {
 	bool OnWindowShouldClose(prosper::Window &window);
 	void JoystickButtonInput(prosper::Window &window, const GLFW::Joystick &joystick, uint32_t key, GLFW::KeyState state);
 	void JoystickAxisInput(prosper::Window &window, const GLFW::Joystick &joystick, uint32_t axis, GLFW::Modifier mods, float newVal, float deltaVal);
+	void OnPreedit(prosper::Window &window, const util::Utf8String &preeditString, const std::vector<int> &blockSizes, int focusedBlock, int caret);
+	void OnIMEStatusChanged(prosper::Window &window, bool imeEnabled);
 	float GetRawJoystickAxisMagnitude() const;
 	// Util
 	virtual bool IsServerOnly() override;
@@ -275,7 +280,7 @@ class DLLCLIENT CEngine : public Engine, public pragma::RenderContext {
 	std::vector<CallbackHandle> m_gpuProfileHandlers = {};
 
 	std::string m_defaultFontSet;
-	std::unordered_map<std::string, FontSet> m_fontSets;
+	std::unordered_map<std::string, std::unique_ptr<FontSet>> m_fontSets;
 	float m_rawInputJoystickMagnitude = 0.f;
 	std::unordered_map<GLFW::Key, GLFW::KeyState> m_joystickKeyStates;
 

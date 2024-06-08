@@ -6,6 +6,7 @@ What is this?
 ------
 This is the repository for the Pragma Game Engine. For more information, visit the official website: https://pragma-engine.com/
 
+
 Download
 ------
 All versions include the core Engine, as well as the Pragma Filmmaker (PFM).
@@ -47,15 +48,16 @@ Please consider creating a [binary module](https://github.com/Silverlan/pragma#m
 Build Requirements
 ------
 - ~60 GiB of disk space
-- CMake 3.21.4 or newer
-- Python 3.9.5 or newer
+- CMake 3.28.3 or newer
+- Python 3.9.5 or newer, with NumPy
 
 ###### Windows
 - Visual Studio 2022 or newer
 - Windows SDK 10.0.22000.0 or newer
 
 ###### Linux
-- clang-15 or newer (Pragma is *not* compatible with gcc!)
+- Ubuntu 24.04 or newer
+- clang-18 or newer (Pragma is *not* compatible with gcc!)
 
 Build Instructions
 ------

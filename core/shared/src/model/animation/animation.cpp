@@ -16,6 +16,7 @@
 #include <panima/channel.hpp>
 #include "pragma/model/animation/bone.hpp"
 #include <bezier_fit.hpp>
+//#include <utility>
 
 decltype(pragma::animation::Animation::s_activityEnumRegister) pragma::animation::Animation::s_activityEnumRegister;
 decltype(pragma::animation::Animation::s_eventEnumRegister) pragma::animation::Animation::s_eventEnumRegister;
@@ -1163,6 +1164,8 @@ std::shared_ptr<panima::Animation> pragma::animation::Animation::ToPanimaAnimati
 				case PoseComponent::Scale:
 					return pose.GetScale();
 				}
+				//unreachable
+				return Vector3 {0, 0, 0};
 			};
 			for(auto &vd : valueData) {
 				auto val = getPoseValue(vd.pose);

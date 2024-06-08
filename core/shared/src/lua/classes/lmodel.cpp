@@ -1134,9 +1134,17 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	defRig.add_static_constant("BONE_TYPE_RIGHT_WING", umath::to_integral(pragma::animation::MetaRigBoneType::RightWing));
 	defRig.add_static_constant("BONE_TYPE_RIGHT_WING_MIDDLE", umath::to_integral(pragma::animation::MetaRigBoneType::RightWingMiddle));
 	defRig.add_static_constant("BONE_TYPE_RIGHT_WING_TIP", umath::to_integral(pragma::animation::MetaRigBoneType::RightWingTip));
+	defRig.add_static_constant("BONE_TYPE_LEFT_BREAST_BASE", umath::to_integral(pragma::animation::MetaRigBoneType::LeftBreastBase));
+	defRig.add_static_constant("BONE_TYPE_LEFT_BREAST_MIDDLE", umath::to_integral(pragma::animation::MetaRigBoneType::LeftBreastMiddle));
+	defRig.add_static_constant("BONE_TYPE_LEFT_BREAST_TIP", umath::to_integral(pragma::animation::MetaRigBoneType::LeftBreastTip));
+	defRig.add_static_constant("BONE_TYPE_RIGHT_BREAST_BASE", umath::to_integral(pragma::animation::MetaRigBoneType::RightBreastBase));
+	defRig.add_static_constant("BONE_TYPE_RIGHT_BREAST_MIDDLE", umath::to_integral(pragma::animation::MetaRigBoneType::RightBreastMiddle));
+	defRig.add_static_constant("BONE_TYPE_RIGHT_BREAST_TIP", umath::to_integral(pragma::animation::MetaRigBoneType::RightBreastTip));
 	defRig.add_static_constant("BONE_TYPE_COUNT", umath::to_integral(pragma::animation::MetaRigBoneType::Count));
+	defRig.add_static_constant("BONE_TYPE_STANDARD_START", umath::to_integral(pragma::animation::MetaRigBoneType::StandardStart));
+	defRig.add_static_constant("BONE_TYPE_STANDARD_END", umath::to_integral(pragma::animation::MetaRigBoneType::StandardEnd));
 	defRig.add_static_constant("BONE_TYPE_INVALID", umath::to_integral(pragma::animation::MetaRigBoneType::Invalid));
-	static_assert(umath::to_integral(pragma::animation::MetaRigBoneType::Count) == 68, "Update this list when new bone types are addded!");
+	static_assert(umath::to_integral(pragma::animation::MetaRigBoneType::Count) == 74, "Update this list when new bone types are addded!");
 	classDef.scope[defRig];
 
 	// Flex Animation

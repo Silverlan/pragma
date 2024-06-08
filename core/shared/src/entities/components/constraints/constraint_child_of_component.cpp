@@ -329,6 +329,7 @@ void ConstraintChildOfComponent::ApplyConstraint()
 		break;
 	case Type::Position:
 		constraintInfo.drivenObjectC->SetTransformMemberPos(drivenPropertyIndex, umath::CoordinateSpace::World, newPose->GetOrigin());
+		break;
 	case Type::Rotation:
 		constraintInfo.drivenObjectC->SetTransformMemberRot(drivenPropertyIndex, umath::CoordinateSpace::World, newPose->GetRotation());
 	}

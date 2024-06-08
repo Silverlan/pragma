@@ -22,6 +22,7 @@
 #include <pragma/lua/classes/ldef_vector.h>
 #include <prosper_window.hpp>
 #include <prosper_render_pass.hpp>
+#include <util_unicode.hpp>
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;

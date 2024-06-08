@@ -75,7 +75,11 @@ namespace pragma::ents {
 		using type = T;
 	};
 	template<class T>
-	constexpr tag_t<T> tag = {};
+    constexpr tag_t<T> tag = {};
+#pragma warning( push )
+#pragma warning( disable : 4715 )
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wreturn-type"
 	constexpr std::variant<tag_t<EntityURef>, tag_t<MultiEntityURef>, tag_t<EntityUComponentMemberRef>, tag_t<Element>> get_managed_member_type_tag(EntityMemberType e)
 	{
 		switch(e) {
@@ -90,6 +94,8 @@ namespace pragma::ents {
 		}
 	}
 
+#pragma warning( pop )
+#pragma GCC diagnostic pop
 	constexpr bool is_udm_member_type(EntityMemberType type) { return umath::to_integral(type) < umath::to_integral(udm::Type::Count) && type != EntityMemberType::Element; }
 	constexpr bool is_managed_member_type_f(EntityMemberType type)
 	{

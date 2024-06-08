@@ -20,6 +20,11 @@ inputs:
     description: 'Module repository name with owner.'
     required: true
     default: '${{ github.repository }}'
+  ref:
+    description: >
+      The branch, tag or SHA to checkout. When checking out the repository that
+      triggered a workflow, this defaults to the reference or SHA for that
+      event.  Otherwise, uses the default branch.
   token:
     description: 'PAT token required to fetch the repository.'
     required: true
@@ -42,7 +47,7 @@ runs:
   using: "composite"
   steps:
     - name: Setup Pragma
-      uses: Silverlan/pragma/github_actions/setup@master
+      uses: Silverlan/pragma/github_actions/setup@main
       with:
         with_cuda: ${{ inputs.with-cuda }}
 
@@ -76,12 +81,13 @@ runs:
         path: 'pragma/modules/${{ inputs.module }}'
         token: '${{ inputs.token }}'
         repository: '${{ inputs.repository }}'
+        ref: ${{ inputs.ref }}
 
     - name: Build Pragma
       id: build-pragma
-      uses: Silverlan/pragma/github_actions/build@master
+      uses: Silverlan/pragma/github_actions/build@main
       with:
-        build-args: '--with-lua-debugger=0 --with-common-modules=0 --with-essential-client-modules=0 --cmake-arg=${{ steps.set-cmake-args.outputs.cmake-args }} ${{ steps.set-cmake-args.outputs.build-args }}'
+        build-args: '--with-lua-debugger=0 --no-libssl --with-common-modules=0 --with-essential-client-modules=0 --cmake-arg=${{ steps.set-cmake-args.outputs.cmake-args }} ${{ steps.set-cmake-args.outputs.build-args }}'
 
     - name: Set Output Variables
       shell: bash
@@ -94,7 +100,7 @@ runs:
 
     - name: Upload Debug Artifacts
       if: ${{ !cancelled() && inputs.debug-artifact-token != '' }}
-      uses: Silverlan/pragma/github_actions/upload_debug_artifacts@master
+      uses: Silverlan/pragma/github_actions/upload_debug_artifacts@main
       with:
         token: ${{ inputs.debug-artifact-token }}
         commit: ${{ github.ref_name }}

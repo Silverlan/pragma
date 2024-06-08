@@ -15,19 +15,7 @@
 #include "pragma/audio/sound_ogg.h"
 #include "pragma/audio/c_sound_load.h"
 
-static bool al_check_error(const std::string &path, uint32_t alBuffer, ALResource &res)
-{
-	/*auto err = alGetError();
-	if(err != AL_NO_ERROR)
-	{
-		Con::cwar<<"OpenAL Error for '"<<path<<"': "<<alGetString(err)<<"!"<<Con::endl;
-		if(alIsBuffer(alBuffer))
-			alDeleteBuffers(1,&alBuffer);
-		res.buffer = 0;
-		return false;
-	}
-	return true;*/
-}
+
 
 template<class T, class S>
 static unsigned int stereo_to_mono(char *src, char **ptgt, unsigned int datalen, unsigned int fragmentSize = 2)

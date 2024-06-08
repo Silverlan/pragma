@@ -116,12 +116,13 @@ function(def_project PROJ_NAME PROJ_TYPE)
 	    "${CMAKE_CURRENT_LIST_DIR}/include/*.hpp"
 	)
 
+	#Commented lines break ninja believe it or not. Thankfully we set relevant rpaths later
 	if(${PROJ_TYPE} MATCHES "lib")
 		add_library(${PROJ_NAME} SHARED ${SRC_FILES})
-		set_target_properties(${PROJ_NAME} PROPERTIES LINK_FLAGS "-Wl,-rpath,$ORIGIN")
+		#set_target_properties(${PROJ_NAME} PROPERTIES LINK_FLAGS "-Wl,-rpath,$ORIGIN")
 	else()
 		add_executable(${PROJ_NAME} WIN32 ${SRC_FILES} ${ARGN})
-		set_target_properties(${PROJ_NAME} PROPERTIES LINK_FLAGS "-Wl,-rpath,$ORIGIN/lib")
+		#set_target_properties(${PROJ_NAME} PROPERTIES LINK_FLAGS "-Wl,-rpath,$ORIGIN/lib")
 	endif()
 
 	# set_target_properties(${PROJ_NAME} PROPERTIES INSTALL_RPATH "$ORIGIN/lib;$ORIGIN")

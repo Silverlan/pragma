@@ -18,7 +18,6 @@
 #include <sharedutils/util_string.h>
 #include <sharedutils/util_file.h>
 #include <pragma/engine_version.h>
-#include <pragma/lua/lua_doc.hpp>
 #include <pragma/asset/util_asset.hpp>
 #include <map>
 

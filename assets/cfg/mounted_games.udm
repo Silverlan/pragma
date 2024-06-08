@@ -53,7 +53,7 @@
 	"steam"
 	{
 		$uint32 app_id 420
-		$string game_path "common/half-life 2/ep2/"
+		$string game_path "common/Half-Life 2/ep2/"
 		$bool mount_workshop 0
 	}
 	"engine"
@@ -71,7 +71,7 @@
 	"steam"
 	{
 		$uint32 app_id 380
-		$string game_path "common/half-life 2/episodic/"
+		$string game_path "common/Half-Life 2/episodic/"
 		$bool mount_workshop 0
 	}
 	"engine"
@@ -131,8 +131,8 @@
 	{
 		$uint32 app_id 280
 		$array game_paths [string][
-			"common/half-life 2/hl1/",
-			"common/half-life 2/hl1_hd/"
+			"common/Half-Life 2/hl1/",
+			"common/Half-Life 2/hl1_hd/"
 		]
 		$bool mount_workshop 0
 	}
@@ -141,7 +141,12 @@
 		$string name "source_engine"
 		$array archives [string][
 			"hl1_hd_pak_dir.vpk",
-			"hl1_pak_dir.vpk"
+			"hl1_pak_dir.vpk",
+            "hl2_misc_dir.vpk"
+			"hl2_pak_dir.vpk",
+			"hl2_sound_misc_dir.vpk",
+			"hl2_sound_vo_english_dir.vpk",
+			"hl2_textures_dir.vpk"
 		]
 	}
 }
@@ -170,14 +175,19 @@
 	"steam"
 	{
 		$uint32 app_id 240
-		$string game_path "common/counter-strike source/cstrike/"
+		$string game_path "common/Counter-Strike Source/cstrike/"
 		$bool mount_workshop 0
 	}
 	"engine"
 	{
 		$string name "source_engine"
 		$array archives [string][
-			"cstrike_pak_dir.vpk"
+			"cstrike_pak_dir.vpk",
+            "hl2_misc_dir.vpk"
+			"hl2_pak_dir.vpk",
+			"hl2_sound_misc_dir.vpk",
+			"hl2_sound_vo_english_dir.vpk",
+			"hl2_textures_dir.vpk"
 		]
 	}
 }
@@ -207,7 +217,7 @@
 	"steam"
 	{
 		$uint32 app_id 500
-		$string game_path "common/left 4 dead/left4dead/"
+		$string game_path "common/Left 4 Dead/left4dead/"
 		$bool mount_workshop 0
 	}
 	"engine"
@@ -251,7 +261,7 @@
 	"steam"
 	{
 		$uint32 app_id 340
-		$string game_path "common/half-life 2/lostcoast/"
+		$string game_path "common/Half-Life 2/lostcoast/"
 		$bool mount_workshop 0
 	}
 	"engine"
@@ -269,14 +279,19 @@
 	"steam"
 	{
 		$uint32 app_id 320
-		$string game_path "common/half-life 2 deathmatch/hl2mp/"
+		$string game_path "common/Half-Life 2 Deathmatch/hl2mp/"
 		$bool mount_workshop 0
 	}
 	"engine"
 	{
 		$string name "source_engine"
 		$array archives [string][
-			"hl2mp_pak_dir.vpk"
+			"hl2mp_pak_dir.vpk",
+            
+            "hl2_misc_dir.vpk"
+			"hl2_sound_misc_dir.vpk",
+			"hl2_sound_vo_english_dir.vpk",
+			"hl2_textures_dir.vpk"
 		]
 	}
 }
@@ -299,7 +314,11 @@
 	{
 		$string name "source_engine"
 		$array archives [string][
-			"platform_misc_dir.vpk"
+			"platform_misc_dir.vpk",
+            "hl2_misc_dir.vpk"
+			"hl2_sound_misc_dir.vpk",
+			"hl2_sound_vo_english_dir.vpk",
+			"hl2_textures_dir.vpk"
 		]
 	}
 }
@@ -367,7 +386,7 @@
 	"steam"
 	{
 		$uint32 app_id 570
-		$string game_path "common/dota 2 beta/game/dota/"
+		$string game_path "common/Dota 2 beta/game/dota/"
 		$bool mount_workshop 1
 	}
 	"engine"
@@ -434,7 +453,11 @@
 	{
 		$string name "source_engine"
 		$array archives [string][
-			"portal_pak_dir.vpk"
+			"portal_pak_dir.vpk",
+            "hl2_misc_dir.vpk"
+			"hl2_sound_misc_dir.vpk",
+			"hl2_sound_vo_english_dir.vpk",
+			"hl2_textures_dir.vpk"
 		]
 	}
 }
@@ -447,8 +470,8 @@
 	{
 		$uint32 app_id 440
 		$array game_paths [string][
-			"common/team fortress 2/tf/",
-			"common/team fortress 2/hl2/"
+			"common/Team Fortress 2/tf/",
+			"common/Team Fortress 2/hl2/"
 		]
 		$bool mount_workshop 1
 	}
@@ -459,7 +482,11 @@
 			"tf2_misc_dir.vpk",
 			"tf2_sound_misc_dir.vpk",
 			"tf2_sound_vo_english_dir.vpk",
-			"tf2_textures_dir.vpk"
+			"tf2_textures_dir.vpk",
+            "hl2_misc_dir.vpk"
+			"hl2_sound_misc_dir.vpk",
+			"hl2_sound_vo_english_dir.vpk",
+			"hl2_textures_dir.vpk"
 		]
 	}
 }

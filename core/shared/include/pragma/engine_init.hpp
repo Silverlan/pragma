@@ -19,12 +19,14 @@ std::shared_ptr<T> InitializeEngine(int argc, char *argv[])
 	MiniDumper dmp(exe.c_str());
 #endif
 	auto en = std::shared_ptr<T> {new T {argc, argv}, [](T *p) {
+#ifdef _WIN32
 		                              if(std::uncaught_exceptions() > 0) {
 			                              // If we're stack unwinding due to an uncaught exception,
 			                              // we DON'T want to destroy the engine, since we'll need
 			                              // the engine object to collect information for our crashdump!
 			                              return;
 		                              }
+#endif
 		                              p->Release();
 		                              delete p;
 	                              }};

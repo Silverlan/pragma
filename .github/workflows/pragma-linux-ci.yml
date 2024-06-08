@@ -1,9 +1,9 @@
 name: Build Linux
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
   workflow_dispatch:
 
 concurrency:
@@ -13,6 +13,10 @@ concurrency:
 permissions:
   contents: write
 
+env:
+  # See https://github.com/git-lfs/git-lfs/issues/5749
+  GIT_CLONE_PROTECTION_ACTIVE: 'false'
+
 jobs:
   build:
     name: Build - ${{ matrix.config.os }}
@@ -21,18 +25,11 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - os: ubuntu-22.04
-            name: "Ubuntu GCC-11"
-            artifact: "ubuntu_gcc.7z"
-            build_type: "RelWithDebInfo"
-            cc: "clang-14"
-            cxx: "clang++-14"
-            archiver: "7z a"
-            generators: "Unix Makefiles"
-            build_dir: 'build'
+          - os: ubuntu-24.04
+            name: "Ubuntu 24.04"
     steps:
       - name: Setup Pragma
-        uses: Silverlan/pragma/github_actions/setup@master
+        uses: Silverlan/pragma/github_actions/setup@main
         with:
           clone_url: "https://github.com/${{ github.repository }}.git"
 
@@ -40,8 +37,8 @@ jobs:
         uses: ./pragma/github_actions/build
         id: build-pragma
         with:
-          build-args: "--with-pfm --with-all-pfm-modules --with-vr --with-networking --with-lua-debugger=0"
-          
+          build-args: "--with-pfm --with-all-pfm-modules --with-vr --with-networking --with-lua-debugger=0 --no-libssl"
+
       - name: Create Release Archive
         shell: bash
         run: |
@@ -76,7 +73,7 @@ jobs:
           prerelease: true
 
       - name: Update nightly release
-        uses: pyTooling/Actions/releaser/composite@main
+        uses: Silverlan/Releaser/releaser/composite@main
         with:
           tag: nightly
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -93,6 +90,7 @@ jobs:
         shell: bash
         if: always()
         run: |
+          sudo apt install tree
           curDir=$(pwd)
 
           if [ -d "pragma/build" ]; then

@@ -50,6 +50,7 @@
 #include <prosper_window.hpp>
 #include <luabind/copy_policy.hpp>
 #include <pragma/debug/intel_vtune.hpp>
+#include <util_unicode.hpp>
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;

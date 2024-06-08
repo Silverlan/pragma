@@ -1,59 +1,49 @@
 "fx.explosion"
 {
-	$array events [element][
+	$array events [element;1][
 		{
-			$string type "playsound"
 			$float gain 1
-			$float pitch 1
 			$string mode "mono"
-			$array source [string][
-				"fx/explosions/explosion_04.wav",
-				"fx/explosions/explosion_15.wav",
-				"fx/explosions/explosion_17.wav",
-				"fx/explosions/explosion_18.wav"
-			]
+			$float pitch 1
+			$array source [string;4]["fx/explosions/explosion_04.wav","fx/explosions/explosion_15.wav","fx/explosions/explosion_17.wav","fx/explosions/explosion_18.wav"]
+			$string type "playsound"
 		}
 	]
 }
 "fx.fire_small"
 {
-	$array events [element][
+	$array events [element;1][
 		{
-			$string type "playsound"
 			$float gain 1
-			$float pitch 1
 			$string mode "mono"
+			$float pitch 1
 			$string source "fx/fire_small_loop.ogg"
+			$string type "playsound"
 		}
 	]
 }
 "fx.underwater"
 {
-	$array events [element][
+	$array events [element;1][
 		{
-			$string type "playsound"
 			$float gain 1
-			$float pitch 1
 			$bool loop 1
 			$string mode "mono"
+			$float pitch 1
 			$string source "ambient/water/underwater.wav"
+			$string type "playsound"
 		}
 	]
 }
 "fx.water_slosh"
 {
-	$array events [element][
+	$array events [element;1][
 		{
-			$string type "playsound"
 			$float gain 1
-			$float pitch 1
 			$string mode "mono"
-			$array source [string][
-				"player/footsteps/slosh1.wav",
-				"player/footsteps/slosh2.wav",
-				"player/footsteps/slosh3.wav",
-				"player/footsteps/slosh4.wav"
-			]
+			$float pitch 1
+			$array source [string;4]["player/footsteps/slosh1.wav","player/footsteps/slosh2.wav","player/footsteps/slosh3.wav","player/footsteps/slosh4.wav"]
+			$string type "playsound"
 		}
 	]
 }

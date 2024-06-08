@@ -232,7 +232,10 @@ function Component:SaveAscii(fileName, saveFlags)
 	for name, animData in pairs(self.m_animations) do
 		animData.animation:Save(data:Get(name))
 	end
-	return udmData:SaveAscii(fileName, saveFlags or udm.ASCII_SAVE_FLAG_BIT_DONT_COMPRESS_LZ4_ARRAYS)
+	return udmData:SaveAscii(
+		fileName,
+		saveFlags or bit.bor(udm.ASCII_SAVE_FLAG_DEFAULT, udm.ASCII_SAVE_FLAG_BIT_DONT_COMPRESS_LZ4_ARRAYS)
+	)
 end
 
 function Component:StartRecording()

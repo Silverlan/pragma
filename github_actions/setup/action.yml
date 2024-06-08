@@ -6,7 +6,7 @@ inputs:
     default: 'https://github.com/Silverlan/pragma.git'
   branch:
     description: 'The branch to clone Pragma from.'
-    default: 'master'
+    default: 'main'
   with_cuda:
     description: 'Install CUDA?'
     required: true
@@ -19,7 +19,7 @@ runs:
         name: "pragma > setup"
   
     - name: Install Requirements
-      uses: Silverlan/pragma/github_actions/install_requirements@master
+      uses: Silverlan/pragma/github_actions/install_requirements@main
       with:
         with_cuda: ${{ inputs.with_cuda }}
       

@@ -234,7 +234,7 @@ std::vector<pragma::animation::MetaRigBoneType> pragma::animation::get_meta_rig_
 	case MetaRigBoneType::Spine2:
 		return {MetaRigBoneType::Spine3};
 	case MetaRigBoneType::Spine3:
-		return {MetaRigBoneType::Neck, MetaRigBoneType::LeftUpperArm, MetaRigBoneType::RightUpperArm};
+		return {MetaRigBoneType::Neck, MetaRigBoneType::LeftUpperArm, MetaRigBoneType::RightUpperArm, MetaRigBoneType::LeftBreastBase, MetaRigBoneType::RightBreastBase};
 	case MetaRigBoneType::Neck:
 		return {MetaRigBoneType::Head};
 	case MetaRigBoneType::Head:
@@ -359,7 +359,15 @@ std::vector<pragma::animation::MetaRigBoneType> pragma::animation::get_meta_rig_
 		return {MetaRigBoneType::RightWingTip};
 	case MetaRigBoneType::RightWingTip:
 		return {};
+	case MetaRigBoneType::LeftBreastBase:
+		return {MetaRigBoneType::LeftBreastMiddle};
+	case MetaRigBoneType::LeftBreastMiddle:
+		return {MetaRigBoneType::LeftBreastTip};
+	case MetaRigBoneType::RightBreastBase:
+		return {MetaRigBoneType::RightBreastMiddle};
+	case MetaRigBoneType::RightBreastMiddle:
+		return {MetaRigBoneType::RightBreastTip};
 	}
-	static_assert(umath::to_integral(MetaRigBoneType::Count) == 68, "Update this list when new types are added!");
+	static_assert(umath::to_integral(MetaRigBoneType::Count) == 74, "Update this list when new types are added!");
 	return {};
 }

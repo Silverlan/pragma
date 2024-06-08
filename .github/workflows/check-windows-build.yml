@@ -2,11 +2,15 @@ name: Check Windows Build
 on:
   push:
     branches-ignore:
-      - master
+      - main
 
 concurrency:
   group: check-build-win-${{ github.ref }}
   cancel-in-progress: true
+
+env:
+  # See https://github.com/git-lfs/git-lfs/issues/5749
+  GIT_CLONE_PROTECTION_ACTIVE: 'false'
 
 jobs:
   build:
@@ -28,7 +32,7 @@ jobs:
             build_dir: 'build'
     steps:
       - name: Setup Pragma
-        uses: Silverlan/pragma/github_actions/setup@master
+        uses: Silverlan/pragma/github_actions/setup@main
         with:
           branch: ${{ github.ref_name }}
           clone_url: "https://github.com/${{ github.repository }}.git"
@@ -44,6 +48,16 @@ jobs:
         with:
           build-args: "--with-pfm --with-all-pfm-modules --with-vr --with-lua-debugger=0 --cmake-arg=\"-DCMAKE_SYSTEM_VERSION=10.0.22621.0\" --vcvars \"C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Auxiliary/Build/vcvars64.bat\""
 
-      - name: Handle Error
-        uses: Silverlan/common_actions/action_handle_error@main
-        if: failure()
+      #- name: Handle Error
+      #  uses: Silverlan/common_actions/action_handle_error@main
+      #  if: failure()
+      #  with:
+      #    timeout-minutes: 15
+
+      - name: Upload Debug Artifacts
+        if: ${{ !cancelled() }}
+        uses: ./pragma/github_actions/upload_debug_artifacts
+        with:
+          build-dir: '${{ steps.build-pragma.outputs.build-dir }}'
+          deps-dir: '${{ steps.build-pragma.outputs.deps-dir }}'
+          install-dir: '${{ steps.build-pragma.outputs.install-dir }}'

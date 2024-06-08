@@ -1,0 +1,121 @@
+{
+    "configurations": [
+        {
+            "name": "(gdb) Launch Pragma",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/install/pragma",
+            "args": [
+                "-verbose"
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/build/install/",
+            "environment": [
+                {
+                    "name": "__NV_PRIME_RENDER_OFFLOAD",
+                    "value": "1"
+                },
+                {
+                    "name": "__VK_LAYER_NV_optimus",
+                    "value": "NVIDIA_only"
+                },
+                {
+                    "name": "__GLX_VENDOR_LIBRARY_NAME",
+                    "value": "nvidia"
+                },
+            ],
+            "externalConsole": true,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Set Disassembly Flavor to Intel",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
+            "name": "(gdb) Launch PFM",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/install/pfm",
+            "args": [
+                "-verbose"
+            ],
+            "stopAtEntry": true,
+            "cwd": "${workspaceFolder}/build/install/",
+            "environment": [
+                {
+                    "name": "__NV_PRIME_RENDER_OFFLOAD",
+                    "value": "1"
+                },
+                {
+                    "name": "__VK_LAYER_NV_optimus",
+                    "value": "NVIDIA_only"
+                },
+                {
+                    "name": "__GLX_VENDOR_LIBRARY_NAME",
+                    "value": "nvidia"
+                },
+            ],
+            "externalConsole": true,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Set Disassembly Flavor to Intel",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
+            "name": "(gdb) Launch Pragma Server",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/install/pragma_server",
+            "args": [
+                "-verbose"
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/build/install/",
+            "environment": [
+                {
+                    "name": "__NV_PRIME_RENDER_OFFLOAD",
+                    "value": "1"
+                },
+                {
+                    "name": "__VK_LAYER_NV_optimus",
+                    "value": "NVIDIA_only"
+                },
+                {
+                    "name": "__GLX_VENDOR_LIBRARY_NAME",
+                    "value": "nvidia"
+                },
+            ],
+            "externalConsole": true,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Set Disassembly Flavor to Intel",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                }
+            ]
+        }
+    ]
+}

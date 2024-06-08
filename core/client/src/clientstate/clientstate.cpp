@@ -292,7 +292,7 @@ void ClientState::InitializeGUILua()
 
 	WGUILuaInterface::Initialize();
 
-	Lua::ExecuteFiles(GetGUILuaState(), "autorun\\gui\\", Lua::HandleTracebackError, [this](Lua::StatusCode code, const std::string &luaFile) { Lua::HandleSyntaxError(GetGUILuaState(), code, luaFile); });
+	Lua::ExecuteFiles(GetGUILuaState(), "autorun/gui/", Lua::HandleTracebackError, [this](Lua::StatusCode code, const std::string &luaFile) { Lua::HandleSyntaxError(GetGUILuaState(), code, luaFile); });
 	if(g_autoExecScripts.has_value()) {
 		for(auto &f : *g_autoExecScripts)
 			Lua::ExecuteFile(GetGUILuaState(), f, Lua::HandleTracebackError);

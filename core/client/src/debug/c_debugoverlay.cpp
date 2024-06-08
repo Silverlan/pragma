@@ -331,7 +331,7 @@ std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawBox(const Vector3 
 {
 	auto center = (end + start) * 0.5f;
 	auto *poutlineColor = renderInfo.outlineColor ? &*renderInfo.outlineColor : nullptr;
-	return draw_box(renderInfo.pose.GetOrigin(), start - center, end - center, renderInfo, poutlineColor);
+	return draw_box(renderInfo.pose.GetOrigin() +center, start - center, end - center, renderInfo, poutlineColor);
 }
 static WIText *create_text_element(const std::string &text)
 {

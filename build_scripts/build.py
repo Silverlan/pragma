@@ -776,7 +776,7 @@ if with_pfm:
 		)
 		add_pragma_module(
 			name="pr_dmx",
-			commitSha="f818ed1",
+			commitSha="f818ed1954705d98739ad59ad6e8d928e910aca1",
 			repositoryUrl="https://github.com/Silverlan/pr_dmx.git"
 		)
 	if with_all_pfm_modules:
@@ -789,16 +789,6 @@ if with_pfm:
 			name="pr_unirender",
 			commitSha="6e64315dbcb855a098f3bce4746c30da1c89faba",
 			repositoryUrl="https://github.com/Silverlan/pr_cycles.git"
-		)
-		add_pragma_module(
-			name="pr_curl",
-			commitSha="d49b477d77310737fd5f88d49e35b7db58f9718c",
-			repositoryUrl="https://github.com/Silverlan/pr_curl.git"
-		)
-		add_pragma_module(
-			name="pr_dmx",
-			commitSha="f818ed1",
-			repositoryUrl="https://github.com/Silverlan/pr_dmx.git"
 		)
 		add_pragma_module(
 			name="pr_xatlas",

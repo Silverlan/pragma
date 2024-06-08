@@ -1378,6 +1378,7 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 	def.def("PlayLayeredAnimation", static_cast<void (*)(lua_State *, pragma::BaseAnimatedComponent &, int, std::string)>([](lua_State *l, pragma::BaseAnimatedComponent &hAnim, int slot, std::string anim) { hAnim.PlayLayeredAnimation(slot, anim); }));
 	def.def("PlayLayeredActivity", static_cast<void (*)(lua_State *, pragma::BaseAnimatedComponent &, int, int)>([](lua_State *l, pragma::BaseAnimatedComponent &hAnim, int slot, int activity) { hAnim.PlayLayeredActivity(slot, static_cast<Activity>(activity)); }));
 	def.def("StopLayeredAnimation", &pragma::BaseAnimatedComponent::StopLayeredAnimation);
+	def.def("StopLayeredAnimations", &pragma::BaseAnimatedComponent::StopLayeredAnimations);
 	def.def("GetLayeredAnimation", &pragma::BaseAnimatedComponent::GetLayeredAnimation);
 	def.def("GetLayeredActivity", &pragma::BaseAnimatedComponent::GetLayeredActivity);
 	def.def("GetLayeredAnimations", static_cast<luabind::object (*)(lua_State *, pragma::BaseAnimatedComponent &)>([](lua_State *l, pragma::BaseAnimatedComponent &hAnim) -> luabind::object {

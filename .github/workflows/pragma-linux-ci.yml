@@ -21,6 +21,10 @@ jobs:
   build:
     permissions:
       actions: write
+      contents: write
+      issues: read
+      pull-requests: read
+
     name: Build - ${{ matrix.config.os }}
     runs-on: ${{ matrix.config.os }}
     strategy:

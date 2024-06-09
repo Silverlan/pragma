@@ -19,6 +19,8 @@ env:
 
 jobs:
   build:
+    permissions:
+      actions: write
     name: Build - ${{ matrix.config.os }}
     runs-on: ${{ matrix.config.os }}
     strategy:
@@ -141,10 +143,11 @@ jobs:
           files: "debug_pdb.zip"
 
       - name: Run Tests
-        uses: ./pragma/github_actions/run_tests
+        uses: benc-uk/workflow-dispatch@v1
         timeout-minutes: 10
         with:
-          install-dir: "${{ steps.build-pragma.outputs.install-dir }}"
+          workflow: pragma-server-tests-ci.yml
+          inputs: '{ "os": "windows" }'
 
       - name: Generate File Lists
         shell: bash

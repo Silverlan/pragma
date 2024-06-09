@@ -159,6 +159,7 @@ namespace pragma {
 		bool PlayLayeredActivity(int slot, Activity activity, FPlayAnim flags = FPlayAnim::Default);
 		bool PlayLayeredAnimation(int slot, std::string animation, FPlayAnim flags = FPlayAnim::Default);
 		virtual void StopLayeredAnimation(int slot);
+		void StopLayeredAnimations();
 		bool PlayAnimation(const std::string &animation, FPlayAnim flags = FPlayAnim::Default);
 		void SetPlaybackRate(float rate);
 		float GetPlaybackRate() const;

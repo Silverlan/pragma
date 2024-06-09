@@ -1154,6 +1154,15 @@ bool BaseAnimatedComponent::PlayLayeredActivity(int slot, Activity activity, FPl
 		animInfo->activity = activity;
 	return (seq == -1) ? false : true;
 }
+void BaseAnimatedComponent::StopLayeredAnimations()
+{
+	std::vector<uint32_t> curSlots;
+	curSlots.reserve(m_animSlots.size());
+	for(auto &[slotId, slotInfo] : m_animSlots)
+		curSlots.push_back(slotId);
+	for(auto slotId : curSlots)
+		StopLayeredAnimation(slotId);
+}
 void BaseAnimatedComponent::StopLayeredAnimation(int slot)
 {
 	auto it = m_animSlots.find(slot);

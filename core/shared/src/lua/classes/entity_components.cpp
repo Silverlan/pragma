@@ -451,126 +451,166 @@ static std::vector<pragma::ComponentMemberIndex> get_dynamic_member_ids(pragma::
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, BaseEntityComponent);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(util, Path);
 
-template<bool parentSpaceOnly = false>
-static std::optional<Vector3> get_transform_member_pos(pragma::BaseEntityComponent &component, pragma::ComponentMemberIndex idx, umath::CoordinateSpace space)
+template<typename TMemberIdentifier, typename TValue, auto TSetValue>
+bool set_transform_member_value(pragma::BaseEntityComponent &component, const TMemberIdentifier &memId, umath::CoordinateSpace space, const TValue &value)
 {
-	Vector3 pos;
-	if constexpr(parentSpaceOnly) {
-		if(component.GetTransformMemberParentPos(idx, space, pos))
-			return pos;
+	if constexpr(std::is_same_v<TMemberIdentifier, std::string>) {
+		auto idx = component.GetMemberIndex(memId);
+		if(!idx)
+			return false;
+		return set_transform_member_value<pragma::ComponentMemberIndex, TValue, TSetValue>(component, *idx, space, value);
+	}
+	else
+		return (component.*TSetValue)(memId, space, value);
+	return false;
+}
+
+template<typename TMemberIdentifier>
+static bool set_transform_member_pos(pragma::BaseEntityComponent &component, const TMemberIdentifier &memId, umath::CoordinateSpace space, const Vector3 &value)
+{
+	return set_transform_member_value<TMemberIdentifier, Vector3, &pragma::BaseEntityComponent::SetTransformMemberPos>(component, memId, space, value);
+}
+
+template<typename TMemberIdentifier>
+static bool set_transform_member_rot(pragma::BaseEntityComponent &component, const TMemberIdentifier &memId, umath::CoordinateSpace space, const Quat &value)
+{
+	return set_transform_member_value<TMemberIdentifier, Quat, &pragma::BaseEntityComponent::SetTransformMemberRot>(component, memId, space, value);
+}
+
+template<typename TMemberIdentifier>
+static bool set_transform_member_scale(pragma::BaseEntityComponent &component, const TMemberIdentifier &memId, umath::CoordinateSpace space, const Vector3 &value)
+{
+	return set_transform_member_value<TMemberIdentifier, Vector3, &pragma::BaseEntityComponent::SetTransformMemberScale>(component, memId, space, value);
+}
+
+template<typename TMemberIdentifier>
+static bool set_transform_member_pose(pragma::BaseEntityComponent &component, const TMemberIdentifier &memId, umath::CoordinateSpace space, const umath::ScaledTransform &value)
+{
+	return set_transform_member_value<TMemberIdentifier, umath::ScaledTransform, &pragma::BaseEntityComponent::SetTransformMemberPose>(component, memId, space, value);
+}
+
+template<typename TMemberIdentifier, typename TValue, auto TGetValue, auto TGetParentValue, bool parentSpaceOnly = false>
+std::optional<TValue> get_transform_member_value(pragma::BaseEntityComponent &component, const TMemberIdentifier &memId, umath::CoordinateSpace space)
+{
+	if constexpr(std::is_same_v<TMemberIdentifier, std::string>) {
+		auto idx = component.GetMemberIndex(memId);
+		if(!idx)
+			return {};
+		return get_transform_member_value<pragma::ComponentMemberIndex, TValue, TGetValue, TGetParentValue, parentSpaceOnly>(component, *idx, space);
 	}
 	else {
-		if(component.GetTransformMemberPos(idx, space, pos))
-			return pos;
+		TValue value;
+		if constexpr(parentSpaceOnly) {
+			if((component.*TGetParentValue)(memId, space, value))
+				return value;
+		}
+		else {
+			if((component.*TGetValue)(memId, space, value))
+				return value;
+		}
 	}
-	return {};
-}
-template<bool parentSpaceOnly = false>
-static std::optional<Quat> get_transform_member_rot(pragma::BaseEntityComponent &component, pragma::ComponentMemberIndex idx, umath::CoordinateSpace space)
-{
-	Quat rot;
-	if constexpr(parentSpaceOnly) {
-		if(component.GetTransformMemberParentRot(idx, space, rot))
-			return rot;
-	}
-	else {
-		if(component.GetTransformMemberRot(idx, space, rot))
-			return rot;
-	}
-	return {};
-}
-template<bool parentSpaceOnly = false>
-static std::optional<Vector3> get_transform_member_scale(pragma::BaseEntityComponent &component, pragma::ComponentMemberIndex idx, umath::CoordinateSpace space)
-{
-	Vector3 scale;
-	if constexpr(parentSpaceOnly) {
-		if(component.GetTransformMemberParentScale(idx, space, scale))
-			return scale;
-	}
-	else {
-		if(component.GetTransformMemberScale(idx, space, scale))
-			return scale;
-	}
-	return {};
-}
-template<bool parentSpaceOnly = false>
-static std::optional<umath::ScaledTransform> get_transform_member_pose(pragma::BaseEntityComponent &component, pragma::ComponentMemberIndex idx, umath::CoordinateSpace space)
-{
-	umath::ScaledTransform pose;
-	if constexpr(parentSpaceOnly) {
-		if(component.GetTransformMemberParentPose(idx, space, pose))
-			return pose;
-	}
-	else {
-		if(component.GetTransformMemberPose(idx, space, pose))
-			return pose;
-	}
-	return {};
-}
-static std::optional<Vector3> convert_transform_member_pos_to_target_space(pragma::BaseEntityComponent &component, pragma::ComponentMemberIndex idx, umath::CoordinateSpace space, const Vector3 &pos)
-{
-	auto newPos = pos;
-	if(component.ConvertTransformMemberPosToTargetSpace(idx, space, newPos))
-		return newPos;
-	return {};
-}
-static std::optional<Quat> convert_transform_member_rot_to_target_space(pragma::BaseEntityComponent &component, pragma::ComponentMemberIndex idx, umath::CoordinateSpace space, const Quat &rot)
-{
-	auto newRot = rot;
-	if(component.ConvertTransformMemberRotToTargetSpace(idx, space, newRot))
-		return newRot;
-	return {};
-}
-static std::optional<Vector3> convert_transform_member_scale_to_target_space(pragma::BaseEntityComponent &component, pragma::ComponentMemberIndex idx, umath::CoordinateSpace space, const Vector3 &scale)
-{
-	auto newScale = scale;
-	if(component.ConvertTransformMemberScaleToTargetSpace(idx, space, newScale))
-		return newScale;
-	return {};
-}
-static std::optional<umath::ScaledTransform> convert_transform_member_pose_to_target_space(pragma::BaseEntityComponent &component, pragma::ComponentMemberIndex idx, umath::CoordinateSpace space, const umath::ScaledTransform &pose)
-{
-	auto newPose = pose;
-	if(component.ConvertTransformMemberPoseToTargetSpace(idx, space, newPose))
-		return newPose;
 	return {};
 }
 
-template<typename T>
-static std::optional<std::pair<T, umath::CoordinateSpace>> convert_pos_to_member_space(pragma::BaseEntityComponent &component, pragma::ComponentMemberIndex idx, umath::CoordinateSpace space, const T &value)
+template<typename TMemberIdentifier, bool parentSpaceOnly = false>
+static std::optional<Vector3> get_transform_member_pos(pragma::BaseEntityComponent &component, const TMemberIdentifier &memId, umath::CoordinateSpace space)
 {
-	umath::CoordinateSpace memberSpace;
-	T newValue = value;
-	if(!component.ConvertPosToMemberSpace(idx, space, newValue, &memberSpace))
-		return {};
-	return std::pair<T, umath::CoordinateSpace> {newValue, memberSpace};
+	return get_transform_member_value<TMemberIdentifier, Vector3, &pragma::BaseEntityComponent::GetTransformMemberPos, &pragma::BaseEntityComponent::GetTransformMemberParentPos, parentSpaceOnly>(component, memId, space);
 }
-template<typename T>
-static std::optional<std::pair<T, umath::CoordinateSpace>> convert_rot_to_member_space(pragma::BaseEntityComponent &component, pragma::ComponentMemberIndex idx, umath::CoordinateSpace space, const T &value)
+
+template<typename TMemberIdentifier, bool parentSpaceOnly = false>
+static std::optional<Quat> get_transform_member_rot(pragma::BaseEntityComponent &component, const TMemberIdentifier &memId, umath::CoordinateSpace space)
 {
-	umath::CoordinateSpace memberSpace;
-	T newValue = value;
-	if(!component.ConvertRotToMemberSpace(idx, space, newValue, &memberSpace))
-		return {};
-	return std::pair<T, umath::CoordinateSpace> {newValue, memberSpace};
+	return get_transform_member_value<TMemberIdentifier, Quat, &pragma::BaseEntityComponent::GetTransformMemberRot, &pragma::BaseEntityComponent::GetTransformMemberParentRot, parentSpaceOnly>(component, memId, space);
 }
-template<typename T>
-static std::optional<std::pair<T, umath::CoordinateSpace>> convert_scale_to_member_space(pragma::BaseEntityComponent &component, pragma::ComponentMemberIndex idx, umath::CoordinateSpace space, const T &value)
+
+template<typename TMemberIdentifier, bool parentSpaceOnly = false>
+static std::optional<Vector3> get_transform_member_scale(pragma::BaseEntityComponent &component, const TMemberIdentifier &memId, umath::CoordinateSpace space)
 {
-	umath::CoordinateSpace memberSpace;
-	T newValue = value;
-	if(!component.ConvertScaleToMemberSpace(idx, space, newValue, &memberSpace))
-		return {};
-	return std::pair<T, umath::CoordinateSpace> {newValue, memberSpace};
+	return get_transform_member_value<TMemberIdentifier, Vector3, &pragma::BaseEntityComponent::GetTransformMemberScale, &pragma::BaseEntityComponent::GetTransformMemberParentScale, parentSpaceOnly>(component, memId, space);
 }
-template<typename T>
-static std::optional<std::pair<T, umath::CoordinateSpace>> convert_pose_to_member_space(pragma::BaseEntityComponent &component, pragma::ComponentMemberIndex idx, umath::CoordinateSpace space, const T &value)
+
+template<typename TMemberIdentifier, bool parentSpaceOnly = false>
+static std::optional<umath::ScaledTransform> get_transform_member_pose(pragma::BaseEntityComponent &component, const TMemberIdentifier &memId, umath::CoordinateSpace space)
 {
-	umath::CoordinateSpace memberSpace;
-	T newValue = value;
-	if(!component.ConvertPoseToMemberSpace(idx, space, newValue, &memberSpace))
-		return {};
-	return std::pair<T, umath::CoordinateSpace> {newValue, memberSpace};
+	return get_transform_member_value<TMemberIdentifier, umath::ScaledTransform, &pragma::BaseEntityComponent::GetTransformMemberPose, &pragma::BaseEntityComponent::GetTransformMemberParentPose, parentSpaceOnly>(component, memId, space);
+}
+
+template<typename TMemberIdentifier, typename TValue, auto TConvert>
+static std::optional<TValue> convert_transform_member_value_to_target_space(pragma::BaseEntityComponent &component, const TMemberIdentifier &memId, umath::CoordinateSpace space, const TValue &value)
+{
+	if constexpr(std::is_same_v<TMemberIdentifier, std::string>) {
+		auto idx = component.GetMemberIndex(memId);
+		if(!idx)
+			return {};
+		return convert_transform_member_value_to_target_space<pragma::ComponentMemberIndex, TValue, TConvert>(component, *idx, space, value);
+	}
+	else {
+		auto newValue = value;
+		if((component.*TConvert)(memId, space, newValue))
+			return newValue;
+	}
+	return {};
+}
+
+template<typename TMemberIdentifier>
+static std::optional<Vector3> convert_transform_member_pos_to_target_space(pragma::BaseEntityComponent &component, const TMemberIdentifier &memId, umath::CoordinateSpace space, const Vector3 &pos)
+{
+	return convert_transform_member_value_to_target_space<TMemberIdentifier, Vector3, &pragma::BaseEntityComponent::ConvertTransformMemberPosToTargetSpace>(component, memId, space, pos);
+}
+template<typename TMemberIdentifier>
+static std::optional<Quat> convert_transform_member_rot_to_target_space(pragma::BaseEntityComponent &component, const TMemberIdentifier &memId, umath::CoordinateSpace space, const Quat &rot)
+{
+	return convert_transform_member_value_to_target_space<TMemberIdentifier, Quat, &pragma::BaseEntityComponent::ConvertTransformMemberRotToTargetSpace>(component, memId, space, rot);
+}
+template<typename TMemberIdentifier>
+static std::optional<Vector3> convert_transform_member_scale_to_target_space(pragma::BaseEntityComponent &component, const TMemberIdentifier &memId, umath::CoordinateSpace space, const Vector3 &scale)
+{
+	return convert_transform_member_value_to_target_space<TMemberIdentifier, Vector3, &pragma::BaseEntityComponent::ConvertTransformMemberScaleToTargetSpace>(component, memId, space, scale);
+}
+template<typename TMemberIdentifier>
+static std::optional<umath::ScaledTransform> convert_transform_member_pose_to_target_space(pragma::BaseEntityComponent &component, const TMemberIdentifier &memId, umath::CoordinateSpace space, const umath::ScaledTransform &pose)
+{
+	return convert_transform_member_value_to_target_space<TMemberIdentifier, umath::ScaledTransform, &pragma::BaseEntityComponent::ConvertTransformMemberPoseToTargetSpace>(component, memId, space, pose);
+}
+
+template<typename TMemberIdentifier, typename T, auto TConvert>
+static std::optional<std::pair<T, umath::CoordinateSpace>> convert_value_to_member_space(pragma::BaseEntityComponent &component, const TMemberIdentifier &memId, umath::CoordinateSpace space, const T &value)
+{
+	if constexpr(std::is_same_v<TMemberIdentifier, std::string>) {
+		auto idx = component.GetMemberIndex(memId);
+		if(!idx)
+			return {};
+		return convert_value_to_member_space<pragma::ComponentMemberIndex, T, TConvert>(component, *idx, space, value);
+	}
+	else {
+		umath::CoordinateSpace memberSpace;
+		T newValue = value;
+		if(!(component.*TConvert)(memId, space, newValue, &memberSpace))
+			return {};
+		return std::pair<T, umath::CoordinateSpace> {newValue, memberSpace};
+	}
+	return {};
+}
+template<typename TMemberIdentifier, typename T>
+static std::optional<std::pair<T, umath::CoordinateSpace>> convert_pos_to_member_space(pragma::BaseEntityComponent &component, const TMemberIdentifier &memId, umath::CoordinateSpace space, const T &value)
+{
+	return convert_value_to_member_space<TMemberIdentifier, T, &pragma::BaseEntityComponent::ConvertPosToMemberSpace>(component, memId, space, value);
+}
+template<typename TMemberIdentifier, typename T>
+static std::optional<std::pair<T, umath::CoordinateSpace>> convert_rot_to_member_space(pragma::BaseEntityComponent &component, const TMemberIdentifier &memId, umath::CoordinateSpace space, const T &value)
+{
+	return convert_value_to_member_space<TMemberIdentifier, T, &pragma::BaseEntityComponent::ConvertRotToMemberSpace>(component, memId, space, value);
+}
+template<typename TMemberIdentifier, typename T>
+static std::optional<std::pair<T, umath::CoordinateSpace>> convert_scale_to_member_space(pragma::BaseEntityComponent &component, const TMemberIdentifier &memId, umath::CoordinateSpace space, const T &value)
+{
+	return convert_value_to_member_space<TMemberIdentifier, T, &pragma::BaseEntityComponent::ConvertScaleToMemberSpace>(component, memId, space, value);
+}
+template<typename TMemberIdentifier, typename T>
+static std::optional<std::pair<T, umath::CoordinateSpace>> convert_pose_to_member_space(pragma::BaseEntityComponent &component, const TMemberIdentifier &memId, umath::CoordinateSpace space, const T &value)
+{
+	return convert_value_to_member_space<TMemberIdentifier, T, &pragma::BaseEntityComponent::ConvertPoseToMemberSpace>(component, memId, space, value);
 }
 
 static std::string to_string(lua_State *l, int i)
@@ -699,6 +739,31 @@ static CallbackHandle add_event_callback(lua_State *l, pragma::BaseEntityCompone
 	return hCb;
 }
 
+template<typename TMemberIdentifier>
+void register_entity_component_transform_methods(luabind::class_<pragma::BaseEntityComponent> &entityComponentDef)
+{
+	entityComponentDef.def("GetTransformMemberPos", &get_transform_member_pos<TMemberIdentifier, false>);
+	entityComponentDef.def("GetTransformMemberRot", &get_transform_member_rot<TMemberIdentifier, false>);
+	entityComponentDef.def("GetTransformMemberScale", &get_transform_member_scale<TMemberIdentifier, false>);
+	entityComponentDef.def("GetTransformMemberPose", &get_transform_member_pose<TMemberIdentifier, false>);
+	entityComponentDef.def("SetTransformMemberPos", &set_transform_member_pos<TMemberIdentifier>);
+	entityComponentDef.def("SetTransformMemberRot", &set_transform_member_rot<TMemberIdentifier>);
+	entityComponentDef.def("SetTransformMemberScale", &set_transform_member_scale<TMemberIdentifier>);
+	entityComponentDef.def("SetTransformMemberPose", &set_transform_member_pose<TMemberIdentifier>);
+	entityComponentDef.def("ConvertTransformMemberPosToTargetSpace", &convert_transform_member_pos_to_target_space<TMemberIdentifier>);
+	entityComponentDef.def("ConvertTransformMemberRotToTargetSpace", &convert_transform_member_rot_to_target_space<TMemberIdentifier>);
+	entityComponentDef.def("ConvertTransformMemberScaleToTargetSpace", &convert_transform_member_scale_to_target_space<TMemberIdentifier>);
+	entityComponentDef.def("ConvertTransformMemberPoseToTargetSpace", &convert_transform_member_pose_to_target_space<TMemberIdentifier>);
+	entityComponentDef.def("GetTransformMemberParentPos", &get_transform_member_pos<TMemberIdentifier, true>);
+	entityComponentDef.def("GetTransformMemberParentRot", &get_transform_member_rot<TMemberIdentifier, true>);
+	entityComponentDef.def("GetTransformMemberParentScale", &get_transform_member_scale<TMemberIdentifier, true>);
+	entityComponentDef.def("GetTransformMemberParentPose", &get_transform_member_pose<TMemberIdentifier, true>);
+	entityComponentDef.def("ConvertPosToMemberSpace", &convert_pos_to_member_space<TMemberIdentifier, Vector3>);
+	entityComponentDef.def("ConvertRotToMemberSpace", &convert_rot_to_member_space<TMemberIdentifier, Quat>);
+	entityComponentDef.def("ConvertScaleToMemberSpace", &convert_scale_to_member_space<TMemberIdentifier, Vector3>);
+	entityComponentDef.def("ConvertPoseToMemberSpace", &convert_pose_to_member_space<TMemberIdentifier, umath::ScaledTransform>);
+}
+
 void pragma::lua::register_entity_component_classes(lua_State *l, luabind::module_ &mod)
 {
 	auto entityComponentDef = pragma::lua::create_entity_component_class<pragma::BaseEntityComponent>("EntityComponent");
@@ -749,26 +814,8 @@ void pragma::lua::register_entity_component_classes(lua_State *l, luabind::modul
 	entityComponentDef.def("GetMemberInfo", &pragma::BaseEntityComponent::GetMemberInfo);
 	entityComponentDef.def("GetDynamicMemberIndices", static_cast<std::vector<pragma::ComponentMemberIndex> (*)(pragma::BaseEntityComponent &)>(&get_dynamic_member_ids));
 	entityComponentDef.def("GetStaticMemberCount", &pragma::BaseEntityComponent::GetStaticMemberCount);
-	entityComponentDef.def("GetTransformMemberPos", &get_transform_member_pos<false>);
-	entityComponentDef.def("GetTransformMemberRot", &get_transform_member_rot<false>);
-	entityComponentDef.def("GetTransformMemberScale", &get_transform_member_scale<false>);
-	entityComponentDef.def("GetTransformMemberPose", &get_transform_member_pose<false>);
-	entityComponentDef.def("ConvertTransformMemberPosToTargetSpace", &convert_transform_member_pos_to_target_space);
-	entityComponentDef.def("ConvertTransformMemberRotToTargetSpace", &convert_transform_member_rot_to_target_space);
-	entityComponentDef.def("ConvertTransformMemberScaleToTargetSpace", &convert_transform_member_scale_to_target_space);
-	entityComponentDef.def("ConvertTransformMemberPoseToTargetSpace", &convert_transform_member_pose_to_target_space);
-	entityComponentDef.def("GetTransformMemberParentPos", &get_transform_member_pos<true>);
-	entityComponentDef.def("GetTransformMemberParentRot", &get_transform_member_rot<true>);
-	entityComponentDef.def("GetTransformMemberParentScale", &get_transform_member_scale<true>);
-	entityComponentDef.def("GetTransformMemberParentPose", &get_transform_member_pose<true>);
-	entityComponentDef.def("ConvertPosToMemberSpace", &convert_pos_to_member_space<Vector3>);
-	entityComponentDef.def("ConvertRotToMemberSpace", &convert_rot_to_member_space<Quat>);
-	entityComponentDef.def("ConvertScaleToMemberSpace", &convert_scale_to_member_space<Vector3>);
-	entityComponentDef.def("ConvertPoseToMemberSpace", &convert_pose_to_member_space<umath::ScaledTransform>);
-	entityComponentDef.def("SetTransformMemberPos", static_cast<bool (pragma::BaseEntityComponent::*)(ComponentMemberIndex, umath::CoordinateSpace, const Vector3 &)>(&pragma::BaseEntityComponent::SetTransformMemberPos));
-	entityComponentDef.def("SetTransformMemberRot", static_cast<bool (pragma::BaseEntityComponent::*)(ComponentMemberIndex, umath::CoordinateSpace, const Quat &)>(&pragma::BaseEntityComponent::SetTransformMemberRot));
-	entityComponentDef.def("SetTransformMemberScale", static_cast<bool (pragma::BaseEntityComponent::*)(ComponentMemberIndex, umath::CoordinateSpace, const Vector3 &)>(&pragma::BaseEntityComponent::SetTransformMemberScale));
-	entityComponentDef.def("SetTransformMemberPose", static_cast<bool (pragma::BaseEntityComponent::*)(ComponentMemberIndex, umath::CoordinateSpace, const umath::ScaledTransform &)>(&pragma::BaseEntityComponent::SetTransformMemberPose));
+	register_entity_component_transform_methods<pragma::ComponentMemberIndex>(entityComponentDef);
+	register_entity_component_transform_methods<std::string>(entityComponentDef);
 	entityComponentDef.def(
 	  "GetTransformMemberSpace", +[](pragma::BaseEntityComponent &c, ComponentMemberIndex memberIndex) -> std::optional<umath::CoordinateSpace> {
 		  auto *memberInfo = c.GetMemberInfo(memberIndex);
@@ -1331,6 +1378,7 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 	def.def("PlayLayeredAnimation", static_cast<void (*)(lua_State *, pragma::BaseAnimatedComponent &, int, std::string)>([](lua_State *l, pragma::BaseAnimatedComponent &hAnim, int slot, std::string anim) { hAnim.PlayLayeredAnimation(slot, anim); }));
 	def.def("PlayLayeredActivity", static_cast<void (*)(lua_State *, pragma::BaseAnimatedComponent &, int, int)>([](lua_State *l, pragma::BaseAnimatedComponent &hAnim, int slot, int activity) { hAnim.PlayLayeredActivity(slot, static_cast<Activity>(activity)); }));
 	def.def("StopLayeredAnimation", &pragma::BaseAnimatedComponent::StopLayeredAnimation);
+	def.def("StopLayeredAnimations", &pragma::BaseAnimatedComponent::StopLayeredAnimations);
 	def.def("GetLayeredAnimation", &pragma::BaseAnimatedComponent::GetLayeredAnimation);
 	def.def("GetLayeredActivity", &pragma::BaseAnimatedComponent::GetLayeredActivity);
 	def.def("GetLayeredAnimations", static_cast<luabind::object (*)(lua_State *, pragma::BaseAnimatedComponent &)>([](lua_State *l, pragma::BaseAnimatedComponent &hAnim) -> luabind::object {

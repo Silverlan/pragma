@@ -72,6 +72,57 @@ static std::ostream &operator<<(std::ostream &stream, const BaseEntity &a)
 	return stream;
 }
 
+template<typename T>
+bool set_member_value(lua_State *l, BaseEntity &ent, const std::string &uri, T value)
+{
+	auto path = pragma::PanimaComponent::ParseComponentChannelPath(panima::ChannelPath {uri});
+	if(!path.has_value())
+		return false;
+	auto c = ent.FindComponent(path->first);
+	if(c.expired())
+		return false;
+	auto &memberPath = path->second;
+	auto *info = c->FindMemberInfo(memberPath.GetString());
+	if(!info)
+		return false;
+	return pragma::lua::set_member_value(l, *c, *info, value);
+}
+
+template<typename TValue, auto TSetValue>
+bool set_transform_member_value(BaseEntity &ent, const std::string &uri, umath::CoordinateSpace space, const TValue &value)
+{
+	auto path = pragma::PanimaComponent::ParseComponentChannelPath(panima::ChannelPath {uri});
+	if(!path.has_value())
+		return false;
+	auto c = ent.FindComponent(path->first);
+	if(c.expired())
+		return false;
+	auto &memberPath = path->second;
+	auto memberIdx = c->GetMemberIndex(memberPath.GetString());
+	if(!memberIdx)
+		return false;
+	return ((*c).*TSetValue)(*memberIdx, space, value);
+}
+
+template<typename TValue, auto TGetValue>
+std::optional<TValue> get_transform_member_value(BaseEntity &ent, const std::string &uri, umath::CoordinateSpace space)
+{
+	auto path = pragma::PanimaComponent::ParseComponentChannelPath(panima::ChannelPath {uri});
+	if(!path.has_value())
+		return {};
+	auto c = ent.FindComponent(path->first);
+	if(c.expired())
+		return {};
+	auto &memberPath = path->second;
+	auto memberIdx = c->GetMemberIndex(memberPath.GetString());
+	if(!memberIdx)
+		return {};
+	TValue val;
+	if(!((*c).*TGetValue)(*memberIdx, space, val))
+		return {};
+	return val;
+}
+
 void Lua::Entity::register_class(luabind::class_<BaseEntity> &classDef)
 {
 	classDef.def(luabind::tostring(luabind::self));
@@ -248,20 +299,18 @@ void Lua::Entity::register_class(luabind::class_<BaseEntity> &classDef)
 			  return {};
 		  return pragma::lua::get_member_value(l, *c, *info);
 	  });
-	classDef.def(
-	  "SetMemberValue", +[](lua_State *l, BaseEntity &ent, const std::string &uri, Lua::udm_type value) -> bool {
-		  auto path = pragma::PanimaComponent::ParseComponentChannelPath(panima::ChannelPath {uri});
-		  if(!path.has_value())
-			  return false;
-		  auto c = ent.FindComponent(path->first);
-		  if(c.expired())
-			  return false;
-		  auto &memberPath = path->second;
-		  auto *info = c->FindMemberInfo(memberPath.GetString());
-		  if(!info)
-			  return false;
-		  return pragma::lua::set_member_value(l, *c, *info, value);
-	  });
+	classDef.def("SetMemberValue", &set_member_value<Lua::udm_type>);
+	classDef.def("SetMemberValue", &set_member_value<const pragma::EntityURef &>);
+	classDef.def("SetMemberValue", &set_member_value<const pragma::MultiEntityURef &>);
+	classDef.def("SetMemberValue", &set_member_value<const pragma::EntityUComponentMemberRef &>);
+	classDef.def("GetTransformMemberPos", &get_transform_member_value<Vector3, &pragma::BaseEntityComponent::GetTransformMemberPos>);
+	classDef.def("GetTransformMemberRot", &get_transform_member_value<Quat, &pragma::BaseEntityComponent::GetTransformMemberRot>);
+	classDef.def("GetTransformMemberScale", &get_transform_member_value<Vector3, &pragma::BaseEntityComponent::GetTransformMemberScale>);
+	classDef.def("GetTransformMemberPose", &get_transform_member_value<umath::ScaledTransform, &pragma::BaseEntityComponent::GetTransformMemberPose>);
+	classDef.def("SetTransformMemberPos", &set_transform_member_value<Vector3, &pragma::BaseEntityComponent::SetTransformMemberPos>);
+	classDef.def("SetTransformMemberRot", &set_transform_member_value<Quat, &pragma::BaseEntityComponent::SetTransformMemberRot>);
+	classDef.def("SetTransformMemberScale", &set_transform_member_value<Vector3, &pragma::BaseEntityComponent::SetTransformMemberScale>);
+	classDef.def("SetTransformMemberPose", &set_transform_member_value<umath::ScaledTransform, &pragma::BaseEntityComponent::SetTransformMemberPose>);
 	classDef.def("GetUuid", static_cast<std::string (*)(BaseEntity &)>([](BaseEntity &ent) -> std::string { return ::util::uuid_to_string(ent.GetUuid()); }));
 	classDef.def("SetUuid", static_cast<void (*)(BaseEntity &, const std::string &)>([](BaseEntity &ent, const std::string &uuid) { ent.SetUuid(::util::uuid_string_to_bytes(uuid)); }));
 	classDef.def(

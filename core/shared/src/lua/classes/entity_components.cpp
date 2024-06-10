@@ -992,7 +992,7 @@ void pragma::lua::register_entity_component_classes(lua_State *l, luabind::modul
 	add_log_func<spdlog::level::debug>(l, oLogger, "LogDebug");
 	add_log_func<spdlog::level::info>(l, oLogger, "LogInfo");
 	add_log_func<spdlog::level::warn>(l, oLogger, "LogWarn");
-	add_log_func<spdlog::level::err>(l, oLogger, "LogError");
+	add_log_func<spdlog::level::err>(l, oLogger, "LogErr");
 	add_log_func<spdlog::level::critical>(l, oLogger, "LogCritical");
 
 	auto defBvh = Lua::create_base_entity_component_class<pragma::BaseBvhComponent>("BaseBvhComponent");

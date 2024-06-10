@@ -32,7 +32,7 @@ Media
 
 What platforms and hardware does it work on?
 ------
-- Windows 10 (or newer) / Ubuntu 22.04 LTS (or newer)
+- Windows 10 (or newer) / Ubuntu 24.04 (or newer)
 - Graphics card: GTX 1050 Ti or newer
 
 Contributions

@@ -1179,6 +1179,31 @@ void CMD_debug_ai_schedule(NetworkState *state, pragma::BasePlayerComponent *pl,
 	client->SendPacket("debug_ai_schedule_tree", p, pragma::networking::Protocol::SlowReliable);
 }
 
+void CMD_debug_draw_line(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+{
+	if(argv.empty()) {
+		Con::cwar << "No position has been specified!" << Con::endl;
+		return;
+	}
+	if(!c_game) {
+		Con::cwar << "No active game!" << Con::endl;
+		return;
+	}
+	auto *cam = c_game->GetRenderCamera();
+	if(!cam)
+		cam = c_game->GetPrimaryCamera();
+	if(!cam) {
+		Con::cwar << "No active camera found!" << Con::endl;
+		return;
+	}
+	auto srcPos = cam->GetEntity().GetPosition();
+	auto tgtPos = uvec::create(argv.front());
+	c_game->DrawLine(srcPos, tgtPos, Color::White, 12.f);
+	c_game->DrawLine(tgtPos, tgtPos + uvec::RIGHT, Color::Red, 12.f);
+	c_game->DrawLine(tgtPos, tgtPos + uvec::UP, Color::Lime, 12.f);
+	c_game->DrawLine(tgtPos, tgtPos + uvec::FORWARD, Color::Blue, 12.f);
+}
+
 void CMD_debug_aim_info(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	if(pl == nullptr)

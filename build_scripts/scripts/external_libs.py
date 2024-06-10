@@ -32,7 +32,7 @@ get_submodule("util_udm","https://github.com/Silverlan/util_udm.git","376c09b8c7
 get_submodule("util_versioned_archive","https://github.com/Silverlan/util_versioned_archive.git","be6d3fe")
 get_submodule("util_vmf","https://github.com/Silverlan/util_vmf.git","cdba99d")
 get_submodule("util_zip","https://github.com/Silverlan/util_zip.git","166f108587962b59391a37e14dcfe1a51f81a81b")
-get_submodule("vfilesystem","https://github.com/Silverlan/vfilesystem.git","ba2db128eec7a23cb65c67b396d77f2d9a93e948")
+get_submodule("vfilesystem","https://github.com/Silverlan/vfilesystem.git","ed362f0f0afb859933d1fc0c4ffc7d2dfdd3187b")
 get_submodule("wgui","https://github.com/Silverlan/wgui.git","7fc86999a0ef9716273993347022f7e40b22110d")
 get_submodule("util_unicode","https://github.com/Silverlan/util_unicode.git","454694b90e01a4b0697bd475c8e62b5903f2353f")
 

@@ -11,6 +11,8 @@ local Component = ents.DebugModelMesh
 
 function Component:Initialize()
 	BaseEntityComponent.Initialize(self)
+
+	self:SetTickPolicy(ents.TICK_POLICY_ALWAYS)
 end
 
 function Component:OnEntitySpawn()
@@ -19,6 +21,12 @@ end
 
 function Component:OnRemove()
 	util.remove(self.m_dbgObject)
+end
+
+function Component:OnTick()
+	if util.is_valid(self.m_dbgObject) then
+		self.m_dbgObject:SetPose(self:GetEntity():GetPose())
+	end
 end
 
 function Component:UpdateDebugMesh()
@@ -43,5 +51,9 @@ function Component:UpdateDebugMesh()
 	drawInfo:SetColor(Color(255, 0, 0, 64))
 	drawInfo:SetOutlineColor(Color.White)
 	self.m_dbgObject = debug.draw_mesh(dbgTris, drawInfo)
+	if util.is_valid(self.m_dbgObject) == false then
+		return
+	end
+	self.m_dbgObject:SetPose(self:GetEntity():GetPose())
 end
 ents.COMPONENT_DEBUG_MODEL_MESH = ents.register_component("debug_model_mesh", Component)

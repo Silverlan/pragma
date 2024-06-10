@@ -1,4 +1,4 @@
-[![Build Windows](https://github.com/Silverlan/pragma/actions/workflows/pragma-windows-ci.yml/badge.svg?branch=master)](https://github.com/Silverlan/pragma/actions/workflows/pragma-windows-ci.yml) [![Build Linux](https://github.com/Silverlan/pragma/actions/workflows/pragma-linux-ci.yml/badge.svg?branch=master)](https://github.com/Silverlan/pragma/actions/workflows/pragma-linux-ci.yml)
+[![Build Windows](https://github.com/Silverlan/pragma/actions/workflows/pragma-windows-ci.yml/badge.svg?branch=main)](https://github.com/Silverlan/pragma/actions/workflows/pragma-windows-ci.yml) [![Build Linux](https://github.com/Silverlan/pragma/actions/workflows/pragma-linux-ci.yml/badge.svg?branch=main)](https://github.com/Silverlan/pragma/actions/workflows/pragma-linux-ci.yml)
 
 <img align="right" width="150" height="150" alt="Pragma Logo" title="Pragma Logo" src="https://wiki.pragma-engine.com/uploads/images/gallery/2022-09/scaled-1680-/pragma-logo-256.png">
 
@@ -99,8 +99,8 @@ Running the build-script with the arguments above will build and install Pragma 
 | --------------------------------------- | -------------------------------------------------------------------------------------------- | ---------------- |
 | `--help`                                | Display this help                                                                            |                  |
 | `--generator <generator>`               | The generator to use.                                                                        | Windows: `Visual Studio 17 2022`<br/>Linux: `Unix Makefiles` |
-| `--c-compiler`                          | [Linux only] The C-compiler to use.                                                          | `clang-15`       |
-| `--cxx-compiler`                        | [Linux only] The C++-compiler to use.                                                        | `clang++-15`     |
+| `--c-compiler`                          | [Linux only] The C-compiler to use.                                                          | `clang-18`       |
+| `--cxx-compiler`                        | [Linux only] The C++-compiler to use.                                                        | `clang++-18`     |
 | `--no-sudo`                             | [Linux only] Will not run sudo commands. System packages will have to be installed manually. | `0`              |
 | `--no-confirm`                          | [Linux only] Disable any interaction with user (suitable for automated run).                 | `0`              |
 | `--with-essential-client-modules <1/0>` | Include essential modules required to run Pragma.                                            | `1`              |
@@ -150,14 +150,14 @@ There are also various pre-made binary modules available for Pragma, some of whi
 > :warning: Some of these modules have not been maintained and may no longer be compatible with the latest version of Pragma.
 - pr_chromium: https://github.com/Silverlan/pr_chromium
 - pr_curl: https://github.com/Silverlan/pr_curl
-- pr_mysql: https://github.com/Silverlan/pragma/tree/master/modules/pr_mysql
-- pr_pcl: https://github.com/Silverlan/pragma/tree/master/modules/pr_pcl
+- pr_mysql: https://github.com/Silverlan/pragma/tree/main/modules/pr_mysql
+- pr_pcl: https://github.com/Silverlan/pragma/tree/main/modules/pr_pcl
 - pr_prosper_opengl: https://github.com/Silverlan/pr_prosper_opengl
 - pr_prosper_vulkan: https://github.com/Silverlan/pr_prosper_vulkan
-- pr_socket: https://github.com/Silverlan/pragma/tree/master/modules/pr_socket
-- pr_video_recorder: https://github.com/Silverlan/pragma/tree/master/modules/pr_video_recorder
-- pr_xml: https://github.com/Silverlan/pragma/tree/master/modules/pr_xml
-- pr_audio_dummy: https://github.com/Silverlan/pragma/tree/master/modules/pr_audio_dummy
+- pr_socket: https://github.com/Silverlan/pragma/tree/main/modules/pr_socket
+- pr_video_recorder: https://github.com/Silverlan/pragma/tree/main/modules/pr_video_recorder
+- pr_xml: https://github.com/Silverlan/pragma/tree/main/modules/pr_xml
+- pr_audio_dummy: https://github.com/Silverlan/pragma/tree/main/modules/pr_audio_dummy
 - pr_cycles: https://github.com/Silverlan/pr_cycles
 - pr_source: https://github.com/Silverlan/pr_source
 - pr_xatlas: https://github.com/Silverlan/pr_xatlas
@@ -205,4 +205,4 @@ Special Thanks
 - [SlawekNowy](https://github.com/SlawekNowy): For helping to make Linux support possible
 - [REDxEYE](https://github.com/REDxEYE): For creating the [Pragma asset import plugin for Blender](https://github.com/REDxEYE/pragma_udm_io)
 - [ZeqMacaw](https://github.com/ZeqMacaw): For their work on [Crowbar](https://github.com/ZeqMacaw/Crowbar)
-- All of the contributors of the [third-party libraries](https://github.com/Silverlan/pragma/blob/master/build_scripts/scripts/third_party_libs.py) used by Pragma/PFM
+- All of the contributors of the [third-party libraries](https://github.com/Silverlan/pragma/blob/main/build_scripts/scripts/third_party_libs.py) used by Pragma/PFM

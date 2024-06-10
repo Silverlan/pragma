@@ -34,6 +34,7 @@ DLLCLIENT void CMD_debug_render_octree_static_print(NetworkState *state, pragma:
 DLLCLIENT void CMD_debug_ai_schedule_print(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
 DLLCLIENT void CMD_debug_ai_schedule(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
 DLLCLIENT void CMD_debug_aim_info(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+DLLCLIENT void CMD_debug_draw_line(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
 
 DLLCLIENT void CMD_thirdperson(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
 DLLCLIENT void CMD_flashlight_toggle(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);

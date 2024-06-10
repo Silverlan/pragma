@@ -38,6 +38,7 @@ REGISTER_CONCOMMAND_CL(debug_render_octree_static_print, CMD_debug_render_octree
 REGISTER_CONCOMMAND_CL(debug_ai_schedule_print, CMD_debug_ai_schedule_print, ConVarFlags::None, "Prints the current schedule behavior tree for the specified NPC.");
 REGISTER_CONCOMMAND_CL(debug_ai_schedule, CMD_debug_ai_schedule, ConVarFlags::None, "Prints the current schedule behavior tree for the specified NPC on screen.");
 REGISTER_CONCOMMAND_CL(debug_aim_info, CMD_debug_aim_info, ConVarFlags::None, "Prints information about whatever the local player is looking at.");
+REGISTER_CONCOMMAND_CL(debug_draw_line, CMD_debug_draw_line, ConVarFlags::None, "Draws a line from the current camera position to the specified target position");
 REGISTER_CONCOMMAND_CL(debug_light_sources, Console::commands::debug_light_sources, ConVarFlags::None, "Prints debug information about all light sources in the scene.");
 REGISTER_CONCOMMAND_CL(debug_gui_cursor, Console::commands::debug_gui_cursor, ConVarFlags::None, "Prints information about the GUI element currently hovered over by the cursor.");
 REGISTER_CONCOMMAND_CL(debug_entity_render_buffer, Console::commands::debug_entity_render_buffer, ConVarFlags::None, "Prints debug information about an entity's render buffer.");

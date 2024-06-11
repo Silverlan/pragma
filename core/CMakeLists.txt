@@ -26,5 +26,8 @@ set_target_properties(client PROPERTIES FOLDER core)
 set_target_properties(pragma PROPERTIES FOLDER core)
 set_target_properties(pragma_server PROPERTIES FOLDER core)
 set_target_properties(wms_shared PROPERTIES FOLDER core)
+if(WIN32)
+    set_target_properties(pragma_console PROPERTIES FOLDER core)
+endif()
 
 set(CMAKE_CXX_STANDARD 20)

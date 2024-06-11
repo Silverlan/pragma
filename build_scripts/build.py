@@ -19,8 +19,6 @@ if platform == "linux":
 else:
 	defaultGenerator = "Visual Studio 17 2022"
 parser.add_argument('--generator', help='The generator to use.', default=defaultGenerator)
-if platform == "win32":
-	parser.add_argument('--vcvars', help='Path to vcvars64.bat.', default="\"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Auxiliary\\Build\\vcvars64.bat\"")
 parser.add_argument("--with-essential-client-modules", type=str2bool, nargs='?', const=True, default=True, help="Include essential modules required to run Pragma.")
 parser.add_argument("--with-common-modules", type=str2bool, nargs='?', const=True, default=True, help="Include non-essential but commonly used modules (e.g. audio and physics modules).")
 parser.add_argument("--with-pfm", type=str2bool, nargs='?', const=True, default=False, help="Include the Pragma Filmmaker.")
@@ -30,9 +28,11 @@ parser.add_argument("--with-vr", type=str2bool, nargs='?', const=True, default=F
 parser.add_argument("--with-networking", type=str2bool, nargs='?', const=True, default=False, help="Include networking module(s) for multiplayer support.")
 parser.add_argument("--with-common-entities", type=str2bool, nargs='?', const=True, default=True, help="Include addons with support for common entity types.")
 parser.add_argument("--with-lua-debugger", type=str2bool, nargs='?', const=True, default=False, help="Include Lua-debugger support.")
+parser.add_argument("--with-swiftshader", type=str2bool, nargs='?', const=True, default=False, help="Include SwiftShader support for CPU-only rendering.")
 parser.add_argument('--vtune-include-path', help='The include path to the VTune profiler (required for CPU profiling).', default='')
 parser.add_argument('--vtune-library-path', help='The path to the "libittnotify" library of the VTune profiler (required for CPU profiling).', default='')
 parser.add_argument("--build", type=str2bool, nargs='?', const=True, default=True, help="Build Pragma after configurating and generating build files.")
+parser.add_argument("--build-swiftshader", type=str2bool, nargs='?', const=True, default=False, help="Builds SwiftShader from source instead of downloading prebuilt binaries.")
 parser.add_argument("--build-all", type=str2bool, nargs='?', const=True, default=False, help="Build all dependencies instead of downloading prebuilt binaries where available. Enabling this may significantly increase the disk space requirement and build time.")
 parser.add_argument('--build-config', help='The build configuration to use.', default='RelWithDebInfo')
 parser.add_argument('--build-directory', help='Directory to write the build files to. Can be relative or absolute.', default='build')
@@ -87,8 +87,6 @@ if platform == "linux":
 	no_sudo = args["no_sudo"]
 	no_confirm = args["no_confirm"]
 generator = args["generator"]
-#if platform == "win32":
-#	vcvars = args["vcvars
 with_essential_client_modules = args["with_essential_client_modules"]
 with_common_modules = args["with_common_modules"]
 with_pfm = args["with_pfm"]
@@ -98,6 +96,8 @@ with_vr = args["with_vr"]
 with_networking = args["with_networking"]
 with_common_entities = args["with_common_entities"]
 with_lua_debugger = args["with_lua_debugger"]
+with_swiftshader = args["with_swiftshader"]
+build_swiftshader = args["build_swiftshader"]
 vtune_include_path = args["vtune_include_path"]
 vtune_library_path = args["vtune_library_path"]
 build = args["build"]
@@ -122,8 +122,6 @@ if platform == "linux":
 	print("c_compiler: " +c_compiler)
 
 print("generator: " +generator)
-#if platform == "win32":
-#	print("vcvars: " +vcvars)
 print("with_essential_client_modules: " +str(with_essential_client_modules))
 print("with_common_modules: " +str(with_common_modules))
 print("with_pfm: " +str(with_pfm))
@@ -131,6 +129,8 @@ print("with_core_pfm_modules: " +str(with_core_pfm_modules))
 print("with_all_pfm_modules: " +str(with_all_pfm_modules))
 print("with_vr: " +str(with_vr))
 print("with_lua_debugger: " +str(with_lua_debugger))
+print("with_swiftshader: " +str(with_swiftshader))
+print("build_swiftshader: " +str(build_swiftshader))
 print("rerun: " +str(rerun))
 print("update: " +str(update))
 print("build: " +str(build))
@@ -493,6 +493,40 @@ reset_to_commit("4995a2f2723c401eb0ea3e10c81298906bf1422b")
 os.chdir("../../")
 os.chdir("../../")
 
+########## SwiftShader ##########
+if with_swiftshader:
+	os.chdir(deps_dir)
+	swiftshader_root = normalize_path(os.getcwd() +"/swiftshader")
+	swiftshader_modules_dir = install_dir +"/modules/swiftshader/"
+
+	swiftshader_bin_dir = swiftshader_root +"/build/bin/"
+	if build_swiftshader:
+		if not Path(swiftshader_root).is_dir():
+			print_msg("SwiftShader not found. Downloading...")
+			git_clone("https://github.com/Silverlan/swiftshader.git")
+		os.chdir("swiftshader")
+		reset_to_commit("8f431ea")
+		
+		print_msg("Building SwiftShader...")
+		os.chdir("build")
+		cmake_configure("..",generator)
+		cmake_build("Release")
+	else:
+		if not Path(swiftshader_root).is_dir():
+			mkpath(swiftshader_bin_dir)
+			os.chdir(swiftshader_bin_dir)
+			print_msg("Downloading prebuilt SwiftShader...")
+			if platform == "win32":
+				http_extract("https://github.com/Silverlan/swiftshader/releases/download/latest/swiftshader.zip")
+			else:
+				http_extract("https://github.com/Silverlan/swiftshader/releases/download/latest/swiftshader.tar.gz",format="tar.gz")
+	print_msg("Installing SwiftShader...")
+	mkpath(swiftshader_modules_dir)
+	if platform == "win32":
+		cp(swiftshader_bin_dir +"/vulkan-1.dll",swiftshader_modules_dir)
+	else:
+		cp(swiftshader_bin_dir +"/libvulkan.so.1",swiftshader_modules_dir)
+
 ########## vcpkg ##########
 os.chdir(deps_dir)
 if platform == "win32":
@@ -703,8 +737,6 @@ def execbuildscript(filepath):
 		l["install_system_packages"] = install_system_packages
 	#	l["harfbuzz_include_dir"] = harfbuzz_include_dir
 	#	l["harfbuzz_lib"] = harfbuzz_lib
-	#else:
-	#	l["vcvars"] = "vcvars"
 
 	if platform == "win32":
 		l["determine_vs_installation_path"] = determine_vs_installation_path

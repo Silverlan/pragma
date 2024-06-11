@@ -14,6 +14,7 @@ try {
 	  "materials/logo/pragma_window_icon.png",
 	  "-title_bar_color",
 	  "#262626",
+	  "-console",
 	};
 	auto cargs = pragma::merge_arguments(argc, argv, extraArgs);
 	auto hModule = pragma::launch_pragma(cargs.size(), cargs.data());

@@ -22,65 +22,63 @@
 #endif
 
 #ifdef __linux__
- //https://stackoverflow.com/a/76104592
-    // Returns 1 on success, 0 when not done, and -1 on failure (check errno)
+//https://stackoverflow.com/a/76104592
+// Returns 1 on success, 0 when not done, and -1 on failure (check errno)
 // str is initially expected to be an empty string and should only altered by this function.
-static int getline_async_thread_safe( std::string& str,const int& fd = 0, char delim = '\n') {
-    int chars_read;
-    do {
-        char buf[2] = { 0 };
-        pollfd fd_stdin {0,POLLIN,0};
+static int getline_async_thread_safe(std::string &str, const int &fd = 0, char delim = '\n')
+{
+	int chars_read;
+	do {
+		char buf[2] = {0};
+		pollfd fd_stdin {0, POLLIN, 0};
 
-        //sigemptyset(&signalset);
-        ppoll(&fd_stdin,1,NULL,nullptr);
-        chars_read = (int) read(fd, buf, 1);
-        if (chars_read == 1) {
-            if (*buf == delim) {
-                return 1;
-            }
-            str.append(buf);
-        } else {
-            if (errno == EAGAIN || errno == EWOULDBLOCK) {
-                chars_read = 0;
-                break;
-            }
-        }
-    } while (chars_read > 0);
+		//sigemptyset(&signalset);
+		ppoll(&fd_stdin, 1, NULL, nullptr);
+		chars_read = (int)read(fd, buf, 1);
+		if(chars_read == 1) {
+			if(*buf == delim) {
+				return 1;
+			}
+			str.append(buf);
+		}
+		else {
+			if(errno == EAGAIN || errno == EWOULDBLOCK) {
+				chars_read = 0;
+				break;
+			}
+		}
+	} while(chars_read > 0);
 
-    return chars_read;
+	return chars_read;
 }
 #endif
-
-
 
 extern Engine *engine;
 static std::atomic_bool bCheckInput = true;
 static void KeyboardInput()
 {
 	//TODO: Rewrite this to use non-blocking algorythms
-    std::string line;
+	std::string line;
 #ifdef _WIN32
 	while(bCheckInput) {
 		std::getline(std::cin, line);
 		if(bCheckInput)
 			engine->ConsoleInput(line);
-    }
+	}
 #else
-    int retval;
-    while(bCheckInput) {
-        retval = getline_async_thread_safe(line);
-        if (retval > 0) {
-            // Process std::string output
-            // Make sure to reset string if continuing through loop
-            if(bCheckInput)
-                engine->ConsoleInput(line);
+	int retval;
+	while(bCheckInput) {
+		retval = getline_async_thread_safe(line);
+		if(retval > 0) {
+			// Process std::string output
+			// Make sure to reset string if continuing through loop
+			if(bCheckInput)
+				engine->ConsoleInput(line);
 
-            line = "";
-
-        }
-        // line = "";
-
-    }
+			line = "";
+		}
+		// line = "";
+	}
 #endif
 }
 
@@ -106,6 +104,9 @@ Engine::ConsoleInstance::ConsoleInstance()
 	util::set_thread_name(*consoleThread, "pr_console_input_listener");
 }
 
+#ifdef _WIN32
+bool is_console_subsystem();
+#endif
 Engine::ConsoleInstance::~ConsoleInstance()
 {
 #ifdef __linux__
@@ -113,7 +114,14 @@ Engine::ConsoleInstance::~ConsoleInstance()
 	bCheckInput = false;
 #endif
 	console->close();
-#ifdef __linux__
+#ifdef _WIN32
+	if(is_console_subsystem() && consoleThread) {
+		// There's no way to cancel the blocking std::getline in the console thread if it is attached
+		// to a parent console, so we have to force terminate the thread.
+		// TODO: Do this properly by implementing an asynchronous non-blocking input method.
+		TerminateThread(consoleThread->native_handle(), 0);
+	}
+#else
 	//It is impossible to unblock KeyboardInput by putting \n. I have to cancel the thread.
 	auto natConsoleThread = consoleThread->native_handle();
 	pthread_cancel(natConsoleThread);

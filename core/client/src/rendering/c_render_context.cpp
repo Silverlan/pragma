@@ -27,6 +27,7 @@ static spdlog::logger &LOGGER_VALIDATION = pragma::register_logger("prosper_vali
 RenderContext::RenderContext() : m_monitor(nullptr), m_renderAPI {"vulkan"} {}
 RenderContext::~RenderContext() { m_graphicsAPILib = nullptr; }
 DLLNETWORK std::optional<std::string> g_customTitle;
+extern bool g_cpuRendering;
 void RenderContext::InitializeRenderAPI()
 {
 	auto &renderAPI = GetRenderAPI();
@@ -38,7 +39,24 @@ void RenderContext::InitializeRenderAPI()
 		std::string location;
 		std::string modulePath;
 		getRenderApiPath(renderAPI, location, modulePath);
-		m_graphicsAPILib = util::load_library_module(modulePath, util::get_default_additional_library_search_directories(modulePath), {}, &outErr);
+
+		auto additionalSearchDirectories = util::get_default_additional_library_search_directories(modulePath);
+		if(g_cpuRendering) {
+			if(renderAPI == "vulkan") {
+				if(filemanager::exists("modules/swiftshader/")) {
+					auto p = util::Path::CreatePath(util::get_program_path());
+					p += "modules/swiftshader/";
+					additionalSearchDirectories.push_back(p.GetString());
+
+					spdlog::info("-cpu_rendering option has been specified. SwiftShader will be used for rendering instead of Vulkan driver.");
+				}
+				else
+					spdlog::error("-cpu_rendering option requires SwiftShader module, which is not installed! Ignoring option...");
+			}
+			else
+				spdlog::error("-cpu_rendering option is only supported for Vulkan render API! Ignoring option...");
+		}
+		m_graphicsAPILib = util::load_library_module(modulePath, additionalSearchDirectories, {}, &outErr);
 		return (m_graphicsAPILib != nullptr);
 	};
 	std::string err;

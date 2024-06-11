@@ -1,4 +1,4 @@
-[![Build Windows](https://github.com/Silverlan/pragma/actions/workflows/pragma-windows-ci.yml/badge.svg?branch=main)](https://github.com/Silverlan/pragma/actions/workflows/pragma-windows-ci.yml) [![Build Linux](https://github.com/Silverlan/pragma/actions/workflows/pragma-linux-ci.yml/badge.svg?branch=main)](https://github.com/Silverlan/pragma/actions/workflows/pragma-linux-ci.yml)
+[![Build Windows](https://github.com/Silverlan/pragma/actions/workflows/pragma-windows-ci.yml/badge.svg?branch=main)](https://github.com/Silverlan/pragma/actions/workflows/pragma-windows-ci.yml) [![Build Linux](https://github.com/Silverlan/pragma/actions/workflows/pragma-linux-ci.yml/badge.svg?branch=main)](https://github.com/Silverlan/pragma/actions/workflows/pragma-linux-ci.yml) [![License](https://img.shields.io/github/license/Silverlan/pragma)](#license) [![CodeFactor](https://img.shields.io/codefactor/grade/github/Silverlan/pragma)](https://www.codefactor.io/repository/github/Silverlan/pragma)
 
 <img align="right" width="150" height="150" alt="Pragma Logo" title="Pragma Logo" src="https://wiki.pragma-engine.com/uploads/images/gallery/2022-09/scaled-1680-/pragma-logo-256.png">
 
@@ -98,7 +98,7 @@ Running the build-script with the arguments above will build and install Pragma 
 | Parameter                               | Description                                                                                  | Default          |
 | --------------------------------------- | -------------------------------------------------------------------------------------------- | ---------------- |
 | `--help`                                | Display this help                                                                            |                  |
-| `--generator <generator>`               | The generator to use.                                                                        | Windows: `Visual Studio 17 2022`<br/>Linux: `Unix Makefiles` |
+| `--generator <generator>`               | The generator to use.                                                                        | Windows: `Visual Studio 17 2022`<br/>Linux: `Ninja Multi-Config` |
 | `--c-compiler`                          | [Linux only] The C-compiler to use.                                                          | `clang-18`       |
 | `--cxx-compiler`                        | [Linux only] The C++-compiler to use.                                                        | `clang++-18`     |
 | `--no-sudo`                             | [Linux only] Will not run sudo commands. System packages will have to be installed manually. | `0`              |
@@ -111,6 +111,8 @@ Running the build-script with the arguments above will build and install Pragma 
 | `--with-vr <1/0>`                       | Include Virtual Reality support.                                                             | `0`              |
 | `--with-networking <1/0>`               | Include networking module(s) for multiplayer support.                                        | `0`              |
 | `--with-lua-debugger <1/0>`             | Include Lua-debugger support.                                                                | `0`              |
+| `--with-swiftshader <1/0>`              | Include SwiftShader support for CPU-only rendering.                                          | `0`              |
+| `--build-swiftshader <1/0>`             | Builds SwiftShader from source instead of downloading prebuilt binaries.                     | `0`              |
 | `--build-cycles <1/0>`                  | Build the Cycles library (otherwise uses pre-built binaries). Requires --with-all-pfm-modules| `0`              |
 | `--build <1/0>`                         | Build Pragma after configurating and generating build files.                                 | `1`              |
 | `--build-all <1/0>`                     | Build all dependencies instead of downloading prebuilt binaries where available.             | `0`              |

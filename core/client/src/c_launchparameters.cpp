@@ -18,6 +18,7 @@ std::optional<uint32_t> g_launchParamHeight {};
 std::optional<Color> g_titleBarColor {};
 std::optional<Color> g_borderColor {};
 bool g_launchParamExperimentalMemoryOptimizationEnabled = false;
+bool g_cpuRendering = false;
 bool g_windowless = false;
 static void LPARAM_windowed(const std::vector<std::string> &argv) { g_launchParamWindowedMode = true; }
 
@@ -111,7 +112,14 @@ static void LPARAM_border_bar_color(const std::vector<std::string> &argv)
 	g_borderColor = Color::CreateFromHexColor(strHex);
 }
 
-static void LPARAM_EXPERIMENTAL_MEMORY_OPTIMIZATION(const std::vector<std::string> &argv) {g_launchParamExperimentalMemoryOptimizationEnabled = (argv.empty() || util::to_boolean(argv.front())); }
+static void LPARAM_EXPERIMENTAL_MEMORY_OPTIMIZATION(const std::vector<std::string> &argv) { g_launchParamExperimentalMemoryOptimizationEnabled = (argv.empty() || util::to_boolean(argv.front())); }
+
+static void LPARAM_cpu_rendering(const std::vector<std::string> &argv)
+{
+	g_cpuRendering = (argv.empty() || util::to_boolean(argv.front()));
+	// Without optimizations enabled, loading with CPU rendering will take a very long time
+	g_launchParamExperimentalMemoryOptimizationEnabled = true;
+}
 
 REGISTER_LAUNCH_PARAMETER_HELP(-windowed, LPARAM_windowed, "-window -startwindowed -sw", "start in windowed mode");
 REGISTER_LAUNCH_PARAMETER(-window, LPARAM_windowed);
@@ -138,3 +146,4 @@ REGISTER_LAUNCH_PARAMETER_HELP(-windowless, LPARAM_windowless, "<1/0>", "If enab
 REGISTER_LAUNCH_PARAMETER_HELP(-title_bar_color, LPARAM_title_bar_color, "<hexColor>", "Hex color for the window title bar.");
 REGISTER_LAUNCH_PARAMETER_HELP(-border_color, LPARAM_border_bar_color, "<hexColor>", "Hex color for the window border.");
 REGISTER_LAUNCH_PARAMETER_HELP(-experimental_memory_optimization, LPARAM_EXPERIMENTAL_MEMORY_OPTIMIZATION, "<1/0>", "Enables experimental code for RAM usage reduction.");
+REGISTER_LAUNCH_PARAMETER_HELP(-cpu_rendering, LPARAM_cpu_rendering, "<1/0>", "If enabled, the CPU will be used for rendering instead of GPU.");

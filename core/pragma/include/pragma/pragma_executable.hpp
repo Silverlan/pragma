@@ -110,23 +110,6 @@ namespace pragma {
 		const char *runEngineSymbol = server ? "RunEngine" : "RunCEngine";
 
 #ifdef _WIN32
-		if(!server) {
-			// Check if Vulkan drivers are installed
-			auto bt = IDTRYAGAIN;
-			while(bt == IDTRYAGAIN) {
-				auto hVulkan = LoadLibrary("vulkan-1.dll");
-				if(hVulkan != NULL)
-					break;
-				std::stringstream msg;
-				msg << "Vulkan drivers not found! Please make sure your GPU drivers are up to date, and that your graphics vendor supports Vulkan for your GPU model.";
-				msg << " You may have to explicitly enable the Vulkan RT during driver installation.";
-				bt = MessageBox(nullptr, msg.str().c_str(), "Critical Error", MB_CANCELTRYCONTINUE | MB_ICONERROR);
-				if(bt == IDCANCEL)
-					return MODULE_NULL;
-				else if(bt == IDCONTINUE)
-					break;
-			}
-		}
 #if ENABLE_GDEBUGGER_SUPPORT == 1
 		HINSTANCE hEngine = LoadLibrary(library);
 #else

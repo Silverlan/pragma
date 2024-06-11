@@ -19,8 +19,6 @@ if platform == "linux":
 else:
 	defaultGenerator = "Visual Studio 17 2022"
 parser.add_argument('--generator', help='The generator to use.', default=defaultGenerator)
-if platform == "win32":
-	parser.add_argument('--vcvars', help='Path to vcvars64.bat.', default="\"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Auxiliary\\Build\\vcvars64.bat\"")
 parser.add_argument("--with-essential-client-modules", type=str2bool, nargs='?', const=True, default=True, help="Include essential modules required to run Pragma.")
 parser.add_argument("--with-common-modules", type=str2bool, nargs='?', const=True, default=True, help="Include non-essential but commonly used modules (e.g. audio and physics modules).")
 parser.add_argument("--with-pfm", type=str2bool, nargs='?', const=True, default=False, help="Include the Pragma Filmmaker.")
@@ -89,8 +87,6 @@ if platform == "linux":
 	no_sudo = args["no_sudo"]
 	no_confirm = args["no_confirm"]
 generator = args["generator"]
-#if platform == "win32":
-#	vcvars = args["vcvars
 with_essential_client_modules = args["with_essential_client_modules"]
 with_common_modules = args["with_common_modules"]
 with_pfm = args["with_pfm"]
@@ -126,8 +122,6 @@ if platform == "linux":
 	print("c_compiler: " +c_compiler)
 
 print("generator: " +generator)
-#if platform == "win32":
-#	print("vcvars: " +vcvars)
 print("with_essential_client_modules: " +str(with_essential_client_modules))
 print("with_common_modules: " +str(with_common_modules))
 print("with_pfm: " +str(with_pfm))
@@ -743,8 +737,6 @@ def execbuildscript(filepath):
 		l["install_system_packages"] = install_system_packages
 	#	l["harfbuzz_include_dir"] = harfbuzz_include_dir
 	#	l["harfbuzz_lib"] = harfbuzz_lib
-	#else:
-	#	l["vcvars"] = "vcvars"
 
 	if platform == "win32":
 		l["determine_vs_installation_path"] = determine_vs_installation_path

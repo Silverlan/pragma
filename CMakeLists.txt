@@ -1112,7 +1112,6 @@ add_dependencies(pragma_updater sharedutils-static)
 
 add_dependencies(pragma_server server)
 add_dependencies(pragma client server)
-add_dependencies(pragma pragma_server)
 add_dependencies(pragma pragma_updater)
 
 set_property(TARGET pragma PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_INSTALL_PREFIX}")
@@ -1167,6 +1166,9 @@ endfunction(pragma_install)
 
 pragma_install(pragma ".")
 pragma_install(pragma_server ".")
+if(WIN32)
+	pragma_install(pragma_console ".")
+endif()
 pragma_install(alsoundsystem "${BINARY_OUTPUT_DIR}")
 
 pragma_install(client "${BINARY_OUTPUT_DIR}")
@@ -1194,8 +1196,12 @@ pragma_install(wgui "${BINARY_OUTPUT_DIR}")
 pragma_install(util_unicode "${BINARY_OUTPUT_DIR}")
 
 message("Custom install targets: ${PRAGMA_INSTALL_CUSTOM_TARGETS}")
+set(PRAGMA_INSTALL_DEPENDENCIES pragma pragma_server iclient iserver udm_convert ${PRAGMA_INSTALL_CUSTOM_TARGETS})
+if(WIN32)
+    list(APPEND PRAGMA_INSTALL_DEPENDENCIES pragma_console)
+endif()
 add_custom_target(pragma-install
-	DEPENDS pragma iclient iserver udm_convert ${PRAGMA_INSTALL_CUSTOM_TARGETS}
+	DEPENDS ${PRAGMA_DEPENDENCIES}
 	COMMAND 
 		"${CMAKE_COMMAND}" -DCMAKE_INSTALL_COMPONENT=${PRAGMA_INSTALL_COMPONENT}
 		-DBUILD_TYPE=${CONFIG_BUILD_TYPE}

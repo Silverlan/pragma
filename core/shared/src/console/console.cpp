@@ -18,6 +18,16 @@
 #include <cstdio>
 #endif
 
+#ifdef _WIN32
+#pragma comment(lib, "Dbghelp.lib")
+bool is_console_subsystem()
+{
+	// See https://stackoverflow.com/a/1440163/1879228
+	PIMAGE_NT_HEADERS nth = ImageNtHeader((PVOID)GetModuleHandle(NULL));
+	return nth->OptionalHeader.Subsystem == IMAGE_SUBSYSTEM_WINDOWS_CUI;
+}
+#endif
+
 DebugConsole::DebugConsole() : _cinbuf(0), _coutbuf(0), _cerrbuf(0) {}
 
 DebugConsole::~DebugConsole() {}
@@ -25,19 +35,21 @@ DebugConsole::~DebugConsole() {}
 void DebugConsole::open()
 {
 #ifdef _WIN32
-	AllocConsole();
-	AttachConsole(GetCurrentProcessId());
-	this->_cinbuf = std::cin.rdbuf();
-	this->_console_cin.open("CONIN$");
-	std::cin.rdbuf(this->_console_cin.rdbuf());
-	this->_coutbuf = std::cout.rdbuf();
-	this->_console_cout.open("CONOUT$");
-	std::cout.rdbuf(this->_console_cout.rdbuf());
-	this->_cerrbuf = std::cerr.rdbuf();
-	this->_console_cerr.open("CONOUT$");
-	std::cerr.rdbuf(this->_console_cerr.rdbuf());
+	if(!is_console_subsystem()) {
+		AllocConsole();
+		AttachConsole(GetCurrentProcessId());
+		this->_cinbuf = std::cin.rdbuf();
+		this->_console_cin.open("CONIN$");
+		std::cin.rdbuf(this->_console_cin.rdbuf());
+		this->_coutbuf = std::cout.rdbuf();
+		this->_console_cout.open("CONOUT$");
+		std::cout.rdbuf(this->_console_cout.rdbuf());
+		this->_cerrbuf = std::cerr.rdbuf();
+		this->_console_cerr.open("CONOUT$");
+		std::cerr.rdbuf(this->_console_cerr.rdbuf());
 
-	freopen("CON", "w", stdout); // Redirect printf, etc.
+		freopen("CON", "w", stdout); // Redirect printf, etc.
+	}
 
 	// Enable ANSI color codes under Windows
 	HANDLE handleOut = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -79,37 +91,44 @@ void DebugConsole::open()
 	}
 
 #else
-    int flags = fcntl(0, F_GETFL, 0);
-    fcntl(0, F_SETFL, flags | O_NONBLOCK);
-    //this->_cinbuf = std::cin.rdbuf();
-    //this->_coutbuf = std::cout.rdbuf();
-    //this->_cerrbuf = std::cerr.rdbuf();
+	int flags = fcntl(0, F_GETFL, 0);
+	fcntl(0, F_SETFL, flags | O_NONBLOCK);
+	//this->_cinbuf = std::cin.rdbuf();
+	//this->_coutbuf = std::cout.rdbuf();
+	//this->_cerrbuf = std::cerr.rdbuf();
 #endif
 }
 
 void DebugConsole::close()
 {
 #ifdef _WIN32
-	this->_console_cout.close();
-	std::cout.rdbuf(this->_coutbuf);
-	//this->_console_cin.close(); // This used to work until windows 7, now it blocks the process until new input is received
-	//std::cin.rdbuf(this->_cinbuf);
-	this->_console_cerr.close();
-	std::cerr.rdbuf(this->_cerrbuf);
+	auto isConsoleSubSys = is_console_subsystem();
+	if(!isConsoleSubSys) {
+		this->_console_cout.close();
+		std::cout.rdbuf(this->_coutbuf);
+		//this->_console_cin.close(); // This used to work until windows 7, now it blocks the process until new input is received
+		//std::cin.rdbuf(this->_cinbuf);
+		this->_console_cerr.close();
+		std::cerr.rdbuf(this->_cerrbuf);
+	}
 	INPUT_RECORD input;
 	unsigned long numEvents;
-	WriteConsoleInput(GetStdHandle(STD_INPUT_HANDLE), &input, 0, &numEvents); // Workaround: Writes to the console to make sure the thread can end properly
-	//CloseHandle(GetStdHandle(STD_INPUT_HANDLE)); // Doesn't work?
-	fclose(stdin);
-	fclose(stdout);
-	fclose(stderr);
-	FreeConsole();
+	// Workaround: Writes to the console to make sure the thread can end properly
+	// Note: This only seems to work with the windows-subsystem
+	WriteConsoleInput(GetStdHandle(STD_INPUT_HANDLE), &input, 0, &numEvents);
+	if(!isConsoleSubSys) {
+		//CloseHandle(GetStdHandle(STD_INPUT_HANDLE)); // Doesn't work?
+		fclose(stdin);
+		fclose(stdout);
+		fclose(stderr);
+		FreeConsole();
+	}
 #else
-    int flags = fcntl(0, F_GETFL, 0);
-    fcntl(0, F_SETFL, flags & ~O_NONBLOCK);
+	int flags = fcntl(0, F_GETFL, 0);
+	fcntl(0, F_SETFL, flags & ~O_NONBLOCK);
 	//see https://stackoverflow.com/questions/55602283/how-to-write-data-to-stdin-to-be-consumed-by-a-separate-thread-waiting-on-input for details
-    //std::cout.rdbuf(this->_coutbuf);
-    //ssstd::cerr.rdbuf(this->_cerrbuf);
+	//std::cout.rdbuf(this->_coutbuf);
+	//ssstd::cerr.rdbuf(this->_cerrbuf);
 	//fwrite("\n", 1, 1, stdin);
 	//std::cin.putback('\n'); //This actually does not work.
 	//We have to fiddle with the owning pts directly.

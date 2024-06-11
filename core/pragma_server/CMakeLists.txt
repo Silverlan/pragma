@@ -9,4 +9,7 @@ if(UNIX)
 	target_link_libraries(pragma_server "pthread")
 else()
 	set_target_properties(pragma_server PROPERTIES VS_DEBUGGER_COMMAND_ARGUMENTS "-console -luaext")
+
+	# This is required so that the executable can be launched from within a Windows terminal
+	set_target_properties(pragma_server PROPERTIES LINK_FLAGS "/SUBSYSTEM:CONSOLE")
 endif()

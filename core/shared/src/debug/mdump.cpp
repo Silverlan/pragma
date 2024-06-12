@@ -83,6 +83,7 @@ LONG MiniDumper::TopLevelFilter(struct _EXCEPTION_POINTERS *pExceptionInfo)
 
 	LPCTSTR szResult = NULL;
 
+	auto shouldShowMsBox = (util::get_subsystem() == util::SubSystem::GUI);
 	if(hDll) {
 		MINIDUMPWRITEDUMP pDump = (MINIDUMPWRITEDUMP)::GetProcAddress(hDll, "MiniDumpWriteDump");
 		if(pDump) {
@@ -93,9 +94,11 @@ LONG MiniDumper::TopLevelFilter(struct _EXCEPTION_POINTERS *pExceptionInfo)
 			char szScratch[_MAX_PATH];
 
 			// ask the user if they want to save a dump file
-			if(::MessageBox(NULL, "A terminal error has occurred in the program. Would you like to save a diagnostic file? This file contains information about your system and the state of the game at the time of the crash and can be utilized by a developer to fix the underlying problem.",
-			     m_szAppName, MB_YESNO)
-			  == IDYES) {
+			if(!shouldShowMsBox
+			  || (::MessageBox(NULL,
+			        "A terminal error has occurred in the program. Would you like to save a diagnostic file? This file contains information about your system and the state of the game at the time of the crash and can be utilized by a developer to fix the underlying problem.", m_szAppName,
+			        MB_YESNO)
+			    == IDYES)) {
 				// create the file
 				HANDLE hFile = ::CreateFileA(szDumpPath.c_str(), GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 
@@ -167,7 +170,7 @@ LONG MiniDumper::TopLevelFilter(struct _EXCEPTION_POINTERS *pExceptionInfo)
 		szResult = "DBGHELP.DLL not found";
 	}
 
-	if(szResult)
+	if(szResult && shouldShowMsBox)
 		::MessageBox(NULL, szResult, m_szAppName, MB_OK);
 
 	return retval;

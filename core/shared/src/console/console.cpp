@@ -18,16 +18,6 @@
 #include <cstdio>
 #endif
 
-#ifdef _WIN32
-#pragma comment(lib, "Dbghelp.lib")
-bool is_console_subsystem()
-{
-	// See https://stackoverflow.com/a/1440163/1879228
-	PIMAGE_NT_HEADERS nth = ImageNtHeader((PVOID)GetModuleHandle(NULL));
-	return nth->OptionalHeader.Subsystem == IMAGE_SUBSYSTEM_WINDOWS_CUI;
-}
-#endif
-
 DebugConsole::DebugConsole() : _cinbuf(0), _coutbuf(0), _cerrbuf(0) {}
 
 DebugConsole::~DebugConsole() {}
@@ -35,7 +25,7 @@ DebugConsole::~DebugConsole() {}
 void DebugConsole::open()
 {
 #ifdef _WIN32
-	if(!is_console_subsystem()) {
+	if(util::get_subsystem() == util::SubSystem::Console) {
 		AllocConsole();
 		AttachConsole(GetCurrentProcessId());
 		this->_cinbuf = std::cin.rdbuf();
@@ -102,7 +92,7 @@ void DebugConsole::open()
 void DebugConsole::close()
 {
 #ifdef _WIN32
-	auto isConsoleSubSys = is_console_subsystem();
+	auto isConsoleSubSys = (util::get_subsystem() == util::SubSystem::Console);
 	if(!isConsoleSubSys) {
 		this->_console_cout.close();
 		std::cout.rdbuf(this->_coutbuf);

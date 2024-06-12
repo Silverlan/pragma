@@ -104,9 +104,6 @@ Engine::ConsoleInstance::ConsoleInstance()
 	util::set_thread_name(*consoleThread, "pr_console_input_listener");
 }
 
-#ifdef _WIN32
-bool is_console_subsystem();
-#endif
 Engine::ConsoleInstance::~ConsoleInstance()
 {
 #ifdef __linux__
@@ -115,7 +112,7 @@ Engine::ConsoleInstance::~ConsoleInstance()
 #endif
 	console->close();
 #ifdef _WIN32
-	if(is_console_subsystem() && consoleThread) {
+	if(util::get_subsystem() == util::SubSystem::Console && consoleThread) {
 		// There's no way to cancel the blocking std::getline in the console thread if it is attached
 		// to a parent console, so we have to force terminate the thread.
 		// TODO: Do this properly by implementing an asynchronous non-blocking input method.

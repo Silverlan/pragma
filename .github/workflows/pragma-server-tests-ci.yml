@@ -72,11 +72,18 @@ jobs:
         fi
 
     - name: Upload Log
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: log_server
         path: "pragma/log_server.txt"
+
+    - name: Upload Crashdumps
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: crashdumps
+        path: "pragma/crashdumps"
 
     - name: Set Failure Workflow Status
       if: failure()

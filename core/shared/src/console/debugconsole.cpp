@@ -84,6 +84,7 @@ static void KeyboardInput()
 
 void Engine::ConsoleInput(const std::string_view &line) // TODO: Make sure input-thread and engine don't access m_consoleInput at the same time?
 {
+	std::unique_lock lock {m_consoleInputMutex};
 	m_consoleInput.push(std::string {line});
 }
 
@@ -147,15 +148,24 @@ DebugConsole *Engine::GetConsole() { return m_consoleInfo ? m_consoleInfo->conso
 
 void Engine::ProcessConsoleInput(KeyState pressState)
 {
-	while(m_consoleInput.empty() == false) {
-		auto &l = m_consoleInput.front();
+	m_consoleInputMutex.lock();
+	if(m_consoleInput.empty()) {
+		m_consoleInputMutex.unlock();
+		return;
+	}
+	auto consoleInput = std::move(m_consoleInput);
+	m_consoleInput = {};
+	m_consoleInputMutex.unlock();
+
+	while(consoleInput.empty() == false) {
+		auto &l = consoleInput.front();
 
 		util::set_console_color(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
 		Con::cout << "> " << l << Con::endl;
 		util::reset_console_color();
 		ProcessConsoleInput(l, pressState);
 
-		m_consoleInput.pop();
+		consoleInput.pop();
 	}
 }
 

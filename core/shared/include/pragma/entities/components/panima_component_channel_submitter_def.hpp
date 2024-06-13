@@ -92,6 +92,8 @@ panima::ChannelValueSubmitter runtime_array_to_compile_time(pragma::BaseEntityCo
 		return TFunc<TChannel, TMember, std::array<T, ARRAY_INDEX_COUNT> {values...}> {}(component, memberIdx, setter, userData);
 }
 
+#pragma warning(push)
+#pragma warning(disable : 4700)
 template<typename TChannel>
 void instantiate_get_member_channel_submitter()
 {
@@ -115,5 +117,6 @@ void instantiate_get_member_channel_submitter()
 		});
 	}
 }
+#pragma warning(pop)
 
 #endif

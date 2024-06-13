@@ -1560,7 +1560,9 @@ pragma::BaseLuaBaseEntityComponent::MemberFlags pragma::lua::string_to_member_fl
 	return flags;
 }
 
+#ifdef __linux__
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, BaseEntityComponent);
+#endif
 
 void Lua::register_base_entity_component(luabind::module_ &modEnts)
 {

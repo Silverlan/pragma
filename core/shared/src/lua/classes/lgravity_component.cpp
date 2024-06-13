@@ -20,7 +20,9 @@ namespace Lua {
 	};
 };
 
+#ifdef __linux__
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, BaseEntityComponent);
+#endif
 
 void Lua::register_gravity_component(luabind::module_ &module)
 {

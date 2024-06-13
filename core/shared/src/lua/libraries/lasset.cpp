@@ -16,6 +16,7 @@
 #include <material_manager2.hpp>
 #include <luainterface.hpp>
 #include <fsys/ifile.hpp>
+#include <sharedutils/magic_enum.hpp>
 
 extern DLLNETWORK Engine *engine;
 

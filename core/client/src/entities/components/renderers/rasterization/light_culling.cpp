@@ -15,6 +15,7 @@
 #include "pragma/entities/environment/lights/c_env_shadow.hpp"
 #include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/game/c_game.h"
+#include "pragma/clientstate/clientstate.h"
 #include <image/prosper_msaa_texture.hpp>
 #include <prosper_util.hpp>
 #include <prosper_descriptor_set_group.hpp>

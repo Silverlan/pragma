@@ -15,6 +15,7 @@
 #include "pragma/model/modelupdateflags.hpp"
 #include <unordered_map>
 #include <mathutil/transform.hpp>
+#include <optional>
 
 namespace umath {
 	DLLNETWORK void normalize_uv_coordinates(Vector2 &uv);
@@ -33,6 +34,7 @@ namespace util {
 namespace pragma::model {
 	enum class IndexType : uint8_t { UInt16 = 0u, UInt32 };
 };
+class Game;
 class DLLNETWORK ModelSubMesh : public std::enable_shared_from_this<ModelSubMesh> {
   public:
 	static constexpr auto PMESH_IDENTIFIER = "PMESH";

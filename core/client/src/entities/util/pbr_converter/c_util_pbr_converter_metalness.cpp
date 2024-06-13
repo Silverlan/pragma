@@ -9,6 +9,7 @@
 #include "pragma/entities/util/c_util_pbr_converter.hpp"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
+#include "pragma/clientstate/clientstate.h"
 #include "cmaterial.h"
 #include <pragma/physics/collisionmesh.h>
 #include <mathutil/transform.hpp>

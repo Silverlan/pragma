@@ -8,7 +8,7 @@ curDir = os.getcwd()
 
 external_libs_dir = curDir +"/external_libs"
 os.chdir(external_libs_dir)
-get_submodule("alsoundsystem","https://github.com/Silverlan/alsoundsystem.git","4dc79d3180bdf62ab63043efac797409309d63a8")
+get_submodule("alsoundsystem","https://github.com/Silverlan/alsoundsystem.git","99a12063afdfc68fa21515236e9c59d9433b1be7")
 get_submodule("datasystem","https://github.com/Silverlan/datasystem.git","7642296ea0f8316957e1123034e87034294f8b46")
 get_submodule("iglfw","https://github.com/Silverlan/iglfw.git","9d0bf8a7123bf7ea54a373df61d240206bddf117")
 get_submodule("luasystem","https://github.com/Silverlan/luasystem.git","aba7e57505fece6b3b6b051068fa01cb37bc567c")

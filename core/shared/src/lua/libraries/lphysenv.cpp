@@ -35,6 +35,7 @@
 #include <luainterface.hpp>
 #include <luabind/iterator_policy.hpp>
 #include <luabind/copy_policy.hpp>
+#include <sharedutils/magic_enum.hpp>
 
 #include <luabind/detail/type_traits.hpp>
 

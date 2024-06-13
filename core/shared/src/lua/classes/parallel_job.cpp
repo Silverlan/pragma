@@ -6,6 +6,10 @@
 
 #include "pragma/lua/classes/parallel_job.hpp"
 #include "pragma/lua/lua_call.hpp"
+#include "pragma/engine.h"
+#include "pragma/game/game.h"
+#include "pragma/console/conout.h"
+#include <sharedutils/magic_enum.hpp>
 
 using namespace pragma::lua;
 

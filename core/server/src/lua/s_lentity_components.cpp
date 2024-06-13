@@ -107,8 +107,10 @@ namespace Lua::SoundEmitter {
 	DLLNETWORK luabind::class_<pragma::BaseSoundEmitterComponent::SoundInfo> RegisterSoundInfo();
 };
 
+#ifdef __linux__
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, BaseEntityComponent);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, BaseEnvSoundDspComponent);
+#endif
 
 void SGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 {

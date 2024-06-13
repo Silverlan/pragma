@@ -18,6 +18,7 @@
 #include "pragma/entities/baseentity_handle.h"
 #include <sharedutils/callback_handler.h>
 #include "pragma/lua/lua_callback_handler.h"
+#include "pragma/lua/lua_script_watcher.h"
 #include <sharedutils/chronotime.h>
 #include "pragma/util/timertypes.h"
 #include <fsys/vfileptr.h>

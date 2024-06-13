@@ -176,6 +176,7 @@ static std::optional<std::pair<uint32_t, uint32_t>> find_index_range_in_time_ran
 	return std::pair<uint32_t, uint32_t> {startIndex, endIndex};
 }
 
+#ifdef __linux__
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(panima, TimeFrame);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(panima, ChannelPath);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(panima, Channel);
@@ -184,6 +185,7 @@ DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(panima, Player);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(panima, Slice);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(panima, AnimationManager);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(panima, Animation);
+#endif
 
 static uint32_t insert_channel_values(lua_State *l, panima::Channel &channel, const std::vector<float> &times, luabind::tableT<void> tValues, float offset, panima::Channel::InsertFlags flags)
 {

@@ -362,7 +362,9 @@ bool Lua::game::raycast(lua_State *l, const ::TraceData &data)
 	return false;
 }
 
+#ifdef __linux__
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, ValueDriverDescriptor);
+#endif
 void Lua::game::register_shared_functions(lua_State *l, luabind::module_ &modGame)
 {
 	modGame[luabind::def("add_callback", Lua::game::add_callback),

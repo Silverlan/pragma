@@ -7,6 +7,7 @@
 
 #include "stdafx_shared.h"
 #include "pragma/model/animation/flex_animation.hpp"
+#include <sharedutils/util_ifile.hpp>
 #include <udm.hpp>
 
 FlexAnimationFrame::FlexAnimationFrame(const FlexAnimationFrame &frame) : m_flexControllerValues {frame.m_flexControllerValues} { static_assert(sizeof(FlexAnimationFrame) == 40, "Update this function when making changes to this class!"); }

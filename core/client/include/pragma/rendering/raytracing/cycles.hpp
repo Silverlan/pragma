@@ -19,6 +19,7 @@
 
 class ClientState;
 class BaseEntity;
+class Model;
 namespace uimg {
 	class ImageBuffer;
 	struct ImageLayerSet;

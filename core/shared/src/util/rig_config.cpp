@@ -12,6 +12,7 @@
 #include <fsys/filesystem.h>
 #include <udm.hpp>
 #include <sharedutils/util_path.hpp>
+#include <sharedutils/magic_enum.hpp>
 #pragma optimize("", off)
 const std::vector<std::string> &pragma::ik::RigConfig::get_supported_extensions()
 {

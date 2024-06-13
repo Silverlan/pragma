@@ -11,6 +11,7 @@
 #include "pragma/definitions.h"
 #include <string>
 #include <vector>
+#include <optional>
 
 namespace engine_info {
 	DLLNETWORK std::string get_identifier();

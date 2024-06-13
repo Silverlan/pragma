@@ -15,6 +15,7 @@
 #include <spdlog/pattern_formatter.h>
 #include <spdlog/formatter.h>
 #include <spdlog/fmt/bundled/format.h>
+#include <sharedutils/magic_enum.hpp>
 
 const std::string PRAGMA_LOGGER_NAME = "pragma_logger";
 const std::string PRAGMA_FILE_LOGGER_NAME = "pragma_logger_file";

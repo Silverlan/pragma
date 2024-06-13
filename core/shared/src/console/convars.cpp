@@ -9,6 +9,7 @@
 #include "pragma/networkstate/networkstate.h"
 #include <pragma/console/convars.h>
 #include <pragma/console/conout.h>
+#include <sharedutils/magic_enum.hpp>
 
 ConConf::ConConf(ConVarFlags flags) : m_help(""), m_ID(0), m_type(ConType::Var), m_flags(flags) {}
 const std::string &ConConf::GetHelpText() const { return m_help; }

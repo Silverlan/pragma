@@ -15,6 +15,8 @@
 #include <atomic>
 #include <thread>
 
+#undef AddJob
+
 struct RenderQueueWorkerStats;
 namespace pragma::rendering {
 	class RenderQueueWorker;

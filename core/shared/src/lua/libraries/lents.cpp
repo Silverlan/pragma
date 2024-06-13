@@ -993,6 +993,15 @@ Lua::opt<Lua::type<BaseEntity>> Lua::ents::find_by_unique_index(lua_State *l, co
 	return ent->GetLuaObject();
 }
 
+#ifdef _WIN32
+namespace luabind {
+	namespace detail {
+		// Note: This is already defined in luabind/src/inheritance.cpp, but
+		// the msvc linker doesn't recognize it, so we're re-defining it here.
+		class_id const class_id_map::local_id_base = std::numeric_limits<class_id>::max() / 2;
+	}
+}
+#endif
 namespace luabind::detail {
 	template<typename ValueType, typename BaseType>
 	void make_null_value(lua_State *L, ValueType &&val)

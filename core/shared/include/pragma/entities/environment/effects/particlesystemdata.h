@@ -8,6 +8,7 @@
 #define __PARTICLESYSTEMDATA_H__
 
 #include "pragma/networkdefinitions.h"
+#include <fsys/vfileptr.h>
 #include <udm_types.hpp>
 #include <unordered_map>
 #include <string>

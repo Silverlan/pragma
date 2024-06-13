@@ -80,6 +80,7 @@ namespace pragma::ik {
 			TwistJoint,
 			AngularJoint,
 			DistanceJoint,
+			ParentJoint,
 
 			Count,
 		};
@@ -137,6 +138,7 @@ namespace pragma::ik {
 		PRigConfigJoint AddTwistJoint(const pragma::GString &bone0, const pragma::GString &bone1, const Vector3 &axisA, const Vector3 &axisB, float rigidity);
 		PRigConfigJoint AddDistanceJoint(const pragma::GString &bone0, const pragma::GString &bone1, float rigidity = 1.f);
 		PRigConfigJoint AddAngularJoint(const pragma::GString &bone0, const pragma::GString &bone1, float rigidity = 1.f);
+		PRigConfigJoint AddParentJoint(const pragma::GString &bone0, const pragma::GString &bone1);
 
 		void RemoveConstraints(const pragma::GString &bone);
 		void RemoveConstraints(const pragma::GString &bone0, const pragma::GString &bone1);

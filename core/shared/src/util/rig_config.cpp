@@ -173,8 +173,13 @@ std::optional<pragma::ik::RigConfig> pragma::ik::RigConfig::load_from_udm_data(u
 				joint = rig.AddDistanceJoint(bone0, bone1, rigidity);
 				break;
 			}
+		case RigConfigJoint::Type::ParentJoint:
+			{
+				joint = rig.AddParentJoint(bone0, bone1);
+				break;
+			}
 		}
-		static_assert(umath::to_integral(RigConfigJoint::Type::Count) == 7u, "Update this list when new joint types are added!");
+		static_assert(umath::to_integral(RigConfigJoint::Type::Count) == 8u, "Update this list when new joint types are added!");
 
 		if(joint)
 			udmJoint["measurementAxisA"] >> joint->measurementAxisA;
@@ -366,6 +371,15 @@ pragma::ik::PRigConfigJoint pragma::ik::RigConfig::AddAngularJoint(const pragma:
 	j->bone1 = bone1;
 	j->rigidity = rigidity;
 	j->type = RigConfigJoint::Type::AngularJoint;
+	return j;
+}
+pragma::ik::PRigConfigJoint pragma::ik::RigConfig::AddParentJoint(const pragma::GString &bone0, const pragma::GString &bone1)
+{
+	m_joints.push_back(std::make_shared<RigConfigJoint>());
+	auto &j = m_joints.back();
+	j->bone0 = bone0;
+	j->bone1 = bone1;
+	j->type = RigConfigJoint::Type::ParentJoint;
 	return j;
 }
 

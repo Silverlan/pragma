@@ -635,15 +635,15 @@ else()
     set(PR_MODULE_INSTALL_SUBDIR ".")
 endif()
 
-message("Processing core libraries...")
-add_subdirectory(core)
-
 message("Processing external libraries...")
 add_subdirectory(external_libs)
 set_target_folder(wgui external_libs/wgui)
 set_target_folder(sample_application external_libs/wgui)
 target_include_directories(util_image PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
 target_include_directories(cmaterialsystem PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
+
+message("Processing core libraries...")
+add_subdirectory(core)
 
 message("Processing modules...")
 add_subdirectory(modules)

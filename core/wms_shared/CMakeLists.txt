@@ -104,7 +104,7 @@ foreach(LIB IN LISTS LIBRARIES)
 	target_link_libraries(${PROJ_NAME} ${${LIB}})
 endforeach(LIB)
 
-target_include_directories(${PROJ_NAME} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/include)
+target_include_directories(${PROJ_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR}/include)
 target_include_directories(${PROJ_NAME} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/src)
 
 foreach(INCLUDE_PATH IN LISTS INCLUDE_DIRS)

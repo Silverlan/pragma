@@ -25,7 +25,7 @@ DebugConsole::~DebugConsole() {}
 void DebugConsole::open()
 {
 #ifdef _WIN32
-	if(util::get_subsystem() == util::SubSystem::Console) {
+	if(util::get_subsystem() != util::SubSystem::Console) {
 		AllocConsole();
 		AttachConsole(GetCurrentProcessId());
 		this->_cinbuf = std::cin.rdbuf();

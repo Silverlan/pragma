@@ -787,12 +787,12 @@ if with_essential_client_modules:
 if with_common_modules:
 	add_pragma_module(
 		name="pr_bullet",
-		commitSha="20bf4f2c7d1b6528164e661c800bc7ab78e97705",
+		commitSha="4eb3df9",
 		repositoryUrl="https://github.com/Silverlan/pr_bullet.git"
 	)
 	add_pragma_module(
 		name="pr_audio_soloud",
-		commitSha="b6a2a4bd6f4a608a76856d5256f9bf1b30909bfc",
+		commitSha="0d82a619deff13cde9fd05c62a00ded933a9558e",
 		repositoryUrl="https://github.com/Silverlan/pr_soloud.git"
 	)
 	add_pragma_module_prebuilt("Silverlan/pr_mount_external_prebuilt")

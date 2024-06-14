@@ -1,7 +1,12 @@
 function(pr_setup_default_project_settings TARGET_NAME)
     if(MSVC)
-        target_compile_options(${TARGET_NAME} PRIVATE /wd4251)
-        target_compile_options(${TARGET_NAME} PRIVATE /wd4996)
+        target_compile_options(${TARGET_NAME} PUBLIC
+            /wd4251 # needs to have dll-interface to be used by clients of class
+            /wd4996
+            /wd4244 # conversion from 'float' to 'unsigned __int64'
+            /wd4267 # conversion from 'size_t' to 'uint32_t'
+            /wd4305 # truncation from 'double' to 'float'
+        )
 
         target_compile_options(${TARGET_NAME} PRIVATE /bigobj)
     endif()

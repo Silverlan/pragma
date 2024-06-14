@@ -787,12 +787,12 @@ if with_essential_client_modules:
 if with_common_modules:
 	add_pragma_module(
 		name="pr_bullet",
-		commitSha="4eb3df9",
+		commitSha="20bf4f2c7d1b6528164e661c800bc7ab78e97705",
 		repositoryUrl="https://github.com/Silverlan/pr_bullet.git"
 	)
 	add_pragma_module(
 		name="pr_audio_soloud",
-		commitSha="0d82a619deff13cde9fd05c62a00ded933a9558e",
+		commitSha="b6a2a4bd6f4a608a76856d5256f9bf1b30909bfc",
 		repositoryUrl="https://github.com/Silverlan/pr_soloud.git"
 	)
 	add_pragma_module_prebuilt("Silverlan/pr_mount_external_prebuilt")
@@ -803,18 +803,18 @@ if with_pfm:
 	if with_core_pfm_modules or with_all_pfm_modules:
 		add_pragma_module(
 			name="pr_curl",
-			commitSha="d49b477d77310737fd5f88d49e35b7db58f9718c",
+			commitSha="4f2a574a67439104290388193cce699b64f1364d",
 			repositoryUrl="https://github.com/Silverlan/pr_curl.git"
 		)
 		add_pragma_module(
 			name="pr_dmx",
-			commitSha="f818ed1954705d98739ad59ad6e8d928e910aca1",
+			commitSha="6a0270b680c94fcdddb681667461e6080694d776",
 			repositoryUrl="https://github.com/Silverlan/pr_dmx.git"
 		)
 	if with_all_pfm_modules:
 		add_pragma_module(
 			name="pr_chromium",
-			commitSha="c8af9e774d67a12eb0f44d6a3af9e0d11efc7449",
+			commitSha="a611f95b20758aaff16156637c081b75e734e1c5",
 			repositoryUrl="https://github.com/Silverlan/pr_chromium.git"
 		)
 		add_pragma_module(
@@ -824,12 +824,12 @@ if with_pfm:
 		)
 		add_pragma_module(
 			name="pr_xatlas",
-			commitSha="485eaad",
+			commitSha="4c9b1f6ca7ddef17043173f2b249d2d897c20f77",
 			repositoryUrl="https://github.com/Silverlan/pr_xatlas.git"
 		)
 		add_pragma_module(
 			name="pr_davinci",
-			commitSha="e8863cd1b8e047ddcdf47b7ae6291e9962568d09",
+			commitSha="da718df7701070255351df81ce74be620b6acd15",
 			repositoryUrl="https://github.com/Silverlan/pr_davinci.git"
 		)
 		add_pragma_module(
@@ -841,14 +841,14 @@ if with_pfm:
 if with_pfm:
 	add_pragma_module(
 		name="pr_git",
-		commitSha="84d7c32",
+		commitSha="004decbf2cac8b5cf08c8aca90124f2f7df106f5",
 		repositoryUrl="https://github.com/Silverlan/pr_git.git"
 	)
 
 if with_vr:
 	add_pragma_module(
 		name="pr_openvr",
-		commitSha="c9ebb5553fc44fea3d02b5fc4762ed7c81797d0c",
+		commitSha="b806f9b16ebd918d4e2e4af72ad5e5e766f36445",
 		repositoryUrl="https://github.com/Silverlan/pr_openvr.git"
 	)
 

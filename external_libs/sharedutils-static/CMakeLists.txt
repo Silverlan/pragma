@@ -3,8 +3,7 @@ include(${CMAKE_SOURCE_DIR}/cmake/pr_common.cmake)
 set(PROJ_NAME sharedutils-static)
 pr_add_library(${PROJ_NAME} STATIC)
 
-# We have to link mathutil as an external library here to avoid a cyclic dependency
-pr_add_external_dependency(${PROJ_NAME} mathutil HEADER_ONLY)
+target_include_directories(${PROJ_NAME} PUBLIC "../mathutil/include/")
 set(IMPORT_GLM_AS_MODULE FALSE)
 if(IMPORT_GLM_AS_MODULE)
 	pr_add_module_reference(${PROJ_NAME} glm TARGET_NAME glm_module PRIVATE)

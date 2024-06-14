@@ -29,7 +29,7 @@ namespace pragma::physics {
 	class IRigidBody;
 	class ISoftBody;
 	class IGhostObject;
-	class ContactInfo;
+	struct ContactInfo;
 	class DLLNETWORK ICollisionObject : public IBase, public IWorldObject {
 	  public:
 		enum class ActivationState : uint32_t {

@@ -3,8 +3,7 @@ function(pr_add_module_reference TARGET_NAME IDENTIFIER)
         set(options PRIVATE PUBLIC)
         set(oneValueArgs)
         set(multiValueArgs)
-        cmake_parse_arguments(PARSE_ARGV 3 PA "${options}" "${oneValueArgs}"
-                              "${multiValueArgs}")
+        cmake_parse_arguments(PARSE_ARGV 3 PA "${options}" "${oneValueArgs}" "${multiValueArgs}")
 
         set(VISIBILITY PRIVATE)
         if(PA_PUBLIC)
@@ -13,18 +12,11 @@ function(pr_add_module_reference TARGET_NAME IDENTIFIER)
 
         pr_get_normalized_identifier_name(${IDENTIFIER})
 
-        # set(DEFAULT_MODULE "") set(DEPENDENCY_${NORMALIZED_IDENTIFIER}_MODULE
-        # ${DEFAULT_MODULE} CACHE PATH "Path to ${PRETTY_IDENTIFIER} module
-        # file.")
+        # set(DEFAULT_MODULE "") set(DEPENDENCY_${NORMALIZED_IDENTIFIER}_MODULE ${DEFAULT_MODULE} CACHE PATH "Path to ${PRETTY_IDENTIFIER} module file.")
 
-        message(
-            "[PR] Adding module reference \"${DEPENDENCY_${NORMALIZED_IDENTIFIER}_MODULE}\" (${NORMALIZED_IDENTIFIER}) to target ${TARGET_NAME}"
-        )
-        # Note: There must *not* be a space between "/reference" and the path,
-        # otherwise only one /reference will be recoginized.
-        target_compile_options(
-            ${PROJ_NAME} ${VISIBILITY}
-            /reference${DEPENDENCY_${NORMALIZED_IDENTIFIER}_MODULE})
+        message("[PR] Adding module reference \"${DEPENDENCY_${NORMALIZED_IDENTIFIER}_MODULE}\" (${NORMALIZED_IDENTIFIER}) to target ${TARGET_NAME}")
+        # Note: There must *not* be a space between "/reference" and the path, otherwise only one /reference will be recoginized.
+        target_compile_options(${PROJ_NAME} ${VISIBILITY} /reference${DEPENDENCY_${NORMALIZED_IDENTIFIER}_MODULE})
     endif()
 endfunction()
 
@@ -33,8 +25,7 @@ function(pr_get_module_file_path IDENTIFIER BIN_PATH)
         set(options)
         set(oneValueArgs TARGET_NAME)
         set(multiValueArgs)
-        cmake_parse_arguments(PARSE_ARGV 2 PA "${options}" "${oneValueArgs}"
-                              "${multiValueArgs}")
+        cmake_parse_arguments(PARSE_ARGV 2 PA "${options}" "${oneValueArgs}" "${multiValueArgs}")
 
         set(MODULE_TARGET_NAME "${IDENTIFIER}")
         if(DEFINED PA_TARGET_NAME)
@@ -55,8 +46,7 @@ function(pr_reference_module TARGET_NAME MODULE_NAME BIN_DIR)
         set(options PRIVATE PUBLIC IGNORE_PATH)
         set(oneValueArgs TARGET_NAME)
         set(multiValueArgs)
-        cmake_parse_arguments(PARSE_ARGV 3 PA "${options}" "${oneValueArgs}"
-                              "${multiValueArgs}")
+        cmake_parse_arguments(PARSE_ARGV 3 PA "${options}" "${oneValueArgs}" "${multiValueArgs}")
 
         set(MODULE_TARGET_NAME "${MODULE_NAME}")
         if(DEFINED PA_TARGET_NAME)
@@ -69,8 +59,7 @@ function(pr_reference_module TARGET_NAME MODULE_NAME BIN_DIR)
         endif()
 
         if(NOT PA_IGNORE_PATH)
-            pr_get_module_file_path(${MODULE_NAME} "${BIN_DIR}" TARGET_NAME
-                                    "${MODULE_TARGET_NAME}")
+            pr_get_module_file_path(${MODULE_NAME} "${BIN_DIR}" TARGET_NAME "${MODULE_TARGET_NAME}")
             pr_get_normalized_identifier_name(${MODULE_NAME})
             set(DEPENDENCY_${NORMALIZED_IDENTIFIER}_MODULE
                 "${MODULE_FILE_PATH}"
@@ -85,8 +74,7 @@ function(pr_init_module TARGET_NAME)
     set(options)
     set(oneValueArgs SRC_PATH)
     set(multiValueArgs)
-    cmake_parse_arguments(PARSE_ARGV 1 PA "${options}" "${oneValueArgs}"
-                          "${multiValueArgs}")
+    cmake_parse_arguments(PARSE_ARGV 1 PA "${options}" "${oneValueArgs}" "${multiValueArgs}")
 
     set(SRC_PATH "src/")
     if(DEFINED PA_SRC_PATH)
@@ -102,12 +90,9 @@ function(pr_init_module TARGET_NAME)
     if(NOT "${PA_UNPARSED_ARGUMENTS}" STREQUAL "")
         list(GET PA_UNPARSED_ARGUMENTS 0 MODULE_NAME)
     endif()
-    pr_get_module_file_path(${MODULE_NAME} ${BIN_DIR} TARGET_NAME
-                            "${TARGET_NAME}")
+    pr_get_module_file_path(${MODULE_NAME} ${BIN_DIR} TARGET_NAME "${TARGET_NAME}")
     pr_get_normalized_identifier_name(${TARGET_NAME})
-    message(
-        "[PR] Initialized module ${TARGET_NAME} with module file \"${MODULE_FILE_PATH}\"."
-    )
+    message("[PR] Initialized module ${TARGET_NAME} with module file \"${MODULE_FILE_PATH}\".")
     set(DEPENDENCY_${NORMALIZED_IDENTIFIER}_MODULE
         "${MODULE_FILE_PATH}"
         CACHE PATH "Path to ${PRETTY_IDENTIFIER} module file.")

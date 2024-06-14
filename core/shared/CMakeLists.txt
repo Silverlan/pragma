@@ -20,8 +20,8 @@ pr_add_dependency(${PROJ_NAME} util_pragma_doc TARGET)
 pr_add_dependency(${PROJ_NAME} util_unicode TARGET PUBLIC)
 
 # We need these for the convar headers
-pr_add_dependency(${PROJ_NAME} server HEADER_ONLY)
-pr_add_dependency(${PROJ_NAME} client HEADER_ONLY)
+target_include_directories(${PROJ_NAME} PRIVATE "../server/include/")
+target_include_directories(${PROJ_NAME} PRIVATE "../client/include/")
 
 pr_add_external_dependency(${PROJ_NAME} recast LIBRARY)
 pr_add_external_dependency(${PROJ_NAME} detour LIBRARY)

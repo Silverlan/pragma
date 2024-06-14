@@ -363,16 +363,19 @@ set(LUA_LIBRARIES
 register_third_party_library(luabind)
 set_target_folder(luabind third_party_libs)
 target_include_directories(luabind PUBLIC ${LUA_INCLUDE_DIR})
+add_dependencies(luasystem luabind)
 #
 
 # mpaheader
 register_third_party_library(mpaheader)
 set_target_folder(mpaheader third_party_libs)
+add_dependencies(util_sound mpaheader)
 #
 
 # VKVParser
 register_third_party_library(vkvparser)
 set_target_folder(KVParser third_party_libs)
+add_dependencies(materialsystem KVParser)
 #
 
 # spdlog
@@ -484,6 +487,7 @@ set(GLFW_INSTALL
 
 register_third_party_library(glfw)
 set_target_folder(glfw third_party_libs/glfw)
+add_dependencies(iglfw glfw)
 #
 
 # libogg
@@ -602,6 +606,7 @@ set_target_folder(pngunknown third_party_libs/libpng)
 set_target_folder(pngvalid third_party_libs/libpng)
 
 target_include_directories(png PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
+add_dependencies(util_image png)
 #
 
 # libsamplerate (required for alsoundsystem with fmod enabled)
@@ -640,6 +645,7 @@ set(USE_LIBTXC_DXTN
 register_third_party_library(vtflib)
 set_target_folder(VTFLib13 third_party_libs)
 target_include_directories(VTFLib13 PUBLIC ${DEPENDENCY_LIBZIP_CONF_INCLUDE})
+add_dependencies(materialsystem VTFLib13)
 #
 
 # recastnavigation

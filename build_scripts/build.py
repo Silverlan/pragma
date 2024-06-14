@@ -792,7 +792,7 @@ if with_common_modules:
 	)
 	add_pragma_module(
 		name="pr_audio_soloud",
-		commitSha="b6a2a4bd6f4a608a76856d5256f9bf1b30909bfc",
+		commitSha="ef8a46d27b09cbb2adcfa4723907dd82ba8b7461",
 		repositoryUrl="https://github.com/Silverlan/pr_soloud.git"
 	)
 	add_pragma_module_prebuilt("Silverlan/pr_mount_external_prebuilt")

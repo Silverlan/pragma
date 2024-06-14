@@ -1,35 +1,38 @@
-cmake_minimum_required(VERSION 3.24) # 3.11 for GENERATOR_IS_MULTI_CONFIG and INTERFACE items on IMPORTED targets
-#3.13 for IMPORTED_TARGET GLOBAL for pkg_check_modules
-#3.15 for MSVC_RUNTIME_LIBRARY
-#3.24 for CMAKE_COLOR_DIAGNOSTICS
-#TODO: 3.29 for picking linker in UNIX environments
+cmake_minimum_required(VERSION 3.28)
+
 project(pragma)
+
+# Global settings
 set(CMAKE_COLOR_DIAGNOSTICS ON)
-
-option(CONFIG_BUILD_WITH_VTUNE_SUPPORT "Build with VTune profiler support?" OFF)
-
-if(${CONFIG_BUILD_WITH_VTUNE_SUPPORT})
-    add_definitions(-DPRAGMA_ENABLE_VTUNE_PROFILING)
-endif()
-
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
-if(LINUX)
-	set(CMAKE_CXX_DEBUG_FLAGS "${CMAKE_CXX_DEBUG_FLAGS} -Og -g")
-endif()
-
-
 if(MSVC)
 	set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /we4715")
 	set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /we4715")
 else()
 	set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror=return-type")
 	set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror=return-type")
+	set(CMAKE_CXX_DEBUG_FLAGS "${CMAKE_CXX_DEBUG_FLAGS} -Og -g")
+	set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif()
 
-#set(CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz TRUE CACHE INTERNAL "" FORCE)
-#set_target_properties(freetype PROPERTIES CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz TRUE)
+if(WIN32)
+	set(BINARY_OUTPUT_DIR "bin")
+	set(EXECUTABLE_OUTPUT_DIR "bin")
 
-#TODO: get "Ninja Multi-Config to work"
+    set(OS_LIB_BIN_EXT ".dll")
+    set(OS_LIB_BIN_PRE "")
+    set(OS_LIB_SHARED_EXT ".lib")
+    set(OS_EXE_EXT ".exe")
+else()
+	set(BINARY_OUTPUT_DIR "lib")
+	set(EXECUTABLE_OUTPUT_DIR "lib")
+
+    set(OS_LIB_BIN_EXT ".so")
+    set(OS_LIB_BIN_PRE "lib")
+    set(OS_LIB_SHARED_EXT ".so")
+    set(OS_EXE_EXT "")
+endif()
+
 get_property(is_multi_config GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
 if(is_multi_config)
 	set(CONFIG_BUILD_TYPE "$<CONFIG>" CACHE STRING "Build Type" FORCE)
@@ -40,21 +43,9 @@ else()
 	set(CMAKE_BUILD_TYPE "${CONFIG_BUILD_TYPE}")
 endif()
 
-
-#set_property(CACHE CONFIG_BUILD_TYPE PROPERTY STRINGS RelWithDebInfo Release Debug)
 set(CMAKE_CONFIGURATION_TYPES "RelWithDebInfo;Release;Debug;" CACHE STRING "Supported configuration options" FORCE)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-if(UNIX)
-	set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-endif()
-
-
-
-
-
-
-#set(CMAKE_BUILD_TYPE ${CONFIG_BUILD_TYPE} CACHE STRING "" FORCE)
 
 if(is_multi_config)
 	set(BINARY_PRAGMA_DIR ${CONFIG_BUILD_TYPE} CACHE INTERNAL "" FORCE)
@@ -173,99 +164,8 @@ endfunction(set_target_folder)
 
 set(DEPENDENCY_PRAGMA_EXECUTABLE_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/core/pragma/include CACHE PATH "Path to include directory.")
 
-set(DEPENDENCY_DATASYSTEM_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/datasystem/include CACHE PATH "Path to include directory.")
-search_lib_recursive_ext(DEPENDENCY_DATASYSTEM_LIBRARY datasystem)
-
-set(DEPENDENCY_ALSOUNDSYSTEM_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/alsoundsystem/include CACHE PATH "Path to include directory.")
-search_lib_recursive_ext(DEPENDENCY_ALSOUNDSYSTEM_LIBRARY alsoundsystem)
-
-set(DEPENDENCY_CMATERIALSYSTEM_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/materialsystem/cmaterialsystem/include CACHE PATH "Path to include directory.")
-search_lib_recursive(DEPENDENCY_CMATERIALSYSTEM_LIBRARY external_libs/materialsystem/${BINARY_PRAGMA_DIR} cmaterialsystem)
-
-set(DEPENDENCY_MATERIALSYSTEM_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/materialsystem/materialsystem/include CACHE PATH "Path to include directory.")
-search_lib_recursive(DEPENDENCY_MATERIALSYSTEM_LIBRARY external_libs/materialsystem/${BINARY_PRAGMA_DIR} materialsystem)
-
-set(DEPENDENCY_VFILESYSTEM_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/vfilesystem/include CACHE PATH "Path to include directory.")
-search_lib_recursive_ext(DEPENDENCY_VFILESYSTEM_LIBRARY vfilesystem)
-
-set(DEPENDENCY_IGLFW_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/iglfw/include CACHE PATH "Path to include directory.")
-search_lib_recursive_ext(DEPENDENCY_IGLFW_LIBRARY iglfw)
-
-set(DEPENDENCY_LUASYSTEM_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/luasystem/include CACHE PATH "Path to include directory.")
-search_lib_recursive_ext(DEPENDENCY_LUASYSTEM_LIBRARY luasystem)
-
-set(DEPENDENCY_MATHUTIL_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/mathutil/include CACHE PATH "Path to include directory.")
-search_lib_recursive_ext(DEPENDENCY_MATHUTIL_LIBRARY mathutil)
-
-set(DEPENDENCY_UTIL_UNICODE_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_unicode/include CACHE PATH "Path to include directory.")
-search_lib_recursive_ext(DEPENDENCY_UTIL_UNICODE_LIBRARY util_unicode)
-
-set(DEPENDENCY_SHAREDUTILS_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/sharedutils/include CACHE PATH "Path to include directory.")
-search_lib_recursive_ext(DEPENDENCY_SHAREDUTILS_LIBRARY sharedutils)
-search_lib_recursive(DEPENDENCY_SHAREDUTILS_LIBRARY_STATIC external_libs/sharedutils-static/${BINARY_PRAGMA_DIR} sharedutils-static STATIC)
-search_lib_recursive(DEPENDENCY_SHAREDUTILS_STATIC_LIBRARY external_libs/sharedutils-static/${BINARY_PRAGMA_DIR} sharedutils-static STATIC)
-
-set(DEPENDENCY_NETWORKMANAGER_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/networkmanager/include CACHE PATH "Path to include directory.")
-search_lib_recursive(DEPENDENCY_NETWORKMANAGER_LIBRARY external_libs/networkmanager/${BINARY_PRAGMA_DIR} networkmanager STATIC)
-search_lib_recursive(DEPENDENCY_SERVERMANAGER_LIBRARY external_libs/networkmanager/${BINARY_PRAGMA_DIR} servermanager STATIC)
-search_lib_recursive(DEPENDENCY_CLIENTMANAGER_LIBRARY external_libs/networkmanager/${BINARY_PRAGMA_DIR} clientmanager STATIC)
-
-set(DEPENDENCY_PROSPER_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/prosper/include CACHE PATH "Path to include directory.")
-search_lib_recursive_ext(DEPENDENCY_PROSPER_LIBRARY prosper)
-
-set(DEPENDENCY_SHADERINFO_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/shaderinfo/include CACHE PATH "Path to include directory.")
-search_lib_recursive_ext(DEPENDENCY_SHADERINFO_LIBRARY shaderinfo)
-
-set(DEPENDENCY_SMDMODEL_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/smdmodel/include CACHE PATH "Path to include directory.")
-search_lib_recursive_ext(DEPENDENCY_SMDMODEL_LIBRARY smdmodel)
-
-set(DEPENDENCY_UTIL_BSP_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_bsp/include CACHE PATH "Path to include directory.")
-search_lib_recursive_ext(DEPENDENCY_UTIL_BSP_LIBRARY util_bsp STATIC)
-
-set(DEPENDENCY_UTIL_VMF_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_vmf/include CACHE PATH "Path to include directory.")
-search_lib_recursive_ext(DEPENDENCY_UTIL_VMF_LIBRARY util_vmf STATIC)
-
-# set(DEPENDENCY_UTIL_ARCHIVE_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_archive/include CACHE PATH "Path to include directory.")
-# search_lib_recursive_ext(DEPENDENCY_UTIL_ARCHIVE_LIBRARY util_archive)
-
-# set(DEPENDENCY_UTIL_FGD_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/modules/pr_source/external_libs/util_fgd/include CACHE PATH "Path to include directory.")
-# search_lib_recursive(DEPENDENCY_UTIL_FGD_LIBRARY modules/pr_source/external_libs/util_fgd/${BINARY_PRAGMA_DIR} util_fgd)
-
-set(DEPENDENCY_UTIL_FORMATTED_TEXT_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_formatted_text/include CACHE PATH "Path to include directory.")
-search_lib_recursive_ext(DEPENDENCY_UTIL_FORMATTED_TEXT_LIBRARY util_formatted_text STATIC)
-
-set(DEPENDENCY_UTIL_SMDMODEL_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_smdmodel/include CACHE PATH "Path to include directory.")
-search_lib_recursive_ext(DEPENDENCY_UTIL_SMDMODEL_LIBRARY util_smdmodel STATIC)
-
-set(DEPENDENCY_UTIL_PAD_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_pad/include CACHE PATH "Path to include directory.")
-search_lib_recursive_ext(DEPENDENCY_UTIL_PAD_LIBRARY util_pad STATIC)
-
-set(DEPENDENCY_UTIL_OCIO_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_ocio/include CACHE PATH "Path to include directory.")
-search_lib_recursive_ext(DEPENDENCY_UTIL_OCIO_LIBRARY util_ocio STATIC)
-
 unset(CONFIG_ENABLE_EXECUTABLE_FLAG CACHE)
 SET(CONFIG_ENABLE_EXECUTABLE_FLAG OFF CACHE BOOL "")
-set(DEPENDENCY_UTIL_PRAGMA_DOC_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_pragma_doc/include CACHE PATH "Path to include directory.")
-search_lib_recursive_ext(DEPENDENCY_UTIL_PRAGMA_DOC_LIBRARY util_pragma_doc STATIC)
-
-set(DEPENDENCY_UTIL_SOUND_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_sound/include CACHE PATH "Path to include directory.")
-search_lib_recursive_ext(DEPENDENCY_UTIL_SOUND_LIBRARY util_sound)
-
-set(DEPENDENCY_UTIL_SOURCE_SCRIPT_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_source_script/include CACHE PATH "Path to include directory.")
-search_lib_recursive_ext(DEPENDENCY_UTIL_SOURCE_SCRIPT_LIBRARY util_source_script STATIC)
-
-set(DEPENDENCY_UTIL_TIMELINE_SCENE_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_timeline_scene/include CACHE PATH "Path to include directory.")
-search_lib_recursive_ext(DEPENDENCY_UTIL_TIMELINE_SCENE_LIBRARY util_timeline_scene STATIC)
-
-set(DEPENDENCY_UTIL_VERSIONED_ARCHIVE_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_versioned_archive/include CACHE PATH "Path to include directory.")
-search_lib_recursive_ext(DEPENDENCY_UTIL_VERSIONED_ARCHIVE_LIBRARY util_versioned_archive STATIC)
-
-set(DEPENDENCY_UTIL_UDM_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_udm/include CACHE PATH "Path to include directory.")
-search_lib_recursive_ext(DEPENDENCY_UTIL_UDM_LIBRARY util_udm STATIC)
-
-set(DEPENDENCY_PANIMA_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/panima/include CACHE PATH "Path to include directory.")
-search_lib_recursive_ext(DEPENDENCY_PANIMA_LIBRARY panima STATIC)
-
 
 if(WIN32)
 	set(ZLIB_LIB_NAME "zlib" CACHE INTERNAL "" FORCE)
@@ -274,14 +174,8 @@ else()
 endif()
 search_lib_recursive(DEPENDENCY_ZLIB_LIBRARY "third_party_libs/zlib/${BINARY_PRAGMA_DIR}" ${ZLIB_LIB_NAME})
 
-set(DEPENDENCY_UTIL_ZIP_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_zip/include CACHE PATH "Path to include directory.")
-search_lib_recursive(DEPENDENCY_UTIL_ZIP_LIBRARY "external_libs/util_zip/${BINARY_PRAGMA_DIR}" util_zip STATIC)
-
-
 set(DEPENDENCY_ZLIB_BUILD_INCLUDE ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib CACHE PATH "Path to include directory.")
 
-set(DEPENDENCY_UTIL_IMAGE_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_image/include CACHE PATH "Path to include directory.")
-search_lib_recursive_ext(DEPENDENCY_UTIL_IMAGE_LIBRARY util_image)
 search_lib_recursive(DEPENDENCY_NVIDIA_TEXTURE_TOOLS_BC6H_LIBRARY external_libs/util_image/third_party_libs/nvtt/src/bc6h/${BINARY_PRAGMA_DIR} bc6h STATIC)
 search_lib_recursive(DEPENDENCY_NVIDIA_TEXTURE_TOOLS_BC7_LIBRARY external_libs/util_image/third_party_libs/nvtt/src/bc7/${BINARY_PRAGMA_DIR} bc7 STATIC)
 search_lib_recursive(DEPENDENCY_NVIDIA_TEXTURE_TOOLS_CORE_LIBRARY external_libs/util_image/third_party_libs/nvtt/src/nvcore/${BINARY_PRAGMA_DIR} nvcore STATIC)
@@ -292,31 +186,8 @@ search_lib_recursive(DEPENDENCY_NVIDIA_TEXTURE_TOOLS_THREAD_LIBRARY external_lib
 search_lib_recursive(DEPENDENCY_NVIDIA_TEXTURE_TOOLS_SQUISH_LIBRARY external_libs/util_image/third_party_libs/nvtt/src/nvtt/squish/${BINARY_PRAGMA_DIR} nvsquish STATIC)
 search_lib_recursive(DEPENDENCY_SQUISH_LIBRARY external_libs/util_image/third_party_libs/nvtt/extern/libsquish-1.15/${BINARY_PRAGMA_DIR} squish STATIC)
 
-set(DEPENDENCY_UTIL_SOURCE2_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_source2/include CACHE PATH "Path to include directory.")
-search_lib_recursive_ext(DEPENDENCY_UTIL_SOURCE2_LIBRARY util_source2 STATIC)
-
-set(DEPENDENCY_WGUI_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/wgui/include CACHE PATH "Path to include directory.")
-search_lib_recursive_ext(DEPENDENCY_WGUI_LIBRARY wgui)
 unset(WGUI_INCLUDE_DEPENDENCIES CACHE)
 SET(WGUI_INCLUDE_DEPENDENCIES OFF CACHE BOOL "Include dependencies required to build the wgui library?")
-
-set(DEPENDENCY_SERVER_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/core/server/include CACHE PATH "Path to include directory.")
-search_lib_recursive(DEPENDENCY_SERVER_LIBRARY core/server/${BINARY_PRAGMA_DIR} server)
-
-set(DEPENDENCY_CLIENT_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/core/client/include CACHE PATH "Path to include directory.")
-search_lib_recursive(DEPENDENCY_CLIENT_LIBRARY core/client/${BINARY_PRAGMA_DIR} client)
-
-set(DEPENDENCY_SHARED_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/core/shared/include CACHE PATH "Path to include directory.")
-search_lib_recursive(DEPENDENCY_SHARED_LIBRARY core/shared/${BINARY_PRAGMA_DIR} shared)
-
-set(DEPENDENCY_WMS_SHARED_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/core/wms_shared/include CACHE PATH "Path to include directory.")
-search_lib_recursive(DEPENDENCY_WMS_SHARED_LIBRARY core/wms_shared/${BINARY_PRAGMA_DIR} wms_shared STATIC)
-
-set(DEPENDENCY_ICLIENT_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/modules/interfaces/iclient/include CACHE PATH "Path to include directory.")
-search_lib_recursive(DEPENDENCY_ICLIENT_LIBRARY modules/interfaces/iclient/${BINARY_PRAGMA_DIR} iclient)
-
-set(DEPENDENCY_ISHARED_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/modules/interfaces/ishared/include CACHE PATH "Path to include directory.")
-search_lib_recursive(DEPENDENCY_ISHARED_LIBRARY modules/interfaces/ishared/${BINARY_PRAGMA_DIR} ishared)
 
 set(DEPENDENCY_LIBVORBIS_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/vorbis/include CACHE STRING "" FORCE)
 search_lib_recursive(DEPENDENCY_LIBVORBIS_LIBRARY third_party_libs/vorbis/lib/${BINARY_PRAGMA_DIR} vorbis)
@@ -361,9 +232,6 @@ endif()
 #set(DEPENDENCY_ANVIL_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/prosper_vulkan/third_party_libs/anvil/include CACHE PATH "Path to include directory." FORCE)
 #set(DEPENDENCY_ANVIL_BUILD_INCLUDE ${CMAKE_CURRENT_BINARY_DIR}/external_libs/prosper_vulkan/third_party_libs/anvil/include CACHE PATH  "Path to include directory." FORCE)
 #set(DEPENDENCY_ANVIL_DEPS_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/prosper_vulkan/third_party_libs/anvil/deps CACHE PATH "Path to include directory." FORCE)
-
-set(DEPENDENCY_CPPBEZIERFIT_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/cppbezierfit/include CACHE PATH "Path to include directory.")
-search_lib_recursive(DEPENDENCY_CPPBEZIERFIT_LIBRARY external_libs/cppbezierfit/${BINARY_PRAGMA_DIR} cppbezierfit STATIC)
 
 search_lib_recursive(DEPENDENCY_VKV_PARSER_LIBRARY third_party_libs/vkvparser/${BINARY_PRAGMA_DIR} KVParser)
 set(DEPENDENCY_VKV_PARSER_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/vkvparser/include CACHE PATH "Path to include directory.")
@@ -470,14 +338,6 @@ set(DEPENDENCY_LIBNOISEUTILS_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/
 search_lib_recursive(DEPENDENCY_LIBNOISE_LIBRARY third_party_libs/libnoise/src/${BINARY_PRAGMA_DIR} noise STATIC)
 search_lib_recursive(DEPENDENCY_LIBNOISEUTILS_LIBRARY third_party_libs/libnoise/noiseutils/${BINARY_PRAGMA_DIR} noiseutils-static STATIC)
 
-# if(WIN32)
-# 	set(ASSIMP_LIB_NAME assimp-vc140-mt)
-# else()
-# 	set(ASSIMP_LIB_NAME assimp)
-# endif()
-# set(DEPENDENCY_ASSIMP_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/assimp/include CACHE PATH "Path to include directory.")
-# search_lib_recursive(DEPENDENCY_ASSIMP_LIBRARY third_party_libs/assimp/code/${BINARY_PRAGMA_DIR} ${ASSIMP_LIB_NAME})
-
 set(DEPENDENCY_EIGEN_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/eigen CACHE PATH "Path to include directory.")
 set(DEPENDENCY_TINYGLTF_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/tinygltf CACHE PATH "Path to include directory.")
 
@@ -495,23 +355,11 @@ if(UNIX)
 		get_filename_component(TMP_${ID} "${${ID}}" REALPATH)
 		set(${ID} ${TMP_${ID}} CACHE PATH "Path to library." FORCE)
 	endfunction()
-	resolve_links(DEPENDENCY_ALSOUNDSYSTEM_LIBRARY)
 	# resolve_links(DEPENDENCY_ASSIMP_LIBRARY)
-	resolve_links(DEPENDENCY_BOOST_CHRONO_LIBRARY)
-	resolve_links(DEPENDENCY_BOOST_DATE_TIME_LIBRARY)
-	resolve_links(DEPENDENCY_BOOST_FILESYSTEM_LIBRARY)
-	resolve_links(DEPENDENCY_BOOST_IOSTREAMS_LIBRARY)
-	resolve_links(DEPENDENCY_BOOST_REGEX_LIBRARY)
-	resolve_links(DEPENDENCY_BOOST_SYSTEM_LIBRARY)
-	resolve_links(DEPENDENCY_BOOST_THREAD_LIBRARY)
 	resolve_links(DEPENDENCY_BZIP2_LIBRARY)
-	resolve_links(DEPENDENCY_CLIENTMANAGER_LIBRARY)
-	resolve_links(DEPENDENCY_CLIENT_LIBRARY)
 	resolve_links(DEPENDENCY_CLIP2TRI_LIBRARY)
 	resolve_links(DEPENDENCY_CLIPPER_LIBRARY)
-	resolve_links(DEPENDENCY_CMATERIALSYSTEM_LIBRARY)
 	resolve_links(DEPENDENCY_CURL_LIBRARY)
-	resolve_links(DEPENDENCY_DATASYSTEM_LIBRARY)
 	resolve_links(DEPENDENCY_DETOUR_LIBRARY)
 	resolve_links(DEPENDENCY_FBXSDK_LIBRARY)
 	resolve_links(DEPENDENCY_FLANN_LIBRARY)
@@ -523,9 +371,6 @@ endif()
 	resolve_links(DEPENDENCY_GLSLANG_OGL_COMPILER_LIBRARY)
         resolve_links(DEPENDENCY_GLSLANG_OS_DEPENDENT_LIBRARY)
         resolve_links(DEPENDENCY_HARFBUZZ_LIBRARY)
-	resolve_links(DEPENDENCY_ICLIENT_LIBRARY)
-	resolve_links(DEPENDENCY_IGLFW_LIBRARY)
-	resolve_links(DEPENDENCY_ISHARED_LIBRARY)
 	resolve_links(DEPENDENCY_LIBNOISEUTILS_LIBRARY)
 	resolve_links(DEPENDENCY_LIBNOISE_LIBRARY)
 	resolve_links(DEPENDENCY_LIBOGG_LIBRARY)
@@ -537,49 +382,18 @@ endif()
 	resolve_links(DEPENDENCY_LUABIND_BINARY)
 	resolve_links(DEPENDENCY_LUABIND_LIBRARY)
 	resolve_links(DEPENDENCY_LUAJIT_LIBRARY)
-	resolve_links(DEPENDENCY_LUASYSTEM_LIBRARY)
 	resolve_links(DEPENDENCY_LUA_LIBRARY)
-	resolve_links(DEPENDENCY_MATERIALSYSTEM_LIBRARY)
-	resolve_links(DEPENDENCY_MATHUTIL_LIBRARY)
-	resolve_links(DEPENDENCY_NETWORKMANAGER_LIBRARY)
 	resolve_links(DEPENDENCY_NIFTOOLS_LIBRARY)
 	resolve_links(DEPENDENCY_OPENVR_LIBRARY)
 	resolve_links(DEPENDENCY_OVR_LIBRARY)
 	resolve_links(DEPENDENCY_POLY2TRI_LIBRARY)
-	resolve_links(DEPENDENCY_PROSPER_LIBRARY)
 	resolve_links(DEPENDENCY_RECAST_LIBRARY)
 	resolve_links(DEPENDENCY_RECTANGLEBINPACK_LIBRARY)
-	resolve_links(DEPENDENCY_SERVERMANAGER_LIBRARY)
-	resolve_links(DEPENDENCY_SERVER_LIBRARY)
-	resolve_links(DEPENDENCY_SHADERINFO_LIBRARY)
-	resolve_links(DEPENDENCY_SHAREDUTILS_LIBRARY)
 	resolve_links(DEPENDENCY_SHAREDUTILS_LIBRARY_STATIC)
-	resolve_links(DEPENDENCY_SHARED_LIBRARY)
-	resolve_links(DEPENDENCY_SMDMODEL_LIBRARY)
 	resolve_links(DEPENDENCY_STEAMWORKS_LIBRARY)
 	resolve_links(DEPENDENCY_STEAM_AUDIO_LIBRARY)
-	# resolve_links(DEPENDENCY_UTIL_ARCHIVE_LIBRARY)
-	resolve_links(DEPENDENCY_UTIL_BSP_LIBRARY)
-	resolve_links(DEPENDENCY_UTIL_FGD_LIBRARY)
-	resolve_links(DEPENDENCY_UTIL_IMAGE_LIBRARY)
-	resolve_links(DEPENDENCY_UTIL_FORMATTED_TEXT_LIBRARY)
-	resolve_links(DEPENDENCY_UTIL_PAD_LIBRARY)
-	resolve_links(DEPENDENCY_UTIL_PRAGMA_DOC_LIBRARY)
-	resolve_links(DEPENDENCY_UTIL_SMDMODEL_LIBRARY)
-	resolve_links(DEPENDENCY_UTIL_SOUND_LIBRARY)
-	resolve_links(DEPENDENCY_UTIL_SOURCE_SCRIPT_LIBRARY)
-	resolve_links(DEPENDENCY_UTIL_TIMELINE_SCENE_LIBRARY)
-	resolve_links(DEPENDENCY_UTIL_VERSIONED_ARCHIVE_LIBRARY)
-	resolve_links(DEPENDENCY_UTIL_UDM_LIBRARY)
-	resolve_links(DEPENDENCY_PANIMA_LIBRARY)
-	resolve_links(DEPENDENCY_UTIL_ZIP_LIBRARY)
-	resolve_links(DEPENDENCY_VFILESYSTEM_LIBRARY)
 	resolve_links(DEPENDENCY_VTFLIB_LIBRARY)
-	resolve_links(DEPENDENCY_WGUI_LIBRARY)
-	resolve_links(DEPENDENCY_WMS_SHARED_LIBRARY)
-        resolve_links(DEPENDENCY_ZLIB_LIBRARY)
-
-	#
+    resolve_links(DEPENDENCY_ZLIB_LIBRARY)
 endif()
 set(BOOST_INCLUDEDIR ${DEPENDENCY_BOOST_INCLUDE} CACHE PATH "Path to include directory." FORCE)
 set(BOOST_ROOT ${DEPENDENCY_BOOST_INCLUDE} CACHE PATH "Path to include directory." FORCE)
@@ -590,7 +404,6 @@ set(DEPENDENCY_LIBOGG_INCLUDE ${OGG_INCLUDE_DIRS} CACHE STRING "" FORCE)
 set(ZLIB_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/zlib CACHE STRING "" FORCE)
 set(DEPENDENCY_ZLIB_INCLUDE ${ZLIB_INCLUDE_DIR} CACHE STRING "" FORCE)
 
-
 function(register_third_party_library LIB_NAME)
 	message("Processing third-party library '${LIB_NAME}'...")
 	set(extra_macro_args ${ARGN})
@@ -598,10 +411,10 @@ function(register_third_party_library LIB_NAME)
 	list(LENGTH extra_macro_args num_extra_args)
 	if(${num_extra_args} GREATER 0)
 		list(GET extra_macro_args 0 optional_arg)
-		add_subdirectory(third_party_libs/${LIB_NAME} third_party_libs/${optional_arg})
+		add_subdirectory(third_party_libs/${LIB_NAME} third_party_libs/${optional_arg} EXCLUDE_FROM_ALL)
 		return()
 	endif()
-	add_subdirectory(third_party_libs/${LIB_NAME})
+	add_subdirectory(third_party_libs/${LIB_NAME} EXCLUDE_FROM_ALL)
 endfunction(register_third_party_library)
 
 function(register_third_party_library_custom LIB_NAME CUSTOM_PATH)
@@ -611,23 +424,11 @@ function(register_third_party_library_custom LIB_NAME CUSTOM_PATH)
 	list(LENGTH extra_macro_args num_extra_args)
 	if(${num_extra_args} GREATER 0)
 		list(GET extra_macro_args 0 optional_arg)
-		add_subdirectory(${CUSTOM_PATH}/${LIB_NAME} ${CUSTOM_PATH}/${optional_arg})
+		add_subdirectory(${CUSTOM_PATH}/${LIB_NAME} ${CUSTOM_PATH}/${optional_arg} EXCLUDE_FROM_ALL)
 		return()
 	endif()
-	add_subdirectory(${CUSTOM_PATH}/${LIB_NAME})
+	add_subdirectory(${CUSTOM_PATH}/${LIB_NAME} EXCLUDE_FROM_ALL)
 endfunction(register_third_party_library_custom)
-
-if(WIN32)
-    set(OS_LIB_BIN_EXT ".dll")
-    set(OS_LIB_BIN_PRE "")
-    set(OS_LIB_SHARED_EXT ".lib")
-    set(OS_EXE_EXT ".exe")
-else()
-    set(OS_LIB_BIN_EXT ".so")
-    set(OS_LIB_BIN_PRE "lib")
-    set(OS_LIB_SHARED_EXT ".so")
-    set(OS_EXE_EXT "")
-endif()
 
 if(is_multi_config)
     set(PR_MODULE_INSTALL_SUBDIR "${CONFIG_BUILD_TYPE}")
@@ -652,121 +453,9 @@ message("Processing tools...")
 add_subdirectory(tools)
 
 message("Processing third-party libaries...")
-# include generated headers
-# target_include_directories(shared PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/assimp/include)
-# target_include_directories(client PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/assimp/include)
-
 target_include_directories(libcurl_shared PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
 
 set(LIBRARY_OUTPUT_PATH "" CACHE PATH "" FORCE)
-
-
-
-
-# Assimp
-# set(ASSIMP_BUILD_TESTS OFF CACHE BOOL ".." FORCE)
-# set(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL ".." FORCE)
-# set(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT ON CACHE BOOL ".." FORCE)
-
-# set(ASSIMP_NO_EXPORT OFF CACHE BOOL ".." FORCE)
-# register_third_party_library(assimp)
-# target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_COLLADA_EXPORTER)
-# target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_X_EXPORTER)
-# target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_STEP_EXPORTER)
-# target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_OBJ_EXPORTER)
-# target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_STL_EXPORTER)
-# target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_PLY_EXPORTER)
-# target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_3DS_EXPORTER)
-# target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_GLTF_EXPORTER)
-# target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_ASSBIN_EXPORTER)
-# target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_ASSXML_EXPORTER)
-# target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_X3D_EXPORTER)
-# target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_FBX_EXPORTER)
-# target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_3MF_EXPORTER)
-
-# target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_X_IMPORTER)
-# target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_AMF_IMPORTER)
-# target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_3DS_IMPORTER)
-# target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_MD3_IMPORTER)
-# target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_MDL_IMPORTER)
-# target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_MD2_IMPORTER)
-# target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_PLY_IMPORTER)
-# target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_ASE_IMPORTER)
-# target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_OBJ_IMPORTER)
-# target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_HMP_IMPORTER)
-# target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_SMD_IMPORTER)
-# target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_MDC_IMPORTER)
-# target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_MD5_IMPORTER)
-# target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_STL_IMPORTER)
-# target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_LWO_IMPORTER)
-# target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_DXF_IMPORTER)
-# target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_NFF_IMPORTER)
-# target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_RAW_IMPORTER)
-# target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_SIB_IMPORTER)
-# target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_OFF_IMPORTER)
-# target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_AC_IMPORTER)
-# target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_BVH_IMPORTER)
-# target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_IRRMESH_IMPORTER)
-# target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_IRR_IMPORTER)
-# target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_Q3D_IMPORTER)
-# target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_B3D_IMPORTER)
-# target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_COLLADA_IMPORTER)
-# target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_TERRAGEN_IMPORTER)
-# target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_CSM_IMPORTER)
-# target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_3D_IMPORTER)
-# target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_LWS_IMPORTER)
-# target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_OGRE_IMPORTER)
-# target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_OPENGEX_IMPORTER)
-# target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_MS3D_IMPORTER)
-# target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_COB_IMPORTER)
-# target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_Q3BSP_IMPORTER)
-# target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_NDO_IMPORTER)
-# target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_IFC_IMPORTER)
-# target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_XGL_IMPORTER)
-# target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_FBX_IMPORTER)
-# target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_ASSBIN_IMPORTER)
-# target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_GLTF_IMPORTER)
-# target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_C4D_IMPORTER)
-# target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_3MF_IMPORTER)
-# target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_X3D_IMPORTER)
-# target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_MMD_IMPORTER)
-# if(UNIX)
-	# target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_STEP_IMPORTER)
-	# target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_BLEND_IMPORTER)
-	# target_compile_options(assimp PUBLIC -Os)
-# endif()
-# set_target_folder(assimp third_party_libs/assimp)
-# set_target_folder(IrrXML third_party_libs/assimp)
-# set_target_folder(uninstall third_party_libs/assimp)
-# if(WIN32)
-# 	set_target_folder(UpdateAssimpLibsDebugSymbolsAndDLLs third_party_libs/assimp)
-# endif()
-# target_include_directories(assimp PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
-#
-
-# libbsa
-# set(PROJECT_STATIC_RUNTIME OFF CACHE BOOL OFF FORCE)
-# set(Boost_INCLUDE_DIRS ${DEPENDENCY_BOOST_INCLUDE} CACHE PATH "Path to include directory." FORCE)
-# set(BUILD_SHARED_LIBS OFF CACHE BOOL OFF FORCE)
-# register_third_party_library(libbsa)
-# set(BUILD_SHARED_LIBS ON CACHE BOOL ".." FORCE)
-# set_target_folder(bsa third_party_libs/libbsa)
-# set_target_folder(tests third_party_libs/libbsa)
-## set_target_folder(zlib third_party_libs/libbsa)
-# target_include_directories(bsa PUBLIC ${ZLIB_INCLUDE_DIR})
-# target_include_directories(bsa PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
-#
-
-# ba2lib
-# if(WIN32)
-# 	include_external_msproject(ba2lib ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/ba2lib/BA2Lib/BA2Lib.vcxproj)
-# 	set_target_folder(ba2lib third_party_libs/libbsa)
-# endif()
-#
-
-# LuaJIT
-# register_third_party_library(luajit)
-#
 
 # Luabind
 set(LUA_INCLUDE_DIR ${DEPENDENCY_LUAJIT_INCLUDE} CACHE STRING "" FORCE)
@@ -1011,38 +700,8 @@ set_target_folder(Recast third_party_libs/recast)
 #
 
 # rectangle_bin_pack
-# if(WIN32)
-# 	include_external_msproject(rectangle_bin_pack ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/rectangle_bin_pack/RectangleBinPack/RectangleBinPack.vcxproj)
-# 	set_target_folder(rectangle_bin_pack third_party_libs)
-# else()
-	register_third_party_library(rectangle_bin_pack_cmake rectangle_bin_pack)
-	set_target_folder(rectangle_bin_pack third_party_libs)
-# endif()
-#
-
-# freetype2 and harfbuzz
-# From Freetype:
-# BZIP2: trivial, uses soname libbzip2.so.1.0, possible swap with our own version.
-# PNG: trivial, uses major 1.6 (libpng16.so.16), possible swap with our own version.
-# TODO: this may be no longer the case. future proof this.
-# Harfbuzz's most of deps can be disabled
-# add boostrap frretype as first step?
-# if(WIN32)
-# 	set(CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz TRUE)
-# 	set(CMAKE_DISABLE_FIND_PACKAGE_BZip2 TRUE)
-# 	set(CMAKE_DISABLE_FIND_PACKAGE_PNG TRUE)
-# endif()
-# register_third_party_library(freetype)
-# if(UNIX)
-#
-#     register_third_party_library(harfbuzz)
-#     add_dependencies(harfbuzz freetype)
-# endif()
-# if(WIN32)
-# 	unset(CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz)
-# 	unset(CMAKE_DISABLE_FIND_PACKAGE_BZip2)
-# 	unset(CMAKE_DISABLE_FIND_PACKAGE_PNG)
-# endif()
+register_third_party_library(rectangle_bin_pack_cmake rectangle_bin_pack)
+set_target_folder(rectangle_bin_pack third_party_libs)
 
 
 if(WIN32)
@@ -1050,7 +709,7 @@ if(WIN32)
 	set_property(TARGET freetype PROPERTY
 	IMPORTED_IMPLIB "${DEPENDENCY_FREETYPE_LIBRARY}") #pragma_install_lib should pick up the dll file to install, since I did not install a target here
 
-target_include_directories(freetype INTERFACE ${DEPENDENCY_FREETYPE_INCLUDE})
+	target_include_directories(freetype INTERFACE ${DEPENDENCY_FREETYPE_INCLUDE})
 endif()
 #in linux the check is done in wgui
 
@@ -1064,70 +723,31 @@ endif()
 
 # dependencies
 add_dependencies(png zlib)
-#add_dependencies(freetype zlib)
 add_dependencies(zip zlib)
 add_dependencies(vorbis ogg)
 add_dependencies(util_pad zip)
-# add_dependencies(util_archive bsa)
-
-add_dependencies(util_image mathutil vfilesystem sharedutils png)
-add_dependencies(materialsystem KVParser datasystem util_image png VTFLib13 util_source2 util_udm)
-add_dependencies(mathutil sharedutils-static)
-add_dependencies(sharedutils mathutil)
-add_dependencies(vfilesystem sharedutils)
-add_dependencies(datasystem vfilesystem)
-add_dependencies(luasystem vfilesystem luabind)
-add_dependencies(iglfw glfw)
-add_dependencies(iglfw vfilesystem)
-add_dependencies(prosper vfilesystem iglfw util_image util_udm muparserx lz4)
-
-add_dependencies(cmaterialsystem materialsystem util_image prosper VTFLib13)
-add_dependencies(util_formatted_text util_unicode)
-add_dependencies(wgui cmaterialsystem util_formatted_text)
-
-add_dependencies(util_sound vfilesystem mpaheader ogg vorbis vorbisfile)
-add_dependencies(alsoundsystem vorbis vorbisfile vfilesystem util_sound samplerate)
-
-add_dependencies(servermanager networkmanager)
-add_dependencies(clientmanager networkmanager)
-add_dependencies(util_pad util_versioned_archive)
 
 if(WIN32)
-add_dependencies(util_zip 7zpp)
+	add_dependencies(util_zip 7zpp)
 endif()
 
-add_dependencies(shared materialsystem util_zip wms_shared util_pragma_doc luasystem networkmanager muparserx libz2 bzip2 clip2tri-static clipper-static poly2tri-static util_udm panima util_bsp util_smdmodel util_source_script rectangle_bin_pack Recast Detour util_pad noise-static noiseutils-static ogg vorbis vorbisfile cppbezierfit spdlog fmt util_unicode)
-add_dependencies(ishared util_udm shared)
-add_dependencies(iclient ishared client)
-add_dependencies(iserver ishared server)
-add_dependencies(server shared servermanager clientmanager util_bsp util_sound)
-add_dependencies(client shared clientmanager wgui alsoundsystem util_timeline_scene util_image)
-add_dependencies(pragma_updater sharedutils-static)
+add_dependencies(shared muparserx libz2 bzip2 clip2tri-static clipper-static poly2tri-static rectangle_bin_pack Recast Detour noise-static noiseutils-static ogg vorbis vorbisfile fmt)
 
-add_dependencies(pragma_server server)
-add_dependencies(pragma client server)
-add_dependencies(pragma pragma_updater)
+if(WIN32)
+	set_target_properties(pragma PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_INSTALL_PREFIX}")
+	set_target_properties(pragma_server PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_INSTALL_PREFIX}")
 
-set_property(TARGET pragma PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_INSTALL_PREFIX}")
-set_property(TARGET pragma_server PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_INSTALL_PREFIX}")
+	set_target_properties(pragma PROPERTIES VS_DEBUGGER_COMMAND "${CMAKE_INSTALL_PREFIX}/pragma.exe")
+	set_target_properties(pragma_server PROPERTIES VS_DEBUGGER_COMMAND "${CMAKE_INSTALL_PREFIX}/pragma_server.exe")
 
-set_property(TARGET pragma PROPERTY VS_DEBUGGER_COMMAND "${CMAKE_INSTALL_PREFIX}/pragma.exe")
-set_property(TARGET pragma_server PROPERTY VS_DEBUGGER_COMMAND "${CMAKE_INSTALL_PREFIX}/pragma_server.exe")
-
-set_property(TARGET pragma PROPERTY VS_DEBUGGER_COMMAND_ARGUMENTS "-console -luaext -graphics_api vulkan")
-set_property(TARGET pragma_server PROPERTY VS_DEBUGGER_COMMAND_ARGUMENTS "-console -luaext")
+	set_target_properties(pragma PROPERTIES VS_DEBUGGER_COMMAND_ARGUMENTS "-console -luaext -graphics_api vulkan")
+	set_target_properties(pragma_server PROPERTIES VS_DEBUGGER_COMMAND_ARGUMENTS "-console -luaext")
+endif()
 
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT pragma)
 
 # Installation
 
-if(WIN32)
-	set(BINARY_OUTPUT_DIR "bin")
-	set(EXECUTABLE_OUTPUT_DIR "bin")
-else()
-    set(BINARY_OUTPUT_DIR "lib")
-	set(EXECUTABLE_OUTPUT_DIR "lib")
-endif()
 
 set(PRAGMA_INSTALL_COMPONENT "pragma")
 set(PRAGMA_INSTALL_COMPONENT_FULL "pragma-full")

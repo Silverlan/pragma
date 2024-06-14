@@ -1,5 +1,7 @@
 include(${CMAKE_SOURCE_DIR}/cmake/pr_common.cmake)
 
+option(CONFIG_BUILD_WITH_VTUNE_SUPPORT "Build with VTune profiler support?" OFF)
+
 set(PROJ_NAME shared)
 pr_add_library(${PROJ_NAME} SHARED)
 pr_precompile_headers(${PROJ_NAME} "stdafx_shared.h")
@@ -49,6 +51,7 @@ pr_add_compile_definitions(${PROJ_NAME} -DDLLNETWORK_EX -DENGINE_NETWORK)
 
 if(${CONFIG_BUILD_WITH_VTUNE_SUPPORT})
 	pr_add_external_dependency(${PROJ_NAME} vtune_profiler LIBRARY)
+	pr_add_compile_definitions(${PROJ_NAME} -DPRAGMA_ENABLE_VTUNE_PROFILING PUBLIC)
 endif()
 
 pr_finalize(${PROJ_NAME})

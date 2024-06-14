@@ -829,7 +829,7 @@ if with_pfm:
 		)
 		add_pragma_module(
 			name="pr_davinci",
-			commitSha="da718df7701070255351df81ce74be620b6acd15",
+			commitSha="1c15825d1cefcaa1b762dd6380a924b6ff47bdd8",
 			repositoryUrl="https://github.com/Silverlan/pr_davinci.git"
 		)
 		add_pragma_module(
@@ -848,7 +848,7 @@ if with_pfm:
 if with_vr:
 	add_pragma_module(
 		name="pr_openvr",
-		commitSha="b806f9b16ebd918d4e2e4af72ad5e5e766f36445",
+		commitSha="f0b177897d124529985e8012e670dff32871d4ab",
 		repositoryUrl="https://github.com/Silverlan/pr_openvr.git"
 	)
 

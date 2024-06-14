@@ -9,8 +9,8 @@ pr_add_headers(${PROJ_NAME} "include/")
 pr_add_sources(${PROJ_NAME} "src/")
 
 if(UNIX)
-    target_link_libraries(${PROJ_NAME} "dl")
-    target_link_libraries(${PROJ_NAME} "pthread")
+    target_link_libraries(${PROJ_NAME} PRIVATE "dl")
+    target_link_libraries(${PROJ_NAME} PRIVATE "pthread")
 endif()
 
 pr_finalize(${PROJ_NAME})

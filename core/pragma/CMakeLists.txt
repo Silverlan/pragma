@@ -7,8 +7,8 @@ pr_add_headers(${PROJ_NAME} "include/")
 pr_add_sources(${PROJ_NAME} "src/")
 
 if(UNIX)
-    target_link_libraries(${PROJ_NAME} "dl")
-    target_link_libraries(${PROJ_NAME} "pthread")
+    target_link_libraries(${PROJ_NAME} PRIVATE "dl")
+    target_link_libraries(${PROJ_NAME} PRIVATE "pthread")
 endif()
 
 pr_finalize(${PROJ_NAME})
@@ -24,8 +24,8 @@ if(WIN32)
     pr_add_sources(${PROJ_NAME} "src/")
 
     if(UNIX)
-        target_link_libraries(${PROJ_NAME} "dl")
-        target_link_libraries(${PROJ_NAME} "pthread")
+        target_link_libraries(${PROJ_NAME} PRIVATE "dl")
+        target_link_libraries(${PROJ_NAME} PRIVATE "pthread")
     endif()
 
     set_target_properties(${PROJ_NAME} PROPERTIES OUTPUT_NAME "pragma" SUFFIX ".com")

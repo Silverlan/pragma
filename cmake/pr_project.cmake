@@ -49,7 +49,26 @@ endfunction()
 
 function(pr_add_executable TARGET_NAME)
     pr_project(${TARGET_NAME})
-    add_executable(${TARGET_NAME})
+
+    if(WIN32)
+        set(options CONSOLE)
+        set(oneValueArgs APP_ICON_WIN APP_ICON_LIN DEBUGGER_LAUNCH_ARGS)
+        set(multiValueArgs)
+        cmake_parse_arguments(PARSE_ARGV 1 PA "${options}" "${oneValueArgs}"
+                            "${multiValueArgs}")
+        add_executable(${TARGET_NAME} WIN32 ${PA_APP_ICON_WIN})
+
+        if(PA_CONSOLE)
+            set_target_properties(${TARGET_NAME} PROPERTIES LINK_FLAGS "/SUBSYSTEM:CONSOLE")
+        endif()
+        if(DEFINED PA_DEBUGGER_LAUNCH_ARGS)
+            set_target_properties(${TARGET_NAME} PROPERTIES VS_DEBUGGER_COMMAND_ARGUMENTS "${PA_DEBUGGER_LAUNCH_ARGS}")
+        endif()
+    else()
+        # TODO: Apply icon using .desktop file
+        add_executable(${TARGET_NAME})
+    endif()
+
     message("[PR] Adding executable ${TARGET_NAME}")
     pr_setup_default_project_settings(${TARGET_NAME})
 endfunction()

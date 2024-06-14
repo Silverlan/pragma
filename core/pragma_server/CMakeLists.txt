@@ -1,15 +1,16 @@
-include("../../CMakeShared.txt")
+include(${CMAKE_SOURCE_DIR}/cmake/pr_common.cmake)
 
-set(APP_ICON_RESOURCE_WINDOWS "${CMAKE_CURRENT_SOURCE_DIR}/../pragma/appicon.rc")
-add_include_dir(pragma_executable)
-def_project(pragma_server exe ${APP_ICON_RESOURCE_WINDOWS})
+set(PROJ_NAME pragma_server)
+pr_add_executable(${PROJ_NAME} CONSOLE APP_ICON_WIN "${CMAKE_CURRENT_SOURCE_DIR}/../pragma/appicon.rc" DEBUGGER_LAUNCH_ARGS "-console -luaext")
+
+pr_add_include_dir(${PROJ_NAME} PRAGMA_EXECUTABLE)
+
+pr_add_headers(${PROJ_NAME} "include/")
+pr_add_sources(${PROJ_NAME} "src/")
 
 if(UNIX)
-	target_link_libraries(pragma_server "dl")
-	target_link_libraries(pragma_server "pthread")
-else()
-	set_target_properties(pragma_server PROPERTIES VS_DEBUGGER_COMMAND_ARGUMENTS "-console -luaext")
-
-	# This is required so that the executable can be launched from within a Windows terminal
-	set_target_properties(pragma_server PROPERTIES LINK_FLAGS "/SUBSYSTEM:CONSOLE")
+    target_link_libraries(${PROJ_NAME} "dl")
+    target_link_libraries(${PROJ_NAME} "pthread")
 endif()
+
+pr_finalize(${PROJ_NAME})

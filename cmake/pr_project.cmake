@@ -28,6 +28,17 @@ function(pr_project TARGET_NAME)
     )
 endfunction()
 
+function(pr_precompile_headers TARGET_NAME PRECOMPILED_HEADER)
+    message("Using precompiled header src/${PRECOMPILED_HEADER} for project ${TARGET_NAME}")
+    target_precompile_headers(${TARGET_NAME} PRIVATE "src/${PRECOMPILED_HEADER}")
+
+    # Disable precompiled headers for c-files
+    file(GLOB_RECURSE SRC_C_FILES
+        "${CMAKE_CURRENT_LIST_DIR}/src/*.c"
+    )
+    set_source_files_properties("${SRC_C_FILES}" PROPERTIES SKIP_PRECOMPILE_HEADERS ON)
+endfunction()
+
 function(pr_add_library TARGET_NAME LIB_TYPE)
     pr_project(${TARGET_NAME})
     add_library(${TARGET_NAME} ${LIB_TYPE})

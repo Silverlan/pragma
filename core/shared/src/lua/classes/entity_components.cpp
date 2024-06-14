@@ -448,8 +448,10 @@ static std::vector<pragma::ComponentMemberIndex> get_dynamic_member_ids(pragma::
 	return memberIndices;
 }
 
+#ifdef __linux__
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, BaseEntityComponent);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(util, Path);
+#endif
 
 template<typename TMemberIdentifier, typename TValue, auto TSetValue>
 bool set_transform_member_value(pragma::BaseEntityComponent &component, const TMemberIdentifier &memId, umath::CoordinateSpace space, const TValue &value)

@@ -6,6 +6,7 @@ function(pr_setup_default_project_settings TARGET_NAME)
             /wd4244 # conversion from 'float' to 'unsigned __int64'
             /wd4267 # conversion from 'size_t' to 'uint32_t'
             /wd4305 # truncation from 'double' to 'float'
+            /wd4275 # non dll-interface class '*' used as base for dll-interface class '*'
         )
 
         target_compile_options(${TARGET_NAME} PRIVATE /bigobj)

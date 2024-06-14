@@ -1,0 +1,145 @@
+function(search_lib_recursive_full VAR_NAME FILE_PATH)
+    if(WIN32)
+        set(FILE_PATH_WITH_EXT "${FILE_PATH}.lib")
+    else()
+        set(FILE_EXTENSION ".so")
+        set(extra_macro_args ${ARGN})
+
+        list(LENGTH extra_macro_args num_extra_args)
+        if(${num_extra_args} GREATER 0)
+            list(GET extra_macro_args 0 optional_arg)
+            if(${optional_arg} STREQUAL "STATIC")
+                set(FILE_EXTENSION ".a")
+            endif()
+        endif()
+
+        set(FILE_PATH_WITH_EXT "${FILE_PATH}${FILE_EXTENSION}")
+    endif()
+    if(EXISTS ${FILE_PATH_WITH_EXT})
+        get_filename_component(FILE_PATH_WITH_EXT "${FILE_PATH_WITH_EXT}" REALPATH)
+    endif()
+
+    if(UNIX)
+        # Find actual library file name
+        get_filename_component(FILE_PATH_DIRECTORY "${FILE_PATH_WITH_EXT}" DIRECTORY)
+        get_filename_component(FILE_PATH_NAME "${FILE_PATH_WITH_EXT}" NAME)
+        execute_process(
+            COMMAND find ./ -name "${FILE_PATH_NAME}*"
+            WORKING_DIRECTORY "${FILE_PATH_DIRECTORY}"
+            OUTPUT_VARIABLE FOUND_RESULT)
+        if(NOT ${FOUND_RESULT} STREQUAL "")
+            get_filename_component(FOUND_RESULT "${FOUND_RESULT}" NAME)
+            string(STRIP ${FOUND_RESULT} FOUND_RESULT)
+            # message("FIND: ${FILE_PATH_DIRECTORY}/${FILE_PATH_NAME}* -> ${FOUND_RESULT}")
+            set(FILE_PATH_WITH_EXT "${FILE_PATH_DIRECTORY}/${FOUND_RESULT}")
+        endif()
+        #
+    endif()
+
+    set(${VAR_NAME}
+        ${FILE_PATH_WITH_EXT}
+        CACHE PATH "Path to library." FORCE)
+endfunction(search_lib_recursive_full)
+
+function(search_lib_recursive_custom VAR_NAME FILE_NAME FULL_PATH)
+    set(ARG_STATIC_LIBRARY FALSE)
+    set(extra_macro_args ${ARGN})
+
+    list(LENGTH extra_macro_args num_extra_args)
+    if(${num_extra_args} GREATER 0)
+        list(GET extra_macro_args 0 optional_arg)
+        if(${optional_arg} STREQUAL "STATIC")
+            set(ARG_STATIC_LIBRARY "STATIC")
+        endif()
+    endif()
+
+    set(LIB_NAME ${FILE_NAME})
+    if(UNIX)
+        set(LIB_NAME lib${LIB_NAME})
+    endif()
+    search_lib_recursive_full(${VAR_NAME} ${FULL_PATH}/${LIB_NAME} ${ARG_STATIC_LIBRARY})
+endfunction(search_lib_recursive_custom)
+
+function(search_lib_recursive_ext VAR_NAME FILE_NAME)
+    set(ARG_STATIC_LIBRARY FALSE)
+    set(extra_macro_args ${ARGN})
+
+    list(LENGTH extra_macro_args num_extra_args)
+    if(${num_extra_args} GREATER 0)
+        list(GET extra_macro_args 0 optional_arg)
+        if(${optional_arg} STREQUAL "STATIC")
+            set(ARG_STATIC_LIBRARY "STATIC")
+        endif()
+    endif()
+
+    set(LIB_NAME ${FILE_NAME})
+    if(UNIX)
+        set(LIB_NAME lib${LIB_NAME})
+    endif()
+    search_lib_recursive_full(${VAR_NAME} ${CMAKE_CURRENT_BINARY_DIR}/external_libs/${FILE_NAME}/${BINARY_PRAGMA_DIR}/${LIB_NAME} ${ARG_STATIC_LIBRARY})
+endfunction(search_lib_recursive_ext)
+
+function(search_lib_recursive VAR_NAME FILE_PATH LIB_NAME)
+    set(ARG_STATIC_LIBRARY FALSE)
+    set(ROOT_DIR ${CMAKE_CURRENT_BINARY_DIR})
+    set(extra_macro_args ${ARGN})
+
+    list(LENGTH extra_macro_args num_extra_args)
+    if(${num_extra_args} GREATER 0)
+        list(GET extra_macro_args 0 optional_arg)
+        if(${optional_arg} STREQUAL "STATIC")
+            set(ARG_STATIC_LIBRARY "STATIC")
+        endif()
+        if(${num_extra_args} GREATER 1)
+            list(GET extra_macro_args 1 optional_arg)
+            set(ROOT_DIR ${optional_arg})
+        endif()
+    endif()
+
+    if(UNIX)
+        set(LIB_NAME lib${LIB_NAME})
+    endif()
+    search_lib_recursive_full(${VAR_NAME} ${ROOT_DIR}/${FILE_PATH}/${LIB_NAME} ${ARG_STATIC_LIBRARY})
+endfunction(search_lib_recursive)
+
+function(set_target_folder TARGET FOLDER)
+    if(TARGET ${TARGET})
+        set_target_properties(${TARGET} PROPERTIES FOLDER ${FOLDER})
+    endif()
+endfunction(set_target_folder)
+
+function(resolve_links IDS)
+    foreach(ID IN LISTS IDS)
+        pr_get_normalized_identifier_name(${ID})
+        get_filename_component(TMP_DEPENDENCY_${NORMALIZED_IDENTIFIER}_LIBRARY "${DEPENDENCY_${NORMALIZED_IDENTIFIER}_LIBRARY}" REALPATH)
+        set(DEPENDENCY_${NORMALIZED_IDENTIFIER}_LIBRARY
+            ${TMP_DEPENDENCY_${NORMALIZED_IDENTIFIER}_LIBRARY}
+            CACHE PATH "Path to library." FORCE)
+    endforeach()
+endfunction()
+
+function(register_third_party_library LIB_NAME)
+    message("Processing third-party library '${LIB_NAME}'...")
+    set(extra_macro_args ${ARGN})
+
+    list(LENGTH extra_macro_args num_extra_args)
+    if(${num_extra_args} GREATER 0)
+        list(GET extra_macro_args 0 optional_arg)
+        add_subdirectory(third_party_libs/${LIB_NAME} third_party_libs/${optional_arg} EXCLUDE_FROM_ALL)
+        return()
+    endif()
+    add_subdirectory(third_party_libs/${LIB_NAME} EXCLUDE_FROM_ALL)
+endfunction(register_third_party_library)
+
+function(register_third_party_library_custom LIB_NAME CUSTOM_PATH)
+    message("Processing third-party library '${LIB_NAME}'...")
+    set(extra_macro_args ${ARGN})
+
+    list(LENGTH extra_macro_args num_extra_args)
+    if(${num_extra_args} GREATER 0)
+        list(GET extra_macro_args 0 optional_arg)
+        add_subdirectory(${CUSTOM_PATH}/${LIB_NAME} ${CUSTOM_PATH}/${optional_arg} EXCLUDE_FROM_ALL)
+        return()
+    endif()
+    add_subdirectory(${CUSTOM_PATH}/${LIB_NAME} EXCLUDE_FROM_ALL)
+endfunction(register_third_party_library_custom)

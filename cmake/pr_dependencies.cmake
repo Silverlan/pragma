@@ -5,33 +5,55 @@ function(pr_set_include_path IDENTIFIER PATH)
     cmake_parse_arguments(PARSE_ARGV 2 PA "${options}" "${oneValueArgs}" "${multiValueArgs}")
 
     pr_get_normalized_identifier_name(${IDENTIFIER})
+
+    set(ADDITIONAL_ARGS "")
     if(PA_FORCE)
-        set(DEPENDENCY_${NORMALIZED_IDENTIFIER}_INCLUDE
-            ${PATH}
-            CACHE PATH "Path to ${PRETTY_IDENTIFIER} include directory." FORCE)
-    else()
-        set(DEPENDENCY_${NORMALIZED_IDENTIFIER}_INCLUDE
-            ${PATH}
-            CACHE PATH "Path to ${PRETTY_IDENTIFIER} include directory.")
+        set(ADDITIONAL_ARGS "FORCE")
     endif()
+
+    set(DEPENDENCY_${NORMALIZED_IDENTIFIER}_INCLUDE
+        ${PATH}
+        CACHE PATH "Path to ${IDENTIFIER} include directory." ${ADDITIONAL_ARGS})
 endfunction()
 
-function(pr_set_library_path IDENTIFIER PATH)
+function(pr_set_raw_library_path IDENTIFIER PATH)
     set(options FORCE)
     set(oneValueArgs)
     set(multiValueArgs)
     cmake_parse_arguments(PARSE_ARGV 2 PA "${options}" "${oneValueArgs}" "${multiValueArgs}")
 
     pr_get_normalized_identifier_name(${IDENTIFIER})
+
+    set(ADDITIONAL_ARGS "")
     if(PA_FORCE)
-        set(DEPENDENCY_${NORMALIZED_IDENTIFIER}_LIBRARY
-            ${PATH}
-            CACHE FILEPATH "Path to ${PRETTY_IDENTIFIER} library." FORCE)
-    else()
-        set(DEPENDENCY_${NORMALIZED_IDENTIFIER}_LIBRARY
-            ${PATH}
-            CACHE FILEPATH "Path to ${PRETTY_IDENTIFIER} library.")
+        set(ADDITIONAL_ARGS "FORCE")
     endif()
+
+    set(DEPENDENCY_${NORMALIZED_IDENTIFIER}_LIBRARY
+        "${PATH}"
+        CACHE FILEPATH "Path to ${IDENTIFIER} library." ${ADDITIONAL_ARGS})
+endfunction()
+
+function(pr_set_library_path IDENTIFIER)
+    set(options FORCE)
+    set(oneValueArgs TARGET)
+    set(multiValueArgs)
+    cmake_parse_arguments(PARSE_ARGV 2 PA "${options}" "${oneValueArgs}" "${multiValueArgs}")
+
+    if(NOT DEFINED PA_TARGET)
+        set(PA_TARGET "${IDENTIFIER}")
+    endif()
+
+    pr_get_normalized_identifier_name(${IDENTIFIER})
+
+    set(ADDITIONAL_ARGS "")
+    if(PA_FORCE)
+        set(ADDITIONAL_ARGS "FORCE")
+    endif()
+
+    set(DEPENDENCY_${NORMALIZED_IDENTIFIER}_LIBRARY
+        "$<TARGET_LINKER_FILE:${TARGET}>"
+        CACHE FILEPATH "Path to ${PRETTY_IDENTIFIER} library." ${ADDITIONAL_ARGS})
 endfunction()
 
 function(pr_add_include_dir TARGET_NAME IDENTIFIER)

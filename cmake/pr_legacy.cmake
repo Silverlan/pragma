@@ -54,8 +54,6 @@ function(pr_include_third_party_library)
         register_third_party_library("${PA_DIR}")
     endif()
     set_target_folder("${PA_TARGET}" third_party_libs)
-
-    pragma_install_lib("${DEPENDENCY_${NORMALIZED_IDENTIFIER}_LIBRARY}" "${BINARY_OUTPUT_DIR}")
 endfunction()
 
 function(pr_install_files)
@@ -77,7 +75,7 @@ function(pr_install_files)
 	endforeach()
 endfunction(pr_install_files)
 
-function(pr_install_targets TARGETS)
+function(pr_install_targets)
     set(options)
     set(oneValueArgs INSTALL_DIR)
     set(multiValueArgs)
@@ -89,10 +87,34 @@ function(pr_install_targets TARGETS)
 
     foreach(TARGET IN LISTS ${PA_UNPARSED_ARGUMENTS})
         set(FILE_PATH "$<TARGET_FILE:${TARGET}>")
-        message("Adding install rule for \"${FILE_PATH}\" to \"${INSTALL_PATH}\"...")
+        message("Adding install rule for \"${FILE_PATH}\" to \"${PA_INSTALL_DIR}\"...")
         install(
             FILES "${FILE_PATH}"
-            DESTINATION "${INSTALL_PATH}"
+            DESTINATION "${PA_INSTALL_DIR}"
             COMPONENT ${PRAGMA_INSTALL_COMPONENT})
     endforeach()
 endfunction(pr_install_targets)
+
+function(pr_install_directory FILE_PATH)
+    set(options)
+    set(oneValueArgs INSTALL_DIR)
+    set(multiValueArgs)
+    cmake_parse_arguments(PARSE_ARGV 1 PA "${options}" "${oneValueArgs}" "${multiValueArgs}")
+
+    if(NOT DEFINED PA_INSTALL_DIR)
+        set(PA_INSTALL_DIR "${BINARY_OUTPUT_DIR}")
+    endif()
+
+    message("Adding install rule for \"${FILE_PATH}\" to \"${PA_INSTALL_DIR}\"...")
+    install(
+        DIRECTORY "${FILE_PATH}"
+        DESTINATION "${PA_INSTALL_DIR}"
+        COMPONENT ${PRAGMA_INSTALL_COMPONENT} ${PA_UNPARSED_ARGUMENTS})
+endfunction(pr_install_directory)
+
+function(pr_install_create_directory DIR_NAME)
+    add_custom_command(
+        TARGET pragma-install
+        POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_INSTALL_PREFIX}/${DIR_NAME})
+endfunction(pr_install_create_directory)

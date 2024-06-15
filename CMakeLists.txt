@@ -186,13 +186,11 @@ target_include_directories(libcurl_shared PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/th
 target_include_directories(materialsystem PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
 
 # Dependencies
-add_dependencies(materialsystem KVParser)
+add_dependencies(materialsystem KVParser VTFLib13)
 add_dependencies(luasystem luabind)
 add_dependencies(util_sound mpaheader)
-add_dependencies(shared spdlog)
 add_dependencies(iglfw glfw)
 add_dependencies(util_image png)
-add_dependencies(materialsystem VTFLib13)
 
 add_dependencies(png zlib)
 add_dependencies(zip zlib)
@@ -217,6 +215,7 @@ add_dependencies(
     noise-static
     noiseutils-static
     ogg
+    spdlog
     vorbis
     vorbisfile
     fmt)
@@ -252,7 +251,6 @@ pr_install_targets(
     mathutil
     prosper
     server
-    servermanager
     shared
     sharedutils
     util_image
@@ -273,16 +271,17 @@ add_dependencies(pragma-install ${PRAGMA_INSTALL_DEPENDENCIES})
 add_dependencies(pragma-install-full pragma iclient iserver)
 
 pragma_install_create_directory(modules)
-# pragma_install_lib("${DEPENDENCY_ASSIMP_LIBRARY}" "${BINARY_OUTPUT_DIR}")
 
-pragma_install_lib("${DEPENDENCY_BOOST_CHRONO_LIBRARY}" "${BINARY_OUTPUT_DIR}")
-pragma_install_lib("${DEPENDENCY_BOOST_DATE_TIME_LIBRARY}" "${BINARY_OUTPUT_DIR}")
-pragma_install_lib("${DEPENDENCY_BOOST_FILESYSTEM_LIBRARY}" "${BINARY_OUTPUT_DIR}")
-pragma_install_lib("${DEPENDENCY_BOOST_IOSTREAMS_LIBRARY}" "${BINARY_OUTPUT_DIR}")
-pragma_install_lib("${DEPENDENCY_BOOST_REGEX_LIBRARY}" "${BINARY_OUTPUT_DIR}")
-pragma_install_lib("${DEPENDENCY_BOOST_SYSTEM_LIBRARY}" "${BINARY_OUTPUT_DIR}")
-pragma_install_lib("${DEPENDENCY_BOOST_THREAD_LIBRARY}" "${BINARY_OUTPUT_DIR}")
-pragma_install_lib("${DEPENDENCY_BZIP2_LIBRARY}" "${BINARY_OUTPUT_DIR}")
+pr_install_files(
+    "${DEPENDENCY_BOOST_CHRONO_LIBRARY}"
+    "${DEPENDENCY_BOOST_DATE_TIME_LIBRARY}"
+    "${DEPENDENCY_BOOST_FILESYSTEM_LIBRARY}"
+    "${DEPENDENCY_BOOST_IOSTREAMS_LIBRARY}"
+    "${DEPENDENCY_BOOST_REGEX_LIBRARY}"
+    "${DEPENDENCY_BOOST_SYSTEM_LIBRARY}"
+    "${DEPENDENCY_BOOST_THREAD_LIBRARY}"
+    "${DEPENDENCY_BZIP2_LIBRARY}")
+
 # In Linux there is a cyclic deps between freetype,harfbuzz,pango,cairo and most importantly fontconfig. Fontconfig in linux is reposnsible for discovery of
 # fonts. (think C:\Windows\Fonts for linux but customizable via configs) recently I hit a snag in which harfbuzz failed to load due to missing pango symbols.
 # The AppImage team hit similar snag too, see https://github.com/AppImageCommunity/pkg2appimage/pull/323 and
@@ -301,50 +300,9 @@ pr_install_targets(
     zip
     spdlog
     mpaheader
-    zlib
-)
+    zlib)
 
-function(pragma_install_file FILE_PATH INSTALL_PATH)
-    if("${FILE_PATH}" STREQUAL "")
-        return()
-    endif()
-    set(extra_macro_args ${ARGN})
-    message("Adding install rule for \"${FILE_PATH}\" to \"${INSTALL_PATH}\"...")
-    install(
-        FILES "${FILE_PATH}"
-        DESTINATION "${INSTALL_PATH}"
-        COMPONENT ${PRAGMA_INSTALL_COMPONENT}
-        ${extra_macro_args})
-endfunction(pragma_install_file)
-
-pragma_install_lib("${DEPENDENCY_ICU_ICUUC_BINARY}" "${BINARY_OUTPUT_DIR}")
-pragma_install_lib("${DEPENDENCY_ICU_ICUDT_BINARY}" "${BINARY_OUTPUT_DIR}")
-
-function(pragma_install_program FILE_PATH INSTALL_PATH)
-    if("${FILE_PATH}" STREQUAL "")
-        return()
-    endif()
-    set(extra_macro_args ${ARGN})
-    message("Adding install rule for \"${FILE_PATH}\" to \"${INSTALL_PATH}\"...")
-    install(
-        PROGRAMS "${FILE_PATH}"
-        DESTINATION "${INSTALL_PATH}"
-        COMPONENT ${PRAGMA_INSTALL_COMPONENT}
-        ${extra_macro_args})
-endfunction(pragma_install_program)
-
-function(pragma_install_directory FILE_PATH INSTALL_PATH)
-    if("${FILE_PATH}" STREQUAL "")
-        return()
-    endif()
-    set(extra_macro_args ${ARGN})
-    message("Adding install rule for \"${FILE_PATH}\" to \"${INSTALL_PATH}\"...")
-    install(
-        DIRECTORY "${FILE_PATH}"
-        DESTINATION "${INSTALL_PATH}"
-        COMPONENT ${PRAGMA_INSTALL_COMPONENT}
-        ${extra_macro_args})
-endfunction(pragma_install_directory)
+pr_install_files("${DEPENDENCY_ICU_ICUUC_BINARY}" "${DEPENDENCY_ICU_ICUDT_BINARY}")
 
 # Modules
 file(GLOB PR_MODULES "modules/pr_*")
@@ -355,9 +313,9 @@ foreach(MODULE_PATH ${PR_MODULES})
     else()
         set(PR_MODULE_PATH_WITH_EXT "${CMAKE_CURRENT_BINARY_DIR}/modules/${MODULE_NAME}/${PR_MODULE_INSTALL_SUBDIR}/lib${MODULE_NAME}.so")
     endif()
-    if(EXISTS "${MODULE_PATH}/CMakeInstall.txt")
+    if(EXISTS "${MODULE_PATH}/Install.cmake")
         message("Running install script for module '${MODULE_PATH}'...")
-        include("${MODULE_PATH}/CMakeInstall.txt" OPTIONAL)
+        include("${MODULE_PATH}/Install.cmake" OPTIONAL)
     else()
         # Default behavior
         message("Adding default installation rule for module \"${MODULE_PATH}\": \"${PR_MODULE_PATH_WITH_EXT}\" to \"${CMAKE_INSTALL_PREFIX}/modules/\"...")
@@ -374,9 +332,9 @@ endforeach()
 file(GLOB PR_MODULES "tools/*")
 foreach(MODULE_PATH ${PR_MODULES})
     get_filename_component(MODULE_NAME "${MODULE_PATH}" NAME)
-    if(EXISTS "${MODULE_PATH}/CMakeInstall.txt")
+    if(EXISTS "${MODULE_PATH}/Install.cmake")
         message("Running install script for tool '${MODULE_PATH}'...")
-        include("${MODULE_PATH}/CMakeInstall.txt" OPTIONAL)
+        include("${MODULE_PATH}/Install.cmake" OPTIONAL)
     endif()
 endforeach()
 

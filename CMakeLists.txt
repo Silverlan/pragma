@@ -111,26 +111,17 @@ pr_set_include_path(libvorbis "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/vorbis
 search_lib_recursive(DEPENDENCY_LIBVORBIS_LIBRARY third_party_libs/vorbis/lib/${BINARY_PRAGMA_DIR} vorbis)
 search_lib_recursive(DEPENDENCY_LIBVORBISFILE_LIBRARY third_party_libs/vorbis/lib/${BINARY_PRAGMA_DIR} vorbisfile)
 
-search_lib_recursive(DEPENDENCY_MPAHEADER_LIBRARY third_party_libs/mpaheader/${BINARY_PRAGMA_DIR} mpaheader)
-pr_set_include_path(mpaheader "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/mpaheader/include")
-
 search_lib_recursive(DEPENDENCY_LIBOGG_LIBRARY third_party_libs/ogg/${BINARY_PRAGMA_DIR} ogg)
 pr_set_include_path(libogg_build "${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/ogg/include")
 set(OGG_LIBRARIES
     ${DEPENDENCY_LIBOGG_LIBRARY}
     CACHE STRING "" FORCE)
 
-pr_set_include_path(bzip2 "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/bzip2" FORCE)
-search_lib_recursive(DEPENDENCY_BZIP2_LIBRARY third_party_libs/bzip2/${BINARY_PRAGMA_DIR} "bz2$<$<CONFIG:Debug>:d>")
-
 pr_set_include_path(lz4 "${CMAKE_CURRENT_LIST_DIR}/external_libs/util_source2/third_party_libs/lz4/lib" FORCE)
 search_lib_recursive(DEPENDENCY_LZ4_LIBRARY external_libs/util_source2/third_party_libs/lz4/${BINARY_PRAGMA_DIR} lz4 STATIC)
 
 pr_set_include_path(liblzma "${CMAKE_CURRENT_LIST_DIR}/external_libs/util_bsp/third_party_libs/liblzma/include" FORCE)
 search_lib_recursive(DEPENDENCY_LIBLZMA_LIBRARY external_libs/util_bsp/third_party_libs/liblzma/${BINARY_PRAGMA_DIR} lzma STATIC)
-
-pr_set_include_path(luabind "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/luabind" FORCE)
-search_lib_recursive(DEPENDENCY_LUABIND_LIBRARY lib/${BINARY_PRAGMA_DIR} luabind)
 
 if(UNIX)
     find_package(Freetype REQUIRED)
@@ -140,63 +131,21 @@ if(UNIX)
         CACHE STRING "" FORCE)
 endif()
 
-search_lib_recursive(DEPENDENCY_VKV_PARSER_LIBRARY third_party_libs/vkvparser/${BINARY_PRAGMA_DIR} KVParser)
-pr_set_include_path(vkv_parser "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/vkvparser/include")
-pr_set_include_path(spdlog "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/spdlog/include")
-search_lib_recursive(DEPENDENCY_SPDLOG_LIBRARY third_party_libs/spdlog/${BINARY_PRAGMA_DIR} spdlog$<$<CONFIG:Debug>:d>)
-
-pr_set_include_path(fmt "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/fmt/include")
-search_lib_recursive(DEPENDENCY_FMT_LIBRARY third_party_libs/fmt/${BINARY_PRAGMA_DIR} fmt$<$<CONFIG:Debug>:d> STATIC)
-
-if(WIN32)
-    pr_set_include_path(7zpp "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/7zpp/include" FORCE)
-    search_lib_recursive(DEPENDENCY_7ZPP_LIBRARY third_party_libs/7zpp/${BINARY_PRAGMA_DIR} 7zpp)
-endif()
-
-if(WIN32)
-    search_lib_recursive(DEPENDENCY_LUABIND_BINARY bin/${BINARY_PRAGMA_DIR} luabind)
-else()
-    search_lib_recursive(DEPENDENCY_LUABIND_BINARY lib/${BINARY_PRAGMA_DIR} luabind)
-endif()
-
 pr_set_include_path(luajit "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/luajit/src")
 pr_set_include_path(lua "${DEPENDENCY_LUAJIT_INCLUDE}")
 
 # Third-party libraries
 pr_set_include_path(gli "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/gli")
-pr_set_include_path(glfw "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/glfw/include")
-
-if(WIN32)
-    set(GLFW_LIB_NAME
-        "glfw3dll"
-        CACHE INTERNAL "" FORCE)
-else()
-    set(GLFW_LIB_NAME
-        "glfw"
-        CACHE INTERNAL "" FORCE)
-endif()
-search_lib_recursive(DEPENDENCY_GLFW_LIBRARY third_party_libs/glfw/src/${BINARY_PRAGMA_DIR} ${GLFW_LIB_NAME})
 
 pr_set_include_path(clip2tri "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/clip2tri")
 search_lib_recursive(DEPENDENCY_CLIP2TRI_LIBRARY third_party_libs/clip2tri/${BINARY_PRAGMA_DIR} clip2tri-static STATIC)
 search_lib_recursive(DEPENDENCY_CLIPPER_LIBRARY third_party_libs/clip2tri/clipper/${BINARY_PRAGMA_DIR} clipper-static STATIC)
 search_lib_recursive(DEPENDENCY_POLY2TRI_LIBRARY third_party_libs/clip2tri/poly2tri/${BINARY_PRAGMA_DIR} poly2tri-static STATIC)
 
-pr_set_include_path(muparserx "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/muparserx/parser")
-search_lib_recursive(DEPENDENCY_MUPARSERX_LIBRARY third_party_libs/muparserx/${BINARY_PRAGMA_DIR} muparserx STATIC)
-
 pr_set_include_path(rapidxml "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/rapidxml")
 pr_set_include_path(ba2 "${CMAKE_CURRENT_LIST_DIR}/modules/pr_source/third_party/ba2lib/BA2Lib")
-pr_set_include_path(recast "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/recastnavigation/Recast/Include")
-search_lib_recursive(DEPENDENCY_RECAST_LIBRARY third_party_libs/recastnavigation/Recast/${BINARY_PRAGMA_DIR} Recast STATIC)
-
-pr_set_include_path(detour "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/recastnavigation/Detour/Include")
-search_lib_recursive(DEPENDENCY_DETOUR_LIBRARY third_party_libs/recastnavigation/Detour/${BINARY_PRAGMA_DIR} Detour STATIC)
 
 pr_set_include_path(exprtk "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/exprtk")
-pr_set_include_path(libzip "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/libzip/lib")
-pr_set_include_path(libzip_conf "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/libzip/xcode")
-search_lib_recursive(DEPENDENCY_LIBZIP_LIBRARY third_party_libs/libzip/lib/${BINARY_PRAGMA_DIR} zip)
 
 pr_set_include_path(lpng "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/libpng")
 pr_set_include_path(lpng_build "${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/libpng")
@@ -211,15 +160,8 @@ else()
 endif()
 search_lib_recursive(DEPENDENCY_LPNG_LIBRARY third_party_libs/libpng/${BINARY_PRAGMA_DIR} ${LIBPNG_LIB_NAME})
 
-pr_set_include_path(rectanglebinpack "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/rectangle_bin_pack")
-search_lib_recursive(DEPENDENCY_RECTANGLEBINPACK_LIBRARY third_party_libs/rectangle_bin_pack/${BINARY_PRAGMA_DIR} rectangle_bin_pack STATIC)
-
 pr_set_include_path(miniball "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/miniball/cpp/main")
 pr_set_include_path(bvh "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/bvh/src")
-
-pr_set_include_path(vtflib "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/vtflib/src")
-pr_set_include_path(vtflib_build "${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/vtflib/src")
-search_lib_recursive(DEPENDENCY_VTFLIB_LIBRARY third_party_libs/vtflib/src/${BINARY_PRAGMA_DIR} VTFLib13)
 
 if(WIN32)
     if("${DEPENDENCY_LUAJIT_LIBRARY}" STREQUAL "")
@@ -236,9 +178,6 @@ else()
         search_lib_recursive(DEPENDENCY_LUA_LIBRARY third_party_libs/luajit/src luajit-p DYNAMIC ${CMAKE_CURRENT_LIST_DIR})
     endif()
 endif()
-
-pr_set_include_path(libsamplerate "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/libsamplerate/src")
-search_lib_recursive(DEPENDENCY_LIBSAMPLERATE_LIBRARY third_party_libs/libsamplerate/${BINARY_PRAGMA_DIR} samplerate STATIC)
 
 pr_set_include_path(libnoise "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/libnoise/src")
 pr_set_include_path(libnoiseutils "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/libnoise/noiseutils")
@@ -293,8 +232,7 @@ if(UNIX)
         steamworks
         steam_audio
         vtflib
-        zlib
-	)
+        zlib)
     if(win32)
         resolve_links(freetype)
     endif()
@@ -347,34 +285,40 @@ set(LIBRARY_OUTPUT_PATH
     ""
     CACHE PATH "" FORCE)
 
+set(PRAGMA_INSTALL_COMPONENT "pragma")
+set(PRAGMA_INSTALL_COMPONENT_FULL "pragma-full")
+add_custom_target(pragma-install COMMAND "${CMAKE_COMMAND}" -DCMAKE_INSTALL_COMPONENT=${PRAGMA_INSTALL_COMPONENT} -DBUILD_TYPE=${CONFIG_BUILD_TYPE} -P
+                                         "${CMAKE_BINARY_DIR}/cmake_install.cmake")
+add_custom_target(pragma-install-full COMMAND "${CMAKE_COMMAND}" -DCMAKE_INSTALL_COMPONENT=${PRAGMA_INSTALL_COMPONENT_FULL} -DBUILD_TYPE=${CONFIG_BUILD_TYPE}
+                                              -P "${CMAKE_BINARY_DIR}/cmake_install.cmake")
 # Luabind
-set(LUA_INCLUDE_DIR
-    ${DEPENDENCY_LUAJIT_INCLUDE}
-    CACHE STRING "" FORCE)
-set(LUA_LIBRARY
-    ${DEPENDENCY_LUA_LIBRARY}
-    CACHE STRING "" FORCE)
-set(LUA_FOUND
-    ON
-    CACHE BOOL ON FORCE)
-set(LUA_LIBRARIES
-    ${LUA_LIBRARY}
-    CACHE STRING "" FORCE)
-register_third_party_library(luabind)
+set(LUA_INCLUDE_DIR ${DEPENDENCY_LUAJIT_INCLUDE} CACHE STRING "" FORCE)
+set(LUA_LIBRARY ${DEPENDENCY_LUA_LIBRARY} CACHE STRING "" FORCE)
+set(LUA_FOUND ON CACHE BOOL ON FORCE)
+set(LUA_LIBRARIES ${LUA_LIBRARY} CACHE STRING "" FORCE)
+pr_include_third_party_library(luabind INC "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/luabind" LIB "lib/${BINARY_PRAGMA_DIR}")
 set_target_folder(luabind third_party_libs)
 target_include_directories(luabind PUBLIC ${LUA_INCLUDE_DIR})
 add_dependencies(luasystem luabind)
 #
 
 # mpaheader
-register_third_party_library(mpaheader)
+pr_include_third_party_library(mpaheader)
 set_target_folder(mpaheader third_party_libs)
 add_dependencies(util_sound mpaheader)
 #
 
 # VKVParser
-register_third_party_library(vkvparser)
-set_target_folder(KVParser third_party_libs)
+pr_include_third_party_library(
+    vkv_parser
+    TARGET
+    KVParser
+    DIR
+    vkvparser
+    INC
+    "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/vkvparser/include"
+    LIB
+    "third_party_libs/vkvparser/${BINARY_PRAGMA_DIR}")
 add_dependencies(materialsystem KVParser)
 #
 
@@ -398,9 +342,10 @@ set(SPDLOG_CLOCK_COARSE
     ON
     CACHE BOOL ON FORCE)
 set(CMAKE_CXX_STANDARD 20) # bump to c++23 after we change scope ops in luabind.
-register_third_party_library(spdlog)
+pr_include_third_party_library(spdlog LIB_NAME spdlog$<$<CONFIG:Debug>:d>)
 set_target_folder(spdlog third_party_libs)
 unset(CMAKE_CXX_STANDARD)
+add_dependencies(shared spdlog)
 #
 
 # fmt
@@ -411,7 +356,7 @@ set(FMT_TEST
 set(FMT_DOC
     OFF
     CACHE BOOL OFF FORCE)
-register_third_party_library(fmt)
+pr_include_third_party_library(fmt LIB_NAME fmt$<$<CONFIG:Debug>:d> STATIC)
 set(BUILD_SHARED_LIBS
     ON
     CACHE BOOL ".." FORCE)
@@ -422,7 +367,7 @@ if(WIN32)
     set(BUILD_SHARED_LIBS
         OFF
         CACHE BOOL OFF FORCE)
-    register_third_party_library(7zpp)
+    pr_include_third_party_library(7zpp)
     set(BUILD_SHARED_LIBS
         ON
         CACHE BOOL ".." FORCE)
@@ -435,7 +380,7 @@ set(BUILD_EXAMPLES
 set(BUILD_SHARED_LIBS
     OFF
     CACHE BOOL OFF FORCE)
-register_third_party_library(muparserx)
+pr_include_third_party_library(muparserx INC "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/muparserx/parser" STATIC)
 set(BUILD_SHARED_LIBS
     ON
     CACHE BOOL ".." FORCE)
@@ -484,8 +429,16 @@ set(GLFW_BUILD_TESTS
 set(GLFW_INSTALL
     OFF
     CACHE BOOL OFF FORCE)
-
-register_third_party_library(glfw)
+if(WIN32)
+    set(GLFW_LIB_NAME
+        "glfw3dll"
+        CACHE INTERNAL "" FORCE)
+else()
+    set(GLFW_LIB_NAME
+        "glfw"
+        CACHE INTERNAL "" FORCE)
+endif()
+pr_include_third_party_library(glfw LIB "third_party_libs/glfw/src/${BINARY_PRAGMA_DIR}" LIB_NAME "${GLFW_LIB_NAME}")
 set_target_folder(glfw third_party_libs/glfw)
 add_dependencies(iglfw glfw)
 #
@@ -536,7 +489,8 @@ set(ENABLE_BZIP2
 set(ENABLE_LZMA
     OFF
     CACHE BOOL ".." FORCE)
-register_third_party_library(libzip)
+pr_include_third_party_library(libzip TARGET zip INC "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/libzip/lib" LIB "third_party_libs/libzip/lib/${BINARY_PRAGMA_DIR}")
+pr_set_include_path(libzip_conf "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/libzip/xcode")
 target_include_directories(zip PUBLIC ${DEPENDENCY_ZLIB_INCLUDE}) # ew.
 set_target_folder(add_from_filep third_party_libs/libzip)
 set_target_folder(can_clone_file third_party_libs/libzip)
@@ -566,7 +520,7 @@ set_target_folder(ziptool_regress third_party_libs/libzip)
 #
 
 # bzip2
-register_third_party_library(bzip2)
+pr_include_third_party_library(bzip2 INC "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/bzip2" LIB_NAME "bz2$<$<CONFIG:Debug>:d>")
 set_target_folder(bzip2 third_party_libs/bzip2)
 set_target_folder(bzip2recover third_party_libs/bzip2)
 set_target_folder(libz2 third_party_libs/bzip2)
@@ -613,7 +567,7 @@ add_dependencies(util_image png)
 set(BUILD_SHARED_LIBS
     OFF
     CACHE BOOL OFF FORCE)
-register_third_party_library(libsamplerate)
+pr_include_third_party_library(libsamplerate INC "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/libsamplerate/src" LIB_NAME "samplerate" STATIC)
 set(BUILD_SHARED_LIBS
     ON
     CACHE BOOL ON FORCE)
@@ -642,7 +596,8 @@ set_target_folder(varispeed-play third_party_libs/libsamplerate)
 set(USE_LIBTXC_DXTN
     OFF
     CACHE BOOL OFF FORCE)
-register_third_party_library(vtflib)
+pr_set_include_path(vtflib_build "${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/vtflib/src")
+pr_include_third_party_library(vtflib INC "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/vtflib/src" LIB "third_party_libs/vtflib/src/${BINARY_PRAGMA_DIR}" LIB_NAME "VTFLib13")
 set_target_folder(VTFLib13 third_party_libs)
 target_include_directories(VTFLib13 PUBLIC ${DEPENDENCY_LIBZIP_CONF_INCLUDE})
 add_dependencies(materialsystem VTFLib13)
@@ -661,7 +616,8 @@ set(RECASTNAVIGATION_STATIC
 set(RECASTNAVIGATION_TESTS
     OFF
     CACHE BOOL OFF FORCE)
-register_third_party_library(recastnavigation)
+pr_include_third_party_library(recastnavigation TARGET Recast INC "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/recastnavigation/Recast/Include" LIB "third_party_libs/recastnavigation/Recast/${BINARY_PRAGMA_DIR}" STATIC)
+pr_include_third_party_library(TARGET Detour INC "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/recastnavigation/Detour/Include" LIB "third_party_libs/recastnavigation/Detour/${BINARY_PRAGMA_DIR}" STATIC)
 set_target_folder(DebugUtils third_party_libs/recast)
 set_target_folder(Detour third_party_libs/recast)
 set_target_folder(DetourCrowd third_party_libs/recast)
@@ -670,7 +626,7 @@ set_target_folder(Recast third_party_libs/recast)
 #
 
 # rectangle_bin_pack
-register_third_party_library(rectangle_bin_pack_cmake rectangle_bin_pack)
+pr_include_third_party_library(rectangle_bin_pack_cmake TARGET rectangle_bin_pack INC "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/rectangle_bin_pack" STATIC)
 set_target_folder(rectangle_bin_pack third_party_libs)
 
 if(WIN32)
@@ -689,6 +645,7 @@ endif()
 #
 
 # dependencies
+
 add_dependencies(png zlib)
 add_dependencies(zip zlib)
 add_dependencies(vorbis ogg)
@@ -767,16 +724,8 @@ set(PRAGMA_INSTALL_DEPENDENCIES pragma pragma_server iclient iserver udm_convert
 if(WIN32)
     list(APPEND PRAGMA_INSTALL_DEPENDENCIES pragma_console)
 endif()
-add_custom_target(
-    pragma-install
-    DEPENDS ${PRAGMA_INSTALL_DEPENDENCIES}
-    COMMAND "${CMAKE_COMMAND}" -DCMAKE_INSTALL_COMPONENT=${PRAGMA_INSTALL_COMPONENT} -DBUILD_TYPE=${CONFIG_BUILD_TYPE} -P
-            "${CMAKE_BINARY_DIR}/cmake_install.cmake")
-add_custom_target(
-    pragma-install-full
-    DEPENDS pragma iclient iserver
-    COMMAND "${CMAKE_COMMAND}" -DCMAKE_INSTALL_COMPONENT=${PRAGMA_INSTALL_COMPONENT_FULL} -DBUILD_TYPE=${CONFIG_BUILD_TYPE} -P
-            "${CMAKE_BINARY_DIR}/cmake_install.cmake")
+add_dependencies(pragma-install ${PRAGMA_INSTALL_DEPENDENCIES})
+add_dependencies(pragma-install-full pragma iclient iserver)
 
 pragma_install_create_directory(modules)
 # pragma_install_lib("${DEPENDENCY_ASSIMP_LIBRARY}" "${BINARY_OUTPUT_DIR}")
@@ -808,7 +757,6 @@ pragma_install_lib("${DEPENDENCY_LIBZIP_LIBRARY}" "${BINARY_OUTPUT_DIR}")
 pragma_install_lib("${DEPENDENCY_LPNG_LIBRARY}" "${BINARY_OUTPUT_DIR}")
 pragma_install_lib("${DEPENDENCY_SPDLOG_LIBRARY}" "${BINARY_OUTPUT_DIR}")
 pragma_install_lib("${DEPENDENCY_MPAHEADER_LIBRARY}" "${BINARY_OUTPUT_DIR}")
-pragma_install_lib("${DEPENDENCY_VKV_PARSER_LIBRARY}" "${BINARY_OUTPUT_DIR}")
 if(WIN32)
     pragma_install_lib_c("${DEPENDENCY_ZLIB_LIBRARY}" zlib1 "${BINARY_OUTPUT_DIR}")
 else()

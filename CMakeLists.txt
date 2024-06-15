@@ -151,51 +151,10 @@ if(UNIX)
     pr_set_raw_library_path(boost_regex "${DEPENDENCY_BOOST_LIBRARY_LOCATION}/libboost_regex.a" FORCE)
     pr_set_raw_library_path(boost_system "${DEPENDENCY_BOOST_LIBRARY_LOCATION}/libboost_system.a" FORCE)
     pr_set_raw_library_path(boost_thread "${DEPENDENCY_BOOST_LIBRARY_LOCATION}/libboost_thread.a" FORCE)
-
-    # Resolve links
-    resolve_links(
-        bzip2
-        clip2tri
-        clipper
-        curl
-        detour
-        fbxsdk
-        flann
-        glfw
-        glslang
-        glslang_ogl_compiler
-        glslang_os_dependent
-        harfbuzz
-        libnoiseutils
-        libnoise
-        libogg
-        libsamplerate
-        libvorbisfile
-        libvorbis
-        libzip
-        lpng
-        luabind_binary
-        luabind
-        luajit
-        lua
-        niftools
-        openvr
-        ovr
-        poly2tri
-        recast
-        rectanglebinpack
-        sharedutils_static
-        steamworks
-        steam_audio
-        vtflib
-        zlib)
-    if(win32)
-        resolve_links(freetype)
-    endif()
 endif()
 
-# ZLIB_LIBRARY is being changed by one of the external libraries, even though it shouldn't be.
-# Until the cause is found, we'll restore the original values after the external libraries have been processed.
+# ZLIB_LIBRARY is being changed by one of the external libraries, even though it shouldn't be. Until the cause is found, we'll restore the original values after
+# the external libraries have been processed.
 set(TMP_ZLIB_INCLUDE_DIR "${ZLIB_INCLUDE_DIR}")
 set(TMP_ZLIB_LIBRARY "${ZLIB_LIBRARY}")
 
@@ -207,8 +166,12 @@ target_include_directories(util_image PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/third_p
 target_include_directories(cmaterialsystem PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
 
 # Restore original values
-set(ZLIB_INCLUDE_DIR "${TMP_ZLIB_INCLUDE_DIR}" CACHE STRING "" FORCE)
-set(ZLIB_LIBRARY "${TMP_ZLIB_LIBRARY}" CACHE STRING "" FORCE)
+set(ZLIB_INCLUDE_DIR
+    "${TMP_ZLIB_INCLUDE_DIR}"
+    CACHE STRING "" FORCE)
+set(ZLIB_LIBRARY
+    "${TMP_ZLIB_LIBRARY}"
+    CACHE STRING "" FORCE)
 
 message("Processing core libraries...")
 add_subdirectory(core)
@@ -272,36 +235,34 @@ endif()
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT pragma)
 
 # Installation
-pragma_install(pragma ".")
-pragma_install(pragma_server ".")
+pr_install_targets(pragma pragma_server INSTALL_DIR ".")
+pr_install_targets(
+    alsoundsystem
+    client
+    cmaterialsystem
+    datasystem
+    glfw
+    iclient
+    iglfw
+    iserver
+    ishared
+    luabind
+    luasystem
+    materialsystem
+    mathutil
+    prosper
+    server
+    servermanager
+    shared
+    sharedutils
+    util_image
+    util_sound
+    util_unicode
+    vfilesystem
+    wgui)
 if(WIN32)
-    pragma_install(pragma_console ".")
+    pr_install_targets(pragma_console INSTALL_DIR ".")
 endif()
-pragma_install(alsoundsystem "${BINARY_OUTPUT_DIR}")
-
-pragma_install(client "${BINARY_OUTPUT_DIR}")
-pragma_install(cmaterialsystem "${BINARY_OUTPUT_DIR}")
-pragma_install(datasystem "${BINARY_OUTPUT_DIR}")
-# pragma_install(freetype "${BINARY_OUTPUT_DIR}")
-pragma_install(glfw "${BINARY_OUTPUT_DIR}")
-pragma_install(iclient "${BINARY_OUTPUT_DIR}")
-pragma_install(iglfw "${BINARY_OUTPUT_DIR}")
-pragma_install(iserver "${BINARY_OUTPUT_DIR}")
-pragma_install(ishared "${BINARY_OUTPUT_DIR}")
-pragma_install(luabind "${BINARY_OUTPUT_DIR}")
-pragma_install(luasystem "${BINARY_OUTPUT_DIR}")
-pragma_install(materialsystem "${BINARY_OUTPUT_DIR}")
-pragma_install(mathutil "${BINARY_OUTPUT_DIR}")
-pragma_install(prosper "${BINARY_OUTPUT_DIR}")
-pragma_install(server "${BINARY_OUTPUT_DIR}")
-pragma_install(servermanager "${BINARY_OUTPUT_DIR}")
-pragma_install(shared "${BINARY_OUTPUT_DIR}")
-pragma_install(sharedutils "${BINARY_OUTPUT_DIR}")
-pragma_install(util_image "${BINARY_OUTPUT_DIR}")
-pragma_install(util_sound "${BINARY_OUTPUT_DIR}")
-pragma_install(vfilesystem "${BINARY_OUTPUT_DIR}")
-pragma_install(wgui "${BINARY_OUTPUT_DIR}")
-pragma_install(util_unicode "${BINARY_OUTPUT_DIR}")
 
 message("Custom install targets: ${PRAGMA_INSTALL_CUSTOM_TARGETS}")
 set(PRAGMA_INSTALL_DEPENDENCIES pragma pragma_server iclient iserver udm_convert ${PRAGMA_INSTALL_CUSTOM_TARGETS})
@@ -328,24 +289,20 @@ pragma_install_lib("${DEPENDENCY_BZIP2_LIBRARY}" "${BINARY_OUTPUT_DIR}")
 # https://github.com/probonopd/linuxdeployqt/issues/261 Even if I would include pango and cairo into our pipeline, CEF would complain (coincidentally hitting
 # AppImage's snag too), since that DOES use system fonts. (fontconfig has persistent presence in all graphical managers in linux)
 if(WIN32)
-    pragma_install_lib("${DEPENDENCY_FREETYPE_LIBRARY}" "${BINARY_OUTPUT_DIR}")
+    pr_install_targets(freetype)
 endif()
-pragma_install_lib("${DEPENDENCY_LUA_LIBRARY}" "${BINARY_OUTPUT_DIR}")
-pragma_install_lib("${DEPENDENCY_LUABIND_BINARY}" "${BINARY_OUTPUT_DIR}")
-pragma_install_lib("${DEPENDENCY_LIBNOISE_LIBRARY}" "${BINARY_OUTPUT_DIR}")
-pragma_install_lib("${DEPENDENCY_LIBOGG_LIBRARY}" "${BINARY_OUTPUT_DIR}")
-pragma_install_lib("${DEPENDENCY_LIBVORBIS_LIBRARY}" "${BINARY_OUTPUT_DIR}")
-pragma_install_lib("${DEPENDENCY_LIBVORBISFILE_LIBRARY}" "${BINARY_OUTPUT_DIR}")
-pragma_install_lib("${DEPENDENCY_VTFLIB_LIBRARY}" "${BINARY_OUTPUT_DIR}")
-pragma_install_lib("${DEPENDENCY_LIBZIP_LIBRARY}" "${BINARY_OUTPUT_DIR}")
-pragma_install_lib("${DEPENDENCY_LPNG_LIBRARY}" "${BINARY_OUTPUT_DIR}")
-pragma_install_lib("${DEPENDENCY_SPDLOG_LIBRARY}" "${BINARY_OUTPUT_DIR}")
-pragma_install_lib("${DEPENDENCY_MPAHEADER_LIBRARY}" "${BINARY_OUTPUT_DIR}")
-if(WIN32)
-    pragma_install_lib_c("${DEPENDENCY_ZLIB_LIBRARY}" zlib1 "${BINARY_OUTPUT_DIR}")
-else()
-    pragma_install_lib("${DEPENDENCY_ZLIB_LIBRARY}" "${BINARY_OUTPUT_DIR}")
-endif()
+pr_install_targets(
+    lua
+    luabind
+    ogg
+    vorbis
+    vorbisfile
+    VTFLib13
+    zip
+    spdlog
+    mpaheader
+    zlib
+)
 
 function(pragma_install_file FILE_PATH INSTALL_PATH)
     if("${FILE_PATH}" STREQUAL "")

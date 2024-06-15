@@ -4,16 +4,6 @@ function(set_target_folder TARGET FOLDER)
     endif()
 endfunction(set_target_folder)
 
-function(resolve_links IDS)
-    foreach(ID IN LISTS IDS)
-        pr_get_normalized_identifier_name(${ID})
-        get_filename_component(TMP_DEPENDENCY_${NORMALIZED_IDENTIFIER}_LIBRARY "${DEPENDENCY_${NORMALIZED_IDENTIFIER}_LIBRARY}" REALPATH)
-        set(DEPENDENCY_${NORMALIZED_IDENTIFIER}_LIBRARY
-            ${TMP_DEPENDENCY_${NORMALIZED_IDENTIFIER}_LIBRARY}
-            CACHE PATH "Path to library." FORCE)
-    endforeach()
-endfunction()
-
 function(register_third_party_library LIB_NAME)
     message("Processing third-party library '${LIB_NAME}'...")
     set(extra_macro_args ${ARGN})
@@ -67,3 +57,42 @@ function(pr_include_third_party_library)
 
     pragma_install_lib("${DEPENDENCY_${NORMALIZED_IDENTIFIER}_LIBRARY}" "${BINARY_OUTPUT_DIR}")
 endfunction()
+
+function(pr_install_files)
+    set(options)
+    set(oneValueArgs INSTALL_DIR)
+    set(multiValueArgs)
+    cmake_parse_arguments(PARSE_ARGV 0 PA "${options}" "${oneValueArgs}" "${multiValueArgs}")
+
+    if(NOT DEFINED PA_INSTALL_DIR)
+        set(PA_INSTALL_DIR "${BINARY_OUTPUT_DIR}")
+    endif()
+
+	foreach(FILE_PATH IN LISTS ${PA_UNPARSED_ARGUMENTS})
+        message("Adding install rule for \"${FILE_PATH}\" to \"${PA_INSTALL_DIR}\"...")
+        install(
+            FILES "${FILE_PATH}"
+            DESTINATION "${PA_INSTALL_DIR}"
+            COMPONENT ${PRAGMA_INSTALL_COMPONENT})
+	endforeach()
+endfunction(pr_install_files)
+
+function(pr_install_targets TARGETS)
+    set(options)
+    set(oneValueArgs INSTALL_DIR)
+    set(multiValueArgs)
+    cmake_parse_arguments(PARSE_ARGV 0 PA "${options}" "${oneValueArgs}" "${multiValueArgs}")
+
+    if(NOT DEFINED PA_INSTALL_DIR)
+        set(PA_INSTALL_DIR "${BINARY_OUTPUT_DIR}")
+    endif()
+
+    foreach(TARGET IN LISTS ${PA_UNPARSED_ARGUMENTS})
+        set(FILE_PATH "$<TARGET_FILE:${TARGET}>")
+        message("Adding install rule for \"${FILE_PATH}\" to \"${INSTALL_PATH}\"...")
+        install(
+            FILES "${FILE_PATH}"
+            DESTINATION "${INSTALL_PATH}"
+            COMPONENT ${PRAGMA_INSTALL_COMPONENT})
+    endforeach()
+endfunction(pr_install_targets)

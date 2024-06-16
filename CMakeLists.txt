@@ -160,8 +160,8 @@ set(TMP_ZLIB_LIBRARY "${ZLIB_LIBRARY}")
 
 message("Processing external libraries...")
 add_subdirectory(external_libs)
-set_target_folder(wgui external_libs/wgui)
-set_target_folder(sample_application external_libs/wgui)
+pr_set_target_folder(wgui external_libs/wgui)
+pr_set_target_folder(sample_application external_libs/wgui)
 target_include_directories(util_image PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
 target_include_directories(cmaterialsystem PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
 
@@ -185,41 +185,6 @@ add_subdirectory(tools)
 target_include_directories(libcurl_shared PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
 target_include_directories(materialsystem PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
 
-# Dependencies
-add_dependencies(materialsystem KVParser VTFLib13)
-add_dependencies(luasystem luabind)
-add_dependencies(util_sound mpaheader)
-add_dependencies(iglfw glfw)
-add_dependencies(util_image png)
-
-add_dependencies(png zlib)
-add_dependencies(zip zlib)
-add_dependencies(vorbis ogg)
-add_dependencies(util_pad zip)
-
-if(WIN32)
-    add_dependencies(util_zip 7zpp)
-endif()
-
-add_dependencies(
-    shared
-    muparserx
-    libz2
-    bzip2
-    clip2tri-static
-    clipper-static
-    poly2tri-static
-    rectangle_bin_pack
-    Recast
-    Detour
-    noise-static
-    noiseutils-static
-    ogg
-    spdlog
-    vorbis
-    vorbisfile
-    fmt)
-
 if(WIN32)
     set_target_properties(pragma PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_INSTALL_PREFIX}")
     set_target_properties(pragma_server PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_INSTALL_PREFIX}")
@@ -235,6 +200,9 @@ set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT p
 
 # Installation
 pr_install_targets(pragma pragma_server INSTALL_DIR ".")
+if(WIN32)
+    pr_install_targets(pragma_console INSTALL_DIR ".")
+endif()
 pr_install_targets(
     alsoundsystem
     client
@@ -258,9 +226,6 @@ pr_install_targets(
     util_unicode
     vfilesystem
     wgui)
-if(WIN32)
-    pr_install_targets(pragma_console INSTALL_DIR ".")
-endif()
 
 message("Custom install targets: ${PRAGMA_INSTALL_CUSTOM_TARGETS}")
 set(PRAGMA_INSTALL_DEPENDENCIES pragma pragma_server iclient iserver udm_convert ${PRAGMA_INSTALL_CUSTOM_TARGETS})
@@ -270,28 +235,9 @@ endif()
 add_dependencies(pragma-install ${PRAGMA_INSTALL_DEPENDENCIES})
 add_dependencies(pragma-install-full pragma iclient iserver)
 
-pragma_install_create_directory(modules)
+pr_install_create_directory(modules)
 
-pr_install_files(
-    "${DEPENDENCY_BOOST_CHRONO_LIBRARY}"
-    "${DEPENDENCY_BOOST_DATE_TIME_LIBRARY}"
-    "${DEPENDENCY_BOOST_FILESYSTEM_LIBRARY}"
-    "${DEPENDENCY_BOOST_IOSTREAMS_LIBRARY}"
-    "${DEPENDENCY_BOOST_REGEX_LIBRARY}"
-    "${DEPENDENCY_BOOST_SYSTEM_LIBRARY}"
-    "${DEPENDENCY_BOOST_THREAD_LIBRARY}"
-    "${DEPENDENCY_BZIP2_LIBRARY}")
-
-# In Linux there is a cyclic deps between freetype,harfbuzz,pango,cairo and most importantly fontconfig. Fontconfig in linux is reposnsible for discovery of
-# fonts. (think C:\Windows\Fonts for linux but customizable via configs) recently I hit a snag in which harfbuzz failed to load due to missing pango symbols.
-# The AppImage team hit similar snag too, see https://github.com/AppImageCommunity/pkg2appimage/pull/323 and
-# https://github.com/probonopd/linuxdeployqt/issues/261 Even if I would include pango and cairo into our pipeline, CEF would complain (coincidentally hitting
-# AppImage's snag too), since that DOES use system fonts. (fontconfig has persistent presence in all graphical managers in linux)
-if(WIN32)
-    pr_install_targets(freetype)
-endif()
 pr_install_targets(
-    lua
     luabind
     ogg
     vorbis
@@ -300,7 +246,15 @@ pr_install_targets(
     zip
     spdlog
     mpaheader
-    zlib)
+    zlib
+    libz2
+    KVParser)
+
+if(WIN32)
+    pr_install_files("${CMAKE_CURRENT_LIST_DIR}/third_party_libs/luajit/src/lua51.dll")
+else()
+    pr_install_files("${CMAKE_CURRENT_LIST_DIR}/third_party_libs/luajit/src/libluajit-p.so")
+endif()
 
 pr_install_files("${DEPENDENCY_ICU_ICUUC_BINARY}" "${DEPENDENCY_ICU_ICUDT_BINARY}")
 
@@ -308,23 +262,25 @@ pr_install_files("${DEPENDENCY_ICU_ICUUC_BINARY}" "${DEPENDENCY_ICU_ICUDT_BINARY
 file(GLOB PR_MODULES "modules/pr_*")
 foreach(MODULE_PATH ${PR_MODULES})
     get_filename_component(MODULE_NAME "${MODULE_PATH}" NAME)
-    if(WIN32)
-        set(PR_MODULE_PATH_WITH_EXT "${CMAKE_CURRENT_BINARY_DIR}/modules/${MODULE_NAME}/${PR_MODULE_INSTALL_SUBDIR}/${MODULE_NAME}.dll")
-    else()
-        set(PR_MODULE_PATH_WITH_EXT "${CMAKE_CURRENT_BINARY_DIR}/modules/${MODULE_NAME}/${PR_MODULE_INSTALL_SUBDIR}/lib${MODULE_NAME}.so")
-    endif()
-    if(EXISTS "${MODULE_PATH}/Install.cmake")
-        message("Running install script for module '${MODULE_PATH}'...")
-        include("${MODULE_PATH}/Install.cmake" OPTIONAL)
-    else()
-        # Default behavior
-        message("Adding default installation rule for module \"${MODULE_PATH}\": \"${PR_MODULE_PATH_WITH_EXT}\" to \"${CMAKE_INSTALL_PREFIX}/modules/\"...")
-        add_custom_command(
-            TARGET pragma-install
-            POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -DInstallSrc=${PR_MODULE_PATH_WITH_EXT} -DInstallDst=\"${CMAKE_INSTALL_PREFIX}/modules/\" -P
-                    ${CMAKE_CURRENT_SOURCE_DIR}/build_scripts/cmake/install_file.cmake
-            COMMENT "Copying ${PR_MODULE_PATH_WITH_EXT} to ${CMAKE_INSTALL_PREFIX}/modules/...")
+    if(NOT DEFINED PRAGMA_DISABLE_MODULE_${MODULE_NAME} OR NOT PRAGMA_DISABLE_MODULE_${MODULE_NAME})
+        if(WIN32)
+            set(PR_MODULE_PATH_WITH_EXT "${CMAKE_CURRENT_BINARY_DIR}/modules/${MODULE_NAME}/${PR_MODULE_INSTALL_SUBDIR}/${MODULE_NAME}.dll")
+        else()
+            set(PR_MODULE_PATH_WITH_EXT "${CMAKE_CURRENT_BINARY_DIR}/modules/${MODULE_NAME}/${PR_MODULE_INSTALL_SUBDIR}/lib${MODULE_NAME}.so")
+        endif()
+        if(EXISTS "${MODULE_PATH}/Install.cmake")
+            message("Running install script for module '${MODULE_PATH}'...")
+            include("${MODULE_PATH}/Install.cmake" OPTIONAL)
+        else()
+            # Default behavior
+            message("Adding default installation rule for module \"${MODULE_PATH}\": \"${PR_MODULE_PATH_WITH_EXT}\" to \"${CMAKE_INSTALL_PREFIX}/modules/\"...")
+            add_custom_command(
+                TARGET pragma-install
+                POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -DInstallSrc=${PR_MODULE_PATH_WITH_EXT} -DInstallDst=\"${CMAKE_INSTALL_PREFIX}/modules/\" -P
+                        ${CMAKE_CURRENT_SOURCE_DIR}/build_scripts/cmake/install_file.cmake
+                COMMENT "Copying ${PR_MODULE_PATH_WITH_EXT} to ${CMAKE_INSTALL_PREFIX}/modules/...")
+        endif()
     endif()
 endforeach()
 
@@ -358,5 +314,5 @@ if(UNIX)
 
 endif()
 
-set_target_folder(pragma-install core)
-set_target_folder(pragma-install-full core)
+pr_set_target_folder(pragma-install core)
+pr_set_target_folder(pragma-install-full core)

@@ -8,4 +8,4 @@ pr_add_dependency(${PROJ_NAME} sharedutils TARGET PUBLIC)
 pr_add_headers(${PROJ_NAME} "include/")
 pr_add_sources(${PROJ_NAME} "src/")
 
-pr_finalize(${PROJ_NAME})
+pr_finalize(${PROJ_NAME} FOLDER "tools")

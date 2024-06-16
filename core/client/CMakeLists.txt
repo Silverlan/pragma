@@ -16,17 +16,17 @@ pr_add_dependency(${PROJ_NAME} util_zip TARGET)
 pr_add_dependency(${PROJ_NAME} util_timeline_scene TARGET PUBLIC)
 pr_add_dependency(${PROJ_NAME} util_bsp TARGET)
 
+pr_add_dependency(${PROJ_NAME} rectangle_bin_pack TARGET)
+pr_add_dependency(${PROJ_NAME} Recast TARGET)
+pr_add_dependency(${PROJ_NAME} Detour TARGET)
+pr_add_dependency(${PROJ_NAME} vorbis TARGET)
+pr_add_dependency(${PROJ_NAME} vorbisfile TARGET)
+pr_add_dependency(${PROJ_NAME} noise-static TARGET)
+pr_add_dependency(${PROJ_NAME} noiseutils-static TARGET)
+
 pr_add_external_dependency(${PROJ_NAME} tinygltf HEADER_ONLY)
-pr_add_external_dependency(${PROJ_NAME} recast LIBRARY)
-pr_add_external_dependency(${PROJ_NAME} detour LIBRARY)
-pr_add_external_dependency(${PROJ_NAME} RectangleBinPack LIBRARY)
-pr_add_external_dependency(${PROJ_NAME} rapidxml LIBRARY)
+pr_add_external_dependency(${PROJ_NAME} rapidxml HEADER_ONLY)
 
-pr_add_external_dependency(${PROJ_NAME} libvorbis LIBRARY LINK_ONLY)
-pr_add_external_dependency(${PROJ_NAME} libvorbisfile LIBRARY LINK_ONLY)
-
-pr_add_external_dependency(${PROJ_NAME} libnoise LIBRARY)
-pr_add_external_dependency(${PROJ_NAME} libnoiseutils LIBRARY)
 pr_add_compile_definitions(${PROJ_NAME} -DNOISE_STATIC)
 
 pr_add_headers(${PROJ_NAME} "include/")

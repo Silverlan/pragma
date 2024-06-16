@@ -1,8 +1,8 @@
-function(set_target_folder TARGET FOLDER)
+function(pr_set_target_folder TARGET FOLDER)
     if(TARGET ${TARGET})
         set_target_properties(${TARGET} PROPERTIES FOLDER ${FOLDER})
     endif()
-endfunction(set_target_folder)
+endfunction(pr_set_target_folder)
 
 function(register_third_party_library LIB_NAME)
     message("Processing third-party library '${LIB_NAME}'...")
@@ -11,30 +11,34 @@ function(register_third_party_library LIB_NAME)
     list(LENGTH extra_macro_args num_extra_args)
     if(${num_extra_args} GREATER 0)
         list(GET extra_macro_args 0 optional_arg)
-        add_subdirectory(third_party_libs/${LIB_NAME} third_party_libs/${optional_arg} EXCLUDE_FROM_ALL)
+        add_subdirectory(third_party_libs/${LIB_NAME} third_party_libs/${optional_arg})
         return()
     endif()
-    add_subdirectory(third_party_libs/${LIB_NAME} EXCLUDE_FROM_ALL)
+    add_subdirectory(third_party_libs/${LIB_NAME})
 endfunction(register_third_party_library)
 
 function(pr_include_third_party_library)
     set(options)
-    set(oneValueArgs DIR TARGET INC LINK_ONLY)
+    set(oneValueArgs DIR TARGET INC LINK_ONLY NAME)
     set(multiValueArgs)
     cmake_parse_arguments(PARSE_ARGV 0 PA "${options}" "${oneValueArgs}" "${multiValueArgs}")
 
     set(SHOULD_INCLUDE_FOLDER 0)
     if(NOT ${PA_UNPARSED_ARGUMENTS} STREQUAL "")
-        set(IDENTIFIER "${PA_UNPARSED_ARGUMENTS}")
+        set(DIR_NAME "${PA_UNPARSED_ARGUMENTS}")
         set(SHOULD_INCLUDE_FOLDER 1)
     else()
-        set(IDENTIFIER "${PA_TARGET}")
+        set(DIR_NAME "${PA_TARGET}")
+    endif()
+    if(DEFINED PA_NAME)
+        set(IDENTIFIER "${PA_NAME}")
+    else()
+        set(IDENTIFIER "${DIR_NAME}")
     endif()
     pr_get_normalized_identifier_name(${IDENTIFIER})
 
     if(NOT DEFINED PA_DIR)
-        string(TOLOWER "${NORMALIZED_IDENTIFIER}" LOWER_NORMALIZED_IDENTIFIER)
-        set(PA_DIR "${LOWER_NORMALIZED_IDENTIFIER}")
+        set(PA_DIR "${DIR_NAME}")
     endif()
 
     if(NOT DEFINED PA_TARGET)
@@ -45,6 +49,8 @@ function(pr_include_third_party_library)
         set(PA_INC "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/${PA_TARGET}/include")
     endif()
 
+    message("Including third-party library \"${IDENTIFIER}\" with target \"${PA_TARGET}\" and directory \"${PA_DIR}\"...")
+
     set(DEPENDENCY_${NORMALIZED_IDENTIFIER}_LIBRARY "$<TARGET_LINKER_FILE:${PA_TARGET}>" CACHE STRING "Path to library." FORCE)
     if(NOT PA_LINK_ONLY)
         pr_set_include_path(${NORMALIZED_IDENTIFIER} "${PA_INC}")
@@ -53,68 +59,21 @@ function(pr_include_third_party_library)
     if(SHOULD_INCLUDE_FOLDER)
         register_third_party_library("${PA_DIR}")
     endif()
-    set_target_folder("${PA_TARGET}" third_party_libs)
+    if(NOT PA_LINK_ONLY)
+		# Some third-party libraries might be using older CMake functions that don't
+		# make the include directory public, so we force it here.
+		target_include_directories("${PA_TARGET}" INTERFACE "$<BUILD_INTERFACE:${PA_INC}>")
+    endif()
+    pr_set_target_folder("${PA_TARGET}" third_party_libs)
 endfunction()
 
-function(pr_install_files)
+function(pr_find_library IDENTIFIER)
     set(options)
-    set(oneValueArgs INSTALL_DIR)
-    set(multiValueArgs)
-    cmake_parse_arguments(PARSE_ARGV 0 PA "${options}" "${oneValueArgs}" "${multiValueArgs}")
-
-    if(NOT DEFINED PA_INSTALL_DIR)
-        set(PA_INSTALL_DIR "${BINARY_OUTPUT_DIR}")
-    endif()
-
-	foreach(FILE_PATH IN LISTS ${PA_UNPARSED_ARGUMENTS})
-        message("Adding install rule for \"${FILE_PATH}\" to \"${PA_INSTALL_DIR}\"...")
-        install(
-            FILES "${FILE_PATH}"
-            DESTINATION "${PA_INSTALL_DIR}"
-            COMPONENT ${PRAGMA_INSTALL_COMPONENT})
-	endforeach()
-endfunction(pr_install_files)
-
-function(pr_install_targets)
-    set(options)
-    set(oneValueArgs INSTALL_DIR)
-    set(multiValueArgs)
-    cmake_parse_arguments(PARSE_ARGV 0 PA "${options}" "${oneValueArgs}" "${multiValueArgs}")
-
-    if(NOT DEFINED PA_INSTALL_DIR)
-        set(PA_INSTALL_DIR "${BINARY_OUTPUT_DIR}")
-    endif()
-
-    foreach(TARGET IN LISTS ${PA_UNPARSED_ARGUMENTS})
-        set(FILE_PATH "$<TARGET_FILE:${TARGET}>")
-        message("Adding install rule for \"${FILE_PATH}\" to \"${PA_INSTALL_DIR}\"...")
-        install(
-            FILES "${FILE_PATH}"
-            DESTINATION "${PA_INSTALL_DIR}"
-            COMPONENT ${PRAGMA_INSTALL_COMPONENT})
-    endforeach()
-endfunction(pr_install_targets)
-
-function(pr_install_directory FILE_PATH)
-    set(options)
-    set(oneValueArgs INSTALL_DIR)
-    set(multiValueArgs)
+    set(oneValueArgs)
+    set(multiValueArgs NAMES PATHS)
     cmake_parse_arguments(PARSE_ARGV 1 PA "${options}" "${oneValueArgs}" "${multiValueArgs}")
 
-    if(NOT DEFINED PA_INSTALL_DIR)
-        set(PA_INSTALL_DIR "${BINARY_OUTPUT_DIR}")
-    endif()
+    pr_get_normalized_identifier_name(${IDENTIFIER})
 
-    message("Adding install rule for \"${FILE_PATH}\" to \"${PA_INSTALL_DIR}\"...")
-    install(
-        DIRECTORY "${FILE_PATH}"
-        DESTINATION "${PA_INSTALL_DIR}"
-        COMPONENT ${PRAGMA_INSTALL_COMPONENT} ${PA_UNPARSED_ARGUMENTS})
-endfunction(pr_install_directory)
-
-function(pr_install_create_directory DIR_NAME)
-    add_custom_command(
-        TARGET pragma-install
-        POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_INSTALL_PREFIX}/${DIR_NAME})
-endfunction(pr_install_create_directory)
+    find_library(DEPENDENCY_${NORMALIZED_IDENTIFIER}_LIBRARY NAMES ${PA_NAMES} PATHS ${PA_PATHS} NO_DEFAULT_PATH)
+endfunction()

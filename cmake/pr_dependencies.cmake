@@ -52,7 +52,7 @@ function(pr_set_library_path IDENTIFIER)
     endif()
 
     set(DEPENDENCY_${NORMALIZED_IDENTIFIER}_LIBRARY
-        "$<TARGET_LINKER_FILE:${TARGET}>"
+        "$<TARGET_LINKER_FILE:${PA_TARGET}>"
         CACHE FILEPATH "Path to ${PRETTY_IDENTIFIER} library." ${ADDITIONAL_ARGS})
 endfunction()
 

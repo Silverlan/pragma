@@ -82,12 +82,22 @@ function(pr_add_source_list TARGET_NAME SOURCE_LIST)
 endfunction()
 
 function(pr_add_sources TARGET_NAME SOURCE_LOCATION)
+    set(options)
+    set(oneValueArgs)
+    set(multiValueArgs FILTER)
+    cmake_parse_arguments(PARSE_ARGV 2 PA "${options}" "${oneValueArgs}" "${multiValueArgs}")
+
     set(VISIBILITY PRIVATE)
     message("[PR] Adding include directory \"${SOURCE_LOCATION}\" to target ${TARGET_NAME} with visibility ${VISIBILITY}")
     target_include_directories(${TARGET_NAME} ${VISIBILITY} "${SOURCE_LOCATION}")
 
     message("[PR] Adding sources in location directory \"${CMAKE_SOURCE_DIR}/${SOURCE_LOCATION}\"...")
-    file(GLOB_RECURSE SOURCE_LIST "${SOURCE_LOCATION}/*.c" "${SOURCE_LOCATION}/*.cpp")
+
+	if(DEFINED PA_FILTER)
+		file(GLOB_RECURSE SOURCE_LIST ${PA_FILTER})
+	else()
+		file(GLOB_RECURSE SOURCE_LIST "${SOURCE_LOCATION}/*.c" "${SOURCE_LOCATION}/*.cpp")
+	endif()
     pr_add_source_list(${TARGET_NAME} "${SOURCE_LIST}")
 endfunction()
 

@@ -1,1 +1,0 @@
-pragma_install_program("${CMAKE_CURRENT_BINARY_DIR}/tools/updater/${PR_MODULE_INSTALL_SUBDIR}/updater${OS_EXE_EXT}" "./${EXECUTABLE_OUTPUT_DIR}/" OPTIONAL)

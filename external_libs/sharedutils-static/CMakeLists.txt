@@ -10,6 +10,14 @@ if(IMPORT_GLM_AS_MODULE)
 else()
 	pr_add_external_dependency(${PROJ_NAME} glm HEADER_ONLY PUBLIC)
 endif()
+# Note: These have to match the definitions in CMakeLists.txt of the mathutil library!
+pr_add_compile_definitions(
+	${PROJ_NAME}
+		-DGLM_FORCE_DEPTH_ZERO_TO_ONE
+		-DGLM_ENABLE_EXPERIMENTAL
+		-DGLM_FORCE_CTOR_INIT
+		PUBLIC
+)
 
 set(BASE_DIR "${CMAKE_CURRENT_LIST_DIR}/../sharedutils/")
 pr_add_headers(${PROJ_NAME} "${CMAKE_CURRENT_LIST_DIR}/../sharedutils/include/" BASE_DIRS "${BASE_DIR}")

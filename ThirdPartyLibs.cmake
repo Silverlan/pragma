@@ -146,6 +146,7 @@ pr_include_third_party_library(ogg)
 pr_set_target_folder(ogg third_party_libs)
 set(OGG_INCLUDE_DIRS "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/ogg/include" CACHE STRING "" FORCE)
 set(OGG_LIBRARIES "$<TARGET_LINKER_FILE:ogg>" CACHE STRING "" FORCE)
+target_include_directories(ogg INTERFACE "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/ogg/include>")
 #
 
 # libvorbis
@@ -157,6 +158,7 @@ pr_set_target_folder(vorbisfile third_party_libs/vorbis)
 
 target_include_directories(vorbis PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/vorbis/include>")
 target_include_directories(vorbis PUBLIC "$<BUILD_INTERFACE:${OGG_INCLUDE_DIRS}>")
+target_include_directories(vorbis PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/ogg/include>")
 
 add_dependencies(vorbis ogg)
 #

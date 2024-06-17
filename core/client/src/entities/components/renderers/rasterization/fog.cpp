@@ -16,6 +16,7 @@
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_dof.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/game/c_game.h"
+#include <pragma/console/convars.h>
 #include <prosper_util.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <prosper_command_buffer.hpp>

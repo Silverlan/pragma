@@ -14,10 +14,6 @@
 #include <util_versioned_archive.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
-extern "C" {
-#include "bzlib.h"
-}
-
 extern DLLCLIENT CEngine *c_engine;
 
 static const std::string &get_query_url()

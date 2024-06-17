@@ -9,12 +9,6 @@
 
 // Workaround for some Linux compilers not being able to locate the << operator in the global namespace
 
-#ifdef _WIN32
-
-#define DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(ns, cl)
-
-#else
-
 #define DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(ns, cl)                                                                                                                                                                                                                                          \
 	namespace ns {                                                                                                                                                                                                                                                                               \
 		static inline std::ostream &operator<<(std::ostream &out, const cl &o)                                                                                                                                                                                                                   \
@@ -22,7 +16,5 @@
 			return ::operator<<(out, o);                                                                                                                                                                                                                                                         \
 		}                                                                                                                                                                                                                                                                                        \
 	};
-
-#endif
 
 #endif

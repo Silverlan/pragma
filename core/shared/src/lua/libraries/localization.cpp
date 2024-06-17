@@ -12,6 +12,7 @@
 #include <fsys/filesystem.h>
 #include <sharedutils/util_string.h>
 #include <sharedutils/util_path.hpp>
+#include <sharedutils/magic_enum.hpp>
 
 #undef CreateFile
 decltype(Locale::m_localization) Locale::m_localization;

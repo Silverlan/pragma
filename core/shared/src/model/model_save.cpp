@@ -19,6 +19,7 @@
 #include "pragma/logging.hpp"
 #include <fsys/filesystem.h>
 #include <sharedutils/util_file.h>
+#include <sharedutils/util_ifile.hpp>
 #include <udm.hpp>
 #include "pragma/model/animation/skeleton.hpp"
 #include "pragma/model/animation/bone.hpp"

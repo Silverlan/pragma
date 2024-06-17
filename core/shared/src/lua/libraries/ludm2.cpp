@@ -1014,12 +1014,14 @@ static std::ostream &operator<<(std::ostream &os, const ::udm::Srgba &srgba) { r
 
 static std::ostream &operator<<(std::ostream &os, const ::udm::HdrColor &hdr) { return os << hdr[0] << " " << hdr[1] << " " << hdr[2] << " " << hdr[3]; }
 
+#ifdef __linux__
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(udm, ::udm::Srgba);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(udm, ::udm::Element);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(udm, ::udm::Reference);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(udm, ::udm::HdrColor);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(udm, ::udm::Data);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(udm, ::udm::Array);
+#endif
 
 namespace Lua::udm {
 	void register_types(Lua::Interface &lua, luabind::module_ &modUdm);

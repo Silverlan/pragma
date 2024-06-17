@@ -8,8 +8,12 @@
 #include "pragma/util/util_game.hpp"
 #include "pragma/networkstate/networkstate.h"
 #include "pragma/util/lookup_identifier.hpp"
+#include "pragma/entities/baseentity.h"
+#include "pragma/entities/components/base_entity_component.hpp"
+#include "pragma/console/cvar_callback.hpp"
 #include "pragma/entities/entity_iterator.hpp"
 #include "pragma/lua/libraries/lfile.h"
+#include "pragma/console/conout.h"
 #include <sharedutils/util_library.hpp>
 #include <sharedutils/util_path.hpp>
 #include <fsys/ifile.hpp>

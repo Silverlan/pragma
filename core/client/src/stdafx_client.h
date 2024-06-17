@@ -23,6 +23,7 @@
 #include "pragma/game/c_game.h"
 #include <pragma/entities/baseentity.h>
 #include "pragma/entities/c_baseentity.h"
+#include <pragma/entities/components/base_entity_component.hpp>
 #include <pragma/physics/physobj.h>
 #include <pragma/lua/luaapi.h>
 #include <pragma/audio/alsound.h>

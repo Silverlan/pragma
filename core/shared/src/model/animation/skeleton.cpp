@@ -98,6 +98,9 @@ pragma::animation::BoneId pragma::animation::Skeleton::AddBone(Bone *bone)
 	auto ID = static_cast<uint32_t>(m_bones.size());
 	bone->ID = ID;
 	m_bones.push_back(std::shared_ptr<Bone>(bone));
+
+	if(bone->name.empty())
+		bone->name = "unnamed_" + std::to_string(ID);
 	return ID;
 }
 

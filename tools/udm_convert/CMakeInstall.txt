@@ -1,1 +1,0 @@
-pragma_install_program("${CMAKE_CURRENT_BINARY_DIR}/tools/udm_convert/${PR_MODULE_INSTALL_SUBDIR}/udm_convert${OS_EXE_EXT}" "./${BINARY_OUTPUT_DIR}/" OPTIONAL)

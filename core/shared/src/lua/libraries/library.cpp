@@ -242,8 +242,10 @@ bool Lua::util::start_debugger_server(lua_State *l)
 	return engine->GetNetworkState(l)->GetGameState()->ExecuteLuaFile(fileName);
 }
 
+#ifdef __linux__
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(util, HSV);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(std, match_results<const char *>);
+#endif
 
 static std::vector<bezierfit::VECTOR> reduce(std::vector<bezierfit::VECTOR> points) { return bezierfit::reduce(points); }
 

@@ -183,8 +183,10 @@ namespace pragma::animation {
 	}
 };
 
+#ifdef __linux__
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(umath, Vertex);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(umath, VertexWeight);
+#endif
 
 template<typename TResult, typename TBoneIdentifier, bool (::Model::*GetValue)(pragma::animation::BoneId, TResult &, umath::CoordinateSpace) const>
 std::optional<TResult> get_reference_bone_value(const ::Model &mdl, TBoneIdentifier boneIdentifier, umath::CoordinateSpace space)

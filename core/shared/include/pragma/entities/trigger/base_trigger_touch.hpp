@@ -18,7 +18,7 @@ class PhysObj;
 struct PhysTouch;
 namespace pragma {
 	namespace physics {
-		class ContactInfo;
+		struct ContactInfo;
 	};
 	struct DLLNETWORK CECanTriggerData : public ComponentEvent {
 		CECanTriggerData(BaseEntity *ent);

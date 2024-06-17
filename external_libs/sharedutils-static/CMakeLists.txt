@@ -1,56 +1,28 @@
-cmake_minimum_required(VERSION 3.12)
+include(${CMAKE_SOURCE_DIR}/cmake/pr_common.cmake)
 
 set(PROJ_NAME sharedutils-static)
-project(${PROJ_NAME} CXX)
+pr_add_library(${PROJ_NAME} STATIC)
 
-set(CMAKE_CXX_STANDARD 20)
-
-set(DEPENDENCY_GLM_INCLUDE "" CACHE PATH "Path to GLM include directory.")
-set(DEPENDENCY_MATHUTIL_INCLUDE "" CACHE PATH "Path to sharedutils include directory.")
-set(DEPENDENCY_MATHUTIL_LIBRARY "" CACHE FILEPATH "Path to mathutil library. Required if this is compiled as a shared library.")
-
-set(LIB_TYPE STATIC)
-
-add_definitions(-DSHUTIL_DLL)
-add_definitions(-DGLM_FORCE_DEPTH_ZERO_TO_ONE)
-add_definitions(-URI_STATIC_BUILD)
-
-function(def_vs_filters FILE_LIST)
-	foreach(source IN LISTS FILE_LIST)
-	    get_filename_component(source_path_real "${source}" REALPATH)
-	    get_filename_component(source_path "${source_path_real}" PATH)
-	    get_filename_component(current_list_path "${CMAKE_CURRENT_LIST_DIR}/../sharedutils" REALPATH)
-
-	    string(REPLACE "${current_list_path}/" "" source_path_relative "${source_path}")
-	    string(REPLACE "/" "\\" source_path_msvc "${source_path_relative}")
-	    source_group("${source_path_msvc}" FILES "${source}")
-	endforeach()
-endfunction(def_vs_filters)
-
-file(GLOB_RECURSE SRC_FILES
-    "${CMAKE_CURRENT_LIST_DIR}/../sharedutils/src/*.h"
-    "${CMAKE_CURRENT_LIST_DIR}/../sharedutils/src/*.hpp"
-    "${CMAKE_CURRENT_LIST_DIR}/../sharedutils/src/*.cpp"
-    "${CMAKE_CURRENT_LIST_DIR}/../sharedutils/src/*.c"
-    "${CMAKE_CURRENT_LIST_DIR}/../sharedutils/include/*.h"
-    "${CMAKE_CURRENT_LIST_DIR}/../sharedutils/include/*.hpp"
+target_include_directories(${PROJ_NAME} PUBLIC "../mathutil/include/")
+set(IMPORT_GLM_AS_MODULE FALSE)
+if(IMPORT_GLM_AS_MODULE)
+	pr_add_module_reference(${PROJ_NAME} glm TARGET_NAME glm_module PRIVATE)
+else()
+	pr_add_external_dependency(${PROJ_NAME} glm HEADER_ONLY PUBLIC)
+endif()
+# Note: These have to match the definitions in CMakeLists.txt of the mathutil library!
+pr_add_compile_definitions(
+	${PROJ_NAME}
+		-DGLM_FORCE_DEPTH_ZERO_TO_ONE
+		-DGLM_ENABLE_EXPERIMENTAL
+		-DGLM_FORCE_CTOR_INIT
+		PUBLIC
 )
-def_vs_filters("${SRC_FILES}")
-add_library(${PROJ_NAME} ${LIB_TYPE} ${SRC_FILES})
-if(WIN32)
-	target_compile_options(${PROJ_NAME} PRIVATE /wd4251)
-	target_compile_options(${PROJ_NAME} PRIVATE /wd4996)
-endif()
 
+set(BASE_DIR "${CMAKE_CURRENT_LIST_DIR}/../sharedutils/")
+pr_add_headers(${PROJ_NAME} "${CMAKE_CURRENT_LIST_DIR}/../sharedutils/include/" BASE_DIRS "${BASE_DIR}")
+pr_add_sources(${PROJ_NAME} "${CMAKE_CURRENT_LIST_DIR}/../sharedutils/src/" BASE_DIRS "${BASE_DIR}")
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    target_compile_options(${PROJ_NAME} PRIVATE -Wno-c++11-narrowing)
-endif()
+pr_add_compile_definitions(${PROJ_NAME} -DSHUTIL_DLL)
 
-target_link_libraries(${PROJ_NAME} ${DEPENDENCY_MATHUTIL_LIBRARY})
-
-set_target_properties(${PROJ_NAME} PROPERTIES LINKER_LANGUAGE CXX)
-target_include_directories(${PROJ_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../sharedutils/include)
-target_include_directories(${PROJ_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../sharedutils/src)
-target_include_directories(${PROJ_NAME} PRIVATE ${DEPENDENCY_GLM_INCLUDE})
-target_include_directories(${PROJ_NAME} PRIVATE ${DEPENDENCY_MATHUTIL_INCLUDE})
+pr_finalize(${PROJ_NAME})

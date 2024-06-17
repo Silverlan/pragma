@@ -86,6 +86,7 @@ def git_clone_commit(name, path, url, commitSha, branch=None):
 def cmake_configure(scriptPath,generator,additionalArgs=[]):
 	args = ["cmake",scriptPath,"-G",generator]
 	args += additionalArgs
+	print("Running CMake configure command:", ' '.join(f'"{arg}"' for arg in args))
 	subprocess.run(args,check=True)
 
 def cmake_build(buildConfig,targets=None):
@@ -95,6 +96,7 @@ def cmake_build(buildConfig,targets=None):
 		args += targets
 	args.append("--parallel")
 	args.append(str(multiprocessing.cpu_count()))
+	print("Running CMake build command:", ' '.join(f'"{arg}"' for arg in args))
 	subprocess.run(args,check=True)
 
 def mkdir(dirName,cd=False):

@@ -406,7 +406,7 @@ namespace pragma {
 	      || std::is_same_v<T, pragma::CLiquidComponent> || std::is_same_v<T, pragma::CWaterSurfaceComponent>)
 	static std::ostream &operator<<(std::ostream &os, const T &component)
 	{
-		return operator<<(os, static_cast<const pragma::BaseEntityComponent &>(component));
+		return ::operator<<(os, static_cast<const pragma::BaseEntityComponent &>(component));
 	}
 };
 

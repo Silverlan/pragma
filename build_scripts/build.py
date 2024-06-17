@@ -411,13 +411,13 @@ ZLIB_LIBPATH = normalize_path(zlib_lib_path)
 if platform == "linux":
     #do we even need static build?
 	subprocess.run([boost_root +"/bootstrap.sh"],check=True,shell=True)
-	subprocess.run(["./b2","cxxflags=-fPIC","cflags=-fPIC","linkflags=-fPIC","address-model=64","stage","variant=release","link=shared","runtime-link=shared","-j3"],check=True,shell=True)
-	subprocess.run(["./b2","cxxflags=-fPIC","cflags=-fPIC","linkflags=-fPIC","address-model=64","stage","variant=release","link=static","runtime-link=shared","-j3"],check=True,shell=True)
+	subprocess.run(["./b2","--without-python","cxxflags=-fPIC","cflags=-fPIC","linkflags=-fPIC","address-model=64","stage","variant=release","link=shared","runtime-link=shared","-j3"],check=True)
+	subprocess.run(["./b2","--without-python","cxxflags=-fPIC","cflags=-fPIC","linkflags=-fPIC","address-model=64","stage","variant=release","link=static","runtime-link=shared","-j3"],check=True)
 
 	print_msg("Building boost zlib libraries...")
-	subprocess.run(["./b2","cxxflags=-fPIC","cflags=-fPIC","linkflags=-fPIC","address-model=64","stage","variant=release","link=shared","runtime-link=shared","--with-iostreams","-sZLIB_SOURCE=" +ZLIB_SOURCE,"-sZLIB_INCLUDE=" +ZLIB_INCLUDE,"-sZLIB_LIBPATH=" +ZLIB_LIBPATH],check=True,shell=True)
+	subprocess.run(["./b2","cxxflags=-fPIC","cflags=-fPIC","linkflags=-fPIC","address-model=64","stage","variant=release","link=shared","runtime-link=shared","--with-iostreams","-sZLIB_SOURCE=" +ZLIB_SOURCE,"-sZLIB_INCLUDE=" +ZLIB_INCLUDE,"-sZLIB_LIBPATH=" +ZLIB_LIBPATH],check=True)
     
-	subprocess.run(["./b2","cxxflags=-fPIC","cflags=-fPIC","linkflags=-fPIC","address-model=64","stage","variant=release","link=static","runtime-link=shared","--with-iostreams","-sZLIB_SOURCE=" +ZLIB_SOURCE,"-sZLIB_INCLUDE=" +ZLIB_INCLUDE,"-sZLIB_LIBPATH=" +ZLIB_LIBPATH],check=True,shell=True)
+	subprocess.run(["./b2","cxxflags=-fPIC","cflags=-fPIC","linkflags=-fPIC","address-model=64","stage","variant=release","link=static","runtime-link=shared","--with-iostreams","-sZLIB_SOURCE=" +ZLIB_SOURCE,"-sZLIB_INCLUDE=" +ZLIB_INCLUDE,"-sZLIB_LIBPATH=" +ZLIB_LIBPATH],check=True)
 else:
 	mkdir("build",cd=True)
 
@@ -434,7 +434,8 @@ else:
 print_msg("Building LuaJIT...")
 if platform == "linux":
 	os.chdir(root +"/third_party_libs/luajit/src")
-	subprocess.run(["make"],check=True)
+	subprocess.run(["make","amalg","BUILDMODE=dynamic"],check=True)
+	lua_jit_lib = normalize_path(root +"/third_party_libs/luajit/src/libluajit-p.so")
 else:
 	#devcmd_path = determine_vsdevcmd_path(deps_dir)
 	os.chdir(root +"/third_party_libs/luajit/src")
@@ -780,19 +781,19 @@ execfile(scripts_dir +"/user_modules.py",g,l)
 if with_essential_client_modules:
 	add_pragma_module(
 		name="pr_prosper_vulkan",
-		commitSha="4e1f498386511a1370b4da1d1f466d7784b03cba",
+		commitSha="8f67850e5d4f4f6206a4e217d03d4277af464764",
 		repositoryUrl="https://github.com/Silverlan/pr_prosper_vulkan.git"
 	)
 
 if with_common_modules:
 	add_pragma_module(
 		name="pr_bullet",
-		commitSha="4eb3df9",
+		commitSha="e390178e90dbbfc9af828bf4db2dfd08e243f9ed",
 		repositoryUrl="https://github.com/Silverlan/pr_bullet.git"
 	)
 	add_pragma_module(
 		name="pr_audio_soloud",
-		commitSha="0d82a619deff13cde9fd05c62a00ded933a9558e",
+		commitSha="99ddd97bf54db2509ae2987bce3a5023f5e335e8",
 		repositoryUrl="https://github.com/Silverlan/pr_soloud.git"
 	)
 	add_pragma_module_prebuilt("Silverlan/pr_mount_external_prebuilt")
@@ -803,59 +804,59 @@ if with_pfm:
 	if with_core_pfm_modules or with_all_pfm_modules:
 		add_pragma_module(
 			name="pr_curl",
-			commitSha="d49b477d77310737fd5f88d49e35b7db58f9718c",
+			commitSha="8b872b0a6ec64cf27b442a1df933190b780c183e",
 			repositoryUrl="https://github.com/Silverlan/pr_curl.git"
 		)
 		add_pragma_module(
 			name="pr_dmx",
-			commitSha="f818ed1954705d98739ad59ad6e8d928e910aca1",
+			commitSha="6a0270b680c94fcdddb681667461e6080694d776",
 			repositoryUrl="https://github.com/Silverlan/pr_dmx.git"
 		)
 	if with_all_pfm_modules:
 		add_pragma_module(
 			name="pr_chromium",
-			commitSha="c8af9e774d67a12eb0f44d6a3af9e0d11efc7449",
+			commitSha="b8cc18419a5bb1ddf62e283224df2cb6b1d78e29",
 			repositoryUrl="https://github.com/Silverlan/pr_chromium.git"
 		)
 		add_pragma_module(
 			name="pr_unirender",
-			commitSha="6e64315dbcb855a098f3bce4746c30da1c89faba",
+			commitSha="fe6741de581ebf938aefd942a082a386443aab35",
 			repositoryUrl="https://github.com/Silverlan/pr_cycles.git"
 		)
 		add_pragma_module(
 			name="pr_xatlas",
-			commitSha="485eaad",
+			commitSha="4c9b1f6ca7ddef17043173f2b249d2d897c20f77",
 			repositoryUrl="https://github.com/Silverlan/pr_xatlas.git"
 		)
 		add_pragma_module(
 			name="pr_davinci",
-			commitSha="e8863cd1b8e047ddcdf47b7ae6291e9962568d09",
+			commitSha="2a3a616f008423bec1e4efdac632b5e344951789",
 			repositoryUrl="https://github.com/Silverlan/pr_davinci.git"
 		)
 		add_pragma_module(
 			name="pr_opencv",
-			commitSha="f7f715b",
+			commitSha="02a55d912a1540ad5b92b758b7b57e721c7693ac",
 			repositoryUrl="https://github.com/Silverlan/pr_opencv.git"
 		)
 
 if with_pfm:
 	add_pragma_module(
 		name="pr_git",
-		commitSha="84d7c32",
+		commitSha="35289bb4051e26f31ea0c0613a27592804ad6a31",
 		repositoryUrl="https://github.com/Silverlan/pr_git.git"
 	)
 
 if with_vr:
 	add_pragma_module(
 		name="pr_openvr",
-		commitSha="c9ebb5553fc44fea3d02b5fc4762ed7c81797d0c",
+		commitSha="a69d07969a1c57c200cf4d5b0c01ea784e7bd1f8",
 		repositoryUrl="https://github.com/Silverlan/pr_openvr.git"
 	)
 
 if with_networking:
 	add_pragma_module(
 		name="pr_steam_networking_sockets",
-		commitSha="311e721c1160d631461c5860d70575ffe79208ef",
+		commitSha="28f4008616f197b5488117125608b417baa7fdf7",
 		repositoryUrl="https://github.com/Silverlan/pr_steam_networking_sockets.git",
 		skipBuildTarget=True
 	)
@@ -926,7 +927,9 @@ cmake_args += [
 	"-DBUILD_TESTING=OFF",
 	"-DCMAKE_INSTALL_PREFIX:PATH=" +install_dir +"",
 	"-DDEPENDENCY_FREETYPE_INCLUDE="+freetype_include_dir,
-	"-DDEPENDENCY_FREETYPE_LIBRARY="+freetype_lib
+	"-DDEPENDENCY_FREETYPE_LIBRARY="+freetype_lib,
+	"-DDEPENDENCY_LUAJIT_LIBRARY=" +lua_jit_lib +"",
+	"-DDEPENDENCY_LUA_LIBRARY=" +lua_jit_lib +""
 ]
 
 if platform == "linux":
@@ -951,9 +954,7 @@ else:
 		"-DDEPENDENCY_BOOST_THREAD_LIBRARY=" +boost_root +"/build/lib/Release/boost_thread.lib",
 		"-DBOOST_ROOT=" +boost_root +"",
 		"-DBOOST_LIBRARYDIR=" +boost_root +"/build/lib/Release/",
-		"-DZLIB_INCLUDE_DIRS=" +build_dir +"/third_party_libs/zlib " +zlib_conf_root +"",
-		"-DDEPENDENCY_LUAJIT_LIBRARY=" +lua_jit_lib +"",
-		"-DDEPENDENCY_LUA_LIBRARY=" +lua_jit_lib +""
+		"-DZLIB_INCLUDE_DIRS=" +build_dir +"/third_party_libs/zlib " +zlib_conf_root +""
 	]
 
 cmake_args.append("-DPME_EXTERNAL_LIB_LOCATION=" +external_libs_dir)

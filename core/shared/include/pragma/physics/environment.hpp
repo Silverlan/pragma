@@ -62,7 +62,7 @@ namespace pragma::physics {
 
 	using Scalar = double;
 
-	class ContactInfo;
+	struct ContactInfo;
 	class DLLNETWORK IEventCallback {
 	  public:
 		virtual ~IEventCallback() = default;

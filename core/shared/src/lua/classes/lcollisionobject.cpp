@@ -192,7 +192,9 @@ namespace Lua {
 	};
 };
 
+#ifdef __linux__
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::physics, ICollisionObject);
+#endif
 
 void Lua::PhysCollisionObj::register_class(lua_State *l, luabind::module_ &mod)
 {

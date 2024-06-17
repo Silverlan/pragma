@@ -16,6 +16,8 @@ class Game;
 namespace ufile {
 	struct IFile;
 };
+class Model;
+class NetworkState;
 namespace pragma::asset {
 	static constexpr auto FORMAT_MAP_BINARY = "pmap_b";
 	static constexpr auto FORMAT_MAP_ASCII = "pmap";

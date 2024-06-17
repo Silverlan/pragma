@@ -12,6 +12,8 @@
 #include <pragma/math/intersection.h>
 #include <udm.hpp>
 #include "pragma/math/icosphere.h"
+#include <sharedutils/util_ifile.hpp>
+#include <sharedutils/magic_enum.hpp>
 
 ModelMesh::ModelMesh() : std::enable_shared_from_this<ModelMesh>(), m_numVerts(0), m_numIndices(0) {}
 ModelMesh::ModelMesh(const ModelMesh &other) : m_min(other.m_min), m_max(other.m_max), m_numVerts(other.m_numVerts), m_numIndices(other.m_numIndices), m_center(other.m_center), m_subMeshes(other.m_subMeshes), m_referenceId {other.m_referenceId}

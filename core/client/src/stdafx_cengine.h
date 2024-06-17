@@ -16,6 +16,7 @@
 #include <mathutil/eulerangles.h>
 #include <mathutil/uquat.h>
 #include <mathutil/uvec.h>
+#include <pragma/lua/luaapi.h>
 #include <pragma/engine.h>
 #include <pragma/networkstate/networkstate.h>
 #include <pragma/clientstate/clientstate.h>

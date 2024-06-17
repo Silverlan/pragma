@@ -47,6 +47,7 @@
 #include <pragma/lua/luaapi.h>
 #include "pragma/audio/alsound.h"
 #include <pragma/console/convars.h>
+#include <pragma/console/conout.h>
 #include <sharedutils/util.h>
 #include <sharedutils/util_string.h>
 #include <mathutil/umath.h>

@@ -24,6 +24,7 @@
 #include <pragma/debug/intel_vtune.hpp>
 #include <sharedutils/util_file.h>
 #include <sharedutils/util_path.hpp>
+#include <sharedutils/magic_enum.hpp>
 #include <unordered_set>
 #include <udm.hpp>
 #include <util_pragma_doc.hpp>

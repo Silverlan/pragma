@@ -24,10 +24,6 @@
 #include <pragma/entities/components/map_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
-extern "C" {
-#include "bzlib.h"
-}
-
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
@@ -125,6 +121,8 @@ void ClientState::HandleClientStartResourceTransfer(NetPacket &packet)
 
 void ClientState::LoadLuaCache(std::string cache, unsigned int cacheSize)
 {
+	throw std::runtime_error {"Not implemented."};
+#if 0
 	std::string path = "cache\\" + cache + ".cache";
 	auto f = FileManager::OpenFile(path.c_str(), "rb");
 	if(f == NULL) {
@@ -157,6 +155,7 @@ void ClientState::LoadLuaCache(std::string cache, unsigned int cacheSize)
 		Con::cwar << "Unable to decompress lua-cache (" << err << ")!" << Con::endl;
 	delete[] dest;
 	delete[] source;
+#endif
 }
 
 extern CBaseEntity *NET_cl_ent_create(NetPacket &packet, bool bSpawn, bool bIgnoreMapInit = false);
@@ -292,10 +291,11 @@ void ClientState::HandleReceiveGameInfo(NetPacket &packet)
 	//
 
 	unsigned int cacheSize = packet->Read<unsigned int>();
-	if(cacheSize > 0) {
+	assert(cacheSize == 0);
+	/*if(cacheSize > 0) {
 		std::string cache = packet->ReadString();
 		LoadLuaCache(cache, cacheSize);
-	}
+	}*/
 	game->SetUp();
 
 	// Note: These have to be called BEFORE the map entities are created

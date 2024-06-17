@@ -1,2 +1,0 @@
-pragma_install_program("${CMAKE_CURRENT_BINARY_DIR}/tools/pfm_executable/${PR_MODULE_INSTALL_SUBDIR}/pfm${OS_EXE_EXT}" "./" OPTIONAL)
-

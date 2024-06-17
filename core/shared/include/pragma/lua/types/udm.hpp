@@ -9,6 +9,7 @@
 #define __PRAGMA_LUA_TYPES_UDM_HPP__
 
 #include "pragma/definitions.h"
+#include "pragma/lua/ldefinitions.h"
 #include <udm.hpp>
 
 #include <luasystem.h>

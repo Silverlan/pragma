@@ -302,6 +302,7 @@ class DLLNETWORK Engine : public CVarHandler, public CallbackHandler {
 	std::unique_ptr<ConsoleInstance> m_consoleInfo = nullptr;
 	ConsoleType m_consoleType = ConsoleType::Terminal;
 	std::queue<std::string> m_consoleInput;
+	std::mutex m_consoleInputMutex;
 
 	std::queue<ConsoleOutput> m_consoleOutput = {};
 	void ProcessConsoleInput(KeyState pressState = KeyState::Press);

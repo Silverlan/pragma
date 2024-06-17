@@ -9,4 +9,4 @@
 #include "pragma/lua/lua_util_component.hpp"
 #include "pragma/lua/lua_util_component_stream.hpp"
 
-DLLNETWORK std::ostream &pragma::operator<<(std::ostream &stream, const pragma::BaseEntityComponent &component) { return ::operator<<(stream, component); }
+// DLLNETWORK std::ostream &pragma::operator<<(std::ostream &stream, const pragma::BaseEntityComponent &component) { return ::operator<<(stream, component); }

@@ -39,7 +39,9 @@ namespace Lua {
 	};
 };
 
+#ifdef __linux__
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, BaseEntityComponent);
+#endif
 
 void Lua::register_sv_character_component(lua_State *l, luabind::module_ &module)
 {

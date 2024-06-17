@@ -61,7 +61,3 @@ jobs:
           build-dir: '${{ steps.build-pragma.outputs.build-dir }}'
           deps-dir: '${{ steps.build-pragma.outputs.deps-dir }}'
           install-dir: '${{ steps.build-pragma.outputs.install-dir }}'
-
-      - name: Handle Error
-        uses: Silverlan/common_actions/action_handle_error@main
-        if: failure()

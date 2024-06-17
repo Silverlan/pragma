@@ -434,7 +434,8 @@ else:
 print_msg("Building LuaJIT...")
 if platform == "linux":
 	os.chdir(root +"/third_party_libs/luajit/src")
-	subprocess.run(["make"],check=True)
+	subprocess.run(["make","amalg","BUILDMODE=dynamic"],check=True)
+	lua_jit_lib = normalize_path(root +"/third_party_libs/luajit/src/libluajit-p.so")
 else:
 	#devcmd_path = determine_vsdevcmd_path(deps_dir)
 	os.chdir(root +"/third_party_libs/luajit/src")
@@ -926,7 +927,9 @@ cmake_args += [
 	"-DBUILD_TESTING=OFF",
 	"-DCMAKE_INSTALL_PREFIX:PATH=" +install_dir +"",
 	"-DDEPENDENCY_FREETYPE_INCLUDE="+freetype_include_dir,
-	"-DDEPENDENCY_FREETYPE_LIBRARY="+freetype_lib
+	"-DDEPENDENCY_FREETYPE_LIBRARY="+freetype_lib,
+	"-DDEPENDENCY_LUAJIT_LIBRARY=" +lua_jit_lib +"",
+	"-DDEPENDENCY_LUA_LIBRARY=" +lua_jit_lib +""
 ]
 
 if platform == "linux":
@@ -951,9 +954,7 @@ else:
 		"-DDEPENDENCY_BOOST_THREAD_LIBRARY=" +boost_root +"/build/lib/Release/boost_thread.lib",
 		"-DBOOST_ROOT=" +boost_root +"",
 		"-DBOOST_LIBRARYDIR=" +boost_root +"/build/lib/Release/",
-		"-DZLIB_INCLUDE_DIRS=" +build_dir +"/third_party_libs/zlib " +zlib_conf_root +"",
-		"-DDEPENDENCY_LUAJIT_LIBRARY=" +lua_jit_lib +"",
-		"-DDEPENDENCY_LUA_LIBRARY=" +lua_jit_lib +""
+		"-DZLIB_INCLUDE_DIRS=" +build_dir +"/third_party_libs/zlib " +zlib_conf_root +""
 	]
 
 cmake_args.append("-DPME_EXTERNAL_LIB_LOCATION=" +external_libs_dir)

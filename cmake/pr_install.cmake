@@ -89,3 +89,33 @@ function(pr_install_create_directory DIR_NAME)
         POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_INSTALL_PREFIX}/${DIR_NAME})
 endfunction(pr_install_create_directory)
+
+function(pr_install_binary)
+    set(options)
+    set(oneValueArgs BIN_DIR WIN LIN INSTALL_DIR)
+    set(multiValueArgs)
+    cmake_parse_arguments(PARSE_ARGV 0 PA "${options}" "${oneValueArgs}" "${multiValueArgs}")
+
+    if(NOT DEFINED PA_INSTALL_DIR)
+        set(PA_INSTALL_DIR "${BINARY_OUTPUT_DIR}")
+    endif()
+
+    if(NOT DEFINED PA_BIN_DIR)
+        set(IDENTIFIER "${PA_UNPARSED_ARGUMENTS}")
+        pr_get_normalized_identifier_name(${IDENTIFIER})
+        get_filename_component(DIR_PATH "${DEPENDENCY_${NORMALIZED_IDENTIFIER}_LIBRARY}" DIRECTORY)
+    else()
+        set(DIR_PATH "${PA_BIN_DIR}")
+    endif()
+    if(WIN32)
+        file(TO_NATIVE_PATH "${DIR_PATH}/${PA_WIN}" PA_BIN_DIR)
+    else()
+        file(TO_NATIVE_PATH "${DIR_PATH}/${PA_LIN}" PA_BIN_DIR)
+    endif()
+
+    message("Installing binary \"${PA_BIN_DIR}\" to \"${PA_INSTALL_DIR}\"...")
+    pr_install_files(
+        "${PA_BIN_DIR}"
+        INSTALL_DIR "${PA_INSTALL_DIR}"
+    )
+endfunction()

@@ -804,7 +804,7 @@ if with_pfm:
 	if with_core_pfm_modules or with_all_pfm_modules:
 		add_pragma_module(
 			name="pr_curl",
-			commitSha="8b872b0a6ec64cf27b442a1df933190b780c183e",
+			commitSha="5d09bb6ed75fc1d6217069bad759c10c425d4d7b",
 			repositoryUrl="https://github.com/Silverlan/pr_curl.git"
 		)
 		add_pragma_module(
@@ -820,7 +820,7 @@ if with_pfm:
 		)
 		add_pragma_module(
 			name="pr_unirender",
-			commitSha="fe6741de581ebf938aefd942a082a386443aab35",
+			commitSha="858ea7a3ad0a68d169d9bd4490e06d36d070fbaf",
 			repositoryUrl="https://github.com/Silverlan/pr_cycles.git"
 		)
 		add_pragma_module(
@@ -835,7 +835,7 @@ if with_pfm:
 		)
 		add_pragma_module(
 			name="pr_opencv",
-			commitSha="02a55d912a1540ad5b92b758b7b57e721c7693ac",
+			commitSha="6206d3afa9551ff3b6d5ad9a97631ea366161881",
 			repositoryUrl="https://github.com/Silverlan/pr_opencv.git"
 		)
 

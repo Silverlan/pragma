@@ -56,7 +56,7 @@ runs:
       uses: Silverlan/pragma/github_actions/build@main
       id: build-pragma
       with:
-        build-args: "--with-pfm --with-all-pfm-modules --with-vr --with-lua-debugger=0"
+        build-args: '--with-lua-debugger=0 --with-common-modules=0 --with-essential-client-modules=0 --cmake-arg=${{ steps.set-cmake-args.outputs.cmake-args }} ${{ steps.set-cmake-args.outputs.build-args }}'
 
     - name: Set Output Variables
       shell: bash

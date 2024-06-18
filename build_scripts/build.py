@@ -856,7 +856,7 @@ if with_vr:
 if with_networking:
 	add_pragma_module(
 		name="pr_steam_networking_sockets",
-		commitSha="28f4008616f197b5488117125608b417baa7fdf7",
+		commitSha="e4e512de894acaf100d74edb7e2c0b1c50fbe062",
 		repositoryUrl="https://github.com/Silverlan/pr_steam_networking_sockets.git",
 		skipBuildTarget=True
 	)

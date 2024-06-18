@@ -28,7 +28,7 @@ inputs:
   token:
     description: 'PAT token required to fetch the repository.'
     required: true
-    default: '${{ github.token }}'
+    default: ''
   debug-artifact-token:
     description: 'Token required for upload of debug artifacts (e.g. CMakeCache.txt).'
     required: true
@@ -49,45 +49,14 @@ runs:
     - name: Setup Pragma
       uses: Silverlan/pragma/github_actions/setup@main
       with:
-        with_cuda: ${{ inputs.with-cuda }}
-
-    # We need the latest Windows SDK
-    - name: Install Windows SDK
-      if: runner.os == 'Windows'
-      uses: GuillaumeFalourd/setup-windows10-sdk-action@v1.11
-      with:
-        sdk-version: 22621
-
-    - name: Set Build and CMake Arguments
-      shell: bash
-      id: set-cmake-args
-      run: |
-        if [ "$RUNNER_OS" == "Linux" ]; then
-          echo "cmake-args=\"\"" >> $GITHUB_OUTPUT
-        else
-          echo "cmake-args=\"-DCMAKE_SYSTEM_VERSION=10.0.22621.0\"" >> $GITHUB_OUTPUT
-        fi
-
-        build_args="${{ inputs.build-args }}"
-        if [ -z "$build_args" ]; then
-          build_args="--module ${{ inputs.module }}"
-        fi
-        echo "build-args=$build_args" >> $GITHUB_OUTPUT
-
-    - name: "Download Module"
-      uses: actions/checkout@v4
-      with:
-        submodules: 'recursive'
-        path: 'pragma/modules/${{ inputs.module }}'
-        token: '${{ inputs.token }}'
-        repository: '${{ inputs.repository }}'
-        ref: ${{ inputs.ref }}
+        branch: main
+        clone_url: "https://github.com/Silverlan/pragma.git"
 
     - name: Build Pragma
-      id: build-pragma
       uses: Silverlan/pragma/github_actions/build@main
+      id: build-pragma
       with:
-        build-args: '--with-lua-debugger=0 --no-libssl --with-common-modules=0 --with-essential-client-modules=0 --cmake-arg=${{ steps.set-cmake-args.outputs.cmake-args }} ${{ steps.set-cmake-args.outputs.build-args }}'
+        build-args: "--with-pfm --with-all-pfm-modules --with-vr --with-lua-debugger=0"
 
     - name: Set Output Variables
       shell: bash
@@ -102,7 +71,7 @@ runs:
       if: ${{ !cancelled() && inputs.debug-artifact-token != '' }}
       uses: Silverlan/pragma/github_actions/upload_debug_artifacts@main
       with:
-        token: ${{ inputs.debug-artifact-token }}
+        token: ${{ steps.set-token.debug_artifact_token }}
         commit: ${{ github.ref_name }}
         build-dir: '${{ steps.build-pragma.outputs.build-dir }}'
         deps-dir: '${{ steps.build-pragma.outputs.deps-dir }}'

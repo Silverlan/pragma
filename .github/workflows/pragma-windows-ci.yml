@@ -56,7 +56,7 @@ jobs:
         uses: ./pragma/github_actions/build
         id: build-pragma
         with:
-          build-args: "--with-pfm --with-all-pfm-modules --with-vr --with-networking --with-lua-debugger=0 --with-swiftshader --cmake-arg=\"-DCMAKE_SYSTEM_VERSION=10.0.22621.0\" --vcvars \"C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Auxiliary/Build/vcvars64.bat\""
+          build-args: "--with-pfm --with-all-pfm-modules --with-vr --with-networking --with-lua-debugger=0 --with-swiftshader"
 
       - name: Create Release Archive
         shell: bash

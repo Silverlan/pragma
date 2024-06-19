@@ -1,0 +1,73 @@
+name: Build Pragma Module
+on:
+  workflow_call:
+    inputs:
+      repository:
+        type: string
+        default: '${{ github.repository }}'
+      branch:
+        type: string
+        default: '${{ github.ref_name }}'
+      os:
+        type: string
+        required: true
+    secrets:
+      repository_token:
+        required: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: environment-${{ inputs.os }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build - ${{ matrix.config.os }}
+    if: github.repository != 'Silverlan/pr_module_template'
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - os: ${{ inputs.os == 'windows' && 'windows-latest' || 'ubuntu-24.04' }}
+    steps:
+      - name: Get Module Info
+        id: module-info
+        uses: Silverlan/pr_module_template/github_actions/get_module_info@main
+        with:
+          repo_access_token: '${{ secrets.repository_token || github.token }}'
+          repository: '${{ inputs.repository }}/${{ inputs.branch }}'
+
+      - name: Build Module
+        id: build-module
+        uses: Silverlan/pragma/github_actions/build_generic_module@main
+        with:
+          module: '${{ steps.module-info.outputs.module_name }}'
+          repository: '${{ inputs.repository }}'
+          token: '${{ secrets.repository_token || github.token }}'
+          ref: '${{ inputs.branch }}'
+          debug-artifact-token: '${{ secrets.GITHUB_TOKEN }}'
+
+      - name: Create Release Files
+        shell: bash
+        run: |
+          if [ "${{ steps.module-info.outputs.release_directory }}" != "DEFAULT" ]; then
+            mkdir -p "release/${{ steps.module-info.outputs.release_directory }}"
+            cp -a "${{ steps.build-module.outputs.install-dir }}/${{ steps.module-info.outputs.release_directory }}." "release/${{ steps.module-info.outputs.release_directory }}"
+          else
+            mkdir -p "release/${{ steps.module-info.outputs.install_directory }}"
+            if [[ "$RUNNER_OS" == "Linux" ]]; then
+              fileName="lib${{ steps.module-info.outputs.module_name }}.so"
+            elif [[ "$RUNNER_OS" == "Windows" ]]; then
+              fileName="${{ steps.module-info.outputs.module_name }}.dll"
+            fi
+            cp "${{ steps.build-module.outputs.install-dir }}/${{ steps.module-info.outputs.install_directory }}$fileName" "release/${{ steps.module-info.outputs.install_directory }}"
+          fi
+
+      - name: Release Binaries
+        uses: Silverlan/common_actions/release_nightly_binaries@main
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit: ${{ github.ref_name }}

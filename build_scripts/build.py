@@ -796,6 +796,11 @@ if with_common_modules:
 		commitSha="73ee6c707e47f41e06148c55aceae8eb43c34842",
 		repositoryUrl="https://github.com/Silverlan/pr_soloud.git"
 	)
+	add_pragma_module(
+		name="pr_audio_dummy",
+		commitSha="84e1249c296dfc6cf288c8262142170851286f48",
+		repositoryUrl="https://github.com/Silverlan/pr_audio_dummy.git"
+	)
 	add_pragma_module_prebuilt("Silverlan/pr_mount_external_prebuilt")
 	add_pragma_module_prebuilt("Silverlan/pr_rig_prebuilt")
 	add_pragma_module_prebuilt("Silverlan/pr_ik_prebuilt")

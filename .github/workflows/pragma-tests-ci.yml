@@ -45,11 +45,7 @@ jobs:
       shell: bash
       run: |
         cd "pragma"
-        if [ "$RUNNER_OS" == "Linux" ]; then
-          ./pragma -cli -luaext -log 2 2 +map "test_physics" +"lua_exec tests/ci_runner_tests.lua"
-        else
-          ./pragma.exe -cli -luaext -log 2 2 +map "test_physics" +"lua_exec tests/ci_runner_tests.lua"
-        fi
+        ./pragma -cli -luaext -log 2 2 +map "test_physics" +"lua_exec tests/ci_runner_tests.lua"
         EXIT_CODE=$?
         # Check the exit code
         if [ $EXIT_CODE -eq 0 ]; then

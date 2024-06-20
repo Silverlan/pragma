@@ -146,11 +146,18 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           files: "debug_pdb.zip"
 
-      - name: Run Tests
+      - name: Run Server Tests
         uses: benc-uk/workflow-dispatch@v1
         timeout-minutes: 10
         with:
           workflow: pragma-server-tests-ci.yml
+          inputs: '{ "os": "windows" }'
+
+      - name: Run Tests
+        uses: benc-uk/workflow-dispatch@v1
+        timeout-minutes: 10
+        with:
+          workflow: pragma-tests-ci.yml
           inputs: '{ "os": "windows" }'
 
       - name: Generate File Lists

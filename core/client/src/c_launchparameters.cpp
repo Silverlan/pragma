@@ -121,6 +121,14 @@ static void LPARAM_cpu_rendering(const std::vector<std::string> &argv)
 	g_launchParamExperimentalMemoryOptimizationEnabled = true;
 }
 
+static void LPARAM_cli(const std::vector<std::string> &argv)
+{
+	LPARAM_cpu_rendering(argv);
+	LPARAM_windowless(argv);
+	if(argv.empty() || util::to_boolean(argv.front()))
+		LPARAM_audio_api({"dummy"});
+}
+
 REGISTER_LAUNCH_PARAMETER_HELP(-windowed, LPARAM_windowed, "-window -startwindowed -sw", "start in windowed mode");
 REGISTER_LAUNCH_PARAMETER(-window, LPARAM_windowed);
 REGISTER_LAUNCH_PARAMETER(-startwindowed, LPARAM_windowed);
@@ -147,3 +155,4 @@ REGISTER_LAUNCH_PARAMETER_HELP(-title_bar_color, LPARAM_title_bar_color, "<hexCo
 REGISTER_LAUNCH_PARAMETER_HELP(-border_color, LPARAM_border_bar_color, "<hexColor>", "Hex color for the window border.");
 REGISTER_LAUNCH_PARAMETER_HELP(-experimental_memory_optimization, LPARAM_EXPERIMENTAL_MEMORY_OPTIMIZATION, "<1/0>", "Enables experimental code for RAM usage reduction.");
 REGISTER_LAUNCH_PARAMETER_HELP(-cpu_rendering, LPARAM_cpu_rendering, "<1/0>", "If enabled, the CPU will be used for rendering instead of GPU.");
+REGISTER_LAUNCH_PARAMETER_HELP(-cli, LPARAM_cli, "<1/0>", "If enabled, will automatically enable the options needed to run Pragma in a command-line-interface-only environment.");

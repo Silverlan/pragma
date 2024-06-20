@@ -235,6 +235,11 @@ def get_submodule(directory,url,commitId=None,branch=None):
 	from pathlib import Path
 
 	print_msg("Updating submodule '" +directory +"'...")
+
+	if os.path.isdir(directory) and not os.path.isdir(os.path.join(directory, '.git')):
+		print_msg("Submodule directory already exists, but is not a git directory. Skipping update...")
+		return
+
 	curDir = os.getcwd()
 	absDir = os.getcwd() +"/" +directory
 	if not Path(absDir).is_dir() or not os.listdir(absDir):

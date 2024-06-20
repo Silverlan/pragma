@@ -92,7 +92,7 @@ jobs:
           workflow: pragma-server-tests-ci.yml
           inputs: '{ "os": "ubuntu" }'
 
-       - name: Run Tests
+      - name: Run Tests
         uses: benc-uk/workflow-dispatch@v1
         timeout-minutes: 10
         with:

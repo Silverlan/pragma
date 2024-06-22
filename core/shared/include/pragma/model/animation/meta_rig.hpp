@@ -220,6 +220,7 @@ namespace pragma::animation {
 		std::array<MetaRigBlendShape, umath::to_integral(BlendShape::Count)> blendShapes;
 
 		bool Save(const Skeleton &skeleton, const udm::AssetData &outData, std::string &outErr) const;
+		float GetReferenceScale() const;
 		void DebugPrint(const Model &mdl);
 		const MetaRigBone *GetBone(pragma::animation::MetaRigBoneType type) const;
 		const MetaRigBlendShape *GetBlendShape(pragma::animation::BlendShape blendShape) const;

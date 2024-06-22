@@ -1015,6 +1015,8 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	defRig.def_readwrite("forwardFacingRotationOffset", &pragma::animation::MetaRig::forwardFacingRotationOffset);
 	defRig.def_readwrite("forwardAxis", &pragma::animation::MetaRig::forwardAxis);
 	defRig.def_readwrite("upAxis", &pragma::animation::MetaRig::upAxis);
+	defRig.def_readwrite("min", &pragma::animation::MetaRig::min);
+	defRig.def_readwrite("max", &pragma::animation::MetaRig::max);
 	defRig.def(luabind::tostring(luabind::self));
 	defRig.add_static_constant("ROOT_BONE", umath::to_integral(pragma::animation::META_RIG_ROOT_BONE_TYPE));
 	defRig.scope[luabind::def("get_bone_name", &pragma::animation::get_meta_rig_bone_type_name)];
@@ -1061,6 +1063,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	defRig.def("GetBone", &pragma::animation::MetaRig::GetBone);
 	defRig.def("FindMetaBoneType", &pragma::animation::MetaRig::FindMetaBoneType);
 	defRig.def("GetBlendShape", &pragma::animation::MetaRig::GetBlendShape);
+	defRig.def("GetReferenceScale", &pragma::animation::MetaRig::GetReferenceScale);
 	defRig.def("DebugPrint", &pragma::animation::MetaRig::DebugPrint);
 	defRig.add_static_constant("RIG_TYPE_BIPED", umath::to_integral(pragma::animation::RigType::Biped));
 	defRig.add_static_constant("RIG_TYPE_QUADRUPED", umath::to_integral(pragma::animation::RigType::Quadruped));

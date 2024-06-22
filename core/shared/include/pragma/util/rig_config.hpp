@@ -40,16 +40,21 @@ namespace pragma::ik {
 	struct DLLNETWORK RigConfigControl {
 		enum class Type : uint8_t {
 			Drag = 0,
+			AngularPlane,
 			State,
 			OrientedDrag,
 			Revolute,
 			Axis,
+			PoleTarget,
 			Count,
 		};
 		pragma::GString bone;
 		Type type = Type::Drag;
 		float maxForce = -1.f;
 		float rigidity = 1.f;
+
+		pragma::GString poleTargetStartBone;
+		pragma::GString poleTargetEndBone;
 	};
 
 	struct DLLNETWORK RigConfigConstraint {

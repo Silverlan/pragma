@@ -62,6 +62,13 @@ std::optional<pragma::ik::RigConfig> pragma::ik::RigConfig::load_from_udm_data(u
 		if(ctrl) {
 			udmControl["maxForce"] >> ctrl->maxForce;
 			udmControl["rigidity"] >> ctrl->rigidity;
+
+			std::string startBone;
+			std::string endBone;
+			udmControl["startBone"] >> startBone;
+			udmControl["endBone"] >> endBone;
+			ctrl->poleTargetStartBone = startBone;
+			ctrl->poleTargetEndBone = endBone;
 		}
 	}
 
@@ -505,6 +512,11 @@ void pragma::ik::RigConfig::ToUdmData(udm::LinkedPropertyWrapper &udmData) const
 		udmControl["type"] << udm::enum_to_string(ctrlData->type);
 		udmControl["maxForce"] << ctrlData->maxForce;
 		udmControl["rigidity"] << ctrlData->rigidity;
+
+		if(ctrlData->type == pragma::ik::RigConfigControl::Type::PoleTarget) {
+			udmControl["startBone"] << ctrlData->poleTargetStartBone.c_str();
+			udmControl["endBone"] << ctrlData->poleTargetEndBone.c_str();
+		}
 	}
 
 	udm::LinkedPropertyWrapper udmConstraints;
@@ -631,6 +643,8 @@ std::ostream &operator<<(std::ostream &out, const pragma::ik::RigConfigBone &bon
 std::ostream &operator<<(std::ostream &out, const pragma::ik::RigConfigControl &control)
 {
 	out << "RigConfigControl[type:" << magic_enum::enum_name(control.type) << "][bone:" << control.bone << "]";
+	if(control.type == pragma::ik::RigConfigControl::Type::PoleTarget)
+		out << "[Start:" << control.poleTargetStartBone << "][End:" << control.poleTargetEndBone << "]";
 	return out;
 }
 std::ostream &operator<<(std::ostream &out, const pragma::ik::RigConfigConstraint &constraint)

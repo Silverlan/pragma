@@ -52,9 +52,12 @@ namespace pragma::ik {
 		Type type = Type::Drag;
 		float maxForce = -1.f;
 		float rigidity = 1.f;
+		std::optional<Vector3> initialPos {};
+		std::optional<Quat> initialRot {};
 
-		pragma::GString poleTargetStartBone;
-		pragma::GString poleTargetEndBone;
+		pragma::GString poleTargetBaseBone;
+		pragma::GString poleTargetEffectorBone;
+		umath::Degree poleAngle = 0.f;
 	};
 
 	struct DLLNETWORK RigConfigConstraint {

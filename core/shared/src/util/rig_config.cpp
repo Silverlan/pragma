@@ -65,10 +65,14 @@ std::optional<pragma::ik::RigConfig> pragma::ik::RigConfig::load_from_udm_data(u
 
 			std::string startBone;
 			std::string endBone;
-			udmControl["startBone"] >> startBone;
-			udmControl["endBone"] >> endBone;
-			ctrl->poleTargetStartBone = startBone;
-			ctrl->poleTargetEndBone = endBone;
+			udmControl["baseBone"] >> startBone;
+			udmControl["effectorBone"] >> endBone;
+			ctrl->poleTargetBaseBone = startBone;
+			ctrl->poleTargetEffectorBone = endBone;
+
+			udmControl["poleAngle"] >> ctrl->poleAngle;
+			udmControl["position"] >> ctrl->initialPos;
+			udmControl["rotation"] >> ctrl->initialRot;
 		}
 	}
 
@@ -514,8 +518,14 @@ void pragma::ik::RigConfig::ToUdmData(udm::LinkedPropertyWrapper &udmData) const
 		udmControl["rigidity"] << ctrlData->rigidity;
 
 		if(ctrlData->type == pragma::ik::RigConfigControl::Type::PoleTarget) {
-			udmControl["startBone"] << ctrlData->poleTargetStartBone.c_str();
-			udmControl["endBone"] << ctrlData->poleTargetEndBone.c_str();
+			if(!ctrlData->poleTargetBaseBone.empty())
+				udmControl["baseBone"] << ctrlData->poleTargetBaseBone.c_str();
+			if(!ctrlData->poleTargetEffectorBone.empty())
+				udmControl["effectorBone"] << ctrlData->poleTargetEffectorBone.c_str();
+
+			udmControl["poleAngle"] << ctrlData->poleAngle;
+			udmControl["position"] << ctrlData->initialPos;
+			udmControl["rotation"] << ctrlData->initialRot;
 		}
 	}
 
@@ -646,7 +656,7 @@ std::ostream &operator<<(std::ostream &out, const pragma::ik::RigConfigControl &
 {
 	out << "RigConfigControl[type:" << magic_enum::enum_name(control.type) << "][bone:" << control.bone << "]";
 	if(control.type == pragma::ik::RigConfigControl::Type::PoleTarget)
-		out << "[Start:" << control.poleTargetStartBone << "][End:" << control.poleTargetEndBone << "]";
+		out << "[Start:" << control.poleTargetBaseBone << "][End:" << control.poleTargetEffectorBone << "][PoleAngle:" << control.poleAngle << "]";
 	return out;
 }
 std::ostream &operator<<(std::ostream &out, const pragma::ik::RigConfigConstraint &constraint)

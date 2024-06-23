@@ -593,6 +593,8 @@ float pragma::ik::RigConfig::CalcScaleFactor() const
 		return 1.f;
 	auto dim = umath::max(umath::abs(max.x - min.x), umath::abs(max.y - min.y), umath::abs(max.z - min.z));
 	dim /= REFERENCE_HUMAN_UNIT_SIZE;
+	if(dim < 0.0001f)
+		return 1.f;
 	return dim;
 }
 

@@ -62,6 +62,17 @@ std::optional<pragma::ik::RigConfig> pragma::ik::RigConfig::load_from_udm_data(u
 		if(ctrl) {
 			udmControl["maxForce"] >> ctrl->maxForce;
 			udmControl["rigidity"] >> ctrl->rigidity;
+
+			std::string startBone;
+			std::string endBone;
+			udmControl["baseBone"] >> startBone;
+			udmControl["effectorBone"] >> endBone;
+			ctrl->poleTargetBaseBone = startBone;
+			ctrl->poleTargetEffectorBone = endBone;
+
+			udmControl["poleAngle"] >> ctrl->poleAngle;
+			udmControl["position"] >> ctrl->initialPos;
+			udmControl["rotation"] >> ctrl->initialRot;
 		}
 	}
 
@@ -505,6 +516,17 @@ void pragma::ik::RigConfig::ToUdmData(udm::LinkedPropertyWrapper &udmData) const
 		udmControl["type"] << udm::enum_to_string(ctrlData->type);
 		udmControl["maxForce"] << ctrlData->maxForce;
 		udmControl["rigidity"] << ctrlData->rigidity;
+
+		if(ctrlData->type == pragma::ik::RigConfigControl::Type::PoleTarget) {
+			if(!ctrlData->poleTargetBaseBone.empty())
+				udmControl["baseBone"] << ctrlData->poleTargetBaseBone.c_str();
+			if(!ctrlData->poleTargetEffectorBone.empty())
+				udmControl["effectorBone"] << ctrlData->poleTargetEffectorBone.c_str();
+
+			udmControl["poleAngle"] << ctrlData->poleAngle;
+			udmControl["position"] << ctrlData->initialPos;
+			udmControl["rotation"] << ctrlData->initialRot;
+		}
 	}
 
 	udm::LinkedPropertyWrapper udmConstraints;
@@ -581,6 +603,8 @@ float pragma::ik::RigConfig::CalcScaleFactor() const
 		return 1.f;
 	auto dim = umath::max(umath::abs(max.x - min.x), umath::abs(max.y - min.y), umath::abs(max.z - min.z));
 	dim /= REFERENCE_HUMAN_UNIT_SIZE;
+	if(dim < 0.0001f)
+		return 1.f;
 	return dim;
 }
 
@@ -631,6 +655,8 @@ std::ostream &operator<<(std::ostream &out, const pragma::ik::RigConfigBone &bon
 std::ostream &operator<<(std::ostream &out, const pragma::ik::RigConfigControl &control)
 {
 	out << "RigConfigControl[type:" << magic_enum::enum_name(control.type) << "][bone:" << control.bone << "]";
+	if(control.type == pragma::ik::RigConfigControl::Type::PoleTarget)
+		out << "[Start:" << control.poleTargetBaseBone << "][End:" << control.poleTargetEffectorBone << "][PoleAngle:" << control.poleAngle << "]";
 	return out;
 }
 std::ostream &operator<<(std::ostream &out, const pragma::ik::RigConfigConstraint &constraint)

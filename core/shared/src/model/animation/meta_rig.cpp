@@ -222,6 +222,12 @@ const pragma::animation::MetaRigBone *pragma::animation::MetaRig::GetBone(pragma
 	return &bones[i];
 }
 
+float pragma::animation::MetaRig::GetReferenceScale() const
+{
+	auto size = max.y - min.y;
+	return size / 64.f;
+}
+
 std::vector<pragma::animation::MetaRigBoneType> pragma::animation::get_meta_rig_bone_children(MetaRigBoneType type)
 {
 	switch(type) {

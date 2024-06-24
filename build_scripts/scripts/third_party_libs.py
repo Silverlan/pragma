@@ -30,7 +30,7 @@ get_submodule("ogg","https://github.com/xiph/ogg.git","db5c7a49ce7ebda47b15b7847
 get_submodule("rapidxml","https://github.com/discord/rapidxml.git","2ae4b2888165a393dfb6382168825fddf00c27b9")
 get_submodule("recastnavigation","https://github.com/recastnavigation/recastnavigation.git","14b2631527c4792e95b2c78ebfa8ac4cd3413363")
 get_submodule("rectangle_bin_pack","https://github.com/juj/RectangleBinPack.git","f159bbeb55e54b510cb12b1011c53dadbf35ed8a")
-get_submodule("spdlog","https://github.com/Silverlan/spdlog.git","ac04f7094c5fe80a87f98a2b96b341399e247c0c","v1.x")
+get_submodule("spdlog","https://github.com/Silverlan/spdlog.git","d1ebfb9","v1.x")
 get_submodule("squish","https://github.com/ivan-kulikov-dev/squish.git","aeb01b8f88f97c994baff8453870f3e8a347afd7")
 get_submodule("tinygltf","https://github.com/syoyo/tinygltf.git","f51243da480806032cfb6f8d6799a7493397cb86","release")
 get_submodule("vorbis","https://github.com/xiph/vorbis.git","9eadeccdc4247127d91ac70555074239f5ce3529")

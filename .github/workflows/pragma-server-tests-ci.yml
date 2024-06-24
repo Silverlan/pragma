@@ -46,6 +46,7 @@ jobs:
       run: |
         cd "pragma"
         if [ "$RUNNER_OS" == "Linux" ]; then
+          chmod +x ./pragma_server
           ./pragma_server -luaext -log 2 2 +map "test_physics" +"lua_exec tests/ci_runner_tests.lua"
         else
           ./pragma_server.exe -luaext -log 2 2 +map "test_physics" +"lua_exec tests/ci_runner_tests.lua"

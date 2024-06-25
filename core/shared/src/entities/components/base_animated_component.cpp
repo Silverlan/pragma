@@ -56,6 +56,7 @@ ComponentEventId BaseAnimatedComponent::EVENT_ON_ANIMATION_RESET = pragma::INVAL
 ComponentEventId BaseAnimatedComponent::EVENT_ON_ANIMATIONS_UPDATED = pragma::INVALID_COMPONENT_ID;
 ComponentEventId BaseAnimatedComponent::EVENT_ON_UPDATE_SKELETON = pragma::INVALID_COMPONENT_ID;
 ComponentEventId BaseAnimatedComponent::EVENT_POST_ANIMATION_UPDATE = pragma::INVALID_COMPONENT_ID;
+ComponentEventId BaseAnimatedComponent::EVENT_ON_RESET_POSE = pragma::INVALID_COMPONENT_ID;
 void BaseAnimatedComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	EVENT_HANDLE_ANIMATION_EVENT = registerEvent("HANDLE_ANIMATION_EVENT", ComponentEventInfo::Type::Explicit);
@@ -86,6 +87,7 @@ void BaseAnimatedComponent::RegisterEvents(pragma::EntityComponentManager &compo
 	EVENT_ON_ANIMATIONS_UPDATED = registerEvent("ON_ANIMATIONS_UPDATED", ComponentEventInfo::Type::Explicit);
 	EVENT_ON_UPDATE_SKELETON = registerEvent("ON_ANIMATIONS_UPDATED", ComponentEventInfo::Type::Explicit);
 	EVENT_POST_ANIMATION_UPDATE = registerEvent("POST_ANIMATION_UPDATE", ComponentEventInfo::Type::Explicit);
+	EVENT_ON_RESET_POSE = registerEvent("ON_RESET_POSE", ComponentEventInfo::Type::Broadcast);
 }
 
 BaseAnimatedComponent::BaseAnimatedComponent(BaseEntity &ent) : BaseEntityComponent(ent), m_playbackRate(util::FloatProperty::Create(1.f)) {}
@@ -876,6 +878,28 @@ void BaseAnimatedComponent::SetCycle(float cycle)
 		return;
 	m_baseAnim.cycle = cycle;
 	SetBaseAnimationDirty();
+}
+
+void BaseAnimatedComponent::ResetPose()
+{
+	auto &mdl = GetEntity().GetModel();
+	if(!mdl)
+		return;
+	auto &skeleton = mdl->GetSkeleton();
+	auto &ref = mdl->GetReference();
+	auto numBones = skeleton.GetBoneCount();
+	std::function<void(const animation::Bone &, const umath::ScaledTransform &)> resetBonePose = nullptr;
+	resetBonePose = [this, &resetBonePose, &ref](const animation::Bone &bone, const umath::ScaledTransform &parentPose) {
+		umath::ScaledTransform pose;
+		ref.GetBonePose(bone.ID, pose);
+		for(auto &[childId, child] : bone.children)
+			resetBonePose(*child, pose);
+		pose = parentPose.GetInverse() * pose;
+		SetBonePose(bone.ID, pose);
+	};
+	for(auto &[boneId, bone] : skeleton.GetRootBones())
+		resetBonePose(*bone, {});
+	BroadcastEvent(EVENT_ON_RESET_POSE);
 }
 
 int BaseAnimatedComponent::GetAnimation() const { return m_baseAnim.animation; }

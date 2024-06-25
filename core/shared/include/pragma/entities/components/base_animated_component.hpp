@@ -57,6 +57,7 @@ namespace pragma {
 		static ComponentEventId EVENT_ON_ANIMATIONS_UPDATED;
 		static ComponentEventId EVENT_ON_UPDATE_SKELETON;
 		static ComponentEventId EVENT_POST_ANIMATION_UPDATE;
+		static ComponentEventId EVENT_ON_RESET_POSE;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
 		enum class StateFlags : uint8_t {
@@ -148,6 +149,8 @@ namespace pragma {
 		void SetCycle(float cycle);
 		pragma::animation::Animation *GetAnimationObject() const;
 		int32_t GetAnimation() const;
+
+		void ResetPose();
 
 		Activity GetActivity() const;
 		int32_t GetLayeredAnimation(uint32_t slot) const;

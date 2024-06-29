@@ -376,6 +376,56 @@ std::vector<pragma::animation::MetaRigBoneType> pragma::animation::get_meta_rig_
 	case MetaRigBoneType::RightBreastMiddle:
 		return {MetaRigBoneType::RightBreastTip};
 	}
+	static_assert(umath::to_integral(pragma::animation::BodyPart::Count) == 12, "Update this list when new bone types are addded!");
 	static_assert(umath::to_integral(MetaRigBoneType::Count) == 74, "Update this list when new types are added!");
 	return {};
+}
+
+pragma::animation::MetaRigBoneType pragma::animation::get_root_meta_bone_id(BodyPart bp)
+{
+	switch(bp) {
+	case BodyPart::LowerBody:
+		return MetaRigBoneType::Hips;
+	case BodyPart::UpperBody:
+		return MetaRigBoneType::Spine;
+	case BodyPart::Head:
+		return MetaRigBoneType::Neck;
+	case BodyPart::LeftArm:
+		return MetaRigBoneType::LeftUpperArm;
+	case BodyPart::RightArm:
+		return MetaRigBoneType::RightUpperArm;
+	case BodyPart::LeftLeg:
+		return MetaRigBoneType::LeftUpperLeg;
+	case BodyPart::RightLeg:
+		return MetaRigBoneType::RightUpperLeg;
+	case BodyPart::Tail:
+		return MetaRigBoneType::TailBase;
+	case BodyPart::LeftWing:
+		return MetaRigBoneType::LeftWing;
+	case BodyPart::RightWing:
+		return MetaRigBoneType::RightWing;
+	case BodyPart::LeftBreast:
+		return MetaRigBoneType::LeftBreastBase;
+	case BodyPart::RightBreast:
+		return MetaRigBoneType::RightBreastBase;
+	}
+	static_assert(umath::to_integral(pragma::animation::BodyPart::Count) == 12, "Update this list when new bone types are addded!");
+	return MetaRigBoneType::Invalid;
+}
+
+std::vector<pragma::animation::MetaRigBoneType> pragma::animation::get_meta_rig_bone_ids(BodyPart bp)
+{
+	if(bp == BodyPart::LowerBody) {
+		auto ids = get_meta_rig_bone_ids(BodyPart::LeftLeg);
+		auto ids2 = get_meta_rig_bone_ids(BodyPart::RightLeg);
+		ids.reserve(ids.size() + ids2.size() + 1);
+		for(auto id : ids2)
+			ids.push_back(id);
+		ids.push_back(get_root_meta_bone_id(bp));
+		return ids;
+	}
+	auto rootId = get_root_meta_bone_id(bp);
+	auto ids = get_meta_rig_bone_children(rootId);
+	ids.push_back(rootId);
+	return ids;
 }

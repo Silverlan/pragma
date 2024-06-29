@@ -120,6 +120,24 @@ namespace pragma::animation {
 	constexpr std::optional<MetaRigBoneType> get_meta_rig_bone_parent_type(MetaRigBoneType type);
 	DLLNETWORK std::vector<pragma::animation::MetaRigBoneType> get_meta_rig_bone_children(MetaRigBoneType type);
 
+	enum class BodyPart : uint8_t {
+		LowerBody = 0,
+		UpperBody,
+		Head,
+		LeftArm,
+		RightArm,
+		LeftLeg,
+		RightLeg,
+		Tail,
+		LeftWing,
+		RightWing,
+		LeftBreast,
+		RightBreast,
+		Count,
+	};
+	DLLNETWORK std::vector<pragma::animation::MetaRigBoneType> get_meta_rig_bone_ids(BodyPart bp);
+	DLLNETWORK MetaRigBoneType get_root_meta_bone_id(BodyPart bp);
+
 	enum class BoneSide : uint8_t { Left = 0, Right, None };
 	constexpr std::optional<BoneSide> get_meta_rig_bone_type_side(MetaRigBoneType type);
 

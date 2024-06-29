@@ -1376,6 +1376,7 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 	  static_cast<void (*)(lua_State *, pragma::BaseAnimatedComponent &, int, uint32_t)>([](lua_State *l, pragma::BaseAnimatedComponent &hAnim, int activity, uint32_t flags) { hAnim.PlayActivity(static_cast<Activity>(activity), static_cast<pragma::FPlayAnim>(flags)); }));
 	def.def("PlayActivity", static_cast<void (*)(lua_State *, pragma::BaseAnimatedComponent &, int)>([](lua_State *l, pragma::BaseAnimatedComponent &hAnim, int activity) { hAnim.PlayActivity(static_cast<Activity>(activity), pragma::FPlayAnim::Default); }));
 	def.def("GetActivity", &pragma::BaseAnimatedComponent::GetActivity);
+	def.def("ResetPose", &pragma::BaseAnimatedComponent::ResetPose);
 	def.def("PlayLayeredAnimation", static_cast<void (*)(lua_State *, pragma::BaseAnimatedComponent &, int, int)>([](lua_State *l, pragma::BaseAnimatedComponent &hAnim, int slot, int anim) { hAnim.PlayLayeredAnimation(slot, anim); }));
 	def.def("PlayLayeredAnimation", static_cast<void (*)(lua_State *, pragma::BaseAnimatedComponent &, int, std::string)>([](lua_State *l, pragma::BaseAnimatedComponent &hAnim, int slot, std::string anim) { hAnim.PlayLayeredAnimation(slot, anim); }));
 	def.def("PlayLayeredActivity", static_cast<void (*)(lua_State *, pragma::BaseAnimatedComponent &, int, int)>([](lua_State *l, pragma::BaseAnimatedComponent &hAnim, int slot, int activity) { hAnim.PlayLayeredActivity(slot, static_cast<Activity>(activity)); }));
@@ -1614,6 +1615,7 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 	def.add_static_constant("EVENT_ON_ANIMATION_RESET", pragma::BaseAnimatedComponent::EVENT_ON_ANIMATION_RESET);
 	def.add_static_constant("EVENT_ON_UPDATE_SKELETON", pragma::BaseAnimatedComponent::EVENT_ON_UPDATE_SKELETON);
 	def.add_static_constant("EVENT_POST_ANIMATION_UPDATE", pragma::BaseAnimatedComponent::EVENT_POST_ANIMATION_UPDATE);
+	def.add_static_constant("EVENT_ON_RESET_POSE", pragma::BaseAnimatedComponent::EVENT_ON_RESET_POSE);
 
 	def.add_static_constant("FPLAYANIM_NONE", umath::to_integral(pragma::FPlayAnim::None));
 	def.add_static_constant("FPLAYANIM_RESET", umath::to_integral(pragma::FPlayAnim::Reset));

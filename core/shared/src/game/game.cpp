@@ -956,7 +956,7 @@ SurfaceMaterial *Game::GetSurfaceMaterial(UInt32 id)
 		return nullptr;
 	return &materials[id];
 }
-std::vector<SurfaceMaterial> &Game::GetSurfaceMaterials() { return m_surfaceMaterialManager->GetMaterials(); }
+std::vector<SurfaceMaterial> *Game::GetSurfaceMaterials() { return m_surfaceMaterialManager ? &m_surfaceMaterialManager->GetMaterials() : nullptr; }
 
 double &Game::RealTime() { return m_tReal; }
 double &Game::CurTime() { return m_tCur; }

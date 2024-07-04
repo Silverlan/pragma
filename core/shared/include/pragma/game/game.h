@@ -112,7 +112,7 @@ class DLLNETWORK Game : public CallbackHandler, public LuaCallbackHandler {
 	SurfaceMaterial &CreateSurfaceMaterial(const std::string &identifier, Float friction = 0.5f, Float restitution = 0.5f);
 	SurfaceMaterial *GetSurfaceMaterial(const std::string &id);
 	SurfaceMaterial *GetSurfaceMaterial(UInt32 id);
-	std::vector<SurfaceMaterial> &GetSurfaceMaterials();
+	std::vector<SurfaceMaterial> *GetSurfaceMaterials();
 
 	enum class GameFlags : uint32_t {
 		None = 0u,

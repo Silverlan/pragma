@@ -127,7 +127,7 @@ std::shared_ptr<pragma::physics::IShape> CollisionMesh::CreateShape(const Vector
 	auto *physEnv = m_game->GetPhysicsEnvironment();
 	if(IsSoftBody() || physEnv == nullptr)
 		return nullptr;
-	auto &materials = m_game->GetSurfaceMaterials();
+	auto &materials = *m_game->GetSurfaceMaterials();
 	auto bConvex = IsConvex();
 	std::shared_ptr<pragma::physics::IShape> shape = nullptr;
 	auto bScale = (scale != Vector3 {1.f, 1.f, 1.f}) ? true : false;
@@ -354,7 +354,7 @@ bool CollisionMesh::Save(Game &game, Model &mdl, udm::AssetDataArg outData, std:
 	outData.SetAssetType(PCOL_IDENTIFIER);
 	outData.SetAssetVersion(PCOL_VERSION);
 
-	auto &surfaceMaterials = game.GetSurfaceMaterials();
+	auto *surfaceMaterials = game.GetSurfaceMaterials();
 	auto surfMatIdx = GetSurfaceMaterial();
 	auto udm = *outData;
 	umath::Transform pose {};
@@ -362,8 +362,8 @@ bool CollisionMesh::Save(Game &game, Model &mdl, udm::AssetDataArg outData, std:
 	udm["uuid"] = util::uuid_to_string(m_uuid);
 	udm["bone"] = GetBoneParent();
 	udm["pose"] = pose;
-	if(surfMatIdx >= 0 && surfMatIdx < surfaceMaterials.size())
-		udm["surfaceMaterial"] = surfaceMaterials[surfMatIdx].GetIdentifier();
+	if(surfMatIdx >= 0 && surfaceMaterials && surfMatIdx < surfaceMaterials->size())
+		udm["surfaceMaterial"] = (*surfaceMaterials)[surfMatIdx].GetIdentifier();
 
 	udm["bounds"]["min"] = m_min;
 	udm["bounds"]["max"] = m_max;
@@ -462,7 +462,6 @@ bool CollisionMesh::LoadFromAssetData(Game &game, Model &mdl, const udm::AssetDa
 
 	umath::Transform pose {};
 	pose.SetOrigin(GetOrigin());
-	auto &surfaceMaterials = game.GetSurfaceMaterials();
 	udm["bone"](m_boneID);
 	udm["pose"](pose);
 	std::string surfaceMaterial;

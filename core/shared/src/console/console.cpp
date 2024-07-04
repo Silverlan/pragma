@@ -26,6 +26,7 @@ void DebugConsole::open()
 {
 #ifdef _WIN32
 	if(util::get_subsystem() != util::SubSystem::Console) {
+		spdlog::info("Allocating new console...");
 		AllocConsole();
 		AttachConsole(GetCurrentProcessId());
 		this->_cinbuf = std::cin.rdbuf();
@@ -39,6 +40,10 @@ void DebugConsole::open()
 		std::cerr.rdbuf(this->_console_cerr.rdbuf());
 
 		freopen("CON", "w", stdout); // Redirect printf, etc.
+	}
+	else {
+		spdlog::info("Application is console sub-system. Attaching process to existing console...");
+		AttachConsole(GetCurrentProcessId());
 	}
 
 	// Enable ANSI color codes under Windows

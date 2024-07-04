@@ -10,6 +10,7 @@
 #include "pragma/engine.h"
 #include "pragma/console/conout.h"
 #include "pragma/logging_wrapper.hpp"
+#include "pragma/logging.hpp"
 #include <material_manager2.hpp>
 
 Engine::LaunchCommand::LaunchCommand(const std::string &cmd, const std::vector<std::string> &_args) : command(cmd), args(_args) {}
@@ -54,6 +55,14 @@ void Engine::InitLaunchOptions(int argc, char *argv[])
 {
 	auto &parameters = g_LaunchParameters->GetParameters();
 	std::vector<std::string> launchCmdArgs {};
+	struct LaunchOption {
+		std::string cmd;
+		std::vector<std::string> argv;
+	};
+
+	std::unordered_set<std::string> consoleDependentOptions {"-console_subsystem", "-non_interactive"};
+
+	std::vector<LaunchOption> launchOptions;
 	for(auto i = argc - 1; i > 0; --i) {
 		std::string arg = argv[i];
 		if(arg.empty())
@@ -69,9 +78,17 @@ void Engine::InitLaunchOptions(int argc, char *argv[])
 			{
 				auto it = parameters.find(arg);
 				if(it != parameters.end()) {
-					auto &f = it->second;
-					f(launchCmdArgs);
+					LaunchOption lo {};
+					lo.cmd = arg;
+					lo.argv = std::move(launchCmdArgs);
+
+					if(consoleDependentOptions.find(arg) == consoleDependentOptions.end() && arg != "-log")
+						launchOptions.push_back(lo);
+					else // Console-dependent options need to be executed before -console, so we move them to the front. -log should also always be first
+						launchOptions.insert(launchOptions.begin(), lo);
 				}
+				else
+					spdlog::warn("Unknown launch option '{}' specified. Ignoring...", arg);
 				break;
 			}
 		case '+':
@@ -90,6 +107,23 @@ void Engine::InitLaunchOptions(int argc, char *argv[])
 			}
 		}
 		launchCmdArgs.clear();
+	}
+
+	for(auto &lo : launchOptions) {
+		auto it = parameters.find(lo.cmd);
+		if(it == parameters.end())
+			continue;
+		auto &f = it->second;
+		spdlog::debug("Initializing launch option '{}'...", lo.cmd);
+		f(lo.argv);
+	}
+
+	if(pragma::is_log_level_enabled(util::LogSeverity::Debug)) {
+		std::vector<std::string> gameCmds;
+		gameCmds.reserve(m_launchCommands.size());
+		for(auto &cmd : m_launchCommands)
+			gameCmds.push_back(cmd.command);
+		spdlog::debug("{} game commands have been queued: {}", m_launchCommands.size(), ustring::implode(gameCmds, ", "));
 	}
 }
 
@@ -214,6 +248,8 @@ static void LPARAM_luaext(const std::vector<std::string> &argv)
 }
 
 static void LPARAM_verbose(const std::vector<std::string> &argv) { engine->SetVerbose(true); }
+static void LPARAM_console_subsystem(const std::vector<std::string> &argv) { engine->SetConsoleSubsystem(true); }
+static void LPARAM_non_interactive(const std::vector<std::string> &argv) { engine->SetNonInteractiveMode(true); }
 
 REGISTER_LAUNCH_PARAMETER_HELP(-console, LPARAM_console, "", "start with the console open");
 REGISTER_LAUNCH_PARAMETER_HELP(-dev, LPARAM_dev, "", "enable developer mode");
@@ -223,6 +259,8 @@ REGISTER_LAUNCH_PARAMETER_HELP(-map, LPARAM_map, "<map>", "load this map on star
 REGISTER_LAUNCH_PARAMETER_HELP(-gamemode, LPARAM_gamemode, "<gamemode>", "load this gamemode on start");
 REGISTER_LAUNCH_PARAMETER_HELP(-luaext, LPARAM_luaext, "", "enables several additional lua modules (e.g. package and io)");
 REGISTER_LAUNCH_PARAMETER_HELP(-verbose, LPARAM_verbose, "", "Enables additional debug messages.");
+REGISTER_LAUNCH_PARAMETER_HELP(-console_subsystem, LPARAM_console_subsystem, "<1/0>", "should only be enabled if the executable was built for console/terminal only");
+REGISTER_LAUNCH_PARAMETER_HELP(-non_interactive, LPARAM_non_interactive, "<1/0>", "if enabled, terminal user inputs will be ignored");
 
 REGISTER_LAUNCH_PARAMETER_HELP(-tcpport, LPARAM_tcpport, "<port>", "set TCP port");
 REGISTER_LAUNCH_PARAMETER_HELP(-udpport, LPARAM_udpport, "<port>", "set UDP port");

@@ -57,6 +57,8 @@ extern Engine *engine;
 static std::atomic_bool bCheckInput = true;
 static void KeyboardInput()
 {
+	if(engine->IsNonInteractiveMode())
+		return;
 	//TODO: Rewrite this to use non-blocking algorythms
 	std::string line;
 #ifdef _WIN32

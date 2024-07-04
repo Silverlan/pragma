@@ -123,6 +123,9 @@ class DLLNETWORK Engine : public CVarHandler, public CallbackHandler {
 		Closed = DeveloperMode << 1u,
 		MultiThreadedAssetLoadingEnabled = Closed << 1u,
 		RunUpdaterOnClose = MultiThreadedAssetLoadingEnabled << 1u,
+		ConsoleSubsystem = RunUpdaterOnClose << 1u,
+		CLIOnly = ConsoleSubsystem << 1u,
+		NonInteractiveMode = CLIOnly << 1u,
 	};
 
 	enum class CPUProfilingPhase : uint32_t {
@@ -165,8 +168,17 @@ class DLLNETWORK Engine : public CVarHandler, public CallbackHandler {
 	void SetVerbose(bool bVerbose);
 	bool IsVerbose() const;
 
+	void SetConsoleSubsystem(bool consoleSubsystem);
+	bool IsConsoleSubsystem() const;
+
 	void SetDeveloperMode(bool devMode);
 	bool IsDeveloperModeEnabled() const;
+
+	void SetNonInteractiveMode(bool nonInteractiveMode);
+	bool IsNonInteractiveMode() const;
+
+	void SetCLIOnly(bool cliOnly);
+	bool IsCLIOnly() const;
 
 	// Console
 	void ConsoleInput(const std::string_view &line);

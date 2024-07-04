@@ -15,6 +15,7 @@ try {
 	  "-title_bar_color",
 	  "#262626",
 	  "-console",
+	  "-console_subsystem",
 	};
 	auto cargs = pragma::merge_arguments(argc, argv, extraArgs);
 	auto hModule = pragma::launch_pragma(cargs.size(), cargs.data());

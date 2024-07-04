@@ -83,7 +83,7 @@ LONG MiniDumper::TopLevelFilter(struct _EXCEPTION_POINTERS *pExceptionInfo)
 
 	LPCTSTR szResult = NULL;
 
-	auto shouldShowMsBox = (util::get_subsystem() == util::SubSystem::GUI);
+	auto shouldShowMsBox = (util::get_subsystem() == util::SubSystem::GUI && !engine->IsNonInteractiveMode());
 	if(hDll) {
 		MINIDUMPWRITEDUMP pDump = (MINIDUMPWRITEDUMP)::GetProcAddress(hDll, "MiniDumpWriteDump");
 		if(pDump) {

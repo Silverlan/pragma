@@ -119,13 +119,13 @@ Engine::Engine(int, char *[]) : CVarHandler(), m_logFile(nullptr), m_tickRate(En
 	engine = this;
 
 #ifdef __linux__
-    //setup fork handler
-    //The fork will dupe the process id, and by extension the std streams. Disable async stdin to children.
-    pthread_atfork(nullptr,nullptr,[](){
+	//setup fork handler
+	//The fork will dupe the process id, and by extension the std streams. Disable async stdin to children.
+	pthread_atfork(nullptr, nullptr, []() {
 		//child, after fork.
-    int flags = fcntl(0, F_GETFL, 0);
-    fcntl(0, F_SETFL, flags & ~O_NONBLOCK);
-    });
+		int flags = fcntl(0, F_GETFL, 0);
+		fcntl(0, F_SETFL, flags & ~O_NONBLOCK);
+	});
 #endif
 
 	// Link package system to file system
@@ -591,8 +591,17 @@ Engine::StateInstance &Engine::GetServerStateInstance() { return *m_svInstance; 
 void Engine::SetVerbose(bool bVerbose) { umath::set_flag(m_stateFlags, StateFlags::Verbose, bVerbose); }
 bool Engine::IsVerbose() const { return umath::is_flag_set(m_stateFlags, StateFlags::Verbose); }
 
+void Engine::SetConsoleSubsystem(bool consoleSubsystem) { umath::set_flag(m_stateFlags, StateFlags::ConsoleSubsystem, consoleSubsystem); }
+bool Engine::IsConsoleSubsystem() const { return umath::is_flag_set(m_stateFlags, StateFlags::ConsoleSubsystem); }
+
 void Engine::SetDeveloperMode(bool devMode) { umath::set_flag(m_stateFlags, StateFlags::DeveloperMode, devMode); }
 bool Engine::IsDeveloperModeEnabled() const { return umath::is_flag_set(m_stateFlags, StateFlags::DeveloperMode); }
+
+void Engine::SetNonInteractiveMode(bool nonInteractiveMode) { umath::set_flag(m_stateFlags, StateFlags::NonInteractiveMode, nonInteractiveMode); }
+bool Engine::IsNonInteractiveMode() const { return umath::is_flag_set(m_stateFlags, StateFlags::NonInteractiveMode); }
+
+void Engine::SetCLIOnly(bool cliOnly) { umath::set_flag(m_stateFlags, StateFlags::CLIOnly, cliOnly); }
+bool Engine::IsCLIOnly() const { return umath::is_flag_set(m_stateFlags, StateFlags::CLIOnly); }
 
 void Engine::Release() { Close(); }
 
@@ -731,8 +740,10 @@ void Engine::InitializeExternalArchiveManager() { util::initialize_external_arch
 
 void Engine::RunLaunchCommands()
 {
+	spdlog::info("Running launch commands...");
 	for(auto it = m_launchCommands.rbegin(); it != m_launchCommands.rend(); ++it) {
 		auto &cmd = *it;
+		spdlog::debug("Running launch command '{}'...", cmd.command);
 		RunConsoleCommand(cmd.command, cmd.args);
 		if(ustring::compare(cmd.command.c_str(), "map", false)) {
 			// We'll delay all remaining commands until after the map has been loaded
@@ -748,6 +759,7 @@ void Engine::RunLaunchCommands()
 			if(!nw)
 				nw = GetServerState();
 			if(nw) {
+				spdlog::info("{} game commands will be executed after map load.", remainingCommands.size());
 				auto cbOnGameStart = FunctionCallback<void>::Create(nullptr);
 				cbOnGameStart.get<Callback<void>>()->SetFunction([this, cbOnGameStart, nw, remainingCommands = std::move(remainingCommands)]() mutable {
 					auto cmds0 = std::move(remainingCommands);
@@ -762,8 +774,9 @@ void Engine::RunLaunchCommands()
 							if(cbOnGameReady.IsValid())
 								cbOnGameReady.Remove();
 
-							for(auto it = cmds1.rbegin(); it != cmds1.rend(); ++it) {
-								auto &cmd = *it;
+							spdlog::info("Executing game commands...");
+							for(auto &cmd : cmds1) {
+								spdlog::debug("Executing game command '{}'...", cmd.command);
 								pThis->RunConsoleCommand(cmd.command, cmd.args);
 							}
 						});
@@ -885,6 +898,7 @@ void Engine::Start()
 
 	InvokeConVarChangeCallbacks("steam_steamworks_enabled");
 
+	spdlog::debug("Starting main game loop...");
 	//const double FRAMES_PER_SECOND = GetTickRate();
 	//const double SKIP_TICKS = 1000 /FRAMES_PER_SECOND;
 	const int MAX_FRAMESKIP = 5;

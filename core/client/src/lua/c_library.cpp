@@ -8,6 +8,7 @@
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
+#include "pragma/util/c_util.hpp"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/lua/libraries/c_ldebugoverlay.h"
@@ -1067,6 +1068,7 @@ void CGame::RegisterLuaLibraries()
 	  luabind::def("save_image", static_cast<bool (*)(lua_State *, luabind::table<>, std::string, uimg::TextureInfo &, bool)>(save_image)), luabind::def("save_image", static_cast<bool (*)(lua_State *, luabind::table<>, std::string, uimg::TextureInfo &)>(save_image)),
 	  luabind::def("save_image", static_cast<bool (*)(lua_State *, prosper::IImage &, std::string, uimg::TextureInfo &)>(save_image)), luabind::def("load_image", static_cast<luabind::object (*)(lua_State *, const std::string &, bool, uimg::Format)>(load_image)),
 	  luabind::def("load_image", static_cast<luabind::object (*)(lua_State *, const std::string &, bool)>(load_image)), luabind::def("load_image", static_cast<luabind::object (*)(lua_State *, const std::string &)>(load_image)),
+	  luabind::def("screenshot", ::util::screenshot),
 	  luabind::def("capture_raytraced_screenshot", static_cast<util::ParallelJob<uimg::ImageLayerSet> (*)(lua_State *, uint32_t, uint32_t, uint32_t, bool, bool)>(capture_raytraced_screenshot)),
 	  luabind::def("capture_raytraced_screenshot", static_cast<util::ParallelJob<uimg::ImageLayerSet> (*)(lua_State *, uint32_t, uint32_t, uint32_t, bool)>(capture_raytraced_screenshot)),
 	  luabind::def("capture_raytraced_screenshot", static_cast<util::ParallelJob<uimg::ImageLayerSet> (*)(lua_State *, uint32_t, uint32_t, uint32_t)>(capture_raytraced_screenshot)),

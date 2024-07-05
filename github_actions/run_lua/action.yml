@@ -1,0 +1,185 @@
+name: Run Pragma Lua Script
+description: 'Run a Pragma Lua-script.'
+inputs:
+  lua-code:
+    description: 'Lua code to execute'
+    required: true
+    default: ''
+  lua-script:
+    description: 'Lua script file to execute'
+    required: true
+    default: ''
+  state:
+    description: 'Set to "client" for client-side execution, otherwise "server".'
+    required: true
+    default: 'client'
+  version:
+    description: 'The version of Pragma to download (if it not already exists).'
+    required: true
+    default: 'nightly'
+  screenshot:
+    description: 'If enabled (and artifacts-name has been specified), a screenshot will be taken and uploaded as artifact after the script has been executed.'
+    required: true
+    default: false
+  artifacts-name:
+    description: 'If specified, debug files (e.g. logs) will be uploaded as artifacts under this name.'
+    required: true
+    default: ''
+outputs:
+  exit-code:
+    description: 'The exit code raised by Pragma.'
+    value: ${{ steps.handle-result.outputs.exit-code }}
+  error:
+    description: 'Describes the type of error that has occurred, or "success" if no error occurred.'
+    value: ${{ steps.handle-result.outputs.error }}
+  lua-error:
+    description: 'The Lua error that was caused by running the Lua-code, if there was one.'
+    value: ${{ steps.handle-result.outputs.lua-error }}
+runs:
+  using: "composite"
+  steps:
+    - name: Download Pragma
+      shell: bash
+      run: |
+        if [ -d "pragma" ]; then
+          echo "Pragma already exists. Skipping download."
+        else
+          repo="Silverlan/pragma"
+
+          version="${{ inputs.version }}"
+
+          dlUrl="https://github.com/Silverlan/pragma/releases/download/${version}/"
+          if [ "$RUNNER_OS" == "Linux" ]; then
+            if [ "$version" == "nightly" ]; then
+              fileName="pragma-lin64.tar.gz"
+            else
+              fileName="pragma-${version}-lin64.tar.gz"
+            fi
+          else
+            if [ "$version" == "nightly" ]; then
+              fileName="pragma-win64.zip"
+            else
+              fileName="pragma-${version}-win64.zip"
+            fi
+          fi
+          dlUrl="${dlUrl}${fileName}"
+
+          curl -L "${dlUrl}" -o "${fileName}"
+          mkdir pragma
+          if [[ $fileName == *.tar.gz ]]; then
+            tar -xzf ${fileName} -C pragma
+          else
+            unzip -q ${fileName} -d pragma
+          fi
+        fi
+
+    - name: Generate CI Lua-script
+      shell: bash
+      run: |
+        mkdir -p pragma/lua
+        scriptFileName="pragma/lua/ci_script.lua"
+
+        cat <<EOF > ${scriptFileName}
+        local cbOnError = game.add_event_listener("OnLuaError",function(err)
+          file.write("ci.txt", "lua")
+          file.write("ci_lua_error.txt", err)
+        end)
+        EOF
+
+        echo "file.write(\"ci.txt\", \"unknown\")" >> ${scriptFileName}
+        if [ "${{ inputs.lua-script }}" != "" ]; then
+          cat <<EOF >> ${scriptFileName}
+        include("${{ inputs.lua-script }}")
+        EOF
+
+        fi
+        echo "${{ inputs.lua-code }}" >> ${scriptFileName}
+        echo "file.write(\"ci.txt\", \"success\")" >> ${scriptFileName}
+        cat ${scriptFileName}
+
+    - name: Run script
+      shell: bash
+      id: run-script
+      run: |
+        cd "pragma"
+        if [ "$RUNNER_OS" == "Linux" ]; then
+          chmod +x ./pragma
+        fi
+        executableName="pragma"
+        luaCmdName="lua_exec"
+        if [ "${{ inputs.state }}" == "client" ]; then
+          luaCmdName="lua_exec_cl"
+        fi
+        if [ "$RUNNER_OS" == "Windows" ]; then
+          if [ "${{ inputs.state }}" == "server" ]; then
+            executableName="pragma_server"
+          else
+            executableName="pragma.com"
+          fi
+        elif [ "${{ inputs.state }}" == "server" ]; then
+          executableName="pragma_server"
+        fi
+        ./${executableName} -cli -non_interactive -luaext -log 1 1 -log_file "log.txt" +map "empty" +"${luaCmdName} ci_script.lua"
+
+        EXIT_CODE=$?
+        echo "exit-code=$(echo $EXIT_CODE)" >> $GITHUB_OUTPUT
+
+    - name: Clean-up
+      shell: bash
+      run: |
+        rm pragma/lua/ci_script.lua
+
+    - name: Check script execution result
+      id: handle-result
+      shell: bash
+      run: |
+        echo "error=success" >> $GITHUB_OUTPUT
+        
+        exit_code=${{ steps.run-script.outputs.exit-code }}
+        echo "exit-code=$exit_code" >> $GITHUB_OUTPUT
+
+        if [ $exit_code -ne 0 ]; then
+          echo "error=exit" >> $GITHUB_OUTPUT
+          exit $exit_code
+        fi
+
+        if [ -f "pragma/ci_lua_error.txt" ]; then
+          CI_LUA_ERROR=$(cat "pragma/ci_lua_error.txt")
+          if [ -n "$CI_LUA_ERROR" ]; then
+            echo "lua-error=$CI_LUA_ERROR" >> $GITHUB_OUTPUT
+          fi
+        fi
+
+        CI_CONTENTS=$(cat "pragma/ci.txt")
+        exit_code=$?
+
+        if [ $exit_code -ne 0 ]; then
+          echo "error=ci_file" >> $GITHUB_OUTPUT
+          exit 1
+        fi
+        if [ "$CI_CONTENTS" != "success" ]; then
+          echo "error=$CI_CONTENTS" >> $GITHUB_OUTPUT
+          exit 2
+        fi
+
+    - name: Prepare artifact files
+      shell: bash
+      if: ${{ always() && inputs.artifacts-name != '' }}
+      run: |
+        mkdir -p artifacts
+        if [ -f "pragma/log.txt" ]; then
+          cp pragma/log.txt artifacts/log.txt
+        fi
+        if [ -d "pragma/crashdumps" ]; then
+          cp -r pragma/crashdumps artifacts/crashdumps
+        fi
+        if [ -d "pragma/artifacts" ]; then
+          cp -rf pragma/artifacts/* artifacts/
+        fi
+
+    - name: Upload artifact files
+      uses: actions/upload-artifact@v4
+      if: ${{ always() && inputs.artifacts-name != '' }}
+      with:
+        name: ${{ inputs.artifacts-name }}
+        path: "artifacts"

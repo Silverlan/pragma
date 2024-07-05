@@ -831,7 +831,12 @@ luabind::object Lua::global::include(lua_State *l, const std::string &f, std::ve
 			Lua::HandleSyntaxError(l, r, fileName);
 			break;
 		case Lua::StatusCode::Ok:
-			return luabind::object {luabind::from_stack {l, Lua::GetStackTop(l) - n}};
+			{
+				auto t = Lua::GetStackTop(l);
+				if(t <= n)
+					return Lua::nil;
+				return luabind::object {luabind::from_stack {l, t - n}};
+			}
 		}
 	}
 	return {};

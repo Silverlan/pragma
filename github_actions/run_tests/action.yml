@@ -1,0 +1,66 @@
+name: Run Pragma Tests
+description: 'Run a Pragma Test Lua-script.'
+inputs:
+  test-scripts:
+    description: 'The test script(s) to execute.'
+    required: true
+    default: ''
+  state:
+    description: 'Set to "client" for client-side execution, otherwise "server".'
+    required: true
+    default: 'client'
+  version:
+    description: 'The version of Pragma to download (if it not already exists).'
+    required: true
+    default: 'nightly'
+  screenshot:
+    description: 'If enabled (and artifacts-name has been specified), a screenshot will be taken and uploaded as artifact after the script has been executed.'
+    required: true
+    default: false
+  artifacts-name:
+    description: 'If specified, debug files (e.g. logs) will be uploaded as artifacts under this name.'
+    required: true
+    default: ''
+runs:
+  using: "composite"
+  steps:
+    - name: Convert test scripts to string
+      id: convert-scripts
+      shell: bash
+      run: |
+        test_scripts="${{ inputs.test-scripts }}"
+        test_scripts=$(echo $test_scripts | jq -R 'split(" ") | map(select(length > 0)) | join("\", \"")')
+        test_scripts_string="\\\"${test_scripts}\\\""
+        echo "test_scripts_string=$test_scripts_string" >> $GITHUB_ENV
+
+    - name: Run Tests
+      id: pragma
+      uses: Silverlan/pragma/github_actions/run_lua@main
+      with:
+        state: "${{ inputs.state }}"
+        version: "${{ inputs.version }}"
+        artifacts-name: "${{ inputs.artifacts-name }}"
+        lua-code: |
+          include(\"/tests/base.lua\")
+          local scripts = {
+            ${{ env.test_scripts_string }}
+          }
+          for _,script in ipairs(scripts) do
+            include(script)
+          end
+          local cbOnTestComplete = tests.add_event_listener(\"OnTestComplete\", function(success, errMsg)
+            if(${{ inputs.screenshot }}) then
+              -- Wait a few frames before taking the screenshot
+              game.wait_for_frames(5, function()
+                local screenshotPath = util.screenshot()
+                if(screenshotPath ~= nil) then
+                  file.create_directory(\"artifacts\")
+                  file.copy(screenshotPath, \"artifacts/screenshot.png\")
+                end
+                engine.shutdown()
+              end)
+            else
+              engine.shutdown()
+            end
+          end)
+          tests.run()

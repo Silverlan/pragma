@@ -89,10 +89,11 @@ function udm.BaseSchemaType:Reinitialize(data)
 	self:CleanUp(false)
 
 	local oldUniqueId
-	local referenceables = self:GetSchema():GetLibrary().detail.referenceables
+	local detail = self:GetSchema():GetLibrary().detail
+	local referenceables = detail.referenceables
 	if self.GetUniqueId then
 		oldUniqueId = tostring(self:GetUniqueId())
-		referenceables[oldUniqueId] = nil
+		detail.set_uuid_object(oldUniqueId, nil)
 	end
 
 	local curData = self:GetUdmData()
@@ -113,17 +114,17 @@ function udm.BaseSchemaType:Reinitialize(data)
 			newUniqueId = oldUniqueId
 			self:SetUniqueId(util.Uuid(newUniqueId))
 		end
-		referenceables[newUniqueId] = self
+		detail.set_uuid_object(newUniqueId, self)
 	end
 end
 function udm.BaseSchemaType:ChangeUniqueId(uuid)
 	if self.GetUniqueId == nil then
 		return
 	end
-	local referenceables = self:GetSchema():GetLibrary().detail.referenceables
+	local detail = self:GetSchema():GetLibrary().detail
 	local newUniqueId = tostring(uuid)
 	self:SetUniqueId(util.Uuid(newUniqueId))
-	referenceables[newUniqueId] = self
+	detail.set_uuid_object(newUniqueId, self)
 end
 function udm.BaseSchemaType:OnInitialize() end
 function udm.BaseSchemaType:OnUdmChildArrayInitialized(name) end
@@ -146,7 +147,8 @@ function udm.BaseSchemaType:CleanUp(clearChangeListeners)
 		end
 	end
 	if self.GetUniqueId then
-		self.m_schema:GetLibrary().detail.referenceables[tostring(self:GetUniqueId())] = nil
+		local detail = self.m_schema:GetLibrary().detail
+		detail.set_uuid_object(tostring(self:GetUniqueId()), nil)
 	end
 	for name, child in pairs(self.m_typedChildren) do
 		if type(child) == "table" then
@@ -312,7 +314,8 @@ function udm.create_property_from_schema(schema, type, parent, el, populate)
 	local obj = schema:GetLibrary()[type]()
 	obj:Initialize(schema, el, parent)
 	if obj.GetUniqueId then
-		schema:GetLibrary().detail.referenceables[tostring(obj:GetUniqueId())] = obj
+		local detail = schema:GetLibrary().detail
+		detail.set_uuid_object(tostring(obj:GetUniqueId()), obj)
 	end
 	return obj
 end
@@ -338,6 +341,25 @@ function udm.generate_lua_api_from_schema(schema)
 	local lib = schema:GetLibrary()
 	lib.detail = lib.detail or {}
 	lib.detail.referenceables = lib.detail.referenceables or {}
+	lib.detail.set_uuid_object = function(uuid, o)
+		if o ~= nil and lib.detail.referenceables[uuid] ~= nil then
+			if util.is_same_object(o, lib.detail.referenceables[uuid]) then
+				return
+			end
+			-- Note: This error check is currently disabled, because UUIDs currently do not get cleaned up
+			-- when a project is unloaded.
+			--[[error(
+				"Attempted to assign uuid "
+					.. tostring(uuid)
+					.. " to object "
+					.. tostring(o)
+					.. ", but uuid is already assigned to object "
+					.. tostring(lib.detail.referenceables[uuid])
+					.. "!"
+			)]]
+		end
+		lib.detail.referenceables[uuid] = o
+	end
 	for name, udmType in pairs(schema:GetUdmData():GetChildren("types")) do
 		local schemaType = udmType:GetValue("type", udm.TYPE_STRING)
 		if udm.Schema.is_enum_type(schemaType) == false then

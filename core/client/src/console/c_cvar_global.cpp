@@ -31,6 +31,7 @@
 #include "pragma/rendering/renderers/raytracing_renderer.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/rendering/raytracing/cycles.hpp"
+#include "pragma/util/c_util.hpp"
 #include <wgui/wgui.h>
 #include <cmaterialmanager.h>
 #include <pragma/networking/netmessages.h>
@@ -297,45 +298,20 @@ void CMD_cl_dump_netmessages(NetworkState *, pragma::BasePlayerComponent *, std:
 }
 #endif
 
-static std::string get_screenshot_name(Game *game, uimg::ImageFormat format)
-{
-	std::string map;
-	if(game == nullptr)
-		map = engine_info::get_identifier();
-	else
-		map = game->GetMapName();
-	std::string path;
-	int i = 1;
-	do {
-		path = "screenshots\\";
-		path += map;
-		path += ustring::fill_zeroes(std::to_string(i), 4);
-		path += "." + uimg::get_image_output_format_extension(format);
-		i++;
-	} while(FileManager::Exists(path.c_str() /*,fsys::SearchFlags::Local*/));
-	return path;
-}
-
-#include <image/prosper_sampler.hpp>
-#include <image/prosper_texture.hpp>
 void CMD_screenshot(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
 	auto *game = client->GetGameState();
 	if(game == nullptr)
 		return;
-	// Determine file name for screenshot
-	FileManager::CreateDirectory("screenshot");
 
 	std::unordered_map<std::string, pragma::console::CommandOption> commandOptions {};
 	pragma::console::parse_command_options(argv, commandOptions);
 
 	auto mode = pragma::console::get_command_option_parameter_value(commandOptions, "mode");
 	if(ustring::compare<std::string>(mode, "raytracing", false)) {
-		auto *pCam = c_game->GetRenderCamera();
-		Con::cout << "Taking raytraced screenshot..." << Con::endl;
-		Con::cout << "Preparing scene for raytracing..." << Con::endl;
-
-		// A raytracing screenshot has been requested; We'll have to re-render the scene with raytracing enabled
+		auto resolution = c_engine->GetRenderResolution();
+		auto width = util::to_uint(pragma::console::get_command_option_parameter_value(commandOptions, "width", std::to_string(resolution.x)));
+		auto height = util::to_uint(pragma::console::get_command_option_parameter_value(commandOptions, "height", std::to_string(resolution.y)));
 
 		auto format = uimg::ImageFormat::PNG;
 		auto itFormat = commandOptions.find("format");
@@ -349,27 +325,19 @@ void CMD_screenshot(NetworkState *, pragma::BasePlayerComponent *, std::vector<s
 			else
 				Con::cwar << "Unsupported format '" << customFormat << "'! Using PNG instead..." << Con::endl;
 		}
-		auto resolution = c_engine->GetRenderResolution();
-		pragma::rendering::cycles::SceneInfo sceneInfo {};
-		sceneInfo.width = util::to_uint(pragma::console::get_command_option_parameter_value(commandOptions, "width", std::to_string(resolution.x)));
-		sceneInfo.height = util::to_uint(pragma::console::get_command_option_parameter_value(commandOptions, "height", std::to_string(resolution.y)));
-		sceneInfo.samples = util::to_uint(pragma::console::get_command_option_parameter_value(commandOptions, "samples", "1024"));
-		sceneInfo.hdrOutput = false; //;//(format == pragma::image::ImageOutputFormat::HDR);
-		pragma::rendering::cycles::RenderImageInfo renderImgInfo {};
-		if(pCam) {
-			renderImgInfo.camPose = pCam->GetEntity().GetPose();
-			renderImgInfo.farZ = pCam->GetFarZ();
-			renderImgInfo.fov = pCam->GetFOV();
-		}
-		sceneInfo.denoise = true;
+
+		util::RtScreenshotSettings settings {};
+		settings.samples = util::to_uint(pragma::console::get_command_option_parameter_value(commandOptions, "samples", "1024"));
+		settings.denoise = true;
 		auto itDenoise = commandOptions.find("nodenoise");
 		if(itDenoise != commandOptions.end())
-			sceneInfo.denoise = false;
+			settings.denoise = false;
 
 		auto quality = 1.f;
 		auto itQuality = commandOptions.find("quality");
 		if(itQuality != commandOptions.end() && itQuality->second.parameters.empty() == false)
 			quality = util::to_float(itQuality->second.parameters.front());
+		settings.quality = quality;
 
 		auto toneMapping = uimg::ToneMapping::GammaCorrection;
 		auto itToneMapping = commandOptions.find("tone_mapping");
@@ -380,138 +348,27 @@ void CMD_screenshot(NetworkState *, pragma::BasePlayerComponent *, std::vector<s
 			else
 				toneMapping = *customToneMapping;
 		}
+		settings.toneMapping = toneMapping;
 
 		auto itSky = commandOptions.find("sky");
 		if(itSky != commandOptions.end() && itSky->second.parameters.empty() == false)
-			sceneInfo.sky = itSky->second.parameters.front();
+			settings.sky = itSky->second.parameters.front();
 
 		auto itSkyStrength = commandOptions.find("sky_strength");
 		if(itSkyStrength != commandOptions.end() && itSkyStrength->second.parameters.empty() == false)
-			sceneInfo.skyStrength = util::to_float(itSkyStrength->second.parameters.front());
+			settings.skyStrength = util::to_float(itSkyStrength->second.parameters.front());
 
 		auto itSkyAngles = commandOptions.find("sky_angles");
 		if(itSkyAngles != commandOptions.end() && itSkyAngles->second.parameters.empty() == false)
-			sceneInfo.skyAngles = EulerAngles {itSkyAngles->second.parameters.front()};
+			settings.skyAngles = EulerAngles {itSkyAngles->second.parameters.front()};
 
-		Con::cout << "Executing raytracer... This may take a few minutes!" << Con::endl;
-		auto job = pragma::rendering::cycles::render_image(*client, sceneInfo, renderImgInfo);
-		if(job.IsValid()) {
-			job.SetCompletionHandler([format, quality, toneMapping](util::ParallelWorker<uimg::ImageLayerSet> &worker) {
-				if(worker.IsSuccessful() == false) {
-					Con::cwar << "Raytraced screenshot failed: " << worker.GetResultMessage() << Con::endl;
-					return;
-				}
-
-				auto path = get_screenshot_name(client ? client->GetGameState() : nullptr, format);
-				Con::cout << "Raytracing complete! Saving screenshot as '" << path << "'..." << Con::endl;
-				auto fp = FileManager::OpenFile<VFilePtrReal>(path.c_str(), "wb");
-				if(fp == nullptr) {
-					Con::cwar << "Unable to open file '" << path << "' for writing!" << Con::endl;
-					return;
-				}
-				auto imgBuffer = worker.GetResult().images.begin()->second;
-				if(imgBuffer->IsHDRFormat())
-					imgBuffer = imgBuffer->ApplyToneMapping(toneMapping);
-				fsys::File f {fp};
-				if(uimg::save_image(f, *imgBuffer, format, quality) == false)
-					Con::cwar << "Unable to save screenshot as '" << path << "'!" << Con::endl;
-
-				// Obsolete
-				// imgBuffer->Convert(util::ImageBuffer::Format::RGB8);
-				// util::tga::write_tga(f,imgBuffer->GetWidth(),imgBuffer->GetHeight(),static_cast<uint8_t*>(imgBuffer->GetData()));
-			});
-			job.Start();
-			c_engine->AddParallelJob(job, "Raytraced screenshot");
-		}
+		util::rt_screenshot(*game, width, height, settings, format);
 		return;
 	}
 
-	auto scene = game->GetScene();
-	std::shared_ptr<prosper::IImage> imgScreenshot = nullptr;
-	std::shared_ptr<prosper::IBuffer> bufScreenshot = nullptr;
-	{
-		// Just use the last rendered image
-		auto *renderer = scene ? dynamic_cast<pragma::CRendererComponent *>(scene->GetRenderer()) : nullptr;
-		if(renderer == nullptr) {
-			Con::cwar << "No scene renderer found!" << Con::endl;
-			return;
-		}
-		auto rasterC = renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>();
-		if(rasterC.expired()) {
-			Con::cwar << "No rasterization renderer found!" << Con::endl;
-			return;
-		}
-
-		enum class ImageStage : uint8_t { GameScene = 0, ScreenOutput };
-		auto stage = ImageStage::ScreenOutput;
-		std::shared_ptr<prosper::RenderTarget> rt = nullptr;
-		switch(stage) {
-		case ImageStage::GameScene:
-			rt = rasterC->GetHDRInfo().toneMappedRenderTarget;
-			break;
-		case ImageStage::ScreenOutput:
-			rt = c_engine->GetRenderContext().GetWindow().GetStagingRenderTarget();
-			break;
-		}
-		if(rt == nullptr) {
-			Con::cwar << "Scene render target is invalid!" << Con::endl;
-			return;
-		}
-		c_engine->GetRenderContext().WaitIdle(); // Make sure rendering is complete
-
-		auto &img = rt->GetTexture().GetImage();
-		imgScreenshot = img.shared_from_this();
-
-		auto bufSize = img.GetWidth() * img.GetHeight() * prosper::util::get_byte_size(img.GetFormat());
-		auto extents = img.GetExtents();
-		bufScreenshot = c_engine->GetRenderContext().AllocateTemporaryBuffer(bufSize);
-
-		// TODO: Check if image formats are compatible (https://www.khronos.org/registry/vulkan/specs/1.1-extensions/html/vkspec.html#features-formats-compatibility)
-		// before issuing the copy command
-		uint32_t queueFamilyIndex;
-		auto cmdBuffer = c_engine->GetRenderContext().AllocatePrimaryLevelCommandBuffer(prosper::QueueFamilyType::Universal, queueFamilyIndex);
-		cmdBuffer->StartRecording();
-		cmdBuffer->RecordImageBarrier(img, prosper::ImageLayout::ColorAttachmentOptimal, prosper::ImageLayout::TransferSrcOptimal);
-		cmdBuffer->RecordCopyImageToBuffer({}, img, prosper::ImageLayout::TransferDstOptimal, *bufScreenshot);
-		cmdBuffer->RecordImageBarrier(img, prosper::ImageLayout::TransferSrcOptimal, prosper::ImageLayout::ColorAttachmentOptimal);
-		// Note: Blit can't be used because some Nvidia GPUs don't support blitting for images with linear tiling
-		//.RecordBlitImage(**cmdBuffer,{},**img,**imgDst);
-		cmdBuffer->StopRecording();
-		c_engine->GetRenderContext().SubmitCommandBuffer(*cmdBuffer, true);
-	}
-	if(bufScreenshot == nullptr) {
-		Con::cwar << "Failed to create screenshot image buffer!" << Con::endl;
-		return;
-	}
-	auto imgFormat = uimg::ImageFormat::PNG;
-	auto path = get_screenshot_name(game, imgFormat);
-	auto fp = FileManager::OpenFile<VFilePtrReal>(path.c_str(), "wb");
-	if(fp == nullptr) {
-		Con::cwar << "Failed to open image output file '" << path << "' for writing!" << Con::endl;
-		return;
-	}
-	auto format = imgScreenshot->GetFormat();
-	auto bSwapped = false;
-	if(format == prosper::Format::B8G8R8A8_UNorm) {
-		format = prosper::Format::R8G8B8A8_UNorm;
-		bSwapped = true;
-	}
-	else if(format == prosper::Format::B8G8R8_UNorm_PoorCoverage) {
-		format = prosper::Format::R8G8B8_UNorm_PoorCoverage;
-		bSwapped = true;
-	}
-
-	void *data;
-	auto byteSize = prosper::util::get_byte_size(format);
-	auto extents = imgScreenshot->GetExtents();
-	auto numBytes = extents.width * extents.height * byteSize;
-	bufScreenshot->Map(0ull, numBytes, prosper::IBuffer::MapFlags::None, &data);
-	auto imgBuf = uimg::ImageBuffer::Create(data, extents.width, extents.height, uimg::Format::RGBA8);
-	fsys::File f {fp};
-	uimg::save_image(f, *imgBuf, imgFormat);
-	bufScreenshot->Unmap();
-	//util::tga::write_tga(f,extents.width,extents.height,pixels);
-	Con::cout << "Saved screenshot as '" << path << "'!" << Con::endl;
+	auto path = util::screenshot(*game);
+	if(path)
+		Con::cout << "Saved screenshot as '" << *path << "'!" << Con::endl;
 }
 
 DLLCLIENT void CMD_shader_reload(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)

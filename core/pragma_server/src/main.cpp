@@ -9,7 +9,7 @@
 
 int main(int argc, char *argv[])
 try {
-	std::vector<std::string> extraArgs {"-log_file", "log_server.txt"};
+	std::vector<std::string> extraArgs {"-log_file", "log_server.txt", "-console_subsystem"};
 	auto cargs = pragma::merge_arguments(argc, argv, extraArgs);
 	auto hModule = pragma::launch_pragma(cargs.size(), cargs.data(), true);
 	return hModule ? EXIT_SUCCESS : EXIT_FAILURE;

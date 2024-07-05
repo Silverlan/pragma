@@ -458,6 +458,9 @@ ConVar *ClientState::SetConVar(std::string scmd, std::string value, bool bApplyI
 
 void ClientState::Draw(util::DrawSceneInfo &drawSceneInfo) //const Vulkan::RenderPass &renderPass,const Vulkan::Framebuffer &framebuffer,const Vulkan::CommandBuffer &drawCmd); // prosper TODO
 {
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	debug::get_domain().BeginTask("draw_game_scenes");
+#endif
 	if(m_game != nullptr)
 		GetGameState()->RenderScenes(drawSceneInfo);
 	/*else // If game is NULL, that means render target has not been used in any render pass and we must transition the image layout ourselves
@@ -471,6 +474,9 @@ void ClientState::Draw(util::DrawSceneInfo &drawSceneInfo) //const Vulkan::Rende
 		);
 	}*/
 	CallCallbacks("Draw"); // Don't call this more than once to prevent infinite loops
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	debug::get_domain().EndTask();
+#endif
 }
 
 void ClientState::Render(util::DrawSceneInfo &drawSceneInfo, std::shared_ptr<prosper::RenderTarget> &rt)

@@ -33,6 +33,7 @@
 #include <sharedutils/util_library.hpp>
 #include <pragma/util/util_module.hpp>
 #include "pragma/asset/util_asset.hpp"
+#include "pragma/logging.hpp"
 
 #define DLLSPEC_ISTEAMWORKS DLLNETWORK
 #include "pragma/game/isteamworks.hpp"
@@ -284,13 +285,16 @@ float NetworkState::GetSoundDuration(std::string snd)
 
 void NetworkState::StartNewGame(const std::string &map, bool singlePlayer)
 {
-	if(!IsGameActive())
+	if(!IsGameActive()) {
+		spdlog::info("Starting new {} game...", singlePlayer ? "single-player" : "multi-player");
 		StartGame(singlePlayer);
+	}
 	ChangeLevel(map);
 }
 
 void NetworkState::ChangeLevel(const std::string &map)
 {
+	spdlog::info("Changing map to '{}'...", map);
 	m_mapInfo = std::make_unique<MapInfo>();
 	m_mapInfo->name = map;
 	Game *game = GetGameState();

@@ -584,7 +584,7 @@ bool CEngine::Initialize(int argc, char *argv[])
 
 	if(g_launchParamExperimentalMemoryOptimizationEnabled) {
 		// PhysX has a lower memory footprint compared to bullet
-		m_launchCommands.push_back({"phys_engine", {"physx"}});
+		// m_launchCommands.push_back({"phys_engine", {"physx"}});
 		pragma::ShaderGameWorldLightingPass::SetMinimalPipelineModeEnabled(true);
 	}
 

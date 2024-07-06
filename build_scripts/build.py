@@ -854,7 +854,7 @@ if with_pfm:
 if with_vr:
 	add_pragma_module(
 		name="pr_openvr",
-		commitSha="cbcdab952f930b0f57870260b7c9f18038f7a88d",
+		commitSha="91840de8725f59bd7b4b203d15f607c20ffac1cf",
 		repositoryUrl="https://github.com/Silverlan/pr_openvr.git"
 	)
 

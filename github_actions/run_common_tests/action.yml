@@ -1,0 +1,46 @@
+name: Run Common Pragma Tests
+description: 'Runs all common Pragma tests.'
+inputs:
+  working-directory:
+    description: 'The location where Pragma resides. If no Pragma installation is found, it will be installed in this location.'
+    required: true
+    default: 'pragma'
+  import-tests-token:
+    required: false
+    default: ""
+runs:
+  using: "composite"
+  steps:
+    - name: Base Tests
+      uses: Silverlan/pragma/github_actions/run_tests@main
+      with:
+        test-scripts: |
+          "tests/assets/assets.lua"
+          "tests/game/game.lua"
+          "tests/pfm/launch_pfm.lua"
+        working-directory: "${{ inputs.working-directory }}"
+        artifacts-name: "base-tests"
+        screenshot: true
+
+    - name: Checkout Import Tests
+      uses: actions/checkout@v4
+      if: ${{ inputs.import-tests-token }} != ""
+      with:
+        repository: Silverlan/pragma_tests_import
+        token: ${{ inputs.import-tests-token }}
+        path: "pragma_tests_import"
+
+    - name: Copy Import Tests files
+      shell: bash
+      run: |
+        cp -rf pragma_tests_import/* ${{ inputs.working-directory }}/
+        rm -rf pragma_tests_import
+
+    - name: Import Tests
+      uses: Silverlan/pragma/github_actions/run_tests@main
+      with:
+        test-scripts: |
+          "tests/import_assets.lua"
+        working-directory: "${{ inputs.working-directory }}"
+        artifacts-name: "import-tests"
+        screenshot: true

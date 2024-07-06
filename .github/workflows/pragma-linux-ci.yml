@@ -85,19 +85,11 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           files: "pragma-lin64.tar.gz"
           
-#      - name: Run Server Tests
-#        uses: benc-uk/workflow-dispatch@v1
-#        timeout-minutes: 10
-#        with:
-#          workflow: pragma-server-tests-ci.yml
-#          inputs: '{ "os": "ubuntu" }'
-
-#      - name: Run Tests
-#        uses: benc-uk/workflow-dispatch@v1
-#        timeout-minutes: 10
-#        with:
-#          workflow: pragma-tests-ci.yml
-#          inputs: '{ "os": "ubuntu" }'
+      #- name: Run Tests
+      #  uses: benc-uk/workflow-dispatch@v1
+      #  with:
+      #    workflow: pragma-tests-ci.yml
+      #    inputs: '{ "os": "ubuntu" }'
 
       - name: Generate File Lists
         shell: bash

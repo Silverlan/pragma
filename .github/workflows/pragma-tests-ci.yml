@@ -24,65 +24,10 @@ jobs:
     - name: Set Initial Workflow Status
       run: echo "WORKFLOW_STATUS=success" >> $GITHUB_ENV
 
-    - name: Checkout repository
-      uses: actions/checkout@v3
-
-    - name: Download Pragma (Windows)
-      if: runner.os == 'Windows'
-      run: |
-        $repo = $env:GITHUB_REPOSITORY
-        Invoke-WebRequest -Uri "https://github.com/$repo/releases/download/nightly/pragma-win64.zip" -OutFile "pragma-win64.zip"
-        Expand-Archive -Path "pragma-win64.zip" -DestinationPath "pragma"
-
-    - name: Download Pragma (Linux)
-      if: runner.os == 'Linux'
-      run: |
-        wget https://github.com/$GITHUB_REPOSITORY/releases/download/nightly/pragma-lin64.tar.gz
-        mkdir pragma
-        tar -xzvf pragma-lin64.tar.gz -C pragma
-
-    - name: Run Test Scripts
-      shell: bash
-      run: |
-        cd "pragma"
-        if [ "$RUNNER_OS" == "Linux" ]; then
-          chmod +x ./pragma
-        fi
-        ./pragma -cli -luaext -log 2 2 +map "test_physics" +"lua_exec tests/ci_runner_tests.lua"
-        EXIT_CODE=$?
-        # Check the exit code
-        if [ $EXIT_CODE -eq 0 ]; then
-          echo "Tests were successful."
-        else
-          echo "Tests have failed with exit code $EXIT_CODE."
-          exit 1 # Exit the step with an error status
-        fi
-
-    - name: Check Result
-      shell: bash
-      run: |
-        CI_CONTENTS=$(cat "pragma/ci.txt")
-        if [ $exit_code -ne 0 ]; then
-          exit $exit_code
-        fi
-        if [ "$CI_CONTENTS" == "0" ]; then
-          echo "ci.txt contains '0'. Step failed."
-          exit 1
-        fi
-
-    - name: Upload Log
-      uses: actions/upload-artifact@v4
-      if: always()
+    - name: Run Tests
+      uses: Silverlan/pragma/github_actions/run_common_tests@main
       with:
-        name: log
-        path: "pragma/log.txt"
-
-    - name: Upload Crashdumps
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: crashdumps
-        path: "pragma/crashdumps"
+        import-tests-token: ${{ secrets.PRAGMA_TESTS_IMPORT_TOKEN }}
 
     - name: Set Failure Workflow Status
       if: failure()

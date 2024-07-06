@@ -53,7 +53,7 @@ runs:
           for _,script in ipairs(scripts) do
             include(script)
           end
-          local cbOnTestComplete = tests.add_event_listener(\"OnTestComplete\", function(success, errMsg)
+          local cbOnTestComplete = tests.add_event_listener(\"OnAllTestsComplete\", function(success, errMsg)
             if(${{ inputs.screenshot }}) then
               -- Wait a few frames before taking the screenshot
               game.wait_for_frames(5, function()

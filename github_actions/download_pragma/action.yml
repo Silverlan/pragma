@@ -1,0 +1,48 @@
+name: Download Pragma
+description: 'Download Pragma.'
+inputs:
+  working-directory:
+    description: 'The location where Pragma resides. If no Pragma installation is found, it will be installed in this location.'
+    required: true
+    default: 'pragma'
+  version:
+    description: 'The version of Pragma to download.'
+    required: true
+    default: 'nightly'
+runs:
+  using: "composite"
+  steps:
+    - name: Download Pragma
+      shell: bash
+      run: |
+        if [ -d "${{ inputs.working-directory }}" ]; then
+          echo "Pragma already exists. Skipping download."
+        else
+          repo="Silverlan/pragma"
+
+          version="${{ inputs.version }}"
+
+          dlUrl="https://github.com/Silverlan/pragma/releases/download/${version}/"
+          if [ "$RUNNER_OS" == "Linux" ]; then
+            if [ "$version" == "nightly" ]; then
+              fileName="pragma-lin64.tar.gz"
+            else
+              fileName="pragma-${version}-lin64.tar.gz"
+            fi
+          else
+            if [ "$version" == "nightly" ]; then
+              fileName="pragma-win64.zip"
+            else
+              fileName="pragma-${version}-win64.zip"
+            fi
+          fi
+          dlUrl="${dlUrl}${fileName}"
+
+          curl -L "${dlUrl}" -o "${fileName}"
+          mkdir -p "${{ inputs.working-directory }}"
+          if [[ $fileName == *.tar.gz ]]; then
+            tar -xzf ${fileName} -C "${{ inputs.working-directory }}"
+          else
+            unzip -q ${fileName} -d "${{ inputs.working-directory }}"
+          fi
+        fi

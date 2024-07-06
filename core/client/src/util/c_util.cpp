@@ -55,12 +55,12 @@ void util::rt_screenshot(CGame &game, uint32_t width, uint32_t height, const RtS
 	// A raytracing screenshot has been requested; We'll have to re-render the scene with raytracing enabled
 
 	auto resolution = c_engine->GetRenderResolution();
-	pragma::rendering::cycles::SceneInfo sceneInfo {};
+	::pragma::rendering::cycles::SceneInfo sceneInfo {};
 	sceneInfo.width = width;
 	sceneInfo.height = height;
 	sceneInfo.samples = settings.samples;
 	sceneInfo.hdrOutput = false; //;//(format == pragma::image::ImageOutputFormat::HDR);
-	pragma::rendering::cycles::RenderImageInfo renderImgInfo {};
+	::pragma::rendering::cycles::RenderImageInfo renderImgInfo {};
 	if(pCam) {
 		renderImgInfo.camPose = pCam->GetEntity().GetPose();
 		renderImgInfo.farZ = pCam->GetFarZ();
@@ -78,7 +78,7 @@ void util::rt_screenshot(CGame &game, uint32_t width, uint32_t height, const RtS
 	sceneInfo.skyAngles = settings.skyAngles;
 
 	Con::cout << "Executing raytracer... This may take a few minutes!" << Con::endl;
-	auto job = pragma::rendering::cycles::render_image(*client, sceneInfo, renderImgInfo);
+	auto job = ::pragma::rendering::cycles::render_image(*client, sceneInfo, renderImgInfo);
 	if(job.IsValid()) {
 		job.SetCompletionHandler([format, quality, toneMapping](util::ParallelWorker<uimg::ImageLayerSet> &worker) {
 			if(worker.IsSuccessful() == false) {
@@ -118,12 +118,12 @@ std::optional<std::string> util::screenshot(CGame &game)
 	std::shared_ptr<prosper::IBuffer> bufScreenshot = nullptr;
 	{
 		// Just use the last rendered image
-		auto *renderer = scene ? dynamic_cast<pragma::CRendererComponent *>(scene->GetRenderer()) : nullptr;
+		auto *renderer = scene ? dynamic_cast<::pragma::CRendererComponent *>(scene->GetRenderer()) : nullptr;
 		if(renderer == nullptr) {
 			Con::cwar << "No scene renderer found!" << Con::endl;
 			return {};
 		}
-		auto rasterC = renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>();
+		auto rasterC = renderer->GetEntity().GetComponent<::pragma::CRasterizationRendererComponent>();
 		if(rasterC.expired()) {
 			Con::cwar << "No rasterization renderer found!" << Con::endl;
 			return {};

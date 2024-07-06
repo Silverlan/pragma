@@ -1,6 +1,10 @@
 name: Run Pragma Tests
 description: 'Run a Pragma Test Lua-script.'
 inputs:
+  working-directory:
+    description: 'The location where Pragma resides. If no Pragma installation is found, it will be installed in this location.'
+    required: true
+    default: 'pragma'
   test-scripts:
     description: 'The test script(s) to execute.'
     required: true
@@ -40,6 +44,7 @@ runs:
         state: "${{ inputs.state }}"
         version: "${{ inputs.version }}"
         artifacts-name: "${{ inputs.artifacts-name }}"
+        working-directory: "${{ inputs.working-directory }}"
         lua-code: |
           include(\"/tests/base.lua\")
           local scripts = {

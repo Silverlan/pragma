@@ -854,7 +854,7 @@ if with_pfm:
 if with_vr:
 	add_pragma_module(
 		name="pr_openvr",
-		commitSha="54ab920d9ab71c57ce6d2c059187af0c6a99928f",
+		commitSha="cbcdab952f930b0f57870260b7c9f18038f7a88d",
 		repositoryUrl="https://github.com/Silverlan/pr_openvr.git"
 	)
 
@@ -1074,7 +1074,7 @@ if not skip_repository_updates:
 		download_addon("model editor","tool_model_editor","https://github.com/Silverlan/pragma_model_editor.git","56d46dacb398fa7540e794359eaf1081c9df1edd")
 
 	if with_vr:
-		download_addon("VR","virtual_reality","https://github.com/Silverlan/PragmaVR.git","271d264ffcc2373ccfd197c5a1a7aacb557726c3")
+		download_addon("VR","virtual_reality","https://github.com/Silverlan/PragmaVR.git","a531c84cf56bd121d36eea03c25f8c38eec17872")
 
 	if with_pfm:
 		download_addon("PFM Living Room Demo","pfm_demo_living_room","https://github.com/Silverlan/pfm_demo_living_room.git","4cbecad4a2d6f502b6d9709178883678101f7e2c")

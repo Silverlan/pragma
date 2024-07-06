@@ -38,6 +38,7 @@ function tests.TestManager:CompleteTest(success, msg)
 
 	if #self.m_testQueue == 0 then
 		print("All tests have been completed!")
+		self:CallCallbacks("OnAllTestsComplete")
 	end
 end
 

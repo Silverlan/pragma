@@ -21,10 +21,6 @@ inputs:
     description: 'The version of Pragma to download (if it not already exists).'
     required: true
     default: 'nightly'
-  screenshot:
-    description: 'If enabled (and artifacts-name has been specified), a screenshot will be taken and uploaded as artifact after the script has been executed.'
-    required: true
-    default: false
   artifacts-name:
     description: 'If specified, debug files (e.g. logs) will be uploaded as artifacts under this name.'
     required: true

@@ -191,6 +191,13 @@ jobs:
           cp -u "files_pragma_deps.txt" artifacts/
           cp -u "files_pragma_install.txt" artifacts/
 
+      - name: Discord Notifcation
+        uses: benc-uk/workflow-dispatch@v1
+        if: ${{ github.repository == 'Silverlan/pragma' }}
+        with:
+          workflow: discord-notification.yml
+          inputs: '{ "webhook": "${{ secrets.PRAGMA_RELEASE_DISCORD_WEBHOOK }}", "message": "A new nightly pre-release build has been generated! It is available for download here:\n<https://github.com/Silverlan/pragma/releases/tag/nightly>\n\nThis is NOT a stable release, use with caution! Only use this version for testing!" }'
+
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         if: always()

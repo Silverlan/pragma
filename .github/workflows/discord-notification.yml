@@ -1,0 +1,29 @@
+name: Discord Notification
+
+on:
+  workflow_dispatch:
+    inputs:
+      webhook:
+        type: string
+        required: true
+      message:
+        type: string
+        required: true
+
+jobs:
+  test:
+    name: Discord Notification
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - os: ubuntu-latest
+
+    steps:
+      - name: Discord notification
+        env:
+          DISCORD_WEBHOOK: ${{ github.event.inputs.webhook }}
+        uses: Ilshidur/action-discord@master
+        with:
+          args: "${{ github.event.inputs.message }}"

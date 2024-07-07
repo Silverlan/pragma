@@ -11,6 +11,16 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Serverside Tests
+      uses: Silverlan/pragma/github_actions/run_tests@main
+      with:
+        test-scripts: |
+          "tests/assets/assets.lua"
+          "tests/game/game.lua"
+        working-directory: "${{ inputs.working-directory }}"
+        artifacts-name: "server-tests"
+        state: "server"
+
     - name: Base Tests
       uses: Silverlan/pragma/github_actions/run_tests@main
       with:

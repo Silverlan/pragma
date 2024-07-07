@@ -22,7 +22,8 @@ jobs:
 
     steps:
     - name: Set Initial Workflow Status
-      run: echo "WORKFLOW_STATUS=success" >> $GITHUB_ENV
+      run: |
+        echo ("WORKFLOW_STATUS=success") >> $env:GITHUB_ENV
 
     - name: Run Tests
       uses: Silverlan/pragma/github_actions/run_common_tests@main
@@ -31,13 +32,8 @@ jobs:
 
     - name: Set Failure Workflow Status
       if: failure()
-      run: echo "WORKFLOW_STATUS=failure" >> $GITHUB_ENV
-      
-    - name: Set Failure Workflow Status
-      if: always()
-      shell: bash
       run: |
-        echo "WORKFLOW_STATUS=failure" >> $GITHUB_ENV
+        echo ("WORKFLOW_STATUS=failure") >> $env:GITHUB_ENV
       
     - uses: LouisBrunner/checks-action@v2.0.0
       if: always()
@@ -46,4 +42,4 @@ jobs:
         conclusion: ${{ env.WORKFLOW_STATUS }}
         name: "Tests - ${{ matrix.config.os }}"
         output: |
-          {"summary":"Test result is '${{ env.WORKFLOW_STATUS }}'."}
+          {"summary":"Test result is '${{ env.WORKFLOW_STATUS }}'. See \"Run Tests\" action for details."}

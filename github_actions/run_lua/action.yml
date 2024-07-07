@@ -96,11 +96,6 @@ runs:
         EXIT_CODE=$?
         echo "exit-code=$(echo $EXIT_CODE)" >> $GITHUB_OUTPUT
 
-    - name: Clean-up
-      shell: bash
-      run: |
-        rm "${{ inputs.working-directory }}/lua/ci_script.lua"
-
     - name: Check script execution result
       id: handle-result
       shell: bash
@@ -155,3 +150,30 @@ runs:
       with:
         name: ${{ inputs.artifacts-name }}
         path: "artifacts"
+
+    - name: Clean-up
+      shell: bash
+      run: |
+        if [ -d "artifacts" ]; then
+          rm -rf "artifacts"
+        fi
+
+        cd "${{ inputs.working-directory }}"
+        if [ -e "lua/ci_script.lua" ]; then
+          rm "lua/ci_script.lua"
+        fi
+        if [ -e "log.txt" ]; then
+          rm "log.txt"
+        fi
+        if [ -e "ci.txt" ]; then
+          rm "ci.txt"
+        fi
+        if [ -e "ci_lua_error.txt" ]; then
+          rm "ci_lua_error.txt"
+        fi
+        if [ -d "crashdumps" ]; then
+          rm -rf "crashdumps"
+        fi
+        if [ -d "artifacts" ]; then
+          rm -rf "artifacts"
+        fi

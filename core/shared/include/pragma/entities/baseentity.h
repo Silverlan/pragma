@@ -119,6 +119,7 @@ class DLLNETWORK BaseEntity : public pragma::BaseLuaHandle, public pragma::BaseE
 	virtual bool IsStatic() const;
 	bool IsDynamic() const;
 	virtual NetworkState *GetNetworkState() const = 0;
+	Game &GetGame() const;
 
 	pragma::NetEventId FindNetEvent(const std::string &name) const;
 
@@ -174,6 +175,7 @@ class DLLNETWORK BaseEntity : public pragma::BaseLuaHandle, public pragma::BaseE
 	uint32_t GetBodyGroup(const std::string &name) const;
 	void SetBodyGroup(const std::string &name, uint32_t id);
 
+	BaseEntity *CreateChild(const std::string &className);
 	void SetParent(BaseEntity *parent);
 	void ClearParent();
 	BaseEntity *GetParent() const;

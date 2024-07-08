@@ -23,6 +23,16 @@
 #include "pragma/entities/entity_component_system_t.hpp"
 #include "pragma/util/global_string_table.hpp"
 
+Game &BaseEntity::GetGame() const { return *GetNetworkState()->GetGameState(); }
+BaseEntity *BaseEntity::CreateChild(const std::string &className)
+{
+	auto &game = GetGame();
+	auto *child = game.CreateEntity(className);
+	if(!child)
+		return nullptr;
+	child->SetParent(this);
+	return child;
+}
 void BaseEntity::SetEnabled(bool enabled)
 {
 	auto *toggleC = dynamic_cast<pragma::BaseToggleComponent *>(FindComponent("toggle").get());

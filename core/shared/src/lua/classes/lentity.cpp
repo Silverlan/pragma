@@ -133,6 +133,7 @@ void Lua::Entity::register_class(luabind::class_<BaseEntity> &classDef)
 	classDef.def("GetIndex", &BaseEntity::GetIndex);
 	classDef.def("GetLocalIndex", &BaseEntity::GetLocalIndex);
 	classDef.def("IsMapEntity", &BaseEntity::IsMapEntity);
+	classDef.def("CreateChild", &BaseEntity::CreateChild);
 	classDef.def(
 	  "CallOnRemove", +[](lua_State *l, BaseEntity &ent, const Lua::func<void> &function) -> CallbackHandle {
 		  return ent.CallOnRemove(FunctionCallback<void>::Create([l, function]() {

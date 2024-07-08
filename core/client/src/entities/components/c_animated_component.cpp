@@ -10,8 +10,7 @@
 #include "pragma/entities/components/c_eye_component.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_vertex_animated_component.hpp"
-#include "pragma/entities/components/c_parent_component.hpp"
-#include "pragma/entities/components/c_attachable_component.hpp"
+#include "pragma/entities/components/c_attachment_component.hpp"
 #include "pragma/entities/components/c_transform_component.hpp"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/lua/libraries/c_lua_vulkan.h"
@@ -170,7 +169,6 @@ void CAnimatedComponent::ResetAnimation(const std::shared_ptr<Model> &mdl)
 
 	// Attach particles defined in the model
 	auto &ent = GetEntity();
-	auto pParentComponent = ent.GetComponent<CParentComponent>();
 	for(auto &objAttachment : mdl->GetObjectAttachments()) {
 		switch(objAttachment.type) {
 		case ObjectAttachment::Type::Model:
@@ -200,7 +198,7 @@ void CAnimatedComponent::ResetAnimation(const std::shared_ptr<Model> &mdl)
 				auto *pt = CParticleSystemComponent::Create(itParticle->second);
 				if(pt != nullptr) {
 					auto &entPt = pt->GetEntity();
-					auto pAttachableComponent = entPt.AddComponent<CAttachableComponent>();
+					auto pAttachableComponent = entPt.AddComponent<CAttachmentComponent>();
 					if(pAttachableComponent.valid()) {
 						auto pTrComponentPt = entPt.GetTransformComponent();
 						if(pTrComponentPt) {

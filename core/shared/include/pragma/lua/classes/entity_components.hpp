@@ -11,7 +11,7 @@
 #include "pragma/lua/types/udm.hpp"
 
 namespace pragma {
-	class BaseAttachableComponent;
+	class ChildComponent;
 	class BaseAnimatedComponent;
 	struct EntityURef;
 	struct MultiEntityURef;

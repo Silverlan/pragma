@@ -7,23 +7,23 @@
 #include "stdafx_server.h"
 #include "pragma/networking/s_nwm_util.h"
 #include <pragma/networking/enums.hpp>
-#include <pragma/entities/components/base_parent_component.hpp>
+#include <pragma/entities/components/parent_component.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
-#include "pragma/entities/components/s_attachable_component.hpp"
+#include "pragma/entities/components/s_attachment_component.hpp"
 #include "pragma/lua/s_lentity_handles.hpp"
 
 using namespace pragma;
 
 extern DLLSERVER ServerState *server;
 
-void SAttachableComponent::Initialize() { BaseAttachableComponent::Initialize(); }
-void SAttachableComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void SAttachmentComponent::Initialize() { BaseAttachmentComponent::Initialize(); }
+void SAttachmentComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
-void SAttachableComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const { outTypeIndex = std::type_index(typeid(BaseAttachableComponent)); }
+void SAttachmentComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const { outTypeIndex = std::type_index(typeid(BaseAttachmentComponent)); }
 
-AttachmentData *SAttachableComponent::SetupAttachment(BaseEntity *ent, const AttachmentInfo &attInfo)
+AttachmentData *SAttachmentComponent::SetupAttachment(BaseEntity *ent, const AttachmentInfo &attInfo)
 {
-	auto *attData = BaseAttachableComponent::SetupAttachment(ent, attInfo);
+	auto *attData = BaseAttachmentComponent::SetupAttachment(ent, attInfo);
 	auto &entThis = static_cast<SBaseEntity &>(GetEntity());
 	if(entThis.IsShared() && attData != nullptr) {
 		NetPacket p;
@@ -37,9 +37,9 @@ AttachmentData *SAttachableComponent::SetupAttachment(BaseEntity *ent, const Att
 	return attData;
 }
 
-void SAttachableComponent::SetAttachmentFlags(FAttachmentMode flags)
+void SAttachmentComponent::SetAttachmentFlags(FAttachmentMode flags)
 {
-	BaseAttachableComponent::SetAttachmentFlags(flags);
+	BaseAttachmentComponent::SetAttachmentFlags(flags);
 	auto &entThis = static_cast<SBaseEntity &>(GetEntity());
 	if(entThis.IsShared()) {
 		NetPacket p;
@@ -49,7 +49,7 @@ void SAttachableComponent::SetAttachmentFlags(FAttachmentMode flags)
 	}
 }
 
-void SAttachableComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)
+void SAttachmentComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)
 {
 	if(m_attachment == nullptr)
 		packet->Write<Bool>(false);
@@ -69,10 +69,5 @@ void SAttachableComponent::SendData(NetPacket &packet, networking::ClientRecipie
 			for(auto it = info->boneMapping.begin(); it != info->boneMapping.end(); ++it)
 				packet->Write<int>(*it);
 		}
-		auto &hParent = info->parent;
-		if(hParent.expired())
-			nwm::write_unique_entity(packet, nullptr);
-		else
-			nwm::write_unique_entity(packet, &hParent->GetEntity());
 	}
 }

@@ -27,7 +27,7 @@
 #include "pragma/entities/components/c_observable_component.hpp"
 #include "pragma/entities/components/c_sound_emitter_component.hpp"
 #include "pragma/entities/components/c_character_component.hpp"
-#include "pragma/entities/components/c_attachable_component.hpp"
+#include "pragma/entities/components/c_attachment_component.hpp"
 #include "pragma/networking/c_nwm_util.h"
 #include <pragma/entities/components/submergible_component.hpp>
 #include <pragma/physics/raytraces.h>
@@ -430,7 +430,7 @@ void CPlayerComponent::UpdateViewModelTransform()
 		pTrComponentVm->SetPosition(offset);
 		pTrComponentVm->SetRotation(rot);
 	}
-	auto pAttComponent = vmEnt.AddComponent<CAttachableComponent>();
+	auto pAttComponent = vmEnt.AddComponent<CAttachmentComponent>();
 	if(pAttComponent.valid()) {
 		AttachmentInfo attInfo {};
 		attInfo.flags |= FAttachmentMode::PlayerView | FAttachmentMode::UpdateEachFrame;
@@ -480,7 +480,7 @@ void CPlayerComponent::SetLocalPlayer(bool b)
 			pTrComponentBody->SetPosition(pos);
 			pTrComponentBody->SetRotation(Quat(rot));
 		}
-		auto pAttComponent = entBody.AddComponent<CAttachableComponent>();
+		auto pAttComponent = entBody.AddComponent<CAttachmentComponent>();
 		if(pAttComponent.valid()) {
 			AttachmentInfo attInfo {};
 			attInfo.flags |= FAttachmentMode::PlayerViewYaw | FAttachmentMode::BoneMerge | FAttachmentMode::UpdateEachFrame;
@@ -499,7 +499,7 @@ void CPlayerComponent::SetLocalPlayer(bool b)
 			pTrComponentListener->SetPosition(pTrComponent->GetPosition());
 			pTrComponentListener->SetRotation(pTrComponent->GetRotation());
 		}
-		auto pAttComponent = entListener.AddComponent<CAttachableComponent>();
+		auto pAttComponent = entListener.AddComponent<CAttachmentComponent>();
 		if(pAttComponent.valid()) {
 			AttachmentInfo attInfo {};
 			attInfo.flags |= FAttachmentMode::PlayerView;
@@ -589,7 +589,7 @@ void CPlayerComponent::ReceiveData(NetPacket &packet)
 			pTrComponentEnt->SetPosition(charComponent.valid() ? (charComponent->GetEyePosition() + charComponent->GetViewRight() * 12.f + charComponent->GetViewForward() * 5.f) : pTrComponent->GetPosition());
 			pTrComponentEnt->SetRotation(charComponent.valid() ? charComponent->GetViewOrientation() : pTrComponent->GetRotation());
 		}
-		auto pAttComponent = ent->AddComponent<CAttachableComponent>();
+		auto pAttComponent = ent->AddComponent<CAttachmentComponent>();
 		if(pAttComponent.valid()) {
 			AttachmentInfo attInfo {};
 			attInfo.flags |= FAttachmentMode::PlayerView | FAttachmentMode::UpdateEachFrame;

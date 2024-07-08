@@ -358,6 +358,7 @@ pragma::BaseTransformComponent *BaseEntity::GetTransformComponent() const { retu
 pragma::BasePhysicsComponent *BaseEntity::GetPhysicsComponent() const { return m_physicsComponent; }
 pragma::BaseModelComponent *BaseEntity::GetModelComponent() const { return m_modelComponent; }
 pragma::BaseGenericComponent *BaseEntity::GetGenericComponent() const { return m_genericComponent; }
+pragma::BaseChildComponent *BaseEntity::GetChildComponent() const { return m_childComponent; }
 
 bool BaseEntity::IsRemoved() const { return umath::is_flag_set(m_stateFlags, StateFlags::Removed); }
 void BaseEntity::Remove() {}

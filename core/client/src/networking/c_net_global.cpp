@@ -39,7 +39,7 @@
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_name_component.hpp"
 #include "pragma/entities/components/c_health_component.hpp"
-#include "pragma/entities/components/c_attachable_component.hpp"
+#include "pragma/entities/components/c_attachment_component.hpp"
 #include "pragma/gui/wiluabase.h"
 #include <pragma/math/intersection.h>
 #include <pragma/entities/baseentity_trace.hpp>
@@ -394,7 +394,7 @@ DLLCLIENT void NET_cl_ent_setparent(NetPacket packet)
 	auto flags = packet->Read<FAttachmentMode>();
 	auto offset = packet->Read<Vector3>();
 	auto rot = packet->Read<Quat>();
-	auto pAttComponent = ent->GetComponent<pragma::CAttachableComponent>();
+	auto pAttComponent = ent->GetComponent<pragma::CAttachmentComponent>();
 	if(pAttComponent.valid()) {
 		AttachmentInfo attInfo {};
 		attInfo.flags |= flags;
@@ -412,7 +412,7 @@ DLLCLIENT void NET_cl_ent_setparentmode(NetPacket packet)
 	if(ent == NULL)
 		return;
 	auto flags = packet->Read<FAttachmentMode>();
-	auto pAttComponent = ent->GetComponent<pragma::CAttachableComponent>();
+	auto pAttComponent = ent->GetComponent<pragma::CAttachmentComponent>();
 	if(pAttComponent.valid())
 		pAttComponent->SetAttachmentFlags(flags);
 }

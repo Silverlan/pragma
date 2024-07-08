@@ -43,6 +43,7 @@
 #include "pragma/entities/components/damageable_component.hpp"
 #include "pragma/entities/components/animation_driver_component.hpp"
 #include "pragma/entities/components/origin_component.hpp"
+#include "pragma/entities/components/parent_component.hpp"
 #include "pragma/entities/components/intersection_handler_component.hpp"
 #include "pragma/entities/components/constraints/constraint_component.hpp"
 #include "pragma/entities/components/constraints/constraint_space_component.hpp"
@@ -766,6 +767,9 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defUsable.add_static_constant("EVENT_ON_USE", pragma::UsableComponent::EVENT_ON_USE);
 	defUsable.add_static_constant("EVENT_CAN_USE", pragma::UsableComponent::EVENT_CAN_USE);
 	entsMod[defUsable];
+
+	auto defParent = pragma::lua::create_entity_component_class<pragma::ParentComponent, pragma::BaseEntityComponent>("ParentComponent");
+	entsMod[defParent];
 
 	auto defMap = pragma::lua::create_entity_component_class<pragma::MapComponent, pragma::BaseEntityComponent>("MapComponent");
 	defMap.def("GetMapIndex", &pragma::MapComponent::GetMapIndex);

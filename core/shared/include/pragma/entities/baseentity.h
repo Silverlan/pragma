@@ -40,6 +40,7 @@ namespace pragma {
 	class BaseEntityComponent;
 	class BaseModelComponent;
 	class BaseGenericComponent;
+	class BaseChildComponent;
 	class BaseAnimatedComponent;
 	class BaseWeaponComponent;
 	class BaseVehicleComponent;
@@ -50,7 +51,7 @@ namespace pragma {
 	class BaseTimeScaleComponent;
 	class BaseNameComponent;
 	class BaseTransformComponent;
-	class BaseParentComponent;
+	class ParentComponent;
 	struct EntityUComponentMemberRef;
 
 	using NetEventId = uint32_t;
@@ -152,6 +153,7 @@ class DLLNETWORK BaseEntity : public pragma::BaseLuaHandle, public pragma::BaseE
 	pragma::BaseTransformComponent *GetTransformComponent() const;
 	pragma::BasePhysicsComponent *GetPhysicsComponent() const;
 	pragma::BaseGenericComponent *GetGenericComponent() const;
+	pragma::BaseChildComponent *GetChildComponent() const;
 
 	// These are quick-access functions for commonly used component functions.
 	// In some cases these may create the component, if it doesn't exist, and transmit
@@ -174,7 +176,7 @@ class DLLNETWORK BaseEntity : public pragma::BaseLuaHandle, public pragma::BaseE
 
 	void SetParent(BaseEntity *parent);
 	void ClearParent();
-	pragma::BaseParentComponent *GetParent() const;
+	BaseEntity *GetParent() const;
 
 	PhysObj *GetPhysicsObject() const;
 	PhysObj *InitializePhysics(PHYSICSTYPE type);
@@ -290,6 +292,7 @@ class DLLNETWORK BaseEntity : public pragma::BaseLuaHandle, public pragma::BaseE
 	pragma::BasePhysicsComponent *m_physicsComponent = nullptr;
 	pragma::BaseModelComponent *m_modelComponent = nullptr;
 	pragma::BaseGenericComponent *m_genericComponent = nullptr;
+	pragma::BaseChildComponent *m_childComponent = nullptr;
 
 	// Should only be used by quick-access methods!
 	// Adds the component and trasmits the information

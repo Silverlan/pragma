@@ -11,13 +11,13 @@
 #include "pragma/game/c_game.h"
 #include "pragma/entities/environment/lights/c_env_light_spot.h"
 #include "pragma/entities/components/c_sound_emitter_component.hpp"
-#include "pragma/entities/components/c_attachable_component.hpp"
-#include "pragma/entities/components/c_parent_component.hpp"
+#include "pragma/entities/components/c_attachment_component.hpp"
 #include "pragma/entities/environment/lights/c_env_light_spot.h"
 #include "pragma/entities/components/c_radius_component.hpp"
 #include "pragma/entities/components/c_color_component.hpp"
 #include "pragma/lua/c_lentity_handles.hpp"
 #include <pragma/audio/alsound_type.h>
+#include <pragma/entities/components/parent_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
@@ -35,9 +35,9 @@ void CFlashlightComponent::Initialize()
 
 	auto &ent = GetEntity();
 	BindEvent(CLightComponent::EVENT_SHOULD_PASS_ENTITY, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
-		auto pAttComponent = GetEntity().GetComponent<CAttachableComponent>();
+		auto pAttComponent = GetEntity().GetComponent<CAttachmentComponent>();
 		auto *pParent = pAttComponent.valid() ? pAttComponent->GetParent() : nullptr;
-		if(pParent != nullptr && &static_cast<CEShouldPassEntity &>(evData.get()).entity == &pParent->GetEntity()) {
+		if(pParent != nullptr && &static_cast<CEShouldPassEntity &>(evData.get()).entity == pParent) {
 			static_cast<CEShouldPassEntity &>(evData.get()).shouldPass = false;
 			return util::EventReply::Handled;
 		}

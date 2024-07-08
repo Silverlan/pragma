@@ -6,22 +6,22 @@
  */
 
 #include "stdafx_client.h"
-#include "pragma/entities/components/c_attachable_component.hpp"
-#include "pragma/entities/components/c_parent_component.hpp"
+#include "pragma/entities/components/c_attachment_component.hpp"
 #include "pragma/entities/components/c_transform_component.hpp"
 #include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/entities/components/c_character_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/networking/c_nwm_util.h"
 #include <pragma/entities/entity_component_system_t.hpp>
+#include <pragma/entities/components/parent_component.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
 using namespace pragma;
 
 extern DLLCLIENT CGame *c_game;
 
-void CAttachableComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
-void CAttachableComponent::ReceiveData(NetPacket &packet)
+void CAttachmentComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CAttachmentComponent::ReceiveData(NetPacket &packet)
 {
 	auto bParent = packet->Read<Bool>();
 	if(bParent == true) {
@@ -47,12 +47,6 @@ void CAttachableComponent::ReceiveData(NetPacket &packet)
 				return;
 			if(m_attachment == nullptr)
 				m_attachment = std::make_unique<AttachmentData>();
-			if(ent == nullptr)
-				m_attachment->parent = ComponentHandle<pragma::BaseParentComponent> {};
-			else {
-				auto pParentComponent = ent->AddComponent<CParentComponent>();
-				m_attachment->parent = pParentComponent.valid() ? util::weak_shared_handle_cast<pragma::CParentComponent, BaseParentComponent>(pParentComponent) : ComponentHandle<BaseParentComponent> {};
-			}
 			m_attachment->attachment = att;
 			m_attachment->bone = bone;
 			m_attachment->flags = flags;
@@ -63,9 +57,9 @@ void CAttachableComponent::ReceiveData(NetPacket &packet)
 	}
 }
 
-void CAttachableComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const { outTypeIndex = std::type_index(typeid(BaseAttachableComponent)); }
+void CAttachmentComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const { outTypeIndex = std::type_index(typeid(BaseAttachmentComponent)); }
 
-void CAttachableComponent::UpdateViewAttachmentOffset(BaseEntity *ent, pragma::BaseCharacterComponent &pl, Vector3 &pos, Quat &rot, Bool bYawOnly) const
+void CAttachmentComponent::UpdateViewAttachmentOffset(BaseEntity *ent, pragma::BaseCharacterComponent &pl, Vector3 &pos, Quat &rot, Bool bYawOnly) const
 {
 	auto *scene = c_game->GetRenderScene();
 	auto cam = scene ? scene->GetActiveCamera() : pragma::ComponentHandle<pragma::CCameraComponent> {};

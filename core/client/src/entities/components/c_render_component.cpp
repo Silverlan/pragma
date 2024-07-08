@@ -15,7 +15,7 @@
 #include "pragma/entities/components/c_color_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/components/c_transform_component.hpp"
-#include "pragma/entities/components/c_attachable_component.hpp"
+#include "pragma/entities/components/c_attachment_component.hpp"
 #include "pragma/entities/components/c_light_map_receiver_component.hpp"
 #include "pragma/entities/components/renderers/c_raytracing_renderer_component.hpp"
 #include "pragma/entities/components/intersection_handler_component.hpp"
@@ -353,8 +353,8 @@ void CRenderComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 		                         }),
 		  CallbackType::Component, &component);
 	}
-	else if(typeid(component) == typeid(pragma::CAttachableComponent))
-		m_attachableComponent = static_cast<CAttachableComponent *>(&component);
+	else if(typeid(component) == typeid(pragma::CAttachmentComponent))
+		m_attachmentComponent = static_cast<CAttachmentComponent *>(&component);
 	else if(typeid(component) == typeid(pragma::CAnimatedComponent))
 		m_animComponent = static_cast<CAnimatedComponent *>(&component);
 	else if(typeid(component) == typeid(pragma::CLightMapReceiverComponent)) {
@@ -365,8 +365,8 @@ void CRenderComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 void CRenderComponent::OnEntityComponentRemoved(BaseEntityComponent &component)
 {
 	BaseRenderComponent::OnEntityComponentRemoved(component);
-	if(typeid(component) == typeid(pragma::CAttachableComponent))
-		m_attachableComponent = nullptr;
+	if(typeid(component) == typeid(pragma::CAttachmentComponent))
+		m_attachmentComponent = nullptr;
 	else if(typeid(component) == typeid(pragma::CAnimatedComponent))
 		m_animComponent = nullptr;
 	else if(typeid(component) == typeid(pragma::CLightMapReceiverComponent)) {
@@ -405,7 +405,7 @@ void CRenderComponent::UpdateShouldDrawShadowState()
 	umath::set_flag(m_stateFlags, StateFlags::ShouldDrawShadow, shouldDraw);
 }
 CModelComponent *CRenderComponent::GetModelComponent() const { return static_cast<CModelComponent *>(GetEntity().GetModelComponent()); }
-CAttachableComponent *CRenderComponent::GetAttachableComponent() const { return m_attachableComponent; }
+CAttachmentComponent *CRenderComponent::GetAttachmentComponent() const { return m_attachmentComponent; }
 CAnimatedComponent *CRenderComponent::GetAnimatedComponent() const { return m_animComponent; }
 CLightMapReceiverComponent *CRenderComponent::GetLightMapReceiverComponent() const { return m_lightMapReceiverComponent; }
 void CRenderComponent::SetRenderOffsetTransform(const umath::ScaledTransform &t)
@@ -680,10 +680,10 @@ void CRenderComponent::UpdateRenderDataMT(const CSceneComponent &scene, const CC
 	CEOnUpdateRenderData evData {};
 	InvokeEventCallbacks(EVENT_ON_UPDATE_RENDER_DATA_MT, evData);
 
-	auto pAttComponent = GetAttachableComponent();
+	auto pAttComponent = GetAttachmentComponent();
 	if(pAttComponent) {
 		auto *attInfo = pAttComponent->GetAttachmentData();
-		if(attInfo != nullptr && (attInfo->flags & FAttachmentMode::UpdateEachFrame) != FAttachmentMode::None && attInfo->parent.valid())
+		if(attInfo != nullptr && (attInfo->flags & FAttachmentMode::UpdateEachFrame) != FAttachmentMode::None && GetEntity().GetParent())
 			pAttComponent->UpdateAttachmentOffset(false);
 	}
 }

@@ -40,7 +40,8 @@
 #include "pragma/entities/components/base_vehicle_component.hpp"
 #include "pragma/entities/components/base_model_component.hpp"
 #include "pragma/entities/components/base_animated_component.hpp"
-#include "pragma/entities/components/base_parent_component.hpp"
+#include "pragma/entities/components/parent_component.hpp"
+#include "pragma/entities/components/base_child_component.hpp"
 #include "pragma/entities/components/base_color_component.hpp"
 #include "pragma/entities/components/base_ownable_component.hpp"
 #include "pragma/entities/components/base_generic_component.hpp"
@@ -354,7 +355,7 @@ void Lua::Entity::register_class(luabind::class_<BaseEntity> &classDef)
 			return;
 		mdlC->SetBodyGroup(bgId, id);
 	}));
-	classDef.def("GetParent", static_cast<luabind::optional<pragma::BaseParentComponent> (*)(BaseEntity &)>([](BaseEntity &ent) -> luabind::optional<pragma::BaseParentComponent> {
+	classDef.def("GetParent", static_cast<luabind::optional<pragma::ParentComponent> (*)(BaseEntity &)>([](BaseEntity &ent) -> luabind::optional<pragma::ParentComponent> {
 		auto *parent = ent.GetParent();
 		if(parent == nullptr)
 			return nil;

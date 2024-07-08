@@ -130,8 +130,8 @@
 #include "pragma/entities/components/c_entity_component.hpp"
 #include "pragma/entities/components/c_io_component.hpp"
 #include "pragma/entities/components/c_time_scale_component.hpp"
-#include "pragma/entities/components/c_attachable_component.hpp"
-#include "pragma/entities/components/c_parent_component.hpp"
+#include "pragma/entities/components/c_attachment_component.hpp"
+#include "pragma/entities/components/c_child_component.hpp"
 #include "pragma/entities/components/c_generic_component.hpp"
 #include "pragma/entities/components/c_point_at_target_component.hpp"
 #include "pragma/entities/components/c_gamemode_component.hpp"
@@ -159,6 +159,7 @@
 #include "pragma/entities/c_filter_entity_class.h"
 #include "pragma/entities/c_filter_entity_name.h"
 #include "pragma/entities/components/c_ownable_component.hpp"
+#include <pragma/entities/components/parent_component.hpp>
 #include <pragma/lua/lua_util_component_stream.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <util_image_buffer.hpp>
@@ -929,11 +930,11 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	auto defCTimeScale = pragma::lua::create_entity_component_class<pragma::CTimeScaleComponent, pragma::BaseTimeScaleComponent>("TimeScaleComponent");
 	entsMod[defCTimeScale];
 
-	auto defCAttachable = pragma::lua::create_entity_component_class<pragma::CAttachableComponent, pragma::BaseAttachableComponent>("AttachableComponent");
+	auto defCAttachable = pragma::lua::create_entity_component_class<pragma::CAttachmentComponent, pragma::BaseAttachmentComponent>("AttachmentComponent");
 	entsMod[defCAttachable];
 
-	auto defCParent = pragma::lua::create_entity_component_class<pragma::CParentComponent, pragma::BaseParentComponent>("ParentComponent");
-	entsMod[defCParent];
+	auto defCChild = pragma::lua::create_entity_component_class<pragma::CChildComponent, pragma::BaseChildComponent>("ChildComponent");
+	entsMod[defCChild];
 
 	auto defCOwnable = pragma::lua::create_entity_component_class<pragma::COwnableComponent, pragma::BaseOwnableComponent>("OwnableComponent");
 	entsMod[defCOwnable];

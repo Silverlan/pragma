@@ -37,7 +37,7 @@ namespace Intersection {
 namespace pragma {
 	class CModelComponent;
 	class CAnimatedComponent;
-	class CAttachableComponent;
+	class CAttachmentComponent;
 	class CLightMapReceiverComponent;
 	enum class GameShaderSpecialization : uint32_t;
 	using RenderMeshIndex = uint32_t;
@@ -147,7 +147,7 @@ namespace pragma {
 		virtual void OnEntitySpawn() override;
 
 		CModelComponent *GetModelComponent() const;
-		CAttachableComponent *GetAttachableComponent() const;
+		CAttachmentComponent *GetAttachmentComponent() const;
 		CAnimatedComponent *GetAnimatedComponent() const;
 		CLightMapReceiverComponent *GetLightMapReceiverComponent() const;
 
@@ -216,7 +216,7 @@ namespace pragma {
 		util::PEnumProperty<rendering::SceneRenderPass> m_renderPass = nullptr;
 
 		// Used for quick access to avoid having to do a lookup on the entity's components
-		mutable CAttachableComponent *m_attachableComponent = nullptr;
+		mutable CAttachmentComponent *m_attachmentComponent = nullptr;
 		mutable CAnimatedComponent *m_animComponent = nullptr;
 		mutable CLightMapReceiverComponent *m_lightMapReceiverComponent = nullptr;
 

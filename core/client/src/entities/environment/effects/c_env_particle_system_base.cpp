@@ -15,7 +15,7 @@
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/entities/components/c_transform_component.hpp"
 #include "pragma/entities/components/c_time_scale_component.hpp"
-#include "pragma/entities/components/c_attachable_component.hpp"
+#include "pragma/entities/components/c_attachment_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include <pragma/asset/util_asset.hpp>
 #include <sprite_sheet_animation.hpp>
@@ -1527,7 +1527,7 @@ void CParticleSystemComponent::Simulate(double tDelta)
 		op->Simulate(tDelta);
 	//unsigned int numRender = 0;
 	if(umath::is_flag_set(m_flags, Flags::MoveWithEmitter) || umath::is_flag_set(m_flags, Flags::RotateWithEmitter)) {
-		auto pAttComponent = GetEntity().GetComponent<pragma::CAttachableComponent>();
+		auto pAttComponent = GetEntity().GetComponent<pragma::CAttachmentComponent>();
 		if(pAttComponent.valid())
 			pAttComponent->UpdateAttachmentOffset();
 	}

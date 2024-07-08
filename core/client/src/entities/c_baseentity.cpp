@@ -31,6 +31,7 @@
 #include "pragma/entities/components/c_entity_component.hpp"
 #include "pragma/console/c_cvar_global_functions.h"
 #include "pragma/entities/components/c_render_component.hpp"
+#include "pragma/entities/components/c_child_component.hpp"
 #include "pragma/entities/components/c_vertex_animated_component.hpp"
 #include "pragma/entities/components/c_name_component.hpp"
 #include "pragma/entities/components/c_scene_component.hpp"
@@ -83,6 +84,8 @@ void CBaseEntity::OnComponentAdded(pragma::BaseEntityComponent &component)
 		m_modelComponent = &static_cast<pragma::CModelComponent &>(component);
 	else if(typeid(component) == typeid(pragma::CGenericComponent))
 		m_genericComponent = &static_cast<pragma::CGenericComponent &>(component);
+	else if(typeid(component) == typeid(pragma::CChildComponent))
+		m_childComponent = &static_cast<pragma::CChildComponent &>(component);
 	else if(typeid(component) == typeid(pragma::CompositeComponent)) {
 		static_cast<pragma::CompositeComponent &>(component).AddEventCallback(pragma::CompositeComponent::EVENT_ON_ENTITY_ADDED, [this](std::reference_wrapper<pragma::ComponentEvent> e) -> util::EventReply {
 			auto &evData = static_cast<pragma::CECompositeEntityChanged &>(e.get());
@@ -111,6 +114,8 @@ void CBaseEntity::OnComponentRemoved(pragma::BaseEntityComponent &component)
 		m_modelComponent = nullptr;
 	else if(typeid(component) == typeid(pragma::CGenericComponent))
 		m_genericComponent = nullptr;
+	else if(typeid(component) == typeid(pragma::CChildComponent))
+		m_childComponent = nullptr;
 }
 pragma::CRenderComponent *CBaseEntity::GetRenderComponent() const { return m_renderComponent; }
 void CBaseEntity::InitializeLuaObject(lua_State *lua) { pragma::BaseLuaHandle::InitializeLuaObject<CBaseEntity>(lua); }

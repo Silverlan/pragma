@@ -11,15 +11,15 @@
 #include "pragma/console/c_cvar.h"
 #include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/entities/components/c_character_component.hpp"
-#include "pragma/entities/components/c_attachable_component.hpp"
+#include "pragma/entities/components/c_attachment_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
-#include "pragma/entities/components/c_parent_component.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/lua/c_lentity_handles.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_ownable_component.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
+#include "pragma/entities/components/parent_component.hpp"
 #include <pragma/entities/observermode.h>
 #include <pragma/entities/entity_component_system_t.hpp>
 
@@ -250,7 +250,7 @@ void CWeaponComponent::UpdateOwnerAttachment()
 	auto &ent = GetEntity();
 	auto *owner = m_whOwnerComponent.valid() ? m_whOwnerComponent->GetOwner() : nullptr;
 	if(owner == nullptr) {
-		auto pAttComponent = ent.GetComponent<CAttachableComponent>();
+		auto pAttComponent = ent.GetComponent<CAttachmentComponent>();
 		if(pAttComponent.valid())
 			pAttComponent->ClearAttachment();
 		return;
@@ -278,7 +278,7 @@ void CWeaponComponent::UpdateOwnerAttachment()
 			pTransformComponent->SetRotation(pTransformComponentParent->GetRotation());
 		}
 
-		auto pAttComponent = ent.AddComponent<CAttachableComponent>();
+		auto pAttComponent = ent.AddComponent<CAttachmentComponent>();
 		if(pAttComponent.valid()) {
 			auto pMdlComponent = parent->GetModelComponent();
 			auto attId = pMdlComponent ? pMdlComponent->LookupAttachment("weapon") : -1;
@@ -291,10 +291,10 @@ void CWeaponComponent::UpdateOwnerAttachment()
 		}
 	}
 
-	auto attC = GetEntity().GetComponent<CAttachableComponent>();
+	auto attC = GetEntity().GetComponent<CAttachmentComponent>();
 	if(attC.valid()) {
 		auto *parent = attC->GetParent();
-		m_hTarget = parent ? parent->GetEntity().GetHandle() : EntityHandle {};
+		m_hTarget = parent ? parent->GetHandle() : EntityHandle {};
 	}
 	//SetParent(parent,FPARENT_BONEMERGE | FPARENT_UPDATE_EACH_FRAME);
 	//SetAnimated(true);

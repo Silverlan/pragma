@@ -11,6 +11,7 @@
 #include "pragma/lua/base_lua_handle.hpp"
 #include "pragma/entities/entity_component_system.hpp"
 #include "pragma/util/global_string_table.hpp"
+#include "pragma/util/coordinate_space.hpp"
 #include "pragma/model/animation/play_animation_flags.hpp"
 #include "pragma/types.hpp"
 #include <pragma/console/conout.h>
@@ -125,18 +126,22 @@ class DLLNETWORK BaseEntity : public pragma::BaseLuaHandle, public pragma::BaseE
 
 	// Returns IDENTITY if the entity has no transform component
 	const umath::ScaledTransform &GetPose() const;
-	void SetPose(const umath::ScaledTransform &outTransform);
-	void SetPose(const umath::Transform &outTransform);
+	umath::ScaledTransform GetPose(pragma::CoordinateSpace space) const;
+	void SetPose(const umath::ScaledTransform &outTransform, pragma::CoordinateSpace space = pragma::CoordinateSpace::World);
+	void SetPose(const umath::Transform &outTransform, pragma::CoordinateSpace space = pragma::CoordinateSpace::World);
 	const Vector3 &GetPosition() const;
-	void SetPosition(const Vector3 &pos);
+	Vector3 GetPosition(pragma::CoordinateSpace space) const;
+	void SetPosition(const Vector3 &pos, pragma::CoordinateSpace space = pragma::CoordinateSpace::World);
 	Vector3 GetCenter() const;
 
 	// Returns unit quaternion if entity has no transform component
 	const Quat &GetRotation() const;
-	void SetRotation(const Quat &rot);
+	Quat GetRotation(pragma::CoordinateSpace space) const;
+	void SetRotation(const Quat &rot, pragma::CoordinateSpace space = pragma::CoordinateSpace::World);
 
 	const Vector3 &GetScale() const;
-	void SetScale(const Vector3 &scale);
+	Vector3 GetScale(pragma::CoordinateSpace space) const;
+	void SetScale(const Vector3 &scale, pragma::CoordinateSpace space = pragma::CoordinateSpace::World);
 
 	pragma::BaseEntityComponent *FindComponentMemberIndex(const util::Path &path, pragma::ComponentMemberIndex &outMemberIdx);
 	const pragma::BaseEntityComponent *FindComponentMemberIndex(const util::Path &path, pragma::ComponentMemberIndex &outMemberIdx) const { return const_cast<BaseEntity *>(this)->FindComponentMemberIndex(path, outMemberIdx); }

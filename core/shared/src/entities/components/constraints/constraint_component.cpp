@@ -191,10 +191,10 @@ void ConstraintComponent::SetDrivenObject(const pragma::EntityUComponentMemberRe
 const pragma::EntityUComponentMemberRef &ConstraintComponent::GetDrivenObject() const { return m_drivenObject; }
 
 void ConstraintComponent::SetDriverSpace(CoordinateSpace space) { m_driverSpace = space; }
-ConstraintComponent::CoordinateSpace ConstraintComponent::GetDriverSpace() const { return m_driverSpace; }
+pragma::CoordinateSpace ConstraintComponent::GetDriverSpace() const { return m_driverSpace; }
 
 void ConstraintComponent::SetDrivenObjectSpace(CoordinateSpace space) { m_drivenObjectSpace = space; }
-ConstraintComponent::CoordinateSpace ConstraintComponent::GetDrivenObjectSpace() const { return m_drivenObjectSpace; }
+pragma::CoordinateSpace ConstraintComponent::GetDrivenObjectSpace() const { return m_drivenObjectSpace; }
 
 void ConstraintComponent::SetOrderIndex(int32_t idx)
 {

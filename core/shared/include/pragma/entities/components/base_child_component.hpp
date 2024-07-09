@@ -35,7 +35,6 @@ namespace pragma {
 		BaseChildComponent(BaseEntity &ent);
 		virtual void OnEntitySpawn() override;
 		virtual void OnParentChanged(BaseEntity *parent) {};
-		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 
 		EntityURef m_parent;
 		pragma::NetEventId m_netEvSetParent = pragma::INVALID_NET_EVENT;

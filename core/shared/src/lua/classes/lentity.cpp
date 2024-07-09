@@ -161,12 +161,19 @@ void Lua::Entity::register_class(luabind::class_<BaseEntity> &classDef)
 	classDef.def("RemoveEntityOnRemoval", static_cast<void (*)(BaseEntity &, BaseEntity &)>(&RemoveEntityOnRemoval));
 	classDef.def("RemoveEntityOnRemoval", static_cast<void (*)(BaseEntity &, BaseEntity &, Bool)>(&RemoveEntityOnRemoval));
 	classDef.def("GetSpawnFlags", &BaseEntity::GetSpawnFlags);
-	classDef.def("GetPose", &BaseEntity::GetPose, luabind::copy_policy<0> {});
+	classDef.def("GetPose", static_cast<const umath::ScaledTransform &(BaseEntity::*)() const>(&BaseEntity::GetPose), luabind::copy_policy<0> {});
+	classDef.def("GetPose", static_cast<umath::ScaledTransform (BaseEntity::*)(pragma::CoordinateSpace) const>(&BaseEntity::GetPose));
 	classDef.def("SetPose", static_cast<void (*)(BaseEntity &, const umath::Transform &)>([](BaseEntity &ent, const umath::Transform &t) {
 		auto *trComponent = static_cast<pragma::BaseTransformComponent *>(ent.AddComponent("transform").get());
 		if(trComponent == nullptr)
 			return;
 		ent.SetPose(t);
+	}));
+	classDef.def("SetPose", static_cast<void (*)(BaseEntity &, const umath::Transform &, pragma::CoordinateSpace)>([](BaseEntity &ent, const umath::Transform &t, pragma::CoordinateSpace space) {
+		auto *trComponent = static_cast<pragma::BaseTransformComponent *>(ent.AddComponent("transform").get());
+		if(trComponent == nullptr)
+			return;
+		ent.SetPose(t, space);
 	}));
 	classDef.def("SetPose", static_cast<void (*)(BaseEntity &, const umath::ScaledTransform &)>([](BaseEntity &ent, const umath::ScaledTransform &t) {
 		auto *trComponent = static_cast<pragma::BaseTransformComponent *>(ent.AddComponent("transform").get());
@@ -174,12 +181,25 @@ void Lua::Entity::register_class(luabind::class_<BaseEntity> &classDef)
 			return;
 		ent.SetPose(t);
 	}));
-	classDef.def("GetPos", &BaseEntity::GetPosition, luabind::copy_policy<0> {});
+	classDef.def("SetPose", static_cast<void (*)(BaseEntity &, const umath::ScaledTransform &, pragma::CoordinateSpace)>([](BaseEntity &ent, const umath::ScaledTransform &t, pragma::CoordinateSpace space) {
+		auto *trComponent = static_cast<pragma::BaseTransformComponent *>(ent.AddComponent("transform").get());
+		if(trComponent == nullptr)
+			return;
+		ent.SetPose(t, space);
+	}));
+	classDef.def("GetPos", static_cast<const Vector3 &(BaseEntity::*)() const>(&BaseEntity::GetPosition), luabind::copy_policy<0> {});
+	classDef.def("GetPos", static_cast<Vector3 (BaseEntity::*)(pragma::CoordinateSpace) const>(&BaseEntity::GetPosition));
 	classDef.def("SetPos", static_cast<void (*)(BaseEntity &, const Vector3 &)>([](BaseEntity &ent, const Vector3 &pos) {
 		auto *trComponent = static_cast<pragma::BaseTransformComponent *>(ent.AddComponent("transform").get());
 		if(trComponent == nullptr)
 			return;
 		ent.SetPosition(pos);
+	}));
+	classDef.def("SetPos", static_cast<void (*)(BaseEntity &, const Vector3 &, pragma::CoordinateSpace)>([](BaseEntity &ent, const Vector3 &pos, pragma::CoordinateSpace space) {
+		auto *trComponent = static_cast<pragma::BaseTransformComponent *>(ent.AddComponent("transform").get());
+		if(trComponent == nullptr)
+			return;
+		ent.SetPosition(pos, space);
 	}));
 	classDef.def("GetAngles", static_cast<EulerAngles (*)(BaseEntity &)>([](BaseEntity &ent) -> EulerAngles {
 		if(!ent.GetTransformComponent())
@@ -192,19 +212,39 @@ void Lua::Entity::register_class(luabind::class_<BaseEntity> &classDef)
 			return;
 		trComponent->SetAngles(ang);
 	}));
+	classDef.def("SetAngles", static_cast<void (*)(BaseEntity &, const EulerAngles &, pragma::CoordinateSpace)>([](BaseEntity &ent, const EulerAngles &ang, pragma::CoordinateSpace space) {
+		auto *trComponent = static_cast<pragma::BaseTransformComponent *>(ent.AddComponent("transform").get());
+		if(trComponent == nullptr)
+			return;
+		trComponent->SetAngles(ang, space);
+	}));
 	classDef.def("SetScale", static_cast<void (*)(BaseEntity &, const Vector3 &)>([](BaseEntity &ent, const Vector3 &v) {
 		auto *trComponent = static_cast<pragma::BaseTransformComponent *>(ent.AddComponent("transform").get());
 		if(trComponent == nullptr)
 			return;
 		trComponent->SetScale(v);
 	}));
-	classDef.def("GetScale", &BaseEntity::GetScale, luabind::copy_policy<0> {});
-	classDef.def("GetRotation", &BaseEntity::GetRotation, luabind::copy_policy<0> {});
+	classDef.def("SetScale", static_cast<void (*)(BaseEntity &, const Vector3 &, pragma::CoordinateSpace)>([](BaseEntity &ent, const Vector3 &v, pragma::CoordinateSpace space) {
+		auto *trComponent = static_cast<pragma::BaseTransformComponent *>(ent.AddComponent("transform").get());
+		if(trComponent == nullptr)
+			return;
+		trComponent->SetScale(v, space);
+	}));
+	classDef.def("GetScale", static_cast<const Vector3 &(BaseEntity::*)() const>(&BaseEntity::GetScale), luabind::copy_policy<0> {});
+	classDef.def("GetScale", static_cast<Vector3 (BaseEntity::*)(pragma::CoordinateSpace) const>(&BaseEntity::GetScale));
+	classDef.def("GetRotation", static_cast<const Quat &(BaseEntity::*)() const>(&BaseEntity::GetRotation), luabind::copy_policy<0> {});
+	classDef.def("GetRotation", static_cast<Quat (BaseEntity::*)(pragma::CoordinateSpace) const>(&BaseEntity::GetRotation));
 	classDef.def("SetRotation", static_cast<void (*)(BaseEntity &, const Quat &)>([](BaseEntity &ent, const Quat &rot) {
 		auto *trComponent = static_cast<pragma::BaseTransformComponent *>(ent.AddComponent("transform").get());
 		if(trComponent == nullptr)
 			return;
 		trComponent->SetRotation(rot);
+	}));
+	classDef.def("SetRotation", static_cast<void (*)(BaseEntity &, const Quat &, pragma::CoordinateSpace)>([](BaseEntity &ent, const Quat &rot, pragma::CoordinateSpace space) {
+		auto *trComponent = static_cast<pragma::BaseTransformComponent *>(ent.AddComponent("transform").get());
+		if(trComponent == nullptr)
+			return;
+		trComponent->SetRotation(rot, space);
 	}));
 	classDef.def("GetCenter", &BaseEntity::GetCenter);
 

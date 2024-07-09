@@ -61,6 +61,7 @@ namespace pragma {
 		float m_tLastAttachmentUpdate = 0.f;
 		std::unique_ptr<AttachmentData> m_attachment = nullptr;
 		CallbackHandle m_poseChangeCallback = {};
+		std::string m_kvParent;
 	};
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::BaseAttachmentComponent::StateFlags)

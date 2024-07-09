@@ -42,6 +42,14 @@ util::EventReply BaseAttachmentComponent::HandleEvent(ComponentEventId eventId, 
 {
 	if(eventId == BaseModelComponent::EVENT_ON_MODEL_CHANGED)
 		UpdateAttachmentData(true);
+	else if(eventId == BaseEntity::EVENT_HANDLE_KEY_VALUE) {
+		auto &kvData = static_cast<CEKeyValueData &>(evData);
+		if(ustring::compare<std::string>(kvData.key, "parent", false) || ustring::compare<std::string>(kvData.key, "parentname", false))
+			m_kvParent = kvData.value;
+		else
+			return util::EventReply::Unhandled;
+		return util::EventReply::Handled;
+	}
 	return BaseEntityComponent::HandleEvent(eventId, evData);
 }
 void BaseAttachmentComponent::OnTick(double dt) { UpdateAttachmentOffset(); }
@@ -54,11 +62,15 @@ void BaseAttachmentComponent::OnRemove()
 void BaseAttachmentComponent::OnEntitySpawn()
 {
 	BaseEntityComponent::OnEntitySpawn();
-	auto *parent = GetEntity().GetParent();
-	if(parent) {
-		AttachmentInfo attInfo {};
-		attInfo.flags = /*FAttachmentMode::SnapToOrigin | */ FAttachmentMode::UpdateEachFrame;
-		AttachToEntity(parent, attInfo);
+	if(!m_kvParent.empty()) {
+		EntityIterator entIt {*GetEntity().GetNetworkState()->GetGameState(), EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
+		entIt.AttachFilter<EntityIteratorFilterEntity>(m_kvParent);
+		auto it = entIt.begin();
+		if(it != entIt.end()) {
+			AttachmentInfo attInfo {};
+			attInfo.flags = /*FAttachmentMode::SnapToOrigin | */ FAttachmentMode::UpdateEachFrame;
+			AttachToEntity(*it, attInfo);
+		}
 	}
 	UpdateAttachmentData();
 }

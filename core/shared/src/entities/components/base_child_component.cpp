@@ -58,15 +58,3 @@ void BaseChildComponent::SetParent(const pragma::EntityURef &parent)
 const pragma::EntityURef &BaseChildComponent::GetParent() const { return m_parent; }
 BaseEntity *BaseChildComponent::GetParentEntity() { return m_parent.GetEntity(GetGame()); }
 bool BaseChildComponent::HasParent() const { return GetParentEntity() != nullptr; }
-util::EventReply BaseChildComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
-{
-	if(eventId == BaseEntity::EVENT_HANDLE_KEY_VALUE) {
-		auto &kvData = static_cast<CEKeyValueData &>(evData);
-		if(ustring::compare<std::string>(kvData.key, "parent", false) || ustring::compare<std::string>(kvData.key, "parentname", false))
-			m_parent = EntityURef {kvData.value};
-		else
-			return util::EventReply::Unhandled;
-		return util::EventReply::Handled;
-	}
-	return BaseEntityComponent::HandleEvent(eventId, evData);
-}

@@ -61,6 +61,7 @@ namespace pragma {
 		float m_tLastAttachmentUpdate = 0.f;
 		std::unique_ptr<AttachmentData> m_attachment = nullptr;
 		CallbackHandle m_poseChangeCallback = {};
+		CallbackHandle m_parentModelChanged {};
 		std::string m_kvParent;
 	};
 };

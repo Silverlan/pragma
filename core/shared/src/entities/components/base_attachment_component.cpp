@@ -42,6 +42,19 @@ util::EventReply BaseAttachmentComponent::HandleEvent(ComponentEventId eventId, 
 {
 	if(eventId == BaseModelComponent::EVENT_ON_MODEL_CHANGED)
 		UpdateAttachmentData(true);
+	else if(eventId == BaseChildComponent::EVENT_ON_PARENT_CHANGED) {
+		if(m_parentModelChanged.IsValid())
+			m_parentModelChanged.Remove();
+		auto *childC = GetEntity().GetChildComponent();
+		auto *parent = childC ? childC->GetParentEntity() : nullptr;
+		auto *mdlC = parent ? parent->GetModelComponent() : nullptr;
+		if(mdlC) {
+			m_parentModelChanged = mdlC->AddEventCallback(BaseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+				UpdateAttachmentData(true);
+				return util::EventReply::Unhandled;
+			});
+		}
+	}
 	else if(eventId == BaseEntity::EVENT_HANDLE_KEY_VALUE) {
 		auto &kvData = static_cast<CEKeyValueData &>(evData);
 		if(ustring::compare<std::string>(kvData.key, "parent", false) || ustring::compare<std::string>(kvData.key, "parentname", false))
@@ -58,6 +71,9 @@ void BaseAttachmentComponent::OnRemove()
 	BaseEntityComponent::OnRemove();
 	if(m_attachment != nullptr)
 		ClearAttachment();
+
+	if(m_parentModelChanged.IsValid())
+		m_parentModelChanged.Remove();
 }
 void BaseAttachmentComponent::OnEntitySpawn()
 {
@@ -138,6 +154,8 @@ void BaseAttachmentComponent::UpdateAttachmentData(bool bForceReload)
 }
 AttachmentData *BaseAttachmentComponent::SetupAttachment(BaseEntity *ent, const AttachmentInfo &attInfo)
 {
+	if(m_parentModelChanged.IsValid())
+		m_parentModelChanged.Remove();
 	if(m_attachment != NULL) {
 		m_attachment = nullptr;
 		SetTickPolicy(TickPolicy::Never);

@@ -71,3 +71,35 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit: ${{ github.ref_name }}
+
+      - name: Check for PDB File
+        id: check-pdb
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          moduleName="${{ steps.module-info.outputs.module_name }}"
+          pdbFilePath="${{ steps.build-module.outputs.build-dir }}/modules/$moduleName/RelWithDebInfo/$moduleName.pdb"
+          echo "Checking for PDB file $pdbFilePath"
+          if [ -f "$pdbFilePath" ]; then
+            echo "PDB file exists"
+            echo "::set-output name=exists::true"
+          else
+            echo "PDB file does not exist"
+            echo "::set-output name=exists::false"
+          fi
+
+      - name: Generate debug_pdb.zip
+        if: runner.os == 'Windows' && steps.check-pdb.outputs.exists == 'true'
+        shell: bash
+        run: |
+          moduleName="${{ steps.module-info.outputs.module_name }}"
+          pdbFilePath="${{ steps.build-module.outputs.build-dir }}/modules/$moduleName/RelWithDebInfo/$moduleName.pdb"
+          7z a debug_pdb.zip "$pdbFilePath"
+
+      - name: Update PDB release
+        if: runner.os == 'Windows' && steps.check-pdb.outputs.exists == 'true'
+        uses: Silverlan/Releaser/releaser/composite@main
+        with:
+          tag: latest
+          token: ${{ secrets.GITHUB_TOKEN }}
+          files: "debug_pdb.zip"

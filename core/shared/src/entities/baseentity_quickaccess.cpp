@@ -22,6 +22,7 @@
 #include "pragma/entities/components/base_io_component.hpp"
 #include "pragma/entities/components/base_render_component.hpp"
 #include "pragma/entities/components/base_child_component.hpp"
+#include "pragma/entities/components/parent_component.hpp"
 #include "pragma/model/model.h"
 
 pragma::ComponentHandle<pragma::BaseEntityComponent> BaseEntity::AddNetworkedComponent(const std::string &name)
@@ -143,6 +144,33 @@ void BaseEntity::SetParent(BaseEntity *parent)
 void BaseEntity::ClearParent() { SetParent(nullptr); }
 
 BaseEntity *BaseEntity::GetParent() const { return m_childComponent ? m_childComponent->GetParentEntity() : nullptr; }
+
+bool BaseEntity::HasParent() const { return GetParent() != nullptr; }
+bool BaseEntity::HasChildren() const
+{
+	auto parentC = GetComponent<pragma::ParentComponent>();
+	if(parentC.expired())
+		return false;
+	for(auto &hChild : parentC->GetChildren()) {
+		if(hChild.valid())
+			return true;
+	}
+	return false;
+}
+
+bool BaseEntity::IsChildOf(const BaseEntity &ent) const { return GetParent() == &ent; }
+bool BaseEntity::IsDescendantOf(const BaseEntity &ent) const
+{
+	auto *parent = GetParent();
+	while(parent) {
+		if(parent == &ent)
+			return true;
+		parent = parent->GetParent();
+	}
+	return false;
+}
+bool BaseEntity::IsAncestorOf(const BaseEntity &ent) const { return ent.IsDescendantOf(*this); }
+bool BaseEntity::IsParentOf(const BaseEntity &ent) const { return ent.IsChildOf(*this); }
 
 PhysObj *BaseEntity::GetPhysicsObject() const
 {

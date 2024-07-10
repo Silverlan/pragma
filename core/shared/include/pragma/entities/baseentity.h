@@ -184,6 +184,13 @@ class DLLNETWORK BaseEntity : public pragma::BaseLuaHandle, public pragma::BaseE
 	void SetParent(BaseEntity *parent);
 	void ClearParent();
 	BaseEntity *GetParent() const;
+	bool HasParent() const;
+	bool HasChildren() const;
+
+	bool IsChildOf(const BaseEntity &ent) const;
+	bool IsAncestorOf(const BaseEntity &ent) const;
+	bool IsDescendantOf(const BaseEntity &ent) const;
+	bool IsParentOf(const BaseEntity &ent) const;
 
 	PhysObj *GetPhysicsObject() const;
 	PhysObj *InitializePhysics(PHYSICSTYPE type);

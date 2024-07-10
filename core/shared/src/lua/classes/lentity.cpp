@@ -404,6 +404,12 @@ void Lua::Entity::register_class(luabind::class_<BaseEntity> &classDef)
 	}));
 	classDef.def("ClearParent", &BaseEntity::ClearParent);
 	classDef.def("SetParent", &BaseEntity::SetParent);
+	classDef.def("HasParent", &BaseEntity::HasParent);
+	classDef.def("HasChildren", &BaseEntity::HasChildren);
+	classDef.def("IsChildOf", &BaseEntity::IsChildOf);
+	classDef.def("IsAncestorOf", &BaseEntity::IsAncestorOf);
+	classDef.def("IsDescendantOf", &BaseEntity::IsDescendantOf);
+	classDef.def("IsParentOf", &BaseEntity::IsParentOf);
 	classDef.def("SetOwner", static_cast<void (*)(BaseEntity &, BaseEntity &)>([](BaseEntity &ent, BaseEntity &hOwner) {
 		auto *ownableC = dynamic_cast<pragma::BaseOwnableComponent *>(ent.AddComponent("ownable").get());
 		if(ownableC == nullptr)

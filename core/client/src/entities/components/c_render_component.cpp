@@ -150,7 +150,7 @@ CRenderComponent::StateFlags CRenderComponent::GetStateFlags() const { return m_
 util::EventReply CRenderComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
 	if(eventId == BaseChildComponent::EVENT_ON_PARENT_CHANGED) {
-		UpdateParentHiddenState();
+		UpdateAncestorHiddenState();
 		PropagateHiddenState();
 	}
 	return BaseRenderComponent::HandleEvent(eventId, evData);
@@ -222,7 +222,7 @@ void CRenderComponent::Initialize()
 		BroadcastEvent(EVENT_ON_RENDER_MODE_CHANGED);
 	});
 	UpdateInstantiability();
-	UpdateParentHiddenState();
+	UpdateAncestorHiddenState();
 	PropagateHiddenState();
 }
 CRenderComponent::~CRenderComponent()
@@ -736,9 +736,9 @@ void CRenderComponent::SetHidden(bool hidden)
 	PropagateHiddenState();
 	UpdateVisibility();
 }
-bool CRenderComponent::IsHidden() const { return umath::is_flag_set(m_stateFlags, StateFlags::Hidden | StateFlags::ParentHidden); }
+bool CRenderComponent::IsHidden() const { return umath::is_flag_set(m_stateFlags, StateFlags::Hidden | StateFlags::AncestorHidden); }
 bool CRenderComponent::IsVisible() const { return !IsHidden() && *m_renderPass != pragma::rendering::SceneRenderPass::None; }
-void CRenderComponent::UpdateParentHiddenState()
+void CRenderComponent::UpdateAncestorHiddenState()
 {
 	auto parentHidden = false;
 	auto *entParent = GetEntity().GetParent();
@@ -750,9 +750,9 @@ void CRenderComponent::UpdateParentHiddenState()
 		}
 		entParent = entParent->GetParent();
 	}
-	if(umath::is_flag_set(m_stateFlags, StateFlags::ParentHidden) == parentHidden)
+	if(umath::is_flag_set(m_stateFlags, StateFlags::AncestorHidden) == parentHidden)
 		return;
-	umath::set_flag(m_stateFlags, StateFlags::ParentHidden, parentHidden);
+	umath::set_flag(m_stateFlags, StateFlags::AncestorHidden, parentHidden);
 	UpdateVisibility();
 }
 void CRenderComponent::PropagateHiddenState()
@@ -768,7 +768,7 @@ void CRenderComponent::PropagateHiddenState()
 				continue;
 			auto renderC = hChild->GetEntity().GetComponent<CRenderComponent>();
 			if(renderC.valid()) {
-				umath::set_flag(renderC->m_stateFlags, StateFlags::ParentHidden, hidden);
+				umath::set_flag(renderC->m_stateFlags, StateFlags::AncestorHidden, hidden);
 				renderC->UpdateVisibility();
 			}
 			propagate(hChild->GetEntity());

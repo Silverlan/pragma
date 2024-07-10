@@ -4,19 +4,21 @@
  *
  * Copyright (c) 2021 Silverlan */
 
-#ifndef __BASE_ATTACHABLE_COMPONENT_HPP__
-#define __BASE_ATTACHABLE_COMPONENT_HPP__
+#ifndef __BASE_ATTACHMENT_COMPONENT_HPP__
+#define __BASE_ATTACHMENT_COMPONENT_HPP__
 
 #include "pragma/entities/components/base_entity_component.hpp"
 #include "pragma/entities/parentmode.h"
 #include "pragma/entities/parentinfo.h"
+#include "pragma/entities/entity_uuid_ref.hpp"
 #include <sharedutils/property/util_property.hpp>
 
 struct AttachmentData;
 struct AttachmentInfo;
 namespace pragma {
-	class BaseParentComponent;
-	class DLLNETWORK BaseAttachableComponent : public BaseEntityComponent {
+	class ParentComponent;
+	class BaseChildComponent;
+	class DLLNETWORK BaseAttachmentComponent : public BaseEntityComponent {
 	  public:
 		static ComponentEventId EVENT_ON_ATTACHMENT_UPDATE;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
@@ -37,7 +39,7 @@ namespace pragma {
 		void RemoveAttachmentFlags(FAttachmentMode flags);
 		FAttachmentMode GetAttachmentFlags() const;
 		bool HasAttachmentFlag(FAttachmentMode flag) const;
-		BaseParentComponent *GetParent() const;
+		BaseEntity *GetParent() const;
 		AttachmentData *GetAttachmentData() const;
 		void UpdateAttachmentData(bool bForceReload = false);
 		void ClearAttachment();
@@ -46,27 +48,23 @@ namespace pragma {
 		void SetLocalPose(const umath::Transform &pose);
 
 		virtual void OnTick(double dt) override;
-
-		void GetChildren(std::vector<BaseEntity *> &children) const;
-		const std::vector<BaseEntity *> &GetChildren() const;
 	  protected:
-		BaseAttachableComponent(BaseEntity &ent);
+		BaseAttachmentComponent(BaseEntity &ent);
 		virtual void OnAttachmentChanged() {}
 		virtual AttachmentData *SetupAttachment(BaseEntity *ent, const AttachmentInfo &attInfo);
 		virtual void UpdateViewAttachmentOffset(BaseEntity *ent, pragma::BaseCharacterComponent &pl, Vector3 &pos, Quat &rot, Bool bYawOnly = false) const;
 		virtual void OnEntitySpawn() override;
-		void AddChild(BaseEntity *ent);
-		void RemoveChild(BaseEntity *ent);
+		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 		std::optional<umath::Transform> GetParentPose() const;
 
 		StateFlags m_stateFlags = StateFlags::None;
-		std::vector<BaseEntity *> m_children = {};
 		float m_tLastAttachmentUpdate = 0.f;
 		std::unique_ptr<AttachmentData> m_attachment = nullptr;
-		std::string m_parentName = {};
 		CallbackHandle m_poseChangeCallback = {};
+		CallbackHandle m_parentModelChanged {};
+		std::string m_kvParent;
 	};
 };
-REGISTER_BASIC_BITWISE_OPERATORS(pragma::BaseAttachableComponent::StateFlags)
+REGISTER_BASIC_BITWISE_OPERATORS(pragma::BaseAttachmentComponent::StateFlags)
 
 #endif

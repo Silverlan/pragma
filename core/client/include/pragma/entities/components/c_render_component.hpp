@@ -37,7 +37,7 @@ namespace Intersection {
 namespace pragma {
 	class CModelComponent;
 	class CAnimatedComponent;
-	class CAttachableComponent;
+	class CAttachmentComponent;
 	class CLightMapReceiverComponent;
 	enum class GameShaderSpecialization : uint32_t;
 	using RenderMeshIndex = uint32_t;
@@ -55,6 +55,8 @@ namespace pragma {
 			RenderBoundsDirty = InstantiationDisabled << 1u,
 			ShouldDraw = RenderBoundsDirty << 1u,
 			ShouldDrawShadow = ShouldDraw << 1u,
+			Hidden = ShouldDrawShadow << 1u,
+			AncestorHidden = Hidden << 1u,
 		};
 		static constexpr auto USE_HOST_MEMORY_FOR_RENDER_DATA = true;
 
@@ -70,6 +72,7 @@ namespace pragma {
 		static ComponentEventId EVENT_ON_CLIP_PLANE_CHANGED;
 		static ComponentEventId EVENT_ON_DEPTH_BIAS_CHANGED;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 
 		CRenderComponent(BaseEntity &ent);
 		const std::shared_ptr<prosper::SwapBuffer> &GetSwapRenderBuffer() const;
@@ -145,9 +148,10 @@ namespace pragma {
 		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void OnEntitySpawn() override;
+		virtual void OnRemove() override;
 
 		CModelComponent *GetModelComponent() const;
-		CAttachableComponent *GetAttachableComponent() const;
+		CAttachmentComponent *GetAttachmentComponent() const;
 		CAnimatedComponent *GetAnimatedComponent() const;
 		CLightMapReceiverComponent *GetLightMapReceiverComponent() const;
 
@@ -193,9 +197,17 @@ namespace pragma {
 		void ClearTranslucencyPassDistanceOverride();
 		const std::optional<double> &GetTranslucencyPassDistanceOverrideSqr() const;
 
+		void SetHidden(bool hidden);
+		bool IsHidden() const;
+		bool IsVisible() const;
+
 		GameShaderSpecialization GetShaderPipelineSpecialization() const;
 		void ClearRenderBuffers();
 	  protected:
+		void UpdateAncestorHiddenState();
+		void PropagateHiddenState();
+		void UpdateVisibility();
+
 		void UpdateShouldDrawShadowState();
 		void UpdateRenderBuffer() const;
 		void UpdateMatrices();
@@ -205,6 +217,7 @@ namespace pragma {
 		static bool RenderCallback(RenderObject *o, CBaseEntity *ent, pragma::CCameraComponent *cam, pragma::ShaderGameWorldLightingPass *shader, Material *mat);
 		bool RenderCallback(RenderObject *o, pragma::CCameraComponent *cam, pragma::ShaderGameWorldLightingPass *shader, Material *mat);
 		void UpdateRenderMeshes();
+		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 
 		void InitializeRenderBuffers();
 		void UpdateBoneBuffer();
@@ -216,7 +229,7 @@ namespace pragma {
 		util::PEnumProperty<rendering::SceneRenderPass> m_renderPass = nullptr;
 
 		// Used for quick access to avoid having to do a lookup on the entity's components
-		mutable CAttachableComponent *m_attachableComponent = nullptr;
+		mutable CAttachmentComponent *m_attachmentComponent = nullptr;
 		mutable CAnimatedComponent *m_animComponent = nullptr;
 		mutable CLightMapReceiverComponent *m_lightMapReceiverComponent = nullptr;
 

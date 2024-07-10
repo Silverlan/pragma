@@ -13,7 +13,7 @@
 #include "pragma/entities/baseentity_luaobject.h"
 #include "pragma/lua/s_lentity_handles.hpp"
 #include "pragma/entities/components/s_wheel_component.hpp"
-#include "pragma/entities/components/s_attachable_component.hpp"
+#include "pragma/entities/components/s_attachment_component.hpp"
 #include "pragma/entities/components/s_player_component.hpp"
 #include <pragma/entities/components/base_character_component.hpp>
 #include <pragma/entities/components/usable_component.hpp>

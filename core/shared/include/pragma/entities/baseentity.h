@@ -11,6 +11,7 @@
 #include "pragma/lua/base_lua_handle.hpp"
 #include "pragma/entities/entity_component_system.hpp"
 #include "pragma/util/global_string_table.hpp"
+#include "pragma/util/coordinate_space.hpp"
 #include "pragma/model/animation/play_animation_flags.hpp"
 #include "pragma/types.hpp"
 #include <pragma/console/conout.h>
@@ -40,6 +41,7 @@ namespace pragma {
 	class BaseEntityComponent;
 	class BaseModelComponent;
 	class BaseGenericComponent;
+	class BaseChildComponent;
 	class BaseAnimatedComponent;
 	class BaseWeaponComponent;
 	class BaseVehicleComponent;
@@ -50,7 +52,7 @@ namespace pragma {
 	class BaseTimeScaleComponent;
 	class BaseNameComponent;
 	class BaseTransformComponent;
-	class BaseParentComponent;
+	class ParentComponent;
 	struct EntityUComponentMemberRef;
 
 	using NetEventId = uint32_t;
@@ -118,23 +120,28 @@ class DLLNETWORK BaseEntity : public pragma::BaseLuaHandle, public pragma::BaseE
 	virtual bool IsStatic() const;
 	bool IsDynamic() const;
 	virtual NetworkState *GetNetworkState() const = 0;
+	Game &GetGame() const;
 
 	pragma::NetEventId FindNetEvent(const std::string &name) const;
 
 	// Returns IDENTITY if the entity has no transform component
 	const umath::ScaledTransform &GetPose() const;
-	void SetPose(const umath::ScaledTransform &outTransform);
-	void SetPose(const umath::Transform &outTransform);
+	umath::ScaledTransform GetPose(pragma::CoordinateSpace space) const;
+	void SetPose(const umath::ScaledTransform &outTransform, pragma::CoordinateSpace space = pragma::CoordinateSpace::World);
+	void SetPose(const umath::Transform &outTransform, pragma::CoordinateSpace space = pragma::CoordinateSpace::World);
 	const Vector3 &GetPosition() const;
-	void SetPosition(const Vector3 &pos);
+	Vector3 GetPosition(pragma::CoordinateSpace space) const;
+	void SetPosition(const Vector3 &pos, pragma::CoordinateSpace space = pragma::CoordinateSpace::World);
 	Vector3 GetCenter() const;
 
 	// Returns unit quaternion if entity has no transform component
 	const Quat &GetRotation() const;
-	void SetRotation(const Quat &rot);
+	Quat GetRotation(pragma::CoordinateSpace space) const;
+	void SetRotation(const Quat &rot, pragma::CoordinateSpace space = pragma::CoordinateSpace::World);
 
 	const Vector3 &GetScale() const;
-	void SetScale(const Vector3 &scale);
+	Vector3 GetScale(pragma::CoordinateSpace space) const;
+	void SetScale(const Vector3 &scale, pragma::CoordinateSpace space = pragma::CoordinateSpace::World);
 
 	pragma::BaseEntityComponent *FindComponentMemberIndex(const util::Path &path, pragma::ComponentMemberIndex &outMemberIdx);
 	const pragma::BaseEntityComponent *FindComponentMemberIndex(const util::Path &path, pragma::ComponentMemberIndex &outMemberIdx) const { return const_cast<BaseEntity *>(this)->FindComponentMemberIndex(path, outMemberIdx); }
@@ -152,6 +159,7 @@ class DLLNETWORK BaseEntity : public pragma::BaseLuaHandle, public pragma::BaseE
 	pragma::BaseTransformComponent *GetTransformComponent() const;
 	pragma::BasePhysicsComponent *GetPhysicsComponent() const;
 	pragma::BaseGenericComponent *GetGenericComponent() const;
+	pragma::BaseChildComponent *GetChildComponent() const;
 
 	// These are quick-access functions for commonly used component functions.
 	// In some cases these may create the component, if it doesn't exist, and transmit
@@ -172,9 +180,17 @@ class DLLNETWORK BaseEntity : public pragma::BaseLuaHandle, public pragma::BaseE
 	uint32_t GetBodyGroup(const std::string &name) const;
 	void SetBodyGroup(const std::string &name, uint32_t id);
 
+	BaseEntity *CreateChild(const std::string &className);
 	void SetParent(BaseEntity *parent);
 	void ClearParent();
-	pragma::BaseParentComponent *GetParent() const;
+	BaseEntity *GetParent() const;
+	bool HasParent() const;
+	bool HasChildren() const;
+
+	bool IsChildOf(const BaseEntity &ent) const;
+	bool IsAncestorOf(const BaseEntity &ent) const;
+	bool IsDescendantOf(const BaseEntity &ent) const;
+	bool IsParentOf(const BaseEntity &ent) const;
 
 	PhysObj *GetPhysicsObject() const;
 	PhysObj *InitializePhysics(PHYSICSTYPE type);
@@ -290,6 +306,7 @@ class DLLNETWORK BaseEntity : public pragma::BaseLuaHandle, public pragma::BaseE
 	pragma::BasePhysicsComponent *m_physicsComponent = nullptr;
 	pragma::BaseModelComponent *m_modelComponent = nullptr;
 	pragma::BaseGenericComponent *m_genericComponent = nullptr;
+	pragma::BaseChildComponent *m_childComponent = nullptr;
 
 	// Should only be used by quick-access methods!
 	// Adds the component and trasmits the information

@@ -7,6 +7,9 @@
 
 #include "stdafx_shared.h"
 #include "pragma/physics/environment.hpp"
+#include "pragma/entities/components/parent_component.hpp"
+#include "pragma/entities/components/base_child_component.hpp"
+#include "pragma/entities/entity_component_system_t.hpp"
 #include <pragma/engine.h>
 #include <pragma/console/convars.h>
 #include <pragma/console/s_convars.h>
@@ -335,6 +338,67 @@ static void debug_profiling_physics_end(NetworkState *nw, pragma::BasePlayerComp
 	physEnv->EndProfiling();
 }
 REGISTER_ENGINE_CONCOMMAND(debug_profiling_physics_end, debug_profiling_physics_end, ConVarFlags::None, "Prints physics profiling information for the last simulation step.");
+
+static void debug_dump_scene_graph(NetworkState *nw)
+{
+	auto *game = nw->GetGameState();
+	if(!game)
+		return;
+	std::vector<BaseEntity *> *ents;
+	game->GetEntities(&ents);
+
+	std::vector<BaseEntity *> rootEnts;
+	rootEnts.reserve(ents->size());
+	for(auto *ent : *ents) {
+		if(!ent)
+			continue;
+		auto *childC = ent->GetChildComponent();
+		if(!childC || !childC->HasParent())
+			rootEnts.push_back(ent);
+	}
+
+	std::function<void(BaseEntity &, const std::string &, bool)> printGraph = nullptr;
+	printGraph = [&printGraph](BaseEntity &ent, const std::string &prefix, bool isLast) {
+		Con::cout << prefix;
+		if(isLast)
+			Con::cout << "\\-- ";
+		else
+			Con::cout << "+-- ";
+		ent.print(Con::cout);
+		Con::cout << Con::endl;
+
+		auto parentC = ent.GetComponent<pragma::ParentComponent>();
+		if(parentC.expired())
+			return;
+		auto &children = parentC->GetChildren();
+		for(size_t i = 0; i < children.size(); ++i) {
+			if(children[i].expired())
+				continue;
+			bool isLastChild = (i == children.size() - 1);
+			printGraph(children[i].get()->GetEntity(), prefix + (isLast ? "    " : "|   "), isLastChild);
+		}
+	};
+
+	Con::cout << (game->IsClient() ? "Client " : "Server ");
+	Con::cout << "Scene Graph:" << Con::endl;
+	for(size_t i = 0; i < rootEnts.size(); ++i) {
+		bool isLastRoot = (i == rootEnts.size() - 1);
+		printGraph(*rootEnts[i], "", isLastRoot);
+	}
+	Con::cout << Con::endl;
+}
+
+static void debug_dump_scene_graph(NetworkState *nw, pragma::BasePlayerComponent *, std::vector<std::string> &)
+{
+	auto *sv = engine->GetServerNetworkState();
+	if(sv)
+		debug_dump_scene_graph(sv);
+
+	auto *cl = engine->GetClientState();
+	if(cl)
+		debug_dump_scene_graph(cl);
+}
+REGISTER_ENGINE_CONCOMMAND(debug_dump_scene_graph, debug_dump_scene_graph, ConVarFlags::None, "Prints the game scene graph.");
 
 //////////////// SERVER ////////////////
 

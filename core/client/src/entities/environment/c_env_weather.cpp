@@ -10,7 +10,7 @@
 #include "pragma/entities/c_entityfactories.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/entities/components/c_player_component.hpp"
-#include "pragma/entities/components/c_attachable_component.hpp"
+#include "pragma/entities/components/c_attachment_component.hpp"
 #include "pragma/lua/c_lentity_handles.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
@@ -45,7 +45,7 @@ void CWeatherComponent::OnEntitySpawn()
 			auto pTrComponentPl = plEnt.GetTransformComponent();
 			if(pTrComponent != nullptr && pTrComponentPl)
 				pTrComponent->SetPosition(pTrComponentPl->GetPosition());
-			auto pAttComponent = ent.AddComponent<CAttachableComponent>();
+			auto pAttComponent = ent.AddComponent<CAttachmentComponent>();
 			if(pAttComponent.valid()) {
 				AttachmentInfo attInfo {};
 				attInfo.flags |= FAttachmentMode::PositionOnly;

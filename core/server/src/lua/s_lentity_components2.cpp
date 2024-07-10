@@ -36,8 +36,8 @@
 #include "pragma/entities/components/s_animated_component.hpp"
 #include "pragma/entities/components/s_io_component.hpp"
 #include "pragma/entities/components/s_time_scale_component.hpp"
-#include "pragma/entities/components/s_attachable_component.hpp"
-#include "pragma/entities/components/s_parent_component.hpp"
+#include "pragma/entities/components/s_attachment_component.hpp"
+#include "pragma/entities/components/s_child_component.hpp"
 #include "pragma/entities/components/s_generic_component.hpp"
 #include "pragma/entities/components/s_point_at_target_component.hpp"
 #include "pragma/entities/components/s_ownable_component.hpp"
@@ -144,11 +144,11 @@ void RegisterLuaEntityComponents2_sv(lua_State *l, luabind::module_ &entsMod)
 	auto defSTimeScale = pragma::lua::create_entity_component_class<pragma::STimeScaleComponent, pragma::BaseTimeScaleComponent>("TimeScaleComponent");
 	entsMod[defSTimeScale];
 
-	auto defSAttachable = pragma::lua::create_entity_component_class<pragma::SAttachableComponent, pragma::BaseAttachableComponent>("AttachableComponent");
+	auto defSAttachable = pragma::lua::create_entity_component_class<pragma::SAttachmentComponent, pragma::BaseAttachmentComponent>("AttachmentComponent");
 	entsMod[defSAttachable];
 
-	auto defSParent = pragma::lua::create_entity_component_class<pragma::SParentComponent, pragma::BaseParentComponent>("ParentComponent");
-	entsMod[defSParent];
+	auto defSChild = pragma::lua::create_entity_component_class<pragma::SChildComponent, pragma::BaseChildComponent>("ChildComponent");
+	entsMod[defSChild];
 
 	auto defSOwnable = pragma::lua::create_entity_component_class<pragma::SOwnableComponent, pragma::BaseOwnableComponent>("OwnableComponent");
 	entsMod[defSOwnable];

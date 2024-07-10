@@ -20,6 +20,7 @@
 #include "pragma/model/s_modelmanager.h"
 #include "pragma/entities/components/s_entity_component.hpp"
 #include "pragma/entities/components/s_player_component.hpp"
+#include "pragma/entities/components/s_child_component.hpp"
 #include "pragma/entities/components/s_model_component.hpp"
 #include "pragma/entities/components/s_animated_component.hpp"
 #include "pragma/entities/components/s_weapon_component.hpp"
@@ -78,6 +79,8 @@ void SBaseEntity::OnComponentAdded(pragma::BaseEntityComponent &component)
 		m_modelComponent = &static_cast<pragma::SModelComponent &>(component);
 	else if(typeid(component) == typeid(pragma::SGenericComponent))
 		m_genericComponent = &static_cast<pragma::SGenericComponent &>(component);
+	else if(typeid(component) == typeid(pragma::SChildComponent))
+		m_childComponent = &static_cast<pragma::SChildComponent &>(component);
 }
 void SBaseEntity::OnComponentRemoved(pragma::BaseEntityComponent &component)
 {
@@ -92,6 +95,8 @@ void SBaseEntity::OnComponentRemoved(pragma::BaseEntityComponent &component)
 		m_modelComponent = nullptr;
 	else if(typeid(component) == typeid(pragma::SGenericComponent))
 		m_genericComponent = nullptr;
+	else if(typeid(component) == typeid(pragma::SChildComponent))
+		m_childComponent = nullptr;
 }
 
 BaseEntity *SBaseEntity::GetClientsideEntity() const

@@ -15,7 +15,7 @@
 #include "pragma/entities/components/c_color_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/components/c_transform_component.hpp"
-#include "pragma/entities/components/c_attachable_component.hpp"
+#include "pragma/entities/components/c_attachment_component.hpp"
 #include "pragma/entities/components/c_light_map_receiver_component.hpp"
 #include "pragma/entities/components/renderers/c_raytracing_renderer_component.hpp"
 #include "pragma/entities/components/intersection_handler_component.hpp"
@@ -38,8 +38,11 @@
 #include <prosper_command_buffer.hpp>
 #include <pragma/entities/components/base_physics_component.hpp>
 #include <pragma/entities/components/base_player_component.hpp>
+#include <pragma/entities/components/base_child_component.hpp>
+#include <pragma/entities/components/parent_component.hpp>
 #include <pragma/math/intersection.h>
 #include <pragma/entities/entity_component_system_t.hpp>
+#include <pragma/entities/entity_component_manager_t.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/console/sh_cmd.h>
@@ -80,6 +83,16 @@ void CRenderComponent::RegisterEvents(pragma::EntityComponentManager &componentM
 	EVENT_UPDATE_INSTANTIABILITY = registerEvent("UPDATE_INSTANTIABILITY", ComponentEventInfo::Type::Broadcast);
 	EVENT_ON_CLIP_PLANE_CHANGED = registerEvent("ON_CLIP_PLANE_CHANGED", ComponentEventInfo::Type::Broadcast);
 	EVENT_ON_DEPTH_BIAS_CHANGED = registerEvent("ON_DEPTH_BIAS_CHANGED", ComponentEventInfo::Type::Broadcast);
+}
+void CRenderComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
+{
+	using T = CRenderComponent;
+
+	{
+		using TVisible = bool;
+		auto memberInfo = create_component_member_info<T, TVisible, +[](const ComponentMemberInfo &, T &component, const TVisible &value) { component.SetHidden(!value); }, +[](const ComponentMemberInfo &, T &component, TVisible &value) { value = !component.IsHidden(); }>("visible", true);
+		registerMember(std::move(memberInfo));
+	}
 }
 CRenderComponent::CRenderComponent(BaseEntity &ent)
     : BaseRenderComponent(ent), m_renderGroups {util::TEnumProperty<pragma::rendering::RenderGroup>::Create(pragma::rendering::RenderGroup::None)}, m_renderPass {util::TEnumProperty<pragma::rendering::SceneRenderPass>::Create(rendering::SceneRenderPass::World)}
@@ -134,6 +147,14 @@ void CRenderComponent::ClearRenderObjects()
 	m_renderInstances.clear();*/ // Vulkan TODO
 }
 CRenderComponent::StateFlags CRenderComponent::GetStateFlags() const { return m_stateFlags; }
+util::EventReply CRenderComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
+{
+	if(eventId == BaseChildComponent::EVENT_ON_PARENT_CHANGED) {
+		UpdateAncestorHiddenState();
+		PropagateHiddenState();
+	}
+	return BaseRenderComponent::HandleEvent(eventId, evData);
+}
 void CRenderComponent::SetDepthPassEnabled(bool enabled) { umath::set_flag(m_stateFlags, StateFlags::EnableDepthPass, enabled); }
 bool CRenderComponent::IsDepthPassEnabled() const { return umath::is_flag_set(m_stateFlags, StateFlags::EnableDepthPass); }
 void CRenderComponent::SetRenderClipPlane(const Vector4 &plane)
@@ -201,6 +222,8 @@ void CRenderComponent::Initialize()
 		BroadcastEvent(EVENT_ON_RENDER_MODE_CHANGED);
 	});
 	UpdateInstantiability();
+	UpdateAncestorHiddenState();
+	PropagateHiddenState();
 }
 CRenderComponent::~CRenderComponent()
 {
@@ -213,6 +236,13 @@ CRenderComponent::~CRenderComponent()
 		c_engine->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_renderBuffer);
 	if(m_renderDescSetGroup != nullptr)
 		c_engine->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_renderDescSetGroup);
+}
+void CRenderComponent::OnRemove()
+{
+	BaseRenderComponent::OnRemove();
+	if(GetEntity().IsRemoved())
+		return;
+	SetHidden(false);
 }
 void CRenderComponent::OnEntitySpawn()
 {
@@ -353,8 +383,8 @@ void CRenderComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 		                         }),
 		  CallbackType::Component, &component);
 	}
-	else if(typeid(component) == typeid(pragma::CAttachableComponent))
-		m_attachableComponent = static_cast<CAttachableComponent *>(&component);
+	else if(typeid(component) == typeid(pragma::CAttachmentComponent))
+		m_attachmentComponent = static_cast<CAttachmentComponent *>(&component);
 	else if(typeid(component) == typeid(pragma::CAnimatedComponent))
 		m_animComponent = static_cast<CAnimatedComponent *>(&component);
 	else if(typeid(component) == typeid(pragma::CLightMapReceiverComponent)) {
@@ -365,8 +395,8 @@ void CRenderComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 void CRenderComponent::OnEntityComponentRemoved(BaseEntityComponent &component)
 {
 	BaseRenderComponent::OnEntityComponentRemoved(component);
-	if(typeid(component) == typeid(pragma::CAttachableComponent))
-		m_attachableComponent = nullptr;
+	if(typeid(component) == typeid(pragma::CAttachmentComponent))
+		m_attachmentComponent = nullptr;
 	else if(typeid(component) == typeid(pragma::CAnimatedComponent))
 		m_animComponent = nullptr;
 	else if(typeid(component) == typeid(pragma::CLightMapReceiverComponent)) {
@@ -405,7 +435,7 @@ void CRenderComponent::UpdateShouldDrawShadowState()
 	umath::set_flag(m_stateFlags, StateFlags::ShouldDrawShadow, shouldDraw);
 }
 CModelComponent *CRenderComponent::GetModelComponent() const { return static_cast<CModelComponent *>(GetEntity().GetModelComponent()); }
-CAttachableComponent *CRenderComponent::GetAttachableComponent() const { return m_attachableComponent; }
+CAttachmentComponent *CRenderComponent::GetAttachmentComponent() const { return m_attachmentComponent; }
 CAnimatedComponent *CRenderComponent::GetAnimatedComponent() const { return m_animComponent; }
 CLightMapReceiverComponent *CRenderComponent::GetLightMapReceiverComponent() const { return m_lightMapReceiverComponent; }
 void CRenderComponent::SetRenderOffsetTransform(const umath::ScaledTransform &t)
@@ -680,10 +710,10 @@ void CRenderComponent::UpdateRenderDataMT(const CSceneComponent &scene, const CC
 	CEOnUpdateRenderData evData {};
 	InvokeEventCallbacks(EVENT_ON_UPDATE_RENDER_DATA_MT, evData);
 
-	auto pAttComponent = GetAttachableComponent();
+	auto pAttComponent = GetAttachmentComponent();
 	if(pAttComponent) {
 		auto *attInfo = pAttComponent->GetAttachmentData();
-		if(attInfo != nullptr && (attInfo->flags & FAttachmentMode::UpdateEachFrame) != FAttachmentMode::None && attInfo->parent.valid())
+		if(attInfo != nullptr && (attInfo->flags & FAttachmentMode::UpdateEachFrame) != FAttachmentMode::None && GetEntity().GetParent())
 			pAttComponent->UpdateAttachmentOffset(false);
 	}
 }
@@ -698,6 +728,61 @@ bool CRenderComponent::AddToRenderGroup(const std::string &name)
 }
 const util::PEnumProperty<pragma::rendering::SceneRenderPass> &CRenderComponent::GetSceneRenderPassProperty() const { return m_renderPass; }
 pragma::rendering::SceneRenderPass CRenderComponent::GetSceneRenderPass() const { return *m_renderPass; }
+void CRenderComponent::SetHidden(bool hidden)
+{
+	if(hidden == IsHidden())
+		return;
+	umath::set_flag(m_stateFlags, StateFlags::Hidden, hidden);
+	PropagateHiddenState();
+	UpdateVisibility();
+}
+bool CRenderComponent::IsHidden() const { return umath::is_flag_set(m_stateFlags, StateFlags::Hidden | StateFlags::AncestorHidden); }
+bool CRenderComponent::IsVisible() const { return !IsHidden() && *m_renderPass != pragma::rendering::SceneRenderPass::None; }
+void CRenderComponent::UpdateAncestorHiddenState()
+{
+	auto parentHidden = false;
+	auto *entParent = GetEntity().GetParent();
+	while(entParent) {
+		auto renderC = entParent->GetComponent<CRenderComponent>();
+		if(renderC.valid() && renderC->IsHidden()) {
+			parentHidden = true;
+			break;
+		}
+		entParent = entParent->GetParent();
+	}
+	if(umath::is_flag_set(m_stateFlags, StateFlags::AncestorHidden) == parentHidden)
+		return;
+	umath::set_flag(m_stateFlags, StateFlags::AncestorHidden, parentHidden);
+	UpdateVisibility();
+}
+void CRenderComponent::PropagateHiddenState()
+{
+	auto hidden = IsHidden();
+	std::function<void(BaseEntity &)> propagate = nullptr;
+	propagate = [&propagate, hidden](BaseEntity &ent) {
+		auto parentC = ent.GetComponent<ParentComponent>();
+		if(parentC.expired())
+			return;
+		for(auto &hChild : parentC->GetChildren()) {
+			if(hChild.expired())
+				continue;
+			auto renderC = hChild->GetEntity().GetComponent<CRenderComponent>();
+			if(renderC.valid()) {
+				umath::set_flag(renderC->m_stateFlags, StateFlags::AncestorHidden, hidden);
+				renderC->UpdateVisibility();
+			}
+			propagate(hChild->GetEntity());
+		}
+	};
+	propagate(GetEntity());
+}
+void CRenderComponent::UpdateVisibility()
+{
+	if(IsHidden())
+		ClearRenderBuffers();
+	else if(GetEntity().IsSpawned())
+		InitializeRenderBuffers();
+}
 void CRenderComponent::SetSceneRenderPass(pragma::rendering::SceneRenderPass pass)
 {
 	*m_renderPass = pass;
@@ -717,10 +802,7 @@ void CRenderComponent::SetSceneRenderPass(pragma::rendering::SceneRenderPass pas
 		}
 	}
 
-	if(pass == rendering::SceneRenderPass::None)
-		ClearRenderBuffers();
-	else if(GetEntity().IsSpawned())
-		InitializeRenderBuffers();
+	UpdateVisibility();
 }
 bool CRenderComponent::IsInRenderGroup(pragma::rendering::RenderGroup group) const { return umath::is_flag_set(GetRenderGroups(), group); }
 void CRenderComponent::AddToRenderGroup(pragma::rendering::RenderGroup group) { SetRenderGroups(GetRenderGroups() | group); }

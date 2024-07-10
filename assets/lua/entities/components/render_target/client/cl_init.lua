@@ -113,7 +113,7 @@ function Component:CreateScene(w, h)
 	scene:Link(gameScene)
 	scene:GetEntity():SetName("scene_render_target")
 
-	local entRenderer = ents.create("rasterization_renderer")
+	local entRenderer = self:GetEntity():CreateChild("rasterization_renderer")
 	local renderer = entRenderer:GetComponent(ents.COMPONENT_RENDERER)
 	local rasterizer = entRenderer:GetComponent(ents.COMPONENT_RASTERIZATION_RENDERER)
 	rasterizer:SetSSAOEnabled(true)

@@ -7,7 +7,7 @@
 
 #include "stdafx_client.h"
 #include "pragma/entities/environment/effects/c_env_sprite.h"
-#include "pragma/entities/components/c_attachable_component.hpp"
+#include "pragma/entities/components/c_attachment_component.hpp"
 #include "pragma/entities/components/c_color_component.hpp"
 #include "pragma/entities/c_entityfactories.h"
 #include "pragma/lua/c_lentity_handles.hpp"
@@ -128,7 +128,7 @@ void CSpriteComponent::StartParticle()
 	if(m_hCbRenderCallback.IsValid())
 		m_hCbRenderCallback.Remove();
 
-	auto whAttComponent = pt->GetEntity().AddComponent<CAttachableComponent>();
+	auto whAttComponent = pt->GetEntity().AddComponent<CAttachmentComponent>();
 	if(whAttComponent.valid()) {
 		AttachmentInfo attInfo {};
 		attInfo.flags = FAttachmentMode::SnapToOrigin | FAttachmentMode::UpdateEachFrame;
@@ -137,7 +137,7 @@ void CSpriteComponent::StartParticle()
 	// We need to update the particle system position every frame
 	m_hCbRenderCallback = pt->AddRenderCallback([this]() {
 		auto &ent = GetEntity();
-		auto pAttComponent = ent.GetComponent<pragma::CAttachableComponent>();
+		auto pAttComponent = ent.GetComponent<pragma::CAttachmentComponent>();
 		if(pAttComponent.valid())
 			pAttComponent->UpdateAttachmentOffset();
 	});

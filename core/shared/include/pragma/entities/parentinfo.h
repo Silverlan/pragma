@@ -16,7 +16,7 @@
 #include <optional>
 
 namespace pragma {
-	class BaseParentComponent;
+	class ParentComponent;
 };
 struct DLLNETWORK AttachmentInfo {
 	std::optional<Vector3> offset = {};
@@ -31,7 +31,6 @@ struct DLLNETWORK AttachmentData {
 	FAttachmentMode flags = FAttachmentMode::None;
 	int32_t bone = -1;
 	int32_t attachment = -1;
-	pragma::ComponentHandle<pragma::BaseParentComponent> parent = {};
 	std::vector<int32_t> boneMapping = {};
 };
 

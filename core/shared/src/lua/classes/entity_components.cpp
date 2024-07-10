@@ -7,10 +7,11 @@
 #include "pragma/physics/raytraces.h"
 #include "stdafx_shared.h"
 #include "pragma/lua/classes/entity_components.hpp"
-#include "pragma/entities/components/base_attachable_component.hpp"
+#include "pragma/entities/components/base_attachment_component.hpp"
 #include "pragma/entities/components/base_game_component.hpp"
 #include "pragma/entities/components/base_entity_component_member_register.hpp"
 #include "pragma/entities/components/base_bvh_component.hpp"
+#include "pragma/entities/components/base_child_component.hpp"
 #include "pragma/entities/components/base_static_bvh_cache_component.hpp"
 #include "pragma/entities/components/base_static_bvh_user_component.hpp"
 #include "pragma/entities/components/intersection_handler_component.hpp"
@@ -33,7 +34,7 @@
 #include "pragma/lua/lua_util_component.hpp"
 #include "pragma/lua/types/udm.hpp"
 #include "pragma/lua/libraries/lprint.h"
-#include "pragma/entities/components/base_parent_component.hpp"
+#include "pragma/entities/components/parent_component.hpp"
 #include "pragma/entities/components/base_entity_component_logging.hpp"
 #include "pragma/physics/shape.hpp"
 #include "pragma/util/render_tile.hpp"
@@ -62,6 +63,9 @@ namespace pragma::lua {
 		static void register_class(luabind::module_ &mod);
 	};
 	namespace base_attachable_component {
+		static void register_class(luabind::module_ &mod);
+	};
+	namespace base_child_component {
 		static void register_class(luabind::module_ &mod);
 	};
 	namespace base_bot_component {
@@ -1040,6 +1044,7 @@ void pragma::lua::register_entity_component_classes(lua_State *l, luabind::modul
 	base_ai_component::register_class(mod);
 	base_animated_component::register_class(mod);
 	base_attachable_component::register_class(mod);
+	base_child_component::register_class(mod);
 	base_bot_component::register_class(mod);
 	base_character_component::register_class(mod);
 	base_color_component::register_class(mod);
@@ -1141,45 +1146,49 @@ void pragma::lua::register_entity_component_classes(lua_State *l, luabind::modul
 	auto defGameComponent = Lua::create_base_entity_component_class<pragma::BaseGameComponent>("BaseGameComponent");
 	mod[defGameComponent];
 }
-
+void pragma::lua::base_child_component::register_class(luabind::module_ &mod)
+{
+	auto def = Lua::create_base_entity_component_class<pragma::BaseChildComponent>("BaseChildComponent");
+	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+}
 void pragma::lua::base_attachable_component::register_class(luabind::module_ &mod)
 {
-	auto def = Lua::create_base_entity_component_class<pragma::BaseAttachableComponent>("BaseAttachableComponent");
+	auto def = Lua::create_base_entity_component_class<pragma::BaseAttachmentComponent>("BaseAttachmentComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
-	def.def("AttachToEntity", &pragma::BaseAttachableComponent::AttachToEntity, luabind::discard_result {});
-	def.def("AttachToEntity", static_cast<AttachmentData *(*)(pragma::BaseAttachableComponent &, BaseEntity *)>([](pragma::BaseAttachableComponent &component, BaseEntity *ent) { return component.AttachToEntity(ent); }), luabind::discard_result {});
+	def.def("AttachToEntity", &pragma::BaseAttachmentComponent::AttachToEntity, luabind::discard_result {});
+	def.def("AttachToEntity", static_cast<AttachmentData *(*)(pragma::BaseAttachmentComponent &, BaseEntity *)>([](pragma::BaseAttachmentComponent &component, BaseEntity *ent) { return component.AttachToEntity(ent); }), luabind::discard_result {});
 	//AttachmentData *AttachToEntity(BaseEntity *ent,const AttachmentInfo &attInfo={});
-	//def.def("AttachToEntity",&pragma::BaseAttachableComponent::AttachToEntity,luabind::default_parameter_policy<0,AttachmentInfo,att>{});
-	//def.def("AttachToEntity",std::bind(&pragma::BaseAttachableComponent::AttachToEntity,std::placeholders::_1,AttachmentInfo{}));
-	def.def("ClearAttachment", &pragma::BaseAttachableComponent::ClearAttachment);
-	def.def("AttachToAttachment", static_cast<AttachmentData *(pragma::BaseAttachableComponent::*)(BaseEntity *, uint32_t, const AttachmentInfo &)>(&pragma::BaseAttachableComponent::AttachToAttachment), luabind::discard_result {});
-	def.def("AttachToAttachment", static_cast<AttachmentData *(*)(pragma::BaseAttachableComponent &, BaseEntity *, uint32_t)>([](pragma::BaseAttachableComponent &component, BaseEntity *ent, uint32_t attIdx) { return component.AttachToAttachment(ent, attIdx); }),
+	//def.def("AttachToEntity",&pragma::BaseAttachmentComponent::AttachToEntity,luabind::default_parameter_policy<0,AttachmentInfo,att>{});
+	//def.def("AttachToEntity",std::bind(&pragma::BaseAttachmentComponent::AttachToEntity,std::placeholders::_1,AttachmentInfo{}));
+	def.def("ClearAttachment", &pragma::BaseAttachmentComponent::ClearAttachment);
+	def.def("AttachToAttachment", static_cast<AttachmentData *(pragma::BaseAttachmentComponent::*)(BaseEntity *, uint32_t, const AttachmentInfo &)>(&pragma::BaseAttachmentComponent::AttachToAttachment), luabind::discard_result {});
+	def.def("AttachToAttachment", static_cast<AttachmentData *(*)(pragma::BaseAttachmentComponent &, BaseEntity *, uint32_t)>([](pragma::BaseAttachmentComponent &component, BaseEntity *ent, uint32_t attIdx) { return component.AttachToAttachment(ent, attIdx); }),
 	  luabind::discard_result {});
-	//def.def("AttachToAttachment",std::bind(static_cast<AttachmentData*(pragma::BaseAttachableComponent::*)(BaseEntity*,uint32_t,const AttachmentInfo&)>(&pragma::BaseAttachableComponent::AttachToAttachment),std::placeholders::_1,std::placeholders::_2,AttachmentInfo{}));
-	def.def("AttachToAttachment", static_cast<AttachmentData *(pragma::BaseAttachableComponent::*)(BaseEntity *, std::string, const AttachmentInfo &)>(&pragma::BaseAttachableComponent::AttachToAttachment), luabind::discard_result {});
-	def.def("AttachToAttachment", static_cast<AttachmentData *(*)(pragma::BaseAttachableComponent &, BaseEntity *, std::string)>([](pragma::BaseAttachableComponent &component, BaseEntity *ent, std::string att) { return component.AttachToAttachment(ent, att); }),
+	//def.def("AttachToAttachment",std::bind(static_cast<AttachmentData*(pragma::BaseAttachmentComponent::*)(BaseEntity*,uint32_t,const AttachmentInfo&)>(&pragma::BaseAttachmentComponent::AttachToAttachment),std::placeholders::_1,std::placeholders::_2,AttachmentInfo{}));
+	def.def("AttachToAttachment", static_cast<AttachmentData *(pragma::BaseAttachmentComponent::*)(BaseEntity *, std::string, const AttachmentInfo &)>(&pragma::BaseAttachmentComponent::AttachToAttachment), luabind::discard_result {});
+	def.def("AttachToAttachment", static_cast<AttachmentData *(*)(pragma::BaseAttachmentComponent &, BaseEntity *, std::string)>([](pragma::BaseAttachmentComponent &component, BaseEntity *ent, std::string att) { return component.AttachToAttachment(ent, att); }),
 	  luabind::discard_result {});
-	//def.def("AttachToAttachment",std::bind(static_cast<AttachmentData*(pragma::BaseAttachableComponent::*)(BaseEntity*,std::string,const AttachmentInfo&)>(&pragma::BaseAttachableComponent::AttachToAttachment),std::placeholders::_1,std::placeholders::_2,AttachmentInfo{}));
+	//def.def("AttachToAttachment",std::bind(static_cast<AttachmentData*(pragma::BaseAttachmentComponent::*)(BaseEntity*,std::string,const AttachmentInfo&)>(&pragma::BaseAttachmentComponent::AttachToAttachment),std::placeholders::_1,std::placeholders::_2,AttachmentInfo{}));
 	def.def("AttachToBone",
-	  static_cast<void (*)(lua_State *, pragma::BaseAttachableComponent &, BaseEntity &, std::string, AttachmentInfo &)>([](lua_State *l, pragma::BaseAttachableComponent &hEnt, BaseEntity &parent, std::string bone, AttachmentInfo &attInfo) { hEnt.AttachToBone(&parent, bone, attInfo); }),
+	  static_cast<void (*)(lua_State *, pragma::BaseAttachmentComponent &, BaseEntity &, std::string, AttachmentInfo &)>([](lua_State *l, pragma::BaseAttachmentComponent &hEnt, BaseEntity &parent, std::string bone, AttachmentInfo &attInfo) { hEnt.AttachToBone(&parent, bone, attInfo); }),
 	  luabind::discard_result {});
-	def.def("AttachToBone", static_cast<void (*)(lua_State *, pragma::BaseAttachableComponent &, BaseEntity &, std::string)>([](lua_State *l, pragma::BaseAttachableComponent &hEnt, BaseEntity &parent, std::string bone) { hEnt.AttachToBone(&parent, bone); }), luabind::discard_result {});
+	def.def("AttachToBone", static_cast<void (*)(lua_State *, pragma::BaseAttachmentComponent &, BaseEntity &, std::string)>([](lua_State *l, pragma::BaseAttachmentComponent &hEnt, BaseEntity &parent, std::string bone) { hEnt.AttachToBone(&parent, bone); }), luabind::discard_result {});
 	def.def("AttachToBone",
-	  static_cast<void (*)(lua_State *, pragma::BaseAttachableComponent &, BaseEntity &, int, AttachmentInfo &)>([](lua_State *l, pragma::BaseAttachableComponent &hEnt, BaseEntity &parent, int bone, AttachmentInfo &attInfo) { hEnt.AttachToBone(&parent, bone, attInfo); }),
+	  static_cast<void (*)(lua_State *, pragma::BaseAttachmentComponent &, BaseEntity &, int, AttachmentInfo &)>([](lua_State *l, pragma::BaseAttachmentComponent &hEnt, BaseEntity &parent, int bone, AttachmentInfo &attInfo) { hEnt.AttachToBone(&parent, bone, attInfo); }),
 	  luabind::discard_result {});
-	def.def("AttachToBone", static_cast<void (*)(lua_State *, pragma::BaseAttachableComponent &, BaseEntity &, int)>([](lua_State *l, pragma::BaseAttachableComponent &hEnt, BaseEntity &parent, int bone) { hEnt.AttachToBone(&parent, bone); })), luabind::discard_result {};
-	def.def("GetLocalPose", &pragma::BaseAttachableComponent::GetLocalPose);
-	def.def("SetLocalPose", &pragma::BaseAttachableComponent::SetLocalPose);
-	def.def("GetParent", &pragma::BaseAttachableComponent::GetParent);
+	def.def("AttachToBone", static_cast<void (*)(lua_State *, pragma::BaseAttachmentComponent &, BaseEntity &, int)>([](lua_State *l, pragma::BaseAttachmentComponent &hEnt, BaseEntity &parent, int bone) { hEnt.AttachToBone(&parent, bone); })), luabind::discard_result {};
+	def.def("GetLocalPose", &pragma::BaseAttachmentComponent::GetLocalPose);
+	def.def("SetLocalPose", &pragma::BaseAttachmentComponent::SetLocalPose);
+	def.def("GetParent", &pragma::BaseAttachmentComponent::GetParent);
 
-	def.def("GetBone", static_cast<luabind::object (*)(lua_State *, pragma::BaseAttachableComponent &)>([](lua_State *l, pragma::BaseAttachableComponent &hEnt) -> luabind::object {
+	def.def("GetBone", static_cast<luabind::object (*)(lua_State *, pragma::BaseAttachmentComponent &)>([](lua_State *l, pragma::BaseAttachmentComponent &hEnt) -> luabind::object {
 		auto *data = hEnt.GetAttachmentData();
 		if(data == nullptr)
 			return luabind::object {};
 		return luabind::object {l, data->bone};
 	}));
-	def.def("SetAttachmentFlags", &pragma::BaseAttachableComponent::SetAttachmentFlags);
-	def.def("GetAttachmentFlags", &pragma::BaseAttachableComponent::GetAttachmentFlags);
+	def.def("SetAttachmentFlags", &pragma::BaseAttachmentComponent::SetAttachmentFlags);
+	def.def("GetAttachmentFlags", &pragma::BaseAttachmentComponent::GetAttachmentFlags);
 
 	auto defAttInfo = luabind::class_<AttachmentInfo>("AttachmentInfo");
 	defAttInfo.def(luabind::constructor<>());
@@ -1190,7 +1199,7 @@ void pragma::lua::base_attachable_component::register_class(luabind::module_ &mo
 	defAttInfo.def_readwrite("flags", reinterpret_cast<std::underlying_type_t<decltype(AttachmentInfo::flags)> AttachmentInfo::*>(&AttachmentInfo::flags));
 	def.scope[defAttInfo];
 
-	def.add_static_constant("EVENT_ON_ATTACHMENT_UPDATE", pragma::BaseAttachableComponent::EVENT_ON_ATTACHMENT_UPDATE);
+	def.add_static_constant("EVENT_ON_ATTACHMENT_UPDATE", pragma::BaseAttachmentComponent::EVENT_ON_ATTACHMENT_UPDATE);
 
 	def.add_static_constant("FATTACHMENT_MODE_POSITION_ONLY", umath::to_integral(FAttachmentMode::PositionOnly));
 	def.add_static_constant("FATTACHMENT_MODE_BONEMERGE", umath::to_integral(FAttachmentMode::BoneMerge));
@@ -2352,20 +2361,28 @@ void pragma::lua::base_transform_component::register_class(luabind::module_ &mod
 	auto def = Lua::create_base_entity_component_class<pragma::BaseTransformComponent>("BaseTransformComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	def.def("GetOrigin", &pragma::BaseTransformComponent::GetOrigin);
-	def.def("GetPos", &pragma::BaseTransformComponent::GetPosition, luabind::copy_policy<0> {});
+	def.def("GetPos", static_cast<const Vector3 &(pragma::BaseTransformComponent::*)() const>(&pragma::BaseTransformComponent::GetPosition), luabind::copy_policy<0> {});
+	def.def("GetPos", static_cast<Vector3 (pragma::BaseTransformComponent::*)(pragma::CoordinateSpace) const>(&pragma::BaseTransformComponent::GetPosition));
 	def.def("SetPos", static_cast<void (pragma::BaseTransformComponent::*)(const Vector3 &)>(&pragma::BaseTransformComponent::SetPosition));
-	def.def("SetPos", static_cast<void (pragma::BaseTransformComponent::*)(const Vector3 &, bool)>(&pragma::BaseTransformComponent::SetPosition));
-	def.def("GetRotation", &pragma::BaseTransformComponent::GetRotation, luabind::copy_policy<0> {});
-	def.def("SetRotation", &pragma::BaseTransformComponent::SetRotation);
+	def.def("SetPos", static_cast<void (pragma::BaseTransformComponent::*)(const Vector3 &, bool, pragma::CoordinateSpace)>(&pragma::BaseTransformComponent::SetPosition));
+	def.def("SetPos", static_cast<void (pragma::BaseTransformComponent::*)(const Vector3 &, bool, pragma::CoordinateSpace)>(&pragma::BaseTransformComponent::SetPosition), luabind::default_parameter_policy<4, pragma::CoordinateSpace::World> {});
+	def.def("GetRotation", static_cast<const Quat &(pragma::BaseTransformComponent::*)() const>(&pragma::BaseTransformComponent::GetRotation), luabind::copy_policy<0> {});
+	def.def("GetRotation", static_cast<Quat (pragma::BaseTransformComponent::*)(pragma::CoordinateSpace) const>(&pragma::BaseTransformComponent::GetRotation));
+	def.def("SetRotation", static_cast<void (pragma::BaseTransformComponent::*)(const Quat &)>(&pragma::BaseTransformComponent::SetRotation));
+	def.def("SetRotation", static_cast<void (pragma::BaseTransformComponent::*)(const Quat &, pragma::CoordinateSpace)>(&pragma::BaseTransformComponent::SetRotation));
 	def.def("GetAngles", static_cast<EulerAngles (pragma::BaseTransformComponent::*)(const Vector3 &, bool) const>(&pragma::BaseTransformComponent::GetAngles));
 	def.def("GetAngles", static_cast<EulerAngles (pragma::BaseTransformComponent::*)(const Vector3 &, bool) const>(&pragma::BaseTransformComponent::GetAngles), luabind::default_parameter_policy<3, false> {});
 	def.def("GetAngles", static_cast<EulerAngles (pragma::BaseTransformComponent::*)(const BaseEntity &, bool) const>(&pragma::BaseTransformComponent::GetAngles));
 	def.def("GetAngles", static_cast<EulerAngles (pragma::BaseTransformComponent::*)(const BaseEntity &, bool) const>(&pragma::BaseTransformComponent::GetAngles), luabind::default_parameter_policy<3, false> {});
 	def.def("GetAngles", static_cast<EulerAngles (pragma::BaseTransformComponent::*)() const>(&pragma::BaseTransformComponent::GetAngles));
-	def.def("SetAngles", &pragma::BaseTransformComponent::SetAngles);
-	def.def("GetForward", &pragma::BaseTransformComponent::GetForward);
-	def.def("GetRight", &pragma::BaseTransformComponent::GetRight);
-	def.def("GetUp", &pragma::BaseTransformComponent::GetUp);
+	def.def("SetAngles", static_cast<void (pragma::BaseTransformComponent::*)(const EulerAngles &, pragma::CoordinateSpace)>(&pragma::BaseTransformComponent::SetAngles));
+	def.def("SetAngles", static_cast<void (pragma::BaseTransformComponent::*)(const EulerAngles &)>(&pragma::BaseTransformComponent::SetAngles));
+	def.def("GetForward", static_cast<Vector3 (pragma::BaseTransformComponent::*)(pragma::CoordinateSpace) const>(&pragma::BaseTransformComponent::GetForward));
+	def.def("GetForward", static_cast<Vector3 (pragma::BaseTransformComponent::*)(pragma::CoordinateSpace) const>(&pragma::BaseTransformComponent::GetForward), luabind::default_parameter_policy<4, pragma::CoordinateSpace::World> {});
+	def.def("GetRight", static_cast<Vector3 (pragma::BaseTransformComponent::*)(pragma::CoordinateSpace) const>(&pragma::BaseTransformComponent::GetRight));
+	def.def("GetRight", static_cast<Vector3 (pragma::BaseTransformComponent::*)(pragma::CoordinateSpace) const>(&pragma::BaseTransformComponent::GetRight), luabind::default_parameter_policy<4, pragma::CoordinateSpace::World> {});
+	def.def("GetUp", static_cast<Vector3 (pragma::BaseTransformComponent::*)(pragma::CoordinateSpace) const>(&pragma::BaseTransformComponent::GetUp));
+	def.def("GetUp", static_cast<Vector3 (pragma::BaseTransformComponent::*)(pragma::CoordinateSpace) const>(&pragma::BaseTransformComponent::GetUp), luabind::default_parameter_policy<4, pragma::CoordinateSpace::World> {});
 
 	def.def("GetEyePos", &pragma::BaseTransformComponent::GetEyePosition);
 	def.def("GetEyeOffset", &pragma::BaseTransformComponent::GetEyeOffset);
@@ -2398,19 +2415,27 @@ void pragma::lua::base_transform_component::register_class(luabind::module_ &mod
 		Lua::Push<Quat>(l, rot);
 	}));
 
-	def.def("GetPitch", &pragma::BaseTransformComponent::GetPitch);
-	def.def("GetYaw", &pragma::BaseTransformComponent::GetYaw);
-	def.def("GetRoll", &pragma::BaseTransformComponent::GetRoll);
-	def.def("SetPitch", &pragma::BaseTransformComponent::SetPitch);
-	def.def("SetYaw", &pragma::BaseTransformComponent::SetYaw);
-	def.def("SetRoll", &pragma::BaseTransformComponent::SetRoll);
+	def.def("GetPitch", static_cast<float (pragma::BaseTransformComponent::*)(pragma::CoordinateSpace) const>(&pragma::BaseTransformComponent::GetPitch));
+	def.def("GetPitch", static_cast<float (pragma::BaseTransformComponent::*)(pragma::CoordinateSpace) const>(&pragma::BaseTransformComponent::GetPitch), luabind::default_parameter_policy<2, pragma::CoordinateSpace::World> {});
+	def.def("GetYaw", static_cast<float (pragma::BaseTransformComponent::*)(pragma::CoordinateSpace) const>(&pragma::BaseTransformComponent::GetYaw));
+	def.def("GetYaw", static_cast<float (pragma::BaseTransformComponent::*)(pragma::CoordinateSpace) const>(&pragma::BaseTransformComponent::GetYaw), luabind::default_parameter_policy<2, pragma::CoordinateSpace::World> {});
+	def.def("GetRoll", static_cast<float (pragma::BaseTransformComponent::*)(pragma::CoordinateSpace) const>(&pragma::BaseTransformComponent::GetRoll));
+	def.def("GetRoll", static_cast<float (pragma::BaseTransformComponent::*)(pragma::CoordinateSpace) const>(&pragma::BaseTransformComponent::GetRoll), luabind::default_parameter_policy<2, pragma::CoordinateSpace::World> {});
+	def.def("SetPitch", static_cast<void (pragma::BaseTransformComponent::*)(float, pragma::CoordinateSpace)>(&pragma::BaseTransformComponent::SetPitch));
+	def.def("SetPitch", static_cast<void (pragma::BaseTransformComponent::*)(float, pragma::CoordinateSpace)>(&pragma::BaseTransformComponent::SetPitch), luabind::default_parameter_policy<3, pragma::CoordinateSpace::World> {});
+	def.def("SetYaw", static_cast<void (pragma::BaseTransformComponent::*)(float, pragma::CoordinateSpace)>(&pragma::BaseTransformComponent::SetYaw));
+	def.def("SetYaw", static_cast<void (pragma::BaseTransformComponent::*)(float, pragma::CoordinateSpace)>(&pragma::BaseTransformComponent::SetYaw), luabind::default_parameter_policy<3, pragma::CoordinateSpace::World> {});
+	def.def("SetRoll", static_cast<void (pragma::BaseTransformComponent::*)(float, pragma::CoordinateSpace)>(&pragma::BaseTransformComponent::SetRoll));
+	def.def("SetRoll", static_cast<void (pragma::BaseTransformComponent::*)(float, pragma::CoordinateSpace)>(&pragma::BaseTransformComponent::SetRoll), luabind::default_parameter_policy<3, pragma::CoordinateSpace::World> {});
 
 	def.def("GetLastMoveTime", &pragma::BaseTransformComponent::GetLastMoveTime);
-	def.def("GetScale", &pragma::BaseTransformComponent::GetScale, luabind::copy_policy<0> {});
+	def.def("GetScale", static_cast<const Vector3 &(pragma::BaseTransformComponent::*)() const>(&pragma::BaseTransformComponent::GetScale), luabind::copy_policy<0> {});
+	def.def("GetScale", static_cast<Vector3 (pragma::BaseTransformComponent::*)(pragma::CoordinateSpace) const>(&pragma::BaseTransformComponent::GetScale));
 	def.def("GetMaxAxisScale", &pragma::BaseTransformComponent::GetMaxAxisScale);
 	def.def("GetAbsMaxAxisScale", &pragma::BaseTransformComponent::GetAbsMaxAxisScale);
 	def.def("SetScale", static_cast<void (pragma::BaseTransformComponent::*)(float)>(&pragma::BaseTransformComponent::SetScale));
 	def.def("SetScale", static_cast<void (pragma::BaseTransformComponent::*)(const Vector3 &)>(&pragma::BaseTransformComponent::SetScale));
+	def.def("SetScale", static_cast<void (pragma::BaseTransformComponent::*)(const Vector3 &, pragma::CoordinateSpace)>(&pragma::BaseTransformComponent::SetScale));
 
 	def.def("GetDistance", static_cast<float (pragma::BaseTransformComponent::*)(const Vector3 &) const>(&pragma::BaseTransformComponent::GetDistance));
 	def.def("GetDistance", static_cast<float (pragma::BaseTransformComponent::*)(const BaseEntity &) const>(&pragma::BaseTransformComponent::GetDistance));
@@ -3545,10 +3570,12 @@ void pragma::lua::base_time_scale_component::register_class(luabind::module_ &mo
 	def.def("GetEffectiveTimeScale", &pragma::BaseTimeScaleComponent::GetEffectiveTimeScale);
 }
 
-#include "pragma/entities/components/base_parent_component.hpp"
+#include "pragma/entities/components/parent_component.hpp"
 void pragma::lua::base_parent_component::register_class(luabind::module_ &mod)
 {
-	auto def = Lua::create_base_entity_component_class<pragma::BaseParentComponent>("BaseParentComponent");
+	auto def = Lua::create_base_entity_component_class<pragma::ParentComponent>("ParentComponent");
+	def.add_static_constant("EVENT_ON_CHILD_ADDED", pragma::ParentComponent::EVENT_ON_CHILD_ADDED);
+	def.add_static_constant("EVENT_ON_CHILD_REMOVED", pragma::ParentComponent::EVENT_ON_CHILD_REMOVED);
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 

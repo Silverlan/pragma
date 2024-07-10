@@ -15,12 +15,14 @@
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/entities/components/base_health_component.hpp"
 #include "pragma/entities/components/base_sound_emitter_component.hpp"
-#include "pragma/entities/components/base_attachable_component.hpp"
+#include "pragma/entities/components/base_attachment_component.hpp"
 #include "pragma/entities/components/base_animated_component.hpp"
 #include "pragma/entities/components/damageable_component.hpp"
 #include "pragma/entities/components/velocity_component.hpp"
 #include "pragma/entities/components/base_io_component.hpp"
 #include "pragma/entities/components/base_render_component.hpp"
+#include "pragma/entities/components/base_child_component.hpp"
+#include "pragma/entities/components/parent_component.hpp"
 #include "pragma/model/model.h"
 
 pragma::ComponentHandle<pragma::BaseEntityComponent> BaseEntity::AddNetworkedComponent(const std::string &name)
@@ -126,21 +128,49 @@ void BaseEntity::SetBodyGroup(const std::string &name, uint32_t id)
 
 void BaseEntity::SetParent(BaseEntity *parent)
 {
-	auto *attC = static_cast<pragma::BaseAttachableComponent *>(AddNetworkedComponent("attachable").get());
-	if(attC == nullptr)
+	if(!parent) {
+		RemoveComponent("child");
 		return;
-	attC->AttachToEntity(parent);
+	}
+	auto childC = AddComponent("child");
+	if(childC.expired())
+		return;
+	assert(m_childComponent != nullptr);
+	if(!m_childComponent)
+		return;
+	m_childComponent->SetParent(*parent);
 }
 
 void BaseEntity::ClearParent() { SetParent(nullptr); }
 
-pragma::BaseParentComponent *BaseEntity::GetParent() const
+BaseEntity *BaseEntity::GetParent() const { return m_childComponent ? m_childComponent->GetParentEntity() : nullptr; }
+
+bool BaseEntity::HasParent() const { return GetParent() != nullptr; }
+bool BaseEntity::HasChildren() const
 {
-	auto attC = FindComponent("attachable");
-	if(attC.expired())
-		return nullptr;
-	return static_cast<pragma::BaseAttachableComponent *>(attC.get())->GetParent();
+	auto parentC = GetComponent<pragma::ParentComponent>();
+	if(parentC.expired())
+		return false;
+	for(auto &hChild : parentC->GetChildren()) {
+		if(hChild.valid())
+			return true;
+	}
+	return false;
 }
+
+bool BaseEntity::IsChildOf(const BaseEntity &ent) const { return GetParent() == &ent; }
+bool BaseEntity::IsDescendantOf(const BaseEntity &ent) const
+{
+	auto *parent = GetParent();
+	while(parent) {
+		if(parent == &ent)
+			return true;
+		parent = parent->GetParent();
+	}
+	return false;
+}
+bool BaseEntity::IsAncestorOf(const BaseEntity &ent) const { return ent.IsDescendantOf(*this); }
+bool BaseEntity::IsParentOf(const BaseEntity &ent) const { return ent.IsChildOf(*this); }
 
 PhysObj *BaseEntity::GetPhysicsObject() const
 {

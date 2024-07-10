@@ -8,6 +8,7 @@
 #define __BASE_TRANSFORM_COMPONENT_HPP__
 
 #include "pragma/entities/components/base_entity_component.hpp"
+#include "pragma/util/coordinate_space.hpp"
 #include <sharedutils/property/util_property_vector.h>
 #include <sharedutils/property/util_property_quat.hpp>
 
@@ -26,25 +27,34 @@ namespace pragma {
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 		virtual void Initialize() override;
 
+		void SetPosition(const Vector3 &pos, pragma::CoordinateSpace space);
 		void SetPosition(const Vector3 &pos);
 		const Vector3 &GetPosition() const;
+		Vector3 GetPosition(pragma::CoordinateSpace space) const;
+		void SetRotation(const Quat &q, pragma::CoordinateSpace space);
 		void SetRotation(const Quat &q);
 		const Quat &GetRotation() const;
+		Quat GetRotation(pragma::CoordinateSpace space) const;
+		void SetPose(const umath::ScaledTransform &pose, pragma::CoordinateSpace space);
+		void SetPose(const umath::Transform &pose, pragma::CoordinateSpace space);
 		void SetPose(const umath::ScaledTransform &pose);
 		void SetPose(const umath::Transform &pose);
 		const umath::ScaledTransform &GetPose() const;
+		umath::ScaledTransform GetPose(pragma::CoordinateSpace space) const;
+		void SetAngles(const EulerAngles &ang, pragma::CoordinateSpace space);
 		void SetAngles(const EulerAngles &ang);
-		void SetPitch(float pitch);
-		void SetYaw(float yaw);
-		void SetRoll(float roll);
+		void SetPitch(float pitch, pragma::CoordinateSpace space = pragma::CoordinateSpace::World);
+		void SetYaw(float yaw, pragma::CoordinateSpace space = pragma::CoordinateSpace::World);
+		void SetRoll(float roll, pragma::CoordinateSpace space = pragma::CoordinateSpace::World);
+		EulerAngles GetAngles(pragma::CoordinateSpace space) const;
 		EulerAngles GetAngles() const;
-		float GetPitch() const;
-		float GetYaw() const;
-		float GetRoll() const;
-		Mat4 GetRotationMatrix() const;
-		Vector3 GetForward() const;
-		Vector3 GetUp() const;
-		Vector3 GetRight() const;
+		float GetPitch(pragma::CoordinateSpace space = pragma::CoordinateSpace::World) const;
+		float GetYaw(pragma::CoordinateSpace space = pragma::CoordinateSpace::World) const;
+		float GetRoll(pragma::CoordinateSpace space = pragma::CoordinateSpace::World) const;
+		Mat4 GetRotationMatrix(pragma::CoordinateSpace space = pragma::CoordinateSpace::World) const;
+		Vector3 GetForward(pragma::CoordinateSpace space = pragma::CoordinateSpace::World) const;
+		Vector3 GetUp(pragma::CoordinateSpace space = pragma::CoordinateSpace::World) const;
+		Vector3 GetRight(pragma::CoordinateSpace space = pragma::CoordinateSpace::World) const;
 		float GetDistance(const Vector3 &p) const;
 		float GetDistance(const BaseEntity &ent) const;
 		void GetOrientation(Vector3 *forward, Vector3 *right, Vector3 *up = nullptr) const;
@@ -71,8 +81,11 @@ namespace pragma {
 		float GetMaxAxisScale() const;
 		float GetAbsMaxAxisScale() const;
 		const Vector3 &GetScale() const;
+		Vector3 GetScale(pragma::CoordinateSpace space) const;
 		void SetScale(float scale);
+		void SetScale(float scale, pragma::CoordinateSpace space);
 		virtual void SetScale(const Vector3 &scale);
+		void SetScale(const Vector3 &scale, pragma::CoordinateSpace space);
 
 		virtual Vector3 GetEyePosition() const;
 		Vector3 GetEyeOffset() const;
@@ -80,15 +93,15 @@ namespace pragma {
 
 		double GetLastMoveTime() const;
 
-		void SetPosition(const Vector3 &pos, Bool bForceUpdate);
+		void SetPosition(const Vector3 &pos, Bool bForceUpdate, pragma::CoordinateSpace space = pragma::CoordinateSpace::World);
 
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
 		virtual void Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) override;
 
 		// Same as SetPosition / SetRotation / SetScale, but don't invoke callbacks
-		void SetRawPosition(const Vector3 &pos);
-		void SetRawRotation(const Quat &rot);
-		void SetRawScale(const Vector3 &scale);
+		void SetRawPosition(const Vector3 &pos, pragma::CoordinateSpace space = pragma::CoordinateSpace::World);
+		void SetRawRotation(const Quat &rot, pragma::CoordinateSpace space = pragma::CoordinateSpace::World);
+		void SetRawScale(const Vector3 &scale, pragma::CoordinateSpace space = pragma::CoordinateSpace::World);
 
 		void UpdateLastMovedTime();
 		void OnPoseChanged(TransformChangeFlags changeFlags, bool updatePhysics = true);

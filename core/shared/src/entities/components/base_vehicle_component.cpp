@@ -18,7 +18,7 @@
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/entities/components/base_model_component.hpp"
 #include "pragma/entities/components/base_render_component.hpp"
-#include "pragma/entities/components/base_attachable_component.hpp"
+#include "pragma/entities/components/base_attachment_component.hpp"
 #include "pragma/physics/raytraces.h"
 #include "pragma/util/util_game.hpp"
 #include "pragma/logging.hpp"
@@ -145,14 +145,14 @@ void BaseVehicleComponent::InitializeSteeringWheel()
 	umath::set_flag(m_stateFlags, StateFlags::SteeringWheelInitialized);
 	if(m_cbSteeringWheel.IsValid())
 		m_cbSteeringWheel.Remove();
-	auto pAttachableComponent = ent->AddComponent("attachable");
+	auto pAttachableComponent = ent->AddComponent("attachment");
 	if(pAttachableComponent.expired())
 		return;
 	AttachmentInfo attInfo {};
 	attInfo.flags |= FAttachmentMode::SnapToOrigin | FAttachmentMode::UpdateEachFrame;
-	static_cast<BaseAttachableComponent *>(pAttachableComponent.get())->AttachToAttachment(&GetEntity(), "steering_wheel", attInfo);
+	static_cast<BaseAttachmentComponent *>(pAttachableComponent.get())->AttachToAttachment(&GetEntity(), "steering_wheel", attInfo);
 
-	m_cbSteeringWheel = pAttachableComponent->AddEventCallback(BaseAttachableComponent::EVENT_ON_ATTACHMENT_UPDATE, [this, pAttachableComponent](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	m_cbSteeringWheel = pAttachableComponent->AddEventCallback(BaseAttachmentComponent::EVENT_ON_ATTACHMENT_UPDATE, [this, pAttachableComponent](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto pTrComponentSteeringWheel = pAttachableComponent->GetEntity().GetTransformComponent();
 		if(!pTrComponentSteeringWheel)
 			return util::EventReply::Unhandled;

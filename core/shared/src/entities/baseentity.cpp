@@ -15,6 +15,7 @@
 #include "pragma/entities/components/base_networked_component.hpp"
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/entities/components/base_color_component.hpp"
+#include "pragma/entities/components/base_child_component.hpp"
 #include "pragma/entities/components/lifeline_link_component.hpp"
 #include "pragma/entities/components/basetoggle.h"
 #include "pragma/entities/components/map_component.hpp"
@@ -23,6 +24,16 @@
 #include "pragma/entities/entity_component_system_t.hpp"
 #include "pragma/util/global_string_table.hpp"
 
+Game &BaseEntity::GetGame() const { return *GetNetworkState()->GetGameState(); }
+BaseEntity *BaseEntity::CreateChild(const std::string &className)
+{
+	auto &game = GetGame();
+	auto *child = game.CreateEntity(className);
+	if(!child)
+		return nullptr;
+	child->SetParent(this);
+	return child;
+}
 void BaseEntity::SetEnabled(bool enabled)
 {
 	auto *toggleC = dynamic_cast<pragma::BaseToggleComponent *>(FindComponent("toggle").get());
@@ -237,7 +248,7 @@ void BaseEntity::Initialize()
 
 pragma::GString BaseEntity::GetClass() const { return m_className; }
 
-void BaseEntity::SetPose(const umath::Transform &outTransform)
+void BaseEntity::SetPose(const umath::Transform &outTransform, pragma::CoordinateSpace space)
 {
 	auto trComponent = GetTransformComponent();
 	if(!trComponent)
@@ -245,11 +256,30 @@ void BaseEntity::SetPose(const umath::Transform &outTransform)
 	SetPosition(outTransform.GetOrigin());
 	SetRotation(outTransform.GetRotation());
 }
-void BaseEntity::SetPose(const umath::ScaledTransform &outTransform)
+void BaseEntity::SetPose(const umath::ScaledTransform &outTransform, pragma::CoordinateSpace space)
 {
 	SetPosition(outTransform.GetOrigin());
 	SetRotation(outTransform.GetRotation());
 	SetScale(outTransform.GetScale());
+}
+umath::ScaledTransform BaseEntity::GetPose(pragma::CoordinateSpace space) const
+{
+	switch(space) {
+	case pragma::CoordinateSpace::Local:
+		{
+			if(!m_childComponent)
+				return GetPose();
+			auto *parent = m_childComponent->GetParentEntity();
+			if(!parent)
+				return GetPose();
+			return parent->GetPose().GetInverse() * GetPose();
+		}
+	case pragma::CoordinateSpace::World:
+	case pragma::CoordinateSpace::Object:
+	default:
+		return GetPose();
+	}
+	return {};
 }
 const umath::ScaledTransform &BaseEntity::GetPose() const
 {
@@ -259,6 +289,13 @@ const umath::ScaledTransform &BaseEntity::GetPose() const
 	}
 	return m_transformComponent->GetPose();
 }
+Vector3 BaseEntity::GetPosition(pragma::CoordinateSpace space) const
+{
+	auto trComponent = GetTransformComponent();
+	if(!trComponent)
+		return uvec::ORIGIN;
+	return trComponent->GetPosition(space);
+}
 const Vector3 &BaseEntity::GetPosition() const
 {
 	auto trComponent = GetTransformComponent();
@@ -266,12 +303,12 @@ const Vector3 &BaseEntity::GetPosition() const
 		return uvec::ORIGIN;
 	return trComponent->GetPosition();
 }
-void BaseEntity::SetPosition(const Vector3 &pos)
+void BaseEntity::SetPosition(const Vector3 &pos, pragma::CoordinateSpace space)
 {
 	auto trComponent = GetTransformComponent();
 	if(!trComponent)
 		return;
-	trComponent->SetPosition(pos);
+	trComponent->SetPosition(pos, space);
 }
 Vector3 BaseEntity::GetCenter() const
 {
@@ -280,6 +317,13 @@ Vector3 BaseEntity::GetCenter() const
 		return GetPosition();
 	return physComponent->GetCenter();
 }
+Quat BaseEntity::GetRotation(pragma::CoordinateSpace space) const
+{
+	auto trComponent = GetTransformComponent();
+	if(!trComponent)
+		return uquat::UNIT;
+	return trComponent->GetRotation(space);
+}
 const Quat &BaseEntity::GetRotation() const
 {
 	auto trComponent = GetTransformComponent();
@@ -287,12 +331,21 @@ const Quat &BaseEntity::GetRotation() const
 		return uquat::UNIT;
 	return trComponent->GetRotation();
 }
-void BaseEntity::SetRotation(const Quat &rot)
+void BaseEntity::SetRotation(const Quat &rot, pragma::CoordinateSpace space)
 {
 	auto trComponent = GetTransformComponent();
 	if(!trComponent)
 		return;
-	trComponent->SetRotation(rot);
+	trComponent->SetRotation(rot, space);
+}
+Vector3 BaseEntity::GetScale(pragma::CoordinateSpace space) const
+{
+	auto trComponent = GetTransformComponent();
+	if(!trComponent) {
+		static Vector3 defaultScale {1.f, 1.f, 1.f};
+		return defaultScale;
+	}
+	return trComponent->GetScale(space);
 }
 const Vector3 &BaseEntity::GetScale() const
 {
@@ -303,12 +356,12 @@ const Vector3 &BaseEntity::GetScale() const
 	}
 	return trComponent->GetScale();
 }
-void BaseEntity::SetScale(const Vector3 &scale)
+void BaseEntity::SetScale(const Vector3 &scale, pragma::CoordinateSpace space)
 {
 	auto trComponent = GetTransformComponent();
 	if(!trComponent)
 		return;
-	trComponent->SetScale(scale);
+	trComponent->SetScale(scale, space);
 }
 
 void BaseEntity::DoSpawn()
@@ -358,6 +411,7 @@ pragma::BaseTransformComponent *BaseEntity::GetTransformComponent() const { retu
 pragma::BasePhysicsComponent *BaseEntity::GetPhysicsComponent() const { return m_physicsComponent; }
 pragma::BaseModelComponent *BaseEntity::GetModelComponent() const { return m_modelComponent; }
 pragma::BaseGenericComponent *BaseEntity::GetGenericComponent() const { return m_genericComponent; }
+pragma::BaseChildComponent *BaseEntity::GetChildComponent() const { return m_childComponent; }
 
 bool BaseEntity::IsRemoved() const { return umath::is_flag_set(m_stateFlags, StateFlags::Removed); }
 void BaseEntity::Remove() {}

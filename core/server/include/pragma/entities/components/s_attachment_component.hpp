@@ -4,17 +4,17 @@
  *
  * Copyright (c) 2021 Silverlan */
 
-#ifndef __S_ATTACHABLE_COMPONENT_HPP__
-#define __S_ATTACHABLE_COMPONENT_HPP__
+#ifndef __S_ATTACHMENT_COMPONENT_HPP__
+#define __S_ATTACHMENT_COMPONENT_HPP__
 
 #include "pragma/serverdefinitions.h"
 #include "pragma/entities/components/s_entity_component.hpp"
-#include <pragma/entities/components/base_attachable_component.hpp>
+#include <pragma/entities/components/base_attachment_component.hpp>
 
 namespace pragma {
-	class DLLSERVER SAttachableComponent final : public BaseAttachableComponent, public SBaseNetComponent {
+	class DLLSERVER SAttachmentComponent final : public BaseAttachmentComponent, public SBaseNetComponent {
 	  public:
-		SAttachableComponent(BaseEntity &ent) : BaseAttachableComponent(ent) {}
+		SAttachmentComponent(BaseEntity &ent) : BaseAttachmentComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 		virtual void SetAttachmentFlags(FAttachmentMode flags) override;

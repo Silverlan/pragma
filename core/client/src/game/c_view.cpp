@@ -12,7 +12,7 @@
 #include "pragma/console/c_cvar.h"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/components/c_player_component.hpp"
-#include "pragma/entities/components/c_attachable_component.hpp"
+#include "pragma/entities/components/c_attachment_component.hpp"
 #include "pragma/entities/components/c_character_component.hpp"
 #include "pragma/entities/components/c_observable_component.hpp"
 #include <pragma/entities/entity_iterator.hpp>

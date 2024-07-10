@@ -15,14 +15,14 @@
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
-#include "pragma/entities/components/c_attachable_component.hpp"
-#include "pragma/entities/components/c_parent_component.hpp"
+#include "pragma/entities/components/c_attachment_component.hpp"
 #include "pragma/entities/components/c_transform_component.hpp"
 #include "pragma/entities/components/c_character_component.hpp"
 #include "pragma/lua/c_lentity_handles.hpp"
 #include <pragma/model/model.h>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/components/logic_component.hpp>
+#include <pragma/entities/components/parent_component.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
 using namespace pragma;
@@ -37,10 +37,10 @@ void CViewModelComponent::Initialize()
 
 	BindEvent(CAnimatedComponent::EVENT_HANDLE_ANIMATION_EVENT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &ent = GetEntity();
-		auto pAttachableComponent = ent.GetComponent<CAttachableComponent>();
+		auto pAttachableComponent = ent.GetComponent<CAttachmentComponent>();
 		auto *parent = pAttachableComponent.valid() ? pAttachableComponent->GetParent() : nullptr;
-		if(parent != nullptr && parent->GetEntity().IsCharacter()) {
-			auto charComponent = parent->GetEntity().GetCharacterComponent();
+		if(parent != nullptr && parent->IsCharacter()) {
+			auto charComponent = parent->GetCharacterComponent();
 			auto *wep = charComponent->GetActiveWeapon();
 			if(wep != nullptr && wep->IsWeapon()) {
 				if(static_cast<pragma::CWeaponComponent &>(*wep->GetWeaponComponent()).HandleViewModelAnimationEvent(this, static_cast<CEHandleAnimationEvent &>(evData.get()).animationEvent))
@@ -87,11 +87,11 @@ void CViewModelComponent::SetViewFOV(float fov)
 {
 	m_viewFov = fov;
 	auto &ent = GetEntity();
-	auto pAttComponent = ent.GetComponent<CAttachableComponent>();
+	auto pAttComponent = ent.GetComponent<CAttachmentComponent>();
 	auto *parent = pAttComponent.valid() ? pAttComponent->GetParent() : nullptr;
-	if(parent == nullptr || parent->GetEntity().IsPlayer() == false)
+	if(parent == nullptr || parent->IsPlayer() == false)
 		return;
-	static_cast<pragma::CPlayerComponent *>(parent->GetEntity().GetPlayerComponent().get())->UpdateViewFOV();
+	static_cast<pragma::CPlayerComponent *>(parent->GetPlayerComponent().get())->UpdateViewFOV();
 }
 float CViewModelComponent::GetViewFOV() const
 {
@@ -102,11 +102,11 @@ float CViewModelComponent::GetViewFOV() const
 CPlayerComponent *CViewModelComponent::GetPlayer()
 {
 	auto &ent = GetEntity();
-	auto pAttComponent = ent.GetComponent<CAttachableComponent>();
+	auto pAttComponent = ent.GetComponent<CAttachmentComponent>();
 	auto *parent = pAttComponent.valid() ? pAttComponent->GetParent() : nullptr;
-	if(parent == nullptr || parent->GetEntity().IsPlayer() == false)
+	if(parent == nullptr || parent->IsPlayer() == false)
 		return nullptr;
-	return static_cast<pragma::CPlayerComponent *>(parent->GetEntity().GetPlayerComponent().get());
+	return static_cast<pragma::CPlayerComponent *>(parent->GetPlayerComponent().get());
 }
 CWeaponComponent *CViewModelComponent::GetWeapon()
 {

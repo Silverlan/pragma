@@ -17,6 +17,7 @@
 #include "pragma/entities/components/velocity_component.hpp"
 #include "pragma/entities/components/usable_component.hpp"
 #include "pragma/entities/components/panima_component.hpp"
+#include "pragma/entities/components/parent_component.hpp"
 #include "pragma/entities/components/composite_component.hpp"
 #include "pragma/entities/components/intersection_handler_component.hpp"
 #include "pragma/entities/components/constraints/constraint_component.hpp"
@@ -71,6 +72,7 @@ void Game::InitializeEntityComponents(pragma::EntityComponentManager &componentM
 	componentManager.RegisterComponentType<pragma::MetaRigComponent>("meta_rig");
 	componentManager.RegisterComponentType<pragma::BoneMergeComponent>("bone_merge");
 	componentManager.RegisterComponentType<pragma::FlexMergeComponent>("flex_merge");
+	componentManager.RegisterComponentType<pragma::ParentComponent>("parent");
 
 	pragma::BaseEntityComponent::RegisterEvents(componentManager, [&componentManager](const std::string &evName, pragma::ComponentEventInfo::Type type) -> pragma::ComponentEventId { return componentManager.RegisterEvent(evName, typeid(pragma::BaseEntityComponent), type); });
 	BaseEntity::RegisterEvents(componentManager);

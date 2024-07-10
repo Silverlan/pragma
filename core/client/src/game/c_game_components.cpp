@@ -110,8 +110,8 @@
 #include "pragma/entities/components/c_entity_component.hpp"
 #include "pragma/entities/components/c_io_component.hpp"
 #include "pragma/entities/components/c_time_scale_component.hpp"
-#include "pragma/entities/components/c_attachable_component.hpp"
-#include "pragma/entities/components/c_parent_component.hpp"
+#include "pragma/entities/components/c_attachment_component.hpp"
+#include "pragma/entities/components/c_child_component.hpp"
 #include "pragma/entities/components/c_generic_component.hpp"
 #include "pragma/entities/components/c_point_at_target_component.hpp"
 #include "pragma/entities/components/c_gamemode_component.hpp"
@@ -223,8 +223,7 @@ void CGame::InitializeEntityComponents(pragma::EntityComponentManager &component
 	componentManager.RegisterComponentType<pragma::CGenericComponent>("entity");
 	componentManager.RegisterComponentType<pragma::CIOComponent>("io");
 	componentManager.RegisterComponentType<pragma::CTimeScaleComponent>("time_scale");
-	componentManager.RegisterComponentType<pragma::CAttachableComponent>("attachable");
-	componentManager.RegisterComponentType<pragma::CParentComponent>("parent");
+	componentManager.RegisterComponentType<pragma::CAttachmentComponent>("attachment");
 	componentManager.RegisterComponentType<pragma::CReflectionProbeComponent>("reflection_probe");
 	componentManager.RegisterComponentType<pragma::CPBRConverterComponent>("pbr_converter");
 	componentManager.RegisterComponentType<pragma::CShadowComponent>("shadow_map");
@@ -271,6 +270,7 @@ void CGame::InitializeEntityComponents(pragma::EntityComponentManager &component
 	componentManager.RegisterComponentType<pragma::CStaticBvhUserComponent>("static_bvh_user");
 	componentManager.RegisterComponentType<pragma::COpticalCameraComponent>("optical_camera");
 	componentManager.RegisterComponentType<pragma::CHitboxBvhComponent>("hitbox_bvh");
+	componentManager.RegisterComponentType<pragma::CChildComponent>("child");
 
 	componentManager.RegisterComponentType<pragma::CRendererPpFogComponent>("renderer_pp_fog");
 	componentManager.RegisterComponentType<pragma::CRendererPpDoFComponent>("renderer_pp_dof");

@@ -21,7 +21,7 @@ void BaseDebugTextComponent::Initialize()
 	m_netEvSetSize = SetupNetEvent("set_size");
 	auto &ent = GetEntity();
 	ent.AddComponent("transform");
-	ent.AddComponent("attachable");
+	ent.AddComponent("attachment");
 	ent.AddComponent("color");
 	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
@@ -81,7 +81,7 @@ void BaseDebugPointComponent::Initialize()
 	BaseEntityComponent::Initialize();
 	auto &ent = GetEntity();
 	ent.AddComponent("transform");
-	ent.AddComponent("attachable");
+	ent.AddComponent("attachment");
 	ent.AddComponent("color");
 }
 BaseDebugPointComponent::BaseDebugPointComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
@@ -93,7 +93,7 @@ void BaseDebugLineComponent::Initialize()
 	BaseEntityComponent::Initialize();
 	auto &ent = GetEntity();
 	ent.AddComponent("transform");
-	ent.AddComponent("attachable");
+	ent.AddComponent("attachment");
 	ent.AddComponent("color");
 	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
@@ -116,7 +116,7 @@ void BaseDebugBoxComponent::Initialize()
 	BaseDebugOutlineComponent::Initialize(*this);
 	auto &ent = GetEntity();
 	ent.AddComponent("transform");
-	ent.AddComponent("attachable");
+	ent.AddComponent("attachment");
 	ent.AddComponent("color");
 	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
@@ -142,7 +142,7 @@ void BaseDebugSphereComponent::Initialize()
 	BaseDebugOutlineComponent::Initialize(*this);
 	auto &ent = GetEntity();
 	ent.AddComponent("transform");
-	ent.AddComponent("attachable");
+	ent.AddComponent("attachment");
 	ent.AddComponent("radius");
 	ent.AddComponent("color");
 	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
@@ -164,7 +164,7 @@ void BaseDebugConeComponent::Initialize()
 	BaseDebugOutlineComponent::Initialize(*this);
 	auto &ent = GetEntity();
 	ent.AddComponent("transform");
-	ent.AddComponent("attachable");
+	ent.AddComponent("attachment");
 	ent.AddComponent("radius");
 	ent.AddComponent("color");
 	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
@@ -197,7 +197,7 @@ void BaseDebugCylinderComponent::Initialize()
 	BaseDebugOutlineComponent::Initialize(*this);
 	auto &ent = GetEntity();
 	ent.AddComponent("transform");
-	ent.AddComponent("attachable");
+	ent.AddComponent("attachment");
 	ent.AddComponent("color");
 	ent.AddComponent("radius");
 	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
@@ -224,7 +224,7 @@ void BaseDebugPlaneComponent::Initialize()
 	BaseEntityComponent::Initialize();
 	auto &ent = GetEntity();
 	ent.AddComponent("transform");
-	ent.AddComponent("attachable");
+	ent.AddComponent("attachment");
 	ent.AddComponent("color");
 }
 BaseDebugPlaneComponent::BaseDebugPlaneComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}

@@ -10,6 +10,7 @@
 #include "pragma/entities/components/base_entity_component.hpp"
 
 namespace pragma {
+	enum class CoordinateSpace : uint8_t;
 	class ConstraintManagerComponent;
 	class DLLNETWORK ConstraintComponent final : public BaseEntityComponent {
 	  public:
@@ -20,11 +21,6 @@ namespace pragma {
 			pragma::ComponentMemberIndex drivenObjectPropIdx;
 		};
 
-		enum class CoordinateSpace : uint8_t {
-			World = umath::to_integral(umath::CoordinateSpace::World),
-			Local = umath::to_integral(umath::CoordinateSpace::Local),
-			Object = umath::to_integral(umath::CoordinateSpace::Object),
-		};
 		static ComponentEventId EVENT_APPLY_CONSTRAINT;
 		static ComponentEventId EVENT_ON_DRIVER_CHANGED;
 		static ComponentEventId EVENT_ON_DRIVEN_OBJECT_CHANGED;

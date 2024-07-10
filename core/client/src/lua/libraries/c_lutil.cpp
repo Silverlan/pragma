@@ -15,7 +15,7 @@
 #include "pragma/entities/environment/c_env_camera.h"
 #include "luasystem.h"
 #include "pragma/entities/components/c_render_component.hpp"
-#include "pragma/entities/components/c_attachable_component.hpp"
+#include "pragma/entities/components/c_attachment_component.hpp"
 #include "pragma/entities/components/c_transform_component.hpp"
 #include "pragma/util/util_baking.hpp"
 #include "pragma/asset/c_util_model.hpp"
@@ -93,7 +93,7 @@ int Lua::util::Client::create_muzzle_flash(lua_State *l)
 		pt->SetRemoveOnComplete(true);
 		auto &entPt = pt->GetEntity();
 		pt->Start();
-		auto pAttachableComponent = entPt.AddComponent<pragma::CAttachableComponent>();
+		auto pAttachableComponent = entPt.AddComponent<pragma::CAttachmentComponent>();
 		if(pAttachableComponent.valid()) {
 			AttachmentInfo attInfo {};
 			attInfo.offset = relOffset;

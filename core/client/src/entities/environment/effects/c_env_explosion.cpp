@@ -11,7 +11,7 @@
 #include "pragma/entities/c_entityfactories.h"
 #include "pragma/entities/environment/c_env_quake.h"
 #include "pragma/entities/components/c_sound_emitter_component.hpp"
-#include "pragma/entities/components/c_attachable_component.hpp"
+#include "pragma/entities/components/c_attachment_component.hpp"
 #include "pragma/entities/components/c_io_component.hpp"
 #include "pragma/lua/c_lentity_handles.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
@@ -61,7 +61,7 @@ void CExplosionComponent::Explode()
 			pQuakeComponent->SetAmplitude(50.f);
 			pQuakeComponent->SetRadius(radius);
 		}
-		auto pAttComponent = entQuake->AddComponent<CAttachableComponent>();
+		auto pAttComponent = entQuake->AddComponent<CAttachmentComponent>();
 		if(pAttComponent.valid()) {
 			AttachmentInfo attInfo {};
 			attInfo.flags |= FAttachmentMode::SnapToOrigin | FAttachmentMode::PositionOnly;

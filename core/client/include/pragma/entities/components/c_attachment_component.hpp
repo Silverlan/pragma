@@ -5,17 +5,17 @@
  * Copyright (c) 2021 Silverlan
  */
 
-#ifndef __C_ATTACHABLE_COMPONENT_HPP__
-#define __C_ATTACHABLE_COMPONENT_HPP__
+#ifndef __C_ATTACHMENT_COMPONENT_HPP__
+#define __C_ATTACHMENT_COMPONENT_HPP__
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/components/c_entity_component.hpp"
-#include <pragma/entities/components/base_attachable_component.hpp>
+#include <pragma/entities/components/base_attachment_component.hpp>
 
 namespace pragma {
-	class DLLCLIENT CAttachableComponent final : public BaseAttachableComponent, public CBaseNetComponent {
+	class DLLCLIENT CAttachmentComponent final : public BaseAttachmentComponent, public CBaseNetComponent {
 	  public:
-		CAttachableComponent(BaseEntity &ent) : BaseAttachableComponent(ent) {}
+		CAttachmentComponent(BaseEntity &ent) : BaseAttachmentComponent(ent) {}
 		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
 

@@ -37,7 +37,7 @@
 #include "pragma/entities/components/base_weapon_component.hpp"
 #include "pragma/entities/components/base_health_component.hpp"
 #include "pragma/entities/components/base_radius_component.hpp"
-#include "pragma/entities/components/base_attachable_component.hpp"
+#include "pragma/entities/components/base_attachment_component.hpp"
 #include "pragma/entities/components/submergible_component.hpp"
 #include "pragma/entities/components/liquid/base_liquid_surface_simulation_component.hpp"
 
@@ -703,7 +703,7 @@ bool Game::InvokeEntityEvent(pragma::BaseEntityComponent &component, uint32_t ev
 	}
 	else if(eventId == pragma::SubmergibleComponent::EVENT_ON_WATER_SUBMERGED || eventId == pragma::SubmergibleComponent::EVENT_ON_WATER_EMERGED || eventId == pragma::SubmergibleComponent::EVENT_ON_WATER_ENTERED || eventId == pragma::SubmergibleComponent::EVENT_ON_WATER_EXITED
 	  || eventId == pragma::BaseModelComponent::EVENT_ON_MODEL_CHANGED || eventId == BaseEntity::EVENT_ON_SPAWN || eventId == pragma::BaseActorComponent::EVENT_ON_RESPAWN || eventId == pragma::BasePhysicsComponent::EVENT_ON_PHYSICS_DESTROYED
-	  || eventId == pragma::BasePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED || eventId == pragma::BaseLiquidSurfaceSimulationComponent::EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED || eventId == pragma::BaseAttachableComponent::EVENT_ON_ATTACHMENT_UPDATE) {
+	  || eventId == pragma::BasePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED || eventId == pragma::BaseLiquidSurfaceSimulationComponent::EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED || eventId == pragma::BaseAttachmentComponent::EVENT_ON_ATTACHMENT_UPDATE) {
 		if(bInject)
 			component.InjectEvent(eventId);
 		else

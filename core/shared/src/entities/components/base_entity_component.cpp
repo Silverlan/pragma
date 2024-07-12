@@ -890,7 +890,7 @@ TickPolicy BaseEntityComponent::GetTickPolicy() const { return m_tickData.tickPo
 
 bool BaseEntityComponent::ShouldThink() const
 {
-	if(m_tickData.tickPolicy != TickPolicy::Always && m_tickData.tickPolicy != TickPolicy::WhenVisible)
+	if(!IsActive() || (m_tickData.tickPolicy != TickPolicy::Always && m_tickData.tickPolicy != TickPolicy::WhenVisible))
 		return false;
 	//auto toggleC = static_cast<pragma::BaseToggleComponent*>(GetEntity().FindComponent("toggle").get());
 	//return toggleC ? toggleC->IsTurnedOn() : true;
@@ -966,6 +966,7 @@ void BaseEntityComponent::SetActive(bool enabled)
 	umath::set_flag(m_stateFlags, StateFlags::IsInactive, !enabled);
 	BroadcastEvent(EVENT_ON_ACTIVE_STATE_CHANGED);
 	OnActiveStateChanged(enabled);
+	UpdateTickPolicy();
 }
 bool BaseEntityComponent::IsActive() const { return !umath::is_flag_set(m_stateFlags, StateFlags::IsInactive); }
 void BaseEntityComponent::Activate() { SetActive(true); }

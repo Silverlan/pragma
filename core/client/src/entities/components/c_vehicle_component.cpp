@@ -16,6 +16,7 @@
 #include "pragma/lua/c_lentity_handles.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_observable_component.hpp"
+#include "pragma/entities/components/c_observer_component.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/input/inkeys.h>
 
@@ -121,8 +122,14 @@ void CVehicleComponent::ClearDriver()
 					pRenderComponent->SetSceneRenderPass(pragma::rendering::SceneRenderPass::View);
 			}
 
-			plComponent->SetObserverTarget(nullptr);
-			plComponent->SetObserverMode(OBSERVERMODE::FIRSTPERSON);
+			auto *cam = c_game->GetPrimaryCamera();
+			if(cam) {
+				auto observerC = cam->GetEntity().GetComponent<CObserverComponent>();
+				if(observerC.valid()) {
+					observerC->SetObserverTarget(nullptr);
+					observerC->SetObserverMode(ObserverMode::FirstPerson);
+				}
+			}
 		}
 	}
 	BaseVehicleComponent::ClearDriver();
@@ -143,9 +150,16 @@ void CVehicleComponent::SetDriver(BaseEntity *ent)
 			pRenderComponent->SetSceneRenderPass(pragma::rendering::SceneRenderPass::None);
 	}
 	auto plComponent = ent->GetPlayerComponent();
-	plComponent->SetObserverMode(OBSERVERMODE::THIRDPERSON);
-	auto pObsComponent = GetEntity().GetComponent<pragma::CObservableComponent>();
-	plComponent->SetObserverTarget(pObsComponent.get());
+	if(plComponent.expired())
+		return;
+	auto *observable = plComponent->GetObservableComponent();
+	auto *observer = observable ? observable->GetObserver() : nullptr;
+	if(!observer)
+		return;
+	observer->SetObserverMode(ObserverMode::ThirdPerson);
+
+	auto vhcObservableC = GetEntity().GetComponent<pragma::CObservableComponent>();
+	observer->SetObserverTarget(vhcObservableC.get());
 }
 void CVehicleComponent::Initialize() { BaseVehicleComponent::Initialize(); }
 Bool CVehicleComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet)

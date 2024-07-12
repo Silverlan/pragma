@@ -553,9 +553,6 @@ class DLLCLIENT CGame : public Game {
 
 	void OnEnvironmentLightSourceChanged(pragma::CLightDirectionalComponent *oldSource, pragma::CLightDirectionalComponent *newSource);
 
-	void CalcView();
-	void CalcLocalPlayerOrientation();
-	Quat m_curFrameRotationModifier = uquat::identity();
 	void UpdateShaderTimeData();
 
 	std::unordered_map<std::string, pragma::rendering::RenderMask> m_customRenderMasks;

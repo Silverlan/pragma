@@ -27,11 +27,7 @@ LINK_ENTITY_TO_CLASS(env_camera, CEnvCamera);
 
 extern DLLCLIENT CGame *c_game;
 
-CCameraComponent::~CCameraComponent()
-{
-	if(m_cbCameraUpdate.IsValid())
-		m_cbCameraUpdate.Remove();
-}
+CCameraComponent::~CCameraComponent() {}
 void CCameraComponent::Save(udm::LinkedPropertyWrapperArg udm) { BaseEnvCameraComponent::Save(udm); }
 void CCameraComponent::Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) { BaseEnvCameraComponent::Load(udm, version); }
 void CCameraComponent::Initialize()
@@ -62,46 +58,14 @@ void CCameraComponent::UpdateState()
 		return;
 	auto toggleC = GetEntity().GetComponent<CToggleComponent>();
 	if(toggleC.expired() || toggleC->IsTurnedOn()) {
-		if(m_cbCameraUpdate.IsValid())
-			m_cbCameraUpdate.Remove();
 		auto *renderScene = c_game->GetRenderScene();
-		if(renderScene && static_cast<CBaseEntity &>(GetEntity()).IsInScene(*renderScene)) {
-			auto *pl = c_game->GetLocalPlayer();
-			if(pl != nullptr)
-				pl->SetObserverMode(OBSERVERMODE::THIRDPERSON);
-			m_cbCameraUpdate = c_game->AddCallback("CalcView",
-			  FunctionCallback<void, std::reference_wrapper<Vector3>, std::reference_wrapper<Quat>, std::reference_wrapper<Quat>>::Create([this](std::reference_wrapper<Vector3> refPos, std::reference_wrapper<Quat> refRot, std::reference_wrapper<Quat> rotMod) {
-				  auto &ent = GetEntity();
-				  auto *pToggleComponent = static_cast<pragma::BaseToggleComponent *>(ent.FindComponent("toggle").get());
-				  if(pToggleComponent != nullptr && pToggleComponent->IsTurnedOn() == false)
-					  return;
-				  auto pTrComponent = ent.GetTransformComponent();
-				  auto &pos = refPos.get();
-				  auto &rot = refRot.get();
-				  if(pTrComponent == nullptr) {
-					  pos = {};
-					  rot = uquat::identity();
-				  }
-				  else {
-					  pos = pTrComponent->GetPosition();
-					  rot = pTrComponent->GetRotation();
-				  }
-			  }));
+		if(renderScene && static_cast<CBaseEntity &>(GetEntity()).IsInScene(*renderScene))
 			renderScene->SetActiveCamera(*this);
-		}
 		return;
 	}
 
 	auto *renderScene = c_game->GetRenderScene();
 	if(renderScene) {
-		if(static_cast<CBaseEntity &>(GetEntity()).IsInScene(*renderScene)) {
-			auto *pl = c_game->GetLocalPlayer();
-			if(pl != nullptr)
-				pl->SetObserverMode(OBSERVERMODE::FIRSTPERSON);
-			if(m_cbCameraUpdate.IsValid())
-				m_cbCameraUpdate.Remove();
-		}
-
 		if(renderScene->GetActiveCamera().get() == this) {
 			EntityIterator entIt {*c_game};
 			entIt.AttachFilter<TEntityIteratorFilterComponent<CCameraComponent>>();

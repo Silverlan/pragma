@@ -23,6 +23,7 @@
 #include "pragma/entities/components/s_name_component.hpp"
 #include "pragma/entities/components/s_networked_component.hpp"
 #include "pragma/entities/components/s_observable_component.hpp"
+#include "pragma/entities/components/s_observer_component.hpp"
 #include "pragma/entities/components/s_physics_component.hpp"
 #include "pragma/entities/components/s_radius_component.hpp"
 #include "pragma/entities/components/s_field_angle_component.hpp"
@@ -128,6 +129,7 @@ void SGame::InitializeEntityComponents(pragma::EntityComponentManager &component
 	componentManager.RegisterComponentType<pragma::SNameComponent>("name");
 	componentManager.RegisterComponentType<pragma::SNetworkedComponent>("networked");
 	componentManager.RegisterComponentType<pragma::SObservableComponent>("observable");
+	componentManager.RegisterComponentType<pragma::SObserverComponent>("observer");
 	componentManager.RegisterComponentType<pragma::SPhysicsComponent>("physics");
 	componentManager.RegisterComponentType<pragma::SPlayerComponent>("player");
 	componentManager.RegisterComponentType<pragma::SRadiusComponent>("radius");

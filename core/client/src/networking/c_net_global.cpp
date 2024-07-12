@@ -654,15 +654,6 @@ DLLCLIENT void NET_cl_pl_slopelimit(NetPacket packet)
 	pl->GetCharacterComponent()->SetSlopeLimit(limit);
 }
 
-void NET_cl_pl_observermode(NetPacket packet)
-{
-	auto *pl = nwm::read_entity(packet);
-	if(pl == nullptr || pl->IsPlayer() == false)
-		return;
-	auto mode = packet->Read<UChar>();
-	pl->GetPlayerComponent()->SetObserverMode(static_cast<OBSERVERMODE>(mode));
-}
-
 DLLCLIENT void NET_cl_pl_stepoffset(NetPacket packet)
 {
 	auto *pl = nwm::read_entity(packet);

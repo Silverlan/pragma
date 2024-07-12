@@ -8,7 +8,6 @@
 #define __BASE_PLAYER_COMPONENT_HPP__
 
 #include "pragma/entities/components/base_entity_component.hpp"
-#include "pragma/entities/observermode.h"
 #include "pragma/input/inkeys.h"
 #include "pragma/emessage.h"
 #include "pragma/model/animation/activities.h"
@@ -32,7 +31,6 @@ namespace pragma {
 	class DLLNETWORK BasePlayerComponent : public BaseEntityComponent {
 	  public:
 		static ComponentEventId EVENT_HANDLE_ACTION_INPUT;
-		static ComponentEventId EVENT_ON_OBSERVATION_MODE_CHANGED;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 		friend Engine;
 		virtual ~BasePlayerComponent() override;
@@ -42,10 +40,6 @@ namespace pragma {
 		virtual void OnTakenDamage(DamageInfo &info, unsigned short oldHealth, unsigned short newHealth);
 		// Same as PlayActivity, but doesn't automatically transmit to clients if called serverside
 		virtual bool PlaySharedActivity(Activity activity);
-
-		virtual void SetObserverMode(OBSERVERMODE mode);
-		OBSERVERMODE GetObserverMode() const;
-		const util::PEnumProperty<OBSERVERMODE> &GetObserverModeProperty() const;
 
 		virtual void SetViewRotation(const Quat &rot);
 
@@ -92,6 +86,9 @@ namespace pragma {
 		bool IsCrouching() const;
 		bool CanUnCrouch() const;
 
+		BaseObservableComponent *GetObservableComponent() { return m_observableComponent; }
+		const BaseObservableComponent *GetObservableComponent() const { return const_cast<BasePlayerComponent *>(this)->GetObservableComponent(); }
+
 		void SetUDPPort(unsigned short port);
 		unsigned short GetUDPPort() const;
 		bool IsLocalPlayer() const;
@@ -110,8 +107,8 @@ namespace pragma {
 		bool GetConVarBool(std::string cvar) const;
 		BaseEntity *FindUseEntity() const;
 		void Use();
-		void SetViewPos(const Vector3 &pos);
-		const Vector3 &GetViewPos() const;
+		Vector3 GetViewPos() const;
+		void SetViewPos(const std::optional<Vector3> &pos);
 
 		// Returns true if a movement activity is currently playing
 		bool IsMoving() const;
@@ -120,27 +117,25 @@ namespace pragma {
 		// Returns true if the player is holding down the sprint-key
 		bool IsSprinting() const;
 
-		virtual void SetObserverTarget(BaseObservableComponent *ent);
-		BaseObservableComponent *GetObserverTarget() const;
 		virtual void ApplyViewRotationOffset(const EulerAngles &ang, float dur = 0.5f) = 0;
 		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 
 		BasePlayer *GetBasePlayer() const;
 		virtual void OnEntitySpawn() override;
 	  protected:
-		enum class DLLNETWORK CrouchTransition : int32_t { None = -1, Crouching = 0, Uncrouching = 1 };
+		enum class CrouchTransition : int32_t {
+			None = -1,
+			Crouching = 0,
+			Uncrouching = 1,
+		};
 		BasePlayerComponent(BaseEntity &ent);
-		virtual void DoSetObserverMode(OBSERVERMODE mode) {};
 		virtual void OnPhysicsInitialized();
 		void OnRespawn();
 		bool m_bFlashlightOn;
 		EntityHandle m_entFlashlight = {};
-		Vector3 m_posView;
 		mutable EntityHandle m_hBasePlayer = {};
+		BaseObservableComponent *m_observableComponent = nullptr;
 
-		ComponentHandle<BaseObservableComponent> m_hEntObserverTarget = {};
-
-		pragma::NetEventId m_netEvSetObserverTarget = pragma::INVALID_NET_EVENT;
 		pragma::NetEventId m_netEvApplyViewRotationOffset = pragma::INVALID_NET_EVENT;
 		pragma::NetEventId m_netEvPrintMessage = pragma::INVALID_NET_EVENT;
 		pragma::NetEventId m_netEvRespawn = pragma::INVALID_NET_EVENT;
@@ -154,7 +149,6 @@ namespace pragma {
 		float m_crouchEyeLevel;
 		float m_tCrouch;
 		CrouchTransition m_crouchTransition = CrouchTransition::None;
-		util::PEnumProperty<OBSERVERMODE> m_obsMode = nullptr;
 		bool m_bCrouching;
 		Activity m_movementActivity = Activity::Invalid; // Current activity, if we're moving
 
@@ -183,6 +177,7 @@ namespace pragma {
 		float m_speedRun;
 		float m_speedSprint;
 		float m_speedCrouchWalk;
+		std::optional<Vector3> m_viewPos {};
 	};
 };
 

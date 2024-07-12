@@ -37,6 +37,8 @@
 #include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/entities/components/c_gamemode_component.hpp"
 #include "pragma/entities/components/c_game_component.hpp"
+#include "pragma/entities/components/c_observer_component.hpp"
+#include "pragma/entities/components/c_observable_component.hpp"
 #include "pragma/entities/game/c_game_occlusion_culler.hpp"
 #include "pragma/entities/util/c_util_pbr_converter.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
@@ -716,6 +718,8 @@ void CGame::InitializeGame() // Called by NET_cl_resourcecomplete
 			toggleC->TurnOn();
 		m_scene->SetActiveCamera(*cam);
 		m_primaryCamera = cam->GetHandle<pragma::CCameraComponent>();
+
+		cam->GetEntity().AddComponent<pragma::CObserverComponent>();
 	}
 
 	m_flags |= GameFlags::GameInitialized;
@@ -1015,10 +1019,12 @@ void CGame::Think()
 
 	double tDelta = m_stateNetwork->DeltaTime();
 	m_tServer += DeltaTime();
-	CalcLocalPlayerOrientation();
+	if(m_gameComponent.valid())
+		m_gameComponent->UpdateFrame(cam);
 	CallCallbacks<void>("Think");
 	CallLuaCallbacks("Think");
-	CalcView();
+	if(m_gameComponent.valid())
+		m_gameComponent->UpdateCamera(cam);
 
 	if(scene)
 		SetRenderScene(*scene);
@@ -1283,6 +1289,15 @@ void CGame::SetLocalPlayer(pragma::CPlayerComponent *pl)
 {
 	m_plLocal = pl->GetHandle<pragma::CPlayerComponent>();
 	pl->SetLocalPlayer(true);
+
+	auto *cam = GetPrimaryCamera();
+	if(cam) {
+		auto observerC = cam->GetEntity().GetComponent<pragma::CObserverComponent>();
+		auto observableC = pl->GetEntity().GetComponent<pragma::CObservableComponent>();
+		if(observerC.valid() && observableC.valid())
+			observerC->SetObserverTarget(observableC.get());
+	}
+
 	CallCallbacks<void, pragma::CPlayerComponent *>("OnLocalPlayerSpawned", pl);
 	CallLuaCallbacks<void, luabind::object>("OnLocalPlayerSpawned", pl->GetLuaObject());
 }

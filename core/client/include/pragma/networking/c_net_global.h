@@ -73,7 +73,6 @@ DECLARE_NETMESSAGE_CL(pl_height_crouch);
 DECLARE_NETMESSAGE_CL(pl_eyelevel_stand);
 DECLARE_NETMESSAGE_CL(pl_eyelevel_crouch);
 DECLARE_NETMESSAGE_CL(pl_slopelimit);
-DECLARE_NETMESSAGE_CL(pl_observermode);
 DECLARE_NETMESSAGE_CL(pl_stepoffset);
 DECLARE_NETMESSAGE_CL(pl_updirection);
 DECLARE_NETMESSAGE_CL(pl_changedname);

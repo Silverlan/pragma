@@ -248,6 +248,9 @@ namespace pragma::lua {
 	namespace base_player_component {
 		static void register_class(luabind::module_ &mod);
 	};
+	namespace base_observer_component {
+		static void register_class(luabind::module_ &mod);
+	};
 	namespace base_point_at_target_component {
 		static void register_class(luabind::module_ &mod);
 	};
@@ -1101,6 +1104,7 @@ void pragma::lua::register_entity_component_classes(lua_State *l, luabind::modul
 	base_name_component::register_class(mod);
 	base_networked_component::register_class(mod);
 	base_observable_component::register_class(mod);
+	base_observer_component::register_class(mod);
 	base_ownable_component::register_class(mod);
 	base_parent_component::register_class(mod);
 	base_physics_component::register_class(mod);
@@ -2066,6 +2070,7 @@ void pragma::lua::base_networked_component::register_class(luabind::module_ &mod
 void pragma::lua::base_observable_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseObservableComponent>("BaseObservableComponent");
+	def.add_static_constant("EVENT_ON_OBSERVER_CHANGED", pragma::BaseObservableComponent::EVENT_ON_OBSERVER_CHANGED);
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	def.def("SetLocalCameraOrigin", static_cast<void (*)(lua_State *, pragma::BaseObservableComponent &, uint32_t, const Vector3 &)>([](lua_State *l, pragma::BaseObservableComponent &hEnt, uint32_t camType, const Vector3 &origin) {
 		hEnt.SetLocalCameraOrigin(static_cast<pragma::BaseObservableComponent::CameraType>(camType), origin);
@@ -3385,11 +3390,6 @@ void pragma::lua::base_player_component::register_class(luabind::module_ &mod)
 	def.def("SetStandEyeLevel", &pragma::BasePlayerComponent::SetStandEyeLevel);
 	def.def("GetCrouchEyeLevel", &pragma::BasePlayerComponent::GetCrouchEyeLevel);
 	def.def("SetCrouchEyeLevel", &pragma::BasePlayerComponent::SetCrouchEyeLevel);
-	def.def("SetObserverMode", &pragma::BasePlayerComponent::SetObserverMode);
-	def.def("GetObserverMode", &pragma::BasePlayerComponent::GetObserverMode);
-	def.def("GetObserverModeProperty", &pragma::BasePlayerComponent::GetObserverModeProperty);
-	def.def("SetObserverTarget", &pragma::BasePlayerComponent::SetObserverTarget);
-	def.def("GetObserverTarget", &pragma::BasePlayerComponent::GetObserverTarget);
 	def.def("SetFlashlightEnabled", &pragma::BasePlayerComponent::SetFlashlight);
 	def.def("ToggleFlashlight", &pragma::BasePlayerComponent::ToggleFlashlight);
 	def.def("IsFlashlightEnabled", &pragma::BasePlayerComponent::IsFlashlightOn);
@@ -3404,17 +3404,31 @@ void pragma::lua::base_player_component::register_class(luabind::module_ &mod)
 	def.def("SetActionInputAxisMagnitude", &pragma::BasePlayerComponent::SetActionInputAxisMagnitude);
 
 	def.add_static_constant("EVENT_HANDLE_ACTION_INPUT", pragma::BasePlayerComponent::EVENT_HANDLE_ACTION_INPUT);
-	def.add_static_constant("EVENT_ON_OBSERVATION_MODE_CHANGED", pragma::BasePlayerComponent::EVENT_ON_OBSERVATION_MODE_CHANGED);
 
 	def.add_static_constant("MESSAGE_TYPE_CONSOLE", umath::to_integral(MESSAGE::PRINTCONSOLE));
 	def.add_static_constant("MESSAGE_TYPE_CHAT", umath::to_integral(MESSAGE::PRINTCHAT));
+}
+
+#include "pragma/entities/components/base_observer_component.hpp"
+void pragma::lua::base_observer_component::register_class(luabind::module_ &mod)
+{
+	auto def = Lua::create_base_entity_component_class<pragma::BaseObserverComponent>("BaseObserverComponent");
+	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	def.def("SetObserverMode", &pragma::BaseObserverComponent::SetObserverMode);
+	def.def("GetObserverMode", &pragma::BaseObserverComponent::GetObserverMode);
+	def.def("GetObserverModeProperty", &pragma::BaseObserverComponent::GetObserverModeProperty);
+	def.def("SetObserverTarget", &pragma::BaseObserverComponent::SetObserverTarget);
+	def.def("GetObserverTarget", &pragma::BaseObserverComponent::GetObserverTarget);
+
+	def.add_static_constant("EVENT_ON_OBSERVATION_MODE_CHANGED", pragma::BaseObserverComponent::EVENT_ON_OBSERVATION_MODE_CHANGED);
 
 	// Enums
-	def.add_static_constant("OBSERVERMODE_NONE", umath::to_integral(OBSERVERMODE::NONE));
-	def.add_static_constant("OBSERVERMODE_FIRSTPERSON", umath::to_integral(OBSERVERMODE::FIRSTPERSON));
-	def.add_static_constant("OBSERVERMODE_THIRDPERSON", umath::to_integral(OBSERVERMODE::THIRDPERSON));
-	def.add_static_constant("OBSERVERMODE_SHOULDER", umath::to_integral(OBSERVERMODE::SHOULDER));
-	def.add_static_constant("OBSERVERMODE_ROAMING", umath::to_integral(OBSERVERMODE::ROAMING));
+	def.add_static_constant("OBSERVERMODE_NONE", umath::to_integral(ObserverMode::None));
+	def.add_static_constant("OBSERVERMODE_FIRSTPERSON", umath::to_integral(ObserverMode::FirstPerson));
+	def.add_static_constant("OBSERVERMODE_THIRDPERSON", umath::to_integral(ObserverMode::ThirdPerson));
+	def.add_static_constant("OBSERVERMODE_SHOULDER", umath::to_integral(ObserverMode::Shoulder));
+	def.add_static_constant("OBSERVERMODE_ROAMING", umath::to_integral(ObserverMode::Roaming));
+	static_assert(umath::to_integral(ObserverMode::Count) == 5, "Update this list when new modes are added!");
 }
 
 #include "pragma/entities/components/base_gamemode_component.hpp"

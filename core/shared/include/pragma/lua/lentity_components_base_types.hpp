@@ -102,6 +102,11 @@ namespace Lua {
 	}
 
 	template<class TLuaClass, class THandle>
+	void register_base_observer_component_methods(lua_State *l, TLuaClass &def)
+	{
+	}
+
+	template<class TLuaClass, class THandle>
 	void register_base_shooter_component_methods(lua_State *l, TLuaClass &def)
 	{
 	}

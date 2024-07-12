@@ -7,6 +7,7 @@
 
 #include "stdafx_shared.h"
 #include "pragma/entities/components/base_observable_component.hpp"
+#include "pragma/entities/components/base_observer_component.hpp"
 #include "pragma/entities/components/base_transform_component.hpp"
 #include <sharedutils/datastream.h>
 #include <udm.hpp>
@@ -17,13 +18,40 @@ pragma::ObserverCameraData::ObserverCameraData() : enabled {util::BoolProperty::
 
 /////////
 
-BaseObservableComponent::BaseObservableComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+ComponentEventId BaseObservableComponent::EVENT_ON_OBSERVER_CHANGED = pragma::INVALID_COMPONENT_ID;
+void BaseObservableComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { EVENT_ON_OBSERVER_CHANGED = registerEvent("ON_OBSERVER_CHANGED", ComponentEventInfo::Type::Broadcast); }
+BaseObservableComponent::BaseObservableComponent(BaseEntity &ent) : BaseEntityComponent(ent), m_viewOffset(0, 0, 0) {}
 
 void BaseObservableComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 	m_netSetObserverOffset = SetupNetEvent("set_observer_offset");
+	m_netSetObserverOrigin = SetupNetEvent("set_observer_origin");
+	m_netSetViewOffset = SetupNetEvent("set_view_offset");
 }
+
+void BaseObservableComponent::ClearObserver()
+{
+	if(m_observer.IsValid() == false)
+		return;
+	BroadcastEvent(EVENT_ON_OBSERVER_CHANGED);
+	m_observer = pragma::ComponentHandle<pragma::BaseObserverComponent> {};
+}
+
+void BaseObservableComponent::SetObserver(BaseObserverComponent *observer)
+{
+	if(observer == GetObserver())
+		return;
+	ClearObserver();
+	if(!observer) {
+		m_observer = pragma::ComponentHandle<BaseObserverComponent> {};
+		BroadcastEvent(EVENT_ON_OBSERVER_CHANGED);
+		return;
+	}
+	m_observer = observer->GetHandle<BaseObserverComponent>();
+	BroadcastEvent(EVENT_ON_OBSERVER_CHANGED);
+}
+BaseObserverComponent *BaseObservableComponent::GetObserver() { return m_observer.get(); }
 
 void BaseObservableComponent::SetLocalCameraOrigin(CameraType type, const Vector3 &origin) { GetCameraData(type).localOrigin = origin; }
 void BaseObservableComponent::ClearLocalCameraOrigin(CameraType type) { GetCameraData(type).localOrigin = {}; }
@@ -83,3 +111,6 @@ void BaseObservableComponent::Load(udm::LinkedPropertyWrapperArg udm, uint32_t v
 	fReadCameraData(udm["firstPerson"], dataFp);
 	fReadCameraData(udm["thirdPerson"], dataTp);
 }
+
+Vector3 &BaseObservableComponent::GetViewOffset() { return m_viewOffset; }
+void BaseObservableComponent::SetViewOffset(const Vector3 &offset) { m_viewOffset = offset; }

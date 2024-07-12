@@ -14,6 +14,8 @@
 #include "pragma/entities/components/c_attachment_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"
+#include "pragma/entities/components/c_observable_component.hpp"
+#include "pragma/entities/components/c_observer_component.hpp"
 #include "pragma/lua/c_lentity_handles.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_ownable_component.hpp"
@@ -113,6 +115,15 @@ void CWeaponComponent::SetViewFOV(umath::Degree fov)
 		return;
 	vm->SetViewFOV(fov);
 }
+void CWeaponComponent::UpdateObserver(BaseObserverComponent *observer)
+{
+	if(m_cbOnOwnerObserverModeChanged.IsValid())
+		m_cbOnOwnerObserverModeChanged.Remove();
+	if(observer) {
+		m_cbOnOwnerObserverModeChanged = observer->GetObserverModeProperty()->AddCallback([this](const std::reference_wrapper<const ObserverMode> oldObserverMode, const std::reference_wrapper<const ObserverMode> observerMode) { UpdateOwnerAttachment(); });
+		FlagCallbackForRemoval(m_cbOnOwnerObserverModeChanged, CallbackType::Component);
+	}
+}
 void CWeaponComponent::Initialize()
 {
 	BaseWeaponComponent::Initialize();
@@ -159,8 +170,15 @@ void CWeaponComponent::Initialize()
 		auto &ownerChangedData = static_cast<pragma::CEOnOwnerChanged &>(evData.get());
 		if(ownerChangedData.newOwner != nullptr && ownerChangedData.newOwner->IsPlayer() == true && static_cast<CPlayerComponent *>(ownerChangedData.newOwner->GetPlayerComponent().get())->IsLocalPlayer() == true) {
 			auto plComponent = ownerChangedData.newOwner->GetPlayerComponent();
-			m_cbOnOwnerObserverModeChanged = plComponent->GetObserverModeProperty()->AddCallback([this](const std::reference_wrapper<const OBSERVERMODE> oldObserverMode, const std::reference_wrapper<const OBSERVERMODE> observerMode) { UpdateOwnerAttachment(); });
-			FlagCallbackForRemoval(m_cbOnOwnerObserverModeChanged, CallbackType::Component);
+			auto *observableC = plComponent->GetObservableComponent();
+			if(observableC) {
+				m_cbOnObserverChanged = observableC->AddEventCallback(CObservableComponent::EVENT_ON_OBSERVER_CHANGED, [this, observableC](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+					UpdateObserver(observableC->GetObserver());
+					return util::EventReply::Unhandled;
+				});
+				FlagCallbackForRemoval(m_cbOnObserverChanged, CallbackType::Component);
+				UpdateObserver(observableC->GetObserver());
+			}
 		}
 	});
 	BindEventUnhandled(EVENT_ON_DEPLOY, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
@@ -238,9 +256,10 @@ void CWeaponComponent::OnFireBullets(const BulletInfo &bulletInfo, Vector3 &bull
 
 void CWeaponComponent::ClearOwnerCallbacks()
 {
-	if(m_cbOnOwnerObserverModeChanged.IsValid() == false)
-		return;
-	m_cbOnOwnerObserverModeChanged.Remove();
+	if(m_cbOnObserverChanged.IsValid())
+		m_cbOnObserverChanged.Remove();
+	if(m_cbOnOwnerObserverModeChanged.IsValid())
+		m_cbOnOwnerObserverModeChanged.Remove();
 }
 
 void CWeaponComponent::UpdateOwnerAttachment()

@@ -13,6 +13,8 @@
 #include "pragma/entities/player.h"
 #include "pragma/lua/s_lentity_handles.hpp"
 #include "pragma/entities/components/s_health_component.hpp"
+#include "pragma/entities/components/s_observer_component.hpp"
+#include "pragma/entities/components/s_observable_component.hpp"
 #include "pragma/networking/s_nwm_util.h"
 #include "pragma/networking/iserver_client.hpp"
 #include "pragma/networking/recipient_filter.hpp"
@@ -110,6 +112,15 @@ void SPlayerComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 		auto &pStepOffsetProp = pCharComponent->GetStepOffsetProperty();
 		FlagCallbackForRemoval(pStepOffsetProp->AddCallback([this](std::reference_wrapper<const float> oldVal, std::reference_wrapper<const float> newVal) { OnSetStepOffset(newVal); }), CallbackType::Component, pCharComponent);
 	}
+	if(typeid(component) == typeid(SObservableComponent))
+		m_observableComponent = &static_cast<SObservableComponent &>(component);
+}
+
+void SPlayerComponent::OnEntityComponentRemoved(BaseEntityComponent &component)
+{
+	BasePlayerComponent::OnEntityComponentRemoved(component);
+	if(typeid(component) == typeid(SObservableComponent))
+		m_observableComponent = nullptr;
 }
 
 void SPlayerComponent::SetViewRotation(const Quat &rot)
@@ -143,7 +154,9 @@ void SPlayerComponent::OnRespawn()
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	if(pPhysComponent != nullptr)
 		pPhysComponent->InitializePhysics(PHYSICSTYPE::CAPSULECONTROLLER);
-	SetObserverMode(OBSERVERMODE::FIRSTPERSON);
+	auto observerC = GetEntity().GetComponent<SObserverComponent>();
+	if(observerC.valid())
+		observerC->SetObserverMode(ObserverMode::FirstPerson);
 
 	ent.SendNetEvent(m_netEvRespawn, pragma::networking::Protocol::SlowReliable);
 }
@@ -175,35 +188,6 @@ void SPlayerComponent::Kick(const std::string &)
 
 bool SPlayerComponent::IsGameReady() const { return m_bGameReady; }
 void SPlayerComponent::SetGameReady(bool b) { m_bGameReady = b; }
-
-void SPlayerComponent::DoSetObserverMode(OBSERVERMODE mode)
-{
-	BasePlayerComponent::DoSetObserverMode(mode);
-	auto &ent = static_cast<SBaseEntity &>(GetEntity());
-	if(ent.IsShared()) {
-		NetPacket p;
-		nwm::write_entity(p, &ent);
-		p->Write<UChar>(CUChar(mode));
-
-		auto *session = GetClientSession();
-		if(session)
-			server->SendPacket("pl_observermode", p, pragma::networking::Protocol::SlowReliable, *session);
-	}
-}
-
-void SPlayerComponent::SetObserverTarget(BaseObservableComponent *ent)
-{
-	BasePlayerComponent::SetObserverTarget(ent);
-	auto &entThis = static_cast<SBaseEntity &>(GetEntity());
-	if(entThis.IsShared() == false)
-		return;
-	NetPacket p {};
-	nwm::write_entity(p, &ent->GetEntity());
-
-	auto *session = GetClientSession();
-	if(session)
-		entThis.SendNetEvent(m_netEvSetObserverTarget, p, pragma::networking::Protocol::SlowReliable, *session);
-}
 
 void SPlayerComponent::OnEntitySpawn()
 {

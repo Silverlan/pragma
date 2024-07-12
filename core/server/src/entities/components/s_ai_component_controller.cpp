@@ -9,6 +9,7 @@
 #include "pragma/entities/components/s_player_component.hpp"
 #include "pragma/entities/components/s_character_component.hpp"
 #include "pragma/entities/components/s_observable_component.hpp"
+#include "pragma/entities/components/s_observer_component.hpp"
 #include "pragma/entities/components/s_generic_component.hpp"
 #include <pragma/entities/components/base_player_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
@@ -71,8 +72,11 @@ void SAIComponent::StartControl(pragma::SPlayerComponent &pl)
 
 	auto pObsComponent = GetEntity().GetComponent<pragma::SObservableComponent>();
 	if(pObsComponent.valid()) {
-		pl.SetObserverMode(OBSERVERMODE::THIRDPERSON);
-		pl.SetObserverTarget(pObsComponent.get());
+		auto observerC = pl.GetEntity().GetComponent<pragma::SObserverComponent>();
+		if(observerC.valid()) {
+			observerC->SetObserverMode(ObserverMode::ThirdPerson);
+			observerC->SetObserverTarget(pObsComponent.get());
+		}
 	}
 	DisableAI();
 	OnStartControl(pl);
@@ -100,8 +104,11 @@ void SAIComponent::EndControl()
 			charComponent->SetNoTarget(false);
 		auto pObservableComponent = pl->GetEntity().GetComponent<SObservableComponent>();
 		if(pObservableComponent.valid()) {
-			pl->SetObserverMode(OBSERVERMODE::FIRSTPERSON);
-			pl->SetObserverTarget(pObservableComponent.get());
+			auto observerC = pl->GetEntity().GetComponent<pragma::SObserverComponent>();
+			if(observerC.valid()) {
+				observerC->SetObserverMode(ObserverMode::FirstPerson);
+				observerC->SetObserverTarget(pObservableComponent.get());
+			}
 		}
 	}
 	OnEndControl();

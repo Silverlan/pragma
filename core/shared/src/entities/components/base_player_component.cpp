@@ -9,6 +9,7 @@
 #include <pragma/definitions.h>
 #include <pragma/engine.h>
 #include "pragma/entities/components/base_player_component.hpp"
+#include "pragma/entities/components/base_observer_component.hpp"
 #include "pragma/entities/components/base_gamemode_component.hpp"
 #include <pragma/math/angle/wvquaternion.h>
 #include <pragma/physics/movetypes.h>
@@ -49,12 +50,7 @@
 using namespace pragma;
 
 ComponentEventId BasePlayerComponent::EVENT_HANDLE_ACTION_INPUT = pragma::INVALID_COMPONENT_ID;
-ComponentEventId BasePlayerComponent::EVENT_ON_OBSERVATION_MODE_CHANGED = pragma::INVALID_COMPONENT_ID;
-void BasePlayerComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
-{
-	EVENT_HANDLE_ACTION_INPUT = registerEvent("HANDLE_ACTION_INPUT", ComponentEventInfo::Type::Explicit);
-	EVENT_ON_OBSERVATION_MODE_CHANGED = registerEvent("ON_OBSERVATION_MODE_CHANGED", ComponentEventInfo::Type::Broadcast);
-}
+void BasePlayerComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { EVENT_HANDLE_ACTION_INPUT = registerEvent("HANDLE_ACTION_INPUT", ComponentEventInfo::Type::Explicit); }
 
 void BasePlayerComponent::SetStandHeight(float height) { m_standHeight = height; }
 void BasePlayerComponent::SetCrouchHeight(float height) { m_crouchHeight = height; }
@@ -68,7 +64,9 @@ void BasePlayerComponent::OnTakenDamage(DamageInfo &info, unsigned short oldHeal
 }
 void BasePlayerComponent::OnKilled(DamageInfo *dmgInfo)
 {
-	SetObserverMode(OBSERVERMODE::THIRDPERSON);
+	auto observerC = GetEntity().FindComponent("observer");
+	if(observerC.valid())
+		static_cast<BaseObserverComponent *>(observerC.get())->SetObserverMode(ObserverMode::ThirdPerson);
 	auto &ent = GetEntity();
 	auto *nw = ent.GetNetworkState();
 	auto *game = nw->GetGameState();
@@ -247,8 +245,7 @@ std::ostream &BasePlayerComponent::print(std::ostream &os)
 
 extern DLLNETWORK Engine *engine;
 BasePlayerComponent::BasePlayerComponent(BaseEntity &ent)
-    : BaseEntityComponent(ent), m_portUDP(0), m_speedWalk(63.33f), m_speedRun(190), m_speedSprint(320), m_speedCrouchWalk(63.33f), m_bCrouching(false), m_standHeight(72), m_crouchHeight(36), m_standEyeLevel(64), m_crouchEyeLevel(28), m_tCrouch(0), m_bFlashlightOn(false),
-      m_obsMode(util::TEnumProperty<OBSERVERMODE>::Create(OBSERVERMODE::FIRSTPERSON))
+    : BaseEntityComponent(ent), m_portUDP(0), m_speedWalk(63.33f), m_speedRun(190), m_speedSprint(320), m_speedCrouchWalk(63.33f), m_bCrouching(false), m_standHeight(72), m_crouchHeight(36), m_standEyeLevel(64), m_crouchEyeLevel(28), m_tCrouch(0), m_bFlashlightOn(false)
 {
 	m_bLocalPlayer = false;
 	m_timeConnected = 0;
@@ -277,7 +274,6 @@ BasePlayer *BasePlayerComponent::GetBasePlayer() const { return dynamic_cast<Bas
 void BasePlayerComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
-	m_netEvSetObserverTarget = SetupNetEvent("set_observer_target");
 	m_netEvApplyViewRotationOffset = SetupNetEvent("apply_view_rotation_offset");
 	m_netEvPrintMessage = SetupNetEvent("print_message");
 	m_netEvRespawn = SetupNetEvent("respawn");
@@ -287,6 +283,7 @@ void BasePlayerComponent::Initialize()
 	ent.AddComponent("character");
 	ent.AddComponent("name");
 	ent.AddComponent("score");
+	ent.AddComponent("observable");
 	m_hBasePlayer = ent.GetHandle();
 
 	BindEvent(BaseCharacterComponent::EVENT_CALC_MOVEMENT_SPEED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
@@ -480,7 +477,8 @@ Vector2 BasePlayerComponent::CalcMovementSpeed() const
 	return {speed, 0.f};
 }
 float BasePlayerComponent::CalcAirMovementModifier() const { return GetEntity().GetNetworkState()->GetGameState()->GetConVarFloat("sv_player_air_move_scale"); }
-float BasePlayerComponent::CalcMovementAcceleration(float &optOutRampUpTime) const {
+float BasePlayerComponent::CalcMovementAcceleration(float &optOutRampUpTime) const
+{
 	auto *game = GetEntity().GetNetworkState()->GetGameState();
 	optOutRampUpTime = game->GetConVarFloat("sv_acceleration_ramp_up_time");
 	return game->GetConVarFloat("sv_acceleration");
@@ -569,33 +567,21 @@ double BasePlayerComponent::TimeConnected() const { return GetEntity().GetNetwor
 
 double BasePlayerComponent::ConnectionTime() const { return m_timeConnected; }
 
-void BasePlayerComponent::SetObserverMode(OBSERVERMODE mode)
+void BasePlayerComponent::SetViewPos(const std::optional<Vector3> &pos) { m_viewPos = pos; }
+Vector3 BasePlayerComponent::GetViewPos() const
 {
-	*m_obsMode = mode;
-	DoSetObserverMode(mode);
-	BroadcastEvent(EVENT_ON_OBSERVATION_MODE_CHANGED);
+	if(m_viewPos)
+		return *m_viewPos;
+	if(!m_observableComponent)
+		return GetEntity().GetPosition();
+	auto viewOffset = m_observableComponent->GetViewOffset();
+	auto charComponent = GetEntity().GetCharacterComponent();
+	auto upDir = uvec::UP;
+	if(charComponent.valid())
+		upDir = charComponent->GetUpDirection();
+	viewOffset = Vector3(viewOffset.x, 0, viewOffset.z) + upDir * viewOffset.y;
+	return GetEntity().GetPosition() + viewOffset;
 }
-OBSERVERMODE BasePlayerComponent::GetObserverMode() const { return *m_obsMode; }
-const util::PEnumProperty<OBSERVERMODE> &BasePlayerComponent::GetObserverModeProperty() const { return m_obsMode; }
-void BasePlayerComponent::SetObserverTarget(BaseObservableComponent *ent)
-{
-	m_hEntObserverTarget = pragma::ComponentHandle<pragma::BaseObservableComponent> {};
-	if(ent == nullptr)
-		return;
-	m_hEntObserverTarget = ent->GetHandle<BaseObservableComponent>();
-}
-BaseObservableComponent *BasePlayerComponent::GetObserverTarget() const
-{
-	auto *r = const_cast<BaseObservableComponent *>(m_hEntObserverTarget.get());
-	if(r == nullptr) {
-		auto pObsComponent = GetEntity().FindComponent("observable");
-		return static_cast<BaseObservableComponent *>(pObsComponent.get());
-	}
-	return r;
-}
-
-void BasePlayerComponent::SetViewPos(const Vector3 &pos) { m_posView = pos; }
-const Vector3 &BasePlayerComponent::GetViewPos() const { return m_posView; }
 
 void BasePlayerComponent::OnActionInputChanged(Action action, bool b)
 {

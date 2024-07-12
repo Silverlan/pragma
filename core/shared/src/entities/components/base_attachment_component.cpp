@@ -385,7 +385,7 @@ void BaseAttachmentComponent::UpdateViewAttachmentOffset(BaseEntity *ent, pragma
 		pos = pTrComponentEnt ? pTrComponentEnt->GetPosition() : Vector3 {};
 		rot = pTrComponentEnt ? pTrComponentEnt->GetRotation() : uquat::identity();
 
-		auto &rotRef = pl.GetOrientationAxesRotation();
+		auto rotRef = pl.GetOrientationAxesRotation();
 		auto viewRot = rotRef * pl.GetViewOrientation();
 		auto viewAng = EulerAngles(viewRot);
 		auto viewYaw = viewAng.y;

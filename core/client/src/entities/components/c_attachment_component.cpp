@@ -85,7 +85,7 @@ void CAttachmentComponent::UpdateViewAttachmentOffset(BaseEntity *ent, pragma::B
 			rot = pTrComponentEnt->GetRotation(); //cam->GetRotation();
 		}
 
-		auto &rotRef = pl.GetOrientationAxesRotation();
+		auto rotRef = pl.GetOrientationAxesRotation();
 		auto viewRot = rotRef * cam->GetEntity().GetRotation(); //pl->GetViewOrientation();
 		auto viewAng = EulerAngles(viewRot);
 		auto viewYaw = viewAng.y;

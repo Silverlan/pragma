@@ -18,6 +18,7 @@
 #include "pragma/model/c_model.h"
 #include "pragma/console/c_cvar.h"
 #include <pragma/physics/raytraces.h>
+#include <pragma/entities/components/orientation_component.hpp>
 
 using namespace pragma;
 
@@ -256,7 +257,12 @@ void CObserverComponent::UpdateCameraPose()
 	Quat orientation = uquat::identity();
 	pos = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3 {};
 	Vector3 offset = static_cast<CObservableComponent *>(target)->GetViewOffset();
-	Vector3 upDir = charComponent.valid() ? charComponent->GetUpDirection() : uvec::UP;
+	auto upDir = uvec::UP;
+	if(charComponent.valid()) {
+		auto *orientC = charComponent->GetOrientationComponent();
+		if(orientC)
+			upDir = orientC->GetUpDirection();
+	}
 	offset = Vector3(offset.x, 0, offset.z) + upDir * offset.y;
 	pos += offset;
 

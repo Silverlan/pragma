@@ -91,6 +91,8 @@ namespace pragma {
 		bool HasReachedDestination() const;
 		Activity GetMoveActivity() const;
 		void StopMoving();
+		Vector3 GetUpDirection() const;
+		bool CanMove() const;
 
 		float GetMaxSpeed(bool bUseAnimSpeedIfAvailable = true) const;
 	  protected:

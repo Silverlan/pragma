@@ -28,6 +28,7 @@
 #include <pragma/entities/components/base_physics_component.hpp>
 #include <pragma/entities/components/base_io_component.hpp>
 #include <pragma/entities/components/damageable_component.hpp>
+#include <pragma/entities/components/movement_component.hpp>
 #include <sharedutils/netpacket.hpp>
 #include <pragma/networking/nwm_util.h>
 #include <pragma/logging.hpp>
@@ -206,7 +207,7 @@ void SAIComponent::Initialize()
 	});
 
 	BindEventUnhandled(SAnimatedComponent::EVENT_MAINTAIN_ANIMATION_MOVEMENT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { MaintainAnimationMovement(static_cast<CEMaintainAnimationMovement &>(evData.get()).displacement); });
-	BindEvent(SCharacterComponent::EVENT_CALC_MOVEMENT_SPEED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(MovementComponent::EVENT_CALC_MOVEMENT_SPEED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		if(m_animMoveInfo.moving == false && m_moveInfo.moving == false) {
 			static_cast<CECalcMovementSpeed &>(evData.get()).speed = {};
 			return util::EventReply::Handled;

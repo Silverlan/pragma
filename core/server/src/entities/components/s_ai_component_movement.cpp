@@ -8,6 +8,7 @@
 #include "pragma/entities/components/s_ai_component.hpp"
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/components/velocity_component.hpp>
+#include <pragma/entities/components/movement_component.hpp>
 #include <pragma/entities/components/base_character_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
@@ -42,7 +43,12 @@ void SAIComponent::OnPrePhysicsSimulate()
 {
 	auto &ent = GetEntity();
 	auto charComponent = ent.GetCharacterComponent();
-	if((charComponent.valid() && charComponent->CanMove() == false) || m_moveInfo.moving == false)
+	if(charComponent.valid()) {
+		auto *movementC = charComponent->GetMovementComponent();
+		if(movementC && movementC->CanMove() == false)
+			return;
+	}
+	if(m_moveInfo.moving == false)
 		return;
 	pragma::SAIComponent::AIAnimationInfo info {};
 	info.SetPlayAsSchedule(false);

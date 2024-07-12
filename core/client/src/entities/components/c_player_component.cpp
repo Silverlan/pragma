@@ -36,6 +36,7 @@
 #include <pragma/entities/components/base_physics_component.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/components/base_name_component.hpp>
+#include <pragma/entities/components/orientation_component.hpp>
 #include <pragma/entities/components/basetoggle.h>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
@@ -132,10 +133,10 @@ void CPlayerComponent::OnDeployWeapon(BaseEntity &ent) {}
 void CPlayerComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {
 	BasePlayerComponent::OnEntityComponentAdded(component);
-	if(typeid(component) == typeid(CCharacterComponent)) {
-		auto &pCharComponent = static_cast<CCharacterComponent &>(component);
-		auto &pUpDirProp = pCharComponent.GetUpDirectionProperty();
-		FlagCallbackForRemoval(pUpDirProp->AddCallback([this](std::reference_wrapper<const Vector3> oldVal, std::reference_wrapper<const Vector3> newVal) { OnSetUpDirection(newVal); }), CallbackType::Component, &pCharComponent);
+	if(typeid(component) == typeid(OrientationComponent)) {
+		auto &orientC = static_cast<OrientationComponent &>(component);
+		auto &pUpDirProp = orientC.GetUpDirectionProperty();
+		FlagCallbackForRemoval(pUpDirProp->AddCallback([this](std::reference_wrapper<const Vector3> oldVal, std::reference_wrapper<const Vector3> newVal) { OnSetUpDirection(newVal); }), CallbackType::Component, &orientC);
 	}
 	else if(typeid(component) == typeid(CObservableComponent))
 		m_observableComponent = &static_cast<CObservableComponent &>(component);
@@ -528,7 +529,7 @@ void CPlayerComponent::OnSetCharacterOrientation(const Vector3 &up)
 
 	// Update camera rotation
 	auto rotCur = charComponent->GetViewOrientation();
-	auto &rotRel = charComponent->GetOrientationAxesRotation();
+	auto rotRel = charComponent->GetOrientationAxesRotation();
 
 	auto rotDst = rotRel * rotCur;
 	//auto ang = EulerAngles{rotDst};

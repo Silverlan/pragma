@@ -11,6 +11,8 @@
 #include "pragma/entities/components/base_player_component.hpp"
 #include "pragma/entities/components/base_observer_component.hpp"
 #include "pragma/entities/components/base_gamemode_component.hpp"
+#include "pragma/entities/components/orientation_component.hpp"
+#include "pragma/entities/components/movement_component.hpp"
 #include <pragma/math/angle/wvquaternion.h>
 #include <pragma/physics/movetypes.h>
 #include "pragma/physics/physobj.h"
@@ -195,8 +197,15 @@ void BasePlayerComponent::OnTick(double tDelta)
 			if(m_bForceAnimationUpdate == true || bMoving == true) {
 				m_bForceAnimationUpdate = false;
 				PlaySharedActivity(Activity::Idle);
-				if(bMoving == true)
-					animComponent->SetLastAnimationBlendScale(1.f - (charComponent.valid() ? charComponent->GetMovementBlendScale() : 0.f));
+				if(bMoving == true) {
+					auto moveBlendScale = 0.f;
+					if(charComponent.valid()) {
+						auto *movementC = charComponent->GetMovementComponent();
+						if(movementC)
+							moveBlendScale = movementC->GetMovementBlendScale();
+					}
+					animComponent->SetLastAnimationBlendScale(1.f - moveBlendScale);
+				}
 			}
 		}
 	}
@@ -286,20 +295,20 @@ void BasePlayerComponent::Initialize()
 	ent.AddComponent("observable");
 	m_hBasePlayer = ent.GetHandle();
 
-	BindEvent(BaseCharacterComponent::EVENT_CALC_MOVEMENT_SPEED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(MovementComponent::EVENT_CALC_MOVEMENT_SPEED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		static_cast<pragma::CECalcMovementSpeed &>(evData.get()).speed = CalcMovementSpeed();
 		return util::EventReply::Handled;
 	});
-	BindEvent(BaseCharacterComponent::EVENT_CALC_AIR_MOVEMENT_MODIFIER, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(MovementComponent::EVENT_CALC_AIR_MOVEMENT_MODIFIER, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		static_cast<pragma::CECalcAirMovementModifier &>(evData.get()).airMovementModifier = CalcAirMovementModifier();
 		return util::EventReply::Handled;
 	});
-	BindEvent(BaseCharacterComponent::EVENT_CALC_MOVEMENT_ACCELERATION, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(MovementComponent::EVENT_CALC_MOVEMENT_ACCELERATION, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &evDataAcc = static_cast<pragma::CECalcMovementAcceleration &>(evData.get());
 		evDataAcc.acceleration = CalcMovementAcceleration(evDataAcc.rampUpTime);
 		return util::EventReply::Handled;
 	});
-	BindEvent(BaseCharacterComponent::EVENT_CALC_MOVEMENT_DIRECTION, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(MovementComponent::EVENT_CALC_MOVEMENT_DIRECTION, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &movementDirData = static_cast<pragma::CECalcMovementDirection &>(evData.get());
 		movementDirData.direction = CalcMovementDirection(movementDirData.forward, movementDirData.right);
 		return util::EventReply::Handled;
@@ -577,8 +586,11 @@ Vector3 BasePlayerComponent::GetViewPos() const
 	auto viewOffset = m_observableComponent->GetViewOffset();
 	auto charComponent = GetEntity().GetCharacterComponent();
 	auto upDir = uvec::UP;
-	if(charComponent.valid())
-		upDir = charComponent->GetUpDirection();
+	if(charComponent.valid()) {
+		auto *orientC = charComponent->GetOrientationComponent();
+		if(orientC)
+			upDir = orientC->GetUpDirection();
+	}
 	viewOffset = Vector3(viewOffset.x, 0, viewOffset.z) + upDir * viewOffset.y;
 	return GetEntity().GetPosition() + viewOffset;
 }

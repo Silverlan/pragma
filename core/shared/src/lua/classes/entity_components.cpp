@@ -3175,19 +3175,11 @@ void pragma::lua::base_character_component::register_class(luabind::module_ &mod
 	def.def("IsFrozen", &pragma::BaseCharacterComponent::IsFrozen);
 	def.def("SetFrozen", &pragma::BaseCharacterComponent::SetFrozen);
 	def.def("Kill", &pragma::BaseCharacterComponent::Kill);
-	def.def("GetOrientationAxes", static_cast<void (*)(lua_State *, pragma::BaseCharacterComponent &)>([](lua_State *l, pragma::BaseCharacterComponent &hEntity) {
-		Vector3 *forward, *right, *up;
-		hEntity.GetOrientationAxes(&forward, &right, &up);
-		Lua::Push<Vector3>(l, *forward);
-		Lua::Push<Vector3>(l, *right);
-		Lua::Push<Vector3>(l, *up);
-	}));
 	def.def("GetOrientationAxesRotation", &pragma::BaseCharacterComponent::GetOrientationAxesRotation, luabind::copy_policy<0> {});
 	def.def("GetShootPos", &pragma::BaseCharacterComponent::GetShootPosition);
 	def.def("GetSlopeLimit", &pragma::BaseCharacterComponent::GetSlopeLimit);
 	def.def("GetStepOffset", &pragma::BaseCharacterComponent::GetStepOffset);
 	def.def("GetTurnSpeed", &pragma::BaseCharacterComponent::GetTurnSpeed);
-	def.def("GetUpDirection", &pragma::BaseCharacterComponent::GetUpDirection, luabind::copy_policy<0> {});
 	def.def("GetViewAngles", &pragma::BaseCharacterComponent::GetViewAngles);
 	def.def("GetViewForward", &pragma::BaseCharacterComponent::GetViewForward);
 	def.def("GetViewRotation", static_cast<const Quat &(pragma::BaseCharacterComponent::*)() const>(&pragma::BaseCharacterComponent::GetViewOrientation), luabind::copy_policy<0> {});
@@ -3197,7 +3189,6 @@ void pragma::lua::base_character_component::register_class(luabind::module_ &mod
 	def.def("SetSlopeLimit", static_cast<void (*)(lua_State *, pragma::BaseCharacterComponent &, float)>([](lua_State *l, pragma::BaseCharacterComponent &hEntity, float slopeLimit) { hEntity.SetSlopeLimit(umath::deg_to_rad(slopeLimit)); }));
 	def.def("SetStepOffset", &pragma::BaseCharacterComponent::SetStepOffset);
 	def.def("SetTurnSpeed", &pragma::BaseCharacterComponent::SetTurnSpeed);
-	def.def("SetUpDirection", &pragma::BaseCharacterComponent::SetUpDirection);
 	def.def("SetViewAngles", &pragma::BaseCharacterComponent::SetViewAngles);
 	def.def("SetViewRotation", &pragma::BaseCharacterComponent::SetViewOrientation);
 	def.def("NormalizeViewRotation", static_cast<void (pragma::BaseCharacterComponent::*)(Quat &)>(&pragma::BaseCharacterComponent::NormalizeViewOrientation));
@@ -3238,8 +3229,6 @@ void pragma::lua::base_character_component::register_class(luabind::module_ &mod
 	def.def("SetMoveController", static_cast<void (pragma::BaseCharacterComponent::*)(const std::string &)>(&pragma::BaseCharacterComponent::SetMoveController));
 	def.def("SetMoveController", static_cast<void (pragma::BaseCharacterComponent::*)(const std::string &, const std::string &)>(&pragma::BaseCharacterComponent::SetMoveController));
 	def.def("GetMoveController", static_cast<luabind::mult<int32_t, int32_t> (*)(lua_State *, pragma::BaseCharacterComponent &)>([](lua_State *l, pragma::BaseCharacterComponent &hEnt) -> luabind::mult<int32_t, int32_t> { return {l, hEnt.GetMoveController(), hEnt.GetMoveControllerY()}; }));
-	def.def("GetMoveVelocity", &pragma::BaseCharacterComponent::GetMoveVelocity, luabind::copy_policy<0> {});
-	def.def("GetRelativeVelocity", &pragma::BaseCharacterComponent::GetLocalVelocity);
 
 	def.def("SetOrientation", &pragma::BaseCharacterComponent::SetCharacterOrientation);
 	def.def("GetLocalOrientationAngles", &pragma::BaseCharacterComponent::GetLocalOrientationAngles);
@@ -3261,7 +3250,6 @@ void pragma::lua::base_character_component::register_class(luabind::module_ &mod
 	def.def("AddAmmo", static_cast<void (pragma::BaseCharacterComponent::*)(uint32_t, int16_t)>(&pragma::BaseCharacterComponent::AddAmmo));
 	def.def("RemoveAmmo", static_cast<void (pragma::BaseCharacterComponent::*)(const std::string &, int16_t)>(&pragma::BaseCharacterComponent::RemoveAmmo));
 	def.def("RemoveAmmo", static_cast<void (pragma::BaseCharacterComponent::*)(uint32_t, int16_t)>(&pragma::BaseCharacterComponent::RemoveAmmo));
-	def.def("GetUpDirectionProperty", &pragma::BaseCharacterComponent::GetUpDirectionProperty);
 	def.def("GetSlopeLimitProperty", &pragma::BaseCharacterComponent::GetSlopeLimitProperty);
 	def.def("GetStepOffsetProperty", &pragma::BaseCharacterComponent::GetStepOffsetProperty);
 	def.def("GetJumpPower", &pragma::BaseCharacterComponent::GetJumpPower);
@@ -3276,10 +3264,6 @@ void pragma::lua::base_character_component::register_class(luabind::module_ &mod
 	def.add_static_constant("EVENT_ON_SET_ACTIVE_WEAPON", pragma::BaseCharacterComponent::EVENT_ON_SET_ACTIVE_WEAPON);
 	def.add_static_constant("EVENT_PLAY_FOOTSTEP_SOUND", pragma::BaseCharacterComponent::EVENT_PLAY_FOOTSTEP_SOUND);
 	def.add_static_constant("EVENT_ON_DEATH", pragma::BaseCharacterComponent::EVENT_ON_DEATH);
-	def.add_static_constant("EVENT_CALC_MOVEMENT_SPEED", pragma::BaseCharacterComponent::EVENT_CALC_MOVEMENT_SPEED);
-	def.add_static_constant("EVENT_CALC_AIR_MOVEMENT_MODIFIER", pragma::BaseCharacterComponent::EVENT_CALC_AIR_MOVEMENT_MODIFIER);
-	def.add_static_constant("EVENT_CALC_MOVEMENT_ACCELERATION", pragma::BaseCharacterComponent::EVENT_CALC_MOVEMENT_ACCELERATION);
-	def.add_static_constant("EVENT_CALC_MOVEMENT_DIRECTION", pragma::BaseCharacterComponent::EVENT_CALC_MOVEMENT_DIRECTION);
 	def.add_static_constant("EVENT_IS_MOVING", pragma::BaseCharacterComponent::EVENT_IS_MOVING);
 	def.add_static_constant("EVENT_HANDLE_VIEW_ROTATION", pragma::BaseCharacterComponent::EVENT_HANDLE_VIEW_ROTATION);
 	def.add_static_constant("EVENT_ON_JUMP", pragma::BaseCharacterComponent::EVENT_ON_JUMP);

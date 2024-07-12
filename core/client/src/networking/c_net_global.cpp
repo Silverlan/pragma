@@ -52,6 +52,7 @@
 #include <pragma/entities/components/basetriggergravity.hpp>
 #include <pragma/entities/components/base_physics_component.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
+#include <pragma/entities/components/orientation_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/networking/enums.hpp>
@@ -732,7 +733,12 @@ DLLCLIENT void NET_cl_pl_updirection(NetPacket packet)
 	if(pl == NULL || pl->IsCharacter() == false)
 		return;
 	Vector3 direction = nwm::read_vector(packet);
-	pl->GetCharacterComponent()->SetUpDirection(direction);
+	auto charC = pl->GetCharacterComponent();
+	if(charC.valid()) {
+		auto *orientC = charC->GetOrientationComponent();
+		if(orientC)
+			orientC->SetUpDirection(direction);
+	}
 }
 
 void NET_cl_pl_changedname(NetPacket packet)

@@ -8,6 +8,7 @@
 #include "stdafx_shared.h"
 #include "pragma/entities/components/basetriggergravity.hpp"
 #include "pragma/entities/components/base_character_component.hpp"
+#include "pragma/entities/components/orientation_component.hpp"
 #include "pragma/entities/trigger/base_trigger_touch.hpp"
 
 using namespace pragma;
@@ -17,8 +18,10 @@ void pragma::Entity::TriggerGravity::apply_gravity(BaseEntity *ent, uint32_t fla
 	if(flags & umath::to_integral(SpawnFlags::ChangeOrientation)) {
 		auto charComponent = ent->GetCharacterComponent();
 		if(charComponent.valid()) {
-			if(upDir != nullptr)
-				*upDir = std::make_unique<Vector3>(charComponent->GetUpDirection());
+			if(upDir != nullptr) {
+				auto *orientC = charComponent->GetOrientationComponent();
+				*upDir = std::make_unique<Vector3>(orientC ? orientC->GetUpDirection() : uvec::UP);
+			}
 			charComponent->SetCharacterOrientation(dirUp);
 		}
 	}

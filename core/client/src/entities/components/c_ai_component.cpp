@@ -14,6 +14,7 @@
 #include "pragma/lua/c_lentity_handles.hpp"
 #include <pragma/entities/components/base_character_component.hpp>
 #include <pragma/entities/components/velocity_component.hpp>
+#include <pragma/entities/components/movement_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
@@ -135,7 +136,7 @@ void CAIComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 	BaseAIComponent::OnEntityComponentAdded(component);
 	if(typeid(component) == typeid(pragma::CCharacterComponent)) {
 		FlagCallbackForRemoval(static_cast<pragma::CCharacterComponent *>(&component)
-		                         ->BindEvent(CCharacterComponent::EVENT_CALC_MOVEMENT_DIRECTION,
+		                         ->BindEvent(MovementComponent::EVENT_CALC_MOVEMENT_DIRECTION,
 		                           [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 			                           auto &dirData = static_cast<CECalcMovementDirection &>(evData.get());
 			                           dirData.direction = OnCalcMovementDirection(dirData.forward, dirData.right);

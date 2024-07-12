@@ -44,6 +44,8 @@
 #include "pragma/entities/components/animation_driver_component.hpp"
 #include "pragma/entities/components/origin_component.hpp"
 #include "pragma/entities/components/parent_component.hpp"
+#include "pragma/entities/components/movement_component.hpp"
+#include "pragma/entities/components/orientation_component.hpp"
 #include "pragma/entities/components/intersection_handler_component.hpp"
 #include "pragma/entities/components/constraints/constraint_component.hpp"
 #include "pragma/entities/components/constraints/constraint_space_component.hpp"
@@ -428,6 +430,29 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defGlobal.def("GetGlobalName", &pragma::GlobalNameComponent::GetGlobalName);
 	defGlobal.def("SetGlobalName", &pragma::GlobalNameComponent::SetGlobalName);
 	entsMod[defGlobal];
+
+	auto defMovement = pragma::lua::create_entity_component_class<pragma::MovementComponent, pragma::BaseEntityComponent>("MovementComponent");
+	defMovement.def("GetMoveVelocity", &pragma::MovementComponent::GetMoveVelocity, luabind::copy_policy<0> {});
+	defMovement.def("GetRelativeVelocity", &pragma::MovementComponent::GetLocalVelocity);
+	defMovement.add_static_constant("EVENT_CALC_MOVEMENT_SPEED", pragma::MovementComponent::EVENT_CALC_MOVEMENT_SPEED);
+	defMovement.add_static_constant("EVENT_CALC_AIR_MOVEMENT_MODIFIER", pragma::MovementComponent::EVENT_CALC_AIR_MOVEMENT_MODIFIER);
+	defMovement.add_static_constant("EVENT_CALC_MOVEMENT_ACCELERATION", pragma::MovementComponent::EVENT_CALC_MOVEMENT_ACCELERATION);
+	defMovement.add_static_constant("EVENT_CALC_MOVEMENT_DIRECTION", pragma::MovementComponent::EVENT_CALC_MOVEMENT_DIRECTION);
+	entsMod[defMovement];
+
+	auto defOrientation = pragma::lua::create_entity_component_class<pragma::OrientationComponent, pragma::BaseEntityComponent>("OrientationComponent");
+	defOrientation.def("GetUpDirection", &pragma::OrientationComponent::GetUpDirection, luabind::copy_policy<0> {});
+	defOrientation.def("SetUpDirection", &pragma::OrientationComponent::SetUpDirection);
+	defOrientation.def("GetUpDirectionProperty", &pragma::OrientationComponent::GetUpDirectionProperty);
+	defOrientation.def(
+	  "GetOrientationAxes", +[](lua_State *l, pragma::OrientationComponent &hEntity) {
+		  Vector3 forward, right, up;
+		  hEntity.GetOrientationAxes(&forward, &right, &up);
+		  Lua::Push<Vector3>(l, forward);
+		  Lua::Push<Vector3>(l, right);
+		  Lua::Push<Vector3>(l, up);
+	  });
+	entsMod[defOrientation];
 
 	auto defComposite = pragma::lua::create_entity_component_class<pragma::CompositeComponent, pragma::BaseEntityComponent>("CompositeComponent");
 	defComposite.def("ClearEntities", &pragma::CompositeComponent::ClearEntities);

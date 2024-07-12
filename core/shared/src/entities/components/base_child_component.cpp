@@ -48,9 +48,11 @@ void BaseChildComponent::SetParent(const pragma::EntityURef &parent)
 	ClearParent();
 	m_parent = parent;
 	auto *entParent = GetParentEntity();
-	auto parentC = entParent->AddComponent<ParentComponent>();
-	if(parentC.valid())
-		parentC->AddChild(*this);
+	if(entParent) {
+		auto parentC = entParent->AddComponent<ParentComponent>();
+		if(parentC.valid())
+			parentC->AddChild(*this);
+	}
 
 	OnParentChanged(entParent);
 	BroadcastEvent(EVENT_ON_PARENT_CHANGED);

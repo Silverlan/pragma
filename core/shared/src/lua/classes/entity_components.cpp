@@ -12,6 +12,7 @@
 #include "pragma/entities/components/base_entity_component_member_register.hpp"
 #include "pragma/entities/components/base_bvh_component.hpp"
 #include "pragma/entities/components/base_child_component.hpp"
+#include "pragma/entities/components/base_observer_component.hpp"
 #include "pragma/entities/components/base_static_bvh_cache_component.hpp"
 #include "pragma/entities/components/base_static_bvh_user_component.hpp"
 #include "pragma/entities/components/intersection_handler_component.hpp"
@@ -2093,6 +2094,15 @@ void pragma::lua::base_observable_component::register_class(luabind::module_ &mo
 	  static_cast<void (*)(lua_State *, pragma::BaseObservableComponent &, uint32_t, bool)>([](lua_State *l, pragma::BaseObservableComponent &hEnt, uint32_t camType, bool enabled) { hEnt.SetCameraEnabled(static_cast<pragma::BaseObservableComponent::CameraType>(camType), enabled); }));
 	def.def("GetCameraEnabledProperty", &pragma::BaseObservableComponent::GetCameraEnabledProperty);
 	def.def("GetCameraOffsetProperty", &pragma::BaseObservableComponent::GetCameraOffsetProperty);
+	def.def(
+	  "GetObserver", +[](pragma::BaseObservableComponent &observableC) -> luabind::object {
+		  auto *observerC = observableC.GetObserver();
+		  if(!observerC)
+			  return Lua::nil;
+		  return observerC->GetLuaObject();
+	  });
+	def.def("GetViewOffset", &pragma::BaseObservableComponent::GetViewOffset);
+	def.def("SetViewOffset", &pragma::BaseObservableComponent::SetViewOffset);
 	def.add_static_constant("CAMERA_TYPE_FIRST_PERSON", umath::to_integral(pragma::BaseObservableComponent::CameraType::FirstPerson));
 	def.add_static_constant("CAMERA_TYPE_THIRD_PERSON", umath::to_integral(pragma::BaseObservableComponent::CameraType::ThirdPerson));
 

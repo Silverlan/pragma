@@ -86,7 +86,7 @@ static CVar cvPitch = GetClientConVar("cl_mouse_pitch");
 void CObserverComponent::UpdateCharacterViewOrientationFromMouseMovement()
 {
 	auto *target = GetObserverTarget();
-	if(!target)
+	if(IsActive() == false || !target)
 		return;
 	auto &ent = target->GetEntity();
 	auto charComponent = ent.GetCharacterComponent();
@@ -245,7 +245,7 @@ void CObserverComponent::ApplyCameraObservationMode(Vector3 &pos, Quat &rot, Qua
 void CObserverComponent::UpdateCameraPose()
 {
 	auto *target = GetObserverTarget();
-	if(!target)
+	if(IsActive() == false || !target)
 		return;
 	auto &ent = target->GetEntity();
 	auto charComponent = ent.GetCharacterComponent();

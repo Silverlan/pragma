@@ -819,6 +819,10 @@ void pragma::lua::register_entity_component_classes(lua_State *l, luabind::modul
 	entityComponentDef.def("GetTickPolicy", &pragma::BaseEntityComponent::GetTickPolicy);
 	entityComponentDef.def("GetNextTick", &pragma::BaseEntityComponent::GetNextTick);
 	entityComponentDef.def("SetNextTick", &pragma::BaseEntityComponent::SetNextTick);
+	entityComponentDef.def("SetActive", &pragma::BaseEntityComponent::SetActive);
+	entityComponentDef.def("IsActive", &pragma::BaseEntityComponent::IsActive);
+	entityComponentDef.def("Activate", &pragma::BaseEntityComponent::Activate);
+	entityComponentDef.def("Deactivate", &pragma::BaseEntityComponent::Deactivate);
 	entityComponentDef.def("GetMemberIndex", &pragma::BaseEntityComponent::GetMemberIndex);
 	entityComponentDef.def("GetMemberInfo", &pragma::BaseEntityComponent::GetMemberInfo);
 	entityComponentDef.def("GetDynamicMemberIndices", static_cast<std::vector<pragma::ComponentMemberIndex> (*)(pragma::BaseEntityComponent &)>(&get_dynamic_member_ids));
@@ -3460,6 +3464,7 @@ void pragma::lua::base_generic_component::register_class(luabind::module_ &mod)
 	def.add_static_constant("EVENT_ON_COMPONENT_ADDED", pragma::BaseGenericComponent::EVENT_ON_ENTITY_COMPONENT_ADDED);
 	def.add_static_constant("EVENT_ON_COMPONENT_REMOVED", pragma::BaseGenericComponent::EVENT_ON_ENTITY_COMPONENT_REMOVED);
 	def.add_static_constant("EVENT_ON_MEMBERS_CHANGED", pragma::BaseGenericComponent::EVENT_ON_MEMBERS_CHANGED);
+	def.add_static_constant("EVENT_ON_ACTIVE_STATE_CHANGED", pragma::BaseGenericComponent::EVENT_ON_ACTIVE_STATE_CHANGED);
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 

@@ -17,6 +17,7 @@
 #include "pragma/entities/c_viewmodel.h"
 #include "pragma/entities/c_viewbody.h"
 #include "pragma/entities/components/c_scene_component.hpp"
+#include "pragma/entities/components/c_observer_component.hpp"
 #include "pragma/rendering/c_rendermode.h"
 #include <pragma/networking/nwm_util.h>
 #include "pragma/entities/c_listener.h"
@@ -38,6 +39,7 @@
 #include <pragma/entities/components/basetoggle.h>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
+#include <pragma/entities/observermode.h>
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/euler_angles.hpp>
 
@@ -86,7 +88,7 @@ std::ostream &CPlayerComponent::print(std::ostream &os)
 	return os;
 }
 
-CPlayerComponent::CPlayerComponent(BaseEntity &ent) : BasePlayerComponent(ent), m_viewOffset(0, m_standEyeLevel, 0), m_crouchViewOffset(nullptr), m_upDirOffset(nullptr)
+CPlayerComponent::CPlayerComponent(BaseEntity &ent) : BasePlayerComponent(ent), m_crouchViewOffset(nullptr), m_upDirOffset(nullptr)
 {
 	s_players.push_back(this);
 
@@ -119,8 +121,6 @@ CPlayerComponent::~CPlayerComponent()
 		m_cbCalcOrientationView.Remove();
 	m_crouchViewOffset = nullptr;
 	m_upDirOffset = nullptr;
-	if(m_cbObserver.IsValid())
-		m_cbObserver.Remove();
 	if(m_cbUnderwaterDsp.valid() == true)
 		m_cbUnderwaterDsp->Remove();
 }
@@ -137,6 +137,14 @@ void CPlayerComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 		auto &pUpDirProp = pCharComponent.GetUpDirectionProperty();
 		FlagCallbackForRemoval(pUpDirProp->AddCallback([this](std::reference_wrapper<const Vector3> oldVal, std::reference_wrapper<const Vector3> newVal) { OnSetUpDirection(newVal); }), CallbackType::Component, &pCharComponent);
 	}
+	else if(typeid(component) == typeid(CObservableComponent))
+		m_observableComponent = &static_cast<CObservableComponent &>(component);
+}
+void CPlayerComponent::OnEntityComponentRemoved(BaseEntityComponent &component)
+{
+	BasePlayerComponent::OnEntityComponentRemoved(component);
+	if(typeid(component) == typeid(CObservableComponent))
+		m_observableComponent = nullptr;
 }
 
 util::EventReply CPlayerComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
@@ -195,126 +203,6 @@ void CPlayerComponent::OnWaterEmerged()
 	m_cbUnderwaterDsp->Remove();
 }
 
-void CPlayerComponent::UpdateObserverOffset()
-{
-	// Obsolete
-	// TODO: Remove this function
-}
-
-bool CPlayerComponent::IsInFirstPersonMode() const
-{
-	auto *pTgt = GetObserverTarget();
-	if(pTgt == nullptr)
-		return false;
-	return (GetObserverMode() == OBSERVERMODE::FIRSTPERSON && &pTgt->GetEntity() == &GetEntity()) ? true : false;
-}
-
-void CPlayerComponent::SetObserverTarget(BaseObservableComponent *ent)
-{
-	BasePlayerComponent::SetObserverTarget(ent);
-	UpdateObserverOffset();
-}
-
-void CPlayerComponent::UpdateObserverCallback()
-{
-	if(IsLocalPlayer() == false)
-		return;
-	auto obsMode = GetObserverMode();
-	if(obsMode == OBSERVERMODE::NONE) {
-		if(m_cbObserver.IsValid())
-			m_cbObserver.Remove();
-		return;
-	}
-	if(m_cbObserver.IsValid())
-		return;
-	// TODO
-	//m_lastObserveeRotation = GetEntity().GetRotation();
-	m_cbObserver
-	  = c_game->AddCallback("CalcView", FunctionCallback<void, std::reference_wrapper<Vector3>, std::reference_wrapper<Quat>, std::reference_wrapper<Quat>>::Create([this](std::reference_wrapper<Vector3> refPos, std::reference_wrapper<Quat> refRot, std::reference_wrapper<Quat> rotMod) {
-		    auto *obsC = GetObserverTarget();
-		    if(obsC == nullptr)
-			    return;
-		    pragma::ObserverCameraData *obsCamData = nullptr;
-		    switch(GetObserverMode()) {
-		    case OBSERVERMODE::FIRSTPERSON:
-			    obsCamData = &obsC->GetCameraData(BaseObservableComponent::CameraType::FirstPerson);
-			    break;
-		    case OBSERVERMODE::THIRDPERSON:
-			    obsCamData = &obsC->GetCameraData(BaseObservableComponent::CameraType::ThirdPerson);
-			    break;
-		    }
-		    auto &pos = refPos.get();
-		    auto &rot = refRot.get();
-		    //auto physType = ent->GetPhysicsType();
-		    auto pTrComponentObs = obsC->GetEntity().GetTransformComponent();
-		    auto camRot = (obsCamData == nullptr || obsCamData->angleLimits.has_value() == false) ? rot : pTrComponentObs ? pTrComponentObs->GetRotation() : uquat::identity();
-
-		    auto pose = obsC->GetEntity().GetPose();
-		    if(obsCamData && obsCamData->localOrigin.has_value())
-			    pose.TranslateLocal(*obsCamData->localOrigin);
-		    else {
-			    // Note: GetEyePosition is not always reliable, since it's derived from the Source Engine $eyeposition parameter,
-			    // which is only valid for NPC models.
-			    // Instead, we'll use the "eyes" attachment as reference if available.
-			    auto &mdl = obsC->GetEntity().GetModel();
-			    auto eyeAtt = mdl ? mdl->LookupAttachment("eyes") : -1; // TODO: Cache the lookup
-			    auto eyePose = (eyeAtt != -1) ? obsC->GetEntity().GetAttachmentPose(eyeAtt) : std::optional<umath::Transform> {};
-			    if(eyePose.has_value()) {
-				    eyePose->GetOrigin().x = 0;
-				    eyePose->GetOrigin().z = 0;
-				    pose.TranslateLocal(eyePose->GetOrigin());
-			    }
-			    else if(pTrComponentObs)
-				    pose.SetOrigin(pTrComponentObs->GetEyePosition());
-		    }
-
-		    auto &entThis = GetEntity();
-		    auto charComponent = entThis.GetCharacterComponent();
-		    auto pTrComponent = entThis.GetTransformComponent();
-		    if(obsCamData == nullptr || obsCamData->angleLimits.has_value() == false) {
-			    if(charComponent.valid())
-				    rot = charComponent->GetViewOrientation();
-			    else
-				    rot = pTrComponent != nullptr ? pTrComponent->GetRotation() : uquat::identity();
-		    }
-		    else
-			    rot = pTrComponentObs ? pTrComponentObs->GetRotation() : uquat::identity();
-
-		    auto rotateWithObservee = (obsCamData && obsCamData->rotateWithObservee) ? true : false;
-		    auto rotPos = camRot;
-		    if(rotateWithObservee) {
-			    // Apply entity rotation for the current frame
-			    auto entRot = obsC->GetEntity().GetRotation() * rotMod.get();
-			    rotMod.get() = entRot;
-			    rotPos = entRot * rotPos;
-		    }
-
-		    auto camLookAtPos = pose.GetOrigin();
-		    auto camPos = camLookAtPos;
-		    if(obsCamData)
-			    camPos += uquat::forward(rotPos) * (*obsCamData->offset)->z + uquat::up(rotPos) * (*obsCamData->offset)->y - uquat::right(rotPos) * (*obsCamData->offset)->x;
-
-		    if(obsCamData != nullptr && uvec::length_sqr(*obsCamData->offset) > 0.f) {
-			    TraceData data {};
-			    data.SetSource(camLookAtPos);
-			    data.SetTarget(camPos);
-			    data.SetFlags(RayCastFlags::Default | RayCastFlags::InvertFilter);
-			    data.SetFilter(obsC->GetEntity());
-			    auto r = c_game->RayCast(data);
-			    pos = (r.hitType == RayCastHitType::Block) ? r.position : camPos;
-		    }
-		    else
-			    pos = camPos;
-	    }));
-}
-
-void CPlayerComponent::DoSetObserverMode(OBSERVERMODE mode)
-{
-	BasePlayerComponent::DoSetObserverMode(mode);
-	UpdateObserverOffset();
-	UpdateObserverCallback();
-}
-
 void CPlayerComponent::ApplyViewRotationOffset(const EulerAngles &ang, float dur)
 {
 	auto tStart = c_game->CurTime();
@@ -340,12 +228,7 @@ void CPlayerComponent::ApplyViewRotationOffset(const EulerAngles &ang, float dur
 
 bool CPlayerComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet)
 {
-	if(eventId == m_netEvSetObserverTarget) {
-		auto *ent = nwm::read_entity(packet);
-		auto pObsComponent = ent->GetComponent<pragma::CObservableComponent>();
-		SetObserverTarget(pObsComponent.get());
-	}
-	else if(eventId == m_netEvApplyViewRotationOffset) {
+	if(eventId == m_netEvApplyViewRotationOffset) {
 		auto ang = nwm::read_angles(packet);
 		auto dur = packet->Read<float>();
 		ApplyViewRotationOffset(ang, dur);
@@ -372,15 +255,6 @@ bool CPlayerComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &pa
 	return true;
 }
 
-void CPlayerComponent::OnUpdateMatrices(Mat4 &transformMatrix)
-{
-	if(IsLocalPlayer() && IsInFirstPersonMode()) {
-		auto pTrComponent = GetEntity().GetTransformComponent();
-		auto t = (pTrComponent != nullptr ? pTrComponent->GetForward() : uvec::FORWARD) * VIEW_BODY_OFFSET;
-		transformMatrix = glm::translate(umat::identity(), t) * transformMatrix; // Translate to align shadow with view body
-	}
-}
-
 void CPlayerComponent::Initialize()
 {
 	BasePlayerComponent::Initialize();
@@ -402,14 +276,29 @@ void CPlayerComponent::Initialize()
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	if(pPhysComponent != nullptr)
 		pPhysComponent->SetCollisionType(COLLISIONTYPE::AABB);
+
+	GetEntity().AddComponent<CObservableComponent>();
+	if(m_observableComponent)
+		m_observableComponent->SetViewOffset(Vector3 {0, m_standEyeLevel, 0});
 }
 
-void CPlayerComponent::SetObserverMode(OBSERVERMODE mode)
+bool CPlayerComponent::IsInFirstPersonMode() const
 {
-	BasePlayerComponent::SetObserverMode(mode);
-	auto *renderC = static_cast<CBaseEntity &>(GetEntity()).GetRenderComponent();
-	if(renderC)
-		renderC->UpdateShouldDrawState();
+	if(!m_observableComponent)
+		return false;
+	auto *observer = m_observableComponent->GetObserver();
+	if(!observer)
+		return false;
+	return static_cast<CObserverComponent *>(observer)->IsInFirstPersonMode();
+}
+
+void CPlayerComponent::OnUpdateMatrices(Mat4 &transformMatrix)
+{
+	if(IsLocalPlayer() && IsInFirstPersonMode()) {
+		auto pTrComponent = GetEntity().GetTransformComponent();
+		auto t = (pTrComponent != nullptr ? pTrComponent->GetForward() : uvec::FORWARD) * VIEW_BODY_OFFSET;
+		transformMatrix = glm::translate(umat::identity(), t) * transformMatrix; // Translate to align shadow with view body
+	}
 }
 
 void CPlayerComponent::UpdateViewModelTransform()
@@ -518,18 +407,19 @@ bool CPlayerComponent::ShouldDraw() const
 	auto *scene = c_game->GetScene();
 	if(c_game->GetRenderScene() != scene)
 		return true;
-	return (GetObserverMode() != OBSERVERMODE::FIRSTPERSON) ? true : false;
+	if(!m_observableComponent)
+		return true;
+	auto *observer = m_observableComponent->GetObserver();
+	if(!observer)
+		return true;
+	return (observer->GetObserverMode() != ObserverMode::FirstPerson) ? true : false;
 }
 
 bool CPlayerComponent::ShouldDrawShadow() const
 {
 	auto pRenderComponent = static_cast<const CBaseEntity &>(GetEntity()).GetRenderComponent();
 	return pRenderComponent ? pRenderComponent->GetCastShadows() : false;
-	;
 }
-
-Vector3 &CPlayerComponent::GetViewOffset() { return m_viewOffset; }
-void CPlayerComponent::SetViewOffset(Vector3 offset) { m_viewOffset = offset; }
 
 void CPlayerComponent::OnTick(double tDelta)
 {
@@ -545,7 +435,8 @@ void CPlayerComponent::OnTick(double tDelta)
 			scale = umath::min(scale, 1.0f);
 			Vector3 mv = doffset.offset * scale;
 			doffset.offset -= mv;
-			SetViewOffset(GetViewOffset() + mv);
+			if(m_observableComponent)
+				m_observableComponent->SetViewOffset(m_observableComponent->GetViewOffset() + mv);
 			doffset.time -= tDelta;
 			if(doffset.time <= 0)
 				m_crouchViewOffset = nullptr;
@@ -562,7 +453,8 @@ void CPlayerComponent::OnTick(double tDelta)
 
 			Vector3 mv = dtrans.offset * scale;
 			dtrans.offset -= mv;
-			SetViewOffset(GetViewOffset() + mv);
+			if(m_observableComponent)
+				m_observableComponent->SetViewOffset(m_observableComponent->GetViewOffset() + mv);
 
 			dtrans.time -= tDelta;
 			if(dtrans.time <= 0)
@@ -570,8 +462,20 @@ void CPlayerComponent::OnTick(double tDelta)
 		}
 	}
 }
-void CPlayerComponent::OnCrouch() { m_crouchViewOffset = std::make_unique<DeltaOffset>(Vector3(0, m_crouchEyeLevel - GetViewOffset().y, 0), 0.2f); }
-void CPlayerComponent::OnUnCrouch() { m_crouchViewOffset = std::make_unique<DeltaOffset>(Vector3(0, m_standEyeLevel - GetViewOffset().y, 0), 0.4f); }
+void CPlayerComponent::OnCrouch()
+{
+	Vector3 viewOffset {};
+	if(m_observableComponent)
+		viewOffset = m_observableComponent->GetViewOffset();
+	m_crouchViewOffset = std::make_unique<DeltaOffset>(Vector3(0, m_crouchEyeLevel - viewOffset.y, 0), 0.2f);
+}
+void CPlayerComponent::OnUnCrouch()
+{
+	Vector3 viewOffset {};
+	if(m_observableComponent)
+		viewOffset = m_observableComponent->GetViewOffset();
+	m_crouchViewOffset = std::make_unique<DeltaOffset>(Vector3(0, m_standEyeLevel - viewOffset.y, 0), 0.4f);
+}
 void CPlayerComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const { outTypeIndex = std::type_index(typeid(BasePlayerComponent)); }
 void CPlayerComponent::ReceiveData(NetPacket &packet)
 {

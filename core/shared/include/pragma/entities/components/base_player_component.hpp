@@ -157,13 +157,13 @@ namespace pragma {
 		Vector2 CalcMovementSpeed() const;
 		float CalcAirMovementModifier() const;
 		float CalcMovementAcceleration(float &optOutRampUpTime) const;
-		Vector3 CalcMovementDirection(const Vector3 &forward, const Vector3 &right) const;
 		virtual void OnActionInputChanged(Action action, bool b);
 		void OnKilled(DamageInfo *dmgInfo = nullptr);
 
 		virtual void OnTick(double tDelta) override;
 		std::shared_ptr<pragma::physics::IConvexShape> m_shapeStand = nullptr;
 	  private:
+		void UpdateMovementProperties();
 		unsigned short m_portUDP;
 		std::unordered_map<int, bool> m_keysPressed;
 		bool m_bLocalPlayer;

@@ -22,18 +22,11 @@
 #include <pragma/physics/movetypes.h>
 
 using namespace pragma;
-
-ComponentEventId MovementComponent::EVENT_CALC_MOVEMENT_SPEED = INVALID_COMPONENT_ID;
-ComponentEventId MovementComponent::EVENT_CALC_AIR_MOVEMENT_MODIFIER = INVALID_COMPONENT_ID;
-ComponentEventId MovementComponent::EVENT_CALC_MOVEMENT_ACCELERATION = INVALID_COMPONENT_ID;
-ComponentEventId MovementComponent::EVENT_CALC_MOVEMENT_DIRECTION = INVALID_COMPONENT_ID;
+ComponentEventId MovementComponent::EVENT_ON_UPDATE_MOVEMENT = INVALID_COMPONENT_ID;
 void MovementComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	BaseEntityComponent::RegisterEvents(componentManager, registerEvent);
-	EVENT_CALC_MOVEMENT_SPEED = registerEvent("CALC_MOVEMENT_SPEED", ComponentEventInfo::Type::Explicit);
-	EVENT_CALC_AIR_MOVEMENT_MODIFIER = registerEvent("CALC_AIR_MOVEMENT_MODIFIER", ComponentEventInfo::Type::Explicit);
-	EVENT_CALC_MOVEMENT_ACCELERATION = registerEvent("CALC_MOVEMENT_ACCELERATION", ComponentEventInfo::Type::Explicit);
-	EVENT_CALC_MOVEMENT_DIRECTION = registerEvent("CALC_MOVEMENT_DIRECTION", ComponentEventInfo::Type::Explicit);
+	EVENT_ON_UPDATE_MOVEMENT = registerEvent("ON_UPDATE_MOVEMENT", ComponentEventInfo::Type::Explicit);
 }
 MovementComponent::MovementComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
 void MovementComponent::Initialize()
@@ -43,6 +36,24 @@ void MovementComponent::Initialize()
 }
 void MovementComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void MovementComponent::OnRemove() { BaseEntityComponent::OnRemove(); }
+
+void MovementComponent::SetSpeed(const Vector2 &speed) { m_movementSpeed = speed; }
+const Vector2 &MovementComponent::GetSpeed() const { return m_movementSpeed; }
+
+void MovementComponent::SetAirModifier(float modifier) { m_airMovementModifier = modifier; }
+float MovementComponent::GetAirModifier() const { return m_airMovementModifier; }
+
+void MovementComponent::SetAcceleration(float acc) { m_movementAcceleration = acc; }
+float MovementComponent::GetAcceleration() const { return m_movementAcceleration; }
+
+void MovementComponent::SetAccelerationRampUpTime(float rampUpTime) { m_accelerationRampUpTime = rampUpTime; }
+float MovementComponent::GetAccelerationRampUpTime() const { return m_accelerationRampUpTime; }
+
+void MovementComponent::SetDirection(const std::optional<Vector3> &dir) { m_movementDirection = dir; }
+const std::optional<Vector3> &MovementComponent::GetDirection() const { return m_movementDirection; }
+
+void MovementComponent::SetDirectionMagnitude(MoveDirection direction, float magnitude) { m_directionMagnitude[umath::to_integral(direction)] = magnitude; }
+float MovementComponent::GetDirectionMagnitude(MoveDirection direction) const { return m_directionMagnitude[umath::to_integral(direction)]; }
 
 Vector3 MovementComponent::GetLocalVelocity() const
 {
@@ -65,7 +76,7 @@ float MovementComponent::GetMovementBlendScale() const
 	auto blendScale = 0.f;
 	auto vel = GetLocalVelocity();
 	float speed = uvec::length(vel);
-	auto mvSpeed = CalcMovementSpeed();
+	auto mvSpeed = GetSpeed();
 	auto speedMax = umath::max(mvSpeed.x, mvSpeed.y);
 	if(speedMax == 0.f)
 		blendScale = 0.f;
@@ -77,38 +88,6 @@ float MovementComponent::GetMovementBlendScale() const
 			blendScale = 0.f;
 	}
 	return blendScale;
-}
-
-Vector2 MovementComponent::CalcMovementSpeed() const
-{
-	CECalcMovementSpeed evData {};
-	if(InvokeEventCallbacks(EVENT_CALC_MOVEMENT_SPEED, evData) == util::EventReply::Handled)
-		return evData.speed;
-	return Vector2 {};
-}
-float MovementComponent::CalcAirMovementModifier() const
-{
-	CECalcAirMovementModifier evData {};
-	if(InvokeEventCallbacks(EVENT_CALC_AIR_MOVEMENT_MODIFIER, evData) == util::EventReply::Handled)
-		return evData.airMovementModifier;
-	return 0.f;
-}
-float MovementComponent::CalcMovementAcceleration(float &optOutRampUpTime) const
-{
-	CECalcMovementAcceleration evData {};
-	if(InvokeEventCallbacks(EVENT_CALC_MOVEMENT_ACCELERATION, evData) == util::EventReply::Handled) {
-		optOutRampUpTime = evData.rampUpTime;
-		return evData.acceleration;
-	}
-	return 0.f;
-}
-
-Vector3 MovementComponent::CalcMovementDirection(const Vector3 &forward, const Vector3 &right) const
-{
-	CECalcMovementDirection evData {forward, right};
-	if(InvokeEventCallbacks(EVENT_CALC_MOVEMENT_DIRECTION, evData) == util::EventReply::Handled)
-		return evData.direction;
-	return Vector3 {};
 }
 
 bool MovementComponent::CanMove() const
@@ -160,6 +139,7 @@ bool MovementComponent::UpdateMovement()
 	auto mv = pPhysComponent->GetMoveType();
 	if(mv == MOVETYPE::NONE || mv == MOVETYPE::PHYSICS)
 		return false;
+	InvokeEventCallbacks(EVENT_ON_UPDATE_MOVEMENT);
 	auto *physController = static_cast<ControllerPhysObj *>(phys);
 	auto pTrComponent = ent.GetTransformComponent();
 	auto pVelComponent = ent.GetComponent<pragma::VelocityComponent>();
@@ -241,12 +221,12 @@ bool MovementComponent::UpdateMovement()
 	auto pTimeScaleComponent = ent.GetTimeScaleComponent();
 	auto ts = pTimeScaleComponent.valid() ? CFloat(pTimeScaleComponent->GetTimeScale()) : 1.f;
 	auto scale = pTrComponent ? pTrComponent->GetScale() : Vector3 {1.f, 1.f, 1.f};
-	auto speed = CalcMovementSpeed() * ts * umath::abs_max(scale.x, scale.y, scale.z);
+	auto speed = GetSpeed() * ts * umath::abs_max(scale.x, scale.y, scale.z);
 
 	auto *nw = ent.GetNetworkState();
 	auto *game = nw->GetGameState();
-	float timeToReachFullAcc = 0.f;
-	auto acceleration = CalcMovementAcceleration(timeToReachFullAcc);
+	float timeToReachFullAcc = GetAccelerationRampUpTime();
+	auto acceleration = GetAcceleration();
 	auto tDelta = CFloat(game->DeltaTickTime()) * ts;
 
 	{
@@ -287,14 +267,22 @@ bool MovementComponent::UpdateMovement()
 		vel += frictionForce * umath::min(tDelta * acceleration, 1.f);
 	}
 	else
-		speed *= CalcAirMovementModifier();
+		speed *= GetAirModifier();
 
 	Vector3 dir = Vector3(0, 0, 0);
 	auto isFrozen = false;
 	if(m_charComponent)
 		isFrozen = m_charComponent->IsFrozen();
-	if(!isFrozen)
-		dir = CalcMovementDirection(forward, right);
+	if(!isFrozen) {
+		if(m_movementDirection)
+			dir = *m_movementDirection;
+		else {
+			dir += forward * GetDirectionMagnitude(MoveDirection::Forward);
+			dir -= forward * GetDirectionMagnitude(MoveDirection::Backward);
+			dir += right * GetDirectionMagnitude(MoveDirection::Right);
+			dir -= right * GetDirectionMagnitude(MoveDirection::Left);
+		}
+	}
 	auto l = uvec::length(dir);
 	if(l > 0.f)
 		dir /= l;
@@ -362,53 +350,3 @@ bool MovementComponent::UpdateMovement()
 
 const Vector3 &MovementComponent::GetMoveVelocity() const { return m_moveVelocity; }
 void MovementComponent::SetMoveVelocity(const Vector3 &vel) { m_moveVelocity = vel; }
-
-//////////////////
-
-CECalcMovementSpeed::CECalcMovementSpeed() {}
-void CECalcMovementSpeed::PushArguments(lua_State *l) {}
-uint32_t CECalcMovementSpeed::GetReturnCount() { return 1; }
-void CECalcMovementSpeed::HandleReturnValues(lua_State *l)
-{
-	if(Lua::IsSet(l, -1))
-		speed = *Lua::CheckVector2(l, -1);
-}
-
-//////////////////
-
-CECalcAirMovementModifier::CECalcAirMovementModifier() {}
-void CECalcAirMovementModifier::PushArguments(lua_State *l) {}
-uint32_t CECalcAirMovementModifier::GetReturnCount() { return 1; }
-void CECalcAirMovementModifier::HandleReturnValues(lua_State *l)
-{
-	if(Lua::IsSet(l, -1))
-		airMovementModifier = Lua::CheckNumber(l, -1);
-}
-
-//////////////////
-
-CECalcMovementAcceleration::CECalcMovementAcceleration() {}
-void CECalcMovementAcceleration::PushArguments(lua_State *l) {}
-uint32_t CECalcMovementAcceleration::GetReturnCount() { return 2; }
-void CECalcMovementAcceleration::HandleReturnValues(lua_State *l)
-{
-	if(Lua::IsSet(l, -2))
-		acceleration = Lua::CheckNumber(l, -2);
-	if(Lua::IsSet(l, -1))
-		rampUpTime = Lua::CheckNumber(l, -1);
-}
-
-//////////////////
-
-CECalcMovementDirection::CECalcMovementDirection(const Vector3 &forward, const Vector3 &right) : forward(forward), right(right) {}
-void CECalcMovementDirection::PushArguments(lua_State *l)
-{
-	Lua::Push<Vector3>(l, forward);
-	Lua::Push<Vector3>(l, right);
-}
-uint32_t CECalcMovementDirection::GetReturnCount() { return 1; }
-void CECalcMovementDirection::HandleReturnValues(lua_State *l)
-{
-	if(Lua::IsSet(l, -1))
-		direction = *Lua::CheckVector(l, -1);
-}

@@ -203,23 +203,7 @@ void BaseAIComponent::Initialize()
 		PathStep(static_cast<float>(static_cast<pragma::CEPhysicsUpdateData &>(eventData.get()).deltaTime));
 		return util::EventReply::Unhandled;
 	});
-	BindEvent(MovementComponent::EVENT_CALC_MOVEMENT_SPEED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		static_cast<pragma::CECalcMovementSpeed &>(evData.get()).speed = CalcMovementSpeed();
-		return util::EventReply::Handled;
-	});
-	BindEvent(MovementComponent::EVENT_CALC_AIR_MOVEMENT_MODIFIER, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		static_cast<pragma::CECalcAirMovementModifier &>(evData.get()).airMovementModifier = CalcAirMovementModifier();
-		return util::EventReply::Handled;
-	});
-	BindEvent(MovementComponent::EVENT_CALC_MOVEMENT_ACCELERATION, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		static_cast<pragma::CECalcMovementAcceleration &>(evData.get()).acceleration = CalcMovementAcceleration();
-		return util::EventReply::Handled;
-	});
-	BindEvent(MovementComponent::EVENT_CALC_MOVEMENT_DIRECTION, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		auto &movementDirData = static_cast<pragma::CECalcMovementDirection &>(evData.get());
-		movementDirData.direction = CalcMovementDirection(movementDirData.forward, movementDirData.right);
-		return util::EventReply::Handled;
-	});
+	BindEventUnhandled(MovementComponent::EVENT_ON_UPDATE_MOVEMENT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateMovementProperties(); });
 	BindEventUnhandled(BaseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnModelChanged(static_cast<pragma::CEOnModelChanged &>(evData.get()).model); });
 	BindEventUnhandled(BaseAnimatedComponent::EVENT_ON_ANIMATION_START, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		auto animComponent = GetEntity().GetAnimatedComponent();
@@ -255,6 +239,23 @@ void BaseAIComponent::Initialize()
 		pCharComponent->SetTurnSpeed(160.f);
 
 	SetTickPolicy(TickPolicy::Always);
+}
+
+void BaseAIComponent::UpdateMovementProperties(MovementComponent &movementC)
+{
+	movementC.SetSpeed(CalcMovementSpeed());
+	movementC.SetAcceleration(CalcMovementAcceleration());
+	movementC.SetAirModifier(CalcAirMovementModifier());
+	movementC.SetDirection(CalcMovementDirection());
+}
+
+void BaseAIComponent::UpdateMovementProperties()
+{
+	auto charC = GetEntity().GetCharacterComponent();
+	auto *movementC = charC.valid() ? charC->GetMovementComponent() : nullptr;
+	if(!movementC)
+		return;
+	UpdateMovementProperties(*movementC);
 }
 
 void BaseAIComponent::OnEntitySpawn()

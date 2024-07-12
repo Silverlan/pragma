@@ -317,6 +317,7 @@ namespace pragma {
 		virtual void OnPathNodeChanged(uint32_t nodeIdx) override;
 		virtual void OnLookTargetChanged() override;
 		virtual bool IsObstruction(const BaseEntity &ent) const override;
+		virtual void UpdateMovementProperties(MovementComponent &movementC) override;
 		void OnTakenDamage(DamageInfo &info, unsigned short oldHealth, unsigned short newHealth);
 		void OnTakeDamage(DamageInfo &info);
 		void MaintainAnimationMovement(const Vector3 &disp);

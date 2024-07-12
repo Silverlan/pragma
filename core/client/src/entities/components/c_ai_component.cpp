@@ -117,7 +117,7 @@ bool CAIComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet
 	return true;
 }
 
-Vector3 CAIComponent::OnCalcMovementDirection(const Vector3 &, const Vector3 &) const
+Vector3 CAIComponent::OnCalcMovementDirection() const
 {
 	auto pVelComponent = GetEntity().GetComponent<pragma::VelocityComponent>();
 	if(pVelComponent.expired())
@@ -131,20 +131,13 @@ Vector3 CAIComponent::OnCalcMovementDirection(const Vector3 &, const Vector3 &) 
 
 void CAIComponent::Initialize() { BaseAIComponent::Initialize(); }
 
-void CAIComponent::OnEntityComponentAdded(BaseEntityComponent &component)
+void CAIComponent::UpdateMovementProperties(MovementComponent &movementC)
 {
-	BaseAIComponent::OnEntityComponentAdded(component);
-	if(typeid(component) == typeid(pragma::CCharacterComponent)) {
-		FlagCallbackForRemoval(static_cast<pragma::CCharacterComponent *>(&component)
-		                         ->BindEvent(MovementComponent::EVENT_CALC_MOVEMENT_DIRECTION,
-		                           [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-			                           auto &dirData = static_cast<CECalcMovementDirection &>(evData.get());
-			                           dirData.direction = OnCalcMovementDirection(dirData.forward, dirData.right);
-			                           return util::EventReply::Handled;
-		                           }),
-		  CallbackType::Component, &component);
-	}
+	BaseAIComponent::UpdateMovementProperties(movementC);
+	movementC.SetDirection(OnCalcMovementDirection());
 }
+
+void CAIComponent::OnEntityComponentAdded(BaseEntityComponent &component) { BaseAIComponent::OnEntityComponentAdded(component); }
 
 util::EventReply CAIComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {

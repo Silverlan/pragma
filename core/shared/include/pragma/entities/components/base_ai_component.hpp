@@ -47,6 +47,7 @@ namespace pragma {
 	namespace physics {
 		class IRayCastFilterCallback;
 	};
+	class MovementComponent;
 	class DLLNETWORK BaseAIComponent : public BaseEntityComponent {
 	  public:
 		enum class MoveResult : uint32_t { TargetUnreachable = 0, TargetReached, WaitingForPath, MovingToTarget };
@@ -104,6 +105,8 @@ namespace pragma {
 	  protected:
 		BaseAIComponent(BaseEntity &ent);
 		virtual ~BaseAIComponent() override;
+		void UpdateMovementProperties();
+		virtual void UpdateMovementProperties(MovementComponent &movementC);
 		virtual void OnPhysicsInitialized();
 		enum class DLLNETWORK PathResult : uint32_t { Idle = 0, Updating, Success, Failed };
 
@@ -174,7 +177,7 @@ namespace pragma {
 		Vector2 CalcMovementSpeed() const;
 		float CalcAirMovementModifier() const;
 		float CalcMovementAcceleration() const;
-		Vector3 CalcMovementDirection(const Vector3 &forward, const Vector3 &right) const;
+		Vector3 CalcMovementDirection() const;
 		virtual bool IsObstruction(const BaseEntity &ent) const;
 	};
 };

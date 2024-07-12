@@ -295,24 +295,7 @@ void BasePlayerComponent::Initialize()
 	ent.AddComponent("observable");
 	m_hBasePlayer = ent.GetHandle();
 
-	BindEvent(MovementComponent::EVENT_CALC_MOVEMENT_SPEED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		static_cast<pragma::CECalcMovementSpeed &>(evData.get()).speed = CalcMovementSpeed();
-		return util::EventReply::Handled;
-	});
-	BindEvent(MovementComponent::EVENT_CALC_AIR_MOVEMENT_MODIFIER, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		static_cast<pragma::CECalcAirMovementModifier &>(evData.get()).airMovementModifier = CalcAirMovementModifier();
-		return util::EventReply::Handled;
-	});
-	BindEvent(MovementComponent::EVENT_CALC_MOVEMENT_ACCELERATION, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		auto &evDataAcc = static_cast<pragma::CECalcMovementAcceleration &>(evData.get());
-		evDataAcc.acceleration = CalcMovementAcceleration(evDataAcc.rampUpTime);
-		return util::EventReply::Handled;
-	});
-	BindEvent(MovementComponent::EVENT_CALC_MOVEMENT_DIRECTION, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		auto &movementDirData = static_cast<pragma::CECalcMovementDirection &>(evData.get());
-		movementDirData.direction = CalcMovementDirection(movementDirData.forward, movementDirData.right);
-		return util::EventReply::Handled;
-	});
+	BindEventUnhandled(MovementComponent::EVENT_ON_UPDATE_MOVEMENT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateMovementProperties(); });
 	BindEventUnhandled(BaseAnimatedComponent::EVENT_ON_ANIMATION_COMPLETE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &hMdl = GetEntity().GetModel();
 		if(hMdl == nullptr)
@@ -366,6 +349,24 @@ void BasePlayerComponent::Initialize()
 	}
 
 	SetTickPolicy(TickPolicy::Always);
+}
+
+void BasePlayerComponent::UpdateMovementProperties()
+{
+	auto charC = GetEntity().GetCharacterComponent();
+	auto *movementC = charC.valid() ? charC->GetMovementComponent() : nullptr;
+	if(!movementC)
+		return;
+	movementC->SetSpeed(CalcMovementSpeed());
+	float rampUpTime;
+	auto acc = CalcMovementAcceleration(rampUpTime);
+	movementC->SetAcceleration(acc);
+	movementC->SetAccelerationRampUpTime(rampUpTime);
+	movementC->SetAirModifier(CalcAirMovementModifier());
+	movementC->SetDirectionMagnitude(MovementComponent::MoveDirection::Forward, GetActionInputAxisMagnitude(Action::MoveForward));
+	movementC->SetDirectionMagnitude(MovementComponent::MoveDirection::Backward, GetActionInputAxisMagnitude(Action::MoveBackward));
+	movementC->SetDirectionMagnitude(MovementComponent::MoveDirection::Left, GetActionInputAxisMagnitude(Action::MoveLeft));
+	movementC->SetDirectionMagnitude(MovementComponent::MoveDirection::Right, GetActionInputAxisMagnitude(Action::MoveRight));
 }
 
 void BasePlayerComponent::OnPhysicsInitialized()
@@ -491,19 +492,6 @@ float BasePlayerComponent::CalcMovementAcceleration(float &optOutRampUpTime) con
 	auto *game = GetEntity().GetNetworkState()->GetGameState();
 	optOutRampUpTime = game->GetConVarFloat("sv_acceleration_ramp_up_time");
 	return game->GetConVarFloat("sv_acceleration");
-}
-Vector3 BasePlayerComponent::CalcMovementDirection(const Vector3 &forward, const Vector3 &right) const
-{
-	Vector3 dir {};
-	if(GetActionInput(Action::MoveForward))
-		dir += forward * GetActionInputAxisMagnitude(Action::MoveForward);
-	if(GetActionInput(Action::MoveBackward))
-		dir -= forward * GetActionInputAxisMagnitude(Action::MoveBackward);
-	if(GetActionInput(Action::MoveRight))
-		dir += right * GetActionInputAxisMagnitude(Action::MoveRight);
-	if(GetActionInput(Action::MoveLeft))
-		dir -= right * GetActionInputAxisMagnitude(Action::MoveLeft);
-	return dir;
 }
 
 void BasePlayerComponent::SetUDPPort(unsigned short port) { m_portUDP = port; }

@@ -207,13 +207,13 @@ void SAIComponent::Initialize()
 	});
 
 	BindEventUnhandled(SAnimatedComponent::EVENT_MAINTAIN_ANIMATION_MOVEMENT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { MaintainAnimationMovement(static_cast<CEMaintainAnimationMovement &>(evData.get()).displacement); });
-	BindEvent(MovementComponent::EVENT_CALC_MOVEMENT_SPEED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		if(m_animMoveInfo.moving == false && m_moveInfo.moving == false) {
-			static_cast<CECalcMovementSpeed &>(evData.get()).speed = {};
-			return util::EventReply::Handled;
-		}
-		return util::EventReply::Unhandled;
-	});
+}
+
+void SAIComponent::UpdateMovementProperties(MovementComponent &movementC)
+{
+	BaseAIComponent::UpdateMovementProperties(movementC);
+	if(m_animMoveInfo.moving == false && m_moveInfo.moving == false)
+		movementC.SetSpeed({0.f, 0.f});
 }
 
 void SAIComponent::OnEntitySpawn()

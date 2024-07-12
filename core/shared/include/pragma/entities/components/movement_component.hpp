@@ -14,10 +14,15 @@ namespace pragma {
 	class BaseCharacterComponent;
 	class DLLNETWORK MovementComponent final : public BaseEntityComponent {
 	  public:
-		static ComponentEventId EVENT_CALC_MOVEMENT_SPEED;
-		static ComponentEventId EVENT_CALC_AIR_MOVEMENT_MODIFIER;
-		static ComponentEventId EVENT_CALC_MOVEMENT_ACCELERATION;
-		static ComponentEventId EVENT_CALC_MOVEMENT_DIRECTION;
+		enum class MoveDirection : uint8_t {
+			Forward = 0,
+			Right,
+			Backward,
+			Left,
+
+			Count,
+		};
+		static ComponentEventId EVENT_ON_UPDATE_MOVEMENT;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
 		MovementComponent(BaseEntity &ent);
@@ -30,11 +35,23 @@ namespace pragma {
 		// Velocity minus ground velocity (Velocity caused by ground object)
 		Vector3 GetLocalVelocity() const;
 
-		// Calculates the forward and sideways movement speed
-		virtual Vector2 CalcMovementSpeed() const;
-		virtual float CalcAirMovementModifier() const;
-		virtual float CalcMovementAcceleration(float &optOutRampUpTime) const;
-		virtual Vector3 CalcMovementDirection(const Vector3 &forward, const Vector3 &right) const;
+		void SetSpeed(const Vector2 &speed);
+		const Vector2 &GetSpeed() const;
+
+		void SetAirModifier(float modifier);
+		float GetAirModifier() const;
+
+		void SetAcceleration(float acc);
+		float GetAcceleration() const;
+
+		void SetAccelerationRampUpTime(float rampUpTime);
+		float GetAccelerationRampUpTime() const;
+
+		void SetDirection(const std::optional<Vector3> &dir);
+		const std::optional<Vector3> &GetDirection() const;
+
+		void SetDirectionMagnitude(MoveDirection direction, float magnitude);
+		float GetDirectionMagnitude(MoveDirection direction) const;
 
 		virtual bool UpdateMovement();
 		float GetMovementBlendScale() const;
@@ -44,41 +61,17 @@ namespace pragma {
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 		virtual void OnEntityComponentRemoved(BaseEntityComponent &component) override;
 
+		Vector2 m_movementSpeed {};
+		float m_airMovementModifier = 0.f;
+		float m_movementAcceleration = 0.f;
+		float m_accelerationRampUpTime = 0.f;
+		std::optional<Vector3> m_movementDirection {};
+		std::array<float, umath::to_integral(MoveDirection::Count)> m_directionMagnitude {0.f, 0.f, 0.f, 0.f};
+
 		Vector3 m_moveVelocity = {};
 		float m_timeSinceMovementStart = 0.f;
 		OrientationComponent *m_orientationComponent = nullptr;
 		BaseCharacterComponent *m_charComponent = nullptr;
-	};
-	struct DLLNETWORK CECalcMovementSpeed : public ComponentEvent {
-		CECalcMovementSpeed();
-		virtual void PushArguments(lua_State *l) override;
-		virtual uint32_t GetReturnCount() override;
-		virtual void HandleReturnValues(lua_State *l) override;
-		Vector2 speed = {};
-	};
-	struct DLLNETWORK CECalcAirMovementModifier : public ComponentEvent {
-		CECalcAirMovementModifier();
-		virtual void PushArguments(lua_State *l) override;
-		virtual uint32_t GetReturnCount() override;
-		virtual void HandleReturnValues(lua_State *l) override;
-		float airMovementModifier = 0.f;
-	};
-	struct DLLNETWORK CECalcMovementAcceleration : public ComponentEvent {
-		CECalcMovementAcceleration();
-		virtual void PushArguments(lua_State *l) override;
-		virtual uint32_t GetReturnCount() override;
-		virtual void HandleReturnValues(lua_State *l) override;
-		float acceleration = 0.f;
-		float rampUpTime = 0.f;
-	};
-	struct DLLNETWORK CECalcMovementDirection : public ComponentEvent {
-		CECalcMovementDirection(const Vector3 &forward, const Vector3 &right);
-		virtual void PushArguments(lua_State *l) override;
-		virtual uint32_t GetReturnCount() override;
-		virtual void HandleReturnValues(lua_State *l) override;
-		const Vector3 &forward;
-		const Vector3 &right;
-		Vector3 direction = {};
 	};
 };
 

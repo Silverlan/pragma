@@ -434,10 +434,23 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	auto defMovement = pragma::lua::create_entity_component_class<pragma::MovementComponent, pragma::BaseEntityComponent>("MovementComponent");
 	defMovement.def("GetMoveVelocity", &pragma::MovementComponent::GetMoveVelocity, luabind::copy_policy<0> {});
 	defMovement.def("GetRelativeVelocity", &pragma::MovementComponent::GetLocalVelocity);
-	defMovement.add_static_constant("EVENT_CALC_MOVEMENT_SPEED", pragma::MovementComponent::EVENT_CALC_MOVEMENT_SPEED);
-	defMovement.add_static_constant("EVENT_CALC_AIR_MOVEMENT_MODIFIER", pragma::MovementComponent::EVENT_CALC_AIR_MOVEMENT_MODIFIER);
-	defMovement.add_static_constant("EVENT_CALC_MOVEMENT_ACCELERATION", pragma::MovementComponent::EVENT_CALC_MOVEMENT_ACCELERATION);
-	defMovement.add_static_constant("EVENT_CALC_MOVEMENT_DIRECTION", pragma::MovementComponent::EVENT_CALC_MOVEMENT_DIRECTION);
+	defMovement.def("SetSpeed", &pragma::MovementComponent::SetSpeed);
+	defMovement.def("GetSpeed", &pragma::MovementComponent::GetSpeed);
+	defMovement.def("SetAirModifier", &pragma::MovementComponent::SetAirModifier);
+	defMovement.def("GetAirModifier", &pragma::MovementComponent::GetAirModifier);
+	defMovement.def("SetAcceleration", &pragma::MovementComponent::SetAcceleration);
+	defMovement.def("GetAcceleration", &pragma::MovementComponent::GetAcceleration);
+	defMovement.def("SetAccelerationRampUpTime", &pragma::MovementComponent::SetAccelerationRampUpTime);
+	defMovement.def("GetAccelerationRampUpTime", &pragma::MovementComponent::GetAccelerationRampUpTime);
+	defMovement.def("SetDirection", &pragma::MovementComponent::SetDirection);
+	defMovement.def("GetDirection", &pragma::MovementComponent::GetDirection);
+	defMovement.def("SetDirectionMagnitude", &pragma::MovementComponent::SetDirectionMagnitude);
+	defMovement.def("GetDirectionMagnitude", &pragma::MovementComponent::GetDirectionMagnitude);
+	defMovement.add_static_constant("EVENT_ON_UPDATE_MOVEMENT", pragma::MovementComponent::EVENT_ON_UPDATE_MOVEMENT);
+	defMovement.add_static_constant("MOVE_DIRECTION_FORWARD", umath::to_integral(pragma::MovementComponent::MoveDirection::Forward));
+	defMovement.add_static_constant("MOVE_DIRECTION_RIGHT", umath::to_integral(pragma::MovementComponent::MoveDirection::Right));
+	defMovement.add_static_constant("MOVE_DIRECTION_BACKWARD", umath::to_integral(pragma::MovementComponent::MoveDirection::Backward));
+	defMovement.add_static_constant("MOVE_DIRECTION_LEFT", umath::to_integral(pragma::MovementComponent::MoveDirection::Left));
 	entsMod[defMovement];
 
 	auto defOrientation = pragma::lua::create_entity_component_class<pragma::OrientationComponent, pragma::BaseEntityComponent>("OrientationComponent");

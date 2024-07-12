@@ -57,7 +57,7 @@ void CCharacterComponent::Initialize()
 			auto anim = hMdl->GetAnimation(animComponent->GetAnimation());
 			auto charC = ent.GetCharacterComponent();
 			auto *movementC = charC.valid() ? charC->GetMovementComponent() : nullptr;
-			auto moveSpeed = movementC ? movementC->CalcMovementSpeed() : Vector2 {};
+			auto moveSpeed = movementC ? movementC->GetSpeed() : Vector2 {};
 			// Animation movement blending does not work well with special movement animations (e.g. leaping),
 			// so we exclude all non-looping movement animations here. (Also see BaseAIComponent::BlendAnimationMovement).
 			// If the result isn't satisfactory, alternatively enable the check for the moveActivity above instead.

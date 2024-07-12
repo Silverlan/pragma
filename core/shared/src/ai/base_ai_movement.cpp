@@ -567,7 +567,7 @@ Vector2 BaseAIComponent::CalcMovementSpeed() const
 }
 float BaseAIComponent::CalcAirMovementModifier() const { return 0.f; }
 float BaseAIComponent::CalcMovementAcceleration() const { return 80.f; }
-Vector3 BaseAIComponent::CalcMovementDirection(const Vector3 &, const Vector3 &) const
+Vector3 BaseAIComponent::CalcMovementDirection() const
 {
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();

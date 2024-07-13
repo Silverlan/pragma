@@ -53,6 +53,7 @@
 #include <pragma/entities/components/base_physics_component.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/components/orientation_component.hpp>
+#include <pragma/entities/components/action_input_controller_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/networking/enums.hpp>
@@ -625,16 +626,17 @@ DLLCLIENT void NET_cl_playerinput(NetPacket packet)
 	}
 	auto actions = packet->Read<Action>();
 	auto bController = packet->Read<bool>();
+	auto *actionInputC = pl ? pl->GetActionInputController() : nullptr;
 	if(bController == true) {
 		auto actionValues = umath::get_power_of_2_values(umath::to_integral(actions));
 		for(auto v : actionValues) {
 			auto magnitude = packet->Read<float>();
 			if(pl != nullptr)
-				pl->SetActionInputAxisMagnitude(static_cast<Action>(v), magnitude);
+				actionInputC->SetActionInputAxisMagnitude(static_cast<Action>(v), magnitude);
 		}
 	}
 	if(pl != nullptr)
-		pl->SetActionInputs(actions, true);
+		actionInputC->SetActionInputs(actions, true);
 }
 
 DLLCLIENT void NET_cl_pl_speed_walk(NetPacket packet)

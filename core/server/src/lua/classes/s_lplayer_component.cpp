@@ -10,6 +10,7 @@
 #include "pragma/lua/s_lentity_components.hpp"
 #include "pragma/entities/components/s_player_component.hpp"
 #include "pragma/entities/components/s_character_component.hpp"
+#include <pragma/entities/components/action_input_controller_component.hpp>
 #include <pragma/lua/lua_util_component.hpp>
 #include <pragma/lua/libraries/lfile.h>
 #include <pragma/lua/luaapi.h>
@@ -48,6 +49,11 @@ void Lua::Player::Server::Respawn(lua_State *l, pragma::SPlayerComponent &hEnt)
 		charComponent->Respawn();
 }
 
-void Lua::Player::Server::SetActionInput(lua_State *l, pragma::SPlayerComponent &hPl, UInt32 input, Bool pressed) { hPl.SetActionInput(static_cast<Action>(input), pressed); }
+void Lua::Player::Server::SetActionInput(lua_State *l, pragma::SPlayerComponent &hPl, UInt32 input, Bool pressed)
+{
+	auto *actionInputC = hPl.GetActionInputController();
+	if(actionInputC)
+		actionInputC->SetActionInput(static_cast<Action>(input), pressed);
+}
 
 bool Lua::Player::Server::SendResource(lua_State *l, pragma::SPlayerComponent &hPl, const std::string &name) { return hPl.SendResource(name); }

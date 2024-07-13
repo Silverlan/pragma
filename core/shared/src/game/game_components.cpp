@@ -21,6 +21,8 @@
 #include "pragma/entities/components/composite_component.hpp"
 #include "pragma/entities/components/movement_component.hpp"
 #include "pragma/entities/components/orientation_component.hpp"
+#include "pragma/entities/components/action_input_controller_component.hpp"
+#include "pragma/entities/components/input_movement_controller_component.hpp"
 #include "pragma/entities/components/intersection_handler_component.hpp"
 #include "pragma/entities/components/constraints/constraint_component.hpp"
 #include "pragma/entities/components/constraints/constraint_manager_component.hpp"
@@ -77,6 +79,8 @@ void Game::InitializeEntityComponents(pragma::EntityComponentManager &componentM
 	componentManager.RegisterComponentType<pragma::ParentComponent>("parent");
 	componentManager.RegisterComponentType<pragma::MovementComponent>("movement");
 	componentManager.RegisterComponentType<pragma::OrientationComponent>("orientation");
+	componentManager.RegisterComponentType<pragma::ActionInputControllerComponent>("action_input_controller");
+	componentManager.RegisterComponentType<pragma::InputMovementControllerComponent>("input_movement_controller");
 
 	pragma::BaseEntityComponent::RegisterEvents(componentManager, [&componentManager](const std::string &evName, pragma::ComponentEventInfo::Type type) -> pragma::ComponentEventId { return componentManager.RegisterEvent(evName, typeid(pragma::BaseEntityComponent), type); });
 	BaseEntity::RegisterEvents(componentManager);

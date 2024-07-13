@@ -106,6 +106,8 @@
 #include <pragma/entities/components/map_component.hpp>
 #include <pragma/networking/snapshot_flags.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
+#include <pragma/entities/components/action_input_controller_component.hpp>
+#include <pragma/entities/components/action_input_controller_component.hpp>
 #include <pragma/rendering/c_sci_gpu_timer_manager.hpp>
 #include <pragma/level/level_info.hpp>
 #include <pragma/asset_types/world.hpp>
@@ -1369,14 +1371,19 @@ void CGame::SendUserInput()
 	nwm::write_quat(p, orientation);
 	p->Write<Vector3>(pl->GetViewPos());
 
-	auto actions = pl->GetActionInputs();
+	auto *actionInputC = pl->GetActionInputController();
+	auto actions = actionInputC ? actionInputC->GetActionInputs() : Action::None;
 	p->Write<Action>(actions);
 	auto bControllers = c_engine->GetControllersEnabled();
 	p->Write<bool>(bControllers);
 	if(bControllers == true) {
 		auto actionValues = umath::get_power_of_2_values(umath::to_integral(actions));
-		for(auto v : actionValues)
-			p->Write<float>(pl->GetActionInputAxisMagnitude(static_cast<Action>(v)));
+		for(auto v : actionValues) {
+			auto magnitude = 0.f;
+			if(actionInputC)
+				actionInputC->GetActionInputAxisMagnitude(static_cast<Action>(v));
+			p->Write<float>(magnitude);
+		}
 	}
 	client->SendPacket("userinput", p, pragma::networking::Protocol::FastUnreliable);
 }
@@ -1589,15 +1596,18 @@ static void set_action_input(Action action, bool b, bool bKeepMagnitude, const f
 	auto *pl = c_game->GetLocalPlayer();
 	if(pl == nullptr)
 		return;
+	auto *actionInputC = pl->GetActionInputController();
+	if(!actionInputC)
+		return;
 	if(bKeepMagnitude == false)
-		pl->SetActionInputAxisMagnitude(action, magnitude);
+		actionInputC->SetActionInputAxisMagnitude(action, magnitude);
 	if(b == false) {
-		pl->SetActionInput(action, b, true);
+		actionInputC->SetActionInput(action, b, true);
 		return;
 	}
-	if(pl->GetRawActionInput(action))
+	if(actionInputC->GetRawActionInput(action))
 		return;
-	pl->SetActionInput(action, b, true);
+	actionInputC->SetActionInput(action, b, true);
 }
 void CGame::SetActionInput(Action action, bool b, bool bKeepMagnitude) { set_action_input(action, b, bKeepMagnitude); }
 void CGame::SetActionInput(Action action, bool b, float magnitude) { set_action_input(action, b, false, &magnitude); }
@@ -1607,7 +1617,10 @@ bool CGame::GetActionInput(Action action)
 	auto *pl = GetLocalPlayer();
 	if(pl == NULL)
 		return false;
-	return pl->GetActionInput(action);
+	auto *actionInputC = pl->GetActionInputController();
+	if(!actionInputC)
+		return false;
+	return actionInputC->GetActionInput(action);
 }
 
 void CGame::DrawLine(const Vector3 &start, const Vector3 &end, const Color &color, float duration) { DebugRenderer::DrawLine(start, end, {color, duration}); }

@@ -220,7 +220,7 @@ Game::Game(NetworkState *state)
 	RegisterCallback<void, pragma::BasePlayerComponent *, DamageInfo *>("OnPlayerDeath");
 	RegisterCallback<void, pragma::BasePlayerComponent *>("OnPlayerSpawned");
 
-	RegisterCallbackWithOptionalReturn<bool, pragma::BasePlayerComponent *, Action, bool>("OnActionInput");
+	RegisterCallbackWithOptionalReturn<bool, pragma::ActionInputControllerComponent *, Action, bool>("OnActionInput");
 
 	RegisterCallback<void, lua_State *>("OnLuaInitialized");
 	RegisterCallback<void, BaseEntity *>("OnEntitySpawned");

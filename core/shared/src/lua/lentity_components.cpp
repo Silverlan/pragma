@@ -46,6 +46,8 @@
 #include "pragma/entities/components/parent_component.hpp"
 #include "pragma/entities/components/movement_component.hpp"
 #include "pragma/entities/components/orientation_component.hpp"
+#include "pragma/entities/components/input_movement_controller_component.hpp"
+#include "pragma/entities/components/action_input_controller_component.hpp"
 #include "pragma/entities/components/intersection_handler_component.hpp"
 #include "pragma/entities/components/constraints/constraint_component.hpp"
 #include "pragma/entities/components/constraints/constraint_space_component.hpp"
@@ -306,6 +308,22 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defVelocity.def("GetVelocityProperty", &pragma::VelocityComponent::GetVelocityProperty);
 	defVelocity.def("GetAngularVelocityProperty", &pragma::VelocityComponent::GetAngularVelocityProperty);
 	entsMod[defVelocity];
+
+	auto defActionC = pragma::lua::create_entity_component_class<pragma::ActionInputControllerComponent, pragma::BaseEntityComponent>("ActionInputControllerComponent");
+	defActionC.def("GetActionInput", &pragma::ActionInputControllerComponent::GetActionInput);
+	defActionC.def("GetActionInputs", &pragma::ActionInputControllerComponent::GetActionInputs);
+	defActionC.def("GetActionInputAxisMagnitude", &pragma::ActionInputControllerComponent::GetActionInputAxisMagnitude);
+	defActionC.def("SetActionInputAxisMagnitude", &pragma::ActionInputControllerComponent::SetActionInputAxisMagnitude);
+	defActionC.def("SetActionInput", static_cast<void (pragma::ActionInputControllerComponent ::*)(Action, bool, bool)>(&pragma::ActionInputControllerComponent::SetActionInput));
+	defActionC.def("SetActionInput", static_cast<void (pragma::ActionInputControllerComponent ::*)(Action, bool, float)>(&pragma::ActionInputControllerComponent::SetActionInput));
+	defActionC.def("SetActionInput", static_cast<void (pragma::ActionInputControllerComponent ::*)(Action, bool, float)>(&pragma::ActionInputControllerComponent::SetActionInput), luabind::default_parameter_policy<4, 1.f> {});
+	defActionC.add_static_constant("EVENT_HANDLE_ACTION_INPUT", pragma::ActionInputControllerComponent::EVENT_HANDLE_ACTION_INPUT);
+	entsMod[defActionC];
+
+	auto defInputMovementC = pragma::lua::create_entity_component_class<pragma::InputMovementControllerComponent, pragma::BaseEntityComponent>("InputMovementControllerComponent");
+	defInputMovementC.def("GetActionInputController", static_cast<pragma::ActionInputControllerComponent *(pragma::InputMovementControllerComponent ::*)()>(&pragma::InputMovementControllerComponent::GetActionInputController));
+	defInputMovementC.def("SetActionInputController", &pragma::InputMovementControllerComponent::SetActionInputController);
+	entsMod[defInputMovementC];
 
 	auto defMetaRig = pragma::lua::create_entity_component_class<pragma::MetaRigComponent, pragma::BaseEntityComponent>("MetaRigComponent");
 	defMetaRig.def("GetBonePose", &get_meta_bone_value<umath::ScaledTransform, &pragma::MetaRigComponent::GetBonePose>);

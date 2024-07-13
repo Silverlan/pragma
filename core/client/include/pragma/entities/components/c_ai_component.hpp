@@ -19,7 +19,7 @@ namespace pragma {
 	  private:
 		static std::vector<CAIComponent *> s_npcs;
 	  protected:
-		Vector3 OnCalcMovementDirection(const Vector3 &forward, const Vector3 &right) const;
+		Vector3 OnCalcMovementDirection() const;
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;
 		virtual void InitializeLuaObject(lua_State *l) override;
@@ -30,6 +30,7 @@ namespace pragma {
 		CAIComponent(BaseEntity &ent);
 		virtual ~CAIComponent() override;
 		virtual void Initialize() override;
+		virtual void UpdateMovementProperties(MovementComponent &movementC) override;
 		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 		virtual bool ShouldTransmitNetData() const override { return false; }
 		virtual void ReceiveSnapshotData(NetPacket &packet) override;

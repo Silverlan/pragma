@@ -54,6 +54,7 @@
 #include "pragma/entities/components/c_name_component.hpp"
 #include "pragma/entities/components/c_networked_component.hpp"
 #include "pragma/entities/components/c_observable_component.hpp"
+#include "pragma/entities/components/c_observer_component.hpp"
 #include "pragma/entities/components/c_physics_component.hpp"
 #include "pragma/entities/components/c_radius_component.hpp"
 #include "pragma/entities/components/c_field_angle_component.hpp"
@@ -66,6 +67,7 @@
 #include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/entities/components/c_raytracing_component.hpp"
 #include "pragma/entities/components/c_surface_component.hpp"
+#include "pragma/entities/components/c_input_component.hpp"
 #include "pragma/entities/components/liquid/c_liquid_surface_component.hpp"
 #include "pragma/entities/components/liquid/c_liquid_volume_component.hpp"
 #include "pragma/entities/components/liquid/c_buoyancy_component.hpp"
@@ -428,6 +430,11 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	auto defCGame = pragma::lua::create_entity_component_class<pragma::CGameComponent, pragma::BaseGameComponent>("GameComponent");
 	entsMod[defCGame];
 
+	auto defCInput = pragma::lua::create_entity_component_class<pragma::CInputComponent, pragma::BaseEntityComponent>("InputComponent");
+	defCInput.def("GetMouseDeltaX", &pragma::CInputComponent::GetMouseDeltaX);
+	defCInput.def("GetMouseDeltaY", &pragma::CInputComponent::GetMouseDeltaY);
+	entsMod[defCInput];
+
 	auto defCColor = pragma::lua::create_entity_component_class<pragma::CColorComponent, pragma::BaseColorComponent>("ColorComponent");
 	entsMod[defCColor];
 
@@ -448,6 +455,9 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 
 	auto defCObservable = pragma::lua::create_entity_component_class<pragma::CObservableComponent, pragma::BaseObservableComponent>("ObservableComponent");
 	entsMod[defCObservable];
+
+	auto defCObserver = pragma::lua::create_entity_component_class<pragma::CObserverComponent, pragma::BaseObserverComponent>("ObserverComponent");
+	entsMod[defCObserver];
 
 	auto defCShooter = pragma::lua::create_entity_component_class<pragma::CShooterComponent, pragma::BaseShooterComponent>("ShooterComponent");
 	entsMod[defCShooter];

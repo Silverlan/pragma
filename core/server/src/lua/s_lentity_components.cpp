@@ -19,6 +19,7 @@
 #include "pragma/entities/components/s_name_component.hpp"
 #include "pragma/entities/components/s_networked_component.hpp"
 #include "pragma/entities/components/s_observable_component.hpp"
+#include "pragma/entities/components/s_observer_component.hpp"
 #include "pragma/entities/components/s_physics_component.hpp"
 #include "pragma/entities/components/s_radius_component.hpp"
 #include "pragma/entities/components/s_field_angle_component.hpp"
@@ -149,6 +150,9 @@ void SGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 
 	auto defSObservable = pragma::lua::create_entity_component_class<pragma::SObservableComponent, pragma::BaseObservableComponent>("ObservableComponent");
 	entsMod[defSObservable];
+
+	auto defSObserver = pragma::lua::create_entity_component_class<pragma::SObserverComponent, pragma::BaseObserverComponent>("ObserverComponent");
+	entsMod[defSObserver];
 
 	auto defSShooter = pragma::lua::create_entity_component_class<pragma::SShooterComponent, pragma::BaseShooterComponent>("ShooterComponent");
 	entsMod[defSShooter];

@@ -19,6 +19,7 @@
 #include "pragma/entities/components/base_model_component.hpp"
 #include "pragma/entities/components/base_render_component.hpp"
 #include "pragma/entities/components/base_attachment_component.hpp"
+#include "pragma/entities/components/action_input_controller_component.hpp"
 #include "pragma/physics/raytraces.h"
 #include "pragma/util/util_game.hpp"
 #include "pragma/logging.hpp"
@@ -271,19 +272,20 @@ void BaseVehicleComponent::OnTick(double tDelta)
 	auto plComponent = driver->GetPlayerComponent();
 
 	auto accFactor = 0.f;
-	if(plComponent->GetActionInput(Action::MoveForward))
+	auto *actionC = plComponent->GetActionInputController();
+	if(actionC && actionC->GetActionInput(Action::MoveForward))
 		accFactor += 1.f;
-	if(plComponent->GetActionInput(Action::MoveBackward))
+	if(actionC && actionC->GetActionInput(Action::MoveBackward))
 		accFactor -= 1.f;
 	m_physVehicle->SetAccelerationFactor(accFactor);
 
-	auto brakeFactor = plComponent->GetActionInput(Action::Jump) ? 1.f : 0.f;
+	auto brakeFactor = (actionC && actionC->GetActionInput(Action::Jump)) ? 1.f : 0.f;
 	m_physVehicle->SetBrakeFactor(brakeFactor);
 
 	auto steerFactor = 0.f;
-	if(plComponent->GetActionInput(Action::MoveLeft))
+	if(actionC && actionC->GetActionInput(Action::MoveLeft))
 		steerFactor -= 1.f;
-	if(plComponent->GetActionInput(Action::MoveRight))
+	if(actionC && actionC->GetActionInput(Action::MoveRight))
 		steerFactor += 1.f;
 	m_physVehicle->SetSteerFactor(steerFactor);
 }

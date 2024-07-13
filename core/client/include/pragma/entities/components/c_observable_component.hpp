@@ -15,7 +15,7 @@
 namespace pragma {
 	class DLLCLIENT CObservableComponent final : public BaseObservableComponent, public CBaseNetComponent {
 	  public:
-		CObservableComponent(BaseEntity &ent) : BaseObservableComponent(ent) {}
+		CObservableComponent(BaseEntity &ent);
 		virtual void SetLocalCameraOrigin(CameraType type, const Vector3 &offset) override;
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;

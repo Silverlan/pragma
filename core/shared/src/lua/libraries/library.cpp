@@ -460,11 +460,11 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	  luabind::def("calc_hermite_spline_position", &Lua::math::calc_hermite_spline_position), luabind::def("is_in_range", &Lua::math::is_in_range), luabind::def("normalize_uv_coordinates", &umath::normalize_uv_coordinates),
 #ifdef __GLIBC__
 	  //GLIBC provides overloads instead of templates for FP types.
-	  luabind::def("is_nan", static_cast<double (*)(double)>([](double val) -> double { return std::isnan(val); })), luabind::def("is_inf", static_cast<double (*)(double)>([](double val) -> double { return std::isinf(val); })),
-	  luabind::def("is_finite", static_cast<double (*)(double)>([](double val) -> double { return std::isfinite(val); })),
+	  luabind::def("is_nan", static_cast<bool (*)(double)>([](double val) -> bool { return std::isnan(val); })), luabind::def("is_inf", static_cast<bool (*)(double)>([](double val) -> bool { return std::isinf(val); })),
+	  luabind::def("is_finite", static_cast<bool (*)(double)>([](double val) -> bool { return std::isfinite(val); })),
 #else
-	  luabind::def("is_nan", static_cast<double (*)(double)>([](double val) -> double { return std::isnan<double>(val); })), luabind::def("is_inf", static_cast<double (*)(double)>([](double val) -> double { return std::isinf<double>(val); })),
-	  luabind::def("is_finite", static_cast<double (*)(double)>([](double val) -> double { return std::isfinite<double>(val); })),
+	  luabind::def("is_nan", static_cast<bool (*)(double)>([](double val) -> bool { return std::isnan<double>(val); })), luabind::def("is_inf", static_cast<bool (*)(double)>([](double val) -> bool { return std::isinf<double>(val); })),
+	  luabind::def("is_finite", static_cast<bool (*)(double)>([](double val) -> bool { return std::isfinite<double>(val); })),
 #endif
 	  luabind::def("cot", umath::cot), luabind::def("calc_fov_from_lens", &::umath::camera::calc_fov_from_lens), luabind::def("calc_focal_length_from_fov", &::umath::camera::calc_focal_length_from_fov),
 	  luabind::def("calc_fov_from_focal_length", &::umath::camera::calc_fov_from_focal_length), luabind::def("calc_aperture_size_from_fstop", &::umath::camera::calc_aperture_size_from_fstop),

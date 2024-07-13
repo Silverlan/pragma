@@ -18,6 +18,7 @@ namespace pragma {
 
 		virtual void SetLocalCameraOrigin(CameraType type, const Vector3 &origin) override;
 		virtual void SetLocalCameraOffset(CameraType type, const Vector3 &offset) override;
+		virtual void SetViewOffset(const Vector3 &offset) override;
 		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void InitializeLuaObject(lua_State *l) override;

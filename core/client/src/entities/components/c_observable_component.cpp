@@ -7,6 +7,7 @@
 
 #include "stdafx_client.h"
 #include "pragma/entities/components/c_observable_component.hpp"
+#include "pragma/entities/components/c_observer_component.hpp"
 #include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/lua/c_lentity_handles.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
@@ -14,6 +15,7 @@
 using namespace pragma;
 
 extern DLLCLIENT CGame *c_game;
+CObservableComponent::CObservableComponent(BaseEntity &ent) : BaseObservableComponent(ent) {}
 void CObservableComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void CObservableComponent::ReceiveData(NetPacket &packet)
 {
@@ -45,19 +47,13 @@ Bool CObservableComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket
 		auto offset = packet->Read<Vector3>();
 		SetLocalCameraOffset(camType, offset);
 	}
+	else if(eventId == m_netSetViewOffset) {
+		auto offset = packet->Read<Vector3>();
+		SetViewOffset(offset);
+	}
 	else
 		return CBaseNetComponent::ReceiveNetEvent(eventId, packet);
 	return true;
 }
 
-void CObservableComponent::SetLocalCameraOrigin(CameraType type, const Vector3 &offset)
-{
-	BaseObservableComponent::SetLocalCameraOrigin(type, offset);
-	auto *pl = c_game->GetLocalPlayer();
-	if(pl == nullptr)
-		return;
-	auto *pObsTgt = pl->GetObserverTarget();
-	if(pObsTgt == nullptr || &pObsTgt->GetEntity() != &GetEntity())
-		return;
-	pl->UpdateObserverOffset();
-}
+void CObservableComponent::SetLocalCameraOrigin(CameraType type, const Vector3 &offset) { BaseObservableComponent::SetLocalCameraOrigin(type, offset); }

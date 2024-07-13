@@ -94,6 +94,7 @@ namespace pragma {
 		static ComponentEventId EVENT_ON_ENTITY_COMPONENT_ADDED;
 		static ComponentEventId EVENT_ON_ENTITY_COMPONENT_REMOVED;
 		static ComponentEventId EVENT_ON_MEMBERS_CHANGED;
+		static ComponentEventId EVENT_ON_ACTIVE_STATE_CHANGED;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 		enum class StateFlags : uint32_t {
@@ -102,6 +103,7 @@ namespace pragma {
 			IsLogicEnabled = IsThinking << 1u,
 			Removed = IsLogicEnabled << 1u,
 			CleanedUp = Removed << 1u,
+			IsInactive = CleanedUp << 1u,
 		};
 
 		enum class LogSeverity : uint8_t {
@@ -266,6 +268,11 @@ namespace pragma {
 		template<typename... Args>
 		void LogCritical(format_string_t<Args...> fmt, Args &&...args) const;
 
+		void SetActive(bool enabled);
+		bool IsActive() const;
+		void Activate();
+		void Deactivate();
+
 		std::string GetUri() const;
 		std::string GetMemberUri(const std::string &memberName) const;
 		std::optional<std::string> GetMemberUri(ComponentMemberIndex memberIdx) const;
@@ -278,6 +285,7 @@ namespace pragma {
 		void CleanUp();
 		void UpdateTickPolicy();
 		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData);
+		virtual void OnActiveStateChanged(bool active);
 		virtual void Load(udm::LinkedPropertyWrapperArg udm, uint32_t version);
 		virtual std::optional<ComponentMemberIndex> DoGetMemberIndex(const std::string &name) const;
 		virtual void OnMembersChanged();

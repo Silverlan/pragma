@@ -52,6 +52,8 @@
 #include <pragma/entities/components/basetriggergravity.hpp>
 #include <pragma/entities/components/base_physics_component.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
+#include <pragma/entities/components/orientation_component.hpp>
+#include <pragma/entities/components/action_input_controller_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/networking/enums.hpp>
@@ -624,16 +626,17 @@ DLLCLIENT void NET_cl_playerinput(NetPacket packet)
 	}
 	auto actions = packet->Read<Action>();
 	auto bController = packet->Read<bool>();
+	auto *actionInputC = pl ? pl->GetActionInputController() : nullptr;
 	if(bController == true) {
 		auto actionValues = umath::get_power_of_2_values(umath::to_integral(actions));
 		for(auto v : actionValues) {
 			auto magnitude = packet->Read<float>();
 			if(pl != nullptr)
-				pl->SetActionInputAxisMagnitude(static_cast<Action>(v), magnitude);
+				actionInputC->SetActionInputAxisMagnitude(static_cast<Action>(v), magnitude);
 		}
 	}
 	if(pl != nullptr)
-		pl->SetActionInputs(actions, true);
+		actionInputC->SetActionInputs(actions, true);
 }
 
 DLLCLIENT void NET_cl_pl_speed_walk(NetPacket packet)
@@ -652,15 +655,6 @@ DLLCLIENT void NET_cl_pl_slopelimit(NetPacket packet)
 		return;
 	float limit = packet->Read<float>();
 	pl->GetCharacterComponent()->SetSlopeLimit(limit);
-}
-
-void NET_cl_pl_observermode(NetPacket packet)
-{
-	auto *pl = nwm::read_entity(packet);
-	if(pl == nullptr || pl->IsPlayer() == false)
-		return;
-	auto mode = packet->Read<UChar>();
-	pl->GetPlayerComponent()->SetObserverMode(static_cast<OBSERVERMODE>(mode));
 }
 
 DLLCLIENT void NET_cl_pl_stepoffset(NetPacket packet)
@@ -741,7 +735,12 @@ DLLCLIENT void NET_cl_pl_updirection(NetPacket packet)
 	if(pl == NULL || pl->IsCharacter() == false)
 		return;
 	Vector3 direction = nwm::read_vector(packet);
-	pl->GetCharacterComponent()->SetUpDirection(direction);
+	auto charC = pl->GetCharacterComponent();
+	if(charC.valid()) {
+		auto *orientC = charC->GetOrientationComponent();
+		if(orientC)
+			orientC->SetUpDirection(direction);
+	}
 }
 
 void NET_cl_pl_changedname(NetPacket packet)

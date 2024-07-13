@@ -9,8 +9,10 @@
 #include "pragma/entities/components/s_player_component.hpp"
 #include "pragma/entities/components/s_character_component.hpp"
 #include "pragma/entities/components/s_observable_component.hpp"
+#include "pragma/entities/components/s_observer_component.hpp"
 #include "pragma/entities/components/s_generic_component.hpp"
 #include <pragma/entities/components/base_player_component.hpp>
+#include <pragma/entities/components/action_input_controller_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
 using namespace pragma;
@@ -52,27 +54,33 @@ void SAIComponent::StartControl(pragma::SPlayerComponent &pl)
 		m_controlInfo.hCbOnRemove = pGenericComponent->BindEventUnhandled(BaseEntity::EVENT_ON_REMOVE, std::bind(&SAIComponent::EndControl, this));
 		m_controlInfo.hCbOnKilled = pGenericComponent->BindEventUnhandled(SCharacterComponent::EVENT_ON_DEATH, std::bind(&SAIComponent::EndControl, this));
 	}
-	m_controlInfo.hCbOnActionInput = pl.BindEvent(SPlayerComponent::EVENT_HANDLE_ACTION_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		auto &actionInputData = static_cast<CEHandleActionInput &>(evData.get());
-		if(actionInputData.pressed == true) {
-			if((m_controlInfo.actions & actionInputData.action) != Action::None)
-				return util::EventReply::Handled;
-			m_controlInfo.actions |= actionInputData.action;
-		}
-		else {
-			if((m_controlInfo.actions & actionInputData.action) == Action::None)
-				return util::EventReply::Handled;
-			m_controlInfo.actions &= ~actionInputData.action;
-		}
-		OnControllerActionInput(actionInputData.action, actionInputData.pressed);
-		return util::EventReply::Handled;
-	});
+	auto *actionInputC = pl.GetActionInputController();
+	if(actionInputC) {
+		m_controlInfo.hCbOnActionInput = actionInputC->BindEvent(ActionInputControllerComponent::EVENT_HANDLE_ACTION_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+			auto &actionInputData = static_cast<CEHandleActionInput &>(evData.get());
+			if(actionInputData.pressed == true) {
+				if((m_controlInfo.actions & actionInputData.action) != Action::None)
+					return util::EventReply::Handled;
+				m_controlInfo.actions |= actionInputData.action;
+			}
+			else {
+				if((m_controlInfo.actions & actionInputData.action) == Action::None)
+					return util::EventReply::Handled;
+				m_controlInfo.actions &= ~actionInputData.action;
+			}
+			OnControllerActionInput(actionInputData.action, actionInputData.pressed);
+			return util::EventReply::Handled;
+		});
+	}
 	m_controlInfo.hController = util::WeakHandle<pragma::SPlayerComponent>(std::static_pointer_cast<pragma::SPlayerComponent>(pl.shared_from_this()));
 
 	auto pObsComponent = GetEntity().GetComponent<pragma::SObservableComponent>();
 	if(pObsComponent.valid()) {
-		pl.SetObserverMode(OBSERVERMODE::THIRDPERSON);
-		pl.SetObserverTarget(pObsComponent.get());
+		auto observerC = pl.GetEntity().GetComponent<pragma::SObserverComponent>();
+		if(observerC.valid()) {
+			observerC->SetObserverMode(ObserverMode::ThirdPerson);
+			observerC->SetObserverTarget(pObsComponent.get());
+		}
 	}
 	DisableAI();
 	OnStartControl(pl);
@@ -100,8 +108,11 @@ void SAIComponent::EndControl()
 			charComponent->SetNoTarget(false);
 		auto pObservableComponent = pl->GetEntity().GetComponent<SObservableComponent>();
 		if(pObservableComponent.valid()) {
-			pl->SetObserverMode(OBSERVERMODE::FIRSTPERSON);
-			pl->SetObserverTarget(pObservableComponent.get());
+			auto observerC = pl->GetEntity().GetComponent<pragma::SObserverComponent>();
+			if(observerC.valid()) {
+				observerC->SetObserverMode(ObserverMode::FirstPerson);
+				observerC->SetObserverTarget(pObservableComponent.get());
+			}
 		}
 	}
 	OnEndControl();

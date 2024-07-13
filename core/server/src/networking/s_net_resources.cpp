@@ -20,6 +20,7 @@
 #include "pragma/entities/components/s_player_component.hpp"
 #include <pragma/networking/enums.hpp>
 #include <pragma/entities/components/base_player_component.hpp>
+#include <pragma/entities/components/action_input_controller_component.hpp>
 #include <material_manager2.hpp>
 #include <sharedutils/util_file.h>
 
@@ -257,15 +258,18 @@ void ServerState::ReceiveUserInput(pragma::networking::IServerClient &client, Ne
 
 	auto bController = packet->Read<bool>();
 	pOut->Write<bool>(bController);
+	auto *actionInputC = pl->GetActionInputController();
 	if(bController == true) {
 		auto actionValues = umath::get_power_of_2_values(umath::to_integral(actions));
 		for(auto v : actionValues) {
 			auto magnitude = packet->Read<float>();
 			pOut->Write<float>(magnitude);
-			pl->SetActionInputAxisMagnitude(static_cast<Action>(v), magnitude);
+			if(actionInputC)
+				actionInputC->SetActionInputAxisMagnitude(static_cast<Action>(v), magnitude);
 		}
 	}
-	pl->SetActionInputs(actions, bController);
+	if(actionInputC)
+		actionInputC->SetActionInputs(actions, bController);
 	//Con::csv<<"Action inputs "<<actions<<" for player "<<pl<<" ("<<pl->GetClientSession()->GetIP()<<")"<<Con::endl;
 
 	SendPacket("playerinput", pOut, pragma::networking::Protocol::FastUnreliable, {client, pragma::networking::ClientRecipientFilter::FilterType::Exclude});

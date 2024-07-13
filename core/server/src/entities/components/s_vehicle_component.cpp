@@ -17,6 +17,7 @@
 #include "pragma/entities/components/s_player_component.hpp"
 #include <pragma/entities/components/base_character_component.hpp>
 #include <pragma/entities/components/usable_component.hpp>
+#include <pragma/entities/components/action_input_controller_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/physics/environment.hpp>
@@ -107,14 +108,17 @@ void SVehicleComponent::SetDriver(BaseEntity *ent)
 		ent->GetCharacterComponent()->SetFrozen(true);
 	if(ent->IsPlayer()) {
 		auto plComponent = ent->GetPlayerComponent();
-		m_playerAction = plComponent->BindEvent(SPlayerComponent::EVENT_HANDLE_ACTION_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-			auto &actionData = static_cast<CEHandleActionInput &>(evData.get());
-			if(actionData.action == Action::Use) {
-				OnActionInput(actionData.action, actionData.pressed);
-				return util::EventReply::Handled;
-			}
-			return util::EventReply::Unhandled;
-		});
+		auto *actionInputC = plComponent->GetActionInputController();
+		if(actionInputC) {
+			m_playerAction = actionInputC->BindEvent(ActionInputControllerComponent::EVENT_HANDLE_ACTION_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+				auto &actionData = static_cast<CEHandleActionInput &>(evData.get());
+				if(actionData.action == Action::Use) {
+					OnActionInput(actionData.action, actionData.pressed);
+					return util::EventReply::Handled;
+				}
+				return util::EventReply::Unhandled;
+			});
+		}
 	}
 	auto &entThis = static_cast<SBaseEntity &>(GetEntity());
 	if(!entThis.IsShared() || !entThis.IsSpawned())

@@ -16,6 +16,7 @@
 #include "pragma/entities/components/base_animated_component.hpp"
 #include "pragma/entities/components/base_render_component.hpp"
 #include "pragma/entities/components/base_ownable_component.hpp"
+#include "pragma/entities/components/action_input_controller_component.hpp"
 #include "pragma/util/bulletinfo.h"
 
 using namespace pragma;
@@ -115,8 +116,9 @@ void BaseWeaponComponent::OnTick(double)
 	if((m_bInAttack1 == true || m_bInAttack2 == true) && owner != nullptr) {
 		if(owner->IsPlayer()) {
 			auto plComponent = owner->GetPlayerComponent();
+			auto *inputC = plComponent->GetActionInputController();
 			if(m_bInAttack1 == true) {
-				if(plComponent->GetActionInput(Action::Attack) == true) {
+				if(inputC && inputC->GetActionInput(Action::Attack) == true) {
 					if(CanPrimaryAttack())
 						PrimaryAttack();
 				}
@@ -127,7 +129,7 @@ void BaseWeaponComponent::OnTick(double)
 				}
 			}
 			if(m_bInAttack2 == true) {
-				if(plComponent->GetActionInput(Action::Attack2) == true) {
+				if(inputC && inputC->GetActionInput(Action::Attack2) == true) {
 					if(CanSecondaryAttack())
 						SecondaryAttack();
 				}

@@ -251,6 +251,9 @@ namespace pragma {
 		void Lua_OnEntityPostSpawn() {}
 		static void default_Lua_OnEntityPostSpawn(lua_State *l, BaseLuaBaseEntityComponent &hComponent) {}
 
+		void Lua_OnActiveStateChanged(bool activate) {}
+		static void default_Lua_OnActiveStateChanged(lua_State *l, BaseLuaBaseEntityComponent &hComponent, bool activate) {}
+
 		void Lua_OnAttachedToEntity() {}
 		static void default_Lua_OnAttachedToEntity(lua_State *l, BaseLuaBaseEntityComponent &hComponent) {}
 
@@ -301,6 +304,7 @@ namespace pragma {
 
 		virtual void OnMemberRegistered(const ComponentMemberInfo &memberInfo, ComponentMemberIndex index) override;
 		virtual void OnMemberRemoved(const ComponentMemberInfo &memberInfo, ComponentMemberIndex index) override;
+		virtual void OnActiveStateChanged(bool active) override;
 
 		std::vector<MemberInfo> m_members = {};
 		std::vector<DynamicMemberInfo> m_dynamicMembers;

@@ -86,6 +86,24 @@ function ents.ViewerCamera:UpdatePose()
 	self:BroadcastEvent(ents.ViewerCamera.EVENT_ON_CAMERA_UPDATED, { camC })
 end
 
+function ents.ViewerCamera:GetPivotPos()
+	local ent = self:GetEntity()
+	local pos = ent:GetPos()
+	return pos + ent:GetForward() * self:GetZoom()
+end
+
+function ents.ViewerCamera:SetPose(pose)
+	local rot = pose:GetRotation()
+	local dir = rot:GetForward()
+	local dist = self:GetZoom()
+	local posTgt = pose:GetOrigin() + dir * dist
+	self:SetLookAtTarget(posTgt)
+
+	local ang = rot:ToEulerAngles()
+	self.m_xRot = math.rad(180 - ang.y)
+	self.m_yRot = math.rad(ang.p)
+end
+
 function ents.ViewerCamera:ToLocalRotation(vector)
 	vector:RotateAround(Vector(), EulerAngles(-math.deg(self.m_yRot), -math.deg(self.m_xRot), 0))
 end

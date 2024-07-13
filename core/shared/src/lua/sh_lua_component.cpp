@@ -901,6 +901,12 @@ void BaseLuaBaseEntityComponent::OnMemberRemoved(const ComponentMemberInfo &memb
 	m_dynamicMembers[index].value = {};
 }
 
+void BaseLuaBaseEntityComponent::OnActiveStateChanged(bool active)
+{
+	BaseEntityComponent::OnActiveStateChanged(active);
+	CallLuaMethod<void, bool>("OnActiveStateChanged", active);
+}
+
 std::optional<ComponentMemberIndex> BaseLuaBaseEntityComponent::DoGetMemberIndex(const std::string &name) const
 {
 	auto *o = GetClassObject();
@@ -1672,6 +1678,7 @@ void Lua::register_base_entity_component(luabind::module_ &modEnts)
 	classDef.def("OnRemove", &pragma::BaseLuaBaseEntityComponent::Lua_OnRemove, &pragma::BaseLuaBaseEntityComponent::default_Lua_OnRemove);
 	classDef.def("OnEntitySpawn", &pragma::BaseLuaBaseEntityComponent::Lua_OnEntitySpawn, &pragma::BaseLuaBaseEntityComponent::default_Lua_OnEntitySpawn);
 	classDef.def("OnEntityPostSpawn", &pragma::BaseLuaBaseEntityComponent::Lua_OnEntityPostSpawn, &pragma::BaseLuaBaseEntityComponent::default_Lua_OnEntityPostSpawn);
+	classDef.def("OnActiveStateChanged", &pragma::BaseLuaBaseEntityComponent::Lua_OnActiveStateChanged, &pragma::BaseLuaBaseEntityComponent::default_Lua_OnActiveStateChanged);
 	classDef.def("OnAttachedToEntity", &pragma::BaseLuaBaseEntityComponent::Lua_OnAttachedToEntity, &pragma::BaseLuaBaseEntityComponent::default_Lua_OnAttachedToEntity);
 	classDef.def("OnDetachedFromEntity", &pragma::BaseLuaBaseEntityComponent::Lua_OnDetachedToEntity, &pragma::BaseLuaBaseEntityComponent::default_Lua_OnDetachedToEntity);
 	// classDef.def("OnEntityComponentAdded",&pragma::BaseLuaBaseEntityComponent::Lua_OnEntityComponentAdded,&pragma::BaseLuaBaseEntityComponent::default_Lua_OnEntityComponentAdded);

@@ -14,6 +14,7 @@
 #include "pragma/entities/components/base_model_component.hpp"
 #include "pragma/entities/components/base_animated_component.hpp"
 #include "pragma/entities/components/velocity_component.hpp"
+#include "pragma/entities/components/orientation_component.hpp"
 #include "pragma/model/model.h"
 #include "pragma/physics/raytraces.h"
 #include "pragma/physics/controller.hpp"
@@ -50,8 +51,7 @@ BaseAIComponent::MoveInfo::MoveInfo(Activity act, bool bMoveOnPath, const Vector
 
 void BaseAIComponent::UpdatePath()
 {
-	auto charComponent = GetEntity().GetCharacterComponent();
-	if((charComponent.valid() && charComponent->CanMove() == false) || m_moveInfo.moveOnPath == false)
+	if(CanMove() == false || m_moveInfo.moveOnPath == false)
 		return;
 	if(m_navInfo.queuedPath != nullptr) {
 		if(s_navThread == nullptr)
@@ -97,9 +97,8 @@ void BaseAIComponent::UpdatePath()
 void BaseAIComponent::ResetPath()
 {
 	auto &ent = GetEntity();
-	auto charComponent = ent.GetCharacterComponent();
 	auto pTrComponent = ent.GetTransformComponent();
-	if((charComponent.valid() && charComponent->CanMove() == false) || m_moveInfo.moveOnPath == false || !pTrComponent)
+	if(CanMove() == false || m_moveInfo.moveOnPath == false || !pTrComponent)
 		return;
 	m_navInfo.bPathUpdateRequired = true;
 	m_navInfo.bTargetReached = false;
@@ -122,8 +121,7 @@ bool BaseAIComponent::IsMoving() const
 
 BaseAIComponent::MoveResult BaseAIComponent::MoveTo(const Vector3 &pos, const MoveInfo &info)
 {
-	auto charComponent = GetEntity().GetCharacterComponent();
-	if(charComponent.valid() && charComponent->CanMove() == false)
+	if(CanMove() == false)
 		return BaseAIComponent::MoveResult::TargetReached;
 	auto moveActivity = Activity::Invalid;
 	auto &ent = GetEntity();
@@ -147,7 +145,7 @@ BaseAIComponent::MoveResult BaseAIComponent::MoveTo(const Vector3 &pos, const Mo
 	m_moveInfo.turnSpeed = (std::isnan(info.turnSpeed) == false) ? std::make_unique<float>(info.turnSpeed) : nullptr;
 	m_moveInfo.destinationTolerance = info.destinationTolerance;
 	//auto &start = m_entity->GetPosition();
-	auto &upDir = ent.IsCharacter() ? ent.GetCharacterComponent()->GetUpDirection() : uvec::UP;
+	auto upDir = GetUpDirection();
 	auto d = uvec::planar_distance_sqr(m_moveInfo.moveTarget, m_navInfo.pathTarget, upDir);
 	if(d > umath::pow2(MAX_NODE_DISTANCE)) // If the new move target is too far away from our old one, we'll probably need a new path
 	{
@@ -342,13 +340,12 @@ void BaseAIComponent::OnPathNodeChanged(uint32_t nodeIdx) {}
 void BaseAIComponent::PathStep(float)
 {
 	auto &ent = GetEntity();
-	auto charComponent = ent.GetCharacterComponent();
 	auto pTrComponent = ent.GetTransformComponent();
-	if((charComponent.valid() && charComponent->CanMove() == false) || !pTrComponent)
+	if(CanMove() == false || !pTrComponent)
 		return;
 	auto &pos = pTrComponent->GetPosition();
 	const auto destReachDist = m_moveInfo.destinationTolerance;
-	auto upDir = ent.IsCharacter() ? ent.GetCharacterComponent()->GetUpDirection() : uvec::UP;
+	auto upDir = GetUpDirection();
 	auto bMoveOnPath = m_moveInfo.moveOnPath == true && m_navInfo.pathInfo != nullptr && m_navInfo.pathInfo->path != nullptr;
 	Vector3 tgt;
 	if(bMoveOnPath == true) {
@@ -570,7 +567,7 @@ Vector2 BaseAIComponent::CalcMovementSpeed() const
 }
 float BaseAIComponent::CalcAirMovementModifier() const { return 0.f; }
 float BaseAIComponent::CalcMovementAcceleration() const { return 80.f; }
-Vector3 BaseAIComponent::CalcMovementDirection(const Vector3 &, const Vector3 &) const
+Vector3 BaseAIComponent::CalcMovementDirection() const
 {
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();

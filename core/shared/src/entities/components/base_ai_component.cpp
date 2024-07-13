@@ -27,6 +27,8 @@
 #include "pragma/entities/components/base_model_component.hpp"
 #include "pragma/entities/components/base_observable_component.hpp"
 #include "pragma/entities/components/base_animated_component.hpp"
+#include "pragma/entities/components/orientation_component.hpp"
+#include "pragma/entities/components/movement_component.hpp"
 #include "pragma/model/model.h"
 
 using namespace pragma;
@@ -51,10 +53,32 @@ BaseAIComponent::~BaseAIComponent() {}
 
 void BaseAIComponent::OnLookTargetChanged() {}
 
+bool BaseAIComponent::CanMove() const
+{
+	auto charC = GetEntity().GetCharacterComponent();
+	if(charC.expired())
+		return false;
+	auto *movementC = charC->GetMovementComponent();
+	if(!movementC)
+		return false;
+	return movementC->CanMove();
+}
+Vector3 BaseAIComponent::GetUpDirection() const
+{
+	auto upDir = uvec::UP;
+	auto &ent = GetEntity();
+	if(ent.IsCharacter()) {
+		auto charC = ent.GetCharacterComponent();
+		auto *orientC = charC.valid() ? charC->GetOrientationComponent() : nullptr;
+		if(orientC)
+			upDir = orientC->GetUpDirection();
+	}
+	return upDir;
+}
+
 bool BaseAIComponent::TurnStep(const Vector3 &target, float &turnAngle, const float *turnSpeed)
 {
-	auto charComponent = GetEntity().GetCharacterComponent();
-	if(charComponent.valid() && charComponent->CanMove() == false) {
+	if(CanMove() == false) {
 		turnAngle = 0.f;
 		return true;
 	}
@@ -71,10 +95,11 @@ bool BaseAIComponent::TurnStep(const Vector3 &target, float &turnAngle, const fl
 		return true;
 	}
 	dir /= l;
+	auto charComponent = GetEntity().GetCharacterComponent();
 	auto speedMax = static_cast<double>((turnSpeed != nullptr) ? *turnSpeed : (charComponent.valid() ? charComponent->GetTurnSpeed() : 100.f)) * game->DeltaTickTime();
 	Vector2 rotAm = {};
 	const Vector2 pitchLimit {0.f, 0.f};
-	auto newRot = uquat::approach_direction(pTrComponent->GetRotation(), charComponent.valid() ? charComponent->GetUpDirection() : uvec::UP, dir, Vector2(speedMax, speedMax), &rotAm, &pitchLimit);
+	auto newRot = uquat::approach_direction(pTrComponent->GetRotation(), GetUpDirection(), dir, Vector2(speedMax, speedMax), &rotAm, &pitchLimit);
 	pTrComponent->SetRotation(newRot);
 	return (umath::abs(rotAm.y) <= speedMax) ? true : false;
 
@@ -178,23 +203,7 @@ void BaseAIComponent::Initialize()
 		PathStep(static_cast<float>(static_cast<pragma::CEPhysicsUpdateData &>(eventData.get()).deltaTime));
 		return util::EventReply::Unhandled;
 	});
-	BindEvent(BaseCharacterComponent::EVENT_CALC_MOVEMENT_SPEED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		static_cast<pragma::CECalcMovementSpeed &>(evData.get()).speed = CalcMovementSpeed();
-		return util::EventReply::Handled;
-	});
-	BindEvent(BaseCharacterComponent::EVENT_CALC_AIR_MOVEMENT_MODIFIER, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		static_cast<pragma::CECalcAirMovementModifier &>(evData.get()).airMovementModifier = CalcAirMovementModifier();
-		return util::EventReply::Handled;
-	});
-	BindEvent(BaseCharacterComponent::EVENT_CALC_MOVEMENT_ACCELERATION, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		static_cast<pragma::CECalcMovementAcceleration &>(evData.get()).acceleration = CalcMovementAcceleration();
-		return util::EventReply::Handled;
-	});
-	BindEvent(BaseCharacterComponent::EVENT_CALC_MOVEMENT_DIRECTION, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		auto &movementDirData = static_cast<pragma::CECalcMovementDirection &>(evData.get());
-		movementDirData.direction = CalcMovementDirection(movementDirData.forward, movementDirData.right);
-		return util::EventReply::Handled;
-	});
+	BindEventUnhandled(MovementComponent::EVENT_ON_UPDATE_MOVEMENT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateMovementProperties(); });
 	BindEventUnhandled(BaseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnModelChanged(static_cast<pragma::CEOnModelChanged &>(evData.get()).model); });
 	BindEventUnhandled(BaseAnimatedComponent::EVENT_ON_ANIMATION_START, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		auto animComponent = GetEntity().GetAnimatedComponent();
@@ -230,6 +239,23 @@ void BaseAIComponent::Initialize()
 		pCharComponent->SetTurnSpeed(160.f);
 
 	SetTickPolicy(TickPolicy::Always);
+}
+
+void BaseAIComponent::UpdateMovementProperties(MovementComponent &movementC)
+{
+	movementC.SetSpeed(CalcMovementSpeed());
+	movementC.SetAcceleration(CalcMovementAcceleration());
+	movementC.SetAirModifier(CalcAirMovementModifier());
+	movementC.SetDirection(CalcMovementDirection());
+}
+
+void BaseAIComponent::UpdateMovementProperties()
+{
+	auto charC = GetEntity().GetCharacterComponent();
+	auto *movementC = charC.valid() ? charC->GetMovementComponent() : nullptr;
+	if(!movementC)
+		return;
+	UpdateMovementProperties(*movementC);
 }
 
 void BaseAIComponent::OnEntitySpawn()

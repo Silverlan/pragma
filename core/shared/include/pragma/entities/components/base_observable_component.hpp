@@ -23,6 +23,7 @@ namespace pragma {
 		bool rotateWithObservee = false;
 		std::optional<std::pair<EulerAngles, EulerAngles>> angleLimits = {};
 	};
+	class BaseObserverComponent;
 	class DLLNETWORK BaseObservableComponent : public BaseEntityComponent {
 	  public:
 		enum class CameraType : uint8_t {
@@ -31,6 +32,9 @@ namespace pragma {
 
 			Count
 		};
+
+		static ComponentEventId EVENT_ON_OBSERVER_CHANGED;
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 		virtual void Initialize() override;
 
 		virtual void SetLocalCameraOrigin(CameraType type, const Vector3 &origin);
@@ -49,14 +53,26 @@ namespace pragma {
 		const util::PBoolProperty &GetCameraEnabledProperty(CameraType type) const;
 		const util::PVector3Property &GetCameraOffsetProperty(CameraType type) const;
 
+		BaseObserverComponent *GetObserver();
+
+		Vector3 &GetViewOffset();
+		virtual void SetViewOffset(const Vector3 &offset);
+
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
 		virtual void Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) override;
 	  protected:
 		BaseObservableComponent(BaseEntity &ent);
 
+		friend BaseObserverComponent;
+		void ClearObserver();
+		void SetObserver(BaseObserverComponent *observer);
+
 		pragma::NetEventId m_netSetObserverOffset = pragma::INVALID_NET_EVENT;
 		pragma::NetEventId m_netSetObserverOrigin = pragma::INVALID_NET_EVENT;
+		pragma::NetEventId m_netSetViewOffset = pragma::INVALID_NET_EVENT;
 		std::array<ObserverCameraData, umath::to_integral(CameraType::Count)> m_cameraData = {};
+		pragma::ComponentHandle<pragma::BaseObserverComponent> m_observer;
+		Vector3 m_viewOffset = {};
 	};
 };
 

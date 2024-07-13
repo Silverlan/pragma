@@ -49,7 +49,6 @@ namespace pragma {
 		void SetCrouchHeight(float height);
 		void SetStandEyeLevel(float eyelevel);
 		void SetCrouchEyeLevel(float eyelevel);
-		virtual void DoSetObserverMode(OBSERVERMODE mode) override;
 		bool IsGameReady() const;
 		void SetGameReady(bool b);
 		bool SendResource(const std::string &fileName) const;
@@ -57,7 +56,6 @@ namespace pragma {
 
 		virtual void SetViewRotation(const Quat &rot) override;
 
-		virtual void SetObserverTarget(BaseObservableComponent *ent) override;
 		virtual void ApplyViewRotationOffset(const EulerAngles &ang, float dur = 0.5f) override;
 
 		virtual bool ShouldTransmitNetData() const override { return true; };
@@ -76,6 +74,7 @@ namespace pragma {
 		virtual void OnEntitySpawn() override;
 		void OnSetViewOrientation(const Quat &orientation);
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
+		virtual void OnEntityComponentRemoved(BaseEntityComponent &component) override;
 		virtual void GetBaseTypeIndex(std::type_index &outTypeIndex) const override;
 	  private:
 		static std::vector<SPlayerComponent *> s_players;

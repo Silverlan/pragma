@@ -1070,7 +1070,7 @@ def download_addon(name,addonName,url,commitId=None):
 curDir = os.getcwd()
 if not skip_repository_updates:
 	if with_pfm:
-		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","002a6f1d5e5c9bf46af204529d98673c99cf48b7")
+		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","45206d8ba1f4b419504313a56fa804e67d8bad6e")
 		download_addon("model editor","tool_model_editor","https://github.com/Silverlan/pragma_model_editor.git","56d46dacb398fa7540e794359eaf1081c9df1edd")
 
 	if with_vr:
@@ -1083,7 +1083,7 @@ if not skip_repository_updates:
 
 	if with_common_entities:
 		download_addon("HL","pragma_hl","https://github.com/Silverlan/pragma_hl.git","b077005a3b8f924c475823a6cc39b9d041ca5bdb")
-		download_addon("TF2","pragma_tf2","https://github.com/Silverlan/pragma_tf2.git","4e16cbed72a79712453958154f6bc4a774c943b2")
+		download_addon("TF2","pragma_tf2","https://github.com/Silverlan/pragma_tf2.git","c489e0d9346e94c65e3e352ae765cbfaa0844cf5")
 
 os.chdir(curDir)
 

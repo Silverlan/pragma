@@ -29,6 +29,7 @@
 #include "pragma/lua/c_lentity_handles.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/components/submergible_component.hpp>
+#include <pragma/entities/components/movement_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/model/model.h>
 #include <pragma/audio/alsound_type.h>
@@ -54,7 +55,9 @@ void CCharacterComponent::Initialize()
 		if(&blendAnimInfo.slotInfo == &animComponent->GetBaseAnimationInfo()) // Only apply to main animation, not to gestures!
 		{
 			auto anim = hMdl->GetAnimation(animComponent->GetAnimation());
-			auto moveSpeed = CalcMovementSpeed();
+			auto charC = ent.GetCharacterComponent();
+			auto *movementC = charC.valid() ? charC->GetMovementComponent() : nullptr;
+			auto moveSpeed = movementC ? movementC->GetSpeed() : Vector2 {};
 			// Animation movement blending does not work well with special movement animations (e.g. leaping),
 			// so we exclude all non-looping movement animations here. (Also see BaseAIComponent::BlendAnimationMovement).
 			// If the result isn't satisfactory, alternatively enable the check for the moveActivity above instead.
@@ -64,7 +67,7 @@ void CCharacterComponent::Initialize()
 				auto anim = hMdl->GetAnimation(hMdl->SelectFirstAnimation(animComponent->TranslateActivity(Activity::Idle)));
 				auto frame = anim ? anim->GetFrame(0) : nullptr;
 				if(frame != nullptr) {
-					auto blendScale = GetMovementBlendScale();
+					auto blendScale = movementC ? movementC->GetMovementBlendScale() : 0.f;
 					auto &dstPoses = frame->GetBoneTransforms();
 					auto &dstScales = frame->GetBoneScales();
 					animComponent->BlendBonePoses(blendAnimInfo.slotInfo.bonePoses, !blendAnimInfo.slotInfo.boneScales.empty() ? &blendAnimInfo.slotInfo.boneScales : nullptr, dstPoses, &dstScales, blendAnimInfo.slotInfo.bonePoses,

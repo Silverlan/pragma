@@ -35,37 +35,6 @@ namespace pragma {
 		virtual void PushArguments(lua_State *l) override;
 		const Vector3 &up;
 	};
-	struct DLLNETWORK CECalcMovementSpeed : public ComponentEvent {
-		CECalcMovementSpeed();
-		virtual void PushArguments(lua_State *l) override;
-		virtual uint32_t GetReturnCount() override;
-		virtual void HandleReturnValues(lua_State *l) override;
-		Vector2 speed = {};
-	};
-	struct DLLNETWORK CECalcAirMovementModifier : public ComponentEvent {
-		CECalcAirMovementModifier();
-		virtual void PushArguments(lua_State *l) override;
-		virtual uint32_t GetReturnCount() override;
-		virtual void HandleReturnValues(lua_State *l) override;
-		float airMovementModifier = 0.f;
-	};
-	struct DLLNETWORK CECalcMovementAcceleration : public ComponentEvent {
-		CECalcMovementAcceleration();
-		virtual void PushArguments(lua_State *l) override;
-		virtual uint32_t GetReturnCount() override;
-		virtual void HandleReturnValues(lua_State *l) override;
-		float acceleration = 0.f;
-		float rampUpTime = 0.f;
-	};
-	struct DLLNETWORK CECalcMovementDirection : public ComponentEvent {
-		CECalcMovementDirection(const Vector3 &forward, const Vector3 &right);
-		virtual void PushArguments(lua_State *l) override;
-		virtual uint32_t GetReturnCount() override;
-		virtual void HandleReturnValues(lua_State *l) override;
-		const Vector3 &forward;
-		const Vector3 &right;
-		Vector3 direction = {};
-	};
 	struct DLLNETWORK CEIsMoving : public ComponentEvent {
 		CEIsMoving();
 		virtual void PushArguments(lua_State *l) override;
@@ -78,6 +47,8 @@ namespace pragma {
 		virtual void PushArguments(lua_State *l) override;
 		const Quat &rotation;
 	};
+	class MovementComponent;
+	class OrientationComponent;
 	class DLLNETWORK BaseCharacterComponent : public BaseActorComponent {
 	  public:
 		static ComponentEventId EVENT_ON_FOOT_STEP;
@@ -85,10 +56,6 @@ namespace pragma {
 		static ComponentEventId EVENT_ON_DEPLOY_WEAPON;
 		static ComponentEventId EVENT_ON_SET_ACTIVE_WEAPON;
 		static ComponentEventId EVENT_PLAY_FOOTSTEP_SOUND;
-		static ComponentEventId EVENT_CALC_MOVEMENT_SPEED;
-		static ComponentEventId EVENT_CALC_AIR_MOVEMENT_MODIFIER;
-		static ComponentEventId EVENT_CALC_MOVEMENT_ACCELERATION;
-		static ComponentEventId EVENT_CALC_MOVEMENT_DIRECTION;
 		static ComponentEventId EVENT_IS_MOVING;
 		static ComponentEventId EVENT_HANDLE_VIEW_ROTATION;
 		static ComponentEventId EVENT_ON_JUMP;
@@ -118,10 +85,6 @@ namespace pragma {
 		void SetNeckControllers(const std::string &yawController, const std::string &pitchController);
 		int32_t GetNeckYawBlendController() const;
 		int32_t GetNeckPitchBlendController() const;
-		const Vector3 &GetMoveVelocity() const;
-		void SetMoveVelocity(const Vector3 &vel);
-		// Velocity minus ground velocity (Velocity caused by ground object)
-		Vector3 GetLocalVelocity() const;
 
 		EulerAngles GetLocalOrientationAngles() const;
 		Quat GetLocalOrientationRotation() const;
@@ -132,17 +95,10 @@ namespace pragma {
 		Quat LocalOrientationToWorld(const Quat &rot);
 		EulerAngles LocalOrientationToWorld(const EulerAngles &ang);
 
+		Quat GetOrientationAxesRotation() const;
 		virtual void SetCharacterOrientation(const Vector3 &up);
 
 		virtual void OnTick(double tDelta) override;
-
-		const util::PVector3Property &GetUpDirectionProperty() const;
-		const Vector3 &GetUpDirection() const;
-		virtual void SetUpDirection(const Vector3 &direction);
-		// Returns the forward,right and up vectors, depending on the player's up direction
-		void GetOrientationAxes(Vector3 **forward, Vector3 **right, Vector3 **up);
-		// Returns the rotation between the world's up vector and the player's up direction
-		const Quat &GetOrientationAxesRotation() const;
 
 		float GetTurnSpeed() const;
 		void SetTurnSpeed(float speed);
@@ -152,7 +108,6 @@ namespace pragma {
 		float GetStepOffset() const;
 		virtual void SetStepOffset(float offset);
 		const util::PFloatProperty &GetStepOffsetProperty() const;
-		virtual bool UpdateMovement();
 		virtual bool IsCharacter() const;
 		virtual bool IsMoving() const;
 
@@ -189,14 +144,16 @@ namespace pragma {
 		virtual void TertiaryAttack();
 		virtual void Attack4();
 		virtual void ReloadWeapon();
-		bool CanMove() const;
-
-		float GetMovementBlendScale() const;
 
 		// Unsticks the character from ground (disabling friction and also making sure gravity is applied) for the specified duration.
 		void DetachFromGround(float duration = 0.1f);
 
 		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
+
+		MovementComponent *GetMovementComponent();
+		const MovementComponent *GetMovementComponent() const { return const_cast<BaseCharacterComponent *>(this)->GetMovementComponent(); }
+		OrientationComponent *GetOrientationComponent();
+		const OrientationComponent *GetOrientationComponent() const { return const_cast<BaseCharacterComponent *>(this)->GetOrientationComponent(); }
 
 		bool Jump();
 		bool Jump(const Vector3 &velocity);
@@ -205,25 +162,24 @@ namespace pragma {
 		void SetJumpPower(float power);
 		bool CanJump() const;
 	  protected:
+		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
+		virtual void OnEntityComponentRemoved(BaseEntityComponent &component) override;
+
 		pragma::NetEventId m_netEvSetActiveWeapon = pragma::INVALID_NET_EVENT;
 		pragma::NetEventId m_netEvSetAmmoCount = pragma::INVALID_NET_EVENT;
 
-		util::PVector3Property m_upDirection = nullptr;
-		Vector3 m_axForward = {0.f, 0.f, 1.f};
-		Vector3 m_axRight = {-1.f, 0.f, 0.f};
-		Quat m_axRot = uquat::identity();
 		float m_turnSpeed = 300.f;
-		float m_timeSinceMovementStart = 0.f;
 		float m_tDetachFromGround = 0.f;
 		util::PFloatProperty m_jumpPower = nullptr;
 		std::unique_ptr<float> m_turnYaw = nullptr;
 		Quat m_angView = uquat::identity();
 		util::PFloatProperty m_slopeLimit = nullptr;
 		util::PFloatProperty m_stepOffset = nullptr;
-		Vector3 m_moveVelocity = {};
 		std::vector<EntityHandle> m_weapons;
 		EntityHandle m_weaponActive;
 		std::unordered_map<UInt32, UInt16> m_ammoCount;
+		MovementComponent *m_movementComponent = nullptr;
+		OrientationComponent *m_orientationComponent = nullptr;
 
 		int32_t m_yawController = -1;
 		int32_t m_pitchController = -1;
@@ -236,11 +192,7 @@ namespace pragma {
 
 		bool HandleAnimationEvent(const AnimationEvent &ev);
 		virtual void PlayFootStepSound(FootType foot, const SurfaceMaterial &surfMat, float scale);
-		// Calculates the forward and sideways movement speed
-		virtual Vector2 CalcMovementSpeed() const;
-		virtual float CalcAirMovementModifier() const;
-		virtual float CalcMovementAcceleration(float &optOutRampUpTime) const;
-		virtual Vector3 CalcMovementDirection(const Vector3 &forward, const Vector3 &right) const;
+
 		void UpdateNeckControllers();
 
 		virtual void UpdateOrientation();

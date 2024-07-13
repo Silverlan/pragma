@@ -40,6 +40,7 @@ decltype(EEntityComponentCallbackEvent::Count) EEntityComponentCallbackEvent::Co
 decltype(BaseEntityComponent::EVENT_ON_ENTITY_COMPONENT_ADDED) BaseEntityComponent::EVENT_ON_ENTITY_COMPONENT_ADDED = INVALID_COMPONENT_ID;
 decltype(BaseEntityComponent::EVENT_ON_ENTITY_COMPONENT_REMOVED) BaseEntityComponent::EVENT_ON_ENTITY_COMPONENT_REMOVED = INVALID_COMPONENT_ID;
 decltype(BaseEntityComponent::EVENT_ON_MEMBERS_CHANGED) BaseEntityComponent::EVENT_ON_MEMBERS_CHANGED = INVALID_COMPONENT_ID;
+decltype(BaseEntityComponent::EVENT_ON_ACTIVE_STATE_CHANGED) BaseEntityComponent::EVENT_ON_ACTIVE_STATE_CHANGED = INVALID_COMPONENT_ID;
 BaseEntityComponent::BaseEntityComponent(BaseEntity &ent) : m_entity {ent} {}
 BaseEntityComponent::~BaseEntityComponent()
 {
@@ -65,6 +66,7 @@ void BaseEntityComponent::RegisterEvents(pragma::EntityComponentManager &compone
 	EVENT_ON_ENTITY_COMPONENT_ADDED = registerEvent("ON_ENTITY_COMPONENT_ADDED", ComponentEventInfo::Type::Broadcast);
 	EVENT_ON_ENTITY_COMPONENT_REMOVED = registerEvent("ON_ENTITY_COMPONENT_REMOVED", ComponentEventInfo::Type::Broadcast);
 	EVENT_ON_MEMBERS_CHANGED = registerEvent("ON_MEMBERS_CHANGED", ComponentEventInfo::Type::Broadcast);
+	EVENT_ON_ACTIVE_STATE_CHANGED = registerEvent("ON_ACTIVE_STATE_CHANGED", ComponentEventInfo::Type::Broadcast);
 }
 
 spdlog::logger &BaseEntityComponent::InitLogger() const
@@ -888,7 +890,7 @@ TickPolicy BaseEntityComponent::GetTickPolicy() const { return m_tickData.tickPo
 
 bool BaseEntityComponent::ShouldThink() const
 {
-	if(m_tickData.tickPolicy != TickPolicy::Always && m_tickData.tickPolicy != TickPolicy::WhenVisible)
+	if(!IsActive() || (m_tickData.tickPolicy != TickPolicy::Always && m_tickData.tickPolicy != TickPolicy::WhenVisible))
 		return false;
 	//auto toggleC = static_cast<pragma::BaseToggleComponent*>(GetEntity().FindComponent("toggle").get());
 	//return toggleC ? toggleC->IsTurnedOn() : true;
@@ -956,6 +958,20 @@ bool BaseEntityComponent::Tick(double tDelta)
 	}
 	return true;
 }
+
+void BaseEntityComponent::SetActive(bool enabled)
+{
+	if(enabled == IsActive())
+		return;
+	umath::set_flag(m_stateFlags, StateFlags::IsInactive, !enabled);
+	BroadcastEvent(EVENT_ON_ACTIVE_STATE_CHANGED);
+	OnActiveStateChanged(enabled);
+	UpdateTickPolicy();
+}
+bool BaseEntityComponent::IsActive() const { return !umath::is_flag_set(m_stateFlags, StateFlags::IsInactive); }
+void BaseEntityComponent::Activate() { SetActive(true); }
+void BaseEntityComponent::Deactivate() { SetActive(false); }
+void BaseEntityComponent::OnActiveStateChanged(bool active) {}
 
 std::string BaseEntityComponent::GetUri() const
 {

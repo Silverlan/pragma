@@ -9,7 +9,12 @@
 #include <pragma/definitions.h>
 #include <pragma/engine.h>
 #include "pragma/entities/components/base_player_component.hpp"
+#include "pragma/entities/components/base_observer_component.hpp"
 #include "pragma/entities/components/base_gamemode_component.hpp"
+#include "pragma/entities/components/orientation_component.hpp"
+#include "pragma/entities/components/movement_component.hpp"
+#include "pragma/entities/components/action_input_controller_component.hpp"
+#include "pragma/entities/components/input_movement_controller_component.hpp"
 #include <pragma/math/angle/wvquaternion.h>
 #include <pragma/physics/movetypes.h>
 #include "pragma/physics/physobj.h"
@@ -48,14 +53,6 @@
 
 using namespace pragma;
 
-ComponentEventId BasePlayerComponent::EVENT_HANDLE_ACTION_INPUT = pragma::INVALID_COMPONENT_ID;
-ComponentEventId BasePlayerComponent::EVENT_ON_OBSERVATION_MODE_CHANGED = pragma::INVALID_COMPONENT_ID;
-void BasePlayerComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
-{
-	EVENT_HANDLE_ACTION_INPUT = registerEvent("HANDLE_ACTION_INPUT", ComponentEventInfo::Type::Explicit);
-	EVENT_ON_OBSERVATION_MODE_CHANGED = registerEvent("ON_OBSERVATION_MODE_CHANGED", ComponentEventInfo::Type::Broadcast);
-}
-
 void BasePlayerComponent::SetStandHeight(float height) { m_standHeight = height; }
 void BasePlayerComponent::SetCrouchHeight(float height) { m_crouchHeight = height; }
 void BasePlayerComponent::OnTakenDamage(DamageInfo &info, unsigned short oldHealth, unsigned short newHealth)
@@ -68,7 +65,9 @@ void BasePlayerComponent::OnTakenDamage(DamageInfo &info, unsigned short oldHeal
 }
 void BasePlayerComponent::OnKilled(DamageInfo *dmgInfo)
 {
-	SetObserverMode(OBSERVERMODE::THIRDPERSON);
+	auto observerC = GetEntity().FindComponent("observer");
+	if(observerC.valid())
+		static_cast<BaseObserverComponent *>(observerC.get())->SetObserverMode(ObserverMode::ThirdPerson);
 	auto &ent = GetEntity();
 	auto *nw = ent.GetNetworkState();
 	auto *game = nw->GetGameState();
@@ -125,13 +124,26 @@ bool BasePlayerComponent::CanUnCrouch() const
 	data.SetShape(*m_shapeStand);
 	return game->Sweep(data).hitType == RayCastHitType::None; // Overlap only works with collision objects, not with individual shapes, so we have to use Sweep instead
 }
+ActionInputControllerComponent *BasePlayerComponent::GetActionInputController() { return m_actionController; }
+void BasePlayerComponent::OnEntityComponentAdded(BaseEntityComponent &component)
+{
+	BaseEntityComponent::OnEntityComponentAdded(component);
+	if(typeid(component) == typeid(ActionInputControllerComponent))
+		m_actionController = &static_cast<ActionInputControllerComponent &>(component);
+}
+void BasePlayerComponent::OnEntityComponentRemoved(BaseEntityComponent &component)
+{
+	BaseEntityComponent::OnEntityComponentRemoved(component);
+	if(typeid(component) == typeid(ActionInputControllerComponent))
+		m_actionController = nullptr;
+}
 void BasePlayerComponent::OnTick(double tDelta)
 {
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	auto *phys = pPhysComponent ? pPhysComponent->GetPhysicsObject() : nullptr;
 	if(m_bCrouching || m_crouchTransition != CrouchTransition::None) {
-		if(GetActionInput(Action::Crouch) == false && m_crouchTransition != CrouchTransition::Uncrouching)
+		if((!m_actionController || m_actionController->GetActionInput(Action::Crouch) == false) && m_crouchTransition != CrouchTransition::Uncrouching)
 			UnCrouch();
 		else if(m_crouchTransition != CrouchTransition::None) {
 			NetworkState *state = ent.GetNetworkState();
@@ -197,8 +209,15 @@ void BasePlayerComponent::OnTick(double tDelta)
 			if(m_bForceAnimationUpdate == true || bMoving == true) {
 				m_bForceAnimationUpdate = false;
 				PlaySharedActivity(Activity::Idle);
-				if(bMoving == true)
-					animComponent->SetLastAnimationBlendScale(1.f - (charComponent.valid() ? charComponent->GetMovementBlendScale() : 0.f));
+				if(bMoving == true) {
+					auto moveBlendScale = 0.f;
+					if(charComponent.valid()) {
+						auto *movementC = charComponent->GetMovementComponent();
+						if(movementC)
+							moveBlendScale = movementC->GetMovementBlendScale();
+					}
+					animComponent->SetLastAnimationBlendScale(1.f - moveBlendScale);
+				}
 			}
 		}
 	}
@@ -210,8 +229,8 @@ bool BasePlayerComponent::IsMoving() const
 	auto animComponent = ent.GetAnimatedComponent();
 	return (animComponent.valid() && animComponent->GetActivity() == m_movementActivity && m_movementActivity != Activity::Invalid) ? true : false;
 }
-bool BasePlayerComponent::IsWalking() const { return GetActionInput(Action::Walk); }
-bool BasePlayerComponent::IsSprinting() const { return (!IsWalking() && GetActionInput(Action::Sprint)) ? true : false; }
+bool BasePlayerComponent::IsWalking() const { return m_actionController && m_actionController->GetActionInput(Action::Walk); }
+bool BasePlayerComponent::IsSprinting() const { return (!IsWalking() && m_actionController && m_actionController->GetActionInput(Action::Sprint)) ? true : false; }
 
 Con::c_cout &BasePlayerComponent::print(Con::c_cout &os)
 {
@@ -247,8 +266,7 @@ std::ostream &BasePlayerComponent::print(std::ostream &os)
 
 extern DLLNETWORK Engine *engine;
 BasePlayerComponent::BasePlayerComponent(BaseEntity &ent)
-    : BaseEntityComponent(ent), m_portUDP(0), m_speedWalk(63.33f), m_speedRun(190), m_speedSprint(320), m_speedCrouchWalk(63.33f), m_bCrouching(false), m_standHeight(72), m_crouchHeight(36), m_standEyeLevel(64), m_crouchEyeLevel(28), m_tCrouch(0), m_bFlashlightOn(false),
-      m_obsMode(util::TEnumProperty<OBSERVERMODE>::Create(OBSERVERMODE::FIRSTPERSON))
+    : BaseEntityComponent(ent), m_portUDP(0), m_speedWalk(63.33f), m_speedRun(190), m_speedSprint(320), m_speedCrouchWalk(63.33f), m_bCrouching(false), m_standHeight(72), m_crouchHeight(36), m_standEyeLevel(64), m_crouchEyeLevel(28), m_tCrouch(0), m_bFlashlightOn(false)
 {
 	m_bLocalPlayer = false;
 	m_timeConnected = 0;
@@ -277,7 +295,6 @@ BasePlayer *BasePlayerComponent::GetBasePlayer() const { return dynamic_cast<Bas
 void BasePlayerComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
-	m_netEvSetObserverTarget = SetupNetEvent("set_observer_target");
 	m_netEvApplyViewRotationOffset = SetupNetEvent("apply_view_rotation_offset");
 	m_netEvPrintMessage = SetupNetEvent("print_message");
 	m_netEvRespawn = SetupNetEvent("respawn");
@@ -287,26 +304,14 @@ void BasePlayerComponent::Initialize()
 	ent.AddComponent("character");
 	ent.AddComponent("name");
 	ent.AddComponent("score");
+	ent.AddComponent("observable");
+	auto actionInputControllerC = ent.AddComponent<ActionInputControllerComponent>();
+	auto movementControllerC = ent.AddComponent<InputMovementControllerComponent>();
+	if(movementControllerC.valid())
+		movementControllerC->SetActionInputController(actionInputControllerC.get());
 	m_hBasePlayer = ent.GetHandle();
 
-	BindEvent(BaseCharacterComponent::EVENT_CALC_MOVEMENT_SPEED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		static_cast<pragma::CECalcMovementSpeed &>(evData.get()).speed = CalcMovementSpeed();
-		return util::EventReply::Handled;
-	});
-	BindEvent(BaseCharacterComponent::EVENT_CALC_AIR_MOVEMENT_MODIFIER, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		static_cast<pragma::CECalcAirMovementModifier &>(evData.get()).airMovementModifier = CalcAirMovementModifier();
-		return util::EventReply::Handled;
-	});
-	BindEvent(BaseCharacterComponent::EVENT_CALC_MOVEMENT_ACCELERATION, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		auto &evDataAcc = static_cast<pragma::CECalcMovementAcceleration &>(evData.get());
-		evDataAcc.acceleration = CalcMovementAcceleration(evDataAcc.rampUpTime);
-		return util::EventReply::Handled;
-	});
-	BindEvent(BaseCharacterComponent::EVENT_CALC_MOVEMENT_DIRECTION, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		auto &movementDirData = static_cast<pragma::CECalcMovementDirection &>(evData.get());
-		movementDirData.direction = CalcMovementDirection(movementDirData.forward, movementDirData.right);
-		return util::EventReply::Handled;
-	});
+	BindEventUnhandled(MovementComponent::EVENT_ON_UPDATE_MOVEMENT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateMovementProperties(); });
 	BindEventUnhandled(BaseAnimatedComponent::EVENT_ON_ANIMATION_COMPLETE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &hMdl = GetEntity().GetModel();
 		if(hMdl == nullptr)
@@ -350,6 +355,11 @@ void BasePlayerComponent::Initialize()
 		return util::EventReply::Handled;
 	});
 	BindEventUnhandled(BaseCharacterComponent::EVENT_ON_JUMP, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { PlaySharedActivity(Activity::Jump); });
+	BindEventUnhandled(ActionInputControllerComponent::EVENT_ON_ACTION_INPUT_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		auto &evAction = static_cast<CEOnActionInputChanged &>(evData.get());
+		HandleActionInput(evAction.action, evAction.pressed);
+		return util::EventReply::Unhandled;
+	});
 
 	auto whObservableComponent = ent.FindComponent("observable");
 	if(whObservableComponent.valid()) {
@@ -360,6 +370,75 @@ void BasePlayerComponent::Initialize()
 	}
 
 	SetTickPolicy(TickPolicy::Always);
+}
+
+void BasePlayerComponent::UpdateMovementProperties()
+{
+	auto charC = GetEntity().GetCharacterComponent();
+	auto *movementC = charC.valid() ? charC->GetMovementComponent() : nullptr;
+	if(!movementC)
+		return;
+	movementC->SetSpeed(CalcMovementSpeed());
+	float rampUpTime;
+	auto acc = CalcMovementAcceleration(rampUpTime);
+	movementC->SetAcceleration(acc);
+	movementC->SetAccelerationRampUpTime(rampUpTime);
+	movementC->SetAirModifier(CalcAirMovementModifier());
+}
+
+void BasePlayerComponent::HandleActionInput(Action action, bool pressed)
+{
+	if(!pressed)
+		return;
+	auto charComponent = GetEntity().GetCharacterComponent();
+	switch(action) {
+	case Action::Jump:
+		{
+			if(charComponent.valid())
+				charComponent->Jump();
+			break;
+		}
+	case Action::Crouch:
+		{
+			Crouch();
+			break;
+		}
+	case Action::Attack:
+		{
+			if(charComponent.valid())
+				charComponent->PrimaryAttack();
+			break;
+		}
+	case Action::Attack2:
+		{
+			if(charComponent.valid())
+				charComponent->SecondaryAttack();
+			break;
+		}
+	case Action::Attack3:
+		{
+			if(charComponent.valid())
+				charComponent->TertiaryAttack();
+			break;
+		}
+	case Action::Attack4:
+		{
+			if(charComponent.valid())
+				charComponent->Attack4();
+			break;
+		}
+	case Action::Reload:
+		{
+			if(charComponent.valid())
+				charComponent->ReloadWeapon();
+			break;
+		}
+	case Action::Use:
+		{
+			Use();
+			break;
+		}
+	}
 }
 
 void BasePlayerComponent::OnPhysicsInitialized()
@@ -480,23 +559,11 @@ Vector2 BasePlayerComponent::CalcMovementSpeed() const
 	return {speed, 0.f};
 }
 float BasePlayerComponent::CalcAirMovementModifier() const { return GetEntity().GetNetworkState()->GetGameState()->GetConVarFloat("sv_player_air_move_scale"); }
-float BasePlayerComponent::CalcMovementAcceleration(float &optOutRampUpTime) const {
+float BasePlayerComponent::CalcMovementAcceleration(float &optOutRampUpTime) const
+{
 	auto *game = GetEntity().GetNetworkState()->GetGameState();
 	optOutRampUpTime = game->GetConVarFloat("sv_acceleration_ramp_up_time");
 	return game->GetConVarFloat("sv_acceleration");
-}
-Vector3 BasePlayerComponent::CalcMovementDirection(const Vector3 &forward, const Vector3 &right) const
-{
-	Vector3 dir {};
-	if(GetActionInput(Action::MoveForward))
-		dir += forward * GetActionInputAxisMagnitude(Action::MoveForward);
-	if(GetActionInput(Action::MoveBackward))
-		dir -= forward * GetActionInputAxisMagnitude(Action::MoveBackward);
-	if(GetActionInput(Action::MoveRight))
-		dir += right * GetActionInputAxisMagnitude(Action::MoveRight);
-	if(GetActionInput(Action::MoveLeft))
-		dir -= right * GetActionInputAxisMagnitude(Action::MoveLeft);
-	return dir;
 }
 
 void BasePlayerComponent::SetUDPPort(unsigned short port) { m_portUDP = port; }
@@ -569,138 +636,23 @@ double BasePlayerComponent::TimeConnected() const { return GetEntity().GetNetwor
 
 double BasePlayerComponent::ConnectionTime() const { return m_timeConnected; }
 
-void BasePlayerComponent::SetObserverMode(OBSERVERMODE mode)
+void BasePlayerComponent::SetViewPos(const std::optional<Vector3> &pos) { m_viewPos = pos; }
+Vector3 BasePlayerComponent::GetViewPos() const
 {
-	*m_obsMode = mode;
-	DoSetObserverMode(mode);
-	BroadcastEvent(EVENT_ON_OBSERVATION_MODE_CHANGED);
-}
-OBSERVERMODE BasePlayerComponent::GetObserverMode() const { return *m_obsMode; }
-const util::PEnumProperty<OBSERVERMODE> &BasePlayerComponent::GetObserverModeProperty() const { return m_obsMode; }
-void BasePlayerComponent::SetObserverTarget(BaseObservableComponent *ent)
-{
-	m_hEntObserverTarget = pragma::ComponentHandle<pragma::BaseObservableComponent> {};
-	if(ent == nullptr)
-		return;
-	m_hEntObserverTarget = ent->GetHandle<BaseObservableComponent>();
-}
-BaseObservableComponent *BasePlayerComponent::GetObserverTarget() const
-{
-	auto *r = const_cast<BaseObservableComponent *>(m_hEntObserverTarget.get());
-	if(r == nullptr) {
-		auto pObsComponent = GetEntity().FindComponent("observable");
-		return static_cast<BaseObservableComponent *>(pObsComponent.get());
+	if(m_viewPos)
+		return *m_viewPos;
+	if(!m_observableComponent)
+		return GetEntity().GetPosition();
+	auto viewOffset = m_observableComponent->GetViewOffset();
+	auto charComponent = GetEntity().GetCharacterComponent();
+	auto upDir = uvec::UP;
+	if(charComponent.valid()) {
+		auto *orientC = charComponent->GetOrientationComponent();
+		if(orientC)
+			upDir = orientC->GetUpDirection();
 	}
-	return r;
-}
-
-void BasePlayerComponent::SetViewPos(const Vector3 &pos) { m_posView = pos; }
-const Vector3 &BasePlayerComponent::GetViewPos() const { return m_posView; }
-
-void BasePlayerComponent::OnActionInputChanged(Action action, bool b)
-{
-	//Con::cwar<<"Action input "<<umath::to_integral(action)<<" has changed for player "<<m_entity<<": "<<b<<Con::endl;
-	if(action == Action::Walk || action == Action::Sprint)
-		m_bForceAnimationUpdate = true;
-}
-
-Action BasePlayerComponent::GetActionInputs() const { return m_actionInputs; }
-Action BasePlayerComponent::GetRawActionInputs() const { return m_rawInputs; }
-void BasePlayerComponent::SetActionInputs(Action actions, bool bKeepMagnitudes)
-{
-	auto rawInputs = m_rawInputs;
-	auto valuesOld = umath::get_power_of_2_values(umath::to_integral(rawInputs));
-	for(auto v : valuesOld) {
-		if((actions & static_cast<Action>(v)) == Action::None) // Action has been unpressed
-			SetActionInput(static_cast<Action>(v), false);
-	}
-	actions &= ~rawInputs;
-	auto values = umath::get_power_of_2_values(umath::to_integral(actions));
-	for(auto v : values)
-		SetActionInput(static_cast<Action>(v), true, bKeepMagnitudes);
-}
-void BasePlayerComponent::SetActionInput(Action action, bool b, bool bKeepMagnitude) { SetActionInput(action, b, (bKeepMagnitude == true) ? GetActionInputAxisMagnitude(action) : ((b == true) ? 1.f : 0.f)); }
-void BasePlayerComponent::SetActionInput(Action action, bool b, float magnitude)
-{
-	SetActionInputAxisMagnitude(action, (b == true) ? magnitude : 0.f);
-	if(((m_rawInputs & action) != Action::None) == b)
-		return;
-	if(b == false)
-		m_rawInputs &= ~action;
-	else
-		m_rawInputs |= action;
-
-	CEHandleActionInput evData {action, b, magnitude};
-	if(InvokeEventCallbacks(EVENT_HANDLE_ACTION_INPUT, evData) == util::EventReply::Handled)
-		return;
-	auto &ent = GetEntity();
-	auto *nw = ent.GetNetworkState();
-	auto *game = nw->GetGameState();
-	auto r = false;
-	if(game->CallCallbacks<bool, BasePlayerComponent *, Action, bool>("OnActionInput", &r, this, action, b) == CallbackReturnType::HasReturnValue) {
-		if(r == false)
-			return;
-	}
-	if(b == false) {
-		if(GetActionInput(action) == true) {
-			m_actionInputs &= ~action;
-			OnActionInputChanged(action, b);
-		}
-		return;
-	}
-	if(GetActionInput(action))
-		return;
-	m_actionInputs |= action;
-	OnActionInputChanged(action, b);
-	auto charComponent = ent.GetCharacterComponent();
-	switch(action) {
-	case Action::Jump:
-		{
-			if(charComponent.valid())
-				charComponent->Jump();
-			break;
-		}
-	case Action::Crouch:
-		{
-			Crouch();
-			break;
-		}
-	case Action::Attack:
-		{
-			if(charComponent.valid())
-				charComponent->PrimaryAttack();
-			break;
-		}
-	case Action::Attack2:
-		{
-			if(charComponent.valid())
-				charComponent->SecondaryAttack();
-			break;
-		}
-	case Action::Attack3:
-		{
-			if(charComponent.valid())
-				charComponent->TertiaryAttack();
-			break;
-		}
-	case Action::Attack4:
-		{
-			if(charComponent.valid())
-				charComponent->Attack4();
-			break;
-		}
-	case Action::Reload:
-		{
-			if(charComponent.valid())
-				charComponent->ReloadWeapon();
-			break;
-		}
-	case Action::Use:
-		{
-			Use();
-			break;
-		}
-	}
+	viewOffset = Vector3(viewOffset.x, 0, viewOffset.z) + upDir * viewOffset.y;
+	return GetEntity().GetPosition() + viewOffset;
 }
 
 bool BasePlayerComponent::PlaySharedActivity(Activity activity)
@@ -772,18 +724,6 @@ void BasePlayerComponent::UnCrouch(bool bForce)
 
 bool BasePlayerComponent::IsCrouching() const { return m_bCrouching; }
 
-bool BasePlayerComponent::GetActionInput(Action action) const { return ((m_actionInputs & action) != Action::None) ? true : false; }
-bool BasePlayerComponent::GetRawActionInput(Action action) const { return ((m_rawInputs & action) != Action::None) ? true : false; }
-const std::unordered_map<Action, float> &BasePlayerComponent::GetActionInputAxisMagnitudes() const { return m_inputAxes; }
-float BasePlayerComponent::GetActionInputAxisMagnitude(Action action) const
-{
-	auto it = m_inputAxes.find(action);
-	if(it == m_inputAxes.end())
-		return 0.f;
-	return it->second;
-}
-void BasePlayerComponent::SetActionInputAxisMagnitude(Action action, float magnitude) { m_inputAxes[action] = magnitude; }
-
 bool BasePlayerComponent::IsLocalPlayer() const { return m_bLocalPlayer; }
 
 bool BasePlayerComponent::IsKeyDown(int key) { return m_keysPressed[key]; }
@@ -834,13 +774,3 @@ float BasePlayerComponent::GetCrouchedWalkSpeed() const
 void BasePlayerComponent::SetCrouchedWalkSpeed(float speed) { m_speedCrouchWalk = speed; }
 
 void BasePlayerComponent::PrintMessage(std::string message, MESSAGE) {}
-
-//////////////////
-
-CEHandleActionInput::CEHandleActionInput(Action action, bool pressed, float magnitude) : action {action}, pressed {pressed}, magnitude {magnitude} {}
-void CEHandleActionInput::PushArguments(lua_State *l)
-{
-	Lua::PushInt(l, umath::to_integral(action));
-	Lua::PushBool(l, pressed);
-	Lua::PushNumber(l, magnitude);
-}

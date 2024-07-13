@@ -13,6 +13,7 @@
 #include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/entities/components/c_character_component.hpp"
 #include "pragma/entities/components/c_observable_component.hpp"
+#include "pragma/entities/components/c_observer_component.hpp"
 #include "pragma/entities/components/c_name_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
@@ -87,19 +88,25 @@ void CMD_thirdperson(NetworkState *state, pragma::BasePlayerComponent *pl, std::
 {
 	if(pl == nullptr)
 		return;
+	auto *observableC = static_cast<pragma::CPlayerComponent *>(pl)->GetObservableComponent();
+	if(!observableC)
+		return;
+	auto *observer = observableC->GetObserver();
+	if(!observer)
+		return;
 	auto *cstate = static_cast<ClientState *>(state);
 	CHECK_CHEATS("thirdperson", cstate, );
 	auto bThirdPerson = false;
 	if(!argv.empty())
 		bThirdPerson = (atoi(argv.front().c_str()) != 0) ? true : false;
 	else
-		bThirdPerson = (pl->GetObserverMode() != OBSERVERMODE::THIRDPERSON) ? true : false;
-	auto obsTarget = pl->GetObserverTarget();
+		bThirdPerson = (observer->GetObserverMode() != ObserverMode::ThirdPerson) ? true : false;
+	auto obsTarget = observer->GetObserverTarget();
 	if(obsTarget) {
 		if((bThirdPerson && obsTarget->IsCameraEnabled(pragma::BaseObservableComponent::CameraType::ThirdPerson) == false) || (bThirdPerson == false && obsTarget->IsCameraEnabled(pragma::BaseObservableComponent::CameraType::FirstPerson) == false))
 			return;
 	}
-	pl->SetObserverMode((bThirdPerson == true) ? OBSERVERMODE::THIRDPERSON : OBSERVERMODE::FIRSTPERSON);
+	observer->SetObserverMode((bThirdPerson == true) ? ObserverMode::ThirdPerson : ObserverMode::FirstPerson);
 }
 
 DLLCLIENT void CMD_setpos(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv)

@@ -28,6 +28,8 @@
 #include "pragma/entities/components/base_time_scale_component.hpp"
 #include "pragma/entities/components/submergible_component.hpp"
 #include "pragma/entities/components/velocity_component.hpp"
+#include "pragma/entities/components/movement_component.hpp"
+#include "pragma/entities/components/orientation_component.hpp"
 #include "pragma/entities/entity_component_system_t.hpp"
 #include "pragma/lua/classes/ldef_vector.h"
 #include "pragma/model/model.h"
@@ -49,34 +51,12 @@ void BaseCharacterComponent::InitializeController()
 	//if(phys == NULL || !phys->IsController())
 	//	return;
 }
-void BaseCharacterComponent::SetUpDirection(const Vector3 &direction)
-{
-	auto ndirection = direction;
-	uvec::normalize(&ndirection);
-	*m_upDirection = ndirection;
-
-	//m_axRot = uquat::create(uvec::FORWARD,uvec::RIGHT,m_upDirection);//uvec::UP);
-
-	m_axRot = uvec::get_rotation(Vector3(0.f, 1.f, 0.f), *m_upDirection);
-	uquat::normalize(m_axRot);
-	m_axForward = Vector3(0.f, 0.f, 1.f) * m_axRot;
-	m_axRight = Vector3(-1.f, 0.f, 0.f) * m_axRot;
-
-	//auto &ent = GetEntity();
-	//PhysObj *phys = ent.GetPhysicsObject();
-	//if(phys == NULL || !phys->IsController())
-	//	return;
-}
 
 ComponentEventId BaseCharacterComponent::EVENT_ON_FOOT_STEP = INVALID_COMPONENT_ID;
 ComponentEventId BaseCharacterComponent::EVENT_ON_CHARACTER_ORIENTATION_CHANGED = INVALID_COMPONENT_ID;
 ComponentEventId BaseCharacterComponent::EVENT_ON_DEPLOY_WEAPON = INVALID_COMPONENT_ID;
 ComponentEventId BaseCharacterComponent::EVENT_ON_SET_ACTIVE_WEAPON = INVALID_COMPONENT_ID;
 ComponentEventId BaseCharacterComponent::EVENT_PLAY_FOOTSTEP_SOUND = INVALID_COMPONENT_ID;
-ComponentEventId BaseCharacterComponent::EVENT_CALC_MOVEMENT_SPEED = INVALID_COMPONENT_ID;
-ComponentEventId BaseCharacterComponent::EVENT_CALC_AIR_MOVEMENT_MODIFIER = INVALID_COMPONENT_ID;
-ComponentEventId BaseCharacterComponent::EVENT_CALC_MOVEMENT_ACCELERATION = INVALID_COMPONENT_ID;
-ComponentEventId BaseCharacterComponent::EVENT_CALC_MOVEMENT_DIRECTION = INVALID_COMPONENT_ID;
 ComponentEventId BaseCharacterComponent::EVENT_IS_MOVING = INVALID_COMPONENT_ID;
 ComponentEventId BaseCharacterComponent::EVENT_HANDLE_VIEW_ROTATION = INVALID_COMPONENT_ID;
 ComponentEventId BaseCharacterComponent::EVENT_ON_JUMP = INVALID_COMPONENT_ID;
@@ -88,23 +68,15 @@ void BaseCharacterComponent::RegisterEvents(pragma::EntityComponentManager &comp
 	EVENT_ON_DEPLOY_WEAPON = registerEvent("ON_DEPLOY_WEAPON", ComponentEventInfo::Type::Broadcast);
 	EVENT_ON_SET_ACTIVE_WEAPON = registerEvent("ON_SET_ACTIVE_WEAPON", ComponentEventInfo::Type::Broadcast);
 	EVENT_PLAY_FOOTSTEP_SOUND = registerEvent("PLAY_FOOTSTEP_SOUND", ComponentEventInfo::Type::Broadcast);
-	EVENT_CALC_MOVEMENT_SPEED = registerEvent("CALC_MOVEMENT_SPEED", ComponentEventInfo::Type::Explicit);
-	EVENT_CALC_AIR_MOVEMENT_MODIFIER = registerEvent("CALC_AIR_MOVEMENT_MODIFIER", ComponentEventInfo::Type::Explicit);
-	EVENT_CALC_MOVEMENT_ACCELERATION = registerEvent("CALC_MOVEMENT_ACCELERATION", ComponentEventInfo::Type::Explicit);
-	EVENT_CALC_MOVEMENT_DIRECTION = registerEvent("CALC_MOVEMENT_DIRECTION", ComponentEventInfo::Type::Explicit);
 	EVENT_IS_MOVING = registerEvent("IS_MOVING", ComponentEventInfo::Type::Explicit);
 	EVENT_HANDLE_VIEW_ROTATION = registerEvent("HANDLE_VIEW_ROTATION", ComponentEventInfo::Type::Explicit);
 	EVENT_ON_JUMP = registerEvent("ON_JUMP", ComponentEventInfo::Type::Broadcast);
 }
 
-BaseCharacterComponent::BaseCharacterComponent(BaseEntity &ent)
-    : BaseActorComponent(ent), m_upDirection(util::Vector3Property::Create({0.f, 1.f, 0.f})), m_slopeLimit(util::FloatProperty::Create(CFloat(umath::cos(umath::deg_to_rad(45.0f))))), m_stepOffset(util::FloatProperty::Create(2.f)), m_jumpPower(util::FloatProperty::Create(0.f))
-{
-}
+BaseCharacterComponent::BaseCharacterComponent(BaseEntity &ent) : BaseActorComponent(ent), m_slopeLimit(util::FloatProperty::Create(CFloat(umath::cos(umath::deg_to_rad(45.0f))))), m_stepOffset(util::FloatProperty::Create(2.f)), m_jumpPower(util::FloatProperty::Create(0.f)) {}
 
 const util::PFloatProperty &BaseCharacterComponent::GetSlopeLimitProperty() const { return m_slopeLimit; }
 const util::PFloatProperty &BaseCharacterComponent::GetStepOffsetProperty() const { return m_stepOffset; }
-const util::PVector3Property &BaseCharacterComponent::GetUpDirectionProperty() const { return m_upDirection; }
 
 void BaseCharacterComponent::InitializePhysObj(PhysObj *)
 {
@@ -121,7 +93,6 @@ void BaseCharacterComponent::Initialize()
 	m_netEvSetAmmoCount = SetupNetEvent("set_ammo_count");
 
 	BindEvent(BaseAnimatedComponent::EVENT_HANDLE_ANIMATION_EVENT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { return HandleAnimationEvent(static_cast<CEHandleAnimationEvent &>(evData.get()).animationEvent) ? util::EventReply::Handled : util::EventReply::Unhandled; });
-	BindEventUnhandled(BasePhysicsComponent::EVENT_ON_PRE_PHYSICS_SIMULATE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateMovement(); });
 	BindEventUnhandled(BasePhysicsComponent::EVENT_ON_POST_PHYSICS_SIMULATE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		auto t = GetEntity().GetNetworkState()->GetGameState()->CurTime();
 		if(t >= m_tDetachFromGround)
@@ -151,22 +122,11 @@ void BaseCharacterComponent::Initialize()
 	auto &ent = GetEntity();
 	ent.AddComponent("sound_emitter");
 	ent.AddComponent("physics");
+	ent.AddComponent("movement");
+	ent.AddComponent("orientation");
 
 	SetTickPolicy(TickPolicy::WhenVisible);
 }
-
-const Vector3 &BaseCharacterComponent::GetUpDirection() const { return *m_upDirection; }
-
-void BaseCharacterComponent::GetOrientationAxes(Vector3 **forward, Vector3 **right, Vector3 **up)
-{
-	if(forward != NULL)
-		*forward = &m_axForward;
-	if(right != NULL)
-		*right = &m_axRight;
-	if(up != NULL)
-		*up = &(**m_upDirection);
-}
-const Quat &BaseCharacterComponent::GetOrientationAxesRotation() const { return m_axRot; }
 
 float BaseCharacterComponent::GetSlopeLimit() const { return *m_slopeLimit; }
 void BaseCharacterComponent::SetSlopeLimit(float limit)
@@ -221,9 +181,26 @@ void BaseCharacterComponent::UpdateNeckControllers()
 	m_pitchController = hMdl->LookupBlendController(m_pitchControllerName);
 }
 
+void BaseCharacterComponent::OnEntityComponentAdded(BaseEntityComponent &component)
+{
+	BaseEntityComponent::OnEntityComponentAdded(component);
+	if(typeid(component) == typeid(MovementComponent))
+		m_movementComponent = &static_cast<MovementComponent &>(component);
+	else if(typeid(component) == typeid(OrientationComponent))
+		m_orientationComponent = &static_cast<OrientationComponent &>(component);
+}
+void BaseCharacterComponent::OnEntityComponentRemoved(BaseEntityComponent &component)
+{
+	BaseEntityComponent::OnEntityComponentRemoved(component);
+	if(typeid(component) == typeid(MovementComponent))
+		m_movementComponent = nullptr;
+	else if(typeid(component) == typeid(OrientationComponent))
+		m_orientationComponent = nullptr;
+}
+
 void BaseCharacterComponent::NormalizeViewOrientation(Quat &rot)
 {
-	auto &rotRel = GetOrientationAxesRotation();
+	auto rotRel = GetOrientationAxesRotation();
 	auto rotDst = rotRel * rot;
 	auto ang = EulerAngles {rotDst};
 	ang.r = 0.f;
@@ -270,7 +247,7 @@ void BaseCharacterComponent::SetViewOrientation(const Quat &orientation)
 	if(ent.IsNPC())
 		return; // NPCs are handled separately (See BaseNPC::LookAtStep).
 	// TODO: This should probably go in player-specific code
-	auto &rotRef = GetOrientationAxesRotation();
+	Quat rotRef = GetOrientationAxesRotation();
 	auto rot = rotRef * orientation;
 	EulerAngles angView(rot);
 	auto animComponent = ent.GetAnimatedComponent();
@@ -319,6 +296,13 @@ util::EventReply BaseCharacterComponent::HandleEvent(ComponentEventId eventId, C
 	return util::EventReply::Unhandled;
 }
 
+Quat BaseCharacterComponent::GetOrientationAxesRotation() const
+{
+	if(!m_orientationComponent)
+		return uquat::identity();
+	return m_orientationComponent->GetOrientationAxesRotation();
+}
+
 EulerAngles BaseCharacterComponent::GetLocalOrientationAngles() const { return EulerAngles(GetLocalOrientationRotation()); }
 Quat BaseCharacterComponent::GetLocalOrientationRotation() const
 {
@@ -333,245 +317,6 @@ Quat BaseCharacterComponent::WorldToLocalOrientation(const Quat &rot) { return G
 EulerAngles BaseCharacterComponent::WorldToLocalOrientation(const EulerAngles &ang) { return EulerAngles(WorldToLocalOrientation(uquat::create(ang))); }
 Quat BaseCharacterComponent::LocalOrientationToWorld(const Quat &rot) { return uquat::get_inverse(GetOrientationAxesRotation()) * rot; }
 EulerAngles BaseCharacterComponent::LocalOrientationToWorld(const EulerAngles &ang) { return EulerAngles(LocalOrientationToWorld(uquat::create(ang))); }
-
-bool BaseCharacterComponent::UpdateMovement()
-{
-	//if(m_entity->IsPlayer() == true)
-	//	m_entity->GetNetworkState()->GetGameState()->HandlePlayerMovement();
-	//if(true)
-	//	return;
-	if(CanMove() == false)
-		return false;
-	auto &ent = GetEntity();
-	auto pPhysComponent = ent.GetPhysicsComponent();
-	auto *phys = pPhysComponent ? pPhysComponent->GetPhysicsObject() : nullptr;
-	if(phys == nullptr || phys->IsController() == false)
-		return false;
-	auto mv = pPhysComponent->GetMoveType();
-	if(mv == MOVETYPE::NONE || mv == MOVETYPE::PHYSICS)
-		return false;
-	auto *physController = static_cast<ControllerPhysObj *>(phys);
-	auto pTrComponent = ent.GetTransformComponent();
-	auto pVelComponent = ent.GetComponent<pragma::VelocityComponent>();
-	auto pos = pTrComponent ? pTrComponent->GetPosition() : Vector3 {};
-	auto vel = pVelComponent.valid() ? pVelComponent->GetVelocity() : Vector3 {};
-
-	auto bOnGround = pPhysComponent->IsOnGround();
-	auto groundVelocity = physController->GetGroundVelocity();
-	vel -= groundVelocity; // We only care about the local velocity; The ground velocity will be re-added later
-
-	auto pSubmergibleComponent = ent.GetComponent<pragma::SubmergibleComponent>();
-	auto bSubmerged = (pSubmergibleComponent.valid() && pSubmergibleComponent->GetSubmergedFraction() > 0.5f) ? true : false;
-	Vector3 *axisForward;
-	Vector3 *axisRight;
-	Vector3 *axisUp;
-	GetOrientationAxes(&axisForward, &axisRight, &axisUp);
-	Quat rot = GetViewOrientation();
-	Quat viewRot = GetOrientationAxesRotation();
-	Quat invViewRot = uquat::get_inverse(viewRot);
-
-	Vector3 forward = uquat::forward(rot);
-	Vector3 right = uquat::right(rot);
-	if(mv == MOVETYPE::WALK && bSubmerged == false) {
-		// No movement on up-axis
-		auto &upDir = GetUpDirection();
-		auto angle = uvec::dot(forward, upDir);
-		if(umath::abs(angle) < 0.99f)
-			forward = uvec::project_to_plane(forward, upDir, 0.f);
-		else // Looking straight up or down; Use camera up-direction as forward-direction instead
-		{
-			auto rotUpDir = uquat::up(rot);
-			if(angle > 0.f)
-				rotUpDir = -rotUpDir;
-			forward = uvec::project_to_plane(rotUpDir, upDir, 0.f);
-		}
-		right = uvec::project_to_plane(right, upDir, 0.f);
-
-		uvec::normalize(&forward);
-		uvec::normalize(&right);
-
-		// Deprecated
-		/*// TODO: Does this work with custom player up directions?
-		// TODO: There should be a better way of doing this
-		if(forward.y <= -0.999999f || forward.y >= 0.999999f)
-		{
-			auto ang = GetViewAngles();
-			ang.p = 0.f;
-			forward = ang.Forward();
-			right = ang.Right();
-		}
-		else
-		{
-			// No movement on up-axis
-			forward = forward *viewRot;
-			right = right *viewRot;
-
-			forward.y = 0.f;
-			right.y = 0.f;
-
-			uvec::normalize(&forward);
-			uvec::normalize(&right);
-
-			forward = forward *invViewRot;
-			right = right *invViewRot;
-		}*/
-	}
-
-	auto pTimeScaleComponent = ent.GetTimeScaleComponent();
-	auto ts = pTimeScaleComponent.valid() ? CFloat(pTimeScaleComponent->GetTimeScale()) : 1.f;
-	auto scale = pTrComponent ? pTrComponent->GetScale() : Vector3 {1.f, 1.f, 1.f};
-	auto speed = CalcMovementSpeed() * ts * umath::abs_max(scale.x, scale.y, scale.z);
-
-	auto *nw = ent.GetNetworkState();
-	auto *game = nw->GetGameState();
-	float timeToReachFullAcc = 0.f;
-	auto acceleration = CalcMovementAcceleration(timeToReachFullAcc);
-	auto tDelta = CFloat(game->DeltaTickTime()) * ts;
-
-	{
-		//if(phys != nullptr && phys->IsController())
-		{
-			auto *groundObject = physController->GetGroundPhysCollisionObject();
-			if(groundObject != nullptr && groundObject->IsRigid()) {
-				//if(owner->GetNetworkState()->IsClient())
-				if(ent.IsNPC() || ent.GetNetworkState()->IsClient()) {
-					// TODO: Rotate with ground object?
-					//auto angVel = static_cast<PhysRigidBody*>(groundObject)->GetAngularVelocity() *static_cast<float>(tDelta);
-					//auto ang = EulerAngles(umath::rad_to_deg(angVel.x),umath::rad_to_deg(angVel.y),umath::rad_to_deg(angVel.z));
-					//owner->SetAngles(owner->GetAngles() +ang);
-					//SetViewAngles(GetViewAngles() +ang);
-				}
-			}
-		}
-	}
-
-	if(pPhysComponent->IsGroundWalkable() || mv != MOVETYPE::WALK || bSubmerged == true) {
-		auto friction = 0.8f;
-		std::optional<Vector3> contactNormal = {};
-		if(phys != nullptr && phys->IsController()) {
-			auto *controller = static_cast<ControllerPhysObj *>(phys);
-			auto *surfMat = controller->GetGroundMaterial();
-			friction = surfMat ? surfMat->GetDynamicFriction() : 1.f;
-			contactNormal = controller->GetController()->GetGroundTouchNormal();
-		}
-		auto frictionVel = vel;
-		if(contactNormal.has_value()) // Only apply friction to the component of the velocity which is parallel to the ground (i.e. jumping and such remain unaffected)
-			frictionVel = uvec::project_to_plane(frictionVel, *contactNormal, 0.f);
-		auto frictionForce = -frictionVel * friction;
-		//if(ent.IsPlayer())
-		//	Con::cout<<"Player friction: "<<friction<<Con::endl;
-		//else
-		//	Con::cout<<"NPC friction: "<<friction<<Con::endl;
-
-		vel += frictionForce * umath::min(tDelta * acceleration, 1.f);
-	}
-	else
-		speed *= CalcAirMovementModifier();
-
-	Vector3 dir = Vector3(0, 0, 0);
-	if(IsFrozen() == false)
-		dir = CalcMovementDirection(forward, right);
-	auto l = uvec::length(dir);
-	if(l > 0.f)
-		dir /= l;
-
-	if(l == 0.f)
-		m_timeSinceMovementStart = 0.f;
-	else
-		m_timeSinceMovementStart = umath::min(m_timeSinceMovementStart + tDelta, timeToReachFullAcc);
-
-	auto speedDir = glm::dot(dir, vel); // The speed in the movement direction of the current velocity
-	if(speedDir < umath::abs(speed.x)) {
-		auto speedDelta = speed.x - speedDir;
-
-		auto addSpeed = speedDelta * tDelta * acceleration;
-		auto f = (timeToReachFullAcc > 0.f) ? (m_timeSinceMovementStart / timeToReachFullAcc) : 1.f;
-		addSpeed *= f;
-
-		vel += dir * umath::min(addSpeed, speedDelta);
-	}
-
-	// Calculate sideways movement speed (NPC animation movement only)
-	if(speed.y != 0.f) {
-		auto dirRight = (uvec::length_sqr(dir) > 0.99f) ? uvec::cross(dir, pTrComponent ? pTrComponent->GetUp() : uvec::UP) : (pTrComponent ? pTrComponent->GetRight() : uvec::RIGHT);
-		auto speedDir = glm::dot(dirRight, vel);
-		if(speedDir < umath::abs(speed.y)) {
-			auto speedDelta = speed.y - speedDir;
-			vel += dirRight * umath::min(speedDelta * tDelta * acceleration, speedDelta);
-		}
-	}
-	//static PhysContactInfo lastGroundContact = {btManifoldPoint{}};
-	m_moveVelocity = vel;
-
-	//static auto forceTest = 100.f;
-	//vel -= uvec::create(lastGroundContact.contactPoint.m_normalWorldOnB) *forceTest;
-	//auto *pGroundContactInfo = physController->GetGroundContactInfo();
-	//if(pGroundContactInfo != nullptr)
-	//	lastGroundContact = *pGroundContactInfo;
-
-	if(pVelComponent.valid()) {
-		vel += groundVelocity; // Re-add ground velocity
-		pVelComponent->SetVelocity(vel);
-	}
-	//return controller->Move(disp,elapsedTime,minDist);
-#ifdef ENABLE_DEPRECATED_PHYSICS
-	const auto threshold = -0.03;
-	auto localVel = vel;
-	uvec::rotate(&localVel, viewRot);
-	auto contactNormal = physController->GetController()->GetGroundTouchNormal();
-	;
-	if(vel.y <= 0.1f && physController->IsGroundWalkable() && (contactNormal.has_value() && pGroundContactInfo->contactDistance >= threshold) && mv == MOVETYPE::WALK) {
-		auto &info = *pGroundContactInfo;
-		//auto pos = uvec::create((info.controllerIndex == 0u ? info.contactPoint.getPositionWorldOnA() : info.contactPoint.getPositionWorldOnB()) /PhysEnv::WORLD_SCALE);
-		auto n = -*contactNormal;
-		//ent.GetNetworkState()->GetGameState()->DrawLine(
-		//	pos,pos -n *100.f,Color::Red,5.f
-		//);
-
-		const auto force = 100.f; // Somewhat arbitrary; The force to apply to the controller to make them stick to the ground
-		physController->AddLinearVelocity(n * force);
-	}
-#endif
-
-	return true;
-}
-
-const Vector3 &BaseCharacterComponent::GetMoveVelocity() const { return m_moveVelocity; }
-void BaseCharacterComponent::SetMoveVelocity(const Vector3 &vel) { m_moveVelocity = vel; }
-Vector3 BaseCharacterComponent::GetLocalVelocity() const
-{
-	auto &ent = GetEntity();
-	auto pVelComponent = ent.GetComponent<pragma::VelocityComponent>();
-	if(pVelComponent.expired())
-		return Vector3 {};
-	auto vel = pVelComponent->GetVelocity();
-	auto pPhysComponent = ent.GetPhysicsComponent();
-	auto *phys = pPhysComponent ? pPhysComponent->GetPhysicsObject() : nullptr;
-	if(phys != nullptr && phys->IsController()) {
-		auto *physController = static_cast<ControllerPhysObj *>(phys);
-		vel -= physController->GetGroundVelocity();
-	}
-	return vel;
-}
-
-float BaseCharacterComponent::GetMovementBlendScale() const
-{
-	auto blendScale = 0.f;
-	auto vel = GetLocalVelocity();
-	float speed = uvec::length(vel);
-	auto mvSpeed = CalcMovementSpeed();
-	auto speedMax = umath::max(mvSpeed.x, mvSpeed.y);
-	if(speedMax == 0.f)
-		blendScale = 0.f;
-	else {
-		blendScale = 1.f - speed / speedMax;
-		if(blendScale > 1.f)
-			blendScale = 1.f;
-		else if(blendScale < 0.f)
-			blendScale = 0.f;
-	}
-	return blendScale;
-}
 
 bool BaseCharacterComponent::HandleAnimationEvent(const AnimationEvent &ev)
 {
@@ -690,6 +435,8 @@ void BaseCharacterComponent::PlayFootStepSound(FootType foot, const SurfaceMater
 		}
 	}
 }
+MovementComponent *BaseCharacterComponent::GetMovementComponent() { return m_movementComponent; }
+OrientationComponent *BaseCharacterComponent::GetOrientationComponent() { return m_orientationComponent; }
 
 bool BaseCharacterComponent::IsCharacter() const { return true; }
 bool BaseCharacterComponent::IsMoving() const
@@ -711,7 +458,8 @@ void BaseCharacterComponent::FootStep(FootType foot)
 
 	auto moveScale = 1.f;
 	if(IsMoving() == true) {
-		moveScale = 1.f - GetMovementBlendScale();
+		if(m_movementComponent)
+			moveScale = 1.f - m_movementComponent->GetMovementBlendScale();
 		if(moveScale < 0.1f) //0.25f)
 			return;
 	}
@@ -740,46 +488,6 @@ TraceData BaseCharacterComponent::GetAimTraceData(std::optional<float> maxDist) 
 	// See also: ControllerPhysObj::PostSimulate
 	return trData;
 }
-bool BaseCharacterComponent::CanMove() const
-{
-	auto pPhysComponent = GetEntity().GetPhysicsComponent();
-	auto mvType = pPhysComponent ? pPhysComponent->GetMoveType() : MOVETYPE::NONE;
-	if(!pPhysComponent || mvType == MOVETYPE::NONE)
-		return false;
-	auto *pPhysObj = pPhysComponent->GetPhysicsObject();
-	return pPhysObj != nullptr && pPhysObj->IsController();
-}
-Vector2 BaseCharacterComponent::CalcMovementSpeed() const
-{
-	CECalcMovementSpeed evData {};
-	if(InvokeEventCallbacks(EVENT_CALC_MOVEMENT_SPEED, evData) == util::EventReply::Handled)
-		return evData.speed;
-	return Vector2 {};
-}
-float BaseCharacterComponent::CalcAirMovementModifier() const
-{
-	CECalcAirMovementModifier evData {};
-	if(InvokeEventCallbacks(EVENT_CALC_AIR_MOVEMENT_MODIFIER, evData) == util::EventReply::Handled)
-		return evData.airMovementModifier;
-	return 0.f;
-}
-float BaseCharacterComponent::CalcMovementAcceleration(float &optOutRampUpTime) const
-{
-	CECalcMovementAcceleration evData {};
-	if(InvokeEventCallbacks(EVENT_CALC_MOVEMENT_ACCELERATION, evData) == util::EventReply::Handled) {
-		optOutRampUpTime = evData.rampUpTime;
-		return evData.acceleration;
-	}
-	return 0.f;
-}
-
-Vector3 BaseCharacterComponent::CalcMovementDirection(const Vector3 &forward, const Vector3 &right) const
-{
-	CECalcMovementDirection evData {forward, right};
-	if(InvokeEventCallbacks(EVENT_CALC_MOVEMENT_DIRECTION, evData) == util::EventReply::Handled)
-		return evData.direction;
-	return Vector3 {};
-}
 
 EulerAngles BaseCharacterComponent::GetViewAngles() const { return EulerAngles(m_angView); }
 void BaseCharacterComponent::SetViewAngles(const EulerAngles &ang) { SetViewOrientation(uquat::create(ang)); }
@@ -794,7 +502,7 @@ void BaseCharacterComponent::OnTick(double tDelta)
 			auto pPhysComponent = ent.GetPhysicsComponent();
 			auto *phys = pPhysComponent ? pPhysComponent->GetPhysicsObject() : nullptr;
 			if(phys == nullptr || phys->IsController()) {
-				auto &rotRef = GetOrientationAxesRotation();
+				auto rotRef = GetOrientationAxesRotation();
 				auto &rotCur = pTrComponent->GetRotation();
 				auto rot = rotRef * rotCur;
 				auto angCur = EulerAngles(rot);
@@ -853,9 +561,8 @@ bool BaseCharacterComponent::Jump()
 	if(GetJumpPower() == 0.f)
 		return false;
 	auto &ent = GetEntity();
-	auto charComponent = ent.GetCharacterComponent();
 	auto pTrComponent = ent.GetTransformComponent();
-	auto upDir = (charComponent.valid()) ? charComponent->GetUpDirection() : uvec::UP;
+	auto upDir = m_orientationComponent ? m_orientationComponent->GetUpDirection() : uvec::UP;
 	auto vel = upDir * (m_jumpPower->GetValue() * (pTrComponent ? pTrComponent->GetScale() : Vector3 {1.f, 1.f, 1.f}));
 	return Jump(vel);
 }
@@ -912,56 +619,6 @@ void CEOnFootStep::PushArguments(lua_State *l) { Lua::PushInt(l, umath::to_integ
 
 CEOnJump::CEOnJump(const Vector3 &velocity) : velocity {velocity} {}
 void CEOnJump::PushArguments(lua_State *l) { Lua::Push<Vector3>(l, velocity); }
-
-//////////////////
-
-CECalcMovementSpeed::CECalcMovementSpeed() {}
-void CECalcMovementSpeed::PushArguments(lua_State *l) {}
-uint32_t CECalcMovementSpeed::GetReturnCount() { return 1; }
-void CECalcMovementSpeed::HandleReturnValues(lua_State *l)
-{
-	if(Lua::IsSet(l, -1))
-		speed = *Lua::CheckVector2(l, -1);
-}
-
-//////////////////
-
-CECalcAirMovementModifier::CECalcAirMovementModifier() {}
-void CECalcAirMovementModifier::PushArguments(lua_State *l) {}
-uint32_t CECalcAirMovementModifier::GetReturnCount() { return 1; }
-void CECalcAirMovementModifier::HandleReturnValues(lua_State *l)
-{
-	if(Lua::IsSet(l, -1))
-		airMovementModifier = Lua::CheckNumber(l, -1);
-}
-
-//////////////////
-
-CECalcMovementAcceleration::CECalcMovementAcceleration() {}
-void CECalcMovementAcceleration::PushArguments(lua_State *l) {}
-uint32_t CECalcMovementAcceleration::GetReturnCount() { return 2; }
-void CECalcMovementAcceleration::HandleReturnValues(lua_State *l)
-{
-	if(Lua::IsSet(l, -2))
-		acceleration = Lua::CheckNumber(l, -2);
-	if(Lua::IsSet(l, -1))
-		rampUpTime = Lua::CheckNumber(l, -1);
-}
-
-//////////////////
-
-CECalcMovementDirection::CECalcMovementDirection(const Vector3 &forward, const Vector3 &right) : forward(forward), right(right) {}
-void CECalcMovementDirection::PushArguments(lua_State *l)
-{
-	Lua::Push<Vector3>(l, forward);
-	Lua::Push<Vector3>(l, right);
-}
-uint32_t CECalcMovementDirection::GetReturnCount() { return 1; }
-void CECalcMovementDirection::HandleReturnValues(lua_State *l)
-{
-	if(Lua::IsSet(l, -1))
-		direction = *Lua::CheckVector(l, -1);
-}
 
 //////////////////
 

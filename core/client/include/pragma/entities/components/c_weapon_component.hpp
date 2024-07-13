@@ -20,6 +20,7 @@ namespace nwm {
 struct AnimationEvent;
 namespace pragma {
 	class CViewModelComponent;
+	class BaseObserverComponent;
 	class DLLCLIENT CWeaponComponent final : public BaseWeaponComponent, public CBaseNetComponent {
 	  public:
 		static ComponentEventId EVENT_ATTACH_TO_OWNER;
@@ -61,6 +62,8 @@ namespace pragma {
 		pragma::ComponentId GetViewModelComponent() const { return m_viewModelComponent; }
 		void UpdateDeployState();
 	  protected:
+		void UpdateObserver(BaseObserverComponent *observer);
+
 		// Either the view-model or the character that owns the weapon
 		EntityHandle m_hTarget;
 		StateFlags m_stateFlags = StateFlags::None;
@@ -70,6 +73,7 @@ namespace pragma {
 
 		std::optional<umath::Degree> m_viewFov {};
 		CallbackHandle m_cbOnOwnerObserverModeChanged = {};
+		CallbackHandle m_cbOnObserverChanged {};
 		virtual Activity TranslateViewActivity(Activity act);
 		virtual void OnFireBullets(const BulletInfo &bulletInfo, Vector3 &bulletOrigin, Vector3 &bulletDir, Vector3 *effectsOrigin = nullptr) override;
 		virtual void InitializeLuaObject(lua_State *l) override;

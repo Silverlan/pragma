@@ -37,6 +37,7 @@ namespace pragma {
 		virtual void OnParentChanged(BaseEntity *parent) {};
 
 		EntityURef m_parent;
+		bool m_parentValid = false;
 		pragma::NetEventId m_netEvSetParent = pragma::INVALID_NET_EVENT;
 	};
 };

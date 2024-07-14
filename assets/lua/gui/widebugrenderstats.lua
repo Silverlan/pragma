@@ -60,28 +60,31 @@ function gui.DebugRenderStats:OnInitialize()
 	self.m_tNextUpdate = time.real_time()
 
 	local pl = ents.get_local_player()
-	self.m_cbActionInput = pl:AddEventCallback(
-		ents.PlayerComponent.EVENT_HANDLE_ACTION_INPUT,
-		function(action, bPressed, magnitude)
-			if action == input.ACTION_ATTACK2 and bPressed then
-				if self:HasFocus() then
-					self:TrapFocus(false)
-					self:KillFocus()
+	local actionInputC = pl:GetEntity():GetComponent(ents.COMPONENT_ACTION_INPUT_CONTROLLER)
+	if actionInputC ~= nil then
+		self.m_cbActionInput = actionInputC:AddEventCallback(
+			ents.ActionInputControllerComponent.EVENT_HANDLE_ACTION_INPUT,
+			function(action, bPressed, magnitude)
+				if action == input.ACTION_ATTACK2 and bPressed then
+					if self:HasFocus() then
+						self:TrapFocus(false)
+						self:KillFocus()
 
-					local windowSize = gui.get_window_size()
-					input.set_cursor_pos(Vector2(windowSize.x * 0.5, windowSize.y * 0.5)) -- Reset mouse cursor to center of screen
-				else
-					self:TrapFocus()
-					self:RequestFocus()
+						local windowSize = gui.get_window_size()
+						input.set_cursor_pos(Vector2(windowSize.x * 0.5, windowSize.y * 0.5)) -- Reset mouse cursor to center of screen
+					else
+						self:TrapFocus()
+						self:RequestFocus()
+					end
+					return util.EVENT_REPLY_HANDLED
 				end
-				return util.EVENT_REPLY_HANDLED
+				if action == input.ACTION_JUMP and bPressed then
+					self:SetLocked(not self:IsLocked())
+					return util.EVENT_REPLY_HANDLED
+				end
 			end
-			if action == input.ACTION_JUMP and bPressed then
-				self:SetLocked(not self:IsLocked())
-				return util.EVENT_REPLY_HANDLED
-			end
-		end
-	)
+		)
+	end
 
 	self:AddSlider({ self.m_tree:GetRoot(), self.m_data }, "Scenes:", function(stats)
 		return self.m_numScenes

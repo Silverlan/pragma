@@ -240,9 +240,6 @@ namespace pragma::lua {
 	namespace base_ownable_component {
 		static void register_class(luabind::module_ &mod);
 	};
-	namespace base_parent_component {
-		static void register_class(luabind::module_ &mod);
-	};
 	namespace base_physics_component {
 		static void register_class(luabind::module_ &mod);
 	};
@@ -1111,7 +1108,6 @@ void pragma::lua::register_entity_component_classes(lua_State *l, luabind::modul
 	base_observable_component::register_class(mod);
 	base_observer_component::register_class(mod);
 	base_ownable_component::register_class(mod);
-	base_parent_component::register_class(mod);
 	base_physics_component::register_class(mod);
 	base_player_component::register_class(mod);
 	base_point_at_target_component::register_class(mod);
@@ -3575,15 +3571,6 @@ void pragma::lua::base_time_scale_component::register_class(luabind::module_ &mo
 	def.def("GetTimeScale", &pragma::BaseTimeScaleComponent::GetTimeScale);
 	def.def("SetTimeScale", &pragma::BaseTimeScaleComponent::GetTimeScale);
 	def.def("GetEffectiveTimeScale", &pragma::BaseTimeScaleComponent::GetEffectiveTimeScale);
-}
-
-#include "pragma/entities/components/parent_component.hpp"
-void pragma::lua::base_parent_component::register_class(luabind::module_ &mod)
-{
-	auto def = Lua::create_base_entity_component_class<pragma::ParentComponent>("ParentComponent");
-	def.add_static_constant("EVENT_ON_CHILD_ADDED", pragma::ParentComponent::EVENT_ON_CHILD_ADDED);
-	def.add_static_constant("EVENT_ON_CHILD_REMOVED", pragma::ParentComponent::EVENT_ON_CHILD_REMOVED);
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
 #include "pragma/entities/components/base_ownable_component.hpp"

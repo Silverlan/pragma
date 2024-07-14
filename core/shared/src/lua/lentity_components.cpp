@@ -39,6 +39,7 @@
 #include "pragma/entities/components/base_weapon_component.hpp"
 #include "pragma/entities/components/base_ownable_component.hpp"
 #include "pragma/entities/components/base_player_component.hpp"
+#include "pragma/entities/components/base_child_component.hpp"
 #include "pragma/entities/components/global_component.hpp"
 #include "pragma/entities/components/damageable_component.hpp"
 #include "pragma/entities/components/animation_driver_component.hpp"
@@ -825,6 +826,29 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	entsMod[defUsable];
 
 	auto defParent = pragma::lua::create_entity_component_class<pragma::ParentComponent, pragma::BaseEntityComponent>("ParentComponent");
+	defParent.def(
+	  "GetChildren", +[](lua_State *l, pragma::ParentComponent &parentC) -> luabind::object {
+		  auto &children = parentC.GetChildren();
+		  auto tChildren = luabind::newtable(l);
+		  int32_t i = 1;
+		  for(auto &hChild : children) {
+			  if(hChild.expired())
+				  continue;
+			  tChildren[i++] = hChild->GetLuaObject();
+		  }
+		  return tChildren;
+	  });
+	defParent.def(
+	  "GetChildCount", +[](pragma::ParentComponent &parentC) -> size_t { return parentC.GetChildren().size(); });
+	defParent.def(
+	  "GetChild", +[](pragma::ParentComponent &parentC, size_t index) -> luabind::object {
+		  auto &children = parentC.GetChildren();
+		  if(index >= children.size() || children[index].expired())
+			  return Lua::nil;
+		  return children[index]->GetLuaObject();
+	  });
+	defParent.add_static_constant("EVENT_ON_CHILD_ADDED", pragma::ParentComponent::EVENT_ON_CHILD_ADDED);
+	defParent.add_static_constant("EVENT_ON_CHILD_REMOVED", pragma::ParentComponent::EVENT_ON_CHILD_REMOVED);
 	entsMod[defParent];
 
 	auto defMap = pragma::lua::create_entity_component_class<pragma::MapComponent, pragma::BaseEntityComponent>("MapComponent");

@@ -107,7 +107,7 @@ void MovementComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 		m_orientationComponent = &static_cast<OrientationComponent &>(component);
 	else {
 		auto *charC = dynamic_cast<BaseCharacterComponent *>(&component);
-		if(m_charComponent)
+		if(charC)
 			m_charComponent = charC;
 	}
 }
@@ -118,7 +118,7 @@ void MovementComponent::OnEntityComponentRemoved(BaseEntityComponent &component)
 		m_orientationComponent = nullptr;
 	else {
 		auto *charC = dynamic_cast<BaseCharacterComponent *>(&component);
-		if(m_charComponent)
+		if(charC)
 			m_charComponent = nullptr;
 	}
 }

@@ -33,9 +33,15 @@ void BaseChildComponent::Initialize()
 	m_netEvSetParent = SetupNetEvent("set_parent");
 }
 void BaseChildComponent::OnRemove() { BaseEntityComponent::OnRemove(); }
-void BaseChildComponent::OnEntitySpawn() { BaseEntityComponent::OnEntitySpawn(); }
+void BaseChildComponent::OnEntitySpawn()
+{
+	BaseEntityComponent::OnEntitySpawn();
+	if(!m_parentValid)
+		SetParent(m_parent); // Try again if parent wasn't valid before
+}
 void BaseChildComponent::ClearParent()
 {
+	m_parentValid = false;
 	auto *entParent = GetParentEntity();
 	if(entParent) {
 		auto parentC = entParent->GetComponent<ParentComponent>();
@@ -49,10 +55,13 @@ void BaseChildComponent::SetParent(const pragma::EntityURef &parent)
 	m_parent = parent;
 	auto *entParent = GetParentEntity();
 	if(entParent) {
+		m_parentValid = true;
 		auto parentC = entParent->AddComponent<ParentComponent>();
 		if(parentC.valid())
 			parentC->AddChild(*this);
 	}
+	else
+		m_parentValid = false;
 
 	OnParentChanged(entParent);
 	BroadcastEvent(EVENT_ON_PARENT_CHANGED);

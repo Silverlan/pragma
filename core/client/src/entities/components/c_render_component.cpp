@@ -736,19 +736,37 @@ void CRenderComponent::SetHidden(bool hidden)
 	PropagateHiddenState();
 	UpdateVisibility();
 }
-bool CRenderComponent::IsHidden() const { return umath::is_flag_set(m_stateFlags, StateFlags::Hidden | StateFlags::AncestorHidden); }
+bool CRenderComponent::IsHidden() const
+{
+	if(ShouldIgnoreAncestorVisibility())
+		return umath::is_flag_set(m_stateFlags, StateFlags::Hidden);
+	return umath::is_flag_set(m_stateFlags, StateFlags::Hidden | StateFlags::AncestorHidden);
+}
 bool CRenderComponent::IsVisible() const { return !IsHidden() && *m_renderPass != pragma::rendering::SceneRenderPass::None; }
+void CRenderComponent::SetIgnoreAncestorVisibility(bool ignoreVisibility)
+{
+	umath::set_flag(m_stateFlags, StateFlags::IgnoreAncestorVisibility, ignoreVisibility);
+	PropagateHiddenState();
+	UpdateVisibility();
+}
+bool CRenderComponent::ShouldIgnoreAncestorVisibility() const { return umath::is_flag_set(m_stateFlags, StateFlags::IgnoreAncestorVisibility); }
 void CRenderComponent::UpdateAncestorHiddenState()
 {
 	auto parentHidden = false;
-	auto *entParent = GetEntity().GetParent();
-	while(entParent) {
-		auto renderC = entParent->GetComponent<CRenderComponent>();
-		if(renderC.valid() && renderC->IsHidden()) {
-			parentHidden = true;
-			break;
+	if(!ShouldIgnoreAncestorVisibility()) {
+		auto *entParent = GetEntity().GetParent();
+		while(entParent) {
+			auto renderC = entParent->GetComponent<CRenderComponent>();
+			if(renderC.valid()) {
+				if(renderC->IsHidden()) {
+					parentHidden = true;
+					break;
+				}
+				if(renderC->ShouldIgnoreAncestorVisibility())
+					break;
+			}
+			entParent = entParent->GetParent();
 		}
-		entParent = entParent->GetParent();
 	}
 	if(umath::is_flag_set(m_stateFlags, StateFlags::AncestorHidden) == parentHidden)
 		return;

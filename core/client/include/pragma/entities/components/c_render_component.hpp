@@ -57,6 +57,7 @@ namespace pragma {
 			ShouldDrawShadow = ShouldDraw << 1u,
 			Hidden = ShouldDrawShadow << 1u,
 			AncestorHidden = Hidden << 1u,
+			IgnoreAncestorVisibility = AncestorHidden << 1u,
 		};
 		static constexpr auto USE_HOST_MEMORY_FOR_RENDER_DATA = true;
 
@@ -200,6 +201,8 @@ namespace pragma {
 		void SetHidden(bool hidden);
 		bool IsHidden() const;
 		bool IsVisible() const;
+		void SetIgnoreAncestorVisibility(bool ignoreVisibility);
+		bool ShouldIgnoreAncestorVisibility() const;
 
 		GameShaderSpecialization GetShaderPipelineSpecialization() const;
 		void ClearRenderBuffers();

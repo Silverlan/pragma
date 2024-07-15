@@ -72,6 +72,17 @@ extern DLLNETWORK Engine *engine;
 static auto s_bIgnoreIncludeCache = false;
 void Lua::set_ignore_include_cache(bool b) { s_bIgnoreIncludeCache = b; }
 
+std::optional<std::string> Lua::find_script_file(const std::string &fileName)
+{
+	auto raw = fileName + Lua::DOT_FILE_EXTENSION;
+	if(filemanager::exists(Lua::SCRIPT_DIRECTORY_SLASH + raw))
+		return raw;
+	auto precompiled = fileName + Lua::DOT_FILE_EXTENSION_PRECOMPILED;
+	if(filemanager::exists(Lua::SCRIPT_DIRECTORY_SLASH + precompiled))
+		return precompiled;
+	return {};
+}
+
 luabind::detail::class_rep *Lua::get_crep(luabind::object o)
 {
 	auto *L = o.interpreter();

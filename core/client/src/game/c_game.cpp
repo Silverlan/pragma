@@ -110,6 +110,7 @@
 #include <pragma/entities/components/action_input_controller_component.hpp>
 #include <pragma/rendering/c_sci_gpu_timer_manager.hpp>
 #include <pragma/level/level_info.hpp>
+#include <pragma/lua/util.hpp>
 #include <pragma/asset_types/world.hpp>
 #include <sharedutils/util_library.hpp>
 #include <shader/prosper_pipeline_loader.hpp>
@@ -859,8 +860,9 @@ WIBase *CGame::CreateGUIElement(std::string className, WIBase *parent)
 			return nullptr;
 		auto lclassName = className;
 		ustring::to_lower(lclassName);
-		auto luaPath = "gui/" + lclassName + ".lua";
-		if(FileManager::Exists("lua/" + luaPath) && ExecuteLuaFile(luaPath)) {
+		auto basePath = "gui/" + lclassName;
+		auto luaPath = Lua::find_script_file(basePath);
+		if(luaPath && ExecuteLuaFile(*luaPath)) {
 			o = m_luaGUIElements.GetClassObject(className);
 			if(o != nullptr) {
 				skipLuaFile = true;

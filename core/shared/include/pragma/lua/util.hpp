@@ -13,6 +13,7 @@
 namespace Lua {
 	DLLNETWORK luabind::detail::class_rep *get_crep(luabind::object o);
 	DLLNETWORK void set_ignore_include_cache(bool b);
+	DLLNETWORK std::optional<std::string> find_script_file(const std::string &fileName);
 
 	template<class T, class TCast>
 	bool get_table_value(lua_State *l, const std::string &name, uint32_t t, TCast &ret, const std::function<T(lua_State *, int32_t)> &check)

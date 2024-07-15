@@ -12,7 +12,7 @@
 #include "pragma/networking/ip_address.hpp"
 #include <cinttypes>
 
-class Resource;
+struct Resource;
 class NetPacket;
 namespace pragma {
 	class SPlayerComponent;

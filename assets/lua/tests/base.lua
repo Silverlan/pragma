@@ -88,9 +88,5 @@ tests.run = function(scriptName)
 	tests.manager:Start()
 end
 tests.complete = function(success, errMsg)
-	if success == false then
-		error("Test '" .. tests.manager:GetActiveTest() .. "' failed: " .. tostring(errMsg))
-	end
-
-	tests.manager:CallCallbacks("OnTestComplete", success, errMsg)
+	tests.manager:CompleteTest(success, errMsg)
 end

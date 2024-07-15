@@ -19,6 +19,7 @@
 #include "pragma/gui/wiluaskin.h"
 #include "pragma/gui/wgui_luainterface.h"
 #include <pragma/lua/lua_call.hpp>
+#include <pragma/lua/util.hpp>
 #include <pragma/lua/classes/ldef_vector.h>
 #include <pragma/logging.hpp>
 #include <prosper_window.hpp>
@@ -290,8 +291,8 @@ void Lua::gui::register_element(const std::string &className, const Lua::classOb
 
 bool Lua::gui::load_skin(const std::string &skinName)
 {
-	std::string fname = "gui/skins/" + skinName + ".lua";
-	return c_game->ExecuteLuaFile(fname, client->GetGUILuaState());
+	auto luaPath = Lua::find_script_file("gui/skins/" + skinName);
+	return luaPath && c_game->ExecuteLuaFile(*luaPath, client->GetGUILuaState());
 }
 
 static bool register_skin(lua_State *l, const std::string &skin, const luabind::tableT<void> &vars, const luabind::tableT<void> &skinData, const std::string *baseName)

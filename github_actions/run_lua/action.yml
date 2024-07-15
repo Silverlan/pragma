@@ -53,8 +53,10 @@ runs:
 
         cat <<EOF > ${scriptFileName}
         local cbOnError = game.add_event_listener("OnLuaError",function(err)
+          console.print_messageln("A Lua error has occurred! Shutting down...")
           file.write("ci.txt", "lua")
           file.write("ci_lua_error.txt", err)
+          engine.shutdown()
         end)
         EOF
 

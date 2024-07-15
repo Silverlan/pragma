@@ -33,14 +33,6 @@ jobs:
         config:
           - os: windows-latest
             name: "Windows x64 MSVC"
-            artifact: "Windows-MSVC.tar.xz"
-            build_type: "RelWithDebInfo"
-            environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
-            cc: "cl"
-            cxx: "cl"
-            archiver: "7z a"
-            generators: "Visual Studio 17 2022"
-            build_dir: 'build'
     steps:
       - name: Setup Pragma
         uses: Silverlan/pragma/github_actions/setup@main

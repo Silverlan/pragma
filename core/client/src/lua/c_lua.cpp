@@ -179,15 +179,32 @@ void CGame::RegisterLua()
 		      if(numFrames < 1)
 			      numFrames = 1;
 		      Lua::CheckFunction(l, 2);
+		      auto waitForThink = false;
+		      if(Lua::IsSet(l, 3))
+			      waitForThink = Lua::CheckBool(l, 3);
 		      luabind::object func {luabind::from_stack(l, 2)};
 		      auto cb = FunctionCallback<void>::Create(nullptr);
-		      static_cast<Callback<void> *>(cb.get())->SetFunction([l, cb, numFrames, func]() mutable {
+		      static_cast<Callback<void> *>(cb.get())->SetFunction([l, cb, numFrames, func, waitForThink]() mutable {
 			      --numFrames;
 			      if(numFrames == 0) {
-				      auto result = Lua::CallFunction(l, [&func](lua_State *l) -> Lua::StatusCode {
-					      func.push(l);
-					      return Lua::StatusCode::Ok;
-				      });
+				      if(waitForThink) {
+					      auto cbThink = FunctionCallback<void>::Create(nullptr);
+					      static_cast<Callback<void> *>(cbThink.get())->SetFunction([l, cbThink, func]() mutable {
+						      Lua::CallFunction(l, [&func](lua_State *l) -> Lua::StatusCode {
+							      func.push(l);
+							      return Lua::StatusCode::Ok;
+						      });
+						      if(cbThink.IsValid())
+							      cbThink.Remove();
+					      });
+					      c_game->AddCallback("Think", cbThink);
+				      }
+				      else {
+					      Lua::CallFunction(l, [&func](lua_State *l) -> Lua::StatusCode {
+						      func.push(l);
+						      return Lua::StatusCode::Ok;
+					      });
+				      }
 				      if(cb.IsValid())
 					      cb.Remove();
 			      }

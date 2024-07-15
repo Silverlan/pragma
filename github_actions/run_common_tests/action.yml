@@ -32,6 +32,15 @@ runs:
         artifacts-name: "base-tests"
         screenshot: true
 
+    - name: PFM - Create Actor
+      uses: Silverlan/pragma/github_actions/run_tests@main
+      with:
+        test-scripts: |
+          "tests/pfm/create_actor.lua"
+        working-directory: "${{ inputs.working-directory }}"
+        artifacts-name: "pfm-create-actor"
+        screenshot: true
+
     - name: Checkout Import Tests
       uses: actions/checkout@v4
       if: ${{ inputs.import-tests-token }} != ""

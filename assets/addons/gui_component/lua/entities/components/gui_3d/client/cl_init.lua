@@ -345,41 +345,44 @@ end
 function ents.GUI3D:InitializeGUICallbacks()
 	local pl = ents.get_local_player()
 	if util.is_valid(pl) then
-		self.m_cbActionInput = pl:AddEventCallback(
-			ents.PlayerComponent.EVENT_HANDLE_ACTION_INPUT,
-			function(action, bPressed, magnitude)
-				if util.is_valid(self.m_pGui) == false then
-					return util.EVENT_REPLY_UNHANDLED
-				end
-
-				local renderC = self:GetEntityComponent(ents.COMPONENT_RENDER)
-				if renderC == nil or renderC:GetSceneRenderPass() == game.SCENE_RENDER_PASS_NONE then
-					return util.EVENT_REPLY_UNHANDLED
-				end
-
-				local bt
-				if action == input.ACTION_ATTACK then
-					bt = input.MOUSE_BUTTON_LEFT
-				elseif action == input.ACTION_ATTACK2 then
-					bt = input.MOUSE_BUTTON_RIGHT
-				end
-				if bt == nil then
-					return util.EVENT_REPLY_UNHANDLED
-				end
-				local state = (bPressed == true) and input.STATE_PRESS or input.STATE_RELEASE
-
-				if state == input.STATE_RELEASE and self.m_keyDown ~= nil then
-					local key = self.m_keyDown
-					self.m_keyDown = nil
-					if key > input.KEY_BACKSPACE then
-						self:InjectKeyboardInput(key, state)
-						return util.EVENT_REPLY_HANDLED
+		local actionInputC = pl:GetEntity():GetComponent(ents.COMPONENT_ACTION_INPUT_CONTROLLER)
+		if actionInputC ~= nil then
+			self.m_cbActionInput = actionInputC:AddEventCallback(
+				ents.ActionInputControllerComponent.EVENT_HANDLE_ACTION_INPUT,
+				function(action, bPressed, magnitude)
+					if util.is_valid(self.m_pGui) == false then
+						return util.EVENT_REPLY_UNHANDLED
 					end
-					return util.EVENT_REPLY_UNHANDLED
+
+					local renderC = self:GetEntityComponent(ents.COMPONENT_RENDER)
+					if renderC == nil or renderC:GetSceneRenderPass() == game.SCENE_RENDER_PASS_NONE then
+						return util.EVENT_REPLY_UNHANDLED
+					end
+
+					local bt
+					if action == input.ACTION_ATTACK then
+						bt = input.MOUSE_BUTTON_LEFT
+					elseif action == input.ACTION_ATTACK2 then
+						bt = input.MOUSE_BUTTON_RIGHT
+					end
+					if bt == nil then
+						return util.EVENT_REPLY_UNHANDLED
+					end
+					local state = (bPressed == true) and input.STATE_PRESS or input.STATE_RELEASE
+
+					if state == input.STATE_RELEASE and self.m_keyDown ~= nil then
+						local key = self.m_keyDown
+						self.m_keyDown = nil
+						if key > input.KEY_BACKSPACE then
+							self:InjectKeyboardInput(key, state)
+							return util.EVENT_REPLY_HANDLED
+						end
+						return util.EVENT_REPLY_UNHANDLED
+					end
+					return self:InjectMouseInput(bt, state)
 				end
-				return self:InjectMouseInput(bt, state)
-			end
-		)
+			)
+		end
 	end
 	self.m_cbScrollInput = game.add_callback("OnScrollInput", function(x, y)
 		if util.is_valid(self.m_pGui) == false then

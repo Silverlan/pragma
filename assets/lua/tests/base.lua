@@ -10,8 +10,11 @@ function tests.TestManager:__finalize()
 	self:Clear()
 end
 
-function tests.TestManager:AddTest(test)
-	table.insert(self.m_testQueue, test)
+function tests.TestManager:AddTest(name, fc)
+	table.insert(self.m_testQueue, {
+		name = name,
+		fc = fc,
+	})
 end
 
 function tests.TestManager:Clear()
@@ -43,11 +46,16 @@ function tests.TestManager:CompleteTest(success, msg)
 end
 
 function tests.TestManager:StartTest(test)
-	print("Starting test '" .. test .. "'...")
-	self.m_currentTest = test
-	self:CallCallbacks("OnTestStart", test)
+	print("Starting test '" .. test.name .. "'...")
+	self.m_currentTest = test.name
+	self:CallCallbacks("OnTestStart", test.name)
 
-	local retVals = { include(test) }
+	local retVals
+	if test.fc ~= nil then
+		retVals = { test.fc() }
+	else
+		retVals = { include(test.name) }
+	end
 	if retVals[1] ~= nil then
 		self:CompleteTest(retVals[1], retVals[2])
 	end
@@ -81,8 +89,8 @@ end
 tests.is_test_running = function()
 	return tests.manager:IsTestActive()
 end
-tests.queue = function(scriptName)
-	tests.manager:AddTest(scriptName)
+tests.queue = function(name, fc)
+	tests.manager:AddTest(name, fc)
 end
 tests.run = function(scriptName)
 	tests.manager:Start()

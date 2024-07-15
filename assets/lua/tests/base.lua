@@ -30,7 +30,7 @@ function tests.TestManager:CompleteTest(success, msg)
 	local curTest = self.m_currentTest
 	self.m_currentTest = nil
 	if success == false then
-		error("Test '" .. tests.impl.currentTest .. "' failed: " .. tostring(msg))
+		error("Test '" .. self.m_currentTest .. "' failed: " .. tostring(msg))
 	end
 
 	print("Test '" .. curTest .. "' has completed!")
@@ -89,8 +89,8 @@ tests.run = function(scriptName)
 end
 tests.complete = function(success, errMsg)
 	if success == false then
-		error("Test '" .. tests.impl.currentTest .. "' failed: " .. tostring(errMsg))
+		error("Test '" .. tests.manager:GetActiveTest() .. "' failed: " .. tostring(errMsg))
 	end
 
-	tests.impl.callbackHandler:CallCallbacks("OnTestComplete", success, errMsg)
+	tests.manager:CallCallbacks("OnTestComplete", success, errMsg)
 end

@@ -15,9 +15,11 @@
 REGISTER_CONCOMMAND_CL(cl_entities, CMD_entities_cl, ConVarFlags::None, "Prints a list of all current clientside entities in the world.");
 REGISTER_CONCOMMAND_CL(setpos, CMD_setpos, ConVarFlags::None, "Changes the position of the local player. Requires cheats to be enabled. Usage: setpos <x> <y> <z>");
 REGISTER_CONCOMMAND_CL(getpos, CMD_getpos, ConVarFlags::None, "Prints the current position of the local player to the console.");
+REGISTER_CONCOMMAND_CL(setcampos, CMD_setcampos, ConVarFlags::None, "Changes the current position of the camera.");
 REGISTER_CONCOMMAND_CL(getcampos, CMD_getcampos, ConVarFlags::None, "Prints the current position of the camera.");
 REGISTER_CONCOMMAND_CL(setang, CMD_setang, ConVarFlags::None, "Changes the angles of the local player. Requires cheats to be enabled. Usage: setang <pitch> <yaw> <roll>");
 REGISTER_CONCOMMAND_CL(getang, CMD_getang, ConVarFlags::None, "Prints the current angles of the local player to the console.");
+REGISTER_CONCOMMAND_CL(setcamang, CMD_setcamang, ConVarFlags::None, "Changes the current angles of the camera to the console.");
 REGISTER_CONCOMMAND_CL(getcamang, CMD_getcamang, ConVarFlags::None, "Prints the current angles of the camera to the console.");
 REGISTER_CONCOMMAND_CL(sound_play, CMD_sound_play, ConVarFlags::None, "Precaches and immediately plays the given sound file. Usage: sound_play <soundFile>");
 REGISTER_CONCOMMAND_CL(sound_stop, CMD_sound_stop, ConVarFlags::None, "Stops all sounds that are currently playing.");

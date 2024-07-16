@@ -14,9 +14,11 @@
 DLLCLIENT void CMD_entities_cl(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &);
 DLLCLIENT void CMD_setpos(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &);
 DLLCLIENT void CMD_getpos(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+DLLCLIENT void CMD_setcampos(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
 DLLCLIENT void CMD_getcampos(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
 DLLCLIENT void CMD_setang(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
 DLLCLIENT void CMD_getang(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+DLLCLIENT void CMD_setcamang(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
 DLLCLIENT void CMD_getcamang(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
 DLLCLIENT void CMD_sound_play(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
 DLLCLIENT void CMD_sound_stop(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);

@@ -140,6 +140,22 @@ DLLCLIENT void CMD_getpos(NetworkState *state, pragma::BasePlayerComponent *pl, 
 	Con::cout << pos.x << " " << pos.y << " " << pos.z << Con::endl;
 }
 
+DLLCLIENT void CMD_setcampos(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+{
+	if(!state->IsGameActive())
+		return;
+	if(argv.size() < 3)
+		return;
+	ClientState *cstate = static_cast<ClientState *>(state);
+	CHECK_CHEATS("setpos", cstate, );
+	Vector3 pos(atof(argv[0].c_str()), atof(argv[1].c_str()), atof(argv[2].c_str()));
+	auto *game = static_cast<CGame *>(state->GetGameState());
+	auto *pCam = game->GetRenderCamera();
+	if(pCam == nullptr)
+		return;
+	pCam->GetEntity().SetPosition(pos);
+}
+
 DLLCLIENT void CMD_getcampos(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	if(!state->IsGameActive())
@@ -182,6 +198,22 @@ DLLCLIENT void CMD_getang(NetworkState *state, pragma::BasePlayerComponent *pl, 
 		return;
 	EulerAngles ang = charComponent->GetViewAngles();
 	Con::cout << ang.p << " " << ang.y << " " << ang.r << Con::endl;
+}
+
+DLLCLIENT void CMD_setcamang(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+{
+	if(!state->IsGameActive())
+		return;
+	if(argv.size() < 3)
+		return;
+	ClientState *cstate = static_cast<ClientState *>(state);
+	CHECK_CHEATS("setpos", cstate, );
+	EulerAngles ang(util::to_float(argv[0]), util::to_float(argv[1]), util::to_float(argv[2]));
+	auto *game = static_cast<CGame *>(state->GetGameState());
+	auto *pCam = game->GetRenderCamera();
+	if(pCam == nullptr)
+		return;
+	pCam->GetEntity().SetRotation(uquat::create(ang));
 }
 
 DLLCLIENT void CMD_getcamang(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &)

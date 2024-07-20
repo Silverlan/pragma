@@ -1015,7 +1015,7 @@ luabind::tableT<SurfaceMaterial> Lua::physenv::get_surface_materials(lua_State *
 	auto t = luabind::newtable(l);
 	if(mats) {
 		for(UInt i = 0; i < mats->size(); i++)
-			t[i + 1] = &mats[i];
+			t[i + 1] = &(*mats)[i];
 	}
 	return t;
 }

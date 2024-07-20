@@ -1389,9 +1389,9 @@ void Game::RegisterLuaLibraries()
 	    "make_relative",
 	    +[](const std::string &path, const std::string &rootPath) -> std::
 	                                                                string {
-		                                                                util::Path p {path};
-		                                                                p.MakeRelative(rootPath);
-		                                                                return p.GetString();
+		    util::Path p {path};
+		    p.MakeRelative(rootPath);
+		    return p.GetString();
 	                                                                }),
 	  luabind::def("read", Lua::file::Read), luabind::def("write", Lua::file::Write), luabind::def("get_canonicalized_path", Lua::file::GetCanonicalizedPath), luabind::def("get_file_path", ufile::get_path_from_filename), luabind::def("get_file_name", ufile::get_file_from_filename),
 	  luabind::def("get_file_extension", static_cast<luabind::object (*)(lua_State *, const std::string &, const std::vector<std::string> &)>(Lua::file::GetFileExtension)),
@@ -1401,16 +1401,16 @@ void Game::RegisterLuaLibraries()
 	    "remove_file_extension",
 	    +[](std::string path) -> std::
 	                            pair<std::string, std::optional<std::string>> {
-		                            auto ext = ufile::remove_extension_from_filename(path);
-		                            return {path, ext};
+		    auto ext = ufile::remove_extension_from_filename(path);
+		    return {path, ext};
 	                            }),
 	  luabind::def(
 	    "remove_file_extension",
 	    +[](lua_State *l, std::string path, luabind::table<> t) -> std::
 	                                                              pair<std::string, std::optional<std::string>> {
-		                                                              auto exts = Lua::table_to_vector<std::string>(l, t, 2);
-		                                                              auto ext = ufile::remove_extension_from_filename(path, exts);
-		                                                              return {path, ext};
+		    auto exts = Lua::table_to_vector<std::string>(l, t, 2);
+		    auto ext = ufile::remove_extension_from_filename(path, exts);
+		    return {path, ext};
 	                                                              }),
 	  luabind::def("strip_illegal_filename_characters", static_cast<std::string (*)(std::string)>([](std::string path) {
 		  // See https://en.wikipedia.org/wiki/Filename#Reserved_characters_and_words
@@ -1428,8 +1428,23 @@ void Game::RegisterLuaLibraries()
 			  return false;
 		  return FileManager::CopyFile(srcFile.c_str(), dstFile.c_str());
 	  })),
+	  luabind::def("move", static_cast<bool (*)(lua_State *, std::string, std::string)>([](lua_State *l, std::string srcFile, std::string dstFile) -> bool {
+		  if(Lua::file::validate_write_operation(l, srcFile) == false)
+			  return false;
+		  if(Lua::file::validate_write_operation(l, dstFile) == false)
+			  return false;
+		  return filemanager::move_file(srcFile.c_str(), dstFile.c_str());
+	  })),
 	  luabind::def(
 	    "update_file_index_cache", +[](lua_State *l, const std::string &path) { filemanager::update_file_index_cache(path); }),
+	  luabind::def(
+	    "rename", +[](lua_State *l, std::string srcFile, std::string dstFile) -> bool {
+		    if(Lua::file::validate_write_operation(l, srcFile) == false)
+			    return false;
+		    if(Lua::file::validate_write_operation(l, dstFile) == false)
+			    return false;
+		    return filemanager::rename_file(srcFile, dstFile);
+	}),
 	  luabind::def(
 	    "is_empty", +[](const std::string &path) -> std::optional<bool> {
 		    auto paths = FileManager::FindAbsolutePaths(path);

@@ -1,0 +1,12 @@
+"load_models"
+{
+	$string scriptFile "tests/assets/load_models.lua"
+}
+
+
+"assets"
+{
+	$array children [string][
+		"load_models"
+	]
+}

@@ -17,10 +17,6 @@ inputs:
     description: 'The version of Pragma to download (if it not already exists).'
     required: true
     default: 'nightly'
-  screenshot:
-    description: 'If enabled (and artifacts-name has been specified), a screenshot will be taken and uploaded as artifact after the script has been executed.'
-    required: true
-    default: false
   artifacts-name:
     description: 'If specified, debug files (e.g. logs) will be uploaded as artifacts under this name.'
     required: true
@@ -50,22 +46,13 @@ runs:
           local scripts = {
             ${{ env.test_scripts_string }}
           }
-          for _,script in ipairs(scripts) do
-            include(script)
+          for _, script in ipairs(scripts) do
+            tests.load(script)
+            local testName = file.remove_file_extension(file.get_file_name(script), {\"udm\"})
+            tests.queue(testName)
           end
           local cbOnTestComplete = tests.add_event_listener(\"OnAllTestsComplete\", function(success, errMsg)
-            if(${{ inputs.screenshot }}) then
-              -- Wait a few frames before taking the screenshot
-              game.wait_for_frames(5, function()
-                local screenshotPath = util.screenshot()
-                if(screenshotPath ~= nil) then
-                  file.create_directory(\"artifacts\")
-                  file.copy(screenshotPath, \"artifacts/screenshot.png\")
-                end
-                engine.shutdown()
-              end)
-            else
-              engine.shutdown()
-            end
+            file.rename(\"temp/tests\", \"artifacts\")
+            engine.shutdown()
           end)
           tests.run()

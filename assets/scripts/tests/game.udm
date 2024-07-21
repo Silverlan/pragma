@@ -1,0 +1,12 @@
+"create_entity"
+{
+	$string scriptFile "tests/game/create_entity.lua"
+}
+
+
+"game"
+{
+	$array children [string][
+		"create_entity"
+	]
+}

@@ -142,7 +142,7 @@ runs:
         if [ -d "${{ inputs.working-directory }}/crashdumps" ]; then
           cp -r ${{ inputs.working-directory }}/crashdumps artifacts/crashdumps
         fi
-        if [ -d "${{ inputs.working-directory }}/artifacts" ]; then
+        if [ -d "${{ inputs.working-directory }}/artifacts" ] && [ "$(ls -A ${{ inputs.working-directory }}/artifacts)" ]; then
           cp -rf ${{ inputs.working-directory }}/artifacts/* artifacts/
         fi
 

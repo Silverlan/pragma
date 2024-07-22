@@ -139,7 +139,7 @@ Alternatively you can also add custom modules by editing `pragma/build_scripts/u
 To build Pragma with PFM, add the `--with-pfm --with-all-pfm-modules` options. Due to licensing issues, this will only include a pre-built version of the Cycles renderer **without** OptiX support.
 If you want to have full CUDA and OptiX support when rendering with Cycles, you will have to add the `--build-cycles` option as well. You will also have to install the following before you do so:
 - [SlikSVN](https://sliksvn.com/download/) (Windows only)
-- [CUDA Toolkit 11.6](https://developer.nvidia.com/cuda-11-6-0-download-archive)
+- [CUDA Toolkit 12.2](https://developer.nvidia.com/cuda-12-2-0-download-archive)
 - [OptiX SDK 7.3.0](https://developer.nvidia.com/designworks/optix/download) (NVIDIA account required)
 
 Please note that newer versions of CUDA or OptiX will likely not work.

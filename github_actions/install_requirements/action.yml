@@ -36,10 +36,10 @@ runs:
 
     # For Cycles
     - name: Install Cuda
-      uses: Jimver/cuda-toolkit@v0.2.10
+      uses: Jimver/cuda-toolkit@v0.2.16
       if: ${{ inputs.with_cuda == '1' }}
       with:
-        cuda: '11.7.0'
+        cuda: '12.2.0'
     # TODO: Install OptiX
 
     - name: Set PIP_BREAK_SYSTEM_PACKAGES env variable

@@ -56,6 +56,8 @@ void BaseChildComponent::SetParent(const pragma::EntityURef &parent)
 	auto *entParent = GetParentEntity();
 	if(entParent) {
 		m_parentValid = true;
+		if(entParent == &GetEntity())
+			throw std::logic_error {"Attempted to assign entity as parent to itself! This is not allowed!"};
 		auto parentC = entParent->AddComponent<ParentComponent>();
 		if(parentC.valid())
 			parentC->AddChild(*this);

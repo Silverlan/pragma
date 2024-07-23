@@ -825,7 +825,7 @@ if with_pfm:
 		)
 		add_pragma_module(
 			name="pr_unirender",
-			commitSha="95556d2832107237a07367c6a09632084758de82",
+			commitSha="622caa7b2012052ef4d8e8735e3a84afa72e6061",
 			repositoryUrl="https://github.com/Silverlan/pr_cycles.git"
 		)
 		add_pragma_module(
@@ -1070,11 +1070,11 @@ def download_addon(name,addonName,url,commitId=None):
 curDir = os.getcwd()
 if not skip_repository_updates:
 	if with_pfm:
-		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","dca3dd89dc596924ca280e35d3659fa6349606d6")
+		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","bba9e0ad7424bf19e6cb074420b66b36e03ffabe")
 		download_addon("model editor","tool_model_editor","https://github.com/Silverlan/pragma_model_editor.git","56d46dacb398fa7540e794359eaf1081c9df1edd")
 
 	if with_vr:
-		download_addon("VR","virtual_reality","https://github.com/Silverlan/PragmaVR.git","4b69a26e366b4da034a9b5d47319eebf28417b95")
+		download_addon("VR","virtual_reality","https://github.com/Silverlan/PragmaVR.git","8eed4f4b5466d794ef8fa316ec4c9cbae65df576")
 
 	if with_pfm:
 		download_addon("PFM Living Room Demo","pfm_demo_living_room","https://github.com/Silverlan/pfm_demo_living_room.git","4cbecad4a2d6f502b6d9709178883678101f7e2c")

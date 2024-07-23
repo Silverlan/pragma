@@ -45,6 +45,24 @@ function tests.TestManager:GetActiveTest()
 end
 
 function tests.TestManager:CompleteTest(success, resultData)
+	resultData = resultData or {}
+	if resultData.screenshot then
+		LOGGER:Info("Taking screenshot...")
+		resultData["assets"] = resultData["assets"] or {}
+		-- Wait a few frames before taking the screenshot
+		game.wait_for_frames(5, function()
+			local screenshotPath = util.screenshot()
+			if screenshotPath ~= nil then
+				table.insert(resultData["assets"], screenshotPath)
+			else
+				LOGGER:Warn("Failed to take screenshot!")
+			end
+			resultData.screenshot = false
+			tests.manager:CompleteTest(success, resultData)
+		end)
+		return
+	end
+
 	if type(resultData) == "string" then
 		resultData = {
 			message = resultData,
@@ -161,22 +179,6 @@ tests.run = function()
 	tests.manager:Start()
 end
 tests.complete = function(success, resultData)
-	resultData = resultData or {}
-	if resultData.screenshot then
-		LOGGER:Info("Taking screenshot...")
-		resultData["assets"] = resultData["assets"] or {}
-		-- Wait a few frames before taking the screenshot
-		game.wait_for_frames(5, function()
-			local screenshotPath = util.screenshot()
-			if screenshotPath ~= nil then
-				table.insert(resultData["assets"], screenshotPath)
-			else
-				LOGGER:Warn("Failed to take screenshot!")
-			end
-			tests.manager:CompleteTest(success, resultData)
-		end)
-		return
-	end
 	tests.manager:CompleteTest(success, resultData)
 end
 tests.load = function(fileName)

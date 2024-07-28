@@ -335,6 +335,7 @@ void Game::RegisterLuaGlobals()
 	    {"ACTION_ATTACK4", umath::to_integral(Action::Attack4)},
 	    {"ACTION_RELOAD", umath::to_integral(Action::Reload)},
 	    {"ACTION_USE", umath::to_integral(Action::Use)},
+	    {"ACTION_LAST", umath::to_integral(Action::Last)},
 	  });
 
 	Lua::RegisterLibraryEnums(GetLuaState(), "game",

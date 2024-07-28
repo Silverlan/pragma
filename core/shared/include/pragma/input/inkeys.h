@@ -25,7 +25,9 @@ enum class Action : uint32_t {
 	Attack3 = Attack2 << 1,
 	Attack4 = Attack3 << 1,
 	Reload = Attack4 << 1,
-	Use = Reload << 1
+	Use = Reload << 1,
+
+	Last = Use,
 };
 
 REGISTER_BASIC_BITWISE_OPERATORS(Action);

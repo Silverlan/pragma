@@ -12,6 +12,7 @@
 #include <wgui/wibase.h>
 #include "pragma/gui/wicontainer.h"
 #include <unordered_map>
+#include <functional>
 
 class WITable;
 class WITableRow;
@@ -27,6 +28,7 @@ class DLLCLIENT WITableCell : public WIContainer {
 	virtual void Initialize() override;
 	virtual void SetSize(int x, int y) override;
 	virtual void OnChildAdded(WIBase *child) override;
+	virtual void DoUpdate() override;
 	WIBase *GetFirstElement();
 	// Not yet implemented
 	void SetRowSpan(int32_t span);
@@ -55,6 +57,9 @@ class DLLCLIENT WITable : public WIContainer {
 	void RemoveRow(uint32_t rowIdx);
 	void SetSortable(bool b);
 	bool IsSortable() const;
+	void SetSortFunction(const std::function<bool(const WITableRow &, const WITableRow &, uint32_t, bool)> &sortFunc);
+	const std::function<bool(const WITableRow &, const WITableRow &, uint32_t, bool)> &GetSortFunction() const;
+	void Sort();
 	void SetRowHeight(int h);
 	int GetRowHeight() const;
 	void SetSelectable(SelectableMode mode);
@@ -70,8 +75,8 @@ class DLLCLIENT WITable : public WIContainer {
 	virtual void SizeToContents(bool x = true, bool y = true) override;
   protected:
 	struct SortData {
-		SortData(WITable *t, bool bAsc, unsigned int col) : table(t), ascending(bAsc), column(col) {}
-		bool operator()(const WIHandle &a, const WIHandle &b) { return table->SortRows(ascending, column, a, b); }
+		SortData(WITable *t, bool bAsc, unsigned int col);
+		bool operator()(const WIHandle &a, const WIHandle &b);
 		WITable *table;
 		bool ascending;
 		unsigned int column;
@@ -80,6 +85,7 @@ class DLLCLIENT WITable : public WIContainer {
 	int m_rowHeight;
 	SelectableMode m_selectableMode = SelectableMode::None;
 	bool m_bSortable;
+	std::function<bool(const WITableRow &, const WITableRow &, uint32_t, bool)> m_sortFunction;
 	unsigned int m_sortColumn;
 	bool m_bSortAsc;
 	WIHandle m_hSortArrow;
@@ -92,7 +98,7 @@ class DLLCLIENT WITable : public WIContainer {
 	void OnRowSelected(WITableRow *row);
 	std::vector<WIHandle> m_selectedRows;
 	static bool SortRows(bool bAsc, unsigned int col, const WIHandle &a, const WIHandle &b);
-	void Sort(bool bAsc = true, unsigned int col = 0);
+	void Sort(bool bAsc, unsigned int col = 0);
 	virtual void DoUpdate() override;
 	WITableRow *GetHeaderRow();
 	void InitializeRow(WITableRow *row, bool bHeader = false);

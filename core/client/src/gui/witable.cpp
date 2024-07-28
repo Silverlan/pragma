@@ -22,6 +22,22 @@ LINK_WGUI_TO_CLASS(WITableCell, WITableCell);
 
 extern DLLCLIENT CEngine *c_engine;
 extern ClientState *client;
+#pragma optimize("", off)
+
+WITable::SortData::SortData(WITable *t, bool bAsc, unsigned int col) : table(t), ascending(bAsc), column(col) {}
+bool WITable::SortData::operator()(const WIHandle &a, const WIHandle &b)
+{
+	auto &func = table->GetSortFunction();
+	if(func) {
+		auto *rowA = dynamic_cast<const WITableRow *>(a.get());
+		auto *rowB = dynamic_cast<const WITableRow *>(b.get());
+		if(!rowA || !rowB)
+			return false;
+		return func(*rowA, *rowB, column, ascending);
+	}
+	return WITable::SortRows(ascending, column, a, b);
+}
+
 WITable::WITable() : WIContainer(), m_bSortAsc(true), m_sortColumn(CUInt32(-1)), m_rowHeight(-1), m_bSortable(false), m_bScrollable(false) { RegisterCallback<void, WITableRow *>("OnRowCreated"); }
 
 WITable::~WITable() { SetSortable(false); }
@@ -61,6 +77,8 @@ void WITable::OnChildAdded(WIBase *child)
 
 bool WITable::SortRows(bool bAsc, unsigned int col, const WIHandle &a, const WIHandle &b)
 {
+	if(a.IsValid() == false || b.IsValid() == false)
+		return false;
 	const util::Utf8String *textA = nullptr;
 	const util::Utf8String *textB = nullptr;
 	const WITableRow *rowA = a.get<const WITableRow>();
@@ -99,6 +117,8 @@ void WITable::OnRowCellCreated(WITableCell *cell)
 		return CallbackReturnType::HasReturnValue;
 	})));
 }
+
+void WITable::Sort() { Sort(m_bSortAsc, m_sortColumn); }
 
 void WITable::OnHeaderCellPressed(WITableCell *cell)
 {
@@ -198,6 +218,9 @@ void WITable::SetSortable(bool b)
 	m_sortCallbacks.push_back(row->AddCallback("OnCellCreated", FunctionCallback<void, WITableCell *>::Create(std::bind(&WITable::OnRowCellCreated, this, std::placeholders::_1))));
 }
 bool WITable::IsSortable() const { return m_bSortable; }
+
+void WITable::SetSortFunction(const std::function<bool(const WITableRow &, const WITableRow &, uint32_t, bool)> &sortFunc) { m_sortFunction = sortFunc; }
+const std::function<bool(const WITableRow &, const WITableRow &, uint32_t, bool)> &WITable::GetSortFunction() const { return m_sortFunction; }
 
 void WITable::SetScrollable(bool b)
 {
@@ -808,6 +831,17 @@ WIBase *WITableCell::GetFirstElement()
 			return hChild.get();
 	}
 	return nullptr;
+}
+void WITableCell::DoUpdate()
+{
+	int32_t xOffset = 0;
+	for(auto &hChild : m_children) {
+		if(!hChild.IsValid())
+			continue;
+		hChild->SetX(xOffset);
+		xOffset += hChild->GetWidth();
+	}
+	WIContainer::DoUpdate();
 }
 WITableRow *WITableCell::GetRow() const
 {

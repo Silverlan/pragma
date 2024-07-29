@@ -1397,6 +1397,17 @@ void Game::RegisterLuaLibraries()
 	  luabind::def("get_file_extension", static_cast<luabind::object (*)(lua_State *, const std::string &, const std::vector<std::string> &)>(Lua::file::GetFileExtension)),
 	  luabind::def("get_file_extension", static_cast<luabind::object (*)(lua_State *, const std::string &)>(Lua::file::GetFileExtension)), luabind::def("get_size", FileManager::GetFileSize),
 	  luabind::def("get_size", static_cast<uint64_t (*)(std::string)>(+[](std::string path) { return FileManager::GetFileSize(path); })), luabind::def("compare_path", Lua::file::ComparePath),
+	  luabind::def("get_last_write_time",+[](const std::string &path) -> std::optional<std::string> {
+		    auto ftime = filemanager::get_last_write_time(path);
+		    if(!ftime)
+			    return {};
+		    auto sctp = std::chrono::time_point_cast<std::chrono::system_clock::duration>(*ftime - std::filesystem::file_time_type::clock::now() + std::chrono::system_clock::now());
+		    std::time_t cftime = std::chrono::system_clock::to_time_t(sctp);
+
+			std::ostringstream oss;
+		    oss << std::put_time(std::localtime(&cftime), "%Y-%m-%d %H:%M");
+		    return oss.str();
+	  }),
 	  luabind::def(
 	    "remove_file_extension",
 	    +[](std::string path) -> std::

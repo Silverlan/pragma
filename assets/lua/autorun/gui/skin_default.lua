@@ -437,18 +437,21 @@ skin["table_row_offset"] = {
 		["witext"] = {
 			Initialize = function(GUI, pElement)
 				local pCell = pElement:GetParent()
-				if pCell:IsValid() and pCell:GetClass() == "witablecell" then
-					local fcSetSize = function()
-						if pElement:IsValid() == false then
-							return
+				if pCell:IsValid() then
+					local childIdx = pCell:FindChildIndex(pElement)
+					if childIdx == 0 and pCell:GetClass() == "witablecell" then
+						local fcSetSize = function()
+							if pElement:IsValid() == false then
+								return
+							end
+							local sz = pCell:GetSize()
+							pElement:SetY(pCell:GetHeight() * 0.5 - pElement:GetHeight() * 0.5)
+							pElement:SetX(GUI.TABLE_TEXT_OFFSET_X)
 						end
-						local sz = pCell:GetSize()
-						pElement:SetY(pCell:GetHeight() * 0.5 - pElement:GetHeight() * 0.5)
-						pElement:SetX(GUI.TABLE_TEXT_OFFSET_X)
+						local cbSetSize = pCell:AddCallback("SetSize", fcSetSize)
+						add_skin_element(pElement, cbSetSize)
+						fcSetSize()
 					end
-					local cbSetSize = pCell:AddCallback("SetSize", fcSetSize)
-					add_skin_element(pElement, cbSetSize)
-					fcSetSize()
 				end
 			end,
 			Release = clear_element,

@@ -739,6 +739,30 @@ void Lua::WITable::register_class(luabind::class_<::WITable, luabind::bases<::WI
 	classDef.def("GetRowCount", &::WITable::GetRowCount);
 	classDef.def("SetSortable", &::WITable::SetSortable);
 	classDef.def("IsSortable", &::WITable::IsSortable);
+	classDef.def("Sort", static_cast<void (::WITable::*)()>(&::WITable::Sort));
+	classDef.def(
+	  "SetSortFunction", +[](lua_State *l, ::WITable &table, const Lua::func<bool, const ::WITableRow &, const ::WITableRow &> &lfunc) {
+		  table.SetSortFunction([l, lfunc](const ::WITableRow &rowA, const ::WITableRow &rowB, uint32_t columnIndex, bool ascending) -> bool {
+			  auto r = Lua::CallFunction(
+			    l,
+			    [&lfunc, &rowA, &rowB, columnIndex, ascending](lua_State *l) {
+				    lfunc.push(l);
+				    Lua::Push<::WIBase *>(l, const_cast<::WITableRow *>(&rowA));
+				    Lua::Push<::WIBase *>(l, const_cast<::WITableRow *>(&rowB));
+				    Lua::Push<uint32_t>(l, columnIndex);
+				    Lua::Push<bool>(l, ascending);
+				    return Lua::StatusCode::Ok;
+			    },
+			    1);
+			  if(r == Lua::StatusCode::Ok) {
+				  auto res = Lua::CheckBool(l, -1);
+				  Lua::Pop(l, 1);
+				  return res;
+			  }
+			  return false;
+		  });
+	  });
+
 	classDef.def("SetScrollable", &::WITable::SetScrollable);
 	classDef.def("IsScrollable", &::WITable::IsScrollable);
 	classDef.def("Clear", &::WITable::Clear);

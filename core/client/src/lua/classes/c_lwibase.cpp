@@ -745,7 +745,7 @@ void Lua::WITable::register_class(luabind::class_<::WITable, luabind::bases<::WI
 		  table.SetSortFunction([l, lfunc](const ::WITableRow &rowA, const ::WITableRow &rowB, uint32_t columnIndex, bool ascending) -> bool {
 			  auto r = Lua::CallFunction(
 			    l,
-			    [l, &lfunc, &rowA, &rowB, columnIndex, ascending](lua_State *l) {
+			    [&lfunc, &rowA, &rowB, columnIndex, ascending](lua_State *l) {
 				    lfunc.push(l);
 				    Lua::Push<::WIBase *>(l, const_cast<::WITableRow *>(&rowA));
 				    Lua::Push<::WIBase *>(l, const_cast<::WITableRow *>(&rowB));

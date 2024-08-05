@@ -529,8 +529,12 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	  luabind::def(
 	    "axis_to_vector", static_cast<Vector3(*)(pragma::SignedAxis)>(&pragma::axis_to_vector)),
 	  luabind::def(
-	    "remap", +[](float value, float fromLow, float fromHigh, float toLow, float toHigh) { return toLow + (value - fromLow) * (toHigh - toLow) / (fromHigh - fromLow);
-			  }),
+	    "remap", +[](float value, float fromLow, float fromHigh, float toLow, float toHigh) {
+		    auto diff = fromHigh - fromLow;
+		    if(umath::abs(diff) < 0.0001f)
+				return toLow;
+		    return toLow + (value - fromLow) * (toHigh - toLow) / diff;
+		}),
 		luabind::def("is_positive_axis",static_cast<bool(*)(pragma::SignedAxis)>(&pragma::is_positive_axis)),
 		luabind::def("is_negative_axis",static_cast<bool(*)(pragma::SignedAxis)>(&pragma::is_negative_axis))
 	];
@@ -1404,7 +1408,7 @@ void Game::RegisterLuaLibraries()
 		    auto sctp = std::chrono::time_point_cast<std::chrono::system_clock::duration>(*ftime - std::filesystem::file_time_type::clock::now() + std::chrono::system_clock::now());
 		    std::time_t cftime = std::chrono::system_clock::to_time_t(sctp);
 
-			std::ostringstream oss;
+		    std::ostringstream oss;
 		    oss << std::put_time(std::localtime(&cftime), "%Y-%m-%d %H:%M");
 		    return oss.str();
 	  }),

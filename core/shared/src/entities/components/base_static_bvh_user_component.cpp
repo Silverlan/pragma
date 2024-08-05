@@ -10,12 +10,18 @@
 #include "pragma/entities/components/base_static_bvh_cache_component.hpp"
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/entities/components/base_physics_component.hpp"
+#include "pragma/entities/components/panima_component.hpp"
 #include "pragma/entities/entity_component_manager_t.hpp"
 
 using namespace pragma;
 
 ComponentEventId BaseStaticBvhUserComponent::EVENT_ON_ACTIVATION_STATE_CHANGED = INVALID_COMPONENT_ID;
-void BaseStaticBvhUserComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { EVENT_ON_ACTIVATION_STATE_CHANGED = registerEvent("ON_ACTIVATION_STATE_CHANGED", ComponentEventInfo::Type::Broadcast); }
+ComponentEventId BaseStaticBvhUserComponent::EVENT_ON_STATIC_BVH_COMPONENT_CHANGED = INVALID_COMPONENT_ID;
+void BaseStaticBvhUserComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
+{
+	EVENT_ON_ACTIVATION_STATE_CHANGED = registerEvent("ON_ACTIVATION_STATE_CHANGED", ComponentEventInfo::Type::Broadcast);
+	EVENT_ON_STATIC_BVH_COMPONENT_CHANGED = registerEvent("ON_STATIC_BVH_COMPONENT_CHANGED", ComponentEventInfo::Type::Broadcast);
+}
 
 BaseStaticBvhUserComponent::BaseStaticBvhUserComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
 BaseStaticBvhUserComponent::~BaseStaticBvhUserComponent() {}
@@ -34,9 +40,6 @@ void BaseStaticBvhUserComponent::Initialize()
 			return util::EventReply::Unhandled;
 		});
 	}
-
-	if(ent.IsSpawned())
-		UpdateBvhStatus();
 }
 void BaseStaticBvhUserComponent::OnEntitySpawn()
 {
@@ -54,7 +57,7 @@ void BaseStaticBvhUserComponent::UpdateBvhStatus()
 	}
 
 	auto isStatic = GetEntity().IsStatic();
-	if(GetEntity().FindComponent("panima").valid())
+	if(m_panimaComponent)
 		isStatic = false;
 
 	if(m_staticBvhComponent.expired()) {
@@ -82,14 +85,18 @@ void BaseStaticBvhUserComponent::UpdateBvhStatus()
 void BaseStaticBvhUserComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {
 	BaseEntityComponent::OnEntityComponentAdded(component);
-	if(GetEntity().IsSpawned())
+	if(typeid(component) == typeid(PanimaComponent)) {
+		m_panimaComponent = static_cast<PanimaComponent *>(&component);
 		UpdateBvhStatus();
+	}
 }
 void BaseStaticBvhUserComponent::OnEntityComponentRemoved(BaseEntityComponent &component)
 {
 	BaseEntityComponent::OnEntityComponentAdded(component);
-	if(GetEntity().IsSpawned())
+	if(typeid(component) == typeid(PanimaComponent)) {
+		m_panimaComponent = nullptr;
 		UpdateBvhStatus();
+	}
 }
 bool BaseStaticBvhUserComponent::IsActive() const { return m_isActive; }
 util::EventReply BaseStaticBvhUserComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
@@ -106,7 +113,11 @@ void BaseStaticBvhUserComponent::OnRemove()
 	if(m_staticBvhComponent.valid())
 		m_staticBvhComponent->RemoveEntity(GetEntity());
 }
-void BaseStaticBvhUserComponent::SetStaticBvhCacheComponent(BaseStaticBvhCacheComponent *component) { m_staticBvhComponent = component ? component->GetHandle<BaseStaticBvhCacheComponent>() : pragma::ComponentHandle<BaseStaticBvhCacheComponent> {}; }
+void BaseStaticBvhUserComponent::SetStaticBvhCacheComponent(BaseStaticBvhCacheComponent *component)
+{
+	m_staticBvhComponent = component ? component->GetHandle<BaseStaticBvhCacheComponent>() : pragma::ComponentHandle<BaseStaticBvhCacheComponent> {};
+	BroadcastEvent(EVENT_ON_STATIC_BVH_COMPONENT_CHANGED);
+}
 void BaseStaticBvhUserComponent::InitializeDynamicBvhSubstitute(size_t staticBvhCacheVersion)
 {
 	m_staticBvhCacheVersion = staticBvhCacheVersion;

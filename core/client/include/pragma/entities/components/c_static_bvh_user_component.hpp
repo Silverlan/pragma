@@ -18,6 +18,8 @@ namespace pragma {
 		CStaticBvhUserComponent(BaseEntity &ent) : BaseStaticBvhUserComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
+		virtual void OnEntityComponentRemoved(BaseEntityComponent &component) override;
 	};
 };
 

@@ -104,6 +104,7 @@ namespace pragma {
 			Removed = IsLogicEnabled << 1u,
 			CleanedUp = Removed << 1u,
 			IsInactive = CleanedUp << 1u,
+			IsInitializing = IsInactive << 1u,
 		};
 
 		enum class LogSeverity : uint8_t {

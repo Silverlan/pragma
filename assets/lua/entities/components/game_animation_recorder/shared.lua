@@ -110,7 +110,7 @@ function Component:GetAnimation()
 	return self.m_animation
 end
 function Component:IsRecording()
-	return self.m_recording
+	return self.m_recording or false
 end
 
 function Component:RecordEntity(channelName, time, entityInfo)

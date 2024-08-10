@@ -68,6 +68,8 @@ function gui.WIFileDialog:OnInitialize()
 		self:CallCallbacks("OnFileSelected", fPath)
 		self:Close()
 	end)
+	t:SetColumnEnabled(gui.WIFileExplorer.COLUMN_DATE_MODIFIED, true)
+	t:UpdateColumns()
 	self.m_pFileList = t
 
 	local options = gui.create("WIPFMControlsMenu", self)

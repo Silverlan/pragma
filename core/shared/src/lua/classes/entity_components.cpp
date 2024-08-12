@@ -30,6 +30,7 @@
 #include "pragma/lua/converters/pair_converter_t.hpp"
 #include "pragma/lua/converters/property_converter_t.hpp"
 #include "pragma/lua/converters/game_type_converters_t.hpp"
+#include "pragma/lua/util_logging.hpp"
 #include "pragma/lua/lua_component_event.hpp"
 #include "pragma/lua/lua_call.hpp"
 #include "pragma/lua/lua_util_component.hpp"
@@ -620,21 +621,12 @@ static std::optional<std::pair<T, umath::CoordinateSpace>> convert_pose_to_membe
 	return convert_value_to_member_space<TMemberIdentifier, T, &pragma::BaseEntityComponent::ConvertPoseToMemberSpace>(component, memId, space, value);
 }
 
-static std::string to_string(lua_State *l, int i)
-{
-	auto status = -1;
-	std::string val;
-	if(Lua::lua_value_to_string(l, i, &status, &val) == false)
-		return "unknown";
-	return val;
-}
-
 template<size_t N>
 void log_with_args(const pragma::BaseEntityComponent &component, const char *msg, spdlog::level::level_enum logLevel, lua_State *l, int32_t argOffset)
 {
 	std::array<std::string, N> args;
 	for(size_t i = 0; i < args.size(); ++i)
-		args[i] = to_string(l, argOffset + (i + 1));
+		args[i] = Lua::logging::to_string(l, argOffset + (i + 1));
 
 	auto log = [&](const auto &...elements) { component.Log(logLevel, fmt::vformat(msg, fmt::make_format_args(elements...))); };
 	std::apply(log, args);
@@ -705,15 +697,6 @@ static int log(lua_State *l, spdlog::level::level_enum logLevel)
 		break;
 	}
 	return 0;
-}
-
-template<spdlog::level::level_enum TLevel>
-static void add_log_func(lua_State *l, luabind::object &oEntityComponent, const char *name)
-{
-	lua_pushcfunction(
-	  l, +[](lua_State *l) -> int { return log(l, TLevel); });
-	oEntityComponent[name] = luabind::object {luabind::from_stack(l, -1)};
-	Lua::Pop(l, 1);
 }
 
 static CallbackHandle add_event_callback(lua_State *l, pragma::BaseEntityComponent &hComponent, uint32_t eventId, const Lua::func<void> &function)
@@ -999,12 +982,12 @@ void pragma::lua::register_entity_component_classes(lua_State *l, luabind::modul
 
 	luabind::object oLogger = luabind::globals(l)["ents"];
 	oLogger = oLogger["EntityComponent"];
-	add_log_func<spdlog::level::trace>(l, oLogger, "LogTrace");
-	add_log_func<spdlog::level::debug>(l, oLogger, "LogDebug");
-	add_log_func<spdlog::level::info>(l, oLogger, "LogInfo");
-	add_log_func<spdlog::level::warn>(l, oLogger, "LogWarn");
-	add_log_func<spdlog::level::err>(l, oLogger, "LogErr");
-	add_log_func<spdlog::level::critical>(l, oLogger, "LogCritical");
+	Lua::logging::add_log_func<spdlog::level::trace, &::log>(l, oLogger, "LogTrace");
+	Lua::logging::add_log_func<spdlog::level::debug, &::log>(l, oLogger, "LogDebug");
+	Lua::logging::add_log_func<spdlog::level::info, &::log>(l, oLogger, "LogInfo");
+	Lua::logging::add_log_func<spdlog::level::warn, &::log>(l, oLogger, "LogWarn");
+	Lua::logging::add_log_func<spdlog::level::err, &::log>(l, oLogger, "LogErr");
+	Lua::logging::add_log_func<spdlog::level::critical, &::log>(l, oLogger, "LogCritical");
 
 	auto defBvh = Lua::create_base_entity_component_class<pragma::BaseBvhComponent>("BaseBvhComponent");
 

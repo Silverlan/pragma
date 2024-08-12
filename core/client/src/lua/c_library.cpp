@@ -55,6 +55,7 @@
 #include <pragma/lua/converters/thread_pool_converter_t.hpp>
 #include <pragma/lua/policies/core_policies.hpp>
 #include <pragma/lua/custom_constructor.hpp>
+#include <pragma/lua/util_logging.hpp>
 #include <pragma/model/modelmanager.h>
 #include <pragma/input/inputhelper.h>
 #include <sharedutils/util_file.h>
@@ -80,6 +81,76 @@
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CEngine *c_engine;
+
+static int log(lua_State *l, spdlog::level::level_enum logLevel)
+{
+	auto &el = Lua::Check<::WIBase>(l, 1);
+	const char *msg = Lua::CheckString(l, 2);
+	std::string loggerName = "ui_" +el.GetClass();
+	int32_t argOffset = 2;
+	auto n = lua_gettop(l) - argOffset; /* number of arguments */
+	switch(n) {
+	case 0:
+		{
+			Lua::logging::log_with_args<0>(loggerName, msg, logLevel, l, argOffset);
+			break;
+		}
+	case 1:
+		{
+			Lua::logging::log_with_args<1>(loggerName, msg, logLevel, l, argOffset);
+			break;
+		}
+	case 2:
+		{
+			Lua::logging::log_with_args<2>(loggerName, msg, logLevel, l, argOffset);
+			break;
+		}
+	case 3:
+		{
+			Lua::logging::log_with_args<3>(loggerName, msg, logLevel, l, argOffset);
+			break;
+		}
+	case 4:
+		{
+			Lua::logging::log_with_args<4>(loggerName, msg, logLevel, l, argOffset);
+			break;
+		}
+	case 5:
+		{
+			Lua::logging::log_with_args<5>(loggerName, msg, logLevel, l, argOffset);
+			break;
+		}
+	case 6:
+		{
+			Lua::logging::log_with_args<6>(loggerName, msg, logLevel, l, argOffset);
+			break;
+		}
+	case 7:
+		{
+			Lua::logging::log_with_args<7>(loggerName, msg, logLevel, l, argOffset);
+			break;
+		}
+	case 8:
+		{
+			Lua::logging::log_with_args<8>(loggerName, msg, logLevel, l, argOffset);
+			break;
+		}
+	case 9:
+		{
+			Lua::logging::log_with_args<9>(loggerName, msg, logLevel, l, argOffset);
+			break;
+		}
+	case 10:
+		{
+			Lua::logging::log_with_args<10>(loggerName, msg, logLevel, l, argOffset);
+			break;
+		}
+	default:
+		Lua::logging::log_with_args<0>(loggerName, msg, logLevel, l, argOffset);
+		break;
+	}
+	return 0;
+}
 
 static void register_gui(Lua::Interface &lua)
 {
@@ -203,14 +274,11 @@ static void register_gui(Lua::Interface &lua)
 			    monitor = &primaryMonitor;
 		    return monitor->GetSupportedVideoModes();
 	    }),
-		  luabind::def("open_main_menu",+[](ClientState *cl) {
-			cl->OpenMainMenu();
+		  luabind::def("open_main_menu",+[](ClientState *cl) { cl->OpenMainMenu();
 			}),
-		  luabind::def("close_main_menu",+[](ClientState *cl) {
-			cl->CloseMainMenu();
+		  luabind::def("close_main_menu",+[](ClientState *cl) { cl->CloseMainMenu();
 			}),
-		  luabind::def("is_main_menu_open",+[](ClientState *cl) -> bool {
-			return cl->IsMainMenuOpen();
+		  luabind::def("is_main_menu_open",+[](ClientState *cl) -> bool { return cl->IsMainMenuOpen();
 		})
 		];
 
@@ -235,6 +303,15 @@ static void register_gui(Lua::Interface &lua)
 	auto wiElementClassDef = luabind::class_<::WIBase>("Element");
 	Lua::WIBase::register_class(wiElementClassDef);
 	guiMod[wiElementClassDef];
+
+	luabind::object oLogger = luabind::globals(l)["gui"];
+	oLogger = oLogger["Element"];
+	Lua::logging::add_log_func<spdlog::level::trace, &log>(l, oLogger, "LogTrace");
+	Lua::logging::add_log_func<spdlog::level::debug, &log>(l, oLogger, "LogDebug");
+	Lua::logging::add_log_func<spdlog::level::info, &log>(l, oLogger, "LogInfo");
+	Lua::logging::add_log_func<spdlog::level::warn, &log>(l, oLogger, "LogWarn");
+	Lua::logging::add_log_func<spdlog::level::err, &log>(l, oLogger, "LogErr");
+	Lua::logging::add_log_func<spdlog::level::critical, &log>(l, oLogger, "LogCritical");
 
 	auto defDrawToTex = luabind::class_<Lua::gui::DrawToTextureInfo>("DrawToTextureInfo");
 	defDrawToTex.def(luabind::constructor<>());
@@ -1067,8 +1144,7 @@ void CGame::RegisterLuaLibraries()
 	  luabind::def("save_image", static_cast<std::pair<bool, std::optional<std::string>> (*)(lua_State *, uimg::ImageBuffer &, std::string, uimg::ImageFormat)>(save_image)),
 	  luabind::def("save_image", static_cast<bool (*)(lua_State *, luabind::table<>, std::string, uimg::TextureInfo &, bool)>(save_image)), luabind::def("save_image", static_cast<bool (*)(lua_State *, luabind::table<>, std::string, uimg::TextureInfo &)>(save_image)),
 	  luabind::def("save_image", static_cast<bool (*)(lua_State *, prosper::IImage &, std::string, uimg::TextureInfo &)>(save_image)), luabind::def("load_image", static_cast<luabind::object (*)(lua_State *, const std::string &, bool, uimg::Format)>(load_image)),
-	  luabind::def("load_image", static_cast<luabind::object (*)(lua_State *, const std::string &, bool)>(load_image)), luabind::def("load_image", static_cast<luabind::object (*)(lua_State *, const std::string &)>(load_image)),
-	  luabind::def("screenshot", ::util::screenshot),
+	  luabind::def("load_image", static_cast<luabind::object (*)(lua_State *, const std::string &, bool)>(load_image)), luabind::def("load_image", static_cast<luabind::object (*)(lua_State *, const std::string &)>(load_image)), luabind::def("screenshot", ::util::screenshot),
 	  luabind::def("capture_raytraced_screenshot", static_cast<util::ParallelJob<uimg::ImageLayerSet> (*)(lua_State *, uint32_t, uint32_t, uint32_t, bool, bool)>(capture_raytraced_screenshot)),
 	  luabind::def("capture_raytraced_screenshot", static_cast<util::ParallelJob<uimg::ImageLayerSet> (*)(lua_State *, uint32_t, uint32_t, uint32_t, bool)>(capture_raytraced_screenshot)),
 	  luabind::def("capture_raytraced_screenshot", static_cast<util::ParallelJob<uimg::ImageLayerSet> (*)(lua_State *, uint32_t, uint32_t, uint32_t)>(capture_raytraced_screenshot)),

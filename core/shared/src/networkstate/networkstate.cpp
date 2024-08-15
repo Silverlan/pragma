@@ -25,6 +25,7 @@
 #include "pragma/entities/components/base_player_component.hpp"
 #include "pragma/model/modelmanager.h"
 #include "pragma/debug/intel_vtune.hpp"
+#include "pragma/debug/debug_performance_profiler.hpp"
 #include <material_manager2.hpp>
 #include <pragma/console/s_cvar_global_functions.h>
 #include <pragma/lua/luaapi.h>
@@ -71,9 +72,8 @@ NetworkState::NetworkState() : CallbackHandler(), CVarHandler()
 		}
 		std::string postFix = IsClient() ? " (CL)" : " (SV)";
 		auto &cpuProfiler = engine->GetProfiler();
-		m_profilingStageManager = std::make_unique<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage, CPUProfilingPhase>>();
-		m_profilingStageManager->InitializeProfilingStageManager(cpuProfiler, {pragma::debug::ProfilingStage::Create(cpuProfiler, "UpdateSounds" + postFix, &engine->GetProfilingStageManager()->GetProfilerStage(Engine::CPUProfilingPhase::Think))});
-		static_assert(umath::to_integral(CPUProfilingPhase::Count) == 1u, "Added new profiling phase, but did not create associated profiling stage!");
+		m_profilingStageManager = std::make_unique<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage>>();
+		m_profilingStageManager->InitializeProfilingStageManager(cpuProfiler);
 	});
 }
 NetworkState::~NetworkState()
@@ -747,9 +747,9 @@ ConCommand *NetworkState::CreateConCommand(const std::string &scmd, LuaFunction 
 	return cmd;
 }
 
-pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage, NetworkState::CPUProfilingPhase> *NetworkState::GetProfilingStageManager() { return m_profilingStageManager.get(); }
-bool NetworkState::StartProfilingStage(CPUProfilingPhase stage) { return m_profilingStageManager && m_profilingStageManager->StartProfilerStage(stage); }
-bool NetworkState::StopProfilingStage(CPUProfilingPhase stage) { return m_profilingStageManager && m_profilingStageManager->StopProfilerStage(stage); }
+pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage> *NetworkState::GetProfilingStageManager() { return m_profilingStageManager.get(); }
+bool NetworkState::StartProfilingStage(const char *stage) { return m_profilingStageManager && m_profilingStageManager->StartProfilerStage(stage); }
+bool NetworkState::StopProfilingStage() { return m_profilingStageManager && m_profilingStageManager->StopProfilerStage(); }
 
 const double MS_THOUSAND = 1000;
 void NetworkState::Think()
@@ -761,9 +761,9 @@ void NetworkState::Think()
 		Con::cwar << "Delta time surpassed 0.5 seconds. Clamping..." << Con::endl;
 		m_tDelta = 0.5f;
 	}
-	StartProfilingStage(CPUProfilingPhase::UpdateSounds);
+	StartProfilingStage("UpdateSounds");
 	UpdateSounds();
-	StopProfilingStage(CPUProfilingPhase::UpdateSounds);
+	StopProfilingStage(); // UpdateSounds
 	CallCallbacks<void>("Think");
 	Game *game = GetGameState();
 	if(game != NULL)

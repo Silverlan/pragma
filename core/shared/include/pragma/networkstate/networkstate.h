@@ -8,7 +8,6 @@
 #ifndef __NETWORKSTATE_H__
 #define __NETWORKSTATE_H__
 #include "pragma/networkdefinitions.h"
-#include "pragma/debug/debug_performance_profiler.hpp"
 #include <pragma/lua/luaapi.h>
 #include <pragma/audio/alenums.hpp>
 #include <sharedutils/callback_handler.h>
@@ -72,6 +71,12 @@ namespace pragma {
 		class ModelManager;
 		enum class Type : uint8_t;
 	};
+	namespace debug {
+		class CPUProfiler;
+		template<class TProfilingStage>
+		class ProfilingStageManager;
+		class ProfilingStage;
+	};
 };
 using ALSoundRef = std::reference_wrapper<ALSound>;
 class DLLNETWORK NetworkState : public CallbackHandler, public CVarHandler {
@@ -80,8 +85,6 @@ class DLLNETWORK NetworkState : public CallbackHandler, public CVarHandler {
 	static ConVarHandle GetConVarHandle(std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &ptrs, std::string scvar);
   public:
 	virtual std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &GetConVarPtrs() = 0;
-	//
-	enum class CPUProfilingPhase : uint32_t { UpdateSounds = 0u, Count };
   public:
 	// Internal
 	std::vector<CallbackHandle> &GetLuaEnumRegisterCallbacks();
@@ -96,9 +99,9 @@ class DLLNETWORK NetworkState : public CallbackHandler, public CVarHandler {
 	pragma::asset::ModelManager &GetModelManager();
 
 	// Debug
-	pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage, CPUProfilingPhase> *GetProfilingStageManager();
-	bool StartProfilingStage(CPUProfilingPhase stage);
-	bool StopProfilingStage(CPUProfilingPhase stage);
+	pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage> *GetProfilingStageManager();
+	bool StartProfilingStage(const char *stage);
+	bool StopProfilingStage();
 
 	ResourceWatcherManager &GetResourceWatcher();
 
@@ -216,7 +219,7 @@ class DLLNETWORK NetworkState : public CallbackHandler, public CVarHandler {
 	std::vector<CallbackHandle> m_tickCallbacks;
 	std::queue<std::function<void()>> m_tickCallQueue;
 	CallbackHandle m_cbProfilingHandle = {};
-	std::unique_ptr<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage, CPUProfilingPhase>> m_profilingStageManager = nullptr;
+	std::unique_ptr<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage>> m_profilingStageManager;
 
 	// Library handles are stored as shared_ptrs of shared_ptr because we need the
 	// use count of each library in the network states to determine when to detach

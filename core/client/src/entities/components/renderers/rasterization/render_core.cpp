@@ -100,7 +100,7 @@ void pragma::CRasterizationRendererComponent::Render(const util::DrawSceneInfo &
 	// scene.GetSceneRenderDesc().BuildRenderQueue(drawSceneInfo);
 
 	// Prepass
-	c_game->StartProfilingStage(CGame::GPUProfilingPhase::Scene);
+	c_game->StartGPUProfilingStage("Scene");
 
 	auto &drawCmd = drawSceneInfo.commandBuffer;
 	auto &sceneRenderDesc = drawSceneInfo.scene->GetSceneRenderDesc();
@@ -199,7 +199,7 @@ void pragma::CRasterizationRendererComponent::Render(const util::DrawSceneInfo &
 		(*drawSceneInfo.renderStats)->SetTime(RenderStats::RenderStage::LightingPassExecutionCpu, std::chrono::steady_clock::now() - t);
 		drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::LightingPass)->EndGpuTimer(RenderPassStats::Timer::GpuExecution, *drawSceneInfo.commandBuffer);
 	}
-	c_game->StopProfilingStage(CGame::GPUProfilingPhase::Scene);
+	c_game->StopGPUProfilingStage(); // Scene
 
 	c_game->CallCallbacks<void, std::reference_wrapper<const util::DrawSceneInfo>>("RenderPostLightingPass", drawSceneInfo);
 
@@ -208,8 +208,8 @@ void pragma::CRasterizationRendererComponent::Render(const util::DrawSceneInfo &
 		(*drawSceneInfo.renderStats)->BeginGpuTimer(RenderStats::RenderStage::PostProcessingGpu, *drawSceneInfo.commandBuffer);
 		t = std::chrono::steady_clock::now();
 	}
-	c_game->StartProfilingStage(CGame::CPUProfilingPhase::PostProcessing);
-	c_game->StartProfilingStage(CGame::GPUProfilingPhase::PostProcessing);
+	c_game->StartProfilingStage("PostProcessing");
+	c_game->StartGPUProfilingStage("PostProcessing");
 
 	// Particles
 	RenderParticles(*drawSceneInfo.commandBuffer, drawSceneInfo, false, drawSceneInfo.commandBuffer.get());
@@ -234,8 +234,8 @@ void pragma::CRasterizationRendererComponent::Render(const util::DrawSceneInfo &
 	c_game->CallCallbacks<void, std::reference_wrapper<const util::DrawSceneInfo>>("RenderPostProcessing", drawSceneInfo);
 	c_game->CallLuaCallbacks<void, const util::DrawSceneInfo *>("RenderPostProcessing", &drawSceneInfo);
 
-	c_game->StopProfilingStage(CGame::GPUProfilingPhase::PostProcessing);
-	c_game->StopProfilingStage(CGame::CPUProfilingPhase::PostProcessing);
+	c_game->StopGPUProfilingStage(); // PostProcessing
+	c_game->StopProfilingStage(); // PostProcessing
 	if(drawSceneInfo.renderStats) {
 		(*drawSceneInfo.renderStats)->SetTime(RenderStats::RenderStage::PostProcessingExecutionCpu, std::chrono::steady_clock::now() - t);
 		(*drawSceneInfo.renderStats)->EndGpuTimer(RenderStats::RenderStage::PostProcessingGpu, *drawSceneInfo.commandBuffer);

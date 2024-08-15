@@ -12,7 +12,6 @@
 #include <pragma/engine.h>
 #include "pragma/launchparameters.h"
 #include "pragma/rendering/c_render_context.hpp"
-#include "pragma/rendering/c_sci_gpu_timer_manager.hpp"
 #include "pragma/input/c_keybind.h"
 #include <sharedutils/util_clock.hpp>
 #include <unordered_map>
@@ -31,6 +30,10 @@ namespace prosper {
 	class TimerQuery;
 	class IQueryPool;
 };
+namespace pragma::debug {
+	class GPUProfilingStage;
+	class GPUProfiler;
+};
 namespace util {
 	class Utf8String;
 };
@@ -47,21 +50,6 @@ class DLLCLIENT CEngine : public Engine, public pragma::RenderContext {
 	static const unsigned int MAX_STEREO_SOURCES = 64;
 	// Threshold at which axis value represents a key press
 	static const float AXIS_PRESS_THRESHOLD;
-
-	enum class GPUProfilingPhase : uint32_t {
-		Frame = 0u,
-		DrawScene,
-		GUI,
-
-		Count
-	};
-	enum class CPUProfilingPhase : uint32_t {
-		DrawFrame = 0u,
-		GUI,
-		ClientTick,
-
-		Count
-	};
   public:
 	enum class StateFlags : uint32_t {
 		None = 0u,
@@ -92,12 +80,12 @@ class DLLCLIENT CEngine : public Engine, public pragma::RenderContext {
 
 	// Debug
 	virtual void DumpDebugInformation(ZIPFile &zip) const override;
-	pragma::debug::ProfilingStageManager<pragma::debug::GPUProfilingStage, GPUProfilingPhase> *GetGPUProfilingStageManager();
-	pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage, CPUProfilingPhase> *GetProfilingStageManager();
-	bool StartProfilingStage(CPUProfilingPhase stage);
-	bool StopProfilingStage(CPUProfilingPhase stage);
-	bool StartProfilingStage(GPUProfilingPhase stage);
-	bool StopProfilingStage(GPUProfilingPhase stage);
+	pragma::debug::ProfilingStageManager<pragma::debug::GPUProfilingStage> *GetGPUProfilingStageManager();
+	pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage> *GetProfilingStageManager();
+	bool StartProfilingStage(const char *stage);
+	bool StopProfilingStage();
+	bool StartGPUProfilingStage(const char *stage);
+	bool StopGPUProfilingStage();
 	CallbackHandle AddGPUProfilingHandler(const std::function<void(bool)> &handler);
 	void SetGPUProfilingEnabled(bool bEnabled);
 
@@ -265,8 +253,8 @@ class DLLCLIENT CEngine : public Engine, public pragma::RenderContext {
 
 	std::unordered_map<std::string, std::shared_ptr<al::IEffect>> m_auxEffects;
 
-	std::unique_ptr<pragma::debug::ProfilingStageManager<pragma::debug::GPUProfilingStage, GPUProfilingPhase>> m_gpuProfilingStageManager = nullptr;
-	std::unique_ptr<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage, CPUProfilingPhase>> m_cpuProfilingStageManager = nullptr;
+	std::unique_ptr<pragma::debug::ProfilingStageManager<pragma::debug::GPUProfilingStage>> m_gpuProfilingStageManager;
+	std::unique_ptr<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage>> m_cpuProfilingStageManager;
 
 	StateFlags m_stateFlags = StateFlags::FirstFrame;
 	float m_speedCam;

@@ -10,6 +10,7 @@
 #include "pragma/entities/components/parent_component.hpp"
 #include "pragma/entities/components/base_child_component.hpp"
 #include "pragma/entities/entity_component_system_t.hpp"
+#include "pragma/debug/debug_performance_profiler.hpp"
 #include <pragma/engine.h>
 #include <pragma/console/convars.h>
 #include <pragma/console/s_convars.h>
@@ -295,26 +296,53 @@ REGISTER_ENGINE_CONCOMMAND(
 static void debug_profiling_print(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
 	Con::cout << "-------- CPU-Profiler Query Results --------" << Con::endl;
+	Con::cout << std::left << std::setw(30) << "Stage Name" << std::setw(20) << "Time (ms)" << std::setw(20) << "Time (ns)" << std::setw(10) << "Count" << std::setw(10) << "Thread" << Con::endl;
+	Con::cout << "--------------------------------------------" << Con::endl;
+
 	std::function<void(pragma::debug::ProfilingStage &, const std::string &, bool)> fPrintResults = nullptr;
-	fPrintResults = [&fPrintResults](pragma::debug::ProfilingStage &stage, const std::string &t, bool bRoot) {
+	fPrintResults = [&fPrintResults](pragma::debug::ProfilingStage &stage, const std::string &indent, bool bRoot) {
 		if(bRoot == false) {
-			std::string sTime = "Pending";
+
+			std::string sTimeMs = "Pending";
+			std::string sTimeNs = "-";
+			std::string sCount = "-";
+			std::string sThread = "-";
+
 			auto result = stage.GetResult();
 			if(result && result->duration.has_value()) {
-				auto t = util::clock::to_milliseconds(*result->duration);
-				sTime = util::round_string(t, 2) + " ms";
-				sTime += " (" + std::to_string(result->duration->count()) + " ns)";
+				std::chrono::steady_clock::duration accDur {};
+				for(auto &hChild : stage.GetChildren()) {
+					if(hChild.expired())
+						continue;
+					auto childRes = hChild.lock()->GetResult();
+					if(!childRes || !childRes->duration)
+						continue;
+					accDur += *childRes->duration;
+				}
+				auto tMsAcc = util::clock::to_milliseconds(accDur);
+				auto tMs = util::clock::to_milliseconds(*result->duration);
+				sTimeMs = util::round_string(tMs, 2) + "ms (" + util::round_string(tMsAcc, 2) + "ms)";
+				sTimeNs = std::to_string(result->duration->count()) + "ns";
+				sCount = std::to_string(stage.GetCount());
+
+				std::stringstream ss;
+				ss << stage.GetThreadId();
+				sThread = ss.str();
 			}
-			Con::cout << t << stage.GetName() << ": " << sTime << Con::endl;
+
+			Con::cout << std::left << std::setw(30) << (indent + stage.GetName()) << std::setw(20) << sTimeMs << std::setw(20) << sTimeNs << std::setw(10) << sCount << std::setw(10) << sThread << Con::endl;
 		}
+
 		for(auto &wpChild : stage.GetChildren()) {
 			if(wpChild.expired())
 				continue;
-			fPrintResults(*wpChild.lock(), t + (bRoot ? "" : "\t"), false);
+			fPrintResults(*wpChild.lock(), indent + (bRoot ? "" : "  "), false);
 		}
 	};
+
 	auto &profiler = engine->GetProfiler();
 	fPrintResults(profiler.GetRootStage(), "", true);
+
 	Con::cout << "--------------------------------------------" << Con::endl;
 }
 REGISTER_ENGINE_CONCOMMAND(debug_profiling_print, debug_profiling_print, ConVarFlags::None, "Prints the last profiled times.");

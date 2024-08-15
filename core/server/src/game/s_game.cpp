@@ -29,6 +29,7 @@
 #include <pragma/networking/nwm_util.h>
 #include <mathutil/umath.h>
 #include <pragma/console/convars.h>
+#include <pragma/debug/debug_performance_profiler.hpp>
 #include "pragma/game/gamemode/gamemodemanager.h"
 #include "pragma/game/s_game_callback.h"
 #include "pragma/lua/classes/s_lua_entity.h"
@@ -120,9 +121,8 @@ SGame::SGame(NetworkState *state) : Game(state)
 			return;
 		}
 		auto &cpuProfiler = engine->GetProfiler();
-		m_profilingStageManager = std::make_unique<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage, CPUProfilingPhase>>();
-		m_profilingStageManager->InitializeProfilingStageManager(cpuProfiler, {pragma::debug::ProfilingStage::Create(cpuProfiler, "Snapshot", &engine->GetProfilingStageManager()->GetProfilerStage(Engine::CPUProfilingPhase::Tick))});
-		static_assert(umath::to_integral(CPUProfilingPhase::Count) == 1u, "Added new profiling phase, but did not create associated profiling stage!");
+		m_profilingStageManager = std::make_unique<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage>>();
+		m_profilingStageManager->InitializeProfilingStageManager(cpuProfiler);
 	});
 }
 
@@ -246,17 +246,17 @@ void SGame::Think()
 
 void SGame::ChangeLevel(const std::string &mapName, const std::string &landmarkName) { m_changeLevelInfo = {mapName, landmarkName}; }
 
-pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage, SGame::CPUProfilingPhase> *SGame::GetProfilingStageManager() { return m_profilingStageManager.get(); }
-bool SGame::StartProfilingStage(CPUProfilingPhase stage) { return m_profilingStageManager && m_profilingStageManager->StartProfilerStage(stage); }
-bool SGame::StopProfilingStage(CPUProfilingPhase stage) { return m_profilingStageManager && m_profilingStageManager->StopProfilerStage(stage); }
+pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage> *SGame::GetProfilingStageManager() { return m_profilingStageManager.get(); }
+bool SGame::StartProfilingStage(const char *stage) { return m_profilingStageManager && m_profilingStageManager->StartProfilerStage(stage); }
+bool SGame::StopProfilingStage() { return m_profilingStageManager && m_profilingStageManager->StopProfilerStage(); }
 
 void SGame::Tick()
 {
 	Game::Tick();
 
-	StartProfilingStage(CPUProfilingPhase::Snapshot);
+	StartProfilingStage("Snapshot");
 	SendSnapshot();
-	StopProfilingStage(CPUProfilingPhase::Snapshot);
+	StopProfilingStage();
 
 	CallCallbacks<void>("Tick");
 	CallLuaCallbacks("Tick");

@@ -140,10 +140,8 @@ Engine::Engine(int, char *[]) : CVarHandler(), m_logFile(nullptr), m_tickRate(En
 			m_profilingStageManager = nullptr;
 			return;
 		}
-		auto stageFrame = pragma::debug::ProfilingStage::Create(*m_cpuProfiler, "Frame");
-		m_profilingStageManager = std::make_unique<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage, CPUProfilingPhase>>();
-		m_profilingStageManager->InitializeProfilingStageManager(*m_cpuProfiler, {stageFrame, pragma::debug::ProfilingStage::Create(*m_cpuProfiler, "Think", stageFrame.get()), pragma::debug::ProfilingStage::Create(*m_cpuProfiler, "Tick", stageFrame.get())});
-		static_assert(umath::to_integral(CPUProfilingPhase::Count) == 3u, "Added new profiling phase, but did not create associated profiling stage!");
+		m_profilingStageManager = std::make_unique<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage>>();
+		m_profilingStageManager->InitializeProfilingStageManager(*m_cpuProfiler);
 	});
 }
 
@@ -496,9 +494,9 @@ void Engine::SetMountExternalGameResources(bool b)
 bool Engine::ShouldMountExternalGameResources() const { return m_bMountExternalGameResources; }
 
 pragma::debug::CPUProfiler &Engine::GetProfiler() const { return *m_cpuProfiler; }
-pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage, Engine::CPUProfilingPhase> *Engine::GetProfilingStageManager() { return m_profilingStageManager.get(); }
-bool Engine::StartProfilingStage(CPUProfilingPhase stage) { return m_profilingStageManager && m_profilingStageManager->StartProfilerStage(stage); }
-bool Engine::StopProfilingStage(CPUProfilingPhase stage) { return m_profilingStageManager && m_profilingStageManager->StopProfilerStage(stage); }
+pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage> *Engine::GetProfilingStageManager() { return m_profilingStageManager.get(); }
+bool Engine::StartProfilingStage(const char *stage) { return m_profilingStageManager && m_profilingStageManager->StartProfilerStage(stage); }
+bool Engine::StopProfilingStage() { return m_profilingStageManager && m_profilingStageManager->StopProfilerStage(); }
 
 void Engine::RunTickEvents()
 {
@@ -530,13 +528,13 @@ void Engine::Tick()
 	ProcessConsoleInput();
 	RunTickEvents();
 
-	StartProfilingStage(CPUProfilingPhase::Tick);
-	StartProfilingStage(CPUProfilingPhase::ServerTick);
+	StartProfilingStage("Tick");
+	StartProfilingStage("ServerTick");
 	auto *sv = GetServerNetworkState();
 	if(sv != NULL)
 		sv->Tick();
-	StopProfilingStage(CPUProfilingPhase::ServerTick);
-	StopProfilingStage(CPUProfilingPhase::Tick);
+	StopProfilingStage(); // ServerTick
+	StopProfilingStage(); // Tick
 
 	UpdateParallelJobs();
 }
@@ -905,9 +903,9 @@ void Engine::Start()
 	long long nextTick = GetTickCount();
 	int loops;
 	do {
-		StartProfilingStage(CPUProfilingPhase::Think);
+		StartProfilingStage("Think");
 		Think();
-		StopProfilingStage(CPUProfilingPhase::Think);
+		StopProfilingStage();
 
 		loops = 0;
 		auto tickRate = GetTickRate();

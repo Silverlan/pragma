@@ -11,6 +11,7 @@
 #include "pragma/networking/nwm_util.h"
 #include "pragma/lua/classes/ldef_entity.h"
 #include "luasystem.h"
+#include <sharedutils/util_clock.hpp>
 
 extern DLLNETWORK Engine *engine;
 

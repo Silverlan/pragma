@@ -89,7 +89,7 @@ void CRendererPpBloomComponent::DoRenderEffect(const util::DrawSceneInfo &drawSc
 	if(!m_controlledBlurSettings.IsValid())
 		return;
 
-	c_game->StartProfilingStage(CGame::GPUProfilingPhase::PostProcessingBloom);
+	c_game->StartGPUProfilingStage("PostProcessingBloom");
 	auto &hdrInfo = m_renderer->GetHDRInfo();
 	auto bloomTexMsaa = hdrInfo.sceneRenderTarget->GetTexture(1u);
 	auto &drawCmd = drawSceneInfo.commandBuffer;
@@ -102,7 +102,7 @@ void CRendererPpBloomComponent::DoRenderEffect(const util::DrawSceneInfo &drawSc
 	m_controlledBlurSettings.RecordBlur(drawCmd, *hdrInfo.bloomBlurSet);
 	drawCmd->RecordImageBarrier(hdrInfo.bloomTexture->GetImage(), prosper::ImageLayout::TransferSrcOptimal, prosper::ImageLayout::ColorAttachmentOptimal);
 	drawCmd->RecordImageBarrier(hdrInfo.bloomBlurRenderTarget->GetTexture().GetImage(), prosper::ImageLayout::ColorAttachmentOptimal, prosper::ImageLayout::ShaderReadOnlyOptimal);
-	c_game->StopProfilingStage(CGame::GPUProfilingPhase::PostProcessingBloom);
+	c_game->StopGPUProfilingStage(); // PostProcessingBloom
 }
 void CRendererPpBloomComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 

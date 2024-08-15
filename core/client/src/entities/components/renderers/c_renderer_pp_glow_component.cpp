@@ -116,7 +116,7 @@ void CRendererPpGlowComponent::ExecuteGlowPass(const util::DrawSceneInfo &drawSc
 			(*drawSceneInfo.renderStats)->EndGpuTimer(RenderStats::RenderStage::PostProcessingGpuGlow, *drawSceneInfo.commandBuffer);
 	}};
 
-	c_game->StartProfilingStage(CGame::GPUProfilingPhase::PostProcessingBloom);
+	c_game->StartGPUProfilingStage("PostProcessingBloom");
 
 	auto &drawCmd = drawSceneInfo.commandBuffer;
 	auto &texGlow = m_glowRt->GetTexture();
@@ -138,7 +138,7 @@ void CRendererPpGlowComponent::ExecuteGlowPass(const util::DrawSceneInfo &drawSc
 
 	drawSceneInfo.commandBuffer->RecordEndRenderPass();
 	//
-	c_game->StopProfilingStage(CGame::GPUProfilingPhase::PostProcessingBloom);
+	c_game->StopGPUProfilingStage(); // PostProcessingBloom
 }
 void CRendererPpGlowComponent::RecordGlowPass(const util::DrawSceneInfo &drawSceneInfo)
 {

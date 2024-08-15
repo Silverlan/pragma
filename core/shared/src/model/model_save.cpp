@@ -21,6 +21,7 @@
 #include <sharedutils/util_file.h>
 #include <sharedutils/util_ifile.hpp>
 #include <udm.hpp>
+#include <set>
 #include "pragma/model/animation/skeleton.hpp"
 #include "pragma/model/animation/bone.hpp"
 

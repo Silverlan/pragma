@@ -13,41 +13,7 @@
 #include <pragma/debug/debug_performance_profiler.hpp>
 #include <array>
 #include <set>
-/*
-enum class GPUProfilingStage : uint32_t
-{
-	// Draw
-	GUI = 0,
-	Frame,
-	Scene,
 
-	Prepass,
-	PrepassSkybox,
-	PrepassWorld,
-	PrepassView,
-
-	CullLightSources,
-	Shadows,
-	SSAO,
-
-	PostProcessing,
-	PostProcessingFog,
-	PostProcessingFXAA,
-	PostProcessingGlow,
-	PostProcessingBloom,
-	PostProcessingHDR,
-
-	Present,
-	Skybox,
-	World,
-	Particles,
-	Debug,
-	Water,
-	View,
-
-	Count
-};
-*/
 namespace prosper {
 	class IQueryPool;
 	class TimerQuery;
@@ -62,16 +28,16 @@ namespace pragma {
 		class GPUProfiler;
 		class DLLCLIENT GPUProfilingStage : public ProfilingStage {
 		  public:
-			static std::shared_ptr<GPUProfilingStage> Create(Profiler &profiler, const std::string &name, prosper::PipelineStageFlags stage, GPUProfilingStage *parent = nullptr);
+			static std::shared_ptr<GPUProfilingStage> Create(Profiler &profiler, std::thread::id tid, const std::string &name, prosper::PipelineStageFlags stage);
+			GPUProfilingStage(Profiler &profiler, std::thread::id tid, const std::string &name);
 			const GPUSwapchainTimer &GetTimer() const;
 			GPUSwapchainTimer &GetTimer();
+			GPUProfilingStage *GetParent();
 
 			prosper::PipelineStageFlags GetPipelineStage() const;
 		  private:
-			using ProfilingStage::ProfilingStage;
 			virtual void InitializeTimer() override;
 			GPUProfiler &GetProfiler();
-			GPUProfilingStage *GetParent();
 			prosper::PipelineStageFlags m_stage;
 		};
 

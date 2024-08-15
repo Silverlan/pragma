@@ -239,25 +239,9 @@ CGame::CGame(NetworkState *state)
 			m_gpuProfilingStageManager = nullptr;
 			return;
 		}
-		m_gpuProfilingStageManager = std::make_unique<pragma::debug::ProfilingStageManager<pragma::debug::GPUProfilingStage, GPUProfilingPhase>>();
+		m_gpuProfilingStageManager = std::make_unique<pragma::debug::ProfilingStageManager<pragma::debug::GPUProfilingStage>>();
 		auto &gpuProfiler = c_engine->GetGPUProfiler();
-		const auto defaultStage = prosper::PipelineStageFlags::BottomOfPipeBit;
-		auto &stageDrawScene = c_engine->GetGPUProfilingStageManager()->GetProfilerStage(CEngine::GPUProfilingPhase::DrawScene);
-		auto stageScene = pragma::debug::GPUProfilingStage::Create(gpuProfiler, "Scene", defaultStage, &stageDrawScene);
-		auto stagePrepass = pragma::debug::GPUProfilingStage::Create(gpuProfiler, "Prepass", defaultStage, stageScene.get());
-		auto stagePostProcessing = pragma::debug::GPUProfilingStage::Create(gpuProfiler, "PostProcessing", defaultStage, &stageDrawScene);
-		m_gpuProfilingStageManager->InitializeProfilingStageManager(gpuProfiler,
-		  {stageScene, stagePrepass, pragma::debug::GPUProfilingStage::Create(gpuProfiler, "SSAO", defaultStage, stageScene.get()), stagePostProcessing, pragma::debug::GPUProfilingStage::Create(gpuProfiler, "Present", defaultStage, &stageDrawScene),
-
-		    pragma::debug::GPUProfilingStage::Create(gpuProfiler, "Skybox", defaultStage, stageScene.get()), pragma::debug::GPUProfilingStage::Create(gpuProfiler, "World", defaultStage, stageScene.get()),
-		    pragma::debug::GPUProfilingStage::Create(gpuProfiler, "Particles", defaultStage, stageScene.get()), pragma::debug::GPUProfilingStage::Create(gpuProfiler, "Debug", defaultStage, stageScene.get()),
-		    pragma::debug::GPUProfilingStage::Create(gpuProfiler, "Water", defaultStage, stageScene.get()), pragma::debug::GPUProfilingStage::Create(gpuProfiler, "View", defaultStage, stageScene.get()),
-
-		    pragma::debug::GPUProfilingStage::Create(gpuProfiler, "PostProcessingFog", defaultStage, stagePostProcessing.get()), pragma::debug::GPUProfilingStage::Create(gpuProfiler, "PostProcessingDoF", defaultStage, stagePostProcessing.get()),
-		    pragma::debug::GPUProfilingStage::Create(gpuProfiler, "PostProcessingFXAA", defaultStage, stagePostProcessing.get()), pragma::debug::GPUProfilingStage::Create(gpuProfiler, "PostProcessingGlow", defaultStage, stagePostProcessing.get()),
-		    pragma::debug::GPUProfilingStage::Create(gpuProfiler, "PostProcessingBloom", defaultStage, stagePostProcessing.get()), pragma::debug::GPUProfilingStage::Create(gpuProfiler, "PostProcessingHDR", defaultStage, stagePostProcessing.get()),
-		    pragma::debug::GPUProfilingStage::Create(gpuProfiler, "CullLightSources", defaultStage, stageScene.get()), pragma::debug::GPUProfilingStage::Create(gpuProfiler, "Shadows", defaultStage, stageScene.get())});
-		static_assert(umath::to_integral(GPUProfilingPhase::Count) == 19u, "Added new profiling phase, but did not create associated profiling stage!");
+		m_gpuProfilingStageManager->InitializeProfilingStageManager(gpuProfiler);
 	});
 	m_cbProfilingHandle = c_engine->AddProfilingHandler([this](bool profilingEnabled) {
 		if(profilingEnabled == false) {
@@ -265,14 +249,8 @@ CGame::CGame(NetworkState *state)
 			return;
 		}
 		auto &cpuProfiler = c_engine->GetProfiler();
-		m_profilingStageManager = std::make_unique<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage, CPUProfilingPhase>>();
-		auto &stageThink = c_engine->Engine::GetProfilingStageManager()->GetProfilerStage(Engine::CPUProfilingPhase::Think);
-		auto &stageDrawFrame = c_engine->GetProfilingStageManager()->GetProfilerStage(CEngine::CPUProfilingPhase::DrawFrame);
-		m_profilingStageManager->InitializeProfilingStageManager(cpuProfiler,
-		  {pragma::debug::ProfilingStage::Create(cpuProfiler, "Present", &stageDrawFrame), pragma::debug::ProfilingStage::Create(cpuProfiler, "BuildRenderQueue", &stageDrawFrame), pragma::debug::ProfilingStage::Create(cpuProfiler, "Prepass", &stageDrawFrame),
-		    pragma::debug::ProfilingStage::Create(cpuProfiler, "SSAO", &stageDrawFrame), pragma::debug::ProfilingStage::Create(cpuProfiler, "CullLightSources", &stageDrawFrame), pragma::debug::ProfilingStage::Create(cpuProfiler, "Shadows", &stageDrawFrame),
-		    pragma::debug::ProfilingStage::Create(cpuProfiler, "RenderWorld", &stageDrawFrame), pragma::debug::ProfilingStage::Create(cpuProfiler, "PostProcessing", &stageDrawFrame)});
-		static_assert(umath::to_integral(CPUProfilingPhase::Count) == 8u, "Added new profiling phase, but did not create associated profiling stage!");
+		m_profilingStageManager = std::make_unique<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage>>();
+		m_profilingStageManager->InitializeProfilingStageManager(cpuProfiler);
 	});
 
 	m_renderQueueBuilder = std::make_unique<pragma::rendering::RenderQueueBuilder>();
@@ -421,19 +399,15 @@ void CGame::UpdateTime()
 	m_tDeltaReal = CDouble(m_tReal - m_tLastReal);
 }
 
-bool CGame::StartProfilingStage(GPUProfilingPhase stage) { return m_gpuProfilingStageManager && m_gpuProfilingStageManager->StartProfilerStage(stage); }
-bool CGame::StopProfilingStage(GPUProfilingPhase stage) { return m_gpuProfilingStageManager && m_gpuProfilingStageManager->StopProfilerStage(stage); }
-pragma::debug::ProfilingStageManager<pragma::debug::GPUProfilingStage, CGame::GPUProfilingPhase> *CGame::GetGPUProfilingStageManager() { return m_gpuProfilingStageManager.get(); }
+bool CGame::StartGPUProfilingStage(const char *stage) { return m_gpuProfilingStageManager && m_gpuProfilingStageManager->StartProfilerStage(stage); }
+bool CGame::StopGPUProfilingStage() { return m_gpuProfilingStageManager && m_gpuProfilingStageManager->StopProfilerStage(); }
+pragma::debug::ProfilingStageManager<pragma::debug::GPUProfilingStage> *CGame::GetGPUProfilingStageManager() { return m_gpuProfilingStageManager.get(); }
 
-pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage, CGame::CPUProfilingPhase> *CGame::GetProfilingStageManager() { return m_profilingStageManager.get(); }
-bool CGame::StartProfilingStage(CPUProfilingPhase stage) { return m_profilingStageManager && m_profilingStageManager->StartProfilerStage(stage); }
-bool CGame::StopProfilingStage(CPUProfilingPhase stage) { return m_profilingStageManager && m_profilingStageManager->StopProfilerStage(stage); }
+pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage> *CGame::GetProfilingStageManager() { return m_profilingStageManager.get(); }
+bool CGame::StartProfilingStage(const char *stage) { return m_profilingStageManager && m_profilingStageManager->StartProfilerStage(stage); }
+bool CGame::StopProfilingStage() { return m_profilingStageManager && m_profilingStageManager->StopProfilerStage(); }
 
-std::shared_ptr<pragma::EntityComponentManager> CGame::InitializeEntityComponentManager()
-{
-	return std::make_shared<pragma::CEntityComponentManager>();
-	;
-}
+std::shared_ptr<pragma::EntityComponentManager> CGame::InitializeEntityComponentManager() { return std::make_shared<pragma::CEntityComponentManager>(); }
 
 void CGame::OnReceivedRegisterNetEvent(NetPacket &packet)
 {

@@ -31,7 +31,6 @@
 #include <sharedutils/util_weak_handle.hpp>
 #include <sharedutils/util_shared_handle.hpp>
 #include <pragma/console/fcvar.h>
-#include <pragma/debug/debug_performance_profiler.hpp>
 #ifdef __linux__
 #include "pragma/lua/lua_script_watcher.h"
 #include "pragma/physics/environment.hpp"
@@ -104,6 +103,12 @@ namespace util {
 struct BaseEntityComponentHandleWrapper;
 namespace pragma::physics {
 	class IEnvironment;
+};
+namespace pragma::debug {
+	class CPUProfiler;
+	template<class TProfilingStage>
+	class ProfilingStageManager;
+	class ProfilingStage;
 };
 class DLLNETWORK Game : public CallbackHandler, public LuaCallbackHandler {
   public:
@@ -257,16 +262,6 @@ class DLLNETWORK Game : public CallbackHandler, public LuaCallbackHandler {
 	//
   public:
 	//
-	enum class CPUProfilingPhase : uint32_t {
-		Tick = 0u,
-		Physics,
-		PhysicsSimulation,
-		GameObjectLogic,
-		Timers,
-		Animations,
-
-		Count
-	};
 	Game(NetworkState *state);
 	virtual ~Game();
 	virtual void OnRemove();
@@ -371,9 +366,9 @@ class DLLNETWORK Game : public CallbackHandler, public LuaCallbackHandler {
 	virtual void DrawBox(const Vector3 &origin, const Vector3 &start, const Vector3 &end, const EulerAngles &ang, const Color &colorOutline, const std::optional<Color> &fillColor, float duration = 0.f) = 0;
 	virtual void DrawPlane(const Vector3 &n, float dist, const Color &color, float duration = 0.f) = 0;
 	virtual void DrawMesh(const std::vector<Vector3> &meshVerts, const Color &color, const Color &colorOutline, float duration = 0.f) = 0;
-	pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage, CPUProfilingPhase> *GetProfilingStageManager();
-	bool StartProfilingStage(CPUProfilingPhase stage);
-	bool StopProfilingStage(CPUProfilingPhase stage);
+	pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage> *GetProfilingStageManager();
+	bool StartProfilingStage(const char *stage);
+	bool StopProfilingStage();
   protected:
 	virtual void UpdateTime();
 	void GetLuaRegisteredEntities(std::vector<std::string> &luaClasses) const;
@@ -419,7 +414,7 @@ class DLLNETWORK Game : public CallbackHandler, public LuaCallbackHandler {
 	EntityHandle m_entGamemode;
 	EntityHandle m_entGame;
 	CallbackHandle m_cbProfilingHandle = {};
-	std::unique_ptr<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage, CPUProfilingPhase>> m_profilingStageManager = nullptr;
+	std::unique_ptr<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage>> m_profilingStageManager;
 	std::shared_ptr<pragma::nav::Mesh> m_navMesh = nullptr;
 	std::unique_ptr<AmmoTypeManager> m_ammoTypes = nullptr;
 	std::unique_ptr<LuaEntityManager> m_luaEnts = nullptr;

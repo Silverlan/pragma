@@ -64,13 +64,16 @@ void CGame::RenderScene(const util::DrawSceneInfo &drawSceneInfo)
 			presentationTexture = renderer->GetPresentationTexture();
 		drawSceneInfo.commandBuffer->RecordImageBarrier(presentationTexture->GetImage(), prosper::ImageLayout::ShaderReadOnlyOptimal, prosper::ImageLayout::ColorAttachmentOptimal);
 
+		StartProfilingStage("Render");
 		renderer->Render(drawSceneInfo);
-		StartProfilingStage(CGame::GPUProfilingPhase::Present);
-		StartProfilingStage(CGame::CPUProfilingPhase::Present);
+		StopProfilingStage(); // Render
+
+		StartGPUProfilingStage("Present");
+		StartProfilingStage("Present");
 
 		RenderScenePresent(drawSceneInfo.commandBuffer, *presentationTexture, drawSceneInfo.outputImage.get(), drawSceneInfo.outputLayerId);
-		StopProfilingStage(CGame::CPUProfilingPhase::Present);
-		StopProfilingStage(CGame::GPUProfilingPhase::Present);
+		StopProfilingStage(); // Present
+		StopGPUProfilingStage(); // Present
 	}
 	CallCallbacks<void, std::reference_wrapper<const util::DrawSceneInfo>>("PostRenderScene", drawSceneInfo);
 	CallLuaCallbacks<void, const util::DrawSceneInfo *>("PostRenderScene", &drawSceneInfo);

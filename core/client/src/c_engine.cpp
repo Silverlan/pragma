@@ -1470,9 +1470,11 @@ void CEngine::DrawScene(std::shared_ptr<prosper::RenderTarget> &rt)
 			auto &windowRt = window->GetStagingRenderTarget();
 			auto &swapCmdGroup = window->GetSwapCommandBufferGroup();
 			swapCmdGroup.StartRecording(windowRt->GetRenderPass(), windowRt->GetFramebuffer());
-			swapCmdGroup.Record([window](prosper::ISecondaryCommandBuffer &drawCmd) {
+			swapCmdGroup.Record([this, window](prosper::ISecondaryCommandBuffer &drawCmd) {
 				auto &gui = WGUI::GetInstance();
+				StartProfilingStage("DrawGUI");
 				gui.Draw(*window, drawCmd);
+				StopProfilingStage();
 			});
 			swapCmdGroup.EndRecording();
 		}
@@ -1505,7 +1507,7 @@ void CEngine::DrawScene(std::shared_ptr<prosper::RenderTarget> &rt)
 		}
 
 		StopGPUProfilingStage(); // DrawScene
-		StopProfilingStage(); // RecordScene
+		StopProfilingStage();    // RecordScene
 	}
 
 	if(drawGui) {
@@ -1623,7 +1625,7 @@ void CEngine::Think()
 	pragma::RenderContext::DrawFrame();
 	CallCallbacks("Draw");
 	StopProfilingStage(); // DrawFrame
-	GLFW::poll_events(); // Needs to be called AFTER rendering!
+	GLFW::poll_events();  // Needs to be called AFTER rendering!
 	auto &windows = GetRenderContext().GetWindows();
 	for(auto it = windows.begin(); it != windows.end();) {
 		auto &window = *it;

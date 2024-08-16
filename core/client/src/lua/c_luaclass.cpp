@@ -902,13 +902,21 @@ void CGame::RegisterLuaClasses()
 	defRenderStats.add_static_constant("TIMER_POST_PROCESSING_GPU_TONE_MAPPING", umath::to_integral(RenderStats::RenderStage::PostProcessingGpuToneMapping));
 	defRenderStats.add_static_constant("TIMER_POST_PROCESSING_GPU_FXAA", umath::to_integral(RenderStats::RenderStage::PostProcessingGpuFxaa));
 	defRenderStats.add_static_constant("TIMER_POST_PROCESSING_GPU_SSAO", umath::to_integral(RenderStats::RenderStage::PostProcessingGpuSsao));
+	defRenderStats.add_static_constant("TIMER_RENDER_SCENE_GPU", umath::to_integral(RenderStats::RenderStage::RenderSceneGpu));
+	defRenderStats.add_static_constant("TIMER_RENDERER_GPU", umath::to_integral(RenderStats::RenderStage::RendererGpu));
+	defRenderStats.add_static_constant("TIMER_UPDATE_RENDER_BUFFERS_GPU", umath::to_integral(RenderStats::RenderStage::UpdateRenderBuffersGpu));
+	defRenderStats.add_static_constant("TIMER_UPDATE_PREPASS_RENDER_BUFFERS_GPU", umath::to_integral(RenderStats::RenderStage::UpdatePrepassRenderBuffersGpu));
+	defRenderStats.add_static_constant("TIMER_RENDER_SHADOWS_GPU", umath::to_integral(RenderStats::RenderStage::RenderShadowsGpu));
+	defRenderStats.add_static_constant("TIMER_RENDER_PARTICLES_GPU", umath::to_integral(RenderStats::RenderStage::RenderParticlesGpu));
+
 	defRenderStats.add_static_constant("TIMER_LIGHT_CULLING_CPU", umath::to_integral(RenderStats::RenderStage::LightCullingCpu));
 	defRenderStats.add_static_constant("TIMER_PREPASS_EXECUTION_CPU", umath::to_integral(RenderStats::RenderStage::PrepassExecutionCpu));
 	defRenderStats.add_static_constant("TIMER_LIGHTING_PASS_EXECUTION_CPU", umath::to_integral(RenderStats::RenderStage::LightingPassExecutionCpu));
 	defRenderStats.add_static_constant("TIMER_POST_PROCESSING_EXECUTION_CPU", umath::to_integral(RenderStats::RenderStage::PostProcessingExecutionCpu));
 	defRenderStats.add_static_constant("TIMER_UPDATE_RENDER_BUFFERS_CPU", umath::to_integral(RenderStats::RenderStage::UpdateRenderBuffersCpu));
+	defRenderStats.add_static_constant("TIMER_RENDER_SCENE_CPU", umath::to_integral(RenderStats::RenderStage::RenderSceneCpu));
 	defRenderStats.add_static_constant("TIMER_COUNT", umath::to_integral(RenderStats::RenderStage::Count));
-	static_assert(umath::to_integral(RenderStats::RenderStage::Count) == 14);
+	static_assert(umath::to_integral(RenderStats::RenderStage::Count) == 21);
 	defRenderStats.def("Copy", static_cast<RenderStats (*)(lua_State *, RenderStats &)>([](lua_State *l, RenderStats &renderStats) -> RenderStats { return renderStats; }));
 	defRenderStats.def("GetPassStats", static_cast<RenderPassStats *(*)(lua_State *, RenderStats &, RenderStats::RenderPass)>([](lua_State *l, RenderStats &renderStats, RenderStats::RenderPass pass) -> RenderPassStats * { return &renderStats.GetPassStats(pass); }));
 	defRenderStats.def("GetTime",

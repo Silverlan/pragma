@@ -1,7 +1,8 @@
 local statsWindow
 local function show_debug_render_stats_ui()
 	if util.is_valid(statsWindow) then
-		statsWindow:Remove()
+		statsWindow:Close()
+		statsWindow = nil
 		return
 	end
 	include("/gui/widebugrenderstats.lua")

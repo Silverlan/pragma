@@ -66,20 +66,25 @@ PanimaComponent::PanimaComponent(BaseEntity &ent) : BaseEntityComponent(ent), m_
 void PanimaComponent::SetPlaybackRate(float rate) { *m_playbackRate = rate; }
 float PanimaComponent::GetPlaybackRate() const { return *m_playbackRate; }
 const util::PFloatProperty &PanimaComponent::GetPlaybackRateProperty() const { return m_playbackRate; }
-std::vector<std::pair<std::string, panima::PAnimationManager>>::iterator PanimaComponent::FindAnimationManager(const std::string_view &name)
+std::vector<std::shared_ptr<pragma::AnimationManagerData>>::iterator PanimaComponent::FindAnimationManager(const std::string_view &name)
 {
-	return std::find_if(m_animationManagers.begin(), m_animationManagers.end(), [&name](const std::pair<std::string, panima::PAnimationManager> &pair) { return pair.first == name; });
+	return std::find_if(m_animationManagers.begin(), m_animationManagers.end(), [&name](const std::shared_ptr<AnimationManagerData> &data) { return data->name == name; });
+}
+AnimationManagerData *PanimaComponent::FindAnimationManagerData(panima::AnimationManager &manager)
+{
+	auto it = std::find_if(m_animationManagers.begin(), m_animationManagers.end(), [&manager](const std::shared_ptr<AnimationManagerData> &amd) { return amd->animationManager.get() == &manager; });
+	return (it != m_animationManagers.end()) ? it->get() : nullptr;
 }
 panima::PAnimationManager PanimaComponent::GetAnimationManager(std::string name)
 {
 	auto it = FindAnimationManager(name);
-	return (it != m_animationManagers.end()) ? it->second : nullptr;
+	return (it != m_animationManagers.end()) ? (*it)->animationManager : nullptr;
 }
 panima::PAnimationManager PanimaComponent::AddAnimationManager(std::string name, int32_t priority)
 {
 	auto it = FindAnimationManager(name);
 	if(it != m_animationManagers.end())
-		return it->second;
+		return (*it)->animationManager;
 	auto player = panima::AnimationManager::Create();
 	panima::AnimationPlayerCallbackInterface callbackInteface {};
 	callbackInteface.onPlayAnimation = [this](const panima::AnimationSet &set, panima::AnimationId animId, panima::PlaybackFlags flags) -> bool {
@@ -94,8 +99,11 @@ panima::PAnimationManager PanimaComponent::AddAnimationManager(std::string name,
 		InvokeEventCallbacks(EVENT_TRANSLATE_ANIMATION, evTranslateAnimData);
 	};
 	auto r = player;
-	m_animationManagers.push_back(std::make_pair<std::string, panima::PAnimationManager>(std::move(name), std::move(player)));
-	std::sort(m_animationManagers.begin(), m_animationManagers.end(), [](const std::pair<std::string, panima::PAnimationManager> &a, const std::pair<std::string, panima::PAnimationManager> &b) { return a.second->GetPriority() < b.second->GetPriority(); });
+	auto amData = std::shared_ptr<AnimationManagerData> {new AnimationManagerData {}};
+	amData->animationManager = player;
+	amData->name = std::move(name);
+	m_animationManagers.push_back(amData);
+	std::sort(m_animationManagers.begin(), m_animationManagers.end(), [](const std::shared_ptr<AnimationManagerData> &a, const std::shared_ptr<AnimationManagerData> &b) { return a->animationManager->GetPriority() < b->animationManager->GetPriority(); });
 	return r;
 }
 void PanimaComponent::RemoveAnimationManager(const std::string_view &name)
@@ -107,7 +115,7 @@ void PanimaComponent::RemoveAnimationManager(const std::string_view &name)
 }
 void PanimaComponent::RemoveAnimationManager(const panima::AnimationManager &player)
 {
-	auto it = std::find_if(m_animationManagers.begin(), m_animationManagers.end(), [&player](const std::pair<std::string, panima::PAnimationManager> &pair) { return pair.second.get() == &player; });
+	auto it = std::find_if(m_animationManagers.begin(), m_animationManagers.end(), [&player](const std::shared_ptr<AnimationManagerData> &data) { return data->animationManager.get() == &player; });
 	if(it == m_animationManagers.end())
 		return;
 	m_animationManagers.erase(it);
@@ -131,34 +139,8 @@ static std::string to_string(const T &value)
 
 void PanimaComponent::InitializeAnimationChannelValueSubmitters()
 {
-	for(auto &pair : m_animationManagers)
-		InitializeAnimationChannelValueSubmitters(*pair.second);
-}
-
-template<uint32_t I>
-    requires(I < 4)
-static bool is_vector_component(const std::string &str)
-{
-	using namespace ustring::string_switch;
-	switch(hash(str)) {
-	case "x"_:
-	case "r"_:
-	case "red"_:
-		return I == 0;
-	case "y"_:
-	case "g"_:
-	case "green"_:
-		return I == 1;
-	case "z"_:
-	case "b"_:
-	case "blue"_:
-		return I == 2;
-	case "w"_:
-	case "a"_:
-	case "alpha"_:
-		return I == 3;
-	}
-	return false;
+	for(auto &data : m_animationManagers)
+		InitializeAnimationChannelValueSubmitters(*data);
 }
 
 void PanimaComponent::DebugPrint(std::stringstream &ss)
@@ -203,8 +185,8 @@ void PanimaComponent::DebugPrint(std::stringstream &ss)
 			ss << "\n";
 		}
 	};
-	for(auto &pair : GetAnimationManagers())
-		printAnimManager(pair.first, *pair.second);
+	for(auto &amData : GetAnimationManagers())
+		printAnimManager(amData->name, *amData->animationManager);
 }
 
 void PanimaComponent::DebugPrint()
@@ -372,8 +354,34 @@ bool PanimaComponent::GetRawPropertyValue(panima::AnimationManager &manager, con
 	});
 }
 
-void PanimaComponent::InitializeAnimationChannelValueSubmitters(panima::AnimationManager &manager)
+template<uint32_t I>
+    requires(I < 4)
+static bool is_vector_component(const std::string &str)
 {
+	using namespace ustring::string_switch;
+	switch(hash(str)) {
+	case "x"_:
+	case "r"_:
+	case "red"_:
+		return I == 0;
+	case "y"_:
+	case "g"_:
+	case "green"_:
+		return I == 1;
+	case "z"_:
+	case "b"_:
+	case "blue"_:
+		return I == 2;
+	case "w"_:
+	case "a"_:
+	case "alpha"_:
+		return I == 3;
+	}
+	return false;
+}
+void PanimaComponent::InitializeAnimationChannelValueSubmitters(AnimationManagerData &amData)
+{
+	auto &manager = *amData.animationManager;
 	auto *anim = manager.GetCurrentAnimation();
 	auto &channelValueSubmitters = manager.GetChannelValueSubmitters();
 	if(!anim) {
@@ -383,6 +391,10 @@ void PanimaComponent::InitializeAnimationChannelValueSubmitters(panima::Animatio
 	auto &channels = anim->GetChannels();
 	channelValueSubmitters.clear();
 	channelValueSubmitters.resize(channels.size(), panima::ChannelValueSubmitter {});
+
+	auto &channelCache = amData.channelCache;
+	channelCache.resize(channelValueSubmitters.size());
+
 	uint32_t numInvalidChannels = 0;
 	auto shouldPrintWarning = [&numInvalidChannels]() {
 		if(numInvalidChannels >= 5) {
@@ -396,6 +408,9 @@ void PanimaComponent::InitializeAnimationChannelValueSubmitters(panima::Animatio
 	};
 	// TODO: Reload this when animation has changed, or if component data has changed (e.g. animated component has changed model and therefore bone positions and rotational data)
 	for(auto it = channels.begin(); it != channels.end(); ++it) {
+		auto channelIdx = it - channels.begin();
+		channelCache[channelIdx].component = nullptr;
+		channelCache[channelIdx].memberInfo = nullptr;
 		auto &channel = *it;
 		auto &path = channel->targetPath;
 		if(!IsPropertyEnabled(path.path.GetString()))
@@ -428,7 +443,6 @@ void PanimaComponent::InitializeAnimationChannelValueSubmitters(panima::Animatio
 			continue;
 		}
 		auto memberPath = memberName;
-		auto channelIdx = it - channels.begin();
 		CEAnim2InitializeChannelValueSubmitter evData {memberPath};
 		if(hComponent->InvokeEventCallbacks(EVENT_INITIALIZE_CHANNEL_VALUE_SUBMITTER, evData) == util::EventReply::Handled) {
 			if(evData.submitter == nullptr)
@@ -454,12 +468,16 @@ void PanimaComponent::InitializeAnimationChannelValueSubmitters(panima::Animatio
 
 		auto &component = *hComponent;
 		auto *valueComponents = path.GetComponents();
-		auto vsGetMemberChannelSubmitter = [valueComponents, &path, &memberIdx, channelIdx, &channelValueSubmitters, &component]<typename TMember>(auto tag) mutable {
+
+		channelCache[channelIdx].component = hComponent.get();
+		channelCache[channelIdx].memberInfo = memberInfo;
+
+		auto vsGetMemberChannelSubmitter = [this, valueComponents, &path, &memberIdx, channelIdx, &channelValueSubmitters, &channelCache, &component]<typename TMember>(auto tag) mutable {
 			using TChannel = typename decltype(tag)::type;
 			constexpr auto setMemberValue = [](const pragma::ComponentMemberInfo &memberInfo, pragma::BaseEntityComponent &component, const void *value, void *userData) { memberInfo.setterFunction(memberInfo, component, value); };
 			if(!valueComponents || valueComponents->empty()) {
 				if constexpr(std::is_same_v<TChannel, TMember>)
-					channelValueSubmitters[channelIdx] = get_member_channel_submitter<TChannel, TMember, 0>(component, *memberIdx, setMemberValue);
+					channelValueSubmitters[channelIdx] = get_member_channel_submitter<TChannel, TMember, 0>(component, channelCache[channelIdx], *memberIdx, setMemberValue);
 				return;
 			}
 			constexpr auto channelType = udm::type_to_enum<TChannel>();
@@ -552,8 +570,8 @@ void PanimaComponent::InitializeAnimationChannelValueSubmitters(panima::Animatio
 					}
 					++idx;
 				}
-				channelValueSubmitters[channelIdx]
-				  = runtime_array_to_compile_time<TChannel, TMember, typename decltype(componentIndices)::value_type, 0, componentIndices.size(), numComponentsMember, get_member_channel_submitter_wrapper>(component, *memberIdx, setMemberValue, nullptr, componentIndices);
+				channelValueSubmitters[channelIdx] = runtime_array_to_compile_time<TChannel, TMember, typename decltype(componentIndices)::value_type, 0, componentIndices.size(), numComponentsMember, get_member_channel_submitter_wrapper>(component, channelCache[channelIdx], *memberIdx,
+				  setMemberValue, nullptr, componentIndices);
 			}
 		};
 
@@ -578,7 +596,9 @@ void PanimaComponent::InitializeAnimationChannelValueSubmitters(panima::Animatio
 void PanimaComponent::PlayAnimation(panima::AnimationManager &manager, panima::Animation &anim)
 {
 	manager->SetAnimation(anim);
-	InitializeAnimationChannelValueSubmitters(manager);
+	auto *amd = FindAnimationManagerData(manager);
+	if(amd)
+		InitializeAnimationChannelValueSubmitters(*amd);
 }
 void PanimaComponent::ReloadAnimation(panima::AnimationManager &manager)
 {
@@ -590,13 +610,13 @@ void PanimaComponent::ReloadAnimation(panima::AnimationManager &manager)
 	manager->SetCurrentTime(t);
 }
 void PanimaComponent::ClearAnimationManagers() { m_animationManagers.clear(); }
-bool PanimaComponent::UpdateAnimations(double dt)
+bool PanimaComponent::UpdateAnimations(GlobalAnimationChannelQueueProcessor &channelQueueProcessor, double dt)
 {
 	if(GetPlaybackRate() == 0.f)
 		return false;
-	return MaintainAnimations(dt);
+	return MaintainAnimations(channelQueueProcessor, dt);
 }
-bool PanimaComponent::MaintainAnimations(double dt)
+bool PanimaComponent::MaintainAnimations(GlobalAnimationChannelQueueProcessor &channelQueueProcessor, double dt)
 {
 	CEAnim2MaintainAnimations evData {dt};
 	if(InvokeEventCallbacks(EVENT_MAINTAIN_ANIMATIONS, evData) == util::EventReply::Handled) {
@@ -604,8 +624,7 @@ bool PanimaComponent::MaintainAnimations(double dt)
 		return true;
 	}
 
-	AdvanceAnimations(dt);
-	InvokeEventCallbacks(EVENT_ON_ANIMATIONS_UPDATED);
+	AdvanceAnimations(channelQueueProcessor, dt);
 	return true;
 }
 
@@ -615,7 +634,9 @@ void PanimaComponent::SetCurrentTime(panima::AnimationManager &manager, float ti
 	if(manager->GetCurrentTime() == time)
 		return;
 	manager->SetCurrentTime(time, true);
-	InvokeValueSubmitters(manager);
+	auto *amd = FindAnimationManagerData(manager);
+	if(amd)
+		UpdateAnimationData(nullptr, *amd);
 }
 
 float PanimaComponent::GetCurrentTimeFraction(panima::AnimationManager &manager) const { return manager->GetCurrentTimeFraction(); }
@@ -624,10 +645,14 @@ void PanimaComponent::SetCurrentTimeFraction(panima::AnimationManager &manager, 
 	if(manager->GetCurrentTimeFraction() == t)
 		return;
 	manager->SetCurrentTimeFraction(t, true);
-	InvokeValueSubmitters(manager);
+	auto *amd = FindAnimationManagerData(manager);
+	if(amd)
+		UpdateAnimationData(nullptr, *amd);
 }
-void PanimaComponent::InvokeValueSubmitters(panima::AnimationManager &manager)
+
+void PanimaComponent::UpdateAnimationData(GlobalAnimationChannelQueueProcessor *channelQueueProcessor, AnimationManagerData &amd)
 {
+	auto &manager = *amd.animationManager;
 	auto *anim = manager.GetCurrentAnimation();
 	if(!anim)
 		return;
@@ -635,30 +660,74 @@ void PanimaComponent::InvokeValueSubmitters(panima::AnimationManager &manager)
 	auto &channels = anim->GetChannels();
 	auto n = umath::min(channelValueSubmitters.size(), channels.size());
 	auto t = manager->GetCurrentTime();
-	for(auto i = decltype(n) {0u}; i < n; ++i) {
-		auto &submitter = channelValueSubmitters[i];
-		if(!submitter)
-			continue;
-		auto &channel = channels[i];
-		if(channel->GetTimeCount() == 0)
-			continue;
-		submitter(*channel, manager->GetLastChannelTimestampIndex(i), t);
+	if(!channelQueueProcessor) {
+		for(auto i = decltype(n) {0u}; i < n; ++i) {
+			auto &submitter = channelValueSubmitters[i];
+			if(!submitter)
+				continue;
+			auto &channel = channels[i];
+			if(channel->GetTimeCount() == 0)
+				continue;
+			submitter(*channel, manager->GetLastChannelTimestampIndex(i), t);
+		}
+		ApplyAnimationValues(nullptr);
+		return;
 	}
+	channelQueueProcessor->Submit(amd);
 }
 
-void PanimaComponent::AdvanceAnimations(double dt)
+void PanimaComponent::AdvanceAnimations(GlobalAnimationChannelQueueProcessor &channelQueueProcessor, double dt)
 {
 	auto &ent = GetEntity();
 	auto pTimeScaleComponent = ent.GetTimeScaleComponent();
 	dt *= (pTimeScaleComponent.valid() ? pTimeScaleComponent->GetEffectiveTimeScale() : 1.f);
 	dt *= GetPlaybackRate();
-	for(auto &pair : m_animationManagers) {
-		auto &manager = pair.second;
+	for(auto &data : m_animationManagers) {
+		auto &manager = data->animationManager;
 		auto change = (*manager)->Advance(dt, true /* forceUpdate */);
 		if(!change)
 			continue;
-		InvokeValueSubmitters(*manager);
+		data->isChannelCacheDirty = true;
+		UpdateAnimationData(&channelQueueProcessor, *data);
 	}
+}
+void PanimaComponent::ApplyAnimationValues(GlobalAnimationChannelQueueProcessor *channelQueueProcessor)
+{
+	if(!channelQueueProcessor) {
+		for(auto &data : m_animationManagers) {
+			auto &manager = *data->animationManager;
+			auto *anim = manager.GetCurrentAnimation();
+			if(!anim)
+				continue;
+			auto &channelValueSubmitters = manager.GetChannelValueSubmitters();
+			auto &channels = anim->GetChannels();
+			auto &cacheData = data->channelCache;
+			for(size_t i = 0; i < channelValueSubmitters.size(); ++i) {
+				auto &submitter = channelValueSubmitters[i];
+				if(!submitter)
+					continue;
+				auto &channel = channels[i];
+				if(channel->GetTimeCount() == 0)
+					continue;
+				auto &channelCacheData = cacheData[i];
+				auto &component = *channelCacheData.component;
+				auto &memberInfo = *channelCacheData.memberInfo;
+				if(channelCacheData.changed != pragma::AnimationChannelCacheData::State::Changed)
+					continue;
+				memberInfo.setterFunction(memberInfo, component, channelCacheData.data.data());
+				channelCacheData.changed = pragma::AnimationChannelCacheData::State::Unchanged;
+			}
+		}
+	}
+	else {
+		for(auto &data : m_animationManagers) {
+			if(!data->isChannelCacheDirty)
+				continue;
+			data->isChannelCacheDirty = false;
+			channelQueueProcessor->ApplyValues();
+		}
+	}
+	InvokeEventCallbacks(EVENT_ON_ANIMATIONS_UPDATED);
 }
 void PanimaComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
@@ -684,8 +753,8 @@ void PanimaComponent::OnRemove()
 void PanimaComponent::ReloadAnimation()
 {
 	InitializeAnimationChannelValueSubmitters();
-	for(auto &pair : m_animationManagers)
-		ReloadAnimation(*pair.second);
+	for(auto &data : m_animationManagers)
+		ReloadAnimation(*data->animationManager);
 }
 void PanimaComponent::Save(udm::LinkedPropertyWrapperArg udm) {}
 void PanimaComponent::Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) {}

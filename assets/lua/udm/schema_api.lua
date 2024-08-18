@@ -63,6 +63,7 @@ function udm.BaseSchemaType:Initialize(schema, udmData, parent)
 end
 function udm.BaseSchemaType:ReloadUdmData(udmData)
 	self.m_udmData = udmData
+	self.m_cachedChildren = {}
 	local typeData = self.m_schema:FindTypeData(self.TypeName)
 	for name, child in pairs(typeData:Get("children"):GetChildren()) do
 		local childType = child:GetValue("type", udm.TYPE_STRING)

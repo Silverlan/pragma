@@ -161,43 +161,6 @@ class DLLCLIENT CGame : public Game {
 
 		Count
 	};
-	enum class CPUProfilingPhase : uint32_t {
-		Present = 0u,
-		BuildRenderQueue,
-		Prepass,
-		SSAO,
-		CullLightSources,
-		Shadows,
-		RenderWorld,
-		PostProcessing,
-
-		Count
-	};
-	enum class GPUProfilingPhase : uint32_t {
-		Scene = 0u,
-		Prepass,
-		SSAO,
-		PostProcessing,
-		Present,
-
-		Skybox,
-		World,
-		Particles,
-		Debug,
-		Water,
-		View,
-
-		PostProcessingFog,
-		PostProcessingDoF,
-		PostProcessingFXAA,
-		PostProcessingGlow,
-		PostProcessingBloom,
-		PostProcessingHDR,
-		CullLightSources,
-		Shadows,
-
-		Count
-	};
 
 	void ReloadSoundCache(bool bReloadBakedCache = false, SoundCacheFlags cacheFlags = SoundCacheFlags::All, float spacing = 1'024.f);
 	void ClearSoundCache();
@@ -238,17 +201,17 @@ class DLLCLIENT CGame : public Game {
 	virtual std::shared_ptr<ModelSubMesh> CreateModelSubMesh() const override;
 	virtual void GetRegisteredEntities(std::vector<std::string> &classes, std::vector<std::string> &luaClasses) const override;
 
-	bool StartProfilingStage(GPUProfilingPhase stage);
-	bool StopProfilingStage(GPUProfilingPhase stage);
-	pragma::debug::ProfilingStageManager<pragma::debug::GPUProfilingStage, GPUProfilingPhase> *GetGPUProfilingStageManager();
+	bool StartGPUProfilingStage(const char *stage);
+	bool StopGPUProfilingStage();
+	pragma::debug::ProfilingStageManager<pragma::debug::GPUProfilingStage> *GetGPUProfilingStageManager();
 
 	template<class TEfxProperties>
 	std::shared_ptr<al::IEffect> CreateAuxEffect(const std::string &name, const TEfxProperties &props);
 	std::shared_ptr<al::IEffect> GetAuxEffect(const std::string &name);
 
-	pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage, CPUProfilingPhase> *GetProfilingStageManager();
-	bool StartProfilingStage(CPUProfilingPhase stage);
-	bool StopProfilingStage(CPUProfilingPhase stage);
+	pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage> *GetProfilingStageManager();
+	bool StartProfilingStage(const char *stage);
+	bool StopProfilingStage();
 
 	// Config
 	Bool RawMouseInput(GLFW::MouseButton button, GLFW::KeyState state, GLFW::Modifier mods);
@@ -487,9 +450,9 @@ class DLLCLIENT CGame : public Game {
 	} m_clientNetEventData {};
 
 	CallbackHandle m_cbGPUProfilingHandle = {};
-	std::unique_ptr<pragma::debug::ProfilingStageManager<pragma::debug::GPUProfilingStage, GPUProfilingPhase>> m_gpuProfilingStageManager = nullptr;
+	std::unique_ptr<pragma::debug::ProfilingStageManager<pragma::debug::GPUProfilingStage>> m_gpuProfilingStageManager;
 	CallbackHandle m_cbProfilingHandle = {};
-	std::unique_ptr<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage, CPUProfilingPhase>> m_profilingStageManager = nullptr;
+	std::unique_ptr<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage>> m_profilingStageManager;
 
 	std::vector<DroppedFile> m_droppedFiles = {}; // Only contains files during OnFilesDropped-call
 

@@ -12,6 +12,7 @@
 #include <fsys/filesystem.h>
 #include <util_zip.h>
 #include <sharedutils/util_debug.h>
+#include <sharedutils/util_clock.hpp>
 #include <sharedutils/util.h>
 #include <sharedutils/util_file.h>
 #include "pragma/engine_info.hpp"

@@ -48,6 +48,7 @@
 #include "pragma/entities/entity_component_system_t.hpp"
 #include "pragma/level/level_info.hpp"
 #include "pragma/entities/components/logic_component.hpp"
+#include "pragma/debug/debug_performance_profiler.hpp"
 #include "pragma/lua/sh_lua_component.hpp"
 #include "pragma/lua/class_manager.hpp"
 #include "pragma/util/util_bsp_tree.hpp"
@@ -542,13 +543,8 @@ void Game::InitializeGame()
 		}
 		std::string postFix = IsClient() ? " (CL)" : " (SV)";
 		auto &cpuProfiler = engine->GetProfiler();
-		m_profilingStageManager = std::make_unique<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage, CPUProfilingPhase>>();
-		auto stageTick = pragma::debug::ProfilingStage::Create(cpuProfiler, "Tick" + postFix, &engine->GetProfilingStageManager()->GetProfilerStage(Engine::CPUProfilingPhase::Tick));
-		auto stagePhysics = pragma::debug::ProfilingStage::Create(cpuProfiler, "Physics" + postFix, stageTick.get());
-		m_profilingStageManager->InitializeProfilingStageManager(cpuProfiler,
-		  {stageTick, stagePhysics, pragma::debug::ProfilingStage::Create(cpuProfiler, "PhysicsSimulation" + postFix, stagePhysics.get()), pragma::debug::ProfilingStage::Create(cpuProfiler, "GameObjectLogic" + postFix, stageTick.get()),
-		    pragma::debug::ProfilingStage::Create(cpuProfiler, "Timers" + postFix, stageTick.get()), pragma::debug::ProfilingStage::Create(cpuProfiler, "Animations" + postFix, stageTick.get())});
-		static_assert(umath::to_integral(CPUProfilingPhase::Count) == 6u, "Added new profiling phase, but did not create associated profiling stage!");
+		m_profilingStageManager = std::make_unique<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage>>();
+		m_profilingStageManager->InitializeProfilingStageManager(cpuProfiler);
 	});
 }
 
@@ -591,20 +587,20 @@ void Game::PostThink()
 double &Game::GetLastThink() { return m_tLast; }
 double &Game::GetLastTick() { return m_tLastTick; }
 
-pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage, Game::CPUProfilingPhase> *Game::GetProfilingStageManager() { return m_profilingStageManager.get(); }
-bool Game::StartProfilingStage(CPUProfilingPhase stage)
+pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage> *Game::GetProfilingStageManager() { return m_profilingStageManager.get(); }
+bool Game::StartProfilingStage(const char *stage)
 {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	debug::get_domain().BeginTask("stage_" + std::string {magic_enum::enum_name(stage)});
+	debug::get_domain().BeginTask("stage_" + std::string {stage});
 #endif
 	return m_profilingStageManager && m_profilingStageManager->StartProfilerStage(stage);
 }
-bool Game::StopProfilingStage(CPUProfilingPhase stage)
+bool Game::StopProfilingStage()
 {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	debug::get_domain().EndTask();
 #endif
-	return m_profilingStageManager && m_profilingStageManager->StopProfilerStage(stage);
+	return m_profilingStageManager && m_profilingStageManager->StopProfilerStage();
 }
 
 std::string Game::GetMapName() { return m_mapInfo.name; }
@@ -619,7 +615,7 @@ void Game::UpdateAnimations(double dt) { m_animUpdateManager->UpdateAnimations(d
 
 void Game::Tick()
 {
-	StartProfilingStage(CPUProfilingPhase::Tick);
+	StartProfilingStage("Tick");
 	if((m_flags & GameFlags::InitialTick) != GameFlags::None) {
 		m_flags &= ~GameFlags::InitialTick;
 		m_tDeltaTick = 0.0f; // First tick is essentially 'skipped' to avoid physics errors after the world has been loaded
@@ -637,11 +633,11 @@ void Game::Tick()
 	// - They may generate logic-based animation events
 	// TODO: This is current inefficient because we're not really doing anything
 	// while the animations are being calculated, resulting in wasted CPU cycles.
-	StartProfilingStage(CPUProfilingPhase::Animations);
+	StartProfilingStage("Animations");
 	UpdateAnimations(m_tDeltaTick);
-	StopProfilingStage(CPUProfilingPhase::Animations);
+	StopProfilingStage(); // Animations
 
-	StartProfilingStage(CPUProfilingPhase::Physics);
+	StartProfilingStage("Physics");
 
 	auto &awakePhysics = GetAwakePhysicsComponents();
 	for(auto &hPhysC : awakePhysics) {
@@ -658,12 +654,12 @@ void Game::Tick()
 
 	CallCallbacks("PrePhysicsSimulate");
 	CallLuaCallbacks("PrePhysicsSimulate");
-	StartProfilingStage(CPUProfilingPhase::PhysicsSimulation);
+	StartProfilingStage("PhysicsSimulation");
 	if(IsPhysicsSimulationEnabled() == true && m_physEnvironment) {
 		static int maxSteps = 1;
 		m_tPhysDeltaRemainder = m_physEnvironment->StepSimulation(CFloat(m_tDeltaTick + m_tPhysDeltaRemainder), maxSteps, CFloat(m_tDeltaTick));
 	}
-	StopProfilingStage(CPUProfilingPhase::PhysicsSimulation);
+	StopProfilingStage(); // PhysicsSimulation
 	CallCallbacks("PostPhysicsSimulate");
 	CallLuaCallbacks("PostPhysicsSimulate");
 
@@ -681,7 +677,7 @@ void Game::Tick()
 			++it;
 	}
 
-	StopProfilingStage(CPUProfilingPhase::Physics);
+	StopProfilingStage(); // Physics
 
 	while(m_entsScheduledForRemoval.empty() == false) {
 		auto &hEnt = m_entsScheduledForRemoval.front();
@@ -691,7 +687,7 @@ void Game::Tick()
 		m_entsScheduledForRemoval.pop();
 	}
 
-	StartProfilingStage(CPUProfilingPhase::GameObjectLogic);
+	StartProfilingStage("GameObjectLogic");
 
 	// Perform some cleanup
 	pragma::BaseEntityComponentSystem::Cleanup();
@@ -716,14 +712,14 @@ void Game::Tick()
 		++i;
 	}
 
-	StopProfilingStage(CPUProfilingPhase::GameObjectLogic);
+	StopProfilingStage(); // GameObjectLogic
 
-	StartProfilingStage(CPUProfilingPhase::Timers);
+	StartProfilingStage("Timers");
 	UpdateTimers();
-	StopProfilingStage(CPUProfilingPhase::Timers);
+	StopProfilingStage(); // Timers
 	//if(GetNetworkState()->IsClient())
 	//	return;
-	StopProfilingStage(CPUProfilingPhase::Tick);
+	StopProfilingStage(); // Tick
 }
 void Game::PostTick() { m_tLastTick = m_tCur; }
 

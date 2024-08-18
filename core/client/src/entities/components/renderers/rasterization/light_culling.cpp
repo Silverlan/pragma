@@ -35,8 +35,8 @@ void pragma::CRasterizationRendererComponent::CullLightSources(const util::DrawS
 	auto &prepass = GetPrepass();
 	auto &drawCmd = drawSceneInfo.commandBuffer;
 	{
-		c_game->StartProfilingStage(CGame::CPUProfilingPhase::CullLightSources);
-		c_game->StartProfilingStage(CGame::GPUProfilingPhase::CullLightSources);
+		c_game->StartProfilingStage("CullLightSources");
+		c_game->StartGPUProfilingStage("CullLightSources");
 		auto depthTex = prepass.textureDepth;
 		auto bMultisampled = depthTex->IsMSAATexture();
 		if(depthTex->IsMSAATexture()) {
@@ -126,11 +126,11 @@ void pragma::CRasterizationRendererComponent::RenderShadows(const util::DrawScen
 	drawCmd->RecordImageBarrier(depthTex->GetImage(), {prosper::PipelineStageFlags::ComputeShaderBit, prosper::ImageLayout::DepthStencilAttachmentOptimal, prosper::AccessFlags::ShaderReadBit},
 	  {prosper::PipelineStageFlags::EarlyFragmentTestsBit, prosper::ImageLayout::DepthStencilAttachmentOptimal, prosper::AccessFlags::DepthStencilAttachmentWriteBit});
 
-	c_game->StopProfilingStage(CGame::GPUProfilingPhase::CullLightSources);
-	c_game->StopProfilingStage(CGame::CPUProfilingPhase::CullLightSources);
+	c_game->StopGPUProfilingStage(); // CullLightSources
+	c_game->StopProfilingStage(); // CullLightSources
 
-	c_game->StartProfilingStage(CGame::CPUProfilingPhase::Shadows);
-	c_game->StartProfilingStage(CGame::GPUProfilingPhase::Shadows);
+	c_game->StartProfilingStage("Shadows");
+	c_game->StartGPUProfilingStage("Shadows");
 	// Update shadows
 	//c_engine->StartGPUTimer(GPUTimerEvent::Shadow); // TODO: Only for main scene // prosper TODO
 
@@ -205,6 +205,6 @@ void pragma::CRasterizationRendererComponent::RenderShadows(const util::DrawScen
 
 	//auto &imgDepth = textureDepth->GetImage(); // prosper TODO
 	//imgDepth->SetDrawLayout(prosper::ImageLayout::ShaderReadOnlyOptimal); // prosper TODO
-	c_game->StopProfilingStage(CGame::GPUProfilingPhase::Shadows);
-	c_game->StopProfilingStage(CGame::CPUProfilingPhase::Shadows);
+	c_game->StopGPUProfilingStage(); // Shadows
+	c_game->StopProfilingStage(); // Shadows
 }

@@ -29,10 +29,10 @@ void CRendererPpFogComponent::DoRenderEffect(const util::DrawSceneInfo &drawScen
 {
 	if(drawSceneInfo.renderStats)
 		(*drawSceneInfo.renderStats)->BeginGpuTimer(RenderStats::RenderStage::PostProcessingGpuFog, *drawSceneInfo.commandBuffer);
-	c_game->StartProfilingStage(CGame::GPUProfilingPhase::PostProcessingFog);
+	c_game->StartGPUProfilingStage("PostProcessingFog");
 
 	util::ScopeGuard scopeGuard {[&drawSceneInfo]() {
-		c_game->StopProfilingStage(CGame::GPUProfilingPhase::PostProcessingFog);
+		c_game->StopGPUProfilingStage(); // PostProcessingFog
 		if(drawSceneInfo.renderStats)
 			(*drawSceneInfo.renderStats)->EndGpuTimer(RenderStats::RenderStage::PostProcessingGpuFog, *drawSceneInfo.commandBuffer);
 	}};

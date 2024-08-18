@@ -13,8 +13,10 @@
 #include "pragma/entities/components/constraints/constraint_manager_component.hpp"
 #include "pragma/entities/entity_iterator.hpp"
 #include "pragma/entities/entity_component_system_t.hpp"
+#include "pragma/console/cvar.h"
+#include "pragma/debug/intel_vtune.hpp"
 
-pragma::AnimationUpdateManager::AnimationUpdateManager(Game &game) : game {game}, m_threadPool {10, "animation_update"}
+pragma::AnimationUpdateManager::AnimationUpdateManager(Game &game) : game {game}
 {
 	auto &componentManager = game.GetEntityComponentManager();
 	auto r = componentManager.GetComponentTypeId("animated", m_animatedComponentId);
@@ -58,35 +60,60 @@ void pragma::AnimationUpdateManager::UpdateEntityAnimationDrivers(double dt)
 		ent->GetComponent<pragma::AnimationDriverComponent>()->ApplyDriver();
 }
 void pragma::AnimationUpdateManager::UpdateConstraints(double dt) { pragma::ConstraintManagerComponent::ApplyConstraints(*game.GetNetworkState()); }
+
+static auto cvDisableAnimUpdates = GetConVar("debug_disable_animation_updates");
 void pragma::AnimationUpdateManager::UpdateAnimations(double dt)
 {
+	m_channelQueueProcessor.Reset();
+
+	if(cvDisableAnimUpdates->GetBool())
+		return;
+	auto t = std::chrono::steady_clock::now();
+	game.StartProfilingStage("UpdateAnimations");
 	for(auto &entInfo : m_animatedEntities) {
+		game.StartProfilingStage("UpdateSkeletalAnimation");
 		auto maintainAnimations = entInfo.animatedC ? entInfo.animatedC->PreMaintainAnimations(dt) : false;
 		if(maintainAnimations)
 			entInfo.animatedC->UpdateAnimations(dt);
+		game.StopProfilingStage();
 
-		if(entInfo.panimaC)
-			entInfo.panimaC->UpdateAnimations(dt);
+		if(entInfo.panimaC) {
+			game.StartProfilingStage("UpdatePanimaAnimation");
+			// This will calculate the new animation data (multi-threaded), but not apply the values yet
+			entInfo.panimaC->UpdateAnimations(m_channelQueueProcessor, dt);
+			game.StopProfilingStage();
+		}
+	}
+	game.StopProfilingStage();
 
+	game.StartProfilingStage("ApplyAnimationValues");
+	for(auto &entInfo : m_animatedEntities) {
+		if(entInfo.panimaC) {
+			// Apply the new animation values
+			entInfo.panimaC->ApplyAnimationValues(&m_channelQueueProcessor);
+		}
 		if(entInfo.animatedC && entInfo.animatedC->IsPostAnimationUpdateEnabled())
 			m_postAnimListenerQueue.push_back(entInfo.animatedC);
 	}
-
-	m_threadPool.WaitForCompletion();
+	game.StopProfilingStage();
 
 	// The remaining steps have to be executed on the main thread because
 	// they may affect arbitrary component properties or call listeners and events,
 	// which can't be guaranteed to be thread-safe in all cases.
-
+	game.StartProfilingStage("UpdateEntityAnimationDrivers");
 	UpdateEntityAnimationDrivers(dt);
+	game.StopProfilingStage();
 
 	// This will also update IK solvers
+	game.StartProfilingStage("UpdateConstraints");
 	UpdateConstraints(dt);
+	game.StopProfilingStage();
 
 	for(auto *animC : m_postAnimListenerQueue)
 		animC->PostAnimationsUpdated();
 	m_postAnimListenerQueue.clear();
 
+	game.StartProfilingStage("HandleAnimationEvents");
 	{
 		EntityIterator entIt {game, m_animatedComponentId};
 		for(auto *ent : entIt) {
@@ -94,4 +121,5 @@ void pragma::AnimationUpdateManager::UpdateAnimations(double dt)
 			animC->HandleAnimationEvents();
 		}
 	}
+	game.StopProfilingStage();
 }

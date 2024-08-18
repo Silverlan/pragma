@@ -9,6 +9,7 @@
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/util/util_thread_pool.hpp"
+#include "pragma/game/global_animation_channel_queue_processor.hpp"
 
 class Game;
 namespace pragma {
@@ -36,9 +37,9 @@ namespace pragma {
 		pragma::ComponentId m_panimaComponentId = std::numeric_limits<pragma::ComponentId>::max();
 		pragma::ComponentId m_animationDriverComponentId = std::numeric_limits<pragma::ComponentId>::max();
 		pragma::ComponentId m_constraintManagerComponentId = std::numeric_limits<pragma::ComponentId>::max();
-		pragma::ThreadPool m_threadPool;
 		std::vector<AnimatedEntity> m_animatedEntities;
 		std::vector<BaseAnimatedComponent *> m_postAnimListenerQueue;
+		GlobalAnimationChannelQueueProcessor m_channelQueueProcessor;
 	};
 };
 

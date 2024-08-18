@@ -32,10 +32,10 @@ void CRendererPpToneMappingComponent::DoRenderEffect(const util::DrawSceneInfo &
 {
 	if(drawSceneInfo.renderStats)
 		(*drawSceneInfo.renderStats)->BeginGpuTimer(RenderStats::RenderStage::PostProcessingGpuToneMapping, *drawSceneInfo.commandBuffer);
-	c_game->StartProfilingStage(CGame::GPUProfilingPhase::PostProcessingHDR);
+	c_game->StartGPUProfilingStage("PostProcessingHDR");
 
 	util::ScopeGuard scopeGuard {[&drawSceneInfo]() {
-		c_game->StopProfilingStage(CGame::GPUProfilingPhase::PostProcessingHDR);
+		c_game->StopGPUProfilingStage(); // PostProcessingHDR
 		if(drawSceneInfo.renderStats)
 			(*drawSceneInfo.renderStats)->EndGpuTimer(RenderStats::RenderStage::PostProcessingGpuToneMapping, *drawSceneInfo.commandBuffer);
 	}};

@@ -16,7 +16,6 @@
 #include "pragma/debug/mdump.h"
 #include "pragma/input/key_state.hpp"
 #include "pragma/engine_info.hpp"
-#include "pragma/debug/debug_performance_profiler.hpp"
 #include "pragma/iserverstate.hpp"
 #include "pragma/types.hpp"
 #include <materialmanager.h>
@@ -53,6 +52,12 @@ namespace util {
 };
 namespace pragma::asset {
 	class AssetManager;
+};
+namespace pragma::debug {
+	class CPUProfiler;
+	template<class TProfilingStage>
+	class ProfilingStageManager;
+	class ProfilingStage;
 };
 enum class NwStateType : uint8_t { Client = 0, Server, Count };
 class DLLNETWORK Engine : public CVarHandler, public CallbackHandler {
@@ -127,14 +132,6 @@ class DLLNETWORK Engine : public CVarHandler, public CallbackHandler {
 		CLIOnly = ConsoleSubsystem << 1u,
 		NonInteractiveMode = CLIOnly << 1u,
 	};
-
-	enum class CPUProfilingPhase : uint32_t {
-		Think = 0u,
-		Tick,
-		ServerTick,
-
-		Count
-	};
   public:
 	DEBUGCONSOLE;
 	virtual bool Initialize(int argc, char *argv[]);
@@ -157,11 +154,11 @@ class DLLNETWORK Engine : public CVarHandler, public CallbackHandler {
 
 	// Debug
 	pragma::debug::CPUProfiler &GetProfiler() const;
-	pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage, CPUProfilingPhase> *GetProfilingStageManager();
+	pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage> *GetProfilingStageManager();
 	CallbackHandle AddProfilingHandler(const std::function<void(bool)> &handler);
 	void SetProfilingEnabled(bool bEnabled);
-	bool StartProfilingStage(CPUProfilingPhase stage);
-	bool StopProfilingStage(CPUProfilingPhase stage);
+	bool StartProfilingStage(const char *stage);
+	bool StopProfilingStage();
 
 	upad::PackageManager *GetPADPackageManager() const;
 
@@ -347,7 +344,7 @@ class DLLNETWORK Engine : public CVarHandler, public CallbackHandler {
 	std::mutex m_tickEventQueueMutex;
 	StateFlags m_stateFlags;
 	mutable upad::PackageManager *m_padPackageManager = nullptr;
-	std::unique_ptr<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage, CPUProfilingPhase>> m_profilingStageManager = nullptr;
+	std::unique_ptr<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage>> m_profilingStageManager;
 
 	std::unordered_map<std::string, std::function<void(int, char *[])>> m_launchOptions;
 

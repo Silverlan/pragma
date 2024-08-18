@@ -151,8 +151,8 @@ void pragma::CRasterizationRendererComponent::ExecutePrepass(const util::DrawSce
 	auto &scene = *drawSceneInfo.scene;
 	auto &hCam = scene.GetActiveCamera();
 	// Pre-render depths and normals (if SSAO is enabled)
-	c_game->StartProfilingStage(CGame::CPUProfilingPhase::Prepass);
-	c_game->StartProfilingStage(CGame::GPUProfilingPhase::Prepass);
+	c_game->StartProfilingStage("Prepass");
+	c_game->StartGPUProfilingStage("Prepass");
 	auto &prepass = GetPrepass();
 	if(prepass.textureDepth->IsMSAATexture())
 		static_cast<prosper::MSAATexture &>(*prepass.textureDepth).Reset();
@@ -188,14 +188,15 @@ void pragma::CRasterizationRendererComponent::ExecutePrepass(const util::DrawSce
 
 	InvokeEventCallbacks(EVENT_POST_PREPASS, evData);
 
-	c_game->StopProfilingStage(CGame::GPUProfilingPhase::Prepass);
-	c_game->StopProfilingStage(CGame::CPUProfilingPhase::Prepass);
+	c_game->StopGPUProfilingStage(); // Prepass
+	c_game->StopProfilingStage();    // Prepass
 }
 
 void pragma::CRasterizationRendererComponent::ExecuteLightingPass(const util::DrawSceneInfo &drawSceneInfo)
 {
 	if(umath::is_flag_set(drawSceneInfo.flags, util::DrawSceneInfo::Flags::DisablePrepass))
 		return;
+	c_game->StartProfilingStage("ExecuteLightingPass");
 	auto &scene = const_cast<pragma::CSceneComponent &>(*drawSceneInfo.scene);
 	auto &cam = scene.GetActiveCamera();
 	bool bShadows = (drawSceneInfo.renderFlags & RenderFlags::Shadows) == RenderFlags::Shadows;
@@ -256,7 +257,7 @@ void pragma::CRasterizationRendererComponent::ExecuteLightingPass(const util::Dr
 
 	InvokeEventCallbacks(EVENT_POST_LIGHTING_PASS, evData);
 
-	c_game->StopProfilingStage(CGame::CPUProfilingPhase::RenderWorld);
+	c_game->StopProfilingStage(); // ExecuteLightingPass
 }
 void pragma::CRasterizationRendererComponent::StartPrepassRecording(const util::DrawSceneInfo &drawSceneInfo)
 {
@@ -293,7 +294,7 @@ void pragma::CRasterizationRendererComponent::RecordLightingPass(const util::Dra
 	auto &scene = const_cast<pragma::CSceneComponent &>(*drawSceneInfo.scene);
 	auto &cam = scene.GetActiveCamera();
 	m_lightingCommandBufferGroup->Record([this, &scene, &cam, &drawSceneInfo](prosper::ISecondaryCommandBuffer &cmd) mutable {
-		c_game->StartProfilingStage(CGame::CPUProfilingPhase::RenderWorld);
+		c_game->StartProfilingStage("RecordLightingPass");
 		auto pcmd = cmd.shared_from_this();
 		auto bGlow = cvDrawGlow->GetBool();
 		auto bTranslucent = cvDrawTranslucent->GetBool();
@@ -306,14 +307,16 @@ void pragma::CRasterizationRendererComponent::RecordLightingPass(const util::Dra
 
 		CELightingStageData evDataLightingStage {rsys};
 		if((drawSceneInfo.renderFlags & RenderFlags::Skybox) != RenderFlags::None) {
-			c_game->StartProfilingStage(CGame::GPUProfilingPhase::Skybox);
+			c_game->StartProfilingStage("Skybox");
+			c_game->StartGPUProfilingStage("Skybox");
 			InvokeEventCallbacks(EVENT_MT_BEGIN_RECORD_SKYBOX, evDataLightingStage);
 
 			rsys.Render(*sceneRenderDesc.GetRenderQueue(pragma::rendering::SceneRenderPass::Sky, false /* translucent */), lightingStageStats);
 			rsys.Render(*sceneRenderDesc.GetRenderQueue(pragma::rendering::SceneRenderPass::Sky, true /* translucent */), lightingStageTranslucentStats);
 
 			InvokeEventCallbacks(EVENT_MT_END_RECORD_SKYBOX, evDataLightingStage);
-			c_game->StopProfilingStage(CGame::GPUProfilingPhase::Skybox);
+			c_game->StopGPUProfilingStage(); // Skybox
+			c_game->StopProfilingStage(); // Skybox
 		}
 
 		// Render static world geometry
@@ -321,7 +324,8 @@ void pragma::CRasterizationRendererComponent::RecordLightingPass(const util::Dra
 		if(g_dbgMode == 3 || g_dbgMode == 5) {
 #endif
 			if((drawSceneInfo.renderFlags & RenderFlags::World) != RenderFlags::None) {
-				c_game->StartProfilingStage(CGame::GPUProfilingPhase::World);
+				c_game->StartProfilingStage("World");
+				c_game->StartGPUProfilingStage("World");
 				InvokeEventCallbacks(EVENT_MT_BEGIN_RECORD_WORLD, evDataLightingStage);
 
 				// For optimization purposes, world geometry is stored in separate render queues.
@@ -347,7 +351,8 @@ void pragma::CRasterizationRendererComponent::RecordLightingPass(const util::Dra
 				rsys.Render(*sceneRenderDesc.GetRenderQueue(pragma::rendering::SceneRenderPass::World, true /* translucent */), lightingStageTranslucentStats);
 
 				InvokeEventCallbacks(EVENT_MT_END_RECORD_WORLD, evDataLightingStage);
-				c_game->StopProfilingStage(CGame::GPUProfilingPhase::World);
+				c_game->StopGPUProfilingStage(); // World
+				c_game->StopProfilingStage(); // World
 			}
 #if DEBUG_RENDER_PERFORMANCE_TEST_ENABLED == 1
 		}
@@ -414,7 +419,8 @@ void pragma::CRasterizationRendererComponent::RecordLightingPass(const util::Dra
 		// c_game->CallLuaCallbacks<void,const util::DrawSceneInfo*>("Render",&drawSceneInfo);
 
 		if((drawSceneInfo.renderFlags & RenderFlags::Debug) == RenderFlags::Debug) {
-			c_game->StartProfilingStage(CGame::GPUProfilingPhase::Debug);
+			c_game->StartProfilingStage("Debug");
+			c_game->StartGPUProfilingStage("Debug");
 			InvokeEventCallbacks(EVENT_MT_BEGIN_RECORD_DEBUG, evDataLightingStage);
 
 			if(cam.valid())
@@ -511,11 +517,13 @@ void pragma::CRasterizationRendererComponent::RecordLightingPass(const util::Dra
 #endif
 
 			InvokeEventCallbacks(EVENT_MT_END_RECORD_DEBUG, evDataLightingStage);
-			c_game->StopProfilingStage(CGame::GPUProfilingPhase::Debug);
+			c_game->StopGPUProfilingStage(); // Debug
+			c_game->StopProfilingStage(); // Debug
 		}
 
 		if((drawSceneInfo.renderFlags & RenderFlags::View) != RenderFlags::None) {
-			c_game->StartProfilingStage(CGame::GPUProfilingPhase::View);
+			c_game->StartGPUProfilingStage("View");
+			c_game->StartProfilingStage("View");
 			InvokeEventCallbacks(EVENT_MT_BEGIN_RECORD_VIEW, evDataLightingStage);
 
 			rsys.SetCameraType(pragma::rendering::BaseRenderProcessor::CameraType::View);
@@ -536,7 +544,9 @@ void pragma::CRasterizationRendererComponent::RecordLightingPass(const util::Dra
 			//RenderGlowMeshes(cam,true);
 
 			InvokeEventCallbacks(EVENT_MT_END_RECORD_VIEW, evDataLightingStage);
-			c_game->StopProfilingStage(CGame::GPUProfilingPhase::View);
+			c_game->StopGPUProfilingStage(); // View
+			c_game->StopProfilingStage(); // View
 		}
+		c_game->StopProfilingStage(); // RecordLightingPass
 	});
 }

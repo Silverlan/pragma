@@ -170,7 +170,7 @@ function Component:InitializeChannels(entityInfo)
 	for componentName, props in pairs(entityInfo.properties) do
 		local c = entityInfo.entity:GetComponent(componentName)
 		if c == nil then
-			self:Log(
+			self:LogInfo(
 				"Unable to add animation channels for component '"
 					.. componentName
 					.. "' of entity "
@@ -181,7 +181,7 @@ function Component:InitializeChannels(entityInfo)
 			for _, propName in ipairs(props) do
 				local idx = c:GetMemberIndex(propName)
 				if idx == nil then
-					self:Log(
+					self:LogInfo(
 						"Unable to add animation channel for property '"
 							.. propName
 							.. "' of component '"

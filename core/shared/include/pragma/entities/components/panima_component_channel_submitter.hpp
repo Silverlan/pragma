@@ -9,6 +9,7 @@
 
 #include <panima/types.hpp>
 #include "pragma/entities/entity_component_manager_t.hpp"
+#include "pragma/game/animation_channel_cache_data.hpp"
 
 static constexpr auto g_debugPrint = false;
 
@@ -35,17 +36,19 @@ static constexpr bool is_type_compatible(udm::Type channelType, udm::Type member
 
 template<typename TChannel, typename TMember, auto TMapArray>
     requires(pragma::is_animatable_type_v<TChannel> && pragma::is_animatable_type_v<TMember> && is_type_compatible(udm::type_to_enum<TChannel>(), udm::type_to_enum<TMember>()))
-panima::ChannelValueSubmitter get_member_channel_submitter(pragma::BaseEntityComponent &component, uint32_t memberIdx, void (*setter)(const pragma::ComponentMemberInfo &, pragma::BaseEntityComponent &, const void *, void *), void *userData = nullptr);
+panima::ChannelValueSubmitter get_member_channel_submitter(pragma::BaseEntityComponent &component, const pragma::AnimationChannelCacheData &cacheData, uint32_t memberIdx, void (*setter)(const pragma::ComponentMemberInfo &, pragma::BaseEntityComponent &, const void *, void *),
+  void *userData = nullptr);
 
 template<typename TChannel, typename TMember, typename T, uint32_t I, uint32_t ARRAY_INDEX_COUNT, T MAX_ARRAY_VALUE, template<typename, typename, auto TTFunc> class TFunc, T... values>
-panima::ChannelValueSubmitter runtime_array_to_compile_time(pragma::BaseEntityComponent &component, uint32_t memberIdx, void (*setter)(const pragma::ComponentMemberInfo &, pragma::BaseEntityComponent &, const void *, void *), void *userData,
+panima::ChannelValueSubmitter runtime_array_to_compile_time(pragma::BaseEntityComponent &component, const pragma::AnimationChannelCacheData &cacheData, uint32_t memberIdx, void (*setter)(const pragma::ComponentMemberInfo &, pragma::BaseEntityComponent &, const void *, void *),
+  void *userData,
   const std::array<T, ARRAY_INDEX_COUNT> &rtValues);
 
 template<typename TChannel, typename TMember, auto TMapArray>
 struct get_member_channel_submitter_wrapper {
-	panima::ChannelValueSubmitter operator()(pragma::BaseEntityComponent &component, uint32_t memberIdx, void (*setter)(const pragma::ComponentMemberInfo &, pragma::BaseEntityComponent &, const void *, void *), void *userData) const
+	panima::ChannelValueSubmitter operator()(pragma::BaseEntityComponent &component, const pragma::AnimationChannelCacheData &cacheData, uint32_t memberIdx, void (*setter)(const pragma::ComponentMemberInfo &, pragma::BaseEntityComponent &, const void *, void *), void *userData) const
 	{
-		return get_member_channel_submitter<TChannel, TMember, TMapArray>(component, memberIdx, setter, userData);
+		return get_member_channel_submitter<TChannel, TMember, TMapArray>(component, cacheData, memberIdx, setter, userData);
 	}
 };
 

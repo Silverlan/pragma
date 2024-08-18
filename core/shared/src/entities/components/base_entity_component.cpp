@@ -108,7 +108,8 @@ bool BaseEntityComponent::IsPropertyAnimated(const std::string &property)
 		return false;
 	std::string componentName {info->name.str};
 	std::string targetPath = "ec/" + componentName + "/" + property;
-	for(auto &[name, manager] : panimaC->GetAnimationManagers()) {
+	for(auto &amData : panimaC->GetAnimationManagers()) {
+		auto &manager = amData->animationManager;
 		auto &player = manager->GetPlayer();
 		auto *anim = player.GetAnimation();
 		if(!anim)
@@ -142,7 +143,8 @@ void BaseEntityComponent::SetPropertyAnimated(const std::string &property, bool 
 	}
 
 	auto hasChannel = false;
-	for(auto &[name, manager] : panimaC->GetAnimationManagers()) {
+	for(auto &amData : panimaC->GetAnimationManagers()) {
+		auto &manager = amData->animationManager;
 		auto &player = manager->GetPlayer();
 		auto *anim = const_cast<panima::Animation *>(player.GetAnimation());
 		if(!anim)

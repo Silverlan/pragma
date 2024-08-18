@@ -52,12 +52,6 @@ class DLLSERVER SGame : public Game {
 	std::unordered_map<std::string, udm::PProperty> m_preTransitionWorldState {};
 	// Delta landmark offset between this level and the previous level (in case there was a level change)
 	Vector3 m_deltaTransitionLandmarkOffset {};
-  public:
-	enum class CPUProfilingPhase : uint32_t {
-		Snapshot = 0u,
-
-		Count
-	};
   protected:
 	template<class T>
 	void GetPlayers(std::vector<T *> *ents);
@@ -91,7 +85,7 @@ class DLLSERVER SGame : public Game {
 
 	pragma::NetEventManager m_entNetEventManager = {};
 	CallbackHandle m_cbProfilingHandle = {};
-	std::unique_ptr<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage, CPUProfilingPhase>> m_profilingStageManager = nullptr;
+	std::unique_ptr<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage>> m_profilingStageManager;
   public:
 	using Game::LoadLuaComponent;
 	virtual void InitializeLua() override;
@@ -122,9 +116,9 @@ class DLLSERVER SGame : public Game {
 	std::vector<std::string> &GetNetEventIds();
 	const std::vector<std::string> &GetNetEventIds() const;
 
-	pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage, CPUProfilingPhase> *GetProfilingStageManager();
-	bool StartProfilingStage(CPUProfilingPhase stage);
-	bool StopProfilingStage(CPUProfilingPhase stage);
+	pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage> *GetProfilingStageManager();
+	bool StartProfilingStage(const char *stage);
+	bool StopProfilingStage();
 
 	void ChangeLevel(const std::string &mapName, const std::string &landmarkName = "");
 

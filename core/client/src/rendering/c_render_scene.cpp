@@ -51,6 +51,12 @@ void CGame::RenderScene(const util::DrawSceneInfo &drawSceneInfo)
 	m_currentDrawCmd = drawSceneInfo.commandBuffer;
 	util::ScopeGuard sgCurrentDrawCmd {[this]() { m_currentDrawCmd = {}; }};
 
+	std::chrono::steady_clock::time_point t;
+	if(drawSceneInfo.renderStats) {
+		t = std::chrono::steady_clock::now();
+		(*drawSceneInfo.renderStats)->BeginGpuTimer(RenderStats::RenderStage::RenderSceneGpu, *drawSceneInfo.commandBuffer);
+	}
+
 	CallCallbacks<void, std::reference_wrapper<const util::DrawSceneInfo>>("PreRenderScene", drawSceneInfo);
 	CallLuaCallbacks<void, const util::DrawSceneInfo *>("PreRenderScene", &drawSceneInfo);
 
@@ -64,14 +70,26 @@ void CGame::RenderScene(const util::DrawSceneInfo &drawSceneInfo)
 			presentationTexture = renderer->GetPresentationTexture();
 		drawSceneInfo.commandBuffer->RecordImageBarrier(presentationTexture->GetImage(), prosper::ImageLayout::ShaderReadOnlyOptimal, prosper::ImageLayout::ColorAttachmentOptimal);
 
+		StartProfilingStage("Render");
+		if(drawSceneInfo.renderStats)
+			(*drawSceneInfo.renderStats)->BeginGpuTimer(RenderStats::RenderStage::RendererGpu, *drawSceneInfo.commandBuffer);
 		renderer->Render(drawSceneInfo);
-		StartProfilingStage(CGame::GPUProfilingPhase::Present);
-		StartProfilingStage(CGame::CPUProfilingPhase::Present);
+		if(drawSceneInfo.renderStats)
+			(*drawSceneInfo.renderStats)->EndGpuTimer(RenderStats::RenderStage::RendererGpu, *drawSceneInfo.commandBuffer);
+		StopProfilingStage(); // Render
+
+		StartGPUProfilingStage("Present");
+		StartProfilingStage("Present");
 
 		RenderScenePresent(drawSceneInfo.commandBuffer, *presentationTexture, drawSceneInfo.outputImage.get(), drawSceneInfo.outputLayerId);
-		StopProfilingStage(CGame::CPUProfilingPhase::Present);
-		StopProfilingStage(CGame::GPUProfilingPhase::Present);
+		StopProfilingStage();    // Present
+		StopGPUProfilingStage(); // Present
 	}
 	CallCallbacks<void, std::reference_wrapper<const util::DrawSceneInfo>>("PostRenderScene", drawSceneInfo);
 	CallLuaCallbacks<void, const util::DrawSceneInfo *>("PostRenderScene", &drawSceneInfo);
+
+	if(drawSceneInfo.renderStats) {
+		(*drawSceneInfo.renderStats)->EndGpuTimer(RenderStats::RenderStage::RenderSceneGpu, *drawSceneInfo.commandBuffer);
+		(*drawSceneInfo.renderStats)->SetTime(RenderStats::RenderStage::RenderSceneCpu, std::chrono::steady_clock::now() - t);
+	}
 }

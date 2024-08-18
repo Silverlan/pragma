@@ -41,7 +41,7 @@ void CRendererPpFxaaComponent::DoRenderEffect(const util::DrawSceneInfo &drawSce
 
 	if(static_cast<pragma::rendering::AntiAliasing>(cvAntiAliasing->GetInt()) != pragma::rendering::AntiAliasing::FXAA || m_renderer.expired())
 		return;
-	c_game->StartProfilingStage(CGame::GPUProfilingPhase::PostProcessingFXAA);
+	c_game->StartGPUProfilingStage("PostProcessingFXAA");
 
 	auto &drawCmd = drawSceneInfo.commandBuffer;
 	auto &hdrInfo = m_renderer->GetHDRInfo();
@@ -87,6 +87,6 @@ void CRendererPpFxaaComponent::DoRenderEffect(const util::DrawSceneInfo &drawSce
 		if(srcImg)
 			drawCmd->RecordImageBarrier(*srcImg, prosper::ImageLayout::ShaderReadOnlyOptimal, prosper::ImageLayout::ColorAttachmentOptimal);
 	}
-	c_game->StopProfilingStage(CGame::GPUProfilingPhase::PostProcessingFXAA);
+	c_game->StopGPUProfilingStage(); // PostProcessingFXAA
 }
 void CRendererPpFxaaComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }

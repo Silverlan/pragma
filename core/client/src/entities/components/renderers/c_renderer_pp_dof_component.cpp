@@ -30,10 +30,10 @@ void CRendererPpDoFComponent::DoRenderEffect(const util::DrawSceneInfo &drawScen
 {
 	if(drawSceneInfo.renderStats)
 		(*drawSceneInfo.renderStats)->BeginGpuTimer(RenderStats::RenderStage::PostProcessingGpuDoF, *drawSceneInfo.commandBuffer);
-	c_game->StartProfilingStage(CGame::GPUProfilingPhase::PostProcessingDoF);
+	c_game->StartGPUProfilingStage("PostProcessingDoF");
 
 	util::ScopeGuard scopeGuard {[&drawSceneInfo]() {
-		c_game->StopProfilingStage(CGame::GPUProfilingPhase::PostProcessingDoF);
+		c_game->StopGPUProfilingStage(); // PostProcessingDoF
 		if(drawSceneInfo.renderStats)
 			(*drawSceneInfo.renderStats)->EndGpuTimer(RenderStats::RenderStage::PostProcessingGpuDoF, *drawSceneInfo.commandBuffer);
 	}};

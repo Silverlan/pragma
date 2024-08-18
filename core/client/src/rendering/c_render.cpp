@@ -345,6 +345,11 @@ static CVar cvClearSceneColor = GetClientConVar("render_clear_scene_color");
 static CVar cvParticleQuality = GetClientConVar("cl_render_particle_quality");
 void CGame::RenderScenes(util::DrawSceneInfo &drawSceneInfo)
 {
+	StartProfilingStage("RenderScenes");
+	util::ScopeGuard sg {[this]() {
+		StopProfilingStage(); // RenderScenes
+	}};
+
 	// Update particle systems
 	// TODO: This isn't a good place for this and particle systems should
 	// only be updated if visible (?)
@@ -397,9 +402,14 @@ void CGame::RenderScenes(util::DrawSceneInfo &drawSceneInfo)
 		Con::cwar << "Attempted to render invalid scene!" << Con::endl;
 		return;
 	}
+	StartProfilingStage("PreRenderScenesCallbacks");
 	CallCallbacks<void, std::reference_wrapper<const util::DrawSceneInfo>>("PreRenderScenes", std::ref(drawSceneInfo));
 	CallLuaCallbacks<void, util::DrawSceneInfo *>("PreRenderScenes", &drawSceneInfo);
+	StopProfilingStage(); // PreRenderScenesCallbacks
+
+	StartProfilingStage("RenderScenesCallbacks");
 	CallLuaCallbacks<void, util::DrawSceneInfo *>("RenderScenes", &drawSceneInfo);
+	StopProfilingStage(); // RenderScenesCallbacks
 
 	if(IsDefaultGameRenderEnabled()) {
 		GetPrimaryCameraRenderMask(drawSceneInfo.inclusionMask, drawSceneInfo.exclusionMask);
@@ -407,8 +417,10 @@ void CGame::RenderScenes(util::DrawSceneInfo &drawSceneInfo)
 	}
 
 	// This is the only callback that allows adding sub-passes
+	StartProfilingStage("OnRenderScenesCallbacks");
 	CallCallbacks("OnRenderScenes");
 	CallLuaCallbacks<void>("OnRenderScenes");
+	StopProfilingStage(); // OnRenderScenesCallbacks
 
 	// Note: At this point no changes must be done to the scene whatsoever!
 	// Any change in the scene will result in undefined behavior until this function
@@ -416,7 +428,9 @@ void CGame::RenderScenes(util::DrawSceneInfo &drawSceneInfo)
 
 	// We'll queue up building the render queues before we start rendering, so
 	// most of it can be done in the background
+	StartProfilingStage("RenderScenes");
 	RenderScenes(m_sceneRenderQueue);
+	StopProfilingStage(); // RenderScenes
 
 	CallCallbacks("PostRenderScenes");
 	CallLuaCallbacks("PostRenderScenes");
@@ -683,13 +697,18 @@ void CGame::RenderScenes(const std::vector<util::DrawSceneInfo> &drawSceneInfos)
 			else
 				m_bMainRenderPass = true;
 #endif
+			StartProfilingStage("RenderScene");
 			RenderScene(drawSceneInfo);
+			StopProfilingStage(); // RenderScene
 			if(newRecording)
 				static_cast<prosper::IPrimaryCommandBuffer *>(drawCmd.get())->StopRecording();
 		}
 	};
 	renderScenes(drawSceneInfos);
+
+	StartProfilingStage("FlushRenderQueueBuilder");
 	m_renderQueueBuilder->Flush();
+	StopProfilingStage(); // FlushRenderQueueBuilder
 
 	// At this point all render threads (render queue and command buffer builders) are guaranteed
 	// to have completed their work for this frame. The scene is now safe for writing again.

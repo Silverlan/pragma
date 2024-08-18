@@ -9,14 +9,19 @@
 #define __DEBUG_PERFORMANCE_PROFILER_HPP__
 
 #include "pragma/definitions.h"
+#include <spdlog/spdlog.h>
 #include <mathutil/umath.h>
 #include <sharedutils/util_clock.hpp>
+#include <sharedutils/util_debug.h>
 #include <optional>
 #include <memory>
 #include <unordered_map>
 #include <chrono>
 #include <array>
+#include <stack>
 #include <set>
+
+#define ENABLE_DEBUG_HISTORY 0
 
 namespace pragma {
 	namespace debug {
@@ -29,11 +34,18 @@ namespace pragma {
 			Timer(const Timer &) = delete;
 			Timer &operator=(const Timer &) = delete;
 			virtual ~Timer() = default;
-			virtual bool Start() = 0;
+			virtual bool Start()
+			{
+				++m_count;
+				return true;
+			}
 			virtual bool Stop() = 0;
+			virtual void ResetCounters() { m_count = 0; }
+			size_t GetCount() const { return m_count; }
 			virtual std::unique_ptr<ProfilerResult> GetResult() const = 0;
 		  protected:
 			Timer() = default;
+			uint32_t m_count = 0;
 		};
 
 		class Profiler;
@@ -41,26 +53,30 @@ namespace pragma {
 		  public:
 			using StageId = uint32_t;
 			template<class TProfilingStage>
-			static std::shared_ptr<TProfilingStage> Create(Profiler &profiler, const std::string &name, TProfilingStage *parent = nullptr);
-			static std::shared_ptr<ProfilingStage> Create(Profiler &profiler, const std::string &name, ProfilingStage *parent = nullptr);
+			static std::shared_ptr<TProfilingStage> Create(Profiler &profiler, std::thread::id tid, const std::string &name);
+			static std::shared_ptr<ProfilingStage> Create(Profiler &profiler, std::thread::id tid, const std::string &name);
 			virtual ~ProfilingStage() = default;
 			ProfilingStage(const ProfilingStage &) = delete;
 			ProfilingStage &operator=(const ProfilingStage &) = delete;
-			virtual void Initialize(ProfilingStage *parent);
+			virtual void Initialize();
 
 			bool Start();
 			bool Stop();
+			void ResetCounters();
 			std::unique_ptr<ProfilerResult> GetResult() const;
+			size_t GetCount() const;
 
+			std::thread::id GetThreadId() const { return m_threadId; }
 			StageId GetStageId() const;
 			const std::string &GetName() const;
 			Profiler &GetProfiler();
 			ProfilingStage *GetParent();
+			void SetParent(ProfilingStage *parent);
 			const std::vector<std::weak_ptr<ProfilingStage>> &GetChildren() const;
 			const Timer &GetTimer() const;
 			Timer &GetTimer();
 		  protected:
-			ProfilingStage(Profiler &profiler, const std::string &name);
+			ProfilingStage(Profiler &profiler, std::thread::id tid, const std::string &name);
 			virtual void InitializeTimer();
 			std::shared_ptr<Timer> m_timer;
 		  private:
@@ -69,6 +85,7 @@ namespace pragma {
 			std::vector<std::weak_ptr<ProfilingStage>> m_children = {};
 			StageId m_stage;
 			std::string m_name;
+			std::thread::id m_threadId;
 		};
 
 		class CPUProfiler;
@@ -93,18 +110,31 @@ namespace pragma {
 		  private:
 			ProfilingStage::StageId m_nextStageId = 0u;
 			std::vector<std::weak_ptr<ProfilingStage>> m_stages = {};
-			friend std::shared_ptr<ProfilingStage> ProfilingStage::Create(Profiler &profiler, const std::string &name, ProfilingStage *parent);
+			friend std::shared_ptr<ProfilingStage> ProfilingStage::Create(Profiler &profiler, std::thread::id tid, const std::string &name);
 		};
 
-		template<class TProfilingStage, typename TPhaseEnum>
+		template<class TProfilingStage>
 		class ProfilingStageManager {
 		  public:
-			TProfilingStage &GetProfilerStage(TPhaseEnum phase);
-			bool StartProfilerStage(TPhaseEnum phase);
-			bool StopProfilerStage(TPhaseEnum phase);
-			void InitializeProfilingStageManager(Profiler &profiler, const std::array<std::shared_ptr<TProfilingStage>, umath::to_integral(TPhaseEnum::Count)> &stages);
+			TProfilingStage &GetProfilerStage(std::thread::id tid, const char *name);
+			bool StartProfilerStage(const char *name);
+			bool StopProfilerStage();
+			void InitializeProfilingStageManager(Profiler &profiler);
 		  protected:
-			std::array<std::shared_ptr<TProfilingStage>, umath::to_integral(TPhaseEnum::Count)> m_profilingStages = {};
+			using ProfilingStageMap = std::unordered_map<const char *, std::shared_ptr<TProfilingStage>>;
+			struct ProfilingThreadData {
+				ProfilingStageMap stageMap;
+				std::stack<const char *> stageStack;
+#if ENABLE_DEBUG_HISTORY == 1
+				struct HistoryItem {
+					std::string name;
+					std::string stackTrace;
+				};
+				std::vector<HistoryItem> history;
+#endif
+			};
+			std::unordered_map<std::thread::id, ProfilingThreadData> m_threadProfilingMap;
+			std::mutex m_profilingStageMutex;
 		  private:
 			Profiler *m_profiler = nullptr;
 		};
@@ -116,11 +146,12 @@ namespace pragma {
 			static std::shared_ptr<CPUTimer> Create();
 			virtual bool Start() override;
 			virtual bool Stop() override;
+			virtual void ResetCounters() override;
 			virtual std::unique_ptr<ProfilerResult> GetResult() const override;
 		  private:
 			CPUTimer() = default;
 			util::Clock::time_point m_startTime = {};
-			util::Clock::time_point m_stopTime = {};
+			util::Clock::duration m_duration = {};
 		};
 
 		class DLLNETWORK CPUProfiler : public Profiler {
@@ -131,31 +162,96 @@ namespace pragma {
 	};
 };
 
-template<class TProfilingStage, typename TPhaseEnum>
-TProfilingStage &pragma::debug::ProfilingStageManager<TProfilingStage, TPhaseEnum>::GetProfilerStage(TPhaseEnum phase)
+template<class TProfilingStage>
+TProfilingStage &pragma::debug::ProfilingStageManager<TProfilingStage>::GetProfilerStage(std::thread::id tid, const char *name)
 {
-	return *m_profilingStages.at(umath::to_integral(phase));
+	auto itThread = m_threadProfilingMap.find(tid);
+	if(itThread == m_threadProfilingMap.end()) {
+		std::stringstream ss;
+		ss << tid;
+		throw std::runtime_error {"No profiling stages exist for thread " + ss.str() + "!"};
+	}
+	auto &profilingStages = itThread->second.stageMap;
+	auto it = profilingStages.find(name);
+	if(it == profilingStages.end())
+		throw std::runtime_error {"Unknown profiler stage '" + std::string {name} + "'!"};
+	return *it->second;
 }
 
-template<class TProfilingStage, typename TPhaseEnum>
-bool pragma::debug::ProfilingStageManager<TProfilingStage, TPhaseEnum>::StartProfilerStage(TPhaseEnum phase)
+template<class TProfilingStage>
+bool pragma::debug::ProfilingStageManager<TProfilingStage>::StartProfilerStage(const char *name)
 {
-	auto &stage = GetProfilerStage(phase);
-	return stage.Start();
+	std::unique_lock<std::mutex> lock {m_profilingStageMutex};
+
+	auto tid = std::this_thread::get_id();
+	auto itThread = m_threadProfilingMap.find(tid);
+	if(itThread == m_threadProfilingMap.end())
+		itThread = m_threadProfilingMap.insert(std::make_pair(tid, ProfilingStageMap {})).first;
+
+	auto &threadData = itThread->second;
+	auto &profilingStages = threadData.stageMap;
+	auto &stageStack = threadData.stageStack;
+
+#if ENABLE_DEBUG_HISTORY == 1
+	std::string prefix(stageStack.size() * 2, ' ');
+	threadData.history.push_back({prefix + "Start " + std::string {name}, util::get_formatted_stack_backtrace_string()});
+	while(threadData.history.size() > 1000)
+		threadData.history.erase(threadData.history.begin());
+#endif
+
+	auto it = profilingStages.find(name);
+	if(it == profilingStages.end()) {
+		const char *parentName = nullptr;
+		if(!stageStack.empty())
+			parentName = stageStack.top();
+		std::stringstream ss;
+		ss << tid;
+		spdlog::info("Creating new profiling stage '{}' with parent '{}' for thread {}...", name, parentName ? parentName : "NULL", ss.str());
+		auto stage = ProfilingStage::Create<TProfilingStage>(*m_profiler, tid, name);
+		it = profilingStages.insert(std::make_pair(name, stage)).first;
+
+		if(parentName) {
+			auto &stageParent = GetProfilerStage(tid, parentName);
+			stage->SetParent(&stageParent);
+		}
+		else
+			stage->SetParent(&m_profiler->GetRootStage());
+	}
+
+	stageStack.push(name);
+	return it->second->Start();
 }
 
-template<class TProfilingStage, typename TPhaseEnum>
-bool pragma::debug::ProfilingStageManager<TProfilingStage, TPhaseEnum>::StopProfilerStage(TPhaseEnum phase)
+template<class TProfilingStage>
+bool pragma::debug::ProfilingStageManager<TProfilingStage>::StopProfilerStage()
 {
-	auto &stage = GetProfilerStage(phase);
+	std::unique_lock<std::mutex> lock {m_profilingStageMutex};
+
+	auto tid = std::this_thread::get_id();
+	auto itThread = m_threadProfilingMap.find(tid);
+	if(itThread == m_threadProfilingMap.end())
+		throw std::logic_error {"Attempted to stop profiling stage on thread that has never started a profiling stage."};
+	auto &threadData = itThread->second;
+	auto &profilingStages = threadData.stageMap;
+	auto &stageStack = threadData.stageStack;
+
+	if(stageStack.empty())
+		throw std::logic_error {"Attempted to stop profiling stage, but no stage has been started!"};
+
+#if ENABLE_DEBUG_HISTORY == 1
+	std::string prefix((stageStack.size() - 1) * 2, ' ');
+	threadData.history.push_back({prefix + "Stop " + std::string {stageStack.top()}, util::get_formatted_stack_backtrace_string()});
+#endif
+
+	auto &stage = GetProfilerStage(tid, stageStack.top());
+	stageStack.pop();
 	return stage.Stop();
 }
 
-template<class TProfilingStage, typename TPhaseEnum>
-void pragma::debug::ProfilingStageManager<TProfilingStage, TPhaseEnum>::InitializeProfilingStageManager(Profiler &profiler, const std::array<std::shared_ptr<TProfilingStage>, umath::to_integral(TPhaseEnum::Count)> &stages)
+template<class TProfilingStage>
+void pragma::debug::ProfilingStageManager<TProfilingStage>::InitializeProfilingStageManager(Profiler &profiler)
 {
 	m_profiler = &profiler;
-	m_profilingStages = stages;
 }
 
 template<class TProfiler>
@@ -167,12 +263,10 @@ std::shared_ptr<TProfiler> pragma::debug::Profiler::Create()
 }
 
 template<class TProfilingStage>
-std::shared_ptr<TProfilingStage> pragma::debug::ProfilingStage::Create(Profiler &profiler, const std::string &name, TProfilingStage *parent)
+std::shared_ptr<TProfilingStage> pragma::debug::ProfilingStage::Create(Profiler &profiler, std::thread::id tid, const std::string &name)
 {
-	if(parent == nullptr)
-		parent = static_cast<TProfilingStage *>(&profiler.GetRootStage());
-	auto result = std::shared_ptr<TProfilingStage> {new TProfilingStage {profiler, name}};
-	result->Initialize(parent);
+	auto result = std::shared_ptr<TProfilingStage> {new TProfilingStage {profiler, tid, name}};
+	result->Initialize();
 	profiler.AddStage(*result);
 	return result;
 }

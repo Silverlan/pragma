@@ -599,8 +599,8 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	  "GetAnimationManagers", +[](lua_State *l, pragma::PanimaComponent &hComponent) -> luabind::tableT<panima::AnimationManager> {
 		  auto t = luabind::newtable(l);
 		  auto &animManagers = hComponent.GetAnimationManagers();
-		  for(auto &pair : animManagers)
-			  t[pair.first] = pair.second;
+		  for(auto &amData : animManagers)
+			  t[amData->name] = amData->animationManager;
 		  return t;
 	  });
 	defAnimated2.def(

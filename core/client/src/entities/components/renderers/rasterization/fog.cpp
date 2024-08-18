@@ -57,7 +57,7 @@ void pragma::CRasterizationRendererComponent::RenderParticles(prosper::ICommandB
 	auto bShouldDrawParticles = (drawSceneInfo.renderFlags & RenderFlags::Particles) == RenderFlags::Particles && cvDrawParticles->GetBool() == true && culledParticles.empty() == false;
 	if(!bShouldDrawParticles)
 		return;
-	c_game->StartProfilingStage(CGame::GPUProfilingPhase::Particles);
+	c_game->StartGPUProfilingStage("Particles");
 	///InvokeEventCallbacks(EVENT_MT_BEGIN_RECORD_PARTICLES,evDataLightingStage);
 
 	auto &hdrInfo = GetHDRInfo();
@@ -110,5 +110,5 @@ void pragma::CRasterizationRendererComponent::RenderParticles(prosper::ICommandB
 	}
 
 	//InvokeEventCallbacks(EVENT_MT_END_RECORD_PARTICLES,evDataLightingStage);
-	c_game->StopProfilingStage(CGame::GPUProfilingPhase::Particles);
+	c_game->StopGPUProfilingStage(); // Particles
 }

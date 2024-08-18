@@ -8,6 +8,7 @@
 #define __PANIMA_COMPONENT_HPP__
 
 #include "pragma/entities/components/base_entity_component.hpp"
+#include "pragma/game/global_animation_channel_queue_processor.hpp"
 #include "pragma/types.hpp"
 #include <panima/types.hpp>
 #include <sharedutils/property/util_property.hpp>
@@ -20,6 +21,13 @@ namespace util {
 	class Path;
 };
 namespace pragma {
+	class GlobalAnimationChannelQueueProcessor;
+	struct DLLNETWORK AnimationManagerData {
+		std::string name;
+		panima::PAnimationManager animationManager;
+		std::vector<AnimationChannelCacheData> channelCache;
+		bool isChannelCacheDirty = false;
+	};
 	class DLLNETWORK PanimaComponent final : public BaseEntityComponent {
 	  public:
 		static ComponentEventId EVENT_HANDLE_ANIMATION_EVENT;
@@ -39,17 +47,18 @@ namespace pragma {
 		float GetPlaybackRate() const;
 		const util::PFloatProperty &GetPlaybackRateProperty() const;
 
-		std::vector<std::pair<std::string, panima::PAnimationManager>> &GetAnimationManagers() { return m_animationManagers; }
-		const std::vector<std::pair<std::string, panima::PAnimationManager>> &GetAnimationManagers() const { return const_cast<PanimaComponent *>(this)->GetAnimationManagers(); }
+		std::vector<std::shared_ptr<AnimationManagerData>> &GetAnimationManagers() { return m_animationManagers; }
+		const std::vector<std::shared_ptr<AnimationManagerData>> &GetAnimationManagers() const { return const_cast<PanimaComponent *>(this)->GetAnimationManagers(); }
 		panima::PAnimationManager AddAnimationManager(std::string name, int32_t priority = 0);
 		panima::PAnimationManager GetAnimationManager(std::string name);
 		void RemoveAnimationManager(const panima::AnimationManager &player);
 		void RemoveAnimationManager(const std::string_view &name);
 		void ClearAnimationManagers();
 
-		bool UpdateAnimations(double dt);
-		bool MaintainAnimations(double dt);
-		void AdvanceAnimations(double dt);
+		bool UpdateAnimations(GlobalAnimationChannelQueueProcessor &channelQueueProcessor, double dt);
+		bool MaintainAnimations(GlobalAnimationChannelQueueProcessor &channelQueueProcessor, double dt);
+		void AdvanceAnimations(GlobalAnimationChannelQueueProcessor &channelQueueProcessor, double dt);
+		void ApplyAnimationValues(GlobalAnimationChannelQueueProcessor *channelQueueProcessor);
 		void DebugPrint(std::stringstream &ss);
 		void DebugPrint();
 
@@ -78,14 +87,15 @@ namespace pragma {
 		using BaseEntityComponent::Load;
 	  protected:
 		virtual void Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) override;
-		void InvokeValueSubmitters(panima::AnimationManager &manager);
+		void UpdateAnimationData(GlobalAnimationChannelQueueProcessor *channelQueueProcessor, AnimationManagerData &amd);
 		bool GetRawAnimatedPropertyValue(panima::AnimationManager &manager, const std::string &propName, udm::Type type, void *outValue, const ComponentMemberInfo **optOutMemberInfo, pragma::BaseEntityComponent **optOutComponent) const;
-		std::vector<std::pair<std::string, panima::PAnimationManager>>::iterator FindAnimationManager(const std::string_view &name);
+		std::vector<std::shared_ptr<AnimationManagerData>>::iterator FindAnimationManager(const std::string_view &name);
+		AnimationManagerData *FindAnimationManagerData(panima::AnimationManager &manager);
 		void InitializeAnimationChannelValueSubmitters();
-		void InitializeAnimationChannelValueSubmitters(panima::AnimationManager &manager);
+		void InitializeAnimationChannelValueSubmitters(AnimationManagerData &amData);
 		void ResetAnimation(const std::shared_ptr<Model> &mdl);
 		util::PFloatProperty m_playbackRate = nullptr;
-		std::vector<std::pair<std::string, panima::PAnimationManager>> m_animationManagers;
+		std::vector<std::shared_ptr<AnimationManagerData>> m_animationManagers;
 		std::unordered_set<const char *> m_disabledProperties;
 	};
 

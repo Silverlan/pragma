@@ -22,9 +22,9 @@ extern DLLCLIENT CEngine *c_engine;
 
 static CVar cvTimerQueries = GetClientConVar("cl_gpu_timer_queries_enabled");
 
-std::shared_ptr<GPUProfilingStage> GPUProfilingStage::Create(Profiler &profiler, const std::string &name, prosper::PipelineStageFlags stage, GPUProfilingStage *parent)
+std::shared_ptr<GPUProfilingStage> GPUProfilingStage::Create(Profiler &profiler, std::thread::id tid, const std::string &name, prosper::PipelineStageFlags stage)
 {
-	auto result = ProfilingStage::Create<GPUProfilingStage>(profiler, name, parent);
+	auto result = ProfilingStage::Create<GPUProfilingStage>(profiler, tid, name);
 	if(result == nullptr)
 		return nullptr;
 	result->m_stage = stage;
@@ -37,6 +37,7 @@ const GPUSwapchainTimer &GPUProfilingStage::GetTimer() const { return const_cast
 GPUSwapchainTimer &GPUProfilingStage::GetTimer() { return static_cast<GPUSwapchainTimer &>(ProfilingStage::GetTimer()); }
 prosper::PipelineStageFlags GPUProfilingStage::GetPipelineStage() const { return m_stage; }
 
+GPUProfilingStage::GPUProfilingStage(Profiler &profiler, std::thread::id tid, const std::string &name) : ProfilingStage {profiler, tid, name} { m_stage = prosper::PipelineStageFlags::BottomOfPipeBit; }
 void GPUProfilingStage::InitializeTimer() { m_timer = GetProfiler().CreateTimer(m_stage); }
 
 GPUProfiler::GPUProfiler() : m_timerQueryPool {nullptr}, m_statsQueryPool {nullptr} { InitializeQueries(); }
@@ -44,7 +45,7 @@ void GPUProfiler::Initialize()
 {
 	if(m_timerQueryPool == nullptr || m_statsQueryPool == nullptr)
 		return;
-	m_rootStage = GPUProfilingStage::Create(*this, "root", prosper::PipelineStageFlags::None);
+	m_rootStage = GPUProfilingStage::Create(*this, {}, "root", prosper::PipelineStageFlags::None);
 }
 std::shared_ptr<pragma::debug::Timer> GPUProfiler::CreateTimer(prosper::PipelineStageFlags stage) { return pragma::debug::GPUSwapchainTimer::Create(*m_timerQueryPool, *m_statsQueryPool, stage); }
 void GPUProfiler::Reset()

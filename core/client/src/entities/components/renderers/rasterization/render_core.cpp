@@ -100,7 +100,7 @@ void pragma::CRasterizationRendererComponent::Render(const util::DrawSceneInfo &
 	// scene.GetSceneRenderDesc().BuildRenderQueue(drawSceneInfo);
 
 	// Prepass
-	c_game->StartProfilingStage(CGame::GPUProfilingPhase::Scene);
+	c_game->StartGPUProfilingStage("Scene");
 
 	auto &drawCmd = drawSceneInfo.commandBuffer;
 	auto &sceneRenderDesc = drawSceneInfo.scene->GetSceneRenderDesc();
@@ -118,8 +118,12 @@ void pragma::CRasterizationRendererComponent::Render(const util::DrawSceneInfo &
 		if(drawSceneInfo.renderStats)
 			drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::Prepass)->SetTime(RenderPassStats::Timer::RenderThreadWait, std::chrono::steady_clock::now() - t);
 
+		if(drawSceneInfo.renderStats)
+			(*drawSceneInfo.renderStats)->BeginGpuTimer(RenderStats::RenderStage::UpdateRenderBuffersGpu, *drawSceneInfo.commandBuffer);
 		for(auto &renderQueue : worldRenderQueues)
 			CSceneComponent::UpdateRenderBuffers(drawCmd, *renderQueue, drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::Prepass) : nullptr);
+		if(drawSceneInfo.renderStats)
+			(*drawSceneInfo.renderStats)->EndGpuTimer(RenderStats::RenderStage::UpdateRenderBuffersGpu, *drawSceneInfo.commandBuffer);
 	}
 
 	// If we're lucky, the render queues for everything else have already been built
@@ -145,7 +149,11 @@ void pragma::CRasterizationRendererComponent::Render(const util::DrawSceneInfo &
 	}
 #endif
 
+	if(drawSceneInfo.renderStats)
+		(*drawSceneInfo.renderStats)->BeginGpuTimer(RenderStats::RenderStage::UpdatePrepassRenderBuffersGpu, *drawSceneInfo.commandBuffer);
 	UpdatePrepassRenderBuffers(drawSceneInfo);
+	if(drawSceneInfo.renderStats)
+		(*drawSceneInfo.renderStats)->EndGpuTimer(RenderStats::RenderStage::UpdatePrepassRenderBuffersGpu, *drawSceneInfo.commandBuffer);
 
 	std::chrono::steady_clock::time_point t;
 	// Start executing the prepass; This may require a waiting period of the recording
@@ -177,7 +185,11 @@ void pragma::CRasterizationRendererComponent::Render(const util::DrawSceneInfo &
 	if(drawSceneInfo.renderStats)
 		(*drawSceneInfo.renderStats)->EndGpuTimer(RenderStats::RenderStage::LightCullingGpu, *drawSceneInfo.commandBuffer);
 
+	if(drawSceneInfo.renderStats)
+		(*drawSceneInfo.renderStats)->BeginGpuTimer(RenderStats::RenderStage::RenderShadowsGpu, *drawSceneInfo.commandBuffer);
 	RenderShadows(drawSceneInfo);
+	if(drawSceneInfo.renderStats)
+		(*drawSceneInfo.renderStats)->EndGpuTimer(RenderStats::RenderStage::RenderShadowsGpu, *drawSceneInfo.commandBuffer);
 
 	// We still need to update the render buffers for some entities
 	// (All others have already been updated in the prepass)
@@ -199,20 +211,24 @@ void pragma::CRasterizationRendererComponent::Render(const util::DrawSceneInfo &
 		(*drawSceneInfo.renderStats)->SetTime(RenderStats::RenderStage::LightingPassExecutionCpu, std::chrono::steady_clock::now() - t);
 		drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::LightingPass)->EndGpuTimer(RenderPassStats::Timer::GpuExecution, *drawSceneInfo.commandBuffer);
 	}
-	c_game->StopProfilingStage(CGame::GPUProfilingPhase::Scene);
+	c_game->StopGPUProfilingStage(); // Scene
 
 	c_game->CallCallbacks<void, std::reference_wrapper<const util::DrawSceneInfo>>("RenderPostLightingPass", drawSceneInfo);
+
+	// Particles
+	if(drawSceneInfo.renderStats)
+		(*drawSceneInfo.renderStats)->BeginGpuTimer(RenderStats::RenderStage::RenderParticlesGpu, *drawSceneInfo.commandBuffer);
+	RenderParticles(*drawSceneInfo.commandBuffer, drawSceneInfo, false, drawSceneInfo.commandBuffer.get());
+	if(drawSceneInfo.renderStats)
+		(*drawSceneInfo.renderStats)->EndGpuTimer(RenderStats::RenderStage::RenderParticlesGpu, *drawSceneInfo.commandBuffer);
 
 	// Post processing
 	if(drawSceneInfo.renderStats) {
 		(*drawSceneInfo.renderStats)->BeginGpuTimer(RenderStats::RenderStage::PostProcessingGpu, *drawSceneInfo.commandBuffer);
 		t = std::chrono::steady_clock::now();
 	}
-	c_game->StartProfilingStage(CGame::CPUProfilingPhase::PostProcessing);
-	c_game->StartProfilingStage(CGame::GPUProfilingPhase::PostProcessing);
-
-	// Particles
-	RenderParticles(*drawSceneInfo.commandBuffer, drawSceneInfo, false, drawSceneInfo.commandBuffer.get());
+	c_game->StartProfilingStage("PostProcessing");
+	c_game->StartGPUProfilingStage("PostProcessing");
 
 	auto *renderer = scene.GetRenderer();
 	auto &postProcessing = renderer->GetPostProcessingEffects();
@@ -234,8 +250,8 @@ void pragma::CRasterizationRendererComponent::Render(const util::DrawSceneInfo &
 	c_game->CallCallbacks<void, std::reference_wrapper<const util::DrawSceneInfo>>("RenderPostProcessing", drawSceneInfo);
 	c_game->CallLuaCallbacks<void, const util::DrawSceneInfo *>("RenderPostProcessing", &drawSceneInfo);
 
-	c_game->StopProfilingStage(CGame::GPUProfilingPhase::PostProcessing);
-	c_game->StopProfilingStage(CGame::CPUProfilingPhase::PostProcessing);
+	c_game->StopGPUProfilingStage(); // PostProcessing
+	c_game->StopProfilingStage();    // PostProcessing
 	if(drawSceneInfo.renderStats) {
 		(*drawSceneInfo.renderStats)->SetTime(RenderStats::RenderStage::PostProcessingExecutionCpu, std::chrono::steady_clock::now() - t);
 		(*drawSceneInfo.renderStats)->EndGpuTimer(RenderStats::RenderStage::PostProcessingGpu, *drawSceneInfo.commandBuffer);

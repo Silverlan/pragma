@@ -253,18 +253,25 @@ struct DLLCLIENT RenderStats {
 		PostProcessingGpuToneMapping,
 		PostProcessingGpuFxaa,
 		PostProcessingGpuSsao,
+		RenderSceneGpu,
+		RendererGpu,
+		UpdateRenderBuffersGpu,
+		UpdatePrepassRenderBuffersGpu,
+		RenderShadowsGpu,
+		RenderParticlesGpu,
 
 		LightCullingCpu,
 		PrepassExecutionCpu,
 		LightingPassExecutionCpu,
 		PostProcessingExecutionCpu,
 		UpdateRenderBuffersCpu,
+		RenderSceneCpu,
 
 		Count,
 		GpuStart = LightCullingGpu,
-		GpuEnd = PostProcessingGpuSsao,
+		GpuEnd = RenderParticlesGpu,
 		CpuStart = LightCullingCpu,
-		CpuEnd = UpdateRenderBuffersCpu,
+		CpuEnd = RenderSceneCpu,
 		GpuCount = (GpuEnd - GpuStart) + 1,
 		CpuCount = (CpuEnd - CpuStart) + 1
 	};

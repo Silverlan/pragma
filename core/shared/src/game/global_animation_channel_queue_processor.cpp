@@ -54,7 +54,7 @@ void GlobalAnimationChannelQueueProcessor::ApplyValues()
 }
 void GlobalAnimationChannelQueueProcessor::Submit(pragma::AnimationManagerData &amData)
 {
-	static int numPerBatch = 50;
+	constexpr uint32_t numPerBatch = 50;
 
 	auto &animManager = *amData.animationManager;
 	auto *anim = animManager.GetCurrentAnimation();

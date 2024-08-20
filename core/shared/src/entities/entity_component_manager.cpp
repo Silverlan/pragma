@@ -222,11 +222,11 @@ std::optional<ComponentMemberIndex> ComponentInfo::FindMember(const std::string 
 
 util::TSharedHandle<BaseEntityComponent> EntityComponentManager::CreateComponent(ComponentId componentId, BaseEntity &ent) const
 {
-	if(componentId >= m_componentInfos.size() || m_componentInfos[componentId].id == INVALID_COMPONENT_ID) {
+	if(componentId >= m_componentInfos.size() || m_componentInfos[componentId]->id == INVALID_COMPONENT_ID) {
 		// Component has been pre-registered, but its script has not yet been loaded!
 		// 'info'-members will not be valid, so we have to retrieve the component information
 		// (name, etc.) from the pre-register data
-		auto it = std::find_if(m_preRegistered.begin(), m_preRegistered.end(), [componentId](const ComponentInfo &componentInfo) { return componentInfo.id == componentId; });
+		auto it = std::find_if(m_preRegistered.begin(), m_preRegistered.end(), [componentId](const std::unique_ptr<ComponentInfo> &componentInfo) { return componentInfo->id == componentId; });
 		if(it == m_preRegistered.end()) {
 			// Component has NOT been pre-registered? Then where did the component id come from?
 			// This should be unreachable!
@@ -237,28 +237,28 @@ util::TSharedHandle<BaseEntityComponent> EntityComponentManager::CreateComponent
 		// Attempt to create the component by name instead.
 		// This will automatically attempt to load the appropriate
 		// component script.
-		std::string name = preRegInfo.name; // Name has to be copied, because pre-register information may be invalidated by the 'CreateComponent'-call
+		std::string name = preRegInfo->name; // Name has to be copied, because pre-register information may be invalidated by the 'CreateComponent'-call
 		return CreateComponent(name, ent);
 	}
 	auto &info = m_componentInfos.at(componentId);
-	auto r = info.factory(ent);
+	auto r = info->factory(ent);
 	if(r == nullptr)
 		return nullptr;
-	r->m_componentId = info.id;
+	r->m_componentId = info->id;
 	m_components.at(r->m_componentId).Push(*r);
-	if(info.onCreateCallbacks) {
-		for(auto it = info.onCreateCallbacks->begin(); it != info.onCreateCallbacks->end();) {
+	if(info->onCreateCallbacks) {
+		for(auto it = info->onCreateCallbacks->begin(); it != info->onCreateCallbacks->end();) {
 			auto &cb = *it;
 			if(cb.IsValid())
 				cb.Call<void, std::reference_wrapper<BaseEntityComponent>>(*r);
 			if(cb.IsValid() == false) {
-				it = info.onCreateCallbacks->erase(it);
+				it = info->onCreateCallbacks->erase(it);
 				continue;
 			}
 			++it;
 		}
-		if(info.onCreateCallbacks->empty())
-			info.onCreateCallbacks = nullptr;
+		if(info->onCreateCallbacks->empty())
+			info->onCreateCallbacks = nullptr;
 	}
 	return r;
 }
@@ -278,10 +278,10 @@ ComponentId EntityComponentManager::PreRegisterComponentType(const std::string &
 	auto componentId = pragma::INVALID_COMPONENT_ID;
 	if(GetComponentTypeId(name, componentId))
 		return componentId;
-	m_preRegistered.push_back({});
+	m_preRegistered.push_back(std::make_unique<ComponentInfo>());
 	std::string lname = name;
 	ustring::to_lower(lname);
-	auto &componentInfo = m_preRegistered.back();
+	auto &componentInfo = *m_preRegistered.back();
 	componentInfo.name = lname;
 	componentInfo.id = m_nextComponentId++;
 	if(componentInfo.id != m_components.size())
@@ -311,10 +311,10 @@ CallbackHandle EntityComponentManager::AddCreationCallback(ComponentId component
 {
 	auto *info = GetComponentInfo(componentId);
 	if(!info) {
-		auto it = std::find_if(m_preRegistered.begin(), m_preRegistered.end(), [componentId](const ComponentInfo &componentInfo) { return componentInfo.id == componentId; });
+		auto it = std::find_if(m_preRegistered.begin(), m_preRegistered.end(), [componentId](const std::unique_ptr<ComponentInfo> &componentInfo) { return componentInfo->id == componentId; });
 		if(it == m_preRegistered.end())
 			throw std::runtime_error {"Invalid component (" + std::to_string(componentId) + ")"};
-		info = &*it;
+		info = it->get();
 	}
 	if(!info->onCreateCallbacks)
 		info->onCreateCallbacks = std::make_unique<std::vector<CallbackHandle>>();
@@ -346,13 +346,20 @@ ComponentId EntityComponentManager::RegisterComponentType(const std::string &nam
 		return componentId;
 	}
 	auto idx = PreRegisterComponentType(name);
-	auto itPre = std::find_if(m_preRegistered.begin(), m_preRegistered.end(), [&name](const ComponentInfo &componentInfo) { return ustring::compare(name.c_str(), componentInfo.name.c_str(), false); });
+	auto itPre = std::find_if(m_preRegistered.begin(), m_preRegistered.end(), [&name](const std::unique_ptr<ComponentInfo> &componentInfo) { return ustring::compare(name.c_str(), componentInfo->name.c_str(), false); });
 	if(itPre == m_preRegistered.end())
 		throw std::logic_error("Error when attempting to pre-register component " + name + "!");
-	componentId = itPre->id;
-	if(componentId >= m_componentInfos.size())
-		m_componentInfos.resize(componentId + 1u, ComponentInfo {});
-	auto &componentInfo = m_componentInfos.at(componentId) = *itPre;
+	auto &preReg = *itPre;
+	componentId = preReg->id;
+	if(componentId >= m_componentInfos.size()) {
+		auto offset = m_componentInfos.size();
+		m_componentInfos.resize(componentId + 1u);
+		for(size_t i = offset; i < m_componentInfos.size(); ++i) {
+			auto &info = m_componentInfos[i];
+			info = std::make_unique<ComponentInfo>();
+		}
+	}
+	auto &componentInfo = m_componentInfos.at(componentId) = std::move(preReg);
 	if(typeIndex != nullptr) {
 		m_typeIndexToComponentId.insert(std::make_pair(*typeIndex, componentId));
 		if(componentId >= m_componentIdToTypeIndex.size())
@@ -361,10 +368,10 @@ ComponentId EntityComponentManager::RegisterComponentType(const std::string &nam
 	}
 	m_preRegistered.erase(itPre);
 
-	componentInfo.factory = factory;
-	componentInfo.flags = flags;
-	OnComponentTypeRegistered(componentInfo);
-	return componentInfo.id;
+	componentInfo->factory = factory;
+	componentInfo->flags = flags;
+	OnComponentTypeRegistered(*componentInfo);
+	return componentInfo->id;
 }
 bool EntityComponentManager::GetComponentTypeIndex(ComponentId componentId, std::type_index &typeIndex) const
 {
@@ -387,16 +394,16 @@ bool EntityComponentManager::GetComponentId(std::type_index typeIndex, Component
 bool EntityComponentManager::GetComponentTypeId(const std::string &name, ComponentId &outId, bool bIncludePreregistered) const
 {
 	if(bIncludePreregistered == true) {
-		auto itPre = std::find_if(m_preRegistered.begin(), m_preRegistered.end(), [&name](const ComponentInfo &componentInfo) { return ustring::compare(name.c_str(), componentInfo.name.c_str()); });
+		auto itPre = std::find_if(m_preRegistered.begin(), m_preRegistered.end(), [&name](const std::unique_ptr<ComponentInfo> &componentInfo) { return ustring::compare(name.c_str(), componentInfo->name.c_str()); });
 		if(itPre != m_preRegistered.end()) {
-			outId = itPre->id;
+			outId = (*itPre)->id;
 			return true;
 		}
 	}
-	auto it = std::find_if(m_componentInfos.begin(), m_componentInfos.end(), [&name](const ComponentInfo &componentInfo) { return ustring::compare(name.c_str(), componentInfo.name.c_str(), false); });
+	auto it = std::find_if(m_componentInfos.begin(), m_componentInfos.end(), [&name](const std::unique_ptr<ComponentInfo> &componentInfo) { return ustring::compare(name.c_str(), componentInfo->name.c_str(), false); });
 	if(it == m_componentInfos.end())
 		return false;
-	outId = it->id;
+	outId = (*it)->id;
 	return true;
 }
 const ComponentInfo *EntityComponentManager::GetComponentInfo(ComponentId id) const { return const_cast<EntityComponentManager *>(this)->GetComponentInfo(id); }
@@ -404,7 +411,7 @@ ComponentInfo *EntityComponentManager::GetComponentInfo(ComponentId id)
 {
 	if(id >= m_componentInfos.size())
 		return nullptr;
-	return &m_componentInfos.at(id);
+	return m_componentInfos.at(id).get();
 }
 ComponentMemberIndex EntityComponentManager::RegisterMember(ComponentInfo &componentInfo, ComponentMemberInfo &&memberInfo)
 {
@@ -415,7 +422,7 @@ ComponentMemberIndex EntityComponentManager::RegisterMember(ComponentInfo &compo
 	componentInfo.memberNameToIndex[lname] = idx;
 	return idx;
 }
-const std::vector<ComponentInfo> &EntityComponentManager::GetRegisteredComponentTypes() const { return m_componentInfos; }
+const std::vector<std::unique_ptr<ComponentInfo>> &EntityComponentManager::GetRegisteredComponentTypes() const { return m_componentInfos; }
 void EntityComponentManager::OnComponentTypeRegistered(const ComponentInfo &componentInfo) {}
 ComponentEventId EntityComponentManager::RegisterEvent(const std::string &evName, std::type_index typeIndex, ComponentEventInfo::Type type)
 {

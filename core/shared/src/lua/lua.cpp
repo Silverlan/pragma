@@ -41,9 +41,9 @@ void Game::InitializeLua()
 	// Initialize component ids
 	std::unordered_map<std::string, lua_Integer> componentIds;
 	for(auto &componentInfo : m_componentManager->GetRegisteredComponentTypes()) {
-		auto name = std::string {*componentInfo.name};
+		auto name = std::string {*componentInfo->name};
 		ustring::to_upper(name);
-		componentIds.insert(std::make_pair("COMPONENT_" + name, componentInfo.id));
+		componentIds.insert(std::make_pair("COMPONENT_" + name, componentInfo->id));
 	}
 	Lua::RegisterLibraryEnums(GetLuaState(), "ents", componentIds);
 

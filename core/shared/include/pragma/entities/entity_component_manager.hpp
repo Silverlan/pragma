@@ -104,7 +104,7 @@ namespace pragma {
 		bool GetComponentTypeId(ComponentId &outId) const;
 		bool GetComponentTypeIndex(ComponentId componentId, std::type_index &typeIndex) const;
 		bool GetComponentId(std::type_index typeIndex, ComponentId &componentId) const;
-		const std::vector<ComponentInfo> &GetRegisteredComponentTypes() const;
+		const std::vector<std::unique_ptr<ComponentInfo>> &GetRegisteredComponentTypes() const;
 		ComponentMemberIndex RegisterMember(ComponentInfo &componentInfo, ComponentMemberInfo &&memberInfo);
 
 		void LinkComponentType(ComponentId linkFrom, ComponentId linkTo);
@@ -158,8 +158,8 @@ namespace pragma {
 			ComponentId targetType;
 			CallbackHandle onCreateCallback;
 		};
-		std::vector<ComponentInfo> m_preRegistered;
-		std::vector<ComponentInfo> m_componentInfos;
+		std::vector<std::unique_ptr<ComponentInfo>> m_preRegistered;
+		std::vector<std::unique_ptr<ComponentInfo>> m_componentInfos;
 		std::unordered_map<std::type_index, ComponentId> m_typeIndexToComponentId;
 		std::unordered_map<ComponentId, std::vector<ComponentTypeLinkInfo>> m_linkedComponentTypes;
 		std::vector<std::shared_ptr<std::type_index>> m_componentIdToTypeIndex;
@@ -193,7 +193,7 @@ pragma::ComponentId pragma::EntityComponentManager::RegisterComponentType(const 
 		  return util::TSharedHandle<BaseEntityComponent> {new TComponent {ent}, [](pragma::BaseEntityComponent *c) { delete c; }};
 	  },
 	  flags, std::type_index(typeid(TComponent)));
-	auto &componentInfo = m_componentInfos[componentId];
+	auto &componentInfo = *m_componentInfos[componentId];
 	TComponent::RegisterMembers(*this, [this, &componentInfo](ComponentMemberInfo &&memberInfo) -> ComponentMemberIndex { return RegisterMember(componentInfo, std::move(memberInfo)); });
 	return componentId;
 }

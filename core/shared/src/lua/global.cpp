@@ -442,7 +442,7 @@ void Game::RegisterLuaGlobals()
 			}
 			componentNames.clear();
 			for(auto &c : game->GetEntityComponentManager().GetRegisteredComponentTypes())
-				componentNames.push_back(c.name);
+				componentNames.push_back(c->name);
 			similarElements.clear();
 			similarities.clear();
 			ustring::gather_similar_elements(name, componentNames, similarElements, 1, &similarities);

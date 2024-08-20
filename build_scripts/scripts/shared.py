@@ -284,7 +284,7 @@ if platform == "win32":
 		if not os.path.exists(vswhere_path):
 			urllib.request.urlretrieve(vswhere_url, vswhere_path)
 
-		return subprocess.check_output([vswhere_path, "-property", "installationPath"], text=True).strip()
+		return subprocess.check_output([vswhere_path, "-latest", "-products", "*", "-requires", "Microsoft.Component.MSBuild", "-property", "installationPath"], text=True).strip()
 	
 	def determine_vsdevcmd_path(deps_dir):
 		installation_path = determine_vs_installation_path(deps_dir)

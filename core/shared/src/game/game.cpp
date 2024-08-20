@@ -695,6 +695,7 @@ void Game::Tick()
 	auto &logicComponents = GetEntityTickComponents();
 	// Note: During the loop, new items may be appended to the end of logicComponents, but no elements
 	// may be erased from outside sources. If an element is removed, it's set to nullptr.
+	auto shouldProfile = (m_profilingStageManager != nullptr);
 	for(auto i = decltype(logicComponents.size()) {0u}; i < logicComponents.size();) {
 		auto *c = logicComponents[i];
 		if(c == nullptr) {
@@ -705,7 +706,14 @@ void Game::Tick()
 			++i;
 			continue;
 		}
-		if(c->Tick(m_tDeltaTick) == false) {
+		if(shouldProfile) {
+			auto *cInfo = c->GetComponentInfo();
+			StartProfilingStage(cInfo->name.str);
+		}
+		auto res = c->Tick(m_tDeltaTick);
+		if(shouldProfile)
+			StopProfilingStage();
+		if(res == false) {
 			logicComponents.erase(logicComponents.begin() + i);
 			continue;
 		}

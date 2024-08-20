@@ -77,8 +77,8 @@ void CModelComponent::UpdateBaseShaderSpecializationFlags()
 		clipPlane = renderC->GetRenderClipPlane();
 		depthBias = renderC->GetDepthBias();
 	}
-	umath::set_flag(m_baseShaderSpecializationConstantFlags, GameShaderSpecializationConstantFlag::EnableClippingBit, clipPlane);
-	umath::set_flag(m_baseShaderSpecializationConstantFlags, GameShaderSpecializationConstantFlag::EnableDepthBias, depthBias);
+	// umath::set_flag(m_baseShaderSpecializationConstantFlags, GameShaderSpecializationConstantFlag::EnableClippingBit, clipPlane);
+	// umath::set_flag(m_baseShaderSpecializationConstantFlags, GameShaderSpecializationConstantFlag::EnableDepthBias, depthBias);
 
 	auto colorC = ent.GetComponent<CColorComponent>();
 	umath::set_flag(m_baseShaderSpecializationConstantFlags, GameShaderSpecializationConstantFlag::EnableTranslucencyBit, colorC.valid() && colorC->GetColor().a < 1.f);

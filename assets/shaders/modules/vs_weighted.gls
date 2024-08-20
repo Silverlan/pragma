@@ -17,8 +17,6 @@ layout(std140,LAYOUT_ID(DESCRIPTOR_SET_INSTANCE,DESCRIPTOR_SET_INSTANCE_BINDING_
 	mat4 matrices[MAX_BONES];
 } u_bones;
 
-layout(constant_id = SPECIALIZATION_CONSTANT_ENABLE_EXTENDED_VERTEX_WEIGHTS) const uint CSPEC_ENABLE_EXTENDED_VERTEX_WEIGHTS = 1;
-
 mat4 calc_bone_matrix(bool weighted,bool weightedExt)
 {
 	if(weighted == false)
@@ -29,15 +27,12 @@ mat4 calc_bone_matrix(bool weighted,bool weightedExt)
 		if(in_boneWeightIDs[i] != -1)
 			mat += in_weights[i] *u_bones.matrices[in_boneWeightIDs[i]];
 	}
-	if(CSPEC_ENABLE_EXTENDED_VERTEX_WEIGHTS == 1)
+	if(weightedExt)
 	{
-		if(weightedExt)
+		for(int i=4;i<8;i++)
 		{
-			for(int i=4;i<8;i++)
-			{
-				if(in_boneWeightExtIDs[i] != -1)
-					mat += in_weightsExt[i] *u_bones.matrices[in_boneWeightExtIDs[i]];
-			}
+			if(in_boneWeightExtIDs[i] != -1)
+				mat += in_weightsExt[i] *u_bones.matrices[in_boneWeightExtIDs[i]];
 		}
 	}
 	return mat;

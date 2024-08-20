@@ -94,14 +94,14 @@ MaterialInfo build_material_info(MaterialData materialData,vec4 albedoColor,vec4
 
 	vec4 colorMod = instanceColor;
 	baseColor = albedoColor;
-	if(CSPEC_ENABLE_TRANSLUCENCY == 1)
+	if(is_material_translucent())
 		baseColor.a = apply_alpha_mode(baseColor.a *colorMod.a *materialData.color.a,materialData.alphaMode,materialData.alphaCutoff);
 	else
 		baseColor.a = 1.0;
 	baseColor.rgb *= colorMod.rgb *materialData.color.rgb;
 
 #if MATERIAL_ENABLE_WRINKLES == 1
-	if(CSPEC_WRINKLES_ENABLED == 1)
+	if(use_wrinkle_maps())
 	{
 		if(wrinkleData != 0.0)
 		{

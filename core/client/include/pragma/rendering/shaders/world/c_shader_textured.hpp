@@ -31,20 +31,10 @@ namespace pragma {
 		EnableAnimationBit = EnableLightMapsBit << 1u,
 		EnableMorphTargetAnimationBit = EnableAnimationBit << 1u,
 
-		// Dynamic
-		EmissionEnabledBit = EnableMorphTargetAnimationBit << 1u,
-		WrinklesEnabledBit = EmissionEnabledBit << 1u,
-		EnableTranslucencyBit = WrinklesEnabledBit << 1u,
-		EnableRmaMapBit = EnableTranslucencyBit << 1u,
-		EnableNormalMapBit = EnableRmaMapBit << 1u,
-		ParallaxEnabledBit = EnableNormalMapBit << 1u,
-		EnableClippingBit = ParallaxEnabledBit << 1u,
-		Enable3dOriginBit = EnableClippingBit << 1u,
-		EnableExtendedVertexWeights = Enable3dOriginBit << 1u,
-		EnableDepthBias = EnableExtendedVertexWeights << 1u,
+		EnableTranslucencyBit = EnableMorphTargetAnimationBit << 1u,
 
-		PermutationCount = (EnableDepthBias << 1u) - 1,
-		Last = EnableDepthBias
+		PermutationCount = (EnableTranslucencyBit << 1u) - 1,
+		Last = EnableTranslucencyBit
 	};
 
 	class DLLCLIENT ShaderSpecializationManager {
@@ -106,8 +96,6 @@ namespace pragma {
 
 	class DLLCLIENT ShaderGameWorldLightingPass : public ShaderGameWorld, public ShaderSpecializationManager {
 	  public:
-		static void SetMinimalPipelineModeEnabled(bool enabled);
-
 		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_RENDER_BUFFER_INDEX;
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX;
 
@@ -169,7 +157,10 @@ namespace pragma {
 
 			DiffuseSRGB = FMAT_GLOW_MODE_4 << 1u,
 			GlowSRGB = DiffuseSRGB << 1u,
-			Debug = GlowSRGB << 1u
+			Debug = GlowSRGB << 1u,
+
+			WrinkleMaps = Debug << 1u,
+			RmaMap = WrinkleMaps << 1u
 		};
 
 #pragma pack(push, 1)

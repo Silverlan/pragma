@@ -75,7 +75,7 @@ vec4 calc_pbr(vec4 albedoColor,vec2 texCoords,uint debugMode)
 	//diffuseColor = baseColor.rgb * oneMinusSpecularStrength;
 
 	vec4 rma;
-	if(CSPEC_ENABLE_RMA_MAP == 1)
+	if(use_rma_map())
 		rma = texture(u_rmaMap,texCoords);
 	else
 		rma = vec4(1 /* ao */,1 /* roughness */,1 /*metalness */,1);
@@ -91,7 +91,7 @@ vec4 calc_pbr(vec4 albedoColor,vec2 texCoords,uint debugMode)
 	metallic = rma[RMA_CHANNEL_METALNESS] * u_material.material.metalnessFactor;
 
 	baseColor = get_base_color(albedoColor);
-	if(CSPEC_WRINKLES_ENABLED == 1)
+	if(use_wrinkle_maps())
 	{
 		if(fs_in.wrinkleDelta != 0.0)
 		{
@@ -188,9 +188,9 @@ vec4 calc_pbr(vec4 albedoColor,vec2 texCoords,uint debugMode)
     color = mix(color, color * ao, materialInfo.aoFactor *0.7 +0.3);
 
 	// regular shading
-	vec4 result = vec4(color.rgb, baseColor.a); // TODO
+	vec4 result = vec4(color.rgb, baseColor.a);
 
-	if(CSPEC_EMISSION_ENABLED == 1)
+	if(use_glow_map())
 	{
 		vec4 emissionColor = get_emission_color(result,baseColor,texCoords);
 		result = get_emission_color(result,baseColor,texCoords);

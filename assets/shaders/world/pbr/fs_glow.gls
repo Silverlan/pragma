@@ -13,7 +13,7 @@ layout(LAYOUT_ID(DESCRIPTOR_SET_MATERIAL,9)) uniform sampler2D u_glowMapTest;
 void main()
 {
 	vec2 texCoords = fs_in.vert_uv;
-	if(CSPEC_PARALLAX_ENABLED == 1)
+	if(use_parallax_map())
 		texCoords = apply_parallax(use_parallax_map(),texCoords);
 	vec4 albedoColor = texture(u_albedoMap,texCoords);
 	fs_color = calc_pbr(albedoColor,texCoords,u_pushConstants.debugMode);

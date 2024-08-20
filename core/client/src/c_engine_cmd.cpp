@@ -65,8 +65,8 @@ void CEngine::RegisterConsoleCommands()
 	  [](const std::string &arg, std::vector<std::string> &autoCompleteOptions) {
 		  std::vector<std::string> resFiles;
 		  auto path = Lua::SCRIPT_DIRECTORY_SLASH + arg;
-		  FileManager::FindFiles((path + "*." +Lua::FILE_EXTENSION).c_str(), &resFiles, nullptr);
-		  FileManager::FindFiles((path + "*." +Lua::FILE_EXTENSION_PRECOMPILED).c_str(), &resFiles, nullptr);
+		  FileManager::FindFiles((path + "*." + Lua::FILE_EXTENSION).c_str(), &resFiles, nullptr);
+		  FileManager::FindFiles((path + "*." + Lua::FILE_EXTENSION_PRECOMPILED).c_str(), &resFiles, nullptr);
 		  autoCompleteOptions.reserve(resFiles.size());
 		  path = ufile::get_path_from_filename(path.substr(4));
 		  for(auto &mapName : resFiles) {
@@ -301,24 +301,32 @@ void CEngine::RegisterConsoleCommands()
 		  }
 		  std::sort(sortedIndices.begin(), sortedIndices.end(), [&textureSizes](size_t idx0, size_t idx1) { return textureSizes[idx0] > textureSizes[idx1]; });
 
-		  auto fPrintImageInfo = [&fGetImageSize](prosper::IImage &img, const std::string &prefix = "", bool perfWarnings = true) {
+		  Con::cout << textures.size() << " textures are currently loaded:" << Con::endl;
+		  Con::cout << std::left << std::setw(35) << "Name" << std::setw(10) << "Use Count" << std::setw(12) << "Resolution";
+		  Con::cout << std::setw(10) << "Layers" << std::setw(10) << "Mipmaps" << std::setw(10) << "Tiling" << std::setw(22) << "Format";
+		  Con::cout << std::setw(12) << "Size" << std::setw(10) << "Last Used" << std::setw(30) << "Filename" << Con::endl;
+
+		  auto fPrintImageInfo = [&fGetImageSize](const std::string &fileName, prosper::IImage &img, bool perfWarnings = true) {
 			  auto &context = img.GetContext();
 			  auto useCount = img.shared_from_this().use_count() - 1;
-			  Con::cout << prefix << "Name: " << img.GetDebugName() << ":" << Con::endl;
+			  auto imgName = img.GetDebugName();
+			  ustring::truncate_string(imgName, 35);
+			  Con::cout << std::left << std::setw(35) << imgName;
 
 			  if(useCount == 0)
 				  util::set_console_color(util::ConsoleColorFlags::Intensity | util::ConsoleColorFlags::Red);
-			  Con::cout << prefix << "Use count: " << useCount << Con::endl;
+			  Con::cout << std::setw(10) << useCount;
 			  if(useCount == 0)
 				  util::reset_console_color();
 
-			  Con::cout << prefix << "Resolution: " << img.GetWidth() << "x" << img.GetHeight() << Con::endl;
-			  Con::cout << prefix << "Layers: " << img.GetLayerCount() << Con::endl;
+			  std::string res = std::to_string(img.GetWidth()) + "x" + std::to_string(img.GetHeight());
+			  Con::cout << std::setw(12) << res;
+			  Con::cout << std::setw(10) << img.GetLayerCount();
 
 			  auto numMipmaps = img.GetMipmapCount();
 			  if(numMipmaps <= 1 && perfWarnings)
 				  util::set_console_color(util::ConsoleColorFlags::Intensity | util::ConsoleColorFlags::Red);
-			  Con::cout << prefix << "Mipmaps: " << numMipmaps << Con::endl;
+			  Con::cout << std::setw(10) << numMipmaps;
 			  if(numMipmaps <= 1 && perfWarnings)
 				  util::reset_console_color();
 
@@ -326,7 +334,7 @@ void CEngine::RegisterConsoleCommands()
 			  auto optimal = tiling == prosper::ImageTiling::Optimal;
 			  if(!optimal)
 				  util::set_console_color(util::ConsoleColorFlags::Intensity | util::ConsoleColorFlags::Red);
-			  Con::cout << prefix << "Tiling: " << prosper::util::to_string(tiling) << Con::endl;
+			  Con::cout << std::setw(10) << prosper::util::to_string(tiling);
 			  if(!optimal)
 				  util::reset_console_color();
 
@@ -334,17 +342,19 @@ void CEngine::RegisterConsoleCommands()
 			  auto isCompressed = prosper::util::is_compressed_format(format);
 			  if(!isCompressed && perfWarnings)
 				  util::set_console_color(util::ConsoleColorFlags::Intensity | util::ConsoleColorFlags::Red);
-			  Con::cout << prefix << "Format: " << prosper::util::to_string(format) << Con::endl;
+			  Con::cout << std::setw(22) << prosper::util::to_string(format);
 			  if(!isCompressed && perfWarnings)
 				  util::reset_console_color();
 
+			  Con::cout << std::setw(12) << util::get_pretty_bytes(fGetImageSize(img));
+
 			  if(context.IsValidationEnabled() == false)
-				  Con::cout << prefix << "Last time used: Enable validation mode to determine" << Con::endl;
+				  Con::cout << std::setw(10) << "n/a";
 			  else {
 				  auto time = context.GetLastUsageTime(img);
 				  if(time.has_value() == false)
 					  util::set_console_color(util::ConsoleColorFlags::Intensity | util::ConsoleColorFlags::Red);
-				  Con::cout << prefix << "Last time used: ";
+				  Con::cout << std::setw(10);
 				  if(time.has_value()) {
 					  auto t = std::chrono::steady_clock::now();
 					  auto dt = t - *time;
@@ -352,48 +362,39 @@ void CEngine::RegisterConsoleCommands()
 				  }
 				  else
 					  Con::cout << "Never";
-				  Con::cout << Con::endl;
 				  if(time.has_value() == false)
 					  util::reset_console_color();
 			  }
 
-			  Con::cout << prefix << "Size: " << util::get_pretty_bytes(fGetImageSize(img)) << Con::endl;
+			  Con::cout << std::setw(30) << fileName << Con::endl;
 
-			  auto deviceLocal = umath::is_flag_set(img.GetCreateInfo().memoryFeatures, prosper::MemoryFeatureFlags::DeviceLocal);
+			  /*auto deviceLocal = umath::is_flag_set(img.GetCreateInfo().memoryFeatures, prosper::MemoryFeatureFlags::DeviceLocal);
 			  if(!deviceLocal) {
 				  util::set_console_color(util::ConsoleColorFlags::Intensity | util::ConsoleColorFlags::Red);
 				  Con::cout << "\tPerformance Warning: Image memory is not device local!" << Con::endl;
 				  util::reset_console_color();
-			  }
+			  }*/
 		  };
 
 		  prosper::DeviceSize totalSize = 0;
-		  Con::cout << textures.size() << " textures are currently loaded:" << Con::endl;
 		  for(auto idx : sortedIndices) {
 			  auto &tex = textures[idx];
-			  Con::cout << tex->GetName();
-			  auto &filePath = tex->GetFilePath();
-			  if(filePath.has_value())
-				  Con::cout << " (" << *filePath << ")";
-			  Con::cout << ":" << Con::endl;
-
+			  auto &filePath = tex->GetName();
 			  auto &vkTex = tex->GetVkTexture();
 			  if(vkTex)
-				  fPrintImageInfo(vkTex->GetImage(), "\t");
-			  else
-				  Con::cout << "\tNULL" << Con::endl;
+				  fPrintImageInfo(filePath, vkTex->GetImage());
+			  // else
+			  //	  Con::cout << "\tNULL" << Con::endl;
 
-			  auto size = textureSizes[idx];
-			  Con::cout << "\tSize: " << util::get_pretty_bytes(size) << Con::endl;
-			  totalSize += size;
+			  totalSize += textureSizes[idx];
 		  }
-		  Con::cout << "Total memory: " << util::get_pretty_bytes(totalSize) << Con::endl;
+		  Con::cout << "Total memory: " << util::get_pretty_bytes(totalSize) << Con::endl << Con::endl;
 
 		  auto *client = GetClientState();
 		  auto *game = client ? static_cast<CGame *>(client->GetGameState()) : nullptr;
 		  if(game) {
 			  auto cIt = EntityCIterator<pragma::CRasterizationRendererComponent> {*game};
-			  Con::cout << "\tNumber of scenes: " << cIt.GetCount() << Con::endl;
+			  Con::cout << "Number of scenes: " << cIt.GetCount() << Con::endl;
 			  for(auto &rast : cIt) {
 				  Con::cout << "Renderer " << rast.GetEntity().GetName() << ":" << Con::endl;
 				  auto &hdrInfo = rast.GetHDRInfo();
@@ -438,14 +439,13 @@ void CEngine::RegisterConsoleCommands()
 					fAddRt(glowInfo.blurSet->GetFinalRenderTarget());
 				}*/
 
-				  Con::cout << "\t" << images.size() << " images:" << Con::endl;
+				  Con::cout << images.size() << " images:" << Con::endl;
 				  prosper::DeviceSize totalSceneSize = 0;
 				  for(auto &img : images) {
-					  fPrintImageInfo(*img, "\t\t", false);
-					  Con::cout << Con::endl;
+					  fPrintImageInfo("<implementation>", *img, false);
 					  totalSceneSize += fGetImageSize(*img);
 				  }
-				  Con::cout << "\tTotal scene image size: " << util::get_pretty_bytes(totalSceneSize) << Con::endl;
+				  Con::cout << "Total scene image size: " << util::get_pretty_bytes(totalSceneSize) << Con::endl << Con::endl;
 			  }
 		  }
 
@@ -470,7 +470,7 @@ void CEngine::RegisterConsoleCommands()
 	  [](const std::string &arg, std::vector<std::string> &autoCompleteOptions) {
 		  std::vector<std::string> resFiles;
 		  auto path = Lua::SCRIPT_DIRECTORY_SLASH + arg;
-		  FileManager::FindFiles((path + "*." +Lua::FILE_EXTENSION).c_str(), &resFiles, nullptr);
+		  FileManager::FindFiles((path + "*." + Lua::FILE_EXTENSION).c_str(), &resFiles, nullptr);
 		  FileManager::FindFiles((path + "*." + Lua::FILE_EXTENSION_PRECOMPILED).c_str(), &resFiles, nullptr);
 		  autoCompleteOptions.reserve(resFiles.size());
 		  for(auto &mapName : resFiles) {

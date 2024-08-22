@@ -30,6 +30,7 @@ struct MaterialData
 	uint flags;
 	float glowScale;
 	float parallaxHeightScale;
+	float parallaxSteps;
 	float alphaDiscardThreshold;
 	float phongIntensity;
 	float metalnessFactor;

@@ -413,6 +413,7 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 	defMatData.def_readwrite("flags", &pragma::ShaderGameWorldLightingPass::MaterialData::flags);
 	defMatData.def_readwrite("glowScale", &pragma::ShaderGameWorldLightingPass::MaterialData::glowScale);
 	defMatData.def_readwrite("parallaxHeightScale", &pragma::ShaderGameWorldLightingPass::MaterialData::parallaxHeightScale);
+	defMatData.def_readwrite("parallaxSteps", &pragma::ShaderGameWorldLightingPass::MaterialData::parallaxSteps);
 	defMatData.def_readwrite("alphaDiscardThreshold", &pragma::ShaderGameWorldLightingPass::MaterialData::alphaDiscardThreshold);
 	defMatData.def_readwrite("phongIntensity", &pragma::ShaderGameWorldLightingPass::MaterialData::phongIntensity);
 	defMatData.def_readwrite("metalnessFactor", &pragma::ShaderGameWorldLightingPass::MaterialData::metalnessFactor);

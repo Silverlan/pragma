@@ -17,6 +17,7 @@ namespace prosper {
 class Texture;
 namespace pragma {
 	const float DefaultParallaxHeightScale = 0.025f;
+	const float DefaultParallaxSteps = 16.0f;
 	const float DefaultAlphaDiscardThreshold = 0.99f;
 
 	namespace rendering {
@@ -184,6 +185,7 @@ namespace pragma {
 			MaterialFlags flags = MaterialFlags::Diffuse;
 			float glowScale = 1.f;
 			float parallaxHeightScale = DefaultParallaxHeightScale;
+			float parallaxSteps = DefaultParallaxSteps;
 			float alphaDiscardThreshold = DefaultAlphaDiscardThreshold;
 			float phongIntensity = 1.f;
 			float metalnessFactor = 0.f;

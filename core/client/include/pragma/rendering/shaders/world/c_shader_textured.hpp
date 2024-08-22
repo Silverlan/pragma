@@ -194,8 +194,8 @@ namespace pragma {
 			AlphaMode alphaMode = AlphaMode::Opaque;
 			float alphaCutoff = 0.5f;
 
-			void SetParallaxHeightScale(float scale) { parallaxHeightScale = glm::detail::toFloat16(DefaultParallaxHeightScale); }
-			float GetParallaxHeightScale() const { return glm::detail::toFloat32(DefaultParallaxHeightScale); }
+			void SetParallaxHeightScale(float scale) { parallaxHeightScale = glm::detail::toFloat16(scale); }
+			float GetParallaxHeightScale() const { return glm::detail::toFloat32(parallaxHeightScale); }
 		};
 #pragma pack(pop)
 

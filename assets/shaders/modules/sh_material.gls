@@ -29,8 +29,7 @@ struct MaterialData
 	vec4 emissionFactor;
 	uint flags;
 	float glowScale;
-	float parallaxHeightScale;
-	float parallaxSteps;
+	uint parallax; // (parallaxSteps << 16) | parallaxHeightScale;
 	float alphaDiscardThreshold;
 	float phongIntensity;
 	float metalnessFactor;
@@ -55,5 +54,12 @@ bool is_material_translucent() {return ((u_material.material.flags &FMAT_TRANSLU
 bool is_diffuse_srgb() {return ((u_material.material.flags &FMAT_DIFFUSE_SRGB) != 0) ? true : false;}
 bool is_glow_srgb() {return ((u_material.material.flags &FMAT_GLOW_SRGB) != 0) ? true : false;}
 bool is_material_debug_flag_set() {return ((u_material.material.flags &FMAT_DEBUG) != 0) ? true : false;}
+
+float get_parallax_height_scale()
+{
+	uint parallaxHeightScaleBits = u_material.material.parallax & 0xFFFF;
+	return unpackHalf2x16(parallaxHeightScaleBits).x;
+}
+float get_parallax_steps() {return (u_material.material.parallax >> 16) & 0xFFFF;}
 
 #endif

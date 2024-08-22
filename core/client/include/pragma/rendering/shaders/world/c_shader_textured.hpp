@@ -17,7 +17,7 @@ namespace prosper {
 class Texture;
 namespace pragma {
 	const float DefaultParallaxHeightScale = 0.025f;
-	const float DefaultParallaxSteps = 16.0f;
+	const uint16_t DefaultParallaxSteps = 16;
 	const float DefaultAlphaDiscardThreshold = 0.99f;
 
 	namespace rendering {
@@ -184,8 +184,8 @@ namespace pragma {
 			Vector4 emissionFactor = {1.f, 1.f, 1.f, 1.f};
 			MaterialFlags flags = MaterialFlags::Diffuse;
 			float glowScale = 1.f;
-			float parallaxHeightScale = DefaultParallaxHeightScale;
-			float parallaxSteps = DefaultParallaxSteps;
+			int16_t parallaxHeightScale = glm::detail::toFloat16(DefaultParallaxHeightScale);
+			uint16_t parallaxSteps = DefaultParallaxSteps;
 			float alphaDiscardThreshold = DefaultAlphaDiscardThreshold;
 			float phongIntensity = 1.f;
 			float metalnessFactor = 0.f;
@@ -193,6 +193,9 @@ namespace pragma {
 			float aoFactor = 1.f;
 			AlphaMode alphaMode = AlphaMode::Opaque;
 			float alphaCutoff = 0.5f;
+
+			void SetParallaxHeightScale(float scale) { parallaxHeightScale = glm::detail::toFloat16(DefaultParallaxHeightScale); }
+			float GetParallaxHeightScale() const { return glm::detail::toFloat32(DefaultParallaxHeightScale); }
 		};
 #pragma pack(pop)
 

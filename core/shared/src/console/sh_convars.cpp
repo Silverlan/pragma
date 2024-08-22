@@ -48,7 +48,7 @@ REGISTER_ENGINE_CONCOMMAND(
   },
   ConVarFlags::None, "Deletes all cache files.");
 REGISTER_ENGINE_CONVAR(cache_version, udm::Type::String, "", ConVarFlags::Archive, "The engine version that the cache files are associated with. If this version doesn't match the current engine version, the cache will be cleared.");
-REGISTER_ENGINE_CONVAR(cache_version_target, udm::Type::UInt32, "13", ConVarFlags::None, "If cache_version does not match this value, the cache files will be cleared and it will be set to it.");
+REGISTER_ENGINE_CONVAR(cache_version_target, udm::Type::UInt32, "14", ConVarFlags::None, "If cache_version does not match this value, the cache files will be cleared and it will be set to it.");
 REGISTER_ENGINE_CONVAR(debug_profiling_enabled, udm::Type::Boolean, "0", ConVarFlags::None, "Enables profiling timers.");
 REGISTER_ENGINE_CONVAR(debug_disable_animation_updates, udm::Type::Boolean, "0", ConVarFlags::None, "Disables animation updates.");
 REGISTER_ENGINE_CONVAR(sh_mount_external_game_resources, udm::Type::Boolean, "1", ConVarFlags::Archive, "If set to 1, the game will attempt to load missing resources from external games.");

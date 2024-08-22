@@ -327,8 +327,12 @@ ShaderGameWorldLightingPass::MaterialData ShaderGameWorldLightingPass::GenerateM
 	if(parallaxMap != nullptr && parallaxMap->texture != nullptr) {
 		matFlags |= MaterialFlags::Parallax;
 
-		data->GetFloat("parallax_height_scale", &matData.parallaxHeightScale);
-		data->GetFloat("parallax_steps", &matData.parallaxSteps);
+		float heightScale = matData.GetParallaxHeightScale();
+		data->GetFloat("parallax_height_scale", &heightScale);
+		matData.SetParallaxHeightScale(heightScale);
+		int32_t parallaxSteps = matData.parallaxSteps;
+		data->GetInt("parallax_steps", &parallaxSteps);
+		matData.parallaxSteps = parallaxSteps;
 	}
 
 	if(cvNormalMappingEnabled->GetBool() == true) {

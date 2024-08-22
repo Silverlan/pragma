@@ -328,6 +328,7 @@ ShaderGameWorldLightingPass::MaterialData ShaderGameWorldLightingPass::GenerateM
 		matFlags |= MaterialFlags::Parallax;
 
 		data->GetFloat("parallax_height_scale", &matData.parallaxHeightScale);
+		data->GetFloat("parallax_steps", &matData.parallaxSteps);
 	}
 
 	if(cvNormalMappingEnabled->GetBool() == true) {

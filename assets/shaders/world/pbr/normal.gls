@@ -7,7 +7,7 @@
 
 vec3 get_normal_from_map(vec2 texCoords)
 {
-	if(CSPEC_ENABLE_NORMAL_MAP == 1 && use_normal_map())
+	if(use_normal_map())
 	{
 		vec3 tangentNormal = texture(u_normalMap,texCoords).xyz *2.0 -1.0;
 

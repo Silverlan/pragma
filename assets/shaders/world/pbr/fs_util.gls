@@ -7,7 +7,7 @@ vec4 get_base_color(vec4 albedoColor)
 {
 	vec4 colorMod = get_instance_color();
 	vec4 baseColor = albedoColor;
-	if(CSPEC_ENABLE_TRANSLUCENCY == 1) {
+	if(is_material_translucent()) {
         uint alphaMode = u_material.material.alphaMode;
         if(colorMod.a < 1.0)
             alphaMode = ALPHA_MODE_BLEND;

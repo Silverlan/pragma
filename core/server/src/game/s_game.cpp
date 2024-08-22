@@ -642,12 +642,12 @@ void SGame::ReceiveUserInfo(pragma::networking::IServerClient &session, NetPacke
 	auto offsetTypes = packetInf->GetOffset();
 	packetInf->Write<uint32_t>(numTypes);
 	for(auto &info : componentTypes) {
-		if(info.IsValid() == false || (info.flags & pragma::ComponentFlags::Networked) == pragma::ComponentFlags::None) {
+		if(info->IsValid() == false || (info->flags & pragma::ComponentFlags::Networked) == pragma::ComponentFlags::None) {
 			--numTypes;
 			continue;
 		}
-		packetInf->WriteString(*info.name);
-		packetInf->Write<pragma::ComponentId>(info.id);
+		packetInf->WriteString(*info->name);
+		packetInf->Write<pragma::ComponentId>(info->id);
 	}
 	packetInf->Write<uint32_t>(numTypes, &offsetTypes);
 	//

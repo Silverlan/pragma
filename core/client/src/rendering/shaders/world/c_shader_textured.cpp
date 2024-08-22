@@ -106,8 +106,6 @@ static void initialize_material_settings_buffer()
 	g_materialSettingsBuffer = c_engine->GetRenderContext().CreateUniformResizableBuffer(bufCreateInfo, sizeof(ShaderGameWorldLightingPass::MaterialData), sizeof(ShaderGameWorldLightingPass::MaterialData) * 524'288, 0.05f);
 	g_materialSettingsBuffer->SetPermanentlyMapped(true, prosper::IBuffer::MapFlags::WriteBit);
 }
-static bool m_minimalPipelineModeEnabled = false;
-void ShaderGameWorldLightingPass::SetMinimalPipelineModeEnabled(bool enabled) { m_minimalPipelineModeEnabled = enabled; }
 ShaderGameWorldLightingPass::ShaderGameWorldLightingPass(prosper::IPrContext &context, const std::string &identifier, const std::string &vsShader, const std::string &fsShader, const std::string &gsShader) : ShaderGameWorld(context, identifier, vsShader, fsShader, gsShader)
 {
 	if(g_instanceCount++ == 0u)
@@ -119,15 +117,14 @@ ShaderGameWorldLightingPass::ShaderGameWorldLightingPass(prosper::IPrContext &co
 		// Note: Every pass type has to have the exact same number of pipelines in the exact same order!
 		auto startIdx = ShaderSpecializationManager::GetPipelineCount();
 		for(auto i = decltype(n) {0u}; i < n; ++i) {
-			auto dynamicFlags = GameShaderSpecializationConstantFlag::EmissionEnabledBit | GameShaderSpecializationConstantFlag::EnableRmaMapBit | GameShaderSpecializationConstantFlag::EnableNormalMapBit | GameShaderSpecializationConstantFlag::ParallaxEnabledBit
-			  | GameShaderSpecializationConstantFlag::EnableDepthBias | GameShaderSpecializationConstantFlag::EnableTranslucencyBit | GameShaderSpecializationConstantFlag::EnableClippingBit;
+			auto dynamicFlags = GameShaderSpecializationConstantFlag::EnableTranslucencyBit;
 			switch(static_cast<GameShaderSpecialization>(i)) {
 			case GameShaderSpecialization::Generic:
 				break;
 			case GameShaderSpecialization::Lightmapped:
 				break;
 			case GameShaderSpecialization::Animated:
-				dynamicFlags |= GameShaderSpecializationConstantFlag::WrinklesEnabledBit | GameShaderSpecializationConstantFlag::EnableExtendedVertexWeights;
+				// dynamicFlags |= GameShaderSpecializationConstantFlag::WrinklesEnabledBit | GameShaderSpecializationConstantFlag::EnableExtendedVertexWeights;
 				break;
 			}
 			auto staticFlags = GetStaticSpecializationConstantFlags(static_cast<GameShaderSpecialization>(i));
@@ -138,13 +135,6 @@ ShaderGameWorldLightingPass::ShaderGameWorldLightingPass(prosper::IPrContext &co
 	}
 
 	auto numPipelines = ShaderSpecializationManager::GetPipelineCount();
-	if(GetContext().IsValidationEnabled()) {
-		// Initializing all pipelines with the validator enabled will take a very long time, and in most cases we don't need
-		// them for debugging, so we'll just use 1.
-		numPipelines = 1;
-	}
-	if(m_minimalPipelineModeEnabled)
-		numPipelines = 1;
 	SetPipelineCount(numPipelines);
 }
 ShaderGameWorldLightingPass::~ShaderGameWorldLightingPass()
@@ -200,33 +190,18 @@ GameShaderSpecializationConstantFlag ShaderGameWorldLightingPass::GetMaterialPip
 		if(data->HasValue("emission_factor"))
 			hasEmission = get_emission_factor(mat).has_value();
 	}
-	if(hasEmission)
-		flags |= GameShaderSpecializationConstantFlag::EmissionEnabledBit;
-	if(mat.GetTextureInfo(Material::WRINKLE_STRETCH_MAP_IDENTIFIER) || mat.GetTextureInfo(Material::WRINKLE_COMPRESS_MAP_IDENTIFIER))
-		flags |= GameShaderSpecializationConstantFlag::WrinklesEnabledBit;
 	if(mat.GetAlphaMode() != AlphaMode::Opaque)
 		flags |= GameShaderSpecializationConstantFlag::EnableTranslucencyBit;
 	auto *rmaMap = mat.GetRMAMap();
 	if(rmaMap) {
-		flags |= GameShaderSpecializationConstantFlag::EnableRmaMapBit;
 		auto texture = std::static_pointer_cast<Texture>(rmaMap->texture);
 		if(texture) {
 			auto texName = texture->GetName();
 			ustring::to_lower(texName);
 			auto path = util::Path::CreateFile(texName);
 			path.RemoveFileExtension();
-			if(path == "pbr/rma_neutral") {
-				// If the material uses the neutral rma texture, we can completely ignore
-				// it for the shader and use the default values instead, which saves
-				// a lot of texture lookups.
-				flags &= ~GameShaderSpecializationConstantFlag::EnableRmaMapBit;
-			}
 		}
 	}
-	if(mat.GetNormalMap())
-		flags |= GameShaderSpecializationConstantFlag::EnableNormalMapBit;
-	if(mat.GetParallaxMap())
-		flags |= GameShaderSpecializationConstantFlag::ParallaxEnabledBit;
 	return flags;
 }
 prosper::DescriptorSetInfo &ShaderGameWorldLightingPass::GetMaterialDescriptorSetInfo() const { return DESCRIPTOR_SET_MATERIAL; }
@@ -297,23 +272,14 @@ void ShaderGameWorldLightingPass::InitializeGfxPipeline(prosper::GraphicsPipelin
 	ToggleDynamicScissorState(pipelineInfo, true);
 
 	// Fragment
-	ShaderSpecializationManager::AddSpecializationConstant(*this, pipelineInfo, pipelineIdx, prosper::ShaderStageFlags::FragmentBit, GameShaderSpecializationConstantFlag::EmissionEnabledBit);
-	ShaderSpecializationManager::AddSpecializationConstant(*this, pipelineInfo, pipelineIdx, prosper::ShaderStageFlags::FragmentBit, GameShaderSpecializationConstantFlag::WrinklesEnabledBit);
 	ShaderSpecializationManager::AddSpecializationConstant(*this, pipelineInfo, pipelineIdx, prosper::ShaderStageFlags::FragmentBit, GameShaderSpecializationConstantFlag::EnableTranslucencyBit);
-	ShaderSpecializationManager::AddSpecializationConstant(*this, pipelineInfo, pipelineIdx, prosper::ShaderStageFlags::FragmentBit, GameShaderSpecializationConstantFlag::EnableRmaMapBit);
 
 	// Shared
-	ShaderSpecializationManager::AddSpecializationConstant(*this, pipelineInfo, pipelineIdx, prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit, GameShaderSpecializationConstantFlag::EnableNormalMapBit);
-	ShaderSpecializationManager::AddSpecializationConstant(*this, pipelineInfo, pipelineIdx, prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit, GameShaderSpecializationConstantFlag::ParallaxEnabledBit);
 	ShaderSpecializationManager::AddSpecializationConstant(*this, pipelineInfo, pipelineIdx, prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit, GameShaderSpecializationConstantFlag::EnableLightMapsBit);
 
 	// Vertex
 	ShaderSpecializationManager::AddSpecializationConstant(*this, pipelineInfo, pipelineIdx, prosper::ShaderStageFlags::VertexBit, GameShaderSpecializationConstantFlag::EnableAnimationBit);
 	ShaderSpecializationManager::AddSpecializationConstant(*this, pipelineInfo, pipelineIdx, prosper::ShaderStageFlags::VertexBit, GameShaderSpecializationConstantFlag::EnableMorphTargetAnimationBit);
-	ShaderSpecializationManager::AddSpecializationConstant(*this, pipelineInfo, pipelineIdx, prosper::ShaderStageFlags::VertexBit, GameShaderSpecializationConstantFlag::EnableClippingBit);
-	ShaderSpecializationManager::AddSpecializationConstant(*this, pipelineInfo, pipelineIdx, prosper::ShaderStageFlags::VertexBit, GameShaderSpecializationConstantFlag::Enable3dOriginBit);
-	ShaderSpecializationManager::AddSpecializationConstant(*this, pipelineInfo, pipelineIdx, prosper::ShaderStageFlags::VertexBit, GameShaderSpecializationConstantFlag::EnableExtendedVertexWeights);
-	ShaderSpecializationManager::AddSpecializationConstant(*this, pipelineInfo, pipelineIdx, prosper::ShaderStageFlags::VertexBit, GameShaderSpecializationConstantFlag::EnableDepthBias);
 
 	// Properties
 	auto &shaderSettings = client->GetGameWorldShaderSettings();
@@ -361,7 +327,12 @@ ShaderGameWorldLightingPass::MaterialData ShaderGameWorldLightingPass::GenerateM
 	if(parallaxMap != nullptr && parallaxMap->texture != nullptr) {
 		matFlags |= MaterialFlags::Parallax;
 
-		data->GetFloat("parallax_height_scale", &matData.parallaxHeightScale);
+		float heightScale = matData.GetParallaxHeightScale();
+		data->GetFloat("parallax_height_scale", &heightScale);
+		matData.SetParallaxHeightScale(heightScale);
+		int32_t parallaxSteps = matData.parallaxSteps;
+		data->GetInt("parallax_steps", &parallaxSteps);
+		matData.parallaxSteps = parallaxSteps;
 	}
 
 	if(cvNormalMappingEnabled->GetBool() == true) {
@@ -470,9 +441,30 @@ ShaderGameWorldLightingPass::MaterialData ShaderGameWorldLightingPass::GenerateM
 	auto alphaCutoff = 0.5f;
 	data->GetFloat("alpha_cutoff", &alphaCutoff);
 	matData.alphaCutoff = alphaCutoff;
-	// Obsolete
-	//if(mat.IsTranslucent() == true)
-	//	matFlags |= MaterialFlags::Translucent;
+
+	if(mat.GetAlphaMode() != AlphaMode::Opaque)
+		matFlags |= MaterialFlags::Translucent;
+	if(mat.GetTextureInfo(Material::WRINKLE_STRETCH_MAP_IDENTIFIER) || mat.GetTextureInfo(Material::WRINKLE_COMPRESS_MAP_IDENTIFIER))
+		matFlags |= MaterialFlags::WrinkleMaps;
+
+	auto *rmaMap = mat.GetRMAMap();
+	if(rmaMap) {
+		matFlags |= MaterialFlags::RmaMap;
+		auto texture = std::static_pointer_cast<Texture>(rmaMap->texture);
+		if(texture) {
+			auto texName = texture->GetName();
+			ustring::to_lower(texName);
+			auto path = util::Path::CreateFile(texName);
+			path.RemoveFileExtension();
+			if(path == "pbr/rma_neutral") {
+				// If the material uses the neutral rma texture, we can completely ignore
+				// it for the shader and use the default values instead, which saves
+				// a lot of texture lookups.
+				matFlags &= ~MaterialFlags::RmaMap;
+			}
+		}
+	}
+
 	return matData;
 }
 std::optional<ShaderGameWorldLightingPass::MaterialData> ShaderGameWorldLightingPass::UpdateMaterialBuffer(CMaterial &mat)

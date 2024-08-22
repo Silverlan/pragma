@@ -412,7 +412,8 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 	defMatData.def_readwrite("emissionFactor", &pragma::ShaderGameWorldLightingPass::MaterialData::emissionFactor);
 	defMatData.def_readwrite("flags", &pragma::ShaderGameWorldLightingPass::MaterialData::flags);
 	defMatData.def_readwrite("glowScale", &pragma::ShaderGameWorldLightingPass::MaterialData::glowScale);
-	defMatData.def_readwrite("parallaxHeightScale", &pragma::ShaderGameWorldLightingPass::MaterialData::parallaxHeightScale);
+	defMatData.def_readwrite("parallaxSteps", &pragma::ShaderGameWorldLightingPass::MaterialData::parallaxSteps);
+	defMatData.property("parallaxHeightScale", &pragma::ShaderGameWorldLightingPass::MaterialData::GetParallaxHeightScale, &pragma::ShaderGameWorldLightingPass::MaterialData::SetParallaxHeightScale);
 	defMatData.def_readwrite("alphaDiscardThreshold", &pragma::ShaderGameWorldLightingPass::MaterialData::alphaDiscardThreshold);
 	defMatData.def_readwrite("phongIntensity", &pragma::ShaderGameWorldLightingPass::MaterialData::phongIntensity);
 	defMatData.def_readwrite("metalnessFactor", &pragma::ShaderGameWorldLightingPass::MaterialData::metalnessFactor);
@@ -712,17 +713,8 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 	defShaderTextured3DBase.add_static_constant("SPECIALIZATION_CONSTANT_ENABLE_LIGHT_MAPS_BIT", umath::to_integral(pragma::GameShaderSpecializationConstantFlag::EnableLightMapsBit));
 	defShaderTextured3DBase.add_static_constant("SPECIALIZATION_CONSTANT_ENABLE_ANIMATION_BIT", umath::to_integral(pragma::GameShaderSpecializationConstantFlag::EnableAnimationBit));
 	defShaderTextured3DBase.add_static_constant("SPECIALIZATION_CONSTANT_ENABLE_MORPH_TARGET_ANIMATION_BIT", umath::to_integral(pragma::GameShaderSpecializationConstantFlag::EnableMorphTargetAnimationBit));
-	defShaderTextured3DBase.add_static_constant("SPECIALIZATION_CONSTANT_EMISSION_ENABLED_BIT", umath::to_integral(pragma::GameShaderSpecializationConstantFlag::EmissionEnabledBit));
-	defShaderTextured3DBase.add_static_constant("SPECIALIZATION_CONSTANT_WRINKLES_ENABLED_BIT", umath::to_integral(pragma::GameShaderSpecializationConstantFlag::WrinklesEnabledBit));
 	defShaderTextured3DBase.add_static_constant("SPECIALIZATION_CONSTANT_ENABLE_TRANSLUCENCY_BIT", umath::to_integral(pragma::GameShaderSpecializationConstantFlag::EnableTranslucencyBit));
-	defShaderTextured3DBase.add_static_constant("SPECIALIZATION_CONSTANT_ENABLE_RMA_MAP_BIT", umath::to_integral(pragma::GameShaderSpecializationConstantFlag::EnableRmaMapBit));
-	defShaderTextured3DBase.add_static_constant("SPECIALIZATION_CONSTANT_ENABLE_NORMAL_MAP_BIT", umath::to_integral(pragma::GameShaderSpecializationConstantFlag::EnableNormalMapBit));
-	defShaderTextured3DBase.add_static_constant("SPECIALIZATION_CONSTANT_PARALLAX_ENABLED_BIT", umath::to_integral(pragma::GameShaderSpecializationConstantFlag::ParallaxEnabledBit));
-	defShaderTextured3DBase.add_static_constant("SPECIALIZATION_CONSTANT_ENABLE_CLIPPING_BIT", umath::to_integral(pragma::GameShaderSpecializationConstantFlag::EnableClippingBit));
-	defShaderTextured3DBase.add_static_constant("SPECIALIZATION_CONSTANT_ENABLE_3D_ORIGIN_BIT", umath::to_integral(pragma::GameShaderSpecializationConstantFlag::Enable3dOriginBit));
-	defShaderTextured3DBase.add_static_constant("SPECIALIZATION_CONSTANT_ENABLE_EXTENDED_VERTEX_WEIGHTS_BIT", umath::to_integral(pragma::GameShaderSpecializationConstantFlag::EnableExtendedVertexWeights));
-	defShaderTextured3DBase.add_static_constant("SPECIALIZATION_CONSTANT_ENABLE_DEPTH_BIAS_BIT", umath::to_integral(pragma::GameShaderSpecializationConstantFlag::EnableDepthBias));
-	static_assert(umath::to_integral(pragma::GameShaderSpecializationConstantFlag::Last) == 4096, "Update this list when adding new flags!");
+	static_assert(umath::to_integral(pragma::GameShaderSpecializationConstantFlag::Last) == 8, "Update this list when adding new flags!");
 
 	defShaderTextured3DBase.def(luabind::constructor<>());
 	defShaderTextured3DBase.def("InitializeGfxPipelineVertexAttributes", &pragma::LuaShaderWrapperTextured3D::Lua_InitializeGfxPipelineVertexAttributes, &pragma::LuaShaderWrapperTextured3D::Lua_default_InitializeGfxPipelineVertexAttributes);

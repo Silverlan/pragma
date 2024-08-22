@@ -50,7 +50,7 @@ void export_world_fragment_data(mat4 mdlMatrix,vec3 vpos)
 			vs_out.wrinkleDelta = wrinkleDelta;
 		}
 		bool extendedWeights = false;
-		if(CSPEC_ENABLE_EXTENDED_VERTEX_WEIGHTS == 1)
+		if(is_weighted_ext())
 			extendedWeights = is_weighted_ext();
 		mBone = calc_bone_matrix(is_instanced_weighted(),extendedWeights);
 		vertPos = mBone *vertPos;
@@ -68,11 +68,8 @@ void export_world_fragment_data(mat4 mdlMatrix,vec3 vpos)
 	vec4 vposWs = mdlMatrix *vertPos;
 
 	mat4 P = u_camera.P;
-	if(CSPEC_ENABLE_DEPTH_BIAS == 1)
-	{
-		if(u_pushConstants.scene.depthBias.x > 0.0)
-			apply_projection_depth_bias_offset(P,u_renderSettings.nearZ,u_renderSettings.farZ,u_pushConstants.scene.depthBias[0],u_pushConstants.scene.depthBias[1]);
-	}
+	if(u_pushConstants.scene.depthBias.x > 0.0)
+		apply_projection_depth_bias_offset(P,u_renderSettings.nearZ,u_renderSettings.farZ,u_pushConstants.scene.depthBias[0],u_pushConstants.scene.depthBias[1]);
 	gl_Position = API_DEPTH_TRANSFORM(P) *V *vposWs;
 
 	vposWs.xyz /= vposWs.w;
@@ -92,12 +89,14 @@ void export_world_fragment_data(mat4 mdlMatrix,vec3 vpos)
 	vs_out.vert_normal = vertNorm;
 	vs_out.vert_uv = in_vert_uv.xy;
 
-	if(CSPEC_ENABLE_NORMAL_MAP == 1 || CSPEC_PARALLAX_ENABLED == 1)
+	if(use_normal_map() || use_parallax_map())
 	{
-	   vec3 T = normalize((mBone *vec4(in_vert_tangent,0.0)).xyz);
-	   vec3 B = normalize((mBone *vec4(in_vert_bitangent,0.0)).xyz);
-	   vec3 N = vertNorm;
-	   vs_out.TBN = mat3(T,B,N);
+		if(CSPEC_ENABLE_ANIMATION == 0)
+			mBone = mat4(1.0);
+		vec3 T = normalize((mBone *vec4(in_vert_tangent,0.0)).xyz);
+		vec3 B = normalize((mBone *vec4(in_vert_bitangent,0.0)).xyz);
+		vec3 N = vertNorm;
+		vs_out.TBN = mat3(T,B,N);
 
 		vs_out.vert_normal_cs = (V *mdlMatrix *vec4(vertNorm,0)).xyz;
 	}

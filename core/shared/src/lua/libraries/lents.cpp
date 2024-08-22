@@ -177,9 +177,9 @@ void Lua::ents::register_library(lua_State *l)
 			auto t = luabind::newtable(l);
 			for(uint32_t idx = 1;auto &componentInfo : manager.GetRegisteredComponentTypes())
 			{
-				if(componentInfo.id == pragma::INVALID_COMPONENT_ID)
+				if(componentInfo->id == pragma::INVALID_COMPONENT_ID)
 					continue;
-				t[idx++] = componentInfo.id;
+				t[idx++] = componentInfo->id;
 			}
 			return t;
 		}),

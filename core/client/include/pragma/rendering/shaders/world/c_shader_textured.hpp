@@ -17,6 +17,7 @@ namespace prosper {
 class Texture;
 namespace pragma {
 	const float DefaultParallaxHeightScale = 0.025f;
+	const uint16_t DefaultParallaxSteps = 16;
 	const float DefaultAlphaDiscardThreshold = 0.99f;
 
 	namespace rendering {
@@ -31,20 +32,10 @@ namespace pragma {
 		EnableAnimationBit = EnableLightMapsBit << 1u,
 		EnableMorphTargetAnimationBit = EnableAnimationBit << 1u,
 
-		// Dynamic
-		EmissionEnabledBit = EnableMorphTargetAnimationBit << 1u,
-		WrinklesEnabledBit = EmissionEnabledBit << 1u,
-		EnableTranslucencyBit = WrinklesEnabledBit << 1u,
-		EnableRmaMapBit = EnableTranslucencyBit << 1u,
-		EnableNormalMapBit = EnableRmaMapBit << 1u,
-		ParallaxEnabledBit = EnableNormalMapBit << 1u,
-		EnableClippingBit = ParallaxEnabledBit << 1u,
-		Enable3dOriginBit = EnableClippingBit << 1u,
-		EnableExtendedVertexWeights = Enable3dOriginBit << 1u,
-		EnableDepthBias = EnableExtendedVertexWeights << 1u,
+		EnableTranslucencyBit = EnableMorphTargetAnimationBit << 1u,
 
-		PermutationCount = (EnableDepthBias << 1u) - 1,
-		Last = EnableDepthBias
+		PermutationCount = (EnableTranslucencyBit << 1u) - 1,
+		Last = EnableTranslucencyBit
 	};
 
 	class DLLCLIENT ShaderSpecializationManager {
@@ -106,8 +97,6 @@ namespace pragma {
 
 	class DLLCLIENT ShaderGameWorldLightingPass : public ShaderGameWorld, public ShaderSpecializationManager {
 	  public:
-		static void SetMinimalPipelineModeEnabled(bool enabled);
-
 		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_RENDER_BUFFER_INDEX;
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX;
 
@@ -169,7 +158,10 @@ namespace pragma {
 
 			DiffuseSRGB = FMAT_GLOW_MODE_4 << 1u,
 			GlowSRGB = DiffuseSRGB << 1u,
-			Debug = GlowSRGB << 1u
+			Debug = GlowSRGB << 1u,
+
+			WrinkleMaps = Debug << 1u,
+			RmaMap = WrinkleMaps << 1u
 		};
 
 #pragma pack(push, 1)
@@ -192,7 +184,8 @@ namespace pragma {
 			Vector4 emissionFactor = {1.f, 1.f, 1.f, 1.f};
 			MaterialFlags flags = MaterialFlags::Diffuse;
 			float glowScale = 1.f;
-			float parallaxHeightScale = DefaultParallaxHeightScale;
+			int16_t parallaxHeightScale = glm::detail::toFloat16(DefaultParallaxHeightScale);
+			uint16_t parallaxSteps = DefaultParallaxSteps;
 			float alphaDiscardThreshold = DefaultAlphaDiscardThreshold;
 			float phongIntensity = 1.f;
 			float metalnessFactor = 0.f;
@@ -200,6 +193,9 @@ namespace pragma {
 			float aoFactor = 1.f;
 			AlphaMode alphaMode = AlphaMode::Opaque;
 			float alphaCutoff = 0.5f;
+
+			void SetParallaxHeightScale(float scale) { parallaxHeightScale = glm::detail::toFloat16(scale); }
+			float GetParallaxHeightScale() const { return glm::detail::toFloat32(parallaxHeightScale); }
 		};
 #pragma pack(pop)
 

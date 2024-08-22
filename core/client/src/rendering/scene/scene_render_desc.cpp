@@ -290,8 +290,6 @@ void SceneRenderDesc::CollectRenderMeshesFromOctree(pragma::CRasterizationRender
   const std::vector<util::BSPTree *> *bspTrees, const std::vector<util::BSPTree::Node *> *bspLeafNodes, int32_t lodBias, const std::function<bool(CBaseEntity &, const pragma::CSceneComponent &, RenderFlags)> &shouldConsiderEntity,
   pragma::GameShaderSpecializationConstantFlag baseSpecializationFlags)
 {
-	if(enableClipping)
-		baseSpecializationFlags |= pragma::GameShaderSpecializationConstantFlag::EnableClippingBit;
 	auto numEntitiesPerWorkerJob = umath::max(cvEntitiesPerJob->GetInt(), 1);
 	std::function<void(const OcclusionOctree<CBaseEntity *>::Node &node)> iterateTree = nullptr;
 	iterateTree = [&iterateTree, &shouldConsiderEntity, &scene, &cam, renderFlags, fShouldCull, optRasterizationRenderer, renderMask, &getRenderQueue, &vp, bspLeafNodes, bspTrees, lodBias, numEntitiesPerWorkerJob, baseSpecializationFlags](const OcclusionOctree<CBaseEntity *>::Node &node) {

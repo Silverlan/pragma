@@ -34,6 +34,7 @@ GlobalAnimationChannelQueueProcessor::ChannelRange GlobalAnimationChannelQueuePr
 	ul.unlock();
 	return range;
 }
+
 void GlobalAnimationChannelQueueProcessor::ApplyValues()
 {
 	while(IsPending()) {
@@ -62,15 +63,17 @@ void GlobalAnimationChannelQueueProcessor::Submit(pragma::AnimationManagerData &
 		return;
 	auto &channelValueSubmitters = animManager.GetChannelValueSubmitters();
 	auto &channels = anim->GetChannels();
+	if(channels.size() != channelValueSubmitters.size())
+		throw std::runtime_error {"Number of channels does not match number of channel value submitters!"};
 	auto n = umath::min(channelValueSubmitters.size(), channels.size());
 	auto t = animManager->GetCurrentTime();
 
-	auto numItems = channelValueSubmitters.size();
+	auto numItems = n;
 	auto numBlocks = numItems / numPerBatch;
-	if(numBlocks == 0)
-		numBlocks = 1;
+	if((numItems % numPerBatch) != 0)
+		++numBlocks;
 	m_threadPool.submit_blocks<size_t>(
-	  0, n,
+	  0, numItems,
 	  [this, &channels, &channelValueSubmitters, &amData, &animManager, t](size_t start, size_t indexAfterLast) {
 		  for(auto i = start; i < indexAfterLast; ++i) {
 			  auto &submitter = channelValueSubmitters[i];

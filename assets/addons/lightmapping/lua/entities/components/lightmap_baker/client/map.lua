@@ -20,14 +20,21 @@ function Component:WriteLightmapInformationToMap(mapFilePath, mapName, lightmapD
 		return false
 	end
 	local lightmapDataCacheC = entWorld:AddComponent("light_map_data_cache")
+	lightmapDataCacheC:SetFlags(
+		bit.bor(lightmapDataCacheC:GetFlags(), util.WorldData.ComponentData.FLAG_CLIENTSIDE_ONLY_BIT)
+	)
 	local data = lightmapDataCacheC:GetData()
 	data:SetValue("lightmapDataCache", udm.TYPE_STRING, lightmapDataCache)
 
 	local lightmapC = entWorld:AddComponent("light_map")
+	lightmapC:SetFlags(bit.bor(lightmapC:GetFlags(), util.WorldData.ComponentData.FLAG_CLIENTSIDE_ONLY_BIT))
 	local data = lightmapC:GetData()
 	data:SetValue("lightmapMaterial", udm.TYPE_STRING, lightmapMaterial)
 
-	entWorld:AddComponent("light_map_receiver")
+	local lightmapReceiverC = entWorld:AddComponent("light_map_receiver")
+	lightmapReceiverC:SetFlags(
+		bit.bor(lightmapReceiverC:GetFlags(), util.WorldData.ComponentData.FLAG_CLIENTSIDE_ONLY_BIT)
+	)
 	local res, err = worldData:Save(mapFilePath, mapName)
 	if res == false then
 		self:LogErr("Failed to save world data as '{}': {}", mapFilePath, err)

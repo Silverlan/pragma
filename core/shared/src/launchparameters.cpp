@@ -250,6 +250,11 @@ static void LPARAM_luaext(const std::vector<std::string> &argv)
 static void LPARAM_verbose(const std::vector<std::string> &argv) { engine->SetVerbose(true); }
 static void LPARAM_console_subsystem(const std::vector<std::string> &argv) { engine->SetConsoleSubsystem(true); }
 static void LPARAM_non_interactive(const std::vector<std::string> &argv) { engine->SetNonInteractiveMode(true); }
+static void LPARAM_disable_ansi_color_codes(const std::vector<std::string> &argv)
+{
+	pragma::logging::set_ansi_color_codes_enabled(false);
+	Con::disable_ansi_color_codes();
+}
 
 REGISTER_LAUNCH_PARAMETER_HELP(-console, LPARAM_console, "", "start with the console open");
 REGISTER_LAUNCH_PARAMETER_HELP(-dev, LPARAM_dev, "", "enable developer mode");
@@ -259,8 +264,9 @@ REGISTER_LAUNCH_PARAMETER_HELP(-map, LPARAM_map, "<map>", "load this map on star
 REGISTER_LAUNCH_PARAMETER_HELP(-gamemode, LPARAM_gamemode, "<gamemode>", "load this gamemode on start");
 REGISTER_LAUNCH_PARAMETER_HELP(-luaext, LPARAM_luaext, "", "enables several additional lua modules (e.g. package and io)");
 REGISTER_LAUNCH_PARAMETER_HELP(-verbose, LPARAM_verbose, "", "Enables additional debug messages.");
-REGISTER_LAUNCH_PARAMETER_HELP(-console_subsystem, LPARAM_console_subsystem, "<1/0>", "should only be enabled if the executable was built for console/terminal only");
-REGISTER_LAUNCH_PARAMETER_HELP(-non_interactive, LPARAM_non_interactive, "<1/0>", "if enabled, terminal user inputs will be ignored");
+REGISTER_LAUNCH_PARAMETER_HELP(-console_subsystem, LPARAM_console_subsystem, "", "should only be enabled if the executable was built for console/terminal only");
+REGISTER_LAUNCH_PARAMETER_HELP(-non_interactive, LPARAM_non_interactive, "", "if enabled, terminal user inputs will be ignored");
+REGISTER_LAUNCH_PARAMETER_HELP(-disable_ansi_color_codes, LPARAM_disable_ansi_color_codes, "", "if set, no ansi color codes will be used in console/log outputs.");
 
 REGISTER_LAUNCH_PARAMETER_HELP(-tcpport, LPARAM_tcpport, "<port>", "set TCP port");
 REGISTER_LAUNCH_PARAMETER_HELP(-udpport, LPARAM_udpport, "<port>", "set UDP port");

@@ -96,28 +96,17 @@ static void preprocess_bsp_data(util::BSPTree &bspTree, std::vector<std::vector<
 	//
 }
 
-bool pragma::asset::WorldData::LoadFromAssetData(const udm::AssetData &data, EntityData::Flags entMask, std::string &outErr)
+bool pragma::asset::WorldData::LoadFromAssetData(udm::LinkedPropertyWrapper &udm, EntityData::Flags entMask, std::string &outErr)
 {
-	if(data.GetAssetType() != PMAP_IDENTIFIER) {
-		outErr = "Incorrect format!";
-		return false;
-	}
-
-	auto udm = *data;
-	auto version = data.GetAssetVersion();
-	if(version < 1) {
-		outErr = "Invalid version!";
-		return false;
-	}
-
-	udm["materials"](m_materialTable);
+	udm["materials"] >> m_materialTable;
 	for(auto &str : m_materialTable)
 		m_nw.PrecacheMaterial(str);
 
 	auto udmLightmap = udm["lightmap"];
 	if(udmLightmap) {
-		udm["lightmap"]["intensity"](m_lightMapIntensity);
-		udm["lightmap"]["exposure"](m_lightMapExposure);
+		m_useLegacyLightmapDefinition = true;
+		udm["lightmap"]["intensity"] >> m_lightMapIntensity;
+		udm["lightmap"]["exposure"] >> m_lightMapExposure;
 	}
 
 	uint32_t nextEntIdx = 0;
@@ -125,10 +114,17 @@ bool pragma::asset::WorldData::LoadFromAssetData(const udm::AssetData &data, Ent
 		auto entIdx = nextEntIdx++;
 		auto entData = EntityData::Create();
 
-		if(udmEnt["flags"]) {
-			auto udmClientsideOnly = udmEnt["flags"]["clientsideOnly"];
-			if(udmClientsideOnly.ToValue<bool>(false))
-				entData->SetFlags(EntityData::Flags::ClientsideOnly);
+		if(PMAP_VERSION > 1) {
+			EntityData::Flags flags;
+			if(udmEnt["flags"] >> flags)
+				entData->SetFlags(flags);
+		}
+		else {
+			if(udmEnt["flags"]) {
+				auto udmClientsideOnly = udmEnt["flags"]["clientsideOnly"];
+				if(udmClientsideOnly.ToValue<bool>(false))
+					entData->SetFlags(EntityData::Flags::ClientsideOnly);
+			}
 		}
 
 		if(entMask != EntityData::Flags::None && (entData->GetFlags() & entMask) == EntityData::Flags::None)
@@ -142,7 +138,7 @@ bool pragma::asset::WorldData::LoadFromAssetData(const udm::AssetData &data, Ent
 		entData->SetPose(pose);
 
 		auto &keyValues = entData->GetKeyValues();
-		udmEnt["keyValues"](keyValues);
+		udmEnt["keyValues"] >> keyValues;
 
 		auto itMdl = keyValues.find("model");
 		if(itMdl != keyValues.end())
@@ -179,7 +175,7 @@ bool pragma::asset::WorldData::LoadFromAssetData(const udm::AssetData &data, Ent
 				auto component = entData->AddComponent(std::string {name});
 
 				auto flags = component->GetFlags();
-				udmComponent["flags"](flags);
+				udmComponent["flags"] >> flags;
 				component->SetFlags(flags);
 
 				auto udmProperties = udmComponent["properties"];
@@ -222,6 +218,65 @@ bool pragma::asset::WorldData::LoadFromAssetData(const udm::AssetData &data, Ent
 	return true;
 }
 
+bool pragma::asset::WorldData::LoadFromAssetData(const udm::AssetData &data, EntityData::Flags entMask, std::string &outErr)
+{
+	if(data.GetAssetType() != PMAP_IDENTIFIER) {
+		outErr = "Incorrect format!";
+		return false;
+	}
+
+	auto udm = *data;
+	auto version = data.GetAssetVersion();
+	if(version < 1) {
+		outErr = "Invalid version!";
+		return false;
+	}
+
+	return LoadFromAssetData(udm, entMask, outErr);
+}
+
+bool pragma::asset::WorldData::Save(const std::string &fileName, const std::string &mapName, std::string &outErr)
+{
+	auto udmData = udm::Data::Create();
+	if(!udmData) {
+		outErr = "Failed to create UDM data.";
+		return false;
+	}
+	if(!Save(udmData->GetAssetData(), mapName, outErr))
+		return false;
+
+	auto normFileName = fileName;
+	auto exts = get_supported_extensions();
+	auto ext = ufile::remove_extension_from_filename(normFileName, exts);
+	if(!ext)
+		ext = PMAP_EXTENSION_BINARY;
+
+	auto asciiFormat = ustring::compare(*ext, std::string {PMAP_EXTENSION_ASCII}, false);
+	auto filePath = util::Path::CreateFile(fileName);
+	auto fileMode = filemanager::FileMode::Write;
+	if(!asciiFormat)
+		fileMode |= filemanager::FileMode::Binary;
+	auto absFilePath = filePath.GetString();
+	filemanager::find_local_path(absFilePath, absFilePath);
+	auto f = filemanager::open_file(absFilePath, fileMode);
+	if(!f) {
+		outErr = "Failed to open file '" + filePath.GetString() + "' for writing.";
+		return false;
+	}
+
+	auto res = false;
+	if(asciiFormat)
+		res = udmData->SaveAscii(f, udm::AsciiSaveFlags::IncludeHeader);
+	else
+		res = udmData->Save(f);
+	f = nullptr;
+	if(res == false) {
+		outErr = "Failed to save world data.";
+		return false;
+	}
+	return true;
+}
+
 bool pragma::asset::WorldData::Save(udm::AssetDataArg outData, const std::string &mapName, std::string &outErr)
 {
 	outData.SetAssetType(PMAP_IDENTIFIER);
@@ -240,34 +295,38 @@ bool pragma::asset::WorldData::Save(udm::AssetDataArg outData, const std::string
 		ustring::to_lower(strPath);
 		normalizedMaterials.push_back(strPath);
 	}
-	udm["materials"] = normalizedMaterials;
+	udm["materials"] << normalizedMaterials;
 
 	// Entities
 	auto udmEntities = udm.AddArray("entities", m_entities.size());
 	uint32_t entIdx = 0;
 	for(auto &entData : m_entities) {
 		auto udmEnt = udmEntities[entIdx++];
-		udmEnt["className"] = entData->GetClassName();
+		udmEnt["className"] << entData->GetClassName();
 
-		if(umath::is_flag_set(entData->GetFlags(), EntityData::Flags::ClientsideOnly))
-			udmEnt["flags"]["clientsideOnly"] = true;
+		if(PMAP_VERSION > 1)
+			udmEnt["flags"] << entData->GetFlags();
+		else {
+			if(umath::is_flag_set(entData->GetFlags(), EntityData::Flags::ClientsideOnly))
+				udmEnt["flags"]["clientsideOnly"] << true;
+		}
 
 		auto &pose = entData->GetPose();
 		if(pose)
-			udmEnt["pose"] = *pose;
-		udmEnt["keyValues"] = entData->GetKeyValues();
+			udmEnt["pose"] << *pose;
+		udmEnt["keyValues"] << entData->GetKeyValues();
 
 		auto &outputs = entData->GetOutputs();
 		auto udmOutputs = udmEnt.AddArray("outputs", outputs.size());
 		uint32_t outputIdx = 0;
 		for(auto &output : outputs) {
 			auto udmOutput = udmOutputs[outputIdx++];
-			udmOutput["name"] = output.name;
-			udmOutput["target"] = output.target;
-			udmOutput["input"] = output.input;
-			udmOutput["param"] = output.param;
-			udmOutput["delay"] = output.delay;
-			udmOutput["times"] = output.times;
+			udmOutput["name"] << output.name;
+			udmOutput["target"] << output.target;
+			udmOutput["input"] << output.input;
+			udmOutput["param"] << output.param;
+			udmOutput["delay"] << output.delay;
+			udmOutput["times"] << output.times;
 		}
 
 		auto udmComponents = udmEnt["components"];
@@ -278,7 +337,7 @@ bool pragma::asset::WorldData::Save(udm::AssetDataArg outData, const std::string
 			}
 			auto &componentData = *pair.second;
 			auto udmComponent = udmComponents[pair.first];
-			udmComponent["flags"] = componentData.GetFlags();
+			udmComponent["flags"] << componentData.GetFlags();
 			auto udmProperties = udmComponent.Add("properties");
 			udmProperties.Merge(udm::LinkedPropertyWrapper {*componentData.GetData()});
 		}
@@ -290,7 +349,7 @@ bool pragma::asset::WorldData::Save(udm::AssetDataArg outData, const std::string
 			leaves.resize(numLeaves);
 			if(numLeaves > 0u)
 				memcpy(leaves.data(), GetStaticPropLeaves().data() + firstLeaf, leaves.size() * sizeof(leaves.front()));
-			udmEnt["bspLeaves"] = leaves;
+			udmEnt["bspLeaves"] << leaves;
 		}
 	}
 
@@ -299,8 +358,8 @@ bool pragma::asset::WorldData::Save(udm::AssetDataArg outData, const std::string
 		ufile::remove_extension_from_filename(strMapName); // TODO: Specify extensions
 		ustring::to_lower(strMapName);
 		SaveLightmapAtlas(strMapName);
-		udm["lightmap"]["intensity"] = m_lightMapIntensity;
-		udm["lightmap"]["exposure"] = m_lightMapExposure;
+		udm["lightmap"]["intensity"] << m_lightMapIntensity;
+		udm["lightmap"]["exposure"] << m_lightMapExposure;
 	}
 
 	if(m_bspTree && m_bspTree->GetNodes().empty() == false && m_bspTree->GetClusterCount() > 0) {
@@ -336,7 +395,7 @@ bool pragma::asset::WorldData::Save(udm::AssetDataArg outData, const std::string
 				memcpy(ptr, meshIndices.data(), meshIndices.size() * sizeof(meshIndices.front()));
 				ptr += meshIndices.size() * sizeof(meshIndices.front());
 			}
-			udmBsp["clusterMeshIndexData"] = udm::compress_lz4_blob(clusterData);
+			udmBsp["clusterMeshIndexData"] << udm::compress_lz4_blob(clusterData);
 		}
 	}
 	return true;

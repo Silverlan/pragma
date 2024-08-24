@@ -22,6 +22,9 @@ const std::string PRAGMA_FILE_LOGGER_NAME = "pragma_logger_file";
 
 extern DLLNETWORK Engine *engine;
 
+static bool g_ansiColorCodesEnabled = true;
+void pragma::logging::set_ansi_color_codes_enabled(bool enabled) { g_ansiColorCodesEnabled = enabled; }
+
 int32_t pragma::logging::severity_to_spdlog_level(util::LogSeverity severity)
 {
 	switch(severity) {
@@ -160,28 +163,31 @@ class SpdPragmaPrefixFormatter : public spdlog::custom_flag_formatter {
 		case spdlog::level::level_enum::warn:
 			{
 				static auto prefix = "[warning] " + Con::COLOR_WARNING;
+				static std::string prefixNoCol = "[warning] ";
 				constexpr uint32_t prefixLen = 10;
 				msg.color_range_start = dest.size() + 1;
 				msg.color_range_end = dest.size() + prefixLen - 2;
-				append_string(dest, prefix);
+				append_string(dest, g_ansiColorCodesEnabled ? prefix : prefixNoCol);
 				break;
 			}
 		case spdlog::level::level_enum::err:
 			{
 				static auto prefix = "[error] " + Con::COLOR_ERROR;
+				static std::string prefixNoCol = "[error] ";
 				constexpr uint32_t prefixLen = 8;
 				msg.color_range_start = dest.size() + 1;
 				msg.color_range_end = dest.size() + prefixLen - 2;
-				append_string(dest, prefix);
+				append_string(dest, g_ansiColorCodesEnabled ? prefix : prefixNoCol);
 				break;
 			}
 		case spdlog::level::level_enum::critical:
 			{
 				static auto prefix = "[critical] " + Con::COLOR_CRITICAL;
+				static std::string prefixNoCol = "[critical] ";
 				constexpr uint32_t prefixLen = 11;
 				msg.color_range_start = dest.size() + 1;
 				msg.color_range_end = dest.size() + prefixLen - 2;
-				append_string(dest, prefix);
+				append_string(dest, g_ansiColorCodesEnabled ? prefix : prefixNoCol);
 				break;
 			}
 		case spdlog::level::level_enum::debug:
@@ -264,27 +270,31 @@ class short_level_formatter_c : public spdlog::custom_flag_formatter {
 	virtual void format(const spdlog::details::log_msg &msg, const std::tm &tm, spdlog::memory_buf_t &dest) override
 	{
 		std::string v;
-		switch(msg.level) {
-		case spdlog::level::trace:
-			break;
-		case spdlog::level::debug:
-			v = util::get_ansi_color_code(util::ConsoleColorFlags::Cyan);
-			break;
-		case spdlog::level::info:
-		default:
-			v = util::get_ansi_color_code(util::ConsoleColorFlags::Green);
-			break;
-		case spdlog::level::warn:
-			v = Con::COLOR_WARNING;
-			break;
-		case spdlog::level::err:
-			v = Con::COLOR_ERROR;
-			break;
-		case spdlog::level::critical:
-			v = Con::COLOR_CRITICAL;
-			break;
+		if(g_ansiColorCodesEnabled) {
+			switch(msg.level) {
+			case spdlog::level::trace:
+				break;
+			case spdlog::level::debug:
+				v = util::get_ansi_color_code(util::ConsoleColorFlags::Cyan);
+				break;
+			case spdlog::level::info:
+			default:
+				v = util::get_ansi_color_code(util::ConsoleColorFlags::Green);
+				break;
+			case spdlog::level::warn:
+				v = Con::COLOR_WARNING;
+				break;
+			case spdlog::level::err:
+				v = Con::COLOR_ERROR;
+				break;
+			case spdlog::level::critical:
+				v = Con::COLOR_CRITICAL;
+				break;
+			}
 		}
-		v += spdlog::level::to_short_c_str(msg.level) + util::get_ansi_color_code(util::ConsoleColorFlags::Reset);
+		v += spdlog::level::to_short_c_str(msg.level);
+		if(g_ansiColorCodesEnabled)
+			util::get_ansi_color_code(util::ConsoleColorFlags::Reset);
 		dest.append(v.data(), v.data() + v.length());
 	}
 
@@ -295,8 +305,10 @@ class color_reset_formatter : public spdlog::custom_flag_formatter {
   public:
 	virtual void format(const spdlog::details::log_msg &msg, const std::tm &tm, spdlog::memory_buf_t &dest) override
 	{
-		static auto prefix = Con::COLOR_RESET;
-		append_string(dest, prefix);
+		if(g_ansiColorCodesEnabled) {
+			static auto prefix = Con::COLOR_RESET;
+			append_string(dest, prefix);
+		}
 	}
 
 	virtual std::unique_ptr<custom_flag_formatter> clone() const override { return spdlog::details::make_unique<color_reset_formatter>(); }
@@ -306,6 +318,8 @@ class color_formatter : public spdlog::custom_flag_formatter {
   public:
 	virtual void format(const spdlog::details::log_msg &msg, const std::tm &tm, spdlog::memory_buf_t &dest) override
 	{
+		if(!g_ansiColorCodesEnabled)
+			return;
 		switch(msg.level) {
 		case spdlog::level::level_enum::warn:
 			{
@@ -333,7 +347,9 @@ class color_formatter : public spdlog::custom_flag_formatter {
 
 static std::string CATEGORY_COLOR = util::get_true_color_code(Color {96, 211, 148});
 static std::string CATEGORY_PREFIX = "[" + CATEGORY_COLOR;
+static std::string CATEGORY_PREFIX_NOCOL = "[";
 static std::string CATEGORY_POSTFIX = std::string {Con::COLOR_RESET} + "] ";
+static std::string CATEGORY_POSTFIX_NOCOL = "] ";
 class category_name_formatter : public spdlog::custom_flag_formatter {
   public:
 	virtual void format(const spdlog::details::log_msg &msg, const std::tm &tm, spdlog::memory_buf_t &dest) override
@@ -345,10 +361,12 @@ class category_name_formatter : public spdlog::custom_flag_formatter {
 #endif
 		if(loggerName.size() >= PRAGMA_LOGGER_NAME.length() && loggerName.substr(0, PRAGMA_LOGGER_NAME.length()) == PRAGMA_LOGGER_NAME)
 			return; // Don't print category name for main logger
-		dest.reserve(dest.size() + CATEGORY_PREFIX.size() + msg.logger_name.size() + CATEGORY_POSTFIX.size());
-		dest.append(CATEGORY_PREFIX);
+		auto &prefix = g_ansiColorCodesEnabled ? CATEGORY_PREFIX : CATEGORY_PREFIX_NOCOL;
+		auto &postfix = g_ansiColorCodesEnabled ? CATEGORY_POSTFIX : CATEGORY_POSTFIX_NOCOL;
+		dest.reserve(dest.size() + prefix.size() + msg.logger_name.size() + postfix.size());
+		dest.append(prefix);
 		dest.append(msg.logger_name);
-		dest.append(CATEGORY_POSTFIX);
+		dest.append(postfix);
 	}
 
 	virtual std::unique_ptr<custom_flag_formatter> clone() const override { return spdlog::details::make_unique<category_name_formatter>(); }
@@ -378,13 +396,15 @@ void pragma::detail::initialize_logger(::util::LogSeverity conLogLevel, ::util::
 		return;
 	g_logFileName = logFile;
 	auto consoleSink = std::make_shared<anycolor_color_sink_mt>();
-	consoleSink->set_color(spdlog::level::trace, util::get_ansi_color_code(util::ConsoleColorFlags::Red | util::ConsoleColorFlags::Green | util::ConsoleColorFlags::Blue));
-	consoleSink->set_color(spdlog::level::debug, util::get_ansi_color_code(util::ConsoleColorFlags::Green | util::ConsoleColorFlags::Blue));
-	consoleSink->set_color(spdlog::level::info, util::get_true_color_code(Color {138, 201, 38})); // Green
-	consoleSink->set_color(spdlog::level::warn, Con::COLOR_WARNING);
-	consoleSink->set_color(spdlog::level::err, Con::COLOR_ERROR);
-	consoleSink->set_color(spdlog::level::critical, Con::COLOR_CRITICAL);
-	consoleSink->set_color(spdlog::level::off, Con::COLOR_RESET);
+	if(g_ansiColorCodesEnabled) {
+		consoleSink->set_color(spdlog::level::trace, util::get_ansi_color_code(util::ConsoleColorFlags::Red | util::ConsoleColorFlags::Green | util::ConsoleColorFlags::Blue));
+		consoleSink->set_color(spdlog::level::debug, util::get_ansi_color_code(util::ConsoleColorFlags::Green | util::ConsoleColorFlags::Blue));
+		consoleSink->set_color(spdlog::level::info, util::get_true_color_code(Color {138, 201, 38})); // Green
+		consoleSink->set_color(spdlog::level::warn, Con::COLOR_WARNING);
+		consoleSink->set_color(spdlog::level::err, Con::COLOR_ERROR);
+		consoleSink->set_color(spdlog::level::critical, Con::COLOR_CRITICAL);
+		consoleSink->set_color(spdlog::level::off, Con::COLOR_RESET);
+	}
 	consoleSink->set_level(static_cast<spdlog::level::level_enum>(pragma::logging::severity_to_spdlog_level(conLogLevel)));
 
 	auto formatter = std::make_unique<spdlog::pattern_formatter>();

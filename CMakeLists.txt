@@ -228,7 +228,7 @@ pr_install_targets(
     wgui)
 
 message("Custom install targets: ${PRAGMA_INSTALL_CUSTOM_TARGETS}")
-set(PRAGMA_INSTALL_DEPENDENCIES pragma pragma_server iclient iserver udm_convert pragma_updater ${PRAGMA_INSTALL_CUSTOM_TARGETS})
+set(PRAGMA_INSTALL_DEPENDENCIES pragma pragma_server iclient iserver udm_convert prad pragma_updater ${PRAGMA_INSTALL_CUSTOM_TARGETS})
 if(WIN32)
     list(APPEND PRAGMA_INSTALL_DEPENDENCIES pragma_console)
 endif()

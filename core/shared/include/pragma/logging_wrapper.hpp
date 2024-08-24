@@ -22,6 +22,7 @@ namespace pragma {
 	namespace logging {
 		DLLNETWORK int32_t severity_to_spdlog_level(::util::LogSeverity severity);
 		DLLNETWORK ::util::LogSeverity spdlog_level_to_severity(int32_t spdlogLevel);
+		DLLNETWORK void set_ansi_color_codes_enabled(bool enabled);
 	};
 	DLLNETWORK spdlog::logger &get_logger(const std::string &name);
 	DLLNETWORK spdlog::logger &register_logger(const std::string &name);

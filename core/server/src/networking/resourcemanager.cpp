@@ -45,6 +45,8 @@ const ResourceManager::ResourceInfo *ResourceManager::FindResource(const std::st
 
 bool ResourceManager::AddResource(std::string res, bool stream)
 {
+	if(server->IsSinglePlayer())
+		return false; // We don't need resources in SinglePlayer
 	res = FileManager::GetCanonicalizedPath(res);
 	auto checkName = res;
 	std::string ext;

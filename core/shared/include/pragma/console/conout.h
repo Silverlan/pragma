@@ -81,6 +81,7 @@ namespace Con {
 	DLLNETWORK void WriteToLog(std::string str);
 	DLLNETWORK int GetLogLevel();
 
+	DLLNETWORK void disable_ansi_color_codes();
 	DLLNETWORK void set_output_callback(const std::function<void(const std::string_view &, MessageFlags, const ::Color *)> &callback);
 	DLLNETWORK const std::function<void(const std::string_view &, MessageFlags, const ::Color *)> &get_output_callback();
 	DLLNETWORK void print(const std::string_view &sv, const ::Color &color, MessageFlags flags = MessageFlags::None);
@@ -106,13 +107,13 @@ namespace Con {
 	DLLNETWORK extern const std::string COLOR_GUI;
 	DLLNETWORK extern const std::string COLOR_RESET;
 
-	DLLNETWORK extern const std::string PREFIX_WARNING;
-	DLLNETWORK extern const std::string PREFIX_ERROR;
-	DLLNETWORK extern const std::string PREFIX_CRITICAL;
-	DLLNETWORK extern const std::string PREFIX_SERVER;
-	DLLNETWORK extern const std::string PREFIX_CLIENT;
-	DLLNETWORK extern const std::string PREFIX_LUA;
-	DLLNETWORK extern const std::string PREFIX_GUI;
+	DLLNETWORK extern std::string PREFIX_WARNING;
+	DLLNETWORK extern std::string PREFIX_ERROR;
+	DLLNETWORK extern std::string PREFIX_CRITICAL;
+	DLLNETWORK extern std::string PREFIX_SERVER;
+	DLLNETWORK extern std::string PREFIX_CLIENT;
+	DLLNETWORK extern std::string PREFIX_LUA;
+	DLLNETWORK extern std::string PREFIX_GUI;
 };
 REGISTER_BASIC_BITWISE_OPERATORS(Con::MessageFlags)
 

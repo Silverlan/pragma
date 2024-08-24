@@ -30,16 +30,28 @@ const std::string Con::COLOR_LUA = util::get_true_color_code(Color {73, 182, 255
 const std::string Con::COLOR_GUI = util::get_true_color_code(Color {181, 23, 158});
 const std::string Con::COLOR_RESET = util::get_reset_color_code();
 
-const std::string Con::PREFIX_WARNING = Con::COLOR_RESET + "[" + Con::COLOR_WARNING + "warning" + Con::COLOR_RESET + "] ";
-const std::string Con::PREFIX_ERROR = Con::COLOR_RESET + "[" + Con::COLOR_ERROR + "error" + Con::COLOR_RESET + "] ";
-const std::string Con::PREFIX_CRITICAL = Con::COLOR_RESET + "[" + Con::COLOR_CRITICAL + "critical" + Con::COLOR_RESET + "] ";
-const std::string Con::PREFIX_SERVER = Con::COLOR_RESET + "[" + Con::COLOR_SERVER + "server" + Con::COLOR_RESET + "] ";
-const std::string Con::PREFIX_CLIENT = Con::COLOR_RESET + "[" + Con::COLOR_CLIENT + "client" + Con::COLOR_RESET + "] ";
-const std::string Con::PREFIX_LUA = Con::COLOR_RESET + "[" + Con::COLOR_LUA + "lua" + Con::COLOR_RESET + "] ";
-const std::string Con::PREFIX_GUI = Con::COLOR_RESET + "[" + Con::COLOR_GUI + "gui" + Con::COLOR_RESET + "] ";
+std::string Con::PREFIX_WARNING = Con::COLOR_RESET + "[" + Con::COLOR_WARNING + "warning" + Con::COLOR_RESET + "] ";
+std::string Con::PREFIX_ERROR = Con::COLOR_RESET + "[" + Con::COLOR_ERROR + "error" + Con::COLOR_RESET + "] ";
+std::string Con::PREFIX_CRITICAL = Con::COLOR_RESET + "[" + Con::COLOR_CRITICAL + "critical" + Con::COLOR_RESET + "] ";
+std::string Con::PREFIX_SERVER = Con::COLOR_RESET + "[" + Con::COLOR_SERVER + "server" + Con::COLOR_RESET + "] ";
+std::string Con::PREFIX_CLIENT = Con::COLOR_RESET + "[" + Con::COLOR_CLIENT + "client" + Con::COLOR_RESET + "] ";
+std::string Con::PREFIX_LUA = Con::COLOR_RESET + "[" + Con::COLOR_LUA + "lua" + Con::COLOR_RESET + "] ";
+std::string Con::PREFIX_GUI = Con::COLOR_RESET + "[" + Con::COLOR_GUI + "gui" + Con::COLOR_RESET + "] ";
 
 extern DLLNETWORK Engine *engine;
 static CVar cvLog = GetConVar("log_enabled");
+
+void Con::disable_ansi_color_codes()
+{
+	PREFIX_WARNING = "[warning] ";
+	PREFIX_ERROR = "[error] ";
+	PREFIX_CRITICAL = "[critical] ";
+	PREFIX_SERVER = "[server] ";
+	PREFIX_CLIENT = "[client] ";
+	PREFIX_LUA = "[lua] ";
+	PREFIX_GUI = "[gui] ";
+}
+
 int Con::GetLogLevel()
 {
 	if(engine == NULL || !engine->IsRunning())
@@ -147,42 +159,42 @@ static void log_output()
 Con::c_cout &operator<<(Con::c_cout &con, conmanipulator manipulator)
 {
 	std::cout << manipulator;
-	// PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(manipulator,Con::MessageFlags::Generic);
+	PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(manipulator, Con::MessageFlags::Generic);
 	return con;
 }
 
 Con::c_cwar &operator<<(Con::c_cwar &con, conmanipulator manipulator)
 {
 	std::cout << manipulator;
-	// PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(manipulator,Con::MessageFlags::Warning);
+	PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(manipulator, Con::MessageFlags::Warning);
 	return con;
 }
 
 Con::c_cerr &operator<<(Con::c_cerr &con, conmanipulator manipulator)
 {
 	std::cout << manipulator;
-	// PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(manipulator,Con::MessageFlags::Error);
+	PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(manipulator, Con::MessageFlags::Error);
 	return con;
 }
 
 Con::c_crit &operator<<(Con::c_crit &con, conmanipulator manipulator)
 {
 	std::cout << manipulator;
-	// PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(manipulator,Con::MessageFlags::Critical);
+	PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(manipulator, Con::MessageFlags::Critical);
 	return con;
 }
 
 Con::c_csv &operator<<(Con::c_csv &con, conmanipulator manipulator)
 {
 	std::cout << manipulator;
-	// PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(manipulator,Con::MessageFlags::ServerSide);
+	PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(manipulator, Con::MessageFlags::ServerSide);
 	return con;
 }
 
 Con::c_ccl &operator<<(Con::c_ccl &con, conmanipulator manipulator)
 {
 	std::cout << manipulator;
-	// PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(manipulator,Con::MessageFlags::ClientSide);
+	PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(manipulator, Con::MessageFlags::ClientSide);
 	return con;
 }
 

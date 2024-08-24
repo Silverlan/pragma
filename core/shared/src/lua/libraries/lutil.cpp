@@ -608,6 +608,11 @@ DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::ik, pragma::ik::RigConfig);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::ik, pragma::ik::RigConfigBone);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::ik, pragma::ik::RigConfigControl);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::ik, pragma::ik::RigConfigConstraint);
+
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::asset, pragma::asset::Output);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::asset, pragma::asset::ComponentData);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::asset, pragma::asset::EntityData);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::asset, pragma::asset::WorldData);
 #endif
 void Lua::util::register_library(lua_State *l)
 {

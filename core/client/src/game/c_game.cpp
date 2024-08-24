@@ -1119,6 +1119,16 @@ void CGame::InitializeMapEntities(pragma::asset::WorldData &worldData, std::vect
 {
 	auto &entityData = worldData.GetEntities();
 	outEnts.reserve(entityData.size());
+
+	std::unordered_map<uint32_t, EntityHandle> mapIndexToEntity;
+	EntityIterator entIt {*this, EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
+	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::MapComponent>>();
+	mapIndexToEntity.reserve(entIt.GetCount());
+	for(auto *ent : entIt) {
+		auto mapC = ent->GetComponent<pragma::MapComponent>();
+		mapIndexToEntity[mapC->GetMapIndex()] = ent->GetHandle();
+	}
+
 	for(auto &entData : entityData) {
 		if(entData->IsClientSideOnly()) {
 			auto *ent = CreateMapEntity(*entData);
@@ -1129,17 +1139,17 @@ void CGame::InitializeMapEntities(pragma::asset::WorldData &worldData, std::vect
 
 		// Entity should already have been created by the server, look for it
 		auto mapIdx = entData->GetMapIndex();
-		EntityIterator entIt {*this, EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
-		entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::MapComponent>>();
-		entIt.AttachFilter<EntityIteratorFilterUser>([mapIdx](BaseEntity &ent, std::size_t index) -> bool {
-			auto pMapComponent = ent.GetComponent<pragma::MapComponent>();
-			return pMapComponent->GetMapIndex() == mapIdx;
-		});
-
-		auto it = entIt.begin();
-		if(it == entIt.end())
+		auto it = mapIndexToEntity.find(mapIdx);
+		if(it == mapIndexToEntity.end() || it->second.IsValid() == false)
 			continue;
-		outEnts.push_back(it->GetHandle());
+		auto &ent = *it->second.Get();
+		outEnts.push_back(it->second);
+		for(auto &[cType, cData] : entData->GetComponents()) {
+			auto flags = cData->GetFlags();
+			if(!umath::is_flag_set(flags, pragma::asset::ComponentData::Flags::ClientsideOnly))
+				continue;
+			CreateMapComponent(ent, cType, *cData);
+		}
 	}
 
 	for(auto &hEnt : outEnts) {
@@ -1203,19 +1213,21 @@ void CGame::InitializeWorldData(pragma::asset::WorldData &worldData)
 			pragma::CLightMapReceiverComponent::SetupLightMapUvData(static_cast<CBaseEntity &>(*ent));
 
 		// Generate lightmap uv buffers for all entities
-		std::vector<std::shared_ptr<prosper::IBuffer>> buffers {};
-		auto globalLightmapUvBuffer = pragma::CLightMapComponent::GenerateLightmapUVBuffers(buffers);
+		if(worldData.IsLegacyLightMapEnabled()) {
+			std::vector<std::shared_ptr<prosper::IBuffer>> buffers {};
+			auto globalLightmapUvBuffer = pragma::CLightMapComponent::GenerateLightmapUVBuffers(buffers);
 
-		auto *world = c_game->GetWorld();
-		if(world && globalLightmapUvBuffer) {
-			auto lightMapC = world->GetEntity().GetComponent<pragma::CLightMapComponent>();
-			if(lightMapC.valid()) {
-				// lightMapC->SetLightMapIntensity(worldData.GetLightMapIntensity());
-				lightMapC->SetLightMapExposure(worldData.GetLightMapExposure());
-				lightMapC->InitializeLightMapData(lightmapAtlas, globalLightmapUvBuffer, buffers);
-				auto *scene = GetRenderScene();
-				if(scene)
-					scene->SetLightMap(*lightMapC);
+			auto *world = c_game->GetWorld();
+			if(world && globalLightmapUvBuffer) {
+				auto lightMapC = world->GetEntity().GetComponent<pragma::CLightMapComponent>();
+				if(lightMapC.valid()) {
+					// lightMapC->SetLightMapIntensity(worldData.GetLightMapIntensity());
+					lightMapC->SetLightMapExposure(worldData.GetLightMapExposure());
+					lightMapC->InitializeLightMapData(lightmapAtlas, globalLightmapUvBuffer, buffers);
+					auto *scene = GetRenderScene();
+					if(scene)
+						scene->SetLightMap(*lightMapC);
+				}
 			}
 		}
 	}

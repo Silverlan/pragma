@@ -43,6 +43,7 @@ void pragma::asset::WorldData::SetLightMapAtlas(uimg::ImageBuffer &imgAtlas)
 	SetLightMapEnabled(true);
 }
 void pragma::asset::WorldData::SetLightMapEnabled(bool enabled) { m_lightMapAtlasEnabled = enabled; }
+bool pragma::asset::WorldData::IsLegacyLightMapEnabled() const { return m_useLegacyLightmapDefinition; }
 void pragma::asset::WorldData::SetLightMapIntensity(float intensity) { m_lightMapIntensity = intensity; }
 void pragma::asset::WorldData::SetLightMapExposure(float exp) { m_lightMapExposure = exp; }
 float pragma::asset::WorldData::GetLightMapIntensity() const { return m_lightMapIntensity; }
@@ -60,6 +61,38 @@ void pragma::asset::WorldData::SetMessageLogger(const std::function<void(const s
 	m_messageLogger = msgLogger ? msgLogger : [](const std::string &) {};
 }
 std::shared_ptr<pragma::asset::WorldData> pragma::asset::WorldData::Create(NetworkState &nw) { return std::shared_ptr<WorldData> {new WorldData {nw}}; }
+
+std::shared_ptr<pragma::asset::WorldData> pragma::asset::WorldData::load(NetworkState &nw, const std::string &fileName, std::string &outErr, EntityData::Flags entMask)
+{
+	auto nFileName = filemanager::find_available_file(fileName, get_supported_extensions());
+	std::shared_ptr<udm::Data> udmData = nullptr;
+	try {
+		udmData = udm::Data::Load(nFileName ? *nFileName : fileName);
+	}
+	catch(const udm::Exception &e) {
+		return {};
+	}
+	if(!udmData)
+		return {};
+	auto data = udmData->GetAssetData().GetData();
+	auto worldData = load_from_udm_data(nw, data, outErr, entMask);
+	if(!worldData)
+		return {};
+	worldData->SetVersion(udmData->GetAssetVersion());
+	return worldData;
+}
+std::shared_ptr<pragma::asset::WorldData> pragma::asset::WorldData::load_from_udm_data(NetworkState &nw, udm::LinkedPropertyWrapper &prop, std::string &outErr, EntityData::Flags entMask)
+{
+	auto worldData = WorldData::Create(nw);
+	if(!worldData->LoadFromAssetData(prop, entMask, outErr))
+		return nullptr;
+	return worldData;
+}
+const std::vector<std::string> &pragma::asset::WorldData::get_supported_extensions()
+{
+	static std::vector<std::string> exts = {PMAP_EXTENSION_ASCII, PMAP_EXTENSION_BINARY};
+	return exts;
+}
 
 ////////////
 
@@ -152,4 +185,38 @@ void pragma::asset::EntityData::GetLeafData(uint32_t &outFirstLeaf, uint32_t &ou
 {
 	outFirstLeaf = m_firstLeaf;
 	outNumLeaves = m_numLeaves;
+}
+
+////////////
+
+std::ostream &operator<<(std::ostream &out, const pragma::asset::Output &output)
+{
+	out << "Output[Name:" << output.name << "][Target:" << output.target << "][Input" << output.input << "][Param:" << output.param << "][Delay:" << output.delay << "][Times:" << output.times << "]";
+	return out;
+}
+std::ostream &operator<<(std::ostream &out, const pragma::asset::ComponentData &componentData)
+{
+	out << "ComponentData[Flags:" << magic_enum::flags::enum_name(componentData.GetFlags()) << "]";
+	return out;
+}
+std::ostream &operator<<(std::ostream &out, const pragma::asset::EntityData &entityData)
+{
+	auto uuid = entityData.GetKeyValue("uuid");
+	out << "EntityData[Class:" << entityData.GetClassName() << "]";
+	if(uuid)
+		out << "[Uuid:" << *uuid << "]";
+	out << "[MapIndex:" << entityData.GetMapIndex() << "] [Flags:" << magic_enum::flags::enum_name(entityData.GetFlags()) << "] ";
+	auto &pose = entityData.GetPose();
+	if(pose) {
+		auto &pos = pose->GetOrigin();
+		auto ang = pose->GetAngles();
+		out << "[Pos:" << pos.x << " " << pos.y << " " << pos.z << "]";
+		out << "[Ang:" << ang.p << " " << ang.y << " " << ang.r << "]";
+	}
+	return out;
+}
+std::ostream &operator<<(std::ostream &out, const pragma::asset::WorldData &worldData)
+{
+	out << "WorldData";
+	return out;
 }

@@ -40,6 +40,35 @@ BaseEntity *Game::FindEntityByUniqueId(const util::Uuid &uuid)
 	return (it != m_uuidToEnt.end()) ? it->second : nullptr;
 }
 
+pragma::BaseEntityComponent *Game::CreateMapComponent(BaseEntity &ent, const std::string &componentType, const pragma::asset::ComponentData &componentData)
+{
+	auto c = ent.AddComponent(componentType);
+	if(c.expired())
+		return nullptr;
+	auto udmData = componentData.GetData();
+	for(auto &pair : udm::LinkedPropertyWrapper {*udmData}.ElIt()) {
+		auto *memberInfo = c->FindMemberInfo(std::string {pair.key});
+		if(!memberInfo || !memberInfo->setterFunction || !pragma::ents::is_udm_member_type(memberInfo->type))
+			continue;
+		auto udmType = pragma::ents::member_type_to_udm_type(memberInfo->type);
+		auto &udmProp = pair.property;
+		auto propType = udmProp.GetType();
+		if(!udm::is_convertible(propType, udmType))
+			continue;
+		udm::visit(propType, [udmType, &udmProp, memberInfo, &c](auto tag) {
+			using T0 = typename decltype(tag)::type;
+			udm::visit(udmType, [&udmProp, memberInfo, &c](auto tag) {
+				using T1 = typename decltype(tag)::type;
+				if constexpr(udm::is_convertible<T0, T1>()) {
+					auto val = udmProp.ToValue<T1>();
+					if(val)
+						memberInfo->setterFunction(*memberInfo, *c, &*val);
+				}
+			});
+		});
+	}
+	return c.get();
+}
 BaseEntity *Game::CreateMapEntity(pragma::asset::EntityData &entData)
 {
 	auto *ent = CreateEntity(entData.GetClassName());
@@ -49,35 +78,11 @@ BaseEntity *Game::CreateMapEntity(pragma::asset::EntityData &entData)
 	if(pTrComponent != nullptr)
 		pTrComponent->SetPose(entData.GetEffectivePose());
 
-	for(auto &pair : entData.GetComponents()) {
-		auto flags = pair.second->GetFlags();
+	for(auto &[componentType, componentData] : entData.GetComponents()) {
+		auto flags = componentData->GetFlags();
 		if(umath::is_flag_set(flags, pragma::asset::ComponentData::Flags::ClientsideOnly) && !IsClient())
 			continue;
-		auto c = ent->AddComponent(pair.first);
-		if(c.expired())
-			continue;
-		auto udmData = pair.second->GetData();
-		for(auto &pair : udm::LinkedPropertyWrapper {*udmData}.ElIt()) {
-			auto *memberInfo = c->FindMemberInfo(std::string {pair.key});
-			if(!memberInfo || !memberInfo->setterFunction || !pragma::ents::is_udm_member_type(memberInfo->type))
-				continue;
-			auto udmType = pragma::ents::member_type_to_udm_type(memberInfo->type);
-			auto &udmProp = pair.property;
-			auto propType = udmProp.GetType();
-			if(!udm::is_convertible(propType, udmType))
-				continue;
-			udm::visit(propType, [udmType, &udmProp, memberInfo, &c](auto tag) {
-				using T0 = typename decltype(tag)::type;
-				udm::visit(udmType, [&udmProp, memberInfo, &c](auto tag) {
-					using T1 = typename decltype(tag)::type;
-					if constexpr(udm::is_convertible<T0, T1>()) {
-						auto val = udmProp.ToValue<T1>();
-						if(val)
-							memberInfo->setterFunction(*memberInfo, *c, &*val);
-					}
-				});
-			});
-		}
+		CreateMapComponent(*ent, componentType, *componentData);
 	}
 
 	auto pMapComponent = ent->AddComponent<pragma::MapComponent>();

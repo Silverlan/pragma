@@ -40,7 +40,10 @@ namespace pragma::asset {
 
 	class DLLNETWORK ComponentData : public std::enable_shared_from_this<ComponentData> {
 	  public:
-		enum class Flags : uint64_t { None = 0u, ClientsideOnly = 1u };
+		enum class Flags : uint64_t {
+			None = 0u,
+			ClientsideOnly = 1u,
+		};
 
 		static std::shared_ptr<ComponentData> Create();
 
@@ -97,7 +100,7 @@ namespace pragma::asset {
 		std::unordered_map<std::string, std::string> m_keyValues;
 		std::vector<Output> m_outputs;
 		uint32_t m_mapIndex = 0u;
-		std::optional < umath::ScaledTransform> m_pose {};
+		std::optional<umath::ScaledTransform> m_pose {};
 		std::vector<uint16_t> m_leaves = {};
 		Flags m_flags = Flags::None;
 
@@ -108,14 +111,24 @@ namespace pragma::asset {
 	using WorldModelMeshIndex = uint32_t;
 	class DLLNETWORK WorldData {
 	  public:
-		static constexpr uint32_t PMAP_VERSION = 1;
+		static constexpr udm::Version PMAP_VERSION = 2;
 		static constexpr auto PMAP_IDENTIFIER = "PMAP";
-		enum class DataFlags : uint64_t { None = 0u, HasLightmapAtlas = 1u, HasBSPTree = HasLightmapAtlas << 1u };
+		static constexpr auto PMAP_EXTENSION_BINARY = "pmap_b";
+		static constexpr auto PMAP_EXTENSION_ASCII = "pmap";
+		enum class DataFlags : uint64_t {
+			None = 0u,
+			HasLightmapAtlas = 1u,
+			HasBSPTree = HasLightmapAtlas << 1u,
+		};
 
 		using Edge = std::array<uint16_t, 2>; // Vertex indices
 
 		static std::shared_ptr<WorldData> Create(NetworkState &nw);
 		static std::string GetLightmapAtlasTexturePath(const std::string &mapName);
+
+		static std::shared_ptr<WorldData> load(NetworkState &nw, const std::string &fileName, std::string &outErr, EntityData::Flags entMask = EntityData::Flags::None);
+		static std::shared_ptr<WorldData> load_from_udm_data(NetworkState &nw, udm::LinkedPropertyWrapper &prop, std::string &outErr, EntityData::Flags entMask = EntityData::Flags::None);
+		static const std::vector<std::string> &get_supported_extensions();
 
 		bool Write(const std::string &fileName, std::string *optOutErrMsg = nullptr);
 		void Write(VFilePtrReal &f);
@@ -130,6 +143,7 @@ namespace pragma::asset {
 
 		void SetLightMapAtlas(uimg::ImageBuffer &imgAtlas);
 		void SetLightMapEnabled(bool enabled);
+		bool IsLegacyLightMapEnabled() const;
 
 		void SetLightMapIntensity(float intensity);
 		void SetLightMapExposure(float exp);
@@ -137,12 +151,16 @@ namespace pragma::asset {
 		float GetLightMapIntensity() const;
 		float GetLightMapExposure() const;
 
+		udm::Version GetVersion() const { return m_version; }
+		void SetVersion(udm::Version version) { m_version = version; }
+
 		const std::vector<std::shared_ptr<EntityData>> &GetEntities() const;
 		const std::vector<std::string> &GetMaterialTable() const;
 		std::vector<std::string> &GetMaterialTable();
 		void SetMessageLogger(const std::function<void(const std::string &)> &msgLogger);
 
 		bool Save(udm::AssetDataArg outData, const std::string &mapName, std::string &outErr);
+		bool Save(const std::string &fileName, const std::string &mapName, std::string &outErr);
 		bool LoadFromAssetData(udm::AssetDataArg data, EntityData::Flags entMask, std::string &outErr);
 	  private:
 		WorldData(NetworkState &nw);
@@ -152,6 +170,7 @@ namespace pragma::asset {
 		bool SaveLightmapAtlas(const std::string &mapName);
 		void WriteEntities(VFilePtrReal &f);
 
+		bool LoadFromAssetData(udm::LinkedPropertyWrapper &prop, EntityData::Flags entMask, std::string &outErr);
 		std::vector<msys::MaterialHandle> ReadMaterials(VFilePtr &f);
 		void ReadBSPTree(VFilePtr &f, uint32_t version);
 		void ReadEntities(VFilePtr &f, const std::vector<msys::MaterialHandle> &materials, EntityData::Flags entMask);
@@ -167,9 +186,17 @@ namespace pragma::asset {
 		std::vector<std::string> m_materialTable {};
 		std::function<void(const std::string &)> m_messageLogger = nullptr;
 		std::shared_ptr<util::BSPTree> m_bspTree = nullptr;
+		udm::Version m_version = PMAP_VERSION;
+
+		bool m_useLegacyLightmapDefinition = false;
 	};
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::asset::EntityData::Flags)
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::asset::WorldData::DataFlags)
+
+DLLNETWORK std::ostream &operator<<(std::ostream &out, const pragma::asset::Output &output);
+DLLNETWORK std::ostream &operator<<(std::ostream &out, const pragma::asset::ComponentData &componentData);
+DLLNETWORK std::ostream &operator<<(std::ostream &out, const pragma::asset::EntityData &entityData);
+DLLNETWORK std::ostream &operator<<(std::ostream &out, const pragma::asset::WorldData &worldData);
 
 #endif

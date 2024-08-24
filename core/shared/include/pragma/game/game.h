@@ -87,6 +87,7 @@ namespace pragma {
 	namespace asset {
 		class WorldData;
 		class EntityData;
+		class ComponentData;
 	};
 	namespace lua {
 		class ClassManager;
@@ -440,6 +441,7 @@ class DLLNETWORK Game : public CallbackHandler, public LuaCallbackHandler {
 
 	// Map
 	BaseEntity *CreateMapEntity(pragma::asset::EntityData &entData);
+	pragma::BaseEntityComponent *CreateMapComponent(BaseEntity &ent, const std::string &componentType, const pragma::asset::ComponentData &componentData);
 	std::unique_ptr<pragma::physics::IEnvironment, void (*)(pragma::physics::IEnvironment *)> m_physEnvironment = std::unique_ptr<pragma::physics::IEnvironment, void (*)(pragma::physics::IEnvironment *)> {nullptr, [](pragma::physics::IEnvironment *) {}};
 
 	virtual std::shared_ptr<pragma::EntityComponentManager> InitializeEntityComponentManager() = 0;

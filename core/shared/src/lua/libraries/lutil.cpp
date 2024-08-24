@@ -222,9 +222,27 @@ static std::unique_ptr<util::HairStrandData> generate_hair_file(const util::Hair
 void Lua::util::register_world_data(lua_State *l, luabind::module_ &mod)
 {
 	auto defWorldData = luabind::class_<pragma::asset::WorldData>("WorldData");
+	defWorldData.def(luabind::tostring(luabind::self));
+	defWorldData.scope[luabind::def(
+	  "load", +[](NetworkState &nw, const std::string &fileName) -> std::pair<std::shared_ptr<pragma::asset::WorldData>, std::optional<std::string>> {
+		  std::string err;
+		  auto worldData = pragma::asset::WorldData::load(nw, fileName, err);
+		  if(!worldData)
+			  return {worldData, err};
+		  return {worldData, {}};
+	  })];
+	defWorldData.scope[luabind::def(
+	  "load_from_udm_data", +[](NetworkState &nw, udm::LinkedPropertyWrapper &prop) -> std::pair<std::shared_ptr<pragma::asset::WorldData>, std::optional<std::string>> {
+		  std::string err;
+		  auto worldData = pragma::asset::WorldData::load_from_udm_data(nw, prop, err);
+		  if(!worldData)
+			  return {worldData, err};
+		  return {worldData, {}};
+	  })];
 
 	auto defOutput = luabind::class_<pragma::asset::Output>("Output");
 	defOutput.def(luabind::constructor<>());
+	defOutput.def(luabind::tostring(luabind::self));
 	defOutput.def_readwrite("name", &pragma::asset::Output::name);
 	defOutput.def_readwrite("target", &pragma::asset::Output::target);
 	defOutput.def_readwrite("input", &pragma::asset::Output::input);
@@ -234,6 +252,7 @@ void Lua::util::register_world_data(lua_State *l, luabind::module_ &mod)
 	defWorldData.scope[defOutput];
 
 	auto defComponentData = luabind::class_<pragma::asset::ComponentData>("ComponentData");
+	defComponentData.def(luabind::tostring(luabind::self));
 	defComponentData.add_static_constant("FLAG_NONE", umath::to_integral(pragma::asset::ComponentData::Flags::None));
 	defComponentData.add_static_constant("FLAG_CLIENTSIDE_ONLY_BIT", umath::to_integral(pragma::asset::ComponentData::Flags::ClientsideOnly));
 	defComponentData.def("GetFlags", &pragma::asset::ComponentData::GetFlags);
@@ -243,6 +262,7 @@ void Lua::util::register_world_data(lua_State *l, luabind::module_ &mod)
 	defWorldData.scope[defComponentData];
 
 	auto defEntityData = luabind::class_<pragma::asset::EntityData>("EntityData");
+	defEntityData.def(luabind::tostring(luabind::self));
 	defEntityData.add_static_constant("FLAG_NONE", umath::to_integral(pragma::asset::EntityData::Flags::None));
 	defEntityData.add_static_constant("FLAG_CLIENTSIDE_ONLY_BIT", umath::to_integral(pragma::asset::EntityData::Flags::ClientsideOnly));
 	defEntityData.def("IsWorld", &pragma::asset::EntityData::IsWorld);
@@ -295,6 +315,14 @@ void Lua::util::register_world_data(lua_State *l, luabind::module_ &mod)
 	  "Save", +[](lua_State *l, pragma::asset::WorldData &worldData, udm::AssetDataArg assetData, const std::string &mapName) -> Lua::mult<bool, Lua::opt<std::string>> {
 		  std::string err;
 		  auto result = worldData.Save(assetData, mapName, err);
+		  if(result)
+			  return luabind::object {l, true};
+		  return luabind::object {l, std::pair<bool, std::string> {false, err}};
+	  });
+	defWorldData.def(
+	  "Save", +[](lua_State *l, pragma::asset::WorldData &worldData, const std::string &fileName, const std::string &mapName) -> Lua::mult<bool, Lua::opt<std::string>> {
+		  std::string err;
+		  auto result = worldData.Save(fileName, mapName, err);
 		  if(result)
 			  return luabind::object {l, true};
 		  return luabind::object {l, std::pair<bool, std::string> {false, err}};

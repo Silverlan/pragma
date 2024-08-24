@@ -62,7 +62,15 @@ function Component:BakeMapLightmaps()
 		self:LogErr("Failed to generate lightmap UVs.")
 		return false
 	end
-	local dirLightmapJob = self:GenerateDirectionalLightmaps()
+	self.m_bakeQueue = {
+		{
+			type = "directional",
+		},
+		{
+			type = "diffuse",
+		},
+	}
+	--[[local dirLightmapJob = self:GenerateDirectionalLightmaps()
 	if dirLightmapJob == nil then
 		self:LogErr("Failed to generate directional lightmaps.")
 		return false
@@ -71,8 +79,20 @@ function Component:BakeMapLightmaps()
 	if lightmapJob == false then
 		self:LogErr("Failed to generate lightmaps.")
 		return false
+	end]]
+	self.m_updateMapLightmapData = {
+		mapName = mapName,
+		mapFilePath = absFilePath,
+	}
+	return true
+end
+function Component:OnBakingCompleted()
+	if self.m_updateMapLightmapData == nil then
+		return
 	end
-
+	local updateMapLightmapData = self.m_updateMapLightmapData
+	self.m_updateMapLightmapData = nil
+	local ent = ents.get_world()
 	local lightmapDataCacheC = ent:GetComponent(ents.COMPONENT_LIGHT_MAP_DATA_CACHE)
 	if lightmapDataCacheC == nil then
 		self:LogErr("No lightmap data cache.")
@@ -86,5 +106,10 @@ function Component:BakeMapLightmaps()
 	end
 	local lightmapDataCache = lightmapDataCacheC:GetLightMapDataCacheFilePath()
 	local lightmapMaterial = lightmapC:GetLightmapMaterialName()
-	return self:WriteLightmapInformationToMap(absFilePath, mapName, lightmapDataCache, lightmapMaterial)
+	return self:WriteLightmapInformationToMap(
+		updateMapLightmapData.mapFilePath,
+		updateMapLightmapData.mapName,
+		lightmapDataCache,
+		lightmapMaterial
+	)
 end

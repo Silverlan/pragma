@@ -314,7 +314,20 @@ function Component:OnTick(dt)
 	pfm.tag_render_scene_as_dirty()
 
 	if self.m_lightmapJob == nil and self.m_dirLightmapJob == nil then
+		if self.m_bakeQueue ~= nil then
+			local item = self.m_bakeQueue[1]
+			table.remove(self.m_bakeQueue, 1)
+			if item ~= nil then
+				if item.type == "directional" then
+					self:GenerateDirectionalLightmaps()
+				elseif item.type == "diffuse" then
+					self:GenerateLightmaps()
+				end
+				return
+			end
+		end
 		self:SetTickPolicy(ents.TICK_POLICY_NEVER)
+		self:OnBakingCompleted()
 		self:BroadcastEvent(Component.EVENT_ON_BAKING_COMPLETED)
 	end
 end

@@ -148,27 +148,33 @@ util.bake_lightmaps = function(preview, lightIntensityFactor)
 	return result
 end
 
-function util.bake_map_lightmaps(entLm, fileName, tEnts)
-	if tEnts == nil then
-		tEnts = {}
-		-- TODO: Static props only?
-		for _, ent in ipairs(ents.get_all()) do
-			local includeEntityForLightmaps = false
-			if ent:IsWorld() then
-				includeEntityForLightmaps = true
-			elseif ent:IsMapEntity() and ent:HasComponent(ents.COMPONENT_PROP) then
-				includeEntityForLightmaps = true
-			end
-			if includeEntityForLightmaps then
-				log.msg(
-					"Including entity '" .. tostring(ent) .. "' for lightmap atlas!",
-					pfm.LOG_CATEGORY_LOG_CATEGORY_LIGHTMAP
-				)
-				table.insert(tEnts, ent)
-			end
+function util.bake_map_lightmaps(entLm, fileName)
+	local lightSources = {}
+	local lightmapReceivers = {}
+	local lightmapInfluencers = {}
+	-- TODO: Static props only?
+	for ent, c in ents.citerator(ents.COMPONENT_MAP) do
+		local includeEntityForLightmaps = false
+		if ent:IsWorld() then
+			includeEntityForLightmaps = true
+		elseif ent:HasComponent(ents.COMPONENT_PROP) then
+			includeEntityForLightmaps = true
+		end
+		if includeEntityForLightmaps then
+			log.msg(
+				"Including entity '" .. tostring(ent) .. "' for lightmap atlas!",
+				pfm.LOG_CATEGORY_LOG_CATEGORY_LIGHTMAP
+			)
+			table.insert(lightmapReceivers, ent)
+		elseif ent:HasComponent(ents.COMPONENT_LIGHT) then
+			log.msg(
+				"Including light source '" .. tostring(ent) .. "' for lightmap!",
+				pfm.LOG_CATEGORY_LOG_CATEGORY_LIGHTMAP
+			)
+			table.insert(lightSources, ent)
 		end
 	end
-	if #tEnts == 0 then
+	if #lightmapReceivers == 0 then
 		log.msg(
 			"Cannot bake lightmaps: No entities to bake lightmaps for!",
 			pfm.LOG_CATEGORY_LOG_CATEGORY_LIGHTMAP,
@@ -186,10 +192,29 @@ function util.bake_map_lightmaps(entLm, fileName, tEnts)
 	end
 	local path = util.Path.CreatePath(fileName)
 	local uvCachePath = path + "lightmap_uv_cache"
-	util.bake_lightmap_uvs(tEnts, uvCachePath:GetString())
+	util.bake_lightmap_uvs(entLm, lightmapReceivers, uvCachePath:GetString())
 	local lightMapPath = path + "lightmap_atlas"
-	-- TODO
-	--util.bake_lightmaps(true)--lightMapPath:GetString())
-	-- self:ReloadLightmapData(tEnts) -- TODO: Reload lightmap data when lightmap has changed!
+
+	local entWorld = ents.get_world()
+	local cCache = entWorld:AddComponent(ents.COMPONENT_LIGHT_MAP_DATA_CACHE)
+
+	local width = 512
+	local height = 512
+	local sampleCount = 100
+	local asJob = false
+	local bakeCombined = false
+	local job = pfm.bake.lightmaps(
+		game.get_scene(),
+		lightmapReceivers,
+		lightmapInfluencers,
+		lightSources,
+		width,
+		height,
+		sampleCount,
+		cCache:GetLightMapDataCache(),
+		function(scene) end,
+		bakeCombined,
+		asJob
+	)
 	return true
 end

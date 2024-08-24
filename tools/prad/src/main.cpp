@@ -173,7 +173,7 @@ int main(int argc, char *argv[])
 			++i; // Skip next argument
 			continue;
 		}
-		if(arg == "-noextra") {
+		if(arg == "-noextra" || arg == "-fast") {
 			fastRender = true;
 			continue;
 		}

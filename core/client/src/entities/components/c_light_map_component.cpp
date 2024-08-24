@@ -461,8 +461,8 @@ bool CLightMapComponent::ImportLightmapAtlas(uimg::ImageBuffer &imgBuffer)
 	if(lightmapC.valid())
 		lightmapC->SetLightMapAtlas(tex);
 
-	std::vector<std::string> argv {};
-	Console::commands::debug_lightmaps(client, nullptr, argv);
+	// std::vector<std::string> argv {};
+	// Console::commands::debug_lightmaps(client, nullptr, argv);
 	return true;
 }
 
@@ -591,46 +591,4 @@ void Console::commands::map_rebuild_lightmaps(NetworkState *state, pragma::BaseP
 	bakeSettings.colorTransform->config = "filmic-blender";
 	bakeSettings.colorTransform->look = "Medium Contrast";
 	CLightMapComponent::BakeLightmaps(bakeSettings);
-}
-
-void Console::commands::debug_lightmaps(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
-{
-	const std::string name = "dbg_lightmaps";
-	auto &wgui = WGUI::GetInstance();
-	auto *pRoot = wgui.GetBaseElement();
-	auto *p = pRoot->FindDescendantByName(name);
-	if(p != nullptr) {
-		p->Remove();
-		return;
-	}
-
-	if(c_game == nullptr)
-		return;
-
-	auto *scene = c_game->GetRenderScene();
-	auto *renderer = scene ? scene->GetRenderer() : nullptr;
-	auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : pragma::ComponentHandle<pragma::CRasterizationRendererComponent> {};
-	if(raster.expired())
-		return;
-	auto &lightmap = raster->GetLightMap();
-	if(lightmap.expired())
-		return;
-	auto &tex = lightmap->GetLightMap();
-	if(tex == nullptr)
-		return;
-
-	auto *pElContainer = wgui.Create<WIBase>();
-	pElContainer->SetAutoAlignToParent(true);
-	pElContainer->SetName(name);
-	pElContainer->TrapFocus(true);
-	pElContainer->RequestFocus();
-
-	auto *pFrame = wgui.Create<WIFrame>(pElContainer);
-	pFrame->SetTitle("Lightmap Atlas");
-	auto *pLightmaps = wgui.Create<WITexturedRect>(pFrame);
-	pLightmaps->SetSize(256, 256);
-	pLightmaps->SetY(24);
-	pLightmaps->SetTexture(*lightmap->GetLightMap());
-	pFrame->SizeToContents();
-	pLightmaps->SetAnchor(0.f, 0.f, 1.f, 1.f);
 }

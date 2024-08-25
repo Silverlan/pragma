@@ -7,6 +7,7 @@
 ]]
 
 include("/util/window.lua")
+include("/gui/debug/uv_atlas_mesh_overlay.lua")
 
 function debug.open_directional_lightmap_atlas_view(ent, onInit)
 	util.open_generic_window("Directional Lightmap Atlas View", function(windowHandle, contents, controls)
@@ -102,7 +103,7 @@ local function is_point_in_uv_mesh(ent, lmCache, x, y)
 end
 
 function debug.open_lightmap_atlas_view(ent, onInit)
-	util.open_generic_window(locale.get_text("pfm_lightmap_atlas_view"), function(windowHandle, contents, controls)
+	util.open_generic_window(locale.get_text("debug_lightmap_atlas_view"), function(windowHandle, contents, controls)
 		if ent:IsValid() == false then
 			return
 		end
@@ -120,15 +121,18 @@ function debug.open_lightmap_atlas_view(ent, onInit)
 		local elTexSelection
 		local wrapper
 		local options = {
-			{ tostring(ents.LightMapComponent.TEXTURE_DIFFUSE), locale.get_text("pfm_lightmap_diffuse") },
-			{ tostring(ents.LightMapComponent.TEXTURE_DIFFUSE_DIRECT), locale.get_text("pfm_lightmap_diffuse_direct") },
+			{ tostring(ents.LightMapComponent.TEXTURE_DIFFUSE), locale.get_text("debug_lightmap_diffuse") },
+			{
+				tostring(ents.LightMapComponent.TEXTURE_DIFFUSE_DIRECT),
+				locale.get_text("debug_lightmap_diffuse_direct"),
+			},
 			{
 				tostring(ents.LightMapComponent.TEXTURE_DIFFUSE_INDIRECT),
-				locale.get_text("pfm_lightmap_diffuse_indirect"),
+				locale.get_text("debug_lightmap_diffuse_indirect"),
 			},
 			{
 				tostring(ents.LightMapComponent.TEXTURE_DOMINANT_DIRECTION),
-				locale.get_text("pfm_lightmap_dominant_direction"),
+				locale.get_text("debug_lightmap_dominant_direction"),
 			},
 		}
 		local selectedOption
@@ -144,7 +148,7 @@ function debug.open_lightmap_atlas_view(ent, onInit)
 			end
 		end
 		elTexSelection, wrapper = controls:AddDropDownMenu(
-			locale.get_text("pfm_lightmap_atlas"),
+			locale.get_text("debug_lightmap_atlas"),
 			"view_lightmap",
 			options,
 			selectedOption or "0",
@@ -167,9 +171,13 @@ function debug.open_lightmap_atlas_view(ent, onInit)
 
 		options = {}
 		for ent, c in ents.citerator(ents.COMPONENT_LIGHT_MAP_RECEIVER) do
+			local name = ent:GetName()
+			if #name == 0 then
+				name = ent:GetClass()
+			end
 			table.insert(options, {
 				tostring(ent:GetUuid()),
-				ent:GetName(),
+				name,
 			})
 		end
 		local elActorSelection

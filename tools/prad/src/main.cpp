@@ -21,9 +21,7 @@
 
 static bool launch_child_console_process(const char *childProcess, const char *args)
 {
-	// Prepare the full command line string
 	std::string fullCmd = std::string("\"") + childProcess + "\" " + args;
-
 #ifdef _WIN32
 	// Initialize the structures for process and startup information
 	STARTUPINFOA si;
@@ -125,9 +123,10 @@ static bool launch_child_console_process(const char *childProcess, const char *a
 
 	return true;
 #else
-	unsigned int exitCode;
-	if(!util::start_and_wait_for_command(fullCmd.c_str(), nullptr, &exitCode)) {
-		std::cerr << "Command '" << fullCmd << "' has failed with exit code " << exitCode << "!" << std::endl;
+	std::vector<std::string> argv;
+	ustring::explode(args, " ", argv);
+	if(!util::start_process(childProcess, argv, true)) {
+		std::cerr << "Command '" << fullCmd << "' has failed!" << std::endl;
 		return false;
 	}
 	return true;

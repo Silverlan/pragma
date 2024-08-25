@@ -146,7 +146,7 @@ luabind::tableT<pragma::physics::ICollisionObject> Lua::PhysObj::GetCollisionObj
 	for(auto &o : objs) {
 		if(o.IsExpired())
 			continue;
-		t[idx++] = o->GetLuaObject();
+		t[idx++] = o->GetLuaObject(l);
 	}
 	return t;
 }

@@ -40,10 +40,10 @@ void luabind::game_object_converter<T, TConverter>::to_lua(lua_State *L, T x)
 		if(!x)
 			lua_pushnil(L);
 		else
-			const_cast<T>(x)->GetLuaObject().push(L);
+			const_cast<T>(x)->GetLuaObject(L).push(L);
 	}
 	else
-		const_cast<T>(x).GetLuaObject().push(L);
+		const_cast<T>(x).GetLuaObject(L).push(L);
 }
 
 template<typename T, typename TConverter>

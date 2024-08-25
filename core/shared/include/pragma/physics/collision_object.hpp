@@ -138,7 +138,7 @@ namespace pragma::physics {
 		virtual IGhostObject *GetGhostObject();
 		const IGhostObject *GetGhostObject() const;
 
-		virtual void InitializeLuaHandle(lua_State *l, const util::TWeakSharedHandle<IBase> &handle) override;
+		virtual void InitializeLuaHandle(const util::TWeakSharedHandle<IBase> &handle) override;
 	  protected:
 		ICollisionObject(pragma::physics::IEnvironment &env, pragma::physics::IShape &shape);
 		virtual void ApplyCollisionShape(pragma::physics::IShape *optShape) = 0;

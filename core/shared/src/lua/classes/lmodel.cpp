@@ -662,8 +662,8 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	classDef.add_static_constant("FUPDATE_NONE", umath::to_integral(ModelUpdateFlags::None));
 	classDef.add_static_constant("FUPDATE_BOUNDS", umath::to_integral(ModelUpdateFlags::UpdateBounds));
 	classDef.add_static_constant("FUPDATE_PRIMITIVE_COUNTS", umath::to_integral(ModelUpdateFlags::UpdatePrimitiveCounts));
-	classDef.add_static_constant("FUPDATE_COLLISION_SHAPES", umath::to_integral(ModelUpdateFlags::UpdateCollisionShapes));
-	classDef.add_static_constant("FUPDATE_TANGENTS", umath::to_integral(ModelUpdateFlags::UpdateTangents));
+	classDef.add_static_constant("FUPDATE_INITIALIZE_COLLISION_SHAPES", umath::to_integral(ModelUpdateFlags::InitializeCollisionShapes));
+	classDef.add_static_constant("FUPDATE_CALCULATE_TANGENTS", umath::to_integral(ModelUpdateFlags::CalculateTangents));
 	classDef.add_static_constant("FUPDATE_VERTEX_BUFFER", umath::to_integral(ModelUpdateFlags::UpdateVertexBuffer));
 	classDef.add_static_constant("FUPDATE_INDEX_BUFFER", umath::to_integral(ModelUpdateFlags::UpdateIndexBuffer));
 	classDef.add_static_constant("FUPDATE_WEIGHT_BUFFER", umath::to_integral(ModelUpdateFlags::UpdateWeightBuffer));
@@ -671,6 +671,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	classDef.add_static_constant("FUPDATE_VERTEX_ANIMATION_BUFFER", umath::to_integral(ModelUpdateFlags::UpdateVertexAnimationBuffer));
 	classDef.add_static_constant("FUPDATE_CHILDREN", umath::to_integral(ModelUpdateFlags::UpdateChildren));
 	classDef.add_static_constant("FUPDATE_BUFFERS", umath::to_integral(ModelUpdateFlags::UpdateBuffers));
+	classDef.add_static_constant("FUPDATE_INITIALIZE", umath::to_integral(ModelUpdateFlags::Initialize));
 	classDef.add_static_constant("FUPDATE_ALL", umath::to_integral(ModelUpdateFlags::All));
 	classDef.add_static_constant("FUPDATE_ALL_DATA", umath::to_integral(ModelUpdateFlags::AllData));
 

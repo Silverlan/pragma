@@ -33,8 +33,8 @@ namespace pragma::physics {
 		virtual void OnRemove();
 		virtual void Initialize();
 		virtual void InitializeLuaObject(lua_State *lua);
-		luabind::object &GetLuaObject();
-		const luabind::object &GetLuaObject() const;
+		luabind::object &GetLuaObject(lua_State *lua);
+		const luabind::object &GetLuaObject(lua_State *lua) const;
 		void Push(lua_State *l);
 
 		void *GetUserData() const;
@@ -45,7 +45,7 @@ namespace pragma::physics {
 		friend PhysObj;
 		IBase(IEnvironment &env);
 		void SetUserData(void *userData) const;
-		virtual void InitializeLuaHandle(lua_State *l, const util::TWeakSharedHandle<IBase> &handle);
+		virtual void InitializeLuaHandle(const util::TWeakSharedHandle<IBase> &handle);
 		template<class T>
 		void InitializeLuaObject(lua_State *lua);
 

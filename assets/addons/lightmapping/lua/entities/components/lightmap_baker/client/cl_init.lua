@@ -84,7 +84,6 @@ end
 function Component:OnEntitySpawn()
 	self.m_lightmapUvCacheDirty = true
 	self:SetTickPolicy(ents.TICK_POLICY_ALWAYS)
-	self:UpdateLightmapTargets()
 end
 function Component:UpdateLightmapData(tEnts)
 	for _, ent in ipairs(tEnts) do

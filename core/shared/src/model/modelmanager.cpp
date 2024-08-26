@@ -79,7 +79,7 @@ bool pragma::asset::ModelProcessor::Load()
 	if(!r)
 		return false;
 	model = mdlHandler.model;
-	model->Update(ModelUpdateFlags::Initialize);
+	model->Update(ModelUpdateFlags::Initialize | ModelUpdateFlags::UpdateChildren);
 	return true;
 }
 bool pragma::asset::ModelProcessor::Finalize()

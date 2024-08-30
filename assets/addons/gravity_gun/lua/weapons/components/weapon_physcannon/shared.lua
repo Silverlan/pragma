@@ -290,11 +290,10 @@ function ents.WeaponPhyscannon:OnTick()
 	end
 
 	local owner = self:GetOwner()
+	local actionInputC = owner:GetComponent(ents.COMPONENT_ACTION_INPUT_CONTROLLER)
 	if
-		(
-			owner:IsPlayer() == false
-			or owner:GetComponent(ents.COMPONENT_PLAYER):GetActionInput(input.ACTION_ATTACK2) == false
-		) and self:IsCarrying() == false
+		(actionInputC == nil or actionInputC:GetActionInput(input.ACTION_ATTACK2) == false)
+		and self:IsCarrying() == false
 	then
 		self:EndHold()
 		return

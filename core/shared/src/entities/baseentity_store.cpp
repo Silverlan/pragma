@@ -23,7 +23,7 @@ void BaseEntity::Load(udm::LinkedPropertyWrapper &udm)
 	std::string uuid;
 	udm["uuid"](uuid);
 	if(util::is_uuid(uuid))
-		m_uuid = util::uuid_string_to_bytes(uuid);
+		SetUuid(util::uuid_string_to_bytes(uuid));
 
 	auto &componentManager = GetNetworkState()->GetGameState()->GetEntityComponentManager();
 	auto udmComponents = udm["components"];

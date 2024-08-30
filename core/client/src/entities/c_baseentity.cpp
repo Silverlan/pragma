@@ -220,7 +220,7 @@ Bool CBaseEntity::ReceiveNetEvent(UInt32 eventId, NetPacket &p)
 void CBaseEntity::ReceiveData(NetPacket &packet)
 {
 	m_spawnFlags = packet->Read<uint32_t>();
-	m_uuid = packet->Read<util::Uuid>();
+	SetUuid(packet->Read<util::Uuid>());
 
 	auto &componentManager = static_cast<pragma::CEntityComponentManager &>(c_game->GetEntityComponentManager());
 	auto &componentTypes = componentManager.GetRegisteredComponentTypes();

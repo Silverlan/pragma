@@ -244,7 +244,7 @@ void CollisionMesh::Update(ModelUpdateFlags flags)
 {
 	if((flags & ModelUpdateFlags::UpdateBounds) != ModelUpdateFlags::None)
 		CalculateBounds();
-	if((flags & ModelUpdateFlags::UpdateCollisionShapes) != ModelUpdateFlags::None)
+	if((flags & ModelUpdateFlags::InitializeCollisionShapes) != ModelUpdateFlags::None)
 		UpdateShape(); // TODO: Surface materials?
 }
 void CollisionMesh::Centralize()

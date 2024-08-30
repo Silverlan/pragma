@@ -788,7 +788,7 @@ if with_essential_client_modules:
 if with_common_modules:
 	add_pragma_module(
 		name="pr_bullet",
-		commitSha="e390178e90dbbfc9af828bf4db2dfd08e243f9ed",
+		commitSha="a64c52cf58dc667ae0c0a99ef4aa931e44f94e5e",
 		repositoryUrl="https://github.com/Silverlan/pr_bullet.git"
 	)
 	add_pragma_module(
@@ -1070,7 +1070,7 @@ def download_addon(name,addonName,url,commitId=None):
 curDir = os.getcwd()
 if not skip_repository_updates:
 	if with_pfm:
-		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","f74f614743ca3654fcfdb456163c718d2a74d168")
+		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","44c57d4dff740ac6477c2cfcb0e9c06c5426470d")
 		download_addon("model editor","tool_model_editor","https://github.com/Silverlan/pragma_model_editor.git","583587dafd49f30679b2326008e2a758e33dbda2")
 
 	if with_vr:

@@ -50,3 +50,26 @@ console.register_command("map_bake_lightmaps", function(pl, ...)
 		engine.shutdown()
 	end
 end)
+
+local dirLmWindow
+local dirAtlasWindow
+console.register_command("debug_lightmaps", function(pl, ...)
+	include("/debug/lightmaps.lua")
+	local ent, c = ents.citerator(ents.COMPONENT_LIGHT_MAP)()
+	if ent == nil then
+		console.print_warning("No lightmap entity found!")
+		return
+	end
+	if util.is_valid(dirLmWindow) then
+		dirLmWindow:Close()
+	end
+	if util.is_valid(dirAtlasWindow) then
+		dirAtlasWindow:Close()
+	end
+	--[[debug.open_directional_lightmap_atlas_view(ent, function(windowHandle, contents, controls)
+		dirLmWindow = windowHandle
+	end)]]
+	debug.open_lightmap_atlas_view(ent, function(windowHandle, contents, controls)
+		dirAtlasWindow = windowHandle
+	end)
+end)

@@ -152,7 +152,7 @@ void CModelSubMesh::Update(ModelUpdateFlags flags)
 	auto bHasAlphas = (GetAlphaCount() > 0) ? true : false;
 	auto bAnimated = !m_vertexWeights->empty() ? true : false;
 
-	if((flags & ModelUpdateFlags::UpdateTangents) != ModelUpdateFlags::None)
+	if((flags & ModelUpdateFlags::CalculateTangents) != ModelUpdateFlags::None)
 		ComputeTangentBasis();
 
 	//auto &renderState = c_engine->GetRenderContext();

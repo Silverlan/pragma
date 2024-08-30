@@ -119,7 +119,7 @@ luabind::optional<pragma::physics::IShape> Lua::CollisionMesh::GetShape(lua_Stat
 	auto shape = mesh.GetShape();
 	if(shape == nullptr)
 		return nil;
-	return shape->GetLuaObject();
+	return shape->GetLuaObject(l);
 }
 luabind::tableT<int32_t> Lua::CollisionMesh::GetSurfaceMaterialIds(lua_State *l, ::CollisionMesh &mesh) { return Lua::vector_to_table(l, mesh.GetSurfaceMaterials()); }
 bool Lua::CollisionMesh::IntersectAABB(lua_State *l, ::CollisionMesh &mesh, const Vector3 &min, const Vector3 &max) { return mesh.IntersectAABB(const_cast<Vector3 *>(&min), const_cast<Vector3 *>(&max)); }

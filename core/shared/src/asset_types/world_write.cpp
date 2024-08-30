@@ -110,11 +110,12 @@ bool pragma::asset::WorldData::LoadFromAssetData(udm::LinkedPropertyWrapper &udm
 	}
 
 	uint32_t nextEntIdx = 0;
+	auto version = GetVersion();
 	for(auto udmEnt : udm["entities"]) {
 		auto entIdx = nextEntIdx++;
 		auto entData = EntityData::Create();
 
-		if(PMAP_VERSION > 1) {
+		if(version > 1) {
 			EntityData::Flags flags;
 			if(udmEnt["flags"] >> flags)
 				entData->SetFlags(flags);
@@ -232,6 +233,7 @@ bool pragma::asset::WorldData::LoadFromAssetData(const udm::AssetData &data, Ent
 		return false;
 	}
 
+	SetVersion(version);
 	return LoadFromAssetData(udm, entMask, outErr);
 }
 
@@ -279,8 +281,9 @@ bool pragma::asset::WorldData::Save(const std::string &fileName, const std::stri
 
 bool pragma::asset::WorldData::Save(udm::AssetDataArg outData, const std::string &mapName, std::string &outErr)
 {
+	auto version = GetVersion();
 	outData.SetAssetType(PMAP_IDENTIFIER);
-	outData.SetAssetVersion(PMAP_VERSION);
+	outData.SetAssetVersion(version);
 	auto udm = *outData;
 
 	// Materials
@@ -304,7 +307,7 @@ bool pragma::asset::WorldData::Save(udm::AssetDataArg outData, const std::string
 		auto udmEnt = udmEntities[entIdx++];
 		udmEnt["className"] << entData->GetClassName();
 
-		if(PMAP_VERSION > 1)
+		if(version > 1)
 			udmEnt["flags"] << entData->GetFlags();
 		else {
 			if(umath::is_flag_set(entData->GetFlags(), EntityData::Flags::ClientsideOnly))

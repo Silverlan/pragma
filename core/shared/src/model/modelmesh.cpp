@@ -677,54 +677,6 @@ void ModelSubMesh::SetVertexAlpha(uint32_t idx, const Vector2 &alpha)
 void ModelSubMesh::ComputeTangentBasis()
 {
 	VisitIndices([this](auto *indexData, uint32_t numIndices) { umath::compute_tangent_basis(*m_vertices, indexData, numIndices); });
-
-	// Obsolete: Remove this block if there are no issues with the above tangent-generator
-#if 0
-	auto &verts = *m_vertices;
-	auto &triangles = *m_triangles;
-	auto numVerts = verts.size();
-	for(unsigned int i=0;i<triangles.size();i+=3)
-	{
-		if(triangles[i] >= numVerts || triangles[i +1] >= numVerts || triangles[i +2] >= numVerts)
-		{
-			Con::cwar<<"Triangle vertices ("<<triangles[i]<<","<<triangles[i +1]<<","<<triangles[i +2]<<") out of bounds for mesh "<<this<<" ("<<numVerts<<" vertices)!"<<Con::endl;
-			return;
-		}
-		auto &v0 = verts[triangles[i]];
-		auto &v1 = verts[triangles[i +1]];
-		auto &v2 = verts[triangles[i +2]];
-
-		auto deltaPos1 = v1.position -v0.position;
-		auto deltaPos2 = v2.position -v0.position;
-
-		auto deltaUV1 = v1.uv -v0.uv;
-		auto deltaUV2 = v2.uv -v0.uv;
-		//auto deltaUV1 = Vector2(v1.uv.x,1.f -v1.uv.y) -Vector2(v0.uv.x,1.f -v0.uv.y);
-		//auto deltaUV2 = Vector2(v2.uv.x,1.f -v2.uv.y) -Vector2(v0.uv.x,1.f -v0.uv.y);
-		//auto deltaUV1 = Vector2(1.f -v1.uv.x,1.f -v1.uv.y) -Vector2(1.f -v0.uv.x,1.f -v0.uv.y);
-		//auto deltaUV2 = Vector2(1.f -v2.uv.x,1.f -v2.uv.y) -Vector2(1.f -v0.uv.x,1.f -v0.uv.y);
-
-		auto d = deltaUV1.x *deltaUV2.y -deltaUV1.y *deltaUV2.x;
-		auto r = (d != 0.f) ? (1.f /d) : 0.f;
-		auto tangent = (deltaPos1 *deltaUV2.y -deltaPos2 *deltaUV1.y) *r;
-		auto biTangent = (deltaPos2 *deltaUV1.x -deltaPos1 *deltaUV2.x) *r;
-		uvec::normalize(&biTangent);
-
-		v0.tangent = {tangent,1.f};
-		v1.tangent = {tangent,1.f};
-		v2.tangent = {tangent,1.f};
-	}
-	for(unsigned int i=0;i<triangles.size();i++)
-	{
-		auto &v = verts[triangles[i]];
-		auto &t = v.tangent;//m_tangents[triangles[i]];
-
-		auto tmp = Vector3{t};
-		tmp = tmp -v.normal *glm::dot(v.normal,tmp);
-		uvec::normalize(&tmp);
-		t = {tmp,1.f};
-	}
-#endif
 }
 const std::vector<umath::VertexWeight> &ModelSubMesh::GetVertexWeightSet(uint32_t idx) const { return const_cast<ModelSubMesh *>(this)->GetVertexWeightSet(idx); }
 std::vector<umath::VertexWeight> &ModelSubMesh::GetVertexWeightSet(uint32_t idx) { return (idx >= 4) ? *m_extendedVertexWeights : *m_vertexWeights; }

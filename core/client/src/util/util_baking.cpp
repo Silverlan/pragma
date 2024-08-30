@@ -27,7 +27,9 @@
 
 extern DLLCLIENT CEngine *c_engine;
 
-static double calc_light_luminance(const util::baking::LightSource &light, const Vector3 &pos, const Vector3 &n, const Vector3 &p0, const Vector3 &p1, const Vector3 &p2)
+// #define DEBUG_BAKE_LIGHT_WEIGHTS
+
+static double calc_light_luminance(const util::baking::LightSource &light, const Vector3 &pos, const Vector3 &p0, const Vector3 &p1, const Vector3 &p2)
 {
 	Vector3 planeNormal;
 	float planeDist;
@@ -36,18 +38,30 @@ static double calc_light_luminance(const util::baking::LightSource &light, const
 	if(side == umath::geometry::PlaneSide::Back)
 		return 0.0;
 	Candela intensity;
+	auto lightIntensity = light.intensity;
+#ifdef DEBUG_BAKE_LIGHT_WEIGHTS
+	lightIntensity = 1.f;
+#endif
 	switch(light.type) {
 	case util::baking::LightSource::Type::Spot:
-		intensity = ::pragma::BaseEnvLightSpotComponent::CalcIntensityAtPoint(light.position, light.intensity, light.direction, light.outerConeAngle, light.innerConeAngle, pos);
+		intensity = ::pragma::BaseEnvLightSpotComponent::CalcIntensityAtPoint(light.position, lightIntensity, light.direction, light.outerConeAngle, light.innerConeAngle, pos);
 		break;
 	case util::baking::LightSource::Type::Point:
-		intensity = ::pragma::BaseEnvLightPointComponent::CalcIntensityAtPoint(light.position, light.intensity, pos);
+		intensity = ::pragma::BaseEnvLightPointComponent::CalcIntensityAtPoint(light.position, lightIntensity, pos);
 		break;
 	case util::baking::LightSource::Type::Directional:
-		intensity = ::pragma::BaseEnvLightDirectionalComponent::CalcIntensityAtPoint(light.intensity, pos) * 0.025f;
+		// TODO: Use as default direction
+		intensity = ::pragma::BaseEnvLightDirectionalComponent::CalcIntensityAtPoint(lightIntensity, pos) * 0.025f;
+		break;
+	default:
+		intensity = 0.f;
 		break;
 	}
+#ifdef DEBUG_BAKE_LIGHT_WEIGHTS
+	return intensity;
+#else
 	return ulighting::srgb_to_luminance(light.color * intensity);
+#endif
 }
 static Vector3 calc_light_direction_to_point(const util::baking::LightSource &light, const Vector3 &pos)
 {
@@ -69,20 +83,14 @@ static Vector3 calc_light_direction_to_point(const util::baking::LightSource &li
 	return uvec::UP;
 }
 
-static std::vector<float> calc_light_weights(const std::vector<util::baking::LightSource> &lights, const Vector3 &pos, const Vector3 &n, const Vector3 &p0, const Vector3 &p1, const Vector3 &p2)
+static std::vector<float> calc_light_weights(const std::vector<util::baking::LightSource> &lights, const Vector3 &pos, const Vector3 &p0, const Vector3 &p1, const Vector3 &p2)
 {
 	std::vector<float> weights;
 	weights.resize(lights.size());
-	float weightSum = 0.f;
 	for(uint32_t idx = 0; auto &l : lights) {
-		auto weight = calc_light_luminance(l, pos, n, p0, p1, p2);
+		auto weight = calc_light_luminance(l, pos, p0, p1, p2);
 		weights[idx] = weight;
-		weightSum += weight;
 		++idx;
-	}
-	if(weightSum > 0.f) {
-		for(auto &w : weights)
-			w /= weightSum;
 	}
 	return weights;
 }
@@ -90,14 +98,19 @@ static std::vector<float> calc_light_weights(const std::vector<util::baking::Lig
 static Vector3 calc_dominant_light_direction(const std::vector<util::baking::LightSource> &lights, const std::vector<float> &weights, const Vector3 &pos)
 {
 	Vector3 n {};
+	auto totalWeight = 0.f;
 	for(uint32_t i = 0; auto &l : lights) {
+#ifdef DEBUG_BAKE_LIGHT_WEIGHTS
+		n += Vector3 {weights[i], weights[i], weights[i]};
+#else
 		auto dir = calc_light_direction_to_point(l, pos);
-		n += dir * weights[i];
+		dir *= weights[i];
+		totalWeight += weights[i];
+		n += dir;
+#endif
 		++i;
 	}
-	auto l = uvec::length(n);
-	if(l > 0.0001)
-		n /= l;
+	uvec::normalize(n, uvec::UP);
 	return n;
 }
 
@@ -140,8 +153,8 @@ static void generate_sh_normals(const std::vector<util::baking::BakePixel> &bps,
 			auto p1 = mesh->GetVertexPosition(indices[1]);
 			auto p2 = mesh->GetVertexPosition(indices[2]);
 			auto p = triangle_point(p0, p1, p2, uv.x, uv.y);
-			auto n = triangle_normal(mesh->GetVertexNormal(indices[0]), mesh->GetVertexNormal(indices[1]), mesh->GetVertexNormal(indices[2]), uv.x, uv.y);
-			auto weights = calc_light_weights(lights, p, n, p0, p1, p2);
+			// auto n = triangle_normal(mesh->GetVertexNormal(indices[0]), mesh->GetVertexNormal(indices[1]), mesh->GetVertexNormal(indices[2]), uv.x, uv.y);
+			auto weights = calc_light_weights(lights, p, p0, p1, p2);
 			auto dir = calc_dominant_light_direction(lights, weights, p);
 			outNormals[idx] = dir;
 		}

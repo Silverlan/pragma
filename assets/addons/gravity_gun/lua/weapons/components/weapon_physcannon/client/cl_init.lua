@@ -2,13 +2,13 @@ include("../shared.lua")
 
 function ents.WeaponPhyscannon:AttachParticleEntity(ent, att)
 	local vm = ents.get_view_model()
-	local attComponent = ent:AddComponent(ents.COMPONENT_ATTACHABLE)
+	local attComponent = ent:AddComponent(ents.COMPONENT_ATTACHMENT)
 	if attComponent ~= nil then
-		local attInfo = ents.AttachableComponent.AttachmentInfo()
+		local attInfo = ents.AttachmentComponent.AttachmentInfo()
 		attInfo.flags = bit.bor(
-			ents.AttachableComponent.FATTACHMENT_MODE_POSITION_ONLY,
-			ents.AttachableComponent.FATTACHMENT_MODE_UPDATE_EACH_FRAME,
-			ents.AttachableComponent.FATTACHMENT_MODE_SNAP_TO_ORIGIN
+			ents.AttachmentComponent.FATTACHMENT_MODE_POSITION_ONLY,
+			ents.AttachmentComponent.FATTACHMENT_MODE_UPDATE_EACH_FRAME,
+			ents.AttachmentComponent.FATTACHMENT_MODE_SNAP_TO_ORIGIN
 		)
 		attComponent:AttachToAttachment(vm, att, attInfo)
 	end

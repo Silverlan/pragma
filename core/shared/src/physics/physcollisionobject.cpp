@@ -66,9 +66,9 @@ const pragma::physics::IRigidBody *pragma::physics::ICollisionObject::GetRigidBo
 const pragma::physics::ISoftBody *pragma::physics::ICollisionObject::GetSoftBody() const { return const_cast<ICollisionObject *>(this)->GetSoftBody(); }
 const pragma::physics::IGhostObject *pragma::physics::ICollisionObject::GetGhostObject() const { return const_cast<ICollisionObject *>(this)->GetGhostObject(); }
 
-void pragma::physics::ICollisionObject::InitializeLuaHandle(lua_State *l, const util::TWeakSharedHandle<IBase> &handle)
+void pragma::physics::ICollisionObject::InitializeLuaHandle(const util::TWeakSharedHandle<IBase> &handle)
 {
-	IBase::InitializeLuaHandle(l, handle);
+	IBase::InitializeLuaHandle(handle);
 	UpdateSurfaceMaterial();
 }
 

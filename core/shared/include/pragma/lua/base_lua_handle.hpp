@@ -22,6 +22,8 @@ namespace pragma {
 		virtual ~BaseLuaHandle();
 		util::TWeakSharedHandle<BaseLuaHandle> GetHandle() const { return util::TWeakSharedHandle<BaseLuaHandle> {m_handle}; }
 		virtual void InitializeLuaObject(lua_State *lua) = 0;
+		const luabind::object &GetLuaObject(lua_State *lua) const { return const_cast<BaseLuaHandle *>(this)->GetLuaObject(lua); }
+		luabind::object &GetLuaObject(lua_State *lua) { return GetLuaObject(); }
 		const luabind::object &GetLuaObject() const { return const_cast<BaseLuaHandle *>(this)->GetLuaObject(); }
 		luabind::object &GetLuaObject() { return m_luaObj; }
 		lua_State *GetLuaState() const;

@@ -193,7 +193,7 @@ void BaseEntity::SetKeyValue(std::string key, std::string val)
 	if(key == "spawnflags")
 		m_spawnFlags = util::to_int(val);
 	else if(key == "uuid")
-		m_uuid = util::uuid_string_to_bytes(val);
+		SetUuid(util::uuid_string_to_bytes(val));
 }
 void BaseEntity::SetSpawnFlags(uint32_t spawnFlags) { m_spawnFlags = spawnFlags; }
 unsigned int BaseEntity::GetSpawnFlags() const { return m_spawnFlags; }

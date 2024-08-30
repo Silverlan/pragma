@@ -58,6 +58,8 @@ function Component:BakeMapLightmaps()
 		return false
 	end
 
+	self:UpdateLightmapTargets()
+
 	if self:GenerateLightmapUvs() == false then
 		self:LogErr("Failed to generate lightmap UVs.")
 		return false

@@ -26,7 +26,7 @@ get_submodule("util_pragma_doc","https://github.com/Silverlan/util_pragma_doc.gi
 get_submodule("util_smdmodel","https://github.com/Silverlan/util_smdmodel.git","1fae16eb43b1f403be7a5f6dce646fbfa84de8c0")
 get_submodule("util_sound","https://github.com/Silverlan/util_sound.git","dcc284ca1affd33c9964ff1646e7aa7cf902eb96")
 get_submodule("util_source2","https://github.com/Silverlan/util_source2.git","2d45b2c76921475b61647ea63aeb180b37a17d44")
-get_submodule("util_source_script","https://github.com/Silverlan/util_source_script.git","f56f97c347e7829f5053fb5b22cbc314148512b9")
+get_submodule("util_source_script","https://github.com/Silverlan/util_source_script.git","3e9cbdd0c8c350e4b08849fce1422f652d3cb30f")
 get_submodule("util_timeline_scene","https://github.com/Silverlan/util_timeline_scene.git","2278d986633254d5c3d7fe90b746c4bc9d736bfe")
 get_submodule("util_udm","https://github.com/Silverlan/util_udm.git","c8cf73d53d45398409d4f976f8a3dbd04e3b5fc1")
 get_submodule("util_versioned_archive","https://github.com/Silverlan/util_versioned_archive.git","77531a4e93ded49dc8e5fe402db4198ab9aaa369")

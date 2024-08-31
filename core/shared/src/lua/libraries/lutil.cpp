@@ -59,13 +59,14 @@
 #include <sharedutils/util_file.h>
 #include <sharedutils/scope_guard.h>
 #include <luainterface.hpp>
-#include <se_scene.hpp>
 #include <pragma/math/intersection.h>
 #include <pragma/model/modelmesh.h>
 #include "pragma/model/animation/skeleton.hpp"
 #include <luabind/class_info.hpp>
 #include <util_zip.h>
 #include <fsys/ifile.hpp>
+
+import se_script;
 
 extern DLLNETWORK Engine *engine;
 
@@ -1495,11 +1496,11 @@ luabind::object Lua::util::read_scene_file(lua_State *l, const std::string &file
 	auto f = FileManager::OpenFile(fname.c_str(), "r");
 	if(f == nullptr)
 		return {};
-	se::SceneScriptValue root {};
-	if(se::read_scene(f, root) != ::util::MarkupFile::ResultCode::Ok)
+	se_script::SceneScriptValue root {};
+	if(se_script::read_scene(f, root) != ::util::MarkupFile::ResultCode::Ok)
 		return {};
-	std::function<void(const se::SceneScriptValue &)> fPushValue = nullptr;
-	fPushValue = [l, &fPushValue](const se::SceneScriptValue &val) {
+	std::function<void(const se_script::SceneScriptValue &)> fPushValue = nullptr;
+	fPushValue = [l, &fPushValue](const se_script::SceneScriptValue &val) {
 		auto t = Lua::CreateTable(l);
 
 		Lua::PushString(l, "identifier");

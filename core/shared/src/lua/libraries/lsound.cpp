@@ -12,7 +12,8 @@
 #include "luasystem.h"
 #include "pragma/audio/alsound.h"
 #include "pragma/audio/alsound_type.h"
-#include <se_scene.hpp>
+
+import se_script;
 
 extern DLLNETWORK Engine *engine;
 
@@ -176,8 +177,8 @@ int Lua::sound::read_wav_phonemes(lua_State *l)
 	auto f = FileManager::OpenFile(fname.c_str(), "rb");
 	if(f == nullptr)
 		return 0;
-	se::SoundPhonemeData sp {};
-	if(se::read_wav_phonemes(f, sp) != util::MarkupFile::ResultCode::Ok)
+	se_script::SoundPhonemeData sp {};
+	if(se_script::read_wav_phonemes(f, sp) != util::MarkupFile::ResultCode::Ok)
 		return 0;
 
 	auto t = Lua::CreateTable(l);

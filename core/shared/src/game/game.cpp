@@ -896,6 +896,8 @@ bool Game::PrecacheModel(const std::string &mdl)
 }
 std::shared_ptr<Model> Game::LoadModel(const std::string &mdl, bool bReload)
 {
+	if(mdl.empty())
+		return nullptr;
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	debug::get_domain().BeginTask("load_model");
 	util::ScopeGuard sgVtune {[]() { debug::get_domain().EndTask(); }};

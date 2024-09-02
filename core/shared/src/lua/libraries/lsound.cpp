@@ -12,6 +12,7 @@
 #include "luasystem.h"
 #include "pragma/audio/alsound.h"
 #include "pragma/audio/alsound_type.h"
+#include <sharedutils/util_markup_file.hpp>
 
 import se_script;
 

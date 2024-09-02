@@ -5,13 +5,13 @@
  * Copyright (c) 2021 Silverlan
  */
 
+import se_script;
+
 #include "stdafx_shared.h"
 #include "pragma/game/game_resources.hpp"
 #include "pragma/audio/alsound_type.h"
 #include <sharedutils/util_file.h>
 #include <udm.hpp>
-
-import se_script;
 
 bool util::port_sound_script(NetworkState *nw, const std::string &path)
 {

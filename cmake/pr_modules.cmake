@@ -76,9 +76,9 @@ function(pr_init_module TARGET_NAME)
     set(multiValueArgs)
     cmake_parse_arguments(PARSE_ARGV 1 PA "${options}" "${oneValueArgs}" "${multiValueArgs}")
 
-    set(SRC_PATH "src/")
+    set(SRC_PATH "src")
     if(DEFINED PA_SRC_PATH)
-        set(SRC_PATH "src/" "${PA_SRC_PATH}")
+        set(SRC_PATH "src" "${PA_SRC_PATH}")
     endif()
 
     pr_add_headers(${TARGET_NAME} "${SRC_PATH}" PRIVATE)

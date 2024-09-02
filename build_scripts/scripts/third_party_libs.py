@@ -35,7 +35,7 @@ get_submodule("squish","https://github.com/ivan-kulikov-dev/squish.git","aeb01b8
 get_submodule("tinygltf","https://github.com/syoyo/tinygltf.git","f51243da480806032cfb6f8d6799a7493397cb86","release")
 get_submodule("vorbis","https://github.com/xiph/vorbis.git","9eadeccdc4247127d91ac70555074239f5ce3529")
 get_submodule("vtflib","https://github.com/Silverlan/VTFLib.git","3e6b80bcd6dacf6bd4a35666869464fac55051cc")
-get_submodule("zlib","https://github.com/Silverlan/zlib.git","0dcc7471231d72376d592f80f06c2e2246c2b3c4")
+get_submodule("zlib","https://github.com/Silverlan/zlib.git","3bbd3b3c24516840ea46d192fcf4a80e7b3eeffd")
 get_submodule("fmt","https://github.com/fmtlib/fmt.git","a337011")
 get_submodule("mpaheader","https://github.com/SlawekNowy/mpaheader.git","275d9d9")
 get_submodule("vkvparser","https://github.com/Silverlan/VKVParser.git","5ffec9da2fc51288d0d77a99fcf173d6e9b91cdb")

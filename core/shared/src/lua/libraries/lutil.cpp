@@ -65,6 +65,7 @@
 #include <luabind/class_info.hpp>
 #include <util_zip.h>
 #include <fsys/ifile.hpp>
+#include <sharedutils/util_markup_file.hpp>
 
 import se_script;
 

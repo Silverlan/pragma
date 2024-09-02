@@ -116,6 +116,22 @@ rerun = args["rerun"]
 update = args["update"]
 modules_prebuilt = []
 
+root = normalize_path(os.getcwd())
+build_dir = normalize_path(build_directory)
+deps_dir = normalize_path(deps_directory)
+install_dir = install_directory
+tools = root +"/tools"
+
+if not os.path.isabs(build_dir):
+	build_dir = os.getcwd() +"/" +build_dir
+
+if not os.path.isabs(deps_dir):
+	deps_dir = os.getcwd() +"/" +deps_dir
+deps_dir_fs = deps_dir.replace("\\", "/")
+
+if not os.path.isabs(install_dir):
+	install_dir = build_dir +"/" +install_dir
+
 print("Inputs:")
 if platform == "linux":
 	print("cxx_compiler: " +cxx_compiler)
@@ -145,26 +161,6 @@ if platform == "linux":
 print("cmake_args: " +', '.join(additional_cmake_args))
 print("modules: " +', '.join(modules))
 
-if platform == "linux":
-	os.environ["CC"] = c_compiler
-	os.environ["CXX"] = cxx_compiler
-
-root = normalize_path(os.getcwd())
-build_dir = normalize_path(build_directory)
-deps_dir = normalize_path(deps_directory)
-install_dir = install_directory
-tools = root +"/tools"
-
-if not os.path.isabs(build_dir):
-	build_dir = os.getcwd() +"/" +build_dir
-
-if not os.path.isabs(deps_dir):
-	deps_dir = os.getcwd() +"/" +deps_dir
-deps_dir_fs = deps_dir.replace("\\", "/")
-
-if not os.path.isabs(install_dir):
-	install_dir = build_dir +"/" +install_dir
-
 if update:
 	os.chdir(root)
 
@@ -184,6 +180,27 @@ mkpath(build_dir)
 mkpath(deps_dir)
 mkpath(install_dir)
 mkpath(tools)
+
+########## clang-19 ##########
+# Due to a compiler bug with C++20 Modules in clang, we have to use clang-19 for now,
+# which has not been released yet, so we use the latest release candidate for now.
+# Once clang-19 has been released officially, this should be removed!
+if platform == "linux":
+	curDir = os.getcwd()
+	os.chdir(deps_dir)
+	clang19_root = os.getcwd() +"/LLVM-19.1.0-rc3-Linux-X64"
+	if not Path(clang19_root).is_dir():
+		print_msg("Downloading clang-19...")
+		http_extract("https://github.com/llvm/llvm-project/releases/download/llvmorg-19.1.0-rc3/LLVM-19.1.0-rc3-Linux-X64.tar.xz",format="tar.xz")
+	c_compiler = clang19_root +"/bin/clang"
+	cxx_compiler = clang19_root +"/bin/clang++"
+	print_msg("Setting c_compiler override to '" +c_compiler +"'")
+	print_msg("Setting cxx_compiler override to '" +cxx_compiler +"'")
+	os.chdir(curDir)
+
+if platform == "linux":
+	os.environ["CC"] = c_compiler
+	os.environ["CXX"] = cxx_compiler
 
 def execscript(filepath):
 	global generator

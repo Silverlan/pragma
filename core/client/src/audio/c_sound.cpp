@@ -28,6 +28,7 @@
 #include <steam_audio/alsound_steam_audio.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/logging.hpp>
+#include <sharedutils/util_markup_file.hpp>
 
 import se_script;
 

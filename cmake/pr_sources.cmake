@@ -64,14 +64,8 @@ function(pr_add_module_list TARGET_NAME FILE_SET_NAME)
         set(VISIBILITY PRIVATE)
     endif()
 
-    foreach(source IN LISTS PA_UNPARSED_ARGUMENTS)
-        get_filename_component(source_path "${source}" PATH)
-        string(REPLACE "${CMAKE_CURRENT_LIST_DIR}" "" source_path_relative "${source_path}")
-        string(REPLACE "/" "\\" source_path_msvc "${source_path_relative}")
-        source_group("${source_path_msvc}" FILES "${source}")
-    endforeach()
-
     target_sources(${TARGET_NAME} ${VISIBILITY} FILE_SET ${FILE_SET_NAME} TYPE CXX_MODULES FILES ${PA_UNPARSED_ARGUMENTS})
+    source_group(TREE "${CMAKE_CURRENT_LIST_DIR}" FILES ${PA_UNPARSED_ARGUMENTS})
 endfunction()
 
 function(pr_add_modules TARGET_NAME MODULE_LOCATION)
@@ -94,7 +88,7 @@ function(pr_add_modules TARGET_NAME MODULE_LOCATION)
 
     # Add the PUBLIC modules to the target
     if (PUBLIC_MODULE_LIST)
-        pr_add_module_list(${TARGET_NAME} cxx_modules PUBLIC "${PUBLIC_MODULE_LIST}")
+        pr_add_module_list(${TARGET_NAME} cxx_modules PUBLIC ${PUBLIC_MODULE_LIST})
     endif()
 endfunction()
 

@@ -81,7 +81,7 @@ function(pr_init_module TARGET_NAME)
         set(SRC_PATH "src" "${PA_SRC_PATH}")
     endif()
 
-    pr_add_headers(${TARGET_NAME} "${SRC_PATH}" PRIVATE)
+    pr_add_headers(${TARGET_NAME} "${SRC_PATH}/implementation" PRIVATE)
     pr_add_sources(${TARGET_NAME} "${SRC_PATH}")
     pr_add_modules(${TARGET_NAME} "${SRC_PATH}")
 

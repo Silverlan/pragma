@@ -33,7 +33,7 @@ std::string pragma::audio::get_audio_api_module_location(const std::string &audi
 
 al::ISoundSystem *CEngine::InitializeSoundEngine()
 {
-	Con::cout << "Initializing sound engine..." << Con::endl;
+	spdlog::info("Initializing sound engine...");
 
 	auto &audioAPI = GetAudioAPI();
 	auto getAudioApiPath = [](const std::string &audioAPI, std::string &outLocation, std::string &outModulePath) {

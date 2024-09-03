@@ -902,7 +902,7 @@ std::shared_ptr<Model> Game::LoadModel(const std::string &mdl, bool bReload)
 	debug::get_domain().BeginTask("load_model");
 	util::ScopeGuard sgVtune {[]() { debug::get_domain().EndTask(); }};
 #endif
-	spdlog::info("Loading model '{}'...", mdl);
+	spdlog::debug("Loading model '{}'...", mdl);
 	auto *asset = GetNetworkState()->GetModelManager().FindCachedAsset(mdl);
 	if(asset)
 		return pragma::asset::ModelManager::GetAssetObject(*asset);

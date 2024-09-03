@@ -58,7 +58,7 @@ Lua::opt<luabind::tableT<void>> Lua::ALBuffer::GetPhonemeData(lua_State *l, al::
 	auto pUserData = buffer.GetUserData();
 	if(pUserData == nullptr)
 		return nil;
-	auto &phonemeData = *static_cast<se_script::SoundPhonemeData *>(pUserData.get());
+	auto &phonemeData = *static_cast<source_engine::script::SoundPhonemeData *>(pUserData.get());
 
 	auto t = luabind::newtable(l);
 	t["plainText"] = phonemeData.plainText;

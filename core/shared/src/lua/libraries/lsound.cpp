@@ -178,8 +178,8 @@ int Lua::sound::read_wav_phonemes(lua_State *l)
 	auto f = FileManager::OpenFile(fname.c_str(), "rb");
 	if(f == nullptr)
 		return 0;
-	se_script::SoundPhonemeData sp {};
-	if(se_script::read_wav_phonemes(f, sp) != util::MarkupFile::ResultCode::Ok)
+	source_engine::script::SoundPhonemeData sp {};
+	if(source_engine::script::read_wav_phonemes(f, sp) != util::MarkupFile::ResultCode::Ok)
 		return 0;
 
 	auto t = Lua::CreateTable(l);

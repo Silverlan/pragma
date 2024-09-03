@@ -304,7 +304,7 @@ void CFlexComponent::UpdateSoundPhonemes(CALSound &snd)
 	if(mdl == nullptr)
 		return;
 	auto &phonemeMap = mdl->GetPhonemeMap();
-	auto &phonemeData = *static_cast<se_script::SoundPhonemeData *>(userData.get());
+	auto &phonemeData = *static_cast<source_engine::script::SoundPhonemeData *>(userData.get());
 	auto t = snd.GetTimeOffset();
 	for(auto itWord = phonemeData.words.begin(); itWord != phonemeData.words.end(); ++itWord) {
 		auto &word = *itWord;
@@ -317,7 +317,7 @@ void CFlexComponent::UpdateSoundPhonemes(CALSound &snd)
 			auto it = phonemeMap.phonemes.find(phoneme.phoneme);
 			if(it != phonemeMap.phonemes.end()) {
 				// Find next phoneme to interpolate
-				se_script::SoundPhonemeData::PhonemeData *nextPhoneme = nullptr;
+				source_engine::script::SoundPhonemeData::PhonemeData *nextPhoneme = nullptr;
 				PhonemeInfo *nextPhonemeInfo = nullptr;
 				auto itPhonemeNext = itPhoneme + 1;
 				if(itPhonemeNext != word.phonemes.end())

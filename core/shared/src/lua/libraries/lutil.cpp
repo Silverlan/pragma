@@ -1497,11 +1497,11 @@ luabind::object Lua::util::read_scene_file(lua_State *l, const std::string &file
 	auto f = FileManager::OpenFile(fname.c_str(), "r");
 	if(f == nullptr)
 		return {};
-	se_script::SceneScriptValue root {};
-	if(se_script::read_scene(f, root) != ::util::MarkupFile::ResultCode::Ok)
+	source_engine::script::SceneScriptValue root {};
+	if(source_engine::script::read_scene(f, root) != ::util::MarkupFile::ResultCode::Ok)
 		return {};
-	std::function<void(const se_script::SceneScriptValue &)> fPushValue = nullptr;
-	fPushValue = [l, &fPushValue](const se_script::SceneScriptValue &val) {
+	std::function<void(const source_engine::script::SceneScriptValue &)> fPushValue = nullptr;
+	fPushValue = [l, &fPushValue](const source_engine::script::SceneScriptValue &val) {
 		auto t = Lua::CreateTable(l);
 
 		Lua::PushString(l, "identifier");

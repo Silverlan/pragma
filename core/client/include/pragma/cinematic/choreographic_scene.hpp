@@ -8,10 +8,9 @@
 #ifndef __CHOREOGRAPHIC_SCENE_HPP__
 #define __CHOREOGRAPHIC_SCENE_HPP__
 
-#include <util_timeline_scene.hpp>
-#include <util_timeline_channel.hpp>
-#include <util_timeline_event.hpp>
 #include <pragma/entities/baseentity_handle.h>
+
+import timeline_scene;
 
 class CBaseEntity;
 namespace choreography {

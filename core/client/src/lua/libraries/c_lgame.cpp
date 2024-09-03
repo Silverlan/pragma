@@ -31,7 +31,6 @@
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <prosper_util.hpp>
-#include <util_timeline_impl.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <cmaterial.h>

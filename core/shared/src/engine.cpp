@@ -40,6 +40,7 @@
 #include <sharedutils/util_path.hpp>
 #include <sharedutils/util_debug.h>
 #include <fsys/filesystem.h>
+#include <spdlog/pattern_formatter.h>
 
 #ifdef __linux__
 #include <pthread.h>
@@ -612,7 +613,9 @@ bool Engine::Initialize(int argc, char *argv[])
 	auto f = filemanager::open_file("git_info.txt", filemanager::FileMode::Read, fsys::SearchFlags::Local | fsys::SearchFlags::NoMounts);
 	if(f) {
 		spdlog::info("Git Info:");
-		spdlog::info(f->ReadString());
+		auto str = f->ReadString();
+		ustring::replace(str, "\n", spdlog::details::os::default_eol);
+		spdlog::info(str);
 	}
 
 #if 0

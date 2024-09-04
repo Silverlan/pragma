@@ -285,7 +285,11 @@ void Engine::RegisterConsoleCommands()
 			  Con::cwar << "Cannot load savegame: No active game!" << Con::endl;
 			  return;
 		  }
-		  auto path = "savegames/" + util::get_date_time() + ".psav";
+		  auto path = "savegames/" + argv.front();
+		  if(filemanager::exists(path + ".psav_b"))
+			  path += ".psav_b";
+		  else
+			  path += ".psav";
 		  FileManager::CreatePath(ufile::get_path_from_filename(path).c_str());
 		  std::string err;
 		  auto result = pragma::savegame::load(*game, path, err);

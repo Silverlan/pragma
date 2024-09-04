@@ -23,7 +23,7 @@ bool savegame::save(Game &game, const std::string &fileName, std::string &outErr
 	auto udmData = udm::Data::Create(PSAV_IDENTIFIER, FORMAT_VERSION);
 	auto outData = udmData->GetAssetData().GetData();
 
-	outData["map"] = game.GetMapName();
+	outData["map"] << game.GetMapName();
 
 	auto &ents = game.GetBaseEntities();
 	uint32_t numEnts = 0;
@@ -38,8 +38,8 @@ bool savegame::save(Game &game, const std::string &fileName, std::string &outErr
 		if(ent == nullptr)
 			continue;
 		auto udmEnt = udmEntities[entIdx];
-		udmEnt["index"] = ent->GetIndex();
-		udmEnt["class"] = ent->GetClass();
+		udmEnt["index"] << ent->GetIndex();
+		udmEnt["class"] << ent->GetClass().str;
 		auto data = udmEnt["data"];
 		ent->Save(data);
 
@@ -68,7 +68,7 @@ bool savegame::load(Game &game, const std::string &fileName, std::string &outErr
 	// 	return false;
 
 	std::string map;
-	data["map"](map);
+	data["map"] >> map;
 
 	if(game.LoadMap(map) == false) {
 		outErr = "Unable to load map '" + map + "'!";
@@ -80,9 +80,9 @@ bool savegame::load(Game &game, const std::string &fileName, std::string &outErr
 	entities.reserve(udmEntities.GetSize());
 	for(auto udmEnt : udmEntities) {
 		EntityIndex idx = 0;
-		udmEnt["index"](idx);
+		udmEnt["index"] >> idx;
 		std::string className;
-		udmEnt["class"](className);
+		udmEnt["class"] >> className;
 
 		auto data = udmEnt["data"];
 		auto *ent = game.CreateEntity(className);

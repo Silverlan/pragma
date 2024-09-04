@@ -17,6 +17,8 @@
 #include <pragma/lua/lua_error_handling.hpp>
 #include <pragma/logging.hpp>
 #include <prosper_window.hpp>
+#include <spdlog/pattern_formatter.h>
+#include <sharedutils/magic_enum.hpp>
 
 using namespace pragma;
 

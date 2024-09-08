@@ -137,6 +137,7 @@ void LightDataBufferManager::Reset()
 	m_lightDataBuffers = {};
 	m_highestBufferIndexInUse = std::numeric_limits<uint32_t>::max();
 }
+uint32_t LightDataBufferManager::GetLightDataBufferCount() const { return std::min(m_lightDataBuffers.size(), static_cast<size_t>(m_highestBufferIndexInUse + 1)); }
 std::shared_ptr<prosper::IBuffer> LightDataBufferManager::Request(CLightComponent &lightSource, const LightBufferData &bufferData)
 {
 	std::shared_ptr<prosper::IBuffer> renderBuffer = nullptr;

@@ -82,7 +82,7 @@ namespace pragma {
 		std::shared_ptr<prosper::IBuffer> Request(CLightComponent &lightSource, const LightBufferData &bufferData);
 		void Free(const std::shared_ptr<prosper::IBuffer> &renderBuffer);
 		virtual void Reset() override;
-		uint32_t GetLightDataBufferCount() const { return m_lightDataBuffers.size(); }
+		uint32_t GetLightDataBufferCount() const;
 	  private:
 		LightDataBufferManager() = default;
 		virtual void DoInitialize() override;

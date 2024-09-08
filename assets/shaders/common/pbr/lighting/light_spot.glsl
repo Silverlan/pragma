@@ -29,7 +29,7 @@ vec3 apply_spot_light(LightSourceData light, MaterialInfo materialInfo, vec3 nor
 {
 	vec3 pointToLight = light.position.xyz - vertPos;
 	float spotAttenuation = calc_spot_light_attenuation(pointToLight, light);
-	vec3 shade = get_point_shade(pointToLight, materialInfo, normal, view);
+	vec3 shade = get_point_shade(normalize(pointToLight), materialInfo, normal, view);
 	return spotAttenuation * light.color.a * light.color.rgb * shade;
 }
 

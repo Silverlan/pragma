@@ -8,9 +8,6 @@
 #define SHADER_VERTEX_BUFFER_LOCATION 0
 #define SHADER_VERTEX_COLOR_LOCATION 1
 
-#define SHADER_UNIFORM_COLOR_SET 0
-#define SHADER_UNIFORM_COLOR_BINDING 0
-
 #include "debug.glsl"
 
 layout(location = SHADER_VERTEX_BUFFER_LOCATION) in vec3 in_vert_pos;

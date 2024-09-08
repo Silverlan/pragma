@@ -12,7 +12,7 @@
 #include "/functions/fs_linearize_depth.glsl"
 #include "/math/intersection.glsl"
 
-layout(std430, LAYOUT_ID(LIGHTS, VISIBLE_LIGHT_TILE_INDEX_BUFFER)) buffer VisibleLightIndicesBuffer { uint visibleBits[]; }
+layout(std430, LAYOUT_ID(LIGHTS, VISIBLE_LIGHT_INDEX_BUFFER)) buffer VisibleLightIndicesBuffer { uint visibleBits[]; }
 visibleLightIndicesBuffer;
 
 layout(LAYOUT_PUSH_CONSTANTS()) uniform LightInfo

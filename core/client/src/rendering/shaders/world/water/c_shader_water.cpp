@@ -24,21 +24,17 @@ using namespace pragma;
 
 extern DLLCLIENT CEngine *c_engine;
 
-decltype(ShaderWater::DESCRIPTOR_SET_MATERIAL) ShaderWater::DESCRIPTOR_SET_MATERIAL = {{prosper::DescriptorSetInfo::Binding {// DuDv Map
-                                                                                          prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit},
-  prosper::DescriptorSetInfo::Binding {// Normal Map
-    prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}}};
-decltype(ShaderWater::DESCRIPTOR_SET_WATER) ShaderWater::DESCRIPTOR_SET_WATER = {{prosper::DescriptorSetInfo::Binding {// Reflection Map
-                                                                                    prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit},
-  prosper::DescriptorSetInfo::Binding {// Refraction Map
-    prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit},
-  prosper::DescriptorSetInfo::Binding {// Refraction Depth
-    prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit},
-  prosper::DescriptorSetInfo::Binding {// Water settings
-    prosper::DescriptorType::UniformBuffer, prosper::ShaderStageFlags::FragmentBit},
-  prosper::DescriptorSetInfo::Binding {// Water fog
-    prosper::DescriptorType::UniformBuffer, prosper::ShaderStageFlags::FragmentBit}}};
-ShaderWater::ShaderWater(prosper::IPrContext &context, const std::string &identifier) : ShaderGameWorldLightingPass(context, identifier, "world/vs_textured", "world/fs_water")
+decltype(ShaderWater::DESCRIPTOR_SET_MATERIAL) ShaderWater::DESCRIPTOR_SET_MATERIAL = {
+  "MATERIAL",
+  {prosper::DescriptorSetInfo::Binding {"DUDV_MAP", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}, prosper::DescriptorSetInfo::Binding {"NORMAL_MAP", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}},
+};
+decltype(ShaderWater::DESCRIPTOR_SET_WATER) ShaderWater::DESCRIPTOR_SET_WATER = {
+  "WATER",
+  {prosper::DescriptorSetInfo::Binding {"REFLECTION_MAP", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}, prosper::DescriptorSetInfo::Binding {"REFRACTION_MAP", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit},
+    prosper::DescriptorSetInfo::Binding {"REFRACTION_DEPTH", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}, prosper::DescriptorSetInfo::Binding {"SETTINGS", prosper::DescriptorType::UniformBuffer, prosper::ShaderStageFlags::FragmentBit},
+    prosper::DescriptorSetInfo::Binding {"FOG", prosper::DescriptorType::UniformBuffer, prosper::ShaderStageFlags::FragmentBit}},
+};
+ShaderWater::ShaderWater(prosper::IPrContext &context, const std::string &identifier) : ShaderGameWorldLightingPass(context, identifier, "programs/scene/water", "programs/scene/water")
 {
 	// SetBaseShader<ShaderTextured3DBase>();
 }
@@ -106,15 +102,12 @@ void ShaderWater::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pip
 	pipelineInfo.ToggleDepthWrites(true); // Water is not part of render pre-pass, but we need the depth for post-processing
 }
 
-void ShaderWater::InitializeGfxPipelineDescriptorSets(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
+void ShaderWater::InitializeGfxPipelineDescriptorSets()
 {
-	ShaderGameWorldLightingPass::InitializeGfxPipelineDescriptorSets(pipelineInfo, pipelineIdx);
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_WATER);
+	ShaderGameWorldLightingPass::InitializeGfxPipelineDescriptorSets();
+	AddDescriptorSetGroup(DESCRIPTOR_SET_WATER);
 }
 
-void ShaderWater::InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
-{
-	AttachPushConstantRange(pipelineInfo, pipelineIdx, 0u, sizeof(ShaderGameWorldLightingPass::PushConstants) + sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit);
-}
+void ShaderWater::InitializeGfxPipelinePushConstantRanges() { AttachPushConstantRange(0u, sizeof(ShaderGameWorldLightingPass::PushConstants) + sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit); }
 
 prosper::DescriptorSetInfo &ShaderWater::GetMaterialDescriptorSetInfo() const { return DESCRIPTOR_SET_MATERIAL; }

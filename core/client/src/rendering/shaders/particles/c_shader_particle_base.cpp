@@ -20,7 +20,12 @@ using namespace pragma;
 
 // +1 for depth pass
 uint32_t ShaderParticleBase::PIPELINE_COUNT = umath::to_integral(ParticleAlphaMode::Count) + 1;
-decltype(ShaderParticleBase::DESCRIPTOR_SET_ANIMATION) ShaderParticleBase::DESCRIPTOR_SET_ANIMATION = {{prosper::DescriptorSetInfo::Binding {prosper::DescriptorType::StorageBuffer, prosper::ShaderStageFlags::FragmentBit}}};
+decltype(ShaderParticleBase::DESCRIPTOR_SET_ANIMATION) ShaderParticleBase::DESCRIPTOR_SET_ANIMATION = {
+  "ANIMATION",
+  {
+    prosper::DescriptorSetInfo::Binding {"ANIMATION_DATA", prosper::DescriptorType::StorageBuffer, prosper::ShaderStageFlags::FragmentBit},
+  },
+};
 prosper::IDescriptorSet &ShaderParticleBase::GetAnimationDescriptorSet(const pragma::CParticleSystemComponent &ps)
 {
 	auto *animDescSet = const_cast<pragma::CParticleSystemComponent &>(ps).GetAnimationDescriptorSet();

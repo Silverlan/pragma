@@ -29,6 +29,7 @@ namespace pragma {
 		bool RecordDraw(prosper::ShaderBindState &bindState, const PushConstants &pushConstants = {{0.f, 0.f, 0.f, 0.f}}) const;
 	  protected:
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
+		virtual void InitializeShaderResources() override;
 	};
 };
 

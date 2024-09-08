@@ -22,20 +22,22 @@ extern DLLCLIENT CEngine *c_engine;
 
 decltype(ShaderPPGlow::DESCRIPTOR_SET_INSTANCE) ShaderPPGlow::DESCRIPTOR_SET_INSTANCE = {&ShaderGameWorldLightingPass::DESCRIPTOR_SET_INSTANCE};
 decltype(ShaderPPGlow::DESCRIPTOR_SET_SCENE) ShaderPPGlow::DESCRIPTOR_SET_SCENE = {&ShaderGameWorldLightingPass::DESCRIPTOR_SET_SCENE};
-decltype(ShaderPPGlow::DESCRIPTOR_SET_MATERIAL) ShaderPPGlow::DESCRIPTOR_SET_MATERIAL = {{prosper::DescriptorSetInfo::Binding {// Glow Map
-  prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}}};
+decltype(ShaderPPGlow::DESCRIPTOR_SET_MATERIAL) ShaderPPGlow::DESCRIPTOR_SET_MATERIAL = {
+  "GLOW",
+  {prosper::DescriptorSetInfo::Binding {"MAP", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}},
+};
 decltype(ShaderPPGlow::RENDER_PASS_FORMAT) ShaderPPGlow::RENDER_PASS_FORMAT = prosper::Format::R8G8B8A8_UNorm;
-ShaderPPGlow::ShaderPPGlow(prosper::IPrContext &context, const std::string &identifier) : ShaderGameWorldLightingPass(context, identifier, "world/vs_glow", "world/fs_glow")
+ShaderPPGlow::ShaderPPGlow(prosper::IPrContext &context, const std::string &identifier) : ShaderGameWorldLightingPass(context, identifier, "programs/scene/glow/glow", "programs/scene/glow/glow")
 {
 	// SetBaseShader<ShaderTextured3DBase>();
 }
 prosper::DescriptorSetInfo &ShaderPPGlow::GetMaterialDescriptorSetInfo() const { return DESCRIPTOR_SET_MATERIAL; }
-void ShaderPPGlow::InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { AttachPushConstantRange(pipelineInfo, pipelineIdx, 0u, sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit); }
-void ShaderPPGlow::InitializeGfxPipelineDescriptorSets(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
+void ShaderPPGlow::InitializeGfxPipelinePushConstantRanges() { AttachPushConstantRange(0u, sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit); }
+void ShaderPPGlow::InitializeGfxPipelineDescriptorSets()
 {
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_INSTANCE);
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, GetMaterialDescriptorSetInfo());
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_SCENE);
+	AddDescriptorSetGroup(DESCRIPTOR_SET_INSTANCE);
+	AddDescriptorSetGroup(GetMaterialDescriptorSetInfo());
+	AddDescriptorSetGroup(DESCRIPTOR_SET_SCENE);
 }
 void ShaderPPGlow::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
 {

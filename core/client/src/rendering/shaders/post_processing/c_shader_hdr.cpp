@@ -13,13 +13,15 @@
 
 using namespace pragma;
 
-ShaderHDR::ShaderHDR(prosper::IPrContext &context, const std::string &identifier) : prosper::ShaderBaseImageProcessing(context, identifier, "screen/fs_hdr") { SetBaseShader<prosper::ShaderCopyImage>(); }
+ShaderHDR::ShaderHDR(prosper::IPrContext &context, const std::string &identifier) : prosper::ShaderBaseImageProcessing(context, identifier, "programs/post_processing/hdr") { SetBaseShader<prosper::ShaderCopyImage>(); }
 
-void ShaderHDR::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
+void ShaderHDR::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { prosper::ShaderBaseImageProcessing::InitializeGfxPipeline(pipelineInfo, pipelineIdx); }
+
+void ShaderHDR::InitializeShaderResources()
 {
-	prosper::ShaderBaseImageProcessing::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
+	prosper::ShaderBaseImageProcessing::InitializeShaderResources();
 
-	AttachPushConstantRange(pipelineInfo, pipelineIdx, 0u, sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit);
+	AttachPushConstantRange(0u, sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit);
 }
 
 bool ShaderHDR::RecordDraw(prosper::ShaderBindState &bindState, prosper::IDescriptorSet &descSetTexture, float exposure) const { return RecordPushConstants(bindState, PushConstants {exposure}) && prosper::ShaderBaseImageProcessing::RecordDraw(bindState, descSetTexture); }

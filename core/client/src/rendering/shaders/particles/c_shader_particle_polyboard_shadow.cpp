@@ -26,7 +26,7 @@ LINK_SHADER_TO_CLASS(ParticlePolyboardShadow,particlepolyboardshadow);
 extern DLLCLIENT CGame *c_game;
 
 ParticlePolyboardShadow::ParticlePolyboardShadow()
-	: ParticleShadowBase<ParticlePolyboard>("particlepolyboardshadow","particles/beam/vs_particle_polyboard_shadow","particles/beam/fs_particle_polyboard_shadow","particles/beam/gs_particle_polyboard_shadow")
+	: ParticleShadowBase<ParticlePolyboard>("particlepolyboardshadow","programs/particles/beam/particle_polyboard_shadow","programs/particles/beam/particle_polyboard_shadow","programs/particles/beam/particle_polyboard_shadow")
 {
 	m_bEnableLighting = false;
 	SetUseDepth(true);

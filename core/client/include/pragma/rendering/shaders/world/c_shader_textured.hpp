@@ -235,12 +235,13 @@ namespace pragma {
 		virtual void UpdateRenderFlags(CModelSubMesh &mesh, SceneFlags &inOutFlags);
 		std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat, const prosper::DescriptorSetInfo &descSetInfo);
 		std::optional<MaterialData> InitializeMaterialBuffer(prosper::IDescriptorSet &descSet, CMaterial &mat);
-		virtual void InitializeGfxPipelineVertexAttributes(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx);
-		virtual void InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx);
-		virtual void InitializeGfxPipelineDescriptorSets(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx);
+		virtual void InitializeGfxPipelineVertexAttributes();
+		virtual void InitializeGfxPipelinePushConstantRanges();
+		virtual void InitializeGfxPipelineDescriptorSets();
 		virtual prosper::DescriptorSetInfo &GetMaterialDescriptorSetInfo() const;
 		virtual void GetVertexAnimationPushConstantInfo(uint32_t &offset) const override;
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
+		virtual void InitializeShaderResources() override;
 		bool m_depthPrepassEnabled = true;
 	};
 };

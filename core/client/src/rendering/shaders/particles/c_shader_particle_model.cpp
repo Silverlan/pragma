@@ -33,10 +33,15 @@ decltype(ShaderParticleModel::VERTEX_ATTRIBUTE_ROTATION) ShaderParticleModel::VE
 decltype(ShaderParticleModel::VERTEX_BINDING_ANIMATION_START) ShaderParticleModel::VERTEX_BINDING_ANIMATION_START = {prosper::VertexInputRate::Instance};
 decltype(ShaderParticleModel::VERTEX_ATTRIBUTE_ANIMATION_START) ShaderParticleModel::VERTEX_ATTRIBUTE_ANIMATION_START = {VERTEX_BINDING_ANIMATION_START, prosper::Format::R32_SFloat};
 
-decltype(ShaderParticleModel::DESCRIPTOR_SET_ANIMATION) ShaderParticleModel::DESCRIPTOR_SET_ANIMATION = {{prosper::DescriptorSetInfo::Binding {prosper::DescriptorType::UniformBuffer, prosper::ShaderStageFlags::FragmentBit}}};
-decltype(ShaderParticleModel::DESCRIPTOR_SET_BONE_MATRICES) ShaderParticleModel::DESCRIPTOR_SET_BONE_MATRICES = {{prosper::DescriptorSetInfo::Binding {// Bone Matrices
-  prosper::DescriptorType::UniformBufferDynamic, prosper::ShaderStageFlags::VertexBit}}};
-ShaderParticleModel::ShaderParticleModel(prosper::IPrContext &context, const std::string &identifier) : ShaderGameWorldLightingPass(context, identifier, "particles/model/vs_particle_model", "particles/model/fs_particle_model")
+decltype(ShaderParticleModel::DESCRIPTOR_SET_ANIMATION) ShaderParticleModel::DESCRIPTOR_SET_ANIMATION = {
+  "ANIMATION",
+  {prosper::DescriptorSetInfo::Binding {"DATA", prosper::DescriptorType::UniformBuffer, prosper::ShaderStageFlags::FragmentBit}},
+};
+decltype(ShaderParticleModel::DESCRIPTOR_SET_BONE_MATRICES) ShaderParticleModel::DESCRIPTOR_SET_BONE_MATRICES = {
+  "BONES",
+  {prosper::DescriptorSetInfo::Binding {"MATRIX_DATA", prosper::DescriptorType::UniformBufferDynamic, prosper::ShaderStageFlags::VertexBit}},
+};
+ShaderParticleModel::ShaderParticleModel(prosper::IPrContext &context, const std::string &identifier) : ShaderGameWorldLightingPass(context, identifier, "programs/particles/model/particle_model", "programs/particles/model/particle_model")
 {
 	SetPipelineCount(GetParticlePipelineCount());
 	SetBaseShader<pragma::ShaderGameWorldLightingPass>();
@@ -54,25 +59,25 @@ void ShaderParticleModel::InitializeGfxPipeline(prosper::GraphicsPipelineCreateI
 {
 	auto basePipelineIdx = GetBasePipelineIndex(pipelineIdx);
 	ShaderGameWorldLightingPass::InitializeGfxPipeline(pipelineInfo, basePipelineIdx);
-
-	//pipelineInfo.ToggleDepthWrites(true);
-	AddVertexAttribute(pipelineInfo, VERTEX_ATTRIBUTE_POSITION);
-	AddVertexAttribute(pipelineInfo, VERTEX_ATTRIBUTE_RADIUS);
-	AddVertexAttribute(pipelineInfo, VERTEX_ATTRIBUTE_PREVPOS);
-	AddVertexAttribute(pipelineInfo, VERTEX_ATTRIBUTE_AGE);
-	AddVertexAttribute(pipelineInfo, VERTEX_ATTRIBUTE_COLOR);
-	AddVertexAttribute(pipelineInfo, VERTEX_ATTRIBUTE_ROTATION);
-
-	AddVertexAttribute(pipelineInfo, VERTEX_ATTRIBUTE_ANIMATION_START);
 	ShaderParticleBase::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
-
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_ANIMATION);
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_BONE_MATRICES);
 }
-void ShaderParticleModel::InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
+void ShaderParticleModel::InitializeShaderResources()
 {
-	AttachPushConstantRange(pipelineInfo, pipelineIdx, 0u, sizeof(ShaderGameWorldLightingPass::PushConstants) + sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit);
+	ShaderGameWorldLightingPass::InitializeShaderResources();
+
+	AddVertexAttribute(VERTEX_ATTRIBUTE_POSITION);
+	AddVertexAttribute(VERTEX_ATTRIBUTE_RADIUS);
+	AddVertexAttribute(VERTEX_ATTRIBUTE_PREVPOS);
+	AddVertexAttribute(VERTEX_ATTRIBUTE_AGE);
+	AddVertexAttribute(VERTEX_ATTRIBUTE_COLOR);
+	AddVertexAttribute(VERTEX_ATTRIBUTE_ROTATION);
+
+	AddVertexAttribute(VERTEX_ATTRIBUTE_ANIMATION_START);
+
+	AddDescriptorSetGroup(DESCRIPTOR_SET_ANIMATION);
+	AddDescriptorSetGroup(DESCRIPTOR_SET_BONE_MATRICES);
 }
+void ShaderParticleModel::InitializeGfxPipelinePushConstantRanges() { AttachPushConstantRange(0u, sizeof(ShaderGameWorldLightingPass::PushConstants) + sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit); }
 bool ShaderParticleModel::RecordParticleSystem(prosper::ShaderBindState &bindState, pragma::CParticleSystemComponent &pSys) const
 {
 	auto &descSet = const_cast<ShaderParticleModel *>(this)->GetAnimationDescriptorSet(pSys);

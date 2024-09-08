@@ -20,7 +20,7 @@ LINK_SHADER_TO_CLASS(ParticleBlobShadow,particleblobshadow);
 extern DLLCLIENT CGame *c_game;
 
 ParticleBlobShadow::ParticleBlobShadow()
-	: ParticleShadowBase<ParticleBase>("ParticleBlobShadow","particles/blob/vs_particle_blob_shadow","particles/blob/fs_particle_blob_shadow")
+	: ParticleShadowBase<ParticleBase>("ParticleBlobShadow","programs/particles/blob/particle_blob_shadow","programs/particles/blob/particle_blob_shadow")
 {}
 
 void ParticleBlobShadow::InitializeVertexDescriptions(std::vector<vk::VertexInputBindingDescription> &vertexBindingDescriptions,std::vector<vk::VertexInputAttributeDescription> &vertexAttributeDescriptions)

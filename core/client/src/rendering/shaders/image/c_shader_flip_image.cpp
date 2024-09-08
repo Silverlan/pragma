@@ -20,15 +20,17 @@ using namespace pragma;
 
 extern DLLCLIENT CEngine *c_engine;
 
-ShaderFlipImage::ShaderFlipImage(prosper::IPrContext &context, const std::string &identifier) : prosper::ShaderBaseImageProcessing(context, identifier, "util/fs_flip") { SetBaseShader<prosper::ShaderCopyImage>(); }
+ShaderFlipImage::ShaderFlipImage(prosper::IPrContext &context, const std::string &identifier) : prosper::ShaderBaseImageProcessing(context, identifier, "programs/util/flip") { SetBaseShader<prosper::ShaderCopyImage>(); }
 
 ShaderFlipImage::~ShaderFlipImage() {}
 
-void ShaderFlipImage::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
-{
-	ShaderBaseImageProcessing::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
+void ShaderFlipImage::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { ShaderBaseImageProcessing::InitializeGfxPipeline(pipelineInfo, pipelineIdx); }
 
-	AttachPushConstantRange(pipelineInfo, pipelineIdx, 0u, sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit);
+void ShaderFlipImage::InitializeShaderResources()
+{
+	ShaderBaseImageProcessing::InitializeShaderResources();
+
+	AttachPushConstantRange(0u, sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit);
 }
 
 bool ShaderFlipImage::RecordDraw(prosper::ICommandBuffer &cmd, prosper::IDescriptorSet &descSetTexture, bool flipHorizontally, bool flipVertically) const

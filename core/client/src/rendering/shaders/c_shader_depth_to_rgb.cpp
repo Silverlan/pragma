@@ -21,21 +21,29 @@ decltype(ShaderDepthToRGB::VERTEX_BINDING_VERTEX) ShaderDepthToRGB::VERTEX_BINDI
 decltype(ShaderDepthToRGB::VERTEX_ATTRIBUTE_POSITION) ShaderDepthToRGB::VERTEX_ATTRIBUTE_POSITION = {VERTEX_BINDING_VERTEX, prosper::CommonBufferCache::GetSquareVertexFormat()};
 decltype(ShaderDepthToRGB::VERTEX_ATTRIBUTE_UV) ShaderDepthToRGB::VERTEX_ATTRIBUTE_UV = {VERTEX_BINDING_VERTEX, prosper::CommonBufferCache::GetSquareUvFormat()};
 
-decltype(ShaderDepthToRGB::DESCRIPTOR_SET) ShaderDepthToRGB::DESCRIPTOR_SET = {{prosper::DescriptorSetInfo::Binding {prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}}};
-ShaderDepthToRGB::ShaderDepthToRGB(prosper::IPrContext &context, const std::string &identifier, const std::string &fsShader) : ShaderGraphics(context, identifier, "screen/vs_screen_uv", fsShader) {}
-ShaderDepthToRGB::ShaderDepthToRGB(prosper::IPrContext &context, const std::string &identifier) : ShaderDepthToRGB(context, identifier, "debug/fs_depth_to_rgb") {}
+decltype(ShaderDepthToRGB::DESCRIPTOR_SET) ShaderDepthToRGB::DESCRIPTOR_SET = {
+  "TEXTURE",
+  {prosper::DescriptorSetInfo::Binding {"DEPTH_MAP", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}},
+};
+ShaderDepthToRGB::ShaderDepthToRGB(prosper::IPrContext &context, const std::string &identifier, const std::string &fsShader) : ShaderGraphics(context, identifier, "programs/image/noop_uv", fsShader) {}
+ShaderDepthToRGB::ShaderDepthToRGB(prosper::IPrContext &context, const std::string &identifier) : ShaderDepthToRGB(context, identifier, "programs/debug/depth_to_rgb") {}
 
 void ShaderDepthToRGB::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
 {
 	ShaderGraphics::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
 
 	ToggleDynamicScissorState(pipelineInfo, true);
-	AddVertexAttribute(pipelineInfo, VERTEX_ATTRIBUTE_POSITION);
-	AddVertexAttribute(pipelineInfo, VERTEX_ATTRIBUTE_UV);
+}
+void ShaderDepthToRGB::InitializeShaderResources()
+{
+	ShaderGraphics::InitializeShaderResources();
 
-	AttachPushConstantRange(pipelineInfo, pipelineIdx, 0u, GetPushConstantSize(), prosper::ShaderStageFlags::FragmentBit);
+	AddVertexAttribute(VERTEX_ATTRIBUTE_POSITION);
+	AddVertexAttribute(VERTEX_ATTRIBUTE_UV);
 
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET);
+	AttachPushConstantRange(0u, GetPushConstantSize(), prosper::ShaderStageFlags::FragmentBit);
+
+	AddDescriptorSetGroup(DESCRIPTOR_SET);
 }
 
 template<class TPushConstants>
@@ -51,7 +59,7 @@ uint32_t ShaderDepthToRGB::GetPushConstantSize() const { return sizeof(PushConst
 
 //////////////////////
 
-ShaderCubeDepthToRGB::ShaderCubeDepthToRGB(prosper::IPrContext &context, const std::string &identifier) : ShaderDepthToRGB(context, identifier, "debug/fs_cube_depth_to_rgb") {}
+ShaderCubeDepthToRGB::ShaderCubeDepthToRGB(prosper::IPrContext &context, const std::string &identifier) : ShaderDepthToRGB(context, identifier, "programs/debug/cube_depth_to_rgb") {}
 
 bool ShaderCubeDepthToRGB::RecordDraw(prosper::ShaderBindState &bindState, prosper::IDescriptorSet &descSetDepthTex, float nearZ, float farZ, uint32_t cubeSide, float contrastFactor) const
 {
@@ -62,7 +70,7 @@ uint32_t ShaderCubeDepthToRGB::GetPushConstantSize() const { return sizeof(PushC
 
 //////////////////////
 
-ShaderCSMDepthToRGB::ShaderCSMDepthToRGB(prosper::IPrContext &context, const std::string &identifier) : ShaderDepthToRGB(context, identifier, "debug/fs_csm_depth_to_rgb") {}
+ShaderCSMDepthToRGB::ShaderCSMDepthToRGB(prosper::IPrContext &context, const std::string &identifier) : ShaderDepthToRGB(context, identifier, "programs/debug/csm_depth_to_rgb") {}
 
 bool ShaderCSMDepthToRGB::RecordDraw(prosper::ShaderBindState &bindState, prosper::IDescriptorSet &descSetDepthTex, float nearZ, float farZ, uint32_t layer, float contrastFactor) const
 {

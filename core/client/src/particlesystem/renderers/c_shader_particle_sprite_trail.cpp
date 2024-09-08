@@ -18,7 +18,7 @@ extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
 
-ShaderParticleSpriteTrail::ShaderParticleSpriteTrail(prosper::IPrContext &context, const std::string &identifier) : ShaderParticle2DBase(context, identifier, "pfm/particles/vs_particle_sprite_trail", "particles/fs_particle") {}
+ShaderParticleSpriteTrail::ShaderParticleSpriteTrail(prosper::IPrContext &context, const std::string &identifier) : ShaderParticle2DBase(context, identifier, "programs/pfm/particles/particle_sprite_trail", "programs/particles/particle") {}
 
 Vector3 ShaderParticleSpriteTrail::DoCalcVertexPosition(const pragma::CParticleSystemComponent &ptc, uint32_t ptIdx, uint32_t localVertIdx, const Vector3 &camPos, const Vector3 &camUpWs, const Vector3 &camRightWs, float nearZ, float farZ) const
 {
@@ -64,6 +64,14 @@ Vector3 ShaderParticleSpriteTrail::DoCalcVertexPosition(const pragma::CParticleS
 	return (ptWorldPos - tangentY * rad * 0.5f) + dtPosWs;
 }
 
+void ShaderParticleSpriteTrail::InitializeShaderResources()
+{
+	ShaderSceneLit::InitializeShaderResources();
+
+	RegisterDefaultGfxPipelineVertexAttributes();
+	AttachPushConstantRange(0u, sizeof(ShaderParticle2DBase::PushConstants) + sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit);
+	RegisterDefaultGfxPipelineDescriptorSetGroups();
+}
 void ShaderParticleSpriteTrail::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
 {
 	auto basePipelineIdx = GetBasePipelineIndex(pipelineIdx);
@@ -72,9 +80,6 @@ void ShaderParticleSpriteTrail::InitializeGfxPipeline(prosper::GraphicsPipelineC
 	pipelineInfo.ToggleDepthWrites(pipelineIdx == GetDepthPipelineIndex()); // Last pipeline is depth pipeline
 
 	ShaderParticleBase::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
-	RegisterDefaultGfxPipelineVertexAttributes(pipelineInfo);
-	AttachPushConstantRange(pipelineInfo, pipelineIdx, 0u, sizeof(ShaderParticle2DBase::PushConstants) + sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit);
-	RegisterDefaultGfxPipelineDescriptorSetGroups(pipelineInfo, pipelineIdx);
 }
 
 bool ShaderParticleSpriteTrail::RecordDraw(prosper::ShaderBindState &bindState, pragma::CSceneComponent &scene, const CRasterizationRendererComponent &r, const CParticleSystemComponent &ps, CParticleSystemComponent::OrientationType orientationType, ParticleRenderFlags renderFlags)

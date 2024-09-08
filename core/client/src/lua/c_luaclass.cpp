@@ -317,7 +317,6 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 	defShader.def("GetEntrypointName", &Lua::Shader::GetEntrypointName);
 	defShader.def("GetEntrypointName", static_cast<void (*)(lua_State *, prosper::Shader &, uint32_t)>([](lua_State *l, prosper::Shader &shader, uint32_t shaderStage) { Lua::Shader::GetEntrypointName(l, shader, shaderStage, 0u); }));
 	defShader.def("CreateDescriptorSet", &Lua::Shader::CreateDescriptorSetGroup);
-	defShader.def("CreateDescriptorSet", static_cast<void (*)(lua_State *, prosper::Shader &, uint32_t)>([](lua_State *l, prosper::Shader &shader, uint32_t setIdx) { Lua::Shader::CreateDescriptorSetGroup(l, shader, setIdx, 0u); }));
 	defShader.def("GetPipelineInfo", &Lua::Shader::GetPipelineInfo);
 	defShader.def("GetPipelineInfo", static_cast<void (*)(lua_State *, prosper::Shader &, uint32_t, uint32_t)>([](lua_State *l, prosper::Shader &shader, uint32_t shaderStage, uint32_t pipelineIdx) { Lua::Shader::GetPipelineInfo(l, shader, shaderStage, 0u); }));
 	defShader.def("GetGlslSourceCode", &Lua::Shader::GetGlslSourceCode);
@@ -510,15 +509,15 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 
 	auto defDescriptorSetInfo = luabind::class_<pragma::LuaDescriptorSetInfo>("DescriptorSetInfo");
 	defDescriptorSetInfo.def(luabind::constructor<>());
-	defDescriptorSetInfo.def(luabind::constructor<luabind::object, uint32_t>());
-	defDescriptorSetInfo.def(luabind::constructor<luabind::object>());
+	defDescriptorSetInfo.def(luabind::constructor<const std::string &, luabind::object, uint32_t>());
+	defDescriptorSetInfo.def(luabind::constructor<const std::string &, luabind::object>());
 	defDescriptorSetInfo.def_readwrite("setIndex", &pragma::LuaDescriptorSetInfo::setIndex);
 	modShader[defDescriptorSetInfo];
 
 	auto defDescriptorSetBinding = luabind::class_<pragma::LuaDescriptorSetBinding>("DescriptorSetBinding");
-	defDescriptorSetBinding.def(luabind::constructor<uint32_t, uint32_t, uint32_t, uint32_t>());
-	defDescriptorSetBinding.def(luabind::constructor<uint32_t, uint32_t, uint32_t>());
-	defDescriptorSetBinding.def(luabind::constructor<uint32_t, uint32_t>());
+	defDescriptorSetBinding.def(luabind::constructor<const std::string &, uint32_t, uint32_t, uint32_t, uint32_t>());
+	defDescriptorSetBinding.def(luabind::constructor<const std::string &, uint32_t, uint32_t, uint32_t>());
+	defDescriptorSetBinding.def(luabind::constructor<const std::string &, uint32_t, uint32_t>());
 	defDescriptorSetBinding.def_readwrite("type", reinterpret_cast<uint32_t pragma::LuaDescriptorSetBinding::*>(&pragma::LuaDescriptorSetBinding::type));
 	defDescriptorSetBinding.def_readwrite("shaderStages", reinterpret_cast<uint32_t pragma::LuaDescriptorSetBinding::*>(&pragma::LuaDescriptorSetBinding::shaderStages));
 	defDescriptorSetBinding.def_readwrite("bindingIndex", &pragma::LuaDescriptorSetBinding::bindingIndex);
@@ -526,8 +525,6 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 	modShader[defDescriptorSetBinding];
 
 	auto defShaderBasePipelineCreateInfo = luabind::class_<prosper::BasePipelineCreateInfo>("BasePipelineCreateInfo");
-	defShaderBasePipelineCreateInfo.def("AttachPushConstantRange", &Lua::BasePipelineCreateInfo::AttachPushConstantRange);
-	defShaderBasePipelineCreateInfo.def("AttachDescriptorSetInfo", &Lua::BasePipelineCreateInfo::AttachDescriptorSetInfo);
 	modShader[defShaderBasePipelineCreateInfo];
 
 	auto defShaderGraphicsPipelineCreateInfo = luabind::class_<prosper::GraphicsPipelineCreateInfo, prosper::BasePipelineCreateInfo>("GraphicsPipelineCreateInfo");
@@ -593,7 +590,6 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 	defShaderGraphicsPipelineCreateInfo.def("IsPrimitiveRestartEnabled", &Lua::GraphicsPipelineCreateInfo::IsPrimitiveRestartEnabled);
 	defShaderGraphicsPipelineCreateInfo.def("IsRasterizerDiscardEnabled", &Lua::GraphicsPipelineCreateInfo::IsRasterizerDiscardEnabled);
 	defShaderGraphicsPipelineCreateInfo.def("IsSampleMaskEnabled", &Lua::GraphicsPipelineCreateInfo::IsSampleMaskEnabled);
-	defShaderGraphicsPipelineCreateInfo.def("AttachVertexAttribute", &Lua::GraphicsPipelineCreateInfo::AttachVertexAttribute);
 	defShaderGraphicsPipelineCreateInfo.def("AddSpecializationConstant", &Lua::GraphicsPipelineCreateInfo::AddSpecializationConstant);
 	defShaderGraphicsPipelineCreateInfo.def("SetAlphaToCoverageEnabled", &Lua::GraphicsPipelineCreateInfo::SetAlphaToCoverageEnabled);
 	defShaderGraphicsPipelineCreateInfo.def("SetAlphaToOneEnabled", &Lua::GraphicsPipelineCreateInfo::SetAlphaToOneEnabled);
@@ -629,14 +625,18 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 	defShaderModule.def("SetShaderSource", &Lua::Shader::SetStageSourceFilePath);
 	defShaderModule.def("SetPipelineCount", &Lua::Shader::SetPipelineCount);
 	defShaderModule.def("GetShader", static_cast<prosper::Shader &(pragma::LuaShaderWrapperBase::*)() const>(&pragma::LuaShaderWrapperBase::GetShader));
+	defShaderModule.def("AttachPushConstantRange", &Lua::Shader::AttachPushConstantRange);
+	defShaderModule.def("AttachDescriptorSetInfo", &Lua::Shader::AttachDescriptorSetInfo);
 
 	defShaderModule.def("InitializePipeline", &pragma::LuaShaderWrapperBase::Lua_InitializePipeline, &pragma::LuaShaderWrapperBase::Lua_default_InitializePipeline);
+	defShaderModule.def("InitializeShaderResources", &pragma::LuaShaderWrapperBase::Lua_InitializeShaderResources, &pragma::LuaShaderWrapperBase::Lua_default_InitializeShaderResources);
 	defShaderModule.def("OnInitialized", &pragma::LuaShaderWrapperBase::Lua_OnInitialized, &pragma::LuaShaderWrapperBase::Lua_default_OnInitialized);
 	defShaderModule.def("OnPipelinesInitialized", &pragma::LuaShaderWrapperBase::Lua_OnPipelinesInitialized, &pragma::LuaShaderWrapperBase::Lua_default_OnPipelinesInitialized);
 	defShaderModule.def("OnPipelineInitialized", &pragma::LuaShaderWrapperBase::Lua_OnPipelineInitialized, &pragma::LuaShaderWrapperBase::Lua_default_OnPipelineInitialized);
 	modShader[defShaderModule];
 
 	auto defShaderGraphicsModule = luabind::class_<pragma::LuaShaderWrapperGraphicsBase, pragma::LuaShaderWrapperBase>("BaseGraphicsModule");
+	defShaderGraphicsModule.def("AttachVertexAttribute", &Lua::Shader::Graphics::AttachVertexAttribute);
 	modShader[defShaderGraphicsModule];
 
 	auto defShaderComputeModule = luabind::class_<pragma::LuaShaderWrapperComputeBase, pragma::LuaShaderWrapperBase>("BaseComputeModule");

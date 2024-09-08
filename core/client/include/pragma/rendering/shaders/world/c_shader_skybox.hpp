@@ -51,7 +51,8 @@ namespace pragma {
 		virtual uint32_t GetInstanceDescriptorSetIndex() const override;
 		virtual prosper::DescriptorSetInfo &GetMaterialDescriptorSetInfo() const override;
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
-		virtual void InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
+		virtual void InitializeShaderResources() override;
+		virtual void InitializeGfxPipelinePushConstantRanges() override;
 		EulerAngles m_skyAngles = {};
 	};
 

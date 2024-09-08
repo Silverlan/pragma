@@ -42,8 +42,14 @@ decltype(ShaderParticle2DBase::VERTEX_BINDING_ANIMATION_START) ShaderParticle2DB
 decltype(ShaderParticle2DBase::VERTEX_ATTRIBUTE_ANIMATION_FRAME_INDICES) ShaderParticle2DBase::VERTEX_ATTRIBUTE_ANIMATION_FRAME_INDICES = {VERTEX_BINDING_ANIMATION_START, prosper::Format::R32_UInt};
 decltype(ShaderParticle2DBase::VERTEX_ATTRIBUTE_ANIMATION_INTERP_FACTOR) ShaderParticle2DBase::VERTEX_ATTRIBUTE_ANIMATION_INTERP_FACTOR = {VERTEX_BINDING_ANIMATION_START, prosper::Format::R32_SFloat};
 
-decltype(ShaderParticle2DBase::DESCRIPTOR_SET_TEXTURE) ShaderParticle2DBase::DESCRIPTOR_SET_TEXTURE = {{prosper::DescriptorSetInfo::Binding {prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}}};
-decltype(ShaderParticle2DBase::DESCRIPTOR_SET_DEPTH_MAP) ShaderParticle2DBase::DESCRIPTOR_SET_DEPTH_MAP = {{prosper::DescriptorSetInfo::Binding {prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}}};
+decltype(ShaderParticle2DBase::DESCRIPTOR_SET_TEXTURE) ShaderParticle2DBase::DESCRIPTOR_SET_TEXTURE = {
+  "TEXTURE",
+  {prosper::DescriptorSetInfo::Binding {"TEXTURE", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}},
+};
+decltype(ShaderParticle2DBase::DESCRIPTOR_SET_DEPTH_MAP) ShaderParticle2DBase::DESCRIPTOR_SET_DEPTH_MAP = {
+  "DEPTH_BUFFER",
+  {prosper::DescriptorSetInfo::Binding {"MAP", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}},
+};
 decltype(ShaderParticle2DBase::DESCRIPTOR_SET_ANIMATION) ShaderParticle2DBase::DESCRIPTOR_SET_ANIMATION = {&ShaderParticleBase::DESCRIPTOR_SET_ANIMATION};
 decltype(ShaderParticle2DBase::DESCRIPTOR_SET_SCENE) ShaderParticle2DBase::DESCRIPTOR_SET_SCENE = {&ShaderSceneLit::DESCRIPTOR_SET_SCENE};
 decltype(ShaderParticle2DBase::DESCRIPTOR_SET_RENDERER) ShaderParticle2DBase::DESCRIPTOR_SET_RENDERER = {&ShaderSceneLit::DESCRIPTOR_SET_RENDERER};
@@ -67,33 +73,38 @@ ShaderParticle2DBase::ShaderParticle2DBase(prosper::IPrContext &context, const s
 {
 	SetPipelineCount(GetParticlePipelineCount());
 }
-void ShaderParticle2DBase::RegisterDefaultGfxPipelineVertexAttributes(prosper::GraphicsPipelineCreateInfo &pipelineInfo)
+void ShaderParticle2DBase::RegisterDefaultGfxPipelineVertexAttributes()
 {
-	AddVertexAttribute(pipelineInfo, VERTEX_ATTRIBUTE_POSITION);
-	AddVertexAttribute(pipelineInfo, VERTEX_ATTRIBUTE_RADIUS);
-	AddVertexAttribute(pipelineInfo, VERTEX_ATTRIBUTE_PREVPOS);
-	AddVertexAttribute(pipelineInfo, VERTEX_ATTRIBUTE_AGE);
-	AddVertexAttribute(pipelineInfo, VERTEX_ATTRIBUTE_COLOR);
-	AddVertexAttribute(pipelineInfo, VERTEX_ATTRIBUTE_ROTATION);
-	AddVertexAttribute(pipelineInfo, VERTEX_ATTRIBUTE_LENGTH_YAW);
+	AddVertexAttribute(VERTEX_ATTRIBUTE_POSITION);
+	AddVertexAttribute(VERTEX_ATTRIBUTE_RADIUS);
+	AddVertexAttribute(VERTEX_ATTRIBUTE_PREVPOS);
+	AddVertexAttribute(VERTEX_ATTRIBUTE_AGE);
+	AddVertexAttribute(VERTEX_ATTRIBUTE_COLOR);
+	AddVertexAttribute(VERTEX_ATTRIBUTE_ROTATION);
+	AddVertexAttribute(VERTEX_ATTRIBUTE_LENGTH_YAW);
 
-	AddVertexAttribute(pipelineInfo, VERTEX_ATTRIBUTE_ANIMATION_FRAME_INDICES);
-	AddVertexAttribute(pipelineInfo, VERTEX_ATTRIBUTE_ANIMATION_INTERP_FACTOR);
+	AddVertexAttribute(VERTEX_ATTRIBUTE_ANIMATION_FRAME_INDICES);
+	AddVertexAttribute(VERTEX_ATTRIBUTE_ANIMATION_INTERP_FACTOR);
 }
-void ShaderParticle2DBase::RegisterDefaultGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
+void ShaderParticle2DBase::RegisterDefaultGfxPipelinePushConstantRanges() { AttachPushConstantRange(0u, sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit); }
+void ShaderParticle2DBase::RegisterDefaultGfxPipelineDescriptorSetGroups()
 {
-	AttachPushConstantRange(pipelineInfo, pipelineIdx, 0u, sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit);
+	AddDescriptorSetGroup(DESCRIPTOR_SET_TEXTURE);
+	AddDescriptorSetGroup(DESCRIPTOR_SET_DEPTH_MAP);
+	AddDescriptorSetGroup(DESCRIPTOR_SET_ANIMATION);
+	AddDescriptorSetGroup(DESCRIPTOR_SET_SCENE);
+	AddDescriptorSetGroup(DESCRIPTOR_SET_RENDERER);
+	AddDescriptorSetGroup(DESCRIPTOR_SET_RENDER_SETTINGS);
+	AddDescriptorSetGroup(DESCRIPTOR_SET_LIGHTS);
+	AddDescriptorSetGroup(DESCRIPTOR_SET_SHADOWS);
 }
-void ShaderParticle2DBase::RegisterDefaultGfxPipelineDescriptorSetGroups(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
+
+void ShaderParticle2DBase::InitializeShaderResources()
 {
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_TEXTURE);
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_DEPTH_MAP);
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_ANIMATION);
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_SCENE);
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_RENDERER);
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_RENDER_SETTINGS);
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_LIGHTS);
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_SHADOWS);
+	ShaderSceneLit::InitializeShaderResources();
+	RegisterDefaultGfxPipelineVertexAttributes();
+	RegisterDefaultGfxPipelinePushConstantRanges();
+	RegisterDefaultGfxPipelineDescriptorSetGroups();
 }
 
 void ShaderParticle2DBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
@@ -104,9 +115,6 @@ void ShaderParticle2DBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreate
 	pipelineInfo.ToggleDepthWrites(pipelineIdx == GetDepthPipelineIndex()); // Last pipeline is depth pipeline
 
 	ShaderParticleBase::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
-	RegisterDefaultGfxPipelineVertexAttributes(pipelineInfo);
-	RegisterDefaultGfxPipelinePushConstantRanges(pipelineInfo, pipelineIdx);
-	RegisterDefaultGfxPipelineDescriptorSetGroups(pipelineInfo, pipelineIdx);
 }
 
 std::optional<uint32_t> ShaderParticle2DBase::RecordBeginDraw(prosper::ShaderBindState &bindState, pragma::CParticleSystemComponent &pSys, ParticleRenderFlags renderFlags, RecordFlags recordFlags)

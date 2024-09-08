@@ -23,17 +23,21 @@ using namespace pragma;
 
 decltype(ShaderParticleBlob::VERTEX_BINDING_BLOB_NEIGHBORS) ShaderParticleBlob::VERTEX_BINDING_BLOB_NEIGHBORS = {prosper::VertexInputRate::Instance, MAX_BLOB_NEIGHBORS * sizeof(uint16_t)};
 decltype(ShaderParticleBlob::VERTEX_ATTRIBUTE_BLOB_NEIGHBORS) ShaderParticleBlob::VERTEX_ATTRIBUTE_BLOB_NEIGHBORS = {VERTEX_BINDING_BLOB_NEIGHBORS, prosper::Format::R32G32B32A32_UInt};
-decltype(ShaderParticleBlob::DESCRIPTOR_SET_PARTICLE_DATA) ShaderParticleBlob::DESCRIPTOR_SET_PARTICLE_DATA = {{prosper::DescriptorSetInfo::Binding {// Particle data
-  prosper::DescriptorType::StorageBufferDynamic, prosper::ShaderStageFlags::FragmentBit}}};
-decltype(ShaderParticleBlob::DESCRIPTOR_SET_MATERIAL) ShaderParticleBlob::DESCRIPTOR_SET_MATERIAL = {{prosper::DescriptorSetInfo::Binding {// Material settings
-  prosper::DescriptorType::UniformBuffer, prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::GeometryBit}}};
+decltype(ShaderParticleBlob::DESCRIPTOR_SET_PARTICLE_DATA) ShaderParticleBlob::DESCRIPTOR_SET_PARTICLE_DATA = {
+  "PARTICLES",
+  {prosper::DescriptorSetInfo::Binding {"DATA", prosper::DescriptorType::StorageBufferDynamic, prosper::ShaderStageFlags::FragmentBit}},
+};
+decltype(ShaderParticleBlob::DESCRIPTOR_SET_MATERIAL) ShaderParticleBlob::DESCRIPTOR_SET_MATERIAL = {
+  "MATERIAL",
+  {prosper::DescriptorSetInfo::Binding {"SETTINGS", prosper::DescriptorType::UniformBuffer, prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::GeometryBit}},
+};
 decltype(ShaderParticleBlob::DESCRIPTOR_SET_SCENE) ShaderParticleBlob::DESCRIPTOR_SET_SCENE = {&ShaderParticle2DBase::DESCRIPTOR_SET_SCENE};
 decltype(ShaderParticleBlob::DESCRIPTOR_SET_RENDERER) ShaderParticleBlob::DESCRIPTOR_SET_RENDERER = {&ShaderParticle2DBase::DESCRIPTOR_SET_RENDERER};
 decltype(ShaderParticleBlob::DESCRIPTOR_SET_RENDER_SETTINGS) ShaderParticleBlob::DESCRIPTOR_SET_RENDER_SETTINGS = {&ShaderParticle2DBase::DESCRIPTOR_SET_RENDER_SETTINGS};
 decltype(ShaderParticleBlob::DESCRIPTOR_SET_LIGHTS) ShaderParticleBlob::DESCRIPTOR_SET_LIGHTS = {&ShaderParticle2DBase::DESCRIPTOR_SET_LIGHTS};
 decltype(ShaderParticleBlob::DESCRIPTOR_SET_SHADOWS) ShaderParticleBlob::DESCRIPTOR_SET_SHADOWS = {&ShaderParticle2DBase::DESCRIPTOR_SET_SHADOWS};
 decltype(ShaderParticleBlob::DESCRIPTOR_SET_PBR) ShaderParticleBlob::DESCRIPTOR_SET_PBR = {&ShaderPBR::DESCRIPTOR_SET_PBR};
-ShaderParticleBlob::ShaderParticleBlob(prosper::IPrContext &context, const std::string &identifier) : ShaderParticle2DBase(context, identifier, "particles/blob/vs_particle_blob", "particles/blob/fs_particle_blob") { SetBaseShader<ShaderParticle>(); }
+ShaderParticleBlob::ShaderParticleBlob(prosper::IPrContext &context, const std::string &identifier) : ShaderParticle2DBase(context, identifier, "programs/particles/blob/particle_blob", "programs/particles/blob/particle_blob") { SetBaseShader<ShaderParticle>(); }
 
 uint32_t ShaderParticleBlob::GetSceneDescriptorSetIndex() const
 {
@@ -68,6 +72,25 @@ bool ShaderParticleBlob::RecordParticleMaterial(prosper::ShaderBindState &bindSt
 	return RecordBindDescriptorSets(bindState, {&descSetTexture}, DESCRIPTOR_SET_MATERIAL.setIndex);
 }
 
+void ShaderParticleBlob::InitializeShaderResources()
+{
+	ShaderSceneLit::InitializeShaderResources();
+
+	RegisterDefaultGfxPipelineVertexAttributes();
+	AddVertexAttribute(VERTEX_ATTRIBUTE_BLOB_NEIGHBORS);
+
+	RegisterDefaultGfxPipelinePushConstantRanges();
+
+	AddDescriptorSetGroup(DESCRIPTOR_SET_PARTICLE_DATA);
+	AddDescriptorSetGroup(DESCRIPTOR_SET_MATERIAL);
+	AddDescriptorSetGroup(DESCRIPTOR_SET_SCENE);
+	AddDescriptorSetGroup(DESCRIPTOR_SET_RENDERER);
+	AddDescriptorSetGroup(DESCRIPTOR_SET_RENDER_SETTINGS);
+	AddDescriptorSetGroup(DESCRIPTOR_SET_LIGHTS);
+	AddDescriptorSetGroup(DESCRIPTOR_SET_SHADOWS);
+	AddDescriptorSetGroup(DESCRIPTOR_SET_PBR);
+}
+
 void ShaderParticleBlob::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
 {
 	auto basePipelineIdx = GetBasePipelineIndex(pipelineIdx);
@@ -77,20 +100,6 @@ void ShaderParticleBlob::InitializeGfxPipeline(prosper::GraphicsPipelineCreateIn
 
 	ShaderParticleBase::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
 	SetGenericAlphaColorBlendAttachmentProperties(pipelineInfo);
-
-	RegisterDefaultGfxPipelineVertexAttributes(pipelineInfo);
-	AddVertexAttribute(pipelineInfo, VERTEX_ATTRIBUTE_BLOB_NEIGHBORS);
-
-	RegisterDefaultGfxPipelinePushConstantRanges(pipelineInfo, pipelineIdx);
-
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_PARTICLE_DATA);
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_MATERIAL);
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_SCENE);
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_RENDERER);
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_RENDER_SETTINGS);
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_LIGHTS);
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_SHADOWS);
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_PBR);
 }
 
 bool ShaderParticleBlob::RecordBindScene(prosper::ICommandBuffer &cmd, const prosper::IShaderPipelineLayout &layout, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer,

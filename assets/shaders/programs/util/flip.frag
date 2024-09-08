@@ -1,0 +1,27 @@
+#version 440
+
+#extension GL_ARB_separate_shader_objects : enable
+#extension GL_ARB_shading_language_420pack : enable
+
+layout(location = 0) in vec2 vs_vert_uv;
+
+layout(LAYOUT_ID(0, 0)) uniform sampler2D u_texture;
+
+layout(location = 0) out vec4 fs_color;
+
+layout(LAYOUT_PUSH_CONSTANTS()) uniform PushConstants
+{
+	uint flipHorizontally;
+	uint flipVertically;
+}
+u_pushConstants;
+
+void main()
+{
+	vec2 uv = vs_vert_uv;
+	if(u_pushConstants.flipHorizontally == 1)
+		uv.x = 1.0 - uv.x;
+	if(u_pushConstants.flipVertically == 1)
+		uv.y = 1.0 - uv.y;
+	fs_color = texture(u_texture, uv).rgba;
+}

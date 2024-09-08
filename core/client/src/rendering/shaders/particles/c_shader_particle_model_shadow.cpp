@@ -22,7 +22,7 @@ extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
 ParticleModelShadow::ParticleModelShadow()
-	: Shadow("particlemodelshadow","particles/model/vs_particle_model_shadow","particles/model/fs_particle_model_shadow")
+	: Shadow("particlemodelshadow","programs/particles/model/particle_model_shadow","programs/particles/model/particle_model_shadow")
 {}
 
 bool ParticleModelShadow::BeginDrawTest(Vulkan::BufferObject *particleBuffer,Vulkan::BufferObject *rotBuffer,Vulkan::CommandBufferObject *cmdBuffer,CLightBase *light,uint32_t w,uint32_t h)

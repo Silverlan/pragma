@@ -29,6 +29,7 @@ namespace pragma {
 	  protected:
 		virtual void GetParticleSystemOrientationInfo(const Mat4 &matrix, const CParticleSystemComponent &particle, Vector3 &up, Vector3 &right, float &nearZ, float &farZ, const Material *material = nullptr, const pragma::CCameraComponent *cam = nullptr) const override;
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
+		virtual void InitializeShaderResources() override;
 	};
 };
 

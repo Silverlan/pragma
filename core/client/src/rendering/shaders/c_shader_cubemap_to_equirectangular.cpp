@@ -18,7 +18,7 @@ extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
 
-ShaderCubemapToEquirectangular::ShaderCubemapToEquirectangular(prosper::IPrContext &context, const std::string &identifier) : prosper::ShaderBaseImageProcessing {context, identifier, "screen/fs_cubemap_to_equirectangular"} { SetPipelineCount(umath::to_integral(Pipeline::Count)); }
+ShaderCubemapToEquirectangular::ShaderCubemapToEquirectangular(prosper::IPrContext &context, const std::string &identifier) : prosper::ShaderBaseImageProcessing {context, identifier, "programs/util/cubemap_to_equirectangular"} { SetPipelineCount(umath::to_integral(Pipeline::Count)); }
 
 void ShaderCubemapToEquirectangular::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx)
 {
@@ -26,10 +26,12 @@ void ShaderCubemapToEquirectangular::InitializeRenderPass(std::shared_ptr<prospe
 	CreateCachedRenderPass<ShaderCubemapToEquirectangular>({{prosper::util::RenderPassCreateInfo::AttachmentInfo {format}}}, outRenderPass, pipelineIdx);
 }
 
-void ShaderCubemapToEquirectangular::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
+void ShaderCubemapToEquirectangular::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { ShaderBaseImageProcessing::InitializeGfxPipeline(pipelineInfo, pipelineIdx); }
+
+void ShaderCubemapToEquirectangular::InitializeShaderResources()
 {
-	ShaderBaseImageProcessing::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
-	AttachPushConstantRange(pipelineInfo, pipelineIdx, 0u, sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit);
+	ShaderBaseImageProcessing::InitializeShaderResources();
+	AttachPushConstantRange(0u, sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit);
 }
 
 std::shared_ptr<prosper::IImage> ShaderCubemapToEquirectangular::CreateEquirectangularMap(uint32_t width, uint32_t height, prosper::util::ImageCreateInfo::Flags flags, bool hdr) const

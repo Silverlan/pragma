@@ -24,15 +24,16 @@ decltype(ShaderCubemap::VERTEX_BINDING_VERTEX) ShaderCubemap::VERTEX_BINDING_VER
 decltype(ShaderCubemap::VERTEX_ATTRIBUTE_POSITION) ShaderCubemap::VERTEX_ATTRIBUTE_POSITION = {VERTEX_BINDING_VERTEX, prosper::Format::R32G32B32_SFloat};
 
 ShaderCubemap::ShaderCubemap(prosper::IPrContext &context, const std::string &identifier, const std::string &vertexShader, const std::string &fragmentShader) : ShaderGraphics {context, identifier, vertexShader, fragmentShader} {}
-ShaderCubemap::ShaderCubemap(prosper::IPrContext &context, const std::string &identifier, const std::string &fragmentShader) : ShaderCubemap {context, identifier, "screen/vs_cubemap", fragmentShader} {}
+ShaderCubemap::ShaderCubemap(prosper::IPrContext &context, const std::string &identifier, const std::string &fragmentShader) : ShaderCubemap {context, identifier, "programs/image/cubemap", fragmentShader} {}
 
-void ShaderCubemap::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
+void ShaderCubemap::InitializeShaderResources()
 {
-	ShaderGraphics::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
+	ShaderGraphics::InitializeShaderResources();
 
-	AddVertexAttribute(pipelineInfo, VERTEX_ATTRIBUTE_POSITION);
-	AttachPushConstantRange(pipelineInfo, pipelineIdx, 0u, sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit);
+	AddVertexAttribute(VERTEX_ATTRIBUTE_POSITION);
+	AttachPushConstantRange(0u, sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit);
 }
+void ShaderCubemap::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { ShaderGraphics::InitializeGfxPipeline(pipelineInfo, pipelineIdx); }
 
 void ShaderCubemap::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx)
 {

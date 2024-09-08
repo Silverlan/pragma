@@ -22,7 +22,7 @@ extern DLLCLIENT CEngine *c_engine;
 using namespace pragma;
 
 ShaderEye::ShaderEye(prosper::IPrContext &context, const std::string &identifier, const std::string &vsShader, const std::string &fsShader, const std::string &gsShader) : ShaderPBR {context, identifier, vsShader, fsShader, gsShader} {}
-ShaderEye::ShaderEye(prosper::IPrContext &context, const std::string &identifier) : ShaderEye {context, identifier, "world/eye/vs_eye", "world/eye/fs_eye"} {}
+ShaderEye::ShaderEye(prosper::IPrContext &context, const std::string &identifier) : ShaderEye {context, identifier, "programs/scene/eye/eye", "programs/scene/eye/eye"} {}
 bool ShaderEye::BindEyeball(rendering::ShaderProcessor &shaderProcessor, uint32_t skinMatIdx) const
 {
 	auto &ent = shaderProcessor.GetCurrentEntity();
@@ -52,12 +52,7 @@ bool ShaderEye::BindEyeball(rendering::ShaderProcessor &shaderProcessor, uint32_
 	shaderProcessor.GetCommandBuffer().RecordPushConstants(shaderProcessor.GetCurrentPipelineLayout(), prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit, sizeof(ShaderPBR::PushConstants), sizeof(pushConstants), &pushConstants);
 	return true;
 }
-void ShaderEye::InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
-{
-	AttachPushConstantRange(pipelineInfo, pipelineIdx, 0u, sizeof(ShaderPBR::PushConstants) + sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit);
-}
-
-//
+void ShaderEye::InitializeGfxPipelinePushConstantRanges() { AttachPushConstantRange(0u, sizeof(ShaderPBR::PushConstants) + sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit); }
 
 void ShaderEye::RecordBindScene(rendering::ShaderProcessor &shaderProcessor, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer, prosper::IDescriptorSet &dsRenderSettings,
   prosper::IDescriptorSet &dsLights, prosper::IDescriptorSet &dsShadows, prosper::IDescriptorSet &dsMaterial, const Vector4 &drawOrigin, ShaderGameWorld::SceneFlags &inOutSceneFlags) const
@@ -78,7 +73,7 @@ bool ShaderEye::OnRecordDrawMesh(rendering::ShaderProcessor &shaderProcessor, CM
 
 ///////////////////////
 
-ShaderEyeLegacy::ShaderEyeLegacy(prosper::IPrContext &context, const std::string &identifier) : ShaderEye {context, identifier, "world/eye/vs_eye", "world/eye/fs_eye_legacy"} {}
+ShaderEyeLegacy::ShaderEyeLegacy(prosper::IPrContext &context, const std::string &identifier) : ShaderEye {context, identifier, "programs/scene/eye/eye", "programs/scene/eye/eye_legacy"} {}
 std::shared_ptr<prosper::IDescriptorSetGroup> ShaderEyeLegacy::InitializeMaterialDescriptorSet(CMaterial &mat)
 {
 	auto descSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_MATERIAL);

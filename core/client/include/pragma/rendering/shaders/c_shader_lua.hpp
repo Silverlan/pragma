@@ -59,11 +59,12 @@ namespace pragma {
 
 	struct LuaDescriptorSetBinding {
 		LuaDescriptorSetBinding() = default;
-		LuaDescriptorSetBinding(uint32_t type, uint32_t shaderStages, uint32_t bindingIndex = std::numeric_limits<uint32_t>::max(), uint32_t descriptorArraySize = 1u)
-		    : type(static_cast<prosper::DescriptorType>(type)), shaderStages(static_cast<prosper::ShaderStageFlags>(shaderStages)), bindingIndex(bindingIndex), descriptorArraySize(descriptorArraySize)
+		LuaDescriptorSetBinding(const std::string &name, uint32_t type, uint32_t shaderStages, uint32_t bindingIndex = std::numeric_limits<uint32_t>::max(), uint32_t descriptorArraySize = 1u)
+		    : name {name}, type(static_cast<prosper::DescriptorType>(type)), shaderStages(static_cast<prosper::ShaderStageFlags>(shaderStages)), bindingIndex(bindingIndex), descriptorArraySize(descriptorArraySize)
 		{
 		}
 		prosper::DescriptorType type = {};
+		std::string name;
 		prosper::ShaderStageFlags shaderStages = prosper::ShaderStageFlags::All;
 		uint32_t bindingIndex = std::numeric_limits<uint32_t>::max();
 		uint32_t descriptorArraySize = 1u;
@@ -71,8 +72,9 @@ namespace pragma {
 
 	struct LuaDescriptorSetInfo {
 		LuaDescriptorSetInfo() = default;
-		LuaDescriptorSetInfo(luabind::object lbindings, uint32_t setIndex = std::numeric_limits<uint32_t>::max());
+		LuaDescriptorSetInfo(const std::string &name, luabind::object lbindings, uint32_t setIndex = std::numeric_limits<uint32_t>::max());
 		uint32_t setIndex = 0u;
+		std::string name;
 		std::vector<LuaDescriptorSetBinding> bindings;
 	};
 	prosper::DescriptorSetInfo to_prosper_descriptor_set_info(const LuaDescriptorSetInfo &ldescSetInfo);
@@ -89,7 +91,7 @@ namespace pragma {
 		LuaShaderWrapperBase &operator=(const LuaShaderWrapperBase &) = delete;
 		void Initialize(const luabind::object &o);
 		void ClearLuaObject();
-		bool AttachDescriptorSetInfo(const pragma::LuaDescriptorSetInfo &descSetInfo, uint32_t pipelineIdx);
+		bool AttachDescriptorSetInfo(const pragma::LuaDescriptorSetInfo &descSetInfo);
 
 		void SetStageSourceFilePath(prosper::ShaderStage shaderStage, const std::string &fpath);
 		void SetPipelineCount(uint32_t pipelineCount);
@@ -100,6 +102,9 @@ namespace pragma {
 
 		virtual void Lua_InitializePipeline(prosper::BasePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) {}
 		static void Lua_default_InitializePipeline(lua_State *l, LuaShaderWrapperBase *shader, prosper::BasePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { shader->Lua_InitializePipeline(pipelineInfo, pipelineIdx); }
+
+		virtual void Lua_InitializeShaderResources() {}
+		static void Lua_default_InitializeShaderResources(lua_State *l, LuaShaderWrapperBase *shader) { shader->Lua_InitializeShaderResources(); }
 
 		void Lua_OnInitialized() {}
 		static void Lua_default_OnInitialized(lua_State *l, LuaShaderWrapperBase *shader) { shader->Lua_OnInitialized(); }
@@ -117,6 +122,7 @@ namespace pragma {
 		void OnPipelinesInitialized();
 	  protected:
 		void InitializePipeline(prosper::BasePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx);
+		void InitializeShaderResources();
 		prosper::Shader *m_shader = nullptr;
 		uint32_t m_curPipelineIdx = std::numeric_limits<uint32_t>::max();
 
@@ -220,9 +226,11 @@ namespace pragma {
 		virtual void SetPipelineCount(uint32_t count) override { prosper::ShaderGraphics::SetPipelineCount(count); }
 	  protected:
 		void BaseInitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { TBaseShader::InitializeGfxPipeline(pipelineInfo, pipelineIdx); }
+		void BaseInitializeShaderResources() { TBaseShader::InitializeShaderResources(); }
 		void BaseInitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx) { TBaseShader::InitializeRenderPass(outRenderPass, pipelineIdx); }
 
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
+		virtual void InitializeShaderResources() override;
 		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx) override;
 		void InitializeDefaultRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx);
 	};
@@ -233,6 +241,7 @@ namespace pragma {
 		LuaShaderWrapperGraphics();
 
 		virtual void Lua_InitializePipeline(prosper::BasePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
+		virtual void Lua_InitializeShaderResources() override;
 		virtual LShaderBase *CreateShader() const override { return new TShader {}; }
 	  protected:
 		virtual void InitializeDefaultRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx) override;
@@ -249,7 +258,9 @@ namespace pragma {
 	  protected:
 		friend LuaShaderWrapperCompute;
 		void BaseInitializeComputePipeline(prosper::ComputePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { TBaseShader::InitializeComputePipeline(pipelineInfo, pipelineIdx); }
+		void BaseInitializeShaderResources() { TBaseShader::InitializeShaderResources(); }
 		virtual void InitializeComputePipeline(prosper::ComputePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
+		virtual void InitializeShaderResources() override;
 	};
 	class DLLCLIENT LuaShaderWrapperCompute : public LuaShaderWrapperComputeBase {
 	  public:
@@ -258,6 +269,7 @@ namespace pragma {
 		LuaShaderWrapperCompute();
 
 		virtual void Lua_InitializePipeline(prosper::BasePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
+		virtual void Lua_InitializeShaderResources() override;
 		virtual LShaderBase *CreateShader() const override { return new TShader {}; }
 	};
 
@@ -274,8 +286,10 @@ namespace pragma {
 	  protected:
 		friend LuaShaderWrapperGUI;
 		void BaseInitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { TBaseShader::InitializeGfxPipeline(pipelineInfo, pipelineIdx); }
+		void BaseInitializeShaderResources() { TBaseShader::InitializeShaderResources(); }
 		void BaseInitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx) { TBaseShader::InitializeRenderPass(outRenderPass, pipelineIdx); }
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
+		virtual void InitializeShaderResources() override;
 		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx) override;
 		void InitializeDefaultRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx);
 	};
@@ -286,6 +300,7 @@ namespace pragma {
 		LuaShaderWrapperGUI();
 
 		virtual void Lua_InitializePipeline(prosper::BasePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
+		virtual void Lua_InitializeShaderResources() override;
 		virtual LShaderBase *CreateShader() const override { return new TShader {}; }
 	  protected:
 		virtual void InitializeDefaultRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx) override;
@@ -302,8 +317,10 @@ namespace pragma {
 	  protected:
 		friend LuaShaderWrapperGUITextured;
 		void BaseInitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { TBaseShader::InitializeGfxPipeline(pipelineInfo, pipelineIdx); }
+		void BaseInitializeShaderResources() { TBaseShader::InitializeShaderResources(); }
 		void BaseInitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx) { TBaseShader::InitializeRenderPass(outRenderPass, pipelineIdx); }
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
+		virtual void InitializeShaderResources() override;
 		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx) override;
 		void InitializeDefaultRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx);
 	};
@@ -314,6 +331,7 @@ namespace pragma {
 		LuaShaderWrapperGUITextured();
 
 		virtual void Lua_InitializePipeline(prosper::BasePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
+		virtual void Lua_InitializeShaderResources() override;
 		virtual LShaderBase *CreateShader() const override { return new TShader {}; }
 	  protected:
 		virtual void InitializeDefaultRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx) override;
@@ -330,9 +348,11 @@ namespace pragma {
 	  protected:
 		friend LuaShaderWrapperParticle2D;
 		void BaseInitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { TBaseShader::InitializeGfxPipeline(pipelineInfo, pipelineIdx); }
+		void BaseInitializeShaderResources() { TBaseShader::InitializeShaderResources(); }
 		void BaseInitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx) { TBaseShader::InitializeRenderPass(outRenderPass, pipelineIdx); }
 		virtual Vector3 DoCalcVertexPosition(const pragma::CParticleSystemComponent &ptc, uint32_t ptIdx, uint32_t localVertIdx, const Vector3 &camPos, const Vector3 &camUpWs, const Vector3 &camRightWs, float nearZ, float farZ) const override;
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
+		virtual void InitializeShaderResources() override;
 		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx) override;
 		void InitializeDefaultRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx);
 	};
@@ -343,6 +363,7 @@ namespace pragma {
 		LuaShaderWrapperParticle2D();
 
 		virtual void Lua_InitializePipeline(prosper::BasePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
+		virtual void Lua_InitializeShaderResources() override;
 
 		Vector3 Lua_CalcVertexPosition(lua_State *l, pragma::CParticleSystemComponent &hPtC, uint32_t ptIdx, uint32_t localVertIdx, const Vector3 &camPos, const Vector3 &camUpWs, const Vector3 &camRightWs, float nearZ, float farZ);
 		static Vector3 Lua_default_CalcVertexPosition(lua_State *l, LuaShaderWrapperParticle2D &shader, pragma::CParticleSystemComponent &hPtC, uint32_t ptIdx, uint32_t localVertIdx, const Vector3 &camPos, const Vector3 &camUpWs, const Vector3 &camRightWs, float nearZ, float farZ)
@@ -366,8 +387,10 @@ namespace pragma {
 	  protected:
 		friend LuaShaderWrapperImageProcessing;
 		void BaseInitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { TBaseShader::InitializeGfxPipeline(pipelineInfo, pipelineIdx); }
+		void BaseInitializeShaderResources() { TBaseShader::InitializeShaderResources(); }
 		void BaseInitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx) { TBaseShader::InitializeRenderPass(outRenderPass, pipelineIdx); }
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
+		virtual void InitializeShaderResources() override;
 		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx) override;
 		void InitializeDefaultRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx);
 	};
@@ -378,6 +401,7 @@ namespace pragma {
 		LuaShaderWrapperImageProcessing();
 
 		virtual void Lua_InitializePipeline(prosper::BasePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
+		virtual void Lua_InitializeShaderResources() override;
 		virtual LShaderBase *CreateShader() const override { return new TShader {}; }
 	  protected:
 		virtual void InitializeDefaultRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx) override;
@@ -394,6 +418,7 @@ namespace pragma {
 	  protected:
 		friend LuaShaderWrapperPostProcessing;
 		void BaseInitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { TBaseShader::InitializeGfxPipeline(pipelineInfo, pipelineIdx); }
+		void BaseInitializeShaderResources() { TBaseShader::InitializeShaderResources(); }
 		void BaseInitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx) { TBaseShader::InitializeRenderPass(outRenderPass, pipelineIdx); }
 		void InitializeDefaultRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx);
 	};
@@ -404,6 +429,7 @@ namespace pragma {
 		LuaShaderWrapperPostProcessing();
 
 		virtual void Lua_InitializePipeline(prosper::BasePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
+		virtual void Lua_InitializeShaderResources() override;
 		virtual LShaderBase *CreateShader() const override { return new TShader {}; }
 	  protected:
 		virtual void InitializeDefaultRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx) override;
@@ -428,15 +454,17 @@ namespace pragma {
 		std::shared_ptr<prosper::IDescriptorSetGroup> BaseInitializeMaterialDescriptorSet(CMaterial &mat);
 		void BaseInitializeMaterialData(CMaterial &mat, pragma::ShaderGameWorldLightingPass::MaterialData &matData);
 		void BaseInitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx);
+		void BaseInitializeShaderResources();
 		void BaseInitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx);
-		void BaseInitializeGfxPipelineVertexAttributes(prosper::BasePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx);
-		void BaseInitializeGfxPipelinePushConstantRanges(prosper::BasePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx);
-		void BaseInitializeGfxPipelineDescriptorSets(prosper::BasePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx);
+		void BaseInitializeGfxPipelineVertexAttributes();
+		void BaseInitializeGfxPipelinePushConstantRanges();
+		void BaseInitializeGfxPipelineDescriptorSets();
 
-		virtual void InitializeGfxPipelineVertexAttributes(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
-		virtual void InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
-		virtual void InitializeGfxPipelineDescriptorSets(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
+		virtual void InitializeGfxPipelineVertexAttributes() override;
+		virtual void InitializeGfxPipelinePushConstantRanges() override;
+		virtual void InitializeGfxPipelineDescriptorSets() override;
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
+		virtual void InitializeShaderResources() override;
 		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx) override;
 		void InitializeDefaultRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx);
 
@@ -449,6 +477,7 @@ namespace pragma {
 		LuaShaderWrapperTextured3D();
 
 		virtual void Lua_InitializePipeline(prosper::BasePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
+		virtual void Lua_InitializeShaderResources() override;
 		// virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override; // TODO: ShaderTexturedBase
 
 		std::shared_ptr<prosper::IDescriptorSetGroup> Lua_InitializeMaterialDescriptorSet(Material &mat);
@@ -457,14 +486,14 @@ namespace pragma {
 		void Lua_InitializeMaterialData(Material &mat, pragma::ShaderGameWorldLightingPass::MaterialData &matData);
 		static void Lua_default_InitializeMaterialData(lua_State *l, LuaShaderWrapperTextured3D &shader, Material &mat, pragma::ShaderGameWorldLightingPass::MaterialData &matData) { shader.Lua_InitializeMaterialData(mat, matData); }
 
-		void Lua_InitializeGfxPipelineVertexAttributes(prosper::BasePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx);
-		static void Lua_default_InitializeGfxPipelineVertexAttributes(lua_State *l, LuaShaderWrapperTextured3D &shader, prosper::BasePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { shader.Lua_InitializeGfxPipelineVertexAttributes(pipelineInfo, pipelineIdx); }
+		void Lua_InitializeGfxPipelineVertexAttributes();
+		static void Lua_default_InitializeGfxPipelineVertexAttributes(lua_State *l, LuaShaderWrapperTextured3D &shader) { shader.Lua_InitializeGfxPipelineVertexAttributes(); }
 
-		void Lua_InitializeGfxPipelinePushConstantRanges(prosper::BasePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx);
-		static void Lua_default_InitializeGfxPipelinePushConstantRanges(lua_State *l, LuaShaderWrapperTextured3D &shader, prosper::BasePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { shader.Lua_InitializeGfxPipelinePushConstantRanges(pipelineInfo, pipelineIdx); }
+		void Lua_InitializeGfxPipelinePushConstantRanges();
+		static void Lua_default_InitializeGfxPipelinePushConstantRanges(lua_State *l, LuaShaderWrapperTextured3D &shader) { shader.Lua_InitializeGfxPipelinePushConstantRanges(); }
 
-		void Lua_InitializeGfxPipelineDescriptorSets(prosper::BasePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx);
-		static void Lua_default_InitializeGfxPipelineDescriptorSets(lua_State *l, LuaShaderWrapperTextured3D &shader, prosper::BasePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { shader.Lua_InitializeGfxPipelineDescriptorSets(pipelineInfo, pipelineIdx); }
+		void Lua_InitializeGfxPipelineDescriptorSets();
+		static void Lua_default_InitializeGfxPipelineDescriptorSets(lua_State *l, LuaShaderWrapperTextured3D &shader) { shader.Lua_InitializeGfxPipelineDescriptorSets(); }
 
 		void Lua_OnBindMaterial(Material &mat);
 		static void Lua_default_OnBindMaterial(lua_State *l, LuaShaderWrapperTextured3D &shader, Material &mat) { shader.Lua_OnBindMaterial(mat); }
@@ -492,9 +521,9 @@ namespace pragma {
 		virtual void InitializeDefaultRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx) override;
 		std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat);
 		void InitializeMaterialData(CMaterial &mat, pragma::ShaderGameWorldLightingPass::MaterialData &matData);
-		void InitializeGfxPipelineVertexAttributes(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx);
-		void InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx);
-		void InitializeGfxPipelineDescriptorSets(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx);
+		void InitializeGfxPipelineVertexAttributes();
+		void InitializeGfxPipelinePushConstantRanges();
+		void InitializeGfxPipelineDescriptorSets();
 	};
 
 	class LuaShaderWrapperPbr;
@@ -507,15 +536,17 @@ namespace pragma {
 		virtual void SetPipelineCount(uint32_t count) override { ShaderPBR::SetPipelineCount(count); }
 	  protected:
 		friend LuaShaderWrapperPbr;
-		void BaseInitializeGfxPipelineVertexAttributes(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { TBaseShader::InitializeGfxPipelineVertexAttributes(pipelineInfo, pipelineIdx); }
-		void BaseInitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { TBaseShader::InitializeGfxPipelinePushConstantRanges(pipelineInfo, pipelineIdx); }
-		void BaseInitializeGfxPipelineDescriptorSets(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { TBaseShader::InitializeGfxPipelineDescriptorSets(pipelineInfo, pipelineIdx); }
+		void BaseInitializeGfxPipelineVertexAttributes() { TBaseShader::InitializeGfxPipelineVertexAttributes(); }
+		void BaseInitializeGfxPipelinePushConstantRanges() { TBaseShader::InitializeGfxPipelinePushConstantRanges(); }
+		void BaseInitializeGfxPipelineDescriptorSets() { TBaseShader::InitializeGfxPipelineDescriptorSets(); }
 		void BaseInitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { TBaseShader::InitializeGfxPipeline(pipelineInfo, pipelineIdx); }
+		void BaseInitializeShaderResources() { TBaseShader::InitializeShaderResources(); }
 		void BaseInitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx) { TBaseShader::InitializeRenderPass(outRenderPass, pipelineIdx); }
-		virtual void InitializeGfxPipelineVertexAttributes(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
-		virtual void InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
-		virtual void InitializeGfxPipelineDescriptorSets(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
+		virtual void InitializeGfxPipelineVertexAttributes() override;
+		virtual void InitializeGfxPipelinePushConstantRanges() override;
+		virtual void InitializeGfxPipelineDescriptorSets() override;
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
+		virtual void InitializeShaderResources() override;
 		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx) override;
 		void InitializeDefaultRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx);
 	};
@@ -526,16 +557,17 @@ namespace pragma {
 		LuaShaderWrapperPbr();
 
 		virtual void Lua_InitializePipeline(prosper::BasePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
+		virtual void Lua_InitializeShaderResources() override;
 		// virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override; // TODO: ShaderTexturedBase
 
-		void Lua_InitializeGfxPipelineVertexAttributes(prosper::BasePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx);
-		static void Lua_default_InitializeGfxPipelineVertexAttributes(lua_State *l, LuaShaderWrapperPbr &shader, prosper::BasePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { shader.Lua_InitializeGfxPipelineVertexAttributes(pipelineInfo, pipelineIdx); }
+		void Lua_InitializeGfxPipelineVertexAttributes();
+		static void Lua_default_InitializeGfxPipelineVertexAttributes(lua_State *l, LuaShaderWrapperPbr &shader) { shader.Lua_InitializeGfxPipelineVertexAttributes(); }
 
-		void Lua_InitializeGfxPipelinePushConstantRanges(prosper::BasePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx);
-		static void Lua_default_InitializeGfxPipelinePushConstantRanges(lua_State *l, LuaShaderWrapperPbr &shader, prosper::BasePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { shader.Lua_InitializeGfxPipelinePushConstantRanges(pipelineInfo, pipelineIdx); }
+		void Lua_InitializeGfxPipelinePushConstantRanges();
+		static void Lua_default_InitializeGfxPipelinePushConstantRanges(lua_State *l, LuaShaderWrapperPbr &shader) { shader.Lua_InitializeGfxPipelinePushConstantRanges(); }
 
-		void Lua_InitializeGfxPipelineDescriptorSets(prosper::BasePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx);
-		static void Lua_default_InitializeGfxPipelineDescriptorSets(lua_State *l, LuaShaderWrapperPbr &shader, prosper::BasePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { shader.Lua_InitializeGfxPipelineDescriptorSets(pipelineInfo, pipelineIdx); }
+		void Lua_InitializeGfxPipelineDescriptorSets();
+		static void Lua_default_InitializeGfxPipelineDescriptorSets(lua_State *l, LuaShaderWrapperPbr &shader) { shader.Lua_InitializeGfxPipelineDescriptorSets(); }
 
 		void Lua_OnBindMaterial(Material &mat);
 		static void Lua_default_OnBindMaterial(lua_State *l, LuaShaderWrapperPbr &shader, Material &mat) { shader.Lua_OnBindMaterial(mat); }
@@ -557,9 +589,9 @@ namespace pragma {
 
 		virtual LShaderBase *CreateShader() const override { return new TShader {}; }
 	  protected:
-		void InitializeGfxPipelineVertexAttributes(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx);
-		void InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx);
-		void InitializeGfxPipelineDescriptorSets(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx);
+		void InitializeGfxPipelineVertexAttributes();
+		void InitializeGfxPipelinePushConstantRanges();
+		void InitializeGfxPipelineDescriptorSets();
 		virtual void InitializeDefaultRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx) override;
 	};
 };

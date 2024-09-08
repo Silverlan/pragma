@@ -35,6 +35,7 @@ namespace pragma {
 		bool Draw(pragma::CSceneComponent &scene, const CRasterizationRendererComponent &renderer, const pragma::CParticleSystemComponent &ps, prosper::IBuffer &vertexBuffer, prosper::IBuffer &indexBuffer, uint32_t numIndices, float radius, float curvature);
 	  protected:
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
+		virtual void InitializeShaderResources() override;
 	  private:
 		bool Draw(pragma::CSceneComponent &scene, const pragma::CParticleSystemComponent &ps, bool bloom) = delete;
 	};

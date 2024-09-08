@@ -20,15 +20,20 @@ using namespace pragma;
 
 extern DLLCLIENT CEngine *c_engine;
 
-decltype(ShaderMergeImages::DESCRIPTOR_SET_TEXTURE_2D) ShaderMergeImages::DESCRIPTOR_SET_TEXTURE_2D = {{prosper::DescriptorSetInfo::Binding {prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}}};
-ShaderMergeImages::ShaderMergeImages(prosper::IPrContext &context, const std::string &identifier) : prosper::ShaderBaseImageProcessing(context, identifier, "util/fs_merge") { SetBaseShader<prosper::ShaderCopyImage>(); }
+decltype(ShaderMergeImages::DESCRIPTOR_SET_TEXTURE_2D) ShaderMergeImages::DESCRIPTOR_SET_TEXTURE_2D = {
+  "TEXTURE2",
+  {prosper::DescriptorSetInfo::Binding {"TEXTURE2", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}},
+};
+ShaderMergeImages::ShaderMergeImages(prosper::IPrContext &context, const std::string &identifier) : prosper::ShaderBaseImageProcessing(context, identifier, "programs/util/merge") { SetBaseShader<prosper::ShaderCopyImage>(); }
 
 ShaderMergeImages::~ShaderMergeImages() {}
 
-void ShaderMergeImages::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
+void ShaderMergeImages::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { ShaderBaseImageProcessing::InitializeGfxPipeline(pipelineInfo, pipelineIdx); }
+
+void ShaderMergeImages::InitializeShaderResources()
 {
-	ShaderBaseImageProcessing::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_TEXTURE_2D);
+	ShaderBaseImageProcessing::InitializeShaderResources();
+	AddDescriptorSetGroup(DESCRIPTOR_SET_TEXTURE_2D);
 }
 
 bool ShaderMergeImages::RecordDraw(prosper::ICommandBuffer &cmd, prosper::IDescriptorSet &descSetTexture, prosper::IDescriptorSet &descSetTexture2) const

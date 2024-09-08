@@ -87,11 +87,6 @@ int luabind::default_converter<LuaShaderRecordTarget>::match(lua_State *l, U u, 
 //
 
 namespace Lua {
-	namespace BasePipelineCreateInfo {
-		DLLCLIENT void AttachPushConstantRange(lua_State *l, prosper::BasePipelineCreateInfo &pipelineInfo, uint32_t offset, uint32_t size, uint32_t shaderStages);
-		DLLCLIENT void AttachDescriptorSetInfo(lua_State *l, prosper::BasePipelineCreateInfo &pipelineInfo, pragma::LuaDescriptorSetInfo &descSetInfo);
-	};
-
 	namespace GraphicsPipelineCreateInfo {
 		DLLCLIENT void SetBlendingProperties(lua_State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo, const Vector4 &blendingProperties);
 		DLLCLIENT void SetCommonAlphaBlendProperties(lua_State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo);
@@ -161,7 +156,6 @@ namespace Lua {
 		DLLCLIENT void IsPrimitiveRestartEnabled(lua_State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo);
 		DLLCLIENT void IsRasterizerDiscardEnabled(lua_State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo);
 		DLLCLIENT void IsSampleMaskEnabled(lua_State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo);
-		DLLCLIENT void AttachVertexAttribute(lua_State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo, const pragma::LuaVertexBinding &binding, luabind::object attributes);
 		DLLCLIENT void AddSpecializationConstant(lua_State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t shaderStage, uint32_t constantId, ::DataStream &ds);
 		DLLCLIENT void SetAlphaToCoverageEnabled(lua_State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo, bool bEnabled);
 		DLLCLIENT void SetAlphaToOneEnabled(lua_State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo, bool bEnabled);
@@ -198,7 +192,7 @@ namespace Lua {
 	};
 
 	namespace Shader {
-		DLLCLIENT void CreateDescriptorSetGroup(lua_State *l, prosper::Shader &shader, uint32_t setIdx, uint32_t pipelineIdx);
+		DLLCLIENT void CreateDescriptorSetGroup(lua_State *l, prosper::Shader &shader, uint32_t setIdx);
 		DLLCLIENT void GetPipelineInfo(lua_State *l, prosper::Shader &shader, uint32_t shaderStage, uint32_t pipelineIdx);
 		DLLCLIENT void GetEntrypointName(lua_State *l, prosper::Shader &shader, uint32_t shaderStage, uint32_t pipelineIdx);
 		DLLCLIENT void GetGlslSourceCode(lua_State *l, prosper::Shader &shader, uint32_t shaderStage, uint32_t pipelineIdx);
@@ -214,6 +208,8 @@ namespace Lua {
 		DLLCLIENT void RecordBindDescriptorSet(lua_State *l, prosper::Shader &shader, prosper::util::PreparedCommandBuffer &pcb, Lua::Vulkan::DescriptorSet &ds, uint32_t firstSet, luabind::object dynamicOffsets, std::optional<uint32_t> dynamicOffsetIndex = {});
 		DLLCLIENT void RecordBindDescriptorSet(lua_State *l, prosper::Shader &shader, prosper::ShaderBindState &bindState, Lua::Vulkan::DescriptorSet &ds, uint32_t firstSet, luabind::object dynamicOffsets, std::optional<uint32_t> dynamicOffsetIndex = {});
 		DLLCLIENT void RecordBindDescriptorSets(lua_State *l, prosper::Shader &shader, prosper::ShaderBindState &bindState, luabind::object descSets, uint32_t firstSet, luabind::object dynamicOffsets);
+		DLLCLIENT void AttachPushConstantRange(lua_State *l, pragma::LuaShaderWrapperBase &shader, uint32_t offset, uint32_t size, uint32_t shaderStages);
+		DLLCLIENT void AttachDescriptorSetInfo(lua_State *l, pragma::LuaShaderWrapperBase &shader, pragma::LuaDescriptorSetInfo &descSetInfo);
 
 		namespace Graphics {
 			DLLCLIENT void RecordBindVertexBuffer(lua_State *l, prosper::ShaderGraphics &shader, prosper::ShaderBindState &bindState, Lua::Vulkan::Buffer &buffer, uint32_t startBinding, uint32_t offset);
@@ -225,6 +221,7 @@ namespace Lua {
 			DLLCLIENT void RecordDraw(lua_State *l, prosper::ShaderGraphics &shader, const LuaShaderRecordTarget &recordTarget);
 			DLLCLIENT void RecordEndDraw(lua_State *l, prosper::ShaderGraphics &shader, const LuaShaderRecordTarget &recordTarget);
 			DLLCLIENT void GetRenderPass(lua_State *l, prosper::ShaderGraphics &shader, uint32_t pipelineIdx);
+			DLLCLIENT void AttachVertexAttribute(lua_State *l, pragma::LuaShaderWrapperGraphicsBase &shader, const pragma::LuaVertexBinding &binding, luabind::object attributes);
 		};
 
 		namespace Scene3D {

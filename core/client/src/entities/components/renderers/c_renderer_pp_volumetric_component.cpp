@@ -68,8 +68,9 @@ void CRendererPpVolumetricComponent::ReloadRenderTarget()
 	auto cRenderer = GetEntity().GetComponent<CRasterizationRendererComponent>();
 	if(rendererC.expired() || cRenderer.expired() || g_shader.expired())
 		return;
-	auto &shaderLightCone = *static_cast<pragma::ShaderPPLightCone *>(g_shader.get());
-	m_renderTarget = c_engine->GetRenderContext().CreateRenderTarget({hdrInfo.sceneRenderTarget->GetTexture(0)->shared_from_this(), hdrInfo.bloomTexture, hdrInfo.prepass.textureDepth}, shaderLightCone.GetRenderPass());
+	auto *shaderLightCone = static_cast<pragma::ShaderPPLightCone *>(g_shader.get());
+	if(shaderLightCone && shaderLightCone->IsValid())
+		m_renderTarget = c_engine->GetRenderContext().CreateRenderTarget({hdrInfo.sceneRenderTarget->GetTexture(0)->shared_from_this(), hdrInfo.bloomTexture, hdrInfo.prepass.textureDepth}, shaderLightCone->GetRenderPass());
 }
 void CRendererPpVolumetricComponent::Initialize()
 {

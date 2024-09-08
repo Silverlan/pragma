@@ -11,14 +11,17 @@
 
 using namespace pragma;
 
-decltype(ShaderWaterSurfaceIntegrate::DESCRIPTOR_SET_WATER_PARTICLES) ShaderWaterSurfaceIntegrate::DESCRIPTOR_SET_WATER_PARTICLES = {{prosper::DescriptorSetInfo::Binding {// Water particles
-  prosper::DescriptorType::StorageBuffer, prosper::ShaderStageFlags::ComputeBit}}};
+decltype(ShaderWaterSurfaceIntegrate::DESCRIPTOR_SET_WATER_PARTICLES) ShaderWaterSurfaceIntegrate::DESCRIPTOR_SET_WATER_PARTICLES = {
+  "WATER",
+  {prosper::DescriptorSetInfo::Binding {"PARTICLE_DATA", prosper::DescriptorType::StorageBuffer, prosper::ShaderStageFlags::ComputeBit}},
+};
 decltype(ShaderWaterSurfaceIntegrate::DESCRIPTOR_SET_SURFACE_INFO) ShaderWaterSurfaceIntegrate::DESCRIPTOR_SET_SURFACE_INFO = {&ShaderWaterSurface::DESCRIPTOR_SET_SURFACE_INFO};
-ShaderWaterSurfaceIntegrate::ShaderWaterSurfaceIntegrate(prosper::IPrContext &context, const std::string &identifier) : ShaderWaterSurface(context, identifier, "compute/water/cs_water_surface_integrate") {}
-void ShaderWaterSurfaceIntegrate::InitializeComputePipeline(prosper::ComputePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
+ShaderWaterSurfaceIntegrate::ShaderWaterSurfaceIntegrate(prosper::IPrContext &context, const std::string &identifier) : ShaderWaterSurface(context, identifier, "programs/compute/water/water_surface_integrate") {}
+void ShaderWaterSurfaceIntegrate::InitializeComputePipeline(prosper::ComputePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { prosper::ShaderCompute::InitializeComputePipeline(pipelineInfo, pipelineIdx); }
+void ShaderWaterSurfaceIntegrate::InitializeShaderResources()
 {
-	prosper::ShaderCompute::InitializeComputePipeline(pipelineInfo, pipelineIdx);
+	prosper::ShaderCompute::InitializeShaderResources();
 
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_WATER_PARTICLES);
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_SURFACE_INFO);
+	AddDescriptorSetGroup(DESCRIPTOR_SET_WATER_PARTICLES);
+	AddDescriptorSetGroup(DESCRIPTOR_SET_SURFACE_INFO);
 }

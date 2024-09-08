@@ -15,17 +15,20 @@
 using namespace pragma;
 
 decltype(ShaderPPDoF::DESCRIPTOR_SET_TEXTURE) ShaderPPDoF::DESCRIPTOR_SET_TEXTURE = {ShaderPPBase::DESCRIPTOR_SET_TEXTURE};
-decltype(ShaderPPDoF::DESCRIPTOR_SET_DEPTH_BUFFER) ShaderPPDoF::DESCRIPTOR_SET_DEPTH_BUFFER = {{prosper::DescriptorSetInfo::Binding {// Depth Buffer
-  prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}}};
-ShaderPPDoF::ShaderPPDoF(prosper::IPrContext &context, const std::string &identifier) : ShaderPPBase(context, identifier, "pfm/post_processing/fs_depth_of_field") { SetBaseShader<prosper::ShaderCopyImage>(); }
+decltype(ShaderPPDoF::DESCRIPTOR_SET_DEPTH_BUFFER) ShaderPPDoF::DESCRIPTOR_SET_DEPTH_BUFFER = {
+  "DEPTH_BUFFER",
+  {prosper::DescriptorSetInfo::Binding {"MAP", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}},
+};
+ShaderPPDoF::ShaderPPDoF(prosper::IPrContext &context, const std::string &identifier) : ShaderPPBase(context, identifier, "programs/post_processing/depth_of_field") { SetBaseShader<prosper::ShaderCopyImage>(); }
 
-void ShaderPPDoF::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
+void ShaderPPDoF::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { ShaderGraphics::InitializeGfxPipeline(pipelineInfo, pipelineIdx); }
+void ShaderPPDoF::InitializeShaderResources()
 {
-	ShaderGraphics::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
-	AddDefaultVertexAttributes(pipelineInfo);
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_TEXTURE);
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_DEPTH_BUFFER);
-	AttachPushConstantRange(pipelineInfo, pipelineIdx, 0u, sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit);
+	ShaderGraphics::InitializeShaderResources();
+	AddDefaultVertexAttributes();
+	AddDescriptorSetGroup(DESCRIPTOR_SET_TEXTURE);
+	AddDescriptorSetGroup(DESCRIPTOR_SET_DEPTH_BUFFER);
+	AttachPushConstantRange(0u, sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit);
 }
 bool ShaderPPDoF::RecordDraw(prosper::ShaderBindState &bindState, prosper::IDescriptorSet &descSetTexture, prosper::IDescriptorSet &descSetDepth, const PushConstants &pushConstants) const
 {

@@ -49,7 +49,7 @@ static Mat3x4 calc_rotation_matrix_around_axis(const Vector3 &axis, umath::Degre
 
 static Vector3 rotate_vector(const Vector3 &v, const Mat4 &m) { return Vector3 {uvec::dot(v, Vector3(m[0][0], m[0][1], m[0][2])), uvec::dot(v, Vector3(m[1][0], m[1][1], m[1][2])), uvec::dot(v, Vector3(m[2][0], m[2][1], m[2][2]))}; }
 
-ShaderParticleAnimatedSprites::ShaderParticleAnimatedSprites(prosper::IPrContext &context, const std::string &identifier) : ShaderParticle2DBase(context, identifier, "pfm/particles/vs_particle_animated_sprites", "particles/fs_particle") {}
+ShaderParticleAnimatedSprites::ShaderParticleAnimatedSprites(prosper::IPrContext &context, const std::string &identifier) : ShaderParticle2DBase(context, identifier, "programs/pfm/particles/particle_animated_sprites", "programs/particles/particle") {}
 
 Vector3 ShaderParticleAnimatedSprites::DoCalcVertexPosition(const pragma::CParticleSystemComponent &ptc, uint32_t ptIdx, uint32_t localVertIdx, const Vector3 &camPos, const Vector3 &camUpWs, const Vector3 &camRightWs, float nearZ, float farZ) const
 {
@@ -115,6 +115,14 @@ Vector3 ShaderParticleAnimatedSprites::DoCalcVertexPosition(const pragma::CParti
 	return vecCorner;
 }
 
+void ShaderParticleAnimatedSprites::InitializeShaderResources()
+{
+	ShaderSceneLit::InitializeShaderResources();
+
+	RegisterDefaultGfxPipelineVertexAttributes();
+	AttachPushConstantRange(0u, sizeof(ShaderParticle2DBase::PushConstants) + sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit);
+	RegisterDefaultGfxPipelineDescriptorSetGroups();
+}
 void ShaderParticleAnimatedSprites::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
 {
 	auto basePipelineIdx = GetBasePipelineIndex(pipelineIdx);
@@ -123,9 +131,6 @@ void ShaderParticleAnimatedSprites::InitializeGfxPipeline(prosper::GraphicsPipel
 	pipelineInfo.ToggleDepthWrites(pipelineIdx == GetDepthPipelineIndex()); // Last pipeline is depth pipeline
 
 	ShaderParticleBase::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
-	RegisterDefaultGfxPipelineVertexAttributes(pipelineInfo);
-	AttachPushConstantRange(pipelineInfo, pipelineIdx, 0u, sizeof(ShaderParticle2DBase::PushConstants) + sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit);
-	RegisterDefaultGfxPipelineDescriptorSetGroups(pipelineInfo, pipelineIdx);
 }
 
 bool ShaderParticleAnimatedSprites::RecordDraw(prosper::ShaderBindState &bindState, pragma::CSceneComponent &scene, const CRasterizationRendererComponent &renderer, const CParticleSystemComponent &ps, CParticleSystemComponent::OrientationType orientationType,

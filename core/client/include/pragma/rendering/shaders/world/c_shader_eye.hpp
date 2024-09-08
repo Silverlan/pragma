@@ -41,7 +41,7 @@ namespace pragma {
 	  protected:
 		ShaderEye(prosper::IPrContext &context, const std::string &identifier, const std::string &vsShader, const std::string &fsShader, const std::string &gsShader = "");
 		bool BindEyeball(rendering::ShaderProcessor &shaderProcessor, uint32_t skinMatIdx) const;
-		virtual void InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
+		virtual void InitializeGfxPipelinePushConstantRanges() override;
 	};
 
 	class DLLCLIENT ShaderEyeLegacy : public ShaderEye {

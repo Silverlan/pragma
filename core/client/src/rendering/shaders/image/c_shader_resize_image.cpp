@@ -20,7 +20,7 @@ using namespace pragma;
 
 extern DLLCLIENT CEngine *c_engine;
 
-ShaderResizeImage::ShaderResizeImage(prosper::IPrContext &context, const std::string &identifier) : prosper::ShaderBaseImageProcessing(context, identifier, "screen/fs_resize_image")
+ShaderResizeImage::ShaderResizeImage(prosper::IPrContext &context, const std::string &identifier) : prosper::ShaderBaseImageProcessing(context, identifier, "programs/image/resize_image")
 {
 	SetBaseShader<prosper::ShaderCopyImage>();
 	SetPipelineCount(umath::to_integral(Filter::Count));
@@ -33,8 +33,13 @@ void ShaderResizeImage::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInf
 	ShaderBaseImageProcessing::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
 
 	AddSpecializationConstant(pipelineInfo, prosper::ShaderStageFlags::FragmentBit, 0u /* constantId */, static_cast<uint32_t>(pipelineIdx));
+}
 
-	AttachPushConstantRange(pipelineInfo, pipelineIdx, 0u, sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit);
+void ShaderResizeImage::InitializeShaderResources()
+{
+	ShaderBaseImageProcessing::InitializeShaderResources();
+
+	AttachPushConstantRange(0u, sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit);
 }
 
 bool ShaderResizeImage::RecordDraw(prosper::ICommandBuffer &cmd, prosper::IDescriptorSet &descSetTexture, const BicubicFilter &bicubicFilter) const

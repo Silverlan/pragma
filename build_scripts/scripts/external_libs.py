@@ -17,7 +17,7 @@ get_submodule("mathutil","https://github.com/Silverlan/mathutil.git","90a6cbb229
 get_submodule("networkmanager","https://github.com/Silverlan/networkmanager.git","981bc5809c1a768267ddace778205e1be0262730")
 get_submodule("panima","https://github.com/Silverlan/panima.git","08492a7bd8b214ff8472ae3288a32020aff1f60e")
 get_submodule("prosper","https://github.com/Silverlan/prosper.git","588ac5fa7ddd79fe472dc6be645d4ea4ce4698c3")
-get_submodule("sharedutils","https://github.com/Silverlan/sharedutils.git","9d3c3b9d1cdbe969c9eebd8bdfc1faf9d67b4e00")
+get_submodule("sharedutils","https://github.com/Silverlan/sharedutils.git","dc88bfc3d87f9405aa585be44799580f5565bbb6")
 get_submodule("util_bsp","https://github.com/Silverlan/util_bsp.git","7c49f7b9a59b1e9776a355881aeecede8a8f9be3")
 get_submodule("util_formatted_text","https://github.com/Silverlan/util_formatted_text.git","3fbb26580f732d0297cd6738f28636f6a1fd1f0c")
 get_submodule("util_image","https://github.com/Silverlan/util_image.git","901be63a3b9bb26dfe6670b1c5ba2c5025f2773a")
@@ -33,7 +33,7 @@ get_submodule("util_versioned_archive","https://github.com/Silverlan/util_versio
 get_submodule("util_vmf","https://github.com/Silverlan/util_vmf.git","3080ba05280ae5b0a76ef283870864c16d1c7826")
 get_submodule("util_zip","https://github.com/Silverlan/util_zip.git","c8a13c03a35a8f44138dd81e35eecd19b7dd538a")
 get_submodule("vfilesystem","https://github.com/Silverlan/vfilesystem.git","25c839e313b1bb1c2b4dee56c4a0298c53f546b4")
-get_submodule("wgui","https://github.com/Silverlan/wgui.git","525f76a73545c4bbe31a425ca6ec9a65122797e8")
+get_submodule("wgui","https://github.com/Silverlan/wgui.git","bfa72cae6258f1233c60e5fd9ecae1bbf53ee7e7")
 get_submodule("util_unicode","https://github.com/Silverlan/util_unicode.git","7d02aa0e66d043ce139c0f7f3885b59e6a398fb7")
 get_submodule("cppbezierfit","https://github.com/Silverlan/cppbezierfit.git","eb08f35ad74c1124f3cd4ef3a8958cded6a04b0e")
 

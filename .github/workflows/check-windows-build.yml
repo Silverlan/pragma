@@ -67,3 +67,10 @@ jobs:
           build-dir: '${{ steps.build-pragma.outputs.build-dir }}'
           deps-dir: '${{ steps.build-pragma.outputs.deps-dir }}'
           install-dir: '${{ steps.build-pragma.outputs.install-dir }}'
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: pragma-win64
+          path: ${{ steps.build-pragma.outputs.install-dir }}
+          retention-days: 1

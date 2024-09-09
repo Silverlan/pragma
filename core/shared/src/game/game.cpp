@@ -414,6 +414,14 @@ void Game::OnInitialized()
 
 void Game::SetUp() {}
 
+static bool check_validity(pragma::BasePhysicsComponent &physC) { return !umath::is_flag_set(physC.BaseEntityComponent::GetStateFlags(), pragma::BaseEntityComponent::StateFlags::Removed); }
+static bool check_validity(BaseEntity *ent)
+{
+	if(!ent || ent->IsRemoved())
+		return false;
+	auto physC = ent->GetPhysicsComponent();
+	return (physC != nullptr && check_validity(*physC));
+}
 class PhysEventCallback : public pragma::physics::IEventCallback {
   public:
 	// Called if contact report is enabled for a collision object and it
@@ -425,7 +433,7 @@ class PhysEventCallback : public pragma::physics::IEventCallback {
 		auto *physObj0 = contactInfo.collisionObj0->GetPhysObj();
 		auto *entC0 = physObj0 ? physObj0->GetOwner() : nullptr;
 		auto *touchC0 = entC0 ? static_cast<pragma::BaseTouchComponent *>(entC0->GetEntity().FindComponent("touch").get()) : nullptr;
-		if(touchC0 == nullptr)
+		if(touchC0 == nullptr || check_validity(&entC0->GetEntity()) == false)
 			return;
 		touchC0->Contact(contactInfo);
 	}
@@ -434,7 +442,7 @@ class PhysEventCallback : public pragma::physics::IEventCallback {
 	virtual void OnConstraintBroken(pragma::physics::IConstraint &constraint) override
 	{
 		auto *ent = constraint.GetEntity();
-		if(ent == nullptr)
+		if(check_validity(ent) == false)
 			return;
 		// TODO: Check constraint component
 	}
@@ -450,7 +458,7 @@ class PhysEventCallback : public pragma::physics::IEventCallback {
 
 		auto *physObj1 = o1.GetPhysObj();
 		auto *entC1 = physObj1 ? physObj1->GetOwner() : nullptr;
-		if(touchC0 == nullptr || entC1 == nullptr)
+		if(touchC0 == nullptr || entC1 == nullptr || !check_validity(&entC0->GetEntity()) || !check_validity(&entC1->GetEntity()))
 			return;
 		touchC0->StartTouch(entC1->GetEntity(), *physObj1, o0, o1);
 	}
@@ -464,7 +472,7 @@ class PhysEventCallback : public pragma::physics::IEventCallback {
 
 		auto *physObj1 = o1.GetPhysObj();
 		auto *entC1 = physObj1 ? physObj1->GetOwner() : nullptr;
-		if(touchC0 == nullptr || entC1 == nullptr)
+		if(touchC0 == nullptr || entC1 == nullptr || !check_validity(&entC0->GetEntity()) || !check_validity(&entC1->GetEntity()))
 			return;
 		touchC0->EndTouch(entC1->GetEntity(), *physObj1, o0, o1);
 	}
@@ -474,7 +482,7 @@ class PhysEventCallback : public pragma::physics::IEventCallback {
 		auto *physObj = o.GetPhysObj();
 		auto *ent = physObj ? physObj->GetOwner() : nullptr;
 		auto *physC = ent ? ent->GetEntity().GetPhysicsComponent() : nullptr;
-		if(physC == nullptr)
+		if(physC == nullptr || !check_validity(*physC))
 			return;
 		physC->OnWake();
 	}
@@ -483,7 +491,7 @@ class PhysEventCallback : public pragma::physics::IEventCallback {
 		auto *physObj = o.GetPhysObj();
 		auto *ent = physObj ? physObj->GetOwner() : nullptr;
 		auto *physC = ent ? ent->GetEntity().GetPhysicsComponent() : nullptr;
-		if(physC == nullptr)
+		if(physC == nullptr || !check_validity(*physC))
 			return;
 		physC->OnSleep();
 	}

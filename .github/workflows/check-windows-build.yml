@@ -74,3 +74,18 @@ jobs:
           name: pragma-win64
           path: ${{ steps.build-pragma.outputs.install-dir }}
           retention-days: 1
+
+      - name: Collect PDB files
+        uses: ./pragma/github_actions/collect_pdb_files
+        if: ${{ !cancelled() }}
+        with:
+          source-directory: "${{ steps.build-pragma.outputs.build-dir }}"
+          target-directory: "${{ github.workspace }}/pdb"
+
+      - name: Upload PDB Artifacts
+        uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: debug-pdb
+          path: "${{ github.workspace }}/pdb"
+          retention-days: 1

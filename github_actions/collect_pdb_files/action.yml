@@ -1,0 +1,47 @@
+name: Collect PDB Files
+description: 'Collect all PDB files in a directory (recursively) and move them elsewhere.'
+inputs:
+  source-directory:
+    description: 'Source directory where the PDB files reside.'
+    required: true
+  target-directory:
+    description: 'Target directory to where to move the PDB files.'
+    required: true
+    default: 'nightly'
+runs:
+  using: "composite"
+  steps:
+    - name: Download Pragma
+      shell: bash
+      run: |
+        curDir="$PWD"
+        mkdir pdb
+        
+        source_directory="${{ inputs.source-directory }}"
+        target_directory="${{ inputs.target-directory }}"
+
+        move_file() {
+          local source_file="$1"
+          local destination_dir
+          local base_name
+          local destination_file
+          local counter=1
+
+          base_name=$(basename "$source_file")
+          destination_dir="$target_directory"
+          destination_file="$destination_dir/$base_name"
+
+          # Check if the destination file already exists
+          while [[ -e "$destination_file" ]]; do
+            # Append a number to the destination file name
+            destination_file="${destination_dir}/${base_name}_${counter}"
+            counter=$((counter + 1))
+          done
+
+          mv "$source_file" "$destination_file"
+          echo "Moved: $source_file -> $destination_file"
+        }
+
+        find "$source_directory" -type f -name "*.pdb" -print0 | while IFS= read -r -d '' file; do
+          move_file "$file"
+        done

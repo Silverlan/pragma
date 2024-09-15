@@ -3,9 +3,6 @@
 
 #include "/math/math.glsl"
 
-const float GAMMA = 2.2;
-const float INV_GAMMA = 1.0 / GAMMA;
-
 // Note: If any of these are changed or new ones are added, make sure to also change the Lua bindings!
 #define TONE_MAPPING_NONE 0
 #define TONE_MAPPING_GAMMA_CORRECTION (TONE_MAPPING_NONE + 1)
@@ -16,14 +13,6 @@ const float INV_GAMMA = 1.0 / GAMMA;
 #define TONE_MAPPING_GRAN_TURISMO (TONE_MAPPING_ACES + 1)
 #define TONE_MAPPING_HDR (TONE_MAPPING_GRAN_TURISMO + 1)
 #define TONE_MAPPING_COUNT (TONE_MAPPING_HDR + 1)
-
-// linear to sRGB approximation
-// see http://chilliant.blogspot.com/2012/08/srgb-approximations-for-hlsl.html
-vec3 linear_to_srgb(vec3 color) { return pow(color, vec3(INV_GAMMA)); }
-
-// sRGB to linear approximation
-// see http://chilliant.blogspot.com/2012/08/srgb-approximations-for-hlsl.html
-vec3 srgb_to_linear(vec3 srgbIn) { return pow(srgbIn.xyz, vec3(GAMMA)); }
 
 // Uncharted 2 tone map
 // see: http://filmicworlds.com/blog/filmic-tonemapping-operators/

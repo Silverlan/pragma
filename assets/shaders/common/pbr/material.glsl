@@ -14,7 +14,6 @@
 
 #if MATERIAL_ENABLE_WRINKLES == 1
 #include "/programs/scene/pbr/textures.glsl"
-#include "/common/inputs/textures/wrinkle_map.glsl"
 #endif
 
 // Khronos
@@ -123,8 +122,6 @@ MaterialInfo build_material_info(PbrMaterial materialData, uint materialFlags, v
 	}
 #endif
 
-	if(true) //is_diffuse_srgb()) // TODO
-		baseColor.rgb = srgb_to_linear(baseColor.rgb);
 	//baseColor *= u_DiffuseFactor;
 	diffuseColor = baseColor.rgb * (vec3(1.0) - f0) * (1.0 - metallic);
 	specularColor = mix(f0, baseColor.rgb, metallic);

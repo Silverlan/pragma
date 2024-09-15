@@ -74,9 +74,6 @@ vec3 calc_light_specular(vec3 normal, vec3 viewVector)
 	return specularHighlights;
 }
 
-layout(LAYOUT_ID(MATERIAL, DUDV_MAP)) uniform sampler2D u_dudvMap;
-layout(LAYOUT_ID(MATERIAL, NORMAL_MAP)) uniform sampler2D u_normalMap;
-
 layout(LAYOUT_ID(WATER, REFLECTION_MAP)) uniform sampler2D u_reflectionMap;
 layout(LAYOUT_ID(WATER, REFRACTION_MAP)) uniform sampler2D u_refractionMap;
 layout(LAYOUT_ID(WATER, REFRACTION_DEPTH)) uniform sampler2D u_refractionDepthMap;

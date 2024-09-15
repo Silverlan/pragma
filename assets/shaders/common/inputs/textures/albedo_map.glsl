@@ -4,8 +4,6 @@
 #include "/common/material_flags.glsl"
 #include "/common/alpha_mode.glsl"
 
-layout(LAYOUT_ID(MATERIAL, ALBEDO_MAP)) uniform sampler2D u_albedoMap;
-
 vec4 get_base_color(vec4 instanceColor, vec4 albedoColor, vec4 materialColor, uint alphaMode, float alphaCutoff, uint materialFlags)
 {
 	vec4 baseColor = albedoColor;

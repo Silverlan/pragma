@@ -13,9 +13,6 @@ struct ParallaxInfo {
 #ifndef USE_PARALLAX_MAP
 #define USE_PARALLAX_MAP 1
 #endif
-#if USE_PARALLAX_MAP == 1
-layout(LAYOUT_ID(MATERIAL, PARALLAX_MAP)) uniform sampler2D u_parallaxMap;
-#endif
 
 //Parallax Occlusion Mapping function from https://learnopengl.com/Advanced-Lighting/Parallax-Mapping
 vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir, ParallaxInfo parallaxInfo)

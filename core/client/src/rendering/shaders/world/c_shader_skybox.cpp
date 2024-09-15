@@ -40,6 +40,7 @@ ShaderSkybox::ShaderSkybox(prosper::IPrContext &context, const std::string &iden
 ShaderSkybox::ShaderSkybox(prosper::IPrContext &context, const std::string &identifier, const std::string &vsShader, const std::string &fsShader) : ShaderGameWorldLightingPass(context, identifier, vsShader, fsShader)
 {
 	// SetBaseShader<ShaderTextured3DBase>();
+	m_shaderMaterialName = {};
 }
 
 prosper::DescriptorSetInfo &ShaderSkybox::GetMaterialDescriptorSetInfo() const { return DESCRIPTOR_SET_MATERIAL; }

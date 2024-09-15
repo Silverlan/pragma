@@ -32,13 +32,15 @@ using namespace pragma;
 
 decltype(ShaderGlow::DESCRIPTOR_SET_MATERIAL) ShaderGlow::DESCRIPTOR_SET_MATERIAL = {
   "MATERIAL",
-  {prosper::DescriptorSetInfo::Binding {"SETTINGS", prosper::DescriptorType::UniformBuffer, prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::GeometryBit},
+  {
+    prosper::DescriptorSetInfo::Binding {"SETTINGS", prosper::DescriptorType::UniformBuffer, prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::GeometryBit},
     prosper::DescriptorSetInfo::Binding {"ALBEDO_MAP", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}, prosper::DescriptorSetInfo::Binding {"NORMAL", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit},
     prosper::DescriptorSetInfo::Binding {"RMA_MAP", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}, prosper::DescriptorSetInfo::Binding {"EMISSION", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit},
     prosper::DescriptorSetInfo::Binding {"PARALLAX_MAP", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit},
     prosper::DescriptorSetInfo::Binding {"WRINKLE_STRETCH_MAP", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit},
     prosper::DescriptorSetInfo::Binding {"WRINKLE_COMPRESS_MAP", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit},
-    prosper::DescriptorSetInfo::Binding {"EXPONENT_MAP", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}, prosper::DescriptorSetInfo::Binding {"GLOW_MAP", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}},
+    //prosper::DescriptorSetInfo::Binding {"GLOW_MAP", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}},
+  },
 };
 static_assert(umath::to_integral(ShaderGlow::MaterialBinding::Count) == 10, "Number of bindings in material descriptor set does not match MaterialBinding enum count!");
 
@@ -50,7 +52,7 @@ decltype(ShaderGlow::DESCRIPTOR_SET_PBR) ShaderGlow::DESCRIPTOR_SET_PBR = {
     prosper::DescriptorSetInfo::Binding {"BRDF_MAP", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit},
   },
 };
-ShaderGlow::ShaderGlow(prosper::IPrContext &context, const std::string &identifier, const std::string &vsShader, const std::string &fsShader, const std::string &gsShader) : ShaderGameWorldLightingPass {context, identifier, vsShader, fsShader, gsShader} {}
+ShaderGlow::ShaderGlow(prosper::IPrContext &context, const std::string &identifier, const std::string &vsShader, const std::string &fsShader, const std::string &gsShader) : ShaderGameWorldLightingPass {context, identifier, vsShader, fsShader, gsShader} { m_shaderMaterialName = "pbr"; }
 ShaderGlow::ShaderGlow(prosper::IPrContext &context, const std::string &identifier) : ShaderGlow {context, identifier, "programs/scene/textured", "programs/scene/glow"} {}
 
 void ShaderGlow::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx)
@@ -132,6 +134,7 @@ bool ShaderGlow::BindDescriptorSetTexture(Material &mat, prosper::IDescriptorSet
 
 bool ShaderGlow::BindDescriptorSetBaseTextures(CMaterial &mat, const prosper::DescriptorSetInfo &descSetInfo, prosper::IDescriptorSet &ds)
 {
+#if 0
 	auto matData = InitializeMaterialBuffer(ds, mat);
 	if(matData.has_value() == false)
 		return false;
@@ -167,6 +170,8 @@ bool ShaderGlow::BindDescriptorSetBaseTextures(CMaterial &mat, const prosper::De
 		return false;
 
 	return true;
+#endif
+	return false;
 }
 
 std::shared_ptr<prosper::IDescriptorSetGroup> ShaderGlow::InitializeMaterialDescriptorSet(CMaterial &mat, const prosper::DescriptorSetInfo &descSetInfo)

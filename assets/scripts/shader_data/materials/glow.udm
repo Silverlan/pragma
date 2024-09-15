@@ -1,0 +1,10 @@
+"shader_material"
+{
+	$array properties [element][]
+	$array textures [element][
+		{
+			$string name "glow_map"
+			$bool required 1
+		}
+	]
+}

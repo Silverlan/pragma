@@ -25,7 +25,7 @@ get_submodule("libzip","https://github.com/nih-at/libzip.git","210b09d9d2d0f4c0b
 get_submodule("luabind","https://github.com/Silverlan/luabind-deboostified.git","a5e629426838af8cbfe8e25a66f6dd1a203bbd4a")
 get_submodule("luajit","https://github.com/Silverlan/LuaJIT.git","95766ce","v2.1")
 get_submodule("miniball","https://github.com/Silverlan/miniball.git","609fbf16e7a9cc3dc8f88e4d1c7a1d8ead842bb1")
-get_submodule("muparserx","https://github.com/Silverlan/muparserx.git","1d4656bd671ab856a79f767c483a78c0a036918b")
+get_submodule("muparserx","https://github.com/Silverlan/muparserx.git","910f6128494e174c3de81bd34c3d938b47873c08")
 get_submodule("ogg","https://github.com/xiph/ogg.git","db5c7a49ce7ebda47b15b78471e78fb7f2483e22")
 get_submodule("rapidxml","https://github.com/discord/rapidxml.git","2ae4b2888165a393dfb6382168825fddf00c27b9")
 get_submodule("recastnavigation","https://github.com/recastnavigation/recastnavigation.git","14b2631527c4792e95b2c78ebfa8ac4cd3413363")

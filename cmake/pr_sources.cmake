@@ -77,11 +77,17 @@ function(pr_add_modules TARGET_NAME MODULE_LOCATION)
         pr_add_module_list(${TARGET_NAME} cxx_modules_impl PRIVATE "${IMPLEMENTATION_MODULE_LIST}")
     endif()
 
-    # 2. Get all .cppm files in ${MODULE_LOCATION} (non-recursively)
-    file(GLOB ROOT_MODULE_LIST "${MODULE_LOCATION}/*.cppm")
+    # 2. Get all .cppm files in ${MODULE_LOCATION} recursively excluding the ones in ${MODULE_LOCATION}/implementation/
+    file(GLOB_RECURSE ALL_MODULE_LIST "${MODULE_LOCATION}/*.cppm")
 
-    # 3. Get all .cppm files in ${MODULE_LOCATION}/interface recursively
-    file(GLOB_RECURSE INTERFACE_MODULE_LIST "${MODULE_LOCATION}/interface/*.cppm")
+    # Filter out the implementation files from ALL_MODULE_LIST
+    set(PUBLIC_MODULE_LIST "")
+    foreach(MODULE_FILE ${ALL_MODULE_LIST})
+        string(FIND ${MODULE_FILE} "/implementation/" FOUND)
+        if (FOUND EQUAL -1) # If "/implementation/" is not found in the path
+            list(APPEND PUBLIC_MODULE_LIST ${MODULE_FILE})
+        endif()
+    endforeach()
 
     # Combine the lists for the PUBLIC module files
     list(APPEND PUBLIC_MODULE_LIST ${ROOT_MODULE_LIST} ${INTERFACE_MODULE_LIST})

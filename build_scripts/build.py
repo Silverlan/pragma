@@ -555,7 +555,7 @@ if not Path(vcpkg_root).is_dir():
 	git_clone("https://github.com/Microsoft/vcpkg.git")
 
 os.chdir("vcpkg")
-reset_to_commit("ad3bae5")
+reset_to_commit("ee2d2a1")
 os.chdir("..")
 if platform == "linux":
 	subprocess.run([vcpkg_root +"/bootstrap-vcpkg.sh","-disableMetrics"],check=True,shell=True)
@@ -798,7 +798,7 @@ execfile(scripts_dir +"/user_modules.py",g,l)
 if with_essential_client_modules:
 	add_pragma_module(
 		name="pr_prosper_vulkan",
-		commitSha="20ac6f66d3e7b4ab3571780eca56d97b820cae3a",
+		commitSha="7711997f09c06d7ac66367bcb562e13ab74baa61",
 		repositoryUrl="https://github.com/Silverlan/pr_prosper_vulkan.git"
 	)
 
@@ -842,7 +842,7 @@ if with_pfm:
 		)
 		add_pragma_module(
 			name="pr_unirender",
-			commitSha="019f7acb3d5fecffe2d973271921bb4af5a19010",
+			commitSha="f89f32a128636e1ba365b120cdb9f00b3a85f654",
 			repositoryUrl="https://github.com/Silverlan/pr_cycles.git"
 		)
 		add_pragma_module(

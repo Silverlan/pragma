@@ -12,9 +12,6 @@
 
 #ifdef GLS_FRAGMENT_SHADER
 #include "/lighting/inputs/fs_light_sources.glsl"
-#if USE_NORMAL_MAP == 1
-layout(LAYOUT_ID(MATERIAL, NORMAL_MAP)) uniform sampler2D u_normalMap;
-#endif
 #if ENABLE_TANGENT_SPACE_NORMALS == 1
 vec3 calc_tangent_space_normal(vec2 uv)
 {

@@ -49,7 +49,7 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderParticleBlob::InitializeMate
 	auto descSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_MATERIAL);
 	if(!descSetGroup)
 		return nullptr;
-	ShaderGameWorldLightingPass::InitializeMaterialBuffer(*descSetGroup->GetDescriptorSet(), mat, 0);
+	// InitializeMaterialBuffer(*descSetGroup->GetDescriptorSet(), mat, 0);
 	mat.SetDescriptorSetGroup(*this, descSetGroup);
 	return descSetGroup;
 }

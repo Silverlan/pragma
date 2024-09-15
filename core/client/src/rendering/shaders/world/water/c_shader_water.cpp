@@ -26,7 +26,8 @@ extern DLLCLIENT CEngine *c_engine;
 
 decltype(ShaderWater::DESCRIPTOR_SET_MATERIAL) ShaderWater::DESCRIPTOR_SET_MATERIAL = {
   "MATERIAL",
-  {prosper::DescriptorSetInfo::Binding {"DUDV_MAP", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}, prosper::DescriptorSetInfo::Binding {"NORMAL_MAP", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}},
+  {prosper::DescriptorSetInfo::Binding {"SETTINGS", prosper::DescriptorType::UniformBuffer, prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::GeometryBit},
+    prosper::DescriptorSetInfo::Binding {"DUDV_MAP", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}, prosper::DescriptorSetInfo::Binding {"NORMAL_MAP", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}},
 };
 decltype(ShaderWater::DESCRIPTOR_SET_WATER) ShaderWater::DESCRIPTOR_SET_WATER = {
   "WATER",
@@ -36,30 +37,11 @@ decltype(ShaderWater::DESCRIPTOR_SET_WATER) ShaderWater::DESCRIPTOR_SET_WATER = 
 };
 ShaderWater::ShaderWater(prosper::IPrContext &context, const std::string &identifier) : ShaderGameWorldLightingPass(context, identifier, "programs/scene/water", "programs/scene/water")
 {
+	m_shaderMaterialName = "water";
 	// SetBaseShader<ShaderTextured3DBase>();
 }
 
-std::shared_ptr<prosper::IDescriptorSetGroup> ShaderWater::InitializeMaterialDescriptorSet(CMaterial &mat)
-{
-	auto descSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_MATERIAL);
-	mat.SetDescriptorSetGroup(*this, descSetGroup);
-	auto &descSet = *descSetGroup->GetDescriptorSet();
-
-	auto *dudvMap = mat.GetTextureInfo(Material::DUDV_MAP_IDENTIFIER);
-	if(dudvMap != nullptr && dudvMap->texture != nullptr) {
-		auto texture = std::static_pointer_cast<Texture>(dudvMap->texture);
-		if(texture->HasValidVkTexture())
-			descSet.SetBindingTexture(*texture->GetVkTexture(), umath::to_integral(MaterialBinding::DuDvMap));
-	}
-
-	auto *normalMap = mat.GetNormalMap();
-	if(normalMap != nullptr && normalMap->texture != nullptr) {
-		auto texture = std::static_pointer_cast<Texture>(normalMap->texture);
-		if(texture->HasValidVkTexture())
-			descSet.SetBindingTexture(*texture->GetVkTexture(), umath::to_integral(MaterialBinding::NormalMap));
-	}
-	return descSetGroup;
-}
+std::shared_ptr<prosper::IDescriptorSetGroup> ShaderWater::InitializeMaterialDescriptorSet(CMaterial &mat) { return ShaderGameWorldLightingPass::InitializeMaterialDescriptorSet(mat); }
 bool ShaderWater::RecordBindEntity(rendering::ShaderProcessor &shaderProcessor, CRenderComponent &renderC, prosper::IShaderPipelineLayout &layout, uint32_t entityInstanceDescriptorSetIndex) const
 {
 	if(ShaderGameWorldLightingPass::RecordBindEntity(shaderProcessor, renderC, layout, entityInstanceDescriptorSetIndex) == false)

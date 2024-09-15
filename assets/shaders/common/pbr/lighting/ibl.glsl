@@ -29,14 +29,8 @@ vec3 get_ibl_contribution(MaterialInfo materialInfo, vec3 n, vec3 v, float refle
 #endif
 	specularSample.rgb *= reflectionProbeIntensity;
 
-#ifdef USE_HDR
-	// Already linear.
 	vec3 diffuseLight = diffuseSample.rgb;
 	vec3 specularLight = specularSample.rgb;
-#else
-	vec3 diffuseLight = srgb_to_linear(diffuseSample.rgb);
-	vec3 specularLight = srgb_to_linear(specularSample.rgb);
-#endif
 
 	vec3 diffuse = diffuseLight * materialInfo.diffuseColor;
 	vec3 specular = specularLight * (materialInfo.specularColor * brdf.x + brdf.y);

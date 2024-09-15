@@ -23,12 +23,14 @@ extern DLLCLIENT CEngine *c_engine;
 decltype(ShaderPPGlow::DESCRIPTOR_SET_INSTANCE) ShaderPPGlow::DESCRIPTOR_SET_INSTANCE = {&ShaderGameWorldLightingPass::DESCRIPTOR_SET_INSTANCE};
 decltype(ShaderPPGlow::DESCRIPTOR_SET_SCENE) ShaderPPGlow::DESCRIPTOR_SET_SCENE = {&ShaderGameWorldLightingPass::DESCRIPTOR_SET_SCENE};
 decltype(ShaderPPGlow::DESCRIPTOR_SET_MATERIAL) ShaderPPGlow::DESCRIPTOR_SET_MATERIAL = {
-  "GLOW",
-  {prosper::DescriptorSetInfo::Binding {"MAP", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}},
+  "MATERIAL",
+  {prosper::DescriptorSetInfo::Binding {"SETTINGS", prosper::DescriptorType::UniformBuffer, prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::GeometryBit},
+    prosper::DescriptorSetInfo::Binding {"GLOW_MAP", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}},
 };
 decltype(ShaderPPGlow::RENDER_PASS_FORMAT) ShaderPPGlow::RENDER_PASS_FORMAT = prosper::Format::R8G8B8A8_UNorm;
 ShaderPPGlow::ShaderPPGlow(prosper::IPrContext &context, const std::string &identifier) : ShaderGameWorldLightingPass(context, identifier, "programs/scene/glow/glow", "programs/scene/glow/glow")
 {
+	m_shaderMaterialName = "glow";
 	// SetBaseShader<ShaderTextured3DBase>();
 }
 prosper::DescriptorSetInfo &ShaderPPGlow::GetMaterialDescriptorSetInfo() const { return DESCRIPTOR_SET_MATERIAL; }
@@ -54,20 +56,7 @@ void ShaderPPGlow::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &o
 	    {RENDER_PASS_DEPTH_FORMAT, prosper::ImageLayout::DepthStencilAttachmentOptimal, prosper::AttachmentLoadOp::Load, prosper::AttachmentStoreOp::Store /* depth values have already been written by prepass */, sampleCount, prosper::ImageLayout::DepthStencilAttachmentOptimal}}}},
 	  outRenderPass, pipelineIdx);
 }
-std::shared_ptr<prosper::IDescriptorSetGroup> ShaderPPGlow::InitializeMaterialDescriptorSet(CMaterial &mat)
-{
-	auto *glowMap = mat.GetGlowMap();
-	if(glowMap == nullptr || glowMap->texture == nullptr)
-		return nullptr;
-	auto glowTexture = std::static_pointer_cast<Texture>(glowMap->texture);
-	if(glowTexture->HasValidVkTexture() == false)
-		return nullptr;
-	auto descSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_MATERIAL);
-	mat.SetDescriptorSetGroup(*this, descSetGroup);
-	auto &descSet = *descSetGroup->GetDescriptorSet();
-	descSet.SetBindingTexture(*glowTexture->GetVkTexture(), 0u);
-	return descSetGroup;
-}
+std::shared_ptr<prosper::IDescriptorSetGroup> ShaderPPGlow::InitializeMaterialDescriptorSet(CMaterial &mat) { return ShaderGameWorldLightingPass::InitializeMaterialDescriptorSet(mat); }
 bool ShaderPPGlow::RecordGlowMaterial(prosper::ShaderBindState &bindState, CMaterial &mat) const
 {
 	auto *glowMap = mat.GetGlowMap();

@@ -28,8 +28,6 @@ vec4 get_emission_color(vec4 color, vec4 baseColor, vec2 texCoords)
 	vec4 result = color;
 	if(use_glow_map()) {
 		vec4 emissiveColor = texture(u_glowMap, texCoords);
-		if(true) //is_glow_srgb()) // TODO
-			emissiveColor.rgb = srgb_to_linear(emissiveColor.rgb);
 		emissiveColor.rgb *= u_material.material.emissionFactor.rgb;
 		emissiveColor.rgb *= emissiveColor.a * 15;
 		result = add_glow_color(u_material.material.flags, result, texCoords, emissiveColor, baseColor);

@@ -23,6 +23,7 @@ decltype(ShaderUnlit::DESCRIPTOR_SET_MATERIAL) ShaderUnlit::DESCRIPTOR_SET_MATER
 };
 ShaderUnlit::ShaderUnlit(prosper::IPrContext &context, const std::string &identifier) : ShaderGameWorldLightingPass {context, identifier, "programs/scene/textured", "programs/scene/unlit"}
 {
+	m_shaderMaterialName = "albedo";
 	// SetPipelineCount(umath::to_integral(Pipeline::Count));
 }
 prosper::DescriptorSetInfo &ShaderUnlit::GetMaterialDescriptorSetInfo() const { return ShaderGameWorldLightingPass::DESCRIPTOR_SET_MATERIAL; } //DESCRIPTOR_SET_MATERIAL;}

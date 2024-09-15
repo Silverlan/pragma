@@ -60,13 +60,6 @@ vec4 calc_pbr(vec4 albedoColor, vec2 texCoords, uint debugMode, PbrMaterial pbrM
 	vec3 specularColor = vec3(0.0);
 	vec3 f0 = vec3(0.04);
 
-#if 0
-	baseColor = texture(u_albedoMap,texCoords);
-	if(u_srgb)
-		baseColor = srgb_to_linear(baseColor);
-	baseColor *= u_DiffuseFactor;
-#endif
-
 	// f0 = specular
 	//specularColor = f0;
 	//float oneMinusSpecularStrength = 1.0 - max(max(f0.r, f0.g), f0.b);
@@ -102,8 +95,6 @@ vec4 calc_pbr(vec4 albedoColor, vec2 texCoords, uint debugMode, PbrMaterial pbrM
 		}
 	}
 
-	if(true) //is_diffuse_srgb()) // TODO
-		baseColor.rgb = srgb_to_linear(baseColor.rgb);
 	//baseColor *= u_DiffuseFactor;
 	diffuseColor = baseColor.rgb * (vec3(1.0) - f0) * (1.0 - metallic);
 	specularColor = mix(f0, baseColor.rgb, metallic);

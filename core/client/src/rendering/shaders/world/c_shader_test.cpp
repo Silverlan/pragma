@@ -202,7 +202,7 @@ static bool bind_texture(Material &mat, prosper::IDescriptorSet &ds, TextureInfo
 
 std::shared_ptr<prosper::IDescriptorSetGroup> ShaderTest::InitializeMaterialDescriptorSet(CMaterial &mat, const prosper::DescriptorSetInfo &descSetInfo)
 {
-	auto *albedoMap = mat.GetDiffuseMap();
+	/*auto *albedoMap = mat.GetDiffuseMap();
 	if(albedoMap == nullptr || albedoMap->texture == nullptr)
 		return nullptr;
 
@@ -241,6 +241,7 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderTest::InitializeMaterialDesc
 	// that seems to cause crashes in some cases
 	if(descSet.Update() == false)
 		return nullptr;
-	return descSetGroup;
+	return descSetGroup;*/
+	return nullptr;
 }
 std::shared_ptr<prosper::IDescriptorSetGroup> ShaderTest::InitializeMaterialDescriptorSet(CMaterial &mat) { return InitializeMaterialDescriptorSet(mat, ShaderPBR::DESCRIPTOR_SET_MATERIAL); }

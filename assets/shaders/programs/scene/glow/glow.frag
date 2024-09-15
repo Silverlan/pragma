@@ -2,8 +2,6 @@
 
 #include "glow.glsl"
 
-layout(LAYOUT_ID(GLOW, MAP)) uniform sampler2D u_glowMap;
-
 vec4 get_glow_map_color() { return texture(u_glowMap, fs_in.vert_uv).rgba; }
 
 layout(LAYOUT_PUSH_CONSTANTS()) uniform pushConstants { float glowScale; }

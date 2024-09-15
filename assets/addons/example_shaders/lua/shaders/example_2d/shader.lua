@@ -20,8 +20,12 @@ function Shader:InitializePipeline(pipelineInfo, pipelineIdx)
 		shader.VertexAttribute(prosper.FORMAT_R32G32_SFLOAT), -- Position
 		shader.VertexAttribute(prosper.FORMAT_R32G32_SFLOAT), -- UV
 	})
-	pipelineInfo:AttachDescriptorSetInfo(shader.DescriptorSetInfo({
-		shader.DescriptorSetBinding(prosper.DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, prosper.SHADER_STAGE_FRAGMENT_BIT),
+	pipelineInfo:AttachDescriptorSetInfo(shader.DescriptorSetInfo("TEXTURE", {
+		shader.DescriptorSetBinding(
+			"TEXTURE",
+			prosper.DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+			prosper.SHADER_STAGE_FRAGMENT_BIT
+		),
 	}))
 
 	pipelineInfo:SetPolygonMode(prosper.POLYGON_MODE_FILL)

@@ -10,6 +10,7 @@
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/entities/components/c_scene_component.hpp"
+#include "pragma/entities/components/base_entity_component_logging.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_bloom_blur.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_hdr.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
@@ -24,6 +25,7 @@
 #include <shader/prosper_shader_blur.hpp>
 #include <image/prosper_msaa_texture.hpp>
 #include <image/prosper_render_target.hpp>
+#include <cmaterial.h>
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT CEngine *c_engine;
@@ -74,9 +76,11 @@ void CRendererPpGlowComponent::RegisterMembers(pragma::EntityComponentManager &c
 
 CRendererPpGlowComponent::CRendererPpGlowComponent(BaseEntity &ent) : CRendererPpBaseComponent(ent) { SetPipelineDirty(); }
 prosper::Texture &CRendererPpGlowComponent::GetGlowTexture() { return m_glowRt->GetTexture(); }
-#include <cmaterial.h>
+
 void CRendererPpGlowComponent::DoRenderEffect(const util::DrawSceneInfo &drawSceneInfo)
 {
+	if(!m_glowRt)
+		return;
 	auto &hdrInfo = m_renderer->GetHDRInfo();
 	auto &drawCmd = drawSceneInfo.commandBuffer;
 	auto &texture = m_glowRt->GetTexture();
@@ -96,6 +100,8 @@ void CRendererPpGlowComponent::DoRenderEffect(const util::DrawSceneInfo &drawSce
 void CRendererPpGlowComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void CRendererPpGlowComponent::ExecuteGlowPass(const util::DrawSceneInfo &drawSceneInfo)
 {
+	if(!m_glowRt)
+		return;
 #if 0
 	static auto matInitialized = false;
 	if(!matInitialized) {
@@ -142,6 +148,9 @@ void CRendererPpGlowComponent::ExecuteGlowPass(const util::DrawSceneInfo &drawSc
 }
 void CRendererPpGlowComponent::RecordGlowPass(const util::DrawSceneInfo &drawSceneInfo)
 {
+	if(!m_glowRt)
+		return;
+
 	auto &rt = m_glowRt;
 	m_glowCommandBufferGroup->StartRecording(rt->GetRenderPass(), rt->GetFramebuffer());
 
@@ -210,6 +219,10 @@ void CRendererPpGlowComponent::InitializeRenderTarget()
 	//descSetHdrResolve.SetBindingTexture(*bloomBlurTexture, umath::to_integral(pragma::ShaderPPHDR::TextureBinding::Bloom));
 
 	auto rp = static_cast<prosper::ShaderGraphics *>(pragma::get_cengine()->GetShader("glow").get())->GetRenderPass();
+	if(!rp) {
+		LogError("Invalid render pass!");
+		return;
+	}
 
 	auto rt = context.CreateRenderTarget({tex, texBloom, cRenderer->GetPrepass().textureDepth}, rp);
 	rt->SetDebugName("scene_glow_rt");

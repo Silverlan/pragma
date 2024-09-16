@@ -67,7 +67,7 @@ static std::optional<PropertyValue> get_ds_value(ds::Value &dv, udm::Type type)
 	case udm::Type::Int32:
 	case udm::Type::UInt32:
 		{
-			udm::visit<true, false, false>(type, [type, sz, &dv](auto tag) -> std::optional<PropertyValue> {
+			return udm::visit<true, false, false>(type, [type, sz, &dv](auto tag) -> std::optional<PropertyValue> {
 				using T = typename decltype(tag)::type;
 				if constexpr(is_valid_property_type_v<T>) {
 					if constexpr(!std::is_same_v<T, udm::Half>)
@@ -75,7 +75,6 @@ static std::optional<PropertyValue> get_ds_value(ds::Value &dv, udm::Type type)
 				}
 				return {};
 			});
-			break;
 		}
 	case udm::Type::Float:
 		{

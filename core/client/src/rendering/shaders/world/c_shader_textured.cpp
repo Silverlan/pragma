@@ -425,7 +425,13 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderGameWorldLightingPass::Initi
 	pragma::rendering::shader_material::ShaderMaterialData materialData {*m_shaderMaterial};
 	materialData.PopulateFromMaterial(mat);
 	InitializeMaterialData(mat, *m_shaderMaterial, materialData);
-	materialData.SetFlags(materialData.GetFlags() | materialFlags);
+
+	materialFlags |= materialData.GetFlags();
+	auto alphaMode = materialData.GetValue<uint32_t>("alpha_mode");
+	if(alphaMode && static_cast<AlphaMode>(*alphaMode) != AlphaMode::Opaque)
+		materialFlags |= pragma::rendering::shader_material::MaterialFlags::Translucent;
+
+	materialData.SetFlags(materialFlags);
 	InitializeMaterialBuffer(descSet, mat, materialData);
 
 	return descSetGroup;

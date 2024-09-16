@@ -371,7 +371,7 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderGameWorldLightingPass::Initi
 		}
 		if(!tex) {
 			if(shaderTexInfo.required) {
-				spdlog::error("Failed to bind texture '{}' to texture binding '{}'!", *shaderTexInfo.defaultTexturePath, shaderTexInfo.name.str);
+				spdlog::error("Failed to bind texture '{}' to texture binding '{}'!", (texData ? texData->GetName() : "NULL"), shaderTexInfo.name.str);
 				return nullptr;
 			}
 			++textureBinding;

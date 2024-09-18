@@ -62,6 +62,7 @@ namespace pragma {
 		bool ApplyDecal(const std::vector<DecalProjector::MeshData> &meshes);
 		bool ApplyDecal();
 
+		void DebugDraw(float duration) const;
 		virtual void OnTick(double dt) override;
 	  protected:
 		bool ApplyDecal(DecalProjector &projector, const std::vector<DecalProjector::MeshData> &meshes);

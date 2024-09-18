@@ -1686,6 +1686,8 @@ void pragma::lua::base_wheel_component::register_class(luabind::module_ &mod)
 void pragma::lua::base_decal_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvDecalComponent>("BaseEnvDecalComponent");
+	def.def("SetSize", &pragma::BaseEnvDecalComponent::SetSize);
+	def.def("GetSize", &pragma::BaseEnvDecalComponent::GetSize);
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 #include "pragma/entities/environment/lights/env_light.h"

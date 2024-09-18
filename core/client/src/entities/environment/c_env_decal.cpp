@@ -313,6 +313,12 @@ DecalProjector CDecalComponent::GetProjector() const
 	return DecalProjector {ent.GetPosition(), ent.GetRotation(), size};
 }
 
+void CDecalComponent::DebugDraw(float duration) const
+{
+	auto projector = GetProjector();
+	projector.DebugDraw(duration);
+}
+
 bool CDecalComponent::ApplyDecal(const std::vector<DecalProjector::MeshData> &meshDatas)
 {
 	auto projector = GetProjector();

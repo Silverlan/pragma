@@ -1,0 +1,15 @@
+"pbr"
+{
+	"textures"
+	{
+		$string albedo_map "test/parallax/bricks2"
+		$string normal_map "test/parallax/bricks2_normal"
+		$string parallax_map "test/parallax/bricks2_disp"
+	}
+
+	"properties"
+	{
+		$float parallax_height_scale "-0.0200000"
+		$uint16 parallax_steps "16.0"
+	}
+}

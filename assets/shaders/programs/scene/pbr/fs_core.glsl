@@ -13,28 +13,38 @@
 #include "/common/pbr/fs_pbr.glsl"
 #include "/programs/scene/scene_push_constants.glsl"
 
-vec2 get_uv_coordinates()
-{
-	vec2 texCoords = fs_in.vert_uv;
-	if(use_parallax_map(u_material.material.flags)) {
-		ParallaxInfo parallaxInfo;
-		parallaxInfo.heightScale = get_mat_parallax_height_scale();
-		parallaxInfo.steps = get_mat_parallax_steps();
-		texCoords = apply_parallax(true, texCoords, parallaxInfo);
-	}
-	return texCoords;
-}
-
 vec4 calc_pbr(vec4 albedoColor, vec2 texCoords, uint debugMode)
 {
 	PbrMaterial pbrMat;
 	pbrMat.color = vec4(get_mat_color_factor(), get_mat_alpha_factor());
+
+#ifdef MATERIAL_PROP_ROUGHNESS_FACTOR_ENABLED
 	pbrMat.roughnessFactor = get_mat_roughness_factor();
+#else
+	pbrMat.roughnessFactor = 0.5;
+#endif
+
+#ifdef MATERIAL_PROP_METALNESS_FACTOR_ENABLED
 	pbrMat.metalnessFactor = get_mat_metalness_factor();
+#else
+	pbrMat.metalnessFactor = 0.0;
+#endif
+
+#ifdef MATERIAL_PROP_AO_FACTOR_ENABLED
 	pbrMat.aoFactor = get_mat_ao_factor();
+#else
+	pbrMat.aoFactor = 1.0;
+#endif
+
+#ifdef MATERIAL_PROP_EMISSION_FACTOR_ENABLED
+	vec3 emissionFactor = get_mat_emission_factor().rgb;
+#else
+	vec3 emissionFactor = vec3(0.0, 0.0, 0.0);
+#endif
+
 	pbrMat.alphaMode = get_mat_alpha_mode();
 	pbrMat.alphaCutoff = get_mat_alpha_cutoff();
-	return calc_pbr(albedoColor, texCoords, u_pushConstants.debugMode, pbrMat, get_mat_emission_factor().rgb, get_mat_flags());
+	return calc_pbr(albedoColor, texCoords, u_pushConstants.debugMode, pbrMat, emissionFactor, get_mat_flags());
 }
 
 #endif

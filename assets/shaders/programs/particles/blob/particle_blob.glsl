@@ -12,7 +12,7 @@
 #define ENABLE_PARTICLE_TEXTURE 0
 #define SHADER_VERTEX_USER_DATA_LOCATION_COUNT 1
 
-#define MATERIAL_ENABLE_WRINKLES 0
+#define MATERIAL_WRINKLE_STRETCH_MAP_ENABLED 0
 
 #include "../particle_mode.glsl"
 #include "../particle_generic.glsl"

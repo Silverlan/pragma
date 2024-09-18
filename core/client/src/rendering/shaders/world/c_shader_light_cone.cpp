@@ -38,13 +38,6 @@ ShaderLightCone::ShaderLightCone(prosper::IPrContext &context, const std::string
 	umath::set_flag(m_sceneFlags, SceneFlags::LightmapsEnabled, false);
 }
 
-std::shared_ptr<prosper::IDescriptorSetGroup> ShaderLightCone::InitializeMaterialDescriptorSet(CMaterial &mat)
-{
-	auto descSetGroup = GetContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_MATERIAL);
-	mat.SetDescriptorSetGroup(*this, descSetGroup);
-	return descSetGroup;
-}
-
 bool ShaderLightCone::RecordBindEntity(rendering::ShaderProcessor &shaderProcessor, CRenderComponent &renderC, prosper::IShaderPipelineLayout &layout, uint32_t entityInstanceDescriptorSetIndex) const
 {
 	if(ShaderGameWorldLightingPass::RecordBindEntity(shaderProcessor, renderC, layout, entityInstanceDescriptorSetIndex) == false)

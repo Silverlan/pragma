@@ -3,7 +3,7 @@
 #extension GL_ARB_separate_shader_objects : enable
 #extension GL_ARB_shading_language_420pack : enable
 
-#define MATERIAL_ENABLE_WRINKLES 0
+#define MATERIAL_WRINKLE_STRETCH_MAP_ENABLED 0
 
 #include "math_scalar_field.glsl"
 #include "../particle_instance.glsl"

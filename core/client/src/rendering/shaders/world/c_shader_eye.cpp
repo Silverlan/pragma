@@ -55,7 +55,7 @@ bool ShaderEye::BindEyeball(rendering::ShaderProcessor &shaderProcessor, uint32_
 void ShaderEye::InitializeGfxPipelinePushConstantRanges() { AttachPushConstantRange(0u, sizeof(ShaderPBR::PushConstants) + sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit); }
 
 void ShaderEye::RecordBindScene(rendering::ShaderProcessor &shaderProcessor, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer, prosper::IDescriptorSet &dsRenderSettings,
-  prosper::IDescriptorSet &dsLights, prosper::IDescriptorSet &dsShadows, prosper::IDescriptorSet &dsMaterial, const Vector4 &drawOrigin, ShaderGameWorld::SceneFlags &inOutSceneFlags) const
+  prosper::IDescriptorSet &dsLights, prosper::IDescriptorSet &dsShadows, const Vector4 &drawOrigin, ShaderGameWorld::SceneFlags &inOutSceneFlags) const
 {
 	RecordPushSceneConstants(shaderProcessor, scene, drawOrigin);
 
@@ -66,32 +66,11 @@ void ShaderEye::RecordBindScene(rendering::ShaderProcessor &shaderProcessor, con
 	//
 
 	auto iblStrength = 1.f;
-	RecordBindSceneDescriptorSets(shaderProcessor, scene, renderer, dsScene, dsRenderer, dsRenderSettings, dsLights, dsShadows, dsMaterial, inOutSceneFlags, iblStrength);
+	RecordBindSceneDescriptorSets(shaderProcessor, scene, renderer, dsScene, dsRenderer, dsRenderSettings, dsLights, dsShadows, inOutSceneFlags, iblStrength);
 }
 
 bool ShaderEye::OnRecordDrawMesh(rendering::ShaderProcessor &shaderProcessor, CModelSubMesh &mesh) const { return BindEyeball(shaderProcessor, mesh.GetSkinTextureIndex()); }
 
 ///////////////////////
 
-ShaderEyeLegacy::ShaderEyeLegacy(prosper::IPrContext &context, const std::string &identifier) : ShaderEye {context, identifier, "programs/scene/eye/eye", "programs/scene/eye/eye_legacy"} {}
-std::shared_ptr<prosper::IDescriptorSetGroup> ShaderEyeLegacy::InitializeMaterialDescriptorSet(CMaterial &mat)
-{
-	auto descSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_MATERIAL);
-	mat.SetDescriptorSetGroup(*this, descSetGroup);
-	auto &descSet = *descSetGroup->GetDescriptorSet();
-
-	if(BindDescriptorSetBaseTextures(mat, DESCRIPTOR_SET_MATERIAL, descSet) == false)
-		return nullptr;
-
-	if(BindDescriptorSetTexture(mat, descSet, mat.GetTextureInfo("sclera_map"), umath::to_integral(MaterialBinding::AlbedoMap), "white") == false)
-		return nullptr;
-
-	if(BindDescriptorSetTexture(mat, descSet, mat.GetTextureInfo("iris_map"), umath::to_integral(MaterialBinding::NormalMap), "white") == false)
-		return nullptr;
-
-	// TODO: FIXME: It would probably be a good idea to update the descriptor set lazily (i.e. not update it here), but
-	// that seems to cause crashes in some cases
-	if(descSet.Update() == false)
-		return nullptr;
-	return descSetGroup;
-}
+ShaderEyeLegacy::ShaderEyeLegacy(prosper::IPrContext &context, const std::string &identifier) : ShaderEye {context, identifier, "programs/scene/eye/eye", "programs/scene/eye/eye_legacy"} { m_shaderMaterialName = "eye_legacy"; }

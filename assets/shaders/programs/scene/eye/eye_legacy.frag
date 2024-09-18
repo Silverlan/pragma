@@ -45,8 +45,8 @@ void main()
 	uv = vSphereUv;
 
 	vec2 irisUvClampRange = u_pushConstants.eyeOrigin.xy;
-	vec4 irisColor = texture(u_normalMap, clamp(vSphereUv, irisUvClampRange.x, irisUvClampRange.y));
-	vec4 scleraColor = texture(u_albedoMap, uvBase);
+	vec4 irisColor = fetch_iris_map(clamp(vSphereUv, irisUvClampRange.x, irisUvClampRange.y));
+	vec4 scleraColor = fetch_sclera_map(uvBase);
 	vec4 albedoColor = mix(scleraColor, irisColor, irisColor.a);
 	fs_color = calc_pbr(albedoColor, uv, u_pushConstants.debugMode);
 	if(CSPEC_BLOOM_OUTPUT_ENABLED == 1)

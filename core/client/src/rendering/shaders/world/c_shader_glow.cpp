@@ -30,20 +30,6 @@ extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
 
-decltype(ShaderGlow::DESCRIPTOR_SET_MATERIAL) ShaderGlow::DESCRIPTOR_SET_MATERIAL = {
-  "MATERIAL",
-  {
-    prosper::DescriptorSetInfo::Binding {"SETTINGS", prosper::DescriptorType::UniformBuffer, prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::GeometryBit},
-    prosper::DescriptorSetInfo::Binding {"ALBEDO_MAP", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}, prosper::DescriptorSetInfo::Binding {"NORMAL", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit},
-    prosper::DescriptorSetInfo::Binding {"RMA_MAP", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}, prosper::DescriptorSetInfo::Binding {"EMISSION", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit},
-    prosper::DescriptorSetInfo::Binding {"PARALLAX_MAP", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit},
-    prosper::DescriptorSetInfo::Binding {"WRINKLE_STRETCH_MAP", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit},
-    prosper::DescriptorSetInfo::Binding {"WRINKLE_COMPRESS_MAP", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit},
-    //prosper::DescriptorSetInfo::Binding {"GLOW_MAP", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}},
-  },
-};
-static_assert(umath::to_integral(ShaderGlow::MaterialBinding::Count) == 10, "Number of bindings in material descriptor set does not match MaterialBinding enum count!");
-
 decltype(ShaderGlow::DESCRIPTOR_SET_PBR) ShaderGlow::DESCRIPTOR_SET_PBR = {
   "PBR",
   {
@@ -68,7 +54,6 @@ void ShaderGlow::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &out
 	CreateCachedRenderPass<ShaderScene>(rpCreateInfo, outRenderPass, pipelineIdx);
 }
 
-prosper::DescriptorSetInfo &ShaderGlow::GetMaterialDescriptorSetInfo() const { return DESCRIPTOR_SET_MATERIAL; }
 void ShaderGlow::UpdateRenderFlags(CModelSubMesh &mesh, SceneFlags &inOutFlags)
 {
 	ShaderGameWorldLightingPass::UpdateRenderFlags(mesh, inOutFlags);
@@ -210,19 +195,19 @@ void ShaderGlow::OnPipelinesInitialized()
 	ds.SetBindingTexture(*dummyTex, umath::to_integral(PBRBinding::BRDFMap));
 }
 prosper::IDescriptorSet &ShaderGlow::GetDefaultPbrDescriptorSet() const { return *m_defaultPbrDsg->GetDescriptorSet(); }
-std::shared_ptr<prosper::IDescriptorSetGroup> ShaderGlow::InitializeMaterialDescriptorSet(CMaterial &mat) { return InitializeMaterialDescriptorSet(mat, DESCRIPTOR_SET_MATERIAL); }
+std::shared_ptr<prosper::IDescriptorSetGroup> ShaderGlow::InitializeMaterialDescriptorSet(CMaterial &mat) { return InitializeMaterialDescriptorSet(mat, GetMaterialDescriptorSetInfo()); }
 void ShaderGlow::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { ShaderGameWorldLightingPass::InitializeGfxPipeline(pipelineInfo, pipelineIdx); }
 
 //
 
 void ShaderGlow::RecordBindSceneDescriptorSets(rendering::ShaderProcessor &shaderProcessor, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer,
-  prosper::IDescriptorSet &dsRenderSettings, prosper::IDescriptorSet &dsLights, prosper::IDescriptorSet &dsShadows, prosper::IDescriptorSet &dsMaterial, ShaderGameWorld::SceneFlags &inOutSceneFlags, float &outIblStrength) const
+  prosper::IDescriptorSet &dsRenderSettings, prosper::IDescriptorSet &dsLights, prosper::IDescriptorSet &dsShadows, ShaderGameWorld::SceneFlags &inOutSceneFlags, float &outIblStrength) const
 {
 	outIblStrength = 1.f;
-	std::array<prosper::IDescriptorSet *, 7> descSets {&dsMaterial, &dsScene, &dsRenderer, &dsRenderSettings, &dsLights, &dsShadows, GetReflectionProbeDescriptorSet(scene, outIblStrength, inOutSceneFlags)};
+	std::array<prosper::IDescriptorSet *, 6> descSets {&dsScene, &dsRenderer, &dsRenderSettings, &dsLights, &dsShadows, GetReflectionProbeDescriptorSet(scene, outIblStrength, inOutSceneFlags)};
 
 	static const std::vector<uint32_t> dynamicOffsets {};
-	shaderProcessor.GetCommandBuffer().RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics, shaderProcessor.GetCurrentPipelineLayout(), pragma::ShaderGameWorld::MATERIAL_DESCRIPTOR_SET_INDEX, descSets, dynamicOffsets);
+	shaderProcessor.GetCommandBuffer().RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics, shaderProcessor.GetCurrentPipelineLayout(), GetSceneDescriptorSetIndex(), descSets, dynamicOffsets);
 }
 
 prosper::IDescriptorSet *ShaderGlow::GetReflectionProbeDescriptorSet(const pragma::CSceneComponent &scene, float &outIblStrength, ShaderGameWorld::SceneFlags &inOutSceneFlags) const
@@ -239,10 +224,10 @@ prosper::IDescriptorSet *ShaderGlow::GetReflectionProbeDescriptorSet(const pragm
 }
 
 void ShaderGlow::RecordBindScene(rendering::ShaderProcessor &shaderProcessor, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer, prosper::IDescriptorSet &dsRenderSettings,
-  prosper::IDescriptorSet &dsLights, prosper::IDescriptorSet &dsShadows, prosper::IDescriptorSet &dsMaterial, const Vector4 &drawOrigin, ShaderGameWorld::SceneFlags &inOutSceneFlags) const
+  prosper::IDescriptorSet &dsLights, prosper::IDescriptorSet &dsShadows, const Vector4 &drawOrigin, ShaderGameWorld::SceneFlags &inOutSceneFlags) const
 {
 	auto iblStrength = 1.f;
-	RecordBindSceneDescriptorSets(shaderProcessor, scene, renderer, dsScene, dsRenderer, dsRenderSettings, dsLights, dsShadows, dsMaterial, inOutSceneFlags, iblStrength);
+	RecordBindSceneDescriptorSets(shaderProcessor, scene, renderer, dsScene, dsRenderer, dsRenderSettings, dsLights, dsShadows, inOutSceneFlags, iblStrength);
 
 	ShaderGameWorldLightingPass::PushConstants pushConstants {};
 	pushConstants.Initialize();

@@ -63,11 +63,7 @@ ShaderPrepassBase::ShaderPrepassBase(prosper::IPrContext &context, const std::st
 	//SetPipelineCount(umath::to_integral(Pipeline::Count));
 }
 
-void ShaderPrepassBase::OnPipelinesInitialized()
-{
-	ShaderGameWorld::OnPipelinesInitialized();
-	m_defaultMatDsg = c_engine->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_MATERIAL);
-}
+void ShaderPrepassBase::OnPipelinesInitialized() { ShaderGameWorld::OnPipelinesInitialized(); }
 
 void ShaderPrepassBase::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx) { CreateCachedRenderPass<ShaderPrepassBase>({{get_depth_render_pass_attachment_info(GetSampleCount(pipelineIdx))}}, outRenderPass, pipelineIdx); }
 
@@ -124,16 +120,15 @@ void ShaderPrepassBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInf
 
 uint32_t ShaderPrepassBase::GetCameraDescriptorSetIndex() const { return DESCRIPTOR_SET_SCENE.setIndex; }
 uint32_t ShaderPrepassBase::GetInstanceDescriptorSetIndex() const { return DESCRIPTOR_SET_INSTANCE.setIndex; }
-uint32_t ShaderPrepassBase::GetMaterialDescriptorSetIndex() const { return DESCRIPTOR_SET_MATERIAL.setIndex; }
 uint32_t ShaderPrepassBase::GetRenderSettingsDescriptorSetIndex() const { return DESCRIPTOR_SET_RENDER_SETTINGS.setIndex; }
 void ShaderPrepassBase::GetVertexAnimationPushConstantInfo(uint32_t &offset) const { offset = offsetof(PushConstants, vertexAnimInfo); }
 
 //
 
 void ShaderPrepassBase::RecordBindScene(rendering::ShaderProcessor &shaderProcessor, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer,
-  prosper::IDescriptorSet &dsRenderSettings, prosper::IDescriptorSet &dsLights, prosper::IDescriptorSet &dsShadows, prosper::IDescriptorSet &dsMaterial, const Vector4 &drawOrigin, ShaderGameWorld::SceneFlags &inOutSceneFlags) const
+  prosper::IDescriptorSet &dsRenderSettings, prosper::IDescriptorSet &dsLights, prosper::IDescriptorSet &dsShadows, const Vector4 &drawOrigin, ShaderGameWorld::SceneFlags &inOutSceneFlags) const
 {
-	std::array<prosper::IDescriptorSet *, 3> descSets {&dsMaterial, &dsScene, &dsRenderSettings};
+	std::array<prosper::IDescriptorSet *, 2> descSets {&dsScene, &dsRenderSettings};
 
 	ShaderPrepass::PushConstants pushConstants {};
 	pushConstants.Initialize();
@@ -142,8 +137,10 @@ void ShaderPrepassBase::RecordBindScene(rendering::ShaderProcessor &shaderProces
 	shaderProcessor.GetCommandBuffer().RecordPushConstants(shaderProcessor.GetCurrentPipelineLayout(), prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit, 0u, sizeof(pushConstants), &pushConstants);
 
 	static const std::vector<uint32_t> dynamicOffsets {};
-	shaderProcessor.GetCommandBuffer().RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics, shaderProcessor.GetCurrentPipelineLayout(), pragma::ShaderGameWorld::MATERIAL_DESCRIPTOR_SET_INDEX, descSets, dynamicOffsets);
+	shaderProcessor.GetCommandBuffer().RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics, shaderProcessor.GetCurrentPipelineLayout(), GetSceneDescriptorSetIndex(), descSets, dynamicOffsets);
 }
+
+uint32_t ShaderPrepassBase::GetSceneDescriptorSetIndex() const { return DESCRIPTOR_SET_SCENE.setIndex; }
 
 void ShaderPrepassBase::RecordAlphaCutoff(rendering::ShaderProcessor &shaderProcessor, float alphaCutoff) const
 {

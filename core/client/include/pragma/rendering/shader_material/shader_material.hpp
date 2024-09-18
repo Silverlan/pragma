@@ -85,10 +85,13 @@ namespace pragma::rendering::shader_material {
 	struct DLLCLIENT Texture {
 		GString name;
 		std::optional<std::string> defaultTexturePath {};
-		bool isColorMap = false;
+		bool cubemap = false;
+		bool colorMap = false;
 		bool required = false;
 	};
 	struct DLLCLIENT ShaderMaterial {
+		static constexpr uint32_t PREDEFINED_PROPERTY_COUNT = 6;
+
 		ShaderMaterial();
 		void AddProperty(Property &&prop);
 		std::vector<Property> properties;
@@ -164,6 +167,8 @@ namespace pragma::rendering::shader_material {
 	  private:
 		std::unordered_map<std::string, std::shared_ptr<ShaderMaterial>> m_cache;
 	};
+	DLLCLIENT ShaderMaterialCache &get_cache();
+	DLLCLIENT void clear_cache();
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::rendering::shader_material::MaterialFlags)
 

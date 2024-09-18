@@ -59,10 +59,11 @@ namespace pragma {
 
 		virtual GameShaderType GetPassType() const { return GameShaderType::DepthPrepass; }
 		virtual bool IsDepthPrepassShader() const override { return true; }
+		virtual uint32_t GetSceneDescriptorSetIndex() const override;
 
 		//
 		virtual void RecordBindScene(rendering::ShaderProcessor &shaderProcessor, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer, prosper::IDescriptorSet &dsRenderSettings,
-		  prosper::IDescriptorSet &dsLights, prosper::IDescriptorSet &dsShadows, prosper::IDescriptorSet &dsMaterial, const Vector4 &drawOrigin, ShaderGameWorld::SceneFlags &inOutSceneFlags) const override;
+		  prosper::IDescriptorSet &dsLights, prosper::IDescriptorSet &dsShadows, const Vector4 &drawOrigin, ShaderGameWorld::SceneFlags &inOutSceneFlags) const override;
 		virtual void RecordAlphaCutoff(rendering::ShaderProcessor &shaderProcessor, float alphaCutoff) const override;
 		virtual bool RecordBindMaterial(rendering::ShaderProcessor &shaderProcessor, CMaterial &mat) const override;
 	  protected:
@@ -72,7 +73,6 @@ namespace pragma {
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
 		virtual void InitializeShaderResources() override;
 
-		virtual uint32_t GetMaterialDescriptorSetIndex() const override;
 		virtual uint32_t GetCameraDescriptorSetIndex() const override;
 		virtual uint32_t GetInstanceDescriptorSetIndex() const override;
 		virtual uint32_t GetRenderSettingsDescriptorSetIndex() const override;

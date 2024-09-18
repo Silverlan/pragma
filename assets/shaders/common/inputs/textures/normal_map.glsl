@@ -1,11 +1,7 @@
 #ifndef F_SH_NORMALMAPPING_GLS
 #define F_SH_NORMALMAPPING_GLS
 
-#ifndef USE_NORMAL_MAP
-#define USE_NORMAL_MAP 1
-#endif
-
-#if USE_NORMAL_MAP == 1
+#ifdef MATERIAL_NORMAL_MAP_ENABLED
 #include "/common/vertex_outputs/tangentspace.glsl"
 #include "/common/material_flags.glsl"
 #endif
@@ -15,7 +11,7 @@
 #if ENABLE_TANGENT_SPACE_NORMALS == 1
 vec3 calc_tangent_space_normal(vec2 uv)
 {
-	vec3 ncol = texture(u_normalMap, uv).rgb;
+	vec3 ncol = fetch_normal_map(uv).rgb;
 	vec3 nmap;
 	float normalMapScale = 1.0;
 	nmap.xy = (2.0 * ncol.rg - 1.0) * normalMapScale;
@@ -28,9 +24,9 @@ float calculate_normal_light_direction_angle(uint lightIdx, vec2 uv, uint materi
 {
 	float cosTheta;
 	LightSourceData light = get_light_source(lightIdx);
-#if USE_NORMAL_MAP == 1
+#ifdef MATERIAL_NORMAL_MAP_ENABLED
 	if(use_normal_map(materialFlags) == true) {
-		vec3 ntex_ts = normalize(texture(u_normalMap, uv).rgb * 2.0 - 1.0);
+		vec3 ntex_ts = normalize(fetch_normal_map(uv).rgb * 2.0 - 1.0);
 		vec3 n = ntex_ts;
 		vec3 l = normalize(get_light_direction_ts(lightIdx));
 		cosTheta = clamp(dot(n, l), 0.0, 1.0);
@@ -45,9 +41,9 @@ float calculate_normal_light_direction_angle(uint lightIdx, vec2 uv, uint materi
 }
 vec3 get_normal_from_map(vec2 texCoords, uint materialFlags)
 {
-#if USE_NORMAL_MAP == 1
+#ifdef MATERIAL_NORMAL_MAP_ENABLED
 	if(use_normal_map(materialFlags)) {
-		vec3 tangentNormal = texture(u_normalMap, texCoords).xyz * 2.0 - 1.0;
+		vec3 tangentNormal = fetch_normal_map(texCoords).xyz * 2.0 - 1.0;
 
 		vec3 Q1 = dFdx(fs_in.vert_pos_ws.xyz);
 		vec3 Q2 = dFdy(fs_in.vert_pos_ws.xyz);

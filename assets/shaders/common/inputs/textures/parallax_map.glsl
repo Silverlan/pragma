@@ -8,15 +8,12 @@ struct ParallaxInfo {
 	float steps;
 };
 
-//uniform bool u_useParallaxMap; // Defined in push constants
 #ifdef GLS_FRAGMENT_SHADER
-#ifndef USE_PARALLAX_MAP
-#define USE_PARALLAX_MAP 1
-#endif
 
 //Parallax Occlusion Mapping function from https://learnopengl.com/Advanced-Lighting/Parallax-Mapping
 vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir, ParallaxInfo parallaxInfo)
 {
+#ifdef MATERIAL_PARALLAX_MAP_ENABLED
 	const float numLayers = parallaxInfo.steps;
 	const float height_scale = parallaxInfo.heightScale;
 	float layerDepth = 1.0 / numLayers;
@@ -39,12 +36,15 @@ vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir, ParallaxInfo parallaxInfo)
 	vec2 finalTexCoords = prevTexCoords * weight + currentTexCoords * (1.0 - weight);
 
 	return finalTexCoords;
+#else
+	return texCoords;
+#endif
 }
 
 //Corrected Viewdir calculations here
 vec2 get_parallax_coordinates(bool useParallaxMap, vec2 texCoords, ParallaxInfo parallaxInfo)
 {
-#if USE_PARALLAX_MAP == 1
+#ifdef MATERIAL_PARALLAX_MAP_ENABLED
 	if(useParallaxMap == false)
 		return texCoords;
 
@@ -73,6 +73,21 @@ vec2 apply_parallax(bool useParallaxMap, vec2 texCoords, ParallaxInfo parallaxIn
 	return texCoords;
 }
 vec2 apply_parallax(vec2 texCoords, ParallaxInfo parallaxInfo) { return apply_parallax(true, texCoords, parallaxInfo); }
+
+vec2 get_uv_coordinates()
+{
+	vec2 texCoords = fs_in.vert_uv;
+#ifdef MATERIAL_PARALLAX_MAP_ENABLED
+	if(use_parallax_map(u_material.material.flags)) {
+		ParallaxInfo parallaxInfo;
+		parallaxInfo.heightScale = get_mat_parallax_height_scale();
+		parallaxInfo.steps = get_mat_parallax_steps();
+		texCoords = apply_parallax(true, texCoords, parallaxInfo);
+	}
+#endif
+	return texCoords;
+}
+
 #endif
 
 #endif

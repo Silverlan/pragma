@@ -15,7 +15,6 @@ namespace pragma {
 	  public:
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_INSTANCE;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_SCENE;
-		static prosper::DescriptorSetInfo DESCRIPTOR_SET_MATERIAL;
 
 		static prosper::Format RENDER_PASS_FORMAT;
 
@@ -29,7 +28,6 @@ namespace pragma {
 		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override;
 		bool RecordGlowMaterial(prosper::ShaderBindState &bindState, CMaterial &mat) const;
 	  protected:
-		virtual prosper::DescriptorSetInfo &GetMaterialDescriptorSetInfo() const override;
 		virtual uint32_t GetCameraDescriptorSetIndex() const override;
 		virtual uint32_t GetInstanceDescriptorSetIndex() const override;
 		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx) override;

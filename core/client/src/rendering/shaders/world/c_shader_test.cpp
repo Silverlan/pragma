@@ -31,16 +31,6 @@ extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
 
-decltype(ShaderTest::DESCRIPTOR_SET_MATERIAL) ShaderTest::DESCRIPTOR_SET_MATERIAL = {
-  "MATERIAL",
-  {prosper::DescriptorSetInfo::Binding {"SETTINGS", prosper::DescriptorType::UniformBuffer, prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::GeometryBit},
-    prosper::DescriptorSetInfo::Binding {"ALBEDO_MAP", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}, prosper::DescriptorSetInfo::Binding {"NORMAL_MAP", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit},
-    prosper::DescriptorSetInfo::Binding {"RMA_MAP", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}, prosper::DescriptorSetInfo::Binding {"EMISSION_MAP", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit},
-    prosper::DescriptorSetInfo::Binding {"PARALLAX_MAP", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit},
-    prosper::DescriptorSetInfo::Binding {"WRINKLE_STRETCH_MAP", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit},
-    prosper::DescriptorSetInfo::Binding {"WRINKLE_COMPRESS_MAP", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit},
-    prosper::DescriptorSetInfo::Binding {"EXPONENT_MAP", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}},
-};
 static_assert(umath::to_integral(ShaderTest::MaterialBinding::Count) == 9, "Number of bindings in material descriptor set does not match MaterialBinding enum count!");
 
 decltype(ShaderTest::DESCRIPTOR_SET_PBR) ShaderTest::DESCRIPTOR_SET_PBR = {
@@ -60,7 +50,6 @@ void ShaderTest::DrawTest(prosper::IBuffer &buf, prosper::IBuffer &ibuf, uint32_
 		ShaderScene::RecordPushConstants(sizeof(Mat4),&m_testMvp) &&
 		RecordDrawIndexed(count);*/
 }
-prosper::DescriptorSetInfo &ShaderTest::GetMaterialDescriptorSetInfo() const { return ShaderGameWorldLightingPass::DESCRIPTOR_SET_MATERIAL; }
 void ShaderTest::SetForceNonIBLMode(bool b) { m_bNonIBLMode = b; }
 #if 0
 bool ShaderTest::BeginDraw(
@@ -199,49 +188,3 @@ static bool bind_texture(Material &mat, prosper::IDescriptorSet &ds, TextureInfo
 		return false;
 	return bind_default_texture(ds, defaultTexName, bindingIndex);
 }
-
-std::shared_ptr<prosper::IDescriptorSetGroup> ShaderTest::InitializeMaterialDescriptorSet(CMaterial &mat, const prosper::DescriptorSetInfo &descSetInfo)
-{
-	/*auto *albedoMap = mat.GetDiffuseMap();
-	if(albedoMap == nullptr || albedoMap->texture == nullptr)
-		return nullptr;
-
-	auto albedoTexture = std::static_pointer_cast<Texture>(albedoMap->texture);
-	if(albedoTexture->HasValidVkTexture() == false)
-		return nullptr;
-	auto descSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(descSetInfo);
-	mat.SetDescriptorSetGroup(*this, descSetGroup);
-	auto &descSet = *descSetGroup->GetDescriptorSet();
-	descSet.SetBindingTexture(*albedoTexture->GetVkTexture(), umath::to_integral(MaterialBinding::AlbedoMap));
-	auto matData = InitializeMaterialBuffer(descSet, mat);
-	if(matData.has_value() == false)
-		return nullptr;
-
-	if(bind_texture(mat, descSet, mat.GetNormalMap(), umath::to_integral(MaterialBinding::NormalMap), "black") == false)
-		return nullptr;
-
-	if(bind_texture(mat, descSet, mat.GetRMAMap(), umath::to_integral(MaterialBinding::RMAMap), "pbr/rma_neutral") == false)
-		return nullptr;
-
-	bind_texture(mat, descSet, mat.GetGlowMap(), umath::to_integral(MaterialBinding::EmissionMap));
-
-	if(bind_texture(mat, descSet, mat.GetParallaxMap(), umath::to_integral(MaterialBinding::ParallaxMap), "black") == false)
-		return nullptr;
-
-	if(bind_texture(mat, descSet, mat.GetTextureInfo("wrinkle_stretch_map"), umath::to_integral(MaterialBinding::WrinkleStretchMap), albedoTexture.get()) == false)
-		return nullptr;
-
-	if(bind_texture(mat, descSet, mat.GetTextureInfo("wrinkle_compress_map"), umath::to_integral(MaterialBinding::WrinkleCompressMap), albedoTexture.get()) == false)
-		return nullptr;
-
-	if(bind_texture(mat, descSet, mat.GetTextureInfo("exponent_map"), umath::to_integral(MaterialBinding::ExponentMap), "white") == false)
-		return nullptr;
-
-	// TODO: FIXME: It would probably be a good idea to update the descriptor set lazily (i.e. not update it here), but
-	// that seems to cause crashes in some cases
-	if(descSet.Update() == false)
-		return nullptr;
-	return descSetGroup;*/
-	return nullptr;
-}
-std::shared_ptr<prosper::IDescriptorSetGroup> ShaderTest::InitializeMaterialDescriptorSet(CMaterial &mat) { return InitializeMaterialDescriptorSet(mat, ShaderPBR::DESCRIPTOR_SET_MATERIAL); }

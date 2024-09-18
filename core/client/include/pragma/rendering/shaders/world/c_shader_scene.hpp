@@ -164,8 +164,6 @@ namespace pragma {
 	};
 	class DLLCLIENT ShaderGameWorld : public ShaderEntity {
 	  public:
-		static constexpr auto MATERIAL_DESCRIPTOR_SET_INDEX = 1u;
-		static constexpr auto SCENE_DESCRIPTOR_SET_START_INDEX = 2u;
 		enum class SceneFlags : uint32_t {
 			None = 0u,
 			UseExtendedVertexWeights = 1u,
@@ -203,12 +201,13 @@ namespace pragma {
 		virtual bool IsDepthPrepassShader() const { return false; }
 		virtual GameShaderType GetPassType() const { return GameShaderType::LightingPass; }
 		virtual size_t GetBaseTypeHashCode() const override;
-		virtual uint32_t GetMaterialDescriptorSetIndex() const { return std::numeric_limits<uint32_t>::max(); }
-		prosper::IDescriptorSet &GetDefaultMaterialDescriptorSet() const;
+		std::optional<uint32_t> GetMaterialDescriptorSetIndex() const;
+		virtual uint32_t GetSceneDescriptorSetIndex() const { return std::numeric_limits<uint32_t>::max(); };
+		const prosper::DescriptorSetInfo *GetMaterialDescriptorSetInfo() const;
 
 		// Note: All recording functions are called in a multi-threaded environment! Handle with care!
 		virtual void RecordBindScene(rendering::ShaderProcessor &shaderProcessor, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer, prosper::IDescriptorSet &dsRenderSettings,
-		  prosper::IDescriptorSet &dsLights, prosper::IDescriptorSet &dsShadows, prosper::IDescriptorSet &dsMaterial, const Vector4 &drawOrigin, SceneFlags &inOutSceneFlags) const
+		  prosper::IDescriptorSet &dsLights, prosper::IDescriptorSet &dsShadows, const Vector4 &drawOrigin, SceneFlags &inOutSceneFlags) const
 		{
 		}
 		virtual bool RecordBindEntity(rendering::ShaderProcessor &shaderProcessor, CRenderComponent &renderC, prosper::IShaderPipelineLayout &layout, uint32_t entityInstanceDescriptorSetIndex) const;
@@ -225,7 +224,7 @@ namespace pragma {
 		virtual uint32_t GetPassPipelineIndexStartOffset(rendering::PassType passType) const { return 0; }
 	  protected:
 		SceneFlags m_sceneFlags = SceneFlags::None;
-		std::shared_ptr<prosper::IDescriptorSetGroup> m_defaultMatDsg = nullptr;
+		std::unique_ptr<prosper::DescriptorSetInfo> m_materialDescSetInfo;
 	};
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::ShaderEntity::InstanceData::RenderFlags);

@@ -32,11 +32,19 @@ vec4 apply_debug_mode(uint materialFlags, uint debugMode, vec4 outputColor, vec2
 	// Since these are only evaluated in debug mode, the overhead from the if-branches
 	// (if there is one) doesn't really matter
 	if(debugMode == DEBUG_MODE_AO) {
-		float ao = texture(u_rmaMap, texCoords)[RMA_CHANNEL_AO];
+#ifdef MATERIAL_RMA_MAP_ENABLED
+		float ao = fetch_rma_map(texCoords)[RMA_CHANNEL_AO];
+#else
+		float ao = 0.0;
+#endif
 		finalColor = mix(vec4(1, 1, 1, 1), vec4(ao, ao, ao, 1.0), aoFactor);
 	}
 	else if(debugMode == DEBUG_MODE_ALBEDO)
+#ifdef MATERIAL_ALBEDO_MAP_ENABLED
 		finalColor = texture(u_albedoMap, texCoords);
+#else
+		finalColor = vec4(1,1,1,1);
+#endif
 	else if(debugMode == DEBUG_MODE_METALNESS)
 		finalColor = vec4(metallic, metallic, metallic, 1.0);
 	else if(debugMode == DEBUG_MODE_ROUGHNESS)
@@ -48,7 +56,11 @@ vec4 apply_debug_mode(uint materialFlags, uint debugMode, vec4 outputColor, vec2
 	else if(debugMode == DEBUG_MODE_NORMAL)
 		finalColor = vec4(get_normal_from_map(texCoords, materialFlags), 1.0);
 	else if(debugMode == DEBUG_MODE_NORMAL_MAP)
+#ifdef MATERIAL_NORMAL_MAP_ENABLED
 		finalColor = texture(u_normalMap, texCoords);
+#else
+		finalColor = vec4(1,1,1,1);
+#endif
 	else if(debugMode == DEBUG_MODE_REFLECTANCE)
 		finalColor = vec4(reflectance, reflectance, reflectance, 1.0);
 	else if(debugMode == DEBUG_MODE_IBL_PREFILTER_MAP)
@@ -56,7 +68,11 @@ vec4 apply_debug_mode(uint materialFlags, uint debugMode, vec4 outputColor, vec2
 	else if(debugMode == DEBUG_MODE_IBL_IRRADIANCE_MAP)
 		finalColor = texture(u_irradianceMap, normalize(fs_in.vert_pos_ws.xyz - u_renderSettings.posCam.xyz));
 	else if(debugMode == DEBUG_MODE_EMISSION_MAP)
-		finalColor = texture(u_glowMap, texCoords);
+#ifdef MATERIAL_EMISSION_MAP_ENABLED
+		finalColor = texture(u_emissionMap, texCoords);
+#else
+		finalColor = vec4(1,1,1,1);
+#endif
 	else if(debugMode == DEBUG_MODE_LIGHTMAP) {
 		if(is_light_map_enabled()) {
 			vec4 colLightMap = texture(u_lightMap, fs_in.vert_uv_lightmap.xy);

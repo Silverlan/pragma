@@ -124,7 +124,6 @@ namespace pragma {
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_LIGHTMAP_UV;
 
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_INSTANCE;
-		static prosper::DescriptorSetInfo DESCRIPTOR_SET_MATERIAL;
 
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_SCENE;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_RENDERER;
@@ -167,9 +166,9 @@ namespace pragma {
 		virtual ~ShaderGameWorldLightingPass() override;
 		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override;
 		virtual bool GetRenderBufferTargets(CModelSubMesh &mesh, uint32_t pipelineIdx, std::vector<prosper::IBuffer *> &outBuffers, std::vector<prosper::DeviceSize> &outOffsets, std::optional<prosper::IndexBufferInfo> &outIndexBufferInfo) const override;
+		virtual uint32_t GetSceneDescriptorSetIndex() const override;
 		bool RecordPushSceneConstants(rendering::ShaderProcessor &shaderProcessor, const pragma::CSceneComponent &scene, const Vector4 &drawOrigin) const;
 
-		virtual uint32_t GetMaterialDescriptorSetIndex() const override;
 		virtual uint32_t GetCameraDescriptorSetIndex() const override;
 		virtual uint32_t GetRendererDescriptorSetIndex() const override;
 		virtual uint32_t GetInstanceDescriptorSetIndex() const override;
@@ -184,7 +183,7 @@ namespace pragma {
 
 		virtual GameShaderSpecializationConstantFlag GetBaseSpecializationFlags() const;
 		virtual void RecordBindScene(rendering::ShaderProcessor &shaderProcessor, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer, prosper::IDescriptorSet &dsRenderSettings,
-		  prosper::IDescriptorSet &dsLights, prosper::IDescriptorSet &dsShadows, prosper::IDescriptorSet &dsMaterial, const Vector4 &drawOrigin, ShaderGameWorld::SceneFlags &inOutSceneFlags) const override;
+		  prosper::IDescriptorSet &dsLights, prosper::IDescriptorSet &dsShadows, const Vector4 &drawOrigin, ShaderGameWorld::SceneFlags &inOutSceneFlags) const override;
 		virtual bool IsUsingLightmaps() const override { return true; }
 		bool IsDepthPrepassEnabled() const;
 		void SetDepthPrepassEnabled(bool enabled) { m_depthPrepassEnabled = enabled; }
@@ -202,11 +201,12 @@ namespace pragma {
 		virtual void InitializeGfxPipelineVertexAttributes();
 		virtual void InitializeGfxPipelinePushConstantRanges();
 		virtual void InitializeGfxPipelineDescriptorSets();
-		virtual prosper::DescriptorSetInfo &GetMaterialDescriptorSetInfo() const;
+		prosper::DescriptorSetInfo &GetMaterialDescriptorSetInfo() const;
 		virtual void GetVertexAnimationPushConstantInfo(uint32_t &offset) const override;
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
 		virtual void InitializeShaderResources() override;
 		virtual void InitializeMaterialData(const CMaterial &mat, const rendering::shader_material::ShaderMaterial &shaderMat, pragma::rendering::shader_material::ShaderMaterialData &inOutMatData);
+		void InitializeShaderMaterial();
 		bool m_depthPrepassEnabled = true;
 		std::optional<std::string> m_shaderMaterialName = "pbr";
 		std::shared_ptr<rendering::shader_material::ShaderMaterial> m_shaderMaterial;

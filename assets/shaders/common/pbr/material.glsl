@@ -8,11 +8,7 @@
 #include "/common/material_flags.glsl"
 #include "/common/alpha_mode.glsl"
 
-#ifndef MATERIAL_ENABLE_WRINKLES
-#define MATERIAL_ENABLE_WRINKLES 1
-#endif
-
-#if MATERIAL_ENABLE_WRINKLES == 1
+#ifdef MATERIAL_WRINKLE_STRETCH_MAP_ENABLED
 #include "/programs/scene/pbr/textures.glsl"
 #endif
 
@@ -107,7 +103,7 @@ MaterialInfo build_material_info(PbrMaterial materialData, uint materialFlags, v
 		baseColor.a = 1.0;
 	baseColor.rgb *= colorMod.rgb * materialData.color.rgb;
 
-#if MATERIAL_ENABLE_WRINKLES == 1
+#ifdef MATERIAL_WRINKLE_STRETCH_MAP_ENABLED
 	if(use_wrinkle_maps(materialFlags)) {
 		if(wrinkleData != 0.0) {
 			float wrinkle = clamp(-wrinkleData, 0, 1);

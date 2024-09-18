@@ -111,7 +111,8 @@ ShaderSceneLit::ShaderSceneLit(prosper::IPrContext &context, const std::string &
 
 decltype(ShaderGameWorld::HASH_TYPE) ShaderGameWorld::HASH_TYPE = typeid(ShaderGameWorld).hash_code();
 size_t ShaderGameWorld::GetBaseTypeHashCode() const { return HASH_TYPE; }
-prosper::IDescriptorSet &ShaderGameWorld::GetDefaultMaterialDescriptorSet() const { return *m_defaultMatDsg->GetDescriptorSet(); }
+std::optional<uint32_t> ShaderGameWorld::GetMaterialDescriptorSetIndex() const { return m_materialDescSetInfo ? m_materialDescSetInfo->setIndex : std::optional<uint32_t> {}; }
+const prosper::DescriptorSetInfo *ShaderGameWorld::GetMaterialDescriptorSetInfo() const { return m_materialDescSetInfo.get(); }
 
 /////////////////////
 
@@ -202,7 +203,10 @@ bool pragma::ShaderGameWorld::RecordBindMaterial(rendering::ShaderProcessor &sha
 	// 	descSetGroup = const_cast<pragma::ShaderGameWorld*>(this)->InitializeMaterialDescriptorSet(mat,false); // Attempt to initialize on the fly (TODO: Is this thread safe?)
 	if(descSetGroup == nullptr)
 		return false;
-	shaderProcessor.GetCommandBuffer().RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics, shaderProcessor.GetCurrentPipelineLayout(), GetMaterialDescriptorSetIndex(), *descSetGroup->GetDescriptorSet(0));
+	auto dsMatIdx = GetMaterialDescriptorSetIndex();
+	if(!dsMatIdx)
+		return false;
+	shaderProcessor.GetCommandBuffer().RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics, shaderProcessor.GetCurrentPipelineLayout(), *dsMatIdx, *descSetGroup->GetDescriptorSet(0));
 	return true;
 }
 

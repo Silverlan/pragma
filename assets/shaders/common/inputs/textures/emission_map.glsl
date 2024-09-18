@@ -4,10 +4,7 @@
 #include "/common/material_flags.glsl"
 #include "/common/fs_tonemapping.glsl"
 
-#ifndef USE_GLOW_MAP
-#define USE_GLOW_MAP 1
-#endif
-#if USE_GLOW_MAP == 1
+#ifdef MATERIAL_EMISSION_MAP_ENABLED
 layout(LAYOUT_ID(MATERIAL, EMISSION_MAP)) uniform sampler2D u_glowMap;
 vec4 get_glow_map_color(vec2 uv) { return texture(u_glowMap, uv).rgba; }
 #endif
@@ -19,7 +16,7 @@ vec4 get_glow_map_color(vec2 uv) { return texture(u_glowMap, uv).rgba; }
 
 vec4 add_glow_color(vec4 col, vec2 texCoords, vec4 glowColor, vec4 baseColor, uint glowMode)
 {
-#if USE_GLOW_MAP == 1
+#ifdef MATERIAL_EMISSION_MAP_ENABLED
 	vec3 colGlow = glowColor.rgb * glowColor.a; // *get_glow_scale();
 	switch(glowMode) {
 	case GLOW_MODE_ADDITIVE:
@@ -50,7 +47,7 @@ vec4 add_glow_color(vec4 col, vec2 texCoords, vec4 glowColor, vec4 baseColor, ui
 }
 vec4 add_glow_color(uint materialFlags, vec4 col, vec2 texCoords, vec4 glowColor, vec4 baseColor)
 {
-#if USE_GLOW_MAP == 1
+#ifdef MATERIAL_EMISSION_MAP_ENABLED
 	if((materialFlags & FMAT_FLAGS_GLOW_MODE1) != 0)
 		return add_glow_color(col, texCoords, glowColor, baseColor, GLOW_MODE_ADDITIVE);
 	else if((materialFlags & FMAT_FLAGS_GLOW_MODE2) != 0)
@@ -65,7 +62,7 @@ vec4 add_glow_color(uint materialFlags, vec4 col, vec2 texCoords, vec4 glowColor
 
 vec4 add_glow_map_color(uint materialFlags, vec4 col, vec2 texCoords, vec4 baseColor)
 {
-#if USE_GLOW_MAP == 1
+#ifdef MATERIAL_EMISSION_MAP_ENABLED
 	if(use_glow_map(materialFlags))
 		return add_glow_color(materialFlags, col, texCoords, texture(u_glowMap, texCoords), baseColor);
 #endif
@@ -75,12 +72,14 @@ vec4 add_glow_map_color(uint materialFlags, vec4 col, vec2 texCoords, vec4 baseC
 vec4 get_emission_color(vec4 color, vec4 baseColor, vec2 texCoords, vec3 materialEmissionFactor, uint materialFlags)
 {
 	vec4 result = color;
+#ifdef MATERIAL_EMISSION_MAP_ENABLED
 	if(use_glow_map(materialFlags)) {
 		vec4 emissiveColor = texture(u_glowMap, texCoords);
 		emissiveColor.rgb *= materialEmissionFactor.rgb;
 		emissiveColor.rgb *= emissiveColor.a * 15;
 		result = add_glow_color(result, texCoords, emissiveColor, baseColor, materialFlags);
 	}
+#endif
 	return result;
 }
 

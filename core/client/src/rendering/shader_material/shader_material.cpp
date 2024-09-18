@@ -43,6 +43,17 @@ std::shared_ptr<ShaderMaterial> ShaderMaterialCache::Load(const std::string &id)
 	return shaderMat;
 }
 
+static std::unique_ptr<pragma::rendering::shader_material::ShaderMaterialCache> g_shaderMaterialCache {};
+pragma::rendering::shader_material::ShaderMaterialCache &pragma::rendering::shader_material::get_cache()
+{
+	if(!g_shaderMaterialCache)
+		g_shaderMaterialCache = std::make_unique<pragma::rendering::shader_material::ShaderMaterialCache>();
+	return *g_shaderMaterialCache;
+}
+void pragma::rendering::shader_material::clear_cache() { g_shaderMaterialCache = {}; }
+
+//////////
+
 const std::unordered_set<udm::Type> allowedTypes {
   udm::Type::Int16,
   udm::Type::UInt16,
@@ -240,6 +251,10 @@ std::string ShaderMaterial::ToGlslStruct() const
 	std::optional<std::string> compositePropName {};
 	for(auto it = properties.begin(); it != properties.end();) {
 		auto &prop = *it;
+
+		auto idName = ustring::get_upper(prop.name);
+		ss << "#define MATERIAL_PROP_" << idName << "_ENABLED 1\n";
+
 		auto methodName = "get_mat_" + std::string {prop.name};
 		auto propName = get_property_name(prop.name);
 		auto matPropName = "u_material.material." + propName;
@@ -296,11 +311,24 @@ std::string ShaderMaterial::ToGlslStruct() const
 		if(!varName.empty())
 			varName[0] = tolower(varName[0]);
 		varName = "u_" + varName;
+
+		ss << "#define MATERIAL_" << idName << "_ENABLED 1\n";
+
 		auto &funcName = tex.name;
-		ss << "layout(LAYOUT_ID(MATERIAL, " << idName << ")) uniform sampler2D " << varName << ";\n";
-		ss << "vec4 fetch_" << funcName << "(vec2 uv) {\n";
+		std::string samplerType;
+		std::string uvType;
+		if(tex.cubemap) {
+			samplerType = "samplerCube";
+			uvType = "vec3";
+		}
+		else {
+			samplerType = "sampler2D";
+			uvType = "vec2";
+		}
+		ss << "layout(LAYOUT_ID(MATERIAL, " << idName << ")) uniform " << samplerType << " " << varName << ";\n";
+		ss << "vec4 fetch_" << funcName << "(" << uvType << " uv) {\n";
 		ss << "\tvec4 val = texture(" << varName << ",uv);\n";
-		if(tex.isColorMap) {
+		if(tex.colorMap) {
 			if(isrgb >= MAX_NUMBER_OF_SRGB_TEXTURES)
 				throw std::runtime_error {"Only up to " + std::to_string(MAX_NUMBER_OF_SRGB_TEXTURES) + "texture definitions with the 'convertToLinearSpace' flag are allowed!"};
 			std::string flag = "FMAT_FLAGS_SRGB" + std::to_string(isrgb);
@@ -311,8 +339,8 @@ std::string ShaderMaterial::ToGlslStruct() const
 		ss << "\treturn val;\n";
 		ss << "}\n";
 
-		if(tex.isColorMap) {
-			ss << "vec4 fetch_" << funcName << "(vec2 uv, vec4 instanceColor) {\n";
+		if(tex.colorMap) {
+			ss << "vec4 fetch_" << funcName << "(" << uvType << " uv, vec4 instanceColor) {\n";
 			ss << "\tvec4 color = fetch_" << funcName << "(uv);\n";
 			ss << "\tMaterialData mat = u_material.material;\n";
 			ss << "\tuint alphaMode = mat.alphaMode;\n";
@@ -334,7 +362,7 @@ std::string ShaderMaterial::ToGlslStruct() const
 
 ShaderMaterial::ShaderMaterial()
 {
-	properties.reserve(5);
+	properties.reserve(PREDEFINED_PROPERTY_COUNT);
 
 	{
 		Property propColor {};
@@ -401,6 +429,9 @@ ShaderMaterial::ShaderMaterial()
 		propPlaceholder.defaultValue = 0.5f;
 		AddProperty(std::move(propPlaceholder));
 	}
+	assert(properties.size() == PREDEFINED_PROPERTY_COUNT);
+	if(properties.size() != PREDEFINED_PROPERTY_COUNT)
+		throw std::logic_error {"Number of predefined properties does not match expected count of " + std::to_string(PREDEFINED_PROPERTY_COUNT) + "!"};
 }
 
 void ShaderMaterial::AddProperty(Property &&prop)
@@ -556,111 +587,125 @@ bool ShaderMaterial::LoadFromUdmData(udm::LinkedPropertyWrapperArg prop, std::st
 		std::string name;
 		prop["name"] >> name;
 
-		auto udmType = udm::ascii_type_to_enum(type);
-		auto it = allowedTypes.find(udmType);
-		if(it == allowedTypes.end()) {
-			outErr = "Type '" + type + "' is not a valid material property type!";
-			return false;
-		}
-
-		if(name.empty()) {
-			outErr = "Material property name must not be empty!";
-			return false;
-		}
-
-		auto udmDefault = prop["default"];
-		if(!udmDefault) {
-			outErr = "Material property '" + name + "' has no default value!";
-			return false;
-		}
-
-		std::unique_ptr<std::unordered_map<std::string, uint32_t>> flags {};
-		std::optional<PropertyValue> defVal {};
-		auto udmFlags = prop["flags"];
-		if(udmFlags) {
-			flags = std::make_unique<std::unordered_map<std::string, uint32_t>>();
-			uint32_t flagValue = 1;
-			flags->reserve(udmFlags.GetSize());
-			for(auto &udmFlag : udmFlags) {
-				auto name = udmFlag.GetValue<std::string>();
-				(*flags)[name] = flagValue;
-
-				flagValue <<= 1;
+		if(type == "import") {
+			auto base = g_shaderMaterialCache->Load(name);
+			if(!base) {
+				outErr = "Failed to import shader material '" + name + "'!";
+				return false;
 			}
-
-			if(udmDefault.GetType() == udm::Type::String) {
-				auto &strVal = udmDefault.GetValue<udm::String>();
-				defVal = parse_flags_expression(strVal, *flags, udmType);
+			properties.reserve(properties.size() + base->properties.size());
+			for(size_t i = PREDEFINED_PROPERTY_COUNT; i < base->properties.size(); ++i) {
+				auto baseProp = base->properties.at(i);
+				AddProperty(std::move(baseProp));
 			}
 		}
-
-		if(!defVal) {
-			defVal = udm::visit_ng(udmType, [&udmDefault](auto tag) -> std::optional<PropertyValue> {
-				using T = typename decltype(tag)::type;
-				if constexpr(is_valid_property_type_v<T>) {
-					auto val = udmDefault.ToValue<T>();
-					if(!val)
-						return {};
-					return PropertyValue {*val};
-				}
-				return {};
-			});
-		}
-		if(!defVal) {
-			outErr = "Unable to convert default value of property '" + name + "' to specified type '" + std::string {magic_enum::enum_name(udmType)} + "'!";
-			return false;
-		}
-
-		if(wasPrevPropHalf) {
-			auto isValidHalfType = false;
-			switch(udmType) {
-			case udm::Type::Int16:
-			case udm::Type::UInt16:
-			case udm::Type::Float:
-			case udm::Type::Half:
-				isValidHalfType = true;
-				break;
-			}
-
-			if(!isValidHalfType) {
-				outErr = "Property type following a half-property must be a int16 or floating-point type, but type of property '" + name + "' is '" + std::string {magic_enum::enum_name(udmType)} + "'!";
+		else {
+			auto udmType = udm::ascii_type_to_enum(type);
+			auto it = allowedTypes.find(udmType);
+			if(it == allowedTypes.end()) {
+				outErr = "Type '" + type + "' is not a valid material property type!";
 				return false;
 			}
 
-			wasPrevPropHalf = false;
-		}
-
-		// TODO: Padding!
-		if(udmType == udm::Type::Half)
-			wasPrevPropHalf = true;
-
-		Property matProp {};
-		matProp.name = std::move(name);
-		matProp.type = udmType;
-		matProp.defaultValue = std::move(*defVal);
-		matProp.flags = std::move(flags);
-		totalSize += udm::size_of(udmType);
-
-		std::string specializationType;
-		if(prop["specializationType"] >> specializationType)
-			matProp.specializationType = specializationType;
-
-		auto udmOptions = prop["options"];
-		if(udmOptions) {
-			matProp.options = std::make_unique<std::unordered_map<std::string, PropertyValue>>();
-			auto &options = *matProp.options;
-			options.reserve(udmOptions.GetSize());
-			for(size_t i = 0; auto &udmOpt : udmOptions) {
-				auto name = udmOpt.GetValue<std::string>();
-				udm::visit<true, false, false>(udmType, [&name, &options, i](auto tag) {
-					using T = typename decltype(tag)::type;
-					if constexpr(!std::is_same_v<T, udm::Half> && is_valid_property_type_v<T>)
-						options[name] = static_cast<T>(i);
-				});
-				++i;
+			if(name.empty()) {
+				outErr = "Material property name must not be empty!";
+				return false;
 			}
+
+			auto udmDefault = prop["default"];
+			if(!udmDefault) {
+				outErr = "Material property '" + name + "' has no default value!";
+				return false;
+			}
+
+			std::unique_ptr<std::unordered_map<std::string, uint32_t>> flags {};
+			std::optional<PropertyValue> defVal {};
+			auto udmFlags = prop["flags"];
+			if(udmFlags) {
+				flags = std::make_unique<std::unordered_map<std::string, uint32_t>>();
+				uint32_t flagValue = 1;
+				flags->reserve(udmFlags.GetSize());
+				for(auto &udmFlag : udmFlags) {
+					auto name = udmFlag.GetValue<std::string>();
+					(*flags)[name] = flagValue;
+
+					flagValue <<= 1;
+				}
+
+				if(udmDefault.GetType() == udm::Type::String) {
+					auto &strVal = udmDefault.GetValue<udm::String>();
+					defVal = parse_flags_expression(strVal, *flags, udmType);
+				}
+			}
+
+			if(!defVal) {
+				defVal = udm::visit_ng(udmType, [&udmDefault](auto tag) -> std::optional<PropertyValue> {
+					using T = typename decltype(tag)::type;
+					if constexpr(is_valid_property_type_v<T>) {
+						auto val = udmDefault.ToValue<T>();
+						if(!val)
+							return {};
+						return PropertyValue {*val};
+					}
+					return {};
+				});
+			}
+			if(!defVal) {
+				outErr = "Unable to convert default value of property '" + name + "' to specified type '" + std::string {magic_enum::enum_name(udmType)} + "'!";
+				return false;
+			}
+
+			if(wasPrevPropHalf) {
+				auto isValidHalfType = false;
+				switch(udmType) {
+				case udm::Type::Int16:
+				case udm::Type::UInt16:
+				case udm::Type::Float:
+				case udm::Type::Half:
+					isValidHalfType = true;
+					break;
+				}
+
+				if(!isValidHalfType) {
+					outErr = "Property type following a half-property must be a int16 or floating-point type, but type of property '" + name + "' is '" + std::string {magic_enum::enum_name(udmType)} + "'!";
+					return false;
+				}
+
+				wasPrevPropHalf = false;
+			}
+
+			// TODO: Padding!
+			if(udmType == udm::Type::Half)
+				wasPrevPropHalf = true;
+
+			Property matProp {};
+			matProp.name = std::move(name);
+			matProp.type = udmType;
+			matProp.defaultValue = std::move(*defVal);
+			matProp.flags = std::move(flags);
+			totalSize += udm::size_of(udmType);
+
+			std::string specializationType;
+			if(prop["specializationType"] >> specializationType)
+				matProp.specializationType = specializationType;
+
+			auto udmOptions = prop["options"];
+			if(udmOptions) {
+				matProp.options = std::make_unique<std::unordered_map<std::string, PropertyValue>>();
+				auto &options = *matProp.options;
+				options.reserve(udmOptions.GetSize());
+				for(size_t i = 0; auto &udmOpt : udmOptions) {
+					auto name = udmOpt.GetValue<std::string>();
+					udm::visit<true, false, false>(udmType, [&name, &options, i](auto tag) {
+						using T = typename decltype(tag)::type;
+						if constexpr(!std::is_same_v<T, udm::Half> && is_valid_property_type_v<T>)
+							options[name] = static_cast<T>(i);
+					});
+					++i;
+				}
+			}
+			AddProperty(std::move(matProp));
 		}
-		AddProperty(std::move(matProp));
 	}
 
 	auto udmTextures = prop["textures"];
@@ -680,8 +725,9 @@ bool ShaderMaterial::LoadFromUdmData(udm::LinkedPropertyWrapperArg prop, std::st
 		std::string defaultTexturePath;
 		if(tex["default"] >> defaultTexturePath)
 			shaderTex.defaultTexturePath = defaultTexturePath;
+		tex["cubemap"] >> shaderTex.cubemap;
 		tex["required"] >> shaderTex.required;
-		tex["isColorMap"] >> shaderTex.isColorMap;
+		tex["colorMap"] >> shaderTex.colorMap;
 	}
 
 	if(totalSize > MAX_MATERIAL_SIZE) {

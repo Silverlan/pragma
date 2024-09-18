@@ -66,9 +66,11 @@ vec4 calc_pbr(vec4 albedoColor, vec2 texCoords, uint debugMode, PbrMaterial pbrM
 	//diffuseColor = baseColor.rgb * oneMinusSpecularStrength;
 
 	vec4 rma;
+#ifdef MATERIAL_RMA_MAP_ENABLED
 	if(use_rma_map(materialFlags))
-		rma = texture(u_rmaMap, texCoords);
+		rma = fetch_rma_map(texCoords);
 	else
+#endif
 		rma = vec4(1 /* ao */, 1 /* roughness */, 1 /*metalness */, 1);
 	perceptualRoughness = rma[RMA_CHANNEL_ROUGHNESS] * 1.0;
 
@@ -82,18 +84,20 @@ vec4 calc_pbr(vec4 albedoColor, vec2 texCoords, uint debugMode, PbrMaterial pbrM
 	metallic = rma[RMA_CHANNEL_METALNESS] * pbrMat.metalnessFactor;
 
 	baseColor = get_base_color(get_instance_color(), albedoColor, pbrMat.color, pbrMat.alphaMode, pbrMat.alphaCutoff, materialFlags);
+#if defined(MATERIAL_WRINKLE_COMPRESS_MAP_ENABLED) && defined(MATERIAL_WRINKLE_STRETCH_MAP_ENABLED)
 	if(use_wrinkle_maps(materialFlags)) {
 		if(fs_in.wrinkleDelta != 0.0) {
 			float wrinkle = clamp(-fs_in.wrinkleDelta, 0, 1);
 			float stretch = clamp(fs_in.wrinkleDelta, 0, 1);
 			float baseColorFactor = 1.0 - wrinkle - stretch;
 
-			vec4 wrinkleCol = texture(u_wrinkleCompressMap, texCoords);
-			vec4 stretchCol = texture(u_wrinkleStretchMap, texCoords);
+			vec4 wrinkleCol = fetch_wrinkle_compress_map(texCoords);
+			vec4 stretchCol = fetch_wrinkle_stretch_map(texCoords);
 
 			baseColor.rgb = baseColorFactor * baseColor.rgb + wrinkle * wrinkleCol.rgb + stretch * stretchCol.rgb;
 		}
 	}
+#endif
 
 	//baseColor *= u_DiffuseFactor;
 	diffuseColor = baseColor.rgb * (vec3(1.0) - f0) * (1.0 - metallic);

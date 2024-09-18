@@ -11,7 +11,7 @@
 #define ENABLE_PARTICLE_TEXTURE 1
 #endif
 
-#define USE_NORMAL_MAP 0
+#define MATERIAL_NORMAL_MAP_ENABLED 0
 #define USE_SPECULAR_MAP 0
 
 #endif

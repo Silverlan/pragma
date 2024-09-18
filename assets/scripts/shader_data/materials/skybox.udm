@@ -1,0 +1,17 @@
+"shader_material"
+{
+	$array properties [element][
+		{
+			$string type "import"
+			$string name "pbr"
+		}
+	]
+	$array textures [element][
+		{
+			$string name "skybox"
+			$bool cubemap 1
+			$bool colorMap 1
+			$bool required 1
+		}
+	]
+}

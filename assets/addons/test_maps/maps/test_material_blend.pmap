@@ -1,0 +1,242 @@
+"assetData"
+{
+	"bsp"
+	{
+		$lz4 clusterMeshIndexData [48][IgIAAQBPAQAAAAwADFAAAQAAAA==]
+		"tree"
+		{
+			"assetData"
+			{
+				$lz4 clusterVisibility [2][IP//]
+				$lz4 nodes [6765][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]
+				$uint64 numClusters 4
+				$uint64 numNodes 55
+				$uint32 rootNode 0
+			}
+			$string assetType "PBSP"
+			$uint32 assetVersion 1
+		}
+	}
+	$array entities [element;7][
+		{
+			$string className "world"
+			"components"
+			{
+				"color"
+				{
+					$string flags "None"
+					"properties"
+					{
+
+					}
+				}
+				"transform"
+				{
+					$string flags "None"
+					"properties"
+					{
+
+					}
+				}
+			}
+			$string flags "None"
+			"keyValues"
+			{
+				$string ambient_color "255 255 255 80"
+				$string classname "worldspawn"
+				$string color "255 255 255 255"
+				$string comment "Decompiled by BSPSource v1.3.24 from stage"
+				$string detailmaterial "detail/detailsprites"
+				$string detailvbsp "detail.vbsp"
+				$string hammerid "1"
+				$string mapversion "22"
+				$string maxpropscreenwidth "-1"
+				$string model "maps/test_material_blend/world_1"
+				$string origin "0.000000 0.000000 0.000000"
+				$string skyname "sky_day01_01"
+				$string uuid "5b721efa-e471-41cf-a4a8-66e7a272e87c"
+				$string world_maxs "320 320 704"
+				$string world_mins "-320 -320 -68"
+			}
+			$array outputs [element;0][]
+			$stransform pose [[0,0,0][1,0,0,0][1,1,1]]
+		},
+		{
+			$string className "env_light_point"
+			"components"
+			{
+				"transform"
+				{
+					$string flags "None"
+					"properties"
+					{
+
+					}
+				}
+			}
+			$string flags "None"
+			"keyValues"
+			{
+				$string falloff_exponent "1.500000"
+				$string light_flags "1"
+				$string light_intensity "150.000000"
+				$string light_intensity_type "0"
+				$string lightcolor "60.000000 58.000000 54.750000"
+				$string origin "111.642998 176.000000 150.005005"
+				$string radius "1383.961670"
+				$string spawnflags "1536"
+				$string uuid "69b8c6e3-bda8-4a78-905c-4bf0f774a4c6"
+			}
+			$array outputs [element;0][]
+			$stransform pose [[111.643,176,150.005][1,0,0,0][1,1,1]]
+		},
+		{
+			$string className "env_light_point"
+			"components"
+			{
+				"transform"
+				{
+					$string flags "None"
+					"properties"
+					{
+
+					}
+				}
+			}
+			$string flags "None"
+			"keyValues"
+			{
+				$string falloff_exponent "1.500000"
+				$string light_flags "1"
+				$string light_intensity "50.000000"
+				$string light_intensity_type "0"
+				$string lightcolor "60.000000 58.000000 54.750000"
+				$string origin "-191.999969 288.000000 128.000000"
+				$string radius "799.030640"
+				$string spawnflags "1536"
+				$string uuid "a8223cc3-5064-4b55-9b31-51b8715369c6"
+			}
+			$array outputs [element;0][]
+			$stransform pose [[-192,288,128][1,0,0,0][1,1,1]]
+		},
+		{
+			$string className "env_light_point"
+			"components"
+			{
+				"transform"
+				{
+					$string flags "None"
+					"properties"
+					{
+
+					}
+				}
+			}
+			$string flags "None"
+			"keyValues"
+			{
+				$string falloff_exponent "1.500000"
+				$string light_flags "1"
+				$string light_intensity "50.000000"
+				$string light_intensity_type "0"
+				$string lightcolor "60.000000 58.000000 54.750000"
+				$string origin "-176.000000 208.000000 -176.000000"
+				$string radius "799.030640"
+				$string spawnflags "1536"
+				$string uuid "441ad6b4-ed84-469e-8300-20da9e9e6650"
+			}
+			$array outputs [element;0][]
+			$stransform pose [[-176,208,-176][1,0,0,0][1,1,1]]
+		},
+		{
+			$string className "env_light_point"
+			"components"
+			{
+				"transform"
+				{
+					$string flags "None"
+					"properties"
+					{
+
+					}
+				}
+			}
+			$string flags "None"
+			"keyValues"
+			{
+				$string falloff_exponent "1.500000"
+				$string light_flags "1"
+				$string light_intensity "50.000000"
+				$string light_intensity_type "0"
+				$string lightcolor "60.000000 58.000000 54.750000"
+				$string origin "160.000000 208.000000 -191.999985"
+				$string radius "799.030640"
+				$string spawnflags "1536"
+				$string uuid "104abca0-9292-45b0-a737-5cc18a9040cd"
+			}
+			$array outputs [element;0][]
+			$stransform pose [[160,208,-192][1,0,0,0][1,1,1]]
+		},
+		{
+			$string className "info_player_teamspawn"
+			"components"
+			{
+				"transform"
+				{
+					$string flags "None"
+					"properties"
+					{
+
+					}
+				}
+			}
+			$string flags "None"
+			"keyValues"
+			{
+				$string StartDisabled "0"
+				$string TeamNum "2"
+				$string angles "0.000000 0.000000 0"
+				$string classname "info_player_teamspawn"
+				$string hammerid "329"
+				$string origin "0.000000 0.000000 0.000000"
+				$string spawnflags "511"
+				$string uuid "444001cf-1af4-4c6f-8804-aa768d65e638"
+			}
+			$array outputs [element;0][]
+			$stransform pose [[0,0,0][1,0,0,0][1,1,1]]
+		},
+		{
+			$string className "info_player_start"
+			"components"
+			{
+				"transform"
+				{
+					$string flags "None"
+					"properties"
+					{
+
+					}
+				}
+			}
+			$string flags "None"
+			"keyValues"
+			{
+				$string angles "0.000000 0.000000 0"
+				$string classname "info_player_start"
+				$string hammerid "72"
+				$string origin "0.000000 9.000000 0.000000"
+				$string uuid "dac095d4-305b-4308-8dfb-b06fc31a0fc9"
+			}
+			$array outputs [element;0][]
+			$stransform pose [[0,9,0][1,0,0,0][1,1,1]]
+		}
+	]
+	"lightmap"
+	{
+		$float exposure 0
+		$float intensity 1
+	}
+	$array materials [string;3]["dev/graygrid","test/proto_blend","tools/toolsnodraw"]
+}
+$string assetType "PMAP"
+$uint32 assetVersion 2

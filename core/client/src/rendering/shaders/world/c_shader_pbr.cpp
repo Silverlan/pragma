@@ -198,3 +198,10 @@ bool ShaderPBRBlend::GetRenderBufferTargets(CModelSubMesh &mesh, uint32_t pipeli
 	outOffsets.push_back(0ull);
 	return true;
 }
+bool ShaderPBRBlend::OnRecordDrawMesh(rendering::ShaderProcessor &shaderProcessor, CModelSubMesh &mesh) const
+{
+	PushConstants pushConstants {};
+	pushConstants.alphaCount = mesh.GetAlphaCount();
+	shaderProcessor.GetCommandBuffer().RecordPushConstants(shaderProcessor.GetCurrentPipelineLayout(), prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit, sizeof(ShaderGameWorldLightingPass::PushConstants), sizeof(pushConstants), &pushConstants);
+	return ShaderPBR::OnRecordDrawMesh(shaderProcessor, mesh);
+}

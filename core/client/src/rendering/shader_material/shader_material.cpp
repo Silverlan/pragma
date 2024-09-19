@@ -718,6 +718,18 @@ bool ShaderMaterial::LoadFromUdmData(udm::LinkedPropertyWrapperArg prop, std::st
 			return false;
 		}
 
+		std::string type;
+		if((tex["type"] >> type) && type == "import") {
+			auto base = g_shaderMaterialCache->Load(name);
+			if(!base) {
+				outErr = "Failed to import shader material '" + name + "'!";
+				return false;
+			}
+			textures.reserve(textures.size() + base->textures.size());
+			for(auto &tex : base->textures)
+				textures.push_back(tex);
+		}
+
 		textures.push_back({});
 		auto &shaderTex = textures.back();
 		shaderTex.name = std::move(name);

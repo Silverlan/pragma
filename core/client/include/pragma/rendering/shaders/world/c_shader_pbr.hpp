@@ -81,6 +81,7 @@ namespace pragma {
 	  protected:
 		virtual void InitializeGfxPipelinePushConstantRanges() override;
 		virtual void InitializeGfxPipelineVertexAttributes() override;
+		virtual bool OnRecordDrawMesh(rendering::ShaderProcessor &shaderProcessor, CModelSubMesh &mesh) const override;
 	};
 };
 

@@ -100,8 +100,7 @@ void register_game_shaders()
 
 	// shaderManager.RegisterShader("raytracing",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderRayTracing(context,identifier);});
 	shaderManager.RegisterShader("pbr", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderPBR(context, identifier); });
-	// shaderManager.RegisterShader("pbr_blend",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderPBRBlend(context,identifier);}); // TODO: Fixme
-	shaderManager.RegisterShader("pbr_blend", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderPBR(context, identifier); });
+	shaderManager.RegisterShader("pbr_blend", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderPBRBlend(context, identifier); });
 	shaderManager.RegisterShader("eye", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderEye(context, identifier); });
 	shaderManager.RegisterShader("eye_legacy", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderEyeLegacy(context, identifier); });
 	shaderManager.RegisterShader("glow", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderGlow(context, identifier); });

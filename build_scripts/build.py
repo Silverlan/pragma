@@ -183,15 +183,14 @@ mkpath(tools)
 
 ########## clang-19 ##########
 # Due to a compiler bug with C++20 Modules in clang, we have to use clang-19 for now,
-# which has not been released yet, so we use the latest release candidate for now.
-# Once clang-19 has been released officially, this should be removed!
+# which is not available in package managers yet.
 if platform == "linux":
 	curDir = os.getcwd()
 	os.chdir(deps_dir)
-	clang19_root = os.getcwd() +"/LLVM-19.1.0-rc4-Linux-X64"
+	clang19_root = os.getcwd() +"/LLVM-19.1.0-Linux-X64"
 	if not Path(clang19_root).is_dir():
 		print_msg("Downloading clang-19...")
-		http_extract("https://github.com/llvm/llvm-project/releases/download/llvmorg-19.1.0-rc4/LLVM-19.1.0-rc4-Linux-X64.tar.xz",format="tar.xz")
+		http_extract("https://github.com/llvm/llvm-project/releases/download/llvmorg-19.1.0/LLVM-19.1.0-Linux-X64.tar.xz",format="tar.xz")
 	c_compiler = clang19_root +"/bin/clang"
 	cxx_compiler = clang19_root +"/bin/clang++"
 	print_msg("Setting c_compiler override to '" +c_compiler +"'")

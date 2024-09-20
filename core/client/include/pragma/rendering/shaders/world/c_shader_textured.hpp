@@ -131,6 +131,9 @@ namespace pragma {
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_LIGHTS;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_SHADOWS;
 
+		static bool InitializeMaterialBuffer(prosper::IDescriptorSet &descSet, CMaterial &mat, const pragma::rendering::shader_material::ShaderMaterialData &matData, uint32_t bindingIdx);
+		static std::unique_ptr<prosper::DescriptorSetInfo> CreateMaterialDescriptorSetInfo(const pragma::rendering::shader_material::ShaderMaterial &shaderMaterial);
+
 		enum class VertexBinding : uint32_t { LightmapUv = umath::to_integral(ShaderEntity::VertexBinding::Count) };
 
 		enum class MaterialBinding : uint32_t {
@@ -187,7 +190,6 @@ namespace pragma {
 		virtual bool IsUsingLightmaps() const override { return true; }
 		bool IsDepthPrepassEnabled() const;
 		void SetDepthPrepassEnabled(bool enabled) { m_depthPrepassEnabled = enabled; }
-		bool InitializeMaterialBuffer(prosper::IDescriptorSet &descSet, CMaterial &mat, const pragma::rendering::shader_material::ShaderMaterialData &matData, uint32_t bindingIdx);
 		static std::shared_ptr<Texture> GetTexture(const std::string &texName);
 	  protected:
 		using ShaderEntity::RecordDraw;

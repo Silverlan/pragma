@@ -3,7 +3,7 @@
 #extension GL_ARB_separate_shader_objects : enable
 #extension GL_ARB_shading_language_420pack : enable
 
-#define MATERIAL_WRINKLE_STRETCH_MAP_ENABLED 0
+bool is_material_translucent(uint flags) {return false;}
 
 #include "math_scalar_field.glsl"
 #include "../particle_instance.glsl"
@@ -13,11 +13,11 @@
 #include "/common/color.glsl"
 #include "/common/depth.glsl"
 #include "/common/inputs/camera.glsl"
-#include "/common/inputs/material.glsl"
 #include "/common/inputs/render_settings.glsl"
 #include "/common/inputs/fs_renderer.glsl"
 #include "/common/limits.glsl"
 #include "/common/light_source.glsl"
+#include "/common/pbr/material.glsl"
 #include "/common/pbr/lighting/ibl.glsl"
 #include "/common/pbr/lighting/lighting_direct.glsl"
 
@@ -129,18 +129,16 @@ void main()
 		vec4 instanceColor = vec4(1, 1, 1, 1);
 		vec4 rma = vec4(1, 1, 1, 1);
 
-		MaterialData matData = u_material.material;
-		matData.color = matData.color * fs_color;
-
 		PbrMaterial pbrMat;
-		pbrMat.color = u_material.material.color;
-		pbrMat.roughnessFactor = u_material.material.roughnessFactor;
-		pbrMat.metalnessFactor = u_material.material.metalnessFactor;
-		pbrMat.aoFactor = u_material.material.aoFactor;
-		pbrMat.alphaMode = u_material.material.alphaMode;
-		pbrMat.alphaCutoff = u_material.material.alphaCutoff;
+		pbrMat.color = vec4(get_mat_color_factor(), get_mat_alpha_factor()) *fs_color;
+		pbrMat.roughnessFactor = get_mat_roughness_factor();
+		pbrMat.metalnessFactor = get_mat_metalness_factor();
+		pbrMat.aoFactor = get_mat_ao_factor();
+		pbrMat.alphaMode = get_mat_alpha_mode();
+		pbrMat.alphaCutoff = get_mat_alpha_cutoff();
+		uint flags = get_mat_flags();
 
-		MaterialInfo materialInfo = build_material_info(pbrMat, u_material.material.flags, albedoColor, instanceColor, rma, 0.0, vec2(0, 0));
+		MaterialInfo materialInfo = build_material_info(pbrMat, flags, albedoColor, instanceColor, rma, 0.0, vec2(0, 0));
 
 		vec3 view = normalize(u_renderSettings.posCam.xyz - fragPosWs);
 		vec3 normal = fragNormalWs;

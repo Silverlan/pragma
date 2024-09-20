@@ -5,7 +5,6 @@
 #include "/math/math.glsl"
 #include "/common/rma.glsl"
 #include "/common/fs_tonemapping.glsl"
-#include "/common/material_flags.glsl"
 #include "/common/alpha_mode.glsl"
 
 #ifdef MATERIAL_WRINKLE_STRETCH_MAP_ENABLED

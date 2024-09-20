@@ -243,36 +243,40 @@ void ShaderGameWorldLightingPass::InitializeGfxPipelineDescriptorSets()
 	AddDescriptorSetGroup(DESCRIPTOR_SET_LIGHTS);
 	AddDescriptorSetGroup(DESCRIPTOR_SET_SHADOWS);
 }
+std::unique_ptr<prosper::DescriptorSetInfo> ShaderGameWorldLightingPass::CreateMaterialDescriptorSetInfo(const pragma::rendering::shader_material::ShaderMaterial &shaderMaterial)
+{
+	std::vector<prosper::DescriptorSetInfo::Binding> bindings;
+	bindings.reserve(shaderMaterial.textures.size() + 1);
+
+	size_t bindingIdx = 0;
+	{
+		prosper::DescriptorSetInfo::Binding binding {};
+		binding.bindingIndex = bindingIdx++;
+		binding.name = "SETTINGS";
+		binding.shaderStages = prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::GeometryBit;
+		binding.type = prosper::DescriptorType::UniformBuffer;
+		binding.flags = prosper::PrDescriptorSetBindingFlags::None;
+		bindings.push_back(binding);
+	}
+
+	for(auto &tex : shaderMaterial.textures) {
+		prosper::DescriptorSetInfo::Binding binding {};
+		binding.bindingIndex = bindingIdx++;
+		binding.name = tex.name.str;
+		binding.shaderStages = prosper::ShaderStageFlags::FragmentBit;
+		binding.type = prosper::DescriptorType::CombinedImageSampler;
+		binding.flags = prosper::PrDescriptorSetBindingFlags::None;
+		if(tex.cubemap)
+			binding.flags |= prosper::PrDescriptorSetBindingFlags::Cubemap;
+		bindings.push_back(binding);
+	}
+	return std::make_unique<prosper::DescriptorSetInfo>("MATERIAL", bindings);
+}
 void ShaderGameWorldLightingPass::InitializeShaderMaterial()
 {
 	if(m_shaderMaterialName) {
 		m_shaderMaterial = pragma::rendering::shader_material::get_cache().Load(*m_shaderMaterialName);
-		std::vector<prosper::DescriptorSetInfo::Binding> bindings;
-		bindings.reserve(m_shaderMaterial->textures.size() + 1);
-
-		size_t bindingIdx = 0;
-		{
-			prosper::DescriptorSetInfo::Binding binding {};
-			binding.bindingIndex = bindingIdx++;
-			binding.name = "SETTINGS";
-			binding.shaderStages = prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::GeometryBit;
-			binding.type = prosper::DescriptorType::UniformBuffer;
-			binding.flags = prosper::PrDescriptorSetBindingFlags::None;
-			bindings.push_back(binding);
-		}
-
-		for(auto &tex : m_shaderMaterial->textures) {
-			prosper::DescriptorSetInfo::Binding binding {};
-			binding.bindingIndex = bindingIdx++;
-			binding.name = tex.name.str;
-			binding.shaderStages = prosper::ShaderStageFlags::FragmentBit;
-			binding.type = prosper::DescriptorType::CombinedImageSampler;
-			binding.flags = prosper::PrDescriptorSetBindingFlags::None;
-			if(tex.cubemap)
-				binding.flags |= prosper::PrDescriptorSetBindingFlags::Cubemap;
-			bindings.push_back(binding);
-		}
-		m_materialDescSetInfo = std::make_unique<prosper::DescriptorSetInfo>("MATERIAL", bindings);
+		m_materialDescSetInfo = CreateMaterialDescriptorSetInfo(*m_shaderMaterial);
 	}
 	else
 		throw std::runtime_error {"Invalid shader material for shader '" + GetIdentifier() + "'!"};

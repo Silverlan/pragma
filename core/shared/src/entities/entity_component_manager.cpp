@@ -176,6 +176,9 @@ void ComponentMemberInfo::SetName(const pragma::GString &name)
 
 //////////////
 
+ComponentRegInfo::ComponentRegInfo(pragma::GString category, Flags flags) : categoryPath {category}, flags {flags} {}
+ComponentRegInfo::ComponentRegInfo(Flags flags) : ComponentRegInfo {"internal", flags} {}
+
 ComponentInfo::ComponentInfo(const ComponentInfo &other) { operator=(other); }
 ComponentInfo::ComponentInfo(ComponentInfo &&other) { operator=(std::move(other)); }
 ComponentInfo &ComponentInfo::operator=(const ComponentInfo &other)
@@ -291,8 +294,14 @@ ComponentId EntityComponentManager::PreRegisterComponentType(const std::string &
 	m_components.push_back({});
 	return componentInfo.id;
 }
-ComponentId EntityComponentManager::RegisterComponentType(const std::string &name, const std::function<util::TSharedHandle<BaseEntityComponent>(BaseEntity &)> &factory, ComponentFlags flags, std::type_index typeIndex) { return RegisterComponentType(name, factory, flags, &typeIndex); }
-ComponentId EntityComponentManager::RegisterComponentType(const std::string &name, const std::function<util::TSharedHandle<BaseEntityComponent>(BaseEntity &)> &factory, ComponentFlags flags) { return RegisterComponentType(name, factory, flags, nullptr); }
+ComponentId EntityComponentManager::RegisterComponentType(const std::string &name, const std::function<util::TSharedHandle<BaseEntityComponent>(BaseEntity &)> &factory, const ComponentRegInfo &regInfo, ComponentFlags flags, std::type_index typeIndex)
+{
+	return RegisterComponentType(name, factory, regInfo, flags, &typeIndex);
+}
+ComponentId EntityComponentManager::RegisterComponentType(const std::string &name, const std::function<util::TSharedHandle<BaseEntityComponent>(BaseEntity &)> &factory, const ComponentRegInfo &regInfo, ComponentFlags flags)
+{
+	return RegisterComponentType(name, factory, regInfo, flags, nullptr);
+}
 void EntityComponentManager::LinkComponentType(ComponentId linkFrom, ComponentId linkTo)
 {
 	auto it = m_linkedComponentTypes.find(linkFrom);
@@ -329,7 +338,7 @@ CallbackHandle EntityComponentManager::AddCreationCallback(const std::string &co
 		id = PreRegisterComponentType(componentName);
 	return AddCreationCallback(id, onCreate);
 }
-ComponentId EntityComponentManager::RegisterComponentType(const std::string &name, const std::function<util::TSharedHandle<BaseEntityComponent>(BaseEntity &)> &factory, ComponentFlags flags, const std::type_index *typeIndex)
+ComponentId EntityComponentManager::RegisterComponentType(const std::string &name, const std::function<util::TSharedHandle<BaseEntityComponent>(BaseEntity &)> &factory, const ComponentRegInfo &regInfo, ComponentFlags flags, const std::type_index *typeIndex)
 {
 	if(typeIndex != nullptr) {
 		auto it = m_typeIndexToComponentId.find(*typeIndex);
@@ -368,8 +377,12 @@ ComponentId EntityComponentManager::RegisterComponentType(const std::string &nam
 	}
 	m_preRegistered.erase(itPre);
 
+	if(umath::is_flag_set(regInfo.flags, ComponentRegInfo::Flags::HideInEditor))
+		flags |= ComponentFlags::HideInEditor;
+
 	componentInfo->factory = factory;
 	componentInfo->flags = flags;
+	componentInfo->category = regInfo.categoryPath;
 	OnComponentTypeRegistered(*componentInfo);
 	return componentInfo->id;
 }

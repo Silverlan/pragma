@@ -435,5 +435,5 @@ function ents.ClickComponent:OnRemove()
 		end
 	end
 end
-ents.COMPONENT_CLICK = ents.register_component("click", ents.ClickComponent)
+ents.register_component("click", ents.ClickComponent, "ui")
 ents.ClickComponent.EVENT_ON_CLICK = ents.register_component_event(ents.COMPONENT_CLICK, "on_clicked")

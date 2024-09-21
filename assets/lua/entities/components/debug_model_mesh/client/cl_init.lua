@@ -56,4 +56,4 @@ function Component:UpdateDebugMesh()
 	end
 	self.m_dbgObject:SetPose(self:GetEntity():GetPose())
 end
-ents.COMPONENT_DEBUG_MODEL_MESH = ents.register_component("debug_model_mesh", Component)
+ents.register_component("debug_model_mesh", Component, "debug")

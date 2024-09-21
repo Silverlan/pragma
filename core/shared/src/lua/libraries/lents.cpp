@@ -335,8 +335,20 @@ void Lua::ents::register_library(lua_State *l)
 	  });
 
 	auto componentInfoDef = luabind::class_<pragma::ComponentInfo>("ComponentInfo");
+	componentInfoDef.def(
+	  "__tostring", +[](const pragma::ComponentInfo &componentInfo) -> std::string {
+		  std::stringstream ss;
+		  ss << "ComponentInfo";
+		  ss << "[" << componentInfo.id << "]";
+		  ss << "[" << componentInfo.name << "]";
+		  ss << "[Cat:" << componentInfo.category << "]";
+		  ss << "[Flags:" << magic_enum::flags::enum_name(componentInfo.flags) << "]";
+		  return ss.str();
+	  });
 	componentInfoDef.property(
 	  "name", +[](lua_State *l, const pragma::ComponentInfo &componentInfo) { return std::string {*componentInfo.name}; });
+	componentInfoDef.property(
+	  "category", +[](lua_State *l, const pragma::ComponentInfo &componentInfo) { return std::string {*componentInfo.category}; });
 	componentInfoDef.def_readonly("id", &pragma::ComponentInfo::id);
 	componentInfoDef.def_readonly("flags", &pragma::ComponentInfo::flags);
 	componentInfoDef.def(
@@ -379,6 +391,11 @@ void Lua::ents::register_library(lua_State *l)
 			  return nullptr;
 		  return &componentInfo.members[memberIdx];
 	  });
+	componentInfoDef.add_static_constant("FLAG_NONE", umath::to_integral(pragma::ComponentFlags::None));
+	componentInfoDef.add_static_constant("FLAG_NETWORKED_BIT", umath::to_integral(pragma::ComponentFlags::Networked));
+	componentInfoDef.add_static_constant("FLAG_MAKE_NETWORKED_BIT", umath::to_integral(pragma::ComponentFlags::MakeNetworked));
+	componentInfoDef.add_static_constant("FLAG_LUA_BASED_BIT", umath::to_integral(pragma::ComponentFlags::LuaBased));
+	componentInfoDef.add_static_constant("FLAG_HIDE_IN_EDITOR_BIT", umath::to_integral(pragma::ComponentFlags::HideInEditor));
 
 	auto memberInfoDef = luabind::class_<pragma::ComponentMemberInfo>("MemberInfo");
 	memberInfoDef.add_static_constant("TYPE_META_DATA_RANGE", umath::to_integral(TypeMetaData::Range));

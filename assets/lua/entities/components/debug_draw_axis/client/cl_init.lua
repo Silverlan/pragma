@@ -41,4 +41,4 @@ function Component:OnTick()
 	self.m_y:SetPose(self:GetEntity():GetPose())
 	self.m_z:SetPose(self:GetEntity():GetPose())
 end
-ents.COMPONENT_DEBUG_DRAW_AXIS = ents.register_component("debug_draw_axis", Component)
+ents.register_component("debug_draw_axis", Component, "debug")

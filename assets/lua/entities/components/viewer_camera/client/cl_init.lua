@@ -222,6 +222,6 @@ function ents.ViewerCamera:Setup(width, height)
 	self:BroadcastEvent(ents.ViewerCamera.EVENT_ON_CAMERA_UPDATED, { camC })
 end
 function ents.ViewerCamera:OnEntitySpawn() end
-ents.COMPONENT_VIEWER_CAMERA = ents.register_component("viewer_camera", ents.ViewerCamera)
+ents.register_component("viewer_camera", ents.ViewerCamera, "util")
 ents.ViewerCamera.EVENT_ON_CAMERA_UPDATED =
 	ents.register_component_event(ents.COMPONENT_VIEWER_CAMERA, "on_camera_updated")

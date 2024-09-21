@@ -8,15 +8,7 @@
 	]
 	$array textures [element][
 		{
-			$string type "import"
-			$string name "pbr"
-		},
-		{
-			$string name "albedo_map2"
-			$bool colorMap 1
-		},
-		{
-			$string name "albedo_map3"
+			$string name "albedo_map"
 			$bool colorMap 1
 		}
 	]

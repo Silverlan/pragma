@@ -8,11 +8,6 @@
 			$vec4 default [1.0, 1.0, 1.0, 1.0]
 		},
 		{
-			$string type "float"
-			$string name "glow_factor"
-			$float default "1.0"
-		},
-		{
 			$string type "half"
 			$string name "parallax_height_scale"
 			$float default 0.025

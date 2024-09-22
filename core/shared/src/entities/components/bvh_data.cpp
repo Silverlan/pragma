@@ -67,10 +67,10 @@ bool pragma::bvh::test_bvh_intersection(const pragma::bvh::MeshBvhTree &bvhData,
 	auto traverse = [&]<bool ReturnOnFirstHit>() {
 		bvh.traverse_top_down<ReturnOnFirstHit>(
 		  bvh.get_root().index, stack,
-		  [outIntersectionInfo, isPrimitiveIntersectionInfo, isMeshIntersectionInfo, &intersectionCache, &bvhData, &testTri, &hasAnyHit](size_t begin, size_t end) {
+		  [outIntersectionInfo, isPrimitiveIntersectionInfo, isMeshIntersectionInfo, &intersectionCache, &bvh, &bvhData, &testTri, &hasAnyHit](size_t begin, size_t end) {
 			  auto hasHit = false;
 			  for(auto i = begin; i < end; ++i) {
-				  auto primIdx = i;
+				  auto primIdx = should_permute ? bvh.prim_ids[i] : i;
 
 				  if(intersectionCache) {
 					  auto skip = false;

@@ -210,4 +210,4 @@ end
 function Component:SetFrustumModelDirty()
 	self.m_updateFrustumModel = true
 end
-ents.register_component("wireframe_camera", Component, "editor")
+ents.register_component("wireframe_camera", Component, "editor", ents.EntityComponent.FREGISTER_BIT_HIDE_IN_EDITOR)

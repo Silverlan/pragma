@@ -258,5 +258,8 @@ function Component:StartRecording()
 	end)
 end
 
-ents.COMPONENT_GAME_ANIMATION_RECORDER =
-	ents.register_component("game_animation_recorder", Component, ents.EntityComponent.FREGISTER_BIT_NETWORKED)
+ents.COMPONENT_GAME_ANIMATION_RECORDER = ents.register_component(
+	"game_animation_recorder",
+	Component,
+	bit.bor(ents.EntityComponent.FREGISTER_BIT_NETWORKED, ents.EntityComponent.FREGISTER_BIT_HIDE_IN_EDITOR)
+)

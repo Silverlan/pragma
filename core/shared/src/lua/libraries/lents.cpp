@@ -391,11 +391,6 @@ void Lua::ents::register_library(lua_State *l)
 			  return nullptr;
 		  return &componentInfo.members[memberIdx];
 	  });
-	componentInfoDef.add_static_constant("FLAG_NONE", umath::to_integral(pragma::ComponentFlags::None));
-	componentInfoDef.add_static_constant("FLAG_NETWORKED_BIT", umath::to_integral(pragma::ComponentFlags::Networked));
-	componentInfoDef.add_static_constant("FLAG_MAKE_NETWORKED_BIT", umath::to_integral(pragma::ComponentFlags::MakeNetworked));
-	componentInfoDef.add_static_constant("FLAG_LUA_BASED_BIT", umath::to_integral(pragma::ComponentFlags::LuaBased));
-	componentInfoDef.add_static_constant("FLAG_HIDE_IN_EDITOR_BIT", umath::to_integral(pragma::ComponentFlags::HideInEditor));
 
 	auto memberInfoDef = luabind::class_<pragma::ComponentMemberInfo>("MemberInfo");
 	memberInfoDef.add_static_constant("TYPE_META_DATA_RANGE", umath::to_integral(TypeMetaData::Range));

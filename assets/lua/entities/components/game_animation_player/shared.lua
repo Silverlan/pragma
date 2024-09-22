@@ -100,5 +100,8 @@ function Component:PlayAnimation()
 		end
 	end
 end
-ents.COMPONENT_GAME_ANIMATION_PLAYER =
-	ents.register_component("game_animation_player", Component, ents.EntityComponent.FREGISTER_BIT_NETWORKED)
+ents.COMPONENT_GAME_ANIMATION_PLAYER = ents.register_component(
+	"game_animation_player",
+	Component,
+	bit.bor(ents.EntityComponent.FREGISTER_BIT_NETWORKED, ents.EntityComponent.FREGISTER_BIT_HIDE_IN_EDITOR)
+)

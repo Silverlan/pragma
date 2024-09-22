@@ -970,6 +970,7 @@ void pragma::lua::register_entity_component_classes(lua_State *l, luabind::modul
 	entityComponentDef.def("IsPropertyAnimated", &pragma::BaseEntityComponent::IsPropertyAnimated);
 	entityComponentDef.add_static_constant("FREGISTER_NONE", umath::to_integral(pragma::ComponentFlags::None));
 	entityComponentDef.add_static_constant("FREGISTER_BIT_NETWORKED", umath::to_integral(pragma::ComponentFlags::Networked));
+	entityComponentDef.add_static_constant("FREGISTER_BIT_HIDE_IN_EDITOR", umath::to_integral(pragma::ComponentFlags::HideInEditor));
 
 	entityComponentDef.add_static_constant("CALLBACK_TYPE_ENTITY", umath::to_integral(pragma::BaseEntityComponent::CallbackType::Entity));
 	entityComponentDef.add_static_constant("CALLBACK_TYPE_COMPONENT", umath::to_integral(pragma::BaseEntityComponent::CallbackType::Component));

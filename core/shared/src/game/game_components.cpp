@@ -48,7 +48,7 @@ void Game::InitializeEntityComponents(pragma::EntityComponentManager &componentM
 {
 	constexpr auto hideInEditor = pragma::ComponentRegInfo::Flags::HideInEditor;
 	componentManager.RegisterComponentType<pragma::DamageableComponent>("damageable", {"gameplay"});
-	componentManager.RegisterComponentType<pragma::IKComponent>("ik", {"animation"});
+	// componentManager.RegisterComponentType<pragma::IKComponent>("ik", {"animation"});
 	componentManager.RegisterComponentType<pragma::LogicComponent>("logic", {"gameplay", hideInEditor});
 	componentManager.RegisterComponentType<pragma::GravityComponent>("gravity", {"physics"});
 	componentManager.RegisterComponentType<pragma::MapComponent>("map", {"world", hideInEditor});
@@ -59,7 +59,7 @@ void Game::InitializeEntityComponents(pragma::EntityComponentManager &componentM
 	componentManager.RegisterComponentType<pragma::PanimaComponent>("panima", {"animation"});
 	componentManager.RegisterComponentType<pragma::CompositeComponent>("composite", {"core", hideInEditor});
 	componentManager.RegisterComponentType<pragma::AnimationDriverComponent>("animation_driver", {"animation"});
-	componentManager.RegisterComponentType<pragma::OriginComponent>("origin", {"world"});
+	componentManager.RegisterComponentType<pragma::OriginComponent>("origin", {"world/transform"});
 	componentManager.RegisterComponentType<pragma::ConstraintComponent>("constraint", {"animation/constraints"});
 	componentManager.RegisterComponentType<pragma::ConstraintManagerComponent>("constraint_manager", {"animation/constraints", hideInEditor});
 	componentManager.RegisterComponentType<pragma::ConstraintCopyLocationComponent>("constraint_copy_location", {"animation/constraints"});
@@ -79,7 +79,7 @@ void Game::InitializeEntityComponents(pragma::EntityComponentManager &componentM
 	componentManager.RegisterComponentType<pragma::FlexMergeComponent>("flex_merge", {"animation"});
 	componentManager.RegisterComponentType<pragma::ParentComponent>("parent", {"core", hideInEditor});
 	componentManager.RegisterComponentType<pragma::MovementComponent>("movement", {"physics", hideInEditor});
-	componentManager.RegisterComponentType<pragma::OrientationComponent>("orientation", {"world"});
+	componentManager.RegisterComponentType<pragma::OrientationComponent>("orientation", {"world/transform"});
 	componentManager.RegisterComponentType<pragma::ActionInputControllerComponent>("action_input_controller", {"input", hideInEditor});
 	componentManager.RegisterComponentType<pragma::InputMovementControllerComponent>("input_movement_controller", {"input", hideInEditor});
 

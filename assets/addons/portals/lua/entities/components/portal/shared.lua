@@ -228,6 +228,6 @@ function Component:ProjectPoseToTarget(pose, planeSide, ignoreMirror)
 	newPose:SetOrigin(pos)
 	return self:GetTargetPose() * newPose
 end
-ents.COMPONENT_PORTAL = ents.register_component("portal", Component, ents.EntityComponent.FREGISTER_BIT_NETWORKED)
+ents.register_component("portal", Component, "gameplay", ents.EntityComponent.FREGISTER_BIT_NETWORKED)
 Component.EVENT_ON_PORTAL_ORIGIN_CHANGED =
 	ents.register_component_event(ents.COMPONENT_PORTAL, "on_portal_origin_changed")

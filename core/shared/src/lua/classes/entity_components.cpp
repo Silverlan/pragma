@@ -1000,6 +1000,8 @@ void pragma::lua::register_entity_component_classes(lua_State *l, luabind::modul
 	defBvh.def("RebuildBvh", static_cast<void (pragma::BaseBvhComponent::*)()>(&pragma::BaseBvhComponent::RebuildBvh));
 	defBvh.def("GetVertex", &pragma::BaseBvhComponent::GetVertex);
 	defBvh.def("GetTriangleCount", &pragma::BaseBvhComponent::GetTriangleCount);
+	defBvh.def("DebugPrint", &pragma::BaseBvhComponent::DebugPrint);
+	defBvh.def("DebugDraw", &pragma::BaseBvhComponent::DebugDraw);
 	defBvh.def("DebugDrawBvhTree", &pragma::BaseBvhComponent::DebugDrawBvhTree);
 	defBvh.def(
 	  "FindPrimitiveMeshInfo", +[](lua_State *l, const pragma::BaseBvhComponent &bvhC, size_t primIdx) -> std::optional<std::pair<EntityHandle, std::shared_ptr<ModelSubMesh>>> {

@@ -82,6 +82,16 @@ std::shared_ptr<pragma::bvh::MeshBvhTree> BaseBvhComponent::SetBvhData(std::shar
 	m_bvhData = bvhData;
 	return tmp;
 }
+void BaseBvhComponent::DebugPrint()
+{
+	auto &bvh = m_bvhData->bvh;
+	pragma::bvh::debug::print_bvh_tree(bvh);
+}
+void BaseBvhComponent::DebugDraw()
+{
+	auto &bvh = m_bvhData->bvh;
+	pragma::bvh::debug::draw_bvh_tree(GetGame(), bvh);
+}
 void BaseBvhComponent::DebugDrawBvhTree(const Vector3 &origin, const Vector3 &dir, float maxDist, float duration) const
 {
 	constexpr size_t invalid_id = std::numeric_limits<size_t>::max();

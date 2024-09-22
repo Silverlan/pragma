@@ -92,7 +92,7 @@ namespace Lua {
 			auto componentFlags = pragma::ComponentFlags::None;
 			if(Lua::IsSet(l, 3)) {
 				int32_t argFlags = 3;
-				if(Lua::IsString(l, 3)) {
+				if(!Lua::IsNumber(l, 3)) {
 					categoryPath = Lua::CheckString(l, 3);
 					++argFlags;
 				}

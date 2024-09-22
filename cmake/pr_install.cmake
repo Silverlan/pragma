@@ -61,13 +61,12 @@ function(pr_install_libraries)
         set(FILE_PATH "${DEPENDENCY_${NORMALIZED_IDENTIFIER}_LIBRARY}")
         string(REPLACE "\\" "/" FILE_PATH ${FILE_PATH})
         message("Adding install rule for library \"${TARGET}\" (\"${FILE_PATH}\") to \"${PA_INSTALL_DIR}\"...")
-        if(WIN32)
-            install(
-                FILES "${FILE_PATH}"
-                DESTINATION "${PA_INSTALL_DIR}"
-                OPTIONAL
-                COMPONENT ${PRAGMA_INSTALL_COMPONENT})
-        else()
+        install(
+            FILES "${FILE_PATH}"
+            DESTINATION "${PA_INSTALL_DIR}"
+            OPTIONAL
+            COMPONENT ${PRAGMA_INSTALL_COMPONENT})
+        if(UNIX)
             install(
                 TARGETS "${TARGET}"
                 RUNTIME DESTINATION "${PA_INSTALL_DIR}"
@@ -92,13 +91,12 @@ function(pr_install_targets)
         set(FILE_PATH "$<TARGET_FILE:${TARGET}>")
         string(REPLACE "\\" "/" FILE_PATH ${FILE_PATH})
         message("Adding install rule for target \"${TARGET}\" (\"${FILE_PATH}\") to \"${PA_INSTALL_DIR}\"...")
-        if(WIN32)
-            install(
-                FILES "${FILE_PATH}"
-                DESTINATION "${PA_INSTALL_DIR}"
-                OPTIONAL
-                COMPONENT ${PRAGMA_INSTALL_COMPONENT})
-        else()
+        install(
+            FILES "${FILE_PATH}"
+            DESTINATION "${PA_INSTALL_DIR}"
+            OPTIONAL
+            COMPONENT ${PRAGMA_INSTALL_COMPONENT})
+        if(UNIX)
             install(
                 TARGETS "${TARGET}"
                 RUNTIME DESTINATION "${PA_INSTALL_DIR}"

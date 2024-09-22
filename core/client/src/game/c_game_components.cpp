@@ -196,7 +196,7 @@ void CGame::InitializeEntityComponents(pragma::EntityComponentManager &component
 	componentManager.RegisterComponentType<pragma::CMicrophoneComponent>("microphone", {"audio"});
 	componentManager.RegisterComponentType<pragma::CParticleSystemComponent>("particle_system", {"rendering/effects"});
 	componentManager.RegisterComponentType<pragma::CQuakeComponent>("quake", {"gameplay/effects"});
-	componentManager.RegisterComponentType<pragma::CSmokeTrailComponent>("smoke_trail", {"gameplay/effects"});
+	componentManager.RegisterComponentType<pragma::CSmokeTrailComponent>("smoke_trail", {"rendering/effects"});
 	componentManager.RegisterComponentType<pragma::CSoundComponent>("sound", {"audio"});
 	componentManager.RegisterComponentType<pragma::CSoundScapeComponent>("sound_scape", {"audio"});
 	componentManager.RegisterComponentType<pragma::CSpriteComponent>("sprite", {"rendering/effects"});

@@ -162,7 +162,7 @@ void SGame::InitializeEntityComponents(pragma::EntityComponentManager &component
 	componentManager.RegisterComponentType<pragma::SMicrophoneComponent>("microphone", {"audio"});
 	componentManager.RegisterComponentType<pragma::SParticleSystemComponent>("particle_system", {"rendering/effects"});
 	componentManager.RegisterComponentType<pragma::SQuakeComponent>("quake", {"gameplay/effects"});
-	componentManager.RegisterComponentType<pragma::SSmokeTrailComponent>("smoke_trail", {"gameplay/effects"});
+	componentManager.RegisterComponentType<pragma::SSmokeTrailComponent>("smoke_trail", {"rendering/effects"});
 	componentManager.RegisterComponentType<pragma::SSoundComponent>("sound", {"audio"});
 	componentManager.RegisterComponentType<pragma::SSoundScapeComponent>("sound_scape", {"audio"});
 	componentManager.RegisterComponentType<pragma::SSpriteComponent>("sprite", {"rendering/effects"});

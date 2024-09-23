@@ -79,7 +79,7 @@ class DLLCLIENT CEngine : public Engine, public pragma::RenderContext {
 	virtual void SetAssetMultiThreadedLoadingEnabled(bool enabled) override;
 
 	// Debug
-	virtual void DumpDebugInformation(ZIPFile &zip) const override;
+	virtual void DumpDebugInformation(uzip::ZIPFile &zip) const override;
 	pragma::debug::ProfilingStageManager<pragma::debug::GPUProfilingStage> *GetGPUProfilingStageManager();
 	pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage> *GetProfilingStageManager();
 	bool StartProfilingStage(const char *stage);

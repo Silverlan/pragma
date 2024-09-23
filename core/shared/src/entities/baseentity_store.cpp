@@ -18,10 +18,10 @@ static const auto ENTITY_DATA_VERSION = 1u;
 void BaseEntity::Load(udm::LinkedPropertyWrapper &udm)
 {
 	uint32_t spawnFlags = m_spawnFlags;
-	udm["spawnFlags"](spawnFlags);
+	udm["spawnFlags"] >> spawnFlags;
 	SetSpawnFlags(spawnFlags);
 	std::string uuid;
-	udm["uuid"](uuid);
+	udm["uuid"] >> uuid;
 	if(util::is_uuid(uuid))
 		SetUuid(util::uuid_string_to_bytes(uuid));
 
@@ -31,7 +31,7 @@ void BaseEntity::Load(udm::LinkedPropertyWrapper &udm)
 	for(auto i = decltype(numComponents) {0u}; i < numComponents; ++i) {
 		auto udmComponent = udmComponents[i];
 		std::string type;
-		udmComponent["type"](type);
+		udmComponent["type"] >> type;
 		auto componentId = pragma::INVALID_COMPONENT_ID;
 		if(componentManager.GetComponentTypeId(type, componentId)) {
 			auto hComponent = AddComponent(componentId);
@@ -45,9 +45,9 @@ void BaseEntity::Load(udm::LinkedPropertyWrapper &udm)
 }
 void BaseEntity::Save(udm::LinkedPropertyWrapper &udm)
 {
-	udm["entityDataVersion"] = ENTITY_DATA_VERSION;
-	udm["spawnFlags"] = m_spawnFlags;
-	udm["uuid"] = util::uuid_to_string(m_uuid);
+	udm["entityDataVersion"] << ENTITY_DATA_VERSION;
+	udm["spawnFlags"] << m_spawnFlags;
+	udm["uuid"] << util::uuid_to_string(m_uuid);
 
 	auto &componentManager = GetNetworkState()->GetGameState()->GetEntityComponentManager();
 	auto &components = GetComponents();
@@ -59,7 +59,7 @@ void BaseEntity::Save(udm::LinkedPropertyWrapper &udm)
 			continue;
 		auto udmComponent = udmComponents[idx++];
 		auto *pComponentInfo = componentManager.GetComponentInfo(ptrComponent->GetComponentId());
-		udmComponent["type"] = pComponentInfo->name;
+		udmComponent["type"] << pComponentInfo->name.str;
 		ptrComponent->Save(udmComponent);
 	}
 

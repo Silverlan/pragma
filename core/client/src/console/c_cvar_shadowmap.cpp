@@ -79,13 +79,13 @@ void CMD_debug_light_shadowmap(NetworkState *nw, pragma::BasePlayerComponent *, 
 	if(pElSm == nullptr)
 		return;
 	auto size = 256u;
+	pElSm->SetZPos(2000);
 	pElSm->SetLightSource(*light);
 	pElSm->SetShadowMapSize(size, size);
 	pElSm->SetShadowMapType(smType);
 	pElSm->SetName(name);
 	pElSm->Update();
 }
-
 static void CVAR_CALLBACK_cl_render_shadow_pssm_split_count(NetworkState *state, const ConVar &, int, int)
 {
 	if(shadowmapTargetIdx == -1)

@@ -970,6 +970,7 @@ void pragma::lua::register_entity_component_classes(lua_State *l, luabind::modul
 	entityComponentDef.def("IsPropertyAnimated", &pragma::BaseEntityComponent::IsPropertyAnimated);
 	entityComponentDef.add_static_constant("FREGISTER_NONE", umath::to_integral(pragma::ComponentFlags::None));
 	entityComponentDef.add_static_constant("FREGISTER_BIT_NETWORKED", umath::to_integral(pragma::ComponentFlags::Networked));
+	entityComponentDef.add_static_constant("FREGISTER_BIT_HIDE_IN_EDITOR", umath::to_integral(pragma::ComponentFlags::HideInEditor));
 
 	entityComponentDef.add_static_constant("CALLBACK_TYPE_ENTITY", umath::to_integral(pragma::BaseEntityComponent::CallbackType::Entity));
 	entityComponentDef.add_static_constant("CALLBACK_TYPE_COMPONENT", umath::to_integral(pragma::BaseEntityComponent::CallbackType::Component));
@@ -999,6 +1000,8 @@ void pragma::lua::register_entity_component_classes(lua_State *l, luabind::modul
 	defBvh.def("RebuildBvh", static_cast<void (pragma::BaseBvhComponent::*)()>(&pragma::BaseBvhComponent::RebuildBvh));
 	defBvh.def("GetVertex", &pragma::BaseBvhComponent::GetVertex);
 	defBvh.def("GetTriangleCount", &pragma::BaseBvhComponent::GetTriangleCount);
+	defBvh.def("DebugPrint", &pragma::BaseBvhComponent::DebugPrint);
+	defBvh.def("DebugDraw", &pragma::BaseBvhComponent::DebugDraw);
 	defBvh.def("DebugDrawBvhTree", &pragma::BaseBvhComponent::DebugDrawBvhTree);
 	defBvh.def(
 	  "FindPrimitiveMeshInfo", +[](lua_State *l, const pragma::BaseBvhComponent &bvhC, size_t primIdx) -> std::optional<std::pair<EntityHandle, std::shared_ptr<ModelSubMesh>>> {
@@ -1686,6 +1689,8 @@ void pragma::lua::base_wheel_component::register_class(luabind::module_ &mod)
 void pragma::lua::base_decal_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvDecalComponent>("BaseEnvDecalComponent");
+	def.def("SetSize", &pragma::BaseEnvDecalComponent::SetSize);
+	def.def("GetSize", &pragma::BaseEnvDecalComponent::GetSize);
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 #include "pragma/entities/environment/lights/env_light.h"

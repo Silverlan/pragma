@@ -34,7 +34,6 @@ namespace pragma {
 
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_INSTANCE;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_SCENE;
-		static prosper::DescriptorSetInfo DESCRIPTOR_SET_MATERIAL;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_RENDER_SETTINGS;
 
 		enum class Pipeline : uint32_t {
@@ -67,7 +66,7 @@ namespace pragma {
 
 		//
 		virtual void RecordBindScene(rendering::ShaderProcessor &shaderProcessor, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer, prosper::IDescriptorSet &dsRenderSettings,
-		  prosper::IDescriptorSet &dsLights, prosper::IDescriptorSet &dsShadows, prosper::IDescriptorSet &dsMaterial, const Vector4 &drawOrigin, ShaderGameWorld::SceneFlags &inOutSceneFlags) const override;
+		  prosper::IDescriptorSet &dsLights, prosper::IDescriptorSet &dsShadows, const Vector4 &drawOrigin, ShaderGameWorld::SceneFlags &inOutSceneFlags) const override;
 		virtual void RecordSceneFlags(rendering::ShaderProcessor &shaderProcessor, SceneFlags sceneFlags) const override;
 		virtual void RecordBindLight(rendering::ShaderProcessor &shaderProcessor, CLightComponent &light, uint32_t layerId) const override;
 		virtual void RecordAlphaCutoff(rendering::ShaderProcessor &shaderProcessor, float alphaCutoff) const override;
@@ -80,9 +79,10 @@ namespace pragma {
 		bool BindEntityDepthMatrix(const Mat4 &depthMVP);
 		virtual void OnPipelinesInitialized() override;
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
+		virtual void InitializeShaderResources() override;
 		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx) override;
+		virtual uint32_t GetSceneDescriptorSetIndex() const override;
 	  private:
-		virtual uint32_t GetMaterialDescriptorSetIndex() const override;
 		virtual uint32_t GetRenderSettingsDescriptorSetIndex() const override;
 		virtual uint32_t GetCameraDescriptorSetIndex() const override;
 		virtual uint32_t GetLightDescriptorSetIndex() const override;

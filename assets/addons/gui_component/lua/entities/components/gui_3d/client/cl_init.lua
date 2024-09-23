@@ -757,5 +757,6 @@ function ents.GUI3D:OnRemove()
 	util.remove(self.m_cbRecordGUI)
 	util.remove(self.m_cbEndRecordGUI)
 end
-ents.COMPONENT_GUI3D = ents.register_component("gui_3d", ents.GUI3D)
-ents.GUI3D.EVENT_ON_UNHANDLED_MOUSE_INPUT = ents.register_component_event(ents.COMPONENT_GUI3D, "unhandled_mouse_input")
+ents.register_component("gui_3d", ents.GUI3D, "ui")
+ents.GUI3D.EVENT_ON_UNHANDLED_MOUSE_INPUT =
+	ents.register_component_event(ents.COMPONENT_GUI_3D, "unhandled_mouse_input")

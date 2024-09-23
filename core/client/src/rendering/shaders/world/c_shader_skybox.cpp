@@ -31,18 +31,13 @@ decltype(ShaderSkybox::VERTEX_ATTRIBUTE_POSITION) ShaderSkybox::VERTEX_ATTRIBUTE
 decltype(ShaderSkybox::DESCRIPTOR_SET_INSTANCE) ShaderSkybox::DESCRIPTOR_SET_INSTANCE = {&ShaderEntity::DESCRIPTOR_SET_INSTANCE};
 decltype(ShaderSkybox::DESCRIPTOR_SET_SCENE) ShaderSkybox::DESCRIPTOR_SET_SCENE = {&ShaderEntity::DESCRIPTOR_SET_SCENE};
 decltype(ShaderSkybox::DESCRIPTOR_SET_RENDERER) ShaderSkybox::DESCRIPTOR_SET_RENDERER = {&ShaderEntity::DESCRIPTOR_SET_RENDERER};
-decltype(ShaderSkybox::DESCRIPTOR_SET_MATERIAL) ShaderSkybox::DESCRIPTOR_SET_MATERIAL = {
-  {prosper::DescriptorSetInfo::Binding {// Skybox Map
-    prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit, prosper::PrDescriptorSetBindingFlags::Cubemap}},
-};
-ShaderSkybox::ShaderSkybox(prosper::IPrContext &context, const std::string &identifier) : ShaderSkybox(context, identifier, "world/vs_skybox", "world/fs_skybox") {}
+ShaderSkybox::ShaderSkybox(prosper::IPrContext &context, const std::string &identifier) : ShaderSkybox(context, identifier, "programs/scene/skybox/skybox", "programs/scene/skybox/skybox") {}
 
 ShaderSkybox::ShaderSkybox(prosper::IPrContext &context, const std::string &identifier, const std::string &vsShader, const std::string &fsShader) : ShaderGameWorldLightingPass(context, identifier, vsShader, fsShader)
 {
 	// SetBaseShader<ShaderTextured3DBase>();
+	m_shaderMaterialName = "skybox";
 }
-
-prosper::DescriptorSetInfo &ShaderSkybox::GetMaterialDescriptorSetInfo() const { return DESCRIPTOR_SET_MATERIAL; }
 
 bool ShaderSkybox::GetRenderBufferTargets(CModelSubMesh &mesh, uint32_t pipelineIdx, std::vector<prosper::IBuffer *> &outBuffers, std::vector<prosper::DeviceSize> &outOffsets, std::optional<prosper::IndexBufferInfo> &outIndexBufferInfo) const
 {
@@ -75,16 +70,21 @@ void ShaderSkybox::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pi
 	pipelineInfo.ToggleDepthWrites(false);
 	pipelineInfo.ToggleDepthTest(false, prosper::CompareOp::Always);
 
-	AddVertexAttribute(pipelineInfo, VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX);
-
-	AddVertexAttribute(pipelineInfo, VERTEX_ATTRIBUTE_POSITION);
-
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_INSTANCE);
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_MATERIAL);
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_SCENE);
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_RENDERER);
 	ToggleDynamicScissorState(pipelineInfo, true);
-	InitializeGfxPipelinePushConstantRanges(pipelineInfo, pipelineIdx);
+}
+void ShaderSkybox::InitializeShaderResources()
+{
+	ShaderEntity::InitializeShaderResources();
+	InitializeShaderMaterial();
+
+	AddVertexAttribute(VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX);
+	AddVertexAttribute(VERTEX_ATTRIBUTE_POSITION);
+
+	AddDescriptorSetGroup(DESCRIPTOR_SET_INSTANCE);
+	AddDescriptorSetGroup(DESCRIPTOR_SET_SCENE);
+	AddDescriptorSetGroup(DESCRIPTOR_SET_RENDERER);
+	AddDescriptorSetGroup(GetMaterialDescriptorSetInfo());
+	InitializeGfxPipelinePushConstantRanges();
 }
 
 uint32_t ShaderSkybox::GetRenderSettingsDescriptorSetIndex() const { return std::numeric_limits<uint32_t>::max(); }
@@ -92,33 +92,17 @@ uint32_t ShaderSkybox::GetRendererDescriptorSetIndex() const { return DESCRIPTOR
 uint32_t ShaderSkybox::GetCameraDescriptorSetIndex() const { return std::numeric_limits<uint32_t>::max(); }
 uint32_t ShaderSkybox::GetLightDescriptorSetIndex() const { return std::numeric_limits<uint32_t>::max(); }
 uint32_t ShaderSkybox::GetInstanceDescriptorSetIndex() const { return DESCRIPTOR_SET_INSTANCE.setIndex; }
-uint32_t ShaderSkybox::GetMaterialDescriptorSetIndex() const { return DESCRIPTOR_SET_MATERIAL.setIndex; }
-
-std::shared_ptr<prosper::IDescriptorSetGroup> ShaderSkybox::InitializeMaterialDescriptorSet(CMaterial &mat)
-{
-	auto *skyboxMap = mat.GetTextureInfo("skybox");
-	if(skyboxMap == nullptr || skyboxMap->texture == nullptr)
-		return nullptr;
-	auto skyboxTexture = std::static_pointer_cast<Texture>(skyboxMap->texture);
-	if(skyboxTexture->HasValidVkTexture() == false)
-		return nullptr;
-	auto descSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_MATERIAL);
-	mat.SetDescriptorSetGroup(*this, descSetGroup);
-	auto &descSet = *descSetGroup->GetDescriptorSet();
-	descSet.SetBindingTexture(*skyboxTexture->GetVkTexture(), 0u);
-	descSet.Update();
-	return descSetGroup;
-}
-//
 
 void ShaderSkybox::RecordBindScene(rendering::ShaderProcessor &shaderProcessor, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer, prosper::IDescriptorSet &dsRenderSettings,
-  prosper::IDescriptorSet &dsLights, prosper::IDescriptorSet &dsShadows, prosper::IDescriptorSet &dsMaterial, const Vector4 &drawOrigin, ShaderGameWorld::SceneFlags &inOutSceneFlags) const
+  prosper::IDescriptorSet &dsLights, prosper::IDescriptorSet &dsShadows, const Vector4 &drawOrigin, ShaderGameWorld::SceneFlags &inOutSceneFlags) const
 {
-	std::array<prosper::IDescriptorSet *, 3> descSets {&dsMaterial, &dsScene, &dsRenderer};
+	std::array<prosper::IDescriptorSet *, 2> descSets {&dsScene, &dsRenderer};
 
 	static const std::vector<uint32_t> dynamicOffsets {};
-	shaderProcessor.GetCommandBuffer().RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics, shaderProcessor.GetCurrentPipelineLayout(), pragma::ShaderGameWorld::MATERIAL_DESCRIPTOR_SET_INDEX, descSets, dynamicOffsets);
+	shaderProcessor.GetCommandBuffer().RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics, shaderProcessor.GetCurrentPipelineLayout(), GetSceneDescriptorSetIndex(), descSets, dynamicOffsets);
 }
+
+uint32_t ShaderSkybox::GetSceneDescriptorSetIndex() const { return DESCRIPTOR_SET_SCENE.setIndex; }
 
 bool ShaderSkybox::RecordBindEntity(rendering::ShaderProcessor &shaderProcessor, CRenderComponent &renderC, prosper::IShaderPipelineLayout &layout, uint32_t entityInstanceDescriptorSetIndex) const
 {
@@ -133,10 +117,7 @@ bool ShaderSkybox::RecordBindEntity(rendering::ShaderProcessor &shaderProcessor,
 	return cmd.RecordPushConstants(layout, prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit, sizeof(ShaderGameWorldLightingPass::PushConstants), sizeof(PushConstants), &pushConstants);
 }
 
-void ShaderSkybox::InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
-{
-	AttachPushConstantRange(pipelineInfo, pipelineIdx, 0u, sizeof(ShaderGameWorldLightingPass::PushConstants) + sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit);
-}
+void ShaderSkybox::InitializeGfxPipelinePushConstantRanges() { AttachPushConstantRange(0u, sizeof(ShaderGameWorldLightingPass::PushConstants) + sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit); }
 
 //////////////
 

@@ -44,6 +44,7 @@ namespace pragma {
 		const Mat4 &GetProjectionMatrix(float aspectRatio) const;
 		const Mat4 &GetViewMatrix(uint8_t layerId) const;
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
+		virtual void InitializeShaderResources() override;
 		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx) override;
 	};
 };

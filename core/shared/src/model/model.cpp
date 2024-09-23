@@ -2218,6 +2218,55 @@ Quat Model::GetTwistAxisRotationOffset(pragma::SignedAxis axis)
 	return uquat::identity();
 }
 
+bool Model::GenerateCollisionMeshes(bool convex, float mass, const std::optional<std::string> &surfaceMaterial)
+{
+	if(!GetCollisionMeshes().empty())
+		return false;
+	for(auto &mg : m_meshGroups) {
+		for(auto &mesh : mg->GetMeshes()) {
+			for(auto &sm : mesh->GetSubMeshes()) {
+				if(sm->GetGeometryType() != ModelSubMesh::GeometryType::Triangles)
+					continue;
+				auto numVerts = sm->GetVertexCount() / 20;
+				numVerts = umath::clamp<uint32_t>(numVerts, 8, 100);
+				auto simplified = sm->Simplify(numVerts);
+				auto cmesh = CollisionMesh::Create(m_networkState->GetGameState());
+				auto &cverts = cmesh->GetVertices();
+				auto &verts = simplified->GetVertices();
+				cverts.reserve(verts.size());
+				for(auto &v : verts)
+					cverts.push_back(v.position);
+
+				if(!convex) {
+					auto &ctris = cmesh->GetTriangles();
+					simplified->VisitIndices([&ctris](auto *indexDataSrc, uint32_t numIndicesSrc) {
+						ctris.reserve(numIndicesSrc);
+						for(uint32_t i = 0; i < numIndicesSrc; ++i) {
+							auto idx = indexDataSrc[i];
+							if(idx >= std::numeric_limits<uint16_t>::max()) {
+								// Max allowed index value exceeded
+								ctris.clear();
+								return;
+							}
+							ctris.push_back(indexDataSrc[i]);
+						}
+					});
+				}
+				cmesh->CalculateVolumeAndCom();
+				cmesh->SetConvex(convex);
+				cmesh->SetMass(mass);
+				if(surfaceMaterial)
+					cmesh->SetSurfaceMaterial(*surfaceMaterial);
+				cmesh->UpdateShape();
+
+				AddCollisionMesh(cmesh);
+			}
+		}
+	}
+	CalculateCollisionBounds();
+	return true;
+}
+
 bool Model::GenerateLowLevelLODs(Game &game)
 {
 	if(umath::is_flag_set(m_metaInfo.flags, Flags::GeneratedLODs))

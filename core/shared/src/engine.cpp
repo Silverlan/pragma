@@ -28,7 +28,6 @@
 #include <sharedutils/util.h>
 #include <sharedutils/util_clock.hpp>
 #include <sharedutils/util_parallel_job.hpp>
-#include <util_zip.h>
 #include <pragma/game/game_resources.hpp>
 #include <pragma/util/resource_watcher.h>
 #include <util_pad.hpp>
@@ -40,13 +39,15 @@
 #include <sharedutils/util_library.hpp>
 #include <sharedutils/util_path.hpp>
 #include <sharedutils/util_debug.h>
-#include <util_zip.h>
 #include <fsys/filesystem.h>
+#include <spdlog/pattern_formatter.h>
 
 #ifdef __linux__
 #include <pthread.h>
 #include <fcntl.h>
 #endif
+
+import util_zip;
 
 const pragma::IServerState &Engine::GetServerStateInterface() const
 {
@@ -612,7 +613,9 @@ bool Engine::Initialize(int argc, char *argv[])
 	auto f = filemanager::open_file("git_info.txt", filemanager::FileMode::Read, fsys::SearchFlags::Local | fsys::SearchFlags::NoMounts);
 	if(f) {
 		spdlog::info("Git Info:");
-		spdlog::info(f->ReadString());
+		auto str = f->ReadString();
+		ustring::replace(str, "\n", spdlog::details::os::default_eol);
+		spdlog::info(str);
 	}
 
 #if 0
@@ -930,12 +933,12 @@ void Engine::UpdateTickCount() { m_ctTick.Update(); }
 #ifdef _WIN32
 extern std::string g_crashExceptionMessage;
 #endif
-std::unique_ptr<ZIPFile> Engine::GenerateEngineDump(const std::string &baseName, std::string &outZipFileName, std::string &outErr)
+std::unique_ptr<uzip::ZIPFile> Engine::GenerateEngineDump(const std::string &baseName, std::string &outZipFileName, std::string &outErr)
 {
 	auto programPath = util::Path::CreatePath(util::get_program_path());
 	outZipFileName = util::get_date_time(baseName + "_%Y-%m-%d_%H-%M-%S.zip");
 	auto zipName = programPath + outZipFileName;
-	auto zipFile = ZIPFile::Open(zipName.GetString(), ZIPFile::OpenMode::Write);
+	auto zipFile = uzip::ZIPFile::Open(zipName.GetString(), uzip::ZIPFile::OpenMode::Write);
 	if(!zipFile) {
 		outErr = "Failed to create dump file '" + zipName.GetString() + "'";
 		return nullptr;
@@ -956,7 +959,7 @@ std::unique_ptr<ZIPFile> Engine::GenerateEngineDump(const std::string &baseName,
 	return zipFile;
 }
 
-void Engine::DumpDebugInformation(ZIPFile &zip) const
+void Engine::DumpDebugInformation(uzip::ZIPFile &zip) const
 {
 	std::stringstream engineInfo;
 	engineInfo << "System: ";

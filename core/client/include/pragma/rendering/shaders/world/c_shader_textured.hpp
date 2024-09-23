@@ -22,6 +22,11 @@ namespace pragma {
 
 	namespace rendering {
 		enum class PassType : uint32_t;
+		namespace shader_material {
+			struct ShaderMaterial;
+			struct ShaderMaterialData;
+			enum class MaterialFlags : uint32_t;
+		};
 	};
 
 	enum class GameShaderSpecializationConstantFlag : uint32_t {
@@ -119,13 +124,15 @@ namespace pragma {
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_LIGHTMAP_UV;
 
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_INSTANCE;
-		static prosper::DescriptorSetInfo DESCRIPTOR_SET_MATERIAL;
 
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_SCENE;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_RENDERER;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_RENDER_SETTINGS;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_LIGHTS;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_SHADOWS;
+
+		static bool InitializeMaterialBuffer(prosper::IDescriptorSet &descSet, CMaterial &mat, const pragma::rendering::shader_material::ShaderMaterialData &matData, uint32_t bindingIdx);
+		static std::unique_ptr<prosper::DescriptorSetInfo> CreateMaterialDescriptorSetInfo(const pragma::rendering::shader_material::ShaderMaterial &shaderMaterial);
 
 		enum class VertexBinding : uint32_t { LightmapUv = umath::to_integral(ShaderEntity::VertexBinding::Count) };
 
@@ -142,28 +149,6 @@ namespace pragma {
 
 		enum class InstanceBinding : uint32_t { Instance = 0u, BoneMatrices, VertexAnimations, VertexAnimationFrameData };
 
-		enum class MaterialFlags : uint32_t {
-			None = 0,
-			Diffuse = 0,
-			Normal = 1,
-			Parallax = Normal << 1,
-			Glow = Parallax << 1,
-			Translucent = Glow << 1,
-			BlackToAlpha = Translucent << 1,
-
-			FMAT_GLOW_MODE_1 = BlackToAlpha << 1,
-			FMAT_GLOW_MODE_2 = FMAT_GLOW_MODE_1 << 1,
-			FMAT_GLOW_MODE_3 = FMAT_GLOW_MODE_2 << 1,
-			FMAT_GLOW_MODE_4 = FMAT_GLOW_MODE_3 << 1,
-
-			DiffuseSRGB = FMAT_GLOW_MODE_4 << 1u,
-			GlowSRGB = DiffuseSRGB << 1u,
-			Debug = GlowSRGB << 1u,
-
-			WrinkleMaps = Debug << 1u,
-			RmaMap = WrinkleMaps << 1u
-		};
-
 #pragma pack(push, 1)
 		struct PushConstants : public ScenePushConstants {
 			static_assert(sizeof(pragma::SceneDebugMode) == sizeof(uint32_t));
@@ -178,37 +163,15 @@ namespace pragma {
 				reflectionProbeIntensity = 1.f;
 			}
 		};
-
-		struct MaterialData {
-			Vector4 color = {1.f, 1.f, 1.f, 1.f};
-			Vector4 emissionFactor = {1.f, 1.f, 1.f, 1.f};
-			MaterialFlags flags = MaterialFlags::Diffuse;
-			float glowScale = 1.f;
-			int16_t parallaxHeightScale = glm::detail::toFloat16(DefaultParallaxHeightScale);
-			uint16_t parallaxSteps = DefaultParallaxSteps;
-			float alphaDiscardThreshold = DefaultAlphaDiscardThreshold;
-			float phongIntensity = 1.f;
-			float metalnessFactor = 0.f;
-			float roughnessFactor = 0.f;
-			float aoFactor = 1.f;
-			AlphaMode alphaMode = AlphaMode::Opaque;
-			float alphaCutoff = 0.5f;
-
-			void SetParallaxHeightScale(float scale) { parallaxHeightScale = glm::detail::toFloat16(scale); }
-			float GetParallaxHeightScale() const { return glm::detail::toFloat32(parallaxHeightScale); }
-		};
 #pragma pack(pop)
 
 		ShaderGameWorldLightingPass(prosper::IPrContext &context, const std::string &identifier, const std::string &vsShader, const std::string &fsShader, const std::string &gsShader = "");
 		virtual ~ShaderGameWorldLightingPass() override;
 		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override;
 		virtual bool GetRenderBufferTargets(CModelSubMesh &mesh, uint32_t pipelineIdx, std::vector<prosper::IBuffer *> &outBuffers, std::vector<prosper::DeviceSize> &outOffsets, std::optional<prosper::IndexBufferInfo> &outIndexBufferInfo) const override;
-		static MaterialData GenerateMaterialData(CMaterial &mat);
-		std::optional<MaterialData> UpdateMaterialBuffer(CMaterial &mat);
+		virtual uint32_t GetSceneDescriptorSetIndex() const override;
 		bool RecordPushSceneConstants(rendering::ShaderProcessor &shaderProcessor, const pragma::CSceneComponent &scene, const Vector4 &drawOrigin) const;
 
-		virtual void InitializeMaterialData(CMaterial &mat, MaterialData &matData);
-		virtual uint32_t GetMaterialDescriptorSetIndex() const override;
 		virtual uint32_t GetCameraDescriptorSetIndex() const override;
 		virtual uint32_t GetRendererDescriptorSetIndex() const override;
 		virtual uint32_t GetInstanceDescriptorSetIndex() const override;
@@ -218,33 +181,39 @@ namespace pragma {
 		std::optional<uint32_t> FindPipelineIndex(rendering::PassType passType, GameShaderSpecialization specialization, GameShaderSpecializationConstantFlag specializationFlags) const;
 		virtual GameShaderSpecializationConstantFlag GetMaterialPipelineSpecializationRequirements(CMaterial &mat) const;
 
-		//
+		void SetShaderMaterialName(const std::optional<std::string> &shaderMaterial);
+		const std::optional<std::string> &GetShaderMaterialName() const;
+
 		virtual GameShaderSpecializationConstantFlag GetBaseSpecializationFlags() const;
 		virtual void RecordBindScene(rendering::ShaderProcessor &shaderProcessor, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer, prosper::IDescriptorSet &dsRenderSettings,
-		  prosper::IDescriptorSet &dsLights, prosper::IDescriptorSet &dsShadows, prosper::IDescriptorSet &dsMaterial, const Vector4 &drawOrigin, ShaderGameWorld::SceneFlags &inOutSceneFlags) const override;
+		  prosper::IDescriptorSet &dsLights, prosper::IDescriptorSet &dsShadows, const Vector4 &drawOrigin, ShaderGameWorld::SceneFlags &inOutSceneFlags) const override;
 		virtual bool IsUsingLightmaps() const override { return true; }
 		bool IsDepthPrepassEnabled() const;
 		void SetDepthPrepassEnabled(bool enabled) { m_depthPrepassEnabled = enabled; }
-		static std::optional<MaterialData> InitializeMaterialBuffer(prosper::IDescriptorSet &descSet, CMaterial &mat, uint32_t bindingIdx);
 		static std::shared_ptr<Texture> GetTexture(const std::string &texName);
 	  protected:
 		using ShaderEntity::RecordDraw;
 		GameShaderSpecializationConstantFlag GetStaticSpecializationConstantFlags(GameShaderSpecialization specialization) const;
 		virtual void OnPipelinesInitialized() override;
-		virtual void ApplyMaterialFlags(CMaterial &mat, MaterialFlags &outFlags) const;
+		virtual void ApplyMaterialFlags(CMaterial &mat, rendering::shader_material::MaterialFlags &outFlags) const;
 		virtual void UpdateRenderFlags(CModelSubMesh &mesh, SceneFlags &inOutFlags);
+		virtual void GetShaderPreprocessorDefinitions(std::unordered_map<std::string, std::string> &outDefinitions, std::string &outPrefixCode) override;
 		std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat, const prosper::DescriptorSetInfo &descSetInfo);
-		std::optional<MaterialData> InitializeMaterialBuffer(prosper::IDescriptorSet &descSet, CMaterial &mat);
-		virtual void InitializeGfxPipelineVertexAttributes(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx);
-		virtual void InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx);
-		virtual void InitializeGfxPipelineDescriptorSets(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx);
-		virtual prosper::DescriptorSetInfo &GetMaterialDescriptorSetInfo() const;
+		bool InitializeMaterialBuffer(prosper::IDescriptorSet &descSet, CMaterial &mat, const pragma::rendering::shader_material::ShaderMaterialData &matData);
+		virtual void InitializeGfxPipelineVertexAttributes();
+		virtual void InitializeGfxPipelinePushConstantRanges();
+		virtual void InitializeGfxPipelineDescriptorSets();
+		prosper::DescriptorSetInfo &GetMaterialDescriptorSetInfo() const;
 		virtual void GetVertexAnimationPushConstantInfo(uint32_t &offset) const override;
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
+		virtual void InitializeShaderResources() override;
+		virtual void InitializeMaterialData(const CMaterial &mat, const rendering::shader_material::ShaderMaterial &shaderMat, pragma::rendering::shader_material::ShaderMaterialData &inOutMatData);
+		void InitializeShaderMaterial();
 		bool m_depthPrepassEnabled = true;
+		std::optional<std::string> m_shaderMaterialName = "pbr";
+		std::shared_ptr<rendering::shader_material::ShaderMaterial> m_shaderMaterial;
 	};
 };
-REGISTER_BASIC_BITWISE_OPERATORS(pragma::ShaderGameWorldLightingPass::MaterialFlags)
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::GameShaderSpecializationConstantFlag)
 
 #endif

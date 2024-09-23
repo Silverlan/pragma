@@ -1,0 +1,37 @@
+#version 440
+
+#include "../lighting/sh_vis_light_buffer.gls"
+#include "/common/limits.glsl"
+
+layout(std430, LAYOUT_ID(VISIBLE_LIGHT, VISIBLE_LIGHT_INDEX_BUFFER)) buffer VisibleLightIndicesBuffer { uint fragmentCount[]; }
+visibleLightIndicesBuffer;
+
+layout(LAYOUT_PUSH_CONSTANTS()) uniform ComputeInfo { uint tileCount; }
+u_computeInfo;
+
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main()
+{
+	// TODO: Clean this mess up!
+
+	// TODO: Use uint8_t bits to determine whether light index is visible or not (8 lights per byte!)
+	// TODO: Only lights with shadows
+	/*for(uint i=0;i<MAX_SCENE_LIGHTS;++i)
+		visibleLightIndicesBuffer.fragmentCount[i] = 0;
+
+	for(uint i=0;i<5000000;++i)
+	{
+		//int idx = visibleLightTileIndicesBuffer.data[i].index;
+		++visibleLightIndicesBuffer.fragmentCount[0];
+	}*/
+
+	// Obsolete?
+	/*uint numTiles = u_computeInfo.tileCount *MAX_SCENE_LIGHTS;
+	for(uint i=0;i<numTiles;++i)
+	{
+		int idx = visibleLightTileIndicesBuffer.data[i].index;
+		//if(idx == -1)
+		//	break;
+		++visibleLightIndicesBuffer.fragmentCount[idx];
+	}*/
+}

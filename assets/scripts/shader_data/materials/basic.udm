@@ -1,0 +1,5 @@
+"shader_material"
+{
+	$array properties [element][]
+	$array textures [element][]
+}

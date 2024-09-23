@@ -65,4 +65,4 @@ function Component:DrawLines()
 		end
 	end
 end
-ents.COMPONENT_DEBUG_EYES = ents.register_component("debug_eyes", Component)
+ents.register_component("debug_eyes", Component, "debug")

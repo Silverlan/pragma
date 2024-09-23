@@ -1,0 +1,27 @@
+"shader_material"
+{
+	$array properties [element][
+		{
+			$string type "vec4"
+			$string specializationType "color"
+			$string name "emission_factor"
+			$vec4 default [1.0, 1.0, 1.0, 1.0]
+		}
+	]
+	$array textures [element][
+		{
+			$string name "sclera_map"
+			$bool colorMap 1
+			$string default "white"
+		},
+		{
+			$string name "iris_map"
+			$bool colorMap 1
+			$string default "white"
+		},
+		{
+			$string name "emission_map"
+			$string default "white"
+		}
+	]
+}

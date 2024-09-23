@@ -5,10 +5,11 @@
  * Copyright (c) 2021 Silverlan
  */
 
+import se_script;
+
 #include "stdafx_shared.h"
 #include "pragma/game/game_resources.hpp"
 #include "pragma/audio/alsound_type.h"
-#include <se_script.hpp>
 #include <sharedutils/util_file.h>
 #include <udm.hpp>
 
@@ -21,8 +22,8 @@ bool util::port_sound_script(NetworkState *nw, const std::string &path)
 	ptrOpenArchiveFile(path, f, {});
 	if(f == nullptr)
 		return false;
-	se::ScriptBlock root {};
-	if(se::read_script(f, root) != se::ResultCode::Ok)
+	source_engine::script::ScriptBlock root {};
+	if(source_engine::script::read_script(f, root) != source_engine::script::ResultCode::Ok)
 		return false;
 	auto outPath = util::IMPORT_PATH + FileManager::GetCanonicalizedPath(path);
 	if(ustring::substr(outPath, 0, 8) == std::string("scripts") + FileManager::GetDirectorySeparator())
@@ -37,7 +38,7 @@ bool util::port_sound_script(NetworkState *nw, const std::string &path)
 	for(auto &data : root.data) {
 		if(data->IsBlock() == false)
 			continue;
-		auto &block = static_cast<se::ScriptBlock &>(*data);
+		auto &block = static_cast<source_engine::script::ScriptBlock &>(*data);
 		auto udmBlock = udm[block.identifier];
 		auto udmEvents = udmBlock.AddArray("events", 1);
 		auto udmEvent = udmEvents[0];
@@ -47,10 +48,10 @@ bool util::port_sound_script(NetworkState *nw, const std::string &path)
 		std::vector<std::string> sources;
 		for(auto &v : block.data) {
 			if(v->IsBlock() == true) {
-				auto &subBlock = static_cast<se::ScriptBlock &>(*v);
+				auto &subBlock = static_cast<source_engine::script::ScriptBlock &>(*v);
 				if(subBlock.identifier == "rndwave") {
 					for(auto &v : subBlock.data) {
-						auto &val = static_cast<se::ScriptValue &>(*v);
+						auto &val = static_cast<source_engine::script::ScriptValue &>(*v);
 						if(val.identifier != "wave")
 							continue;
 						sources.push_back(val.value);
@@ -58,7 +59,7 @@ bool util::port_sound_script(NetworkState *nw, const std::string &path)
 				}
 				continue;
 			}
-			auto &val = static_cast<se::ScriptValue &>(*v);
+			auto &val = static_cast<source_engine::script::ScriptValue &>(*v);
 			if(val.identifier == "volume") {
 				auto outVal = (val.value != "VOL_NORM") ? val.value : "1.0";
 				udmEvent["gain"] = outVal;

@@ -17,6 +17,8 @@
 #include <pragma/lua/lua_error_handling.hpp>
 #include <pragma/logging.hpp>
 #include <prosper_window.hpp>
+#include <spdlog/pattern_formatter.h>
+#include <sharedutils/magic_enum.hpp>
 
 using namespace pragma;
 
@@ -110,14 +112,18 @@ void RenderContext::InitializeRenderAPI()
 	GetRenderContext().GetInitialWindowSettings().resizable = false;
 	prosper::Shader::SetLogCallback([](prosper::Shader &shader, prosper::ShaderStage stage, const std::string &infoLog, const std::string &debugInfoLog) {
 		std::stringstream msg;
-		msg << "Unable to load shader '" << shader.GetIdentifier() << "':\r\n";
-		msg << "Shader Stage: " << prosper::util::to_string(stage) << "\r\n";
+		msg << "Unable to load shader '" << shader.GetIdentifier() << "':" << spdlog::details::os::default_eol;
+		msg << "Shader Stage: " << prosper::util::to_string(stage) << spdlog::details::os::default_eol;
 		auto filePath = (stage != prosper::ShaderStage::Unknown) ? shader.GetStageSourceFilePath(stage) : std::optional<std::string> {};
 		if(filePath.has_value())
-			msg << "Shader Stage Filename: " << *filePath << "\r\n";
-		msg << infoLog << "\r\n";
-		msg << "\r\n";
-		msg << debugInfoLog;
+			msg << "Shader Stage Filename: " << *filePath << spdlog::details::os::default_eol;
+		auto infoLogConv = infoLog;
+		ustring::replace(infoLogConv, "\n", spdlog::details::os::default_eol);
+		msg << infoLogConv << spdlog::details::os::default_eol;
+		msg << spdlog::details::os::default_eol;
+		auto debugInfoLogConv = debugInfoLog;
+		ustring::replace(debugInfoLogConv, "\n", spdlog::details::os::default_eol);
+		msg << debugInfoLogConv;
 		LOGGER.warn(msg.str());
 	});
 	prosper::debug::set_debug_validation_callback([](prosper::DebugReportObjectTypeEXT objectType, const std::string &msg) { LOGGER_VALIDATION.error("{}", msg); });

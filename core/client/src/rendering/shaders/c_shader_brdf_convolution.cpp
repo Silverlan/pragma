@@ -17,16 +17,17 @@ extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
 
-ShaderBRDFConvolution::ShaderBRDFConvolution(prosper::IPrContext &context, const std::string &identifier) : ShaderBaseImageProcessing {context, identifier, "screen/fs_brdf_convolution.gls"} {}
+ShaderBRDFConvolution::ShaderBRDFConvolution(prosper::IPrContext &context, const std::string &identifier) : ShaderBaseImageProcessing {context, identifier, "programs/lighting/brdf_convolution"} {}
 void ShaderBRDFConvolution::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx)
 {
 	CreateCachedRenderPass<ShaderBRDFConvolution>({{prosper::util::RenderPassCreateInfo::AttachmentInfo {prosper::Format::R16G16_SFloat}}}, outRenderPass, pipelineIdx);
 }
-void ShaderBRDFConvolution::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
+void ShaderBRDFConvolution::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { ShaderGraphics::InitializeGfxPipeline(pipelineInfo, pipelineIdx); }
+void ShaderBRDFConvolution::InitializeShaderResources()
 {
-	ShaderGraphics::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
+	ShaderGraphics::InitializeShaderResources();
 
-	AddDefaultVertexAttributes(pipelineInfo);
+	AddDefaultVertexAttributes();
 }
 std::shared_ptr<prosper::Texture> ShaderBRDFConvolution::CreateBRDFConvolutionMap(uint32_t resolution)
 {

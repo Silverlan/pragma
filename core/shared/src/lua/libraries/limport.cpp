@@ -16,7 +16,6 @@
 #include "pragma/game/game_resources.hpp"
 #include "pragma/game/game_limits.h"
 #include <pragma/util/util_game.hpp>
-#include <smdmodel.h>
 #include <unordered_set>
 #include <sharedutils/util_file.h>
 #if 0

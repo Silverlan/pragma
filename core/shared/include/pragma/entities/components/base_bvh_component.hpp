@@ -48,6 +48,8 @@ namespace pragma {
 		std::optional<Vector3> GetVertex(size_t idx) const;
 		size_t GetTriangleCount() const;
 
+		void DebugPrint();
+		void DebugDraw();
 		void DebugDrawBvhTree(const Vector3 &origin, const Vector3 &dir, float maxDist, float duration = 12.f) const;
 
 		// For internal use only

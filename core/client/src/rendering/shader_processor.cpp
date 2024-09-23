@@ -32,7 +32,7 @@ bool pragma::rendering::ShaderProcessor::RecordBindScene(const pragma::CSceneCom
 {
 	auto &hCam = scene.GetActiveCamera();
 	if(hCam.expired()) {
-		spdlog::trace( "Attempted to bind scene '{}' with no active camera!",scene.GetEntity().ToString() );
+		spdlog::trace("Attempted to bind scene '{}' with no active camera!", scene.GetEntity().ToString());
 		return false;
 	}
 	auto *dsScene = view ? scene.GetViewCameraDescriptorSet() : scene.GetCameraDescriptorSetGraphics();
@@ -46,9 +46,8 @@ bool pragma::rendering::ShaderProcessor::RecordBindScene(const pragma::CSceneCom
 	assert(dsShadows);
 	m_sceneC = &scene;
 	m_rendererC = &renderer;
-	auto &dsMat = shader.GetDefaultMaterialDescriptorSet();
 	// m_sceneFlags = ShaderGameWorld::SceneFlags::None;
-	shader.RecordBindScene(*this, scene, renderer, *dsScene, *dsRenderer, dsRenderSettings, *dsLights, *dsShadows, dsMat, m_drawOrigin, m_sceneFlags);
+	shader.RecordBindScene(*this, scene, renderer, *dsScene, *dsRenderer, dsRenderSettings, *dsLights, *dsShadows, m_drawOrigin, m_sceneFlags);
 	return true;
 }
 void pragma::rendering::ShaderProcessor::SetDrawOrigin(const Vector4 &drawOrigin) { m_drawOrigin = drawOrigin; }
@@ -56,8 +55,9 @@ bool pragma::rendering::ShaderProcessor::RecordBindShader(const pragma::CSceneCo
 {
 	auto &context = c_engine->GetRenderContext();
 	m_curShader = &shader;
+	auto matDsIdx = m_curShader->GetMaterialDescriptorSetIndex();
 	m_currentPipelineLayout = context.GetShaderPipelineLayout(shader, pipelineIdx);
-	m_materialDescriptorSetIndex = m_curShader->GetMaterialDescriptorSetIndex();
+	m_materialDescriptorSetIndex = matDsIdx ? *matDsIdx : std::numeric_limits<uint32_t>::max();
 	m_entityInstanceDescriptorSetIndex = m_curShader->GetInstanceDescriptorSetIndex();
 	m_curInstanceSet = nullptr;
 	// m_clipPlane = {};

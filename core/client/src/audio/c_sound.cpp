@@ -25,10 +25,12 @@
 #include <pragma/audio/sound_util.hpp>
 #include <util_sound.hpp>
 #include <sharedutils/util_file.h>
-#include <se_scene.hpp>
 #include <steam_audio/alsound_steam_audio.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/logging.hpp>
+#include <sharedutils/util_markup_file.hpp>
+
+import se_script;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
@@ -174,8 +176,8 @@ bool ClientState::PrecacheSound(std::string snd, std::pair<al::ISoundBuffer *, a
 	if(ufile::get_extension(path, &ext) == true && ustring::compare<std::string>(ext, "wav", false) == true) {
 		auto f = FileManager::OpenFile(path.c_str(), "rb");
 		if(f != nullptr) {
-			auto phonemeData = std::make_shared<se::SoundPhonemeData>();
-			if(se::read_wav_phonemes(f, *phonemeData) == util::MarkupFile::ResultCode::Ok) {
+			auto phonemeData = std::make_shared<source_engine::script::SoundPhonemeData>();
+			if(source_engine::script::read_wav_phonemes(f, *phonemeData) == util::MarkupFile::ResultCode::Ok) {
 				if(tgtBuffers->first != nullptr)
 					tgtBuffers->first->SetUserData(phonemeData);
 				if(tgtBuffers->second != nullptr)

@@ -35,8 +35,12 @@ function util.ImageProcessor:__init(w, h)
 end
 
 function util.ImageProcessor:CreateTextureDescriptorSet(tex)
-	local dsInfo = shader.DescriptorSetInfo({
-		shader.DescriptorSetBinding(prosper.DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, prosper.SHADER_STAGE_FRAGMENT_BIT),
+	local dsInfo = shader.DescriptorSetInfo("TEXTURE", {
+		shader.DescriptorSetBinding(
+			"TEXTURE",
+			prosper.DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+			prosper.SHADER_STAGE_FRAGMENT_BIT
+		),
 	})
 	local ds = prosper.create_descriptor_set(dsInfo)
 	ds:SetBindingTexture(0, tex)
@@ -157,8 +161,12 @@ function util.ImageProcessor:AddStagingTexture(createInfo)
 	local rp = prosper.create_render_pass(rpCreateInfo)
 	local rt = prosper.create_render_target(prosper.RenderTargetCreateInfo(), { tex }, rp)
 
-	local dsInfo = shader.DescriptorSetInfo({
-		shader.DescriptorSetBinding(prosper.DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, prosper.SHADER_STAGE_FRAGMENT_BIT),
+	local dsInfo = shader.DescriptorSetInfo("TEXTURE", {
+		shader.DescriptorSetBinding(
+			"TEXTURE",
+			prosper.DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+			prosper.SHADER_STAGE_FRAGMENT_BIT
+		),
 	})
 	local ds = prosper.create_descriptor_set(dsInfo)
 	ds:SetBindingTexture(0, tex)

@@ -59,13 +59,15 @@
 #include <sharedutils/util_file.h>
 #include <sharedutils/scope_guard.h>
 #include <luainterface.hpp>
-#include <se_scene.hpp>
 #include <pragma/math/intersection.h>
 #include <pragma/model/modelmesh.h>
 #include "pragma/model/animation/skeleton.hpp"
 #include <luabind/class_info.hpp>
-#include <util_zip.h>
 #include <fsys/ifile.hpp>
+#include <sharedutils/util_markup_file.hpp>
+
+import se_script;
+import util_zip;
 
 extern DLLNETWORK Engine *engine;
 
@@ -335,13 +337,13 @@ void Lua::util::register_world_data(lua_State *l, luabind::module_ &mod)
 
 void Lua::util::register_os(lua_State *l, luabind::module_ &mod) { mod[luabind::def("set_prevent_os_sleep_mode", &::util::set_prevent_os_sleep_mode)]; }
 
-static Lua::var<bool, Lua::opt<std::string>, ::util::FunctionalParallelWorker> extract_files(lua_State *l, Game &game, const Lua::type<ZIPFile> &ozip, const std::string &outputPath, bool runInBackground = false)
+static Lua::var<bool, Lua::opt<std::string>, ::util::FunctionalParallelWorker> extract_files(lua_State *l, Game &game, const Lua::type<uzip::ZIPFile> &ozip, const std::string &outputPath, bool runInBackground = false)
 {
 	auto path = ::util::Path::CreateFile(outputPath);
 	path.Canonicalize();
 	path = ::util::Path::CreatePath(::util::get_program_path()) + path;
 
-	auto &zip = *luabind::object_cast<ZIPFile *>(ozip);
+	auto &zip = *luabind::object_cast<uzip::ZIPFile *>(ozip);
 	if(runInBackground) {
 		auto job = ::util::create_parallel_job<::util::FunctionalParallelWorker>(false);
 		auto cpyOzip = ozip;
@@ -518,29 +520,29 @@ void Lua::util::register_shared_generic(lua_State *l, luabind::module_ &mod)
 	auto defHairData = luabind::class_<::util::HairData>("HairData");
 	mod[defHairData];
 
-	auto defZip = luabind::class_<ZIPFile>("ZipFile");
-	defZip.add_static_constant("OPEN_MODE_READ", umath::to_integral(ZIPFile::OpenMode::Read));
-	defZip.add_static_constant("OPEN_MODE_WRITE", umath::to_integral(ZIPFile::OpenMode::Write));
+	auto defZip = luabind::class_<uzip::ZIPFile>("ZipFile");
+	defZip.add_static_constant("OPEN_MODE_READ", umath::to_integral(uzip::ZIPFile::OpenMode::Read));
+	defZip.add_static_constant("OPEN_MODE_WRITE", umath::to_integral(uzip::ZIPFile::OpenMode::Write));
 
 	defZip.scope[luabind::def(
-	  "open", +[](const std::string &filePath, ZIPFile::OpenMode openMode) -> std::shared_ptr<ZIPFile> {
+	  "open", +[](const std::string &filePath, uzip::ZIPFile::OpenMode openMode) -> std::shared_ptr<uzip::ZIPFile> {
 		  auto path = ::util::Path::CreateFile(filePath);
 		  path.Canonicalize();
 		  path = ::util::Path::CreatePath(::util::get_program_path()) + path;
-		  auto zipFile = ZIPFile::Open(path.GetString(), openMode);
+		  auto zipFile = uzip::ZIPFile::Open(path.GetString(), openMode);
 		  if(!zipFile)
 			  return nullptr;
 		  return zipFile;
 	  })];
 	defZip.scope[luabind::def(
-	  "open", +[](LFile &f, ZIPFile::OpenMode openMode) -> std::shared_ptr<ZIPFile> {
+	  "open", +[](LFile &f, uzip::ZIPFile::OpenMode openMode) -> std::shared_ptr<uzip::ZIPFile> {
 		  auto ptr = f.GetHandle();
 		  if(!ptr)
 			  return nullptr;
 		  auto filePath = ptr->GetFileName();
 		  if(!filePath.has_value())
 			  return nullptr;
-		  auto zipFile = ZIPFile::Open(*filePath, openMode);
+		  auto zipFile = uzip::ZIPFile::Open(*filePath, openMode);
 		  if(!zipFile)
 			  return nullptr;
 		  return zipFile;
@@ -551,7 +553,7 @@ void Lua::util::register_shared_generic(lua_State *l, luabind::module_ &mod)
 		    "7z"};
 	  })];
 	defZip.def(
-	  "GetFileList", +[](ZIPFile &zip) -> std::optional<std::vector<std::string>> {
+	  "GetFileList", +[](uzip::ZIPFile &zip) -> std::optional<std::vector<std::string>> {
 		  std::vector<std::string> files;
 		  if(!zip.GetFileList(files))
 			  return {};
@@ -560,7 +562,7 @@ void Lua::util::register_shared_generic(lua_State *l, luabind::module_ &mod)
 	defZip.def("ExtractFiles", &extract_files);
 	defZip.def("ExtractFiles", &extract_files, luabind::default_parameter_policy<5, false> {});
 	defZip.def(
-	  "ExtractFile", +[](ZIPFile &zip, const std::string &zipFileName, const std::string &outputZipFileName) -> std::pair<bool, std::optional<std::string>> {
+	  "ExtractFile", +[](uzip::ZIPFile &zip, const std::string &zipFileName, const std::string &outputZipFileName) -> std::pair<bool, std::optional<std::string>> {
 		  std::vector<uint8_t> data;
 		  std::string err;
 		  if(!zip.ReadFile(zipFileName, data, err))
@@ -1495,11 +1497,11 @@ luabind::object Lua::util::read_scene_file(lua_State *l, const std::string &file
 	auto f = FileManager::OpenFile(fname.c_str(), "r");
 	if(f == nullptr)
 		return {};
-	se::SceneScriptValue root {};
-	if(se::read_scene(f, root) != ::util::MarkupFile::ResultCode::Ok)
+	source_engine::script::SceneScriptValue root {};
+	if(source_engine::script::read_scene(f, root) != ::util::MarkupFile::ResultCode::Ok)
 		return {};
-	std::function<void(const se::SceneScriptValue &)> fPushValue = nullptr;
-	fPushValue = [l, &fPushValue](const se::SceneScriptValue &val) {
+	std::function<void(const source_engine::script::SceneScriptValue &)> fPushValue = nullptr;
+	fPushValue = [l, &fPushValue](const source_engine::script::SceneScriptValue &val) {
 		auto t = Lua::CreateTable(l);
 
 		Lua::PushString(l, "identifier");
@@ -1731,10 +1733,10 @@ Lua::var<bool, ::util::ParallelJob<luabind::object>> Lua::util::pack_zip_archive
 		}
 	}
 
-	auto zip = ZIPFile::Open(zipFileName, ZIPFile::OpenMode::Write);
+	auto zip = uzip::ZIPFile::Open(zipFileName, uzip::ZIPFile::OpenMode::Write);
 	if(zip == nullptr)
 		return luabind::object {l, false};
-	auto pzip = std::shared_ptr<ZIPFile> {std::move(zip)};
+	auto pzip = std::shared_ptr<uzip::ZIPFile> {std::move(zip)};
 
 	struct ResultData {
 		std::vector<std::string> notFound;

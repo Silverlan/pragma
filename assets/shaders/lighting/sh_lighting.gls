@@ -1,7 +1,0 @@
-#ifndef F_SH_LIGHTING_GLS
-#define F_SH_LIGHTING_GLS
-
-#include "sh_light_sources.gls"
-#include "../modules/sh_rendersettings.gls"
-
-#endif

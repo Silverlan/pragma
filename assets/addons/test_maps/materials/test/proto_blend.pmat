@@ -1,0 +1,8 @@
+"pbr_blend"
+{
+	"textures"
+	{
+		$string albedo_map "dev/proto_gray"
+		$string albedo_map2 "dev/proto_red"
+	}
+}

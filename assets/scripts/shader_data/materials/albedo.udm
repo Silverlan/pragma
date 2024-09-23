@@ -1,0 +1,11 @@
+"shader_material"
+{
+	$array properties [element][]
+	$array textures [element][
+		{
+			$string name "albedo_map"
+			$bool colorMap 1
+			$bool required 1
+		}
+	]
+}

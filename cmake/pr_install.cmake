@@ -8,15 +8,42 @@ function(pr_install_files)
         set(PA_INSTALL_DIR "${BINARY_OUTPUT_DIR}")
     endif()
 
-	foreach(FILE_PATH ${PA_UNPARSED_ARGUMENTS})
+    foreach(FILE_PATH ${PA_UNPARSED_ARGUMENTS})
         string(REPLACE "\\" "/" FILE_PATH ${FILE_PATH})
         message("Adding install rule for \"${FILE_PATH}\" to \"${PA_INSTALL_DIR}\"...")
-        install(
-            FILES "${FILE_PATH}"
-            DESTINATION "${PA_INSTALL_DIR}"
-            OPTIONAL
-            COMPONENT ${PRAGMA_INSTALL_COMPONENT})
-	endforeach()
+
+        # Check if the file is a symlink and get the real file path
+        get_filename_component(REAL_FILE_PATH "${FILE_PATH}" REALPATH)
+
+        if(FILE_PATH STREQUAL REAL_FILE_PATH)
+            # If the file is not a symlink, just install it
+            install(
+                FILES "${FILE_PATH}"
+                DESTINATION "${PA_INSTALL_DIR}"
+                OPTIONAL
+                COMPONENT ${PRAGMA_INSTALL_COMPONENT}
+            )
+        else()
+            # If the file is a symlink, install both the symlink and the real file
+            message("File \"${FILE_PATH}\" is a symlink to \"${REAL_FILE_PATH}\"")
+            
+            # Install the real file (the target of the symlink)
+            install(
+                FILES "${REAL_FILE_PATH}"
+                DESTINATION "${PA_INSTALL_DIR}"
+                OPTIONAL
+                COMPONENT ${PRAGMA_INSTALL_COMPONENT}
+            )
+
+            # Install the symlink itself
+            install(
+                FILES "${FILE_PATH}"
+                DESTINATION "${PA_INSTALL_DIR}"
+                OPTIONAL
+                COMPONENT ${PRAGMA_INSTALL_COMPONENT}
+            )
+        endif()
+    endforeach()
 endfunction(pr_install_files)
 
 function(pr_install_libraries)
@@ -39,6 +66,14 @@ function(pr_install_libraries)
             DESTINATION "${PA_INSTALL_DIR}"
             OPTIONAL
             COMPONENT ${PRAGMA_INSTALL_COMPONENT})
+        if(UNIX)
+            install(
+                TARGETS "${TARGET}"
+                RUNTIME DESTINATION "${PA_INSTALL_DIR}"
+                LIBRARY DESTINATION "${PA_INSTALL_DIR}"
+                OPTIONAL
+                COMPONENT ${PRAGMA_INSTALL_COMPONENT})
+        endif()
     endforeach()
 endfunction(pr_install_libraries)
 
@@ -61,6 +96,14 @@ function(pr_install_targets)
             DESTINATION "${PA_INSTALL_DIR}"
             OPTIONAL
             COMPONENT ${PRAGMA_INSTALL_COMPONENT})
+        if(UNIX)
+            install(
+                TARGETS "${TARGET}"
+                RUNTIME DESTINATION "${PA_INSTALL_DIR}"
+                LIBRARY DESTINATION "${PA_INSTALL_DIR}"
+                OPTIONAL
+                COMPONENT ${PRAGMA_INSTALL_COMPONENT})
+        endif()
     endforeach()
 endfunction(pr_install_targets)
 

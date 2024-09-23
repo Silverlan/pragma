@@ -22,26 +22,29 @@ extern DLLCLIENT CEngine *c_engine;
 
 decltype(ShaderPPWater::DESCRIPTOR_SET_TEXTURE) ShaderPPWater::DESCRIPTOR_SET_TEXTURE = {&ShaderPPFog::DESCRIPTOR_SET_TEXTURE};
 decltype(ShaderPPWater::DESCRIPTOR_SET_DEPTH_BUFFER) ShaderPPWater::DESCRIPTOR_SET_DEPTH_BUFFER = {&ShaderPPFog::DESCRIPTOR_SET_DEPTH_BUFFER};
-decltype(ShaderPPWater::DESCRIPTOR_SET_REFRACTION_MAP) ShaderPPWater::DESCRIPTOR_SET_REFRACTION_MAP = {{prosper::DescriptorSetInfo::Binding {// Refraction Map
-  prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}}};
+decltype(ShaderPPWater::DESCRIPTOR_SET_REFRACTION_MAP) ShaderPPWater::DESCRIPTOR_SET_REFRACTION_MAP = {
+  "REFRACTION",
+  {prosper::DescriptorSetInfo::Binding {"MAP", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}},
+};
 decltype(ShaderPPWater::DESCRIPTOR_SET_SCENE) ShaderPPWater::DESCRIPTOR_SET_SCENE = {&ShaderScene::DESCRIPTOR_SET_SCENE};
 decltype(ShaderPPWater::DESCRIPTOR_SET_RENDER_SETTINGS) ShaderPPWater::DESCRIPTOR_SET_RENDER_SETTINGS = {&ShaderScene::DESCRIPTOR_SET_RENDER_SETTINGS};
 decltype(ShaderPPWater::DESCRIPTOR_SET_FOG) ShaderPPWater::DESCRIPTOR_SET_FOG = {&ShaderPPFog::DESCRIPTOR_SET_FOG};
-ShaderPPWater::ShaderPPWater(prosper::IPrContext &context, const std::string &identifier) : ShaderPPBase(context, identifier, "screen/fs_pp_water") { SetBaseShader<prosper::ShaderCopyImage>(); }
+ShaderPPWater::ShaderPPWater(prosper::IPrContext &context, const std::string &identifier) : ShaderPPBase(context, identifier, "programs/post_processing/water") { SetBaseShader<prosper::ShaderCopyImage>(); }
 
-void ShaderPPWater::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
+void ShaderPPWater::InitializeShaderResources()
 {
-	prosper::ShaderGraphics::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_TEXTURE);
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_DEPTH_BUFFER);
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_REFRACTION_MAP);
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_SCENE);
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_RENDER_SETTINGS);
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_FOG);
-	AddDefaultVertexAttributes(pipelineInfo);
+	prosper::ShaderGraphics::InitializeShaderResources();
+	AddDescriptorSetGroup(DESCRIPTOR_SET_TEXTURE);
+	AddDescriptorSetGroup(DESCRIPTOR_SET_DEPTH_BUFFER);
+	AddDescriptorSetGroup(DESCRIPTOR_SET_REFRACTION_MAP);
+	AddDescriptorSetGroup(DESCRIPTOR_SET_SCENE);
+	AddDescriptorSetGroup(DESCRIPTOR_SET_RENDER_SETTINGS);
+	AddDescriptorSetGroup(DESCRIPTOR_SET_FOG);
+	AddDefaultVertexAttributes();
 
-	AttachPushConstantRange(pipelineInfo, pipelineIdx, 0u, sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit);
+	AttachPushConstantRange(0u, sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit);
 }
+void ShaderPPWater::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { prosper::ShaderGraphics::InitializeGfxPipeline(pipelineInfo, pipelineIdx); }
 
 std::shared_ptr<prosper::IDescriptorSetGroup> ShaderPPWater::InitializeMaterialDescriptorSet(CMaterial &mat)
 {

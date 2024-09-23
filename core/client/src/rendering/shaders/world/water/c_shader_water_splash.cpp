@@ -12,19 +12,20 @@
 
 using namespace pragma;
 
-decltype(ShaderWaterSplash::DESCRIPTOR_SET_WATER_EFFECT) ShaderWaterSplash::DESCRIPTOR_SET_WATER_EFFECT = {{prosper::DescriptorSetInfo::Binding {// Water particles
-                                                                                                              prosper::DescriptorType::StorageBuffer, prosper::ShaderStageFlags::ComputeBit},
-  prosper::DescriptorSetInfo::Binding {// Water Positions
-    prosper::DescriptorType::StorageBuffer, prosper::ShaderStageFlags::ComputeBit}}};
-ShaderWaterSplash::ShaderWaterSplash(prosper::IPrContext &context, const std::string &identifier) : prosper::ShaderCompute(context, identifier, "compute/water/cs_water_splash") {}
+decltype(ShaderWaterSplash::DESCRIPTOR_SET_WATER_EFFECT) ShaderWaterSplash::DESCRIPTOR_SET_WATER_EFFECT = {
+  "WATER",
+  {prosper::DescriptorSetInfo::Binding {"PARTICLE_DATA", prosper::DescriptorType::StorageBuffer, prosper::ShaderStageFlags::ComputeBit}, prosper::DescriptorSetInfo::Binding {"POSITIONS", prosper::DescriptorType::StorageBuffer, prosper::ShaderStageFlags::ComputeBit}},
+};
+ShaderWaterSplash::ShaderWaterSplash(prosper::IPrContext &context, const std::string &identifier) : prosper::ShaderCompute(context, identifier, "programs/compute/water/water_splash") {}
 
-void ShaderWaterSplash::InitializeComputePipeline(prosper::ComputePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
+void ShaderWaterSplash::InitializeComputePipeline(prosper::ComputePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { prosper::ShaderCompute::InitializeComputePipeline(pipelineInfo, pipelineIdx); }
+
+void ShaderWaterSplash::InitializeShaderResources()
 {
-	prosper::ShaderCompute::InitializeComputePipeline(pipelineInfo, pipelineIdx);
+	prosper::ShaderCompute::InitializeShaderResources();
 
-	AttachPushConstantRange(pipelineInfo, pipelineIdx, 0u, sizeof(PhysWaterSurfaceSimulator::SplashInfo), prosper::ShaderStageFlags::ComputeBit);
-
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_WATER_EFFECT);
+	AttachPushConstantRange(0u, sizeof(PhysWaterSurfaceSimulator::SplashInfo), prosper::ShaderStageFlags::ComputeBit);
+	AddDescriptorSetGroup(DESCRIPTOR_SET_WATER_EFFECT);
 }
 
 bool ShaderWaterSplash::RecordCompute(prosper::ShaderBindState &bindState, prosper::IDescriptorSet &descParticles, const PhysWaterSurfaceSimulator::SplashInfo &info) const

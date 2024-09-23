@@ -12,20 +12,26 @@
 
 using namespace pragma;
 
-decltype(ShaderCalcImageColor::DESCRIPTOR_SET_TEXTURE) ShaderCalcImageColor::DESCRIPTOR_SET_TEXTURE = {{prosper::DescriptorSetInfo::Binding {// Texture
-  prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::ComputeBit}}};
-decltype(ShaderCalcImageColor::DESCRIPTOR_SET_COLOR) ShaderCalcImageColor::DESCRIPTOR_SET_COLOR = {{prosper::DescriptorSetInfo::Binding {// Average Color
-  prosper::DescriptorType::StorageBuffer, prosper::ShaderStageFlags::ComputeBit}}};
-ShaderCalcImageColor::ShaderCalcImageColor(prosper::IPrContext &context, const std::string &identifier) : prosper::ShaderCompute(context, identifier, "compute/cs_calc_image_color") {}
+decltype(ShaderCalcImageColor::DESCRIPTOR_SET_TEXTURE) ShaderCalcImageColor::DESCRIPTOR_SET_TEXTURE = {
+  "TEXTURE",
+  {prosper::DescriptorSetInfo::Binding {"TEXTURE", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::ComputeBit}},
+};
+decltype(ShaderCalcImageColor::DESCRIPTOR_SET_COLOR) ShaderCalcImageColor::DESCRIPTOR_SET_COLOR = {
+  "AVERAGE_COLOR",
+  {prosper::DescriptorSetInfo::Binding {"OUTPUT_BUFFER", prosper::DescriptorType::StorageBuffer, prosper::ShaderStageFlags::ComputeBit}},
+};
+ShaderCalcImageColor::ShaderCalcImageColor(prosper::IPrContext &context, const std::string &identifier) : prosper::ShaderCompute(context, identifier, "programs/compute/calc_image_color") {}
 
-void ShaderCalcImageColor::InitializeComputePipeline(prosper::ComputePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
+void ShaderCalcImageColor::InitializeComputePipeline(prosper::ComputePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { prosper::ShaderCompute::InitializeComputePipeline(pipelineInfo, pipelineIdx); }
+
+void ShaderCalcImageColor::InitializeShaderResources()
 {
-	prosper::ShaderCompute::InitializeComputePipeline(pipelineInfo, pipelineIdx);
+	prosper::ShaderCompute::InitializeShaderResources();
 
-	AttachPushConstantRange(pipelineInfo, pipelineIdx, 0u, sizeof(PushConstants), prosper::ShaderStageFlags::ComputeBit);
+	AttachPushConstantRange(0u, sizeof(PushConstants), prosper::ShaderStageFlags::ComputeBit);
 
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_TEXTURE);
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_COLOR);
+	AddDescriptorSetGroup(DESCRIPTOR_SET_TEXTURE);
+	AddDescriptorSetGroup(DESCRIPTOR_SET_COLOR);
 }
 
 bool ShaderCalcImageColor::RecordCompute(prosper::ShaderBindState &bindState, prosper::IDescriptorSet &descSetTexture, prosper::IDescriptorSet &descSetColor, uint32_t sampleCount) const

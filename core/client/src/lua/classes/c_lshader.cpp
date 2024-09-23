@@ -22,17 +22,15 @@
 
 prosper::ShaderBindState *LuaShaderRecordTarget::GetBindState() const { return luabind::object_cast_nothrow<prosper::ShaderBindState *>(target, static_cast<prosper::ShaderBindState *>(nullptr)); }
 prosper::util::PreparedCommandBuffer *LuaShaderRecordTarget::GetPcb() const { return luabind::object_cast_nothrow<prosper::util::PreparedCommandBuffer *>(target, static_cast<prosper::util::PreparedCommandBuffer *>(nullptr)); }
-void Lua::BasePipelineCreateInfo::AttachDescriptorSetInfo(lua_State *l, prosper::BasePipelineCreateInfo &pipelineInfo, pragma::LuaDescriptorSetInfo &descSetInfo)
+void Lua::Shader::AttachDescriptorSetInfo(lua_State *l, pragma::LuaShaderWrapperBase &shader, pragma::LuaDescriptorSetInfo &descSetInfo)
 {
-	auto *shader = pragma::LuaShaderWrapperBase::GetShader(pipelineInfo);
-	if(shader == nullptr)
-		return;
-	prosper::DescriptorSetInfo shaderDescSetInfo {};
+	prosper::DescriptorSetInfo shaderDescSetInfo {pragma::register_global_string(descSetInfo.name), {}};
 	shaderDescSetInfo.bindings.reserve(descSetInfo.bindings.size());
 	auto bindingIdx = 0u;
 	for(auto &lBinding : descSetInfo.bindings) {
 		shaderDescSetInfo.bindings.push_back({});
 		auto &binding = shaderDescSetInfo.bindings.back();
+		binding.name = pragma::register_global_string(lBinding.name);
 		binding.type = lBinding.type;
 		binding.shaderStages = lBinding.shaderStages;
 		binding.descriptorArraySize = lBinding.descriptorArraySize;
@@ -41,15 +39,9 @@ void Lua::BasePipelineCreateInfo::AttachDescriptorSetInfo(lua_State *l, prosper:
 		bindingIdx = binding.bindingIndex + 1u;
 	}
 	shaderDescSetInfo.setIndex = descSetInfo.setIndex;
-	shader->GetShader().AddDescriptorSetGroup(pipelineInfo, shader->GetCurrentPipelineIndex(), shaderDescSetInfo);
+	shader.GetShader().AddDescriptorSetGroup(shaderDescSetInfo);
 }
-void Lua::BasePipelineCreateInfo::AttachPushConstantRange(lua_State *l, prosper::BasePipelineCreateInfo &pipelineInfo, uint32_t offset, uint32_t size, uint32_t shaderStages)
-{
-	auto *shader = pragma::LuaShaderWrapperBase::GetShader(pipelineInfo);
-	if(shader == nullptr)
-		return;
-	shader->GetShader().AttachPushConstantRange(pipelineInfo, shader->GetCurrentPipelineIndex(), offset, size, static_cast<prosper::ShaderStageFlags>(shaderStages));
-}
+void Lua::Shader::AttachPushConstantRange(lua_State *l, pragma::LuaShaderWrapperBase &shader, uint32_t offset, uint32_t size, uint32_t shaderStages) { shader.GetShader().AttachPushConstantRange(offset, size, static_cast<prosper::ShaderStageFlags>(shaderStages)); }
 
 void Lua::shader::push_shader(lua_State *l, prosper::Shader &shader)
 {
@@ -89,9 +81,9 @@ void Lua::shader::push_shader(lua_State *l, prosper::Shader &shader)
 			Lua::PushRaw<prosper::Shader *>(l, &shader);
 	}
 }
-void Lua::Shader::CreateDescriptorSetGroup(lua_State *l, prosper::Shader &shader, uint32_t setIdx, uint32_t pipelineIdx)
+void Lua::Shader::CreateDescriptorSetGroup(lua_State *l, prosper::Shader &shader, uint32_t setIdx)
 {
-	auto dsg = shader.CreateDescriptorSetGroup(setIdx, pipelineIdx);
+	auto dsg = shader.CreateDescriptorSetGroup(setIdx);
 	if(dsg == nullptr)
 		return;
 	Lua::Push(l, dsg);

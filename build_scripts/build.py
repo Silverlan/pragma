@@ -116,6 +116,22 @@ rerun = args["rerun"]
 update = args["update"]
 modules_prebuilt = []
 
+root = normalize_path(os.getcwd())
+build_dir = normalize_path(build_directory)
+deps_dir = normalize_path(deps_directory)
+install_dir = install_directory
+tools = root +"/tools"
+
+if not os.path.isabs(build_dir):
+	build_dir = os.getcwd() +"/" +build_dir
+
+if not os.path.isabs(deps_dir):
+	deps_dir = os.getcwd() +"/" +deps_dir
+deps_dir_fs = deps_dir.replace("\\", "/")
+
+if not os.path.isabs(install_dir):
+	install_dir = build_dir +"/" +install_dir
+
 print("Inputs:")
 if platform == "linux":
 	print("cxx_compiler: " +cxx_compiler)
@@ -145,26 +161,6 @@ if platform == "linux":
 print("cmake_args: " +', '.join(additional_cmake_args))
 print("modules: " +', '.join(modules))
 
-if platform == "linux":
-	os.environ["CC"] = c_compiler
-	os.environ["CXX"] = cxx_compiler
-
-root = normalize_path(os.getcwd())
-build_dir = normalize_path(build_directory)
-deps_dir = normalize_path(deps_directory)
-install_dir = install_directory
-tools = root +"/tools"
-
-if not os.path.isabs(build_dir):
-	build_dir = os.getcwd() +"/" +build_dir
-
-if not os.path.isabs(deps_dir):
-	deps_dir = os.getcwd() +"/" +deps_dir
-deps_dir_fs = deps_dir.replace("\\", "/")
-
-if not os.path.isabs(install_dir):
-	install_dir = build_dir +"/" +install_dir
-
 if update:
 	os.chdir(root)
 
@@ -184,6 +180,26 @@ mkpath(build_dir)
 mkpath(deps_dir)
 mkpath(install_dir)
 mkpath(tools)
+
+########## clang-19 ##########
+# Due to a compiler bug with C++20 Modules in clang, we have to use clang-19 for now,
+# which is not available in package managers yet.
+if platform == "linux":
+	curDir = os.getcwd()
+	os.chdir(deps_dir)
+	clang19_root = os.getcwd() +"/LLVM-19.1.0-Linux-X64"
+	if not Path(clang19_root).is_dir():
+		print_msg("Downloading clang-19...")
+		http_extract("https://github.com/llvm/llvm-project/releases/download/llvmorg-19.1.0/LLVM-19.1.0-Linux-X64.tar.xz",format="tar.xz")
+	c_compiler = clang19_root +"/bin/clang"
+	cxx_compiler = clang19_root +"/bin/clang++"
+	print_msg("Setting c_compiler override to '" +c_compiler +"'")
+	print_msg("Setting cxx_compiler override to '" +cxx_compiler +"'")
+	os.chdir(curDir)
+
+if platform == "linux":
+	os.environ["CC"] = c_compiler
+	os.environ["CXX"] = cxx_compiler
 
 def execscript(filepath):
 	global generator
@@ -369,9 +385,9 @@ if platform == "win32":
 else:
 	cmake_args += [
 		"-DDEPENDENCY_ICU_INCLUDE=" +icu_root +"/icu/usr/local/include/",
-		"-DDEPENDENCY_ICU_ICUUC_LIBRARY=" +icu_root +"/icu/usr/local/lib/libicuuc.so",
-		"-DDEPENDENCY_ICU_ICUUC_BINARY=" +icu_root +"/icu/usr/local/lib/libicuuc.so",
-		"-DDEPENDENCY_ICU_ICUDT_BINARY=" +icu_root +"/icu/usr/local/lib/libicudata.so"
+		"-DDEPENDENCY_ICU_ICUUC_LIBRARY=" +icu_root +"/icu/usr/local/lib/libicuuc.so.75",
+		"-DDEPENDENCY_ICU_ICUUC_BINARY=" +icu_root +"/icu/usr/local/lib/libicuuc.so.75",
+		"-DDEPENDENCY_ICU_ICUDT_BINARY=" +icu_root +"/icu/usr/local/lib/libicudata.so.75"
 	]
 
 ########## boost ##########
@@ -538,7 +554,7 @@ if not Path(vcpkg_root).is_dir():
 	git_clone("https://github.com/Microsoft/vcpkg.git")
 
 os.chdir("vcpkg")
-reset_to_commit("ad3bae5")
+reset_to_commit("ee2d2a1")
 os.chdir("..")
 if platform == "linux":
 	subprocess.run([vcpkg_root +"/bootstrap-vcpkg.sh","-disableMetrics"],check=True,shell=True)
@@ -781,7 +797,7 @@ execfile(scripts_dir +"/user_modules.py",g,l)
 if with_essential_client_modules:
 	add_pragma_module(
 		name="pr_prosper_vulkan",
-		commitSha="32b40a82978503b917d6d6b26f37aadc79ffd0f5",
+		commitSha="f7416f9d24e79a6cdac2798d1d064c20816cbfee",
 		repositoryUrl="https://github.com/Silverlan/pr_prosper_vulkan.git"
 	)
 
@@ -825,7 +841,7 @@ if with_pfm:
 		)
 		add_pragma_module(
 			name="pr_unirender",
-			commitSha="019f7acb3d5fecffe2d973271921bb4af5a19010",
+			commitSha="f89f32a128636e1ba365b120cdb9f00b3a85f654",
 			repositoryUrl="https://github.com/Silverlan/pr_cycles.git"
 		)
 		add_pragma_module(
@@ -1070,20 +1086,20 @@ def download_addon(name,addonName,url,commitId=None):
 curDir = os.getcwd()
 if not skip_repository_updates:
 	if with_pfm:
-		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","44c57d4dff740ac6477c2cfcb0e9c06c5426470d")
-		download_addon("model editor","tool_model_editor","https://github.com/Silverlan/pragma_model_editor.git","583587dafd49f30679b2326008e2a758e33dbda2")
+		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","264862c84eec63252642cae0e531822a726a8833")
+		download_addon("model editor","tool_model_editor","https://github.com/Silverlan/pragma_model_editor.git","4c185ce7533fba1294e7282ae88168e7842e1a2b")
 
 	if with_vr:
-		download_addon("VR","virtual_reality","https://github.com/Silverlan/PragmaVR.git","49036448123b0a303fa1e78897d0a070bb3102f7")
+		download_addon("VR","virtual_reality","https://github.com/Silverlan/PragmaVR.git","93fe4f849493651c14133ddf1963b0a8b719f836")
 
 	if with_pfm:
 		download_addon("PFM Living Room Demo","pfm_demo_living_room","https://github.com/Silverlan/pfm_demo_living_room.git","4cbecad4a2d6f502b6d9709178883678101f7e2c")
 		download_addon("PFM Bedroom Demo","pfm_demo_bedroom","https://github.com/Silverlan/pfm_demo_bedroom.git","0fed1d5b54a25c3ded2ce906e7da80ca8dd2fb0d")
-		download_addon("PFM Tutorials","pfm_tutorials","https://github.com/Silverlan/pfm_tutorials.git","49928e6db5ae661e20568718f834e29483cf5e5c")
+		download_addon("PFM Tutorials","pfm_tutorials","https://github.com/Silverlan/pfm_tutorials.git","3798414ad461f7e306bbd91f1015b4589fc085b6")
 
 	if with_common_entities:
-		download_addon("HL","pragma_hl","https://github.com/Silverlan/pragma_hl.git","b077005a3b8f924c475823a6cc39b9d041ca5bdb")
-		download_addon("TF2","pragma_tf2","https://github.com/Silverlan/pragma_tf2.git","c489e0d9346e94c65e3e352ae765cbfaa0844cf5")
+		download_addon("HL","pragma_hl","https://github.com/Silverlan/pragma_hl.git","7d146f517a9d514e9c22ca918460b85b27694155")
+		download_addon("TF2","pragma_tf2","https://github.com/Silverlan/pragma_tf2.git","9cf3dc9a1a5fef4cc18b85fc2646cf4263134e9b")
 
 os.chdir(curDir)
 

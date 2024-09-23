@@ -21,16 +21,24 @@ extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
 
-decltype(ShaderComputeIrradianceMapRoughness::DESCRIPTOR_SET_IRRADIANCE) ShaderComputeIrradianceMapRoughness::DESCRIPTOR_SET_IRRADIANCE = {{prosper::DescriptorSetInfo::Binding {prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}}};
-decltype(ShaderComputeIrradianceMapRoughness::DESCRIPTOR_SET_ROUGHNESS) ShaderComputeIrradianceMapRoughness::DESCRIPTOR_SET_ROUGHNESS = {{prosper::DescriptorSetInfo::Binding {prosper::DescriptorType::UniformBuffer, prosper::ShaderStageFlags::FragmentBit}}};
-ShaderComputeIrradianceMapRoughness::ShaderComputeIrradianceMapRoughness(prosper::IPrContext &context, const std::string &identifier) : ShaderCubemap {context, identifier, "screen/fs_compute_irradiance_map_roughness"} {}
+decltype(ShaderComputeIrradianceMapRoughness::DESCRIPTOR_SET_IRRADIANCE) ShaderComputeIrradianceMapRoughness::DESCRIPTOR_SET_IRRADIANCE = {
+  "IRRADIANCE",
+  {prosper::DescriptorSetInfo::Binding {"IRRADIANCE", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}},
+};
+decltype(ShaderComputeIrradianceMapRoughness::DESCRIPTOR_SET_ROUGHNESS) ShaderComputeIrradianceMapRoughness::DESCRIPTOR_SET_ROUGHNESS = {
+  "ROUGHNESS",
+  {prosper::DescriptorSetInfo::Binding {"ROUGHNESS", prosper::DescriptorType::UniformBuffer, prosper::ShaderStageFlags::FragmentBit}},
+};
+ShaderComputeIrradianceMapRoughness::ShaderComputeIrradianceMapRoughness(prosper::IPrContext &context, const std::string &identifier) : ShaderCubemap {context, identifier, "programs/lighting/compute_irradiance_map_roughness"} {}
 
-void ShaderComputeIrradianceMapRoughness::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
+void ShaderComputeIrradianceMapRoughness::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { ShaderCubemap::InitializeGfxPipeline(pipelineInfo, pipelineIdx); }
+
+void ShaderComputeIrradianceMapRoughness::InitializeShaderResources()
 {
-	ShaderCubemap::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
+	ShaderCubemap::InitializeShaderResources();
 
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_IRRADIANCE);
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_ROUGHNESS);
+	AddDescriptorSetGroup(DESCRIPTOR_SET_IRRADIANCE);
+	AddDescriptorSetGroup(DESCRIPTOR_SET_ROUGHNESS);
 }
 
 void ShaderComputeIrradianceMapRoughness::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx)

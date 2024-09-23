@@ -15,15 +15,18 @@
 using namespace pragma;
 
 decltype(ShaderPPMotionBlur::DESCRIPTOR_SET_TEXTURE) ShaderPPMotionBlur::DESCRIPTOR_SET_TEXTURE = {ShaderPPBase::DESCRIPTOR_SET_TEXTURE};
-decltype(ShaderPPMotionBlur::DESCRIPTOR_SET_TEXTURE_VELOCITY) ShaderPPMotionBlur::DESCRIPTOR_SET_TEXTURE_VELOCITY = {{prosper::DescriptorSetInfo::Binding {// Velocity Texture
-  prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}}};
+decltype(ShaderPPMotionBlur::DESCRIPTOR_SET_TEXTURE_VELOCITY) ShaderPPMotionBlur::DESCRIPTOR_SET_TEXTURE_VELOCITY = {
+  "VELOCITY",
+  {prosper::DescriptorSetInfo::Binding {"TEXTURE", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}},
+};
 
-ShaderPPMotionBlur::ShaderPPMotionBlur(prosper::IPrContext &context, const std::string &identifier) : ShaderPPBase(context, identifier, "screen/fs_motion_blur") { SetBaseShader<prosper::ShaderCopyImage>(); }
-void ShaderPPMotionBlur::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
+ShaderPPMotionBlur::ShaderPPMotionBlur(prosper::IPrContext &context, const std::string &identifier) : ShaderPPBase(context, identifier, "programs/post_processing/motion_blur") { SetBaseShader<prosper::ShaderCopyImage>(); }
+void ShaderPPMotionBlur::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { ShaderPPBase::InitializeGfxPipeline(pipelineInfo, pipelineIdx); }
+void ShaderPPMotionBlur::InitializeShaderResources()
 {
-	ShaderPPBase::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_TEXTURE_VELOCITY);
-	AttachPushConstantRange(pipelineInfo, pipelineIdx, 0u, sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit);
+	ShaderPPBase::InitializeShaderResources();
+	AddDescriptorSetGroup(DESCRIPTOR_SET_TEXTURE_VELOCITY);
+	AttachPushConstantRange(0u, sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit);
 }
 bool ShaderPPMotionBlur::RecordDraw(prosper::ShaderBindState &bindState, const PushConstants &pushConstants, prosper::IDescriptorSet &descSetTexture, prosper::IDescriptorSet &descSetTextureVelocity) const
 {

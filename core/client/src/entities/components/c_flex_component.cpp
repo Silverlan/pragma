@@ -15,10 +15,11 @@
 #include "pragma/lua/c_lentity_handles.hpp"
 #include <stack>
 #include <pragma/model/model.h>
-#include <se_scene.hpp>
 #include <alsound_buffer.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
+
+import se_script;
 
 using namespace pragma;
 
@@ -303,7 +304,7 @@ void CFlexComponent::UpdateSoundPhonemes(CALSound &snd)
 	if(mdl == nullptr)
 		return;
 	auto &phonemeMap = mdl->GetPhonemeMap();
-	auto &phonemeData = *static_cast<se::SoundPhonemeData *>(userData.get());
+	auto &phonemeData = *static_cast<source_engine::script::SoundPhonemeData *>(userData.get());
 	auto t = snd.GetTimeOffset();
 	for(auto itWord = phonemeData.words.begin(); itWord != phonemeData.words.end(); ++itWord) {
 		auto &word = *itWord;
@@ -316,7 +317,7 @@ void CFlexComponent::UpdateSoundPhonemes(CALSound &snd)
 			auto it = phonemeMap.phonemes.find(phoneme.phoneme);
 			if(it != phonemeMap.phonemes.end()) {
 				// Find next phoneme to interpolate
-				se::SoundPhonemeData::PhonemeData *nextPhoneme = nullptr;
+				source_engine::script::SoundPhonemeData::PhonemeData *nextPhoneme = nullptr;
 				PhonemeInfo *nextPhonemeInfo = nullptr;
 				auto itPhonemeNext = itPhoneme + 1;
 				if(itPhonemeNext != word.phonemes.end())

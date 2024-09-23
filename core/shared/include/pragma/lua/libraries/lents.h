@@ -88,9 +88,17 @@ namespace Lua {
 			auto &manager = game->GetLuaEntityManager();
 
 			auto &classManager = game->GetLuaClassManager();
+			std::string categoryPath;
 			auto componentFlags = pragma::ComponentFlags::None;
-			if(Lua::IsSet(l, 3))
-				componentFlags = static_cast<pragma::ComponentFlags>(Lua::CheckInt(l, 3));
+			if(Lua::IsSet(l, 3)) {
+				int32_t argFlags = 3;
+				if(!Lua::IsNumber(l, 3)) {
+					categoryPath = Lua::CheckString(l, 3);
+					++argFlags;
+				}
+				if(Lua::IsSet(l, argFlags))
+					componentFlags = static_cast<pragma::ComponentFlags>(Lua::CheckInt(l, argFlags));
+			}
 			componentFlags |= pragma::ComponentFlags::LuaBased;
 
 			// Check if there's an __init-method defined for this class.
@@ -109,6 +117,7 @@ namespace Lua {
 			}
 
 			auto firstCreation = true;
+			pragma::ComponentRegInfo regInfo {categoryPath};
 			auto componentId = game->GetEntityComponentManager().RegisterComponentType(
 			  name,
 			  [o, game, name, firstCreation](BaseEntity &ent) mutable -> util::TSharedHandle<pragma::BaseEntityComponent> {
@@ -156,8 +165,12 @@ namespace Lua {
 				  }
 				  return util::to_shared_handle<pragma::BaseEntityComponent>(std::shared_ptr<TComponent> {static_cast<TComponent *>(game->CreateLuaEntityComponent(ent, name))});
 			  },
-			  componentFlags);
+			  regInfo, componentFlags);
 			manager.RegisterComponent(name, o, componentId);
+
+			luabind::object ents {luabind::globals(l)["ents"]};
+			ents["COMPONENT_" + ustring::get_upper(name)] = componentId;
+
 			Lua::PushInt(l, componentId);
 			return 1;
 		}

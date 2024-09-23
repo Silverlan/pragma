@@ -21,14 +21,18 @@ extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
 
-decltype(ShaderEquirectangularToCubemap::DESCRIPTOR_SET_EQUIRECTANGULAR_TEXTURE) ShaderEquirectangularToCubemap::DESCRIPTOR_SET_EQUIRECTANGULAR_TEXTURE = {{prosper::DescriptorSetInfo::Binding {prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}}};
-ShaderEquirectangularToCubemap::ShaderEquirectangularToCubemap(prosper::IPrContext &context, const std::string &identifier) : ShaderCubemap {context, identifier, "screen/fs_equirectangular_to_cubemap"} {}
+decltype(ShaderEquirectangularToCubemap::DESCRIPTOR_SET_EQUIRECTANGULAR_TEXTURE) ShaderEquirectangularToCubemap::DESCRIPTOR_SET_EQUIRECTANGULAR_TEXTURE = {
+  "TEXTURE",
+  {prosper::DescriptorSetInfo::Binding {"EQUIRECTANGULAR_TEXTURE", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}},
+};
+ShaderEquirectangularToCubemap::ShaderEquirectangularToCubemap(prosper::IPrContext &context, const std::string &identifier) : ShaderCubemap {context, identifier, "programs/util/equirectangular_to_cubemap"} {}
 
-void ShaderEquirectangularToCubemap::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
+void ShaderEquirectangularToCubemap::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { ShaderCubemap::InitializeGfxPipeline(pipelineInfo, pipelineIdx); }
+
+void ShaderEquirectangularToCubemap::InitializeShaderResources()
 {
-	ShaderCubemap::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
-
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_EQUIRECTANGULAR_TEXTURE);
+	ShaderCubemap::InitializeShaderResources();
+	AddDescriptorSetGroup(DESCRIPTOR_SET_EQUIRECTANGULAR_TEXTURE);
 }
 
 void ShaderEquirectangularToCubemap::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx)

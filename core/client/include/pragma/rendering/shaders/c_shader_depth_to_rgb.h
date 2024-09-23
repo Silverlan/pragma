@@ -36,6 +36,7 @@ namespace pragma {
 		bool RecordDraw(prosper::ShaderBindState &bindState, prosper::IDescriptorSet &descSetDepthTex, const TPushConstants &pushConstants) const;
 		virtual uint32_t GetPushConstantSize() const;
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
+		virtual void InitializeShaderResources() override;
 	};
 
 	//////////////////////

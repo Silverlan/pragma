@@ -47,8 +47,8 @@ namespace pragma {
 		virtual GameShaderSpecializationConstantFlag GetBaseSpecializationFlags() const override;
 	  protected:
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
-		virtual void InitializeGfxPipelineDescriptorSets(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
-		virtual void InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
+		virtual void InitializeGfxPipelineDescriptorSets() override;
+		virtual void InitializeGfxPipelinePushConstantRanges() override;
 		virtual prosper::DescriptorSetInfo &GetMaterialDescriptorSetInfo() const;
 	  private:
 		bool UpdateBindFogDensity();

@@ -145,6 +145,10 @@ def extract(zipName,removeZip=True,format="zip"):
 		tar = tarfile.open(zipName, "r:gz")  
 		tar.extractall()
 		tar.close()
+	elif format == "tar.xz":
+		tar = tarfile.open(zipName, "r:xz")
+		tar.extractall()
+		tar.close()
 	if removeZip:
 		os.remove(zipName)
 

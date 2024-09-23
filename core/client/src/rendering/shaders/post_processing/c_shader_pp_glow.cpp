@@ -22,20 +22,17 @@ extern DLLCLIENT CEngine *c_engine;
 
 decltype(ShaderPPGlow::DESCRIPTOR_SET_INSTANCE) ShaderPPGlow::DESCRIPTOR_SET_INSTANCE = {&ShaderGameWorldLightingPass::DESCRIPTOR_SET_INSTANCE};
 decltype(ShaderPPGlow::DESCRIPTOR_SET_SCENE) ShaderPPGlow::DESCRIPTOR_SET_SCENE = {&ShaderGameWorldLightingPass::DESCRIPTOR_SET_SCENE};
-decltype(ShaderPPGlow::DESCRIPTOR_SET_MATERIAL) ShaderPPGlow::DESCRIPTOR_SET_MATERIAL = {{prosper::DescriptorSetInfo::Binding {// Glow Map
-  prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}}};
 decltype(ShaderPPGlow::RENDER_PASS_FORMAT) ShaderPPGlow::RENDER_PASS_FORMAT = prosper::Format::R8G8B8A8_UNorm;
-ShaderPPGlow::ShaderPPGlow(prosper::IPrContext &context, const std::string &identifier) : ShaderGameWorldLightingPass(context, identifier, "world/vs_glow", "world/fs_glow")
+ShaderPPGlow::ShaderPPGlow(prosper::IPrContext &context, const std::string &identifier) : ShaderGameWorldLightingPass(context, identifier, "programs/scene/glow/glow", "programs/scene/glow/glow")
 {
+	m_shaderMaterialName = "glow";
 	// SetBaseShader<ShaderTextured3DBase>();
 }
-prosper::DescriptorSetInfo &ShaderPPGlow::GetMaterialDescriptorSetInfo() const { return DESCRIPTOR_SET_MATERIAL; }
-void ShaderPPGlow::InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { AttachPushConstantRange(pipelineInfo, pipelineIdx, 0u, sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit); }
-void ShaderPPGlow::InitializeGfxPipelineDescriptorSets(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
+void ShaderPPGlow::InitializeGfxPipelinePushConstantRanges() { AttachPushConstantRange(0u, sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit); }
+void ShaderPPGlow::InitializeGfxPipelineDescriptorSets()
 {
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_INSTANCE);
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, GetMaterialDescriptorSetInfo());
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_SCENE);
+	AddDescriptorSetGroup(DESCRIPTOR_SET_INSTANCE);
+	AddDescriptorSetGroup(DESCRIPTOR_SET_SCENE);
 }
 void ShaderPPGlow::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
 {
@@ -52,20 +49,7 @@ void ShaderPPGlow::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &o
 	    {RENDER_PASS_DEPTH_FORMAT, prosper::ImageLayout::DepthStencilAttachmentOptimal, prosper::AttachmentLoadOp::Load, prosper::AttachmentStoreOp::Store /* depth values have already been written by prepass */, sampleCount, prosper::ImageLayout::DepthStencilAttachmentOptimal}}}},
 	  outRenderPass, pipelineIdx);
 }
-std::shared_ptr<prosper::IDescriptorSetGroup> ShaderPPGlow::InitializeMaterialDescriptorSet(CMaterial &mat)
-{
-	auto *glowMap = mat.GetGlowMap();
-	if(glowMap == nullptr || glowMap->texture == nullptr)
-		return nullptr;
-	auto glowTexture = std::static_pointer_cast<Texture>(glowMap->texture);
-	if(glowTexture->HasValidVkTexture() == false)
-		return nullptr;
-	auto descSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_MATERIAL);
-	mat.SetDescriptorSetGroup(*this, descSetGroup);
-	auto &descSet = *descSetGroup->GetDescriptorSet();
-	descSet.SetBindingTexture(*glowTexture->GetVkTexture(), 0u);
-	return descSetGroup;
-}
+std::shared_ptr<prosper::IDescriptorSetGroup> ShaderPPGlow::InitializeMaterialDescriptorSet(CMaterial &mat) { return ShaderGameWorldLightingPass::InitializeMaterialDescriptorSet(mat); }
 bool ShaderPPGlow::RecordGlowMaterial(prosper::ShaderBindState &bindState, CMaterial &mat) const
 {
 	auto *glowMap = mat.GetGlowMap();
@@ -86,5 +70,5 @@ bool ShaderPPGlow::RecordGlowMaterial(prosper::ShaderBindState &bindState, CMate
 	if(data != nullptr)
 		data->GetFloat("glow_scale", &scale);
 
-	return RecordPushConstants(bindState, PushConstants {scale}) && RecordBindDescriptorSet(bindState, *descSetGroup->GetDescriptorSet(), GetMaterialDescriptorSetIndex());
+	return false; // RecordPushConstants(bindState, PushConstants {scale}) && RecordBindDescriptorSet(bindState, *descSetGroup->GetDescriptorSet(), GetMaterialDescriptorSetIndex());
 }

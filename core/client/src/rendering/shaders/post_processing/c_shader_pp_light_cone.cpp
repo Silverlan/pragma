@@ -21,8 +21,10 @@
 using namespace pragma;
 
 decltype(ShaderPPLightCone::DESCRIPTOR_SET_TEXTURE) ShaderPPLightCone::DESCRIPTOR_SET_TEXTURE = {ShaderPPBase::DESCRIPTOR_SET_TEXTURE};
-decltype(ShaderPPLightCone::DESCRIPTOR_SET_DEPTH_BUFFER) ShaderPPLightCone::DESCRIPTOR_SET_DEPTH_BUFFER = {{prosper::DescriptorSetInfo::Binding {// Depth Buffer
-  prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}}};
+decltype(ShaderPPLightCone::DESCRIPTOR_SET_DEPTH_BUFFER) ShaderPPLightCone::DESCRIPTOR_SET_DEPTH_BUFFER = {
+  "DEPTH_BUFFER",
+  {prosper::DescriptorSetInfo::Binding {"MAP", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}},
+};
 decltype(ShaderPPLightCone::DESCRIPTOR_SET_SCENE) ShaderPPLightCone::DESCRIPTOR_SET_SCENE = {&ShaderEntity::DESCRIPTOR_SET_SCENE};
 decltype(ShaderPPLightCone::DESCRIPTOR_SET_INSTANCE) ShaderPPLightCone::DESCRIPTOR_SET_INSTANCE = {&ShaderEntity::DESCRIPTOR_SET_INSTANCE};
 
@@ -30,13 +32,10 @@ decltype(ShaderPPLightCone::VERTEX_BINDING_VERTEX) ShaderPPLightCone::VERTEX_BIN
 decltype(ShaderPPLightCone::VERTEX_ATTRIBUTE_POSITION) ShaderPPLightCone::VERTEX_ATTRIBUTE_POSITION = {ShaderEntity::VERTEX_ATTRIBUTE_POSITION, VERTEX_BINDING_VERTEX};
 decltype(ShaderPPLightCone::VERTEX_ATTRIBUTE_NORMAL) ShaderPPLightCone::VERTEX_ATTRIBUTE_NORMAL = {ShaderEntity::VERTEX_ATTRIBUTE_NORMAL, VERTEX_BINDING_VERTEX};
 
-ShaderPPLightCone::ShaderPPLightCone(prosper::IPrContext &context, const std::string &identifier) : ShaderPPBase(context, identifier, "screen/vs_light_cone", "screen/fs_light_cone") { SetBaseShader<prosper::ShaderCopyImage>(); }
+ShaderPPLightCone::ShaderPPLightCone(prosper::IPrContext &context, const std::string &identifier) : ShaderPPBase(context, identifier, "programs/scene/light_cone/light_cone", "programs/scene/light_cone/light_cone") { SetBaseShader<prosper::ShaderCopyImage>(); }
 void ShaderPPLightCone::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
 {
 	ShaderGraphics::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
-
-	AddVertexAttribute(pipelineInfo, VERTEX_ATTRIBUTE_POSITION);
-	AddVertexAttribute(pipelineInfo, VERTEX_ATTRIBUTE_NORMAL);
 
 	pipelineInfo.ToggleDepthWrites(false);
 	pipelineInfo.ToggleDepthTest(true, prosper::CompareOp::LessOrEqual);
@@ -53,11 +52,19 @@ void ShaderPPLightCone::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInf
 		prosper::BlendFactor::SrcAlpha,prosper::BlendFactor::OneMinusSrcAlpha,
 		prosper::ColorComponentFlags::RBit | prosper::ColorComponentFlags::GBit | prosper::ColorComponentFlags::BBit | prosper::ColorComponentFlags::ABit
 	);*/
-	AttachPushConstantRange(pipelineInfo, pipelineIdx, 0u, sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit);
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_TEXTURE);
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_DEPTH_BUFFER);
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_INSTANCE);
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_SCENE);
+}
+void ShaderPPLightCone::InitializeShaderResources()
+{
+	ShaderGraphics::InitializeShaderResources();
+
+	AddVertexAttribute(VERTEX_ATTRIBUTE_POSITION);
+	AddVertexAttribute(VERTEX_ATTRIBUTE_NORMAL);
+
+	AttachPushConstantRange(0u, sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit);
+	AddDescriptorSetGroup(DESCRIPTOR_SET_TEXTURE);
+	AddDescriptorSetGroup(DESCRIPTOR_SET_DEPTH_BUFFER);
+	AddDescriptorSetGroup(DESCRIPTOR_SET_INSTANCE);
+	AddDescriptorSetGroup(DESCRIPTOR_SET_SCENE);
 }
 void ShaderPPLightCone::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx)
 {

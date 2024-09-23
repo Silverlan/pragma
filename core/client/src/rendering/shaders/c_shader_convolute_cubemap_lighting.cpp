@@ -18,14 +18,19 @@ extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
 
-decltype(ShaderConvoluteCubemapLighting::DESCRIPTOR_SET_CUBEMAP_TEXTURE) ShaderConvoluteCubemapLighting::DESCRIPTOR_SET_CUBEMAP_TEXTURE = {{prosper::DescriptorSetInfo::Binding {prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}}};
-ShaderConvoluteCubemapLighting::ShaderConvoluteCubemapLighting(prosper::IPrContext &context, const std::string &identifier) : ShaderCubemap {context, identifier, "screen/fs_convolute_cubemap_lighting"} {}
+decltype(ShaderConvoluteCubemapLighting::DESCRIPTOR_SET_CUBEMAP_TEXTURE) ShaderConvoluteCubemapLighting::DESCRIPTOR_SET_CUBEMAP_TEXTURE = {
+  "TEXTURE",
+  {prosper::DescriptorSetInfo::Binding {"CUBEMAP", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}},
+};
+ShaderConvoluteCubemapLighting::ShaderConvoluteCubemapLighting(prosper::IPrContext &context, const std::string &identifier) : ShaderCubemap {context, identifier, "programs/lighting/convolute_cubemap_lighting"} {}
 
-void ShaderConvoluteCubemapLighting::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
+void ShaderConvoluteCubemapLighting::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { ShaderCubemap::InitializeGfxPipeline(pipelineInfo, pipelineIdx); }
+
+void ShaderConvoluteCubemapLighting::InitializeShaderResources()
 {
-	ShaderCubemap::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
+	ShaderCubemap::InitializeShaderResources();
 
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_CUBEMAP_TEXTURE);
+	AddDescriptorSetGroup(DESCRIPTOR_SET_CUBEMAP_TEXTURE);
 }
 
 void ShaderConvoluteCubemapLighting::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx)

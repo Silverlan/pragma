@@ -1,0 +1,9 @@
+#ifndef F_VS_CONFIG_GLS
+#define F_VS_CONFIG_GLS
+
+#include "pbr/sh_pbr.glsl"
+
+layout(constant_id = SPECIALIZATION_CONSTANT_ENABLE_ANIMATION) const uint CSPEC_ENABLE_ANIMATION = 1;
+layout(constant_id = SPECIALIZATION_CONSTANT_ENABLE_MORPH_TARGET_ANIMATION) const uint CSPEC_ENABLE_MORPH_TARGET_ANIMATION = 1;
+
+#endif

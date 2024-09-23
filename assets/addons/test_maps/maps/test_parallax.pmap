@@ -1,0 +1,135 @@
+"assetData"
+{
+	$array entities [element;4][
+		{
+			$string className "entity"
+			"components"
+			{
+				"pfm_sky"
+				{
+					$string flags "ClientsideOnly"
+					"properties"
+					{
+						$string skyTexture "skies/dusk379.hdr"
+						$float strength 0.3
+						$bool transparent 0
+					}
+				}
+			}
+			$string flags "ClientsideOnly"
+			"keyValues"
+			{
+				$string uuid "3942e382-236d-4300-9cf0-8f678d0c34b7"
+			}
+			$array outputs [element;0][]
+			$stransform pose [[0,0,50][1,0,0,0][1,1,1]]
+		},
+		{
+			$string className "entity"
+			"components"
+			{
+				"reflection_probe"
+				{
+					$string flags "ClientsideOnly"
+					"properties"
+					{
+						$string iblMaterial "pbr/ibl/venice_sunset"
+						$float iblStrength 1.4
+					}
+				}
+			}
+			$string flags "ClientsideOnly"
+			"keyValues"
+			{
+				$string uuid "e27c8c53-f093-406a-9329-7b659065e163"
+			}
+			$array outputs [element;0][]
+			$stransform pose [[0,0,50][1,0,0,0][1,1,1]]
+		},
+		{
+			$string className "entity"
+			"components"
+			{
+				"light_map"
+				{
+					$string flags "ClientsideOnly"
+					"properties"
+					{
+						$float exposure 1
+						$string lightmapMaterial ""
+					}
+				}
+				"light_map_data_cache"
+				{
+					$string flags "ClientsideOnly"
+					"properties"
+					{
+						$string lightmapDataCache ""
+					}
+				}
+				"pfm_cuboid_bounds"
+				{
+					$string flags "ClientsideOnly"
+					"properties"
+					{
+						$vec3 maxBounds [0,0,0]
+						$vec3 minBounds [0,0,0]
+						$bool showDebugBounds 0
+					}
+				}
+			}
+			$string flags "ClientsideOnly"
+			"keyValues"
+			{
+				$string uuid "f0c4204e-4b0f-4633-9a01-a52ef79ceee4"
+			}
+			$array outputs [element;0][]
+			$stransform pose [[0,0,50][1,0,0,0][1,1,1]]
+		},
+		{
+			$string className "prop_dynamic"
+			"components"
+			{
+				"light_map_receiver"
+				{
+					$string flags "ClientsideOnly"
+					"properties"
+					{
+
+					}
+				}
+			}
+			$string flags "ClientsideOnly"
+			"keyValues"
+			{
+				$string model "test/test_parallax"
+				$string skin "0"
+				$string uuid "c9d6f865-08cd-4b63-acbb-d1f9b71a2581"
+			}
+			$array outputs [element;0][]
+			$stransform pose [[-23.0094,-61.0519,119.0467][1,0,0,0][20,20,20]]
+		},
+		{
+			$string className "env_light_spot"
+			$array components [string;1]["transform"]
+			"keyValues"
+			{
+				$string angles "25.6683 -40.3359 0.000132335"
+				$string blendfraction "0.10000000149012"
+				$string light_flags "0"
+				$string light_intensity "100"
+				$string light_intensity_type "0"
+				$string lightcolor "255 255 255"
+				$string origin "47.3593 -8.003 35.9849"
+				$string outerconeangle "60.000001404387"
+				$string radius "200"
+				$string spawnflags "1536"
+				$string uuid "55c310c1-29dd-407a-ab7e-3e9c4dddcec4"
+			}
+			$array outputs [element;0][]
+		}
+	]
+	$array materials [string;0][]
+}
+$string assetType "PMAP"
+$uint32 assetVersion 2

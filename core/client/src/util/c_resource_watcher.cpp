@@ -16,6 +16,7 @@
 #include <textureinfo.h>
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/asset/util_asset.hpp>
+#include <prosper_glsl.hpp>
 #include <cmaterial_manager2.hpp>
 #include <cmaterial.h>
 
@@ -141,7 +142,7 @@ void CResourceWatcherManager::OnResourceChanged(const util::Path &rootPath, cons
 			CallChangeCallbacks(ECResourceWatcherCallbackType::ParticleSystem, strPath, ext);
 		}
 	}
-	else if(ext == "gls" || ext == "hls") {
+	else if(prosper::glsl::is_glsl_file_extension(ext) || ext == "hlsl") {
 #if RESOURCE_WATCHER_VERBOSE > 0
 		auto shaderPath = "shaders\\" + strPath;
 		Con::cout << "[ResourceWatcher] Shader has changed: " << shaderPath << ". Attempting to reload..." << Con::endl;

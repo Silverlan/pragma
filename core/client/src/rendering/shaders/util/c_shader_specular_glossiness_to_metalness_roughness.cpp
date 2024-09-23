@@ -27,13 +27,12 @@
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;
 
-decltype(pragma::ShaderSpecularGlossinessToMetalnessRoughness::DESCRIPTOR_SET_TEXTURE) pragma::ShaderSpecularGlossinessToMetalnessRoughness::DESCRIPTOR_SET_TEXTURE = {{prosper::DescriptorSetInfo::Binding {// Diffuse Map
-                                                                                                                                                                          prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit},
-  prosper::DescriptorSetInfo::Binding {// Specular glossiness map
-    prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit},
-  prosper::DescriptorSetInfo::Binding {// Ambient occlusion Map
-    prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}}};
-pragma::ShaderSpecularGlossinessToMetalnessRoughness::ShaderSpecularGlossinessToMetalnessRoughness(prosper::IPrContext &context, const std::string &identifier) : ShaderBaseImageProcessing {context, identifier, "util/fs_specular_glossiness_to_metalness_roughness.gls"} {}
+decltype(pragma::ShaderSpecularGlossinessToMetalnessRoughness::DESCRIPTOR_SET_TEXTURE) pragma::ShaderSpecularGlossinessToMetalnessRoughness::DESCRIPTOR_SET_TEXTURE = {
+  "TEXTURES",
+  {prosper::DescriptorSetInfo::Binding {"DIFFUSE", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}, prosper::DescriptorSetInfo::Binding {"SPECULAR_GLOSSINESS", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit},
+    prosper::DescriptorSetInfo::Binding {"AMBIENT_OCCLUSION", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}},
+};
+pragma::ShaderSpecularGlossinessToMetalnessRoughness::ShaderSpecularGlossinessToMetalnessRoughness(prosper::IPrContext &context, const std::string &identifier) : ShaderBaseImageProcessing {context, identifier, "programs/util/specular_glossiness_to_metalness_roughness"} {}
 
 std::optional<pragma::ShaderSpecularGlossinessToMetalnessRoughness::MetalnessRoughnessImageSet> pragma::ShaderSpecularGlossinessToMetalnessRoughness::ConvertToMetalnessRoughness(prosper::IPrContext &context, prosper::Texture *diffuseMap, prosper::Texture *specularGlossinessMap,
   const PushConstants &pushConstantData, prosper::Texture *aoMap)
@@ -122,10 +121,16 @@ void pragma::ShaderSpecularGlossinessToMetalnessRoughness::InitializeGfxPipeline
 {
 	ShaderGraphics::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
 
-	AddDefaultVertexAttributes(pipelineInfo);
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_TEXTURE);
-	AttachPushConstantRange(pipelineInfo, pipelineIdx, 0u, sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit);
 	SetGenericAlphaColorBlendAttachmentProperties(pipelineInfo);
+}
+
+void pragma::ShaderSpecularGlossinessToMetalnessRoughness::InitializeShaderResources()
+{
+	ShaderGraphics::InitializeShaderResources();
+
+	AddDefaultVertexAttributes();
+	AddDescriptorSetGroup(DESCRIPTOR_SET_TEXTURE);
+	AttachPushConstantRange(0u, sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit);
 }
 
 void pragma::ShaderSpecularGlossinessToMetalnessRoughness::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx)

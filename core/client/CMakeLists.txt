@@ -24,6 +24,7 @@ pr_add_dependency(${PROJ_NAME} vorbis TARGET)
 pr_add_dependency(${PROJ_NAME} vorbisfile TARGET)
 pr_add_dependency(${PROJ_NAME} noise-static TARGET)
 pr_add_dependency(${PROJ_NAME} noiseutils-static TARGET)
+pr_add_dependency(${PROJ_NAME} muparserx TARGET)
 
 pr_add_external_dependency(${PROJ_NAME} tinygltf HEADER_ONLY)
 pr_add_external_dependency(${PROJ_NAME} rapidxml HEADER_ONLY)
@@ -32,6 +33,7 @@ pr_add_compile_definitions(${PROJ_NAME} -DNOISE_STATIC)
 
 pr_add_headers(${PROJ_NAME} "include/")
 pr_add_sources(${PROJ_NAME} "src/")
+pr_add_modules(${PROJ_NAME} "src/")
 
 pr_add_compile_definitions(${PROJ_NAME} -DWMS_STATIC PUBLIC)
 pr_add_compile_definitions(${PROJ_NAME} -DDLLCLIENT_EX)

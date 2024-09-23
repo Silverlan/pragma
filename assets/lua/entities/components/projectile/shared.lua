@@ -46,7 +46,12 @@ function ents.ProjectileComponent:InitializePhysics(component)
 	end
 	self:SetupPhysics()
 end
-ents.COMPONENT_PROJECTILE = ents.register_component("projectile", ents.ProjectileComponent)
+ents.register_component(
+	"projectile",
+	ents.ProjectileComponent,
+	"gameplay",
+	ents.EntityComponent.FREGISTER_BIT_HIDE_IN_EDITOR
+)
 
 ents.ProjectileComponent.EVENT_ON_PROJECTILE_IMPACT = ents.register_component_event(ents.COMPONENT_PROJECTILE, "impact")
 ents.ProjectileComponent.EVENT_ON_PROJECTILE_HIT_DAMAGE =

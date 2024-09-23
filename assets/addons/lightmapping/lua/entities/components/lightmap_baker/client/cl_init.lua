@@ -523,7 +523,7 @@ function Component:ReloadLightmapData(tEnts)
 	end
 	vrp.load_baked_lightmap_uvs("lm_cache",tEnts)]]
 end
-ents.COMPONENT_LIGHTMAP_BAKER = ents.register_component("lightmap_baker", Component)
+ents.register_component("lightmap_baker", Component, "baking")
 Component.EVENT_UPDATE_LIGHTMAP_TARGETS =
 	ents.register_component_event(ents.COMPONENT_LIGHTMAP_BAKER, "update_lightmap_targets")
 Component.EVENT_ON_BAKING_COMPLETED =

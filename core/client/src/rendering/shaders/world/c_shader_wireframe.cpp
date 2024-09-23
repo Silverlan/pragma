@@ -11,7 +11,7 @@
 
 using namespace pragma;
 
-ShaderWireframe::ShaderWireframe(prosper::IPrContext &context, const std::string &identifier) : ShaderPBR(context, identifier, "world/vs_textured", "world/fs_wireframe")
+ShaderWireframe::ShaderWireframe(prosper::IPrContext &context, const std::string &identifier) : ShaderPBR(context, identifier, "programs/scene/textured", "programs/scene/wireframe")
 {
 	// SetBaseShader<ShaderTextured3DBase>();
 }

@@ -335,8 +335,20 @@ void Lua::ents::register_library(lua_State *l)
 	  });
 
 	auto componentInfoDef = luabind::class_<pragma::ComponentInfo>("ComponentInfo");
+	componentInfoDef.def(
+	  "__tostring", +[](const pragma::ComponentInfo &componentInfo) -> std::string {
+		  std::stringstream ss;
+		  ss << "ComponentInfo";
+		  ss << "[" << componentInfo.id << "]";
+		  ss << "[" << componentInfo.name << "]";
+		  ss << "[Cat:" << componentInfo.category << "]";
+		  ss << "[Flags:" << magic_enum::flags::enum_name(componentInfo.flags) << "]";
+		  return ss.str();
+	  });
 	componentInfoDef.property(
 	  "name", +[](lua_State *l, const pragma::ComponentInfo &componentInfo) { return std::string {*componentInfo.name}; });
+	componentInfoDef.property(
+	  "category", +[](lua_State *l, const pragma::ComponentInfo &componentInfo) { return std::string {*componentInfo.category}; });
 	componentInfoDef.def_readonly("id", &pragma::ComponentInfo::id);
 	componentInfoDef.def_readonly("flags", &pragma::ComponentInfo::flags);
 	componentInfoDef.def(

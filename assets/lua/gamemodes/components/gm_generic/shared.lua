@@ -115,4 +115,4 @@ function Component:OnPlayerSpawned(pl)
 		end
 	end
 end
-ents.COMPONENT_GM_GENERIC = ents.register_component("gm_generic", Component)
+ents.register_component("gm_generic", Component, "gameplay")

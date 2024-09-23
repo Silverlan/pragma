@@ -9,7 +9,8 @@
 #include "pragma/audio/c_lalsound.hpp"
 #include <pragma/lua/policies/pair_policy.hpp>
 #include <pragma/lua/converters/pair_converter_t.hpp>
-#include <se_scene.hpp>
+
+import se_script;
 
 namespace Lua {
 	namespace ALSound {
@@ -57,7 +58,7 @@ Lua::opt<luabind::tableT<void>> Lua::ALBuffer::GetPhonemeData(lua_State *l, al::
 	auto pUserData = buffer.GetUserData();
 	if(pUserData == nullptr)
 		return nil;
-	auto &phonemeData = *static_cast<se::SoundPhonemeData *>(pUserData.get());
+	auto &phonemeData = *static_cast<source_engine::script::SoundPhonemeData *>(pUserData.get());
 
 	auto t = luabind::newtable(l);
 	t["plainText"] = phonemeData.plainText;

@@ -16,9 +16,6 @@ namespace pragma {
 		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_ALPHA;
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_ALPHA;
 
-		static prosper::DescriptorSetInfo DESCRIPTOR_SET_MATERIAL;
-		enum class MaterialBinding : uint32_t { DiffuseMap2 = umath::to_integral(ShaderGameWorldLightingPass::MaterialBinding::Count), DiffuseMap3 };
-
 #pragma pack(push, 1)
 		struct PushConstants {
 			int32_t alphaCount;
@@ -27,10 +24,9 @@ namespace pragma {
 
 		ShaderTexturedAlphaTransition(prosper::IPrContext &context, const std::string &identifier);
 	  protected:
-		virtual void InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
+		virtual void InitializeGfxPipelinePushConstantRanges() override;
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
-		virtual prosper::DescriptorSetInfo &GetMaterialDescriptorSetInfo() const override;
-		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override;
+		virtual void InitializeShaderResources() override;
 	};
 };
 

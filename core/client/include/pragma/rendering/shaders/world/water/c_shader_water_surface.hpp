@@ -25,6 +25,7 @@ namespace pragma {
 	  protected:
 		ShaderWaterSurface(prosper::IPrContext &context, const std::string &identifier, const std::string &csShader);
 		virtual void InitializeComputePipeline(prosper::ComputePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
+		virtual void InitializeShaderResources() override;
 	};
 };
 

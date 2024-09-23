@@ -10,4 +10,4 @@ function Component:Initialize()
 		self:BindEvent(ents.GamemodeComponent.EVENT_ON_GAME_READY, "InitializeHud")
 	end
 end
-ents.COMPONENT_GM_ZEN = ents.register_component("gm_zen", Component)
+ents.register_component("gm_zen", Component, "gameplay")

@@ -1,3 +1,0 @@
-#version 440
-
-#include "vs_wgui_text_cheap_base.gls"

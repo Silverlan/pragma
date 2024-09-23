@@ -30,9 +30,10 @@
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <image/prosper_render_target.hpp>
 #include <pragma/entities/environment/effects/particlesystemdata.h>
-#include <util_zip.h>
 #include <prosper_window.hpp>
 #include <fsys/ifile.hpp>
+
+import util_zip;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;

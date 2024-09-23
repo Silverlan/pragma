@@ -253,6 +253,7 @@ function gui.WIContextMenu:CloseActiveSubMenu()
 		return
 	end
 	local pSubMenu = self.m_activeSubMenu
+	pSubMenu:CloseActiveSubMenu()
 	pSubMenu:SetVisible(false)
 	self:RequestFocus()
 	self.m_activeSubMenu = nil

@@ -1,0 +1,33 @@
+#version 440
+
+#define SHADER_STORAGE_WATER_PARTICLE_SET 0
+#define SHADER_STORAGE_WATER_PARTICLE_BINDING 0
+
+#define SHADER_STORAGE_WATER_PARTICLE_WATER_EDGE_DATA_SET SHADER_STORAGE_WATER_PARTICLE_SET
+#define SHADER_STORAGE_WATER_PARTICLE_WATER_EDGE_DATA_BINDING (SHADER_STORAGE_WATER_PARTICLE_BINDING + 1)
+
+#define SHADER_STORAGE_WATER_SURFACE_INFO_SET (SHADER_STORAGE_WATER_PARTICLE_WATER_EDGE_DATA_SET + 1)
+#define SHADER_STORAGE_WATER_SURFACE_INFO_BINDING 0
+
+#include "water_particle.glsl"
+#include "water_surface_info.glsl"
+#include "water_surface_edge_data.glsl"
+
+layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
+
+void main()
+{
+	uint x = gl_GlobalInvocationID.x;
+	uint y = gl_GlobalInvocationID.y;
+	if(x >= u_surfaceInfo.width || y >= u_surfaceInfo.height)
+		return;
+	const float dt = 0.01;
+
+	uint ptIdx = y * u_surfaceInfo.width + x;
+
+	float height = u_particles.particles[ptIdx].height;
+	for(uint i = 0; i < 4; ++i) {
+		height += u_waterParticleEdgeData.edgeData[ptIdx].thisToNb[i] + u_waterParticleEdgeData.edgeData[ptIdx].nbToThis[i];
+	}
+	u_particles.particles[ptIdx].height = height;
+}

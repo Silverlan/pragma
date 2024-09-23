@@ -13,4 +13,4 @@ extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
 
-ShaderSpecularToRoughness::ShaderSpecularToRoughness(prosper::IPrContext &context, const std::string &identifier) : ShaderBaseImageProcessing {context, identifier, "util/fs_specular_to_roughness.gls"} {}
+ShaderSpecularToRoughness::ShaderSpecularToRoughness(prosper::IPrContext &context, const std::string &identifier) : ShaderBaseImageProcessing {context, identifier, "programs/util/specular_to_roughness"} {}

@@ -254,6 +254,7 @@ class DLLNETWORK Model : public std::enable_shared_from_this<Model> {
 	std::shared_ptr<Model> Copy(Game *game, CopyFlags copyFlags = CopyFlags::ShallowCopy) const;
 	bool FindMaterial(const std::string &texture, std::string &matPath) const;
 	bool GenerateLowLevelLODs(Game &game);
+	bool GenerateCollisionMeshes(bool convex, float mass, const std::optional<std::string> &surfaceMaterial = {});
 	MetaInfo &GetMetaInfo() const;
 	Vector3 GetOrigin() const;
 	const Vector3 &GetEyeOffset() const;

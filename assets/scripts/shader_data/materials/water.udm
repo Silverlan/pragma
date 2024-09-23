@@ -1,0 +1,14 @@
+"shader_material"
+{
+	$array properties [element][]
+	$array textures [element][
+		{
+			$string name "dudv_map"
+			$bool required 1
+		},
+		{
+			$string name "normal_map"
+			$bool required 1
+		}
+	]
+}

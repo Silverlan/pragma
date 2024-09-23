@@ -16,32 +16,38 @@ using namespace pragma;
 extern DLLCLIENT CEngine *c_engine;
 
 uint32_t ShaderForwardPLightCulling::TILE_SIZE = 16u;
-decltype(ShaderForwardPLightCulling::DESCRIPTOR_SET_LIGHTS) ShaderForwardPLightCulling::DESCRIPTOR_SET_LIGHTS = {{prosper::DescriptorSetInfo::Binding {// Light Buffers
-                                                                                                                    LIGHT_SOURCE_BUFFER_TYPE, prosper::ShaderStageFlags::ComputeBit},
-  prosper::DescriptorSetInfo::Binding {// Visible light tile index buffer
-    prosper::DescriptorType::StorageBuffer, prosper::ShaderStageFlags::ComputeBit},
-  prosper::DescriptorSetInfo::Binding {// Shadow Buffers
-    LIGHT_SOURCE_BUFFER_TYPE, prosper::ShaderStageFlags::ComputeBit},
-  prosper::DescriptorSetInfo::Binding {// Visible light index buffer
-    prosper::DescriptorType::StorageBuffer, prosper::ShaderStageFlags::ComputeBit},
-  prosper::DescriptorSetInfo::Binding {// Depth Map
-    prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::ComputeBit}}};
-decltype(ShaderForwardPLightCulling::DESCRIPTOR_SET_SCENE) ShaderForwardPLightCulling::DESCRIPTOR_SET_SCENE = {{prosper::DescriptorSetInfo::Binding {// Camera
-                                                                                                                  prosper::DescriptorType::UniformBuffer, prosper::ShaderStageFlags::ComputeBit},
-  prosper::DescriptorSetInfo::Binding {// Render Settings
-    prosper::DescriptorType::UniformBuffer, prosper::ShaderStageFlags::ComputeBit}}};
-ShaderForwardPLightCulling::ShaderForwardPLightCulling(prosper::IPrContext &context, const std::string &identifier) : prosper::ShaderCompute(context, identifier, "compute/cs_forwardp_light_culling") {}
+decltype(ShaderForwardPLightCulling::DESCRIPTOR_SET_LIGHTS) ShaderForwardPLightCulling::DESCRIPTOR_SET_LIGHTS = {
+  "LIGHTS",
+  {prosper::DescriptorSetInfo::Binding {"LIGHT_BUFFERS", LIGHT_SOURCE_BUFFER_TYPE, prosper::ShaderStageFlags::ComputeBit}, prosper::DescriptorSetInfo::Binding {"VISIBLE_LIGHT_TILE_INDEX_BUFFER", prosper::DescriptorType::StorageBuffer, prosper::ShaderStageFlags::ComputeBit},
+    prosper::DescriptorSetInfo::Binding {"SHADOW_BUFFERS", LIGHT_SOURCE_BUFFER_TYPE, prosper::ShaderStageFlags::ComputeBit}, prosper::DescriptorSetInfo::Binding {"VISIBLE_LIGHT_INDEX_BUFFER", prosper::DescriptorType::StorageBuffer, prosper::ShaderStageFlags::ComputeBit},
+    prosper::DescriptorSetInfo::Binding {"DEPTH_MAP", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::ComputeBit}},
+};
+decltype(ShaderForwardPLightCulling::DESCRIPTOR_SET_SCENE) ShaderForwardPLightCulling::DESCRIPTOR_SET_SCENE = {
+  "SCENE",
+  {
+    prosper::DescriptorSetInfo::Binding {"CAMERA", prosper::DescriptorType::UniformBuffer, prosper::ShaderStageFlags::ComputeBit},
+    prosper::DescriptorSetInfo::Binding {"RENDER_SETTINGS", prosper::DescriptorType::UniformBuffer, prosper::ShaderStageFlags::ComputeBit},
+  },
+};
+ShaderForwardPLightCulling::ShaderForwardPLightCulling(prosper::IPrContext &context, const std::string &identifier) : prosper::ShaderCompute(context, identifier, "programs/compute/forwardp_light_culling") {}
 
 void ShaderForwardPLightCulling::InitializeComputePipeline(prosper::ComputePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
 {
 	prosper::ShaderCompute::InitializeComputePipeline(pipelineInfo, pipelineIdx);
 
-	AttachPushConstantRange(pipelineInfo, pipelineIdx, 0u, sizeof(PushConstants), prosper::ShaderStageFlags::ComputeBit);
+	// Currently not supported on some GPUs?
+	// AddSpecializationConstant(pipelineInfo,0u /* constant id */,sizeof(TILE_SIZE),&TILE_SIZE);
+}
+void ShaderForwardPLightCulling::InitializeShaderResources()
+{
+	prosper::ShaderCompute::InitializeShaderResources();
+
+	AttachPushConstantRange(0u, sizeof(PushConstants), prosper::ShaderStageFlags::ComputeBit);
 	// Currently not supported on some GPUs?
 	// AddSpecializationConstant(pipelineInfo,0u /* constant id */,sizeof(TILE_SIZE),&TILE_SIZE);
 
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_LIGHTS);
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_SCENE);
+	AddDescriptorSetGroup(DESCRIPTOR_SET_LIGHTS);
+	AddDescriptorSetGroup(DESCRIPTOR_SET_SCENE);
 }
 
 bool ShaderForwardPLightCulling::RecordCompute(prosper::ShaderBindState &bindState, prosper::IDescriptorSet &descSetLights, prosper::IDescriptorSet &descSetCamera, uint32_t vpWidth, uint32_t vpHeight, uint32_t workGroupsX, uint32_t workGroupsY, uint32_t lightCount,

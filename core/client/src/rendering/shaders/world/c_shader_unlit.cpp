@@ -16,38 +16,8 @@ extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
 
-decltype(ShaderUnlit::DESCRIPTOR_SET_MATERIAL) ShaderUnlit::DESCRIPTOR_SET_MATERIAL = {{prosper::DescriptorSetInfo::Binding {// Material settings
-                                                                                          prosper::DescriptorType::UniformBuffer, prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::GeometryBit},
-  prosper::DescriptorSetInfo::Binding {// Albedo Map
-    prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}}};
-ShaderUnlit::ShaderUnlit(prosper::IPrContext &context, const std::string &identifier) : ShaderGameWorldLightingPass {context, identifier, "world/vs_textured", "world/fs_unlit"}
+ShaderUnlit::ShaderUnlit(prosper::IPrContext &context, const std::string &identifier) : ShaderGameWorldLightingPass {context, identifier, "programs/scene/textured", "programs/scene/unlit"}
 {
+	m_shaderMaterialName = "albedo";
 	// SetPipelineCount(umath::to_integral(Pipeline::Count));
-}
-prosper::DescriptorSetInfo &ShaderUnlit::GetMaterialDescriptorSetInfo() const { return ShaderGameWorldLightingPass::DESCRIPTOR_SET_MATERIAL; } //DESCRIPTOR_SET_MATERIAL;}
-std::shared_ptr<prosper::IDescriptorSetGroup> ShaderUnlit::InitializeMaterialDescriptorSet(CMaterial &mat, const prosper::DescriptorSetInfo &descSetInfo)
-{
-	return ShaderGameWorldLightingPass::InitializeMaterialDescriptorSet(mat, descSetInfo);
-	/*auto *albedoMap = mat.GetDiffuseMap();
-	if(albedoMap == nullptr || albedoMap->texture == nullptr)
-		return nullptr;
-	auto albedoTexture = std::static_pointer_cast<Texture>(albedoMap->texture);
-	if(albedoTexture->HasValidVkTexture() == false)
-		return nullptr;
-	auto descSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(descSetInfo);
-	mat.SetDescriptorSetGroup(*this,descSetGroup);
-	auto &descSet = *descSetGroup->GetDescriptorSet();
-	descSet.SetBindingTexture(*albedoTexture->GetVkTexture(),umath::to_integral(MaterialBinding::AlbedoMap));
-	InitializeMaterialBuffer(descSet,mat);
-
-	// TODO: FIXME: It would probably be a good idea to update the descriptor set lazily (i.e. not update it here), but
-	// that seems to cause crashes in some cases
-	if(descSet.Update() == false)
-		return false;
-	return descSetGroup;*/
-}
-std::shared_ptr<prosper::IDescriptorSetGroup> ShaderUnlit::InitializeMaterialDescriptorSet(CMaterial &mat)
-{
-	return InitializeMaterialDescriptorSet(mat, ShaderGameWorldLightingPass::DESCRIPTOR_SET_MATERIAL);
-	//return InitializeMaterialDescriptorSet(mat,DESCRIPTOR_SET_MATERIAL);
 }

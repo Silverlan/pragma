@@ -335,9 +335,9 @@ void NetworkState::Initialize()
 {
 	CVarHandler::Initialize();
 	if(IsClient())
-		Con::cout << "Initializing client state..." << Con::endl;
+		spdlog::info("Initializing client state...");
 	else {
-		Con::cout << "Initializing server state..." << Con::endl;
+		spdlog::info("Initializing server state...");
 		if(engine->IsServerOnly()) {
 			Con::cout << "If you encounter problems, such as the server not showing up in the server browser, or clients not being able to connect to it, please make sure the following ports are forwarded:" << Con::endl;
 			Con::cout << engine_info::DEFAULT_SERVER_PORT << " (TCP): Required if the boost asio networking layer is used" << Con::endl;

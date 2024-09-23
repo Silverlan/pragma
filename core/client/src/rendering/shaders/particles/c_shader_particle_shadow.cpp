@@ -19,7 +19,7 @@ LINK_SHADER_TO_CLASS(ParticleShadow,particleshadow);
 extern DLLCLIENT CGame *c_game;
 
 ParticleShadow::ParticleShadow()
-	: ParticleShadowBase<ParticleBase>("ParticleShadow","particles/vs_particle_shadow","particles/fs_particle_shadow")
+	: ParticleShadowBase<ParticleBase>("ParticleShadow","programs/particles/particle_shadow","programs/particles/particle_shadow")
 {}
 
 void ParticleShadow::Draw(CParticleSystem *particle,CLightBase *light,uint32_t layerId)

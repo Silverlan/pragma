@@ -36,7 +36,7 @@ static bool get_line_line_intersection(const Vector2 &p0, const Vector2 &p1, con
 }
 
 static ShaderGradient *s_shaderGradient = nullptr;
-ShaderGradient::ShaderGradient(prosper::IPrContext &context, const std::string &identifier) : prosper::ShaderBaseImageProcessing(context, identifier, "screen/fs_gradient")
+ShaderGradient::ShaderGradient(prosper::IPrContext &context, const std::string &identifier) : prosper::ShaderBaseImageProcessing(context, identifier, "programs/effects/gradient")
 {
 	s_shaderGradient = this;
 	SetBaseShader<prosper::ShaderCopyImage>();
@@ -44,12 +44,14 @@ ShaderGradient::ShaderGradient(prosper::IPrContext &context, const std::string &
 
 ShaderGradient::~ShaderGradient() { s_shaderGradient = nullptr; }
 
-void ShaderGradient::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
-{
-	ShaderGraphics::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
+void ShaderGradient::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { ShaderGraphics::InitializeGfxPipeline(pipelineInfo, pipelineIdx); }
 
-	AddDefaultVertexAttributes(pipelineInfo);
-	AttachPushConstantRange(pipelineInfo, pipelineIdx, 0u, sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit);
+void ShaderGradient::InitializeShaderResources()
+{
+	ShaderGraphics::InitializeShaderResources();
+
+	AddDefaultVertexAttributes();
+	AttachPushConstantRange(0u, sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit);
 }
 
 bool ShaderGradient::RecordDraw(prosper::ShaderBindState &bindState, const PushConstants &pushConstants) const { return RecordPushConstants(bindState, pushConstants) && prosper::ShaderBaseImageProcessing::RecordDraw(bindState); }

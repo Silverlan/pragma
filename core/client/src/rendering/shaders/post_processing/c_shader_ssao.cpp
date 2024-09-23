@@ -22,16 +22,20 @@ using namespace pragma;
 extern DLLCLIENT CEngine *c_engine;
 
 decltype(ShaderSSAO::RENDER_PASS_FORMAT) ShaderSSAO::RENDER_PASS_FORMAT = prosper::Format::R8_UNorm;
-decltype(ShaderSSAO::DESCRIPTOR_SET_PREPASS) ShaderSSAO::DESCRIPTOR_SET_PREPASS = {{prosper::DescriptorSetInfo::Binding {// Normal Buffer
-                                                                                      prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit},
-  prosper::DescriptorSetInfo::Binding {// Depth Buffer
-    prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}}};
-decltype(ShaderSSAO::DESCRIPTOR_SET_NOISE_TEXTURE) ShaderSSAO::DESCRIPTOR_SET_NOISE_TEXTURE = {{prosper::DescriptorSetInfo::Binding {// Random Normal
-  prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}}};
-decltype(ShaderSSAO::DESCRIPTOR_SET_SAMPLE_BUFFER) ShaderSSAO::DESCRIPTOR_SET_SAMPLE_BUFFER = {{prosper::DescriptorSetInfo::Binding {// Sample Buffer
-  prosper::DescriptorType::UniformBuffer, prosper::ShaderStageFlags::FragmentBit}}};
+decltype(ShaderSSAO::DESCRIPTOR_SET_PREPASS) ShaderSSAO::DESCRIPTOR_SET_PREPASS = {
+  "PREPASS",
+  {prosper::DescriptorSetInfo::Binding {"NORMAL_MAP", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}, prosper::DescriptorSetInfo::Binding {"DEPTH_BUFFER", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}},
+};
+decltype(ShaderSSAO::DESCRIPTOR_SET_NOISE_TEXTURE) ShaderSSAO::DESCRIPTOR_SET_NOISE_TEXTURE = {
+  "NOISE",
+  {prosper::DescriptorSetInfo::Binding {"RANDOM_NORMAL", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}},
+};
+decltype(ShaderSSAO::DESCRIPTOR_SET_SAMPLE_BUFFER) ShaderSSAO::DESCRIPTOR_SET_SAMPLE_BUFFER = {
+  "SAMPLE",
+  {prosper::DescriptorSetInfo::Binding {"BUFFER", prosper::DescriptorType::UniformBuffer, prosper::ShaderStageFlags::FragmentBit}},
+};
 decltype(ShaderSSAO::DESCRIPTOR_SET_SCENE) ShaderSSAO::DESCRIPTOR_SET_SCENE = {&ShaderScene::DESCRIPTOR_SET_SCENE};
-ShaderSSAO::ShaderSSAO(prosper::IPrContext &context, const std::string &identifier) : prosper::ShaderBaseImageProcessing(context, identifier, "screen/fs_ssao")
+ShaderSSAO::ShaderSSAO(prosper::IPrContext &context, const std::string &identifier) : prosper::ShaderBaseImageProcessing(context, identifier, "programs/post_processing/ssao")
 {
 	// Generate random sample kernel
 	std::uniform_real_distribution<float> randomFloats(0.f, 1.f);
@@ -117,18 +121,20 @@ void ShaderSSAO::OnPipelineInitialized(uint32_t pipelineIdx)
 	m_descSetGroupTexture->GetDescriptorSet()->SetBindingTexture(*m_noiseTexture, 0u);
 }
 
-void ShaderSSAO::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
+void ShaderSSAO::InitializeShaderResources()
 {
-	ShaderGraphics::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
+	ShaderGraphics::InitializeShaderResources();
 
-	AddDefaultVertexAttributes(pipelineInfo);
+	AddDefaultVertexAttributes();
 
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_PREPASS);
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_NOISE_TEXTURE);
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_SAMPLE_BUFFER);
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_SCENE);
-	AttachPushConstantRange(pipelineInfo, pipelineIdx, 0u, sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit);
+	AddDescriptorSetGroup(DESCRIPTOR_SET_PREPASS);
+	AddDescriptorSetGroup(DESCRIPTOR_SET_NOISE_TEXTURE);
+	AddDescriptorSetGroup(DESCRIPTOR_SET_SAMPLE_BUFFER);
+	AddDescriptorSetGroup(DESCRIPTOR_SET_SCENE);
+	AttachPushConstantRange(0u, sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit);
 }
+
+void ShaderSSAO::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { ShaderGraphics::InitializeGfxPipeline(pipelineInfo, pipelineIdx); }
 
 bool ShaderSSAO::RecordDraw(prosper::ShaderBindState &bindState, const pragma::CSceneComponent &scene, prosper::IDescriptorSet &descSetPrepass, const std::array<uint32_t, 2> &renderTargetDimensions) const
 {

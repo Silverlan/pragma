@@ -31,6 +31,8 @@
 
 #undef CreateFile
 
+import util_zip;
+
 static std::optional<std::string> udm_convert(const std::string &fileName)
 {
 	std::string err;
@@ -283,7 +285,11 @@ void Engine::RegisterConsoleCommands()
 			  Con::cwar << "Cannot load savegame: No active game!" << Con::endl;
 			  return;
 		  }
-		  auto path = "savegames/" + util::get_date_time() + ".psav";
+		  auto path = "savegames/" + argv.front();
+		  if(filemanager::exists(path + ".psav_b"))
+			  path += ".psav_b";
+		  else
+			  path += ".psav";
 		  FileManager::CreatePath(ufile::get_path_from_filename(path).c_str());
 		  std::string err;
 		  auto result = pragma::savegame::load(*game, path, err);
@@ -478,7 +484,6 @@ void Engine::RegisterConsoleCommands()
 }
 
 #include "pragma/util/curl_query_handler.hpp"
-#include <util_zip.h>
 
 class ModuleInstallJob : public util::ParallelWorker<bool> {
   public:
@@ -548,7 +553,7 @@ void ModuleInstallJob::Install()
 	  [this, archivePath](int code) {
 		  UpdateProgress(0.9f);
 		  if(code == 0) {
-			  auto zip = ZIPFile::Open(archivePath, ZIPFile::OpenMode::Read);
+			  auto zip = uzip::ZIPFile::Open(archivePath, uzip::ZIPFile::OpenMode::Read);
 			  if(!zip) {
 				  std::string msg = "Failed to open module archive '" + archivePath + "'!";
 				  Con::cwar << "" << msg << Con::endl;

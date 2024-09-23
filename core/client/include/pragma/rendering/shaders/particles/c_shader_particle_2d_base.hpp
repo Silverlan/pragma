@@ -92,12 +92,13 @@ namespace pragma {
 		virtual uint32_t GetLightDescriptorSetIndex() const override;
 		virtual uint32_t GetCameraDescriptorSetIndex() const override;
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
+		virtual void InitializeShaderResources() override;
 		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx) override;
 		virtual bool ShouldInitializePipeline(uint32_t pipelineIdx) override;
 
-		void RegisterDefaultGfxPipelineVertexAttributes(prosper::GraphicsPipelineCreateInfo &pipelineInfo);
-		void RegisterDefaultGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx);
-		void RegisterDefaultGfxPipelineDescriptorSetGroups(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx);
+		void RegisterDefaultGfxPipelineVertexAttributes();
+		void RegisterDefaultGfxPipelinePushConstantRanges();
+		void RegisterDefaultGfxPipelineDescriptorSetGroups();
 
 		void GetParticleSystemOrientationInfo(const Mat4 &matrix, const CParticleSystemComponent &particle, CParticleSystemComponent::OrientationType orientationType, Vector3 &up, Vector3 &right, float &nearZ, float &farZ, const Material *material = nullptr,
 		  const pragma::CCameraComponent *cam = nullptr) const;

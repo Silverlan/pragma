@@ -1,9 +1,0 @@
-#ifndef F_ANIMATION_GLS
-#define F_ANIMATION_GLS
-
-struct EntityBoneMatrixData
-{
-	mat4 matrices[MAX_BONES];
-};
-
-#endif

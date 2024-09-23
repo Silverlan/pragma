@@ -18,16 +18,22 @@ extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
 
-decltype(ShaderMerge2dImageIntoEquirectangular::DESCRIPTOR_SET_TEXTURE_2D) ShaderMerge2dImageIntoEquirectangular::DESCRIPTOR_SET_TEXTURE_2D = {{prosper::DescriptorSetInfo::Binding {prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}}};
-ShaderMerge2dImageIntoEquirectangular::ShaderMerge2dImageIntoEquirectangular(prosper::IPrContext &context, const std::string &identifier) : prosper::ShaderBaseImageProcessing {context, identifier, "util/vs_merge_2d_image_into_equirectangular", "util/fs_merge_2d_image_into_equirectangular"}
+decltype(ShaderMerge2dImageIntoEquirectangular::DESCRIPTOR_SET_TEXTURE_2D) ShaderMerge2dImageIntoEquirectangular::DESCRIPTOR_SET_TEXTURE_2D = {
+  "TEXTURE_2D",
+  {prosper::DescriptorSetInfo::Binding {"TEXTURE_2D", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}},
+};
+ShaderMerge2dImageIntoEquirectangular::ShaderMerge2dImageIntoEquirectangular(prosper::IPrContext &context, const std::string &identifier)
+    : prosper::ShaderBaseImageProcessing {context, identifier, "programs/util/merge_2d_image_into_equirectangular", "programs/util/merge_2d_image_into_equirectangular"}
 {
 }
 
-void ShaderMerge2dImageIntoEquirectangular::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
+void ShaderMerge2dImageIntoEquirectangular::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { ShaderBaseImageProcessing::InitializeGfxPipeline(pipelineInfo, pipelineIdx); }
+
+void ShaderMerge2dImageIntoEquirectangular::InitializeShaderResources()
 {
-	ShaderBaseImageProcessing::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
-	AttachPushConstantRange(pipelineInfo, pipelineIdx, 0u, sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit);
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_TEXTURE_2D);
+	ShaderBaseImageProcessing::InitializeShaderResources();
+	AttachPushConstantRange(0u, sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit);
+	AddDescriptorSetGroup(DESCRIPTOR_SET_TEXTURE_2D);
 }
 
 bool ShaderMerge2dImageIntoEquirectangular::RecordDraw(prosper::ICommandBuffer &cmd, prosper::IDescriptorSet &descSetTextureEquirect, prosper::IDescriptorSet &descSetTexture2d, CubeFace cubeFace, umath::Degree range)

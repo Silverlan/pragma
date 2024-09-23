@@ -12,14 +12,18 @@
 
 using namespace pragma;
 
-decltype(ShaderDebugText::DESCRIPTOR_SET_TEXTURE) ShaderDebugText::DESCRIPTOR_SET_TEXTURE = {{prosper::DescriptorSetInfo::Binding {prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}}};
-ShaderDebugText::ShaderDebugText(prosper::IPrContext &context, const std::string &identifier) : ShaderDebug(context, identifier, "debug/vs_debug_text", "debug/fs_debug_text") { SetBaseShader<ShaderDebug>(); }
+decltype(ShaderDebugText::DESCRIPTOR_SET_TEXTURE) ShaderDebugText::DESCRIPTOR_SET_TEXTURE = {
+  "TEXTURE",
+  {prosper::DescriptorSetInfo::Binding {"TEXTURE", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}},
+};
+ShaderDebugText::ShaderDebugText(prosper::IPrContext &context, const std::string &identifier) : ShaderDebug(context, identifier, "programs/debug/debug_text", "programs/debug/debug_text") { SetBaseShader<ShaderDebug>(); }
 
-void ShaderDebugText::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
+void ShaderDebugText::InitializeShaderResources()
 {
-	ShaderDebug::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_TEXTURE);
+	ShaderDebug::InitializeShaderResources();
+	AddDescriptorSetGroup(DESCRIPTOR_SET_TEXTURE);
 }
+void ShaderDebugText::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { ShaderDebug::InitializeGfxPipeline(pipelineInfo, pipelineIdx); }
 
 bool ShaderDebugText::RecordDraw(prosper::ShaderBindState &bindState, prosper::IBuffer &vertexBuffer, uint32_t vertexCount, prosper::IDescriptorSet &descSetTexture, const Mat4 &mvp, const Vector4 &color) const
 {

@@ -82,8 +82,8 @@ void ShaderPPBloomBlurBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreat
 	}
 }
 
-ShaderPPBloomBlurH::ShaderPPBloomBlurH(prosper::IPrContext &context, const std::string &identifier) : ShaderPPBloomBlurBase(context, identifier, "screen/fs_gaussianblur_horizontal") {}
+ShaderPPBloomBlurH::ShaderPPBloomBlurH(prosper::IPrContext &context, const std::string &identifier) : ShaderPPBloomBlurBase(context, identifier, "programs/effects/gaussianblur_horizontal") {}
 ShaderPPBloomBlurH::~ShaderPPBloomBlurH() {}
 
-ShaderPPBloomBlurV::ShaderPPBloomBlurV(prosper::IPrContext &context, const std::string &identifier) : ShaderPPBloomBlurBase(context, identifier, "screen/fs_gaussianblur_vertical") { SetBaseShader<ShaderPPBloomBlurH>(); }
+ShaderPPBloomBlurV::ShaderPPBloomBlurV(prosper::IPrContext &context, const std::string &identifier) : ShaderPPBloomBlurBase(context, identifier, "programs/effects/gaussianblur_vertical") { SetBaseShader<ShaderPPBloomBlurH>(); }
 ShaderPPBloomBlurV::~ShaderPPBloomBlurV() {}

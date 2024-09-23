@@ -704,7 +704,7 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	auto defCDecal = pragma::lua::create_entity_component_class<pragma::CDecalComponent, pragma::BaseEnvDecalComponent>("DecalComponent");
 	defCDecal.def("CreateFromProjection", static_cast<void (*)(lua_State *, pragma::CDecalComponent &, luabind::object, const umath::ScaledTransform &)>(&Lua::Decal::create_from_projection));
 	defCDecal.def("CreateFromProjection", static_cast<void (*)(lua_State *, pragma::CDecalComponent &, luabind::object)>(&Lua::Decal::create_from_projection));
-	defCDecal.def("DebugDraw", static_cast<void (*)(lua_State *, pragma::CDecalComponent &, float)>([](lua_State *l, pragma::CDecalComponent &hEnt, float duration) { hEnt.GetProjector().DebugDraw(duration); }));
+	defCDecal.def("DebugDraw", &pragma::CDecalComponent::DebugDraw);
 	defCDecal.def("ApplyDecal", static_cast<bool (pragma::CDecalComponent::*)()>(&pragma::CDecalComponent::ApplyDecal));
 	entsMod[defCDecal];
 

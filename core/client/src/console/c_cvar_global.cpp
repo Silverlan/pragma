@@ -471,7 +471,7 @@ void CMD_shader_optimize(NetworkState *state, pragma::BasePlayerComponent *pl, s
 		auto itSrc = shaderStages.find(pair.first);
 		if(itSrc == shaderStages.end())
 			continue;
-		auto shaderFile = renderContext.FindShaderFile("shaders/" + itSrc->second);
+		auto shaderFile = renderContext.FindShaderFile(pair.first, "shaders/" + itSrc->second);
 		if(shaderFile.has_value() == false) {
 			Con::cwar << "Unable to find shader file for '" << pair.second << "'!" << Con::endl;
 			return;

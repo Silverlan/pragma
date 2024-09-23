@@ -11,6 +11,9 @@
 #include "pragma/rendering/shaders/particles/c_shader_particle_2d_base.hpp"
 
 namespace pragma {
+	namespace rendering::shader_material {
+		struct ShaderMaterial;
+	};
 	class DLLCLIENT ShaderParticleBlob : public ShaderParticle2DBase {
 	  public:
 		enum class DebugMode : uint8_t { None = 0, EyeDir, SurfaceNormal, FlatColor };
@@ -28,7 +31,6 @@ namespace pragma {
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_PBR;
 
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_PARTICLE_DATA;
-		static prosper::DescriptorSetInfo DESCRIPTOR_SET_MATERIAL;
 
 		ShaderParticleBlob(prosper::IPrContext &context, const std::string &identifier);
 		virtual uint32_t GetSceneDescriptorSetIndex() const override;
@@ -38,8 +40,12 @@ namespace pragma {
 		  prosper::IDescriptorSet &dsRenderSettings, prosper::IDescriptorSet &dsLights, prosper::IDescriptorSet &dsShadows) const override;
 		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override;
 	  protected:
+		virtual void GetShaderPreprocessorDefinitions(std::unordered_map<std::string, std::string> &outDefinitions, std::string &outPrefixCode) override;
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
+		virtual void InitializeShaderResources() override;
 		virtual bool RecordParticleMaterial(prosper::ShaderBindState &bindState, const CRasterizationRendererComponent &renderer, const CParticleSystemComponent &ps) const override;
+		std::shared_ptr<rendering::shader_material::ShaderMaterial> m_shaderMaterial;
+		std::unique_ptr<prosper::DescriptorSetInfo> m_materialDescSetInfo;
 	};
 };
 

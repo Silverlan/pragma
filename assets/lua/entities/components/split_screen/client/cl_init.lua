@@ -118,4 +118,4 @@ function ents.SplitScreen:RenderEyes(drawSceneInfo)
 		end
 	end
 end
-ents.COMPONENT_SPLIT_SCREEN = ents.register_component("split_screen", ents.SplitScreen)
+ents.register_component("split_screen", ents.SplitScreen, "util")

@@ -454,6 +454,9 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	classDef.def("GetLODData", static_cast<void (*)(lua_State *, ::Model &)>(&Lua::Model::GetLODData));
 	classDef.def("GetLOD", &Lua::Model::GetLOD);
 	classDef.def("GenerateLowLevelLODs", &::Model::GenerateLowLevelLODs);
+	classDef.def("GenerateCollisionMeshes", &::Model::GenerateCollisionMeshes);
+	classDef.def(
+	  "GenerateCollisionMeshes", +[](::Model &mdl, bool convex, float mass) -> bool { return mdl.GenerateCollisionMeshes(convex, mass); });
 	classDef.def("TranslateLODMeshes", static_cast<void (*)(lua_State *, ::Model &, uint32_t, luabind::object)>(&Lua::Model::TranslateLODMeshes));
 	classDef.def("TranslateLODMeshes", static_cast<void (*)(lua_State *, ::Model &, uint32_t)>(&Lua::Model::TranslateLODMeshes));
 	classDef.def("GetJoints", &Lua::Model::GetJoints);

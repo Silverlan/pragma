@@ -25,9 +25,17 @@ ShaderDebug::ShaderDebug(prosper::IPrContext &context, const std::string &identi
 {
 	SetPipelineCount(umath::to_integral(Pipeline::Count) * umath::to_integral(PipelineType::Count));
 }
-ShaderDebug::ShaderDebug(prosper::IPrContext &context, const std::string &identifier) : ShaderDebug(context, identifier, "debug/vs_debug", "debug/fs_debug") {}
+ShaderDebug::ShaderDebug(prosper::IPrContext &context, const std::string &identifier) : ShaderDebug(context, identifier, "programs/debug/debug", "programs/debug/debug") {}
 
 bool ShaderDebug::ShouldInitializePipeline(uint32_t pipelineIdx) { return true; }
+
+void ShaderDebug::InitializeShaderResources()
+{
+	ShaderScene::InitializeShaderResources();
+
+	AddVertexAttribute(VERTEX_ATTRIBUTE_POSITION);
+	AttachPushConstantRange(0u, sizeof(PushConstants), prosper::ShaderStageFlags::VertexBit);
+}
 
 void ShaderDebug::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
 {
@@ -68,9 +76,6 @@ void ShaderDebug::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pip
 		pipelineInfo.SetPrimitiveTopology(prosper::PrimitiveTopology::PointList);
 		break;
 	}
-
-	AddVertexAttribute(pipelineInfo, VERTEX_ATTRIBUTE_POSITION);
-	AttachPushConstantRange(pipelineInfo, pipelineIdx, 0u, sizeof(PushConstants), prosper::ShaderStageFlags::VertexBit);
 }
 
 bool ShaderDebug::RecordBeginDraw(prosper::ShaderBindState &bindState, Pipeline pipelineIdx) const { return ShaderGraphics::RecordBeginDraw(bindState, umath::to_integral(pipelineIdx)) == true && bindState.commandBuffer.RecordSetDepthBias(1.f, 0.f, 0.f); }
@@ -98,17 +103,24 @@ bool ShaderDebug::RecordDraw(prosper::ShaderBindState &bindState, prosper::IBuff
 
 decltype(ShaderDebugTexture::VERTEX_BINDING_VERTEX) ShaderDebugTexture::VERTEX_BINDING_VERTEX = {prosper::VertexInputRate::Vertex};
 decltype(ShaderDebugTexture::VERTEX_ATTRIBUTE_POSITION) ShaderDebugTexture::VERTEX_ATTRIBUTE_POSITION = {VERTEX_BINDING_VERTEX, prosper::Format::R32G32_SFloat};
-decltype(ShaderDebugTexture::DESCRIPTOR_SET_TEXTURE) ShaderDebugTexture::DESCRIPTOR_SET_TEXTURE = {{prosper::DescriptorSetInfo::Binding {prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}}};
-ShaderDebugTexture::ShaderDebugTexture(prosper::IPrContext &context, const std::string &identifier) : ShaderScene(context, identifier, "debug/vs_debug_uv", "debug/fs_debug_texture") {}
+decltype(ShaderDebugTexture::DESCRIPTOR_SET_TEXTURE) ShaderDebugTexture::DESCRIPTOR_SET_TEXTURE = {
+  "TEXTURE",
+  {prosper::DescriptorSetInfo::Binding {"TEXTURE", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}},
+};
+ShaderDebugTexture::ShaderDebugTexture(prosper::IPrContext &context, const std::string &identifier) : ShaderScene(context, identifier, "programs/debug/debug_uv", "programs/debug/debug_texture") {}
 
 void ShaderDebugTexture::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
 {
 	ShaderScene::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
 	prosper::util::set_graphics_pipeline_cull_mode_flags(pipelineInfo, prosper::CullModeFlags::None);
 	prosper::util::set_generic_alpha_color_blend_attachment_properties(pipelineInfo);
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_TEXTURE);
-	AddVertexAttribute(pipelineInfo, VERTEX_ATTRIBUTE_POSITION);
-	AttachPushConstantRange(pipelineInfo, pipelineIdx, 0u, sizeof(ShaderDebug::PushConstants), prosper::ShaderStageFlags::VertexBit);
+}
+void ShaderDebugTexture::InitializeShaderResources()
+{
+	ShaderScene::InitializeShaderResources();
+	AddDescriptorSetGroup(DESCRIPTOR_SET_TEXTURE);
+	AddVertexAttribute(VERTEX_ATTRIBUTE_POSITION);
+	AttachPushConstantRange(0u, sizeof(ShaderDebug::PushConstants), prosper::ShaderStageFlags::VertexBit);
 }
 bool ShaderDebugTexture::RecordDraw(prosper::ShaderBindState &bindState, prosper::IDescriptorSet &descSetTexture, const ShaderDebug::PushConstants &pushConstants) const
 {
@@ -121,12 +133,14 @@ bool ShaderDebugTexture::RecordDraw(prosper::ShaderBindState &bindState, prosper
 decltype(ShaderDebugVertexColor::VERTEX_BINDING_COLOR) ShaderDebugVertexColor::VERTEX_BINDING_COLOR = {prosper::VertexInputRate::Vertex};
 decltype(ShaderDebugVertexColor::VERTEX_ATTRIBUTE_COLOR) ShaderDebugVertexColor::VERTEX_ATTRIBUTE_COLOR = {VERTEX_BINDING_COLOR, prosper::Format::R32G32B32A32_SFloat};
 
-ShaderDebugVertexColor::ShaderDebugVertexColor(prosper::IPrContext &context, const std::string &identifier) : ShaderDebug(context, identifier, "debug/vs_debug_vertex_color", "debug/fs_debug") { SetBaseShader<ShaderDebug>(); }
+ShaderDebugVertexColor::ShaderDebugVertexColor(prosper::IPrContext &context, const std::string &identifier) : ShaderDebug(context, identifier, "programs/debug/debug_vertex_color", "programs/debug/debug") { SetBaseShader<ShaderDebug>(); }
 
-void ShaderDebugVertexColor::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
+void ShaderDebugVertexColor::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { ShaderDebug::InitializeGfxPipeline(pipelineInfo, pipelineIdx); }
+
+void ShaderDebugVertexColor::InitializeShaderResources()
 {
-	ShaderDebug::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
-	AddVertexAttribute(pipelineInfo, VERTEX_ATTRIBUTE_COLOR);
+	ShaderDebug::InitializeShaderResources();
+	AddVertexAttribute(VERTEX_ATTRIBUTE_COLOR);
 }
 
 bool ShaderDebugVertexColor::RecordDraw(prosper::ShaderBindState &bindState, prosper::IBuffer &vertexBuffer, prosper::IBuffer &colorBuffer, uint32_t vertexCount, const Mat4 &modelMatrix) const

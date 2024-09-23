@@ -27,13 +27,12 @@
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;
 
-decltype(pragma::ShaderComposeRMA::DESCRIPTOR_SET_TEXTURE) pragma::ShaderComposeRMA::DESCRIPTOR_SET_TEXTURE = {{prosper::DescriptorSetInfo::Binding {// Roughness Map
-                                                                                                                  prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit},
-  prosper::DescriptorSetInfo::Binding {// Metalness Map
-    prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit},
-  prosper::DescriptorSetInfo::Binding {// Ambient occlusion Map
-    prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}}};
-pragma::ShaderComposeRMA::ShaderComposeRMA(prosper::IPrContext &context, const std::string &identifier) : ShaderBaseImageProcessing {context, identifier, "util/fs_compose_rma.gls"} {}
+decltype(pragma::ShaderComposeRMA::DESCRIPTOR_SET_TEXTURE) pragma::ShaderComposeRMA::DESCRIPTOR_SET_TEXTURE = {
+  "TEXTURES",
+  {prosper::DescriptorSetInfo::Binding {"ROUGHNESS", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}, prosper::DescriptorSetInfo::Binding {"METALNESS", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit},
+    prosper::DescriptorSetInfo::Binding {"AMBIENT_OCCLUSION", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}},
+};
+pragma::ShaderComposeRMA::ShaderComposeRMA(prosper::IPrContext &context, const std::string &identifier) : ShaderBaseImageProcessing {context, identifier, "programs/util/compose_rma"} {}
 
 std::shared_ptr<prosper::IImage> pragma::ShaderComposeRMA::ComposeRMA(prosper::IPrContext &context, prosper::Texture *roughnessMap, prosper::Texture *metalnessMap, prosper::Texture *aoMap, Flags flags)
 {
@@ -141,10 +140,16 @@ void pragma::ShaderComposeRMA::InitializeGfxPipeline(prosper::GraphicsPipelineCr
 {
 	ShaderGraphics::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
 
-	AddDefaultVertexAttributes(pipelineInfo);
-	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_TEXTURE);
-	AttachPushConstantRange(pipelineInfo, pipelineIdx, 0u, sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit);
 	SetGenericAlphaColorBlendAttachmentProperties(pipelineInfo);
+}
+
+void pragma::ShaderComposeRMA::InitializeShaderResources()
+{
+	ShaderGraphics::InitializeShaderResources();
+
+	AddDefaultVertexAttributes();
+	AddDescriptorSetGroup(DESCRIPTOR_SET_TEXTURE);
+	AttachPushConstantRange(0u, sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit);
 }
 
 void pragma::ShaderComposeRMA::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx)

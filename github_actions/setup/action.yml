@@ -28,4 +28,15 @@ runs:
       run: |
         git clone ${{ inputs.clone_url }} --recurse-submodules --branch ${{ inputs.branch }} pragma
   
+    # This is a temporary workaround until gcc 14.2 is available
+    # with a fix for https://gcc.gnu.org/git/gitweb.cgi?p=gcc.git;h=e909d360dfaeafa9f45eda2461a1bedffac99ac2 
+    - name: Workaround for libstdc++ Bug
+      if: runner.os == 'Linux'
+      shell: bash
+      run: |
+        sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+        sudo apt update
+        sudo apt install gcc-14 g++-14
+        sudo sed -i 's/\+\+this;/\+\+\*this;/g' /usr/include/c++/14/bits/unicode.h
+
     - uses: Silverlan/common_actions/action_end@main

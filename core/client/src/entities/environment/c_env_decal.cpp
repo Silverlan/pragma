@@ -250,7 +250,8 @@ void DecalProjector::DebugDraw(float duration) const
 void CDecalComponent::Initialize()
 {
 	BaseEnvDecalComponent::Initialize();
-	GetEntity().AddComponent<pragma::CRenderComponent>();
+	auto renderC = GetEntity().AddComponent<pragma::CRenderComponent>();
+	renderC->SetCastShadows(false);
 	/*auto &ent = static_cast<CBaseEntity&>(GetEntity());
 	auto pSpriteComponent = ent.AddComponent<pragma::CSpriteComponent>();
 	if(pSpriteComponent.valid())
@@ -347,13 +348,14 @@ bool CDecalComponent::ApplyDecal(DecalProjector &projector, const std::vector<De
 	subMesh->GetVertices() = std::move(verts);
 	subMesh->SetIndices(tris);
 	subMesh->SetSkinTextureIndex(0);
+	subMesh->GenerateNormals();
 
 	auto mesh = c_game->CreateModelMesh();
 	mesh->AddSubMesh(subMesh);
 	meshGroup->AddMesh(mesh);
 	mdl->AddMaterial(0, mat);
 
-	mdl->Update(ModelUpdateFlags::All);
+	mdl->Update(ModelUpdateFlags::All | ModelUpdateFlags::UpdateChildren);
 
 	//decalRenderC->SetDepthBias(-1'000.f,0.f,-2.f);
 	// TODO

@@ -10,6 +10,7 @@
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/shaders/world/c_shader_pbr.hpp"
 #include "pragma/rendering/render_processor.hpp"
+#include "pragma/rendering/shader_material/shader_material.hpp"
 #include "pragma/model/c_vertex_buffer_data.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/model/vk_mesh.h"
@@ -104,6 +105,7 @@ void ShaderPrepassBase::InitializeShaderResources()
 	AddDescriptorSetGroup(DESCRIPTOR_SET_MATERIAL);
 	AddDescriptorSetGroup(DESCRIPTOR_SET_SCENE);
 	AddDescriptorSetGroup(DESCRIPTOR_SET_RENDER_SETTINGS);
+	m_materialDescSetInfo = std::make_unique<prosper::DescriptorSetInfo>(DESCRIPTOR_SET_MATERIAL);
 }
 
 void ShaderPrepassBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)

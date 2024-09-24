@@ -1,0 +1,41 @@
+"shader_material"
+{
+	$array properties [element][
+		{
+			$string type "vec3"
+			$string specializationType "color"
+			$string name "rim_color"
+			$vec3 default [1.0, 1.0, 1.0]
+		},
+		{
+			$string type "float"
+			$string name "rim_amount"
+			$float default "0.716"
+		},
+		{
+			$string type "vec3"
+			$string specializationType "color"
+			$string name "specular_color"
+			$vec3 default [1.0, 1.0, 1.0]
+		},
+		{
+			$string type "float"
+			$string name "glossiness"
+			$float default "8.0"
+		}
+	]
+	$array textures [element][
+		{
+			$string name "albedo_map"
+			$bool colorMap 1
+			$bool required 1
+		},
+		{
+			$string name "normal_map"
+		},
+		{
+			$string name "ramp_texture"
+			$string default "error"
+		}
+	]
+}

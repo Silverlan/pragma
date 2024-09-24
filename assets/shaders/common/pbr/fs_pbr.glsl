@@ -83,7 +83,7 @@ vec4 calc_pbr(vec4 albedoColor, vec2 texCoords, uint debugMode, PbrMaterial pbrM
 
 	metallic = rma[RMA_CHANNEL_METALNESS] * pbrMat.metalnessFactor;
 
-	baseColor = get_base_color(get_instance_color(), albedoColor, pbrMat.color, pbrMat.alphaMode, pbrMat.alphaCutoff, materialFlags);
+	baseColor = albedoColor;
 #if defined(MATERIAL_WRINKLE_COMPRESS_MAP_ENABLED) && defined(MATERIAL_WRINKLE_STRETCH_MAP_ENABLED)
 	if(use_wrinkle_maps(materialFlags)) {
 		if(fs_in.wrinkleDelta != 0.0) {

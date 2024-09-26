@@ -16,6 +16,8 @@
 #include "/common/inputs/textures/normal_map.glsl"
 #include "/common/inputs/fs_renderer.glsl"
 #include "/common/pbr/lighting/light_spot.glsl"
+#include "/common/pbr/lighting/light_point.glsl"
+#include "/common/pbr/lighting/light_directional.glsl"
 #include "/common/pixel_outputs/fs_bloom_color.glsl"
 #include "/programs/scene/pbr/fs_config.glsl"
 #include "/programs/scene/scene_push_constants.glsl"
@@ -62,14 +64,7 @@ vec3 calc_rim_lighting(const ShadingInfo shadingInfo, const LightInfo lightInfo,
 	return rimIntensity * rimInfo.color;
 }
 
-void calc_toon_blinn_phong_lighting(const ShadingInfo shadingInfo, const SpecularInfo specInfo, LightSourceData lightData, const LightInfo lightInfo, const RimLightingInfo rimInfo, inout vec3 lightColor, inout vec3 specularColor, inout vec3 rimColor, uint lightIndex, bool enableShadows)
 {
-	float shadowFactor = 1.0;
-	if(CSPEC_ENABLE_DYNAMIC_SHADOWS == 1)
-		shadowFactor = enableShadows ? get_spot_light_shadow_factor(lightIndex, true) : 1.0;
-
-	vec2 uv = vec2(1 - (lightInfo.NdotL * 0.5 + 0.5), 0.5);
-	//vec4 tex = fetch_ramp_texture(vec2(0,0))
 	float lightIntensity = (lightInfo.NdotL * shadowFactor) > 0 ? 1 : 0;
 	//float lightIntensity = smoothstep(0, 0.01, lightInfo.NdotL * shadowFactor); // Two bands
 	vec3 light = lightIntensity * lightData.color.rgb * lightInfo.lightIntensity;
@@ -92,6 +87,22 @@ void calc_toon_blinn_phong_lighting(const ShadingInfo shadingInfo, const Specula
 #define TOON_DEBUG_MODE_RIM 5
 
 const uint TOON_DEBUG_MODE = TOON_DEBUG_MODE_NONE;
+
+void calc_toon_blinn_phong_lighting(ShadingInfo shadingInfo, SpecularInfo specInfo, RimLightingInfo rimInfo, LightSourceData light, vec3 lightDir, float attenuation, float shadowFactor, vec3 normal, inout vec3 lightColor, inout vec3 specularColor, inout vec3 rimColor, uint lightIndex, bool enableShadows)
+{
+	LightInfo lightInfo;
+	// Default light intensities are designed for PBR, we have to
+	// (subjectively) adjust using some factor.
+	lightInfo.lightIntensity = light.color.a / 5.0;
+
+	lightInfo.lightIntensity *= attenuation;
+	
+	float NdotL = max(dot(normal, lightDir), 0.0);
+	lightInfo.NdotL = NdotL;
+	lightInfo.lightDirection = lightDir;
+
+	calc_toon_blinn_phong_lighting(shadingInfo, specInfo, light, lightInfo, shadowFactor, rimInfo, lightColor, specularColor, rimColor, lightIndex, enableShadows);
+}
 
 void main()
 {
@@ -131,33 +142,35 @@ void main()
 			uint lightIndex = visibleLightTileIndicesBuffer.data[tileStartOffset + i].index;
 			LightSourceData light = get_light_source(lightIndex);
 			float attenuation = calc_spot_light_attenuation(light, fs_in.vert_pos_ws.xyz);
-
-			LightInfo lightInfo;
-			// Default light intensities are designed for PBR, we have to
-			// (subjectively) adjust using some factor.
-			lightInfo.lightIntensity = light.color.a / 5.0;
-
-			lightInfo.lightIntensity *= attenuation;
 			vec3 lightDir = normalize(light.position.xyz - fs_in.vert_pos_ws.xyz);
-			float NdotL = max(dot(normal, lightDir), 0.0);
-			lightInfo.NdotL = NdotL;
-			lightInfo.lightDirection = lightDir;
-
-			calc_toon_blinn_phong_lighting(shadingInfo, specInfo, light, lightInfo, rimInfo, totalLightColor, totalSpecularColor, totalRimColor, lightIndex, enableShadows);
+			float shadowFactor = 1.0;
+			if(CSPEC_ENABLE_DYNAMIC_SHADOWS == 1)
+				shadowFactor = enableShadows ? get_spot_light_shadow_factor(lightIndex, true) : 1.0;
+			calc_toon_blinn_phong_lighting(shadingInfo, specInfo, rimInfo, light, lightDir, attenuation, shadowFactor, normal, totalLightColor, totalSpecularColor, totalRimColor, lightIndex, enableShadows);
 		}
 	}
 	if(CSPEC_ENABLE_LIGHT_SOURCES_POINT == 1) {
 		for(uint i = SCENE_POINT_LIGHT_BUFFER_START; i < SCENE_POINT_LIGHT_BUFFER_END && visibleLightTileIndicesBuffer.data[tileStartOffset + i].index != -1; i++) {
-			//uint lightIndex = visibleLightTileIndicesBuffer.data[tileStartOffset +i].index;
-			//LightSourceData light = get_light_source(lightIndex);
-			//color += apply_point_light(light,lightIndex,materialInfo,normal,view,vertPos,enableShadows);
+			uint lightIndex = visibleLightTileIndicesBuffer.data[tileStartOffset + i].index;
+			LightSourceData light = get_light_source(lightIndex);
+			float attenuation = calc_point_light_attenuation(light, fs_in.vert_pos_ws.xyz);
+			vec3 lightDir = normalize(light.position.xyz - fs_in.vert_pos_ws.xyz);
+			float shadowFactor = 1.0;
+			if(CSPEC_ENABLE_DYNAMIC_SHADOWS == 1)
+				shadowFactor = enableShadows ? get_point_light_shadow_factor(lightIndex, true, fs_in.vert_pos_ws.xyz) : 1.0;
+			calc_toon_blinn_phong_lighting(shadingInfo, specInfo, rimInfo, light, lightDir, attenuation, shadowFactor, normal, totalLightColor, totalSpecularColor, totalRimColor, lightIndex, enableShadows);
 		}
 	}
 	if(CSPEC_ENABLE_LIGHT_SOURCES_DIRECTIONAL == 1) {
 		for(uint i = SCENE_DIRECTIONAL_LIGHT_BUFFER_START; i < SCENE_DIRECTIONAL_LIGHT_BUFFER_END && visibleLightTileIndicesBuffer.data[tileStartOffset + i].index != -1; i++) {
-			//uint lightIndex = visibleLightTileIndicesBuffer.data[tileStartOffset +i].index;
-			//LightSourceData light = get_light_source(lightIndex);
-			//color += apply_directional_light(light,lightIndex,materialInfo,normal,view,enableShadows);
+			uint lightIndex = visibleLightTileIndicesBuffer.data[tileStartOffset + i].index;
+			LightSourceData light = get_light_source(lightIndex);
+			float attenuation = 1.0;
+			vec3 lightDir = -light.direction.xyz;
+			float shadowFactor = 1.0;
+			if(CSPEC_ENABLE_DYNAMIC_SHADOWS == 1)
+				shadowFactor = enableShadows ? get_directional_light_shadow_factor(lightIndex) : 1.0;
+			calc_toon_blinn_phong_lighting(shadingInfo, specInfo, rimInfo, light, lightDir, attenuation, shadowFactor, normal, totalLightColor, totalSpecularColor, totalRimColor, lightIndex, enableShadows);
 		}
 	}
 

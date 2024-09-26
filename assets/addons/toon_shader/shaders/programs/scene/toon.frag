@@ -64,10 +64,12 @@ vec3 calc_rim_lighting(const ShadingInfo shadingInfo, const LightInfo lightInfo,
 	return rimIntensity * rimInfo.color;
 }
 
+layout(LAYOUT_ID(RAMP, TEXTURE)) uniform sampler2D u_rampTexture;
+void calc_toon_blinn_phong_lighting(const ShadingInfo shadingInfo, const SpecularInfo specInfo, LightSourceData lightData, const LightInfo lightInfo, float shadowFactor, const RimLightingInfo rimInfo, inout vec3 lightColor, inout vec3 specularColor, inout vec3 rimColor, uint lightIndex, bool enableShadows)
 {
-	float lightIntensity = (lightInfo.NdotL * shadowFactor) > 0 ? 1 : 0;
-	//float lightIntensity = smoothstep(0, 0.01, lightInfo.NdotL * shadowFactor); // Two bands
-	vec3 light = lightIntensity * lightData.color.rgb * lightInfo.lightIntensity;
+	vec2 uv = vec2(1 - (lightInfo.NdotL * 0.5 + 0.5), 0.5);
+	vec4 rampCol = texture(u_rampTexture, uv);
+	vec3 light = lightData.color.rgb * lightInfo.lightIntensity *rampCol.rgb *shadowFactor;
 
 	// Specular
 	vec3 specular = calc_specular_component(shadingInfo, specInfo, lightInfo);

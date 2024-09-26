@@ -284,6 +284,20 @@ static void pcb_recordBufferBarrier(prosper::util::PreparedCommandBuffer &pcb, L
 	    Lua::Vulkan::make_pcb_arg<prosper::AccessFlags>(dstAccessMask), Lua::Vulkan::make_pcb_arg<uint32_t>(offset), Lua::Vulkan::make_pcb_arg<uint32_t>(size))));
 };
 
+static bool pcb_record_bind_descriptor_set(prosper::util::PreparedCommandBuffer &pcb, const std::shared_ptr<prosper::IDescriptorSetGroup> &descSet, const PcbLuaArg &firstSet, const PcbLuaArg &dynamicOffset)
+{
+	pcb.PushCommand(
+	  [descSet](const prosper::util::PreparedCommandBufferRecordState &recordState) -> bool {
+		  constexpr auto BIND_PIPELINE_LAYOUT = ustring::string_switch::hash("pipelineLayout");
+		  auto &pipelineLayout = recordState.userData.Get<prosper::IShaderPipelineLayout>(BIND_PIPELINE_LAYOUT);
+
+		  auto dynOffset = recordState.GetArgument<uint32_t>(1);
+		  return recordState.commandBuffer.RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics, pipelineLayout, recordState.GetArgument<uint32_t>(0), *descSet->GetDescriptorSet(), &dynOffset);
+	  },
+	  std::move(util::make_vector<PcbArg>(Lua::Vulkan::make_pcb_arg<uint32_t>(firstSet), Lua::Vulkan::make_pcb_arg<uint32_t>(dynamicOffset))));
+	return true;
+}
+
 void register_vulkan_lua_interface2(Lua::Interface &lua, luabind::module_ &prosperMod)
 {
 	auto defVkFramebuffer = luabind::class_<Lua::Vulkan::Framebuffer>("Framebuffer");
@@ -617,6 +631,13 @@ bool Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffers(
 		  });
 		  return true;
 	  });
+	defPcb.def("RecordBindDescriptorSet", &pcb_record_bind_descriptor_set);
+	defPcb.def(
+	  "RecordBindDescriptorSet",
+	  +[](lua_State *l, prosper::util::PreparedCommandBuffer &pcb, const std::shared_ptr<prosper::IDescriptorSetGroup> &descSet, const PcbLuaArg &firstSet) -> bool { return pcb_record_bind_descriptor_set(pcb, descSet, firstSet, PcbLuaArg::CreateValue<uint32_t>(l, 0)); });
+	defPcb.def(
+	  "RecordBindDescriptorSet",
+	  +[](lua_State *l, prosper::util::PreparedCommandBuffer &pcb, const std::shared_ptr<prosper::IDescriptorSetGroup> &descSet) -> bool { return pcb_record_bind_descriptor_set(pcb, descSet, PcbLuaArg::CreateValue<uint32_t>(l, 0), PcbLuaArg::CreateValue<uint32_t>(l, 0)); });
 	defPcb.def(
 	  "RecordCommands", +[](prosper::util::PreparedCommandBuffer &pcb, prosper::ICommandBuffer &cmd) -> bool { return pcb.RecordCommands(cmd, {}, {}); });
 	defPcb.def_readonly("enableDrawArgs", &prosper::util::PreparedCommandBuffer::enableDrawArgs);

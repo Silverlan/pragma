@@ -209,7 +209,7 @@ namespace Lua {
 		DLLCLIENT void RecordBindDescriptorSet(lua_State *l, prosper::Shader &shader, prosper::ShaderBindState &bindState, Lua::Vulkan::DescriptorSet &ds, uint32_t firstSet, luabind::object dynamicOffsets, std::optional<uint32_t> dynamicOffsetIndex = {});
 		DLLCLIENT void RecordBindDescriptorSets(lua_State *l, prosper::Shader &shader, prosper::ShaderBindState &bindState, luabind::object descSets, uint32_t firstSet, luabind::object dynamicOffsets);
 		DLLCLIENT void AttachPushConstantRange(lua_State *l, pragma::LuaShaderWrapperBase &shader, uint32_t offset, uint32_t size, uint32_t shaderStages);
-		DLLCLIENT void AttachDescriptorSetInfo(lua_State *l, pragma::LuaShaderWrapperBase &shader, pragma::LuaDescriptorSetInfo &descSetInfo);
+		DLLCLIENT uint32_t AttachDescriptorSetInfo(lua_State *l, pragma::LuaShaderWrapperBase &shader, pragma::LuaDescriptorSetInfo &descSetInfo);
 
 		namespace Graphics {
 			DLLCLIENT void RecordBindVertexBuffer(lua_State *l, prosper::ShaderGraphics &shader, prosper::ShaderBindState &bindState, Lua::Vulkan::Buffer &buffer, uint32_t startBinding, uint32_t offset);

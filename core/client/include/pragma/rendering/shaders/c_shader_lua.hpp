@@ -14,6 +14,7 @@
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_base.hpp"
 #include "pragma/rendering/shaders/particles/c_shader_particle_2d_base.hpp"
 #include <shader/prosper_shader_base_image_processing.hpp>
+#include <prosper_prepared_command_buffer.hpp>
 #include <pragma/lua/luaobjectbase.h>
 #include <wgui/shaders/wishader_textured.hpp>
 
@@ -454,6 +455,8 @@ namespace pragma {
 		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override;
 		virtual void InitializeMaterialData(const CMaterial &mat, const rendering::shader_material::ShaderMaterial &shaderMat, pragma::rendering::shader_material::ShaderMaterialData &inOutMatData) override;
 		void SetPushConstants(DataStream dsPushConstants);
+
+		prosper::util::PreparedCommandBuffer &GetBindPcb() { return m_bindPcb; }
 	  protected:
 		friend LuaShaderWrapperTextured3D;
 		std::shared_ptr<prosper::IDescriptorSetGroup> BaseInitializeMaterialDescriptorSet(CMaterial &mat);
@@ -474,6 +477,10 @@ namespace pragma {
 		void InitializeDefaultRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx);
 
 		DataStream m_pushConstants;
+
+		prosper::util::PreparedCommandBuffer m_bindPcb;
+		mutable prosper::util::PreparedCommandBufferUserData m_bindUserData;
+		prosper::util::PreparedCommandArgumentMap m_bindArgs;
 	};
 	class DLLCLIENT LuaShaderWrapperTextured3D : public LuaShaderWrapperGraphicsBase {
 	  public:
@@ -522,6 +529,7 @@ namespace pragma {
 		static void Lua_default_OnEndDraw(lua_State *l, LuaShaderWrapperTextured3D &shader) { shader.Lua_OnEndDraw(); }
 
 		void SetPushConstants(DataStream dsPushConstants);
+		prosper::util::PreparedCommandBuffer &GetBindPcb();
 		void InitializeMaterialBuffer(prosper::IDescriptorSetGroup &descSet, CMaterial &mat, const pragma::rendering::shader_material::ShaderMaterialData &matData);
 
 		virtual LShaderBase *CreateShader() const override { return new TShader {}; }

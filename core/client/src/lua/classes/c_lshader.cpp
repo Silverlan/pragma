@@ -22,7 +22,7 @@
 
 prosper::ShaderBindState *LuaShaderRecordTarget::GetBindState() const { return luabind::object_cast_nothrow<prosper::ShaderBindState *>(target, static_cast<prosper::ShaderBindState *>(nullptr)); }
 prosper::util::PreparedCommandBuffer *LuaShaderRecordTarget::GetPcb() const { return luabind::object_cast_nothrow<prosper::util::PreparedCommandBuffer *>(target, static_cast<prosper::util::PreparedCommandBuffer *>(nullptr)); }
-void Lua::Shader::AttachDescriptorSetInfo(lua_State *l, pragma::LuaShaderWrapperBase &shader, pragma::LuaDescriptorSetInfo &descSetInfo)
+uint32_t Lua::Shader::AttachDescriptorSetInfo(lua_State *l, pragma::LuaShaderWrapperBase &shader, pragma::LuaDescriptorSetInfo &descSetInfo)
 {
 	prosper::DescriptorSetInfo shaderDescSetInfo {pragma::register_global_string(descSetInfo.name), {}};
 	shaderDescSetInfo.bindings.reserve(descSetInfo.bindings.size());
@@ -39,7 +39,7 @@ void Lua::Shader::AttachDescriptorSetInfo(lua_State *l, pragma::LuaShaderWrapper
 		bindingIdx = binding.bindingIndex + 1u;
 	}
 	shaderDescSetInfo.setIndex = descSetInfo.setIndex;
-	shader.GetShader().AddDescriptorSetGroup(shaderDescSetInfo);
+	return shader.GetShader().AddDescriptorSetGroup(shaderDescSetInfo);
 }
 void Lua::Shader::AttachPushConstantRange(lua_State *l, pragma::LuaShaderWrapperBase &shader, uint32_t offset, uint32_t size, uint32_t shaderStages) { shader.GetShader().AttachPushConstantRange(offset, size, static_cast<prosper::ShaderStageFlags>(shaderStages)); }
 

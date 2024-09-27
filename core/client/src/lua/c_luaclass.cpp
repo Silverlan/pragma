@@ -346,6 +346,7 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 	defShader.def("GetIdentifier", &Lua::Shader::GetIdentifier);
 	defShader.def("GetSourceFilePath", &Lua::Shader::GetSourceFilePath);
 	defShader.def("GetSourceFilePaths", &Lua::Shader::GetSourceFilePaths);
+	defShader.def("FindDescriptorSetIndex", &prosper::Shader::FindDescriptorSetIndex);
 	modShader[defShader];
 
 	auto defShaderGraphics = luabind::class_<prosper::ShaderGraphics, prosper::Shader>("Graphics");

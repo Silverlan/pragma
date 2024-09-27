@@ -68,6 +68,14 @@ void pragma::LuaShaderWrapperBase::Initialize(const luabind::object &o)
 	m_baseLuaObj = std::shared_ptr<luabind::object>(new luabind::object(o));
 	CallLuaMember("Initialize");
 }
+void pragma::LuaShaderWrapperBase::OnInitializationComplete()
+{
+	// TODO: This doesn't belong here
+	auto *shader = dynamic_cast<LShaderGameWorldLightingPass *>(m_shader);
+	if(shader)
+		shader->ResetPcb();
+	CallLuaMember("OnInitializationComplete");
+}
 void pragma::LuaShaderWrapperBase::ClearLuaObject() { m_baseLuaObj = nullptr; }
 void pragma::LuaShaderWrapperBase::OnInitialized() { CallLuaMember("OnInitialized"); }
 void pragma::LuaShaderWrapperBase::OnPipelinesInitialized() { CallLuaMember("OnPipelinesInitialized"); }
@@ -284,6 +292,7 @@ pragma::LShaderGameWorldLightingPass::LShaderGameWorldLightingPass() : TLShaderB
 {
 	// SetBaseShader<ShaderTextured3DBase>();
 }
+pragma::LShaderGameWorldLightingPass::~LShaderGameWorldLightingPass() {}
 void pragma::LShaderGameWorldLightingPass::RecordBindScene(rendering::ShaderProcessor &shaderProcessor, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer,
   prosper::IDescriptorSet &dsRenderSettings, prosper::IDescriptorSet &dsLights, prosper::IDescriptorSet &dsShadows, const Vector4 &drawOrigin, ShaderGameWorld::SceneFlags &inOutSceneFlags) const
 {
@@ -330,11 +339,33 @@ void pragma::LShaderGameWorldLightingPass::InitializeGfxPipelineVertexAttributes
 void pragma::LShaderGameWorldLightingPass::InitializeGfxPipelinePushConstantRanges() { static_cast<LuaShaderWrapperTextured3D *>(m_wrapper)->InitializeGfxPipelinePushConstantRanges(); }
 void pragma::LShaderGameWorldLightingPass::InitializeGfxPipelineDescriptorSets() { static_cast<LuaShaderWrapperTextured3D *>(m_wrapper)->InitializeGfxPipelineDescriptorSets(); }
 void pragma::LShaderGameWorldLightingPass::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { static_cast<LuaShaderWrapperTextured3D *>(m_wrapper)->InitializeGfxPipeline(pipelineInfo, pipelineIdx); }
-void pragma::LShaderGameWorldLightingPass::InitializeShaderResources() { static_cast<LuaShaderWrapperTextured3D *>(m_wrapper)->InitializeShaderResources(); }
+void pragma::LShaderGameWorldLightingPass::InitializeShaderResources()
+{
+	ResetPcb();
+	static_cast<LuaShaderWrapperTextured3D *>(m_wrapper)->InitializeShaderResources();
+}
 void pragma::LShaderGameWorldLightingPass::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx) { static_cast<LuaShaderWrapperTextured3D *>(m_wrapper)->InitializeRenderPass(outRenderPass, pipelineIdx); }
 void pragma::LShaderGameWorldLightingPass::InitializeDefaultRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx) { ShaderGameWorldLightingPass::InitializeRenderPass(outRenderPass, pipelineIdx); }
+void pragma::LShaderGameWorldLightingPass::ResetPcb()
+{
+	m_bindPcb.Reset();
+	m_bindUserData = {};
+	m_bindArgs = {};
+}
 
 pragma::LuaShaderWrapperTextured3D::LuaShaderWrapperTextured3D() {}
+pragma::LuaShaderWrapperTextured3D::~LuaShaderWrapperTextured3D()
+{
+	auto &shader = *static_cast<LShaderGameWorldLightingPass *>(m_shader);
+	shader.ResetPcb();
+}
+
+void pragma::LuaShaderWrapperTextured3D::Initialize(const luabind::object &o)
+{
+	LuaShaderWrapperGraphicsBase::Initialize(o);
+	auto &shader = *static_cast<LShaderGameWorldLightingPass *>(m_shader);
+	shader.ResetPcb();
+}
 void pragma::LuaShaderWrapperTextured3D::Lua_InitializePipeline(prosper::BasePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
 {
 	static_cast<LShaderGameWorldLightingPass *>(m_shader)->BaseInitializeGfxPipeline(static_cast<prosper::GraphicsPipelineCreateInfo &>(pipelineInfo), pipelineIdx);
@@ -444,6 +475,9 @@ void pragma::LuaShaderManager::RegisterShader(std::string className, luabind::ob
 	auto itShader = m_shaders.find(className);
 	if(itShader != m_shaders.end()) {
 		Con::cwar << "Attempted to register shader '" << className << "', which has already been registered previously! Ignoring..." << Con::endl;
+		auto *shader = dynamic_cast<LShaderBase *>(itShader->second.whShader.get());
+		if(shader)
+			shader->GetWrapper()->OnInitializationComplete();
 		return;
 	}
 	auto *l = o.interpreter();
@@ -543,6 +577,7 @@ void pragma::LuaShaderManager::RegisterShader(std::string className, luabind::ob
 		shaderWrapper->SetShader(shader.get());
 		shaderWrapper->Initialize(r);
 		initLua(*shader.get());
+		shaderWrapper->OnInitializationComplete();
 	}
 	::Lua::Pop(l);
 	pair.whShader = shaderManager.GetShader(className);

@@ -93,7 +93,8 @@ namespace pragma {
 		LuaShaderWrapperBase();
 		LuaShaderWrapperBase(const LuaShaderWrapperBase &) = delete;
 		LuaShaderWrapperBase &operator=(const LuaShaderWrapperBase &) = delete;
-		void Initialize(const luabind::object &o);
+		virtual void Initialize(const luabind::object &o);
+		void OnInitializationComplete();
 		void ClearLuaObject();
 
 		void SetStageSourceFilePath(prosper::ShaderStage shaderStage, const std::string &fpath);
@@ -211,6 +212,7 @@ namespace pragma {
 			if(!wrapper)
 				return;
 			wrapper->OnPipelinesInitialized();
+			wrapper->OnInitializationComplete();
 		}
 		virtual void OnPipelineInitialized(uint32_t pipelineIdx) override
 		{
@@ -446,6 +448,7 @@ namespace pragma {
 	  public:
 		using TBaseShader = ShaderGameWorldLightingPass;
 		LShaderGameWorldLightingPass();
+		virtual ~LShaderGameWorldLightingPass() override;
 
 		virtual void SetIdentifier(const std::string &identifier) override { ShaderGameWorldLightingPass::SetIdentifier(identifier); }
 		virtual void SetPipelineCount(uint32_t count) override { ShaderGameWorldLightingPass::SetPipelineCount(count); }
@@ -456,6 +459,7 @@ namespace pragma {
 		virtual void InitializeMaterialData(const CMaterial &mat, const rendering::shader_material::ShaderMaterial &shaderMat, pragma::rendering::shader_material::ShaderMaterialData &inOutMatData) override;
 		void SetPushConstants(DataStream dsPushConstants);
 
+		void ResetPcb();
 		prosper::util::PreparedCommandBuffer &GetBindPcb() { return m_bindPcb; }
 	  protected:
 		friend LuaShaderWrapperTextured3D;
@@ -487,6 +491,8 @@ namespace pragma {
 		using TShader = LShaderGameWorldLightingPass;
 		friend TShader;
 		LuaShaderWrapperTextured3D();
+		virtual ~LuaShaderWrapperTextured3D() override;
+		virtual void Initialize(const luabind::object &o) override;
 
 		virtual void Lua_InitializePipeline(prosper::BasePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
 		virtual void Lua_InitializeShaderResources() override;

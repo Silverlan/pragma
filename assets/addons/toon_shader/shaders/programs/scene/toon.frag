@@ -14,6 +14,7 @@
 #include "/common/light_source.glsl"
 #include "/common/vertex_outputs/vertex_data.glsl"
 #include "/common/inputs/textures/normal_map.glsl"
+#include "/common/inputs/fs_lightmap.glsl"
 #include "/common/inputs/fs_renderer.glsl"
 #include "/common/pbr/lighting/light_spot.glsl"
 #include "/common/pbr/lighting/light_point.glsl"
@@ -47,14 +48,16 @@ struct LightInfo {
 	float NdotL; // The dot product of the normal and the light direction
 };
 
+layout(LAYOUT_ID(RAMP, TEXTURE)) uniform sampler2D u_rampTexture;
 vec3 calc_specular_component(const ShadingInfo shadingInfo, const SpecularInfo specInfo, const LightInfo lightInfo)
 {
 	vec3 halfVector = normalize(lightInfo.lightDirection + shadingInfo.viewDirection);
 	float NdotH = max(dot(shadingInfo.surfaceNormal, halfVector), 0.0);
-	float specularIntensity = pow(NdotH * lightInfo.lightIntensity, specInfo.glossiness * specInfo.glossiness);
+	float specularIntensity = pow(NdotH * lightInfo.lightIntensity, specInfo.glossiness *specInfo.glossiness);
 	float specularIntensitySmooth = smoothstep(0.005, 0.01, specularIntensity);
 	return specularIntensitySmooth * specInfo.specularColor;
 }
+
 
 vec3 calc_rim_lighting(const ShadingInfo shadingInfo, const LightInfo lightInfo, const RimLightingInfo rimInfo)
 {
@@ -64,16 +67,17 @@ vec3 calc_rim_lighting(const ShadingInfo shadingInfo, const LightInfo lightInfo,
 	return rimIntensity * rimInfo.color;
 }
 
-layout(LAYOUT_ID(RAMP, TEXTURE)) uniform sampler2D u_rampTexture;
+vec3 calc_light_color(float NdotL, vec3 lightColor, float lightIntensity, float shadowFactor)
+{
+	vec2 uv = vec2(1 - (NdotL * 0.5 + 0.5), 0.5);
+	vec4 rampCol = texture(u_rampTexture, uv);
+	return lightColor * lightIntensity *rampCol.rgb *shadowFactor;
+}
+
 void calc_toon_blinn_phong_lighting(const ShadingInfo shadingInfo, const SpecularInfo specInfo, LightSourceData lightData, const LightInfo lightInfo, float shadowFactor, const RimLightingInfo rimInfo, inout vec3 lightColor, inout vec3 specularColor, inout vec3 rimColor, uint lightIndex, bool enableShadows)
 {
-	vec2 uv = vec2(1 - (lightInfo.NdotL * 0.5 + 0.5), 0.5);
-	vec4 rampCol = texture(u_rampTexture, uv);
-	vec3 light = lightData.color.rgb * lightInfo.lightIntensity *rampCol.rgb *shadowFactor;
-
-	// Specular
+	vec3 light = calc_light_color(lightInfo.NdotL, lightData.color.rgb, lightInfo.lightIntensity, shadowFactor);
 	vec3 specular = calc_specular_component(shadingInfo, specInfo, lightInfo);
-
 	vec3 rim = calc_rim_lighting(shadingInfo, lightInfo, rimInfo);
 
 	lightColor += light.rgb;
@@ -90,19 +94,22 @@ void calc_toon_blinn_phong_lighting(const ShadingInfo shadingInfo, const Specula
 
 const uint TOON_DEBUG_MODE = TOON_DEBUG_MODE_NONE;
 
-void calc_toon_blinn_phong_lighting(ShadingInfo shadingInfo, SpecularInfo specInfo, RimLightingInfo rimInfo, LightSourceData light, vec3 lightDir, float attenuation, float shadowFactor, vec3 normal, inout vec3 lightColor, inout vec3 specularColor, inout vec3 rimColor, uint lightIndex, bool enableShadows)
+LightInfo calc_light_info(float lightIntensity, vec3 normal, vec3 lightDir)
 {
 	LightInfo lightInfo;
 	// Default light intensities are designed for PBR, we have to
 	// (subjectively) adjust using some factor.
-	lightInfo.lightIntensity = light.color.a / 5.0;
-
-	lightInfo.lightIntensity *= attenuation;
+	lightInfo.lightIntensity = lightIntensity;
 	
 	float NdotL = max(dot(normal, lightDir), 0.0);
 	lightInfo.NdotL = NdotL;
 	lightInfo.lightDirection = lightDir;
+	return lightInfo;
+}
 
+void calc_toon_blinn_phong_lighting(ShadingInfo shadingInfo, SpecularInfo specInfo, RimLightingInfo rimInfo, LightSourceData light, vec3 lightDir, float attenuation, float shadowFactor, vec3 normal, inout vec3 lightColor, inout vec3 specularColor, inout vec3 rimColor, uint lightIndex, bool enableShadows)
+{
+	LightInfo lightInfo = calc_light_info((light.color.a / 5.0) *attenuation, normal, lightDir);
 	calc_toon_blinn_phong_lighting(shadingInfo, specInfo, light, lightInfo, shadowFactor, rimInfo, lightColor, specularColor, rimColor, lightIndex, enableShadows);
 }
 
@@ -118,7 +125,8 @@ void main()
 	rimInfo.color = get_mat_rim_color();
 
 	vec2 texCoords = fs_in.vert_uv;
-	vec4 color = fetch_albedo_map(texCoords, get_instance_color());
+	vec4 baseColor = fetch_albedo_map(texCoords, get_instance_color());
+	vec4 color = baseColor;
 
 	mat3 normalMatrix = transpose(inverse(mat3(fs_in.M)));
 	vec3 normal = get_normal_from_map(texCoords, get_mat_flags());
@@ -179,6 +187,12 @@ void main()
 	// TODO
 	vec3 ambientLightColor = vec3(0.4, 0.4, 0.4);
 
+	bool useLightmaps = false;
+	if(CSPEC_ENABLE_LIGHT_MAPS == 1) {
+		useLightmaps = is_light_map_enabled();
+		//if(useLightmaps)
+		//	color = baseColor.rgb;
+	}
 	if(CSPEC_ENABLE_IBL == 1) {
 		//if(!useLightmaps)
 		/*MaterialInfo matInfo;
@@ -187,6 +201,34 @@ void main()
         matInfo.specularColor = vec3(1,1,1);//specInfo.specularColor;
 	    ambientLightColor = texture(u_brdfLUT, texCoords).rgb;//get_ibl_contribution(matInfo, normal, viewDir, get_reflection_probe_intensity()) *100;
     */
+	}
+	if(CSPEC_ENABLE_LIGHT_MAPS == 1) {
+		// TODO: Lightmap mode should be determined by specialization constant to avoid if-condition overhead
+		if(useLightmaps) {
+			vec4 colDirect = texture(u_lightMap, fs_in.vert_uv_lightmap.xy);
+			float exposure = get_lightmap_exposure_pow();
+			if(is_indirect_light_map_enabled()) {
+				vec3 colIndirect = texture(u_lightMapIndirect, fs_in.vert_uv_lightmap.xy).rgb;
+				if(is_directional_light_map_enabled()) {
+					vec3 dominantDir = texture(u_lightMapDominant, fs_in.vert_uv_lightmap.xy).rgb;
+					dominantDir = dominantDir * 2.0 - 1.0;
+					dominantDir = normalize(dominantDir);
+
+					LightInfo lightInfo = calc_light_info(1.0, normal, dominantDir);
+					vec3 light = calc_light_color(lightInfo.NdotL, colDirect.rgb, lightInfo.lightIntensity, 1.0);
+					vec3 specular = calc_specular_component(shadingInfo, specInfo, lightInfo);
+					vec3 rim = calc_rim_lighting(shadingInfo, lightInfo, rimInfo);
+
+					totalLightColor += light.rgb;
+					totalSpecularColor += specular;
+					totalRimColor += rim;
+				}
+				else
+					color.rgb = baseColor.rgb * ((colDirect.rgb + colIndirect.rgb) * exposure);
+			}
+			else
+				color.rgb += baseColor.rgb * (exposure * colDirect.rgb);
+		}
 	}
 
 	if(TOON_DEBUG_MODE == TOON_DEBUG_MODE_NONE)

@@ -9,7 +9,7 @@
 local cvRampTexture = console.register_variable(
 	"toon_shader_ramp_texture",
 	udm.TYPE_STRING,
-	"toon/ramp_texture",
+	"toon/ramp_2band",
 	bit.bor(console.FLAG_BIT_ARCHIVE),
 	"The ramp texture to use for the toon shader."
 )
@@ -71,11 +71,17 @@ function Shader:InitializeShaderResources()
 			prosper.SHADER_STAGE_FRAGMENT_BIT
 		),
 	})
-	self.m_rampDescriptorSet = prosper.create_descriptor_set(rampDsInfo)
-	self.m_rampDescriptorSetIndex = self:AttachDescriptorSetInfo(rampDsInfo)
+	self:AttachDescriptorSetInfo(rampDsInfo)
+end
+function Shader:OnInitializationComplete()
+	local setIdx = self:GetShader():FindDescriptorSetIndex("RAMP")
+	if setIdx == nil then
+		return
+	end
+	self.m_rampDescriptorSet = self:GetShader():CreateDescriptorSet(setIdx)
 	self:InitializeRampTexture()
 
 	local pcb = self:GetBindPcb()
-	pcb:RecordBindDescriptorSet(self.m_rampDescriptorSet, self.m_rampDescriptorSetIndex)
+	pcb:RecordBindDescriptorSet(self.m_rampDescriptorSet, setIdx)
 end
 shader.register("toon", Shader)

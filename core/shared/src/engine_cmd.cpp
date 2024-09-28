@@ -553,7 +553,7 @@ void ModuleInstallJob::Install()
 	  [this, archivePath](int code) {
 		  UpdateProgress(0.9f);
 		  if(code == 0) {
-			  auto zip = uzip::ZIPFile::Open(archivePath, uzip::ZIPFile::OpenMode::Read);
+			  auto zip = uzip::ZIPFile::Open(archivePath, uzip::OpenMode::Read);
 			  if(!zip) {
 				  std::string msg = "Failed to open module archive '" + archivePath + "'!";
 				  Con::cwar << "" << msg << Con::endl;

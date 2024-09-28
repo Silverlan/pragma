@@ -521,11 +521,11 @@ void Lua::util::register_shared_generic(lua_State *l, luabind::module_ &mod)
 	mod[defHairData];
 
 	auto defZip = luabind::class_<uzip::ZIPFile>("ZipFile");
-	defZip.add_static_constant("OPEN_MODE_READ", umath::to_integral(uzip::ZIPFile::OpenMode::Read));
-	defZip.add_static_constant("OPEN_MODE_WRITE", umath::to_integral(uzip::ZIPFile::OpenMode::Write));
+	defZip.add_static_constant("OPEN_MODE_READ", umath::to_integral(uzip::OpenMode::Read));
+	defZip.add_static_constant("OPEN_MODE_WRITE", umath::to_integral(uzip::OpenMode::Write));
 
 	defZip.scope[luabind::def(
-	  "open", +[](const std::string &filePath, uzip::ZIPFile::OpenMode openMode) -> std::shared_ptr<uzip::ZIPFile> {
+	  "open", +[](const std::string &filePath, uzip::OpenMode openMode) -> std::shared_ptr<uzip::ZIPFile> {
 		  auto path = ::util::Path::CreateFile(filePath);
 		  path.Canonicalize();
 		  path = ::util::Path::CreatePath(::util::get_program_path()) + path;
@@ -535,7 +535,7 @@ void Lua::util::register_shared_generic(lua_State *l, luabind::module_ &mod)
 		  return zipFile;
 	  })];
 	defZip.scope[luabind::def(
-	  "open", +[](LFile &f, uzip::ZIPFile::OpenMode openMode) -> std::shared_ptr<uzip::ZIPFile> {
+	  "open", +[](LFile &f, uzip::OpenMode openMode) -> std::shared_ptr<uzip::ZIPFile> {
 		  auto ptr = f.GetHandle();
 		  if(!ptr)
 			  return nullptr;
@@ -1733,7 +1733,7 @@ Lua::var<bool, ::util::ParallelJob<luabind::object>> Lua::util::pack_zip_archive
 		}
 	}
 
-	auto zip = uzip::ZIPFile::Open(zipFileName, uzip::ZIPFile::OpenMode::Write);
+	auto zip = uzip::ZIPFile::Open(zipFileName, uzip::OpenMode::Write);
 	if(zip == nullptr)
 		return luabind::object {l, false};
 	auto pzip = std::shared_ptr<uzip::ZIPFile> {std::move(zip)};

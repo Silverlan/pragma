@@ -580,6 +580,23 @@ if platform == "win32":
 	cmake_build("Release")
 	cmake_build("Release",["install"])
 
+########## bit7z ##########
+os.chdir(deps_dir)
+bit7z_root = normalize_path(os.getcwd() +"/bit7z")
+if not Path(bit7z_root).is_dir():
+	print_msg("bit7z not found. Downloading...")
+	git_clone("https://github.com/rikyoz/bit7z.git")
+os.chdir("bit7z")
+reset_to_commit("bec6a22")
+
+print_msg("Building bit7z...")
+mkdir("build",cd=True)
+cmake_configure("..",generator,["-DBIT7Z_AUTO_FORMAT=ON"])
+cmake_build("Release")
+cmake_args += [
+	"-DDEPENDENCY_BIT7Z_INCLUDE=" +bit7z_root +"/include/",
+	"-DDEPENDENCY_BIT7Z_LIBRARY=" +bit7z_root +"/lib/x64/Release/bit7z.lib"
+]
 
 ########## compressonator deps ##########
 if platform == "linux":
@@ -1008,6 +1025,17 @@ if platform == "win32":
 	cp(build_dir +"/third_party_libs/libzip/zipconf.h",root +"/external_libs/util_zip/include")
 	os.chdir(curDir)
 	#
+
+# 7z binaries (required for bit7z)
+os.chdir(deps_dir)
+sevenz_root = normalize_path(os.getcwd() +"/7z-lib")
+if not Path(sevenz_root).is_dir():
+	print_msg("bit7z not found. Downloading...")
+	git_clone("https://github.com/Silverlan/7z-lib.git")
+os.chdir("7z-lib")
+reset_to_commit("1a9ec9a")
+if platform == "win32":
+	cp(sevenz_root +"/win-x64/7z.dll",install_dir +"/bin/")
 
 ########## Lua Extensions ##########
 lua_ext_dir = deps_dir +"/lua_extensions"

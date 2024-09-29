@@ -595,7 +595,7 @@ cmake_configure("..",generator,["-DBIT7Z_AUTO_FORMAT=ON"])
 cmake_build("Release")
 cmake_args += [
 	"-DDEPENDENCY_BIT7Z_INCLUDE=" +bit7z_root +"/include/",
-	"-DDEPENDENCY_BIT7Z_LIBRARY=" +bit7z_root +"/lib/x64/Release/bit7z.lib"
+	"-DDEPENDENCY_BIT7Z_LIBRARY=" +bit7z_root +"/lib/x64/Release/libbit7z.a"
 ]
 
 ########## compressonator deps ##########
@@ -1029,13 +1029,24 @@ if platform == "win32":
 # 7z binaries (required for bit7z)
 os.chdir(deps_dir)
 sevenz_root = normalize_path(os.getcwd() +"/7z-lib")
-if not Path(sevenz_root).is_dir():
-	print_msg("bit7z not found. Downloading...")
-	git_clone("https://github.com/Silverlan/7z-lib.git")
-os.chdir("7z-lib")
-reset_to_commit("1a9ec9a")
 if platform == "win32":
+	if not Path(sevenz_root).is_dir():
+		print_msg("7z-lib not found. Downloading...")
+		git_clone("https://github.com/Silverlan/7z-lib.git")
+	os.chdir("7z-lib")
+	reset_to_commit("1a9ec9a")
 	cp(sevenz_root +"/win-x64/7z.dll",install_dir +"/bin/")
+else:
+	if not Path(sevenz_root).is_dir():
+		print_msg("7z-lib not found. Downloading...")
+		mkdir("7z-lib",cd=True)
+		http_extract("https://7-zip.org/a/7z2408-src.tar.xz",format="tar.xz")
+	os.chdir(sevenz_root)
+	sevenz_so_path = sevenz_root +"/CPP/7zip/Bundles/Format7zF"
+	os.chdir(sevenz_so_path)
+	subprocess.run(["make","-j","-f","../../cmpl_gcc.mak"],check=True)
+	mkpath(install_dir +"/bin")
+	cp(sevenz_so_path +"/b/g/7z.so",install_dir +"/bin/7z.so")
 
 ########## Lua Extensions ##########
 lua_ext_dir = deps_dir +"/lua_extensions"

@@ -596,10 +596,11 @@ if platform == "linux":
 	bit7z_cmake_args.append("-DCMAKE_CXX_FLAGS=-fPIC")
 cmake_configure("..",generator,bit7z_cmake_args)
 cmake_build("Release")
-cmake_args += [
-	"-DDEPENDENCY_BIT7Z_INCLUDE=" +bit7z_root +"/include/",
-	"-DDEPENDENCY_BIT7Z_LIBRARY=" +bit7z_root +"/lib/x64/Release/libbit7z.a"
-]
+if platform == "linux":
+	bit7z_lib_name = "libbit7z.a"
+else:
+	bit7z_lib_name = "bit7z.lib"
+cmake_args += ["-DDEPENDENCY_BIT7Z_INCLUDE=" +bit7z_root +"/include/", "-DDEPENDENCY_BIT7Z_LIBRARY=" +bit7z_root +"/lib/x64/Release/" +bit7z_lib_name]
 
 ########## compressonator deps ##########
 if platform == "linux":

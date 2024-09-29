@@ -591,7 +591,10 @@ reset_to_commit("bec6a22")
 
 print_msg("Building bit7z...")
 mkdir("build",cd=True)
-cmake_configure("..",generator,["-DBIT7Z_AUTO_FORMAT=ON"])
+bit7z_cmake_args = ["-DBIT7Z_AUTO_FORMAT=ON"]
+if platform == "linux":
+	bit7z_cmake_args.append("-DCMAKE_CXX_FLAGS=-fPIC")
+cmake_configure("..",generator,bit7z_cmake_args)
 cmake_build("Release")
 cmake_args += [
 	"-DDEPENDENCY_BIT7Z_INCLUDE=" +bit7z_root +"/include/",

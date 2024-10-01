@@ -446,7 +446,7 @@ void ModelSubMesh::GenerateNormals()
 		for(auto &fn : faceNormals)
 			n += fn;
 		n /= static_cast<float>(faceNormals.size());
-		uvec::normalize(&n);
+		uvec::normalize(n, uvec::UP);
 		(*m_vertices)[vertIdx].normal = n;
 		++vertIdx;
 	}

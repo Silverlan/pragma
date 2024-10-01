@@ -100,6 +100,7 @@ namespace pragma::animation {
 		AnimationBlendController *GetBlendController();
 		const AnimationBlendController *GetBlendController() const;
 		void ClearBlendController();
+		void Validate();
 		void Localize(const pragma::animation::Skeleton &skeleton);
 		void Rotate(const pragma::animation::Skeleton &skeleton, const Quat &rot);
 		void Translate(const pragma::animation::Skeleton &skeleton, const Vector3 &t);

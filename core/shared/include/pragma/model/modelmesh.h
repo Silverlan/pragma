@@ -103,6 +103,7 @@ class DLLNETWORK ModelSubMesh : public std::enable_shared_from_this<ModelSubMesh
 	void AddPoint(uint32_t idx);
 	void ReserveIndices(size_t num);
 	void ReserveVertices(size_t num);
+	void Validate();
 	virtual void Update(ModelUpdateFlags flags = ModelUpdateFlags::AllData);
 
 	GeometryType GetGeometryType() const;

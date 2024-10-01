@@ -24,6 +24,10 @@ namespace umath {
 	class ScaledTransform;
 };
 
+namespace pragma {
+	enum class Axis : uint8_t;
+};
+
 struct DLLNETWORK FlexFrameData {
 	std::vector<float> flexControllerWeights;
 	std::vector<uint32_t> flexControllerIds;
@@ -83,6 +87,7 @@ class DLLNETWORK Frame : public std::enable_shared_from_this<Frame> {
 	std::vector<Vector3> &GetBoneScales();
 	umath::Transform *GetBoneTransform(uint32_t idx);
 	const umath::Transform *GetBoneTransform(uint32_t idx) const;
+	void Validate();
 
 	bool operator==(const Frame &other) const;
 	bool operator!=(const Frame &other) const { return !operator==(other); }

@@ -7,6 +7,7 @@
 
 #include "stdafx_shared.h"
 #include "pragma/model/modelmesh.h"
+#include "pragma/model/model.h"
 #include "pragma/model/simplify.h"
 #include <mathutil/uvec.h>
 #include <pragma/math/intersection.h>
@@ -622,6 +623,33 @@ void ModelSubMesh::SetIndexType(pragma::model::IndexType type)
 }
 ModelSubMesh::GeometryType ModelSubMesh::GetGeometryType() const { return m_geometryType; }
 void ModelSubMesh::SetGeometryType(GeometryType type) { m_geometryType = type; }
+void ModelSubMesh::Validate()
+{
+	for(auto &a : GetAlphas())
+		pragma::model::validate_value(a);
+	Vector3 min, max;
+	GetBounds(min, max);
+	pragma::model::validate_value(min);
+	pragma::model::validate_value(max);
+	pragma::model::validate_value(GetCenter());
+	for(auto &vw : GetExtendedVertexWeights())
+		pragma::model::validate_value(vw.weights);
+	auto &pose = GetPose();
+	pragma::model::validate_value(pose.GetOrigin());
+	pragma::model::validate_value(pose.GetRotation());
+	for(auto &[name, uvSet] : GetUVSets()) {
+		for(auto &uv : uvSet)
+			pragma::model::validate_value(uv);
+	}
+	for(auto &vw : GetVertexWeights())
+		pragma::model::validate_value(vw.weights);
+	for(auto &v : GetVertices()) {
+		pragma::model::validate_value(v.position);
+		pragma::model::validate_value(v.normal);
+		pragma::model::validate_value(v.uv);
+		pragma::model::validate_value(v.tangent);
+	}
+}
 void ModelSubMesh::Update(ModelUpdateFlags flags)
 {
 	if((flags & ModelUpdateFlags::UpdateBounds) == ModelUpdateFlags::None)

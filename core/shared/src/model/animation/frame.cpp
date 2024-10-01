@@ -205,6 +205,17 @@ std::vector<umath::Transform> &Frame::GetBoneTransforms() { return m_bones; }
 std::vector<Vector3> &Frame::GetBoneScales() { return m_scales; }
 umath::Transform *Frame::GetBoneTransform(uint32_t idx) { return (idx < m_bones.size()) ? &m_bones.at(idx) : nullptr; }
 const umath::Transform *Frame::GetBoneTransform(uint32_t idx) const { return const_cast<Frame *>(this)->GetBoneTransform(idx); }
+void Frame::Validate()
+{
+	for(auto &pose : GetBoneTransforms()) {
+		pragma::model::validate_value(pose.GetOrigin());
+		pragma::model::validate_value(pose.GetRotation());
+	}
+	for(auto &scale : GetBoneScales())
+		pragma::model::validate_value(scale);
+	for(auto &w : GetFlexFrameData().flexControllerWeights)
+		pragma::model::validate_value(w);
+}
 bool Frame::GetBonePose(uint32_t boneId, umath::ScaledTransform &outTransform) const
 {
 	if(boneId >= m_bones.size())

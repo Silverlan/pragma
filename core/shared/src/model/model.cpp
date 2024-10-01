@@ -773,6 +773,87 @@ void Model::PrecacheTexture(uint32_t texId, bool bReload)
 	}
 }
 
+void Model::Validate()
+{
+	pragma::model::validate_value(m_maxEyeDeflection);
+	for(auto &[name, info] : m_phonemeMap.phonemes) {
+		for(auto &[name, val] : info.flexControllers)
+			pragma::model::validate_value(val);
+	}
+	for(auto &eb : m_eyeballs) {
+		pragma::model::validate_value(eb.irisScale);
+		pragma::model::validate_value(eb.forward);
+		pragma::model::validate_value(eb.irisUvRadius);
+		pragma::model::validate_value(eb.maxDilationFactor);
+		pragma::model::validate_value(eb.origin);
+		pragma::model::validate_value(eb.radius);
+		pragma::model::validate_value(eb.up);
+		pragma::model::validate_value(eb.zOffset);
+	}
+	for(auto &[id, hb] : m_hitboxes) {
+		pragma::model::validate_value(hb.min);
+		pragma::model::validate_value(hb.max);
+	}
+	for(auto &fc : m_flexControllers) {
+		pragma::model::validate_value(fc.min);
+		pragma::model::validate_value(fc.max);
+	}
+	pragma::model::validate_value(m_eyeOffset);
+	pragma::model::validate_value(m_collisionMin);
+	pragma::model::validate_value(m_collisionMax);
+	pragma::model::validate_value(m_renderMin);
+	pragma::model::validate_value(m_renderMax);
+	for(auto &pose : m_bindPose)
+		pragma::model::validate_value(pose);
+	for(auto &lod : m_lods)
+		pragma::model::validate_value(lod.distance);
+	for(auto &att : m_attachments) {
+		pragma::model::validate_value(att.offset);
+		pragma::model::validate_value(att.angles);
+	}
+	for(auto &cmesh : m_collisionMeshes)
+		cmesh->Validate();
+	if(m_metaRig) {
+		pragma::model::validate_value(m_metaRig->forwardFacingRotationOffset);
+		pragma::model::validate_value(m_metaRig->min);
+		pragma::model::validate_value(m_metaRig->max);
+	}
+	for(auto &flexAnim : m_flexAnimations) {
+		pragma::model::validate_value(flexAnim->GetFps());
+		for(auto &frame : flexAnim->GetFrames()) {
+			for(auto &v : frame->GetValues())
+				pragma::model::validate_value(v);
+		}
+	}
+	for(auto &mg : m_meshGroups) {
+		for(auto &m : mg->GetMeshes()) {
+			for(auto &sm : m->GetSubMeshes())
+				sm->Validate();
+		}
+	}
+	for(auto &va : m_vertexAnimations) {
+		for(auto &ma : va->GetMeshAnimations()) {
+			for(auto &mf : ma->GetFrames()) {
+				auto n = mf->GetVertexCount();
+				for(size_t i = 0; i < n; ++i) {
+					float delta;
+					if(mf->GetDeltaValue(i, delta))
+						pragma::model::validate_value(delta);
+					Vector3 n;
+					if(mf->GetVertexNormal(i, n))
+						pragma::model::validate_value(n);
+					Vector3 v;
+					if(mf->GetVertexPosition(i, v))
+						pragma::model::validate_value(v);
+				}
+			}
+		}
+	}
+	m_reference->Validate();
+	for(auto &anim : m_animations)
+		anim->Validate();
+}
+
 void Model::Optimize()
 {
 	auto &meshGroups = GetMeshGroups();

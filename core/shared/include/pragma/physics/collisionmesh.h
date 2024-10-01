@@ -86,6 +86,7 @@ class DLLNETWORK CollisionMesh : public std::enable_shared_from_this<CollisionMe
 	void SetBoneParent(int boneID);
 	int GetBoneParent() const;
 	void CalculateBounds();
+	void Validate();
 	void GetAABB(Vector3 *min, Vector3 *max) const;
 	void SetAABB(Vector3 &min, Vector3 &max);
 	void SetOrigin(const Vector3 &origin);

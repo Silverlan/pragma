@@ -228,6 +228,19 @@ void CollisionMesh::SetOrigin(const Vector3 &origin) { m_origin = origin; }
 const Vector3 &CollisionMesh::GetOrigin() const { return const_cast<CollisionMesh *>(this)->GetOrigin(); }
 Vector3 &CollisionMesh::GetOrigin() { return m_origin; }
 std::vector<Vector3> &CollisionMesh::GetVertices() { return m_vertices; }
+void CollisionMesh::Validate()
+{
+	Vector3 min, max;
+	GetAABB(&min, &max);
+	pragma::model::validate_value(min);
+	pragma::model::validate_value(max);
+	pragma::model::validate_value(GetCenterOfMass());
+	pragma::model::validate_value(GetMass());
+	pragma::model::validate_value(GetOrigin());
+	pragma::model::validate_value(GetVolume());
+	for(auto &v : GetVertices())
+		pragma::model::validate_value(v);
+}
 void CollisionMesh::CalculateBounds()
 {
 	auto numVerts = m_vertices.size();

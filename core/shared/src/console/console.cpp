@@ -45,6 +45,8 @@ void DebugConsole::open()
 		spdlog::info("Application is console sub-system. Attaching process to existing console...");
 		AttachConsole(GetCurrentProcessId());
 	}
+	SetConsoleOutputCP(CP_UTF8);
+	SetConsoleCP(CP_UTF8);
 
 	// Enable ANSI color codes under Windows
 	HANDLE handleOut = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -59,7 +61,7 @@ void DebugConsole::open()
 	//
 
 	// Change the console font
-	if(handleOut) {
+	/*if(handleOut) {
 		auto fontPath = util::get_program_path() + "\\fonts\\ubuntu\\UbuntuMono-R.ttf";
 		ustring::replace(fontPath, "/", "\\");
 		HANDLE m_stdOut = handleOut;
@@ -83,7 +85,7 @@ void DebugConsole::open()
 		}
 		else
 			spdlog::warn("Failed to set console font: AddFontResourceEx failed.");
-	}
+	}*/
 
 #else
 	int flags = fcntl(0, F_GETFL, 0);

@@ -182,6 +182,15 @@ void Frame::Scale(const Vector3 &scale)
 	for(auto &t : m_bones)
 		t.SetOrigin(t.GetOrigin() * scale);
 }
+void Frame::Mirror(pragma::Axis axis)
+{
+	auto transform = pragma::model::get_mirror_transform_vector(axis);
+	for(auto &t : m_bones) {
+		t.SetOrigin(t.GetOrigin() * transform);
+		auto &rot = t.GetRotation();
+		uquat::mirror_on_axis(rot, umath::to_integral(axis));
+	}
+}
 
 bool Frame::operator==(const Frame &other) const
 {

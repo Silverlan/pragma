@@ -528,6 +528,7 @@ class DLLNETWORK Model : public std::enable_shared_from_this<Model> {
 	void Rotate(const Quat &rot);
 	void Translate(const Vector3 &t);
 	void Scale(const Vector3 &scale);
+	void Mirror(pragma::Axis axis);
 
 	// Merges meshes with same materials (Only within mesh groups)
 	void Optimize();

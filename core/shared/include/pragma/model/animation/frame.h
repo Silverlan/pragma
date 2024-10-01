@@ -75,6 +75,7 @@ class DLLNETWORK Frame : public std::enable_shared_from_this<Frame> {
 	void Rotate(const pragma::animation::Animation &anim, const pragma::animation::Skeleton &skeleton, const Quat &rot);
 	void Translate(const pragma::animation::Animation &anim, const pragma::animation::Skeleton &skeleton, const Vector3 &t);
 	void Scale(const Vector3 &scale);
+	void Mirror(pragma::Axis axis);
 
 	const FlexFrameData &GetFlexFrameData() const;
 	FlexFrameData &GetFlexFrameData();

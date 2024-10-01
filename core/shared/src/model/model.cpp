@@ -328,6 +328,57 @@ void Model::Scale(const Vector3 &scale)
 	GenerateBindPoseMatrices();
 }
 
+void Model::Mirror(pragma::Axis axis)
+{
+	Vector3 transform {1.f, 1.f, 1.f};
+	m_collisionMin *= transform;
+	m_collisionMax *= transform;
+	uvec::to_min_max(m_collisionMin, m_collisionMax);
+
+	m_renderMin *= transform;
+	m_renderMax *= transform;
+	uvec::to_min_max(m_renderMin, m_renderMax);
+
+	for(auto &eb : m_eyeballs) {
+		eb.forward *= transform;
+		eb.origin *= transform;
+		eb.up *= transform;
+	}
+	for(auto &[id, hb] : m_hitboxes) {
+		hb.min *= transform;
+		hb.max *= transform;
+		uvec::to_min_max(hb.min, hb.max);
+	}
+	m_eyeOffset *= transform;
+
+	for(auto &att : m_attachments) {
+		att.offset *= transform;
+		auto rot = uquat::create(att.angles);
+		uquat::mirror_on_axis(rot, umath::to_integral(axis));
+		att.angles = EulerAngles {rot};
+	}
+	for(auto &cmesh : m_collisionMeshes)
+		cmesh->Mirror(axis);
+	if(m_metaRig) {
+		uquat::mirror_on_axis(m_metaRig->forwardFacingRotationOffset, umath::to_integral(axis));
+		m_metaRig->min *= transform;
+		m_metaRig->max *= transform;
+		uvec::to_min_max(m_metaRig->min, m_metaRig->max);
+	}
+	for(auto &mg : m_meshGroups) {
+		for(auto &m : mg->GetMeshes())
+			m->Mirror(axis);
+	}
+	for(auto &va : m_vertexAnimations)
+		va->Mirror(axis);
+	m_reference->Mirror(axis);
+	for(auto &anim : m_animations)
+		anim->Mirror(axis);
+	m_reference->Mirror(axis);
+
+	GenerateBindPoseMatrices();
+}
+
 void Model::GenerateBindPoseMatrices()
 {
 	auto &bones = GetSkeleton().GetBones();
@@ -2508,4 +2559,17 @@ void Model::TransformBone(pragma::animation::BoneId boneId, const umath::Transfo
 
 		return TransformBone(boneId, newPose, umath::CoordinateSpace::World);
 	}
+}
+
+Vector3 pragma::model::get_mirror_transform_vector(pragma::Axis axis)
+{
+	switch(axis) {
+	case Axis::X:
+		return Vector3 {-1.f, 0.f, 0.f};
+	case Axis::Y:
+		return Vector3 {0.f, -1.f, 0.f};
+	case Axis::Z:
+		return Vector3 {0.f, 0.f, -1.f};
+	}
+	return Vector3 {1.f, 1.f, 1.f};
 }

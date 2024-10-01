@@ -913,6 +913,17 @@ void pragma::animation::Animation::Scale(const Vector3 &scale)
 		frame->Scale(scale);
 }
 
+void pragma::animation::Animation::Mirror(pragma::Axis axis)
+{
+	auto transform = pragma::model::get_mirror_transform_vector(axis);
+	for(auto &frame : m_frames)
+		frame->Mirror(axis);
+
+	m_renderBounds.first *= transform;
+	m_renderBounds.second *= transform;
+	uvec::to_min_max(m_renderBounds.first, m_renderBounds.second);
+}
+
 int32_t pragma::animation::Animation::LookupBone(uint32_t boneId) const
 {
 	if(boneId < m_boneIds.size() && m_boneIds.at(boneId) == boneId) // Faster than map lookup and this statement is true for most cases
@@ -961,7 +972,7 @@ AnimationBlendController &pragma::animation::Animation::SetBlendController(uint3
 AnimationBlendController *pragma::animation::Animation::GetBlendController() { return m_blendController.has_value() ? &*m_blendController : nullptr; }
 const AnimationBlendController *pragma::animation::Animation::GetBlendController() const { return const_cast<Animation *>(this)->GetBlendController(); }
 void pragma::animation::Animation::ClearBlendController() { m_blendController = {}; }
-void pragma::animation::Animation ::Validate()
+void pragma::animation::Animation::Validate()
 {
 	for(auto &frame : GetFrames())
 		frame->Validate();

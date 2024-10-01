@@ -129,6 +129,11 @@ void ModelMesh::Scale(const Vector3 &scale)
 	for(auto &subMesh : m_subMeshes)
 		subMesh->Scale(scale);
 }
+void ModelMesh::Mirror(pragma::Axis axis)
+{
+	for(auto &subMesh : m_subMeshes)
+		subMesh->Mirror(axis);
+}
 
 //////////////////////////////////////////////////
 
@@ -292,6 +297,31 @@ void ModelSubMesh::Scale(const Vector3 &scale)
 	m_pose.SetOrigin(m_pose.GetOrigin() * scale);
 	for(auto &v : *m_vertices)
 		v.position *= scale;
+}
+void ModelSubMesh::Mirror(pragma::Axis axis)
+{
+	auto transform = pragma::model::get_mirror_transform_vector(axis);
+	m_center *= transform;
+	for(auto &v : *m_vertices) {
+		v.position *= transform;
+		v.normal *= transform;
+		reinterpret_cast<Vector3 &>(v.tangent) *= transform;
+		v.tangent.w *= -1.f; // Invert handedness
+	}
+
+	if(m_geometryType == GeometryType::Triangles) {
+		VisitIndices([](auto *indexData, uint32_t numIndices) {
+			for(auto i = decltype(numIndices) {0u}; i < numIndices; i += 3)
+				umath::swap(indexData[i], indexData[i + 1]);
+		});
+	}
+
+	m_min *= transform;
+	m_max *= transform;
+	uvec::to_min_max(m_min, m_max);
+
+	m_pose.SetOrigin(m_pose.GetOrigin() * transform);
+	uquat::mirror_on_axis(m_pose.GetRotation(), umath::to_integral(axis));
 }
 void ModelSubMesh::Merge(const ModelSubMesh &other)
 {

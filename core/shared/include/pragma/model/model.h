@@ -341,6 +341,7 @@ class DLLNETWORK Model : public std::enable_shared_from_this<Model> {
 	virtual std::shared_ptr<ModelMesh> CreateMesh() const;
 	virtual std::shared_ptr<ModelSubMesh> CreateSubMesh() const;
 	float CalcBoneLength(pragma::animation::BoneId boneId) const;
+	void RemoveBone(pragma::animation::BoneId boneId);
 
 	// Vertex animations
 	const std::vector<std::shared_ptr<VertexAnimation>> &GetVertexAnimations() const;

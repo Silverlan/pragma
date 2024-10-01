@@ -1987,6 +1987,95 @@ std::shared_ptr<pragma::animation::Animation> Model::GetAnimation(uint32_t ID) c
 uint32_t Model::GetAnimationCount() const { return static_cast<uint32_t>(m_animations.size()); }
 std::shared_ptr<ModelMesh> Model::CreateMesh() const { return std::make_shared<ModelMesh>(); }
 std::shared_ptr<ModelSubMesh> Model::CreateSubMesh() const { return std::make_shared<ModelSubMesh>(); }
+void Model::RemoveBone(pragma::animation::BoneId boneId)
+{
+	auto &bones = m_skeleton->GetBones();
+	if(boneId >= bones.size())
+		return;
+	auto &bone = bones[boneId];
+	for(auto &[boneId, child] : bone->children)
+		child->parent = bone->parent;
+	auto parent = bone->parent.lock();
+	if(parent) {
+		for(auto &[boneId, child] : bone->children)
+			parent->children[boneId] = child;
+	}
+	else {
+		auto &rootBones = m_skeleton->GetRootBones();
+		auto it = rootBones.find(boneId);
+		if(it != rootBones.end())
+			rootBones.erase(it);
+		for(auto &[boneId, child] : bone->children)
+			rootBones[boneId] = child;
+	}
+
+	bones.erase(bones.begin() + boneId);
+
+	auto removeFromFrame = [](Frame &frame, pragma::animation::BoneId boneId) {
+		auto &poses = frame.GetBoneTransforms();
+		if(boneId < poses.size())
+			poses.erase(poses.begin() + boneId);
+
+		auto &scales = frame.GetBoneScales();
+		if(boneId < scales.size())
+			scales.erase(scales.begin() + boneId);
+	};
+	removeFromFrame(*m_reference, boneId);
+	for(auto &anim : GetAnimations()) {
+		auto &boneList = const_cast<std::vector<uint16_t> &>(anim->GetBoneList());
+		if(boneList.empty()) {
+			for(auto &frame : anim->GetFrames())
+				removeFromFrame(*frame, boneId);
+			continue;
+		}
+		auto &boneMap = const_cast<std::unordered_map<uint32_t, uint32_t> &>(anim->GetBoneMap());
+		auto it = boneMap.find(boneId);
+		if(it == boneMap.end())
+			continue;
+		auto localBoneId = it->second;
+		for(auto &frame : anim->GetFrames())
+			removeFromFrame(*frame, localBoneId);
+		boneList.erase(boneList.begin() + localBoneId);
+		boneMap.erase(it);
+
+		for(auto &id : boneList) {
+			if(id >= boneId)
+				--id;
+		}
+
+		std::unordered_map<uint32_t, uint32_t> newBoneMap;
+		for(auto &pair : boneMap) {
+			auto globalId = pair.first;
+			auto localId = pair.second;
+			if(boneId >= globalId)
+				--globalId;
+			if(localId >= localBoneId)
+				--localId;
+			newBoneMap[globalId] = localId;
+		}
+		boneMap = newBoneMap;
+	}
+
+	std::unordered_map<pragma::animation::BoneId, std::shared_ptr<pragma::animation::Bone>> newRootBones;
+	for(auto &[boneId, bone] : m_skeleton->GetRootBones()) {
+		auto newBoneId = boneId;
+		if(boneId >= newBoneId)
+			--newBoneId;
+		newRootBones[newBoneId] = bone;
+	}
+	m_skeleton->GetRootBones() = newRootBones;
+
+	for(auto &bone : m_skeleton->GetBones()) {
+		std::unordered_map<pragma::animation::BoneId, std::shared_ptr<pragma::animation::Bone>> newChildren;
+		for(auto &[boneId, bone] : bone->children) {
+			auto newBoneId = boneId;
+			if(boneId >= newBoneId)
+				--newBoneId;
+			newChildren[newBoneId] = bone;
+		}
+		bone->children = newChildren;
+	}
+}
 float Model::CalcBoneLength(pragma::animation::BoneId boneId) const
 {
 	umath::ScaledTransform pose;

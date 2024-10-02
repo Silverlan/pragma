@@ -19,6 +19,9 @@ class Game;
 struct PhysSoftBodyInfo;
 class ModelSubMesh;
 class Model;
+namespace pragma {
+	enum class Axis : uint8_t;
+};
 namespace pragma::physics {
 	class IShape;
 };
@@ -86,6 +89,7 @@ class DLLNETWORK CollisionMesh : public std::enable_shared_from_this<CollisionMe
 	void SetBoneParent(int boneID);
 	int GetBoneParent() const;
 	void CalculateBounds();
+	void Validate();
 	void GetAABB(Vector3 *min, Vector3 *max) const;
 	void SetAABB(Vector3 &min, Vector3 &max);
 	void SetOrigin(const Vector3 &origin);
@@ -109,6 +113,7 @@ class DLLNETWORK CollisionMesh : public std::enable_shared_from_this<CollisionMe
 	void Rotate(const Quat &rot);
 	void Translate(const Vector3 &t);
 	void Scale(const Vector3 &scale);
+	void Mirror(pragma::Axis axis);
 	void Centralize();
 
 	const util::Uuid &GetUuid() const;

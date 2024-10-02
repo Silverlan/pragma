@@ -328,6 +328,57 @@ void Model::Scale(const Vector3 &scale)
 	GenerateBindPoseMatrices();
 }
 
+void Model::Mirror(pragma::Axis axis)
+{
+	Vector3 transform {1.f, 1.f, 1.f};
+	m_collisionMin *= transform;
+	m_collisionMax *= transform;
+	uvec::to_min_max(m_collisionMin, m_collisionMax);
+
+	m_renderMin *= transform;
+	m_renderMax *= transform;
+	uvec::to_min_max(m_renderMin, m_renderMax);
+
+	for(auto &eb : m_eyeballs) {
+		eb.forward *= transform;
+		eb.origin *= transform;
+		eb.up *= transform;
+	}
+	for(auto &[id, hb] : m_hitboxes) {
+		hb.min *= transform;
+		hb.max *= transform;
+		uvec::to_min_max(hb.min, hb.max);
+	}
+	m_eyeOffset *= transform;
+
+	for(auto &att : m_attachments) {
+		att.offset *= transform;
+		auto rot = uquat::create(att.angles);
+		uquat::mirror_on_axis(rot, umath::to_integral(axis));
+		att.angles = EulerAngles {rot};
+	}
+	for(auto &cmesh : m_collisionMeshes)
+		cmesh->Mirror(axis);
+	if(m_metaRig) {
+		uquat::mirror_on_axis(m_metaRig->forwardFacingRotationOffset, umath::to_integral(axis));
+		m_metaRig->min *= transform;
+		m_metaRig->max *= transform;
+		uvec::to_min_max(m_metaRig->min, m_metaRig->max);
+	}
+	for(auto &mg : m_meshGroups) {
+		for(auto &m : mg->GetMeshes())
+			m->Mirror(axis);
+	}
+	for(auto &va : m_vertexAnimations)
+		va->Mirror(axis);
+	m_reference->Mirror(axis);
+	for(auto &anim : m_animations)
+		anim->Mirror(axis);
+	m_reference->Mirror(axis);
+
+	GenerateBindPoseMatrices();
+}
+
 void Model::GenerateBindPoseMatrices()
 {
 	auto &bones = GetSkeleton().GetBones();
@@ -771,6 +822,87 @@ void Model::PrecacheTexture(uint32_t texId, bool bReload)
 		if(mat != nullptr)
 			AddLoadingMaterial(*mat, texId);
 	}
+}
+
+void Model::Validate()
+{
+	pragma::model::validate_value(m_maxEyeDeflection);
+	for(auto &[name, info] : m_phonemeMap.phonemes) {
+		for(auto &[name, val] : info.flexControllers)
+			pragma::model::validate_value(val);
+	}
+	for(auto &eb : m_eyeballs) {
+		pragma::model::validate_value(eb.irisScale);
+		pragma::model::validate_value(eb.forward);
+		pragma::model::validate_value(eb.irisUvRadius);
+		pragma::model::validate_value(eb.maxDilationFactor);
+		pragma::model::validate_value(eb.origin);
+		pragma::model::validate_value(eb.radius);
+		pragma::model::validate_value(eb.up);
+		pragma::model::validate_value(eb.zOffset);
+	}
+	for(auto &[id, hb] : m_hitboxes) {
+		pragma::model::validate_value(hb.min);
+		pragma::model::validate_value(hb.max);
+	}
+	for(auto &fc : m_flexControllers) {
+		pragma::model::validate_value(fc.min);
+		pragma::model::validate_value(fc.max);
+	}
+	pragma::model::validate_value(m_eyeOffset);
+	pragma::model::validate_value(m_collisionMin);
+	pragma::model::validate_value(m_collisionMax);
+	pragma::model::validate_value(m_renderMin);
+	pragma::model::validate_value(m_renderMax);
+	for(auto &pose : m_bindPose)
+		pragma::model::validate_value(pose);
+	for(auto &lod : m_lods)
+		pragma::model::validate_value(lod.distance);
+	for(auto &att : m_attachments) {
+		pragma::model::validate_value(att.offset);
+		pragma::model::validate_value(att.angles);
+	}
+	for(auto &cmesh : m_collisionMeshes)
+		cmesh->Validate();
+	if(m_metaRig) {
+		pragma::model::validate_value(m_metaRig->forwardFacingRotationOffset);
+		pragma::model::validate_value(m_metaRig->min);
+		pragma::model::validate_value(m_metaRig->max);
+	}
+	for(auto &flexAnim : m_flexAnimations) {
+		pragma::model::validate_value(flexAnim->GetFps());
+		for(auto &frame : flexAnim->GetFrames()) {
+			for(auto &v : frame->GetValues())
+				pragma::model::validate_value(v);
+		}
+	}
+	for(auto &mg : m_meshGroups) {
+		for(auto &m : mg->GetMeshes()) {
+			for(auto &sm : m->GetSubMeshes())
+				sm->Validate();
+		}
+	}
+	for(auto &va : m_vertexAnimations) {
+		for(auto &ma : va->GetMeshAnimations()) {
+			for(auto &mf : ma->GetFrames()) {
+				auto n = mf->GetVertexCount();
+				for(size_t i = 0; i < n; ++i) {
+					float delta;
+					if(mf->GetDeltaValue(i, delta))
+						pragma::model::validate_value(delta);
+					Vector3 n;
+					if(mf->GetVertexNormal(i, n))
+						pragma::model::validate_value(n);
+					Vector3 v;
+					if(mf->GetVertexPosition(i, v))
+						pragma::model::validate_value(v);
+				}
+			}
+		}
+	}
+	m_reference->Validate();
+	for(auto &anim : m_animations)
+		anim->Validate();
 }
 
 void Model::Optimize()
@@ -1855,6 +1987,95 @@ std::shared_ptr<pragma::animation::Animation> Model::GetAnimation(uint32_t ID) c
 uint32_t Model::GetAnimationCount() const { return static_cast<uint32_t>(m_animations.size()); }
 std::shared_ptr<ModelMesh> Model::CreateMesh() const { return std::make_shared<ModelMesh>(); }
 std::shared_ptr<ModelSubMesh> Model::CreateSubMesh() const { return std::make_shared<ModelSubMesh>(); }
+void Model::RemoveBone(pragma::animation::BoneId boneId)
+{
+	auto &bones = m_skeleton->GetBones();
+	if(boneId >= bones.size())
+		return;
+	auto &bone = bones[boneId];
+	for(auto &[boneId, child] : bone->children)
+		child->parent = bone->parent;
+	auto parent = bone->parent.lock();
+	if(parent) {
+		for(auto &[boneId, child] : bone->children)
+			parent->children[boneId] = child;
+	}
+	else {
+		auto &rootBones = m_skeleton->GetRootBones();
+		auto it = rootBones.find(boneId);
+		if(it != rootBones.end())
+			rootBones.erase(it);
+		for(auto &[boneId, child] : bone->children)
+			rootBones[boneId] = child;
+	}
+
+	bones.erase(bones.begin() + boneId);
+
+	auto removeFromFrame = [](Frame &frame, pragma::animation::BoneId boneId) {
+		auto &poses = frame.GetBoneTransforms();
+		if(boneId < poses.size())
+			poses.erase(poses.begin() + boneId);
+
+		auto &scales = frame.GetBoneScales();
+		if(boneId < scales.size())
+			scales.erase(scales.begin() + boneId);
+	};
+	removeFromFrame(*m_reference, boneId);
+	for(auto &anim : GetAnimations()) {
+		auto &boneList = const_cast<std::vector<uint16_t> &>(anim->GetBoneList());
+		if(boneList.empty()) {
+			for(auto &frame : anim->GetFrames())
+				removeFromFrame(*frame, boneId);
+			continue;
+		}
+		auto &boneMap = const_cast<std::unordered_map<uint32_t, uint32_t> &>(anim->GetBoneMap());
+		auto it = boneMap.find(boneId);
+		if(it == boneMap.end())
+			continue;
+		auto localBoneId = it->second;
+		for(auto &frame : anim->GetFrames())
+			removeFromFrame(*frame, localBoneId);
+		boneList.erase(boneList.begin() + localBoneId);
+		boneMap.erase(it);
+
+		for(auto &id : boneList) {
+			if(id >= boneId)
+				--id;
+		}
+
+		std::unordered_map<uint32_t, uint32_t> newBoneMap;
+		for(auto &pair : boneMap) {
+			auto globalId = pair.first;
+			auto localId = pair.second;
+			if(boneId >= globalId)
+				--globalId;
+			if(localId >= localBoneId)
+				--localId;
+			newBoneMap[globalId] = localId;
+		}
+		boneMap = newBoneMap;
+	}
+
+	std::unordered_map<pragma::animation::BoneId, std::shared_ptr<pragma::animation::Bone>> newRootBones;
+	for(auto &[boneId, bone] : m_skeleton->GetRootBones()) {
+		auto newBoneId = boneId;
+		if(boneId >= newBoneId)
+			--newBoneId;
+		newRootBones[newBoneId] = bone;
+	}
+	m_skeleton->GetRootBones() = newRootBones;
+
+	for(auto &bone : m_skeleton->GetBones()) {
+		std::unordered_map<pragma::animation::BoneId, std::shared_ptr<pragma::animation::Bone>> newChildren;
+		for(auto &[boneId, bone] : bone->children) {
+			auto newBoneId = boneId;
+			if(boneId >= newBoneId)
+				--newBoneId;
+			newChildren[newBoneId] = bone;
+		}
+		bone->children = newChildren;
+	}
+}
 float Model::CalcBoneLength(pragma::animation::BoneId boneId) const
 {
 	umath::ScaledTransform pose;
@@ -2427,4 +2648,17 @@ void Model::TransformBone(pragma::animation::BoneId boneId, const umath::Transfo
 
 		return TransformBone(boneId, newPose, umath::CoordinateSpace::World);
 	}
+}
+
+Vector3 pragma::model::get_mirror_transform_vector(pragma::Axis axis)
+{
+	switch(axis) {
+	case Axis::X:
+		return Vector3 {-1.f, 0.f, 0.f};
+	case Axis::Y:
+		return Vector3 {0.f, -1.f, 0.f};
+	case Axis::Z:
+		return Vector3 {0.f, 0.f, -1.f};
+	}
+	return Vector3 {1.f, 1.f, 1.f};
 }

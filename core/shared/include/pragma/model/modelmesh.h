@@ -31,6 +31,10 @@ namespace util {
 	using Uuid = std::array<uint64_t, 2>;
 };
 
+namespace pragma {
+	enum class Axis : uint8_t;
+};
+
 namespace pragma::model {
 	enum class IndexType : uint8_t { UInt16 = 0u, UInt32 };
 };
@@ -103,6 +107,7 @@ class DLLNETWORK ModelSubMesh : public std::enable_shared_from_this<ModelSubMesh
 	void AddPoint(uint32_t idx);
 	void ReserveIndices(size_t num);
 	void ReserveVertices(size_t num);
+	void Validate();
 	virtual void Update(ModelUpdateFlags flags = ModelUpdateFlags::AllData);
 
 	GeometryType GetGeometryType() const;
@@ -161,6 +166,7 @@ class DLLNETWORK ModelSubMesh : public std::enable_shared_from_this<ModelSubMesh
 	void Transform(const umath::ScaledTransform &pose);
 	void Merge(const ModelSubMesh &other);
 	void Scale(const Vector3 &scale);
+	void Mirror(pragma::Axis axis);
 	void ClipAgainstPlane(const Vector3 &n, double d, ModelSubMesh &clippedMeshA, ModelSubMesh &clippedMeshB, const std::vector<Mat4> *boneMatrices = nullptr, ModelSubMesh *clippedCoverMeshA = nullptr, ModelSubMesh *clippedCoverMeshB = nullptr);
 	virtual std::shared_ptr<ModelSubMesh> Copy(bool fullCopy = false) const;
 	std::shared_ptr<ModelSubMesh> Simplify(uint32_t targetVertexCount, double aggressiveness = 5.0, std::vector<uint64_t> *optOutNewVertexIndexToOriginalIndex = nullptr) const;
@@ -237,6 +243,7 @@ class DLLNETWORK ModelMesh : public std::enable_shared_from_this<ModelMesh> {
 	void Translate(const Vector3 &t);
 	void Merge(const ModelMesh &other);
 	void Scale(const Vector3 &scale);
+	void Mirror(pragma::Axis axis);
 	virtual std::shared_ptr<ModelMesh> Copy() const;
 
 	uint32_t GetReferenceId() const;

@@ -580,6 +580,27 @@ if platform == "win32":
 	cmake_build("Release")
 	cmake_build("Release",["install"])
 
+########## bit7z ##########
+os.chdir(deps_dir)
+bit7z_root = normalize_path(os.getcwd() +"/bit7z")
+if not Path(bit7z_root).is_dir():
+	print_msg("bit7z not found. Downloading...")
+	git_clone("https://github.com/rikyoz/bit7z.git")
+os.chdir("bit7z")
+reset_to_commit("bec6a22")
+
+print_msg("Building bit7z...")
+mkdir("build",cd=True)
+bit7z_cmake_args = ["-DBIT7Z_AUTO_FORMAT=ON"]
+if platform == "linux":
+	bit7z_cmake_args.append("-DCMAKE_CXX_FLAGS=-fPIC")
+cmake_configure("..",generator,bit7z_cmake_args)
+cmake_build("Release")
+if platform == "linux":
+	bit7z_lib_name = "libbit7z.a"
+else:
+	bit7z_lib_name = "bit7z.lib"
+cmake_args += ["-DDEPENDENCY_BIT7Z_INCLUDE=" +bit7z_root +"/include/", "-DDEPENDENCY_BIT7Z_LIBRARY=" +bit7z_root +"/lib/x64/Release/" +bit7z_lib_name]
 
 ########## compressonator deps ##########
 if platform == "linux":
@@ -841,7 +862,7 @@ if with_pfm:
 		)
 		add_pragma_module(
 			name="pr_unirender",
-			commitSha="bed4a4b0cc0b005a8d43448623e87c131a065718",
+			commitSha="7356fb4ba517e999cf853e41f8ce79918e3307d2",
 			repositoryUrl="https://github.com/Silverlan/pr_cycles.git"
 		)
 		add_pragma_module(
@@ -1009,6 +1030,28 @@ if platform == "win32":
 	os.chdir(curDir)
 	#
 
+# 7z binaries (required for bit7z)
+os.chdir(deps_dir)
+sevenz_root = normalize_path(os.getcwd() +"/7z-lib")
+if platform == "win32":
+	if not Path(sevenz_root).is_dir():
+		print_msg("7z-lib not found. Downloading...")
+		git_clone("https://github.com/Silverlan/7z-lib.git")
+	os.chdir("7z-lib")
+	reset_to_commit("1a9ec9a")
+	cp(sevenz_root +"/win-x64/7z.dll",install_dir +"/bin/")
+else:
+	if not Path(sevenz_root).is_dir():
+		print_msg("7z-lib not found. Downloading...")
+		mkdir("7z-lib",cd=True)
+		http_extract("https://7-zip.org/a/7z2408-src.tar.xz",format="tar.xz")
+	os.chdir(sevenz_root)
+	sevenz_so_path = sevenz_root +"/CPP/7zip/Bundles/Format7zF"
+	os.chdir(sevenz_so_path)
+	subprocess.run(["make","-j","-f","../../cmpl_gcc.mak"],check=True)
+	mkpath(install_dir +"/bin")
+	cp(sevenz_so_path +"/b/g/7z.so",install_dir +"/bin/7z.so")
+
 ########## Lua Extensions ##########
 lua_ext_dir = deps_dir +"/lua_extensions"
 mkdir(lua_ext_dir,cd=True)
@@ -1086,7 +1129,7 @@ def download_addon(name,addonName,url,commitId=None):
 curDir = os.getcwd()
 if not skip_repository_updates:
 	if with_pfm:
-		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","264862c84eec63252642cae0e531822a726a8833")
+		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","b4ed38338fd3478f50361bdeed6f433924e932e3")
 		download_addon("model editor","tool_model_editor","https://github.com/Silverlan/pragma_model_editor.git","4c185ce7533fba1294e7282ae88168e7842e1a2b")
 
 	if with_vr:

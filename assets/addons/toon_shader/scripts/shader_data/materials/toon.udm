@@ -32,10 +32,6 @@
 		},
 		{
 			$string name "normal_map"
-		},
-		{
-			$string name "ramp_texture"
-			$string default "error"
 		}
 	]
 }

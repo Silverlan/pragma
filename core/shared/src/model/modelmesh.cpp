@@ -7,6 +7,7 @@
 
 #include "stdafx_shared.h"
 #include "pragma/model/modelmesh.h"
+#include "pragma/model/model.h"
 #include "pragma/model/simplify.h"
 #include <mathutil/uvec.h>
 #include <pragma/math/intersection.h>
@@ -127,6 +128,11 @@ void ModelMesh::Scale(const Vector3 &scale)
 {
 	for(auto &subMesh : m_subMeshes)
 		subMesh->Scale(scale);
+}
+void ModelMesh::Mirror(pragma::Axis axis)
+{
+	for(auto &subMesh : m_subMeshes)
+		subMesh->Mirror(axis);
 }
 
 //////////////////////////////////////////////////
@@ -292,6 +298,31 @@ void ModelSubMesh::Scale(const Vector3 &scale)
 	for(auto &v : *m_vertices)
 		v.position *= scale;
 }
+void ModelSubMesh::Mirror(pragma::Axis axis)
+{
+	auto transform = pragma::model::get_mirror_transform_vector(axis);
+	m_center *= transform;
+	for(auto &v : *m_vertices) {
+		v.position *= transform;
+		v.normal *= transform;
+		reinterpret_cast<Vector3 &>(v.tangent) *= transform;
+		v.tangent.w *= -1.f; // Invert handedness
+	}
+
+	if(m_geometryType == GeometryType::Triangles) {
+		VisitIndices([](auto *indexData, uint32_t numIndices) {
+			for(auto i = decltype(numIndices) {0u}; i < numIndices; i += 3)
+				umath::swap(indexData[i], indexData[i + 1]);
+		});
+	}
+
+	m_min *= transform;
+	m_max *= transform;
+	uvec::to_min_max(m_min, m_max);
+
+	m_pose.SetOrigin(m_pose.GetOrigin() * transform);
+	uquat::mirror_on_axis(m_pose.GetRotation(), umath::to_integral(axis));
+}
 void ModelSubMesh::Merge(const ModelSubMesh &other)
 {
 	// TODO: Take poses into account!
@@ -445,7 +476,7 @@ void ModelSubMesh::GenerateNormals()
 		for(auto &fn : faceNormals)
 			n += fn;
 		n /= static_cast<float>(faceNormals.size());
-		uvec::normalize(&n);
+		uvec::normalize(n, uvec::UP);
 		(*m_vertices)[vertIdx].normal = n;
 		++vertIdx;
 	}
@@ -622,6 +653,33 @@ void ModelSubMesh::SetIndexType(pragma::model::IndexType type)
 }
 ModelSubMesh::GeometryType ModelSubMesh::GetGeometryType() const { return m_geometryType; }
 void ModelSubMesh::SetGeometryType(GeometryType type) { m_geometryType = type; }
+void ModelSubMesh::Validate()
+{
+	for(auto &a : GetAlphas())
+		pragma::model::validate_value(a);
+	Vector3 min, max;
+	GetBounds(min, max);
+	pragma::model::validate_value(min);
+	pragma::model::validate_value(max);
+	pragma::model::validate_value(GetCenter());
+	for(auto &vw : GetExtendedVertexWeights())
+		pragma::model::validate_value(vw.weights);
+	auto &pose = GetPose();
+	pragma::model::validate_value(pose.GetOrigin());
+	pragma::model::validate_value(pose.GetRotation());
+	for(auto &[name, uvSet] : GetUVSets()) {
+		for(auto &uv : uvSet)
+			pragma::model::validate_value(uv);
+	}
+	for(auto &vw : GetVertexWeights())
+		pragma::model::validate_value(vw.weights);
+	for(auto &v : GetVertices()) {
+		pragma::model::validate_value(v.position);
+		pragma::model::validate_value(v.normal);
+		pragma::model::validate_value(v.uv);
+		pragma::model::validate_value(v.tangent);
+	}
+}
 void ModelSubMesh::Update(ModelUpdateFlags flags)
 {
 	if((flags & ModelUpdateFlags::UpdateBounds) == ModelUpdateFlags::None)

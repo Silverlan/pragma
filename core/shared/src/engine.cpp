@@ -102,6 +102,7 @@ DLLNETWORK Engine *engine = NULL;
 extern std::optional<std::string> g_lpLogFile;
 extern util::LogSeverity g_lpLogLevelCon;
 extern util::LogSeverity g_lpLogLevelFile;
+
 Engine::Engine(int, char *[]) : CVarHandler(), m_logFile(nullptr), m_tickRate(Engine::DEFAULT_TICK_RATE), m_stateFlags {StateFlags::Running | StateFlags::MultiThreadedAssetLoadingEnabled}
 {
 	// TODO: File cache doesn't work with absolute paths at the moment
@@ -693,7 +694,6 @@ bool Engine::Initialize(int argc, char *argv[])
 		filemanager::set_use_file_index_cache(false);
 	if(!GetConVarBool("asset_multithreading_enabled"))
 		SetAssetMultiThreadedLoadingEnabled(false);
-
 	return true;
 }
 
@@ -938,7 +938,7 @@ std::unique_ptr<uzip::ZIPFile> Engine::GenerateEngineDump(const std::string &bas
 	auto programPath = util::Path::CreatePath(util::get_program_path());
 	outZipFileName = util::get_date_time(baseName + "_%Y-%m-%d_%H-%M-%S.zip");
 	auto zipName = programPath + outZipFileName;
-	auto zipFile = uzip::ZIPFile::Open(zipName.GetString(), uzip::ZIPFile::OpenMode::Write);
+	auto zipFile = uzip::ZIPFile::Open(zipName.GetString(), uzip::OpenMode::Write);
 	if(!zipFile) {
 		outErr = "Failed to create dump file '" + zipName.GetString() + "'";
 		return nullptr;

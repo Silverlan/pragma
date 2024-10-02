@@ -12,6 +12,7 @@
 #include <udm.hpp>
 #include <mathutil/umath.h>
 #include "pragma/model/animation/skeleton.hpp"
+#include "pragma/model/model.h"
 #include <panima/animation.hpp>
 #include <panima/channel.hpp>
 #include "pragma/model/animation/bone.hpp"
@@ -912,6 +913,17 @@ void pragma::animation::Animation::Scale(const Vector3 &scale)
 		frame->Scale(scale);
 }
 
+void pragma::animation::Animation::Mirror(pragma::Axis axis)
+{
+	auto transform = pragma::model::get_mirror_transform_vector(axis);
+	for(auto &frame : m_frames)
+		frame->Mirror(axis);
+
+	m_renderBounds.first *= transform;
+	m_renderBounds.second *= transform;
+	uvec::to_min_max(m_renderBounds.first, m_renderBounds.second);
+}
+
 int32_t pragma::animation::Animation::LookupBone(uint32_t boneId) const
 {
 	if(boneId < m_boneIds.size() && m_boneIds.at(boneId) == boneId) // Faster than map lookup and this statement is true for most cases
@@ -960,6 +972,19 @@ AnimationBlendController &pragma::animation::Animation::SetBlendController(uint3
 AnimationBlendController *pragma::animation::Animation::GetBlendController() { return m_blendController.has_value() ? &*m_blendController : nullptr; }
 const AnimationBlendController *pragma::animation::Animation::GetBlendController() const { return const_cast<Animation *>(this)->GetBlendController(); }
 void pragma::animation::Animation::ClearBlendController() { m_blendController = {}; }
+void pragma::animation::Animation::Validate()
+{
+	for(auto &frame : GetFrames())
+		frame->Validate();
+	for(auto &w : GetBoneWeights())
+		pragma::model::validate_value(w);
+	pragma::model::validate_value(GetDuration());
+	pragma::model::validate_value(GetFadeInTime());
+	pragma::model::validate_value(GetFadeOutTime());
+	auto &[min, max] = GetRenderBounds();
+	pragma::model::validate_value(min);
+	pragma::model::validate_value(max);
+}
 float pragma::animation::Animation::GetFadeInTime()
 {
 	if(m_fadeIn == nullptr)

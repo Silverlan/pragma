@@ -182,6 +182,15 @@ void Frame::Scale(const Vector3 &scale)
 	for(auto &t : m_bones)
 		t.SetOrigin(t.GetOrigin() * scale);
 }
+void Frame::Mirror(pragma::Axis axis)
+{
+	auto transform = pragma::model::get_mirror_transform_vector(axis);
+	for(auto &t : m_bones) {
+		t.SetOrigin(t.GetOrigin() * transform);
+		auto &rot = t.GetRotation();
+		uquat::mirror_on_axis(rot, umath::to_integral(axis));
+	}
+}
 
 bool Frame::operator==(const Frame &other) const
 {
@@ -205,6 +214,17 @@ std::vector<umath::Transform> &Frame::GetBoneTransforms() { return m_bones; }
 std::vector<Vector3> &Frame::GetBoneScales() { return m_scales; }
 umath::Transform *Frame::GetBoneTransform(uint32_t idx) { return (idx < m_bones.size()) ? &m_bones.at(idx) : nullptr; }
 const umath::Transform *Frame::GetBoneTransform(uint32_t idx) const { return const_cast<Frame *>(this)->GetBoneTransform(idx); }
+void Frame::Validate()
+{
+	for(auto &pose : GetBoneTransforms()) {
+		pragma::model::validate_value(pose.GetOrigin());
+		pragma::model::validate_value(pose.GetRotation());
+	}
+	for(auto &scale : GetBoneScales())
+		pragma::model::validate_value(scale);
+	for(auto &w : GetFlexFrameData().flexControllerWeights)
+		pragma::model::validate_value(w);
+}
 bool Frame::GetBonePose(uint32_t boneId, umath::ScaledTransform &outTransform) const
 {
 	if(boneId >= m_bones.size())

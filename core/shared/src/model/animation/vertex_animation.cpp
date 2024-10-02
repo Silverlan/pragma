@@ -117,6 +117,24 @@ void MeshVertexFrame::Scale(const Vector3 &scale)
 		SetVertexPosition(i, pos);
 	}
 }
+void MeshVertexFrame::Mirror(pragma::Axis axis)
+{
+	auto transform = pragma::model::get_mirror_transform_vector(axis);
+	auto numVerts = GetVertexCount();
+	for(auto i = decltype(numVerts) {0u}; i < numVerts; ++i) {
+		Vector3 pos;
+		if(GetVertexPosition(i, pos)) {
+			pos *= transform;
+			SetVertexPosition(i, pos);
+		}
+
+		Vector3 norm;
+		if(GetVertexNormal(i, norm)) {
+			norm *= transform;
+			SetVertexNormal(i, norm);
+		}
+	}
+}
 bool MeshVertexFrame::operator==(const MeshVertexFrame &other) const
 {
 	if(m_vertices.size() != other.m_vertices.size() || m_normals.size() != other.m_normals.size())
@@ -190,6 +208,11 @@ void MeshVertexAnimation::Scale(const Vector3 &scale)
 {
 	for(auto &frame : m_frames)
 		frame->Scale(scale);
+}
+void MeshVertexAnimation::Mirror(pragma::Axis axis)
+{
+	for(auto &frame : m_frames)
+		frame->Mirror(axis);
 }
 bool MeshVertexAnimation::operator==(const MeshVertexAnimation &other) const
 {
@@ -470,4 +493,9 @@ void VertexAnimation::Scale(const Vector3 &scale)
 {
 	for(auto &meshAnim : m_meshAnims)
 		meshAnim->Scale(scale);
+}
+void VertexAnimation::Mirror(pragma::Axis axis)
+{
+	for(auto &meshAnim : m_meshAnims)
+		meshAnim->Mirror(axis);
 }

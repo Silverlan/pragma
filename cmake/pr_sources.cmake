@@ -69,16 +69,39 @@ function(pr_add_module_list TARGET_NAME FILE_SET_NAME)
 endfunction()
 
 function(pr_add_modules TARGET_NAME MODULE_LOCATION)
+    if(NOT "${MODULE_LOCATION}" MATCHES "/$")
+        # Append a trailing slash if not present
+        set(MODULE_LOCATION "${MODULE_LOCATION}/")
+    endif()
+
+    set(options)
+    set(oneValueArgs)
+    set(multiValueArgs EXCLUDE)
+    cmake_parse_arguments(PARSE_ARGV 2 PA "${options}" "${oneValueArgs}" "${multiValueArgs}")
+
+    if(NOT DEFINED PA_EXCLUDE)
+        set(PA_EXCLUDE "")
+    endif()
+
     message("[PR] Adding modules in location directory \"${CMAKE_SOURCE_DIR}/${MODULE_LOCATION}\"...")
 
-    # 1. Get all .cppm files in ${MODULE_LOCATION}/implementation recursively and add as PRIVATE
-    file(GLOB_RECURSE IMPLEMENTATION_MODULE_LIST "${MODULE_LOCATION}/implementation/*.cppm")
+    set(EXCLUSION_MODULE_LIST "")
+    foreach(EXCLUSION_FILTER ${PA_EXCLUDE})
+        file(GLOB_RECURSE EXCLUSION_FILTER_LIST "${EXCLUSION_FILTER}")
+        list(APPEND EXCLUSION_MODULE_LIST ${EXCLUSION_FILTER_LIST})
+    endforeach()
+
+    # 1. Get all .cppm files in ${MODULE_LOCATION}implementation recursively and add as PRIVATE
+    file(GLOB_RECURSE IMPLEMENTATION_MODULE_LIST "${MODULE_LOCATION}implementation/*.cppm")
     if (IMPLEMENTATION_MODULE_LIST)
+        foreach(EXCLUDED_FILE ${EXCLUSION_MODULE_LIST})
+            list(REMOVE_ITEM IMPLEMENTATION_MODULE_LIST "${EXCLUDED_FILE}")
+        endforeach()
         pr_add_module_list(${TARGET_NAME} cxx_modules_impl PRIVATE "${IMPLEMENTATION_MODULE_LIST}")
     endif()
 
-    # 2. Get all .cppm files in ${MODULE_LOCATION} recursively excluding the ones in ${MODULE_LOCATION}/implementation/
-    file(GLOB_RECURSE ALL_MODULE_LIST "${MODULE_LOCATION}/*.cppm")
+    # 2. Get all .cppm files in ${MODULE_LOCATION} recursively excluding the ones in ${MODULE_LOCATION}implementation/
+    file(GLOB_RECURSE ALL_MODULE_LIST "${MODULE_LOCATION}*.cppm")
 
     # Filter out the implementation files from ALL_MODULE_LIST
     set(PUBLIC_MODULE_LIST "")
@@ -89,11 +112,11 @@ function(pr_add_modules TARGET_NAME MODULE_LOCATION)
         endif()
     endforeach()
 
-    # Combine the lists for the PUBLIC module files
-    list(APPEND PUBLIC_MODULE_LIST ${ROOT_MODULE_LIST} ${INTERFACE_MODULE_LIST})
-
     # Add the PUBLIC modules to the target
     if (PUBLIC_MODULE_LIST)
+        foreach(EXCLUDED_FILE ${EXCLUSION_MODULE_LIST})
+            list(REMOVE_ITEM PUBLIC_MODULE_LIST "${EXCLUDED_FILE}")
+        endforeach()
         pr_add_module_list(${TARGET_NAME} cxx_modules PUBLIC ${PUBLIC_MODULE_LIST})
     endif()
 endfunction()
@@ -111,10 +134,19 @@ function(pr_add_source_list TARGET_NAME SOURCE_LIST)
 endfunction()
 
 function(pr_add_sources TARGET_NAME SOURCE_LOCATION)
+    if(NOT "${SOURCE_LOCATION}" MATCHES "/$")
+        # Append a trailing slash if not present
+        set(SOURCE_LOCATION "${SOURCE_LOCATION}/")
+    endif()
+
     set(options)
     set(oneValueArgs)
-    set(multiValueArgs FILTER)
+    set(multiValueArgs EXCLUDE FILTER)
     cmake_parse_arguments(PARSE_ARGV 2 PA "${options}" "${oneValueArgs}" "${multiValueArgs}")
+
+    if(NOT DEFINED PA_EXCLUDE)
+        set(PA_EXCLUDE "")
+    endif()
 
     set(VISIBILITY PRIVATE)
     message("[PR] Adding include directory \"${SOURCE_LOCATION}\" to target ${TARGET_NAME} with visibility ${VISIBILITY}")
@@ -122,11 +154,20 @@ function(pr_add_sources TARGET_NAME SOURCE_LOCATION)
 
     message("[PR] Adding sources in location directory \"${CMAKE_SOURCE_DIR}/${SOURCE_LOCATION}\"...")
 
+    set(EXCLUSION_MODULE_LIST "")
+    foreach(EXCLUSION_FILTER ${PA_EXCLUDE})
+        file(GLOB_RECURSE EXCLUSION_FILTER_LIST "${EXCLUSION_FILTER}")
+        list(APPEND EXCLUSION_MODULE_LIST ${EXCLUSION_FILTER_LIST})
+    endforeach()
+
 	if(DEFINED PA_FILTER)
 		file(GLOB_RECURSE SOURCE_LIST ${PA_FILTER})
 	else()
-		file(GLOB_RECURSE SOURCE_LIST "${SOURCE_LOCATION}/*.c" "${SOURCE_LOCATION}/*.cpp")
+		file(GLOB_RECURSE SOURCE_LIST "${SOURCE_LOCATION}*.c" "${SOURCE_LOCATION}*.cpp")
 	endif()
+    foreach(EXCLUDED_FILE ${EXCLUSION_MODULE_LIST})
+        list(REMOVE_ITEM SOURCE_LIST "${EXCLUDED_FILE}")
+    endforeach()
     pr_add_source_list(${TARGET_NAME} "${SOURCE_LIST}")
 endfunction()
 

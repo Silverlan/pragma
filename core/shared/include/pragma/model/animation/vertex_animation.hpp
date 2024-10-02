@@ -13,6 +13,10 @@
 #include <mathutil/uvec.h>
 #include <memory>
 
+namespace pragma {
+	enum class Axis : uint8_t;
+};
+
 class DLLNETWORK MeshVertexFrame : public std::enable_shared_from_this<MeshVertexFrame> {
   public:
 	enum class Flags : uint8_t {
@@ -54,6 +58,7 @@ class DLLNETWORK MeshVertexFrame : public std::enable_shared_from_this<MeshVerte
 
 	void Rotate(const Quat &rot);
 	void Scale(const Vector3 &scale);
+	void Mirror(pragma::Axis axis);
 
 	bool operator==(const MeshVertexFrame &other) const;
 	bool operator!=(const MeshVertexFrame &other) const { return !operator==(other); }
@@ -84,6 +89,7 @@ class DLLNETWORK MeshVertexAnimation : public std::enable_shared_from_this<MeshV
 
 	void Rotate(const Quat &rot);
 	void Scale(const Vector3 &scale);
+	void Mirror(pragma::Axis axis);
 
 	bool operator==(const MeshVertexAnimation &other) const;
 	bool operator!=(const MeshVertexAnimation &other) const { return !operator==(other); }
@@ -124,6 +130,7 @@ class DLLNETWORK VertexAnimation : public std::enable_shared_from_this<VertexAni
 
 	void Rotate(const Quat &rot);
 	void Scale(const Vector3 &scale);
+	void Mirror(pragma::Axis axis);
 	bool Save(Model &mdl, udm::AssetDataArg outData, std::string &outErr);
 
 	bool operator==(const VertexAnimation &other) const;

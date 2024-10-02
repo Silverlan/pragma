@@ -114,6 +114,16 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 
 	auto &modUtil = lua.RegisterLibrary("util");
 	auto defTexture = luabind::class_<Texture>("Texture");
+	defTexture.def(
+	  "__tostring", +[](const Texture &tex) -> std::string {
+		  std::stringstream ss;
+		  ss << "Texture";
+		  ss << "[" << tex.GetName() << "]";
+		  ss << "[" << tex.GetWidth() << "x" << tex.GetHeight() << "]";
+		  ss << "[" << magic_enum::enum_name(tex.GetFlags()) << "]";
+		  return ss.str();
+	  });
+	defTexture.def("GetName", &Texture::GetName, luabind::copy_policy<0> {});
 	defTexture.def("GetWidth", &Texture::GetWidth);
 	defTexture.def("GetHeight", &Texture::GetHeight);
 	defTexture.def("GetVkTexture", &Lua::Texture::GetVkTexture);
@@ -336,6 +346,7 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 	defShader.def("GetIdentifier", &Lua::Shader::GetIdentifier);
 	defShader.def("GetSourceFilePath", &Lua::Shader::GetSourceFilePath);
 	defShader.def("GetSourceFilePaths", &Lua::Shader::GetSourceFilePaths);
+	defShader.def("FindDescriptorSetIndex", &prosper::Shader::FindDescriptorSetIndex);
 	modShader[defShader];
 
 	auto defShaderGraphics = luabind::class_<prosper::ShaderGraphics, prosper::Shader>("Graphics");
@@ -719,6 +730,7 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 	defShaderTextured3DBase.def("InitializeMaterialDescriptorSet", &pragma::LuaShaderWrapperTextured3D::Lua_InitializeMaterialDescriptorSet, &pragma::LuaShaderWrapperTextured3D::Lua_default_InitializeMaterialDescriptorSet);
 	defShaderTextured3DBase.def("InitializeMaterialData", &pragma::LuaShaderWrapperTextured3D::Lua_InitializeMaterialData, &pragma::LuaShaderWrapperTextured3D::Lua_default_InitializeMaterialData);
 	defShaderTextured3DBase.def("SetPushConstants", &pragma::LuaShaderWrapperTextured3D::SetPushConstants);
+	defShaderTextured3DBase.def("GetBindPcb", &pragma::LuaShaderWrapperTextured3D::GetBindPcb);
 	defShaderTextured3DBase.def("InitializeMaterialBuffer", &pragma::LuaShaderWrapperTextured3D::InitializeMaterialBuffer);
 
 	defShaderTextured3DBase.def("OnBindMaterial", &pragma::LuaShaderWrapperTextured3D::Lua_OnBindMaterial, &pragma::LuaShaderWrapperTextured3D::Lua_default_OnBindMaterial);

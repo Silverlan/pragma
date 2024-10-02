@@ -20,6 +20,10 @@
 
 #define PRAGMA_ANIMATION_VERSION 2
 
+namespace pragma {
+	enum class Axis : uint8_t;
+};
+
 struct DLLNETWORK AnimationBlendControllerTransition {
 	uint32_t animation = std::numeric_limits<uint32_t>::max();
 	float transition = 0.f;
@@ -100,10 +104,12 @@ namespace pragma::animation {
 		AnimationBlendController *GetBlendController();
 		const AnimationBlendController *GetBlendController() const;
 		void ClearBlendController();
+		void Validate();
 		void Localize(const pragma::animation::Skeleton &skeleton);
 		void Rotate(const pragma::animation::Skeleton &skeleton, const Quat &rot);
 		void Translate(const pragma::animation::Skeleton &skeleton, const Vector3 &t);
 		void Scale(const Vector3 &scale);
+		void Mirror(pragma::Axis axis);
 		// Reverses all frames in the animation
 		void Reverse();
 

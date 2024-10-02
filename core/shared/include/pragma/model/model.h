@@ -155,6 +155,27 @@ namespace pragma::animation {
 	struct MetaRig;
 	enum class MetaRigBoneType : uint8_t;
 };
+namespace pragma::model {
+	template<typename T>
+	static void validate_value(const T &v)
+	{
+		if constexpr(std::is_arithmetic_v<T>) {
+			if(isnan(v))
+				throw std::runtime_error {"NaN value"};
+			if(isinf(v))
+				throw std::runtime_error {"inv value"};
+		}
+		else if constexpr(std::is_same_v<T, EulerAngles>) {
+			for(int i = 0; i < 3; ++i)
+				validate_value(v[i]);
+		}
+		else {
+			for(size_t i = 0; i < T::length(); ++i)
+				validate_value(v[i]);
+		}
+	}
+	Vector3 get_mirror_transform_vector(pragma::Axis axis);
+};
 enum class JointType : uint8_t;
 namespace umath {
 	class ScaledTransform;
@@ -320,6 +341,7 @@ class DLLNETWORK Model : public std::enable_shared_from_this<Model> {
 	virtual std::shared_ptr<ModelMesh> CreateMesh() const;
 	virtual std::shared_ptr<ModelSubMesh> CreateSubMesh() const;
 	float CalcBoneLength(pragma::animation::BoneId boneId) const;
+	void RemoveBone(pragma::animation::BoneId boneId);
 
 	// Vertex animations
 	const std::vector<std::shared_ptr<VertexAnimation>> &GetVertexAnimations() const;
@@ -507,9 +529,11 @@ class DLLNETWORK Model : public std::enable_shared_from_this<Model> {
 	void Rotate(const Quat &rot);
 	void Translate(const Vector3 &t);
 	void Scale(const Vector3 &scale);
+	void Mirror(pragma::Axis axis);
 
 	// Merges meshes with same materials (Only within mesh groups)
 	void Optimize();
+	void Validate();
 
 	// BodyGroups
 	BodyGroup *GetBodyGroup(uint32_t id);

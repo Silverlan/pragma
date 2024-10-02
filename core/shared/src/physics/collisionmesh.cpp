@@ -122,6 +122,20 @@ void CollisionMesh::Scale(const Vector3 &scale)
 	m_min *= scale;
 	m_max *= scale;
 }
+void CollisionMesh::Mirror(pragma::Axis axis)
+{
+	auto transform = pragma::model::get_mirror_transform_vector(axis);
+	for(auto &v : m_vertices)
+		v *= transform;
+	for(size_t i = 0; i < m_triangles.size(); i += 3)
+		umath::swap(m_triangles[i], m_triangles[i + 1]);
+	m_min *= transform;
+	m_max *= transform;
+	uvec::to_min_max(m_min, m_max);
+
+	m_origin *= transform;
+	m_centerOfMass *= transform;
+}
 std::shared_ptr<pragma::physics::IShape> CollisionMesh::CreateShape(const Vector3 &scale) const
 {
 	auto *physEnv = m_game->GetPhysicsEnvironment();
@@ -228,6 +242,19 @@ void CollisionMesh::SetOrigin(const Vector3 &origin) { m_origin = origin; }
 const Vector3 &CollisionMesh::GetOrigin() const { return const_cast<CollisionMesh *>(this)->GetOrigin(); }
 Vector3 &CollisionMesh::GetOrigin() { return m_origin; }
 std::vector<Vector3> &CollisionMesh::GetVertices() { return m_vertices; }
+void CollisionMesh::Validate()
+{
+	Vector3 min, max;
+	GetAABB(&min, &max);
+	pragma::model::validate_value(min);
+	pragma::model::validate_value(max);
+	pragma::model::validate_value(GetCenterOfMass());
+	pragma::model::validate_value(GetMass());
+	pragma::model::validate_value(GetOrigin());
+	pragma::model::validate_value(GetVolume());
+	for(auto &v : GetVertices())
+		pragma::model::validate_value(v);
+}
 void CollisionMesh::CalculateBounds()
 {
 	auto numVerts = m_vertices.size();

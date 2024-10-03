@@ -32,7 +32,6 @@ struct DLLNETWORK FontSetFileData {
 struct DLLNETWORK FontSet {
 	std::vector<FontSetFileData> fileData;
 	std::vector<std::string> features;
-	std::optional<util::Utf8String> requiredChars {};
 	FontSetFileData *FindFontFileCandidate(FontSetFlag flags);
 	const FontSetFileData *FindFontFileCandidate(FontSetFlag flags) const;
 	bool HasFeature(const std::string_view &feature) const;

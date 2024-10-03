@@ -153,7 +153,7 @@ void WIConsole::Initialize()
 
 	EnableThinking();
 	SetSize(512, 256);
-	FontInfo::FontSettings settings {};
+	FontSettings settings {};
 	settings.fontSize = 12;
 	FontManager::LoadFont("console", "dejavu/DejaVuSansMono", settings);
 

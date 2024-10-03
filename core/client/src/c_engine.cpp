@@ -734,15 +734,6 @@ bool CEngine::Initialize(int argc, char *argv[])
 			if(FindFontSet(sourceHanSans))
 				defaultFontSet = sourceHanSans;
 		}
-		auto udmReqChars = (*lanInfo->configData)["font"]["requiredChars"];
-		if(udmReqChars) {
-			auto *fontSet = const_cast<FontSet *>(FindFontSet(defaultFontSet));
-			if(fontSet) {
-				std::string reqChars;
-				udmReqChars(reqChars);
-				fontSet->requiredChars = util::Utf8String {reqChars};
-			}
-		}
 	}
 
 	auto fail = [&]() {
@@ -768,7 +759,7 @@ bool CEngine::Initialize(int argc, char *argv[])
 		fail();
 		return false;
 	}
-	auto r = gui.Initialize(GetRenderResolution(), fontData->fileName, fontSet.requiredChars);
+	auto r = gui.Initialize(GetRenderResolution(), fontData->fileName, {"source-han-sans/SourceHanSans-VF.ttf"});
 	if(r != WGUI::ResultCode::Ok) {
 		Con::cerr << "Unable to initialize GUI library: ";
 		switch(r) {
@@ -1453,7 +1444,7 @@ void CEngine::DrawScene(std::shared_ptr<prosper::RenderTarget> &rt)
 		StartProfilingStage("RecordGUI");
 		StartProfilingStage("GUI");
 
-		WGUI::GetInstance().SetLockedForDrawing(true);
+		WGUI::GetInstance().BeginDraw();
 		CallCallbacks<void>("PreRecordGUI");
 		if(c_game != nullptr)
 			c_game->PreGUIRecord();
@@ -1534,7 +1525,7 @@ void CEngine::DrawScene(std::shared_ptr<prosper::RenderTarget> &rt)
 		CallCallbacks<void>("PostDrawGUI");
 		if(c_game != nullptr)
 			c_game->PostGUIDraw();
-		WGUI::GetInstance().SetLockedForDrawing(false);
+		WGUI::GetInstance().EndDraw();
 		StopProfilingStage(); // ExecuteGUIDrawCalls
 	}
 }

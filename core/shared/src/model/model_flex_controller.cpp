@@ -34,6 +34,8 @@ FlexController *Model::GetFlexController(const std::string &name)
 }
 FlexController &Model::AddFlexController(const std::string &name)
 {
+	if(name.find_first_of("/\\") != std::string::npos)
+		throw std::invalid_argument {"Name '" + name + "' contains illegal characters!"};
 	auto it = FindFlexController(name);
 	if(it == m_flexControllers.end()) {
 		m_flexControllers.push_back({});
@@ -93,6 +95,8 @@ Flex *Model::GetFlex(const std::string &name)
 }
 Flex &Model::AddFlex(const std::string &name)
 {
+	if(name.find_first_of("/\\") != std::string::npos)
+		throw std::invalid_argument {"Name '" + name + "' contains illegal characters!"};
 	auto it = FindFlex(name);
 	if(it == m_flexes.end()) {
 		m_flexes.push_back({name});

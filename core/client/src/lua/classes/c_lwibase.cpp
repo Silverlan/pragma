@@ -544,6 +544,10 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	  "ClampToVisibleBounds", +[](const ::WIBase &el, Vector2i &pos, Vector2i &size) { el.ClampToVisibleBounds(pos, size); });
 	classDef.def(
 	  "DebugPrintHierarchy", +[](const ::WIBase &el) { debug_print_hierarchy(el); });
+	classDef.def("IsFileHovering", &::WIBase::IsFileHovering);
+	classDef.def("SetFileHovering", &::WIBase::SetFileHovering);
+	classDef.def("GetFileDropInputEnabled", &::WIBase::GetFileDropInputEnabled);
+	classDef.def("SetFileDropInputEnabled", &::WIBase::SetFileDropInputEnabled);
 
 	auto defDrawInfo = luabind::class_<::WIBase::DrawInfo>("DrawInfo");
 	defDrawInfo.add_static_constant("FLAG_NONE", umath::to_integral(::WIBase::DrawInfo::Flags::None));

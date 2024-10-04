@@ -74,6 +74,11 @@ class DLLCLIENT CEngine : public Engine, public pragma::RenderContext {
 
 		Count
 	};
+	struct DLLCLIENT DroppedFile {
+		DroppedFile(const std::string &fullPath);
+		std::string fullPath;
+		std::string fileName;
+	};
 
 	using pragma::RenderContext::DrawFrame;
 	virtual void SetAssetMultiThreadedLoadingEnabled(bool enabled) override;
@@ -109,6 +114,7 @@ class DLLCLIENT CEngine : public Engine, public pragma::RenderContext {
 	virtual void StartDefaultGame(const std::string &map) override;
 	virtual void EndGame() override;
 	virtual bool IsClientConnected() override;
+	const std::vector<DroppedFile> &GetDroppedFiles() const;
 	bool IsWindowFocused() const;
 	bool IsValidAxisInput(float axisInput) const;
 	void GetMappedKeys(const std::string &cmd, std::vector<GLFW::Key> &keys, uint32_t maxKeys = 1);
@@ -156,6 +162,8 @@ class DLLCLIENT CEngine : public Engine, public pragma::RenderContext {
 	void ScrollInput(prosper::Window &window, Vector2 offset);
 	void OnWindowFocusChanged(prosper::Window &window, bool bFocus);
 	void OnFilesDropped(prosper::Window &window, std::vector<std::string> &files);
+	void OnDragEnter(prosper::Window &window);
+	void OnDragExit(prosper::Window &window);
 	void OnWindowResized(prosper::Window &window, Vector2i size);
 	bool OnWindowShouldClose(prosper::Window &window);
 	void JoystickButtonInput(prosper::Window &window, const GLFW::Joystick &joystick, uint32_t key, GLFW::KeyState state);
@@ -278,6 +286,8 @@ class DLLCLIENT CEngine : public Engine, public pragma::RenderContext {
 	std::shared_ptr<prosper::IQueryPool> m_gpuTimerPool = nullptr;
 	std::vector<std::shared_ptr<prosper::TimerQuery>> m_gpuTimers;
 	std::vector<std::chrono::nanoseconds> m_gpuExecTimes {};
+
+	std::vector<DroppedFile> m_droppedFiles = {}; // Only contains files during OnFilesDropped-call
 
 	virtual void Think() override;
 	virtual void Tick() override;

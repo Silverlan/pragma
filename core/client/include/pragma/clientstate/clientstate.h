@@ -239,6 +239,8 @@ class DLLCLIENT ClientState : public NetworkState {
 	Bool CharInput(unsigned int c);
 	Bool ScrollInput(Vector2 offset);
 	void OnFilesDropped(std::vector<std::string> &files);
+	void OnDragEnter(prosper::Window &window);
+	void OnDragExit(prosper::Window &window);
 	bool OnWindowShouldClose(prosper::Window &window);
 	void OnPreedit(prosper::Window &window, const util::Utf8String &preeditString, const std::vector<int> &blockSizes, int focusedBlock, int caret);
 	void OnIMEStatusChanged(prosper::Window &window, bool imeEnabled);

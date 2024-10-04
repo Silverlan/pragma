@@ -72,6 +72,20 @@ void ClientState::OnFilesDropped(std::vector<std::string> &files)
 		return;
 	game->OnFilesDropped(files);
 }
+void ClientState::OnDragEnter(prosper::Window &window)
+{
+	auto *game = GetGameState();
+	if(game == nullptr)
+		return;
+	game->OnDragEnter(window);
+}
+void ClientState::OnDragExit(prosper::Window &window)
+{
+	auto *game = GetGameState();
+	if(game == nullptr)
+		return;
+	game->OnDragExit(window);
+}
 bool ClientState::OnWindowShouldClose(prosper::Window &window)
 {
 	auto *game = GetGameState();

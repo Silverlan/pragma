@@ -58,6 +58,9 @@ class DLLCLIENT WILuaBase : public WIBase, public LuaObjectBase {
 	virtual void Render(const DrawInfo &drawInfo, wgui::DrawState &drawState, const Mat4 &matDraw, const Vector2 &scale = {1.f, 1.f}, uint32_t testStencilLevel = 0u, wgui::StencilPipeline stencilPipeline = wgui::StencilPipeline::Test) override;
 	virtual void OnCursorEntered() override;
 	virtual void OnCursorExited() override;
+	virtual void OnFileDragEntered() override;
+	virtual void OnFileDragExited() override;
+	virtual util::EventReply OnFilesDropped(const std::vector<std::string> &files) override;
 	virtual void OnFocusGained() override;
 	virtual void OnFocusKilled() override;
 	virtual void OnRemove() override;
@@ -112,6 +115,15 @@ class DLLCLIENT WILuaBase : public WIBase, public LuaObjectBase {
 
 	void Lua_OnCursorExited();
 	static void default_OnCursorExited(lua_State *l, WILuaBase &hElement);
+
+	void Lua_OnFileDragEntered();
+	static void default_OnFileDragEntered(lua_State *l, WILuaBase &hElement);
+
+	void Lua_OnFileDragExited();
+	static void default_OnFileDragExited(lua_State *l, WILuaBase &hElement);
+
+	void Lua_OnFilesDropped(const std::vector<std::string> &files);
+	static void default_OnFilesDropped(lua_State *l, WILuaBase &hElement, const std::vector<std::string> &files);
 
 	void Lua_OnFocusGained();
 	static void default_OnFocusGained(lua_State *l, WILuaBase &hElement);

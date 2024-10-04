@@ -10,7 +10,7 @@ external_libs_dir = curDir +"/external_libs"
 os.chdir(external_libs_dir)
 get_submodule("alsoundsystem","https://github.com/Silverlan/alsoundsystem.git","7daad8c34ab5000fc92b6f326b08fdc81b984cfe")
 get_submodule("datasystem","https://github.com/Silverlan/datasystem.git","7642296ea0f8316957e1123034e87034294f8b46")
-get_submodule("iglfw","https://github.com/Silverlan/iglfw.git","c5ea5319c17e206e8e418a2549a195e662f59dfd")
+get_submodule("iglfw","https://github.com/Silverlan/iglfw.git","e3a165cdac0ec9a2b3ced4becc0b7beeb5cf5508")
 get_submodule("luasystem","https://github.com/Silverlan/luasystem.git","b36cfa22c79906270dec09a0d882e92c07a12104")
 get_submodule("materialsystem","https://github.com/Silverlan/materialsystem.git","b5ef761c20f5f6afa573bee079340d6da4db8bd2")
 get_submodule("mathutil","https://github.com/Silverlan/mathutil.git","90a6cbb229cf3b2e7af1eb9bc58b3ff22db5a611")
@@ -33,7 +33,7 @@ get_submodule("util_versioned_archive","https://github.com/Silverlan/util_versio
 get_submodule("util_vmf","https://github.com/Silverlan/util_vmf.git","3080ba05280ae5b0a76ef283870864c16d1c7826")
 get_submodule("util_zip","https://github.com/Silverlan/util_zip.git","d9bf05a5cbf71bf53f9fbea82c7352f870989ed1")
 get_submodule("vfilesystem","https://github.com/Silverlan/vfilesystem.git","25c839e313b1bb1c2b4dee56c4a0298c53f546b4")
-get_submodule("wgui","https://github.com/Silverlan/wgui.git","a9359e5cc44d09f8fb6fb4d7c1f9ae099f8a89d0")
+get_submodule("wgui","https://github.com/Silverlan/wgui.git","82e5cbce64d36d8008545cb9786b163f1c880039")
 get_submodule("util_unicode","https://github.com/Silverlan/util_unicode.git","344d62ac0b06db9d970b08e9cf3a1d039ed6b28a")
 get_submodule("cppbezierfit","https://github.com/Silverlan/cppbezierfit.git","eb08f35ad74c1124f3cd4ef3a8958cded6a04b0e")
 

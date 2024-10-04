@@ -515,11 +515,55 @@ void CEngine::OnWindowFocusChanged(prosper::Window &window, bool bFocused)
 	if(client != nullptr)
 		client->UpdateSoundVolume();
 }
+
+// Usually we don't allow opening external files, but we make an exception for files that have been dropped into Pragma.
+static std::unordered_map<std::string, std::string> g_droppedFiles;
+namespace pragma {
+	DLLCLIENT const std::unordered_map<std::string, std::string> &get_dropped_files() { return g_droppedFiles; }
+};
+const std::vector<CEngine::DroppedFile> &CEngine::GetDroppedFiles() const { return m_droppedFiles; }
 void CEngine::OnFilesDropped(prosper::Window &window, std::vector<std::string> &files)
 {
 	if(client == nullptr)
 		return;
+
+	m_droppedFiles.reserve(files.size());
+	for(auto &f : files) {
+		if(FileManager::IsSystemFile(f) == true) {
+			m_droppedFiles.push_back(DroppedFile {f});
+			auto path = util::Path::CreateFile(f).GetString();
+			ustring::to_lower(path);
+			g_droppedFiles.insert(std::make_pair(ufile::get_file_from_filename(path), path));
+		}
+	}
+	util::ScopeGuard g {[this]() {
+		m_droppedFiles.clear();
+		m_droppedFiles.shrink_to_fit();
+	}};
+
+	std::vector<std::string> droppedFileNames;
+	droppedFileNames.reserve(m_droppedFiles.size());
+	for(auto &f : m_droppedFiles)
+		droppedFileNames.push_back(f.fileName);
+	if(WGUI::GetInstance().HandleFileDrop(window, droppedFileNames))
+		return;
 	client->OnFilesDropped(files);
+}
+void CEngine::OnDragEnter(prosper::Window &window)
+{
+	if(client == nullptr)
+		return;
+	if(WGUI::GetInstance().HandleFileDragEnter(window))
+		return;
+	client->OnDragEnter(window);
+}
+void CEngine::OnDragExit(prosper::Window &window)
+{
+	if(client == nullptr)
+		return;
+	if(WGUI::GetInstance().HandleFileDragExit(window))
+		return;
+	client->OnDragExit(window);
 }
 bool CEngine::OnWindowShouldClose(prosper::Window &window)
 {
@@ -1022,6 +1066,7 @@ void CEngine::SetGPUProfilingEnabled(bool bEnabled)
 		++it;
 	}
 }
+
 std::shared_ptr<prosper::Window> CEngine::CreateWindow(prosper::WindowSettings &settings)
 {
 	if(settings.width == 0 || settings.height == 0)
@@ -1058,6 +1103,8 @@ void CEngine::InitializeWindowInputCallbacks(prosper::Window &window)
 	window->SetScrollCallback([this, &window](GLFW::Window &glfwWindow, Vector2 offset) mutable { ScrollInput(window, offset); });
 	window->SetFocusCallback([this, &window](GLFW::Window &glfwWindow, bool bFocused) mutable { OnWindowFocusChanged(window, bFocused); });
 	window->SetDropCallback([this, &window](GLFW::Window &glfwWindow, std::vector<std::string> &files) mutable { OnFilesDropped(window, files); });
+	window->SetDragEnterCallback([this, &window](GLFW::Window &glfwWindow) mutable { OnDragEnter(window); });
+	window->SetDragExitCallback([this, &window](GLFW::Window &glfwWindow) mutable { OnDragExit(window); });
 	window->SetOnShouldCloseCallback([this, &window](GLFW::Window &glfwWindow) -> bool { return OnWindowShouldClose(window); });
 	window->SetPreeditCallback([this, &window](GLFW::Window &glfwWindow, int preedit_count, unsigned int *preedit_string, int block_count, int *block_sizes, int focused_block, int caret) {
 		std::vector<int32_t> istr;
@@ -1770,6 +1817,8 @@ uint32_t CEngine::DoClearUnusedAssets(pragma::asset::Type type) const
 	}
 	return n;
 }
+
+CEngine::DroppedFile::DroppedFile(const std::string &_fullPath) : fullPath(_fullPath), fileName(ufile::get_file_from_filename(_fullPath)) {}
 
 REGISTER_CONVAR_CALLBACK_CL(cl_render_monitor, [](NetworkState *, const ConVar &, int32_t, int32_t monitor) {
 	auto monitors = GLFW::get_monitors();

@@ -1,7 +1,6 @@
 "jp"
 {
-	// $string displayName "日本語"
-	$string displayName "Japanese"
+	$string displayName "日本語"
 	"font"
 	{
 		$array characterSetRequirements [string]["jp"]

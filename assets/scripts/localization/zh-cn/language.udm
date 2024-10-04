@@ -1,6 +1,6 @@
 "zh-cn"
 {
-	$string displayName "Chinese (Simplified)"
+	$string displayName "中文 (简体)"
 	"font"
 	{
 		$array characterSetRequirements [string]["zh"]

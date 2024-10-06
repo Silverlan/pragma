@@ -591,7 +591,7 @@ bool CEngine::OnWindowShouldClose(prosper::Window &window)
 		return true;
 	return client->OnWindowShouldClose(window);
 }
-void CEngine::OnPreedit(prosper::Window &window, const util::Utf8String &preeditString, const std::vector<int> &blockSizes, int focusedBlock, int caret)
+void CEngine::OnPreedit(prosper::Window &window, const pragma::string::Utf8String &preeditString, const std::vector<int> &blockSizes, int focusedBlock, int caret)
 {
 	if(client == nullptr)
 		return;
@@ -1131,7 +1131,7 @@ void CEngine::InitializeWindowInputCallbacks(prosper::Window &window)
 		istr.resize(preedit_count);
 		for(auto i = decltype(preedit_count) {0u}; i < preedit_count; ++i)
 			istr[i] = static_cast<int32_t>(preedit_string[i]);
-		util::Utf8String preeditString {istr.data(), istr.size()};
+		pragma::string::Utf8String preeditString {istr.data(), istr.size()};
 
 		std::vector<int32_t> blockSizes;
 		blockSizes.reserve(block_count);

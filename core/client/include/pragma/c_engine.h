@@ -34,7 +34,7 @@ namespace pragma::debug {
 	class GPUProfilingStage;
 	class GPUProfiler;
 };
-namespace util {
+namespace pragma::string {
 	class Utf8String;
 };
 struct InputBindingLayer;
@@ -168,7 +168,7 @@ class DLLCLIENT CEngine : public Engine, public pragma::RenderContext {
 	bool OnWindowShouldClose(prosper::Window &window);
 	void JoystickButtonInput(prosper::Window &window, const GLFW::Joystick &joystick, uint32_t key, GLFW::KeyState state);
 	void JoystickAxisInput(prosper::Window &window, const GLFW::Joystick &joystick, uint32_t axis, GLFW::Modifier mods, float newVal, float deltaVal);
-	void OnPreedit(prosper::Window &window, const util::Utf8String &preeditString, const std::vector<int> &blockSizes, int focusedBlock, int caret);
+	void OnPreedit(prosper::Window &window, const pragma::string::Utf8String &preeditString, const std::vector<int> &blockSizes, int focusedBlock, int caret);
 	void OnIMEStatusChanged(prosper::Window &window, bool imeEnabled);
 	float GetRawJoystickAxisMagnitude() const;
 	// Util

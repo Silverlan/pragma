@@ -14,7 +14,8 @@
 #include <wgui/types/wiscrollbar.h>
 #include "pragma/gui/wiscrollcontainer.h"
 #include <prosper_window.hpp>
-#include <util_unicode.hpp>
+
+import pragma.string.unicode;
 
 LINK_WGUI_TO_CLASS(WITable, WITable);
 LINK_WGUI_TO_CLASS(WITableRow, WITableRow);
@@ -79,8 +80,8 @@ bool WITable::SortRows(bool bAsc, unsigned int col, const WIHandle &a, const WIH
 {
 	if(a.IsValid() == false || b.IsValid() == false)
 		return false;
-	const util::Utf8String *textA = nullptr;
-	const util::Utf8String *textB = nullptr;
+	const pragma::string::Utf8String *textA = nullptr;
+	const pragma::string::Utf8String *textB = nullptr;
 	const WITableRow *rowA = a.get<const WITableRow>();
 	if(rowA != nullptr) {
 		WITableCell *cellA = rowA->GetCell(col);

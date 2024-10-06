@@ -17,7 +17,7 @@ class WITextEntry;
 class WICommandLineEntry;
 class WIFrame;
 class WISnapArea;
-namespace util {
+namespace pragma::string {
 	class Utf8String;
 };
 class DLLCLIENT WIConsole : public WIBase {
@@ -45,7 +45,7 @@ class DLLCLIENT WIConsole : public WIBase {
 	void SetFrame(WIFrame &frame);
 	WIFrame *GetFrame();
 
-	const util::Utf8String &GetText() const;
+	const pragma::string::Utf8String &GetText() const;
 	void SetText(const std::string &text);
 	// This will only add complete lines (lines which have
 	// been ended with a new-line character). Anything

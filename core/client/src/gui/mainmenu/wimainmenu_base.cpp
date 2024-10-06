@@ -305,7 +305,7 @@ void WIMainMenuElement::OnCursorExited() { Deselect(); }
 void WIMainMenuElement::SetText(std::string &text)
 {
 	if(m_hText.IsValid()) {
-		util::Utf8String upperText {text};
+		pragma::string::Utf8String upperText {text};
 		upperText.toUpper();
 		WIText *pText = static_cast<WIText *>(m_hText.get());
 		pText->SetText(upperText);

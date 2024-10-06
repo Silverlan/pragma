@@ -11,7 +11,8 @@
 #include <wgui/types/wicontextmenu.hpp>
 #include <wgui/types/witext.h>
 #include <mathutil/umath_geometry.hpp>
-#include <util_unicode.hpp>
+
+import pragma.string.unicode;
 
 LINK_WGUI_TO_CLASS(WICommandLineEntry, WICommandLineEntry);
 
@@ -169,7 +170,7 @@ void WICommandLineEntry::SetAutocompleteEnabled(bool enabled)
 		m_hAutoCompleteList->Remove();
 }
 bool WICommandLineEntry::IsAutocompleteEnabled() const { return m_bAutocompleteEnabled; }
-void WICommandLineEntry::OnTextChanged(const util::Utf8String &text, bool changedByUser)
+void WICommandLineEntry::OnTextChanged(const pragma::string::Utf8String &text, bool changedByUser)
 {
 	WITextEntry::OnTextChanged(text, changedByUser);
 	if(m_bSkipAutoComplete)

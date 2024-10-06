@@ -14,7 +14,8 @@
 #include <optional>
 #include <string_view>
 #include <vector>
-#include <util_unicode.hpp>
+
+import pragma.string.unicode;
 
 enum class FontSetFlag : uint8_t {
 	None = 0,

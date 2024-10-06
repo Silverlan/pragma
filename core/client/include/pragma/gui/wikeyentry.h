@@ -18,7 +18,7 @@ class DLLCLIENT WIKeyEntry : public WITextEntryBase {
 	GLFW::Key m_key;
 	bool m_bKeyPressed;
 	WIHandle m_hMouseTrap;
-	virtual void OnTextChanged(const util::Utf8String &text, bool changedByUser) override;
+	virtual void OnTextChanged(const pragma::string::Utf8String &text, bool changedByUser) override;
 	void ApplyKey(GLFW::Key key);
   public:
 	WIKeyEntry();

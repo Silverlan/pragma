@@ -13,7 +13,8 @@
 #include <sharedutils/util_file.h>
 #include <sharedutils/scope_guard.h>
 #include <prosper_window.hpp>
-#include <util_unicode.hpp>
+
+import pragma.string.unicode;
 
 extern DLLCLIENT CEngine *c_engine;
 
@@ -78,7 +79,7 @@ bool CGame::OnWindowShouldClose(prosper::Window &window)
 	CallLuaCallbacks<bool, prosper::Window *>("OnWindowShouldClose", &ret, &window);
 	return ret;
 }
-void CGame::OnPreedit(prosper::Window &window, const util::Utf8String &preeditString, const std::vector<int> &blockSizes, int focusedBlock, int caret)
+void CGame::OnPreedit(prosper::Window &window, const pragma::string::Utf8String &preeditString, const std::vector<int> &blockSizes, int focusedBlock, int caret)
 {
 	CallLuaCallbacks<void, prosper::Window *, std::string, std::vector<int>, int, int>("OnPreedit", &window, preeditString.cpp_str(), blockSizes, focusedBlock, caret);
 }

@@ -50,7 +50,8 @@
 #include <prosper_window.hpp>
 #include <luabind/copy_policy.hpp>
 #include <pragma/debug/intel_vtune.hpp>
-#include <util_unicode.hpp>
+
+import pragma.string.unicode;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
@@ -1374,7 +1375,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l, ::WIBase &panel, std::stri
 	}
 	else if(name == "ontextchanged") {
 		if(ustring::compare(panel.GetClass(), std::string {"witext"}, false)) {
-			hCallback = FunctionCallback<void, std::reference_wrapper<const util::Utf8String>>::Create([l, hPanel, o](std::reference_wrapper<const util::Utf8String> text) mutable {
+			hCallback = FunctionCallback<void, std::reference_wrapper<const pragma::string::Utf8String>>::Create([l, hPanel, o](std::reference_wrapper<const pragma::string::Utf8String> text) mutable {
 				if(!hPanel.IsValid())
 					return;
 				Lua::CallFunction(
@@ -1391,7 +1392,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l, ::WIBase &panel, std::stri
 			});
 		}
 		else {
-			hCallback = FunctionCallback<void, std::reference_wrapper<const util::Utf8String>, bool>::Create([l, hPanel, o](std::reference_wrapper<const util::Utf8String> text, bool changedByUser) mutable {
+			hCallback = FunctionCallback<void, std::reference_wrapper<const pragma::string::Utf8String>, bool>::Create([l, hPanel, o](std::reference_wrapper<const pragma::string::Utf8String> text, bool changedByUser) mutable {
 				if(!hPanel.IsValid())
 					return;
 				Lua::CallFunction(

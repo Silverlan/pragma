@@ -50,7 +50,7 @@ Locale::LoadResult Locale::Load(const std::string &file, const std::string &lan,
 
 std::string Locale::GetFileLocation(const std::string &file, const std::string &lan) { return LOCALIZATION_ROOT_PATH + lan + "/texts/" + file; }
 
-Locale::LoadResult Locale::ParseFile(const std::string &file, const std::string &lan, std::unordered_map<std::string, util::Utf8String> &outTexts)
+Locale::LoadResult Locale::ParseFile(const std::string &file, const std::string &lan, std::unordered_map<std::string, pragma::string::Utf8String> &outTexts)
 {
 	auto filePath = GetFileLocation(file, lan);
 	auto f = FileManager::OpenFile(filePath.c_str(), "r");
@@ -139,7 +139,7 @@ const Locale::LanguageInfo *Locale::GetLanguageInfo()
 		return nullptr;
 	return &it->second;
 }
-std::unordered_map<std::string, util::Utf8String> &Locale::GetTexts() { return m_localization.texts; }
+std::unordered_map<std::string, pragma::string::Utf8String> &Locale::GetTexts() { return m_localization.texts; }
 const std::unordered_map<std::string, Locale::LanguageInfo> &Locale::GetLanguages()
 {
 	if(g_languages.empty()) {
@@ -166,14 +166,14 @@ const std::unordered_map<std::string, Locale::LanguageInfo> &Locale::GetLanguage
 	}
 	return g_languages;
 }
-bool Locale::SetLocalization(const std::string &id, const util::Utf8String &text, bool overwriteIfExists)
+bool Locale::SetLocalization(const std::string &id, const pragma::string::Utf8String &text, bool overwriteIfExists)
 {
 	if(!overwriteIfExists && m_localization.texts.find(id) != m_localization.texts.end())
 		return false;
 	m_localization.texts[id] = text;
 	return true;
 }
-bool Locale::GetText(const std::string &id, util::Utf8String &outText) { return GetText(id, {}, outText); }
+bool Locale::GetText(const std::string &id, pragma::string::Utf8String &outText) { return GetText(id, {}, outText); }
 bool Locale::GetText(const std::string &id, std::string &outText) { return GetText(id, {}, outText); }
 bool Locale::GetRawText(const std::string &id, std::string &outText)
 {
@@ -183,7 +183,7 @@ bool Locale::GetRawText(const std::string &id, std::string &outText)
 	outText = it->second.cpp_str();
 	return true;
 }
-bool Locale::GetRawText(const std::string &id, util::Utf8String &outText)
+bool Locale::GetRawText(const std::string &id, pragma::string::Utf8String &outText)
 {
 	auto it = m_localization.texts.find(id);
 	if(it == m_localization.texts.end())
@@ -218,11 +218,11 @@ static void insert_arguments(const std::vector<TString> &args, TString &inOutTex
 			}
 		}
 		else {
-			using TSubStr = std::conditional_t<std::is_same_v<TString, util::Utf8String>, std::string, std::string_view>;
+			using TSubStr = std::conditional_t<std::is_same_v<TString, pragma::string::Utf8String>, std::string, std::string_view>;
 			auto innerStartPos = startPos + 1;
 			auto innerLen = (endPos - startPos) - 1;
 			TSubStr inner;
-			if constexpr(std::is_same_v<TString, util::Utf8String>)
+			if constexpr(std::is_same_v<TString, pragma::string::Utf8String>)
 				inner = inOutText.substr(innerStartPos, innerLen).cpp_str();
 			else
 				inner = {inOutText.c_str() + innerStartPos, innerLen};
@@ -256,13 +256,13 @@ static void insert_arguments(const std::vector<TString> &args, TString &inOutTex
 		startPos = inOutText.find('{', endPos);
 	}
 }
-bool Locale::GetText(const std::string &id, const std::vector<util::Utf8String> &args, util::Utf8String &outText)
+bool Locale::GetText(const std::string &id, const std::vector<pragma::string::Utf8String> &args, pragma::string::Utf8String &outText)
 {
 	auto it = m_localization.texts.find(id);
 	if(it == m_localization.texts.end())
 		return false;
 	outText = it->second;
-	insert_arguments<util::Utf8String>(args, outText);
+	insert_arguments<pragma::string::Utf8String>(args, outText);
 	return true;
 }
 bool Locale::GetText(const std::string &id, const std::vector<std::string> &args, std::string &outText)
@@ -285,7 +285,7 @@ std::string Locale::GetText(const std::string &id, const std::vector<std::string
 	insert_arguments<std::string>(args, r);
 	return r;
 }
-util::Utf8String Locale::GetTextUtf8(const std::string &id, const std::vector<util::Utf8String> &args)
+pragma::string::Utf8String Locale::GetTextUtf8(const std::string &id, const std::vector<pragma::string::Utf8String> &args)
 {
 	auto it = m_localization.texts.find(id);
 	if(it == m_localization.texts.end()) {
@@ -293,7 +293,7 @@ util::Utf8String Locale::GetTextUtf8(const std::string &id, const std::vector<ut
 		return std::string("<MISSING LOCALIZATION: ") + id + std::string(">");
 	}
 	auto r = it->second;
-	insert_arguments<util::Utf8String>(args, r);
+	insert_arguments<pragma::string::Utf8String>(args, r);
 	return r;
 }
 std::string Locale::DetermineSystemLanguage()
@@ -311,7 +311,7 @@ void Locale::LoadAll()
 	for(auto &f : files)
 		LoadFile(f, lan);
 }
-util::Utf8String Locale::GetUsedCharacters()
+pragma::string::Utf8String Locale::GetUsedCharacters()
 {
 	std::unordered_set<uint32_t> usedCharacters;
 	for(auto &pair : m_localization.texts) {
@@ -323,12 +323,12 @@ util::Utf8String Locale::GetUsedCharacters()
 	for(auto c : usedCharacters)
 		vUsedCharacters.push_back(c);
 	std::sort(vUsedCharacters.begin(), vUsedCharacters.end());
-	util::Utf8String usedCharsStr;
+	pragma::string::Utf8String usedCharsStr;
 	for(auto c : vUsedCharacters)
 		usedCharsStr += static_cast<char16_t>(c);
 	return usedCharsStr;
 }
-bool Locale::Localize(const std::string &identifier, const std::string &lan, const std::string &category, const util::Utf8String &text)
+bool Locale::Localize(const std::string &identifier, const std::string &lan, const std::string &category, const pragma::string::Utf8String &text)
 {
 	auto fileName = category + ".txt";
 	Localization loc {};
@@ -365,8 +365,8 @@ bool Locale::Localize(const std::string &identifier, const std::string &lan, con
 			first = false;
 
 		auto val = loc.texts[key];
-		ustring::replace<util::Utf8String>(val, "\"", "\\\"");
-		ustring::replace<util::Utf8String>(val, "\n", "\\n");
+		ustring::replace<pragma::string::Utf8String>(val, "\"", "\\\"");
+		ustring::replace<pragma::string::Utf8String>(val, "\n", "\\n");
 		out << key << " = \"" << val << "\"";
 	}
 

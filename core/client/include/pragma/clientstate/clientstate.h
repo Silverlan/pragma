@@ -73,7 +73,7 @@ namespace pragma::networking {
 namespace prosper {
 	class RenderTarget;
 };
-namespace util {
+namespace pragma::string {
 	class Utf8String;
 };
 class DLLCLIENT ClientState : public NetworkState {
@@ -242,7 +242,7 @@ class DLLCLIENT ClientState : public NetworkState {
 	void OnDragEnter(prosper::Window &window);
 	void OnDragExit(prosper::Window &window);
 	bool OnWindowShouldClose(prosper::Window &window);
-	void OnPreedit(prosper::Window &window, const util::Utf8String &preeditString, const std::vector<int> &blockSizes, int focusedBlock, int caret);
+	void OnPreedit(prosper::Window &window, const pragma::string::Utf8String &preeditString, const std::vector<int> &blockSizes, int focusedBlock, int caret);
 	void OnIMEStatusChanged(prosper::Window &window, bool imeEnabled);
 
 	Material *LoadMaterial(const std::string &path, const std::function<void(Material *)> &onLoaded, bool bReload = false);

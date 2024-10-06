@@ -9,7 +9,8 @@
 #include "pragma/gui/winetgraph.h"
 #include <wgui/types/witext.h>
 #include <pragma/networking/netmessages.h>
-#include <util_unicode.hpp>
+
+import pragma.string.unicode;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;

@@ -14,11 +14,12 @@
 #include <wgui/types/wiroot.h>
 #include <prosper_window.hpp>
 #include <fsys/ifile.hpp>
-#include <util_unicode.hpp>
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
+
+import pragma.string.unicode;
 
 class GUIDebugCursorManager {
   public:

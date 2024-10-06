@@ -76,7 +76,8 @@
 #include <fsys/ifile.hpp>
 #include <wgui/types/witooltip.h>
 #include <wgui/types/wiroot.h>
-#include <util_unicode.hpp>
+
+import pragma.string.unicode;
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;

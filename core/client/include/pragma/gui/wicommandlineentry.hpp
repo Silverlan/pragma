@@ -30,7 +30,7 @@ class DLLCLIENT WICommandLineEntry : public WITextEntry {
 	virtual void OnFocusGained() override;
 	virtual void OnFocusKilled() override;
 	virtual void OnTextEntered() override;
-	virtual void OnTextChanged(const util::Utf8String &text, bool changedByUser) override;
+	virtual void OnTextChanged(const pragma::string::Utf8String &text, bool changedByUser) override;
 	void InitializeAutoCompleteList();
 	std::vector<std::string> m_commandHistory = {};
 	std::function<void(const std::string &, std::vector<std::string> &)> m_fAutoCompleteHandler = nullptr;

@@ -34,7 +34,7 @@ get_submodule("util_vmf","https://github.com/Silverlan/util_vmf.git","3080ba0528
 get_submodule("util_zip","https://github.com/Silverlan/util_zip.git","d9bf05a5cbf71bf53f9fbea82c7352f870989ed1")
 get_submodule("vfilesystem","https://github.com/Silverlan/vfilesystem.git","25c839e313b1bb1c2b4dee56c4a0298c53f546b4")
 get_submodule("wgui","https://github.com/Silverlan/wgui.git","28f5feb6f72f472f77d15dc75f26e5c6672ca0ba")
-get_submodule("util_unicode","https://github.com/Silverlan/util_unicode.git","70dfdefd2693c48a2d79124d5ea0ed99e4a454bf")
+get_submodule("util_unicode","https://github.com/Silverlan/util_unicode.git","5a0ac6c02f199e42d7d38d99231503cf42e26f8a")
 get_submodule("cppbezierfit","https://github.com/Silverlan/cppbezierfit.git","eb08f35ad74c1124f3cd4ef3a8958cded6a04b0e")
 
 os.chdir(curDir)

@@ -825,17 +825,17 @@ if with_essential_client_modules:
 if with_common_modules:
 	add_pragma_module(
 		name="pr_bullet",
-		commitSha="a64c52cf58dc667ae0c0a99ef4aa931e44f94e5e",
+		commitSha="be622341b5890ae2f8f1c97481ff52ddbd351cf0",
 		repositoryUrl="https://github.com/Silverlan/pr_bullet.git"
 	)
 	add_pragma_module(
 		name="pr_audio_soloud",
-		commitSha="73ee6c707e47f41e06148c55aceae8eb43c34842",
+		commitSha="7d4361d289ff1527e4783cde65dd7e5852684975",
 		repositoryUrl="https://github.com/Silverlan/pr_soloud.git"
 	)
 	add_pragma_module(
 		name="pr_audio_dummy",
-		commitSha="84e1249c296dfc6cf288c8262142170851286f48",
+		commitSha="1a806a1a7b2283bd8551d07e4f1d680499f68b90",
 		repositoryUrl="https://github.com/Silverlan/pr_audio_dummy.git"
 	)
 	add_pragma_module_prebuilt("Silverlan/pr_mount_external_prebuilt")
@@ -891,7 +891,7 @@ if with_pfm:
 if with_vr:
 	add_pragma_module(
 		name="pr_openvr",
-		commitSha="15b090a2c5c6e55cff146d6344bfb03347a3d1d4",
+		commitSha="2dd977344ebe8cd102cd24aa1ddcb34d696c7dda",
 		repositoryUrl="https://github.com/Silverlan/pr_openvr.git"
 	)
 

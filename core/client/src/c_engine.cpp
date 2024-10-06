@@ -528,14 +528,34 @@ void CEngine::OnFilesDropped(prosper::Window &window, std::vector<std::string> &
 		return;
 
 	m_droppedFiles.reserve(files.size());
-	for(auto &f : files) {
-		if(FileManager::IsSystemFile(f) == true) {
-			m_droppedFiles.push_back(DroppedFile {f});
-			auto path = util::Path::CreateFile(f).GetString();
-			ustring::to_lower(path);
-			g_droppedFiles.insert(std::make_pair(ufile::get_file_from_filename(path), path));
+	auto addFile = [this](const std::string &fileName, const std::string &rootPath) {
+		m_droppedFiles.push_back(DroppedFile {rootPath, fileName});
+		auto path = util::Path::CreateFile(fileName).GetString();
+		ustring::to_lower(path);
+		g_droppedFiles.insert(std::make_pair(ufile::get_file_from_filename(path), path));
+	};
+	std::function<void(const std::vector<std::string> &, const std::optional<std::string> &)> addFiles = nullptr;
+	addFiles = [this, &addFile, &addFiles](const std::vector<std::string> &files, const std::optional<std::string> &rootPath) {
+		for(auto &f : files) {
+			if(filemanager::is_system_file(f))
+				addFile(f, rootPath ? *rootPath : ufile::get_path_from_filename(f));
+			else if(filemanager::is_system_dir(f)) {
+				auto subRootPath = rootPath;
+				if(!subRootPath)
+					subRootPath = f;
+				std::vector<std::string> subFiles;
+				std::vector<std::string> subDirs;
+				filemanager::find_system_files(f + "/*", &subFiles, &subDirs);
+				for(auto &fileName : subFiles)
+					addFile(util::Path::CreateFile(f, fileName).GetString(), *subRootPath);
+				for(auto &subDir : subDirs)
+					subDir = util::Path::CreatePath(f, subDir).GetString();
+				addFiles(subDirs, subRootPath);
+			}
 		}
-	}
+	};
+	addFiles(files, {});
+
 	util::ScopeGuard g {[this]() {
 		m_droppedFiles.clear();
 		m_droppedFiles.shrink_to_fit();
@@ -1818,7 +1838,12 @@ uint32_t CEngine::DoClearUnusedAssets(pragma::asset::Type type) const
 	return n;
 }
 
-CEngine::DroppedFile::DroppedFile(const std::string &_fullPath) : fullPath(_fullPath), fileName(ufile::get_file_from_filename(_fullPath)) {}
+CEngine::DroppedFile::DroppedFile(const std::string &rootPath, const std::string &_fullPath) : fullPath(_fullPath)
+{
+	auto path = util::Path::CreateFile(fullPath);
+	path.MakeRelative(rootPath);
+	fileName = path.GetString();
+}
 
 REGISTER_CONVAR_CALLBACK_CL(cl_render_monitor, [](NetworkState *, const ConVar &, int32_t, int32_t monitor) {
 	auto monitors = GLFW::get_monitors();

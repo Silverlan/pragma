@@ -75,7 +75,7 @@ class DLLCLIENT CEngine : public Engine, public pragma::RenderContext {
 		Count
 	};
 	struct DLLCLIENT DroppedFile {
-		DroppedFile(const std::string &fullPath);
+		DroppedFile(const std::string &rootPath, const std::string &fullPath);
 		std::string fullPath;
 		std::string fileName;
 	};

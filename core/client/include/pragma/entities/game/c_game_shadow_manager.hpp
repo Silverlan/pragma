@@ -24,7 +24,7 @@ namespace prosper {
 namespace Anvil {
 	class DescriptorSet;
 };
-namespace util::pragma {
+namespace pragma {
 	enum class LightType : uint8_t;
 };
 namespace pragma {
@@ -54,11 +54,11 @@ namespace pragma {
 		struct LightSourceData {
 			std::shared_ptr<prosper::IPrimaryCommandBuffer> drawCmd;
 			pragma::CLightComponent *light;
-			util::pragma::LightType type;
+			pragma::LightType type;
 			Vector3 position;
 			float radius;
 		};
-		void RenderShadows(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, pragma::CLightComponent &light, pragma::CLightComponent::ShadowMapType smType, util::pragma::LightType type, bool drawParticleShadows);
+		void RenderShadows(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, pragma::CLightComponent &light, pragma::CLightComponent::ShadowMapType smType, pragma::LightType type, bool drawParticleShadows);
 		bool UpdateShadowCasters(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, pragma::CLightComponent &light, pragma::CLightComponent::ShadowMapType smType);
 		void UpdateWorldShadowCasters(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, pragma::CLightComponent &light);
 		void UpdateEntityShadowCasters(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, pragma::CLightComponent &light);

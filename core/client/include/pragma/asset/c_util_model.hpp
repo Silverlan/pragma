@@ -45,7 +45,7 @@ namespace pragma::asset {
 		bool fullExport = false;
 		bool normalizeTextureNames = false;
 		ImageFormat imageFormat = ImageFormat::DDS;
-		float scale = ::util::pragma::units_to_metres(1.f);
+		float scale = ::pragma::units_to_metres(1.f);
 
 		bool generateAo = false;
 		uint32_t aoResolution = 512;

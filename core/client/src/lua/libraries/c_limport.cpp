@@ -40,7 +40,7 @@ extern DLLCLIENT CGame *c_game;
 #if 0
 static aiVector3D to_assimp_position(const Vector3 &pos)
 {
-	return aiVector3D{pos.x,pos.y,pos.z} *static_cast<float>(util::pragma::units_to_metres(1.f));
+	return aiVector3D{pos.x,pos.y,pos.z} *static_cast<float>(pragma::units_to_metres(1.f));
 }
 static aiVector3D to_assimp_normal(const Vector3 &dir)
 {
@@ -95,7 +95,7 @@ static aiNode &add_node(aiNode &parentNode,uint32_t index,const std::string &nam
 {
 	auto &t = ent.GetPose();
 
-	auto scale = static_cast<float>(util::pragma::units_to_metres(1.f));
+	auto scale = static_cast<float>(pragma::units_to_metres(1.f));
 	umath::ScaledTransform tScaled = t;
 	tScaled.Scale(Vector3{scale,scale,scale});
 
@@ -202,8 +202,8 @@ int Lua::lib_export::export_scene(lua_State *l)
 		auto &entCam = cam->GetEntity();
 		std::string name = add_node(*scene->mRootNode,camNodeIndex,"cam",cam->GetEntity()).mName.C_Str();
 		outCam->mAspect = cam->GetAspectRatio();
-		outCam->mClipPlaneFar = ::util::pragma::units_to_metres(cam->GetFarZ());
-		outCam->mClipPlaneNear = ::util::pragma::units_to_metres(cam->GetNearZ());
+		outCam->mClipPlaneFar = ::pragma::units_to_metres(cam->GetFarZ());
+		outCam->mClipPlaneNear = ::pragma::units_to_metres(cam->GetNearZ());
 		outCam->mHorizontalFOV = cam->GetFOVRad();
 		outCam->mName = name;
 	}

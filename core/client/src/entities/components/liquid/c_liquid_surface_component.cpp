@@ -403,10 +403,10 @@ void CLiquidSurfaceComponent::InitializeWaterScene(const Vector3 &refPos, const 
 		fogEnabled = fogBlock->GetBool("enabled", true);
 		fog.start = nearZ;
 		if(fogBlock->GetFloat("start", &fog.start))
-			fog.start = util::pragma::metres_to_units(fog.start);
+			fog.start = pragma::metres_to_units(fog.start);
 		fog.end = farZ;
 		if(fogBlock->GetFloat("end", &fog.end))
-			fog.end = util::pragma::metres_to_units(fog.end);
+			fog.end = pragma::metres_to_units(fog.end);
 		fog.density = fogBlock->GetFloat("density", 0.008f);
 		Color color {68, 140, 200, 255};
 		if(fogBlock->GetColor("color", &color))

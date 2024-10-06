@@ -461,9 +461,9 @@ void LightShadowRenderer::Render(const util::DrawSceneInfo &drawSceneInfo)
 	auto rt = wpRt.lock();
 	m_hLight->SetShadowMapIndex(rt->index, pragma::CLightComponent::ShadowMapType::Dynamic);
 
-	//auto &shader = (type != util::pragma::LightType::Spot) ? static_cast<pragma::ShaderShadow&>(*m_shader.get()) : static_cast<pragma::ShaderShadow&>(*m_shaderSpot.get());
+	//auto &shader = (type != pragma::LightType::Spot) ? static_cast<pragma::ShaderShadow&>(*m_shader.get()) : static_cast<pragma::ShaderShadow&>(*m_shaderSpot.get());
 	//pragma::ShaderShadowTransparent *shaderTransparent = nullptr;
-	//if(type != util::pragma::LightType::Spot)
+	//if(type != pragma::LightType::Spot)
 	//	shaderTransparent = static_cast<pragma::ShaderShadowTransparent*>(m_shaderTransparent.expired() == false ? m_shaderTransparent.get() : nullptr);
 	//else
 	//	shaderTransparent = static_cast<pragma::ShaderShadowTransparent*>(m_shaderSpotTransparent.expired() == false ? m_shaderSpotTransparent.get() : nullptr);

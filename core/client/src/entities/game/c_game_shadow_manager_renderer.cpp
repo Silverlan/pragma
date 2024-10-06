@@ -59,7 +59,7 @@ ShadowRenderer::ShadowRenderer()
 		m_shadowCasters.push_back({});
 		auto &info = m_shadowCasters.back();
 		info.entity = &ent;
-		info.renderFlags = (m_lightSourceData.type == util::pragma::LightType::Point) ? renderFlags : 1u; // Spot-lights only have 1 layer, so we can ignore the flags
+		info.renderFlags = (m_lightSourceData.type == pragma::LightType::Point) ? renderFlags : 1u; // Spot-lights only have 1 layer, so we can ignore the flags
 		auto pRenderComponent = ent.GetRenderComponent();
 		if(pRenderComponent) {
 			// Make sure entity buffer data is up to date
@@ -266,14 +266,14 @@ ShadowRenderer::RenderResultFlags ShadowRenderer::RenderShadows(std::shared_ptr<
 }
 
 static CVar cvParticleQuality = GetClientConVar("cl_render_particle_quality");
-void ShadowRenderer::RenderShadows(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, pragma::CLightComponent &light, pragma::CLightComponent::ShadowMapType smType, util::pragma::LightType type, bool drawParticleShadows)
+void ShadowRenderer::RenderShadows(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, pragma::CLightComponent &light, pragma::CLightComponent::ShadowMapType smType, pragma::LightType type, bool drawParticleShadows)
 {
 	auto hShadowMap = light.GetShadowMap(smType);
 	if(hShadowMap.expired() || light.GetEffectiveShadowType() == pragma::BaseEnvLightComponent::ShadowType::None || UpdateShadowCasters(drawCmd, light, smType) == false)
 		return;
-	auto &shader = (type != util::pragma::LightType::Spot) ? static_cast<pragma::ShaderShadow &>(*m_shader.get()) : static_cast<pragma::ShaderShadow &>(*m_shaderSpot.get());
+	auto &shader = (type != pragma::LightType::Spot) ? static_cast<pragma::ShaderShadow &>(*m_shader.get()) : static_cast<pragma::ShaderShadow &>(*m_shaderSpot.get());
 	pragma::ShaderShadowTransparent *shaderTransparent = nullptr;
-	if(type != util::pragma::LightType::Spot)
+	if(type != pragma::LightType::Spot)
 		shaderTransparent = static_cast<pragma::ShaderShadowTransparent *>(m_shaderTransparent.expired() == false ? m_shaderTransparent.get() : nullptr);
 	else
 		shaderTransparent = static_cast<pragma::ShaderShadowTransparent *>(m_shaderSpotTransparent.expired() == false ? m_shaderSpotTransparent.get() : nullptr);
@@ -327,10 +327,10 @@ void ShadowRenderer::RenderShadows(std::shared_ptr<prosper::IPrimaryCommandBuffe
 
 void ShadowRenderer::RenderShadows(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, pragma::CLightComponent &light)
 {
-	auto type = util::pragma::LightType::Undefined;
+	auto type = pragma::LightType::Undefined;
 	auto *pLight = light.GetLight(type);
 	auto bDrawParticleShadows = (cvParticleQuality->GetInt() >= 3) ? true : false;
-	if(type == util::pragma::LightType::Directional) {
+	if(type == pragma::LightType::Directional) {
 		RenderCSMShadows(drawCmd, static_cast<pragma::CLightDirectionalComponent &>(*pLight), bDrawParticleShadows);
 		return;
 	}

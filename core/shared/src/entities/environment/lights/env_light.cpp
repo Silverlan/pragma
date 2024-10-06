@@ -133,26 +133,26 @@ void BaseEnvLightComponent::OnEntitySpawn()
 }
 void BaseEnvLightComponent::SetLight(BaseEnvLightSpotComponent &light)
 {
-	m_lightType = util::pragma::LightType::Spot;
+	m_lightType = pragma::LightType::Spot;
 	if(m_lightIntensityType == LightIntensityType::Lux)
 		SetLightIntensity(0.f, LightIntensityType::Lumen);
 	InitializeLight(light);
 }
 void BaseEnvLightComponent::SetLight(BaseEnvLightPointComponent &light)
 {
-	m_lightType = util::pragma::LightType::Point;
+	m_lightType = pragma::LightType::Point;
 	if(m_lightIntensityType == LightIntensityType::Lux)
 		SetLightIntensity(0.f, LightIntensityType::Lumen);
 	InitializeLight(light);
 }
 void BaseEnvLightComponent::SetLight(BaseEnvLightDirectionalComponent &light)
 {
-	m_lightType = util::pragma::LightType::Directional;
+	m_lightType = pragma::LightType::Directional;
 	if(m_lightIntensityType != LightIntensityType::Lux)
 		SetLightIntensity(0.f, LightIntensityType::Lux);
 	InitializeLight(light);
 }
-BaseEntityComponent *BaseEnvLightComponent::GetLight(util::pragma::LightType &outType) const
+BaseEntityComponent *BaseEnvLightComponent::GetLight(pragma::LightType &outType) const
 {
 	outType = m_lightType;
 	return const_cast<BaseEntityComponent *>(m_hLight.get());
@@ -163,11 +163,11 @@ void BaseEnvLightComponent::SetLightIntensityType(LightIntensityType type) { m_l
 BaseEnvLightComponent::LightIntensityType BaseEnvLightComponent::GetLightIntensityType() const { return m_lightIntensityType; }
 void BaseEnvLightComponent::SetLightIntensity(float intensity, LightIntensityType type)
 {
-	if(m_lightType == util::pragma::LightType::Directional && type != LightIntensityType::Lux) {
+	if(m_lightType == pragma::LightType::Directional && type != LightIntensityType::Lux) {
 		Con::cwar << "Attempted to use intensity type " << LightIntensityTypeToString(type) << " for a directional light source. This is not allowed!" << Con::endl;
 		return;
 	}
-	if((m_lightType == util::pragma::LightType::Point || m_lightType == util::pragma::LightType::Spot) && type == LightIntensityType::Lux) {
+	if((m_lightType == pragma::LightType::Point || m_lightType == pragma::LightType::Spot) && type == LightIntensityType::Lux) {
 		Con::cwar << "Attempted to use intensity type " << LightIntensityTypeToString(type) << " for a point or spot light source. This is not allowed!" << Con::endl;
 		return;
 	}
@@ -241,9 +241,9 @@ void BaseEnvLightComponent::SetFalloffExponent(float falloffExponent) { m_fallof
 float BaseEnvLightComponent::CalcDistanceFalloff(const Vector3 &lightPos, const Vector3 &point, std::optional<float> radius)
 {
 	auto dist = uvec::distance(point, lightPos);
-	dist = util::pragma::units_to_metres(dist);
+	dist = pragma::units_to_metres(dist);
 	if(radius.has_value())
-		return ulighting::calc_light_falloff(dist, util::pragma::units_to_metres(*radius));
+		return ulighting::calc_light_falloff(dist, pragma::units_to_metres(*radius));
 	return ulighting::calc_light_falloff(dist);
 }
 

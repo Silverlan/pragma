@@ -53,7 +53,7 @@ namespace pragma {
 		void SetLight(BaseEnvLightPointComponent &light);
 		void SetLight(BaseEnvLightDirectionalComponent &light);
 
-		BaseEntityComponent *GetLight(util::pragma::LightType &outType) const;
+		BaseEntityComponent *GetLight(pragma::LightType &outType) const;
 		BaseEntityComponent *GetLight() const;
 
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
@@ -73,7 +73,7 @@ namespace pragma {
 		virtual void InitializeLight(BaseEntityComponent &component);
 		ComponentHandle<BaseEntityComponent> m_hLight = {};
 
-		util::pragma::LightType m_lightType = util::pragma::LightType::Undefined;
+		pragma::LightType m_lightType = pragma::LightType::Undefined;
 		ShadowType m_shadowType = ShadowType::Full;
 		LightFlags m_lightFlags = LightFlags::None;
 		float m_falloffExponent = 1.f;

@@ -291,7 +291,7 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	    +[](const Vector3 &p, const Vector3 &d, float interocularDistance, float convergenceDistance) -> std::pair<Vector3, Vector3> {
 		    auto pr = p;
 		    auto dr = d;
-		    uvec::calc_spherical_stereo_transform(pr, dr, ::util::pragma::metres_to_units(interocularDistance), ::util::pragma::metres_to_units(convergenceDistance));
+		    uvec::calc_spherical_stereo_transform(pr, dr, ::pragma::metres_to_units(interocularDistance), ::pragma::metres_to_units(convergenceDistance));
 		    return std::pair<Vector3, Vector3> {pr, dr};
 	    }),
 	  luabind::def(
@@ -300,14 +300,14 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	                                                                         pair<Vector3, Vector3> {
 		                                                                         auto pr = p;
 		                                                                         auto dr = d;
-		                                                                         uvec::calc_spherical_stereo_transform(pr, dr, ::util::pragma::metres_to_units(interocularDistance), ::util::pragma::metres_to_units(30.0f * 0.065f));
+		                                                                         uvec::calc_spherical_stereo_transform(pr, dr, ::pragma::metres_to_units(interocularDistance), ::pragma::metres_to_units(30.0f * 0.065f));
 		                                                                         return std::pair<Vector3, Vector3> {pr, dr};
 	                                                                         }),
 	  luabind::def(
 	    "calc_spherical_stereo_transform", +[](const Vector3 &p, const Vector3 &d) -> std::pair<Vector3, Vector3> {
 		    auto pr = p;
 		    auto dr = d;
-		    uvec::calc_spherical_stereo_transform(pr, dr, ::util::pragma::metres_to_units(0.065f), ::util::pragma::metres_to_units(30.0f * 0.065f));
+		    uvec::calc_spherical_stereo_transform(pr, dr, ::pragma::metres_to_units(0.065f), ::pragma::metres_to_units(30.0f * 0.065f));
 		    return std::pair<Vector3, Vector3> {pr, dr};
 	    })];
 

@@ -108,9 +108,9 @@ void OcclusionCullingHandler::PerformCulling(pragma::CSceneComponent &scene, con
 		auto &ent = light->GetEntity();
 		auto pToggleComponent = ent.GetComponent<pragma::CToggleComponent>();
 		if(pToggleComponent.expired() || pToggleComponent->IsTurnedOn()) {
-			auto type = util::pragma::LightType::Undefined;
+			auto type = pragma::LightType::Undefined;
 			auto *pLight = light->GetLight(type);
-			if(type == util::pragma::LightType::Directional) {
+			if(type == pragma::LightType::Directional) {
 				lightsOut.insert(lightsOut.begin(), light);
 				distances.push_back(0.f);
 			}
@@ -146,15 +146,15 @@ void OcclusionCullingHandler::PerformCulling(pragma::CSceneComponent &scene, con
 	uint32_t numPointLights = 0;
 	for(auto it = lightsOut.begin(); it != lightsOut.end();) {
 		auto *light = *it;
-		auto type = util::pragma::LightType::Undefined;
+		auto type = pragma::LightType::Undefined;
 		auto *pLight = light->GetLight(type);
-		if(type == util::pragma::LightType::Spot) {
+		if(type == pragma::LightType::Spot) {
 			if(++numSpotLights > static_cast<uint32_t>(GameLimits::MaxActiveShadowMaps))
 				it = lightsOut.erase(it);
 			else
 				++it;
 		}
-		else if(type == util::pragma::LightType::Point) {
+		else if(type == pragma::LightType::Point) {
 			if(++numPointLights > static_cast<uint32_t>(GameLimits::MaxActiveShadowCubeMaps))
 				it = lightsOut.erase(it);
 			else

@@ -52,7 +52,7 @@ void WIDebugShadowMap::DoUpdate()
 	if(c_game == nullptr || m_lightHandle.expired())
 		return;
 	auto &lightSource = *m_lightHandle;
-	auto type = util::pragma::LightType::Undefined;
+	auto type = pragma::LightType::Undefined;
 	auto *pLight = lightSource.GetLight(type);
 	if(pLight == nullptr)
 		return;
@@ -74,7 +74,7 @@ void WIDebugShadowMap::DoUpdate()
 	auto pRadiusComponent = lightSource.GetEntity().GetComponent<pragma::CRadiusComponent>();
 	auto &wgui = WGUI::GetInstance();
 	switch(type) {
-	case util::pragma::LightType::Point:
+	case pragma::LightType::Point:
 		{
 			for(auto i = decltype(numLayers) {0}; i < numLayers; ++i) {
 				auto *dt = wgui.Create<WIDebugDepthTexture>(this);
@@ -99,7 +99,7 @@ void WIDebugShadowMap::DoUpdate()
 			}
 			break;
 		}
-	case util::pragma::LightType::Spot:
+	case pragma::LightType::Spot:
 		{
 			auto *dt = wgui.Create<WIDebugDepthTexture>(this);
 			dt->SetTexture(*depthTexture, barrierImageLayout, barrierImageLayout);
@@ -110,7 +110,7 @@ void WIDebugShadowMap::DoUpdate()
 			m_shadowMapImages.push_back(dt->GetHandle());
 			break;
 		}
-	case util::pragma::LightType::Directional:
+	case pragma::LightType::Directional:
 		{
 			wLayer *= 0.5f;
 			hLayer *= 0.5f;

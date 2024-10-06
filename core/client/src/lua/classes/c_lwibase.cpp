@@ -223,6 +223,8 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	classDef.def("SetSkinCallbacksEnabled", &::WIBase::SetSkinCallbacksEnabled);
 	classDef.def("Remove", &::WIBase::Remove);
 	classDef.def("RemoveSafely", &::WIBase::RemoveSafely);
+	classDef.def("SetIgnoreParentAlpha", &::WIBase::SetIgnoreParentAlpha);
+	classDef.def("ShouldIgnoreParentAlpha", &::WIBase::ShouldIgnoreParentAlpha);
 	classDef.def("SetZPos", &::WIBase::SetZPos);
 	classDef.def("GetZPos", &::WIBase::GetZPos);
 	classDef.def("HasFocus", &::WIBase::HasFocus);

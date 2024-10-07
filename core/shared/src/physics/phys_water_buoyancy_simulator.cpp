@@ -99,7 +99,7 @@ double pragma::physics::WaterBuoyancySimulator::CalcBuoyancy(const Quat &rorigin
 
 	if(force || torque) {
 		// Liquid density is specified in kg/m^3, we'll have to convert it to Pragma's scale
-		constexpr auto scale = umath::pow3(util::pragma::units_to_metres(1.0));
+		constexpr auto scale = umath::pow3(pragma::units_to_metres(1.0));
 		auto density = liquid.density * scale;
 		if(force != nullptr) {
 			*force = CalcBuoyancy(density, submergedVolume, gravity, waterPlane);

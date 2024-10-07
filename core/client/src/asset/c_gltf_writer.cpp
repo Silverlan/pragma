@@ -668,8 +668,8 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg, const std::string
 				// or something is wrong on this side. TODO: Compare the behavior with another application that supports glTF assets with camera data.
 				camData.perspective.yfov = umath::deg_to_rad(cam.vFov);
 
-				camData.perspective.znear = util::pragma::units_to_metres(cam.zNear);
-				camData.perspective.zfar = util::pragma::units_to_metres(cam.zFar);
+				camData.perspective.znear = pragma::units_to_metres(cam.zNear);
+				camData.perspective.zfar = pragma::units_to_metres(cam.zFar);
 			}
 		}
 	}
@@ -732,9 +732,9 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg, const std::string
 				color /= colMax;
 				intensity *= colMax;
 			}
-			auto lightType = (lightSource.type == LightSource::Type::Spot) ? util::pragma::LightType::Spot : (lightSource.type == LightSource::Type::Directional) ? util::pragma::LightType::Directional : util::pragma::LightType::Point;
-			intensity = (lightType == util::pragma::LightType::Spot) ? ulighting::cycles::lumen_to_watt_spot(intensity, color, outerConeAngle)
-			  : (lightType == util::pragma::LightType::Point)        ? ulighting::cycles::lumen_to_watt_point(intensity, color)
+			auto lightType = (lightSource.type == LightSource::Type::Spot) ? pragma::LightType::Spot : (lightSource.type == LightSource::Type::Directional) ? pragma::LightType::Directional : pragma::LightType::Point;
+			intensity = (lightType == pragma::LightType::Spot) ? ulighting::cycles::lumen_to_watt_spot(intensity, color, outerConeAngle)
+			  : (lightType == pragma::LightType::Point)        ? ulighting::cycles::lumen_to_watt_point(intensity, color)
 			                                                         : ulighting::cycles::lumen_to_watt_area(intensity, color);
 
 			auto lightName = lightSource.name;

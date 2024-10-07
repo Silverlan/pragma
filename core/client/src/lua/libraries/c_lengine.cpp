@@ -49,9 +49,8 @@ std::shared_ptr<const FontInfo> Lua::engine::create_font(lua_State *l, const std
 		return nullptr;
 	if(fontFileData->fontSizeAdjustment)
 		size += *fontFileData->fontSizeAdjustment;
-	FontInfo::FontSettings settings {};
+	FontSettings settings {};
 	settings.fontSize = size;
-	settings.requiredChars = fontSet->requiredChars ? std::make_unique<util::Utf8String>(*fontSet->requiredChars) : std::unique_ptr<util::Utf8String> {};
 	return FontManager::LoadFont(identifier.c_str(), fontFileData->fileName, settings, reload);
 }
 std::shared_ptr<const FontInfo> Lua::engine::create_font(lua_State *l, const std::string &identifier, const std::string &fontSetName, FontSetFlag features, uint32_t size) { return create_font(l, identifier, fontSetName, features, size, false); }

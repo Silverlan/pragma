@@ -1489,8 +1489,8 @@ std::string Lua::util::get_pretty_time(lua_State *l, float t)
 	return prettyTime;
 }
 
-double Lua::util::units_to_metres(double units) { return ::util::pragma::units_to_metres(units); }
-double Lua::util::metres_to_units(double metres) { return ::util::pragma::metres_to_units(metres); }
+double Lua::util::units_to_metres(double units) { return ::pragma::units_to_metres(units); }
+double Lua::util::metres_to_units(double metres) { return ::pragma::metres_to_units(metres); }
 luabind::object Lua::util::read_scene_file(lua_State *l, const std::string &fileName)
 {
 	auto fname = "scenes\\" + FileManager::GetCanonicalizedPath(fileName);

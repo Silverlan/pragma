@@ -515,11 +515,75 @@ void CEngine::OnWindowFocusChanged(prosper::Window &window, bool bFocused)
 	if(client != nullptr)
 		client->UpdateSoundVolume();
 }
+
+// Usually we don't allow opening external files, but we make an exception for files that have been dropped into Pragma.
+static std::unordered_map<std::string, std::string> g_droppedFiles;
+namespace pragma {
+	DLLCLIENT const std::unordered_map<std::string, std::string> &get_dropped_files() { return g_droppedFiles; }
+};
+const std::vector<CEngine::DroppedFile> &CEngine::GetDroppedFiles() const { return m_droppedFiles; }
 void CEngine::OnFilesDropped(prosper::Window &window, std::vector<std::string> &files)
 {
 	if(client == nullptr)
 		return;
+
+	m_droppedFiles.reserve(files.size());
+	auto addFile = [this](const std::string &fileName, const std::string &rootPath) {
+		m_droppedFiles.push_back(DroppedFile {rootPath, fileName});
+		auto path = util::Path::CreateFile(fileName).GetString();
+		ustring::to_lower(path);
+		g_droppedFiles.insert(std::make_pair(ufile::get_file_from_filename(path), path));
+	};
+	std::function<void(const std::vector<std::string> &, const std::optional<std::string> &)> addFiles = nullptr;
+	addFiles = [this, &addFile, &addFiles](const std::vector<std::string> &files, const std::optional<std::string> &rootPath) {
+		for(auto &f : files) {
+			if(filemanager::is_system_file(f))
+				addFile(f, rootPath ? *rootPath : ufile::get_path_from_filename(f));
+			else if(filemanager::is_system_dir(f)) {
+				auto subRootPath = rootPath;
+				if(!subRootPath)
+					subRootPath = f;
+				std::vector<std::string> subFiles;
+				std::vector<std::string> subDirs;
+				filemanager::find_system_files(f + "/*", &subFiles, &subDirs);
+				for(auto &fileName : subFiles)
+					addFile(util::Path::CreateFile(f, fileName).GetString(), *subRootPath);
+				for(auto &subDir : subDirs)
+					subDir = util::Path::CreatePath(f, subDir).GetString();
+				addFiles(subDirs, subRootPath);
+			}
+		}
+	};
+	addFiles(files, {});
+
+	util::ScopeGuard g {[this]() {
+		m_droppedFiles.clear();
+		m_droppedFiles.shrink_to_fit();
+	}};
+
+	std::vector<std::string> droppedFileNames;
+	droppedFileNames.reserve(m_droppedFiles.size());
+	for(auto &f : m_droppedFiles)
+		droppedFileNames.push_back(f.fileName);
+	if(WGUI::GetInstance().HandleFileDrop(window, droppedFileNames))
+		return;
 	client->OnFilesDropped(files);
+}
+void CEngine::OnDragEnter(prosper::Window &window)
+{
+	if(client == nullptr)
+		return;
+	if(WGUI::GetInstance().HandleFileDragEnter(window))
+		return;
+	client->OnDragEnter(window);
+}
+void CEngine::OnDragExit(prosper::Window &window)
+{
+	if(client == nullptr)
+		return;
+	if(WGUI::GetInstance().HandleFileDragExit(window))
+		return;
+	client->OnDragExit(window);
 }
 bool CEngine::OnWindowShouldClose(prosper::Window &window)
 {
@@ -527,7 +591,7 @@ bool CEngine::OnWindowShouldClose(prosper::Window &window)
 		return true;
 	return client->OnWindowShouldClose(window);
 }
-void CEngine::OnPreedit(prosper::Window &window, const util::Utf8String &preeditString, const std::vector<int> &blockSizes, int focusedBlock, int caret)
+void CEngine::OnPreedit(prosper::Window &window, const pragma::string::Utf8String &preeditString, const std::vector<int> &blockSizes, int focusedBlock, int caret)
 {
 	if(client == nullptr)
 		return;
@@ -734,15 +798,6 @@ bool CEngine::Initialize(int argc, char *argv[])
 			if(FindFontSet(sourceHanSans))
 				defaultFontSet = sourceHanSans;
 		}
-		auto udmReqChars = (*lanInfo->configData)["font"]["requiredChars"];
-		if(udmReqChars) {
-			auto *fontSet = const_cast<FontSet *>(FindFontSet(defaultFontSet));
-			if(fontSet) {
-				std::string reqChars;
-				udmReqChars(reqChars);
-				fontSet->requiredChars = util::Utf8String {reqChars};
-			}
-		}
 	}
 
 	auto fail = [&]() {
@@ -768,7 +823,7 @@ bool CEngine::Initialize(int argc, char *argv[])
 		fail();
 		return false;
 	}
-	auto r = gui.Initialize(GetRenderResolution(), fontData->fileName, fontSet.requiredChars);
+	auto r = gui.Initialize(GetRenderResolution(), fontData->fileName, {"source-han-sans/SourceHanSans-VF.ttf"});
 	if(r != WGUI::ResultCode::Ok) {
 		Con::cerr << "Unable to initialize GUI library: ";
 		switch(r) {
@@ -1031,6 +1086,7 @@ void CEngine::SetGPUProfilingEnabled(bool bEnabled)
 		++it;
 	}
 }
+
 std::shared_ptr<prosper::Window> CEngine::CreateWindow(prosper::WindowSettings &settings)
 {
 	if(settings.width == 0 || settings.height == 0)
@@ -1067,13 +1123,15 @@ void CEngine::InitializeWindowInputCallbacks(prosper::Window &window)
 	window->SetScrollCallback([this, &window](GLFW::Window &glfwWindow, Vector2 offset) mutable { ScrollInput(window, offset); });
 	window->SetFocusCallback([this, &window](GLFW::Window &glfwWindow, bool bFocused) mutable { OnWindowFocusChanged(window, bFocused); });
 	window->SetDropCallback([this, &window](GLFW::Window &glfwWindow, std::vector<std::string> &files) mutable { OnFilesDropped(window, files); });
+	window->SetDragEnterCallback([this, &window](GLFW::Window &glfwWindow) mutable { OnDragEnter(window); });
+	window->SetDragExitCallback([this, &window](GLFW::Window &glfwWindow) mutable { OnDragExit(window); });
 	window->SetOnShouldCloseCallback([this, &window](GLFW::Window &glfwWindow) -> bool { return OnWindowShouldClose(window); });
 	window->SetPreeditCallback([this, &window](GLFW::Window &glfwWindow, int preedit_count, unsigned int *preedit_string, int block_count, int *block_sizes, int focused_block, int caret) {
 		std::vector<int32_t> istr;
 		istr.resize(preedit_count);
 		for(auto i = decltype(preedit_count) {0u}; i < preedit_count; ++i)
 			istr[i] = static_cast<int32_t>(preedit_string[i]);
-		util::Utf8String preeditString {istr.data(), istr.size()};
+		pragma::string::Utf8String preeditString {istr.data(), istr.size()};
 
 		std::vector<int32_t> blockSizes;
 		blockSizes.reserve(block_count);
@@ -1453,7 +1511,7 @@ void CEngine::DrawScene(std::shared_ptr<prosper::RenderTarget> &rt)
 		StartProfilingStage("RecordGUI");
 		StartProfilingStage("GUI");
 
-		WGUI::GetInstance().SetLockedForDrawing(true);
+		WGUI::GetInstance().BeginDraw();
 		CallCallbacks<void>("PreRecordGUI");
 		if(c_game != nullptr)
 			c_game->PreGUIRecord();
@@ -1534,7 +1592,7 @@ void CEngine::DrawScene(std::shared_ptr<prosper::RenderTarget> &rt)
 		CallCallbacks<void>("PostDrawGUI");
 		if(c_game != nullptr)
 			c_game->PostGUIDraw();
-		WGUI::GetInstance().SetLockedForDrawing(false);
+		WGUI::GetInstance().EndDraw();
 		StopProfilingStage(); // ExecuteGUIDrawCalls
 	}
 }
@@ -1778,6 +1836,13 @@ uint32_t CEngine::DoClearUnusedAssets(pragma::asset::Type type) const
 		}
 	}
 	return n;
+}
+
+CEngine::DroppedFile::DroppedFile(const std::string &rootPath, const std::string &_fullPath) : fullPath(_fullPath)
+{
+	auto path = util::Path::CreateFile(fullPath);
+	path.MakeRelative(rootPath);
+	fileName = path.GetString();
 }
 
 REGISTER_CONVAR_CALLBACK_CL(cl_render_monitor, [](NetworkState *, const ConVar &, int32_t, int32_t monitor) {

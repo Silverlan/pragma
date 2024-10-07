@@ -20,7 +20,7 @@ class DLLCLIENT WIFrame : public WITransformable {
 	WIBase *GetContents();
 	using WITransformable::SetSize;
 	void SetTitle(std::string title);
-	const util::Utf8String &GetTitle() const;
+	const pragma::string::Utf8String &GetTitle() const;
 	void SetCloseButtonEnabled(bool b);
 	void SetDetachButtonEnabled(bool b);
 	virtual util::EventReply MouseCallback(GLFW::MouseButton button, GLFW::KeyState state, GLFW::Modifier mods) override;

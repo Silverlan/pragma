@@ -76,7 +76,8 @@
 #include <fsys/ifile.hpp>
 #include <wgui/types/witooltip.h>
 #include <wgui/types/wiroot.h>
-#include <util_unicode.hpp>
+
+import pragma.string.unicode;
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;
@@ -86,7 +87,7 @@ static int log(lua_State *l, spdlog::level::level_enum logLevel)
 {
 	auto &el = Lua::Check<::WIBase>(l, 1);
 	const char *msg = Lua::CheckString(l, 2);
-	std::string loggerName = "ui_" +el.GetClass();
+	std::string loggerName = "ui_" + el.GetClass();
 	int32_t argOffset = 2;
 	auto n = lua_gettop(l) - argOffset; /* number of arguments */
 	switch(n) {
@@ -343,6 +344,9 @@ static void register_gui(Lua::Interface &lua)
 	wiBaseWIElement.def("OnDraw", &WILuaBase::Lua_Render, &WILuaBase::default_Render);
 	wiBaseWIElement.def("OnCursorEntered", &WILuaBase::Lua_OnCursorEntered, &WILuaBase::default_OnCursorEntered);
 	wiBaseWIElement.def("OnCursorExited", &WILuaBase::Lua_OnCursorExited, &WILuaBase::default_OnCursorExited);
+	wiBaseWIElement.def("OnFileDragEntered", &WILuaBase::Lua_OnFileDragEntered, &WILuaBase::default_OnFileDragEntered);
+	wiBaseWIElement.def("OnFileDragExited", &WILuaBase::Lua_OnFileDragExited, &WILuaBase::default_OnFileDragExited);
+	wiBaseWIElement.def("OnFilesDropped", &WILuaBase::Lua_OnFilesDropped, &WILuaBase::default_OnFilesDropped);
 	wiBaseWIElement.def("OnFocusGained", &WILuaBase::Lua_OnFocusGained, &WILuaBase::default_OnFocusGained);
 	wiBaseWIElement.def("OnFocusKilled", &WILuaBase::Lua_OnFocusKilled, &WILuaBase::default_OnFocusKilled);
 	wiBaseWIElement.def("OnRemove", &WILuaBase::Lua_OnRemove, &WILuaBase::default_OnRemove);

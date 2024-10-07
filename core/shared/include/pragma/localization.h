@@ -13,12 +13,13 @@
 #include <vector>
 #include <optional>
 #include <unordered_map>
-#include <util_unicode.hpp>
+
+import pragma.string.unicode;
 
 class Locale;
 struct DLLNETWORK Localization {
 	Localization();
-	std::unordered_map<std::string, util::Utf8String> texts;
+	std::unordered_map<std::string, pragma::string::Utf8String> texts;
 };
 
 class DLLNETWORK Locale {
@@ -37,25 +38,25 @@ class DLLNETWORK Locale {
 	static void SetLanguage(std::string lan);
 	static void ReloadFiles();
 	static bool GetRawText(const std::string &id, std::string &outText);
-	static bool GetRawText(const std::string &id, util::Utf8String &outText);
+	static bool GetRawText(const std::string &id, pragma::string::Utf8String &outText);
 	static bool GetText(const std::string &id, std::string &outText);
-	static bool GetText(const std::string &id, util::Utf8String &outText);
+	static bool GetText(const std::string &id, pragma::string::Utf8String &outText);
 	static bool GetText(const std::string &id, const std::vector<std::string> &args, std::string &outText);
-	static bool GetText(const std::string &id, const std::vector<util::Utf8String> &args, util::Utf8String &outText);
+	static bool GetText(const std::string &id, const std::vector<pragma::string::Utf8String> &args, pragma::string::Utf8String &outText);
 	static std::string GetText(const std::string &id, const std::vector<std::string> &args = {});
-	static util::Utf8String GetTextUtf8(const std::string &id, const std::vector<util::Utf8String> &args = {});
-	static bool SetLocalization(const std::string &id, const util::Utf8String &text, bool overwriteIfExists = true);
+	static pragma::string::Utf8String GetTextUtf8(const std::string &id, const std::vector<pragma::string::Utf8String> &args = {});
+	static bool SetLocalization(const std::string &id, const pragma::string::Utf8String &text, bool overwriteIfExists = true);
 	static const std::string &GetLanguage();
 	static const LanguageInfo *GetLanguageInfo();
 	static const std::unordered_map<std::string, LanguageInfo> &GetLanguages();
-	static std::unordered_map<std::string, util::Utf8String> &GetTexts();
+	static std::unordered_map<std::string, pragma::string::Utf8String> &GetTexts();
 	static void Poll();
 	static std::string DetermineSystemLanguage();
 	static LoadResult LoadFile(const std::string &file, const std::string &lan, Localization &outLoc);
-	static LoadResult ParseFile(const std::string &file, const std::string &lan, std::unordered_map<std::string, util::Utf8String> &outTexts);
+	static LoadResult ParseFile(const std::string &file, const std::string &lan, std::unordered_map<std::string, pragma::string::Utf8String> &outTexts);
 	static std::string GetFileLocation(const std::string &file, const std::string &lan);
-	static bool Localize(const std::string &identifier, const std::string &lan, const std::string &category, const util::Utf8String &text);
-	static util::Utf8String GetUsedCharacters();
+	static bool Localize(const std::string &identifier, const std::string &lan, const std::string &category, const pragma::string::Utf8String &text);
+	static pragma::string::Utf8String GetUsedCharacters();
 
 	// Loads all available scripts for the current language. For debugging purposes only.
 	static void LoadAll();

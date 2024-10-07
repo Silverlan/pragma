@@ -27,11 +27,11 @@
 #include <sharedutils/magic_enum.hpp>
 #include <unordered_set>
 #include <udm.hpp>
-#include <util_pragma_doc.hpp>
 
 #undef CreateFile
 
 import util_zip;
+import pragma.doc;
 
 static std::optional<std::string> udm_convert(const std::string &fileName)
 {

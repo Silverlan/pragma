@@ -135,7 +135,7 @@ float BaseVehicleComponent::GetSpeedKmh() const
 {
 	if(m_physVehicle == nullptr)
 		return 0.f;
-	return util::pragma::units_to_metres(m_physVehicle->GetForwardSpeed()) / 1'000.f * 60.f * 60.f;
+	return pragma::units_to_metres(m_physVehicle->GetForwardSpeed()) / 1'000.f * 60.f * 60.f;
 }
 
 void BaseVehicleComponent::InitializeSteeringWheel()

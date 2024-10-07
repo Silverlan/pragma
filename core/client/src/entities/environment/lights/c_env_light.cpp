@@ -451,9 +451,9 @@ void CLightComponent::UpdatePos()
 }
 void CLightComponent::UpdateDir()
 {
-	util::pragma::LightType lightType;
+	pragma::LightType lightType;
 	GetLight(lightType);
-	if(lightType != util::pragma::LightType::Point) {
+	if(lightType != pragma::LightType::Point) {
 		auto &rot = GetEntity().GetRotation();
 		auto dir = uquat::forward(rot);
 		if(uvec::cmp(dir, reinterpret_cast<Vector3 &>(m_bufferData.direction)) == false) {
@@ -690,16 +690,16 @@ void Console::commands::debug_light_sources(NetworkState *state, pragma::BasePla
 	for(auto *l : lights) {
 		Con::cout << "Light #" << lightId << ":" << Con::endl;
 		Con::cout << "\tType: ";
-		auto type = util::pragma::LightType::Undefined;
+		auto type = pragma::LightType::Undefined;
 		auto *pLight = l->GetLight(type);
 		switch(type) {
-		case util::pragma::LightType::Directional:
+		case pragma::LightType::Directional:
 			Con::cout << "Directional";
 			break;
-		case util::pragma::LightType::Point:
+		case pragma::LightType::Point:
 			Con::cout << "Point";
 			break;
-		case util::pragma::LightType::Spot:
+		case pragma::LightType::Spot:
 			Con::cout << "Spot";
 			break;
 		default:

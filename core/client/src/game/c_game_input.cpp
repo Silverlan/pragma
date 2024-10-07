@@ -13,7 +13,11 @@
 #include <sharedutils/util_file.h>
 #include <sharedutils/scope_guard.h>
 #include <prosper_window.hpp>
-#include <util_unicode.hpp>
+
+import pragma.string.unicode;
+
+extern DLLCLIENT CEngine *c_engine;
+
 Bool CGame::RawMouseInput(GLFW::MouseButton button, GLFW::KeyState state, GLFW::Modifier mods)
 {
 	if(m_inputCallbackHandler.CallLuaEvents<int, int, int>("OnMouseInput", static_cast<int>(button), static_cast<int>(state), static_cast<int>(mods)) == util::EventReply::Handled)
@@ -69,47 +73,29 @@ Bool CGame::ScrollInput(Vector2 offset)
 	return true;
 }
 
-CGame::DroppedFile::DroppedFile(const std::string &_fullPath) : fullPath(_fullPath), fileName(ufile::get_file_from_filename(_fullPath)) {}
-
-// Usually we don't allow opening external files, but we make an exception for files that have been dropped into Pragma.
-static std::unordered_map<std::string, std::string> g_droppedFiles;
-namespace pragma {
-	DLLCLIENT const std::unordered_map<std::string, std::string> &get_dropped_files() { return g_droppedFiles; }
-};
 bool CGame::OnWindowShouldClose(prosper::Window &window)
 {
 	bool ret = true;
 	CallLuaCallbacks<bool, prosper::Window *>("OnWindowShouldClose", &ret, &window);
 	return ret;
 }
-void CGame::OnPreedit(prosper::Window &window, const util::Utf8String &preeditString, const std::vector<int> &blockSizes, int focusedBlock, int caret)
+void CGame::OnPreedit(prosper::Window &window, const pragma::string::Utf8String &preeditString, const std::vector<int> &blockSizes, int focusedBlock, int caret)
 {
 	CallLuaCallbacks<void, prosper::Window *, std::string, std::vector<int>, int, int>("OnPreedit", &window, preeditString.cpp_str(), blockSizes, focusedBlock, caret);
 }
 void CGame::OnIMEStatusChanged(prosper::Window &window, bool imeEnabled) { CallLuaCallbacks<void, prosper::Window *, bool>("OnIMEStatusChanged", &window, imeEnabled); }
+void CGame::OnDragEnter(prosper::Window &window) { CallLuaCallbacks<bool, prosper::Window *>("OnWindowDragEnter", &window); }
+void CGame::OnDragExit(prosper::Window &window) { CallLuaCallbacks<bool, prosper::Window *>("OnWindowDragExit", &window); }
 void CGame::OnFilesDropped(std::vector<std::string> &files)
 {
-	m_droppedFiles.reserve(files.size());
-	for(auto &f : files) {
-		if(FileManager::IsSystemFile(f) == true) {
-			m_droppedFiles.push_back(DroppedFile {f});
-			auto path = util::Path::CreateFile(f).GetString();
-			ustring::to_lower(path);
-			g_droppedFiles.insert(std::make_pair(ufile::get_file_from_filename(path), path));
-		}
-	}
-	util::ScopeGuard g {[this]() {
-		m_droppedFiles.clear();
-		m_droppedFiles.shrink_to_fit();
-	}};
 	auto *l = GetLuaState();
 	auto t = Lua::CreateTable(l);
-	for(auto i = decltype(m_droppedFiles.size()) {0}; i < m_droppedFiles.size(); ++i) {
+	auto &droppedFiles = c_engine->GetDroppedFiles();
+	for(auto i = decltype(droppedFiles.size()) {0}; i < droppedFiles.size(); ++i) {
 		Lua::PushInt(l, i + 1);
-		Lua::PushString(l, m_droppedFiles[i].fileName);
+		Lua::PushString(l, droppedFiles[i].fileName);
 		Lua::SetTableValue(l, t);
 	}
 	auto o = luabind::object(luabind::from_stack(l, -1));
 	CallLuaCallbacks<void, luabind::object>("OnFilesDropped", o);
 }
-const std::vector<CGame::DroppedFile> &CGame::GetDroppedFiles() const { return m_droppedFiles; }

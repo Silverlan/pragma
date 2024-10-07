@@ -72,7 +72,7 @@ al::ISoundSystem *CEngine::InitializeSoundEngine()
 			err = "Symbol 'initialize_audio_api' not found in library '" + location + "'!";
 		else {
 			std::string errMsg;
-			auto success = fInitAudioAPI(util::pragma::units_to_metres(1.f), m_soundSystem, errMsg);
+			auto success = fInitAudioAPI(pragma::units_to_metres(1.f), m_soundSystem, errMsg);
 			if(success == false)
 				err = errMsg;
 		}
@@ -87,7 +87,7 @@ al::ISoundSystem *CEngine::InitializeSoundEngine()
 			                                  delete snd;
 		                                  }};
 	});
-	al::set_world_scale(util::pragma::units_to_metres(1.0));
+	al::set_world_scale(pragma::units_to_metres(1.0));
 	return m_soundSystem.get();
 }
 

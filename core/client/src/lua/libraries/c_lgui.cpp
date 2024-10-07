@@ -24,7 +24,8 @@
 #include <pragma/logging.hpp>
 #include <prosper_window.hpp>
 #include <prosper_render_pass.hpp>
-#include <util_unicode.hpp>
+
+import pragma.string.unicode;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;

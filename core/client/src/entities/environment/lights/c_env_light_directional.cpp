@@ -121,9 +121,9 @@ void CLightDirectionalComponent::Initialize()
 				                         return util::EventReply::Unhandled;
 			                         auto &ent = GetEntity();
 			                         auto pLightComponent = ent.GetComponent<CLightComponent>();
-			                         auto type = util::pragma::LightType::Undefined;
+			                         auto type = pragma::LightType::Undefined;
 			                         auto *pLight = pLightComponent.valid() ? pLightComponent->GetLight(type) : nullptr;
-			                         if(pLight == nullptr || type != util::pragma::LightType::Directional)
+			                         if(pLight == nullptr || type != pragma::LightType::Directional)
 				                         return util::EventReply::Unhandled;
 			                         auto pTrComponent = pLight->GetEntity().GetTransformComponent();
 			                         if(pTrComponent != nullptr)

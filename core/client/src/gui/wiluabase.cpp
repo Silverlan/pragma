@@ -196,6 +196,23 @@ void WILuaBase::OnCursorExited()
 	WIBase::OnCursorExited();
 	CallLuaMember("OnCursorExited");
 }
+void WILuaBase::OnFileDragEntered()
+{
+	WIBase::OnFileDragEntered();
+	CallLuaMember("OnFileDragEntered");
+}
+void WILuaBase::OnFileDragExited()
+{
+	WIBase::OnFileDragExited();
+	CallLuaMember("OnFileDragExited");
+}
+util::EventReply WILuaBase::OnFilesDropped(const std::vector<std::string> &files)
+{
+	WIBase::OnFilesDropped(files);
+	uint32_t reply = umath::to_integral(util::EventReply::Unhandled);
+	CallLuaMember<uint32_t, std::vector<std::string>>("OnFilesDropped", &reply, files);
+	return static_cast<util::EventReply>(reply);
+}
 void WILuaBase::OnFocusGained()
 {
 	WIBase::OnFocusGained();
@@ -258,6 +275,15 @@ void WILuaBase::default_OnCursorEntered(lua_State *, WILuaBase &) {}
 
 void WILuaBase::Lua_OnCursorExited() {}
 void WILuaBase::default_OnCursorExited(lua_State *, WILuaBase &) {}
+
+void WILuaBase::Lua_OnFileDragEntered() {}
+void WILuaBase::default_OnFileDragEntered(lua_State *l, WILuaBase &hElement) {}
+
+void WILuaBase::Lua_OnFileDragExited() {}
+void WILuaBase::default_OnFileDragExited(lua_State *l, WILuaBase &hElement) {}
+
+void WILuaBase::Lua_OnFilesDropped(const std::vector<std::string> &files) {}
+void WILuaBase::default_OnFilesDropped(lua_State *l, WILuaBase &hElement, const std::vector<std::string> &files) {}
 
 void WILuaBase::Lua_OnFocusGained() {}
 void WILuaBase::default_OnFocusGained(lua_State *, WILuaBase &) {}

@@ -26,7 +26,7 @@ WIKeyEntry::~WIKeyEntry()
 		m_hMouseTrap->Remove();
 }
 
-void WIKeyEntry::OnTextChanged(const util::Utf8String &text, bool changedByUser)
+void WIKeyEntry::OnTextChanged(const pragma::string::Utf8String &text, bool changedByUser)
 {
 	WITextEntryBase::OnTextChanged(text, changedByUser);
 	if(!m_hText.IsValid())
@@ -47,7 +47,7 @@ void WIKeyEntry::Initialize()
 		m_hCaret->Remove();
 	if(m_hText.IsValid()) {
 		auto hThis = GetHandle();
-		m_hText->AddCallback("OnTextChanged", FunctionCallback<void, std::reference_wrapper<const util::Utf8String>>::Create([hThis](std::reference_wrapper<const util::Utf8String> newText) mutable {
+		m_hText->AddCallback("OnTextChanged", FunctionCallback<void, std::reference_wrapper<const pragma::string::Utf8String>>::Create([hThis](std::reference_wrapper<const pragma::string::Utf8String> newText) mutable {
 			if(!hThis.IsValid())
 				return;
 			static_cast<WIKeyEntry *>(hThis.get())->OnTextChanged(newText, false);

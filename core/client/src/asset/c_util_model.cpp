@@ -268,7 +268,7 @@ struct OutputData {
 };
 static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::string &optFileName, std::string &outErrMsg, const util::Path &outputPath, bool importAsMap)
 {
-	auto scale = static_cast<float>(util::pragma::metres_to_units(1.f));
+	auto scale = static_cast<float>(pragma::metres_to_units(1.f));
 
 	std::string fileName = optFileName;
 	std::string absPathToFile;
@@ -1308,8 +1308,8 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 			ent->SetClassName("env_camera");
 
 			ent->SetKeyValue("fov", std::to_string(umath::rad_to_deg(cam.perspective.yfov)));
-			ent->SetKeyValue("farz", std::to_string(util::pragma::metres_to_units(cam.perspective.znear)));
-			ent->SetKeyValue("nearz", std::to_string(util::pragma::metres_to_units(cam.perspective.zfar)));
+			ent->SetKeyValue("farz", std::to_string(pragma::metres_to_units(cam.perspective.znear)));
+			ent->SetKeyValue("nearz", std::to_string(pragma::metres_to_units(cam.perspective.zfar)));
 			ent->SetKeyValue("aspectRatio", std::to_string(cam.perspective.aspectRatio));
 
 			worldData->AddEntity(*ent);
@@ -1521,7 +1521,7 @@ bool pragma::asset::export_map(const std::string &mapName, const ModelExportInfo
 
 			auto radiusC = ent.GetComponent<CRadiusComponent>();
 			if(radiusC.valid())
-				lightScene.range = util::pragma::units_to_metres(radiusC->GetRadius());
+				lightScene.range = pragma::units_to_metres(radiusC->GetRadius());
 
 			auto spotC = ent.GetComponent<CLightSpotComponent>();
 			if(spotC.valid()) {

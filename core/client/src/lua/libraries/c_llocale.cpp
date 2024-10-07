@@ -81,7 +81,7 @@ Lua::map<std::string, std::string> Lua::Locale::get_texts(lua_State *l)
 }
 Lua::opt<Lua::map<std::string, std::string>> Lua::Locale::parse(lua_State *l, const std::string &fileName, const std::string &lan)
 {
-	std::unordered_map<std::string, util::Utf8String> texts;
+	std::unordered_map<std::string, pragma::string::Utf8String> texts;
 	auto res = ::Locale::ParseFile(fileName, lan, texts);
 	if(res != ::Locale::LoadResult::Success)
 		return Lua::nil;

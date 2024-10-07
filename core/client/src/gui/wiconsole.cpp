@@ -19,7 +19,7 @@
 #include <pragma/engine_info.hpp>
 #include <pragma/lua/lua_error_handling.hpp>
 #include <pragma/localization.h>
-#include <util_unicode.hpp>
+import pragma.string.unicode;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
@@ -153,7 +153,7 @@ void WIConsole::Initialize()
 
 	EnableThinking();
 	SetSize(512, 256);
-	FontInfo::FontSettings settings {};
+	FontSettings settings {};
 	settings.fontSize = 12;
 	FontManager::LoadFont("console", "dejavu/DejaVuSansMono", settings);
 
@@ -455,9 +455,9 @@ void WIConsole::SetFrame(WIFrame &frame)
 }
 WIFrame *WIConsole::GetFrame() { return static_cast<WIFrame *>(m_hFrame.get()); }
 
-const util::Utf8String &WIConsole::GetText() const
+const pragma::string::Utf8String &WIConsole::GetText() const
 {
-	static util::Utf8String s {};
+	static pragma::string::Utf8String s {};
 	if(m_hLog.IsValid()) {
 		auto *pTextEntry = static_cast<const WITextEntry *>(m_hLog.get());
 		if(pTextEntry == nullptr)
@@ -523,7 +523,7 @@ std::string_view WIConsole::AppendText(const std::string &text)
 		remaining = std::string_view {text}.substr(lineStartOffset, numCharsInLine);
 	}
 	for(auto &line : lines) {
-		util::Utf8String str {std::string {line}};
+		pragma::string::Utf8String str {std::string {line}};
 		pText->AppendText(str);
 	}
 

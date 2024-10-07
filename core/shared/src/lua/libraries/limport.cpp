@@ -440,7 +440,7 @@ std::shared_ptr<aiScene> Lua::import::snapshot_to_assimp_scene(const pragma::Sce
 		for(uint32_t vertIdx=0u;vertIdx<numVerts;++vertIdx)
 		{
 			auto &v = mesh->verts.at(vertIdx);
-			aiMesh.mVertices[vertIdx] = aiVector3D{v.position.x,v.position.y,v.position.z} *static_cast<float>(util::pragma::units_to_metres(1.0));
+			aiMesh.mVertices[vertIdx] = aiVector3D{v.position.x,v.position.y,v.position.z} *static_cast<float>(pragma::units_to_metres(1.0));
 			aiMesh.mNormals[vertIdx] = aiVector3D{v.normal.x,v.normal.y,v.normal.z};
 			aiMesh.mTextureCoords[0][vertIdx] = aiVector3D{v.uv.x,1.f -v.uv.y,0.f};
 			if(lightmapUvs.empty() == false)

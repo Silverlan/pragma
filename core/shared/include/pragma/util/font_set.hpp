@@ -14,7 +14,8 @@
 #include <optional>
 #include <string_view>
 #include <vector>
-#include <util_unicode.hpp>
+
+import pragma.string.unicode;
 
 enum class FontSetFlag : uint8_t {
 	None = 0,
@@ -32,7 +33,6 @@ struct DLLNETWORK FontSetFileData {
 struct DLLNETWORK FontSet {
 	std::vector<FontSetFileData> fileData;
 	std::vector<std::string> features;
-	std::optional<util::Utf8String> requiredChars {};
 	FontSetFileData *FindFontFileCandidate(FontSetFlag flags);
 	const FontSetFileData *FindFontFileCandidate(FontSetFlag flags) const;
 	bool HasFeature(const std::string_view &feature) const;

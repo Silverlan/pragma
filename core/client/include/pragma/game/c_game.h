@@ -103,17 +103,14 @@ namespace prosper {
 };
 namespace util {
 	struct DrawSceneInfo;
+};
+namespace pragma::string {
 	class Utf8String;
 };
 #pragma warning(push)
 #pragma warning(disable : 4251)
 class DLLCLIENT CGame : public Game {
   public:
-	struct DLLCLIENT DroppedFile {
-		DroppedFile(const std::string &fullPath);
-		std::string fullPath;
-		std::string fileName;
-	};
 	struct GlobalRenderSettingsBufferData {
 		GlobalRenderSettingsBufferData();
 		std::shared_ptr<prosper::IBuffer> debugBuffer = nullptr;
@@ -224,8 +221,10 @@ class DLLCLIENT CGame : public Game {
 	Bool CharInput(unsigned int c);
 	Bool ScrollInput(Vector2 offset);
 	void OnFilesDropped(std::vector<std::string> &files);
+	void OnDragEnter(prosper::Window &window);
+	void OnDragExit(prosper::Window &window);
 	bool OnWindowShouldClose(prosper::Window &window);
-	void OnPreedit(prosper::Window &window, const util::Utf8String &preeditString, const std::vector<int> &blockSizes, int focusedBlock, int caret);
+	void OnPreedit(prosper::Window &window, const pragma::string::Utf8String &preeditString, const std::vector<int> &blockSizes, int focusedBlock, int caret);
 	void OnIMEStatusChanged(prosper::Window &window, bool imeEnabled);
 
 	// Game
@@ -288,7 +287,6 @@ class DLLCLIENT CGame : public Game {
 	void RenderDebugPhysics(std::shared_ptr<prosper::ICommandBuffer> &drawCmd, pragma::CCameraComponent &cam);
 
 	using Game::LoadNavMesh;
-	const std::vector<DroppedFile> &GetDroppedFiles() const;
 
 	void OnReceivedRegisterNetEvent(NetPacket &packet);
 	virtual pragma::NetEventId FindNetEvent(const std::string &name) const override;
@@ -453,8 +451,6 @@ class DLLCLIENT CGame : public Game {
 	std::unique_ptr<pragma::debug::ProfilingStageManager<pragma::debug::GPUProfilingStage>> m_gpuProfilingStageManager;
 	CallbackHandle m_cbProfilingHandle = {};
 	std::unique_ptr<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage>> m_profilingStageManager;
-
-	std::vector<DroppedFile> m_droppedFiles = {}; // Only contains files during OnFilesDropped-call
 
 	struct DLLCLIENT MessagePacketTracker {
 		MessagePacketTracker();

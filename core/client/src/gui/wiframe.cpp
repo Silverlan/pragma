@@ -13,7 +13,8 @@
 #include <wgui/types/wirect.h>
 #include <mathutil/umath.h>
 #include <prosper_window.hpp>
-#include <util_unicode.hpp>
+
+import pragma.string.unicode;
 
 LINK_WGUI_TO_CLASS(WIFrame, WIFrame);
 
@@ -183,10 +184,10 @@ void WIFrame::SetTitle(std::string title)
 	pText->SizeToContents();
 	pText->SetVisible(!title.empty());
 }
-const util::Utf8String &WIFrame::GetTitle() const
+const pragma::string::Utf8String &WIFrame::GetTitle() const
 {
 	if(!m_hTitle.IsValid()) {
-		static util::Utf8String emptyString {};
+		static pragma::string::Utf8String emptyString {};
 		return emptyString;
 	}
 	return static_cast<const WIText *>(m_hTitle.get())->GetText();

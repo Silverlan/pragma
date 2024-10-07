@@ -50,7 +50,8 @@
 #include <prosper_window.hpp>
 #include <luabind/copy_policy.hpp>
 #include <pragma/debug/intel_vtune.hpp>
-#include <util_unicode.hpp>
+
+import pragma.string.unicode;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
@@ -223,6 +224,8 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	classDef.def("SetSkinCallbacksEnabled", &::WIBase::SetSkinCallbacksEnabled);
 	classDef.def("Remove", &::WIBase::Remove);
 	classDef.def("RemoveSafely", &::WIBase::RemoveSafely);
+	classDef.def("SetIgnoreParentAlpha", &::WIBase::SetIgnoreParentAlpha);
+	classDef.def("ShouldIgnoreParentAlpha", &::WIBase::ShouldIgnoreParentAlpha);
 	classDef.def("SetZPos", &::WIBase::SetZPos);
 	classDef.def("GetZPos", &::WIBase::GetZPos);
 	classDef.def("HasFocus", &::WIBase::HasFocus);
@@ -544,6 +547,10 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	  "ClampToVisibleBounds", +[](const ::WIBase &el, Vector2i &pos, Vector2i &size) { el.ClampToVisibleBounds(pos, size); });
 	classDef.def(
 	  "DebugPrintHierarchy", +[](const ::WIBase &el) { debug_print_hierarchy(el); });
+	classDef.def("IsFileHovering", &::WIBase::IsFileHovering);
+	classDef.def("SetFileHovering", &::WIBase::SetFileHovering);
+	classDef.def("GetFileDropInputEnabled", &::WIBase::GetFileDropInputEnabled);
+	classDef.def("SetFileDropInputEnabled", &::WIBase::SetFileDropInputEnabled);
 
 	auto defDrawInfo = luabind::class_<::WIBase::DrawInfo>("DrawInfo");
 	defDrawInfo.add_static_constant("FLAG_NONE", umath::to_integral(::WIBase::DrawInfo::Flags::None));
@@ -1368,7 +1375,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l, ::WIBase &panel, std::stri
 	}
 	else if(name == "ontextchanged") {
 		if(ustring::compare(panel.GetClass(), std::string {"witext"}, false)) {
-			hCallback = FunctionCallback<void, std::reference_wrapper<const util::Utf8String>>::Create([l, hPanel, o](std::reference_wrapper<const util::Utf8String> text) mutable {
+			hCallback = FunctionCallback<void, std::reference_wrapper<const pragma::string::Utf8String>>::Create([l, hPanel, o](std::reference_wrapper<const pragma::string::Utf8String> text) mutable {
 				if(!hPanel.IsValid())
 					return;
 				Lua::CallFunction(
@@ -1385,7 +1392,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l, ::WIBase &panel, std::stri
 			});
 		}
 		else {
-			hCallback = FunctionCallback<void, std::reference_wrapper<const util::Utf8String>, bool>::Create([l, hPanel, o](std::reference_wrapper<const util::Utf8String> text, bool changedByUser) mutable {
+			hCallback = FunctionCallback<void, std::reference_wrapper<const pragma::string::Utf8String>, bool>::Create([l, hPanel, o](std::reference_wrapper<const pragma::string::Utf8String> text, bool changedByUser) mutable {
 				if(!hPanel.IsValid())
 					return;
 				Lua::CallFunction(

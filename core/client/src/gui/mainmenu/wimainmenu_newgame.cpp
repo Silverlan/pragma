@@ -43,9 +43,9 @@ void WIMainMenuNewGame::OnStartGame(GLFW::MouseButton button, GLFW::KeyState sta
 		return;
 	auto *pOptionsList = static_cast<WIOptionsList *>(m_hControlSettings.get());
 	std::string map;
-	util::Utf8String serverName;
+	pragma::string::Utf8String serverName;
 	std::string gameMode;
-	util::Utf8String rconPassword;
+	pragma::string::Utf8String rconPassword;
 	UInt32 maxPlayers = 1;
 	if(m_hMapList.IsValid()) {
 		auto *pMap = static_cast<WIDropDownMenu *>(m_hMapList.get());

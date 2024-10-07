@@ -86,6 +86,7 @@
 #include <glm/gtx/matrix_decompose.hpp>
 
 extern DLLNETWORK Engine *engine;
+
 std::ostream &operator<<(std::ostream &out, const ALSound &snd)
 {
 	auto state = snd.GetState();
@@ -768,7 +769,9 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	// Path
 	auto defPath = pragma::lua::register_class<util::Path>(lua.GetState(), "Path");
 	defPath->scope[luabind::def("CreateFilePath", static_cast<void (*)(lua_State *, const std::string &)>([](lua_State *l, const std::string &path) { Lua::Push<util::Path>(l, util::Path::CreateFile(path)); }))];
+	defPath->scope[luabind::def("CreateFilePath", static_cast<void (*)(lua_State *, const util::Path &)>([](lua_State *l, const util::Path &path) { Lua::Push<util::Path>(l, util::Path::CreateFile(path.GetString())); }))];
 	defPath->scope[luabind::def("CreatePath", static_cast<void (*)(lua_State *, const std::string &)>([](lua_State *l, const std::string &path) { Lua::Push<util::Path>(l, util::Path::CreatePath(path)); }))];
+	defPath->scope[luabind::def("CreatePath", static_cast<void (*)(lua_State *, const util::Path &)>([](lua_State *l, const util::Path &path) { Lua::Push<util::Path>(l, util::Path::CreatePath(path.GetString())); }))];
 	defPath->scope[luabind::def("CreateFromComponents", static_cast<void (*)(lua_State *, luabind::object)>([](lua_State *l, luabind::object o) {
 		int32_t t = 1;
 		Lua::CheckTable(l, t);

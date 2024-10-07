@@ -17,9 +17,6 @@
 
 #pragma warning(push)
 #pragma warning(disable : 4251)
-namespace bsp {
-	class File;
-};
 namespace prosper {
 	class Buffer;
 };

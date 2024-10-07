@@ -12,13 +12,14 @@
 #include "pragma/entities/components/c_light_map_component.hpp"
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/game/game_resources.hpp>
-#include <util_bsp.hpp>
 #include <util_image_buffer.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_util.hpp>
 #include <image/prosper_texture.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
+
+import source_engine.bsp;
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;
@@ -75,7 +76,7 @@ void CLightMapComponent::ConvertLightmapToBSPLuxelData() const
 	// imgBuf->Clear(Color::Red);
 
 	auto mapPath = "maps/" + c_game->GetMapName() + ".bsp";
-	auto *convertLightmapDataToBspLuxelData = reinterpret_cast<bool (*)(NetworkState &, const std::string &, const uimg::ImageBuffer &, uint32_t, uint32_t, std::string &)>(util::impl::get_module_func(client, "convert_lightmap_data_to_bsp_luxel_data"));
+	auto *convertLightmapDataToBspLuxelData = reinterpret_cast<bool (*)(NetworkState &, const std::string &, const uimg::ImageBuffer &, uint32_t, uint32_t, std::string &)>(::util::impl::get_module_func(client, "convert_lightmap_data_to_bsp_luxel_data"));
 	if(convertLightmapDataToBspLuxelData == nullptr)
 		return;
 	std::string errMsg;

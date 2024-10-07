@@ -25,7 +25,6 @@
 #include "pragma/rendering/world_environment.hpp"
 #include "pragma/rendering/render_processor.hpp"
 #include "pragma/lua/c_lentity_handles.hpp"
-#include <util_bsp.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_util.hpp>
 #include <pragma/entities/entity_iterator.hpp>
@@ -33,6 +32,8 @@
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <cmaterial.h>
+
+import source_engine.bsp;
 
 using namespace pragma;
 
@@ -72,9 +73,9 @@ void CWorldComponent::Initialize()
 		if(pRenderComponent.valid())
 			pRenderComponent->SetLocalRenderBounds(min, max);
 	});
-	BindEvent(CModelComponent::EVENT_ON_RENDER_MESHES_UPDATED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(CModelComponent::EVENT_ON_RENDER_MESHES_UPDATED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> ::util::EventReply {
 		BuildOfflineRenderQueues(true);
-		return util::EventReply::Handled;
+		return ::util::EventReply::Handled;
 	});
 #if 0
 	BindEventUnhandled(CColorComponent::EVENT_ON_COLOR_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
@@ -107,13 +108,13 @@ void CWorldComponent::ReloadCHCController()
 	m_chcController = std::make_shared<CHC>(*cam);
 	m_chcController->Reset(m_meshTree);*/ // prosper TODO
 }
-void CWorldComponent::SetBSPTree(const std::shared_ptr<util::BSPTree> &bspTree, const std::vector<std::vector<RenderMeshIndex>> &meshesPerCluster)
+void CWorldComponent::SetBSPTree(const std::shared_ptr<::util::BSPTree> &bspTree, const std::vector<std::vector<RenderMeshIndex>> &meshesPerCluster)
 {
 	m_bspTree = bspTree;
 	m_meshesPerCluster = meshesPerCluster;
 	BuildOfflineRenderQueues(false);
 }
-const std::shared_ptr<util::BSPTree> &CWorldComponent::GetBSPTree() const { return m_bspTree; }
+const std::shared_ptr<::util::BSPTree> &CWorldComponent::GetBSPTree() const { return m_bspTree; }
 void CWorldComponent::ReloadMeshCache()
 {
 	m_meshTree = nullptr;
@@ -159,7 +160,7 @@ void CWorldComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 std::shared_ptr<OcclusionOctree<std::shared_ptr<ModelMesh>>> CWorldComponent::GetMeshTree() const { return m_meshTree; };
 std::shared_ptr<CHC> CWorldComponent::GetCHCController() const { return m_chcController; }
 
-const pragma::rendering::RenderQueue *CWorldComponent::GetClusterRenderQueue(util::BSPTree::ClusterIndex clusterIndex, bool translucent) const
+const pragma::rendering::RenderQueue *CWorldComponent::GetClusterRenderQueue(::util::BSPTree::ClusterIndex clusterIndex, bool translucent) const
 {
 	auto &queue = translucent ? m_clusterRenderTranslucentQueues : m_clusterRenderQueues;
 	return (clusterIndex < queue.size()) ? queue.at(clusterIndex).get() : nullptr;
@@ -228,7 +229,7 @@ void CWorldComponent::BuildOfflineRenderQueues(bool rebuild)
 	auto &meshesPerClusters = m_meshesPerCluster;
 	if(meshesPerClusters.empty()) {
 		meshesPerClusters.resize(numClusters);
-		auto fAddClusterMesh = [&meshesPerClusters](util::BSPTree::ClusterIndex clusterIndex, RenderMeshIndex meshIdx) {
+		auto fAddClusterMesh = [&meshesPerClusters](::util::BSPTree::ClusterIndex clusterIndex, RenderMeshIndex meshIdx) {
 			auto &clusterMeshes = meshesPerClusters.at(clusterIndex);
 			if(clusterMeshes.size() == clusterMeshes.capacity())
 				clusterMeshes.reserve(clusterMeshes.size() * 1.1 + 100);
@@ -247,10 +248,10 @@ void CWorldComponent::BuildOfflineRenderQueues(bool rebuild)
 				Vector3 min, max;
 				mesh->GetBounds(min, max);
 				auto leafNodes = m_bspTree->FindLeafNodesInAabb(min, max);
-				std::unordered_set<util::BSPTree::ClusterIndex> clusters;
+				std::unordered_set<::util::BSPTree::ClusterIndex> clusters;
 				for(auto *node : leafNodes) {
 					auto meshClusterIdx = node->cluster;
-					if(meshClusterIdx == std::numeric_limits<util::BSPTree::ClusterIndex>::max())
+					if(meshClusterIdx == std::numeric_limits<::util::BSPTree::ClusterIndex>::max())
 						continue;
 					for(auto clusterIdx = decltype(numClusters) {0u}; clusterIdx < numClusters; ++clusterIdx) {
 						if(m_bspTree->IsClusterVisible(clusterIdx, meshClusterIdx) == false)

@@ -18,7 +18,6 @@
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/model/c_model.h"
 #include <pragma/math/intersection.h>
-#include <util_bsp.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
 using namespace pragma;

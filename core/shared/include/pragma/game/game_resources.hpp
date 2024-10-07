@@ -14,9 +14,6 @@
 
 class NetworkState;
 class Model;
-namespace bsp {
-	class File;
-};
 namespace util {
 	class Library;
 	static const std::string IMPORT_PATH = "addons/imported/";

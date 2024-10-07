@@ -6,6 +6,13 @@
  */
 
 #include "stdafx_cengine.h"
+
+namespace pragma::string {
+	class Utf8String;
+	class Utf8StringView;
+	class Utf8StringArg;
+};
+
 #include "pragma/c_engine.h"
 #include "pragma/audio/c_audio.hpp"
 #include "pragma/rendering/render_processor.hpp"

@@ -6,6 +6,13 @@
  */
 
 #include "stdafx_client.h"
+
+namespace pragma::string {
+	class Utf8String;
+	class Utf8StringView;
+	class Utf8StringArg;
+};
+
 #include "pragma/gui/mainmenu/wimainmenu.h"
 #include "pragma/gui/mainmenu/wimainmenu_credits.hpp"
 #include <pragma/localization.h>

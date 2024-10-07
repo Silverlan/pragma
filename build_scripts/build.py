@@ -851,7 +851,7 @@ if with_pfm:
 		)
 		add_pragma_module(
 			name="pr_dmx",
-			commitSha="e2b0eff826eda999056f182fc15cfb16cbfbe913",
+			commitSha="9d312f376b193115e466a8b771732193fbfd41ab",
 			repositoryUrl="https://github.com/Silverlan/pr_dmx.git"
 		)
 	if with_all_pfm_modules:

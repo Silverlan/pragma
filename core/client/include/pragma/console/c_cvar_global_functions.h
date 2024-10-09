@@ -68,6 +68,7 @@ namespace Console {
 
 		DLLCLIENT void debug_texture_mipmaps(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
 		DLLCLIENT void debug_pbr_ibl(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+		DLLCLIENT void debug_print_shader_material_data(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
 		DLLCLIENT void debug_font(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
 		DLLCLIENT void debug_hitboxes(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
 		DLLCLIENT void debug_water(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);

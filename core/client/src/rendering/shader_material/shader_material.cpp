@@ -473,6 +473,29 @@ static std::optional<PropertyValue> parse_flags_expression(const std::string &st
 	return {};
 }
 
+void ShaderMaterialData::DebugPrint()
+{
+	std::stringstream ss;
+	for(auto &prop : m_shaderMaterial.properties) {
+		ss << "$" << udm::enum_type_to_ascii(prop.type) << " " << prop.name << " ";
+		udm::visit_ng(prop.type, [this, &prop, &ss](auto tag) {
+			using T = typename decltype(tag)::type;
+			if constexpr(is_valid_property_type_v<T>) {
+				auto val = GetValue<T>(prop.name.c_str());
+				if(!val)
+					ss << "NULL";
+				else
+					ss << udm::convert<T, udm::String>(*val);
+			}
+			else
+				ss << "UNSUPPORTED";
+		});
+		ss << "\n";
+	}
+	Con::cout << "Material Data:" << Con::endl;
+	Con::cout << ss.str() << Con::endl;
+}
+
 void ShaderMaterialData::PopulateFromMaterial(const CMaterial &mat)
 {
 	auto &matData = mat.GetDataBlock();

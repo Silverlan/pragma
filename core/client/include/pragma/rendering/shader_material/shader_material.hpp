@@ -112,6 +112,7 @@ namespace pragma::rendering::shader_material {
 
 	struct ShaderMaterialData {
 		ShaderMaterialData(const ShaderMaterial &shaderMaterial) : m_shaderMaterial {shaderMaterial} {}
+		void DebugPrint();
 		void PopulateFromMaterial(const CMaterial &mat);
 		MaterialFlags GetFlags() const;
 		void SetFlags(MaterialFlags flags);

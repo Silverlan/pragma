@@ -23,7 +23,8 @@
 #include <pragma/audio/sound_util.hpp>
 #include <pragma/game/game_resources.hpp>
 #include <pragma/logging.hpp>
-#include <util_sound.hpp>
+
+import pragma.audio.util;
 
 void ServerState::SendSoundSourceToClient(SALSound &sound, bool sendFullUpdate, const pragma::networking::ClientRecipientFilter *rf)
 {
@@ -233,7 +234,7 @@ bool ServerState::PrecacheSound(std::string snd, ALChannel mode)
 		}
 	}
 	auto duration = 0.f;
-	if(util::sound::get_duration(subPath, duration) == false || duration == 0.f) {
+	if(pragma::audio::util::get_duration(subPath, duration) == false || duration == 0.f) {
 		spdlog::warn("Unable to precache sound '{}': Invalid format!", snd);
 		return false;
 	}

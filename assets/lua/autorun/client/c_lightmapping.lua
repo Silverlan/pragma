@@ -72,4 +72,13 @@ console.register_command("debug_lightmaps", function(pl, ...)
 	debug.open_lightmap_atlas_view(ent, function(windowHandle, contents, controls)
 		dirAtlasWindow = windowHandle
 	end)
+
+	local _, cDataCache = ents.citerator(ents.COMPONENT_LIGHT_MAP_DATA_CACHE)()
+
+	print("Lightmap material name: " .. c:GetLightmapMaterialName())
+	local lightmapDataCache = "NULL"
+	if cDataCache ~= nil then
+		lightmapDataCache = cDataCache:GetLightMapDataCachePath()
+	end
+	print("Lightmap data cache: " .. lightmapDataCache)
 end)

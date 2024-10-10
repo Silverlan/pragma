@@ -127,20 +127,30 @@ void CLightMapDataCacheComponent::ReloadCache()
 		entIt.AttachFilter<EntityIteratorFilterUuid>(pair.first.uuid);
 
 		auto it = entIt.begin();
-		if(it == entIt.end())
+		if(it == entIt.end()) {
+			CLightMapComponent::LOGGER.warn("Entity '{}' defined in lightmap data cache does not exist!", util::uuid_to_string(pair.first.uuid));
 			continue;
+		}
 		auto *ent = *it;
-		if(!ent)
+		if(!ent) {
+			CLightMapComponent::LOGGER.warn("Entity '{}' defined in lightmap data cache is invalid!", util::uuid_to_string(pair.first.uuid));
 			continue;
+		}
 		auto &mdl = ent->GetModel();
-		if(!mdl)
+		if(!mdl) {
+			CLightMapComponent::LOGGER.warn("Entity '{}' defined in lightmap data cache has no valid model!", util::uuid_to_string(pair.first.uuid));
 			continue;
+		}
 		auto mdlName = mdl->GetName();
-		if(mdlName != pair.second.model)
+		if(mdlName != pair.second.model) {
+			CLightMapComponent::LOGGER.warn("Model name '{}' of entity '{}' defined in lightmap data cache does not match expected model '{}'!", mdlName, util::uuid_to_string(pair.first.uuid), pair.second.model);
 			continue;
+		}
 		auto itCache = cachedModels.find(mdlName);
-		if(itCache != cachedModels.end() && itCache->second == nullptr)
+		if(itCache != cachedModels.end() && itCache->second == nullptr) {
+			CLightMapComponent::LOGGER.warn("Invalid model cache for entity '{}' defined in lightmap data cache! Ignoring...", util::uuid_to_string(pair.first.uuid));
 			continue;
+		}
 		auto hasLightmapData = false;
 		if(itCache == cachedModels.end()) {
 			for(auto &mg : mdl->GetMeshGroups()) {
@@ -161,8 +171,10 @@ void CLightMapDataCacheComponent::ReloadCache()
 		std::shared_ptr<Model> lmModel = nullptr;
 		if(itCache != cachedModels.end())
 			lmModel = itCache->second;
-		else if(!hasLightmapData)
+		else if(!hasLightmapData) {
+			CLightMapComponent::LOGGER.warn("Model '{}' of entity '{}' defined in lightmap data cache does not have lightmap uv data!", mdlName, util::uuid_to_string(pair.first.uuid));
 			cachedModels[mdlName] = nullptr;
+		}
 		else {
 			auto cpy = mdl->Copy(GetEntity().GetNetworkState()->GetGameState(), Model::CopyFlags::CopyMeshesBit | Model::CopyFlags::CopyUniqueIdsBit);
 			for(auto &mg : cpy->GetMeshGroups()) {

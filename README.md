@@ -89,7 +89,8 @@ If you just wish to re-run the build script without updating to the latest commi
 ###### Code Changes
 If you make any code changes to the core engine code, you can build the `pragma-install` target to build them. This will also re-install the binaries.
 
-If you make any code changes to a module, you will have to build the module build target first, and then build `pragma-install` afterwards.
+###### Code Changes
+If you make any code changes to the source code, you can build the `pragma-install` target to build them. This will also re-install the binaries.
 
 ### Build Customization
 

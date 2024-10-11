@@ -436,9 +436,6 @@ local function import_assets(handler, settings)
 		table.remove(mdlAssets, 1)
 		time.create_simple_timer(0.25, function()
 			logCb("Importing model '" .. mdl .. "'...", log.SEVERITY_INFO)
-			if callback ~= nil then
-				callback(asset.TYPE_MODEL, mdl)
-			end
 
 			local ext = file.get_file_extension(mdl)
 			local handled = false
@@ -455,6 +452,10 @@ local function import_assets(handler, settings)
 								importedAssets[asset.TYPE_MODEL] = importedAssets[asset.TYPE_MODEL] or {}
 								for _, mdlName in ipairs(res.models) do
 									table.insert(importedAssets[asset.TYPE_MODEL], mdlName)
+
+									if callback ~= nil then
+										callback(asset.TYPE_MODEL, mdlName)
+									end
 								end
 							end
 							if #res.mapName > 0 then
@@ -480,10 +481,11 @@ local function import_assets(handler, settings)
 						)
 					end
 				else
-					local res = asset.import(absPath, asset.TYPE_MODEL)
+					local res = asset.import(absPath, mdl, asset.TYPE_MODEL)
 					if res == false then
 						logCb("Failed to import model '" .. mdl .. "'!", log.SEVERITY_ERROR)
 					end
+					mdl = file.remove_file_extension(mdl, { ext })
 				end
 			end
 
@@ -491,9 +493,13 @@ local function import_assets(handler, settings)
 				local mdlName = mdl
 				local mdl = game.load_model(mdlName)
 				if mdl ~= nil then
-					logCb("Model has been imported successfully!", log.SEVERITY_INFO)
+					logCb("Model '" .. mdlName .. "' has been imported successfully!", log.SEVERITY_INFO)
 					importedAssets[asset.TYPE_MODEL] = importedAssets[asset.TYPE_MODEL] or {}
 					table.insert(importedAssets[asset.TYPE_MODEL], mdlName)
+
+					if callback ~= nil then
+						callback(asset.TYPE_MODEL, mdlName)
+					end
 				else
 					logCb("Failed to import model!", log.SEVERITY_ERROR)
 				end

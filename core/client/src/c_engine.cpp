@@ -5,6 +5,11 @@
  * Copyright (c) 2021 Silverlan
  */
 
+namespace pragma::string {
+	class Utf8String;
+	class Utf8StringView;
+	class Utf8StringArg;
+};
 #include "stdafx_cengine.h"
 #include "pragma/c_engine.h"
 #include <wgui/wgui.h>

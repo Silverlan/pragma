@@ -15,6 +15,7 @@
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/model/c_vertex_buffer_data.hpp"
 #include "pragma/model/vk_mesh.h"
+#include "pragma/console/c_cvar_global_functions.h"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <pragma/game/game_limits.h>
 #include <pragma/logging.hpp>
@@ -570,4 +571,44 @@ std::optional<uint32_t> ShaderSpecializationManager::FindSpecializationPipelineI
 	auto &specToPipelineIdx = m_passTypeSpecializationToPipelineIdx[passType].specializationToPipelineIdx;
 	auto pipelineIdx = specToPipelineIdx[specializationFlags];
 	return (pipelineIdx != std::numeric_limits<uint32_t>::max()) ? pipelineIdx : std::optional<uint32_t> {};
+}
+
+static void print_shader_material_data(CMaterial &mat)
+{
+	auto *shader = dynamic_cast<ShaderGameWorldLightingPass *>(mat.GetPrimaryShader());
+	if(!shader) {
+		Con::cwar << "Material '" << mat.GetName() << "' has no primary shader!" << Con::endl;
+		return;
+	}
+	auto *shaderMat = shader->GetShaderMaterial();
+	if(!shaderMat) {
+		Con::cwar << "Shader '" << shader->GetIdentifier() << "' has no shader material!" << Con::endl;
+		return;
+	}
+	auto *buf = mat.GetSettingsBuffer();
+	if(!buf) {
+		Con::cwar << "Material '" << mat.GetName() << "' has no settings buffer!" << Con::endl;
+		return;
+	}
+	pragma::rendering::shader_material::ShaderMaterialData shaderMatData {*shaderMat};
+	if(!buf->Read(0, shaderMatData.data.size(), shaderMatData.data.data())) {
+		Con::cwar << "Failed to read settings buffer data of material '" << mat.GetName() << "'!" << Con::endl;
+		return;
+	}
+	shaderMatData.DebugPrint();
+}
+
+void Console::commands::debug_print_shader_material_data(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+{
+	if(argv.empty()) {
+		Con::cwar << "No material specified!" << Con::endl;
+		return;
+	}
+	auto &matName = argv.front();
+	auto *mat = client->LoadMaterial(matName);
+	if(!mat) {
+		Con::cwar << "Failed to load material '" << matName << "'!" << Con::endl;
+		return;
+	}
+	print_shader_material_data(static_cast<CMaterial &>(*mat));
 }

@@ -183,6 +183,7 @@ namespace pragma {
 
 		void SetShaderMaterialName(const std::optional<std::string> &shaderMaterial);
 		const std::optional<std::string> &GetShaderMaterialName() const;
+		const rendering::shader_material::ShaderMaterial *GetShaderMaterial() const { return m_shaderMaterial.get(); }
 
 		virtual GameShaderSpecializationConstantFlag GetBaseSpecializationFlags() const;
 		virtual void RecordBindScene(rendering::ShaderProcessor &shaderProcessor, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer, prosper::IDescriptorSet &dsRenderSettings,

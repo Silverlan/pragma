@@ -68,7 +68,6 @@
 #include <cmaterialmanager.h>
 #include <cmaterial_manager2.hpp>
 #include <impl_texture_formats.h>
-#include <util_sound.hpp>
 #include <prosper_window.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_prepared_command_buffer.hpp>
@@ -78,6 +77,7 @@
 #include <wgui/types/wiroot.h>
 
 import pragma.string.unicode;
+import pragma.audio.util;
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;
@@ -678,7 +678,7 @@ void ClientState::RegisterSharedLuaLibraries(Lua::Interface &lua, bool bGUI)
 			      return 1;
 		      }
 		      float duration;
-		      auto success = ::util::sound::get_duration(std::string {pragma::asset::get_asset_root_directory(pragma::asset::Type::Sound)} + "/" + *absPath, duration);
+		      auto success = pragma::audio::util::get_duration(std::string {pragma::asset::get_asset_root_directory(pragma::asset::Type::Sound)} + "/" + *absPath, duration);
 		      if(success)
 			      Lua::PushNumber(l, duration);
 		      else

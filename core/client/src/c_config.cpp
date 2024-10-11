@@ -9,6 +9,13 @@
 #include "pragma/c_engine.h"
 #include <pragma/console/convars.h>
 #include "pragma/input/input_binding_layer.hpp"
+
+namespace pragma::string {
+	class Utf8String;
+	class Utf8StringView;
+	class Utf8StringArg;
+};
+
 #include "pragma/localization.h"
 #include <fsys/filesystem.h>
 #include "pragma/input/inputhelper.h"

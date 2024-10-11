@@ -187,10 +187,10 @@ mkpath(tools)
 if platform == "linux":
 	curDir = os.getcwd()
 	os.chdir(deps_dir)
-	clang19_root = os.getcwd() +"/LLVM-19.1.0-Linux-X64"
+	clang19_root = os.getcwd() +"/LLVM-19.1.1-Linux-X64"
 	if not Path(clang19_root).is_dir():
 		print_msg("Downloading clang-19...")
-		http_extract("https://github.com/llvm/llvm-project/releases/download/llvmorg-19.1.0/LLVM-19.1.0-Linux-X64.tar.xz",format="tar.xz")
+		http_extract("https://github.com/llvm/llvm-project/releases/download/llvmorg-19.1.1/LLVM-19.1.1-Linux-X64.tar.xz",format="tar.xz")
 	c_compiler = clang19_root +"/bin/clang"
 	cxx_compiler = clang19_root +"/bin/clang++"
 	print_msg("Setting c_compiler override to '" +c_compiler +"'")
@@ -851,7 +851,7 @@ if with_pfm:
 		)
 		add_pragma_module(
 			name="pr_dmx",
-			commitSha="e2b0eff826eda999056f182fc15cfb16cbfbe913",
+			commitSha="eb6b4c8e0cd45dc27cc7ed46ff50eb5a9cae1fba",
 			repositoryUrl="https://github.com/Silverlan/pr_dmx.git"
 		)
 	if with_all_pfm_modules:
@@ -1129,7 +1129,7 @@ def download_addon(name,addonName,url,commitId=None):
 curDir = os.getcwd()
 if not skip_repository_updates:
 	if with_pfm:
-		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","b4ed38338fd3478f50361bdeed6f433924e932e3")
+		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","46ef461311983bb6878169ffa8262b21747b6a02")
 		download_addon("model editor","tool_model_editor","https://github.com/Silverlan/pragma_model_editor.git","4c185ce7533fba1294e7282ae88168e7842e1a2b")
 
 	if with_vr:

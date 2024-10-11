@@ -12,9 +12,6 @@
 #include "pragma/rendering/raytracing/cycles.hpp"
 #include <pragma/entities/components/base_entity_component.hpp>
 
-namespace bsp {
-	class File;
-};
 namespace prosper {
 	class IDynamicResizableBuffer;
 };

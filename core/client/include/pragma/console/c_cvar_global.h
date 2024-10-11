@@ -88,6 +88,7 @@ REGISTER_CONCOMMAND_CL(debug_particle_alpha_mode, Console::commands::debug_parti
 Blend factor options: zero, one, src_color, one_minus_src_color, dst_color, one_minus_dst_color, src_alpha, one_minus_src_alpha, dst_alpha, one_minus_dst_alpha, constant_color, \
 one_minus_constant_color, constant_alpha, one_minus_constant_alpha, src_alpha_saturate, src1_color, one_minus_src1_color, src1_alpha, one_minus_src1_alpha\n\
 Operation options: add, subtract, reverse_subtract, min, max");
+REGISTER_CONCOMMAND_CL(debug_print_shader_material_data, Console::commands::debug_print_shader_material_data, ConVarFlags::None, "Prints the shader material data for the specified material.");
 
 #ifdef _DEBUG
 REGISTER_CONCOMMAND_CL(cl_dump_sounds, CMD_cl_dump_sounds, ConVarFlags::None, "Prints information about all active sounds to the console.");

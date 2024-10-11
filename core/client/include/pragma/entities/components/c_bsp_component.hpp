@@ -11,7 +11,7 @@
 #include "pragma/clientdefinitions.h"
 #include <pragma/entities/components/base_entity_component.hpp>
 
-namespace bsp {
+namespace source_engine::bsp {
 	class File;
 };
 namespace pragma {
@@ -21,7 +21,7 @@ namespace pragma {
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *l) override;
 	  protected:
-		void InitializeBSPTree(bsp::File &bsp);
+		void InitializeBSPTree(source_engine::bsp::File &bsp);
 	};
 };
 

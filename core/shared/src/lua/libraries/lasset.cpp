@@ -265,16 +265,29 @@ void Lua::asset::register_library(Lua::Interface &lua, bool extended)
 	];
 
 	Lua::RegisterLibraryEnums(lua.GetState(), "asset",
-	  {{"TYPE_MODEL", umath::to_integral(pragma::asset::Type::Model)}, {"TYPE_MAP", umath::to_integral(pragma::asset::Type::Map)}, {"TYPE_MATERIAL", umath::to_integral(pragma::asset::Type::Material)}, {"TYPE_TEXTURE", umath::to_integral(pragma::asset::Type::Texture)},
-	    {"TYPE_AUDIO", umath::to_integral(pragma::asset::Type::Sound)}, {"TYPE_PARTICLE_SYSTEM", umath::to_integral(pragma::asset::Type::ParticleSystem)},
+	  {
+	    {"TYPE_MODEL", umath::to_integral(pragma::asset::Type::Model)},
+	    {"TYPE_MAP", umath::to_integral(pragma::asset::Type::Map)},
+	    {"TYPE_MATERIAL", umath::to_integral(pragma::asset::Type::Material)},
+	    {"TYPE_TEXTURE", umath::to_integral(pragma::asset::Type::Texture)},
+	    {"TYPE_AUDIO", umath::to_integral(pragma::asset::Type::Sound)},
+	    {"TYPE_PARTICLE_SYSTEM", umath::to_integral(pragma::asset::Type::ParticleSystem)},
+	    {"TYPE_COUNT", umath::to_integral(pragma::asset::Type::Count)},
 
-	    {"FORMAT_TYPE_NATIVE", umath::to_integral(pragma::asset::FormatType::Native)}, {"FORMAT_TYPE_IMPORT", umath::to_integral(pragma::asset::FormatType::Import)}, {"FORMAT_TYPE_ALL", umath::to_integral(pragma::asset::FormatType::All)},
+	    {"FORMAT_TYPE_NATIVE", umath::to_integral(pragma::asset::FormatType::Native)},
+	    {"FORMAT_TYPE_IMPORT", umath::to_integral(pragma::asset::FormatType::Import)},
+	    {"FORMAT_TYPE_ALL", umath::to_integral(pragma::asset::FormatType::All)},
 
-	    {"ASSET_LOAD_FLAG_NONE", umath::to_integral(util::AssetLoadFlags::None)}, {"ASSET_LOAD_FLAG_ABSOLUTE_PATH_BIT", umath::to_integral(util::AssetLoadFlags::AbsolutePath)}, {"ASSET_LOAD_FLAG_DONT_CACHE_BIT", umath::to_integral(util::AssetLoadFlags::DontCache)},
+	    {"ASSET_LOAD_FLAG_NONE", umath::to_integral(util::AssetLoadFlags::None)},
+	    {"ASSET_LOAD_FLAG_ABSOLUTE_PATH_BIT", umath::to_integral(util::AssetLoadFlags::AbsolutePath)},
+	    {"ASSET_LOAD_FLAG_DONT_CACHE_BIT", umath::to_integral(util::AssetLoadFlags::DontCache)},
 	    {"ASSET_LOAD_FLAG_IGNORE_CACHE_BIT", umath::to_integral(util::AssetLoadFlags::IgnoreCache)},
 
-	    {"ASSET_STATE_NOT_LOADED", umath::to_integral(util::AssetState::NotLoaded)}, {"ASSET_STATE_LOADED", umath::to_integral(util::AssetState::Loaded)}, {"ASSET_STATE_FAILED_TO_LOAD", umath::to_integral(util::AssetState::FailedToLoad)},
-	    {"ASSET_STATE_LOADING", umath::to_integral(util::AssetState::Loading)}});
+	    {"ASSET_STATE_NOT_LOADED", umath::to_integral(util::AssetState::NotLoaded)},
+	    {"ASSET_STATE_LOADED", umath::to_integral(util::AssetState::Loaded)},
+	    {"ASSET_STATE_FAILED_TO_LOAD", umath::to_integral(util::AssetState::FailedToLoad)},
+	    {"ASSET_STATE_LOADING", umath::to_integral(util::AssetState::Loading)},
+	  });
 	static_assert(umath::to_integral(pragma::asset::Type::Count) == 6, "Update this list!");
 
 	Lua::RegisterLibraryValue<std::string>(lua.GetState(), "asset", "FORMAT_MAP_BINARY", pragma::asset::FORMAT_MAP_BINARY);

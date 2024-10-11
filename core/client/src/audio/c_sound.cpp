@@ -23,7 +23,6 @@
 #include <alsound_buffer.hpp>
 #include <pragma/game/game_resources.hpp>
 #include <pragma/audio/sound_util.hpp>
-#include <util_sound.hpp>
 #include <sharedutils/util_file.h>
 #include <steam_audio/alsound_steam_audio.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
@@ -31,6 +30,7 @@
 #include <sharedutils/util_markup_file.hpp>
 
 import se_script;
+import pragma.audio.util;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
@@ -140,7 +140,7 @@ bool ClientState::PrecacheSound(std::string snd, std::pair<al::ISoundBuffer *, a
 	}
 
 	auto duration = 0.f;
-	if(util::sound::get_duration(path, duration) == false || duration == 0.f) {
+	if(pragma::audio::util::get_duration(path, duration) == false || duration == 0.f) {
 		spdlog::warn("Unable to precache sound '{}': Invalid format!", snd);
 		return false;
 	}

@@ -11,8 +11,9 @@
 #include <pragma/addonsystem/addonsystem.h>
 #include <sharedutils/util_file.h>
 #include <util_pad.hpp>
-#include <util_versioned_archive.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
+
+import pragma.uva;
 
 extern DLLCLIENT CEngine *c_engine;
 
@@ -111,7 +112,7 @@ void pragma::AddonInstallManager::QueryFile(const std::shared_ptr<AddonUpdateQue
 							  }
 
 							  // Add new version information
-							  VersionInfo vi {};
+							  pragma::uva::VersionInfo vi {};
 							  vi.version = version;
 							  vi.files = newFileIds;
 							  archFile->AddVersion(vi);

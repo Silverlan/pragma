@@ -12,10 +12,11 @@
 #include <util_pad.hpp>
 #include <sharedutils/util_file.h>
 #include <fsys/directory_watcher.h>
-#include <util_versioned_archive.hpp>
 #ifdef _WIN32
 #include <sharedutils/util_link.hpp>
 #endif
+
+import pragma.uva;
 
 extern DLLNETWORK Engine *engine;
 
@@ -196,7 +197,7 @@ void AddonSystem::MountAddons()
 						  auto *archFile = pad->GetArchiveFile();
 						  if(archFile != nullptr) {
 							  load_autorun_scripts([archFile](const std::string &findTarget, std::vector<std::string> &outFiles) {
-								  std::vector<uva::FileInfo *> results;
+								  std::vector<pragma::uva::FileInfo *> results;
 								  archFile->SearchFiles(findTarget, results);
 								  // archFile->SearchFiles(Lua::SCRIPT_DIRECTORY + "\\autorun\\*." + Lua::FILE_EXTENSION_PRECOMPILED, results);
 								  outFiles.reserve(outFiles.size() + results.size());

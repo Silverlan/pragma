@@ -57,7 +57,7 @@ Build Requirements
 
 ###### Linux
 - Ubuntu 24.04 or newer
-- clang-18 or newer (Pragma is *not* compatible with gcc!)
+- clang-19 or newer (Pragma is *not* compatible with gcc!)
 
 Build Instructions
 ------

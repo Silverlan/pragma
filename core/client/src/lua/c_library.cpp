@@ -1126,6 +1126,16 @@ static util::ParallelJob<uimg::ImageLayerSet> capture_raytraced_screenshot(lua_S
 static util::ParallelJob<uimg::ImageLayerSet> capture_raytraced_screenshot(lua_State *l, uint32_t width, uint32_t height, uint32_t samples) { return capture_raytraced_screenshot(l, width, height, samples, false, true); }
 static util::ParallelJob<uimg::ImageLayerSet> capture_raytraced_screenshot(lua_State *l, uint32_t width, uint32_t height) { return capture_raytraced_screenshot(l, width, height, 1'024, false, true); }
 
+static bool asset_import(NetworkState &nw, const std::string &name, const std::string &outputName, pragma::asset::Type type)
+{
+	if(type == pragma::asset::Type::Map)
+		return util::port_hl2_map(&nw, name);
+	auto *manager = nw.GetAssetManager(type);
+	if(!manager)
+		return false;
+	return manager->Import(name, outputName);
+}
+
 void CGame::RegisterLuaLibraries()
 {
 	Lua::util::register_library(GetLuaState());
@@ -1428,14 +1438,9 @@ void CGame::RegisterLuaLibraries()
 		    return luabind::object {};
 	    }),
 	  luabind::def(
-	    "import", +[](NetworkState &nw, const std::string &name, pragma::asset::Type type) -> bool {
-		    if(type == pragma::asset::Type::Map)
-			    return util::port_hl2_map(&nw, name);
-		    auto *manager = nw.GetAssetManager(type);
-		    if(!manager)
-			    return false;
-		    return manager->Import(name);
-	    })];
+	    "import", +[](NetworkState &nw, const std::string &name, pragma::asset::Type type) -> bool { return asset_import(nw, name, name, type); }),
+	  luabind::def(
+	    "import", +[](NetworkState &nw, const std::string &name, const std::string &outputName, pragma::asset::Type type) -> bool { return asset_import(nw, name, outputName, type); })];
 	auto defMapExportInfo = luabind::class_<pragma::asset::MapExportInfo>("MapExportInfo");
 	defMapExportInfo.def(luabind::constructor<>());
 	defMapExportInfo.def_readwrite("includeMapLightSources", &pragma::asset::MapExportInfo::includeMapLightSources);

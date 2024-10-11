@@ -471,7 +471,7 @@ bool ShaderGameWorldLightingPass::InitializeMaterialBuffer(prosper::IDescriptorS
 		return false;
 	descSet.SetBindingUniformBuffer(*settingsBuffer, bindingIdx);
 	mat.SetSettingsBuffer(*settingsBuffer);
-	return settingsBuffer->Write(0, matData);
+	return settingsBuffer->Write(0, matData.data.size(), matData.data.data());
 }
 void ShaderGameWorldLightingPass::InitializeMaterialData(const CMaterial &mat, const rendering::shader_material::ShaderMaterial &shaderMat, pragma::rendering::shader_material::ShaderMaterialData &inOutMatData) {}
 bool ShaderGameWorldLightingPass::InitializeMaterialBuffer(prosper::IDescriptorSet &descSet, CMaterial &mat, const pragma::rendering::shader_material::ShaderMaterialData &matData)

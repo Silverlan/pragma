@@ -32,12 +32,13 @@ function util.DropAssetImportFileHandler:__init(tFiles)
 	util.IAssetImportFileHandler.__init(self)
 	local fileNames = {}
 	for _, f in ipairs(tFiles) do
-		table.insert(fileNames, f:GetPath())
+		local path = util.Path.CreateFilePath(f)
+		table.insert(fileNames, path:GetString())
 	end
 	self.m_files = fileNames
 end
 function util.DropAssetImportFileHandler:ExtractFile(fileName, outPath)
-	local f = game.open_dropped_file(file.get_file_name(fileName), true)
+	local f = game.open_dropped_file(fileName, true)
 	if f == nil then
 		return false, "Failed to open input file!"
 	end
@@ -96,6 +97,98 @@ local function import_assets(handler, settings)
 	local clearFiles = settings.clearFiles
 
 	local files = handler:GetFileList()
+
+	local function installFiles(dropPath, installPath)
+		local numInstalled = 0
+		local i = 1
+		while i <= #files do
+			local f = files[i]
+			if f:sub(1, #dropPath) == dropPath then
+				local addonFilePath = f:sub(#dropPath + 1)
+				local fileInstallPath = installPath .. addonFilePath
+				file.create_path(file.get_file_path(fileInstallPath))
+				logCb("Extracting file '" .. f .. "' to '" .. fileInstallPath .. "'...", log.SEVERITY_INFO)
+				local result, msg = handler:ExtractFile(f, fileInstallPath)
+				if result == false then
+					logCb(
+						"Failed to extract file '" .. f .. "' to '" .. fileInstallPath .. "': " .. msg,
+						log.SEVERITY_ERROR
+					)
+				end
+				table.remove(files, i)
+				numInstalled = numInstalled + 1
+			else
+				i = i + 1
+			end
+		end
+		return numInstalled
+	end
+
+	for assetType = 0, asset.TYPE_COUNT - 1 do
+		local exts = asset.get_supported_extensions(assetType, asset.FORMAT_TYPE_NATIVE)
+		local rootAssetDir = asset.get_asset_root_directory(assetType)
+		local altRootAssetDir
+		if assetType == asset.TYPE_AUDIO then
+			altRootAssetDir = "sound" -- We'll allow "sound" as alternative, since that is the asset directory name in the Sourc Engine
+		end
+		local i = 1
+		while i <= #files do
+			local f = files[i]
+			local ext = file.get_file_extension(f, exts)
+			if ext ~= nil then
+				local path = util.Path.CreateFilePath(f)
+				local pathC = path:ToComponents()
+				if pathC[#pathC - 3] == "addons" then
+					-- Found Pragma assets that appear to be part of a Pragma addon.
+					-- Install the addon directly to Pragma.
+					local pathToAddons = path:Copy()
+					pathToAddons:PopBack() -- Pop filename
+					pathToAddons:PopBack() -- Pop asset dir
+					pathToAddons:PopBack() -- Pop addon
+					local numInstalled = installFiles(pathToAddons:GetString(), "addons/")
+					assert(numInstalled > 0)
+				else
+					local numInstalled = 0
+					for j = #pathC - 1, 1, -1 do
+						if pathC[j] == rootAssetDir or pathC[j] == altRootAssetDir then
+							local addonName = pathC[j - 1]
+							if addonName == nil then
+								-- Asset has been dropped directly into Pragma.
+								-- Just put it in the "imported" addon
+								addonName = "imported"
+							end
+							local installPath = "addons/" .. addonName .. "/" .. pathC[j] .. "/"
+							local dropPath = util.Path()
+							for k = 1, j do
+								dropPath = dropPath + (pathC[k] .. "/")
+							end
+							numInstalled = installFiles(dropPath:GetString(), installPath)
+							assert(numInstalled > 0)
+							break
+						end
+					end
+					if numInstalled == 0 then
+						-- The root addon dir for this asset type does not exist in the import files.
+						if #pathC == 1 then
+							-- It's just the asset file, install it directly
+							installFiles(f, "addons/imported/" .. rootAssetDir .. "/" .. f)
+						else
+							-- Take everything except the root dir
+							local installPath = path:Copy()
+							installPath:PopFront()
+							installPath = util.Path.CreateFilePath("addons/imported/" .. rootAssetDir .. "/")
+								+ installPath
+							installFiles(f, "addons/imported/" .. rootAssetDir .. "/" .. f)
+						end
+						i = i + 1
+					end
+				end
+			else
+				i = i + 1
+			end
+		end
+	end
+
 	local IMPORT_ASSET_TYPE_NATIVE = 0
 	local IMPORT_ASSET_TYPE_SOURCE = 1
 	local IMPORT_ASSET_TYPE_IMPORT = 2
@@ -308,6 +401,7 @@ local function import_assets(handler, settings)
 	handler = nil
 	collectgarbage()
 
+	logCb("Found " .. #mdlAssets .. " model assets!", log.SEVERITY_INFO)
 	local function import_next_model()
 		if #mdlAssets == 0 then
 			logCb("All models have been imported successfully!", log.SEVERITY_INFO)
@@ -342,18 +436,14 @@ local function import_assets(handler, settings)
 		table.remove(mdlAssets, 1)
 		time.create_simple_timer(0.25, function()
 			logCb("Importing model '" .. mdl .. "'...", log.SEVERITY_INFO)
-			if callback ~= nil then
-				callback(asset.TYPE_MODEL, mdl)
-			end
 
 			local ext = file.get_file_extension(mdl)
 			local handled = false
 			if ext ~= nil then
 				ext = ext:lower()
+				local absPath = file.find_absolute_path(asset.get_asset_root_directory(asset.TYPE_MODEL) .. "/" .. mdl)
 				if ext == "gltf" or ext == "glb" then
 					handled = true
-					local absPath =
-						file.find_absolute_path(asset.get_asset_root_directory(asset.TYPE_MODEL) .. "/" .. mdl)
 					if absPath ~= nil then
 						local res, errMsg =
 							asset.import_gltf(absPath, file.get_file_path(mdl), not settings.importAsCollection)
@@ -362,6 +452,10 @@ local function import_assets(handler, settings)
 								importedAssets[asset.TYPE_MODEL] = importedAssets[asset.TYPE_MODEL] or {}
 								for _, mdlName in ipairs(res.models) do
 									table.insert(importedAssets[asset.TYPE_MODEL], mdlName)
+
+									if callback ~= nil then
+										callback(asset.TYPE_MODEL, mdlName)
+									end
 								end
 							end
 							if #res.mapName > 0 then
@@ -386,6 +480,12 @@ local function import_assets(handler, settings)
 							log.SEVERITY_ERROR
 						)
 					end
+				else
+					local res = asset.import(absPath, mdl, asset.TYPE_MODEL)
+					if res == false then
+						logCb("Failed to import model '" .. mdl .. "'!", log.SEVERITY_ERROR)
+					end
+					mdl = file.remove_file_extension(mdl, { ext })
 				end
 			end
 
@@ -393,9 +493,13 @@ local function import_assets(handler, settings)
 				local mdlName = mdl
 				local mdl = game.load_model(mdlName)
 				if mdl ~= nil then
-					logCb("Model has been imported successfully!", log.SEVERITY_INFO)
+					logCb("Model '" .. mdlName .. "' has been imported successfully!", log.SEVERITY_INFO)
 					importedAssets[asset.TYPE_MODEL] = importedAssets[asset.TYPE_MODEL] or {}
 					table.insert(importedAssets[asset.TYPE_MODEL], mdlName)
+
+					if callback ~= nil then
+						callback(asset.TYPE_MODEL, mdlName)
+					end
 				else
 					logCb("Failed to import model!", log.SEVERITY_ERROR)
 				end
@@ -439,17 +543,23 @@ function util.import_assets(files, settings)
 		end
 		local ext = file.get_file_extension(filePath)
 		if ext ~= nil and zipExts[ext] == true then
-			local zipFile = util.ZipFile.open(f, util.ZipFile.OPEN_MODE_READ)
-			if zipFile == nil then
-				settings.logger(
-					"Unable to open zip-archive '" .. filePath .. "': Unsupported archive format?",
-					log.SEVERITY_ERROR
-				)
+			local f = game.open_dropped_file(file.get_file_name(filePath), true)
+			if f == nil then
+				settings.logger("Unable to open zip-archive '" .. filePath .. "': File not found!", log.SEVERITY_ERROR)
 			else
-				hasZipAssets = true
-				local handler = util.ZipAssetImportFileHandler(zipFile)
-				zipFile = nil
-				import_assets(handler, settings)
+				local zipFile = util.ZipFile.open(f, util.ZipFile.OPEN_MODE_READ)
+				if zipFile == nil then
+					settings.logger(
+						"Unable to open zip-archive '" .. filePath .. "': Unsupported archive format?",
+						log.SEVERITY_ERROR
+					)
+				-- util.open_path_in_explorer(file.get_file_path(filePath), file.get_file_name(filePath))
+				else
+					hasZipAssets = true
+					local handler = util.ZipAssetImportFileHandler(zipFile)
+					zipFile = nil
+					import_assets(handler, settings)
+				end
 			end
 		else
 			table.insert(nonZipFiles, f)

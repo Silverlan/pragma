@@ -57,7 +57,7 @@ Build Requirements
 
 ###### Linux
 - Ubuntu 24.04 or newer
-- clang-18 or newer (Pragma is *not* compatible with gcc!)
+- clang-19 or newer (Pragma is *not* compatible with gcc!)
 
 Build Instructions
 ------
@@ -86,10 +86,23 @@ This will pull all of the latest changes for the Pragma repository and the modul
 
 If you just wish to re-run the build script without updating to the latest commit, you can use the `--rerun` option instead. Like the `--update` option, this will also re-use the arguments used in the last execution of the build script.
 
-###### Code Changes
-If you make any code changes to the core engine code, you can build the `pragma-install` target to build them. This will also re-install the binaries.
+###### Branches
+The purpose of the branches is as follows:
+### `main` Branch
+- **Purpose:** The `main` branch is the primary branch that contains the latest functional code and should always be deployable. The [nightly pre-release builds](https://github.com/Silverlan/pragma/releases/tag/nightly) are generated from this branch. Please note that only [commits tagged with release points](https://github.com/Silverlan/pragma/tags) (e.g. v1.3.0) are considered stable!
+- **Usage:** 
+  - Only tested and approved features or bug fixes from the `develop` branch should be merged into `main`.
+  - Direct commits to `main` are discouraged.
+  - A stable release can be generated from `main` using the `Create Stable Release` action once the nightly release has been thoroughly tested.
 
-If you make any code changes to a module, you will have to build the module build target first, and then build `pragma-install` afterwards.
+### `develop` Branch
+- **Purpose:** The `develop` branch is used as the integration branch for new features, bug fixes, and other changes. It acts as the "working" version of the codebase where ongoing development takes place. This branch is *not* considered stable and may not be functional or even build without errors.
+- **Usage:** 
+  - Developers create feature branches (e.g., `feature/feature-name`) off the `develop` branch for new features or improvements.
+  - Once a feature is complete and tested, it is merged back into `develop`.
+
+###### Code Changes
+If you make any code changes to the source code, you can build the `pragma-install` target to build them. This will also re-install the binaries.
 
 ### Build Customization
 

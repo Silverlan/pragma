@@ -546,8 +546,11 @@ void CEngine::OnFilesDropped(prosper::Window &window, std::vector<std::string> &
 				addFile(f, rootPath ? *rootPath : ufile::get_path_from_filename(f));
 			else if(filemanager::is_system_dir(f)) {
 				auto subRootPath = rootPath;
-				if(!subRootPath)
-					subRootPath = f;
+				if(!subRootPath) {
+					auto path = util::Path::CreatePath(f);
+					path.PopBack();
+					subRootPath = path.GetString();
+				}
 				std::vector<std::string> subFiles;
 				std::vector<std::string> subDirs;
 				filemanager::find_system_files(f + "/*", &subFiles, &subDirs);

@@ -21,7 +21,7 @@ get_submodule("sharedutils","https://github.com/Silverlan/sharedutils.git","fece
 get_submodule("util_bsp","https://github.com/Silverlan/util_bsp.git","26ca23e32ebedf1797985567455d125f2e94e2df")
 get_submodule("util_formatted_text","https://github.com/Silverlan/util_formatted_text.git","c473a2bdc1ad84ef52d391226d6983ef3076958e")
 get_submodule("util_image","https://github.com/Silverlan/util_image.git","bc1af9d7a0e4e4e51550a4730d65e072ae97d592")
-get_submodule("util_pad","https://github.com/Silverlan/util_pad.git","1bca1e01058cc4a17a16d79ffe2a4397f9e667e5")
+get_submodule("util_pad","https://github.com/Silverlan/util_pad.git","d3e649427bc8109814920e9b38ecf413f0e6075c")
 get_submodule("util_pragma_doc","https://github.com/Silverlan/util_pragma_doc.git","88e85503b120f820143f6f4566e194b539297ffa")
 get_submodule("util_smdmodel","https://github.com/Silverlan/util_smdmodel.git","10fb2d10eb62188c8b9639a62da646152277a748")
 get_submodule("util_sound","https://github.com/Silverlan/util_sound.git","729915ed7eaa7c9669a57c4e0d3dc4bf02a62cea")

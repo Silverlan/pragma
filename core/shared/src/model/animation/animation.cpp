@@ -16,8 +16,9 @@
 #include <panima/animation.hpp>
 #include <panima/channel.hpp>
 #include "pragma/model/animation/bone.hpp"
-#include <bezier_fit.hpp>
 //#include <utility>
+
+import bezierfit;
 
 decltype(pragma::animation::Animation::s_activityEnumRegister) pragma::animation::Animation::s_activityEnumRegister;
 decltype(pragma::animation::Animation::s_eventEnumRegister) pragma::animation::Animation::s_eventEnumRegister;

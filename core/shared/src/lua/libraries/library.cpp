@@ -72,7 +72,6 @@
 #include <panima/channel.hpp>
 #include <mathutil/camera.hpp>
 #include <mathutil/umath_frustum.hpp>
-#include <bezier_fit.hpp>
 #include <regex>
 #include <complex>
 #include <random>
@@ -84,6 +83,8 @@
 #include <luabind/discard_result_policy.hpp>
 #include <filesystem>
 #include <fmt/core.h>
+
+import bezierfit;
 
 extern DLLNETWORK Engine *engine;
 

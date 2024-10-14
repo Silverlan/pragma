@@ -35,7 +35,7 @@ class DLLNETWORK AddonInfo {
 };
 
 class DirectoryWatcherCallback;
-namespace upad {
+namespace pragma::pad {
 	class PADPackage;
 };
 class DLLNETWORK AddonSystem {
@@ -50,7 +50,7 @@ class DLLNETWORK AddonSystem {
 	static bool MountAddon(const std::string &addonPath, std::vector<AddonInfo> &outAddons, bool silent = true);
 	static std::vector<AddonInfo> m_addons;
 	static std::shared_ptr<DirectoryWatcherCallback> m_addonWatcher;
-	static upad::PADPackage *LoadPADPackage(const std::string &path);
+	static pragma::pad::PADPackage *LoadPADPackage(const std::string &path);
 };
 #pragma warning(pop)
 

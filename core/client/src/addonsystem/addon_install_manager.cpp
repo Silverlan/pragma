@@ -10,9 +10,10 @@
 #include "pragma/util/curl_query_handler.hpp"
 #include <pragma/addonsystem/addonsystem.h>
 #include <sharedutils/util_file.h>
-#include <util_pad.hpp>
-#include <util_versioned_archive.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
+
+import pragma.uva;
+import pragma.pad;
 
 extern DLLCLIENT CEngine *c_engine;
 
@@ -57,13 +58,13 @@ void pragma::AddonInstallManager::QueryFile(const std::shared_ptr<AddonUpdateQue
 			  if(it != addon->fileIds.end()) {
 				  addon->fileIds.erase(it);
 				  if(addon->fileIds.empty() == true && updateFile->ReOpen("rb") == true) {
-					  upad::PADPackage *pad = nullptr;
+					  pragma::pad::PADPackage *pad = nullptr;
 					  uva::ArchiveFile *archFile = nullptr;
 					  std::unique_ptr<uva::ArchiveFile> ptrArchFile = nullptr;
 					  if(addon->addonInfo->GetLocalPath().empty() == true) // New addon
 					  {
-						  std::shared_ptr<upad::PADPackage::Header> header = nullptr;
-						  ptrArchFile = upad::open(addon->addonPath, header);
+						  std::shared_ptr<pragma::pad::PADPackage::Header> header = nullptr;
+						  ptrArchFile = pragma::pad::open(addon->addonPath, header);
 						  archFile = ptrArchFile.get();
 
 						  auto &uniqueId = addon->addonInfo->GetUniqueId();
@@ -111,7 +112,7 @@ void pragma::AddonInstallManager::QueryFile(const std::shared_ptr<AddonUpdateQue
 							  }
 
 							  // Add new version information
-							  VersionInfo vi {};
+							  pragma::uva::VersionInfo vi {};
 							  vi.version = version;
 							  vi.files = newFileIds;
 							  archFile->AddVersion(vi);

@@ -818,7 +818,7 @@ execfile(scripts_dir +"/user_modules.py",g,l)
 if with_essential_client_modules:
 	add_pragma_module(
 		name="pr_prosper_vulkan",
-		commitSha="f7416f9d24e79a6cdac2798d1d064c20816cbfee",
+		commitSha="932a3596e24383accdb03d9f2c16ea5dc5c2ef5e",
 		repositoryUrl="https://github.com/Silverlan/pr_prosper_vulkan.git"
 	)
 
@@ -857,7 +857,7 @@ if with_pfm:
 	if with_all_pfm_modules:
 		add_pragma_module(
 			name="pr_chromium",
-			commitSha="b1bd5cdf6c6fda9eb205ba3bfdbd7af01260eba0",
+			commitSha="707a428772cefddacea9b1fc99a405e95fed323c",
 			repositoryUrl="https://github.com/Silverlan/pr_chromium.git"
 		)
 		add_pragma_module(

@@ -9,25 +9,26 @@
 #include "pragma/addonsystem/addonsystem.h"
 #include "pragma/logging.hpp"
 #include <fsys/filesystem.h>
-#include <util_pad.hpp>
 #include <sharedutils/util_file.h>
 #include <fsys/directory_watcher.h>
-#include <util_versioned_archive.hpp>
 #ifdef _WIN32
 #include <sharedutils/util_link.hpp>
 #endif
+
+import pragma.uva;
+import pragma.pad;
 
 extern DLLNETWORK Engine *engine;
 
 decltype(AddonSystem::m_addons) AddonSystem::m_addons;
 decltype(AddonSystem::m_addonWatcher) AddonSystem::m_addonWatcher = nullptr;
 
-upad::PADPackage *AddonSystem::LoadPADPackage(const std::string &path)
+pragma::pad::PADPackage *AddonSystem::LoadPADPackage(const std::string &path)
 {
 	auto it = std::find_if(m_addons.begin(), m_addons.end(), [&path](const AddonInfo &addon) { return FileManager::ComparePath(addon.GetLocalPath(), path); });
 	if(it != m_addons.end())
 		return nullptr;
-	auto *package = dynamic_cast<upad::PADPackage *>(FileManager::LoadPackage(path.c_str(), static_cast<fsys::SearchFlags>(FSYS_SEARCH_ADDON)));
+	auto *package = dynamic_cast<pragma::pad::PADPackage *>(FileManager::LoadPackage(path.c_str(), static_cast<fsys::SearchFlags>(FSYS_SEARCH_ADDON)));
 	if(package != nullptr)
 		m_addons.push_back(AddonInfo(path, package->GetPackageVersion(), package->GetPackageId()));
 	return package;
@@ -196,7 +197,7 @@ void AddonSystem::MountAddons()
 						  auto *archFile = pad->GetArchiveFile();
 						  if(archFile != nullptr) {
 							  load_autorun_scripts([archFile](const std::string &findTarget, std::vector<std::string> &outFiles) {
-								  std::vector<uva::FileInfo *> results;
+								  std::vector<pragma::uva::FileInfo *> results;
 								  archFile->SearchFiles(findTarget, results);
 								  // archFile->SearchFiles(Lua::SCRIPT_DIRECTORY + "\\autorun\\*." + Lua::FILE_EXTENSION_PRECOMPILED, results);
 								  outFiles.reserve(outFiles.size() + results.size());

@@ -36,8 +36,9 @@
 #include <sharedutils/util_file.h>
 #include <sharedutils/util_clock.hpp>
 #include <fsys/fsys_package.hpp>
-#include <util_pad.hpp>
 #include <prosper_window.hpp>
+
+import pragma.pad;
 
 extern DLLCLIENT CEngine *c_engine;
 extern ClientState *client;
@@ -1233,7 +1234,7 @@ void WIMainMenuOptions::InitializeControlSettings()
 	pList->AddKeyBinding(Locale::GetText("key_toggle_vr_mirror_window"), "toggle cl_vr_mirror_window_enabled");
 
 	// Initialize custom control options from addons
-	auto *upadManager = dynamic_cast<upad::PackageManager *>(FileManager::GetPackageManager("upad"));
+	auto *upadManager = dynamic_cast<pragma::pad::PackageManager *>(FileManager::GetPackageManager("upad"));
 	auto &mountedAddons = AddonSystem::GetMountedAddons();
 	for(auto &info : mountedAddons) {
 		auto addonPath = info.GetAbsolutePath();

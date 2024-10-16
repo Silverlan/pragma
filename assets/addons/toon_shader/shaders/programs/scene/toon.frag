@@ -113,6 +113,15 @@ void calc_toon_blinn_phong_lighting(ShadingInfo shadingInfo, SpecularInfo specIn
 	calc_toon_blinn_phong_lighting(shadingInfo, specInfo, light, lightInfo, shadowFactor, rimInfo, lightColor, specularColor, rimColor, lightIndex, enableShadows);
 }
 
+vec2 calc_matcap_uv(vec3 surfaceNormal, vec3 viewDirection)
+{
+	vec3 crossSpace = cross(normalize(viewDirection), surfaceNormal);
+	vec2 matSpace = vec2(crossSpace.y * 1.0, crossSpace.x);
+	matSpace *= vec2(-0.5, -0.5);
+	matSpace += vec2(0.5, 0.5);
+	return matSpace;
+}
+
 void main()
 {
 	SpecularInfo specInfo;
@@ -243,6 +252,10 @@ void main()
 		color = vec4(totalSpecularColor, 1);
 	else if(TOON_DEBUG_MODE == TOON_DEBUG_MODE_RIM)
 		color = vec4(totalRimColor, 1);
+
+	vec2 uvMatcap = calc_matcap_uv(shadingInfo.surfaceNormal, shadingInfo.viewDirection);
+	vec4 matcapColor = fetch_matcap_map(uvMatcap);
+	color.rgb = color.rgb * matcapColor.rgb;
 
 	fs_color = color;
 	extract_bright_color(color);

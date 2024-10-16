@@ -32,6 +32,10 @@
 		},
 		{
 			$string name "normal_map"
+		},
+		{
+			$string name "matcap_map"
+			$string default "white"
 		}
 	]
 }

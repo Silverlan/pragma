@@ -5,7 +5,7 @@ on:
       - main
 
 concurrency:
-  group: check-build-lin-${{ github.ref }}
+  group: check-build-lin-${{ github.ref }}-gcc
   cancel-in-progress: true
 
 env:

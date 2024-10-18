@@ -97,6 +97,9 @@ local function import_assets(handler, settings)
 	local clearFiles = settings.clearFiles
 
 	local files = handler:GetFileList()
+	for i, f in ipairs(files) do
+		files[i] = util.Path.CreateFilePath(f):GetString()
+	end
 
 	local function installFiles(dropPath, installPath)
 		local numInstalled = 0
@@ -363,6 +366,10 @@ local function import_assets(handler, settings)
 			end
 		end
 	elseif assetType == IMPORT_ASSET_TYPE_IMPORT then
+		-- Reset file list. If there are model import assets, they may require some of the assets (e.g. textures) that we have
+		-- already copied.
+		files = handler:GetFileList()
+
 		local extractMap = {}
 		local filePaths = {}
 		for i, f in ipairs(files) do
@@ -383,6 +390,7 @@ local function import_assets(handler, settings)
 		-- to "addons/imported/", so Pragma can locate them.
 		for rootPath, _ in pairs(extractMap) do
 			for i, path in ipairs(filePaths) do
+				path = path:Copy()
 				if path:MakeRelative(rootPath) then
 					local outPath = "addons/imported/models/" .. basePath .. path:GetString()
 					file.create_path(file.get_file_path(outPath))
@@ -543,7 +551,12 @@ function util.import_assets(files, settings)
 		end
 		local ext = file.get_file_extension(filePath)
 		if ext ~= nil and zipExts[ext] == true then
-			local f = game.open_dropped_file(file.get_file_name(filePath), true)
+			local f
+			if settings.dropped then
+				f = game.open_dropped_file(filePath, true)
+			else
+				f = file.open(filePath, bit.bor(file.OPEN_MODE_READ, file.OPEN_MODE_BINARY))
+			end
 			if f == nil then
 				settings.logger("Unable to open zip-archive '" .. filePath .. "': File not found!", log.SEVERITY_ERROR)
 			else
@@ -560,6 +573,7 @@ function util.import_assets(files, settings)
 					zipFile = nil
 					import_assets(handler, settings)
 				end
+				f:Close()
 			end
 		else
 			table.insert(nonZipFiles, f)

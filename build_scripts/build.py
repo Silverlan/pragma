@@ -193,7 +193,7 @@ if platform == "linux" and (c_compiler == "clang-19" or c_compiler == "clang++-1
 		http_extract("https://github.com/llvm/llvm-project/releases/download/llvmorg-19.1.2/LLVM-19.1.2-Linux-X64.tar.xz",format="tar.xz")
 	if c_compiler == "clang-19":
 		c_compiler = clang19_root +"/bin/clang"
-	if c_compiler == "clang++-19":
+	if cxx_compiler == "clang++-19":
 		cxx_compiler = clang19_root +"/bin/clang++"
 	print_msg("Setting c_compiler override to '" +c_compiler +"'")
 	print_msg("Setting cxx_compiler override to '" +cxx_compiler +"'")

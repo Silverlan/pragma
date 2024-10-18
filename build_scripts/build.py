@@ -13,8 +13,8 @@ parser = argparse.ArgumentParser(description='Pragma build script', allow_abbrev
 
 # See https://stackoverflow.com/a/43357954/1879228 for boolean args
 if platform == "linux":
-	parser.add_argument('--c-compiler', help='The C-compiler to use.', default='clang-18')
-	parser.add_argument('--cxx-compiler', help='The C++-compiler to use.', default='clang++-18')
+	parser.add_argument('--c-compiler', help='The C-compiler to use.', default='clang-19')
+	parser.add_argument('--cxx-compiler', help='The C++-compiler to use.', default='clang++-19')
 	defaultGenerator = "Ninja Multi-Config"
 else:
 	defaultGenerator = "Visual Studio 17 2022"
@@ -184,15 +184,17 @@ mkpath(tools)
 ########## clang-19 ##########
 # Due to a compiler bug with C++20 Modules in clang, we have to use clang-19 for now,
 # which is not available in package managers yet.
-if platform == "linux":
+if platform == "linux" and (c_compiler == "clang-19" or c_compiler == "clang++-19"):
 	curDir = os.getcwd()
 	os.chdir(deps_dir)
 	clang19_root = os.getcwd() +"/LLVM-19.1.2-Linux-X64"
 	if not Path(clang19_root).is_dir():
 		print_msg("Downloading clang-19...")
 		http_extract("https://github.com/llvm/llvm-project/releases/download/llvmorg-19.1.2/LLVM-19.1.2-Linux-X64.tar.xz",format="tar.xz")
-	c_compiler = clang19_root +"/bin/clang"
-	cxx_compiler = clang19_root +"/bin/clang++"
+	if c_compiler == "clang-19":
+		c_compiler = clang19_root +"/bin/clang"
+	if c_compiler == "clang++-19":
+		cxx_compiler = clang19_root +"/bin/clang++"
 	print_msg("Setting c_compiler override to '" +c_compiler +"'")
 	print_msg("Setting cxx_compiler override to '" +cxx_compiler +"'")
 	os.chdir(curDir)

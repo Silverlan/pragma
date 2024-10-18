@@ -840,6 +840,11 @@ if with_common_modules:
 		commitSha="1a806a1a7b2283bd8551d07e4f1d680499f68b90",
 		repositoryUrl="https://github.com/Silverlan/pr_audio_dummy.git"
 	)
+	add_pragma_module(
+		name="pr_prosper_opengl",
+		commitSha="ff5b2b91e82aca8a2bcc35542691f4488b12f0af",
+		repositoryUrl="https://github.com/Silverlan/pr_prosper_opengl.git"
+	)
 	add_pragma_module_prebuilt("Silverlan/pr_mount_external_prebuilt")
 	add_pragma_module_prebuilt("Silverlan/pr_rig_prebuilt")
 	add_pragma_module_prebuilt("Silverlan/pr_ik_prebuilt")

@@ -842,7 +842,7 @@ if with_common_modules:
 	)
 	add_pragma_module(
 		name="pr_prosper_opengl",
-		commitSha="ff5b2b91e82aca8a2bcc35542691f4488b12f0af",
+		commitSha="f0c4b6800bded2f5b218fcb49e8460d28c8ceff6",
 		repositoryUrl="https://github.com/Silverlan/pr_prosper_opengl.git"
 	)
 	add_pragma_module_prebuilt("Silverlan/pr_mount_external_prebuilt")

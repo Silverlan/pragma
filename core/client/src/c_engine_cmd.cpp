@@ -92,7 +92,7 @@ void CEngine::RegisterConsoleCommands()
 	conVarMap.RegisterConVar<bool>("render_ibl_enabled", true, ConVarFlags::Archive, "Enables or disables image-based lighting.");
 	conVarMap.RegisterConVar<bool>("render_dynamic_lighting_enabled", true, ConVarFlags::Archive, "Enables or disables dynamic lighting.");
 	conVarMap.RegisterConVar<bool>("render_dynamic_shadows_enabled", true, ConVarFlags::Archive, "Enables or disables dynamic shadows.");
-	conVarMap.RegisterConVar<std::string>("render_api", "vulkan", ConVarFlags::Archive | ConVarFlags::Replicated, "The underlying rendering API to use.", "<renderApi>", [](const std::string &arg, std::vector<std::string> &autoCompleteOptions) {
+	conVarMap.RegisterConVar<std::string>("render_api", "vulkan", ConVarFlags::Archive, "The underlying rendering API to use.", "<renderApi>", [](const std::string &arg, std::vector<std::string> &autoCompleteOptions) {
 		auto renderAPIs = pragma::rendering::get_available_graphics_apis();
 		auto it = renderAPIs.begin();
 		std::vector<std::string_view> similarCandidates {};

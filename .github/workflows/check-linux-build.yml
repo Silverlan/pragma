@@ -1,4 +1,4 @@
-name: Check Linux Build
+name: Check Linux Build (Clang)
 on:
   push:
     branches-ignore:

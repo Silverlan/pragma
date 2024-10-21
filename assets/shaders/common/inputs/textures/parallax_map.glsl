@@ -48,12 +48,13 @@ vec2 get_parallax_coordinates(bool useParallaxMap, vec2 texCoords, ParallaxInfo 
 	if(useParallaxMap == false)
 		return texCoords;
 
-	vec3 T = normalize(fs_in.TBN[0]);
-	vec3 B = normalize(fs_in.TBN[1]);
-	vec3 N = normalize(fs_in.TBN[2]);
+	mat3 tbn = get_tbn_matrix();
+	vec3 T = normalize(tbn[0]);
+	vec3 B = normalize(tbn[1]);
+	vec3 N = normalize(tbn[2]);
 	mat3 tbnMatrix = transpose(mat3(T, B, N));
 	vec3 camPosWs = u_renderSettings.posCam.xyz;
-	vec3 vertPosWs = fs_in.vert_pos_ws;
+	vec3 vertPosWs = get_vertex_position_ws();
 	vec3 viewDirWs = normalize(camPosWs - vertPosWs);
 	vec3 viewDirTs = normalize(tbnMatrix * viewDirWs);
 	vec2 finalTexCoords = ParallaxMapping(texCoords, viewDirTs, parallaxInfo);
@@ -76,7 +77,7 @@ vec2 apply_parallax(vec2 texCoords, ParallaxInfo parallaxInfo) { return apply_pa
 
 vec2 get_uv_coordinates()
 {
-	vec2 texCoords = fs_in.vert_uv;
+	vec2 texCoords = get_vertex_uv();
 #ifdef MATERIAL_PARALLAX_MAP_ENABLED
 	if(use_parallax_map(u_material.material.flags)) {
 		ParallaxInfo parallaxInfo;

@@ -840,6 +840,11 @@ if with_common_modules:
 		commitSha="1a806a1a7b2283bd8551d07e4f1d680499f68b90",
 		repositoryUrl="https://github.com/Silverlan/pr_audio_dummy.git"
 	)
+	add_pragma_module(
+		name="pr_prosper_opengl",
+		commitSha="d73bf6dea11b1a79d5dc4715e224aa4cb15d0d48",
+		repositoryUrl="https://github.com/Silverlan/pr_prosper_opengl.git"
+	)
 	add_pragma_module_prebuilt("Silverlan/pr_mount_external_prebuilt")
 	add_pragma_module_prebuilt("Silverlan/pr_rig_prebuilt")
 	add_pragma_module_prebuilt("Silverlan/pr_ik_prebuilt")
@@ -1131,8 +1136,8 @@ def download_addon(name,addonName,url,commitId=None):
 curDir = os.getcwd()
 if not skip_repository_updates:
 	if with_pfm:
-		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","724ee291537368254ff09f07abb49c99234568cb")
-		download_addon("model editor","tool_model_editor","https://github.com/Silverlan/pragma_model_editor.git","4c185ce7533fba1294e7282ae88168e7842e1a2b")
+		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","7bccfe22a5fdfbfdc1fc4a9efea474d86236cfa3")
+		download_addon("model editor","tool_model_editor","https://github.com/Silverlan/pragma_model_editor.git","bd4844c06b9a42bacd17bb7e52d3381c3fd119e4")
 
 	if with_vr:
 		download_addon("VR","virtual_reality","https://github.com/Silverlan/PragmaVR.git","93fe4f849493651c14133ddf1963b0a8b719f836")

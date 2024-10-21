@@ -17,7 +17,7 @@ vec3 calc_tangent_space_normal(vec2 uv)
 	nmap.xy = (2.0 * ncol.rg - 1.0) * normalMapScale;
 	nmap.z = sqrt(1.0 - dot(nmap.xy, nmap.xy));
 
-	return normalize((fs_in.vert_tangent * nmap.x) + (fs_in.vert_bitangent * nmap.y) + (fs_in.vert_normal * nmap.z));
+	return normalize((fs_in.vert_tangent * nmap.x) + (fs_in.vert_bitangent * nmap.y) + (get_vertex_normal() * nmap.z));
 }
 #endif
 float calculate_normal_light_direction_angle(uint lightIdx, vec2 uv, uint materialFlags)
@@ -45,12 +45,13 @@ vec3 get_normal_from_map(vec2 texCoords, uint materialFlags)
 	if(use_normal_map(materialFlags)) {
 		vec3 tangentNormal = fetch_normal_map(texCoords).xyz * 2.0 - 1.0;
 
-		vec3 Q1 = dFdx(fs_in.vert_pos_ws.xyz);
-		vec3 Q2 = dFdy(fs_in.vert_pos_ws.xyz);
+		vec3 vertPos = get_vertex_position_ws();
+		vec3 Q1 = dFdx(vertPos);
+		vec3 Q2 = dFdy(vertPos);
 		vec2 st1 = dFdx(texCoords);
 		vec2 st2 = dFdy(texCoords);
 
-		vec3 N = normalize(fs_in.vert_normal);
+		vec3 N = normalize(get_vertex_normal());
 		vec3 T = Q1 * st2.t - Q2 * st1.t;
 		T = normalize((get_model_matrix() * vec4(T, 0)).xyz);
 		vec3 B = -normalize(cross(N, T));
@@ -59,7 +60,7 @@ vec3 get_normal_from_map(vec2 texCoords, uint materialFlags)
 		return normalize(TBN * tangentNormal);
 	}
 #endif
-	return fs_in.vert_normal;
+	return get_vertex_normal();
 }
 #endif
 

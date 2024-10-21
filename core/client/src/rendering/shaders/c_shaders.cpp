@@ -34,7 +34,6 @@
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_bloom_blur.hpp"
 #include "pragma/rendering/shaders/image/c_shader_clear_color.hpp"
 #include "pragma/rendering/shaders/image/c_shader_resize_image.hpp"
-#include "pragma/rendering/shaders/image/c_shader_flip_image.hpp"
 #include "pragma/rendering/shaders/image/c_shader_merge_images.hpp"
 #include "pragma/rendering/shaders/image/c_shader_merge_2d_image_into_equirectangular.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_dof.hpp"
@@ -170,7 +169,6 @@ void register_game_shaders()
 	shaderManager.RegisterShader("pp_water", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderPPWater(context, identifier); });
 	shaderManager.RegisterShader("pp_fxaa", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderPPFXAA(context, identifier); });
 
-	shaderManager.RegisterShader("flip_image", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderFlipImage(context, identifier); });
 	shaderManager.RegisterShader("merge_images", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderMergeImages(context, identifier); });
 	shaderManager.RegisterShader("merge_2d_image_to_equirectangular", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderMerge2dImageIntoEquirectangular(context, identifier); });
 }

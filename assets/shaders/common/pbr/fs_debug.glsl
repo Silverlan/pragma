@@ -64,9 +64,9 @@ vec4 apply_debug_mode(uint materialFlags, uint debugMode, vec4 outputColor, vec2
 	else if(debugMode == DEBUG_MODE_REFLECTANCE)
 		finalColor = vec4(reflectance, reflectance, reflectance, 1.0);
 	else if(debugMode == DEBUG_MODE_IBL_PREFILTER_MAP)
-		finalColor = texture(u_prefilterMap, normalize(fs_in.vert_pos_ws.xyz - u_renderSettings.posCam.xyz));
+		finalColor = texture(u_prefilterMap, normalize(get_vertex_position_ws() - u_renderSettings.posCam.xyz));
 	else if(debugMode == DEBUG_MODE_IBL_IRRADIANCE_MAP)
-		finalColor = texture(u_irradianceMap, normalize(fs_in.vert_pos_ws.xyz - u_renderSettings.posCam.xyz));
+		finalColor = texture(u_irradianceMap, normalize(get_vertex_position_ws() - u_renderSettings.posCam.xyz));
 	else if(debugMode == DEBUG_MODE_EMISSION_MAP)
 #ifdef MATERIAL_EMISSION_MAP_ENABLED
 		finalColor = texture(u_emissionMap, texCoords);
@@ -75,7 +75,7 @@ vec4 apply_debug_mode(uint materialFlags, uint debugMode, vec4 outputColor, vec2
 #endif
 	else if(debugMode == DEBUG_MODE_LIGHTMAP) {
 		if(is_light_map_enabled()) {
-			vec4 colLightMap = texture(u_lightMap, fs_in.vert_uv_lightmap.xy);
+			vec4 colLightMap = texture(u_lightMap, get_vertex_uv_lightmap());
 			//colLightMap.rgb /= 255.0;
 			finalColor = colLightMap.rgba;
 		}
@@ -84,7 +84,7 @@ vec4 apply_debug_mode(uint materialFlags, uint debugMode, vec4 outputColor, vec2
 	}
 	else if(debugMode == DEBUG_MODE_LIGHTMAP_INDIRECT) {
 		if(is_light_map_enabled() && is_indirect_light_map_enabled()) {
-			vec4 colLightMap = texture(u_lightMapIndirect, fs_in.vert_uv_lightmap.xy);
+			vec4 colLightMap = texture(u_lightMapIndirect, get_vertex_uv_lightmap());
 			//colLightMap.rgb /= 255.0;
 			finalColor = colLightMap.rgba;
 		}
@@ -93,7 +93,7 @@ vec4 apply_debug_mode(uint materialFlags, uint debugMode, vec4 outputColor, vec2
 	}
 	else if(debugMode == DEBUG_MODE_LIGHTMAP_DOMINANT) {
 		if(is_light_map_enabled() && is_directional_light_map_enabled()) {
-			vec4 colLightMap = texture(u_lightMapDominant, fs_in.vert_uv_lightmap.xy);
+			vec4 colLightMap = texture(u_lightMapDominant, get_vertex_uv_lightmap());
 			//colLightMap.rgb /= 255.0;
 			finalColor = colLightMap.rgba;
 		}
@@ -102,7 +102,7 @@ vec4 apply_debug_mode(uint materialFlags, uint debugMode, vec4 outputColor, vec2
 	}
 	else if(debugMode == DEBUG_MODE_LIGHTMAP_UV) {
 		if(is_light_map_enabled())
-			finalColor = vec4(fs_in.vert_uv_lightmap.xy, 0, 1);
+			finalColor = vec4(get_vertex_uv_lightmap(), 0, 1);
 		else
 			finalColor = vec4(0, 0, 0, 1);
 	}

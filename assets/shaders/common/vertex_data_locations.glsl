@@ -9,7 +9,8 @@
 #define SHADER_VERTEX_DATA_LOCATION 0
 #endif
 #ifndef SHADER_USER1_LOCATION
-#define SHADER_USER1_LOCATION 17
+// See /common/vertex_outputs/vertex_data.glsl
+#define SHADER_USER1_LOCATION 14
 #endif
 
 // Note: Number of attributes must NOT exceed 32!

@@ -10,7 +10,7 @@
 
 void main()
 {
-	fs_color = fetch_albedo_map(fs_in.vert_uv, get_instance_color());
+	fs_color = fetch_albedo_map(get_vertex_uv(), get_instance_color());
 	if(CSPEC_BLOOM_OUTPUT_ENABLED == 1)
 		extract_bright_color(fs_color, u_renderer.bloomThreshold);
 }

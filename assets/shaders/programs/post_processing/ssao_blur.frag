@@ -7,7 +7,7 @@
 
 layout(location = 0) in vec2 vs_vert_uv;
 
-layout(LAYOUT_ID(0, 0)) uniform sampler2D u_ssao;
+layout(LAYOUT_ID(TEXTURE, TEXTURE)) uniform sampler2D u_ssao;
 
 layout(location = 0) out float fs_ssao;
 

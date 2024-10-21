@@ -5,7 +5,7 @@
 
 layout(location = 0) in vec2 vs_vert_uv;
 
-layout(LAYOUT_ID(0, 0)) uniform sampler2D u_diffuseMap;
+layout(LAYOUT_ID(TEXTURE, TEXTURE)) uniform sampler2D u_diffuseMap;
 
 layout(location = 0) out vec4 fs_color;
 

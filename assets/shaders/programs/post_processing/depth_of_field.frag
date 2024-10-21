@@ -52,8 +52,8 @@ changelog:
 #include "/math/math.glsl"
 #include "/functions/fs_linearize_depth.glsl"
 
-layout(LAYOUT_ID(0,0)) uniform sampler2D bgl_RenderedTexture;
-layout(LAYOUT_ID(1,0)) uniform sampler2D bgl_DepthTexture;
+layout(LAYOUT_ID(TEXTURE, TEXTURE)) uniform sampler2D bgl_RenderedTexture;
+layout(LAYOUT_ID(DEPTH_BUFFER, MAP)) uniform sampler2D bgl_DepthTexture;
 
 layout(location = 0) in vec2 vs_vert_uv;
 

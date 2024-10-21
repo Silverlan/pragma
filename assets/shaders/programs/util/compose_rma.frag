@@ -7,9 +7,9 @@
 
 layout(location = 0) in vec2 vs_vert_uv;
 
-layout(LAYOUT_ID(0, 0)) uniform sampler2D u_roughnessMap;
-layout(LAYOUT_ID(0, 1)) uniform sampler2D u_metalnessMap;
-layout(LAYOUT_ID(0, 2)) uniform sampler2D u_aoMap;
+layout(LAYOUT_ID(TEXTURES, ROUGHNESS)) uniform sampler2D u_roughnessMap;
+layout(LAYOUT_ID(TEXTURES, METALNESS)) uniform sampler2D u_metalnessMap;
+layout(LAYOUT_ID(TEXTURES, AMBIENT_OCCLUSION)) uniform sampler2D u_aoMap;
 
 layout(location = 0) out vec4 fs_rma;
 

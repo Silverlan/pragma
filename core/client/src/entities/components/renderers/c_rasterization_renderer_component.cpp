@@ -10,6 +10,7 @@
 #include "pragma/rendering/c_ssao.hpp"
 #include "pragma/rendering/shaders/world/c_shader_pbr.hpp"
 #include "pragma/rendering/shaders/c_shader_forwardp_light_culling.hpp"
+#include "pragma/rendering/lighting/c_light_data_buffer_manager.hpp"
 #include "pragma/entities/c_entityfactories.h"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"

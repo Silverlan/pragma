@@ -10,7 +10,7 @@
 #include "/common/inputs/scene_depth.glsl"
 #include "/common/pixel_outputs/fs_bloom_color.glsl"
 
-layout(LAYOUT_ID(0, 0)) uniform sampler2D u_texture;
+layout(LAYOUT_ID(TEXTURE, TEXTURE)) uniform sampler2D u_texture;
 
 // See http://john-chapman-graphics.blogspot.com/2013/01/good-enough-volumetrics-for-spotlights.html
 

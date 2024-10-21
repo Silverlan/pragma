@@ -7,7 +7,7 @@
 
 layout(location = 0) in vec2 vs_vert_uv;
 
-layout(LAYOUT_ID(0, 0)) uniform sampler2D u_depthTexture;
+layout(LAYOUT_ID(TEXTURE, DEPTH_MAP)) uniform sampler2D u_depthTexture;
 
 layout(LAYOUT_PUSH_CONSTANTS()) uniform Depth
 {

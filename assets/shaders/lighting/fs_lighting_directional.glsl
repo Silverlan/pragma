@@ -7,7 +7,7 @@
 float get_directional_light_shadow_factor(uint lightIdx)
 {
 	LightSourceData light = get_light_source(lightIdx);
-	vec4 shadowCoord = vec4(fs_in.vert_pos_ws.xyz, 1.0);
+	vec4 shadowCoord = vec4(get_vertex_position_ws(), 1.0);
 	float shadow = 1.0;
 	int layer = get_csm_cascade_index();
 	uint shadowMapIndex = light.shadowIndex;
@@ -42,7 +42,7 @@ vec3 calculate_directional_lighting(int lightIdx, vec3 fragLightColor, vec3 frag
 #if SHADOW_PCF_ENABLED == 0
 	/*if(CSPEC_DEBUG_MODE_ENABLED == 1)
 	{
-		vec4 lightVertPos = vec4(fs_in.vert_pos_ws.xyz,1.0);
+		vec4 lightVertPos = vec4(get_vertex_position_ws(),1.0);
 		if((u_debug.flags &DEBUG_LIGHT_SHOW_SHADOW_MAP_DEPTH) != 0)
 		{
 			int layer = get_csm_cascade_index();

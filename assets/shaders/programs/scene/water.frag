@@ -98,7 +98,8 @@ u_waterFog;
 
 void main()
 {
-	vec4 coords = u_camera.VP * vec4(fs_in.vert_pos_ws, 1.0);
+	vec3 vertPos = get_vertex_position_ws();
+	vec4 coords = u_camera.VP * vec4(vertPos, 1.0);
 	coords.xy /= coords.w;
 	coords.x = coords.x * 0.5 + 0.5;
 	coords.y = coords.y * 0.5 + 0.5;
@@ -111,7 +112,7 @@ void main()
 	fs_color = texture(u_reflectionMap, reflectUv);
 	fs_color.a = 1;
 #else
-	vec4 wposWorld = inverse(get_view_matrix()) * get_model_matrix() * vec4(fs_in.vert_pos_ws, 1.0);
+	vec4 wposWorld = inverse(get_view_matrix()) * get_model_matrix() * vec4(vertPos, 1.0);
 
 	float waterScale = u_water.waterScale;
 	float waveStrength = u_water.waveStrength;
@@ -125,7 +126,7 @@ void main()
 	float depthWater = depthWaterFloor - depthWaterSurf;
 
 	float t = mod(cur_time() * waveSpeed, 1.0) / 1.0;
-	vec2 uv = fs_in.vert_uv * waterScale;
+	vec2 uv = get_vertex_uv() * waterScale;
 	vec2 dudvCoord = (texture(u_dudvMap, vec2(uv.x + t, uv.y)).rg * 0.1);
 	dudvCoord = uv + vec2(dudvCoord.x, dudvCoord.y + t);
 	vec2 distortion = (texture(u_dudvMap, dudvCoord).rg * 2.0 - 1.0) * waveStrength;
@@ -142,8 +143,8 @@ void main()
 	Fog fog = u_waterFog.fog;
 	refractColor.rgb = mix(refractColor.rgb, u_waterFog.fog.color.rgb, get_fog_factor(fog, depthWater) * u_pushConstants.waterFogIntensity);
 
-	vec3 viewVector = normalize(u_renderSettings.posCam.xyz - fs_in.vert_pos_ws.xyz);
-	vec3 vertNormal = (get_model_matrix() * vec4(fs_in.vert_normal, 0.0)).xyz;
+	vec3 viewVector = normalize(u_renderSettings.posCam.xyz - vertPos.xyz);
+	vec3 vertNormal = (get_model_matrix() * vec4(get_vertex_normal(), 0.0)).xyz;
 	float refractiveFactor = dot(viewVector, vertNormal);
 	refractiveFactor = pow(refractiveFactor, reflectiveIntensity);
 

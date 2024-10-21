@@ -25,7 +25,7 @@ layout(location = 0) out vec4 fs_color;
 
 layout(constant_id = 0) const uint CSPEC_BLOOM_ENABLED = 1;
 layout(constant_id = 1) const uint CSPEC_FXAA_ENABLED = 1;
-layout(constant_id = 2) const uint CSPEC_GLOW_ENABLED = 1;
+layout(constant_id = 2) const uint CSPEC_GLOW_ENABLED = 0;
 
 void main()
 {

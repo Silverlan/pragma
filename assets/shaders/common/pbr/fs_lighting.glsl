@@ -17,7 +17,7 @@
 vec3 apply_lighting(LightSourceData light, uint lightIndex, MaterialInfo materialInfo, vec3 normal, vec3 view)
 {
 	bool enableShadows = are_shadows_enabled();
-	return ((light.flags & FLIGHT_TYPE_SPOT) == 0) ? apply_spot_light(light, lightIndex, materialInfo, normal, view, fs_in.vert_pos_ws.xyz, enableShadows) : apply_point_light(light, lightIndex, materialInfo, normal, view, fs_in.vert_pos_ws.xyz, enableShadows);
+	return ((light.flags & FLIGHT_TYPE_SPOT) == 0) ? apply_spot_light(light, lightIndex, materialInfo, normal, view, get_vertex_position_ws(), enableShadows) : apply_point_light(light, lightIndex, materialInfo, normal, view, get_vertex_position_ws(), enableShadows);
 }
 
 vec3 calc_pbr_lighting(vec2 uv, MaterialInfo materialInfo, uint materialFlags, vec4 baseColor)
@@ -28,7 +28,7 @@ vec3 calc_pbr_lighting(vec2 uv, MaterialInfo materialInfo, uint materialFlags, v
 	vec3 normal = get_normal_from_map(uv, materialFlags);
 	normal = normalize((get_model_matrix() * vec4(normal.xyz, 0.0)).xyz);
 
-	vec3 view = normalize(u_renderSettings.posCam.xyz - fs_in.vert_pos_ws.xyz);
+	vec3 view = normalize(u_renderSettings.posCam.xyz - get_vertex_position_ws());
 
 	bool useLightmaps = false;
 	if(CSPEC_ENABLE_LIGHT_MAPS == 1) {
@@ -45,12 +45,13 @@ vec3 calc_pbr_lighting(vec2 uv, MaterialInfo materialInfo, uint materialFlags, v
 	if(CSPEC_ENABLE_LIGHT_MAPS == 1) {
 		// TODO: Lightmap mode should be determined by specialization constant to avoid if-condition overhead
 		if(useLightmaps) {
-			vec4 colDirect = texture(u_lightMap, fs_in.vert_uv_lightmap.xy);
+			vec2 uv = get_vertex_uv_lightmap();
+			vec4 colDirect = texture(u_lightMap, uv);
 			float exposure = get_lightmap_exposure_pow();
 			if(is_indirect_light_map_enabled()) {
-				vec3 colIndirect = texture(u_lightMapIndirect, fs_in.vert_uv_lightmap.xy).rgb;
+				vec3 colIndirect = texture(u_lightMapIndirect, uv).rgb;
 				if(is_directional_light_map_enabled()) {
-					vec3 dominantDir = texture(u_lightMapDominant, fs_in.vert_uv_lightmap.xy).rgb;
+					vec3 dominantDir = texture(u_lightMapDominant, uv).rgb;
 					dominantDir = dominantDir * 2.0 - 1.0;
 					dominantDir = normalize(dominantDir);
 
@@ -66,7 +67,7 @@ vec3 calc_pbr_lighting(vec2 uv, MaterialInfo materialInfo, uint materialFlags, v
 	}
 
 	if(CSPEC_ENABLE_LIGHT_SOURCES == 1 && CSPEC_ENABLE_DYNAMIC_LIGHTING == 1)
-		color += calc_pbr_direct_lighting(materialInfo, normal, view, fs_in.vert_pos_ws.xyz, are_shadows_enabled());
+		color += calc_pbr_direct_lighting(materialInfo, normal, view, get_vertex_position_ws(), are_shadows_enabled());
 	return color;
 }
 

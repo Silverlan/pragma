@@ -1,11 +1,12 @@
+# Note: This workflow is currently not functional due to compiler bugs in GCC. The workflow is currently triggered every day.
+# Once the compiler bugs have been fixed and the workflow runs successfully, it can be changed to be triggered on-push.
 name: Check Linux Build (GCC)
 on:
-  push:
-    branches-ignore:
-      - main
+  schedule:
+    - cron: '0 0 * * *'  # Run daily at midnight
 
 concurrency:
-  group: check-build-lin-${{ github.ref }}-gcc
+  group: check-build-lin-gcc
   cancel-in-progress: true
 
 env:
@@ -26,7 +27,7 @@ jobs:
       - name: Setup Pragma
         uses: Silverlan/pragma/github_actions/setup@main
         with:
-          branch: ${{ github.ref_name }}
+          branch: 'develop'
           clone_url: "https://github.com/${{ github.repository }}.git"
 
       - name: Install gcc-14

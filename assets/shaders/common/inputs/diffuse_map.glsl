@@ -10,8 +10,8 @@
 #if USE_DIFFUSE_MAP == 1
 layout(LAYOUT_ID(MATERIAL, ALBEDO_MAP)) uniform sampler2D u_diffuseMap;
 vec4 get_diffuse_map_color(vec2 texCoords) { return texture(u_diffuseMap, texCoords).rgba; }
-vec4 get_diffuse_map_color() { return get_diffuse_map_color(fs_in.vert_uv); }
-vec4 get_diffuse_map_color(sampler2D diffMap) { return texture(diffMap, fs_in.vert_uv).rgba; }
+vec4 get_diffuse_map_color() { return get_diffuse_map_color(get_vertex_uv()); }
+vec4 get_diffuse_map_color(sampler2D diffMap) { return texture(diffMap, get_vertex_uv()).rgba; }
 #endif
 
 vec4 get_color_modifier() { return get_instance_color(); }

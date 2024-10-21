@@ -17,7 +17,9 @@ layout(LAYOUT_PUSH_CONSTANTS()) uniform Font
 	uint glyphMapWidth;
 	uint glyphMapHeight;
 	uint maxGlyphBitmapWidth;
+	uint maxGlyphBitmapHeight;
 	uint yOffset;
+	uint numGlyphsPerRow;
 }
 u_font;
 

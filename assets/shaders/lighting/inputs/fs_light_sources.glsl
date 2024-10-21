@@ -26,7 +26,7 @@ vec3 get_light_direction_cs(uint i)
 	vm[3][0] = 0.0;
 	vm[3][1] = 0.0;
 	vm[3][2] = 0.0;
-	return (vm * vec4(light.position.xyz - fs_in.vert_pos_ws.xyz, 1.0)).xyz;
+	return (vm * vec4(light.position.xyz - get_vertex_position_ws(), 1.0)).xyz;
 }
 
 vec4 get_light_vertex_position(uint i)
@@ -34,14 +34,14 @@ vec4 get_light_vertex_position(uint i)
 	LightSourceData light = get_light_source(i);
 	ShadowData shadow = shadowBuffer.data[light.shadowIndex - 1];
 
-	vec4 lightVertPos = shadow.depthVP * vec4(fs_in.vert_pos_ws.xyz, 1.0);
+	vec4 lightVertPos = shadow.depthVP * vec4(get_vertex_position_ws(), 1.0);
 	lightVertPos.z /= light.position.w;
 	return lightVertPos;
 }
 #endif
 
 #if USE_LIGHT_DIR_TS == 1
-vec3 get_light_direction_ts(uint i) { return fs_in.TBN * get_light_direction_cs(i); }
+vec3 get_light_direction_ts(uint i) { return get_light_direction_cs(i); }
 #endif
 
 #endif

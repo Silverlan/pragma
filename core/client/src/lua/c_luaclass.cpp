@@ -25,7 +25,6 @@
 #include "pragma/lua/classes/lshaderinfo.h"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/rendering/shaders/c_shader_cubemap_to_equirectangular.hpp"
-#include "pragma/rendering/shaders/image/c_shader_flip_image.hpp"
 #include "pragma/rendering/shaders/image/c_shader_merge_images.hpp"
 #include "pragma/rendering/shaders/image/c_shader_merge_2d_image_into_equirectangular.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
@@ -68,6 +67,7 @@
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/lua/converters/optional_converter_t.hpp>
 #include <pragma/entities/components/liquid/base_liquid_component.hpp>
+#include <shader/prosper_shader_flip_image.hpp>
 #include <prosper_prepared_command_buffer.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
@@ -459,9 +459,9 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 	    }));
 	modShader[defShaderComposeRMA];
 
-	auto defShaderFlipImage = luabind::class_<pragma::ShaderFlipImage, luabind::bases<prosper::ShaderGraphics, prosper::Shader>>("FlipImage");
+	auto defShaderFlipImage = luabind::class_<prosper::ShaderFlipImage, luabind::bases<prosper::ShaderGraphics, prosper::Shader>>("FlipImage");
 	defShaderFlipImage.def(
-	  "RecordDraw", +[](pragma::ShaderFlipImage &shader, Lua::Vulkan::CommandBuffer &hCommandBuffer, Lua::Vulkan::DescriptorSet &ds, bool flipHorizontally, bool flipVertically) { return shader.RecordDraw(hCommandBuffer, *ds.GetDescriptorSet(), flipHorizontally, flipVertically); });
+	  "RecordDraw", +[](prosper::ShaderFlipImage &shader, Lua::Vulkan::CommandBuffer &hCommandBuffer, Lua::Vulkan::DescriptorSet &ds, bool flipHorizontally, bool flipVertically) { return shader.RecordDraw(hCommandBuffer, *ds.GetDescriptorSet(), flipHorizontally, flipVertically); });
 	modShader[defShaderFlipImage];
 
 	auto defShaderMergeImages = luabind::class_<pragma::ShaderMergeImages, luabind::bases<prosper::ShaderGraphics, prosper::Shader>>("MergeImages");

@@ -19,6 +19,7 @@
 #include <prosper_window.hpp>
 #include <spdlog/pattern_formatter.h>
 #include <sharedutils/magic_enum.hpp>
+#include <cmaterial_manager2.hpp>
 
 using namespace pragma;
 
@@ -108,6 +109,8 @@ void RenderContext::InitializeRenderAPI()
 	m_renderContext->SetCallbacks(callbacks);
 	if(umath::is_flag_set(m_stateFlags, StateFlags::GfxAPIValidationEnabled))
 		m_renderContext->SetValidationEnabled(true);
+
+	msys::CMaterialManager::SetFlipTexturesVerticallyOnLoad(m_renderContext->ShouldFlipTexturesOnLoad());
 
 	GetRenderContext().GetInitialWindowSettings().resizable = false;
 	prosper::Shader::SetLogCallback([](prosper::Shader &shader, prosper::ShaderStage stage, const std::string &infoLog, const std::string &debugInfoLog) {

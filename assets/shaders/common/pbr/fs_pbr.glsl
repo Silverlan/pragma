@@ -86,9 +86,10 @@ vec4 calc_pbr(vec4 albedoColor, vec2 texCoords, uint debugMode, PbrMaterial pbrM
 	baseColor = albedoColor;
 #if defined(MATERIAL_WRINKLE_COMPRESS_MAP_ENABLED) && defined(MATERIAL_WRINKLE_STRETCH_MAP_ENABLED)
 	if(use_wrinkle_maps(materialFlags)) {
-		if(fs_in.wrinkleDelta != 0.0) {
-			float wrinkle = clamp(-fs_in.wrinkleDelta, 0, 1);
-			float stretch = clamp(fs_in.wrinkleDelta, 0, 1);
+		float wrinkleDelta = get_wrinkle_delta();
+		if(wrinkleDelta != 0.0) {
+			float wrinkle = clamp(-wrinkleDelta, 0, 1);
+			float stretch = clamp(wrinkleDelta, 0, 1);
 			float baseColorFactor = 1.0 - wrinkle - stretch;
 
 			vec4 wrinkleCol = fetch_wrinkle_compress_map(texCoords);

@@ -75,7 +75,7 @@ vec3 calculate_lighting(vec3 diffuseColor, vec2 texCoords, mat4 mdlMatrix, vec3 
 	float ssaoFactor = 1.0;
 #if ENABLE_LIGHTMAP == 1
 	if(is_light_map_enabled()) {
-		vec4 colLightMap = texture(u_lightMap, fs_in.vert_uv_lightmap.xy);
+		vec4 colLightMap = texture(u_lightMap, get_vertex_uv_lightmap());
 		colLightMap.rgb /= 255.0;
 		finalColor.rgb = diffuseColor * colLightMap.rgb;
 	}

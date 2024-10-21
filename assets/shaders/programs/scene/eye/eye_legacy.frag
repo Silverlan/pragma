@@ -10,7 +10,7 @@
 
 void main()
 {
-	vec2 uvBase = fs_in.vert_uv;
+	vec2 uvBase = get_vertex_uv();
 	vec2 uv = uvBase;
 
 	vec4 irisProjectionU = u_pushConstants.irisProjectionU;

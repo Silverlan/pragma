@@ -42,7 +42,7 @@ void export_world_fragment_data(mat4 mdlMatrix, vec3 vpos, bool useNormalMap, bo
 			vertNorm += morphTargetNorm;
 
 			vertNorm = normalize(vertNorm);
-			vs_out.wrinkleDelta = wrinkleDelta;
+			set_wrinkle_delta(wrinkleDelta);
 		}
 		bool extendedWeights = false;
 		if(is_weighted_ext())
@@ -75,14 +75,14 @@ void export_world_fragment_data(mat4 mdlMatrix, vec3 vpos, bool useNormalMap, bo
 	//else
 	//	gl_ClipDistance[0] = 1.0;
 
-	vs_out.vert_pos_ws = vposWs.xyz;
-	vs_out.M = mdlMatrix;
-	vs_out.color = get_instanced_instance_color();
+	set_vertex_position_ws(vposWs.xyz);
+	set_model_matrix(mdlMatrix);
+	set_instance_color(get_instanced_instance_color());
 	//vs_out.vert_pos = vertPos;
 	//vs_out.vert_pos_cs = (V *vposWs).xyz;
 
-	vs_out.vert_normal = vertNorm;
-	vs_out.vert_uv = in_vert_uv.xy;
+	set_vertex_normal(vertNorm);
+	set_vertex_uv(in_vert_uv.xy);
 
 	if(useNormalMap || useParallaxMap) {
 		if(CSPEC_ENABLE_ANIMATION == 0)
@@ -90,15 +90,14 @@ void export_world_fragment_data(mat4 mdlMatrix, vec3 vpos, bool useNormalMap, bo
 		vec3 T = normalize((mBone * vec4(in_vert_tangent, 0.0)).xyz);
 		vec3 B = normalize((mBone * vec4(in_vert_bitangent, 0.0)).xyz);
 		vec3 N = vertNorm;
-		vs_out.TBN = mat3(T, B, N);
-
-		vs_out.vert_normal_cs = (V * mdlMatrix * vec4(vertNorm, 0)).xyz;
+		set_tbn_matrix(mat3(T, B, N));
+		set_vertex_normal_cs((V * mdlMatrix * vec4(vertNorm, 0)).xyz);
 	}
 
 #if ENABLE_LIGHTMAP == 1
 	if(CSPEC_ENABLE_LIGHT_MAPS == 1) {
 		if(is_light_map_enabled())
-			vs_out.vert_uv_lightmap.xy = in_uv_lightmap;
+			set_vertex_uv_lightmap(in_uv_lightmap);
 	}
 #endif
 

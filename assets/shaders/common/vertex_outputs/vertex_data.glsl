@@ -5,42 +5,55 @@
 #include "/lighting/lighting.glsl"
 #include "/common/vertex_data_locations.glsl"
 
-struct VertexData {
-	mat4 M;
-	vec4 color;
-	mat3 TBN;
-	vec3 vert_pos_ws; // Vertex Position in world space
+// This would be cleaner as a struct, but that has casued issues with OpenGL in the past.
+layout(location = SHADER_VERTEX_DATA_LOCATION) EXPORT_VS mat4 CONCAT(EXPORT_VS_PREFIX, M);
+layout(location = SHADER_VERTEX_DATA_LOCATION +4) EXPORT_VS mat3 CONCAT(EXPORT_VS_PREFIX, TBN);
 
-	vec3 vert_normal;    // Vertex Normal
-	vec3 vert_normal_cs; // Vertex Normal in camera space
+layout(location = SHADER_VERTEX_DATA_LOCATION +7) EXPORT_VS vec4 CONCAT(EXPORT_VS_PREFIX, color);
+layout(location = SHADER_VERTEX_DATA_LOCATION +8) EXPORT_VS vec3 CONCAT(EXPORT_VS_PREFIX, vert_pos_ws);
 
-	vec2 vert_uv;          // Texture coordinates
-	vec2 vert_uv_lightmap; // Texture coordinates for light map atlas
+layout(location = SHADER_VERTEX_DATA_LOCATION +9) EXPORT_VS vec3 CONCAT(EXPORT_VS_PREFIX, vert_normal);
+layout(location = SHADER_VERTEX_DATA_LOCATION +10) EXPORT_VS vec3 CONCAT(EXPORT_VS_PREFIX, vert_normal_cs);
 
-	float wrinkleDelta;
-};
-layout(location = SHADER_VERTEX_DATA_LOCATION) EXPORT_VS VertexData
+layout(location = SHADER_VERTEX_DATA_LOCATION +11) EXPORT_VS vec2 CONCAT(EXPORT_VS_PREFIX, vert_uv);
+layout(location = SHADER_VERTEX_DATA_LOCATION +12) EXPORT_VS vec2 CONCAT(EXPORT_VS_PREFIX, vert_uv_lightmap);
+
+layout(location = SHADER_VERTEX_DATA_LOCATION +13) EXPORT_VS float CONCAT(EXPORT_VS_PREFIX, wrinkleDelta);
+
+// Note: If new data is added, make sure to update SHADER_USER1_LOCATION accordingly!
+
 #ifdef GLS_FRAGMENT_SHADER
-  fs_in
+
+mat4 get_model_matrix() { return CONCAT(EXPORT_VS_PREFIX, M); }
+mat3 get_tbn_matrix() { return CONCAT(EXPORT_VS_PREFIX, TBN); }
+
+vec4 get_instance_color() { return CONCAT(EXPORT_VS_PREFIX, color); }
+vec3 get_vertex_position_ws() { return CONCAT(EXPORT_VS_PREFIX, vert_pos_ws); }
+
+vec3 get_vertex_normal() { return CONCAT(EXPORT_VS_PREFIX, vert_normal); }
+vec3 get_vertex_normal_cs() { return CONCAT(EXPORT_VS_PREFIX, vert_normal_cs); }
+
+vec2 get_vertex_uv() { return CONCAT(EXPORT_VS_PREFIX, vert_uv); }
+vec2 get_vertex_uv_lightmap() { return CONCAT(EXPORT_VS_PREFIX, vert_uv_lightmap); }
+
+float get_wrinkle_delta() { return CONCAT(EXPORT_VS_PREFIX, wrinkleDelta); }
+
 #else
-  vs_out
-#endif
-  ;
 
-#ifdef GLS_FRAGMENT_SHADER
-#define VERTEX_DATA fs_in
-#else
-#define VERTEX_DATA vs_out
-#endif
+void set_model_matrix(mat4 value) { CONCAT(EXPORT_VS_PREFIX, M) = value; }
+void set_tbn_matrix(mat3 value) { CONCAT(EXPORT_VS_PREFIX, TBN) = value; }
 
-vec3 get_vertex_position_ws() { return VERTEX_DATA.vert_pos_ws; }
-//vec3 get_vertex_position_cs() {return VERTEX_DATA.vert_pos_cs;}
-vec3 get_vertex_normal() { return VERTEX_DATA.vert_normal; }
-vec3 get_vertex_normal_cs() { return VERTEX_DATA.vert_normal_cs; }
+void set_instance_color(vec4 value) { CONCAT(EXPORT_VS_PREFIX, color) = value; }
+void set_vertex_position_ws(vec3 value) { CONCAT(EXPORT_VS_PREFIX, vert_pos_ws) = value; }
 
-#ifdef GLS_FRAGMENT_SHADER
-mat4 get_model_matrix() { return fs_in.M; }
-vec4 get_instance_color() { return fs_in.color; }
+void set_vertex_normal(vec3 value) { CONCAT(EXPORT_VS_PREFIX, vert_normal) = value; }
+void set_vertex_normal_cs(vec3 value) { CONCAT(EXPORT_VS_PREFIX, vert_normal_cs) = value; }
+
+void set_vertex_uv(vec2 value) { CONCAT(EXPORT_VS_PREFIX, vert_uv) = value; }
+void set_vertex_uv_lightmap(vec2 value) { CONCAT(EXPORT_VS_PREFIX, vert_uv_lightmap) = value; }
+
+void set_wrinkle_delta(float value) { CONCAT(EXPORT_VS_PREFIX, wrinkleDelta) = value; }
+
 #endif
 
 #endif

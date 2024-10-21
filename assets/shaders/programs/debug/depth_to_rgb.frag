@@ -32,7 +32,7 @@ float linearDepth(float depthSample)
 	return zLinear;
 }
 
-/*layout(LAYOUT_ID(0,0)) uniform usampler2D u_depthTexture;
+/*layout(LAYOUT_ID(TEXTURE, DEPTH_MAP)) uniform usampler2D u_depthTexture;
 void fetch_stencil_value()
 {
 	uint d = texelFetch(u_depthTexture,ivec2(vs_vert_uv.x *1920,vs_vert_uv.y *1080),0).r;

@@ -16,7 +16,7 @@ void main()
 	vec4 irisProjectionU = u_pushConstants.irisProjectionU;
 	vec4 irisProjectionV = u_pushConstants.irisProjectionV;
 
-	vec3 worldPos = fs_in.vert_pos_ws.xyz;
+	vec3 worldPos = get_vertex_position_ws();
 	vec4 worldPosProjZ;
 	worldPosProjZ.xyz = worldPos.xyz;
 

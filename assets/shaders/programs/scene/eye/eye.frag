@@ -16,12 +16,13 @@ void main()
 	vec4 irisProjectionU = u_pushConstants.irisProjectionU;
 	vec4 irisProjectionV = u_pushConstants.irisProjectionV;
 
+	vec3 vertPos = get_vertex_position_ws();
 #if ENABLE_NOISE == 1
 	vec3 eyeOrigin = u_pushConstants.eyeOrigin.xyz;
 	vec3 eyePos = eyeOrigin;
-	vec3 nWorld = normalize(fs_in.vert_pos_ws.xyz - eyeOrigin.xyz);
+	vec3 nWorld = normalize(vertPos - eyeOrigin.xyz);
 
-	vec3 worldViewVector = normalize(fs_in.vert_pos_ws.xyz - eyePos.xyz);
+	vec3 worldViewVector = normalize(vertPos - eyePos.xyz);
 
 	vec3 eyeSocketUp = normalize(-u_pushConstants.irisProjectionV.xyz);
 	vec3 eyeSocketLeft = normalize(-u_pushConstants.irisProjectionU.xyz);
@@ -29,12 +30,12 @@ void main()
 	vec3 vWorldBinormal = normalize(cross(nWorld.xyz, vWorldTangent.xyz));
 
 	{
-		vec3 Q1 = dFdx(fs_in.vert_pos_ws.xyz);
-		vec3 Q2 = dFdy(fs_in.vert_pos_ws.xyz);
+		vec3 Q1 = dFdx(vertPos);
+		vec3 Q2 = dFdy(vertPos);
 		vec2 st1 = dFdx(uv);
 		vec2 st2 = dFdy(uv);
 
-		vec3 N = normalize(fs_in.vert_normal);
+		vec3 N = normalize(get_vertex_normal());
 		vec3 T = normalize(Q1 * st2.t - Q2 * st1.t);
 		vec3 B = -normalize(cross(N, T));
 		//nWorld = N;
@@ -45,7 +46,7 @@ void main()
 
 #endif
 
-	vec3 worldPos = fs_in.vert_pos_ws.xyz; // TODO: This needs to be unmodified (no matrix transform!)
+	vec3 worldPos = vertPos; // TODO: This needs to be unmodified (no matrix transform!)
 	vec4 worldPosProjZ;
 	worldPosProjZ.xyz = worldPos.xyz;
 
@@ -54,7 +55,7 @@ void main()
 	vec4 vProjPos = cViewProj * vec4(worldPos, 1.0);
 
 	worldPosProjZ.w = vProjPos.z;
-	worldPosProjZ.xyz = fs_in.vert_pos_ws.xyz;
+	worldPosProjZ.xyz = vertPos;
 
 	vec2 vCorneaUv; // Note: Cornea texture is a cropped version of the iris texture
 	vCorneaUv.x = dot(irisProjectionU, vec4(worldPosProjZ.xyz, 1.0));

@@ -133,15 +133,16 @@ void main()
 	rimInfo.threshold = 0.1;
 	rimInfo.color = get_mat_rim_color();
 
-	vec2 texCoords = fs_in.vert_uv;
+	vec2 texCoords = get_vertex_uv();
 	vec4 baseColor = fetch_albedo_map(texCoords, get_instance_color());
 	vec4 color = baseColor;
 
-	mat3 normalMatrix = transpose(inverse(mat3(fs_in.M)));
+	mat3 normalMatrix = transpose(inverse(mat3(get_model_matrix())));
 	vec3 normal = get_normal_from_map(texCoords, get_mat_flags());
 	normal = normalize(normalMatrix * normal);
 
-	vec3 viewDir = normalize(u_renderSettings.posCam.xyz - fs_in.vert_pos_ws.xyz);
+	vec3 vertPos = get_vertex_position_ws();
+	vec3 viewDir = normalize(u_renderSettings.posCam.xyz - vertPos);
 	ShadingInfo shadingInfo;
 	shadingInfo.surfaceNormal = normal;
 	shadingInfo.viewDirection = viewDir;
@@ -160,8 +161,8 @@ void main()
 		for(uint i = SCENE_SPOT_LIGHT_BUFFER_START; i < SCENE_SPOT_LIGHT_BUFFER_END && visibleLightTileIndicesBuffer.data[tileStartOffset + i].index != -1; i++) {
 			uint lightIndex = visibleLightTileIndicesBuffer.data[tileStartOffset + i].index;
 			LightSourceData light = get_light_source(lightIndex);
-			float attenuation = calc_spot_light_attenuation(light, fs_in.vert_pos_ws.xyz);
-			vec3 lightDir = normalize(light.position.xyz - fs_in.vert_pos_ws.xyz);
+			float attenuation = calc_spot_light_attenuation(light, vertPos);
+			vec3 lightDir = normalize(light.position.xyz - vertPos);
 			float shadowFactor = 1.0;
 			if(CSPEC_ENABLE_DYNAMIC_SHADOWS == 1)
 				shadowFactor = enableShadows ? get_spot_light_shadow_factor(lightIndex, true) : 1.0;
@@ -172,11 +173,11 @@ void main()
 		for(uint i = SCENE_POINT_LIGHT_BUFFER_START; i < SCENE_POINT_LIGHT_BUFFER_END && visibleLightTileIndicesBuffer.data[tileStartOffset + i].index != -1; i++) {
 			uint lightIndex = visibleLightTileIndicesBuffer.data[tileStartOffset + i].index;
 			LightSourceData light = get_light_source(lightIndex);
-			float attenuation = calc_point_light_attenuation(light, fs_in.vert_pos_ws.xyz);
-			vec3 lightDir = normalize(light.position.xyz - fs_in.vert_pos_ws.xyz);
+			float attenuation = calc_point_light_attenuation(light, vertPos);
+			vec3 lightDir = normalize(light.position.xyz - vertPos);
 			float shadowFactor = 1.0;
 			if(CSPEC_ENABLE_DYNAMIC_SHADOWS == 1)
-				shadowFactor = enableShadows ? get_point_light_shadow_factor(lightIndex, true, fs_in.vert_pos_ws.xyz) : 1.0;
+				shadowFactor = enableShadows ? get_point_light_shadow_factor(lightIndex, true, vertPos) : 1.0;
 			calc_toon_blinn_phong_lighting(shadingInfo, specInfo, rimInfo, light, lightDir, attenuation, shadowFactor, normal, totalLightColor, totalSpecularColor, totalRimColor, lightIndex, enableShadows);
 		}
 	}
@@ -214,12 +215,13 @@ void main()
 	if(CSPEC_ENABLE_LIGHT_MAPS == 1) {
 		// TODO: Lightmap mode should be determined by specialization constant to avoid if-condition overhead
 		if(useLightmaps) {
-			vec4 colDirect = texture(u_lightMap, fs_in.vert_uv_lightmap.xy);
+			vec2 uv = get_vertex_uv_lightmap();
+			vec4 colDirect = texture(u_lightMap, uv);
 			float exposure = get_lightmap_exposure_pow();
 			if(is_indirect_light_map_enabled()) {
-				vec3 colIndirect = texture(u_lightMapIndirect, fs_in.vert_uv_lightmap.xy).rgb;
+				vec3 colIndirect = texture(u_lightMapIndirect, uv).rgb;
 				if(is_directional_light_map_enabled()) {
-					vec3 dominantDir = texture(u_lightMapDominant, fs_in.vert_uv_lightmap.xy).rgb;
+					vec3 dominantDir = texture(u_lightMapDominant, uv).rgb;
 					dominantDir = dominantDir * 2.0 - 1.0;
 					dominantDir = normalize(dominantDir);
 

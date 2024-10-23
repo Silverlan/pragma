@@ -35,6 +35,9 @@ namespace pragma::debug {
 	};
 	DLLNETWORK void open_file_in_zerobrane(const std::string &fileName, uint32_t lineIdx);
 	DLLNETWORK std::optional<MessageBoxButton> show_message_prompt(const std::string &msg, MessageBoxButtons bts, std::optional<std::string> title = {});
+#ifdef _WIN32
+	DLLNETWORK bool is_module_in_callstack(struct _EXCEPTION_POINTERS *exp, const std::string &moduleName);
+#endif
 };
 
 #endif

@@ -110,3 +110,27 @@ std::optional<pragma::debug::MessageBoxButton> pragma::debug::show_message_promp
 	return {};
 #endif
 }
+
+#ifdef _WIN32
+#include "debug/StackWalker/StackWalker.h"
+class StackWalkerModuleFinder : public StackWalker {
+  public:
+	static bool find_module_in_callstack(PEXCEPTION_POINTERS exp, const std::string &moduleName)
+	{
+		StackWalkerModuleFinder finder {moduleName, exp};
+		finder.ShowCallstack();
+		return finder.m_found;
+	}
+  protected:
+	StackWalkerModuleFinder(const std::string &moduleName, PEXCEPTION_POINTERS exp = NULL) : StackWalker {StackWalker::ExceptType::AfterCatch, OptionsAll, exp}, m_moduleName {moduleName} {}
+	virtual void OnOutput(LPCSTR szText) {}
+	virtual void OnCallstackEntry(CallstackEntryType eType, CallstackEntry &entry) override
+	{
+		if(ustring::find(std::string {entry.moduleName}, m_moduleName, false))
+			m_found = true;
+	}
+	std::string m_moduleName;
+	bool m_found = false;
+};
+bool pragma::debug::is_module_in_callstack(struct _EXCEPTION_POINTERS *exp, const std::string &moduleName) { return StackWalkerModuleFinder ::find_module_in_callstack(exp, moduleName); }
+#endif

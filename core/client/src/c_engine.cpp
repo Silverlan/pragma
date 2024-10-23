@@ -24,6 +24,7 @@ namespace pragma::string {
 #include <pragma/engine_init.hpp>
 #include <pragma/console/convars.h>
 #include "pragma/console/engine_cvar.h"
+#include "pragma/debug/debug_utils.hpp"
 #include "pragma/model/c_modelmanager.h"
 #include "pragma/networking/iclient.hpp"
 #include "pragma/networking/local_client.hpp"
@@ -637,6 +638,23 @@ extern std::optional<Color> g_titleBarColor;
 extern std::optional<Color> g_borderColor;
 extern bool g_windowless;
 void register_game_shaders();
+
+void CEngine::HandleOpenGLFallback()
+{
+	if(ustring::compare(GetRenderAPI(), std::string {"opengl"}, false))
+		return;
+	auto *cl = static_cast<ClientState *>(GetClientState());
+	if(!cl)
+		return;
+	auto msg = Locale::GetText("prompt_fallback_to_opengl");
+	if(pragma::debug::show_message_prompt(msg, pragma::debug::MessageBoxButtons::YesNo, util::get_program_name()) != pragma::debug::MessageBoxButton::Yes)
+		return;
+	cl->SetConVar("render_api", "opengl");
+	SaveClientConfig();
+	ShutDown();
+	util::start_process(util::get_program_name().c_str());
+}
+
 bool CEngine::Initialize(int argc, char *argv[])
 {
 	Engine::Initialize(argc, argv);

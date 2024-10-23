@@ -122,6 +122,8 @@ class DLLCLIENT CEngine : public Engine, public pragma::RenderContext {
 	// If the input is an axis input, inOutState may change to represent actual button state
 	bool GetInputButtonState(float axisInput, GLFW::Modifier mods, GLFW::KeyState &inOutState) const;
 
+	virtual void HandleOpenGLFallback() override;
+
 	void SetRenderResolution(std::optional<Vector2i> resolution);
 	Vector2i GetRenderResolution() const;
 

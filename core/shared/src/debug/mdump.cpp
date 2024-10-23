@@ -196,6 +196,13 @@ bool CrashHandler::GenerateCrashDump() const
 	if(!szResult.empty() && shouldShowMsBox)
 		debug::show_message_prompt(szResult, debug::MessageBoxButtons::Ok, m_appName);
 
+#ifdef _WIN32
+	if(pragma::debug::is_module_in_callstack(m_pExceptionInfo, "prosper")) {
+		// Probably a rendering related crash.
+		engine->HandleOpenGLFallback();
+	}
+#endif
+
 	return success;
 }
 

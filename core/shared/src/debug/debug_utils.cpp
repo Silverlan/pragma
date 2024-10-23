@@ -80,7 +80,9 @@ std::optional<pragma::debug::MessageBoxButton> pragma::debug::show_message_promp
 		break;
 	}
 
-	auto res = ::MessageBox(NULL, msg.c_str(), title->c_str(), winBt);
+	auto wmsg = ustring::string_to_wstring(msg);
+	auto wtitle = ustring::string_to_wstring(*title);
+	auto res = ::MessageBoxW(NULL, wmsg.c_str(), wtitle.c_str(), winBt);
 	switch(res) {
 	case IDOK:
 		return MessageBoxButton::Ok;

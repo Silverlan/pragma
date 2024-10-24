@@ -36,6 +36,8 @@ namespace pragma::debug {
 		struct _EXCEPTION_POINTERS *m_pExceptionInfo = nullptr;
 		std::optional<std::string> GenerateMiniDump(std::string &outErr) const;
 		static LONG WINAPI TopLevelFilter(struct _EXCEPTION_POINTERS *pExceptionInfo);
+#else
+		int m_sig = -1;
 #endif
 	};
 };

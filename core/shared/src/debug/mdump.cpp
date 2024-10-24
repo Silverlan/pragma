@@ -8,15 +8,21 @@
 #include "stdafx_shared.h"
 #include "pragma/debug/mdump.h"
 #include "pragma/debug/debug_utils.hpp"
-#include <tchar.h>
 #include <fsys/filesystem.h>
 #include <sharedutils/util_debug.h>
 #include <sharedutils/util_clock.hpp>
 #include <sharedutils/util.h>
 #include <sharedutils/util_file.h>
+#include <exception>
 #include "pragma/engine_info.hpp"
 #include "pragma/logging.hpp"
 #include "pragma/localization.h"
+#ifdef _WIN32
+#include <tchar.h>
+#else
+#include <signal.h>
+#include <execinfo.h>
+#endif
 
 import util_zip;
 
@@ -32,10 +38,20 @@ CrashHandler::CrashHandler(const std::string &appName) : m_appName {appName}
 	g_crashHandler = this;
 #ifdef _WIN32
 	::SetUnhandledExceptionFilter(TopLevelFilter);
+#else
+	signal(SIGSEGV, +[](int sig) {
+		if(!g_crashHandler) {
+			exit(1);
+			return;
+		}
+		g_crashHandler->m_sig = sig;
+		g_crashHandler->GenerateCrashDump();
+		exit(1);
+	});
 #endif
 	// Note: set_terminate handler is called before SetUnhandledExceptionFilter.
 	// set_terminate allows us to retrieve the underlying message from the exception (if there was one)
-	set_terminate([]() {
+	std::set_terminate([]() {
 		auto eptr = std::current_exception();
 		if(!eptr) {
 			g_crashExceptionMessage = {};
@@ -137,7 +153,10 @@ bool CrashHandler::GenerateCrashDump() const
 
 	// ask the user if they want to save a dump file
 	auto saveDump = false;
-	auto shouldShowMsBox = (util::get_subsystem() == util::SubSystem::GUI && !engine->IsNonInteractiveMode());
+	auto shouldShowMsBox = !engine->IsNonInteractiveMode();
+#ifdef _WIN32
+	shouldShowMsBox = (shouldShowMsBox && util::get_subsystem() == util::SubSystem::GUI);
+#endif
 	if(!shouldShowMsBox)
 		saveDump = true;
 	else {
@@ -180,6 +199,28 @@ bool CrashHandler::GenerateCrashDump() const
 			}
 			else
 				zipFile->AddFile("minidump_generation_error.txt", dumpErr);
+#else
+			void *array[10];
+			size_t size;
+			char **symbols;
+			char buffer[1024];
+			buffer[0] = '\0';
+
+			size = backtrace(array, 10);
+			symbols = backtrace_symbols(array, size);
+
+			if (symbols != nullptr) {
+				snprintf(buffer, sizeof(buffer), "Error: signal %d:\n", m_sig);
+
+				for (size_t i = 0; i < size; i++) {
+					strncat(buffer, symbols[i], sizeof(buffer) - strlen(buffer) - 1);
+					strncat(buffer, "\n", sizeof(buffer) - strlen(buffer) - 1);
+				}
+
+				zipFile->AddFile("backtrace.txt", buffer);
+				free(symbols);
+			} else
+				zipFile->AddFile("backtrace_generation_error.txt", "Failed to generate backtrace symbols");
 #endif
 			zipFile = nullptr;
 
@@ -206,6 +247,7 @@ bool CrashHandler::GenerateCrashDump() const
 	return success;
 }
 
+#ifdef _WIN32
 LONG CrashHandler::TopLevelFilter(struct _EXCEPTION_POINTERS *pExceptionInfo)
 {
 	if(!g_crashHandler)
@@ -214,3 +256,4 @@ LONG CrashHandler::TopLevelFilter(struct _EXCEPTION_POINTERS *pExceptionInfo)
 	g_crashHandler->GenerateCrashDump();
 	return EXCEPTION_EXECUTE_HANDLER;
 }
+#endif

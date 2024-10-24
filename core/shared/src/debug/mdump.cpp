@@ -165,6 +165,30 @@ bool CrashHandler::GenerateCrashDump() const
 		saveDump = (res == debug::MessageBoxButton::Yes);
 	}
 
+#ifdef __linux__
+	void *array[10];
+	size_t size;
+	char **symbols;
+	char buffer[1024];
+	buffer[0] = '\0';
+
+	size = backtrace(array, 10);
+	symbols = backtrace_symbols(array, size);
+
+	std::optional<std::string> backtraceStr {};
+	if (symbols != nullptr) {
+		snprintf(buffer, sizeof(buffer), "Error: signal %d:\n", m_sig);
+
+		for (size_t i = 0; i < size; i++) {
+			strncat(buffer, symbols[i], sizeof(buffer) - strlen(buffer) - 1);
+			strncat(buffer, "\n", sizeof(buffer) - strlen(buffer) - 1);
+		}
+
+		backtraceStr = buffer;
+		free(symbols);
+	}
+#endif
+
 	auto success = false;
 	if(saveDump) {
 		std::string err;
@@ -200,26 +224,9 @@ bool CrashHandler::GenerateCrashDump() const
 			else
 				zipFile->AddFile("minidump_generation_error.txt", dumpErr);
 #else
-			void *array[10];
-			size_t size;
-			char **symbols;
-			char buffer[1024];
-			buffer[0] = '\0';
-
-			size = backtrace(array, 10);
-			symbols = backtrace_symbols(array, size);
-
-			if (symbols != nullptr) {
-				snprintf(buffer, sizeof(buffer), "Error: signal %d:\n", m_sig);
-
-				for (size_t i = 0; i < size; i++) {
-					strncat(buffer, symbols[i], sizeof(buffer) - strlen(buffer) - 1);
-					strncat(buffer, "\n", sizeof(buffer) - strlen(buffer) - 1);
-				}
-
-				zipFile->AddFile("backtrace.txt", buffer);
-				free(symbols);
-			} else
+			if (backtraceStr)
+				zipFile->AddFile("backtrace.txt", *backtraceStr);
+			else
 				zipFile->AddFile("backtrace_generation_error.txt", "Failed to generate backtrace symbols");
 #endif
 			zipFile = nullptr;
@@ -237,12 +244,16 @@ bool CrashHandler::GenerateCrashDump() const
 	if(!szResult.empty() && shouldShowMsBox)
 		debug::show_message_prompt(szResult, debug::MessageBoxButtons::Ok, m_appName);
 
+	auto crashInProsperModule = false;
 #ifdef _WIN32
-	if(pragma::debug::is_module_in_callstack(m_pExceptionInfo, "prosper")) {
+	crashInProsperModule = pragma::debug::is_module_in_callstack(m_pExceptionInfo, "prosper");
+#else
+	crashInProsperModule = (backtraceStr && backtraceStr->find("libprosper") != std::string::npos);
+#endif
+	if(crashInProsperModule) {
 		// Probably a rendering related crash.
 		engine->HandleOpenGLFallback();
 	}
-#endif
 
 	return success;
 }

@@ -8,8 +8,9 @@
 #ifndef __MDUMP_H__
 #define __MDUMP_H__
 
-#ifdef _WIN32
 #include "pragma/definitions.h"
+
+#ifdef _WIN32
 #if _MSC_VER < 1300
 #define DECLSPEC_DEPRECATED
 // VC6: change this path to your Platform SDK headers
@@ -21,15 +22,23 @@
 
 // based on dbghelp.h
 typedef BOOL(WINAPI *MINIDUMPWRITEDUMP)(HANDLE hProcess, DWORD dwPid, HANDLE hFile, MINIDUMP_TYPE DumpType, CONST PMINIDUMP_EXCEPTION_INFORMATION ExceptionParam, CONST PMINIDUMP_USER_STREAM_INFORMATION UserStreamParam, CONST PMINIDUMP_CALLBACK_INFORMATION CallbackParam);
-
-class DLLNETWORK MiniDumper {
-  private:
-	static LPCSTR m_szAppName;
-
-	static LONG WINAPI TopLevelFilter(struct _EXCEPTION_POINTERS *pExceptionInfo);
-  public:
-	MiniDumper(LPCSTR szAppName);
-};
 #endif
 
+namespace pragma::debug {
+	class DLLNETWORK CrashHandler {
+	  public:
+		CrashHandler(const std::string &appName);
+		~CrashHandler();
+	  private:
+		bool GenerateCrashDump() const;
+		std::string m_appName;
+#ifdef _WIN32
+		struct _EXCEPTION_POINTERS *m_pExceptionInfo = nullptr;
+		std::optional<std::string> GenerateMiniDump(std::string &outErr) const;
+		static LONG WINAPI TopLevelFilter(struct _EXCEPTION_POINTERS *pExceptionInfo);
+#else
+		int m_sig = -1;
+#endif
+	};
+};
 #endif

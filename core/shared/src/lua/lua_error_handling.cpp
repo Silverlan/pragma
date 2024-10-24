@@ -14,7 +14,7 @@
 #include "pragma/lua/lua_doc.hpp"
 #include "pragma/console/util_console_color.hpp"
 #include "pragma/console/conout.h"
-#include <pragma/debug/debug_lua_zerobrane.hpp>
+#include <pragma/debug/debug_utils.hpp>
 #include <pragma/lua/luafunction_call.h>
 #include <sharedutils/util.h>
 #include <sharedutils/util_file.h>
@@ -63,7 +63,7 @@ void Lua::OpenFileInZeroBrane(const std::string &fname, uint32_t lineId)
 			tLastFileOpened = t;
 			auto fullLocalPath = GetLuaFilePath(fname);
 			if(fullLocalPath.has_value())
-				debug::open_file_in_zerobrane(*fullLocalPath, lineId);
+				pragma::debug::open_file_in_zerobrane(*fullLocalPath, lineId);
 		}
 	}
 }

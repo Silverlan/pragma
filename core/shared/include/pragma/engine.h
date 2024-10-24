@@ -144,6 +144,7 @@ class DLLNETWORK Engine : public CVarHandler, public CallbackHandler {
 	virtual void Close();
 	virtual void Release();
 	virtual void ClearConsole();
+	virtual void HandleOpenGLFallback() {};
 	void ClearCache();
 
 	void SetRunUpdaterOnClose(bool run);

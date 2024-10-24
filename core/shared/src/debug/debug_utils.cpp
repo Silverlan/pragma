@@ -11,6 +11,9 @@
 #include <cstdio>
 // #include <windows.h>
 // #include <tlhelp32.h>
+#ifdef __linux__
+#include "pragma/localization.h"
+#endif
 
 void pragma::debug::open_file_in_zerobrane(const std::string &fileName, uint32_t lineIdx)
 {
@@ -52,9 +55,9 @@ void pragma::debug::open_file_in_zerobrane(const std::string &fileName, uint32_t
 
 std::optional<pragma::debug::MessageBoxButton> pragma::debug::show_message_prompt(const std::string &msg, MessageBoxButtons bts, std::optional<std::string> title)
 {
-#ifdef _WIN32
 	if(!title)
 		title = util::get_program_name();
+#ifdef _WIN32
 	uint32_t winBt = 0;
 	switch(bts) {
 	case MessageBoxButtons::Ok:
@@ -107,7 +110,69 @@ std::optional<pragma::debug::MessageBoxButton> pragma::debug::show_message_promp
 	}
 	return {};
 #else
-	return {};
+	std::vector<MessageBoxButton> buttons;
+	buttons.reserve(3);
+	switch(bts) {
+	case MessageBoxButtons::Ok:
+		buttons.push_back(MessageBoxButton::Ok);
+		break;
+	case MessageBoxButtons::OkCancel:
+		buttons.push_back(MessageBoxButton::Ok);
+		buttons.push_back(MessageBoxButton::Cancel);
+		break;
+	case MessageBoxButtons::AbortRetryIgnore:
+		buttons.push_back(MessageBoxButton::Abort);
+		buttons.push_back(MessageBoxButton::Retry);
+		buttons.push_back(MessageBoxButton::Ignore);
+		break;
+	case MessageBoxButtons::YesNoCancel:
+		buttons.push_back(MessageBoxButton::Yes);
+		buttons.push_back(MessageBoxButton::No);
+		buttons.push_back(MessageBoxButton::Cancel);
+		break;
+	case MessageBoxButtons::YesNo:
+		buttons.push_back(MessageBoxButton::Yes);
+		buttons.push_back(MessageBoxButton::No);
+		break;
+	case MessageBoxButtons::RetryCancel:
+		buttons.push_back(MessageBoxButton::Retry);
+		buttons.push_back(MessageBoxButton::Cancel);
+		break;
+	case MessageBoxButtons::CancelTryAgainContinue:
+		buttons.push_back(MessageBoxButton::Cancel);
+		buttons.push_back(MessageBoxButton::TryAgain);
+		buttons.push_back(MessageBoxButton::Continue);
+		break;
+	}
+
+	if(buttons.empty())
+		return {};
+	std::stringstream cmd;
+	cmd<<"zenity ";
+	if(buttons.size() == 1)
+		cmd<<"--info ";
+	else
+		cmd<<"--question ";
+	cmd<<"--title='" +*title +"' ";
+	cmd<<"--text='" +msg +"' ";
+
+	auto getButtonText = [](MessageBoxButton button) -> std::string {
+		auto identifier = ustring::to_snake_case(std::string{magic_enum::enum_name(button)});
+		auto text = Locale::GetText("prompt_button_" +identifier);
+		return text;
+	};
+	cmd<<"--ok-label='"<<getButtonText(buttons[0])<<"' ";
+	if(buttons.size() > 1) {
+		cmd<<"--cancel-label='"<<getButtonText(buttons[1])<<"' ";
+		if(buttons.size() > 2) {
+			cmd<<"--extra-button='"<<getButtonText(buttons[2])<<"' ";
+		}
+	}
+
+	int result = system(cmd.str().c_str());
+	if(result < 0 || result >= buttons.size())
+		return {};
+	return buttons[result];
 #endif
 }
 

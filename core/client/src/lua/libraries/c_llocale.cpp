@@ -76,6 +76,7 @@ int Lua::Locale::get_languages(lua_State *l)
 }
 
 bool Lua::Locale::localize(const std::string &identifier, const std::string &lan, const std::string &category, const std::string &text) { return ::Locale::Localize(identifier, lan, category, text); }
+bool Lua::Locale::relocalize(const std::string &identifier, const std::string &newIdentifier, const std::string &oldCategory, const std::string &newCategory) { return ::Locale::Relocalize(identifier, newIdentifier, oldCategory, newCategory); }
 
 void Lua::Locale::clear() { ::Locale::Clear(); }
 Lua::map<std::string, std::string> Lua::Locale::get_texts(lua_State *l)

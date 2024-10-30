@@ -95,7 +95,8 @@ void Lua::register_shared_client_state(lua_State *l)
 {
 	Lua::RegisterLibrary(l, "locale", {{"get_text", Lua::Locale::get_text}, {"get_languages", Lua::Locale::get_languages}});
 	auto modLocale = luabind::module_(l, "locale");
-	modLocale[luabind::def("load", Lua::Locale::load), luabind::def("get_language", Lua::Locale::get_language), luabind::def("change_language", Lua::Locale::change_language), luabind::def("set_text", Lua::Locale::set_localization), luabind::def("localize", Lua::Locale::localize)];
+	modLocale[luabind::def("load", Lua::Locale::load), luabind::def("get_language", Lua::Locale::get_language), luabind::def("change_language", Lua::Locale::change_language), luabind::def("set_text", Lua::Locale::set_localization), luabind::def("localize", Lua::Locale::localize),
+	  luabind::def("relocalize", Lua::Locale::relocalize)];
 	modLocale[luabind::def(
 	  "get_used_characters", +[]() -> std::string { return ::Locale::GetUsedCharacters().cpp_str(); })];
 	modLocale[luabind::def(

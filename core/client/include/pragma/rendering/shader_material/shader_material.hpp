@@ -106,6 +106,15 @@ namespace pragma::rendering::shader_material {
 		}
 		const Property *FindProperty(const char *key) const { return const_cast<ShaderMaterial *>(this)->FindProperty(key); }
 
+		Texture *FindTexture(const char *key)
+		{
+			auto it = std::find_if(textures.begin(), textures.end(), [key](const Texture &tex) { return tex.name == key; });
+			if(it == textures.end())
+				return nullptr;
+			return &*it;
+		}
+		const Texture *FindTexture(const char *key) const { return const_cast<ShaderMaterial *>(this)->FindTexture(key); }
+
 		bool LoadFromUdmData(udm::LinkedPropertyWrapperArg prop, std::string &outErr);
 		std::string ToGlslStruct() const;
 	};

@@ -7,7 +7,7 @@
 ]]
 
 include("/gui/vbox.lua")
-include("/gui/pfm/controls_menu.lua")
+include("/gui/pfm/controls_menu/controls_menu.lua")
 
 util.open_generic_window = function(title, onOpen)
 	time.create_simple_timer(0.0, function()

@@ -57,6 +57,7 @@
 #include "pragma/rendering/shaders/util/c_shader_compose_rma.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_glow.hpp"
 #include "pragma/rendering/shader_material/shader_material.hpp"
+#include "pragma/lua/libraries/ludm.hpp"
 #include <pragma/lua/lua_entity_component.hpp>
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <wgui/fontmanager.h>
@@ -66,6 +67,7 @@
 #include <pragma/lua/converters/pair_converter_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/lua/converters/optional_converter_t.hpp>
+#include <pragma/lua/converters/vector_converter_t.hpp>
 #include <pragma/entities/components/liquid/base_liquid_component.hpp>
 #include <shader/prosper_shader_flip_image.hpp>
 #include <prosper_prepared_command_buffer.hpp>
@@ -104,6 +106,11 @@ static void reload_textures(CMaterial &mat)
 
 	for(auto &pair : textureMappings)
 		mat.SetTexture(pair.first, pair.second);
+}
+
+static luabind::object shader_mat_value_to_lua_object(lua_State *l, const pragma::rendering::shader_material::PropertyValue &val)
+{
+	return std::visit([l](const auto &val) { return luabind::object {l, val}; }, val);
 }
 
 void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
@@ -223,6 +230,16 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 		if(shaderHandler)
 			shaderHandler(&mat);
 	}));
+	materialClassDef.def(
+	  "GetPrimaryShader", +[](lua_State *l, ::Material &mat) -> luabind::object {
+		  auto *shader = static_cast<CMaterial &>(mat).GetPrimaryShader();
+		  if(!shader)
+			  return Lua::nil;
+		  Lua::shader::push_shader(l, *shader);
+		  auto o = luabind::object {luabind::from_stack(l, -1)};
+		  Lua::Pop(l, 1);
+		  return o;
+	  });
 	modGame[materialClassDef];
 
 	// prosper TODO
@@ -298,6 +315,81 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 	modShader[defBindState];
 
 	auto defMat = luabind::class_<pragma::rendering::shader_material::ShaderMaterial>("ShaderMaterial");
+	defMat.def(
+	  "__tostring", +[](const pragma::rendering::shader_material::ShaderMaterial &shaderMat) -> std::string { return "ShaderMaterial"; });
+	defMat.def(
+	  "FindProperty", +[](const pragma::rendering::shader_material::ShaderMaterial &shaderMat, const std::string &name) -> const pragma::rendering::shader_material::Property * { return shaderMat.FindProperty(name.c_str()); });
+	defMat.def(
+	  "FindTexture", +[](const pragma::rendering::shader_material::ShaderMaterial &shaderMat, const std::string &name) -> const pragma::rendering::shader_material::Texture * { return shaderMat.FindTexture(name.c_str()); });
+	defMat.def(
+	  "GetProperties", +[](const pragma::rendering::shader_material::ShaderMaterial &shaderMat) -> std::vector<const pragma::rendering::shader_material::Property *> {
+		  std::vector<const pragma::rendering::shader_material::Property *> props;
+		  props.reserve(shaderMat.properties.size());
+		  for(auto &prop : shaderMat.properties)
+			  props.push_back(&prop);
+		  return props;
+	  });
+	defMat.def(
+	  "GetTextures", +[](const pragma::rendering::shader_material::ShaderMaterial &shaderMat) -> std::vector<const pragma::rendering::shader_material::Texture *> {
+		  std::vector<const pragma::rendering::shader_material::Texture *> textures;
+		  textures.reserve(shaderMat.textures.size());
+		  for(auto &tex : shaderMat.textures)
+			  textures.push_back(&tex);
+		  return textures;
+	  });
+
+	auto defProp = luabind::class_<pragma::rendering::shader_material::Property>("Property");
+	defProp.def(
+	  "__tostring", +[](const pragma::rendering::shader_material::Property &prop) -> std::string {
+		  std::stringstream ss;
+		  ss << "Property";
+		  ss << "[" << prop.name << "]";
+		  ss << "[Type:" << magic_enum::enum_name(prop.type) << "]";
+		  return ss.str();
+	  });
+	defProp.def_readonly("type", &pragma::rendering::shader_material::Property::type);
+	defProp.property(
+	  "specializationType", +[](const pragma::rendering::shader_material::Property &prop) -> std::optional<std::string> { return prop.specializationType ? *prop.specializationType : std::optional<std::string> {}; });
+	defProp.property(
+	  "name", +[](const pragma::rendering::shader_material::Property &prop) -> std::string { return prop.name; });
+	defProp.property(
+	  "defaultValue", +[](lua_State *l, const pragma::rendering::shader_material::Property &prop) -> luabind::object { return shader_mat_value_to_lua_object(l, prop.defaultValue); });
+	defProp.def_readonly("offset", &pragma::rendering::shader_material::Property::offset);
+	defProp.def("GetSize", &pragma::rendering::shader_material::Property::GetSize);
+	defProp.def(
+	  "GetFlags", +[](const pragma::rendering::shader_material::Property &prop) -> std::optional<std::unordered_map<std::string, uint32_t>> {
+		  if(!prop.flags)
+			  return {};
+		  return *prop.flags;
+	  });
+	defProp.def(
+	  "GetOptions", +[](lua_State *l, const pragma::rendering::shader_material::Property &prop) -> std::optional<std::unordered_map<std::string, luabind::object>> {
+		  if(!prop.options)
+			  return {};
+		  std::unordered_map<std::string, luabind::object> options {};
+		  options.reserve(prop.options->size());
+		  for(auto &[name, value] : *prop.options)
+			  options[name] = shader_mat_value_to_lua_object(l, value);
+		  return options;
+	  });
+	defMat.scope[defProp];
+
+	auto defTex = luabind::class_<pragma::rendering::shader_material::Texture>("Texture");
+	defTex.def(
+	  "__tostring", +[](const pragma::rendering::shader_material::Texture &tex) -> std::string {
+		  std::stringstream ss;
+		  ss << "Texture";
+		  ss << "[" << tex.name << "]";
+		  return ss.str();
+	  });
+	defTex.property(
+	  "name", +[](const pragma::rendering::shader_material::Texture &tex) -> std::string { return tex.name; });
+	defTex.def_readonly("defaultTexturePath", &pragma::rendering::shader_material::Texture::defaultTexturePath);
+	defTex.def_readonly("cubemap", &pragma::rendering::shader_material::Texture::cubemap);
+	defTex.def_readonly("colorMap", &pragma::rendering::shader_material::Texture::colorMap);
+	defTex.def_readonly("required", &pragma::rendering::shader_material::Texture::required);
+	defMat.scope[defTex];
+
 	modShader[defMat];
 
 	auto defMatData = luabind::class_<pragma::rendering::shader_material::ShaderMaterialData>("ShaderMaterialData");
@@ -423,7 +515,7 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 	auto defShaderTextured3D = luabind::class_<pragma::ShaderGameWorldLightingPass, luabind::bases<pragma::ShaderGameWorld, pragma::ShaderEntity, pragma::ShaderSceneLit, pragma::ShaderScene, prosper::ShaderGraphics, prosper::Shader>>("TexturedLit3D");
 	defShaderTextured3D.add_static_constant("PUSH_CONSTANTS_SIZE", sizeof(pragma::ShaderGameWorldLightingPass::PushConstants));
 	defShaderTextured3D.add_static_constant("PUSH_CONSTANTS_USER_DATA_OFFSET", sizeof(pragma::ShaderGameWorldLightingPass::PushConstants));
-
+	defShaderTextured3D.def("GetShaderMaterial", &pragma::ShaderGameWorldLightingPass::GetShaderMaterial);
 	modShader[defShaderTextured3D];
 
 	auto defShaderGlow = luabind::class_<pragma::ShaderPPGlow, luabind::bases<pragma::ShaderGameWorldLightingPass, pragma::ShaderEntity, pragma::ShaderSceneLit, pragma::ShaderScene, prosper::ShaderGraphics, prosper::Shader>>("Glow");

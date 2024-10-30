@@ -230,6 +230,10 @@ void CEngine::DumpDebugInformation(uzip::ZIPFile &zip) const
 	if(GetClientState())
 		fWriteLuaTraceback(static_cast<ClientState *>(GetClientState())->GetGUILuaState(), "gui");
 
+	std::stringstream engineInfo;
+	engineInfo << "Render API: " << GetRenderAPI();
+	zip.AddFile("engine_cl.txt", engineInfo.str());
+
 #if 0
 	prosper::debug::dump_layers(c_engine->GetRenderContext(),ss);
 	zip.AddFile("vk_layers.txt",ss.str());

@@ -248,7 +248,7 @@ void Lua::ModelSubMesh::register_class(luabind::class_<::ModelSubMesh> &classDef
 		  vws = std::move(newVertWeights);
 	  });
 	classDef.def(
-	  "SetVertices", +[](lua_State *l, ::ModelSubMesh &mesh, std::vector<umath::Vertex> verts) { mesh.GetVertices() == std::move(verts); });
+	  "SetVertices", +[](lua_State *l, ::ModelSubMesh &mesh, std::vector<umath::Vertex> verts) { mesh.GetVertices() = std::move(verts); });
 	classDef.def(
 	  "SetIndices", +[](lua_State *l, ::ModelSubMesh &mesh, const std::vector<uint32_t> &indices) {
 		  mesh.SetIndices(indices);

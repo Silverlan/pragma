@@ -20,22 +20,31 @@
 		{
 			$string type "float"
 			$string name "phong_intensity"
+			$bool hideInEditor 1
 			$float default 1.0
+			$float min 0.0
+			$float max 1.0
 		},
 		{
 			$string type "float"
 			$string name "metalness_factor"
 			$float default 0.0
+			$float min 0.0
+			$float max 1.0
 		},
 		{
 			$string type "float"
 			$string name "roughness_factor"
 			$float default 0.5
+			$float min 0.0
+			$float max 1.0
 		},
 		{
 			$string type "float"
 			$string name "ao_factor"
 			$float default 1.0
+			$float min 0.0
+			$float max 1.0
 		}
 	]
 	$array textures [element][
@@ -43,19 +52,24 @@
 			$string name "albedo_map"
 			$bool colorMap 1
 			$bool required 1
+			$string specializationType "albedo"
 		},
 		{
 			$string name "normal_map"
+			$string specializationType "normal"
 		},
 		{
 			$string name "rma_map"
+			$string specializationType "rma"
 		},
 		{
 			$string name "emission_map"
 			$string default "white"
+			$string specializationType "emission"
 		},
 		{
 			$string name "parallax_map"
+			$string specializationType "parallax"
 		},
 		{
 			$string name "wrinkle_stretch_map"

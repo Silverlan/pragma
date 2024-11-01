@@ -9,6 +9,7 @@
 #include "pragma/lua/classes/lmaterial.h"
 #include "pragma/lua/libraries/lfile.h"
 #include "pragma/lua/converters/game_type_converters_t.hpp"
+#include <pragma/lua/policies/default_parameter_policy.hpp>
 #include <material_manager2.hpp>
 #include "luasystem.h"
 #include "material.h"
@@ -53,6 +54,7 @@ void Lua::Material::register_class(luabind::class_<::Material> &classDef)
 		Lua::Push<msys::MaterialHandle>(l, matCopy);
 	}));
 	classDef.def("UpdateTextures", &::Material::UpdateTextures);
+	classDef.def("UpdateTextures", &::Material::UpdateTextures, luabind::default_parameter_policy<2, bool {false}> {});
 	classDef.def("Save", static_cast<luabind::variant<std::string, bool> (*)(lua_State *, ::Material &, udm::AssetData &)>([](lua_State *l, ::Material &mat, udm::AssetData &assetData) -> luabind::variant<std::string, bool> {
 		std::string err;
 		auto result = mat.Save(assetData, err);

@@ -110,7 +110,15 @@ static void reload_textures(CMaterial &mat)
 
 static luabind::object shader_mat_value_to_lua_object(lua_State *l, const pragma::rendering::shader_material::PropertyValue &val)
 {
-	return std::visit([l](const auto &val) { return luabind::object {l, val}; }, val);
+	return std::visit(
+	  [l](const auto &val) {
+		  using T = util::base_type<decltype(val)>;
+		  if constexpr(std::is_same_v<T, udm::Half>)
+			  return luabind::object {l, static_cast<float>(val)};
+		  else
+			  return luabind::object {l, val};
+	  },
+	  val);
 }
 
 void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
@@ -224,11 +232,12 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 		if(db == nullptr)
 			return;
 		auto shaderInfo = c_engine->GetShaderManager().PreRegisterShader(shader);
+		static_cast<CMaterial &>(mat).ClearDescriptorSets();
 		mat.Initialize(shaderInfo, db);
+		mat.SetUserData2(nullptr);
 		mat.SetLoaded(true);
-		auto shaderHandler = static_cast<msys::CMaterialManager &>(client->GetMaterialManager()).GetShaderHandler();
-		if(shaderHandler)
-			shaderHandler(&mat);
+		mat.UpdateTextures(true);
+		c_game->ReloadMaterialShader(static_cast<CMaterial *>(&mat));
 	}));
 	materialClassDef.def(
 	  "GetPrimaryShader", +[](lua_State *l, ::Material &mat) -> luabind::object {
@@ -546,6 +555,7 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 	defShaderTextured3D.add_static_constant("PUSH_CONSTANTS_SIZE", sizeof(pragma::ShaderGameWorldLightingPass::PushConstants));
 	defShaderTextured3D.add_static_constant("PUSH_CONSTANTS_USER_DATA_OFFSET", sizeof(pragma::ShaderGameWorldLightingPass::PushConstants));
 	defShaderTextured3D.def("GetShaderMaterial", &pragma::ShaderGameWorldLightingPass::GetShaderMaterial);
+	defShaderTextured3D.def("GetShaderMaterialName", &pragma::ShaderGameWorldLightingPass::GetShaderMaterialName);
 	modShader[defShaderTextured3D];
 
 	auto defShaderGlow = luabind::class_<pragma::ShaderPPGlow, luabind::bases<pragma::ShaderGameWorldLightingPass, pragma::ShaderEntity, pragma::ShaderSceneLit, pragma::ShaderScene, prosper::ShaderGraphics, prosper::Shader>>("Glow");

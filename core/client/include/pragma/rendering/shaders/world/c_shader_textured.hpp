@@ -191,7 +191,7 @@ namespace pragma {
 		virtual bool IsUsingLightmaps() const override { return true; }
 		bool IsDepthPrepassEnabled() const;
 		void SetDepthPrepassEnabled(bool enabled) { m_depthPrepassEnabled = enabled; }
-		static std::shared_ptr<Texture> GetTexture(const std::string &texName);
+		static std::shared_ptr<Texture> GetTexture(const std::string &texName, bool load = false);
 	  protected:
 		using ShaderEntity::RecordDraw;
 		GameShaderSpecializationConstantFlag GetStaticSpecializationConstantFlags(GameShaderSpecialization specialization) const;

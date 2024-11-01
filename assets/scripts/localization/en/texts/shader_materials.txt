@@ -1,4 +1,6 @@
 mat_prop_albedo_map = "Albedo Map"
+mat_prop_albedo_map2 = "Albedo Map 2"
+mat_prop_albedo_map3 = "Albedo Map 3"
 mat_prop_alpha_cutoff = "Alpha Cutoff"
 mat_prop_alpha_cutoff_desc = "Opacity threshold for discarding fragments or pixels based on their alpha values."
 mat_prop_alpha_factor = "Alpha Factor"

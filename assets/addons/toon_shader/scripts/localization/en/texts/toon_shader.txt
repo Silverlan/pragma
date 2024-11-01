@@ -1,1 +1,6 @@
 c_toon = "Toon"
+mat_prop_glossiness = "Glossiness"
+mat_prop_matcap_map = "Matcap Map"
+mat_prop_rim_amount = "Rim Amount"
+mat_prop_rim_color = "Rim Color"
+mat_prop_specular_color = "Specular Color"

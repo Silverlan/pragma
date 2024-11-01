@@ -788,6 +788,7 @@ bool ShaderMaterial::LoadFromUdmData(udm::LinkedPropertyWrapperArg prop, std::st
 			textures.reserve(textures.size() + base->textures.size());
 			for(auto &tex : base->textures)
 				textures.push_back(tex);
+			continue;
 		}
 
 		textures.push_back({});

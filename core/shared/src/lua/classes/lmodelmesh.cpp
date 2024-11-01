@@ -476,9 +476,10 @@ void Lua::ModelSubMesh::GetVertexUV(lua_State *l, ::ModelSubMesh &mdl, uint32_t 
 }
 void Lua::ModelSubMesh::GetVertexAlpha(lua_State *l, ::ModelSubMesh &mdl, uint32_t idx)
 {
-	if(idx >= mdl.GetAlphaCount())
+	auto &alphas = mdl.GetAlphas();
+	if(idx >= alphas.size())
 		return;
-	Lua::Push<Vector2>(l, mdl.GetVertexAlpha(idx));
+	Lua::Push<Vector2>(l, alphas[idx]);
 }
 void Lua::ModelSubMesh::GetVertexWeight(lua_State *l, ::ModelSubMesh &mdl, uint32_t idx)
 {

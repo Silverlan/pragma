@@ -264,6 +264,19 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 		      Lua::shader::push_shader(l, *whShader.get());
 		      return 1;
 	      }},
+	    {"get_all",
+	      [](lua_State *l) {
+		      auto t = luabind::newtable(l);
+		      uint32_t idx = 1;
+		      for(auto &shader : c_engine->GetShaderManager().GetShaders()) {
+			      Lua::shader::push_shader(l, *shader);
+			      luabind::object o {luabind::from_stack(l, -1)};
+			      Lua::Pop(l, 1);
+			      t[idx++] = o;
+		      }
+		      t.push(l);
+		      return 1;
+	      }},
 	    {"cubemap_to_equirectangular_texture", [](lua_State *l) {
 		     auto *shader = static_cast<pragma::ShaderCubemapToEquirectangular *>(c_engine->GetShader("cubemap_to_equirectangular").get());
 		     if(!shader)

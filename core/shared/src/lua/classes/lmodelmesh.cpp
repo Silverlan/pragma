@@ -147,6 +147,8 @@ void Lua::ModelSubMesh::register_class(luabind::class_<::ModelSubMesh> &classDef
 	classDef.def("GetSkinTextureIndex", &Lua::ModelSubMesh::GetSkinTextureIndex);
 	classDef.def("FlipTriangleWindingOrder", &Lua::ModelSubMesh::FlipTriangleWindingOrder);
 	classDef.def("GetVertexCount", &Lua::ModelSubMesh::GetVertexCount);
+	classDef.def("GetAlphaCount", &::ModelSubMesh::GetAlphaCount);
+	classDef.def("SetAlphaCount", &::ModelSubMesh::SetAlphaCount);
 	classDef.def("SetVertexCount", &Lua::ModelSubMesh::SetVertexCount);
 	classDef.def("SetIndexCount", &Lua::ModelSubMesh::SetIndexCount);
 	classDef.def("GetIndexCount", &Lua::ModelSubMesh::GetTriangleVertexCount);

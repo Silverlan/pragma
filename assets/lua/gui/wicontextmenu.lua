@@ -209,6 +209,15 @@ function gui.WIContextMenu:Clear()
 		util.remove(item)
 	end
 end
+function gui.WIContextMenu:ScrollToItem(el)
+	local elWrapper = self.m_scrollContainer:GetWrapperElement()
+	local scrlBar = self.m_scrollContainer:GetVerticalScrollBar()
+	if util.is_valid(elWrapper) == false or util.is_valid(scrlBar) == false then
+		return
+	end
+	local offset = el:GetAbsolutePos().y - elWrapper:GetAbsolutePos().y
+	scrlBar:SetScrollOffset(offset)
+end
 function gui.WIContextMenu:AddItem(name, fcOnClick, keybind)
 	local pItem = gui.create("WIMenuItem", self.m_contents)
 	if pItem == nil then

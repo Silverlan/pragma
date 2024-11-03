@@ -189,6 +189,32 @@ void CLightMapDataCacheComponent::ReloadCache()
 							std::vector<umath::Vertex> verts;
 							udmMeshData["vertices"](verts);
 
+							auto udmAlphas = udmMeshData["alphas"];
+							auto *alphaArray = udmAlphas.GetValuePtr<udm::Array>();
+							if(alphaArray) {
+								if(alphaArray->GetValueType() == udm::Type::Float) {
+									// Alphas can be vec2 or float
+									std::vector<float> alphas;
+									udmMeshData["alphas"](alphas);
+									if(!alphas.empty()) {
+										std::vector<Vector2> valphas;
+										valphas.reserve(alphas.size());
+										for(auto &a : alphas)
+											valphas.push_back({a, 0.f});
+										subMesh->GetAlphas() = std::move(valphas);
+										subMesh->SetAlphaCount(1);
+									}
+								}
+								else {
+									std::vector<Vector2> alphas;
+									udmMeshData["alphas"](alphas);
+									if(!alphas.empty()) {
+										subMesh->GetAlphas() = std::move(alphas);
+										subMesh->SetAlphaCount(2);
+									}
+								}
+							}
+
 							subMesh->GetVertices() = std::move(verts);
 
 							auto udmIndices = udmMeshData["indices"];

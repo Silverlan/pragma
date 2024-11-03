@@ -140,12 +140,14 @@ pragma::rendering::shader_material::Property &pragma::rendering::shader_material
 	specializationType = other.specializationType;
 	name = other.name;
 	defaultValue = other.defaultValue;
+	propertyFlags = other.propertyFlags;
 	offset = other.offset;
 	padding = other.padding;
 	options = other.options ? std::make_unique<std::unordered_map<std::string, PropertyValue>>(*other.options) : std::unique_ptr<std::unordered_map<std::string, PropertyValue>> {};
 	flags = other.flags ? std::make_unique<std::unordered_map<std::string, uint32_t>>(*other.flags) : std::unique_ptr<std::unordered_map<std::string, uint32_t>> {};
+	range = other.range;
 #ifdef _WIN32
-	static_assert(sizeof(*this) == 72);
+	static_assert(sizeof(*this) == 120);
 #endif
 	return *this;
 }
@@ -369,6 +371,7 @@ ShaderMaterial::ShaderMaterial()
 		propColor.name = "color_factor";
 		propColor.type = udm::Type::Vector3;
 		propColor.defaultValue = Vector3 {1.f, 1.f, 1.f};
+		propColor.specializationType = "color";
 		AddProperty(std::move(propColor));
 	}
 
@@ -377,6 +380,7 @@ ShaderMaterial::ShaderMaterial()
 		propAlphaFactor.name = "alpha_factor";
 		propAlphaFactor.type = udm::Type::Float;
 		propAlphaFactor.defaultValue = 1.f;
+		propAlphaFactor.range = Property::Range {0.f, 1.f};
 		AddProperty(std::move(propAlphaFactor));
 	}
 
@@ -400,6 +404,7 @@ ShaderMaterial::ShaderMaterial()
 		propCutoff.name = "alpha_cutoff";
 		propCutoff.type = udm::Type::Float;
 		propCutoff.defaultValue = static_cast<float>(0.5f);
+		propCutoff.range = Property::Range {0.f, 1.f};
 		AddProperty(std::move(propCutoff));
 	}
 
@@ -408,6 +413,7 @@ ShaderMaterial::ShaderMaterial()
 		propFlags.name = "flags";
 		propFlags.type = udm::Type::UInt32;
 		propFlags.defaultValue = static_cast<uint32_t>(MaterialFlags::None);
+		propFlags.propertyFlags |= Property::Flags::HideInEditor;
 		auto names = magic_enum::flags::enum_names<MaterialFlags>();
 		auto values = magic_enum::flags::enum_values<MaterialFlags>();
 		std::unordered_map<std::string, uint32_t> flags;
@@ -427,6 +433,7 @@ ShaderMaterial::ShaderMaterial()
 		propPlaceholder.name = "placeholder";
 		propPlaceholder.type = udm::Type::Float;
 		propPlaceholder.defaultValue = 0.5f;
+		propPlaceholder.propertyFlags |= Property::Flags::HideInEditor;
 		AddProperty(std::move(propPlaceholder));
 	}
 	assert(properties.size() == PREDEFINED_PROPERTY_COUNT);
@@ -712,6 +719,36 @@ bool ShaderMaterial::LoadFromUdmData(udm::LinkedPropertyWrapperArg prop, std::st
 			if(prop["specializationType"] >> specializationType)
 				matProp.specializationType = specializationType;
 
+			auto hideInEditor = false;
+			if((prop["hideInEditor"] >> hideInEditor) && hideInEditor)
+				matProp.propertyFlags |= Property::Flags::HideInEditor;
+
+			auto udmMin = prop["min"];
+			auto udmMax = prop["max"];
+			if(udmMin || udmMax) {
+				if(!udmMin || !udmMax) {
+					outErr = "If min has been defined, max has to be defined as well (and vice versa)!";
+					return false;
+				}
+
+				matProp.range = udm::visit_ng(udmType, [&udmMin, &udmMax](auto tag) -> std::optional<Property::Range> {
+					using T = typename decltype(tag)::type;
+					if constexpr(is_valid_property_type_v<T>) {
+						Property::Range range {};
+						auto min = udmMin.ToValue<T>();
+						auto max = udmMax.ToValue<T>();
+						if(!min || !max)
+							return {};
+						return Property::Range {*min, *max};
+					}
+					return {};
+				});
+				if(!matProp.range) {
+					outErr = "Failed to convert min/max values to property type!";
+					return {};
+				}
+			}
+
 			auto udmOptions = prop["options"];
 			if(udmOptions) {
 				matProp.options = std::make_unique<std::unordered_map<std::string, PropertyValue>>();
@@ -751,11 +788,16 @@ bool ShaderMaterial::LoadFromUdmData(udm::LinkedPropertyWrapperArg prop, std::st
 			textures.reserve(textures.size() + base->textures.size());
 			for(auto &tex : base->textures)
 				textures.push_back(tex);
+			continue;
 		}
 
 		textures.push_back({});
 		auto &shaderTex = textures.back();
 		shaderTex.name = std::move(name);
+
+		std::string specializationType;
+		if(tex["specializationType"] >> specializationType)
+			shaderTex.specializationType = specializationType;
 
 		std::string defaultTexturePath;
 		if(tex["default"] >> defaultTexturePath)

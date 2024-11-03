@@ -52,6 +52,31 @@ void Lua::DataBlock::GetColor(lua_State *l, ds::Block &data, const std::string &
 void Lua::DataBlock::GetVector(lua_State *l, ds::Block &data, const std::string &val) { Lua::Push<Vector3>(l, data.GetVector3(val)); }
 void Lua::DataBlock::GetVector2(lua_State *l, ds::Block &data, const std::string &val) { Lua::Push<Vector2>(l, data.GetVector2(val)); }
 void Lua::DataBlock::GetVector4(lua_State *l, ds::Block &data, const std::string &val) { Lua::Push<Vector4>(l, data.GetVector4(val)); }
+void Lua::DataBlock::GetValue(lua_State *l, ds::Block &data, const std::string &key)
+{
+	auto &v = data.GetValue(key);
+	if(!v || v->IsBlock())
+		return;
+	auto o = Lua::nil;
+	auto &dsVal = static_cast<ds::Value &>(*v);
+	if(typeid(dsVal) == typeid(ds::Int))
+		o = luabind::object {l, static_cast<ds::Int &>(dsVal).GetValue()};
+	else if(typeid(dsVal) == typeid(ds::Float))
+		o = luabind::object {l, static_cast<ds::Float &>(dsVal).GetValue()};
+	else if(typeid(dsVal) == typeid(ds::Bool))
+		o = luabind::object {l, static_cast<ds::Bool &>(dsVal).GetValue()};
+	else if(typeid(dsVal) == typeid(ds::String))
+		o = luabind::object {l, static_cast<ds::String &>(dsVal).GetValue()};
+	else if(typeid(dsVal) == typeid(ds::Color))
+		o = luabind::object {l, static_cast<ds::Color &>(dsVal).GetValue()};
+	else if(typeid(dsVal) == typeid(ds::Vector))
+		o = luabind::object {l, static_cast<ds::Vector &>(dsVal).GetValue()};
+	else if(typeid(dsVal) == typeid(ds::Vector2))
+		o = luabind::object {l, static_cast<ds::Vector2 &>(dsVal).GetValue()};
+	else if(typeid(dsVal) == typeid(ds::Vector4))
+		o = luabind::object {l, static_cast<ds::Vector4 &>(dsVal).GetValue()};
+	o.push(l);
+}
 
 void Lua::DataBlock::GetData(lua_State *l, ds::Block &data, const std::string &val)
 {

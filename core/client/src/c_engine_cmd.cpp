@@ -543,6 +543,25 @@ void CEngine::RegisterConsoleCommands()
 	  },
 	  ConVarFlags::None, "Adds the specified text to the localization files. Usage: locale_localize <group> <language> <textIdentifier> <localizedText>");
 	conVarMap.RegisterConCommand(
+	  "locale_relocalize",
+	  [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
+		  if(argv.size() < 4) {
+			  Con::cwar << "Insufficient arguments supplied!" << Con::endl;
+			  return;
+		  }
+		  auto identifier = argv[0];
+		  auto newIdentifier = argv[1];
+		  auto oldCategory = argv[2];
+		  auto newCategory = argv[3];
+		  Con::cout << "Re-localizing '" << identifier << "' in category '" << oldCategory << "' as '" << newIdentifier << "' in category '" << newCategory << "'..." << Con::endl;
+		  auto res = Locale::Relocalize(identifier, newIdentifier, oldCategory, newCategory);
+		  if(res)
+			  Con::cout << "Done!" << Con::endl;
+		  else
+			  Con::cwar << "Re-Localization failed!" << Con::endl;
+	  },
+	  ConVarFlags::None, "Moves the specified localized string to a different category with a different identifier. Usage: locale_localize <identifier> <newIdentifier> <category> <newCategory>");
+	conVarMap.RegisterConCommand(
 	  "debug_start_lua_debugger_server_cl",
 	  [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  auto *l = state->GetLuaState();

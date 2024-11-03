@@ -147,6 +147,8 @@ void Lua::ModelSubMesh::register_class(luabind::class_<::ModelSubMesh> &classDef
 	classDef.def("GetSkinTextureIndex", &Lua::ModelSubMesh::GetSkinTextureIndex);
 	classDef.def("FlipTriangleWindingOrder", &Lua::ModelSubMesh::FlipTriangleWindingOrder);
 	classDef.def("GetVertexCount", &Lua::ModelSubMesh::GetVertexCount);
+	classDef.def("GetAlphaCount", &::ModelSubMesh::GetAlphaCount);
+	classDef.def("SetAlphaCount", &::ModelSubMesh::SetAlphaCount);
 	classDef.def("SetVertexCount", &Lua::ModelSubMesh::SetVertexCount);
 	classDef.def("SetIndexCount", &Lua::ModelSubMesh::SetIndexCount);
 	classDef.def("GetIndexCount", &Lua::ModelSubMesh::GetTriangleVertexCount);
@@ -248,7 +250,7 @@ void Lua::ModelSubMesh::register_class(luabind::class_<::ModelSubMesh> &classDef
 		  vws = std::move(newVertWeights);
 	  });
 	classDef.def(
-	  "SetVertices", +[](lua_State *l, ::ModelSubMesh &mesh, std::vector<umath::Vertex> verts) { mesh.GetVertices() == std::move(verts); });
+	  "SetVertices", +[](lua_State *l, ::ModelSubMesh &mesh, std::vector<umath::Vertex> verts) { mesh.GetVertices() = std::move(verts); });
 	classDef.def(
 	  "SetIndices", +[](lua_State *l, ::ModelSubMesh &mesh, const std::vector<uint32_t> &indices) {
 		  mesh.SetIndices(indices);
@@ -476,9 +478,10 @@ void Lua::ModelSubMesh::GetVertexUV(lua_State *l, ::ModelSubMesh &mdl, uint32_t 
 }
 void Lua::ModelSubMesh::GetVertexAlpha(lua_State *l, ::ModelSubMesh &mdl, uint32_t idx)
 {
-	if(idx >= mdl.GetAlphaCount())
+	auto &alphas = mdl.GetAlphas();
+	if(idx >= alphas.size())
 		return;
-	Lua::Push<Vector2>(l, mdl.GetVertexAlpha(idx));
+	Lua::Push<Vector2>(l, alphas[idx]);
 }
 void Lua::ModelSubMesh::GetVertexWeight(lua_State *l, ::ModelSubMesh &mdl, uint32_t idx)
 {

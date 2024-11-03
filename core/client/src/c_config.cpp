@@ -113,4 +113,5 @@ void CEngine::PreloadConfig(NwStateType type, const std::string &configName)
 	Locale::Load("menu.txt");
 	Locale::Load("misc.txt");
 	Locale::Load("components.txt");
+	Locale::Load("shader_materials.txt");
 }

@@ -18,7 +18,7 @@
 decltype(Locale::m_localization) Locale::m_localization;
 decltype(Locale::m_language) Locale::m_language;
 decltype(Locale::m_loadedFiles) Locale::m_loadedFiles;
-
+#pragma optimize("", off)
 Localization::Localization() {}
 
 //////////////////////////
@@ -328,6 +328,55 @@ pragma::string::Utf8String Locale::GetUsedCharacters()
 		usedCharsStr += static_cast<char16_t>(c);
 	return usedCharsStr;
 }
+static bool save_localization(const Localization &loc, const std::string &fileName, const std::string &lan)
+{
+	std::vector<std::string> keys;
+	keys.reserve(loc.texts.size());
+	for(auto &pair : loc.texts)
+		keys.push_back(pair.first);
+	std::sort(keys.begin(), keys.end());
+
+	std::stringstream out;
+	auto first = true;
+	for(auto &key : keys) {
+		if(!first)
+			out << "\n";
+		else
+			first = false;
+
+		auto val = loc.texts.find(key)->second;
+		ustring::replace<pragma::string::Utf8String>(val, "\"", "\\\"");
+		ustring::replace<pragma::string::Utf8String>(val, "\n", "\\n");
+		out << key << " = \"" << val << "\"";
+	}
+
+	auto fullFileName = Locale::GetFileLocation(fileName, lan);
+	if(!FileManager::FindLocalPath(fullFileName, fullFileName))
+		return false;
+	auto f = filemanager::open_file<VFilePtrReal>(fullFileName, filemanager::FileMode::Write);
+	if(!f)
+		return false;
+	f->WriteString(out.str());
+	return true;
+}
+bool Locale::Relocalize(const std::string &identifier, const std::string &newIdentifier, const std::string &oldCategory, const std::string &newCategory)
+{
+	auto fileName = oldCategory + ".txt";
+	for(auto &[lan, lanInfo] : Locale::GetLanguages()) {
+		Localization loc {};
+		if(Locale::LoadFile(fileName, lan, loc) == LoadResult::Failed)
+			continue;
+		auto it = loc.texts.find(identifier);
+		if(it == loc.texts.end())
+			continue;
+		auto text = std::move(it->second);
+		loc.texts.erase(it);
+
+		if(Localize(newIdentifier, lan, newCategory, text));
+			save_localization(loc, fileName, lan);
+	}
+	return true;
+}
 bool Locale::Localize(const std::string &identifier, const std::string &lan, const std::string &category, const pragma::string::Utf8String &text)
 {
 	auto fileName = category + ".txt";
@@ -350,32 +399,5 @@ bool Locale::Localize(const std::string &identifier, const std::string &lan, con
 			return false;
 	}
 	loc.texts[identifier] = text;
-	std::vector<std::string> keys;
-	keys.reserve(loc.texts.size());
-	for(auto &pair : loc.texts)
-		keys.push_back(pair.first);
-	std::sort(keys.begin(), keys.end());
-
-	std::stringstream out;
-	auto first = true;
-	for(auto &key : keys) {
-		if(!first)
-			out << "\n";
-		else
-			first = false;
-
-		auto val = loc.texts[key];
-		ustring::replace<pragma::string::Utf8String>(val, "\"", "\\\"");
-		ustring::replace<pragma::string::Utf8String>(val, "\n", "\\n");
-		out << key << " = \"" << val << "\"";
-	}
-
-	auto fullFileName = Locale::GetFileLocation(fileName, lan);
-	if(!FileManager::FindLocalPath(fullFileName, fullFileName))
-		return false;
-	auto f = filemanager::open_file<VFilePtrReal>(fullFileName, filemanager::FileMode::Write);
-	if(!f)
-		return false;
-	f->WriteString(out.str());
-	return true;
+	return save_localization(loc, fileName, lan);
 }

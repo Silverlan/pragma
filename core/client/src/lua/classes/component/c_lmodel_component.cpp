@@ -80,6 +80,8 @@ void Lua::ModelDef::register_class(lua_State *l, luabind::module_ &entsMod)
 	defCModel.def("ClearMaterialOverride", &pragma::CModelComponent::ClearMaterialOverride);
 	defCModel.def("ClearMaterialOverrides", &pragma::CModelComponent::ClearMaterialOverrides);
 	defCModel.def("GetMaterialOverride", &pragma::CModelComponent::GetMaterialOverride);
+	defCModel.def(
+	  "GetMaterialOverrideCount", +[](pragma::CModelComponent &c) -> size_t { return c.GetMaterialOverrides().size(); });
 	defCModel.def("GetRenderMaterial", static_cast<CMaterial *(pragma::CModelComponent::*)(uint32_t, uint32_t) const>(&pragma::CModelComponent::GetRenderMaterial));
 	defCModel.def("GetRenderMaterial", static_cast<CMaterial *(pragma::CModelComponent::*)(uint32_t) const>(&pragma::CModelComponent::GetRenderMaterial));
 	defCModel.def("GetLOD", &pragma::CModelComponent::GetLOD);

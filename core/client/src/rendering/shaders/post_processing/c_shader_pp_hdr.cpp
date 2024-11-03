@@ -56,7 +56,7 @@ void ShaderPPHDR::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pip
 	auto fxaaEnabled = (settings.fxaaEnabled && static_cast<Pipeline>(pipelineIdx) != Pipeline::HDR);
 	AddSpecializationConstant(pipelineInfo, prosper::ShaderStageFlags::FragmentBit, 1u /* constantId */, static_cast<uint32_t>(fxaaEnabled));
 
-	static auto settingsGlowEnabled = true;
+	static auto settingsGlowEnabled = false;
 	auto glowEnabled = settingsGlowEnabled;
 	AddSpecializationConstant(pipelineInfo, prosper::ShaderStageFlags::FragmentBit, 2u /* constantId */, static_cast<uint32_t>(glowEnabled));
 }

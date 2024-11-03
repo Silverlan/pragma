@@ -335,11 +335,15 @@ void ShaderGameWorldLightingPass::InitializeGfxPipeline(prosper::GraphicsPipelin
 	fSetPropertyValue(GameShaderSpecializationPropertyIndex::EnableDynamicShadows, static_cast<uint32_t>(shaderSettings.dynamicShadowsEnabled));
 }
 
-std::shared_ptr<Texture> ShaderGameWorldLightingPass::GetTexture(const std::string &texName)
+std::shared_ptr<Texture> ShaderGameWorldLightingPass::GetTexture(const std::string &texName, bool load)
 {
 	auto &matManager = static_cast<msys::CMaterialManager &>(client->GetMaterialManager());
 	auto &texManager = matManager.GetTextureManager();
 	auto *asset = texManager.FindCachedAsset(texName);
+	if(load && !asset) {
+		texManager.LoadAsset(texName);
+		asset = texManager.FindCachedAsset(texName);
+	}
 	if(!asset)
 		return nullptr;
 	auto ptrTex = msys::TextureManager::GetAssetObject(*asset);
@@ -387,7 +391,7 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderGameWorldLightingPass::Initi
 				tex = texData->GetVkTexture();
 		}
 		if(!tex && shaderTexInfo.defaultTexturePath) {
-			texData = pragma::ShaderGameWorldLightingPass::GetTexture(*shaderTexInfo.defaultTexturePath);
+			texData = pragma::ShaderGameWorldLightingPass::GetTexture(*shaderTexInfo.defaultTexturePath, true);
 			if(texData && texData->HasValidVkTexture())
 				tex = texData->GetVkTexture();
 			else {

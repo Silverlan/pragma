@@ -700,6 +700,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defDataBlock.def("GetVector", static_cast<void (*)(lua_State *, ds::Block &, const std::string &)>(&Lua::DataBlock::GetVector));
 	defDataBlock.def("GetVector2", static_cast<void (*)(lua_State *, ds::Block &, const std::string &)>(&Lua::DataBlock::GetVector2));
 	defDataBlock.def("GetVector4", static_cast<void (*)(lua_State *, ds::Block &, const std::string &)>(&Lua::DataBlock::GetVector4));
+	defDataBlock.def("GetValue", &Lua::DataBlock::GetValue);
 
 	defDataBlock.def("GetInt", static_cast<void (*)(lua_State *, ds::Block &, const std::string &, int32_t)>(&Lua::DataBlock::GetInt));
 	defDataBlock.def("GetFloat", static_cast<void (*)(lua_State *, ds::Block &, const std::string &, float)>(&Lua::DataBlock::GetFloat));

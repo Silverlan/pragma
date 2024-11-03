@@ -68,6 +68,14 @@ namespace pragma::rendering::shader_material {
 	concept is_valid_property_type_v = is_valid_property_type(udm::type_to_enum<T>());
 
 	struct DLLCLIENT Property {
+		struct DLLCLIENT Range {
+			PropertyValue min;
+			PropertyValue max;
+		};
+		enum class Flags : uint32_t {
+			None = 0u,
+			HideInEditor = 1u,
+		};
 		Property() = default;
 		Property(const Property &other);
 		Property &operator=(const Property &other);
@@ -75,6 +83,8 @@ namespace pragma::rendering::shader_material {
 		std::optional<GString> specializationType {};
 		GString name;
 		PropertyValue defaultValue;
+		std::optional<Range> range;
+		Flags propertyFlags = Flags::None;
 		size_t offset = 0;
 		size_t padding = 0;
 
@@ -85,6 +95,7 @@ namespace pragma::rendering::shader_material {
 	struct DLLCLIENT Texture {
 		GString name;
 		std::optional<std::string> defaultTexturePath {};
+		std::optional<GString> specializationType {};
 		bool cubemap = false;
 		bool colorMap = false;
 		bool required = false;
@@ -181,5 +192,6 @@ namespace pragma::rendering::shader_material {
 	DLLCLIENT void clear_cache();
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::rendering::shader_material::MaterialFlags)
+REGISTER_BASIC_BITWISE_OPERATORS(pragma::rendering::shader_material::Property::Flags)
 
 #endif

@@ -18,16 +18,13 @@ function util.UVAtlasGenerator:AddEntity(ent, meshFilter)
 	if mdl == nil or mdlC == nil or renderC == nil then
 		return
 	end
-
 	mdl = game.load_model(mdl:GetName()) -- Get original model
 	if mdl == nil then
 		return
 	end
-
 	if self.m_entities[ent] ~= nil then
 		return
 	end
-
 	mdl = mdl:Copy(bit.bor(game.Model.FCOPY_DEEP, game.Model.FCOPY_BIT_COPY_UNIQUE_IDS))
 
 	local skin = mdlC:GetSkin()
@@ -109,6 +106,11 @@ function util.UVAtlasGenerator:Generate(lightmapCachePath)
 			local lightmapUvs = {}
 			local dsVerts = util.DataStream()
 			dsVerts:Resize(numVerts * (util.SIZEOF_VECTOR3 * 2 + util.SIZEOF_VECTOR2 + util.SIZEOF_VECTOR4))
+			local numAlphas = origMesh:GetAlphaCount()
+			local alphas
+			if numAlphas > 0 then
+				alphas = {}
+			end
 			for j = 1, numVerts do
 				local atlasData = atlasMesh:GetVertex(j - 1)
 				local uv = atlasData.uv
@@ -122,6 +124,12 @@ function util.UVAtlasGenerator:Generate(lightmapCachePath)
 				dsVerts:WriteVector2(oldVertex.uv)
 				dsVerts:WriteVector(oldVertex.normal)
 				dsVerts:WriteVector4(oldVertex.tangent)
+
+				if alphas ~= nil then
+					local oldAlpha = origMesh:GetVertexAlpha(originalVertexIndex)
+					oldAlpha = oldAlpha or Vector2()
+					table.insert(alphas, (numAlphas == 1) and oldAlpha.x or oldAlpha)
+				end
 			end
 
 			lmCache:AddInstanceData(
@@ -183,6 +191,15 @@ function util.UVAtlasGenerator:Generate(lightmapCachePath)
 					},
 				})
 				udmMeshData:SetArrayValues("vertices", strct, numVerts, dsVerts, udm.TYPE_ARRAY_LZ4)
+				if alphas ~= nil and #alphas > 0 then
+					udmMeshData:RemoveValue("alphas")
+					udmMeshData:SetArrayValues(
+						"alphas",
+						(numAlphas == 1) and udm.TYPE_FLOAT or udm.TYPE_VECTOR2,
+						alphas,
+						udm.TYPE_ARRAY_LZ4
+					)
+				end
 				udmMeshData:SetArrayValues(
 					"indices",
 					(indexType == game.Model.Mesh.Sub.INDEX_TYPE_UINT32) and udm.TYPE_UINT32 or udm.TYPE_UINT16,

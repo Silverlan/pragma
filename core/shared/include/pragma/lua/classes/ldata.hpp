@@ -29,6 +29,7 @@ namespace Lua {
 		DLLNETWORK void GetVector(lua_State *l, ds::Block &data, const std::string &key);
 		DLLNETWORK void GetVector2(lua_State *l, ds::Block &data, const std::string &key);
 		DLLNETWORK void GetVector4(lua_State *l, ds::Block &data, const std::string &key);
+		DLLNETWORK void GetValue(lua_State *l, ds::Block &data, const std::string &key);
 
 		DLLNETWORK void GetInt(lua_State *l, ds::Block &data, const std::string &val, int32_t def);
 		DLLNETWORK void GetFloat(lua_State *l, ds::Block &data, const std::string &val, float def);

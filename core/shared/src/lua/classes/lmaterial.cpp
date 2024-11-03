@@ -43,6 +43,7 @@ void Lua::Material::register_class(luabind::class_<::Material> &classDef)
 	classDef.def("IsValid", &::Material::IsValid);
 	classDef.def("GetShaderName", &::Material::GetShaderIdentifier);
 	classDef.def("GetName", &::Material::GetName);
+	classDef.def("GetIndex", &::Material::GetIndex);
 	classDef.def("GetDataBlock", &::Material::GetDataBlock);
 	classDef.def("SetLoaded", &::Material::SetLoaded);
 	classDef.def(

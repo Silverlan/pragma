@@ -922,9 +922,8 @@ std::shared_ptr<Model> Game::LoadModel(const std::string &mdl, bool bReload)
 		CallLuaCallbacks<void, std::shared_ptr<Model>>("OnModelLoaded", r);
 	}
 	else {
-		Con::cwar << "Failed to load model '" << mdl << "': " << magic_enum::enum_name(result.result) << Con::endl;
-		if(result.errorMessage)
-			Con::cwar << "Error Message:\n" << *result.errorMessage << Con::endl;
+		std::string errMsg = result.errorMessage ? *result.errorMessage : "Unknown error";
+		Con::cwar << "Failed to load model '" << mdl << "': " << errMsg << Con::endl;
 	}
 	return r;
 }

@@ -1260,27 +1260,26 @@ std::shared_ptr<panima::Animation> pragma::animation::Animation::ToPanimaAnimati
 				return nullptr;
 
 			auto channel = std::make_shared<panima::Channel>();
-
+			auto valueType = (eComponent != PoseComponent::Rotation) ? udm::Type::Vector3 : udm::Type::Quaternion;
 			auto &timeArray = channel->GetTimesArray();
-			timeArray.Resize(times.size());
+			auto &valueArray = channel->GetValueArray();
+			valueArray.SetValueType(valueType);
+
+			channel->Resize(times.size());
 			memcpy(timeArray.GetValuePtr(0), times.data(), util::size_of_container(times));
 
 			if(eComponent != PoseComponent::Rotation) {
 				auto &valueArray = channel->GetValueArray();
-				valueArray.SetValueType(udm::Type::Vector3);
-				valueArray.Resize(values.size());
 				memcpy(valueArray.GetValuePtr(0), values.data(), util::size_of_container(values));
 			}
 			else {
 				auto &valueArray = channel->GetValueArray();
-				valueArray.SetValueType(udm::Type::Quaternion);
 
 				std::vector<Quat> quatValues;
 				quatValues.reserve(values.size());
 				for(auto &v : values)
 					quatValues.push_back(uquat::create(EulerAngles {v.x, v.y, v.z}));
 
-				valueArray.Resize(quatValues.size());
 				memcpy(valueArray.GetValuePtr(0), quatValues.data(), util::size_of_container(quatValues));
 			}
 

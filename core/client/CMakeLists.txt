@@ -25,6 +25,7 @@ pr_add_dependency(${PROJ_NAME} vorbisfile TARGET)
 pr_add_dependency(${PROJ_NAME} noise-static TARGET)
 pr_add_dependency(${PROJ_NAME} noiseutils-static TARGET)
 pr_add_dependency(${PROJ_NAME} muparserx TARGET)
+pr_add_dependency(${PROJ_NAME} OpenFBX TARGET)
 
 pr_add_external_dependency(${PROJ_NAME} tinygltf HEADER_ONLY)
 pr_add_external_dependency(${PROJ_NAME} rapidxml HEADER_ONLY)

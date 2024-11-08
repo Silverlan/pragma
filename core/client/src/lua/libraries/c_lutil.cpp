@@ -152,7 +152,7 @@ int Lua::util::Client::import_gltf(lua_State *l)
 	if(Lua::IsSet(l, 3))
 		importAsSingleModel = Lua::CheckBool(l, 3);
 	std::string errMsg;
-	std::optional<pragma::asset::GltfImportInfo> importInfo {};
+	std::optional<pragma::asset::AssetImportResult> importInfo {};
 	if(f) {
 		importInfo = pragma::asset::import_gltf(*f, errMsg, outputPath, importAsSingleModel);
 	}

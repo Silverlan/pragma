@@ -39,5 +39,6 @@ get_submodule("zlib","https://github.com/Silverlan/zlib.git","3bbd3b3c24516840ea
 get_submodule("fmt","https://github.com/fmtlib/fmt.git","a337011")
 get_submodule("mpaheader","https://github.com/SlawekNowy/mpaheader.git","275d9d9")
 get_submodule("vkvparser","https://github.com/Silverlan/VKVParser.git","5ffec9da2fc51288d0d77a99fcf173d6e9b91cdb")
+get_submodule("openfbx","https://github.com/nem0/OpenFBX.git","ea1af1d81cd04c603e65042c95385370274c61af")
 
 os.chdir(curDir)

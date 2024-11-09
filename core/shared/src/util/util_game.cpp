@@ -94,7 +94,7 @@ static std::shared_ptr<udm::Data> load_udm_asset(T &&f, std::string *optOutErr)
 		if constexpr(std::is_same_v<TBase, std::string>)
 			return udm::Data::Load(f);
 		else {
-			if(typeid(f) == typeid(fsys::File))
+			if(typeid(*f) == typeid(fsys::File))
 				fptr = static_cast<fsys::File *>(f.get())->GetFile();
 			return udm::Data::Load(std::move(f));
 		}

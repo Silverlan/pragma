@@ -53,7 +53,7 @@ const std::vector<std::string> engine_info::get_supported_audio_formats()
 
 DLLNETWORK std::optional<engine_info::GitInfo> engine_info::get_git_info()
 {
-	auto f = filemanager::open_file("git_info.txt", filemanager::FileMode::Read, fsys::SearchFlags::Local | fsys::SearchFlags::NoMounts);
+	auto f = filemanager::open_file("git_info.txt", filemanager::FileMode::Read, nullptr, fsys::SearchFlags::Local | fsys::SearchFlags::NoMounts);
 	if(f == nullptr)
 		return {};
 	GitInfo gitInfo {};

@@ -90,8 +90,8 @@ namespace pragma::asset {
 	DLLCLIENT std::optional<AssetImportResult> import_gltf(ufile::IFile &f, std::string &outErrMsg, const util::Path &outputPath = {}, bool importAsSingleModel = false);
 	DLLCLIENT std::optional<AssetImportResult> import_gltf(const std::string &fileName, std::string &outErrMsg, const util::Path &outputPath = {}, bool importAsSingleModel = false);
 
-	DLLCLIENT std::optional<AssetImportResult> import_fbx(ufile::IFile &f, std::string &outErrMsg);
-	DLLCLIENT std::optional<AssetImportResult> import_fbx(const std::string &fileName, std::string &outErrMsg);
+	DLLCLIENT std::optional<AssetImportResult> import_fbx(ufile::IFile &f, std::string &outErrMsg, const util::Path &outputPath = {});
+	DLLCLIENT std::optional<AssetImportResult> import_fbx(const std::string &fileName, std::string &outErrMsg, const util::Path &outputPath = {});
 
 	DLLCLIENT bool import_texture(const std::string &fileName, const TextureImportInfo &texInfo, const std::string &outputPath, std::string &outErrMsg);
 	DLLCLIENT bool import_texture(std::unique_ptr<ufile::IFile> &&f, const TextureImportInfo &texInfo, const std::string &outputPath, std::string &outErrMsg);

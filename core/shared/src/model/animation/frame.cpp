@@ -274,7 +274,12 @@ void Frame::GetMoveOffset(float *x, float *z)
 	*z = m_move->y;
 }
 uint32_t Frame::GetBoneCount() const { return static_cast<uint32_t>(m_bones.size()); }
-void Frame::SetBoneCount(uint32_t numBones) { m_bones.resize(numBones); }
+void Frame::SetBoneCount(uint32_t numBones)
+{
+	m_bones.resize(numBones);
+	if(!m_scales.empty())
+		UpdateScales();
+}
 void Frame::SetMoveOffset(float x, float z)
 {
 	if(m_move == nullptr)

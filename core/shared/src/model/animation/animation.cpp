@@ -16,6 +16,7 @@
 #include <panima/animation.hpp>
 #include <panima/channel.hpp>
 #include "pragma/model/animation/bone.hpp"
+#include "pragma/entities/components/panima_component.hpp"
 //#include <utility>
 
 import bezierfit;
@@ -1123,6 +1124,99 @@ void pragma::animation::Animation::SetBoneWeight(uint32_t boneId, float weight)
 	if(m_boneIds.size() > m_boneWeights.size())
 		m_boneWeights.resize(m_boneIds.size(), 1.f);
 	m_boneWeights.at(boneId) = weight;
+}
+
+std::shared_ptr<pragma::animation::Animation> pragma::animation::Animation::Create(const panima::Animation &panim, const pragma::animation::Skeleton &skeleton, const Frame &refPose, uint8_t fps)
+{
+	auto duration = panim.GetDuration();
+	auto fnumFrames = duration * fps;
+	uint32_t numFrames;
+	if(umath::abs(1.f - fmodf(fnumFrames, 1.f)) < 0.01f)
+		numFrames = umath::round(fnumFrames);
+	else
+		numFrames = umath::ceil(fnumFrames);
+
+	struct BoneChannels {
+		panima::Channel *position = nullptr;
+		panima::Channel *rotation = nullptr;
+		panima::Channel *scale = nullptr;
+	};
+	std::map<BoneId, BoneChannels> boneChannels;
+
+	for(auto &channel : panim.GetChannels()) {
+		auto componentPath = pragma::PanimaComponent::ParseComponentChannelPath(channel->targetPath);
+		if(componentPath) {
+			auto &[componentName, propertyPath] = *componentPath;
+			if(componentName == "animated" && propertyPath.GetFront() == "bone") {
+				propertyPath.PopFront();
+
+				auto boneName = propertyPath.GetFront();
+				auto boneId = skeleton.LookupBone(std::string {boneName});
+				if(boneId != -1) {
+					auto it = boneChannels.find(boneId);
+					if(it == boneChannels.end())
+						it = boneChannels.insert(std::make_pair(boneId, BoneChannels {})).first;
+					auto &channels = it->second;
+					auto type = propertyPath.GetBack();
+					if(type == "position")
+						channels.position = channel.get();
+					else if(type == "rotation")
+						channels.rotation = channel.get();
+					else if(type == "scale")
+						channels.scale = channel.get();
+				}
+			}
+		}
+	}
+
+	auto numBones = boneChannels.size();
+
+	std::vector<uint16_t> boneList;
+	boneList.reserve(numBones);
+	for(auto &[boneId, channels] : boneChannels)
+		boneList.push_back(boneId);
+
+	auto anim = Animation::Create();
+	anim->SetBoneList(boneList);
+	anim->SetFPS(fps);
+	for(uint32_t frameIdx = 0; frameIdx < numFrames; ++frameIdx) {
+		auto frame = Frame::Create(numBones);
+		auto t = (frameIdx / static_cast<float>(numFrames - 1)) * duration;
+		uint32_t idx = 0;
+		for(auto &[boneId, channels] : boneChannels) {
+			umath::ScaledTransform pose {};
+			if(channels.position) {
+				auto pos = channels.position->GetInterpolatedValue<Vector3>(t);
+				pose.SetOrigin(pos);
+			}
+			else {
+				auto *pos = refPose.GetBonePosition(boneId);
+				if(pos)
+					pose.SetOrigin(*pos);
+			}
+			if(channels.rotation) {
+				auto rot = channels.rotation->GetInterpolatedValue<Quat>(t);
+				pose.SetRotation(rot);
+			}
+			else {
+				auto *rot = refPose.GetBoneOrientation(boneId);
+				if(rot)
+					pose.SetRotation(*rot);
+			}
+			if(channels.scale) {
+				auto scale = channels.scale->GetInterpolatedValue<Vector3>(t);
+				pose.SetScale(scale);
+			}
+			else {
+				auto *scale = refPose.GetBoneScale(boneId);
+				if(scale)
+					pose.SetScale(*scale);
+			}
+			frame->SetBonePose(idx++, pose);
+		}
+		anim->AddFrame(frame);
+	}
+	return anim;
 }
 
 std::shared_ptr<panima::Animation> pragma::animation::Animation::ToPanimaAnimation(const pragma::animation::Skeleton &skel, const Frame *optRefPose) const

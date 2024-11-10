@@ -11,6 +11,7 @@
 #include <pragma/model/c_modelmesh.h>
 #include <pragma/model/c_model.h>
 #include <pragma/model/animation/bone.hpp>
+#include <pragma/model/animation/vertex_animation.hpp>
 #include <pragma/game/game_resources.hpp>
 #include <pragma/asset/util_asset.hpp>
 #include <cmaterial.h>
@@ -305,14 +306,78 @@ bool FbxImporter::LoadMeshes(std::string &outErr)
 		const ofbx::Vec2Attributes uvs = geom.getUVs();
 		auto tangents = geom.getTangents();
 
+		struct BlendShapeData {
+			std::vector<Vector3> posDeltas;
+			std::vector<Vector3> normDeltas;
+			std::shared_ptr<VertexAnimation> va;
+		};
+		std::vector<BlendShapeData> blendShapeData;
 		auto *blendShape = fbxMesh.getBlendShape();
 		if(blendShape) {
+			auto *geom = fbxMesh.getGeometry();
 			auto numChannels = blendShape->getBlendShapeChannelCount();
+			blendShapeData.reserve(numChannels);
 			for(size_t i = 0; i < numChannels; ++i) {
+				blendShapeData.push_back({});
+				auto &shapeData = blendShapeData.back();
 				auto *channel = blendShape->getBlendShapeChannel(i);
-				channel->getDeformPercent();
-			}
+				auto numShapes = channel->getShapeCount();
+				if(numShapes == 0)
+					continue;
+				auto *shape = channel->getShape(numShapes - 1);
+				const int *shapeIndices = shape->getIndices();
 
+				const int shapeVertexCount = shape->getVertexCount();
+				const int shapeIndexCount = shape->getIndexCount();
+				if(shapeVertexCount != shapeIndexCount)
+					continue;
+				std::string morphTargetName = shape->name;
+
+				if(m_model->GetFlexController(morphTargetName) == nullptr) {
+					auto weight = channel->getShapeCount() > 1 ? (float)(channel->getDeformPercent() / 100.0) : 1.0f;
+					auto &fc = m_model->AddFlexController(morphTargetName);
+					fc.min = 0.f;
+					fc.max = 1.f;
+					// TODO: Apply default
+				}
+				uint32_t fcId = 0;
+				m_model->GetFlexControllerId(morphTargetName, fcId);
+
+				if(m_model->GetFlex(morphTargetName) == nullptr) {
+					auto &flex = m_model->AddFlex(morphTargetName);
+					auto va = m_model->AddVertexAnimation(morphTargetName);
+					flex.SetVertexAnimation(*va);
+
+					auto &operations = flex.GetOperations();
+					operations.push_back({});
+					auto &op = flex.GetOperations().back();
+					op.type = Flex::Operation::Type::Fetch;
+					op.d.index = fcId;
+				}
+				uint32_t flexId;
+				m_model->GetFlexId(morphTargetName, flexId);
+				auto va = m_model->GetFlex(flexId)->GetVertexAnimation()->shared_from_this();
+				shapeData.va = va;
+
+				auto *shapeVertices = shape->getVertices();
+				auto *shapeNormals = shape->getNormals();
+
+				shapeData.posDeltas.resize(fbxMesh.getGeometryData().getPositions().count);
+				if(shapeNormals)
+					shapeData.normDeltas.resize(fbxMesh.getGeometryData().getPositions().count);
+				for(int32_t i = 0; i < shapeIndexCount; i++) {
+					int shapeIndex = shapeIndices[i];
+					auto &shapeVert = shapeVertices[i];
+					Vector3 posDelta {shapeVert.x, shapeVert.y, shapeVert.z};
+					shapeData.posDeltas[shapeIndex] = posDelta * m_fbxScale;
+
+					if(shapeNormals) {
+						auto &shapeNorm = shapeNormals[i];
+						Vector3 normDelta {shapeNorm.x, shapeNorm.y, shapeNorm.z};
+						shapeData.normDeltas[shapeIndex] = normDelta;
+					}
+				}
+			}
 		}
 
 		std::vector<umath::VertexWeight> vertWeights {};
@@ -352,10 +417,12 @@ bool FbxImporter::LoadMeshes(std::string &outErr)
 		auto mesh = c_game->CreateModelMesh();
 		for(int partition_idx = 0; partition_idx < geom.getPartitionCount(); ++partition_idx) {
 			const ofbx::GeometryPartition &partition = geom.getPartition(partition_idx);
+			auto *mat = (fbxMesh.getMaterialCount() > 0) ? fbxMesh.getMaterial(partition_idx) : nullptr;
 
 			auto subMesh = c_game->CreateModelSubMesh();
 			auto &verts = subMesh->GetVertices();
 
+			std::unordered_map<int64_t, int64_t> fbxIndexToPragmaIndex;
 			for(int polygon_idx = 0; polygon_idx < partition.polygon_count; ++polygon_idx) {
 				const ofbx::GeometryPartition::Polygon &polygon = partition.polygons[polygon_idx];
 
@@ -386,6 +453,7 @@ bool FbxImporter::LoadMeshes(std::string &outErr)
 						auto &vw = vertWeights[positions.indices[idx]];
 						subMesh->SetVertexWeight(vertIdx, vw);
 					}
+					fbxIndexToPragmaIndex[idx] = vertIdx;
 				}
 
 				for(size_t i = 0; i < numIndices; i += 3)
@@ -403,6 +471,32 @@ bool FbxImporter::LoadMeshes(std::string &outErr)
 			//}
 
 			mesh->AddSubMesh(subMesh);
+
+			auto numVerts = subMesh->GetVertexCount();
+			for(auto &shapeData : blendShapeData) {
+				if(!shapeData.va || shapeData.posDeltas.empty())
+					continue;
+				auto mva = shapeData.va->AddMeshFrame(*mesh, *subMesh);
+				mva->SetVertexCount(numVerts);
+				auto hasNormals = !shapeData.normDeltas.empty();
+				if(hasNormals)
+					mva->SetFlagEnabled(MeshVertexFrame::Flags::HasNormals);
+
+				for(size_t i = 0; i < shapeData.posDeltas.size(); ++i) {
+					auto it = fbxIndexToPragmaIndex.find(i);
+					if(it == fbxIndexToPragmaIndex.end())
+						continue;
+					mva->SetVertexPosition(it->second, shapeData.posDeltas[positions.indices[i]]);
+				}
+				if(hasNormals) {
+					for(size_t i = 0; i < shapeData.normDeltas.size(); ++i) {
+						auto it = fbxIndexToPragmaIndex.find(i);
+						if(it == fbxIndexToPragmaIndex.end())
+							continue;
+						mva->SetVertexNormal(it->second, shapeData.normDeltas[positions.indices[i]]);
+					}
+				}
+			}
 		}
 
 		mg->AddMesh(mesh);

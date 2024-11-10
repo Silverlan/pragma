@@ -50,19 +50,34 @@ namespace pragma::asset::fbx {
 		~FbxImporter();
 		std::optional<AssetImportResult> Load(std::string &outErr);
 	  private:
+		struct FbxMeshInfo {
+			const ofbx::Mesh *mesh = nullptr;
+			const ofbx::Material *material = nullptr;
+			int32_t subMesh = -1;
+			int32_t boneIndex = -1;
+			int32_t lod = -1;
+			bool skinned = false;
+		};
 		std::shared_ptr<Model> m_model;
 		std::string m_mdlPath;
 		std::string m_mdlName;
 		util::Path m_outputPath;
 		ofbx::IScene *m_fbxScene;
 		float m_fbxScale = 1.f;
+		std::vector<const ofbx::Object *> m_fbxBones;
+		std::vector<FbxMeshInfo> m_fbxMeshes;
 		UpVector m_upVector = UpVector::Y;
 
 		static umath::ScaledTransform GetPose(const ofbx::Object &o);
 		static Vector3 GetTranslation(const ofbx::DVec3 &o);
 		static Quat GetRotation(const ofbx::DVec3 &o, RotationOrder order);
 		static Vector3 GetScale(const ofbx::DVec3 &o);
+		static std::string GetImportMeshName(const FbxMeshInfo &mesh);
+		static int DetectMeshLOD(const FbxMeshInfo &mesh);
 
+		void GatherBones(bool force_skinned);
+		void SortBones(bool force_skinned);
+		void InsertHierarchy(std::vector<const ofbx::Object *> &bones, const ofbx::Object *node);
 		void FillSkinInfo(std::vector<umath::VertexWeight> &skinning, const ofbx::Mesh *mesh, int32_t boneId);
 		bool LoadMaterial(const ofbx::Material &mat, std::string &outErr);
 		bool LoadMeshes(std::string &outErr);

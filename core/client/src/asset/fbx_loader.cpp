@@ -15,6 +15,7 @@
 #include <pragma/asset/util_asset.hpp>
 #include <cmaterial.h>
 #include <ofbx.h>
+#include <span>
 #include <util_image.hpp>
 #include <fsys/ifile.hpp>
 #include "pragma/asset/c_util_model.hpp"
@@ -175,9 +176,126 @@ std::optional<std::string> FbxImporter::Finalize(std::string &outErr)
 	return mdlPath;
 }
 
+static char makeLowercase(char ch) { return std::tolower(static_cast<unsigned char>(ch)); }
+
+// Converts a string to lowercase and writes to an output span
+static bool makeLowercase(std::span<char> output, std::string_view src)
+{
+	if(src.size() + 1 > output.size()) // +1 for null terminator
+		return false;
+
+	auto destination = output.begin();
+	for(const char &ch : src) {
+		*destination++ = makeLowercase(ch);
+	}
+	*destination = '\0'; // Null-terminate the output
+	return true;
+}
+
+const char *findInsensitive(std::string_view haystack, std::string_view needle)
+{
+	assert(!needle.empty());
+	if(needle.size() > haystack.size())
+		return nullptr;
+
+	const char needle0 = makeLowercase(needle[0]);
+
+	for(size_t i = 0; i <= haystack.size() - needle.size(); ++i) {
+		if(makeLowercase(haystack[i]) == needle0) {
+			size_t j = 1;
+			while(j < needle.size() && makeLowercase(haystack[i + j]) == makeLowercase(needle[j])) {
+				++j;
+			}
+			if(j == needle.size())
+				return haystack.data() + i; // Match found
+		}
+	}
+	return nullptr;
+}
+
+int stringLength(const char *str) { return (int)strlen(str); }
+
+std::string FbxImporter::GetImportMeshName(const FbxImporter::FbxMeshInfo &mesh)
+{
+	const char *name = mesh.mesh->name;
+	const ofbx::Material *material = mesh.material;
+
+	if(name[0] == '\0' && mesh.mesh->getParent())
+		name = mesh.mesh->getParent()->name;
+	if(name[0] == '\0' && material)
+		name = material->name;
+	std::string out = name;
+	for(char &c : out) {
+		if(c == 0)
+			break;
+		// we use ':' as a separator between subresource:resource, so we can't have
+		// use it in mesh name
+		if(c == ':')
+			c = '_';
+	}
+	if(mesh.subMesh >= 0) {
+		out += "_" + std::to_string(mesh.subMesh);
+	}
+	return out;
+}
+
+int FbxImporter::DetectMeshLOD(const FbxImporter::FbxMeshInfo &mesh)
+{
+	const char *node_name = mesh.mesh->name;
+	const char *lod_str = findInsensitive(node_name, "_LOD");
+	if(!lod_str) {
+		auto meshName = GetImportMeshName(mesh);
+		lod_str = findInsensitive(meshName, "_LOD");
+		if(!lod_str)
+			return 0;
+	}
+
+	lod_str += stringLength("_LOD");
+
+	auto lod = ustring::to_int(lod_str);
+	return lod;
+}
+
 bool FbxImporter::LoadMeshes(std::string &outErr)
 {
 	int mesh_count = m_fbxScene->getMeshCount();
+
+	m_fbxMeshes.reserve(mesh_count);
+	for(int mesh_idx = 0; mesh_idx < mesh_count; ++mesh_idx) {
+		const ofbx::Mesh *fbx_mesh = (const ofbx::Mesh *)m_fbxScene->getMesh(mesh_idx);
+		int mat_count = fbx_mesh->getMaterialCount();
+		auto hasMat = (mat_count > 0);
+		if(mat_count == 0)
+			mat_count = 1;
+		for(int j = 0; j < mat_count; ++j) {
+			m_fbxMeshes.push_back({});
+			auto &mesh = m_fbxMeshes.back();
+			mesh.skinned = false;
+			const ofbx::Skin *skin = fbx_mesh->getSkin();
+			if(skin) {
+				for(int i = 0; i < skin->getClusterCount(); ++i) {
+					if(skin->getCluster(i)->getIndicesCount() > 0) {
+						mesh.skinned = true;
+						break;
+					}
+				}
+			}
+			mesh.mesh = fbx_mesh;
+			mesh.material = hasMat ? fbx_mesh->getMaterial(j) : nullptr;
+			mesh.subMesh = mat_count > 1 ? j : -1;
+			mesh.lod = DetectMeshLOD(mesh);
+		}
+	}
+
+	auto anySkinned = false;
+	for(auto &mesh : m_fbxMeshes) {
+		if(mesh.skinned) {
+			anySkinned = true;
+			break;
+		}
+	}
+	GatherBones(anySkinned);
+
 	auto mg = m_model->AddMeshGroup("reference");
 	for(int mesh_idx = 0; mesh_idx < mesh_count; ++mesh_idx) {
 		const ofbx::Mesh &fbxMesh = *m_fbxScene->getMesh(mesh_idx);
@@ -274,15 +392,15 @@ bool FbxImporter::LoadMeshes(std::string &outErr)
 					subMesh->AddTriangle(startIdx + i, startIdx + i + 1, startIdx + i + 2);
 			}
 
-			if(pose != umath::ScaledTransform {}) {
-				for(auto &v : subMesh->GetVertices()) {
-					v.position *= scale;
-					v.position = pose * v.position;
-					v.position *= m_fbxScale;
-					uvec::rotate(&v.normal, pose.GetRotation());
-					v.position = fix_orientation(v.position, m_upVector);
-				}
+			//if(pose != umath::ScaledTransform {}) {
+			for(auto &v : subMesh->GetVertices()) {
+				v.position *= scale;
+				v.position = pose * v.position;
+				v.position *= m_fbxScale;
+				uvec::rotate(&v.normal, pose.GetRotation());
+				v.position = fix_orientation(v.position, m_upVector);
 			}
+			//}
 
 			mesh->AddSubMesh(subMesh);
 		}
@@ -298,6 +416,207 @@ bool FbxImporter::LoadMorphTargets(std::string &outErr)
 {
 	//
 	return true;
+}
+
+static void normalizeScale(Mat4 &m)
+{
+	Vector3 scale = {1 / length(Vector3(m[0].x, m[1].x, m[2].x)), 1 / length(Vector3(m[0].y, m[1].y, m[2].y)), 1 / length(Vector3(m[0].z, m[1].z, m[2].z))};
+
+	m[0].x *= scale.x;
+	m[1].x *= scale.x;
+	m[2].x *= scale.x;
+
+	m[0].y *= scale.y;
+	m[1].y *= scale.y;
+	m[2].y *= scale.y;
+
+	m[0].z *= scale.z;
+	m[1].z *= scale.z;
+	m[2].z *= scale.z;
+}
+
+static void convert(const ofbx::DMatrix &mtx, Vector3 &pos, Quat &rot)
+{
+	auto m = to_pragma_matrix(mtx);
+	normalizeScale(m);
+	umath::Transform pose {m};
+	pos = pose.GetOrigin();
+	rot = pose.GetRotation();
+}
+
+static float evalCurve(ofbx::i64 time, const ofbx::AnimationCurve &curve)
+{
+	const ofbx::i64 *times = curve.getKeyTime();
+	const float *values = curve.getKeyValue();
+	const int count = curve.getKeyCount();
+
+	time = std::clamp(time, times[0], times[count - 1]);
+
+	for(int i = 0; i < count; ++i) {
+		if(time == times[i])
+			return values[i];
+		if(time < times[i]) {
+			const float t = float((time - times[i - 1]) / double(times[i] - times[i - 1]));
+			return values[i - 1] * (1 - t) + values[i] * t;
+		}
+	}
+	return 0.f;
+}
+
+static ofbx::i64 sampleToFBXTime(ofbx::u32 sample, float fps) { return ofbx::secondsToFbxTime(sample / fps); }
+
+struct Key {
+	Key() : pos {}, rot {} {}
+	Vector3 pos;
+	Quat rot;
+};
+static void fill(const ofbx::Object &bone, const ofbx::AnimationLayer &layer, std::vector<Key> &keys, ofbx::u32 from_sample, ofbx::u32 samples_count, float fps)
+{
+	const ofbx::AnimationCurveNode *translation_node = layer.getCurveNode(bone, "Lcl Translation");
+	const ofbx::AnimationCurveNode *rotation_node = layer.getCurveNode(bone, "Lcl Rotation");
+	if(!translation_node && !rotation_node)
+		return;
+
+	keys.resize(samples_count);
+
+	auto fill_rot = [&](ofbx::u32 idx, const ofbx::AnimationCurve *curve) {
+		if(!curve) {
+			const ofbx::DVec3 lcl_rot = bone.getLocalRotation();
+			for(Key &k : keys) {
+				(&k.rot.x)[idx] = float((&lcl_rot.x)[idx]);
+			}
+			return;
+		}
+
+		for(ofbx::u32 f = 0; f < samples_count; ++f) {
+			Key &k = keys[f];
+			(&k.rot.x)[idx] = evalCurve(sampleToFBXTime(from_sample + f, fps), *curve);
+		}
+	};
+
+	auto fill_pos = [&](ofbx::u32 idx, const ofbx::AnimationCurve *curve) {
+		if(!curve) {
+			const ofbx::DVec3 lcl_pos = bone.getLocalTranslation();
+			for(Key &k : keys) {
+				(&k.pos.x)[idx] = float((&lcl_pos.x)[idx]);
+			}
+			return;
+		}
+
+		for(ofbx::u32 f = 0; f < samples_count; ++f) {
+			Key &k = keys[f];
+			(&k.pos.x)[idx] = evalCurve(sampleToFBXTime(from_sample + f, fps), *curve);
+		}
+	};
+
+	fill_rot(0, rotation_node ? rotation_node->getCurve(0) : nullptr);
+	fill_rot(1, rotation_node ? rotation_node->getCurve(1) : nullptr);
+	fill_rot(2, rotation_node ? rotation_node->getCurve(2) : nullptr);
+
+	fill_pos(0, translation_node ? translation_node->getCurve(0) : nullptr);
+	fill_pos(1, translation_node ? translation_node->getCurve(1) : nullptr);
+	fill_pos(2, translation_node ? translation_node->getCurve(2) : nullptr);
+
+	for(Key &key : keys) {
+		const ofbx::DMatrix mtx = bone.evalLocal({key.pos.x, key.pos.y, key.pos.z}, {key.rot.x, key.rot.y, key.rot.z});
+		convert(mtx, key.pos, key.rot);
+	}
+}
+
+void FbxImporter::InsertHierarchy(std::vector<const ofbx::Object *> &bones, const ofbx::Object *node)
+{
+	if(!node)
+		return;
+	auto it = std::find(bones.begin(), bones.end(), node);
+	if(it != bones.end())
+		return;
+	ofbx::Object *parent = node->getParent();
+	InsertHierarchy(bones, parent);
+	bones.push_back(node);
+}
+
+void FbxImporter::GatherBones(bool force_skinned)
+{
+	for(auto &mesh : m_fbxMeshes) {
+		const ofbx::Skin *skin = mesh.mesh->getSkin();
+		if(skin) {
+			for(int i = 0; i < skin->getClusterCount(); ++i) {
+				const ofbx::Cluster *cluster = skin->getCluster(i);
+				InsertHierarchy(m_fbxBones, cluster->getLink());
+			}
+		}
+
+		if(force_skinned) {
+			InsertHierarchy(m_fbxBones, mesh.mesh);
+		}
+	}
+
+	for(int i = 0, n = m_fbxScene->getAnimationStackCount(); i < n; ++i) {
+		const ofbx::AnimationStack *stack = m_fbxScene->getAnimationStack(i);
+		for(int j = 0; stack->getLayer(j); ++j) {
+			const ofbx::AnimationLayer *layer = stack->getLayer(j);
+			for(int k = 0; layer->getCurveNode(k); ++k) {
+				const ofbx::AnimationCurveNode *node = layer->getCurveNode(k);
+				if(node->getBone())
+					InsertHierarchy(m_fbxBones, node->getBone());
+			}
+		}
+	}
+
+	// removeDuplicates
+	for(auto it0 = m_fbxBones.begin(); it0 != m_fbxBones.end();) {
+		auto *bone = *it0;
+		auto it1 = std::find(it0 + 1, m_fbxBones.end(), bone);
+		if(it1 != m_fbxBones.end()) {
+			it0 = m_fbxBones.erase(it0);
+		}
+		else
+			++it0;
+	}
+	SortBones(force_skinned);
+}
+
+template<typename T>
+void swapAndPop(std::vector<T> &vec, size_t index)
+{
+	if(index < vec.size()) { // Ensure index is valid
+		// Swap the element at 'index' with the last element
+		std::swap(vec[index], vec.back());
+		// Remove the last element (originally at 'index')
+		vec.pop_back();
+	}
+}
+
+void FbxImporter::SortBones(bool force_skinned)
+{
+	const int count = m_fbxBones.size();
+	ofbx::u32 first_nonroot = 0;
+	for(int32_t i = 0; i < count; ++i) {
+		if(!m_fbxBones[i]->getParent()) {
+			std::swap(m_fbxBones[i], m_fbxBones[first_nonroot]);
+			++first_nonroot;
+		}
+	}
+
+	for(int32_t i = 0; i < count; ++i) {
+		for(int j = i + 1; j < count; ++j) {
+			if(m_fbxBones[i]->getParent() == m_fbxBones[j]) {
+				const ofbx::Object *bone = m_fbxBones[j];
+				swapAndPop(m_fbxBones, j);
+				m_fbxBones.insert(m_fbxBones.begin() + i, bone);
+				--i;
+				break;
+			}
+		}
+	}
+
+	if(force_skinned) {
+		for(auto &m : m_fbxMeshes) {
+			auto it = std::find(m_fbxBones.begin(), m_fbxBones.end(), m.mesh);
+			m.boneIndex = (it != m_fbxBones.end()) ? (it - m_fbxBones.begin()) : -1;
+			m.skinned = true;
+		}
+	}
 }
 
 bool FbxImporter::LoadAnimations(std::string &outErr)
@@ -340,6 +659,56 @@ bool FbxImporter::LoadAnimations(std::string &outErr)
 			continue;
 		}
 
+		double full_len;
+		if(take_info) {
+			full_len = take_info->local_time_to - take_info->local_time_from;
+		}
+		else if(m_fbxScene->getGlobalSettings()) {
+			full_len = m_fbxScene->getGlobalSettings()->TimeSpanStop;
+		}
+		else {
+			//logError("Unsupported animation in ", src);
+			continue;
+		}
+
+		const float fps = m_fbxScene->getSceneFrameRate();
+		auto anim = pragma::animation::Animation::Create();
+
+		auto numBones = m_fbxBones.size();
+		std::vector<pragma::animation::BoneId> boneIds;
+		boneIds.reserve(numBones);
+		for(auto *fbxBone : m_fbxBones) {
+			auto bone = AddBone(*fbxBone);
+			boneIds.push_back(bone->ID);
+		}
+		size_t fbxBoneId = 0;
+		for(const ofbx::Object *fbxBone : m_fbxBones) {
+			std::vector<Key> keys;
+			fill(*fbxBone, *anim_layer, keys, 0, ofbx::u32(full_len * fps + 0.5f) + 1, fps);
+
+			while(anim->GetFrameCount() < keys.size())
+				anim->AddFrame(Frame::Create(numBones));
+			for(size_t i = 0; i < keys.size(); ++i) {
+				auto frame = anim->GetFrame(i);
+				auto &key = keys[i];
+
+				auto pos = key.pos;
+				auto rot = key.rot;
+
+				pos *= m_fbxScale;
+				pos = fix_orientation(pos, m_upVector);
+				rot = fix_orientation(rot, m_upVector);
+
+				umath::Transform pose {pos, rot};
+				frame->SetBonePose(fbxBoneId, pose);
+			}
+			++fbxBoneId;
+		}
+		anim->SetBoneList(boneIds);
+		anim->SetFPS(fps);
+		m_model->AddAnimation(name, anim);
+
+#if 0
 		auto panim = std::make_shared<panima::Animation>();
 		bool data_found = false;
 		for(int k = 0; anim_layer->getCurveNode(k); ++k) {
@@ -464,9 +833,26 @@ bool FbxImporter::LoadAnimations(std::string &outErr)
 			}
 		}
 
-		uint8_t fps = 24;
-		auto anim = pragma::animation::Animation::Create(*panim, skel, ref, fps);
-		m_model->AddAnimation(name, anim);
+		{
+			uint8_t fps = 24; // TODO: Determine from frame diff
+			auto anim = pragma::animation::Animation::Create(*panim, skel, ref, fps);
+			for(auto &frame : anim->GetFrames()) {
+				auto numTransforms = frame->GetBoneCount();
+				for(size_t i = 0; i < numTransforms; ++i) {
+					umath::ScaledTransform pose;
+					if(!frame->GetBonePose(i, pose))
+						continue;
+					auto origin = pose.GetOrigin();
+					origin *= m_fbxScale;
+					origin = fix_orientation(origin, m_upVector);
+					pose.SetOrigin(origin);
+					frame->SetBonePose(i, pose);
+				}
+			}
+
+			m_model->AddAnimation(name, anim);
+		}
+#endif
 	}
 	return true;
 }
@@ -478,7 +864,7 @@ std::optional<pragma::asset::AssetImportResult> FbxImporter::Load(std::string &o
 	mdl->GetBaseMeshes() = {0u};
 	mdl->CreateTextureGroup();
 
-	m_fbxScale = m_fbxScene->getGlobalSettings()->UnitScaleFactor * pragma::metres_to_units(1.0) *0.01f;
+	m_fbxScale = m_fbxScene->getGlobalSettings()->UnitScaleFactor * pragma::metres_to_units(1.0) * 0.01f;
 	m_upVector = static_cast<UpVector>(m_fbxScene->getGlobalSettings()->UpAxis);
 
 	if(!LoadMeshes(outErr) || !LoadAnimations(outErr) || !LoadMorphTargets(outErr))
@@ -562,10 +948,11 @@ std::shared_ptr<pragma::animation::Bone> FbxImporter::AddBone(const ofbx::Object
 	ref.SetBoneCount(skel.GetBoneCount());
 	auto m = to_pragma_matrix(o.getGlobalTransform());
 	umath::ScaledTransform pose {m};
-
-	pose.SetRotation(fix_orientation(pose.GetRotation(), m_upVector));
-	auto origin = fix_orientation(pose.GetOrigin(), m_upVector);
+	auto scale = pose.GetScale();
+	pose.SetScale(uvec::IDENTITY_SCALE);
+	auto origin = pose.GetOrigin();
 	origin *= m_fbxScale;
+	origin = fix_orientation(origin, m_upVector);
 	pose.SetOrigin(origin);
 
 	ref.SetBonePose(boneId, pose);

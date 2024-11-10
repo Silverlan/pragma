@@ -85,6 +85,7 @@ namespace pragma::asset {
 
 	struct DLLCLIENT AssetImportResult {
 		std::vector<std::string> models;
+		std::vector<std::shared_ptr<Model>> modelObjects;
 		std::string mapName;
 	};
 	DLLCLIENT std::optional<AssetImportResult> import_gltf(ufile::IFile &f, std::string &outErrMsg, const util::Path &outputPath = {}, bool importAsSingleModel = false);

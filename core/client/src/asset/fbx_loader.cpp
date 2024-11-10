@@ -968,6 +968,7 @@ std::optional<pragma::asset::AssetImportResult> FbxImporter::Load(std::string &o
 		return {};
 	AssetImportResult result {};
 	result.models.push_back(*mdlPath);
+	result.modelObjects.push_back(m_model);
 	return result;
 }
 Vector3 FbxImporter::GetTranslation(const ofbx::DVec3 &o) { return {o.x, o.y, o.z}; }

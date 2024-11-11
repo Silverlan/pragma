@@ -41,7 +41,7 @@
 		},
 		{
 			$string name "matcap_map"
-			$string default "matcap"
+			$string default "matcaps/00default"
 			$string specializationType "matcap"
 		}
 	]

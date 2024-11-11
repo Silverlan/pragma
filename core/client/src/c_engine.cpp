@@ -719,6 +719,23 @@ bool CEngine::Initialize(int argc, char *argv[])
 	contextCreateInfo.width = 1280;
 	contextCreateInfo.height = 1024;
 	contextCreateInfo.windowless = g_windowless;
+
+	auto renderApiData = udm::Data::Load("cfg/render_api.udm");
+	if(renderApiData) {
+		auto &renderAPI = GetRenderAPI();
+		auto data = renderApiData->GetAssetData().GetData();
+		for(auto &pair : data["all"]["extensions"].ElIt()) {
+			auto availability = prosper::IPrContext::ExtensionAvailability::EnableIfAvailable;
+			udm::to_enum_value<prosper::IPrContext::ExtensionAvailability>(pair.property, availability);
+			contextCreateInfo.extensions[std::string {pair.key}] = availability;
+		}
+		for(auto &pair : data[renderAPI]["extensions"].ElIt()) {
+			auto availability = prosper::IPrContext::ExtensionAvailability::EnableIfAvailable;
+			udm::to_enum_value<prosper::IPrContext::ExtensionAvailability>(pair.property, availability);
+			contextCreateInfo.extensions[std::string {pair.key}] = availability;
+		}
+	}
+
 	if(windowRes) {
 		std::vector<std::string> vals;
 		ustring::explode(*windowRes, "x", vals);

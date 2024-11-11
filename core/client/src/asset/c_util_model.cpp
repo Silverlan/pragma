@@ -292,6 +292,16 @@ uimg::TextureInfo pragma::asset::get_texture_info(bool isGreyScale, bool isNorma
 	return texInfo;
 }
 
+void pragma::asset::assign_texture(CMaterial &mat, const std::string &textureRootPath, const std::string &matIdentifier, const std::string &texName, prosper::IImage &img, bool greyScale, bool normalMap, AlphaMode alphaMode)
+{
+	auto texInfo = pragma::asset::get_texture_info(greyScale, normalMap, alphaMode);
+	c_game->SaveImage(img, textureRootPath + texName, texInfo);
+
+	auto path = util::FilePath(texName);
+	path.PopFront();
+	mat.SetTexture(matIdentifier, path.GetString());
+}
+
 static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::string &optFileName, std::string &outErrMsg, const util::Path &outputPath, bool importAsMap)
 {
 	auto scale = static_cast<float>(pragma::metres_to_units(1.f));
@@ -446,15 +456,8 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 		dataBlock->AddValue("int", "alpha_mode", std::to_string(umath::to_integral(alphaMode)));
 		dataBlock->AddValue("float", "alpha_cutoff", std::to_string(gltfMat.alphaCutoff));
 
-		std::string textureRootPath = "addons/converted/";
-
-		auto fWriteImage = [cmat, &textureRootPath](const std::string &matIdentifier, const std::string &texName, prosper::IImage &img, bool greyScale, bool normalMap, AlphaMode alphaMode = AlphaMode::Opaque) {
-			auto texInfo = pragma::asset::get_texture_info(greyScale, normalMap, alphaMode);
-			c_game->SaveImage(img, textureRootPath + texName, texInfo);
-
-			util::Path albedoPath {texName};
-			albedoPath.PopFront();
-			cmat->SetTexture(matIdentifier, albedoPath.GetString());
+		auto fWriteImage = [cmat](const std::string &matIdentifier, const std::string &texName, prosper::IImage &img, bool greyScale, bool normalMap, AlphaMode alphaMode = AlphaMode::Opaque) {
+			pragma::asset::assign_texture(*cmat, ::util::CONVERT_PATH, matIdentifier, texName, img, greyScale, normalMap, alphaMode);
 		};
 
 		auto isHandled = false;

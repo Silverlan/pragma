@@ -14,18 +14,55 @@
 #include <pragma/model/animation/vertex_animation.hpp>
 #include <pragma/game/game_resources.hpp>
 #include <pragma/asset/util_asset.hpp>
+#include "pragma/rendering/shaders/util/c_shader_specular_glossiness_to_metalness_roughness.hpp"
+#include "pragma/rendering/shaders/util/c_shader_compose_rma.hpp"
+#include "pragma/rendering/shaders/util/c_shader_combine_image_channels.hpp"
 #include <cmaterial.h>
 #include <ofbx.h>
 #include <span>
 #include <util_image.hpp>
+#include <util_image_buffer.hpp>
 #include <fsys/ifile.hpp>
 #include "pragma/asset/c_util_model.hpp"
+#include <cmaterial_manager2.hpp>
+#include <texturemanager/texture_manager2.hpp>
 
 using namespace pragma::asset::fbx;
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;
+extern DLLCLIENT CEngine *c_engine;
 
 static std::string_view to_string_view(ofbx::DataView data) { return std::string_view {(const char *)data.begin, (const char *)data.end}; }
+
+static std::shared_ptr<prosper::Texture> load_texture_image(const std::string &mdlPath, const std::string &mdlName, const std::string &texPath, bool isAbsPath)
+{
+	auto fullTexFilePath = util::FilePath(texPath);
+	if(!isAbsPath)
+		fullTexFilePath = mdlPath + fullTexFilePath;
+	auto ext = fullTexFilePath.GetFileExtension();
+	if(ext && (*ext == "dds" || *ext == "ktx")) {
+		auto &texManager = static_cast<msys::CMaterialManager &>(client->GetMaterialManager()).GetTextureManager();
+		auto tex = texManager.LoadAsset(fullTexFilePath.GetString(), util::AssetLoadFlags::AbsolutePath | util::AssetLoadFlags::DontCache | util::AssetLoadFlags::IgnoreCache);
+		if(!tex)
+			return nullptr;
+		return tex->GetVkTexture();
+	}
+	auto f = filemanager::open_file(fullTexFilePath.GetString(), filemanager::FileMode::Read | filemanager::FileMode::Binary);
+	if(!f)
+		f = filemanager::open_system_file(fullTexFilePath.GetString(), filemanager::FileMode::Read | filemanager::FileMode::Binary);
+	if(!f)
+		return nullptr;
+	fsys::File file {f};
+	auto imgBuf = uimg::load_image(file);
+	if(!imgBuf)
+		return nullptr;
+	imgBuf->SwapChannels(uimg::Channel::Red, uimg::Channel::Blue);
+	auto img = c_engine->GetRenderContext().CreateImage(*imgBuf);
+	prosper::util::TextureCreateInfo texCreateInfo {};
+	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
+	prosper::util::SamplerCreateInfo samplerCreateInfo {};
+	return c_engine->GetRenderContext().CreateTexture(texCreateInfo, *img, imgViewCreateInfo, samplerCreateInfo);
+}
 
 static std::optional<std::string> import_texture(const std::string &mdlPath, const std::string &mdlName, const std::string &texPath, bool isAbsPath)
 {
@@ -57,6 +94,8 @@ static std::optional<std::string> import_texture(const std::string &mdlPath, con
 	auto img = uimg::load_image(file);
 	if(!img)
 		return {};
+	img->SwapChannels(uimg::Channel::Red, uimg::Channel::Blue);
+	// TODO
 	auto greyScale = false;
 	auto normalMap = false;
 	auto alphaMode = AlphaMode::Opaque;
@@ -120,10 +159,10 @@ static Quat fix_orientation(const Quat &v, pragma::asset::fbx::UpVector orientat
 
 FbxImporter::~FbxImporter() { m_fbxScene->destroy(); }
 
-bool FbxImporter::LoadMaterial(const ofbx::Material &mat, std::string &outErr)
+std::optional<uint32_t> FbxImporter::LoadMaterial(const ofbx::Material &fbxMat, uint32_t partitionIdx, std::string &outErr)
 {
-	auto importTexture = [this, &mat](ofbx::Texture::TextureType etex) -> std::optional<std::string> {
-		auto *tex = mat.getTexture(etex);
+	auto importTexture = [this, &fbxMat](ofbx::Texture::TextureType etex) -> std::optional<std::string> {
+		auto *tex = fbxMat.getTexture(etex);
 		if(!tex)
 			return {};
 		ofbx::DataView filename = tex->getRelativeFileName();
@@ -135,34 +174,103 @@ bool FbxImporter::LoadMaterial(const ofbx::Material &mat, std::string &outErr)
 		auto path = util::FilePath(std::string {to_string_view(filename)});
 		return ::import_texture(m_mdlPath, m_mdlName, path.GetString(), isAbsPath);
 	};
-	auto texPath = importTexture(ofbx::Texture::DIFFUSE);
-	if(texPath) {
-		std::string fbxMatName = mat.name;
-		auto matPath = *texPath;
-		if(!fbxMatName.empty()) {
-			matPath = ufile::get_path_from_filename(matPath);
-			matPath += fbxMatName;
+	auto loadTexture = [this, &fbxMat](ofbx::Texture::TextureType etex) -> std::shared_ptr<prosper::Texture> {
+		auto *tex = fbxMat.getTexture(etex);
+		if(!tex)
+			return {};
+		ofbx::DataView filename = tex->getRelativeFileName();
+		auto isAbsPath = false;
+		if(filename == "") {
+			filename = tex->getFileName();
+			isAbsPath = true;
 		}
-		else
-			ufile::remove_extension_from_filename(matPath, pragma::asset::get_supported_extensions(pragma::asset::Type::Texture, pragma::asset::FormatType::All));
-		auto mat = client->CreateMaterial(matPath, "pbr");
-		auto *cmat = static_cast<CMaterial *>(mat.get());
+		auto path = util::FilePath(std::string {to_string_view(filename)});
+		return ::load_texture_image(m_mdlPath, m_mdlName, path.GetString(), isAbsPath);
+	};
 
-		auto &dataBlock = mat->GetDataBlock();
+	auto matFilePath = util::DirPath(::util::CONVERT_PATH, pragma::asset::get_asset_root_directory(pragma::asset::Type::Material), "models", m_mdlName);
+	std::string fbxMatName = fbxMat.name;
+	if(!fbxMatName.empty())
+		matFilePath += fbxMatName;
+	else
+		matFilePath += "material" + std::to_string(partitionIdx);
 
+	auto relMatPath = matFilePath;
+	relMatPath.MakeRelative(util::CONVERT_PATH);
+	relMatPath.MakeRelative(std::string {pragma::asset::get_asset_root_directory(pragma::asset::Type::Material)});
+	auto mat = client->CreateMaterial(relMatPath.GetString(), "pbr");
+	auto *cmat = static_cast<CMaterial *>(mat.get());
+
+	auto &dataBlock = mat->GetDataBlock();
+
+	auto importAndAssignTexture = [&importTexture, cmat](ofbx::Texture::TextureType etex, const std::string &matIdentifier) -> std::optional<std::string> {
+		auto texPath = importTexture(etex);
+		if(!texPath)
+			return {};
 		auto relTexPath = util::FilePath(*texPath);
 		relTexPath.MakeRelative(util::CONVERT_PATH);
 		relTexPath.MakeRelative(std::string {pragma::asset::get_asset_root_directory(pragma::asset::Type::Material)});
-		cmat->SetTexture(Material::ALBEDO_MAP_IDENTIFIER, relTexPath.GetString());
+		cmat->SetTexture(matIdentifier, relTexPath.GetString());
+		return texPath;
+	};
+	importAndAssignTexture(ofbx::Texture::TextureType::DIFFUSE, Material::ALBEDO_MAP_IDENTIFIER);
+	importAndAssignTexture(ofbx::Texture::TextureType::NORMAL, Material::NORMAL_MAP_IDENTIFIER);
+	importAndAssignTexture(ofbx::Texture::TextureType::EMISSIVE, Material::EMISSION_MAP_IDENTIFIER);
 
-		mat->UpdateTextures();
+	auto applyColorFactor = [&fbxMat, &dataBlock](const ofbx::Color &fbxColor, double factor, const std::string &matProp) {
+		Vector3 colorFactor {fbxColor.r, fbxColor.g, fbxColor.b};
+		colorFactor *= factor;
+		if(umath::abs(1.f - colorFactor.x) > 0.001f || umath::abs(1.f - colorFactor.y) > 0.001f || umath::abs(1.f - colorFactor.z) > 0.001f)
+			dataBlock->AddValue("vector", matProp, std::to_string(colorFactor.x) + ' ' + std::to_string(colorFactor.y) + ' ' + std::to_string(colorFactor.z));
+	};
+	applyColorFactor(fbxMat.getDiffuseColor(), fbxMat.getDiffuseFactor(), "color_factor");
+	applyColorFactor(fbxMat.getEmissiveColor(), fbxMat.getEmissiveFactor(), "emission_factor");
 
-		std::string err;
-		mat->Save(matPath, err, true);
+	// TODO
+	//dataBlock->AddValue("float", "roughness_factor", std::to_string(pbrMetallicRoughness.roughnessFactor));
+	//dataBlock->AddValue("float", "metalness_factor", std::to_string(pbrMetallicRoughness.metallicFactor));
 
-		auto idx = m_model->AddMaterial(0, mat.get());
+
+	auto *combine = static_cast<pragma::ShaderCombineImageChannels *>(c_engine->GetShader("combine_image_channels").get());
+	auto *rma = static_cast<pragma::ShaderSpecularGlossinessToMetalnessRoughness *>(c_engine->GetShader("specular_glossiness_to_metalness_roughness").get());
+	if(combine && rma) {
+		auto specularMap = loadTexture(ofbx::Texture::TextureType::SPECULAR);
+		auto shininessMap = loadTexture(ofbx::Texture::TextureType::SHININESS);
+		auto ambientMap = loadTexture(ofbx::Texture::TextureType::AMBIENT);
+		auto reflectionMap = loadTexture(ofbx::Texture::TextureType::REFLECTION); // TODO
+
+		if(specularMap || shininessMap || ambientMap) {
+			auto tex = static_cast<msys::CMaterialManager &>(client->GetMaterialManager()).GetTextureManager().LoadAsset("white");
+			if(tex) {
+				auto whiteMap = tex->GetVkTexture();
+				if(!specularMap)
+					specularMap = whiteMap;
+				if(!shininessMap)
+					shininessMap = whiteMap;
+
+				auto &context = c_engine->GetRenderContext();
+				pragma::ShaderCombineImageChannels::PushConstants pushConstants {};
+				pushConstants.alphaChannel = umath::to_integral(uimg::Channel::Red);
+				auto specularGlossinessMap = combine->CombineImageChannels(context, *specularMap, *specularMap, *specularMap, *shininessMap, pushConstants);
+				if(specularGlossinessMap) {
+					pragma::ShaderSpecularGlossinessToMetalnessRoughness::PushConstants pushConstants {};
+					auto metallicRoughnessSet = rma->ConvertToMetalnessRoughness(c_engine->GetRenderContext(), nullptr, specularGlossinessMap.get(), pushConstants, ambientMap.get());
+					if(metallicRoughnessSet.has_value()) {
+						auto texPath = matFilePath;
+						texPath.MakeRelative(util::CONVERT_PATH);
+						pragma::asset::assign_texture(*cmat, ::util::CONVERT_PATH, Material::RMA_MAP_IDENTIFIER, texPath.GetString() + "_rma", *metallicRoughnessSet->rmaMap, false, false, ambientMap ? AlphaMode::Blend : AlphaMode::Opaque);
+					}
+				}
+			}
+		}
 	}
-	return true;
+
+	mat->UpdateTextures();
+
+	std::string err;
+	mat->Save(matFilePath.GetString(), err, true);
+
+	return m_model->AddMaterial(0, mat.get());
 }
 
 std::optional<std::string> FbxImporter::Finalize(std::string &outErr)
@@ -395,20 +503,6 @@ bool FbxImporter::LoadMeshes(std::string &outErr)
 		auto meshBone = AddBone(fbxMesh);
 		FillSkinInfo(vertWeights, &fbxMesh, meshBone->ID);
 
-		auto numMats = fbxMesh.getMaterialCount();
-		//if(numMats == 0)
-		{
-
-			m_model->AddMaterial(0, client->LoadMaterial("white"));
-		}
-		for(auto i = decltype(numMats) {0u}; i < numMats; ++i) {
-			auto *fbxMat = fbxMesh.getMaterial(i);
-			if(!fbxMat)
-				continue;
-			std::string err;
-			LoadMaterial(*fbxMat, err);
-		}
-
 		auto geoMatrix = to_pragma_matrix(fbxMesh.getGeometricMatrix());
 		auto transformMatrix = to_pragma_matrix(fbxMesh.getGlobalTransform()) * geoMatrix;
 		umath::ScaledTransform pose {transformMatrix};
@@ -417,10 +511,17 @@ bool FbxImporter::LoadMeshes(std::string &outErr)
 		auto mesh = c_game->CreateModelMesh();
 		for(int partition_idx = 0; partition_idx < geom.getPartitionCount(); ++partition_idx) {
 			const ofbx::GeometryPartition &partition = geom.getPartition(partition_idx);
-			auto *mat = (fbxMesh.getMaterialCount() > 0) ? fbxMesh.getMaterial(partition_idx) : nullptr;
 
 			auto subMesh = c_game->CreateModelSubMesh();
 			auto &verts = subMesh->GetVertices();
+
+			auto *mat = (fbxMesh.getMaterialCount() > 0) ? fbxMesh.getMaterial(partition_idx) : nullptr;
+			if(mat) {
+				std::string err;
+				auto matIdx = LoadMaterial(*mat, partition_idx, err);
+				if(matIdx)
+					subMesh->SetSkinTextureIndex(*matIdx);
+			}
 
 			std::unordered_map<int64_t, int64_t> fbxIndexToPragmaIndex;
 			for(int polygon_idx = 0; polygon_idx < partition.polygon_count; ++polygon_idx) {
@@ -442,7 +543,7 @@ bool FbxImporter::LoadMeshes(std::string &outErr)
 					}
 					if(uvs.values != nullptr) {
 						ofbx::Vec2 uv = uvs.get(idx);
-						v.uv = {uv.x, uv.y};
+						v.uv = {uv.x, 1.f - uv.y};
 					}
 					if(tangents.values != nullptr) {
 						ofbx::Vec3 t = tangents.get(idx);
@@ -505,12 +606,6 @@ bool FbxImporter::LoadMeshes(std::string &outErr)
 }
 
 static double fbxTimeToSeconds(ofbx::i64 value) { return double(value) / 46186158000L; }
-
-bool FbxImporter::LoadMorphTargets(std::string &outErr)
-{
-	//
-	return true;
-}
 
 static void normalizeScale(Mat4 &m)
 {
@@ -961,7 +1056,7 @@ std::optional<pragma::asset::AssetImportResult> FbxImporter::Load(std::string &o
 	m_fbxScale = m_fbxScene->getGlobalSettings()->UnitScaleFactor * pragma::metres_to_units(1.0) * 0.01f;
 	m_upVector = static_cast<UpVector>(m_fbxScene->getGlobalSettings()->UpAxis);
 
-	if(!LoadMeshes(outErr) || !LoadAnimations(outErr) || !LoadMorphTargets(outErr))
+	if(!LoadMeshes(outErr) || !LoadAnimations(outErr))
 		return {};
 	auto mdlPath = Finalize(outErr);
 	if(!mdlPath)

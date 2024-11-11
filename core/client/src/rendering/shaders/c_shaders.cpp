@@ -64,6 +64,7 @@
 #include "pragma/rendering/shaders/util/c_shader_specular_to_roughness.hpp"
 #include "pragma/rendering/shaders/util/c_shader_extract_diffuse_ambient_occlusion.hpp"
 #include "pragma/rendering/shaders/util/c_shader_compose_rma.hpp"
+#include "pragma/rendering/shaders/util/c_shader_combine_image_channels.hpp"
 #include "pragma/rendering/shaders/util/c_shader_specular_glossiness_to_metalness_roughness.hpp"
 #include <pragma/console/convars.h>
 #include "pragma/console/c_cvar.h"
@@ -145,6 +146,7 @@ void register_game_shaders()
 	shaderManager.RegisterShader("specular_to_roughness", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderSpecularToRoughness(context, identifier); });
 	shaderManager.RegisterShader("extract_diffuse_ambient_occlusion", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderExtractDiffuseAmbientOcclusion(context, identifier); });
 	shaderManager.RegisterShader("compose_rma", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderComposeRMA(context, identifier); });
+	shaderManager.RegisterShader("combine_image_channels", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderCombineImageChannels(context, identifier); });
 	shaderManager.RegisterShader("specular_glossiness_to_metalness_roughness", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderSpecularGlossinessToMetalnessRoughness(context, identifier); });
 
 	shaderManager.RegisterShader("calcimagecolor", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderCalcImageColor(context, identifier); });
@@ -156,7 +158,7 @@ void register_game_shaders()
 
 	shaderManager.RegisterShader("ssao", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderSSAO(context, identifier); });
 	shaderManager.RegisterShader("ssao_blur", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderSSAOBlur(context, identifier); });
-	shaderManager.RegisterShader("pp_glow",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderPPGlow(context,identifier);});
+	shaderManager.RegisterShader("pp_glow", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderPPGlow(context, identifier); });
 	shaderManager.RegisterShader("pp_hdr", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderPPHDR(context, identifier); });
 	shaderManager.RegisterShader("pp_fog", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderPPFog(context, identifier); });
 	shaderManager.RegisterShader("pp_dof", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderPPDoF(context, identifier); });

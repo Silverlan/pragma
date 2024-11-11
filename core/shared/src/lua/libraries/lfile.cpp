@@ -25,7 +25,7 @@ void LFile::Construct(const std::shared_ptr<ufile::IFile> &f) { m_file = f; }
 
 bool LFile::Construct(const char *path, const char *mode, fsys::SearchFlags fsearchmode)
 {
-	auto f = FileManager::OpenFile(path, mode, fsearchmode);
+	auto f = FileManager::OpenFile(path, mode, nullptr, fsearchmode);
 	if(!f)
 		return false;
 	m_file = std::make_shared<fsys::File>(f);

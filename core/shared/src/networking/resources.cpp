@@ -44,10 +44,10 @@ static std::vector<std::string> &get_folders()
 DLLNETWORK bool IsValidResource(std::string res)
 {
 	auto &extensions = get_extensions();
-	if(!ufile::compare_extension(res, &extensions))
+	if(!ufile::compare_extension(res, extensions))
 		return false;
 	auto &folders = get_folders();
-	if(!ufile::compare_directory(res, &folders))
+	if(!ufile::compare_directory(res, folders))
 		return false;
 	return true;
 }

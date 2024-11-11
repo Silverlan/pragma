@@ -363,6 +363,17 @@ pr_set_target_folder(rectangle_bin_pack third_party_libs)
 pr_set_include_path(rapidxml "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/rapidxml")
 #
 
+# OpenFBX
+set(BUILD_SHARED_LIBS
+    OFF
+    CACHE BOOL OFF FORCE)
+pr_include_third_party_library(openfbx TARGET OpenFBX INC "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/OpenFBX/src")
+set(BUILD_SHARED_LIBS
+    ON
+    CACHE BOOL ON FORCE)
+pr_set_target_folder(OpenFBX third_party_libs)
+#
+
 # In Linux there is a cyclic deps between freetype,harfbuzz,pango,cairo and most importantly fontconfig. Fontconfig in linux is reposnsible for discovery of
 # fonts. (think C:\Windows\Fonts for linux but customizable via configs) recently I hit a snag in which harfbuzz failed to load due to missing pango symbols.
 # The AppImage team hit similar snag too, see https://github.com/AppImageCommunity/pkg2appimage/pull/323 and

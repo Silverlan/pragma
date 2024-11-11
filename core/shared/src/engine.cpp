@@ -611,7 +611,7 @@ bool Engine::Initialize(int argc, char *argv[])
 
 	pragma::detail::initialize_logger(g_lpLogLevelCon, g_lpLogLevelFile, g_lpLogFile);
 	spdlog::info("Engine Version: {}", get_pretty_engine_version());
-	auto f = filemanager::open_file("git_info.txt", filemanager::FileMode::Read, fsys::SearchFlags::Local | fsys::SearchFlags::NoMounts);
+	auto f = filemanager::open_file("git_info.txt", filemanager::FileMode::Read, nullptr, fsys::SearchFlags::Local | fsys::SearchFlags::NoMounts);
 	if(f) {
 		spdlog::info("Git Info:");
 		auto str = f->ReadString();

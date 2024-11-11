@@ -24,6 +24,7 @@ namespace prosper {
 namespace ufile {
 	struct IFile;
 };
+enum class AlphaMode : uint32_t;
 namespace pragma::asset {
 	static std::string EXPORT_PATH = "export/";
 	struct DLLCLIENT ModelExportInfo {
@@ -82,12 +83,16 @@ namespace pragma::asset {
 	DLLCLIENT std::shared_ptr<Model> import_model(ufile::IFile &f, std::string &outErrMsg, const util::Path &outputPath = {}, bool importAsSingleModel = true);
 	DLLCLIENT std::shared_ptr<Model> import_model(const std::string &fileName, std::string &outErrMsg, const util::Path &outputPath = {}, bool importAsSingleModel = true);
 
-	struct DLLCLIENT GltfImportInfo {
+	struct DLLCLIENT AssetImportResult {
 		std::vector<std::string> models;
+		std::vector<std::shared_ptr<Model>> modelObjects;
 		std::string mapName;
 	};
-	DLLCLIENT std::optional<GltfImportInfo> import_gltf(ufile::IFile &f, std::string &outErrMsg, const util::Path &outputPath = {}, bool importAsSingleModel = false);
-	DLLCLIENT std::optional<GltfImportInfo> import_gltf(const std::string &fileName, std::string &outErrMsg, const util::Path &outputPath = {}, bool importAsSingleModel = false);
+	DLLCLIENT std::optional<AssetImportResult> import_gltf(ufile::IFile &f, std::string &outErrMsg, const util::Path &outputPath = {}, bool importAsSingleModel = false);
+	DLLCLIENT std::optional<AssetImportResult> import_gltf(const std::string &fileName, std::string &outErrMsg, const util::Path &outputPath = {}, bool importAsSingleModel = false);
+
+	DLLCLIENT std::optional<AssetImportResult> import_fbx(ufile::IFile &f, std::string &outErrMsg, const util::Path &outputPath = {});
+	DLLCLIENT std::optional<AssetImportResult> import_fbx(const std::string &fileName, std::string &outErrMsg, const util::Path &outputPath = {});
 
 	DLLCLIENT bool import_texture(const std::string &fileName, const TextureImportInfo &texInfo, const std::string &outputPath, std::string &outErrMsg);
 	DLLCLIENT bool import_texture(std::unique_ptr<ufile::IFile> &&f, const TextureImportInfo &texInfo, const std::string &outputPath, std::string &outErrMsg);
@@ -118,6 +123,8 @@ namespace pragma::asset {
 	DLLCLIENT bool export_texture_as_vtf(const std::string &fileName, const std::function<const uint8_t *(uint32_t, uint32_t)> &fGetImgData, uint32_t width, uint32_t height, uint32_t szPerPixel, uint32_t numLayers, uint32_t numMipmaps, bool cubemap, const VtfInfo &texInfo,
 	  const std::function<void(const std::string &)> &errorHandler, bool absoluteFileName);
 	DLLCLIENT bool export_texture_as_vtf(const std::string &fileName, const prosper::IImage &img, const VtfInfo &texInfo, const std::function<void(const std::string &)> &errorHandler, bool absoluteFileName);
+
+	DLLCLIENT uimg::TextureInfo get_texture_info(bool isGreyScale, bool isNormalMap, AlphaMode alphaMode = AlphaMode::Opaque);
 };
 
 #endif

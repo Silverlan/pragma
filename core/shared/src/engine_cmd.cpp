@@ -119,7 +119,9 @@ void Engine::RegisterSharedConsoleCommands(ConVarMap &map)
 		  std::string err;
 		  auto udmData = util::load_udm_asset(fileName, &err);
 		  if(udmData)
-			  Con::cout << "No validation errors found, file is a valid UDM file!" << err << Con::endl;
+			  Con::cout << "No validation errors found, file is a valid UDM file!" << Con::endl;
+		  else
+			  Con::cerr << "Validation failed: " << err << Con::endl;
 	  },
 	  ConVarFlags::None, "Validates the specified UDM file.");
 	map.RegisterConVar<std::string>("phys_engine", "bullet", ConVarFlags::Archive | ConVarFlags::Replicated, "The underlying physics engine to use.", "<physEngie>", [](const std::string &arg, std::vector<std::string> &autoCompleteOptions) {

@@ -820,7 +820,7 @@ execfile(scripts_dir +"/user_modules.py",g,l)
 if with_essential_client_modules:
 	add_pragma_module(
 		name="pr_prosper_vulkan",
-		commitSha="9a7475a881d006e421f4c729f7009c140a5e5866",
+		commitSha="9071ef182a9286369922fab76232267208027a93",
 		repositoryUrl="https://github.com/Silverlan/pr_prosper_vulkan.git"
 	)
 
@@ -1150,6 +1150,8 @@ if not skip_repository_updates:
 	if with_common_entities:
 		download_addon("HL","pragma_hl","https://github.com/Silverlan/pragma_hl.git","7d146f517a9d514e9c22ca918460b85b27694155")
 		download_addon("TF2","pragma_tf2","https://github.com/Silverlan/pragma_tf2.git","9cf3dc9a1a5fef4cc18b85fc2646cf4263134e9b")
+
+	download_addon("Matcaps","matcaps","https://github.com/Silverlan/pragma_matcaps.git","304800623fc6c07901053fb41428fa2c430f2d0d")
 
 os.chdir(curDir)
 

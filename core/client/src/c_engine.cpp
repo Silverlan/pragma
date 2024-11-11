@@ -140,22 +140,48 @@ CEngine::CEngine(int argc, char *argv[])
 	inputLayer->identifier = "core";
 	AddInputBindingLayer(inputLayer);
 
-	pragma::asset::AssetManager::ImporterInfo importerInfo {};
-	importerInfo.name = "glTF";
-	importerInfo.fileExtensions = {{"gltf", false}, {"glb", true}, {"vrm", true}}; // VRM is based on glTF ( https://vrm.dev/en/ )
-	GetAssetManager().RegisterImporter(importerInfo, pragma::asset::Type::Model, [](Game &game, ufile::IFile &f, const std::optional<std::string> &mdlPath, std::string &errMsg) -> std::unique_ptr<pragma::asset::IAssetWrapper> {
-		util::Path path {};
-		if(mdlPath.has_value()) {
-			path = util::Path::CreateFile(*mdlPath);
-			path.PopBack();
-		}
-		auto mdl = pragma::asset::import_model(f, errMsg, path);
-		if(mdl == nullptr)
-			return nullptr;
-		auto wrapper = std::make_unique<pragma::asset::ModelAssetWrapper>();
-		wrapper->SetModel(*mdl);
-		return wrapper;
-	});
+	{
+		pragma::asset::AssetManager::ImporterInfo importerInfo {};
+		importerInfo.name = "glTF";
+		importerInfo.fileExtensions = {{"gltf", false}, {"glb", true}, {"vrm", true}}; // VRM is based on glTF ( https://vrm.dev/en/ )
+		GetAssetManager().RegisterImporter(importerInfo, pragma::asset::Type::Model, [](Game &game, ufile::IFile &f, const std::optional<std::string> &mdlPath, std::string &errMsg) -> std::unique_ptr<pragma::asset::IAssetWrapper> {
+			util::Path path {};
+			if(mdlPath.has_value()) {
+				path = util::Path::CreateFile(*mdlPath);
+				path.PopBack();
+			}
+			auto mdl = pragma::asset::import_model(f, errMsg, path);
+			if(mdl == nullptr)
+				return nullptr;
+			auto wrapper = std::make_unique<pragma::asset::ModelAssetWrapper>();
+			wrapper->SetModel(*mdl);
+			return wrapper;
+		});
+	}
+
+	{
+		pragma::asset::AssetManager::ImporterInfo importerInfo {};
+		importerInfo.name = "fbx";
+		importerInfo.fileExtensions = {{"fbx", true}};
+		GetAssetManager().RegisterImporter(importerInfo, pragma::asset::Type::Model, [](Game &game, ufile::IFile &f, const std::optional<std::string> &mdlPath, std::string &errMsg) -> std::unique_ptr<pragma::asset::IAssetWrapper> {
+			util::Path path {};
+			if(mdlPath.has_value()) {
+				path = util::Path::CreateFile(*mdlPath);
+				path.PopBack();
+			}
+			auto result = pragma::asset::import_fbx(f, errMsg, path);
+			if(!result)
+				return nullptr;
+			if(result->modelObjects.empty()) {
+				errMsg = "No models found in model file!";
+				return nullptr;
+			}
+
+			auto wrapper = std::make_unique<pragma::asset::ModelAssetWrapper>();
+			wrapper->SetModel(*result->modelObjects.front());
+			return wrapper;
+		});
+	}
 }
 
 void CEngine::Release()
@@ -693,6 +719,23 @@ bool CEngine::Initialize(int argc, char *argv[])
 	contextCreateInfo.width = 1280;
 	contextCreateInfo.height = 1024;
 	contextCreateInfo.windowless = g_windowless;
+
+	auto renderApiData = udm::Data::Load("cfg/render_api.udm");
+	if(renderApiData) {
+		auto &renderAPI = GetRenderAPI();
+		auto data = renderApiData->GetAssetData().GetData();
+		for(auto &pair : data["all"]["extensions"].ElIt()) {
+			auto availability = prosper::IPrContext::ExtensionAvailability::EnableIfAvailable;
+			udm::to_enum_value<prosper::IPrContext::ExtensionAvailability>(pair.property, availability);
+			contextCreateInfo.extensions[std::string {pair.key}] = availability;
+		}
+		for(auto &pair : data[renderAPI]["extensions"].ElIt()) {
+			auto availability = prosper::IPrContext::ExtensionAvailability::EnableIfAvailable;
+			udm::to_enum_value<prosper::IPrContext::ExtensionAvailability>(pair.property, availability);
+			contextCreateInfo.extensions[std::string {pair.key}] = availability;
+		}
+	}
+
 	if(windowRes) {
 		std::vector<std::string> vals;
 		ustring::explode(*windowRes, "x", vals);

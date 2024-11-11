@@ -65,6 +65,7 @@ namespace pragma::animation {
 		};
 		static std::shared_ptr<Animation> Create();
 		static std::shared_ptr<Animation> Create(const Animation &other, ShareMode share = ShareMode::None);
+		static std::shared_ptr<Animation> Create(const panima::Animation &panim, const pragma::animation::Skeleton &skeleton, const Frame &refPose, uint8_t fps);
 		static std::shared_ptr<Animation> Load(const udm::AssetData &data, std::string &outErr, const pragma::animation::Skeleton *optSkeleton = nullptr, const Frame *optReference = nullptr);
 		const std::pair<Vector3, Vector3> &GetRenderBounds() const;
 		void SetRenderBounds(const Vector3 &min, const Vector3 &max);

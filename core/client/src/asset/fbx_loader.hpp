@@ -79,10 +79,9 @@ namespace pragma::asset::fbx {
 		void SortBones(bool force_skinned);
 		void InsertHierarchy(std::vector<const ofbx::Object *> &bones, const ofbx::Object *node);
 		void FillSkinInfo(std::vector<umath::VertexWeight> &skinning, const ofbx::Mesh *mesh, int32_t boneId);
-		bool LoadMaterial(const ofbx::Material &mat, std::string &outErr);
+		std::optional<uint32_t> LoadMaterial(const ofbx::Material &mat, uint32_t partitionIdx, std::string &outErr);
 		bool LoadMeshes(std::string &outErr);
 		bool LoadAnimations(std::string &outErr);
-		bool LoadMorphTargets(std::string &outErr);
 		std::optional<std::string> Finalize(std::string &outErr);
 		std::shared_ptr<pragma::animation::Bone> AddBone(const ofbx::Object &o);
 	};

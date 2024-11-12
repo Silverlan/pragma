@@ -39,15 +39,16 @@ CrashHandler::CrashHandler(const std::string &appName) : m_appName {appName}
 #ifdef _WIN32
 	::SetUnhandledExceptionFilter(TopLevelFilter);
 #else
-	signal(SIGSEGV, +[](int sig) {
-		if(!g_crashHandler) {
-			exit(1);
-			return;
-		}
-		g_crashHandler->m_sig = sig;
-		g_crashHandler->GenerateCrashDump();
-		exit(1);
-	});
+	signal(
+	  SIGSEGV, +[](int sig) {
+		  if(!g_crashHandler) {
+			  exit(1);
+			  return;
+		  }
+		  g_crashHandler->m_sig = sig;
+		  g_crashHandler->GenerateCrashDump();
+		  exit(1);
+	  });
 #endif
 	// Note: set_terminate handler is called before SetUnhandledExceptionFilter.
 	// set_terminate allows us to retrieve the underlying message from the exception (if there was one)
@@ -176,10 +177,10 @@ bool CrashHandler::GenerateCrashDump() const
 	symbols = backtrace_symbols(array, size);
 
 	std::optional<std::string> backtraceStr {};
-	if (symbols != nullptr) {
+	if(symbols != nullptr) {
 		snprintf(buffer, sizeof(buffer), "Error: signal %d:\n", m_sig);
 
-		for (size_t i = 0; i < size; i++) {
+		for(size_t i = 0; i < size; i++) {
 			strncat(buffer, symbols[i], sizeof(buffer) - strlen(buffer) - 1);
 			strncat(buffer, "\n", sizeof(buffer) - strlen(buffer) - 1);
 		}
@@ -224,14 +225,14 @@ bool CrashHandler::GenerateCrashDump() const
 			else
 				zipFile->AddFile("minidump_generation_error.txt", dumpErr);
 #else
-			if (backtraceStr)
+			if(backtraceStr)
 				zipFile->AddFile("backtrace.txt", *backtraceStr);
 			else
 				zipFile->AddFile("backtrace_generation_error.txt", "Failed to generate backtrace symbols");
 #endif
 			zipFile = nullptr;
 
-			szResult = Locale::GetText("prompt_crash_dump_saved", std::vector<std::string> {zipFileName});
+			szResult = Locale::GetText("prompt_crash_dump_saved", std::vector<std::string> {zipFileName, "crashdumps@pragma-engine.com"});
 			auto absPath = util::Path::CreatePath(util::get_program_path()) + zipFileName;
 			util::open_path_in_explorer(std::string {absPath.GetPath()}, std::string {absPath.GetFileName()});
 

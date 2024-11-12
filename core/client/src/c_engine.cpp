@@ -720,7 +720,12 @@ bool CEngine::Initialize(int argc, char *argv[])
 	contextCreateInfo.height = 1024;
 	contextCreateInfo.windowless = g_windowless;
 
-	auto renderApiData = udm::Data::Load("cfg/render_api.udm");
+	std::shared_ptr<udm::Data> renderApiData {};
+	try {
+		renderApiData = udm::Data::Load("cfg/render_api.udm");
+	}
+	catch(const udm::Exception &e) {
+	}
 	if(renderApiData) {
 		auto &renderAPI = GetRenderAPI();
 		auto data = renderApiData->GetAssetData().GetData();

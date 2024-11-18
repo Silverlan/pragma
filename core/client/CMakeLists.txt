@@ -15,6 +15,7 @@ pr_add_dependency(${PROJ_NAME} util_source_script TARGET)
 pr_add_dependency(${PROJ_NAME} util_zip TARGET)
 pr_add_dependency(${PROJ_NAME} util_timeline_scene TARGET PUBLIC)
 pr_add_dependency(${PROJ_NAME} util_bsp TARGET)
+pr_add_dependency(${PROJ_NAME} util_shadergraph TARGET)
 
 pr_add_dependency(${PROJ_NAME} rectangle_bin_pack TARGET)
 pr_add_dependency(${PROJ_NAME} Recast TARGET)

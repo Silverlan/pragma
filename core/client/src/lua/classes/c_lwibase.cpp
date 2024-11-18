@@ -821,6 +821,7 @@ void Lua::WIFrame::register_class(luabind::class_<::WIFrame, luabind::bases<::WI
 	classDef.def("SetTitle", &::WIFrame::SetTitle);
 	classDef.def("GetTitle", &::WIFrame::GetTitle);
 	classDef.def("SetCloseButtonEnabled", &::WIFrame::SetCloseButtonEnabled);
+	classDef.def("SetDetachButtonEnabled", &::WIFrame::SetDetachButtonEnabled);
 }
 
 void Lua::WIDropDownMenu::register_class(luabind::class_<::WIDropDownMenu, luabind::bases<::WITextEntry, ::WIBase>> &classDef)

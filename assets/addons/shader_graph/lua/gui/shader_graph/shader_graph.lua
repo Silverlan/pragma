@@ -25,6 +25,61 @@ function Element:MouseCallback(button, state, mods)
 	if button == input.MOUSE_BUTTON_RIGHT and state == input.STATE_PRESS then
 		local pContext = gui.open_context_menu(self)
 		if util.is_valid(pContext) then
+			pContext:AddItem("Load Graph", function()
+				local pFileDialog = pfm.create_file_open_dialog(function(el, fileName)
+					if fileName == nil then
+						return
+					end
+					fileName = el:GetFilePath(false)
+
+					local udmData, err = udm.load(fileName)
+					if udmData == false then
+						self:LogWarn("Failed to load shader graph file '" .. fileName .. "': " .. err)
+						return
+					end
+
+					local reg = shader.get_test_node_register() -- TODO
+					local graph, err = shader.ShaderGraph.load(udmData:GetAssetData(), reg)
+					if graph == false then
+						self:LogWarn("Failed to load shader graph '" .. fileName .. "': " .. err)
+						return
+					end
+					self:LogInfo("Loaded shader graph '" .. fileName .. "'!")
+					self:SetGraph(graph)
+				end)
+				pFileDialog:SetRootPath("scripts/shader_data/graphs")
+				pFileDialog:SetExtensions({ shader.ShaderGraph.EXTENSION_ASCII, shader.ShaderGraph.EXTENSION_BINARY })
+				pFileDialog:Update()
+			end)
+			pContext:AddItem("Save Graph", function()
+				local pFileDialog = pfm.create_file_save_dialog(function(el, fileName)
+					if fileName == nil then
+						return
+					end
+
+					fileName = el:GetFilePath(false)
+					fileName = file.remove_file_extension(
+						fileName,
+						{ shader.ShaderGraph.EXTENSION_ASCII, shader.ShaderGraph.EXTENSION_BINARY }
+					)
+					fileName = fileName .. "." .. shader.ShaderGraph.EXTENSION_ASCII
+					local udmData = udm.create(shader.ShaderGraph.PSG_IDENTIFIER, shader.ShaderGraph.PSG_VERSION)
+					local res, err = self.m_graph:Save(udmData:GetAssetData())
+					if res == false then
+						self:LogWarn("Failed to save shader graph: " .. err)
+						return
+					end
+					file.create_path(file.get_file_path(fileName))
+					res, err = udmData:SaveAscii(fileName)
+					if res == false then
+						self:LogWarn("Failed to save shader graph as '" .. fileName .. "': " .. err)
+						return
+					end
+					self:LogInfo("Saved shader graph as '" .. fileName .. "'!")
+				end)
+				pFileDialog:SetRootPath("scripts/shader_data/graphs")
+				pFileDialog:Update()
+			end)
 			pContext:AddItem("Add Node", function()
 				local graphNode = self.m_graph:AddNode("math")
 				if graphNode ~= nil then
@@ -38,6 +93,13 @@ function Element:MouseCallback(button, state, mods)
 	end
 end
 function Element:SetGraph(graph)
+	self:ClearLinks()
+	for _, t in ipairs(self.m_nodeData) do
+		util.remove(t.frame)
+	end
+	self.m_nodeData = {}
+	self.m_nameToElementData = {}
+
 	self.m_graph = graph
 
 	local nodes = self.m_graph:GetNodes()
@@ -109,6 +171,7 @@ function Element:AddNode(graphNode)
 	local frame = gui.create("WIFrame", self)
 	frame:SetTitle(name)
 	frame:SetDetachButtonEnabled(false)
+	frame:SetCloseButtonEnabled(false)
 	frame:SetSize(128, 128)
 
 	frame:SetMouseInputEnabled(true)

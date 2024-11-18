@@ -144,8 +144,7 @@ static void create_directory_change_listener(lua_State *l, const std::string &pa
 {
 	Lua::CheckFunction(l, 2);
 	try {
-		auto listener = std::make_shared<DirectoryWatcherCallback>(
-		  path, [callback](const std::string &fileName) mutable { callback(fileName); }, flags);
+		auto listener = std::make_shared<DirectoryWatcherCallback>(path, [callback](const std::string &fileName) mutable { callback(fileName); }, flags);
 		Lua::Push(l, listener);
 	}
 	catch(const std::runtime_error &err) {
@@ -279,8 +278,7 @@ void pragma::lua::detail::register_lua_debug_tostring(lua_State *l, const std::t
 	assert(crep);
 	lua_rawgeti(l, LUA_REGISTRYINDEX, crep->metatable_ref());
 	auto o = luabind::object {luabind::from_stack(l, -1)};
-	o["__debugger_tostring"] = luabind::make_function(
-	  l, +[](const luabind::object &o) -> std::string { return tostring(o); });
+	o["__debugger_tostring"] = luabind::make_function(l, +[](const luabind::object &o) -> std::string { return tostring(o); });
 	o["__name"] = crep->name();
 	lua_pop(l, 1);
 }
@@ -310,6 +308,41 @@ static void add_task(lua_State *l, pragma::lua::LuaWorker &worker, const luabind
 }
 
 static void add_task(pragma::lua::LuaWorker &worker, const std::shared_ptr<util::ParallelJob<luabind::object>> &subJob, float taskProgress) { worker.AddLuaTask(subJob, taskProgress); }
+
+static int util_file_path(lua_State *l)
+{
+	int n = lua_gettop(l); /* number of arguments */
+	int i;
+	std::vector<std::string> args;
+	args.reserve(n);
+	for(i = 1; i <= n; i++)
+		args.push_back(Lua::CheckString(l, i));
+	util::Path path {};
+	if(args.size() > 1) {
+		for(size_t i = 0; i < (args.size() - 1); ++i)
+			path += util::Path::CreatePath(args[i]);
+		path += util::Path::CreateFile(args.back());
+	}
+	else if(args.size() == 1)
+		path = util::Path::CreateFile(args.back());
+	Lua::Push(l, path);
+	return 1;
+}
+
+static int util_dir_path(lua_State *l)
+{
+	int n = lua_gettop(l); /* number of arguments */
+	int i;
+	std::vector<std::string> args;
+	args.reserve(n);
+	for(i = 1; i <= n; i++)
+		args.push_back(Lua::CheckString(l, i));
+	util::Path path {};
+	for(size_t i = 0; i < args.size(); ++i)
+		path += util::Path::CreatePath(args[i]);
+	Lua::Push(l, path);
+	return 1;
+}
 
 void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 {
@@ -581,10 +614,8 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	}));
 	defImageBuffer->def("SetPixelColor", static_cast<void (uimg::ImageBuffer::*)(uint32_t, uint32_t, const Vector4 &)>(&uimg::ImageBuffer::SetPixelColor));
 	defImageBuffer->def("SetPixelColor", static_cast<void (uimg::ImageBuffer::*)(uimg::ImageBuffer::PixelIndex, const Vector4 &)>(&uimg::ImageBuffer::SetPixelColor));
-	defImageBuffer->def(
-	  "SetPixelColor", +[](lua_State *l, uimg::ImageBuffer &imgBuffer, uint32_t x, uint32_t y, const Color &color) { imgBuffer.SetPixelColor(x, y, color.ToVector4()); });
-	defImageBuffer->def(
-	  "SetPixelColor", +[](lua_State *l, uimg::ImageBuffer &imgBuffer, uimg::ImageBuffer::PixelIndex pixelIdx, const Color &color) { imgBuffer.SetPixelColor(pixelIdx, color.ToVector4()); });
+	defImageBuffer->def("SetPixelColor", +[](lua_State *l, uimg::ImageBuffer &imgBuffer, uint32_t x, uint32_t y, const Color &color) { imgBuffer.SetPixelColor(x, y, color.ToVector4()); });
+	defImageBuffer->def("SetPixelColor", +[](lua_State *l, uimg::ImageBuffer &imgBuffer, uimg::ImageBuffer::PixelIndex pixelIdx, const Color &color) { imgBuffer.SetPixelColor(pixelIdx, color.ToVector4()); });
 	defImageBuffer->def("CalcLuminance", static_cast<void (*)(lua_State *, uimg::ImageBuffer &)>([](lua_State *l, uimg::ImageBuffer &imgBuffer) {
 		float avgLuminance, minLuminance, maxLuminance, logAvgLuminance;
 		Vector3 avgIntensity;
@@ -605,8 +636,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 			  return nullptr;
 		  return it->second;
 	  });
-	defImageLayerSet->def(
-	  "GetImages", +[](const uimg::ImageLayerSet &layerSet) { return layerSet.images; });
+	defImageLayerSet->def("GetImages", +[](const uimg::ImageLayerSet &layerSet) { return layerSet.images; });
 	modUtil[*defImageLayerSet];
 
 	auto defWorker = luabind::class_<pragma::lua::LuaWorker>("Worker");
@@ -615,44 +645,29 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defWorker.def("GetResult", &pragma::lua::LuaWorker::GetResult);
 	defWorker.def("SetResult", &pragma::lua::LuaWorker::SetResult);
 	defWorker.def("SetStatus", &pragma::lua::LuaWorker::SetStatus);
-	defWorker.def(
-	  "SetStatus", +[](pragma::lua::LuaWorker &worker, util::JobStatus jobStatus, const std::optional<std::string> &resultMsg) { worker.SetStatus(jobStatus, resultMsg); });
-	defWorker.def(
-	  "SetStatus", +[](pragma::lua::LuaWorker &worker, util::JobStatus jobStatus) { worker.SetStatus(jobStatus); });
+	defWorker.def("SetStatus", +[](pragma::lua::LuaWorker &worker, util::JobStatus jobStatus, const std::optional<std::string> &resultMsg) { worker.SetStatus(jobStatus, resultMsg); });
+	defWorker.def("SetStatus", +[](pragma::lua::LuaWorker &worker, util::JobStatus jobStatus) { worker.SetStatus(jobStatus); });
 	defWorker.def("UpdateProgress", &pragma::lua::LuaWorker::UpdateProgress);
 	defWorker.def("AddTask", static_cast<void (*)(pragma::lua::LuaWorker &, const std::shared_ptr<util::ParallelJob<luabind::object>> &, float)>(&add_task));
 	defWorker.def("AddTask", static_cast<void (*)(lua_State *, pragma::lua::LuaWorker &, const luabind::object &, const luabind::object &, float)>(&add_task));
 	defWorker.def("SetProgressCallback", &pragma::lua::LuaWorker::SetProgressCallback);
-	defWorker.def(
-	  "Cancel", +[](pragma::lua::LuaWorker &worker) { worker.Cancel(); });
-	defWorker.def(
-	  "IsComplete", +[](pragma::lua::LuaWorker &worker) { return worker.IsComplete(); });
-	defWorker.def(
-	  "IsPending", +[](pragma::lua::LuaWorker &worker) { return worker.IsPending(); });
-	defWorker.def(
-	  "IsCancelled", +[](pragma::lua::LuaWorker &worker) { return worker.IsCancelled(); });
-	defWorker.def(
-	  "IsSuccessful", +[](pragma::lua::LuaWorker &worker) { return worker.IsSuccessful(); });
-	defWorker.def(
-	  "IsThreadActive", +[](pragma::lua::LuaWorker &worker) { return worker.IsThreadActive(); });
-	defWorker.def(
-	  "GetProgress", +[](pragma::lua::LuaWorker &worker) { return worker.GetProgress(); });
-	defWorker.def(
-	  "GetStatus", +[](pragma::lua::LuaWorker &worker) { return worker.GetStatus(); });
-	defWorker.def(
-	  "GetResultMessage", +[](pragma::lua::LuaWorker &worker) { return worker.GetResultMessage(); });
-	defWorker.def(
-	  "GetResultCode", +[](pragma::lua::LuaWorker &worker) { return worker.GetResultCode(); });
-	defWorker.def(
-	  "IsValid", +[](pragma::lua::LuaWorker &worker) { return worker.IsValid(); });
+	defWorker.def("Cancel", +[](pragma::lua::LuaWorker &worker) { worker.Cancel(); });
+	defWorker.def("IsComplete", +[](pragma::lua::LuaWorker &worker) { return worker.IsComplete(); });
+	defWorker.def("IsPending", +[](pragma::lua::LuaWorker &worker) { return worker.IsPending(); });
+	defWorker.def("IsCancelled", +[](pragma::lua::LuaWorker &worker) { return worker.IsCancelled(); });
+	defWorker.def("IsSuccessful", +[](pragma::lua::LuaWorker &worker) { return worker.IsSuccessful(); });
+	defWorker.def("IsThreadActive", +[](pragma::lua::LuaWorker &worker) { return worker.IsThreadActive(); });
+	defWorker.def("GetProgress", +[](pragma::lua::LuaWorker &worker) { return worker.GetProgress(); });
+	defWorker.def("GetStatus", +[](pragma::lua::LuaWorker &worker) { return worker.GetStatus(); });
+	defWorker.def("GetResultMessage", +[](pragma::lua::LuaWorker &worker) { return worker.GetResultMessage(); });
+	defWorker.def("GetResultCode", +[](pragma::lua::LuaWorker &worker) { return worker.GetResultCode(); });
+	defWorker.def("IsValid", +[](pragma::lua::LuaWorker &worker) { return worker.IsValid(); });
 	modUtil[defWorker];
 
 	auto defLuaParallelJob = luabind::class_<util::ParallelJob<luabind::object>, util::BaseParallelJob>("ParallelJob");
 	defLuaParallelJob.def("GetResult", static_cast<luabind::object (*)(lua_State *, util::ParallelJob<luabind::object> &)>([](lua_State *l, util::ParallelJob<luabind::object> &job) -> luabind::object { return job.GetResult(); }));
-	defLuaParallelJob.def(
-	  "CallOnComplete", +[](util::ParallelJob<luabind::object> &job, const Lua::func<void> &onComplete) { static_cast<pragma::lua::LuaWorker &>(job.GetWorker()).CallOnComplete(onComplete); });
-	defLuaParallelJob.def(
-	  "SetProgressCallback", +[](util::ParallelJob<luabind::object> &job, const Lua::func<float> &func) { static_cast<pragma::lua::LuaWorker &>(job.GetWorker()).SetProgressCallback(func); });
+	defLuaParallelJob.def("CallOnComplete", +[](util::ParallelJob<luabind::object> &job, const Lua::func<void> &onComplete) { static_cast<pragma::lua::LuaWorker &>(job.GetWorker()).CallOnComplete(onComplete); });
+	defLuaParallelJob.def("SetProgressCallback", +[](util::ParallelJob<luabind::object> &job, const Lua::func<float> &func) { static_cast<pragma::lua::LuaWorker &>(job.GetWorker()).SetProgressCallback(func); });
 	modUtil[defLuaParallelJob];
 	modUtil[luabind::def(
 	  "create_parallel_job", +[](Game &game, const std::string &name, const Lua::func<void> &func, const Lua::func<void> &cancelFunc) -> std::shared_ptr<util::ParallelJob<luabind::object>> {
@@ -669,8 +684,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	modUtil[defImgParallelJob];
 
 	auto defImgLayerSetParallelJob = luabind::class_<util::ParallelJob<uimg::ImageLayerSet>, util::BaseParallelJob>("ParallelJobImageLayerSet");
-	defImgLayerSetParallelJob.def(
-	  "GetResult", +[](lua_State *l, util::ParallelJob<uimg::ImageLayerSet> &job) { Lua::Push(l, job.GetResult()); });
+	defImgLayerSetParallelJob.def("GetResult", +[](lua_State *l, util::ParallelJob<uimg::ImageLayerSet> &job) { Lua::Push(l, job.GetResult()); });
 	defImgLayerSetParallelJob.def(
 	  "GetImage", +[](lua_State *l, util::ParallelJob<uimg::ImageLayerSet> &job) -> std::shared_ptr<uimg::ImageBuffer> {
 		  if(job.GetResult().images.empty())
@@ -827,12 +841,9 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 		Lua::PushString(l, *ext);
 	}));
 	defPath->def("RemoveFileExtension", static_cast<void (*)(lua_State *, util::Path &)>([](lua_State *l, util::Path &p) { p.RemoveFileExtension(); }));
-	defPath->def(
-	  "RemoveFileExtension", +[](lua_State *l, util::Path &p, const std::vector<std::string> &extensions) { p.RemoveFileExtension(extensions); });
-	defPath->def(
-	  "MakeRelative", +[](lua_State *l, util::Path &p, util::Path &pOther) { return p.MakeRelative(pOther); });
-	defPath->def(
-	  "MakeRelative", +[](lua_State *l, util::Path &p, const std::string &other) { return p.MakeRelative(other); });
+	defPath->def("RemoveFileExtension", +[](lua_State *l, util::Path &p, const std::vector<std::string> &extensions) { p.RemoveFileExtension(extensions); });
+	defPath->def("MakeRelative", +[](lua_State *l, util::Path &p, util::Path &pOther) { return p.MakeRelative(pOther); });
+	defPath->def("MakeRelative", +[](lua_State *l, util::Path &p, const std::string &other) { return p.MakeRelative(other); });
 	defPath->def("GetComponentCount", &util::Path::GetComponentCount);
 	defPath->def(
 	  "GetComponent", +[](util::Path &p, size_t offset) -> std::optional<std::pair<std::string_view, size_t>> {
@@ -844,6 +855,9 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	  });
 	defPath->def("IsEmpty", &util::Path::IsEmpty);
 	modUtil[*defPath];
+
+	lua_pushtablecfunction(lua.GetState(), "util", "FilePath", util_file_path);
+	lua_pushtablecfunction(lua.GetState(), "util", "DirPath", util_dir_path);
 
 	// Properties
 	Lua::Property::register_classes(lua);
@@ -1423,8 +1437,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defQuat->def("Distance", &uquat::distance);
 	defQuat->def("GetConjugate", static_cast<Quat (*)(const Quat &)>(&glm::conjugate));
 	defQuat->def("AlignToAxis", &uquat::align_rotation_to_axis);
-	defQuat->def(
-	  "Equals", +[](const Quat &a, const Quat &b, float epsilon) { return umath::abs(a.x - b.x) <= epsilon && umath::abs(a.y - b.y) <= epsilon && umath::abs(a.z - b.z) <= epsilon && umath::abs(a.w - b.w) <= epsilon; });
+	defQuat->def("Equals", +[](const Quat &a, const Quat &b, float epsilon) { return umath::abs(a.x - b.x) <= epsilon && umath::abs(a.y - b.y) <= epsilon && umath::abs(a.z - b.z) <= epsilon && umath::abs(a.w - b.w) <= epsilon; });
 	defQuat->def(
 	  "Equals", +[](const Quat &a, const Quat &b) {
 		  float epsilon = 0.001f;
@@ -1524,10 +1537,8 @@ void Game::RegisterLuaClasses()
 	    {"COORDINATE_SPACE_VIEW", umath::to_integral(umath::CoordinateSpace::View)},
 	    {"COORDINATE_SPACE_SCREEN", umath::to_integral(umath::CoordinateSpace::Screen)},
 	  });
-	modMath[luabind::def(
-	  "coordinate_space_to_string", +[](umath::CoordinateSpace space) -> std::string { return std::string {magic_enum::enum_name(space)}; })];
-	modMath[luabind::def(
-	  "string_to_coordinate_space", +[](const std::string &space) -> std::optional<umath::CoordinateSpace> { return magic_enum::enum_cast<umath::CoordinateSpace>(space); })];
+	modMath[luabind::def("coordinate_space_to_string", +[](umath::CoordinateSpace space) -> std::string { return std::string {magic_enum::enum_name(space)}; })];
+	modMath[luabind::def("string_to_coordinate_space", +[](const std::string &space) -> std::optional<umath::CoordinateSpace> { return magic_enum::enum_cast<umath::CoordinateSpace>(space); })];
 
 	auto defPlane = luabind::class_<umath::Plane>("Plane");
 	defPlane.def(luabind::constructor<Vector3, Vector3, Vector3>());
@@ -1707,8 +1718,7 @@ void Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
 		  return *s_entIterator;
 	  },
 	  luabind::return_stl_iterator {})];
-	modEnts[luabind::def(
-	  "citerator", +[](lua_State *l, Lua::nil_type) -> LuaEntityComponentIterator & { return citerator(l, pragma::INVALID_COMPONENT_ID); }, luabind::return_stl_iterator {})];
+	modEnts[luabind::def("citerator", +[](lua_State *l, Lua::nil_type) -> LuaEntityComponentIterator & { return citerator(l, pragma::INVALID_COMPONENT_ID); }, luabind::return_stl_iterator {})];
 	modEnts[luabind::def("citerator", static_cast<LuaEntityComponentIterator &(*)(lua_State *, pragma::ComponentId)>(&citerator), luabind::return_stl_iterator {})];
 	modEnts[luabind::def("citerator", static_cast<LuaEntityComponentIterator &(*)(lua_State *, pragma::ComponentId, const Lua::var<EntityIterator::FilterFlags, Lua::tb<LuaEntityIteratorFilterBase>> &)>(&citerator), luabind::return_stl_iterator {})];
 	modEnts[luabind::def("citerator", static_cast<LuaEntityComponentIterator &(*)(lua_State *, pragma::ComponentId, EntityIterator::FilterFlags, const Lua::tb<LuaEntityIteratorFilterBase> &)>(&citerator), luabind::return_stl_iterator {})];

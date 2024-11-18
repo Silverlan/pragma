@@ -127,8 +127,27 @@ static luabind::object shader_mat_value_to_lua_object(lua_State *l, const pragma
 
 static void register_shader_graph(luabind::module_ &modShader)
 {
+static void register_shader_graph(lua_State *l, luabind::module_ &modShader)
+{
 	auto defGraph = luabind::class_<pragma::shadergraph::Graph>("ShaderGraph");
+	defGraph.scope[luabind::def(
+	  "load", +[](udm::AssetData &assetData, const std::shared_ptr<pragma::shadergraph::NodeRegistry> &nodeReg) -> std::pair<std::shared_ptr<pragma::shadergraph::Graph>, std::optional<std::string>> {
+		  auto graph = std::make_shared<pragma::shadergraph::Graph>(nodeReg);
+		  std::string err;
+		  auto data = assetData.GetData();
+		  auto result = graph->Load(data, err);
+		  if(!result)
+			  return {std::shared_ptr<pragma::shadergraph::Graph> {}, std::optional<std::string> {err}};
+		  return {graph, {}};
+	  })];
 	defGraph.def("__tostring", +[](const pragma::shadergraph::Graph &graph) -> std::string { return "ShaderGraph"; });
+	defGraph.def(
+	  "Save", +[](const pragma::shadergraph::Graph &graph, udm::AssetData &assetData) -> std::pair<bool, std::optional<std::string>> {
+		  std::string err;
+		  if(!graph.Save(assetData, err))
+			  return {false, std::optional<std::string> {}};
+		  return {true, err};
+	  });
 	defGraph.def("AddNode", &pragma::shadergraph::Graph::AddNode);
 	defGraph.def("RemoveNode", &pragma::shadergraph::Graph::RemoveNode);
 	defGraph.def("GetNode", &pragma::shadergraph::Graph::GetNode);
@@ -217,6 +236,13 @@ static void register_shader_graph(luabind::module_ &modShader)
 	modShader[defOutputSocket];
 
 	modShader[defGraph];
+
+	auto oClass = luabind::globals(l);
+	luabind::object oGraph = oClass["shader"]["ShaderGraph"];
+	oGraph["EXTENSION_BINARY"] = pragma::shadergraph::Graph::EXTENSION_BINARY;
+	oGraph["EXTENSION_ASCII"] = pragma::shadergraph::Graph::EXTENSION_ASCII;
+	oGraph["PSG_IDENTIFIER"] = pragma::shadergraph::Graph::PSG_IDENTIFIER;
+	oGraph["PSG_VERSION"] = pragma::shadergraph::Graph::PSG_VERSION;
 }
 
 void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
@@ -524,7 +550,7 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 	auto defMatData = luabind::class_<pragma::rendering::shader_material::ShaderMaterialData>("ShaderMaterialData");
 	modShader[defMatData];
 
-	register_shader_graph(modShader);
+	register_shader_graph(lua.GetState(), modShader);
 
 	auto defShader = luabind::class_<prosper::Shader>("Shader");
 	defShader.def(

@@ -14,12 +14,28 @@ local Element = util.register_class("gui.ShaderGraph", gui.Base)
 function Element:OnInitialize()
 	gui.Base.OnInitialize(self)
 
-	self.m_nameToElement = {}
-	self.m_nodeElements = {}
+	self.m_nameToElementData = {}
+	self.m_nodeData = {}
 	self.m_linkElements = {}
 	self:SetSize(1280, 1024)
-	self:TrapFocus()
-	self:RequestFocus()
+
+	self:SetMouseInputEnabled(true)
+end
+function Element:MouseCallback(button, state, mods)
+	if button == input.MOUSE_BUTTON_RIGHT and state == input.STATE_PRESS then
+		local pContext = gui.open_context_menu(self)
+		if util.is_valid(pContext) then
+			pContext:AddItem("Add Node", function()
+				local graphNode = self.m_graph:AddNode("math")
+				if graphNode ~= nil then
+					self:AddNode(graphNode)
+					self:InitializeLinks()
+				end
+			end)
+			pContext:Update()
+			return util.EVENT_REPLY_HANDLED
+		end
+	end
 end
 function Element:SetGraph(graph)
 	self.m_graph = graph
@@ -51,8 +67,8 @@ function Element:InitializeLinks()
 	end
 
 	for _, link in ipairs(links) do
-		local elOutput = self.m_nameToElement[link.outputNode:GetName()]
-		local elInput = self.m_nameToElement[link.inputNode:GetName()]
+		local elOutput = self.m_nameToElementData[link.outputNode:GetName()].nodeElement
+		local elInput = self.m_nameToElementData[link.inputNode:GetName()].nodeElement
 		local elOutputSocket = elOutput:GetOutputSocket(link.output)
 		local elInputSocket = elInput:GetInputSocket(link.input)
 		if util.is_valid(elOutputSocket) and util.is_valid(elInputSocket) then
@@ -71,11 +87,58 @@ function Element:AddLink(elOutputSocket, elInputSocket)
 	l:Setup(elOutputSocket, elInputSocket)
 	table.insert(self.m_linkElements, l)
 end
+function Element:RemoveNode(name)
+	local t = self.m_nameToElementData[name]
+	if t == nil then
+		return
+	end
+
+	util.remove(t.frame)
+
+	for i, tOther in ipairs(self.m_nodeData) do
+		if tOther == t then
+			table.remove(self.m_nodeData, i)
+			break
+		end
+	end
+	self.m_nameToElementData[name] = nil
+	self:InitializeLinks()
+end
 function Element:AddNode(graphNode)
-	local node = graphNode:GetNode()
-	local elNode = gui.create("WIGraphNode", self)
+	local name = graphNode:GetName()
+	local frame = gui.create("WIFrame", self)
+	frame:SetTitle(name)
+	frame:SetDetachButtonEnabled(false)
+	frame:SetSize(128, 128)
+
+	frame:SetMouseInputEnabled(true)
+	frame:AddCallback("OnMouseEvent", function(el, button, state, mods)
+		if button == input.MOUSE_BUTTON_RIGHT and state == input.STATE_PRESS then
+			local pContext = gui.open_context_menu(self)
+			if util.is_valid(pContext) then
+				pContext:AddItem("Remove Node", function()
+					if self.m_graph:RemoveNode(name) then
+						time.create_simple_timer(0.0, function()
+							if self:IsValid() then
+								self:RemoveNode(name)
+							end
+						end)
+					end
+				end)
+				pContext:Update()
+			end
+			return util.EVENT_REPLY_HANDLED
+		end
+	end)
+
+	local pDrag = frame:GetDragArea()
+	pDrag:SetHeight(31)
+	pDrag:SetAutoAlignToParent(true, false)
+
+	local elNode = gui.create("WIGraphNode", frame)
 	elNode:SetNode(graphNode:GetName())
-	elNode:SetX(#self.m_nodeElements * 200)
+	elNode:SetY(31)
+	frame:SetX(#self.m_nodeData * 200)
 	for _, output in ipairs(graphNode:GetOutputs()) do
 		local socket = output:GetSocket()
 		local elOutput = elNode:AddOutput(socket.name)
@@ -110,7 +173,12 @@ function Element:AddNode(graphNode)
 		end
 	end)
 
-	table.insert(self.m_nodeElements, elNode)
-	self.m_nameToElement[graphNode:GetName()] = elNode
+	local t = {
+		frame = frame,
+		nodeElement = elNode,
+		graphNode = name,
+	}
+	table.insert(self.m_nodeData, t)
+	self.m_nameToElementData[graphNode:GetName()] = t
 end
 gui.register("WIShaderGraph", Element)

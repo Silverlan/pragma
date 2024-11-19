@@ -125,7 +125,6 @@ static luabind::object shader_mat_value_to_lua_object(lua_State *l, const pragma
 	  val);
 }
 
-{
 static void register_shader_graph(lua_State *l, luabind::module_ &modShader)
 {
 	auto defGraph = luabind::class_<pragma::shadergraph::Graph>("ShaderGraph");

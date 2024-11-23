@@ -32,83 +32,83 @@ extern DLLNETWORK Engine *engine;
 Lua::udm::LuaUdmArrayIterator::LuaUdmArrayIterator(::udm::PropertyWrapper &prop) : m_property {&prop} {}
 
 template<typename T>
-static bool is_udm_type(luabind::object &val)
+static bool is_udm_type(const luabind::object &val)
 {
 	return luabind::object_cast_nothrow<T *>(val, static_cast<T *>(nullptr)) != nullptr;
 }
-static udm::Type determine_udm_type(luabind::object &val)
+::udm::Type Lua::udm::determine_udm_type(const luabind::object &val)
 {
-	auto t = luabind::type(val);
-	switch(t) {
-	case LUA_TNIL:
-		return udm::Type::Nil;
-	case LUA_TBOOLEAN:
-		return udm::Type::Boolean;
-	case LUA_TSTRING:
-		return udm::Type::String;
-	case LUA_TNUMBER:
+	auto type = static_cast<Lua::Type>(luabind::type(val));
+	switch(type) {
+	case Lua::Type::Nil:
+		return ::udm::Type::Nil;
+	case Lua::Type::Bool:
+		return ::udm::Type::Boolean;
+	case Lua::Type::String:
+		return ::udm::Type::String;
+	case Lua::Type::Number:
 		{
 			auto v = luabind::object_cast<double>(val);
 			if(static_cast<int64_t>(v) == v) {
 				if(v < 0.0)
-					return udm::Type::UInt32;
-				return udm::Type::Int32;
+					return ::udm::Type::UInt32;
+				return ::udm::Type::Int32;
 			}
-			return udm::Type::Float;
+			return ::udm::Type::Float;
 		}
-	case LUA_TUSERDATA:
+	case Lua::Type::UserData:
 		break;
 	default:
-		return udm::Type::Invalid;
+		return ::udm::Type::Invalid;
 	}
 
-	if(is_udm_type<udm::Vector2>(val))
-		return udm::Type::Vector2;
-	if(is_udm_type<udm::Vector3>(val))
-		return udm::Type::Vector3;
-	if(is_udm_type<udm::Vector4>(val))
-		return udm::Type::Vector4;
-	if(is_udm_type<udm::Vector2i>(val))
-		return udm::Type::Vector2i;
-	if(is_udm_type<udm::Vector3i>(val))
-		return udm::Type::Vector3i;
-	if(is_udm_type<udm::Vector4i>(val))
-		return udm::Type::Vector4i;
-	if(is_udm_type<udm::Quaternion>(val))
-		return udm::Type::Quaternion;
-	if(is_udm_type<udm::EulerAngles>(val))
-		return udm::Type::EulerAngles;
-	if(is_udm_type<udm::Srgba>(val))
-		return udm::Type::Srgba;
-	if(is_udm_type<udm::HdrColor>(val))
-		return udm::Type::HdrColor;
-	if(is_udm_type<udm::Transform>(val))
-		return udm::Type::Transform;
-	if(is_udm_type<udm::ScaledTransform>(val))
-		return udm::Type::ScaledTransform;
-	if(is_udm_type<udm::Mat4>(val))
-		return udm::Type::Mat4;
-	if(is_udm_type<udm::Mat3x4>(val))
-		return udm::Type::Mat3x4;
-	if(is_udm_type<udm::String>(val))
-		return udm::Type::String;
-	if(is_udm_type<udm::Utf8String>(val))
-		return udm::Type::Utf8String;
-	if(is_udm_type<udm::Blob>(val))
-		return udm::Type::Blob;
-	if(is_udm_type<udm::BlobLz4>(val))
-		return udm::Type::BlobLz4;
-	if(is_udm_type<udm::Element>(val))
-		return udm::Type::Element;
-	if(is_udm_type<udm::Array>(val))
-		return udm::Type::Array;
-	if(is_udm_type<udm::ArrayLz4>(val))
-		return udm::Type::ArrayLz4;
-	if(is_udm_type<udm::Reference>(val))
-		return udm::Type::Reference;
-	if(is_udm_type<udm::Struct>(val))
-		return udm::Type::Struct;
-	return udm::Type::Invalid;
+	if(is_udm_type<::udm::Vector2>(val))
+		return ::udm::Type::Vector2;
+	if(is_udm_type<::udm::Vector3>(val))
+		return ::udm::Type::Vector3;
+	if(is_udm_type<::udm::Vector4>(val))
+		return ::udm::Type::Vector4;
+	if(is_udm_type<::udm::Vector2i>(val))
+		return ::udm::Type::Vector2i;
+	if(is_udm_type<::udm::Vector3i>(val))
+		return ::udm::Type::Vector3i;
+	if(is_udm_type<::udm::Vector4i>(val))
+		return ::udm::Type::Vector4i;
+	if(is_udm_type<::udm::Quaternion>(val))
+		return ::udm::Type::Quaternion;
+	if(is_udm_type<::udm::EulerAngles>(val))
+		return ::udm::Type::EulerAngles;
+	if(is_udm_type<::udm::Srgba>(val))
+		return ::udm::Type::Srgba;
+	if(is_udm_type<::udm::HdrColor>(val))
+		return ::udm::Type::HdrColor;
+	if(is_udm_type<::udm::Transform>(val))
+		return ::udm::Type::Transform;
+	if(is_udm_type<::udm::ScaledTransform>(val))
+		return ::udm::Type::ScaledTransform;
+	if(is_udm_type<::udm::Mat4>(val))
+		return ::udm::Type::Mat4;
+	if(is_udm_type<::udm::Mat3x4>(val))
+		return ::udm::Type::Mat3x4;
+	if(is_udm_type<::udm::String>(val))
+		return ::udm::Type::String;
+	if(is_udm_type<::udm::Utf8String>(val))
+		return ::udm::Type::Utf8String;
+	if(is_udm_type<::udm::Blob>(val))
+		return ::udm::Type::Blob;
+	if(is_udm_type<::udm::BlobLz4>(val))
+		return ::udm::Type::BlobLz4;
+	if(is_udm_type<::udm::Element>(val))
+		return ::udm::Type::Element;
+	if(is_udm_type<::udm::Array>(val))
+		return ::udm::Type::Array;
+	if(is_udm_type<::udm::ArrayLz4>(val))
+		return ::udm::Type::ArrayLz4;
+	if(is_udm_type<::udm::Reference>(val))
+		return ::udm::Type::Reference;
+	if(is_udm_type<::udm::Struct>(val))
+		return ::udm::Type::Struct;
+	return ::udm::Type::Invalid;
 }
 
 void Lua::udm::table_to_udm(const Lua::tb<void> &t, ::udm::LinkedPropertyWrapper &udm)
@@ -344,48 +344,6 @@ static Lua::var<Lua::mult<bool, std::string>, ::udm::Data> create(lua_State *l, 
 	}
 }
 
-static udm::Type determine_lua_object_udm_type(const luabind::object &o)
-{
-	auto type = static_cast<Lua::Type>(luabind::type(o));
-	if(type == Lua::Type::Bool)
-		return udm::Type::Boolean;
-	if(type == Lua::Type::Number)
-		return udm::Type::Float;
-	if(type == Lua::Type::String)
-		return udm::Type::String;
-
-	auto isType = [&o]<typename T>() -> bool { return luabind::object_cast_nothrow<T *>(o, static_cast<T *>(nullptr)) != nullptr; };
-	if(isType.template operator()<udm::Vector2>())
-		return udm::Type::Vector2;
-	if(isType.template operator()<udm::Vector3>())
-		return udm::Type::Vector3;
-	if(isType.template operator()<udm::Vector4>())
-		return udm::Type::Vector4;
-	if(isType.template operator()<udm::Quaternion>())
-		return udm::Type::Quaternion;
-	if(isType.template operator()<udm::EulerAngles>())
-		return udm::Type::EulerAngles;
-	if(isType.template operator()<udm::Srgba>())
-		return udm::Type::Srgba;
-	if(isType.template operator()<udm::HdrColor>())
-		return udm::Type::HdrColor;
-	if(isType.template operator()<udm::Transform>())
-		return udm::Type::Transform;
-	if(isType.template operator()<udm::ScaledTransform>())
-		return udm::Type::ScaledTransform;
-	if(isType.template operator()<udm::Mat4>())
-		return udm::Type::Mat4;
-	if(isType.template operator()<udm::Mat3x4>())
-		return udm::Type::Mat3x4;
-	if(isType.template operator()<udm::Vector2i>())
-		return udm::Type::Vector2i;
-	if(isType.template operator()<udm::Vector3i>())
-		return udm::Type::Vector3i;
-	if(isType.template operator()<udm::Vector4i>())
-		return udm::Type::Vector4i;
-	return udm::Type::Invalid;
-}
-
 template<typename T>
 static T &get_lua_object_udm_value(const luabind::object &o)
     requires(!std::is_arithmetic_v<T>)
@@ -424,7 +382,7 @@ static void set_numeric_component(T &value, int32_t idx, lua_udm_underlying_nume
 
 static Lua::type<uint32_t> get_numeric_component(lua_State *l, const luabind::object &value, int32_t idx, udm::Type type)
 {
-	type = (type != udm::Type::Invalid) ? type : determine_lua_object_udm_type(value);
+	type = (type != udm::Type::Invalid) ? type : Lua::udm::determine_udm_type(value);
 	if(type == udm::Type::Invalid)
 		return Lua::nil;
 	return ::udm::visit_ng(type, [l, &value, idx](auto tag) {
@@ -439,7 +397,7 @@ static Lua::type<uint32_t> get_numeric_component(lua_State *l, const luabind::ob
 
 static luabind::object set_numeric_component(lua_State *l, const luabind::object &value, int32_t idx, udm::Type type, const Lua::udm_numeric &componentValue)
 {
-	type = (type != udm::Type::Invalid) ? type : determine_lua_object_udm_type(value);
+	type = (type != udm::Type::Invalid) ? type : Lua::udm::determine_udm_type(value);
 	if(type == udm::Type::Invalid)
 		return Lua::nil;
 	return ::udm::visit_ng(type, [l, &value, idx, &componentValue](auto tag) {
@@ -458,7 +416,7 @@ static luabind::object set_numeric_component(lua_State *l, const luabind::object
 
 static Lua::udm_ng lerp_value(lua_State *l, const luabind::object &value0, const luabind::object &value1, float t, udm::Type type)
 {
-	type = (type != udm::Type::Invalid) ? type : determine_lua_object_udm_type(value0);
+	type = (type != udm::Type::Invalid) ? type : Lua::udm::determine_udm_type(value0);
 	if(type == udm::Type::Invalid)
 		return Lua::nil;
 	return ::udm::visit_ng(type, [l, &value0, &value1, t, type](auto tag) {
@@ -901,7 +859,7 @@ void Lua::udm::register_library(Lua::Interface &lua)
 	    {"ASCII_SAVE_FLAG_BIT_INCLUDE_HEADER", umath::to_integral(::udm::AsciiSaveFlags::IncludeHeader)},
 	    {"ASCII_SAVE_FLAG_BIT_DONT_COMPRESS_LZ4_ARRAYS", umath::to_integral(::udm::AsciiSaveFlags::DontCompressLz4Arrays)},
 	    {"ASCII_SAVE_FLAG_DEFAULT", umath::to_integral(::udm::AsciiSaveFlags::Default)},
-		
+
 	    {"FORMAT_TYPE_BINARY", umath::to_integral(::udm::FormatType::Binary)},
 	    {"FORMAT_TYPE_ASCII", umath::to_integral(::udm::FormatType::Ascii)},
 	  });

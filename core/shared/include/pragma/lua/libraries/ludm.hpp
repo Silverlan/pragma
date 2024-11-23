@@ -32,6 +32,7 @@ namespace Lua {
 		DLLNETWORK void set_array_values(lua_State *l, ::udm::Array &a, luabind::tableT<void> t, uint32_t tIdx);
 		DLLNETWORK bool set_array_value(lua_State *l, ::udm::Array &a, int32_t idx, const luabind::object &o);
 		DLLNETWORK void table_to_udm(const Lua::tb<void> &t, ::udm::LinkedPropertyWrapper &udm);
+		DLLNETWORK ::udm::Type determine_udm_type(const luabind::object &val);
 		DLLNETWORK luabind::object udm_to_value(lua_State *l, ::udm::LinkedPropertyWrapperArg udm);
 		template<typename T>
 		T cast_object(const Lua::udm_ng &value)

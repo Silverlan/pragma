@@ -57,6 +57,7 @@
 #include "pragma/rendering/shaders/util/c_shader_compose_rma.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_glow.hpp"
 #include "pragma/rendering/shader_material/shader_material.hpp"
+#include "pragma/rendering/shader_graph_manager.hpp"
 #include "pragma/lua/libraries/ludm.hpp"
 #include <pragma/lua/lua_entity_component.hpp>
 #include <shader/prosper_pipeline_create_info.hpp>
@@ -78,6 +79,7 @@
 #include <pragma/lua/lua_call.hpp>
 #include <pragma/lua/policies/default_parameter_policy.hpp>
 #include <pragma/lua/converters/string_view_converter_t.hpp>
+#include <pragma/logging.hpp>
 #include <luainterface.hpp>
 #include <luabind/copy_policy.hpp>
 #include <luabind/return_reference_to_policy.hpp>
@@ -90,6 +92,9 @@ import pragma.shadergraph;
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
+
+static spdlog::logger &LOGGER_SG = pragma::register_logger("shadergraph");
+
 static void reload_textures(CMaterial &mat)
 {
 	auto &data = mat.GetDataBlock();
@@ -129,6 +134,21 @@ static void register_shader_graph(lua_State *l, luabind::module_ &modShader)
 {
 	auto defGraph = luabind::class_<pragma::shadergraph::Graph>("ShaderGraph");
 	defGraph.scope[luabind::def(
+	  "load", +[](const std::string &type, const std::string &name) -> std::pair<std::shared_ptr<pragma::shadergraph::Graph>, std::optional<std::string>> {
+		  auto filePath = pragma::rendering::ShaderGraphManager::GetShaderGraphFilePath(type, name);
+		  auto reg = c_engine->GetShaderGraphManager().GetNodeRegistry(type);
+		  if(!reg) {
+			  LOGGER_SG.error("Failed to load shader graph of type '{}' with name '{}' - no registry found!", type, name);
+			  return {std::shared_ptr<pragma::shadergraph::Graph> {}, std::optional<std::string> {}};
+		  }
+		  auto graph = std::make_shared<pragma::shadergraph::Graph>(reg);
+		  std::string err;
+		  auto result = graph->Load(filePath, err);
+		  if(!result)
+			  return {std::shared_ptr<pragma::shadergraph::Graph> {}, std::optional<std::string> {err}};
+		  return {graph, {}};
+	  })];
+	defGraph.scope[luabind::def(
 	  "load", +[](udm::AssetData &assetData, const std::shared_ptr<pragma::shadergraph::NodeRegistry> &nodeReg) -> std::pair<std::shared_ptr<pragma::shadergraph::Graph>, std::optional<std::string>> {
 		  auto graph = std::make_shared<pragma::shadergraph::Graph>(nodeReg);
 		  std::string err;
@@ -143,10 +163,27 @@ static void register_shader_graph(lua_State *l, luabind::module_ &modShader)
 	  "Save", +[](const pragma::shadergraph::Graph &graph, udm::AssetData &assetData) -> std::pair<bool, std::optional<std::string>> {
 		  std::string err;
 		  if(!graph.Save(assetData, err))
-			  return {false, std::optional<std::string> {}};
-		  return {true, err};
+			  return {false, err};
+		  return {true, std::optional<std::string> {}};
 	  });
-	defGraph.def("AddNode", &pragma::shadergraph::Graph::AddNode);
+	defGraph.def(
+	  "Save", +[](const pragma::shadergraph::Graph &graph, const std::string &type, const std::string &name) -> std::pair<bool, std::optional<std::string>> {
+		  auto filePath = pragma::rendering::ShaderGraphManager::GetShaderGraphFilePath(type, name);
+		  std::string err;
+		  filemanager::create_path(ufile::get_path_from_filename(filePath));
+		  if(!graph.Save(filePath, err))
+			  return {false, err};
+		  return {true, std::optional<std::string> {}};
+	  });
+	defGraph.def(
+	  "AddNode", +[](pragma::shadergraph::Graph &graph, const std::string &type) -> std::shared_ptr<pragma::shadergraph::GraphNode> {
+		  auto node = graph.AddNode(type);
+		  if(!node) {
+			  LOGGER_SG.error("Failed to add node of type '{}'!", type);
+			  return nullptr;
+		  }
+		  return node;
+	  });
 	defGraph.def("RemoveNode", &pragma::shadergraph::Graph::RemoveNode);
 	defGraph.def("GetNode", &pragma::shadergraph::Graph::GetNode);
 	defGraph.def(
@@ -157,6 +194,8 @@ static void register_shader_graph(lua_State *l, luabind::module_ &modShader)
 			  t[idx++] = node.get();
 		  return t;
 	  });
+	defGraph.def("GenerateGlsl", &pragma::shadergraph::Graph::GenerateGlsl);
+	defGraph.def("DebugPrint", &pragma::shadergraph::Graph::DebugPrint);
 
 	auto defNode = luabind::class_<pragma::shadergraph::Node>("Node");
 	defNode.def("GetType", &pragma::shadergraph::Node::GetType);
@@ -179,12 +218,35 @@ static void register_shader_graph(lua_State *l, luabind::module_ &modShader)
 	modShader[defNode];
 
 	auto defSocket = luabind::class_<pragma::shadergraph::Socket>("Socket");
+	defSocket.add_static_constant("TYPE_BOOLEAN", umath::to_integral(pragma::shadergraph::SocketType::Boolean));
+	defSocket.add_static_constant("TYPE_INT", umath::to_integral(pragma::shadergraph::SocketType::Int));
+	defSocket.add_static_constant("TYPE_UINT", umath::to_integral(pragma::shadergraph::SocketType::UInt));
+	defSocket.add_static_constant("TYPE_FLOAT", umath::to_integral(pragma::shadergraph::SocketType::Float));
+	defSocket.add_static_constant("TYPE_COLOR", umath::to_integral(pragma::shadergraph::SocketType::Color));
+	defSocket.add_static_constant("TYPE_VECTOR", umath::to_integral(pragma::shadergraph::SocketType::Vector));
+	defSocket.add_static_constant("TYPE_POINT", umath::to_integral(pragma::shadergraph::SocketType::Point));
+	defSocket.add_static_constant("TYPE_NORMAL", umath::to_integral(pragma::shadergraph::SocketType::Normal));
+	defSocket.add_static_constant("TYPE_POINT2", umath::to_integral(pragma::shadergraph::SocketType::Point2));
+	defSocket.add_static_constant("TYPE_STRING", umath::to_integral(pragma::shadergraph::SocketType::String));
+	defSocket.add_static_constant("TYPE_TRANSFORM", umath::to_integral(pragma::shadergraph::SocketType::Transform));
+	defSocket.add_static_constant("TYPE_ENUM", umath::to_integral(pragma::shadergraph::SocketType::Enum));
+	defSocket.add_static_constant("TYPE_INVALID", umath::to_integral(pragma::shadergraph::SocketType::Invalid));
+	defSocket.scope[luabind::def("udm_to_socket_type", &pragma::shadergraph::to_socket_type)];
+	defSocket.scope[luabind::def("to_udm_type", &pragma::shadergraph::to_udm_type)];
+	defSocket.scope[luabind::def("to_glsl_type", &pragma::shadergraph::to_glsl_type)];
+
 	defSocket.def_readonly("name", &pragma::shadergraph::Socket::name);
 	defSocket.def_readonly("type", &pragma::shadergraph::Socket::type);
 	modShader[defSocket];
 
 	auto defNodeRegistry = luabind::class_<pragma::shadergraph::NodeRegistry>("NodeRegistry");
 	defNodeRegistry.def("GetNode", &pragma::shadergraph::NodeRegistry::GetNode);
+	defNodeRegistry.def(
+	  "GetNodeTypes", +[](const pragma::shadergraph::NodeRegistry &reg) -> std::vector<std::string> {
+		  std::vector<std::string> names;
+		  reg.GetNodeTypes(names);
+		  return names;
+	  });
 	modShader[defNodeRegistry];
 
 	auto defGraphNode = luabind::class_<pragma::shadergraph::GraphNode>("GraphNode");
@@ -193,8 +255,46 @@ static void register_shader_graph(lua_State *l, luabind::module_ &modShader)
 	defGraphNode.def("SetDisplayName", &pragma::shadergraph::GraphNode::SetDisplayName);
 	defGraphNode.def("GetDisplayName", &pragma::shadergraph::GraphNode::GetDisplayName);
 	defGraphNode.def("ClearInputValue", &pragma::shadergraph::GraphNode::ClearInputValue);
+	defGraphNode.def(
+	  "SetInputValue", +[](pragma::shadergraph::GraphNode &graphNode, const std::string_view &inputName, luabind::object value) {
+		  auto type = Lua::udm::determine_udm_type(value);
+		  ::udm::visit(type, [&graphNode, &inputName, &value](auto tag) {
+			  using T = typename decltype(tag)::type;
+			  if constexpr(pragma::shadergraph::is_socket_type<T>()) {
+				  auto val = luabind::object_cast<T>(value);
+				  graphNode.SetInputValue(inputName, val);
+			  }
+		  });
+	  });
+	defGraphNode.def(
+	  "GetInputValue", +[](lua_State *l, const pragma::shadergraph::GraphNode &graphNode, const std::string_view &inputName) -> Lua::udm_type {
+		  auto *input = graphNode.FindInput(inputName);
+		  if(!input)
+			  return Lua::nil;
+		  auto type = pragma::shadergraph::to_udm_type(input->GetSocket().type);
+		  if(type == udm::Type::Invalid)
+			  return Lua::nil;
+		  return ::udm::visit(type, [l, &graphNode, &inputName](auto tag) {
+			  using T = typename decltype(tag)::type;
+			  if constexpr(pragma::shadergraph::is_socket_type<T>()) {
+				  T val;
+				  auto res = graphNode.GetInputValue(inputName, val);
+				  if(!res)
+					  return Lua::nil;
+				  return luabind::object {l, val};
+			  }
+			  return Lua::nil;
+		  });
+	  });
 	defGraphNode.def("CanLink", &pragma::shadergraph::GraphNode::CanLink);
-	defGraphNode.def("Link", &pragma::shadergraph::GraphNode::Link);
+	defGraphNode.def(
+	  "Link", +[](pragma::shadergraph::GraphNode &graphNode, const std::string_view &outputName, pragma::shadergraph::GraphNode &linkTarget, const std::string_view &inputName) -> std::pair<bool, std::optional<std::string>> {
+		  std::string err;
+		  auto res = graphNode.Link(outputName, linkTarget, inputName, &err);
+		  if(!res)
+			  LOGGER_SG.debug("Failed to link output '{}' of node '{}' ({}) to input '{}' of node '{}' ({}): {}", outputName, graphNode.GetName(), graphNode->GetType(), inputName, linkTarget.GetName(), linkTarget->GetType(), err);
+		  return {res, err.empty() ? std::optional<std::string> {} : std::optional<std::string> {err}};
+	  });
 	defGraphNode.def("Disconnect", static_cast<bool (pragma::shadergraph::GraphNode ::*)(const std::string_view &)>(&pragma::shadergraph::GraphNode::Disconnect));
 	defGraphNode.def("IsOutputLinked", &pragma::shadergraph::GraphNode::IsOutputLinked);
 	defGraphNode.def("FindOutputIndex", &pragma::shadergraph::GraphNode::FindOutputIndex);
@@ -241,6 +341,7 @@ static void register_shader_graph(lua_State *l, luabind::module_ &modShader)
 	oGraph["EXTENSION_ASCII"] = pragma::shadergraph::Graph::EXTENSION_ASCII;
 	oGraph["PSG_IDENTIFIER"] = pragma::shadergraph::Graph::PSG_IDENTIFIER;
 	oGraph["PSG_VERSION"] = pragma::shadergraph::Graph::PSG_VERSION;
+	oGraph["ROOT_PATH"] = pragma::rendering::ShaderGraphManager::ROOT_GRAPH_PATH;
 }
 
 void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
@@ -386,6 +487,48 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 		     }
 		     return 0;
 	     }},
+	    {"register_graph",
+	      [](lua_State *l) {
+		      std::string type = Lua::CheckString(l, 1);
+		      std::string identifier = Lua::CheckString(l, 2);
+		      auto &manager = c_engine->GetShaderGraphManager();
+		      auto graph = manager.RegisterGraph(type, identifier);
+		      Lua::Push(l, graph);
+		      return 1;
+	      }},
+	    {"create_graph",
+	      [](lua_State *l) {
+		      std::string type = Lua::CheckString(l, 1);
+		      auto &manager = c_engine->GetShaderGraphManager();
+		      auto graph = manager.CreateGraph(type);
+		      Lua::Push(l, graph);
+		      return 1;
+	      }},
+	    {"get_graph",
+	      [](lua_State *l) {
+		      std::string identifier = Lua::CheckString(l, 1);
+		      auto &manager = c_engine->GetShaderGraphManager();
+		      auto graph = manager.GetGraph(identifier);
+		      Lua::Push(l, graph);
+		      return 1;
+	      }},
+	    {"reload_graph_shader",
+	      [](lua_State *l) {
+		      std::string identifier = Lua::CheckString(l, 1);
+		      auto &manager = c_engine->GetShaderGraphManager();
+		      manager.ReloadShader(identifier);
+		      return 0;
+	      }},
+	    {"get_graph_node_registry",
+	      [](lua_State *l) {
+		      std::string type = Lua::CheckString(l, 1);
+		      auto &manager = c_engine->GetShaderGraphManager();
+		      auto reg = manager.GetNodeRegistry(type);
+		      if(!reg)
+			      return 0;
+		      Lua::Push(l, reg);
+		      return 1;
+	      }},
 	    {"get",
 	      [](lua_State *l) {
 		      auto *className = Lua::CheckString(l, 1);

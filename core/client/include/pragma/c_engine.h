@@ -37,6 +37,9 @@ namespace pragma::debug {
 namespace pragma::string {
 	class Utf8String;
 };
+namespace pragma::rendering {
+	class ShaderGraphManager;
+};
 struct InputBindingLayer;
 struct CoreInputBindingLayer;
 struct FontSet;
@@ -203,6 +206,8 @@ class DLLCLIENT CEngine : public Engine, public pragma::RenderContext {
 	// Shaders
 	::util::WeakHandle<prosper::Shader> ReloadShader(const std::string &name);
 	void ReloadShaderPipelines();
+	pragma::rendering::ShaderGraphManager &GetShaderGraphManager() { return *m_shaderGraphManager; }
+	const pragma::rendering::ShaderGraphManager &GetShaderGraphManager() const { return const_cast<CEngine *>(this)->GetShaderGraphManager(); }
 	//
 
 	Double GetDeltaFrameTime() const;
@@ -272,6 +277,7 @@ class DLLCLIENT CEngine : public Engine, public pragma::RenderContext {
 	float m_nearZ, m_farZ;
 	std::unique_ptr<StateInstance> m_clInstance;
 	std::unique_ptr<ConVarInfoList> m_clConfig;
+	std::unique_ptr<pragma::rendering::ShaderGraphManager> m_shaderGraphManager;
 	std::optional<Vector2i> m_renderResolution = {};
 
 	std::shared_ptr<pragma::debug::GPUProfiler> m_gpuProfiler;

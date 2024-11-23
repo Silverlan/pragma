@@ -17,6 +17,7 @@ function Element:OnInitialize()
 	self.m_nameToElementData = {}
 	self.m_nodeData = {}
 	self.m_linkElements = {}
+	self:Clear()
 	self:SetSize(1280, 1024)
 
 	self:SetMouseInputEnabled(true)
@@ -80,31 +81,55 @@ function Element:MouseCallback(button, state, mods)
 				pFileDialog:SetRootPath("scripts/shader_data/graphs")
 				pFileDialog:Update()
 			end)
-			pContext:AddItem("Add Node", function()
-				local graphNode = self.m_graph:AddNode("math")
-				if graphNode ~= nil then
-					self:AddNode(graphNode)
-					self:InitializeLinks()
-				end
+			pContext:AddItem("Generate GLSL", function()
+				util.set_clipboard_string(self.m_graph:GenerateGlsl())
 			end)
+			local reg = shader.get_graph_node_registry("object")
+			if reg ~= nil then
+				local nodeTypes = reg:GetNodeTypes()
+				table.sort(nodeTypes)
+				local pItem, pSubMenu = pContext:AddSubMenu("Add Node")
+				for _, name in pairs(nodeTypes) do
+					pSubMenu:AddItem(name, function(pItem)
+						local graphNode = self.m_graph:AddNode(name)
+						if graphNode ~= nil then
+							local frame = self:AddNode(graphNode)
+							local pos = self:GetCursorPos()
+							frame:SetPos(pos.x - frame:GetWidth() * 0.5, pos.y - frame:GetHeight() * 0.5)
+							self:InitializeLinks()
+						end
+					end)
+				end
+				pSubMenu:Update()
+			end
 			pContext:Update()
 			return util.EVENT_REPLY_HANDLED
 		end
 	end
 end
-function Element:SetGraph(graph)
+function Element:GetGraph()
+	return self.m_graph
+end
+function Element:Clear()
 	self:ClearLinks()
 	for _, t in ipairs(self.m_nodeData) do
 		util.remove(t.frame)
 	end
 	self.m_nodeData = {}
 	self.m_nameToElementData = {}
+	self.m_graph = shader.create_graph("object")
+end
+function Element:SetGraph(graph)
+	self:Clear()
 
 	self.m_graph = graph
 
 	local nodes = self.m_graph:GetNodes()
+	local offset = 0
 	for _, graphNode in ipairs(nodes) do
-		self:AddNode(graphNode)
+		local frame = self:AddNode(graphNode)
+		frame:SetX(offset)
+		offset = offset + frame:GetWidth() + 80
 	end
 
 	self:InitializeLinks()
@@ -146,6 +171,7 @@ function Element:AddLink(elOutputSocket, elInputSocket)
 	local l = gui.create("WIElementConnectorLine", self)
 	l:SetSize(self:GetSize())
 	l:SetAnchor(0, 0, 1, 1)
+	l:SetZPos(-1)
 	l:Setup(elOutputSocket, elInputSocket)
 	table.insert(self.m_linkElements, l)
 end
@@ -172,7 +198,15 @@ function Element:AddNode(graphNode)
 	frame:SetTitle(name)
 	frame:SetDetachButtonEnabled(false)
 	frame:SetCloseButtonEnabled(false)
+	frame:SetResizable(false)
 	frame:SetSize(128, 128)
+	frame:SetZPos(0)
+	frame:AddCallback("OnDragStart", function(el, x, y)
+		el:SetZPos(1)
+	end)
+	frame:AddCallback("OnDragEnd", function(el, x, y)
+		el:SetZPos(0)
+	end)
 
 	frame:SetMouseInputEnabled(true)
 	frame:AddCallback("OnMouseEvent", function(el, button, state, mods)
@@ -201,16 +235,17 @@ function Element:AddNode(graphNode)
 	local elNode = gui.create("WIGraphNode", frame)
 	elNode:SetNode(graphNode:GetName())
 	elNode:SetY(31)
-	frame:SetX(#self.m_nodeData * 200)
+	elNode:AddCallback("SetSize", function()
+		frame:SetHeight(elNode:GetBottom())
+	end)
 	for _, output in ipairs(graphNode:GetOutputs()) do
 		local socket = output:GetSocket()
 		local elOutput = elNode:AddOutput(socket.name)
 	end
 	for _, input in ipairs(graphNode:GetInputs()) do
 		local socket = input:GetSocket()
-		local elInput = elNode:AddInput(socket.name)
+		local elInput = elNode:AddInput(socket.name, shader.Socket.to_udm_type(socket.type))
 	end
-	--x = elNode:GetRight() + 80
 
 	elNode:AddCallback("OnSocketClicked", function(elNode, elSocket, socketType, id)
 		if util.is_valid(self.m_outSocket) == false then
@@ -243,5 +278,6 @@ function Element:AddNode(graphNode)
 	}
 	table.insert(self.m_nodeData, t)
 	self.m_nameToElementData[graphNode:GetName()] = t
+	return frame
 end
 gui.register("WIShaderGraph", Element)

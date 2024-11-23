@@ -12,6 +12,7 @@
 extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma::rendering;
+#pragma optimize("", off)
 void ShaderGraphTypeManager::RegisterGraph(const std::string &identifier, std::shared_ptr<pragma::shadergraph::Graph> graph)
 {
 	auto fragFilePath = util::FilePath(ShaderGraphManager::GetShaderFilePath(m_typeName, identifier));

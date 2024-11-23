@@ -29,4 +29,18 @@ namespace pragma::rendering::shader_graph {
 	};
 };
 
+#if 0
+layout(std140, LAYOUT_ID(SCENE, RENDER_SETTINGS)) uniform RenderSettings
+{
+	vec4 posCam; // w component is fov
+	int flags;
+	float shadowRatioX;
+	float shadowRatioY;
+	float nearZ;
+	float farZ;
+	int shaderQuality; // 1 = lowest, 10 = highest
+}
+u_renderSettings;
+#endif
+
 #endif

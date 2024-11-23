@@ -18,6 +18,9 @@ function Element:OnInitialize()
 	local box = gui.create("WIVBox", self, 0, 0, self:GetWidth(), self:GetHeight())
 	box:SetName("global_container")
 	box:SetFixedWidth(true)
+	box:AddCallback("SetSize", function()
+		self:SetHeight(box:GetBottom())
+	end)
 
 	local outputControls = gui.create("WIPFMControlsMenu", box, 0, 0, box:GetWidth(), box:GetHeight())
 	outputControls:SetAutoFillContentsToHeight(false)
@@ -28,9 +31,6 @@ function Element:OnInitialize()
 		gui.create("WIPFMControlsMenu", box, 0, outputControls:GetBottom(), box:GetWidth(), box:GetHeight())
 	inputControls:SetAutoFillContentsToHeight(false)
 	inputControls:SetFixedHeight(false)
-	inputControls:AddCallback("SetSize", function()
-		self:SetHeight(inputControls:GetBottom())
-	end)
 	self.m_inputControls = inputControls
 
 	self.m_inputs = {}
@@ -47,12 +47,17 @@ end
 function Element:GetNode()
 	return self.m_node
 end
-function Element:AddControl(socketType, title, id)
+function Element:AddControl(socketType, title, id, type)
 	local ctrlMenu = (socketType == gui.GraphNodeSocket.SOCKET_TYPE_INPUT) and self.m_inputControls
 		or self.m_outputControls
-	local elCtrl = ctrlMenu:AddSliderControl(title, id, 0.01, 0.0, 0.1, function(el, value)
-		--
-	end, 0.001)
+	local elCtrl
+	if socketType == gui.GraphNodeSocket.SOCKET_TYPE_INPUT and type ~= nil then
+		local wrapper = ctrlMenu:AddPropertyControl(type, id, title, {})
+		elCtrl = wrapper:GetWrapperElement()
+	else
+		local el, wrapper = ctrlMenu:AddText(title, id, "")
+		elCtrl = wrapper
+	end
 	local el = gui.create("WIGraphNodeSocket", elCtrl)
 	el:SetSocket(self, id, socketType)
 	el:SetMouseInputEnabled(true)
@@ -67,7 +72,7 @@ function Element:AddControl(socketType, title, id)
 		socketElement = el,
 		controlElement = elCtrl,
 	}
-	return el
+	return el, elCtrl
 end
 function Element:GetSocket(socketType, name)
 	local t = (socketType == gui.GraphNodeSocket.SOCKET_TYPE_INPUT) and self.m_inputs or self.m_outputs
@@ -82,12 +87,16 @@ end
 function Element:GetOutputSocket(name)
 	return self:GetSocket(gui.GraphNodeSocket.SOCKET_TYPE_OUTPUT, name)
 end
-function Element:AddInput(name)
-	return self:AddControl(gui.GraphNodeSocket.SOCKET_TYPE_INPUT, name, name)
+function Element:AddInput(name, type)
+	local elSocket, elCtrl = self:AddControl(gui.GraphNodeSocket.SOCKET_TYPE_INPUT, name, name, type)
+	elSocket:SetX(elSocket:GetWidth() * -0.5)
+	elSocket:SetY(elCtrl:GetHeight() * 0.5 - elSocket:GetHeight() * 0.5)
+	return elSocket
 end
 function Element:AddOutput(name)
-	local elSocket = self:AddControl(gui.GraphNodeSocket.SOCKET_TYPE_OUTPUT, name, name)
-	elSocket:SetX(self:GetWidth() - elSocket:GetWidth())
+	local elSocket, elCtrl = self:AddControl(gui.GraphNodeSocket.SOCKET_TYPE_OUTPUT, name, name)
+	elSocket:SetX(elCtrl:GetWidth() - elSocket:GetWidth() * 0.5)
+	elSocket:SetY(elCtrl:GetHeight() * 0.5 - elSocket:GetHeight() * 0.5)
 	elSocket:SetAnchor(1, 0, 1, 0)
 	return elSocket
 end

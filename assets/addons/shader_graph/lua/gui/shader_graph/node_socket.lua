@@ -14,8 +14,8 @@ function Element:OnInitialize()
 
 	self:SetSize(16, 16)
 
-	local bg = gui.create("WIRect", self, 0, 0, self:GetWidth(), self:GetHeight(), 0, 0, 1, 1)
-	bg:SetColor(Color.Red)
+	local bg = gui.create("WITexturedRect", self, 0, 0, self:GetWidth(), self:GetHeight(), 0, 0, 1, 1)
+	bg:SetMaterial("circle")
 	self.m_bg = bg
 end
 function Element:SetSocket(node, socket, socketType)

@@ -27,8 +27,15 @@ function Element:OnInitialize()
 	outputControls:SetFixedHeight(false)
 	self.m_outputControls = outputControls
 
-	local inputControls =
-		gui.create("WIPFMControlsMenu", box, 0, outputControls:GetBottom(), box:GetWidth(), box:GetHeight())
+	local offsetControls = 0
+	local inputControls = gui.create(
+		"WIPFMControlsMenu",
+		box,
+		offsetControls,
+		outputControls:GetBottom(),
+		box:GetWidth() - offsetControls,
+		box:GetHeight()
+	)
 	inputControls:SetAutoFillContentsToHeight(false)
 	inputControls:SetFixedHeight(false)
 	self.m_inputControls = inputControls
@@ -52,7 +59,17 @@ function Element:AddControl(socketType, title, id, type)
 		or self.m_outputControls
 	local elCtrl
 	if socketType == gui.GraphNodeSocket.SOCKET_TYPE_INPUT and type ~= nil then
-		local wrapper = ctrlMenu:AddPropertyControl(type, id, title, {})
+		local udmType = shader.Socket.to_udm_type(type)
+		local propInfo = {}
+		if type == shader.Socket.TYPE_COLOR then
+			propInfo.specializationType = "color"
+		end
+		local wrapper = ctrlMenu:AddPropertyControl(udmType, id, title, propInfo)
+		wrapper:SetOnChangeValueHandler(function(val, isFinal, initialValue)
+			if isFinal then
+				self:CallCallbacks("OnSocketValueChanged", id, val)
+			end
+		end)
 		elCtrl = wrapper:GetWrapperElement()
 	else
 		local el, wrapper = ctrlMenu:AddText(title, id, "")

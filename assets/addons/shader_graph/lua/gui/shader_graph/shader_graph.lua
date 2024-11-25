@@ -238,13 +238,19 @@ function Element:AddNode(graphNode)
 	elNode:AddCallback("SetSize", function()
 		frame:SetHeight(elNode:GetBottom())
 	end)
+	elNode:AddCallback("OnSocketValueChanged", function(elNode, id, val)
+		local node = self.m_graph:GetNode(name)
+		if node:SetInputValue(id, val) then
+			self:CallCallbacks("OnNodeSocketValueChanged", name, id, val)
+		end
+	end)
 	for _, output in ipairs(graphNode:GetOutputs()) do
 		local socket = output:GetSocket()
 		local elOutput = elNode:AddOutput(socket.name)
 	end
 	for _, input in ipairs(graphNode:GetInputs()) do
 		local socket = input:GetSocket()
-		local elInput = elNode:AddInput(socket.name, shader.Socket.to_udm_type(socket.type))
+		local elInput = elNode:AddInput(socket.name, socket.type)
 	end
 
 	elNode:AddCallback("OnSocketClicked", function(elNode, elSocket, socketType, id)

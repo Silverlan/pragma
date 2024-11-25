@@ -20,6 +20,8 @@ namespace pragma::rendering {
 	  public:
 		ShaderGraphData(const std::string &typeName, const std::string &identifier, const std::shared_ptr<pragma::shadergraph::Graph> &graph) : m_typeName {typeName}, m_identifier {identifier}, m_graph {graph} {}
 		const std::string &GetIdentifier() const { return m_identifier; }
+		const std::string &GetTypeName() const { return m_typeName; }
+		const std::shared_ptr<pragma::shadergraph::Graph> &GetGraph() const { return m_graph; }
 		void GenerateGlsl();
 	  private:
 		std::string m_typeName;
@@ -44,24 +46,30 @@ namespace pragma::rendering {
 		std::shared_ptr<pragma::shadergraph::NodeRegistry> m_nodeRegistry;
 	};
 
+	class ShaderGraphModuleManager;
 	class DLLCLIENT ShaderGraphManager {
 	  public:
 		static constexpr const char *ROOT_GRAPH_PATH = "scripts/shader_data/graphs/";
 		static std::string GetShaderFilePath(const std::string &type, const std::string &identifier);
 		static std::string GetShaderGraphFilePath(const std::string &type, const std::string &identifier);
 
-		ShaderGraphManager() {}
-		~ShaderGraphManager() {}
+		ShaderGraphManager();
+		~ShaderGraphManager();
 		const std::unordered_map<std::string, std::shared_ptr<ShaderGraphTypeManager>> &GetShaderGraphTypeManagers() const { return m_shaderGraphTypeManagers; }
 		void RegisterGraphTypeManager(const std::string &type, std::shared_ptr<pragma::shadergraph::NodeRegistry> nodeRegistry);
 		std::shared_ptr<pragma::shadergraph::Graph> RegisterGraph(const std::string &type, const std::string &identifier);
 		std::shared_ptr<pragma::shadergraph::Graph> CreateGraph(const std::string &type) const;
+		std::shared_ptr<pragma::shadergraph::Graph> LoadShader(const std::string &identifier, std::string &outErr);
 		void ReloadShader(const std::string &identifier);
 		std::shared_ptr<ShaderGraphData> GetGraph(const std::string &identifier) const;
 		std::shared_ptr<pragma::shadergraph::NodeRegistry> GetNodeRegistry(const std::string &type) const;
+
+		ShaderGraphModuleManager &GetModuleManager();
+		const ShaderGraphModuleManager &GetModuleManager() const;
 	  private:
 		std::unordered_map<std::string, std::shared_ptr<ShaderGraphTypeManager>> m_shaderGraphTypeManagers;
 		std::unordered_map<std::string, std::string> m_shaderNameToType;
+		std::unique_ptr<ShaderGraphModuleManager> m_moduleManager;
 	};
 }
 

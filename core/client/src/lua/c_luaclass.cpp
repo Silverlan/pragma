@@ -57,7 +57,7 @@
 #include "pragma/rendering/shaders/util/c_shader_compose_rma.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_glow.hpp"
 #include "pragma/rendering/shader_material/shader_material.hpp"
-#include "pragma/rendering/shader_graph_manager.hpp"
+#include "pragma/rendering/shader_graph/manager.hpp"
 #include "pragma/lua/libraries/ludm.hpp"
 #include <pragma/lua/lua_entity_component.hpp>
 #include <shader/prosper_pipeline_create_info.hpp>
@@ -256,14 +256,15 @@ static void register_shader_graph(lua_State *l, luabind::module_ &modShader)
 	defGraphNode.def("GetDisplayName", &pragma::shadergraph::GraphNode::GetDisplayName);
 	defGraphNode.def("ClearInputValue", &pragma::shadergraph::GraphNode::ClearInputValue);
 	defGraphNode.def(
-	  "SetInputValue", +[](pragma::shadergraph::GraphNode &graphNode, const std::string_view &inputName, luabind::object value) {
+	  "SetInputValue", +[](pragma::shadergraph::GraphNode &graphNode, const std::string_view &inputName, luabind::object value) -> bool {
 		  auto type = Lua::udm::determine_udm_type(value);
-		  ::udm::visit(type, [&graphNode, &inputName, &value](auto tag) {
+		  return ::udm::visit(type, [&graphNode, &inputName, &value](auto tag) {
 			  using T = typename decltype(tag)::type;
 			  if constexpr(pragma::shadergraph::is_socket_type<T>()) {
 				  auto val = luabind::object_cast<T>(value);
-				  graphNode.SetInputValue(inputName, val);
+				  return graphNode.SetInputValue(inputName, val);
 			  }
+			  return false;
 		  });
 	  });
 	defGraphNode.def(
@@ -487,48 +488,6 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 		     }
 		     return 0;
 	     }},
-	    {"register_graph",
-	      [](lua_State *l) {
-		      std::string type = Lua::CheckString(l, 1);
-		      std::string identifier = Lua::CheckString(l, 2);
-		      auto &manager = c_engine->GetShaderGraphManager();
-		      auto graph = manager.RegisterGraph(type, identifier);
-		      Lua::Push(l, graph);
-		      return 1;
-	      }},
-	    {"create_graph",
-	      [](lua_State *l) {
-		      std::string type = Lua::CheckString(l, 1);
-		      auto &manager = c_engine->GetShaderGraphManager();
-		      auto graph = manager.CreateGraph(type);
-		      Lua::Push(l, graph);
-		      return 1;
-	      }},
-	    {"get_graph",
-	      [](lua_State *l) {
-		      std::string identifier = Lua::CheckString(l, 1);
-		      auto &manager = c_engine->GetShaderGraphManager();
-		      auto graph = manager.GetGraph(identifier);
-		      Lua::Push(l, graph);
-		      return 1;
-	      }},
-	    {"reload_graph_shader",
-	      [](lua_State *l) {
-		      std::string identifier = Lua::CheckString(l, 1);
-		      auto &manager = c_engine->GetShaderGraphManager();
-		      manager.ReloadShader(identifier);
-		      return 0;
-	      }},
-	    {"get_graph_node_registry",
-	      [](lua_State *l) {
-		      std::string type = Lua::CheckString(l, 1);
-		      auto &manager = c_engine->GetShaderGraphManager();
-		      auto reg = manager.GetNodeRegistry(type);
-		      if(!reg)
-			      return 0;
-		      Lua::Push(l, reg);
-		      return 1;
-	      }},
 	    {"get",
 	      [](lua_State *l) {
 		      auto *className = Lua::CheckString(l, 1);
@@ -571,6 +530,44 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 		     Lua::Push(l, tex);
 		     return 1;
 	     }}});
+
+	modShader[luabind::def(
+	  "register_graph", +[](const std::string &type, const std::string &identifier) -> std::shared_ptr<pragma::shadergraph::Graph> {
+		  auto &manager = c_engine->GetShaderGraphManager();
+		  return manager.RegisterGraph(type, identifier);
+	  })];
+	modShader[luabind::def(
+	  "create_graph", +[](const std::string &type) -> std::shared_ptr<pragma::shadergraph::Graph> {
+		  auto &manager = c_engine->GetShaderGraphManager();
+		  return manager.CreateGraph(type);
+	  })];
+	modShader[luabind::def(
+	  "get_graph", +[](const std::string &identifier) -> std::shared_ptr<pragma::shadergraph::Graph> {
+		  auto &manager = c_engine->GetShaderGraphManager();
+		  auto graphData = manager.GetGraph(identifier);
+		  if(!graphData)
+			  return nullptr;
+		  return graphData->GetGraph();
+	  })];
+	modShader[luabind::def(
+	  "reload_graph_shader", +[](const std::string &identifier) {
+		  auto &manager = c_engine->GetShaderGraphManager();
+		  manager.ReloadShader(identifier);
+	  })];
+	modShader[luabind::def(
+	  "get_graph_node_registry", +[](const std::string &type) -> std::shared_ptr<pragma::shadergraph::NodeRegistry> {
+		  auto &manager = c_engine->GetShaderGraphManager();
+		  return manager.GetNodeRegistry(type);
+	  })];
+	modShader[luabind::def(
+	  "load_shader_graph", +[](const std::string &identifier) -> std::pair<std::shared_ptr<pragma::shadergraph::Graph>, std::optional<std::string>> {
+		  auto &manager = c_engine->GetShaderGraphManager();
+		  std::string err;
+		  auto graph = manager.LoadShader(identifier, err);
+		  if(!graph)
+			  return {nullptr, std::optional<std::string> {err}};
+		  return {graph, std::optional<std::string> {}};
+	  })];
 
 	// These have to match shaders/modules/fs_tonemapping.gls!
 	enum class ToneMapping : uint8_t {

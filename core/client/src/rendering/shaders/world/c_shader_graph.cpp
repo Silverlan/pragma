@@ -13,6 +13,8 @@
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/rendering/render_processor.hpp"
 #include "pragma/rendering/shader_material/shader_material.hpp"
+#include "pragma/rendering/shader_graph/manager.hpp"
+#include "pragma/rendering/shader_graph/module.hpp"
 #include "pragma/model/vk_mesh.h"
 #include "pragma/model/c_modelmesh.h"
 #include <shader/prosper_pipeline_create_info.hpp>
@@ -35,15 +37,55 @@ using namespace pragma;
 
 ShaderGraph::ShaderGraph(prosper::IPrContext &context, const std::string &identifier, const std::string &fsShader) : ShaderGameWorldLightingPass {context, identifier, "programs/scene/textured", fsShader} {}
 
+ShaderGraph::~ShaderGraph() {}
+
 void ShaderGraph::UpdateRenderFlags(CModelSubMesh &mesh, SceneFlags &inOutFlags)
 {
 	ShaderGameWorldLightingPass::UpdateRenderFlags(mesh, inOutFlags);
-	inOutFlags |= m_extRenderFlags;
+	for(auto &mod : m_modules)
+		mod->UpdateRenderFlags(mesh, inOutFlags);
 }
-void ShaderGraph::InitializeGfxPipelineDescriptorSets() { ShaderGameWorldLightingPass::InitializeGfxPipelineDescriptorSets(); }
+void ShaderGraph::InitializeGfxPipelineDescriptorSets()
+{
+	ShaderGameWorldLightingPass::InitializeGfxPipelineDescriptorSets();
+	for(auto &mod : m_modules)
+		mod->InitializeGfxPipelineDescriptorSets();
+}
+
+void ShaderGraph::ClearShaderResources()
+{
+	m_modules.clear();
+	ShaderGameWorldLightingPass::ClearShaderResources();
+}
+
+void ShaderGraph::InitializeShaderResources()
+{
+	auto &graphManager = c_engine->GetShaderGraphManager();
+	auto graphData = graphManager.GetGraph(GetIdentifier());
+	if(graphData) {
+		auto &graph = graphData->GetGraph();
+		std::unordered_set<std::string> moduleNames;
+		for(auto &node : graph->GetNodes()) {
+			auto &deps = (*node)->GetModuleDependencies();
+			moduleNames.reserve(moduleNames.size() + deps.size());
+			moduleNames.insert(deps.begin(), deps.end());
+		}
+		for(auto &modName : moduleNames) {
+			auto mod = graphManager.GetModuleManager().CreateModule(modName, *this);
+			if(mod)
+				m_modules.emplace_back(std::move(mod));
+		}
+	}
+
+	ShaderGameWorldLightingPass::InitializeShaderResources();
+}
 
 void ShaderGraph::InitializeMaterialData(const CMaterial &mat, const rendering::shader_material::ShaderMaterial &shaderMat, pragma::rendering::shader_material::ShaderMaterialData &inOutMatData)
 {
+
+	// If graph has "pbr" module, pbr descriptor set should be added
+	//prosper::DescriptorSetInfo
+
 	ShaderGameWorldLightingPass::InitializeMaterialData(mat, shaderMat, inOutMatData);
 	auto &data = mat.GetDataBlock();
 	float specularFactor;
@@ -60,29 +102,17 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderGraph::InitializeMaterialDes
 void ShaderGraph::OnPipelinesInitialized() { ShaderGameWorldLightingPass::OnPipelinesInitialized(); }
 void ShaderGraph::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { ShaderGameWorldLightingPass::InitializeGfxPipeline(pipelineInfo, pipelineIdx); }
 
-//
-
-void ShaderGraph::RecordBindSceneDescriptorSets(rendering::ShaderProcessor &shaderProcessor, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer,
-  prosper::IDescriptorSet &dsRenderSettings, prosper::IDescriptorSet &dsLights, prosper::IDescriptorSet &dsShadows, ShaderGameWorld::SceneFlags &inOutSceneFlags, float &outIblStrength) const
-{
-	outIblStrength = 1.f;
-	std::array<prosper::IDescriptorSet *, 5> descSets {&dsScene, &dsRenderer, &dsRenderSettings, &dsLights, &dsShadows};
-
-	static const std::vector<uint32_t> dynamicOffsets {};
-	shaderProcessor.GetCommandBuffer().RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics, shaderProcessor.GetCurrentPipelineLayout(), GetSceneDescriptorSetIndex(), descSets, dynamicOffsets);
-}
-
 void ShaderGraph::RecordBindScene(rendering::ShaderProcessor &shaderProcessor, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer, prosper::IDescriptorSet &dsRenderSettings,
   prosper::IDescriptorSet &dsLights, prosper::IDescriptorSet &dsShadows, const Vector4 &drawOrigin, ShaderGameWorld::SceneFlags &inOutSceneFlags) const
 {
-	auto iblStrength = 1.f;
-	RecordBindSceneDescriptorSets(shaderProcessor, scene, renderer, dsScene, dsRenderer, dsRenderSettings, dsLights, dsShadows, inOutSceneFlags, iblStrength);
-
 	ShaderGameWorldLightingPass::PushConstants pushConstants {};
 	pushConstants.Initialize();
 	pushConstants.debugMode = scene.GetDebugMode();
-	pushConstants.reflectionProbeIntensity = iblStrength;
+	pushConstants.reflectionProbeIntensity = 1.f;
 	pushConstants.flags = inOutSceneFlags;
 	pushConstants.drawOrigin = drawOrigin;
 	shaderProcessor.GetCommandBuffer().RecordPushConstants(shaderProcessor.GetCurrentPipelineLayout(), prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit, 0u, sizeof(pushConstants), &pushConstants);
+
+	for(auto &mod : m_modules)
+		mod->RecordBindScene(shaderProcessor, scene, renderer, inOutSceneFlags);
 }

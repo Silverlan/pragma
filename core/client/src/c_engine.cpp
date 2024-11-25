@@ -31,7 +31,7 @@ namespace pragma::string {
 #include "pragma/rendering/c_sci_gpu_timer_manager.hpp"
 #include <pragma/rendering/scene/util_draw_scene_info.hpp>
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
-#include "pragma/rendering/shader_graph_manager.hpp"
+#include "pragma/rendering/shader_graph/manager.hpp"
 #include <pragma/entities/environment/lights/c_env_light.h>
 #include <pragma/input/input_binding_layer.hpp>
 #include <pragma/lua/lua_error_handling.hpp>
@@ -111,6 +111,8 @@ static const auto SEPARATE_JOYSTICK_AXES = true;
 #include "pragma/rendering/shader_graph/nodes/lightmap.hpp"
 #include "pragma/rendering/shader_graph/nodes/object.hpp"
 #include "pragma/rendering/shader_graph/nodes/time.hpp"
+#include "pragma/rendering/shader_graph/nodes/pbr.hpp"
+#include "pragma/rendering/shader_graph/modules/pbr.hpp"
 
 CEngine::CEngine(int argc, char *argv[])
     : Engine(argc, argv), pragma::RenderContext(), m_nearZ(pragma::BaseEnvCameraComponent::DEFAULT_NEAR_Z), //10.0f), //0.1f
@@ -204,6 +206,7 @@ CEngine::CEngine(int argc, char *argv[])
 		regScene->RegisterNode<pragma::rendering::shader_graph::LightmapNode>("lightmap");
 		regScene->RegisterNode<pragma::rendering::shader_graph::ObjectNode>("object");
 		regScene->RegisterNode<pragma::rendering::shader_graph::TimeNode>("time");
+		regScene->RegisterNode<pragma::rendering::shader_graph::PbrNode>("pbr");
 
 		auto shaderMat = pragma::rendering::shader_material::get_cache().Load("pbr");
 		auto node = std::make_shared<pragma::rendering::shader_graph::ShaderMaterialNode>("test", *shaderMat);
@@ -217,6 +220,8 @@ CEngine::CEngine(int argc, char *argv[])
 		m_shaderGraphManager = std::make_unique<pragma::rendering::ShaderGraphManager>();
 		m_shaderGraphManager->RegisterGraphTypeManager("post_processing", regPp);
 		m_shaderGraphManager->RegisterGraphTypeManager("object", regScene);
+
+		m_shaderGraphManager->GetModuleManager().RegisterFactory("pbr", [](prosper::Shader &shader) -> std::unique_ptr<pragma::rendering::ShaderGraphModule> { return std::make_unique<pragma::rendering::shader_graph::PbrModule>(shader); });
 	}
 }
 

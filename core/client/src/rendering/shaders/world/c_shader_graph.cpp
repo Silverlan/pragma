@@ -64,14 +64,21 @@ void ShaderGraph::InitializeShaderResources()
 	auto graphData = graphManager.GetGraph(GetIdentifier());
 	if(graphData) {
 		auto &graph = graphData->GetGraph();
-		std::unordered_set<std::string> moduleNames;
+		struct ModuleData {
+			std::vector<pragma::shadergraph::GraphNode *> nodes;
+		};
+		std::unordered_map<std::string, ModuleData> moduleData;
 		for(auto &node : graph->GetNodes()) {
 			auto &deps = (*node)->GetModuleDependencies();
-			moduleNames.reserve(moduleNames.size() + deps.size());
-			moduleNames.insert(deps.begin(), deps.end());
+			moduleData.reserve(moduleData.size() + deps.size());
+			for(auto &dep : deps) {
+				auto &modData = moduleData[dep];
+				modData.nodes.push_back(node.get());
+			}
 		}
-		for(auto &modName : moduleNames) {
-			auto mod = graphManager.GetModuleManager().CreateModule(modName, *this);
+		for(auto &modData : moduleData) {
+			auto &modName = modData.first;
+			auto mod = graphManager.GetModuleManager().CreateModule(modName, *this, std::move(modData.second.nodes));
 			if(mod)
 				m_modules.emplace_back(std::move(mod));
 		}

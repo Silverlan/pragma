@@ -114,7 +114,6 @@ CRasterizationRendererComponent::CRasterizationRendererComponent(BaseEntity &ent
 {
 	m_whShaderWireframe = c_engine->GetShader("wireframe");
 
-	InitializeLightDescriptorSets();
 	InitializeCommandBufferGroups();
 
 	prosper::util::BufferCreateInfo bufCreateInfo {};
@@ -129,6 +128,8 @@ CRasterizationRendererComponent::CRasterizationRendererComponent(BaseEntity &ent
 		m_descSetGroupRenderer = shaderPbr->CreateDescriptorSetGroup(pragma::ShaderPBR::DESCRIPTOR_SET_RENDERER.setIndex);
 		m_descSetGroupRenderer->GetDescriptorSet()->SetBindingUniformBuffer(*m_rendererBuffer, umath::to_integral(pragma::ShaderScene::RendererBinding::Renderer));
 	}
+
+	InitializeLightDescriptorSets();
 }
 
 CRasterizationRendererComponent::~CRasterizationRendererComponent()
@@ -138,7 +139,6 @@ CRasterizationRendererComponent::~CRasterizationRendererComponent()
 	renderContext.KeepResourceAliveUntilPresentationComplete(m_shadowCommandBufferGroup);
 	renderContext.KeepResourceAliveUntilPresentationComplete(m_lightingCommandBufferGroup);
 	renderContext.KeepResourceAliveUntilPresentationComplete(m_descSetGroupFogOverride);
-	renderContext.KeepResourceAliveUntilPresentationComplete(m_dsgLights);
 	renderContext.KeepResourceAliveUntilPresentationComplete(m_dsgLightsCompute);
 	renderContext.KeepResourceAliveUntilPresentationComplete(m_rendererBuffer);
 	renderContext.KeepResourceAliveUntilPresentationComplete(m_descSetGroupRenderer);
@@ -184,7 +184,6 @@ void CRasterizationRendererComponent::UpdateRendererBuffer(std::shared_ptr<prosp
 prosper::IDescriptorSet *CRasterizationRendererComponent::GetDepthDescriptorSet() const { return (m_hdrInfo.dsgSceneDepth != nullptr) ? m_hdrInfo.dsgSceneDepth->GetDescriptorSet() : nullptr; }
 prosper::IDescriptorSet *CRasterizationRendererComponent::GetRendererDescriptorSet() const { return m_descSetGroupRenderer->GetDescriptorSet(); }
 
-prosper::IDescriptorSet *CRasterizationRendererComponent::GetLightSourceDescriptorSet() const { return m_dsgLights->GetDescriptorSet(); }
 prosper::IDescriptorSet *CRasterizationRendererComponent::GetLightSourceDescriptorSetCompute() const { return m_dsgLightsCompute->GetDescriptorSet(); }
 
 void CRasterizationRendererComponent::InitializeCommandBufferGroups()
@@ -198,16 +197,16 @@ void CRasterizationRendererComponent::InitializeCommandBufferGroups()
 
 void CRasterizationRendererComponent::InitializeLightDescriptorSets()
 {
-	if(pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_LIGHTS.IsValid()) {
+	if(pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_RENDERER.IsValid()) {
 		auto &bufLightSources = pragma::CLightComponent::GetGlobalRenderBuffer();
 		auto &bufShadowData = pragma::CLightComponent::GetGlobalShadowBuffer();
-		m_dsgLights = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_LIGHTS);
+		auto &ds = *GetRendererDescriptorSet();
 #if USE_LIGHT_SOURCE_UNIFORM_BUFFER == 1
-		m_dsgLights->GetDescriptorSet()->SetBindingUniformBuffer(const_cast<prosper::IUniformResizableBuffer &>(bufLightSources), umath::to_integral(pragma::ShaderGameWorldLightingPass::LightBinding::LightBuffers));
-		m_dsgLights->GetDescriptorSet()->SetBindingUniformBuffer(const_cast<prosper::IUniformResizableBuffer &>(bufShadowData), umath::to_integral(pragma::ShaderGameWorldLightingPass::LightBinding::ShadowData));
+		ds.SetBindingUniformBuffer(const_cast<prosper::IUniformResizableBuffer &>(bufLightSources), umath::to_integral(pragma::ShaderGameWorldLightingPass::RendererBinding::LightBuffers));
+		ds.SetBindingUniformBuffer(const_cast<prosper::IUniformResizableBuffer &>(bufShadowData), umath::to_integral(pragma::ShaderGameWorldLightingPass::RendererBinding::ShadowData));
 #else
-		m_dsgLights->GetDescriptorSet()->SetBindingStorageBuffer(const_cast<prosper::IUniformResizableBuffer &>(bufLightSources), umath::to_integral(pragma::ShaderGameWorldLightingPass::LightBinding::LightBuffers));
-		m_dsgLights->GetDescriptorSet()->SetBindingStorageBuffer(const_cast<prosper::IUniformResizableBuffer &>(bufShadowData), umath::to_integral(pragma::ShaderGameWorldLightingPass::LightBinding::ShadowData));
+		ds.SetBindingStorageBuffer(const_cast<prosper::IUniformResizableBuffer &>(bufLightSources), umath::to_integral(pragma::ShaderGameWorldLightingPass::RendererBinding::LightBuffers));
+		ds.SetBindingStorageBuffer(const_cast<prosper::IUniformResizableBuffer &>(bufShadowData), umath::to_integral(pragma::ShaderGameWorldLightingPass::RendererBinding::ShadowData));
 #endif
 
 		m_dsgLightsCompute = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderForwardPLightCulling::DESCRIPTOR_SET_LIGHTS);
@@ -223,7 +222,7 @@ void CRasterizationRendererComponent::InitializeLightDescriptorSets()
 
 void CRasterizationRendererComponent::UpdateCSMDescriptorSet(pragma::CLightDirectionalComponent &lightSource)
 {
-	auto *dsLights = GetLightSourceDescriptorSet();
+	auto *dsLights = GetRendererDescriptorSet();
 	if(dsLights == nullptr)
 		return;
 	auto *pShadowMap = lightSource.GetShadowMap();
@@ -232,7 +231,7 @@ void CRasterizationRendererComponent::UpdateCSMDescriptorSet(pragma::CLightDirec
 		return;
 	auto numLayers = pShadowMap->GetLayerCount();
 	for(auto i = decltype(numLayers) {0}; i < numLayers; ++i) {
-		dsLights->SetBindingArrayTexture(*texture, umath::to_integral(pragma::ShaderSceneLit::LightBinding::CSM), i, i);
+		dsLights->SetBindingArrayTexture(*texture, umath::to_integral(pragma::ShaderSceneLit::RendererBinding::CSM), i, i);
 	}
 }
 

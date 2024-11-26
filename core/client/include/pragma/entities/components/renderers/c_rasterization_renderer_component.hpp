@@ -202,7 +202,6 @@ namespace pragma {
 		// rendering has finished.
 		void SetFrameDepthBufferSamplingRequired();
 
-		prosper::IDescriptorSet *GetLightSourceDescriptorSet() const;
 		prosper::IDescriptorSet *GetLightSourceDescriptorSetCompute() const;
 
 		prosper::Shader *GetWireframeShader() const;
@@ -268,7 +267,6 @@ namespace pragma {
 
 		LightMapInfo m_lightMapInfo = {};
 		bool m_bFrameDepthBufferSamplingRequired = false;
-		std::shared_ptr<prosper::IDescriptorSetGroup> m_dsgLights;
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_dsgLightsCompute;
 
 		std::vector<pragma::CLightComponent *> m_visLightSources;

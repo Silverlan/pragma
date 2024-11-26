@@ -36,7 +36,6 @@ namespace pragma {
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_SCENE;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_RENDERER;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_RENDER_SETTINGS;
-		static prosper::DescriptorSetInfo DESCRIPTOR_SET_LIGHTS;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_SHADOWS;
 
 		static constexpr auto VERTEX_COUNT = 6u;
@@ -73,7 +72,7 @@ namespace pragma {
 		virtual bool RecordDraw(prosper::ShaderBindState &bindState, pragma::CSceneComponent &scene, const CRasterizationRendererComponent &renderer, const CParticleSystemComponent &ps, CParticleSystemComponent::OrientationType orientationType, ParticleRenderFlags renderFlags);
 		std::optional<uint32_t> RecordBeginDraw(prosper::ShaderBindState &bindState, CParticleSystemComponent &pSys, ParticleRenderFlags renderFlags, RecordFlags recordFlags = RecordFlags::RenderPassTargetAsViewportAndScissor);
 		virtual bool RecordBindScene(prosper::ICommandBuffer &cmd, const prosper::IShaderPipelineLayout &layout, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer,
-		  prosper::IDescriptorSet &dsRenderSettings, prosper::IDescriptorSet &dsLights, prosper::IDescriptorSet &dsShadows) const;
+		  prosper::IDescriptorSet &dsRenderSettings, prosper::IDescriptorSet &dsShadows) const;
 		virtual uint32_t GetSceneDescriptorSetIndex() const;
 
 		void GetParticleSystemOrientationInfo(const Mat4 &matrix, const CParticleSystemComponent &particle, CParticleSystemComponent::OrientationType orientationType, Vector3 &up, Vector3 &right, float &nearZ, float &farZ, const Material *material = nullptr, float camNearZ = 0.f,
@@ -89,7 +88,6 @@ namespace pragma {
 		virtual bool RecordParticleMaterial(prosper::ShaderBindState &bindState, const CRasterizationRendererComponent &renderer, const CParticleSystemComponent &ps) const;
 
 		virtual uint32_t GetRenderSettingsDescriptorSetIndex() const override;
-		virtual uint32_t GetLightDescriptorSetIndex() const override;
 		virtual uint32_t GetCameraDescriptorSetIndex() const override;
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
 		virtual void InitializeShaderResources() override;

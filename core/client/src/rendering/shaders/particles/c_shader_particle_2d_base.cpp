@@ -54,7 +54,6 @@ decltype(ShaderParticle2DBase::DESCRIPTOR_SET_ANIMATION) ShaderParticle2DBase::D
 decltype(ShaderParticle2DBase::DESCRIPTOR_SET_SCENE) ShaderParticle2DBase::DESCRIPTOR_SET_SCENE = {&ShaderSceneLit::DESCRIPTOR_SET_SCENE};
 decltype(ShaderParticle2DBase::DESCRIPTOR_SET_RENDERER) ShaderParticle2DBase::DESCRIPTOR_SET_RENDERER = {&ShaderSceneLit::DESCRIPTOR_SET_RENDERER};
 decltype(ShaderParticle2DBase::DESCRIPTOR_SET_RENDER_SETTINGS) ShaderParticle2DBase::DESCRIPTOR_SET_RENDER_SETTINGS = {&ShaderSceneLit::DESCRIPTOR_SET_RENDER_SETTINGS};
-decltype(ShaderParticle2DBase::DESCRIPTOR_SET_LIGHTS) ShaderParticle2DBase::DESCRIPTOR_SET_LIGHTS = {&ShaderSceneLit::DESCRIPTOR_SET_LIGHTS};
 decltype(ShaderParticle2DBase::DESCRIPTOR_SET_SHADOWS) ShaderParticle2DBase::DESCRIPTOR_SET_SHADOWS = {&ShaderSceneLit::DESCRIPTOR_SET_SHADOWS};
 
 static uint32_t get_vertex_index(uint32_t absVertIdx)
@@ -95,7 +94,6 @@ void ShaderParticle2DBase::RegisterDefaultGfxPipelineDescriptorSetGroups()
 	AddDescriptorSetGroup(DESCRIPTOR_SET_SCENE);
 	AddDescriptorSetGroup(DESCRIPTOR_SET_RENDERER);
 	AddDescriptorSetGroup(DESCRIPTOR_SET_RENDER_SETTINGS);
-	AddDescriptorSetGroup(DESCRIPTOR_SET_LIGHTS);
 	AddDescriptorSetGroup(DESCRIPTOR_SET_SHADOWS);
 }
 
@@ -132,7 +130,6 @@ std::optional<uint32_t> ShaderParticle2DBase::RecordBeginDraw(prosper::ShaderBin
 }
 
 uint32_t ShaderParticle2DBase::GetRenderSettingsDescriptorSetIndex() const { return DESCRIPTOR_SET_RENDER_SETTINGS.setIndex; }
-uint32_t ShaderParticle2DBase::GetLightDescriptorSetIndex() const { return DESCRIPTOR_SET_LIGHTS.setIndex; }
 uint32_t ShaderParticle2DBase::GetCameraDescriptorSetIndex() const { return DESCRIPTOR_SET_SCENE.setIndex; }
 
 std::shared_ptr<prosper::IDescriptorSetGroup> ShaderParticle2DBase::InitializeMaterialDescriptorSet(CMaterial &mat)
@@ -258,9 +255,9 @@ bool ShaderParticle2DBase::RecordParticleMaterial(prosper::ShaderBindState &bind
 uint32_t ShaderParticle2DBase::GetSceneDescriptorSetIndex() const { return DESCRIPTOR_SET_SCENE.setIndex; }
 
 bool ShaderParticle2DBase::RecordBindScene(prosper::ICommandBuffer &cmd, const prosper::IShaderPipelineLayout &layout, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer,
-  prosper::IDescriptorSet &dsRenderSettings, prosper::IDescriptorSet &dsLights, prosper::IDescriptorSet &dsShadows) const
+  prosper::IDescriptorSet &dsRenderSettings, prosper::IDescriptorSet &dsShadows) const
 {
-	std::array<prosper::IDescriptorSet *, 5> descSets {&dsScene, &dsRenderer, &dsRenderSettings, &dsLights, &dsShadows};
+	std::array<prosper::IDescriptorSet *, 4> descSets {&dsScene, &dsRenderer, &dsRenderSettings, &dsShadows};
 	static const std::vector<uint32_t> dynamicOffsets {};
 	// TODO: Pick correct pipeline index
 	return cmd.RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics, layout, GetSceneDescriptorSetIndex(), descSets, dynamicOffsets);

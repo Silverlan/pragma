@@ -12,7 +12,7 @@
 #include "/functions/fs_linearize_depth.glsl"
 #include "/math/intersection.glsl"
 
-layout(std430, LAYOUT_ID(LIGHTS, VISIBLE_LIGHT_INDEX_BUFFER)) buffer VisibleLightIndicesBuffer { uint visibleBits[]; }
+layout(std430, LAYOUT_ID(RENDERER, VISIBLE_LIGHT_INDEX_BUFFER)) buffer VisibleLightIndicesBuffer { uint visibleBits[]; }
 visibleLightIndicesBuffer;
 
 layout(LAYOUT_PUSH_CONSTANTS()) uniform LightInfo
@@ -23,7 +23,7 @@ layout(LAYOUT_PUSH_CONSTANTS()) uniform LightInfo
 }
 u_lightInfo;
 
-layout(LAYOUT_ID(LIGHTS, DEPTH_MAP)) uniform sampler2D u_sceneDepth;
+layout(LAYOUT_ID(RENDERER, DEPTH_MAP)) uniform sampler2D u_sceneDepth;
 
 // Specialization constants not supported on some GPUs?
 // layout(constant_id = 1) const uint FORWARDP_TILE_SIZE = 16;

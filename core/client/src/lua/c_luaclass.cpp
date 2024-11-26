@@ -785,7 +785,6 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 	modShader[defShaderScene];
 
 	auto defShaderSceneLit = luabind::class_<pragma::ShaderSceneLit, luabind::bases<pragma::ShaderScene, prosper::ShaderGraphics, prosper::Shader>>("SceneLit3D");
-	defShaderSceneLit.def("GetLightDescriptorSetIndex", &pragma::ShaderSceneLit::GetLightDescriptorSetIndex);
 	modShader[defShaderSceneLit];
 
 	auto defShaderEntity = luabind::class_<pragma::ShaderEntity, luabind::bases<pragma::ShaderSceneLit, pragma::ShaderScene, prosper::ShaderGraphics, prosper::Shader>>("ShaderEntity");

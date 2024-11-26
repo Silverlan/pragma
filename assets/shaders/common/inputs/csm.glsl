@@ -12,7 +12,7 @@ layout(std140, LAYOUT_ID(RENDER_SETTINGS, CSM_DATA)) uniform CSM
 }
 u_csm;
 #ifdef GLS_FRAGMENT_SHADER
-layout(LAYOUT_ID(LIGHTS, CSM_MAPS)) uniform sampler2D csmTextures[MAX_CSM_CASCADES];
+layout(LAYOUT_ID(RENDERER, CSM_MAPS)) uniform sampler2D csmTextures[MAX_CSM_CASCADES];
 
 int get_csm_cascade_index()
 {

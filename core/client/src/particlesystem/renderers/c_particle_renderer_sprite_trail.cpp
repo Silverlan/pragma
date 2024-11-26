@@ -58,9 +58,8 @@ void CParticleRendererSpriteTrail::RecordRender(prosper::ICommandBuffer &drawCmd
 	auto *dsScene = scene.GetCameraDescriptorSetGraphics();
 	auto *dsRenderer = renderer.GetRendererDescriptorSet();
 	auto &dsRenderSettings = c_game->GetGlobalRenderSettingsDescriptorSet();
-	auto *dsLights = renderer.GetLightSourceDescriptorSet();
 	auto *dsShadows = pragma::CShadowComponent::GetDescriptorSet();
-	shader->RecordBindScene(bindState.commandBuffer, *layout, scene, renderer, *dsScene, *dsRenderer, dsRenderSettings, *dsLights, *dsShadows);
+	shader->RecordBindScene(bindState.commandBuffer, *layout, scene, renderer, *dsScene, *dsRenderer, dsRenderSettings, *dsShadows);
 	shader->RecordDraw(bindState, scene, renderer, *m_particleSystem, m_particleSystem->GetOrientationType(), renderFlags);
 	shader->RecordEndDraw(bindState);
 }

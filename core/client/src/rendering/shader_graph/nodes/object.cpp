@@ -21,7 +21,7 @@ ObjectNode::ObjectNode(const std::string_view &type) : Node {type}
 std::string ObjectNode::DoEvaluate(const pragma::shadergraph::Graph &graph, const pragma::shadergraph::GraphNode &instance) const
 {
 	std::ostringstream code;
-	code << instance.GetOutputVarName(OUT_MODEL_MATRIX) << " = u_instance.M;\n";
-	code << instance.GetOutputVarName(OUT_COLOR) << " = u_instance.color;\n";
+	code << instance.GetGlslOutputDeclaration(OUT_MODEL_MATRIX) << " = u_instance.M;\n";
+	code << instance.GetGlslOutputDeclaration(OUT_COLOR) << " = u_instance.color;\n";
 	return code.str();
 }

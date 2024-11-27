@@ -27,12 +27,12 @@ CameraNode::CameraNode(const std::string_view &type) : Node {type}
 std::string CameraNode::DoEvaluate(const pragma::shadergraph::Graph &graph, const pragma::shadergraph::GraphNode &instance) const
 {
 	std::ostringstream code;
-	code << instance.GetOutputVarName(OUT_POSITION) << " = u_renderSettings.posCam.xyz;\n";
-	code << instance.GetOutputVarName(OUT_FOV) << " = u_renderSettings.posCam.w;\n";
-	code << instance.GetOutputVarName(OUT_NEARZ) << " = u_renderSettings.nearZ;\n";
-	code << instance.GetOutputVarName(OUT_FARZ) << " = u_renderSettings.farZ;\n";
-	code << instance.GetOutputVarName(OUT_VIEW_MATRIX) << " = u_camera.V;\n";
-	code << instance.GetOutputVarName(OUT_PROJECTION_MATRIX) << " = u_camera.P;\n";
-	code << instance.GetOutputVarName(OUT_VIEW_PROJECTION_MATRIX) << " = u_camera.VP;\n";
+	code << instance.GetGlslOutputDeclaration(OUT_POSITION) << " = u_renderSettings.posCam.xyz;\n";
+	code << instance.GetGlslOutputDeclaration(OUT_FOV) << " = u_renderSettings.posCam.w;\n";
+	code << instance.GetGlslOutputDeclaration(OUT_NEARZ) << " = u_renderSettings.nearZ;\n";
+	code << instance.GetGlslOutputDeclaration(OUT_FARZ) << " = u_renderSettings.farZ;\n";
+	code << instance.GetGlslOutputDeclaration(OUT_VIEW_MATRIX) << " = u_camera.V;\n";
+	code << instance.GetGlslOutputDeclaration(OUT_PROJECTION_MATRIX) << " = u_camera.P;\n";
+	code << instance.GetGlslOutputDeclaration(OUT_VIEW_PROJECTION_MATRIX) << " = u_camera.VP;\n";
 	return code.str();
 }

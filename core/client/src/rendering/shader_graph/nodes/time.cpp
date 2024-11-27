@@ -23,9 +23,9 @@ TimeNode::TimeNode(const std::string_view &type) : Node {type}
 std::string TimeNode::DoEvaluate(const pragma::shadergraph::Graph &graph, const pragma::shadergraph::GraphNode &instance) const
 {
 	std::ostringstream code;
-	code << instance.GetOutputVarName(OUT_TIME) << " = u_time.time;\n";
-	code << instance.GetOutputVarName(OUT_DELTA_TIME) << " = u_time.deltaTime;\n";
-	code << instance.GetOutputVarName(OUT_REAL_TIME) << " = u_time.realTime;\n";
-	code << instance.GetOutputVarName(OUT_DELTA_REAL_TIME) << " = u_time.deltaRealTime;\n";
+	code << instance.GetGlslOutputDeclaration(OUT_TIME) << " = u_time.time;\n";
+	code << instance.GetGlslOutputDeclaration(OUT_DELTA_TIME) << " = u_time.deltaTime;\n";
+	code << instance.GetGlslOutputDeclaration(OUT_REAL_TIME) << " = u_time.realTime;\n";
+	code << instance.GetGlslOutputDeclaration(OUT_DELTA_REAL_TIME) << " = u_time.deltaRealTime;\n";
 	return code.str();
 }

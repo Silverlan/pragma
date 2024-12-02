@@ -95,6 +95,7 @@ extern DLLCLIENT CGame *c_game;
 
 static spdlog::logger &LOGGER_SG = pragma::register_logger("shadergraph");
 
+#pragma optimize("", off)
 static void reload_textures(CMaterial &mat)
 {
 	auto &data = mat.GetDataBlock();
@@ -130,8 +131,18 @@ static luabind::object shader_mat_value_to_lua_object(lua_State *l, const pragma
 	  val);
 }
 
+std::shared_ptr<pragma::shadergraph::Graph> test_shader_graph();
+
 static void register_shader_graph(lua_State *l, luabind::module_ &modShader)
 {
+	modShader[luabind::def("get_test_graph", &test_shader_graph)];
+	modShader[luabind::def(
+	  "get_test_node_register", +[]() -> std::shared_ptr<pragma::shadergraph::NodeRegistry> {
+		  auto reg = std::make_shared<pragma::shadergraph::NodeRegistry>();
+		  reg->RegisterNode<pragma::shadergraph::MathNode>("math");
+		  return reg;
+	  })];
+
 	auto defGraph = luabind::class_<pragma::shadergraph::Graph>("ShaderGraph");
 	defGraph.scope[luabind::def(
 	  "load", +[](const std::string &type, const std::string &name) -> std::pair<std::shared_ptr<pragma::shadergraph::Graph>, std::optional<std::string>> {
@@ -287,7 +298,7 @@ static void register_shader_graph(lua_State *l, luabind::module_ &modShader)
 			  return Lua::nil;
 		  });
 	  });
-	defGraphNode.def("CanLink", &pragma::shadergraph::GraphNode::CanLink);
+	defGraphNode.def("CanLink", static_cast<bool (pragma::shadergraph::GraphNode::*)(const std::string_view &, pragma::shadergraph::GraphNode &, const std::string_view &) const>(&pragma::shadergraph::GraphNode::CanLink));
 	defGraphNode.def(
 	  "Link", +[](pragma::shadergraph::GraphNode &graphNode, const std::string_view &outputName, pragma::shadergraph::GraphNode &linkTarget, const std::string_view &inputName) -> std::pair<bool, std::optional<std::string>> {
 		  std::string err;

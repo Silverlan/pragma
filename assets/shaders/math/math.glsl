@@ -31,6 +31,9 @@ float length_sqr(vec3 v) { return pow2(v.x) + pow2(v.y) + pow2(v.z); }
 float units_to_meters(float units) { return units * 0.025; }
 float meters_to_units(float meters) { return meters / 0.025; }
 
+bool compare(float a, float b) { return abs(a - b) < FLT_EPSILON; }
+bool compare(vec3 a, vec3 b) { return compare(a.x, b.x) && compare(a.y, b.y) && compare(a.z, b.z); }
+
 float atan2(in float y, in float x)
 {
 	// Source: https://stackoverflow.com/a/27228836

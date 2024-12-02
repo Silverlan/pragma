@@ -5,7 +5,7 @@
 #include "/common/inputs/csm.glsl"
 
 // Required for CSM / PSSM -> standard in shader model 400 and above
-//#extension GL_EXT_texture_array : enable
+// # extension GL_EXT_texture_array : enable
 
 float calculate_csm_shadow(shadowMapSamplerType shadowMap, mat4 vp, vec4 worldCoord, float bias)
 {

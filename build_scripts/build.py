@@ -842,7 +842,7 @@ if with_common_modules:
 	)
 	add_pragma_module(
 		name="pr_prosper_opengl",
-		commitSha="d73bf6dea11b1a79d5dc4715e224aa4cb15d0d48",
+		commitSha="9cf6bc0b8b26cbd044c2e202dc9be57cc87e7e1b",
 		repositoryUrl="https://github.com/Silverlan/pr_prosper_opengl.git"
 	)
 	add_pragma_module_prebuilt("Silverlan/pr_mount_external_prebuilt")
@@ -1136,7 +1136,7 @@ def download_addon(name,addonName,url,commitId=None):
 curDir = os.getcwd()
 if not skip_repository_updates:
 	if with_pfm:
-		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","f41835d289e2b2da604a3f598590f7ffaaabbf9f")
+		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","183eaf445f648b7c055b2ba1f5ff4f7681c3ae36")
 		download_addon("model editor","tool_model_editor","https://github.com/Silverlan/pragma_model_editor.git","a9ea4820f03be250bdf1e6951dad313561b75b17")
 
 	if with_vr:

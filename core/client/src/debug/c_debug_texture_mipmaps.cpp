@@ -86,9 +86,13 @@ void Console::commands::debug_texture_mipmaps(NetworkState *, pragma::BasePlayer
 	else {
 		auto *asset = materialManager.FindCachedAsset(texPath);
 		auto mat = asset ? msys::CMaterialManager::GetAssetObject(*asset) : nullptr;
-		auto *diffuseMap = (mat != nullptr) ? mat->GetDiffuseMap() : nullptr;
+		if(!mat) {
+			Con::cwar << "No material with name '" << texPath << "' found or loaded!" << Con::endl;
+			return;
+		}
+		auto *diffuseMap = mat->GetDiffuseMap();
 		if(diffuseMap == nullptr || diffuseMap->texture == nullptr || static_cast<Texture *>(diffuseMap->texture.get())->HasValidVkTexture() == false) {
-			Con::cwar << "No texture or material with name '" << texPath << "' found or loaded!" << Con::endl;
+			Con::cwar << "Material '" << texPath << "' has no valid albedo map!" << Con::endl;
 			return;
 		}
 		texture = std::static_pointer_cast<Texture>(diffuseMap->texture);

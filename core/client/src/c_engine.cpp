@@ -903,7 +903,7 @@ bool CEngine::Initialize(int argc, char *argv[])
 
 	// Initialize Client Instance
 	auto matManager = msys::CMaterialManager::Create(GetRenderContext());
-	matManager->SetImportDirectory("addons/converted/materials");
+	matManager->SetImportDirectory("addons/converted/");
 	InitializeAssetManager(*matManager);
 	pragma::asset::update_extension_cache(pragma::asset::Type::Material);
 

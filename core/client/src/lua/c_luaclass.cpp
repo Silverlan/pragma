@@ -131,11 +131,8 @@ static luabind::object shader_mat_value_to_lua_object(lua_State *l, const pragma
 	  val);
 }
 
-std::shared_ptr<pragma::shadergraph::Graph> test_shader_graph();
-
 static void register_shader_graph(lua_State *l, luabind::module_ &modShader)
 {
-	modShader[luabind::def("get_test_graph", &test_shader_graph)];
 	modShader[luabind::def(
 	  "get_test_node_register", +[]() -> std::shared_ptr<pragma::shadergraph::NodeRegistry> {
 		  auto reg = std::make_shared<pragma::shadergraph::NodeRegistry>();

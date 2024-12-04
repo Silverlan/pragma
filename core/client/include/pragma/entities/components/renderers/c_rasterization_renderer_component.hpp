@@ -72,6 +72,7 @@ namespace pragma {
 		static ComponentEventId EVENT_POST_PREPASS;
 		static ComponentEventId EVENT_PRE_LIGHTING_PASS;
 		static ComponentEventId EVENT_POST_LIGHTING_PASS;
+		static ComponentEventId EVENT_UPDATE_RENDER_BUFFERS;
 
 		static ComponentEventId EVENT_MT_BEGIN_RECORD_SKYBOX;
 		static ComponentEventId EVENT_MT_END_RECORD_SKYBOX;
@@ -301,6 +302,12 @@ namespace pragma {
 		virtual void PushArguments(lua_State *l) override;
 		pragma::rendering::DepthStageRenderProcessor &renderProcessor;
 		pragma::ShaderPrepassBase &shader;
+	};
+
+	struct DLLCLIENT CEUpdateRenderBuffers : public ComponentEvent {
+		CEUpdateRenderBuffers(const util::DrawSceneInfo &drawSceneInfo);
+		virtual void PushArguments(lua_State *l) override;
+		const util::DrawSceneInfo &drawSceneInfo;
 	};
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::CRasterizationRendererComponent::StateFlags)

@@ -215,13 +215,12 @@ void CAnimatedComponent::ResetAnimation(const std::shared_ptr<Model> &mdl)
 	}
 }
 
-prosper::SwapBuffer *CAnimatedComponent::GetSwapBoneBuffer() { return m_boneBuffer.get(); }
-const prosper::IBuffer *CAnimatedComponent::GetBoneBuffer() const { return m_boneBuffer ? &m_boneBuffer->GetBuffer() : nullptr; }
+const prosper::IBuffer *CAnimatedComponent::GetBoneBuffer() const { return m_boneBuffer.get(); }
 void CAnimatedComponent::InitializeBoneBuffer()
 {
 	if(m_boneBuffer != nullptr)
 		return;
-	m_boneBuffer = prosper::SwapBuffer::Create(c_engine->GetRenderContext().GetWindow(), *pragma::get_instance_bone_buffer());
+	m_boneBuffer = pragma::get_instance_bone_buffer()->AllocateBuffer();
 
 	CEOnBoneBufferInitialized evData {m_boneBuffer};
 	BroadcastEvent(EVENT_ON_BONE_BUFFER_INITIALIZED, evData);
@@ -229,8 +228,12 @@ void CAnimatedComponent::InitializeBoneBuffer()
 void CAnimatedComponent::UpdateBoneBuffer(prosper::IPrimaryCommandBuffer &commandBuffer, bool flagAsDirty)
 {
 	auto numBones = GetBoneCount();
-	if(m_boneBuffer && numBones > 0u && m_boneMatrices.empty() == false)
-		m_boneBuffer->Update(0ull, GetBoneCount() * sizeof(Mat4), m_boneMatrices.data(), flagAsDirty);
+	if(m_boneBuffer && flagAsDirty && numBones > 0u && m_boneMatrices.empty() == false) {
+		constexpr auto pipelineStages = prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::ComputeShaderBit | prosper::PipelineStageFlags::GeometryShaderBit;
+		commandBuffer.RecordBufferBarrier(*m_boneBuffer, pipelineStages, prosper::PipelineStageFlags::TransferBit, prosper::AccessFlags::UniformReadBit, prosper::AccessFlags::TransferWriteBit);
+		commandBuffer.RecordUpdateBuffer(*m_boneBuffer, 0ull, numBones * sizeof(Mat4), m_boneMatrices.data());
+		commandBuffer.RecordBufferBarrier(*m_boneBuffer, prosper::PipelineStageFlags::TransferBit, pipelineStages, prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::UniformReadBit);
+	}
 }
 const std::vector<Mat4> &CAnimatedComponent::GetBoneMatrices() const { return const_cast<CAnimatedComponent *>(this)->GetBoneMatrices(); }
 std::vector<Mat4> &CAnimatedComponent::GetBoneMatrices() { return m_boneMatrices; }
@@ -316,5 +319,5 @@ void CEOnSkeletonUpdated::HandleReturnValues(lua_State *l)
 
 //////////////
 
-CEOnBoneBufferInitialized::CEOnBoneBufferInitialized(const std::shared_ptr<prosper::SwapBuffer> &buffer) : buffer {buffer} {}
-void CEOnBoneBufferInitialized::PushArguments(lua_State *l) { Lua::Push<std::shared_ptr<Lua::Vulkan::SwapBuffer>>(l, buffer); }
+CEOnBoneBufferInitialized::CEOnBoneBufferInitialized(const std::shared_ptr<prosper::IBuffer> &buffer) : buffer {buffer} {}
+void CEOnBoneBufferInitialized::PushArguments(lua_State *l) { Lua::Push<std::shared_ptr<Lua::Vulkan::Buffer>>(l, buffer); }

@@ -131,11 +131,9 @@ void CRenderComponent::InitializeBuffers()
 	pragma::initialize_articulated_buffers();
 	pragma::initialize_vertex_animation_buffer();
 }
-const prosper::IBuffer &CRenderComponent::GetRenderBuffer() const { return m_renderBuffer->GetBuffer(); }
-const std::shared_ptr<prosper::SwapBuffer> &CRenderComponent::GetSwapRenderBuffer() const { return m_renderBuffer; }
-std::optional<RenderBufferIndex> CRenderComponent::GetRenderBufferIndex() const { return m_renderBuffer ? m_renderBuffer->GetBuffer().GetBaseIndex() : std::optional<RenderBufferIndex> {}; }
-prosper::IDescriptorSet *CRenderComponent::GetRenderDescriptorSet() const { return (m_renderDescSetGroup != nullptr) ? &m_renderDescSetGroup->GetDescriptorSet() : nullptr; }
-prosper::SwapDescriptorSet *CRenderComponent::GetSwapRenderDescriptorSet() const { return m_renderDescSetGroup.get(); }
+const prosper::IBuffer *CRenderComponent::GetRenderBuffer() const { return m_renderBuffer.get(); }
+std::optional<RenderBufferIndex> CRenderComponent::GetRenderBufferIndex() const { return m_renderBuffer ? m_renderBuffer->GetBaseIndex() : std::optional<RenderBufferIndex> {}; }
+prosper::IDescriptorSet *CRenderComponent::GetRenderDescriptorSet() const { return (m_renderDescSetGroup != nullptr) ? m_renderDescSetGroup->GetDescriptorSet() : nullptr; }
 void CRenderComponent::ClearRenderObjects()
 {
 	/*std::unordered_map<unsigned int,RenderInstance*>::iterator it;
@@ -680,9 +678,12 @@ void CRenderComponent::UpdateRenderBuffers(const std::shared_ptr<prosper::IPrima
 		m_instanceData.entityIndex = GetEntity().GetLocalIndex();
 		bufferDirty = true;
 	}
-	auto &renderBuffer = GetSwapRenderBuffer();
-	if(renderBuffer)
-		renderBuffer->Update(0ull, sizeof(m_instanceData), &m_instanceData, bufferDirty);
+	if(bufferDirty) {
+		constexpr auto pipelineStages = prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::ComputeShaderBit | prosper::PipelineStageFlags::GeometryShaderBit;
+		drawCmd->RecordBufferBarrier(*m_renderBuffer, pipelineStages, prosper::PipelineStageFlags::TransferBit, prosper::AccessFlags::UniformReadBit, prosper::AccessFlags::TransferWriteBit);
+		drawCmd->RecordUpdateBuffer(*m_renderBuffer, 0, m_instanceData);
+		drawCmd->RecordBufferBarrier(*m_renderBuffer, prosper::PipelineStageFlags::TransferBit, pipelineStages, prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::UniformReadBit);
+	}
 
 	CEOnUpdateRenderBuffers evData {drawCmd};
 	InvokeEventCallbacks(EVENT_ON_UPDATE_RENDER_BUFFERS, evData);
@@ -851,11 +852,13 @@ void CRenderComponent::InitializeRenderBuffers()
 
 	c_engine->GetRenderContext().WaitIdle();
 	umath::set_flag(m_stateFlags, StateFlags::RenderBufferDirty);
-	m_renderBuffer = prosper::SwapBuffer::Create(c_engine->GetRenderContext().GetWindow(), *s_instanceBuffer);
-	m_renderDescSetGroup = prosper::SwapDescriptorSet::Create(c_engine->GetRenderContext().GetWindow(), pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_INSTANCE);
-	m_renderDescSetGroup->SetBindingUniformBuffer(*m_renderBuffer, umath::to_integral(pragma::ShaderGameWorldLightingPass::InstanceBinding::Instance));
+	m_renderBuffer = s_instanceBuffer->AllocateBuffer();
+	if(!m_renderBuffer)
+		return;
+	m_renderDescSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_INSTANCE);
+	m_renderDescSetGroup->GetDescriptorSet()->SetBindingUniformBuffer(*m_renderBuffer, umath::to_integral(pragma::ShaderGameWorldLightingPass::InstanceBinding::Instance));
 	UpdateBoneBuffer();
-	m_renderDescSetGroup->Update();
+	m_renderDescSetGroup->GetDescriptorSet()->Update();
 	UpdateInstantiability();
 
 	BroadcastEvent(EVENT_ON_RENDER_BUFFERS_INITIALIZED);
@@ -868,12 +871,12 @@ void CRenderComponent::UpdateBoneBuffer()
 	auto pAnimComponent = ent.GetAnimatedComponent();
 	if(pAnimComponent.expired())
 		return;
-	auto wpBoneBuffer = static_cast<pragma::CAnimatedComponent &>(*pAnimComponent).GetSwapBoneBuffer();
-	if(!wpBoneBuffer)
+	auto *buf = static_cast<pragma::CAnimatedComponent &>(*pAnimComponent).GetBoneBuffer();
+	if(!buf)
 		return;
 	c_engine->GetRenderContext().WaitIdle();
-	m_renderDescSetGroup->SetBindingUniformBuffer(*wpBoneBuffer, umath::to_integral(pragma::ShaderGameWorldLightingPass::InstanceBinding::BoneMatrices));
-	m_renderDescSetGroup->Update();
+	m_renderDescSetGroup->GetDescriptorSet()->SetBindingUniformBuffer(const_cast<prosper::IBuffer &>(*buf), umath::to_integral(pragma::ShaderGameWorldLightingPass::InstanceBinding::BoneMatrices));
+	m_renderDescSetGroup->GetDescriptorSet()->Update();
 }
 void CRenderComponent::ClearRenderBuffers()
 {
@@ -1092,9 +1095,9 @@ void Console::commands::debug_entity_render_buffer(NetworkState *state, pragma::
 		Con::cout << "Instance data:" << Con::endl;
 		printInstanceData(instanceData);
 
-		auto &buf = renderC->GetRenderBuffer();
+		auto *buf = renderC->GetRenderBuffer();
 		pragma::ShaderEntity::InstanceData bufData;
-		if(!buf.Read(0, sizeof(bufData), &bufData))
+		if(!buf || !buf->Read(0, sizeof(bufData), &bufData))
 			Con::cwar << "Failed to read buffer data!" << Con::endl;
 		else {
 			if(memcmp(&instanceData, &bufData, sizeof(bufData)) != 0) {

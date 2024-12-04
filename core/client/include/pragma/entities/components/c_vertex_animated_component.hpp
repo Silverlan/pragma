@@ -13,7 +13,7 @@
 
 namespace prosper {
 	class IDynamicResizableBuffer;
-	class SwapBuffer;
+	class IBuffer;
 };
 namespace pragma {
 	DLLCLIENT void initialize_vertex_animation_buffer();
@@ -35,7 +35,7 @@ namespace pragma {
 		virtual void Initialize() override;
 		void UpdateVertexAnimationDataMT();
 		void UpdateVertexAnimationBuffer(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd);
-		const std::shared_ptr<prosper::SwapBuffer> &GetVertexAnimationBuffer() const;
+		const std::shared_ptr<prosper::IBuffer> &GetVertexAnimationBuffer() const;
 		bool GetVertexAnimationBufferMeshOffset(CModelSubMesh &mesh, uint32_t &offset, uint32_t &animCount) const;
 		bool GetLocalVertexPosition(const ModelSubMesh &subMesh, uint32_t vertexId, Vector3 &pos, Vector3 *optOutNormal = nullptr, float *optOutDelta = nullptr) const;
 		virtual void InitializeLuaObject(lua_State *l) override;
@@ -60,7 +60,7 @@ namespace pragma {
 		uint32_t m_maxVertexAnimations = 0u;
 		uint32_t m_activeVertexAnimations = 0u;
 		uint32_t m_vertexAnimationBufferDataCount = 0;
-		std::shared_ptr<prosper::SwapBuffer> m_vertexAnimationBuffer = nullptr;
+		std::shared_ptr<prosper::IBuffer> m_vertexAnimationBuffer = nullptr;
 		bool m_bufferUpdateRequired = false;
 		void InitializeVertexAnimationBuffer();
 		void DestroyVertexAnimationBuffer();

@@ -22,12 +22,13 @@
 void Lua::Animated::register_class(lua_State *l, luabind::module_ &entsMod)
 {
 	auto defCAnimated = pragma::lua::create_entity_component_class<pragma::CAnimatedComponent, pragma::BaseAnimatedComponent>("AnimatedComponent");
-	defCAnimated.def("GetBoneBuffer", static_cast<std::optional<std::shared_ptr<prosper::SwapBuffer>> (*)(lua_State *, pragma::CAnimatedComponent &)>([](lua_State *l, pragma::CAnimatedComponent &hAnim) -> std::optional<std::shared_ptr<prosper::SwapBuffer>> {
-		auto buf = hAnim.GetSwapBoneBuffer();
-		if(!buf)
-			return {};
-		return buf->shared_from_this();
-	}));
+	defCAnimated.def(
+	  "GetBoneBuffer", +[](lua_State *l, pragma::CAnimatedComponent &hAnim) -> std::optional<std::shared_ptr<prosper::IBuffer>> {
+		  auto *buf = hAnim.GetBoneBuffer();
+		  if(!buf)
+			  return {};
+		  return const_cast<prosper::IBuffer *>(buf)->shared_from_this();
+	  });
 	defCAnimated.def("GetBoneRenderMatrices", static_cast<const std::vector<Mat4> &(pragma::CAnimatedComponent::*)() const>(&pragma::CAnimatedComponent::GetBoneMatrices));
 	defCAnimated.def("GetBoneRenderMatrix", static_cast<std::optional<Mat4> (*)(lua_State *, pragma::CAnimatedComponent &, uint32_t)>([](lua_State *l, pragma::CAnimatedComponent &hAnim, uint32_t boneIndex) -> std::optional<Mat4> {
 		auto &mats = hAnim.GetBoneMatrices();

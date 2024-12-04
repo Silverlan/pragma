@@ -46,6 +46,7 @@ ComponentEventId CRasterizationRendererComponent::EVENT_PRE_PREPASS = INVALID_CO
 ComponentEventId CRasterizationRendererComponent::EVENT_POST_PREPASS = INVALID_COMPONENT_ID;
 ComponentEventId CRasterizationRendererComponent::EVENT_PRE_LIGHTING_PASS = INVALID_COMPONENT_ID;
 ComponentEventId CRasterizationRendererComponent::EVENT_POST_LIGHTING_PASS = INVALID_COMPONENT_ID;
+ComponentEventId CRasterizationRendererComponent::EVENT_UPDATE_RENDER_BUFFERS = INVALID_COMPONENT_ID;
 
 ComponentEventId CRasterizationRendererComponent::EVENT_MT_BEGIN_RECORD_SKYBOX = INVALID_COMPONENT_ID;
 ComponentEventId CRasterizationRendererComponent::EVENT_MT_END_RECORD_SKYBOX = INVALID_COMPONENT_ID;
@@ -72,6 +73,7 @@ void CRasterizationRendererComponent::RegisterEvents(pragma::EntityComponentMana
 	EVENT_POST_PREPASS = registerEvent("POST_PREPASS", ComponentEventInfo::Type::Explicit);
 	EVENT_PRE_LIGHTING_PASS = registerEvent("PRE_LIGHTING_PASS", ComponentEventInfo::Type::Explicit);
 	EVENT_POST_LIGHTING_PASS = registerEvent("POST_LIGHTING_PASS", ComponentEventInfo::Type::Explicit);
+	EVENT_UPDATE_RENDER_BUFFERS = registerEvent("UPDATE_RENDER_BUFFERS", ComponentEventInfo::Type::Explicit);
 
 	EVENT_MT_BEGIN_RECORD_SKYBOX = registerEvent("MT_BEGIN_RECORD_SKYBOX", ComponentEventInfo::Type::Explicit);
 	EVENT_MT_END_RECORD_SKYBOX = registerEvent("MT_END_RECORD_SKYBOX", ComponentEventInfo::Type::Explicit);
@@ -533,6 +535,11 @@ void CELightingStageData::PushArguments(lua_State *l) {}
 
 CEPrepassStageData::CEPrepassStageData(pragma::rendering::DepthStageRenderProcessor &renderProcessor, pragma::ShaderPrepassBase &shader) : renderProcessor {renderProcessor}, shader {shader} {}
 void CEPrepassStageData::PushArguments(lua_State *l) {}
+
+////////
+
+CEUpdateRenderBuffers::CEUpdateRenderBuffers(const util::DrawSceneInfo &drawSceneInfo) : drawSceneInfo {drawSceneInfo} {}
+void CEUpdateRenderBuffers::PushArguments(lua_State *l) {}
 
 ////////
 

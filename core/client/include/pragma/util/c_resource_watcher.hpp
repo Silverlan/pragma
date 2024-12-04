@@ -29,7 +29,7 @@ class DLLCLIENT CResourceWatcherManager : public ResourceWatcherManager {
 	virtual void ReloadTexture(const std::string &path) override;
 	virtual void GetWatchPaths(std::vector<std::string> &paths) override;
   public:
-	using ResourceWatcherManager::ResourceWatcherManager;
+	CResourceWatcherManager(NetworkState *nw);
 };
 
 #endif

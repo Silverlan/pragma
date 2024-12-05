@@ -597,29 +597,47 @@ void Console::commands::cl_find(NetworkState *state, pragma::BasePlayerComponent
 
 void CMD_fps(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &) { Con::cout << "FPS: " << util::round_string(c_engine->GetFPS(), 0) << Con::endl << "Frame Time: " << util::round_string(c_engine->GetFrameTime(), 2) << "ms" << Con::endl; }
 
+static void write_to_file(const std::string &fileName, const std::optional<std::string> &contents)
+{
+	if(!contents) {
+		Con::cwar << "Unable to dump '" << fileName << "': No contents available!" << Con::endl;
+		return;
+	}
+	if(!filemanager::write_file(fileName, *contents)) {
+		Con::cwar << "Unable to write '" << fileName << "'!" << Con::endl;
+		return;
+	}
+	Con::cout << "Dumped contents to '" << fileName << "'!" << Con::endl;
+}
 void Console::commands::vk_dump_limits(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
-	// prosper::debug::dump_limits(c_engine->GetRenderContext(),"vk_limits.txt");
+	auto limits = c_engine->GetRenderContext().DumpLimits();
+	write_to_file("vk_limits.txt", limits);
 }
 void Console::commands::vk_dump_features(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
-	// prosper::debug::dump_features(c_engine->GetRenderContext(),"vk_features.txt");
+	auto limits = c_engine->GetRenderContext().DumpFeatures();
+	write_to_file("vk_features.txt", limits);
 }
 void Console::commands::vk_dump_format_properties(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
-	// prosper::debug::dump_format_properties(c_engine->GetRenderContext(),"vk_format_properties.txt");
+	auto limits = c_engine->GetRenderContext().DumpFormatProperties();
+	write_to_file("vk_format_properties.txt", limits);
 }
 void Console::commands::vk_dump_image_format_properties(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
-	// prosper::debug::dump_image_format_properties(c_engine->GetRenderContext(),"vk_image_format_properties.txt");
+	auto limits = c_engine->GetRenderContext().DumpImageFormatProperties();
+	write_to_file("vk_image_format_properties.txt", limits);
 }
 void Console::commands::vk_dump_layers(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
-	// prosper::debug::dump_layers(c_engine->GetRenderContext(),"vk_layers.txt");
+	auto limits = c_engine->GetRenderContext().DumpLayers();
+	write_to_file("vk_layers.txt", limits);
 }
 void Console::commands::vk_dump_extensions(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
-	// prosper::debug::dump_extensions(c_engine->GetRenderContext(),"vk_extensions.txt");
+	auto limits = c_engine->GetRenderContext().DumpExtensions();
+	write_to_file("vk_extensions.txt", limits);
 }
 /*static void print_memory_stats(std::stringstream &ss,Vulkan::MemoryManager::StatInfo &info)
 {

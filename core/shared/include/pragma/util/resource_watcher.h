@@ -36,6 +36,7 @@ class Model;
 class LuaDirectoryWatcherManager;
 class DLLNETWORK ResourceWatcherManager {
   public:
+	using TypeHandler = std::function<void(const util::Path &, const std::string &)>;
 	ResourceWatcherManager(NetworkState *nw);
 	bool MountDirectory(const std::string &path, bool bAbsolutePath = false);
 	void Poll();
@@ -48,6 +49,7 @@ class DLLNETWORK ResourceWatcherManager {
 	util::ScopeGuard ScopeLock();
 	bool IsLocked() const;
 	CallbackHandle AddChangeCallback(EResourceWatcherCallbackType type, const std::function<void(std::reference_wrapper<const std::string>, std::reference_wrapper<const std::string>)> &fcallback);
+	void RegisterTypeHandler(const std::string &ext, const TypeHandler &handler);
   protected:
 	NetworkState *m_networkState = nullptr;
 	uint32_t m_lockedCount = 0;
@@ -63,6 +65,7 @@ class DLLNETWORK ResourceWatcherManager {
 	std::unordered_map<EResourceWatcherCallbackType, std::vector<CallbackHandle>> m_callbacks;
 	std::unordered_map<std::string, std::function<void()>> m_watchFiles;
 	std::vector<std::shared_ptr<DirectoryWatcherCallback>> m_watchers;
+	std::unordered_map<std::string, TypeHandler> m_typeHandlers;
 };
 
 #endif

@@ -60,6 +60,8 @@ util::ScopeGuard ResourceWatcherManager::ScopeLock()
 
 bool ResourceWatcherManager::IsLocked() const { return m_lockedCount > 0; }
 
+void ResourceWatcherManager::RegisterTypeHandler(const std::string &ext, const TypeHandler &handler) { m_typeHandlers[ext] = handler; }
+
 void ResourceWatcherManager::ReloadMaterial(const std::string &path)
 {
 	auto *nw = m_networkState;
@@ -140,6 +142,11 @@ void ResourceWatcherManager::OnResourceChanged(const util::Path &rootPath, const
 	auto &strPath = path.GetString();
 	auto *nw = m_networkState;
 	auto *game = nw->GetGameState();
+	auto it = m_typeHandlers.find(ext);
+	if(it != m_typeHandlers.end()) {
+		it->second(path, ext);
+		return;
+	}
 	auto assetType = pragma::asset::determine_type_from_extension(ext);
 	if(assetType.has_value()) {
 		if(*assetType == pragma::asset::Type::Model) {

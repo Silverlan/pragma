@@ -793,6 +793,16 @@ bool CEngine::Initialize(int argc, char *argv[])
 			udm::to_enum_value<prosper::IPrContext::ExtensionAvailability>(pair.property, availability);
 			contextCreateInfo.extensions[std::string {pair.key}] = availability;
 		}
+
+		std::vector<std::string> layersAll;
+		std::vector<std::string> layersApi;
+		data["all"]["layers"] >> layersAll;
+		data[renderAPI]["layers"] >> layersApi;
+		contextCreateInfo.layers.reserve(layersAll.size() + layersApi.size());
+		for(auto &layer : layersAll)
+			contextCreateInfo.layers.push_back(layer);
+		for(auto &layer : layersApi)
+			contextCreateInfo.layers.push_back(layer);
 	}
 
 	if(windowRes) {

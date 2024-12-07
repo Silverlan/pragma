@@ -147,6 +147,13 @@ void CEngine::RegisterConsoleCommands()
 	  },
 	  ConVarFlags::None, "Forces the engine to crash.");
 	conVarMap.RegisterConCommand(
+	  "crash_gpu",
+	  [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
+		  Con::cwar << "GPU Crash command has been invoked. Crashing intentionally..." << Con::endl;
+		  GetRenderContext().Crash();
+	  },
+	  ConVarFlags::None, "Forces a GPU crash.");
+	conVarMap.RegisterConCommand(
 	  "debug_render_memory_budget",
 	  [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  auto budget = GetRenderContext().DumpMemoryBudget();
@@ -232,8 +239,7 @@ void CEngine::RegisterConsoleCommands()
 		  Con::cout << "Done! Written shader files to '" << path << "'!" << Con::endl;
 	  },
 	  ConVarFlags::None, "Dumps the glsl code for the specified shader.");
-	conVarMap.RegisterConCommand(
-	  "debug_dump_render_queues", [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) { g_dumpRenderQueues = true; }, ConVarFlags::None, "Prints all render queues for the next frame to the console.");
+	conVarMap.RegisterConCommand("debug_dump_render_queues", [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) { g_dumpRenderQueues = true; }, ConVarFlags::None, "Prints all render queues for the next frame to the console.");
 	conVarMap.RegisterConVar<bool>("debug_hide_gui", false, ConVarFlags::None, "Disables GUI rendering.");
 
 	conVarMap.RegisterConVar<bool>("render_vsync_enabled", true, ConVarFlags::Archive, "Enables or disables vsync. OpenGL only.");
@@ -487,8 +493,7 @@ void CEngine::RegisterConsoleCommands()
 		  }
 	  });
 #endif
-	conVarMap.RegisterConCommand(
-	  "asset_clear_unused_textures", [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) { ClearUnusedAssets(pragma::asset::Type::Texture, true); }, ConVarFlags::None, "Clears all unused textures from memory.");
+	conVarMap.RegisterConCommand("asset_clear_unused_textures", [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) { ClearUnusedAssets(pragma::asset::Type::Texture, true); }, ConVarFlags::None, "Clears all unused textures from memory.");
 	conVarMap.RegisterConCommand(
 	  "vr_preinitialize",
 	  [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {

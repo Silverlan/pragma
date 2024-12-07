@@ -314,35 +314,30 @@ void CEngine::DumpDebugInformation(uzip::ZIPFile &zip) const
 	engineInfo << "Render API: " << GetRenderAPI();
 	zip.AddFile("engine_cl.txt", engineInfo.str());
 
-#if 0
-	prosper::debug::dump_layers(c_engine->GetRenderContext(),ss);
-	zip.AddFile("vk_layers.txt",ss.str());
+	auto &context = c_engine->GetRenderContext();
+	auto layers = context.DumpLayers();
+	if(layers)
+		zip.AddFile("prosper_layers.txt", *layers);
 
-	ss.str(std::string());
-	ss.clear();
-	prosper::debug::dump_extensions(c_engine->GetRenderContext(),ss);
-	zip.AddFile("vk_extensions.txt",ss.str());
+	auto extensions = context.DumpExtensions();
+	if(extensions)
+		zip.AddFile("prosper_extensions.txt", *extensions);
 
-	ss.str(std::string());
-	ss.clear();
-	prosper::debug::dump_limits(c_engine->GetRenderContext(),ss);
-	zip.AddFile("vk_limits.txt",ss.str());
+	auto limits = context.DumpLimits();
+	if(limits)
+		zip.AddFile("prosper_limits.txt", *limits);
 
-	ss.str(std::string());
-	ss.clear();
-	prosper::debug::dump_features(c_engine->GetRenderContext(),ss);
-	zip.AddFile("vk_features.txt",ss.str());
+	auto features = context.DumpFeatures();
+	if(features)
+		zip.AddFile("prosper_features.txt", *features);
 
-	ss.str(std::string());
-	ss.clear();
-	prosper::debug::dump_image_format_properties(c_engine->GetRenderContext(),ss);
-	zip.AddFile("vk_image_format_properties.txt",ss.str());
+	auto imageFormatProperties = context.DumpImageFormatProperties();
+	if(imageFormatProperties)
+		zip.AddFile("prosper_image_format_properties.txt", *imageFormatProperties);
 
-	ss.str(std::string());
-	ss.clear();
-	prosper::debug::dump_format_properties(c_engine->GetRenderContext(),ss);
-	zip.AddFile("vk_format_properties.txt",ss.str());
-#endif
+	auto formatProperties = context.DumpFormatProperties();
+	if(formatProperties)
+		zip.AddFile("prosper_format_properties.txt", *formatProperties);
 }
 
 void CEngine::SetRenderResolution(std::optional<Vector2i> resolution)

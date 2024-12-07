@@ -767,7 +767,8 @@ def execbuildscript(filepath):
 		"execbuildscript": execbuildscript,
 		"str2bool": str2bool,
 		"install_prebuilt_binaries": install_prebuilt_binaries,
-		"reset_to_commit": reset_to_commit
+		"reset_to_commit": reset_to_commit,
+		"add_pragma_module": add_pragma_module
 	}
 	if platform == "linux":
 		l["c_compiler"] = c_compiler
@@ -820,7 +821,7 @@ execfile(scripts_dir +"/user_modules.py",g,l)
 if with_essential_client_modules:
 	add_pragma_module(
 		name="pr_prosper_vulkan",
-		commitSha="1cab6a2cc1cfb5ab3f5e45e0b454d9638ef3e87f",
+		commitSha="b878be11c48f9b6e11fae8b4395b3ba78551569b",
 		repositoryUrl="https://github.com/Silverlan/pr_prosper_vulkan.git"
 	)
 
@@ -914,7 +915,10 @@ if with_networking:
 # CMake configuration explicitly if they should be disabled.
 shippedModules = ["pr_audio_dummy","pr_prosper_opengl","pr_prosper_vulkan","pr_curl"]
 
-for module in module_info:
+index = 0
+# The module list can be modified during iteration, so we have to use a while loop here.
+while index < len(module_info):
+	module = module_info[index]
 	global moduleName
 	moduleName = module["name"]
 	moduleUrl = module["repositoryUrl"]
@@ -945,6 +949,7 @@ for module in module_info:
 
 	if not skipBuildTarget:
 		module_list.append(moduleName)
+	index += 1
 
 for module in shippedModules:
 	if module != "pr_curl": # Curl is currently required

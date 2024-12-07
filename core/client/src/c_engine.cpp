@@ -91,9 +91,6 @@ void DLLCLIENT RunCEngine(int argc, char *argv[])
 	en = nullptr;
 }
 }
-#ifdef PRAGMA_ENABLE_NSIGHT_AFTERMATH
-void enable_nsight_aftermath_crash_tracker();
-#endif
 
 DLLCLIENT CEngine *c_engine = NULL;
 extern DLLCLIENT ClientState *client;
@@ -124,9 +121,6 @@ CEngine::CEngine(int argc, char *argv[])
       m_farZ(pragma::BaseEnvCameraComponent::DEFAULT_FAR_Z), m_fps(0), m_tFPSTime(0.f), m_tLastFrame(util::Clock::now()), m_tDeltaFrameTime(0), m_audioAPI {"fmod"}
 {
 	c_engine = this;
-#ifdef PRAGMA_ENABLE_NSIGHT_AFTERMATH
-	enable_nsight_aftermath_crash_tracker();
-#endif
 	RegisterCallback<void, std::reference_wrapper<const GLFW::Joystick>, bool>("OnJoystickStateChanged");
 	RegisterCallback<void, std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>>("DrawFrame");
 	RegisterCallback<void>("PreDrawGUI");

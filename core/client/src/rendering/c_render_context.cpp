@@ -8,6 +8,7 @@
 #include "stdafx_cengine.h"
 #include "pragma/rendering/c_render_context.hpp"
 #include "pragma/rendering/render_apis.hpp"
+#include "pragma/debug/debug_utils.hpp"
 #include <prosper_util.hpp>
 #include <debug/prosper_debug.hpp>
 #include <shader/prosper_shader.hpp>
@@ -28,7 +29,15 @@ static spdlog::logger &LOGGER = pragma::register_logger("prosper");
 static spdlog::logger &LOGGER_VALIDATION = pragma::register_logger("prosper_validation");
 
 RenderContext::RenderContext() : m_monitor(nullptr), m_renderAPI {"vulkan"} {}
-RenderContext::~RenderContext() { m_graphicsAPILib = nullptr; }
+RenderContext::~RenderContext()
+{
+	if(m_graphicsAPILib) {
+		auto *detach = m_graphicsAPILib->FindSymbolAddress<void (*)()>("pragma_detach");
+		if(detach)
+			detach();
+	}
+	m_graphicsAPILib = nullptr;
+}
 DLLNETWORK std::optional<std::string> g_customTitle;
 extern bool g_cpuRendering;
 void RenderContext::InitializeRenderAPI()
@@ -99,6 +108,7 @@ void RenderContext::InitializeRenderAPI()
 	}
 
 	m_renderContext->SetLogHandler(&pragma::log, &pragma::is_log_level_enabled);
+	m_renderContext->SetProfilingHandler([](const char *taskName) { pragma::debug::start_profiling_task(taskName); }, []() { pragma::debug::end_profiling_task(); });
 
 	prosper::Callbacks callbacks {};
 	callbacks.validationCallback = [this](prosper::DebugMessageSeverityFlags severityFlags, const std::string &message) { ValidationCallback(severityFlags, message); };

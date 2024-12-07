@@ -774,6 +774,7 @@ bool CEngine::Initialize(int argc, char *argv[])
 		renderApiData = udm::Data::Load("cfg/render_api.udm");
 	}
 	catch(const udm::Exception &e) {
+		Con::cwar << "Failed to load render API data: " << e.what() << Con::endl;
 	}
 	if(renderApiData) {
 		auto &renderAPI = GetRenderAPI();
@@ -783,21 +784,111 @@ bool CEngine::Initialize(int argc, char *argv[])
 			udm::to_enum_value<prosper::IPrContext::ExtensionAvailability>(pair.property, availability);
 			contextCreateInfo.extensions[std::string {pair.key}] = availability;
 		}
-		for(auto &pair : data[renderAPI]["extensions"].ElIt()) {
+		for(auto &[key, prop] : data[renderAPI]["extensions"].ElIt()) {
 			auto availability = prosper::IPrContext::ExtensionAvailability::EnableIfAvailable;
-			udm::to_enum_value<prosper::IPrContext::ExtensionAvailability>(pair.property, availability);
-			contextCreateInfo.extensions[std::string {pair.key}] = availability;
+			udm::to_enum_value<prosper::IPrContext::ExtensionAvailability>(prop, availability);
+			contextCreateInfo.extensions[std::string {key}] = availability;
 		}
 
-		std::vector<std::string> layersAll;
-		std::vector<std::string> layersApi;
-		data["all"]["layers"] >> layersAll;
-		data[renderAPI]["layers"] >> layersApi;
-		contextCreateInfo.layers.reserve(layersAll.size() + layersApi.size());
-		for(auto &layer : layersAll)
-			contextCreateInfo.layers.push_back(layer);
-		for(auto &layer : layersApi)
-			contextCreateInfo.layers.push_back(layer);
+		std::vector<std::string> layers;
+		auto getLayerData = [&](udm::LinkedPropertyWrapper udmLayers) {
+			layers.reserve(layers.size() + udmLayers.GetSize());
+			for(auto &layer : udmLayers) {
+				std::string name;
+				layer["name"] >> name;
+				if(name.empty())
+					continue;
+				layers.push_back(name);
+				auto settings = layer["settings"];
+				contextCreateInfo.layerSettings.reserve(contextCreateInfo.layerSettings.size() + settings.GetSize());
+				for(auto &[key, prop] : settings.ElIt()) {
+					auto type = prop.GetType();
+					prosper::LayerSetting setting {};
+					setting.layerName = name;
+					setting.settingName = key;
+					if(type == udm::Type::Element) {
+						std::string settingType;
+						prop["type"] >> settingType;
+						auto udmValues = prop["values"];
+						if(udmValues) {
+							auto *a = udmValues.GetValuePtr<udm::Array>();
+							if(a) {
+								auto size = a->GetSize();
+								::udm::visit(a->GetValueType(), [a, size, &setting, &settingType](auto tag) {
+									using T = typename decltype(tag)::type;
+									if constexpr(std::is_same_v<T, udm::Boolean> || std::is_same_v<T, udm::Int32> || std::is_same_v<T, udm::Int64> || std::is_same_v<T, udm::UInt32> || std::is_same_v<T, udm::UInt64> || std::is_same_v<T, udm::Float> || std::is_same_v<T, udm::Double>) {
+										auto *values = new T[size];
+										for(size_t i = 0; i < size; ++i)
+											values[i] = a->GetValue<T>(i);
+										setting.SetValues(size, values);
+									}
+									else if constexpr(std::is_same_v<T, udm::String>) {
+										if(settingType == "file") {
+											auto *values = new const char *[size];
+											std::vector<util::Path> tmpPaths;
+											tmpPaths.reserve(size);
+											for(size_t i = 0; i < size; ++i) {
+												auto filePath = util::FilePath(util::get_program_path(), a->GetValue<std::string>(i));
+												tmpPaths.push_back(filePath);
+												values[i] = filePath.GetString().c_str();
+											}
+											// SetValues copies the strings, so we can safely delete the temporary paths
+											setting.SetValues(size, values);
+										}
+										else {
+											auto *values = new const char *[size];
+											for(size_t i = 0; i < size; ++i)
+												values[i] = a->GetValue<std::string>(i).c_str();
+											setting.SetValues(size, values);
+										}
+									}
+									else
+										throw std::invalid_argument {"Unsupported layer setting type " + std::string {magic_enum::enum_name(a->GetValueType())}};
+								});
+							}
+						}
+						else {
+							auto udmValue = prop["value"];
+							::udm::visit(udmValue.GetType(), [&udmValue, &setting, &settingType](auto tag) {
+								using T = typename decltype(tag)::type;
+								if constexpr(std::is_same_v<T, udm::Boolean> || std::is_same_v<T, udm::Int32> || std::is_same_v<T, udm::Int64> || std::is_same_v<T, udm::UInt32> || std::is_same_v<T, udm::UInt64> || std::is_same_v<T, udm::Float> || std::is_same_v<T, udm::Double>)
+									setting.SetValues(1, &udmValue.GetValue<T>());
+								else if constexpr(std::is_same_v<T, udm::String>) {
+									if(settingType == "file") {
+										auto filePath = util::FilePath(util::get_program_path(), udmValue.GetValue<T>());
+										auto *str = filePath.GetString().c_str();
+										setting.SetValues(1, &str);
+									}
+									else {
+										auto *str = udmValue.GetValue<T>().c_str();
+										setting.SetValues(1, &str);
+									}
+								}
+								else
+									throw std::invalid_argument {"Unsupported layer setting type " + std::string {magic_enum::enum_name(udmValue.GetType())}};
+							});
+						}
+					}
+					else {
+						::udm::visit(type, [&prop, &setting](auto tag) {
+							using T = typename decltype(tag)::type;
+							if constexpr(std::is_same_v<T, udm::Boolean> || std::is_same_v<T, udm::Int32> || std::is_same_v<T, udm::Int64> || std::is_same_v<T, udm::UInt32> || std::is_same_v<T, udm::UInt64> || std::is_same_v<T, udm::Float> || std::is_same_v<T, udm::Double>)
+								setting.SetValues(1, &prop.GetValue<T>());
+							else if constexpr(std::is_same_v<T, udm::String>) {
+								auto *str = prop.GetValue<T>().c_str();
+								setting.SetValues(1, &str);
+							}
+							else
+								throw std::invalid_argument {"Unsupported layer setting type " + std::string {magic_enum::enum_name(prop.GetType())}};
+						});
+					}
+					contextCreateInfo.layerSettings.push_back(setting);
+				}
+			}
+		};
+		getLayerData(data["all"]["layers"]);
+		getLayerData(data[renderAPI]["layers"]);
+		contextCreateInfo.layers = std::move(layers);
 	}
 
 	if(windowRes) {
@@ -1056,9 +1147,11 @@ bool CEngine::Initialize(int argc, char *argv[])
 		if(r == IDCANCEL)
 			ShutDown();
 	}
+
 #endif
 	return true;
 }
+
 const std::string &CEngine::GetDefaultFontSetName() const { return m_defaultFontSet; }
 const FontSet &CEngine::GetDefaultFontSet() const
 {

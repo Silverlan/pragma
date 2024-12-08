@@ -29,15 +29,7 @@ static spdlog::logger &LOGGER = pragma::register_logger("prosper");
 static spdlog::logger &LOGGER_VALIDATION = pragma::register_logger("prosper_validation");
 
 RenderContext::RenderContext() : m_monitor(nullptr), m_renderAPI {"vulkan"} {}
-RenderContext::~RenderContext()
-{
-	if(m_graphicsAPILib) {
-		auto *detach = m_graphicsAPILib->FindSymbolAddress<void (*)()>("pragma_detach");
-		if(detach)
-			detach();
-	}
-	m_graphicsAPILib = nullptr;
-}
+RenderContext::~RenderContext() {}
 DLLNETWORK std::optional<std::string> g_customTitle;
 extern bool g_cpuRendering;
 void RenderContext::InitializeRenderAPI()
@@ -157,6 +149,13 @@ void RenderContext::Release()
 		return;
 	GetRenderContext().Close();
 	m_renderContext = nullptr;
+
+	if(m_graphicsAPILib) {
+		auto *detach = m_graphicsAPILib->FindSymbolAddress<void (*)()>("pragma_detach");
+		if(detach)
+			detach();
+	}
+	m_graphicsAPILib = nullptr;
 }
 const prosper::IPrContext &RenderContext::GetRenderContext() const { return const_cast<RenderContext *>(this)->GetRenderContext(); }
 prosper::IPrContext &RenderContext::GetRenderContext() { return *m_renderContext; }

@@ -187,10 +187,10 @@ mkpath(tools)
 if platform == "linux" and (c_compiler == "clang-19" or c_compiler == "clang++-19"):
 	curDir = os.getcwd()
 	os.chdir(deps_dir)
-	clang19_root = os.getcwd() +"/LLVM-19.1.2-Linux-X64"
+	clang19_root = os.getcwd() +"/LLVM-19.1.5-Linux-X64"
 	if not Path(clang19_root).is_dir():
 		print_msg("Downloading clang-19...")
-		http_extract("https://github.com/llvm/llvm-project/releases/download/llvmorg-19.1.2/LLVM-19.1.2-Linux-X64.tar.xz",format="tar.xz")
+		http_extract("https://github.com/llvm/llvm-project/releases/download/llvmorg-19.1.5/LLVM-19.1.5-Linux-X64.tar.xz",format="tar.xz")
 	if c_compiler == "clang-19":
 		c_compiler = clang19_root +"/bin/clang"
 	if cxx_compiler == "clang++-19":

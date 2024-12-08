@@ -240,5 +240,9 @@ void RenderContext::SetGfxAPIValidationEnabled(bool b)
 	if(b)
 		spdlog::flush_on(spdlog::level::info); // Immediately flush all messages
 }
+void RenderContext::SetGfxDiagnosticsModeEnabled(bool b) { umath::set_flag(m_stateFlags, StateFlags::GfxDiagnosticsModeEnabled, b); }
+bool RenderContext::IsGfxAPIValidationEnabled() const { return umath::is_flag_set(m_stateFlags, StateFlags::GfxAPIValidationEnabled); }
+bool RenderContext::IsGfxDiagnosticsModeEnabled() const { return umath::is_flag_set(m_stateFlags, StateFlags::GfxDiagnosticsModeEnabled); }
+
 void RenderContext::SetRenderAPI(const std::string &renderAPI) { m_renderAPI = renderAPI; }
 const std::string &RenderContext::GetRenderAPI() const { return m_renderAPI; }

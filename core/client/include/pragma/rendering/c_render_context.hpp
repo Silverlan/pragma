@@ -29,7 +29,11 @@ namespace prosper {
 namespace pragma {
 	class DLLCLIENT RenderContext {
 	  public:
-		enum class StateFlags : uint8_t { None = 0u, GfxAPIValidationEnabled = 1u };
+		enum class StateFlags : uint8_t {
+			None = 0u,
+			GfxAPIValidationEnabled = 1u,
+			GfxDiagnosticsModeEnabled = GfxAPIValidationEnabled << 1u,
+		};
 		RenderContext();
 		virtual ~RenderContext();
 
@@ -53,6 +57,9 @@ namespace pragma {
 
 		void InitializeRenderAPI();
 		void SetGfxAPIValidationEnabled(bool b);
+		void SetGfxDiagnosticsModeEnabled(bool b);
+		bool IsGfxAPIValidationEnabled() const;
+		bool IsGfxDiagnosticsModeEnabled() const;
 		void SetRenderAPI(const std::string &renderAPI);
 		const std::string &GetRenderAPI() const;
 

@@ -1,0 +1,26 @@
+"vulkan"
+{
+	$array layers [element;1][
+		{
+			$string name "VK_LAYER_LUNARG_crash_diagnostic"
+			settings
+			{
+				log_file
+				{
+					$string type "file"
+					$string value "crashdumps/log.txt"
+				}
+				output_path
+				{
+					$string type "file"
+					$string value "crashdumps"
+				}
+				$string dump_shaders "on_crash"
+				$string dump_commands "running"
+				$string dump_command_buffers "running"
+				$string dump_queue_submissions "running"
+				$bool trace_on 1
+			}
+		}
+	]
+}

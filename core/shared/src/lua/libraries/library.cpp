@@ -419,7 +419,12 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	auto modMath = luabind::module_(lua.GetState(), "math");
 	modMath[luabind::def("approach", umath::approach<double>), luabind::def("get_angle_difference", umath::get_angle_difference), luabind::def("approach_angle", umath::approach_angle), luabind::def("clamp_angle", umath::clamp_angle),
 	  luabind::def("is_angle_in_range", umath::is_angle_in_range), luabind::def("clamp", umath::clamp<double>), luabind::def("get_next_power_of_2", umath::next_power_of_2), luabind::def("get_previous_power_of_2", umath::previous_power_of_2),
-	  luabind::def("get_power_of_2_values", umath::get_power_of_2_values), luabind::def("smooth_step", umath::smooth_step<double>), luabind::def("smoother_step", umath::smoother_step<double>), luabind::def("calc_ballistic_range", umath::calc_ballistic_range),
+	  luabind::def("get_power_of_2_values", umath::get_power_of_2_values), luabind::def("get_largest_power_of_10",+[](int32_t n) -> int32_t {
+		    if(n == 0)
+			    return 0;
+		    int exponent = static_cast<int>(std::log10(n));
+		    return static_cast<int>(std::pow(10, exponent));
+		}),luabind::def("smooth_step", umath::smooth_step<double>), luabind::def("smoother_step", umath::smoother_step<double>), luabind::def("calc_ballistic_range", umath::calc_ballistic_range),
 	  luabind::def("calc_ballistic_position", umath::calc_ballistic_position), luabind::def("calc_ballistic_angle_of_reach", umath::approach<double>), luabind::def("get_frustum_plane_center", umath::frustum::get_plane_center),
 	  luabind::def(
 	    "calc_average_rotation",
@@ -533,7 +538,7 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	    "remap", +[](float value, float fromLow, float fromHigh, float toLow, float toHigh) {
 		    auto diff = fromHigh - fromLow;
 		    if(umath::abs(diff) < 0.0001f)
-				return toLow;
+			    return toLow;
 		    return toLow + (value - fromLow) * (toHigh - toLow) / diff;
 		}),
 		luabind::def("is_positive_axis",static_cast<bool(*)(pragma::SignedAxis)>(&pragma::is_positive_axis)),
@@ -902,19 +907,13 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	}));
 	classDefCallback.def("Call",
 	  static_cast<void (*)(lua_State *, CallbackHandle &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(
-	    [](lua_State *l, CallbackHandle &cb, luabind::object arg0, luabind::object arg1, luabind::object arg2, luabind::object arg3, luabind::object arg4) {
-		    call_callback(cb, {arg0, arg1, arg2, arg3, arg4});
-	    }));
+	    [](lua_State *l, CallbackHandle &cb, luabind::object arg0, luabind::object arg1, luabind::object arg2, luabind::object arg3, luabind::object arg4) { call_callback(cb, {arg0, arg1, arg2, arg3, arg4}); }));
 	classDefCallback.def("Call",
 	  static_cast<void (*)(lua_State *, CallbackHandle &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(
-	    [](lua_State *l, CallbackHandle &cb, luabind::object arg0, luabind::object arg1, luabind::object arg2, luabind::object arg3, luabind::object arg4, luabind::object arg5) {
-		    call_callback(cb, {arg0, arg1, arg2, arg3, arg4, arg5});
-	    }));
+	    [](lua_State *l, CallbackHandle &cb, luabind::object arg0, luabind::object arg1, luabind::object arg2, luabind::object arg3, luabind::object arg4, luabind::object arg5) { call_callback(cb, {arg0, arg1, arg2, arg3, arg4, arg5}); }));
 	classDefCallback.def("Call",
 	  static_cast<void (*)(lua_State *, CallbackHandle &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(
-	    [](lua_State *l, CallbackHandle &cb, luabind::object arg0, luabind::object arg1, luabind::object arg2, luabind::object arg3, luabind::object arg4, luabind::object arg5, luabind::object arg6) {
-		    call_callback(cb, {arg0, arg1, arg2, arg3, arg4, arg5, arg6});
-	    }));
+	    [](lua_State *l, CallbackHandle &cb, luabind::object arg0, luabind::object arg1, luabind::object arg2, luabind::object arg3, luabind::object arg4, luabind::object arg5, luabind::object arg6) { call_callback(cb, {arg0, arg1, arg2, arg3, arg4, arg5, arg6}); }));
 	classDefCallback.def("Call",
 	  static_cast<void (*)(lua_State *, CallbackHandle &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(
 	    [](lua_State *l, CallbackHandle &cb, luabind::object arg0, luabind::object arg1, luabind::object arg2, luabind::object arg3, luabind::object arg4, luabind::object arg5, luabind::object arg6, luabind::object arg7) {
@@ -938,33 +937,25 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	classDefCallback.def("Call",
 	  static_cast<void (*)(lua_State *, CallbackHandle &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(
 	    [](lua_State *l, CallbackHandle &cb, luabind::object arg0, luabind::object arg1, luabind::object arg2, luabind::object arg3, luabind::object arg4, luabind::object arg5, luabind::object arg6, luabind::object arg7, luabind::object arg8, luabind::object arg9, luabind::object arg10,
-	      luabind::object arg11) {
-		    call_callback(cb, {arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11});
-	    }));
+	      luabind::object arg11) { call_callback(cb, {arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11}); }));
 	classDefCallback.def("Call",
 	  static_cast<void (*)(lua_State *, CallbackHandle &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(
 	    [](lua_State *l, CallbackHandle &cb, luabind::object arg0, luabind::object arg1, luabind::object arg2, luabind::object arg3, luabind::object arg4, luabind::object arg5, luabind::object arg6, luabind::object arg7, luabind::object arg8, luabind::object arg9, luabind::object arg10,
-	      luabind::object arg11, luabind::object arg12) {
-		    call_callback(cb, {arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12});
-	    }));
+	      luabind::object arg11, luabind::object arg12) { call_callback(cb, {arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12}); }));
 	classDefCallback.def("Call",
 	  static_cast<void (*)(lua_State *, CallbackHandle &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object,
 	    luabind::object)>([](lua_State *l, CallbackHandle &cb, luabind::object arg0, luabind::object arg1, luabind::object arg2, luabind::object arg3, luabind::object arg4, luabind::object arg5, luabind::object arg6, luabind::object arg7, luabind::object arg8, luabind::object arg9,
-	                        luabind::object arg10, luabind::object arg11, luabind::object arg12, luabind::object arg13) {
-		  call_callback(cb, {arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13});
-	  }));
+	                        luabind::object arg10, luabind::object arg11, luabind::object arg12, luabind::object arg13) { call_callback(cb, {arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13}); }));
 	classDefCallback.def("Call",
 	  static_cast<void (*)(lua_State *, CallbackHandle &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object,
-	    luabind::object, luabind::object)>([](lua_State *l, CallbackHandle &cb, luabind::object arg0, luabind::object arg1, luabind::object arg2, luabind::object arg3, luabind::object arg4, luabind::object arg5, luabind::object arg6, luabind::object arg7, luabind::object arg8,
-	                                         luabind::object arg9, luabind::object arg10, luabind::object arg11, luabind::object arg12, luabind::object arg13, luabind::object arg14) {
-		  call_callback(cb, {arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14});
-	  }));
+	    luabind::object, luabind::object)>(
+	    [](lua_State *l, CallbackHandle &cb, luabind::object arg0, luabind::object arg1, luabind::object arg2, luabind::object arg3, luabind::object arg4, luabind::object arg5, luabind::object arg6, luabind::object arg7, luabind::object arg8, luabind::object arg9, luabind::object arg10,
+	      luabind::object arg11, luabind::object arg12, luabind::object arg13, luabind::object arg14) { call_callback(cb, {arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14}); }));
 	classDefCallback.def("Call",
 	  static_cast<void (*)(lua_State *, CallbackHandle &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object,
-	    luabind::object, luabind::object, luabind::object)>([](lua_State *l, CallbackHandle &cb, luabind::object arg0, luabind::object arg1, luabind::object arg2, luabind::object arg3, luabind::object arg4, luabind::object arg5, luabind::object arg6, luabind::object arg7,
-	                                                          luabind::object arg8, luabind::object arg9, luabind::object arg10, luabind::object arg11, luabind::object arg12, luabind::object arg13, luabind::object arg14, luabind::object arg15) {
-		  call_callback(cb, {arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15});
-	  }));
+	    luabind::object, luabind::object, luabind::object)>(
+	    [](lua_State *l, CallbackHandle &cb, luabind::object arg0, luabind::object arg1, luabind::object arg2, luabind::object arg3, luabind::object arg4, luabind::object arg5, luabind::object arg6, luabind::object arg7, luabind::object arg8, luabind::object arg9, luabind::object arg10,
+	      luabind::object arg11, luabind::object arg12, luabind::object arg13, luabind::object arg14, luabind::object arg15) { call_callback(cb, {arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15}); }));
 	classDefCallback.def("IsValid", &Lua_Callback_IsValid);
 	classDefCallback.def("Remove", &Lua_Callback_Remove);
 
@@ -1283,8 +1274,7 @@ static int log(lua_State *l, spdlog::level::level_enum logLevel)
 template<spdlog::level::level_enum TLevel>
 static void add_log_func(lua_State *l, luabind::object &oLogger, const char *name)
 {
-	lua_pushcfunction(
-	  l, +[](lua_State *l) -> int { return log(l, TLevel); });
+	lua_pushcfunction(l, +[](lua_State *l) -> int { return log(l, TLevel); });
 	oLogger[name] = luabind::object {luabind::from_stack(l, -1)};
 	Lua::Pop(l, 1);
 }

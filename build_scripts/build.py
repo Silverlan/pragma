@@ -187,10 +187,10 @@ mkpath(tools)
 if platform == "linux" and (c_compiler == "clang-19" or c_compiler == "clang++-19"):
 	curDir = os.getcwd()
 	os.chdir(deps_dir)
-	clang19_root = os.getcwd() +"/LLVM-19.1.2-Linux-X64"
+	clang19_root = os.getcwd() +"/LLVM-19.1.5-Linux-X64"
 	if not Path(clang19_root).is_dir():
 		print_msg("Downloading clang-19...")
-		http_extract("https://github.com/llvm/llvm-project/releases/download/llvmorg-19.1.2/LLVM-19.1.2-Linux-X64.tar.xz",format="tar.xz")
+		http_extract("https://github.com/llvm/llvm-project/releases/download/llvmorg-19.1.5/LLVM-19.1.5-Linux-X64.tar.xz",format="tar.xz")
 	if c_compiler == "clang-19":
 		c_compiler = clang19_root +"/bin/clang"
 	if cxx_compiler == "clang++-19":
@@ -494,21 +494,21 @@ os.chdir(deps_dir)
 if not Path(os.getcwd() +"/SPIRV-Tools").is_dir():
 	git_clone("https://github.com/KhronosGroup/SPIRV-Tools.git")
 os.chdir("SPIRV-Tools")
-
-# Note: When updating to a newer version, the SPIRV-Headers commit below has to match
-# the one defined in https://github.com/KhronosGroup/SPIRV-Tools/blob/master/DEPS for the
-# timestamp of this commit
-reset_to_commit("7826e19")
+# Note: See the branches on https://github.com/KhronosGroup/SPIRV-Tools to find the correct commit for
+# the target Vulkan SDK version.
+# When updating to a newer version, the SPIRV-Headers commit below has to match
+# the one defined in https://github.com/KhronosGroup/SPIRV-Tools/blob/<SHA>/DEPS
+reset_to_commit("6dcc7e350a0b9871a825414d42329e44b0eb8109")
 os.chdir("../../")
 
 ########## SPIRV-Headers ##########
 print_msg("Downloading SPIRV-Headers...")
 os.chdir(deps_dir)
 os.chdir("SPIRV-Tools/external")
-if not Path(os.getcwd() +"/SPIRV-Headers").is_dir():
-	git_clone("https://github.com/KhronosGroup/SPIRV-Headers")
-os.chdir("SPIRV-Headers")
-reset_to_commit("4995a2f2723c401eb0ea3e10c81298906bf1422b")
+if not Path(os.getcwd() +"/spirv-headers").is_dir():
+	git_clone("https://github.com/KhronosGroup/SPIRV-Headers", "spirv-headers")
+os.chdir("spirv-headers")
+reset_to_commit("2a9b6f951c7d6b04b6c21fe1bf3f475b68b84801")
 os.chdir("../../")
 os.chdir("../../")
 
@@ -767,7 +767,8 @@ def execbuildscript(filepath):
 		"execbuildscript": execbuildscript,
 		"str2bool": str2bool,
 		"install_prebuilt_binaries": install_prebuilt_binaries,
-		"reset_to_commit": reset_to_commit
+		"reset_to_commit": reset_to_commit,
+		"add_pragma_module": add_pragma_module
 	}
 	if platform == "linux":
 		l["c_compiler"] = c_compiler
@@ -820,7 +821,7 @@ execfile(scripts_dir +"/user_modules.py",g,l)
 if with_essential_client_modules:
 	add_pragma_module(
 		name="pr_prosper_vulkan",
-		commitSha="9071ef182a9286369922fab76232267208027a93",
+		commitSha="7a6fdd08d4ab4f0677d2c3f0223b99a18a8f2e33",
 		repositoryUrl="https://github.com/Silverlan/pr_prosper_vulkan.git"
 	)
 
@@ -842,7 +843,7 @@ if with_common_modules:
 	)
 	add_pragma_module(
 		name="pr_prosper_opengl",
-		commitSha="d73bf6dea11b1a79d5dc4715e224aa4cb15d0d48",
+		commitSha="9cf6bc0b8b26cbd044c2e202dc9be57cc87e7e1b",
 		repositoryUrl="https://github.com/Silverlan/pr_prosper_opengl.git"
 	)
 	add_pragma_module_prebuilt("Silverlan/pr_mount_external_prebuilt")
@@ -914,7 +915,10 @@ if with_networking:
 # CMake configuration explicitly if they should be disabled.
 shippedModules = ["pr_audio_dummy","pr_prosper_opengl","pr_prosper_vulkan","pr_curl"]
 
-for module in module_info:
+index = 0
+# The module list can be modified during iteration, so we have to use a while loop here.
+while index < len(module_info):
+	module = module_info[index]
 	global moduleName
 	moduleName = module["name"]
 	moduleUrl = module["repositoryUrl"]
@@ -945,6 +949,7 @@ for module in module_info:
 
 	if not skipBuildTarget:
 		module_list.append(moduleName)
+	index += 1
 
 for module in shippedModules:
 	if module != "pr_curl": # Curl is currently required
@@ -1136,8 +1141,8 @@ def download_addon(name,addonName,url,commitId=None):
 curDir = os.getcwd()
 if not skip_repository_updates:
 	if with_pfm:
-		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","e7680ee941c9696c5277c98e5b1b7a3530f3bc8e")
-		download_addon("model editor","tool_model_editor","https://github.com/Silverlan/pragma_model_editor.git","bd4844c06b9a42bacd17bb7e52d3381c3fd119e4")
+		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","183eaf445f648b7c055b2ba1f5ff4f7681c3ae36")
+		download_addon("model editor","tool_model_editor","https://github.com/Silverlan/pragma_model_editor.git","a9ea4820f03be250bdf1e6951dad313561b75b17")
 
 	if with_vr:
 		download_addon("VR","virtual_reality","https://github.com/Silverlan/PragmaVR.git","93fe4f849493651c14133ddf1963b0a8b719f836")

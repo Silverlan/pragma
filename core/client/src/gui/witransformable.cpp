@@ -26,6 +26,8 @@ WITransformable::WITransformable() : WIBase()
 {
 	RegisterCallback<void>("OnClose");
 	RegisterCallback<void, std::reference_wrapper<Vector2i>, bool>("TranslateTransformPosition");
+	RegisterCallback<void>("OnDragStart");
+	RegisterCallback<void>("OnDragEnd");
 }
 WITransformable::~WITransformable()
 {
@@ -129,6 +131,7 @@ void WITransformable::StartDrag()
 		return;
 	GetMousePos(&m_dragCursorOffset.x, &m_dragCursorOffset.y);
 	umath::set_flag(m_stateFlags, StateFlags::Dragging, true);
+	CallCallbacks("OnDragStart");
 }
 void WITransformable::OnVisibilityChanged(bool bVisible)
 {
@@ -146,6 +149,7 @@ void WITransformable::EndDrag()
 		return;
 	umath::set_flag(m_stateFlags, StateFlags::Dragging, false);
 	umath::set_flag(m_stateFlags, StateFlags::WasDragged);
+	CallCallbacks("OnDragEnd");
 }
 void WITransformable::StartResizing()
 {
@@ -234,8 +238,7 @@ void WITransformable::OnCursorMoved(int x, int y)
 		return;
 	const auto fValidateCursorOverlap = [this]() {
 		auto &wgui = WGUI::GetInstance();
-		auto *pElCursor = wgui.GetCursorGUIElement(
-		  wgui.GetBaseElement(), [](WIBase *el) -> bool { return true; }, GetRootWindow());
+		auto *pElCursor = wgui.GetCursorGUIElement(wgui.GetBaseElement(), [](WIBase *el) -> bool { return true; }, GetRootWindow());
 		if(pElCursor != nullptr && pElCursor != this && pElCursor->IsDescendantOf(this) == false) {
 			SetResizeMode(ResizeMode::none);
 			return false;

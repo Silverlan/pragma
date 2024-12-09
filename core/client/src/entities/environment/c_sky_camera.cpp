@@ -44,6 +44,8 @@ CSkyCameraComponent::SceneData::~SceneData()
 		onBuildRenderQueue.Remove();
 	if(renderSkybox.IsValid())
 		renderSkybox.Remove();
+	if(updateRenderBuffers.IsValid())
+		updateRenderBuffers.Remove();
 	if(renderPrepass.IsValid())
 		renderPrepass.Remove();
 }
@@ -200,6 +202,17 @@ void CSkyCameraComponent::UpdateScenes()
 			UnbindFromShader(rsys);
 			return util::EventReply::Unhandled;
 		});
+		sceneData->updateRenderBuffers = rasterizationC->AddEventCallback(pragma::CRasterizationRendererComponent::EVENT_UPDATE_RENDER_BUFFERS, [this, pSceneData, &ent, scene](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+			auto &updateRenderBuffersInfo = static_cast<pragma::CEUpdateRenderBuffers &>(evData.get());
+			auto &drawSceneInfo = updateRenderBuffersInfo.drawSceneInfo;
+			auto &drawCmd = drawSceneInfo.commandBuffer;
+			if(!umath::is_flag_set(drawSceneInfo.renderFlags, RenderFlags::Skybox) || !ent.IsInScene(*scene))
+				return util::EventReply::Unhandled;
+			// Need to update the render buffers for our render queues
+			CSceneComponent::UpdateRenderBuffers(drawCmd, *pSceneData->renderQueue, drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::Prepass) : nullptr);
+			CSceneComponent::UpdateRenderBuffers(drawCmd, *pSceneData->renderQueueTranslucent, drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::Prepass) : nullptr);
+			return util::EventReply::Unhandled;
+		});
 		sceneData->renderPrepass = rasterizationC->AddEventCallback(pragma::CRasterizationRendererComponent::EVENT_MT_BEGIN_RECORD_PREPASS, [this, pSceneData, &ent, scene](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 			auto &stageData = static_cast<pragma::CEPrepassStageData &>(evData.get());
 			auto &rsys = stageData.renderProcessor;
@@ -208,10 +221,6 @@ void CSkyCameraComponent::UpdateScenes()
 			auto &drawCmd = drawSceneInfo.commandBuffer;
 			if(!umath::is_flag_set(drawSceneInfo.renderFlags, RenderFlags::Skybox) || !ent.IsInScene(*scene))
 				return util::EventReply::Unhandled;
-			// Need to update the render buffers for our render queues
-			CSceneComponent::UpdateRenderBuffers(drawCmd, *pSceneData->renderQueue, drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::Prepass) : nullptr);
-			CSceneComponent::UpdateRenderBuffers(drawCmd, *pSceneData->renderQueueTranslucent, drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::Prepass) : nullptr);
-
 			rsys.UnbindShader();
 			BindToShader(rsys);
 			rsys.BindShader(stageData.shader, umath::to_integral(pragma::ShaderPrepass::Pipeline::Opaque));

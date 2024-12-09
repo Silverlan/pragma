@@ -660,7 +660,7 @@ bool Engine::Initialize(int argc, char *argv[])
 
 	// Initialize Server Instance
 	auto matManager = msys::MaterialManager::Create();
-	matManager->SetImportDirectory("addons/converted/materials");
+	matManager->SetImportDirectory("addons/converted/");
 	InitializeAssetManager(*matManager);
 
 	pragma::asset::update_extension_cache(pragma::asset::Type::Map);

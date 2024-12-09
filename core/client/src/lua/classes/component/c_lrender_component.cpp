@@ -235,13 +235,10 @@ void Lua::Render::SetLocalRenderBounds(lua_State *l, pragma::CRenderComponent &h
 void Lua::Render::UpdateRenderBuffers(lua_State *l,pragma::CRenderComponent &hEnt,std::shared_ptr<prosper::ICommandBuffer> &drawCmd,CSceneHandle &hScene,CCameraHandle &hCam) {UpdateRenderBuffers(l,hEnt,drawCmd,hScene,hCam,false);}*/
 void Lua::Render::GetRenderBuffer(lua_State *l, pragma::CRenderComponent &hEnt)
 {
-
-	if(hEnt.GetSwapRenderBuffer() == nullptr)
+	auto *buf = hEnt.GetRenderBuffer();
+	if(buf == nullptr)
 		return;
-	auto &buf = hEnt.GetRenderBuffer();
-	//if(buf == nullptr)
-	//	return;
-	Lua::Push(l, buf.shared_from_this());
+	Lua::Push(l, buf->shared_from_this());
 }
 void Lua::Render::GetBoneBuffer(lua_State *l, pragma::CRenderComponent &hEnt)
 {
@@ -249,7 +246,7 @@ void Lua::Render::GetBoneBuffer(lua_State *l, pragma::CRenderComponent &hEnt)
 	auto *pAnimComponent = static_cast<pragma::CAnimatedComponent *>(hEnt.GetEntity().GetAnimatedComponent().get());
 	if(pAnimComponent == nullptr)
 		return;
-	auto buf = pAnimComponent->GetSwapBoneBuffer();
+	auto *buf = pAnimComponent->GetBoneBuffer();
 	if(!buf)
 		return;
 	Lua::Push(l, buf->shared_from_this());

@@ -31,6 +31,7 @@ namespace pragma::string {
 #include "pragma/rendering/c_sci_gpu_timer_manager.hpp"
 #include <pragma/rendering/scene/util_draw_scene_info.hpp>
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
+#include "pragma/rendering/shader_graph/manager.hpp"
 #include <pragma/entities/environment/lights/c_env_light.h>
 #include <pragma/input/input_binding_layer.hpp>
 #include <pragma/lua/lua_error_handling.hpp>
@@ -79,7 +80,7 @@ namespace pragma::string {
 #endif
 
 import util_zip;
-
+import pragma.shadergraph;
 extern "C" {
 void DLLCLIENT RunCEngine(int argc, char *argv[])
 {
@@ -90,9 +91,6 @@ void DLLCLIENT RunCEngine(int argc, char *argv[])
 	en = nullptr;
 }
 }
-#ifdef PRAGMA_ENABLE_NSIGHT_AFTERMATH
-void enable_nsight_aftermath_crash_tracker();
-#endif
 
 DLLCLIENT CEngine *c_engine = NULL;
 extern DLLCLIENT ClientState *client;
@@ -103,14 +101,26 @@ decltype(CEngine::AXIS_PRESS_THRESHOLD) CEngine::AXIS_PRESS_THRESHOLD = 0.5f;
 // can be bound individually
 static const auto SEPARATE_JOYSTICK_AXES = true;
 
+#include "pragma/rendering/shader_graph/nodes/scene_output.hpp"
+#include "pragma/rendering/shader_graph/nodes/shader_material.hpp"
+#include "pragma/rendering/shader_graph/nodes/camera.hpp"
+#include "pragma/rendering/shader_graph/nodes/fog.hpp"
+#include "pragma/rendering/shader_graph/nodes/lightmap.hpp"
+#include "pragma/rendering/shader_graph/nodes/object.hpp"
+#include "pragma/rendering/shader_graph/nodes/time.hpp"
+#include "pragma/rendering/shader_graph/nodes/pbr.hpp"
+#include "pragma/rendering/shader_graph/nodes/image_texture.hpp"
+#include "pragma/rendering/shader_graph/nodes/texture_coordinate.hpp"
+#include "pragma/rendering/shader_graph/nodes/vector_transform.hpp"
+#include "pragma/rendering/shader_graph/nodes/geometry.hpp"
+#include "pragma/rendering/shader_graph/modules/pbr.hpp"
+#include "pragma/rendering/shader_graph/modules/image_texture.hpp"
+
 CEngine::CEngine(int argc, char *argv[])
     : Engine(argc, argv), pragma::RenderContext(), m_nearZ(pragma::BaseEnvCameraComponent::DEFAULT_NEAR_Z), //10.0f), //0.1f
       m_farZ(pragma::BaseEnvCameraComponent::DEFAULT_FAR_Z), m_fps(0), m_tFPSTime(0.f), m_tLastFrame(util::Clock::now()), m_tDeltaFrameTime(0), m_audioAPI {"fmod"}
 {
 	c_engine = this;
-#ifdef PRAGMA_ENABLE_NSIGHT_AFTERMATH
-	enable_nsight_aftermath_crash_tracker();
-#endif
 	RegisterCallback<void, std::reference_wrapper<const GLFW::Joystick>, bool>("OnJoystickStateChanged");
 	RegisterCallback<void, std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>>("DrawFrame");
 	RegisterCallback<void>("PreDrawGUI");
@@ -181,6 +191,44 @@ CEngine::CEngine(int argc, char *argv[])
 			wrapper->SetModel(*result->modelObjects.front());
 			return wrapper;
 		});
+	}
+
+	{
+		auto regBase = std::make_shared<pragma::shadergraph::NodeRegistry>();
+		regBase->RegisterNode<pragma::shadergraph::MathNode>("math");
+		regBase->RegisterNode<pragma::shadergraph::CombineXyzNode>("combine_xyz");
+		regBase->RegisterNode<pragma::shadergraph::SeparateXyzNode>("separate_xyz");
+		regBase->RegisterNode<pragma::shadergraph::VectorMathNode>("vector_math");
+		regBase->RegisterNode<pragma::shadergraph::MixNode>("mix");
+
+		auto regScene = std::make_shared<pragma::shadergraph::NodeRegistry>();
+		regScene->RegisterNode<pragma::rendering::shader_graph::SceneOutputNode>("output");
+		regScene->RegisterNode<pragma::rendering::shader_graph::CameraNode>("camera");
+		regScene->RegisterNode<pragma::rendering::shader_graph::FogNode>("fog");
+		regScene->RegisterNode<pragma::rendering::shader_graph::LightmapNode>("lightmap");
+		regScene->RegisterNode<pragma::rendering::shader_graph::ObjectNode>("object");
+		regScene->RegisterNode<pragma::rendering::shader_graph::TimeNode>("time");
+		regScene->RegisterNode<pragma::rendering::shader_graph::PbrNode>("pbr");
+		regScene->RegisterNode<pragma::rendering::shader_graph::ImageTextureNode>("image_texture");
+		regScene->RegisterNode<pragma::rendering::shader_graph::TextureCoordinateNode>("texture_coordinate");
+		regScene->RegisterNode<pragma::rendering::shader_graph::VectorTransformNode>("vector_transform");
+		regScene->RegisterNode<pragma::rendering::shader_graph::GeometryNode>("geometry");
+
+		auto shaderMat = pragma::rendering::shader_material::get_cache().Load("pbr");
+		auto node = std::make_shared<pragma::rendering::shader_graph::ShaderMaterialNode>("test", *shaderMat);
+		regScene->RegisterNode(node);
+
+		regScene->AddChildRegistry(regBase);
+
+		auto regPp = std::make_shared<pragma::shadergraph::NodeRegistry>();
+		regPp->AddChildRegistry(regBase);
+
+		m_shaderGraphManager = std::make_unique<pragma::rendering::ShaderGraphManager>();
+		m_shaderGraphManager->RegisterGraphTypeManager("post_processing", regPp);
+		m_shaderGraphManager->RegisterGraphTypeManager("object", regScene);
+
+		m_shaderGraphManager->GetModuleManager().RegisterFactory("pbr", [](prosper::Shader &shader) -> std::unique_ptr<pragma::rendering::ShaderGraphModule> { return std::make_unique<pragma::rendering::shader_graph::PbrModule>(shader); });
+		m_shaderGraphManager->GetModuleManager().RegisterFactory("image_texture", [](prosper::Shader &shader) -> std::unique_ptr<pragma::rendering::ShaderGraphModule> { return std::make_unique<pragma::rendering::shader_graph::ImageTextureModule>(shader); });
 	}
 }
 
@@ -260,35 +308,30 @@ void CEngine::DumpDebugInformation(uzip::ZIPFile &zip) const
 	engineInfo << "Render API: " << GetRenderAPI();
 	zip.AddFile("engine_cl.txt", engineInfo.str());
 
-#if 0
-	prosper::debug::dump_layers(c_engine->GetRenderContext(),ss);
-	zip.AddFile("vk_layers.txt",ss.str());
+	auto &context = c_engine->GetRenderContext();
+	auto layers = context.DumpLayers();
+	if(layers)
+		zip.AddFile("prosper_layers.txt", *layers);
 
-	ss.str(std::string());
-	ss.clear();
-	prosper::debug::dump_extensions(c_engine->GetRenderContext(),ss);
-	zip.AddFile("vk_extensions.txt",ss.str());
+	auto extensions = context.DumpExtensions();
+	if(extensions)
+		zip.AddFile("prosper_extensions.txt", *extensions);
 
-	ss.str(std::string());
-	ss.clear();
-	prosper::debug::dump_limits(c_engine->GetRenderContext(),ss);
-	zip.AddFile("vk_limits.txt",ss.str());
+	auto limits = context.DumpLimits();
+	if(limits)
+		zip.AddFile("prosper_limits.txt", *limits);
 
-	ss.str(std::string());
-	ss.clear();
-	prosper::debug::dump_features(c_engine->GetRenderContext(),ss);
-	zip.AddFile("vk_features.txt",ss.str());
+	auto features = context.DumpFeatures();
+	if(features)
+		zip.AddFile("prosper_features.txt", *features);
 
-	ss.str(std::string());
-	ss.clear();
-	prosper::debug::dump_image_format_properties(c_engine->GetRenderContext(),ss);
-	zip.AddFile("vk_image_format_properties.txt",ss.str());
+	auto imageFormatProperties = context.DumpImageFormatProperties();
+	if(imageFormatProperties)
+		zip.AddFile("prosper_image_format_properties.txt", *imageFormatProperties);
 
-	ss.str(std::string());
-	ss.clear();
-	prosper::debug::dump_format_properties(c_engine->GetRenderContext(),ss);
-	zip.AddFile("vk_format_properties.txt",ss.str());
-#endif
+	auto formatProperties = context.DumpFormatProperties();
+	if(formatProperties)
+		zip.AddFile("prosper_format_properties.txt", *formatProperties);
 }
 
 void CEngine::SetRenderResolution(std::optional<Vector2i> resolution)
@@ -725,6 +768,7 @@ bool CEngine::Initialize(int argc, char *argv[])
 		renderApiData = udm::Data::Load("cfg/render_api.udm");
 	}
 	catch(const udm::Exception &e) {
+		Con::cwar << "Failed to load render API data: " << e.what() << Con::endl;
 	}
 	if(renderApiData) {
 		auto &renderAPI = GetRenderAPI();
@@ -734,11 +778,111 @@ bool CEngine::Initialize(int argc, char *argv[])
 			udm::to_enum_value<prosper::IPrContext::ExtensionAvailability>(pair.property, availability);
 			contextCreateInfo.extensions[std::string {pair.key}] = availability;
 		}
-		for(auto &pair : data[renderAPI]["extensions"].ElIt()) {
+		for(auto &[key, prop] : data[renderAPI]["extensions"].ElIt()) {
 			auto availability = prosper::IPrContext::ExtensionAvailability::EnableIfAvailable;
-			udm::to_enum_value<prosper::IPrContext::ExtensionAvailability>(pair.property, availability);
-			contextCreateInfo.extensions[std::string {pair.key}] = availability;
+			udm::to_enum_value<prosper::IPrContext::ExtensionAvailability>(prop, availability);
+			contextCreateInfo.extensions[std::string {key}] = availability;
 		}
+
+		std::vector<std::string> layers;
+		auto getLayerData = [&](udm::LinkedPropertyWrapper udmLayers) {
+			layers.reserve(layers.size() + udmLayers.GetSize());
+			for(auto &layer : udmLayers) {
+				std::string name;
+				layer["name"] >> name;
+				if(name.empty())
+					continue;
+				layers.push_back(name);
+				auto settings = layer["settings"];
+				contextCreateInfo.layerSettings.reserve(contextCreateInfo.layerSettings.size() + settings.GetSize());
+				for(auto &[key, prop] : settings.ElIt()) {
+					auto type = prop.GetType();
+					prosper::LayerSetting setting {};
+					setting.layerName = name;
+					setting.settingName = key;
+					if(type == udm::Type::Element) {
+						std::string settingType;
+						prop["type"] >> settingType;
+						auto udmValues = prop["values"];
+						if(udmValues) {
+							auto *a = udmValues.GetValuePtr<udm::Array>();
+							if(a) {
+								auto size = a->GetSize();
+								::udm::visit(a->GetValueType(), [a, size, &setting, &settingType](auto tag) {
+									using T = typename decltype(tag)::type;
+									if constexpr(std::is_same_v<T, udm::Boolean> || std::is_same_v<T, udm::Int32> || std::is_same_v<T, udm::Int64> || std::is_same_v<T, udm::UInt32> || std::is_same_v<T, udm::UInt64> || std::is_same_v<T, udm::Float> || std::is_same_v<T, udm::Double>) {
+										auto *values = new T[size];
+										for(size_t i = 0; i < size; ++i)
+											values[i] = a->GetValue<T>(i);
+										setting.SetValues(size, values);
+									}
+									else if constexpr(std::is_same_v<T, udm::String>) {
+										if(settingType == "file") {
+											auto *values = new const char *[size];
+											std::vector<util::Path> tmpPaths;
+											tmpPaths.reserve(size);
+											for(size_t i = 0; i < size; ++i) {
+												auto filePath = util::FilePath(util::get_program_path(), a->GetValue<std::string>(i));
+												tmpPaths.push_back(filePath);
+												values[i] = filePath.GetString().c_str();
+											}
+											// SetValues copies the strings, so we can safely delete the temporary paths
+											setting.SetValues(size, values);
+										}
+										else {
+											auto *values = new const char *[size];
+											for(size_t i = 0; i < size; ++i)
+												values[i] = a->GetValue<std::string>(i).c_str();
+											setting.SetValues(size, values);
+										}
+									}
+									else
+										throw std::invalid_argument {"Unsupported layer setting type " + std::string {magic_enum::enum_name(a->GetValueType())}};
+								});
+							}
+						}
+						else {
+							auto udmValue = prop["value"];
+							::udm::visit(udmValue.GetType(), [&udmValue, &setting, &settingType](auto tag) {
+								using T = typename decltype(tag)::type;
+								if constexpr(std::is_same_v<T, udm::Boolean> || std::is_same_v<T, udm::Int32> || std::is_same_v<T, udm::Int64> || std::is_same_v<T, udm::UInt32> || std::is_same_v<T, udm::UInt64> || std::is_same_v<T, udm::Float> || std::is_same_v<T, udm::Double>)
+									setting.SetValues(1, &udmValue.GetValue<T>());
+								else if constexpr(std::is_same_v<T, udm::String>) {
+									if(settingType == "file") {
+										auto filePath = util::FilePath(util::get_program_path(), udmValue.GetValue<T>());
+										auto *str = filePath.GetString().c_str();
+										setting.SetValues(1, &str);
+									}
+									else {
+										auto *str = udmValue.GetValue<T>().c_str();
+										setting.SetValues(1, &str);
+									}
+								}
+								else
+									throw std::invalid_argument {"Unsupported layer setting type " + std::string {magic_enum::enum_name(udmValue.GetType())}};
+							});
+						}
+					}
+					else {
+						::udm::visit(type, [&prop, &setting](auto tag) {
+							using T = typename decltype(tag)::type;
+							if constexpr(std::is_same_v<T, udm::Boolean> || std::is_same_v<T, udm::Int32> || std::is_same_v<T, udm::Int64> || std::is_same_v<T, udm::UInt32> || std::is_same_v<T, udm::UInt64> || std::is_same_v<T, udm::Float> || std::is_same_v<T, udm::Double>)
+								setting.SetValues(1, &prop.GetValue<T>());
+							else if constexpr(std::is_same_v<T, udm::String>) {
+								auto *str = prop.GetValue<T>().c_str();
+								setting.SetValues(1, &str);
+							}
+							else
+								throw std::invalid_argument {"Unsupported layer setting type " + std::string {magic_enum::enum_name(prop.GetType())}};
+						});
+					}
+					contextCreateInfo.layerSettings.push_back(setting);
+				}
+			}
+		};
+		getLayerData(data["all"]["layers"]);
+		getLayerData(data[renderAPI]["layers"]);
+		contextCreateInfo.layers = std::move(layers);
 	}
 
 	if(windowRes) {
@@ -849,7 +993,7 @@ bool CEngine::Initialize(int argc, char *argv[])
 
 	// Initialize Client Instance
 	auto matManager = msys::CMaterialManager::Create(GetRenderContext());
-	matManager->SetImportDirectory("addons/converted/materials");
+	matManager->SetImportDirectory("addons/converted/");
 	InitializeAssetManager(*matManager);
 	pragma::asset::update_extension_cache(pragma::asset::Type::Material);
 
@@ -997,9 +1141,11 @@ bool CEngine::Initialize(int argc, char *argv[])
 		if(r == IDCANCEL)
 			ShutDown();
 	}
+
 #endif
 	return true;
 }
+
 const std::string &CEngine::GetDefaultFontSetName() const { return m_defaultFontSet; }
 const FontSet &CEngine::GetDefaultFontSet() const
 {

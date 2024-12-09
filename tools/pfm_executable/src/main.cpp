@@ -20,6 +20,11 @@ try {
 	  "#262626",
 	  "+map empty",
 	  "+pfm",
+
+	  // Enabling GFX diagnostics will lower performance,
+	  // but can help with debugging rendering-related crashes and
+	  // for PFM rendering performance is not as critical.
+	  "-enable_gfx_diagnostics",
 	};
 	auto cargs = pragma::merge_arguments(argc, argv, extraArgs);
 	auto hModule = pragma::launch_pragma(cargs.size(), cargs.data());

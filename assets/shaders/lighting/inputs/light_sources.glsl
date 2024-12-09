@@ -20,16 +20,16 @@ struct ShadowData {
 
 #if USE_LIGHT_SOURCE_UNIFORM_BUFFER == 0
 
-layout(std430, LAYOUT_ID(LIGHTS, LIGHT_BUFFERS)) readonly buffer LightBuffer { LightSourceData data[]; }
+layout(std430, LAYOUT_ID(RENDERER, LIGHT_BUFFERS)) readonly buffer LightBuffer { LightSourceData data[]; }
 lightBuffer;
-layout(std430, LAYOUT_ID(LIGHTS, SHADOW_BUFFERS)) readonly buffer ShadowBuffer { ShadowData data[]; }
+layout(std430, LAYOUT_ID(RENDERER, SHADOW_BUFFERS)) readonly buffer ShadowBuffer { ShadowData data[]; }
 shadowBuffer;
 
 #else
 
-layout(std140, LAYOUT_ID(LIGHTS, LIGHT_BUFFERS)) uniform LightBuffer { LightSourceData data[MAX_SCENE_LIGHTS]; }
+layout(std140, LAYOUT_ID(RENDERER, LIGHT_BUFFERS)) uniform LightBuffer { LightSourceData data[MAX_SCENE_LIGHTS]; }
 lightBuffer;
-layout(std140, LAYOUT_ID(LIGHTS, SHADOW_BUFFERS)) uniform ShadowBuffer { ShadowData data[MAX_ACTIVE_SHADOW_SOURCES]; }
+layout(std140, LAYOUT_ID(RENDERER, SHADOW_BUFFERS)) uniform ShadowBuffer { ShadowData data[MAX_ACTIVE_SHADOW_SOURCES]; }
 shadowBuffer;
 
 #endif

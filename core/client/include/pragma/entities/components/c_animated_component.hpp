@@ -14,8 +14,8 @@
 
 struct Eyeball;
 namespace prosper {
-	class SwapBuffer;
-	class SwapDescriptorSet;
+	class IBuffer;
+	class IDescriptorSetGroup;
 };
 namespace pragma {
 	void initialize_articulated_buffers();
@@ -42,8 +42,6 @@ namespace pragma {
 		bool HasBones() const;
 		using BaseAnimatedComponent::PlayAnimation;
 
-		prosper::SwapBuffer *GetSwapBoneBuffer();
-		const prosper::SwapBuffer *GetSwapBoneBuffer() const { return const_cast<CAnimatedComponent *>(this)->GetSwapBoneBuffer(); }
 		const prosper::IBuffer *GetBoneBuffer() const;
 		const std::vector<Mat4> &GetBoneMatrices() const;
 		std::vector<Mat4> &GetBoneMatrices();
@@ -65,7 +63,7 @@ namespace pragma {
 		virtual void ResetAnimation(const std::shared_ptr<Model> &mdl) override;
 		virtual void GetBaseTypeIndex(std::type_index &outTypeIndex) const override;
 	  private:
-		std::shared_ptr<prosper::SwapBuffer> m_boneBuffer = nullptr;
+		std::shared_ptr<prosper::IBuffer> m_boneBuffer = nullptr;
 		std::vector<Mat4> m_boneMatrices;
 		StateFlags m_stateFlags = StateFlags::BoneBufferDirty;
 	};
@@ -81,9 +79,9 @@ namespace pragma {
 	};
 
 	struct DLLCLIENT CEOnBoneBufferInitialized : public ComponentEvent {
-		CEOnBoneBufferInitialized(const std::shared_ptr<prosper::SwapBuffer> &buffer);
+		CEOnBoneBufferInitialized(const std::shared_ptr<prosper::IBuffer> &buffer);
 		virtual void PushArguments(lua_State *l) override;
-		std::shared_ptr<prosper::SwapBuffer> buffer;
+		std::shared_ptr<prosper::IBuffer> buffer;
 	};
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::CAnimatedComponent::StateFlags)

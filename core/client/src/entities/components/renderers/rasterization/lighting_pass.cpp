@@ -132,6 +132,9 @@ void pragma::CRasterizationRendererComponent::UpdatePrepassRenderBuffers(const u
 		CSceneComponent::UpdateRenderBuffers(drawCmd, *sceneRenderDesc.GetRenderQueue(pragma::rendering::SceneRenderPass::View, true /* translucent */), drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::Prepass) : nullptr);
 	}
 
+	CEUpdateRenderBuffers evData {drawSceneInfo};
+	InvokeEventCallbacks(EVENT_UPDATE_RENDER_BUFFERS, evData);
+
 	c_game->CallLuaCallbacks<void, const util::DrawSceneInfo *>("UpdateRenderBuffers", &drawSceneInfo);
 	//
 }
@@ -316,7 +319,7 @@ void pragma::CRasterizationRendererComponent::RecordLightingPass(const util::Dra
 
 			InvokeEventCallbacks(EVENT_MT_END_RECORD_SKYBOX, evDataLightingStage);
 			c_game->StopGPUProfilingStage(); // Skybox
-			c_game->StopProfilingStage(); // Skybox
+			c_game->StopProfilingStage();    // Skybox
 		}
 
 		// Render static world geometry
@@ -352,7 +355,7 @@ void pragma::CRasterizationRendererComponent::RecordLightingPass(const util::Dra
 
 				InvokeEventCallbacks(EVENT_MT_END_RECORD_WORLD, evDataLightingStage);
 				c_game->StopGPUProfilingStage(); // World
-				c_game->StopProfilingStage(); // World
+				c_game->StopProfilingStage();    // World
 			}
 #if DEBUG_RENDER_PERFORMANCE_TEST_ENABLED == 1
 		}
@@ -518,7 +521,7 @@ void pragma::CRasterizationRendererComponent::RecordLightingPass(const util::Dra
 
 			InvokeEventCallbacks(EVENT_MT_END_RECORD_DEBUG, evDataLightingStage);
 			c_game->StopGPUProfilingStage(); // Debug
-			c_game->StopProfilingStage(); // Debug
+			c_game->StopProfilingStage();    // Debug
 		}
 
 		if((drawSceneInfo.renderFlags & RenderFlags::View) != RenderFlags::None) {
@@ -545,7 +548,7 @@ void pragma::CRasterizationRendererComponent::RecordLightingPass(const util::Dra
 
 			InvokeEventCallbacks(EVENT_MT_END_RECORD_VIEW, evDataLightingStage);
 			c_game->StopGPUProfilingStage(); // View
-			c_game->StopProfilingStage(); // View
+			c_game->StopProfilingStage();    // View
 		}
 		c_game->StopProfilingStage(); // RecordLightingPass
 	});

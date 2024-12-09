@@ -38,6 +38,8 @@ namespace pragma::debug {
 #ifdef _WIN32
 	DLLNETWORK bool is_module_in_callstack(struct _EXCEPTION_POINTERS *exp, const std::string &moduleName);
 #endif
+	DLLNETWORK void start_profiling_task(const char *taskName);
+	DLLNETWORK void end_profiling_task();
 };
 
 #endif

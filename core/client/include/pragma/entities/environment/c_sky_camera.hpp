@@ -40,6 +40,7 @@ namespace pragma {
 			CallbackHandle onRendererChanged = {};
 			CallbackHandle renderSkybox = {};
 			CallbackHandle renderPrepass = {};
+			CallbackHandle updateRenderBuffers = {};
 
 			std::shared_ptr<pragma::rendering::RenderQueue> renderQueue = nullptr;
 			std::shared_ptr<pragma::rendering::RenderQueue> renderQueueTranslucent = nullptr;

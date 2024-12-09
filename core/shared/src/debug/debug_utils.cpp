@@ -7,6 +7,7 @@
 
 #include "stdafx_shared.h"
 #include "pragma/debug/debug_utils.hpp"
+#include <pragma/debug/intel_vtune.hpp>
 #include <sharedutils/util.h>
 #include <cstdio>
 // #include <windows.h>
@@ -14,6 +15,19 @@
 #ifdef __linux__
 #include "pragma/localization.h"
 #endif
+
+void pragma::debug::start_profiling_task(const char *taskName)
+{
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	::debug::get_domain().BeginTask(taskName);
+#endif
+}
+void pragma::debug::end_profiling_task()
+{
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	::debug::get_domain().EndTask();
+#endif
+}
 
 void pragma::debug::open_file_in_zerobrane(const std::string &fileName, uint32_t lineIdx)
 {
@@ -148,24 +162,24 @@ std::optional<pragma::debug::MessageBoxButton> pragma::debug::show_message_promp
 	if(buttons.empty())
 		return {};
 	std::stringstream cmd;
-	cmd<<"zenity ";
+	cmd << "zenity ";
 	if(buttons.size() == 1)
-		cmd<<"--info ";
+		cmd << "--info ";
 	else
-		cmd<<"--question ";
-	cmd<<"--title='" +*title +"' ";
-	cmd<<"--text='" +msg +"' ";
+		cmd << "--question ";
+	cmd << "--title='" + *title + "' ";
+	cmd << "--text='" + msg + "' ";
 
 	auto getButtonText = [](MessageBoxButton button) -> std::string {
-		auto identifier = ustring::to_snake_case(std::string{magic_enum::enum_name(button)});
-		auto text = Locale::GetText("prompt_button_" +identifier);
+		auto identifier = ustring::to_snake_case(std::string {magic_enum::enum_name(button)});
+		auto text = Locale::GetText("prompt_button_" + identifier);
 		return text;
 	};
-	cmd<<"--ok-label='"<<getButtonText(buttons[0])<<"' ";
+	cmd << "--ok-label='" << getButtonText(buttons[0]) << "' ";
 	if(buttons.size() > 1) {
-		cmd<<"--cancel-label='"<<getButtonText(buttons[1])<<"' ";
+		cmd << "--cancel-label='" << getButtonText(buttons[1]) << "' ";
 		if(buttons.size() > 2) {
-			cmd<<"--extra-button='"<<getButtonText(buttons[2])<<"' ";
+			cmd << "--extra-button='" << getButtonText(buttons[2]) << "' ";
 		}
 	}
 

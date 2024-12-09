@@ -39,15 +39,16 @@ CrashHandler::CrashHandler(const std::string &appName) : m_appName {appName}
 #ifdef _WIN32
 	::SetUnhandledExceptionFilter(TopLevelFilter);
 #else
-	signal(SIGSEGV, +[](int sig) {
-		if(!g_crashHandler) {
-			exit(1);
-			return;
-		}
-		g_crashHandler->m_sig = sig;
-		g_crashHandler->GenerateCrashDump();
-		exit(1);
-	});
+	signal(
+	  SIGSEGV, +[](int sig) {
+		  if(!g_crashHandler) {
+			  exit(1);
+			  return;
+		  }
+		  g_crashHandler->m_sig = sig;
+		  g_crashHandler->GenerateCrashDump();
+		  exit(1);
+	  });
 #endif
 	// Note: set_terminate handler is called before SetUnhandledExceptionFilter.
 	// set_terminate allows us to retrieve the underlying message from the exception (if there was one)
@@ -74,6 +75,8 @@ CrashHandler::CrashHandler(const std::string &appName) : m_appName {appName}
 CrashHandler::~CrashHandler() { g_crashHandler = nullptr; }
 
 #ifdef _WIN32
+BOOL CALLBACK MyMiniDumpCallback(PVOID pParam, const PMINIDUMP_CALLBACK_INPUT pInput, PMINIDUMP_CALLBACK_OUTPUT pOutput);
+
 std::optional<std::string> CrashHandler::GenerateMiniDump(std::string &outErr) const
 {
 	if(!m_pExceptionInfo) {
@@ -130,14 +133,95 @@ std::optional<std::string> CrashHandler::GenerateMiniDump(std::string &outErr) c
 	ExInfo.ExceptionPointers = m_pExceptionInfo;
 	ExInfo.ClientPointers = NULL;
 
+	MINIDUMP_CALLBACK_INFORMATION mci;
+
+	mci.CallbackRoutine = (MINIDUMP_CALLBACK_ROUTINE)MyMiniDumpCallback;
+	mci.CallbackParam = 0;
+
 	// write the dump
-	//MiniDumpWithFullMemory
-	BOOL bOK = pDump(GetCurrentProcess(), GetCurrentProcessId(), hFile, MiniDumpNormal, &ExInfo, NULL, NULL);
+	// Add MiniDumpWithDataSegs if global variables are needed
+	MINIDUMP_TYPE mdt = (MINIDUMP_TYPE)(MiniDumpWithIndirectlyReferencedMemory | MiniDumpScanMemory);
+	BOOL bOK = pDump(GetCurrentProcess(), GetCurrentProcessId(), hFile, mdt, &ExInfo, NULL, &mci);
 	::CloseHandle(hFile);
 	if(bOK)
 		return szDumpPath;
 	outErr = "Failed to write minidump!";
 	return {};
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Custom minidump callback
+//
+
+BOOL CALLBACK MyMiniDumpCallback(PVOID pParam, const PMINIDUMP_CALLBACK_INPUT pInput, PMINIDUMP_CALLBACK_OUTPUT pOutput)
+{
+	BOOL bRet = FALSE;
+
+	// Check parameters
+
+	if(pInput == 0)
+		return FALSE;
+
+	if(pOutput == 0)
+		return FALSE;
+
+	// Process the callbacks
+
+	switch(pInput->CallbackType) {
+	case IncludeModuleCallback:
+		{
+			// Include the module into the dump
+			bRet = TRUE;
+		}
+		break;
+
+	case IncludeThreadCallback:
+		{
+			// Include the thread into the dump
+			bRet = TRUE;
+		}
+		break;
+
+	case ModuleCallback:
+		{
+			// Does the module have ModuleReferencedByMemory flag set ?
+
+			if(!(pOutput->ModuleWriteFlags & ModuleReferencedByMemory)) {
+				// No, it does not - exclude it
+
+				pOutput->ModuleWriteFlags &= (~ModuleWriteModule);
+			}
+
+			bRet = TRUE;
+		}
+		break;
+
+	case ThreadCallback:
+		{
+			// Include all thread information into the minidump
+			bRet = TRUE;
+		}
+		break;
+
+	case ThreadExCallback:
+		{
+			// Include this information
+			bRet = TRUE;
+		}
+		break;
+
+	case MemoryCallback:
+		{
+			// We do not include any information here -> return FALSE
+			bRet = FALSE;
+		}
+		break;
+
+	case CancelCallback:
+		break;
+	}
+
+	return bRet;
 }
 #endif
 
@@ -176,10 +260,10 @@ bool CrashHandler::GenerateCrashDump() const
 	symbols = backtrace_symbols(array, size);
 
 	std::optional<std::string> backtraceStr {};
-	if (symbols != nullptr) {
+	if(symbols != nullptr) {
 		snprintf(buffer, sizeof(buffer), "Error: signal %d:\n", m_sig);
 
-		for (size_t i = 0; i < size; i++) {
+		for(size_t i = 0; i < size; i++) {
 			strncat(buffer, symbols[i], sizeof(buffer) - strlen(buffer) - 1);
 			strncat(buffer, "\n", sizeof(buffer) - strlen(buffer) - 1);
 		}
@@ -224,14 +308,14 @@ bool CrashHandler::GenerateCrashDump() const
 			else
 				zipFile->AddFile("minidump_generation_error.txt", dumpErr);
 #else
-			if (backtraceStr)
+			if(backtraceStr)
 				zipFile->AddFile("backtrace.txt", *backtraceStr);
 			else
 				zipFile->AddFile("backtrace_generation_error.txt", "Failed to generate backtrace symbols");
 #endif
 			zipFile = nullptr;
 
-			szResult = Locale::GetText("prompt_crash_dump_saved", std::vector<std::string> {zipFileName});
+			szResult = Locale::GetText("prompt_crash_dump_saved", std::vector<std::string> {zipFileName, "crashdumps@pragma-engine.com"});
 			auto absPath = util::Path::CreatePath(util::get_program_path()) + zipFileName;
 			util::open_path_in_explorer(std::string {absPath.GetPath()}, std::string {absPath.GetFileName()});
 

@@ -171,7 +171,7 @@ function gui.WIFileDialog:GetFilePath(relativePath)
 	if util.is_valid(self.m_pFileName) == false then
 		return ""
 	end
-	return path .. self.m_pFileName:GetText()
+	return util.FilePath(path, self.m_pFileName:GetText()):GetString()
 end
 function gui.WIFileDialog:SetType(type)
 	self.m_type = type

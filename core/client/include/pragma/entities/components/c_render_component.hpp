@@ -28,8 +28,8 @@ class ModelMesh;
 namespace prosper {
 	class IUniformResizableBuffer;
 	class IDescriptorSet;
-	class SwapDescriptorSet;
-	class SwapBuffer;
+	class IDescriptorSetGroup;
+	class IBuffer;
 };
 namespace Intersection {
 	struct LineMeshResult;
@@ -76,12 +76,10 @@ namespace pragma {
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 
 		CRenderComponent(BaseEntity &ent);
-		const std::shared_ptr<prosper::SwapBuffer> &GetSwapRenderBuffer() const;
-		const prosper::IBuffer &GetRenderBuffer() const;
-		bool IsRenderBufferValid() const { return m_renderBuffer != nullptr; }
+		const prosper::IBuffer *GetRenderBuffer() const;
 		std::optional<RenderBufferIndex> GetRenderBufferIndex() const;
+		bool IsRenderBufferValid() const { return m_renderBuffer != nullptr; }
 		prosper::IDescriptorSet *GetRenderDescriptorSet() const;
-		prosper::SwapDescriptorSet *GetSwapRenderDescriptorSet() const;
 
 		static const std::vector<CRenderComponent *> &GetEntitiesExemptFromOcclusionCulling();
 		static const std::shared_ptr<prosper::IUniformResizableBuffer> &GetInstanceBuffer();
@@ -257,8 +255,8 @@ namespace pragma {
 		void UpdateAbsoluteSphereRenderBounds();
 		void UpdateAbsoluteAABBRenderBounds();
 		pragma::ShaderEntity::InstanceData m_instanceData {};
-		std::shared_ptr<prosper::SwapBuffer> m_renderBuffer = nullptr;
-		std::shared_ptr<prosper::SwapDescriptorSet> m_renderDescSetGroup = nullptr;
+		std::shared_ptr<prosper::IBuffer> m_renderBuffer = nullptr;
+		std::shared_ptr<prosper::IDescriptorSetGroup> m_renderDescSetGroup = nullptr;
 		std::optional<double> m_translucencyPassDistanceOverrideSqr {};
 	};
 

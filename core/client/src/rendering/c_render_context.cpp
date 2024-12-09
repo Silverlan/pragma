@@ -8,6 +8,7 @@
 #include "stdafx_cengine.h"
 #include "pragma/rendering/c_render_context.hpp"
 #include "pragma/rendering/render_apis.hpp"
+#include "pragma/debug/debug_utils.hpp"
 #include <prosper_util.hpp>
 #include <debug/prosper_debug.hpp>
 #include <shader/prosper_shader.hpp>
@@ -28,7 +29,7 @@ static spdlog::logger &LOGGER = pragma::register_logger("prosper");
 static spdlog::logger &LOGGER_VALIDATION = pragma::register_logger("prosper_validation");
 
 RenderContext::RenderContext() : m_monitor(nullptr), m_renderAPI {"vulkan"} {}
-RenderContext::~RenderContext() { m_graphicsAPILib = nullptr; }
+RenderContext::~RenderContext() {}
 DLLNETWORK std::optional<std::string> g_customTitle;
 extern bool g_cpuRendering;
 void RenderContext::InitializeRenderAPI()
@@ -99,6 +100,7 @@ void RenderContext::InitializeRenderAPI()
 	}
 
 	m_renderContext->SetLogHandler(&pragma::log, &pragma::is_log_level_enabled);
+	m_renderContext->SetProfilingHandler([](const char *taskName) { pragma::debug::start_profiling_task(taskName); }, []() { pragma::debug::end_profiling_task(); });
 
 	prosper::Callbacks callbacks {};
 	callbacks.validationCallback = [this](prosper::DebugMessageSeverityFlags severityFlags, const std::string &message) { ValidationCallback(severityFlags, message); };
@@ -147,6 +149,13 @@ void RenderContext::Release()
 		return;
 	GetRenderContext().Close();
 	m_renderContext = nullptr;
+
+	if(m_graphicsAPILib) {
+		auto *detach = m_graphicsAPILib->FindSymbolAddress<void (*)()>("pragma_detach");
+		if(detach)
+			detach();
+	}
+	m_graphicsAPILib = nullptr;
 }
 const prosper::IPrContext &RenderContext::GetRenderContext() const { return const_cast<RenderContext *>(this)->GetRenderContext(); }
 prosper::IPrContext &RenderContext::GetRenderContext() { return *m_renderContext; }
@@ -231,5 +240,9 @@ void RenderContext::SetGfxAPIValidationEnabled(bool b)
 	if(b)
 		spdlog::flush_on(spdlog::level::info); // Immediately flush all messages
 }
+void RenderContext::SetGfxDiagnosticsModeEnabled(bool b) { umath::set_flag(m_stateFlags, StateFlags::GfxDiagnosticsModeEnabled, b); }
+bool RenderContext::IsGfxAPIValidationEnabled() const { return umath::is_flag_set(m_stateFlags, StateFlags::GfxAPIValidationEnabled); }
+bool RenderContext::IsGfxDiagnosticsModeEnabled() const { return umath::is_flag_set(m_stateFlags, StateFlags::GfxDiagnosticsModeEnabled); }
+
 void RenderContext::SetRenderAPI(const std::string &renderAPI) { m_renderAPI = renderAPI; }
 const std::string &RenderContext::GetRenderAPI() const { return m_renderAPI; }

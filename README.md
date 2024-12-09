@@ -61,10 +61,13 @@ Build Requirements
 
 Build Instructions
 ------
-To build Pragma, all you have to do is run the following command from a command-line interface:
+Quick-Start: Simply run the "build.bat" for Windows or "build.sh" for Linux systems to build Pragma with the default settings.
+
+Alternatively you can run the following command from a command-line interface:
 ```console
 git clone https://github.com/Silverlan/pragma.git && cd pragma && python build_scripts/build.py --with-pfm --with-all-pfm-modules --with-vr
 ```
+(Use `python3` instead of `python` if you're on Linux.)
 
 This will clone Pragma and run the build-script, which will automatically download all dependencies, configure CMake, and build and install the project (this will take several hours).
 If you don't need the filmmaker, you can omit the `--with-pfm --with-all-pfm-modules` arguments, which will reduce the build time and the required amount of disk space.

@@ -39,11 +39,31 @@ namespace pragma {
 		static prosper::SampleCountFlags RENDER_PASS_SAMPLES;
 		static void SetRenderPassSampleCount(prosper::SampleCountFlags samples);
 
-		enum class SceneBinding : uint32_t { Camera = 0u, RenderSettings };
+		enum class SceneBinding : uint32_t {
+			Camera = 0u,
+			RenderSettings,
+		};
 
-		enum class RendererBinding : uint32_t { Renderer = 0u, SSAOMap, LightMapDiffuse, LightMapDiffuseIndirect, LightMapDominantDirection };
+		enum class RendererBinding : uint32_t {
+			Renderer = 0u,
+			SSAOMap,
 
-		enum class RenderSettingsBinding : uint32_t { Debug = 0u, Time, CSMData, GlobalInstance };
+			LightBuffers,
+			TileVisLightIndexBuffer,
+			ShadowData,
+			CSM,
+
+			LightMapDiffuse,
+			LightMapDiffuseIndirect,
+			LightMapDominantDirection,
+		};
+
+		enum class RenderSettingsBinding : uint32_t {
+			Debug = 0u,
+			Time,
+			CSMData,
+			GlobalInstance,
+		};
 
 		enum class DebugFlags : uint32_t {
 			None = 0u,
@@ -80,10 +100,14 @@ namespace pragma {
 
 	class DLLCLIENT ShaderSceneLit : public ShaderScene {
 	  public:
-		static prosper::DescriptorSetInfo DESCRIPTOR_SET_LIGHTS;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_SHADOWS;
 
-		enum class LightBinding : uint32_t { LightBuffers = 0u, TileVisLightIndexBuffer, ShadowData, CSM };
+		enum class LightBinding : uint32_t {
+			LightBuffers = 0u,
+			TileVisLightIndexBuffer,
+			ShadowData,
+			CSM,
+		};
 
 		enum class ShadowBinding : uint32_t {
 			ShadowMaps = 0u,
@@ -97,7 +121,6 @@ namespace pragma {
 			int32_t count;
 		};
 #pragma pack(pop)
-		virtual uint32_t GetLightDescriptorSetIndex() const = 0;
 	  protected:
 		ShaderSceneLit(prosper::IPrContext &context, const std::string &identifier, const std::string &vsShader, const std::string &fsShader, const std::string &gsShader = "");
 	};
@@ -207,7 +230,7 @@ namespace pragma {
 
 		// Note: All recording functions are called in a multi-threaded environment! Handle with care!
 		virtual void RecordBindScene(rendering::ShaderProcessor &shaderProcessor, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer, prosper::IDescriptorSet &dsRenderSettings,
-		  prosper::IDescriptorSet &dsLights, prosper::IDescriptorSet &dsShadows, const Vector4 &drawOrigin, SceneFlags &inOutSceneFlags) const
+		  prosper::IDescriptorSet &dsShadows, const Vector4 &drawOrigin, SceneFlags &inOutSceneFlags) const
 		{
 		}
 		virtual bool RecordBindEntity(rendering::ShaderProcessor &shaderProcessor, CRenderComponent &renderC, prosper::IShaderPipelineLayout &layout, uint32_t entityInstanceDescriptorSetIndex) const;

@@ -89,6 +89,12 @@ namespace pragma {
 		~ModuleWrapper()
 		{
 #ifdef _WIN32
+			if(std::uncaught_exceptions() > 0) {
+				// If we're stack unwinding due to an uncaught exception,
+				// we DON'T want to release the library, since we'll need
+				// the library to collect information for our crashdump!
+				return;
+			}
 			FreeLibrary(handle);
 #else
 			dlclose(handle);
@@ -103,9 +109,9 @@ namespace pragma {
 	static std::unique_ptr<ModuleWrapper> launch_pragma(int argc, char *argv[], bool server = false)
 	{
 #ifdef __linux__
-        const char *library = server ? "libshared.so" : "libclient.so";
+		const char *library = server ? "libshared.so" : "libclient.so";
 #else
-        const char *library = server ? "shared.dll" : "client.dll";
+		const char *library = server ? "shared.dll" : "client.dll";
 #endif
 		const char *runEngineSymbol = server ? "RunEngine" : "RunCEngine";
 
@@ -149,7 +155,7 @@ namespace pragma {
 #if 0
 		std::thread t([]() { std::cout << "Linux Thread Test"; });
 #endif
-        void (*runEngine)(int, char *[]) = (void (*)(int, char *[]))dlsym(hEngine, runEngineSymbol);
+		void (*runEngine)(int, char *[]) = (void (*)(int, char *[]))dlsym(hEngine, runEngineSymbol);
 		if(runEngine != nullptr) {
 			runEngine(argc, argv);
 			return wrapper;

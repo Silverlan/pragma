@@ -31,22 +31,17 @@ extern DLLNETWORK Engine *engine;
 using namespace pragma::debug;
 
 std::string g_crashExceptionMessage = {};
-static CrashHandler *g_crashHandler = nullptr;
-CrashHandler::CrashHandler(const std::string &appName) : m_appName {appName}
+static CrashHandler g_crashHandler {};
+CrashHandler &CrashHandler::Get() { return g_crashHandler; }
+CrashHandler::CrashHandler()
 {
-	assert(!g_crashHandler);
-	g_crashHandler = this;
 #ifdef _WIN32
 	::SetUnhandledExceptionFilter(TopLevelFilter);
 #else
 	signal(
 	  SIGSEGV, +[](int sig) {
-		  if(!g_crashHandler) {
-			  exit(1);
-			  return;
-		  }
-		  g_crashHandler->m_sig = sig;
-		  g_crashHandler->GenerateCrashDump();
+		  g_crashHandler.m_sig = sig;
+		  g_crashHandler.GenerateCrashDump();
 		  exit(1);
 	  });
 #endif
@@ -72,7 +67,9 @@ CrashHandler::CrashHandler(const std::string &appName) : m_appName {appName}
 	});
 }
 
-CrashHandler::~CrashHandler() { g_crashHandler = nullptr; }
+void CrashHandler::SetAppName(const std::string &appName) { m_appName = appName; }
+
+CrashHandler::~CrashHandler() {}
 
 #ifdef _WIN32
 BOOL CALLBACK MyMiniDumpCallback(PVOID pParam, const PMINIDUMP_CALLBACK_INPUT pInput, PMINIDUMP_CALLBACK_OUTPUT pOutput);
@@ -343,12 +340,21 @@ bool CrashHandler::GenerateCrashDump() const
 }
 
 #ifdef _WIN32
+static auto g_crashDumpGenerated = false;
+static std::mutex g_crashMutex;
 LONG CrashHandler::TopLevelFilter(struct _EXCEPTION_POINTERS *pExceptionInfo)
 {
-	if(!g_crashHandler)
+	// When a crash occurs, there's a good chance that other threads will also crash.
+	// This can cause the entire application to die before the crash dump has been fully generated.
+	// Since we probably only care about the first crash anyway, we'll simply make all other threads wait
+	// until the crash dump has been generated.
+	std::unique_lock<std::mutex> lock {g_crashMutex};
+	if(g_crashDumpGenerated)
 		return EXCEPTION_CONTINUE_SEARCH;
-	g_crashHandler->m_pExceptionInfo = pExceptionInfo;
-	g_crashHandler->GenerateCrashDump();
+
+	g_crashDumpGenerated = true;
+	g_crashHandler.m_pExceptionInfo = pExceptionInfo;
+	g_crashHandler.GenerateCrashDump();
 	return EXCEPTION_EXECUTE_HANDLER;
 }
 #endif

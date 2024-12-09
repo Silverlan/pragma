@@ -27,8 +27,10 @@ typedef BOOL(WINAPI *MINIDUMPWRITEDUMP)(HANDLE hProcess, DWORD dwPid, HANDLE hFi
 namespace pragma::debug {
 	class DLLNETWORK CrashHandler {
 	  public:
-		CrashHandler(const std::string &appName);
+		static CrashHandler &Get();
+		CrashHandler();
 		~CrashHandler();
+		void SetAppName(const std::string &appName);
 	  private:
 		bool GenerateCrashDump() const;
 		std::string m_appName;

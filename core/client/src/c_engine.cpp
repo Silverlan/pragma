@@ -762,6 +762,7 @@ bool CEngine::Initialize(int argc, char *argv[])
 	contextCreateInfo.width = 1280;
 	contextCreateInfo.height = 1024;
 	contextCreateInfo.windowless = g_windowless;
+	contextCreateInfo.enableDiagnostics = IsGfxDiagnosticsModeEnabled();
 
 	std::shared_ptr<udm::Data> renderApiData {};
 	try {

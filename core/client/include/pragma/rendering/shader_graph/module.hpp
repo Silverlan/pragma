@@ -11,6 +11,8 @@
 #include <pragma/clientdefinitions.h>
 #include "pragma/rendering/shaders/world/c_shader_scene.hpp"
 
+import pragma.shadergraph;
+
 namespace prosper {
 	class Shader;
 }
@@ -18,9 +20,6 @@ namespace prosper {
 namespace pragma {
 	class CSceneComponent;
 	class CRasterizationRendererComponent;
-	namespace shadergraph {
-		struct GraphNode;
-	}
 };
 
 class CModelSubMesh;

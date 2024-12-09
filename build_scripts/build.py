@@ -505,9 +505,9 @@ os.chdir("../../")
 print_msg("Downloading SPIRV-Headers...")
 os.chdir(deps_dir)
 os.chdir("SPIRV-Tools/external")
-if not Path(os.getcwd() +"/SPIRV-Headers").is_dir():
-	git_clone("https://github.com/KhronosGroup/SPIRV-Headers")
-os.chdir("SPIRV-Headers")
+if not Path(os.getcwd() +"/spirv-headers").is_dir():
+	git_clone("https://github.com/KhronosGroup/SPIRV-Headers", "spirv-headers")
+os.chdir("spirv-headers")
 reset_to_commit("2a9b6f951c7d6b04b6c21fe1bf3f475b68b84801")
 os.chdir("../../")
 os.chdir("../../")

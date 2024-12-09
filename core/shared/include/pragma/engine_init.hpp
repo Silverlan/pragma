@@ -15,7 +15,7 @@ template<class T>
 std::shared_ptr<T> InitializeEngine(int argc, char *argv[])
 {
 	auto exe = engine_info::get_executable_name();
-	pragma::debug::CrashHandler dmp(exe);
+	pragma::debug::CrashHandler::Get().SetAppName(exe);
 	auto en = std::shared_ptr<T> {new T {argc, argv}, [](T *p) {
 #ifdef _WIN32
 		                              if(std::uncaught_exceptions() > 0) {
@@ -40,7 +40,7 @@ std::shared_ptr<T> InitializeEngine(int argc, char *argv[])
 inline DLLNETWORK std::shared_ptr<Engine> InitializeServer(int argc, char *argv[])
 {
 	auto exe = engine_info::get_executable_name();
-	pragma::debug::CrashHandler dmp(exe);
+	pragma::debug::CrashHandler::Get().SetAppName(exe);
 	auto en = std::shared_ptr<Engine> {new Engine {argc, argv}, [](Engine *p) {
 		                                   if(std::uncaught_exceptions() > 0) {
 			                                   // If we're stack unwinding due to an uncaught exception,

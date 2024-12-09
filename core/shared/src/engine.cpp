@@ -1042,6 +1042,8 @@ void Engine::DumpDebugInformation(uzip::ZIPFile &zip) const
 		fWriteConvars(GetServerNetworkState()->GetConVars(), "cvars_sv.txt");
 		fWriteLuaTraceback(GetServerNetworkState()->GetLuaState(), "sv");
 	}
+
+	const_cast<Engine *>(this)->CallCallbacks<void, std::reference_wrapper<uzip::ZIPFile>>("DumpDebugInformation", zip);
 }
 
 const long long &Engine::GetLastTick() const { return m_lastTick; }

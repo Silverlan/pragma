@@ -17,6 +17,7 @@
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/rendering/render_queue.hpp"
 #include "pragma/rendering/shaders/world/c_shader_scene.hpp"
+#include "pragma/rendering/global_render_settings_buffer_data.hpp"
 #include "pragma/debug/debug_render_filter.hpp"
 #include "pragma/entities/environment/c_env_reflection_probe.hpp"
 #include "pragma/entities/environment/c_env_camera.h"

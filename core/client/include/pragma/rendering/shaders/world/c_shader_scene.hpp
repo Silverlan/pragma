@@ -63,6 +63,9 @@ namespace pragma {
 			Time,
 			CSMData,
 			GlobalInstance,
+// #ifdef PRAGMA_ENABLE_SHADER_DEBUG_PRINT
+			DebugPrint,
+// #endif
 		};
 
 		enum class DebugFlags : uint32_t {
@@ -89,6 +92,7 @@ namespace pragma {
 		virtual uint32_t GetRenderSettingsDescriptorSetIndex() const = 0;
 		virtual uint32_t GetCameraDescriptorSetIndex() const = 0;
 		virtual uint32_t GetRendererDescriptorSetIndex() const { return std::numeric_limits<uint32_t>::max(); }
+		virtual std::optional<std::string> GetGlslPrefixCode(prosper::ShaderStage stage) const override;
 	  protected:
 		ShaderScene(prosper::IPrContext &context, const std::string &identifier, const std::string &vsShader, const std::string &fsShader, const std::string &gsShader = "");
 		prosper::SampleCountFlags GetSampleCount(uint32_t pipelineIdx) const;

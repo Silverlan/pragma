@@ -31,6 +31,7 @@
 #include "pragma/rendering/rendersystem.h"
 #include "pragma/rendering/render_queue.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
+#include "pragma/rendering/global_render_settings_buffer_data.hpp"
 #include "pragma/entities/baseentity.h"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
@@ -345,6 +346,10 @@ static CVar cvClearSceneColor = GetClientConVar("render_clear_scene_color");
 static CVar cvParticleQuality = GetClientConVar("cl_render_particle_quality");
 void CGame::RenderScenes(util::DrawSceneInfo &drawSceneInfo)
 {
+#ifdef PRAGMA_ENABLE_SHADER_DEBUG_PRINT
+	GetGlobalRenderSettingsBufferData().EvaluateDebugPrint();
+#endif
+
 	StartProfilingStage("RenderScenes");
 	util::ScopeGuard sg {[this]() {
 		StopProfilingStage(); // RenderScenes

@@ -16,6 +16,7 @@
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/rendering/shaders/c_shader_shadow.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
+#include "pragma/rendering/global_render_settings_buffer_data.hpp"
 #include "pragma/lua/c_lentity_handles.hpp"
 #include <pragma/math/math_seb.h>
 #include <pragma/math/e_frustum.h>

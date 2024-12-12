@@ -7,7 +7,8 @@
 float get_spot_light_shadow_sample(uint lightIdx, bool dynamic, vec3 fragPosWs)
 {
 	LightSourceData light = get_light_source(lightIdx);
-
+	if(light.shadowIndex == 0)
+		return 1.0;
 	vec4 depthCoord = get_light_vertex_position(lightIdx);
 	depthCoord.z *= light.position.w; // Undo transformation from get_light_vertex_position()
 	depthCoord = depthCoord / light.position.w;
@@ -22,6 +23,8 @@ float get_spot_light_shadow_sample(uint lightIdx, bool dynamic, vec3 fragPosWs)
 float get_spot_light_shadow_factor(uint lightIdx, bool dynamic)
 {
 	LightSourceData light = get_light_source(lightIdx);
+	if(light.shadowIndex == 0)
+		return 1.0;
 	vec4 depthCoord = get_light_vertex_position(lightIdx);
 	depthCoord.z *= light.position.w; // Undo transformation from get_light_vertex_position()
 	depthCoord = depthCoord / light.position.w;

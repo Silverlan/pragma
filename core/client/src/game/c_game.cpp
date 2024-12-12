@@ -57,6 +57,7 @@
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/rendering/renderers/raytracing_renderer.hpp"
 #include "pragma/rendering/render_queue_worker.hpp"
+#include "pragma/rendering/global_render_settings_buffer_data.hpp"
 #include "pragma/ai/c_navsystem.h"
 #include <texturemanager/texturemanager.h>
 #include <pragma/physics/environment.hpp>
@@ -660,7 +661,7 @@ void CGame::InitializeGame() // Called by NET_cl_resourcecomplete
 	c_engine->GetRenderContext().GetPipelineLoader().Flush();
 	c_engine->GetRenderContext().SavePipelineCache();
 
-	m_globalRenderSettingsBufferData = std::make_unique<GlobalRenderSettingsBufferData>();
+	m_globalRenderSettingsBufferData = std::make_unique<pragma::rendering::GlobalRenderSettingsBufferData>();
 	auto *scene = pragma::CSceneComponent::Create(pragma::CSceneComponent::CreateInfo {});
 	if(scene) {
 		scene->GetEntity().SetName("scene_game");

@@ -35,6 +35,7 @@ namespace pragma::debug {
 		bool GenerateCrashDump() const;
 		std::string m_appName;
 #ifdef _WIN32
+		static bool GenerateCrashDump(EXCEPTION_POINTERS *pExceptionPointers);
 		struct _EXCEPTION_POINTERS *m_pExceptionInfo = nullptr;
 		std::optional<std::string> GenerateMiniDump(std::string &outErr) const;
 		static LONG WINAPI TopLevelFilter(struct _EXCEPTION_POINTERS *pExceptionInfo);

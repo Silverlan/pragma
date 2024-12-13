@@ -19,6 +19,7 @@
 #include "pragma/localization.h"
 #ifdef _WIN32
 #include <tchar.h>
+#include <signal.h>
 #else
 #include <signal.h>
 #include <execinfo.h>
@@ -33,10 +34,42 @@ using namespace pragma::debug;
 std::string g_crashExceptionMessage = {};
 static CrashHandler g_crashHandler {};
 CrashHandler &CrashHandler::Get() { return g_crashHandler; }
+
 CrashHandler::CrashHandler()
 {
 #ifdef _WIN32
 	::SetUnhandledExceptionFilter(TopLevelFilter);
+	_set_invalid_parameter_handler([](const wchar_t *expression, const wchar_t *function, const wchar_t *file, unsigned int line, uintptr_t pReserved) {
+		__try {
+			// Trigger an exception
+			int *p = nullptr;
+			*p = 42;
+		}
+		__except(CrashHandler::GenerateCrashDump(GetExceptionInformation()), EXCEPTION_EXECUTE_HANDLER) {
+		}
+		exit(1);
+	});
+	_set_abort_behavior(0, _WRITE_ABORT_MSG | _CALL_REPORTFAULT);
+	_set_purecall_handler([]() {
+		__try {
+			// Trigger an exception
+			int *p = nullptr;
+			*p = 42;
+		}
+		__except(CrashHandler::GenerateCrashDump(GetExceptionInformation()), EXCEPTION_EXECUTE_HANDLER) {
+		}
+		exit(1);
+	});
+	signal(SIGABRT, [](int signal) {
+		__try {
+			// Trigger an exception
+			int *p = nullptr;
+			*p = 42;
+		}
+		__except(CrashHandler::GenerateCrashDump(GetExceptionInformation()), EXCEPTION_EXECUTE_HANDLER) {
+		}
+		exit(signal);
+	});
 #else
 	signal(
 	  SIGSEGV, +[](int sig) {
@@ -76,10 +109,6 @@ BOOL CALLBACK MyMiniDumpCallback(PVOID pParam, const PMINIDUMP_CALLBACK_INPUT pI
 
 std::optional<std::string> CrashHandler::GenerateMiniDump(std::string &outErr) const
 {
-	if(!m_pExceptionInfo) {
-		outErr = "No exception info!";
-		return {};
-	}
 	LONG retval = EXCEPTION_CONTINUE_SEARCH;
 	HWND hParent = NULL; // find a better value for your app
 
@@ -219,6 +248,12 @@ BOOL CALLBACK MyMiniDumpCallback(PVOID pParam, const PMINIDUMP_CALLBACK_INPUT pI
 	}
 
 	return bRet;
+}
+
+bool CrashHandler::GenerateCrashDump(EXCEPTION_POINTERS *pExceptionPointers)
+{
+	g_crashHandler.m_pExceptionInfo = pExceptionPointers;
+	return g_crashHandler.GenerateCrashDump();
 }
 #endif
 

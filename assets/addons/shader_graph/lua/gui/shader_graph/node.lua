@@ -49,6 +49,7 @@ function Element:OnInitialize()
 end
 function Element:OnRemove()
 	util.remove(self.m_framePosChangedCallback)
+	util.remove(self.m_frameSizeChangedCallback)
 
 	local function removeSocketElements(sockets)
 		for id, elData in pairs(sockets) do
@@ -68,8 +69,13 @@ function Element:GetNode()
 end
 function Element:SetFrame(frame)
 	util.remove(self.m_framePosChangedCallback)
+	util.remove(self.m_frameSizeChangedCallback)
+
 	self.m_frame = frame
 	self.m_framePosChangedCallback = frame:AddCallback("SetPos", function()
+		self:UpdateSocketElementPositions()
+	end)
+	self.m_frameSizeChangedCallback = frame:AddCallback("SetSize", function()
 		self:UpdateSocketElementPositions()
 	end)
 end
@@ -134,8 +140,27 @@ function Element:AddControl(socketType, linkable, title, id, type, defaultVal, m
 		socketElement = el,
 		controlElement = elCtrl,
 	}
-	self:UpdateSocketElementPositions()
+	self:UpdateSocketPosition(t[id], socketType == gui.GraphNodeSocket.SOCKET_TYPE_OUTPUT)
 	return el, elCtrl
+end
+function Element:UpdateSocketPosition(elData, output)
+	local frame = self:GetFrame()
+	local graph = self:GetShaderGraph()
+	if util.is_valid(frame) == false or util.is_valid(graph) == false then
+		return
+	end
+	local graphPos = graph:GetAbsolutePos()
+	local elSocket = elData.socketElement
+	local elCtrl = elData.controlElement
+	if util.is_valid(elSocket) and elCtrl:IsValid() then
+		local pos = elCtrl:GetAbsolutePos() - graphPos
+		if output then
+			elSocket:SetX(pos.x + elCtrl:GetWidth() - elSocket:GetWidth() * 0.5 + 7)
+		else
+			elSocket:SetX(pos.x - elSocket:GetWidth() * 0.5 - 7)
+		end
+		elSocket:SetY(pos.y + elCtrl:GetHeight() * 0.5 - elSocket:GetHeight() * 0.5)
+	end
 end
 function Element:UpdateSocketElementPositions()
 	local frame = self:GetFrame()
@@ -143,20 +168,9 @@ function Element:UpdateSocketElementPositions()
 	if util.is_valid(frame) == false or util.is_valid(graph) == false then
 		return
 	end
-	local graphPos = graph:GetAbsolutePos()
 	local function updatePositions(sockets, output)
 		for id, elData in pairs(sockets) do
-			local elSocket = elData.socketElement
-			local elCtrl = elData.controlElement
-			if util.is_valid(elSocket) and elCtrl:IsValid() then
-				local pos = elCtrl:GetAbsolutePos() - graphPos
-				if output then
-					elSocket:SetX(pos.x + elCtrl:GetWidth() - elSocket:GetWidth() * 0.5 + 7)
-				else
-					elSocket:SetX(pos.x - elSocket:GetWidth() * 0.5 - 7)
-				end
-				elSocket:SetY(pos.y + elCtrl:GetHeight() * 0.5 - elSocket:GetHeight() * 0.5)
-			end
+			self:UpdateSocketPosition(elData, output)
 		end
 	end
 	updatePositions(self.m_inputs, false)
@@ -181,19 +195,10 @@ function Element:ResetControls()
 end
 function Element:AddInput(name, type, linkable, defaultVal, minVal, maxVal, enumValues)
 	local elSocket, elCtrl = self:AddControl(gui.GraphNodeSocket.SOCKET_TYPE_INPUT, linkable, name, name, type, defaultVal, minVal, maxVal, enumValues)
-	if(elSocket ~= nil) then
-		elSocket:SetX(elSocket:GetWidth() * -0.5)
-		elSocket:SetY(elCtrl:GetHeight() * 0.5 - elSocket:GetHeight() * 0.5)
-	end
 	return elSocket
 end
 function Element:AddOutput(name)
 	local elSocket, elCtrl = self:AddControl(gui.GraphNodeSocket.SOCKET_TYPE_OUTPUT, true, name, name)
-	if(elSocket ~= nil) then
-		elSocket:SetX(elCtrl:GetWidth() - elSocket:GetWidth() * 0.5)
-		elSocket:SetY(elCtrl:GetHeight() * 0.5 - elSocket:GetHeight() * 0.5)
-		elSocket:SetAnchor(1, 0, 1, 0)
-	end
 	return elSocket
 end
 gui.register("WIGraphNode", Element)

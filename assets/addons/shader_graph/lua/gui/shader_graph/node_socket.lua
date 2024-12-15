@@ -23,7 +23,11 @@ function Element:OnInitialize()
 	inner:SetMaterial("gui/pfm/circle_filled")
 	inner:CenterToParent()
 	inner:SetColor(Color.Lime)
+	inner:SetVisible(false)
 	self.m_innerCircle = inner
+end
+function Element:SetLinked(linked)
+	self.m_innerCircle:SetVisible(linked)
 end
 function Element:SetSocket(node, socket, socketType)
 	self.m_node = node

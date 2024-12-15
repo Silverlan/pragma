@@ -173,7 +173,14 @@ function Element:AddLink(elOutputSocket, elInputSocket)
 	l:SetAnchor(0, 0, 1, 1)
 	l:SetZPos(-1)
 	l:Setup(elOutputSocket, elInputSocket)
+	l:AddCallback("OnRemove", function()
+		if(elInputSocket:IsValid()) then elInputSocket:SetLinked(false) end
+		if(elOutputSocket:IsValid()) then elOutputSocket:SetLinked(false) end
+	end)
 	table.insert(self.m_linkElements, l)
+
+	elInputSocket:SetLinked(true)
+	elOutputSocket:SetLinked(true)
 end
 function Element:RemoveNode(name)
 	local t = self.m_nameToElementData[name]

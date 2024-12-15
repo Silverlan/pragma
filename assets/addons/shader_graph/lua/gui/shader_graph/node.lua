@@ -52,7 +52,7 @@ function Element:OnRemove()
 
 	local function removeSocketElements(sockets)
 		for id, elData in pairs(sockets) do
-			if elData.socketElement:IsValid() then
+			if util.is_valid(elData.socketElement) then
 				elData.socketElement:Remove()
 			end
 		end
@@ -82,15 +82,17 @@ end
 function Element:GetShaderGraph()
 	return self.m_graph
 end
-function Element:AddControl(socketType, title, id, type, defaultVal, enumValues)
+function Element:AddControl(socketType, linkable, title, id, type, defaultVal, minVal, maxVal, enumValues)
 	local ctrlMenu = (socketType == gui.GraphNodeSocket.SOCKET_TYPE_INPUT) and self.m_inputControls
 		or self.m_outputControls
 	local elCtrl
-	if socketType == gui.GraphNodeSocket.SOCKET_TYPE_INPUT and type ~= nil then
+	if (socketType == gui.GraphNodeSocket.SOCKET_TYPE_INPUT) and type ~= nil then
 		local udmType = shader.Socket.to_udm_type(type)
 		local propInfo = {
 			defaultValue = defaultVal,
-			enumValues = enumValues
+			enumValues = enumValues,
+			minValue = minVal,
+			maxValue = maxVal
 		}
 		if type == shader.Socket.TYPE_COLOR then
 			propInfo.specializationType = "color"
@@ -110,20 +112,23 @@ function Element:AddControl(socketType, title, id, type, defaultVal, enumValues)
 	if util.is_valid(shaderGraph) == false then
 		return
 	end
-	local el = gui.create("WIGraphNodeSocket", shaderGraph)
-	el:SetSocket(self, id, socketType)
-	el:SetMouseInputEnabled(true)
-	el:SetZPos(2)
-	el:AddCallback("OnMouseEvent", function(el, button, state, mods)
-		if button == input.MOUSE_BUTTON_LEFT and state == input.STATE_PRESS then
-			local graph = self:GetShaderGraph()
-			if util.is_valid(graph) then
-				graph:StartInteractiveLinkMode(el)
-			end
+	local el
+	if(linkable) then
+		el = gui.create("WIGraphNodeSocket", shaderGraph)
+		el:SetSocket(self, id, socketType)
+		el:SetMouseInputEnabled(true)
+		el:SetZPos(2)
+		el:AddCallback("OnMouseEvent", function(el, button, state, mods)
+			if button == input.MOUSE_BUTTON_LEFT and state == input.STATE_PRESS then
+				local graph = self:GetShaderGraph()
+				if util.is_valid(graph) then
+					graph:StartInteractiveLinkMode(el)
+				end
 
-			return util.EVENT_REPLY_HANDLED
-		end
-	end)
+				return util.EVENT_REPLY_HANDLED
+			end
+		end)
+	end
 	local t = (socketType == gui.GraphNodeSocket.SOCKET_TYPE_INPUT) and self.m_inputs or self.m_outputs
 	t[id] = {
 		socketElement = el,
@@ -143,7 +148,7 @@ function Element:UpdateSocketElementPositions()
 		for id, elData in pairs(sockets) do
 			local elSocket = elData.socketElement
 			local elCtrl = elData.controlElement
-			if elSocket:IsValid() and elCtrl:IsValid() then
+			if util.is_valid(elSocket) and elCtrl:IsValid() then
 				local pos = elCtrl:GetAbsolutePos() - graphPos
 				if output then
 					elSocket:SetX(pos.x + elCtrl:GetWidth() - elSocket:GetWidth() * 0.5 + 7)
@@ -174,17 +179,21 @@ function Element:ResetControls()
 	self.m_outputControls:ResetControls()
 	self.m_inputControls:ResetControls()
 end
-function Element:AddInput(name, type, defaultVal, enumValues)
-	local elSocket, elCtrl = self:AddControl(gui.GraphNodeSocket.SOCKET_TYPE_INPUT, name, name, type, defaultVal, enumValues)
-	elSocket:SetX(elSocket:GetWidth() * -0.5)
-	elSocket:SetY(elCtrl:GetHeight() * 0.5 - elSocket:GetHeight() * 0.5)
+function Element:AddInput(name, type, linkable, defaultVal, minVal, maxVal, enumValues)
+	local elSocket, elCtrl = self:AddControl(gui.GraphNodeSocket.SOCKET_TYPE_INPUT, linkable, name, name, type, defaultVal, minVal, maxVal, enumValues)
+	if(elSocket ~= nil) then
+		elSocket:SetX(elSocket:GetWidth() * -0.5)
+		elSocket:SetY(elCtrl:GetHeight() * 0.5 - elSocket:GetHeight() * 0.5)
+	end
 	return elSocket
 end
 function Element:AddOutput(name)
-	local elSocket, elCtrl = self:AddControl(gui.GraphNodeSocket.SOCKET_TYPE_OUTPUT, name, name)
-	elSocket:SetX(elCtrl:GetWidth() - elSocket:GetWidth() * 0.5)
-	elSocket:SetY(elCtrl:GetHeight() * 0.5 - elSocket:GetHeight() * 0.5)
-	elSocket:SetAnchor(1, 0, 1, 0)
+	local elSocket, elCtrl = self:AddControl(gui.GraphNodeSocket.SOCKET_TYPE_OUTPUT, true, name, name)
+	if(elSocket ~= nil) then
+		elSocket:SetX(elCtrl:GetWidth() - elSocket:GetWidth() * 0.5)
+		elSocket:SetY(elCtrl:GetHeight() * 0.5 - elSocket:GetHeight() * 0.5)
+		elSocket:SetAnchor(1, 0, 1, 0)
+	end
 	return elSocket
 end
 gui.register("WIGraphNode", Element)

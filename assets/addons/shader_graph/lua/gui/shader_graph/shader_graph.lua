@@ -268,7 +268,7 @@ function Element:AddNode(graphNode)
 				table.insert(enumValues, {tostring(k), v})
 			end
 		end
-		local elInput = elNode:AddInput(socket.name, socket.type, socket.defaultValue, enumValues)
+		local elInput = elNode:AddInput(socket.name, socket.type, socket:IsLinkable(), socket.defaultValue, socket.min, socket.max, enumValues)
 	end
 	elNode:ResetControls()
 

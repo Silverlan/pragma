@@ -247,6 +247,8 @@ static void register_shader_graph(lua_State *l, luabind::module_ &modShader)
 	  });
 
 	auto defSocket = luabind::class_<pragma::shadergraph::Socket>("Socket");
+	defSocket.add_static_constant("FLAG_NONE", umath::to_integral(pragma::shadergraph::Socket::Flags::None));
+	defSocket.add_static_constant("FLAG_LINKABLE", umath::to_integral(pragma::shadergraph::Socket::Flags::Linkable));
 	defSocket.add_static_constant("TYPE_BOOLEAN", umath::to_integral(pragma::shadergraph::SocketType::Boolean));
 	defSocket.add_static_constant("TYPE_INT", umath::to_integral(pragma::shadergraph::SocketType::Int));
 	defSocket.add_static_constant("TYPE_UINT", umath::to_integral(pragma::shadergraph::SocketType::UInt));
@@ -266,6 +268,9 @@ static void register_shader_graph(lua_State *l, luabind::module_ &modShader)
 
 	defSocket.def_readonly("name", &pragma::shadergraph::Socket::name);
 	defSocket.def_readonly("type", &pragma::shadergraph::Socket::type);
+	defSocket.def_readonly("min", &pragma::shadergraph::Socket::min);
+	defSocket.def_readonly("max", &pragma::shadergraph::Socket::max);
+	defSocket.def_readonly("flags", &pragma::shadergraph::Socket::flags);
 	defSocket.property(
 	  "defaultValue", +[](lua_State *l, const pragma::shadergraph::Socket &socket) -> luabind::object {
 		  auto udmType = pragma::shadergraph::to_udm_type(socket.defaultValue.GetType());
@@ -280,6 +285,7 @@ static void register_shader_graph(lua_State *l, luabind::module_ &modShader)
 		  return val;
 	  });
 	defSocket.property("enumSet", +[](lua_State *l, const pragma::shadergraph::Socket &socket) -> pragma::shadergraph::EnumSet * { return socket.enumSet.get(); });
+	defSocket.def("IsLinkable", &pragma::shadergraph::Socket::IsLinkable);
 	defSocket.scope[defEnumSet];
 	modShader[defSocket];
 

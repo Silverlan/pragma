@@ -225,6 +225,27 @@ static void register_shader_graph(lua_State *l, luabind::module_ &modShader)
 	  });
 	modShader[defNode];
 
+	auto defEnumSet = luabind::class_<pragma::shadergraph::EnumSet>("EnumSet");
+	defEnumSet.def("IsEmpty", &pragma::shadergraph::EnumSet::empty);
+	defEnumSet.def("Exists", static_cast<bool (pragma::shadergraph::EnumSet::*)(const std::string &) const>(&pragma::shadergraph::EnumSet::exists));
+	defEnumSet.def("Exists", static_cast<bool (pragma::shadergraph::EnumSet::*)(int32_t) const>(&pragma::shadergraph::EnumSet::exists));
+	defEnumSet.def("FindValue", &pragma::shadergraph::EnumSet::findValue);
+	defEnumSet.def("FindName", &pragma::shadergraph::EnumSet::findName);
+	defEnumSet.def(
+	  "GetNameToValue", +[](lua_State *l, const pragma::shadergraph::EnumSet &enumSet) -> Lua::map<std::string, int32_t> {
+		  auto t = luabind::newtable(l);
+		  for(auto &pair : enumSet.getNameToValue())
+			  t[pair.first] = pair.second;
+		  return t;
+	  });
+	defEnumSet.def(
+	  "GetValueToName", +[](lua_State *l, const pragma::shadergraph::EnumSet &enumSet) -> Lua::map<int32_t, std::string> {
+		  auto t = luabind::newtable(l);
+		  for(auto &pair : enumSet.getValueToName())
+			  t[pair.first] = pair.second;
+		  return t;
+	  });
+
 	auto defSocket = luabind::class_<pragma::shadergraph::Socket>("Socket");
 	defSocket.add_static_constant("TYPE_BOOLEAN", umath::to_integral(pragma::shadergraph::SocketType::Boolean));
 	defSocket.add_static_constant("TYPE_INT", umath::to_integral(pragma::shadergraph::SocketType::Int));
@@ -245,6 +266,21 @@ static void register_shader_graph(lua_State *l, luabind::module_ &modShader)
 
 	defSocket.def_readonly("name", &pragma::shadergraph::Socket::name);
 	defSocket.def_readonly("type", &pragma::shadergraph::Socket::type);
+	defSocket.property(
+	  "defaultValue", +[](lua_State *l, const pragma::shadergraph::Socket &socket) -> luabind::object {
+		  auto udmType = pragma::shadergraph::to_udm_type(socket.defaultValue.GetType());
+		  if(udmType == udm::Type::Invalid)
+			  return Lua::nil;
+		  udm::Property prop {};
+		  prop.type = udmType;
+		  prop.value = socket.defaultValue.GetData();
+		  udm::LinkedPropertyWrapper lp {prop};
+		  auto val = Lua::udm::udm_to_value(l, lp);
+		  prop.value = nullptr; // We don't want to free the data
+		  return val;
+	  });
+	defSocket.property("enumSet", +[](lua_State *l, const pragma::shadergraph::Socket &socket) -> pragma::shadergraph::EnumSet * { return socket.enumSet.get(); });
+	defSocket.scope[defEnumSet];
 	modShader[defSocket];
 
 	auto defNodeRegistry = luabind::class_<pragma::shadergraph::NodeRegistry>("NodeRegistry");

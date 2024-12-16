@@ -61,6 +61,9 @@ class DLLCLIENT WITransformable : public WIBase {
 
 	void AddSnapTarget(WISnapArea &target);
 	void SetRemoveOnClose(bool remove);
+
+	void StartDrag();
+	void EndDrag();
   protected:
 	virtual void DoUpdate() override;
 	enum class ResizeMode { none = -1, ew = 1, we = 2, ns = 3, sn = 4, nwse = 5, nesw = 6, senw = 7, swne = 8 };
@@ -75,8 +78,6 @@ class DLLCLIENT WITransformable : public WIBase {
 	std::vector<WIHandle> m_snapTargets = {};
 	void InitializeSnapTargetGhost(WISnapArea &snapArea);
 	void DestroySnapTargetGhost();
-	void StartDrag();
-	void EndDrag();
 	void SetResizeMode(ResizeMode mode);
 	void StartResizing();
 	void EndResizing();

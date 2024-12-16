@@ -15,6 +15,7 @@ function Element:OnInitialize()
 	gui.Base.OnInitialize(self)
 
 	self.m_nameToElementData = {}
+	self.m_frameToNodeData = {}
 	self.m_nodeData = {}
 	self.m_linkElements = {}
 	self:Clear()
@@ -22,7 +23,40 @@ function Element:OnInitialize()
 
 	self:SetMouseInputEnabled(true)
 end
+function Element:SetShaderEditor(editor)
+	self.m_shaderEditor = editor
+end
 function Element:MouseCallback(button, state, mods)
+	if button == input.MOUSE_BUTTON_LEFT then
+		if state == input.STATE_PRESS then
+			self.m_selectionRect = gui.create("WISelectionRect", self)
+			self.m_selectionRect:SetPos(self:GetCursorPos())
+			self.m_selectionRect:SetZPos(10000)
+		else
+			local gnFrames = self.m_selectionRect:FindElements(function(el)
+				return el:GetClass() == "wiframe"
+			end)
+			self:DeselectAll()
+			for _, frame in ipairs(gnFrames) do
+				local elementData = self.m_frameToNodeData[frame]
+				if elementData ~= nil then
+					elementData.nodeElement:SetSelected(true)
+				end
+			end
+			util.remove(self.m_selectionRect)
+		end
+		return util.EVENT_REPLY_HANDLED
+	end
+
+	if button == input.MOUSE_BUTTON_MIDDLE then
+		if state == input.STATE_PRESS then
+			self.m_shaderEditor:GetTransformableElement():StartDrag()
+		else
+			self.m_shaderEditor:GetTransformableElement():EndDrag()
+		end
+		return util.EVENT_REPLY_HANDLED
+	end
+
 	if button == input.MOUSE_BUTTON_RIGHT and state == input.STATE_PRESS then
 		local pContext = gui.open_context_menu(self)
 		if util.is_valid(pContext) then
@@ -107,6 +141,11 @@ function Element:MouseCallback(button, state, mods)
 		end
 	end
 end
+function Element:DeselectAll()
+	for _, t in ipairs(self.m_nodeData) do
+		t.nodeElement:SetSelected(false)
+	end
+end
 function Element:GetGraph()
 	return self.m_graph
 end
@@ -117,6 +156,7 @@ function Element:Clear()
 	end
 	self.m_nodeData = {}
 	self.m_nameToElementData = {}
+	self.m_frameToNodeData = {}
 	self.m_graph = shader.create_graph("object")
 end
 function Element:SetGraph(graph)
@@ -162,10 +202,12 @@ function Element:InitializeLinks()
 			self:AddLink(elOutputSocket, elInputSocket)
 		end
 	end
+	self:CallCallbacks("OnLinksChanged")
 end
 function Element:ClearLinks()
 	util.remove(self.m_linkElements)
 	self.m_linkElements = {}
+	self:CallCallbacks("OnLinksChanged")
 end
 function Element:AddLink(elOutputSocket, elInputSocket)
 	local l = gui.create("WIElementConnectorLine", self)
@@ -174,8 +216,12 @@ function Element:AddLink(elOutputSocket, elInputSocket)
 	l:SetZPos(-1)
 	l:Setup(elOutputSocket, elInputSocket)
 	l:AddCallback("OnRemove", function()
-		if(elInputSocket:IsValid()) then elInputSocket:SetLinked(false) end
-		if(elOutputSocket:IsValid()) then elOutputSocket:SetLinked(false) end
+		if elInputSocket:IsValid() then
+			elInputSocket:SetLinked(false)
+		end
+		if elOutputSocket:IsValid() then
+			elOutputSocket:SetLinked(false)
+		end
 	end)
 	table.insert(self.m_linkElements, l)
 
@@ -197,6 +243,12 @@ function Element:RemoveNode(name)
 		end
 	end
 	self.m_nameToElementData[name] = nil
+	for k, v in pairs(self.m_frameToNodeData) do
+		if v == t then
+			self.m_frameToNodeData[k] = nil
+			break
+		end
+	end
 	self:InitializeLinks()
 end
 function Element:AddNode(graphNode)
@@ -206,7 +258,7 @@ function Element:AddNode(graphNode)
 	frame:SetDetachButtonEnabled(false)
 	frame:SetCloseButtonEnabled(false)
 	frame:SetResizable(false)
-	frame:SetSize(128, 128)
+	frame:SetSize(160, 128)
 	frame:SetZPos(0)
 	util.remove(frame:FindDescendantByName("background"))
 
@@ -249,7 +301,7 @@ function Element:AddNode(graphNode)
 
 	local elNode = gui.create("WIGraphNode", frame)
 	elNode:SetShaderGraph(self)
-	elNode:SetFrame(frame)
+	elNode:SetFrame(frame, elBg)
 	elNode:SetNode(graphNode:GetName())
 	elNode:SetY(31)
 	elNode:AddCallback("SetSize", function()
@@ -269,13 +321,21 @@ function Element:AddNode(graphNode)
 		local socket = input:GetSocket()
 		local enumSet = socket.enumSet
 		local enumValues
-		if(enumSet ~= nil) then
+		if enumSet ~= nil then
 			enumValues = {}
-			for k,v in pairs(enumSet:GetValueToName()) do
-				table.insert(enumValues, {tostring(k), v})
+			for k, v in pairs(enumSet:GetValueToName()) do
+				table.insert(enumValues, { tostring(k), v })
 			end
 		end
-		local elInput = elNode:AddInput(socket.name, socket.type, socket:IsLinkable(), socket.defaultValue, socket.min, socket.max, enumValues)
+		local elInput = elNode:AddInput(
+			socket.name,
+			socket.type,
+			socket:IsLinkable(),
+			socket.defaultValue,
+			socket.min,
+			socket.max,
+			enumValues
+		)
 	end
 	elNode:ResetControls()
 
@@ -284,6 +344,7 @@ function Element:AddNode(graphNode)
 		nodeElement = elNode,
 		graphNode = name,
 	}
+	self.m_frameToNodeData[frame] = t
 	table.insert(self.m_nodeData, t)
 	self.m_nameToElementData[graphNode:GetName()] = t
 	return frame

@@ -10,7 +10,7 @@ local Element = util.register_class("gui.GraphNode", gui.Base)
 function Element:OnInitialize()
 	gui.Base.OnInitialize(self)
 
-	self:SetSize(128, 128)
+	self:SetSize(160, 128)
 
 	local box = gui.create("WIVBox", self, 0, 0, self:GetWidth(), self:GetHeight())
 	box:SetName("global_container")
@@ -61,17 +61,30 @@ function Element:OnRemove()
 	removeSocketElements(self.m_inputs)
 	removeSocketElements(self.m_outputs)
 end
+function Element:SetSelected(selected)
+	self.m_selected = selected
+	if selected then
+		self.m_backgroundElement:AddStyleClass("node_background_selected")
+	else
+		self.m_backgroundElement:RemoveStyleClass("node_background_selected")
+	end
+	self.m_backgroundElement:RefreshSkin()
+end
+function Element:IsSelected()
+	return self.m_selected or false
+end
 function Element:SetNode(name)
 	self.m_node = name
 end
 function Element:GetNode()
 	return self.m_node
 end
-function Element:SetFrame(frame)
+function Element:SetFrame(frame, elBg)
 	util.remove(self.m_framePosChangedCallback)
 	util.remove(self.m_frameSizeChangedCallback)
 
 	self.m_frame = frame
+	self.m_backgroundElement = elBg
 	self.m_framePosChangedCallback = frame:AddCallback("SetPos", function()
 		self:UpdateSocketElementPositions()
 	end)
@@ -98,7 +111,7 @@ function Element:AddControl(socketType, linkable, title, id, type, defaultVal, m
 			defaultValue = defaultVal,
 			enumValues = enumValues,
 			minValue = minVal,
-			maxValue = maxVal
+			maxValue = maxVal,
 		}
 		if type == shader.Socket.TYPE_COLOR then
 			propInfo.specializationType = "color"
@@ -111,7 +124,7 @@ function Element:AddControl(socketType, linkable, title, id, type, defaultVal, m
 		end)
 		elCtrl = wrapper:GetWrapperElement()
 	else
-		local el, wrapper = ctrlMenu:AddText(title, id, "")
+		local el, wrapper = ctrlMenu:AddInfo(title, id)
 		elCtrl = wrapper
 	end
 	local shaderGraph = self:GetShaderGraph()
@@ -119,7 +132,7 @@ function Element:AddControl(socketType, linkable, title, id, type, defaultVal, m
 		return
 	end
 	local el
-	if(linkable) then
+	if linkable then
 		el = gui.create("WIGraphNodeSocket", shaderGraph)
 		el:SetSocket(self, id, socketType)
 		el:SetMouseInputEnabled(true)
@@ -194,7 +207,17 @@ function Element:ResetControls()
 	self.m_inputControls:ResetControls()
 end
 function Element:AddInput(name, type, linkable, defaultVal, minVal, maxVal, enumValues)
-	local elSocket, elCtrl = self:AddControl(gui.GraphNodeSocket.SOCKET_TYPE_INPUT, linkable, name, name, type, defaultVal, minVal, maxVal, enumValues)
+	local elSocket, elCtrl = self:AddControl(
+		gui.GraphNodeSocket.SOCKET_TYPE_INPUT,
+		linkable,
+		name,
+		name,
+		type,
+		defaultVal,
+		minVal,
+		maxVal,
+		enumValues
+	)
 	return elSocket
 end
 function Element:AddOutput(name)

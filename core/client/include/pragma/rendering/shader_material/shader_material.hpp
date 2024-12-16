@@ -103,8 +103,9 @@ namespace pragma::rendering::shader_material {
 	struct DLLCLIENT ShaderMaterial {
 		static constexpr uint32_t PREDEFINED_PROPERTY_COUNT = 6;
 
-		ShaderMaterial();
+		ShaderMaterial(const pragma::GString &name);
 		void AddProperty(Property &&prop);
+		const pragma::GString name;
 		std::vector<Property> properties;
 		std::vector<Texture> textures;
 
@@ -185,6 +186,8 @@ namespace pragma::rendering::shader_material {
 	  public:
 		ShaderMaterialCache();
 		std::shared_ptr<ShaderMaterial> Load(const std::string &id);
+		std::shared_ptr<ShaderMaterial> Get(const std::string &id) const;
+		const std::unordered_map<std::string, std::shared_ptr<ShaderMaterial>> &GetShaderMaterials() const { return m_cache; }
 	  private:
 		std::unordered_map<std::string, std::shared_ptr<ShaderMaterial>> m_cache;
 	};

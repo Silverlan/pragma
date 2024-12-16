@@ -6,33 +6,19 @@
  */
 
 #include "stdafx_client.h"
-#include "pragma/rendering/shader_graph/nodes/image_texture.hpp"
+#include "pragma/rendering/shader_graph/nodes/material_texture.hpp"
 
 using namespace pragma::rendering::shader_graph;
-
-ImageTextureNode::ImageTextureNode(const std::string_view &type) : Node {type}
+MaterialTextureNode::MaterialTextureNode(const std::string_view &type) : Node {type}
 {
-	AddInput(IN_FILENAME, pragma::shadergraph::SocketType::String, "");
+	AddInput(IN_TEXTURE, pragma::shadergraph::SocketType::String, "");
 	AddInput(IN_VECTOR, pragma::shadergraph::SocketType::Vector, Vector3 {0.f, 0.f, 0.f}); // TODO: Make input only, don't allow writing manually
 
 	AddOutput(OUT_COLOR, pragma::shadergraph::SocketType::Color);
 	AddOutput(OUT_ALPHA, pragma::shadergraph::SocketType::Float);
-
-	AddModuleDependency("image_texture");
 }
 
-std::string ImageTextureNode::DoEvaluateResourceDeclarations(const pragma::shadergraph::Graph &graph, const pragma::shadergraph::GraphNode &gn) const
-{
-	std::ostringstream code;
-	auto prefix = gn.GetBaseVarName() + "_";
-	std::string texName = prefix + "tex";
-	auto upperTexName = texName;
-	ustring::to_upper(upperTexName);
-	code << "layout(LAYOUT_ID(TEST, " << upperTexName << ")) uniform sampler2D " << texName << ";\n";
-	return code.str();
-}
-
-std::string ImageTextureNode::DoEvaluate(const pragma::shadergraph::Graph &graph, const pragma::shadergraph::GraphNode &gn) const
+std::string MaterialTextureNode::DoEvaluate(const pragma::shadergraph::Graph &graph, const pragma::shadergraph::GraphNode &gn) const
 {
 	std::ostringstream code;
 	std::string uv;
@@ -42,8 +28,11 @@ std::string ImageTextureNode::DoEvaluate(const pragma::shadergraph::Graph &graph
 		uv = "vec3(get_vertex_uv(), 0.0)";
 
 	auto prefix = gn.GetBaseVarName() + "_";
-	std::string texName = prefix + "tex";
-	code << "vec4 " << prefix << "texCol = texture(" << texName << ", " << uv << ".xy);\n";
+	auto *texInputSocket = gn.FindInputSocket(IN_TEXTURE);
+	if(texInputSocket && texInputSocket->link)
+		code << "vec4 " << prefix << "texCol = fetch_" << ustring::to_snake_case(texInputSocket->link->GetSocket().name) << "(" << uv << ".xy);\n";
+	else
+		code << "vec4 " << prefix << "texCol = vec4(1.0, 1.0, 1.0, 1.0);\n";
 
 	code << gn.GetGlslOutputDeclaration(OUT_COLOR) << " = ";
 	code << prefix << "texCol.rgb;\n";

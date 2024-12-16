@@ -33,7 +33,7 @@ std::shared_ptr<ShaderMaterial> ShaderMaterialCache::Load(const std::string &id)
 	}
 	if(!udmData)
 		return nullptr;
-	auto shaderMat = std::make_shared<ShaderMaterial>();
+	auto shaderMat = std::make_shared<ShaderMaterial>(id);
 	std::string err;
 	if(shaderMat->LoadFromUdmData(udmData->GetAssetData().GetData()["shader_material"], err) == false) {
 		LOGGER.error("Failed to load shader material '" + id + "'!");
@@ -41,6 +41,14 @@ std::shared_ptr<ShaderMaterial> ShaderMaterialCache::Load(const std::string &id)
 	}
 	it->second = shaderMat;
 	return shaderMat;
+}
+
+std::shared_ptr<ShaderMaterial> ShaderMaterialCache::Get(const std::string &id) const
+{
+	auto it = m_cache.find(id);
+	if(it == m_cache.end())
+		return nullptr;
+	return it->second;
 }
 
 static std::unique_ptr<pragma::rendering::shader_material::ShaderMaterialCache> g_shaderMaterialCache {};
@@ -362,7 +370,7 @@ std::string ShaderMaterial::ToGlslStruct() const
 	return ss.str();
 }
 
-ShaderMaterial::ShaderMaterial()
+ShaderMaterial::ShaderMaterial(const pragma::GString &name) : name {name}
 {
 	properties.reserve(PREDEFINED_PROPERTY_COUNT);
 

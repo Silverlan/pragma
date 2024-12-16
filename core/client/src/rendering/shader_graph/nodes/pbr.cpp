@@ -48,8 +48,8 @@ std::string PbrNode::DoEvaluate(const pragma::shadergraph::Graph &graph, const p
 	code << vMat << ".aoFactor = " << inAo << ";\n";
 	code << vMat << ".alphaMode = ALPHA_MODE_OPAQUE;\n";
 	code << vMat << ".alphaCutoff = 0.5;\n";
-	code << "vec3 " << vEmission << " = vec3(0,0,0);\n";
-	code << "uint " << vMatFlags << " = 0;\n";
+	code << "vec3 " << vEmission << " = vec3(0,0,0);\n"; // TODO
+	code << "uint " << vMatFlags << " = get_mat_flags();\n";
 	code << gn.GetGlslOutputDeclaration(OUT_COLOR) << " = ";
 	code << "calc_pbr(" << vA << ", " << vUv << ", " << vDbg << ", " << vMat << ", " << vEmission << ", " << vMatFlags << ").rgb;\n";
 	return code.str();

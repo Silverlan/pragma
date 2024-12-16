@@ -15,6 +15,7 @@
 #include "pragma/rendering/shader_material/shader_material.hpp"
 #include "pragma/rendering/shader_graph/manager.hpp"
 #include "pragma/rendering/shader_graph/module.hpp"
+#include "pragma/rendering/shader_graph/nodes/shader_material.hpp"
 #include "pragma/model/vk_mesh.h"
 #include "pragma/model/c_modelmesh.h"
 #include <shader/prosper_pipeline_create_info.hpp>
@@ -58,12 +59,27 @@ void ShaderGraph::ClearShaderResources()
 	ShaderGameWorldLightingPass::ClearShaderResources();
 }
 
+static const pragma::rendering::shader_material::ShaderMaterial *find_shader_material(const pragma::shadergraph::Graph &graph)
+{
+	for(auto &node : graph.GetNodes()) {
+		auto *matNode = dynamic_cast<const pragma::rendering::shader_graph::ShaderMaterialNode *>(&node->node);
+		if(matNode)
+			return &matNode->GetShaderMaterial();
+	}
+	return nullptr;
+}
+
 void ShaderGraph::InitializeShaderResources()
 {
 	auto &graphManager = c_engine->GetShaderGraphManager();
 	auto graphData = graphManager.GetGraph(GetIdentifier());
 	if(graphData) {
 		auto &graph = graphData->GetGraph();
+
+		auto *shaderMat = find_shader_material(*graph);
+		if(shaderMat)
+			SetShaderMaterialName(shaderMat->name);
+
 		struct ModuleData {
 			std::vector<pragma::shadergraph::GraphNode *> nodes;
 		};

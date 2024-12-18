@@ -425,8 +425,18 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderGameWorldLightingPass::Initi
 			materialFlags |= pragma::rendering::shader_material::MaterialFlags::HasParallaxMap;
 			break;
 		case "emission_map"_:
-			materialFlags |= pragma::rendering::shader_material::MaterialFlags::HasEmissionMap;
-			break;
+			{
+				materialFlags |= pragma::rendering::shader_material::MaterialFlags::HasEmissionMap;
+				auto path = pragma::asset::get_normalized_path(texData->GetName(), pragma::asset::Type::Texture);
+				static const auto emissionNeutralMap = pragma::asset::get_normalized_path("black", pragma::asset::Type::Texture);
+				if(path == emissionNeutralMap) {
+					// If the material uses the neutral emission texture, we can completely ignore
+					// it for the shader and use the default values instead, which saves
+					// a lot of texture lookups.
+					materialFlags &= ~pragma::rendering::shader_material::MaterialFlags::HasEmissionMap;
+				}
+				break;
+			}
 		case "rma_map"_:
 			{
 				materialFlags |= pragma::rendering::shader_material::MaterialFlags::HasRmaMap;

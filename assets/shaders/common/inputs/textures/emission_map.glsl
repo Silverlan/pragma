@@ -45,6 +45,20 @@ vec4 add_glow_color(vec4 col, vec2 texCoords, vec4 glowColor, vec4 baseColor, ui
 #endif
 	return col;
 }
+
+uint get_glow_mode(uint materialFlags)
+{
+#ifdef MATERIAL_EMISSION_MAP_ENABLED
+	if((materialFlags & FMAT_FLAGS_GLOW_MODE1) != 0)
+		return GLOW_MODE_ADDITIVE;
+	else if((materialFlags & FMAT_FLAGS_GLOW_MODE2) != 0)
+		return GLOW_MODE_OVERLAY;
+	else if((materialFlags & FMAT_FLAGS_GLOW_MODE3) != 0)
+		return GLOW_MODE_MIX;
+#endif
+	return GLOW_MODE_MODULATED;
+}
+
 vec4 add_glow_color(uint materialFlags, vec4 col, vec2 texCoords, vec4 glowColor, vec4 baseColor)
 {
 #ifdef MATERIAL_EMISSION_MAP_ENABLED
@@ -77,7 +91,7 @@ vec4 get_emission_color(vec4 color, vec4 baseColor, vec2 texCoords, vec3 materia
 		vec4 emissiveColor = texture(u_glowMap, texCoords);
 		emissiveColor.rgb *= materialEmissionFactor.rgb;
 		emissiveColor.rgb *= emissiveColor.a * 15;
-		result = add_glow_color(result, texCoords, emissiveColor, baseColor, materialFlags);
+		result = add_glow_color(result, texCoords, emissiveColor, baseColor, get_glow_mode(materialFlags));
 	}
 #endif
 	return result;

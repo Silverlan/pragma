@@ -19,7 +19,7 @@ function Element:OnInitialize()
 	self.m_nodeData = {}
 	self.m_linkElements = {}
 	self:Clear()
-	self:SetSize(1280, 1024)
+	self:SetSize(10000, 10000)
 
 	self:SetMouseInputEnabled(true)
 end
@@ -165,10 +165,11 @@ function Element:SetGraph(graph)
 	self.m_graph = graph
 
 	local nodes = self.m_graph:GetNodes()
-	local offset = 0
+	local offset = self:GetWidth() * 0.5
 	for _, graphNode in ipairs(nodes) do
 		local frame = self:AddNode(graphNode)
 		frame:SetX(offset)
+		frame:SetY(self:GetHeight() * 0.5)
 		offset = offset + frame:GetWidth() + 80
 	end
 

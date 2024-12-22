@@ -18,40 +18,25 @@
 using namespace pragma::rendering::shader_graph;
 
 extern DLLCLIENT CEngine *c_engine;
+extern DLLCLIENT CGame *c_game;
 
-static std::unique_ptr<pragma::rendering::GlobalShaderInputDataManager> g_globalShaderInputDataManager {};
-size_t InputDataModule::g_instanceCount = 0;
 InputDataModule::InputDataModule(prosper::Shader &shader) : pragma::rendering::ShaderGraphModule {shader}
 {
-	if(g_instanceCount == 0)
-		g_globalShaderInputDataManager = std::make_unique<pragma::rendering::GlobalShaderInputDataManager>();
 	m_globalInputDataDsInfo = {
 	  "SHADER_GRAPH",
 	  {prosper::DescriptorSetInfo::Binding {"GLOBAL_INPUT_DATA", prosper::DescriptorType::UniformBuffer, prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::GeometryBit}},
 	};
 }
-InputDataModule::~InputDataModule()
-{
-	if(--g_instanceCount == 0) {
-		g_globalShaderInputDataManager = nullptr;
-	}
-}
-
-void pragma::rendering::shader_graph::InputDataModule::set_shader_input_value(const std::string &name, float val)
-{
-	g_globalShaderInputDataManager->SetValue<float>(name, val);
-
-	auto cmd = c_engine->GetRenderContext().GetSetupCommandBuffer();
-	g_globalShaderInputDataManager->UpdateBufferData(*cmd);
-	c_engine->GetRenderContext().FlushSetupCommandBuffer();
-}
+InputDataModule::~InputDataModule() {}
 
 void InputDataModule::GetShaderPreprocessorDefinitions(std::unordered_map<std::string, std::string> &outDefinitions, std::string &outPrefixCode)
 {
+	auto &inputDataManager = c_game->GetGlobalShaderInputDataManager();
+
 	std::ostringstream code;
 	code << "\nlayout(LAYOUT_ID(SHADER_GRAPH, GLOBAL_INPUT_DATA)) uniform GlobalInputData\n";
 	code << "{\n";
-	for(auto &prop : g_globalShaderInputDataManager->GetDescriptor().properties) {
+	for(auto &prop : inputDataManager.GetDescriptor().properties) {
 		if(prop.parameter.name.empty())
 			continue;
 		code << "\t" << pragma::shadergraph::to_glsl_type(prop.parameter.type) << " " << prop.parameter.name << ";\n";
@@ -62,11 +47,12 @@ void InputDataModule::GetShaderPreprocessorDefinitions(std::unordered_map<std::s
 
 void InputDataModule::InitializeGfxPipelineDescriptorSets()
 {
+	auto &inputDataManager = c_game->GetGlobalShaderInputDataManager();
 	// TODO:
 	auto testPbr = c_engine->GetShaderGraphManager().GetGraph("z");
-	g_globalShaderInputDataManager->PopulateProperties(*testPbr->GetGraph());
+	inputDataManager.PopulateProperties(*testPbr->GetGraph());
 	auto cmd = c_engine->GetRenderContext().GetSetupCommandBuffer();
-	g_globalShaderInputDataManager->UpdateBufferData(*cmd);
+	inputDataManager.UpdateBufferData(*cmd);
 	c_engine->GetRenderContext().FlushSetupCommandBuffer();
 
 	m_shader.AddDescriptorSetGroup(m_globalInputDataDsInfo);
@@ -79,7 +65,7 @@ void InputDataModule::InitializeGfxPipelineDescriptorSets()
 	auto &dummyCubemapTex = context.GetDummyCubemapTexture();
 	auto &ds = *m_globalInputDsg->GetDescriptorSet(0);
 	constexpr uint32_t BINDING_IDX = 0;
-	auto buf = g_globalShaderInputDataManager->GetBuffer();
+	auto buf = inputDataManager.GetBuffer();
 	if(!buf)
 		buf = c_engine->GetRenderContext().GetDummyBuffer();
 	ds.SetBindingUniformBuffer(*buf, BINDING_IDX);

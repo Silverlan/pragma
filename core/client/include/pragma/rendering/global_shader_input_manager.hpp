@@ -5,8 +5,8 @@
 * Copyright (c) 2024 Silverlan
 */
 
-#ifndef __PRAGMA_GLOBAL_RENDER_SETTINGS_BUFFER_DATA_HPP__
-#define __PRAGMA_GLOBAL_RENDER_SETTINGS_BUFFER_DATA_HPP__
+#ifndef __PRAGMA_GLOBAL_SHADER_INPUT_MANAGER_HPP__
+#define __PRAGMA_GLOBAL_SHADER_INPUT_MANAGER_HPP__
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/rendering/shader_material/shader_material.hpp"
@@ -73,6 +73,20 @@ namespace pragma::rendering {
 			m_dirtyTracker.MarkRange(prop->offset, sizeof(T));
 			return true;
 		}
+
+		template<typename T>
+		bool GetValue(const std::string_view &name, T &outVal) const
+		{
+			auto *prop = m_inputDescriptor->FindProperty(name.data());
+			if(!prop)
+				return false;
+			auto val = m_inputData->GetValue<T>(name.data());
+			if(!val)
+				return false;
+			outVal = *val;
+			return true;
+		}
+
 		const pragma::rendering::ShaderInputData &GetData() const { return *m_inputData; }
 		const pragma::rendering::ShaderInputDescriptor &GetDescriptor() const { return *m_inputDescriptor; }
 		const std::shared_ptr<prosper::IBuffer> &GetBuffer() const { return m_inputDataBuffer; }

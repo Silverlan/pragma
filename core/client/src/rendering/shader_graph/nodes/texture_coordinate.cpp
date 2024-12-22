@@ -12,7 +12,7 @@ using namespace pragma::rendering::shader_graph;
 
 TextureCoordinateNode::TextureCoordinateNode(const std::string_view &type) : Node {type}
 {
-	AddOutput(OUT_UV, pragma::shadergraph::SocketType::Vector);
+	AddOutput(OUT_UV, pragma::shadergraph::DataType::Vector);
 
 	AddModuleDependency("uv_data");
 }

@@ -11,11 +11,11 @@
 using namespace pragma::rendering::shader_graph;
 MaterialTextureNode::MaterialTextureNode(const std::string_view &type) : Node {type}
 {
-	AddInput(IN_TEXTURE, pragma::shadergraph::SocketType::String, "");
-	AddInput(IN_VECTOR, pragma::shadergraph::SocketType::Vector, Vector3 {0.f, 0.f, 0.f}); // TODO: Make input only, don't allow writing manually
+	AddInput(IN_TEXTURE, pragma::shadergraph::DataType::String, "");
+	AddInput(IN_VECTOR, pragma::shadergraph::DataType::Vector, Vector3 {0.f, 0.f, 0.f}); // TODO: Make input only, don't allow writing manually
 
-	AddOutput(OUT_COLOR, pragma::shadergraph::SocketType::Color);
-	AddOutput(OUT_ALPHA, pragma::shadergraph::SocketType::Float);
+	AddOutput(OUT_COLOR, pragma::shadergraph::DataType::Color);
+	AddOutput(OUT_ALPHA, pragma::shadergraph::DataType::Float);
 }
 
 std::string MaterialTextureNode::DoEvaluate(const pragma::shadergraph::Graph &graph, const pragma::shadergraph::GraphNode &gn) const

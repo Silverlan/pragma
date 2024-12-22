@@ -12,10 +12,10 @@ using namespace pragma::rendering::shader_graph;
 
 TimeNode::TimeNode(const std::string_view &type) : Node {type}
 {
-	AddOutput(OUT_TIME, pragma::shadergraph::SocketType::Float);
-	AddOutput(OUT_DELTA_TIME, pragma::shadergraph::SocketType::Float);
-	AddOutput(OUT_REAL_TIME, pragma::shadergraph::SocketType::Float);
-	AddOutput(OUT_DELTA_REAL_TIME, pragma::shadergraph::SocketType::Float);
+	AddOutput(OUT_TIME, pragma::shadergraph::DataType::Float);
+	AddOutput(OUT_DELTA_TIME, pragma::shadergraph::DataType::Float);
+	AddOutput(OUT_REAL_TIME, pragma::shadergraph::DataType::Float);
+	AddOutput(OUT_DELTA_REAL_TIME, pragma::shadergraph::DataType::Float);
 
 	AddModuleDependency("time");
 }

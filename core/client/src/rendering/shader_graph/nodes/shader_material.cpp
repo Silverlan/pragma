@@ -14,16 +14,16 @@ ShaderMaterialNode::ShaderMaterialNode(const std::string_view &type, const pragm
 {
 	for(auto &tex : m_shaderMaterial.textures) {
 		auto name = ustring::to_camel_case(tex.name);
-		AddOutput(name, pragma::shadergraph::SocketType::String);
+		AddOutput(name, pragma::shadergraph::DataType::String);
 	}
 
 	for(auto &prop : m_shaderMaterial.properties) {
 		if(umath::is_flag_set(prop.propertyFlags, pragma::rendering::shader_material::Property::Flags::HideInEditor))
 			continue;
-		auto socketType = pragma::shadergraph::to_socket_type(prop.type);
-		if(socketType == pragma::shadergraph::SocketType::Invalid)
+		auto socketType = pragma::shadergraph::to_data_type(pragma::shadergraph::to_udm_type(prop.parameter.type));
+		if(socketType == pragma::shadergraph::DataType::Invalid)
 			continue;
-		AddOutput(ustring::to_camel_case(prop.name), socketType);
+		AddOutput(ustring::to_camel_case(prop.parameter.name), socketType);
 	}
 }
 std::string ShaderMaterialNode::DoEvaluate(const pragma::shadergraph::Graph &graph, const pragma::shadergraph::GraphNode &gn) const
@@ -32,16 +32,16 @@ std::string ShaderMaterialNode::DoEvaluate(const pragma::shadergraph::Graph &gra
 	// get_mat_x();
 	std::ostringstream code;
 	for(auto &prop : m_shaderMaterial.properties) {
-		auto socketType = pragma::shadergraph::to_socket_type(prop.type);
-		if(socketType == pragma::shadergraph::SocketType::Invalid)
+		auto socketType = prop.parameter.type;
+		if(socketType == pragma::shadergraph::DataType::Invalid)
 			continue;
-		auto socketName = ustring::to_camel_case(prop.name);
+		auto socketName = ustring::to_camel_case(prop.parameter.name);
 		if(!gn.IsOutputLinked(socketName))
 			continue;
 		auto *glslType = pragma::shadergraph::to_glsl_type(socketType);
 		code << glslType << " ";
 		code << gn.GetOutputVarName(socketName) << " = ";
-		code << "get_mat_" << prop.name.c_str() << "();\n";
+		code << "get_mat_" << prop.parameter.name.c_str() << "();\n";
 	}
 	return code.str();
 }

@@ -24,7 +24,7 @@ namespace pragma {
 		enum class PassType : uint32_t;
 		namespace shader_material {
 			struct ShaderMaterial;
-			struct ShaderMaterialData;
+			struct ShaderInputData;
 			enum class MaterialFlags : uint32_t;
 		};
 	};
@@ -130,7 +130,7 @@ namespace pragma {
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_RENDER_SETTINGS;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_SHADOWS;
 
-		static bool InitializeMaterialBuffer(prosper::IDescriptorSet &descSet, CMaterial &mat, const pragma::rendering::shader_material::ShaderMaterialData &matData, uint32_t bindingIdx);
+		static bool InitializeMaterialBuffer(prosper::IDescriptorSet &descSet, CMaterial &mat, const pragma::rendering::shader_material::ShaderInputData &matData, uint32_t bindingIdx);
 		static std::unique_ptr<prosper::DescriptorSetInfo> CreateMaterialDescriptorSetInfo(const pragma::rendering::shader_material::ShaderMaterial &shaderMaterial);
 
 		enum class VertexBinding : uint32_t { LightmapUv = umath::to_integral(ShaderEntity::VertexBinding::Count) };
@@ -198,7 +198,7 @@ namespace pragma {
 		virtual void UpdateRenderFlags(CModelSubMesh &mesh, SceneFlags &inOutFlags);
 		virtual void GetShaderPreprocessorDefinitions(std::unordered_map<std::string, std::string> &outDefinitions, std::string &outPrefixCode) override;
 		std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat, const prosper::DescriptorSetInfo &descSetInfo);
-		bool InitializeMaterialBuffer(prosper::IDescriptorSet &descSet, CMaterial &mat, const pragma::rendering::shader_material::ShaderMaterialData &matData);
+		bool InitializeMaterialBuffer(prosper::IDescriptorSet &descSet, CMaterial &mat, const pragma::rendering::shader_material::ShaderInputData &matData);
 		virtual void InitializeGfxPipelineVertexAttributes();
 		virtual void InitializeGfxPipelinePushConstantRanges();
 		virtual void InitializeGfxPipelineDescriptorSets();
@@ -206,7 +206,7 @@ namespace pragma {
 		virtual void GetVertexAnimationPushConstantInfo(uint32_t &offset) const override;
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
 		virtual void InitializeShaderResources() override;
-		virtual void InitializeMaterialData(const CMaterial &mat, const rendering::shader_material::ShaderMaterial &shaderMat, pragma::rendering::shader_material::ShaderMaterialData &inOutMatData);
+		virtual void InitializeMaterialData(const CMaterial &mat, const rendering::shader_material::ShaderMaterial &shaderMat, pragma::rendering::shader_material::ShaderInputData &inOutMatData);
 		void InitializeShaderMaterial();
 		bool m_depthPrepassEnabled = true;
 		std::optional<std::string> m_shaderMaterialName = "pbr";

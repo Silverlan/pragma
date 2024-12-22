@@ -16,7 +16,6 @@ import pragma.shadergraph;
 namespace pragma::rendering::shader_graph {
 	class DLLCLIENT ImageTextureModule : public pragma::rendering::ShaderGraphModule {
 	  public:
-	  public:
 		enum class PBRBinding : uint32_t {
 			IrradianceMap = 0u,
 			PrefilterMap,

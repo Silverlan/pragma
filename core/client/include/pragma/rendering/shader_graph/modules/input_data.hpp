@@ -5,33 +5,34 @@
  * Copyright (c) 2024 Silverlan
  */
 
-#ifndef __PRAGMA_SHADER_GRAPH_MODULES_PBR_HPP__
-#define __PRAGMA_SHADER_GRAPH_MODULES_PBR_HPP__
+#ifndef __PRAGMA_SHADER_GRAPH_MODULES_INPUT_DATA_HPP__
+#define __PRAGMA_SHADER_GRAPH_MODULES_INPUT_DATA_HPP__
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/rendering/shader_graph/module.hpp"
 
 import pragma.shadergraph;
 
-namespace pragma::rendering::shader_graph {
-	class DLLCLIENT PbrModule : public pragma::rendering::ShaderGraphModule {
-	  public:
-		enum class PBRBinding : uint32_t {
-			IrradianceMap = 0u,
-			PrefilterMap,
-			BRDFMap,
+namespace prosper {
+	class IBuffer;
+};
 
-			Count
-		};
-		PbrModule(prosper::Shader &shader);
-		virtual ~PbrModule() override;
+namespace pragma::rendering {
+	class GlobalShaderInputDataManager;
+};
+
+namespace pragma::rendering::shader_graph {
+	class DLLCLIENT InputDataModule : public pragma::rendering::ShaderGraphModule {
+	  public:
+		static void set_shader_input_value(const std::string &name, float val);
+		InputDataModule(prosper::Shader &shader);
+		virtual ~InputDataModule() override;
 		virtual void InitializeGfxPipelineDescriptorSets() override;
+		virtual void GetShaderPreprocessorDefinitions(std::unordered_map<std::string, std::string> &outDefinitions, std::string &outPrefixCode) override;
 		virtual void RecordBindScene(rendering::ShaderProcessor &shaderProcessor, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, ShaderGameWorld::SceneFlags &inOutSceneFlags) const override;
-		prosper::IDescriptorSet *GetReflectionProbeDescriptorSet(const pragma::CSceneComponent &scene, float &outIblStrength, ShaderGameWorld::SceneFlags &inOutSceneFlags) const;
-		prosper::IDescriptorSet &GetDefaultPbrDescriptorSet() const;
 	  private:
-		prosper::DescriptorSetInfo m_pbrDescSetInfo;
-		static std::shared_ptr<prosper::IDescriptorSetGroup> g_defaultPbrDsg;
+		prosper::DescriptorSetInfo m_globalInputDataDsInfo;
+		std::shared_ptr<prosper::IDescriptorSetGroup> m_globalInputDsg;
 		static size_t g_instanceCount;
 	};
 };

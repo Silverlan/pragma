@@ -16,6 +16,7 @@
 #include "pragma/rendering/shader_graph/manager.hpp"
 #include "pragma/rendering/shader_graph/module.hpp"
 #include "pragma/rendering/shader_graph/nodes/shader_material.hpp"
+#include "pragma/rendering/shader_graph/nodes/input_parameter_float.hpp"
 #include "pragma/model/vk_mesh.h"
 #include "pragma/model/c_modelmesh.h"
 #include <shader/prosper_pipeline_create_info.hpp>
@@ -53,6 +54,13 @@ void ShaderGraph::InitializeGfxPipelineDescriptorSets()
 		mod->InitializeGfxPipelineDescriptorSets();
 }
 
+void ShaderGraph::GetShaderPreprocessorDefinitions(std::unordered_map<std::string, std::string> &outDefinitions, std::string &outPrefixCode)
+{
+	ShaderGameWorldLightingPass::GetShaderPreprocessorDefinitions(outDefinitions, outPrefixCode);
+	for(auto &mod : m_modules)
+		mod->GetShaderPreprocessorDefinitions(outDefinitions, outPrefixCode);
+}
+
 void ShaderGraph::ClearShaderResources()
 {
 	m_modules.clear();
@@ -69,13 +77,20 @@ static const pragma::rendering::shader_material::ShaderMaterial *find_shader_mat
 	return nullptr;
 }
 
-void ShaderGraph::InitializeShaderResources()
+const pragma::shadergraph::Graph *ShaderGraph::GetGraph() const
 {
 	auto &graphManager = c_engine->GetShaderGraphManager();
 	auto graphData = graphManager.GetGraph(GetIdentifier());
-	if(graphData) {
-		auto &graph = graphData->GetGraph();
+	if(graphData)
+		return graphData->GetGraph().get();
+	return nullptr;
+}
 
+void ShaderGraph::InitializeShaderResources()
+{
+	auto &graphManager = c_engine->GetShaderGraphManager();
+	auto *graph = GetGraph();
+	if(graph) {
 		auto *shaderMat = find_shader_material(*graph);
 		if(shaderMat)
 			SetShaderMaterialName(shaderMat->name);
@@ -103,7 +118,7 @@ void ShaderGraph::InitializeShaderResources()
 	ShaderGameWorldLightingPass::InitializeShaderResources();
 }
 
-void ShaderGraph::InitializeMaterialData(const CMaterial &mat, const rendering::shader_material::ShaderMaterial &shaderMat, pragma::rendering::shader_material::ShaderMaterialData &inOutMatData)
+void ShaderGraph::InitializeMaterialData(const CMaterial &mat, const rendering::shader_material::ShaderMaterial &shaderMat, pragma::rendering::shader_material::ShaderInputData &inOutMatData)
 {
 
 	// If graph has "pbr" module, pbr descriptor set should be added

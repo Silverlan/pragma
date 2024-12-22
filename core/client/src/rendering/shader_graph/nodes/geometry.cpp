@@ -12,10 +12,10 @@ using namespace pragma::rendering::shader_graph;
 
 GeometryNode::GeometryNode(const std::string_view &type) : Node {type}
 {
-	AddOutput(OUT_POSITION_WS, pragma::shadergraph::SocketType::Vector);
-	AddOutput(OUT_NORMAL_WS, pragma::shadergraph::SocketType::Vector);
-	AddOutput(OUT_NORMAL_CS, pragma::shadergraph::SocketType::Vector);
-	AddOutput(OUT_TANGENT_WS, pragma::shadergraph::SocketType::Vector);
+	AddOutput(OUT_POSITION_WS, pragma::shadergraph::DataType::Vector);
+	AddOutput(OUT_NORMAL_WS, pragma::shadergraph::DataType::Vector);
+	AddOutput(OUT_NORMAL_CS, pragma::shadergraph::DataType::Vector);
+	AddOutput(OUT_TANGENT_WS, pragma::shadergraph::DataType::Vector);
 
 	AddModuleDependency("vertex_data");
 }

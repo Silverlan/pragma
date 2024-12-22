@@ -11,6 +11,8 @@
 #include "pragma/clientdefinitions.h"
 #include <udm.hpp>
 
+import pragma.shadergraph;
+
 namespace pragma::rendering::shader_material {
 	constexpr size_t MAX_MATERIAL_SIZE = 128; // Max size per material in bytes
 
@@ -44,53 +46,27 @@ namespace pragma::rendering::shader_material {
 	};
 	constexpr uint32_t MAX_NUMBER_OF_SRGB_TEXTURES = 4;
 
-	using PropertyValue = std::variant<udm::Int16, udm::UInt16, udm::Int32, udm::UInt32, udm::Float, udm::Half, udm::Vector2, udm::Vector3, udm::Vector4, udm::Vector2i, udm::Vector3i, udm::Vector4i>;
-	constexpr bool is_valid_property_type(udm::Type type)
-	{
-		switch(type) {
-		case udm::Type::Int16:
-		case udm::Type::UInt16:
-		case udm::Type::Int32:
-		case udm::Type::UInt32:
-		case udm::Type::Float:
-		case udm::Type::Half:
-		case udm::Type::Vector2:
-		case udm::Type::Vector3:
-		case udm::Type::Vector4:
-		case udm::Type::Vector2i:
-		case udm::Type::Vector3i:
-		case udm::Type::Vector4i:
-			return true;
-		}
-		return false;
-	}
-	template<typename T>
-	concept is_valid_property_type_v = is_valid_property_type(udm::type_to_enum<T>());
-
 	struct DLLCLIENT Property {
-		struct DLLCLIENT Range {
-			PropertyValue min;
-			PropertyValue max;
-		};
 		enum class Flags : uint32_t {
 			None = 0u,
 			HideInEditor = 1u,
 		};
-		Property() = default;
+		Property(const std::string &name, pragma::shadergraph::DataType type);
 		Property(const Property &other);
 		Property &operator=(const Property &other);
-		udm::Type type;
+
+		pragma::shadergraph::Parameter *operator->() { return &parameter; }
+		const pragma::shadergraph::Parameter *operator->() const { return &parameter; }
+
+		pragma::shadergraph::Parameter parameter;
+
 		std::optional<GString> specializationType {};
-		GString name;
-		PropertyValue defaultValue;
-		std::optional<Range> range;
 		Flags propertyFlags = Flags::None;
 		size_t offset = 0;
 		size_t padding = 0;
 
-		std::unique_ptr<std::unordered_map<std::string, PropertyValue>> options {};
 		std::unique_ptr<std::unordered_map<std::string, uint32_t>> flags {};
-		size_t GetSize() const { return udm::size_of(type); }
+		size_t GetSize() const { return udm::size_of(pragma::shadergraph::to_udm_type(parameter.type)); }
 	};
 	struct DLLCLIENT Texture {
 		GString name;
@@ -100,23 +76,31 @@ namespace pragma::rendering::shader_material {
 		bool colorMap = false;
 		bool required = false;
 	};
-	struct DLLCLIENT ShaderMaterial {
-		static constexpr uint32_t PREDEFINED_PROPERTY_COUNT = 6;
-
-		ShaderMaterial(const pragma::GString &name);
+	struct DLLCLIENT ShaderInputDescriptor {
+		ShaderInputDescriptor(const pragma::GString &name);
 		void AddProperty(Property &&prop);
 		const pragma::GString name;
 		std::vector<Property> properties;
-		std::vector<Texture> textures;
 
 		Property *FindProperty(const char *key)
 		{
-			auto it = std::find_if(properties.begin(), properties.end(), [key](const Property &prop) { return prop.name == key; });
-			if(it == properties.end())
+			auto it = m_propertyMap.find(key);
+			if(it == m_propertyMap.end())
 				return nullptr;
-			return &*it;
+			return &properties[it->second];
 		}
-		const Property *FindProperty(const char *key) const { return const_cast<ShaderMaterial *>(this)->FindProperty(key); }
+		const Property *FindProperty(const char *key) const { return const_cast<ShaderInputDescriptor *>(this)->FindProperty(key); }
+
+		bool LoadFromUdmData(udm::LinkedPropertyWrapperArg prop, std::string &outErr);
+		std::string ToGlslStruct() const;
+	  private:
+		std::unordered_map<std::string, size_t> m_propertyMap;
+	};
+	struct DLLCLIENT ShaderMaterial : public ShaderInputDescriptor {
+		static constexpr uint32_t PREDEFINED_PROPERTY_COUNT = 6;
+
+		ShaderMaterial(const pragma::GString &name);
+		std::vector<Texture> textures;
 
 		Texture *FindTexture(const char *key)
 		{
@@ -131,24 +115,27 @@ namespace pragma::rendering::shader_material {
 		std::string ToGlslStruct() const;
 	};
 
-	struct ShaderMaterialData {
-		ShaderMaterialData(const ShaderMaterial &shaderMaterial) : m_shaderMaterial {shaderMaterial} {}
+	struct ShaderInputData {
+		ShaderInputData(const ShaderInputDescriptor &descriptor) : m_inputDescriptor {descriptor} {}
+		void ResetToDefault();
+		void ResetToDefault(size_t idx);
+		void ResizeToDescriptor();
 		void DebugPrint();
 		void PopulateFromMaterial(const CMaterial &mat);
 		MaterialFlags GetFlags() const;
 		void SetFlags(MaterialFlags flags);
 
 		template<typename T>
-		    requires is_valid_property_type_v<T>
+		    requires pragma::shadergraph::is_data_type_v<T>
 		std::optional<T> GetValue(const char *key) const
 		{
 			constexpr auto type = udm::type_to_enum<T>();
-			auto *prop = m_shaderMaterial.FindProperty(key);
+			auto *prop = m_inputDescriptor.FindProperty(key);
 			if(!prop)
 				return {};
 			size_t offset = prop->offset;
 			auto *ptr = data.data() + offset;
-			return udm::visit_ng(prop->type, [prop, ptr](auto tag) -> std::optional<T> {
+			return udm::visit_ng(pragma::shadergraph::to_udm_type(prop->parameter.type), [prop, ptr](auto tag) -> std::optional<T> {
 				using TProp = typename decltype(tag)::type;
 				if constexpr(udm::is_convertible<TProp, T>()) {
 					auto *val = reinterpret_cast<const TProp *>(ptr);
@@ -158,15 +145,15 @@ namespace pragma::rendering::shader_material {
 			});
 		}
 		template<typename T>
-		    requires is_valid_property_type_v<T>
+		    requires pragma::shadergraph::is_data_type_v<T>
 		bool SetValue(const char *key, const T &val)
 		{
 			constexpr auto type = udm::type_to_enum<T>();
-			auto *prop = m_shaderMaterial.FindProperty(key);
+			auto *prop = m_inputDescriptor.FindProperty(key);
 			if(!prop)
 				return false;
 			auto *ptr = data.data() + prop->offset;
-			return udm::visit_ng(prop->type, [prop, ptr, &val](auto tag) -> bool {
+			return udm::visit_ng(pragma::shadergraph::to_udm_type(prop->parameter.type), [prop, ptr, &val](auto tag) -> bool {
 				using TProp = typename decltype(tag)::type;
 				if constexpr(udm::is_convertible<T, TProp>()) {
 					auto convVal = udm::convert<T, TProp>(val);
@@ -177,9 +164,9 @@ namespace pragma::rendering::shader_material {
 			});
 		}
 
-		std::array<uint8_t, pragma::rendering::shader_material::MAX_MATERIAL_SIZE> data;
+		std::vector<uint8_t> data;
 	  private:
-		const ShaderMaterial &m_shaderMaterial;
+		const ShaderInputDescriptor &m_inputDescriptor;
 	};
 
 	class DLLCLIENT ShaderMaterialCache {

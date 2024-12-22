@@ -12,8 +12,8 @@ using namespace pragma::rendering::shader_graph;
 
 ObjectNode::ObjectNode(const std::string_view &type) : Node {type}
 {
-	AddOutput(OUT_MODEL_MATRIX, pragma::shadergraph::SocketType::Transform);
-	AddOutput(OUT_COLOR, pragma::shadergraph::SocketType::Color);
+	AddOutput(OUT_MODEL_MATRIX, pragma::shadergraph::DataType::Transform);
+	AddOutput(OUT_COLOR, pragma::shadergraph::DataType::Color);
 
 	AddModuleDependency("object");
 }

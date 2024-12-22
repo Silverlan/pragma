@@ -12,11 +12,11 @@ using namespace pragma::rendering::shader_graph;
 
 ImageTextureNode::ImageTextureNode(const std::string_view &type) : Node {type}
 {
-	AddInput(IN_FILENAME, pragma::shadergraph::SocketType::String, "");
-	AddInput(IN_VECTOR, pragma::shadergraph::SocketType::Vector, Vector3 {0.f, 0.f, 0.f}); // TODO: Make input only, don't allow writing manually
+	AddInput(IN_FILENAME, pragma::shadergraph::DataType::String, "");
+	AddInput(IN_VECTOR, pragma::shadergraph::DataType::Vector, Vector3 {0.f, 0.f, 0.f}); // TODO: Make input only, don't allow writing manually
 
-	AddOutput(OUT_COLOR, pragma::shadergraph::SocketType::Color);
-	AddOutput(OUT_ALPHA, pragma::shadergraph::SocketType::Float);
+	AddOutput(OUT_COLOR, pragma::shadergraph::DataType::Color);
+	AddOutput(OUT_ALPHA, pragma::shadergraph::DataType::Float);
 
 	AddModuleDependency("image_texture");
 }

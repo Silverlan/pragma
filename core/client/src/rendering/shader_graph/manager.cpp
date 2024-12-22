@@ -100,10 +100,10 @@ std::shared_ptr<pragma::shadergraph::Graph> ShaderGraphManager::CreateGraph(cons
 		return nullptr;
 	return it->second->CreateGraph();
 }
-std::shared_ptr<pragma::shadergraph::Graph> ShaderGraphManager::LoadShader(const std::string &identifier, std::string &outErr)
+std::shared_ptr<pragma::shadergraph::Graph> ShaderGraphManager::LoadShader(const std::string &identifier, std::string &outErr, bool reload)
 {
 	auto graph = GetGraph(identifier);
-	if(graph)
+	if(graph && !reload)
 		return graph->GetGraph();
 	for(auto &[typeName, typeManager] : m_shaderGraphTypeManagers) {
 		auto path = GetShaderGraphFilePath(typeName, identifier);

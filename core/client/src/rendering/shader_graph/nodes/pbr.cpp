@@ -12,12 +12,12 @@ using namespace pragma::rendering::shader_graph;
 
 PbrNode::PbrNode(const std::string_view &type) : Node {type}
 {
-	AddInput(IN_ALBEDO_COLOR, pragma::shadergraph::SocketType::Color, Vector3 {1.f, 1.f, 1.f});
-	AddInput(IN_METALNESS, pragma::shadergraph::SocketType::Float, 0.f);
-	AddInput(IN_ROUGHNESS, pragma::shadergraph::SocketType::Float, 0.5f);
-	AddInput(IN_AMBIENT_OCCLUSION, pragma::shadergraph::SocketType::Float, 0.f);
+	AddInput(IN_ALBEDO_COLOR, pragma::shadergraph::DataType::Color, Vector3 {1.f, 1.f, 1.f});
+	AddInput(IN_METALNESS, pragma::shadergraph::DataType::Float, 0.f);
+	AddInput(IN_ROUGHNESS, pragma::shadergraph::DataType::Float, 0.5f);
+	AddInput(IN_AMBIENT_OCCLUSION, pragma::shadergraph::DataType::Float, 0.f);
 
-	AddOutput(OUT_COLOR, pragma::shadergraph::SocketType::Color);
+	AddOutput(OUT_COLOR, pragma::shadergraph::DataType::Color);
 
 	AddModuleDependency("pbr");
 }

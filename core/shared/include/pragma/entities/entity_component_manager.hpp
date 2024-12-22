@@ -38,6 +38,10 @@ namespace udm {
 };
 
 class BaseEntity;
+typedef struct lua_State lua_State;
+namespace luabind {
+	class module_;
+};
 namespace pragma {
 	class BaseEntityComponent;
 	DLLNETWORK std::string get_normalized_component_member_name(const std::string &name);
@@ -162,6 +166,8 @@ namespace pragma {
 		const std::vector<BaseEntityComponent *> &GetComponents(ComponentId componentId) const;
 		const std::vector<BaseEntityComponent *> &GetComponents(ComponentId componentId, std::size_t &count) const;
 
+		void RegisterLuaBindings(lua_State *l, luabind::module_ &module);
+
 		// Automatically called when a component was removed; Don't call this manually!
 		void DeregisterComponent(BaseEntityComponent &component);
 	  private:
@@ -177,6 +183,7 @@ namespace pragma {
 		std::unordered_map<std::type_index, ComponentId> m_typeIndexToComponentId;
 		std::unordered_map<ComponentId, std::vector<ComponentTypeLinkInfo>> m_linkedComponentTypes;
 		std::vector<std::shared_ptr<std::type_index>> m_componentIdToTypeIndex;
+		std::vector<void (*)(lua_State *, luabind::module_ &)> m_luaBindingRegistrations;
 		ComponentId m_nextComponentId = 0u;
 
 		// List of all created components by component id
@@ -201,14 +208,12 @@ pragma::ComponentId pragma::EntityComponentManager::RegisterComponentType(const 
 		it->second.componentId = componentId;
 		return id;
 	});
-	RegisterComponentType(
-	  name,
-	  [](BaseEntity &ent) {
-		  return util::TSharedHandle<BaseEntityComponent> {new TComponent {ent}, [](pragma::BaseEntityComponent *c) { delete c; }};
-	  },
-	  regInfo, flags, std::type_index(typeid(TComponent)));
+	RegisterComponentType(name, [](BaseEntity &ent) { return util::TSharedHandle<BaseEntityComponent> {new TComponent {ent}, [](pragma::BaseEntityComponent *c) { delete c; }}; }, regInfo, flags, std::type_index(typeid(TComponent)));
 	auto &componentInfo = *m_componentInfos[componentId];
 	TComponent::RegisterMembers(*this, [this, &componentInfo](ComponentMemberInfo &&memberInfo) -> ComponentMemberIndex { return RegisterMember(componentInfo, std::move(memberInfo)); });
+	if(m_luaBindingRegistrations.size() == m_luaBindingRegistrations.capacity())
+		m_luaBindingRegistrations.reserve(m_luaBindingRegistrations.size() * 1.5 + 50);
+	m_luaBindingRegistrations.push_back(&TComponent::RegisterLuaBindings);
 	return componentId;
 }
 

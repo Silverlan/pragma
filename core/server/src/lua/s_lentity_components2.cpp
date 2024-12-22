@@ -67,6 +67,8 @@
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, BaseEntityComponent);
 #endif
 
+extern DLLSERVER SGame *s_game;
+
 void RegisterLuaEntityComponents2_sv(lua_State *l, luabind::module_ &entsMod)
 {
 	auto defSPointConstraintBallSocket = pragma::lua::create_entity_component_class<pragma::SPointConstraintBallSocketComponent, pragma::BasePointConstraintBallSocketComponent>("PointConstraintBallSocketComponent");
@@ -191,5 +193,8 @@ void RegisterLuaEntityComponents2_sv(lua_State *l, luabind::module_ &entsMod)
 
 	auto defLiquidSurfaceSimulation = pragma::lua::create_entity_component_class<pragma::SLiquidSurfaceSimulationComponent, pragma::BaseLiquidSurfaceSimulationComponent>("LiquidSurfaceSimulationComponent");
 	entsMod[defLiquidSurfaceSimulation];
+
+	s_game->GetEntityComponentManager().RegisterLuaBindings(l, entsMod);
+
 	// --template-component-register-location
 }

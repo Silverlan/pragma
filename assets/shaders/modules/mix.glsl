@@ -204,16 +204,16 @@ vec3 color_color(vec3 col1, vec3 col2, float t) {
 vec3 soft_light_color(vec3 col1, vec3 col2, float t) {
 	float tm = 1.0 -t;
 
-	vec3 one = make_vec3(1.0, 1.0, 1.0);
+	vec3 one = vec3(1.0, 1.0, 1.0);
 	vec3 scr = one -(one -col2) *(one -col1);
 
 	return tm *col1 +t *((one -col1) *col2 *col1 +col1 *scr);
 }
 
 vec3 linear_light_color(vec3 col1, vec3 col2, float t) {
-	return col1 +t *(2.0 *col2 +make_vec3(-1.0, -1.0, -1.0));
+	return col1 +t *(2.0 *col2 +vec3(-1.0, -1.0, -1.0));
 }
 
 vec3 exclusion_color(vec3 col1, vec3 col2, float t) {
-	return max(mix(col1, col1 +col2 -2.0 *col1 *col2, t), zero_vec3());
+	return max(mix(col1, col1 +col2 -2.0 *col1 *col2, t), vec3(0.0, 0.0, 0.0));
 }

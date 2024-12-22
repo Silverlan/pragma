@@ -57,7 +57,12 @@ void ImageTextureModule::InitializeGfxPipelineDescriptorSets()
 		std::string fileName;
 		node->GetInputValue<std::string>(pragma::rendering::shader_graph::ImageTextureNode::IN_FILENAME, fileName);
 		auto tex = texManager.LoadAsset(fileName);
-		ds.SetBindingTexture(*tex->GetVkTexture(), bindingIdx++);
+		std::shared_ptr<prosper::Texture> prosperTex;
+		if(tex)
+			prosperTex = tex->GetVkTexture();
+		if(!prosperTex)
+			prosperTex = context.GetDummyTexture();
+		ds.SetBindingTexture(*prosperTex, bindingIdx++);
 	}
 
 	m_dsg = dsg;

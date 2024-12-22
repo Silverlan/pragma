@@ -136,7 +136,8 @@ static luabind::object shader_mat_value_to_lua_object(lua_State *l, const pragma
 #include "pragma/rendering/shader_graph/modules/input_data.hpp"
 static void register_shader_graph(lua_State *l, luabind::module_ &modShader)
 {
-	modShader[luabind::def("set_shader_input_value", &pragma::rendering::shader_graph::InputDataModule::set_shader_input_value)];
+	modShader[luabind::def("set_shader_input_value", static_cast<void (*)(const std::string &, float)>(&pragma::rendering::shader_graph::InputDataModule::set_shader_input_value))];
+	modShader[luabind::def("set_shader_input_value", static_cast<void (*)(const std::string &, const Vector3 &)>(&pragma::rendering::shader_graph::InputDataModule::set_shader_input_value))];
 
 	modShader[luabind::def(
 	  "get_test_node_register", +[]() -> std::shared_ptr<pragma::shadergraph::NodeRegistry> {

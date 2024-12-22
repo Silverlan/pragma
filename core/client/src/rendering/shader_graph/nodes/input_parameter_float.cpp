@@ -10,19 +10,14 @@
 
 using namespace pragma::rendering::shader_graph;
 
-InputParameterFloatNode::InputParameterFloatNode(const std::string_view &type) : Node {type}
+InputParameterFloatNode::InputParameterFloatNode(const std::string_view &type) : BaseInputParameterNode {type}
 {
-	// Global parameter buffer
-	AddInput(CONST_NAME, pragma::shadergraph::DataType::String, "");
-	AddSocketEnum<Scope>(CONST_SCOPE, Scope::Global);
-	AddInput(CONST_DEFAULT, pragma::shadergraph::DataType::Float, 0.f);
 	AddInput(CONST_MIN, pragma::shadergraph::DataType::Float, 0.f);
 	AddInput(CONST_MAX, pragma::shadergraph::DataType::Float, 1.f);
 	AddInput(CONST_STEP_SIZE, pragma::shadergraph::DataType::Float, 0.1f);
+	AddInput(CONST_DEFAULT, pragma::shadergraph::DataType::Float, 0.f);
 
 	AddOutput(OUT_VALUE, pragma::shadergraph::DataType::Float);
-
-	AddModuleDependency("input_data");
 }
 
 std::string InputParameterFloatNode::DoEvaluate(const pragma::shadergraph::Graph &graph, const pragma::shadergraph::GraphNode &gn) const

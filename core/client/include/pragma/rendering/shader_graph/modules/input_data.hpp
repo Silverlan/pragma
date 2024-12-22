@@ -25,6 +25,7 @@ namespace pragma::rendering::shader_graph {
 	class DLLCLIENT InputDataModule : public pragma::rendering::ShaderGraphModule {
 	  public:
 		static void set_shader_input_value(const std::string &name, float val);
+		static void set_shader_input_value(const std::string &name, const Vector3 &val);
 		InputDataModule(prosper::Shader &shader);
 		virtual ~InputDataModule() override;
 		virtual void InitializeGfxPipelineDescriptorSets() override;

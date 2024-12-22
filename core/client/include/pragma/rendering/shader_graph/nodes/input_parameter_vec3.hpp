@@ -5,22 +5,18 @@
  * Copyright (c) 2024 Silverlan
  */
 
-#ifndef __PRAGMA_SHADER_GRAPH_NODES_INPUT_PARAMETER_FLOAT_HPP__
-#define __PRAGMA_SHADER_GRAPH_NODES_INPUT_PARAMETER_FLOAT_HPP__
+#ifndef __PRAGMA_SHADER_GRAPH_NODES_INPUT_PARAMETER_VEC3_HPP__
+#define __PRAGMA_SHADER_GRAPH_NODES_INPUT_PARAMETER_VEC3_HPP__
 
 #include "pragma/rendering/shader_graph/nodes/base_input_parameter.hpp"
 
 import pragma.shadergraph;
 
 namespace pragma::rendering::shader_graph {
-	class DLLCLIENT InputParameterFloatNode : public BaseInputParameterNode {
+	class DLLCLIENT InputParameterVec3Node : public BaseInputParameterNode {
 	  public:
-		static constexpr const char *CONST_MIN = "min";
-		static constexpr const char *CONST_MAX = "max";
-		static constexpr const char *CONST_STEP_SIZE = "stepSize";
-
-		InputParameterFloatNode(const std::string_view &type);
-		virtual pragma::shadergraph::DataType GetParameterType() const override { return pragma::shadergraph::DataType::Float; }
+		InputParameterVec3Node(const std::string_view &type);
+		virtual pragma::shadergraph::DataType GetParameterType() const override { return pragma::shadergraph::DataType::Vector; }
 		virtual std::string DoEvaluate(const pragma::shadergraph::Graph &graph, const pragma::shadergraph::GraphNode &instance) const override;
 	};
 };

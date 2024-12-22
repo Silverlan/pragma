@@ -22,13 +22,13 @@ void pragma::rendering::GlobalShaderInputDataManager::PopulateProperties(const p
 {
 	std::vector<pragma::shadergraph::GraphNode *> globalParamNodes;
 	for(auto &node : graph.GetNodes()) {
-		auto *floatNode = dynamic_cast<const pragma::rendering::shader_graph::InputParameterFloatNode *>(&node->node);
-		if(!floatNode)
+		auto *paramNode = dynamic_cast<const pragma::rendering::shader_graph::BaseInputParameterNode *>(&node->node);
+		if(!paramNode)
 			continue;
-		pragma::rendering::shader_graph::InputParameterFloatNode::Scope scope;
-		if(!node->GetInputValue(pragma::rendering::shader_graph::InputParameterFloatNode::CONST_SCOPE, scope))
+		pragma::rendering::shader_graph::BaseInputParameterNode::Scope scope;
+		if(!node->GetInputValue(pragma::rendering::shader_graph::BaseInputParameterNode::CONST_SCOPE, scope))
 			continue;
-		if(scope != pragma::rendering::shader_graph::InputParameterFloatNode::Scope::Global)
+		if(scope != pragma::rendering::shader_graph::BaseInputParameterNode::Scope::Global)
 			continue;
 		if(globalParamNodes.size() == globalParamNodes.capacity())
 			globalParamNodes.reserve(globalParamNodes.size() * 2 + 10);
@@ -42,9 +42,9 @@ void pragma::rendering::GlobalShaderInputDataManager::PopulateProperties(const p
 	std::vector<pragma::rendering::Property> params;
 	params.reserve(globalParamNodes.size());
 	for(auto *node : globalParamNodes) {
-		auto &floatNode = *dynamic_cast<const pragma::rendering::shader_graph::InputParameterFloatNode *>(&node->node);
+		auto &paramNode = *dynamic_cast<const pragma::rendering::shader_graph::BaseInputParameterNode *>(&node->node);
 		std::string name;
-		if(!node->GetInputValue(pragma::rendering::shader_graph::InputParameterFloatNode::CONST_NAME, name))
+		if(!node->GetInputValue(pragma::rendering::shader_graph::BaseInputParameterNode::CONST_NAME, name))
 			continue;
 
 		if(name.empty())
@@ -53,23 +53,36 @@ void pragma::rendering::GlobalShaderInputDataManager::PopulateProperties(const p
 		if(m_inputDescriptor->FindProperty(name.c_str()) != nullptr)
 			continue; // TODO: What if a parameter is used in multiple shader graphs with different types?
 
-		float defaultVal;
-		float minVal;
-		float maxVal;
-		float stepSize;
-		if(!node->GetInputValue(pragma::rendering::shader_graph::InputParameterFloatNode::CONST_DEFAULT, defaultVal))
-			continue;
-		if(!node->GetInputValue(pragma::rendering::shader_graph::InputParameterFloatNode::CONST_MIN, minVal))
-			continue;
-		if(!node->GetInputValue(pragma::rendering::shader_graph::InputParameterFloatNode::CONST_MAX, maxVal))
-			continue;
-		if(!node->GetInputValue(pragma::rendering::shader_graph::InputParameterFloatNode::CONST_STEP_SIZE, stepSize))
-			continue;
+		auto type = paramNode.GetParameterType();
+		pragma::rendering::Property prop {name, type};
 
-		pragma::rendering::Property prop {name, pragma::shadergraph::DataType::Float};
-		prop->defaultValue.Set(defaultVal);
-		prop->min = minVal;
-		prop->max = maxVal;
+		auto res = pragma::shadergraph::visit(type, [this, node, &prop](auto tag) -> bool {
+			using T = typename decltype(tag)::type;
+
+			T defaultVal;
+			if(!node->GetInputValue(pragma::rendering::shader_graph::BaseInputParameterNode::CONST_DEFAULT, defaultVal))
+				return false;
+			prop->defaultValue.Set(defaultVal);
+
+			if constexpr(std::is_same_v<T, float>) {
+				float minVal;
+				float maxVal;
+				float stepSize;
+				if(!node->GetInputValue(pragma::rendering::shader_graph::InputParameterFloatNode::CONST_MIN, minVal))
+					return false;
+				if(!node->GetInputValue(pragma::rendering::shader_graph::InputParameterFloatNode::CONST_MAX, maxVal))
+					return false;
+				if(!node->GetInputValue(pragma::rendering::shader_graph::InputParameterFloatNode::CONST_STEP_SIZE, stepSize))
+					return false;
+				prop->min = minVal;
+				prop->max = maxVal;
+				// prop->stepSize = stepSize;
+			}
+
+			return true;
+		});
+		if(!res)
+			continue;
 		params.push_back(prop);
 	}
 

@@ -68,7 +68,7 @@ namespace pragma::rendering {
 			auto *prop = m_inputDescriptor->FindProperty(name.data());
 			if(!prop)
 				return false;
-			if(!m_inputData->SetValue<float>(name.data(), val))
+			if(!m_inputData->SetValue<T>(name.data(), val))
 				return false;
 			m_dirtyTracker.MarkRange(prop->offset, sizeof(T));
 			return true;

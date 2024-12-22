@@ -16,7 +16,7 @@ import pragma.shadergraph;
 extern DLLCLIENT CEngine *c_engine;
 pragma::rendering::GlobalShaderInputDataManager::GlobalShaderInputDataManager() { ResetInputDescriptor(); }
 
-void pragma::rendering::GlobalShaderInputDataManager::ResetInputDescriptor() { m_inputDescriptor = std::make_unique<pragma::rendering::shader_material::ShaderInputDescriptor>("GlobalInputData"); }
+void pragma::rendering::GlobalShaderInputDataManager::ResetInputDescriptor() { m_inputDescriptor = std::make_unique<pragma::rendering::ShaderInputDescriptor>("GlobalInputData"); }
 
 void pragma::rendering::GlobalShaderInputDataManager::PopulateProperties(const pragma::shadergraph::Graph &graph)
 {
@@ -39,7 +39,7 @@ void pragma::rendering::GlobalShaderInputDataManager::PopulateProperties(const p
 
 	std::sort(globalParamNodes.begin(), globalParamNodes.end(), [](auto *a, auto *b) { return a->GetName() < b->GetName(); });
 
-	std::vector<pragma::rendering::shader_material::Property> params;
+	std::vector<pragma::rendering::Property> params;
 	params.reserve(globalParamNodes.size());
 	for(auto *node : globalParamNodes) {
 		auto &floatNode = *dynamic_cast<const pragma::rendering::shader_graph::InputParameterFloatNode *>(&node->node);
@@ -66,7 +66,7 @@ void pragma::rendering::GlobalShaderInputDataManager::PopulateProperties(const p
 		if(!node->GetInputValue(pragma::rendering::shader_graph::InputParameterFloatNode::CONST_STEP_SIZE, stepSize))
 			continue;
 
-		pragma::rendering::shader_material::Property prop {name, pragma::shadergraph::DataType::Float};
+		pragma::rendering::Property prop {name, pragma::shadergraph::DataType::Float};
 		prop->defaultValue.Set(defaultVal);
 		prop->min = minVal;
 		prop->max = maxVal;
@@ -125,7 +125,7 @@ void pragma::rendering::GlobalShaderInputDataManager::ReallocateBuffer()
 	std::vector<uint8_t> oldData;
 	if(m_inputData)
 		oldData = m_inputData->data;
-	m_inputData = std::make_unique<pragma::rendering::shader_material::ShaderInputData>(*m_inputDescriptor);
+	m_inputData = std::make_unique<pragma::rendering::ShaderInputData>(*m_inputDescriptor);
 	if(!m_inputDescriptor->properties.empty()) {
 		auto &lastProp = m_inputDescriptor->properties.back();
 		m_inputData->data.resize(lastProp.offset + udm::size_of(pragma::shadergraph::to_udm_type(lastProp.parameter.type)));

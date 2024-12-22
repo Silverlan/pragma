@@ -118,7 +118,7 @@ void ShaderGraph::InitializeShaderResources()
 	ShaderGameWorldLightingPass::InitializeShaderResources();
 }
 
-void ShaderGraph::InitializeMaterialData(const CMaterial &mat, const rendering::shader_material::ShaderMaterial &shaderMat, pragma::rendering::shader_material::ShaderInputData &inOutMatData)
+void ShaderGraph::InitializeMaterialData(const CMaterial &mat, const rendering::shader_material::ShaderMaterial &shaderMat, pragma::rendering::ShaderInputData &inOutMatData)
 {
 
 	// If graph has "pbr" module, pbr descriptor set should be added
@@ -159,4 +159,21 @@ void ShaderGraph::RecordBindScene(rendering::ShaderProcessor &shaderProcessor, c
 
 	for(auto &mod : m_modules)
 		mod->RecordBindScene(shaderProcessor, scene, renderer, inOutSceneFlags);
+}
+
+bool ShaderGraph::RecordBindEntity(rendering::ShaderProcessor &shaderProcessor, CRenderComponent &renderC, prosper::IShaderPipelineLayout &layout, uint32_t entityInstanceDescriptorSetIndex) const
+{
+	if(!ShaderGameWorldLightingPass::RecordBindEntity(shaderProcessor, renderC, layout, entityInstanceDescriptorSetIndex))
+		return false;
+	for(auto &mod : m_modules)
+		mod->RecordBindEntity(shaderProcessor, renderC, layout, entityInstanceDescriptorSetIndex);
+	return true;
+}
+bool ShaderGraph::RecordBindMaterial(rendering::ShaderProcessor &shaderProcessor, CMaterial &mat) const
+{
+	if(!ShaderGameWorldLightingPass::RecordBindMaterial(shaderProcessor, mat))
+		return false;
+	for(auto &mod : m_modules)
+		mod->RecordBindMaterial(shaderProcessor, mat);
+	return true;
 }

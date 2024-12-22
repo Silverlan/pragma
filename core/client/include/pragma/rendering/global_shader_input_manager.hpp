@@ -14,15 +14,15 @@
 #include <string>
 #include <vector>
 
-namespace pragma::shadergraph {
-	class Graph;
-};
+import pragma.shadergraph;
 
 namespace prosper {
 	class ICommandBuffer;
 };
 
 namespace pragma::rendering {
+	struct ShaderInputData;
+	struct ShaderInputDescriptor;
 	class DLLCLIENT DirtyRangeTracker {
 	  public:
 		void MarkRange(size_t offset, size_t size)
@@ -73,8 +73,8 @@ namespace pragma::rendering {
 			m_dirtyTracker.MarkRange(prop->offset, sizeof(T));
 			return true;
 		}
-		const pragma::rendering::shader_material::ShaderInputData &GetData() const { return *m_inputData; }
-		const pragma::rendering::shader_material::ShaderInputDescriptor &GetDescriptor() const { return *m_inputDescriptor; }
+		const pragma::rendering::ShaderInputData &GetData() const { return *m_inputData; }
+		const pragma::rendering::ShaderInputDescriptor &GetDescriptor() const { return *m_inputDescriptor; }
 		const std::shared_ptr<prosper::IBuffer> &GetBuffer() const { return m_inputDataBuffer; }
 
 		void UpdateBufferData(prosper::ICommandBuffer &cmd);
@@ -86,10 +86,10 @@ namespace pragma::rendering {
 
 		DirtyRangeTracker m_dirtyTracker;
 
-		std::unique_ptr<pragma::rendering::shader_material::ShaderInputData> m_inputData;
+		std::unique_ptr<pragma::rendering::ShaderInputData> m_inputData;
 		bool m_inputDataDirty = false;
 
-		std::unique_ptr<pragma::rendering::shader_material::ShaderInputDescriptor> m_inputDescriptor;
+		std::unique_ptr<pragma::rendering::ShaderInputDescriptor> m_inputDescriptor;
 		std::shared_ptr<prosper::IBuffer> m_inputDataBuffer;
 	};
 };

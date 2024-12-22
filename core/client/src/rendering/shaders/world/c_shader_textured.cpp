@@ -459,21 +459,21 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderGameWorldLightingPass::Initi
 		++textureBinding;
 	}
 
-	pragma::rendering::shader_material::ShaderInputData materialData {*m_shaderMaterial};
-	materialData.PopulateFromMaterial(mat);
+	pragma::rendering::ShaderInputData materialData {*m_shaderMaterial};
+	pragma::rendering::shader_material::ShaderMaterial::PopulateShaderInputDataFromMaterial(materialData, mat);
 	InitializeMaterialData(mat, *m_shaderMaterial, materialData);
 
-	materialFlags |= materialData.GetFlags();
+	materialFlags |= pragma::rendering::shader_material::ShaderMaterial::GetFlagsFromShaderInputData(materialData);
 	auto alphaMode = materialData.GetValue<uint32_t>("alpha_mode");
 	if(alphaMode && static_cast<AlphaMode>(*alphaMode) != AlphaMode::Opaque)
 		materialFlags |= pragma::rendering::shader_material::MaterialFlags::Translucent;
 
-	materialData.SetFlags(materialFlags);
+	pragma::rendering::shader_material::ShaderMaterial::SetShaderInputDataFlags(materialData, materialFlags);
 	InitializeMaterialBuffer(descSet, mat, materialData);
 
 	return descSetGroup;
 }
-bool ShaderGameWorldLightingPass::InitializeMaterialBuffer(prosper::IDescriptorSet &descSet, CMaterial &mat, const pragma::rendering::shader_material::ShaderInputData &matData, uint32_t bindingIdx)
+bool ShaderGameWorldLightingPass::InitializeMaterialBuffer(prosper::IDescriptorSet &descSet, CMaterial &mat, const pragma::rendering::ShaderInputData &matData, uint32_t bindingIdx)
 {
 	auto settingsBuffer = mat.GetSettingsBuffer() ? mat.GetSettingsBuffer()->shared_from_this() : nullptr;
 	if(settingsBuffer == nullptr && g_materialSettingsBuffer)
@@ -484,11 +484,8 @@ bool ShaderGameWorldLightingPass::InitializeMaterialBuffer(prosper::IDescriptorS
 	mat.SetSettingsBuffer(*settingsBuffer);
 	return settingsBuffer->Write(0, matData.data.size(), matData.data.data());
 }
-void ShaderGameWorldLightingPass::InitializeMaterialData(const CMaterial &mat, const rendering::shader_material::ShaderMaterial &shaderMat, pragma::rendering::shader_material::ShaderInputData &inOutMatData) {}
-bool ShaderGameWorldLightingPass::InitializeMaterialBuffer(prosper::IDescriptorSet &descSet, CMaterial &mat, const pragma::rendering::shader_material::ShaderInputData &matData)
-{
-	return InitializeMaterialBuffer(descSet, mat, matData, umath::to_integral(MaterialBinding::MaterialSettings));
-}
+void ShaderGameWorldLightingPass::InitializeMaterialData(const CMaterial &mat, const rendering::shader_material::ShaderMaterial &shaderMat, pragma::rendering::ShaderInputData &inOutMatData) {}
+bool ShaderGameWorldLightingPass::InitializeMaterialBuffer(prosper::IDescriptorSet &descSet, CMaterial &mat, const pragma::rendering::ShaderInputData &matData) { return InitializeMaterialBuffer(descSet, mat, matData, umath::to_integral(MaterialBinding::MaterialSettings)); }
 std::shared_ptr<prosper::IDescriptorSetGroup> ShaderGameWorldLightingPass::InitializeMaterialDescriptorSet(CMaterial &mat) { return InitializeMaterialDescriptorSet(mat, GetMaterialDescriptorSetInfo()); }
 
 ////////
@@ -601,7 +598,7 @@ static void print_shader_material_data(CMaterial &mat)
 		Con::cwar << "Material '" << mat.GetName() << "' has no settings buffer!" << Con::endl;
 		return;
 	}
-	pragma::rendering::shader_material::ShaderInputData shaderMatData {*shaderMat};
+	pragma::rendering::ShaderInputData shaderMatData {*shaderMat};
 	if(!buf->Read(0, shaderMatData.data.size(), shaderMatData.data.data())) {
 		Con::cwar << "Failed to read settings buffer data of material '" << mat.GetName() << "'!" << Con::endl;
 		return;

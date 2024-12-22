@@ -18,7 +18,7 @@ ShaderMaterialNode::ShaderMaterialNode(const std::string_view &type, const pragm
 	}
 
 	for(auto &prop : m_shaderMaterial.properties) {
-		if(umath::is_flag_set(prop.propertyFlags, pragma::rendering::shader_material::Property::Flags::HideInEditor))
+		if(umath::is_flag_set(prop.propertyFlags, pragma::rendering::Property::Flags::HideInEditor))
 			continue;
 		auto socketType = pragma::shadergraph::to_data_type(pragma::shadergraph::to_udm_type(prop.parameter.type));
 		if(socketType == pragma::shadergraph::DataType::Invalid)

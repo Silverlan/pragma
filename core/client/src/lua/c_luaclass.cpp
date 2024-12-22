@@ -24,6 +24,7 @@
 #include "pragma/lua/classes/c_lshaderinfo.h"
 #include "pragma/lua/classes/lshaderinfo.h"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
+#include "pragma/rendering/shader_input_data.hpp"
 #include "pragma/rendering/shaders/c_shader_cubemap_to_equirectangular.hpp"
 #include "pragma/rendering/shaders/image/c_shader_merge_images.hpp"
 #include "pragma/rendering/shaders/image/c_shader_merge_2d_image_into_equirectangular.hpp"
@@ -681,11 +682,11 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 
 	auto defMat = luabind::class_<pragma::rendering::shader_material::ShaderMaterial>("ShaderMaterial");
 	defMat.def("__tostring", +[](const pragma::rendering::shader_material::ShaderMaterial &shaderMat) -> std::string { return "ShaderMaterial"; });
-	defMat.def("FindProperty", +[](const pragma::rendering::shader_material::ShaderMaterial &shaderMat, const std::string &name) -> const pragma::rendering::shader_material::Property * { return shaderMat.FindProperty(name.c_str()); });
+	defMat.def("FindProperty", +[](const pragma::rendering::shader_material::ShaderMaterial &shaderMat, const std::string &name) -> const pragma::rendering::Property * { return shaderMat.FindProperty(name.c_str()); });
 	defMat.def("FindTexture", +[](const pragma::rendering::shader_material::ShaderMaterial &shaderMat, const std::string &name) -> const pragma::rendering::shader_material::Texture * { return shaderMat.FindTexture(name.c_str()); });
 	defMat.def(
-	  "GetProperties", +[](const pragma::rendering::shader_material::ShaderMaterial &shaderMat) -> std::vector<const pragma::rendering::shader_material::Property *> {
-		  std::vector<const pragma::rendering::shader_material::Property *> props;
+	  "GetProperties", +[](const pragma::rendering::shader_material::ShaderMaterial &shaderMat) -> std::vector<const pragma::rendering::Property *> {
+		  std::vector<const pragma::rendering::Property *> props;
 		  props.reserve(shaderMat.properties.size());
 		  for(auto &prop : shaderMat.properties)
 			  props.push_back(&prop);
@@ -700,24 +701,24 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 		  return textures;
 	  });
 
-	auto defProp = luabind::class_<pragma::rendering::shader_material::Property>("Property");
-	defProp.add_static_constant("FLAG_NONE", umath::to_integral(pragma::rendering::shader_material::Property::Flags::None));
-	defProp.add_static_constant("FLAG_HIDE_IN_EDITOR_BIT", umath::to_integral(pragma::rendering::shader_material::Property::Flags::HideInEditor));
+	auto defProp = luabind::class_<pragma::rendering::Property>("Property");
+	defProp.add_static_constant("FLAG_NONE", umath::to_integral(pragma::rendering::Property::Flags::None));
+	defProp.add_static_constant("FLAG_HIDE_IN_EDITOR_BIT", umath::to_integral(pragma::rendering::Property::Flags::HideInEditor));
 	defProp.def(
-	  "__tostring", +[](const pragma::rendering::shader_material::Property &prop) -> std::string {
+	  "__tostring", +[](const pragma::rendering::Property &prop) -> std::string {
 		  std::stringstream ss;
 		  ss << "Property";
 		  ss << "[" << prop.parameter.name << "]";
 		  ss << "[Type:" << magic_enum::enum_name(prop.parameter.type) << "]";
 		  return ss.str();
 	  });
-	defProp.def_readonly("parameter", &pragma::rendering::shader_material::Property::parameter);
-	defProp.def_readonly("propertyFlags", &pragma::rendering::shader_material::Property::propertyFlags);
-	defProp.property("specializationType", +[](const pragma::rendering::shader_material::Property &prop) -> std::optional<std::string> { return prop.specializationType ? *prop.specializationType : std::optional<std::string> {}; });
-	defProp.def_readonly("offset", &pragma::rendering::shader_material::Property::offset);
-	defProp.def("GetSize", &pragma::rendering::shader_material::Property::GetSize);
+	defProp.def_readonly("parameter", &pragma::rendering::Property::parameter);
+	defProp.def_readonly("propertyFlags", &pragma::rendering::Property::propertyFlags);
+	defProp.property("specializationType", +[](const pragma::rendering::Property &prop) -> std::optional<std::string> { return prop.specializationType ? *prop.specializationType : std::optional<std::string> {}; });
+	defProp.def_readonly("offset", &pragma::rendering::Property::offset);
+	defProp.def("GetSize", &pragma::rendering::Property::GetSize);
 	defProp.def(
-	  "GetFlags", +[](const pragma::rendering::shader_material::Property &prop) -> std::optional<std::unordered_map<std::string, uint32_t>> {
+	  "GetFlags", +[](const pragma::rendering::Property &prop) -> std::optional<std::unordered_map<std::string, uint32_t>> {
 		  if(!prop.flags)
 			  return {};
 		  return *prop.flags;
@@ -742,7 +743,7 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 
 	modShader[defMat];
 
-	auto defMatData = luabind::class_<pragma::rendering::shader_material::ShaderInputData>("ShaderInputData");
+	auto defMatData = luabind::class_<pragma::rendering::ShaderInputData>("ShaderInputData");
 	modShader[defMatData];
 
 	register_shader_graph(lua.GetState(), modShader);

@@ -16,7 +16,7 @@
 #include "pragma/rendering/shader_graph/manager.hpp"
 #include "pragma/rendering/shader_graph/module.hpp"
 #include "pragma/rendering/shader_graph/nodes/shader_material.hpp"
-#include "pragma/rendering/shader_graph/nodes/input_parameter_float.hpp"
+#include "pragma/rendering/shader_graph/nodes/input_parameter.hpp"
 #include "pragma/model/vk_mesh.h"
 #include "pragma/model/c_modelmesh.h"
 #include <shader/prosper_pipeline_create_info.hpp>

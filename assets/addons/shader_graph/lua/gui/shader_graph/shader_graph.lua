@@ -141,6 +141,16 @@ function Element:MouseCallback(button, state, mods)
 		end
 	end
 end
+function Element:GetNodeData()
+	return self.m_nodeData
+end
+function Element:GetNodeElements()
+	local t = {}
+	for _, v in ipairs(self.m_nodeData) do
+		table.insert(t, v.nodeElement)
+	end
+	return t
+end
 function Element:DeselectAll()
 	for _, t in ipairs(self.m_nodeData) do
 		t.nodeElement:SetSelected(false)
@@ -165,12 +175,12 @@ function Element:SetGraph(graph)
 	self.m_graph = graph
 
 	local nodes = self.m_graph:GetNodes()
-	local offset = self:GetWidth() * 0.5
 	for _, graphNode in ipairs(nodes) do
+		local pos = graphNode:GetPos()
 		local frame = self:AddNode(graphNode)
-		frame:SetX(offset)
-		frame:SetY(self:GetHeight() * 0.5)
-		offset = offset + frame:GetWidth() + 80
+		pos.x = pos.x + self:GetHalfWidth()
+		pos.y = pos.y + self:GetHalfHeight()
+		frame:SetPos(pos)
 	end
 
 	self:InitializeLinks()
@@ -318,6 +328,7 @@ function Element:AddNode(graphNode)
 		local socket = output:GetSocket()
 		local elOutput = elNode:AddOutput(socket.name)
 	end
+	local socketValues = {}
 	for _, input in ipairs(graphNode:GetInputs()) do
 		local socket = input:GetSocket()
 		local enumSet = socket.enumSet
@@ -328,7 +339,7 @@ function Element:AddNode(graphNode)
 				table.insert(enumValues, { tostring(k), v })
 			end
 		end
-		local elInput = elNode:AddInput(
+		local elInput, elWrapper = elNode:AddInput(
 			socket.name,
 			socket.type,
 			socket:IsLinkable(),
@@ -337,13 +348,23 @@ function Element:AddNode(graphNode)
 			socket.max,
 			enumValues
 		)
+
+		table.insert(socketValues, {
+			elWrapper = elWrapper,
+			value = graphNode:GetInputValue(socket.name),
+		})
 	end
 	elNode:ResetControls()
+
+	for _, val in ipairs(socketValues) do
+		print(val.elWrapper)
+		val.elWrapper:SetValue(val.value)
+	end
 
 	local t = {
 		frame = frame,
 		nodeElement = elNode,
-		graphNode = name,
+		graphNode = graphNode,
 	}
 	self.m_frameToNodeData[frame] = t
 	table.insert(self.m_nodeData, t)

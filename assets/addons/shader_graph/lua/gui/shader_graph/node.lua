@@ -105,6 +105,7 @@ function Element:AddControl(socketType, linkable, title, id, type, defaultVal, m
 	local ctrlMenu = (socketType == gui.GraphNodeSocket.SOCKET_TYPE_INPUT) and self.m_inputControls
 		or self.m_outputControls
 	local elCtrl
+	local elWrapper
 	if (socketType == gui.GraphNodeSocket.SOCKET_TYPE_INPUT) and type ~= nil then
 		local udmType = shader.Socket.to_udm_type(type)
 		local propInfo = {
@@ -123,9 +124,11 @@ function Element:AddControl(socketType, linkable, title, id, type, defaultVal, m
 			end
 		end)
 		elCtrl = wrapper:GetWrapperElement()
+		elWrapper = wrapper
 	else
 		local el, wrapper = ctrlMenu:AddInfo(title, id)
 		elCtrl = wrapper
+		elWrapper = wrapper
 	end
 	local shaderGraph = self:GetShaderGraph()
 	if util.is_valid(shaderGraph) == false then
@@ -154,7 +157,7 @@ function Element:AddControl(socketType, linkable, title, id, type, defaultVal, m
 		controlElement = elCtrl,
 	}
 	self:UpdateSocketPosition(t[id], socketType == gui.GraphNodeSocket.SOCKET_TYPE_OUTPUT)
-	return el, elCtrl
+	return el, elWrapper
 end
 function Element:UpdateSocketPosition(elData, output)
 	local frame = self:GetFrame()
@@ -218,10 +221,10 @@ function Element:AddInput(name, type, linkable, defaultVal, minVal, maxVal, enum
 		maxVal,
 		enumValues
 	)
-	return elSocket
+	return elSocket, elCtrl
 end
 function Element:AddOutput(name)
 	local elSocket, elCtrl = self:AddControl(gui.GraphNodeSocket.SOCKET_TYPE_OUTPUT, true, name, name)
-	return elSocket
+	return elSocket, elCtrl
 end
 gui.register("WIGraphNode", Element)

@@ -331,6 +331,8 @@ static void register_shader_graph(lua_State *l, luabind::module_ &modShader)
 	auto defGraphNode = luabind::class_<pragma::shadergraph::GraphNode>("GraphNode");
 	defGraphNode.def("GetName", &pragma::shadergraph::GraphNode::GetName);
 	defGraphNode.def("GetNode", +[](const pragma::shadergraph::GraphNode &graphNode) -> const pragma::shadergraph::Node * { return &graphNode.node; });
+	defGraphNode.def("SetPos", &pragma::shadergraph::GraphNode::SetPos);
+	defGraphNode.def("GetPos", &pragma::shadergraph::GraphNode::GetPos, luabind::copy_policy<0> {});
 	defGraphNode.def("SetDisplayName", &pragma::shadergraph::GraphNode::SetDisplayName);
 	defGraphNode.def("GetDisplayName", &pragma::shadergraph::GraphNode::GetDisplayName);
 	defGraphNode.def("ClearInputValue", &pragma::shadergraph::GraphNode::ClearInputValue);

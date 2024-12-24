@@ -1023,8 +1023,7 @@ void pragma::lua::register_entity_component_classes(lua_State *l, luabind::modul
 	auto defStaticBvh = pragma::lua::create_entity_component_class<pragma::BaseStaticBvhCacheComponent, pragma::BaseBvhComponent>("BaseStaticBvhCacheComponent");
 	defStaticBvh.def("SetEntityDirty", &pragma::BaseStaticBvhCacheComponent::SetEntityDirty);
 	defStaticBvh.def("AddEntity", &pragma::BaseStaticBvhCacheComponent::AddEntity);
-	defStaticBvh.def(
-	  "RemoveEntity", +[](pragma::BaseStaticBvhCacheComponent &component, BaseEntity &ent) { component.RemoveEntity(ent); });
+	defStaticBvh.def("RemoveEntity", +[](pragma::BaseStaticBvhCacheComponent &component, BaseEntity &ent) { component.RemoveEntity(ent); });
 	mod[defStaticBvh];
 
 	auto defStaticBvhUser = Lua::create_base_entity_component_class<pragma::BaseStaticBvhUserComponent>("BaseStaticBvhUserComponent");
@@ -1141,7 +1140,13 @@ void pragma::lua::register_entity_component_classes(lua_State *l, luabind::modul
 void pragma::lua::base_child_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseChildComponent>("BaseChildComponent");
+	def.add_static_constant("EVENT_ON_PARENT_CHANGED", pragma::BaseChildComponent::EVENT_ON_PARENT_CHANGED);
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	def.def("ClearParent", &pragma::BaseChildComponent::ClearParent);
+	def.def("SetParent", &pragma::BaseChildComponent::SetParent);
+	def.def("GetParent", &pragma::BaseChildComponent::GetParent, luabind::copy_policy<0> {});
+	def.def("GetParentEntity", static_cast<BaseEntity *(pragma::BaseChildComponent::*)()>(&pragma::BaseChildComponent::GetParentEntity));
+	def.def("HasParent", &pragma::BaseChildComponent::HasParent);
 }
 void pragma::lua::base_attachable_component::register_class(luabind::module_ &mod)
 {
@@ -1395,8 +1400,7 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 	def.def("SetPlaybackRate", &pragma::BaseAnimatedComponent::SetPlaybackRate);
 	def.def("GetPlaybackRate", &pragma::BaseAnimatedComponent::GetPlaybackRate);
 	def.def("GetPlaybackRateProperty", &pragma::BaseAnimatedComponent::GetPlaybackRateProperty);
-	def.def(
-	  "GetEffectiveBonePoses", +[](pragma::BaseAnimatedComponent &animC) -> std::vector<umath::ScaledTransform> { return animC.GetProcessedBones(); });
+	def.def("GetEffectiveBonePoses", +[](pragma::BaseAnimatedComponent &animC) -> std::vector<umath::ScaledTransform> { return animC.GetProcessedBones(); });
 
 	def.def("GetBoneMatrix", &pragma::BaseAnimatedComponent::GetBoneMatrix);
 	def.def(
@@ -2093,9 +2097,8 @@ void pragma::lua::base_observable_component::register_class(luabind::module_ &mo
 
 	auto defObsCamData = luabind::class_<pragma::ObserverCameraData>("CameraData");
 	defObsCamData.def_readwrite("rotateWithObservee", &pragma::ObserverCameraData::rotateWithObservee);
-	defObsCamData.def("SetAngleLimits", static_cast<void (*)(lua_State *, pragma::ObserverCameraData &, const EulerAngles &, const EulerAngles &)>([](lua_State *l, pragma::ObserverCameraData &obsCamData, const EulerAngles &min, const EulerAngles &max) {
-		obsCamData.angleLimits = {min, max};
-	}));
+	defObsCamData.def("SetAngleLimits",
+	  static_cast<void (*)(lua_State *, pragma::ObserverCameraData &, const EulerAngles &, const EulerAngles &)>([](lua_State *l, pragma::ObserverCameraData &obsCamData, const EulerAngles &min, const EulerAngles &max) { obsCamData.angleLimits = {min, max}; }));
 	defObsCamData.def("GetAngleLimits", static_cast<void (*)(lua_State *, pragma::ObserverCameraData &)>([](lua_State *l, pragma::ObserverCameraData &obsCamData) {
 		if(obsCamData.angleLimits.has_value() == false)
 			return;
@@ -2333,11 +2336,9 @@ void pragma::lua::base_sound_emitter_component::register_class(luabind::module_ 
 	auto def = Lua::create_base_entity_component_class<pragma::BaseSoundEmitterComponent>("BaseSoundEmitterComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	def.def("CreateSound", &pragma::BaseSoundEmitterComponent::CreateSound);
-	def.def(
-	  "CreateSound", +[](pragma::BaseSoundEmitterComponent &c, std::string snd, ALSoundType type) { return c.CreateSound(std::move(snd), type); });
+	def.def("CreateSound", +[](pragma::BaseSoundEmitterComponent &c, std::string snd, ALSoundType type) { return c.CreateSound(std::move(snd), type); });
 	def.def("EmitSound", &pragma::BaseSoundEmitterComponent::EmitSound);
-	def.def(
-	  "EmitSound", +[](pragma::BaseSoundEmitterComponent &c, std::string snd, ALSoundType type) { return c.EmitSound(std::move(snd), type); });
+	def.def("EmitSound", +[](pragma::BaseSoundEmitterComponent &c, std::string snd, ALSoundType type) { return c.EmitSound(std::move(snd), type); });
 	def.def("StopSounds", &pragma::BaseSoundEmitterComponent::StopSounds);
 	def.def("GetSounds", static_cast<void (*)(lua_State *, pragma::BaseSoundEmitterComponent &)>([](lua_State *l, pragma::BaseSoundEmitterComponent &hEnt) {
 		std::vector<std::shared_ptr<ALSound>> *sounds;
@@ -2526,10 +2527,8 @@ void pragma::lua::base_surface_component::register_class(luabind::module_ &mod)
 		  return std::pair<bool, double> {r, t};
 	  });
 	def.def("GetMesh", static_cast<ModelSubMesh *(pragma::BaseSurfaceComponent::*)()>(&pragma::BaseSurfaceComponent::GetMesh), luabind::shared_from_this_policy<0> {});
-	def.def(
-	  "FindAndAssignSurfaceMesh", +[](pragma::BaseSurfaceComponent &c, luabind::object oFilter) -> std::optional<std::tuple<std::shared_ptr<ModelMesh>, std::shared_ptr<ModelSubMesh>, Material *>> { return FindAndAssignSurfaceMesh(c, oFilter); });
-	def.def(
-	  "FindAndAssignSurfaceMesh", +[](pragma::BaseSurfaceComponent &c) -> std::optional<std::tuple<std::shared_ptr<ModelMesh>, std::shared_ptr<ModelSubMesh>, Material *>> { return FindAndAssignSurfaceMesh(c, Lua::nil); });
+	def.def("FindAndAssignSurfaceMesh", +[](pragma::BaseSurfaceComponent &c, luabind::object oFilter) -> std::optional<std::tuple<std::shared_ptr<ModelMesh>, std::shared_ptr<ModelSubMesh>, Material *>> { return FindAndAssignSurfaceMesh(c, oFilter); });
+	def.def("FindAndAssignSurfaceMesh", +[](pragma::BaseSurfaceComponent &c) -> std::optional<std::tuple<std::shared_ptr<ModelMesh>, std::shared_ptr<ModelSubMesh>, Material *>> { return FindAndAssignSurfaceMesh(c, Lua::nil); });
 	def.add_static_constant("EVENT_ON_SURFACE_PLANE_CHANGED", pragma::BaseSurfaceComponent::EVENT_ON_SURFACE_PLANE_CHANGED);
 }
 
@@ -2584,8 +2583,7 @@ void pragma::lua::base_env_camera_component::register_class(luabind::module_ &mo
 	def.add_static_constant("DEFAULT_FAR_Z", pragma::BaseEnvCameraComponent::DEFAULT_FAR_Z);
 	def.add_static_constant("DEFAULT_FOV", pragma::BaseEnvCameraComponent::DEFAULT_FOV);
 	def.add_static_constant("DEFAULT_VIEWMODEL_FOV", pragma::BaseEnvCameraComponent::DEFAULT_VIEWMODEL_FOV);
-	def.scope[luabind::def(
-	  "calc_projection_matrix", +[](umath::Radian fov, float aspectRatio, float nearZ, float farZ, const rendering::Tile *optTile) -> Mat4 { return pragma::BaseEnvCameraComponent::CalcProjectionMatrix(fov, aspectRatio, nearZ, farZ, optTile); })];
+	def.scope[luabind::def("calc_projection_matrix", +[](umath::Radian fov, float aspectRatio, float nearZ, float farZ, const rendering::Tile *optTile) -> Mat4 { return pragma::BaseEnvCameraComponent::CalcProjectionMatrix(fov, aspectRatio, nearZ, farZ, optTile); })];
 	def.def("GetProjectionMatrix", &pragma::BaseEnvCameraComponent::GetProjectionMatrix, luabind::copy_policy<0> {});
 	def.def("GetViewMatrix", &pragma::BaseEnvCameraComponent::GetViewMatrix, luabind::copy_policy<0> {});
 	def.def("LookAt", static_cast<void (*)(lua_State *, pragma::BaseEnvCameraComponent &, const Vector3 &)>([](lua_State *l, pragma::BaseEnvCameraComponent &hComponent, const Vector3 &lookAtPos) {

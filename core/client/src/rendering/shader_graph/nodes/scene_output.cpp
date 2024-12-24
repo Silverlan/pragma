@@ -15,13 +15,22 @@ SceneOutputNode::SceneOutputNode(const std::string_view &type) : Node {type}
 	AddInput(IN_COLOR, pragma::shadergraph::DataType::Color, Vector3 {1.f, 1.f, 1.f});
 	AddInput(IN_ALPHA, pragma::shadergraph::DataType::Float, 1.f);
 	AddInput(IN_BLOOM_COLOR, pragma::shadergraph::DataType::Color, Vector3 {0.f, 0.f, 0.f});
+
+	AddSocketEnum<AlphaMode>(CONST_ALPHA_MODE, AlphaMode::Opaque);
 }
 
-std::string SceneOutputNode::DoEvaluate(const pragma::shadergraph::Graph &graph, const pragma::shadergraph::GraphNode &instance) const
+std::string SceneOutputNode::DoEvaluate(const pragma::shadergraph::Graph &graph, const pragma::shadergraph::GraphNode &gn) const
 {
 	std::ostringstream code;
-	code << "fs_color = vec4(" << GetInputNameOrValue(instance, IN_COLOR) << ", " << GetInputNameOrValue(instance, IN_ALPHA) << ");\n";
-	code << "fs_brightColor = vec4(" << GetInputNameOrValue(instance, IN_BLOOM_COLOR) << ", 1.0);\n";
+	code << "fs_color = vec4(" << GetInputNameOrValue(gn, IN_COLOR) << ", " << GetInputNameOrValue(gn, IN_ALPHA) << ");\n";
+	code << "fs_brightColor = vec4(" << GetInputNameOrValue(gn, IN_BLOOM_COLOR) << ", 1.0);\n";
+
+	auto alphaMode = *gn.GetConstantInputValue<AlphaMode>(CONST_ALPHA_MODE);
+	if(alphaMode == AlphaMode::Mask) {
+		// TODO: Use alpha cutoff value
+		code << "if(fs_color.a < 0.5)\n";
+		code << "\tdiscard;\n";
+	}
+
 	return code.str();
-	//
 }

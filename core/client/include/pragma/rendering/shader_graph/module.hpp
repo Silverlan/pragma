@@ -20,6 +20,7 @@ namespace prosper {
 namespace pragma {
 	class CSceneComponent;
 	class CRasterizationRendererComponent;
+	class ShaderGraph;
 };
 
 class CModelSubMesh;
@@ -27,8 +28,9 @@ namespace pragma::rendering {
 	class ShaderProcessor;
 	class DLLCLIENT ShaderGraphModule {
 	  public:
-		ShaderGraphModule(prosper::Shader &shader) : m_shader(shader) {}
+		ShaderGraphModule(ShaderGraph &shader) : m_shader(shader) {}
 		virtual ~ShaderGraphModule() {}
+		virtual void InitializeShaderResources() {}
 		virtual void InitializeGfxPipelineDescriptorSets() = 0;
 		virtual void GetShaderPreprocessorDefinitions(std::unordered_map<std::string, std::string> &outDefinitions, std::string &outPrefixCode) {}
 		virtual void UpdateRenderFlags(CModelSubMesh &mesh, ShaderGameWorld::SceneFlags &inOutFlags) {}
@@ -37,16 +39,16 @@ namespace pragma::rendering {
 		virtual void RecordBindMaterial(rendering::ShaderProcessor &shaderProcessor, CMaterial &mat) const {}
 		void SetNodes(std::vector<pragma::shadergraph::GraphNode *> &&nodes) { m_nodes = std::move(nodes); }
 	  protected:
-		prosper::Shader &m_shader;
+		ShaderGraph &m_shader;
 		std::vector<pragma::shadergraph::GraphNode *> m_nodes;
 	};
 
 	class DLLCLIENT ShaderGraphModuleManager {
 	  public:
-		using Factory = std::function<std::unique_ptr<ShaderGraphModule>(prosper::Shader &shader)>;
+		using Factory = std::function<std::unique_ptr<ShaderGraphModule>(ShaderGraph &shader)>;
 		ShaderGraphModuleManager() {}
 		void RegisterFactory(const std::string &name, const Factory &factory);
-		std::unique_ptr<ShaderGraphModule> CreateModule(const std::string &name, prosper::Shader &shader, std::vector<pragma::shadergraph::GraphNode *> &&nodes) const;
+		std::unique_ptr<ShaderGraphModule> CreateModule(const std::string &name, ShaderGraph &shader, std::vector<pragma::shadergraph::GraphNode *> &&nodes) const;
 		const std::unordered_map<std::string, Factory> &GetFactories() const { return m_factories; }
 	  private:
 		std::unordered_map<std::string, Factory> m_factories;

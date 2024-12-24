@@ -21,14 +21,19 @@ ImageTextureNode::ImageTextureNode(const std::string_view &type) : Node {type}
 	AddModuleDependency("image_texture");
 }
 
+std::string ImageTextureNode::GetTextureVariableName(const pragma::shadergraph::GraphNode &gn) const
+{
+	auto prefix = gn.GetBaseVarName() + "_";
+	return prefix + "tex";
+}
+
 std::string ImageTextureNode::DoEvaluateResourceDeclarations(const pragma::shadergraph::Graph &graph, const pragma::shadergraph::GraphNode &gn) const
 {
 	std::ostringstream code;
-	auto prefix = gn.GetBaseVarName() + "_";
-	std::string texName = prefix + "tex";
-	auto upperTexName = texName;
-	ustring::to_upper(upperTexName);
-	code << "layout(LAYOUT_ID(TEST, " << upperTexName << ")) uniform sampler2D " << texName << ";\n";
+	//auto texName = GetTextureVariableName(gn);
+	//auto upperTexName = texName;
+	//ustring::to_upper(upperTexName);
+	//code << "layout(LAYOUT_ID(TEST, " << upperTexName << ")) uniform sampler2D " << texName << ";\n";
 	return code.str();
 }
 
@@ -42,8 +47,7 @@ std::string ImageTextureNode::DoEvaluate(const pragma::shadergraph::Graph &graph
 		uv = "vec3(get_vertex_uv(), 0.0)";
 
 	auto prefix = gn.GetBaseVarName() + "_";
-	std::string texName = prefix + "tex";
-	code << "vec4 " << prefix << "texCol = texture(" << texName << ", " << uv << ".xy);\n";
+	code << "vec4 " << prefix << "texCol = texture(" << GetTextureVariableName(gn) << ", " << uv << ".xy);\n";
 
 	code << gn.GetGlslOutputDeclaration(OUT_COLOR) << " = ";
 	code << prefix << "texCol.rgb;\n";

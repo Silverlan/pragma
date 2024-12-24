@@ -24,14 +24,19 @@ namespace pragma::rendering {
 namespace pragma::rendering::shader_graph {
 	class DLLCLIENT InputDataModule : public pragma::rendering::ShaderGraphModule {
 	  public:
-		InputDataModule(prosper::Shader &shader);
+		InputDataModule(ShaderGraph &shader);
 		virtual ~InputDataModule() override;
+		virtual void InitializeShaderResources() override;
 		virtual void InitializeGfxPipelineDescriptorSets() override;
 		virtual void GetShaderPreprocessorDefinitions(std::unordered_map<std::string, std::string> &outDefinitions, std::string &outPrefixCode) override;
 		virtual void RecordBindScene(rendering::ShaderProcessor &shaderProcessor, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, ShaderGameWorld::SceneFlags &inOutSceneFlags) const override;
 	  private:
 		prosper::DescriptorSetInfo m_globalInputDataDsInfo;
+
+		std::unique_ptr<pragma::shadergraph::Graph> m_resolvedGraph;
+
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_globalInputDsg;
+		std::vector<const pragma::shadergraph::GraphNode *> m_imageTextureNodes;
 	};
 };
 

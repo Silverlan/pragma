@@ -17,6 +17,7 @@
 #include "pragma/rendering/shader_graph/module.hpp"
 #include "pragma/rendering/shader_graph/nodes/shader_material.hpp"
 #include "pragma/rendering/shader_graph/nodes/input_parameter.hpp"
+#include "pragma/rendering/shader_graph/nodes/scene_output.hpp"
 #include "pragma/model/vk_mesh.h"
 #include "pragma/model/c_modelmesh.h"
 #include <shader/prosper_pipeline_create_info.hpp>
@@ -115,6 +116,9 @@ void ShaderGraph::InitializeShaderResources()
 		}
 	}
 
+	for(auto &mod : m_modules)
+		mod->InitializeShaderResources();
+
 	ShaderGameWorldLightingPass::InitializeShaderResources();
 }
 
@@ -138,7 +142,32 @@ void ShaderGraph::InitializeMaterialData(const CMaterial &mat, const rendering::
 
 std::shared_ptr<prosper::IDescriptorSetGroup> ShaderGraph::InitializeMaterialDescriptorSet(CMaterial &mat, const prosper::DescriptorSetInfo &descSetInfo) { return ShaderGameWorldLightingPass::InitializeMaterialDescriptorSet(mat, descSetInfo); }
 void ShaderGraph::OnPipelinesInitialized() { ShaderGameWorldLightingPass::OnPipelinesInitialized(); }
-void ShaderGraph::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { ShaderGameWorldLightingPass::InitializeGfxPipeline(pipelineInfo, pipelineIdx); }
+void ShaderGraph::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
+{
+	ShaderGameWorldLightingPass::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
+
+	auto *graph = GetGraph();
+	if(graph) {
+		for(auto &node : graph->GetNodes()) {
+			auto *outputNode = dynamic_cast<const pragma::rendering::shader_graph::SceneOutputNode *>(&node->node);
+			if(!outputNode)
+				continue;
+			AlphaMode alphaMode;
+			if(node->GetInputValue(pragma::rendering::shader_graph::SceneOutputNode::CONST_ALPHA_MODE, alphaMode)) {
+				switch(alphaMode) {
+				case AlphaMode::Blend:
+					SetGenericAlphaColorBlendAttachmentProperties(pipelineInfo);
+					break;
+				case AlphaMode::Mask:
+					SetGenericAlphaColorBlendAttachmentProperties(pipelineInfo);
+					pipelineInfo.ToggleDepthWrites(true);
+					break;
+				}
+			}
+			break;
+		}
+	}
+}
 
 void ShaderGraph::RecordBindScene(rendering::ShaderProcessor &shaderProcessor, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer, prosper::IDescriptorSet &dsRenderSettings,
   prosper::IDescriptorSet &dsShadows, const Vector4 &drawOrigin, ShaderGameWorld::SceneFlags &inOutSceneFlags) const

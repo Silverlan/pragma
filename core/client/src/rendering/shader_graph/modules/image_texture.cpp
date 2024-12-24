@@ -22,7 +22,7 @@ using namespace pragma::rendering::shader_graph;
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 #pragma optimize("", off)
-ImageTextureModule::ImageTextureModule(prosper::Shader &shader) : pragma::rendering::ShaderGraphModule {shader}
+ImageTextureModule::ImageTextureModule(ShaderGraph &shader) : pragma::rendering::ShaderGraphModule {shader}
 {
 	//Global settings +textures?
 	/* prosper::PrDescriptorSetBindingFlags::Cubemap */
@@ -31,7 +31,7 @@ ImageTextureModule::~ImageTextureModule() {}
 void ImageTextureModule::InitializeGfxPipelineDescriptorSets()
 {
 	// TODO: Move this somewhere else
-	std::vector<prosper::DescriptorSetInfo::Binding> bindings;
+	/*std::vector<prosper::DescriptorSetInfo::Binding> bindings;
 	bindings.reserve(m_nodes.size());
 	for(auto *node : m_nodes) {
 		auto texName = node->GetBaseVarName() + "_tex";
@@ -42,13 +42,13 @@ void ImageTextureModule::InitializeGfxPipelineDescriptorSets()
 	m_descSetInfo = {
 	  "TEST",
 	  bindings,
-	};
+	};*/
 
 	//
 
-	m_shader.AddDescriptorSetGroup(m_descSetInfo);
+	//m_shader.AddDescriptorSetGroup(m_descSetInfo);
 
-	auto &context = c_engine->GetRenderContext();
+	/*auto &context = c_engine->GetRenderContext();
 	auto dsg = context.CreateDescriptorSetGroup(m_descSetInfo);
 	auto &ds = *dsg->GetDescriptorSet(0);
 	auto &texManager = static_cast<msys::CMaterialManager &>(client->GetMaterialManager()).GetTextureManager();
@@ -65,9 +65,9 @@ void ImageTextureModule::InitializeGfxPipelineDescriptorSets()
 		ds.SetBindingTexture(*prosperTex, bindingIdx++);
 	}
 
-	m_dsg = dsg;
+	m_dsg = dsg;*/
 }
 void ImageTextureModule::RecordBindScene(rendering::ShaderProcessor &shaderProcessor, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, ShaderGameWorld::SceneFlags &inOutSceneFlags) const
 {
-	shaderProcessor.GetCommandBuffer().RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics, shaderProcessor.GetCurrentPipelineLayout(), m_descSetInfo.setIndex, *m_dsg->GetDescriptorSet());
+	//shaderProcessor.GetCommandBuffer().RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics, shaderProcessor.GetCurrentPipelineLayout(), m_descSetInfo.setIndex, *m_dsg->GetDescriptorSet());
 }

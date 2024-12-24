@@ -23,7 +23,7 @@ namespace pragma::rendering::shader_graph {
 
 			Count
 		};
-		PbrModule(prosper::Shader &shader);
+		PbrModule(ShaderGraph &shader);
 		virtual ~PbrModule() override;
 		virtual void InitializeGfxPipelineDescriptorSets() override;
 		virtual void RecordBindScene(rendering::ShaderProcessor &shaderProcessor, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, ShaderGameWorld::SceneFlags &inOutSceneFlags) const override;

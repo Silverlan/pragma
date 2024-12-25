@@ -75,7 +75,7 @@ void CWorldComponent::Initialize()
 			pRenderComponent->SetLocalRenderBounds(min, max);
 	});
 	BindEvent(CModelComponent::EVENT_ON_RENDER_MESHES_UPDATED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> ::util::EventReply {
-		BuildOfflineRenderQueues(true);
+		SetRenderQueuesDirty();
 		return ::util::EventReply::Handled;
 	});
 #if 0
@@ -101,6 +101,17 @@ void CWorldComponent::Initialize()
 	auto mdlC = ent.GetComponent<CModelComponent>();
 	if(mdlC.valid())
 		mdlC->SetAutoLodEnabled(false);
+}
+void CWorldComponent::SetRenderQueuesDirty()
+{
+	m_renderQueuesDirty = true;
+	SetTickPolicy(TickPolicy::Always);
+}
+void CWorldComponent::OnTick(double tDelta)
+{
+	if(m_renderQueuesDirty)
+		BuildOfflineRenderQueues(true);
+	SetTickPolicy(TickPolicy::Never);
 }
 void CWorldComponent::ReloadCHCController()
 {
@@ -188,9 +199,9 @@ void CWorldComponent::RebuildRenderQueues()
 	BuildOfflineRenderQueues(true);
 }
 
-#include "pragma/rendering/shaders/world/c_shader_pbr.hpp"
 void CWorldComponent::BuildOfflineRenderQueues(bool rebuild)
 {
+	m_renderQueuesDirty = false;
 	auto &clusterRenderQueues = m_clusterRenderQueues;
 	auto &clusterRenderTranslucentQueues = m_clusterRenderTranslucentQueues;
 	if(rebuild == false && clusterRenderQueues.empty() == false)

@@ -39,12 +39,14 @@ namespace pragma {
 		std::shared_ptr<OcclusionOctree<std::shared_ptr<ModelMesh>>> GetMeshTree() const;
 		std::shared_ptr<CHC> GetCHCController() const;
 		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void OnTick(double tDelta) override;
 
 		const rendering::RenderQueue *GetClusterRenderQueue(util::BSPTree::ClusterIndex clusterIndex, bool translucent = false) const;
 		void SetBSPTree(const std::shared_ptr<util::BSPTree> &bspTree, const std::vector<std::vector<RenderMeshIndex>> &meshesPerCluster);
 		const std::shared_ptr<util::BSPTree> &GetBSPTree() const;
 		void RebuildRenderQueues();
 	  protected:
+		void SetRenderQueuesDirty();
 		void BuildOfflineRenderQueues(bool rebuild = false);
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 		void UpdateRenderMeshes();
@@ -57,6 +59,8 @@ namespace pragma {
 
 		std::shared_ptr<util::BSPTree> m_bspTree = nullptr;
 		std::vector<std::vector<RenderMeshIndex>> m_meshesPerCluster;
+
+		bool m_renderQueuesDirty = false;
 	};
 };
 #pragma warning(pop)

@@ -201,7 +201,7 @@ void SceneRenderDesc::AddRenderMeshesToRenderQueue(pragma::CRasterizationRendere
 		// shader = rasterizationRenderer->GetShaderOverride(shader);
 		// if(shader == nullptr)
 		// 	continue;
-		auto translucent = mat->GetAlphaMode() == AlphaMode::Blend || isBaseTranslucent;
+		auto translucent = shader->IsTranslucentPipeline(*pipelineIdx) || isBaseTranslucent;
 		if(renderTranslucent == false && translucent)
 			continue;
 		auto *renderQueue = getRenderQueue(renderMode, translucent);
@@ -252,8 +252,7 @@ void SceneRenderDesc::AddRenderMeshesToRenderQueue(pragma::CRasterizationRendere
 void SceneRenderDesc::AddRenderMeshesToRenderQueue(pragma::CRasterizationRendererComponent *optRasterizationRenderer, RenderFlags renderFlags, pragma::CRenderComponent &renderC, const pragma::CSceneComponent &scene, const pragma::CCameraComponent &cam, const Mat4 &vp,
   const std::function<bool(const Vector3 &, const Vector3 &)> &fShouldCull, pragma::GameShaderSpecializationConstantFlag baseSpecializationFlags)
 {
-	AddRenderMeshesToRenderQueue(
-	  optRasterizationRenderer, renderFlags, renderC, [this](pragma::rendering::SceneRenderPass renderMode, bool translucent) { return GetRenderQueue(renderMode, translucent); }, scene, cam, vp, fShouldCull, 0, nullptr, baseSpecializationFlags);
+	AddRenderMeshesToRenderQueue(optRasterizationRenderer, renderFlags, renderC, [this](pragma::rendering::SceneRenderPass renderMode, bool translucent) { return GetRenderQueue(renderMode, translucent); }, scene, cam, vp, fShouldCull, 0, nullptr, baseSpecializationFlags);
 }
 
 bool SceneRenderDesc::ShouldCull(CBaseEntity &ent, const std::function<bool(const Vector3 &, const Vector3 &)> &fShouldCull)

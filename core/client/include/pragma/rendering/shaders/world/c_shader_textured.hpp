@@ -178,6 +178,7 @@ namespace pragma {
 		virtual uint32_t GetPassPipelineIndexStartOffset(rendering::PassType passType) const override;
 		std::optional<uint32_t> FindPipelineIndex(rendering::PassType passType, GameShaderSpecialization specialization, GameShaderSpecializationConstantFlag specializationFlags) const;
 		virtual GameShaderSpecializationConstantFlag GetMaterialPipelineSpecializationRequirements(CMaterial &mat) const;
+		virtual bool IsTranslucentPipeline(uint32_t pipelineIdx) const;
 
 		void SetShaderMaterialName(const std::optional<std::string> &shaderMaterial);
 		const std::optional<std::string> &GetShaderMaterialName() const;

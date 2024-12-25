@@ -26,6 +26,7 @@ namespace pragma {
 		  prosper::IDescriptorSet &dsShadows, const Vector4 &drawOrigin, ShaderGameWorld::SceneFlags &inOutSceneFlags) const override;
 		virtual bool RecordBindEntity(rendering::ShaderProcessor &shaderProcessor, CRenderComponent &renderC, prosper::IShaderPipelineLayout &layout, uint32_t entityInstanceDescriptorSetIndex) const override;
 		virtual bool RecordBindMaterial(rendering::ShaderProcessor &shaderProcessor, CMaterial &mat) const override;
+		virtual bool IsTranslucentPipeline(uint32_t pipelineIdx) const override;
 
 		const pragma::shadergraph::Graph *GetGraph() const;
 	  protected:
@@ -42,6 +43,7 @@ namespace pragma {
 
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_defaultPbrDsg = nullptr;
 		std::vector<std::unique_ptr<rendering::ShaderGraphModule>> m_modules;
+		AlphaMode m_alphaMode = AlphaMode::Opaque;
 	};
 };
 

@@ -80,8 +80,7 @@ void Lua::ModelDef::register_class(lua_State *l, luabind::module_ &entsMod)
 	defCModel.def("ClearMaterialOverride", &pragma::CModelComponent::ClearMaterialOverride);
 	defCModel.def("ClearMaterialOverrides", &pragma::CModelComponent::ClearMaterialOverrides);
 	defCModel.def("GetMaterialOverride", &pragma::CModelComponent::GetMaterialOverride);
-	defCModel.def(
-	  "GetMaterialOverrideCount", +[](pragma::CModelComponent &c) -> size_t { return c.GetMaterialOverrides().size(); });
+	defCModel.def("GetMaterialOverrideCount", +[](pragma::CModelComponent &c) -> size_t { return c.GetMaterialOverrides().size(); });
 	defCModel.def("GetRenderMaterial", static_cast<CMaterial *(pragma::CModelComponent::*)(uint32_t, uint32_t) const>(&pragma::CModelComponent::GetRenderMaterial));
 	defCModel.def("GetRenderMaterial", static_cast<CMaterial *(pragma::CModelComponent::*)(uint32_t) const>(&pragma::CModelComponent::GetRenderMaterial));
 	defCModel.def("GetLOD", &pragma::CModelComponent::GetLOD);
@@ -91,23 +90,21 @@ void Lua::ModelDef::register_class(lua_State *l, luabind::module_ &entsMod)
 	defCModel.def("GetMaxDrawDistance", &pragma::CModelComponent::GetMaxDrawDistance);
 	defCModel.def("UpdateRenderMeshes", &pragma::CModelComponent::UpdateRenderMeshes, luabind::default_parameter_policy<2, true> {});
 	defCModel.def("UpdateRenderMeshes", &pragma::CModelComponent::UpdateRenderMeshes);
+	defCModel.def("UpdateRenderBufferList", &pragma::CModelComponent::UpdateRenderBufferList);
 	defCModel.def("SetRenderMeshesDirty", &pragma::CModelComponent::SetRenderMeshesDirty);
 	defCModel.def("ReloadRenderBufferList", &pragma::CModelComponent::ReloadRenderBufferList, luabind::default_parameter_policy<2, false> {});
 	defCModel.def("ReloadRenderBufferList", &pragma::CModelComponent::ReloadRenderBufferList);
 	defCModel.def("IsDepthPrepassEnabled", &pragma::CModelComponent::IsDepthPrepassEnabled);
 	defCModel.def("SetDepthPrepassEnabled", &pragma::CModelComponent::SetDepthPrepassEnabled);
 	defCModel.def("SetRenderBufferData", &pragma::CModelComponent::SetRenderBufferData);
-	defCModel.def(
-	  "GetRenderBufferData", +[](pragma::CModelComponent &c) -> std::vector<pragma::rendering::RenderBufferData> { return c.GetRenderBufferData(); });
+	defCModel.def("GetRenderBufferData", +[](pragma::CModelComponent &c) -> std::vector<pragma::rendering::RenderBufferData> { return c.GetRenderBufferData(); });
 	defCModel.def("AddRenderMesh", &pragma::CModelComponent::AddRenderMesh);
 	defCModel.def("AddRenderMesh", &pragma::CModelComponent::AddRenderMesh, luabind::default_parameter_policy<4, pragma::rendering::RenderBufferData::StateFlags::EnableDepthPrepass> {});
-	defCModel.def(
-	  "GetRenderMeshes", +[](pragma::CModelComponent &c) -> std::vector<std::shared_ptr<ModelSubMesh>> { return c.GetRenderMeshes(); });
+	defCModel.def("GetRenderMeshes", +[](pragma::CModelComponent &c) -> std::vector<std::shared_ptr<ModelSubMesh>> { return c.GetRenderMeshes(); });
 	defCModel.def("GetBaseShaderSpecializationFlags", &pragma::CModelComponent::GetBaseShaderSpecializationFlags);
 	defCModel.def("SetBaseShaderSpecializationFlags", &pragma::CModelComponent::SetBaseShaderSpecializationFlags);
 	defCModel.def("SetBaseShaderSpecializationFlag", &pragma::CModelComponent::SetBaseShaderSpecializationFlag);
-	defCModel.def(
-	  "SetBaseShaderSpecializationFlag", +[](pragma::CModelComponent &c, pragma::GameShaderSpecializationConstantFlag flag) { c.SetBaseShaderSpecializationFlag(flag); });
+	defCModel.def("SetBaseShaderSpecializationFlag", +[](pragma::CModelComponent &c, pragma::GameShaderSpecializationConstantFlag flag) { c.SetBaseShaderSpecializationFlag(flag); });
 	defCModel.def("GetStaticShaderSpecializationFlags", &pragma::CModelComponent::GetStaticShaderSpecializationFlags);
 	defCModel.def("SetStaticShaderSpecializationFlags", &pragma::CModelComponent::SetStaticShaderSpecializationFlags);
 

@@ -109,6 +109,7 @@ namespace pragma {
 		virtual void OnTick(double tDelta) override;
 		void FlushRenderData();
 
+		void UpdateRenderBufferList();
 		void UpdateRenderMeshes(bool requireBoundingVolumeUpdate = true);
 		void ReloadRenderBufferList(bool immediate = false);
 		// Only use if LOD is handled externally!
@@ -116,7 +117,6 @@ namespace pragma {
 	  protected:
 		void UpdateBaseShaderSpecializationFlags();
 		virtual void OnModelChanged(const std::shared_ptr<Model> &model) override;
-		void UpdateRenderBufferList();
 
 		std::unordered_map<const CModelSubMesh *, std::shared_ptr<prosper::IBuffer>> m_lightmapUvBuffers {};
 		std::vector<msys::MaterialHandle> m_materialOverrides = {};

@@ -26,6 +26,7 @@
 #include "pragma/rendering/render_processor.hpp"
 #include "pragma/lua/c_lentity_handles.hpp"
 #include <buffers/prosper_buffer.hpp>
+#include <sharedutils/BS_thread_pool.hpp>
 #include <prosper_util.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
@@ -273,49 +274,59 @@ void CWorldComponent::BuildOfflineRenderQueues(bool rebuild)
 		}
 	}
 
-	clusterRenderQueues.reserve(numClusters);
-	clusterRenderTranslucentQueues.reserve(numClusters);
+	clusterRenderQueues.resize(numClusters);
+	clusterRenderTranslucentQueues.resize(numClusters);
+	BS::thread_pool tp {std::thread::hardware_concurrency()};
+	std::atomic<bool> failure {false};
 	auto &context = c_engine->GetRenderContext();
-	for(auto clusterIdx = decltype(meshesPerClusters.size()) {0u}; clusterIdx < meshesPerClusters.size(); ++clusterIdx) {
-		clusterRenderQueues.push_back(pragma::rendering::RenderQueue::Create("world_cluster_" + std::to_string(clusterIdx)));
-		std::shared_ptr<pragma::rendering::RenderQueue> clusterRenderTranslucentQueue = nullptr;
-		auto &clusterRenderQueue = clusterRenderQueues.back();
-		auto &meshes = meshesPerClusters.at(clusterIdx);
-		for(auto subMeshIdx : meshes) {
-			if(subMeshIdx >= renderMeshes.size()) {
-				// Something went wrong (Maybe world model is missing?)
-				clusterRenderQueues.clear();
-				clusterRenderTranslucentQueues.clear();
+	tp.submit_blocks<size_t>(0u, meshesPerClusters.size(), [&](size_t start, size_t end) {
+		for(auto clusterIdx = start; clusterIdx < end; ++clusterIdx) {
+			if(failure == true)
 				return;
+			auto clusterRenderQueue = pragma::rendering::RenderQueue::Create("world_cluster_" + std::to_string(clusterIdx));
+			clusterRenderQueues[clusterIdx] = clusterRenderQueue;
+			std::shared_ptr<pragma::rendering::RenderQueue> clusterRenderTranslucentQueue = nullptr;
+			auto &meshes = meshesPerClusters.at(clusterIdx);
+			for(auto subMeshIdx : meshes) {
+				if(subMeshIdx >= renderMeshes.size()) {
+					failure = true;
+					return;
+				}
+				auto subMesh = renderMeshes.at(subMeshIdx);
+				auto *mat = mdlC->GetRenderMaterial(subMesh->GetSkinTextureIndex());
+				if(mat == nullptr)
+					continue;
+				auto hShader = mat->GetPrimaryShader();
+				if(!hShader)
+					continue;
+				auto *shader = dynamic_cast<pragma::ShaderGameWorldLightingPass *>(hShader);
+				if(shader == nullptr)
+					continue;
+				uint32_t pipelineIdx = 0;
+				auto t = shader->FindPipelineIndex(pragma::rendering::PassType::Generic, renderC->GetShaderPipelineSpecialization(), shader->GetMaterialPipelineSpecializationRequirements(*mat)); // | pragma::GameShaderSpecializationConstantFlag::Enable3dOriginBit);
+				if(t.has_value())
+					pipelineIdx = *t;
+				prosper::PipelineID pipelineId;
+				if(shader->GetPipelineId(pipelineId, pipelineIdx) == false || pipelineId == std::numeric_limits<decltype(pipelineId)>::max())
+					continue;
+				if(mat->GetAlphaMode() == AlphaMode::Blend || shader->IsTranslucentPipeline(pipelineIdx)) {
+					clusterRenderTranslucentQueue = clusterRenderTranslucentQueue ? clusterRenderTranslucentQueue : pragma::rendering::RenderQueue::Create("world_translucent_cluster_" + std::to_string(clusterIdx));
+					clusterRenderTranslucentQueue->Add(static_cast<CBaseEntity &>(GetEntity()), subMeshIdx, *mat, pipelineId);
+					continue;
+				}
+				clusterRenderQueue->Add(static_cast<CBaseEntity &>(GetEntity()), subMeshIdx, *mat, pipelineId);
 			}
-			auto subMesh = renderMeshes.at(subMeshIdx);
-			auto *mat = mdlC->GetRenderMaterial(subMesh->GetSkinTextureIndex());
-			if(mat == nullptr)
-				continue;
-			auto hShader = mat->GetPrimaryShader();
-			if(!hShader)
-				continue;
-			auto *shader = dynamic_cast<pragma::ShaderGameWorldLightingPass *>(hShader);
-			if(shader == nullptr)
-				continue;
-			uint32_t pipelineIdx = 0;
-			auto t = shader->FindPipelineIndex(pragma::rendering::PassType::Generic, renderC->GetShaderPipelineSpecialization(), shader->GetMaterialPipelineSpecializationRequirements(*mat)); // | pragma::GameShaderSpecializationConstantFlag::Enable3dOriginBit);
-			if(t.has_value())
-				pipelineIdx = *t;
-			prosper::PipelineID pipelineId;
-			if(shader->GetPipelineId(pipelineId, pipelineIdx) == false || pipelineId == std::numeric_limits<decltype(pipelineId)>::max())
-				continue;
-			if(mat->GetAlphaMode() == AlphaMode::Blend) {
-				clusterRenderTranslucentQueue = clusterRenderTranslucentQueue ? clusterRenderTranslucentQueue : pragma::rendering::RenderQueue::Create("world_translucent_cluster_" + std::to_string(clusterIdx));
-				clusterRenderTranslucentQueue->Add(static_cast<CBaseEntity &>(GetEntity()), subMeshIdx, *mat, pipelineId);
-				continue;
-			}
-			clusterRenderQueue->Add(static_cast<CBaseEntity &>(GetEntity()), subMeshIdx, *mat, pipelineId);
+			clusterRenderTranslucentQueues[clusterIdx] = clusterRenderTranslucentQueue;
+			clusterRenderQueue->Sort();
+			if(clusterRenderTranslucentQueue)
+				clusterRenderTranslucentQueue->Sort();
 		}
-		clusterRenderTranslucentQueues.push_back(clusterRenderTranslucentQueue);
-		clusterRenderQueue->Sort();
-		if(clusterRenderTranslucentQueue)
-			clusterRenderTranslucentQueue->Sort();
+	});
+	tp.wait();
+	if(failure == true) {
+		// Something went wrong (Maybe world model is missing?)
+		clusterRenderQueues.clear();
+		clusterRenderTranslucentQueues.clear();
 	}
 }
 

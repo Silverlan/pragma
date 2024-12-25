@@ -50,6 +50,11 @@ bool pragma::rendering::Prepass::Initialize(prosper::IPrContext &context, uint32
 	samplerCreateInfo.addressModeW = prosper::SamplerAddressMode::ClampToEdge;
 	textureDepth = context.CreateTexture(texCreateInfo, *imgDepth, imgViewCreateInfo, samplerCreateInfo);
 
+#ifdef ENABLE_TRANSLUCENT_DEPTH_PREPASS
+	auto imgDepthTranslucent = context.CreateImage(imgCreateInfo);
+	textureDepthTranslucent = context.CreateTexture(texCreateInfo, *imgDepthTranslucent, imgViewCreateInfo, samplerCreateInfo);
+#endif
+
 	imgCreateInfo.usage = prosper::ImageUsageFlags::TransferDstBit | prosper::ImageUsageFlags::SampledBit;
 	imgCreateInfo.postCreateLayout = prosper::ImageLayout::ShaderReadOnlyOptimal;
 	imgCreateInfo.samples = prosper::SampleCountFlags::e1Bit;

@@ -12,6 +12,10 @@
 #include <cinttypes>
 #include <sharedutils/util_weak_handle.hpp>
 
+// Not yet fully implemented.
+// See https://aras-p.info/blog/2012/03/02/2012-theory-for-forward-rendering/ for implementation details
+// #define ENABLE_TRANSLUCENT_DEPTH_PREPASS
+
 namespace Anvil {
 	class PrimaryCommandBuffer;
 };
@@ -36,15 +40,21 @@ namespace pragma {
 			pragma::ShaderPrepassBase &GetShader() const;
 			prosper::RenderTarget &BeginRenderPass(const util::DrawSceneInfo &drawSceneInfo, prosper::IRenderPass *optRenderPass = nullptr, bool secondaryCommandBuffers = false);
 			void EndRenderPass(const util::DrawSceneInfo &drawSceneInfo);
+			// Required for SSAO
 			std::shared_ptr<prosper::Texture> textureNormals = nullptr;
 
-			// Required for SSAO
 			std::shared_ptr<prosper::Texture> textureDepth = nullptr;
 
 			// Depth buffer used for sampling (e.g. particle render pass)
 			std::shared_ptr<prosper::Texture> textureDepthSampled = nullptr;
 
 			std::shared_ptr<prosper::RenderTarget> renderTarget = nullptr;
+
+#ifdef ENABLE_TRANSLUCENT_DEPTH_PREPASS
+			std::shared_ptr<prosper::RenderTarget> renderTargetTranslucent = nullptr;
+			std::shared_ptr<prosper::Texture> textureDepthTranslucent = nullptr;
+#endif
+
 			std::shared_ptr<prosper::IRenderPass> subsequentRenderPass = nullptr;
 
 			void SetUseExtendedPrepass(bool b, bool bForceReload = false);

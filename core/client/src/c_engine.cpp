@@ -115,6 +115,7 @@ static const auto SEPARATE_JOYSTICK_AXES = true;
 #include "pragma/rendering/shader_graph/nodes/geometry.hpp"
 #include "pragma/rendering/shader_graph/modules/pbr.hpp"
 #include "pragma/rendering/shader_graph/modules/image_texture.hpp"
+#include "pragma/rendering/shader_graph/modules/input_data.hpp"
 
 CEngine::CEngine(int argc, char *argv[])
     : Engine(argc, argv), pragma::RenderContext(), m_nearZ(pragma::BaseEnvCameraComponent::DEFAULT_NEAR_Z), //10.0f), //0.1f

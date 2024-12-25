@@ -159,6 +159,7 @@ GameShaderSpecializationConstantFlag ShaderGameWorldLightingPass::GetStaticSpeci
 	}
 	return staticFlags;
 }
+bool ShaderGameWorldLightingPass::IsTranslucentPipeline(uint32_t pipelineIdx) const { return IsSpecializationConstantSet(pipelineIdx, GameShaderSpecializationConstantFlag::EnableTranslucencyBit); }
 std::optional<uint32_t> ShaderGameWorldLightingPass::FindPipelineIndex(rendering::PassType passType, GameShaderSpecialization specialization, GameShaderSpecializationConstantFlag specializationFlags) const
 {
 	if(GetContext().IsValidationEnabled())

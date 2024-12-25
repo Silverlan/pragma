@@ -312,6 +312,7 @@ void CModelComponent::UpdateRenderMeshes(bool requireBoundingVolumeUpdate)
 		Con::cwar << "Attempted to update render meshes from non-main thread, this is illegal!" << Con::endl;
 		return;
 	}
+	auto renderMeshesUpdated = false;
 	if(umath::is_flag_set(m_stateFlags, StateFlags::RenderMeshUpdateRequired)) {
 		umath::set_flag(m_stateFlags, StateFlags::RenderMeshUpdateRequired, false);
 		m_lodRenderMeshes.clear();
@@ -340,9 +341,12 @@ void CModelComponent::UpdateRenderMeshes(bool requireBoundingVolumeUpdate)
 				m_lodRenderMeshGroups[i] = {subMeshOffset, m_lodRenderMeshes.size() - subMeshOffset};
 			}
 		}
+
+		renderMeshesUpdated = true;
 	}
 	UpdateRenderBufferList();
-	BroadcastEvent(EVENT_ON_RENDER_MESHES_UPDATED, CEOnRenderMeshesUpdated {requireBoundingVolumeUpdate});
+	if(renderMeshesUpdated)
+		BroadcastEvent(EVENT_ON_RENDER_MESHES_UPDATED, CEOnRenderMeshesUpdated {requireBoundingVolumeUpdate});
 }
 
 void CModelComponent::UpdateLOD(UInt32 lod)

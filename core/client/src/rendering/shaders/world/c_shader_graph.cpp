@@ -119,12 +119,21 @@ void ShaderGraph::InitializeShaderResources()
 	for(auto &mod : m_modules)
 		mod->InitializeShaderResources();
 
+	m_alphaMode = AlphaMode::Opaque;
+	if(graph) {
+		for(auto &node : graph->GetNodes()) {
+			auto *outputNode = dynamic_cast<const pragma::rendering::shader_graph::SceneOutputNode *>(&node->node);
+			if(!outputNode)
+				continue;
+			node->GetInputValue(pragma::rendering::shader_graph::SceneOutputNode::CONST_ALPHA_MODE, m_alphaMode);
+		}
+	}
+
 	ShaderGameWorldLightingPass::InitializeShaderResources();
 }
 
 void ShaderGraph::InitializeMaterialData(const CMaterial &mat, const rendering::shader_material::ShaderMaterial &shaderMat, pragma::rendering::ShaderInputData &inOutMatData)
 {
-
 	// If graph has "pbr" module, pbr descriptor set should be added
 	//prosper::DescriptorSetInfo
 
@@ -146,26 +155,14 @@ void ShaderGraph::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pip
 {
 	ShaderGameWorldLightingPass::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
 
-	auto *graph = GetGraph();
-	if(graph) {
-		for(auto &node : graph->GetNodes()) {
-			auto *outputNode = dynamic_cast<const pragma::rendering::shader_graph::SceneOutputNode *>(&node->node);
-			if(!outputNode)
-				continue;
-			AlphaMode alphaMode;
-			if(node->GetInputValue(pragma::rendering::shader_graph::SceneOutputNode::CONST_ALPHA_MODE, alphaMode)) {
-				switch(alphaMode) {
-				case AlphaMode::Blend:
-					SetGenericAlphaColorBlendAttachmentProperties(pipelineInfo);
-					break;
-				case AlphaMode::Mask:
-					SetGenericAlphaColorBlendAttachmentProperties(pipelineInfo);
-					pipelineInfo.ToggleDepthWrites(true);
-					break;
-				}
-			}
-			break;
-		}
+	switch(m_alphaMode) {
+	case AlphaMode::Blend:
+		SetGenericAlphaColorBlendAttachmentProperties(pipelineInfo);
+		break;
+	case AlphaMode::Mask:
+		SetGenericAlphaColorBlendAttachmentProperties(pipelineInfo);
+		pipelineInfo.ToggleDepthWrites(true);
+		break;
 	}
 }
 
@@ -206,3 +203,4 @@ bool ShaderGraph::RecordBindMaterial(rendering::ShaderProcessor &shaderProcessor
 		mod->RecordBindMaterial(shaderProcessor, mat);
 	return true;
 }
+bool ShaderGraph::IsTranslucentPipeline(uint32_t pipelineIdx) const { return m_alphaMode != AlphaMode::Opaque; }

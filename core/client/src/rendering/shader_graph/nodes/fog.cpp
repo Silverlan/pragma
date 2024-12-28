@@ -12,10 +12,10 @@ using namespace pragma::rendering::shader_graph;
 
 FogNode::FogNode(const std::string_view &type) : Node {type}
 {
-	AddOutput(OUT_COLOR, pragma::shadergraph::SocketType::Color);
-	AddOutput(OUT_START_DISTANCE, pragma::shadergraph::SocketType::Float);
-	AddOutput(OUT_END_DISTANCE, pragma::shadergraph::SocketType::Float);
-	AddOutput(OUT_DENSITY, pragma::shadergraph::SocketType::Float);
+	AddOutput(OUT_COLOR, pragma::shadergraph::DataType::Color);
+	AddOutput(OUT_START_DISTANCE, pragma::shadergraph::DataType::Float);
+	AddOutput(OUT_END_DISTANCE, pragma::shadergraph::DataType::Float);
+	AddOutput(OUT_DENSITY, pragma::shadergraph::DataType::Float);
 
 	AddModuleDependency("fog");
 }

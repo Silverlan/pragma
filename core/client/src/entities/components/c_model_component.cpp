@@ -101,7 +101,7 @@ void CModelComponent::SetMaterialOverride(uint32_t idx, CMaterial &mat)
 	if(idx >= m_materialOverrides.size())
 		m_materialOverrides.resize(idx + 1);
 	m_materialOverrides.at(idx) = mat.GetHandle();
-	umath::set_flag(m_stateFlags, StateFlags::RenderMeshUpdateRequired);
+	umath::set_flag(m_stateFlags, StateFlags::RenderBufferListUpdateRequired);
 	mat.UpdateTextures(); // Ensure all textures have been fully loaded
 }
 void CModelComponent::ClearMaterialOverride(uint32_t idx)
@@ -109,14 +109,14 @@ void CModelComponent::ClearMaterialOverride(uint32_t idx)
 	if(idx >= m_materialOverrides.size())
 		return;
 	m_materialOverrides.at(idx) = {};
-	umath::set_flag(m_stateFlags, StateFlags::RenderMeshUpdateRequired);
+	umath::set_flag(m_stateFlags, StateFlags::RenderBufferListUpdateRequired);
 }
 void CModelComponent::ClearMaterialOverrides()
 {
 	if(m_materialOverrides.empty())
 		return;
 	m_materialOverrides.clear();
-	umath::set_flag(m_stateFlags, StateFlags::RenderMeshUpdateRequired);
+	umath::set_flag(m_stateFlags, StateFlags::RenderBufferListUpdateRequired);
 	BroadcastEvent(EVENT_ON_MATERIAL_OVERRIDES_CLEARED);
 }
 CMaterial *CModelComponent::GetMaterialOverride(uint32_t idx) const { return (idx < m_materialOverrides.size()) ? static_cast<CMaterial *>(m_materialOverrides.at(idx).get()) : nullptr; }
@@ -312,6 +312,7 @@ void CModelComponent::UpdateRenderMeshes(bool requireBoundingVolumeUpdate)
 		Con::cwar << "Attempted to update render meshes from non-main thread, this is illegal!" << Con::endl;
 		return;
 	}
+	auto renderMeshesUpdated = false;
 	if(umath::is_flag_set(m_stateFlags, StateFlags::RenderMeshUpdateRequired)) {
 		umath::set_flag(m_stateFlags, StateFlags::RenderMeshUpdateRequired, false);
 		m_lodRenderMeshes.clear();
@@ -340,9 +341,12 @@ void CModelComponent::UpdateRenderMeshes(bool requireBoundingVolumeUpdate)
 				m_lodRenderMeshGroups[i] = {subMeshOffset, m_lodRenderMeshes.size() - subMeshOffset};
 			}
 		}
+
+		renderMeshesUpdated = true;
 	}
 	UpdateRenderBufferList();
-	BroadcastEvent(EVENT_ON_RENDER_MESHES_UPDATED, CEOnRenderMeshesUpdated {requireBoundingVolumeUpdate});
+	if(renderMeshesUpdated)
+		BroadcastEvent(EVENT_ON_RENDER_MESHES_UPDATED, CEOnRenderMeshesUpdated {requireBoundingVolumeUpdate});
 }
 
 void CModelComponent::UpdateLOD(UInt32 lod)

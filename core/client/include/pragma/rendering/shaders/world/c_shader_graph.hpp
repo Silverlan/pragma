@@ -10,6 +10,8 @@
 
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 
+import pragma.shadergraph;
+
 class Texture;
 namespace pragma {
 	namespace rendering {
@@ -22,19 +24,26 @@ namespace pragma {
 
 		virtual void RecordBindScene(rendering::ShaderProcessor &shaderProcessor, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer, prosper::IDescriptorSet &dsRenderSettings,
 		  prosper::IDescriptorSet &dsShadows, const Vector4 &drawOrigin, ShaderGameWorld::SceneFlags &inOutSceneFlags) const override;
+		virtual bool RecordBindEntity(rendering::ShaderProcessor &shaderProcessor, CRenderComponent &renderC, prosper::IShaderPipelineLayout &layout, uint32_t entityInstanceDescriptorSetIndex) const override;
+		virtual bool RecordBindMaterial(rendering::ShaderProcessor &shaderProcessor, CMaterial &mat) const override;
+		virtual bool IsTranslucentPipeline(uint32_t pipelineIdx) const override;
+
+		const pragma::shadergraph::Graph *GetGraph() const;
 	  protected:
 		using ShaderGameWorldLightingPass::RecordDraw;
 		virtual void OnPipelinesInitialized() override;
 		virtual void ClearShaderResources() override;
 		virtual void InitializeShaderResources() override;
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
-		virtual void InitializeMaterialData(const CMaterial &mat, const rendering::shader_material::ShaderMaterial &shaderMat, pragma::rendering::shader_material::ShaderMaterialData &inOutMatData) override;
+		virtual void InitializeMaterialData(const CMaterial &mat, const rendering::shader_material::ShaderMaterial &shaderMat, pragma::rendering::ShaderInputData &inOutMatData) override;
 		virtual void UpdateRenderFlags(CModelSubMesh &mesh, SceneFlags &inOutFlags) override;
 		virtual void InitializeGfxPipelineDescriptorSets() override;
+		virtual void GetShaderPreprocessorDefinitions(std::unordered_map<std::string, std::string> &outDefinitions, std::string &outPrefixCode) override;
 		std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat, const prosper::DescriptorSetInfo &descSetInfo);
 
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_defaultPbrDsg = nullptr;
 		std::vector<std::unique_ptr<rendering::ShaderGraphModule>> m_modules;
+		AlphaMode m_alphaMode = AlphaMode::Opaque;
 	};
 };
 

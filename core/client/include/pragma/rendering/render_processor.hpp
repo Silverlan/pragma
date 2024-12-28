@@ -146,6 +146,9 @@ namespace pragma::rendering {
 		const RenderQueue::InstanceSet *m_curInstanceSet = nullptr;
 		ShaderGameWorld::SceneFlags m_baseSceneFlags = ShaderGameWorld::SceneFlags::None;
 
+		prosper::PipelineID m_prepassCurScenePipeline = std::numeric_limits<prosper::PipelineID>::max();
+		bool m_prepassIsCurScenePipelineTranslucent = false;
+
 		uint32_t TranslateBasePipelineIndexToPassPipelineIndex(prosper::Shader &shader, uint32_t pipelineIdx, PassType passType) const;
 
 		CameraType m_camType = CameraType::World;

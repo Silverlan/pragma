@@ -16,7 +16,6 @@ import pragma.shadergraph;
 namespace pragma::rendering::shader_graph {
 	class DLLCLIENT PbrModule : public pragma::rendering::ShaderGraphModule {
 	  public:
-	  public:
 		enum class PBRBinding : uint32_t {
 			IrradianceMap = 0u,
 			PrefilterMap,
@@ -24,7 +23,7 @@ namespace pragma::rendering::shader_graph {
 
 			Count
 		};
-		PbrModule(prosper::Shader &shader);
+		PbrModule(ShaderGraph &shader);
 		virtual ~PbrModule() override;
 		virtual void InitializeGfxPipelineDescriptorSets() override;
 		virtual void RecordBindScene(rendering::ShaderProcessor &shaderProcessor, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, ShaderGameWorld::SceneFlags &inOutSceneFlags) const override;

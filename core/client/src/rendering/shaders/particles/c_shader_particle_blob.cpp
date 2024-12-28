@@ -60,8 +60,8 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderParticleBlob::InitializeMate
 	auto descSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(*m_materialDescSetInfo);
 	if(!descSetGroup)
 		return nullptr;
-	pragma::rendering::shader_material::ShaderMaterialData materialData {*m_shaderMaterial};
-	materialData.PopulateFromMaterial(mat);
+	pragma::rendering::ShaderInputData materialData {*m_shaderMaterial};
+	pragma::rendering::shader_material::ShaderMaterial::PopulateShaderInputDataFromMaterial(materialData, mat);
 	if(!ShaderGameWorldLightingPass::InitializeMaterialBuffer(*descSetGroup->GetDescriptorSet(), mat, materialData, 0u))
 		return nullptr;
 	mat.SetDescriptorSetGroup(*this, descSetGroup);

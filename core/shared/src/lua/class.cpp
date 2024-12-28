@@ -325,6 +325,11 @@ static int util_file_path(lua_State *l)
 	}
 	else if(args.size() == 1)
 		path = util::Path::CreateFile(args.back());
+
+	auto &str = path.GetString();
+	if(!str.empty() && str.front() == '/')
+		path.PopFront();
+
 	Lua::Push(l, path);
 	return 1;
 }
@@ -340,6 +345,11 @@ static int util_dir_path(lua_State *l)
 	util::Path path {};
 	for(size_t i = 0; i < args.size(); ++i)
 		path += util::Path::CreatePath(args[i]);
+
+	auto &str = path.GetString();
+	if(!str.empty() && str.front() == '/')
+		path.PopFront();
+
 	Lua::Push(l, path);
 	return 1;
 }

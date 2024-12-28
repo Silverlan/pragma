@@ -33,6 +33,8 @@
 #include <pragma/lua/lua_util_class.hpp>
 // --template-include-location
 
+extern DLLCLIENT CGame *c_game;
+
 void RegisterLuaEntityComponents2_cl(lua_State *l, luabind::module_ &entsMod)
 {
 	auto defLiquidControl = pragma::lua::create_entity_component_class<pragma::CLiquidControlComponent, pragma::BaseLiquidControlComponent>("LiquidControlComponent");
@@ -177,6 +179,8 @@ void RegisterLuaEntityComponents2_cl(lua_State *l, luabind::module_ &entsMod)
 	auto defMotionBlurData = pragma::lua::create_entity_component_class<pragma::CMotionBlurDataComponent, pragma::BaseEntityComponent>("MotionBlurDataComponent");
 	defMotionBlurData.def("UpdatePoses", &pragma::CMotionBlurDataComponent::UpdateEntityPoses);
 	entsMod[defMotionBlurData];
+
+	c_game->GetEntityComponentManager().RegisterLuaBindings(l, entsMod);
 
 	// --template-component-register-location
 }

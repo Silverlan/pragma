@@ -59,7 +59,7 @@ namespace pragma::rendering {
 		void RegisterGraphTypeManager(const std::string &type, std::shared_ptr<pragma::shadergraph::NodeRegistry> nodeRegistry);
 		std::shared_ptr<pragma::shadergraph::Graph> RegisterGraph(const std::string &type, const std::string &identifier);
 		std::shared_ptr<pragma::shadergraph::Graph> CreateGraph(const std::string &type) const;
-		std::shared_ptr<pragma::shadergraph::Graph> LoadShader(const std::string &identifier, std::string &outErr);
+		std::shared_ptr<pragma::shadergraph::Graph> LoadShader(const std::string &identifier, std::string &outErr, bool reload = false);
 		void ReloadShader(const std::string &identifier);
 		std::shared_ptr<ShaderGraphData> GetGraph(const std::string &identifier) const;
 		std::shared_ptr<pragma::shadergraph::NodeRegistry> GetNodeRegistry(const std::string &type) const;

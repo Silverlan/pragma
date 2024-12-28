@@ -13,10 +13,9 @@ function gui.BaseFileExplorer:SetFilter(filter)
 end
 function gui.BaseFileExplorer:OnPathChanged(path) end
 function gui.BaseFileExplorer:SetPath(path)
-	path = file.get_canonicalized_path(path)
-	if path:sub(-1) ~= "/" then
-		path = path .. "/"
-	end
+	path = util.DirPath(path)
+	path:Canonicalize()
+	path = path:GetString()
 	self:OnPathChanged(path)
 	self:CallCallbacks("OnPathChanged", path)
 	self.m_path = path
@@ -29,10 +28,9 @@ function gui.BaseFileExplorer:Refresh()
 	self:ReloadPath()
 end
 function gui.BaseFileExplorer:SetRootPath(path)
-	path = file.get_canonicalized_path(path)
-	if path:sub(-1) ~= "/" then
-		path = path .. "/"
-	end
+	path = util.DirPath(path)
+	path:Canonicalize()
+	path = path:GetString()
 	self.m_rootPath = path
 end
 function gui.BaseFileExplorer:SetExtensions(exts)

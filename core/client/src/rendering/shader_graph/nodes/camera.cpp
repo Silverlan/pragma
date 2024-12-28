@@ -12,13 +12,13 @@ using namespace pragma::rendering::shader_graph;
 
 CameraNode::CameraNode(const std::string_view &type) : Node {type}
 {
-	AddOutput(OUT_POSITION, pragma::shadergraph::SocketType::Vector);
-	AddOutput(OUT_FOV, pragma::shadergraph::SocketType::Float);
-	AddOutput(OUT_NEARZ, pragma::shadergraph::SocketType::Float);
-	AddOutput(OUT_FARZ, pragma::shadergraph::SocketType::Float);
-	AddOutput(OUT_VIEW_MATRIX, pragma::shadergraph::SocketType::Transform);
-	AddOutput(OUT_PROJECTION_MATRIX, pragma::shadergraph::SocketType::Transform);
-	AddOutput(OUT_VIEW_PROJECTION_MATRIX, pragma::shadergraph::SocketType::Transform);
+	AddOutput(OUT_POSITION, pragma::shadergraph::DataType::Vector);
+	AddOutput(OUT_FOV, pragma::shadergraph::DataType::Float);
+	AddOutput(OUT_NEARZ, pragma::shadergraph::DataType::Float);
+	AddOutput(OUT_FARZ, pragma::shadergraph::DataType::Float);
+	AddOutput(OUT_VIEW_MATRIX, pragma::shadergraph::DataType::Transform);
+	AddOutput(OUT_PROJECTION_MATRIX, pragma::shadergraph::DataType::Transform);
+	AddOutput(OUT_VIEW_PROJECTION_MATRIX, pragma::shadergraph::DataType::Transform);
 
 	AddModuleDependency("camera");
 	AddModuleDependency("render_settings");

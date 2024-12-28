@@ -18,6 +18,7 @@
 #include "pragma/entities/components/c_player_component.hpp"
 #include <wgui/wgui.h>
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
+#include "pragma/rendering/global_shader_input_manager.hpp"
 #include "pragma/console/c_cvar.h"
 #include "pragma/console/c_cvar_global_functions.h"
 #include "pragma/entities/components/c_vehicle_component.hpp"
@@ -349,6 +350,9 @@ void CGame::RenderScenes(util::DrawSceneInfo &drawSceneInfo)
 #ifdef PRAGMA_ENABLE_SHADER_DEBUG_PRINT
 	GetGlobalRenderSettingsBufferData().EvaluateDebugPrint();
 #endif
+
+	auto &inputDataManager = GetGlobalShaderInputDataManager();
+	inputDataManager.UpdateBufferData(*drawSceneInfo.commandBuffer);
 
 	StartProfilingStage("RenderScenes");
 	util::ScopeGuard sg {[this]() {

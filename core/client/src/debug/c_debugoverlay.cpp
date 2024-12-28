@@ -332,7 +332,7 @@ std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawBox(const Vector3 
 {
 	auto center = (end + start) * 0.5f;
 	auto *poutlineColor = renderInfo.outlineColor ? &*renderInfo.outlineColor : nullptr;
-	return draw_box(renderInfo.pose.GetOrigin() +center, start - center, end - center, renderInfo, poutlineColor);
+	return draw_box(renderInfo.pose.GetOrigin() + center, start - center, end - center, renderInfo, poutlineColor);
 }
 static WIText *create_text_element(const std::string &text)
 {
@@ -678,8 +678,10 @@ void DebugRenderer::Render(std::shared_ptr<prosper::ICommandBuffer> &drawCmd, pr
 			if(mesh.obj->ShouldIgnoreDepth())
 				pipelineId = static_cast<pragma::ShaderDebug::Pipeline>(umath::to_integral(pipelineId) + umath::to_integral(pragma::ShaderDebug::Pipeline::Count));
 			if(curPipelineId != umath::to_integral(pipelineId)) {
-				if(shader->RecordBeginDraw(bindState, pipelineId) == false)
+				if(shader->RecordBeginDraw(bindState, pipelineId) == false) {
+					++it;
 					continue;
+				}
 				curPipelineId = umath::to_integral(pipelineId);
 				if(basePipelineId == pragma::ShaderDebug::Pipeline::Line || basePipelineId == pragma::ShaderDebug::Pipeline::Wireframe || basePipelineId == pragma::ShaderDebug::Pipeline::LineStrip)
 					drawCmd->RecordSetLineWidth(2.f);

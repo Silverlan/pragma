@@ -24,6 +24,7 @@
 #include "pragma/lua/classes/c_lshaderinfo.h"
 #include "pragma/lua/classes/lshaderinfo.h"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
+#include "pragma/rendering/shader_input_data.hpp"
 #include "pragma/rendering/shaders/c_shader_cubemap_to_equirectangular.hpp"
 #include "pragma/rendering/shaders/image/c_shader_merge_images.hpp"
 #include "pragma/rendering/shaders/image/c_shader_merge_2d_image_into_equirectangular.hpp"
@@ -118,17 +119,18 @@ static void reload_textures(CMaterial &mat)
 		mat.SetTexture(pair.first, pair.second);
 }
 
-static luabind::object shader_mat_value_to_lua_object(lua_State *l, const pragma::rendering::shader_material::PropertyValue &val)
+static luabind::object shader_mat_value_to_lua_object(lua_State *l, const pragma::shadergraph::Value &val)
 {
-	return std::visit(
-	  [l](const auto &val) {
-		  using T = util::base_type<decltype(val)>;
-		  if constexpr(std::is_same_v<T, udm::Half>)
-			  return luabind::object {l, static_cast<float>(val)};
-		  else
-			  return luabind::object {l, val};
-	  },
-	  val);
+	return pragma::shadergraph::visit(val.GetType(), [l, &val](auto tag) {
+		using T = typename decltype(tag)::type;
+		T value;
+		if(!val.Get(value))
+			return Lua::nil;
+		if constexpr(std::is_same_v<T, udm::Half>)
+			return luabind::object {l, static_cast<float>(value)};
+		else
+			return luabind::object {l, value};
+	});
 }
 
 static void register_shader_graph(lua_State *l, luabind::module_ &modShader)
@@ -225,26 +227,95 @@ static void register_shader_graph(lua_State *l, luabind::module_ &modShader)
 	  });
 	modShader[defNode];
 
+	auto defEnumSet = luabind::class_<pragma::shadergraph::EnumSet>("EnumSet");
+	defEnumSet.def("IsEmpty", &pragma::shadergraph::EnumSet::empty);
+	defEnumSet.def("Exists", static_cast<bool (pragma::shadergraph::EnumSet::*)(const std::string &) const>(&pragma::shadergraph::EnumSet::exists));
+	defEnumSet.def("Exists", static_cast<bool (pragma::shadergraph::EnumSet::*)(int32_t) const>(&pragma::shadergraph::EnumSet::exists));
+	defEnumSet.def("FindValue", &pragma::shadergraph::EnumSet::findValue);
+	defEnumSet.def("FindName", &pragma::shadergraph::EnumSet::findName);
+	defEnumSet.def(
+	  "GetNameToValue", +[](lua_State *l, const pragma::shadergraph::EnumSet &enumSet) -> Lua::map<std::string, int32_t> {
+		  auto t = luabind::newtable(l);
+		  for(auto &pair : enumSet.getNameToValue())
+			  t[pair.first] = pair.second;
+		  return t;
+	  });
+	defEnumSet.def(
+	  "GetValueToName", +[](lua_State *l, const pragma::shadergraph::EnumSet &enumSet) -> Lua::map<int32_t, std::string> {
+		  auto t = luabind::newtable(l);
+		  for(auto &pair : enumSet.getValueToName())
+			  t[pair.first] = pair.second;
+		  return t;
+	  });
+
+	auto defParameter = luabind::class_<pragma::shadergraph::Parameter>("Parameter");
+	defParameter.def_readonly("name", &pragma::shadergraph::Parameter::name);
+	defParameter.def_readonly("type", &pragma::shadergraph::Parameter::type);
+	defParameter.def_readonly("min", &pragma::shadergraph::Parameter::min);
+	defParameter.def_readonly("max", &pragma::shadergraph::Parameter::max);
+	defParameter.property("defaultValue", +[](lua_State *l, const pragma::shadergraph::Parameter &param) -> luabind::object { return shader_mat_value_to_lua_object(l, param.defaultValue); });
+	defParameter.def(
+	  "__tostring", +[](const pragma::shadergraph::Parameter &param) -> std::string {
+		  std::stringstream ss;
+		  ss << "Parameter";
+		  ss << "[" << param.name << "]";
+		  ss << "[Type:" << magic_enum::enum_name(param.type) << "]";
+		  return ss.str();
+	  });
+	defParameter.def(
+	  "GetOptions", +[](lua_State *l, const pragma::shadergraph::Parameter &param) -> std::optional<std::unordered_map<std::string, luabind::object>> {
+		  if(!param.enumSet)
+			  return {};
+		  std::unordered_map<std::string, luabind::object> options {};
+		  auto &nameToVal = param.enumSet->getNameToValue();
+		  options.reserve(nameToVal.size());
+		  for(auto &[name, value] : nameToVal)
+			  options[name] = luabind::object {l, value};
+		  return options;
+	  });
+	modShader[defParameter];
+
 	auto defSocket = luabind::class_<pragma::shadergraph::Socket>("Socket");
-	defSocket.add_static_constant("TYPE_BOOLEAN", umath::to_integral(pragma::shadergraph::SocketType::Boolean));
-	defSocket.add_static_constant("TYPE_INT", umath::to_integral(pragma::shadergraph::SocketType::Int));
-	defSocket.add_static_constant("TYPE_UINT", umath::to_integral(pragma::shadergraph::SocketType::UInt));
-	defSocket.add_static_constant("TYPE_FLOAT", umath::to_integral(pragma::shadergraph::SocketType::Float));
-	defSocket.add_static_constant("TYPE_COLOR", umath::to_integral(pragma::shadergraph::SocketType::Color));
-	defSocket.add_static_constant("TYPE_VECTOR", umath::to_integral(pragma::shadergraph::SocketType::Vector));
-	defSocket.add_static_constant("TYPE_POINT", umath::to_integral(pragma::shadergraph::SocketType::Point));
-	defSocket.add_static_constant("TYPE_NORMAL", umath::to_integral(pragma::shadergraph::SocketType::Normal));
-	defSocket.add_static_constant("TYPE_POINT2", umath::to_integral(pragma::shadergraph::SocketType::Point2));
-	defSocket.add_static_constant("TYPE_STRING", umath::to_integral(pragma::shadergraph::SocketType::String));
-	defSocket.add_static_constant("TYPE_TRANSFORM", umath::to_integral(pragma::shadergraph::SocketType::Transform));
-	defSocket.add_static_constant("TYPE_ENUM", umath::to_integral(pragma::shadergraph::SocketType::Enum));
-	defSocket.add_static_constant("TYPE_INVALID", umath::to_integral(pragma::shadergraph::SocketType::Invalid));
-	defSocket.scope[luabind::def("udm_to_socket_type", &pragma::shadergraph::to_socket_type)];
+	defSocket.add_static_constant("FLAG_NONE", umath::to_integral(pragma::shadergraph::Socket::Flags::None));
+	defSocket.add_static_constant("FLAG_LINKABLE", umath::to_integral(pragma::shadergraph::Socket::Flags::Linkable));
+	defSocket.add_static_constant("TYPE_BOOLEAN", umath::to_integral(pragma::shadergraph::DataType::Boolean));
+	defSocket.add_static_constant("TYPE_INT", umath::to_integral(pragma::shadergraph::DataType::Int));
+	defSocket.add_static_constant("TYPE_UINT", umath::to_integral(pragma::shadergraph::DataType::UInt));
+	defSocket.add_static_constant("TYPE_FLOAT", umath::to_integral(pragma::shadergraph::DataType::Float));
+	defSocket.add_static_constant("TYPE_COLOR", umath::to_integral(pragma::shadergraph::DataType::Color));
+	defSocket.add_static_constant("TYPE_VECTOR", umath::to_integral(pragma::shadergraph::DataType::Vector));
+	defSocket.add_static_constant("TYPE_POINT", umath::to_integral(pragma::shadergraph::DataType::Point));
+	defSocket.add_static_constant("TYPE_NORMAL", umath::to_integral(pragma::shadergraph::DataType::Normal));
+	defSocket.add_static_constant("TYPE_POINT2", umath::to_integral(pragma::shadergraph::DataType::Point2));
+	defSocket.add_static_constant("TYPE_STRING", umath::to_integral(pragma::shadergraph::DataType::String));
+	defSocket.add_static_constant("TYPE_TRANSFORM", umath::to_integral(pragma::shadergraph::DataType::Transform));
+	defSocket.add_static_constant("TYPE_ENUM", umath::to_integral(pragma::shadergraph::DataType::Enum));
+	defSocket.add_static_constant("TYPE_INVALID", umath::to_integral(pragma::shadergraph::DataType::Invalid));
+	defSocket.scope[luabind::def("udm_to_data_type", &pragma::shadergraph::to_data_type)];
 	defSocket.scope[luabind::def("to_udm_type", &pragma::shadergraph::to_udm_type)];
 	defSocket.scope[luabind::def("to_glsl_type", &pragma::shadergraph::to_glsl_type)];
 
 	defSocket.def_readonly("name", &pragma::shadergraph::Socket::name);
 	defSocket.def_readonly("type", &pragma::shadergraph::Socket::type);
+	defSocket.def_readonly("min", &pragma::shadergraph::Socket::min);
+	defSocket.def_readonly("max", &pragma::shadergraph::Socket::max);
+	defSocket.def_readonly("flags", &pragma::shadergraph::Socket::flags);
+	defSocket.property(
+	  "defaultValue", +[](lua_State *l, const pragma::shadergraph::Socket &socket) -> luabind::object {
+		  auto udmType = pragma::shadergraph::to_udm_type(socket.defaultValue.GetType());
+		  if(udmType == udm::Type::Invalid)
+			  return Lua::nil;
+		  udm::Property prop {};
+		  prop.type = udmType;
+		  prop.value = socket.defaultValue.GetData();
+		  udm::LinkedPropertyWrapper lp {prop};
+		  auto val = Lua::udm::udm_to_value(l, lp);
+		  prop.value = nullptr; // We don't want to free the data
+		  return val;
+	  });
+	defSocket.property("enumSet", +[](lua_State *l, const pragma::shadergraph::Socket &socket) -> pragma::shadergraph::EnumSet * { return socket.enumSet.get(); });
+	defSocket.def("IsLinkable", &pragma::shadergraph::Socket::IsLinkable);
+	defSocket.scope[defEnumSet];
 	modShader[defSocket];
 
 	auto defNodeRegistry = luabind::class_<pragma::shadergraph::NodeRegistry>("NodeRegistry");
@@ -260,6 +331,8 @@ static void register_shader_graph(lua_State *l, luabind::module_ &modShader)
 	auto defGraphNode = luabind::class_<pragma::shadergraph::GraphNode>("GraphNode");
 	defGraphNode.def("GetName", &pragma::shadergraph::GraphNode::GetName);
 	defGraphNode.def("GetNode", +[](const pragma::shadergraph::GraphNode &graphNode) -> const pragma::shadergraph::Node * { return &graphNode.node; });
+	defGraphNode.def("SetPos", &pragma::shadergraph::GraphNode::SetPos);
+	defGraphNode.def("GetPos", &pragma::shadergraph::GraphNode::GetPos, luabind::copy_policy<0> {});
 	defGraphNode.def("SetDisplayName", &pragma::shadergraph::GraphNode::SetDisplayName);
 	defGraphNode.def("GetDisplayName", &pragma::shadergraph::GraphNode::GetDisplayName);
 	defGraphNode.def("ClearInputValue", &pragma::shadergraph::GraphNode::ClearInputValue);
@@ -268,7 +341,7 @@ static void register_shader_graph(lua_State *l, luabind::module_ &modShader)
 		  auto type = Lua::udm::determine_udm_type(value);
 		  return ::udm::visit(type, [&graphNode, &inputName, &value](auto tag) {
 			  using T = typename decltype(tag)::type;
-			  if constexpr(pragma::shadergraph::is_socket_type<T>()) {
+			  if constexpr(pragma::shadergraph::is_data_type<T>()) {
 				  auto val = luabind::object_cast<T>(value);
 				  return graphNode.SetInputValue(inputName, val);
 			  }
@@ -285,7 +358,7 @@ static void register_shader_graph(lua_State *l, luabind::module_ &modShader)
 			  return Lua::nil;
 		  return ::udm::visit(type, [l, &graphNode, &inputName](auto tag) {
 			  using T = typename decltype(tag)::type;
-			  if constexpr(pragma::shadergraph::is_socket_type<T>()) {
+			  if constexpr(pragma::shadergraph::is_data_type<T>()) {
 				  T val;
 				  auto res = graphNode.GetInputValue(inputName, val);
 				  if(!res)
@@ -571,7 +644,7 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 	  "load_shader_graph", +[](const std::string &identifier) -> std::pair<std::shared_ptr<pragma::shadergraph::Graph>, std::optional<std::string>> {
 		  auto &manager = c_engine->GetShaderGraphManager();
 		  std::string err;
-		  auto graph = manager.LoadShader(identifier, err);
+		  auto graph = manager.LoadShader(identifier, err, true);
 		  if(!graph)
 			  return {nullptr, std::optional<std::string> {err}};
 		  return {graph, std::optional<std::string> {}};
@@ -608,11 +681,11 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 
 	auto defMat = luabind::class_<pragma::rendering::shader_material::ShaderMaterial>("ShaderMaterial");
 	defMat.def("__tostring", +[](const pragma::rendering::shader_material::ShaderMaterial &shaderMat) -> std::string { return "ShaderMaterial"; });
-	defMat.def("FindProperty", +[](const pragma::rendering::shader_material::ShaderMaterial &shaderMat, const std::string &name) -> const pragma::rendering::shader_material::Property * { return shaderMat.FindProperty(name.c_str()); });
+	defMat.def("FindProperty", +[](const pragma::rendering::shader_material::ShaderMaterial &shaderMat, const std::string &name) -> const pragma::rendering::Property * { return shaderMat.FindProperty(name.c_str()); });
 	defMat.def("FindTexture", +[](const pragma::rendering::shader_material::ShaderMaterial &shaderMat, const std::string &name) -> const pragma::rendering::shader_material::Texture * { return shaderMat.FindTexture(name.c_str()); });
 	defMat.def(
-	  "GetProperties", +[](const pragma::rendering::shader_material::ShaderMaterial &shaderMat) -> std::vector<const pragma::rendering::shader_material::Property *> {
-		  std::vector<const pragma::rendering::shader_material::Property *> props;
+	  "GetProperties", +[](const pragma::rendering::shader_material::ShaderMaterial &shaderMat) -> std::vector<const pragma::rendering::Property *> {
+		  std::vector<const pragma::rendering::Property *> props;
 		  props.reserve(shaderMat.properties.size());
 		  for(auto &prop : shaderMat.properties)
 			  props.push_back(&prop);
@@ -627,51 +700,27 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 		  return textures;
 	  });
 
-	auto defProp = luabind::class_<pragma::rendering::shader_material::Property>("Property");
-	defProp.add_static_constant("FLAG_NONE", umath::to_integral(pragma::rendering::shader_material::Property::Flags::None));
-	defProp.add_static_constant("FLAG_HIDE_IN_EDITOR_BIT", umath::to_integral(pragma::rendering::shader_material::Property::Flags::HideInEditor));
+	auto defProp = luabind::class_<pragma::rendering::Property>("Property");
+	defProp.add_static_constant("FLAG_NONE", umath::to_integral(pragma::rendering::Property::Flags::None));
+	defProp.add_static_constant("FLAG_HIDE_IN_EDITOR_BIT", umath::to_integral(pragma::rendering::Property::Flags::HideInEditor));
 	defProp.def(
-	  "__tostring", +[](const pragma::rendering::shader_material::Property &prop) -> std::string {
+	  "__tostring", +[](const pragma::rendering::Property &prop) -> std::string {
 		  std::stringstream ss;
 		  ss << "Property";
-		  ss << "[" << prop.name << "]";
-		  ss << "[Type:" << magic_enum::enum_name(prop.type) << "]";
+		  ss << "[" << prop.parameter.name << "]";
+		  ss << "[Type:" << magic_enum::enum_name(prop.parameter.type) << "]";
 		  return ss.str();
 	  });
-	defProp.def_readonly("type", &pragma::rendering::shader_material::Property::type);
-	defProp.def_readonly("propertyFlags", &pragma::rendering::shader_material::Property::propertyFlags);
-	defProp.property("specializationType", +[](const pragma::rendering::shader_material::Property &prop) -> std::optional<std::string> { return prop.specializationType ? *prop.specializationType : std::optional<std::string> {}; });
-	defProp.property("name", +[](const pragma::rendering::shader_material::Property &prop) -> std::string { return prop.name; });
-	defProp.property("defaultValue", +[](lua_State *l, const pragma::rendering::shader_material::Property &prop) -> luabind::object { return shader_mat_value_to_lua_object(l, prop.defaultValue); });
-	defProp.property(
-	  "minValue", +[](lua_State *l, const pragma::rendering::shader_material::Property &prop) -> luabind::object {
-		  if(!prop.range)
-			  return Lua::nil;
-		  return shader_mat_value_to_lua_object(l, prop.range->min);
-	  });
-	defProp.property(
-	  "maxValue", +[](lua_State *l, const pragma::rendering::shader_material::Property &prop) -> luabind::object {
-		  if(!prop.range)
-			  return Lua::nil;
-		  return shader_mat_value_to_lua_object(l, prop.range->max);
-	  });
-	defProp.def_readonly("offset", &pragma::rendering::shader_material::Property::offset);
-	defProp.def("GetSize", &pragma::rendering::shader_material::Property::GetSize);
+	defProp.def_readonly("parameter", &pragma::rendering::Property::parameter);
+	defProp.def_readonly("propertyFlags", &pragma::rendering::Property::propertyFlags);
+	defProp.property("specializationType", +[](const pragma::rendering::Property &prop) -> std::optional<std::string> { return prop.specializationType ? *prop.specializationType : std::optional<std::string> {}; });
+	defProp.def_readonly("offset", &pragma::rendering::Property::offset);
+	defProp.def("GetSize", &pragma::rendering::Property::GetSize);
 	defProp.def(
-	  "GetFlags", +[](const pragma::rendering::shader_material::Property &prop) -> std::optional<std::unordered_map<std::string, uint32_t>> {
+	  "GetFlags", +[](const pragma::rendering::Property &prop) -> std::optional<std::unordered_map<std::string, uint32_t>> {
 		  if(!prop.flags)
 			  return {};
 		  return *prop.flags;
-	  });
-	defProp.def(
-	  "GetOptions", +[](lua_State *l, const pragma::rendering::shader_material::Property &prop) -> std::optional<std::unordered_map<std::string, luabind::object>> {
-		  if(!prop.options)
-			  return {};
-		  std::unordered_map<std::string, luabind::object> options {};
-		  options.reserve(prop.options->size());
-		  for(auto &[name, value] : *prop.options)
-			  options[name] = shader_mat_value_to_lua_object(l, value);
-		  return options;
 	  });
 	defMat.scope[defProp];
 
@@ -693,7 +742,7 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 
 	modShader[defMat];
 
-	auto defMatData = luabind::class_<pragma::rendering::shader_material::ShaderMaterialData>("ShaderMaterialData");
+	auto defMatData = luabind::class_<pragma::rendering::ShaderInputData>("ShaderInputData");
 	modShader[defMatData];
 
 	register_shader_graph(lua.GetState(), modShader);

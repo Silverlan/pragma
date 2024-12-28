@@ -526,6 +526,13 @@ const std::vector<BaseEntityComponent *> &EntityComponentManager::GetComponents(
 }
 void EntityComponentManager::DeregisterComponent(BaseEntityComponent &component) { m_components.at(component.GetComponentId()).Pop(component); }
 
+void EntityComponentManager::RegisterLuaBindings(lua_State *l, luabind::module_ &module)
+{
+	for(auto &reg : m_luaBindingRegistrations)
+		reg(l, module);
+	m_luaBindingRegistrations.clear();
+}
+
 ////////////////////
 
 void EntityComponentManager::ComponentContainerInfo::Push(BaseEntityComponent &component)

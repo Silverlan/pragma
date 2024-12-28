@@ -15,14 +15,48 @@ function Element:OnInitialize()
 	gui.Base.OnInitialize(self)
 
 	self.m_nameToElementData = {}
+	self.m_frameToNodeData = {}
 	self.m_nodeData = {}
 	self.m_linkElements = {}
 	self:Clear()
-	self:SetSize(1280, 1024)
+	self:SetSize(10000, 10000)
 
 	self:SetMouseInputEnabled(true)
 end
+function Element:SetShaderEditor(editor)
+	self.m_shaderEditor = editor
+end
 function Element:MouseCallback(button, state, mods)
+	if button == input.MOUSE_BUTTON_LEFT then
+		if state == input.STATE_PRESS then
+			self.m_selectionRect = gui.create("WISelectionRect", self)
+			self.m_selectionRect:SetPos(self:GetCursorPos())
+			self.m_selectionRect:SetZPos(10000)
+		else
+			local gnFrames = self.m_selectionRect:FindElements(function(el)
+				return el:GetClass() == "wiframe"
+			end)
+			self:DeselectAll()
+			for _, frame in ipairs(gnFrames) do
+				local elementData = self.m_frameToNodeData[frame]
+				if elementData ~= nil then
+					elementData.nodeElement:SetSelected(true)
+				end
+			end
+			util.remove(self.m_selectionRect)
+		end
+		return util.EVENT_REPLY_HANDLED
+	end
+
+	if button == input.MOUSE_BUTTON_MIDDLE then
+		if state == input.STATE_PRESS then
+			self.m_shaderEditor:GetTransformableElement():StartDrag()
+		else
+			self.m_shaderEditor:GetTransformableElement():EndDrag()
+		end
+		return util.EVENT_REPLY_HANDLED
+	end
+
 	if button == input.MOUSE_BUTTON_RIGHT and state == input.STATE_PRESS then
 		local pContext = gui.open_context_menu(self)
 		if util.is_valid(pContext) then
@@ -107,6 +141,21 @@ function Element:MouseCallback(button, state, mods)
 		end
 	end
 end
+function Element:GetNodeData()
+	return self.m_nodeData
+end
+function Element:GetNodeElements()
+	local t = {}
+	for _, v in ipairs(self.m_nodeData) do
+		table.insert(t, v.nodeElement)
+	end
+	return t
+end
+function Element:DeselectAll()
+	for _, t in ipairs(self.m_nodeData) do
+		t.nodeElement:SetSelected(false)
+	end
+end
 function Element:GetGraph()
 	return self.m_graph
 end
@@ -117,6 +166,7 @@ function Element:Clear()
 	end
 	self.m_nodeData = {}
 	self.m_nameToElementData = {}
+	self.m_frameToNodeData = {}
 	self.m_graph = shader.create_graph("object")
 end
 function Element:SetGraph(graph)
@@ -125,11 +175,12 @@ function Element:SetGraph(graph)
 	self.m_graph = graph
 
 	local nodes = self.m_graph:GetNodes()
-	local offset = 0
 	for _, graphNode in ipairs(nodes) do
+		local pos = graphNode:GetPos()
 		local frame = self:AddNode(graphNode)
-		frame:SetX(offset)
-		offset = offset + frame:GetWidth() + 80
+		pos.x = pos.x + self:GetHalfWidth()
+		pos.y = pos.y + self:GetHalfHeight()
+		frame:SetPos(pos)
 	end
 
 	self:InitializeLinks()
@@ -162,18 +213,33 @@ function Element:InitializeLinks()
 			self:AddLink(elOutputSocket, elInputSocket)
 		end
 	end
+	self:CallCallbacks("OnLinksChanged")
 end
 function Element:ClearLinks()
 	util.remove(self.m_linkElements)
 	self.m_linkElements = {}
+	self:CallCallbacks("OnLinksChanged")
 end
 function Element:AddLink(elOutputSocket, elInputSocket)
 	local l = gui.create("WIElementConnectorLine", self)
+	l:SetPointToVisibleBounds(false)
+	l:SetArrowScale(0.5)
 	l:SetSize(self:GetSize())
 	l:SetAnchor(0, 0, 1, 1)
 	l:SetZPos(-1)
 	l:Setup(elOutputSocket, elInputSocket)
+	l:AddCallback("OnRemove", function()
+		if elInputSocket:IsValid() then
+			elInputSocket:SetLinked(false)
+		end
+		if elOutputSocket:IsValid() then
+			elOutputSocket:SetLinked(false)
+		end
+	end)
 	table.insert(self.m_linkElements, l)
+
+	elInputSocket:SetLinked(true)
+	elOutputSocket:SetLinked(true)
 end
 function Element:RemoveNode(name)
 	local t = self.m_nameToElementData[name]
@@ -190,6 +256,12 @@ function Element:RemoveNode(name)
 		end
 	end
 	self.m_nameToElementData[name] = nil
+	for k, v in pairs(self.m_frameToNodeData) do
+		if v == t then
+			self.m_frameToNodeData[k] = nil
+			break
+		end
+	end
 	self:InitializeLinks()
 end
 function Element:AddNode(graphNode)
@@ -199,8 +271,16 @@ function Element:AddNode(graphNode)
 	frame:SetDetachButtonEnabled(false)
 	frame:SetCloseButtonEnabled(false)
 	frame:SetResizable(false)
-	frame:SetSize(128, 128)
+	frame:SetSize(160, 128)
 	frame:SetZPos(0)
+	util.remove(frame:FindDescendantByName("background"))
+
+	local elBg = gui.create("WIRoundedRect", frame)
+	elBg:SetZPos(-100)
+	elBg:SetBackgroundElement(true)
+	elBg:SetAutoAlignToParent(true)
+	elBg:AddStyleClass("background")
+
 	frame:AddCallback("OnDragStart", function(el, x, y)
 		el:SetZPos(1)
 	end)
@@ -233,6 +313,8 @@ function Element:AddNode(graphNode)
 	pDrag:SetAutoAlignToParent(true, false)
 
 	local elNode = gui.create("WIGraphNode", frame)
+	elNode:SetShaderGraph(self)
+	elNode:SetFrame(frame, elBg)
 	elNode:SetNode(graphNode:GetName())
 	elNode:SetY(31)
 	elNode:AddCallback("SetSize", function()
@@ -248,42 +330,138 @@ function Element:AddNode(graphNode)
 		local socket = output:GetSocket()
 		local elOutput = elNode:AddOutput(socket.name)
 	end
+	local socketValues = {}
 	for _, input in ipairs(graphNode:GetInputs()) do
 		local socket = input:GetSocket()
-		local elInput = elNode:AddInput(socket.name, socket.type)
-	end
-
-	elNode:AddCallback("OnSocketClicked", function(elNode, elSocket, socketType, id)
-		if util.is_valid(self.m_outSocket) == false then
-			self.m_outSocket = elSocket
-		else
-			local outSocket = self.m_outSocket
-			local inSocket = elSocket
-			local outNode = outSocket:GetNode():GetNode()
-			local outSocket = outSocket:GetSocket()
-			local inNode = inSocket:GetNode():GetNode()
-			local inSocket = inSocket:GetSocket()
-			self.m_outSocket = nil
-
-			if outNode == inNode then
-				if outSocket == inSocket then
-					self.m_graph:GetNode(outNode):Disconnect(outSocket)
-					self:InitializeLinks()
-					return
-				end
+		local enumSet = socket.enumSet
+		local enumValues
+		if enumSet ~= nil then
+			enumValues = {}
+			for k, v in pairs(enumSet:GetValueToName()) do
+				table.insert(enumValues, { tostring(k), v })
 			end
-			self.m_graph:GetNode(outNode):Link(outSocket, self.m_graph:GetNode(inNode), inSocket)
-			self:InitializeLinks()
 		end
-	end)
+		local elInput, elWrapper = elNode:AddInput(
+			socket.name,
+			socket.type,
+			socket:IsLinkable(),
+			socket.defaultValue,
+			socket.min,
+			socket.max,
+			enumValues
+		)
+
+		table.insert(socketValues, {
+			elWrapper = elWrapper,
+			value = graphNode:GetInputValue(socket.name),
+		})
+	end
+	elNode:ResetControls()
+
+	for _, val in ipairs(socketValues) do
+		print(val.elWrapper)
+		val.elWrapper:SetValue(val.value)
+	end
 
 	local t = {
 		frame = frame,
 		nodeElement = elNode,
-		graphNode = name,
+		graphNode = graphNode,
 	}
+	self.m_frameToNodeData[frame] = t
 	table.insert(self.m_nodeData, t)
 	self.m_nameToElementData[graphNode:GetName()] = t
 	return frame
+end
+function Element:StopInteractiveLinkMode(applyLink)
+	util.remove(self.m_interactiveLinkTargetElement)
+	util.remove(self.m_interactiveLinkLine)
+	util.remove(self.m_cbOnMouseRelease)
+	self:SetThinkingEnabled(false)
+
+	if applyLink and util.is_valid(self.m_interactiveLinkSourceSocket) then
+		local outSocket = self.m_interactiveLinkSourceSocket
+		local inSocket = self.m_interactiveLinkTargetSocket
+		if util.is_valid(inSocket) == false then
+			inSocket = outSocket
+		end
+		if outSocket:GetSocketType() == gui.GraphNodeSocket.SOCKET_TYPE_INPUT then
+			local tmp = outSocket
+			outSocket = inSocket
+			inSocket = tmp
+		end
+		local outNode = outSocket:GetNode():GetNode()
+		local outSocket = outSocket:GetSocket()
+		local inNode = inSocket:GetNode():GetNode()
+		local inSocket = inSocket:GetSocket()
+		self.m_outSocket = nil
+
+		if outNode == inNode then
+			if outSocket == inSocket then
+				self.m_graph:GetNode(outNode):Disconnect(outSocket)
+				self:InitializeLinks()
+				return
+			end
+		end
+		self.m_graph:GetNode(outNode):Link(outSocket, self.m_graph:GetNode(inNode), inSocket)
+		self:InitializeLinks()
+	end
+	self.m_interactiveLinkTargetSocket = nil
+end
+function Element:StartInteractiveLinkMode(el)
+	self:StopInteractiveLinkMode()
+	self.m_interactiveLinkSourceSocket = el
+
+	local elTgt = gui.create("WIBase", self)
+	elTgt:SetPos(self:GetCursorPos())
+	self.m_interactiveLinkTargetElement = elTgt
+	self.m_cbOnMouseRelease = input.add_callback("OnMouseInput", function(mouseButton, state, mods)
+		if mouseButton == input.MOUSE_BUTTON_LEFT and state == input.STATE_RELEASE then
+			self:StopInteractiveLinkMode(true)
+		end
+	end)
+
+	local l = gui.create("WIElementConnectorLine", self)
+	l:SetPointToVisibleBounds(false)
+	l:SetArrowScale(0.5)
+	l:SetSize(self:GetSize())
+	l:SetAnchor(0, 0, 1, 1)
+	l:SetZPos(-1)
+	if el:GetSocketType() == gui.GraphNodeSocket.SOCKET_TYPE_INPUT then
+		l:Setup(elTgt, el)
+	else
+		l:Setup(el, elTgt)
+	end
+	self.m_interactiveLinkLine = l
+
+	self:SetThinkingEnabled(true)
+end
+function Element:OnRemove()
+	self:StopInteractiveLinkMode()
+end
+function Element:OnThink()
+	local cursorPos = self:GetCursorPos()
+	if
+		util.is_valid(self.m_interactiveLinkTargetElement)
+		and util.is_valid(self.m_interactiveLinkLine)
+		and util.is_valid(self.m_interactiveLinkSourceSocket)
+	then
+		local elSocket = gui.get_element_under_cursor(function(el)
+			return el:GetClass() == "wigraphnodesocket"
+				and el:GetSocketType() ~= self.m_interactiveLinkSourceSocket:GetSocketType()
+		end)
+		self.m_interactiveLinkTargetSocket = elSocket
+		if util.is_valid(elSocket) then
+			local pos = elSocket:GetAbsolutePos() - self:GetAbsolutePos() + Vector2(0, elSocket:GetHeight() * 0.5)
+			if elSocket:GetSocketType() == gui.GraphNodeSocket.SOCKET_TYPE_OUTPUT then
+				pos.x = pos.x + elSocket:GetWidth()
+			end
+			self.m_interactiveLinkTargetElement:SetPos(pos)
+		else
+			self.m_interactiveLinkTargetElement:SetPos(cursorPos)
+		end
+
+		self.m_interactiveLinkLine:Update()
+	end
 end
 gui.register("WIShaderGraph", Element)

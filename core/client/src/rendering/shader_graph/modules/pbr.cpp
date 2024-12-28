@@ -6,6 +6,7 @@
  */
 
 #include "stdafx_client.h"
+#include "pragma/rendering/shaders/world/c_shader_graph.hpp"
 #include "pragma/rendering/shader_graph/modules/pbr.hpp"
 #include "pragma/rendering/render_processor.hpp"
 #include "pragma/entities/environment/c_env_reflection_probe.hpp"
@@ -15,9 +16,10 @@
 using namespace pragma::rendering::shader_graph;
 
 extern DLLCLIENT CEngine *c_engine;
+#pragma optimize("", off)
 std::shared_ptr<prosper::IDescriptorSetGroup> PbrModule::g_defaultPbrDsg = {};
 size_t PbrModule::g_instanceCount = 0;
-PbrModule::PbrModule(prosper::Shader &shader) : pragma::rendering::ShaderGraphModule {shader}
+PbrModule::PbrModule(ShaderGraph &shader) : pragma::rendering::ShaderGraphModule {shader}
 {
 	m_pbrDescSetInfo = {
 	  "PBR",

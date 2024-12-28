@@ -319,13 +319,13 @@ std::shared_ptr<prosper::IDescriptorSetGroup> pragma::LShaderGameWorldLightingPa
 		mat.SetDescriptorSetGroup(shader, descSet);
 	return descSet;
 }
-void pragma::LShaderGameWorldLightingPass::InitializeMaterialData(const CMaterial &mat, const rendering::shader_material::ShaderMaterial &shaderMat, pragma::rendering::shader_material::ShaderMaterialData &inOutMatData)
+void pragma::LShaderGameWorldLightingPass::InitializeMaterialData(const CMaterial &mat, const rendering::shader_material::ShaderMaterial &shaderMat, pragma::rendering::ShaderInputData &inOutMatData)
 {
 	static_cast<LuaShaderWrapperTextured3D *>(m_wrapper)->InitializeMaterialData(const_cast<CMaterial &>(mat), shaderMat, inOutMatData);
 }
 void pragma::LShaderGameWorldLightingPass::SetPushConstants(DataStream dsPushConstants) { m_pushConstants = dsPushConstants; }
 std::shared_ptr<prosper::IDescriptorSetGroup> pragma::LShaderGameWorldLightingPass::BaseInitializeMaterialDescriptorSet(CMaterial &mat) { return ShaderGameWorldLightingPass::InitializeMaterialDescriptorSet(mat); }
-void pragma::LShaderGameWorldLightingPass::BaseInitializeMaterialData(CMaterial &mat, const rendering::shader_material::ShaderMaterial &shaderMat, pragma::rendering::shader_material::ShaderMaterialData &inOutMatData)
+void pragma::LShaderGameWorldLightingPass::BaseInitializeMaterialData(CMaterial &mat, const rendering::shader_material::ShaderMaterial &shaderMat, pragma::rendering::ShaderInputData &inOutMatData)
 {
 	return ShaderGameWorldLightingPass::InitializeMaterialData(mat, shaderMat, inOutMatData);
 }
@@ -372,7 +372,7 @@ void pragma::LuaShaderWrapperTextured3D::Lua_InitializePipeline(prosper::BasePip
 }
 void pragma::LuaShaderWrapperTextured3D::Lua_InitializeShaderResources() { static_cast<LShaderGameWorldLightingPass *>(m_shader)->BaseInitializeShaderResources(); }
 std::shared_ptr<prosper::IDescriptorSetGroup> pragma::LuaShaderWrapperTextured3D::Lua_InitializeMaterialDescriptorSet(Material &mat) { return static_cast<LShaderGameWorldLightingPass *>(m_shader)->BaseInitializeMaterialDescriptorSet(static_cast<CMaterial &>(mat)); }
-void pragma::LuaShaderWrapperTextured3D::Lua_InitializeMaterialData(CMaterial &mat, const rendering::shader_material::ShaderMaterial &shaderMat, pragma::rendering::shader_material::ShaderMaterialData &inOutMatData)
+void pragma::LuaShaderWrapperTextured3D::Lua_InitializeMaterialData(CMaterial &mat, const rendering::shader_material::ShaderMaterial &shaderMat, pragma::rendering::ShaderInputData &inOutMatData)
 {
 	return static_cast<LShaderGameWorldLightingPass *>(m_shader)->BaseInitializeMaterialData(mat, shaderMat, inOutMatData);
 }
@@ -387,7 +387,7 @@ void pragma::LuaShaderWrapperTextured3D::Lua_OnBeginDraw(prosper::ICommandBuffer
 void pragma::LuaShaderWrapperTextured3D::Lua_OnEndDraw() {}
 void pragma::LuaShaderWrapperTextured3D::SetPushConstants(DataStream dsPushConstants) { static_cast<LShaderGameWorldLightingPass *>(m_shader)->SetPushConstants(dsPushConstants); }
 prosper::util::PreparedCommandBuffer &pragma::LuaShaderWrapperTextured3D::GetBindPcb() { return static_cast<LShaderGameWorldLightingPass *>(m_shader)->GetBindPcb(); }
-void pragma::LuaShaderWrapperTextured3D::InitializeMaterialBuffer(prosper::IDescriptorSetGroup &descSet, CMaterial &mat, const pragma::rendering::shader_material::ShaderMaterialData &matData)
+void pragma::LuaShaderWrapperTextured3D::InitializeMaterialBuffer(prosper::IDescriptorSetGroup &descSet, CMaterial &mat, const pragma::rendering::ShaderInputData &matData)
 {
 	static_cast<LShaderGameWorldLightingPass *>(m_shader)->InitializeMaterialBuffer(*descSet.GetDescriptorSet(), mat, matData);
 }
@@ -396,9 +396,9 @@ std::shared_ptr<prosper::IDescriptorSetGroup> pragma::LuaShaderWrapperTextured3D
 	auto *dsg = CallLuaMember<prosper::IDescriptorSetGroup *, CMaterial *>("InitializeMaterialDescriptorSet", &mat);
 	return dsg ? dsg->shared_from_this() : nullptr;
 }
-void pragma::LuaShaderWrapperTextured3D::InitializeMaterialData(CMaterial &mat, const rendering::shader_material::ShaderMaterial &shaderMat, pragma::rendering::shader_material::ShaderMaterialData &inOutMatData)
+void pragma::LuaShaderWrapperTextured3D::InitializeMaterialData(CMaterial &mat, const rendering::shader_material::ShaderMaterial &shaderMat, pragma::rendering::ShaderInputData &inOutMatData)
 {
-	CallLuaMember<void, CMaterial *, const rendering::shader_material::ShaderMaterial *, pragma::rendering::shader_material::ShaderMaterialData *>("InitializeMaterialData", const_cast<CMaterial *>(&mat), &shaderMat, &inOutMatData);
+	CallLuaMember<void, CMaterial *, const rendering::shader_material::ShaderMaterial *, pragma::rendering::ShaderInputData *>("InitializeMaterialData", const_cast<CMaterial *>(&mat), &shaderMat, &inOutMatData);
 }
 void pragma::LuaShaderWrapperTextured3D::InitializeGfxPipelineVertexAttributes() { CallLuaMember<void>("InitializeGfxPipelineVertexAttributes"); }
 void pragma::LuaShaderWrapperTextured3D::InitializeGfxPipelinePushConstantRanges() { CallLuaMember<void>("InitializeGfxPipelinePushConstantRanges"); }

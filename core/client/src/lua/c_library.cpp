@@ -75,6 +75,7 @@
 #include <fsys/ifile.hpp>
 #include <wgui/types/witooltip.h>
 #include <wgui/types/wiroot.h>
+#include <wgui/types/wicontentwrapper.hpp>
 
 import pragma.string.unicode;
 import pragma.audio.util;
@@ -414,10 +415,8 @@ static void register_gui(Lua::Interface &lua)
 	guiMod[wiProgressBarClassDef];
 
 	auto wiTooltipClassDef = luabind::class_<WITooltip, ::WIBase>("Tooltip");
-	wiTooltipClassDef.def(
-	  "SetText", +[](WITooltip &elTooltip, const std::string &text) { elTooltip.SetText(text); });
-	wiTooltipClassDef.def(
-	  "GetText", +[](const WITooltip &elTooltip) { return elTooltip.GetText().cpp_str(); });
+	wiTooltipClassDef.def("SetText", +[](WITooltip &elTooltip, const std::string &text) { elTooltip.SetText(text); });
+	wiTooltipClassDef.def("GetText", +[](const WITooltip &elTooltip) { return elTooltip.GetText().cpp_str(); });
 	guiMod[wiTooltipClassDef];
 
 	auto wiSliderClassDef = luabind::class_<WISlider, luabind::bases<WIProgressBar, ::WIBase>>("Slider");
@@ -494,6 +493,22 @@ static void register_gui(Lua::Interface &lua)
 	auto wiLineClassDef = luabind::class_<WILine, ::WIBase>("Line");
 	Lua::WILine::register_class(wiLineClassDef);
 
+	auto wiWIContentWrapper = luabind::class_<WIContentWrapper, ::WIBase>("ContentWrapper");
+	wiWIContentWrapper.def("SetPadding", static_cast<void (WIContentWrapper::*)(int32_t, int32_t, int32_t, int32_t)>(&WIContentWrapper::SetPadding));
+	wiWIContentWrapper.def("ClearPadding", &WIContentWrapper::ClearPadding);
+	wiWIContentWrapper.def(
+	  "GetPadding", +[](WIContentWrapper &el) -> std::tuple<int32_t, int32_t, int32_t, int32_t> {
+		  auto padding = el.GetPadding();
+		  return std::make_tuple(padding.left, padding.right, padding.top, padding.bottom);
+	  });
+	wiWIContentWrapper.def("SetPaddingLeft", &WIContentWrapper::SetPaddingLeft);
+	wiWIContentWrapper.def("SetPaddingRight", &WIContentWrapper::SetPaddingRight);
+	wiWIContentWrapper.def("SetPaddingTop", &WIContentWrapper::SetPaddingTop);
+	wiWIContentWrapper.def("SetPaddingBottom", &WIContentWrapper::SetPaddingBottom);
+	wiWIContentWrapper.def("SetPaddingLeftRight", &WIContentWrapper::SetPaddingLeftRight);
+	wiWIContentWrapper.def("SetPaddingTopBottom", &WIContentWrapper::SetPaddingTopBottom);
+	guiMod[wiWIContentWrapper];
+
 	auto wiRoundedRectClassDef = luabind::class_<WIRoundedRect, luabind::bases<WIShape, ::WIBase>>("RoundedRect");
 	Lua::WIRoundedRect::register_class(wiRoundedRectClassDef);
 	guiMod[wiRoundedRectClassDef];
@@ -527,8 +542,7 @@ static void register_gui(Lua::Interface &lua)
 	wiConsoleClassDef.def("SetExternallyOwned", &WIConsole::SetExternallyOwned);
 	wiConsoleClassDef.def("IsExternallyOwned", &WIConsole::IsExternallyOwned);
 	wiConsoleClassDef.def("GetFrame", &WIConsole::GetFrame);
-	wiConsoleClassDef.def(
-	  "GetText", +[](const ::WIConsole &console) { return console.GetText().cpp_str(); });
+	wiConsoleClassDef.def("GetText", +[](const ::WIConsole &console) { return console.GetText().cpp_str(); });
 	wiConsoleClassDef.def("SetText", &WIConsole::SetText);
 	wiConsoleClassDef.def("AppendText", &WIConsole::AppendText);
 	wiConsoleClassDef.def("Clear", &WIConsole::Clear);
@@ -1270,8 +1284,7 @@ void CGame::RegisterLuaLibraries()
 	ClientState::RegisterSharedLuaLibraries(GetLuaInterface());
 
 	auto consoleMod = luabind::module(GetLuaState(), "console");
-	consoleMod[luabind::def(
-	  "save_config", +[](CEngine &engine) { engine.SaveClientConfig(); })];
+	consoleMod[luabind::def("save_config", +[](CEngine &engine) { engine.SaveClientConfig(); })];
 
 	GetLuaInterface().RegisterLibrary("asset",
 	  {{"export_map", Lua::util::Client::export_map}, {"import_model", Lua::util::Client::import_model}, {"import_gltf", Lua::util::Client::import_gltf}, {"export_texture", Lua::util::Client::export_texture}, {"export_material", Lua::util::Client::export_material},
@@ -1439,8 +1452,7 @@ void CGame::RegisterLuaLibraries()
 	    }),
 	  luabind::def(
 	    "import", +[](NetworkState &nw, const std::string &name, pragma::asset::Type type) -> bool { return asset_import(nw, name, name, type); }),
-	  luabind::def(
-	    "import", +[](NetworkState &nw, const std::string &name, const std::string &outputName, pragma::asset::Type type) -> bool { return asset_import(nw, name, outputName, type); })];
+	  luabind::def("import", +[](NetworkState &nw, const std::string &name, const std::string &outputName, pragma::asset::Type type) -> bool { return asset_import(nw, name, outputName, type); })];
 	auto defMapExportInfo = luabind::class_<pragma::asset::MapExportInfo>("MapExportInfo");
 	defMapExportInfo.def(luabind::constructor<>());
 	defMapExportInfo.def_readwrite("includeMapLightSources", &pragma::asset::MapExportInfo::includeMapLightSources);
@@ -1485,6 +1497,5 @@ void CGame::RegisterLuaLibraries()
 	  luabind::def("draw_plane", static_cast<std::shared_ptr<::DebugRenderer::BaseObject> (*)(const Vector3 &, float, const DebugRenderInfo &)>(&Lua::DebugRenderer::Client::DrawPlane)),
 	  luabind::def("draw_frustum", static_cast<std::shared_ptr<::DebugRenderer::BaseObject> (*)(pragma::CCameraComponent &, const DebugRenderInfo &)>(&Lua::DebugRenderer::Client::DrawFrustum)),
 	  luabind::def("draw_frustum", static_cast<std::shared_ptr<::DebugRenderer::BaseObject> (*)(const std::vector<Vector3> &, const DebugRenderInfo &)>(&Lua::DebugRenderer::Client::DrawFrustum)),
-	  luabind::def(
-	    "create_collection", +[](const std::vector<std::shared_ptr<::DebugRenderer::BaseObject>> &objects) -> std::shared_ptr<::DebugRenderer::BaseObject> { return std::make_shared<::DebugRenderer::CollectionObject>(objects); })];
+	  luabind::def("create_collection", +[](const std::vector<std::shared_ptr<::DebugRenderer::BaseObject>> &objects) -> std::shared_ptr<::DebugRenderer::BaseObject> { return std::make_shared<::DebugRenderer::CollectionObject>(objects); })];
 }

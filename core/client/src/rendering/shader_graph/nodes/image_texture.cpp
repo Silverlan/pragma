@@ -12,23 +12,28 @@ using namespace pragma::rendering::shader_graph;
 
 ImageTextureNode::ImageTextureNode(const std::string_view &type) : Node {type}
 {
-	AddInput(IN_FILENAME, pragma::shadergraph::SocketType::String, "");
-	AddInput(IN_VECTOR, pragma::shadergraph::SocketType::Vector, Vector3 {0.f, 0.f, 0.f}); // TODO: Make input only, don't allow writing manually
+	AddInput(IN_FILENAME, pragma::shadergraph::DataType::String, "");
+	AddInput(IN_VECTOR, pragma::shadergraph::DataType::Vector, Vector3 {0.f, 0.f, 0.f}); // TODO: Make input only, don't allow writing manually
 
-	AddOutput(OUT_COLOR, pragma::shadergraph::SocketType::Color);
-	AddOutput(OUT_ALPHA, pragma::shadergraph::SocketType::Float);
+	AddOutput(OUT_COLOR, pragma::shadergraph::DataType::Color);
+	AddOutput(OUT_ALPHA, pragma::shadergraph::DataType::Float);
 
 	AddModuleDependency("image_texture");
+}
+
+std::string ImageTextureNode::GetTextureVariableName(const pragma::shadergraph::GraphNode &gn) const
+{
+	auto prefix = gn.GetBaseVarName() + "_";
+	return prefix + "tex";
 }
 
 std::string ImageTextureNode::DoEvaluateResourceDeclarations(const pragma::shadergraph::Graph &graph, const pragma::shadergraph::GraphNode &gn) const
 {
 	std::ostringstream code;
-	auto prefix = gn.GetBaseVarName() + "_";
-	std::string texName = prefix + "tex";
-	auto upperTexName = texName;
-	ustring::to_upper(upperTexName);
-	code << "layout(LAYOUT_ID(TEST, " << upperTexName << ")) uniform sampler2D " << texName << ";\n";
+	//auto texName = GetTextureVariableName(gn);
+	//auto upperTexName = texName;
+	//ustring::to_upper(upperTexName);
+	//code << "layout(LAYOUT_ID(TEST, " << upperTexName << ")) uniform sampler2D " << texName << ";\n";
 	return code.str();
 }
 
@@ -39,11 +44,10 @@ std::string ImageTextureNode::DoEvaluate(const pragma::shadergraph::Graph &graph
 	if(gn.IsInputLinked(IN_VECTOR))
 		uv = gn.GetInputNameOrValue(IN_VECTOR);
 	else
-		uv = "vec3(get_uv_coordinates(), 0.0)";
+		uv = "vec3(get_vertex_uv(), 0.0)";
 
 	auto prefix = gn.GetBaseVarName() + "_";
-	std::string texName = prefix + "tex";
-	code << "vec4 " << prefix << "texCol = texture(" << texName << ", " << uv << ".xy);\n";
+	code << "vec4 " << prefix << "texCol = texture(" << GetTextureVariableName(gn) << ", " << uv << ".xy);\n";
 
 	code << gn.GetGlslOutputDeclaration(OUT_COLOR) << " = ";
 	code << prefix << "texCol.rgb;\n";

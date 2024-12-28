@@ -2077,6 +2077,8 @@ void Lua::WITransformable::register_class(luabind::class_<::WITransformable, ::W
 	classDef.def("SetResizeRatioLocked", &::WITransformable::SetResizeRatioLocked);
 	classDef.def("IsResizeRatioLocked", &::WITransformable::IsResizeRatioLocked);
 	classDef.def("AddSnapTarget", &::WITransformable::AddSnapTarget);
+	classDef.def("StartDrag", &::WITransformable::StartDrag);
+	classDef.def("EndDrag", &::WITransformable::EndDrag);
 }
 
 ////////////////////////////////////

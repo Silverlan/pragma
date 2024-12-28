@@ -77,6 +77,7 @@ namespace pragma {
 	namespace rendering {
 		class RenderQueueBuilder;
 		class RenderQueueWorkerManager;
+		class GlobalShaderInputDataManager;
 		struct GameWorldShaderSettings;
 		struct GlobalRenderSettingsBufferData;
 	};
@@ -397,6 +398,9 @@ class DLLCLIENT CGame : public Game {
 	void ResetGameplayControlCamera();
 	pragma::CCameraComponent *GetGameplayControlCamera();
 
+	pragma::rendering::GlobalShaderInputDataManager &GetGlobalShaderInputDataManager();
+	const pragma::rendering::GlobalShaderInputDataManager &GetGlobalShaderInputDataManager() const;
+
 	pragma::rendering::RenderQueueBuilder &GetRenderQueueBuilder();
 	pragma::rendering::RenderQueueWorkerManager &GetRenderQueueWorkerManager();
 	prosper::IDescriptorSet &GetGlobalRenderSettingsDescriptorSet();
@@ -486,6 +490,7 @@ class DLLCLIENT CGame : public Game {
 	std::vector<util::DrawSceneInfo> m_sceneRenderQueue {};
 	std::shared_ptr<pragma::rendering::RenderQueueBuilder> m_renderQueueBuilder = nullptr;
 	std::shared_ptr<pragma::rendering::RenderQueueWorkerManager> m_renderQueueWorkerManager = nullptr;
+	std::unique_ptr<pragma::rendering::GlobalShaderInputDataManager> m_globalShaderInputDataManager;
 	Vector4 m_clipPlane = {};
 	Vector4 m_colScale = {};
 	Material *m_matOverride = nullptr;

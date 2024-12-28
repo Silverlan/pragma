@@ -64,7 +64,7 @@
 		},
 		{
 			$string name "emission_map"
-			$string default "white"
+			$string default "black"
 			$string specializationType "emission"
 		},
 		{

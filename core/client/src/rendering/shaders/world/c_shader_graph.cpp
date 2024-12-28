@@ -15,6 +15,9 @@
 #include "pragma/rendering/shader_material/shader_material.hpp"
 #include "pragma/rendering/shader_graph/manager.hpp"
 #include "pragma/rendering/shader_graph/module.hpp"
+#include "pragma/rendering/shader_graph/nodes/shader_material.hpp"
+#include "pragma/rendering/shader_graph/nodes/input_parameter.hpp"
+#include "pragma/rendering/shader_graph/nodes/scene_output.hpp"
 #include "pragma/model/vk_mesh.h"
 #include "pragma/model/c_modelmesh.h"
 #include <shader/prosper_pipeline_create_info.hpp>
@@ -52,18 +55,47 @@ void ShaderGraph::InitializeGfxPipelineDescriptorSets()
 		mod->InitializeGfxPipelineDescriptorSets();
 }
 
+void ShaderGraph::GetShaderPreprocessorDefinitions(std::unordered_map<std::string, std::string> &outDefinitions, std::string &outPrefixCode)
+{
+	ShaderGameWorldLightingPass::GetShaderPreprocessorDefinitions(outDefinitions, outPrefixCode);
+	for(auto &mod : m_modules)
+		mod->GetShaderPreprocessorDefinitions(outDefinitions, outPrefixCode);
+}
+
 void ShaderGraph::ClearShaderResources()
 {
 	m_modules.clear();
 	ShaderGameWorldLightingPass::ClearShaderResources();
 }
 
-void ShaderGraph::InitializeShaderResources()
+static const pragma::rendering::shader_material::ShaderMaterial *find_shader_material(const pragma::shadergraph::Graph &graph)
+{
+	for(auto &node : graph.GetNodes()) {
+		auto *matNode = dynamic_cast<const pragma::rendering::shader_graph::ShaderMaterialNode *>(&node->node);
+		if(matNode)
+			return &matNode->GetShaderMaterial();
+	}
+	return nullptr;
+}
+
+const pragma::shadergraph::Graph *ShaderGraph::GetGraph() const
 {
 	auto &graphManager = c_engine->GetShaderGraphManager();
 	auto graphData = graphManager.GetGraph(GetIdentifier());
-	if(graphData) {
-		auto &graph = graphData->GetGraph();
+	if(graphData)
+		return graphData->GetGraph().get();
+	return nullptr;
+}
+
+void ShaderGraph::InitializeShaderResources()
+{
+	auto &graphManager = c_engine->GetShaderGraphManager();
+	auto *graph = GetGraph();
+	if(graph) {
+		auto *shaderMat = find_shader_material(*graph);
+		if(shaderMat)
+			SetShaderMaterialName(shaderMat->name);
+
 		struct ModuleData {
 			std::vector<pragma::shadergraph::GraphNode *> nodes;
 		};
@@ -84,12 +116,24 @@ void ShaderGraph::InitializeShaderResources()
 		}
 	}
 
+	for(auto &mod : m_modules)
+		mod->InitializeShaderResources();
+
+	m_alphaMode = AlphaMode::Opaque;
+	if(graph) {
+		for(auto &node : graph->GetNodes()) {
+			auto *outputNode = dynamic_cast<const pragma::rendering::shader_graph::SceneOutputNode *>(&node->node);
+			if(!outputNode)
+				continue;
+			node->GetInputValue(pragma::rendering::shader_graph::SceneOutputNode::CONST_ALPHA_MODE, m_alphaMode);
+		}
+	}
+
 	ShaderGameWorldLightingPass::InitializeShaderResources();
 }
 
-void ShaderGraph::InitializeMaterialData(const CMaterial &mat, const rendering::shader_material::ShaderMaterial &shaderMat, pragma::rendering::shader_material::ShaderMaterialData &inOutMatData)
+void ShaderGraph::InitializeMaterialData(const CMaterial &mat, const rendering::shader_material::ShaderMaterial &shaderMat, pragma::rendering::ShaderInputData &inOutMatData)
 {
-
 	// If graph has "pbr" module, pbr descriptor set should be added
 	//prosper::DescriptorSetInfo
 
@@ -107,11 +151,30 @@ void ShaderGraph::InitializeMaterialData(const CMaterial &mat, const rendering::
 
 std::shared_ptr<prosper::IDescriptorSetGroup> ShaderGraph::InitializeMaterialDescriptorSet(CMaterial &mat, const prosper::DescriptorSetInfo &descSetInfo) { return ShaderGameWorldLightingPass::InitializeMaterialDescriptorSet(mat, descSetInfo); }
 void ShaderGraph::OnPipelinesInitialized() { ShaderGameWorldLightingPass::OnPipelinesInitialized(); }
-void ShaderGraph::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { ShaderGameWorldLightingPass::InitializeGfxPipeline(pipelineInfo, pipelineIdx); }
+void ShaderGraph::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
+{
+	ShaderGameWorldLightingPass::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
+
+	switch(m_alphaMode) {
+	case AlphaMode::Blend:
+		SetGenericAlphaColorBlendAttachmentProperties(pipelineInfo);
+		break;
+	case AlphaMode::Mask:
+		SetGenericAlphaColorBlendAttachmentProperties(pipelineInfo);
+		pipelineInfo.ToggleDepthWrites(true);
+		break;
+	}
+}
 
 void ShaderGraph::RecordBindScene(rendering::ShaderProcessor &shaderProcessor, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer, prosper::IDescriptorSet &dsRenderSettings,
   prosper::IDescriptorSet &dsShadows, const Vector4 &drawOrigin, ShaderGameWorld::SceneFlags &inOutSceneFlags) const
 {
+	std::array<prosper::IDescriptorSet *, 4> descSets {&dsScene, &dsRenderer, &dsRenderSettings, &dsShadows};
+
+	static const std::vector<uint32_t> dynamicOffsets {};
+	shaderProcessor.GetCommandBuffer().RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics, shaderProcessor.GetCurrentPipelineLayout(), GetSceneDescriptorSetIndex(), descSets, dynamicOffsets);
+
+	ShaderGameWorldLightingPass::RecordBindScene(shaderProcessor, scene, renderer, dsScene, dsRenderer, dsRenderSettings, dsShadows, drawOrigin, inOutSceneFlags);
 	ShaderGameWorldLightingPass::PushConstants pushConstants {};
 	pushConstants.Initialize();
 	pushConstants.debugMode = scene.GetDebugMode();
@@ -123,3 +186,21 @@ void ShaderGraph::RecordBindScene(rendering::ShaderProcessor &shaderProcessor, c
 	for(auto &mod : m_modules)
 		mod->RecordBindScene(shaderProcessor, scene, renderer, inOutSceneFlags);
 }
+
+bool ShaderGraph::RecordBindEntity(rendering::ShaderProcessor &shaderProcessor, CRenderComponent &renderC, prosper::IShaderPipelineLayout &layout, uint32_t entityInstanceDescriptorSetIndex) const
+{
+	if(!ShaderGameWorldLightingPass::RecordBindEntity(shaderProcessor, renderC, layout, entityInstanceDescriptorSetIndex))
+		return false;
+	for(auto &mod : m_modules)
+		mod->RecordBindEntity(shaderProcessor, renderC, layout, entityInstanceDescriptorSetIndex);
+	return true;
+}
+bool ShaderGraph::RecordBindMaterial(rendering::ShaderProcessor &shaderProcessor, CMaterial &mat) const
+{
+	if(!ShaderGameWorldLightingPass::RecordBindMaterial(shaderProcessor, mat))
+		return false;
+	for(auto &mod : m_modules)
+		mod->RecordBindMaterial(shaderProcessor, mat);
+	return true;
+}
+bool ShaderGraph::IsTranslucentPipeline(uint32_t pipelineIdx) const { return m_alphaMode != AlphaMode::Opaque; }

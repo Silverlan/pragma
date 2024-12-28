@@ -115,6 +115,7 @@ static const auto SEPARATE_JOYSTICK_AXES = true;
 #include "pragma/rendering/shader_graph/nodes/geometry.hpp"
 #include "pragma/rendering/shader_graph/modules/pbr.hpp"
 #include "pragma/rendering/shader_graph/modules/image_texture.hpp"
+#include "pragma/rendering/shader_graph/modules/input_data.hpp"
 
 CEngine::CEngine(int argc, char *argv[])
     : Engine(argc, argv), pragma::RenderContext(), m_nearZ(pragma::BaseEnvCameraComponent::DEFAULT_NEAR_Z), //10.0f), //0.1f
@@ -227,8 +228,9 @@ CEngine::CEngine(int argc, char *argv[])
 		m_shaderGraphManager->RegisterGraphTypeManager("post_processing", regPp);
 		m_shaderGraphManager->RegisterGraphTypeManager("object", regScene);
 
-		m_shaderGraphManager->GetModuleManager().RegisterFactory("pbr", [](prosper::Shader &shader) -> std::unique_ptr<pragma::rendering::ShaderGraphModule> { return std::make_unique<pragma::rendering::shader_graph::PbrModule>(shader); });
-		m_shaderGraphManager->GetModuleManager().RegisterFactory("image_texture", [](prosper::Shader &shader) -> std::unique_ptr<pragma::rendering::ShaderGraphModule> { return std::make_unique<pragma::rendering::shader_graph::ImageTextureModule>(shader); });
+		m_shaderGraphManager->GetModuleManager().RegisterFactory("pbr", [](pragma::ShaderGraph &shader) -> std::unique_ptr<pragma::rendering::ShaderGraphModule> { return std::make_unique<pragma::rendering::shader_graph::PbrModule>(shader); });
+		m_shaderGraphManager->GetModuleManager().RegisterFactory("image_texture", [](pragma::ShaderGraph &shader) -> std::unique_ptr<pragma::rendering::ShaderGraphModule> { return std::make_unique<pragma::rendering::shader_graph::ImageTextureModule>(shader); });
+		m_shaderGraphManager->GetModuleManager().RegisterFactory("input_data", [](pragma::ShaderGraph &shader) -> std::unique_ptr<pragma::rendering::ShaderGraphModule> { return std::make_unique<pragma::rendering::shader_graph::InputDataModule>(shader); });
 	}
 }
 

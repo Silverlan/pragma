@@ -15,8 +15,8 @@ VectorTransformNode::VectorTransformNode(const std::string_view &type) : Node {t
 	AddSocketEnum<Type>(IN_TRANSFORM_TYPE, Type::Vector);
 	AddSocketEnum<Space>(IN_CONVERT_FROM, Space::World);
 	AddSocketEnum<Space>(IN_CONVERT_TO, Space::Object);
-	AddInput(IN_VECTOR, pragma::shadergraph::SocketType::Vector, Vector3 {0.f, 0.f, 0.f});
-	AddOutput(OUT_VECTOR, pragma::shadergraph::SocketType::Vector);
+	AddInput(IN_VECTOR, pragma::shadergraph::DataType::Vector, Vector3 {0.f, 0.f, 0.f});
+	AddOutput(OUT_VECTOR, pragma::shadergraph::DataType::Vector);
 
 	AddModuleDependency("camera");
 	AddModuleDependency("entity");

@@ -12,28 +12,36 @@ using namespace pragma::rendering::shader_graph;
 
 ShaderMaterialNode::ShaderMaterialNode(const std::string_view &type, const pragma::rendering::shader_material::ShaderMaterial &shaderMaterial) : pragma::shadergraph::Node {type}, m_shaderMaterial {shaderMaterial}
 {
+	for(auto &tex : m_shaderMaterial.textures) {
+		auto name = ustring::to_camel_case(tex.name);
+		AddOutput(name, pragma::shadergraph::DataType::String);
+	}
+
 	for(auto &prop : m_shaderMaterial.properties) {
-		auto socketType = pragma::shadergraph::to_socket_type(prop.type);
-		if(socketType == pragma::shadergraph::SocketType::Invalid)
+		if(umath::is_flag_set(prop.propertyFlags, pragma::rendering::Property::Flags::HideInEditor))
 			continue;
-		AddOutput(prop.name.c_str(), socketType);
+		auto socketType = pragma::shadergraph::to_data_type(pragma::shadergraph::to_udm_type(prop.parameter.type));
+		if(socketType == pragma::shadergraph::DataType::Invalid)
+			continue;
+		AddOutput(ustring::to_camel_case(prop.parameter.name), socketType);
 	}
 }
-std::string ShaderMaterialNode::DoEvaluate(const pragma::shadergraph::Graph &graph, const pragma::shadergraph::GraphNode &instance) const
+std::string ShaderMaterialNode::DoEvaluate(const pragma::shadergraph::Graph &graph, const pragma::shadergraph::GraphNode &gn) const
 {
 	// TODO: Only write output var is output is set?
 	// get_mat_x();
 	std::ostringstream code;
 	for(auto &prop : m_shaderMaterial.properties) {
-		auto socketType = pragma::shadergraph::to_socket_type(prop.type);
-		if(socketType == pragma::shadergraph::SocketType::Invalid)
+		auto socketType = prop.parameter.type;
+		if(socketType == pragma::shadergraph::DataType::Invalid)
 			continue;
-		if(!instance.IsOutputLinked(prop.name))
+		auto socketName = ustring::to_camel_case(prop.parameter.name);
+		if(!gn.IsOutputLinked(socketName))
 			continue;
 		auto *glslType = pragma::shadergraph::to_glsl_type(socketType);
 		code << glslType << " ";
-		code << instance.GetOutputVarName(prop.name.c_str()) << " = ";
-		code << "get_mat_" << prop.name.c_str() << "();\n";
+		code << gn.GetOutputVarName(socketName) << " = ";
+		code << "get_mat_" << prop.parameter.name.c_str() << "();\n";
 	}
 	return code.str();
 }

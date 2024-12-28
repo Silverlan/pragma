@@ -51,7 +51,7 @@ void ShaderPBR::InitializeGfxPipelineDescriptorSets()
 	AddDescriptorSetGroup(DESCRIPTOR_SET_PBR);
 }
 
-void ShaderPBR::InitializeMaterialData(const CMaterial &mat, const rendering::shader_material::ShaderMaterial &shaderMat, pragma::rendering::shader_material::ShaderMaterialData &inOutMatData)
+void ShaderPBR::InitializeMaterialData(const CMaterial &mat, const rendering::shader_material::ShaderMaterial &shaderMat, pragma::rendering::ShaderInputData &inOutMatData)
 {
 	ShaderGameWorldLightingPass::InitializeMaterialData(mat, shaderMat, inOutMatData);
 	auto &data = mat.GetDataBlock();

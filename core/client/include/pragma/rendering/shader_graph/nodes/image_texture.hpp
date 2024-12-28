@@ -22,6 +22,7 @@ namespace pragma::rendering::shader_graph {
 		static constexpr const char *OUT_ALPHA = "alpha";
 
 		ImageTextureNode(const std::string_view &type);
+		std::string GetTextureVariableName(const pragma::shadergraph::GraphNode &gn) const;
 
 		virtual std::string DoEvaluate(const pragma::shadergraph::Graph &graph, const pragma::shadergraph::GraphNode &instance) const override;
 		virtual std::string DoEvaluateResourceDeclarations(const pragma::shadergraph::Graph &graph, const pragma::shadergraph::GraphNode &instance) const override;

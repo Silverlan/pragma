@@ -627,6 +627,10 @@ uint32_t pragma::rendering::BaseRenderProcessor::Render(const pragma::rendering:
 	m_shaderProcessor.SetStats(m_stats);
 	if(!prepass)
 		UnbindShader();
+	else {
+		m_prepassIsCurScenePipelineTranslucent = false;
+		m_prepassCurScenePipeline = std::numeric_limits<prosper::PipelineID>::max();
+	}
 
 	auto &scene = *m_drawSceneInfo.drawSceneInfo.scene;
 	auto &referenceShader = prepass ? c_game->GetGameShader(CGame::GameShader::Prepass) : c_game->GetGameShader(CGame::GameShader::Pbr);
@@ -677,6 +681,16 @@ uint32_t pragma::rendering::BaseRenderProcessor::Render(const pragma::rendering:
 					(*optStats)->AddTime(RenderPassStats::Timer::ShaderBind, std::chrono::steady_clock::now() - ttmp);
 			}
 			if(umath::is_flag_set(m_stateFlags, StateFlags::ShaderBound) == false)
+				continue;
+		}
+		else {
+			if(item.pipelineId != m_prepassCurScenePipeline) {
+				uint32_t pipelineIdx;
+				auto *shader = dynamic_cast<pragma::ShaderGameWorldLightingPass *>(c_engine->GetRenderContext().GetShaderPipeline(item.pipelineId, pipelineIdx));
+				m_prepassIsCurScenePipelineTranslucent = shader && shader->IsTranslucentPipeline(pipelineIdx);
+				m_prepassCurScenePipeline = item.pipelineId;
+			}
+			if(m_prepassIsCurScenePipelineTranslucent)
 				continue;
 		}
 		if(item.material != m_curMaterialIndex) {

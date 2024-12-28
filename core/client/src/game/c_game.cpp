@@ -58,6 +58,7 @@
 #include "pragma/rendering/renderers/raytracing_renderer.hpp"
 #include "pragma/rendering/render_queue_worker.hpp"
 #include "pragma/rendering/global_render_settings_buffer_data.hpp"
+#include "pragma/rendering/global_shader_input_manager.hpp"
 #include "pragma/ai/c_navsystem.h"
 #include <texturemanager/texturemanager.h>
 #include <pragma/physics/environment.hpp>
@@ -257,6 +258,8 @@ CGame::CGame(NetworkState *state)
 	m_renderQueueBuilder = std::make_unique<pragma::rendering::RenderQueueBuilder>();
 	m_renderQueueWorkerManager = std::make_unique<pragma::rendering::RenderQueueWorkerManager>(umath::clamp(cvWorkerThreadCount->GetInt(), 1, 20));
 
+	m_globalShaderInputDataManager = std::make_unique<pragma::rendering::GlobalShaderInputDataManager>();
+
 	auto &texManager = static_cast<msys::CMaterialManager &>(static_cast<ClientState *>(GetNetworkState())->GetMaterialManager()).GetTextureManager();
 	for(auto &tex : g_requiredGameTextures) {
 		texManager.LoadAsset(tex); // Pre-loaded in ClientState constructor
@@ -326,6 +329,9 @@ void CGame::OnRemove()
 
 	Game::OnRemove();
 }
+
+pragma::rendering::GlobalShaderInputDataManager &CGame::GetGlobalShaderInputDataManager() { return *m_globalShaderInputDataManager; }
+const pragma::rendering::GlobalShaderInputDataManager &CGame::GetGlobalShaderInputDataManager() const { return const_cast<CGame *>(this)->GetGlobalShaderInputDataManager(); }
 
 void CGame::GetRegisteredEntities(std::vector<std::string> &classes, std::vector<std::string> &luaClasses) const
 {

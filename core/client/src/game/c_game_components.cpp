@@ -44,6 +44,7 @@
 #include "pragma/entities/components/c_optical_camera_component.hpp"
 #include "pragma/entities/components/c_hitbox_bvh_component.hpp"
 #include "pragma/entities/components/c_input_component.hpp"
+#include "pragma/entities/components/c_global_shader_input.hpp"
 #include "pragma/entities/components/liquid/c_buoyancy_component.hpp"
 #include "pragma/entities/components/liquid/c_liquid_surface_component.hpp"
 #include "pragma/entities/components/liquid/c_liquid_volume_component.hpp"
@@ -296,6 +297,8 @@ void CGame::InitializeEntityComponents(pragma::EntityComponentManager &component
 	componentManager.RegisterComponentType<pragma::CRaytracingRendererComponent>("raytracing_renderer", {"rendering", hideInEditor});
 	componentManager.RegisterComponentType<pragma::CLiquidControlComponent>("liquid_control", {"physics/fluid", hideInEditor});
 	componentManager.RegisterComponentType<pragma::CLiquidSurfaceSimulationComponent>("liquid_surface_simulation", {"physics/fluid", hideInEditor});
+
+	componentManager.RegisterComponentType<pragma::CGlobalShaderInputComponent>("global_shader_input", {"rendering"});
 
 	componentManager.RegisterComponentType<pragma::CDebugHitboxComponent>("debug_hitbox", {"debug"});
 	// --template-component-register-location

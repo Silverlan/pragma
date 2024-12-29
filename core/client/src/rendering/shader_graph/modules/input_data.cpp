@@ -86,9 +86,16 @@ void InputDataModule::GetShaderPreprocessorDefinitions(std::unordered_map<std::s
 void InputDataModule::InitializeGfxPipelineDescriptorSets()
 {
 	auto &inputDataManager = c_game->GetGlobalShaderInputDataManager();
+
 	// TODO:
-	auto testPbr = c_engine->GetShaderGraphManager().GetGraph("z");
-	inputDataManager.PopulateProperties(*testPbr->GetGraph());
+	auto &graphManager = c_engine->GetShaderGraphManager();
+	auto &typeManagers = graphManager.GetShaderGraphTypeManagers();
+	auto it = typeManagers.find("object");
+	if(it == typeManagers.end())
+		return;
+	auto &typeManager = *it->second;
+	for(auto &[name, graphData] : typeManager.GetGraphs())
+		inputDataManager.PopulateProperties(*graphData->GetGraph());
 	auto cmd = c_engine->GetRenderContext().GetSetupCommandBuffer();
 	inputDataManager.UpdateBufferData(*cmd);
 	c_engine->GetRenderContext().FlushSetupCommandBuffer();

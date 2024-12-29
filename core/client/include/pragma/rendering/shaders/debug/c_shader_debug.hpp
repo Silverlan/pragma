@@ -45,6 +45,7 @@ namespace pragma {
 
 		bool RecordBeginDraw(prosper::ShaderBindState &bindState, Pipeline pipelineIdx = Pipeline::Triangle) const;
 		bool RecordDraw(prosper::ShaderBindState &bindState, prosper::IBuffer &vertexBuffer, uint32_t vertexCount, const Mat4 &mvp = umat::identity(), const Vector4 &color = Vector4(1.f, 1.f, 1.f, 1.f)) const;
+		virtual bool IsDebugPrintEnabled() const override { return false; }
 	  protected:
 		ShaderDebug(prosper::IPrContext &context, const std::string &identifier, const std::string &vsShader, const std::string &fsShader);
 		bool RecordDraw(prosper::ShaderBindState &bindState, const std::vector<prosper::IBuffer *> &buffers, uint32_t vertexCount, const Mat4 &mvp, const Vector4 &color = Vector4(1.f, 1.f, 1.f, 1.f)) const;

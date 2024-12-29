@@ -195,6 +195,29 @@ void pragma::bvh::BvhTree::InitializeBvh()
 	return config;
 }
 
+void pragma::bvh::MeshBvhTree::Refit()
+{
+	bvh.refit([this](pragma::bvh::Node &node) {
+		auto begin = node.index.first_id;
+		auto end = begin + node.index.prim_count;
+		for(size_t i = begin; i < end; ++i) {
+			size_t j = bvh.prim_ids[i];
+
+			auto &prim = primitives[j];
+			auto bbox = prim.get_bbox();
+			node.set_bbox(bbox);
+		}
+	});
+}
+
+void pragma::bvh::MeshBvhTree::Update()
+{
+	if(!dirty)
+		return;
+	dirty = false;
+	Refit();
+}
+
 void pragma::bvh::MeshBvhTree::Deserialize(const std::vector<uint8_t> &data, std::vector<pragma::bvh::Primitive> &&primitives)
 {
 	InitializeExecutor();
@@ -263,11 +286,14 @@ bool pragma::bvh::MeshBvhTree::DoInitializeBvh(Executor &executor, ::bvh::v2::De
 	bvh = ::bvh::v2::DefaultBuilder<Node>::build(bboxes, centers, config);
 	//bvh = ::bvh::v2::DefaultBuilder<Node>::build(GetThreadPool(), bboxes, centers, config);
 	InitializePrecomputedTris();
+	dirty = false;
 	return true;
 }
 
 bool pragma::bvh::MeshBvhTree::Raycast(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, HitData &outHitData)
 {
+	Update();
+
 	constexpr size_t invalid_id = std::numeric_limits<size_t>::max();
 	constexpr size_t stack_size = 64;
 	constexpr bool use_robust_traversal = false;

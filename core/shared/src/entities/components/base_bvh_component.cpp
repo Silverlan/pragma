@@ -138,22 +138,6 @@ void BaseBvhComponent::GetVertexData(std::vector<pragma::bvh::Primitive> &outDat
 	memcpy(outData.data(), m_bvhData->primitives.data(), util::size_of_container(outData));
 }
 
-static void refit(pragma::bvh::MeshBvhTree &bvhData)
-{
-	auto &bvh = bvhData.bvh;
-	bvh.refit([&bvh, &bvhData](pragma::bvh::Node &node) {
-		auto begin = node.index.first_id;
-		auto end = begin + node.index.prim_count;
-		for(size_t i = begin; i < end; ++i) {
-			size_t j = bvh.prim_ids[i];
-
-			auto &prim = bvhData.primitives[j];
-			auto bbox = prim.get_bbox();
-			node.set_bbox(bbox);
-		}
-	});
-}
-
 void BaseBvhComponent::DeleteRange(pragma::bvh::MeshBvhTree &bvhData, size_t start, size_t end)
 {
 	if(end == start)
@@ -164,7 +148,7 @@ void BaseBvhComponent::DeleteRange(pragma::bvh::MeshBvhTree &bvhData, size_t sta
 	p = {{p.p0[0], p.p0[1], p.p0[2]}, {p.p0[0], p.p0[1], p.p0[2]}, {p.p0[0], p.p0[1], p.p0[2]}};
 	for(size_t i = (start / 3) + 1; i < (end / 3); ++i)
 		bvhData.primitives[i] = p;
-	refit(bvhData);
+	bvhData.SetDirty();
 }
 
 bool BaseBvhComponent::SetVertexData(pragma::bvh::MeshBvhTree &bvhData, const std::vector<pragma::bvh::Primitive> &data)
@@ -172,7 +156,7 @@ bool BaseBvhComponent::SetVertexData(pragma::bvh::MeshBvhTree &bvhData, const st
 	if(bvhData.primitives.size() != data.size())
 		return false;
 	memcpy(bvhData.primitives.data(), data.data(), util::size_of_container(data));
-	refit(bvhData);
+	bvhData.SetDirty();
 	return true;
 }
 

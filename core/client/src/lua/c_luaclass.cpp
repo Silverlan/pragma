@@ -649,6 +649,11 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 			  return {nullptr, std::optional<std::string> {err}};
 		  return {graph, std::optional<std::string> {}};
 	  })];
+	modShader[luabind::def(
+	  "set_shader_graph", +[](const std::string &type, const std::string &identifier, const std::shared_ptr<pragma::shadergraph::Graph> &graph) {
+		  auto &manager = c_engine->GetShaderGraphManager();
+		  manager.SetGraph(type, identifier, graph);
+	  })];
 
 	// These have to match shaders/modules/fs_tonemapping.gls!
 	enum class ToneMapping : uint8_t {

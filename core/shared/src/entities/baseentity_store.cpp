@@ -86,7 +86,7 @@ bool BaseEntity::CreateMemberReference(pragma::EntityIdentifier identifier, std:
 		outRef = pragma::EntityUComponentMemberRef {std::move(identifier), "", ""};
 		return true;
 	}
-	util::Path path {std::move(var)};
+	auto path = util::RelFile(std::move(var));
 	size_t offset = 0;
 	if(path.GetComponent(offset, &offset) != "ec") {
 		outRef = pragma::EntityUComponentMemberRef {std::move(identifier), "", ""};
@@ -107,7 +107,7 @@ bool BaseEntity::ParseUri(std::string uriPath, pragma::EntityUComponentMemberRef
 		return false;
 	auto uriPathNorm = uri.path();
 	ustring::replace(uriPathNorm, "%20", " ");
-	util::Path path {uriPathNorm};
+	auto path = util::RelFile(uriPathNorm);
 	size_t offset = 0;
 	if(path.GetComponent(offset, &offset) != "game" || path.GetComponent(offset, &offset) != "entity")
 		return false;

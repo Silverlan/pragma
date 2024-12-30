@@ -16,15 +16,16 @@ namespace pragma {
 	struct ComponentMemberInfo;
 	struct DLLNETWORK AnimationChannelCacheData {
 		enum class State : uint8_t {
-			Initial = 0,
-			Changed,
-			Unchanged,
+			None = 0,
+			Dirty = 1u,
+			AlwaysDirty = Dirty << 1u,
 		};
 		pragma::BaseEntityComponent *component;
 		const pragma::ComponentMemberInfo *memberInfo;
-		State changed = State::Initial;
+		State changed = State::Dirty;
 		std::array<float, 16> data;
 	};
 };
+REGISTER_BASIC_BITWISE_OPERATORS(pragma::AnimationChannelCacheData::State);
 
 #endif

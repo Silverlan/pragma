@@ -32,10 +32,10 @@ panima::ChannelValueSubmitter get_member_channel_submitter(pragma::BaseEntityCom
 				Con::cout << "Changing channel value '" << channel.targetPath.ToUri() << " from " << to_string(curVal) << " to " << to_string(value) << " (t: " << t << ")..." << Con::endl;
 			}
 			auto &changed = const_cast<pragma::AnimationChannelCacheData &>(cacheData).changed;
-			if(changed != pragma::AnimationChannelCacheData::State::Initial && memcmp(const_cast<void *>(static_cast<const void *>(cacheData.data.data())), &value, sizeof(value)) == 0)
-				changed = pragma::AnimationChannelCacheData::State::Unchanged;
-			else
-				changed = pragma::AnimationChannelCacheData::State::Changed;
+			if(!umath::is_flag_set(changed, pragma::AnimationChannelCacheData::State::Dirty | pragma::AnimationChannelCacheData::State::AlwaysDirty)) {
+				if(memcmp(const_cast<void *>(static_cast<const void *>(cacheData.data.data())), &value, sizeof(value)) == 0)
+					changed |= pragma::AnimationChannelCacheData::State::Dirty;
+			}
 			memcpy(const_cast<void *>(static_cast<const void *>(cacheData.data.data())), &value, sizeof(value));
 			// setter(*memberInfo, component, &value, userData);
 		}

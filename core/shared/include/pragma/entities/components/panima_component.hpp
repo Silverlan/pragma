@@ -30,6 +30,12 @@ namespace pragma {
 	};
 	class DLLNETWORK PanimaComponent final : public BaseEntityComponent {
 	  public:
+		enum class PropertyFlags : uint8_t {
+			None = 0,
+			Disabled = 1u,
+			AlwaysDirty = Disabled << 1u,
+		};
+
 		static ComponentEventId EVENT_HANDLE_ANIMATION_EVENT;
 		static ComponentEventId EVENT_ON_PLAY_ANIMATION;
 		static ComponentEventId EVENT_ON_ANIMATION_COMPLETE;
@@ -73,6 +79,12 @@ namespace pragma {
 		void SetCurrentTimeFraction(panima::AnimationManager &manager, float t);
 		void ReloadAnimation();
 
+		bool SetPropertyFlag(const std::string &propName, PropertyFlags flag, bool enabled);
+		bool IsPropertyFlagSet(const std::string &propName, PropertyFlags flag) const;
+
+		bool SetPropertyAlwaysDirty(const std::string &propName, bool alwaysDirty);
+		bool IsPropertyAlwaysDirty(const std::string &propName) const;
+
 		void SetPropertyEnabled(const std::string &propName, bool enabled);
 		bool IsPropertyEnabled(const std::string &propName) const;
 		bool IsPropertyAnimated(panima::AnimationManager &manager, const std::string &propName) const;
@@ -86,6 +98,7 @@ namespace pragma {
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
 		using BaseEntityComponent::Load;
 	  protected:
+		bool UnsetPropertyFlags(const char *propName, PropertyFlags flags);
 		virtual void Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) override;
 		void UpdateAnimationData(GlobalAnimationChannelQueueProcessor *channelQueueProcessor, AnimationManagerData &amd);
 		bool GetRawAnimatedPropertyValue(panima::AnimationManager &manager, const std::string &propName, udm::Type type, void *outValue, const ComponentMemberInfo **optOutMemberInfo, pragma::BaseEntityComponent **optOutComponent) const;
@@ -96,7 +109,7 @@ namespace pragma {
 		void ResetAnimation(const std::shared_ptr<Model> &mdl);
 		util::PFloatProperty m_playbackRate = nullptr;
 		std::vector<std::shared_ptr<AnimationManagerData>> m_animationManagers;
-		std::unordered_set<const char *> m_disabledProperties;
+		std::unordered_map<const char *, PropertyFlags> m_propertyFlags;
 	};
 
 	struct DLLNETWORK CEAnim2OnAnimationComplete : public ComponentEvent {
@@ -150,5 +163,6 @@ namespace pragma {
 		panima::ChannelValueSubmitter submitter {};
 	};
 };
+REGISTER_BASIC_BITWISE_OPERATORS(pragma::PanimaComponent::PropertyFlags);
 
 #endif

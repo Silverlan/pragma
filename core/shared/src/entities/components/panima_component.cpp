@@ -237,27 +237,52 @@ bool PanimaComponent::IsPropertyAnimated(panima::AnimationManager &manager, cons
 	return false;
 }
 
+bool PanimaComponent::UnsetPropertyFlags(const char *propName, PropertyFlags flags)
+{
+	auto it = m_propertyFlags.find(propName);
+	if(it == m_propertyFlags.end())
+		return false;
+	auto hasFlags = umath::is_flag_set(it->second, flags);
+	it->second &= ~flags;
+	if(it->second == PropertyFlags::None)
+		m_propertyFlags.erase(it);
+	return hasFlags;
+}
+
+bool PanimaComponent::SetPropertyFlag(const std::string &propName, PropertyFlags flag, bool enabled)
+{
+	panima::ChannelPath channelPath {propName};
+	auto normalizedPath = channelPath.ToUri(false);
+	auto *cnorm = pragma::register_global_string(normalizedPath);
+	if(!enabled)
+		return UnsetPropertyFlags(cnorm, flag);
+	auto it = m_propertyFlags.find(cnorm);
+	if(it == m_propertyFlags.end())
+		it = m_propertyFlags.insert(std::make_pair(cnorm, PropertyFlags::None)).first;
+	else if(umath::is_flag_set(it->second, flag))
+		return false;
+	it->second |= flag;
+	InitializeAnimationChannelValueSubmitters();
+	return true;
+}
+
+bool PanimaComponent::IsPropertyFlagSet(const std::string &propName, PropertyFlags flag) const
+{
+	panima::ChannelPath channelPath {propName};
+	auto normalizedPath = channelPath.ToUri(false);
+	auto it = m_propertyFlags.find(pragma::register_global_string(normalizedPath));
+	return it != m_propertyFlags.end() && umath::is_flag_set(it->second, flag);
+}
+
+bool PanimaComponent::SetPropertyAlwaysDirty(const std::string &propName, bool alwaysDirty) { return SetPropertyFlag(propName, PropertyFlags::AlwaysDirty, alwaysDirty); }
+bool PanimaComponent::IsPropertyAlwaysDirty(const std::string &propName) const { return IsPropertyFlagSet(propName, PropertyFlags::AlwaysDirty); }
+
 void PanimaComponent::SetPropertyEnabled(const std::string &propName, bool enabled)
 {
-	panima::ChannelPath channelPath {propName};
-	auto normalizedPath = channelPath.ToUri(false);
-	if(enabled) {
-		auto it = m_disabledProperties.find(pragma::register_global_string(normalizedPath));
-		if(it != m_disabledProperties.end()) {
-			m_disabledProperties.erase(it);
-			InitializeAnimationChannelValueSubmitters();
-		}
-		return;
-	}
-	m_disabledProperties.insert(pragma::register_global_string(normalizedPath));
-	InitializeAnimationChannelValueSubmitters();
+	if(SetPropertyFlag(propName, PropertyFlags::Disabled, !enabled))
+		InitializeAnimationChannelValueSubmitters();
 }
-bool PanimaComponent::IsPropertyEnabled(const std::string &propName) const
-{
-	panima::ChannelPath channelPath {propName};
-	auto normalizedPath = channelPath.ToUri(false);
-	return m_disabledProperties.find(pragma::register_global_string(normalizedPath)) == m_disabledProperties.end();
-}
+bool PanimaComponent::IsPropertyEnabled(const std::string &propName) const { return !IsPropertyFlagSet(propName, PropertyFlags::Disabled); }
 bool PanimaComponent::GetRawAnimatedPropertyValue(panima::AnimationManager &manager, const std::string &propName, udm::Type type, void *outValue, const ComponentMemberInfo **optOutMemberInfo, pragma::BaseEntityComponent **optOutComponent) const
 {
 	if(optOutMemberInfo)
@@ -471,6 +496,9 @@ void PanimaComponent::InitializeAnimationChannelValueSubmitters(AnimationManager
 
 		channelCache[channelIdx].component = hComponent.get();
 		channelCache[channelIdx].memberInfo = memberInfo;
+		channelCache[channelIdx].changed = pragma::AnimationChannelCacheData::State::Dirty;
+		if(IsPropertyAlwaysDirty(path))
+			channelCache[channelIdx].changed |= pragma::AnimationChannelCacheData::State::AlwaysDirty;
 
 		auto vsGetMemberChannelSubmitter = [this, valueComponents, &path, &memberIdx, channelIdx, &channelValueSubmitters, &channelCache, &component]<typename TMember>(auto tag) mutable {
 			using TChannel = typename decltype(tag)::type;
@@ -712,10 +740,10 @@ void PanimaComponent::ApplyAnimationValues(GlobalAnimationChannelQueueProcessor 
 				auto &channelCacheData = cacheData[i];
 				auto &component = *channelCacheData.component;
 				auto &memberInfo = *channelCacheData.memberInfo;
-				if(channelCacheData.changed != pragma::AnimationChannelCacheData::State::Changed)
+				if(!umath::is_flag_set(channelCacheData.changed, pragma::AnimationChannelCacheData::State::Dirty | pragma::AnimationChannelCacheData::State::AlwaysDirty))
 					continue;
 				memberInfo.setterFunction(memberInfo, component, channelCacheData.data.data());
-				channelCacheData.changed = pragma::AnimationChannelCacheData::State::Unchanged;
+				umath::set_flag(channelCacheData.changed, pragma::AnimationChannelCacheData::State::Dirty, false);
 			}
 		}
 	}

@@ -17,6 +17,7 @@ namespace pragma::rendering::shader_graph {
 	  public:
 		static constexpr const char *IN_COLOR = "color";
 		static constexpr const char *IN_ALPHA = "alpha";
+		static constexpr const char *IN_ALPHA_CUTOFF = "alphaCutoff";
 		static constexpr const char *IN_BLOOM_COLOR = "bloomColor";
 		static constexpr const char *CONST_ALPHA_MODE = "alphaMode";
 		// TODO: Only allow one of these!

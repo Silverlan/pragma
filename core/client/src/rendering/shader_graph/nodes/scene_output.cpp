@@ -14,6 +14,7 @@ SceneOutputNode::SceneOutputNode(const std::string_view &type) : Node {type}
 {
 	AddInput(IN_COLOR, pragma::shadergraph::DataType::Color, Vector3 {1.f, 1.f, 1.f});
 	AddInput(IN_ALPHA, pragma::shadergraph::DataType::Float, 1.f);
+	AddInput(IN_ALPHA_CUTOFF, pragma::shadergraph::DataType::Float, 0.5f);
 	AddInput(IN_BLOOM_COLOR, pragma::shadergraph::DataType::Color, Vector3 {0.f, 0.f, 0.f});
 
 	AddSocketEnum<AlphaMode>(CONST_ALPHA_MODE, AlphaMode::Opaque);
@@ -27,8 +28,9 @@ std::string SceneOutputNode::DoEvaluate(const pragma::shadergraph::Graph &graph,
 
 	auto alphaMode = *gn.GetConstantInputValue<AlphaMode>(CONST_ALPHA_MODE);
 	if(alphaMode == AlphaMode::Mask) {
+		auto alphaCutoff = GetInputNameOrValue(gn, IN_ALPHA_CUTOFF);
 		// TODO: Use alpha cutoff value
-		code << "if(fs_color.a < 0.5)\n";
+		code << "if(fs_color.a < " << alphaCutoff << ")\n";
 		code << "\tdiscard;\n";
 	}
 

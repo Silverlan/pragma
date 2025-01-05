@@ -42,6 +42,7 @@ namespace pragma {
 		bool HasBones() const;
 		using BaseAnimatedComponent::PlayAnimation;
 
+		virtual bool UpdateBonePoses() override;
 		const prosper::IBuffer *GetBoneBuffer() const;
 		const std::vector<Mat4> &GetBoneMatrices() const;
 		std::vector<Mat4> &GetBoneMatrices();

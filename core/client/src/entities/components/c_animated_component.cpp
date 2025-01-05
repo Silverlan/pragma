@@ -250,6 +250,14 @@ bool CAnimatedComponent::MaintainAnimations(double dt)
 	return true;
 }
 
+bool CAnimatedComponent::UpdateBonePoses()
+{
+	auto updated = BaseAnimatedComponent::UpdateBonePoses();
+	if(updated)
+		SetBoneBufferDirty();
+	return updated;
+}
+
 void CAnimatedComponent::UpdateBoneMatricesMT()
 {
 	auto &mdl = GetEntity().GetModel();
@@ -258,8 +266,7 @@ void CAnimatedComponent::UpdateBoneMatricesMT()
 	auto *bindPose = GetBindPose();
 	if(m_boneMatrices.empty() || bindPose == nullptr)
 		return;
-	if(UpdateSkeleton()) // Costly
-		SetBoneBufferDirty();
+	UpdateSkeleton();
 	auto physRootBoneId = OnSkeletonUpdated();
 
 	auto callbacksEnabled = AreSkeletonUpdateCallbacksEnabled();

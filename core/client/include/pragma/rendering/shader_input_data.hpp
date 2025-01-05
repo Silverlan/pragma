@@ -102,6 +102,8 @@ namespace pragma::rendering {
 				using TProp = typename decltype(tag)::type;
 				if constexpr(udm::is_convertible<T, TProp>()) {
 					auto convVal = udm::convert<T, TProp>(val);
+					if(memcmp(ptr, &convVal, sizeof(convVal)) == 0)
+						return false; // No need to update
 					memcpy(ptr, &convVal, sizeof(convVal));
 					return true;
 				}

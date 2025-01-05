@@ -378,6 +378,8 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 			  return {};
 		  return poses;
 	  });
+	classDef.def("CalcNormalizedMetaBoneRotation", &::Model::CalcNormalizedMetaBoneRotation);
+	classDef.def("RetargetMetaBoneRotation", &::Model::RetargetMetaBoneRotation);
 	classDef.def("GetMetaRigBoneParentId", &::Model::GetMetaRigBoneParentId);
 	classDef.def("GetTextureGroupCount", &Lua::Model::GetTextureGroupCount);
 	classDef.def("GetTextureGroups", &Lua::Model::GetTextureGroups);
@@ -456,8 +458,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	classDef.def("GetLOD", &Lua::Model::GetLOD);
 	classDef.def("GenerateLowLevelLODs", &::Model::GenerateLowLevelLODs);
 	classDef.def("GenerateCollisionMeshes", &::Model::GenerateCollisionMeshes);
-	classDef.def(
-	  "GenerateCollisionMeshes", +[](::Model &mdl, bool convex, float mass) -> bool { return mdl.GenerateCollisionMeshes(convex, mass); });
+	classDef.def("GenerateCollisionMeshes", +[](::Model &mdl, bool convex, float mass) -> bool { return mdl.GenerateCollisionMeshes(convex, mass); });
 	classDef.def("TranslateLODMeshes", static_cast<void (*)(lua_State *, ::Model &, uint32_t, luabind::object)>(&Lua::Model::TranslateLODMeshes));
 	classDef.def("TranslateLODMeshes", static_cast<void (*)(lua_State *, ::Model &, uint32_t)>(&Lua::Model::TranslateLODMeshes));
 	classDef.def("GetJoints", &Lua::Model::GetJoints);
@@ -494,8 +495,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 		  return mdl.GetFlexControllers().size() - 1;
 	  });
 	classDef.def("GetFlexes", &Lua::Model::GetFlexes);
-	classDef.def(
-	  "AddFlex", +[](::Model &mdl, const ::Flex &flex) { mdl.GetFlexes().push_back(flex); });
+	classDef.def("AddFlex", +[](::Model &mdl, const ::Flex &flex) { mdl.GetFlexes().push_back(flex); });
 	classDef.def("LookupFlex", &Lua::Model::GetFlexId);
 	classDef.def("GetFlexFormula", static_cast<void (*)(lua_State *, ::Model &, const std::string &)>(&Lua::Model::GetFlexFormula));
 	classDef.def("GetFlexFormula", static_cast<void (*)(lua_State *, ::Model &, uint32_t)>(&Lua::Model::GetFlexFormula));
@@ -748,11 +748,9 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 		  ss << "[" << flex.GetName() << "]";
 		  return ss.str();
 	  });
-	classDefFlex.def(
-	  "SetName", +[](::Flex &flex, const std::string &name) { flex.SetName(name); });
+	classDefFlex.def("SetName", +[](::Flex &flex, const std::string &name) { flex.SetName(name); });
 	classDefFlex.def("GetName", static_cast<void (*)(lua_State *, ::Flex &)>([](lua_State *l, ::Flex &flex) { Lua::PushString(l, flex.GetName()); }));
-	classDefFlex.def(
-	  "AddOperation", +[](::Flex &flex, const ::Flex::Operation &op) { flex.GetOperations().push_back(op); });
+	classDefFlex.def("AddOperation", +[](::Flex &flex, const ::Flex::Operation &op) { flex.GetOperations().push_back(op); });
 	classDefFlex.def("GetOperations", static_cast<void (*)(lua_State *, ::Flex &)>([](lua_State *l, ::Flex &flex) {
 		auto t = Lua::CreateTable(l);
 		auto &ops = flex.GetOperations();
@@ -800,8 +798,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	classDefFlexOp.def_readwrite("type", reinterpret_cast<uint32_t Flex::Operation::*>(&Flex::Operation::type));
 	classDefFlexOp.def_readwrite("index", reinterpret_cast<int32_t Flex::Operation::*>(&Flex::Operation::d));
 	classDefFlexOp.def_readwrite("value", reinterpret_cast<float Flex::Operation::*>(&Flex::Operation::d));
-	classDefFlexOp.def(
-	  "SetName", +[](::Flex &flex, const std::string name) { flex.SetName(name); });
+	classDefFlexOp.def("SetName", +[](::Flex &flex, const std::string name) { flex.SetName(name); });
 	classDefFlexOp.def("GetName", static_cast<void (*)(lua_State *, ::Flex &)>([](lua_State *l, ::Flex &flex) { Lua::PushString(l, flex.GetName()); }));
 	classDefFlex.scope[classDefFlexOp];
 
@@ -992,10 +989,8 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	defBoneInfo.def_readwrite("radius", &pragma::animation::MetaRigBone::radius);
 	defBoneInfo.def_readwrite("length", &pragma::animation::MetaRigBone::length);
 	defBoneInfo.def_readwrite("normalizedRotationOffset", &pragma::animation::MetaRigBone::normalizedRotationOffset);
-	defBoneInfo.property(
-	  "min", +[](const pragma::animation::MetaRigBone &boneInfo) -> Vector3 { return boneInfo.bounds.first; }, +[](pragma::animation::MetaRigBone &boneInfo, const Vector3 &min) { boneInfo.bounds.first = min; });
-	defBoneInfo.property(
-	  "max", +[](const pragma::animation::MetaRigBone &boneInfo) -> Vector3 { return boneInfo.bounds.second; }, +[](pragma::animation::MetaRigBone &boneInfo, const Vector3 &max) { boneInfo.bounds.second = max; });
+	defBoneInfo.property("min", +[](const pragma::animation::MetaRigBone &boneInfo) -> Vector3 { return boneInfo.bounds.first; }, +[](pragma::animation::MetaRigBone &boneInfo, const Vector3 &min) { boneInfo.bounds.first = min; });
+	defBoneInfo.property("max", +[](const pragma::animation::MetaRigBone &boneInfo) -> Vector3 { return boneInfo.bounds.second; }, +[](pragma::animation::MetaRigBone &boneInfo, const Vector3 &max) { boneInfo.bounds.second = max; });
 	classDef.scope[defBoneInfo];
 
 	auto defBlendShapeInfo = luabind::class_<pragma::animation::MetaRigBlendShape>("MetaRigBlendShape");
@@ -1301,8 +1296,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	classDefVertexAnimation.scope[classDefMeshVertexAnimation];
 
 	auto classDefSkeleton = luabind::class_<pragma::animation::Skeleton>("Skeleton");
-	classDefSkeleton.scope[luabind::def(
-	  "create", +[]() { return std::make_shared<pragma::animation::Skeleton>(); })];
+	classDefSkeleton.scope[luabind::def("create", +[]() { return std::make_shared<pragma::animation::Skeleton>(); })];
 	classDefSkeleton.def(
 	  "DebugPrint", +[](const pragma::animation::Skeleton &skeleton) {
 		  std::stringstream ss;

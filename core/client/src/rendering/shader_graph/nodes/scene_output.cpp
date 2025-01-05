@@ -30,7 +30,7 @@ std::string SceneOutputNode::DoEvaluate(const pragma::shadergraph::Graph &graph,
 	if(alphaMode == AlphaMode::Mask) {
 		auto alphaCutoff = GetInputNameOrValue(gn, IN_ALPHA_CUTOFF);
 		// TODO: Use alpha cutoff value
-		code << "if(fs_color.a < " << alphaCutoff << ")\n";
+		code << "if(fs_color.a <= " << alphaCutoff << ")\n";
 		code << "\tdiscard;\n";
 	}
 

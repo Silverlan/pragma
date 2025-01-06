@@ -37,6 +37,7 @@ namespace pragma {
 	  public:
 		static void RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts);
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
+		static void DebugPrintProperties();
 
 		CGlobalShaderInputComponent(BaseEntity &ent);
 

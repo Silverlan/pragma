@@ -11,9 +11,11 @@
 #include "pragma/rendering/global_shader_input_manager.hpp"
 #include "pragma/lua/lua_util_component.hpp"
 #include <pragma/entities/entity_component_manager_t.hpp>
+#include <pragma/entities/entity_iterator.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
 extern DLLCLIENT CGame *c_game;
+extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
@@ -92,6 +94,9 @@ const std::string *UdmPropertyList::GetPropertyName(size_t index) const { return
 
 void CGlobalShaderInputComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts)
 {
+	// TODO: This should be moved to a more appropriate location
+	client->RegisterConCommand("debug_print_shader_input_properties", +[](NetworkState *nw, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv, float) { CGlobalShaderInputComponent::DebugPrintProperties(); });
+
 	auto def = pragma::lua::create_entity_component_class<pragma::CGlobalShaderInputComponent, pragma::BaseEntityComponent>("GlobalShaderInputComponent");
 	modEnts[def];
 }
@@ -104,6 +109,57 @@ void CGlobalShaderInputComponent::RegisterMembers(pragma::EntityComponentManager
 		  +[](const ComponentMemberInfo &memberInfo, CGlobalShaderInputComponent &component, pragma::ents::Element &value) { value = component.m_propertyList.GetUdmData(); }>("properties");
 		registerMember(std::move(memberInfo));
 	}
+}
+
+void CGlobalShaderInputComponent::DebugPrintProperties()
+{
+	if(!c_game) {
+		Con::cwar << "No game instance available" << Con::endl;
+		return;
+	}
+	auto &inputDataManager = c_game->GetGlobalShaderInputDataManager();
+	auto &descriptor = inputDataManager.GetDescriptor();
+	auto &buf = inputDataManager.GetBuffer();
+	auto &propMap = descriptor.GetPropertyMap();
+	auto &props = descriptor.properties;
+
+	if(props.empty()) {
+		Con::cwar << "No global shader input properties available" << Con::endl;
+		return;
+	}
+
+	pragma::rendering::ShaderInputData inputData {descriptor};
+	inputData.ResizeToDescriptor();
+	if(!buf->Read(0, inputData.data.size(), inputData.data.data())) {
+		Con::cwar << "Failed to read global shader input data" << Con::endl;
+		return;
+	}
+
+	std::stringstream ss;
+	ss << std::left << std::setw(20) << "Property Name" << std::setw(10) << "Offset" << std::setw(10) << "Size"
+	   << "Value" << "\n";
+	ss << std::string(50, '-') << "\n"; // Add a separator line
+	for(auto &[name, propIdx] : propMap) {
+		auto &prop = props.at(propIdx);
+		auto size = prop.GetSize();
+		auto offset = prop.offset;
+		auto udmType = pragma::shadergraph::to_udm_type(prop->type);
+		auto strVal = udm::visit_ng(udmType, [&inputData, &name](auto tag) -> std::optional<std::string> {
+			using TProp = typename decltype(tag)::type;
+			if constexpr(pragma::shadergraph::is_data_type_v<TProp> && udm::is_convertible<TProp, std::string>()) {
+				auto val = inputData.GetValue<TProp>(name.c_str());
+				if(!val)
+					return {};
+				return udm::convert<TProp, std::string>(*val);
+			}
+			return {};
+		});
+		// Format and add the property information to the stream
+		ss << std::left << std::setw(20) << name << std::setw(10) << offset << std::setw(10) << size << (strVal ? *strVal : "N/A") // Handle optional value
+		   << "\n";
+	}
+	Con::cout << "Global shader input properties:\n";
+	Con::cout << ss.str() << Con::endl;
 }
 
 CGlobalShaderInputComponent::CGlobalShaderInputComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}

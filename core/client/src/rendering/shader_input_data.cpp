@@ -98,8 +98,11 @@ std::optional<pragma::shadergraph::Value> ShaderInputDescriptor::parse_flags_exp
 
 ShaderInputDescriptor::ShaderInputDescriptor(const pragma::GString &name) : name {name} {}
 
-void ShaderInputDescriptor::AddProperty(Property &&prop)
+bool ShaderInputDescriptor::AddProperty(Property &&prop)
 {
+	auto it = m_propertyMap.find(prop.parameter.name);
+	if(it != m_propertyMap.end())
+		return false; // TODO: Update min, max, etc.
 	size_t offset = 0;
 	if(!properties.empty()) {
 		auto &lastProp = properties.back();
@@ -108,6 +111,7 @@ void ShaderInputDescriptor::AddProperty(Property &&prop)
 	properties.push_back(std::move(prop));
 	properties.back().offset = offset;
 	m_propertyMap[properties.back().parameter.name] = properties.size() - 1;
+	return true;
 }
 
 bool ShaderInputDescriptor::LoadFromUdmData(udm::LinkedPropertyWrapperArg prop, std::string &outErr)

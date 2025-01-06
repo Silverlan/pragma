@@ -281,8 +281,26 @@ void CGlobalShaderInputComponent::UpdateMembers()
 		toRemove.pop();
 	}
 
-	for(auto &memberInfo : newMembers)
+	for(auto &memberInfo : newMembers) {
+		auto udmType = pragma::ents::member_type_to_udm_type(memberInfo.type);
+		pragma::rendering::Property prop {memberInfo.GetName(), pragma::shadergraph::to_data_type(udmType)};
+		auto min = memberInfo.GetMin();
+		if(min)
+			prop->min = *min;
+		auto max = memberInfo.GetMax();
+		if(max)
+			prop->max = *max;
+
+		udm::visit_ng(udmType, [&memberInfo, &prop](auto tag) {
+			using T = typename decltype(tag)::type;
+			T defVal;
+			if(memberInfo.GetDefault<T>(defVal))
+				prop->defaultValue.Set(defVal);
+		});
+
+		c_game->GetGlobalShaderInputDataManager().AddProperty(std::move(prop));
 		RegisterMember(std::move(memberInfo));
+	}
 
 	OnMembersChanged();
 }

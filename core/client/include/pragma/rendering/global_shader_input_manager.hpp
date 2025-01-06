@@ -68,6 +68,7 @@ namespace pragma::rendering {
 			auto *prop = m_inputDescriptor->FindProperty(name.data());
 			if(!prop)
 				return false;
+			UpdateInputData();
 			if(!m_inputData->SetValue<T>(name.data(), val))
 				return false;
 			m_dirtyTracker.MarkRange(prop->offset, sizeof(T));
@@ -80,6 +81,7 @@ namespace pragma::rendering {
 			auto *prop = m_inputDescriptor->FindProperty(name.data());
 			if(!prop)
 				return false;
+			const_cast<GlobalShaderInputDataManager *>(this)->UpdateInputData();
 			auto val = m_inputData->GetValue<T>(name.data());
 			if(!val)
 				return false;
@@ -92,11 +94,14 @@ namespace pragma::rendering {
 		const std::shared_ptr<prosper::IBuffer> &GetBuffer() const { return m_inputDataBuffer; }
 
 		void UpdateBufferData(prosper::ICommandBuffer &cmd);
+		void AddProperty(pragma::rendering::Property &&prop);
 		void PopulateProperties(const pragma::shadergraph::Graph &graph);
 	  private:
 		void ResetInputDescriptor();
+		void AllocateInputData();
 		void ReallocateBuffer();
-		void Clear();
+		void UpdateInputData();
+		void ClearBuffer();
 
 		DirtyRangeTracker m_dirtyTracker;
 

@@ -221,19 +221,19 @@ void CRendererPpMotionBlurComponent::RecordVelocityPass(const util::DrawSceneInf
 			if(drawSceneInfo.renderStats)
 				drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::Prepass)->SetTime(RenderPassStats::Timer::RenderThreadWait, std::chrono::steady_clock::now() - t);
 			for(auto i = decltype(worldRenderQueues.size()) {0u}; i < worldRenderQueues.size(); ++i)
-				rsys.Render(*worldRenderQueues.at(i), nullptr, i);
+				rsys.Render(*worldRenderQueues.at(i), pragma::rendering::RenderPass::Prepass, nullptr, i);
 		}
 
 		// Note: The non-translucent render queues also include transparent (alpha masked) objects.
 		// We don't care about translucent objects here.
 		if((renderPassDrawInfo.drawSceneInfo.renderFlags & RenderFlags::World) != RenderFlags::None) {
-			rsys.Render(*sceneRenderDesc.GetRenderQueue(pragma::rendering::SceneRenderPass::World, false /* translucent */));
+			rsys.Render(*sceneRenderDesc.GetRenderQueue(pragma::rendering::SceneRenderPass::World, false /* translucent */), pragma::rendering::RenderPass::Prepass);
 
 			auto &queueTranslucent = *sceneRenderDesc.GetRenderQueue(pragma::rendering::SceneRenderPass::World, true /* translucent */);
 			queueTranslucent.WaitForCompletion();
 			if(queueTranslucent.queue.empty() == false) {
 				// rsys.BindShader(shaderPrepass,umath::to_integral(pragma::ShaderPrepass::Pipeline::AlphaTest));
-				rsys.Render(queueTranslucent);
+				rsys.Render(queueTranslucent, pragma::rendering::RenderPass::Prepass);
 			}
 		}
 		rsys.UnbindShader();

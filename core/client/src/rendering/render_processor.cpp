@@ -614,18 +614,19 @@ void pragma::rendering::BaseRenderProcessor::RecordViewport()
 	m_drawSceneInfo.commandBuffer->RecordSetScissor(extents.width, extents.height);
 }
 
-uint32_t pragma::rendering::BaseRenderProcessor::Render(const pragma::rendering::RenderQueue &renderQueue, bool prepass, RenderPassStats *optStats, std::optional<uint32_t> worldRenderQueueIndex)
+uint32_t pragma::rendering::BaseRenderProcessor::Render(const pragma::rendering::RenderQueue &renderQueue, RenderPass pass, RenderPassStats *optStats, std::optional<uint32_t> worldRenderQueueIndex)
 {
 	std::chrono::steady_clock::time_point t;
 	if(optStats)
 		t = std::chrono::steady_clock::now();
 
 	renderQueue.WaitForCompletion(optStats);
-	if(m_renderer == nullptr || (prepass && umath::is_flag_set(m_stateFlags, StateFlags::ShaderBound) == false))
+	auto isDepthPass = (pass == RenderPass::Prepass || pass == RenderPass::Shadow);
+	if(m_renderer == nullptr || (isDepthPass && umath::is_flag_set(m_stateFlags, StateFlags::ShaderBound) == false))
 		return 0;
 	m_stats = optStats;
 	m_shaderProcessor.SetStats(m_stats);
-	if(!prepass)
+	if(!isDepthPass)
 		UnbindShader();
 	else {
 		m_prepassIsCurScenePipelineTranslucent = false;
@@ -633,7 +634,7 @@ uint32_t pragma::rendering::BaseRenderProcessor::Render(const pragma::rendering:
 	}
 
 	auto &scene = *m_drawSceneInfo.drawSceneInfo.scene;
-	auto &referenceShader = prepass ? c_game->GetGameShader(CGame::GameShader::Prepass) : c_game->GetGameShader(CGame::GameShader::Pbr);
+	auto &referenceShader = isDepthPass ? c_game->GetGameShader(CGame::GameShader::Prepass) : c_game->GetGameShader(CGame::GameShader::Pbr);
 	auto view = (m_camType == CameraType::View) ? true : false;
 	if(referenceShader.expired())
 		return 0;
@@ -672,7 +673,7 @@ uint32_t pragma::rendering::BaseRenderProcessor::Render(const pragma::rendering:
 		}
 		if(worldRenderQueueIndex.has_value() && sceneRenderDesc.IsWorldMeshVisible(*worldRenderQueueIndex, item.mesh) == false)
 			continue;
-		if(!prepass) {
+		if(!isDepthPass) {
 			if(item.pipelineId != m_curPipeline) {
 				if(optStats)
 					ttmp = std::chrono::steady_clock::now();
@@ -687,7 +688,8 @@ uint32_t pragma::rendering::BaseRenderProcessor::Render(const pragma::rendering:
 			if(item.pipelineId != m_prepassCurScenePipeline) {
 				uint32_t pipelineIdx;
 				auto *shader = dynamic_cast<pragma::ShaderGameWorldLightingPass *>(c_engine->GetRenderContext().GetShaderPipeline(item.pipelineId, pipelineIdx));
-				m_prepassIsCurScenePipelineTranslucent = shader && shader->IsTranslucentPipeline(pipelineIdx);
+				if(pass == RenderPass::Prepass)
+					m_prepassIsCurScenePipelineTranslucent = shader && shader->IsTranslucentPipeline(pipelineIdx);
 				m_prepassCurScenePipeline = item.pipelineId;
 			}
 			if(m_prepassIsCurScenePipelineTranslucent)
@@ -698,7 +700,7 @@ uint32_t pragma::rendering::BaseRenderProcessor::Render(const pragma::rendering:
 				ttmp = std::chrono::steady_clock::now();
 			auto *mat = item.GetMaterial();
 			assert(mat);
-			if(prepass) {
+			if(isDepthPass) {
 				// Hack: Transparent objects do not need to be depth-sorted, so they're part of
 				// the regular opaque pass. For the lighting pass this doesn't matter, but
 				// the regular depth prepass doesn't do any texture lookups, so we may have to
@@ -729,7 +731,7 @@ uint32_t pragma::rendering::BaseRenderProcessor::Render(const pragma::rendering:
 			if(inInstancedEntityGroup == false) {
 				auto *ent = item.GetEntity();
 				assert(ent);
-				if(prepass) {
+				if(isDepthPass) {
 					// Skip translucent objects for prepass
 					auto &rbd = ent->GetRenderComponent()->GetInstanceData();
 					if(rbd.color.a < 1.f)

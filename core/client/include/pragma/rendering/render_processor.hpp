@@ -46,6 +46,11 @@ namespace pragma::rendering {
 
 		Count
 	};
+	enum class RenderPass : uint8_t {
+		Prepass = 0,
+		Lighting,
+		Shadow,
+	};
 
 	class DLLCLIENT ShaderProcessor {
 	  public:
@@ -61,9 +66,9 @@ namespace pragma::rendering {
 		void SetClipPlane(const std::optional<Vector4> &clipPlane) { m_clipPlane = clipPlane; }
 
 		inline prosper::ICommandBuffer &GetCommandBuffer() const { return m_cmdBuffer; }
-        inline prosper::IShaderPipelineLayout &GetCurrentPipelineLayout() const { return *m_currentPipelineLayout; }
-        CBaseEntity &GetCurrentEntity() const;
-        const pragma::CSceneComponent &GetCurrentScene() const;
+		inline prosper::IShaderPipelineLayout &GetCurrentPipelineLayout() const { return *m_currentPipelineLayout; }
+		CBaseEntity &GetCurrentEntity() const;
+		const pragma::CSceneComponent &GetCurrentScene() const;
 		PassType GetPassType() const { return m_passType; }
 	  private:
 		bool RecordBindScene(const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, const pragma::ShaderGameWorld &referenceShader, bool view);
@@ -127,7 +132,7 @@ namespace pragma::rendering {
 		void RecordViewport();
 		const util::RenderPassDrawInfo &GetRenderPassDrawInfo() const { return m_drawSceneInfo; }
 	  protected:
-		uint32_t Render(const pragma::rendering::RenderQueue &renderQueue, bool bindShaders, RenderPassStats *optStats = nullptr, std::optional<uint32_t> worldRenderQueueIndex = {});
+		uint32_t Render(const pragma::rendering::RenderQueue &renderQueue, RenderPass pass, RenderPassStats *optStats = nullptr, std::optional<uint32_t> worldRenderQueueIndex = {});
 		bool BindInstanceSet(pragma::ShaderGameWorld &shaderScene, const RenderQueue::InstanceSet *instanceSet = nullptr);
 		void UnbindMaterial();
 		void UnbindEntity();
@@ -164,7 +169,7 @@ namespace pragma::rendering {
 	class DLLCLIENT DepthStageRenderProcessor : public pragma::rendering::BaseRenderProcessor {
 	  public:
 		DepthStageRenderProcessor(const util::RenderPassDrawInfo &drawSceneInfo, const Vector4 &drawOrigin);
-		uint32_t Render(const pragma::rendering::RenderQueue &renderQueue, RenderPassStats *optStats = nullptr, std::optional<uint32_t> worldRenderQueueIndex = {});
+		uint32_t Render(const pragma::rendering::RenderQueue &renderQueue, RenderPass renderPass, RenderPassStats *optStats = nullptr, std::optional<uint32_t> worldRenderQueueIndex = {});
 		void BindLight(CLightComponent &light, uint32_t layerId);
 	};
 

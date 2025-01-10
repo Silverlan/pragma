@@ -109,11 +109,15 @@ static const auto SEPARATE_JOYSTICK_AXES = true;
 #include "pragma/rendering/shader_graph/nodes/object.hpp"
 #include "pragma/rendering/shader_graph/nodes/time.hpp"
 #include "pragma/rendering/shader_graph/nodes/pbr.hpp"
+#include "pragma/rendering/shader_graph/nodes/toon.hpp"
 #include "pragma/rendering/shader_graph/nodes/image_texture.hpp"
 #include "pragma/rendering/shader_graph/nodes/texture_coordinate.hpp"
 #include "pragma/rendering/shader_graph/nodes/vector_transform.hpp"
 #include "pragma/rendering/shader_graph/nodes/geometry.hpp"
+#include "pragma/rendering/shader_graph/nodes/material_texture.hpp"
+#include "pragma/rendering/shader_graph/nodes/input_parameter.hpp"
 #include "pragma/rendering/shader_graph/modules/pbr.hpp"
+#include "pragma/rendering/shader_graph/modules/toon.hpp"
 #include "pragma/rendering/shader_graph/modules/image_texture.hpp"
 #include "pragma/rendering/shader_graph/modules/input_data.hpp"
 
@@ -192,45 +196,6 @@ CEngine::CEngine(int argc, char *argv[])
 			wrapper->SetModel(*result->modelObjects.front());
 			return wrapper;
 		});
-	}
-
-	{
-		auto regBase = std::make_shared<pragma::shadergraph::NodeRegistry>();
-		regBase->RegisterNode<pragma::shadergraph::MathNode>("math");
-		regBase->RegisterNode<pragma::shadergraph::CombineXyzNode>("combine_xyz");
-		regBase->RegisterNode<pragma::shadergraph::SeparateXyzNode>("separate_xyz");
-		regBase->RegisterNode<pragma::shadergraph::VectorMathNode>("vector_math");
-		regBase->RegisterNode<pragma::shadergraph::MixNode>("mix");
-
-		auto regScene = std::make_shared<pragma::shadergraph::NodeRegistry>();
-		regScene->RegisterNode<pragma::rendering::shader_graph::SceneOutputNode>("output");
-		regScene->RegisterNode<pragma::rendering::shader_graph::CameraNode>("camera");
-		regScene->RegisterNode<pragma::rendering::shader_graph::FogNode>("fog");
-		regScene->RegisterNode<pragma::rendering::shader_graph::LightmapNode>("lightmap");
-		regScene->RegisterNode<pragma::rendering::shader_graph::ObjectNode>("object");
-		regScene->RegisterNode<pragma::rendering::shader_graph::TimeNode>("time");
-		regScene->RegisterNode<pragma::rendering::shader_graph::PbrNode>("pbr");
-		regScene->RegisterNode<pragma::rendering::shader_graph::ImageTextureNode>("image_texture");
-		regScene->RegisterNode<pragma::rendering::shader_graph::TextureCoordinateNode>("texture_coordinate");
-		regScene->RegisterNode<pragma::rendering::shader_graph::VectorTransformNode>("vector_transform");
-		regScene->RegisterNode<pragma::rendering::shader_graph::GeometryNode>("geometry");
-
-		auto shaderMat = pragma::rendering::shader_material::get_cache().Load("pbr");
-		auto node = std::make_shared<pragma::rendering::shader_graph::ShaderMaterialNode>("test", *shaderMat);
-		regScene->RegisterNode(node);
-
-		regScene->AddChildRegistry(regBase);
-
-		auto regPp = std::make_shared<pragma::shadergraph::NodeRegistry>();
-		regPp->AddChildRegistry(regBase);
-
-		m_shaderGraphManager = std::make_unique<pragma::rendering::ShaderGraphManager>();
-		m_shaderGraphManager->RegisterGraphTypeManager("post_processing", regPp);
-		m_shaderGraphManager->RegisterGraphTypeManager("object", regScene);
-
-		m_shaderGraphManager->GetModuleManager().RegisterFactory("pbr", [](pragma::ShaderGraph &shader) -> std::unique_ptr<pragma::rendering::ShaderGraphModule> { return std::make_unique<pragma::rendering::shader_graph::PbrModule>(shader); });
-		m_shaderGraphManager->GetModuleManager().RegisterFactory("image_texture", [](pragma::ShaderGraph &shader) -> std::unique_ptr<pragma::rendering::ShaderGraphModule> { return std::make_unique<pragma::rendering::shader_graph::ImageTextureModule>(shader); });
-		m_shaderGraphManager->GetModuleManager().RegisterFactory("input_data", [](pragma::ShaderGraph &shader) -> std::unique_ptr<pragma::rendering::ShaderGraphModule> { return std::make_unique<pragma::rendering::shader_graph::InputDataModule>(shader); });
 	}
 }
 
@@ -1146,6 +1111,96 @@ bool CEngine::Initialize(int argc, char *argv[])
 	}
 
 #endif
+
+	{
+		auto regBase = std::make_shared<pragma::shadergraph::NodeRegistry>();
+		regBase->RegisterNode<pragma::shadergraph::BlackbodyNode>("blackbody");
+		regBase->RegisterNode<pragma::shadergraph::BrightContrastNode>("bright_contrast");
+		regBase->RegisterNode<pragma::shadergraph::ClampNode>("clamp");
+		regBase->RegisterNode<pragma::shadergraph::ColorNode>("color");
+		regBase->RegisterNode<pragma::shadergraph::CombineXyzNode>("combine_xyz");
+		regBase->RegisterNode<pragma::shadergraph::GammaNode>("gamma");
+		regBase->RegisterNode<pragma::shadergraph::GroupNode>("group");
+		//regBase->RegisterNode<pragma::shadergraph::GroupInputNode>("group_input");
+		//regBase->RegisterNode<pragma::shadergraph::GroupOutputNode>("group_output");
+		regBase->RegisterNode<pragma::shadergraph::HsvNode>("hsv");
+		regBase->RegisterNode<pragma::shadergraph::InvertNode>("invert");
+		regBase->RegisterNode<pragma::shadergraph::LightFalloffNode>("light_falloff");
+		regBase->RegisterNode<pragma::shadergraph::MapRangeNode>("map_range_node");
+		regBase->RegisterNode<pragma::shadergraph::MappingNode>("mapping");
+		regBase->RegisterNode<pragma::shadergraph::MathNode>("math");
+		regBase->RegisterNode<pragma::shadergraph::MixNode>("mix");
+		regBase->RegisterNode<pragma::shadergraph::RgbRampNode>("rgb_ramp");
+		regBase->RegisterNode<pragma::shadergraph::RgbToBwNode>("rgb_to_bw");
+		regBase->RegisterNode<pragma::shadergraph::SepiaToneNode>("sepia_tone");
+		regBase->RegisterNode<pragma::shadergraph::SeparateXyzNode>("separate_xyz");
+		regBase->RegisterNode<pragma::shadergraph::ValueNode>("value");
+		regBase->RegisterNode<pragma::shadergraph::VectorDisplacementNode>("vector_displacement");
+		regBase->RegisterNode<pragma::shadergraph::VectorMapRangeNode>("vector_map_range");
+		regBase->RegisterNode<pragma::shadergraph::VectorMathNode>("vector_math");
+		regBase->RegisterNode<pragma::shadergraph::VectorRotateNode>("vector_rotate");
+		regBase->RegisterNode<pragma::shadergraph::VectorTransformNode>("vector_transform");
+		regBase->RegisterNode<pragma::shadergraph::WavelengthNode>("wavelength");
+
+		auto regScene = std::make_shared<pragma::shadergraph::NodeRegistry>();
+		regScene->RegisterNode<pragma::rendering::shader_graph::SceneOutputNode>("output");
+		regScene->RegisterNode<pragma::rendering::shader_graph::CameraNode>("camera");
+		regScene->RegisterNode<pragma::rendering::shader_graph::FogNode>("fog");
+		regScene->RegisterNode<pragma::rendering::shader_graph::LightmapNode>("lightmap");
+		regScene->RegisterNode<pragma::rendering::shader_graph::ObjectNode>("object");
+		regScene->RegisterNode<pragma::rendering::shader_graph::TimeNode>("time");
+		regScene->RegisterNode<pragma::rendering::shader_graph::PbrNode>("pbr");
+		regScene->RegisterNode<pragma::rendering::shader_graph::ToonNode>("toon");
+		regScene->RegisterNode<pragma::rendering::shader_graph::ImageTextureNode>("image_texture");
+		regScene->RegisterNode<pragma::rendering::shader_graph::MaterialTextureNode>("material_texture");
+		regScene->RegisterNode<pragma::rendering::shader_graph::TextureCoordinateNode>("texture_coordinate");
+		regScene->RegisterNode<pragma::rendering::shader_graph::VectorTransformNode>("vector_transform");
+		regScene->RegisterNode<pragma::rendering::shader_graph::GeometryNode>("geometry");
+		regScene->RegisterNode<pragma::rendering::shader_graph::InputParameterBooleanNode>("input_parameter_boolean");
+		regScene->RegisterNode<pragma::rendering::shader_graph::InputParameterIntNode>("input_parameter_int");
+		regScene->RegisterNode<pragma::rendering::shader_graph::InputParameterUIntNode>("input_parameter_uint");
+		regScene->RegisterNode<pragma::rendering::shader_graph::InputParameterUInt16Node>("input_parameter_uint16");
+		regScene->RegisterNode<pragma::rendering::shader_graph::InputParameterColorNode>("input_parameter_color");
+		regScene->RegisterNode<pragma::rendering::shader_graph::InputParameterVectorNode>("input_parameter_vector");
+		regScene->RegisterNode<pragma::rendering::shader_graph::InputParameterVector4Node>("input_parameter_vector4");
+		regScene->RegisterNode<pragma::rendering::shader_graph::InputParameterPointNode>("input_parameter_point");
+		regScene->RegisterNode<pragma::rendering::shader_graph::InputParameterNormalNode>("input_parameter_normal");
+		regScene->RegisterNode<pragma::rendering::shader_graph::InputParameterPoint2Node>("input_parameter_point2");
+		regScene->RegisterNode<pragma::rendering::shader_graph::InputParameterStringNode>("input_parameter_string");
+		regScene->RegisterNode<pragma::rendering::shader_graph::InputParameterTransformNode>("input_parameter_transform");
+		regScene->RegisterNode<pragma::rendering::shader_graph::InputParameterFloatNode>("input_parameter_float");
+
+		std::vector<std::string> files;
+		filemanager::find_files("scripts/shader_data/materials/*.udm", &files, nullptr);
+		for(auto &f : files) {
+			ufile::remove_extension_from_filename(f);
+			pragma::rendering::shader_material::get_cache().Load(f);
+		}
+
+		auto &cache = pragma::rendering::shader_material::get_cache();
+		for(auto &[name, mat] : cache.GetShaderMaterials()) {
+			auto nodeName = name;
+			nodeName = "sm_" + nodeName;
+			auto node = std::make_shared<pragma::rendering::shader_graph::ShaderMaterialNode>(pragma::GString {nodeName}, *mat);
+			regScene->RegisterNode(node);
+		}
+
+		regScene->AddChildRegistry(regBase);
+
+		auto regPp = std::make_shared<pragma::shadergraph::NodeRegistry>();
+		regPp->AddChildRegistry(regBase);
+
+		m_shaderGraphManager = std::make_unique<pragma::rendering::ShaderGraphManager>();
+		m_shaderGraphManager->RegisterGraphTypeManager("post_processing", regPp);
+		m_shaderGraphManager->RegisterGraphTypeManager("object", regScene);
+		//m_shaderGraphManager->RegisterGraphTypeManager("group", regGroup);
+
+		m_shaderGraphManager->GetModuleManager().RegisterFactory("pbr", [](pragma::ShaderGraph &shader) -> std::unique_ptr<pragma::rendering::ShaderGraphModule> { return std::make_unique<pragma::rendering::shader_graph::PbrModule>(shader); });
+		m_shaderGraphManager->GetModuleManager().RegisterFactory("toon", [](pragma::ShaderGraph &shader) -> std::unique_ptr<pragma::rendering::ShaderGraphModule> { return std::make_unique<pragma::rendering::shader_graph::ToonModule>(shader); });
+		m_shaderGraphManager->GetModuleManager().RegisterFactory("image_texture", [](pragma::ShaderGraph &shader) -> std::unique_ptr<pragma::rendering::ShaderGraphModule> { return std::make_unique<pragma::rendering::shader_graph::ImageTextureModule>(shader); });
+		m_shaderGraphManager->GetModuleManager().RegisterFactory("input_data", [](pragma::ShaderGraph &shader) -> std::unique_ptr<pragma::rendering::ShaderGraphModule> { return std::make_unique<pragma::rendering::shader_graph::InputDataModule>(shader); });
+	}
+
 	return true;
 }
 

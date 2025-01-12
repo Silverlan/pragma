@@ -18,7 +18,8 @@ namespace pragma::rendering::shader_graph {
 		static constexpr const char *IN_COLOR = "color";
 		static constexpr const char *IN_ALPHA = "alpha";
 		static constexpr const char *IN_ALPHA_CUTOFF = "alphaCutoff";
-		static constexpr const char *IN_BLOOM_COLOR = "bloomColor";
+		static constexpr const char *IN_BLOOM_FACTOR = "bloomFactor";
+		static constexpr const char *IN_EMISSIVE_COLOR = "emissiveColor";
 		static constexpr const char *CONST_ALPHA_MODE = "alphaMode";
 		// TODO: Only allow one of these!
 		SceneOutputNode(const std::string_view &type);

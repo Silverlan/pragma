@@ -32,7 +32,7 @@ get_submodule("util_udm","https://github.com/Silverlan/util_udm.git","6c70fdf885
 get_submodule("util_versioned_archive","https://github.com/Silverlan/util_versioned_archive.git","e8db74a6ad9ed44d7e8a4492eb8fe44eae3452f6")
 get_submodule("util_vmf","https://github.com/Silverlan/util_vmf.git","4e477b1425e1a7b9898975effaf527f661e792da")
 get_submodule("util_zip","https://github.com/Silverlan/util_zip.git","d9bf05a5cbf71bf53f9fbea82c7352f870989ed1")
-get_submodule("util_shadergraph","https://github.com/Silverlan/util_shadergraph.git","5f125e5d50a7581ce53250bd82b402019e4b5031")
+get_submodule("util_shadergraph","https://github.com/Silverlan/util_shadergraph.git","01e2c8fb26ba52e9da5d104dd4418eda7d04c716")
 get_submodule("vfilesystem","https://github.com/Silverlan/vfilesystem.git","2fe6363c9dc7a24da1ba245233012f3034a05e7a")
 get_submodule("wgui","https://github.com/Silverlan/wgui.git","d2fb58bd5a07285d6c103389e32b6e669c39302b")
 get_submodule("util_unicode","https://github.com/Silverlan/util_unicode.git","5a0ac6c02f199e42d7d38d99231503cf42e26f8a")

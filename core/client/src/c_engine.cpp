@@ -1121,6 +1121,7 @@ bool CEngine::Initialize(int argc, char *argv[])
 		regBase->RegisterNode<pragma::shadergraph::CombineXyzNode>("combine_xyz");
 		regBase->RegisterNode<pragma::shadergraph::GammaNode>("gamma");
 		regBase->RegisterNode<pragma::shadergraph::GroupNode>("group");
+		regBase->RegisterNode<pragma::shadergraph::EmissionNode>("emission");
 		//regBase->RegisterNode<pragma::shadergraph::GroupInputNode>("group_input");
 		//regBase->RegisterNode<pragma::shadergraph::GroupOutputNode>("group_output");
 		regBase->RegisterNode<pragma::shadergraph::HsvNode>("hsv");

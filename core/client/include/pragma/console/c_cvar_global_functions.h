@@ -28,7 +28,6 @@ DLLCLIENT void CMD_shader_reload(NetworkState *state, pragma::BasePlayerComponen
 DLLCLIENT void CMD_shader_list(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
 DLLCLIENT void CMD_shader_optimize(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
 DLLCLIENT void CMD_debug_light_shadowmap(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
-DLLCLIENT void CMD_debug_glow_bloom(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
 DLLCLIENT void CMD_debug_hdr_bloom(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
 DLLCLIENT void CMD_debug_render_octree_dynamic_print(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
 DLLCLIENT void CMD_debug_render_octree_dynamic_find(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);

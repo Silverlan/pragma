@@ -32,7 +32,6 @@ REGISTER_CONCOMMAND_CL(shader_reload, CMD_shader_reload, ConVarFlags::None, "Rel
 REGISTER_CONCOMMAND_CL(shader_list, CMD_shader_list, ConVarFlags::None, "Prints a list of all currently loaded shaders");
 REGISTER_CONCOMMAND_CL(shader_optimize, CMD_shader_optimize, ConVarFlags::None, "Uses LunarGLASS to optimize the specified shader.");
 REGISTER_CONCOMMAND_CL(debug_light_shadowmap, CMD_debug_light_shadowmap, ConVarFlags::None, "Displays the depth map for the given light on screen. Call without arguments to turn the display off. Usage: debug_light_shadowmap <lightEntityIndex>");
-REGISTER_CONCOMMAND_CL(debug_glow_bloom, CMD_debug_glow_bloom, ConVarFlags::None, "Displays the scene glow texture on screen. Usage: debug_glow_bloom <1/0>");
 REGISTER_CONCOMMAND_CL(debug_hdr_bloom, CMD_debug_hdr_bloom, ConVarFlags::None, "Displays the scene bloom texture on screen. Usage: debug_hdr_bloom <1/0>");
 REGISTER_CONCOMMAND_CL(debug_render_octree_dynamic_print, CMD_debug_render_octree_dynamic_print, ConVarFlags::None, "Prints the octree for dynamic objects to the console, or a file if a file name is specified.");
 REGISTER_CONCOMMAND_CL(debug_render_octree_dynamic_find, CMD_debug_render_octree_dynamic_find, ConVarFlags::None, "Finds the specified entity in the octree for dynamic objects.");

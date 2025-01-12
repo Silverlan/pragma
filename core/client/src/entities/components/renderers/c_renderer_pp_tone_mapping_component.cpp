@@ -67,7 +67,6 @@ void CRendererPpToneMappingComponent::DoRenderEffect(const util::DrawSceneInfo &
 		prosper::ShaderBindState bindState {*drawCmd};
 		if(shaderPPHdr.RecordBeginDraw(bindState, umath::to_integral(pipeline)) == true) {
 			const float bloomAdditiveScale = 0.5f;
-			auto glowScale = 0.f; //(GetGlowInfo().bGlowScheduled == true) ? 1.f : 0.f;
 
 			rendering::ToneMapping toneMapping;
 			if(drawSceneInfo.toneMapping.has_value())
@@ -84,7 +83,7 @@ void CRendererPpToneMappingComponent::DoRenderEffect(const util::DrawSceneInfo &
 				}
 			}
 
-			shaderPPHdr.RecordDraw(bindState, descSetHdrResolve, toneMapping, m_renderer->GetHDRExposure(), bloomAdditiveScale, glowScale, umath::is_flag_set(drawSceneInfo.flags, util::DrawSceneInfo::Flags::FlipVertically));
+			shaderPPHdr.RecordDraw(bindState, descSetHdrResolve, toneMapping, m_renderer->GetHDRExposure(), bloomAdditiveScale, umath::is_flag_set(drawSceneInfo.flags, util::DrawSceneInfo::Flags::FlipVertically));
 			shaderPPHdr.RecordEndDraw(bindState);
 		}
 		drawCmd->RecordEndRenderPass();

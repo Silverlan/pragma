@@ -56,7 +56,6 @@
 #include "pragma/lua/classes/c_lworldenvironment.hpp"
 #include "pragma/asset/c_util_model.hpp"
 #include "pragma/rendering/shaders/util/c_shader_compose_rma.hpp"
-#include "pragma/rendering/shaders/post_processing/c_shader_pp_glow.hpp"
 #include "pragma/rendering/shader_material/shader_material.hpp"
 #include "pragma/rendering/shader_graph/manager.hpp"
 #include "pragma/lua/libraries/ludm.hpp"
@@ -864,10 +863,6 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 	defShaderTextured3D.def("GetShaderMaterial", &pragma::ShaderGameWorldLightingPass::GetShaderMaterial);
 	defShaderTextured3D.def("GetShaderMaterialName", &pragma::ShaderGameWorldLightingPass::GetShaderMaterialName);
 	modShader[defShaderTextured3D];
-
-	auto defShaderGlow = luabind::class_<pragma::ShaderPPGlow, luabind::bases<pragma::ShaderGameWorldLightingPass, pragma::ShaderEntity, pragma::ShaderSceneLit, pragma::ShaderScene, prosper::ShaderGraphics, prosper::Shader>>("Glow");
-	defShaderGlow.add_static_constant("RENDER_PASS_COLOR_FORMAT", umath::to_integral(pragma::ShaderPPGlow::RENDER_PASS_FORMAT));
-	modShader[defShaderGlow];
 
 	auto defShaderCompute = luabind::class_<prosper::ShaderCompute, prosper::Shader>("Compute");
 	defShaderCompute.def("RecordDispatch", &Lua::Shader::Compute::RecordDispatch);

@@ -7,13 +7,11 @@ layout(location = 0) in vec2 vs_vert_uv;
 
 layout(LAYOUT_ID(TEXTURES, SCENE)) uniform sampler2D u_texture;
 layout(LAYOUT_ID(TEXTURES, BLOOM)) uniform sampler2D u_bloom;
-layout(LAYOUT_ID(TEXTURES, GLOW)) uniform sampler2D u_glow;
 
 layout(LAYOUT_PUSH_CONSTANTS()) uniform RenderSettings
 {
 	float exposure;
 	float bloomScale;
-	float glowScale; // Obsolete
 	uint toneMapping;
 	uint flipVertically;
 }
@@ -25,7 +23,6 @@ layout(location = 0) out vec4 fs_color;
 
 layout(constant_id = 0) const uint CSPEC_BLOOM_ENABLED = 1;
 layout(constant_id = 1) const uint CSPEC_FXAA_ENABLED = 1;
-layout(constant_id = 2) const uint CSPEC_GLOW_ENABLED = 0;
 
 void main()
 {
@@ -36,10 +33,6 @@ void main()
 	if(CSPEC_BLOOM_ENABLED == 1) {
 		vec3 colBloom = texture(u_bloom, uv).rgb;
 		col.rgb += colBloom * u_renderSettings.bloomScale;
-	}
-	if(CSPEC_GLOW_ENABLED == 1) {
-		vec3 colGlow = texture(u_glow, uv).rgb;
-		col.rgb += colGlow;
 	}
 
 	fs_color = vec4(apply_tone_mapping(col.rgb, u_renderSettings.toneMapping, u_renderSettings.exposure), col.a);

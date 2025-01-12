@@ -15,7 +15,7 @@
 #include <stdexcept>
 
 namespace pragma::rendering {
-	enum class SceneRenderPass : uint8_t { None = 0, World, View, Sky, Glow, Count };
+	enum class SceneRenderPass : uint8_t { None = 0, World, View, Sky, Count };
 
 	enum class RenderMask : uint64_t { None = 0u };
 	using RenderGroup = RenderMask;

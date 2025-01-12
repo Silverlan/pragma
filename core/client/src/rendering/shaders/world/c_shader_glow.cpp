@@ -39,7 +39,7 @@ decltype(ShaderGlow::DESCRIPTOR_SET_PBR) ShaderGlow::DESCRIPTOR_SET_PBR = {
   },
 };
 ShaderGlow::ShaderGlow(prosper::IPrContext &context, const std::string &identifier, const std::string &vsShader, const std::string &fsShader, const std::string &gsShader) : ShaderGameWorldLightingPass {context, identifier, vsShader, fsShader, gsShader} { m_shaderMaterialName = "pbr"; }
-ShaderGlow::ShaderGlow(prosper::IPrContext &context, const std::string &identifier) : ShaderGlow {context, identifier, "programs/scene/textured", "programs/scene/glow"} {}
+ShaderGlow::ShaderGlow(prosper::IPrContext &context, const std::string &identifier) : ShaderGlow {context, identifier, "programs/scene/textured", "programs/scene/glow/glow"} {}
 
 void ShaderGlow::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx)
 {

@@ -127,67 +127,93 @@ local function import_assets(handler, settings)
 		return numInstalled
 	end
 
+	-- We want to install all native assets directly.
+	-- Textures are problematic, because there's no easy way to tell if they
+	-- are meant to be imported as native assets, or if they are part of a non-native
+	-- asset (e.g. a glTF model).
+	-- If there are any native models, materials or maps, we'll assume that all textures
+	-- are meant to be native assets.
+	-- Otherwise they will not be imported, and we'll let the asset importer handle them.
+	-- (Note: asset.TYPE_TEXTURE comes after the enums for models, materials and maps, so it will be processed after them)
+	local hasNativeTextureBaseAssets = false
 	for assetType = 0, asset.TYPE_COUNT - 1 do
-		local exts = asset.get_supported_extensions(assetType, asset.FORMAT_TYPE_NATIVE)
-		local rootAssetDir = asset.get_asset_root_directory(assetType)
-		local altRootAssetDir
-		if assetType == asset.TYPE_AUDIO then
-			altRootAssetDir = "sound" -- We'll allow "sound" as alternative, since that is the asset directory name in the Sourc Engine
-		end
-		local i = 1
-		while i <= #files do
-			local f = files[i]
-			local ext = file.get_file_extension(f, exts)
-			if ext ~= nil then
-				local path = util.Path.CreateFilePath(f)
-				local pathC = path:ToComponents()
-				if pathC[#pathC - 3] == "addons" then
-					-- Found Pragma assets that appear to be part of a Pragma addon.
-					-- Install the addon directly to Pragma.
-					local pathToAddons = path:Copy()
-					pathToAddons:PopBack() -- Pop filename
-					pathToAddons:PopBack() -- Pop asset dir
-					pathToAddons:PopBack() -- Pop addon
-					local numInstalled = installFiles(pathToAddons:GetString(), "addons/")
-					assert(numInstalled > 0)
+		if assetType ~= asset.TYPE_TEXTURE or hasNativeTextureBaseAssets then
+			local exts = asset.get_supported_extensions(assetType, asset.FORMAT_TYPE_NATIVE)
+			local rootAssetDir = asset.get_asset_root_directory(assetType)
+			local altRootAssetDir
+			if assetType == asset.TYPE_AUDIO then
+				altRootAssetDir = "sound" -- We'll allow "sound" as alternative, since that is the asset directory name in the Source Engine
+			end
+			local i = 1
+			while i <= #files do
+				local f = files[i]
+				local ext = file.get_file_extension(f, exts)
+				logCb("Handling file '" .. f .. "'...", log.SEVERITY_INFO)
+				if ext ~= nil then
+					if
+						assetType == asset.TYPE_MODEL
+						or assetType == asset.TYPE_MAP
+						or assetType == asset.TYPE_MATERIAL
+					then
+						hasNativeTextureBaseAssets = true
+					end
+
+					local path = util.Path.CreateFilePath(f)
+					local pathC = path:ToComponents()
+					if pathC[#pathC - 3] == "addons" then
+						-- Found Pragma assets that appear to be part of a Pragma addon.
+						-- Install the addon directly to Pragma.
+						local pathToAddons = path:Copy()
+						pathToAddons:PopBack() -- Pop filename
+						pathToAddons:PopBack() -- Pop asset dir
+						pathToAddons:PopBack() -- Pop addon
+						local numInstalled = installFiles(pathToAddons:GetString(), "addons/")
+						assert(numInstalled > 0)
+					else
+						local numInstalled = 0
+						for j = #pathC - 1, 1, -1 do
+							if pathC[j] == rootAssetDir or pathC[j] == altRootAssetDir then
+								local addonName = pathC[j - 1]
+								if addonName == nil then
+									-- Asset has been dropped directly into Pragma.
+									-- Just put it in the "imported" addon
+									addonName = "imported"
+								end
+								local installPath = "addons/" .. addonName .. "/" .. pathC[j] .. "/"
+								local dropPath = util.Path()
+								for k = 1, j do
+									dropPath = dropPath + (pathC[k] .. "/")
+								end
+								numInstalled = installFiles(dropPath:GetString(), installPath)
+								assert(numInstalled > 0)
+								break
+							end
+						end
+						if numInstalled == 0 then
+							-- The root addon dir for this asset type does not exist in the import files.
+							if #pathC == 1 then
+								-- It's just the asset file, install it directly
+								numInstalled = installFiles(f, "addons/imported/" .. rootAssetDir .. "/" .. f)
+							else
+								-- Take everything except the root dir
+								local installPath = path:Copy()
+								installPath:PopFront()
+								installPath = util.Path.CreateFilePath("addons/imported/" .. rootAssetDir .. "/")
+									+ installPath
+								numInstalled = installFiles(f, "addons/imported/" .. rootAssetDir .. "/" .. f)
+							end
+							if numInstalled == 0 then
+								i = 1 + 1
+							else
+								-- One or more items have been removed from the list.
+								-- None of the items should be before index i, but we'll restart the loop to be sure.
+								i = 1
+							end
+						end
+					end
 				else
-					local numInstalled = 0
-					for j = #pathC - 1, 1, -1 do
-						if pathC[j] == rootAssetDir or pathC[j] == altRootAssetDir then
-							local addonName = pathC[j - 1]
-							if addonName == nil then
-								-- Asset has been dropped directly into Pragma.
-								-- Just put it in the "imported" addon
-								addonName = "imported"
-							end
-							local installPath = "addons/" .. addonName .. "/" .. pathC[j] .. "/"
-							local dropPath = util.Path()
-							for k = 1, j do
-								dropPath = dropPath + (pathC[k] .. "/")
-							end
-							numInstalled = installFiles(dropPath:GetString(), installPath)
-							assert(numInstalled > 0)
-							break
-						end
-					end
-					if numInstalled == 0 then
-						-- The root addon dir for this asset type does not exist in the import files.
-						if #pathC == 1 then
-							-- It's just the asset file, install it directly
-							installFiles(f, "addons/imported/" .. rootAssetDir .. "/" .. f)
-						else
-							-- Take everything except the root dir
-							local installPath = path:Copy()
-							installPath:PopFront()
-							installPath = util.Path.CreateFilePath("addons/imported/" .. rootAssetDir .. "/")
-								+ installPath
-							installFiles(f, "addons/imported/" .. rootAssetDir .. "/" .. f)
-						end
-						i = i + 1
-					end
+					i = i + 1
 				end
-			else
-				i = i + 1
 			end
 		end
 	end

@@ -8,6 +8,8 @@
 #include "stdafx_client.h"
 #include "pragma/rendering/shader_graph/nodes/toon.hpp"
 #include "pragma/rendering/shader_material/shader_material.hpp"
+#include "pragma/rendering/shader_graph/nodes/image_texture.hpp"
+#include "pragma/rendering/shader_graph/nodes/shader_material.hpp"
 
 using namespace pragma::rendering::shader_graph;
 ToonNode::ToonNode(const std::string_view &type) : Node {type}
@@ -24,6 +26,17 @@ ToonNode::ToonNode(const std::string_view &type) : Node {type}
 	AddOutput(OUT_COLOR, pragma::shadergraph::DataType::Color);
 
 	AddModuleDependency("toon");
+}
+
+static std::optional<std::string> get_image_texture_variable_name(const pragma::shadergraph::InputSocket &input)
+{
+	auto *texNode = dynamic_cast<const ImageTextureNodeBase *>(&input.link->parent->node);
+	if(texNode)
+		return texNode->GetTextureVariableName(*input.link);
+	auto *matNode = dynamic_cast<const ShaderMaterialNode *>(&input.link->parent->node);
+	if(matNode)
+		return matNode->GetTextureVariableName(*input.link);
+	return {};
 }
 
 std::string ToonNode::DoEvaluate(const pragma::shadergraph::Graph &graph, const pragma::shadergraph::GraphNode &gn) const
@@ -49,13 +62,20 @@ std::string ToonNode::DoEvaluate(const pragma::shadergraph::Graph &graph, const 
 	code << inRimColor << ", " << vMatFlags << ", ";
 
 	auto *matcapInputSocket = gn.FindInputSocket(IN_MATCAP_TEXTURE);
-	if(matcapInputSocket && matcapInputSocket->link)
-		code << pragma::rendering::shader_material::ShaderMaterial::GetTextureUniformVariableName(matcapInputSocket->link->GetSocket().name);
+	if(matcapInputSocket && matcapInputSocket->link) {
+		auto texVarName = get_image_texture_variable_name(*matcapInputSocket);
+		if(texVarName)
+			code << *texVarName;
+	}
 	code << ", ";
 
 	auto *rampInputSocket = gn.FindInputSocket(IN_RAMP_TEXTURE);
-	if(rampInputSocket && rampInputSocket->link)
-		code << pragma::rendering::shader_material::ShaderMaterial::GetTextureUniformVariableName(rampInputSocket->link->GetSocket().name);
+	auto *texNode = dynamic_cast<const ImageTextureNodeBase *>(&rampInputSocket->link->parent->node);
+	if(rampInputSocket && rampInputSocket->link) {
+		auto texVarName = get_image_texture_variable_name(*rampInputSocket);
+		if(texVarName)
+			code << *texVarName;
+	}
 
 	code << ").rgb;\n";
 

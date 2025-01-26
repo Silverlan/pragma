@@ -828,7 +828,7 @@ if with_essential_client_modules:
 if with_common_modules:
 	add_pragma_module(
 		name="pr_bullet",
-		commitSha="be622341b5890ae2f8f1c97481ff52ddbd351cf0",
+		commitSha="b4a0af6d3db48d322b63a757ba5574fda87b99d8",
 		repositoryUrl="https://github.com/Silverlan/pr_bullet.git"
 	)
 	add_pragma_module(

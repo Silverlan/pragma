@@ -1114,34 +1114,34 @@ bool CEngine::Initialize(int argc, char *argv[])
 
 	{
 		auto regBase = std::make_shared<pragma::shadergraph::NodeRegistry>();
-		regBase->RegisterNode<pragma::shadergraph::BlackbodyNode>("blackbody");
+		//regBase->RegisterNode<pragma::shadergraph::BlackbodyNode>("blackbody");
 		regBase->RegisterNode<pragma::shadergraph::BrightContrastNode>("bright_contrast");
 		regBase->RegisterNode<pragma::shadergraph::ClampNode>("clamp");
-		regBase->RegisterNode<pragma::shadergraph::ColorNode>("color");
+		//regBase->RegisterNode<pragma::shadergraph::ColorNode>("color");
 		regBase->RegisterNode<pragma::shadergraph::CombineXyzNode>("combine_xyz");
 		regBase->RegisterNode<pragma::shadergraph::GammaNode>("gamma");
-		regBase->RegisterNode<pragma::shadergraph::GroupNode>("group");
+		//regBase->RegisterNode<pragma::shadergraph::GroupNode>("group");
 		regBase->RegisterNode<pragma::shadergraph::EmissionNode>("emission");
 		//regBase->RegisterNode<pragma::shadergraph::GroupInputNode>("group_input");
 		//regBase->RegisterNode<pragma::shadergraph::GroupOutputNode>("group_output");
 		regBase->RegisterNode<pragma::shadergraph::HsvNode>("hsv");
 		regBase->RegisterNode<pragma::shadergraph::InvertNode>("invert");
-		regBase->RegisterNode<pragma::shadergraph::LightFalloffNode>("light_falloff");
+		//regBase->RegisterNode<pragma::shadergraph::LightFalloffNode>("light_falloff");
 		regBase->RegisterNode<pragma::shadergraph::MapRangeNode>("map_range_node");
-		regBase->RegisterNode<pragma::shadergraph::MappingNode>("mapping");
+		//regBase->RegisterNode<pragma::shadergraph::MappingNode>("mapping");
 		regBase->RegisterNode<pragma::shadergraph::MathNode>("math");
 		regBase->RegisterNode<pragma::shadergraph::MixNode>("mix");
-		regBase->RegisterNode<pragma::shadergraph::RgbRampNode>("rgb_ramp");
+		//regBase->RegisterNode<pragma::shadergraph::RgbRampNode>("rgb_ramp");
 		regBase->RegisterNode<pragma::shadergraph::RgbToBwNode>("rgb_to_bw");
 		regBase->RegisterNode<pragma::shadergraph::SepiaToneNode>("sepia_tone");
 		regBase->RegisterNode<pragma::shadergraph::SeparateXyzNode>("separate_xyz");
 		regBase->RegisterNode<pragma::shadergraph::ValueNode>("value");
-		regBase->RegisterNode<pragma::shadergraph::VectorDisplacementNode>("vector_displacement");
-		regBase->RegisterNode<pragma::shadergraph::VectorMapRangeNode>("vector_map_range");
+		//regBase->RegisterNode<pragma::shadergraph::VectorDisplacementNode>("vector_displacement");
+		//regBase->RegisterNode<pragma::shadergraph::VectorMapRangeNode>("vector_map_range");
 		regBase->RegisterNode<pragma::shadergraph::VectorMathNode>("vector_math");
-		regBase->RegisterNode<pragma::shadergraph::VectorRotateNode>("vector_rotate");
-		regBase->RegisterNode<pragma::shadergraph::VectorTransformNode>("vector_transform");
-		regBase->RegisterNode<pragma::shadergraph::WavelengthNode>("wavelength");
+		//regBase->RegisterNode<pragma::shadergraph::VectorRotateNode>("vector_rotate");
+		//regBase->RegisterNode<pragma::shadergraph::VectorTransformNode>("vector_transform");
+		//regBase->RegisterNode<pragma::shadergraph::WavelengthNode>("wavelength");
 
 		auto regScene = std::make_shared<pragma::shadergraph::NodeRegistry>();
 		regScene->RegisterNode<pragma::rendering::shader_graph::SceneOutputNode>("output");

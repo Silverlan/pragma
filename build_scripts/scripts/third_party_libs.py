@@ -15,7 +15,7 @@ get_submodule("clip2tri","https://github.com/raptor/clip2tri.git","f62a734d22733
 get_submodule("eigen","https://gitlab.com/libeigen/eigen.git","969c31ee")
 get_submodule("exprtk","https://github.com/ArashPartow/exprtk.git","f46bffcd6966d38a09023fb37ba9335214c9b959")
 get_submodule("freetype","https://github.com/aseprite/freetype2.git","e8ebfe9")
-get_submodule("glfw","https://github.com/clear-code/glfw.git","4a2883b","im-support")
+get_submodule("glfw","https://github.com/clear-code/glfw.git","c0d34f3","im-support")
 get_submodule("gli","https://github.com/g-truc/gli.git","779b99ac6656e4d30c3b24e96e0136a59649a869")
 get_submodule("glm","https://github.com/g-truc/glm.git","d58f9bcfedfdb4ef78f2c547601238b4fdbd14b8")
 get_submodule("libnoise","https://github.com/qknight/libnoise.git","2fb16f638aac6868d550c735898f217cdefa3559")

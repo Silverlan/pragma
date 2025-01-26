@@ -26,6 +26,7 @@ ShaderMaterialNode::ShaderMaterialNode(const std::string_view &type, const pragm
 		AddOutput(ustring::to_camel_case(prop.parameter.name), socketType);
 	}
 }
+std::string ShaderMaterialNode::GetTextureVariableName(const pragma::shadergraph::OutputSocket &socket) const { return pragma::rendering::shader_material::ShaderMaterial::GetTextureUniformVariableName(socket.GetSocket().name); }
 std::string ShaderMaterialNode::DoEvaluate(const pragma::shadergraph::Graph &graph, const pragma::shadergraph::GraphNode &gn) const
 {
 	// TODO: Only write output var is output is set?

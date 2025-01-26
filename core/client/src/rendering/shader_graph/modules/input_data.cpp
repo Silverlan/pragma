@@ -43,7 +43,7 @@ void InputDataModule::InitializeShaderResources()
 	m_resolvedGraph = std::make_unique<pragma::shadergraph::Graph>(*graph);
 	m_resolvedGraph->Resolve();
 	for(auto &graphNode : m_resolvedGraph->GetNodes()) {
-		auto *node = dynamic_cast<const ImageTextureNode *>(&graphNode->node);
+		auto *node = dynamic_cast<const ImageTextureNodeBase *>(&graphNode->node);
 		if(!node)
 			continue;
 		auto texVarName = node->GetTextureVariableName(*graphNode);
@@ -73,7 +73,7 @@ void InputDataModule::GetShaderPreprocessorDefinitions(std::unordered_map<std::s
 	code << "} u_globalInputData;\n";
 
 	for(auto *graphNode : m_imageTextureNodes) {
-		auto *node = dynamic_cast<const ImageTextureNode *>(&graphNode->node);
+		auto *node = dynamic_cast<const ImageTextureNodeBase *>(&graphNode->node);
 		auto texVarName = node->GetTextureVariableName(*graphNode);
 		auto texVarNameUpper = texVarName;
 		ustring::to_upper(texVarNameUpper);
@@ -111,6 +111,8 @@ void InputDataModule::InitializeGfxPipelineDescriptorSets()
 	auto buf = inputDataManager.GetBuffer();
 	if(!buf)
 		buf = c_engine->GetRenderContext().GetDummyBuffer();
+	// TODO: Each shader should have its own global input buffer.
+	// Alternativly: Push-constants?
 	ds.SetBindingUniformBuffer(*buf, BINDING_IDX);
 
 	// Image texture nodes

@@ -18,7 +18,7 @@ SceneOutputNode::SceneOutputNode(const std::string_view &type) : Node {type}
 	AddInput(IN_BLOOM_FACTOR, pragma::shadergraph::DataType::Float, 1.f);
 	AddInput(IN_EMISSIVE_COLOR, pragma::shadergraph::DataType::Color, Vector3 {0.f, 0.f, 0.f});
 
-	AddSocketEnum<AlphaMode>(CONST_ALPHA_MODE, AlphaMode::Opaque);
+	AddSocketEnum<AlphaMode>(CONST_ALPHA_MODE, AlphaMode::Opaque, true);
 }
 
 std::string SceneOutputNode::DoEvaluate(const pragma::shadergraph::Graph &graph, const pragma::shadergraph::GraphNode &gn) const

@@ -8,6 +8,7 @@
 #include "stdafx_shared.h"
 #include "pragma/entities/components/constraints/constraint_component.hpp"
 #include "pragma/entities/components/constraints/constraint_manager_component.hpp"
+#include "pragma/entities/components/panima_component.hpp"
 #include "pragma/entities/entity_component_manager_t.hpp"
 #include "pragma/entities/components/component_member_flags.hpp"
 #include "pragma/entities/entity_component_system_t.hpp"
@@ -112,6 +113,19 @@ const std::optional<ConstraintComponent::ConstraintParticipants> &ConstraintComp
 	ConstraintParticipants participants {};
 	participants.drivenObjectC = const_cast<pragma::BaseEntityComponent *>(drivenObjC)->GetHandle();
 	participants.drivenObjectPropIdx = idxDrivenObject;
+
+	auto *entDrivenObj = drivenObj.GetEntity(GetGame());
+	if(entDrivenObj) {
+		auto panimaC = entDrivenObj->GetComponent<pragma::PanimaComponent>();
+		if(panimaC.valid()) {
+			auto *memberInfo = drivenObj.GetMemberInfo(GetGame());
+			if(memberInfo) {
+				// TODO: Should we undo the dirty flag after the constraint has been removed?
+				panimaC->SetPropertyAlwaysDirty(memberInfo->GetName(), true);
+			}
+		}
+	}
+
 	if(!m_hasDriver) {
 		m_constraintParticipants = std::move(participants);
 		return m_constraintParticipants;

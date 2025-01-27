@@ -110,14 +110,21 @@ void WILuaBase::SetSize(int x, int y)
 	if(x == GetWidth() && y == GetHeight())
 		return;
 	WIBase::SetSize(x, y);
-	CallLuaMember<void, int, int>("OnSizeChanged", x, y);
+	// WIBase::SetSize may have called additional callbacks, which may have changed the size
+	// of this element before we got to call the "OnSizeChanged" callback below. In this case
+	// "OnSizeChanged" has already been called by one of the other callbacks, so we should skip it.
+	auto newW = GetWidth();
+	auto newH = GetHeight();
+	if(newW == x && newH == y)
+		CallLuaMember<void, int, int>("OnSizeChanged", x, y);
 }
 void WILuaBase::OnVisibilityChanged(bool bVisible)
 {
 	// if(bVisible == *GetVisibilityProperty())
 	// 	return;
 	WIBase::OnVisibilityChanged(bVisible);
-	CallLuaMember<void, bool>("OnVisibilityChanged", bVisible);
+	if(*GetVisibilityProperty() == bVisible) // See explanation in WILuaBase::SetSize
+		CallLuaMember<void, bool>("OnVisibilityChanged", bVisible);
 }
 void WILuaBase::DoUpdate()
 {
@@ -126,16 +133,22 @@ void WILuaBase::DoUpdate()
 }
 void WILuaBase::SetColor(float r, float g, float b, float a)
 {
-	// TODO: Check against current values?
+	auto newCol = Vector4 {r, g, b, a};
+	auto vCol = GetColor().ToVector4();
+	if(uvec::cmp(vCol, newCol))
+		return;
 	WIBase::SetColor(r, g, b, a);
-	CallLuaMember<void, float, float, float, float>("OnColorChanged", r, g, b, a);
+	vCol = GetColor().ToVector4();
+	if(uvec::cmp(vCol, newCol)) // See explanation in WILuaBase::SetSize
+		CallLuaMember<void, float, float, float, float>("OnColorChanged", r, g, b, a);
 }
 void WILuaBase::SetAlpha(float alpha)
 {
-	if(alpha == GetAlpha())
+	if(umath::equals(alpha, GetAlpha()))
 		return;
 	WIBase::SetAlpha(alpha);
-	CallLuaMember<void, float>("OnAlphaChanged", alpha);
+	if(umath::equals(alpha, GetAlpha())) // See explanation in WILuaBase::SetSize
+		CallLuaMember<void, float>("OnAlphaChanged", alpha);
 }
 bool WILuaBase::DoPosInBounds(const Vector2i &pos) const
 {

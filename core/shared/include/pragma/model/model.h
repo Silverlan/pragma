@@ -153,6 +153,7 @@ namespace pragma::animation {
 	using BoneId = uint16_t;
 	using FlexControllerId = uint32_t;
 	struct MetaRig;
+	struct MetaRigBone;
 	enum class MetaRigBoneType : uint8_t;
 };
 namespace pragma::model {
@@ -412,6 +413,8 @@ class DLLNETWORK Model : public std::enable_shared_from_this<Model> {
 	std::optional<pragma::animation::MetaRigBoneType> GetMetaRigBoneParentId(pragma::animation::MetaRigBoneType type) const;
 	std::optional<umath::ScaledTransform> GetMetaRigReferencePose(pragma::animation::MetaRigBoneType type) const;
 	bool GenerateStandardMetaRigReferenceBonePoses(std::vector<umath::ScaledTransform> &outPoses) const;
+	Quat CalcNormalizedMetaBoneRotation(pragma::animation::MetaRigBoneType type, const Quat &metaReferenceRot, const Quat &posedRot) const;
+	Quat RetargetMetaBoneRotation(pragma::animation::MetaRigBoneType type, const Quat &metaReferenceRot, const Quat &posedRot, const pragma::animation::MetaRigBone &targetBone, const Quat &targetMetaReferenceRot) const;
 	void ApplyPostImportProcessing();
 
 	uint32_t GetBoneCount() const;

@@ -65,6 +65,7 @@ namespace pragma::rendering::shader_material {
 		static void PopulateShaderInputDataFromMaterial(ShaderInputData &inputData, const CMaterial &mat);
 		static MaterialFlags GetFlagsFromShaderInputData(const ShaderInputData &inputData);
 		static void SetShaderInputDataFlags(ShaderInputData &inputData, MaterialFlags flags);
+		static std::string GetTextureUniformVariableName(const std::string &texIdentifier);
 
 		ShaderMaterial(const pragma::GString &name);
 		std::vector<Texture> textures;

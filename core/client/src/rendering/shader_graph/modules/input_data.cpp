@@ -43,7 +43,7 @@ void InputDataModule::InitializeShaderResources()
 	m_resolvedGraph = std::make_unique<pragma::shadergraph::Graph>(*graph);
 	m_resolvedGraph->Resolve();
 	for(auto &graphNode : m_resolvedGraph->GetNodes()) {
-		auto *node = dynamic_cast<const ImageTextureNode *>(&graphNode->node);
+		auto *node = dynamic_cast<const ImageTextureNodeBase *>(&graphNode->node);
 		if(!node)
 			continue;
 		auto texVarName = node->GetTextureVariableName(*graphNode);
@@ -73,7 +73,7 @@ void InputDataModule::GetShaderPreprocessorDefinitions(std::unordered_map<std::s
 	code << "} u_globalInputData;\n";
 
 	for(auto *graphNode : m_imageTextureNodes) {
-		auto *node = dynamic_cast<const ImageTextureNode *>(&graphNode->node);
+		auto *node = dynamic_cast<const ImageTextureNodeBase *>(&graphNode->node);
 		auto texVarName = node->GetTextureVariableName(*graphNode);
 		auto texVarNameUpper = texVarName;
 		ustring::to_upper(texVarNameUpper);
@@ -86,9 +86,16 @@ void InputDataModule::GetShaderPreprocessorDefinitions(std::unordered_map<std::s
 void InputDataModule::InitializeGfxPipelineDescriptorSets()
 {
 	auto &inputDataManager = c_game->GetGlobalShaderInputDataManager();
+
 	// TODO:
-	auto testPbr = c_engine->GetShaderGraphManager().GetGraph("z");
-	inputDataManager.PopulateProperties(*testPbr->GetGraph());
+	auto &graphManager = c_engine->GetShaderGraphManager();
+	auto &typeManagers = graphManager.GetShaderGraphTypeManagers();
+	auto it = typeManagers.find("object");
+	if(it == typeManagers.end())
+		return;
+	auto &typeManager = *it->second;
+	for(auto &[name, graphData] : typeManager.GetGraphs())
+		inputDataManager.PopulateProperties(*graphData->GetGraph());
 	auto cmd = c_engine->GetRenderContext().GetSetupCommandBuffer();
 	inputDataManager.UpdateBufferData(*cmd);
 	c_engine->GetRenderContext().FlushSetupCommandBuffer();
@@ -104,6 +111,8 @@ void InputDataModule::InitializeGfxPipelineDescriptorSets()
 	auto buf = inputDataManager.GetBuffer();
 	if(!buf)
 		buf = c_engine->GetRenderContext().GetDummyBuffer();
+	// TODO: Each shader should have its own global input buffer.
+	// Alternativly: Push-constants?
 	ds.SetBindingUniformBuffer(*buf, BINDING_IDX);
 
 	// Image texture nodes

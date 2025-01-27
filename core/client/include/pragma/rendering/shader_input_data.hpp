@@ -41,7 +41,7 @@ namespace pragma::rendering {
 		static std::optional<pragma::shadergraph::Value> parse_flags_expression(const std::string &strVal, const std::unordered_map<std::string, uint32_t> &flags, udm::Type propType);
 
 		ShaderInputDescriptor(const pragma::GString &name);
-		void AddProperty(Property &&prop);
+		bool AddProperty(Property &&prop);
 		const pragma::GString name;
 		std::vector<Property> properties;
 
@@ -53,6 +53,7 @@ namespace pragma::rendering {
 			return &properties[it->second];
 		}
 		const Property *FindProperty(const char *key) const { return const_cast<ShaderInputDescriptor *>(this)->FindProperty(key); }
+		const std::unordered_map<std::string, size_t> &GetPropertyMap() const { return m_propertyMap; }
 
 		bool LoadFromUdmData(udm::LinkedPropertyWrapperArg prop, std::string &outErr);
 		std::string ToGlslStruct() const;
@@ -102,6 +103,8 @@ namespace pragma::rendering {
 				using TProp = typename decltype(tag)::type;
 				if constexpr(udm::is_convertible<T, TProp>()) {
 					auto convVal = udm::convert<T, TProp>(val);
+					if(memcmp(ptr, &convVal, sizeof(convVal)) == 0)
+						return false; // No need to update
 					memcpy(ptr, &convVal, sizeof(convVal));
 					return true;
 				}

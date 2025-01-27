@@ -109,10 +109,8 @@ static RenderFlags render_mode_to_render_flag(pragma::rendering::SceneRenderPass
 		return RenderFlags::View;
 	case pragma::rendering::SceneRenderPass::Sky:
 		return RenderFlags::Skybox;
-	case pragma::rendering::SceneRenderPass::Glow:
-		return RenderFlags::Glow;
 	}
-	static_assert(umath::to_integral(pragma::rendering::SceneRenderPass::Count) == 5);
+	static_assert(umath::to_integral(pragma::rendering::SceneRenderPass::Count) == 4);
 	return RenderFlags::None;
 }
 
@@ -127,8 +125,6 @@ SceneRenderDesc::RenderQueueId SceneRenderDesc::GetRenderQueueId(pragma::renderi
 	// 	return !translucent ? RenderQueueId::Water : RenderQueueId::Invalid;
 	case pragma::rendering::SceneRenderPass::World:
 		return !translucent ? RenderQueueId::World : RenderQueueId::WorldTranslucent;
-	case pragma::rendering::SceneRenderPass::Glow:
-		return RenderQueueId::Glow;
 	}
 	static_assert(umath::to_integral(RenderQueueId::Count) == 8u);
 	return RenderQueueId::Invalid;
@@ -229,24 +225,6 @@ void SceneRenderDesc::AddRenderMeshesToRenderQueue(pragma::CRasterizationRendere
 			fOptInsertItemToQueue(*renderQueue, item);
 		else
 			renderQueue->Add(item);
-
-		if(renderBufferData[meshIdx].IsGlowPassEnabled() && umath::is_flag_set(renderFlags, RenderFlags::Glow)) {
-			auto *renderQueueGlow = getRenderQueue(pragma::rendering::SceneRenderPass::Glow, false);
-			if(renderQueueGlow) {
-				// TODO
-				auto *shader = static_cast<pragma::ShaderGameWorldLightingPass *>(c_engine->GetShader("glow").get());
-				auto pipelineIdx = shader->FindPipelineIndex(pragma::rendering::PassType::Generic, renderC.GetShaderPipelineSpecialization(), specializationFlags);
-
-				prosper::PipelineID pipelineId;
-				if(pipelineIdx.has_value() != false && shader->GetPipelineId(pipelineId, *pipelineIdx) == true && pipelineId != std::numeric_limits<decltype(pipelineId)>::max()) {
-					pragma::rendering::RenderQueueItem itemGlow {static_cast<CBaseEntity &>(renderC.GetEntity()), meshIdx, *mat, pipelineId, nullptr};
-					if(fOptInsertItemToQueue)
-						fOptInsertItemToQueue(*renderQueueGlow, itemGlow);
-					else
-						renderQueueGlow->Add(itemGlow);
-				}
-			}
-		}
 	}
 }
 void SceneRenderDesc::AddRenderMeshesToRenderQueue(pragma::CRasterizationRendererComponent *optRasterizationRenderer, RenderFlags renderFlags, pragma::CRenderComponent &renderC, const pragma::CSceneComponent &scene, const pragma::CCameraComponent &cam, const Mat4 &vp,

@@ -56,7 +56,6 @@
 #include "pragma/lua/classes/c_lworldenvironment.hpp"
 #include "pragma/asset/c_util_model.hpp"
 #include "pragma/rendering/shaders/util/c_shader_compose_rma.hpp"
-#include "pragma/rendering/shaders/post_processing/c_shader_pp_glow.hpp"
 #include "pragma/rendering/shader_material/shader_material.hpp"
 #include "pragma/rendering/shader_graph/manager.hpp"
 #include "pragma/lua/libraries/ludm.hpp"
@@ -649,6 +648,11 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 			  return {nullptr, std::optional<std::string> {err}};
 		  return {graph, std::optional<std::string> {}};
 	  })];
+	modShader[luabind::def(
+	  "set_shader_graph", +[](const std::string &type, const std::string &identifier, const std::shared_ptr<pragma::shadergraph::Graph> &graph) {
+		  auto &manager = c_engine->GetShaderGraphManager();
+		  manager.SetGraph(type, identifier, graph);
+	  })];
 
 	// These have to match shaders/modules/fs_tonemapping.gls!
 	enum class ToneMapping : uint8_t {
@@ -859,10 +863,6 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 	defShaderTextured3D.def("GetShaderMaterial", &pragma::ShaderGameWorldLightingPass::GetShaderMaterial);
 	defShaderTextured3D.def("GetShaderMaterialName", &pragma::ShaderGameWorldLightingPass::GetShaderMaterialName);
 	modShader[defShaderTextured3D];
-
-	auto defShaderGlow = luabind::class_<pragma::ShaderPPGlow, luabind::bases<pragma::ShaderGameWorldLightingPass, pragma::ShaderEntity, pragma::ShaderSceneLit, pragma::ShaderScene, prosper::ShaderGraphics, prosper::Shader>>("Glow");
-	defShaderGlow.add_static_constant("RENDER_PASS_COLOR_FORMAT", umath::to_integral(pragma::ShaderPPGlow::RENDER_PASS_FORMAT));
-	modShader[defShaderGlow];
 
 	auto defShaderCompute = luabind::class_<prosper::ShaderCompute, prosper::Shader>("Compute");
 	defShaderCompute.def("RecordDispatch", &Lua::Shader::Compute::RecordDispatch);
@@ -1479,7 +1479,7 @@ void CGame::RegisterLuaClasses()
 	auto defDepthStageRenderProcessor = luabind::class_<pragma::rendering::DepthStageRenderProcessor, luabind::bases<pragma::rendering::BaseRenderProcessor>>("DepthStageRenderProcessor");
 	defDepthStageRenderProcessor.def("Render",
 	  static_cast<void (*)(lua_State *, pragma::rendering::DepthStageRenderProcessor &, const pragma::rendering::RenderQueue &)>(
-	    [](lua_State *l, pragma::rendering::DepthStageRenderProcessor &processor, const pragma::rendering::RenderQueue &renderQueue) { processor.Render(renderQueue); }));
+	    [](lua_State *l, pragma::rendering::DepthStageRenderProcessor &processor, const pragma::rendering::RenderQueue &renderQueue) { processor.Render(renderQueue, pragma::rendering::RenderPass::Prepass); }));
 	modGame[defDepthStageRenderProcessor];
 
 	auto defLightingStageRenderProcessor = luabind::class_<pragma::rendering::LightingStageRenderProcessor, luabind::bases<pragma::rendering::BaseRenderProcessor>>("LightingStageRenderProcessor");

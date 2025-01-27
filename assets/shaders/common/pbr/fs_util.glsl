@@ -30,7 +30,7 @@ vec4 get_emission_color(vec4 color, vec4 baseColor, vec2 texCoords)
 		vec4 emissiveColor = texture(u_glowMap, texCoords);
 		emissiveColor.rgb *= u_material.material.emissionFactor.rgb;
 		emissiveColor.rgb *= emissiveColor.a * 15;
-		result = add_glow_color(u_material.material.flags, result, texCoords, emissiveColor, baseColor);
+		result = apply_emission_color(u_material.material.flags, result, texCoords, emissiveColor, baseColor);
 	}
 	return result;
 }

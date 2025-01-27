@@ -890,11 +890,11 @@ void CRenderComponent::ClearRenderBuffers()
 }
 pragma::rendering::RenderGroup CRenderComponent::GetRenderGroups() const { return *m_renderGroups; }
 const util::PEnumProperty<pragma::rendering::RenderGroup> &CRenderComponent::GetRenderGroupsProperty() const { return m_renderGroups; }
-bool CRenderComponent::ShouldDraw() const { return umath::is_flag_set(m_stateFlags, StateFlags::ShouldDraw); }
+bool CRenderComponent::ShouldDraw() const { return m_renderBuffer && umath::is_flag_set(m_stateFlags, StateFlags::ShouldDraw); }
 bool CRenderComponent::ShouldDrawShadow() const
 {
 	// TODO: Streamline this! We only need one flag!
-	return umath::is_flag_set(m_stateFlags, StateFlags::ShouldDrawShadow) && !umath::is_flag_set(m_stateFlags, StateFlags::DisableShadows) && GetCastShadows();
+	return m_renderBuffer && umath::is_flag_set(m_stateFlags, StateFlags::ShouldDrawShadow) && !umath::is_flag_set(m_stateFlags, StateFlags::DisableShadows) && GetCastShadows();
 }
 
 RenderMeshGroup &CRenderComponent::GetLodRenderMeshGroup(uint32_t lod)

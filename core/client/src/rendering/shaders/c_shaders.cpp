@@ -42,7 +42,6 @@
 #include "pragma/rendering/shaders/world/c_shader_loading.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_ssao.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_ssao_blur.hpp"
-#include "pragma/rendering/shaders/post_processing/c_shader_pp_glow.hpp"
 #include "pragma/rendering/shaders/world/water/c_shader_water.hpp"
 #include "pragma/rendering/shaders/world/water/c_shader_water_splash.hpp"
 #include "pragma/rendering/shaders/world/water/c_shader_water_surface_integrate.hpp"
@@ -54,7 +53,6 @@
 #include "pragma/rendering/shaders/c_shader_cubemap_to_equirectangular.hpp"
 #include "pragma/rendering/shaders/world/raytracing/c_shader_raytracing.hpp"
 #include "pragma/rendering/shaders/world/c_shader_pbr.hpp"
-#include "pragma/rendering/shaders/world/c_shader_glow.hpp"
 #include "pragma/rendering/shaders/info/c_shader_velocity_buffer.hpp"
 #include "pragma/rendering/shaders/world/c_shader_eye.hpp"
 #include "pragma/rendering/shaders/world/c_shader_unlit.hpp"
@@ -104,7 +102,6 @@ void register_game_shaders()
 	shaderManager.RegisterShader("pbr_blend", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderPBRBlend(context, identifier); });
 	shaderManager.RegisterShader("eye", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderEye(context, identifier); });
 	shaderManager.RegisterShader("eye_legacy", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderEyeLegacy(context, identifier); });
-	shaderManager.RegisterShader("glow", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderGlow(context, identifier); });
 
 	// shaderManager.RegisterShader("flat",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderFlat(context,identifier);});
 	// shaderManager.RegisterShader("test",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderTest(context,identifier);});
@@ -159,7 +156,6 @@ void register_game_shaders()
 
 	shaderManager.RegisterShader("ssao", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderSSAO(context, identifier); });
 	shaderManager.RegisterShader("ssao_blur", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderSSAOBlur(context, identifier); });
-	shaderManager.RegisterShader("pp_glow", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderPPGlow(context, identifier); });
 	shaderManager.RegisterShader("pp_hdr", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderPPHDR(context, identifier); });
 	shaderManager.RegisterShader("pp_fog", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderPPFog(context, identifier); });
 	shaderManager.RegisterShader("pp_dof", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderPPDoF(context, identifier); });

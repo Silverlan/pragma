@@ -30,6 +30,9 @@ extern DLLCLIENT CGame *c_game;
 #include "pragma/rendering/render_processor.hpp"
 
 pragma::rendering::DepthStageRenderProcessor::DepthStageRenderProcessor(const util::RenderPassDrawInfo &drawSceneInfo, const Vector4 &drawOrigin) : BaseRenderProcessor {drawSceneInfo, drawOrigin} { SetCountNonOpaqueMaterialsOnly(true); }
-uint32_t pragma::rendering::DepthStageRenderProcessor::Render(const pragma::rendering::RenderQueue &renderQueue, RenderPassStats *optStats, std::optional<uint32_t> worldRenderQueueIndex) { return BaseRenderProcessor::Render(renderQueue, true, optStats, worldRenderQueueIndex); }
+uint32_t pragma::rendering::DepthStageRenderProcessor::Render(const pragma::rendering::RenderQueue &renderQueue, RenderPass renderPass, RenderPassStats *optStats, std::optional<uint32_t> worldRenderQueueIndex)
+{
+	return BaseRenderProcessor::Render(renderQueue, renderPass, optStats, worldRenderQueueIndex);
+}
 
 void pragma::rendering::DepthStageRenderProcessor::BindLight(CLightComponent &light, uint32_t layerId) { m_shaderProcessor.RecordBindLight(light, layerId); }

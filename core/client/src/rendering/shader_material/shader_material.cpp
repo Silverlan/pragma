@@ -192,6 +192,15 @@ static std::string value_to_glsl_string(const pragma::shadergraph::Value &value,
 	});
 }
 
+std::string ShaderMaterial::GetTextureUniformVariableName(const std::string &texIdentifier)
+{
+	auto varName = ustring::to_camel_case(texIdentifier);
+	if(!varName.empty())
+		varName[0] = tolower(varName[0]);
+	varName = "u_" + varName;
+	return varName;
+}
+
 std::string ShaderMaterial::ToGlslStruct() const
 {
 	std::stringstream ss;
@@ -280,10 +289,7 @@ std::string ShaderMaterial::ToGlslStruct() const
 	uint32_t isrgb = 0;
 	for(auto &tex : textures) {
 		auto idName = ustring::get_upper(tex.name);
-		auto varName = ustring::to_camel_case(tex.name);
-		if(!varName.empty())
-			varName[0] = tolower(varName[0]);
-		varName = "u_" + varName;
+		auto varName = GetTextureUniformVariableName(tex.name);
 
 		ss << "#define MATERIAL_" << idName << "_ENABLED 1\n";
 

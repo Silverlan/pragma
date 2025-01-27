@@ -500,7 +500,7 @@ void LightShadowRenderer::Render(const util::DrawSceneInfo &drawSceneInfo)
 
 		if(shadowRenderProcessor.BindShader(*shader, umath::to_integral(pipeline))) {
 			shadowRenderProcessor.BindLight(*m_hLight, layerId);
-			shadowRenderProcessor.Render(*m_renderQueues.at(layerId), drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::ShadowPass) : nullptr);
+			shadowRenderProcessor.Render(*m_renderQueues.at(layerId), pragma::rendering::RenderPass::Shadow, drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::ShadowPass) : nullptr);
 
 			// TODO: Translucent render pass ?
 			shadowRenderProcessor.UnbindShader();

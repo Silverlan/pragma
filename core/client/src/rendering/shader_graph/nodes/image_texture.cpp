@@ -10,31 +10,13 @@
 
 using namespace pragma::rendering::shader_graph;
 
-ImageTextureNode::ImageTextureNode(const std::string_view &type) : Node {type}
+ImageTextureNode::ImageTextureNode(const std::string_view &type) : ImageTextureNodeBase {type, false}
 {
 	AddInput(IN_FILENAME, pragma::shadergraph::DataType::String, "");
 	AddInput(IN_VECTOR, pragma::shadergraph::DataType::Vector, Vector3 {0.f, 0.f, 0.f}); // TODO: Make input only, don't allow writing manually
 
 	AddOutput(OUT_COLOR, pragma::shadergraph::DataType::Color);
 	AddOutput(OUT_ALPHA, pragma::shadergraph::DataType::Float);
-
-	AddModuleDependency("image_texture");
-}
-
-std::string ImageTextureNode::GetTextureVariableName(const pragma::shadergraph::GraphNode &gn) const
-{
-	auto prefix = gn.GetBaseVarName() + "_";
-	return prefix + "tex";
-}
-
-std::string ImageTextureNode::DoEvaluateResourceDeclarations(const pragma::shadergraph::Graph &graph, const pragma::shadergraph::GraphNode &gn) const
-{
-	std::ostringstream code;
-	//auto texName = GetTextureVariableName(gn);
-	//auto upperTexName = texName;
-	//ustring::to_upper(upperTexName);
-	//code << "layout(LAYOUT_ID(TEST, " << upperTexName << ")) uniform sampler2D " << texName << ";\n";
-	return code.str();
 }
 
 std::string ImageTextureNode::DoEvaluate(const pragma::shadergraph::Graph &graph, const pragma::shadergraph::GraphNode &gn) const
@@ -54,5 +36,42 @@ std::string ImageTextureNode::DoEvaluate(const pragma::shadergraph::Graph &graph
 
 	code << gn.GetGlslOutputDeclaration(OUT_ALPHA) << " = ";
 	code << prefix << "texCol.a;\n";
+	return code.str();
+}
+
+//
+
+ImageTextureNodeBase::ImageTextureNodeBase(const std::string_view &type, bool populateOutputsAndInputs) : Node {type}
+{
+	if(populateOutputsAndInputs) {
+		AddInput(IN_FILENAME, pragma::shadergraph::DataType::String, "");
+
+		AddOutput(OUT_TEXTURE, pragma::shadergraph::DataType::String);
+	}
+
+	AddModuleDependency("image_texture");
+}
+
+std::string ImageTextureNodeBase::GetTextureVariableName(const pragma::shadergraph::OutputSocket &socket) const { return GetTextureVariableName(*socket.parent); }
+
+std::string ImageTextureNodeBase::GetTextureVariableName(const pragma::shadergraph::GraphNode &gn) const
+{
+	auto prefix = gn.GetBaseVarName() + "_";
+	return prefix + "tex";
+}
+
+std::string ImageTextureNodeBase::DoEvaluateResourceDeclarations(const pragma::shadergraph::Graph &graph, const pragma::shadergraph::GraphNode &gn) const
+{
+	std::ostringstream code;
+	//auto texName = GetTextureVariableName(gn);
+	//auto upperTexName = texName;
+	//ustring::to_upper(upperTexName);
+	//code << "layout(LAYOUT_ID(TEST, " << upperTexName << ")) uniform sampler2D " << texName << ";\n";
+	return code.str();
+}
+
+std::string ImageTextureNodeBase::DoEvaluate(const pragma::shadergraph::Graph &graph, const pragma::shadergraph::GraphNode &gn) const
+{
+	std::ostringstream code;
 	return code.str();
 }

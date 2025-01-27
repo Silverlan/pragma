@@ -18,6 +18,13 @@ pragma::rendering::GlobalShaderInputDataManager::GlobalShaderInputDataManager() 
 
 void pragma::rendering::GlobalShaderInputDataManager::ResetInputDescriptor() { m_inputDescriptor = std::make_unique<pragma::rendering::ShaderInputDescriptor>("GlobalInputData"); }
 
+void pragma::rendering::GlobalShaderInputDataManager::AddProperty(pragma::rendering::Property &&prop)
+{
+	if(!m_inputDescriptor->AddProperty(std::move(prop)))
+		return;
+	m_inputDataDirty = true;
+}
+
 void pragma::rendering::GlobalShaderInputDataManager::PopulateProperties(const pragma::shadergraph::Graph &graph)
 {
 	std::vector<pragma::shadergraph::GraphNode *> globalParamNodes;
@@ -98,43 +105,44 @@ void pragma::rendering::GlobalShaderInputDataManager::PopulateProperties(const p
 	m_inputDataDirty = true;
 }
 
-void pragma::rendering::GlobalShaderInputDataManager::Clear()
+void pragma::rendering::GlobalShaderInputDataManager::ClearBuffer()
 {
 	c_engine->GetRenderContext().WaitIdle();
-	m_inputData = nullptr;
 	m_inputDataBuffer = nullptr;
-	m_inputDataDirty = false;
 	m_dirtyTracker.Clear();
+}
+
+void pragma::rendering::GlobalShaderInputDataManager::UpdateInputData()
+{
+	AllocateInputData();
+	if(!m_inputDataDirty)
+		return;
+	m_inputDataDirty = false;
+	auto size = m_inputData->data.size();
+	m_inputData->ResizeToDescriptor();
+	auto newSize = m_inputData->data.size();
+	m_dirtyTracker.MarkRange(size, newSize - size);
+
+	if(m_inputDataBuffer && newSize > m_inputDataBuffer->GetSize())
+		ClearBuffer();
 }
 
 void pragma::rendering::GlobalShaderInputDataManager::UpdateBufferData(prosper::ICommandBuffer &cmd)
 {
 	if(m_inputDescriptor->properties.empty())
 		return;
+	UpdateInputData();
 	if(!m_inputDataBuffer)
 		ReallocateBuffer();
-	if(m_inputDataDirty) {
-		m_inputDataDirty = false;
-		auto size = m_inputData->data.size();
-		m_inputData->ResizeToDescriptor();
-		auto newSize = m_inputData->data.size();
-		m_dirtyTracker.MarkRange(size, newSize - size);
-
-		if(newSize > m_inputDataBuffer->GetSize())
-			ReallocateBuffer();
-	}
 	for(auto &[offset, size] : m_dirtyTracker.GetRanges())
 		cmd.RecordUpdateBuffer(*m_inputDataBuffer, offset, size, m_inputData->data.data() + offset);
 	m_dirtyTracker.Clear();
 }
 
-void pragma::rendering::GlobalShaderInputDataManager::ReallocateBuffer()
+void pragma::rendering::GlobalShaderInputDataManager::AllocateInputData()
 {
-	Clear();
-
-	// TODO: Iterate all input parameter nodes of all shader graphs and add them to the input data
-	// TODO: What if a parameter is used in multiple shader graphs with different types?
-
+	if(m_inputData)
+		return;
 	std::vector<uint8_t> oldData;
 	if(m_inputData)
 		oldData = m_inputData->data;
@@ -148,6 +156,14 @@ void pragma::rendering::GlobalShaderInputDataManager::ReallocateBuffer()
 		assert(m_inputData->data.size() >= oldData.size());
 		memcpy(m_inputData->data.data(), oldData.data(), oldData.size());
 	}
+}
+
+void pragma::rendering::GlobalShaderInputDataManager::ReallocateBuffer()
+{
+	ClearBuffer();
+
+	// TODO: Iterate all input parameter nodes of all shader graphs and add them to the input data
+	// TODO: What if a parameter is used in multiple shader graphs with different types?
 
 	auto bufferSize = umath::get_aligned_offset(m_inputData->data.size(), BUFFER_BASE_SIZE);
 	if(bufferSize == 0)

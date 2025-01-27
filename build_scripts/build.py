@@ -828,7 +828,7 @@ if with_essential_client_modules:
 if with_common_modules:
 	add_pragma_module(
 		name="pr_bullet",
-		commitSha="be622341b5890ae2f8f1c97481ff52ddbd351cf0",
+		commitSha="b4a0af6d3db48d322b63a757ba5574fda87b99d8",
 		repositoryUrl="https://github.com/Silverlan/pr_bullet.git"
 	)
 	add_pragma_module(
@@ -906,7 +906,7 @@ if with_vr:
 if with_networking:
 	add_pragma_module(
 		name="pr_steam_networking_sockets",
-		commitSha="4890de55f2bfddbe8a8d838ab8ce12301e1647f9",
+		commitSha="ffef84e5bba8467370c7d447017ebf8e864c2a0f",
 		repositoryUrl="https://github.com/Silverlan/pr_steam_networking_sockets.git",
 		skipBuildTarget=True
 	)
@@ -1141,7 +1141,7 @@ def download_addon(name,addonName,url,commitId=None):
 curDir = os.getcwd()
 if not skip_repository_updates:
 	if with_pfm:
-		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","1c217d5a467924f87d9eb3734afc5fc39b36dbb5")
+		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","864bcc1ace4b9de8bfbf73536e015e1dadececda")
 		download_addon("model editor","tool_model_editor","https://github.com/Silverlan/pragma_model_editor.git","a9ea4820f03be250bdf1e6951dad313561b75b17")
 
 	if with_vr:

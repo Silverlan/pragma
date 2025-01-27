@@ -582,9 +582,9 @@ void CGame::RenderScenes(const std::vector<util::DrawSceneInfo> &drawSceneInfos)
 			}
 
 			if(drawWorld == 2)
-				drawSceneInfo.renderFlags &= ~(RenderFlags::Shadows | RenderFlags::Glow);
+				drawSceneInfo.renderFlags &= ~(RenderFlags::Shadows);
 			else if(drawWorld == 0)
-				drawSceneInfo.renderFlags &= ~(RenderFlags::Shadows | RenderFlags::Glow | RenderFlags::View | RenderFlags::World | RenderFlags::Skybox);
+				drawSceneInfo.renderFlags &= ~(RenderFlags::Shadows | RenderFlags::View | RenderFlags::World | RenderFlags::Skybox);
 
 			if(cvDrawStatic->GetBool() == false)
 				drawSceneInfo.renderFlags &= ~RenderFlags::Static;

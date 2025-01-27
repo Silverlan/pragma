@@ -21,8 +21,7 @@ using namespace pragma;
 
 decltype(ShaderPPHDR::DESCRIPTOR_SET_TEXTURE) ShaderPPHDR::DESCRIPTOR_SET_TEXTURE = {
   "TEXTURES",
-  {prosper::DescriptorSetInfo::Binding {"SCENE", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}, prosper::DescriptorSetInfo::Binding {"BLOOM", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit},
-    prosper::DescriptorSetInfo::Binding {"GLOW", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}},
+  {prosper::DescriptorSetInfo::Binding {"SCENE", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}, prosper::DescriptorSetInfo::Binding {"BLOOM", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}},
 };
 decltype(ShaderPPHDR::RENDER_PASS_FORMAT) ShaderPPHDR::RENDER_PASS_FORMAT = prosper::Format::R8G8B8A8_UNorm;
 decltype(ShaderPPHDR::RENDER_PASS_FORMAT_HDR) ShaderPPHDR::RENDER_PASS_FORMAT_HDR = prosper::Format::R16G16B16A16_SFloat;
@@ -55,10 +54,6 @@ void ShaderPPHDR::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pip
 
 	auto fxaaEnabled = (settings.fxaaEnabled && static_cast<Pipeline>(pipelineIdx) != Pipeline::HDR);
 	AddSpecializationConstant(pipelineInfo, prosper::ShaderStageFlags::FragmentBit, 1u /* constantId */, static_cast<uint32_t>(fxaaEnabled));
-
-	static auto settingsGlowEnabled = false;
-	auto glowEnabled = settingsGlowEnabled;
-	AddSpecializationConstant(pipelineInfo, prosper::ShaderStageFlags::FragmentBit, 2u /* constantId */, static_cast<uint32_t>(glowEnabled));
 }
 
 void ShaderPPHDR::InitializeShaderResources()
@@ -69,7 +64,7 @@ void ShaderPPHDR::InitializeShaderResources()
 	AttachPushConstantRange(0u, sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit);
 }
 
-bool ShaderPPHDR::RecordDraw(prosper::ShaderBindState &bindState, prosper::IDescriptorSet &descSetTexture, pragma::rendering::ToneMapping toneMapping, float exposure, float bloomScale, float glowScale, bool flipVertically) const
+bool ShaderPPHDR::RecordDraw(prosper::ShaderBindState &bindState, prosper::IDescriptorSet &descSetTexture, pragma::rendering::ToneMapping toneMapping, float exposure, float bloomScale, bool flipVertically) const
 {
-	return RecordPushConstants(bindState, PushConstants {exposure, bloomScale, glowScale, toneMapping, flipVertically ? 1u : 0u}) && ShaderPPBase::RecordDraw(bindState, descSetTexture) == true;
+	return RecordPushConstants(bindState, PushConstants {exposure, bloomScale, toneMapping, flipVertically ? 1u : 0u}) && ShaderPPBase::RecordDraw(bindState, descSetTexture) == true;
 }

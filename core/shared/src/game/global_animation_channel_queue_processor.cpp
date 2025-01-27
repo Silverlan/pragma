@@ -45,10 +45,10 @@ void GlobalAnimationChannelQueueProcessor::ApplyValues()
 				continue;
 			auto &component = *channelCacheData.component;
 			auto &memberInfo = *channelCacheData.memberInfo;
-			if(channelCacheData.changed != pragma::AnimationChannelCacheData::State::Changed)
+			if(!umath::is_flag_set(channelCacheData.changed, pragma::AnimationChannelCacheData::State::Dirty | pragma::AnimationChannelCacheData::State::AlwaysDirty))
 				continue;
 			memberInfo.setterFunction(memberInfo, component, channelCacheData.data.data());
-			const_cast<pragma::AnimationChannelCacheData &>(channelCacheData).changed = pragma::AnimationChannelCacheData::State::Unchanged;
+			umath::set_flag(const_cast<pragma::AnimationChannelCacheData &>(channelCacheData).changed, pragma::AnimationChannelCacheData::State::Dirty, false);
 		}
 		m_itemCompleteCount += (range.indexAfterLast - range.start);
 	}

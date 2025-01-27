@@ -31,25 +31,19 @@ namespace pragma {
 		enum class TextureBinding : uint32_t {
 			Texture = 0u,
 			Bloom,
-			Glow
 		};
 
 #pragma pack(push, 1)
 		struct PushConstants {
 			float exposure;
 			float bloomScale;
-			float glowScale;
 			rendering::ToneMapping toneMapping;
 			uint32_t flipVertically;
 		};
 #pragma pack(pop)
 
 		ShaderPPHDR(prosper::IPrContext &context, const std::string &identifier);
-		bool RecordDraw(
-			prosper::ShaderBindState &bindState, prosper::IDescriptorSet &descSetTexture, 
-			pragma::rendering::ToneMapping toneMapping, float exposure, float bloomScale, float glowScale, 
-			bool flipVertically = false
-		) const;
+		bool RecordDraw(prosper::ShaderBindState &bindState, prosper::IDescriptorSet &descSetTexture, pragma::rendering::ToneMapping toneMapping, float exposure, float bloomScale, bool flipVertically = false) const;
 	  protected:
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
 		virtual void InitializeShaderResources() override;

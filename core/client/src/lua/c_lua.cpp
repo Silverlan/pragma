@@ -97,10 +97,8 @@ void Lua::register_shared_client_state(lua_State *l)
 	auto modLocale = luabind::module_(l, "locale");
 	modLocale[luabind::def("load", Lua::Locale::load), luabind::def("get_language", Lua::Locale::get_language), luabind::def("change_language", Lua::Locale::change_language), luabind::def("set_text", Lua::Locale::set_localization), luabind::def("localize", Lua::Locale::localize),
 	  luabind::def("relocalize", Lua::Locale::relocalize)];
-	modLocale[luabind::def(
-	  "get_used_characters", +[]() -> std::string { return ::Locale::GetUsedCharacters().cpp_str(); })];
-	modLocale[luabind::def(
-	  "load_all", +[]() { ::Locale::LoadAll(); })];
+	modLocale[luabind::def("get_used_characters", +[]() -> std::string { return ::Locale::GetUsedCharacters().cpp_str(); })];
+	modLocale[luabind::def("load_all", +[]() { ::Locale::LoadAll(); })];
 	modLocale[luabind::def("clear", Lua::Locale::clear)];
 	modLocale[luabind::def("get_texts", Lua::Locale::get_texts)];
 	modLocale[luabind::def(
@@ -352,13 +350,27 @@ void CGame::RegisterLua()
 	    {"CURSOR_MODE_DISABLED", umath::to_integral(GLFW::CursorMode::Disabled)}, {"CURSOR_MODE_HIDDEN", umath::to_integral(GLFW::CursorMode::Hidden)}, {"CURSOR_MODE_NORMAL", umath::to_integral(GLFW::CursorMode::Normal)}});
 
 	Lua::RegisterLibraryEnums(GetLuaState(), "game",
-	  {{"RENDER_FLAG_NONE", 0}, {"RENDER_FLAG_BIT_WORLD", umath::to_integral(RenderFlags::World)}, {"RENDER_FLAG_BIT_VIEW", umath::to_integral(RenderFlags::View)}, {"RENDER_FLAG_BIT_SKYBOX", umath::to_integral(RenderFlags::Skybox)},
-	    {"RENDER_FLAG_BIT_SHADOWS", umath::to_integral(RenderFlags::Shadows)}, {"RENDER_FLAG_BIT_PARTICLES", umath::to_integral(RenderFlags::Particles)}, {"RENDER_FLAG_BIT_GLOW", umath::to_integral(RenderFlags::Glow)}, {"RENDER_FLAG_BIT_DEBUG", umath::to_integral(RenderFlags::Debug)},
-	    {"RENDER_FLAG_ALL", umath::to_integral(RenderFlags::All)}, {"RENDER_FLAG_REFLECTION_BIT", umath::to_integral(RenderFlags::Reflection)}, {"RENDER_FLAG_WATER_BIT", umath::to_integral(RenderFlags::Water)}, {"RENDER_FLAG_STATIC_BIT", umath::to_integral(RenderFlags::Static)},
-	    {"RENDER_FLAG_DYNAMIC_BIT", umath::to_integral(RenderFlags::Dynamic)}, {"RENDER_FLAG_TRANSLUCENT_BIT", umath::to_integral(RenderFlags::Translucent)}, {"RENDER_FLAG_HDR_BIT", umath::to_integral(RenderFlags::HDR)},
+	  {
+	    {"RENDER_FLAG_NONE", 0},
+	    {"RENDER_FLAG_BIT_WORLD", umath::to_integral(RenderFlags::World)},
+	    {"RENDER_FLAG_BIT_VIEW", umath::to_integral(RenderFlags::View)},
+	    {"RENDER_FLAG_BIT_SKYBOX", umath::to_integral(RenderFlags::Skybox)},
+	    {"RENDER_FLAG_BIT_SHADOWS", umath::to_integral(RenderFlags::Shadows)},
+	    {"RENDER_FLAG_BIT_PARTICLES", umath::to_integral(RenderFlags::Particles)},
+	    {"RENDER_FLAG_BIT_DEBUG", umath::to_integral(RenderFlags::Debug)},
+	    {"RENDER_FLAG_ALL", umath::to_integral(RenderFlags::All)},
+	    {"RENDER_FLAG_REFLECTION_BIT", umath::to_integral(RenderFlags::Reflection)},
+	    {"RENDER_FLAG_WATER_BIT", umath::to_integral(RenderFlags::Water)},
+	    {"RENDER_FLAG_STATIC_BIT", umath::to_integral(RenderFlags::Static)},
+	    {"RENDER_FLAG_DYNAMIC_BIT", umath::to_integral(RenderFlags::Dynamic)},
+	    {"RENDER_FLAG_TRANSLUCENT_BIT", umath::to_integral(RenderFlags::Translucent)},
+	    {"RENDER_FLAG_HDR_BIT", umath::to_integral(RenderFlags::HDR)},
 	    {"RENDER_FLAG_PARTICLE_DEPTH_BIT", umath::to_integral(RenderFlags::ParticleDepth)},
 
-	    {"ASSET_LOAD_FLAG_NONE", umath::to_integral(util::AssetLoadFlags::None)}, {"ASSET_LOAD_FLAG_DONT_CACHE", umath::to_integral(util::AssetLoadFlags::DontCache)}, {"ASSET_LOAD_FLAG_IGNORE_CACHE", umath::to_integral(util::AssetLoadFlags::IgnoreCache)}});
+	    {"ASSET_LOAD_FLAG_NONE", umath::to_integral(util::AssetLoadFlags::None)},
+	    {"ASSET_LOAD_FLAG_DONT_CACHE", umath::to_integral(util::AssetLoadFlags::DontCache)},
+	    {"ASSET_LOAD_FLAG_IGNORE_CACHE", umath::to_integral(util::AssetLoadFlags::IgnoreCache)},
+	  });
 
 	auto gameMod = luabind::module(GetLuaState(), "game");
 	RegisterLuaGameClasses(gameMod);

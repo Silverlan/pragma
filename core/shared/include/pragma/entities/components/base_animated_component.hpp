@@ -202,7 +202,7 @@ namespace pragma {
 
 		// Transforms all bone positions / rotations to entity space
 		bool UpdateSkeleton();
-		bool UpdateBonePoses();
+		virtual bool UpdateBonePoses();
 		void PostAnimationsUpdated();
 
 		void SetPostAnimationUpdateEnabled(bool enabled);

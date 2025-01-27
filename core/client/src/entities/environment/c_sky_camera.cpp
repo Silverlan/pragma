@@ -224,8 +224,8 @@ void CSkyCameraComponent::UpdateScenes()
 			rsys.UnbindShader();
 			BindToShader(rsys);
 			rsys.BindShader(stageData.shader, umath::to_integral(pragma::ShaderPrepass::Pipeline::Opaque));
-			rsys.Render(*pSceneData->renderQueue);
-			rsys.Render(*pSceneData->renderQueueTranslucent);
+			rsys.Render(*pSceneData->renderQueue, pragma::rendering::RenderPass::Prepass);
+			rsys.Render(*pSceneData->renderQueueTranslucent, pragma::rendering::RenderPass::Prepass);
 			UnbindFromShader(rsys);
 			rsys.UnbindShader();
 			return util::EventReply::Unhandled;

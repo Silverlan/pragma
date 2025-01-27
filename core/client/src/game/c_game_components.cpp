@@ -142,7 +142,6 @@
 #include "pragma/entities/components/renderers/c_renderer_pp_fog_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_pp_dof_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_pp_bloom_component.hpp"
-#include "pragma/entities/components/renderers/c_renderer_pp_glow_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_pp_tone_mapping_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_pp_fxaa_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_pp_motion_blur_component.hpp"
@@ -281,7 +280,6 @@ void CGame::InitializeEntityComponents(pragma::EntityComponentManager &component
 	componentManager.RegisterComponentType<pragma::CRendererPpFogComponent>("renderer_pp_fog", {"rendering/post_processing", hideInEditor});
 	componentManager.RegisterComponentType<pragma::CRendererPpDoFComponent>("renderer_pp_dof", {"rendering/post_processing", hideInEditor});
 	componentManager.RegisterComponentType<pragma::CRendererPpBloomComponent>("renderer_pp_bloom", {"rendering/post_processing", hideInEditor});
-	componentManager.RegisterComponentType<pragma::CRendererPpGlowComponent>("renderer_pp_glow", {"rendering/post_processing", hideInEditor});
 	componentManager.RegisterComponentType<pragma::CRendererPpToneMappingComponent>("renderer_pp_tone_mapping", {"rendering/post_processing", hideInEditor});
 	componentManager.RegisterComponentType<pragma::CRendererPpFxaaComponent>("renderer_pp_fxaa", {"rendering/post_processing", hideInEditor});
 	componentManager.RegisterComponentType<pragma::CRendererPpMotionBlurComponent>("renderer_pp_motion_blur", {"rendering/post_processing", hideInEditor});

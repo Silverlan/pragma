@@ -65,10 +65,18 @@ ShaderScene::ShaderScene(prosper::IPrContext &context, const std::string &identi
 {
 	//SetPipelineCount(umath::to_integral(Pipeline::Count));
 }
+bool ShaderScene::IsDebugPrintEnabled() const
+{
+#ifdef PRAGMA_ENABLE_SHADER_DEBUG_PRINT
+	return true;
+#else
+	return false;
+#endif
+}
 std::optional<std::string> ShaderScene::GetGlslPrefixCode(prosper::ShaderStage stage) const
 {
 #ifdef PRAGMA_ENABLE_SHADER_DEBUG_PRINT
-	if(stage == prosper::ShaderStage::Fragment || stage == prosper::ShaderStage::Vertex)
+	if(IsDebugPrintEnabled() && (stage == prosper::ShaderStage::Fragment || stage == prosper::ShaderStage::Vertex))
 		return "#include \"/debug/debug_print.glsl\"\n";
 #endif
 	return Shader3DBase::GetGlslPrefixCode(stage);

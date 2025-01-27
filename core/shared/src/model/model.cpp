@@ -1901,6 +1901,24 @@ bool Model::GenerateStandardMetaRigReferenceBonePoses(std::vector<umath::ScaledT
 	GenerateStandardMetaRigReferenceBonePoses(*m_metaRig, *m_skeleton, *m_reference, outPoses);
 	return true;
 }
+Quat Model::CalcNormalizedMetaBoneRotation(pragma::animation::MetaRigBoneType type, const Quat &metaReferenceRot, const Quat &posedRot) const
+{
+	if(!m_metaRig)
+		return uquat::identity();
+	auto *metaBone = m_metaRig->GetBone(type);
+	if(!metaBone)
+		return uquat::identity();
+	return uquat::get_inverse(metaReferenceRot * metaBone->normalizedRotationOffset) * (posedRot * metaBone->normalizedRotationOffset);
+}
+Quat Model::RetargetMetaBoneRotation(pragma::animation::MetaRigBoneType type, const Quat &metaReferenceRot, const Quat &posedRot, const pragma::animation::MetaRigBone &targetBone, const Quat &targetMetaReferenceRot) const
+{
+	auto normalizedRot = CalcNormalizedMetaBoneRotation(type, metaReferenceRot, posedRot);
+	auto rot = targetMetaReferenceRot;
+	rot *= targetBone.normalizedRotationOffset;
+	rot *= normalizedRot;
+	rot *= uquat::get_inverse(targetBone.normalizedRotationOffset);
+	return rot;
+}
 std::optional<pragma::animation::MetaRigBoneType> Model::GetMetaRigBoneParentId(pragma::animation::MetaRigBoneType type) const
 {
 	if(!m_metaRig)

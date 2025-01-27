@@ -9,6 +9,7 @@
 #include "pragma/util/c_resource_watcher.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
+#include "pragma/rendering/shader_graph/manager.hpp"
 #include "pragma/console/c_cvar.h"
 #include <texture_load_flags.hpp>
 #include <sharedutils/util_file.h>
@@ -19,6 +20,8 @@
 #include <prosper_glsl.hpp>
 #include <cmaterial_manager2.hpp>
 #include <cmaterial.h>
+
+import pragma.shadergraph;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
@@ -126,6 +129,7 @@ void CResourceWatcherManager::GetWatchPaths(std::vector<std::string> &paths)
 	paths.reserve(paths.size() + 2);
 	paths.push_back("shaders");
 	paths.push_back("particles");
+	paths.push_back("scripts/shader_data");
 }
 
 void CResourceWatcherManager::OnResourceChanged(const util::Path &rootPath, const util::Path &path, const std::string &ext)
@@ -174,5 +178,18 @@ void CResourceWatcherManager::OnResourceChanged(const util::Path &rootPath, cons
 			c_engine->ReloadShader(name);
 		}
 		CallChangeCallbacks(ECResourceWatcherCallbackType::Shader, strPath, ext);
+	}
+	else if(ext == pragma::shadergraph::Graph::EXTENSION_ASCII || ext == pragma::shadergraph::Graph::EXTENSION_BINARY) {
+		auto &graphManager = c_engine->GetShaderGraphManager();
+		std::string name {path.GetFileName()};
+		ufile::remove_extension_from_filename(name, std::array<std::string, 2> {pragma::shadergraph::Graph::EXTENSION_ASCII, pragma::shadergraph::Graph::EXTENSION_BINARY});
+		std::string err;
+		auto graph = graphManager.LoadShader(name, err, false /* reload */);
+		if(graph == nullptr) {
+#if RESOURCE_WATCHER_VERBOSE > 0
+			Con::cwar << "[ResourceWatcher] Failed to reload shader graph '" << name << "': " << err << Con::endl;
+#endif
+			return;
+		}
 	}
 }

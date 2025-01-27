@@ -39,6 +39,7 @@ namespace pragma {
 		virtual void RecordDrawOrigin(rendering::ShaderProcessor &shaderProcessor, const Vector4 &drawOrigin) const {}
 		virtual void RecordDepthBias(rendering::ShaderProcessor &shaderProcessor, const Vector2 &depthBias) const override {}
 		virtual void RecordVertexAnimationOffset(rendering::ShaderProcessor &shaderProcessor, uint32_t vertexAnimationOffset) const override {}
+		virtual bool IsDebugPrintEnabled() const override { return false; }
 	  protected:
 		ShaderSkybox(prosper::IPrContext &context, const std::string &identifier, const std::string &vsShader, const std::string &fsShader);
 		virtual uint32_t GetRendererDescriptorSetIndex() const override;

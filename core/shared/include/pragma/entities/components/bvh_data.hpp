@@ -77,12 +77,18 @@ namespace pragma::bvh {
 		std::vector<Primitive> primitives;
 		std::vector<MeshRange> meshRanges;
 
+		void SetDirty() { dirty = true; }
+		bool IsDirty() const { return dirty; }
+		void Update();
+
 		const MeshRange *FindMeshRange(size_t primIdx) const;
 		void Deserialize(const std::vector<uint8_t> &data, std::vector<pragma::bvh::Primitive> &&primitives);
 	  private:
 		virtual bool DoInitializeBvh(Executor &executor, ::bvh::v2::DefaultBuilder<Node>::Config &config) override;
+		void Refit();
 		void InitializePrecomputedTris();
 		std::vector<PrecomputedTri> precomputed_tris;
+		bool dirty = true;
 	};
 
 	DLLNETWORK Primitive create_triangle(const Vector3 &a, const Vector3 &b, const Vector3 &c);

@@ -833,7 +833,7 @@ if with_common_modules:
 	)
 	add_pragma_module(
 		name="pr_audio_soloud",
-		commitSha="7d4361d289ff1527e4783cde65dd7e5852684975",
+		commitSha="ae89cb889a7fa89ca47cdf878cb7f91eef8ba0a3",
 		repositoryUrl="https://github.com/Silverlan/pr_soloud.git"
 	)
 	add_pragma_module(
@@ -1141,7 +1141,7 @@ def download_addon(name,addonName,url,commitId=None):
 curDir = os.getcwd()
 if not skip_repository_updates:
 	if with_pfm:
-		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","864bcc1ace4b9de8bfbf73536e015e1dadececda")
+		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","f7930c52ee24a2ae9351dfea1810bbadeae035e1")
 		download_addon("model editor","tool_model_editor","https://github.com/Silverlan/pragma_model_editor.git","a9ea4820f03be250bdf1e6951dad313561b75b17")
 
 	if with_vr:

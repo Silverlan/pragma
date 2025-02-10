@@ -804,7 +804,11 @@ void Lua::udm::register_library(Lua::Interface &lua)
 		luabind::def("compare_numeric_values",+[](const Lua::udm_ng &ov0, const Lua::udm_ng &ov1, ::udm::Type type) {
 			return compare_numeric_values(ov0,ov1,type);
 		}),
-		luabind::def("is_animatable_type", &panima::is_animatable_type)
+		luabind::def("is_animatable_type", +[](::udm::Type type) -> bool {
+			if(umath::to_integral(type) >= umath::to_integral(::udm::Type::Count))
+				return false;
+			return panima::is_animatable_type(type);
+		})
 		// luabind::def("compare_numeric_values",&compare_numeric_values,luabind::default_parameter_policy<4,0.0001>{}) // Currently not supported by clang compiler
 	];
 

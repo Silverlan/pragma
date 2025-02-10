@@ -98,7 +98,9 @@ namespace pragma {
 			RenderResolved = BloomResolved << 1u,
 
 			SSAOEnabled = RenderResolved << 1u,
-			PrepassEnabled = SSAOEnabled << 1u
+			PrepassEnabled = SSAOEnabled << 1u,
+
+			InitialRender = PrepassEnabled << 1u,
 		};
 
 		enum class Stage : uint8_t {
@@ -257,7 +259,7 @@ namespace pragma {
 		std::shared_ptr<prosper::ISwapCommandBufferGroup> m_shadowCommandBufferGroup = nullptr;
 		std::shared_ptr<prosper::ISwapCommandBufferGroup> m_lightingCommandBufferGroup = nullptr;
 
-		StateFlags m_stateFlags = StateFlags::PrepassEnabled;
+		StateFlags m_stateFlags;
 		CRendererComponent *m_rendererComponent = nullptr;
 
 		prosper::SampleCountFlags m_sampleCount = prosper::SampleCountFlags::e1Bit;

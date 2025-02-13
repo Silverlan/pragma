@@ -71,6 +71,9 @@ pragma::BaseEntityComponent *Game::CreateMapComponent(BaseEntity &ent, const std
 }
 BaseEntity *Game::CreateMapEntity(pragma::asset::EntityData &entData)
 {
+	auto flags = entData.GetFlags();
+	if(umath::is_flag_set(flags, pragma::asset::EntityData::Flags::ClientsideOnly) && !IsClient())
+		return nullptr;
 	auto *ent = CreateEntity(entData.GetClassName());
 	if(ent == nullptr)
 		return nullptr;

@@ -99,6 +99,7 @@ namespace pragma::rendering {
 		uint32_t m_curVertexAnimationOffset = std::numeric_limits<uint32_t>::max();
 		RenderPassStats *m_stats = nullptr;
 
+		bool m_materialDescSetBound = false;
 		float m_alphaCutoff = std::numeric_limits<float>::max();
 		bool m_depthPrepass = false;
 	};

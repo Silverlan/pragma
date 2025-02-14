@@ -22,10 +22,12 @@
 #include "pragma/entities/environment/lights/c_env_shadow.hpp"
 #include "pragma/model/c_model.h"
 #include "pragma/logging.hpp"
+#include <cmaterial_manager2.hpp>
 #include <prosper_command_buffer.hpp>
 #include <cmaterial.h>
 
 extern DLLCLIENT CEngine *c_engine;
+extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
 bool pragma::rendering::ShaderProcessor::RecordBindScene(const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, const pragma::ShaderGameWorld &shader, bool view)
@@ -64,6 +66,7 @@ bool pragma::rendering::ShaderProcessor::RecordBindShader(const pragma::CSceneCo
 	m_vertexAnimC = nullptr;
 	m_modelC = nullptr;
 	m_lightMapReceiverC = nullptr;
+	m_materialDescSetBound = false;
 	m_curVertexAnimationOffset = std::numeric_limits<uint32_t>::max();
 	m_sceneFlags = sceneFlags;
 	m_alphaCutoff = std::numeric_limits<float>::max();
@@ -97,8 +100,19 @@ bool pragma::rendering::ShaderProcessor::RecordBindLight(CLightComponent &light,
 }
 bool pragma::rendering::ShaderProcessor::RecordBindMaterial(CMaterial &mat)
 {
-	if(m_curShader->RecordBindMaterial(*this, mat) == false)
+	if(m_curShader->RecordBindMaterial(*this, mat) == false) {
+		if(!m_materialDescSetBound) {
+			m_materialDescSetBound = true;
+			auto *errMat = client->GetMaterialManager().GetErrorMaterial();
+			if(!errMat)
+				return false;
+			// Bind a dummy material
+			if(!m_curShader->ShaderGameWorld::RecordBindMaterial(*this, static_cast<CMaterial &>(*errMat)))
+				return false;
+		}
 		return true; // TODO: This should only return true if we're doing a depth pre-pass and the material isn't transparent
+	}
+	m_materialDescSetBound = true;
 	auto flags = m_sceneFlags;
 	auto alphaMode = mat.GetAlphaMode();
 	if(alphaMode != AlphaMode::Opaque) {

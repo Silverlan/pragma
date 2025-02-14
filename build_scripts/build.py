@@ -498,7 +498,7 @@ os.chdir("SPIRV-Tools")
 # the target Vulkan SDK version.
 # When updating to a newer version, the SPIRV-Headers commit below has to match
 # the one defined in https://github.com/KhronosGroup/SPIRV-Tools/blob/<SHA>/DEPS
-reset_to_commit("6dcc7e350a0b9871a825414d42329e44b0eb8109")
+reset_to_commit("4d2f0b4")
 os.chdir("../../")
 
 ########## SPIRV-Headers ##########
@@ -508,7 +508,7 @@ os.chdir("SPIRV-Tools/external")
 if not Path(os.getcwd() +"/spirv-headers").is_dir():
 	git_clone("https://github.com/KhronosGroup/SPIRV-Headers", "spirv-headers")
 os.chdir("spirv-headers")
-reset_to_commit("2a9b6f951c7d6b04b6c21fe1bf3f475b68b84801")
+reset_to_commit("3f17b2af6784bfa2c5aa5dbb8e0e74a607dd8b3b")
 os.chdir("../../")
 os.chdir("../../")
 
@@ -821,7 +821,7 @@ execfile(scripts_dir +"/user_modules.py",g,l)
 if with_essential_client_modules:
 	add_pragma_module(
 		name="pr_prosper_vulkan",
-		commitSha="7a6fdd08d4ab4f0677d2c3f0223b99a18a8f2e33",
+		commitSha="f5b60e671d61a2a559b8f6a20ed61edde07e22e7",
 		repositoryUrl="https://github.com/Silverlan/pr_prosper_vulkan.git"
 	)
 

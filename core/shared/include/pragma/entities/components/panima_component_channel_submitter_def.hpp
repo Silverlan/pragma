@@ -33,7 +33,7 @@ panima::ChannelValueSubmitter get_member_channel_submitter(pragma::BaseEntityCom
 			}
 			auto &changed = const_cast<pragma::AnimationChannelCacheData &>(cacheData).changed;
 			if(!umath::is_flag_set(changed, pragma::AnimationChannelCacheData::State::Dirty | pragma::AnimationChannelCacheData::State::AlwaysDirty)) {
-				if(memcmp(const_cast<void *>(static_cast<const void *>(cacheData.data.data())), &value, sizeof(value)) == 0)
+				if(memcmp(const_cast<void *>(static_cast<const void *>(cacheData.data.data())), &value, sizeof(value)) != 0)
 					changed |= pragma::AnimationChannelCacheData::State::Dirty;
 			}
 			memcpy(const_cast<void *>(static_cast<const void *>(cacheData.data.data())), &value, sizeof(value));
@@ -69,6 +69,11 @@ panima::ChannelValueSubmitter get_member_channel_submitter(pragma::BaseEntityCom
 				TMember curVal;
 				memberInfo->getterFunction(*memberInfo, component, &curVal);
 				Con::cout << "Changing " << TMapArray.size() << " components of channel value '" << channel.targetPath.ToUri() << " from " << to_string(curVal) << " to " << to_string(value) << " (t: " << t << ")..." << Con::endl;
+			}
+			auto &changed = const_cast<pragma::AnimationChannelCacheData &>(cacheData).changed;
+			if(!umath::is_flag_set(changed, pragma::AnimationChannelCacheData::State::Dirty | pragma::AnimationChannelCacheData::State::AlwaysDirty)) {
+				if(memcmp(const_cast<void *>(static_cast<const void *>(cacheData.data.data())), &curVal, sizeof(curVal)) != 0)
+					changed |= pragma::AnimationChannelCacheData::State::Dirty;
 			}
 			memcpy(const_cast<void *>(static_cast<const void *>(cacheData.data.data())), &curVal, sizeof(curVal));
 			// setter(*memberInfo, component, &curVal, userData);

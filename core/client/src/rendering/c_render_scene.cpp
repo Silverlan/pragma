@@ -66,9 +66,10 @@ void CGame::RenderScene(const util::DrawSceneInfo &drawSceneInfo)
 		prosper::Texture *presentationTexture = nullptr;
 		if(umath::is_flag_set(drawSceneInfo.renderFlags, RenderFlags::HDR))
 			presentationTexture = drawSceneInfo.renderTarget ? &drawSceneInfo.renderTarget->GetTexture() : renderer->GetHDRPresentationTexture();
-		else
+		else {
 			presentationTexture = renderer->GetPresentationTexture();
-		drawSceneInfo.commandBuffer->RecordImageBarrier(presentationTexture->GetImage(), prosper::ImageLayout::ShaderReadOnlyOptimal, prosper::ImageLayout::ColorAttachmentOptimal);
+			drawSceneInfo.commandBuffer->RecordImageBarrier(presentationTexture->GetImage(), prosper::ImageLayout::ShaderReadOnlyOptimal, prosper::ImageLayout::ColorAttachmentOptimal);
+		}
 
 		StartProfilingStage("Render");
 		if(drawSceneInfo.renderStats)

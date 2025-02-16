@@ -68,6 +68,8 @@ namespace pragma {
 		Material *LoadMaterial(bool &outIsDefault);
 
 		void InitializeDescriptorSet();
+		void ClearDescriptorSet();
+		void ClearIblData();
 		util::ParallelJob<uimg::ImageLayerSet> CaptureRaytracedIBLReflectionsFromScene(uint32_t width, uint32_t height, const Vector3 &camPos, const Quat &camRot, float nearZ, float farZ, umath::Degree fov, float exposure, const std::vector<BaseEntity *> *optEntityList = nullptr,
 		  bool renderJob = false);
 		bool FinalizeCubemap(prosper::IImage &imgCubemap);

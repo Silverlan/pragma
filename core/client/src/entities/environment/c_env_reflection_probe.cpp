@@ -382,12 +382,8 @@ void CReflectionProbeComponent::OnEntitySpawn()
 void CReflectionProbeComponent::OnRemove()
 {
 	BaseEntityComponent::OnRemove();
-	if(m_iblData) {
-		c_engine->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_iblData->brdfMap);
-		c_engine->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_iblData->irradianceMap);
-		c_engine->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_iblData->prefilterMap);
-	}
-	c_engine->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_iblDsg);
+	ClearDescriptorSet();
+	ClearIblData();
 }
 
 std::string CReflectionProbeComponent::GetCubemapIBLMaterialFilePath() const
@@ -758,7 +754,8 @@ bool CReflectionProbeComponent::GenerateIBLReflectionsFromCubemap(prosper::Textu
 
 	if(irradianceMap == nullptr || prefilterMap == nullptr)
 		return false;
-	m_iblDsg = nullptr;
+	ClearDescriptorSet();
+	ClearIblData();
 	m_iblData = std::make_unique<rendering::IBLData>(irradianceMap, prefilterMap, brdfTex);
 	InitializeDescriptorSet();
 
@@ -801,6 +798,15 @@ Material *CReflectionProbeComponent::LoadMaterial(bool &outIsDefault)
 	auto *mat = client->LoadMaterial(matPath.GetString(), nullptr, false, true);
 	return (mat && mat->IsError() == false) ? mat : nullptr;
 }
+void CReflectionProbeComponent::ClearIblData()
+{
+	if(m_iblData) {
+		c_engine->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_iblData->brdfMap);
+		c_engine->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_iblData->irradianceMap);
+		c_engine->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_iblData->prefilterMap);
+	}
+	m_iblData = nullptr;
+}
 bool CReflectionProbeComponent::LoadIBLReflectionsFromFile()
 {
 	auto isDefaultMaterial = false;
@@ -817,7 +823,8 @@ bool CReflectionProbeComponent::LoadIBLReflectionsFromFile()
 	auto texBrdf = std::static_pointer_cast<Texture>(pBrdf->texture);
 	if(texPrefilter == nullptr || texPrefilter->HasValidVkTexture() == false || texIrradiance == nullptr || texIrradiance->HasValidVkTexture() == false || texBrdf == nullptr || texBrdf->HasValidVkTexture() == false)
 		return false;
-	m_iblDsg = nullptr;
+	ClearDescriptorSet();
+	ClearIblData();
 	m_iblData = std::make_unique<rendering::IBLData>(texIrradiance->GetVkTexture(), texPrefilter->GetVkTexture(), texBrdf->GetVkTexture());
 	if(m_strength.has_value())
 		m_iblData->strength = *m_strength;
@@ -849,12 +856,19 @@ bool CReflectionProbeComponent::LoadIBLReflectionsFromFile()
 		umath::set_flag(m_stateFlags, StateFlags::RequiresRebuild, false);
 	return true;
 }
+void CReflectionProbeComponent::ClearDescriptorSet()
+{
+	if(m_iblDsg)
+		c_engine->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_iblDsg);
+	m_iblDsg = nullptr;
+}
 void CReflectionProbeComponent::InitializeDescriptorSet()
 {
-	m_iblDsg = nullptr;
+	ClearDescriptorSet();
 	if(m_iblData == nullptr)
 		return;
-	m_iblDsg = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderPBR::DESCRIPTOR_SET_PBR);
+	auto &context = c_engine->GetRenderContext();
+	m_iblDsg = context.CreateDescriptorSetGroup(pragma::ShaderPBR::DESCRIPTOR_SET_PBR);
 	auto &ds = *m_iblDsg->GetDescriptorSet();
 	ds.SetBindingTexture(*m_iblData->irradianceMap, umath::to_integral(pragma::ShaderPBR::PBRBinding::IrradianceMap));
 	ds.SetBindingTexture(*m_iblData->prefilterMap, umath::to_integral(pragma::ShaderPBR::PBRBinding::PrefilterMap));

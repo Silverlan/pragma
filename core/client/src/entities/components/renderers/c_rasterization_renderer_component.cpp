@@ -192,9 +192,12 @@ void CRasterizationRendererComponent::InitializeCommandBufferGroups()
 {
 	auto &context = c_engine->GetRenderContext();
 	auto &window = context.GetWindow();
-	m_prepassCommandBufferGroup = context.CreateSwapCommandBufferGroup(window);
-	m_shadowCommandBufferGroup = context.CreateSwapCommandBufferGroup(window);
-	m_lightingCommandBufferGroup = context.CreateSwapCommandBufferGroup(window);
+	std::string dbgPrefix;
+	auto uuid = GetEntity().GetUuid();
+	dbgPrefix = util::uuid_to_string(uuid) + "_";
+	m_prepassCommandBufferGroup = context.CreateSwapCommandBufferGroup(window, true, dbgPrefix + "prepass");
+	m_shadowCommandBufferGroup = context.CreateSwapCommandBufferGroup(window, true, dbgPrefix + "shadow");
+	m_lightingCommandBufferGroup = context.CreateSwapCommandBufferGroup(window, true, dbgPrefix + "lighting");
 }
 
 void CRasterizationRendererComponent::InitializeLightDescriptorSets()

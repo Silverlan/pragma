@@ -200,7 +200,7 @@ bool util::to_image_buffer(prosper::IImage &image, const ToImageBufferInfo &info
 		setupCmd->RecordImageBarrier(*imgRead, prosper::ImageLayout::TransferSrcOptimal, prosper::ImageLayout::TransferDstOptimal);
 		setupCmd->RecordImageBarrier(image, info.inputImageLayout, prosper::ImageLayout::TransferSrcOptimal);
 		image.Copy(*setupCmd, *imgRead);
-		setupCmd->RecordImageBarrier(image, prosper::ImageLayout::TransferDstOptimal, info.inputImageLayout);
+		setupCmd->RecordImageBarrier(image, prosper::ImageLayout::TransferSrcOptimal, info.inputImageLayout);
 	}
 	else if(copyCreateInfo.format != dstFormat) {
 		copyCreateInfo.format = dstFormat;

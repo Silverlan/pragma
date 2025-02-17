@@ -88,7 +88,7 @@ void CRendererPpToneMappingComponent::DoRenderEffect(const util::DrawSceneInfo &
 		}
 		drawCmd->RecordEndRenderPass();
 
-		drawCmd->RecordPostRenderPassImageBarrier(dstImgPostHdr, prosper::ImageLayout::ColorAttachmentOptimal, prosper::ImageLayout::TransferSrcOptimal);
+		drawCmd->RecordPostRenderPassImageBarrier(dstImgPostHdr, prosper::ImageLayout::ColorAttachmentOptimal, m_applyToHdrImage ? prosper::ImageLayout::ShaderReadOnlyOptimal : prosper::ImageLayout::TransferSrcOptimal);
 	}
 	if(m_renderer->IsMultiSampled() == false) {
 		drawCmd->RecordImageBarrier(*srcImg, prosper::ImageLayout::ShaderReadOnlyOptimal, prosper::ImageLayout::ColorAttachmentOptimal);

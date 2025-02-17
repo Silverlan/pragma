@@ -312,6 +312,13 @@ void register_vulkan_lua_interface2(Lua::Interface &lua, luabind::module_ &prosp
 	defVkRenderPass.def(luabind::tostring(luabind::self));
 	defVkRenderPass.def(luabind::const_self == luabind::const_self);
 	defVkRenderPass.def("IsValid", &Lua::Vulkan::VKRenderPass::IsValid);
+	defVkRenderPass.def(
+	  "GetFinalLayout", +[](const Lua::Vulkan::RenderPass &rp, uint32_t attIdx) -> std::optional<prosper::ImageLayout> {
+		  auto &createInfo = rp.GetCreateInfo();
+		  if(attIdx >= createInfo.attachments.size())
+			  return {};
+		  return createInfo.attachments[attIdx].finalLayout;
+	  });
 	prosperMod[defVkRenderPass];
 
 	auto defVkEvent = luabind::class_<Lua::Vulkan::Event>("Event");
@@ -571,8 +578,7 @@ bool Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffers(
 	}));
 	defVkDescriptorSet.def("SetDebugName", static_cast<void (*)(lua_State *, Lua::Vulkan::DescriptorSet &, const std::string &)>([](lua_State *l, Lua::Vulkan::DescriptorSet &ds, const std::string &name) { Lua::Vulkan::VKContextObject::SetDebugName(l, ds, name); }));
 	defVkDescriptorSet.def("GetDebugName", static_cast<std::string (*)(lua_State *, Lua::Vulkan::DescriptorSet &)>([](lua_State *l, Lua::Vulkan::DescriptorSet &ds) { return Lua::Vulkan::VKContextObject::GetDebugName(l, ds); }));
-	defVkDescriptorSet.def(
-	  "Update", +[](lua_State *l, Lua::Vulkan::DescriptorSet &ds) { return ds.GetDescriptorSet()->Update(); });
+	defVkDescriptorSet.def("Update", +[](lua_State *l, Lua::Vulkan::DescriptorSet &ds) { return ds.GetDescriptorSet()->Update(); });
 	prosperMod[defVkDescriptorSet];
 
 	auto defVkMesh = luabind::class_<pragma::SceneMesh>("Mesh");
@@ -638,8 +644,7 @@ bool Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffers(
 	defPcb.def(
 	  "RecordBindDescriptorSet",
 	  +[](lua_State *l, prosper::util::PreparedCommandBuffer &pcb, const std::shared_ptr<prosper::IDescriptorSetGroup> &descSet) -> bool { return pcb_record_bind_descriptor_set(pcb, descSet, PcbLuaArg::CreateValue<uint32_t>(l, 0), PcbLuaArg::CreateValue<uint32_t>(l, 0)); });
-	defPcb.def(
-	  "RecordCommands", +[](prosper::util::PreparedCommandBuffer &pcb, prosper::ICommandBuffer &cmd) -> bool { return pcb.RecordCommands(cmd, {}, {}); });
+	defPcb.def("RecordCommands", +[](prosper::util::PreparedCommandBuffer &pcb, prosper::ICommandBuffer &cmd) -> bool { return pcb.RecordCommands(cmd, {}, {}); });
 	defPcb.def_readonly("enableDrawArgs", &prosper::util::PreparedCommandBuffer::enableDrawArgs);
 
 	auto defPcbDa = luabind::class_<Lua::Vulkan::PreparedCommandLuaDynamicArg>("DynArg");

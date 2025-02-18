@@ -6,6 +6,8 @@
     file, You can obtain one at http://mozilla.org/MPL/2.0/.
 ]]
 
+local LOGGER = log.register_logger("image_processor")
+
 util.register_class("util.ImageProcessor")
 
 util.register_class("util.ImageProcessor.Stage")
@@ -14,6 +16,7 @@ function util.ImageProcessor.Stage:__init(f)
 	self.m_executor = f
 end
 function util.ImageProcessor.Stage:Apply(drawCmd, dsTex, rtDst)
+	LOGGER:Info("Applying stage...")
 	self.m_executor(drawCmd, dsTex, rtDst)
 end
 function util.ImageProcessor.Stage:SetEnabled(enabled)
@@ -85,13 +88,16 @@ function util.ImageProcessor:SetStageEnabled(name, enabled)
 end
 
 function util.ImageProcessor:AcquireTexture(drawCmd)
+	LOGGER:Info("Acquiring texture...")
 	local curTex = self.m_curTexture
 	local prevTex = self.m_prevTexture
 	if prevTex ~= nil and #self.m_textures == 1 then
+		LOGGER:Warn("Only one texture available, skipping...")
 		return
 	end
 	local tex = self.m_textures[curTex]
 	if tex == nil then
+		LOGGER:Warn("No texture available, skipping...")
 		return
 	end
 	self.m_prevTexture = curTex
@@ -104,31 +110,34 @@ function util.ImageProcessor:AcquireTexture(drawCmd)
 	local texSrc = (srcData ~= nil) and srcData.texture or nil
 	local texDst = tex.texture
 	if texSrc ~= nil then
+		--[[LOGGER:Debug(
+			"Transitioning source texture '"
+				.. texSrc:GetImage():GetDebugName()
+				.. "' from COLOR_ATTACHMENT to SHADER_READ_ONLY"
+		)
 		drawCmd:RecordImageBarrier(
 			texSrc:GetImage(),
-			prosper.PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-			prosper.PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
 			prosper.IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-			prosper.IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-			prosper.ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-			prosper.ACCESS_SHADER_READ_BIT
-		)
+			prosper.IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+		)]]
 	end
+
+	LOGGER:Debug(
+		"Transitioning destination texture '"
+			.. texDst:GetImage():GetDebugName()
+			.. "' from SHADER_READ_ONLY to COLOR_ATTACHMENT"
+	)
 	drawCmd:RecordImageBarrier(
 		texDst:GetImage(),
-		prosper.PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-		prosper.PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
 		prosper.IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-		prosper.IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-		prosper.ACCESS_SHADER_READ_BIT,
-		prosper.ACCESS_COLOR_ATTACHMENT_WRITE_BIT
+		prosper.IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
 	)
 
 	local dsSrc = (srcData ~= nil) and srcData.descriptorSet or nil
 	if dsSrc == nil then
 		dsSrc = self.m_inputTexture.descriptorSet
 	end
-	return tex.renderTarget, dsSrc
+	return tex.renderTarget, dsSrc, texSrc
 end
 
 function util.ImageProcessor:Reset()
@@ -141,14 +150,23 @@ function util.ImageProcessor:AddStagingTexture(createInfo)
 		bit.bor(createInfo.usageFlags, prosper.IMAGE_USAGE_COLOR_ATTACHMENT_BIT, prosper.IMAGE_USAGE_SAMPLED_BIT)
 	createInfo.tiling = prosper.IMAGE_TILING_OPTIMAL
 	createInfo.memoryFeatures = prosper.MEMORY_FEATURE_GPU_BULK_BIT
-	createInfo.postCreateLayout = prosper.IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
+	createInfo.postCreateLayout = prosper.IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
 	local img = prosper.create_image(createInfo)
+	img:SetDebugName("image_processor_staging_tex")
 	local samplerCreateInfo = prosper.SamplerCreateInfo()
 	samplerCreateInfo.addressModeU = prosper.SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE -- TODO: This should be the default for the SamplerCreateInfo struct; TODO: Add additional constructors
 	samplerCreateInfo.addressModeV = prosper.SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE
 	samplerCreateInfo.addressModeW = prosper.SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE
 	local tex =
 		prosper.create_texture(img, prosper.TextureCreateInfo(), prosper.ImageViewCreateInfo(), samplerCreateInfo)
+	tex:SetDebugName("image_processor_staging_tex")
+	LOGGER:Debug(
+		"Created staging texture '"
+			.. tex:GetImage():GetDebugName()
+			.. "' with initial layout '"
+			.. prosper.image_layout_to_string(createInfo.postCreateLayout)
+			.. "'"
+	)
 
 	local rpCreateInfo = prosper.RenderPassCreateInfo()
 	rpCreateInfo:AddAttachment(
@@ -160,6 +178,7 @@ function util.ImageProcessor:AddStagingTexture(createInfo)
 	)
 	local rp = prosper.create_render_pass(rpCreateInfo)
 	local rt = prosper.create_render_target(prosper.RenderTargetCreateInfo(), { tex }, rp)
+	rt:SetDebugName("image_processor_staging_rt")
 
 	local dsInfo = shader.DescriptorSetInfo("TEXTURE", {
 		shader.DescriptorSetBinding(
@@ -179,58 +198,71 @@ end
 
 function util.ImageProcessor:Apply(drawCmd, inputTex)
 	self:Reset()
+	LOGGER:Info("Applying image processor...")
 	local tex
 	for _, stage in ipairs(self.m_stages) do
 		if stage:IsEnabled() then
-			local rtDst, dsSrc = self:AcquireTexture(drawCmd)
+			local rtDst, dsSrc, texSrc = self:AcquireTexture(drawCmd)
 			if rtDst == nil then
 				break
 			end
+			LOGGER:Info("Beginning render pass with render target '" .. rtDst:GetDebugName() .. "'")
 			if drawCmd:RecordBeginRenderPass(prosper.RenderPassInfo(rtDst)) then
 				stage:Apply(drawCmd, dsSrc, rtDst)
 
+				LOGGER:Info("Ending render pass")
 				drawCmd:RecordEndRenderPass()
 			end
 			tex = rtDst:GetTexture()
+			LOGGER:Debug(
+				"Image '"
+					.. tex:GetImage():GetDebugName()
+					.. "' is now in layout '"
+					.. prosper.image_layout_to_string(rtDst:GetRenderPass():GetFinalLayout(0))
+					.. "'"
+			)
 		end
 	end
 	if tex == nil then
+		LOGGER:Warn("No texture available, skipping...")
 		return
 	end
-	--[[drawCmd:RecordImageBarrier(
-		tex:GetImage(),
-		prosper.PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,prosper.PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-		prosper.IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,prosper.IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-		prosper.ACCESS_COLOR_ATTACHMENT_WRITE_BIT,prosper.ACCESS_SHADER_READ_BIT
-	)]]
+	LOGGER:Info("Image processor applied successfully!")
 	return tex
 end
 
 function util.ImageProcessor:Finalize(drawCmd)
+	LOGGER:Info("Finalizing image processor...")
 	local texInput = self:GetInputTexture()
 	local lastTexInfo = self.m_textures[self.m_prevTexture]
 	if texInput == nil or lastTexInfo == nil then
+		LOGGER:Warn("No input texture or last texture available, skipping...")
 		return false
 	end
 	local lastTex = lastTexInfo.texture
+	LOGGER:Debug("Transitioning input texture '" .. texInput:GetImage():GetDebugName() .. "' to TRANSFER_DST")
 	drawCmd:RecordImageBarrier(
 		texInput:GetImage(),
 		prosper.IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
 		prosper.IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
 	)
+	LOGGER:Debug("Transitioning last texture '" .. lastTex:GetImage():GetDebugName() .. "' to TRANSFER_SRC")
 	drawCmd:RecordImageBarrier(
 		lastTex:GetImage(),
 		prosper.IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
 		prosper.IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL
 	)
 
+	LOGGER:Info("Blitting last texture to input texture...")
 	drawCmd:RecordBlitImage(lastTex:GetImage(), texInput:GetImage(), prosper.BlitInfo())
 
+	LOGGER:Debug("Transitioning input texture '" .. texInput:GetImage():GetDebugName() .. "' to SHADER_READ_ONLY")
 	drawCmd:RecordImageBarrier(
 		texInput:GetImage(),
 		prosper.IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 		prosper.IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
 	)
+	LOGGER:Debug("Transitioning last texture '" .. lastTex:GetImage():GetDebugName() .. "' to SHADER_READ_ONLY")
 	drawCmd:RecordImageBarrier(
 		lastTex:GetImage(),
 		prosper.IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,

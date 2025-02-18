@@ -195,6 +195,7 @@ bool util::to_image_buffer(prosper::IImage &image, const ToImageBufferInfo &info
 
 	auto copyCreateInfo = image.GetCreateInfo();
 	auto imgRead = image.shared_from_this();
+	auto isOrigImg = false;
 	if(info.stagingImage) {
 		imgRead = info.stagingImage->shared_from_this();
 		setupCmd->RecordImageBarrier(*imgRead, prosper::ImageLayout::TransferSrcOptimal, prosper::ImageLayout::TransferDstOptimal);
@@ -211,6 +212,8 @@ bool util::to_image_buffer(prosper::IImage &image, const ToImageBufferInfo &info
 		imgRead = image.Copy(*setupCmd, copyCreateInfo);
 		setupCmd->RecordImageBarrier(image, prosper::ImageLayout::TransferSrcOptimal, info.inputImageLayout);
 	}
+	else
+		isOrigImg = true;
 
 	// Copy the image data to a buffer
 	uint64_t size = 0;
@@ -277,6 +280,8 @@ bool util::to_image_buffer(prosper::IImage &image, const ToImageBufferInfo &info
 			setupCmd->RecordCopyImageToBuffer(copyInfo, *imgRead, prosper::ImageLayout::TransferSrcOptimal, *buf);
 		}
 	}
+	if(isOrigImg && info.finalImageLayout != prosper::ImageLayout::TransferSrcOptimal)
+		setupCmd->RecordImageBarrier(*imgRead, prosper::ImageLayout::TransferSrcOptimal, info.finalImageLayout);
 	context.FlushSetupCommandBuffer();
 
 	for(auto iLayer = decltype(layers.size()) {0u}; iLayer < layers.size(); ++iLayer) {

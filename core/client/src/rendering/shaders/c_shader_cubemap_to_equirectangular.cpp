@@ -43,7 +43,7 @@ std::shared_ptr<prosper::IImage> ShaderCubemapToEquirectangular::CreateEquirecta
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	createInfo.tiling = prosper::ImageTiling::Optimal;
 	createInfo.flags |= flags;
-	createInfo.usage = prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::TransferSrcBit;
+	createInfo.usage = prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::TransferSrcBit | prosper::ImageUsageFlags::TransferDstBit;
 	createInfo.postCreateLayout = prosper::ImageLayout::ShaderReadOnlyOptimal;
 
 	return c_engine->GetRenderContext().CreateImage(createInfo);
@@ -52,6 +52,7 @@ std::shared_ptr<prosper::IImage> ShaderCubemapToEquirectangular::CreateEquirecta
 std::shared_ptr<prosper::RenderTarget> ShaderCubemapToEquirectangular::CreateEquirectangularRenderTarget(uint32_t width, uint32_t height, prosper::util::ImageCreateInfo::Flags flags, bool hdr) const
 {
 	auto img = CreateEquirectangularMap(width, height, flags, hdr);
+
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
 	prosper::util::SamplerCreateInfo samplerCreateInfo {};
 	//InitializeSamplerCreateInfo(flags,samplerCreateInfo);
@@ -62,10 +63,13 @@ std::shared_ptr<prosper::RenderTarget> ShaderCubemapToEquirectangular::CreateEqu
 
 	prosper::util::RenderTargetCreateInfo rtCreateInfo {};
 	//rtCreateInfo.useLayerFramebuffers = true;
-	return c_engine->GetRenderContext().CreateRenderTarget({tex}, GetRenderPass(), rtCreateInfo);
+	auto rt = c_engine->GetRenderContext().CreateRenderTarget({tex}, GetRenderPass(), rtCreateInfo);
+	if(rt)
+		rt->SetDebugName("equirectangular_render_target");
+	return rt;
 }
 
-std::shared_ptr<prosper::Texture> ShaderCubemapToEquirectangular::CubemapToEquirectangularTexture(prosper::Texture &cubemap, uint32_t width, uint32_t height, umath::Degree range)
+std::shared_ptr<prosper::Texture> ShaderCubemapToEquirectangular::CubemapToEquirectangularTexture(prosper::Texture &cubemap, uint32_t width, uint32_t height, umath::Degree range, prosper::ImageLayout cubemapLayout)
 {
 	auto inputFormat = cubemap.GetImage().GetFormat();
 	// TODO: If compressed, check if compressed HDR format
@@ -79,7 +83,9 @@ std::shared_ptr<prosper::Texture> ShaderCubemapToEquirectangular::CubemapToEquir
 
 	// Shader execution
 	auto &setupCmd = c_engine->GetSetupCommandBuffer();
-	setupCmd->RecordPostRenderPassImageBarrier(rt->GetTexture().GetImage(), prosper::ImageLayout::ShaderReadOnlyOptimal, prosper::ImageLayout::ColorAttachmentOptimal);
+	if(cubemapLayout != prosper::ImageLayout::ShaderReadOnlyOptimal)
+		setupCmd->RecordImageBarrier(cubemap.GetImage(), cubemapLayout, prosper::ImageLayout::ShaderReadOnlyOptimal);
+	setupCmd->RecordImageBarrier(rt->GetTexture().GetImage(), prosper::ImageLayout::ShaderReadOnlyOptimal, prosper::ImageLayout::ColorAttachmentOptimal);
 	auto success = true;
 
 	auto vertBuffer = c_engine->GetRenderContext().GetCommonBufferCache().GetSquareVertexBuffer();
@@ -107,6 +113,8 @@ std::shared_ptr<prosper::Texture> ShaderCubemapToEquirectangular::CubemapToEquir
 	auto &img = rt->GetTexture().GetImage();
 	setupCmd->RecordPostRenderPassImageBarrier(img, prosper::ImageLayout::ColorAttachmentOptimal, prosper::ImageLayout::ShaderReadOnlyOptimal);
 	setupCmd->RecordGenerateMipmaps(img, prosper::ImageLayout::ShaderReadOnlyOptimal, prosper::AccessFlags::ShaderReadBit, prosper::PipelineStageFlags::FragmentShaderBit);
+	if(cubemapLayout != prosper::ImageLayout::ShaderReadOnlyOptimal)
+		setupCmd->RecordImageBarrier(cubemap.GetImage(), prosper::ImageLayout::ShaderReadOnlyOptimal, cubemapLayout);
 	GetContext().FlushSetupCommandBuffer();
 	return success ? rt->GetTexture().shared_from_this() : nullptr;
 }

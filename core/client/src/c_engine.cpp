@@ -874,11 +874,11 @@ bool CEngine::Initialize(int argc, char *argv[])
 	//
 
 	auto windowMode = findCmdArg("cl_render_window_mode");
-	int mode = 0;
+	int mode = 1;
 	if(windowMode)
 		mode = util::to_int(*windowMode);
 	auto &initialWindowSettings = GetRenderContext().GetInitialWindowSettings();
-	initialWindowSettings.windowedMode = (mode == 0);
+	initialWindowSettings.windowedMode = (mode != 0);
 	initialWindowSettings.decorated = ((mode == 2) ? false : true);
 
 	if(g_launchParamWindowedMode.has_value())

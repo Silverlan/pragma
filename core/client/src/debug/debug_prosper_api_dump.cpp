@@ -6,11 +6,21 @@
  */
 
 #include "stdafx_client.h"
-#ifdef PR_DEBUG_API_DUMP
 #include "pragma/c_engine.h"
+#include <debug/api_dump_recorder.hpp>
+
+void LPARAM_enable_gfx_api_dump(const std::vector<std::string> &argv)
+{
+#ifdef PR_DEBUG_API_DUMP
+	prosper::debug::set_api_dump_enabled(argv.empty() || util::to_boolean(argv.front()));
+#else
+	Con::cerr << "API dump launch parameter was set, but API dump is not enabled in this build. Build with -DENABLE_DEBUG_API_DUMP to enable it." << Con::endl;
+#endif
+}
+
+#ifdef PR_DEBUG_API_DUMP
 #include <prosper_context.hpp>
 #include <prosper_command_buffer.hpp>
-#include <debug/api_dump_recorder.hpp>
 
 extern DLLCLIENT CEngine *c_engine;
 

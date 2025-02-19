@@ -19,12 +19,7 @@
 using namespace pragma;
 
 extern DLLCLIENT CEngine *c_engine;
-
-ShaderResizeImage::ShaderResizeImage(prosper::IPrContext &context, const std::string &identifier) : prosper::ShaderBaseImageProcessing(context, identifier, "programs/image/resize_image")
-{
-	SetBaseShader<prosper::ShaderCopyImage>();
-	SetPipelineCount(umath::to_integral(Filter::Count) * umath::to_integral(RenderPass::Count));
-}
+ShaderResizeImage::ShaderResizeImage(prosper::IPrContext &context, const std::string &identifier) : prosper::ShaderBaseImageProcessing(context, identifier, "programs/image/resize_image") { SetPipelineCount(umath::to_integral(Filter::Count) * umath::to_integral(RenderPass::Count)); }
 
 ShaderResizeImage::~ShaderResizeImage() {}
 
@@ -60,7 +55,7 @@ void ShaderResizeImage::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInf
 {
 	ShaderBaseImageProcessing::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
 
-	AddSpecializationConstant(pipelineInfo, prosper::ShaderStageFlags::FragmentBit, 0u /* constantId */, static_cast<uint32_t>(pipelineIdx));
+	AddSpecializationConstant(pipelineInfo, prosper::ShaderStageFlags::FragmentBit, 0u /* constantId */, static_cast<uint32_t>(GetFilter(pipelineIdx)));
 }
 
 void ShaderResizeImage::InitializeShaderResources()

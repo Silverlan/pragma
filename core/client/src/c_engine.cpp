@@ -687,7 +687,7 @@ void CEngine::HandleOpenGLFallback()
 	if(!cl)
 		return;
 	auto msg = Locale::GetText("prompt_fallback_to_opengl");
-	if(pragma::debug::show_message_prompt(msg, pragma::debug::MessageBoxButtons::YesNo, util::get_program_name()) != pragma::debug::MessageBoxButton::Yes)
+	if(util::debug::show_message_prompt(msg, util::debug::MessageBoxButtons::YesNo, util::get_program_name()) != util::debug::MessageBoxButton::Yes)
 		return;
 	cl->SetConVar("render_api", "opengl");
 	SaveClientConfig();

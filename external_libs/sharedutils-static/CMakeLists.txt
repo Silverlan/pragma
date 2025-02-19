@@ -25,4 +25,13 @@ pr_add_sources(${PROJ_NAME} "${CMAKE_CURRENT_LIST_DIR}/../sharedutils/src/" BASE
 
 pr_add_compile_definitions(${PROJ_NAME} -DSHUTIL_DLL)
 
+include(FetchContent)
+FetchContent_Declare(
+	cpptrace
+	GIT_REPOSITORY https://github.com/jeremy-rifkin/cpptrace.git
+	GIT_TAG        v0.7.5
+)
+FetchContent_MakeAvailable(cpptrace)
+target_link_libraries(${PROJ_NAME} PRIVATE cpptrace::cpptrace)
+
 pr_finalize(${PROJ_NAME})

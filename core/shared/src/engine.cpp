@@ -113,8 +113,7 @@ Engine::Engine(int, char *[]) : CVarHandler(), m_logFile(nullptr), m_tickRate(En
 	debug::open_domain();
 #endif
 
-#ifdef _WIN32
-	util::set_lua_backtrace_function([this]() -> std::string {
+	util::debug::set_lua_backtrace_function([this]() -> std::string {
 		// We can only get the Lua callstack from the main thread
 		if(std::this_thread::get_id() == GetMainThreadId()) {
 			for(auto *state : {GetClientState(), GetServerNetworkState()}) {
@@ -131,7 +130,6 @@ Engine::Engine(int, char *[]) : CVarHandler(), m_logFile(nullptr), m_tickRate(En
 		}
 		return {};
 	});
-#endif
 
 	Locale::Init();
 	// OpenConsole();
@@ -966,10 +964,9 @@ std::unique_ptr<uzip::ZIPFile> Engine::GenerateEngineDump(const std::string &bas
 	// Write Exception
 	if(g_crashExceptionMessage.empty() == false)
 		zipFile->AddFile("exception.txt", g_crashExceptionMessage);
-#ifdef _WIN32
+
 	// Write Stack Backtrace
-	zipFile->AddFile("stack_backtrace.txt", util::get_formatted_stack_backtrace_string());
-#endif
+	zipFile->AddFile("stack_backtrace.txt", util::debug::get_formatted_stack_backtrace_string());
 
 	// Write Info
 	if(engine != nullptr)
@@ -1127,9 +1124,7 @@ Engine::~Engine()
 	debug::close_domain();
 #endif
 
-#ifdef _WIN32
-	util::set_lua_backtrace_function(nullptr);
-#endif
+	util::debug::set_lua_backtrace_function(nullptr);
 
 	spdlog::info("Closing logger...");
 	pragma::detail::close_logger();

@@ -113,6 +113,7 @@ Engine::Engine(int, char *[]) : CVarHandler(), m_logFile(nullptr), m_tickRate(En
 	debug::open_domain();
 #endif
 
+#ifdef _WIN32
 	util::set_lua_backtrace_function([this]() -> std::string {
 		// We can only get the Lua callstack from the main thread
 		if(std::this_thread::get_id() == GetMainThreadId()) {
@@ -130,6 +131,7 @@ Engine::Engine(int, char *[]) : CVarHandler(), m_logFile(nullptr), m_tickRate(En
 		}
 		return {};
 	});
+#endif
 
 	Locale::Init();
 	// OpenConsole();
@@ -1125,7 +1127,9 @@ Engine::~Engine()
 	debug::close_domain();
 #endif
 
+#ifdef _WIN32
 	util::set_lua_backtrace_function(nullptr);
+#endif
 
 	spdlog::info("Closing logger...");
 	pragma::detail::close_logger();

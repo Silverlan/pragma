@@ -624,12 +624,6 @@ else:
 	cpptrace_lib_name = "cpptrace.lib"
 cpptrace_bin_dir = cpptrace_root +"/build/" +build_config +"/"
 cmake_args += ["-DDEPENDENCY_CPPTRACE_INCLUDE=" +cpptrace_root +"/include/", "-DDEPENDENCY_CPPTRACE_LIBRARY=" +cpptrace_bin_dir +cpptrace_lib_name]
-if platform == "win32":
-	cp(cpptrace_bin_dir +"cpptrace.dll",install_dir +"/bin/cpptrace.dll")
-else:
-	cp(cpptrace_bin_dir +"libcpptrace.so",install_dir +"/lib/libcpptrace.so")
-	cp(cpptrace_bin_dir +"libcpptrace.so.0",install_dir +"/lib/libcpptrace.so.0")
-	cp(cpptrace_bin_dir +"libcpptrace.so.0.8.0",install_dir +"/lib/libcpptrace.so.0.8.0")
 
 ########## compressonator deps ##########
 if platform == "linux":
@@ -1090,6 +1084,16 @@ else:
 	subprocess.run(["make","-j","-f","../../cmpl_gcc.mak"],check=True)
 	mkpath(install_dir +"/bin")
 	cp(sevenz_so_path +"/b/g/7z.so",install_dir +"/bin/7z.so")
+
+########## install cpptrace ##########
+if platform == "win32":
+	mkpath(install_dir +"/bin/")
+	cp(cpptrace_bin_dir +"cpptrace.dll",install_dir +"/bin/cpptrace.dll")
+else:
+	mkpath(install_dir +"/lib/")
+	cp(cpptrace_bin_dir +"libcpptrace.so",install_dir +"/lib/libcpptrace.so")
+	cp(cpptrace_bin_dir +"libcpptrace.so.0",install_dir +"/lib/libcpptrace.so.0")
+	cp(cpptrace_bin_dir +"libcpptrace.so.0.8.0",install_dir +"/lib/libcpptrace.so.0.8.0")
 
 ########## Lua Extensions ##########
 lua_ext_dir = deps_dir +"/lua_extensions"

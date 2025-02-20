@@ -9,6 +9,7 @@
 #include "pragma/c_engine.h"
 #include <pragma/console/convars.h>
 #include "pragma/input/input_binding_layer.hpp"
+#include <sharedutils/util_debug.h>
 
 namespace pragma::string {
 	class Utf8String;
@@ -114,4 +115,12 @@ void CEngine::PreloadConfig(NwStateType type, const std::string &configName)
 	Locale::Load("misc.txt");
 	Locale::Load("components.txt");
 	Locale::Load("shader_materials.txt");
+
+	constexpr auto numBts = umath::to_integral(util::debug::MessageBoxButton::Count);
+	std::array<std::string, numBts> labels;
+	for(size_t i = 0; i < numBts; ++i) {
+		auto identifier = ustring::to_snake_case(std::string {magic_enum::enum_name(static_cast<util::debug::MessageBoxButton>(i))});
+		labels[i] = Locale::GetText("prompt_button_" + identifier);
+	}
+	util::debug::set_button_labels(labels);
 }

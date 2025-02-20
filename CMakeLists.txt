@@ -249,7 +249,7 @@ pr_install_targets(
     zlib
     libz2
     KVParser
-    cpptrace::cpptrace)
+    cpptrace-lib)
 
 if(WIN32)
     pr_install_files("${CMAKE_CURRENT_LIST_DIR}/third_party_libs/luajit/src/lua51.dll")

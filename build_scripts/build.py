@@ -604,6 +604,27 @@ else:
 	bit7z_lib_name = "bit7z.lib"
 cmake_args += ["-DDEPENDENCY_BIT7Z_INCLUDE=" +bit7z_root +"/include/", "-DDEPENDENCY_BIT7Z_LIBRARY=" +bit7z_root +"/lib/x64/Release/" +bit7z_lib_name]
 
+########## cpptrace ##########
+os.chdir(deps_dir)
+cpptrace_root = normalize_path(os.getcwd() +"/cpptrace")
+if not Path(cpptrace_root).is_dir():
+	print_msg("cpptrace not found. Downloading...")
+	git_clone("https://github.com/jeremy-rifkin/cpptrace.git")
+os.chdir("cpptrace")
+reset_to_commit("34ea957") # v0.8.0
+
+print_msg("Building cpptrace...")
+mkdir("build",cd=True)
+cpptrace_cmake_args = ["-DBUILD_SHARED_LIBS=ON"]
+cmake_configure("..",generator,cpptrace_cmake_args)
+cmake_build(build_config)
+if platform == "linux":
+	cpptrace_lib_name = "libcpptrace.so"
+else:
+	cpptrace_lib_name = "cpptrace.lib"
+cpptrace_bin_dir = cpptrace_root +"/build/" +build_config +"/"
+cmake_args += ["-DDEPENDENCY_CPPTRACE_INCLUDE=" +cpptrace_root +"/include/", "-DDEPENDENCY_CPPTRACE_LIBRARY=" +cpptrace_bin_dir +cpptrace_lib_name]
+
 ########## compressonator deps ##########
 if platform == "linux":
 	execfile(root+"/external_libs/util_image/third_party_libs/compressonator/build/fetch_dependencies.py")
@@ -821,7 +842,7 @@ execfile(scripts_dir +"/user_modules.py",g,l)
 if with_essential_client_modules:
 	add_pragma_module(
 		name="pr_prosper_vulkan",
-		commitSha="32b731b4dc7beefb7ec85d7c9e441f3ecacf5003",
+		commitSha="b25616eabf7ef4c64eb05cc6af500a4b92132536",
 		repositoryUrl="https://github.com/Silverlan/pr_prosper_vulkan.git"
 	)
 
@@ -865,7 +886,7 @@ if with_pfm:
 	if with_all_pfm_modules:
 		add_pragma_module(
 			name="pr_chromium",
-			commitSha="707a428772cefddacea9b1fc99a405e95fed323c",
+			commitSha="c5e84c5f4fa6c9c1261cc4d23d98fe6d1f7cd254",
 			repositoryUrl="https://github.com/Silverlan/pr_chromium.git"
 		)
 		add_pragma_module(
@@ -1064,6 +1085,16 @@ else:
 	mkpath(install_dir +"/bin")
 	cp(sevenz_so_path +"/b/g/7z.so",install_dir +"/bin/7z.so")
 
+########## install cpptrace ##########
+if platform == "win32":
+	mkpath(install_dir +"/bin/")
+	cp(cpptrace_bin_dir +"cpptrace.dll",install_dir +"/bin/cpptrace.dll")
+else:
+	mkpath(install_dir +"/lib/")
+	cp(cpptrace_bin_dir +"libcpptrace.so",install_dir +"/lib/libcpptrace.so")
+	cp(cpptrace_bin_dir +"libcpptrace.so.0",install_dir +"/lib/libcpptrace.so.0")
+	cp(cpptrace_bin_dir +"libcpptrace.so.0.8.0",install_dir +"/lib/libcpptrace.so.0.8.0")
+
 ########## Lua Extensions ##########
 lua_ext_dir = deps_dir +"/lua_extensions"
 mkdir(lua_ext_dir,cd=True)
@@ -1141,7 +1172,7 @@ def download_addon(name,addonName,url,commitId=None):
 curDir = os.getcwd()
 if not skip_repository_updates:
 	if with_pfm:
-		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","cde449d3ff20a1e87794ebb9c32f034f502bde61")
+		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","901a319d699de21b1429059fa61609b2c3e84370")
 		download_addon("model editor","tool_model_editor","https://github.com/Silverlan/pragma_model_editor.git","a9ea4820f03be250bdf1e6951dad313561b75b17")
 
 	if with_vr:

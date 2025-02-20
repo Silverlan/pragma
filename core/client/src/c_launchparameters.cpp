@@ -52,6 +52,8 @@ static void LPARAM_vk_enable_validation(const std::vector<std::string> &argv) { 
 
 static void LPARAM_vk_enable_gfx_diagnostics(const std::vector<std::string> &argv) { c_engine->SetGfxDiagnosticsModeEnabled(true); }
 
+void LPARAM_enable_gfx_api_dump(const std::vector<std::string> &argv);
+
 static void LPARAM_render_api(const std::vector<std::string> &argv)
 {
 	if(argv.empty())
@@ -139,6 +141,7 @@ REGISTER_LAUNCH_PARAMETER_HELP(-h, LPARAM_h, "<height>", "set the screen height"
 
 REGISTER_LAUNCH_PARAMETER_HELP(-fullbright, LPARAM_fullbright, "", "start in fullbright mode");
 
+REGISTER_LAUNCH_PARAMETER_HELP(-enable_gfx_api_dump, LPARAM_enable_gfx_api_dump, "<1/0>", "Enables or disables graphics API dump.");
 REGISTER_LAUNCH_PARAMETER_HELP(-enable_gfx_validation, LPARAM_vk_enable_validation, "<1/0>", "Enables or disables graphics API validation.");
 REGISTER_LAUNCH_PARAMETER_HELP(-enable_gfx_diagnostics, LPARAM_vk_enable_gfx_diagnostics, "<1/0>", "Enables or disables GPU diagnostics mode.");
 REGISTER_LAUNCH_PARAMETER_HELP(-graphics_api, LPARAM_render_api, "<moduleName>", "Changes the graphics API to use for rendering.");

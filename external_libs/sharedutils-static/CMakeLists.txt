@@ -10,6 +10,8 @@ if(IMPORT_GLM_AS_MODULE)
 else()
 	pr_add_external_dependency(${PROJ_NAME} glm HEADER_ONLY PUBLIC)
 endif()
+pr_add_external_dependency(${PROJ_NAME} cpptrace LIBRARY PRIVATE)
+
 # Note: These have to match the definitions in CMakeLists.txt of the mathutil library!
 pr_add_compile_definitions(
 	${PROJ_NAME}

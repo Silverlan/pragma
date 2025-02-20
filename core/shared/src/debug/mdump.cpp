@@ -277,8 +277,8 @@ bool CrashHandler::GenerateCrashDump() const
 		saveDump = true;
 	else {
 		auto msg = Locale::GetText("prompt_crash");
-		auto res = debug::show_message_prompt(msg, debug::MessageBoxButtons::YesNo, m_appName);
-		saveDump = (res == debug::MessageBoxButton::Yes);
+		auto res = util::debug::show_message_prompt(msg, util::debug::MessageBoxButtons::YesNo, m_appName);
+		saveDump = (res == util::debug::MessageBoxButton::Yes);
 	}
 
 #ifdef __linux__
@@ -358,7 +358,7 @@ bool CrashHandler::GenerateCrashDump() const
 	}
 
 	if(!szResult.empty() && shouldShowMsBox)
-		debug::show_message_prompt(szResult, debug::MessageBoxButtons::Ok, m_appName);
+		util::debug::show_message_prompt(szResult, util::debug::MessageBoxButtons::Ok, m_appName);
 
 	auto crashInProsperModule = false;
 #ifdef _WIN32

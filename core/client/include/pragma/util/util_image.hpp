@@ -22,6 +22,7 @@ namespace util {
 		bool includeMipmaps = false;
 		std::optional<uimg::Format> targetFormat {};
 		prosper::ImageLayout inputImageLayout = prosper::ImageLayout::ShaderReadOnlyOptimal;
+		prosper::ImageLayout finalImageLayout = prosper::ImageLayout::TransferSrcOptimal;
 		prosper::IImage *stagingImage = nullptr;
 	};
 	DLLCLIENT bool to_image_buffer(prosper::IImage &image, const ToImageBufferInfo &info, std::vector<std::vector<std::shared_ptr<uimg::ImageBuffer>>> &outImageBuffers);

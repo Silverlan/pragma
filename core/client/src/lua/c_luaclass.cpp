@@ -604,7 +604,10 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 		     umath::Degree range = 360.f;
 		     if(Lua::IsSet(l, 4))
 			     range = Lua::CheckNumber(l, 4);
-		     auto tex = shader->CubemapToEquirectangularTexture(*cubemap, width, height, range);
+		     auto layout = prosper::ImageLayout::ShaderReadOnlyOptimal;
+		     if(Lua::IsSet(l, 5))
+			     layout = static_cast<prosper::ImageLayout>(Lua::CheckInt(l, 5));
+		     auto tex = shader->CubemapToEquirectangularTexture(*cubemap, width, height, range, layout);
 		     if(!tex)
 			     return 0;
 		     Lua::Push(l, tex);

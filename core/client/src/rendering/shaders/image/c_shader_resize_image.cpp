@@ -19,20 +19,43 @@
 using namespace pragma;
 
 extern DLLCLIENT CEngine *c_engine;
-
-ShaderResizeImage::ShaderResizeImage(prosper::IPrContext &context, const std::string &identifier) : prosper::ShaderBaseImageProcessing(context, identifier, "programs/image/resize_image")
-{
-	SetBaseShader<prosper::ShaderCopyImage>();
-	SetPipelineCount(umath::to_integral(Filter::Count));
-}
+ShaderResizeImage::ShaderResizeImage(prosper::IPrContext &context, const std::string &identifier) : prosper::ShaderBaseImageProcessing(context, identifier, "programs/image/resize_image") { SetPipelineCount(umath::to_integral(Filter::Count) * umath::to_integral(RenderPass::Count)); }
 
 ShaderResizeImage::~ShaderResizeImage() {}
+
+ShaderResizeImage::Filter ShaderResizeImage::GetFilter(uint32_t pipelineIdx) const { return static_cast<Filter>(pipelineIdx % umath::to_integral(Filter::Count)); }
+ShaderResizeImage::RenderPass ShaderResizeImage::GetRenderPassType(uint32_t pipelineIdx) const { return static_cast<RenderPass>(pipelineIdx / umath::to_integral(Filter::Count)); }
+std::optional<ShaderResizeImage::RenderPass> ShaderResizeImage::GetRenderPassType(prosper::Format format) const
+{
+	switch(format) {
+	case prosper::Format::R8G8B8A8_UNorm:
+		return RenderPass::R8G8B8A8;
+	case prosper::Format::R16G16B16A16_SFloat:
+		return RenderPass::R16G16B16A16;
+	default:
+		return std::nullopt;
+	}
+}
+prosper::Format ShaderResizeImage::GetFormat(uint32_t pipelineIdx) const
+{
+	switch(GetRenderPassType(pipelineIdx)) {
+	case RenderPass::R8G8B8A8:
+		return prosper::Format::R8G8B8A8_UNorm;
+	case RenderPass::R16G16B16A16:
+		return prosper::Format::R16G16B16A16_SFloat;
+	default:
+		return prosper::Format::Unknown;
+	}
+}
+uint32_t ShaderResizeImage::GetPipelineIndex(Filter filter, RenderPass renderPass) const { return umath::to_integral(filter) + umath::to_integral(renderPass) * umath::to_integral(Filter::Count); }
+
+void ShaderResizeImage::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx) { CreateCachedRenderPass<ShaderResizeImage>({{prosper::util::RenderPassCreateInfo::AttachmentInfo {GetFormat(pipelineIdx)}}}, outRenderPass, pipelineIdx); }
 
 void ShaderResizeImage::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
 {
 	ShaderBaseImageProcessing::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
 
-	AddSpecializationConstant(pipelineInfo, prosper::ShaderStageFlags::FragmentBit, 0u /* constantId */, static_cast<uint32_t>(pipelineIdx));
+	AddSpecializationConstant(pipelineInfo, prosper::ShaderStageFlags::FragmentBit, 0u /* constantId */, static_cast<uint32_t>(GetFilter(pipelineIdx)));
 }
 
 void ShaderResizeImage::InitializeShaderResources()
@@ -42,20 +65,26 @@ void ShaderResizeImage::InitializeShaderResources()
 	AttachPushConstantRange(0u, sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit);
 }
 
-bool ShaderResizeImage::RecordDraw(prosper::ICommandBuffer &cmd, prosper::IDescriptorSet &descSetTexture, const BicubicFilter &bicubicFilter) const
+bool ShaderResizeImage::RecordDraw(prosper::ICommandBuffer &cmd, prosper::IDescriptorSet &descSetTexture, const BicubicFilter &bicubicFilter, prosper::Format format) const
 {
 	prosper::ShaderBindState bindState {cmd};
-	if(RecordBeginDraw(bindState, umath::to_integral(Filter::Bicubic)) == false)
+	auto rpType = GetRenderPassType(format);
+	if(!rpType)
+		return false;
+	if(RecordBeginDraw(bindState, GetPipelineIndex(Filter::Bicubic, *rpType)) == false)
 		return false;
 	PushConstants pushConstants {};
 	auto res = RecordDraw(bindState, descSetTexture, pushConstants);
 	RecordEndDraw(bindState);
 	return res;
 }
-bool ShaderResizeImage::RecordDraw(prosper::ICommandBuffer &cmd, prosper::IDescriptorSet &descSetTexture, const LanczosFilter &lanczosFilter) const
+bool ShaderResizeImage::RecordDraw(prosper::ICommandBuffer &cmd, prosper::IDescriptorSet &descSetTexture, const LanczosFilter &lanczosFilter, prosper::Format format) const
 {
 	prosper::ShaderBindState bindState {cmd};
-	if(RecordBeginDraw(bindState, umath::to_integral(Filter::Lanczos)) == false)
+	auto rpType = GetRenderPassType(format);
+	if(!rpType)
+		return false;
+	if(RecordBeginDraw(bindState, GetPipelineIndex(Filter::Lanczos, *rpType)) == false)
 		return false;
 
 	constexpr std::array<Vector4, 2> aaKernel {

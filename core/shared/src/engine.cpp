@@ -112,6 +112,25 @@ Engine::Engine(int, char *[]) : CVarHandler(), m_logFile(nullptr), m_tickRate(En
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	debug::open_domain();
 #endif
+
+	util::debug::set_lua_backtrace_function([this]() -> std::string {
+		// We can only get the Lua callstack from the main thread
+		if(std::this_thread::get_id() == GetMainThreadId()) {
+			for(auto *state : {GetClientState(), GetServerNetworkState()}) {
+				if(!state)
+					continue;
+				auto *game = state->GetGameState();
+				auto *l = game ? game->GetLuaState() : nullptr;
+				if(l) {
+					std::stringstream ss;
+					if(Lua::get_callstack(l, ss))
+						return ss.str();
+				}
+			}
+		}
+		return {};
+	});
+
 	Locale::Init();
 	// OpenConsole();
 
@@ -945,10 +964,9 @@ std::unique_ptr<uzip::ZIPFile> Engine::GenerateEngineDump(const std::string &bas
 	// Write Exception
 	if(g_crashExceptionMessage.empty() == false)
 		zipFile->AddFile("exception.txt", g_crashExceptionMessage);
-#ifdef _WIN32
+
 	// Write Stack Backtrace
-	zipFile->AddFile("stack_backtrace.txt", util::get_formatted_stack_backtrace_string());
-#endif
+	zipFile->AddFile("stack_backtrace.txt", util::debug::get_formatted_stack_backtrace_string());
 
 	// Write Info
 	if(engine != nullptr)
@@ -1105,6 +1123,8 @@ Engine::~Engine()
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	debug::close_domain();
 #endif
+
+	util::debug::set_lua_backtrace_function(nullptr);
 
 	spdlog::info("Closing logger...");
 	pragma::detail::close_logger();

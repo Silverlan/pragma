@@ -135,6 +135,7 @@ namespace Lua {
 #endif
 			static bool SetBindingTexture(lua_State *l, DescriptorSet &hDescSet, uint32_t bindingIdx, Lua::Vulkan::Texture &texture, uint32_t layerId);
 			static bool SetBindingTexture(lua_State *l, DescriptorSet &hDescSet, uint32_t bindingIdx, Lua::Vulkan::Texture &texture);
+			static prosper::Texture *GetBindingTexture(lua_State *l, DescriptorSet &hDescSet, uint32_t bindingIdx);
 			static bool SetBindingArrayTexture(lua_State *l, DescriptorSet &hDescSet, uint32_t bindingIdx, Lua::Vulkan::Texture &texture, uint32_t arrayIdx, uint32_t layerId);
 			static bool SetBindingArrayTexture(lua_State *l, DescriptorSet &hDescSet, uint32_t bindingIdx, Lua::Vulkan::Texture &texture, uint32_t arrayIdx);
 			static bool SetBindingStorageBuffer(lua_State *l, DescriptorSet &hDescSet, uint32_t bindingIdx, Lua::Vulkan::Buffer &buffer, uint32_t startOffset, uint32_t size);
@@ -312,6 +313,13 @@ void register_vulkan_lua_interface2(Lua::Interface &lua, luabind::module_ &prosp
 	defVkRenderPass.def(luabind::tostring(luabind::self));
 	defVkRenderPass.def(luabind::const_self == luabind::const_self);
 	defVkRenderPass.def("IsValid", &Lua::Vulkan::VKRenderPass::IsValid);
+	defVkRenderPass.def(
+	  "GetFinalLayout", +[](const Lua::Vulkan::RenderPass &rp, uint32_t attIdx) -> std::optional<prosper::ImageLayout> {
+		  auto &createInfo = rp.GetCreateInfo();
+		  if(attIdx >= createInfo.attachments.size())
+			  return {};
+		  return createInfo.attachments[attIdx].finalLayout;
+	  });
 	prosperMod[defVkRenderPass];
 
 	auto defVkEvent = luabind::class_<Lua::Vulkan::Event>("Event");
@@ -537,6 +545,7 @@ bool Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffers(
 	defVkDescriptorSet.def("GetBindingInfo",static_cast<void(*)(lua_State*,Lua::Vulkan::DescriptorSet&)>(&Lua::Vulkan::VKDescriptorSet::GetBindingInfo));
 #endif
 	defVkDescriptorSet.def("GetBindingCount", &Lua::Vulkan::DescriptorSet::GetBindingCount);
+	defVkDescriptorSet.def("GetBindingTexture", &Lua::Vulkan::VKDescriptorSet::GetBindingTexture);
 	defVkDescriptorSet.def("SetBindingTexture", static_cast<bool (*)(lua_State *, Lua::Vulkan::DescriptorSet &, uint32_t, Lua::Vulkan::Texture &, uint32_t)>([](lua_State *l, Lua::Vulkan::DescriptorSet &hDescSet, uint32_t bindingIdx, Lua::Vulkan::Texture &texture, uint32_t layerId) {
 		return Lua::Vulkan::VKDescriptorSet::SetBindingTexture(l, hDescSet, bindingIdx, texture, layerId);
 	}));
@@ -571,8 +580,7 @@ bool Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffers(
 	}));
 	defVkDescriptorSet.def("SetDebugName", static_cast<void (*)(lua_State *, Lua::Vulkan::DescriptorSet &, const std::string &)>([](lua_State *l, Lua::Vulkan::DescriptorSet &ds, const std::string &name) { Lua::Vulkan::VKContextObject::SetDebugName(l, ds, name); }));
 	defVkDescriptorSet.def("GetDebugName", static_cast<std::string (*)(lua_State *, Lua::Vulkan::DescriptorSet &)>([](lua_State *l, Lua::Vulkan::DescriptorSet &ds) { return Lua::Vulkan::VKContextObject::GetDebugName(l, ds); }));
-	defVkDescriptorSet.def(
-	  "Update", +[](lua_State *l, Lua::Vulkan::DescriptorSet &ds) { return ds.GetDescriptorSet()->Update(); });
+	defVkDescriptorSet.def("Update", +[](lua_State *l, Lua::Vulkan::DescriptorSet &ds) { return ds.GetDescriptorSet()->Update(); });
 	prosperMod[defVkDescriptorSet];
 
 	auto defVkMesh = luabind::class_<pragma::SceneMesh>("Mesh");
@@ -638,8 +646,7 @@ bool Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffers(
 	defPcb.def(
 	  "RecordBindDescriptorSet",
 	  +[](lua_State *l, prosper::util::PreparedCommandBuffer &pcb, const std::shared_ptr<prosper::IDescriptorSetGroup> &descSet) -> bool { return pcb_record_bind_descriptor_set(pcb, descSet, PcbLuaArg::CreateValue<uint32_t>(l, 0), PcbLuaArg::CreateValue<uint32_t>(l, 0)); });
-	defPcb.def(
-	  "RecordCommands", +[](prosper::util::PreparedCommandBuffer &pcb, prosper::ICommandBuffer &cmd) -> bool { return pcb.RecordCommands(cmd, {}, {}); });
+	defPcb.def("RecordCommands", +[](prosper::util::PreparedCommandBuffer &pcb, prosper::ICommandBuffer &cmd) -> bool { return pcb.RecordCommands(cmd, {}, {}); });
 	defPcb.def_readonly("enableDrawArgs", &prosper::util::PreparedCommandBuffer::enableDrawArgs);
 
 	auto defPcbDa = luabind::class_<Lua::Vulkan::PreparedCommandLuaDynamicArg>("DynArg");
@@ -986,6 +993,19 @@ void Lua::Vulkan::VKDescriptorSet::GetBindingInfo(lua_State *l,DescriptorSet &hD
 	Lua::Push(l,binding);
 }
 #endif
+
+prosper::Texture *Lua::Vulkan::VKDescriptorSet::GetBindingTexture(lua_State *l, DescriptorSet &hDescSet, uint32_t bindingIdx)
+{
+	auto *binding = hDescSet.GetDescriptorSet()->GetBinding(bindingIdx);
+	if(!binding)
+		return nullptr;
+	if(binding->GetType() != prosper::DescriptorSetBinding::Type::Texture)
+		return nullptr;
+	auto &tex = static_cast<prosper::DescriptorSetBindingTexture *>(binding)->GetTexture();
+	if(tex.expired())
+		return nullptr;
+	return tex.lock().get();
+}
 bool Lua::Vulkan::VKDescriptorSet::SetBindingTexture(lua_State *l, Lua::Vulkan::DescriptorSet &hDescSet, uint32_t bindingIdx, Lua::Vulkan::Texture &texture) { return hDescSet.GetDescriptorSet()->SetBindingTexture(texture, bindingIdx); }
 bool Lua::Vulkan::VKDescriptorSet::SetBindingTexture(lua_State *l, Lua::Vulkan::DescriptorSet &hDescSet, uint32_t bindingIdx, Lua::Vulkan::Texture &texture, uint32_t layerId) { return hDescSet.GetDescriptorSet()->SetBindingTexture(texture, bindingIdx, layerId); }
 bool Lua::Vulkan::VKDescriptorSet::SetBindingArrayTexture(lua_State *l, DescriptorSet &hDescSet, uint32_t bindingIdx, Lua::Vulkan::Texture &texture, uint32_t arrayIdx, uint32_t layerId) { return hDescSet.GetDescriptorSet()->SetBindingArrayTexture(texture, bindingIdx, arrayIdx, layerId); }

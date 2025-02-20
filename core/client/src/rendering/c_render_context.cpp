@@ -86,7 +86,7 @@ void RenderContext::InitializeRenderAPI()
 		else {
 			std::string errMsg;
 			auto title = g_customTitle.has_value() ? *g_customTitle : engine_info::get_name();
-            auto success = fInitRenderAPI(title, false, m_renderContext, errMsg);
+			auto success = fInitRenderAPI(title, false, m_renderContext, errMsg);
 			if(success == false)
 				err = errMsg;
 		}
@@ -187,40 +187,41 @@ bool RenderContext::IsValidationErrorDisabled(const std::string &id) const
 }
 void RenderContext::ValidationCallback(prosper::DebugMessageSeverityFlags severityFlags, const std::string &message)
 {
-	if((severityFlags & (prosper::DebugMessageSeverityFlags::ErrorBit | prosper::DebugMessageSeverityFlags::WarningBit)) != prosper::DebugMessageSeverityFlags::None) {
-		std::string strMsg = message;
+	std::string strMsg = message;
 
-		auto p = strMsg.find("[ VUID-");
-		if(p == std::string::npos)
-			p = strMsg.find("[ UNASSIGNED");
-		if(p != std::string::npos) {
-			p += 2;
-			auto pEnd = strMsg.find(" ]", p);
-			auto id = strMsg.substr(p, (pEnd != std::string::npos) ? (pEnd - p) : std::numeric_limits<size_t>::max());
-			if(IsValidationErrorDisabled(id))
-				return;
-		}
+	if(strMsg.find("No optimized version") != std::string::npos)
+		return;
 
-		LOGGER_VALIDATION.error(strMsg);
-		if(std::this_thread::get_id() == c_engine->GetMainThreadId()) {
-			// In many cases the error may have been caused by a Lua script, so we'll print
-			// some information here about the current Lua call stack.
-			auto *cl = c_engine->GetClientState();
-			auto *game = cl ? static_cast<CGame *>(cl->GetGameState()) : nullptr;
-			auto *l = game ? game->GetLuaState() : nullptr;
-			if(l) {
-				std::stringstream ss;
-				if(Lua::get_callstack(l, ss))
-					LOGGER_VALIDATION.error("Lua callstack: {}", ss.str());
-			}
-		}
-#ifdef _WIN32
-		auto stackBacktraceString = util::get_formatted_stack_backtrace_string();
-		if(!stackBacktraceString.empty())
-			LOGGER_VALIDATION.debug("Backtrace: {}", stackBacktraceString);
-#endif
-		pragma::flush_loggers();
+	auto p = strMsg.find("[ VUID-");
+	if(p == std::string::npos)
+		p = strMsg.find("[ UNASSIGNED");
+	if(p != std::string::npos) {
+		p += 2;
+		auto pEnd = strMsg.find(" ]", p);
+		auto id = strMsg.substr(p, (pEnd != std::string::npos) ? (pEnd - p) : std::numeric_limits<size_t>::max());
+		if(IsValidationErrorDisabled(id))
+			return;
 	}
+
+	if(umath::is_flag_set(severityFlags, prosper::DebugMessageSeverityFlags::ErrorBit))
+		LOGGER_VALIDATION.error(strMsg);
+	else if(umath::is_flag_set(severityFlags, prosper::DebugMessageSeverityFlags::WarningBit))
+		LOGGER_VALIDATION.warn(strMsg);
+	else if(umath::is_flag_set(severityFlags, prosper::DebugMessageSeverityFlags::InfoBit))
+		LOGGER_VALIDATION.info(strMsg);
+	else if(umath::is_flag_set(severityFlags, prosper::DebugMessageSeverityFlags::VerboseBit))
+		LOGGER_VALIDATION.debug(strMsg);
+	else
+		LOGGER_VALIDATION.trace(strMsg);
+
+	if(umath::is_flag_set(severityFlags, prosper::DebugMessageSeverityFlags::WarningBit | prosper::DebugMessageSeverityFlags::ErrorBit)) {
+		auto stackBacktraceString = util::debug::get_formatted_stack_backtrace_string();
+		if(!stackBacktraceString.empty()) {
+			ustring::replace(stackBacktraceString, "\n", ::util::LOG_NL);
+			LOGGER_VALIDATION.debug("Backtrace: {}", stackBacktraceString);
+		}
+	}
+	pragma::flush_loggers();
 }
 
 void RenderContext::OnClose() {}

@@ -628,6 +628,8 @@ if platform == "win32":
 	cp(cpptrace_bin_dir +"cpptrace.dll",install_dir +"/bin/cpptrace.dll")
 else:
 	cp(cpptrace_bin_dir +"libcpptrace.so",install_dir +"/lib/libcpptrace.so")
+	cp(cpptrace_bin_dir +"libcpptrace.so.0",install_dir +"/lib/libcpptrace.so.0")
+	cp(cpptrace_bin_dir +"libcpptrace.so.0.8.0",install_dir +"/lib/libcpptrace.so.0.8.0")
 
 ########## compressonator deps ##########
 if platform == "linux":

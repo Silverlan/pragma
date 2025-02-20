@@ -604,6 +604,29 @@ else:
 	bit7z_lib_name = "bit7z.lib"
 cmake_args += ["-DDEPENDENCY_BIT7Z_INCLUDE=" +bit7z_root +"/include/", "-DDEPENDENCY_BIT7Z_LIBRARY=" +bit7z_root +"/lib/x64/Release/" +bit7z_lib_name]
 
+########## cpptrace ##########
+os.chdir(deps_dir)
+cpptrace_root = normalize_path(os.getcwd() +"/cpptrace")
+if not Path(cpptrace_root).is_dir():
+	print_msg("cpptrace not found. Downloading...")
+	git_clone("https://github.com/jeremy-rifkin/cpptrace.git")
+os.chdir("cpptrace")
+reset_to_commit("34ea957") # v0.8.0
+
+print_msg("Building cpptrace...")
+mkdir("build",cd=True)
+cpptrace_cmake_args = ["-DBUILD_SHARED_LIBS=ON"]
+cmake_configure("..",generator,cpptrace_cmake_args)
+cmake_build(build_config)
+if platform == "linux":
+	cpptrace_lib_name = "libcpptrace.a"
+else:
+	cpptrace_lib_name = "cpptrace.lib"
+cpptrace_bin_dir = cpptrace_root +"/build/" +build_config +"/"
+cmake_args += ["-DDEPENDENCY_CPPTRACE_INCLUDE=" +cpptrace_root +"/include/", "-DDEPENDENCY_CPPTRACE_LIBRARY=" +cpptrace_bin_dir +cpptrace_lib_name]
+if platform == "win32":
+	cp(cpptrace_bin_dir +"cpptrace.dll",install_dir +"/bin/cpptrace.dll")
+
 ########## compressonator deps ##########
 if platform == "linux":
 	execfile(root+"/external_libs/util_image/third_party_libs/compressonator/build/fetch_dependencies.py")

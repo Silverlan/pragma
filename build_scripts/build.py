@@ -619,13 +619,15 @@ cpptrace_cmake_args = ["-DBUILD_SHARED_LIBS=ON"]
 cmake_configure("..",generator,cpptrace_cmake_args)
 cmake_build(build_config)
 if platform == "linux":
-	cpptrace_lib_name = "libcpptrace.a"
+	cpptrace_lib_name = "libcpptrace.so"
 else:
 	cpptrace_lib_name = "cpptrace.lib"
 cpptrace_bin_dir = cpptrace_root +"/build/" +build_config +"/"
 cmake_args += ["-DDEPENDENCY_CPPTRACE_INCLUDE=" +cpptrace_root +"/include/", "-DDEPENDENCY_CPPTRACE_LIBRARY=" +cpptrace_bin_dir +cpptrace_lib_name]
 if platform == "win32":
 	cp(cpptrace_bin_dir +"cpptrace.dll",install_dir +"/bin/cpptrace.dll")
+else:
+	cp(cpptrace_bin_dir +"libcpptrace.so",install_dir +"/lib/libcpptrace.so")
 
 ########## compressonator deps ##########
 if platform == "linux":

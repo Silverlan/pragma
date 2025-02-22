@@ -8,8 +8,9 @@
 #ifndef __PRAGMA_POSE_HPP__
 #define __PRAGMA_POSE_HPP__
 
-#include "panima/types.hpp"
 #include <mathutil/transform.hpp>
+
+import panima;
 
 namespace pragma::animation {
 	class Pose {

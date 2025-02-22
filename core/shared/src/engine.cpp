@@ -26,6 +26,7 @@
 #include "pragma/localization.h"
 #include <pragma/asset/util_asset.hpp>
 #include <sharedutils/util.h>
+#include <sharedutils/util_debug.h>
 #include <sharedutils/util_clock.hpp>
 #include <sharedutils/util_parallel_job.hpp>
 #include <pragma/game/game_resources.hpp>

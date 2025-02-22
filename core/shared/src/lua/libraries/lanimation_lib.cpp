@@ -24,14 +24,9 @@
 #include <luainterface.hpp>
 #include "pragma/model/animation/pose.hpp"
 #include "pragma/model/animation/skeleton.hpp"
-#include <panima/channel.hpp>
-#include <panima/channel_t.hpp>
-#include <panima/player.hpp>
-#include <panima/animation.hpp>
-#include <panima/animation_set.hpp>
-#include <panima/animation_manager.hpp>
-#include <panima/slice.hpp>
 #include <luabind/copy_policy.hpp>
+
+import panima;
 
 namespace Lua::animation {
 	void register_library(Lua::Interface &lua);

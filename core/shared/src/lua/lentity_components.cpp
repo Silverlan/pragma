@@ -80,9 +80,8 @@
 #include "pragma/lua/ostream_operator_alias.hpp"
 #include <pragma/physics/movetypes.h>
 #include <luabind/copy_policy.hpp>
-#include <panima/animation.hpp>
-#include <panima/animation_manager.hpp>
-#include <panima/channel.hpp>
+
+import panima;
 
 namespace Lua {
 	bool get_bullet_master(BaseEntity &ent);

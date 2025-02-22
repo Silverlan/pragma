@@ -69,7 +69,6 @@
 #include <sharedutils/util_file.h>
 #include <sharedutils/util_path.hpp>
 #include <pragma/math/intersection.h>
-#include <panima/channel.hpp>
 #include <mathutil/camera.hpp>
 #include <mathutil/umath_frustum.hpp>
 #include <regex>
@@ -85,6 +84,7 @@
 #include <fmt/core.h>
 
 import bezierfit;
+import panima;
 
 extern DLLNETWORK Engine *engine;
 

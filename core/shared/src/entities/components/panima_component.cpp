@@ -19,15 +19,10 @@
 #include "pragma/lua/lua_call.hpp"
 #include "pragma/debug/intel_vtune.hpp"
 #include <sharedutils/util_uri.hpp>
-#include <panima/animation_manager.hpp>
-#include <panima/channel.hpp>
-#include <panima/animation.hpp>
-#include <panima/animation_set.hpp>
-#include <panima/player.hpp>
-#include <panima/channel_t.hpp>
+
+import panima;
 
 using namespace pragma;
-
 ComponentEventId PanimaComponent::EVENT_HANDLE_ANIMATION_EVENT = pragma::INVALID_COMPONENT_ID;
 ComponentEventId PanimaComponent::EVENT_ON_PLAY_ANIMATION = pragma::INVALID_COMPONENT_ID;
 ComponentEventId PanimaComponent::EVENT_ON_ANIMATION_COMPLETE = pragma::INVALID_COMPONENT_ID;

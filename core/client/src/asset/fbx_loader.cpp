@@ -6,8 +6,6 @@
  */
 
 #include "asset/fbx_loader.hpp"
-#include <panima/animation.hpp>
-#include <panima/channel.hpp>
 #include <pragma/model/c_modelmesh.h>
 #include <pragma/model/c_model.h>
 #include <pragma/model/animation/bone.hpp>
@@ -26,6 +24,8 @@
 #include "pragma/asset/c_util_model.hpp"
 #include <cmaterial_manager2.hpp>
 #include <texturemanager/texture_manager2.hpp>
+
+import panima;
 
 using namespace pragma::asset::fbx;
 extern DLLCLIENT CGame *c_game;

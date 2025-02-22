@@ -15,12 +15,10 @@
 #include "pragma/entities/entity_component_system_t.hpp"
 #include "pragma/entities/entity_component_manager_t.hpp"
 #include "pragma/logging.hpp"
-#include <panima/animation_manager.hpp>
-#include <panima/player.hpp>
-#include <panima/animation.hpp>
-#include <panima/channel.hpp>
 #include <sharedutils/datastream.h>
 #include <udm.hpp>
+
+import panima;
 
 using namespace pragma;
 

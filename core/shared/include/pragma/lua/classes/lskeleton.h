@@ -10,7 +10,8 @@
 #include "pragma/networkdefinitions.h"
 #include <pragma/lua/luaapi.h>
 #include "pragma/model/animation/skeleton.hpp"
-#include <panima/types.hpp>
+
+import panima;
 
 namespace Lua {
 	namespace Skeleton {

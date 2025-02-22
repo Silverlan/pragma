@@ -10,9 +10,10 @@
 #include "pragma/entities/components/base_entity_component.hpp"
 #include "pragma/game/global_animation_channel_queue_processor.hpp"
 #include "pragma/types.hpp"
-#include <panima/types.hpp>
 #include <sharedutils/property/util_property.hpp>
 #include <unordered_set>
+
+import panima;
 
 #undef GetCurrentTime
 

@@ -8,10 +8,8 @@
 #include "stdafx_shared.h"
 #include "pragma/game/global_animation_channel_queue_processor.hpp"
 #include "pragma/entities/components/panima_component.hpp"
-#include <panima/animation_manager.hpp>
-#include <panima/animation.hpp>
-#include <panima/channel.hpp>
-#include <panima/player.hpp>
+
+import panima;
 
 #undef GetCurrentTime
 

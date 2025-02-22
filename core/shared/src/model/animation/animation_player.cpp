@@ -11,7 +11,8 @@
 #include "pragma/model/animation/animation_channel.hpp"
 #include "pragma/model/animation/animation_player.hpp"
 #include "pragma/model/animation/animation2.hpp"
-#include <panima/player.hpp>
+
+import panima;
 
 std::shared_ptr<panima::Player> panima::Player::Create()
 {

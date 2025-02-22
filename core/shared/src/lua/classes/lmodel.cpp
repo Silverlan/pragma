@@ -37,11 +37,12 @@
 #include <sharedutils/util_path.hpp>
 #include <sharedutils/util_file.h>
 #include <mathutil/vertex.hpp>
-#include <panima/animation.hpp>
 #include "pragma/model/animation/skeleton.hpp"
 #include "pragma/model/animation/bone.hpp"
 #include <fsys/ifile.hpp>
 #include <udm.hpp>
+
+import panima;
 
 extern DLLNETWORK Engine *engine;
 

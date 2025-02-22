@@ -55,11 +55,12 @@
 #include "pragma/lua/classes/lproperty.hpp"
 #include "pragma/lua/l_entity_handles.hpp"
 #include "pragma/lua/lua_entity_component.hpp"
-#include <panima/channel.hpp>
 #include <luabind/copy_policy.hpp>
 #include <sharedutils/datastream.h>
 #include <pragma/physics/movetypes.h>
 #include <udm.hpp>
+
+import panima;
 
 extern DLLNETWORK Engine *engine;
 

@@ -15,8 +15,10 @@ namespace pragma::string {
 
 #include "pragma/gui/mainmenu/wimainmenu.h"
 #include "pragma/gui/mainmenu/wimainmenu_credits.hpp"
-#include <pragma/localization.h>
 #include <wgui/types/witext.h>
+
+import pragma.locale;
+import pragma.string.unicode;
 
 WIMainMenuCredits::WIMainMenuCredits() : WIMainMenuBase() {}
 
@@ -77,7 +79,7 @@ WIBase &WIMainMenuCredits::AddGap(uint32_t size)
 void WIMainMenuCredits::Initialize()
 {
 	WIMainMenuBase::Initialize();
-	AddMenuItem(Locale::GetText("back"), FunctionCallback<void, WIMainMenuElement *>::Create([this](WIMainMenuElement *) {
+	AddMenuItem(pragma::locale::get_text("back"), FunctionCallback<void, WIMainMenuElement *>::Create([this](WIMainMenuElement *) {
 		auto *mainMenu = dynamic_cast<WIMainMenu *>(GetParent());
 		if(mainMenu == nullptr)
 			return;
@@ -120,19 +122,19 @@ void WIMainMenuCredits::OnVisibilityChanged(bool bVisible)
 	m_creditsContainer->SetAutoAlignToParent(true);
 
 	AddGap(120);
-	AddHeader(Locale::GetText("menu_credits"), "header");
-	/*AddHeader(Locale::GetText("patrons"));
+	AddHeader(pragma::locale::get_text("menu_credits"), "header");
+	/*AddHeader(pragma::locale::get_text("patrons"));
 
 	for(auto &patron : engine_info::get_patrons())
 		AddText(patron,"credits_text");*/
 
-	AddHeader(Locale::GetText("localization"));
-	AddText("Shmeerz (" + Locale::GetText("lan_portuguese") + ")", "credits_text");
+	AddHeader(pragma::locale::get_text("localization"));
+	AddText("Shmeerz (" + pragma::locale::get_text("lan_portuguese") + ")", "credits_text");
 
-	AddHeader(Locale::GetText("tools_and_plugins"));
+	AddHeader(pragma::locale::get_text("tools_and_plugins"));
 	AddText("Ilya Getsman aka \"RED_EYE\" (Blender plugins)", "credits_text");
 
-	AddHeader(Locale::GetText("powered_by"), "header2");
+	AddHeader(pragma::locale::get_text("powered_by"), "header2");
 	AddLogo("third_party/vulkan_logo");
 	AddLogo("third_party/fmod_logo");
 	AddLogo("third_party/physx_logo");

@@ -14,7 +14,9 @@
 #include "pragma/gui/wioptionslist.h"
 #include <wgui/types/witext.h>
 #include <wgui/types/wirect.h>
-#include "pragma/localization.h"
+
+import pragma.locale;
+import pragma.string.unicode;
 
 LINK_WGUI_TO_CLASS(WIMainMenuElement, WIMainMenuElement);
 

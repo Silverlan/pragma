@@ -13,7 +13,8 @@
 #include <wgui/types/wiroot.h>
 #include <mathutil/umath.h>
 #include <prosper_window.hpp>
-#include <pragma/localization.h>
+
+import pragma.locale;
 
 extern DLLCLIENT CEngine *c_engine;
 
@@ -56,7 +57,7 @@ void WIDetachable::Detach()
 	prosper::WindowSettings settings {};
 	settings.width = w;
 	settings.height = h;
-	settings.title = Locale::GetText("console");
+	settings.title = pragma::locale::get_text("console");
 	m_detachedWindow = std::unique_ptr<DetachedWindow> {new DetachedWindow {}};
 	m_detachedWindow->window = c_engine->CreateWindow(settings);
 	if(!m_detachedWindow->window)

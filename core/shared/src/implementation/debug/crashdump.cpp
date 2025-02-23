@@ -267,7 +267,7 @@ bool CrashHandler::GenerateCrashDump() const
 	pragma::flush_loggers();
 
 	std::string szResult;
-	Locale::Load("prompts.txt");
+	pragma::locale::load("prompts.txt");
 
 	FileManager::CreateDirectory("crashdumps");
 
@@ -280,7 +280,7 @@ bool CrashHandler::GenerateCrashDump() const
 	if(!shouldShowMsBox)
 		saveDump = true;
 	else {
-		auto msg = Locale::GetText("prompt_crash");
+		auto msg = pragma::locale::get_text("prompt_crash");
 		auto res = util::debug::show_message_prompt(msg, util::debug::MessageBoxButtons::YesNo, m_appName);
 		saveDump = (res == util::debug::MessageBoxButton::Yes);
 	}
@@ -351,14 +351,14 @@ bool CrashHandler::GenerateCrashDump() const
 #endif
 			zipFile = nullptr;
 
-			szResult = Locale::GetText("prompt_crash_dump_saved", std::vector<std::string> {zipFileName, "crashdumps@pragma-engine.com"});
+			szResult = pragma::locale::get_text("prompt_crash_dump_saved", std::vector<std::string> {zipFileName, "crashdumps@pragma-engine.com"});
 			auto absPath = util::Path::CreatePath(util::get_program_path()) + zipFileName;
 			util::open_path_in_explorer(std::string {absPath.GetPath()}, std::string {absPath.GetFileName()});
 
 			success = true;
 		}
 		else
-			szResult = Locale::GetText("prompt_crash_dump_archive_failed", {err});
+			szResult = pragma::locale::get_text("prompt_crash_dump_archive_failed", {err});
 	}
 
 	if(!szResult.empty() && shouldShowMsBox)

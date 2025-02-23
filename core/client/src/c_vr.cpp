@@ -17,7 +17,6 @@ namespace pragma::string {
 #include "pragma/c_engine.h"
 #include "pragma/gui/wimessagebox.h"
 #include "pragma/console/c_cvar.h"
-#include <pragma/localization.h>
 #include <wgui/types/wirect.h>
 #include <wgui/types/witext.h>
 #include <sharedutils/scope_guard.h>
@@ -25,6 +24,9 @@ namespace pragma::string {
 #include <pragma/input/inputhelper.h>
 #include <prosper_util.hpp>
 #include <prosper_command_buffer.hpp>
+
+import pragma.locale;
+import pragma.string.unicode;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
@@ -71,10 +73,10 @@ static void cl_render_vr_enabled(bool b)
 {
 	if(b == false)
 		return;
-	Locale::Load("vr.txt");
+	pragma::locale::load("vr.txt");
 	std::string err;
 	if(client->InitializeLibrary(OPENVR_MODULE_PATH, &err) == nullptr) {
-		lastMessage = Locale::GetText("vr_msg_error_load", std::vector<std::string> {err});
+		lastMessage = pragma::locale::get_text("vr_msg_error_load", std::vector<std::string> {err});
 		Con::cerr << lastMessage << Con::endl;
 		lastColor = Color::Red;
 		show_hmd_message();
@@ -88,7 +90,7 @@ static void cl_render_vr_enabled(bool b)
 	std::vector<std::string> reqDeviceExtensions;
 	auto *fInitialize = dllHandle->FindSymbolAddress<bool (*)(std::string &, std::vector<std::string> &, std::vector<std::string> &)>("openvr_initialize");
 	if(fInitialize(err, reqInstanceExtensions, reqDeviceExtensions) == false) {
-		lastMessage = Locale::GetText("vr_msg_error_init", std::vector<std::string> {err});
+		lastMessage = pragma::locale::get_text("vr_msg_error_init", std::vector<std::string> {err});
 		Con::cerr << lastMessage << Con::endl;
 		lastColor = Color::Red;
 		show_hmd_message();
@@ -100,7 +102,7 @@ static void cl_render_vr_enabled(bool b)
 			if((instanceExtension == false && dev.is_extension_enabled(ext) == true) || (instanceExtension == true && dev.get_parent_instance()->is_instance_extension_enabled(ext)))
 				return true;
 			WIMessageBox::ShowMessageBox(
-				Locale::GetText("unsupported_extension") +": " +ext,Locale::GetText("unsupported_extension"),
+				pragma::locale::get_text("unsupported_extension") +": " +ext,pragma::locale::get_text("unsupported_extension"),
 				WIMessageBox::Button::OK,nullptr,[](WIMessageBox *pMessageBox,WIMessageBox::Button button) {
 					pMessageBox->RemoveSafely();
 				}
@@ -118,7 +120,7 @@ static void cl_render_vr_enabled(bool b)
 				return;
 		}*/
 
-		lastMessage = Locale::GetText("vr_msg_switch_display");
+		lastMessage = pragma::locale::get_text("vr_msg_switch_display");
 		lastColor = Color::White;
 	}
 }

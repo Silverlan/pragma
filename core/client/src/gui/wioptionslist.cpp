@@ -16,7 +16,9 @@
 #include "pragma/gui/wiscrollcontainer.h"
 #include "pragma/gui/wikeyentry.h"
 #include "pragma/input/input_binding_layer.hpp"
-#include "pragma/localization.h"
+
+import pragma.locale;
+import pragma.string.unicode;
 
 LINK_WGUI_TO_CLASS(WIOptionsList, WIOptionsList);
 

@@ -12,12 +12,13 @@
 #include <wgui/types/wibutton.h>
 #include "pragma/gui/wisilkicon.h"
 #include "pragma/gui/wiscrollcontainer.h"
-#include "pragma/localization.h"
 #include "wms_shared.h"
 #include "wms_request_filter.h"
 #include "wms_message.h"
 #include "pragma/networking/wv_message.h"
 #include <sharedutils/util_library.hpp>
+
+import pragma.locale;
 
 LINK_WGUI_TO_CLASS(WIServerBrowser, WIServerBrowser);
 
@@ -173,15 +174,15 @@ WIServerBrowser::WIServerBrowser() : WIFrame(), m_bRefreshScheduled(false)
 	};
 	eventCallbacks.onRefreshComplete = [this](uint32_t numServers) {
 		if(numServers == 0u)
-			DisplayMessage(Locale::GetText("server_browser_no_servers"));
+			DisplayMessage(pragma::locale::get_text("server_browser_no_servers"));
 	};
 	eventCallbacks.onQueryResponse = [this](bool querySuccessful, uint32_t numServersFound) {
 		if(querySuccessful == false) {
-			DisplayMessage(Locale::GetText("server_browser_connect_error"));
+			DisplayMessage(pragma::locale::get_text("server_browser_connect_error"));
 			return;
 		}
 		if(numServersFound == 0u) {
-			DisplayMessage(Locale::GetText("server_browser_no_servers"));
+			DisplayMessage(pragma::locale::get_text("server_browser_no_servers"));
 			return;
 		}
 		WITable *t = m_hServerList.get<WITable>();
@@ -235,7 +236,7 @@ void WIServerBrowser::Initialize()
 	WIFrame::Initialize();
 	EnableThinking();
 	AddStyleClass("serverbrowser");
-	SetTitle(Locale::GetText("server_browser"));
+	SetTitle(pragma::locale::get_text("server_browser"));
 
 	auto *contents = GetContents();
 	if(!contents)
@@ -249,12 +250,12 @@ void WIServerBrowser::Initialize()
 		t->SetSelectable(WITable::SelectableMode::Single);
 		WITableRow *row = t->AddHeaderRow();
 		if(row != nullptr) {
-			row->SetValue(0, Locale::GetText("password_protected"));
-			row->SetValue(1, Locale::GetText("server_name"));
-			row->SetValue(2, Locale::GetText("gamemode"));
-			row->SetValue(3, Locale::GetText("map"));
-			row->SetValue(4, Locale::GetText("players"));
-			row->SetValue(5, Locale::GetText("latency"));
+			row->SetValue(0, pragma::locale::get_text("password_protected"));
+			row->SetValue(1, pragma::locale::get_text("server_name"));
+			row->SetValue(2, pragma::locale::get_text("gamemode"));
+			row->SetValue(3, pragma::locale::get_text("map"));
+			row->SetValue(4, pragma::locale::get_text("players"));
+			row->SetValue(5, pragma::locale::get_text("latency"));
 		}
 		t->SetColumnWidth(0, 30);
 		t->SizeToContents();
@@ -266,7 +267,7 @@ void WIServerBrowser::Initialize()
 	m_hRefresh = wgui.Create<WIButton>(contents)->GetHandle();
 	WIButton *buttonRefresh = m_hRefresh.get<WIButton>();
 	if(buttonRefresh != nullptr) {
-		buttonRefresh->SetText(Locale::GetText("refresh"));
+		buttonRefresh->SetText(pragma::locale::get_text("refresh"));
 		auto hServerBrowser = GetHandle();
 		buttonRefresh->AddCallback("OnPressed", FunctionCallback<util::EventReply>::CreateWithOptionalReturn([hServerBrowser](util::EventReply *reply) mutable -> CallbackReturnType {
 			*reply = util::EventReply::Handled;
@@ -284,7 +285,7 @@ void WIServerBrowser::Initialize()
 	m_hConnect = wgui.Create<WIButton>(contents)->GetHandle();
 	WIButton *buttonConnect = m_hConnect.get<WIButton>();
 	if(buttonConnect != nullptr) {
-		buttonConnect->SetText(Locale::GetText("connect"));
+		buttonConnect->SetText(pragma::locale::get_text("connect"));
 		auto hServerBrowser = GetHandle();
 		buttonConnect->AddCallback("OnPressed", FunctionCallback<util::EventReply>::CreateWithOptionalReturn([this, hServerBrowser](util::EventReply *reply) mutable -> CallbackReturnType {
 			*reply = util::EventReply::Handled;

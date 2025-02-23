@@ -10,8 +10,9 @@
 #include <wgui/types/witext.h>
 #include <wgui/types/wirect.h>
 #include "pragma/input/inputhelper.h"
-#include "pragma/localization.h"
 #include <mathutil/umath.h>
+
+import pragma.locale;
 
 // TODO
 // Create full-screen element to capture mouse inputs
@@ -99,7 +100,7 @@ void WIKeyEntry::ApplyKey(GLFW::Key key)
 	m_key = key;
 	std::string skey;
 	if(key == static_cast<GLFW::Key>(-1))
-		skey = Locale::GetText("not_assigned");
+		skey = pragma::locale::get_text("not_assigned");
 	else if(key != GLFW::Key::Escape)
 		KeyToText(CInt16(key), &skey);
 	//std::transform(skey.begin(),skey.end(),skey.begin(),::tolower);
@@ -115,7 +116,7 @@ void WIKeyEntry::OnFocusGained()
 	if(m_hMouseTrap.IsValid())
 		m_hMouseTrap->Remove();
 	m_previousKey = GetText().cpp_str();
-	SetText(Locale::GetText("press_a_key"));
+	SetText(pragma::locale::get_text("press_a_key"));
 	auto *pRect = WGUI::GetInstance().Create<WIBase>();
 	m_hMouseTrap = pRect->GetHandle();
 	pRect->SetAutoAlignToParent(true);

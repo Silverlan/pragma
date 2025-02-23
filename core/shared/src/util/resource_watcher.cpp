@@ -12,10 +12,11 @@
 #include "pragma/entities/entity_iterator.hpp"
 #include "pragma/model/modelmanager.h"
 #include "pragma/model/model.h"
-#include "pragma/localization.h"
 #include <material_manager2.hpp>
 #include <sharedutils/util_file.h>
 #include <pragma/asset/util_asset.hpp>
+
+import pragma.locale;
 
 decltype(EResourceWatcherCallbackType::Model) EResourceWatcherCallbackType::Model = EResourceWatcherCallbackType {umath::to_integral(E::Model)};
 decltype(EResourceWatcherCallbackType::Material) EResourceWatcherCallbackType::Material = EResourceWatcherCallbackType {umath::to_integral(E::Material)};
@@ -274,7 +275,7 @@ void ResourceWatcherManager::OnResourceChanged(const util::Path &rootPath, const
 		}
 	}
 	else if(rootPath == "scripts/localization/")
-		Locale::ReloadFiles();
+		pragma::locale::reload_files();
 }
 
 void ResourceWatcherManager::OnResourceChanged(const util::Path &rootPath, const util::Path &path)

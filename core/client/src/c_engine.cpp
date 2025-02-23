@@ -58,7 +58,6 @@ namespace pragma::string {
 #include <pragma/entities/environment/effects/c_env_particle_system.h>
 #include <pragma/rendering/shaders/image/c_shader_clear_color.hpp>
 #include <pragma/rendering/shaders/image/c_shader_gradient.hpp>
-#include <pragma/localization.h>
 #include <pragma/logging.hpp>
 #include <wgui/types/wicontextmenu.hpp>
 #include <wgui/types/witext.h>
@@ -81,6 +80,8 @@ namespace pragma::string {
 
 import util_zip;
 import pragma.shadergraph;
+import pragma.locale;
+
 extern "C" {
 void DLLCLIENT RunCEngine(int argc, char *argv[])
 {
@@ -686,7 +687,7 @@ void CEngine::HandleOpenGLFallback()
 	auto *cl = static_cast<ClientState *>(GetClientState());
 	if(!cl)
 		return;
-	auto msg = Locale::GetText("prompt_fallback_to_opengl");
+	auto msg = pragma::locale::get_text("prompt_fallback_to_opengl");
 	if(util::debug::show_message_prompt(msg, util::debug::MessageBoxButtons::YesNo, util::get_program_name()) != util::debug::MessageBoxButton::Yes)
 		return;
 	cl->SetConVar("render_api", "opengl");
@@ -979,7 +980,7 @@ bool CEngine::Initialize(int argc, char *argv[])
 	LoadFontSets();
 	auto &defaultFontSet = m_defaultFontSet;
 	defaultFontSet = "dejavu";
-	auto *lanInfo = Locale::GetLanguageInfo();
+	auto *lanInfo = pragma::locale::get_language_info();
 	if(lanInfo && lanInfo->configData) {
 		std::vector<std::string> characterSetRequirements;
 		(*lanInfo->configData)["font"]["characterSetRequirements"](characterSetRequirements);
@@ -2018,7 +2019,7 @@ void CEngine::Tick()
 		}
 	}
 
-	Locale::Poll();
+	pragma::locale::poll();
 	ProcessConsoleInput();
 	RunTickEvents();
 

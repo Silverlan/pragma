@@ -10,7 +10,8 @@
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/gui/mainmenu/wimainmenu.h"
 #include "pragma/gui/mainmenu/wimainmenu_loadgame.h"
-#include "pragma/localization.h"
+
+import pragma.locale;
 
 extern DLLCLIENT CEngine *c_engine;
 extern ClientState *client;
@@ -21,7 +22,7 @@ WIMainMenuLoadGame::~WIMainMenuLoadGame() {}
 void WIMainMenuLoadGame::Initialize()
 {
 	WIMainMenuBase::Initialize();
-	AddMenuItem(Locale::GetText("back"), FunctionCallback<void, WIMainMenuElement *>::Create([this](WIMainMenuElement *) {
+	AddMenuItem(pragma::locale::get_text("back"), FunctionCallback<void, WIMainMenuElement *>::Create([this](WIMainMenuElement *) {
 		auto *mainMenu = dynamic_cast<WIMainMenu *>(GetParent());
 		if(mainMenu == nullptr)
 			return;

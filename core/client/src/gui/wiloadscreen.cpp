@@ -12,7 +12,8 @@
 #include "pragma/gui/wiloadscreen.h"
 #include "pragma/gui/wiprogressbar.h"
 #include <wgui/types/witext.h>
-#include "pragma/localization.h"
+
+import pragma.locale;
 
 extern DLLCLIENT CEngine *c_engine;
 extern ClientState *client;
@@ -23,7 +24,7 @@ WILoadScreen::~WILoadScreen() {}
 void WILoadScreen::Initialize()
 {
 	WIMainMenuBase::Initialize();
-	AddMenuItem(Locale::GetText("cancel"), FunctionCallback<void, WIMainMenuElement *>::Create([this](WIMainMenuElement *) {
+	AddMenuItem(pragma::locale::get_text("cancel"), FunctionCallback<void, WIMainMenuElement *>::Create([this](WIMainMenuElement *) {
 		auto *mainMenu = dynamic_cast<WIMainMenu *>(GetParent());
 		if(mainMenu == nullptr)
 			return;

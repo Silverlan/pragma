@@ -14,12 +14,13 @@
 #include "pragma/addonsystem/addon_install_manager.hpp"
 #include "pragma/gui/wiprogressbar.h"
 #include <pragma/addonsystem/addonsystem.h>
-#include <pragma/localization.h>
 #ifdef PRAGMA_CHROMIUM_ENABLED
 #include <../../../modules/pr_chromium/include/util_javascript.hpp>
 #endif
 
 #define PAD_ADDON_VERBOSE 1
+
+import pragma.locale;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
@@ -87,7 +88,7 @@ bool WIMainMenuMods::SetAddonSubscription(const std::string &uniqueId, bool bSub
 
 void WIMainMenuMods::OnFirstEntered()
 {
-	auto lan = Locale::GetLanguage();
+	auto lan = pragma::locale::get_language();
 	if(lan != "de")
 		lan = "en";
 	// SetInitialURL(engine_info::get_modding_hub_url() + "index_game.php?lan=" + lan);
@@ -157,7 +158,7 @@ void WIMainMenuMods::Initialize()
 {
 	WIMainMenuBase::Initialize();
 	EnableThinking();
-	AddMenuItem(Locale::GetText("back"), FunctionCallback<void, WIMainMenuElement *>::Create([this](WIMainMenuElement *) {
+	AddMenuItem(pragma::locale::get_text("back"), FunctionCallback<void, WIMainMenuElement *>::Create([this](WIMainMenuElement *) {
 		auto *mainMenu = dynamic_cast<WIMainMenu *>(GetParent());
 		if(mainMenu == nullptr)
 			return;

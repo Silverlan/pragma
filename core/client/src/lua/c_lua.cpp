@@ -72,7 +72,6 @@ namespace pragma::string {
 #include <image/prosper_render_target.hpp>
 #include <pragma/lua/libraries/lfile.h>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
-#include <pragma/localization.h>
 #include <wgui/fontmanager.h>
 #include <udm.hpp>
 
@@ -82,6 +81,8 @@ namespace pragma::string {
 #undef BOTTOM
 #undef NEAR
 #undef FAR
+
+import pragma.locale;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
@@ -97,14 +98,14 @@ void Lua::register_shared_client_state(lua_State *l)
 	auto modLocale = luabind::module_(l, "locale");
 	modLocale[luabind::def("load", Lua::Locale::load), luabind::def("get_language", Lua::Locale::get_language), luabind::def("change_language", Lua::Locale::change_language), luabind::def("set_text", Lua::Locale::set_localization), luabind::def("localize", Lua::Locale::localize),
 	  luabind::def("relocalize", Lua::Locale::relocalize)];
-	modLocale[luabind::def("get_used_characters", +[]() -> std::string { return ::Locale::GetUsedCharacters().cpp_str(); })];
-	modLocale[luabind::def("load_all", +[]() { ::Locale::LoadAll(); })];
+	modLocale[luabind::def("get_used_characters", +[]() -> std::string { return pragma::locale::get_used_characters().cpp_str(); })];
+	modLocale[luabind::def("load_all", +[]() { pragma::locale::load_all(); })];
 	modLocale[luabind::def("clear", Lua::Locale::clear)];
 	modLocale[luabind::def("get_texts", Lua::Locale::get_texts)];
 	modLocale[luabind::def(
 	  "get_raw_text", +[](const std::string &id) -> std::optional<std::string> {
 		  std::string text;
-		  if(::Locale::GetRawText(id, text))
+		  if(pragma::locale::get_raw_text(id, text))
 			  return text;
 		  return {};
 	  })];

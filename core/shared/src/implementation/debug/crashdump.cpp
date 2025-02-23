@@ -5,9 +5,12 @@
  * Copyright (c) 2021 Silverlan
  */
 
+module;
+
 #include "stdafx_shared.h"
-#include "pragma/debug/mdump.h"
 #include "pragma/debug/debug_utils.hpp"
+#include "pragma/logging.hpp"
+#include "crashdump_helper.hpp"
 #include <fsys/filesystem.h>
 #include <sharedutils/util_debug.h>
 #include <sharedutils/util_clock.hpp>
@@ -15,8 +18,6 @@
 #include <sharedutils/util_file.h>
 #include <exception>
 #include "pragma/engine_info.hpp"
-#include "pragma/logging.hpp"
-#include "pragma/localization.h"
 #ifdef _WIN32
 #include <tchar.h>
 #include <signal.h>
@@ -25,7 +26,10 @@
 #include <execinfo.h>
 #endif
 
+module pragma.debug.crashdump;
+
 import util_zip;
+import pragma.locale;
 
 extern DLLNETWORK Engine *engine;
 

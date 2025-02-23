@@ -11,6 +11,8 @@
 #include "engine.h"
 #include <exception>
 
+import pragma.debug.crashdump;
+
 template<class T>
 std::shared_ptr<T> InitializeEngine(int argc, char *argv[])
 {

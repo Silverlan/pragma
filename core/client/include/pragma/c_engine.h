@@ -120,10 +120,10 @@ class DLLCLIENT CEngine : public Engine, public pragma::RenderContext {
 	const std::vector<DroppedFile> &GetDroppedFiles() const;
 	bool IsWindowFocused() const;
 	bool IsValidAxisInput(float axisInput) const;
-	void GetMappedKeys(const std::string &cmd, std::vector<GLFW::Key> &keys, uint32_t maxKeys = 1);
+	void GetMappedKeys(const std::string &cmd, std::vector<pragma::platform::Key> &keys, uint32_t maxKeys = 1);
 	// Returns true if the input is a valid button input state (pressed or released)
 	// If the input is an axis input, inOutState may change to represent actual button state
-	bool GetInputButtonState(float axisInput, GLFW::Modifier mods, GLFW::KeyState &inOutState) const;
+	bool GetInputButtonState(float axisInput, pragma::platform::Modifier mods, pragma::platform::KeyState &inOutState) const;
 
 	virtual void HandleOpenGLFallback() override;
 
@@ -161,8 +161,8 @@ class DLLCLIENT CEngine : public Engine, public pragma::RenderContext {
 	float GetNearZ();
 	float GetFarZ();
 	// Input
-	void MouseInput(prosper::Window &window, GLFW::MouseButton button, GLFW::KeyState state, GLFW::Modifier mods);
-	void KeyboardInput(prosper::Window &window, GLFW::Key key, int scanCode, GLFW::KeyState state, GLFW::Modifier mods, float magnitude = 1.f);
+	void MouseInput(prosper::Window &window, pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods);
+	void KeyboardInput(prosper::Window &window, pragma::platform::Key key, int scanCode, pragma::platform::KeyState state, pragma::platform::Modifier mods, float magnitude = 1.f);
 	void CharInput(prosper::Window &window, unsigned int c);
 	void ScrollInput(prosper::Window &window, Vector2 offset);
 	void OnWindowFocusChanged(prosper::Window &window, bool bFocus);
@@ -171,8 +171,8 @@ class DLLCLIENT CEngine : public Engine, public pragma::RenderContext {
 	void OnDragExit(prosper::Window &window);
 	void OnWindowResized(prosper::Window &window, Vector2i size);
 	bool OnWindowShouldClose(prosper::Window &window);
-	void JoystickButtonInput(prosper::Window &window, const GLFW::Joystick &joystick, uint32_t key, GLFW::KeyState state);
-	void JoystickAxisInput(prosper::Window &window, const GLFW::Joystick &joystick, uint32_t axis, GLFW::Modifier mods, float newVal, float deltaVal);
+	void JoystickButtonInput(prosper::Window &window, const pragma::platform::Joystick &joystick, uint32_t key, pragma::platform::KeyState state);
+	void JoystickAxisInput(prosper::Window &window, const pragma::platform::Joystick &joystick, uint32_t axis, pragma::platform::Modifier mods, float newVal, float deltaVal);
 	void OnPreedit(prosper::Window &window, const pragma::string::Utf8String &preeditString, const std::vector<int> &blockSizes, int focusedBlock, int caret);
 	void OnIMEStatusChanged(prosper::Window &window, bool imeEnabled);
 	float GetRawJoystickAxisMagnitude() const;
@@ -286,7 +286,7 @@ class DLLCLIENT CEngine : public Engine, public pragma::RenderContext {
 	std::string m_defaultFontSet;
 	std::unordered_map<std::string, std::unique_ptr<FontSet>> m_fontSets;
 	float m_rawInputJoystickMagnitude = 0.f;
-	std::unordered_map<GLFW::Key, GLFW::KeyState> m_joystickKeyStates;
+	std::unordered_map<pragma::platform::Key, pragma::platform::KeyState> m_joystickKeyStates;
 
 	std::vector<std::shared_ptr<InputBindingLayer>> m_inputBindingLayers;
 	std::shared_ptr<InputBindingLayer> m_coreInputBindingLayer;
@@ -299,8 +299,8 @@ class DLLCLIENT CEngine : public Engine, public pragma::RenderContext {
 
 	virtual void Think() override;
 	virtual void Tick() override;
-	void Input(int key, GLFW::KeyState state, GLFW::Modifier mods = {}, float magnitude = 1.f);
-	void Input(int key, GLFW::KeyState inputState, GLFW::KeyState pressState, GLFW::Modifier mods, float magnitude = 1.f);
+	void Input(int key, pragma::platform::KeyState state, pragma::platform::Modifier mods = {}, float magnitude = 1.f);
+	void Input(int key, pragma::platform::KeyState inputState, pragma::platform::KeyState pressState, pragma::platform::Modifier mods, float magnitude = 1.f);
 	void UpdateFPS(float t);
 };
 REGISTER_BASIC_BITWISE_OPERATORS(CEngine::StateFlags)

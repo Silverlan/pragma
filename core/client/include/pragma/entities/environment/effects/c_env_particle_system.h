@@ -97,7 +97,7 @@ namespace pragma {
 		};
 
 		struct DLLCLIENT ChildData {
-			util::WeakHandle<CParticleSystemComponent> child {};
+			::util::WeakHandle<CParticleSystemComponent> child {};
 			float delay = 0.f;
 		};
 
@@ -127,7 +127,7 @@ namespace pragma {
 		virtual void Initialize() override;
 		virtual void OnRemove() override;
 		virtual ~CParticleSystemComponent() override;
-		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
+		virtual ::util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void SetRemoveOnComplete(bool b) override;
 		virtual void InitializeLuaObject(lua_State *l) override;
@@ -315,7 +315,7 @@ namespace pragma {
 		void SetFlags(Flags flags) { m_flags = flags; }
 		void SetMaxParticleCount(uint32_t count);
 	  protected:
-		util::EventReply HandleKeyValue(const std::string &key, const std::string &value);
+		::util::EventReply HandleKeyValue(const std::string &key, const std::string &value);
 
 		virtual void CreateParticle();
 	  private:
@@ -332,7 +332,7 @@ namespace pragma {
 		};
 		enum class State : uint32_t { Initial = 0u, Active, Complete, Paused };
 		std::vector<ChildData> m_childSystems;
-		util::WeakHandle<CParticleSystemComponent> m_hParent = {};
+		::util::WeakHandle<CParticleSystemComponent> m_hParent = {};
 		std::vector<Node> m_nodes;
 		std::vector<CParticle> m_particles;
 		std::vector<std::size_t> m_sortedParticleIndices;

@@ -152,7 +152,7 @@ class DLLCLIENT WITableRow : public WIContainer {
 	bool GetValue(uint32_t col, std::string &val) const;
 	WITableCell *InsertElement(unsigned int col, WIBase *el);
 	WITableCell *InsertElement(unsigned int col, WIHandle hElement);
-	virtual util::EventReply MouseCallback(GLFW::MouseButton button, GLFW::KeyState state, GLFW::Modifier mods) override;
+	virtual util::EventReply MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods) override;
 	void Select();
 	void Deselect();
 	bool IsSelected();

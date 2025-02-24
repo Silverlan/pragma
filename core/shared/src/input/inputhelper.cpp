@@ -10,6 +10,10 @@
 
 import pragma.locale;
 
+#ifdef DLLCLIENT_EX
+import pragma.platform;
+#endif
+
 DLLNETWORK bool KeyToString(short c, std::string *key)
 {
 	if(c <= GLFW_KEY_WORLD_2 && c != GLFW_KEY_SPACE) {

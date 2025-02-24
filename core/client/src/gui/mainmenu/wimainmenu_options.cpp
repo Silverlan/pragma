@@ -107,9 +107,9 @@ void WIMainMenuOptions::CloseMessageBox()
 	if(m_hMessageBox.IsValid())
 		m_hMessageBox->Remove();
 }
-void WIMainMenuOptions::Apply(GLFW::MouseButton button, GLFW::KeyState state, GLFW::Modifier)
+void WIMainMenuOptions::Apply(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier)
 {
-	if(button != GLFW::MouseButton::Left || state != GLFW::KeyState::Press)
+	if(button != pragma::platform::MouseButton::Left || state != pragma::platform::KeyState::Press)
 		return;
 	ApplyOptions();
 	CloseMessageBox();
@@ -123,9 +123,9 @@ void WIMainMenuOptions::Apply(GLFW::MouseButton button, GLFW::KeyState state, GL
 	m_hMessageBox = pMessageBox->GetHandle();*/
 }
 
-void WIMainMenuOptions::ResetDefaults(GLFW::MouseButton button, GLFW::KeyState state, GLFW::Modifier)
+void WIMainMenuOptions::ResetDefaults(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier)
 {
-	if(button != GLFW::MouseButton::Left || state != GLFW::KeyState::Press)
+	if(button != pragma::platform::MouseButton::Left || state != pragma::platform::KeyState::Press)
 		return;
 	CloseMessageBox();
 	auto *pMessageBox = WIMessageBox::Create(pragma::locale::get_text("menu_reset_defaults_confirm"), pragma::locale::get_text("menu_reset_defaults_confirm_title"), WIMessageBox::Button::YESNO, [](WIMessageBox *pMessageBox, WIMessageBox::Button) { pMessageBox->RemoveSafely(); });
@@ -163,7 +163,7 @@ WICheckbox *WIMainMenuOptions::CreateCheckbox(std::string text)
 	return checkBox;
 }
 
-static bool sortResolutions(GLFW::Monitor::VideoMode &a, GLFW::Monitor::VideoMode &b) { return ((a.width < b.width) || (a.width == b.width && a.height < b.height)) ? true : false; }
+static bool sortResolutions(pragma::platform::Monitor::VideoMode &a, pragma::platform::Monitor::VideoMode &b) { return ((a.width < b.width) || (a.width == b.width && a.height < b.height)) ? true : false; }
 void WIMainMenuOptions::SetActiveMenu(WIHandle &hMenu)
 {
 	if(hMenu.get() == m_hActive.get() && hMenu.IsValid())
@@ -225,7 +225,7 @@ void WIMainMenuOptions::InitializeOptionsList(WIOptionsList *pList)
 	buttonReset->SetText(pragma::locale::get_text("reset_defaults"));
 	buttonReset->SizeToContents();
 	buttonReset->SetAutoCenterToParent(true);
-	buttonReset->AddCallback("OnMouseEvent", FunctionCallback<util::EventReply, GLFW::MouseButton, GLFW::KeyState, GLFW::Modifier>::CreateWithOptionalReturn([this](util::EventReply *reply, GLFW::MouseButton button, GLFW::KeyState state, GLFW::Modifier mods) -> CallbackReturnType {
+	buttonReset->AddCallback("OnMouseEvent", FunctionCallback<util::EventReply, pragma::platform::MouseButton, pragma::platform::KeyState, pragma::platform::Modifier>::CreateWithOptionalReturn([this](util::EventReply *reply, pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods) -> CallbackReturnType {
 		ResetDefaults(button, state, mods);
 		*reply = util::EventReply::Handled;
 		return CallbackReturnType::HasReturnValue;
@@ -237,7 +237,7 @@ void WIMainMenuOptions::InitializeOptionsList(WIOptionsList *pList)
 	buttonApply->SetText(pragma::locale::get_text("apply"));
 	buttonApply->SizeToContents();
 	buttonApply->SetAutoCenterToParent(true);
-	buttonApply->AddCallback("OnMouseEvent", FunctionCallback<util::EventReply, GLFW::MouseButton, GLFW::KeyState, GLFW::Modifier>::CreateWithOptionalReturn([this](util::EventReply *reply, GLFW::MouseButton button, GLFW::KeyState state, GLFW::Modifier mods) -> CallbackReturnType {
+	buttonApply->AddCallback("OnMouseEvent", FunctionCallback<util::EventReply, pragma::platform::MouseButton, pragma::platform::KeyState, pragma::platform::Modifier>::CreateWithOptionalReturn([this](util::EventReply *reply, pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods) -> CallbackReturnType {
 		Apply(button, state, mods);
 		*reply = util::EventReply::Handled;
 		return CallbackReturnType::HasReturnValue;
@@ -587,17 +587,17 @@ void WIMainMenuOptions::InitializeVideoSettings()
 		  auto &context = WGUI::GetInstance().GetContext();
 		  auto &window = context.GetWindow();
 		  auto *monitor = window->GetMonitor();
-		  auto primaryMonitor = GLFW::get_primary_monitor();
+		  auto primaryMonitor = pragma::platform::get_primary_monitor();
 		  if(monitor == nullptr)
 			  monitor = &primaryMonitor;
 		  //GLWindow *window = c_engine->GetWindow();
-		  std::vector<GLFW::Monitor::VideoMode> modes;
+		  std::vector<pragma::platform::Monitor::VideoMode> modes;
 		  if(monitor != nullptr) {
 			  auto videoModes = monitor->GetSupportedVideoModes();
 			  modes.reserve(videoModes.size());
 			  for(auto it = videoModes.begin(); it != videoModes.end(); ++it) {
 				  auto &videoMode = *it;
-				  auto itMode = std::find_if(modes.begin(), modes.end(), [&videoMode](GLFW::Monitor::VideoMode &mode) { return (mode.width == videoMode.width && mode.height == videoMode.height) ? true : false; });
+				  auto itMode = std::find_if(modes.begin(), modes.end(), [&videoMode](pragma::platform::Monitor::VideoMode &mode) { return (mode.width == videoMode.width && mode.height == videoMode.height) ? true : false; });
 				  if(itMode == modes.end())
 					  modes.push_back(videoMode);
 			  }
@@ -627,7 +627,7 @@ void WIMainMenuOptions::InitializeVideoSettings()
 	WIDropDownMenu *display = pList->AddDropDownMenu(
 	  pragma::locale::get_text("monitor"),
 	  [](WIDropDownMenu *pMenu) {
-		  auto monitors = GLFW::get_monitors();
+		  auto monitors = pragma::platform::get_monitors();
 
 		  std::vector<std::string> monitorNames(monitors.size());
 		  std::vector<std::string> monitorOptionNames(monitors.size());
@@ -993,8 +993,8 @@ void WIMainMenuOptions::InitializeVideoSettings()
 		pListPreset->SelectChoice(3);
 		if(m_hButtonApply.IsValid()) {
 			SetActiveMenu(m_hVideoSettings);
-			m_hButtonApply->InjectMouseInput(GLFW::MouseButton::Left, GLFW::KeyState::Press, {});
-			m_hButtonApply->InjectMouseInput(GLFW::MouseButton::Left, GLFW::KeyState::Release, {});
+			m_hButtonApply->InjectMouseInput(pragma::platform::MouseButton::Left, pragma::platform::KeyState::Press, {});
+			m_hButtonApply->InjectMouseInput(pragma::platform::MouseButton::Left, pragma::platform::KeyState::Release, {});
 			WIHandle hMenu {};
 			SetActiveMenu(hMenu);
 		}

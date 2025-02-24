@@ -198,14 +198,14 @@ static void cl_vr_hmd_view_enabled(bool val)
 			cbPreRender.Remove();
 	}
 
-	auto *fSetControllerStateCallback = dllHandle->FindSymbolAddress<void(*)(const std::function<void(uint32_t,uint32_t,GLFW::KeyState)>&)>("openvr_set_controller_state_callback");
+	auto *fSetControllerStateCallback = dllHandle->FindSymbolAddress<void(*)(const std::function<void(uint32_t,uint32_t,pragma::platform::KeyState)>&)>("openvr_set_controller_state_callback");
 	if(fSetControllerStateCallback != nullptr)
 	{
 		if(val == true)
 		{
-			fSetControllerStateCallback([](uint32_t controllerId,uint32_t key,GLFW::KeyState state) {
+			fSetControllerStateCallback([](uint32_t controllerId,uint32_t key,pragma::platform::KeyState state) {
 				//Con::cerr<<"Controller Key State: "<<controllerId<<","<<key<<","<<umath::to_integral(state)<<Con::endl;
-				auto joystick = GLFW::Joystick::Create(controllerId +GLFW_MAX_JOYSTICK_COUNT); // TODO
+				auto joystick = pragma::platform::Joystick::Create(controllerId +GLFW_MAX_JOYSTICK_COUNT); // TODO
 				auto keyOffset = GLFW_CUSTOM_KEY_JOYSTICK_0_KEY_START +joystick->GetJoystickId() *GLFW_CUSTOM_KEY_JOYSTICK_CONTROL_COUNT;
 				c_engine->JoystickButtonInput(c_engine->GetWindow(),*joystick,key +keyOffset,state);
 			});

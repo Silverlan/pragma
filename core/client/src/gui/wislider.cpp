@@ -39,12 +39,12 @@ void WISlider::Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &draw
 
 bool WISlider::IsBeingDragged() const { return m_bMoveSlider; }
 
-util::EventReply WISlider::MouseCallback(GLFW::MouseButton button, GLFW::KeyState state, GLFW::Modifier mods)
+util::EventReply WISlider::MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods)
 {
 	if(WIProgressBar::MouseCallback(button, state, mods) == util::EventReply::Handled)
 		return util::EventReply::Handled;
-	if(button == GLFW::MouseButton::Left) {
-		if(state == GLFW::KeyState::Press)
+	if(button == pragma::platform::MouseButton::Left) {
+		if(state == pragma::platform::KeyState::Press)
 			m_bMoveSlider = true;
 		else
 			m_bMoveSlider = false;

@@ -53,7 +53,7 @@ class DLLCLIENT WITreeList : public WITable {
 	WITreeList();
 	virtual void Initialize() override;
 	virtual void SetSize(int x, int y) override;
-	virtual util::EventReply MouseCallback(GLFW::MouseButton button, GLFW::KeyState state, GLFW::Modifier mods) override;
+	virtual util::EventReply MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods) override;
 	virtual WITableRow *AddRow() override;
 	WITreeListElement *AddItem(const std::string &text, const std::function<void(WITreeListElement &)> &fPopulate = nullptr);
 	WITreeListElement *GetRootItem() const;

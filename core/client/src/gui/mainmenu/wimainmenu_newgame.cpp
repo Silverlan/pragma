@@ -39,9 +39,9 @@ WIMainMenuNewGame::~WIMainMenuNewGame()
 		m_cbMapListReload.Remove();
 }
 
-void WIMainMenuNewGame::OnStartGame(GLFW::MouseButton button, GLFW::KeyState state, GLFW::Modifier)
+void WIMainMenuNewGame::OnStartGame(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier)
 {
-	if(button != GLFW::MouseButton::Left || state != GLFW::KeyState::Press)
+	if(button != pragma::platform::MouseButton::Left || state != pragma::platform::KeyState::Press)
 		return;
 	auto *pOptionsList = static_cast<WIOptionsList *>(m_hControlSettings.get());
 	std::string map;
@@ -110,7 +110,7 @@ void WIMainMenuNewGame::InitializeOptionsList(WIOptionsList *pList)
 	buttonStart->SetText(pragma::locale::get_text("start_game"));
 	buttonStart->SizeToContents();
 	buttonStart->SetAutoCenterToParent(true);
-	buttonStart->AddCallback("OnMouseEvent", FunctionCallback<util::EventReply, GLFW::MouseButton, GLFW::KeyState, GLFW::Modifier>::CreateWithOptionalReturn([this](util::EventReply *reply, GLFW::MouseButton button, GLFW::KeyState state, GLFW::Modifier mods) -> CallbackReturnType {
+	buttonStart->AddCallback("OnMouseEvent", FunctionCallback<util::EventReply, pragma::platform::MouseButton, pragma::platform::KeyState, pragma::platform::Modifier>::CreateWithOptionalReturn([this](util::EventReply *reply, pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods) -> CallbackReturnType {
 		OnStartGame(button, state, mods);
 		*reply = util::EventReply::Handled;
 		return CallbackReturnType::HasReturnValue;

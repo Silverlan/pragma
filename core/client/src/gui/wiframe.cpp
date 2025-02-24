@@ -25,7 +25,7 @@ WIFrame::WIFrame() : WITransformable() {}
 WIFrame::~WIFrame()
 {
 	if(m_resizeMode != ResizeMode::none)
-		WGUI::GetInstance().SetCursor(GLFW::Cursor::Shape::Arrow);
+		WGUI::GetInstance().SetCursor(pragma::platform::Cursor::Shape::Arrow);
 }
 
 WIBase *WIFrame::GetContents() { return m_hContents.get(); }
@@ -112,7 +112,7 @@ void WIFrame::Initialize()
 		}
 	}
 }
-util::EventReply WIFrame::MouseCallback(GLFW::MouseButton button, GLFW::KeyState state, GLFW::Modifier mods)
+util::EventReply WIFrame::MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods)
 {
 	if(WITransformable::MouseCallback(button, state, mods) == util::EventReply::Handled)
 		return util::EventReply::Handled;

@@ -10,10 +10,11 @@
 
 #include "pragma/c_enginedefinitions.h"
 #include <prosper_context.hpp>
-#include <iglfw/glfw_window.h>
 #include <unordered_set>
 #include <memory>
 #include <optional>
+
+import pragma.platform;
 
 #undef CreateWindow
 
@@ -46,7 +47,7 @@ namespace pragma {
 		::util::WeakHandle<prosper::Shader> GetShader(const std::string &identifier) const;
 
 		prosper::Window &GetWindow();
-		GLFW::Window &GetGlfwWindow();
+		pragma::platform::Window &GetGlfwWindow();
 		const std::shared_ptr<prosper::IPrimaryCommandBuffer> &GetSetupCommandBuffer();
 		const std::shared_ptr<prosper::IPrimaryCommandBuffer> &GetDrawCommandBuffer() const;
 		const std::shared_ptr<prosper::IPrimaryCommandBuffer> &GetDrawCommandBuffer(uint32_t swapchainIdx) const;
@@ -77,7 +78,7 @@ namespace pragma {
 		std::unordered_set<std::string> m_disabledValidationErrors;
 		StateFlags m_stateFlags = StateFlags::None;
 		std::shared_ptr<util::Library> m_graphicsAPILib = nullptr;
-		std::unique_ptr<GLFW::Monitor> m_monitor = nullptr;
+		std::unique_ptr<pragma::platform::Monitor> m_monitor = nullptr;
 		std::string m_renderAPI;
 	};
 }

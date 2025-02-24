@@ -63,7 +63,7 @@ WIMainMenu::~WIMainMenu()
 		m_cbOnSteamworksShutdown.Remove();
 }
 
-util::EventReply WIMainMenu::KeyboardCallback(GLFW::Key key, int scanCode, GLFW::KeyState state, GLFW::Modifier mods)
+util::EventReply WIMainMenu::KeyboardCallback(pragma::platform::Key key, int scanCode, pragma::platform::KeyState state, pragma::platform::Modifier mods)
 {
 	if(!m_hActive.IsValid())
 		return util::EventReply::Handled;
@@ -314,7 +314,7 @@ void WIMainMenu::Initialize()
 	pIcon->SetMaterial("wgui/patreon_logo");
 	pIcon->SetSize(64, 64);
 	pIcon->SetMouseInputEnabled(true);
-	pIcon->SetCursor(GLFW::Cursor::Shape::Hand);
+	pIcon->SetCursor(pragma::platform::Cursor::Shape::Hand);
 	pIcon->AddCallback("OnMousePressed", FunctionCallback<util::EventReply>::CreateWithOptionalReturn([](util::EventReply *reply) -> CallbackReturnType {
 		util::open_url_in_browser(engine_info::get_patreon_url());
 		*reply = util::EventReply::Handled;

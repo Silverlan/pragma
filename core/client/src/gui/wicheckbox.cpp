@@ -43,11 +43,11 @@ void WICheckbox::SetChecked(bool bChecked)
 }
 bool WICheckbox::IsChecked() { return m_bChecked; }
 void WICheckbox::Toggle() { SetChecked(!m_bChecked); }
-util::EventReply WICheckbox::MouseCallback(GLFW::MouseButton button, GLFW::KeyState state, GLFW::Modifier mods)
+util::EventReply WICheckbox::MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods)
 {
 	if(WIRect::MouseCallback(button, state, mods) == util::EventReply::Handled)
 		return util::EventReply::Handled;
-	if(button == GLFW::MouseButton::Left && state == GLFW::KeyState::Press)
+	if(button == pragma::platform::MouseButton::Left && state == pragma::platform::KeyState::Press)
 		Toggle();
 	return util::EventReply::Handled;
 }

@@ -590,9 +590,8 @@ static luabind::object get_property_value(lua_State *l, const ::udm::PropertyWra
 template<class T, class TPropertyWrapper, class TClassDef>
 void register_property_methods(TClassDef &classDef)
 {
-	classDef
-	  .def(
-	    "Add", +[](lua_State *l, T &p, const std::string &path) -> ::udm::LinkedPropertyWrapper { return static_cast<TPropertyWrapper>(p).Add(path); })
+	classDef.def(
+	          "Add", +[](lua_State *l, T &p, const std::string &path) -> ::udm::LinkedPropertyWrapper { return static_cast<TPropertyWrapper>(p).Add(path); })
 	  .def(
 	    "Add", +[](lua_State *l, T &p, const std::string &path, ::udm::Type type) -> ::udm::LinkedPropertyWrapper { return static_cast<TPropertyWrapper>(p).Add(path, type); })
 	  .def(
@@ -957,8 +956,7 @@ void register_property_methods(TClassDef &classDef)
 			    return;
 		    a->ClearUncompressedMemory();
 	    })
-	  .def(
-	    "IsValid", +[](lua_State *l, T &prop) -> bool { return static_cast<bool>(static_cast<TPropertyWrapper>(prop)); });
+	  .def("IsValid", +[](lua_State *l, T &prop) -> bool { return static_cast<bool>(static_cast<TPropertyWrapper>(prop)); });
 }
 
 static void debug_print_wrapper(const udm::PropertyWrapper &lp, const std::string &t)
@@ -1037,25 +1035,20 @@ void Lua::udm::register_types(Lua::Interface &lua, luabind::module_ &modUdm)
 	cdRef.def(luabind::constructor<>());
 	cdRef.def(luabind::constructor<const std::string &>());
 	cdRef.def(luabind::tostring(luabind::self));
-	cdRef.def(
-	  "GetProperty", +[](lua_State *l, ::udm::Reference &ref) -> ::udm::PropertyWrapper { return ref.property ? ::udm::PropertyWrapper {*ref.property} : ::udm::PropertyWrapper {}; });
+	cdRef.def("GetProperty", +[](lua_State *l, ::udm::Reference &ref) -> ::udm::PropertyWrapper { return ref.property ? ::udm::PropertyWrapper {*ref.property} : ::udm::PropertyWrapper {}; });
 	modUdm[cdRef];
 
 	auto cdStructDescription = luabind::class_<::udm::StructDescription>("StructDescription");
 	cdStructDescription.def(luabind::constructor<>());
-	cdStructDescription.def(
-	  "GetTypes", +[](lua_State *l, ::udm::StructDescription &udmData) -> luabind::object { return Lua::vector_to_table<::udm::Type>(l, udmData.types); });
-	cdStructDescription.def(
-	  "GetNames", +[](lua_State *l, ::udm::StructDescription &udmData) -> luabind::object { return Lua::vector_to_table<std::string>(l, udmData.names); });
-	cdStructDescription.def(
-	  "GetMemberCount", +[](lua_State *l, ::udm::StructDescription &udmData) -> uint32_t { return udmData.GetMemberCount(); });
+	cdStructDescription.def("GetTypes", +[](lua_State *l, ::udm::StructDescription &udmData) -> luabind::object { return Lua::vector_to_table<::udm::Type>(l, udmData.types); });
+	cdStructDescription.def("GetNames", +[](lua_State *l, ::udm::StructDescription &udmData) -> luabind::object { return Lua::vector_to_table<std::string>(l, udmData.names); });
+	cdStructDescription.def("GetMemberCount", +[](lua_State *l, ::udm::StructDescription &udmData) -> uint32_t { return udmData.GetMemberCount(); });
 	modUdm[cdStructDescription];
 
 	auto cdStruct = luabind::class_<::udm::Struct>("Struct");
 	cdStruct.def(luabind::constructor<>());
 	cdStruct.def(luabind::constructor<const ::udm::StructDescription &>());
-	cdStruct.def(
-	  "GetDescription", +[](lua_State *l, ::udm::Struct &strct) -> ::udm::StructDescription * { return &strct.description; });
+	cdStruct.def("GetDescription", +[](lua_State *l, ::udm::Struct &strct) -> ::udm::StructDescription * { return &strct.description; });
 	cdStruct.def(
 	  "GetValue", +[](lua_State *l, ::udm::Struct &strct) -> luabind::object {
 		  auto t = luabind::newtable(l);
@@ -1093,14 +1086,10 @@ void Lua::udm::register_types(Lua::Interface &lua, luabind::module_ &modUdm)
 		  return ss.str();
 	  });
 #endif
-	cdSrgba.property(
-	  "r", +[](lua_State *l, ::udm::Srgba &srgba) -> uint8_t { return srgba[0]; }, +[](lua_State *l, ::udm::Srgba &srgba, uint8_t r) { srgba[0] = r; });
-	cdSrgba.property(
-	  "g", +[](lua_State *l, ::udm::Srgba &srgba) -> uint8_t { return srgba[1]; }, +[](lua_State *l, ::udm::Srgba &srgba, uint8_t g) { srgba[1] = g; });
-	cdSrgba.property(
-	  "b", +[](lua_State *l, ::udm::Srgba &srgba) -> uint8_t { return srgba[2]; }, +[](lua_State *l, ::udm::Srgba &srgba, uint8_t b) { srgba[2] = b; });
-	cdSrgba.property(
-	  "a", +[](lua_State *l, ::udm::Srgba &srgba) -> uint8_t { return srgba[3]; }, +[](lua_State *l, ::udm::Srgba &srgba, uint8_t a) { srgba[3] = a; });
+	cdSrgba.property("r", +[](lua_State *l, ::udm::Srgba &srgba) -> uint8_t { return srgba[0]; }, +[](lua_State *l, ::udm::Srgba &srgba, uint8_t r) { srgba[0] = r; });
+	cdSrgba.property("g", +[](lua_State *l, ::udm::Srgba &srgba) -> uint8_t { return srgba[1]; }, +[](lua_State *l, ::udm::Srgba &srgba, uint8_t g) { srgba[1] = g; });
+	cdSrgba.property("b", +[](lua_State *l, ::udm::Srgba &srgba) -> uint8_t { return srgba[2]; }, +[](lua_State *l, ::udm::Srgba &srgba, uint8_t b) { srgba[2] = b; });
+	cdSrgba.property("a", +[](lua_State *l, ::udm::Srgba &srgba) -> uint8_t { return srgba[3]; }, +[](lua_State *l, ::udm::Srgba &srgba, uint8_t a) { srgba[3] = a; });
 	modUdm[cdSrgba];
 
 	auto cdHdr = luabind::class_<::udm::HdrColor>("HdrColor");
@@ -1115,14 +1104,10 @@ void Lua::udm::register_types(Lua::Interface &lua, luabind::module_ &modUdm)
 		  return ss.str();
 	  });
 #endif
-	cdHdr.property(
-	  "r", +[](lua_State *l, ::udm::HdrColor &srgba) -> uint8_t { return srgba[0]; }, +[](lua_State *l, ::udm::HdrColor &srgba, uint8_t r) { srgba[0] = r; });
-	cdHdr.property(
-	  "g", +[](lua_State *l, ::udm::HdrColor &srgba) -> uint8_t { return srgba[1]; }, +[](lua_State *l, ::udm::HdrColor &srgba, uint8_t g) { srgba[1] = g; });
-	cdHdr.property(
-	  "b", +[](lua_State *l, ::udm::HdrColor &srgba) -> uint8_t { return srgba[2]; }, +[](lua_State *l, ::udm::HdrColor &srgba, uint8_t b) { srgba[2] = b; });
-	cdHdr.property(
-	  "a", +[](lua_State *l, ::udm::HdrColor &srgba) -> uint8_t { return srgba[3]; }, +[](lua_State *l, ::udm::HdrColor &srgba, uint8_t a) { srgba[3] = a; });
+	cdHdr.property("r", +[](lua_State *l, ::udm::HdrColor &srgba) -> uint8_t { return srgba[0]; }, +[](lua_State *l, ::udm::HdrColor &srgba, uint8_t r) { srgba[0] = r; });
+	cdHdr.property("g", +[](lua_State *l, ::udm::HdrColor &srgba) -> uint8_t { return srgba[1]; }, +[](lua_State *l, ::udm::HdrColor &srgba, uint8_t g) { srgba[1] = g; });
+	cdHdr.property("b", +[](lua_State *l, ::udm::HdrColor &srgba) -> uint8_t { return srgba[2]; }, +[](lua_State *l, ::udm::HdrColor &srgba, uint8_t b) { srgba[2] = b; });
+	cdHdr.property("a", +[](lua_State *l, ::udm::HdrColor &srgba) -> uint8_t { return srgba[3]; }, +[](lua_State *l, ::udm::HdrColor &srgba, uint8_t a) { srgba[3] = a; });
 	modUdm[cdHdr];
 
 	auto cdData = luabind::class_<::udm::Data>("Data");
@@ -1226,8 +1211,7 @@ void Lua::udm::register_types(Lua::Interface &lua, luabind::module_ &modUdm)
 		  udmData.ToAscii(ss);
 		  return ss.str();
 	  });
-	cdData.def(
-	  "GetAssetData", +[](lua_State *l, ::udm::Data &udmData) -> ::udm::AssetData { return udmData.GetAssetData(); });
+	cdData.def("GetAssetData", +[](lua_State *l, ::udm::Data &udmData) -> ::udm::AssetData { return udmData.GetAssetData(); });
 	cdData.def(
 	  "LoadProperty", +[](lua_State *l, ::udm::Data &udmData, const std::string &path) {
 		  try {
@@ -1239,12 +1223,9 @@ void Lua::udm::register_types(Lua::Interface &lua, luabind::module_ &modUdm)
 			  Lua::PushString(l, e.what());
 		  }
 	  });
-	cdData.def(
-	  "GetRootElement", +[](lua_State *l, ::udm::Data &udmData) -> ::udm::Element * { return &udmData.GetRootElement(); });
-	cdData.def(
-	  "Get", +[](lua_State *l, ::udm::Data &udmData, const std::string &key) -> ::udm::LinkedPropertyWrapper { return udmData.GetRootElement()[key]; });
-	cdData.def(
-	  "ResolveReferences", +[](lua_State *l, ::udm::Data &udmData) { udmData.ResolveReferences(); });
+	cdData.def("GetRootElement", +[](lua_State *l, ::udm::Data &udmData) -> ::udm::Element * { return &udmData.GetRootElement(); });
+	cdData.def("Get", +[](lua_State *l, ::udm::Data &udmData, const std::string &key) -> ::udm::LinkedPropertyWrapper { return udmData.GetRootElement()[key]; });
+	cdData.def("ResolveReferences", +[](lua_State *l, ::udm::Data &udmData) { udmData.ResolveReferences(); });
 	modUdm[cdData];
 
 	auto cdPropWrap = luabind::class_<::udm::PropertyWrapper>("PropertyWrapper");
@@ -1265,15 +1246,12 @@ void Lua::udm::register_types(Lua::Interface &lua, luabind::module_ &modUdm)
 	auto cdLinkedPropWrap = luabind::class_<::udm::LinkedPropertyWrapper, ::udm::PropertyWrapper>("LinkedPropertyWrapper");
 	cdLinkedPropWrap.def(luabind::tostring(luabind::self));
 	cdLinkedPropWrap.def(luabind::constructor<>());
-	cdLinkedPropWrap.def(
-	  "GetAssetData", +[](lua_State *l, ::udm::LinkedPropertyWrapper &prop) -> ::udm::AssetData { return ::udm::AssetData {prop}; });
-	cdLinkedPropWrap.def(
-	  "GetPath", +[](lua_State *l, ::udm::LinkedPropertyWrapper &prop) -> std::string { return prop.GetPath(); });
-	cdLinkedPropWrap.def(
-	  "ClaimOwnership", +[](lua_State *l, ::udm::LinkedPropertyWrapper &prop) -> ::udm::PProperty { return prop.ClaimOwnership(); });
+	cdLinkedPropWrap.def("GetAssetData", +[](lua_State *l, ::udm::LinkedPropertyWrapper &prop) -> ::udm::AssetData { return ::udm::AssetData {prop}; });
+	cdLinkedPropWrap.def("GetPath", +[](lua_State *l, ::udm::LinkedPropertyWrapper &prop) -> std::string { return prop.GetPath(); });
+	cdLinkedPropWrap.def("ClaimOwnership", +[](lua_State *l, ::udm::LinkedPropertyWrapper &prop) -> ::udm::PProperty { return prop.ClaimOwnership(); });
 	modUdm[cdLinkedPropWrap];
-	pragma::lua::define_custom_constructor<::udm::LinkedPropertyWrapper, [](::udm::Property &prop) -> ::udm::LinkedPropertyWrapper { return ::udm::LinkedPropertyWrapper {prop}; }, ::udm::Property &>(lua.GetState());
-	pragma::lua::define_custom_constructor<::udm::LinkedPropertyWrapper, [](::udm::LinkedPropertyWrapper &prop) -> ::udm::LinkedPropertyWrapper { return prop; }, ::udm::LinkedPropertyWrapper &>(lua.GetState());
+	pragma::lua::define_custom_constructor<::udm::LinkedPropertyWrapper, +[](::udm::Property &prop) -> ::udm::LinkedPropertyWrapper { return ::udm::LinkedPropertyWrapper {prop}; }, ::udm::Property &>(lua.GetState());
+	pragma::lua::define_custom_constructor<::udm::LinkedPropertyWrapper, +[](::udm::LinkedPropertyWrapper &prop) -> ::udm::LinkedPropertyWrapper { return prop; }, ::udm::LinkedPropertyWrapper &>(lua.GetState());
 
 	auto cdAssetData = luabind::class_<::udm::AssetData, ::udm::LinkedPropertyWrapper, ::udm::PropertyWrapper>("AssetData");
 	cdAssetData.def(luabind::tostring(luabind::self));
@@ -1281,13 +1259,11 @@ void Lua::udm::register_types(Lua::Interface &lua, luabind::module_ &modUdm)
 	cdAssetData.def("GetAssetVersion", &::udm::AssetData::GetAssetVersion);
 	cdAssetData.def("SetAssetType", &::udm::AssetData::SetAssetType);
 	cdAssetData.def("SetAssetVersion", &::udm::AssetData::SetAssetVersion);
-	cdAssetData.def(
-	  "GetData", +[](lua_State *l, ::udm::AssetData &a) -> ::udm::LinkedPropertyWrapper { return a.GetData(); });
-	cdAssetData.def(
-	  "SetData", +[](lua_State *l, ::udm::AssetData &a, ::udm::PProperty &prop) { a.GetData() = prop; });
+	cdAssetData.def("GetData", +[](lua_State *l, ::udm::AssetData &a) -> ::udm::LinkedPropertyWrapper { return a.GetData(); });
+	cdAssetData.def("SetData", +[](lua_State *l, ::udm::AssetData &a, ::udm::PProperty &prop) { a.GetData() = prop; });
 	modUdm[cdAssetData];
 	pragma::lua::define_custom_constructor<::udm::AssetData,
-	  [](::udm::LinkedPropertyWrapper &prop, const std::string &identifier, ::udm::Version version) -> ::udm::AssetData {
+	  +[](::udm::LinkedPropertyWrapper &prop, const std::string &identifier, ::udm::Version version) -> ::udm::AssetData {
 		  ::udm::AssetData assetData {prop};
 		  assetData.SetAssetType(identifier);
 		  assetData.SetAssetVersion(version);
@@ -1325,8 +1301,7 @@ void Lua::udm::register_types(Lua::Interface &lua, luabind::module_ &modUdm)
 		  prop.ToAscii(::udm::AsciiSaveFlags::Default, ss, propName);
 		  return ss.str();
 	  });
-	cdProp.def(
-	  "Get", +[](lua_State *l, ::udm::Property &prop) -> ::udm::LinkedPropertyWrapper { return ::udm::LinkedPropertyWrapper {prop}; });
+	cdProp.def("Get", +[](lua_State *l, ::udm::Property &prop) -> ::udm::LinkedPropertyWrapper { return ::udm::LinkedPropertyWrapper {prop}; });
 	modUdm[cdProp];
 
 	// TODO: Register "Get" method as subscript operator for the Lua classes

@@ -224,7 +224,7 @@ WITreeListElement *WITreeList::AddItem(const std::string &text, const std::funct
 		return nullptr;
 	return static_cast<WITreeListElement *>(m_pRoot.get())->AddItem(text, fPopulate);
 }
-util::EventReply WITreeList::MouseCallback(GLFW::MouseButton button, GLFW::KeyState state, GLFW::Modifier mods)
+util::EventReply WITreeList::MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods)
 {
 	if(WITable::MouseCallback(button, state, mods) == util::EventReply::Handled)
 		return util::EventReply::Handled;

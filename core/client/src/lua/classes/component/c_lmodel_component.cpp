@@ -122,5 +122,5 @@ void Lua::ModelDef::register_class(lua_State *l, luabind::module_ &entsMod)
 
 	entsMod[defCModel];
 
-	pragma::lua::define_custom_constructor<pragma::rendering::RenderBufferData, [](const pragma::rendering::RenderBufferData &renderBufferData) -> pragma::rendering::RenderBufferData { return renderBufferData; }, const pragma::rendering::RenderBufferData &>(l);
+	pragma::lua::define_custom_constructor<pragma::rendering::RenderBufferData, +[](const pragma::rendering::RenderBufferData &renderBufferData) -> pragma::rendering::RenderBufferData { return renderBufferData; }, const pragma::rendering::RenderBufferData &>(l);
 }

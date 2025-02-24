@@ -183,7 +183,7 @@ void Lua::Lightmap::register_class(lua_State *l, luabind::module_ &entsMod)
 	  "GetLightmapEntity", +[](lua_State *l, pragma::LightmapDataCache &cache) -> std::string { return util::uuid_to_string(cache.lightmapEntityId); });
 	defCLightMap.scope[defCache];
 	entsMod[defCLightMap];
-	pragma::lua::define_custom_constructor<pragma::LightmapDataCache, []() -> std::shared_ptr<pragma::LightmapDataCache> { return std::make_shared<pragma::LightmapDataCache>(); }>(l);
+	pragma::lua::define_custom_constructor<pragma::LightmapDataCache, +[]() -> std::shared_ptr<pragma::LightmapDataCache> { return std::make_shared<pragma::LightmapDataCache>(); }>(l);
 
 	auto defCLightMapReceiver = pragma::lua::create_entity_component_class<pragma::CLightMapReceiverComponent, pragma::BaseEntityComponent>("LightMapReceiverComponent");
 	defCLightMapReceiver.def("UpdateLightmapUvData", &pragma::CLightMapReceiverComponent::UpdateLightMapUvData);

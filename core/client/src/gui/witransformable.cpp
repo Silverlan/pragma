@@ -32,7 +32,7 @@ WITransformable::WITransformable() : WIBase()
 WITransformable::~WITransformable()
 {
 	if(m_resizeMode != ResizeMode::none)
-		WGUI::GetInstance().SetCursor(GLFW::Cursor::Shape::Arrow, GetRootWindow());
+		WGUI::GetInstance().SetCursor(pragma::platform::Cursor::Shape::Arrow, GetRootWindow());
 }
 void WITransformable::DoUpdate()
 {
@@ -93,17 +93,17 @@ void WITransformable::SetMaxSize(Vector2i size)
 int WITransformable::GetMaxWidth() { return m_maxSize.x; }
 int WITransformable::GetMaxHeight() { return m_maxSize.y; }
 const Vector2i &WITransformable::GetMaxSize() const { return m_maxSize; }
-void WITransformable::OnTitleBarMouseEvent(GLFW::MouseButton button, GLFW::KeyState state, GLFW::Modifier mods)
+void WITransformable::OnTitleBarMouseEvent(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods)
 {
 	MouseCallback(button, state, mods);
 	if(umath::is_flag_set(m_stateFlags, StateFlags::Draggable) == false)
 		return;
-	if(button == GLFW::MouseButton::Left) {
-		if(state == GLFW::KeyState::Press) {
+	if(button == pragma::platform::MouseButton::Left) {
+		if(state == pragma::platform::KeyState::Press) {
 			if(m_resizeMode == ResizeMode::none)
 				StartDrag();
 		}
-		else if(state == GLFW::KeyState::Release)
+		else if(state == pragma::platform::KeyState::Release)
 			EndDrag();
 	}
 }
@@ -138,7 +138,7 @@ void WITransformable::OnVisibilityChanged(bool bVisible)
 	if(bVisible == false) {
 		if(m_resizeMode != ResizeMode::none) {
 			EndResizing();
-			WGUI::GetInstance().SetCursor(GLFW::Cursor::Shape::Arrow, GetRootWindow());
+			WGUI::GetInstance().SetCursor(pragma::platform::Cursor::Shape::Arrow, GetRootWindow());
 		}
 		EndDrag();
 	}
@@ -170,20 +170,20 @@ void WITransformable::SetResizeMode(ResizeMode mode)
 {
 	if(m_resizeMode == mode || IsResizable() == false)
 		return;
-	auto cursor = GLFW::Cursor::Shape::Arrow;
+	auto cursor = pragma::platform::Cursor::Shape::Arrow;
 	switch(mode) {
 	case ResizeMode::none:
 		break;
 	case ResizeMode::ns:
 	case ResizeMode::sn:
-		cursor = GLFW::Cursor::Shape::VResize;
+		cursor = pragma::platform::Cursor::Shape::VResize;
 		break;
 	case ResizeMode::ew:
 	case ResizeMode::we:
-		cursor = GLFW::Cursor::Shape::HResize;
+		cursor = pragma::platform::Cursor::Shape::HResize;
 		break;
 	default:
-		cursor = GLFW::Cursor::Shape::Crosshair;
+		cursor = pragma::platform::Cursor::Shape::Crosshair;
 		break;
 	};
 	m_resizeMode = mode;
@@ -211,22 +211,22 @@ void WITransformable::Initialize()
 	auto *pMoveRect = m_hMoveRect.get();
 	pMoveRect->AddStyleClass("move_rect");
 	pMoveRect->SetMouseInputEnabled(umath::is_flag_set(m_stateFlags, StateFlags::Draggable));
-	pMoveRect->AddCallback("OnMouseEvent", FunctionCallback<util::EventReply, GLFW::MouseButton, GLFW::KeyState, GLFW::Modifier>::CreateWithOptionalReturn([this](util::EventReply *reply, GLFW::MouseButton button, GLFW::KeyState state, GLFW::Modifier mods) -> CallbackReturnType {
+	pMoveRect->AddCallback("OnMouseEvent", FunctionCallback<util::EventReply, pragma::platform::MouseButton, pragma::platform::KeyState, pragma::platform::Modifier>::CreateWithOptionalReturn([this](util::EventReply *reply, pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods) -> CallbackReturnType {
 		OnTitleBarMouseEvent(button, state, mods);
 		*reply = util::EventReply::Handled;
 		return CallbackReturnType::HasReturnValue;
 	}));
 }
-util::EventReply WITransformable::MouseCallback(GLFW::MouseButton button, GLFW::KeyState state, GLFW::Modifier mods)
+util::EventReply WITransformable::MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods)
 {
 	if(WIBase::MouseCallback(button, state, mods) == util::EventReply::Handled)
 		return util::EventReply::Handled;
-	if(button == GLFW::MouseButton::Left) {
-		if(state == GLFW::KeyState::Press) {
+	if(button == pragma::platform::MouseButton::Left) {
+		if(state == pragma::platform::KeyState::Press) {
 			if(m_resizeMode != ResizeMode::none)
 				StartResizing();
 		}
-		else if(state == GLFW::KeyState::Release)
+		else if(state == pragma::platform::KeyState::Release)
 			EndResizing();
 	}
 	return util::EventReply::Handled;
@@ -599,7 +599,7 @@ void WITransformable::SetResizable(bool b)
 	resizeRect->SetMouseInputEnabled(true);
 	resizeRect->SetVisible(IsVisible());
 	resizeRect->SetZPos(GetZPos());
-	resizeRect->AddCallback("OnMouseEvent", FunctionCallback<util::EventReply, GLFW::MouseButton, GLFW::KeyState, GLFW::Modifier>::CreateWithOptionalReturn([hThis](util::EventReply *reply, GLFW::MouseButton button, GLFW::KeyState state, GLFW::Modifier mods) mutable -> CallbackReturnType {
+	resizeRect->AddCallback("OnMouseEvent", FunctionCallback<util::EventReply, pragma::platform::MouseButton, pragma::platform::KeyState, pragma::platform::Modifier>::CreateWithOptionalReturn([hThis](util::EventReply *reply, pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods) mutable -> CallbackReturnType {
 		if(hThis.IsValid() == false) {
 			*reply = util::EventReply::Handled;
 			return CallbackReturnType::HasReturnValue;

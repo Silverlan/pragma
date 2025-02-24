@@ -114,11 +114,11 @@ bool GUIDebugCursorManager::Initialize()
 		return CallbackReturnType::HasReturnValue;
 	}));
 	m_cbMiddleMouse = c_engine->AddCallback("OnMouseInput",
-	  FunctionCallback<bool, std::reference_wrapper<prosper::Window>, GLFW::MouseButton, GLFW::KeyState, GLFW::Modifier>::CreateWithOptionalReturn(
-	    [this](bool *reply, std::reference_wrapper<prosper::Window> window, GLFW::MouseButton button, GLFW::KeyState state, GLFW::Modifier mods) -> CallbackReturnType {
-		    if(button == GLFW::MouseButton::Middle) {
+	  FunctionCallback<bool, std::reference_wrapper<prosper::Window>, pragma::platform::MouseButton, pragma::platform::KeyState, pragma::platform::Modifier>::CreateWithOptionalReturn(
+	    [this](bool *reply, std::reference_wrapper<prosper::Window> window, pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods) -> CallbackReturnType {
+		    if(button == pragma::platform::MouseButton::Middle) {
 			    *reply = true;
-			    if(state == GLFW::KeyState::Press && !m_cursorElementList.empty()) {
+			    if(state == pragma::platform::KeyState::Press && !m_cursorElementList.empty()) {
 				    auto &hEl = m_cursorElementList.front();
 				    if(hEl.IsValid()) {
 					    auto *el = hEl.get();

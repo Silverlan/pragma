@@ -31,7 +31,7 @@ class DLLCLIENT WITransformable : public WIBase {
 	bool IsDraggable();
 	bool IsResizable();
 	virtual void Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd) override;
-	virtual util::EventReply MouseCallback(GLFW::MouseButton button, GLFW::KeyState state, GLFW::Modifier mods) override;
+	virtual util::EventReply MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods) override;
 	virtual void OnCursorMoved(int x, int y) override;
 	void SetMinWidth(int w);
 	void SetMinHeight(int h);
@@ -91,7 +91,7 @@ class DLLCLIENT WITransformable : public WIBase {
 
 	virtual void OnVisibilityChanged(bool bVisible) override;
 	Vector2i GetConfinedMousePos();
-	void OnTitleBarMouseEvent(GLFW::MouseButton button, GLFW::KeyState state, GLFW::Modifier mods);
+	void OnTitleBarMouseEvent(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods);
 	void OnCloseButtonPressed();
 	void UpdateResizeRect();
 	void UpdateResizeRectPos();

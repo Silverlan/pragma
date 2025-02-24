@@ -12,12 +12,21 @@
 #include <luabind/function.hpp>
 
 namespace pragma::lua {
+	template<typename T>
+	struct function_traits;
+
+	// Specialization for function pointers
+	template<typename R, typename... Args>
+	struct function_traits<R (*)(Args...)> {
+		using return_type = R;
+	};
+
 	// See luabind::detail::construct_aux_helper
 	template<typename T, auto TCnstrct, typename... TArgs>
 	static void custom_constructor(luabind::argument const &self_, TArgs... args)
 	{
 		luabind::detail::object_rep *self = luabind::touserdata<luabind::detail::object_rep>(self_);
-		using TResult = typename decltype(std::function {TCnstrct})::result_type;
+		using TResult = typename function_traits<decltype(TCnstrct)>::return_type;
 		if constexpr(!util::is_specialization<TResult, std::shared_ptr>::value) {
 			using holder_type = luabind::detail::value_holder<TResult>;
 

@@ -132,7 +132,7 @@ void RenderContext::InitializeRenderAPI()
 		LOGGER.warn(msg.str());
 	});
 	prosper::debug::set_debug_validation_callback([](prosper::DebugReportObjectTypeEXT objectType, const std::string &msg) { LOGGER_VALIDATION.error("{}", msg); });
-	GLFW::initialize();
+	pragma::platform::initialize();
 
 	if(GetRenderContext().IsValidationEnabled()) {
 		// A VkImageStencilUsageCreateInfoEXT error is caused due to a bug in Anvil: https://github.com/GPUOpen-LibrariesAndSDKs/Anvil/issues/153
@@ -164,7 +164,7 @@ void RenderContext::RegisterShader(const std::string &identifier, const std::fun
 ::util::WeakHandle<prosper::Shader> RenderContext::GetShader(const std::string &identifier) const { return GetRenderContext().GetShader(identifier); }
 
 prosper::Window &RenderContext::GetWindow() { return GetRenderContext().GetWindow(); }
-GLFW::Window &RenderContext::GetGlfwWindow() { return *GetRenderContext().GetWindow(); }
+pragma::platform::Window &RenderContext::GetGlfwWindow() { return *GetRenderContext().GetWindow(); }
 const std::shared_ptr<prosper::IPrimaryCommandBuffer> &RenderContext::GetSetupCommandBuffer() { return GetRenderContext().GetSetupCommandBuffer(); }
 const std::shared_ptr<prosper::IPrimaryCommandBuffer> &RenderContext::GetDrawCommandBuffer() const { return GetRenderContext().GetWindow().GetDrawCommandBuffer(); }
 const std::shared_ptr<prosper::IPrimaryCommandBuffer> &RenderContext::GetDrawCommandBuffer(uint32_t swapchainIdx) const { return GetRenderContext().GetWindow().GetDrawCommandBuffer(swapchainIdx); }

@@ -320,8 +320,8 @@ namespace prosper { // For some reason these need to be in the same namespaces a
 	}
 };
 
-namespace GLFW {
-	static std::ostream &operator<<(std::ostream &out, const GLFW::Monitor &monitor)
+namespace pragma::platform {
+	static std::ostream &operator<<(std::ostream &out, const pragma::platform::Monitor &monitor)
 	{
 		out << "Monitor";
 		out << "[" << monitor.GetName() << "]";
@@ -1807,12 +1807,12 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defWindowCreateInfo.def_readwrite("height", &prosper::WindowSettings::height);
 	prosperMod[defWindowCreateInfo];
 
-	auto defMonitor = luabind::class_<GLFW::Monitor>("Monitor");
+	auto defMonitor = luabind::class_<pragma::platform::Monitor>("Monitor");
 	defMonitor.def(luabind::tostring(luabind::self));
-	defMonitor.def("GetName", &GLFW::Monitor::GetName);
-	defMonitor.def("GetPhysicalSize", &GLFW::Monitor::GetPhysicalSize);
+	defMonitor.def("GetName", &pragma::platform::Monitor::GetName);
+	defMonitor.def("GetPhysicalSize", &pragma::platform::Monitor::GetPhysicalSize);
 	defMonitor.def(
-	  "GetVideoMode", +[](lua_State *l, const GLFW::Monitor &monitor) -> Lua::map<std::string, int> {
+	  "GetVideoMode", +[](lua_State *l, const pragma::platform::Monitor &monitor) -> Lua::map<std::string, int> {
 		  auto t = luabind::newtable(l);
 		  auto videoMode = monitor.GetVideoMode();
 		  t["width"] = videoMode.width;
@@ -1823,11 +1823,11 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 		  t["refreshRate"] = videoMode.refreshRate;
 		  return t;
 	  });
-	defMonitor.def("GetPos", &GLFW::Monitor::GetPos);
-	defMonitor.def("GetGammaRamp", &GLFW::Monitor::GetGammaRamp);
-	defMonitor.def("SetGammaRamp", &GLFW::Monitor::SetGammaRamp);
-	defMonitor.def("SetGamma", &GLFW::Monitor::SetGamma);
-	defMonitor.def("GetSupportedVideoModes", &GLFW::Monitor::GetSupportedVideoModes);
+	defMonitor.def("GetPos", &pragma::platform::Monitor::GetPos);
+	defMonitor.def("GetGammaRamp", &pragma::platform::Monitor::GetGammaRamp);
+	defMonitor.def("SetGammaRamp", &pragma::platform::Monitor::SetGammaRamp);
+	defMonitor.def("SetGamma", &pragma::platform::Monitor::SetGamma);
+	defMonitor.def("GetSupportedVideoModes", &pragma::platform::Monitor::GetSupportedVideoModes);
 	prosperMod[defMonitor];
 
 	auto defWindow = luabind::class_<prosper::Window>("Window");
@@ -1878,14 +1878,14 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defWindow.def("ClearCursor", static_cast<void (*)(prosper::Window &)>([](prosper::Window &window) { window->ClearCursor(); }));
 	defWindow.def("SetBorderColor", +[](prosper::Window &window, const Color &color) { window->SetBorderColor(color); });
 	defWindow.def("SetTitleBarColor", +[](prosper::Window &window, const Color &color) { window->SetTitleBarColor(color); });
-	defWindow.def("GetKeyState", static_cast<GLFW::KeyState (*)(prosper::Window &, GLFW::Key)>([](prosper::Window &window, GLFW::Key key) -> GLFW::KeyState { return window->GetKeyState(key); }));
-	defWindow.def("GetMouseButtonState", static_cast<GLFW::KeyState (*)(prosper::Window &, GLFW::MouseButton)>([](prosper::Window &window, GLFW::MouseButton mouseButton) -> GLFW::KeyState { return window->GetMouseButtonState(mouseButton); }));
-	defWindow.def("SetCursorInputMode", static_cast<void (*)(prosper::Window &, GLFW::CursorMode)>([](prosper::Window &window, GLFW::CursorMode cursorMode) { window->SetCursorInputMode(cursorMode); }));
-	defWindow.def("GetCursorInputMode", static_cast<GLFW::CursorMode (*)(prosper::Window &)>([](prosper::Window &window) -> GLFW::CursorMode { return window->GetCursorInputMode(); }));
-	defWindow.def("SetCursor", static_cast<void (*)(prosper::Window &, GLFW::Cursor &)>([](prosper::Window &window, GLFW::Cursor &cursor) { window->SetCursor(cursor); }));
+	defWindow.def("GetKeyState", static_cast<pragma::platform::KeyState (*)(prosper::Window &, pragma::platform::Key)>([](prosper::Window &window, pragma::platform::Key key) -> pragma::platform::KeyState { return window->GetKeyState(key); }));
+	defWindow.def("GetMouseButtonState", static_cast<pragma::platform::KeyState (*)(prosper::Window &, pragma::platform::MouseButton)>([](prosper::Window &window, pragma::platform::MouseButton mouseButton) -> pragma::platform::KeyState { return window->GetMouseButtonState(mouseButton); }));
+	defWindow.def("SetCursorInputMode", static_cast<void (*)(prosper::Window &, pragma::platform::CursorMode)>([](prosper::Window &window, pragma::platform::CursorMode cursorMode) { window->SetCursorInputMode(cursorMode); }));
+	defWindow.def("GetCursorInputMode", static_cast<pragma::platform::CursorMode (*)(prosper::Window &)>([](prosper::Window &window) -> pragma::platform::CursorMode { return window->GetCursorInputMode(); }));
+	defWindow.def("SetCursor", static_cast<void (*)(prosper::Window &, pragma::platform::Cursor &)>([](prosper::Window &window, pragma::platform::Cursor &cursor) { window->SetCursor(cursor); }));
 	defWindow.def("Close", &prosper::Window::Close);
 	defWindow.def(
-	  "GetMonitor", +[](prosper::Window &window) -> const GLFW::Monitor * {
+	  "GetMonitor", +[](prosper::Window &window) -> const pragma::platform::Monitor * {
 		  auto &glfwWindow = window.GetGlfwWindow();
 		  return glfwWindow.GetMonitor();
 	  });

@@ -5,6 +5,7 @@
  * Copyright (c) 2021 Silverlan */
 
 #include "stdafx_server.h"
+#include <pragma/engine.h>
 #include "pragma/networking/resourcemanager.h"
 #include "pragma/networking/resources.h"
 #include <fsys/filesystem.h>

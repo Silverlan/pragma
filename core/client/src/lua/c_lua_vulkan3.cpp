@@ -6,8 +6,10 @@
  */
 
 #include "stdafx_client.h"
+#include "pragma/c_engine.h"
 #include "pragma/lua/libraries/c_lua_vulkan.h"
 #include "pragma/lua/classes/c_lua_vulkan.hpp"
+#include <prosper_descriptor_set_group.hpp>
 #include <prosper_event.hpp>
 
 extern DLLCLIENT CEngine *c_engine;

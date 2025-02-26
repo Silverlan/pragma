@@ -5,6 +5,7 @@
  * Copyright (c) 2021 Silverlan */
 
 #include "stdafx_server.h"
+#include <pragma/engine.h>
 #include "pragma/game/s_game.h"
 #include "pragma/lua/classes/lresource.h"
 #include "pragma/lua/libraries/s_ldebugoverlay.h"

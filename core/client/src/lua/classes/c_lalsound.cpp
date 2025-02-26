@@ -7,6 +7,7 @@
 
 #include "stdafx_client.h"
 #include "pragma/audio/c_lalsound.hpp"
+#include "pragma/audio/c_alsound.h"
 #include <pragma/lua/policies/pair_policy.hpp>
 #include <pragma/lua/converters/pair_converter_t.hpp>
 

@@ -9,6 +9,7 @@
 #define __C_RENDER_CONTEXT_HPP__
 
 #include "pragma/c_enginedefinitions.h"
+#include <sharedutils/util_library.hpp>
 #include <prosper_context.hpp>
 #include <unordered_set>
 #include <memory>
@@ -77,7 +78,7 @@ namespace pragma {
 		std::shared_ptr<prosper::IPrContext> m_renderContext = nullptr;
 		std::unordered_set<std::string> m_disabledValidationErrors;
 		StateFlags m_stateFlags = StateFlags::None;
-		std::shared_ptr<util::Library> m_graphicsAPILib = nullptr;
+		std::shared_ptr<::util::Library> m_graphicsAPILib = nullptr;
 		std::unique_ptr<pragma::platform::Monitor> m_monitor = nullptr;
 		std::string m_renderAPI;
 	};

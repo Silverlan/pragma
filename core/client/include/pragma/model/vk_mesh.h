@@ -9,11 +9,12 @@
 #define __VK_MESH_H__
 
 #include "pragma/clientdefinitions.h"
+#include <prosper_context.hpp>
 #include <memory>
 #include <mutex>
 
 namespace prosper {
-	class Buffer;
+	class IBuffer;
 	class IRenderBuffer;
 };
 

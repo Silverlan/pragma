@@ -6,6 +6,7 @@
  */
 
 #include "stdafx_shared.h"
+#include "pragma/engine.h"
 #include "pragma/physics/phys_water_surface_simulator.hpp"
 #include <pragma/console/s_cvar.h>
 #include <pragma/math/intersection.h>

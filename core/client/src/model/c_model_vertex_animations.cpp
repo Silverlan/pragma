@@ -6,6 +6,7 @@
  */
 
 #include "stdafx_client.h"
+#include "pragma/c_engine.h"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
 #include <pragma/model/animation/vertex_animation.hpp>

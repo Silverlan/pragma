@@ -9,6 +9,7 @@
 #define __PRAGMA_UTIL_IMAGE_HPP__
 
 #include "pragma/clientdefinitions.h"
+#include <prosper_enums.hpp>
 #include <pragma/util/resource_watcher.h>
 #include <util_image_buffer.hpp>
 

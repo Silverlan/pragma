@@ -6,6 +6,7 @@
  */
 
 #include "stdafx_shared.h"
+#include "pragma/engine.h"
 #include "pragma/addonsystem/addonsystem.h"
 #include "pragma/logging.hpp"
 #include <fsys/filesystem.h>

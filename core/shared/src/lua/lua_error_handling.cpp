@@ -6,6 +6,7 @@
  */
 
 #include "stdafx_shared.h"
+#include "pragma/engine.h"
 #include "pragma/lua/lua_error_handling.hpp"
 #include "pragma/lua/luaapi.h"
 #include <pragma/console/convars.h>

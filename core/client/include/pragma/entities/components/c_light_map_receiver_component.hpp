@@ -10,6 +10,7 @@
 
 #include "pragma/clientdefinitions.h"
 #include <pragma/entities/components/base_entity_component.hpp>
+#include <pragma/entities/c_world.h>
 
 namespace pragma {
 	struct LightmapDataCache;

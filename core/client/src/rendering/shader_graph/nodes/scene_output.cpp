@@ -6,6 +6,7 @@
  */
 
 #include "stdafx_client.h"
+#include <sharedutils/alpha_mode.hpp>
 #include "pragma/rendering/shader_graph/nodes/scene_output.hpp"
 
 using namespace pragma::rendering::shader_graph;

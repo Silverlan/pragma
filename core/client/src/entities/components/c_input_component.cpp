@@ -6,6 +6,7 @@
  */
 
 #include "stdafx_client.h"
+#include "pragma/game/c_game.h"
 #include "pragma/entities/components/c_input_component.hpp"
 #include "pragma/console/c_cvar.h"
 #include <wgui/wgui.h>

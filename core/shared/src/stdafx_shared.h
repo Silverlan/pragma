@@ -39,7 +39,6 @@
 #include <mathutil/eulerangles.h>
 #include <mathutil/uquat.h>
 #include <mathutil/uvec.h>
-#include <pragma/engine.h>
 #include "pragma/networkstate/networkstate.h"
 #include <pragma/game/game.h>
 #include "pragma/entities/baseentity.h"
@@ -75,7 +74,6 @@
 #include "pragma/lua/policies/string_view_policy.hpp"
 #include "pragma/lua/policies/tuple_policy.hpp"
 #include "pragma/lua/policies/vector_policy.hpp"
-#include <pragma/entities/components/panima_component_channel_submitter_def.hpp>
 
 #include "pragma/lua/converters/alias_converter_t.hpp"
 #include "pragma/lua/converters/cast_converter_t.hpp"
@@ -87,6 +85,5 @@
 #include "pragma/lua/converters/string_view_converter_t.hpp"
 #include "pragma/lua/converters/thread_pool_converter_t.hpp"
 #include "pragma/lua/converters/vector_converter_t.hpp"
-#include <pragma/entities/entity_component_manager_t.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #endif

@@ -6,6 +6,7 @@
  */
 
 #include "stdafx_shared.h"
+#include "pragma/engine.h"
 #include "pragma/asset/util_asset.hpp"
 #include "pragma/networkstate/networkstate.h"
 #include "pragma/model/modelmanager.h"

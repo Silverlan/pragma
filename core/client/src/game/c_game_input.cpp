@@ -6,7 +6,8 @@
  */
 
 #include "stdafx_client.h"
-
+#include "pragma/c_engine.h"
+#include "pragma/game/c_game.h"
 namespace pragma::string {
 	class Utf8String;
 	class Utf8StringView;

@@ -10,6 +10,7 @@
 #include "pragma/lua/classes/lphysics.h"
 #include "pragma/lua/classes/lphysobj.h"
 #include "pragma/physics/environment.hpp"
+#include "material_manager2.hpp"
 #include "pragma/lua/classes/ldef_vector.h"
 #include "pragma/lua/classes/ldef_quaternion.h"
 #include "pragma/lua/classes/ldef_tracedata.h"

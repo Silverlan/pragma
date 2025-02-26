@@ -6,6 +6,7 @@
  */
 
 #include "stdafx_client.h"
+#include "pragma/clientstate/clientstate.h"
 #include "pragma/rendering/shaders/world/c_shader_prepass.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/shaders/world/c_shader_pbr.hpp"

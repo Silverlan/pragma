@@ -11,6 +11,7 @@
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/c_baseentity.h"
 #include "pragma/entities/components/c_entity_component.hpp"
+#include "sharedutils/util_parallel_job.hpp"
 #include <pragma/entities/components/base_entity_component.hpp>
 
 namespace prosper {

@@ -6,6 +6,7 @@
  */
 
 #include "stdafx_client.h"
+#include "pragma/c_engine.h"
 #include "pragma/gui/wiimageslideshow.h"
 #include <cmaterialmanager.h>
 #include <cmaterial_manager2.hpp>

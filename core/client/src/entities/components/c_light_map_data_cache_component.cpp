@@ -6,6 +6,7 @@
  */
 
 #include "stdafx_client.h"
+#include "pragma/game/c_game.h"
 #include "pragma/entities/components/c_light_map_data_cache_component.hpp"
 #include "pragma/entities/components/c_light_map_receiver_component.hpp"
 #include "pragma/entities/components/c_light_map_component.hpp"

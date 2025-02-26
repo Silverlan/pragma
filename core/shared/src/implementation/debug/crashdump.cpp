@@ -8,6 +8,7 @@
 module;
 
 #include "stdafx_shared.h"
+#include "pragma/engine.h"
 #include "pragma/debug/debug_utils.hpp"
 #include "pragma/logging.hpp"
 #include "crashdump_helper.hpp"

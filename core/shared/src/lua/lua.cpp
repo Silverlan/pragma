@@ -6,6 +6,7 @@
  */
 
 #include "stdafx_shared.h"
+#include "pragma/engine.h"
 #include <pragma/game/game.h>
 #include <pragma/console/convars.h>
 #include "pragma/physics/raytraces.h"

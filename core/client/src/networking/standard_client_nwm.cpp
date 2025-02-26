@@ -6,6 +6,7 @@
  */
 
 #include "stdafx_client.h"
+#include "pragma/clientstate/clientstate.h"
 #include "pragma/networking/standard_client.hpp"
 #include <iostream>
 #include <pragma/networking/netmessages.h>

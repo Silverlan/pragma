@@ -6,6 +6,7 @@
  */
 
 #include "stdafx_client.h"
+#include "pragma/c_engine.h"
 #include "pragma/util/util_baking.hpp"
 #include "pragma/util/util_image.hpp"
 #include "pragma/model/c_modelmesh.h"

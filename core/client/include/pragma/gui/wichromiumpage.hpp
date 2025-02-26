@@ -9,6 +9,7 @@
 #define __WICHROMIUMPAGE_HPP__
 
 #include "pragma/clientdefinitions.h"
+#include <wgui/wibase.h>
 #include <string>
 #include <mathutil/uvec.h>
 

@@ -6,12 +6,14 @@
  */
 
 #include "stdafx_client.h"
+#include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_pp_bloom_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_pp_dof_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_pp_fog_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_pp_tone_mapping_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_pp_fxaa_component.hpp"
+#include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/entity_component_system_t.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/lua/c_lentity_handles.hpp"

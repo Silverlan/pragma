@@ -6,6 +6,8 @@
  */
 
 #include "stdafx_client.h"
+#include "pragma/game/c_game.h"
+#include "pragma/clientstate/clientstate.h"
 #include "pragma/entities/components/c_shooter_component.hpp"
 #include "pragma/entities/components/c_transform_component.hpp"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"

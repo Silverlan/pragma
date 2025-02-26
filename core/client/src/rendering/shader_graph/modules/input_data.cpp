@@ -6,6 +6,8 @@
  */
 
 #include "stdafx_client.h"
+#include "pragma/game/c_game.h"
+#include "pragma/clientstate/clientstate.h"
 #include "pragma/rendering/shader_graph/modules/input_data.hpp"
 #include "pragma/rendering/shader_graph/nodes/image_texture.hpp"
 #include "pragma/rendering/render_processor.hpp"

@@ -9,6 +9,8 @@
 #define __C_RENDERER_COMPONENT_HPP__
 
 #include "pragma/clientdefinitions.h"
+#include "pragma/rendering/scene/util_draw_scene_info.hpp"
+#include "pragma/rendering/shaders/world/c_shader_textured_uniform_data.hpp"
 #include <pragma/entities/components/base_entity_component.hpp>
 #include <unordered_set>
 

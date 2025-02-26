@@ -6,6 +6,8 @@
  */
 
 #include "stdafx_client.h"
+#include "pragma/c_engine.h"
+#include "pragma/game/c_game.h"
 #include "pragma/util/c_resource_watcher.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"

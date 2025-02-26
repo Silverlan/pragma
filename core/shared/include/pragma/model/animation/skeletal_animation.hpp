@@ -12,6 +12,8 @@
 #include "pragma/types.hpp"
 #include <cinttypes>
 
+import panima;
+
 enum class Activity : uint16_t;
 namespace util {
 	class EnumRegister;

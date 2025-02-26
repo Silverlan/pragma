@@ -5,4 +5,4 @@
 module;
 
 export module pragma.core;
-export import pragma.locale;
+// export import pragma.locale;

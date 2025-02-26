@@ -11,6 +11,7 @@
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/components/c_entity_component.hpp"
 #include <pragma/entities/components/base_animated_component.hpp>
+#include <buffers/prosper_uniform_resizable_buffer.hpp>
 
 struct Eyeball;
 namespace prosper {

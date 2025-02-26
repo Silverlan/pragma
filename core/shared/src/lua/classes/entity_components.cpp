@@ -6,6 +6,7 @@
 
 #include "pragma/physics/raytraces.h"
 #include "stdafx_shared.h"
+#include "pragma/engine.h"
 #include "pragma/lua/classes/entity_components.hpp"
 #include "pragma/entities/components/base_attachment_component.hpp"
 #include "pragma/entities/components/base_game_component.hpp"

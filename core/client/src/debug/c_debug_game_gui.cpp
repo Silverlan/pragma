@@ -6,6 +6,7 @@
  */
 
 #include "stdafx_client.h"
+#include "pragma/clientstate/clientstate.h"
 #include "pragma/debug/c_debug_game_gui.h"
 #include "pragma/game/c_game.h"
 #include <wgui/wibase.h>

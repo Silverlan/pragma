@@ -57,16 +57,4 @@ namespace pragma::animation {
 	static constexpr auto INVALID_FLEX_CONTROLLER_INDEX = std::numeric_limits<FlexControllerId>::max();
 };
 
-namespace panima {
-	using AnimationId = uint32_t;
-	using AnimationChannelId = uint16_t;
-	class Animation;
-	struct Channel;
-	class Manager;
-	class Player;
-	struct Slice;
-
-	using PPlayer = std::shared_ptr<Player>;
-};
-
 #endif

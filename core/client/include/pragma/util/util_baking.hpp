@@ -9,6 +9,7 @@
 #define __PRAGMA_UTIL_BAKING_HPP__
 
 #include "pragma/clientdefinitions.h"
+#include <sharedutils/util_parallel_job.hpp>
 #include <mathutil/umath_lighting.hpp>
 #include <vector>
 

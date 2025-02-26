@@ -6,8 +6,10 @@
  */
 
 #include "stdafx_client.h"
+#include "pragma/c_engine.h"
 #include "pragma/lua/classes/c_lentity.h"
 #include "pragma/entities/c_baseentity.h"
+#include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/lua/classes/ldef_entity.h"
 #include "pragma/lua/lua_entity_component.hpp"
 #include "luasystem.h"

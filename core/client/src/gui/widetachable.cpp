@@ -6,6 +6,7 @@
  */
 
 #include "stdafx_client.h"
+#include "pragma/c_engine.h"
 #include "pragma/gui/widetachable.hpp"
 #include <wgui/types/witext.h>
 #include <wgui/types/wibutton.h>

@@ -13,7 +13,9 @@
 #include "pragma/rendering/shaders/world/c_shader_textured_uniform_data.hpp"
 #include "pragma/rendering/c_rendermode.h"
 #include "pragma/rendering/c_renderflags.h"
+#include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/rendering/render_mesh_collection_handler.hpp"
+#include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include <pragma/util/util_bsp_tree.hpp>
 #include <pragma/entities/components/base_entity_component.hpp>
 #include <shader/prosper_descriptor_array_manager.hpp>
@@ -244,12 +246,12 @@ namespace pragma {
 		CSceneComponent *GetParentScene();
 		const CSceneComponent *GetParentScene() const { return const_cast<CSceneComponent *>(this)->GetParentScene(); }
 
-		void BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo);
+		void BuildRenderQueues(const ::util::DrawSceneInfo &drawSceneInfo);
 
 		const std::vector<ComponentHandle<pragma::CLightComponent>> &GetPreviouslyVisibleShadowedLights() const { return m_previouslyVisibleShadowedLights; }
 		void SwapPreviouslyVisibleLights(std::vector<ComponentHandle<pragma::CLightComponent>> &&components) { std::swap(m_previouslyVisibleShadowedLights, components); }
 
-		void RecordRenderCommandBuffers(const util::DrawSceneInfo &drawSceneInfo);
+		void RecordRenderCommandBuffers(const ::util::DrawSceneInfo &drawSceneInfo);
 		void UpdateRenderData();
 	  private:
 		static float CalcLightMapPowExposure(pragma::CLightMapComponent &lightMapC);
@@ -312,9 +314,9 @@ namespace pragma {
 	// Events
 
 	struct DLLCLIENT CEDrawSceneInfo : public ComponentEvent {
-		CEDrawSceneInfo(const util::DrawSceneInfo &drawSceneInfo);
+		CEDrawSceneInfo(const ::util::DrawSceneInfo &drawSceneInfo);
 		virtual void PushArguments(lua_State *l) override;
-		const util::DrawSceneInfo &drawSceneInfo;
+		const ::util::DrawSceneInfo &drawSceneInfo;
 	};
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::CSceneComponent::FRenderSetting);

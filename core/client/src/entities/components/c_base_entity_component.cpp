@@ -6,6 +6,7 @@
  */
 
 #include "stdafx_client.h"
+#include "pragma/game/c_game.h"
 #include "pragma/entities/components/c_entity_component.hpp"
 
 extern DLLCLIENT CGame *c_game;

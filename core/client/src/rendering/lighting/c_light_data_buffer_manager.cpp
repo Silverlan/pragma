@@ -6,9 +6,11 @@
  */
 
 #include "stdafx_client.h"
+#include "pragma/c_engine.h"
 #include "pragma/rendering/lighting/c_light_data_buffer_manager.hpp"
 #include "pragma/rendering/lighting/c_light_data.hpp"
 #include "pragma/entities/environment/lights/c_env_light.h"
+#include "pragma/game/game_limits.h"
 
 extern DLLCLIENT CEngine *c_engine;
 

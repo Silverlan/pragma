@@ -6,6 +6,7 @@
  */
 
 #include "stdafx_client.h"
+#include "pragma/c_engine.h"
 #include "pragma/rendering/shaders/c_shader_base_cubemap.hpp"
 #include "pragma/math/c_util_math.hpp"
 #include <shader/prosper_pipeline_create_info.hpp>
@@ -79,13 +80,14 @@ std::shared_ptr<prosper::IBuffer> ShaderCubemap::CreateCubeMesh(uint32_t &outNum
 }
 std::shared_ptr<prosper::IImage> ShaderCubemap::CreateCubeMap(uint32_t width, uint32_t height, prosper::util::ImageCreateInfo::Flags flags) const
 {
+	flags = static_cast<prosper::util::ImageCreateInfo::Flags>(umath::to_integral(flags) | umath::to_integral(prosper::util::ImageCreateInfo::Flags::Cubemap));
 	prosper::util::ImageCreateInfo createInfo {};
 	createInfo.format = prosper::Format::R16G16B16A16_SFloat;
 	createInfo.width = width;
 	createInfo.height = height;
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	createInfo.tiling = prosper::ImageTiling::Optimal;
-	createInfo.flags |= flags | prosper::util::ImageCreateInfo::Flags::Cubemap;
+	createInfo.flags = flags;
 	createInfo.usage = prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::TransferSrcBit | prosper::ImageUsageFlags::TransferDstBit;
 	createInfo.postCreateLayout = prosper::ImageLayout::ShaderReadOnlyOptimal;
 

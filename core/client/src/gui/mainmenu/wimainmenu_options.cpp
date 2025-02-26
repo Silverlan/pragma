@@ -604,7 +604,7 @@ void WIMainMenuOptions::InitializeVideoSettings()
 			  std::sort(modes.begin(), modes.end(), &sortResolutions);
 		  }
 		  for(int i = 0; i < modes.size(); i++) {
-			  const GLFWvidmode &videoMode = modes[i];
+			  const auto &videoMode = modes[i];
 			  std::string res = std::to_string(videoMode.width);
 			  res += "x";
 			  res += std::to_string(videoMode.height);

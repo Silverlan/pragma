@@ -6,10 +6,13 @@
  */
 
 #include "stdafx_client.h"
+#include "pragma/c_engine.h"
 #include "pragma/util/util_image.hpp"
+#include "prosper_util.hpp"
 #include <prosper_command_buffer.hpp>
 #include <image/prosper_image.hpp>
 #include <buffers/prosper_buffer.hpp>
+#include <prosper_context.hpp>
 
 extern DLLCLIENT CEngine *c_engine;
 static uimg::Format determine_target_format(prosper::Format format)

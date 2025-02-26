@@ -8,6 +8,7 @@
 #define __ENTITY_ITERATOR_HPP__
 
 #include "pragma/networkdefinitions.h"
+#include "pragma/game/game.h"
 #include "pragma/entities/entity_component_manager.hpp"
 #include <vector>
 

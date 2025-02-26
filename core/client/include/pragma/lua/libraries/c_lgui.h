@@ -9,6 +9,9 @@
 #define _C_LGUI_H__
 
 #include "pragma/clientdefinitions.h"
+#include "pragma/game/c_game.h"
+#include <wgui/wibase.h>
+#include <image/prosper_image.hpp>
 #include <pragma/lua/ldefinitions.h>
 
 namespace prosper {

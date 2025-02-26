@@ -6,6 +6,8 @@
  */
 
 #include "stdafx_shared.h"
+#include <mathutil/umath.h>
+#include <glm/gtx/matrix_decompose.hpp>
 #include <pragma/game/game.h>
 #include "pragma/lua/classes/lvector.h"
 #include "pragma/lua/classes/langle.h"
@@ -83,7 +85,6 @@
 #include <mathutil/inverse_kinematics/constraints.hpp>
 #include <sharedutils/magic_enum.hpp>
 #include <fsys/directory_watcher.h>
-#include <glm/gtx/matrix_decompose.hpp>
 
 extern DLLNETWORK Engine *engine;
 

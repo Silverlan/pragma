@@ -6,6 +6,8 @@
  */
 
 #include "stdafx_client.h"
+#include "pragma/game/c_game.h"
+#include "pragma/clientstate/clientstate.h"
 #include "pragma/rendering/c_ssao.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_ssao.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_ssao_blur.hpp"

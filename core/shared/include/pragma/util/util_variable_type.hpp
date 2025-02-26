@@ -9,6 +9,7 @@
 #define __UTIL_VARIABLE_TYPE_HPP__
 
 #include "pragma/networkdefinitions.h"
+#include <sharedutils/netpacket.hpp>
 #include <any>
 
 namespace util {

@@ -11,6 +11,7 @@
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/components/c_entity_component.hpp"
 #include "pragma/rendering/c_model_render_buffer_data.hpp"
+#include "pragma/entities/c_world.h"
 #include <pragma/entities/components/base_model_component.hpp>
 #include <vector>
 #include <optional>

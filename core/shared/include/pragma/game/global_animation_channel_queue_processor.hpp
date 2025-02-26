@@ -13,9 +13,8 @@
 #include <sharedutils/BS_thread_pool.hpp>
 #include <array>
 
-namespace panima {
-	class AnimationManager;
-};
+import panima;
+
 namespace pragma {
 	class PanimaComponent;
 	struct AnimationManagerData;

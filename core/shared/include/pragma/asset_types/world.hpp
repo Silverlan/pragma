@@ -14,6 +14,7 @@
 #include <sharedutils/util_path.hpp>
 #include <fsys/filesystem.h>
 #include <mathutil/uvec.h>
+#include <material_manager2.hpp>
 #include <unordered_set>
 #include <udm.hpp>
 

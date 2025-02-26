@@ -9,6 +9,9 @@
 #define __C_FORWARDPLUS_HPP__
 
 #include "pragma/clientdefinitions.h"
+#include <prosper_command_buffer.hpp>
+#include <image/prosper_texture.hpp>
+#include <shader/prosper_shader.hpp>
 #include <cinttypes>
 #include <memory>
 

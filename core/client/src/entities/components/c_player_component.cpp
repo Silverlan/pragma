@@ -6,6 +6,9 @@
  */
 
 #include "stdafx_client.h"
+#include <mathutil/umath.h>
+#include <glm/gtx/quaternion.hpp>
+#include <glm/gtx/euler_angles.hpp>
 #include "pragma/c_engine.h"
 #include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/entities/c_entityfactories.h"
@@ -41,8 +44,6 @@
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/observermode.h>
-#include <glm/gtx/quaternion.hpp>
-#include <glm/gtx/euler_angles.hpp>
 
 using namespace pragma;
 

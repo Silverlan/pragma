@@ -10,6 +10,7 @@
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/types.hpp"
+#include "pragma/rendering/render_queue.hpp"
 #include <buffers/prosper_dynamic_resizable_buffer.hpp>
 #include <sharedutils/util_hash.hpp>
 

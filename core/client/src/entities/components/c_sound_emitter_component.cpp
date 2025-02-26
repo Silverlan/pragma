@@ -6,6 +6,7 @@
  */
 
 #include "stdafx_client.h"
+#include "pragma/clientstate/clientstate.h"
 #include "pragma/entities/components/c_sound_emitter_component.hpp"
 #include "pragma/entities/components/c_flex_component.hpp"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"

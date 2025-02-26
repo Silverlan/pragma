@@ -9,6 +9,7 @@
 #define __C_ENV_PARTICLE_SYSTEM_H__
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/c_baseentity.h"
+#include "pragma/rendering/c_rendermode.h"
 #include "pragma/entities/environment/effects/env_particle_system.h"
 #include "pragma/entities/components/c_entity_component.hpp"
 #include "pragma/particlesystem/c_particle.h"

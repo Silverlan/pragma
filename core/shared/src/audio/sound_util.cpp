@@ -6,6 +6,7 @@
  */
 
 #include "stdafx_shared.h"
+#include "pragma/engine.h"
 #include "pragma/audio/sound_util.hpp"
 #include <sharedutils/util_file.h>
 

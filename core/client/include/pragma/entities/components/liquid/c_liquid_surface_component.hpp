@@ -10,8 +10,10 @@
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/components/c_entity_component.hpp"
+#include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include <pragma/types.hpp>
 #include <pragma/entities/components/liquid/base_liquid_surface_component.hpp>
+#include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include <image/prosper_texture.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <mathutil/umath_geometry.hpp>

@@ -6,6 +6,9 @@
  */
 
 #include "stdafx_shared.h"
+#include <mathutil/umath.h>
+#include <glm/gtx/matrix_decompose.hpp>
+#include <glm/gtx/quaternion.hpp>
 #include "pragma/lua/libraries/lmatrix.h"
 #include <pragma/engine.h>
 #include "luasystem.h"
@@ -16,8 +19,6 @@
 #include <pragma/math/angle/wvquaternion.h>
 #include "pragma/lua/classes/ldef_mat4.h"
 #include "pragma/lua/classes/lvector.h"
-#include <glm/gtx/matrix_decompose.hpp>
-#include <glm/gtx/quaternion.hpp>
 #include <Eigen/Eigenvalues>
 
 extern DLLNETWORK Engine *engine;

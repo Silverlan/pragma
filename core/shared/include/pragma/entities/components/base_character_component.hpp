@@ -9,6 +9,7 @@
 
 #include "pragma/entities/components/base_actor_component.hpp"
 #include "pragma/model/animation/activities.h"
+#include "pragma/math/surfacematerial.h"
 #include "pragma/ai/navsystem.h"
 #include "pragma/entities/baseentity_handle.h"
 #include <pragma/math/orientation.h>

@@ -18,6 +18,8 @@
 #include <optional>
 #include <vector>
 
+import panima;
+
 #define PRAGMA_ANIMATION_VERSION 2
 
 namespace pragma {

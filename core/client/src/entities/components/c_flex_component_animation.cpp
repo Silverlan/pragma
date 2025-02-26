@@ -6,6 +6,7 @@
  */
 
 #include "stdafx_client.h"
+#include "pragma/game/c_game.h"
 #include "pragma/entities/components/c_flex_component.hpp"
 #include <pragma/model/animation/flex_animation.hpp>
 #include <pragma/model/model.h>

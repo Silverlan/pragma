@@ -6,6 +6,7 @@
  */
 
 #include "stdafx_shared.h"
+#include "pragma/engine.h"
 #include "pragma/lua/classes/lentity.h"
 #include <pragma/math/angle/wvquaternion.h>
 #include "luasystem.h"

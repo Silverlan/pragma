@@ -6,6 +6,7 @@
  */
 
 #include "stdafx_client.h"
+#include "pragma/game/c_game.h"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/entities/components/renderers/rasterization/culled_mesh_data.hpp"
 #include "pragma/entities/components/renderers/rasterization/hdr_data.hpp"

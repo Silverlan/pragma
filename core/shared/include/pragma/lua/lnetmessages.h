@@ -6,5 +6,6 @@
  */
 
 #include "pragma/networkdefinitions.h"
+#include <sharedutils/netpacket.hpp>
 
 DLLNETWORK bool NetIncludePacketID(NetworkState *state, std::string identifier, NetPacket &packet, NetPacket &packetNew);

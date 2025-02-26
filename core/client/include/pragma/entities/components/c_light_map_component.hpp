@@ -10,7 +10,10 @@
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/rendering/raytracing/cycles.hpp"
+#include <cmaterial_manager2.hpp>
 #include <pragma/entities/components/base_entity_component.hpp>
+#include <buffers/prosper_buffer.hpp>
+#include <image/prosper_texture.hpp>
 
 namespace prosper {
 	class IDynamicResizableBuffer;

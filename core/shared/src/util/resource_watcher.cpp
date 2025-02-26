@@ -6,13 +6,14 @@
  */
 
 #include "stdafx_shared.h"
+#include <material_manager2.hpp>
 #include "pragma/util/resource_watcher.h"
 #include "pragma/lua/lua_script_watcher.h"
 #include "pragma/entities/components/base_model_component.hpp"
 #include "pragma/entities/entity_iterator.hpp"
 #include "pragma/model/modelmanager.h"
 #include "pragma/model/model.h"
-#include <material_manager2.hpp>
+#include <materialmanager.h>
 #include <sharedutils/util_file.h>
 #include <pragma/asset/util_asset.hpp>
 

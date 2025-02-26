@@ -11,6 +11,7 @@
 #include "pragma/clientdefinitions.h"
 #include <sharedutils/functioncallback.h>
 #include <wgui/wihandle.h>
+#include <wgui/wibase.h>
 #include <unordered_map>
 
 struct DLLCLIENT DebugGameGUI {

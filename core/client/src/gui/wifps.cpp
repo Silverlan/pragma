@@ -6,6 +6,8 @@
  */
 
 #include "stdafx_client.h"
+#include "pragma/c_engine.h"
+#include "pragma/clientstate/clientstate.h"
 #include "pragma/gui/wifps.h"
 #include <wgui/types/witext.h>
 

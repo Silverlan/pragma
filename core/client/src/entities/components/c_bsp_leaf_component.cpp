@@ -6,6 +6,7 @@
  */
 
 #include "stdafx_client.h"
+#include "pragma/c_engine.h"
 #include "pragma/entities/components/c_bsp_leaf_component.hpp"
 #include "pragma/lua/c_lentity_handles.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>

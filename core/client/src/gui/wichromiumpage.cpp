@@ -6,6 +6,7 @@
  */
 
 #include "stdafx_client.h"
+#include "pragma/clientstate/clientstate.h"
 #include "pragma/gui/wichromiumpage.hpp"
 #include <wgui/wibase.h>
 #include <memory>

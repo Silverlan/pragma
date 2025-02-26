@@ -6,6 +6,7 @@
  */
 
 #include "stdafx_client.h"
+#include "pragma/game/c_game.h"
 #include "pragma/c_engine.h"
 #include "pragma/entities/components/c_observer_component.hpp"
 #include "pragma/entities/components/c_observable_component.hpp"

@@ -5,7 +5,11 @@
  * Copyright (c) 2024 Silverlan
  */
 
+#include <mathutil/umath.h>
+#include <glm/gtx/euler_angles.hpp>
 #include "asset/fbx_loader.hpp"
+#include "pragma/game/c_game.h"
+#include "pragma/clientstate/clientstate.h"
 #include <pragma/model/c_modelmesh.h>
 #include <pragma/model/c_model.h>
 #include <pragma/model/animation/bone.hpp>
@@ -1067,7 +1071,7 @@ std::optional<pragma::asset::AssetImportResult> FbxImporter::Load(std::string &o
 	return result;
 }
 Vector3 FbxImporter::GetTranslation(const ofbx::DVec3 &o) { return {o.x, o.y, o.z}; }
-#include <glm/gtx/euler_angles.hpp>
+
 Quat FbxImporter::GetRotation(const ofbx::DVec3 &o, RotationOrder order)
 {
 	order = RotationOrder::Yxz;

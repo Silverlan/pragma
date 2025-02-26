@@ -8,6 +8,8 @@
 #define __BASE_GAMEMODE_COMPONENT_HPP__
 
 #include "pragma/entities/components/base_entity_component.hpp"
+#include "pragma/game/gamemode/gamemodemanager.h"
+#include <pragma/networking/enums.hpp>
 #include <sharedutils/util_version.h>
 
 #undef GetClassName

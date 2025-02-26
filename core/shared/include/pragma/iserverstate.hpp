@@ -9,6 +9,7 @@
 #define __PR_ISERVERSTATE_HPP__
 
 #include "pragma/networkdefinitions.h"
+#include <sharedutils/util_library.hpp>
 #include <memory>
 #include <optional>
 
@@ -19,7 +20,7 @@ namespace util {
 };
 namespace pragma {
 	struct DLLNETWORK IServerState final {
-		void Initialize(util::Library &lib);
+		void Initialize(::util::Library &lib);
 		IServerState() = default;
 		void (*create_server_state)(std::unique_ptr<ServerState> &) = nullptr;
 		void (*start_server)(bool) = nullptr;

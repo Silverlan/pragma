@@ -6,6 +6,8 @@
  */
 
 #include "stdafx_client.h"
+#include "pragma/clientstate/clientstate.h"
+#include "pragma/game/c_game.h"
 #include "pragma/networking/c_nwm_util.h"
 
 extern DLLCLIENT ClientState *client;

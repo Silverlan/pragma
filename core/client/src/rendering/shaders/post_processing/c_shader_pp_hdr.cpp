@@ -6,6 +6,8 @@
  */
 
 #include "stdafx_client.h"
+#include "pragma/game/c_game.h"
+#include "pragma/clientstate/clientstate.h"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_hdr.hpp"
 #include "pragma/rendering/c_settings.hpp"
 #include <shader/prosper_pipeline_create_info.hpp>

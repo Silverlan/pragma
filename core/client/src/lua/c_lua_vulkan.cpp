@@ -7,6 +7,7 @@
 
 #include "stdafx_client.h"
 #include "pragma/lua/libraries/c_lua_vulkan.h"
+#include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
 #include "pragma/rendering/shaders/c_shader_lua.hpp"
 #include "pragma/rendering/shaders/image/c_shader_resize_image.hpp"

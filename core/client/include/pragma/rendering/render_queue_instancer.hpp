@@ -9,6 +9,7 @@
 #define __RENDER_QUEUE_INSTANCER_HPP__
 
 #include "pragma/clientdefinitions.h"
+#include "pragma/rendering/render_queue.hpp"
 #include <sharedutils/util_hash.hpp>
 
 using EntityIndex = uint32_t;

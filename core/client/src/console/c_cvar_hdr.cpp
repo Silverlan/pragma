@@ -6,6 +6,7 @@
  */
 
 #include "stdafx_client.h"
+#include "pragma/game/c_game.h"
 #include "pragma/gui/debug/widebughdrbloom.hpp"
 #include <wgui/types/wiroot.h>
 

@@ -6,6 +6,8 @@
  */
 
 #include "stdafx_shared.h"
+#include <mathutil/umath.h>
+#include <glm/gtx/matrix_decompose.hpp>
 #include "pragma/entities/environment/env_camera.h"
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/entities/components/base_field_angle_component.hpp"
@@ -17,7 +19,6 @@
 #include <mathutil/umath_frustum.hpp>
 #include <mathutil/umat.h>
 #include <sharedutils/datastream.h>
-#include <glm/gtx/matrix_decompose.hpp>
 #include <udm.hpp>
 
 #define EPSILON 0.001f

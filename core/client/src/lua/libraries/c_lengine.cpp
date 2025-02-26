@@ -14,6 +14,7 @@ namespace pragma::string {
 };
 
 #include "pragma/lua/libraries/c_lengine.h"
+#include "pragma/clientstate/clientstate.h"
 #include "pragma/input/inputhelper.h"
 #include "cmaterialmanager.h"
 #include "luasystem.h"

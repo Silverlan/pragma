@@ -6,6 +6,7 @@
  */
 
 #include "stdafx_client.h"
+#include "pragma/c_engine.h"
 #include "pragma/rendering/shaders/c_shader_compute_irradiance_map_roughness.hpp"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <shader/prosper_shader_t.hpp>
@@ -15,6 +16,7 @@
 #include <prosper_descriptor_set_group.hpp>
 #include <image/prosper_image_view.hpp>
 #include <prosper_framebuffer.hpp>
+#include <prosper_util.hpp>
 #include <buffers/prosper_buffer.hpp>
 
 extern DLLCLIENT CEngine *c_engine;

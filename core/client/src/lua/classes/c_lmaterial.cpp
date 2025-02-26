@@ -6,6 +6,8 @@
  */
 
 #include "stdafx_client.h"
+#include "pragma/clientstate/clientstate.h"
+#include "pragma/game/c_game.h"
 #include "pragma/lua/classes/c_lmaterial.h"
 #include "luasystem.h"
 #include "cmaterialmanager.h"

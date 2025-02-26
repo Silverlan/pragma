@@ -6,6 +6,7 @@
  */
 
 #include "stdafx_shared.h"
+#include "pragma/engine.h"
 #include "pragma/lua/libraries/lasset.hpp"
 #include "pragma/model/modelmanager.h"
 #include "pragma/asset/util_asset.hpp"

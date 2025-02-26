@@ -6,6 +6,7 @@
  */
 
 #include "stdafx_shared.h"
+#include "pragma/engine.h"
 #include "pragma/game/game_resources.hpp"
 #include "pragma/entities/prop/prop_base.h"
 #include "pragma/entities/environment/lights/env_light.h"

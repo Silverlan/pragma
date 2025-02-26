@@ -6,6 +6,7 @@
  */
 
 #include "stdafx_client.h"
+#include "pragma/game/c_game.h"
 #include "pragma/rendering/c_forwardplus.hpp"
 #include "pragma/console/c_cvar_global_functions.h"
 #include "pragma/debug/c_debug_game_gui.h"
@@ -18,6 +19,7 @@
 #include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/environment/lights/c_env_light.h"
+#include "pragma/game/game_limits.h"
 #include "pragma/console/c_cvar.h"
 #include <wgui/types/wirect.h>
 #include <prosper_util.hpp>

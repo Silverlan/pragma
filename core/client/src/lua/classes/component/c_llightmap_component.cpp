@@ -6,6 +6,7 @@
  */
 
 #include "stdafx_client.h"
+#include "pragma/clientstate/clientstate.h"
 #include "pragma/lua/classes/components/c_lentity_components.hpp"
 #include "pragma/lua/libraries/lfile.h"
 #include "pragma/lua/policies/file_policy.hpp"

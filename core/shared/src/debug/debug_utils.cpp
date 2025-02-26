@@ -13,7 +13,7 @@
 // #include <windows.h>
 // #include <tlhelp32.h>
 #ifdef __linux__
-#include "pragma/localization.h"
+import pragma.locale;
 #endif
 
 void pragma::debug::start_profiling_task(const char *taskName)

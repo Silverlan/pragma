@@ -7,6 +7,7 @@
 
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
+#include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
 #include "pragma/lua/libraries/c_lutil.h"
 #include "pragma/lua/classes/c_lcamera.h"

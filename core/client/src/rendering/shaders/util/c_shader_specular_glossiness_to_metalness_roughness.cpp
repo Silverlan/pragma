@@ -6,6 +6,7 @@
  */
 
 #include "stdafx_client.h"
+#include "pragma/clientstate/clientstate.h"
 #include "pragma/rendering/shaders/util/c_shader_specular_glossiness_to_metalness_roughness.hpp"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <shader/prosper_shader_t.hpp>

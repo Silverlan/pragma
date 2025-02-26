@@ -6,6 +6,7 @@
  */
 
 #include "stdafx_shared.h"
+#include "pragma/engine.h"
 #include "pragma/lua/classes/ldef_angle.h"
 #include "pragma/lua/classes/ldef_vector.h"
 #include "pragma/lua/classes/lmodel.h"

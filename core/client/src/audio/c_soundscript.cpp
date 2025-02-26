@@ -7,6 +7,8 @@
 
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
+#include "pragma/clientstate/clientstate.h"
+#include "pragma/audio/c_alsound.h"
 #include "pragma/audio/c_soundscript.h"
 #include <sharedutils/util_string.h>
 #include "pragma/audio/c_sound_efx.hpp"

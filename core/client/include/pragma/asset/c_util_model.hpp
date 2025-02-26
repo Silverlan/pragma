@@ -10,6 +10,8 @@
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/rendering/raytracing/cycles.hpp"
+#include "pragma/entities/environment/lights/c_env_light.h"
+#include "pragma/entities/environment/c_env_camera.h"
 #include <pragma/util/util_game.hpp>
 #include <pragma/asset/util_asset.hpp>
 #include <pragma/types.hpp>

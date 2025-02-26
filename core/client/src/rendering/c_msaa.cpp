@@ -6,7 +6,9 @@
  */
 
 #include "stdafx_client.h"
+#include "pragma/c_engine.h"
 #include "pragma/rendering/c_msaa.h"
+#include "prosper_util.hpp"
 #include <mathutil/umath.h>
 
 extern DLLCLIENT CEngine *c_engine;

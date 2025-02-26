@@ -6,6 +6,7 @@
  */
 
 #include "stdafx_shared.h"
+#include "pragma/engine.h"
 #include "pragma/game/value_driver.hpp"
 #include "pragma/entities/entity_component_manager_t.hpp"
 #include "pragma/lua/lua_call.hpp"

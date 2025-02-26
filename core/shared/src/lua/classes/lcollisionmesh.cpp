@@ -6,6 +6,7 @@
  */
 
 #include "stdafx_shared.h"
+#include "pragma/engine.h"
 #include "pragma/lua/classes/lcollisionmesh.h"
 #include "pragma/physics/collisionmesh.h"
 #include "pragma/physics/shape.hpp"

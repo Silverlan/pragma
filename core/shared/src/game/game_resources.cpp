@@ -6,6 +6,7 @@
  */
 
 #include "stdafx_shared.h"
+#include "pragma/engine.h"
 #include "pragma/networkstate/networkstate.h"
 #include "pragma/game/game_resources.hpp"
 #include "pragma/model/model.h"

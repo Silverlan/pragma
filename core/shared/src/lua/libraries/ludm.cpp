@@ -26,6 +26,7 @@
 #include <sharedutils/util_file.h>
 #include <sharedutils/util_ifile.hpp>
 #include <fsys/ifile.hpp>
+#include <textureinfo.h>
 
 extern DLLNETWORK Engine *engine;
 #pragma optimize("", off)

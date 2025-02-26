@@ -6,6 +6,7 @@
  */
 
 #include "stdafx_shared.h"
+#include "pragma/engine.h"
 #include "pragma/lua/libraries/lfile.h"
 #include "luasystem.h"
 #include "pragma/game/game_resources.hpp"

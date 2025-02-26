@@ -6,6 +6,7 @@
  */
 
 #include "stdafx_client.h"
+#include "pragma/c_engine.h"
 #include "pragma/rendering/shaders/util/c_shader_specular_to_roughness.hpp"
 #include <shader/prosper_pipeline_create_info.hpp>
 

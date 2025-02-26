@@ -6,6 +6,7 @@
  */
 
 #include "stdafx_shared.h"
+#include "pragma/engine.h"
 #include "pragma/lua/libraries/ltime.hpp"
 #include "pragma/util/util_duration_type.hpp"
 

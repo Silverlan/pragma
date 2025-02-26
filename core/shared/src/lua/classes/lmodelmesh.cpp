@@ -6,6 +6,7 @@
  */
 
 #include "stdafx_shared.h"
+#include "pragma/engine.h"
 #include "pragma/lua/classes/lmodelmesh.h"
 #include "luasystem.h"
 #include "pragma/model/model.h"

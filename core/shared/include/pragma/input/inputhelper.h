@@ -10,6 +10,7 @@
 #include "pragma/definitions.h"
 #include <algorithm>
 #include <string>
+
 #ifndef GLFW_DLL
 #define GLFW_KEY_MENU 348
 #define GLFW_KEY_LAST GLFW_KEY_MENU
@@ -137,6 +138,8 @@
 #define GLFW_KEY_RIGHT_SUPER 347
 #define GLFW_KEY_MENU 348
 #define GLFW_KEY_LAST GLFW_KEY_MENU
+#else
+#define GLFW_KEY_LAST umath::to_integral(pragma::platform::Key::Last)
 #endif
 
 #define GLFW_KEY_SPECIAL_MOUSE_BUTTON_1 (GLFW_KEY_LAST + 0)

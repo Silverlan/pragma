@@ -7,12 +7,12 @@
 #ifndef __PANIMA_COMPONENT_CHANNEL_SUBMITTER_DEF_HPP__
 #define __PANIMA_COMPONENT_CHANNEL_SUBMITTER_DEF_HPP__
 
-#include <panima/types.hpp>
-#include <panima/channel.hpp>
 #include "pragma/entities/entity_component_manager_t.hpp"
 #include "pragma/entities/components/panima_component_channel_submitter.hpp"
 #include "pragma/entities/components/panima_component.hpp"
 #include "pragma/game/animation_channel_cache_data.hpp"
+
+import panima;
 
 template<typename TChannel, typename TMember, auto TMapArray>
     requires(pragma::is_animatable_type_v<TChannel> && pragma::is_animatable_type_v<TMember> && is_type_compatible(udm::type_to_enum<TChannel>(), udm::type_to_enum<TMember>()))

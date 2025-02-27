@@ -47,6 +47,7 @@ pr_add_dependency(${PROJ_NAME} vorbisfile TARGET)
 
 pr_add_headers(${PROJ_NAME} "include/")
 pr_add_sources(${PROJ_NAME} "src/")
+pr_init_module(${PROJ_NAME})
 
 pr_add_compile_definitions(${PROJ_NAME} -DDLLNETWORK_EX -DENGINE_NETWORK)
 

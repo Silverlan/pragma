@@ -23,9 +23,9 @@
 #include "pragma/engine_version.h"
 #include "pragma/console/cvar.h"
 #include "pragma/debug/debug_performance_profiler.hpp"
-#include "pragma/localization.h"
 #include <pragma/asset/util_asset.hpp>
 #include <sharedutils/util.h>
+#include <sharedutils/util_debug.h>
 #include <sharedutils/util_clock.hpp>
 #include <sharedutils/util_parallel_job.hpp>
 #include <pragma/game/game_resources.hpp>
@@ -48,6 +48,7 @@
 
 import util_zip;
 import pragma.pad;
+import pragma.locale;
 
 const pragma::IServerState &Engine::GetServerStateInterface() const
 {
@@ -131,7 +132,7 @@ Engine::Engine(int, char *[]) : CVarHandler(), m_logFile(nullptr), m_tickRate(En
 		return {};
 	});
 
-	Locale::Init();
+	pragma::locale::init();
 	// OpenConsole();
 
 	m_mainThreadId = std::this_thread::get_id();
@@ -324,7 +325,7 @@ void Engine::Close()
 	EndLogging();
 
 	Con::set_output_callback(nullptr);
-	Locale::Clear();
+	pragma::locale::clear();
 }
 
 static uint32_t clear_assets(NetworkState *state, pragma::asset::Type type, bool verbose)
@@ -544,7 +545,7 @@ void Engine::AddTickEvent(const std::function<void()> &ev)
 
 void Engine::Tick()
 {
-	Locale::Poll();
+	pragma::locale::poll();
 	m_ctTick.Update();
 	ProcessConsoleInput();
 	RunTickEvents();
@@ -988,6 +989,7 @@ void Engine::DumpDebugInformation(uzip::ZIPFile &zip) const
 		engineInfo << " x86";
 	if(engine != nullptr)
 		engineInfo << "\nEngine Version: " << get_pretty_engine_version();
+
 	auto *nw = static_cast<NetworkState *>(GetServerNetworkState());
 	if(nw == nullptr)
 		nw = GetClientState();
@@ -1052,6 +1054,7 @@ void Engine::DumpDebugInformation(uzip::ZIPFile &zip) const
 			ss << "\n\n" << *strStack;
 		zip.AddFile("lua_traceback_" + identifier + ".txt", ss.str());
 	};
+
 	if(GetClientState()) {
 		fWriteConvars(GetClientState()->GetConVars(), "cvars_cl.txt");
 		fWriteLuaTraceback(GetClientState()->GetLuaState(), "cl");

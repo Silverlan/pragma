@@ -13,11 +13,6 @@
 #include <mathutil/glmutil.h>
 #include <string>
 #include <vector>
-
-#ifndef GLFW_DLL
-#define GLFW_DLL
-#endif
-#include <GLFW/glfw3.h>
 #include <alsound_source.hpp>
 
 class ClientState;

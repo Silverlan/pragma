@@ -15,6 +15,7 @@
 #include <sharedutils/functioncallback.h>
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree.hpp"
 #include "pragma/rendering/occlusion_culling/occlusion_culling_handler.hpp"
+#include <wgui/wibase.h>
 #include <wgui/wihandle.h>
 #include <queue>
 

@@ -6,6 +6,7 @@
  */
 
 #include "stdafx_shared.h"
+#include "pragma/engine.h"
 #include "pragma/model/modelmanager.h"
 #include "pragma/util/util_game.hpp"
 #include "pragma/file_formats/wmd_load.h"

@@ -6,6 +6,7 @@
  */
 
 #include "stdafx_client.h"
+#include "pragma/c_engine.h"
 #include "pragma/entities/components/c_bvh_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"

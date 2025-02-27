@@ -13,13 +13,12 @@
 #include <mathutil/umath.h>
 #include "pragma/model/animation/skeleton.hpp"
 #include "pragma/model/model.h"
-#include <panima/animation.hpp>
-#include <panima/channel.hpp>
 #include "pragma/model/animation/bone.hpp"
 #include "pragma/entities/components/panima_component.hpp"
 //#include <utility>
 
 import bezierfit;
+import panima;
 
 decltype(pragma::animation::Animation::s_activityEnumRegister) pragma::animation::Animation::s_activityEnumRegister;
 decltype(pragma::animation::Animation::s_eventEnumRegister) pragma::animation::Animation::s_eventEnumRegister;

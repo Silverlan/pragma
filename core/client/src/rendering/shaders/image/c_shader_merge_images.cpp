@@ -6,6 +6,7 @@
  */
 
 #include "stdafx_client.h"
+#include "pragma/c_engine.h"
 #include "pragma/rendering/shaders/image/c_shader_merge_images.hpp"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <shader/prosper_shader_copy_image.hpp>

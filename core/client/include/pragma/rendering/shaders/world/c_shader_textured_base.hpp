@@ -9,6 +9,7 @@
 #define __C_SHADER_TEXTURED_BASE_HPP__
 
 #include "pragma/clientdefinitions.h"
+#include "prosper_descriptor_set_group.hpp"
 
 class CMaterial;
 namespace pragma {

@@ -11,7 +11,8 @@
 #include <wgui/types/wirect.h>
 #include <wgui/types/witext.h>
 #include <wgui/types/wibutton.h>
-#include "pragma/localization.h"
+
+import pragma.locale;
 
 LINK_WGUI_TO_CLASS(WIMessageBox, WIMessageBox);
 
@@ -112,37 +113,37 @@ void WIMessageBox::EnableButtons(Button buttons)
 		switch(button) {
 		case Button::APPLY:
 			{
-				AddButton(Locale::GetText("apply"), button);
+				AddButton(pragma::locale::get_text("apply"), button);
 				break;
 			}
 		case Button::CANCEL:
 			{
-				AddButton(Locale::GetText("cancel"), button);
+				AddButton(pragma::locale::get_text("cancel"), button);
 				break;
 			}
 		case Button::YES:
 			{
-				AddButton(Locale::GetText("yes"), button);
+				AddButton(pragma::locale::get_text("yes"), button);
 				break;
 			}
 		case Button::NO:
 			{
-				AddButton(Locale::GetText("no"), button);
+				AddButton(pragma::locale::get_text("no"), button);
 				break;
 			}
 		case Button::ACCEPT:
 			{
-				AddButton(Locale::GetText("accept"), button);
+				AddButton(pragma::locale::get_text("accept"), button);
 				break;
 			}
 		case Button::DECLINE:
 			{
-				AddButton(Locale::GetText("decline"), button);
+				AddButton(pragma::locale::get_text("decline"), button);
 				break;
 			}
 		case Button::OK:
 			{
-				AddButton(Locale::GetText("ok"), button);
+				AddButton(pragma::locale::get_text("ok"), button);
 				break;
 			}
 		}

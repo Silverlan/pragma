@@ -7,7 +7,12 @@
 
 #include "stdafx_shared.h"
 #include "pragma/input/inputhelper.h"
-#include <pragma/localization.h>
+
+import pragma.locale;
+
+#ifdef DLLCLIENT_EX
+import pragma.platform;
+#endif
 
 DLLNETWORK bool KeyToString(short c, std::string *key)
 {
@@ -296,247 +301,247 @@ DLLNETWORK bool KeyToText(short c, std::string *key)
 	}
 	switch(c) {
 	case GLFW_KEY_SPACE:
-		*key = Locale::GetText("key_space");
+		*key = pragma::locale::get_text("key_space");
 		break;
 	case GLFW_KEY_ESCAPE:
-		*key = Locale::GetText("key_escape");
+		*key = pragma::locale::get_text("key_escape");
 		break;
 	case GLFW_KEY_F1:
-		*key = Locale::GetText("key_function") + "1";
+		*key = pragma::locale::get_text("key_function") + "1";
 		break;
 	case GLFW_KEY_F2:
-		*key = Locale::GetText("key_function") + "2";
+		*key = pragma::locale::get_text("key_function") + "2";
 		break;
 	case GLFW_KEY_F3:
-		*key = Locale::GetText("key_function") + "3";
+		*key = pragma::locale::get_text("key_function") + "3";
 		break;
 	case GLFW_KEY_F4:
-		*key = Locale::GetText("key_function") + "4";
+		*key = pragma::locale::get_text("key_function") + "4";
 		break;
 	case GLFW_KEY_F5:
-		*key = Locale::GetText("key_function") + "5";
+		*key = pragma::locale::get_text("key_function") + "5";
 		break;
 	case GLFW_KEY_F6:
-		*key = Locale::GetText("key_function") + "6";
+		*key = pragma::locale::get_text("key_function") + "6";
 		break;
 	case GLFW_KEY_F7:
-		*key = Locale::GetText("key_function") + "7";
+		*key = pragma::locale::get_text("key_function") + "7";
 		break;
 	case GLFW_KEY_F8:
-		*key = Locale::GetText("key_function") + "8";
+		*key = pragma::locale::get_text("key_function") + "8";
 		break;
 	case GLFW_KEY_F9:
-		*key = Locale::GetText("key_function") + "9";
+		*key = pragma::locale::get_text("key_function") + "9";
 		break;
 	case GLFW_KEY_F10:
-		*key = Locale::GetText("key_function") + "10";
+		*key = pragma::locale::get_text("key_function") + "10";
 		break;
 	case GLFW_KEY_F11:
-		*key = Locale::GetText("key_function") + "11";
+		*key = pragma::locale::get_text("key_function") + "11";
 		break;
 	case GLFW_KEY_F12:
-		*key = Locale::GetText("key_function") + "12";
+		*key = pragma::locale::get_text("key_function") + "12";
 		break;
 	case GLFW_KEY_F13:
-		*key = Locale::GetText("key_function") + "13";
+		*key = pragma::locale::get_text("key_function") + "13";
 		break;
 	case GLFW_KEY_F14:
-		*key = Locale::GetText("key_function") + "14";
+		*key = pragma::locale::get_text("key_function") + "14";
 		break;
 	case GLFW_KEY_F15:
-		*key = Locale::GetText("key_function") + "15";
+		*key = pragma::locale::get_text("key_function") + "15";
 		break;
 	case GLFW_KEY_F16:
-		*key = Locale::GetText("key_function") + "16";
+		*key = pragma::locale::get_text("key_function") + "16";
 		break;
 	case GLFW_KEY_F17:
-		*key = Locale::GetText("key_function") + "17";
+		*key = pragma::locale::get_text("key_function") + "17";
 		break;
 	case GLFW_KEY_F18:
-		*key = Locale::GetText("key_function") + "18";
+		*key = pragma::locale::get_text("key_function") + "18";
 		break;
 	case GLFW_KEY_F19:
-		*key = Locale::GetText("key_function") + "19";
+		*key = pragma::locale::get_text("key_function") + "19";
 		break;
 	case GLFW_KEY_F20:
-		*key = Locale::GetText("key_function") + "20";
+		*key = pragma::locale::get_text("key_function") + "20";
 		break;
 	case GLFW_KEY_F21:
-		*key = Locale::GetText("key_function") + "21";
+		*key = pragma::locale::get_text("key_function") + "21";
 		break;
 	case GLFW_KEY_F22:
-		*key = Locale::GetText("key_function") + "22";
+		*key = pragma::locale::get_text("key_function") + "22";
 		break;
 	case GLFW_KEY_F23:
-		*key = Locale::GetText("key_function") + "23";
+		*key = pragma::locale::get_text("key_function") + "23";
 		break;
 	case GLFW_KEY_F24:
-		*key = Locale::GetText("key_function") + "24";
+		*key = pragma::locale::get_text("key_function") + "24";
 		break;
 	case GLFW_KEY_F25:
-		*key = Locale::GetText("key_function") + "25";
+		*key = pragma::locale::get_text("key_function") + "25";
 		break;
 	case GLFW_KEY_UP:
-		*key = Locale::GetText("key_uparrow");
+		*key = pragma::locale::get_text("key_uparrow");
 		break;
 	case GLFW_KEY_DOWN:
-		*key = Locale::GetText("key_downarrow");
+		*key = pragma::locale::get_text("key_downarrow");
 		break;
 	case GLFW_KEY_LEFT:
-		*key = Locale::GetText("key_leftarrow");
+		*key = pragma::locale::get_text("key_leftarrow");
 		break;
 	case GLFW_KEY_RIGHT:
-		*key = Locale::GetText("key_rightarrow");
+		*key = pragma::locale::get_text("key_rightarrow");
 		break;
 	case GLFW_KEY_LEFT_SHIFT:
-		*key = Locale::GetText("key_lshift");
+		*key = pragma::locale::get_text("key_lshift");
 		break;
 	case GLFW_KEY_RIGHT_SHIFT:
-		*key = Locale::GetText("key_rshift");
+		*key = pragma::locale::get_text("key_rshift");
 		break;
 	case GLFW_KEY_LEFT_CONTROL:
-		*key = Locale::GetText("key_lctrl");
+		*key = pragma::locale::get_text("key_lctrl");
 		break;
 	case GLFW_KEY_RIGHT_CONTROL:
-		*key = Locale::GetText("key_rctrl");
+		*key = pragma::locale::get_text("key_rctrl");
 		break;
 	case GLFW_KEY_LEFT_ALT:
-		*key = Locale::GetText("key_lalt");
+		*key = pragma::locale::get_text("key_lalt");
 		break;
 	case GLFW_KEY_RIGHT_ALT:
-		*key = Locale::GetText("key_ralt");
+		*key = pragma::locale::get_text("key_ralt");
 		break;
 	case GLFW_KEY_TAB:
-		*key = Locale::GetText("key_tab");
+		*key = pragma::locale::get_text("key_tab");
 		break;
 	case GLFW_KEY_ENTER:
-		*key = Locale::GetText("key_enter");
+		*key = pragma::locale::get_text("key_enter");
 		break;
 	case GLFW_KEY_BACKSPACE:
-		*key = Locale::GetText("key_backspace");
+		*key = pragma::locale::get_text("key_backspace");
 		break;
 	case GLFW_KEY_INSERT:
-		*key = Locale::GetText("key_ins");
+		*key = pragma::locale::get_text("key_ins");
 		break;
 	case GLFW_KEY_DELETE:
-		*key = Locale::GetText("key_del");
+		*key = pragma::locale::get_text("key_del");
 		break;
 	case GLFW_KEY_PAGE_UP:
-		*key = Locale::GetText("key_pgup");
+		*key = pragma::locale::get_text("key_pgup");
 		break;
 	case GLFW_KEY_PAGE_DOWN:
-		*key = Locale::GetText("key_pgdn");
+		*key = pragma::locale::get_text("key_pgdn");
 		break;
 	case GLFW_KEY_HOME:
-		*key = Locale::GetText("key_home");
+		*key = pragma::locale::get_text("key_home");
 		break;
 	case GLFW_KEY_END:
-		*key = Locale::GetText("key_end");
+		*key = pragma::locale::get_text("key_end");
 		break;
 	case GLFW_KEY_KP_0:
-		*key = Locale::GetText("key_kp") + " 0";
+		*key = pragma::locale::get_text("key_kp") + " 0";
 		break;
 	case GLFW_KEY_KP_1:
-		*key = Locale::GetText("key_kp") + " 1";
+		*key = pragma::locale::get_text("key_kp") + " 1";
 		break;
 	case GLFW_KEY_KP_2:
-		*key = Locale::GetText("key_kp") + " 2";
+		*key = pragma::locale::get_text("key_kp") + " 2";
 		break;
 	case GLFW_KEY_KP_3:
-		*key = Locale::GetText("key_kp") + " 3";
+		*key = pragma::locale::get_text("key_kp") + " 3";
 		break;
 	case GLFW_KEY_KP_4:
-		*key = Locale::GetText("key_kp") + " 4";
+		*key = pragma::locale::get_text("key_kp") + " 4";
 		break;
 	case GLFW_KEY_KP_5:
-		*key = Locale::GetText("key_kp") + " 5";
+		*key = pragma::locale::get_text("key_kp") + " 5";
 		break;
 	case GLFW_KEY_KP_6:
-		*key = Locale::GetText("key_kp") + " 6";
+		*key = pragma::locale::get_text("key_kp") + " 6";
 		break;
 	case GLFW_KEY_KP_7:
-		*key = Locale::GetText("key_kp") + " 7";
+		*key = pragma::locale::get_text("key_kp") + " 7";
 		break;
 	case GLFW_KEY_KP_8:
-		*key = Locale::GetText("key_kp") + " 8";
+		*key = pragma::locale::get_text("key_kp") + " 8";
 		break;
 	case GLFW_KEY_KP_9:
-		*key = Locale::GetText("key_kp") + " 9";
+		*key = pragma::locale::get_text("key_kp") + " 9";
 		break;
 	case GLFW_KEY_KP_DIVIDE:
-		*key = Locale::GetText("key_kp_slash");
+		*key = pragma::locale::get_text("key_kp_slash");
 		break;
 	case GLFW_KEY_KP_MULTIPLY:
-		*key = Locale::GetText("key_kp_multiply");
+		*key = pragma::locale::get_text("key_kp_multiply");
 		break;
 	case GLFW_KEY_KP_SUBTRACT:
-		*key = Locale::GetText("key_kp_minus");
+		*key = pragma::locale::get_text("key_kp_minus");
 		break;
 	case GLFW_KEY_KP_ADD:
-		*key = Locale::GetText("key_kp_plus");
+		*key = pragma::locale::get_text("key_kp_plus");
 		break;
 	case GLFW_KEY_KP_DECIMAL:
-		*key = Locale::GetText("key_kp_del");
+		*key = pragma::locale::get_text("key_kp_del");
 		break;
 	case GLFW_KEY_KP_EQUAL:
-		*key = Locale::GetText("key_kp_equal");
+		*key = pragma::locale::get_text("key_kp_equal");
 		break;
 	case GLFW_KEY_KP_ENTER:
-		*key = Locale::GetText("key_kp_enter");
+		*key = pragma::locale::get_text("key_kp_enter");
 		break;
 	case GLFW_KEY_NUM_LOCK:
-		*key = Locale::GetText("key_numlock");
+		*key = pragma::locale::get_text("key_numlock");
 		break;
 	case GLFW_KEY_CAPS_LOCK:
-		*key = Locale::GetText("key_capslock");
+		*key = pragma::locale::get_text("key_capslock");
 		break;
 	case GLFW_KEY_SCROLL_LOCK:
-		*key = Locale::GetText("key_scrolllock");
+		*key = pragma::locale::get_text("key_scrolllock");
 		break;
 	case GLFW_KEY_PAUSE:
-		*key = Locale::GetText("key_pause");
+		*key = pragma::locale::get_text("key_pause");
 		break;
 	case GLFW_KEY_LEFT_SUPER:
-		*key = Locale::GetText("key_lsuper");
+		*key = pragma::locale::get_text("key_lsuper");
 		break;
 	case GLFW_KEY_RIGHT_SUPER:
-		*key = Locale::GetText("key_rsuper");
+		*key = pragma::locale::get_text("key_rsuper");
 		break;
 	case GLFW_KEY_SPECIAL_MOUSE_BUTTON_1:
-		*key = Locale::GetText("mouse_left");
+		*key = pragma::locale::get_text("mouse_left");
 		break;
 	case GLFW_KEY_SPECIAL_MOUSE_BUTTON_2:
-		*key = Locale::GetText("mouse_right");
+		*key = pragma::locale::get_text("mouse_right");
 		break;
 	case GLFW_KEY_SPECIAL_MOUSE_BUTTON_3:
-		*key = Locale::GetText("mouse_middle");
+		*key = pragma::locale::get_text("mouse_middle");
 		break;
 	case GLFW_KEY_SPECIAL_MOUSE_BUTTON_4:
-		*key = Locale::GetText("mouse") + " 4";
+		*key = pragma::locale::get_text("mouse") + " 4";
 		break;
 	case GLFW_KEY_SPECIAL_MOUSE_BUTTON_5:
-		*key = Locale::GetText("mouse") + " 5";
+		*key = pragma::locale::get_text("mouse") + " 5";
 		break;
 	case GLFW_KEY_SPECIAL_MOUSE_BUTTON_6:
-		*key = Locale::GetText("mouse") + " 6";
+		*key = pragma::locale::get_text("mouse") + " 6";
 		break;
 	case GLFW_KEY_SPECIAL_MOUSE_BUTTON_7:
-		*key = Locale::GetText("mouse") + " 7";
+		*key = pragma::locale::get_text("mouse") + " 7";
 		break;
 	case GLFW_KEY_SPECIAL_MOUSE_BUTTON_8:
-		*key = Locale::GetText("mouse") + " 8";
+		*key = pragma::locale::get_text("mouse") + " 8";
 		break;
 	case GLFW_KEY_SPECIAL_MOUSE_BUTTON_9:
-		*key = Locale::GetText("mouse") + " 9";
+		*key = pragma::locale::get_text("mouse") + " 9";
 		break;
 	case GLFW_KEY_PRINT_SCREEN:
-		*key = Locale::GetText("key_printscreen");
+		*key = pragma::locale::get_text("key_printscreen");
 		break;
 	case GLFW_CUSTOM_KEY_SCRL_UP:
-		*key = Locale::GetText("key_scroll_up");
+		*key = pragma::locale::get_text("key_scroll_up");
 		break;
 	case GLFW_CUSTOM_KEY_SCRL_DOWN:
-		*key = Locale::GetText("key_scroll_down");
+		*key = pragma::locale::get_text("key_scroll_down");
 		break;
 	default:
 		{
@@ -549,7 +554,7 @@ DLLNETWORK bool KeyToText(short c, std::string *key)
 					identifier = (bAxis == false) ? "key_vr" : "key_vr_axis";
 				else
 					identifier = (bAxis == false) ? "key_joystick" : "key_joystick_axis";
-				*key = Locale::GetText(identifier, {std::to_string(controllerId + 1), std::to_string(btId + 1)});
+				*key = pragma::locale::get_text(identifier, {std::to_string(controllerId + 1), std::to_string(btId + 1)});
 			}
 			else
 				return false;

@@ -330,9 +330,9 @@ void WITable::SelectRow(WITableRow &row)
 	auto deselect = (m_selectableMode == SelectableMode::Single);
 	if(m_selectableMode == SelectableMode::Multi) {
 		auto &window = WGUI::GetInstance().GetContext().GetWindow();
-		auto lctrl = window->GetKeyState(GLFW::Key::LeftControl);
-		auto rctrl = window->GetKeyState(GLFW::Key::RightControl);
-		deselect = !(lctrl == GLFW::KeyState::Press || lctrl == GLFW::KeyState::Held || rctrl == GLFW::KeyState::Press || rctrl == GLFW::KeyState::Held);
+		auto lctrl = window->GetKeyState(pragma::platform::Key::LeftControl);
+		auto rctrl = window->GetKeyState(pragma::platform::Key::RightControl);
+		deselect = !(lctrl == pragma::platform::KeyState::Press || lctrl == pragma::platform::KeyState::Held || rctrl == pragma::platform::KeyState::Press || rctrl == pragma::platform::KeyState::Held);
 	}
 	if(deselect)
 		DeselectAllRows();
@@ -609,11 +609,11 @@ void WITableRow::SetCellWidth(unsigned int col, int width)
 	m_cellWidths[col] = width;
 	ScheduleUpdate();
 }
-util::EventReply WITableRow::MouseCallback(GLFW::MouseButton button, GLFW::KeyState state, GLFW::Modifier mods)
+util::EventReply WITableRow::MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods)
 {
 	if(WIBase::MouseCallback(button, state, mods) == util::EventReply::Handled)
 		return util::EventReply::Handled;
-	if(button == GLFW::MouseButton::Left && state == GLFW::KeyState::Press) {
+	if(button == pragma::platform::MouseButton::Left && state == pragma::platform::KeyState::Press) {
 		auto *t = GetTable();
 		if(t)
 			t->SelectRow(*this);

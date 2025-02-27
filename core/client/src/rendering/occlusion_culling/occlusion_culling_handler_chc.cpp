@@ -6,6 +6,7 @@
  */
 
 #include "stdafx_client.h"
+#include "pragma/game/c_game.h"
 #include "pragma/rendering/occlusion_culling/occlusion_culling_handler_chc.hpp"
 #include "pragma/rendering/occlusion_culling/chc.hpp"
 

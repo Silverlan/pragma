@@ -6,6 +6,7 @@
  */
 
 #include "stdafx_client.h"
+#include "pragma/game/c_game.h"
 #include "pragma/entities/components/c_optical_camera_component.hpp"
 #include <pragma/entities/entity_component_manager_t.hpp>
 

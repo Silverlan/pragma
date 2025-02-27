@@ -19,7 +19,7 @@ class DLLCLIENT WIMainMenuNewGame : public WIMainMenuBase {
 	WIHandle m_hRconPassword;
 	WIHandle m_hMaxPlayers;
 	CallbackHandle m_cbMapListReload;
-	void OnStartGame(GLFW::MouseButton button, GLFW::KeyState state, GLFW::Modifier mods);
+	void OnStartGame(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods);
 	void InitializeGameSettings();
 	virtual void InitializeOptionsList(WIOptionsList *pList) override;
 	using WIMainMenuBase::InitializeOptionsList;

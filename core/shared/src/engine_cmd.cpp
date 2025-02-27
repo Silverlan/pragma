@@ -13,7 +13,6 @@
 #include "pragma/game/savegame.hpp"
 #include "pragma/asset/util_asset.hpp"
 #include "pragma/logging_wrapper.hpp"
-#include "pragma/localization.h"
 #include "pragma/util/util_game.hpp"
 #include <pragma/console/convars.h>
 #include <pragma/lua/util.hpp>
@@ -32,6 +31,7 @@
 
 import util_zip;
 import pragma.doc;
+import pragma.locale;
 
 static std::optional<std::string> udm_convert(const std::string &fileName)
 {
@@ -381,7 +381,7 @@ void Engine::RegisterConsoleCommands()
 	  "clear_cache", [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) { ClearCache(); }, ConVarFlags::None, "Clears all of the cached engine files.");
 
 	conVarMap.RegisterConCommand(
-	  "loc_reload", [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) { Locale::ReloadFiles(); }, ConVarFlags::None, "Reloads all localization files.");
+	  "loc_reload", [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) { pragma::locale::reload_files(); }, ConVarFlags::None, "Reloads all localization files.");
 
 	conVarMap.RegisterConCommand(
 	  "loc_find",
@@ -390,7 +390,7 @@ void Engine::RegisterConsoleCommands()
 			  Con::cwar << "No argument specified!" << Con::endl;
 			  return;
 		  }
-		  auto &texts = Locale::GetTexts();
+		  auto &texts = pragma::locale::get_texts();
 		  std::vector<std::string> baseTexts;
 		  std::vector<std::string> ids;
 		  baseTexts.reserve(texts.size());

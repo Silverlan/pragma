@@ -9,10 +9,12 @@
 #define __C_POINT_RENDERTARGET_H__
 #include "pragma/clientdefinitions.h"
 #include "pragma/c_enginedefinitions.h"
+#include "pragma/rendering/c_rendermode.h"
 #include "pragma/entities/c_baseentity.h"
 #include <pragma/entities/baseentity_handle.h>
 #include "pragma/entities/point/point_rendertarget.h"
 #include "pragma/entities/components/c_entity_component.hpp"
+#include "pragma/entities/environment/c_env_camera.h"
 #include <texturemanager/texture.h>
 
 namespace pragma {

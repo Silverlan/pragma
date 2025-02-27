@@ -1432,7 +1432,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l, ::WIBase &panel, std::stri
 		});
 	}
 	else if(name == "oncharevent") {
-		hCallback = FunctionCallback<::util::EventReply, int, GLFW::Modifier>::CreateWithOptionalReturn([l, hPanel, o](::util::EventReply *reply, int c, GLFW::Modifier mods) mutable -> CallbackReturnType {
+		hCallback = FunctionCallback<::util::EventReply, int, pragma::platform::Modifier>::CreateWithOptionalReturn([l, hPanel, o](::util::EventReply *reply, int c, pragma::platform::Modifier mods) mutable -> CallbackReturnType {
 			if(!hPanel.IsValid())
 				return CallbackReturnType::NoReturnValue;
 			if(Lua::CallFunction(
@@ -1461,7 +1461,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l, ::WIBase &panel, std::stri
 		});
 	}
 	else if(name == "onkeyevent") {
-		hCallback = FunctionCallback<::util::EventReply, GLFW::Key, int, GLFW::KeyState, GLFW::Modifier>::CreateWithOptionalReturn([l, hPanel, o](::util::EventReply *reply, GLFW::Key key, int, GLFW::KeyState action, GLFW::Modifier mods) mutable -> CallbackReturnType {
+		hCallback = FunctionCallback<::util::EventReply, pragma::platform::Key, int, pragma::platform::KeyState, pragma::platform::Modifier>::CreateWithOptionalReturn([l, hPanel, o](::util::EventReply *reply, pragma::platform::Key key, int, pragma::platform::KeyState action, pragma::platform::Modifier mods) mutable -> CallbackReturnType {
 			if(!hPanel.IsValid())
 				return CallbackReturnType::NoReturnValue;
 			if(Lua::CallFunction(
@@ -1491,7 +1491,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l, ::WIBase &panel, std::stri
 		});
 	}
 	else if(name == "onmouseevent") {
-		hCallback = FunctionCallback<::util::EventReply, GLFW::MouseButton, GLFW::KeyState, GLFW::Modifier>::CreateWithOptionalReturn([l, hPanel, o](::util::EventReply *reply, GLFW::MouseButton button, GLFW::KeyState action, GLFW::Modifier mods) mutable -> CallbackReturnType {
+		hCallback = FunctionCallback<::util::EventReply, pragma::platform::MouseButton, pragma::platform::KeyState, pragma::platform::Modifier>::CreateWithOptionalReturn([l, hPanel, o](::util::EventReply *reply, pragma::platform::MouseButton button, pragma::platform::KeyState action, pragma::platform::Modifier mods) mutable -> CallbackReturnType {
 			if(!hPanel.IsValid())
 				return CallbackReturnType::NoReturnValue;
 			if(Lua::CallFunction(
@@ -1668,8 +1668,8 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l, ::WIBase &panel, std::stri
 		});
 	}
 	else if(name == "onjoystickevent") {
-		hCallback = FunctionCallback<::util::EventReply, std::reference_wrapper<const GLFW::Joystick>, uint32_t, GLFW::KeyState>::CreateWithOptionalReturn(
-		  [l, hPanel, o](::util::EventReply *reply, std::reference_wrapper<const GLFW::Joystick> joystick, uint32_t key, GLFW::KeyState state) mutable -> CallbackReturnType {
+		hCallback = FunctionCallback<::util::EventReply, std::reference_wrapper<const pragma::platform::Joystick>, uint32_t, pragma::platform::KeyState>::CreateWithOptionalReturn(
+		  [l, hPanel, o](::util::EventReply *reply, std::reference_wrapper<const pragma::platform::Joystick> joystick, uint32_t key, pragma::platform::KeyState state) mutable -> CallbackReturnType {
 			  if(!hPanel.IsValid())
 				  return CallbackReturnType::NoReturnValue;
 			  if(Lua::CallFunction(
@@ -1919,7 +1919,7 @@ void Lua::WIBase::InjectMouseMoveInput(lua_State *l, ::WIBase &hPanel, const Vec
 	if(elRoot)
 		elRoot->SetCursorPosOverride(Vector2 {static_cast<float>(absPos.x + mousePos.x), static_cast<float>(absPos.y + mousePos.y)});
 	::util::ScopeGuard sg {[elRoot, &origOverride]() { restore_cursor_pos_override(elRoot, origOverride); }};
-	return hPanel.InjectMouseInput(GLFW::MouseButton(button), GLFW::KeyState(action), GLFW::Modifier(mods));
+	return hPanel.InjectMouseInput(pragma::platform::MouseButton(button), pragma::platform::KeyState(action), pragma::platform::Modifier(mods));
 }
 ::util::EventReply Lua::WIBase::InjectMouseInput(lua_State *l, ::WIBase &hPanel, const Vector2 &mousePos, int button, int action) { return InjectMouseInput(l, hPanel, mousePos, button, action, 0); }
 ::util::EventReply Lua::WIBase::InjectMouseClick(lua_State *l, ::WIBase &hPanel, const Vector2 &mousePos, int button, int mods)
@@ -1933,7 +1933,7 @@ void Lua::WIBase::InjectMouseMoveInput(lua_State *l, ::WIBase &hPanel, const Vec
 ::util::EventReply Lua::WIBase::InjectMouseClick(lua_State *l, ::WIBase &hPanel, const Vector2 &mousePos, int button) { return InjectMouseClick(l, hPanel, mousePos, button, 0); }
 ::util::EventReply Lua::WIBase::InjectKeyboardInput(lua_State *l, ::WIBase &hPanel, int key, int action, int mods)
 {
-	return hPanel.InjectKeyboardInput(GLFW::Key(key), 0, GLFW::KeyState(action), GLFW::Modifier(mods));
+	return hPanel.InjectKeyboardInput(pragma::platform::Key(key), 0, pragma::platform::KeyState(action), pragma::platform::Modifier(mods));
 	// Vulkan TODO
 }
 ::util::EventReply Lua::WIBase::InjectKeyboardInput(lua_State *l, ::WIBase &hPanel, int key, int action) { return InjectKeyboardInput(l, hPanel, key, action, 0); }
@@ -1951,7 +1951,7 @@ void Lua::WIBase::InjectMouseMoveInput(lua_State *l, ::WIBase &hPanel, const Vec
 	if(c.empty())
 		return ::util::EventReply::Unhandled;
 	const char *cStr = c.c_str();
-	return hPanel.InjectCharInput(cStr[0], static_cast<GLFW::Modifier>(mods));
+	return hPanel.InjectCharInput(cStr[0], static_cast<pragma::platform::Modifier>(mods));
 }
 ::util::EventReply Lua::WIBase::InjectCharInput(lua_State *l, ::WIBase &hPanel, std::string c)
 {

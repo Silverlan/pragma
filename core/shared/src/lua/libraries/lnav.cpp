@@ -6,6 +6,7 @@
  */
 
 #include "stdafx_shared.h"
+#include "pragma/engine.h"
 #include "pragma/lua/libraries/lnav.hpp"
 #include "pragma/ai/navsystem.h"
 #include "pragma/lua/classes/ldef_entity.h"

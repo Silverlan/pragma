@@ -8,6 +8,7 @@
 #define __LENTS_H__
 
 #include "pragma/networkdefinitions.h"
+#include "pragma/engine.h"
 #include <pragma/lua/luaapi.h>
 #include "pragma/entities/entity_iterator.hpp"
 #include "pragma/lua/class_manager.hpp"

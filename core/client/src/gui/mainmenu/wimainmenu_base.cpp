@@ -14,7 +14,9 @@
 #include "pragma/gui/wioptionslist.h"
 #include <wgui/types/witext.h>
 #include <wgui/types/wirect.h>
-#include "pragma/localization.h"
+
+import pragma.locale;
+import pragma.string.unicode;
 
 LINK_WGUI_TO_CLASS(WIMainMenuElement, WIMainMenuElement);
 
@@ -23,7 +25,7 @@ WIMainMenuBase::WIMainMenuBase() : WIBase(), m_selected(-1) { AddStyleClass("mai
 
 void WIMainMenuBase::OnGoBack(int button, int action, int)
 {
-	if(button != GLFW_MOUSE_BUTTON_LEFT || action != GLFW_PRESS)
+	if(static_cast<pragma::platform::MouseButton>(button) != pragma::platform::MouseButton::Left || static_cast<pragma::platform::KeyState>(action) != pragma::platform::KeyState::Press)
 		return;
 	WIMainMenu *mainMenu = dynamic_cast<WIMainMenu *>(GetParent());
 	if(mainMenu == nullptr)
@@ -45,27 +47,27 @@ void WIMainMenuBase::DoUpdate()
 	WIBase::DoUpdate();
 	UpdateElements();
 }
-util::EventReply WIMainMenuBase::MouseCallback(GLFW::MouseButton, GLFW::KeyState state, GLFW::Modifier)
+util::EventReply WIMainMenuBase::MouseCallback(pragma::platform::MouseButton, pragma::platform::KeyState state, pragma::platform::Modifier)
 {
-	if(state != GLFW::KeyState::Press)
+	if(state != pragma::platform::KeyState::Press)
 		return util::EventReply::Handled;
 	return util::EventReply::Handled;
 }
-util::EventReply WIMainMenuBase::KeyboardCallback(GLFW::Key key, int, GLFW::KeyState state, GLFW::Modifier)
+util::EventReply WIMainMenuBase::KeyboardCallback(pragma::platform::Key key, int, pragma::platform::KeyState state, pragma::platform::Modifier)
 {
-	if(key == GLFW::Key::Enter) {
+	if(key == pragma::platform::Key::Enter) {
 		WIMainMenuElement *el = GetSelectedElement();
 		if(el == NULL)
 			return util::EventReply::Handled;
-		if(state == GLFW::KeyState::Press)
+		if(state == pragma::platform::KeyState::Press)
 			el->Activate();
 		return util::EventReply::Handled;
 	}
-	if(state != GLFW::KeyState::Press)
+	if(state != pragma::platform::KeyState::Press)
 		return util::EventReply::Unhandled;
-	if(key == GLFW::Key::S || key == GLFW::Key::Down)
+	if(key == pragma::platform::Key::S || key == pragma::platform::Key::Down)
 		SelectNextItem();
-	else if(key == GLFW::Key::W || key == GLFW::Key::Up)
+	else if(key == pragma::platform::Key::W || key == pragma::platform::Key::Up)
 		SelectPreviousItem();
 	return util::EventReply::Unhandled;
 }
@@ -290,10 +292,10 @@ void WIMainMenuElement::Activate()
 	onActivated(this);
 }
 
-util::EventReply WIMainMenuElement::MouseCallback(GLFW::MouseButton button, GLFW::KeyState state, GLFW::Modifier mods)
+util::EventReply WIMainMenuElement::MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods)
 {
 	WIBase::MouseCallback(button, state, mods);
-	if(state != GLFW::KeyState::Press)
+	if(state != pragma::platform::KeyState::Press)
 		return util::EventReply::Handled;
 	Activate();
 	return util::EventReply::Handled;

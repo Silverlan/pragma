@@ -6,6 +6,8 @@
  */
 
 #include "stdafx_client.h"
+#include "pragma/game/c_game.h"
+#include "pragma/clientstate/clientstate.h"
 #include "pragma/entities/components/c_physics_component.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/model/c_model.h"

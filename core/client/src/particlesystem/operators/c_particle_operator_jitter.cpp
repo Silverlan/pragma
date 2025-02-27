@@ -6,6 +6,7 @@
  */
 
 #include "stdafx_client.h"
+#include "pragma/c_engine.h"
 #include "pragma/particlesystem/operators/c_particle_operator_jitter.hpp"
 #include <mathutil/umath.h>
 #include <pragma/math/vector/wvvector3.h>

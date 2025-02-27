@@ -35,11 +35,12 @@ namespace pragma::string {
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/components/renderers/c_rasterization_renderer_component.hpp>
-#include <pragma/localization.h>
 #include <image/prosper_render_target.hpp>
 #include <shader/prosper_shader_blur.hpp>
 #include <prosper_window.hpp>
 #include <fsys/directory_watcher.h>
+
+import pragma.locale;
 
 extern DLLCLIENT void debug_render_stats(bool enabled, bool full, bool print, bool continuous);
 extern bool g_dumpRenderQueues;
@@ -540,7 +541,7 @@ void CEngine::RegisterConsoleCommands()
 		  auto identifier = argv[2];
 		  auto text = argv[3];
 		  Con::cout << "Localizing '" << identifier << "' in category '" << category << "' for language '" << lan << "' as '" << text << "'..." << Con::endl;
-		  auto res = Locale::Localize(identifier, lan, category, text);
+		  auto res = pragma::locale::localize(identifier, lan, category, text);
 		  if(res)
 			  Con::cout << "Done!" << Con::endl;
 		  else
@@ -559,7 +560,7 @@ void CEngine::RegisterConsoleCommands()
 		  auto oldCategory = argv[2];
 		  auto newCategory = argv[3];
 		  Con::cout << "Re-localizing '" << identifier << "' in category '" << oldCategory << "' as '" << newIdentifier << "' in category '" << newCategory << "'..." << Con::endl;
-		  auto res = Locale::Relocalize(identifier, newIdentifier, oldCategory, newCategory);
+		  auto res = pragma::locale::relocalize(identifier, newIdentifier, oldCategory, newCategory);
 		  if(res)
 			  Con::cout << "Done!" << Con::endl;
 		  else

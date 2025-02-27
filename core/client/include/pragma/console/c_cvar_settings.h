@@ -20,7 +20,7 @@ REGISTER_CONVAR_CL(cl_window_resolution, udm::Type::String, "1280x1024", ConVarF
 REGISTER_CONVAR_CL(cl_render_resolution, udm::Type::String, "", ConVarFlags::Archive, "Changes the internal rendering resolution. If left empty, the resolution will be the same as the window resolution!");
 REGISTER_CONVAR_CL(cl_render_monitor, udm::Type::UInt32, "0", ConVarFlags::Archive, "Which monitor to use in fullscreen mode.");
 REGISTER_CONVAR_CL(cl_gpu_device, udm::Type::String, "", ConVarFlags::Archive, "The unique identifier for the GPU vendor and device to use. If empty (or invalid), the first detected device will be used. Usage: <vendorId,deviceId>");
-REGISTER_CONVAR_CL(cl_render_window_mode, udm::Type::UInt8, "0", ConVarFlags::Archive, "0 = Fullscreen, 1 = Windowed, 2 = Windowed no-border.");
+REGISTER_CONVAR_CL(cl_render_window_mode, udm::Type::UInt8, "1", ConVarFlags::Archive, "0 = Fullscreen, 1 = Windowed, 2 = Windowed no-border.");
 REGISTER_CONVAR_CL(cl_render_texture_quality, udm::Type::UInt8, "4", ConVarFlags::Archive, "0 = Minimal, 1 = Low, 2 = Medium, 3 = High, 4 = Very High.");
 REGISTER_CONVAR_CL(cl_render_anti_aliasing, udm::Type::UInt8, "2", ConVarFlags::Archive, "0 = No Anti Aliasing, 1 = MSAA, 2 = FXAA.");
 REGISTER_CONVAR_CL(cl_render_msaa_samples, udm::Type::UInt8, "1", ConVarFlags::Archive, "1 = MSAAx2, 2 = MSAAx4, 3 = MSAAx8, etc.");

@@ -330,9 +330,9 @@ void Lua::util::register_world_data(lua_State *l, luabind::module_ &mod)
 		  return luabind::object {l, std::pair<bool, std::string> {false, err}};
 	  });
 	mod[defWorldData];
-	pragma::lua::define_custom_constructor<pragma::asset::ComponentData, []() -> std::shared_ptr<pragma::asset::ComponentData> { return pragma::asset::ComponentData::Create(); }>(l);
-	pragma::lua::define_custom_constructor<pragma::asset::EntityData, []() -> std::shared_ptr<pragma::asset::EntityData> { return pragma::asset::EntityData::Create(); }>(l);
-	pragma::lua::define_custom_constructor<pragma::asset::WorldData, [](NetworkState &nw) -> std::shared_ptr<pragma::asset::WorldData> { return pragma::asset::WorldData::Create(nw); }, NetworkState &>(l);
+	pragma::lua::define_custom_constructor<pragma::asset::ComponentData, +[]() -> std::shared_ptr<pragma::asset::ComponentData> { return pragma::asset::ComponentData::Create(); }>(l);
+	pragma::lua::define_custom_constructor<pragma::asset::EntityData, +[]() -> std::shared_ptr<pragma::asset::EntityData> { return pragma::asset::EntityData::Create(); }>(l);
+	pragma::lua::define_custom_constructor<pragma::asset::WorldData, +[](NetworkState &nw) -> std::shared_ptr<pragma::asset::WorldData> { return pragma::asset::WorldData::Create(nw); }, NetworkState &>(l);
 }
 
 void Lua::util::register_os(lua_State *l, luabind::module_ &mod) { mod[luabind::def("set_prevent_os_sleep_mode", &::util::set_prevent_os_sleep_mode)]; }
@@ -760,7 +760,7 @@ void Lua::util::register_library(lua_State *l)
 		  return false;
 	  });
 	utilMod[defUuid];
-	pragma::lua::define_custom_constructor<util::Uuid, [](const std::string &uuid) -> util::Uuid { return util::Uuid {::util::uuid_string_to_bytes(uuid)}; }, const std::string &>(l);
+	pragma::lua::define_custom_constructor<util::Uuid, +[](const std::string &uuid) -> util::Uuid { return util::Uuid {::util::uuid_string_to_bytes(uuid)}; }, const std::string &>(l);
 }
 
 luabind::object Lua::global::include(lua_State *l, const std::string &f) { return include(l, f, s_bIgnoreIncludeCache); }

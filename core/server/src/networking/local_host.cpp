@@ -5,6 +5,7 @@
  * Copyright (c) 2021 Silverlan */
 
 #include "stdafx_server.h"
+#include <pragma/engine.h>
 #include "pragma/networking/local_server.hpp"
 #include "pragma/networking/recipient_filter.hpp"
 #include <sharedutils/util_clock.hpp>

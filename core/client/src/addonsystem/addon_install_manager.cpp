@@ -6,6 +6,7 @@
  */
 
 #include "stdafx_client.h"
+#include "pragma/c_engine.h"
 #include "pragma/addonsystem/addon_install_manager.hpp"
 #include "pragma/util/curl_query_handler.hpp"
 #include <pragma/addonsystem/addonsystem.h>

@@ -6,6 +6,8 @@
  */
 
 #include "stdafx_client.h"
+#include "pragma/game/c_game.h"
+#include "pragma/entities/entity_iterator.hpp"
 #include "pragma/entities/components/renderers/c_renderer_pp_motion_blur_component.hpp"
 #include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"

@@ -229,13 +229,13 @@ class DLLCLIENT ClientState : public NetworkState {
 	void ShowFPSCounter(bool b);
 
 	// Config
-	Bool RawMouseInput(GLFW::MouseButton button, GLFW::KeyState state, GLFW::Modifier mods);
-	Bool RawKeyboardInput(GLFW::Key key, int scanCode, GLFW::KeyState state, GLFW::Modifier mods, float magnitude = 1.f);
+	Bool RawMouseInput(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods);
+	Bool RawKeyboardInput(pragma::platform::Key key, int scanCode, pragma::platform::KeyState state, pragma::platform::Modifier mods, float magnitude = 1.f);
 	Bool RawCharInput(unsigned int c);
 	Bool RawScrollInput(Vector2 offset);
 
-	Bool MouseInput(GLFW::MouseButton button, GLFW::KeyState state, GLFW::Modifier mods);
-	Bool KeyboardInput(GLFW::Key key, int scanCode, GLFW::KeyState state, GLFW::Modifier mods, float magnitude = 1.f);
+	Bool MouseInput(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods);
+	Bool KeyboardInput(pragma::platform::Key key, int scanCode, pragma::platform::KeyState state, pragma::platform::Modifier mods, float magnitude = 1.f);
 	Bool CharInput(unsigned int c);
 	Bool ScrollInput(Vector2 offset);
 	void OnFilesDropped(std::vector<std::string> &files);

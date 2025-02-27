@@ -72,7 +72,6 @@ namespace pragma::string {
 #include <image/prosper_render_target.hpp>
 #include <pragma/lua/libraries/lfile.h>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
-#include <pragma/localization.h>
 #include <wgui/fontmanager.h>
 #include <udm.hpp>
 
@@ -82,6 +81,8 @@ namespace pragma::string {
 #undef BOTTOM
 #undef NEAR
 #undef FAR
+
+import pragma.locale;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
@@ -97,14 +98,14 @@ void Lua::register_shared_client_state(lua_State *l)
 	auto modLocale = luabind::module_(l, "locale");
 	modLocale[luabind::def("load", Lua::Locale::load), luabind::def("get_language", Lua::Locale::get_language), luabind::def("change_language", Lua::Locale::change_language), luabind::def("set_text", Lua::Locale::set_localization), luabind::def("localize", Lua::Locale::localize),
 	  luabind::def("relocalize", Lua::Locale::relocalize)];
-	modLocale[luabind::def("get_used_characters", +[]() -> std::string { return ::Locale::GetUsedCharacters().cpp_str(); })];
-	modLocale[luabind::def("load_all", +[]() { ::Locale::LoadAll(); })];
+	modLocale[luabind::def("get_used_characters", +[]() -> std::string { return pragma::locale::get_used_characters().cpp_str(); })];
+	modLocale[luabind::def("load_all", +[]() { pragma::locale::load_all(); })];
 	modLocale[luabind::def("clear", Lua::Locale::clear)];
 	modLocale[luabind::def("get_texts", Lua::Locale::get_texts)];
 	modLocale[luabind::def(
 	  "get_raw_text", +[](const std::string &id) -> std::optional<std::string> {
 		  std::string text;
-		  if(::Locale::GetRawText(id, text))
+		  if(pragma::locale::get_raw_text(id, text))
 			  return text;
 		  return {};
 	  })];
@@ -343,11 +344,11 @@ void CGame::RegisterLua()
 	    {"FrustumPoint_NearTopRight", umath::to_integral(FrustumPoint::NearTopRight)}, {"FrustumPoint_NearBottomRight", umath::to_integral(FrustumPoint::NearBottomRight)}});
 
 	Lua::RegisterLibraryEnums(GetLuaState(), "gui",
-	  {{"CURSOR_SHAPE_DEFAULT", umath::to_integral(GLFW::Cursor::Shape::Default)}, {"CURSOR_SHAPE_HIDDEN", umath::to_integral(GLFW::Cursor::Shape::Hidden)}, {"CURSOR_SHAPE_ARROW", umath::to_integral(GLFW::Cursor::Shape::Arrow)},
-	    {"CURSOR_SHAPE_IBEAM", umath::to_integral(GLFW::Cursor::Shape::IBeam)}, {"CURSOR_SHAPE_CROSSHAIR", umath::to_integral(GLFW::Cursor::Shape::Crosshair)}, {"CURSOR_SHAPE_HAND", umath::to_integral(GLFW::Cursor::Shape::Hand)},
-	    {"CURSOR_SHAPE_HRESIZE", umath::to_integral(GLFW::Cursor::Shape::HResize)}, {"CURSOR_SHAPE_VRESIZE", umath::to_integral(GLFW::Cursor::Shape::VResize)},
+	  {{"CURSOR_SHAPE_DEFAULT", umath::to_integral(pragma::platform::Cursor::Shape::Default)}, {"CURSOR_SHAPE_HIDDEN", umath::to_integral(pragma::platform::Cursor::Shape::Hidden)}, {"CURSOR_SHAPE_ARROW", umath::to_integral(pragma::platform::Cursor::Shape::Arrow)},
+	    {"CURSOR_SHAPE_IBEAM", umath::to_integral(pragma::platform::Cursor::Shape::IBeam)}, {"CURSOR_SHAPE_CROSSHAIR", umath::to_integral(pragma::platform::Cursor::Shape::Crosshair)}, {"CURSOR_SHAPE_HAND", umath::to_integral(pragma::platform::Cursor::Shape::Hand)},
+	    {"CURSOR_SHAPE_HRESIZE", umath::to_integral(pragma::platform::Cursor::Shape::HResize)}, {"CURSOR_SHAPE_VRESIZE", umath::to_integral(pragma::platform::Cursor::Shape::VResize)},
 
-	    {"CURSOR_MODE_DISABLED", umath::to_integral(GLFW::CursorMode::Disabled)}, {"CURSOR_MODE_HIDDEN", umath::to_integral(GLFW::CursorMode::Hidden)}, {"CURSOR_MODE_NORMAL", umath::to_integral(GLFW::CursorMode::Normal)}});
+	    {"CURSOR_MODE_DISABLED", umath::to_integral(pragma::platform::CursorMode::Disabled)}, {"CURSOR_MODE_HIDDEN", umath::to_integral(pragma::platform::CursorMode::Hidden)}, {"CURSOR_MODE_NORMAL", umath::to_integral(pragma::platform::CursorMode::Normal)}});
 
 	Lua::RegisterLibraryEnums(GetLuaState(), "game",
 	  {
@@ -395,39 +396,186 @@ void CGame::RegisterLua()
 	_G["BaseEntityComponent"] = _G["ents"]["BaseEntityComponent"];
 
 	Lua::RegisterLibraryEnums(GetLuaState(), "input",
-	  {{"STATE_PRESS", GLFW_PRESS}, {"STATE_RELEASE", GLFW_RELEASE}, {"STATE_REPEAT", GLFW_REPEAT},
+	  {
+	    {"STATE_PRESS", umath::to_integral(pragma::platform::KeyState::Press)},
+	    {"STATE_RELEASE", umath::to_integral(pragma::platform::KeyState::Release)},
+	    {"STATE_REPEAT", umath::to_integral(pragma::platform::KeyState::Repeat)},
 
-	    {"MOUSE_BUTTON_1", GLFW_MOUSE_BUTTON_1}, {"MOUSE_BUTTON_2", GLFW_MOUSE_BUTTON_2}, {"MOUSE_BUTTON_3", GLFW_MOUSE_BUTTON_3}, {"MOUSE_BUTTON_4", GLFW_MOUSE_BUTTON_4}, {"MOUSE_BUTTON_5", GLFW_MOUSE_BUTTON_5}, {"MOUSE_BUTTON_6", GLFW_MOUSE_BUTTON_6},
-	    {"MOUSE_BUTTON_7", GLFW_MOUSE_BUTTON_7}, {"MOUSE_BUTTON_8", GLFW_MOUSE_BUTTON_8}, {"MOUSE_BUTTON_LEFT", GLFW_MOUSE_BUTTON_LEFT}, {"MOUSE_BUTTON_RIGHT", GLFW_MOUSE_BUTTON_RIGHT}, {"MOUSE_BUTTON_MIDDLE", GLFW_MOUSE_BUTTON_MIDDLE},
+	    {"MOUSE_BUTTON_1", umath::to_integral(pragma::platform::MouseButton::N1)},
+	    {"MOUSE_BUTTON_2", umath::to_integral(pragma::platform::MouseButton::N2)},
+	    {"MOUSE_BUTTON_3", umath::to_integral(pragma::platform::MouseButton::N3)},
+	    {"MOUSE_BUTTON_4", umath::to_integral(pragma::platform::MouseButton::N4)},
+	    {"MOUSE_BUTTON_5", umath::to_integral(pragma::platform::MouseButton::N5)},
+	    {"MOUSE_BUTTON_6", umath::to_integral(pragma::platform::MouseButton::N6)},
+	    {"MOUSE_BUTTON_7", umath::to_integral(pragma::platform::MouseButton::N7)},
+	    {"MOUSE_BUTTON_8", umath::to_integral(pragma::platform::MouseButton::N8)},
+	    {"MOUSE_BUTTON_LEFT", umath::to_integral(pragma::platform::MouseButton::Left)},
+	    {"MOUSE_BUTTON_RIGHT", umath::to_integral(pragma::platform::MouseButton::Right)},
+	    {"MOUSE_BUTTON_MIDDLE", umath::to_integral(pragma::platform::MouseButton::Middle)},
 
-	    {"MOD_NONE", 0}, {"MOD_SHIFT", GLFW_MOD_SHIFT}, {"MOD_CONTROL", GLFW_MOD_CONTROL}, {"MOD_ALT", GLFW_MOD_ALT}, {"MOD_SUPER", GLFW_MOD_SUPER},
+	    {"MOD_NONE", umath::to_integral(pragma::platform::Modifier::None)},
+	    {"MOD_SHIFT", umath::to_integral(pragma::platform::Modifier::Shift)},
+	    {"MOD_CONTROL", umath::to_integral(pragma::platform::Modifier::Control)},
+	    {"MOD_ALT", umath::to_integral(pragma::platform::Modifier::Alt)},
+	    {"MOD_SUPER", umath::to_integral(pragma::platform::Modifier::Super)},
 
-	    {"KEY_UNKNOWN", GLFW_KEY_UNKNOWN}, {"KEY_SPACE", GLFW_KEY_SPACE}, {"KEY_APOSTROPHE", GLFW_KEY_APOSTROPHE}, {"KEY_COMMA", GLFW_KEY_COMMA}, {"KEY_MINUS", GLFW_KEY_MINUS}, {"KEY_PERIOD", GLFW_KEY_PERIOD}, {"KEY_SLASH", GLFW_KEY_SLASH}, {"KEY_0", GLFW_KEY_0}, {"KEY_1", GLFW_KEY_1},
-	    {"KEY_2", GLFW_KEY_2}, {"KEY_3", GLFW_KEY_3}, {"KEY_4", GLFW_KEY_4}, {"KEY_5", GLFW_KEY_5}, {"KEY_6", GLFW_KEY_6}, {"KEY_7", GLFW_KEY_7}, {"KEY_8", GLFW_KEY_8}, {"KEY_9", GLFW_KEY_9}, {"KEY_SEMICOLON", GLFW_KEY_SEMICOLON}, {"KEY_EQUAL", GLFW_KEY_EQUAL}, {"KEY_A", GLFW_KEY_A},
-	    {"KEY_B", GLFW_KEY_B}, {"KEY_C", GLFW_KEY_C}, {"KEY_D", GLFW_KEY_D}, {"KEY_E", GLFW_KEY_E}, {"KEY_F", GLFW_KEY_F}, {"KEY_G", GLFW_KEY_G}, {"KEY_H", GLFW_KEY_H}, {"KEY_I", GLFW_KEY_I}, {"KEY_J", GLFW_KEY_J}, {"KEY_K", GLFW_KEY_K}, {"KEY_L", GLFW_KEY_L}, {"KEY_M", GLFW_KEY_M},
-	    {"KEY_N", GLFW_KEY_N}, {"KEY_O", GLFW_KEY_O}, {"KEY_P", GLFW_KEY_P}, {"KEY_Q", GLFW_KEY_Q}, {"KEY_R", GLFW_KEY_R}, {"KEY_S", GLFW_KEY_S}, {"KEY_T", GLFW_KEY_T}, {"KEY_U", GLFW_KEY_U}, {"KEY_V", GLFW_KEY_V}, {"KEY_W", GLFW_KEY_W}, {"KEY_X", GLFW_KEY_X}, {"KEY_Y", GLFW_KEY_Y},
-	    {"KEY_Z", GLFW_KEY_Z}, {"KEY_LEFT_BRACKET", GLFW_KEY_LEFT_BRACKET}, {"KEY_BACKSLASH", GLFW_KEY_BACKSLASH}, {"KEY_RIGHT_BRACKET", GLFW_KEY_RIGHT_BRACKET}, {"KEY_GRAVE_ACCENT", GLFW_KEY_GRAVE_ACCENT}, {"KEY_WORLD_1", GLFW_KEY_WORLD_1}, {"KEY_WORLD_2", GLFW_KEY_WORLD_2},
-	    {"KEY_ESCAPE", GLFW_KEY_ESCAPE}, {"KEY_ENTER", GLFW_KEY_ENTER}, {"KEY_TAB", GLFW_KEY_TAB}, {"KEY_BACKSPACE", GLFW_KEY_BACKSPACE}, {"KEY_INSERT", GLFW_KEY_INSERT}, {"KEY_DELETE", GLFW_KEY_DELETE}, {"KEY_RIGHT", GLFW_KEY_RIGHT}, {"KEY_LEFT", GLFW_KEY_LEFT},
-	    {"KEY_DOWN", GLFW_KEY_DOWN}, {"KEY_UP", GLFW_KEY_UP}, {"KEY_PAGE_UP", GLFW_KEY_PAGE_UP}, {"KEY_PAGE_DOWN", GLFW_KEY_PAGE_DOWN}, {"KEY_HOME", GLFW_KEY_HOME}, {"KEY_END", GLFW_KEY_END}, {"KEY_CAPS_LOCK", GLFW_KEY_CAPS_LOCK}, {"KEY_SCROLL_LOCK", GLFW_KEY_SCROLL_LOCK},
-	    {"KEY_NUM_LOCK", GLFW_KEY_NUM_LOCK}, {"KEY_PRINT_SCREEN", GLFW_KEY_PRINT_SCREEN}, {"KEY_PAUSE", GLFW_KEY_PAUSE}, {"KEY_F1", GLFW_KEY_F1}, {"KEY_F2", GLFW_KEY_F2}, {"KEY_F3", GLFW_KEY_F3}, {"KEY_F4", GLFW_KEY_F4}, {"KEY_F5", GLFW_KEY_F5}, {"KEY_F6", GLFW_KEY_F6},
-	    {"KEY_F7", GLFW_KEY_F7}, {"KEY_F8", GLFW_KEY_F8}, {"KEY_F9", GLFW_KEY_F9}, {"KEY_F10", GLFW_KEY_F10}, {"KEY_F11", GLFW_KEY_F11}, {"KEY_F12", GLFW_KEY_F12}, {"KEY_F13", GLFW_KEY_F13}, {"KEY_F14", GLFW_KEY_F14}, {"KEY_F15", GLFW_KEY_F15}, {"KEY_F16", GLFW_KEY_F16},
-	    {"KEY_F17", GLFW_KEY_F17}, {"KEY_F18", GLFW_KEY_F18}, {"KEY_F19", GLFW_KEY_F19}, {"KEY_F20", GLFW_KEY_F20}, {"KEY_F21", GLFW_KEY_F21}, {"KEY_F22", GLFW_KEY_F22}, {"KEY_F23", GLFW_KEY_F23}, {"KEY_F24", GLFW_KEY_F24}, {"KEY_F25", GLFW_KEY_F25}, {"KEY_KP_0", GLFW_KEY_KP_0},
-	    {"KEY_KP_1", GLFW_KEY_KP_1}, {"KEY_KP_2", GLFW_KEY_KP_2}, {"KEY_KP_3", GLFW_KEY_KP_3}, {"KEY_KP_4", GLFW_KEY_KP_4}, {"KEY_KP_5", GLFW_KEY_KP_5}, {"KEY_KP_6", GLFW_KEY_KP_6}, {"KEY_KP_7", GLFW_KEY_KP_7}, {"KEY_KP_8", GLFW_KEY_KP_8}, {"KEY_KP_9", GLFW_KEY_KP_9},
-	    {"KEY_KP_DECIMAL", GLFW_KEY_KP_DECIMAL}, {"KEY_KP_DIVIDE", GLFW_KEY_KP_DIVIDE}, {"KEY_KP_MULTIPLY", GLFW_KEY_KP_MULTIPLY}, {"KEY_KP_SUBTRACT", GLFW_KEY_KP_SUBTRACT}, {"KEY_KP_ADD", GLFW_KEY_KP_ADD}, {"KEY_KP_ENTER", GLFW_KEY_KP_ENTER}, {"KEY_KP_EQUAL", GLFW_KEY_KP_EQUAL},
-	    {"KEY_LEFT_SHIFT", GLFW_KEY_LEFT_SHIFT}, {"KEY_LEFT_CONTROL", GLFW_KEY_LEFT_CONTROL}, {"KEY_LEFT_ALT", GLFW_KEY_LEFT_ALT}, {"KEY_LEFT_SUPER", GLFW_KEY_LEFT_SUPER}, {"KEY_RIGHT_SHIFT", GLFW_KEY_RIGHT_SHIFT}, {"KEY_RIGHT_CONTROL", GLFW_KEY_RIGHT_CONTROL},
-	    {"KEY_RIGHT_ALT", GLFW_KEY_RIGHT_ALT}, {"KEY_RIGHT_SUPER", GLFW_KEY_RIGHT_SUPER}, {"KEY_MENU", GLFW_KEY_MENU},
+	    {"KEY_UNKNOWN", umath::to_integral(pragma::platform::Key::Unknown)},
+	    {"KEY_SPACE", umath::to_integral(pragma::platform::Key::Space)},
+	    {"KEY_APOSTROPHE", umath::to_integral(pragma::platform::Key::Apostrophe)},
+	    {"KEY_COMMA", umath::to_integral(pragma::platform::Key::Comma)},
+	    {"KEY_MINUS", umath::to_integral(pragma::platform::Key::Minus)},
+	    {"KEY_PERIOD", umath::to_integral(pragma::platform::Key::Period)},
+	    {"KEY_SLASH", umath::to_integral(pragma::platform::Key::Slash)},
+	    {"KEY_0", umath::to_integral(pragma::platform::Key::N0)},
+	    {"KEY_1", umath::to_integral(pragma::platform::Key::N1)},
+	    {"KEY_2", umath::to_integral(pragma::platform::Key::N2)},
+	    {"KEY_3", umath::to_integral(pragma::platform::Key::N3)},
+	    {"KEY_4", umath::to_integral(pragma::platform::Key::N4)},
+	    {"KEY_5", umath::to_integral(pragma::platform::Key::N5)},
+	    {"KEY_6", umath::to_integral(pragma::platform::Key::N6)},
+	    {"KEY_7", umath::to_integral(pragma::platform::Key::N7)},
+	    {"KEY_8", umath::to_integral(pragma::platform::Key::N8)},
+	    {"KEY_9", umath::to_integral(pragma::platform::Key::N9)},
+	    {"KEY_SEMICOLON", umath::to_integral(pragma::platform::Key::Semicolon)},
+	    {"KEY_EQUAL", umath::to_integral(pragma::platform::Key::Equal)},
+	    {"KEY_A", umath::to_integral(pragma::platform::Key::A)},
+	    {"KEY_B", umath::to_integral(pragma::platform::Key::B)},
+	    {"KEY_C", umath::to_integral(pragma::platform::Key::C)},
+	    {"KEY_D", umath::to_integral(pragma::platform::Key::D)},
+	    {"KEY_E", umath::to_integral(pragma::platform::Key::E)},
+	    {"KEY_F", umath::to_integral(pragma::platform::Key::F)},
+	    {"KEY_G", umath::to_integral(pragma::platform::Key::G)},
+	    {"KEY_H", umath::to_integral(pragma::platform::Key::H)},
+	    {"KEY_I", umath::to_integral(pragma::platform::Key::I)},
+	    {"KEY_J", umath::to_integral(pragma::platform::Key::J)},
+	    {"KEY_K", umath::to_integral(pragma::platform::Key::K)},
+	    {"KEY_L", umath::to_integral(pragma::platform::Key::L)},
+	    {"KEY_M", umath::to_integral(pragma::platform::Key::M)},
+	    {"KEY_N", umath::to_integral(pragma::platform::Key::N)},
+	    {"KEY_O", umath::to_integral(pragma::platform::Key::O)},
+	    {"KEY_P", umath::to_integral(pragma::platform::Key::P)},
+	    {"KEY_Q", umath::to_integral(pragma::platform::Key::Q)},
+	    {"KEY_R", umath::to_integral(pragma::platform::Key::R)},
+	    {"KEY_S", umath::to_integral(pragma::platform::Key::S)},
+	    {"KEY_T", umath::to_integral(pragma::platform::Key::T)},
+	    {"KEY_U", umath::to_integral(pragma::platform::Key::U)},
+	    {"KEY_V", umath::to_integral(pragma::platform::Key::V)},
+	    {"KEY_W", umath::to_integral(pragma::platform::Key::W)},
+	    {"KEY_X", umath::to_integral(pragma::platform::Key::X)},
+	    {"KEY_Y", umath::to_integral(pragma::platform::Key::Y)},
+	    {"KEY_Z", umath::to_integral(pragma::platform::Key::Z)},
+	    {"KEY_LEFT_BRACKET", umath::to_integral(pragma::platform::Key::LeftBracket)},
+	    {"KEY_BACKSLASH", umath::to_integral(pragma::platform::Key::Backslash)},
+	    {"KEY_RIGHT_BRACKET", umath::to_integral(pragma::platform::Key::RightBracket)},
+	    {"KEY_GRAVE_ACCENT", umath::to_integral(pragma::platform::Key::GraveAccent)},
+	    {"KEY_WORLD_1", umath::to_integral(pragma::platform::Key::World1)},
+	    {"KEY_WORLD_2", umath::to_integral(pragma::platform::Key::World2)},
+	    {"KEY_ESCAPE", umath::to_integral(pragma::platform::Key::Escape)},
+	    {"KEY_ENTER", umath::to_integral(pragma::platform::Key::Enter)},
+	    {"KEY_TAB", umath::to_integral(pragma::platform::Key::Tab)},
+	    {"KEY_BACKSPACE", umath::to_integral(pragma::platform::Key::Backspace)},
+	    {"KEY_INSERT", umath::to_integral(pragma::platform::Key::Insert)},
+	    {"KEY_DELETE", umath::to_integral(pragma::platform::Key::Delete)},
+	    {"KEY_RIGHT", umath::to_integral(pragma::platform::Key::Right)},
+	    {"KEY_LEFT", umath::to_integral(pragma::platform::Key::Left)},
+	    {"KEY_DOWN", umath::to_integral(pragma::platform::Key::Down)},
+	    {"KEY_UP", umath::to_integral(pragma::platform::Key::Up)},
+	    {"KEY_PAGE_UP", umath::to_integral(pragma::platform::Key::PageUp)},
+	    {"KEY_PAGE_DOWN", umath::to_integral(pragma::platform::Key::PageDown)},
+	    {"KEY_HOME", umath::to_integral(pragma::platform::Key::Home)},
+	    {"KEY_END", umath::to_integral(pragma::platform::Key::End)},
+	    {"KEY_CAPS_LOCK", umath::to_integral(pragma::platform::Key::CapsLock)},
+	    {"KEY_SCROLL_LOCK", umath::to_integral(pragma::platform::Key::ScrollLock)},
+	    {"KEY_NUM_LOCK", umath::to_integral(pragma::platform::Key::NumLock)},
+	    {"KEY_PRINT_SCREEN", umath::to_integral(pragma::platform::Key::PrintScreen)},
+	    {"KEY_PAUSE", umath::to_integral(pragma::platform::Key::Pause)},
+	    {"KEY_F1", umath::to_integral(pragma::platform::Key::F1)},
+	    {"KEY_F2", umath::to_integral(pragma::platform::Key::F2)},
+	    {"KEY_F3", umath::to_integral(pragma::platform::Key::F3)},
+	    {"KEY_F4", umath::to_integral(pragma::platform::Key::F4)},
+	    {"KEY_F5", umath::to_integral(pragma::platform::Key::F5)},
+	    {"KEY_F6", umath::to_integral(pragma::platform::Key::F6)},
+	    {"KEY_F7", umath::to_integral(pragma::platform::Key::F7)},
+	    {"KEY_F8", umath::to_integral(pragma::platform::Key::F8)},
+	    {"KEY_F9", umath::to_integral(pragma::platform::Key::F9)},
+	    {"KEY_F10", umath::to_integral(pragma::platform::Key::F10)},
+	    {"KEY_F11", umath::to_integral(pragma::platform::Key::F11)},
+	    {"KEY_F12", umath::to_integral(pragma::platform::Key::F12)},
+	    {"KEY_F13", umath::to_integral(pragma::platform::Key::F13)},
+	    {"KEY_F14", umath::to_integral(pragma::platform::Key::F14)},
+	    {"KEY_F15", umath::to_integral(pragma::platform::Key::F15)},
+	    {"KEY_F16", umath::to_integral(pragma::platform::Key::F16)},
+	    {"KEY_F17", umath::to_integral(pragma::platform::Key::F17)},
+	    {"KEY_F18", umath::to_integral(pragma::platform::Key::F18)},
+	    {"KEY_F19", umath::to_integral(pragma::platform::Key::F19)},
+	    {"KEY_F20", umath::to_integral(pragma::platform::Key::F20)},
+	    {"KEY_F21", umath::to_integral(pragma::platform::Key::F21)},
+	    {"KEY_F22", umath::to_integral(pragma::platform::Key::F22)},
+	    {"KEY_F23", umath::to_integral(pragma::platform::Key::F23)},
+	    {"KEY_F24", umath::to_integral(pragma::platform::Key::F24)},
+	    {"KEY_F25", umath::to_integral(pragma::platform::Key::F25)},
+	    {"KEY_KP_0", umath::to_integral(pragma::platform::Key::Kp0)},
+	    {"KEY_KP_1", umath::to_integral(pragma::platform::Key::Kp1)},
+	    {"KEY_KP_2", umath::to_integral(pragma::platform::Key::Kp2)},
+	    {"KEY_KP_3", umath::to_integral(pragma::platform::Key::Kp3)},
+	    {"KEY_KP_4", umath::to_integral(pragma::platform::Key::Kp4)},
+	    {"KEY_KP_5", umath::to_integral(pragma::platform::Key::Kp5)},
+	    {"KEY_KP_6", umath::to_integral(pragma::platform::Key::Kp6)},
+	    {"KEY_KP_7", umath::to_integral(pragma::platform::Key::Kp7)},
+	    {"KEY_KP_8", umath::to_integral(pragma::platform::Key::Kp8)},
+	    {"KEY_KP_9", umath::to_integral(pragma::platform::Key::Kp9)},
+	    {"KEY_KP_DECIMAL", umath::to_integral(pragma::platform::Key::KpDecimal)},
+	    {"KEY_KP_DIVIDE", umath::to_integral(pragma::platform::Key::KpDivide)},
+	    {"KEY_KP_MULTIPLY", umath::to_integral(pragma::platform::Key::KpMultiply)},
+	    {"KEY_KP_SUBTRACT", umath::to_integral(pragma::platform::Key::KpSubtract)},
+	    {"KEY_KP_ADD", umath::to_integral(pragma::platform::Key::KpAdd)},
+	    {"KEY_KP_ENTER", umath::to_integral(pragma::platform::Key::KpEnter)},
+	    {"KEY_KP_EQUAL", umath::to_integral(pragma::platform::Key::KpEqual)},
+	    {"KEY_LEFT_SHIFT", umath::to_integral(pragma::platform::Key::LeftShift)},
+	    {"KEY_LEFT_CONTROL", umath::to_integral(pragma::platform::Key::LeftControl)},
+	    {"KEY_LEFT_ALT", umath::to_integral(pragma::platform::Key::LeftAlt)},
+	    {"KEY_LEFT_SUPER", umath::to_integral(pragma::platform::Key::LeftSuper)},
+	    {"KEY_RIGHT_SHIFT", umath::to_integral(pragma::platform::Key::RightShift)},
+	    {"KEY_RIGHT_CONTROL", umath::to_integral(pragma::platform::Key::RightControl)},
+	    {"KEY_RIGHT_ALT", umath::to_integral(pragma::platform::Key::RightAlt)},
+	    {"KEY_RIGHT_SUPER", umath::to_integral(pragma::platform::Key::RightSuper)},
+	    {"KEY_MENU", umath::to_integral(pragma::platform::Key::Menu)},
 
-	    {"KEY_SCRL_UP", GLFW_CUSTOM_KEY_SCRL_UP}, {"KEY_SCRL_DOWN", GLFW_CUSTOM_KEY_SCRL_DOWN}, {"KEY_SCRL_DOWN", GLFW_CUSTOM_KEY_SCRL_DOWN},
+	    {"KEY_SCRL_UP", GLFW_CUSTOM_KEY_SCRL_UP},
+	    {"KEY_SCRL_DOWN", GLFW_CUSTOM_KEY_SCRL_DOWN},
+	    {"KEY_SCRL_DOWN", GLFW_CUSTOM_KEY_SCRL_DOWN},
 
-	    {"KEY_MOUSE_BUTTON_1", GLFW_KEY_SPECIAL_MOUSE_BUTTON_1}, {"KEY_MOUSE_BUTTON_2", GLFW_KEY_SPECIAL_MOUSE_BUTTON_2}, {"KEY_MOUSE_BUTTON_3", GLFW_KEY_SPECIAL_MOUSE_BUTTON_3}, {"KEY_MOUSE_BUTTON_4", GLFW_KEY_SPECIAL_MOUSE_BUTTON_4},
-	    {"KEY_MOUSE_BUTTON_5", GLFW_KEY_SPECIAL_MOUSE_BUTTON_5}, {"KEY_MOUSE_BUTTON_6", GLFW_KEY_SPECIAL_MOUSE_BUTTON_6}, {"KEY_MOUSE_BUTTON_7", GLFW_KEY_SPECIAL_MOUSE_BUTTON_7}, {"KEY_MOUSE_BUTTON_8", GLFW_KEY_SPECIAL_MOUSE_BUTTON_8},
+	    {"KEY_MOUSE_BUTTON_1", GLFW_KEY_SPECIAL_MOUSE_BUTTON_1},
+	    {"KEY_MOUSE_BUTTON_2", GLFW_KEY_SPECIAL_MOUSE_BUTTON_2},
+	    {"KEY_MOUSE_BUTTON_3", GLFW_KEY_SPECIAL_MOUSE_BUTTON_3},
+	    {"KEY_MOUSE_BUTTON_4", GLFW_KEY_SPECIAL_MOUSE_BUTTON_4},
+	    {"KEY_MOUSE_BUTTON_5", GLFW_KEY_SPECIAL_MOUSE_BUTTON_5},
+	    {"KEY_MOUSE_BUTTON_6", GLFW_KEY_SPECIAL_MOUSE_BUTTON_6},
+	    {"KEY_MOUSE_BUTTON_7", GLFW_KEY_SPECIAL_MOUSE_BUTTON_7},
+	    {"KEY_MOUSE_BUTTON_8", GLFW_KEY_SPECIAL_MOUSE_BUTTON_8},
 	    {"KEY_MOUSE_BUTTON_9", GLFW_KEY_SPECIAL_MOUSE_BUTTON_9},
 
-	    {"CONTROLLER_0_KEY_START", GLFW_CUSTOM_KEY_JOYSTICK_0_KEY_START}, {"CONTROLLER_0_AXIS_START", GLFW_CUSTOM_KEY_JOYSTICK_0_AXIS_START}, {"CONTROLLER_1_KEY_START", GLFW_CUSTOM_KEY_JOYSTICK_1_KEY_START}, {"CONTROLLER_1_AXIS_START", GLFW_CUSTOM_KEY_JOYSTICK_1_AXIS_START},
-	    {"CONTROLLER_2_KEY_START", GLFW_CUSTOM_KEY_JOYSTICK_2_KEY_START}, {"CONTROLLER_2_AXIS_START", GLFW_CUSTOM_KEY_JOYSTICK_2_AXIS_START}, {"CONTROLLER_3_KEY_START", GLFW_CUSTOM_KEY_JOYSTICK_3_KEY_START}, {"CONTROLLER_3_AXIS_START", GLFW_CUSTOM_KEY_JOYSTICK_3_AXIS_START},
-	    {"CONTROLLER_4_KEY_START", GLFW_CUSTOM_KEY_JOYSTICK_4_KEY_START}, {"CONTROLLER_4_AXIS_START", GLFW_CUSTOM_KEY_JOYSTICK_4_AXIS_START}, {"CONTROLLER_5_KEY_START", GLFW_CUSTOM_KEY_JOYSTICK_5_KEY_START}, {"CONTROLLER_5_AXIS_START", GLFW_CUSTOM_KEY_JOYSTICK_5_AXIS_START},
-	    {"CONTROLLER_6_KEY_START", GLFW_CUSTOM_KEY_JOYSTICK_6_KEY_START}, {"CONTROLLER_6_AXIS_START", GLFW_CUSTOM_KEY_JOYSTICK_6_AXIS_START}, {"CONTROLLER_7_KEY_START", GLFW_CUSTOM_KEY_JOYSTICK_7_KEY_START}, {"CONTROLLER_7_AXIS_START", GLFW_CUSTOM_KEY_JOYSTICK_7_AXIS_START},
-	    {"CONTROLLER_8_KEY_START", GLFW_CUSTOM_KEY_JOYSTICK_8_KEY_START}, {"CONTROLLER_8_AXIS_START", GLFW_CUSTOM_KEY_JOYSTICK_8_AXIS_START}, {"CONTROLLER_9_KEY_START", GLFW_CUSTOM_KEY_JOYSTICK_9_KEY_START}, {"CONTROLLER_9_AXIS_START", GLFW_CUSTOM_KEY_JOYSTICK_9_AXIS_START}});
+	    {"CONTROLLER_0_KEY_START", GLFW_CUSTOM_KEY_JOYSTICK_0_KEY_START},
+	    {"CONTROLLER_0_AXIS_START", GLFW_CUSTOM_KEY_JOYSTICK_0_AXIS_START},
+	    {"CONTROLLER_1_KEY_START", GLFW_CUSTOM_KEY_JOYSTICK_1_KEY_START},
+	    {"CONTROLLER_1_AXIS_START", GLFW_CUSTOM_KEY_JOYSTICK_1_AXIS_START},
+	    {"CONTROLLER_2_KEY_START", GLFW_CUSTOM_KEY_JOYSTICK_2_KEY_START},
+	    {"CONTROLLER_2_AXIS_START", GLFW_CUSTOM_KEY_JOYSTICK_2_AXIS_START},
+	    {"CONTROLLER_3_KEY_START", GLFW_CUSTOM_KEY_JOYSTICK_3_KEY_START},
+	    {"CONTROLLER_3_AXIS_START", GLFW_CUSTOM_KEY_JOYSTICK_3_AXIS_START},
+	    {"CONTROLLER_4_KEY_START", GLFW_CUSTOM_KEY_JOYSTICK_4_KEY_START},
+	    {"CONTROLLER_4_AXIS_START", GLFW_CUSTOM_KEY_JOYSTICK_4_AXIS_START},
+	    {"CONTROLLER_5_KEY_START", GLFW_CUSTOM_KEY_JOYSTICK_5_KEY_START},
+	    {"CONTROLLER_5_AXIS_START", GLFW_CUSTOM_KEY_JOYSTICK_5_AXIS_START},
+	    {"CONTROLLER_6_KEY_START", GLFW_CUSTOM_KEY_JOYSTICK_6_KEY_START},
+	    {"CONTROLLER_6_AXIS_START", GLFW_CUSTOM_KEY_JOYSTICK_6_AXIS_START},
+	    {"CONTROLLER_7_KEY_START", GLFW_CUSTOM_KEY_JOYSTICK_7_KEY_START},
+	    {"CONTROLLER_7_AXIS_START", GLFW_CUSTOM_KEY_JOYSTICK_7_AXIS_START},
+	    {"CONTROLLER_8_KEY_START", GLFW_CUSTOM_KEY_JOYSTICK_8_KEY_START},
+	    {"CONTROLLER_8_AXIS_START", GLFW_CUSTOM_KEY_JOYSTICK_8_AXIS_START},
+	    {"CONTROLLER_9_KEY_START", GLFW_CUSTOM_KEY_JOYSTICK_9_KEY_START},
+	    {"CONTROLLER_9_AXIS_START", GLFW_CUSTOM_KEY_JOYSTICK_9_AXIS_START},
+	  });
 
 	/*lua_registerglobalint(SHADER_VERTEX_BUFFER_LOCATION);
 	lua_registerglobalint(SHADER_UV_BUFFER_LOCATION);

@@ -9,6 +9,9 @@
 #define _C_LGUI_H__
 
 #include "pragma/clientdefinitions.h"
+#include "pragma/game/c_game.h"
+#include <wgui/wibase.h>
+#include <image/prosper_image.hpp>
 #include <pragma/lua/ldefinitions.h>
 
 namespace prosper {
@@ -66,14 +69,14 @@ namespace Lua {
 		DLLCLIENT bool load_skin(const std::string &skinName);
 		DLLCLIENT void set_skin(const std::string &skin);
 		DLLCLIENT bool skin_exists(const std::string &name);
-		DLLCLIENT GLFW::Cursor::Shape get_cursor();
-		DLLCLIENT void set_cursor(GLFW::Cursor::Shape shape);
-		DLLCLIENT GLFW::CursorMode get_cursor_input_mode();
-		DLLCLIENT void set_cursor_input_mode(GLFW::CursorMode mode);
+		DLLCLIENT pragma::platform::Cursor::Shape get_cursor();
+		DLLCLIENT void set_cursor(pragma::platform::Cursor::Shape shape);
+		DLLCLIENT pragma::platform::CursorMode get_cursor_input_mode();
+		DLLCLIENT void set_cursor_input_mode(pragma::platform::CursorMode mode);
 		DLLCLIENT ::Vector2i get_window_size(lua_State *l);
-		DLLCLIENT bool inject_mouse_input(GLFW::MouseButton button, GLFW::KeyState state, GLFW::Modifier mods, const Vector2i &pCursorPos);
-		DLLCLIENT bool inject_mouse_input(GLFW::MouseButton button, GLFW::KeyState state, GLFW::Modifier mods);
-		DLLCLIENT bool inject_keyboard_input(GLFW::Key key, GLFW::KeyState state, GLFW::Modifier mods);
+		DLLCLIENT bool inject_mouse_input(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods, const Vector2i &pCursorPos);
+		DLLCLIENT bool inject_mouse_input(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods);
+		DLLCLIENT bool inject_keyboard_input(pragma::platform::Key key, pragma::platform::KeyState state, pragma::platform::Modifier mods);
 		DLLCLIENT bool inject_char_input(const std::string &c);
 		DLLCLIENT bool inject_scroll_input(lua_State *l, const Vector2 &offset, const ::Vector2i &pCursorPos);
 		DLLCLIENT bool inject_scroll_input(lua_State *l, const Vector2 &offset);

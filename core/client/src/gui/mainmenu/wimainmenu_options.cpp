@@ -23,7 +23,6 @@
 #include "pragma/rendering/c_msaa.h"
 #include "pragma/rendering/render_apis.hpp"
 #include "pragma/entities/environment/lights/c_env_shadow_csm.hpp"
-#include "pragma/localization.h"
 #include <sharedutils/util_string.h>
 #include "pragma/rendering/c_settings.hpp"
 #include <pragma/addonsystem/addonsystem.h>
@@ -39,6 +38,8 @@
 #include <prosper_window.hpp>
 
 import pragma.pad;
+import pragma.locale;
+import pragma.string.unicode;
 
 extern DLLCLIENT CEngine *c_engine;
 extern ClientState *client;
@@ -106,14 +107,14 @@ void WIMainMenuOptions::CloseMessageBox()
 	if(m_hMessageBox.IsValid())
 		m_hMessageBox->Remove();
 }
-void WIMainMenuOptions::Apply(GLFW::MouseButton button, GLFW::KeyState state, GLFW::Modifier)
+void WIMainMenuOptions::Apply(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier)
 {
-	if(button != GLFW::MouseButton::Left || state != GLFW::KeyState::Press)
+	if(button != pragma::platform::MouseButton::Left || state != pragma::platform::KeyState::Press)
 		return;
 	ApplyOptions();
 	CloseMessageBox();
 	/*auto *pMessageBox = WIMessageBox::Create(
-		Locale::GetText("menu_apply_restart_required"),Locale::GetText("menu_apply_restart_required_title"),
+		pragma::locale::get_text("menu_apply_restart_required"),pragma::locale::get_text("menu_apply_restart_required_title"),
 		WIMessageBox::Button::OK,
 		[](WIMessageBox *pMessageBox,WIMessageBox::Button) {
 			pMessageBox->RemoveSafely();
@@ -122,12 +123,12 @@ void WIMainMenuOptions::Apply(GLFW::MouseButton button, GLFW::KeyState state, GL
 	m_hMessageBox = pMessageBox->GetHandle();*/
 }
 
-void WIMainMenuOptions::ResetDefaults(GLFW::MouseButton button, GLFW::KeyState state, GLFW::Modifier)
+void WIMainMenuOptions::ResetDefaults(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier)
 {
-	if(button != GLFW::MouseButton::Left || state != GLFW::KeyState::Press)
+	if(button != pragma::platform::MouseButton::Left || state != pragma::platform::KeyState::Press)
 		return;
 	CloseMessageBox();
-	auto *pMessageBox = WIMessageBox::Create(Locale::GetText("menu_reset_defaults_confirm"), Locale::GetText("menu_reset_defaults_confirm_title"), WIMessageBox::Button::YESNO, [](WIMessageBox *pMessageBox, WIMessageBox::Button) { pMessageBox->RemoveSafely(); });
+	auto *pMessageBox = WIMessageBox::Create(pragma::locale::get_text("menu_reset_defaults_confirm"), pragma::locale::get_text("menu_reset_defaults_confirm_title"), WIMessageBox::Button::YESNO, [](WIMessageBox *pMessageBox, WIMessageBox::Button) { pMessageBox->RemoveSafely(); });
 	m_hMessageBox = pMessageBox->GetHandle();
 }
 
@@ -162,7 +163,7 @@ WICheckbox *WIMainMenuOptions::CreateCheckbox(std::string text)
 	return checkBox;
 }
 
-static bool sortResolutions(GLFW::Monitor::VideoMode &a, GLFW::Monitor::VideoMode &b) { return ((a.width < b.width) || (a.width == b.width && a.height < b.height)) ? true : false; }
+static bool sortResolutions(pragma::platform::Monitor::VideoMode &a, pragma::platform::Monitor::VideoMode &b) { return ((a.width < b.width) || (a.width == b.width && a.height < b.height)) ? true : false; }
 void WIMainMenuOptions::SetActiveMenu(WIHandle &hMenu)
 {
 	if(hMenu.get() == m_hActive.get() && hMenu.IsValid())
@@ -178,11 +179,11 @@ void WIMainMenuOptions::Initialize()
 {
 	WIMainMenuBase::Initialize();
 	EnableThinking();
-	AddMenuItem(Locale::GetText("menu_options_general"), FunctionCallback<void, WIMainMenuElement *>::Create([this](WIMainMenuElement *) { ShowGeneralSettings(); }));
-	AddMenuItem(Locale::GetText("menu_options_video"), FunctionCallback<void, WIMainMenuElement *>::Create([this](WIMainMenuElement *) { ShowVideoSettings(); }));
-	AddMenuItem(Locale::GetText("menu_options_audio"), FunctionCallback<void, WIMainMenuElement *>::Create([this](WIMainMenuElement *) { ShowAudioSettings(); }));
-	AddMenuItem(Locale::GetText("menu_options_controls"), FunctionCallback<void, WIMainMenuElement *>::Create([this](WIMainMenuElement *) { ShowControlSettings(); }));
-	AddMenuItem(Locale::GetText("back"), FunctionCallback<void, WIMainMenuElement *>::Create([this](WIMainMenuElement *) {
+	AddMenuItem(pragma::locale::get_text("menu_options_general"), FunctionCallback<void, WIMainMenuElement *>::Create([this](WIMainMenuElement *) { ShowGeneralSettings(); }));
+	AddMenuItem(pragma::locale::get_text("menu_options_video"), FunctionCallback<void, WIMainMenuElement *>::Create([this](WIMainMenuElement *) { ShowVideoSettings(); }));
+	AddMenuItem(pragma::locale::get_text("menu_options_audio"), FunctionCallback<void, WIMainMenuElement *>::Create([this](WIMainMenuElement *) { ShowAudioSettings(); }));
+	AddMenuItem(pragma::locale::get_text("menu_options_controls"), FunctionCallback<void, WIMainMenuElement *>::Create([this](WIMainMenuElement *) { ShowControlSettings(); }));
+	AddMenuItem(pragma::locale::get_text("back"), FunctionCallback<void, WIMainMenuElement *>::Create([this](WIMainMenuElement *) {
 		auto *mainMenu = dynamic_cast<WIMainMenu *>(GetParent());
 		if(mainMenu == nullptr)
 			return;
@@ -221,10 +222,10 @@ void WIMainMenuOptions::InitializeOptionsList(WIOptionsList *pList)
 	auto *pRow = pList->AddRow();
 	auto &gui = WGUI::GetInstance();
 	auto *buttonReset = gui.Create<WIButton>();
-	buttonReset->SetText(Locale::GetText("reset_defaults"));
+	buttonReset->SetText(pragma::locale::get_text("reset_defaults"));
 	buttonReset->SizeToContents();
 	buttonReset->SetAutoCenterToParent(true);
-	buttonReset->AddCallback("OnMouseEvent", FunctionCallback<util::EventReply, GLFW::MouseButton, GLFW::KeyState, GLFW::Modifier>::CreateWithOptionalReturn([this](util::EventReply *reply, GLFW::MouseButton button, GLFW::KeyState state, GLFW::Modifier mods) -> CallbackReturnType {
+	buttonReset->AddCallback("OnMouseEvent", FunctionCallback<util::EventReply, pragma::platform::MouseButton, pragma::platform::KeyState, pragma::platform::Modifier>::CreateWithOptionalReturn([this](util::EventReply *reply, pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods) -> CallbackReturnType {
 		ResetDefaults(button, state, mods);
 		*reply = util::EventReply::Handled;
 		return CallbackReturnType::HasReturnValue;
@@ -233,10 +234,10 @@ void WIMainMenuOptions::InitializeOptionsList(WIOptionsList *pList)
 	pRow->InsertElement(0, buttonReset);
 
 	auto *buttonApply = gui.Create<WIButton>();
-	buttonApply->SetText(Locale::GetText("apply"));
+	buttonApply->SetText(pragma::locale::get_text("apply"));
 	buttonApply->SizeToContents();
 	buttonApply->SetAutoCenterToParent(true);
-	buttonApply->AddCallback("OnMouseEvent", FunctionCallback<util::EventReply, GLFW::MouseButton, GLFW::KeyState, GLFW::Modifier>::CreateWithOptionalReturn([this](util::EventReply *reply, GLFW::MouseButton button, GLFW::KeyState state, GLFW::Modifier mods) -> CallbackReturnType {
+	buttonApply->AddCallback("OnMouseEvent", FunctionCallback<util::EventReply, pragma::platform::MouseButton, pragma::platform::KeyState, pragma::platform::Modifier>::CreateWithOptionalReturn([this](util::EventReply *reply, pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods) -> CallbackReturnType {
 		Apply(button, state, mods);
 		*reply = util::EventReply::Handled;
 		return CallbackReturnType::HasReturnValue;
@@ -250,16 +251,16 @@ void WIMainMenuOptions::InitializeGeneralSettings()
 	m_hGeneralSettings = CreateChild<WIOptionsList>();
 	m_hGeneralSettings->SetName("settings_general");
 	auto *pList = static_cast<WIOptionsList *>(m_hGeneralSettings.get());
-	auto title = Locale::GetText("general_options");
+	auto title = pragma::locale::get_text("general_options");
 	ustring::to_upper(title);
 	pList->SetTitle(title);
 	// Player Name
-	auto *teName = pList->AddTextEntry(Locale::GetText("player_name"), "playername");
+	auto *teName = pList->AddTextEntry(pragma::locale::get_text("player_name"), "playername");
 	teName->SizeToContents();
 	//
 	// Language
 	std::unordered_map<std::string, std::string> lanOptions {};
-	for(auto &pair : Locale::GetLanguages()) {
+	for(auto &pair : pragma::locale::get_languages()) {
 		auto &lanInfo = pair.second;
 		auto enabled = true;
 		if(lanInfo.configData)
@@ -268,41 +269,41 @@ void WIMainMenuOptions::InitializeGeneralSettings()
 			continue;
 		lanOptions[lanInfo.displayName] = pair.first;
 	}
-	WIDropDownMenu *language = pList->AddDropDownMenu(Locale::GetText("language"), lanOptions, "cl_language");
+	WIDropDownMenu *language = pList->AddDropDownMenu(pragma::locale::get_text("language"), lanOptions, "cl_language");
 	//
 
 	auto *pRowGameplay = pList->AddHeaderRow();
-	pRowGameplay->SetValue(0, Locale::GetText("gameplay_options"));
+	pRowGameplay->SetValue(0, pragma::locale::get_text("gameplay_options"));
 
 	// Physics Engine
 	std::unordered_map<std::string, std::string> physEngines {};
 	for(auto &engine : pragma::physics::IEnvironment::GetAvailablePhysicsEngines())
-		physEngines.insert(std::make_pair(Locale::GetText("physics_engine_" + engine), engine));
-	auto *pPhysEngineList = pList->AddDropDownMenu(Locale::GetText("physics_engine"), physEngines, "phys_engine");
+		physEngines.insert(std::make_pair(pragma::locale::get_text("physics_engine_" + engine), engine));
+	auto *pPhysEngineList = pList->AddDropDownMenu(pragma::locale::get_text("physics_engine"), physEngines, "phys_engine");
 	//
 
 	// Audio Engine
 	std::unordered_map<std::string, std::string> audioEngines {};
 	for(auto &engine : pragma::audio::get_available_audio_apis())
-		audioEngines.insert(std::make_pair(Locale::GetText("audio_engine_" + engine), engine));
-	auto *pAudioEngineList = pList->AddDropDownMenu(Locale::GetText("audio_engine"), audioEngines, "audio_engine");
+		audioEngines.insert(std::make_pair(pragma::locale::get_text("audio_engine_" + engine), engine));
+	auto *pAudioEngineList = pList->AddDropDownMenu(pragma::locale::get_text("audio_engine"), audioEngines, "audio_engine");
 	//
 
 	// Networking library
 	std::unordered_map<std::string, std::string> netLibs {};
 	for(auto &lib : pragma::networking::GetAvailableNetworkingModules())
-		netLibs.insert(std::make_pair(Locale::GetText("networking_library_" + lib), lib));
-	auto *pNetLibList = pList->AddDropDownMenu(Locale::GetText("networking_library"), netLibs, "net_library");
+		netLibs.insert(std::make_pair(pragma::locale::get_text("networking_library_" + lib), lib));
+	auto *pNetLibList = pList->AddDropDownMenu(pragma::locale::get_text("networking_library"), netLibs, "net_library");
 	//
 
-	pList->AddToggleChoice(Locale::GetText("enable_steamworks"), "steam_steamworks_enabled");
+	pList->AddToggleChoice(pragma::locale::get_text("enable_steamworks"), "steam_steamworks_enabled");
 
 	// Lua memory usage
 	auto *pRow = pList->AddHeaderRow();
-	pRow->SetValue(0, Locale::GetText("lua_memory_statistics"));
+	pRow->SetValue(0, pragma::locale::get_text("lua_memory_statistics"));
 	auto fAddLuaMemorySlider = [pList](const std::string &title, uint32_t totalSize) {
 		return pList
-		  ->AddSlider(Locale::GetText(title),
+		  ->AddSlider(pragma::locale::get_text(title),
 		    [totalSize](WISlider *pSlider) {
 			    pSlider->SetRange(0, totalSize, 1);
 			    pSlider->SetMouseInputEnabled(false);
@@ -375,19 +376,19 @@ void WIMainMenuOptions::InitializeVideoSettings()
 	m_hVideoSettings = CreateChild<WIOptionsList>();
 	m_hVideoSettings->SetName("settings_video");
 	auto *pList = static_cast<WIOptionsList *>(m_hVideoSettings.get());
-	auto title = Locale::GetText("video_options");
+	auto title = pragma::locale::get_text("video_options");
 	ustring::to_upper(title);
 	pList->SetTitle(title);
 
 	// Preset
 	auto *pListPreset = pList->AddChoiceList(
-	  Locale::GetText("preset"),
+	  pragma::locale::get_text("preset"),
 	  [](WIChoiceList *pList) {
-		  pList->AddChoice(Locale::GetText("minimal"), "0");
-		  pList->AddChoice(Locale::GetText("low"), "1");
-		  pList->AddChoice(Locale::GetText("medium"), "2");
-		  pList->AddChoice(Locale::GetText("high"), "3");
-		  pList->AddChoice(Locale::GetText("very_high"), "4");
+		  pList->AddChoice(pragma::locale::get_text("minimal"), "0");
+		  pList->AddChoice(pragma::locale::get_text("low"), "1");
+		  pList->AddChoice(pragma::locale::get_text("medium"), "2");
+		  pList->AddChoice(pragma::locale::get_text("high"), "3");
+		  pList->AddChoice(pragma::locale::get_text("very_high"), "4");
 	  },
 	  "cl_render_preset");
 	auto hThis = GetHandle();
@@ -576,34 +577,34 @@ void WIMainMenuOptions::InitializeVideoSettings()
 	}));
 	//
 	// Vertical Sync
-	auto *vSync = pList->AddToggleChoice(Locale::GetText("vertical_sync"), "cl_render_vsync_enabled");
+	auto *vSync = pList->AddToggleChoice(pragma::locale::get_text("vertical_sync"), "cl_render_vsync_enabled");
 	//
 	// Resolution Menu
 	// TODO Aspect Ratio
 	auto *resMenu = pList->AddDropDownMenu(
-	  Locale::GetText("resolution"),
+	  pragma::locale::get_text("resolution"),
 	  [](WIDropDownMenu *pMenu) {
 		  auto &context = WGUI::GetInstance().GetContext();
 		  auto &window = context.GetWindow();
 		  auto *monitor = window->GetMonitor();
-		  auto primaryMonitor = GLFW::get_primary_monitor();
+		  auto primaryMonitor = pragma::platform::get_primary_monitor();
 		  if(monitor == nullptr)
 			  monitor = &primaryMonitor;
 		  //GLWindow *window = c_engine->GetWindow();
-		  std::vector<GLFW::Monitor::VideoMode> modes;
+		  std::vector<pragma::platform::Monitor::VideoMode> modes;
 		  if(monitor != nullptr) {
 			  auto videoModes = monitor->GetSupportedVideoModes();
 			  modes.reserve(videoModes.size());
 			  for(auto it = videoModes.begin(); it != videoModes.end(); ++it) {
 				  auto &videoMode = *it;
-				  auto itMode = std::find_if(modes.begin(), modes.end(), [&videoMode](GLFW::Monitor::VideoMode &mode) { return (mode.width == videoMode.width && mode.height == videoMode.height) ? true : false; });
+				  auto itMode = std::find_if(modes.begin(), modes.end(), [&videoMode](pragma::platform::Monitor::VideoMode &mode) { return (mode.width == videoMode.width && mode.height == videoMode.height) ? true : false; });
 				  if(itMode == modes.end())
 					  modes.push_back(videoMode);
 			  }
 			  std::sort(modes.begin(), modes.end(), &sortResolutions);
 		  }
 		  for(int i = 0; i < modes.size(); i++) {
-			  const GLFWvidmode &videoMode = modes[i];
+			  const auto &videoMode = modes[i];
 			  std::string res = std::to_string(videoMode.width);
 			  res += "x";
 			  res += std::to_string(videoMode.height);
@@ -619,14 +620,14 @@ void WIMainMenuOptions::InitializeVideoSettings()
 	// Graphics API
 	std::unordered_map<std::string, std::string> graphicsAPIs {};
 	for(auto &api : pragma::rendering::get_available_graphics_apis())
-		graphicsAPIs.insert(std::make_pair(Locale::GetText("graphics_api_" + api), api));
-	auto *pGraphicsAPIList = pList->AddDropDownMenu(Locale::GetText("graphics_api"), graphicsAPIs, "render_api");
+		graphicsAPIs.insert(std::make_pair(pragma::locale::get_text("graphics_api_" + api), api));
+	auto *pGraphicsAPIList = pList->AddDropDownMenu(pragma::locale::get_text("graphics_api"), graphicsAPIs, "render_api");
 	//
 	// Display
 	WIDropDownMenu *display = pList->AddDropDownMenu(
-	  Locale::GetText("monitor"),
+	  pragma::locale::get_text("monitor"),
 	  [](WIDropDownMenu *pMenu) {
-		  auto monitors = GLFW::get_monitors();
+		  auto monitors = pragma::platform::get_monitors();
 
 		  std::vector<std::string> monitorNames(monitors.size());
 		  std::vector<std::string> monitorOptionNames(monitors.size());
@@ -660,7 +661,7 @@ void WIMainMenuOptions::InitializeVideoSettings()
 	// Device
 	// TODO
 #if 0
-	auto *pDeviceMenu = pList->AddDropDownMenu(Locale::GetText("physical_device"),[](WIDropDownMenu *pMenu) {
+	auto *pDeviceMenu = pList->AddDropDownMenu(pragma::locale::get_text("physical_device"),[](WIDropDownMenu *pMenu) {
 		auto deviceList = prosper::util::get_available_vendor_devices(c_engine->GetRenderContext());
 		for(auto &devInfo : deviceList)
 			pMenu->AddOption(devInfo.deviceName,std::to_string(umath::to_integral(devInfo.vendor)) +"," +std::to_string(devInfo.deviceId));
@@ -671,13 +672,13 @@ void WIMainMenuOptions::InitializeVideoSettings()
 #endif
 	//
 	// Window Mode
-	pList->AddChoiceList(Locale::GetText("window_mode"), {Locale::GetText("windowmode_fullscreen"), Locale::GetText("windowmode_windowed"), Locale::GetText("windowmode_noborder_window")}, "cl_render_window_mode");
+	pList->AddChoiceList(pragma::locale::get_text("window_mode"), {pragma::locale::get_text("windowmode_fullscreen"), pragma::locale::get_text("windowmode_windowed"), pragma::locale::get_text("windowmode_noborder_window")}, "cl_render_window_mode");
 	//
 	// FPS Limit
 	pList->AddChoiceList(
-	  Locale::GetText("fps_limit"),
+	  pragma::locale::get_text("fps_limit"),
 	  [](WIChoiceList *pList) {
-		  pList->AddChoice(Locale::GetText("no_limit"), "-1");
+		  pList->AddChoice(pragma::locale::get_text("no_limit"), "-1");
 		  pList->AddChoice("30 FPS", "30");
 		  pList->AddChoice("60 FPS", "60");
 		  pList->AddChoice("90 FPS", "90");
@@ -687,29 +688,29 @@ void WIMainMenuOptions::InitializeVideoSettings()
 	//
 	// Texture Quality (Mipmap Level)
 	auto texList = pList->AddChoiceList(
-	  Locale::GetText("texture_quality"),
+	  pragma::locale::get_text("texture_quality"),
 	  [](WIChoiceList *pList) {
-		  pList->AddChoice(Locale::GetText("minimal"), "0");
-		  pList->AddChoice(Locale::GetText("low"), "1");
-		  pList->AddChoice(Locale::GetText("medium"), "2");
-		  pList->AddChoice(Locale::GetText("high"), "3");
-		  pList->AddChoice(Locale::GetText("very_high"), "4");
+		  pList->AddChoice(pragma::locale::get_text("minimal"), "0");
+		  pList->AddChoice(pragma::locale::get_text("low"), "1");
+		  pList->AddChoice(pragma::locale::get_text("medium"), "2");
+		  pList->AddChoice(pragma::locale::get_text("high"), "3");
+		  pList->AddChoice(pragma::locale::get_text("very_high"), "4");
 	  },
 	  "cl_render_texture_quality");
 	m_hTexQuality = texList->GetHandle();
 	//
 	// Texture Streaming
-	auto *texStreaming = pList->AddToggleChoice(Locale::GetText("texture_streaming"), "cl_material_streaming_enabled");
+	auto *texStreaming = pList->AddToggleChoice(pragma::locale::get_text("texture_streaming"), "cl_material_streaming_enabled");
 	//
 	// Model Quality
 	auto *mdlQualityList = pList->AddChoiceList(
-	  Locale::GetText("model_quality"),
+	  pragma::locale::get_text("model_quality"),
 	  [](WIChoiceList *pList) {
-		  pList->AddChoice(Locale::GetText("minimal"), "10000");
-		  pList->AddChoice(Locale::GetText("low"), "3");
-		  pList->AddChoice(Locale::GetText("medium"), "2");
-		  pList->AddChoice(Locale::GetText("high"), "1");
-		  pList->AddChoice(Locale::GetText("very_high"), "0");
+		  pList->AddChoice(pragma::locale::get_text("minimal"), "10000");
+		  pList->AddChoice(pragma::locale::get_text("low"), "3");
+		  pList->AddChoice(pragma::locale::get_text("medium"), "2");
+		  pList->AddChoice(pragma::locale::get_text("high"), "1");
+		  pList->AddChoice(pragma::locale::get_text("very_high"), "0");
 	  },
 	  "cl_render_lod_bias");
 	m_hMdlQuality = mdlQualityList->GetHandle();
@@ -717,7 +718,7 @@ void WIMainMenuOptions::InitializeVideoSettings()
 	// Anti-Aliasing
 	std::vector<std::pair<std::string, std::string>> aaChoices;
 	auto maxSamples = GetMaxMSAASampleCount();
-	aaChoices.push_back(std::make_pair("off", Locale::GetText("off")));
+	aaChoices.push_back(std::make_pair("off", pragma::locale::get_text("off")));
 	aaChoices.push_back(std::make_pair("fxaa", "FXAA"));
 	int samples = 2;
 	/*while(samples <= maxSamples)
@@ -727,7 +728,7 @@ void WIMainMenuOptions::InitializeVideoSettings()
 		aaChoices.push_back(std::make_pair("msaa" +std::to_string(samples),o));
 		samples *= 2;
 	}*/
-	auto *antiAlias = pList->AddChoiceList(Locale::GetText("anti_aliasing"), aaChoices, "", "cl_render_anti_aliasing");
+	auto *antiAlias = pList->AddChoiceList(pragma::locale::get_text("anti_aliasing"), aaChoices, "", "cl_render_anti_aliasing");
 	m_hAntiAliasing = antiAlias->GetHandle();
 	if(antiAlias != nullptr) {
 		auto antiAliasingType = static_cast<pragma::rendering::AntiAliasing>(client->GetConVarInt("cl_render_anti_aliasing"));
@@ -746,47 +747,47 @@ void WIMainMenuOptions::InitializeVideoSettings()
 	//
 	// Tone Mapping
 	auto *pToneMappingList = pList->AddChoiceList(
-	  Locale::GetText("tone_mapping"),
+	  pragma::locale::get_text("tone_mapping"),
 	  [](WIChoiceList *pList) {
-		  pList->AddChoice(Locale::GetText("default"), "-1");
-		  pList->AddChoice(Locale::GetText("gamma_correction"), "0");
-		  pList->AddChoice(Locale::GetText("tone_mapping_reinhard"), "1");
-		  pList->AddChoice(Locale::GetText("tone_mapping_hejil_richard"), "2");
-		  pList->AddChoice(Locale::GetText("tone_mapping_uncharted"), "3");
-		  pList->AddChoice(Locale::GetText("tone_mapping_aces"), "4");
-		  pList->AddChoice(Locale::GetText("tone_mapping_gran_turismo"), "5");
+		  pList->AddChoice(pragma::locale::get_text("default"), "-1");
+		  pList->AddChoice(pragma::locale::get_text("gamma_correction"), "0");
+		  pList->AddChoice(pragma::locale::get_text("tone_mapping_reinhard"), "1");
+		  pList->AddChoice(pragma::locale::get_text("tone_mapping_hejil_richard"), "2");
+		  pList->AddChoice(pragma::locale::get_text("tone_mapping_uncharted"), "3");
+		  pList->AddChoice(pragma::locale::get_text("tone_mapping_aces"), "4");
+		  pList->AddChoice(pragma::locale::get_text("tone_mapping_gran_turismo"), "5");
 	  },
 	  "cl_render_tone_mapping");
 	//
 	// SSAO
-	m_hSsao = pList->AddToggleChoice(Locale::GetText("ssao"), "cl_render_ssao")->GetHandle();
+	m_hSsao = pList->AddToggleChoice(pragma::locale::get_text("ssao"), "cl_render_ssao")->GetHandle();
 	//
 	// HDRR
-	m_hdrr = pList->AddToggleChoice(Locale::GetText("hdrr"), "cl_render_hdrr")->GetHandle();
+	m_hdrr = pList->AddToggleChoice(pragma::locale::get_text("hdrr"), "cl_render_hdrr")->GetHandle();
 	//
 	// Bloom
-	m_hBloom = pList->AddToggleChoice(Locale::GetText("bloom"), "cl_render_bloom")->GetHandle();
+	m_hBloom = pList->AddToggleChoice(pragma::locale::get_text("bloom"), "cl_render_bloom")->GetHandle();
 	//
 	// Motion Blur
-	m_hMotionBlur = pList->AddSlider(Locale::GetText("motion_blur"), sliderInitializer, "cl_render_motion_blur")->GetHandle();
+	m_hMotionBlur = pList->AddSlider(pragma::locale::get_text("motion_blur"), sliderInitializer, "cl_render_motion_blur")->GetHandle();
 	//
 	// Horizontal FOV
 	pList->AddSlider(
-	  Locale::GetText("horizontal_fov"), [](WISlider *pSlider) { pSlider->SetRange(60, 120); }, "cl_render_fov");
+	  pragma::locale::get_text("horizontal_fov"), [](WISlider *pSlider) { pSlider->SetRange(60, 120); }, "cl_render_fov");
 	//
 	// Brightness
-	pList->AddSlider(Locale::GetText("brightness"), sliderInitializer, "cl_render_brightness");
+	pList->AddSlider(pragma::locale::get_text("brightness"), sliderInitializer, "cl_render_brightness");
 	//
 	// Contrast
-	pList->AddSlider(Locale::GetText("contrast"), sliderInitializer, "cl_render_contrast");
+	pList->AddSlider(pragma::locale::get_text("contrast"), sliderInitializer, "cl_render_contrast");
 	//
 	// Texture Filtering
 	auto *texFilter = pList->AddChoiceList(
-	  Locale::GetText("texture_filtering"),
+	  pragma::locale::get_text("texture_filtering"),
 	  [](WIChoiceList *pList) {
-		  pList->AddChoice(Locale::GetText("off"), "0");
-		  pList->AddChoice(Locale::GetText("texfilter_bilinear_filtering"), "1");
-		  pList->AddChoice(Locale::GetText("texfilter_trilinear_filtering"), "2");
+		  pList->AddChoice(pragma::locale::get_text("off"), "0");
+		  pList->AddChoice(pragma::locale::get_text("texfilter_bilinear_filtering"), "1");
+		  pList->AddChoice(pragma::locale::get_text("texfilter_trilinear_filtering"), "2");
 
 		  auto limits = c_engine->GetRenderContext().GetPhysicalDeviceLimits();
 		  std::vector<int> anisotropy;
@@ -805,7 +806,7 @@ void WIMainMenuOptions::InitializeVideoSettings()
 		  auto start = 3;
 		  for(auto it = anisotropy.begin(); it != anisotropy.end(); ++it) {
 			  auto v = *it;
-			  pList->AddChoice(Locale::GetText("texfilter_anisotropic_filtering") + " x" + std::to_string(v), std::to_string(start++));
+			  pList->AddChoice(pragma::locale::get_text("texfilter_anisotropic_filtering") + " x" + std::to_string(v), std::to_string(start++));
 		  }
 	  },
 	  "cl_render_texture_filtering");
@@ -813,35 +814,35 @@ void WIMainMenuOptions::InitializeVideoSettings()
 	//
 	// Occlusion Culling
 	auto *occlusionCulling = pList->AddChoiceList(
-	  Locale::GetText("occlusion_culling"),
+	  pragma::locale::get_text("occlusion_culling"),
 	  [](WIChoiceList *pList) {
-		  pList->AddChoice(Locale::GetText("disabled"), "0");
-		  pList->AddChoice(Locale::GetText("bruteforce"), "1");
-		  pList->AddChoice(Locale::GetText("chcplusplus"), "2");
-		  pList->AddChoice(Locale::GetText("bsp_and_octree"), "4");
+		  pList->AddChoice(pragma::locale::get_text("disabled"), "0");
+		  pList->AddChoice(pragma::locale::get_text("bruteforce"), "1");
+		  pList->AddChoice(pragma::locale::get_text("chcplusplus"), "2");
+		  pList->AddChoice(pragma::locale::get_text("bsp_and_octree"), "4");
 	  },
 	  "cl_render_occlusion_culling");
 	m_hOcclusionCulling = occlusionCulling->GetHandle();
 	//
 	// DOF
-	m_hDoF = pList->AddToggleChoice(Locale::GetText("depth_of_field"), "cl_render_depth_of_field")->GetHandle();
+	m_hDoF = pList->AddToggleChoice(pragma::locale::get_text("depth_of_field"), "cl_render_depth_of_field")->GetHandle();
 	//m_hDOF = dof->GetHandle();
 	//
 	// Present Mode
 	auto *presentMode = pList->AddChoiceList(
-	  Locale::GetText("present_mode"),
+	  pragma::locale::get_text("present_mode"),
 	  [](WIChoiceList *pList) {
 		  auto limits = c_engine->GetRenderContext().GetPhysicalDeviceLimits();
 		  auto maxImageCount = limits.maxSurfaceImageCount;
 		  if(maxImageCount > 0) {
 			  if(c_engine->GetRenderContext().IsPresentationModeSupported(prosper::PresentModeKHR::Immediate))
-				  pList->AddChoice(Locale::GetText("immediate"), "0");
+				  pList->AddChoice(pragma::locale::get_text("immediate"), "0");
 			  if(maxImageCount > 1) {
 				  if(c_engine->GetRenderContext().IsPresentationModeSupported(prosper::PresentModeKHR::Fifo))
-					  pList->AddChoice(Locale::GetText("fifo"), "1");
+					  pList->AddChoice(pragma::locale::get_text("fifo"), "1");
 				  if(maxImageCount > 2) {
 					  if(c_engine->GetRenderContext().IsPresentationModeSupported(prosper::PresentModeKHR::Mailbox))
-						  pList->AddChoice(Locale::GetText("mailbox"), "2");
+						  pList->AddChoice(pragma::locale::get_text("mailbox"), "2");
 				  }
 			  }
 		  }
@@ -851,97 +852,97 @@ void WIMainMenuOptions::InitializeVideoSettings()
 	//
 	// Particle Quality
 	auto *particleQuality = pList->AddChoiceList(
-	  Locale::GetText("particle_quality"),
+	  pragma::locale::get_text("particle_quality"),
 	  [](WIChoiceList *pList) {
-		  pList->AddChoice(Locale::GetText("disabled"), "0");
-		  pList->AddChoice(Locale::GetText("low"), "1");
-		  pList->AddChoice(Locale::GetText("medium"), "2");
-		  pList->AddChoice(Locale::GetText("high"), "3");
+		  pList->AddChoice(pragma::locale::get_text("disabled"), "0");
+		  pList->AddChoice(pragma::locale::get_text("low"), "1");
+		  pList->AddChoice(pragma::locale::get_text("medium"), "2");
+		  pList->AddChoice(pragma::locale::get_text("high"), "3");
 	  },
 	  "cl_render_particle_quality");
 	m_hParticleQuality = particleQuality->GetHandle();
 	//
 	// Shader Quality
 	auto *shaderQuality = pList->AddChoiceList(
-	  Locale::GetText("shader_quality"),
+	  pragma::locale::get_text("shader_quality"),
 	  [](WIChoiceList *pList) {
-		  pList->AddChoice(Locale::GetText("very_low"), "1");
-		  pList->AddChoice(Locale::GetText("low"), "3");
-		  pList->AddChoice(Locale::GetText("medium"), "6");
-		  pList->AddChoice(Locale::GetText("high"), "8");
-		  pList->AddChoice(Locale::GetText("very_high"), "10");
+		  pList->AddChoice(pragma::locale::get_text("very_low"), "1");
+		  pList->AddChoice(pragma::locale::get_text("low"), "3");
+		  pList->AddChoice(pragma::locale::get_text("medium"), "6");
+		  pList->AddChoice(pragma::locale::get_text("high"), "8");
+		  pList->AddChoice(pragma::locale::get_text("very_high"), "10");
 	  },
 	  "cl_render_shader_quality");
 	m_hShaderQuality = shaderQuality->GetHandle();
 	//
 	// Reflection Quality
 	auto *pReflectionQuality = pList->AddChoiceList(
-	  Locale::GetText("reflection_quality"),
+	  pragma::locale::get_text("reflection_quality"),
 	  [](WIChoiceList *pList) {
-		  pList->AddChoice(Locale::GetText("static_only"), "0");
-		  pList->AddChoice(Locale::GetText("dynamic"), "1");
-		  pList->AddChoice(Locale::GetText("full"), "2");
+		  pList->AddChoice(pragma::locale::get_text("static_only"), "0");
+		  pList->AddChoice(pragma::locale::get_text("dynamic"), "1");
+		  pList->AddChoice(pragma::locale::get_text("full"), "2");
 	  },
 	  "cl_render_reflection_quality");
 	m_hReflectionQuality = pReflectionQuality->GetHandle();
 	//
 	auto *pRow = pList->AddHeaderRow();
-	pRow->SetValue(0, Locale::GetText("lighting_and_shadows"));
+	pRow->SetValue(0, pragma::locale::get_text("lighting_and_shadows"));
 	// Shadow Resolution
 	auto *shadowRes = pList->AddChoiceList(
-	  Locale::GetText("shadow_resolution"),
+	  pragma::locale::get_text("shadow_resolution"),
 	  [](WIChoiceList *pList) {
 		  pList->AddChoice("256x256", "256");
 		  pList->AddChoice("512x512", "512");
 		  pList->AddChoice("1024x1024", "1024");
 		  pList->AddChoice("2048x2048", "2048");
-		  //pList->AddChoice(Locale::GetText("very_high"),"4096"); // NOT supported! See "cl_render_shadow_resolution"-callback in c_shadowmap.cpp for more information.
+		  //pList->AddChoice(pragma::locale::get_text("very_high"),"4096"); // NOT supported! See "cl_render_shadow_resolution"-callback in c_shadowmap.cpp for more information.
 	  },
 	  "cl_render_shadow_resolution");
 	m_hShadowRes = shadowRes->GetHandle();
 	//
 	// Shadow Quality
 	auto *pShadowQuality = pList->AddChoiceList(
-	  Locale::GetText("shadow_quality"),
+	  pragma::locale::get_text("shadow_quality"),
 	  [](WIChoiceList *pList) {
-		  pList->AddChoice(Locale::GetText("disabled"), "0");
-		  pList->AddChoice(Locale::GetText("low"), "1");
-		  pList->AddChoice(Locale::GetText("medium"), "2");
-		  pList->AddChoice(Locale::GetText("high"), "3");
-		  pList->AddChoice(Locale::GetText("very_high"), "4");
+		  pList->AddChoice(pragma::locale::get_text("disabled"), "0");
+		  pList->AddChoice(pragma::locale::get_text("low"), "1");
+		  pList->AddChoice(pragma::locale::get_text("medium"), "2");
+		  pList->AddChoice(pragma::locale::get_text("high"), "3");
+		  pList->AddChoice(pragma::locale::get_text("very_high"), "4");
 	  },
 	  "render_shadow_quality");
 	m_hShadowQuality = pShadowQuality->GetHandle();
 	//
 	// Dynamic Shadows
-	m_hDynamicShadows = pList->AddToggleChoice(Locale::GetText("shadow_enable_dynamic"), "cl_render_shadow_dynamic")->GetHandle();
+	m_hDynamicShadows = pList->AddToggleChoice(pragma::locale::get_text("shadow_enable_dynamic"), "cl_render_shadow_dynamic")->GetHandle();
 	//
 	// Shadow Update Frequency
 	m_hShadowUpdateFrequency = pList
 	                             ->AddSlider(
-	                               Locale::GetText("shadow_update_frequency"), [](WISlider *pSlider) { pSlider->SetRange(0, 10); }, "cl_render_shadow_update_frequency")
+	                               pragma::locale::get_text("shadow_update_frequency"), [](WISlider *pSlider) { pSlider->SetRange(0, 10); }, "cl_render_shadow_update_frequency")
 	                             ->GetHandle();
 	//
 	// PSSM Shadow Update Frequency Offset
 	m_hPssmShadowUpdateFrequencyOffset = pList
 	                                       ->AddSlider(
-	                                         Locale::GetText("shadow_pssm_update_frequency_offset"), [](WISlider *pSlider) { pSlider->SetRange(0, 10); }, "cl_render_shadow_pssm_update_frequency_offset")
+	                                         pragma::locale::get_text("shadow_pssm_update_frequency_offset"), [](WISlider *pSlider) { pSlider->SetRange(0, 10); }, "cl_render_shadow_pssm_update_frequency_offset")
 	                                       ->GetHandle();
 	//
 	// PSSM Split Count
 	m_hPssmSplitCount = pList
 	                      ->AddSlider(
-	                        Locale::GetText("shadow_pssm_split_count"), [](WISlider *pSlider) { pSlider->SetRange(1.f, static_cast<float>(pragma::CShadowCSMComponent::MAX_CASCADE_COUNT)); }, "cl_render_shadow_pssm_split_count")
+	                        pragma::locale::get_text("shadow_pssm_split_count"), [](WISlider *pSlider) { pSlider->SetRange(1.f, static_cast<float>(pragma::CShadowCSMComponent::MAX_CASCADE_COUNT)); }, "cl_render_shadow_pssm_split_count")
 	                      ->GetHandle();
 	//
 	// TODO Restore defaults
 
 	pRow = pList->AddHeaderRow();
-	pRow->SetValue(0, Locale::GetText("virtual_reality"));
+	pRow->SetValue(0, pragma::locale::get_text("virtual_reality"));
 	auto *pRowVr = pRow;
 	// Virtual Reality
-	auto *vrSupport = pList->AddToggleChoice(Locale::GetText("vr_support_enable"), "cl_render_vr_enabled");
-	/*auto *vrResMenu = pList->AddDropDownMenu(Locale::GetText("vr_resolution"),[](WIDropDownMenu *pMenu) {
+	auto *vrSupport = pList->AddToggleChoice(pragma::locale::get_text("vr_support_enable"), "cl_render_vr_enabled");
+	/*auto *vrResMenu = pList->AddDropDownMenu(pragma::locale::get_text("vr_resolution"),[](WIDropDownMenu *pMenu) {
 		std::vector<std::string> resolutions = {
 			"128x128",
 			"256x256"
@@ -956,8 +957,8 @@ void WIMainMenuOptions::InitializeVideoSettings()
 	// TODO
 #if 0
 	pRow = pList->AddHeaderRow();
-	pRow->SetValue(0,Locale::GetText("gpu_memory_statistics"));
-	m_hGPUMemoryUsage = pList->AddSlider(Locale::GetText("gpu_memory_current_usage"),[](WISlider *pSlider) {
+	pRow->SetValue(0,pragma::locale::get_text("gpu_memory_statistics"));
+	m_hGPUMemoryUsage = pList->AddSlider(pragma::locale::get_text("gpu_memory_current_usage"),[](WISlider *pSlider) {
 		auto memProps = prosper::util::get_physical_device_memory_properties(c_engine->GetRenderContext());
 		if(memProps.has_value() == false)
 			return;
@@ -992,8 +993,8 @@ void WIMainMenuOptions::InitializeVideoSettings()
 		pListPreset->SelectChoice(3);
 		if(m_hButtonApply.IsValid()) {
 			SetActiveMenu(m_hVideoSettings);
-			m_hButtonApply->InjectMouseInput(GLFW::MouseButton::Left, GLFW::KeyState::Press, {});
-			m_hButtonApply->InjectMouseInput(GLFW::MouseButton::Left, GLFW::KeyState::Release, {});
+			m_hButtonApply->InjectMouseInput(pragma::platform::MouseButton::Left, pragma::platform::KeyState::Press, {});
+			m_hButtonApply->InjectMouseInput(pragma::platform::MouseButton::Left, pragma::platform::KeyState::Release, {});
 			WIHandle hMenu {};
 			SetActiveMenu(hMenu);
 		}
@@ -1027,11 +1028,11 @@ void WIMainMenuOptions::InitializeAudioSettings()
 	m_hAudioSettings = CreateChild<WIOptionsList>();
 	m_hAudioSettings->SetName("settings_audio");
 	auto *pList = static_cast<WIOptionsList *>(m_hAudioSettings.get());
-	auto title = Locale::GetText("audio_options");
+	auto title = pragma::locale::get_text("audio_options");
 	ustring::to_upper(title);
 	pList->SetTitle(title);
 	// Audio Device
-	/*WIDropDownMenu *audioDevice = pList->AddDropDownMenu(Locale::GetText("audio_device"));
+	/*WIDropDownMenu *audioDevice = pList->AddDropDownMenu(pragma::locale::get_text("audio_device"));
 	auto alDevices = alcGetString(nullptr,ALC_DEVICE_SPECIFIER);
 	UInt i = 0;
 	while(alDevices[i] != '\0' && alDevices[i +1] != '\0')
@@ -1044,32 +1045,32 @@ void WIMainMenuOptions::InitializeAudioSettings()
 	//
 
 	// Audio Device
-	//WIDropDownMenu *captureDevice = pList->AddDropDownMenu(Locale::GetText("capture_device"));
+	//WIDropDownMenu *captureDevice = pList->AddDropDownMenu(pragma::locale::get_text("capture_device"));
 	//auto r = alcGetString(nullptr,ALC_CAPTURE_DEVICE_SPECIFIER);
 	//
 
 	// Master Volume
-	pList->AddSlider(Locale::GetText("master_volume"), sliderInitializer, "cl_audio_master_volume");
+	pList->AddSlider(pragma::locale::get_text("master_volume"), sliderInitializer, "cl_audio_master_volume");
 	//
 
 	// Effects Volume
-	pList->AddSlider(Locale::GetText("effects_volume"), sliderInitializer, "cl_effects_volume");
+	pList->AddSlider(pragma::locale::get_text("effects_volume"), sliderInitializer, "cl_effects_volume");
 	//
 
 	// Music Volume
-	pList->AddSlider(Locale::GetText("music_volume"), sliderInitializer, "cl_music_volume");
+	pList->AddSlider(pragma::locale::get_text("music_volume"), sliderInitializer, "cl_music_volume");
 	//
 
 	// Voice Volume
-	pList->AddSlider(Locale::GetText("voice_volume"), sliderInitializer, "cl_voice_volume");
+	pList->AddSlider(pragma::locale::get_text("voice_volume"), sliderInitializer, "cl_voice_volume");
 	//
 
 	// GUI Volume
-	pList->AddSlider(Locale::GetText("gui_volume"), sliderInitializer, "cl_gui_volume");
+	pList->AddSlider(pragma::locale::get_text("gui_volume"), sliderInitializer, "cl_gui_volume");
 	//
 
 	// Sound Device
-	/*auto *soundDeviceMenu = pList->AddDropDownMenu(Locale::GetText("audio_device"),[](WIDropDownMenu *pMenu) {
+	/*auto *soundDeviceMenu = pList->AddDropDownMenu(pragma::locale::get_text("audio_device"),[](WIDropDownMenu *pMenu) {
 		auto devices = al::get_devices();
 		for(auto &dev : devices)
 			pMenu->AddOption(dev,dev); // TODO: ID?
@@ -1077,50 +1078,50 @@ void WIMainMenuOptions::InitializeAudioSettings()
 	//
 
 	// Enable HRTF
-	pList->AddToggleChoice(Locale::GetText("enable_hrtf"), "cl_audio_hrtf_enabled");
+	pList->AddToggleChoice(pragma::locale::get_text("enable_hrtf"), "cl_audio_hrtf_enabled");
 	//
 
 	// Audio Streaming
-	pList->AddToggleChoice(Locale::GetText("audio_streaming"), "cl_audio_streaming_enabled");
+	pList->AddToggleChoice(pragma::locale::get_text("audio_streaming"), "cl_audio_streaming_enabled");
 	//
 
 	// Enable Microphone
-	pList->AddToggleChoice(Locale::GetText("enable_microphone"), "");
+	pList->AddToggleChoice(pragma::locale::get_text("enable_microphone"), "");
 	//
 
 	// Play sounds when window is not active
-	pList->AddToggleChoice(Locale::GetText("play_sounds_if_inactive"), "cl_audio_always_play");
+	pList->AddToggleChoice(pragma::locale::get_text("play_sounds_if_inactive"), "cl_audio_always_play");
 	//
 
 	auto *pRow = pList->AddHeaderRow();
-	pRow->SetValue(0, Locale::GetText("steam_audio"));
+	pRow->SetValue(0, pragma::locale::get_text("steam_audio"));
 
 	// Enable / Disable
-	pList->AddToggleChoice(Locale::GetText("enable_steam_audio"), "cl_steam_audio_enabled");
+	pList->AddToggleChoice(pragma::locale::get_text("enable_steam_audio"), "cl_steam_audio_enabled");
 	//
 
 	// Number of rays
 	pList->AddSlider(
-	  Locale::GetText("steam_audio_number_of_rays"), [](WISlider *pSlider) { pSlider->SetRange(1'024, 131'072, 1'024); }, "cl_steam_audio_number_of_rays");
+	  pragma::locale::get_text("steam_audio_number_of_rays"), [](WISlider *pSlider) { pSlider->SetRange(1'024, 131'072, 1'024); }, "cl_steam_audio_number_of_rays");
 	//
 
 	// Number of bounces
 	pList->AddSlider(
-	  Locale::GetText("steam_audio_number_of_bounces"), [](WISlider *pSlider) { pSlider->SetRange(1, 32, 1); }, "cl_steam_audio_number_of_bounces");
+	  pragma::locale::get_text("steam_audio_number_of_bounces"), [](WISlider *pSlider) { pSlider->SetRange(1, 32, 1); }, "cl_steam_audio_number_of_bounces");
 	//
 
 	// Ir duration
 	pList->AddSlider(
-	  Locale::GetText("steam_audio_ir_duration"), [](WISlider *pSlider) { pSlider->SetRange(0.5f, 4.0f, 0.1f); }, "cl_steam_audio_ir_duration");
+	  pragma::locale::get_text("steam_audio_ir_duration"), [](WISlider *pSlider) { pSlider->SetRange(0.5f, 4.0f, 0.1f); }, "cl_steam_audio_ir_duration");
 	//
 
 	// Ambisonics order
 	pList->AddSlider(
-	  Locale::GetText("steam_audio_ambisonics_order"), [](WISlider *pSlider) { pSlider->SetRange(0, 3, 1); }, "cl_steam_audio_ambisonics_order");
+	  pragma::locale::get_text("steam_audio_ambisonics_order"), [](WISlider *pSlider) { pSlider->SetRange(0, 3, 1); }, "cl_steam_audio_ambisonics_order");
 	//
 
 	// Sound propagation delay
-	pList->AddToggleChoice(Locale::GetText("enable_propagation_delay"), "cl_steam_audio_propagation_delay_enabled");
+	pList->AddToggleChoice(pragma::locale::get_text("enable_propagation_delay"), "cl_steam_audio_propagation_delay_enabled");
 	//
 
 	InitializeOptionsList(pList);
@@ -1130,17 +1131,17 @@ void WIMainMenuOptions::InitializeControlSettings()
 	m_hControlSettings = CreateChild<WIOptionsList>();
 	m_hControlSettings->SetName("settings_controls");
 	auto *pList = static_cast<WIOptionsList *>(m_hControlSettings.get());
-	auto title = Locale::GetText("control_options");
+	auto title = pragma::locale::get_text("control_options");
 	ustring::to_upper(title);
 	pList->SetTitle(title);
 	// Mouse Sensitivity
 	pList->AddSlider(
-	  Locale::GetText("mouse_sensitivity"), [](WISlider *pSlider) { pSlider->SetRange(0.f, 4.f, 0.f); }, "cl_mouse_sensitivity");
+	  pragma::locale::get_text("mouse_sensitivity"), [](WISlider *pSlider) { pSlider->SetRange(0.f, 4.f, 0.f); }, "cl_mouse_sensitivity");
 	//
 
 	// Invert Y-Axis
 	pList->AddToggleChoice(
-	  Locale::GetText("invert_y_axis"), "cl_mouse_pitch",
+	  pragma::locale::get_text("invert_y_axis"), "cl_mouse_pitch",
 	  [](bool b) {
 		  if(b == true)
 			  return "1";
@@ -1154,84 +1155,84 @@ void WIMainMenuOptions::InitializeControlSettings()
 	//
 
 	// Mouse Acceleration
-	pList->AddSlider(Locale::GetText("mouse_acceleration"), sliderInitializer, "cl_mouse_acceleration");
+	pList->AddSlider(pragma::locale::get_text("mouse_acceleration"), sliderInitializer, "cl_mouse_acceleration");
 	//
 
 	// Raw Input
-	//pList->AddToggleChoice(Locale::GetText("raw_input")); // TODO
+	//pList->AddToggleChoice(pragma::locale::get_text("raw_input")); // TODO
 	//
 
 	// Confine Mouse Cursor
-	//pList->AddToggleChoice(Locale::GetText("confine_mouse_cursor")); // TODO
+	//pList->AddToggleChoice(pragma::locale::get_text("confine_mouse_cursor")); // TODO
 	//
 	/*WIHandle m_hKeyBindings = WGUI::Create<WIKeyBindingList>(pList)->GetHandle();
 	WIKeyBindingList *t = m_hKeyBindings.get<WIKeyBindingList>();
 	t->SetPos(500,64);
 	t->SetSize(500,24 *t->GetRowCount());*/
 
-	auto *pCheckbox = pList->AddToggleChoice(Locale::GetText("enable_controllers"), "cl_controller_enabled");
+	auto *pCheckbox = pList->AddToggleChoice(pragma::locale::get_text("enable_controllers"), "cl_controller_enabled");
 	// Has to be applied immediately, otherwise controller keys can't be bound before applying the settings first
 	pCheckbox->AddCallback("OnChange", FunctionCallback<void>::Create([pCheckbox]() { c_engine->SetControllersEnabled(pCheckbox->IsChecked()); }));
 
 	auto *pRow = pList->AddHeaderRow();
-	pRow->SetValue(0, Locale::GetText("action"));
-	pRow->SetValue(1, Locale::GetText("key") + " 1");
-	pRow->SetValue(2, Locale::GetText("key") + " 2");
+	pRow->SetValue(0, pragma::locale::get_text("action"));
+	pRow->SetValue(1, pragma::locale::get_text("key") + " 1");
+	pRow->SetValue(2, pragma::locale::get_text("key") + " 2");
 
-	pList->AddKeyBinding(Locale::GetText("key_use"), "+use");
-
-	pRow = pList->AddHeaderRow();
-	pRow->SetValue(0, Locale::GetText("movement"));
-	pList->AddKeyBinding(Locale::GetText("key_move_forward"), "+forward");
-	pList->AddKeyBinding(Locale::GetText("key_move_back"), "+backward");
-	pList->AddKeyBinding(Locale::GetText("key_move_left"), "+left");
-	pList->AddKeyBinding(Locale::GetText("key_move_right"), "+right");
-
-	pList->AddKeyBinding(Locale::GetText("key_turn_up"), "+turn_up");
-	pList->AddKeyBinding(Locale::GetText("key_turn_down"), "+turn_down");
-	pList->AddKeyBinding(Locale::GetText("key_turn_left"), "+turn_left");
-	pList->AddKeyBinding(Locale::GetText("key_turn_right"), "+turn_right");
-
-	pList->AddKeyBinding(Locale::GetText("key_sprint"), "+sprint");
-	pList->AddKeyBinding(Locale::GetText("key_walk"), "+walk");
-	pList->AddKeyBinding(Locale::GetText("key_strafe"), "+strafe");
-	pList->AddKeyBinding(Locale::GetText("key_jump"), "+jump");
-	pList->AddKeyBinding(Locale::GetText("key_duck"), "+crouch");
-	pList->AddKeyBinding(Locale::GetText("key_noclip"), "noclip");
+	pList->AddKeyBinding(pragma::locale::get_text("key_use"), "+use");
 
 	pRow = pList->AddHeaderRow();
-	pRow->SetValue(0, Locale::GetText("gameplay"));
+	pRow->SetValue(0, pragma::locale::get_text("movement"));
+	pList->AddKeyBinding(pragma::locale::get_text("key_move_forward"), "+forward");
+	pList->AddKeyBinding(pragma::locale::get_text("key_move_back"), "+backward");
+	pList->AddKeyBinding(pragma::locale::get_text("key_move_left"), "+left");
+	pList->AddKeyBinding(pragma::locale::get_text("key_move_right"), "+right");
+
+	pList->AddKeyBinding(pragma::locale::get_text("key_turn_up"), "+turn_up");
+	pList->AddKeyBinding(pragma::locale::get_text("key_turn_down"), "+turn_down");
+	pList->AddKeyBinding(pragma::locale::get_text("key_turn_left"), "+turn_left");
+	pList->AddKeyBinding(pragma::locale::get_text("key_turn_right"), "+turn_right");
+
+	pList->AddKeyBinding(pragma::locale::get_text("key_sprint"), "+sprint");
+	pList->AddKeyBinding(pragma::locale::get_text("key_walk"), "+walk");
+	pList->AddKeyBinding(pragma::locale::get_text("key_strafe"), "+strafe");
+	pList->AddKeyBinding(pragma::locale::get_text("key_jump"), "+jump");
+	pList->AddKeyBinding(pragma::locale::get_text("key_duck"), "+crouch");
+	pList->AddKeyBinding(pragma::locale::get_text("key_noclip"), "noclip");
+
+	pRow = pList->AddHeaderRow();
+	pRow->SetValue(0, pragma::locale::get_text("gameplay"));
 	pRow->SetValue(1, "");
 	pRow->SetValue(2, "");
-	pList->AddKeyBinding(Locale::GetText("key_suicide"), "suicide");
-	pList->AddKeyBinding(Locale::GetText("key_flashlight"), "flashlight");
-	pList->AddKeyBinding(Locale::GetText("key_toggle_thirdperson"), "thirdperson");
+	pList->AddKeyBinding(pragma::locale::get_text("key_suicide"), "suicide");
+	pList->AddKeyBinding(pragma::locale::get_text("key_flashlight"), "flashlight");
+	pList->AddKeyBinding(pragma::locale::get_text("key_toggle_thirdperson"), "thirdperson");
 
 	pRow = pList->AddHeaderRow();
-	pRow->SetValue(0, Locale::GetText("combat"));
-	pRow->SetValue(1, "");
-	pRow->SetValue(2, "");
-
-	pList->AddKeyBinding(Locale::GetText("key_primary_attack"), "+attack");
-	pList->AddKeyBinding(Locale::GetText("key_secondary_attack"), "+attack2");
-	pList->AddKeyBinding(Locale::GetText("key_tertiary_attack"), "+attack3");
-	pList->AddKeyBinding(Locale::GetText("key_quaternary_attack"), "+attack4");
-	pList->AddKeyBinding(Locale::GetText("key_reload"), "+reload");
-	pList->AddKeyBinding(Locale::GetText("key_drop_weapon"), "drop");
-	pList->AddKeyBinding(Locale::GetText("key_next_weapon"), "next_weapon");
-	pList->AddKeyBinding(Locale::GetText("key_previous_weapon"), "previous_weapon");
-
-	pRow = pList->AddHeaderRow();
-	pRow->SetValue(0, Locale::GetText("other"));
+	pRow->SetValue(0, pragma::locale::get_text("combat"));
 	pRow->SetValue(1, "");
 	pRow->SetValue(2, "");
 
-	pList->AddKeyBinding(Locale::GetText("key_spraylogo"), "spray");
-	pList->AddKeyBinding(Locale::GetText("key_screenshot"), "screenshot");
-	pList->AddKeyBinding(Locale::GetText("key_quit"), "exit");
-	pList->AddKeyBinding(Locale::GetText("chat"), "chat");
-	pList->AddKeyBinding(Locale::GetText("key_toggle_vr_view"), "toggle cl_vr_hmd_view_enabled");
-	pList->AddKeyBinding(Locale::GetText("key_toggle_vr_mirror_window"), "toggle cl_vr_mirror_window_enabled");
+	pList->AddKeyBinding(pragma::locale::get_text("key_primary_attack"), "+attack");
+	pList->AddKeyBinding(pragma::locale::get_text("key_secondary_attack"), "+attack2");
+	pList->AddKeyBinding(pragma::locale::get_text("key_tertiary_attack"), "+attack3");
+	pList->AddKeyBinding(pragma::locale::get_text("key_quaternary_attack"), "+attack4");
+	pList->AddKeyBinding(pragma::locale::get_text("key_reload"), "+reload");
+	pList->AddKeyBinding(pragma::locale::get_text("key_drop_weapon"), "drop");
+	pList->AddKeyBinding(pragma::locale::get_text("key_next_weapon"), "next_weapon");
+	pList->AddKeyBinding(pragma::locale::get_text("key_previous_weapon"), "previous_weapon");
+
+	pRow = pList->AddHeaderRow();
+	pRow->SetValue(0, pragma::locale::get_text("other"));
+	pRow->SetValue(1, "");
+	pRow->SetValue(2, "");
+
+	pList->AddKeyBinding(pragma::locale::get_text("key_spraylogo"), "spray");
+	pList->AddKeyBinding(pragma::locale::get_text("key_screenshot"), "screenshot");
+	pList->AddKeyBinding(pragma::locale::get_text("key_quit"), "exit");
+	pList->AddKeyBinding(pragma::locale::get_text("chat"), "chat");
+	pList->AddKeyBinding(pragma::locale::get_text("key_toggle_vr_view"), "toggle cl_vr_hmd_view_enabled");
+	pList->AddKeyBinding(pragma::locale::get_text("key_toggle_vr_mirror_window"), "toggle cl_vr_mirror_window_enabled");
 
 	// Initialize custom control options from addons
 	auto *upadManager = dynamic_cast<pragma::pad::PackageManager *>(FileManager::GetPackageManager("upad"));
@@ -1258,7 +1259,7 @@ void WIMainMenuOptions::InitializeControlSettings()
 
 				auto *nodeLocale = xmlDoc.first_node("locale");
 				while(nodeLocale != nullptr) {
-					Locale::Load(nodeLocale->value());
+					pragma::locale::load(nodeLocale->value());
 
 					nodeLocale = nodeLocale->next_sibling("locale");
 				}
@@ -1279,14 +1280,14 @@ void WIMainMenuOptions::InitializeControlSettings()
 										auto bHeader = (attrHeader != nullptr && strcmp(attrHeader->value(), "true") == 0) ? true : false;
 										if(bHeader == true) {
 											pRow = pList->AddHeaderRow();
-											pRow->SetValue(0, Locale::GetText(nodeName->value()));
+											pRow->SetValue(0, pragma::locale::get_text(nodeName->value()));
 											pRow->SetValue(1, "");
 											pRow->SetValue(2, "");
 										}
 										else {
 											auto *nodeCmd = nodeControl->first_node("cmd");
 											if(nodeCmd != nullptr)
-												pList->AddKeyBinding(Locale::GetText(nodeName->value()), nodeCmd->value());
+												pList->AddKeyBinding(pragma::locale::get_text(nodeName->value()), nodeCmd->value());
 										}
 									}
 									nodeControl = nodeControl->next_sibling("control");

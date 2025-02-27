@@ -353,10 +353,10 @@ bool Lua::gui::skin_exists(const std::string &name)
 	return (skin != nullptr) ? true : false;
 }
 
-GLFW::Cursor::Shape Lua::gui::get_cursor() { return WGUI::GetInstance().GetCursor(); }
-void Lua::gui::set_cursor(GLFW::Cursor::Shape shape) { WGUI::GetInstance().SetCursor(shape); }
-GLFW::CursorMode Lua::gui::get_cursor_input_mode() { return WGUI::GetInstance().GetCursorInputMode(); }
-void Lua::gui::set_cursor_input_mode(GLFW::CursorMode mode) { WGUI::GetInstance().SetCursorInputMode(mode); }
+pragma::platform::Cursor::Shape Lua::gui::get_cursor() { return WGUI::GetInstance().GetCursor(); }
+void Lua::gui::set_cursor(pragma::platform::Cursor::Shape shape) { WGUI::GetInstance().SetCursor(shape); }
+pragma::platform::CursorMode Lua::gui::get_cursor_input_mode() { return WGUI::GetInstance().GetCursorInputMode(); }
+void Lua::gui::set_cursor_input_mode(pragma::platform::CursorMode mode) { WGUI::GetInstance().SetCursorInputMode(mode); }
 ::Vector2i Lua::gui::get_window_size(lua_State *l)
 {
 	auto &context = WGUI::GetInstance().GetContext();
@@ -414,7 +414,7 @@ std::shared_ptr<prosper::RenderTarget> Lua::gui::create_render_target(uint32_t w
 	return context.CreateRenderTarget({tex, depthStencilTex}, rp.shared_from_this());
 }
 
-bool Lua::gui::inject_mouse_input(GLFW::MouseButton button, GLFW::KeyState state, GLFW::Modifier mods, const Vector2i &pCursorPos)
+bool Lua::gui::inject_mouse_input(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods, const Vector2i &pCursorPos)
 {
 	Vector2i cursorPos = {};
 	auto &gui = WGUI::GetInstance();
@@ -423,18 +423,18 @@ bool Lua::gui::inject_mouse_input(GLFW::MouseButton button, GLFW::KeyState state
 	auto &window = c_engine->GetWindow();
 	window->SetCursorPos({pCursorPos.x, pCursorPos.y});
 
-	auto b = gui.HandleMouseInput(window, static_cast<GLFW::MouseButton>(button), static_cast<GLFW::KeyState>(state), static_cast<GLFW::Modifier>(mods));
+	auto b = gui.HandleMouseInput(window, static_cast<pragma::platform::MouseButton>(button), static_cast<pragma::platform::KeyState>(state), static_cast<pragma::platform::Modifier>(mods));
 	window->SetCursorPos(cursorPos);
 	return b;
 }
-bool Lua::gui::inject_mouse_input(GLFW::MouseButton button, GLFW::KeyState state, GLFW::Modifier mods)
+bool Lua::gui::inject_mouse_input(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods)
 {
 	Vector2i cursorPos = {};
 	auto &gui = WGUI::GetInstance();
 	auto &window = c_engine->GetWindow();
-	return gui.HandleMouseInput(window, static_cast<GLFW::MouseButton>(button), static_cast<GLFW::KeyState>(state), static_cast<GLFW::Modifier>(mods));
+	return gui.HandleMouseInput(window, static_cast<pragma::platform::MouseButton>(button), static_cast<pragma::platform::KeyState>(state), static_cast<pragma::platform::Modifier>(mods));
 }
-bool Lua::gui::inject_keyboard_input(GLFW::Key key, GLFW::KeyState state, GLFW::Modifier mods)
+bool Lua::gui::inject_keyboard_input(pragma::platform::Key key, pragma::platform::KeyState state, pragma::platform::Modifier mods)
 {
 	auto &window = c_engine->GetWindow();
 	return WGUI::GetInstance().HandleKeyboardInput(window, key, 0, state, mods);

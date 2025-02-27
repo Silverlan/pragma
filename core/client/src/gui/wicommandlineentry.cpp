@@ -24,8 +24,8 @@ void WICommandLineEntry::Initialize()
 	SetAutoCompleteEntryLimit(10);
 	if(m_hBase.IsValid()) {
 		auto hThis = GetHandle();
-		m_hBase->AddCallback("OnKeyEvent", FunctionCallback<util::EventReply, GLFW::Key, int, GLFW::KeyState, GLFW::Modifier>::CreateWithOptionalReturn([hThis, this](util::EventReply *reply, GLFW::Key key, int scanCode, GLFW::KeyState state, GLFW::Modifier mods) -> CallbackReturnType {
-			if((state != GLFW::KeyState::Press && state != GLFW::KeyState::Repeat) || hThis.IsValid() == false)
+		m_hBase->AddCallback("OnKeyEvent", FunctionCallback<util::EventReply, pragma::platform::Key, int, pragma::platform::KeyState, pragma::platform::Modifier>::CreateWithOptionalReturn([hThis, this](util::EventReply *reply, pragma::platform::Key key, int scanCode, pragma::platform::KeyState state, pragma::platform::Modifier mods) -> CallbackReturnType {
+			if((state != pragma::platform::KeyState::Press && state != pragma::platform::KeyState::Repeat) || hThis.IsValid() == false)
 				return CallbackReturnType::NoReturnValue;
 			const auto fApplyText = [this](WIMenuItem *pItem) {
 				if(pItem == nullptr)
@@ -42,7 +42,7 @@ void WICommandLineEntry::Initialize()
 				m_bSkipAutoComplete = false;
 			};
 			switch(key) {
-			case GLFW::Key::Up:
+			case pragma::platform::Key::Up:
 				{
 					auto *pContextMenu = static_cast<WIContextMenu *>(m_hAutoCompleteList.get());
 					if(pContextMenu != nullptr) {
@@ -55,7 +55,7 @@ void WICommandLineEntry::Initialize()
 					}
 					break;
 				}
-			case GLFW::Key::Down:
+			case pragma::platform::Key::Down:
 				{
 					auto *pContextMenu = static_cast<WIContextMenu *>(m_hAutoCompleteList.get());
 					if(pContextMenu != nullptr) {

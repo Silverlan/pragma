@@ -6,6 +6,7 @@
  */
 
 #include "stdafx_client.h"
+#include "pragma/game/c_game.h"
 #include "pragma/rendering/occlusion_culling/occlusion_culling_handler_brute_force.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/entities/components/c_render_component.hpp"

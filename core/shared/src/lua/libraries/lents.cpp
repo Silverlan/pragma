@@ -345,14 +345,11 @@ void Lua::ents::register_library(lua_State *l)
 		  ss << "[Flags:" << magic_enum::flags::enum_name(componentInfo.flags) << "]";
 		  return ss.str();
 	  });
-	componentInfoDef.property(
-	  "name", +[](lua_State *l, const pragma::ComponentInfo &componentInfo) { return std::string {*componentInfo.name}; });
-	componentInfoDef.property(
-	  "category", +[](lua_State *l, const pragma::ComponentInfo &componentInfo) { return std::string {*componentInfo.category}; });
+	componentInfoDef.property("name", +[](lua_State *l, const pragma::ComponentInfo &componentInfo) { return std::string {*componentInfo.name}; });
+	componentInfoDef.property("category", +[](lua_State *l, const pragma::ComponentInfo &componentInfo) { return std::string {*componentInfo.category}; });
 	componentInfoDef.def_readonly("id", &pragma::ComponentInfo::id);
 	componentInfoDef.def_readonly("flags", &pragma::ComponentInfo::flags);
-	componentInfoDef.def(
-	  "GetMemberCount", +[](const pragma::ComponentInfo &componentInfo) { return componentInfo.members.size(); });
+	componentInfoDef.def("GetMemberCount", +[](const pragma::ComponentInfo &componentInfo) { return componentInfo.members.size(); });
 	componentInfoDef.def(
 	  "FindMemberIndex", +[](const pragma::ComponentInfo &componentInfo, const std::string &name) -> std::optional<pragma::ComponentMemberIndex> {
 		  auto it = componentInfo.memberNameToIndex.find(name);
@@ -418,10 +415,8 @@ void Lua::ents::register_library(lua_State *l)
 	memberInfoDef.scope[coordinateTypeMetaDataDef];
 
 	auto poseTypeMetaDataDef = luabind::class_<pragma::ents::PoseTypeMetaData, pragma::ents::TypeMetaData>("PoseTypeMetaData");
-	poseTypeMetaDataDef.property(
-	  "posProperty", +[](lua_State *l, const pragma::ents::PoseTypeMetaData &metaData) { Lua::PushString(l, metaData.posProperty.c_str()); }, +[](lua_State *l, pragma::ents::PoseTypeMetaData &metaData, const std::string &prop) { metaData.posProperty = prop; });
-	poseTypeMetaDataDef.property(
-	  "rotProperty", +[](lua_State *l, const pragma::ents::PoseTypeMetaData &metaData) { Lua::PushString(l, metaData.rotProperty.c_str()); }, +[](lua_State *l, pragma::ents::PoseTypeMetaData &metaData, const std::string &prop) { metaData.rotProperty = prop; });
+	poseTypeMetaDataDef.property("posProperty", +[](lua_State *l, const pragma::ents::PoseTypeMetaData &metaData) { Lua::PushString(l, metaData.posProperty.c_str()); }, +[](lua_State *l, pragma::ents::PoseTypeMetaData &metaData, const std::string &prop) { metaData.posProperty = prop; });
+	poseTypeMetaDataDef.property("rotProperty", +[](lua_State *l, const pragma::ents::PoseTypeMetaData &metaData) { Lua::PushString(l, metaData.rotProperty.c_str()); }, +[](lua_State *l, pragma::ents::PoseTypeMetaData &metaData, const std::string &prop) { metaData.rotProperty = prop; });
 	poseTypeMetaDataDef.property(
 	  "scaleProperty", +[](lua_State *l, const pragma::ents::PoseTypeMetaData &metaData) { Lua::PushString(l, metaData.scaleProperty.c_str()); }, +[](lua_State *l, pragma::ents::PoseTypeMetaData &metaData, const std::string &prop) { metaData.scaleProperty = prop; });
 	memberInfoDef.scope[poseTypeMetaDataDef];
@@ -506,12 +501,9 @@ void Lua::ents::register_library(lua_State *l)
 		  return values;
 	  });
 	memberInfoDef.def_readonly("type", &pragma::ComponentMemberInfo::type);
-	memberInfoDef.property(
-	  "name", +[](lua_State *l, const pragma::ComponentMemberInfo &memInfo) { return std::string {*memInfo.GetName()}; });
-	memberInfoDef.property(
-	  "nameHash", +[](lua_State *l, const pragma::ComponentMemberInfo &memInfo) { return memInfo.GetNameHash(); });
-	memberInfoDef.property(
-	  "specializationType", +[](lua_State *l, const pragma::ComponentMemberInfo &memInfo) { return memInfo.GetSpecializationType(); });
+	memberInfoDef.property("name", +[](lua_State *l, const pragma::ComponentMemberInfo &memInfo) { return std::string {*memInfo.GetName()}; });
+	memberInfoDef.property("nameHash", +[](lua_State *l, const pragma::ComponentMemberInfo &memInfo) { return memInfo.GetNameHash(); });
+	memberInfoDef.property("specializationType", +[](lua_State *l, const pragma::ComponentMemberInfo &memInfo) { return memInfo.GetSpecializationType(); });
 	memberInfoDef.property(
 	  "customSpecializationType", +[](lua_State *l, const pragma::ComponentMemberInfo &memInfo) -> std::optional<std::string> {
 		  auto *type = memInfo.GetCustomSpecializationType();
@@ -519,14 +511,10 @@ void Lua::ents::register_library(lua_State *l)
 			  return {};
 		  return *type;
 	  });
-	memberInfoDef.property(
-	  "minValue", +[](lua_State *l, const pragma::ComponentMemberInfo &memInfo) { return memInfo.GetMin(); });
-	memberInfoDef.property(
-	  "maxValue", +[](lua_State *l, const pragma::ComponentMemberInfo &memInfo) { return memInfo.GetMax(); });
-	memberInfoDef.property(
-	  "stepSize", +[](lua_State *l, const pragma::ComponentMemberInfo &memInfo) { return memInfo.GetStepSize(); });
-	memberInfoDef.property(
-	  "metaData", +[](lua_State *l, const pragma::ComponentMemberInfo &memInfo) -> udm::PProperty { return memInfo.GetMetaData(); });
+	memberInfoDef.property("minValue", +[](lua_State *l, const pragma::ComponentMemberInfo &memInfo) { return memInfo.GetMin(); });
+	memberInfoDef.property("maxValue", +[](lua_State *l, const pragma::ComponentMemberInfo &memInfo) { return memInfo.GetMax(); });
+	memberInfoDef.property("stepSize", +[](lua_State *l, const pragma::ComponentMemberInfo &memInfo) { return memInfo.GetStepSize(); });
+	memberInfoDef.property("metaData", +[](lua_State *l, const pragma::ComponentMemberInfo &memInfo) -> udm::PProperty { return memInfo.GetMetaData(); });
 	memberInfoDef.property(
 	  "default", +[](lua_State *l, const pragma::ComponentMemberInfo &memInfo) -> udm_type {
 		  // Default value is currently only allowed for UDM types. Tag: component-member-udm-default
@@ -561,9 +549,9 @@ void Lua::ents::register_library(lua_State *l)
 
 	entsMod[componentInfoDef];
 
-	pragma::lua::define_custom_constructor<pragma::ents::RangeTypeMetaData, []() -> std::shared_ptr<pragma::ents::RangeTypeMetaData> { return std::make_shared<pragma::ents::RangeTypeMetaData>(); }>(l);
+	pragma::lua::define_custom_constructor<pragma::ents::RangeTypeMetaData, +[]() -> std::shared_ptr<pragma::ents::RangeTypeMetaData> { return std::make_shared<pragma::ents::RangeTypeMetaData>(); }>(l);
 	pragma::lua::define_custom_constructor<pragma::ents::RangeTypeMetaData,
-	  [](std::optional<float> min, std::optional<float> max, std::optional<float> stepSize) -> std::shared_ptr<pragma::ents::RangeTypeMetaData> {
+	  +[](std::optional<float> min, std::optional<float> max, std::optional<float> stepSize) -> std::shared_ptr<pragma::ents::RangeTypeMetaData> {
 		  auto metaData = std::shared_ptr<pragma::ents::RangeTypeMetaData> {new pragma::ents::RangeTypeMetaData {}};
 		  metaData->min = min;
 		  metaData->max = max;
@@ -572,9 +560,9 @@ void Lua::ents::register_library(lua_State *l)
 	  },
 	  std::optional<float>, std::optional<float>, std::optional<float>>(l);
 
-	pragma::lua::define_custom_constructor<pragma::ents::CoordinateTypeMetaData, []() -> std::shared_ptr<pragma::ents::CoordinateTypeMetaData> { return std::make_shared<pragma::ents::CoordinateTypeMetaData>(); }>(l);
+	pragma::lua::define_custom_constructor<pragma::ents::CoordinateTypeMetaData, +[]() -> std::shared_ptr<pragma::ents::CoordinateTypeMetaData> { return std::make_shared<pragma::ents::CoordinateTypeMetaData>(); }>(l);
 	pragma::lua::define_custom_constructor<pragma::ents::CoordinateTypeMetaData,
-	  [](umath::CoordinateSpace space, const std::string &parentProperty) -> std::shared_ptr<pragma::ents::CoordinateTypeMetaData> {
+	  +[](umath::CoordinateSpace space, const std::string &parentProperty) -> std::shared_ptr<pragma::ents::CoordinateTypeMetaData> {
 		  auto metaData = std::shared_ptr<pragma::ents::CoordinateTypeMetaData> {new pragma::ents::CoordinateTypeMetaData {}};
 		  metaData->space = space;
 		  metaData->parentProperty = parentProperty;
@@ -582,9 +570,9 @@ void Lua::ents::register_library(lua_State *l)
 	  },
 	  umath::CoordinateSpace, const std::string &>(l);
 
-	pragma::lua::define_custom_constructor<pragma::ents::PoseTypeMetaData, []() -> std::shared_ptr<pragma::ents::PoseTypeMetaData> { return std::make_shared<pragma::ents::PoseTypeMetaData>(); }>(l);
+	pragma::lua::define_custom_constructor<pragma::ents::PoseTypeMetaData, +[]() -> std::shared_ptr<pragma::ents::PoseTypeMetaData> { return std::make_shared<pragma::ents::PoseTypeMetaData>(); }>(l);
 	pragma::lua::define_custom_constructor<pragma::ents::PoseTypeMetaData,
-	  [](const std::string &posProperty, const std::string &rotProperty, const std::string &scaleProperty) -> std::shared_ptr<pragma::ents::PoseTypeMetaData> {
+	  +[](const std::string &posProperty, const std::string &rotProperty, const std::string &scaleProperty) -> std::shared_ptr<pragma::ents::PoseTypeMetaData> {
 		  auto metaData = std::shared_ptr<pragma::ents::PoseTypeMetaData> {new pragma::ents::PoseTypeMetaData {}};
 		  metaData->posProperty = posProperty;
 		  metaData->rotProperty = rotProperty;
@@ -593,34 +581,34 @@ void Lua::ents::register_library(lua_State *l)
 	  },
 	  const std::string &, const std::string &, const std::string &>(l);
 
-	pragma::lua::define_custom_constructor<pragma::ents::PoseComponentTypeMetaData, []() -> std::shared_ptr<pragma::ents::PoseComponentTypeMetaData> { return std::make_shared<pragma::ents::PoseComponentTypeMetaData>(); }>(l);
+	pragma::lua::define_custom_constructor<pragma::ents::PoseComponentTypeMetaData, +[]() -> std::shared_ptr<pragma::ents::PoseComponentTypeMetaData> { return std::make_shared<pragma::ents::PoseComponentTypeMetaData>(); }>(l);
 	pragma::lua::define_custom_constructor<pragma::ents::PoseComponentTypeMetaData,
-	  [](const std::string &poseProperty) -> std::shared_ptr<pragma::ents::PoseComponentTypeMetaData> {
+	  +[](const std::string &poseProperty) -> std::shared_ptr<pragma::ents::PoseComponentTypeMetaData> {
 		  auto metaData = std::shared_ptr<pragma::ents::PoseComponentTypeMetaData> {new pragma::ents::PoseComponentTypeMetaData {}};
 		  metaData->poseProperty = poseProperty;
 		  return metaData;
 	  },
 	  const std::string &>(l);
 
-	pragma::lua::define_custom_constructor<pragma::ents::OptionalTypeMetaData, []() -> std::shared_ptr<pragma::ents::OptionalTypeMetaData> { return std::make_shared<pragma::ents::OptionalTypeMetaData>(); }>(l);
+	pragma::lua::define_custom_constructor<pragma::ents::OptionalTypeMetaData, +[]() -> std::shared_ptr<pragma::ents::OptionalTypeMetaData> { return std::make_shared<pragma::ents::OptionalTypeMetaData>(); }>(l);
 	pragma::lua::define_custom_constructor<pragma::ents::OptionalTypeMetaData,
-	  [](const std::string &enabledProperty) -> std::shared_ptr<pragma::ents::OptionalTypeMetaData> {
+	  +[](const std::string &enabledProperty) -> std::shared_ptr<pragma::ents::OptionalTypeMetaData> {
 		  auto metaData = std::shared_ptr<pragma::ents::OptionalTypeMetaData> {new pragma::ents::OptionalTypeMetaData {}};
 		  metaData->enabledProperty = enabledProperty;
 		  return metaData;
 	  },
 	  const std::string &>(l);
-	pragma::lua::define_custom_constructor<pragma::ents::EnablerTypeMetaData, []() -> std::shared_ptr<pragma::ents::EnablerTypeMetaData> { return std::make_shared<pragma::ents::EnablerTypeMetaData>(); }>(l);
+	pragma::lua::define_custom_constructor<pragma::ents::EnablerTypeMetaData, +[]() -> std::shared_ptr<pragma::ents::EnablerTypeMetaData> { return std::make_shared<pragma::ents::EnablerTypeMetaData>(); }>(l);
 	pragma::lua::define_custom_constructor<pragma::ents::EnablerTypeMetaData,
-	  [](const std::string &targetProperty) -> std::shared_ptr<pragma::ents::EnablerTypeMetaData> {
+	  +[](const std::string &targetProperty) -> std::shared_ptr<pragma::ents::EnablerTypeMetaData> {
 		  auto metaData = std::shared_ptr<pragma::ents::EnablerTypeMetaData> {new pragma::ents::EnablerTypeMetaData {}};
 		  metaData->targetProperty = targetProperty;
 		  return metaData;
 	  },
 	  const std::string &>(l);
-	pragma::lua::define_custom_constructor<pragma::ents::ParentTypeMetaData, []() -> std::shared_ptr<pragma::ents::ParentTypeMetaData> { return std::make_shared<pragma::ents::ParentTypeMetaData>(); }>(l);
+	pragma::lua::define_custom_constructor<pragma::ents::ParentTypeMetaData, +[]() -> std::shared_ptr<pragma::ents::ParentTypeMetaData> { return std::make_shared<pragma::ents::ParentTypeMetaData>(); }>(l);
 	pragma::lua::define_custom_constructor<pragma::ents::ParentTypeMetaData,
-	  [](const std::string &parentProperty) -> std::shared_ptr<pragma::ents::ParentTypeMetaData> {
+	  +[](const std::string &parentProperty) -> std::shared_ptr<pragma::ents::ParentTypeMetaData> {
 		  auto metaData = std::shared_ptr<pragma::ents::ParentTypeMetaData> {new pragma::ents::ParentTypeMetaData {}};
 		  metaData->parentProperty = parentProperty;
 		  return metaData;

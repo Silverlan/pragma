@@ -20,7 +20,6 @@
 #include "pragma/gui/wiserverbrowser.h"
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
-#include "pragma/localization.h"
 #include <pragma/engine_version.h>
 #include <pragma/audio/alsound_type.h>
 #if WIMENU_ENABLE_PATREON_LOGO != 0
@@ -30,6 +29,8 @@
 
 #define DLLSPEC_ISTEAMWORKS DLLNETWORK
 #include <pragma/game/isteamworks.hpp>
+
+import pragma.locale;
 
 extern DLLCLIENT CEngine *c_engine;
 extern ClientState *client;
@@ -62,7 +63,7 @@ WIMainMenu::~WIMainMenu()
 		m_cbOnSteamworksShutdown.Remove();
 }
 
-util::EventReply WIMainMenu::KeyboardCallback(GLFW::Key key, int scanCode, GLFW::KeyState state, GLFW::Modifier mods)
+util::EventReply WIMainMenu::KeyboardCallback(pragma::platform::Key key, int scanCode, pragma::platform::KeyState state, pragma::platform::Modifier mods)
 {
 	if(!m_hActive.IsValid())
 		return util::EventReply::Handled;
@@ -180,8 +181,8 @@ void WIMainMenu::Initialize()
 	menu->SetVisible(false);
 	menu->SetSize(GetWidth(), GetHeight());
 	menu->SetAnchor(0.f, 0.f, 1.f, 1.f);
-	menu->AddMenuItem(Locale::GetText("menu_newgame"), FunctionCallback<>::Create([this]() { SetActiveMenu(m_hNewGame); }));
-	menu->AddMenuItem(Locale::GetText("menu_find_servers"), FunctionCallback<>::Create([this]() {
+	menu->AddMenuItem(pragma::locale::get_text("menu_newgame"), FunctionCallback<>::Create([this]() { SetActiveMenu(m_hNewGame); }));
+	menu->AddMenuItem(pragma::locale::get_text("menu_find_servers"), FunctionCallback<>::Create([this]() {
 		if(m_hServerBrowser.IsValid())
 			m_hServerBrowser->Remove();
 		m_hServerBrowser = CreateChild<WIServerBrowser>();
@@ -192,13 +193,13 @@ void WIMainMenu::Initialize()
 		sb->RequestFocus();
 	}));
 #ifdef _DEBUG
-	menu->AddMenuItem(Locale::GetText("menu_loadgame"), FunctionCallback<>::Create([this]() { SetActiveMenu(m_hLoad); }));
+	menu->AddMenuItem(pragma::locale::get_text("menu_loadgame"), FunctionCallback<>::Create([this]() { SetActiveMenu(m_hLoad); }));
 #endif
-	menu->AddMenuItem(Locale::GetText("menu_options"), FunctionCallback<>::Create([this]() { SetActiveMenu(m_hOptions); }));
+	menu->AddMenuItem(pragma::locale::get_text("menu_options"), FunctionCallback<>::Create([this]() { SetActiveMenu(m_hOptions); }));
 #if WIMENU_ENABLE_CREDITS_MENU != 0
-	menu->AddMenuItem(Locale::GetText("menu_credits"), FunctionCallback<>::Create([this]() { SetActiveMenu(m_hCredits); }));
+	menu->AddMenuItem(pragma::locale::get_text("menu_credits"), FunctionCallback<>::Create([this]() { SetActiveMenu(m_hCredits); }));
 #endif
-	/*menu->AddMenuItem(Locale::GetText("menu_addons"), FunctionCallback<>::Create([this]() {
+	/*menu->AddMenuItem(pragma::locale::get_text("menu_addons"), FunctionCallback<>::Create([this]() {
 		//SetActiveMenu(m_hMods);
 		//ShellExecute(0,0,engine_info::get_modding_hub_url().c_str(),0,0,SW_SHOW);
 		util::open_url_in_browser("steam://url/SteamWorkshopPage/" + std::to_string(engine_info::get_steam_app_id()));
@@ -206,7 +207,7 @@ void WIMainMenu::Initialize()
 #ifdef _DEBUG
 	menu->AddMenuItem("Loadscreen", FunctionCallback<>::Create([this]() { SetActiveMenu(m_hLoadScreen); }));
 #endif
-	menu->AddMenuItem(Locale::GetText("menu_quit"), FunctionCallback<>::Create([]() { c_engine->ShutDown(); }));
+	menu->AddMenuItem(pragma::locale::get_text("menu_quit"), FunctionCallback<>::Create([]() { c_engine->ShutDown(); }));
 	menu->SetKeyboardInputEnabled(true);
 
 	m_hNewGame = CreateChild<WIMainMenuNewGame>();
@@ -313,7 +314,7 @@ void WIMainMenu::Initialize()
 	pIcon->SetMaterial("wgui/patreon_logo");
 	pIcon->SetSize(64, 64);
 	pIcon->SetMouseInputEnabled(true);
-	pIcon->SetCursor(GLFW::Cursor::Shape::Hand);
+	pIcon->SetCursor(pragma::platform::Cursor::Shape::Hand);
 	pIcon->AddCallback("OnMousePressed", FunctionCallback<util::EventReply>::CreateWithOptionalReturn([](util::EventReply *reply) -> CallbackReturnType {
 		util::open_url_in_browser(engine_info::get_patreon_url());
 		*reply = util::EventReply::Handled;
@@ -411,8 +412,8 @@ void WIMainMenu::SetContinueMenu()
 		return;
 	m_menuType = 1;
 	WIMainMenuBase *menu = static_cast<WIMainMenuBase *>(m_hMain.get());
-	menu->AddMenuItem(0, Locale::GetText("menu_resumegame"), FunctionCallback<>::Create([]() { client->CloseMainMenu(); }));
-	menu->AddMenuItem(1, Locale::GetText("menu_disconnect"), FunctionCallback<>::Create([]() { c_engine->EndGame(); }));
+	menu->AddMenuItem(0, pragma::locale::get_text("menu_resumegame"), FunctionCallback<>::Create([]() { client->CloseMainMenu(); }));
+	menu->AddMenuItem(1, pragma::locale::get_text("menu_disconnect"), FunctionCallback<>::Create([]() { c_engine->EndGame(); }));
 }
 
 void WIMainMenu::SetNewGameMenu()

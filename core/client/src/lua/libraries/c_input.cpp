@@ -8,14 +8,14 @@
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientstate.h"
 
-Bool ClientState::RawMouseInput(GLFW::MouseButton button, GLFW::KeyState state, GLFW::Modifier mods)
+Bool ClientState::RawMouseInput(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods)
 {
 	auto *game = GetGameState();
 	if(game == nullptr)
 		return true;
 	return game->RawMouseInput(button, state, mods);
 }
-Bool ClientState::RawKeyboardInput(GLFW::Key key, int scanCode, GLFW::KeyState state, GLFW::Modifier mods, float magnitude)
+Bool ClientState::RawKeyboardInput(pragma::platform::Key key, int scanCode, pragma::platform::KeyState state, pragma::platform::Modifier mods, float magnitude)
 {
 	auto *game = GetGameState();
 	if(game == nullptr)
@@ -37,14 +37,14 @@ Bool ClientState::RawScrollInput(Vector2 offset)
 	return game->RawScrollInput(offset);
 }
 
-Bool ClientState::MouseInput(GLFW::MouseButton button, GLFW::KeyState action, GLFW::Modifier mods)
+Bool ClientState::MouseInput(pragma::platform::MouseButton button, pragma::platform::KeyState action, pragma::platform::Modifier mods)
 {
 	auto *game = GetGameState();
 	if(game == nullptr)
 		return true;
 	return game->MouseInput(button, action, mods);
 }
-Bool ClientState::KeyboardInput(GLFW::Key key, int scancode, GLFW::KeyState action, GLFW::Modifier mods, float magnitude)
+Bool ClientState::KeyboardInput(pragma::platform::Key key, int scancode, pragma::platform::KeyState action, pragma::platform::Modifier mods, float magnitude)
 {
 	auto *game = GetGameState();
 	if(game == nullptr)

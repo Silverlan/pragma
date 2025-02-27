@@ -16,7 +16,9 @@
 #include "pragma/gui/wiscrollcontainer.h"
 #include "pragma/gui/wikeyentry.h"
 #include "pragma/input/input_binding_layer.hpp"
-#include "pragma/localization.h"
+
+import pragma.locale;
+import pragma.string.unicode;
 
 LINK_WGUI_TO_CLASS(WIOptionsList, WIOptionsList);
 
@@ -281,17 +283,17 @@ void WIOptionsList::AddKeyBinding(const std::string &keyName, const std::string 
 	auto *row = AddRow(cvarName);
 	if(row == nullptr)
 		return;
-	std::vector<GLFW::Key> mappedKeys {};
+	std::vector<pragma::platform::Key> mappedKeys {};
 	c_engine->GetMappedKeys(cvarName, mappedKeys, 2u);
-	auto key1 = (mappedKeys.size() > 0) ? mappedKeys.at(0) : static_cast<GLFW::Key>(-1);
-	auto key2 = (mappedKeys.size() > 1) ? mappedKeys.at(1) : static_cast<GLFW::Key>(-1);
+	auto key1 = (mappedKeys.size() > 0) ? mappedKeys.at(0) : static_cast<pragma::platform::Key>(-1);
+	auto key2 = (mappedKeys.size() > 1) ? mappedKeys.at(1) : static_cast<pragma::platform::Key>(-1);
 	row->SetValue(0, keyName);
 	WIHandle hOptionsList = GetHandle();
-	auto callback = [hOptionsList, cvarName](int entryId, WIHandle hKeyOther, GLFW::Key oldKey, GLFW::Key newKey) mutable {
+	auto callback = [hOptionsList, cvarName](int entryId, WIHandle hKeyOther, pragma::platform::Key oldKey, pragma::platform::Key newKey) mutable {
 		if(!hOptionsList.IsValid())
 			return;
 		auto *pOptionsList = hOptionsList.get<WIOptionsList>();
-		if(oldKey != static_cast<GLFW::Key>(-1) && (!hKeyOther.IsValid() || (hKeyOther.get<WIKeyEntry>()->GetKey() != oldKey)))
+		if(oldKey != static_cast<pragma::platform::Key>(-1) && (!hKeyOther.IsValid() || (hKeyOther.get<WIKeyEntry>()->GetKey() != oldKey)))
 			pOptionsList->m_keyBindingsErase[entryId][cvarName] = oldKey;
 		pOptionsList->m_keyBindingsAdd[entryId][cvarName] = newKey;
 	};
@@ -303,9 +305,9 @@ void WIOptionsList::AddKeyBinding(const std::string &keyName, const std::string 
 	pKey2->SetKey(key2);
 	row->InsertElement(1, pKey1);
 	pKey1->SetAutoAlignToParent(true);
-	pKey1->AddCallback("OnKeyChanged", FunctionCallback<void, GLFW::Key, GLFW::Key>::Create(std::bind(callback, 0, pKey2->GetHandle(), std::placeholders::_1, std::placeholders::_2)));
+	pKey1->AddCallback("OnKeyChanged", FunctionCallback<void, pragma::platform::Key, pragma::platform::Key>::Create(std::bind(callback, 0, pKey2->GetHandle(), std::placeholders::_1, std::placeholders::_2)));
 
 	row->InsertElement(2, pKey2);
 	pKey2->SetAutoAlignToParent(true);
-	pKey2->AddCallback("OnKeyChanged", FunctionCallback<void, GLFW::Key, GLFW::Key>::Create(std::bind(callback, 1, pKey1->GetHandle(), std::placeholders::_1, std::placeholders::_2)));
+	pKey2->AddCallback("OnKeyChanged", FunctionCallback<void, pragma::platform::Key, pragma::platform::Key>::Create(std::bind(callback, 1, pKey1->GetHandle(), std::placeholders::_1, std::placeholders::_2)));
 }

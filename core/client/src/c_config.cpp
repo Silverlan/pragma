@@ -17,10 +17,11 @@ namespace pragma::string {
 	class Utf8StringArg;
 };
 
-#include "pragma/localization.h"
 #include <fsys/filesystem.h>
 #include "pragma/input/inputhelper.h"
 #include <pragma/logging.hpp>
+
+import pragma.locale;
 
 void CEngine::SaveClientConfig()
 {
@@ -105,22 +106,22 @@ void CEngine::PreloadConfig(NwStateType type, const std::string &configName)
 	auto &cfg = GetConVarConfig(NwStateType::Client);
 	if(!cfg)
 		return;
-	std::string lan = Locale::DetermineSystemLanguage();
+	std::string lan = pragma::locale::determine_system_language();
 	auto *args = cfg->Find("cl_language");
 	if(args && !args->empty())
 		lan = args->front();
-	Locale::SetLanguage(lan);
-	Locale::Load("inputs.txt");
-	Locale::Load("menu.txt");
-	Locale::Load("misc.txt");
-	Locale::Load("components.txt");
-	Locale::Load("shader_materials.txt");
+	pragma::locale::set_language(lan);
+	pragma::locale::load("inputs.txt");
+	pragma::locale::load("menu.txt");
+	pragma::locale::load("misc.txt");
+	pragma::locale::load("components.txt");
+	pragma::locale::load("shader_materials.txt");
 
 	constexpr auto numBts = umath::to_integral(util::debug::MessageBoxButton::Count);
 	std::array<std::string, numBts> labels;
 	for(size_t i = 0; i < numBts; ++i) {
 		auto identifier = ustring::to_snake_case(std::string {magic_enum::enum_name(static_cast<util::debug::MessageBoxButton>(i))});
-		labels[i] = Locale::GetText("prompt_button_" + identifier);
+		labels[i] = pragma::locale::get_text("prompt_button_" + identifier);
 	}
 	util::debug::set_button_labels(labels);
 }

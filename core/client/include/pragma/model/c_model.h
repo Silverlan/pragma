@@ -13,7 +13,7 @@
 
 class CModelMesh;
 namespace prosper {
-	class Buffer;
+	class IBuffer;
 };
 class DLLCLIENT CModel : public Model {
   public:

@@ -6,6 +6,7 @@
  */
 
 #include "stdafx_client.h"
+#include "pragma/c_engine.h"
 #include "pragma/networking/local_client.hpp"
 
 extern DLLNETWORK Engine *engine;

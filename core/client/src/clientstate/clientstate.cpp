@@ -171,6 +171,7 @@ void ClientState::ResetGameClient()
 }
 
 static auto cvSteamAudioEnabled = GetClientConVar("cl_steam_audio_enabled");
+import pragma.string.unicode;
 void ClientState::Initialize()
 {
 	/*Con::cwar<<"Client NetMessages:"<<Con::endl;
@@ -327,7 +328,7 @@ void ClientState::CloseMainMenu()
 	auto &window = c_engine->GetWindow();
 	if(window->IsFocused())
 		window->SetCursorPos(Vector2i(w / 2, h / 2));
-	window->SetCursorInputMode(GLFW::CursorMode::Disabled);
+	window->SetCursorInputMode(pragma::platform::CursorMode::Disabled);
 }
 void ClientState::OpenMainMenu()
 {
@@ -335,7 +336,7 @@ void ClientState::OpenMainMenu()
 	if(menu == NULL)
 		return;
 	auto &window = c_engine->GetWindow();
-	window->SetCursorInputMode(GLFW::CursorMode::Normal);
+	window->SetCursorInputMode(pragma::platform::CursorMode::Normal);
 	menu->SetVisible(true);
 }
 void ClientState::ToggleMainMenu()

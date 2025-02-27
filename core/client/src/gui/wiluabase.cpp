@@ -60,7 +60,7 @@ void WILuaBase::OnFirstThink()
 	CallLuaMember("OnFirstThink");
 }
 
-util::EventReply WILuaBase::MouseCallback(GLFW::MouseButton button, GLFW::KeyState state, GLFW::Modifier mods)
+util::EventReply WILuaBase::MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods)
 {
 	auto hThis = GetHandle();
 	if(WIBase::MouseCallback(button, state, mods) == util::EventReply::Handled)
@@ -71,7 +71,7 @@ util::EventReply WILuaBase::MouseCallback(GLFW::MouseButton button, GLFW::KeySta
 	CallLuaMember<uint32_t, int, int, int>("MouseCallback", &reply, static_cast<int>(button), static_cast<int>(state), static_cast<int>(mods));
 	return static_cast<util::EventReply>(reply);
 }
-util::EventReply WILuaBase::KeyboardCallback(GLFW::Key key, int scanCode, GLFW::KeyState state, GLFW::Modifier mods)
+util::EventReply WILuaBase::KeyboardCallback(pragma::platform::Key key, int scanCode, pragma::platform::KeyState state, pragma::platform::Modifier mods)
 {
 	auto hThis = GetHandle();
 	if(WIBase::KeyboardCallback(key, scanCode, state, mods) == util::EventReply::Handled)
@@ -82,7 +82,7 @@ util::EventReply WILuaBase::KeyboardCallback(GLFW::Key key, int scanCode, GLFW::
 	CallLuaMember<uint32_t, int, int, int, int>("KeyboardCallback", &reply, static_cast<int>(key), scanCode, static_cast<int>(state), static_cast<int>(mods));
 	return static_cast<util::EventReply>(reply);
 }
-util::EventReply WILuaBase::CharCallback(unsigned int c, GLFW::Modifier mods)
+util::EventReply WILuaBase::CharCallback(unsigned int c, pragma::platform::Modifier mods)
 {
 	auto hThis = GetHandle();
 	if(WIBase::CharCallback(c) == util::EventReply::Handled)

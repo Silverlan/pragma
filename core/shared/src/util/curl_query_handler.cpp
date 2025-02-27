@@ -6,6 +6,7 @@
  */
 
 #include "stdafx_shared.h"
+#include "pragma/engine.h"
 #include "pragma/util/curl_query_handler.hpp"
 #include <sharedutils/util_library.hpp>
 

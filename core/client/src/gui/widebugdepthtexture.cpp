@@ -6,6 +6,8 @@
  */
 
 #include "stdafx_client.h"
+#include "pragma/c_engine.h"
+#include "pragma/game/c_game.h"
 #include "pragma/gui/widebugdepthtexture.h"
 #include "pragma/rendering/shaders/c_shader_depth_to_rgb.h"
 #include "pragma/entities/environment/c_env_camera.h"

@@ -8,6 +8,7 @@
 #include "stdafx_client.h"
 #include "pragma/entities/components/liquid/c_liquid_surface_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
+#include "pragma/game/c_game.h"
 #include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/components/c_surface_component.hpp"

@@ -5,9 +5,11 @@
  * Copyright (c) 2024 Silverlan
  */
 
+#include <mathutil/umath.h>
+#include <glm/gtx/euler_angles.hpp>
 #include "asset/fbx_loader.hpp"
-#include <panima/animation.hpp>
-#include <panima/channel.hpp>
+#include "pragma/game/c_game.h"
+#include "pragma/clientstate/clientstate.h"
 #include <pragma/model/c_modelmesh.h>
 #include <pragma/model/c_model.h>
 #include <pragma/model/animation/bone.hpp>
@@ -26,6 +28,8 @@
 #include "pragma/asset/c_util_model.hpp"
 #include <cmaterial_manager2.hpp>
 #include <texturemanager/texture_manager2.hpp>
+
+import panima;
 
 using namespace pragma::asset::fbx;
 extern DLLCLIENT CGame *c_game;
@@ -1067,7 +1071,7 @@ std::optional<pragma::asset::AssetImportResult> FbxImporter::Load(std::string &o
 	return result;
 }
 Vector3 FbxImporter::GetTranslation(const ofbx::DVec3 &o) { return {o.x, o.y, o.z}; }
-#include <glm/gtx/euler_angles.hpp>
+
 Quat FbxImporter::GetRotation(const ofbx::DVec3 &o, RotationOrder order)
 {
 	order = RotationOrder::Yxz;

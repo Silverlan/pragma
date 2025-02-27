@@ -67,8 +67,8 @@ class DLLCLIENT WIMainMenuOptions : public WIMainMenuBase {
 
 	CallbackHandle m_joystickStateChanged = {};
 	int m_yOffset;
-	void Apply(GLFW::MouseButton button, GLFW::KeyState state, GLFW::Modifier mods);
-	void ResetDefaults(GLFW::MouseButton button, GLFW::KeyState state, GLFW::Modifier mods);
+	void Apply(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods);
+	void ResetDefaults(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods);
 	void ApplyOptions();
 	void ApplyWindowSize();
 	void CloseMessageBox();

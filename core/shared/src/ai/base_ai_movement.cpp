@@ -6,6 +6,8 @@
  */
 
 #include "stdafx_shared.h"
+#include <mathutil/umath.h>
+#include <glm/gtx/projection.hpp>
 #include "pragma/entities/components/base_ai_component.hpp"
 #include "pragma/entities/components/base_character_component.hpp"
 #include "pragma/ai/ai_definitions.h"
@@ -20,7 +22,6 @@
 #include "pragma/physics/controller.hpp"
 #include "pragma/physics/shape.hpp"
 #include <pragma/physics/movetypes.h>
-#include <glm/gtx/projection.hpp>
 
 #define AI_OBSTRUCTION_CHECK_RAYCAST_TYPE_RAY 0
 #define AI_OBSTRUCTION_CHECK_RAYCAST_TYPE_SWEEP 1

@@ -10,6 +10,7 @@
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/shaders/c_shader_forwardp_light_culling.hpp"
 #include "pragma/rendering/shaders/world/c_shader_pbr.hpp"
+#include "pragma/game/game_limits.h"
 #include "pragma/model/c_vertex_buffer_data.hpp"
 #include "pragma/rendering/renderers/raytracing_renderer.hpp"
 #include <shader/prosper_shader_t.hpp>

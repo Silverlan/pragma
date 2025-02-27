@@ -6,6 +6,8 @@
  */
 
 #include "stdafx_client.h"
+#include "pragma/clientstate/clientstate.h"
+#include "pragma/game/c_game.h"
 #include "pragma/entities/components/liquid/c_liquid_control_component.hpp"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/lua/c_lentity_handles.hpp"

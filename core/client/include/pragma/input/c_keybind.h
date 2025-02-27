@@ -11,7 +11,9 @@
 #include <string>
 #include <memory>
 #include <vector>
-#include <iglfw/glfw_keys.h>
+
+import pragma.platform;
+
 #pragma warning(push)
 #pragma warning(disable : 4251)
 struct DLLCLIENT KeyBind {
@@ -38,7 +40,7 @@ struct DLLCLIENT KeyBind {
 	Type GetType() const;
 	const std::string &GetBind() const;
 	std::optional<luabind::function<>> GetFunction() const;
-	bool Execute(GLFW::KeyState inputState, GLFW::KeyState pressState, GLFW::Modifier mods, float magnitude = 1.f);
+	bool Execute(pragma::platform::KeyState inputState, pragma::platform::KeyState pressState, pragma::platform::Modifier mods, float magnitude = 1.f);
 };
 #pragma warning(pop)
 #endif

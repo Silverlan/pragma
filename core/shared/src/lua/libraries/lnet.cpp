@@ -6,6 +6,7 @@
  */
 
 #include "stdafx_shared.h"
+#include "pragma/engine.h"
 #include "pragma/lua/libraries/lnet.hpp"
 #include "pragma/networking/enums.hpp"
 #include <networkmanager/interface/nwm_manager.hpp>

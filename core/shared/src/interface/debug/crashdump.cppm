@@ -5,26 +5,13 @@
  * Copyright (c) 2021 Silverlan
  */
 
-#ifndef __MDUMP_H__
-#define __MDUMP_H__
+module;
 
-#include "pragma/definitions.h"
+#include "debug/crashdump_helper.hpp"
 
-#ifdef _WIN32
-#if _MSC_VER < 1300
-#define DECLSPEC_DEPRECATED
-// VC6: change this path to your Platform SDK headers
-#include "M:\\dev7\\vs\\devtools\\common\\win32sdk\\include\\dbghelp.h" // must be XP version of file
-#else
-// VC7: ships with updated headers
-#include "dbghelp.h"
-#endif
+export module pragma.debug.crashdump;
 
-// based on dbghelp.h
-typedef BOOL(WINAPI *MINIDUMPWRITEDUMP)(HANDLE hProcess, DWORD dwPid, HANDLE hFile, MINIDUMP_TYPE DumpType, CONST PMINIDUMP_EXCEPTION_INFORMATION ExceptionParam, CONST PMINIDUMP_USER_STREAM_INFORMATION UserStreamParam, CONST PMINIDUMP_CALLBACK_INFORMATION CallbackParam);
-#endif
-
-namespace pragma::debug {
+export namespace pragma::debug {
 	class DLLNETWORK CrashHandler {
 	  public:
 		static CrashHandler &Get();
@@ -44,4 +31,3 @@ namespace pragma::debug {
 #endif
 	};
 };
-#endif

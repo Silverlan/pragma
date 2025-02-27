@@ -84,15 +84,15 @@ void KeyBind::Initialize()
 	});
 }
 
-bool KeyBind::Execute(GLFW::KeyState inputState, GLFW::KeyState pressState, GLFW::Modifier mods, float magnitude)
+bool KeyBind::Execute(pragma::platform::KeyState inputState, pragma::platform::KeyState pressState, pragma::platform::Modifier mods, float magnitude)
 {
 	auto type = GetType();
 	switch(type) {
 	case Type::Regular: // Regular bind
 		{
-			auto bAxisInput = (mods & GLFW::Modifier::AxisInput) != GLFW::Modifier::None;
-			auto bNegativeAxis = (bAxisInput == true && (mods & GLFW::Modifier::AxisNegative) != GLFW::Modifier::None) ? true : false;
-			auto bReleased = (pressState == GLFW::KeyState::Release) ? true : false;
+			auto bAxisInput = (mods & pragma::platform::Modifier::AxisInput) != pragma::platform::Modifier::None;
+			auto bNegativeAxis = (bAxisInput == true && (mods & pragma::platform::Modifier::AxisNegative) != pragma::platform::Modifier::None) ? true : false;
+			auto bReleased = (pressState == pragma::platform::KeyState::Release) ? true : false;
 			auto bExecutedCmd = false;
 			for(auto &info : m_cmds) {
 				auto bActionCmd = (info.cmd.empty() == false && info.cmd.front() == '+') ? true : false;
@@ -110,7 +110,7 @@ bool KeyBind::Execute(GLFW::KeyState inputState, GLFW::KeyState pressState, GLFW
 						bExecutedCmd = true; // Single axis commands have priority over everything else
 					if(bAxisInput == true) {
 						// invalidKeyState is true if the input is neither pressed, nor released
-						auto invalidKeyState = (pressState == GLFW::KeyState::Invalid) ? true : false;
+						auto invalidKeyState = (pressState == pragma::platform::KeyState::Invalid) ? true : false;
 
 						if((flags & ConVarFlags::JoystickAxisContinuous) != ConVarFlags::None && (cmdReleased == true || invalidKeyState == true))
 							cmdReleased = (c_engine->IsValidAxisInput(magnitude) == false) ? true : false; // Input won't count as 'released' unless joystick axis is at home position (near 0)
@@ -136,23 +136,23 @@ bool KeyBind::Execute(GLFW::KeyState inputState, GLFW::KeyState pressState, GLFW
 		}
 	case Type::Function: // Lua-function bind
 		{
-			if(pressState != GLFW::KeyState::Press && pressState != GLFW::KeyState::Release)
+			if(pressState != pragma::platform::KeyState::Press && pressState != pragma::platform::KeyState::Release)
 				return false;
 			auto *clState = static_cast<ClientState *>(c_engine->GetClientState());
 			if(clState == NULL)
 				return false;
 			auto *game = clState->GetGameState();
 			// TODO: Check for errors?
-			(*m_function)((pressState == GLFW::KeyState::Press) ? true : false);
+			(*m_function)((pressState == pragma::platform::KeyState::Press) ? true : false);
 			return true;
 		}
 		// Deprecated (Replaced by "toggle" console command)
 		/*case Type::Toggle: // BindToggle
 		{
-			if(pressState != GLFW::KeyState::Press && pressState != GLFW::KeyState::Release)
+			if(pressState != pragma::platform::KeyState::Press && pressState != pragma::platform::KeyState::Release)
 				return false;
 			std::string bind = GetBind();
-			if(pressState == GLFW::KeyState::Press)
+			if(pressState == pragma::platform::KeyState::Press)
 			{
 				for(auto &info : m_cmds)
 					KeyBind_CmdToggle(info.cmd,info.argv);

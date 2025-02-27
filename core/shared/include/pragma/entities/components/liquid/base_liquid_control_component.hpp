@@ -9,6 +9,8 @@
 #define __BASE_LIQUID_CONTROL_COMPONENT_HPP__
 
 #include "pragma/entities/components/base_entity_component.hpp"
+#include "pragma/physics/phys_liquid.hpp"
+#include "pragma/math/surfacematerial.h"
 
 struct BulletInfo;
 namespace pragma {

@@ -18,8 +18,8 @@ class DLLCLIENT WIMainMenuBase : public WIBase {
   public:
 	WIMainMenuBase();
 	virtual void Initialize() override;
-	virtual util::EventReply MouseCallback(GLFW::MouseButton button, GLFW::KeyState state, GLFW::Modifier mods) override;
-	virtual util::EventReply KeyboardCallback(GLFW::Key key, int scanCode, GLFW::KeyState state, GLFW::Modifier mods) override;
+	virtual util::EventReply MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods) override;
+	virtual util::EventReply KeyboardCallback(pragma::platform::Key key, int scanCode, pragma::platform::KeyState state, pragma::platform::Modifier mods) override;
 	void SelectItem(int i);
 	void SelectNextItem();
 	void SelectPreviousItem();
@@ -55,7 +55,7 @@ class DLLCLIENT WIMainMenuElement : public WIBase {
 	void Select();
 	void Deselect();
 	void SetText(std::string &text);
-	virtual util::EventReply MouseCallback(GLFW::MouseButton button, GLFW::KeyState state, GLFW::Modifier mods) override;
+	virtual util::EventReply MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods) override;
 	virtual void OnCursorEntered() override;
 	virtual void OnCursorExited() override;
 	void Activate();

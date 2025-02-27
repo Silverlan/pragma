@@ -9,9 +9,9 @@
 #include "pragma/model/animation/skeletal_animation.hpp"
 #include "pragma/model/animation/animation.hpp"
 #include <udm.hpp>
-#include <panima/channel.hpp>
 #include "pragma/model/animation/pose.hpp"
-#include <panima/slice.hpp>
+
+import panima;
 
 Activity pragma::animation::skeletal::get_activity(const panima::Animation &anim)
 {

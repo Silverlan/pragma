@@ -6,7 +6,8 @@
  */
 
 #include "stdafx_client.h"
-
+#include "pragma/c_engine.h"
+#include "pragma/game/c_game.h"
 namespace pragma::string {
 	class Utf8String;
 	class Utf8StringView;
@@ -25,13 +26,13 @@ import pragma.string.unicode;
 
 extern DLLCLIENT CEngine *c_engine;
 
-Bool CGame::RawMouseInput(GLFW::MouseButton button, GLFW::KeyState state, GLFW::Modifier mods)
+Bool CGame::RawMouseInput(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods)
 {
 	if(m_inputCallbackHandler.CallLuaEvents<int, int, int>("OnMouseInput", static_cast<int>(button), static_cast<int>(state), static_cast<int>(mods)) == util::EventReply::Handled)
 		return false;
 	return true;
 }
-Bool CGame::RawKeyboardInput(GLFW::Key key, int, GLFW::KeyState state, GLFW::Modifier mods, float magnitude)
+Bool CGame::RawKeyboardInput(pragma::platform::Key key, int, pragma::platform::KeyState state, pragma::platform::Modifier mods, float magnitude)
 {
 	if(m_inputCallbackHandler.CallLuaEvents<int, int, int>("OnKeyboardInput", static_cast<int>(key), static_cast<int>(state), static_cast<int>(mods)) == util::EventReply::Handled)
 		return false;
@@ -50,15 +51,15 @@ Bool CGame::RawScrollInput(Vector2 offset)
 	return true;
 }
 
-Bool CGame::MouseInput(GLFW::MouseButton button, GLFW::KeyState state, GLFW::Modifier mods)
+Bool CGame::MouseInput(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods)
 {
 	auto r = false;
-	int bt = static_cast<int>(button) - static_cast<int>(GLFW::Key::Last);
+	int bt = static_cast<int>(button) - static_cast<int>(pragma::platform::Key::Last);
 	if(CallLuaCallbacks<bool, int, int, int>("OnMouseInput", &r, bt, static_cast<int>(state), static_cast<int>(mods)) == CallbackReturnType::HasReturnValue)
 		return r;
 	return true;
 }
-Bool CGame::KeyboardInput(GLFW::Key key, int, GLFW::KeyState state, GLFW::Modifier mods, float magnitude)
+Bool CGame::KeyboardInput(pragma::platform::Key key, int, pragma::platform::KeyState state, pragma::platform::Modifier mods, float magnitude)
 {
 	auto r = false;
 	if(CallLuaCallbacks<bool, int, int, int>("OnKeyboardInput", &r, static_cast<int>(key), static_cast<int>(state), static_cast<int>(mods)) == CallbackReturnType::HasReturnValue)

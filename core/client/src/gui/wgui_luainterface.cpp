@@ -27,7 +27,7 @@ CallbackHandle WGUILuaInterface::m_cbGameStart;
 CallbackHandle WGUILuaInterface::m_cbLuaReleased;
 lua_State *WGUILuaInterface::m_guiLuaState = nullptr;
 
-static std::optional<util::EventReply> GUI_Callback_OnMouseEvent(WIBase &p, GLFW::MouseButton button, GLFW::KeyState state, GLFW::Modifier mods)
+static std::optional<util::EventReply> GUI_Callback_OnMouseEvent(WIBase &p, pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods)
 {
 	lua_State *luaStates[2] = {client->GetGUILuaState(), NULL};
 	if(c_game != NULL)
@@ -70,7 +70,7 @@ static std::optional<util::EventReply> GUI_Callback_OnMouseEvent(WIBase &p, GLFW
 	return reply;
 }
 
-static std::optional<util::EventReply> GUI_Callback_OnKeyEvent(WIBase &p, GLFW::Key key, int scanCode, GLFW::KeyState state, GLFW::Modifier mods)
+static std::optional<util::EventReply> GUI_Callback_OnKeyEvent(WIBase &p, pragma::platform::Key key, int scanCode, pragma::platform::KeyState state, pragma::platform::Modifier mods)
 {
 	lua_State *luaStates[2] = {client->GetGUILuaState(), NULL};
 	if(c_game != NULL)
@@ -113,7 +113,7 @@ static std::optional<util::EventReply> GUI_Callback_OnKeyEvent(WIBase &p, GLFW::
 	return reply;
 }
 
-static std::optional<util::EventReply> GUI_Callback_OnCharEvent(WIBase &p, int c, GLFW::Modifier mods)
+static std::optional<util::EventReply> GUI_Callback_OnCharEvent(WIBase &p, int c, pragma::platform::Modifier mods)
 {
 	lua_State *luaStates[2] = {client->GetGUILuaState(), NULL};
 	if(c_game != NULL)
@@ -262,7 +262,7 @@ void WGUILuaInterface::Clear()
 
 void WGUILuaInterface::InitializeGUIElement(WIBase &p)
 {
-	p.AddCallback("OnMouseEvent", FunctionCallback<util::EventReply, GLFW::MouseButton, GLFW::KeyState, GLFW::Modifier>::CreateWithOptionalReturn([&p](util::EventReply *reply, GLFW::MouseButton button, GLFW::KeyState state, GLFW::Modifier mods) -> CallbackReturnType {
+	p.AddCallback("OnMouseEvent", FunctionCallback<util::EventReply, pragma::platform::MouseButton, pragma::platform::KeyState, pragma::platform::Modifier>::CreateWithOptionalReturn([&p](util::EventReply *reply, pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods) -> CallbackReturnType {
 		auto r = GUI_Callback_OnMouseEvent(p, button, state, mods);
 		if(r.has_value()) {
 			*reply = *r;
@@ -270,7 +270,7 @@ void WGUILuaInterface::InitializeGUIElement(WIBase &p)
 		}
 		return CallbackReturnType::NoReturnValue;
 	}));
-	p.AddCallback("OnKeyEvent", FunctionCallback<util::EventReply, GLFW::Key, int, GLFW::KeyState, GLFW::Modifier>::CreateWithOptionalReturn([&p](util::EventReply *reply, GLFW::Key key, int scanCode, GLFW::KeyState state, GLFW::Modifier mods) -> CallbackReturnType {
+	p.AddCallback("OnKeyEvent", FunctionCallback<util::EventReply, pragma::platform::Key, int, pragma::platform::KeyState, pragma::platform::Modifier>::CreateWithOptionalReturn([&p](util::EventReply *reply, pragma::platform::Key key, int scanCode, pragma::platform::KeyState state, pragma::platform::Modifier mods) -> CallbackReturnType {
 		auto r = GUI_Callback_OnKeyEvent(p, key, scanCode, state, mods);
 		if(r.has_value()) {
 			*reply = *r;
@@ -278,7 +278,7 @@ void WGUILuaInterface::InitializeGUIElement(WIBase &p)
 		}
 		return CallbackReturnType::NoReturnValue;
 	}));
-	p.AddCallback("OnCharEvent", FunctionCallback<util::EventReply, int, GLFW::Modifier>::CreateWithOptionalReturn([&p](util::EventReply *reply, int c, GLFW::Modifier mods) -> CallbackReturnType {
+	p.AddCallback("OnCharEvent", FunctionCallback<util::EventReply, int, pragma::platform::Modifier>::CreateWithOptionalReturn([&p](util::EventReply *reply, int c, pragma::platform::Modifier mods) -> CallbackReturnType {
 		auto r = GUI_Callback_OnCharEvent(p, c, mods);
 		if(r.has_value()) {
 			*reply = *r;

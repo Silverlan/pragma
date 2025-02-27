@@ -23,8 +23,8 @@ class DLLCLIENT WIOptionsList : public WIBase {
 	WIHandle m_hHeaderRow;
 	uint32_t m_maxHeight = 512;
 	std::unordered_map<std::string, std::string> m_updateCvars;
-	std::unordered_map<std::string, GLFW::Key> m_keyBindingsAdd[2];
-	std::unordered_map<std::string, GLFW::Key> m_keyBindingsErase[2];
+	std::unordered_map<std::string, pragma::platform::Key> m_keyBindingsAdd[2];
+	std::unordered_map<std::string, pragma::platform::Key> m_keyBindingsErase[2];
 	std::unordered_map<std::string, WIHandle> m_rows;
 	template<class T>
 	WIChoiceList *AddChoiceList(const std::string &name, T list, const std::string &cvarName, const std::function<void(WIChoiceList *)> &initializer, const std::optional<std::string> &optRowIdent = {});

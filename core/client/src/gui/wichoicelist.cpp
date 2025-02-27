@@ -9,7 +9,9 @@
 #include "pragma/gui/wichoicelist.h"
 #include <wgui/types/witext.h>
 #include <wgui/types/wibutton.h>
-#include "pragma/localization.h"
+
+import pragma.locale;
+import pragma.string.unicode;
 
 LINK_WGUI_TO_CLASS(WIChoiceList, WIChoiceList);
 

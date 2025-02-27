@@ -7,8 +7,8 @@
 
 #include "stdafx_shared.h"
 #include "pragma/entities/components/panima_component_channel_submitter_def.hpp"
-#include <panima/channel.hpp>
-#include <panima/channel_t.hpp>
+
+import panima;
 
 #pragma optimize("", off)
 void __panima_cvs_2()

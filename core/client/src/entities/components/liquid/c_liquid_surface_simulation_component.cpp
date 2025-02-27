@@ -6,6 +6,7 @@
  */
 
 #include "stdafx_client.h"
+#include "pragma/game/c_game.h"
 #include "pragma/entities/components/liquid/c_liquid_surface_simulation_component.hpp"
 #include "pragma/entities/components/liquid/c_liquid_control_component.hpp"
 #include "pragma/entities/c_water_surface.hpp"

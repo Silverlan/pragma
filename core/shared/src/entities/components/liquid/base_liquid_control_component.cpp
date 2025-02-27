@@ -10,6 +10,7 @@
 #include "pragma/entities/components/base_surface_component.hpp"
 #include "pragma/entities/entity_component_manager_t.hpp"
 #include "pragma/entities/baseentity_events.hpp"
+#include <material.h>
 
 using namespace pragma;
 

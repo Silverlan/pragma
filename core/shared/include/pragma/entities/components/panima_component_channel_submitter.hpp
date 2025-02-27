@@ -7,9 +7,10 @@
 #ifndef __PANIMA_COMPONENT_CHANNEL_SUBMITTER_HPP__
 #define __PANIMA_COMPONENT_CHANNEL_SUBMITTER_HPP__
 
-#include <panima/types.hpp>
 #include "pragma/entities/entity_component_manager_t.hpp"
 #include "pragma/game/animation_channel_cache_data.hpp"
+
+import panima;
 
 static constexpr auto g_debugPrint = false;
 

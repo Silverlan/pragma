@@ -6,6 +6,7 @@
  */
 
 #include "stdafx_client.h"
+#include "pragma/game/c_game.h"
 #include "pragma/rendering/occlusion_culling/occlusion_culling_handler_brute_force.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/entities/environment/lights/c_env_light.h"
@@ -19,6 +20,7 @@
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/model/c_modelmesh.h"
+#include "pragma/game/game_limits.h"
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/math/intersection.h>
 #include <pragma/entities/entity_component_system_t.hpp>

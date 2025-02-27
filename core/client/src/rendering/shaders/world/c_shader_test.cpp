@@ -8,6 +8,7 @@
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/world/c_shader_test.hpp"
 #include "pragma/rendering/shaders/world/c_shader_pbr.hpp"
+#include "pragma/clientstate/clientstate.h"
 #include "cmaterialmanager.h"
 #include "pragma/entities/environment/c_env_reflection_probe.hpp"
 #include "pragma/entities/components/c_render_component.hpp"

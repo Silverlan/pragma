@@ -159,7 +159,7 @@ util::EventReply WIScrollContainer::ScrollCallback(Vector2 offset, bool offsetAs
 		return util::EventReply::Handled;
 	auto &window = WGUI::GetInstance().GetContext().GetWindow();
 	if(m_hScrollBarH.IsValid() && m_hScrollBarV.IsValid()) {
-		auto isShiftDown = (window->GetKeyState(GLFW::Key::LeftShift) != GLFW::KeyState::Release || window->GetKeyState(GLFW::Key::RightShift) != GLFW::KeyState::Release) ? true : false;
+		auto isShiftDown = (window->GetKeyState(pragma::platform::Key::LeftShift) != pragma::platform::KeyState::Release || window->GetKeyState(pragma::platform::Key::RightShift) != pragma::platform::KeyState::Release) ? true : false;
 		if(isShiftDown || m_hScrollBarV->IsVisible() == false)
 			m_hScrollBarH.get<WIScrollBar>()->ScrollCallback(Vector2(0.f, offset.y), offsetAsPixels);
 		else

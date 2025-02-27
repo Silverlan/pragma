@@ -6,6 +6,8 @@
  */
 
 #include "stdafx_shared.h"
+#include <mathutil/umath.h>
+#include <glm/gtx/matrix_decompose.hpp>
 #include <pragma/game/game.h>
 #include "pragma/lua/classes/lvector.h"
 #include "pragma/lua/classes/langle.h"
@@ -83,7 +85,6 @@
 #include <mathutil/inverse_kinematics/constraints.hpp>
 #include <sharedutils/magic_enum.hpp>
 #include <fsys/directory_watcher.h>
-#include <glm/gtx/matrix_decompose.hpp>
 
 extern DLLNETWORK Engine *engine;
 
@@ -202,7 +203,7 @@ template<typename T>
 static void register_string_to_vector_type_constructor(lua_State *l)
 {
 	pragma::lua::define_custom_constructor<T,
-	  [](const std::string &str) -> T {
+	  +[](const std::string &str) -> T {
 		  T r;
 		  using ValueType = typename decltype(r)::value_type;
 		  ustring::string_to_array<ValueType, Double>(str, reinterpret_cast<ValueType *>(&r[0]), atof, decltype(r)::length());
@@ -1457,7 +1458,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	pragma::lua::define_custom_constructor<Quat, &uquat::identity>(lua.GetState());
 	pragma::lua::define_custom_constructor<Quat, static_cast<Quat (*)(const Vector3 &, float)>(&uquat::create), const Vector3 &, float>(lua.GetState());
 	pragma::lua::define_custom_constructor<Quat,
-	  [](const Vector3 &a, const Vector3 &b, const Vector3 &c) -> Quat {
+	  +[](const Vector3 &a, const Vector3 &b, const Vector3 &c) -> Quat {
 		  auto m = umat::create_from_axes(a, b, c);
 		  return Quat(m);
 	  },

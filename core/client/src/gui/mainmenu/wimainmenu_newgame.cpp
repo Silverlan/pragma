@@ -16,7 +16,6 @@
 #include <wgui/types/witextentry.h>
 #include "pragma/gui/wislider.h"
 #include "pragma/gui/wioptionslist.h"
-#include "pragma/localization.h"
 #include "pragma/game/gamemode/gamemodemanager.h"
 #include <pragma/util/resource_watcher.h>
 #include <pragma/game/game_resources.hpp>
@@ -25,6 +24,9 @@
 #include <sharedutils/util_file.h>
 #include <wgui/types/witext.h>
 #include <fsys/ifile.hpp>
+
+import pragma.locale;
+import pragma.string.unicode;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
@@ -37,9 +39,9 @@ WIMainMenuNewGame::~WIMainMenuNewGame()
 		m_cbMapListReload.Remove();
 }
 
-void WIMainMenuNewGame::OnStartGame(GLFW::MouseButton button, GLFW::KeyState state, GLFW::Modifier)
+void WIMainMenuNewGame::OnStartGame(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier)
 {
-	if(button != GLFW::MouseButton::Left || state != GLFW::KeyState::Press)
+	if(button != pragma::platform::MouseButton::Left || state != pragma::platform::KeyState::Press)
 		return;
 	auto *pOptionsList = static_cast<WIOptionsList *>(m_hControlSettings.get());
 	std::string map;
@@ -77,7 +79,7 @@ void WIMainMenuNewGame::OnStartGame(GLFW::MouseButton button, GLFW::KeyState sta
 void WIMainMenuNewGame::Initialize()
 {
 	WIMainMenuBase::Initialize();
-	AddMenuItem(Locale::GetText("back"), FunctionCallback<void, WIMainMenuElement *>::Create([this](WIMainMenuElement *) {
+	AddMenuItem(pragma::locale::get_text("back"), FunctionCallback<void, WIMainMenuElement *>::Create([this](WIMainMenuElement *) {
 		auto *mainMenu = dynamic_cast<WIMainMenu *>(GetParent());
 		if(mainMenu == nullptr)
 			return;
@@ -105,10 +107,10 @@ void WIMainMenuNewGame::InitializeOptionsList(WIOptionsList *pList)
 	pRow->SetValue(0, "");
 
 	auto *buttonStart = WGUI::GetInstance().Create<WIButton>();
-	buttonStart->SetText(Locale::GetText("start_game"));
+	buttonStart->SetText(pragma::locale::get_text("start_game"));
 	buttonStart->SizeToContents();
 	buttonStart->SetAutoCenterToParent(true);
-	buttonStart->AddCallback("OnMouseEvent", FunctionCallback<util::EventReply, GLFW::MouseButton, GLFW::KeyState, GLFW::Modifier>::CreateWithOptionalReturn([this](util::EventReply *reply, GLFW::MouseButton button, GLFW::KeyState state, GLFW::Modifier mods) -> CallbackReturnType {
+	buttonStart->AddCallback("OnMouseEvent", FunctionCallback<util::EventReply, pragma::platform::MouseButton, pragma::platform::KeyState, pragma::platform::Modifier>::CreateWithOptionalReturn([this](util::EventReply *reply, pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods) -> CallbackReturnType {
 		OnStartGame(button, state, mods);
 		*reply = util::EventReply::Handled;
 		return CallbackReturnType::HasReturnValue;
@@ -224,7 +226,7 @@ void WIMainMenuNewGame::ReloadMapList()
 void WIMainMenuNewGame::InitializeGameSettings()
 {
 	auto *pList = InitializeOptionsList();
-	auto title = Locale::GetText("game_settings");
+	auto title = pragma::locale::get_text("game_settings");
 	ustring::to_upper(title);
 	pList->SetTitle(title);
 
@@ -235,7 +237,7 @@ void WIMainMenuNewGame::InitializeGameSettings()
 		auto &info = it->second;
 		gameModeOptions[info.name] = it->first;
 	}
-	auto *pGameMode = pList->AddDropDownMenu(Locale::GetText("gamemode"), gameModeOptions, "sv_gamemode");
+	auto *pGameMode = pList->AddDropDownMenu(pragma::locale::get_text("gamemode"), gameModeOptions, "sv_gamemode");
 	pGameMode->AddCallback("OnValueChanged", FunctionCallback<void>::Create([pGameMode, this]() {
 		auto val = pGameMode->GetOptionValue(pGameMode->GetSelectedOption());
 		auto &gameModes = GameModeManager::GetGameModes();
@@ -253,7 +255,7 @@ void WIMainMenuNewGame::InitializeGameSettings()
 	//
 
 	// Map
-	auto *pMap = pList->AddDropDownMenu(Locale::GetText("map"));
+	auto *pMap = pList->AddDropDownMenu(pragma::locale::get_text("map"));
 	// pMap->SetEditable(true);
 	pMap->SetName("map");
 	m_hMapList = pMap->GetHandle();
@@ -264,17 +266,17 @@ void WIMainMenuNewGame::InitializeGameSettings()
 	m_cbMapListReload = resourceWatcher.AddChangeCallback(EResourceWatcherCallbackType::Map, [this](std::reference_wrapper<const std::string> fileName, std::reference_wrapper<const std::string> ext) { ReloadMapList(); });
 
 	// Server Name
-	auto *pServerName = pList->AddTextEntry(Locale::GetText("server_name"), "sv_servername");
+	auto *pServerName = pList->AddTextEntry(pragma::locale::get_text("server_name"), "sv_servername");
 	m_hServerName = pServerName->GetHandle();
 	//
 	// RCON Password
-	auto *pPassword = pList->AddTextEntry(Locale::GetText("server_password"), "sv_password");
+	auto *pPassword = pList->AddTextEntry(pragma::locale::get_text("server_password"), "sv_password");
 	pPassword->SetInputHidden(true);
 	m_hRconPassword = pPassword->GetHandle();
 	//
 	// Player Count
 	auto *pMaxPlayers = pList->AddSlider(
-	  Locale::GetText("max_players"), [](WISlider *pSlider) { pSlider->SetRange(1.f, 50.f, 1.f); }, "sv_maxplayers");
+	  pragma::locale::get_text("max_players"), [](WISlider *pSlider) { pSlider->SetRange(1.f, 50.f, 1.f); }, "sv_maxplayers");
 	m_hMaxPlayers = pMaxPlayers;
 	//
 	InitializeOptionsList(pList);

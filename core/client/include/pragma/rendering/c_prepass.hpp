@@ -11,6 +11,8 @@
 #include "pragma/clientdefinitions.h"
 #include <cinttypes>
 #include <sharedutils/util_weak_handle.hpp>
+#include <image/prosper_render_target.hpp>
+#include <prosper_enums.hpp>
 
 // Not yet fully implemented.
 // See https://aras-p.info/blog/2012/03/02/2012-theory-for-forward-rendering/ for implementation details

@@ -6,6 +6,7 @@
  */
 
 #include "stdafx_client.h"
+#include "pragma/c_engine.h"
 #include "pragma/particlesystem/operators/c_particle_operator_wander.hpp"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include <mathutil/umath.h>

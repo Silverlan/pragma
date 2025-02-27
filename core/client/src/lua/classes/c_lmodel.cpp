@@ -7,6 +7,8 @@
 
 #include "stdafx_client.h"
 #include "pragma/lua/classes/c_lmodel.h"
+#include "pragma/game/c_game.h"
+#include "pragma/clientstate/clientstate.h"
 #include "luasystem.h"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"

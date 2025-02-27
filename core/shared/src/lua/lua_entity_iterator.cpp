@@ -6,6 +6,7 @@
  */
 
 #include "stdafx_shared.h"
+#include "pragma/engine.h"
 #include "pragma/lua/lua_entity_iterator.hpp"
 
 extern DLLNETWORK Engine *engine;

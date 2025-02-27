@@ -6,6 +6,8 @@
  */
 
 #include "stdafx_client.h"
+#include "pragma/c_engine.h"
+#include "pragma/clientstate/clientstate.h"
 #include <wgui/types/witext.h>
 #include <wgui/types/witextentry.h>
 #include <wgui/types/wirect.h>
@@ -18,8 +20,8 @@
 #include "pragma/gui/mainmenu/wimainmenu.h"
 #include <pragma/engine_info.hpp>
 #include <pragma/lua/lua_error_handling.hpp>
-#include <pragma/localization.h>
 import pragma.string.unicode;
+import pragma.locale;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
@@ -43,7 +45,7 @@ WIConsole *WIConsole::Open()
 	pFrame->SetSize(512, 256);
 	pFrame->SetMinSize(160, 100);
 	pFrame->SetZPos(10'000);
-	pFrame->SetTitle(Locale::GetText("console"));
+	pFrame->SetTitle(pragma::locale::get_text("console"));
 	pFrame->SetPos(675, 86);
 	pFrame->SetSize(450, 876);
 	pFrame->SetAnchor(0, 0, 1, 1, 1'280, 1'024);

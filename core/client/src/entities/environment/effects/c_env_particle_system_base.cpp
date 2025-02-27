@@ -6,6 +6,9 @@
  */
 
 #include "stdafx_client.h"
+#include <mathutil/umath.h>
+#include <glm/gtx/euler_angles.hpp>
+#include <glm/gtx/norm.hpp>
 #include <algorithm>
 #include <sharedutils/util_weak_handle.hpp>
 #include "pragma/clientstate/clientstate.h"
@@ -24,8 +27,6 @@
 #include <prosper_util.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <sharedutils/util_file.h>
-#include <glm/gtx/euler_angles.hpp>
-#include <glm/gtx/norm.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/environment/effects/particlesystemdata.h>
 #include <pragma/util/util_game.hpp>

@@ -32,7 +32,15 @@
 #include <mathutil/eulerangles.h>
 #include <mathutil/uquat.h>
 #include <mathutil/uvec.h>
+#ifdef _WIN32
+#include <pragma/engine.h>
+#include <pragma/networkstate/networkstate.h>
+#endif
 #include <pragma/serverstate/serverstate.h>
+#ifdef _WIN32
+#include <pragma/game/game.h>
+#include "pragma/game/s_game.h"
+#endif
 #include <pragma/entities/baseentity.h>
 #include "pragma/entities/s_baseentity.h"
 #include <pragma/physics/physobj.h>

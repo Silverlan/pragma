@@ -35,12 +35,24 @@ runs:
         sudo update-alternatives --set g++ /usr/bin/g++-11
 
     # For Cycles
-    - name: Install Cuda
+    - name: Install Cuda (Linux)
+      if: ${{ runner.os == 'Linux' }}
       uses: Jimver/cuda-toolkit@v0.2.16
       if: ${{ inputs.with_cuda == '1' }}
       with:
         cuda: '12.2.0'
     # TODO: Install OptiX
+
+    - name: Clone setup_cuda repository (Windows)
+      if: ${{ runner.os != 'Linux' }}
+      run: git clone https://github.com/Silverlan/setup_cuda.git
+
+    - name: Install Cuda (Windows)
+      if: ${{ runner.os != 'Linux' }}
+      shell: pwsh
+      run: setup_cuda/setup_cuda.ps1
+      env:
+          INPUT_CUDA_VERSION: "12.5.0"
 
     - name: Set PIP_BREAK_SYSTEM_PACKAGES env variable
       shell: bash

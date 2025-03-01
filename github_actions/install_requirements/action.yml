@@ -36,14 +36,14 @@ runs:
 
     # For Cycles
     - name: Install Cuda (Linux)
-      if: ${{ runner.os == 'Linux' }}
+      if: ${{ runner.os == 'Linux' && inputs.with_cuda == '1' }}
       uses: Jimver/cuda-toolkit@v0.2.16
-      if: ${{ inputs.with_cuda == '1' }}
       with:
         cuda: '12.2.0'
     # TODO: Install OptiX
 
     - name: Clone setup_cuda repository (Windows)
+      shell: bash
       if: ${{ runner.os != 'Linux' }}
       run: git clone https://github.com/Silverlan/setup_cuda.git
 

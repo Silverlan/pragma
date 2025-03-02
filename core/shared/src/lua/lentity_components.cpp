@@ -63,6 +63,7 @@
 #include "pragma/entities/components/constraints/constraint_look_at_component.hpp"
 #include "pragma/entities/components/constraints/constraint_child_of_component.hpp"
 #include "pragma/entities/components/lifeline_link_component.hpp"
+#include "pragma/entities/components/meta_rig_component.hpp"
 #include "pragma/entities/components/bone_merge_component.hpp"
 #include "pragma/entities/components/flex_merge_component.hpp"
 #include "pragma/lua/classes/entity_components.hpp"
@@ -79,8 +80,6 @@
 #include "pragma/lua/ostream_operator_alias.hpp"
 #include <pragma/physics/movetypes.h>
 #include <luabind/copy_policy.hpp>
-
-import pragma.entities.components;
 
 import panima;
 

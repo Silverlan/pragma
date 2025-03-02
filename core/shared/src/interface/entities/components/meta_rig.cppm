@@ -4,12 +4,13 @@
  *
  * Copyright (c) 2024 Silverlan */
 
-#ifndef __META_RIG_COMPONENT_HPP__
-#define __META_RIG_COMPONENT_HPP__
+module;
 
 #include "pragma/entities/components/base_entity_component.hpp"
 
-namespace pragma {
+export module pragma.entities.components.meta_rig;
+
+export namespace pragma {
 	namespace animation {
 		enum class MetaRigBoneType : uint8_t;
 		struct MetaRig;
@@ -38,5 +39,3 @@ namespace pragma {
 		std::shared_ptr<animation::MetaRig> m_metaRig = nullptr;
 	};
 };
-
-#endif

@@ -40,9 +40,9 @@
 #include "pragma/entities/components/bone_merge_component.hpp"
 #include "pragma/entities/components/flex_merge_component.hpp"
 #include "pragma/entities/components/origin_component.hpp"
-#include "pragma/entities/components/lifeline_link_component.hpp"
-#include "pragma/entities/components/meta_rig_component.hpp"
 #include "pragma/entities/components/basegravity.h"
+
+import pragma.entities.components;
 
 void Game::InitializeEntityComponents(pragma::EntityComponentManager &componentManager)
 {

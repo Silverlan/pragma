@@ -62,6 +62,7 @@
 #include "pragma/entities/components/constraints/constraint_limit_scale_component.hpp"
 #include "pragma/entities/components/constraints/constraint_look_at_component.hpp"
 #include "pragma/entities/components/constraints/constraint_child_of_component.hpp"
+#include "pragma/entities/components/lifeline_link_component.hpp"
 #include "pragma/entities/components/bone_merge_component.hpp"
 #include "pragma/entities/components/flex_merge_component.hpp"
 #include "pragma/lua/classes/entity_components.hpp"

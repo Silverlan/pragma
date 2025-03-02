@@ -4,13 +4,12 @@
  *
  * Copyright (c) 2023 Silverlan */
 
-module;
+#ifndef __LIFELINE_LINK_COMPONENT_HPP__
+#define __LIFELINE_LINK_COMPONENT_HPP__
 
 #include "pragma/entities/components/base_entity_component.hpp"
 
-export module pragma.entities.components.lifeline_link;
-
-export namespace pragma {
+namespace pragma {
 	class DLLNETWORK LifelineLinkComponent final : public BaseEntityComponent {
 	  public:
 		LifelineLinkComponent(BaseEntity &ent);
@@ -25,3 +24,5 @@ export namespace pragma {
 		std::vector<EntityHandle> m_entsRemove; // List of entities that should be removed when this component is removed
 	};
 };
+
+#endif

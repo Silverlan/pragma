@@ -5,5 +5,4 @@
 module;
 
 export module pragma.entities.components;
-export import pragma.entities.components.lifeline_link;
 export import pragma.entities.components.meta_rig;

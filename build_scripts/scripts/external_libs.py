@@ -12,7 +12,7 @@ get_submodule("alsoundsystem","https://github.com/Silverlan/alsoundsystem.git","
 get_submodule("datasystem","https://github.com/Silverlan/datasystem.git","7642296ea0f8316957e1123034e87034294f8b46")
 get_submodule("iglfw","https://github.com/Silverlan/iglfw.git","473bb63")
 get_submodule("luasystem","https://github.com/Silverlan/luasystem.git","8eef5fe5593f9b9496d2d03158ecc1f485a34d7d")
-get_submodule("materialsystem","https://github.com/Silverlan/materialsystem.git","fdcc07f")
+get_submodule("materialsystem","https://github.com/Silverlan/materialsystem.git","15da1198fab65103bd5107c532ee93e6f5683222")
 get_submodule("mathutil","https://github.com/Silverlan/mathutil.git","554d67f7b621fe87fecea90269581c2ca50dadb9")
 get_submodule("networkmanager","https://github.com/Silverlan/networkmanager.git","981bc5809c1a768267ddace778205e1be0262730")
 get_submodule("panima","https://github.com/Silverlan/panima.git","1718348")

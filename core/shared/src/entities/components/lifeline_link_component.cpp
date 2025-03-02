@@ -5,13 +5,10 @@
  * Copyright (c) 2023 Silverlan
  */
 
-module;
-
 #include "stdafx_shared.h"
+#include "pragma/entities/components/lifeline_link_component.hpp"
 #include "pragma/entities/entity_component_manager_t.hpp"
 #include "pragma/entities/components/component_member_flags.hpp"
-
-module pragma.entities.components.lifeline_link;
 
 using namespace pragma;
 

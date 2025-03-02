@@ -16,14 +16,13 @@
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/entities/components/base_color_component.hpp"
 #include "pragma/entities/components/base_child_component.hpp"
+#include "pragma/entities/components/lifeline_link_component.hpp"
 #include "pragma/entities/components/basetoggle.h"
 #include "pragma/entities/components/map_component.hpp"
 #include "pragma/model/model.h"
 #include "pragma/entities/baseentity_events.hpp"
 #include "pragma/entities/entity_component_system_t.hpp"
 #include "pragma/util/global_string_table.hpp"
-
-import pragma.entities.components;
 
 Game &BaseEntity::GetGame() const { return *GetNetworkState()->GetGameState(); }
 BaseEntity *BaseEntity::CreateChild(const std::string &className)

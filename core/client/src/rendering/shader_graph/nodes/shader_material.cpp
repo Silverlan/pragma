@@ -10,7 +10,7 @@
 
 using namespace pragma::rendering::shader_graph;
 
-ShaderMaterialNode::ShaderMaterialNode(const std::string_view &type, const pragma::rendering::shader_material::ShaderMaterial &shaderMaterial) : pragma::shadergraph::Node {type}, m_shaderMaterial {shaderMaterial}
+ShaderMaterialNode::ShaderMaterialNode(const std::string_view &type, const pragma::rendering::shader_material::ShaderMaterial &shaderMaterial) : pragma::shadergraph::Node {type, pragma::shadergraph::CATEGORY_TEXTURE}, m_shaderMaterial {shaderMaterial}
 {
 	for(auto &tex : m_shaderMaterial.textures) {
 		auto name = ustring::to_camel_case(tex.name);

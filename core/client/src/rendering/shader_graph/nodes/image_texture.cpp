@@ -41,7 +41,7 @@ std::string ImageTextureNode::DoEvaluate(const pragma::shadergraph::Graph &graph
 
 //
 
-ImageTextureNodeBase::ImageTextureNodeBase(const std::string_view &type, bool populateOutputsAndInputs) : Node {type}
+ImageTextureNodeBase::ImageTextureNodeBase(const std::string_view &type, bool populateOutputsAndInputs) : Node {type, pragma::shadergraph::CATEGORY_TEXTURE}
 {
 	if(populateOutputsAndInputs) {
 		AddInput(IN_FILENAME, pragma::shadergraph::DataType::String, "");

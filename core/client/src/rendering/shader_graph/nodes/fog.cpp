@@ -10,7 +10,7 @@
 
 using namespace pragma::rendering::shader_graph;
 
-FogNode::FogNode(const std::string_view &type) : Node {type}
+FogNode::FogNode(const std::string_view &type) : Node {type, pragma::shadergraph::CATEGORY_ENVIRONMENT}
 {
 	AddOutput(OUT_COLOR, pragma::shadergraph::DataType::Color);
 	AddOutput(OUT_START_DISTANCE, pragma::shadergraph::DataType::Float);

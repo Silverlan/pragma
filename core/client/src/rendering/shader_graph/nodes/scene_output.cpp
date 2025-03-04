@@ -11,7 +11,7 @@
 
 using namespace pragma::rendering::shader_graph;
 
-SceneOutputNode::SceneOutputNode(const std::string_view &type) : Node {type}
+SceneOutputNode::SceneOutputNode(const std::string_view &type) : Node {type, pragma::shadergraph::CATEGORY_OUTPUT}
 {
 	AddInput(IN_COLOR, pragma::shadergraph::DataType::Color, Vector3 {1.f, 1.f, 1.f});
 	AddInput(IN_ALPHA, pragma::shadergraph::DataType::Float, 1.f);

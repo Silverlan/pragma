@@ -10,7 +10,7 @@
 
 using namespace pragma::rendering::shader_graph;
 
-PbrNode::PbrNode(const std::string_view &type) : Node {type}
+PbrNode::PbrNode(const std::string_view &type) : Node {type, pragma::shadergraph::CATEGORY_SHADER}
 {
 	AddInput(IN_ALBEDO_COLOR, pragma::shadergraph::DataType::Color, Vector3 {1.f, 1.f, 1.f});
 	AddInput(IN_METALNESS, pragma::shadergraph::DataType::Float, 0.f);

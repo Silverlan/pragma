@@ -30,7 +30,7 @@ namespace pragma::rendering::shader_graph {
 
 		static constexpr const char *OUT_VALUE = "value";
 
-		BaseInputParameterNode(const std::string_view &type) : Node {type}
+		BaseInputParameterNode(const std::string_view &type) : Node {type, pragma::shadergraph::CATEGORY_INPUT_PARAMETER}
 		{
 			AddInput(CONST_NAME, pragma::shadergraph::DataType::String, "");
 			AddSocketEnum<Scope>(CONST_SCOPE, Scope::Global);

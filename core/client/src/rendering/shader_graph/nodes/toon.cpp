@@ -12,7 +12,7 @@
 #include "pragma/rendering/shader_graph/nodes/shader_material.hpp"
 
 using namespace pragma::rendering::shader_graph;
-ToonNode::ToonNode(const std::string_view &type) : Node {type}
+ToonNode::ToonNode(const std::string_view &type) : Node {type, pragma::shadergraph::CATEGORY_SHADER}
 {
 	AddInput(IN_ALBEDO_COLOR, pragma::shadergraph::DataType::Color, Vector3 {1.f, 1.f, 1.f});
 	AddInput(IN_ALPHA, pragma::shadergraph::DataType::Float, 1.f);

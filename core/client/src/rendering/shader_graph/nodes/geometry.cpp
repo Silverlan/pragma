@@ -10,7 +10,7 @@
 
 using namespace pragma::rendering::shader_graph;
 
-GeometryNode::GeometryNode(const std::string_view &type) : Node {type}
+GeometryNode::GeometryNode(const std::string_view &type) : Node {type, pragma::shadergraph::CATEGORY_SCENE}
 {
 	AddOutput(OUT_POSITION_WS, pragma::shadergraph::DataType::Vector);
 	AddOutput(OUT_NORMAL_WS, pragma::shadergraph::DataType::Vector);

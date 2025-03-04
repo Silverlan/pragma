@@ -10,7 +10,7 @@
 
 using namespace pragma::rendering::shader_graph;
 
-ObjectNode::ObjectNode(const std::string_view &type) : Node {type}
+ObjectNode::ObjectNode(const std::string_view &type) : Node {type, pragma::shadergraph::CATEGORY_SCENE}
 {
 	AddOutput(OUT_MODEL_MATRIX, pragma::shadergraph::DataType::Transform);
 	AddOutput(OUT_COLOR, pragma::shadergraph::DataType::Color);

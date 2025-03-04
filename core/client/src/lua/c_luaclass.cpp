@@ -142,6 +142,8 @@ static void register_shader_graph(lua_State *l, luabind::module_ &modShader)
 	  })];
 
 	auto defGraph = luabind::class_<pragma::shadergraph::Graph>("ShaderGraph");
+	defGraph.scope[luabind::def("get_shader_file_path", &pragma::rendering::ShaderGraphManager::GetShaderFilePath)];
+	defGraph.scope[luabind::def("get_file_path", &pragma::rendering::ShaderGraphManager::GetShaderGraphFilePath)];
 	defGraph.scope[luabind::def(
 	  "load", +[](const std::string &type, const std::string &name) -> std::pair<std::shared_ptr<pragma::shadergraph::Graph>, std::optional<std::string>> {
 		  auto filePath = pragma::rendering::ShaderGraphManager::GetShaderGraphFilePath(type, name);

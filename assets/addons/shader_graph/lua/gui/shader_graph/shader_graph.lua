@@ -10,6 +10,9 @@ include("/gui/pfm/tutorials/element_connector_line.lua")
 include("node.lua")
 include("node_socket.lua")
 
+locale.load("sg_categories.txt")
+locale.load("sg_nodes.txt")
+
 local Element = util.register_class("gui.ShaderGraph", gui.Base)
 function Element:OnInitialize()
 	gui.Base.OnInitialize(self)
@@ -131,17 +134,23 @@ function Element:MouseCallback(button, state, mods)
 						local cat = node:GetCategory()
 						if catNodes[cat] == nil then
 							catNodes[cat] = {}
-							table.insert(catList, cat)
+							table.insert(catList, {
+								category = cat,
+								name = locale.get_text("sg_cat_" .. cat),
+							})
 						end
 						table.insert(catNodes[cat], name)
 					end
 				end
-				table.sort(catList) -- TODO: Sort by localized name
-				for _, cat in ipairs(catList) do
-					local nodeTypes = catNodes[cat]
-					local pItem, pSubMenuCat = pSubMenu:AddSubMenu(cat)
+				table.sort(catList, function(a, b)
+					return a.name < b.name
+				end)
+				for _, t in ipairs(catList) do
+					local nodeTypes = catNodes[t.category]
+					local pItem, pSubMenuCat = pSubMenu:AddSubMenu(t.name)
 					for _, name in pairs(nodeTypes) do
-						pSubMenuCat:AddItem(name, function(pItem)
+						local locName = locale.get_text("sg_node_" .. name)
+						pSubMenuCat:AddItem(locName, function(pItem)
 							local graphNode = self.m_graph:AddNode(name)
 							if graphNode ~= nil then
 								local frame = self:AddNode(graphNode)

@@ -59,7 +59,7 @@ namespace pragma::rendering::shader_graph {
 			code << gn.GetGlslOutputDeclaration(OUT_VALUE) << " = ";
 			// TODO: Check if name exists in global input data
 			if(!name.empty())
-				code << "u_globalInputData." << name << ";\n";
+				code << "u_material.material." << name << ";\n";
 			else
 				code << "0.0;\n";
 

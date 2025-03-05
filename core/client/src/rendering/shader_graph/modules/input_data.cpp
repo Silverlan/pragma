@@ -62,17 +62,17 @@ void InputDataModule::InitializeShaderResources()
 
 void InputDataModule::GetShaderPreprocessorDefinitions(std::unordered_map<std::string, std::string> &outDefinitions, std::string &outPrefixCode)
 {
-	auto &inputDataManager = c_game->GetGlobalShaderInputDataManager();
+	//auto &inputDataManager = c_game->GetGlobalShaderInputDataManager();
 
 	std::ostringstream code;
-	code << "\nlayout(LAYOUT_ID(SHADER_GRAPH, GLOBAL_INPUT_DATA)) uniform GlobalInputData\n";
-	code << "{\n";
-	for(auto &prop : inputDataManager.GetDescriptor().properties) {
-		if(prop.parameter.name.empty())
-			continue;
-		code << "\t" << pragma::shadergraph::to_glsl_type(prop.parameter.type) << " " << prop.parameter.name << ";\n";
-	}
-	code << "} u_globalInputData;\n";
+	//code << "\nlayout(LAYOUT_ID(SHADER_GRAPH, GLOBAL_INPUT_DATA)) uniform GlobalInputData\n";
+	//code << "{\n";
+	//for(auto &prop : inputDataManager.GetDescriptor().properties) {
+	//	if(prop.parameter.name.empty())
+	//		continue;
+	//	code << "\t" << pragma::shadergraph::to_glsl_type(prop.parameter.type) << " " << prop.parameter.name << ";\n";
+	//}
+	//code << "} u_globalInputData;\n";
 
 	for(auto *graphNode : m_imageTextureNodes) {
 		auto *node = dynamic_cast<const ImageTextureNodeBase *>(&graphNode->node);
@@ -87,7 +87,7 @@ void InputDataModule::GetShaderPreprocessorDefinitions(std::unordered_map<std::s
 
 void InputDataModule::InitializeGfxPipelineDescriptorSets()
 {
-	auto &inputDataManager = c_game->GetGlobalShaderInputDataManager();
+	//auto &inputDataManager = c_game->GetGlobalShaderInputDataManager();
 
 	// TODO:
 	auto &graphManager = c_engine->GetShaderGraphManager();
@@ -96,10 +96,10 @@ void InputDataModule::InitializeGfxPipelineDescriptorSets()
 	if(it == typeManagers.end())
 		return;
 	auto &typeManager = *it->second;
-	for(auto &[name, graphData] : typeManager.GetGraphs())
-		inputDataManager.PopulateProperties(*graphData->GetGraph());
+	//for(auto &[name, graphData] : typeManager.GetGraphs())
+	//	inputDataManager.PopulateProperties(*graphData->GetGraph());
 	auto cmd = c_engine->GetRenderContext().GetSetupCommandBuffer();
-	inputDataManager.UpdateBufferData(*cmd);
+	//inputDataManager.UpdateBufferData(*cmd);
 	c_engine->GetRenderContext().FlushSetupCommandBuffer();
 
 	m_shader.AddDescriptorSetGroup(m_globalInputDataDsInfo);
@@ -110,12 +110,12 @@ void InputDataModule::InitializeGfxPipelineDescriptorSets()
 	m_globalInputDsg = context.CreateDescriptorSetGroup(m_globalInputDataDsInfo);
 	auto &ds = *m_globalInputDsg->GetDescriptorSet(0);
 	constexpr uint32_t BINDING_IDX = 0;
-	auto buf = inputDataManager.GetBuffer();
-	if(!buf)
-		buf = c_engine->GetRenderContext().GetDummyBuffer();
+	//auto buf = inputDataManager.GetBuffer();
+	//if(!buf)
+	//	buf = c_engine->GetRenderContext().GetDummyBuffer();
 	// TODO: Each shader should have its own global input buffer.
 	// Alternativly: Push-constants?
-	ds.SetBindingUniformBuffer(*buf, BINDING_IDX);
+	//ds.SetBindingUniformBuffer(*buf, BINDING_IDX);
 
 	// Image texture nodes
 	auto &texManager = static_cast<msys::CMaterialManager &>(client->GetMaterialManager()).GetTextureManager();

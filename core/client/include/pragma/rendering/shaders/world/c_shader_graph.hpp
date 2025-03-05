@@ -16,10 +16,13 @@ class Texture;
 namespace pragma {
 	namespace rendering {
 		class ShaderGraphModule;
+		namespace shader_material {
+			struct ShaderMaterial;
+		};
 	};
 	class DLLCLIENT ShaderGraph : public ShaderGameWorldLightingPass {
 	  public:
-		ShaderGraph(prosper::IPrContext &context, const std::string &identifier, const std::string &fsShader);
+		ShaderGraph(prosper::IPrContext &context, const std::shared_ptr<pragma::shadergraph::Graph> &sg, const std::string &identifier, const std::string &fsShader);
 		virtual ~ShaderGraph() override;
 
 		virtual void RecordBindScene(rendering::ShaderProcessor &shaderProcessor, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer, prosper::IDescriptorSet &dsRenderSettings,
@@ -30,6 +33,9 @@ namespace pragma {
 
 		const pragma::shadergraph::Graph *GetGraph() const;
 	  protected:
+		std::shared_ptr<pragma::rendering::shader_material::ShaderMaterial> GenerateShaderMaterial();
+		virtual void InitializeShaderMaterial() override;
+
 		using ShaderGameWorldLightingPass::RecordDraw;
 		virtual void OnPipelinesInitialized() override;
 		virtual void ClearShaderResources() override;
@@ -41,6 +47,7 @@ namespace pragma {
 		virtual void GetShaderPreprocessorDefinitions(std::unordered_map<std::string, std::string> &outDefinitions, std::string &outPrefixCode) override;
 		std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat, const prosper::DescriptorSetInfo &descSetInfo);
 
+		std::shared_ptr<pragma::shadergraph::Graph> m_shaderGraph;
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_defaultPbrDsg = nullptr;
 		std::vector<std::unique_ptr<rendering::ShaderGraphModule>> m_modules;
 		AlphaMode m_alphaMode = AlphaMode::Opaque;

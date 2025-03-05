@@ -187,6 +187,12 @@ static void register_shader_graph(lua_State *l, luabind::module_ &modShader)
 		  return {true, std::optional<std::string> {}};
 	  });
 	defGraph.def(
+	  "Copy", +[](const pragma::shadergraph::Graph &graph) -> std::shared_ptr<pragma::shadergraph::Graph> {
+		  auto cpy = std::make_shared<pragma::shadergraph::Graph>(graph.GetNodeRegistry());
+		  cpy->Merge(graph);
+		  return cpy;
+	  });
+	defGraph.def(
 	  "AddNode", +[](pragma::shadergraph::Graph &graph, const std::string &type) -> std::shared_ptr<pragma::shadergraph::GraphNode> {
 		  auto node = graph.AddNode(type);
 		  if(!node) {
@@ -667,9 +673,9 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 		  return {graph, std::optional<std::string> {}};
 	  })];
 	modShader[luabind::def(
-	  "set_shader_graph", +[](const std::string &type, const std::string &identifier, const std::shared_ptr<pragma::shadergraph::Graph> &graph) {
+	  "sync_shader_graph", +[](const std::string &type, const std::string &identifier, const pragma::shadergraph::Graph &graph) {
 		  auto &manager = c_engine->GetShaderGraphManager();
-		  manager.SetGraph(type, identifier, graph);
+		  manager.SyncGraph(type, identifier, graph);
 	  })];
 
 	// These have to match shaders/modules/fs_tonemapping.gls!

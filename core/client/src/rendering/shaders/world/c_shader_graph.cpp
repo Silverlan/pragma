@@ -37,8 +37,8 @@ extern DLLCLIENT CEngine *c_engine;
 import pragma.shadergraph;
 
 using namespace pragma;
-
-ShaderGraph::ShaderGraph(prosper::IPrContext &context, const std::string &identifier, const std::string &fsShader) : ShaderGameWorldLightingPass {context, identifier, "programs/scene/textured", fsShader} {}
+#pragma optimize("", off)
+ShaderGraph::ShaderGraph(prosper::IPrContext &context, const std::shared_ptr<pragma::shadergraph::Graph> &sg, const std::string &identifier, const std::string &fsShader) : ShaderGameWorldLightingPass {context, identifier, "programs/scene/textured", fsShader}, m_shaderGraph {sg} {}
 
 ShaderGraph::~ShaderGraph() {}
 
@@ -78,14 +78,7 @@ static const pragma::rendering::shader_material::ShaderMaterial *find_shader_mat
 	return nullptr;
 }
 
-const pragma::shadergraph::Graph *ShaderGraph::GetGraph() const
-{
-	auto &graphManager = c_engine->GetShaderGraphManager();
-	auto graphData = graphManager.GetGraph(GetIdentifier());
-	if(graphData)
-		return graphData->GetGraph().get();
-	return nullptr;
-}
+const pragma::shadergraph::Graph *ShaderGraph::GetGraph() const { return m_shaderGraph.get(); }
 
 void ShaderGraph::InitializeShaderResources()
 {
@@ -164,6 +157,93 @@ void ShaderGraph::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pip
 		pipelineInfo.ToggleDepthWrites(true);
 		break;
 	}
+}
+
+void ShaderGraph::InitializeShaderMaterial()
+{
+	m_shaderMaterial = GenerateShaderMaterial();
+	if(m_shaderMaterial)
+		m_materialDescSetInfo = CreateMaterialDescriptorSetInfo(*m_shaderMaterial);
+	else
+		ShaderGameWorldLightingPass::InitializeShaderMaterial(); // Use default shader material
+}
+
+std::shared_ptr<pragma::rendering::shader_material::ShaderMaterial> ShaderGraph::GenerateShaderMaterial()
+{
+	auto *graph = GetGraph();
+	if(!graph)
+		return nullptr;
+	auto sm = std::make_shared<pragma::rendering::shader_material::ShaderMaterial>(GetIdentifier());
+	std::vector<pragma::shadergraph::GraphNode *> globalParamNodes;
+	for(auto &node : graph->GetNodes()) {
+		auto *paramNode = dynamic_cast<const pragma::rendering::shader_graph::BaseInputParameterNode *>(&node->node);
+		if(!paramNode)
+			continue;
+		pragma::rendering::shader_graph::BaseInputParameterNode::Scope scope;
+		if(!node->GetInputValue(pragma::rendering::shader_graph::BaseInputParameterNode::CONST_SCOPE, scope))
+			continue;
+		if(scope != pragma::rendering::shader_graph::BaseInputParameterNode::Scope::Global)
+			continue;
+		if(globalParamNodes.size() == globalParamNodes.capacity())
+			globalParamNodes.reserve(globalParamNodes.size() * 2 + 10);
+		globalParamNodes.push_back(node.get());
+	}
+
+	// TODO: Sort by type?
+
+	std::sort(globalParamNodes.begin(), globalParamNodes.end(), [](auto *a, auto *b) { return a->GetName() < b->GetName(); });
+
+	std::vector<pragma::rendering::Property> params;
+	params.reserve(globalParamNodes.size());
+	for(auto *node : globalParamNodes) {
+		auto &paramNode = *dynamic_cast<const pragma::rendering::shader_graph::BaseInputParameterNode *>(&node->node);
+		std::string name;
+		if(!node->GetInputValue(pragma::rendering::shader_graph::BaseInputParameterNode::CONST_NAME, name))
+			continue;
+
+		if(name.empty())
+			continue;
+
+		auto type = paramNode.GetParameterType();
+		pragma::rendering::Property prop {name, type};
+
+		auto res = pragma::shadergraph::visit(type, [this, node, &prop](auto tag) -> bool {
+			using T = typename decltype(tag)::type;
+
+			T defaultVal;
+			if(!node->GetInputValue(pragma::rendering::shader_graph::BaseInputParameterNode::CONST_DEFAULT, defaultVal))
+				return false;
+			prop->defaultValue.Set(defaultVal);
+
+			if constexpr(std::is_same_v<T, float>) {
+				float minVal;
+				float maxVal;
+				float stepSize;
+				if(!node->GetInputValue(pragma::rendering::shader_graph::InputParameterFloatNode::CONST_MIN, minVal))
+					return false;
+				if(!node->GetInputValue(pragma::rendering::shader_graph::InputParameterFloatNode::CONST_MAX, maxVal))
+					return false;
+				if(!node->GetInputValue(pragma::rendering::shader_graph::InputParameterFloatNode::CONST_STEP_SIZE, stepSize))
+					return false;
+				prop->min = minVal;
+				prop->max = maxVal;
+				// prop->stepSize = stepSize;
+			}
+
+			return true;
+		});
+		if(!res)
+			continue;
+		params.push_back(prop);
+	}
+
+	if(params.empty())
+		return nullptr;
+
+	sm->properties.reserve(sm->properties.size() + params.size());
+	for(auto &param : params)
+		sm->AddProperty(std::move(param));
+	return sm;
 }
 
 void ShaderGraph::RecordBindScene(rendering::ShaderProcessor &shaderProcessor, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer, prosper::IDescriptorSet &dsRenderSettings,

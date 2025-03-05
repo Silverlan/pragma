@@ -39,7 +39,7 @@ namespace pragma::rendering {
 		const std::unordered_map<std::string, std::shared_ptr<ShaderGraphData>> &GetGraphs() const { return m_graphs; }
 	  private:
 		friend ShaderGraphManager;
-		void RegisterGraph(const std::string &identifier, std::shared_ptr<pragma::shadergraph::Graph> graph);
+		std::shared_ptr<pragma::shadergraph::Graph> RegisterGraph(const std::string &identifier, std::shared_ptr<pragma::shadergraph::Graph> graph);
 		std::shared_ptr<pragma::shadergraph::Graph> RegisterGraph(const std::string &identifier);
 		std::shared_ptr<pragma::shadergraph::Graph> CreateGraph() const;
 		std::string m_typeName;
@@ -63,7 +63,7 @@ namespace pragma::rendering {
 		std::shared_ptr<pragma::shadergraph::Graph> LoadShader(const std::string &identifier, std::string &outErr, bool reload = false);
 		void ReloadShader(const std::string &identifier);
 		std::shared_ptr<ShaderGraphData> GetGraph(const std::string &identifier) const;
-		void SetGraph(const std::string &type, const std::string &identifier, const std::shared_ptr<pragma::shadergraph::Graph> &graph);
+		void SyncGraph(const std::string &type, const std::string &identifier, const pragma::shadergraph::Graph &graph);
 		std::shared_ptr<pragma::shadergraph::NodeRegistry> GetNodeRegistry(const std::string &type) const;
 
 		ShaderGraphModuleManager &GetModuleManager();

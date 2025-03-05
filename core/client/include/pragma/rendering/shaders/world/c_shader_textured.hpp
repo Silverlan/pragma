@@ -208,7 +208,7 @@ namespace pragma {
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
 		virtual void InitializeShaderResources() override;
 		virtual void InitializeMaterialData(const CMaterial &mat, const rendering::shader_material::ShaderMaterial &shaderMat, pragma::rendering::ShaderInputData &inOutMatData);
-		void InitializeShaderMaterial();
+		virtual void InitializeShaderMaterial();
 		bool m_depthPrepassEnabled = true;
 		std::optional<std::string> m_shaderMaterialName = "pbr";
 		std::shared_ptr<rendering::shader_material::ShaderMaterial> m_shaderMaterial;

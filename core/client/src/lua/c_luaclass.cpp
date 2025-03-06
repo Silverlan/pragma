@@ -142,6 +142,8 @@ static void register_shader_graph(lua_State *l, luabind::module_ &modShader)
 	  })];
 
 	auto defGraph = luabind::class_<pragma::shadergraph::Graph>("ShaderGraph");
+	defGraph.scope[luabind::def("get_shader_file_path", &pragma::rendering::ShaderGraphManager::GetShaderFilePath)];
+	defGraph.scope[luabind::def("get_file_path", &pragma::rendering::ShaderGraphManager::GetShaderGraphFilePath)];
 	defGraph.scope[luabind::def(
 	  "load", +[](const std::string &type, const std::string &name) -> std::pair<std::shared_ptr<pragma::shadergraph::Graph>, std::optional<std::string>> {
 		  auto filePath = pragma::rendering::ShaderGraphManager::GetShaderGraphFilePath(type, name);
@@ -185,6 +187,12 @@ static void register_shader_graph(lua_State *l, luabind::module_ &modShader)
 		  return {true, std::optional<std::string> {}};
 	  });
 	defGraph.def(
+	  "Copy", +[](const pragma::shadergraph::Graph &graph) -> std::shared_ptr<pragma::shadergraph::Graph> {
+		  auto cpy = std::make_shared<pragma::shadergraph::Graph>(graph.GetNodeRegistry());
+		  cpy->Merge(graph);
+		  return cpy;
+	  });
+	defGraph.def(
 	  "AddNode", +[](pragma::shadergraph::Graph &graph, const std::string &type) -> std::shared_ptr<pragma::shadergraph::GraphNode> {
 		  auto node = graph.AddNode(type);
 		  if(!node) {
@@ -208,6 +216,7 @@ static void register_shader_graph(lua_State *l, luabind::module_ &modShader)
 
 	auto defNode = luabind::class_<pragma::shadergraph::Node>("Node");
 	defNode.def("GetType", &pragma::shadergraph::Node::GetType);
+	defNode.def("GetCategory", &pragma::shadergraph::Node::GetCategory);
 	defNode.def(
 	  "GetInputs", +[](lua_State *l, const pragma::shadergraph::Node &node) -> luabind::object {
 		  auto t = luabind::newtable(l);
@@ -423,6 +432,18 @@ static void register_shader_graph(lua_State *l, luabind::module_ &modShader)
 	oGraph["PSG_IDENTIFIER"] = pragma::shadergraph::Graph::PSG_IDENTIFIER;
 	oGraph["PSG_VERSION"] = pragma::shadergraph::Graph::PSG_VERSION;
 	oGraph["ROOT_PATH"] = pragma::rendering::ShaderGraphManager::ROOT_GRAPH_PATH;
+
+	oGraph["CATEGORY_INPUT_PARAMETER"] = pragma::shadergraph::CATEGORY_INPUT_PARAMETER;
+	oGraph["CATEGORY_INPUT_SYSTEM"] = pragma::shadergraph::CATEGORY_INPUT_SYSTEM;
+	oGraph["CATEGORY_MATH"] = pragma::shadergraph::CATEGORY_MATH;
+	oGraph["CATEGORY_VECTOR_MATH"] = pragma::shadergraph::CATEGORY_VECTOR_MATH;
+	oGraph["CATEGORY_COLOR"] = pragma::shadergraph::CATEGORY_COLOR;
+	oGraph["CATEGORY_TEXTURE"] = pragma::shadergraph::CATEGORY_TEXTURE;
+	oGraph["CATEGORY_SHADER"] = pragma::shadergraph::CATEGORY_SHADER;
+	oGraph["CATEGORY_SCENE"] = pragma::shadergraph::CATEGORY_SCENE;
+	oGraph["CATEGORY_ENVIRONMENT"] = pragma::shadergraph::CATEGORY_ENVIRONMENT;
+	oGraph["CATEGORY_OUTPUT"] = pragma::shadergraph::CATEGORY_OUTPUT;
+	oGraph["CATEGORY_UTILITY"] = pragma::shadergraph::CATEGORY_UTILITY;
 }
 
 void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
@@ -652,9 +673,9 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 		  return {graph, std::optional<std::string> {}};
 	  })];
 	modShader[luabind::def(
-	  "set_shader_graph", +[](const std::string &type, const std::string &identifier, const std::shared_ptr<pragma::shadergraph::Graph> &graph) {
+	  "sync_shader_graph", +[](const std::string &type, const std::string &identifier, const pragma::shadergraph::Graph &graph) {
 		  auto &manager = c_engine->GetShaderGraphManager();
-		  manager.SetGraph(type, identifier, graph);
+		  manager.SyncGraph(type, identifier, graph);
 	  })];
 
 	// These have to match shaders/modules/fs_tonemapping.gls!

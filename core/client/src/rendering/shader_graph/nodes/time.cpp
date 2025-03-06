@@ -10,7 +10,7 @@
 
 using namespace pragma::rendering::shader_graph;
 
-TimeNode::TimeNode(const std::string_view &type) : Node {type}
+TimeNode::TimeNode(const std::string_view &type) : Node {type, pragma::shadergraph::CATEGORY_UTILITY}
 {
 	AddOutput(OUT_TIME, pragma::shadergraph::DataType::Float);
 	AddOutput(OUT_DELTA_TIME, pragma::shadergraph::DataType::Float);

@@ -10,7 +10,7 @@
 
 using namespace pragma::rendering::shader_graph;
 
-VectorTransformNode::VectorTransformNode(const std::string_view &type) : Node {type}
+VectorTransformNode::VectorTransformNode(const std::string_view &type) : Node {type, pragma::shadergraph::CATEGORY_VECTOR_MATH}
 {
 	AddSocketEnum<Type>(IN_TRANSFORM_TYPE, Type::Vector);
 	AddSocketEnum<Space>(IN_CONVERT_FROM, Space::World);

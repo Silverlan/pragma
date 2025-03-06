@@ -10,7 +10,7 @@
 
 using namespace pragma::rendering::shader_graph;
 
-CameraNode::CameraNode(const std::string_view &type) : Node {type}
+CameraNode::CameraNode(const std::string_view &type) : Node {type, pragma::shadergraph::CATEGORY_SCENE}
 {
 	AddOutput(OUT_POSITION, pragma::shadergraph::DataType::Vector);
 	AddOutput(OUT_FOV, pragma::shadergraph::DataType::Float);

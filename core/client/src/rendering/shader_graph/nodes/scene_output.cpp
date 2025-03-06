@@ -11,7 +11,7 @@
 
 using namespace pragma::rendering::shader_graph;
 
-SceneOutputNode::SceneOutputNode(const std::string_view &type) : Node {type}
+SceneOutputNode::SceneOutputNode(const std::string_view &type) : Node {type, pragma::shadergraph::CATEGORY_OUTPUT}
 {
 	AddInput(IN_COLOR, pragma::shadergraph::DataType::Color, Vector3 {1.f, 1.f, 1.f});
 	AddInput(IN_ALPHA, pragma::shadergraph::DataType::Float, 1.f);
@@ -20,6 +20,8 @@ SceneOutputNode::SceneOutputNode(const std::string_view &type) : Node {type}
 	AddInput(IN_EMISSIVE_COLOR, pragma::shadergraph::DataType::Color, Vector3 {0.f, 0.f, 0.f});
 
 	AddSocketEnum<AlphaMode>(CONST_ALPHA_MODE, AlphaMode::Opaque, true);
+
+	AddModuleDependency("scene_output");
 }
 
 std::string SceneOutputNode::DoEvaluate(const pragma::shadergraph::Graph &graph, const pragma::shadergraph::GraphNode &gn) const

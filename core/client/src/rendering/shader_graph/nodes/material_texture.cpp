@@ -9,7 +9,7 @@
 #include "pragma/rendering/shader_graph/nodes/material_texture.hpp"
 
 using namespace pragma::rendering::shader_graph;
-MaterialTextureNode::MaterialTextureNode(const std::string_view &type) : Node {type}
+MaterialTextureNode::MaterialTextureNode(const std::string_view &type) : Node {type, pragma::shadergraph::CATEGORY_TEXTURE}
 {
 	AddInput(IN_TEXTURE, pragma::shadergraph::DataType::String, "");
 	AddInput(IN_VECTOR, pragma::shadergraph::DataType::Vector, Vector3 {0.f, 0.f, 0.f}); // TODO: Make input only, don't allow writing manually

@@ -14,8 +14,17 @@ extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma::rendering;
 #pragma optimize("", off)
-void ShaderGraphTypeManager::RegisterGraph(const std::string &identifier, std::shared_ptr<pragma::shadergraph::Graph> graph)
+std::shared_ptr<pragma::shadergraph::Graph> ShaderGraphTypeManager::RegisterGraph(const std::string &identifier, std::shared_ptr<pragma::shadergraph::Graph> graph)
 {
+	auto it = m_graphs.find(identifier);
+	if(it != m_graphs.end()) {
+		// We'll keep the existing graph to prevent mismatches with already
+		// registered shaders.
+		auto curGraph = it->second->GetGraph();
+		curGraph->Clear();
+		curGraph->Merge(*graph);
+		graph = curGraph;
+	}
 	auto fragFilePath = util::FilePath(ShaderGraphManager::GetShaderFilePath(m_typeName, identifier));
 	fragFilePath.PopFront();
 	auto strFragFilePath = fragFilePath.GetString();
@@ -31,9 +40,10 @@ void ShaderGraphTypeManager::RegisterGraph(const std::string &identifier, std::s
 		auto path = ShaderGraphManager::GetShaderFilePath(m_typeName, identifier);
 		if(!filemanager::exists(path))
 			graphData->GenerateGlsl();
-		shaderManager.RegisterShader(identifier, [strFragFilePath](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderGraph {context, identifier, strFragFilePath}; });
+		shaderManager.RegisterShader(identifier, [strFragFilePath, graph](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderGraph {context, graph, identifier, strFragFilePath}; });
 	}
 	m_graphs[identifier] = graphData;
+	return graph;
 }
 
 std::shared_ptr<pragma::shadergraph::Graph> ShaderGraphTypeManager::RegisterGraph(const std::string &identifier)
@@ -114,7 +124,7 @@ std::shared_ptr<pragma::shadergraph::Graph> ShaderGraphManager::LoadShader(const
 		auto result = graph->Load(path, outErr);
 		if(!result)
 			return nullptr;
-		typeManager->RegisterGraph(identifier, graph);
+		graph = typeManager->RegisterGraph(identifier, graph);
 		m_shaderNameToType[identifier] = typeName;
 		return graph;
 	}
@@ -143,12 +153,25 @@ std::shared_ptr<ShaderGraphData> ShaderGraphManager::GetGraph(const std::string 
 		return nullptr;
 	return it->second->GetGraph(identifier);
 }
-void ShaderGraphManager::SetGraph(const std::string &type, const std::string &identifier, const std::shared_ptr<pragma::shadergraph::Graph> &graph)
+void ShaderGraphManager::SyncGraph(const std::string &type, const std::string &identifier, const pragma::shadergraph::Graph &graph)
 {
-	auto it = m_shaderGraphTypeManagers.find(type);
-	if(it == m_shaderGraphTypeManagers.end())
-		return;
-	it->second->RegisterGraph(identifier, graph);
+	auto graphData = GetGraph(identifier);
+	if(!graphData) {
+		auto itType = m_shaderNameToType.find(identifier);
+		if(itType == m_shaderNameToType.end())
+			return;
+		auto it = m_shaderGraphTypeManagers.find(type);
+		if(it == m_shaderGraphTypeManagers.end())
+			return;
+		auto newGraph = std::make_shared<pragma::shadergraph::Graph>(graph.GetNodeRegistry());
+		it->second->RegisterGraph(identifier, newGraph);
+		graphData = GetGraph(identifier);
+		if(!graphData)
+			return;
+	}
+	auto &curGraph = graphData->GetGraph();
+	curGraph->Clear();
+	curGraph->Merge(graph);
 }
 
 std::shared_ptr<pragma::shadergraph::NodeRegistry> ShaderGraphManager::GetNodeRegistry(const std::string &type) const

@@ -1201,6 +1201,20 @@ bool CEngine::Initialize(int argc, char *argv[])
 		m_shaderGraphManager->GetModuleManager().RegisterFactory("toon", [](pragma::ShaderGraph &shader) -> std::unique_ptr<pragma::rendering::ShaderGraphModule> { return std::make_unique<pragma::rendering::shader_graph::ToonModule>(shader); });
 		m_shaderGraphManager->GetModuleManager().RegisterFactory("image_texture", [](pragma::ShaderGraph &shader) -> std::unique_ptr<pragma::rendering::ShaderGraphModule> { return std::make_unique<pragma::rendering::shader_graph::ImageTextureModule>(shader); });
 		m_shaderGraphManager->GetModuleManager().RegisterFactory("input_data", [](pragma::ShaderGraph &shader) -> std::unique_ptr<pragma::rendering::ShaderGraphModule> { return std::make_unique<pragma::rendering::shader_graph::InputDataModule>(shader); });
+
+		// TODO: Load shader graphs from mounted addons
+		for(auto &[type, man] : m_shaderGraphManager->GetShaderGraphTypeManagers()) {
+			std::vector<std::string> sgFiles;
+			filemanager::find_files(pragma::rendering::ShaderGraphManager::ROOT_GRAPH_PATH + type + std::string {"/*."} + pragma::shadergraph::Graph::EXTENSION_BINARY, &sgFiles, nullptr);
+			filemanager::find_files(pragma::rendering::ShaderGraphManager::ROOT_GRAPH_PATH + type + std::string {"/*."} + pragma::shadergraph::Graph::EXTENSION_ASCII, &sgFiles, nullptr);
+			for(auto &f : sgFiles) {
+				ufile::remove_extension_from_filename(f, std::array<std::string, 2> {pragma::shadergraph::Graph::EXTENSION_BINARY, pragma::shadergraph::Graph::EXTENSION_ASCII});
+				std::string err;
+				auto graph = m_shaderGraphManager->LoadShader(f, err);
+				if(!graph)
+					spdlog::error("Failed to load shader graph '{}': {}", f, err);
+			}
+		}
 	}
 
 	return true;

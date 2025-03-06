@@ -30,7 +30,7 @@ namespace pragma::rendering::shader_graph {
 
 		static constexpr const char *OUT_VALUE = "value";
 
-		BaseInputParameterNode(const std::string_view &type) : Node {type}
+		BaseInputParameterNode(const std::string_view &type) : Node {type, pragma::shadergraph::CATEGORY_INPUT_PARAMETER}
 		{
 			AddInput(CONST_NAME, pragma::shadergraph::DataType::String, "");
 			AddSocketEnum<Scope>(CONST_SCOPE, Scope::Global);
@@ -59,7 +59,7 @@ namespace pragma::rendering::shader_graph {
 			code << gn.GetGlslOutputDeclaration(OUT_VALUE) << " = ";
 			// TODO: Check if name exists in global input data
 			if(!name.empty())
-				code << "u_globalInputData." << name << ";\n";
+				code << "u_material.material." << name << ";\n";
 			else
 				code << "0.0;\n";
 

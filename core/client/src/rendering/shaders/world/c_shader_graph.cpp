@@ -26,6 +26,7 @@
 #include <image/prosper_sampler.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <prosper_command_buffer.hpp>
+#include <sharedutils/util_debug.h>
 #include <cmaterial_manager2.hpp>
 #include <texture_type.h>
 #include <cmaterial.h>
@@ -168,13 +169,66 @@ void ShaderGraph::InitializeShaderMaterial()
 		ShaderGameWorldLightingPass::InitializeShaderMaterial(); // Use default shader material
 }
 
+static size_t get_size(pragma::shadergraph::DataType type)
+{
+	switch(type) {
+	case pragma::shadergraph::DataType::Boolean:
+	case pragma::shadergraph::DataType::Int:
+	case pragma::shadergraph::DataType::UInt:
+	case pragma::shadergraph::DataType::Float:
+	case pragma::shadergraph::DataType::UInt16:
+		return sizeof(float);
+	case pragma::shadergraph::DataType::Color:
+	case pragma::shadergraph::DataType::Vector:
+	case pragma::shadergraph::DataType::Point:
+	case pragma::shadergraph::DataType::Normal:
+		return sizeof(Vector3);
+	case pragma::shadergraph::DataType::Vector4:
+		return sizeof(Vector4);
+	case pragma::shadergraph::DataType::Point2:
+		return sizeof(Vector2);
+	case pragma::shadergraph::DataType::Transform:
+		return sizeof(Mat4);
+	}
+	return 0;
+}
+
+static size_t get_alignment(pragma::shadergraph::DataType type)
+{
+	switch(type) {
+	case pragma::shadergraph::DataType::Boolean:
+	case pragma::shadergraph::DataType::Int:
+	case pragma::shadergraph::DataType::UInt:
+	case pragma::shadergraph::DataType::Float:
+	case pragma::shadergraph::DataType::UInt16:
+		return sizeof(float);
+	case pragma::shadergraph::DataType::Color:
+	case pragma::shadergraph::DataType::Vector:
+	case pragma::shadergraph::DataType::Vector4:
+	case pragma::shadergraph::DataType::Point:
+	case pragma::shadergraph::DataType::Normal:
+		return sizeof(Vector4);
+	case pragma::shadergraph::DataType::Point2:
+		return sizeof(Vector2);
+	case pragma::shadergraph::DataType::Transform:
+		return sizeof(Mat4);
+	}
+	return 0;
+}
+
 std::shared_ptr<pragma::rendering::shader_material::ShaderMaterial> ShaderGraph::GenerateShaderMaterial()
 {
 	auto *graph = GetGraph();
 	if(!graph)
 		return nullptr;
 	auto sm = std::make_shared<pragma::rendering::shader_material::ShaderMaterial>(GetIdentifier());
-	std::vector<pragma::shadergraph::GraphNode *> globalParamNodes;
+	struct ParamNodeInfo {
+		std::string name;
+		pragma::shadergraph::GraphNode *node;
+		size_t alignment;
+		size_t size;
+	};
+	std::vector<ParamNodeInfo> globalParamNodes;
 	for(auto &node : graph->GetNodes()) {
 		auto *paramNode = dynamic_cast<const pragma::rendering::shader_graph::BaseInputParameterNode *>(&node->node);
 		if(!paramNode)
@@ -184,54 +238,88 @@ std::shared_ptr<pragma::rendering::shader_material::ShaderMaterial> ShaderGraph:
 			continue;
 		if(scope != pragma::rendering::shader_graph::BaseInputParameterNode::Scope::Global)
 			continue;
-		if(globalParamNodes.size() == globalParamNodes.capacity())
-			globalParamNodes.reserve(globalParamNodes.size() * 2 + 10);
-		globalParamNodes.push_back(node.get());
-	}
-
-	// TODO: Sort by type?
-
-	std::sort(globalParamNodes.begin(), globalParamNodes.end(), [](auto *a, auto *b) { return a->GetName() < b->GetName(); });
-
-	std::vector<pragma::rendering::Property> params;
-	params.reserve(globalParamNodes.size());
-	for(auto *node : globalParamNodes) {
-		auto &paramNode = *dynamic_cast<const pragma::rendering::shader_graph::BaseInputParameterNode *>(&node->node);
 		std::string name;
 		if(!node->GetInputValue(pragma::rendering::shader_graph::BaseInputParameterNode::CONST_NAME, name))
 			continue;
-
 		if(name.empty())
 			continue;
 
-		auto type = paramNode.GetParameterType();
-		pragma::rendering::Property prop {name, type};
+		if(globalParamNodes.size() == globalParamNodes.capacity())
+			globalParamNodes.reserve(globalParamNodes.size() * 2 + 10);
+		globalParamNodes.push_back({});
+		auto &info = globalParamNodes.back();
+		info.node = node.get();
+		info.alignment = get_alignment(paramNode->GetParameterType());
+		info.size = get_size(paramNode->GetParameterType());
+		info.name = std::move(name);
+	}
 
-		auto res = pragma::shadergraph::visit(type, [this, node, &prop](auto tag) -> bool {
-			using T = typename decltype(tag)::type;
+	// TODO: Throw error if two parameters have the same name
+	std::sort(globalParamNodes.begin(), globalParamNodes.end(), [](auto &a, auto &b) {
+		if(a.alignment == b.alignment)
+			return a.name < b.name;
+		return a.alignment > b.alignment;
+	});
 
-			T defaultVal;
-			if(!node->GetInputValue(pragma::rendering::shader_graph::BaseInputParameterNode::CONST_DEFAULT, defaultVal))
-				return false;
-			prop->defaultValue.Set(defaultVal);
+	size_t offset = 0;
+	if(!sm->properties.empty()) {
+		auto &lastProp = sm->properties.back();
+		offset = lastProp.offset + lastProp.GetSize();
+	}
+	size_t paddingIdx = 0;
+	for(auto it = globalParamNodes.begin(); it != globalParamNodes.end();) {
+		auto *info = &*it;
+		auto alignment = info->alignment;
+		if((offset % alignment) != 0) {
+			auto padding = alignment - (offset % alignment);
+			UTIL_ASSERT((padding % sizeof(float)) == 0);
+			auto paddingName = "padding" + std::to_string(paddingIdx++);
+			it = globalParamNodes.insert(it, {paddingName, nullptr, sizeof(float), sizeof(float)});
+			continue;
+		}
+		offset += info->size;
+		++it;
+	}
 
-			if constexpr(std::is_same_v<T, float>) {
-				float minVal;
-				float maxVal;
-				float stepSize;
-				if(!node->GetInputValue(pragma::rendering::shader_graph::InputParameterFloatNode::CONST_MIN, minVal))
+	std::vector<pragma::rendering::Property> params;
+	params.reserve(globalParamNodes.size());
+	for(auto &info : globalParamNodes) {
+		auto type = pragma::shadergraph::DataType::Float;
+		if(info.node) {
+			auto &paramNode = *dynamic_cast<const pragma::rendering::shader_graph::BaseInputParameterNode *>(&info.node->node);
+			type = paramNode.GetParameterType();
+		}
+		pragma::rendering::Property prop {info.name, type};
+		auto res = true;
+		if(info.node) {
+			res = pragma::shadergraph::visit(type, [this, &info, &prop](auto tag) -> bool {
+				using T = typename decltype(tag)::type;
+
+				T defaultVal;
+				if(!info.node->GetInputValue(pragma::rendering::shader_graph::BaseInputParameterNode::CONST_DEFAULT, defaultVal))
 					return false;
-				if(!node->GetInputValue(pragma::rendering::shader_graph::InputParameterFloatNode::CONST_MAX, maxVal))
-					return false;
-				if(!node->GetInputValue(pragma::rendering::shader_graph::InputParameterFloatNode::CONST_STEP_SIZE, stepSize))
-					return false;
-				prop->min = minVal;
-				prop->max = maxVal;
-				// prop->stepSize = stepSize;
-			}
+				prop->defaultValue.Set(defaultVal);
 
-			return true;
-		});
+				if constexpr(std::is_same_v<T, float>) {
+					float minVal;
+					float maxVal;
+					float stepSize;
+					if(!info.node->GetInputValue(pragma::rendering::shader_graph::InputParameterFloatNode::CONST_MIN, minVal))
+						return false;
+					if(!info.node->GetInputValue(pragma::rendering::shader_graph::InputParameterFloatNode::CONST_MAX, maxVal))
+						return false;
+					if(!info.node->GetInputValue(pragma::rendering::shader_graph::InputParameterFloatNode::CONST_STEP_SIZE, stepSize))
+						return false;
+					prop->min = minVal;
+					prop->max = maxVal;
+					// prop->stepSize = stepSize;
+				}
+
+				return true;
+			});
+		}
+		else
+			prop->defaultValue = 0.f;
 		if(!res)
 			continue;
 		params.push_back(prop);

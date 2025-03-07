@@ -63,9 +63,9 @@ namespace pragma::rendering::shader_graph {
 			else {
 				auto type = GetParameterType();
 				pragma::shadergraph::visit(type, [&code](auto tag) {
-					using T = typename decltype(tag)::type;
+					using TValue = typename decltype(tag)::type;
 					if constexpr(!std::is_same_v<T, udm::String>) {
-						T value {};
+						TValue value {};
 						code << pragma::shadergraph::to_glsl_value(value) << ";\n";
 					}
 				});

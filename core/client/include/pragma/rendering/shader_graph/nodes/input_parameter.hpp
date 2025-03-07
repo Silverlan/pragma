@@ -32,7 +32,7 @@ namespace pragma::rendering::shader_graph {
 
 		BaseInputParameterNode(const std::string_view &type) : Node {type, pragma::shadergraph::CATEGORY_INPUT_PARAMETER}
 		{
-			AddInput(CONST_NAME, pragma::shadergraph::DataType::String, "");
+			AddSocket(CONST_NAME, pragma::shadergraph::DataType::String, "");
 			AddSocketEnum<Scope>(CONST_SCOPE, Scope::Global);
 
 			AddModuleDependency("input_data");
@@ -45,7 +45,7 @@ namespace pragma::rendering::shader_graph {
 	  public:
 		InputParameterNode(const std::string_view &type) : BaseInputParameterNode {type}
 		{
-			AddInput(CONST_DEFAULT, GetParameterType(), T {});
+			AddSocket(CONST_DEFAULT, GetParameterType(), T {});
 			AddOutput(OUT_VALUE, GetParameterType());
 		}
 		virtual pragma::shadergraph::DataType GetParameterType() const override { return pragma::shadergraph::to_data_type(udm::type_to_enum<T>()); }
@@ -60,8 +60,16 @@ namespace pragma::rendering::shader_graph {
 			// TODO: Check if name exists in global input data
 			if(!name.empty())
 				code << "u_material.material." << name << ";\n";
-			else
-				code << "0.0;\n";
+			else {
+				auto type = GetParameterType();
+				pragma::shadergraph::visit(type, [&code](auto tag) {
+					using T = typename decltype(tag)::type;
+					if constexpr(!std::is_same_v<T, udm::String>) {
+						T value {};
+						code << pragma::shadergraph::to_glsl_value(value) << ";\n";
+					}
+				});
+			}
 
 			return code.str();
 		}
@@ -75,9 +83,9 @@ namespace pragma::rendering::shader_graph {
 
 		InputParameterFloatNode(const std::string_view &type) : InputParameterNode<float> {type}
 		{
-			AddInput(CONST_MIN, pragma::shadergraph::DataType::Float, 0.f);
-			AddInput(CONST_MAX, pragma::shadergraph::DataType::Float, 1.f);
-			AddInput(CONST_STEP_SIZE, pragma::shadergraph::DataType::Float, 0.1f);
+			AddSocket(CONST_MIN, pragma::shadergraph::DataType::Float, 0.f);
+			AddSocket(CONST_MAX, pragma::shadergraph::DataType::Float, 1.f);
+			AddSocket(CONST_STEP_SIZE, pragma::shadergraph::DataType::Float, 0.1f);
 		}
 	};
 

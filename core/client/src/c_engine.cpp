@@ -1171,6 +1171,7 @@ bool CEngine::Initialize(int argc, char *argv[])
 		regScene->RegisterNode<pragma::rendering::shader_graph::InputParameterStringNode>("input_parameter_string");
 		regScene->RegisterNode<pragma::rendering::shader_graph::InputParameterTransformNode>("input_parameter_transform");
 		regScene->RegisterNode<pragma::rendering::shader_graph::InputParameterFloatNode>("input_parameter_float");
+		regScene->RegisterNode<pragma::rendering::shader_graph::InputParameterTextureNode>("input_parameter_texture");
 
 		std::vector<std::string> files;
 		filemanager::find_files("scripts/shader_data/materials/*.udm", &files, nullptr);

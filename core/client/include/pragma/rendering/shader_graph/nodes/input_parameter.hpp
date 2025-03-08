@@ -40,6 +40,19 @@ namespace pragma::rendering::shader_graph {
 		virtual pragma::shadergraph::DataType GetParameterType() const = 0;
 	};
 
+	class DLLCLIENT InputParameterTextureNode : public BaseInputParameterNode {
+	  public:
+		static constexpr const char *CONST_TEXTURE = "texture";
+
+		InputParameterTextureNode(const std::string_view &type) : BaseInputParameterNode {type} { AddOutput(CONST_TEXTURE, pragma::shadergraph::DataType::String); }
+		virtual pragma::shadergraph::DataType GetParameterType() const override { return pragma::shadergraph::DataType::String; }
+		virtual std::string DoEvaluate(const pragma::shadergraph::Graph &graph, const pragma::shadergraph::GraphNode &gn) const override
+		{
+			std::ostringstream code;
+			return code.str();
+		}
+	};
+
 	template<typename T>
 	class DLLCLIENT InputParameterNode : public BaseInputParameterNode {
 	  public:

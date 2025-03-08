@@ -244,6 +244,16 @@ std::shared_ptr<pragma::rendering::shader_material::ShaderMaterial> ShaderGraph:
 		if(name.empty())
 			continue;
 
+		auto *texNode = dynamic_cast<const pragma::rendering::shader_graph::InputParameterTextureNode *>(paramNode);
+		if(texNode) {
+			sm->textures.push_back({});
+			auto &tex = sm->textures.back();
+			tex.name = name;
+			tex.defaultTexturePath = "white";
+			tex.colorMap = true;
+			continue;
+		}
+
 		if(globalParamNodes.size() == globalParamNodes.capacity())
 			globalParamNodes.reserve(globalParamNodes.size() * 2 + 10);
 		globalParamNodes.push_back({});

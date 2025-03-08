@@ -42,9 +42,30 @@ namespace pragma::rendering::shader_graph {
 
 	class DLLCLIENT InputParameterTextureNode : public BaseInputParameterNode {
 	  public:
-		static constexpr const char *CONST_TEXTURE = "texture";
+		enum class ColorSpace : uint8_t {
+			Srgb = 0,
+			Linear,
+		};
 
-		InputParameterTextureNode(const std::string_view &type) : BaseInputParameterNode {type} { AddOutput(CONST_TEXTURE, pragma::shadergraph::DataType::String); }
+		enum class ImageType : uint8_t {
+			e2D = 0,
+			Cube,
+		};
+
+		static constexpr const char *CONST_DEFAULT_TEXTURE = "defaultTexture";
+		static constexpr const char *CONST_COLOR_SPACE = "colorSpace";
+		static constexpr const char *CONST_IMAGE_TYPE = "imageType";
+
+		static constexpr const char *OUT_TEXTURE = "texture";
+
+		InputParameterTextureNode(const std::string_view &type) : BaseInputParameterNode {type}
+		{
+			AddSocket(CONST_DEFAULT_TEXTURE, pragma::shadergraph::DataType::String, "white");
+			AddSocketEnum<ColorSpace>(CONST_COLOR_SPACE, ColorSpace::Srgb);
+			AddSocketEnum<ImageType>(CONST_IMAGE_TYPE, ImageType::e2D);
+
+			AddOutput(OUT_TEXTURE, pragma::shadergraph::DataType::String);
+		}
 		virtual pragma::shadergraph::DataType GetParameterType() const override { return pragma::shadergraph::DataType::String; }
 		virtual std::string DoEvaluate(const pragma::shadergraph::Graph &graph, const pragma::shadergraph::GraphNode &gn) const override
 		{

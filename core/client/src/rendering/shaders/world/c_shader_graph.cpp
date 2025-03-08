@@ -250,7 +250,25 @@ std::shared_ptr<pragma::rendering::shader_material::ShaderMaterial> ShaderGraph:
 			auto &tex = sm->textures.back();
 			tex.name = name;
 			tex.defaultTexturePath = "white";
-			tex.colorMap = true;
+			node->GetInputValue(pragma::rendering::shader_graph::InputParameterTextureNode::CONST_DEFAULT_TEXTURE, *tex.defaultTexturePath);
+
+			auto colorSpace = node->GetConstantInputValue<pragma::rendering::shader_graph::InputParameterTextureNode::ColorSpace>(pragma::rendering::shader_graph::InputParameterTextureNode::CONST_COLOR_SPACE);
+			if(!colorSpace)
+				colorSpace = pragma::rendering::shader_graph::InputParameterTextureNode::ColorSpace::Srgb;
+			switch(*colorSpace) {
+			case pragma::rendering::shader_graph::InputParameterTextureNode::ColorSpace::Srgb:
+				tex.colorMap = true;
+				break;
+			}
+
+			auto imageType = node->GetConstantInputValue<pragma::rendering::shader_graph::InputParameterTextureNode::ImageType>(pragma::rendering::shader_graph::InputParameterTextureNode::CONST_IMAGE_TYPE);
+			if(!imageType)
+				imageType = pragma::rendering::shader_graph::InputParameterTextureNode::ImageType::e2D;
+			switch(*imageType) {
+			case pragma::rendering::shader_graph::InputParameterTextureNode::ImageType::Cube:
+				tex.cubemap = true;
+				break;
+			}
 			continue;
 		}
 

@@ -30,7 +30,7 @@ get_submodule("util_source_script","https://github.com/Silverlan/util_source_scr
 get_submodule("util_timeline_scene","https://github.com/Silverlan/util_timeline_scene.git","8cac3eae6f4bc892e2ea229a97261385651a90f6")
 get_submodule("util_udm","https://github.com/Silverlan/util_udm.git","6c70fdf885a33054d2c61f5d420927554275865b")
 get_submodule("util_versioned_archive","https://github.com/Silverlan/util_versioned_archive.git","e8db74a6ad9ed44d7e8a4492eb8fe44eae3452f6")
-get_submodule("util_vmf","https://github.com/Silverlan/util_vmf.git","4e477b1425e1a7b9898975effaf527f661e792da")
+get_submodule("util_vmf","https://github.com/Silverlan/util_vmf.git","ae1c498c20ff0ccff4a0245c6cc9b9a59561881b")
 get_submodule("util_zip","https://github.com/Silverlan/util_zip.git","6b1695545f66ec19db8b81ca081f8502358b823f")
 get_submodule("util_shadergraph","https://github.com/Silverlan/util_shadergraph.git","15231d501ca893d077c1a1de5cd173daf94fc1e5")
 get_submodule("vfilesystem","https://github.com/Silverlan/vfilesystem.git","6663b7b90b927febd14eee641a791766ad8b55d3")

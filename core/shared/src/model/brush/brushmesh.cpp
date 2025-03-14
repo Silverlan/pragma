@@ -75,14 +75,11 @@ void BrushMesh::UpdateHullShape(pragma::physics::IEnvironment &env, const std::v
 		const SurfaceMaterial *surfaceMat = nullptr;
 		auto *mat = side->GetMaterial();
 		if(mat != nullptr) {
-			auto &data = mat->GetDataBlock();
-			if(data != nullptr) {
-				std::string surfaceIdentifier;
-				if(data->GetString("surfacematerial", &surfaceIdentifier) == true) {
-					auto it = std::find_if(surfaceMaterials->begin(), surfaceMaterials->end(), [&surfaceIdentifier](const SurfaceMaterial &mat) { return (mat.GetIdentifier() == surfaceIdentifier) ? true : false; });
-					if(it != surfaceMaterials->end())
-						surfaceMat = &(*it);
-				}
+			std::string surfaceIdentifier;
+			if(mat->GetProperty("surfacematerial", &surfaceIdentifier) == true) {
+				auto it = std::find_if(surfaceMaterials->begin(), surfaceMaterials->end(), [&surfaceIdentifier](const SurfaceMaterial &mat) { return (mat.GetIdentifier() == surfaceIdentifier) ? true : false; });
+				if(it != surfaceMaterials->end())
+					surfaceMat = &(*it);
 			}
 		}
 		auto numTris = (triangles != nullptr) ? triangles->size() : 0ull;

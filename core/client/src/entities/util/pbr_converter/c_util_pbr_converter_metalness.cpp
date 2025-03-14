@@ -11,6 +11,7 @@
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/clientstate/clientstate.h"
 #include "cmaterial.h"
+#include <datasystem_t.hpp>
 #include <pragma/physics/collisionmesh.h>
 #include <mathutil/transform.hpp>
 
@@ -142,41 +143,37 @@ void CPBRConverterComponent::UpdateMetalness(Model &mdl, CMaterial &mat)
 	std::optional<float> roughness = (numSurfMats > 0) ? (accRoughness / static_cast<float>(numSurfMats)) : std::optional<float> {};
 	accGlass = (numSurfMats > 0) ? (accGlass / static_cast<float>(numSurfMats)) : 0.f;
 
-	auto rmaInfo = mat.GetDataBlock()->GetBlock("rma_info");
-	if(rmaInfo == nullptr)
+	if(!mat.HasPropertyBlock("rma_info"))
 		return;
-	if(rmaInfo->GetBool("requires_roughness_update")) {
+	if(mat.GetProperty("rma_info/requires_roughness_update", false)) {
 		if(roughness.has_value()) {
 			Con::cout << "Assigning roughness value of " << *roughness << " to material '" << mat.GetName() << "', based on surface material properties of model '" << mdl.GetName() << "'!" << Con::endl;
-			mat.GetDataBlock()->AddValue("float", "roughness_factor", std::to_string(*roughness));
+			mat.SetProperty("roughness_factor", *roughness);
 		}
-		rmaInfo->RemoveValue("requires_roughness_update");
+		mat.ClearProperty("rma_info/requires_roughness_update");
 	}
-	if(rmaInfo->GetBool("requires_metalness_update")) {
+	if(mat.GetProperty("rma_info/requires_metalness_update", false)) {
 		if(metalness.has_value()) {
 			Con::cout << "Assigning metalness value of " << *metalness << " to material '" << mat.GetName() << "', based on surface material properties of model '" << mdl.GetName() << "'!" << Con::endl;
-			mat.GetDataBlock()->AddValue("float", "metalness_factor", std::to_string(*metalness));
+			mat.SetProperty("metalness_factor", *metalness);
 		}
-		rmaInfo->RemoveValue("requires_metalness_update");
+		mat.ClearProperty("rma_info/requires_metalness_update");
 	}
-	if(rmaInfo->GetBool("requires_sss_update")) {
+
+	if(mat.GetProperty("rma_info/requires_sss_update", false)) {
 		if(sufMatSSS) {
-			auto &data = mat.GetDataBlock();
 			auto &pbrInfo = sufMatSSS->GetPBRInfo();
-			auto dataSSS = data->AddBlock("subsurface_scattering");
-			data->AddValue("float", "factor", std::to_string(pbrInfo.subsurface.factor));
-			data->AddValue("int", "method", "0");
-			data->AddValue("vector", "scatter_color", std::to_string(pbrInfo.subsurface.scatterColor.r) + ' ' + std::to_string(pbrInfo.subsurface.scatterColor.g) + ' ' + std::to_string(pbrInfo.subsurface.scatterColor.b));
+			mat.SetProperty("subsurface_scattering/factor", pbrInfo.subsurface.factor);
+			mat.SetProperty("subsurface_scattering/method", 0);
+			mat.SetProperty("subsurface_scattering/scatter_color", pbrInfo.subsurface.scatterColor);
 		}
-		rmaInfo->RemoveValue("requires_sss_update");
+		mat.ClearProperty("rma_info/requires_sss_update");
 	}
 
 	if(accGlass > 0.5f)
-		ApplyMiscMaterialProperties(*mat.GetDataBlock(), *surfMatGlass, "glass");
+		ApplyMiscMaterialProperties(mat, *surfMatGlass, "glass");
 
 	auto resWatcherLock = c_engine->ScopeLockResourceWatchers();
-	if(rmaInfo->IsEmpty())
-		mat.GetDataBlock()->RemoveValue("rma_info");
 
 	mat.UpdateTextures();
 	std::string err;
@@ -194,8 +191,7 @@ void CPBRConverterComponent::UpdateMetalness(Model &mdl)
 		// Make sure it's a PBR material
 		if(IsPBR(mat) == false)
 			continue;
-		auto rmaInfo = mat.GetDataBlock()->GetBlock("rma_info");
-		if(rmaInfo == nullptr || rmaInfo->GetBool("requires_metalness_update") == false)
+		if(mat.GetProperty("rma_info/requires_metalness_update", false) == false)
 			continue;
 		UpdateMetalness(mdl, mat);
 	}

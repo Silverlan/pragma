@@ -83,6 +83,7 @@
 #include <luainterface.hpp>
 #include <luabind/copy_policy.hpp>
 #include <luabind/return_reference_to_policy.hpp>
+#include <material_property_block_view.hpp>
 #include <cmaterialmanager.h>
 #include <cmaterial_manager2.hpp>
 #include <wgui/wgui.h>
@@ -98,20 +99,15 @@ static spdlog::logger &LOGGER_SG = pragma::register_logger("shadergraph");
 #pragma optimize("", off)
 static void reload_textures(CMaterial &mat)
 {
-	auto &data = mat.GetDataBlock();
-	if(!data)
-		return;
-	auto *pdata = data->GetData();
-	if(!pdata)
-		return;
 	std::unordered_map<std::string, std::string> textureMappings;
-	for(auto &pair : *pdata) {
-		auto &val = static_cast<ds::Value &>(*pair.second);
-		auto &type = typeid(val);
-		if(type != typeid(ds::Texture))
+	for(auto &name : msys::MaterialPropertyBlockView {mat}) {
+		auto type = mat.GetPropertyType(name);
+		if(type != msys::PropertyType::Texture)
 			continue;
-		auto &datTex = static_cast<ds::Texture &>(val);
-		textureMappings[pair.first] = datTex.GetString();
+		std::string tex;
+		if(!mat.GetProperty(name, &tex))
+			continue;
+		textureMappings[std::string {name}] = tex;
 	}
 
 	for(auto &pair : textureMappings)
@@ -541,7 +537,6 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 	materialClassDef.def("SetTexture", static_cast<void (*)(lua_State *, Material *, const std::string &, Lua::Vulkan::Texture &)>(&Lua::Material::Client::SetTexture));
 	materialClassDef.def("SetTexture", static_cast<void (*)(lua_State *, Material *, const std::string &, Lua::Vulkan::Texture &, const std::string &)>(&Lua::Material::Client::SetTexture));
 	materialClassDef.def("GetTextureInfo", &Lua::Material::Client::GetTexture);
-	materialClassDef.def("GetData", &Lua::Material::Client::GetData);
 	materialClassDef.def("ReloadTextures", &reload_textures);
 	materialClassDef.def("InitializeShaderDescriptorSet", static_cast<void (*)(lua_State *, ::Material *, bool)>(&Lua::Material::Client::InitializeShaderData));
 	materialClassDef.def("InitializeShaderDescriptorSet", static_cast<void (*)(lua_State *, ::Material *)>(&Lua::Material::Client::InitializeShaderData));
@@ -553,7 +548,7 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 		Lua::Push<SpriteSheetAnimation *>(l, spriteSheetAnim);
 	}));
 	materialClassDef.def("SetShader", static_cast<void (*)(lua_State *, ::Material &, const std::string &)>([](lua_State *l, ::Material &mat, const std::string &shader) {
-		auto db = mat.GetDataBlock();
+		auto db = mat.GetPropertyDataBlock();
 		if(db == nullptr)
 			return;
 		auto shaderInfo = c_engine->GetShaderManager().PreRegisterShader(shader);

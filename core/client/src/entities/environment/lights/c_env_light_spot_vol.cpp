@@ -22,6 +22,7 @@
 #include <pragma/math/intersection.h>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
+#include <datasystem_t.hpp>
 #include <cmaterial.h>
 
 using namespace pragma;
@@ -90,7 +91,7 @@ bool CLightSpotVolComponent::UpdateMeshData()
 	auto endRadius = CalcEndRadius();
 
 	if(m_material)
-		m_material->GetDataBlock()->AddValue("float", "cone_height", std::to_string(maxDist));
+		m_material->SetProperty("cone_height", maxDist);
 
 	const uint32_t coneDetail = 64;
 	const Vector3 dir {0.f, 0.f, 1.f};
@@ -217,9 +218,8 @@ void CLightSpotVolComponent::InitializeVolumetricLight()
 
 	auto mat = client->CreateMaterial("lightcone", "noop");
 	auto *cmat = static_cast<CMaterial *>(mat.get());
-	auto &data = mat->GetDataBlock();
-	data->AddValue("int", "alpha_mode", std::to_string(umath::to_integral(AlphaMode::Blend)));
-	data->AddValue("float", "cone_height", std::to_string(CalcEndRadius()));
+	cmat->SetProperty("alpha_mode", AlphaMode::Blend);
+	cmat->SetProperty("cone_height", CalcEndRadius());
 	cmat->SetTexture("albedo_map", "error");
 	cmat->UpdateTextures();
 	cmat->SetLoaded(true);

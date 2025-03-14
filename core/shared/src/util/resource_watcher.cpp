@@ -13,6 +13,7 @@
 #include "pragma/entities/entity_iterator.hpp"
 #include "pragma/model/modelmanager.h"
 #include "pragma/model/model.h"
+#include <material_property_block_view.hpp>
 #include <materialmanager.h>
 #include <sharedutils/util_file.h>
 #include <pragma/asset/util_asset.hpp>
@@ -207,38 +208,39 @@ void ResourceWatcherManager::OnResourceChanged(const util::Path &rootPath, const
 				if(!hMat)
 					continue;
 				auto *mat = hMat.get();
-				auto &block = mat->GetDataBlock();
-				if(block == nullptr)
-					continue;
+
 				auto canonName = FileManager::GetCanonicalizedPath(strPath);
 				ustring::to_lower(canonName);
 				ufile::remove_extension_from_filename(canonName);
 
-				std::function<bool(const std::shared_ptr<ds::Block> &)> fHasTexture = nullptr;
-				fHasTexture = [&fHasTexture, &canonName](const std::shared_ptr<ds::Block> &block) -> bool {
-					auto *data = block->GetData();
-					if(data != nullptr) {
-						for(auto &pair : *data) {
-							auto v = pair.second;
-							if(v->IsBlock() == true) {
-								if(fHasTexture(std::static_pointer_cast<ds::Block>(v)) == true)
+				std::function<bool(const util::Path &path)> fHasTexture = nullptr;
+				fHasTexture = [mat, &canonName, &fHasTexture](const util::Path &path) -> bool {
+					for(auto &name : msys::MaterialPropertyBlockView {*mat, path}) {
+						auto propType = mat->GetPropertyType(name);
+						switch(propType) {
+						case msys::PropertyType::Block:
+							{
+								if(fHasTexture(util::FilePath(path, name)))
 									return true;
+								break;
 							}
-							else {
-								auto dataTex = std::dynamic_pointer_cast<ds::Texture>(v);
-								if(dataTex != nullptr) {
-									auto texName = FileManager::GetCanonicalizedPath(dataTex->GetString());
+						case msys::PropertyType::Texture:
+							{
+								std::string texName;
+								if(mat->GetProperty(util::FilePath(path, name).GetString(), &texName)) {
+									texName = FileManager::GetCanonicalizedPath(texName);
 									ustring::to_lower(texName);
 									ufile::remove_extension_from_filename(texName);
 									if(canonName == texName)
 										return true;
 								}
+								break;
 							}
 						}
 					}
 					return false;
 				};
-				if(fHasTexture(block) == true) // Material has texture, reload it
+				if(fHasTexture({}) == true) // Material has texture, reload it
 				{
 					auto matName = mat->GetName();
 					// A new material with a different extension may have just been

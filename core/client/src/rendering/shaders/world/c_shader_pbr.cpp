@@ -54,9 +54,8 @@ void ShaderPBR::InitializeGfxPipelineDescriptorSets()
 void ShaderPBR::InitializeMaterialData(const CMaterial &mat, const rendering::shader_material::ShaderMaterial &shaderMat, pragma::rendering::ShaderInputData &inOutMatData)
 {
 	ShaderGameWorldLightingPass::InitializeMaterialData(mat, shaderMat, inOutMatData);
-	auto &data = mat.GetDataBlock();
 	float specularFactor;
-	if(data->GetFloat("specular_factor", &specularFactor)) {
+	if(mat.GetProperty("specular_factor", &specularFactor)) {
 		auto roughnessFactor = inOutMatData.GetValue<float>("roughness_factor");
 		if(!roughnessFactor)
 			roughnessFactor = 1.f;

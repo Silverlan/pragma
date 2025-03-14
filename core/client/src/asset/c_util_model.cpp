@@ -22,6 +22,7 @@
 #include "pragma/entities/components/c_radius_component.hpp"
 #include "c_gltf_writer.hpp"
 #include <cmaterial_manager2.hpp>
+#include <datasystem_t.hpp>
 #include <texturemanager/texture_manager2.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/model/animation/vertex_animation.hpp>
@@ -452,9 +453,8 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 
 		auto mat = client->CreateMaterial(matPathRelative.GetString(), "pbr");
 		auto *cmat = static_cast<CMaterial *>(mat.get());
-		auto &dataBlock = mat->GetDataBlock();
-		dataBlock->AddValue("int", "alpha_mode", std::to_string(umath::to_integral(alphaMode)));
-		dataBlock->AddValue("float", "alpha_cutoff", std::to_string(gltfMat.alphaCutoff));
+		mat->SetProperty("alpha_mode", alphaMode);
+		mat->SetProperty("alpha_cutoff", gltfMat.alphaCutoff);
 
 		auto fWriteImage = [cmat](const std::string &matIdentifier, const std::string &texName, prosper::IImage &img, bool greyScale, bool normalMap, AlphaMode alphaMode = AlphaMode::Opaque) {
 			pragma::asset::assign_texture(*cmat, ::util::CONVERT_PATH, matIdentifier, texName, img, greyScale, normalMap, alphaMode);
@@ -501,11 +501,8 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 					}
 
 					auto occlusionTex = fGetTexture(gltfMat.occlusionTexture.index);
-					if(occlusionTex == nullptr) {
-						auto rmaInfo = dataBlock->AddBlock("rma_info");
-						if(rmaInfo)
-							rmaInfo->AddValue("bool", "requires_ao_update", "1");
-					}
+					if(occlusionTex == nullptr)
+						mat->SetProperty("rma_info/requires_ao_update", true);
 
 					auto *shader = static_cast<pragma::ShaderSpecularGlossinessToMetalnessRoughness *>(c_engine->GetShader("specular_glossiness_to_metalness_roughness").get());
 					if(shader) {
@@ -532,7 +529,7 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 
 			auto &baseColorFactor = gltfMat.pbrMetallicRoughness.baseColorFactor;
 			if(baseColorFactor != std::vector<double> {1.0, 1.0, 1.0, 1.0})
-				dataBlock->AddValue("vector", "color_factor", std::to_string(baseColorFactor.at(0)) + ' ' + std::to_string(baseColorFactor.at(1)) + ' ' + std::to_string(baseColorFactor.at(2)) + ' ' + std::to_string(baseColorFactor.at(3)));
+				mat->SetProperty("color_factor", Vector4 {baseColorFactor.at(0), baseColorFactor.at(1), baseColorFactor.at(2), baseColorFactor.at(3)});
 
 			auto metallicRoughnessImg = fGetImage(gltfMat.pbrMetallicRoughness.metallicRoughnessTexture.index);
 			if(metallicRoughnessImg) {
@@ -546,15 +543,12 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 					if(shaderComposeRMA)
 						shaderComposeRMA->InsertAmbientOcclusion(c_engine->GetRenderContext(), rmaName, *occlusionImg);
 				}
-				else {
-					auto rmaInfo = dataBlock->AddBlock("rma_info");
-					if(rmaInfo)
-						rmaInfo->AddValue("bool", "requires_ao_update", "1");
-				}
+				else
+					mat->SetProperty("rma_info/requires_ao_update", true);
 			}
 
-			dataBlock->AddValue("float", "roughness_factor", std::to_string(gltfMat.pbrMetallicRoughness.roughnessFactor));
-			dataBlock->AddValue("float", "metalness_factor", std::to_string(gltfMat.pbrMetallicRoughness.metallicFactor));
+			mat->SetProperty("roughness_factor", gltfMat.pbrMetallicRoughness.roughnessFactor);
+			mat->SetProperty("metalness_factor", gltfMat.pbrMetallicRoughness.metallicFactor);
 		}
 
 		if(gltfMat.normalTexture.index != -1) {
@@ -569,9 +563,8 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 				fWriteImage(Material::EMISSION_MAP_IDENTIFIER, matName + "_emission", tex->GetImage(), false /* greyScale */, false /* normalMap */);
 		}
 		auto &emissiveFactor = gltfMat.emissiveFactor;
-		if(emissiveFactor != std::vector<double> {1.0, 1.0, 1.0, 1.0}) {
-			dataBlock->AddValue("vector", "emission_factor", std::to_string(emissiveFactor.at(0)) + ' ' + std::to_string(emissiveFactor.at(1)) + ' ' + std::to_string(emissiveFactor.at(2)));
-		}
+		if(emissiveFactor != std::vector<double> {1.0, 1.0, 1.0, 1.0})
+			mat->SetProperty("emission_factor", Vector3 {emissiveFactor.at(0), emissiveFactor.at(1), emissiveFactor.at(2)});
 
 		mat->UpdateTextures();
 		auto savePath = pragma::asset::relative_path_to_absolute_path(matPathRelative, pragma::asset::Type::Material, util::CONVERT_PATH);
@@ -1746,7 +1739,6 @@ std::optional<pragma::asset::MaterialTexturePaths> pragma::asset::export_materia
 		return export_texture(texInfo->name, imageFormat, errMsg, alpha ? uimg::TextureInfo::AlphaMode::Transparency : uimg::TextureInfo::AlphaMode::None, false, &exportPath, &imgOutputPath, normalizeTextureNames ? normalizedName : std::optional<std::string> {});
 	};
 
-	auto &data = mat.GetDataBlock();
 	auto alphaMode = mat.GetAlphaMode();
 
 	pragma::asset::MaterialTexturePaths texturePaths {};
@@ -1848,7 +1840,7 @@ static bool save_ambient_occlusion(Material &mat, std::string rmaPath, T &img, s
 		outPath = mat.GetName();
 		outPath.RemoveFileExtension();
 		rmaPath = outPath.GetString() + "_rma";
-		mat.GetDataBlock()->AddValue("texture", Material::RMA_MAP_IDENTIFIER, rmaPath);
+		mat.SetTextureProperty(Material::RMA_MAP_IDENTIFIER, rmaPath);
 		requiresSave = true;
 	}
 
@@ -1857,14 +1849,8 @@ static bool save_ambient_occlusion(Material &mat, std::string rmaPath, T &img, s
 		return false;
 	}
 
-	auto &dataBlock = mat.GetDataBlock();
-	auto rmaInfo = dataBlock->GetBlock("rma_info");
-	if(rmaInfo) {
-		rmaInfo->RemoveValue("requires_ao_update");
-		if(rmaInfo->IsEmpty())
-			dataBlock->RemoveValue("rma_info");
-	}
-	dataBlock->RemoveValue("ao_map");
+	mat.ClearProperty("rma_info/requires_ao_update");
+	mat.ClearProperty("ao_map");
 
 	if(requiresSave) {
 		mat.UpdateTextures();
@@ -1880,8 +1866,9 @@ pragma::asset::AOResult pragma::asset::generate_ambient_occlusion(Model &mdl, Ma
 	// Use a compute shader to determine if it's all white or black?
 	// On the other hand a rma texture should be unique to a model, so does it really matter?
 
-	auto rmaInfo = mat.GetDataBlock()->GetBlock("rma_info");
-	if(forceRebuild == false && (rmaInfo == nullptr || rmaInfo->GetBool("requires_ao_update") == false))
+	auto requiresAOUpdate = false;
+	mat.GetProperty("rma_info/requires_ao_update", &requiresAOUpdate);
+	if(forceRebuild == false && requiresAOUpdate == false)
 		return AOResult::NoAOGenerationRequired;
 	auto *rmaTexInfo = mat.GetRMAMap();
 	if(rmaTexInfo == nullptr || std::static_pointer_cast<Texture>(rmaTexInfo->texture) == nullptr) {
@@ -2042,8 +2029,7 @@ bool pragma::asset::export_texture_as_vtf(const std::string &fileName, const pro
 	std::function<void(void)> deleter = nullptr;
 	auto nTexInfo = texInfo;
 	nTexInfo.inputFormat = *inputFormat;
-	auto result = export_texture_as_vtf(
-	  fileName, [&fGetImgData, &deleter](uint32_t layerId, uint32_t mipmapIdx) -> const uint8_t * { return fGetImgData(layerId, mipmapIdx, deleter); }, width, height, sizePerPixel, numLayers, numMipmaps, cubemap, nTexInfo, errorHandler, absoluteFileName);
+	auto result = export_texture_as_vtf(fileName, [&fGetImgData, &deleter](uint32_t layerId, uint32_t mipmapIdx) -> const uint8_t * { return fGetImgData(layerId, mipmapIdx, deleter); }, width, height, sizePerPixel, numLayers, numMipmaps, cubemap, nTexInfo, errorHandler, absoluteFileName);
 	if(deleter)
 		deleter();
 	return result;

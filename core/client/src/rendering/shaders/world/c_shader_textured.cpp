@@ -169,12 +169,10 @@ std::optional<uint32_t> ShaderGameWorldLightingPass::FindPipelineIndex(rendering
 }
 static std::optional<Vector3> get_emission_factor(CMaterial &mat)
 {
-	auto &data = mat.GetDataBlock();
-	auto &dbEmissionFactor = data->GetValue("emission_factor");
-	if(dbEmissionFactor == nullptr || typeid(*dbEmissionFactor) != typeid(ds::Vector))
+	Vector3 emissionFactor;
+	if(!mat.GetProperty("emission_factor", &emissionFactor))
 		return {};
-	auto emissionFactor = static_cast<ds::Vector *>(dbEmissionFactor.get())->GetValue();
-	emissionFactor *= data->GetFloat("emission_strength", 1.f);
+	emissionFactor *= mat.GetProperty("emission_strength", 1.f);
 	if(emissionFactor.r == 0.f && emissionFactor.g == 0.f && emissionFactor.b == 0.f)
 		return {};
 	return emissionFactor;
@@ -186,8 +184,7 @@ GameShaderSpecializationConstantFlag ShaderGameWorldLightingPass::GetMaterialPip
 	auto flags = GameShaderSpecializationConstantFlag::None;
 	auto hasEmission = (mat.GetTextureInfo(Material::EMISSION_MAP_IDENTIFIER) != nullptr);
 	if(!hasEmission) {
-		auto &data = mat.GetDataBlock();
-		if(data->HasValue("emission_factor"))
+		if(mat.GetPropertyValueType("emission_factor") != ds::ValueType::Invalid)
 			hasEmission = get_emission_factor(mat).has_value();
 	}
 	if(mat.GetAlphaMode() != AlphaMode::Opaque)

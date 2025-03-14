@@ -425,8 +425,7 @@ bool CReflectionProbeComponent::SaveIBLReflectionsToFile()
 		if(pragma::asset::exists(m_iblMat, pragma::asset::Type::Material)) {
 			auto *curMat = client->LoadMaterial(m_iblMat);
 			if(curMat) {
-				auto generated = curMat->GetDataBlock()->GetBool("generated");
-				if(generated == false)
+				if(curMat->GetProperty("generated", false) == false)
 					return false; // Don't overwrite non-generated material
 			}
 		}
@@ -469,11 +468,10 @@ bool CReflectionProbeComponent::SaveIBLReflectionsToFile()
 	auto mat = client->CreateMaterial("ibl");
 	if(mat == nullptr)
 		return false;
-	auto &dataBlock = mat->GetDataBlock();
-	dataBlock->AddValue("texture", "prefilter", relPath + prefix + "prefilter");
-	dataBlock->AddValue("texture", "irradiance", relPath + prefix + "irradiance");
-	dataBlock->AddValue("texture", "brdf", "env/brdf");
-	dataBlock->AddValue("bool", "generated", "1");
+	mat->SetTextureProperty("prefilter", relPath + prefix + "prefilter");
+	mat->SetTextureProperty("irradiance", relPath + prefix + "irradiance");
+	mat->SetTextureProperty("brdf", "env/brdf");
+	mat->SetProperty("generated", true);
 	auto rpath = util::Path::CreateFile(relPath + identifier + "." + pragma::asset::FORMAT_MATERIAL_ASCII);
 	auto apath = pragma::asset::relative_path_to_absolute_path(rpath, pragma::asset::Type::Material);
 	std::string err;
@@ -829,7 +827,7 @@ bool CReflectionProbeComponent::LoadIBLReflectionsFromFile()
 	if(m_strength.has_value())
 		m_iblData->strength = *m_strength;
 	else
-		mat->GetDataBlock()->GetFloat("ibl_strength", &m_iblData->strength);
+		mat->GetProperty("ibl_strength", &m_iblData->strength);
 
 	// TODO: Do this properly (e.g. via material attributes)
 	//static auto brdfSamplerInitialized = false;

@@ -98,8 +98,7 @@ void CPBRConverterComponent::UpdateAmbientOcclusion(Model &mdl, const AmbientOcc
 		// Make sure it's a PBR material and it doesn't already have an ao map
 		if(IsPBR(*mat) == false)
 			continue;
-		auto rmaInfo = mat->GetDataBlock()->GetBlock("rma_info");
-		if(aoInfo.rebuild == false && (rmaInfo == nullptr || rmaInfo->GetBool("requires_ao_update") == false))
+		if(aoInfo.rebuild == false && mat->GetProperty("rma_info/requires_ao_update", false) == false)
 			continue;
 		PBRAOBakeJob job {mdl, *mat};
 		job.width = aoInfo.width;
@@ -131,7 +130,7 @@ void CPBRConverterComponent::WriteAOMap(Model &mdl, CMaterial &mat, uimg::ImageB
 		outPath = mat.GetName();
 		outPath.RemoveFileExtension();
 		rmaName = outPath.GetString() + "_rma";
-		mat.GetDataBlock()->AddValue("texture", Material::RMA_MAP_IDENTIFIER, rmaName);
+		mat.SetTextureProperty(Material::RMA_MAP_IDENTIFIER, rmaName);
 		requiresSave = true;
 	}
 

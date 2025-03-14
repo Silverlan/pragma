@@ -735,7 +735,7 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg, const std::string
 			auto lightType = (lightSource.type == LightSource::Type::Spot) ? pragma::LightType::Spot : (lightSource.type == LightSource::Type::Directional) ? pragma::LightType::Directional : pragma::LightType::Point;
 			intensity = (lightType == pragma::LightType::Spot) ? ulighting::cycles::lumen_to_watt_spot(intensity, color, outerConeAngle)
 			  : (lightType == pragma::LightType::Point)        ? ulighting::cycles::lumen_to_watt_point(intensity, color)
-			                                                         : ulighting::cycles::lumen_to_watt_area(intensity, color);
+			                                                   : ulighting::cycles::lumen_to_watt_area(intensity, color);
 
 			auto lightName = lightSource.name;
 			if(lightName.empty())
@@ -1390,15 +1390,13 @@ void pragma::asset::GLTFWriter::WriteMaterials()
 		gltfMat.name = ufile::get_file_from_filename(mat->GetName());
 		ufile::remove_extension_from_filename(gltfMat.name);
 
-		auto &data = mat->GetDataBlock();
-
 		auto itAlbedo = texturePaths->find(Material::ALBEDO_MAP_IDENTIFIER);
 		if(itAlbedo != texturePaths->end())
 			gltfMat.pbrMetallicRoughness.baseColorTexture.index = fAddTexture(itAlbedo->second);
 
 		Vector4 colorFactor {1.f, 1.f, 1.f, 1.f};
-		data->GetVector3("color_factor", reinterpret_cast<Vector3 *>(&colorFactor));
-		data->GetFloat("alpha_factor", &colorFactor.a);
+		mat->GetProperty("color_factor", reinterpret_cast<Vector3 *>(&colorFactor));
+		mat->GetProperty("alpha_factor", &colorFactor.a);
 		gltfMat.pbrMetallicRoughness.baseColorFactor = {colorFactor[0], colorFactor[1], colorFactor[2], colorFactor[3]};
 
 		auto itNormal = texturePaths->find(Material::NORMAL_MAP_IDENTIFIER);
@@ -1414,11 +1412,11 @@ void pragma::asset::GLTFWriter::WriteMaterials()
 			roughnessFactor = 1.f;
 		}
 
-		auto alphaMode = static_cast<int32_t>(AlphaMode::Opaque);
-		data->GetInt("alpha_mode", &alphaMode);
+		auto alphaMode = AlphaMode::Opaque;
+		mat->GetProperty("alpha_mode", &alphaMode);
 
 		auto alphaCutoff = 0.5f;
-		data->GetFloat("alpha_cutoff", &alphaCutoff);
+		mat->GetProperty("alpha_cutoff", &alphaCutoff);
 		switch(static_cast<AlphaMode>(alphaMode)) {
 		case AlphaMode::Mask:
 			gltfMat.alphaMode = "MASK";
@@ -1437,17 +1435,15 @@ void pragma::asset::GLTFWriter::WriteMaterials()
 		if(itEmissive != texturePaths->end())
 			gltfMat.emissiveTexture.index = fAddTexture(itEmissive->second);
 
-		data->GetFloat("metalness_factor", &metalnessFactor);
-		data->GetFloat("roughness_factor", &roughnessFactor);
+		mat->GetProperty("metalness_factor", &metalnessFactor);
+		mat->GetProperty("roughness_factor", &roughnessFactor);
 
 		gltfMat.pbrMetallicRoughness.metallicFactor = metalnessFactor;
 		gltfMat.pbrMetallicRoughness.roughnessFactor = roughnessFactor;
 
-		auto &emissionFactor = data->GetValue("emission_factor");
-		if(emissionFactor != nullptr && typeid(*emissionFactor) == typeid(ds::Vector)) {
-			auto &f = static_cast<ds::Vector *>(emissionFactor.get())->GetValue();
-			gltfMat.emissiveFactor = {f.r, f.g, f.b};
-		}
+		Vector3 emissionFactor;
+		if(mat->GetProperty("emission_factor", &emissionFactor))
+			gltfMat.emissiveFactor = {emissionFactor.r, emissionFactor.g, emissionFactor.b};
 		else if(gltfMat.emissiveTexture.index != -1)
 			gltfMat.emissiveFactor = {1.0, 1.0, 1.0};
 		m_materialToGltfIndex[mat] = m_gltfMdl.materials.size() - 1;

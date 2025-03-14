@@ -20,6 +20,7 @@
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/asset/util_asset.hpp>
 #include <prosper_glsl.hpp>
+#include <material_property_block_view.hpp>
 #include <cmaterial_manager2.hpp>
 #include <cmaterial.h>
 
@@ -57,34 +58,34 @@ void CResourceWatcherManager::ReloadTexture(const std::string &path)
 		if(bExt)
 			ext = '.' + ext;
 		ufile::remove_extension_from_filename(pathNoExt);
-		std::function<void(ds::Block &, CMaterial &)> fLookForTextureAndUpdate = nullptr;
-		fLookForTextureAndUpdate = [&fLookForTextureAndUpdate, &pathNoExt, &ext](ds::Block &dataBlock, CMaterial &mat) {
-			auto *data = dataBlock.GetData();
-			if(data == nullptr)
-				return;
-			for(auto &pair : *data) {
-				auto &dataVal = pair.second;
-				if(dataVal == nullptr)
-					continue;
-				if(dataVal->IsBlock()) {
-					fLookForTextureAndUpdate(static_cast<ds::Block &>(*dataVal), mat);
-					continue;
-				}
-				auto *dsTex = dynamic_cast<ds::Texture *>(dataVal.get());
-				if(dsTex != nullptr) {
-					auto &texInfo = dsTex->GetValue();
-					if(texInfo.texture == nullptr)
-						continue;
-					auto texName = texInfo.name;
-					ufile::remove_extension_from_filename(texName);
-					if(FileManager::ComparePath(texName, pathNoExt) == false)
-						continue;
-					auto identifier = pair.first;
-					auto &texture = texInfo.texture;
-					mat.CallOnLoaded([&mat, identifier, texture]() {
-						auto &tex = *static_cast<Texture *>(texture.get());
-						mat.SetTexture(identifier, &tex);
-					});
+
+		std::function<void(CMaterial &, const util::Path &path)> fLookForTextureAndUpdate = nullptr;
+		fLookForTextureAndUpdate = [&fLookForTextureAndUpdate, &pathNoExt](CMaterial &mat, const util::Path &path) {
+			for(auto &name : msys::MaterialPropertyBlockView {mat, path}) {
+				auto propType = mat.GetPropertyType(name);
+				switch(propType) {
+				case msys::PropertyType::Block:
+					fLookForTextureAndUpdate(mat, util::FilePath(path, name));
+					break;
+				case msys::PropertyType::Texture:
+					{
+						std::string texName;
+						if(!mat.GetProperty(util::FilePath(path, name).GetString(), &texName))
+							continue;
+						auto *texInfo = mat.GetTextureInfo(name);
+						if(!texInfo)
+							continue;
+						ufile::remove_extension_from_filename(texName);
+						if(FileManager::ComparePath(texName, pathNoExt) == false)
+							continue;
+						auto &identifier = name;
+						auto &texture = texInfo->texture;
+						mat.CallOnLoaded([&mat, identifier, texture]() {
+							auto &tex = *static_cast<Texture *>(texture.get());
+							mat.SetTexture(std::string {identifier}, &tex);
+						});
+						break;
+					}
 				}
 			}
 		};
@@ -97,9 +98,7 @@ void CResourceWatcherManager::ReloadTexture(const std::string &path)
 			auto hMat = msys::CMaterialManager::GetAssetObject(*asset);
 			if(!hMat)
 				continue;
-			auto &data = hMat.get()->GetDataBlock();
-			if(data != nullptr)
-				fLookForTextureAndUpdate(*data, static_cast<CMaterial &>(*hMat.get()));
+			fLookForTextureAndUpdate(static_cast<CMaterial &>(*hMat.get()), {});
 		}
 	};
 	texManager.LoadAsset(path, std::move(loadInfo));

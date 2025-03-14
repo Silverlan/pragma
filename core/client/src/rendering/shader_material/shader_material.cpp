@@ -62,7 +62,7 @@ void pragma::rendering::shader_material::clear_cache() { g_shaderMaterialCache =
 
 //////////
 
-static std::optional<pragma::shadergraph::Value> get_ds_value(ds::Value &dv, udm::Type type)
+static std::optional<pragma::shadergraph::Value> get_ds_value(const Material &mat, const std::string_view &propertyPath, udm::Type type)
 {
 	auto sz = udm::size_of(type);
 	switch(type) {
@@ -71,39 +71,50 @@ static std::optional<pragma::shadergraph::Value> get_ds_value(ds::Value &dv, udm
 	case udm::Type::Int32:
 	case udm::Type::UInt32:
 		{
-			return udm::visit<true, false, false>(type, [type, sz, &dv](auto tag) -> std::optional<pragma::shadergraph::Value> {
+			return udm::visit<true, false, false>(type, [type, sz, &mat, &propertyPath](auto tag) -> std::optional<pragma::shadergraph::Value> {
 				using T = typename decltype(tag)::type;
-				if constexpr(pragma::shadergraph::is_data_type<T>()) {
-					if constexpr(!std::is_same_v<T, udm::Half>)
-						return pragma::shadergraph::Value::Create<T>(static_cast<T>(dv.GetInt()));
+				if constexpr(pragma::shadergraph::is_data_type_v<T>) {
+					T val;
+					if(mat.GetProperty(propertyPath, &val))
+						return pragma::shadergraph::Value::Create(val);
 				}
 				return {};
 			});
 		}
 	case udm::Type::Float:
 		{
-			auto val = static_cast<udm::Float>(dv.GetFloat());
-			return pragma::shadergraph::Value::Create(val);
+			float val;
+			if(mat.GetProperty(propertyPath, &val))
+				return pragma::shadergraph::Value::Create(val);
+			return {};
 		}
 	case udm::Type::Half:
 		{
-			auto half = static_cast<udm::Half>(dv.GetFloat());
-			return pragma::shadergraph::Value::Create(half);
+			udm::Half val;
+			if(mat.GetProperty(propertyPath, &val))
+				return pragma::shadergraph::Value::Create(val);
+			return {};
 		}
 	case udm::Type::Vector2:
 		{
-			auto val = static_cast<udm::Vector2>(dv.GetVector2());
-			return pragma::shadergraph::Value::Create(val);
+			Vector2 val;
+			if(mat.GetProperty(propertyPath, &val))
+				return pragma::shadergraph::Value::Create(val);
+			return {};
 		}
 	case udm::Type::Vector3:
 		{
-			auto val = static_cast<udm::Vector3>(dv.GetVector());
-			return pragma::shadergraph::Value::Create(val);
+			Vector3 val;
+			if(mat.GetProperty(propertyPath, &val))
+				return pragma::shadergraph::Value::Create(val);
+			return {};
 		}
 	case udm::Type::Vector4:
 		{
-			auto val = static_cast<udm::Vector4>(dv.GetVector4());
-			return pragma::shadergraph::Value::Create(val);
+			Vector4 val;
+			if(mat.GetProperty(propertyPath, &val))
+				return pragma::shadergraph::Value::Create(val);
+			return {};
 		}
 	default:
 		throw std::logic_error {"Unsupported shader material property type'" + std::string {magic_enum::enum_name(type)} + "'!"};
@@ -414,7 +425,6 @@ void ShaderMaterial::PopulateShaderInputDataFromMaterial(ShaderInputData &inputD
 {
 	inputData.data.resize(MAX_MATERIAL_SIZE);
 
-	auto &matData = mat.GetDataBlock();
 	uint8_t *dataPtr = inputData.data.data();
 	size_t totalSize = 0;
 	std::optional<uint32_t> compositeVal {};
@@ -427,12 +437,13 @@ void ShaderMaterial::PopulateShaderInputDataFromMaterial(ShaderInputData &inputD
 			throw std::runtime_error {"Size of shader material properties (" + util::get_pretty_bytes(totalSize) + " exceeds maximum allowed size of " + util::get_pretty_bytes(MAX_MATERIAL_SIZE) + "!"};
 
 		auto val = prop->defaultValue;
-		auto matVal = matData->GetDataValue(prop.parameter.name);
-		if(matVal) {
+		auto matValType = mat.GetPropertyType(prop.parameter.name);
+		if(matValType != msys::PropertyType::None && matValType != msys::PropertyType::Block) {
 			auto handled = false;
-			if(matVal->GetTypeString() == "string") {
+			if(mat.GetPropertyValueType(prop.parameter.name) == ds::ValueType::String) {
+				std::string strVal;
+				mat.GetProperty(prop.parameter.name, &strVal);
 				if(prop->enumSet) {
-					auto strVal = matVal->GetString();
 					auto ival = prop->enumSet->findValue(strVal);
 					if(ival)
 						val = *ival;
@@ -441,14 +452,14 @@ void ShaderMaterial::PopulateShaderInputDataFromMaterial(ShaderInputData &inputD
 					handled = true;
 				}
 				else if(prop.flags) {
-					auto evalVal = parse_flags_expression(matVal->GetString(), *prop.flags, pragma::shadergraph::to_udm_type(prop.parameter.type));
+					auto evalVal = parse_flags_expression(strVal, *prop.flags, pragma::shadergraph::to_udm_type(prop.parameter.type));
 					if(evalVal)
 						val = *evalVal;
 					handled = true;
 				}
 			}
 			if(!handled) {
-				auto dsVal = get_ds_value(*matVal, pragma::shadergraph::to_udm_type(prop.parameter.type));
+				auto dsVal = get_ds_value(mat, prop.parameter.name, pragma::shadergraph::to_udm_type(prop.parameter.type));
 				if(dsVal) {
 					val = *dsVal;
 					if(prop.specializationType && *prop.specializationType == "color") {
@@ -523,7 +534,7 @@ void ShaderMaterial::PopulateShaderInputDataFromMaterial(ShaderInputData &inputD
 	}
 
 	auto flags = GetFlagsFromShaderInputData(inputData);
-	if(matData->GetBool("black_to_alpha") == true)
+	if(mat.GetProperty("black_to_alpha", false))
 		flags |= MaterialFlags::BlackToAlpha;
 	SetShaderInputDataFlags(inputData, flags);
 }

@@ -100,7 +100,7 @@ void Lua::DataBlock::GetChildBlocks(lua_State *l, ds::Block &data)
 void Lua::DataBlock::SetValue(lua_State *, ds::Block &data, const std::string &type, const std::string &key, const std::string &val) { data.AddValue(type, key, val); }
 void Lua::DataBlock::Merge(lua_State *l, ds::Block &data, ds::Block &other)
 {
-	auto *data0 = const_cast<std::unordered_map<std::string, std::shared_ptr<ds::Base>> *>(data.GetData());
+	auto *data0 = const_cast<ds::Block::DataMap *>(data.GetData());
 	auto *data1 = other.GetData();
 	for(auto &pair : *data1)
 		(*data0)[pair.first] = pair.second;

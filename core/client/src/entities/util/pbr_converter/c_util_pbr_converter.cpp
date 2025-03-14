@@ -33,6 +33,7 @@
 #include <pragma/entities/components/logic_component.hpp>
 #include <util_texture_info.hpp>
 #include <pragma/model/modelmanager.h>
+#include <datasystem_t.hpp>
 #include <cmaterialmanager.h>
 #include <cmaterial_manager2.hpp>
 #include <cmaterial.h>
@@ -183,24 +184,21 @@ bool CPBRConverterComponent::IsPBR(CMaterial &mat) const
 
 void CPBRConverterComponent::PollEvents() { ProcessQueue(); }
 
-void CPBRConverterComponent::ApplyMiscMaterialProperties(ds::Block &dataBlock, const SurfaceMaterial &surfMat, const std::string &surfMatName)
+void CPBRConverterComponent::ApplyMiscMaterialProperties(CMaterial &mat, const SurfaceMaterial &surfMat, const std::string &surfMatName)
 {
 	auto ior = surfMat.GetIOR();
 	if(ior.has_value() == false)
 		return;
-	dataBlock.AddValue("float", "ior", std::to_string(*ior));
+	mat.SetProperty("ior", *ior);
 	if(surfMatName.find("glass") == std::string::npos)
 		return;
-	auto cyclesBlock = dataBlock.AddBlock("cycles");
-	if(cyclesBlock && cyclesBlock->HasValue("shader") == false)
-		cyclesBlock->AddValue("string", "shader", "glass");
+	if(mat.GetPropertyType("cycles/shader") == msys::PropertyType::None)
+		mat.SetProperty<std::string>("cycles/shader", "glass");
 }
 
 bool CPBRConverterComponent::ConvertToPBR(CMaterial &matTraditional)
 {
-	auto dataBlock = matTraditional.GetDataBlock();
-	auto rmaInfo = dataBlock->GetBlock("rma_info");
-	if(rmaInfo == nullptr)
+	if(!matTraditional.HasPropertyBlock("rma_info"))
 		return false;
 	auto resWatcherLock = c_engine->ScopeLockResourceWatchers();
 	Con::cout << "Converting material '" << matTraditional.GetName() << "' to PBR..." << Con::endl;
@@ -210,25 +208,24 @@ bool CPBRConverterComponent::ConvertToPBR(CMaterial &matTraditional)
 	auto matName = matTraditional.GetName();
 	ufile::remove_extension_from_filename(matName);
 
-	auto valSurfMat = dataBlock->GetDataValue("surfacematerial");
-	auto surfMatName = valSurfMat ? valSurfMat->GetString() : "";
-	auto *surfMat = valSurfMat ? c_game->GetSurfaceMaterial(surfMatName) : nullptr;
+	std::string surfMatName;
+	auto hasSurfaceMaterial = matTraditional.GetProperty("surfacematerial", &surfMatName);
+	auto *surfMat = hasSurfaceMaterial ? c_game->GetSurfaceMaterial(surfMatName) : nullptr;
 
-	auto fSetMaterialValue = [&matTraditional](ds::Block &dataBlock, const std::string &type, const std::string &name, const std::string &value) {
-		if(dataBlock.GetValue(name))
+	auto fSetMaterialValue = [&matTraditional]<typename T>(CMaterial &mat, const std::string &path, const T &value) {
+		if(mat.GetPropertyType(path) == msys::PropertyType::None)
 			return;
-		dataBlock.AddValue(type, name, value);
+		mat.SetProperty(path, value);
 	};
 
 	auto *pbrInfo = surfMat ? &surfMat->GetPBRInfo() : nullptr;
-	if(rmaInfo->GetBool("requires_sss_update") && pbrInfo && pbrInfo->subsurface.factor != 0.f) {
-		auto dataSSS = dataBlock->GetBlock("subsurface_scattering");
-		if(dataSSS == nullptr) {
-			fSetMaterialValue(*dataSSS, "float", "factor", std::to_string(pbrInfo->subsurface.factor));
-			fSetMaterialValue(*dataSSS, "int", "method", "0");
-			fSetMaterialValue(*dataSSS, "vector", "scatter_color", std::to_string(pbrInfo->subsurface.scatterColor.r) + ' ' + std::to_string(pbrInfo->subsurface.scatterColor.g) + ' ' + std::to_string(pbrInfo->subsurface.scatterColor.b));
+	if(matTraditional.GetProperty("rma_info/requires_sss_update", false) && pbrInfo && pbrInfo->subsurface.factor != 0.f) {
+		if(matTraditional.HasPropertyBlock("subsurface_scattering") == false) {
+			fSetMaterialValue(matTraditional, "subsurface_scattering/factor", pbrInfo->subsurface.factor);
+			fSetMaterialValue(matTraditional, "subsurface_scattering/method", 0);
+			fSetMaterialValue(matTraditional, "subsurface_scattering/scatter_color", pbrInfo->subsurface.scatterColor);
 
-			rmaInfo->RemoveValue("requires_sss_update");
+			matTraditional.ClearProperty("rma_info/requires_sss_update");
 		}
 	}
 
@@ -236,7 +233,7 @@ bool CPBRConverterComponent::ConvertToPBR(CMaterial &matTraditional)
 	if(shaderComposeRMA == nullptr)
 		return false;
 
-	auto fGetTexture = [&matTraditional, &dataBlock](const std::string &name) -> prosper::Texture * {
+	auto fGetTexture = [&matTraditional](const std::string &name) -> prosper::Texture * {
 		auto *map = matTraditional.GetTextureInfo(name);
 		if(map && map->texture && std::static_pointer_cast<Texture>(map->texture)->HasValidVkTexture())
 			return std::static_pointer_cast<Texture>(map->texture)->GetVkTexture().get();
@@ -268,45 +265,42 @@ bool CPBRConverterComponent::ConvertToPBR(CMaterial &matTraditional)
 		c_game->SaveImage(*rmaMap, "addons/converted/materials/" + rmaMapName, imgWriteInfo);
 
 		if(metalnessMap)
-			rmaInfo->RemoveValue("requires_metalness_update");
+			matTraditional.ClearProperty("rma_info/requires_metalness_update");
 		if(aoMap)
-			rmaInfo->RemoveValue("requires_ao_update");
+			matTraditional.ClearProperty("rma_info/requires_ao_update");
 	}
 
 	if(surfMat)
-		ApplyMiscMaterialProperties(*dataBlock, *surfMat, surfMatName);
+		ApplyMiscMaterialProperties(matTraditional, *surfMat, surfMatName);
 
 	float tmp;
-	if(dataBlock->GetFloat("roughness_factor", &tmp))
-		rmaInfo->RemoveValue("requires_roughness_update");
+	if(matTraditional.GetProperty("roughness_factor", &tmp))
+		matTraditional.ClearProperty("requires_roughness_update");
 	else if(roughnessMap == nullptr && pbrInfo) {
-		dataBlock->AddValue("float", "roughness_factor", std::to_string(pbrInfo->roughness));
-		rmaInfo->RemoveValue("requires_roughness_update");
+		matTraditional.SetProperty("roughness_factor", pbrInfo->roughness);
+		matTraditional.ClearProperty("rma_info/requires_roughness_update");
 	}
 
-	if(dataBlock->GetFloat("metalness_factor", &tmp))
-		rmaInfo->RemoveValue("requires_metalness_update");
+	if(matTraditional.GetProperty("metalness_factor", &tmp))
+		matTraditional.ClearProperty("requires_metalness_update");
 	else if(metalnessMap == nullptr && pbrInfo) {
-		dataBlock->AddValue("float", "metalness_factor", std::to_string(pbrInfo->metalness));
-		rmaInfo->RemoveValue("requires_metalness_update");
+		matTraditional.SetProperty("metalness_factor", pbrInfo->metalness);
+		matTraditional.ClearProperty("rma_info/requires_metalness_update");
 	}
 
 	if(aoMap == nullptr)
-		rmaInfo->AddValue("bool", "requires_ao_update", "1");
+		matTraditional.SetProperty("rma_info/requires_ao_update", true);
 	else
-		rmaInfo->RemoveValue("requires_ao_update");
+		matTraditional.ClearProperty("requires_ao_update");
 
 	if(rmaMapName.empty()) {
 		rmaMapName = "pbr/rma_neutral";
-		if(dataBlock->HasValue("metalness_factor") == false)
-			dataBlock->AddValue("float", "metalness_factor", "0.0");
-		if(dataBlock->HasValue("roughness_factor") == false)
-			dataBlock->AddValue("float", "roughness_factor", "0.5");
+		if(matTraditional.GetPropertyType("metalness_factor") == msys::PropertyType::None)
+			matTraditional.SetProperty("metalness_factor", 0.f);
+		if(matTraditional.GetPropertyType("roughness_factor") == msys::PropertyType::None)
+			matTraditional.SetProperty("roughness_factor", 0.5f);
 	}
-	dataBlock->AddValue("texture", Material::RMA_MAP_IDENTIFIER, rmaMapName);
-
-	if(rmaInfo->IsEmpty())
-		dataBlock->RemoveValue("rma_info");
+	matTraditional.SetTextureProperty(Material::RMA_MAP_IDENTIFIER, rmaMapName);
 
 	// Note: If no surface material could be found in the material,
 	// the model's surface material will be checked as well in 'GenerateGeometryBasedTextures'.

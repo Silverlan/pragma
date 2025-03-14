@@ -235,7 +235,7 @@ bool CSkyboxComponent::CreateCubemapFromIndividualTextures(const std::string &ma
 	if(c_game->SaveImage(ptrCubemapBuffers, largestWidth, largestHeight, szPerPixel, fullPath, imgWriteInfo, true)) {
 		Con::cout << "Skybox cubemap texture saved as '" << fullPath << "'! Generating material..." << Con::endl;
 		auto mat = client->CreateMaterial("skybox");
-		mat->GetDataBlock()->AddValue("texture", "skybox", matName);
+		mat->SetTextureProperty("skybox", matName);
 		auto savePath = pragma::asset::relative_path_to_absolute_path(matName, pragma::asset::Type::Material, util::CONVERT_PATH);
 		std::string err;
 		if(mat->Save(savePath.GetString(), err, true)) {

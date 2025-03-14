@@ -132,9 +132,8 @@ void ShaderGraph::InitializeMaterialData(const CMaterial &mat, const rendering::
 	//prosper::DescriptorSetInfo
 
 	ShaderGameWorldLightingPass::InitializeMaterialData(mat, shaderMat, inOutMatData);
-	auto &data = mat.GetDataBlock();
 	float specularFactor;
-	if(data->GetFloat("specular_factor", &specularFactor)) {
+	if(mat.GetProperty("specular_factor", &specularFactor)) {
 		auto roughnessFactor = inOutMatData.GetValue<float>("roughness_factor");
 		if(!roughnessFactor)
 			roughnessFactor = 1.f;

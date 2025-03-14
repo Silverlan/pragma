@@ -299,7 +299,7 @@ void CModelComponent::UpdateRenderBufferList()
 		if(mat == nullptr || shader == nullptr)
 			continue;
 		renderBufferData.pipelineSpecializationFlags = shader->GetMaterialPipelineSpecializationRequirements(*mat);
-		if(mat->GetDataBlock()->GetBool("test_glow", false))
+		if(mat->GetProperty("test_glow", false))
 			umath::set_flag(renderBufferData.stateFlags, pragma::rendering::RenderBufferData::StateFlags::EnableGlowPass);
 	}
 }

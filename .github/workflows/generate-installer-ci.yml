@@ -1,0 +1,67 @@
+name: Generate Installer
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version'
+        required: true
+        type: string
+      tag:
+        description: 'Tag'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+env:
+  # See https://github.com/git-lfs/git-lfs/issues/5749
+  GIT_CLONE_PROTECTION_ACTIVE: 'false'
+
+jobs:
+  build:
+    permissions:
+      actions: write
+      contents: write
+      issues: read
+      pull-requests: read
+
+    name: Generate Installer - ${{ matrix.config.os }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - os: windows-latest
+            name: "Windows x64 MSVC"
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Create Directories
+        shell: bash
+        run: |
+          mkdir pragma
+          cd pragma
+          mkdir deps
+          mkdir install
+
+      - name: Download and Extract Pragma
+        run: |
+          curl -L -o pragma-win64.zip https://github.com/Silverlan/pragma/releases/download/nightly/pragma-win64.zip
+          unzip pragma-win64.zip -d pragma/install
+          rm pragma-win64.zip
+
+      - name: Generate Installer
+        uses: ./github_actions/generate_installer@main
+        with:
+          version: "${{ github.event.inputs.version }}"
+          install-directory: "${{ github.workspace }}/pragma/install"
+          deps-directory: "${{ github.workspace }}/pragma/deps"
+          pragma-directory: "."
+
+      - name: Publish Installer
+        uses: Silverlan/Releaser/releaser/composite@main
+        with:
+          tag: "${{ github.event.inputs.tag }}"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          files: "${{ github.workspace }}/pragma/deps/pragma_installer/pragma_setup.exe"

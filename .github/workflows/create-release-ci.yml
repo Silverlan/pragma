@@ -12,6 +12,10 @@ permissions:
 
 jobs:
   build:
+    # Required for workflow-dispatch
+    permissions:
+      actions: write
+      
     name: Publish Release
     runs-on: ${{ matrix.config.os }}
     strategy:
@@ -43,6 +47,8 @@ jobs:
           wget https://github.com/${{ github.repository }}/archive/refs/tags/nightly.zip
           unzip nightly.zip -d source
           rm nightly.zip
+          oldname=$(find source -mindepth 1 -maxdepth 1 -type d)
+          mv "$oldname" source/pragma-nightly
           fileName="./source/pragma-nightly/core/shared/include/pragma/engine_version.h"
           readarray -t a < "$fileName"
           rm -r source
@@ -131,6 +137,13 @@ jobs:
           for dir in pragma-windows pragma-linux; do
             # Disable experimental updates in client.cfg
             sed -i 's/pfm_enable_experimental_updates "1"/pfm_enable_experimental_updates "0"/' "$dir/cfg/client.cfg"
+          done
+
+      - name: Re-create Zip Archives
+        run: |
+          for dir in pragma-windows pragma-linux; do
+            # Disable experimental updates in client.cfg
+            sed -i 's/pfm_enable_experimental_updates "1"/pfm_enable_experimental_updates "0"/' "$dir/cfg/client.cfg"
       
             # Re-create zip archive
             if [ "$dir" == "pragma-windows" ]; then
@@ -148,7 +161,7 @@ jobs:
             # Remove the current directory
             rm -rf "$dir"
           done
-          
+
       - name: Get PDB Debug Files
         id: pdb-debug
         shell: bash
@@ -171,7 +184,7 @@ jobs:
           prerelease: false
 
       - name: Publish Windows Release
-        uses: Silverlan/Releaser/releaser/composite@main
+        uses: pyTooling/Actions/releaser/composite@v4.2.2
         with:
           tag: "v${{ steps.determine-version.outputs.version }}"
           rm: true
@@ -179,15 +192,22 @@ jobs:
           files: ${{ steps.windows-version.outputs.filename }}
             
       - name: Publish Linux Release
-        uses: Silverlan/Releaser/releaser/composite@main
+        uses: pyTooling/Actions/releaser/composite@v4.2.2
         with:
           tag: "v${{ steps.determine-version.outputs.version }}"
           token: ${{ secrets.GITHUB_TOKEN }}
           files: ${{ steps.linux-version.outputs.filename }}
             
       - name: Publish PDB Files
-        uses: Silverlan/Releaser/releaser/composite@main
+        uses: pyTooling/Actions/releaser/composite@v4.2.2
         with:
           tag: "v${{ steps.determine-version.outputs.version }}"
           token: ${{ secrets.GITHUB_TOKEN }}
           files: ${{ steps.pdb-debug.outputs.filename }}
+
+      - name: Dispatch Generate Installer Workflow
+        uses: benc-uk/workflow-dispatch@v1.2.4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          workflow: generate-installer-ci.yml
+          inputs: '{ "version": "v${{ steps.determine-version.outputs.version }}", "tag": "${{ steps.determine-version.outputs.version }}" }'

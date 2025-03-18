@@ -79,7 +79,7 @@ jobs:
           prerelease: true
 
       - name: Update nightly release
-        uses: Silverlan/Releaser/releaser/composite@main
+        uses: pyTooling/Actions/releaser/composite@v4.2.2
         with:
           tag: nightly
           token: ${{ secrets.GITHUB_TOKEN }}

@@ -84,7 +84,7 @@ jobs:
           prerelease: true
 
       - name: Update nightly release
-        uses: Silverlan/Releaser/releaser/composite@main
+        uses: pyTooling/Actions/releaser/composite@v4.2.2
         with:
           tag: nightly
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -105,7 +105,7 @@ jobs:
           7z a debug_pdb.zip "$winPath/pdb/**"
 
       - name: Update PDB release
-        uses: Silverlan/Releaser/releaser/composite@main
+        uses: pyTooling/Actions/releaser/composite@v4.2.2
         with:
           tag: nightly
           token: ${{ secrets.GITHUB_TOKEN }}

@@ -29,6 +29,8 @@
 #include <buffers/prosper_buffer.hpp>
 #include <cmaterial.h>
 
+import pragma.client.entities.components;
+
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
@@ -301,10 +303,15 @@ void CSkyboxComponent::SetSkyMaterial(Material *mat)
 	auto mdlC = ent.GetComponent<CModelComponent>();
 	if(mdlC.expired())
 		return;
-	if(mat)
-		mdlC->SetMaterialOverride(0, static_cast<CMaterial &>(*mat));
-	else
-		mdlC->ClearMaterialOverride(0);
+	if(mat) {
+		auto overrideC = ent.AddComponent<CMaterialOverrideComponent>();
+		overrideC->SetMaterialOverride(0, static_cast<CMaterial &>(*mat));
+	}
+	else {
+		auto overrideC = ent.GetComponent<CMaterialOverrideComponent>();
+		if(overrideC.valid())
+			overrideC->ClearMaterialOverride(0);
+	}
 	ValidateMaterials();
 	mdlC->UpdateRenderMeshes();
 }

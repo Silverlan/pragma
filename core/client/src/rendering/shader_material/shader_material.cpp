@@ -469,6 +469,7 @@ void ShaderMaterial::PopulateShaderInputDataFromMaterial(ShaderInputData &inputD
 								Vector3 col {};
 								val.Get<Vector3>(col);
 								to_srgb_color(col);
+								val.Set<Vector3>(col);
 								break;
 							}
 						case udm::Type::Vector4:
@@ -476,6 +477,7 @@ void ShaderMaterial::PopulateShaderInputDataFromMaterial(ShaderInputData &inputD
 								Vector4 col {};
 								val.Get<Vector4>(col);
 								to_srgb_color(col);
+								val.Set<Vector4>(col);
 								break;
 							}
 						default:

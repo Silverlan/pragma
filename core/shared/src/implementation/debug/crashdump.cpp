@@ -32,12 +32,15 @@ module pragma.debug.crashdump;
 import util_zip;
 import pragma.locale;
 
-extern DLLNETWORK Engine *engine;
-
 using namespace pragma::debug;
 
-std::string g_crashExceptionMessage = {};
+static std::string g_crashExceptionMessage = {};
 static CrashHandler g_crashHandler {};
+
+const std::string &pragma::debug::get_exception_message() {
+	return g_crashExceptionMessage;
+}
+
 CrashHandler &CrashHandler::Get() { return g_crashHandler; }
 
 CrashHandler::CrashHandler()
@@ -274,6 +277,7 @@ bool CrashHandler::GenerateCrashDump() const
 
 	// ask the user if they want to save a dump file
 	auto saveDump = false;
+	auto *engine = pragma::get_engine();
 	auto shouldShowMsBox = !engine->IsNonInteractiveMode();
 #ifdef _WIN32
 	shouldShowMsBox = (shouldShowMsBox && util::get_subsystem() == util::SubSystem::GUI);

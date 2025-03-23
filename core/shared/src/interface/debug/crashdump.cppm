@@ -12,6 +12,7 @@ module;
 export module pragma.debug.crashdump;
 
 export namespace pragma::debug {
+	DLLNETWORK const std::string &get_exception_message();
 	class DLLNETWORK CrashHandler {
 	  public:
 		static CrashHandler &Get();

@@ -950,7 +950,6 @@ void Engine::Start()
 
 void Engine::UpdateTickCount() { m_ctTick.Update(); }
 
-extern std::string g_crashExceptionMessage;
 std::unique_ptr<uzip::ZIPFile> Engine::GenerateEngineDump(const std::string &baseName, std::string &outZipFileName, std::string &outErr)
 {
 	auto programPath = util::Path::CreatePath(util::get_program_path());
@@ -963,8 +962,9 @@ std::unique_ptr<uzip::ZIPFile> Engine::GenerateEngineDump(const std::string &bas
 	}
 
 	// Write Exception
-	if(g_crashExceptionMessage.empty() == false)
-		zipFile->AddFile("exception.txt", g_crashExceptionMessage);
+	auto &exceptionMsg = pragma::debug::get_exception_message();
+	if(exceptionMsg.empty() == false)
+		zipFile->AddFile("exception.txt", exceptionMsg);
 
 	// Write Stack Backtrace
 	zipFile->AddFile("stack_backtrace.txt", util::debug::get_formatted_stack_backtrace_string());

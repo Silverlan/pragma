@@ -427,14 +427,16 @@ void CEngine::GetMappedKeys(const std::string &cvarName, std::vector<pragma::pla
 void CEngine::JoystickButtonInput(prosper::Window &window, const pragma::platform::Joystick &joystick, uint32_t key, pragma::platform::KeyState state)
 {
 	auto handled = false;
-	if(CallCallbacksWithOptionalReturn<bool, std::reference_wrapper<prosper::Window>, std::reference_wrapper<const pragma::platform::Joystick>, uint32_t, pragma::platform::KeyState>("OnJoystickButtonInput", handled, window, joystick, key, state) == CallbackReturnType::HasReturnValue && handled == true)
+	if(CallCallbacksWithOptionalReturn<bool, std::reference_wrapper<prosper::Window>, std::reference_wrapper<const pragma::platform::Joystick>, uint32_t, pragma::platform::KeyState>("OnJoystickButtonInput", handled, window, joystick, key, state) == CallbackReturnType::HasReturnValue
+	  && handled == true)
 		return;
 	KeyboardInput(window, static_cast<pragma::platform::Key>(key), -1, state, {});
 }
 void CEngine::JoystickAxisInput(prosper::Window &window, const pragma::platform::Joystick &joystick, uint32_t axis, pragma::platform::Modifier mods, float newVal, float deltaVal)
 {
 	auto handled = false;
-	if(CallCallbacksWithOptionalReturn<bool, std::reference_wrapper<prosper::Window>, std::reference_wrapper<const pragma::platform::Joystick>, uint32_t, pragma::platform::Modifier, float, float>("OnJoystickAxisInput", handled, window, joystick, axis, mods, newVal, deltaVal) == CallbackReturnType::HasReturnValue
+	if(CallCallbacksWithOptionalReturn<bool, std::reference_wrapper<prosper::Window>, std::reference_wrapper<const pragma::platform::Joystick>, uint32_t, pragma::platform::Modifier, float, float>("OnJoystickAxisInput", handled, window, joystick, axis, mods, newVal, deltaVal)
+	    == CallbackReturnType::HasReturnValue
 	  && handled == true)
 		return;
 	auto oldVal = newVal - deltaVal;
@@ -491,7 +493,8 @@ bool CEngine::GetInputButtonState(float axisInput, pragma::platform::Modifier mo
 void CEngine::KeyboardInput(prosper::Window &window, pragma::platform::Key key, int scanCode, pragma::platform::KeyState state, pragma::platform::Modifier mods, float magnitude)
 {
 	auto handled = false;
-	if(CallCallbacksWithOptionalReturn<bool, std::reference_wrapper<prosper::Window>, pragma::platform::Key, int, pragma::platform::KeyState, pragma::platform::Modifier, float>("OnKeyboardInput", handled, window, key, scanCode, state, mods, magnitude) == CallbackReturnType::HasReturnValue && handled == true)
+	if(CallCallbacksWithOptionalReturn<bool, std::reference_wrapper<prosper::Window>, pragma::platform::Key, int, pragma::platform::KeyState, pragma::platform::Modifier, float>("OnKeyboardInput", handled, window, key, scanCode, state, mods, magnitude) == CallbackReturnType::HasReturnValue
+	  && handled == true)
 		return;
 	if(client != nullptr && client->RawKeyboardInput(key, scanCode, state, mods, magnitude) == false)
 		return;
@@ -1171,6 +1174,7 @@ bool CEngine::Initialize(int argc, char *argv[])
 		regScene->RegisterNode<pragma::rendering::shader_graph::InputParameterStringNode>("input_parameter_string");
 		regScene->RegisterNode<pragma::rendering::shader_graph::InputParameterTransformNode>("input_parameter_transform");
 		regScene->RegisterNode<pragma::rendering::shader_graph::InputParameterFloatNode>("input_parameter_float");
+		regScene->RegisterNode<pragma::rendering::shader_graph::InputParameterTextureNode>("input_parameter_texture");
 
 		std::vector<std::string> files;
 		filemanager::find_files("scripts/shader_data/materials/*.udm", &files, nullptr);

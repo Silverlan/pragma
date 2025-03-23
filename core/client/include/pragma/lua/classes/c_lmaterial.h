@@ -24,7 +24,6 @@ namespace Lua {
 			DLLCLIENT void SetTexture(lua_State *l, ::Material *mat, const std::string &textureID, Lua::Vulkan::Texture &hTex);
 			DLLCLIENT void SetTexture(lua_State *l, ::Material *mat, const std::string &textureID, Lua::Vulkan::Texture &hTex, const std::string &name);
 			DLLCLIENT void GetTexture(lua_State *l, ::Material *mat, const std::string &textureID);
-			DLLCLIENT void GetData(lua_State *l, ::Material *mat);
 			DLLCLIENT void InitializeShaderData(lua_State *l, ::Material *mat, bool reload);
 			DLLCLIENT void InitializeShaderData(lua_State *l, ::Material *mat);
 		};

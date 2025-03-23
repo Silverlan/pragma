@@ -730,12 +730,9 @@ std::optional<Vector4> CParticleSystemComponent::GetEffectiveBloomColorFactor() 
 	auto colorFactor = GetBloomColorFactor();
 	auto *mat = GetMaterial();
 	if(mat) {
-		auto &data = mat->GetDataBlock();
-		auto &dColorFactor = data->GetValue("bloom_color_factor");
-		if(dColorFactor != nullptr && typeid(*dColorFactor) == typeid(ds::Vector4)) {
-			auto &matColorFactor = static_cast<ds::Vector4 *>(dColorFactor.get())->GetValue();
-			colorFactor *= matColorFactor;
-		}
+		Vector4 bloomColorFactor;
+		if(mat->GetProperty("bloom_color_factor", &bloomColorFactor))
+			colorFactor *= bloomColorFactor;
 	}
 	if(colorFactor.r == 0.f && colorFactor.g == 0.f && colorFactor.b == 0.f)
 		return {};
@@ -1042,55 +1039,49 @@ void CParticleSystemComponent::Start()
 				auto *spriteSheetAnim = static_cast<CMaterial *>(m_material.get())->GetSpriteSheetAnimation();
 				m_spriteSheetAnimationData = spriteSheetAnim ? std::make_unique<SpriteSheetAnimation>(*spriteSheetAnim) : nullptr;
 
-				auto &data = m_material->GetDataBlock();
-				if(!m_spriteSheetAnimationData && data != nullptr) {
-					auto &anim = data->GetValue("animation");
-					if(anim) {
-						if(anim->IsBlock()) {
-							auto &animBlock = *std::static_pointer_cast<ds::Block>(anim);
+				if(!m_spriteSheetAnimationData) {
+					if(m_material->HasPropertyBlock("animation")) {
+						int32_t offset = 0;
+						int32_t numFrames = 0;
+						int32_t fps = 0;
+						int32_t rows = 0;
+						int32_t columns = 0;
+						m_material->GetProperty("animation/offset", &offset);
+						m_material->GetProperty("animation/frames", &numFrames);
+						m_material->GetProperty("animation/fps", &fps);
+						m_material->GetProperty("animation/rows", &rows);
+						m_material->GetProperty("animation/columns", &columns);
 
-							int32_t offset = 0;
-							int32_t numFrames = 0;
-							int32_t fps = 0;
-							int32_t rows = 0;
-							int32_t columns = 0;
-							animBlock.GetInt("offset", &offset);
-							animBlock.GetInt("frames", &numFrames);
-							animBlock.GetInt("fps", &fps);
-							animBlock.GetInt("rows", &rows);
-							animBlock.GetInt("columns", &columns);
-
-							uint32_t w = 0;
-							uint32_t h = 0;
-							auto *albedoMap = m_material->GetAlbedoMap();
-							if(albedoMap) {
-								w = albedoMap->width;
-								h = albedoMap->height;
-							}
-
-							m_spriteSheetAnimationData = std::make_unique<SpriteSheetAnimation>();
-							m_spriteSheetAnimationData->sequences.push_back({});
-							auto &seq = m_spriteSheetAnimationData->sequences.back();
-
-							auto &frames = seq.frames;
-							frames.reserve(numFrames);
-							auto widthPerFrame = w / static_cast<float>(columns);
-							auto heightPerFrame = h / static_cast<float>(rows);
-							for(auto x = decltype(rows) {0u}; x < rows; ++x) {
-								for(auto y = decltype(columns) {0u}; y < columns; ++y) {
-									frames.push_back({});
-									auto &frame = frames.back();
-									frame.uvStart = Vector2 {y * widthPerFrame, x * heightPerFrame};
-									frame.uvEnd = frame.uvStart + Vector2 {widthPerFrame, heightPerFrame};
-
-									frame.uvStart /= Vector2 {w, h};
-									frame.uvEnd /= Vector2 {w, h};
-
-									frame.duration = 0.1f;
-								}
-							}
-							m_spriteSheetAnimationData->UpdateLookupData();
+						uint32_t w = 0;
+						uint32_t h = 0;
+						auto *albedoMap = m_material->GetAlbedoMap();
+						if(albedoMap) {
+							w = albedoMap->width;
+							h = albedoMap->height;
 						}
+
+						m_spriteSheetAnimationData = std::make_unique<SpriteSheetAnimation>();
+						m_spriteSheetAnimationData->sequences.push_back({});
+						auto &seq = m_spriteSheetAnimationData->sequences.back();
+
+						auto &frames = seq.frames;
+						frames.reserve(numFrames);
+						auto widthPerFrame = w / static_cast<float>(columns);
+						auto heightPerFrame = h / static_cast<float>(rows);
+						for(auto x = decltype(rows) {0u}; x < rows; ++x) {
+							for(auto y = decltype(columns) {0u}; y < columns; ++y) {
+								frames.push_back({});
+								auto &frame = frames.back();
+								frame.uvStart = Vector2 {y * widthPerFrame, x * heightPerFrame};
+								frame.uvEnd = frame.uvStart + Vector2 {widthPerFrame, heightPerFrame};
+
+								frame.uvStart /= Vector2 {w, h};
+								frame.uvEnd /= Vector2 {w, h};
+
+								frame.duration = 0.1f;
+							}
+						}
+						m_spriteSheetAnimationData->UpdateLookupData();
 					}
 				}
 
@@ -1313,8 +1304,7 @@ pragma::ParticleAlphaMode CParticleSystemComponent::GetEffectiveAlphaMode() cons
 		return alphaMode;
 	auto *mat = GetMaterial();
 	if(mat) {
-		auto &data = mat->GetDataBlock();
-		if(data->GetBool("additive"))
+		if(mat->GetProperty("additive", false))
 			alphaMode = ParticleAlphaMode::AdditiveByColor;
 	}
 	return alphaMode;

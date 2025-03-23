@@ -7,6 +7,7 @@
 
 #include "stdafx_client.h"
 #include "pragma/rendering/shader_graph/nodes/material_texture.hpp"
+#include "pragma/rendering/shader_graph/nodes/input_parameter.hpp"
 
 using namespace pragma::rendering::shader_graph;
 MaterialTextureNode::MaterialTextureNode(const std::string_view &type) : Node {type, pragma::shadergraph::CATEGORY_TEXTURE}
@@ -29,8 +30,18 @@ std::string MaterialTextureNode::DoEvaluate(const pragma::shadergraph::Graph &gr
 
 	auto prefix = gn.GetBaseVarName() + "_";
 	auto *texInputSocket = gn.FindInputSocket(IN_TEXTURE);
-	if(texInputSocket && texInputSocket->link)
-		code << "vec4 " << prefix << "texCol = fetch_" << ustring::to_snake_case(texInputSocket->link->GetSocket().name) << "(" << uv << ".xy);\n";
+	if(texInputSocket && texInputSocket->link) {
+		std::string texName = ustring::to_snake_case(texInputSocket->link->GetSocket().name);
+		if(texInputSocket->link->parent) {
+			auto *dynTexNode = dynamic_cast<const pragma::rendering::shader_graph::InputParameterTextureNode *>(&texInputSocket->link->parent->node);
+			if(dynTexNode) {
+				std::string name;
+				if(texInputSocket->link->parent->GetInputValue(pragma::rendering::shader_graph::BaseInputParameterNode::CONST_NAME, name))
+					texName = name;
+			}
+		}
+		code << "vec4 " << prefix << "texCol = fetch_" << texName << "(" << uv << ".xy);\n";
+	}
 	else
 		code << "vec4 " << prefix << "texCol = vec4(1.0, 1.0, 1.0, 1.0);\n";
 

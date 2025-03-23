@@ -45,12 +45,9 @@ void BaseLiquidControlComponent::Initialize()
 	BindEventUnhandled(BaseSurfaceComponent::EVENT_ON_SURFACE_MESH_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		auto &data = static_cast<CEOnSurfaceMeshChanged &>(evData.get());
 		if(data.meshInfo.subMesh && m_kvSurfaceMaterial.empty() == true) {
-			auto &dataBlock = data.meshInfo.material->GetDataBlock();
-			if(dataBlock != nullptr) {
-				std::string surfaceMatIdentifier;
-				if(dataBlock->GetString("surfacematerial", &surfaceMatIdentifier) == true)
-					SetSurfaceMaterial(surfaceMatIdentifier);
-			}
+			std::string surfaceMatIdentifier;
+			if(data.meshInfo.material->GetProperty("surfacematerial", &surfaceMatIdentifier) == true)
+				SetSurfaceMaterial(surfaceMatIdentifier);
 		}
 	});
 }

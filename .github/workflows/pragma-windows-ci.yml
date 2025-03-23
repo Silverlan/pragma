@@ -84,7 +84,7 @@ jobs:
           prerelease: true
 
       - name: Update nightly release
-        uses: Silverlan/Releaser/releaser/composite@main
+        uses: pyTooling/Actions/releaser/composite@v4.2.2
         with:
           tag: nightly
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -105,11 +105,25 @@ jobs:
           7z a debug_pdb.zip "$winPath/pdb/**"
 
       - name: Update PDB release
-        uses: Silverlan/Releaser/releaser/composite@main
+        uses: pyTooling/Actions/releaser/composite@v4.2.2
         with:
           tag: nightly
           token: ${{ secrets.GITHUB_TOKEN }}
           files: "debug_pdb.zip"
+
+      - name: Generate Installer
+        uses: ./github_actions/generate_installer@main
+        with:
+          version: "Nightly"
+          install-directory: "${{ steps.build-pragma.outputs.install-dir }}"
+          deps-directory: "c:/pragma/deps"
+
+      - name: Publish Installer
+        uses: pyTooling/Actions/releaser/composite@v4.2.2
+        with:
+          tag: "nightly"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          files: "c:/pragma/deps/pragma_installer/pragma_setup.exe"
 
       - name: Run Tests
         uses: benc-uk/workflow-dispatch@v1

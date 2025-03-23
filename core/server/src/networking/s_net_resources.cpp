@@ -21,6 +21,8 @@
 #include <pragma/networking/enums.hpp>
 #include <pragma/entities/components/base_player_component.hpp>
 #include <pragma/entities/components/action_input_controller_component.hpp>
+#include <pragma/asset/util_asset.hpp>
+#include <material_property_block_view.hpp>
 #include <material_manager2.hpp>
 #include <sharedutils/util_file.h>
 
@@ -348,27 +350,28 @@ void NET_sv_query_model_texture(pragma::networking::IServerClient &session, NetP
 	auto mat = matAsset ? msys::MaterialManager::GetAssetObject(*matAsset) : nullptr;
 	if(mat == nullptr)
 		return;
-	auto &block = mat->GetDataBlock();
 	std::vector<std::string> textures;
-	std::function<void(const std::shared_ptr<ds::Block> &, std::vector<std::string> &)> fFindTextures = nullptr;
-	fFindTextures = [&fFindTextures](const std::shared_ptr<ds::Block> &block, std::vector<std::string> &textures) {
-		auto *data = block->GetData();
-		if(data == nullptr)
-			return;
-		for(auto &pair : *data) {
-			auto v = pair.second;
-			if(v->IsBlock() == true)
-				fFindTextures(std::static_pointer_cast<ds::Block>(v), textures);
-			else {
-				auto dataTex = std::dynamic_pointer_cast<ds::Texture>(v);
-				if(dataTex != nullptr) {
-					auto &texInfo = dataTex->GetValue();
-					textures.push_back("materials\\" + texInfo.name);
+	std::function<void(const util::Path &path)> fFindTextures = nullptr;
+	fFindTextures = [mat, &fFindTextures, &textures](const util::Path &path) {
+		for(auto &name : msys::MaterialPropertyBlockView {*mat, path}) {
+			auto propType = mat->GetPropertyType(name);
+			switch(propType) {
+			case msys::PropertyType::Block:
+				fFindTextures(util::FilePath(path, name));
+				break;
+			case msys::PropertyType::Texture:
+				{
+					std::string texName;
+					if(mat->GetProperty(util::FilePath(path, name).GetString(), &texName)) {
+						auto path = util::FilePath(pragma::asset::get_asset_root_directory(pragma::asset::Type::Material), texName).GetString();
+						textures.push_back(path);
+					}
+					break;
 				}
 			}
 		}
 	};
-	fFindTextures(block, textures);
+	fFindTextures({});
 
 	std::vector<pragma::networking::IServerClient *> vSession = {&session};
 	for(auto &tex : textures)

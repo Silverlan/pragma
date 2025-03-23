@@ -79,7 +79,7 @@ namespace pragma {
 		void UpdateMetalness(Model &mdl, CMaterial &mat);
 		void UpdateAmbientOcclusion(Model &mdl, const AmbientOcclusionInfo &aoInfo = {}, BaseEntity *optEnt = nullptr);
 		void UpdateModel(Model &mdl, ModelUpdateInfo &updateInfo, BaseEntity *optEnt = nullptr);
-		void ApplyMiscMaterialProperties(ds::Block &dataBlock, const SurfaceMaterial &surfMat, const std::string &surfMatName);
+		void ApplyMiscMaterialProperties(CMaterial &mat, const SurfaceMaterial &surfMat, const std::string &surfMatName);
 		void ScheduleModelUpdate(Model &mdl, bool updateMetalness, std::optional<AmbientOcclusionInfo> updateAOInfo = {}, BaseEntity *optEnt = nullptr);
 
 		void ProcessQueue();

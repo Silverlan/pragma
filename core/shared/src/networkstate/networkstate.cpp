@@ -27,6 +27,7 @@
 #include "pragma/debug/intel_vtune.hpp"
 #include "pragma/debug/debug_performance_profiler.hpp"
 #include <material_manager2.hpp>
+#include <material_property_block_view.hpp>
 #include <pragma/console/s_cvar_global_functions.h>
 #include <pragma/lua/luaapi.h>
 #include <luainterface.hpp>
@@ -160,28 +161,29 @@ bool NetworkState::PortMaterial(const std::string &path)
 	}
 
 	auto *mat = LoadMaterial(matPath, true);
-	if(mat && mat->GetDataBlock()) {
-		// Port textures as well
-		std::function<void(const std::shared_ptr<ds::Block> &)> fPortTextures = nullptr;
-		fPortTextures = [this, &fPortTextures](const std::shared_ptr<ds::Block> &block) {
-			auto *data = block->GetData();
-			if(data == nullptr)
-				return;
-			for(auto &pair : *data) {
-				auto v = pair.second;
-				if(v->IsBlock() == true)
-					fPortTextures(std::static_pointer_cast<ds::Block>(v));
-				else {
-					auto dataTex = std::dynamic_pointer_cast<ds::Texture>(v);
-					if(dataTex) {
-						auto path = "materials/" + dataTex->GetValue().name;
-						if(FileManager::Exists(path) == false && util::port_file(this, path + ".vtf") == false && util::port_file(this, path + ".vtex_c") == false)
-							Con::cwar << "Unable to port texture '" << dataTex->GetValue().name << "'!" << Con::endl;
+	if(mat) {
+		std::function<void(const util::Path &path)> fPortTextures = nullptr;
+		fPortTextures = [this, mat, &fPortTextures](const util::Path &path) {
+			for(auto &name : msys::MaterialPropertyBlockView {*mat, path}) {
+				auto propType = mat->GetPropertyType(name);
+				switch(propType) {
+				case msys::PropertyType::Block:
+					fPortTextures(util::FilePath(path, name));
+					break;
+				case msys::PropertyType::Texture:
+					{
+						std::string texName;
+						if(mat->GetProperty(util::FilePath(path, name).GetString(), &texName)) {
+							auto path = util::FilePath(pragma::asset::get_asset_root_directory(pragma::asset::Type::Material), texName).GetString();
+							if(FileManager::Exists(path) == false && util::port_file(this, path + ".vtf") == false && util::port_file(this, path + ".vtex_c") == false)
+								Con::cwar << "Unable to port texture '" << texName << "'!" << Con::endl;
+						}
+						break;
 					}
 				}
 			}
 		};
-		fPortTextures(mat->GetDataBlock());
+		fPortTextures({});
 	}
 	return (mat != nullptr) ? true : false;
 }

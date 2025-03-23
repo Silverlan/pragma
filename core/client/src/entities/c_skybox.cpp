@@ -29,6 +29,8 @@
 #include <buffers/prosper_buffer.hpp>
 #include <cmaterial.h>
 
+import pragma.client.entities.components;
+
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
@@ -235,7 +237,7 @@ bool CSkyboxComponent::CreateCubemapFromIndividualTextures(const std::string &ma
 	if(c_game->SaveImage(ptrCubemapBuffers, largestWidth, largestHeight, szPerPixel, fullPath, imgWriteInfo, true)) {
 		Con::cout << "Skybox cubemap texture saved as '" << fullPath << "'! Generating material..." << Con::endl;
 		auto mat = client->CreateMaterial("skybox");
-		mat->GetDataBlock()->AddValue("texture", "skybox", matName);
+		mat->SetTextureProperty("skybox", matName);
 		auto savePath = pragma::asset::relative_path_to_absolute_path(matName, pragma::asset::Type::Material, util::CONVERT_PATH);
 		std::string err;
 		if(mat->Save(savePath.GetString(), err, true)) {
@@ -301,10 +303,15 @@ void CSkyboxComponent::SetSkyMaterial(Material *mat)
 	auto mdlC = ent.GetComponent<CModelComponent>();
 	if(mdlC.expired())
 		return;
-	if(mat)
-		mdlC->SetMaterialOverride(0, static_cast<CMaterial &>(*mat));
-	else
-		mdlC->ClearMaterialOverride(0);
+	if(mat) {
+		auto overrideC = ent.AddComponent<CMaterialOverrideComponent>();
+		overrideC->SetMaterialOverride(0, static_cast<CMaterial &>(*mat));
+	}
+	else {
+		auto overrideC = ent.GetComponent<CMaterialOverrideComponent>();
+		if(overrideC.valid())
+			overrideC->ClearMaterialOverride(0);
+	}
 	ValidateMaterials();
 	mdlC->UpdateRenderMeshes();
 }

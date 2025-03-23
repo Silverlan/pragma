@@ -205,8 +205,6 @@ std::optional<uint32_t> FbxImporter::LoadMaterial(const ofbx::Material &fbxMat, 
 	auto mat = client->CreateMaterial(relMatPath.GetString(), "pbr");
 	auto *cmat = static_cast<CMaterial *>(mat.get());
 
-	auto &dataBlock = mat->GetDataBlock();
-
 	auto importAndAssignTexture = [&importTexture, cmat](ofbx::Texture::TextureType etex, const std::string &matIdentifier) -> std::optional<std::string> {
 		auto texPath = importTexture(etex);
 		if(!texPath)
@@ -221,11 +219,11 @@ std::optional<uint32_t> FbxImporter::LoadMaterial(const ofbx::Material &fbxMat, 
 	importAndAssignTexture(ofbx::Texture::TextureType::NORMAL, Material::NORMAL_MAP_IDENTIFIER);
 	importAndAssignTexture(ofbx::Texture::TextureType::EMISSIVE, Material::EMISSION_MAP_IDENTIFIER);
 
-	auto applyColorFactor = [&fbxMat, &dataBlock](const ofbx::Color &fbxColor, double factor, const std::string &matProp) {
+	auto applyColorFactor = [&fbxMat, mat](const ofbx::Color &fbxColor, double factor, const std::string &matProp) {
 		Vector3 colorFactor {fbxColor.r, fbxColor.g, fbxColor.b};
 		colorFactor *= factor;
 		if(umath::abs(1.f - colorFactor.x) > 0.001f || umath::abs(1.f - colorFactor.y) > 0.001f || umath::abs(1.f - colorFactor.z) > 0.001f)
-			dataBlock->AddValue("vector", matProp, std::to_string(colorFactor.x) + ' ' + std::to_string(colorFactor.y) + ' ' + std::to_string(colorFactor.z));
+			mat->SetProperty(matProp, colorFactor);
 	};
 	applyColorFactor(fbxMat.getDiffuseColor(), fbxMat.getDiffuseFactor(), "color_factor");
 	applyColorFactor(fbxMat.getEmissiveColor(), fbxMat.getEmissiveFactor(), "emission_factor");
@@ -233,7 +231,6 @@ std::optional<uint32_t> FbxImporter::LoadMaterial(const ofbx::Material &fbxMat, 
 	// TODO
 	//dataBlock->AddValue("float", "roughness_factor", std::to_string(pbrMetallicRoughness.roughnessFactor));
 	//dataBlock->AddValue("float", "metalness_factor", std::to_string(pbrMetallicRoughness.metallicFactor));
-
 
 	auto *combine = static_cast<pragma::ShaderCombineImageChannels *>(c_engine->GetShader("combine_image_channels").get());
 	auto *rma = static_cast<pragma::ShaderSpecularGlossinessToMetalnessRoughness *>(c_engine->GetShader("specular_glossiness_to_metalness_roughness").get());

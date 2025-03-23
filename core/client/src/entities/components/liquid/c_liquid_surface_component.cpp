@@ -397,22 +397,20 @@ void CLiquidSurfaceComponent::InitializeWaterScene(const Vector3 &refPos, const 
 	descSetEffects.SetBindingUniformBuffer(*m_waterScene->settingsBuffer, umath::to_integral(pragma::ShaderWater::WaterBinding::WaterSettings));
 
 	pragma::ShaderPPFog::Fog fog {};
-	auto &dataBlock = mat->GetDataBlock();
 	auto fogEnabled = false;
-	auto fogBlock = dataBlock->GetBlock("fog");
-	if(fogBlock) {
-		fogEnabled = fogBlock->GetBool("enabled", true);
+	if(mat->HasPropertyBlock("fog")) {
+		fogEnabled = mat->GetProperty("fog/enabled", true);
 		fog.start = nearZ;
-		if(fogBlock->GetFloat("start", &fog.start))
+		if(mat->GetProperty("fog/start", &fog.start))
 			fog.start = pragma::metres_to_units(fog.start);
 		fog.end = farZ;
-		if(fogBlock->GetFloat("end", &fog.end))
+		if(mat->GetProperty("fog/end", &fog.end))
 			fog.end = pragma::metres_to_units(fog.end);
-		fog.density = fogBlock->GetFloat("density", 0.008f);
-		Color color {68, 140, 200, 255};
-		if(fogBlock->GetColor("color", &color))
+		fog.density = mat->GetProperty("density", 0.008f);
+		auto color = Color {68, 140, 200, 255}.ToVector4();
+		if(mat->GetProperty("fog/color", &color))
 			;
-		fog.color = color.ToVector4();
+		fog.color = color;
 	}
 	if(fogEnabled)
 		fog.flags = pragma::ShaderPPFog::Fog::Flag::Enabled;
@@ -442,8 +440,7 @@ void CLiquidSurfaceComponent::InitializeWaterScene(const Vector3 &refPos, const 
 
 void CLiquidSurfaceComponent::InitializeRenderer(pragma::CRendererComponent &component)
 {
-	auto handle = component.AddPostProcessingEffect(
-	  "pp_water_overlay", [this](const util::DrawSceneInfo &drawSceneInfo) { RenderPostProcessingOverlay(drawSceneInfo); }, 380'000);
+	auto handle = component.AddPostProcessingEffect("pp_water_overlay", [this](const util::DrawSceneInfo &drawSceneInfo) { RenderPostProcessingOverlay(drawSceneInfo); }, 380'000);
 	m_waterScene->hPostProcessing.push_back(handle);
 }
 

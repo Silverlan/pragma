@@ -56,12 +56,6 @@ void Lua::Material::Client::GetTexture(lua_State *l, ::Material *mat, const std:
 	Lua::Push<::TextureInfo *>(l, tex);
 }
 
-void Lua::Material::Client::GetData(lua_State *l, ::Material *mat)
-{
-	auto &data = mat->GetDataBlock();
-	Lua::Push<std::shared_ptr<ds::Block>>(l, data);
-}
-
 void Lua::Material::Client::InitializeShaderData(lua_State *l, ::Material *mat, bool reload)
 {
 	auto shaderHandler = static_cast<msys::CMaterialManager &>(client->GetMaterialManager()).GetShaderHandler();

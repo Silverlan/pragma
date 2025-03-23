@@ -141,12 +141,9 @@ bool ShaderParticleBlob::RecordDraw(prosper::ShaderBindState &bindState, pragma:
 		auto &psColorFactor = ps.GetColorFactor();
 		colorFactor *= psColorFactor;
 		if(mat) {
-			auto &data = mat->GetDataBlock();
-			auto &dColorFactor = data->GetValue("color_factor");
-			if(dColorFactor != nullptr && typeid(*dColorFactor) == typeid(ds::Vector4)) {
-				auto &matColorFactor = static_cast<ds::Vector4 *>(dColorFactor.get())->GetValue();
+			Vector4 matColorFactor;
+			if(mat->GetProperty("color_factor", &matColorFactor))
 				colorFactor *= matColorFactor;
-			}
 		}
 	}
 

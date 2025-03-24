@@ -774,6 +774,7 @@ def execbuildscript(filepath):
 		"normalize_path": normalize_path,
 		"mkpath": mkpath,
 		"print_msg": print_msg,
+		"print_warning": print_warning,
 		"git_clone": git_clone,
 		"git_clone_commit": git_clone_commit,
 		"cmake_configure": cmake_configure,

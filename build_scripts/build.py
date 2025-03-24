@@ -238,6 +238,7 @@ def execscript(filepath):
 		"normalize_path": normalize_path,
 		"mkpath": mkpath,
 		"print_msg": print_msg,
+		"print_warning": print_warning,
 		"git_clone": git_clone,
 		"cmake_configure": cmake_configure,
 		"cmake_build": cmake_build,

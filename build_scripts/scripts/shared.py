@@ -153,6 +153,8 @@ def extract(zipName,removeZip=True,format="zip"):
 		os.remove(zipName)
 
 def http_extract(url,removeZip=True,format="zip"):
+	from scripts.shared import print_msg
+	print_msg("Downloading and extracting " +url +"...")
 	fileName = http_download(url)
 	extract(fileName,removeZip,format)
 

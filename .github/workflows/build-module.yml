@@ -38,7 +38,7 @@ jobs:
         uses: Silverlan/pr_module_template/github_actions/get_module_info@main
         with:
           repo_access_token: '${{ secrets.repository_token || github.token }}'
-          repository: '${{ inputs.repository }}/${{ inputs.branch }}'
+          repository: '${{ inputs.repository }}'
 
       - name: Build Module
         id: build-module

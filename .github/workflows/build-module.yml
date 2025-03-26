@@ -17,6 +17,12 @@ on:
     secrets:
       repository_token:
         required: false
+      build_token1:
+        required: false
+      build_token2:
+        required: false
+      build_token3:
+        required: false
 
 permissions:
   contents: write
@@ -43,6 +49,17 @@ jobs:
           repo_access_token: '${{ secrets.repository_token || github.token }}'
           repository: '${{ inputs.repository }}'
 
+      - name: Parse Args
+        shell: bash
+        id: parse-args
+        run: |
+          args="${{ inputs.build-args }}"
+          new_args=$(sed -e "s/BUILD_TOKEN1/${{ secrets.build_token1 || '' }}/g" \
+                        -e "s/BUILD_TOKEN2/${{ secrets.build_token2 || '' }}/g" \
+                        -e "s/BUILD_TOKEN3/${{ secrets.build_token3 || '' }}/g" <<< "$text")
+
+          echo "build-args=$new_args" >> $GITHUB_OUTPUT
+
       - name: Build Module
         id: build-module
         uses: Silverlan/pragma/github_actions/build_generic_module@main
@@ -52,7 +69,7 @@ jobs:
           token: '${{ secrets.repository_token || github.token }}'
           ref: '${{ inputs.branch }}'
           debug-artifact-token: '${{ secrets.GITHUB_TOKEN }}'
-          build-args: '${{ inputs.build-args }}'
+          build-args: '${{ steps.parse-args.outputs.build-args }}'
 
       - name: Create Release Files
         shell: bash

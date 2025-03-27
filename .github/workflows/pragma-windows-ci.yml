@@ -74,7 +74,7 @@ jobs:
         shell: bash
         run:   |
           curDate=$(date -u '+%Y-%m-%d %H:%M:%S %Z')
-          printf "This is an auto-generated pre-release, built from the latest version of the source code.\nIt includes all files necessary to run Pragma, as well as the latest version of the Pragma Filmmaker, however functionality and stability are **not** guaranteed.\n\nLatest release date: $curDate" > tag_text.txt
+          printf "This is an auto-generated pre-release, built from the latest version of the source code.\nIt includes all files necessary to run Pragma, as well as the latest version of the Pragma Filmmaker, however functionality and stability are **not** guaranteed.\n\nFor Windows, you can either download `pragma_setup.exe` to install Pragma on your system, or `pragma-win64.zip` if you prefer a portable version.\n\nLatest release date: $curDate" > tag_text.txt
 
       - name: Update nightly tag description
         uses: softprops/action-gh-release@v0.1.15

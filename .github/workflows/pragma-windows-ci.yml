@@ -112,7 +112,7 @@ jobs:
           files: "debug_pdb.zip"
 
       - name: Generate Installer
-        uses: ./pragma/github_actions/generate_installer@main
+        uses: ./pragma/github_actions/generate_installer
         with:
           version: "Nightly"
           install-directory: "${{ steps.build-pragma.outputs.install-dir }}"

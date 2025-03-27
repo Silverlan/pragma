@@ -64,6 +64,25 @@ runs:
       run: |
         pip install numpy
   
+    - name: Print Disk Space
+      shell: bash
+      if: runner.os == 'Linux'
+      run: |
+        echo "Available disk space:"
+        df -h
+
+    - name: Free Disk Space
+      if: runner.os == 'Linux'
+      uses: jlumbroso/free-disk-space@main
+      with:
+        tool-cache: true
+        android: true
+        dotnet: true
+        haskell: true
+        large-packages: true
+        docker-images: true
+        swap-storage: true
+
     - name: Maximize build space
       if: runner.os == 'Linux'
       uses: easimon/maximize-build-space@master
@@ -72,4 +91,11 @@ runs:
         swap-size-mb: 1024
         remove-dotnet: 'true'
         
+    - name: Print Disk Space Post-Optimization
+      shell: bash
+      if: runner.os == 'Linux'
+      run: |
+        echo "Available disk space after optimization:"
+        df -h
+
     - uses: Silverlan/common_actions/action_end@main

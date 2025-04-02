@@ -22,7 +22,7 @@ get_submodule("libnoise","https://github.com/qknight/libnoise.git","2fb16f638aac
 get_submodule("libpng","https://github.com/glennrp/libpng.git","5a0b7e9c29ec23f87c601622cb2db01781a6cbba","libpng16")
 get_submodule("libsamplerate","https://github.com/libsndfile/libsamplerate.git","a2eb2814150a4ada0b49ea3cc5e51170572fc606")
 get_submodule("libzip","https://github.com/nih-at/libzip.git","210b09d9d2d0f4c0bbc64f92ad45c1ac53598fec")
-get_submodule("luabind","https://github.com/Silverlan/luabind-deboostified.git","a5e629426838af8cbfe8e25a66f6dd1a203bbd4a")
+get_submodule("luabind","https://github.com/Silverlan/luabind-deboostified.git","0a84faa0ab6539428300cf7bd2fafcf47cac12c8")
 get_submodule("luajit","https://github.com/Silverlan/LuaJIT.git","95766ce","v2.1")
 get_submodule("miniball","https://github.com/Silverlan/miniball.git","609fbf16e7a9cc3dc8f88e4d1c7a1d8ead842bb1")
 get_submodule("muparserx","https://github.com/Silverlan/muparserx.git","910f6128494e174c3de81bd34c3d938b47873c08")

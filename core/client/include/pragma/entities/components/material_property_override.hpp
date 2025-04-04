@@ -47,9 +47,11 @@ namespace pragma {
 	  protected:
 		static std::string GetNormalizedMaterialName(std::string name);
 		static std::string GetNormalizedMaterialName(const CMaterial &mat);
+		static const rendering::shader_material::ShaderMaterial *GetShaderMaterial(const CMaterial &mat);
 		struct PropertyInfo {
 			udm::PProperty property;
 			bool enabled = false;
+			bool texture = false;
 		};
 		struct MaterialData {
 			std::shared_ptr<Material> material;

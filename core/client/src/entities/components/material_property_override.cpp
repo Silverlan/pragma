@@ -77,11 +77,12 @@ udm::Property *CMaterialPropertyOverrideComponent::InitializeMaterialProperty(ui
 	auto *mat = GetTargetMaterial(matIdx);
 	if(!mat)
 		return nullptr;
-	auto propType = mat->GetPropertyType(key);
-	if(propType == msys::PropertyType::None || propType == msys::PropertyType::Block)
+	auto *shaderMat = GetShaderMaterial(static_cast<CMaterial &>(*mat));
+	if(!shaderMat)
 		return nullptr;
-	auto valType = mat->GetPropertyValueType(key);
-	if(valType == ds::ValueType::Invalid)
+	auto *smProp = shaderMat->FindProperty(key);
+	auto *tex = !smProp ? shaderMat->FindTexture(key) : nullptr;
+	if(!smProp && !tex)
 		return nullptr;
 	if(matIdx >= m_materialOverrides.size()) {
 		UpdateMaterialOverride(matIdx, static_cast<CMaterial &>(*mat), true);
@@ -92,7 +93,7 @@ udm::Property *CMaterialPropertyOverrideComponent::InitializeMaterialProperty(ui
 	auto it = matData.properties.find(key);
 	if(it != matData.properties.end())
 		return it->second.property.get();
-	auto udmType = msys::to_udm_type(valType);
+	auto udmType = tex ? udm::Type::String : pragma::shadergraph::to_udm_type((*smProp)->type);
 	auto prop = udm::Property::Create(udmType);
 	auto res = udm::visit(udmType, [&prop, &mat, key](auto tag) -> bool {
 		using T = typename decltype(tag)::type;
@@ -107,7 +108,7 @@ udm::Property *CMaterialPropertyOverrideComponent::InitializeMaterialProperty(ui
 	});
 	if(!res)
 		return nullptr;
-	matData.properties[key] = {prop, true};
+	matData.properties[key] = {prop, true, tex ? true : false};
 	return prop.get();
 }
 
@@ -122,24 +123,32 @@ void CMaterialPropertyOverrideComponent::ClearMaterialProperty(uint32_t matIdx, 
 	auto propType = it->second.property->type;
 	matData.properties.erase(it);
 	if(matData.material) {
+		auto valType = matData.material->GetPropertyValueType(key);
 		matData.material->ClearProperty(key);
-		auto *shader = dynamic_cast<pragma::ShaderGameWorldLightingPass *>(pragma::get_cengine()->GetShader("pbr").get());
-		if(shader) {
-			auto *shaderMat = shader->GetShaderMaterial();
-			if(shaderMat) {
-				udm::visit(propType, [this, &matData, &key, shaderMat](auto tag) {
-					using T = typename decltype(tag)::type;
-					if constexpr(msys::is_property_type<T>) {
-						Vector3 val;
-						if(matData.material->GetProperty(key, &val))
-							SetMaterialPropertyBufferValue(*matData.material, *shaderMat, key, val);
-					}
-				});
-			}
+		auto *shaderMat = GetShaderMaterial(static_cast<CMaterial &>(*matData.material));
+		if(shaderMat) {
+			udm::visit(propType, [this, &matData, &key, shaderMat](auto tag) {
+				using T = typename decltype(tag)::type;
+				if constexpr(msys::is_property_type<T>) {
+					Vector3 val;
+					if(matData.material->GetProperty(key, &val))
+						SetMaterialPropertyBufferValue(*matData.material, *shaderMat, key, val);
+				}
+			});
 		}
 		if(matData.properties.empty()) {
 			//matData.material = nullptr;
 			// TODO: Force model component to reload
+		}
+
+		if(valType == ds::ValueType::Texture) {
+			if(matIdx < m_materialOverrides.size()) {
+				auto &matInfo = m_materialOverrides[matIdx];
+				if(matInfo.material) {
+					UpdateMaterialOverride(static_cast<CMaterial &>(*matInfo.material));
+					//UpdateMaterialOverride(matIdx, static_cast<CMaterial &>(*matInfo.material), true);
+				}
+			}
 		}
 	}
 }
@@ -296,8 +305,8 @@ void CMaterialPropertyOverrideComponent::SetTexture(uint32_t matIdx, const char 
 
 	if(matIdx < m_materialOverrides.size()) {
 		auto &matInfo = m_materialOverrides[matIdx];
-		if(matInfo.material)
-			UpdateMaterialOverride(matIdx, static_cast<CMaterial &>(*matInfo.material), true);
+		//if(matInfo.material)
+		//	UpdateMaterialOverride(matIdx, static_cast<CMaterial &>(*matInfo.material), true);
 	}
 	/*auto *mat = GetRenderMaterial(0);
 	if(!mat)
@@ -344,10 +353,7 @@ void CMaterialPropertyOverrideComponent::SetMaterialProperty(uint32_t matIdx, co
 	}
 	if(!mat)
 		return;
-	auto *shader = dynamic_cast<pragma::ShaderGameWorldLightingPass *>(pragma::get_cengine()->GetShader("pbr").get());
-	if(!shader)
-		return;
-	auto *shaderMat = shader->GetShaderMaterial();
+	auto *shaderMat = GetShaderMaterial(*mat);
 	if(!shaderMat)
 		return;
 	//MaterialPropertyOverride *o;
@@ -380,6 +386,14 @@ std::string CMaterialPropertyOverrideComponent::GetNormalizedMaterialName(std::s
 	return name;
 }
 std::string CMaterialPropertyOverrideComponent::GetNormalizedMaterialName(const CMaterial &mat) { return GetNormalizedMaterialName(std::string {util::FilePath(const_cast<CMaterial &>(mat).GetName()).GetBack()}); }
+
+const rendering::shader_material::ShaderMaterial *CMaterialPropertyOverrideComponent::GetShaderMaterial(const CMaterial &mat)
+{
+	auto *shader = dynamic_cast<pragma::ShaderGameWorldLightingPass *>(const_cast<CMaterial &>(mat).GetPrimaryShader());
+	if(!shader)
+		return nullptr;
+	return shader->GetShaderMaterial();
+}
 
 void CMaterialPropertyOverrideComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void CMaterialPropertyOverrideComponent::Initialize()
@@ -422,6 +436,12 @@ void CMaterialPropertyOverrideComponent::UpdateMaterialOverride(uint32_t idx, co
 			using T = typename decltype(tag)::type;
 			if constexpr(msys::is_property_type<T>) {
 				auto &val = propInfo.property->GetValue<T>();
+				if constexpr(std::is_same_v<T, udm::String>) {
+					if(propInfo.texture) {
+						newMat->SetTextureProperty(name, val);
+						return;
+					}
+				}
 				newMat->SetProperty<T>(name, val);
 			}
 		});
@@ -519,10 +539,7 @@ void CMaterialPropertyOverrideComponent::PopulateProperties()
 	for(auto &mat : mats) {
 		if(!mat)
 			continue;
-		auto *shader = dynamic_cast<pragma::ShaderGameWorldLightingPass *>(static_cast<CMaterial *>(mat.get())->GetPrimaryShader());
-		if(!shader)
-			continue;
-		auto *shaderMat = shader->GetShaderMaterial();
+		auto *shaderMat = GetShaderMaterial(static_cast<CMaterial &>(*mat));
 		if(!shaderMat)
 			continue;
 		shaderMaterials.insert(shaderMat);

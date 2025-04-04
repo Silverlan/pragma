@@ -652,6 +652,7 @@ if platform == "win32":
 		"-DCMAKE_DISABLE_FIND_PACKAGE_BZip2=TRUE",
 		"-DCMAKE_DISABLE_FIND_PACKAGE_PNG=TRUE"
 	]
+	freetype_cmake_args.append("-DCMAKE_POLICY_VERSION_MINIMUM=4.0")
 
 	print_msg("Building freetype...")
 	cmake_configure(freetype_root,generator,freetype_cmake_args)
@@ -844,7 +845,7 @@ execfile(scripts_dir +"/user_modules.py",g,l)
 if with_essential_client_modules:
 	add_pragma_module(
 		name="pr_prosper_vulkan",
-		commitSha="ee7eac0b9f3db0e4eda8e15d5e94269ff7ba959b",
+		commitSha="3d33edfca536e57ceeb903aa44b68edcac716803",
 		repositoryUrl="https://github.com/Silverlan/pr_prosper_vulkan.git"
 	)
 
@@ -893,7 +894,7 @@ if with_pfm:
 		)
 		add_pragma_module(
 			name="pr_unirender",
-			commitSha="d1d6f448719798c6dccbf78c6f9ea37682388c47",
+			commitSha="f5ef0ecdd7a2a4a368e795423affb4c6c8cecfd7",
 			repositoryUrl="https://github.com/Silverlan/pr_cycles.git"
 		)
 		add_pragma_module(
@@ -915,7 +916,7 @@ if with_pfm:
 if with_pfm:
 	add_pragma_module(
 		name="pr_git",
-		commitSha="9a5c12b900de8ada6d22689a849ba2c01ba0e4dd",
+		commitSha="08b2d74f2c8641f791936a868d562e61423cc040",
 		repositoryUrl="https://github.com/Silverlan/pr_git.git"
 	)
 
@@ -1048,6 +1049,7 @@ if len(vtune_include_path) > 0 or len(vtune_library_path) > 0:
 		raise argparse.ArgumentError(None,"Both the --vtune-include-path and --vtune-library-path options have to be specified to enable VTune support!")
 
 cmake_args += additional_cmake_args
+cmake_args.append("-DCMAKE_POLICY_VERSION_MINIMUM=4.0")
 cmake_configure(root,generator,cmake_args)
 
 print_msg("Build files have been written to \"" +build_dir +"\".")

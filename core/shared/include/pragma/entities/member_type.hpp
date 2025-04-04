@@ -113,6 +113,7 @@ namespace pragma::ents {
 		return false;
 	}
 	constexpr udm::Type member_type_to_udm_type(EntityMemberType type) { return (umath::to_integral(type) < umath::to_integral(udm::Type::Count)) ? static_cast<udm::Type>(type) : udm::Type::Invalid; }
+	constexpr EntityMemberType udm_type_to_member_type(udm::Type type) { return static_cast<EntityMemberType>(type); }
 
 	template<bool ENABLE_DEFAULT_RETURN = true, typename T>
 	constexpr decltype(auto) visit_member(EntityMemberType type, T vs)

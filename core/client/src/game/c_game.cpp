@@ -190,6 +190,7 @@ CGame::CGame(NetworkState *state)
 	RegisterCallback<void, pragma::CLightDirectionalComponent *, pragma::CLightDirectionalComponent *>("OnEnvironmentLightSourceChanged");
 	RegisterCallback<void, std::reference_wrapper<const util::DrawSceneInfo>>("Render");
 	RegisterCallback<void, std::reference_wrapper<const util::DrawSceneInfo>>("PreRenderScenes");
+	RegisterCallback<void, std::reference_wrapper<const util::DrawSceneInfo>>("UpdateRenderBuffers");
 	RegisterCallback<void>("OnRenderScenes");
 	RegisterCallbackWithOptionalReturn<bool, std::reference_wrapper<const util::DrawSceneInfo>>("DrawScene");
 	RegisterCallback<void>("PostRenderScenes");

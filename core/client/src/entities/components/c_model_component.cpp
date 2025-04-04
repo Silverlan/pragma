@@ -14,6 +14,7 @@
 #include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/entities/components/c_bvh_component.hpp"
 #include "pragma/entities/components/c_static_bvh_cache_component.hpp"
+#include "pragma/entities/components/material_override.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
@@ -445,16 +446,22 @@ void CModelComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 	BaseModelComponent::OnEntityComponentAdded(component);
 	if(typeid(component) == typeid(CBvhComponent))
 		m_bvhComponent = static_cast<CBvhComponent *>(&component);
-	else if(typeid(component) == typeid(CMaterialOverrideComponent))
+	else if(typeid(component) == typeid(CMaterialOverrideComponent)) {
 		m_materialOverrideComponent = static_cast<CMaterialOverrideComponent *>(&component);
+		umath::set_flag(m_stateFlags, StateFlags::RenderMeshUpdateRequired, true);
+		SetTickPolicy(TickPolicy::Always);
+	}
 }
 void CModelComponent::OnEntityComponentRemoved(BaseEntityComponent &component)
 {
 	BaseModelComponent::OnEntityComponentRemoved(component);
 	if(typeid(component) == typeid(CBvhComponent))
 		m_bvhComponent = nullptr;
-	else if(typeid(component) == typeid(CMaterialOverrideComponent))
+	else if(typeid(component) == typeid(CMaterialOverrideComponent)) {
 		m_materialOverrideComponent = nullptr;
+		umath::set_flag(m_stateFlags, StateFlags::RenderMeshUpdateRequired, true);
+		SetTickPolicy(TickPolicy::Always);
+	}
 }
 
 void CModelComponent::FlushRenderData()

@@ -55,6 +55,15 @@ namespace pragma::rendering {
 		const Property *FindProperty(const char *key) const { return const_cast<ShaderInputDescriptor *>(this)->FindProperty(key); }
 		const std::unordered_map<std::string, size_t> &GetPropertyMap() const { return m_propertyMap; }
 
+		std::optional<std::pair<size_t, size_t>> GetPropertyDataRange(const char *key) const
+		{
+			auto *prop = FindProperty(key);
+			if(!prop)
+				return {};
+			size_t offset = prop->offset;
+			return std::pair<size_t, size_t> {offset, udm::size_of(pragma::shadergraph::to_udm_type(prop->parameter.type))};
+		}
+
 		bool LoadFromUdmData(udm::LinkedPropertyWrapperArg prop, std::string &outErr);
 		std::string ToGlslStruct() const;
 	  protected:

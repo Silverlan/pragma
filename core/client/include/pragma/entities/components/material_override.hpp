@@ -5,26 +5,29 @@
  * Copyright (c) 2025 Silverlan
  */
 
-module;
+#ifndef __PRAGMA_MATERIAL_OVERRIDE_HPP__
+#define __PRAGMA_MATERIAL_OVERRIDE_HPP__
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/components/c_entity_component.hpp"
+#include "pragma/rendering/shader_input_data.hpp"
+#include "pragma/rendering/shader_material/shader_material.hpp"
 #include <pragma/entities/components/base_time_scale_component.hpp>
 #include <material_manager2.hpp>
-
-export module pragma.client.entities.components.material_override;
+#include <queue>
 
 import pragma.client.rendering.material_property_block;
 
-export namespace pragma {
+namespace pragma {
 	class DLLCLIENT CMaterialOverrideComponent final : public BaseEntityComponent {
 	  public:
 		static ComponentEventId EVENT_ON_MATERIAL_OVERRIDES_CLEARED;
+		static ComponentEventId EVENT_ON_MATERIAL_OVERRIDE_CHANGED;
 
 		static void RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts);
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
-		CMaterialOverrideComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+		CMaterialOverrideComponent(BaseEntity &ent);
 		virtual ~CMaterialOverrideComponent() override;
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *l) override;
@@ -58,10 +61,19 @@ export namespace pragma {
 		};
 		void UpdateMaterialPropertyOverride(size_t matIdx);
 		void ApplyMaterialPropertyOverride(Material &mat, const pragma::rendering::MaterialPropertyBlock &matPropOverride);
-		void UpdateMaterialOverride(Material &mat);
+		void UpdateMaterialOverride(uint32_t matIdx, CMaterial &mat);
 		std::unordered_map<size_t, MaterialPropertyOverride> m_materialPropertyOverrides;
 		std::unique_ptr<MaterialPropertyOverride> m_globalMaterialPropertyOverride;
 
 		std::vector<MaterialOverride> m_materialOverrides = {};
 	};
+
+	struct DLLCLIENT CEOnMaterialOverrideChanged : public ComponentEvent {
+		CEOnMaterialOverrideChanged(uint32_t idx, CMaterial &mat);
+		virtual void PushArguments(lua_State *l) override;
+		uint32_t materialIndex;
+		CMaterial &material;
+	};
 };
+
+#endif

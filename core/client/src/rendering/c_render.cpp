@@ -354,6 +354,8 @@ void CGame::RenderScenes(util::DrawSceneInfo &drawSceneInfo)
 	auto &inputDataManager = GetGlobalShaderInputDataManager();
 	inputDataManager.UpdateBufferData(*drawSceneInfo.commandBuffer);
 
+	CallCallbacks<void, std::reference_wrapper<const util::DrawSceneInfo>>("UpdateRenderBuffers", std::ref(drawSceneInfo));
+
 	StartProfilingStage("RenderScenes");
 	util::ScopeGuard sg {[this]() {
 		StopProfilingStage(); // RenderScenes

@@ -5,26 +5,34 @@
  * Copyright (c) 2025 Silverlan
  */
 
-module;
-
 #include "stdafx_client.h"
+#include "pragma/entities/components/material_override.hpp"
 #include "pragma/entities/components/c_time_scale_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
+#include "pragma/entities/entity_component_manager_t.hpp"
+#include "pragma/entities/components/material_property_override.hpp"
+#include "pragma/entities/entity_component_system_t.hpp"
 #include "pragma/model/c_model.h"
 #include "pragma/lua/lua_util_component.hpp"
+#include "pragma/rendering/global_shader_input_manager.hpp"
+#include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include <pragma/asset/util_asset.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
+#include <prosper_command_buffer.hpp>
+#include <buffers/prosper_buffer.hpp>
 #include <cmaterial.h>
-
-module pragma.client.entities.components.material_override;
 
 using namespace pragma;
 ComponentEventId CMaterialOverrideComponent::EVENT_ON_MATERIAL_OVERRIDES_CLEARED = INVALID_COMPONENT_ID;
+ComponentEventId CMaterialOverrideComponent::EVENT_ON_MATERIAL_OVERRIDE_CHANGED = INVALID_COMPONENT_ID;
 void CMaterialOverrideComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	BaseModelComponent::RegisterEvents(componentManager, registerEvent);
 	EVENT_ON_MATERIAL_OVERRIDES_CLEARED = registerEvent("EVENT_ON_MATERIAL_OVERRIDES_CLEARED", ComponentEventInfo::Type::Broadcast);
+	EVENT_ON_MATERIAL_OVERRIDE_CHANGED = registerEvent("EVENT_ON_MATERIAL_OVERRIDE_CHANGED", ComponentEventInfo::Type::Broadcast);
 }
+
+CMaterialOverrideComponent::CMaterialOverrideComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
 
 CMaterialOverrideComponent::~CMaterialOverrideComponent() {}
 void CMaterialOverrideComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
@@ -50,9 +58,9 @@ void CMaterialOverrideComponent::SetMaterialOverride(uint32_t idx, CMaterial &ma
 	if(idx >= m_materialOverrides.size())
 		m_materialOverrides.resize(idx + 1);
 	m_materialOverrides.at(idx).materialOverride = mat.GetHandle();
-	UpdateMaterialOverride(mat);
+	UpdateMaterialOverride(idx, mat);
 }
-void CMaterialOverrideComponent::UpdateMaterialOverride(Material &mat)
+void CMaterialOverrideComponent::UpdateMaterialOverride(uint32_t matIdx, CMaterial &mat)
 {
 	auto *mdlC = static_cast<CModelComponent *>(GetEntity().GetModelComponent());
 	if(mdlC)
@@ -61,6 +69,8 @@ void CMaterialOverrideComponent::UpdateMaterialOverride(Material &mat)
 	mat.UpdateTextures(true); // Ensure all textures have been fully loaded
 	if(mdlC)
 		mdlC->UpdateRenderBufferList();
+
+	BroadcastEvent(EVENT_ON_MATERIAL_OVERRIDE_CHANGED, CEOnMaterialOverrideChanged {matIdx, mat});
 }
 void CMaterialOverrideComponent::ClearMaterialOverride(uint32_t idx)
 {
@@ -86,6 +96,12 @@ CMaterial *CMaterialOverrideComponent::GetMaterialOverride(uint32_t idx) const {
 
 CMaterial *CMaterialOverrideComponent::GetRenderMaterial(uint32_t idx) const
 {
+	auto c = GetEntity().GetComponent<CMaterialPropertyOverrideComponent>();
+	if(c.valid()) {
+		auto *mat = c->GetRenderMaterial(idx);
+		if(mat)
+			return mat;
+	}
 	if(idx >= m_materialOverrides.size())
 		return nullptr;
 	auto &matOverride = m_materialOverrides[idx];
@@ -145,7 +161,7 @@ void CMaterialOverrideComponent::UpdateMaterialPropertyOverride(size_t matIdx)
 	if(matIdx >= m_materialOverrides.size())
 		m_materialOverrides.resize(matIdx + 1);
 	m_materialOverrides[matIdx].propertyOverride = newMat->shared_from_this();
-	UpdateMaterialOverride(*newMat);
+	UpdateMaterialOverride(matIdx, static_cast<CMaterial &>(*newMat));
 }
 
 void CMaterialOverrideComponent::ClearMaterialPropertyOverride() { m_globalMaterialPropertyOverride = nullptr; }
@@ -240,6 +256,7 @@ void CMaterialOverrideComponent::RegisterLuaBindings(lua_State *l, luabind::modu
 	def.def("ClearMaterialOverrides", &pragma::CMaterialOverrideComponent::ClearMaterialOverrides);
 	def.def("GetMaterialOverride", &pragma::CMaterialOverrideComponent::GetMaterialOverride);
 	def.def("GetMaterialOverrideCount", &pragma::CMaterialOverrideComponent::GetMaterialOverrideCount);
+	def.def("GetRenderMaterial", &pragma::CMaterialOverrideComponent::GetRenderMaterial);
 	def.def("ClearMaterialPropertyOverrides", static_cast<void (pragma::CMaterialOverrideComponent::*)()>(&pragma::CMaterialOverrideComponent::ClearMaterialPropertyOverrides));
 	def.def("ClearMaterialPropertyOverride", static_cast<void (pragma::CMaterialOverrideComponent::*)(size_t)>(&pragma::CMaterialOverrideComponent::ClearMaterialPropertyOverride));
 	def.def("ClearMaterialPropertyOverride", static_cast<void (pragma::CMaterialOverrideComponent::*)()>(&pragma::CMaterialOverrideComponent::ClearMaterialPropertyOverride));
@@ -249,3 +266,8 @@ void CMaterialOverrideComponent::RegisterLuaBindings(lua_State *l, luabind::modu
 	def.def("GetMaterialPropertyOverride", static_cast<const pragma::rendering::MaterialPropertyBlock *(pragma::CMaterialOverrideComponent::*)() const>(&pragma::CMaterialOverrideComponent::GetMaterialPropertyOverride));
 	modEnts[def];
 }
+
+////////////
+
+CEOnMaterialOverrideChanged::CEOnMaterialOverrideChanged(uint32_t idx, CMaterial &mat) : materialIndex {idx}, material {mat} {}
+void CEOnMaterialOverrideChanged::PushArguments(lua_State *l) { Lua::PushInt(l, materialIndex); }

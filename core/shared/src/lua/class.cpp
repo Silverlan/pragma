@@ -48,6 +48,7 @@
 #include "pragma/lua/libraries/lents.h"
 #include "pragma/lua/converters/game_type_converters_t.hpp"
 #include "pragma/lua/converters/string_view_converter_t.hpp"
+#include "pragma/lua/converters/utf8_string_converter_t.hpp"
 #include "pragma/lua/converters/pair_converter_t.hpp"
 #include "pragma/lua/converters/vector_converter_t.hpp"
 #include "pragma/util/util_splash_damage_info.hpp"
@@ -155,6 +156,33 @@ static void create_directory_change_listener(lua_State *l, const std::string &pa
 	}
 	Lua::PushBool(l, false);
 	Lua::PushString(l, "Unknown error!");
+}
+
+static void register_utf8_string(lua_State *l, luabind::module_ &modStr)
+{
+	auto defBaseStr = pragma::lua::register_class<"BaseUtf8String", pragma::string::BaseUtf8String>(l);
+	defBaseStr->def("GetSize", &pragma::string::BaseUtf8String::size);
+	defBaseStr->def("GetLength", &pragma::string::BaseUtf8String::length);
+	defBaseStr->def("IsEmpty", &pragma::string::BaseUtf8String::empty);
+	defBaseStr->def("GetAt", &pragma::string::BaseUtf8String::at);
+	defBaseStr->def("GetFront", &pragma::string::BaseUtf8String::front);
+	defBaseStr->def("GetBack", &pragma::string::BaseUtf8String::back);
+	defBaseStr->def("ToUpper", &pragma::string::BaseUtf8String::toUpper);
+	defBaseStr->def("ToLower", &pragma::string::BaseUtf8String::toLower);
+	defBaseStr->def("ToString", +[](const pragma::string::BaseUtf8String &str) -> std::string { return static_cast<std::string>(str); });
+	modStr[*defBaseStr];
+
+	auto defStr = pragma::lua::register_class<"Utf8String", pragma::string::Utf8String, pragma::string::BaseUtf8String>(l);
+	defStr->def(luabind::constructor<>());
+	defStr->def(luabind::constructor<const std::string &>());
+	defStr->def(luabind::constructor<const pragma::string::Utf8String &>());
+	defStr->def(luabind::const_self == luabind::const_self);
+	defStr->def(luabind::tostring(luabind::self));
+	defStr->def("SubStr", +[](const pragma::string::Utf8String &str, size_t start, size_t count) -> pragma::string::Utf8String { return str.substr(start, count); });
+	defStr->def("SubStr", +[](const pragma::string::Utf8String &str, size_t start) -> pragma::string::Utf8String { return str.substr(start); });
+	defStr->def("Find", +[](const pragma::string::Utf8String &str, const std::string &s) -> size_t { return str.find(s); });
+	defStr->def("Find", +[](const pragma::string::Utf8String &str, const pragma::string::BaseUtf8String &s) -> size_t { return str.find(s); });
+	modStr[*defStr];
 }
 
 static void register_directory_watcher(lua_State *l, luabind::module_ &modUtil)
@@ -358,6 +386,7 @@ static int util_dir_path(lua_State *l)
 void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 {
 	auto modString = luabind::module_(lua.GetState(), "string");
+	register_utf8_string(lua.GetState(), modString);
 	modString[luabind::def("snake_case_to_camel_case", Lua::string::snake_case_to_camel_case), luabind::def("camel_case_to_snake_case", Lua::string::camel_case_to_snake_case), luabind::def("calc_levenshtein_distance", Lua::string::calc_levenshtein_distance),
 	  luabind::def("calc_levenshtein_similarity", Lua::string::calc_levenshtein_similarity),
 	  luabind::def("find_longest_common_substring", Lua::string::find_longest_common_substring, luabind::meta::join<luabind::pure_out_value<3>, luabind::pure_out_value<4>, luabind::pure_out_value<5>>::type {}),

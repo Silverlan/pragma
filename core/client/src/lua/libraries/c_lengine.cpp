@@ -110,6 +110,36 @@ Vector2i Lua::engine::get_text_size(lua_State *l, const std::string &text, const
 	return Vector2i {w, h};
 }
 
+std::pair<size_t, size_t> Lua::engine::get_truncated_text_length(lua_State *l, const std::string &text, const std::string &font, uint32_t maxWidth)
+{
+	auto info = FontManager::GetFont(font);
+	if(info == nullptr)
+		return {0, 0};
+	return get_truncated_text_length(l, text, *info, maxWidth);
+}
+
+std::pair<size_t, size_t> Lua::engine::get_truncated_text_length(lua_State *l, const std::string &text, const FontInfo &font, uint32_t maxWidth)
+{
+	pragma::string::Utf8String uText {text};
+	uint32_t offset = 0;
+	size_t numChars = 0;
+	uint32_t idx = 0;
+	for(auto it = uText.begin(); it != uText.end(); ++it) {
+		int w = 0;
+		int h = 0;
+		FontManager::GetTextSize(*it, idx, &font, &w, &h);
+		if(offset + w > maxWidth) {
+			numChars = idx;
+			break;
+		}
+		offset += w;
+		++numChars;
+		++idx;
+	}
+
+	return {numChars, offset};
+}
+
 void Lua::engine::precache_material(lua_State *l, const std::string &mat) { client->PrecacheMaterial(mat.c_str()); }
 
 void Lua::engine::precache_model(lua_State *l, const std::string &mdl) { c_game->PrecacheModel(mdl); }
@@ -247,7 +277,7 @@ int Lua::engine::create_particle_system(lua_State *l)
 						renderers.push_back(std::make_unique<ParticleData>(name, tObj));
 					Lua::RemoveValue(l, k); /* 2 */
 					Lua::RemoveValue(l, v); /* 1 */
-				}                           /* 0 */
+				} /* 0 */
 				Lua::RemoveValue(l, -3);
 				Lua::RemoveValue(l, -2);
 			}

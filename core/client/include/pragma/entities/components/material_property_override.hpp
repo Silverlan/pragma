@@ -113,6 +113,7 @@ namespace pragma {
 			ShaderMaterialPropertyInfo(const ShaderMaterialPropertyInfo &other);
 			const char *name;
 			bool enabled = false;
+			uint32_t materialIndex = std::numeric_limits<uint32_t>::max();
 			std::unique_ptr<MaterialPropertyOverride> propertyOverride;
 		};
 		std::vector<ShaderMaterialPropertyInfo> m_shaderMaterialPropertyInfos;

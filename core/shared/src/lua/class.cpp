@@ -258,6 +258,7 @@ DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(glm, Vector3);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(glm, Vector4);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(glm, Quat);
 
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::string, Utf8String);
 /* namespace panima
 {
 std::ostream &operator<<(std::ostream &out,const pragma::animation::Bone &o)

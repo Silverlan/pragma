@@ -21,6 +21,11 @@
 
 import pragma.client.rendering.material_property_block;
 
+namespace prosper {
+	class IPrimaryCommandBuffer;
+	class IBuffer;
+};
+
 namespace pragma {
 	class DLLCLIENT CMaterialPropertyOverrideComponent final : public BaseEntityComponent, public DynamicMemberRegister {
 	  public:
@@ -34,20 +39,24 @@ namespace pragma {
 		virtual void OnEntitySpawn() override;
 		CMaterial *GetRenderMaterial(uint32_t matIdx) const;
 
-		void ResetMaterialProperty(uint32_t matIdx, const char *key);
+		template<typename T, bool TEXTURE = false>
+		void ApplyMaterialProperty(uint32_t matIdx, const char *key, const T &value);
+		void ApplyMaterialProperty(uint32_t matIdx, const char *key);
 		template<typename T, bool TEXTURE = false>
 		void SetMaterialProperty(uint32_t matIdx, const char *key, const T &value);
 		template<typename T>
 		bool GetMaterialProperty(uint32_t matIdx, const char *key, T &outValue) const;
 
-		void SetTexture(uint32_t matIdx, const char *key, const std::string &tex);
-		std::string GetTexture(uint32_t matIdx, const char *key) const;
+		void SetTextureProperty(uint32_t matIdx, const char *key, const std::string &tex);
+		std::string GetTextureProperty(uint32_t matIdx, const char *key) const;
 
 		virtual const ComponentMemberInfo *GetMemberInfo(ComponentMemberIndex idx) const override;
 	  protected:
 		static std::string GetNormalizedMaterialName(std::string name);
 		static std::string GetNormalizedMaterialName(const CMaterial &mat);
 		static const rendering::shader_material::ShaderMaterial *GetShaderMaterial(const CMaterial &mat);
+		static std::string GetPropertyName(const CMaterial &mat, const char *key, bool texture);
+		static std::string NormalizeTexturePath(const std::string &path);
 		struct PropertyInfo {
 			udm::PProperty property;
 			bool enabled = false;
@@ -58,17 +67,13 @@ namespace pragma {
 			std::unordered_map<std::string, PropertyInfo> properties;
 		};
 		void UpdateMaterialOverride(uint32_t idx, const CMaterial &mat, bool forceInitialize = false);
-		std::shared_ptr<Material> InitializeMaterialCopy(const char *materialName);
 		void UpdateRenderBuffers(prosper::IPrimaryCommandBuffer &drawCmd);
 
-		udm::Property *InitializeMaterialProperty(uint32_t matIdx, const char *key);
+		PropertyInfo *InitializeMaterialProperty(uint32_t matIdx, const char *key);
 		void ClearMaterialProperty(uint32_t matIdx, const char *key);
 
-		udm::Property *InitializeMaterialProperty(const char *key);
-		void ClearMaterialProperty(const char *key);
-
-		MaterialData *FindMaterialData(const char *materialName);
 		PropertyInfo *FindMaterialPropertyInfo(uint32_t matIdx, const char *key);
+		const PropertyInfo *FindMaterialPropertyInfo(uint32_t matIdx, const char *key) const { return const_cast<CMaterialPropertyOverrideComponent *>(this)->FindMaterialPropertyInfo(matIdx, key); }
 		udm::Property *FindMaterialProperty(uint32_t matIdx, const char *key);
 		Material *GetTargetMaterial(uint32_t matIdx);
 		std::vector<MaterialData> m_materialOverrides;
@@ -80,10 +85,6 @@ namespace pragma {
 		template<typename T>
 		void SetMaterialPropertyBufferValue(Material &mat, const pragma::rendering::shader_material::ShaderMaterial &shaderMat, const char *keyName, const T &newVal);
 		void PopulateProperties();
-		template<typename T>
-		void SetProperty(const char *keyName, const T &v);
-		template<typename T>
-		T GetProperty(const char *keyName) const;
 		struct BufferUpdateInfo {
 			std::shared_ptr<prosper::IBuffer> buffer;
 			size_t startOffset;
@@ -99,20 +100,15 @@ namespace pragma {
 			// on top of the main material override
 			std::shared_ptr<Material> propertyOverride;
 		};
-		void UpdateMaterialPropertyOverride(size_t matIdx);
 		void ApplyMaterialPropertyOverride(Material &mat, const pragma::rendering::MaterialPropertyBlock &matPropOverride);
 		void UpdateMaterialOverride(Material &mat);
-		std::unordered_map<size_t, MaterialPropertyOverride> m_materialPropertyOverrides;
-		std::unique_ptr<MaterialPropertyOverride> m_globalMaterialPropertyOverride;
 
-		//std::vector<MaterialOverride> m_materialOverrides = {};
 		std::queue<BufferUpdateInfo> m_bufferUpdateQueue;
 
 		struct ShaderMaterialPropertyInfo {
 			ShaderMaterialPropertyInfo();
 			ShaderMaterialPropertyInfo(const ShaderMaterialPropertyInfo &other);
 			const char *name;
-			bool enabled = false;
 			uint32_t materialIndex = std::numeric_limits<uint32_t>::max();
 			std::unique_ptr<MaterialPropertyOverride> propertyOverride;
 		};

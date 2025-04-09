@@ -22,25 +22,33 @@ function Component:InitializeMaterialOverrides()
 		return
 	end
 	local mdlC = self:GetEntity():GetModelComponent()
-	local n = mdl:GetMaterialCount()
-	for i = 0, n - 1 do
-		local mat = mdl:GetMaterial(i)
-		if mat ~= nil then
-			local shader = mat:GetShaderName()
-			if shader ~= "eye_legacy" then
-				mat = mat:Copy()
-				mat:SetShader("toon")
-				mdlC:SetMaterialOverride(i, mat)
+	local matOverrideC = self:GetEntity():GetComponent(ents.COMPONENT_MATERIAL_OVERRIDE)
+	if matOverrideC ~= nil then
+		local n = mdl:GetMaterialCount()
+		for i = 0, n - 1 do
+			local mat = mdl:GetMaterial(i)
+			if mat ~= nil then
+				local shader = mat:GetShaderName()
+				if shader ~= "eye_legacy" then
+					mat = mat:Copy()
+					mat:SetShader("toon")
+					matOverrideC:SetMaterialOverride(i, mat)
+				end
 			end
 		end
 	end
-	mdlC:UpdateRenderMeshes()
+	if mdlC ~= nil then
+		mdlC:UpdateRenderMeshes()
+	end
 end
 
 function Component:OnRemove()
 	local mdlC = self:GetEntity():GetModelComponent()
 	if mdlC ~= nil then
-		mdlC:ClearMaterialOverrides()
+		local matOverrideC = self:GetEntity():GetComponent(ents.COMPONENT_MATERIAL_OVERRIDE)
+		if matOverrideC ~= nil then
+			mdlC:ClearMaterialOverrides()
+		end
 		mdlC:UpdateRenderMeshes()
 	end
 

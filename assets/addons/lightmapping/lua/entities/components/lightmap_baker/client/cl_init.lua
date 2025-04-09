@@ -249,11 +249,11 @@ function Component:OnTick(dt)
 						"lightmap_diffuse_indirect"
 					)
 					if mat ~= nil then
-						mat:GetDataBlock():RemoveValue("diffuse_map")
+						mat:ClearProperty("diffuse_map")
 					end
 				else
-					mat:GetDataBlock():RemoveValue("diffuse_direct_map")
-					mat:GetDataBlock():RemoveValue("diffuse_indirect_map")
+					mat:ClearProperty("diffuse_direct_map")
+					mat:ClearProperty("diffuse_indirect_map")
 				end
 
 				if mat ~= nil then

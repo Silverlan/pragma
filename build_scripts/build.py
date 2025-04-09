@@ -1176,11 +1176,11 @@ def download_addon(name,addonName,url,commitId=None):
 curDir = os.getcwd()
 if not skip_repository_updates:
 	if with_pfm:
-		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","d8f33ebeab3c597fc542e56413fc11ff14897572")
+		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","8b52eaffc03b2107e247d1ff9349e09a94d57bd3")
 		download_addon("model editor","tool_model_editor","https://github.com/Silverlan/pragma_model_editor.git","a9ea4820f03be250bdf1e6951dad313561b75b17")
 
 	if with_vr:
-		download_addon("VR","virtual_reality","https://github.com/Silverlan/PragmaVR.git","129db0e7642e9e1ec08a4b41860d95f97e55e2fa")
+		download_addon("VR","virtual_reality","https://github.com/Silverlan/PragmaVR.git","e4728fc7c5fa92059167b73c4f56deaa5bfa062a")
 
 	if with_pfm:
 		download_addon("PFM Living Room Demo","pfm_demo_living_room","https://github.com/Silverlan/pfm_demo_living_room.git","4cbecad4a2d6f502b6d9709178883678101f7e2c")

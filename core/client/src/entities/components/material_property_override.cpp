@@ -6,11 +6,11 @@
  */
 
 #include "stdafx_client.h"
+#include "pragma/game/c_game.h"
 #include "pragma/entities/components/material_property_override.hpp"
 #include "pragma/entities/components/material_override.hpp"
 #include "pragma/entities/components/c_time_scale_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
-#include "pragma/entities/components/material_override.hpp"
 #include "pragma/entities/entity_component_manager_t.hpp"
 #include "pragma/model/c_model.h"
 #include "pragma/lua/lua_util_component.hpp"

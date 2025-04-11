@@ -37,6 +37,7 @@ namespace pragma {
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual void OnEntitySpawn() override;
+		virtual void OnRemove() override;
 		CMaterial *GetRenderMaterial(uint32_t matIdx) const;
 
 		template<typename T, bool TEXTURE = false>

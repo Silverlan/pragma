@@ -389,6 +389,19 @@ void CMaterialPropertyOverrideComponent::OnEntitySpawn()
 	PopulateProperties();
 }
 
+void CMaterialPropertyOverrideComponent::OnRemove()
+{
+	m_materialOverrides.clear();
+	BaseEntityComponent::OnRemove();
+	if(GetEntity().IsRemoved())
+		return;
+	auto *mdlC = static_cast<CModelComponent *>(GetEntity().GetModelComponent());
+	if(!mdlC)
+		return;
+	mdlC->SetRenderBufferListUpdateRequired();
+	mdlC->UpdateRenderBufferList();
+}
+
 void CMaterialPropertyOverrideComponent::UpdateMaterialOverride(Material &mat)
 {
 	auto *mdlC = static_cast<CModelComponent *>(GetEntity().GetModelComponent());

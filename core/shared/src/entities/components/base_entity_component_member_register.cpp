@@ -21,13 +21,17 @@ void pragma::DynamicMemberRegister::ClearMembers()
 	m_members.clear();
 	m_memberNameToIndex.clear();
 }
+size_t pragma::DynamicMemberRegister::GetDynamicMemberStartOffset() const { return dynamic_cast<const BaseEntityComponent *>(this)->GetStaticMemberCount(); }
 void pragma::DynamicMemberRegister::RemoveMember(ComponentMemberIndex idx)
 {
-	if(idx >= m_members.size())
+	auto offset = GetDynamicMemberStartOffset();
+	if(idx < offset)
 		return;
-	auto member = m_members[idx];
-	//std::move(m_members[idx]);
-	m_members.erase(m_members.begin() + idx);
+	auto dynamicIdx = idx - offset;
+	if(dynamicIdx >= m_members.size())
+		return;
+	auto member = std::move(m_members[dynamicIdx]);
+	m_members.erase(m_members.begin() + dynamicIdx);
 	auto itMap = m_memberNameToIndex.find(member.GetName());
 	if(itMap != m_memberNameToIndex.end())
 		m_memberNameToIndex.erase(itMap);
@@ -48,14 +52,7 @@ void pragma::DynamicMemberRegister::RemoveMember(const std::string &name)
 
 void pragma::DynamicMemberRegister::UpdateMemberNameMap()
 {
-	/*m_memberNameToIndex.clear();
-	m_memberNameToIndex.reserve(m_members.size());
-	for(size_t idx = 0; auto &memberInfo : m_members)
-	{
-		auto lname = memberInfo.GetName();
-		ustring::to_lower(lname);
-		m_memberNameToIndex[lname] = idx++;
-	}*/
+	// Obsolete
 }
 
 std::optional<pragma::ComponentMemberIndex> pragma::DynamicMemberRegister::GetMemberIndex(const std::string &name) const
@@ -69,9 +66,10 @@ std::optional<pragma::ComponentMemberIndex> pragma::DynamicMemberRegister::GetMe
 }
 const pragma::ComponentMemberInfo *pragma::DynamicMemberRegister::GetMemberInfo(ComponentMemberIndex idx) const
 {
-	if(idx >= m_members.size())
+	auto offset = GetDynamicMemberStartOffset();
+	if(idx < offset || idx >= offset + m_members.size())
 		return nullptr;
-	return &m_members[idx];
+	return &m_members[idx - offset];
 }
 
 pragma::ComponentMemberIndex pragma::DynamicMemberRegister::RegisterMember(pragma::ComponentMemberInfo &&memberInfo)
@@ -81,18 +79,19 @@ pragma::ComponentMemberIndex pragma::DynamicMemberRegister::RegisterMember(pragm
 	if(m_memberNameToIndex.find(lmemberName) != m_memberNameToIndex.end())
 		RemoveMember(lmemberName);
 	auto itName = m_memberNameToIndex.find(lmemberName);
+	auto offset = GetDynamicMemberStartOffset();
 	uint32_t idx;
 	if(itName != m_memberNameToIndex.end()) {
 		idx = itName->second;
-		m_members[idx] = std::move(memberInfo);
+		m_members[idx - offset] = std::move(memberInfo);
 	}
 	else {
-		idx = m_members.size();
+		idx = m_members.size() + offset;
 		m_members.push_back(std::move(memberInfo));
 	}
 
 	m_memberNameToIndex[lmemberName] = idx;
-	OnMemberRegistered(m_members[idx], idx);
+	OnMemberRegistered(m_members[idx - offset], idx);
 	return idx;
 }
 pragma::ComponentMemberIndex pragma::DynamicMemberRegister::RegisterMember(const pragma::ComponentMemberInfo &memberInfo)

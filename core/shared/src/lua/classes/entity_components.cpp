@@ -443,10 +443,11 @@ static void get_dynamic_member_ids(pragma::BaseEntityComponent &c, std::vector<p
 	auto *reg = dynamic_cast<pragma::DynamicMemberRegister *>(&c);
 	if(!reg)
 		return;
+	auto offset = c.GetStaticMemberCount();
 	auto &members = reg->GetMembers();
 	memberIndices.reserve(memberIndices.size() + members.size());
 	for(size_t i = 0; i < members.size(); ++i)
-		memberIndices.push_back(i);
+		memberIndices.push_back(offset + i);
 }
 static std::vector<pragma::ComponentMemberIndex> get_dynamic_member_ids(pragma::BaseEntityComponent &c)
 {

@@ -273,6 +273,7 @@ void Lua::asset::register_library(Lua::Interface &lua, bool extended)
 	    {"TYPE_TEXTURE", umath::to_integral(pragma::asset::Type::Texture)},
 	    {"TYPE_AUDIO", umath::to_integral(pragma::asset::Type::Sound)},
 	    {"TYPE_PARTICLE_SYSTEM", umath::to_integral(pragma::asset::Type::ParticleSystem)},
+		{"TYPE_SHADER_GRAPH", umath::to_integral(pragma::asset::Type::ShaderGraph)},
 	    {"TYPE_COUNT", umath::to_integral(pragma::asset::Type::Count)},
 
 	    {"FORMAT_TYPE_NATIVE", umath::to_integral(pragma::asset::FormatType::Native)},
@@ -289,7 +290,7 @@ void Lua::asset::register_library(Lua::Interface &lua, bool extended)
 	    {"ASSET_STATE_FAILED_TO_LOAD", umath::to_integral(util::AssetState::FailedToLoad)},
 	    {"ASSET_STATE_LOADING", umath::to_integral(util::AssetState::Loading)},
 	  });
-	static_assert(umath::to_integral(pragma::asset::Type::Count) == 6, "Update this list!");
+	static_assert(umath::to_integral(pragma::asset::Type::Count) == 7, "Update this list!");
 
 	Lua::RegisterLibraryValue<std::string>(lua.GetState(), "asset", "FORMAT_MAP_BINARY", pragma::asset::FORMAT_MAP_BINARY);
 	Lua::RegisterLibraryValue<std::string>(lua.GetState(), "asset", "FORMAT_MAP_ASCII", pragma::asset::FORMAT_MAP_ASCII);

@@ -24,6 +24,7 @@ namespace pragma {
 		friend BaseEntityComponentSystem;
 		virtual void OnMemberRegistered(const ComponentMemberInfo &memberInfo, ComponentMemberIndex index) {}
 		virtual void OnMemberRemoved(const ComponentMemberInfo &memberInfo, ComponentMemberIndex index) {}
+		size_t GetDynamicMemberStartOffset() const;
 		void ReserveMembers(uint32_t count);
 		ComponentMemberIndex RegisterMember(ComponentMemberInfo &&memberInfo);
 		ComponentMemberIndex RegisterMember(const ComponentMemberInfo &memberInfo);

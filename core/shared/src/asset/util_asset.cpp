@@ -86,7 +86,10 @@ std::optional<std::string> pragma::asset::get_udm_format_extension(Type type, bo
 		return binary ? FORMAT_MATERIAL_BINARY : FORMAT_MATERIAL_ASCII;
 	case Type::ParticleSystem:
 		return binary ? FORMAT_PARTICLE_SYSTEM_BINARY : FORMAT_PARTICLE_SYSTEM_ASCII;
+	case Type::ShaderGraph:
+		return binary ? FORMAT_SHADER_GRAPH_BINARY : FORMAT_SHADER_GRAPH_ASCII;
 	}
+	static_assert(umath::to_integral(Type::Count) == 7, "New asset type added, please update get_udm_format_extension");
 	return {};
 }
 std::optional<std::string> pragma::asset::get_legacy_extension(Type type)
@@ -114,7 +117,10 @@ std::optional<std::string> pragma::asset::get_binary_udm_extension(Type type)
 		return FORMAT_MATERIAL_BINARY;
 	case Type::ParticleSystem:
 		return FORMAT_PARTICLE_SYSTEM_BINARY;
+	case Type::ShaderGraph:
+		return FORMAT_SHADER_GRAPH_BINARY;
 	}
+	static_assert(umath::to_integral(Type::Count) == 7, "New asset type added, please update get_binary_udm_extension");
 	return {};
 }
 std::optional<std::string> pragma::asset::get_ascii_udm_extension(Type type)
@@ -128,7 +134,10 @@ std::optional<std::string> pragma::asset::get_ascii_udm_extension(Type type)
 		return FORMAT_MATERIAL_ASCII;
 	case Type::ParticleSystem:
 		return FORMAT_PARTICLE_SYSTEM_ASCII;
+	case Type::ShaderGraph:
+		return FORMAT_SHADER_GRAPH_ASCII;
 	}
+	static_assert(umath::to_integral(Type::Count) == 7, "New asset type added, please update get_ascii_udm_extension");
 	return {};
 }
 struct AssetFormatExtensionCache {
@@ -255,9 +264,11 @@ std::string pragma::asset::get_normalized_path(const std::string &name, Type typ
 	case Type::Texture:
 	case Type::ParticleSystem:
 	case Type::Sound:
+	case Type::ShaderGraph:
 		path.RemoveFileExtension(get_supported_extensions(type));
 		break;
 	}
+	static_assert(umath::to_integral(Type::Count) == 7, "New asset type added, please update get_normalized_path");
 	return path.GetString();
 }
 bool pragma::asset::matches(const std::string &name0, const std::string &name1, Type type) { return ustring::compare(get_normalized_path(name0, type), get_normalized_path(name1, type), false); }
@@ -286,6 +297,7 @@ std::optional<std::string> pragma::asset::find_file(const std::string &name, Typ
 	case Type::Texture:
 	case Type::ParticleSystem:
 	case Type::Sound:
+	case Type::ShaderGraph:
 		{
 			for(auto &ext : get_supported_extensions(type)) {
 				auto nameWithExt = normalizedName + '.' + ext;
@@ -305,6 +317,7 @@ std::optional<std::string> pragma::asset::find_file(const std::string &name, Typ
 			return nw ? nw->GetMaterialManager().FindAssetFilePath(name) : std::optional<std::string> {};
 		}
 	}
+	static_assert(umath::to_integral(Type::Count) == 7, "New asset type added, please update find_file");
 	return {};
 }
 bool pragma::asset::is_loaded(NetworkState &nw, const std::string &name, Type type)
@@ -325,7 +338,10 @@ bool pragma::asset::is_loaded(NetworkState &nw, const std::string &name, Type ty
 		return false; // TODO
 	case Type::Texture:
 		return false; // Only client knows about textures
+	case Type::ShaderGraph:
+		return false; // Only client knows about shader graphs
 	}
+	static_assert(umath::to_integral(Type::Count) == 7, "New asset type added, please update is_loaded");
 	return false;
 }
 

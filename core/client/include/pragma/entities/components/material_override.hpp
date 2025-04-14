@@ -10,6 +10,7 @@
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/components/c_entity_component.hpp"
+#include "pragma/entities/components/base_entity_component_member_register.hpp"
 #include "pragma/rendering/shader_input_data.hpp"
 #include "pragma/rendering/shader_material/shader_material.hpp"
 #include <pragma/entities/components/base_time_scale_component.hpp>
@@ -19,7 +20,7 @@
 import pragma.client.rendering.material_property_block;
 
 namespace pragma {
-	class DLLCLIENT CMaterialOverrideComponent final : public BaseEntityComponent {
+	class DLLCLIENT CMaterialOverrideComponent final : public BaseEntityComponent, public DynamicMemberRegister {
 	  public:
 		static ComponentEventId EVENT_ON_MATERIAL_OVERRIDES_CLEARED;
 		static ComponentEventId EVENT_ON_MATERIAL_OVERRIDE_CHANGED;
@@ -31,6 +32,8 @@ namespace pragma {
 		virtual ~CMaterialOverrideComponent() override;
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void OnEntitySpawn() override;
+		virtual void OnRemove() override;
 
 		void SetMaterialOverride(uint32_t idx, const std::string &matOverride);
 		void SetMaterialOverride(uint32_t idx, CMaterial &mat);
@@ -40,31 +43,14 @@ namespace pragma {
 		CMaterial *GetRenderMaterial(uint32_t idx) const;
 		size_t GetMaterialOverrideCount() const;
 
-		void ClearMaterialPropertyOverrides();
-		void ClearMaterialPropertyOverride(size_t materialIndex);
-		void ClearMaterialPropertyOverride();
-
-		void SetMaterialPropertyOverride(size_t materialIndex, const pragma::rendering::MaterialPropertyBlock &block);
-		const pragma::rendering::MaterialPropertyBlock *GetMaterialPropertyOverride(size_t materialIndex) const;
-
-		void SetMaterialPropertyOverride(const pragma::rendering::MaterialPropertyBlock &block);
-		const pragma::rendering::MaterialPropertyBlock *GetMaterialPropertyOverride() const;
+		virtual const ComponentMemberInfo *GetMemberInfo(ComponentMemberIndex idx) const override;
 	  protected:
-		struct MaterialPropertyOverride {
-			pragma::rendering::MaterialPropertyBlock block;
-		};
 		struct MaterialOverride {
-			msys::MaterialHandle materialOverride; // Optionally defined by user
-			// Acts as an additional "layer" and allows the user to overwrite specific material properties
-			// on top of the main material override
-			std::shared_ptr<Material> propertyOverride;
+			msys::MaterialHandle materialOverride;
 		};
-		void UpdateMaterialPropertyOverride(size_t matIdx);
-		void ApplyMaterialPropertyOverride(Material &mat, const pragma::rendering::MaterialPropertyBlock &matPropOverride);
+		virtual std::optional<ComponentMemberIndex> DoGetMemberIndex(const std::string &name) const override;
+		void PopulateProperties();
 		void UpdateMaterialOverride(uint32_t matIdx, CMaterial &mat);
-		std::unordered_map<size_t, MaterialPropertyOverride> m_materialPropertyOverrides;
-		std::unique_ptr<MaterialPropertyOverride> m_globalMaterialPropertyOverride;
-
 		std::vector<MaterialOverride> m_materialOverrides = {};
 	};
 

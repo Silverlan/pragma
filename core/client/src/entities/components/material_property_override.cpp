@@ -25,11 +25,8 @@
 using namespace pragma;
 void CMaterialPropertyOverrideComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { BaseModelComponent::RegisterEvents(componentManager, registerEvent); }
 
-CMaterialPropertyOverrideComponent::ShaderMaterialPropertyInfo::ShaderMaterialPropertyInfo() : propertyOverride {std::make_unique<MaterialPropertyOverride>()} {}
-CMaterialPropertyOverrideComponent::ShaderMaterialPropertyInfo::ShaderMaterialPropertyInfo(const ShaderMaterialPropertyInfo &other)
-    : propertyOverride {other.propertyOverride ? std::make_unique<MaterialPropertyOverride>(*other.propertyOverride) : std::unique_ptr<MaterialPropertyOverride> {}}, name {other.name}, materialIndex {other.materialIndex}
-{
-}
+CMaterialPropertyOverrideComponent::ShaderMaterialPropertyInfo::ShaderMaterialPropertyInfo() {}
+CMaterialPropertyOverrideComponent::ShaderMaterialPropertyInfo::ShaderMaterialPropertyInfo(const ShaderMaterialPropertyInfo &other) : name {other.name}, materialIndex {other.materialIndex} {}
 
 static std::vector<CMaterialPropertyOverrideComponent *> g_components;
 static CallbackHandle g_updateRenderBuffersCallback = {};
@@ -346,6 +343,17 @@ void CMaterialPropertyOverrideComponent::Initialize()
 	GetEntity().AddComponent<CMaterialOverrideComponent>();
 }
 
+void CMaterialPropertyOverrideComponent::ReloadMaterialOverride(uint32_t matIdx)
+{
+	auto overrideC = GetEntity().GetComponent<CMaterialOverrideComponent>();
+	if(overrideC.expired())
+		return;
+	auto *mat = GetTargetMaterial(matIdx);
+	if(!mat)
+		return;
+	UpdateMaterialOverride(matIdx, static_cast<CMaterial &>(*mat), true);
+}
+
 void CMaterialPropertyOverrideComponent::UpdateMaterialOverride(uint32_t idx, const CMaterial &mat, bool forceInitialize)
 {
 	// TODO: If not base material index, skip!
@@ -361,6 +369,11 @@ void CMaterialPropertyOverrideComponent::UpdateMaterialOverride(uint32_t idx, co
 	auto newMat = mat.Copy(false);
 	if(!newMat)
 		return;
+	if(matInfo.shaderOverrideEnabled) {
+		auto shaderOverride = pragma::get_cengine()->GetShader(matInfo.shaderOverride);
+		if(shaderOverride.valid())
+			static_cast<CMaterial &>(*newMat).SetPrimaryShader(*shaderOverride);
+	}
 	newMat->SetBaseMaterial(&const_cast<CMaterial &>(mat));
 	matInfo.material = newMat;
 	for(auto &[name, propInfo] : matInfo.properties) {
@@ -446,126 +459,310 @@ void CMaterialPropertyOverrideComponent::GetPropertyEnabled(const ComponentMembe
 	outEnabled = it->second.enabled;
 }
 
+void CMaterialPropertyOverrideComponent::SetShader(const ComponentMemberInfo &info, CMaterialPropertyOverrideComponent &component, std::string shader)
+{
+	auto matIdx = info.userIndex;
+	if(matIdx >= component.m_materialOverrides.size()) {
+		component.ReloadMaterialOverride(matIdx);
+		if(matIdx >= component.m_materialOverrides.size())
+			return;
+	}
+	auto &matData = component.m_materialOverrides[matIdx];
+	if(!matData.material)
+		return;
+	matData.shaderOverride = std::move(shader);
+	component.UpdateShaderOverride(matIdx);
+}
+void CMaterialPropertyOverrideComponent::GetShader(const ComponentMemberInfo &info, CMaterialPropertyOverrideComponent &component, std::string &outShader)
+{
+	auto matIdx = info.userIndex;
+	if(matIdx >= component.m_materialOverrides.size()) {
+		outShader = {};
+		return;
+	}
+	auto &matData = component.m_materialOverrides[matIdx];
+	outShader = matData.shaderOverride;
+}
+
+void CMaterialPropertyOverrideComponent::SetShaderEnabled(const ComponentMemberInfo &info, CMaterialPropertyOverrideComponent &component, bool enabled)
+{
+	auto matIdx = info.userIndex;
+	if(matIdx >= component.m_materialOverrides.size())
+		return;
+	auto &matData = component.m_materialOverrides[matIdx];
+	matData.shaderOverrideEnabled = enabled;
+	component.UpdateShaderOverride(matIdx);
+}
+void CMaterialPropertyOverrideComponent::GetShaderEnabled(const ComponentMemberInfo &info, CMaterialPropertyOverrideComponent &component, bool &outEnabled)
+{
+	auto matIdx = info.userIndex;
+	if(matIdx >= component.m_materialOverrides.size()) {
+		outEnabled = false;
+		return;
+	}
+	auto &matData = component.m_materialOverrides[matIdx];
+	outEnabled = matData.shaderOverrideEnabled;
+}
+
+void CMaterialPropertyOverrideComponent::UpdateShaderOverride(uint32_t matIdx)
+{
+	ReloadMaterialOverride(matIdx);
+	ClearProperties(matIdx);
+	auto *matTarget = GetTargetMaterial(matIdx);
+	auto *matRender = GetRenderMaterial(matIdx);
+	if(matTarget && matRender)
+		PopulateProperties(std::string {util::FilePath(matTarget->GetName()).GetFileName()}, static_cast<CMaterial &>(*matRender), matIdx);
+	OnMembersChanged();
+}
+
+void CMaterialPropertyOverrideComponent::AddMaterialTexturePropertyMember(const std::string &propPath, const pragma::rendering::shader_material::Texture &tex, std::optional<uint32_t> matIdx)
+{
+	Material *mat = nullptr;
+	if(matIdx) {
+		auto &mdl = GetEntity().GetModel();
+		if(!mdl)
+			return;
+		auto &mats = mdl->GetMaterials();
+		if(*matIdx >= mats.size())
+			return;
+		mat = mats[*matIdx].get();
+	}
+
+	std::string name {tex.name};
+	auto propName = propPath + name;
+	auto propNameEnabled = propName + "_enabled";
+	auto *cPropName = pragma::register_global_string(name);
+	auto *cPropNameEnabled = pragma::register_global_string(propNameEnabled);
+
+	uint32_t idx;
+	if(!m_freePropertyInfoIndices.empty()) {
+		idx = m_freePropertyInfoIndices.front();
+		m_freePropertyInfoIndices.pop();
+	}
+	else {
+		idx = m_shaderMaterialPropertyInfos.size();
+		m_shaderMaterialPropertyInfos.push_back({});
+	}
+	auto &info = m_shaderMaterialPropertyInfos[idx];
+	info.name = cPropName;
+	if(matIdx)
+		info.materialIndex = *matIdx;
+
+	auto memberInfo = pragma::ComponentMemberInfo::CreateDummy();
+	memberInfo.SetName(propName);
+	memberInfo.type = pragma::ents::EntityMemberType::String;
+	memberInfo.userIndex = idx;
+	memberInfo.AddTypeMetaData<pragma::ents::OptionalTypeMetaData>().enabledProperty = cPropNameEnabled;
+	auto *texInfo = mat ? mat->GetTextureInfo(name) : nullptr;
+	if(texInfo)
+		memberInfo.SetDefault<std::string>(NormalizeTexturePath(texInfo->name));
+	else if(tex.defaultTexturePath)
+		memberInfo.SetDefault<std::string>(NormalizeTexturePath(*tex.defaultTexturePath));
+	using TComponent = CMaterialPropertyOverrideComponent;
+	using TValue = udm::String;
+	memberInfo.SetGetterFunction<TComponent, TValue, +[](const pragma::ComponentMemberInfo &memberInfo, TComponent &component, TValue &outValue) {
+		auto &propInfo = component.m_shaderMaterialPropertyInfos[memberInfo.userIndex];
+		outValue = component.GetTextureProperty(propInfo.materialIndex, propInfo.name);
+	}>();
+	memberInfo.SetSetterFunction<TComponent, TValue, +[](const pragma::ComponentMemberInfo &memberInfo, TComponent &component, const TValue &value) {
+		auto &propInfo = component.m_shaderMaterialPropertyInfos[memberInfo.userIndex];
+		component.SetTextureProperty(propInfo.materialIndex, propInfo.name, value);
+	}>();
+	RegisterMember(std::move(memberInfo));
+
+	auto memberInfoToggle = create_component_member_info<TComponent, bool, &CMaterialPropertyOverrideComponent::SetPropertyEnabled, &CMaterialPropertyOverrideComponent::GetPropertyEnabled>(cPropNameEnabled, false);
+	memberInfoToggle.userIndex = idx;
+	memberInfoToggle.AddTypeMetaData<pragma::ents::EnablerTypeMetaData>().targetProperty = cPropName;
+	RegisterMember(std::move(memberInfoToggle));
+}
+
+void CMaterialPropertyOverrideComponent::AddMaterialPropertyMember(const pragma::rendering::Property &prop, const std::string &propPath, const std::string &name, std::optional<uint32_t> matIdx)
+{
+	Material *mat = nullptr;
+	if(matIdx) {
+		auto &mdl = GetEntity().GetModel();
+		if(!mdl)
+			return;
+		auto &mats = mdl->GetMaterials();
+		if(*matIdx >= mats.size())
+			return;
+		mat = mats[*matIdx].get();
+	}
+
+	auto propName = propPath + name;
+	auto propNameEnabled = propName + "_enabled";
+
+	auto *cPropNameEnabled = pragma::register_global_string(propNameEnabled);
+	auto *cPropName = pragma::register_global_string(name);
+	uint32_t idx;
+	if(!m_freePropertyInfoIndices.empty()) {
+		idx = m_freePropertyInfoIndices.front();
+		m_freePropertyInfoIndices.pop();
+	}
+	else {
+		idx = m_shaderMaterialPropertyInfos.size();
+		m_shaderMaterialPropertyInfos.push_back({});
+	}
+	auto &info = m_shaderMaterialPropertyInfos[idx];
+	info.name = cPropName;
+	if(matIdx)
+		info.materialIndex = *matIdx;
+
+	auto memberInfo = pragma::ComponentMemberInfo::CreateDummy();
+	memberInfo.SetName(propName);
+	memberInfo.type = pragma::ents::udm_type_to_member_type(pragma::shadergraph::to_udm_type(prop->type));
+	memberInfo.SetMin(prop->min);
+	memberInfo.SetMax(prop->max);
+	memberInfo.AddTypeMetaData<pragma::ents::OptionalTypeMetaData>().enabledProperty = cPropNameEnabled;
+	memberInfo.userIndex = idx;
+	using TComponent = CMaterialPropertyOverrideComponent;
+	pragma::shadergraph::visit(prop->type, [mat, &prop, &memberInfo, &name](auto tag) {
+		using T = typename decltype(tag)::type;
+		T val;
+		if(mat && mat->GetProperty<T>(name, &val))
+			memberInfo.SetDefault(val);
+		else if(prop->defaultValue.Get<T>(val))
+			memberInfo.SetDefault(val);
+
+		using TValue = T;
+		memberInfo.SetGetterFunction<TComponent, TValue, +[](const pragma::ComponentMemberInfo &memberInfo, TComponent &component, TValue &outValue) {
+			auto &propInfo = component.m_shaderMaterialPropertyInfos[memberInfo.userIndex];
+			if(!component.GetMaterialProperty<TValue>(propInfo.materialIndex, propInfo.name, outValue))
+				outValue = TValue {};
+		}>();
+		memberInfo.SetSetterFunction<TComponent, TValue, +[](const pragma::ComponentMemberInfo &memberInfo, TComponent &component, const TValue &value) {
+			auto &propInfo = component.m_shaderMaterialPropertyInfos[memberInfo.userIndex];
+			component.SetMaterialProperty(propInfo.materialIndex, propInfo.name, value);
+		}>();
+	});
+	if(prop.specializationType && prop.specializationType == "color")
+		memberInfo.SetSpecializationType(pragma::AttributeSpecializationType::Color);
+	RegisterMember(std::move(memberInfo));
+
+	auto memberInfoToggle = create_component_member_info<TComponent, bool, &CMaterialPropertyOverrideComponent::SetPropertyEnabled, &CMaterialPropertyOverrideComponent::GetPropertyEnabled>(cPropNameEnabled, false);
+	memberInfoToggle.userIndex = idx;
+	memberInfoToggle.AddTypeMetaData<pragma::ents::EnablerTypeMetaData>().targetProperty = cPropName;
+	RegisterMember(std::move(memberInfoToggle));
+}
+
+void CMaterialPropertyOverrideComponent::ClearProperties(uint32_t matIdx)
+{
+	if(matIdx >= m_materialOverrides.size())
+		return;
+	auto &matData = m_materialOverrides[matIdx];
+	auto *matTarget = GetTargetMaterial(matIdx);
+	if(!matTarget)
+		return;
+	auto matName = std::string {util::FilePath(matTarget->GetName()).GetFileName()};
+
+	std::string matPropName = "material/" + matName + "/";
+	RemoveMember(matPropName + "shader");
+	RemoveMember(matPropName + "shader_enabled");
+
+	std::string matPropPath = matPropName + "properties/";
+	std::string matTexPath = matPropName + "textures/";
+	size_t propIdx = 0;
+	for(auto &propInfo : m_shaderMaterialPropertyInfos) {
+		util::ScopeGuard sg {[&propIdx]() { ++propIdx; }};
+		if(!propInfo.IsValid() || propInfo.materialIndex != matIdx)
+			continue;
+
+		RemoveMember(matTexPath + propInfo.name);
+		RemoveMember(matTexPath + propInfo.name + "_enabled");
+		RemoveMember(matPropPath + propInfo.name);
+		RemoveMember(matPropPath + propInfo.name + "_enabled");
+
+		propInfo.Invalidate();
+		m_freePropertyInfoIndices.push(propIdx);
+	}
+	matData.properties.clear();
+}
+
+void CMaterialPropertyOverrideComponent::PopulateProperties(std::string matName, CMaterial &mat, uint32_t matIdx)
+{
+	auto *shaderMat = GetShaderMaterial(mat);
+	if(!shaderMat)
+		return;
+	ustring::to_lower(matName);
+	std::string matPropName = "material/" + matName + "/";
+
+	auto &propertyMap = shaderMat->GetPropertyMap();
+	auto &textures = shaderMat->textures;
+	ReserveMembers(propertyMap.size() + textures.size() + 2); // +2 for shader override
+
+	{
+		auto shaderPropName = matPropName + "shader";
+		auto shaderPropNameEnabled = shaderPropName + "_enabled";
+
+		auto *cPropName = pragma::register_global_string(shaderPropName);
+		auto *cPropNameEnabled = pragma::register_global_string(shaderPropNameEnabled);
+
+		auto memberInfo = pragma::ComponentMemberInfo::CreateDummy();
+		memberInfo.SetName(shaderPropName);
+		memberInfo.type = ents::EntityMemberType::String;
+		memberInfo.userIndex = matIdx;
+		memberInfo.AddTypeMetaData<pragma::ents::OptionalTypeMetaData>().enabledProperty = cPropNameEnabled;
+		memberInfo.SetDefault<std::string>(mat.GetShaderIdentifier());
+		using TComponent = CMaterialPropertyOverrideComponent;
+		using TValue = udm::String;
+		memberInfo.SetGetterFunction<TComponent, TValue, &CMaterialPropertyOverrideComponent::GetShader>();
+		memberInfo.SetSetterFunction<TComponent, TValue, &CMaterialPropertyOverrideComponent::SetShader>();
+		RegisterMember(std::move(memberInfo));
+
+		auto memberInfoToggle = create_component_member_info<TComponent, bool, &CMaterialPropertyOverrideComponent::SetShaderEnabled, &CMaterialPropertyOverrideComponent::GetShaderEnabled>(cPropNameEnabled, false);
+		memberInfoToggle.userIndex = matIdx;
+		memberInfoToggle.AddTypeMetaData<pragma::ents::EnablerTypeMetaData>().targetProperty = cPropName;
+		RegisterMember(std::move(memberInfoToggle));
+	}
+
+	std::unordered_set<std::string> sharedProps;
+
+	for(auto &[name, index] : propertyMap) {
+		if(index >= shaderMat->properties.size())
+			continue;
+		auto &prop = shaderMat->properties[index];
+		if(umath::is_flag_set(prop.propertyFlags, pragma::rendering::Property::Flags::HideInEditor))
+			continue;
+
+		/*auto it = sharedProps.find(name);
+		if(it == sharedProps.end()) {
+			sharedProps.insert(name);
+			AddMaterialPropertyMember(prop, "properties/", name);
+		}*/
+
+		AddMaterialPropertyMember(prop, matPropName + "properties/", name, matIdx);
+	}
+
+	for(auto &tex : textures) {
+		auto &name = tex.name;
+		/*auto it = sharedProps.find(name);
+		if(it == sharedProps.end()) {
+			sharedProps.insert(name);
+			AddMaterialTexturePropertyMember("textures/", tex);
+		}*/
+
+		AddMaterialTexturePropertyMember(matPropName + "textures/", tex, matIdx);
+	}
+}
+
 void CMaterialPropertyOverrideComponent::PopulateProperties()
 {
 	ClearMembers();
 	m_shaderMaterialPropertyInfos.clear();
+	m_freePropertyInfoIndices = {};
 	util::ScopeGuard sg {[this]() { OnMembersChanged(); }};
 
 	auto &mdl = GetEntity().GetModel();
 	if(!mdl)
 		return;
+
 	auto &mats = mdl->GetMaterials();
 	for(size_t matIdx = 0; matIdx < mats.size(); ++matIdx) {
 		auto &mat = mats[matIdx];
 		if(!mat)
 			continue;
-		auto *shaderMat = GetShaderMaterial(static_cast<CMaterial &>(*mat));
-		if(!shaderMat)
-			continue;
-		auto matName = std::string {util::FilePath(mat->GetName()).GetFileName()};
-		ustring::to_lower(matName);
-		std::string matPropName = "material/" + matName + "/";
-
-		auto &propertyMap = shaderMat->GetPropertyMap();
-		auto &textures = shaderMat->textures;
-		ReserveMembers(propertyMap.size() + textures.size());
-		for(auto &[name, index] : propertyMap) {
-			if(index >= shaderMat->properties.size())
-				continue;
-			auto &prop = shaderMat->properties[index];
-			if(umath::is_flag_set(prop.propertyFlags, pragma::rendering::Property::Flags::HideInEditor))
-				continue;
-
-			auto propName = matPropName + "properties/" + name;
-			auto propNameEnabled = propName + "_enabled";
-
-			auto *cPropNameEnabled = pragma::register_global_string(propNameEnabled);
-			auto *cPropName = pragma::register_global_string(name);
-			auto idx = m_shaderMaterialPropertyInfos.size();
-			m_shaderMaterialPropertyInfos.push_back({});
-			auto &info = m_shaderMaterialPropertyInfos.back();
-			info.name = cPropName;
-			info.materialIndex = matIdx;
-
-			auto memberInfo = pragma::ComponentMemberInfo::CreateDummy();
-			memberInfo.SetName(propName);
-			memberInfo.type = pragma::ents::udm_type_to_member_type(pragma::shadergraph::to_udm_type(prop->type));
-			memberInfo.SetMin(prop->min);
-			memberInfo.SetMax(prop->max);
-			memberInfo.AddTypeMetaData<pragma::ents::OptionalTypeMetaData>().enabledProperty = cPropNameEnabled;
-			memberInfo.userIndex = idx;
-			using TComponent = CMaterialPropertyOverrideComponent;
-			pragma::shadergraph::visit(prop->type, [mat, &prop, &memberInfo, &name](auto tag) {
-				using T = typename decltype(tag)::type;
-				T val;
-				if(mat->GetProperty<T>(name, &val))
-					memberInfo.SetDefault(val);
-				else if(prop->defaultValue.Get<T>(val))
-					memberInfo.SetDefault(val);
-
-				using TValue = T;
-				memberInfo.SetGetterFunction<TComponent, TValue, +[](const pragma::ComponentMemberInfo &memberInfo, TComponent &component, TValue &outValue) {
-					auto &propInfo = component.m_shaderMaterialPropertyInfos[memberInfo.userIndex];
-					if(!component.GetMaterialProperty<TValue>(propInfo.materialIndex, propInfo.name, outValue))
-						outValue = TValue {};
-				}>();
-				memberInfo.SetSetterFunction<TComponent, TValue, +[](const pragma::ComponentMemberInfo &memberInfo, TComponent &component, const TValue &value) {
-					auto &propInfo = component.m_shaderMaterialPropertyInfos[memberInfo.userIndex];
-					component.SetMaterialProperty(propInfo.materialIndex, propInfo.name, value);
-				}>();
-			});
-			if(prop.specializationType && prop.specializationType == "color")
-				memberInfo.SetSpecializationType(pragma::AttributeSpecializationType::Color);
-			RegisterMember(std::move(memberInfo));
-
-			auto memberInfoToggle = create_component_member_info<TComponent, bool, &CMaterialPropertyOverrideComponent::SetPropertyEnabled, &CMaterialPropertyOverrideComponent::GetPropertyEnabled>(cPropNameEnabled, false);
-			memberInfoToggle.userIndex = idx;
-			memberInfoToggle.AddTypeMetaData<pragma::ents::EnablerTypeMetaData>().targetProperty = cPropName;
-			RegisterMember(std::move(memberInfoToggle));
-		}
-
-		for(auto &tex : textures) {
-			auto propName = matPropName + "textures/" + std::string {tex.name};
-			auto propNameEnabled = propName + "_enabled";
-			auto *cPropName = *tex.name;
-			auto *cPropNameEnabled = pragma::register_global_string(propNameEnabled);
-
-			auto idx = m_shaderMaterialPropertyInfos.size();
-			m_shaderMaterialPropertyInfos.push_back({});
-			auto &info = m_shaderMaterialPropertyInfos.back();
-			info.name = *tex.name;
-			info.materialIndex = matIdx;
-
-			auto memberInfo = pragma::ComponentMemberInfo::CreateDummy();
-			memberInfo.SetName(propName);
-			memberInfo.type = pragma::ents::EntityMemberType::String;
-			memberInfo.userIndex = idx;
-			memberInfo.AddTypeMetaData<pragma::ents::OptionalTypeMetaData>().enabledProperty = cPropNameEnabled;
-			auto *texInfo = mat->GetTextureInfo(tex.name);
-			if(texInfo)
-				memberInfo.SetDefault<std::string>(NormalizeTexturePath(texInfo->name));
-			else if(tex.defaultTexturePath)
-				memberInfo.SetDefault<std::string>(NormalizeTexturePath(*tex.defaultTexturePath));
-			using TComponent = CMaterialPropertyOverrideComponent;
-			using TValue = udm::String;
-			memberInfo.SetGetterFunction<TComponent, TValue, +[](const pragma::ComponentMemberInfo &memberInfo, TComponent &component, TValue &outValue) {
-				auto &propInfo = component.m_shaderMaterialPropertyInfos[memberInfo.userIndex];
-				outValue = component.GetTextureProperty(propInfo.materialIndex, propInfo.name);
-			}>();
-			memberInfo.SetSetterFunction<TComponent, TValue, +[](const pragma::ComponentMemberInfo &memberInfo, TComponent &component, const TValue &value) {
-				auto &propInfo = component.m_shaderMaterialPropertyInfos[memberInfo.userIndex];
-				component.SetTextureProperty(propInfo.materialIndex, propInfo.name, value);
-			}>();
-			RegisterMember(std::move(memberInfo));
-
-			auto memberInfoToggle = create_component_member_info<TComponent, bool, &CMaterialPropertyOverrideComponent::SetPropertyEnabled, &CMaterialPropertyOverrideComponent::GetPropertyEnabled>(cPropNameEnabled, false);
-			memberInfoToggle.userIndex = idx;
-			memberInfoToggle.AddTypeMetaData<pragma::ents::EnablerTypeMetaData>().targetProperty = cPropName;
-			RegisterMember(std::move(memberInfoToggle));
-		}
+		PopulateProperties(std::string {util::FilePath(mat->GetName()).GetFileName()}, static_cast<CMaterial &>(*mat), matIdx);
 	}
-	OnMembersChanged();
 }
 
 const ComponentMemberInfo *CMaterialPropertyOverrideComponent::GetMemberInfo(ComponentMemberIndex idx) const

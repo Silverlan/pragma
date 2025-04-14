@@ -157,6 +157,15 @@ void CMaterialOverrideComponent::PopulateProperties()
 		auto *cPropName = pragma::register_global_string(propName);
 
 		auto memberInfo = pragma::ComponentMemberInfo::CreateDummy();
+
+		auto &metaData = memberInfo.AddMetaData();
+		metaData["assetType"] = "material";
+		metaData["rootPath"] = util::Path::CreatePath(pragma::asset::get_asset_root_directory(pragma::asset::Type::Material)).GetString();
+		metaData["extensions"] = pragma::asset::get_supported_extensions(pragma::asset::Type::Material, pragma::asset::FormatType::All);
+		metaData["stripRootPath"] = true;
+		metaData["stripExtension"] = true;
+
+		memberInfo.SetSpecializationType(AttributeSpecializationType::File);
 		memberInfo.SetName(matName);
 		memberInfo.type = ents::EntityMemberType::String;
 		memberInfo.SetDefault<std::string>("");

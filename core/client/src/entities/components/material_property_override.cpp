@@ -698,6 +698,15 @@ void CMaterialPropertyOverrideComponent::PopulateProperties(std::string matName,
 		auto *cPropNameEnabled = pragma::register_global_string(shaderPropNameEnabled);
 
 		auto memberInfo = pragma::ComponentMemberInfo::CreateDummy();
+
+		auto &metaData = memberInfo.AddMetaData();
+		metaData["assetType"] = "shader";
+		metaData["rootPath"] = util::Path::CreatePath(pragma::asset::get_asset_root_directory(pragma::asset::Type::ShaderGraph)).GetString();
+		metaData["extensions"] = pragma::asset::get_supported_extensions(pragma::asset::Type::ShaderGraph, pragma::asset::FormatType::All);
+		metaData["stripRootPath"] = true;
+		metaData["stripExtension"] = true;
+
+		memberInfo.SetSpecializationType(AttributeSpecializationType::File);
 		memberInfo.SetName(shaderPropName);
 		memberInfo.type = ents::EntityMemberType::String;
 		memberInfo.userIndex = matIdx;

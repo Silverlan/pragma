@@ -637,6 +637,24 @@ void CMaterialPropertyOverrideComponent::AddMaterialPropertyMember(const pragma:
 	});
 	if(prop.specializationType && prop.specializationType == "color")
 		memberInfo.SetSpecializationType(pragma::AttributeSpecializationType::Color);
+	if(prop->enumSet) {
+		auto nameToValue = prop->enumSet->getNameToValue();
+		auto valueToName = prop->enumSet->getValueToName();
+		std::vector<int64_t> values;
+		values.reserve(nameToValue.size());
+		for(auto &[name, value] : nameToValue)
+			values.push_back(value);
+		memberInfo.SetEnum(
+		  [nameToValue = std::move(nameToValue)](const std::string &enumName) -> std::optional<int64_t> {
+			  auto it = nameToValue.find(enumName);
+			  return (it != nameToValue.end()) ? it->second : std::optional<int64_t> {};
+		  },
+		  [valueToName = std::move(valueToName)](int64_t enumValue) -> std::optional<std::string> {
+			  auto it = valueToName.find(enumValue);
+			  return (it != valueToName.end()) ? it->second : std::optional<std::string> {};
+		  },
+		  [values = std::move(values)]() -> std::vector<int64_t> { return values; });
+	}
 	RegisterMember(std::move(memberInfo));
 
 	auto memberInfoToggle = create_component_member_info<TComponent, bool, &CMaterialPropertyOverrideComponent::SetPropertyEnabled, &CMaterialPropertyOverrideComponent::GetPropertyEnabled>(cPropNameEnabled, false);

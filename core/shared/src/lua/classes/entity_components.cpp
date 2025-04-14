@@ -445,8 +445,8 @@ static void get_dynamic_member_ids(pragma::BaseEntityComponent &c, std::vector<p
 		return;
 	auto &members = reg->GetMembers();
 	memberIndices.reserve(memberIndices.size() + members.size());
-	for(auto &pair : members)
-		memberIndices.push_back(pair.first);
+	for(size_t i = 0; i < members.size(); ++i)
+		memberIndices.push_back(i);
 }
 static std::vector<pragma::ComponentMemberIndex> get_dynamic_member_ids(pragma::BaseEntityComponent &c)
 {

@@ -11,7 +11,6 @@
 #include <pragma/networking/nwm_util.h>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <sharedutils/util.h>
-#include "pragma/lua/s_lentity_handles.hpp"
 
 using namespace pragma;
 

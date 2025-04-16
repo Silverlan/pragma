@@ -9,7 +9,6 @@
 #include "pragma/entities/s_baseentity.h"
 #include "luasystem.h"
 #include "pragma/networking/recipient_filter.hpp"
-#include <pragma/lua/policies/game_object_policy.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/audio/alsound_type.h>
 #include <pragma/networking/enums.hpp>

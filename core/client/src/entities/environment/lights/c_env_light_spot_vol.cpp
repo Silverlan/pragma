@@ -13,8 +13,6 @@
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/components/c_radius_component.hpp"
 #include "pragma/entities/components/c_field_angle_component.hpp"
-#include "pragma/rendering/renderers/rasterization_renderer.hpp"
-#include "pragma/lua/c_lentity_handles.hpp"
 #include "pragma/networking/c_nwm_util.h"
 #include <sharedutils/alpha_mode.hpp>
 #include <pragma/physics/raytraces.h>

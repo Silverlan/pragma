@@ -11,7 +11,6 @@
 #include "pragma/entities/prop/s_prop_dynamic.hpp"
 #include "pragma/entities/player.h"
 #include "pragma/entities/baseentity_luaobject.h"
-#include "pragma/lua/s_lentity_handles.hpp"
 #include "pragma/entities/components/s_wheel_component.hpp"
 #include "pragma/entities/components/s_attachment_component.hpp"
 #include "pragma/entities/components/s_player_component.hpp"

@@ -8,7 +8,6 @@
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/particles/c_shader_particle_2d_base.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
-#include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/entities/components/c_transform_component.hpp"
 #include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"

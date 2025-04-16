@@ -15,10 +15,7 @@
 #include <pragma/lua/classes/ldef_vector.h>
 #include <pragma/lua/classes/lerrorcode.h>
 #include <pragma/lua/classes/ldatastream.h>
-#include <pragma/lua/policies/optional_policy.hpp>
 #include <pragma/lua/policies/shared_from_this_policy.hpp>
-#include <pragma/lua/policies/pair_policy.hpp>
-#include <pragma/lua/policies/vector_policy.hpp>
 #include <pragma/lua/policies/default_parameter_policy.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/lua/converters/vector_converter_t.hpp>

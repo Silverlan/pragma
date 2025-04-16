@@ -10,7 +10,6 @@
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/c_ldefinitions.h"
-#include "pragma/lua/c_lentity_handles.hpp"
 #include <sharedutils/util_parallel_job.hpp>
 #include <mathutil/uvec.h>
 

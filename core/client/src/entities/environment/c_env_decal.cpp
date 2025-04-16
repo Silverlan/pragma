@@ -14,7 +14,6 @@
 #include "pragma/entities/components/c_static_bvh_user_component.hpp"
 #include "pragma/entities/components/intersection_handler_component.hpp"
 #include "pragma/entities/c_entityfactories.h"
-#include "pragma/lua/c_lentity_handles.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/model/c_model.h"
 #include "pragma/debug/c_debugoverlay.h"

@@ -14,13 +14,10 @@
 #include "pragma/entities/components/s_ai_component.hpp"
 #include "pragma/entities/components/s_player_component.hpp"
 #include "pragma/lua/s_lentity_components.hpp"
-#include "pragma/lua/s_lentity_handles.hpp"
-#include "pragma/lua/policies/game_object_policy.hpp"
 #include "pragma/lua/policies/default_parameter_policy.hpp"
 #include <pragma/lua/lua_util_component.hpp>
 #include <pragma/model/model.h>
 #include <pragma/lua/lentity_components_base_types.hpp>
-#include <pragma/lua/lua_entity_component.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/components/base_ai_component.hpp>
 #include <pragma/lua/converters/pair_converter_t.hpp>

@@ -26,7 +26,6 @@
 #include "pragma/entities/c_listener.h"
 #include "pragma/entities/environment/audio/c_env_sound_dsp.h"
 #include "pragma/entities/components/c_weapon_component.hpp"
-#include "pragma/lua/c_lentity_handles.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_observable_component.hpp"
 #include "pragma/entities/components/c_sound_emitter_component.hpp"

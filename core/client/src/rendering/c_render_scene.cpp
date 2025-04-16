@@ -13,7 +13,6 @@
 #include "pragma/rendering/shaders/post_processing/c_shader_ssao.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_ssao_blur.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_fxaa.hpp"
-#include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/rendering/world_environment.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/console/c_cvar.h"

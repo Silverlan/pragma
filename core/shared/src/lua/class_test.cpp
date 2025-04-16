@@ -121,7 +121,6 @@ static void test()
 #include "pragma/entities/baseentity.h"
 #include "pragma/entities/components/base_entity_component.hpp"
 #include "pragma/util/bulletinfo.h"
-#include "pragma/lua/policies/handle_policy.hpp"
 #include <sharedutils/util_shared_handle.hpp>
 namespace Lua {
 	// These don't like to be in core/shared/src/lua/class.cpp for some reason (Something to do with EntityHandle hAttacker/hInflictor)

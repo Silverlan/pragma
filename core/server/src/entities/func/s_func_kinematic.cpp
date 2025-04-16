@@ -10,7 +10,6 @@
 #include "pragma/entities/point/s_point_path_node.h"
 #include <sharedutils/util_string.h>
 #include <pragma/audio/alsound.h>
-#include "pragma/lua/s_lentity_handles.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/audio/alsound_type.h>
 #include <sharedutils/netpacket.hpp>

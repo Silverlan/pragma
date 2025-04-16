@@ -15,7 +15,6 @@
 #include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
-#include "pragma/lua/c_lentity_handles.hpp"
 #include "pragma/console/c_cvar.h"
 #include "pragma/rendering/shaders/world/water/c_shader_water.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_water.hpp"

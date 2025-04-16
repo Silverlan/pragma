@@ -16,7 +16,6 @@
 #include "pragma/model/modelmesh.h"
 #include "pragma/model/brush/brushmesh.h"
 #include "pragma/physics/collisionmesh.h"
-#include "pragma/file_formats/wmd.h"
 #include <sharedutils/util_string.h>
 #include "pragma/entities/baseworld.h"
 #include <sharedutils/util_file.h>

@@ -15,7 +15,6 @@
 #include "pragma/rendering/c_renderflags.h"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/lua/c_lua_gui_manager.h"
-#include "pragma/rendering/rendersystem.h"
 #include "pragma/rendering/lighting/shadows/c_shadow_type.hpp"
 #include "pragma/input/input_binding_layer_lua.hpp"
 #include "pragma/lua/c_listener_handle.hpp"

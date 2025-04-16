@@ -7,13 +7,11 @@
 
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/world/water/c_shader_water.hpp"
-#include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/components/liquid/c_liquid_surface_component.hpp"
 #include "pragma/entities/components/c_surface_component.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/rendering/render_processor.hpp"
-#include "pragma/c_water_object.hpp"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <prosper_util.hpp>
 #include <prosper_descriptor_set_group.hpp>

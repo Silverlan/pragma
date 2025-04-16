@@ -16,7 +16,6 @@
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/rendering/shaders/c_shader_shadow.hpp"
-#include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/rendering/render_queue.hpp"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"

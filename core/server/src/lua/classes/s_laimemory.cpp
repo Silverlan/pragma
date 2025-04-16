@@ -9,7 +9,6 @@
 #include "pragma/lua/classes/s_laimemory.h"
 #include "luasystem.h"
 #include "pragma/ai/ai_memory.h"
-#include <pragma/lua/policies/game_object_policy.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
 namespace Lua {

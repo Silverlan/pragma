@@ -11,7 +11,6 @@
 #include "pragma/rendering/c_ssao.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_ssao.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_ssao_blur.hpp"
-#include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/console/c_cvar_global_functions.h"

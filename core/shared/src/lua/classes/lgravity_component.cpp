@@ -7,8 +7,6 @@
 
 #include "stdafx_shared.h"
 #include "pragma/lua/lentity_components.hpp"
-#include "pragma/lua/l_entity_handles.hpp"
-#include "pragma/lua/lua_entity_component.hpp"
 #include "pragma/lua/converters/game_type_converters_t.hpp"
 
 #include "pragma/lua/ostream_operator_alias.hpp"

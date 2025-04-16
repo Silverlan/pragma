@@ -7,7 +7,6 @@
 
 #include "stdafx_client.h"
 #include "pragma/entities/components/c_point_at_target_component.hpp"
-#include "pragma/lua/c_lentity_handles.hpp"
 #include "pragma/networking/c_nwm_util.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 

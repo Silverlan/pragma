@@ -19,12 +19,9 @@
 #include "pragma/physics/c_phys_water_surface_simulator.hpp"
 #include "pragma/gui/widebugmsaatexture.hpp"
 #include "pragma/model/vk_mesh.h"
-#include "pragma/lua/c_lentity_handles.hpp"
 #include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
-#include "pragma/rendering/renderers/rasterization_renderer.hpp"
-#include "pragma/rendering/renderers/base_renderer.hpp"
 #include <pragma/entities/components/base_player_component.hpp>
 #include <pragma/console/sh_cmd.h>
 #include <image/prosper_render_target.hpp>

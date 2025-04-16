@@ -62,8 +62,6 @@
 #include "pragma/lua/classes/lproperty_entity.hpp"
 #include "pragma/game/game_coordinate_system.hpp"
 #include "pragma/lua/lua_entity_handles.hpp"
-#include "pragma/lua/policies/handle_policy.hpp"
-#include "pragma/lua/policies/game_object_policy.hpp"
 #include "pragma/lua/policies/generic_policy.hpp"
 #include "pragma/lua/custom_constructor.hpp"
 #include "pragma/lua/converters/optional_converter_t.hpp"
@@ -81,7 +79,6 @@
 #include <luabind/iterator_policy.hpp>
 #include <luabind/out_value_policy.hpp>
 #include <luabind/copy_policy.hpp>
-#include <pragma/lua/policies/optional_policy.hpp>
 #include <mathutil/inverse_kinematics/ik.hpp>
 #include <mathutil/inverse_kinematics/constraints.hpp>
 #include <sharedutils/magic_enum.hpp>

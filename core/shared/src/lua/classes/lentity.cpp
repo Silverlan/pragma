@@ -17,11 +17,6 @@
 #include "pragma/lua/classes/ldef_angle.h"
 #include "pragma/lua/classes/ldef_color.h"
 #include "pragma/lua/libraries/lutil.hpp"
-#include "pragma/lua/policies/game_object_policy.hpp"
-#include "pragma/lua/policies/optional_policy.hpp"
-#include "pragma/lua/policies/handle_policy.hpp"
-#include "pragma/lua/policies/pair_policy.hpp"
-#include "pragma/lua/policies/vector_policy.hpp"
 #include "pragma/lua/policies/core_policies.hpp"
 #include "pragma/lua/converters/optional_converter_t.hpp"
 #include "pragma/lua/converters/game_type_converters_t.hpp"
@@ -54,8 +49,6 @@
 #include "pragma/lua/classes/entity_components.hpp"
 #include "pragma/lua/lentity_type.hpp"
 #include "pragma/lua/classes/lproperty.hpp"
-#include "pragma/lua/l_entity_handles.hpp"
-#include "pragma/lua/lua_entity_component.hpp"
 #include <luabind/copy_policy.hpp>
 #include <sharedutils/datastream.h>
 #include <pragma/physics/movetypes.h>

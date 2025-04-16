@@ -18,7 +18,6 @@
 #include "pragma/ai/ai_schedule.h"
 #include "pragma/game/s_game.h"
 #include "pragma/entities/player.h"
-#include "pragma/lua/s_lentity_handles.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/networking/enums.hpp>
 #include <pragma/model/model.h>

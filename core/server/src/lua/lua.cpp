@@ -31,8 +31,6 @@
 #include <pragma/lua/lua_util_component.hpp>
 #include <pragma/lua/classes/lentity.h>
 #include <pragma/lua/lua_component_event.hpp>
-#include <pragma/lua/lua_entity_component.hpp>
-#include <pragma/lua/sh_lua_component_wrapper.hpp>
 #include <pragma/lua/lentity_component_lua.hpp>
 #include <pragma/lua/sh_lua_component.hpp>
 #include <pragma/lua/libraries/lnet.hpp>

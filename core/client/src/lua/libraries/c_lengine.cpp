@@ -21,7 +21,6 @@ namespace pragma::string {
 #include "pragma/c_engine.h"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
-#include "pragma/file_formats/wmd_load.h"
 #include "pragma/lua/libraries/c_lengine.h"
 #include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
@@ -34,7 +33,6 @@ namespace pragma::string {
 #include <cmaterial_manager2.hpp>
 #include <pragma/lua/libraries/lengine.h>
 #include <pragma/lua/libraries/lfile.h>
-#include <pragma/lua/lua_entity_component.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <image/prosper_render_target.hpp>
 #include <pragma/entities/environment/effects/particlesystemdata.h>

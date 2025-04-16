@@ -9,8 +9,6 @@
 #include "pragma/entities/components/s_ai_component.hpp"
 #include "pragma/entities/components/s_player_component.hpp"
 #include "pragma/lua/s_ldef_memory_fragment.hpp"
-#include "pragma/lua/s_lentity_handles.hpp"
-#include <pragma/lua/lua_entity_component.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
 bool SGame::InvokeEntityEvent(pragma::BaseEntityComponent &component, uint32_t eventId, int32_t argsIdx, bool bInject)

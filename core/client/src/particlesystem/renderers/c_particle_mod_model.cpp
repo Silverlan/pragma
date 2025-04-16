@@ -11,7 +11,6 @@
 #include "pragma/particlesystem/renderers/c_particle_mod_model.hpp"
 #include "pragma/rendering/shaders/particles/c_shader_particle_model.hpp"
 #include "pragma/rendering/shaders/particles/c_shader_particle_model_shadow.hpp"
-#include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"

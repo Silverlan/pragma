@@ -14,7 +14,6 @@
 #include "pragma/game/animation_update_manager.hpp"
 #include "pragma/model/model.h"
 #include "pragma/model/animation/animation.hpp"
-#include "pragma/lua/l_entity_handles.hpp"
 #include "pragma/lua/converters/game_type_converters_t.hpp"
 #include "pragma/lua/lua_call.hpp"
 #include "pragma/debug/intel_vtune.hpp"

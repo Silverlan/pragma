@@ -5,8 +5,6 @@
  * Copyright (c) 2021 Silverlan
  */
 
-#include "pragma/rendering/renderers/rasterization_renderer.hpp"
-#include "pragma/entities/components/renderers/rasterization/culled_mesh_data.hpp"
 #include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"

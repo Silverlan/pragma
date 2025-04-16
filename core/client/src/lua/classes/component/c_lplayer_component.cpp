@@ -9,13 +9,11 @@
 #include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/lua/classes/ldef_entity.h"
 #include "luasystem.h"
-#include "pragma/lua/c_lentity_handles.hpp"
 #include "pragma/lua/classes/components/c_lentity_components.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/lua/classes/lproperty_generic.hpp>
 #include <pragma/lua/lua_util_component.hpp>
 #include <pragma/lua/lua_util_component_stream.hpp>
-#include <pragma/lua/lua_entity_component.hpp>
 #include <pragma/lua/lentity_components_base_types.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 

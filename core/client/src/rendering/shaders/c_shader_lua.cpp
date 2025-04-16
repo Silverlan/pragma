@@ -9,13 +9,11 @@
 #include "pragma/rendering/shaders/c_shader_lua.hpp"
 #include "pragma/lua/libraries/c_lua_vulkan.h"
 #include "pragma/model/c_modelmesh.h"
-#include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/rendering/render_processor.hpp"
 #include "pragma/rendering/shader_material/shader_material.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
-#include <pragma/lua/lua_entity_component.hpp>
 #include <pragma/lua/util.hpp>
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <shader/prosper_shader_copy_image.hpp>

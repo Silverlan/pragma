@@ -20,7 +20,6 @@ namespace pragma::string {
 #include "pragma/lua/libraries/lents.h"
 #include "pragma/lua/libraries/c_lnetmessages.h"
 #include "pragma/lua/libraries/c_lents.h"
-#include "pragma/lua/libraries/c_lrender.h"
 #include "pragma/lua/libraries/lengine.h"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
@@ -48,15 +47,11 @@ namespace pragma::string {
 #include "pragma/lua/classes/components/c_lentity_components.hpp"
 #include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/entities/components/c_lua_component.hpp"
-#include "pragma/rendering/renderers/rasterization_renderer.hpp"
-#include "pragma/rendering/renderers/raytracing_renderer.hpp"
 #include "pragma/lua/classes/c_lentity.h"
 #include "pragma/lua/classes/c_lua_entity.h"
 #include <pragma/math/e_frustum.h>
 #include <pragma/lua/lua_util_component.hpp>
 #include <pragma/lua/classes/lproperty.hpp>
-#include <pragma/lua/lua_entity_component.hpp>
-#include <pragma/lua/sh_lua_component_wrapper.hpp>
 #include <pragma/lua/lentity_component_lua.hpp>
 #include <pragma/lua/sh_lua_component.hpp>
 #include <pragma/lua/sh_lua_component_t.hpp>

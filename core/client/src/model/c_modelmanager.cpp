@@ -7,8 +7,6 @@
 
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientstate.h"
-#include "pragma/file_formats/wmd.h"
-#include "pragma/file_formats/wmd_load.h"
 #include "pragma/model/c_modelmanager.h"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"

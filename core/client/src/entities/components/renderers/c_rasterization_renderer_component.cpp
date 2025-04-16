@@ -19,7 +19,6 @@
 #include "pragma/entities/environment/lights/c_env_light.h"
 #include "pragma/entities/environment/lights/c_env_light_directional.h"
 #include "pragma/entities/environment/c_env_camera.h"
-#include "pragma/lua/c_lentity_handles.hpp"
 #include <image/prosper_msaa_texture.hpp>
 #include <pragma/logging.hpp>
 #include <pragma/entities/entity_iterator.hpp>

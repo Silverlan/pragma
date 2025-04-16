@@ -13,7 +13,6 @@
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/c_viewmodel.h"
 #include "pragma/entities/c_viewbody.h"
-#include "pragma/lua/c_lentity_handles.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_observable_component.hpp"
 #include "pragma/entities/components/c_observer_component.hpp"

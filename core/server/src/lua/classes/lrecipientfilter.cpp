@@ -11,9 +11,7 @@
 #include "pragma/networking/recipient_filter.hpp"
 #include "pragma/lua/classes/ldef_recipientfilter.h"
 #include "pragma/lua/classes/ldef_entity.h"
-#include "pragma/lua/s_lentity_handles.hpp"
 #include "pragma/entities/components/s_player_component.hpp"
-#include <pragma/lua/lua_entity_component.hpp>
 
 extern ServerState *server;
 luabind::tableT<pragma::SPlayerComponent> Lua::RecipientFilter::GetRecipients(lua_State *l, pragma::networking::TargetRecipientFilter &rp)

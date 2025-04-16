@@ -11,7 +11,6 @@
 #include <pragma/lua/ldefinitions.h>
 #include "pragma/ai/ai_behavior.h"
 #include "pragma/lua/luaobjectbase.h"
-#include "pragma/lua/s_lentity_handles.hpp"
 
 /*
 	NOTE:

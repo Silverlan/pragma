@@ -11,7 +11,6 @@
 #include "pragma/physics/collisiontypes.h"
 #include "pragma/entities/s_flashlight.h"
 #include "pragma/entities/player.h"
-#include "pragma/lua/s_lentity_handles.hpp"
 #include "pragma/entities/components/s_health_component.hpp"
 #include "pragma/entities/components/s_observer_component.hpp"
 #include "pragma/entities/components/s_observable_component.hpp"

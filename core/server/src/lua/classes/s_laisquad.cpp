@@ -9,7 +9,6 @@
 #include "pragma/lua/classes/s_laisquad.h"
 #include "luasystem.h"
 #include "pragma/ai/ai_squad.h"
-#include "pragma/lua/s_lentity_handles.hpp"
 
 namespace Lua {
 	namespace AISquad {

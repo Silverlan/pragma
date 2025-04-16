@@ -19,7 +19,6 @@
 #include "pragma/physics/controllerhitdata.h"
 #include <mathutil/transform.hpp>
 #include "pragma/physics/collision_object.hpp"
-#include "pragma/physics/phys_contact_info.hpp"
 #include "pragma/types.hpp"
 #ifdef __linux__
 #include "pragma/physics/controller.hpp"

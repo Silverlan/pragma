@@ -10,7 +10,6 @@
 #include <pragma/physics/physobj.h>
 #include <sharedutils/util_string.h>
 #include "pragma/entities/baseentity_luaobject.h"
-#include "pragma/lua/s_lentity_handles.hpp"
 #include "pragma/entities/components/s_model_component.hpp"
 #include <pragma/physics/phys_water_surface_simulator.hpp>
 #include <pragma/entities/components/base_physics_component.hpp>

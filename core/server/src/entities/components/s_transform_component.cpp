@@ -6,7 +6,6 @@
 
 #include "stdafx_server.h"
 #include "pragma/entities/components/s_transform_component.hpp"
-#include "pragma/lua/s_lentity_handles.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/components/base_physics_component.hpp>
 #include <pragma/networking/nwm_util.h>

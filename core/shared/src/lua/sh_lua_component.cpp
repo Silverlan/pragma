@@ -7,7 +7,6 @@
 
 #include "stdafx_shared.h"
 #include "pragma/lua/sh_lua_component.hpp"
-#include "pragma/lua/sh_lua_component_wrapper.hpp"
 #include "pragma/lua/lua_call.hpp"
 #include "pragma/lua/classes/lproperty.hpp"
 #include "pragma/lua/libraries/ludm.hpp"

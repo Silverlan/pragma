@@ -15,7 +15,6 @@
 #include "pragma/model/animation/vertex_animation.hpp"
 #include "pragma/model/animation/flex_animation.hpp"
 #include "pragma/model/animation/meta_rig.hpp"
-#include "pragma/file_formats/wmd.h"
 #include "pragma/asset/util_asset.hpp"
 #include "pragma/logging.hpp"
 #include <fsys/filesystem.h>

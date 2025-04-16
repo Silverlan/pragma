@@ -7,7 +7,6 @@
 #ifndef __WAD_H__
 #define __WAD_H__
 #include "pragma/networkdefinitions.h"
-#include "pragma/file_formats/wdf.h"
 #include "pragma/model/animation/animation.hpp"
 
 namespace ufile {

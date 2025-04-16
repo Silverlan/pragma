@@ -18,7 +18,6 @@
 #include <pragma/math/intersection.h>
 #include "pragma/entities/baseentity_luaobject.h"
 #include "pragma/entities/parentinfo.h"
-#include "pragma/rendering/rendersystem.h"
 #include <materialmanager.h>
 #include "pragma/model/c_modelmesh.h"
 #include <pragma/logging.hpp>

@@ -12,7 +12,6 @@
 #include <pragma/entities/components/base_entity_component.hpp>
 #include "pragma/entities/c_baseentity.h"
 #include "pragma/entities/components/c_scene_component.hpp"
-#include "pragma/rendering/renderers/base_renderer.hpp"
 #include "pragma/entities/components/renderers/rasterization/hdr_data.hpp"
 #include "pragma/rendering/c_rendermode.h"
 #include <unordered_set>

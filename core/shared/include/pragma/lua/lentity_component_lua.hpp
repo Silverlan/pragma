@@ -11,7 +11,6 @@
 #include "pragma/networkdefinitions.h"
 #include "pragma/lua/ldefinitions.h"
 #include "pragma/lua/sh_lua_component.hpp"
-#include "pragma/lua/l_entity_handles.hpp"
 #include <sharedutils/util_weak_handle.hpp>
 
 inline std::ostream &operator<<(std::ostream &out, const pragma::BaseEntityComponent *hComponent)

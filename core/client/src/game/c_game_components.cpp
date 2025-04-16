@@ -7,7 +7,6 @@
 
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
-#include "pragma/lua/c_lentity_handles.hpp"
 #include "pragma/entities/components/c_lua_component.hpp"
 #include "pragma/entities/components/c_ownable_component.hpp"
 #include <pragma/lua/lentity_component_lua.hpp>

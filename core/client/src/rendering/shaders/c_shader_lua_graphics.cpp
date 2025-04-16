@@ -10,7 +10,6 @@
 #include "pragma/rendering/shaders/c_shader_lua.hpp"
 #include "pragma/entities/entity_instance_index_buffer.hpp"
 #include "pragma/model/c_modelmesh.h"
-#include "pragma/lua/lua_entity_component.hpp"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <shader/prosper_shader_t.hpp>
 #include <pragma/lua/util.hpp>

@@ -9,7 +9,6 @@
 #include "pragma/serverdefinitions.h"
 #include "pragma/networkdefinitions.h"
 #include <pragma/lua/ldefinitions.h>
-#include "pragma/lua/s_lentity_handles.hpp"
 
 namespace pragma::networking {
 	class TargetRecipientFilter;

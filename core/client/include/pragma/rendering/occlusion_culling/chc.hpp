@@ -10,7 +10,6 @@
 
 #include "pragma/clientdefinitions.h"
 #include <pragma/types.hpp>
-#include <pragma/math/plane.h>
 #include <sharedutils/def_handle.h>
 #include <sharedutils/functioncallback.h>
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree.hpp"

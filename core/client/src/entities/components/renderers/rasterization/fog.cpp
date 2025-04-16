@@ -5,7 +5,6 @@
  * Copyright (c) 2021 Silverlan
  */
 
-#include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/entities/components/c_optical_camera_component.hpp"
 #include "pragma/entities/components/renderers/rasterization/hdr_data.hpp"

@@ -7,9 +7,6 @@
 
 #include "stdafx_shared.h"
 #include "pragma/lua/classes/lalsound.h"
-#include "pragma/lua/policies/pair_policy.hpp"
-#include "pragma/lua/policies/tuple_policy.hpp"
-#include "pragma/lua/policies/game_object_policy.hpp"
 #include "pragma/lua/converters/pair_converter_t.hpp"
 #include "pragma/lua/converters/game_type_converters_t.hpp"
 #include "pragma/audio/alsound.h"

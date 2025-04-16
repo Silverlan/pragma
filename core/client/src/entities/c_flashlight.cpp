@@ -15,7 +15,6 @@
 #include "pragma/entities/environment/lights/c_env_light_spot.h"
 #include "pragma/entities/components/c_radius_component.hpp"
 #include "pragma/entities/components/c_color_component.hpp"
-#include "pragma/lua/c_lentity_handles.hpp"
 #include <pragma/audio/alsound_type.h>
 #include <pragma/entities/components/parent_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>

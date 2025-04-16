@@ -23,7 +23,6 @@
 #include "pragma/entities/point/c_point_rendertarget.h"
 #include "pragma/lua/classes/c_lshaderinfo.h"
 #include "pragma/lua/classes/lshaderinfo.h"
-#include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/rendering/shader_input_data.hpp"
 #include "pragma/rendering/shaders/c_shader_cubemap_to_equirectangular.hpp"
 #include "pragma/rendering/shaders/image/c_shader_merge_images.hpp"
@@ -59,12 +58,10 @@
 #include "pragma/rendering/shader_material/shader_material.hpp"
 #include "pragma/rendering/shader_graph/manager.hpp"
 #include "pragma/lua/libraries/ludm.hpp"
-#include <pragma/lua/lua_entity_component.hpp>
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <wgui/fontmanager.h>
 #include <wgui/shaders/wishader_textured.hpp>
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
-#include <pragma/lua/policies/pair_policy.hpp>
 #include <pragma/lua/converters/pair_converter_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/lua/converters/optional_converter_t.hpp>

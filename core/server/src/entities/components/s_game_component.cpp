@@ -8,7 +8,6 @@
 #include "pragma/entities/components/s_game_component.hpp"
 #include "pragma/entities/s_entityfactories.h"
 #include "pragma/entities/entity_component_system_t.hpp"
-#include "pragma/lua/s_lentity_handles.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
 using namespace pragma;

@@ -9,7 +9,6 @@
 #include "pragma/game/c_game.h"
 #include "pragma/entities/components/c_transform_component.hpp"
 #include "pragma/console/c_cvar.h"
-#include "pragma/lua/c_lentity_handles.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <stack>
 

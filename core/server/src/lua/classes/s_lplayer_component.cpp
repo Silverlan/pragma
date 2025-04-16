@@ -6,7 +6,6 @@
 
 #include "stdafx_server.h"
 #include "pragma/entities/player.h"
-#include "pragma/lua/s_lentity_handles.hpp"
 #include "pragma/lua/s_lentity_components.hpp"
 #include "pragma/entities/components/s_player_component.hpp"
 #include "pragma/entities/components/s_character_component.hpp"

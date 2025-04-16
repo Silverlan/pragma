@@ -18,7 +18,6 @@
 #include "pragma/entities/game/c_game_occlusion_culler.hpp"
 #include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/entities/c_entityfactories.h"
-#include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/rendering/render_queue.hpp"
 #include "pragma/rendering/render_processor.hpp"

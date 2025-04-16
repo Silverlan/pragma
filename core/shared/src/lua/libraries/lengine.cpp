@@ -13,7 +13,6 @@
 #include "pragma/engine_version.h"
 #include "pragma/lua/classes/ldef_vector.h"
 #include "pragma/lua/libraries/lutil.hpp"
-#include "pragma/file_formats/wmd_load.h"
 #include "pragma/util/util_module.hpp"
 #include "luasystem.h"
 #include "pragma/model/modelmesh.h"

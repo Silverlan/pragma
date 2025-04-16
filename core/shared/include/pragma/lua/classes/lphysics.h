@@ -24,9 +24,6 @@ namespace Lua {
 	namespace PhysCollisionObj {
 		DLLNETWORK void register_class(lua_State *l, luabind::module_ &mod);
 	};
-	namespace PhysKinematicCharacterController {
-		DLLNETWORK void register_class(lua_State *l, luabind::module_ &mod);
-	};
 	namespace PhysContact {
 		DLLNETWORK void register_class(lua_State *l, luabind::module_ &mod);
 	};

@@ -14,7 +14,6 @@
 #include "pragma/lua/classes/c_lcamera.h"
 #include "pragma/lua/converters/shader_converter_t.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
-#include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/rendering/render_queue.hpp"
 #include "pragma/rendering/shaders/world/c_shader_scene.hpp"
 #include "pragma/rendering/global_render_settings_buffer_data.hpp"

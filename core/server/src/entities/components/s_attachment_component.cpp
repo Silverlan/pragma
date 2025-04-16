@@ -7,10 +7,9 @@
 #include "stdafx_server.h"
 #include "pragma/networking/s_nwm_util.h"
 #include <pragma/networking/enums.hpp>
+#include "pragma/entities/components/s_attachment_component.hpp"
 #include <pragma/entities/components/parent_component.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
-#include "pragma/entities/components/s_attachment_component.hpp"
-#include "pragma/lua/s_lentity_handles.hpp"
 
 using namespace pragma;
 

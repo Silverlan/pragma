@@ -17,7 +17,6 @@
 #include "pragma/lua/classes/ldef_recipientfilter.h"
 #include "pragma/lua/libraries/s_lnetmessages.h"
 #include "pragma/entities/components/s_player_component.hpp"
-#include "pragma/lua/s_lentity_handles.hpp"
 #include <pragma/networking/enums.hpp>
 #include <pragma/lua/lua_handle.hpp>
 #include <pragma/lua/luaapi.h>

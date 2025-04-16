@@ -6,7 +6,6 @@
 
 #include "stdafx_server.h"
 #include "pragma/game/s_game.h"
-#include "pragma/lua/s_lentity_handles.hpp"
 #include "pragma/lua/s_lua_component.hpp"
 #include "pragma/entities/components/s_ownable_component.hpp"
 #include "pragma/entities/components/s_debug_component.hpp"

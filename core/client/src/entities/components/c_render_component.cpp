@@ -23,7 +23,6 @@
 #include "pragma/entities/components/c_raytracing_component.hpp"
 #include "pragma/entities/components/c_bvh_component.hpp"
 #include "pragma/entities/game/c_game_occlusion_culler.hpp"
-#include "pragma/lua/c_lentity_handles.hpp"
 #include "pragma/model/c_vertex_buffer_data.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/console/c_cvar_global_functions.h"

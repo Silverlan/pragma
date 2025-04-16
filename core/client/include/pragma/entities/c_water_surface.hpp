@@ -10,7 +10,6 @@
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/c_baseentity.h"
-#include "pragma/c_water_object.hpp"
 
 class PhysWaterSurfaceSimulator;
 namespace pragma {

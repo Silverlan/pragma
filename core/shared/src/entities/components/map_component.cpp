@@ -7,7 +7,6 @@
 
 #include "stdafx_shared.h"
 #include "pragma/entities/components/map_component.hpp"
-#include "pragma/lua/l_entity_handles.hpp"
 #include "pragma/lua/converters/game_type_converters_t.hpp"
 
 using namespace pragma;

@@ -54,15 +54,12 @@
 #include "pragma/console/c_cvar.h"
 #include "pragma/rendering/c_rendermode.h"
 #include "pragma/rendering/shaders/post_processing/c_shader_hdr.hpp"
-#include "pragma/rendering/renderers/rasterization_renderer.hpp"
-#include "pragma/rendering/renderers/raytracing_renderer.hpp"
 #include "pragma/rendering/render_queue_worker.hpp"
 #include "pragma/rendering/global_render_settings_buffer_data.hpp"
 #include "pragma/rendering/global_shader_input_manager.hpp"
 #include "pragma/ai/c_navsystem.h"
 #include <texturemanager/texturemanager.h>
 #include <pragma/physics/environment.hpp>
-#include "pragma/rendering/rendersystem.h"
 #include "pragma/rendering/render_queue.hpp"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"

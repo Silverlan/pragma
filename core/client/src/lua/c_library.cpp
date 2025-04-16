@@ -16,7 +16,6 @@
 #include "pragma/lua/libraries/c_lsound.h"
 #include "pragma/lua/classes/c_lshader.h"
 #include "pragma/lua/libraries/c_lutil.h"
-#include "pragma/lua/libraries/c_linput.h"
 #include "pragma/lua/libraries/lasset.hpp"
 #include "pragma/lua/converters/gui_element_converter_t.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
@@ -39,14 +38,11 @@
 #include <pragma/debug/debug_render_info.hpp>
 #include <pragma/game/game_resources.hpp>
 #include <pragma/util/giblet_create_info.hpp>
-#include <pragma/lua/lua_entity_component.hpp>
 #include <pragma/lua/classes/ldef_entity.h>
 #include <pragma/lua/classes/thread_pool.hpp>
 #include <pragma/lua/libraries/lfile.h>
 #include <pragma/lua/libraries/lutil.hpp>
 #include <pragma/lua/policies/default_parameter_policy.hpp>
-#include <pragma/lua/policies/vector_policy.hpp>
-#include <pragma/lua/policies/optional_policy.hpp>
 #include <pragma/lua/converters/string_view_converter_t.hpp>
 #include <pragma/lua/converters/vector_converter_t.hpp>
 #include <pragma/lua/converters/pair_converter_t.hpp>

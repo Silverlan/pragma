@@ -10,8 +10,6 @@
 #include "pragma/entities/components/base_entity_component.hpp"
 #include "pragma/physics/phys_liquid.hpp"
 #include "pragma/entities/trigger/base_trigger_touch.hpp"
-#include "pragma/math/plane.h"
-#include "pragma/basewaterobject.hpp"
 
 struct BulletInfo;
 namespace pragma {

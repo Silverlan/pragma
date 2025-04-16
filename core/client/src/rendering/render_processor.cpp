@@ -13,7 +13,6 @@
 #include "pragma/debug/renderdebuginfo.hpp"
 #include "pragma/rendering/render_processor.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
-#include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/shaders/world/c_shader_pbr.hpp"
 #include "pragma/rendering/shaders/world/c_shader_prepass.hpp"

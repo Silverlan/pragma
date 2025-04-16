@@ -64,19 +64,8 @@
 #ifdef __linux__
 #include "pragma/lua/policies/core_policies.hpp"
 #include "pragma/lua/policies/default_parameter_policy.hpp"
-#include "pragma/lua/policies/file_policy.hpp"
-#include "pragma/lua/policies/game_object_policy.hpp"
-#include "pragma/lua/policies/game_policy.hpp"
 #include "pragma/lua/policies/generic_policy.hpp"
-#include "pragma/lua/policies/handle_policy.hpp"
-#include "pragma/lua/policies/network_state_policy.hpp"
-#include "pragma/lua/policies/optional_policy.hpp"
-#include "pragma/lua/policies/pair_policy.hpp"
-#include "pragma/lua/policies/property_policy.hpp"
 #include "pragma/lua/policies/shared_from_this_policy.hpp"
-#include "pragma/lua/policies/string_view_policy.hpp"
-#include "pragma/lua/policies/tuple_policy.hpp"
-#include "pragma/lua/policies/vector_policy.hpp"
 #ifdef _WIN32
 #include <pragma/entities/components/panima_component_channel_submitter_def.hpp>
 #endif

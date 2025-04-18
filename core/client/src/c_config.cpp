@@ -115,6 +115,7 @@ void CEngine::PreloadConfig(NwStateType type, const std::string &configName)
 	pragma::locale::load("menu.txt");
 	pragma::locale::load("misc.txt");
 	pragma::locale::load("components.txt");
+	pragma::locale::load("prompts.txt");
 	pragma::locale::load("shader_materials.txt");
 
 	constexpr auto numBts = umath::to_integral(util::debug::MessageBoxButton::Count);

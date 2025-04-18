@@ -10,11 +10,13 @@
 #include "pragma/lua/classes/lmaterial.h"
 #include "pragma/lua/libraries/lfile.h"
 #include "pragma/lua/converters/game_type_converters_t.hpp"
+#include "pragma/lua/libraries/ludm.hpp"
 #include <pragma/lua/policies/default_parameter_policy.hpp>
 #include <material_manager2.hpp>
 #include "luasystem.h"
 #include "material.h"
 #include <detail_mode.hpp>
+#include <datasystem_t.hpp>
 #include <luabind/copy_policy.hpp>
 #include <sharedutils/alpha_mode.hpp>
 #include <sharedutils/util_shaderinfo.hpp>
@@ -56,7 +58,7 @@ void Lua::Material::register_class(luabind::class_<::Material> &classDef)
 	}));
 	classDef.def("UpdateTextures", &::Material::UpdateTextures);
 	classDef.def("UpdateTextures", &::Material::UpdateTextures, luabind::default_parameter_policy<2, bool {false}> {});
-	classDef.def("Save", static_cast<luabind::variant<std::string, bool> (*)(lua_State *, ::Material &, udm::AssetData &)>([](lua_State *l, ::Material &mat, udm::AssetData &assetData) -> luabind::variant<std::string, bool> {
+	classDef.def("Save", static_cast<luabind::variant<std::string, bool> (*)(lua_State *, ::Material &, ::udm::AssetData &)>([](lua_State *l, ::Material &mat, ::udm::AssetData &assetData) -> luabind::variant<std::string, bool> {
 		std::string err;
 		auto result = mat.Save(assetData, err);
 		if(result == false)
@@ -85,4 +87,43 @@ void Lua::Material::register_class(luabind::class_<::Material> &classDef)
 	classDef.def("GetAlphaMode", &::Material::GetAlphaMode);
 	classDef.def("GetAlphaCutoff", &::Material::GetAlphaCutoff);
 	classDef.def("Reset", &::Material::Reset);
+	classDef.def("SetTextureProperty", &::Material::SetTextureProperty);
+	classDef.def("ClearProperty", static_cast<void (::Material::*)(const std::string_view &, bool)>(&::Material::ClearProperty));
+	classDef.def("ClearProperty", static_cast<void (::Material::*)(const std::string_view &, bool)>(&::Material::ClearProperty), luabind::default_parameter_policy<3, bool {true}> {});
+	classDef.def(
+	  "SetProperty", +[](::Material &mat, const std::string_view &key, Lua::udm_type value) {
+		  auto type = Lua::udm::determine_udm_type(value);
+		  if(type == ::udm::Type::Invalid)
+			  return;
+		  ::udm::visit(type, [&mat, &key, &value](auto tag) {
+			  using T = typename decltype(tag)::type;
+			  if constexpr(msys::is_property_type<T>)
+				  mat.SetProperty(key, Lua::udm::cast_object<T>(value));
+		  });
+	  });
+	classDef.def(
+	  "GetProperty", +[](lua_State *l, ::Material &mat, const std::string_view &key, ::udm::Type type) -> luabind::object {
+		  return ::udm::visit(type, [l, &mat, &key](auto tag) -> luabind::object {
+			  using T = typename decltype(tag)::type;
+			  if constexpr(msys::is_property_type<T>) {
+				  T val;
+				  if(mat.GetProperty<T>(key, &val))
+					  return luabind::object {l, val};
+			  }
+			  return Lua::nil;
+		  });
+	  });
+	classDef.def(
+	  "GetProperty", +[](lua_State *l, ::Material &mat, const std::string_view &key, ::udm::Type type, Lua::udm_type defVal) -> luabind::object {
+		  return ::udm::visit(type, [l, &mat, &key, &defVal](auto tag) -> luabind::object {
+			  using T = typename decltype(tag)::type;
+			  if constexpr(msys::is_property_type<T>) {
+				  auto val = luabind::object_cast<T>(defVal);
+				  val = mat.GetProperty<T>(key, val);
+				  return luabind::object {l, val};
+			  }
+			  return Lua::nil;
+		  });
+	  });
+	classDef.def("GetPropertyValueType", &::Material::GetPropertyValueType);
 }

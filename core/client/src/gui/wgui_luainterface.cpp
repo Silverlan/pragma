@@ -16,6 +16,7 @@
 #include "pragma/gui/wiluahandlewrapper.h"
 #include <wgui/types/witextentry.h>
 #include <wgui/types/witooltip.h>
+#include <wgui/types/wi9slicerect.hpp>
 #include "pragma/gui/wiluabase.h"
 #include <pragma/lua/converters/gui_element_converter_t.hpp>
 #include <pragma/lua/lua_call.hpp>
@@ -262,22 +263,26 @@ void WGUILuaInterface::Clear()
 
 void WGUILuaInterface::InitializeGUIElement(WIBase &p)
 {
-	p.AddCallback("OnMouseEvent", FunctionCallback<util::EventReply, pragma::platform::MouseButton, pragma::platform::KeyState, pragma::platform::Modifier>::CreateWithOptionalReturn([&p](util::EventReply *reply, pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods) -> CallbackReturnType {
-		auto r = GUI_Callback_OnMouseEvent(p, button, state, mods);
-		if(r.has_value()) {
-			*reply = *r;
-			return CallbackReturnType::HasReturnValue;
-		}
-		return CallbackReturnType::NoReturnValue;
-	}));
-	p.AddCallback("OnKeyEvent", FunctionCallback<util::EventReply, pragma::platform::Key, int, pragma::platform::KeyState, pragma::platform::Modifier>::CreateWithOptionalReturn([&p](util::EventReply *reply, pragma::platform::Key key, int scanCode, pragma::platform::KeyState state, pragma::platform::Modifier mods) -> CallbackReturnType {
-		auto r = GUI_Callback_OnKeyEvent(p, key, scanCode, state, mods);
-		if(r.has_value()) {
-			*reply = *r;
-			return CallbackReturnType::HasReturnValue;
-		}
-		return CallbackReturnType::NoReturnValue;
-	}));
+	p.AddCallback("OnMouseEvent",
+	  FunctionCallback<util::EventReply, pragma::platform::MouseButton, pragma::platform::KeyState, pragma::platform::Modifier>::CreateWithOptionalReturn(
+	    [&p](util::EventReply *reply, pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods) -> CallbackReturnType {
+		    auto r = GUI_Callback_OnMouseEvent(p, button, state, mods);
+		    if(r.has_value()) {
+			    *reply = *r;
+			    return CallbackReturnType::HasReturnValue;
+		    }
+		    return CallbackReturnType::NoReturnValue;
+	    }));
+	p.AddCallback("OnKeyEvent",
+	  FunctionCallback<util::EventReply, pragma::platform::Key, int, pragma::platform::KeyState, pragma::platform::Modifier>::CreateWithOptionalReturn(
+	    [&p](util::EventReply *reply, pragma::platform::Key key, int scanCode, pragma::platform::KeyState state, pragma::platform::Modifier mods) -> CallbackReturnType {
+		    auto r = GUI_Callback_OnKeyEvent(p, key, scanCode, state, mods);
+		    if(r.has_value()) {
+			    *reply = *r;
+			    return CallbackReturnType::HasReturnValue;
+		    }
+		    return CallbackReturnType::NoReturnValue;
+	    }));
 	p.AddCallback("OnCharEvent", FunctionCallback<util::EventReply, int, pragma::platform::Modifier>::CreateWithOptionalReturn([&p](util::EventReply *reply, int c, pragma::platform::Modifier mods) -> CallbackReturnType {
 		auto r = GUI_Callback_OnCharEvent(p, c, mods);
 		if(r.has_value()) {
@@ -390,6 +395,8 @@ luabind::object WGUILuaInterface::CreateLuaObject(lua_State *l, WIBase &p)
 		return cast_to_type<WITooltip>(l, p);
 	else if(dynamic_cast<WIRoot *>(&p) != nullptr)
 		return cast_to_type<WIRoot>(l, p);
+	else if(dynamic_cast<wgui::WI9SliceRect *>(&p) != nullptr)
+		return cast_to_type<wgui::WI9SliceRect>(l, p);
 	return pragma::lua::raw_object_to_luabind_object(l, p.GetHandle());
 }
 

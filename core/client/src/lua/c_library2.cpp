@@ -35,6 +35,7 @@
 #include <wgui/types/wiroot.h>
 #include <wgui/types/witooltip.h>
 #include <wgui/types/wicontentwrapper.hpp>
+#include <wgui/types/wi9slicerect.hpp>
 #include <prosper_window.hpp>
 #include <prosper_command_buffer.hpp>
 #include <alsoundsystem.hpp>
@@ -490,9 +491,10 @@ static void register_gui(Lua::Interface &lua)
 	wiWIContentWrapper.def("SetPaddingTopBottom", &WIContentWrapper::SetPaddingTopBottom);
 	guiMod[wiWIContentWrapper];
 
-	auto wiRoundedRectClassDef = luabind::class_<WIRoundedRect, luabind::bases<WIShape, ::WIBase>>("RoundedRect");
-	Lua::WIRoundedRect::register_class(wiRoundedRectClassDef);
-	guiMod[wiRoundedRectClassDef];
+	auto wiNineSliceRect = luabind::class_<wgui::WI9SliceRect, ::WIBase>("NineSliceRect");
+	wiNineSliceRect.def("SetMaterial", &wgui::WI9SliceRect::SetMaterial);
+	wiNineSliceRect.def("GetMaterial", &wgui::WI9SliceRect::GetMaterial);
+	guiMod[wiNineSliceRect];
 
 	auto wiRoundedTexturedRect = luabind::class_<WIRoundedTexturedRect, luabind::bases<WITexturedShape, WIShape, ::WIBase>>("RoundedTexturedRect");
 	Lua::WIRoundedTexturedRect::register_class(wiRoundedTexturedRect);
@@ -530,6 +532,10 @@ static void register_gui(Lua::Interface &lua)
 	wiConsoleClassDef.def("SetMaxLogLineCount", &WIConsole::SetMaxLogLineCount);
 	wiConsoleClassDef.def("GetMaxLogLineCount", &WIConsole::GetMaxLogLineCount);
 	guiMod[wiConsoleClassDef];
+
+	auto wiRoundedRectClassDef = luabind::class_<WIRoundedRect, luabind::bases<WIShape, ::WIBase>>("RoundedRect");
+	Lua::WIRoundedRect::register_class(wiRoundedRectClassDef);
+	guiMod[wiRoundedRectClassDef];
 
 	guiMod[wiOutlinedRectClassDef];
 	guiMod[wiLineClassDef];

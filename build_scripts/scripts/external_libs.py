@@ -12,7 +12,7 @@ get_submodule("alsoundsystem","https://github.com/Silverlan/alsoundsystem.git","
 get_submodule("datasystem","https://github.com/Silverlan/datasystem.git","8af3736de84e8e6ad88a57a2298f41b34cd9e984")
 get_submodule("iglfw","https://github.com/Silverlan/iglfw.git","473bb63")
 get_submodule("luasystem","https://github.com/Silverlan/luasystem.git","8eef5fe5593f9b9496d2d03158ecc1f485a34d7d")
-get_submodule("materialsystem","https://github.com/Silverlan/materialsystem.git","1f2bef260acee67dd50b798b02a92fb642cc7a24")
+get_submodule("materialsystem","https://github.com/Silverlan/materialsystem.git","c8690a4ceb91dfdab76b16d6ed76dcbd641e0327")
 get_submodule("mathutil","https://github.com/Silverlan/mathutil.git","554d67f7b621fe87fecea90269581c2ca50dadb9")
 get_submodule("networkmanager","https://github.com/Silverlan/networkmanager.git","981bc5809c1a768267ddace778205e1be0262730")
 get_submodule("panima","https://github.com/Silverlan/panima.git","1718348")
@@ -34,7 +34,7 @@ get_submodule("util_vmf","https://github.com/Silverlan/util_vmf.git","ae1c498c20
 get_submodule("util_zip","https://github.com/Silverlan/util_zip.git","6b1695545f66ec19db8b81ca081f8502358b823f")
 get_submodule("util_shadergraph","https://github.com/Silverlan/util_shadergraph.git","15231d501ca893d077c1a1de5cd173daf94fc1e5")
 get_submodule("vfilesystem","https://github.com/Silverlan/vfilesystem.git","6663b7b90b927febd14eee641a791766ad8b55d3")
-get_submodule("wgui","https://github.com/Silverlan/wgui.git","26fd4f3077878ddd4d8041bfb2222cf19ddf94e1")
+get_submodule("wgui","https://github.com/Silverlan/wgui.git","5c3ac1ea2ae259bef6e7bc23222f6baaa94828cd")
 get_submodule("util_unicode","https://github.com/Silverlan/util_unicode.git","5a0ac6c02f199e42d7d38d99231503cf42e26f8a")
 get_submodule("cppbezierfit","https://github.com/Silverlan/cppbezierfit.git","b1f76c0187411230ebe59fa606292b0947e730b6")
 

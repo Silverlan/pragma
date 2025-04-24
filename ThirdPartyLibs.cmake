@@ -282,6 +282,13 @@ pr_set_target_folder(pngvalid third_party_libs/libpng)
 target_include_directories(png PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
 #
 
+# lunasvg
+pr_include_third_party_library(lunasvg)
+pr_set_target_folder(lunasvg third_party_libs/lunasvg)
+pr_set_target_folder(plutovg third_party_libs/lunasvg)
+pr_set_target_folder(smiley third_party_libs/lunasvg)
+pr_set_target_folder(svg2png third_party_libs/lunasvg)
+
 # libsamplerate (required for alsoundsystem with fmod enabled)
 set(BUILD_SHARED_LIBS
     OFF

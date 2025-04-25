@@ -50,7 +50,7 @@ import pragma.string.unicode;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
-
+#pragma optimize("", off)
 template<class TStream>
 static TStream &print_ui_element(TStream &os, const ::WIBase &handle)
 {
@@ -432,6 +432,8 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	classDef.def("SetBackgroundElement", static_cast<void (*)(::WIBase &, bool)>([](::WIBase &el, bool backgroundElement) { el.SetBackgroundElement(backgroundElement); }));
 	classDef.def("SetBackgroundElement", static_cast<void (*)(::WIBase &)>([](::WIBase &el) { el.SetBackgroundElement(true); }));
 	classDef.def("IsBackgroundElement", &::WIBase::IsBackgroundElement);
+	classDef.def("SetBaseElement", &::WIBase::SetBaseElement);
+	classDef.def("IsBaseElement", &::WIBase::IsBaseElement);
 	classDef.def("FindDescendantByName", static_cast<::WIBase *(*)(lua_State *, ::WIBase &, const std::string &)>([](lua_State *l, ::WIBase &hPanel, const std::string &name) { return hPanel.FindDescendantByName(name); }));
 	classDef.def("FindDescendantsByName", static_cast<luabind::tableT<::WIBase> (*)(lua_State *, ::WIBase &, const std::string &)>([](lua_State *l, ::WIBase &hPanel, const std::string &name) -> luabind::tableT<::WIBase> {
 		std::vector<::WIHandle> children {};

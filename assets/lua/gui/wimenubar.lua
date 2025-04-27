@@ -62,8 +62,6 @@ function gui.WIMenuBar:OnInitialize()
 	self:AddStyleClass("menu_bar")
 	self:ScheduleUpdate()
 
-	gui.get_primary_window():SetTitleBarColor(Color.CreateFromHexColor("262626"))
-
 	self.m_eventData = get_event()
 	self:UpdateThinkState()
 end

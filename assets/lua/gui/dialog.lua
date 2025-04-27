@@ -44,7 +44,7 @@ gui.create_dialog = function(fCreateElement, parent, noFrame)
 
 	local pMainOutline = gui.create("WIOutlinedRect", frame)
 	pMainOutline:SetAutoAlignToParent(true)
-	pMainOutline:SetColor(Color.DodgerBlue)
+	pMainOutline:AddStyleClass("outline")
 
 	frame:CenterToParent()
 	frame:TrapFocus(true)

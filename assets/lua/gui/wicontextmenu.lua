@@ -86,9 +86,6 @@ function gui.WIContextMenu:OnInitialize()
 	self.m_contents = contents
 
 	self:AddStyleClass("context_menu")
-	if gui.impl.contextMenu.skin ~= nil then
-		self:SetSkin(gui.impl.contextMenu.skin)
-	end
 end
 function gui.WIContextMenu:IsPopulated()
 	return self:GetItemCount() > 0
@@ -384,6 +381,13 @@ local function get_base_element(window)
 		return window
 	end
 	if typeName ~= "Window" then
+		local el = window
+		while util.is_valid(el) do
+			if el:IsBaseElement() then
+				return el
+			end
+			el = el:GetParent()
+		end
 		local elBase = window:GetRootElement()
 		if util.is_valid(elBase) == false or util.get_type_name(elBase) ~= "Root" then
 			return
@@ -448,8 +452,5 @@ gui.is_context_menu_open = function(elBase)
 		return false
 	end
 	return util.is_valid(gui.impl.contextMenu.menues[elBase])
-end
-gui.set_context_menu_skin = function(skin)
-	gui.impl.contextMenu.skin = skin
 end
 gui.register("WIContextMenu", gui.WIContextMenu)

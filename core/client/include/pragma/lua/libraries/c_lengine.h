@@ -20,23 +20,27 @@ namespace util {
 	enum class AssetLoadFlags : uint32_t;
 };
 namespace Lua {
+	namespace asset_client {
+		DLLCLIENT void register_library(Lua::Interface &lua, luabind::module_ &modAsset);
+		DLLCLIENT Material *get_error_material();
+		DLLCLIENT void clear_unused_materials();
+		DLLCLIENT std::shared_ptr<Material> create_material(const std::string &identifier, const std::string &shader);
+		DLLCLIENT std::shared_ptr<Material> create_material(const std::string &shader);
+		DLLCLIENT std::shared_ptr<Material> create_material(const ::udm::AssetData &data);
+		DLLCLIENT Material *get_material(const std::string &identifier);
+	};
 	namespace engine {
 		DLLCLIENT void precache_material(lua_State *l, const std::string &mat);
 		DLLCLIENT void precache_model(lua_State *l, const std::string &mdl);
 		DLLCLIENT Material *load_material(lua_State *l, const std::string &mat, bool reload, bool loadInstantly);
 		DLLCLIENT Material *load_material(lua_State *l, const std::string &mat, bool reload);
 		DLLCLIENT Material *load_material(lua_State *l, const std::string &mat);
-		DLLCLIENT std::shared_ptr<prosper::Texture> load_texture(lua_State *l, const std::string &name, util::AssetLoadFlags loadFlags);
+		DLLCLIENT std::shared_ptr<prosper::Texture> load_texture(lua_State *l, const std::string &name, ::util::AssetLoadFlags loadFlags);
 		DLLCLIENT std::shared_ptr<prosper::Texture> load_texture(lua_State *l, const std::string &name);
-		DLLCLIENT std::shared_ptr<prosper::Texture> load_texture(lua_State *l, const LFile &file, const std::string &cacheName, util::AssetLoadFlags loadFlags);
+		DLLCLIENT std::shared_ptr<prosper::Texture> load_texture(lua_State *l, const LFile &file, const std::string &cacheName, ::util::AssetLoadFlags loadFlags);
 		DLLCLIENT std::shared_ptr<prosper::Texture> load_texture(lua_State *l, const LFile &file, const std::string &cacheName);
-		DLLCLIENT std::shared_ptr<prosper::Texture> load_texture(lua_State *l, const LFile &file, util::AssetLoadFlags loadFlags);
+		DLLCLIENT std::shared_ptr<prosper::Texture> load_texture(lua_State *l, const LFile &file, ::util::AssetLoadFlags loadFlags);
 		DLLCLIENT std::shared_ptr<prosper::Texture> load_texture(lua_State *l, const LFile &file);
-		DLLCLIENT Material *get_error_material();
-		DLLCLIENT void clear_unused_materials();
-		DLLCLIENT std::shared_ptr<Material> create_material(const std::string &identifier, const std::string &shader);
-		DLLCLIENT std::shared_ptr<Material> create_material(const std::string &shader);
-		DLLCLIENT Material *get_material(const std::string &identifier);
 		DLLCLIENT int create_particle_system(lua_State *l);
 		DLLCLIENT bool precache_particle_system(lua_State *l, const std::string &particle, bool reload);
 		DLLCLIENT bool precache_particle_system(lua_State *l, const std::string &particle);

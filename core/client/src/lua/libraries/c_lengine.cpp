@@ -200,16 +200,25 @@ Material *Lua::engine::load_material(lua_State *l, const std::string &mat, bool 
 Material *Lua::engine::load_material(lua_State *l, const std::string &mat, bool reload) { return load_material(l, mat, reload, true); }
 Material *Lua::engine::load_material(lua_State *l, const std::string &mat) { return load_material(l, mat, false, true); }
 
-Material *Lua::engine::get_error_material() { return client->GetMaterialManager().GetErrorMaterial(); }
-void Lua::engine::clear_unused_materials() { client->GetMaterialManager().ClearUnused(); }
+Material *Lua::asset_client::get_error_material() { return client->GetMaterialManager().GetErrorMaterial(); }
+void Lua::asset_client::clear_unused_materials() { client->GetMaterialManager().ClearUnused(); }
 
-std::shared_ptr<Material> Lua::engine::create_material(const std::string &identifier, const std::string &shader)
+void Lua::asset_client::register_library(Lua::Interface &lua, luabind::module_ &modAsset)
 {
-	return client->CreateMaterial(identifier, shader);
-	;
+	modAsset[luabind::def("create_material", static_cast<std::shared_ptr<Material> (*)(const std::string &, const std::string &)>(Lua::asset_client::create_material)),
+	  luabind::def("create_material", static_cast<std::shared_ptr<Material> (*)(const std::string &)>(Lua::asset_client::create_material)), luabind::def("create_material", static_cast<std::shared_ptr<Material> (*)(const udm::AssetData &)>(Lua::asset_client::create_material)),
+	  luabind::def("get_material", static_cast<Material *(*)(const std::string &)>(Lua::asset_client::get_material)), luabind::def("precache_model", static_cast<void (*)(lua_State *, const std::string &)>(Lua::engine::precache_model)),
+	  luabind::def("precache_material", static_cast<void (*)(lua_State *, const std::string &)>(Lua::engine::precache_material)), luabind::def("get_error_material", Lua::asset_client::get_error_material), luabind::def("clear_unused_materials", Lua::asset_client::clear_unused_materials)];
 }
-std::shared_ptr<Material> Lua::engine::create_material(const std::string &shader) { return client->CreateMaterial(shader); }
-Material *Lua::engine::get_material(const std::string &identifier)
+
+std::shared_ptr<Material> Lua::asset_client::create_material(const std::string &identifier, const std::string &shader) { return client->CreateMaterial(identifier, shader); }
+std::shared_ptr<Material> Lua::asset_client::create_material(const std::string &shader) { return client->CreateMaterial(shader); }
+std::shared_ptr<Material> Lua::asset_client::create_material(const udm::AssetData &data)
+{
+	std::string err;
+	return client->GetMaterialManager().CreateMaterial(data, err);
+}
+Material *Lua::asset_client::get_material(const std::string &identifier)
 {
 	auto *asset = client->GetMaterialManager().FindCachedAsset(identifier);
 	return asset ? msys::CMaterialManager::GetAssetObject(*asset).get() : nullptr;

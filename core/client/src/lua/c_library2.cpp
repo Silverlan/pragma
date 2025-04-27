@@ -492,7 +492,8 @@ static void register_gui(Lua::Interface &lua)
 	guiMod[wiWIContentWrapper];
 
 	auto wiNineSliceRect = luabind::class_<wgui::WI9SliceRect, ::WIBase>("NineSliceRect");
-	wiNineSliceRect.def("SetMaterial", &wgui::WI9SliceRect::SetMaterial);
+	wiNineSliceRect.def("SetMaterial", static_cast<void (wgui::WI9SliceRect ::*)(const std::string &)>(&wgui::WI9SliceRect::SetMaterial));
+	wiNineSliceRect.def("SetMaterial", static_cast<void (wgui::WI9SliceRect ::*)(Material &)>(&wgui::WI9SliceRect::SetMaterial));
 	wiNineSliceRect.def("GetMaterial", &wgui::WI9SliceRect::GetMaterial);
 	guiMod[wiNineSliceRect];
 

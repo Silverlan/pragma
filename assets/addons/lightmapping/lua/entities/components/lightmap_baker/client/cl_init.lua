@@ -144,7 +144,7 @@ function Component:ImportLightmapTexture(matIdentifier, texName, importTex)
 	matName = asset.get_normalized_path(matName, asset.TYPE_MATERIAL)
 	local mat = game.load_material(matName)
 	if mat == nil then
-		mat = game.create_material(matName, "lightmap")
+		mat = asset.create_material(matName, "lightmap")
 	end
 
 	local path = file.get_file_path(matName)
@@ -202,7 +202,7 @@ function Component:SaveLightmapTexture(jobResult, resultIdentifier, matIdentifie
 	matName = asset.get_normalized_path(matName, asset.TYPE_MATERIAL)
 	local mat = game.load_material(matName)
 	if mat == nil then
-		mat = game.create_material(matName, "lightmap")
+		mat = asset.create_material(matName, "lightmap")
 	end
 
 	local img

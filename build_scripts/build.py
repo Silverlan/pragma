@@ -590,7 +590,7 @@ if not Path(bit7z_root).is_dir():
 	print_msg("bit7z not found. Downloading...")
 	git_clone("https://github.com/rikyoz/bit7z.git")
 os.chdir("bit7z")
-reset_to_commit("bec6a22")
+reset_to_commit("0f03717") # v4.0.10
 
 print_msg("Building bit7z...")
 mkdir("build",cd=True)

@@ -14,8 +14,8 @@
 #include <queue>
 
 extern DLLCLIENT ClientState *client;
-
-WILuaSkin::WILuaSkin(std::string id) : WISkin(id), m_lua(nullptr), m_rootClass(nullptr) {}
+#pragma optimize("", off)
+WILuaSkin::WILuaSkin() : WISkin {}, m_lua(nullptr), m_rootClass(nullptr) {}
 
 void WILuaSkin::Release(WIBase *el)
 {

@@ -232,8 +232,7 @@ void Lua::gui::register_element(const std::string &className, const Lua::classOb
 	auto *el = WGUI::GetInstance().GetBaseElement(window);
 	if(!el)
 		return nullptr;
-	return ::WGUI::GetInstance().GetCursorGUIElement(
-	  el, [l](::WIBase *el) -> bool { return true; }, window);
+	return ::WGUI::GetInstance().GetCursorGUIElement(el, [l](::WIBase *el) -> bool { return true; }, window);
 }
 ::WIBase *Lua::gui::get_element_under_cursor(lua_State *l, ::WIBase &elRoot)
 {
@@ -303,15 +302,14 @@ static bool register_skin(lua_State *l, const std::string &skin, const luabind::
 		return false;
 	}
 
-	WILuaSkin *s = WGUI::GetInstance().RegisterSkin<WILuaSkin>(skin, true);
-	if(s == nullptr)
-		return false;
+	auto s = std::make_unique<WILuaSkin>();
 	WILuaSkin::Settings settings;
 	settings.vars = vars;
 	settings.skin = skinData;
 	if(baseName)
 		settings.base = dynamic_cast<WILuaSkin *>(WGUI::GetInstance().GetSkin(*baseName));
 	s->Initialize(l, settings);
+	WGUI::GetInstance().RegisterSkin(skin, std::move(s));
 	return true;
 }
 void Lua::gui::register_default_skin(const std::string &vars, const std::string &skinData)

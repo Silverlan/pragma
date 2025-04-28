@@ -429,6 +429,7 @@ class DLLCLIENT CGame : public Game {
 	virtual void OnEntityCreated(BaseEntity *ent) override;
 	virtual unsigned int GetFreeEntityIndex() override;
 	virtual void SetupEntity(BaseEntity *ent, unsigned int idx) override;
+	virtual void InitializeLuaScriptWatcher() override;
 	virtual std::shared_ptr<pragma::EntityComponentManager> InitializeEntityComponentManager() override;
   private:
 	std::queue<WIHandle> m_luaGUIObjects = {};

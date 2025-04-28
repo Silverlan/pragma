@@ -10,6 +10,7 @@
 #include "pragma/entities/c_entityfactories.h"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/lua/converters/gui_element_converter_t.hpp"
+#include "pragma/lua/c_lua_script_watcher.hpp"
 #include "pragma/input/input_binding_layer.hpp"
 #include "pragma/model/c_polymesh.h"
 #include "pragma/model/brush/c_brushmesh.h"
@@ -513,6 +514,8 @@ void CGame::SetRenderModeEnabled(pragma::rendering::SceneRenderPass renderMode, 
 void CGame::EnableRenderMode(pragma::rendering::SceneRenderPass renderMode) { SetRenderModeEnabled(renderMode, true); }
 void CGame::DisableRenderMode(pragma::rendering::SceneRenderPass renderMode) { SetRenderModeEnabled(renderMode, false); }
 bool CGame::IsRenderModeEnabled(pragma::rendering::SceneRenderPass renderMode) const { return m_renderModesEnabled[umath::to_integral(renderMode)]; }
+
+void CGame::InitializeLuaScriptWatcher() { m_scriptWatcher = std::make_unique<CLuaDirectoryWatcherManager>(this); }
 
 Material *CGame::GetLoadMaterial() { return m_matLoad.get(); }
 void CGame::OnEntityCreated(BaseEntity *ent)

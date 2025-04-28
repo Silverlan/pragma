@@ -44,7 +44,7 @@ class DLLCLIENT WILuaSkin : public WISkin {
 	void InitializeBase(WILuaSkin *base);
 	void InitializeBaseClass(WISkinClass &base, WISkinClass &cl);
   public:
-	WILuaSkin(std::string id);
+	WILuaSkin();
 	virtual void Release(WIBase *el) override;
 	virtual void Initialize(WIBase *el) override;
 	void Initialize(lua_State *l, Settings &settings);

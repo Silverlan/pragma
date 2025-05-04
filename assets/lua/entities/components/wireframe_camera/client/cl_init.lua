@@ -50,7 +50,7 @@ function Component:InitializeModel()
 		subMesh:AddLine(indices[i], indices[i + 1])
 	end
 
-	local mat = game.create_material("pfm_wireframe_line")
+	local mat = asset.create_material("pfm_wireframe_line")
 	mat:SetTexture("albedo_map", "white")
 	local matIdx = mdl:AddMaterial(0, mat)
 	subMesh:SetSkinTextureIndex(matIdx)

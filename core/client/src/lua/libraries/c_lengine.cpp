@@ -26,6 +26,7 @@ namespace pragma::string {
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/asset/util_asset.hpp"
 #include <wgui/fontmanager.h>
+#include <wgui/types/witext.h>
 #include "pragma/lua/classes/c_ldef_fontinfo.h"
 #include <texturemanager/texturemanager.h>
 #include "textureinfo.h"
@@ -69,7 +70,16 @@ void Lua::engine::register_library(lua_State *l)
 	  luabind::def("create_font", static_cast<std::shared_ptr<const FontInfo> (*)(lua_State *, const std::string &, const std::string &, FontSetFlag, uint32_t)>(Lua::engine::create_font)), luabind::def("get_font", Lua::engine::get_font),
 	  luabind::def("set_fixed_frame_delta_time_interpretation", Lua::engine::set_fixed_frame_delta_time_interpretation), luabind::def("clear_fixed_frame_delta_time_interpretation", Lua::engine::clear_fixed_frame_delta_time_interpretation),
 	  luabind::def("set_tick_delta_time_tied_to_frame_rate", Lua::engine::set_tick_delta_time_tied_to_frame_rate), luabind::def("get_window_resolution", Lua::engine::get_window_resolution), luabind::def("get_render_resolution", Lua::engine::get_render_resolution),
-	  luabind::def("get_staging_render_target", Lua::engine::get_staging_render_target), luabind::def("get_current_frame_index", &Lua::engine::get_current_frame_index), luabind::def("get_default_font_set_name", &CEngine::GetDefaultFontSetName)];
+	  luabind::def("get_staging_render_target", Lua::engine::get_staging_render_target), luabind::def("get_current_frame_index", &Lua::engine::get_current_frame_index), luabind::def("get_default_font_set_name", &CEngine::GetDefaultFontSetName),
+	  luabind::def(
+	    "get_font_sets", +[]() -> std::vector<std::string> {
+		    std::vector<std::string> fontSets;
+		    auto &fontSetMap = c_engine->GetFontSets();
+		    fontSets.reserve(fontSetMap.size());
+		    for(auto &[name, fontSet] : fontSetMap)
+			    fontSets.push_back(name);
+		    return fontSets;
+	    })];
 	modEngine[luabind::def("toggle_console", &Engine::ToggleConsole)];
 	modEngine[luabind::def(
 	  "generate_info_dump", +[](const std::string &baseName) -> std::optional<std::string> {
@@ -201,14 +211,13 @@ Material *Lua::engine::load_material(lua_State *l, const std::string &mat, bool 
 Material *Lua::engine::load_material(lua_State *l, const std::string &mat) { return load_material(l, mat, false, true); }
 
 Material *Lua::asset_client::get_error_material() { return client->GetMaterialManager().GetErrorMaterial(); }
-void Lua::asset_client::clear_unused_materials() { client->GetMaterialManager().ClearUnused(); }
 
 void Lua::asset_client::register_library(Lua::Interface &lua, luabind::module_ &modAsset)
 {
 	modAsset[luabind::def("create_material", static_cast<std::shared_ptr<Material> (*)(const std::string &, const std::string &)>(Lua::asset_client::create_material)),
 	  luabind::def("create_material", static_cast<std::shared_ptr<Material> (*)(const std::string &)>(Lua::asset_client::create_material)), luabind::def("create_material", static_cast<std::shared_ptr<Material> (*)(const udm::AssetData &)>(Lua::asset_client::create_material)),
 	  luabind::def("get_material", static_cast<Material *(*)(const std::string &)>(Lua::asset_client::get_material)), luabind::def("precache_model", static_cast<void (*)(lua_State *, const std::string &)>(Lua::engine::precache_model)),
-	  luabind::def("precache_material", static_cast<void (*)(lua_State *, const std::string &)>(Lua::engine::precache_material)), luabind::def("get_error_material", Lua::asset_client::get_error_material), luabind::def("clear_unused_materials", Lua::asset_client::clear_unused_materials)];
+	  luabind::def("precache_material", static_cast<void (*)(lua_State *, const std::string &)>(Lua::engine::precache_material)), luabind::def("get_error_material", Lua::asset_client::get_error_material)];
 }
 
 std::shared_ptr<Material> Lua::asset_client::create_material(const std::string &identifier, const std::string &shader) { return client->CreateMaterial(identifier, shader); }

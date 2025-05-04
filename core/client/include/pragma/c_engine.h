@@ -103,6 +103,7 @@ class DLLCLIENT CEngine : public Engine, public pragma::RenderContext {
 	const std::string &GetDefaultFontSetName() const;
 	const FontSet &GetDefaultFontSet() const;
 	const FontSet *FindFontSet(const std::string &name) const;
+	const std::unordered_map<std::string, std::unique_ptr<FontSet>> &GetFontSets() const { return m_fontSets; }
 	virtual void Start() override;
 	virtual void Close() override;
 	virtual void ClearConsole() override;

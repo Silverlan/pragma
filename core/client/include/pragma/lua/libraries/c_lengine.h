@@ -23,7 +23,6 @@ namespace Lua {
 	namespace asset_client {
 		DLLCLIENT void register_library(Lua::Interface &lua, luabind::module_ &modAsset);
 		DLLCLIENT Material *get_error_material();
-		DLLCLIENT void clear_unused_materials();
 		DLLCLIENT std::shared_ptr<Material> create_material(const std::string &identifier, const std::string &shader);
 		DLLCLIENT std::shared_ptr<Material> create_material(const std::string &shader);
 		DLLCLIENT std::shared_ptr<Material> create_material(const ::udm::AssetData &data);

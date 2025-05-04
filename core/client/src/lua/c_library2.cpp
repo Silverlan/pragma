@@ -263,7 +263,28 @@ static void register_gui(Lua::Interface &lua)
 		  luabind::def("close_main_menu",+[](ClientState *cl) { cl->CloseMainMenu();
 			}),
 		  luabind::def("is_main_menu_open",+[](ClientState *cl) -> bool { return cl->IsMainMenuOpen();
-		})
+		}),
+	  luabind::def(
+	    "reload_text_elements", +[]() {
+		    auto &baseElements = WGUI::GetInstance().GetBaseElements();
+		    std::function<void(WIBase &)> updateTextElements = nullptr;
+		    updateTextElements = [&updateTextElements](WIBase &el) {
+			    if(typeid(el) == typeid(WIText)) {
+				    static_cast<WIText &>(el).ReloadFont();
+				    static_cast<WIText &>(el).SizeToContents();
+			    }
+			    for(auto &hEl : *el.GetChildren()) {
+				    if(!hEl.IsValid())
+					    continue;
+				    updateTextElements(*hEl.get());
+			    }
+		    };
+		    for(auto &hEl : baseElements) {
+			    if(!hEl.IsValid())
+				    continue;
+			    updateTextElements(const_cast<WIBase &>(*hEl.get()));
+		    }
+	    })
 		];
 
 	//

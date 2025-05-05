@@ -410,6 +410,7 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	classDef.def("Resize", &::WIBase::Resize);
 	classDef.def("ScheduleUpdate", &::WIBase::ScheduleUpdate);
 	classDef.def("SetSkin", &::WIBase::SetSkin);
+	classDef.def("GetSkinName", &::WIBase::GetSkinName);
 	classDef.def("ResetSkin", &::WIBase::ResetSkin);
 	classDef.def("GetStyleClasses", &::WIBase::GetStyleClasses);
 	classDef.def("AddStyleClass", &::WIBase::AddStyleClass);

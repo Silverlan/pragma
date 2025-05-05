@@ -1875,9 +1875,12 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defWindow.def("SetResizable", +[](prosper::Window &window, bool resizable) { window->SetResizable(resizable); });
 	defWindow.def("ClearCursor", static_cast<void (*)(prosper::Window &)>([](prosper::Window &window) { window->ClearCursor(); }));
 	defWindow.def("SetBorderColor", +[](prosper::Window &window, const Color &color) { window->SetBorderColor(color); });
+	defWindow.def("GetBorderColor", +[](prosper::Window &window) -> std::optional<Color> { return window->GetBorderColor(); });
 	defWindow.def("SetTitleBarColor", +[](prosper::Window &window, const Color &color) { window->SetTitleBarColor(color); });
+	defWindow.def("GetTitleBarColor", +[](prosper::Window &window) -> std::optional<Color> { return window->GetTitleBarColor(); });
 	defWindow.def("GetKeyState", static_cast<pragma::platform::KeyState (*)(prosper::Window &, pragma::platform::Key)>([](prosper::Window &window, pragma::platform::Key key) -> pragma::platform::KeyState { return window->GetKeyState(key); }));
-	defWindow.def("GetMouseButtonState", static_cast<pragma::platform::KeyState (*)(prosper::Window &, pragma::platform::MouseButton)>([](prosper::Window &window, pragma::platform::MouseButton mouseButton) -> pragma::platform::KeyState { return window->GetMouseButtonState(mouseButton); }));
+	defWindow.def("GetMouseButtonState",
+	  static_cast<pragma::platform::KeyState (*)(prosper::Window &, pragma::platform::MouseButton)>([](prosper::Window &window, pragma::platform::MouseButton mouseButton) -> pragma::platform::KeyState { return window->GetMouseButtonState(mouseButton); }));
 	defWindow.def("SetCursorInputMode", static_cast<void (*)(prosper::Window &, pragma::platform::CursorMode)>([](prosper::Window &window, pragma::platform::CursorMode cursorMode) { window->SetCursorInputMode(cursorMode); }));
 	defWindow.def("GetCursorInputMode", static_cast<pragma::platform::CursorMode (*)(prosper::Window &)>([](prosper::Window &window) -> pragma::platform::CursorMode { return window->GetCursorInputMode(); }));
 	defWindow.def("SetCursor", static_cast<void (*)(prosper::Window &, pragma::platform::Cursor &)>([](prosper::Window &window, pragma::platform::Cursor &cursor) { window->SetCursor(cursor); }));

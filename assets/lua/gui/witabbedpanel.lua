@@ -23,7 +23,7 @@ function gui.WITabbedPanelTab:OnInitialize()
 	pOutline:SetColor(Color(38, 38, 38, 255))
 
 	local pText = gui.create("WIText", pTab)
-	pText:SetColor(Color.LightGrey)
+	pText:AddStyleClass("tab_title")
 	pText:SizeToContents()
 	self.m_pText = pText
 

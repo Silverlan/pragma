@@ -161,73 +161,6 @@ target_include_directories(vorbis PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINA
 add_dependencies(vorbis ogg)
 #
 
-# zlib
-set(ZLIB_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/zlib CACHE STRING "" FORCE)
-pr_include_third_party_library(zlib INC "${ZLIB_INCLUDE_DIR}")
-
-target_include_directories(zlib PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib>")
-
-target_include_directories(zlibstatic PUBLIC "${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib" "${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib")
-pr_set_target_folder(example third_party_libs/zlib)
-pr_set_target_folder(minigzip third_party_libs/zlib)
-pr_set_target_folder(zlib third_party_libs/zlib)
-pr_set_target_folder(zlibstatic third_party_libs/zlib)
-
-# if(UNIX) intervene here beacuse libzip uses pkgconfig
-set(ZLIB_INCLUDE_DIR
-    ${DEPENDENCY_ZLIB_INCLUDE}
-    CACHE STRING "" FORCE)
-set(ZLIB_LIBRARY
-    "$<TARGET_LINKER_FILE:zlib>"
-    CACHE STRING "" FORCE)
-add_library(ZLIB::ZLIB ALIAS zlib) # for libzip just ahead.
-set(ZLIB_LINK_LIBRARY_NAME "ZLIB::ZLIB")
-# endif()
-#
-
-# libzip
-set(LIBZIP_DO_INSTALL
-    OFF
-    CACHE BOOL ".." FORCE)
-set(ENABLE_BZIP2
-    OFF
-    CACHE BOOL ".." FORCE)
-set(ENABLE_LZMA
-    OFF
-    CACHE BOOL ".." FORCE)
-pr_include_third_party_library(libzip TARGET zip INC "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/libzip/lib")
-pr_set_include_path(libzip_conf "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/libzip/xcode")
-target_include_directories(zip PUBLIC ${DEPENDENCY_ZLIB_INCLUDE}) # ew.
-pr_set_target_folder(add_from_filep third_party_libs/libzip)
-pr_set_target_folder(can_clone_file third_party_libs/libzip)
-pr_set_target_folder(check third_party_libs/libzip)
-pr_set_target_folder(cleanup third_party_libs/libzip)
-pr_set_target_folder(dist third_party_libs/libzip)
-pr_set_target_folder(distcheck third_party_libs/libzip)
-pr_set_target_folder(fopen_unchanged third_party_libs/libzip)
-pr_set_target_folder(fread third_party_libs/libzip)
-pr_set_target_folder(fseek third_party_libs/libzip)
-pr_set_target_folder(hole third_party_libs/libzip)
-# pr_set_target_folder(in-memory third_party_libs/libzip)
-pr_set_target_folder(man third_party_libs/libzip)
-pr_set_target_folder(nonrandomopen third_party_libs/libzip)
-pr_set_target_folder(nonrandomopentest third_party_libs/libzip)
-pr_set_target_folder(testinput third_party_libs/libzip)
-pr_set_target_folder(tryopen third_party_libs/libzip)
-# pr_set_target_folder(update_zip_err_str third_party_libs/libzip)
-pr_set_target_folder(update_zip_errors third_party_libs/libzip)
-pr_set_target_folder(update-html third_party_libs/libzip)
-pr_set_target_folder(update-man third_party_libs/libzip)
-pr_set_target_folder(zip third_party_libs/libzip)
-pr_set_target_folder(zipcmp third_party_libs/libzip)
-pr_set_target_folder(zipmerge third_party_libs/libzip)
-pr_set_target_folder(ziptool third_party_libs/libzip)
-pr_set_target_folder(ziptool_regress third_party_libs/libzip)
-pr_set_target_folder(lzma third_party_libs/libzip)
-
-add_dependencies(zip zlib)
-#
-
 # bzip2
 pr_include_third_party_library(bzip2 TARGET libz2 INC "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/bzip2")
 pr_set_target_folder(bzip2 third_party_libs/bzip2)
@@ -258,28 +191,6 @@ target_include_directories(noiseutils-static PRIVATE ${CMAKE_CURRENT_LIST_DIR}/t
 
 pr_find_library(libnoise NAMES "noise" PATHS "third_party_libs/libnoise/src/${BINARY_PRAGMA_DIR}")
 pr_find_library(libnoiseutils NAMES "noiseutils-static" PATHS "third_party_libs/libnoise/noiseutils/${BINARY_PRAGMA_DIR}")
-#
-
-# libpng
-pr_include_third_party_library(libpng NAME lpng TARGET png_static INC "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/libpng")
-pr_set_include_path(lpng_build "${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/libpng")
-add_dependencies(png_static zlib)
-
-target_include_directories(png_static PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/libpng>")
-#
-
-pr_set_target_folder(genfiles third_party_libs/libpng)
-pr_set_target_folder(png third_party_libs/libpng)
-pr_set_target_folder(png_static third_party_libs/libpng)
-pr_set_target_folder(pngfix third_party_libs/libpng)
-pr_set_target_folder(png-fix-itxt third_party_libs/libpng)
-pr_set_target_folder(pngimage third_party_libs/libpng)
-pr_set_target_folder(pngstest third_party_libs/libpng)
-pr_set_target_folder(pngtest third_party_libs/libpng)
-pr_set_target_folder(pngunknown third_party_libs/libpng)
-pr_set_target_folder(pngvalid third_party_libs/libpng)
-
-target_include_directories(png PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
 #
 
 # lunasvg

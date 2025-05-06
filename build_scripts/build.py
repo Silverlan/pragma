@@ -18,6 +18,8 @@ if platform == "linux":
 	defaultGenerator = "Ninja Multi-Config"
 else:
 	defaultGenerator = "Visual Studio 17 2022"
+	defaultToolset = "msvc"
+
 parser.add_argument('--generator', help='The generator to use.', default=defaultGenerator)
 parser.add_argument("--with-essential-client-modules", type=str2bool, nargs='?', const=True, default=True, help="Include essential modules required to run Pragma.")
 parser.add_argument("--with-common-modules", type=str2bool, nargs='?', const=True, default=True, help="Include non-essential but commonly used modules (e.g. audio and physics modules).")
@@ -48,6 +50,8 @@ parser.add_argument("--skip-repository-updates", type=str2bool, nargs='?', const
 if platform == "linux":
 	parser.add_argument("--no-sudo", type=str2bool, nargs='?', const=True, default=False, help="Will not run sudo commands. System packages will have to be installed manually.")
 	parser.add_argument("--no-confirm", type=str2bool, nargs='?', const=True, default=False, help="Disable any interaction with user (suitable for automated run).")
+else:
+	parser.add_argument('--toolset', help='The toolset to use. Supported toolsets: msvc, clang-cl', default=defaultToolset)
 args,unknown = parser.parse_known_args()
 args = vars(args)
 input_args = args
@@ -86,6 +90,8 @@ if platform == "linux":
 	cxx_compiler = args["cxx_compiler"]
 	no_sudo = args["no_sudo"]
 	no_confirm = args["no_confirm"]
+else:
+	toolset = args["toolset"]
 generator = args["generator"]
 with_essential_client_modules = args["with_essential_client_modules"]
 with_common_modules = args["with_common_modules"]
@@ -136,6 +142,8 @@ print("Inputs:")
 if platform == "linux":
 	print("cxx_compiler: " +cxx_compiler)
 	print("c_compiler: " +c_compiler)
+else:
+	print("toolset: " +toolset)
 
 print("generator: " +generator)
 print("with_essential_client_modules: " +str(with_essential_client_modules))
@@ -160,6 +168,18 @@ if platform == "linux":
 	print("no_confirm: " +str(no_confirm))
 print("cmake_args: " +', '.join(additional_cmake_args))
 print("modules: " +', '.join(modules))
+
+if platform == "win32":
+	toolsetArgs = None
+	if toolset == "msvc":
+		toolset = None # Let the compiler use the default toolset
+	elif toolset == "clang-cl":
+		toolsetArgs = [
+			"-T", "ClangCL",
+			"-A", "x64",
+			"-DCMAKE_C_FLAGS=-Wno-error -Wno-unused-command-line-argument -Wno-enum-constexpr-conversion -fexceptions -fcxx-exceptions /EHsc",
+			"-DCMAKE_CXX_FLAGS=-Wno-error -Wno-unused-command-line-argument -Wno-enum-constexpr-conversion -fexceptions  -fcxx-exceptions /EHsc",
+		]
 
 if update:
 	os.chdir(root)
@@ -343,14 +363,13 @@ if platform == "linux":
 	zlib_lib = zlib_lib_path +"/libz.a"
 else:
 	zlib_lib_path = zlib_root +"/build/" +build_config
-	zlib_lib = zlib_lib_path +"/zlibstatic.lib"
+	zlib_lib = zlib_lib_path +"/zs.lib"
 zlib_include_dirs = zlib_root +" " +zlib_lib_path
 if not Path(zlib_root).is_dir():
 	print_msg("zlib not found. Downloading...")
-	git_clone("https://github.com/madler/zlib")
+	git_clone("https://github.com/Silverlan/zlib.git")
 	os.chdir("zlib")
-	#Bump to zlib 1.3 to fix  CVE-2022-37434
-	reset_to_commit("09155eaa2f9270dc4ed1fa13e2b4b2613e6e4851")
+	reset_to_commit("6bc8ac0") # v1.3.1
 
 	os.chdir("../")
 os.chdir("zlib")
@@ -358,12 +377,84 @@ os.chdir("zlib")
 # Build
 print_msg("Building zlib...")
 mkdir("build",cd=True)
-cmake_configure("..",generator)
-cmake_build(build_config)
+zlib_build_dir = os.getcwd()
+cmake_configure("..",generator,toolsetArgs,["-DZLIB_BUILD_TESTING=OFF", "-DZLIB_BUILD_MINIZIP=OFF"])
+cmake_build(build_config, ["zlib", "zlibstatic"])
 if platform == "win32":
 	zlib_conf_root = normalize_path(os.getcwd())
 cp("zconf.h","../")
 os.chdir("../..")
+
+cmake_args += [
+	"-DDEPENDENCY_ZLIB_INCLUDE=" +zlib_root,
+	"-DDEPENDENCY_ZLIB_LIBRARY=" +zlib_lib
+]
+
+########## libzip ##########
+ZLIB_SOURCE = normalize_path(zlib_root)
+ZLIB_INCLUDE = normalize_path(zlib_root)
+ZLIB_LIBPATH = normalize_path(zlib_lib_path)
+
+# Download
+os.chdir(deps_dir)
+libzip_root = os.getcwd() +"/libzip"
+if not Path(libzip_root).is_dir():
+	print_msg("libzip not found. Downloading...")
+	git_clone("https://github.com/nih-at/libzip.git")
+	os.chdir("libzip")
+	reset_to_commit("f30f529") # v1.11.3
+
+	os.chdir("../")
+os.chdir("libzip")
+
+# Build
+print_msg("Building libzip...")
+mkdir("build",cd=True)
+cmake_configure("..",generator,toolsetArgs,["-DLIBZIP_DO_INSTALL=OFF", "-DENABLE_BZIP2=OFF", "-DENABLE_LZMA=OFF", "-DZLIB_INCLUDE_DIR=" +ZLIB_INCLUDE,"-DZLIB_LIBRARY=" +zlib_lib])
+cmake_build(build_config)
+os.chdir(deps_dir)
+
+if platform == "linux":
+	libzip_lib_path = libzip_root +"/build/lib/"
+	libzip_lib = libzip_lib_path +"libzip.a"
+else:
+	libzip_lib_path = libzip_root +"/build/lib/" +build_config +"/"
+	libzip_lib = libzip_lib_path +"zip.lib"
+
+cmake_args += [
+	"-DDEPENDENCY_LIBZIP_INCLUDE=" +libzip_root +"/lib/",
+	"-DDEPENDENCY_LIBZIP_BUILD_INCLUDE=" +libzip_root +"/build/",
+	"-DDEPENDENCY_LIBZIP_LIBRARY=" +libzip_lib
+]
+if platform == "win32":
+	mkpath(install_dir +"/bin/")
+	cp(libzip_lib_path +"zip.dll", install_dir +"/bin/")
+
+########## libpng ##########
+# Download
+os.chdir(deps_dir)
+libpng_root = os.getcwd() +"/libpng"
+if not Path(libpng_root).is_dir():
+	print_msg("libpng not found. Downloading...")
+	git_clone("https://github.com/glennrp/libpng.git", branch = "libpng16")
+	os.chdir("libpng")
+	reset_to_commit("5a0b7e9c29ec23f87c601622cb2db01781a6cbba")
+
+	os.chdir("../")
+os.chdir("libpng")
+
+# Build
+print_msg("Building libpng...")
+mkdir("build",cd=True)
+cmake_configure("..",generator,toolsetArgs,["-DCMAKE_POLICY_VERSION_MINIMUM=3.5","-DZLIB_INCLUDE_DIR=" +ZLIB_INCLUDE,"-DZLIB_LIBRARY=" +ZLIB_LIBPATH])
+cmake_build(build_config, ["png_static"])
+os.chdir(deps_dir)
+
+cmake_args += [
+	"-DDEPENDENCY_LIBPNG_INCLUDE=" +libpng_root,
+	"-DDEPENDENCY_LIBPNG_BUILD_INCLUDE=" +libpng_root +"/build/",
+	"-DDEPENDENCY_LIBPNG_LIBRARY=" +libpng_root +"/build/" +build_config +"/libpng16_static.lib",
+]
 
 ########## icu ##########
 # Download
@@ -424,9 +515,6 @@ else:
 print_msg("Building boost...")
 
 os.chdir(boost_root)
-ZLIB_SOURCE = normalize_path(zlib_root)
-ZLIB_INCLUDE = normalize_path(zlib_root)
-ZLIB_LIBPATH = normalize_path(zlib_lib_path)
 if platform == "linux":
     #do we even need static build?
 	subprocess.run([boost_root +"/bootstrap.sh"],check=True,shell=True)
@@ -443,7 +531,7 @@ else:
 	# boost_url = "https://boostorg.jfrog.io/artifactory/main/release/1.80.0/source/boost_1_80_0.tar.bz2"
 	# The URL above is currently unavailable, so we'll use this mirror for the time being ( https://github.com/boostorg/boost/issues/842 )
 	boost_url = "https://archives.boost.io/release/1.80.0/source/boost_1_80_0.tar.bz2"
-	cmake_configure("..",generator,["-DBOOST_DISABLE_TESTS=ON","-DZLIB_INCLUDE_DIR=" +ZLIB_INCLUDE,"-DZLIB_LIBRARY=" +ZLIB_LIBPATH,"-DBOOST_URL=" +boost_url])
+	cmake_configure("..",generator,toolsetArgs,["-DBOOST_DISABLE_TESTS=ON","-DZLIB_INCLUDE_DIR=" +ZLIB_INCLUDE,"-DZLIB_LIBRARY=" +ZLIB_LIBPATH,"-DBOOST_URL=" +boost_url])
 	cmake_build("Release")
 	os.chdir("../..")
 
@@ -474,7 +562,7 @@ else:
 	# os.chdir(deps_dir)
 	# mkdir("luajit_build")
 	# os.chdir("luajit_build")
-	# cmake_configure(root +"/third_party_libs/luajit",generator,["-DBUILD_SHARED_LIBS=1"])
+	# cmake_configure(root +"/third_party_libs/luajit",generator,toolsetArgs,["-DBUILD_SHARED_LIBS=1"])
 	# cmake_build("Release")
     
 	# lua_jit_lib = normalize_path(deps_dir +"/luajit_build/src/Release/luajit.lib")
@@ -529,7 +617,7 @@ if with_swiftshader:
 		
 		print_msg("Building SwiftShader...")
 		os.chdir("build")
-		cmake_configure("..",generator)
+		cmake_configure("..",generator,toolsetArgs)
 		cmake_build("Release")
 	else:
 		if not Path(swiftshader_root).is_dir():
@@ -571,18 +659,6 @@ if platform == "win32":
 	mkpath(install_dir +"/bin/")
 	cp(deps_dir +"/vcpkg/installed/x64-windows/bin/7zip.dll",install_dir +"/bin/")
 
-########## zlib (for freetype) ############
-if platform == "win32":
-	os.chdir(deps_dir)
-	mkdir("zlib_build",cd=True)
-	zlib_cmake_args = [
-			"-DCMAKE_INSTALL_PREFIX="+deps_dir_fs+"/zlib_prefix",
-			"-DBUILD_SHARED_LIBS=ON"
-			]
-	cmake_configure(root+"/third_party_libs/zlib",generator,zlib_cmake_args)
-	cmake_build("Release")
-	cmake_build("Release",["install"])
-
 ########## bit7z ##########
 os.chdir(deps_dir)
 bit7z_root = normalize_path(os.getcwd() +"/bit7z")
@@ -597,7 +673,7 @@ mkdir("build",cd=True)
 bit7z_cmake_args = ["-DBIT7Z_AUTO_FORMAT=ON"]
 if platform == "linux":
 	bit7z_cmake_args.append("-DCMAKE_CXX_FLAGS=-fPIC")
-cmake_configure("..",generator,bit7z_cmake_args)
+cmake_configure("..",generator,toolsetArgs,bit7z_cmake_args)
 cmake_build("Release")
 if platform == "linux":
 	bit7z_lib_name = "libbit7z.a"
@@ -617,7 +693,7 @@ reset_to_commit("34ea957") # v0.8.0
 print_msg("Building cpptrace...")
 mkdir("build",cd=True)
 cpptrace_cmake_args = ["-DBUILD_SHARED_LIBS=ON"]
-cmake_configure("..",generator,cpptrace_cmake_args)
+cmake_configure("..",generator,toolsetArgs,cpptrace_cmake_args)
 cmake_build(build_config)
 if platform == "linux":
 	cpptrace_lib_name = "libcpptrace.so"
@@ -655,7 +731,7 @@ if platform == "win32":
 	freetype_cmake_args.append("-DCMAKE_POLICY_VERSION_MINIMUM=4.0")
 
 	print_msg("Building freetype...")
-	cmake_configure(freetype_root,generator,freetype_cmake_args)
+	cmake_configure(freetype_root,generator,toolsetArgs,freetype_cmake_args)
 	cmake_build("Release")
 	freetype_include_dir += freetype_root+"/include"
 	freetype_lib += freetype_root+"/build/Release/freetype.lib"
@@ -1060,10 +1136,9 @@ if platform == "win32":
 	# a lot of issues, so we'll copy it over to where we need it.
 	# TODO: Implement a proper solution for this
 	curDir = os.getcwd()
-	os.chdir(root +"/third_party_libs/zlib")
-	cp("zconf.h","../libzip/lib/")
-	os.chdir(root +"/third_party_libs/libzip")
-	cp(build_dir +"/third_party_libs/libzip/zipconf.h",root +"/external_libs/util_zip/include")
+	os.chdir(zlib_build_dir)
+	cp("zconf.h",libzip_root +"/lib/")
+	cp(libzip_root +"/build/zipconf.h",root +"/external_libs/util_zip/include")
 	os.chdir(curDir)
 	#
 
@@ -1133,6 +1208,7 @@ if with_lua_debugger:
 		luasocket_args.append("-DLUA_LIBRARY=" +root +"/third_party_libs/luajit/src/lua51.lib")
 	else:
 		luasocket_args.append("-DLUA_LIBRARY=" +root +"/third_party_libs/luajit/src/libluajit-p.so")
+	luasocket_args.append("-DCMAKE_POLICY_VERSION_MINIMUM=3.5")
 	cmake_configure("..",generator,luasocket_args)
 	cmake_build(build_config)
 	cp(luasocket_root +"/src/socket.lua",install_dir +"/lua/modules/")

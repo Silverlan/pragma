@@ -1,2 +1,3 @@
-python build_scripts/build.py
+@echo off
+python build_scripts/build.py %*
 pause

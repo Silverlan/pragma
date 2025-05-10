@@ -232,7 +232,7 @@ pr_install_targets(
     VTFLib13
     spdlog
     mpaheader
-    libz2
+    bz2
     KVParser
     lunasvg
     plutovg)

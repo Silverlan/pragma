@@ -162,10 +162,11 @@ add_dependencies(vorbis ogg)
 #
 
 # bzip2
-pr_include_third_party_library(bzip2 TARGET libz2 INC "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/bzip2")
-pr_set_target_folder(bzip2 third_party_libs/bzip2)
-pr_set_target_folder(bzip2recover third_party_libs/bzip2)
-pr_set_target_folder(libz2 third_party_libs/bzip2)
+set(ENABLE_LIB_ONLY ON CACHE BOOL ON FORCE)
+pr_include_third_party_library(bzip2 TARGET bz2 INC "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/bzip2")
+pr_set_target_folder(bz2 third_party_libs/bzip2)
+pr_set_target_folder(bz2_static third_party_libs/bzip2)
+pr_set_target_folder(bz2_ObjLib third_party_libs/bzip2)
 #
 
 # libnoise

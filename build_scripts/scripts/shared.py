@@ -84,8 +84,11 @@ def git_clone_commit(name, path, url, commitSha, branch=None):
 	reset_to_commit(commitSha)
 	return path
 
-def cmake_configure(scriptPath,generator,toolsetArgs=None,additionalArgs=[]):
+def cmake_configure(scriptPath,generator,toolsetArgs=None,additionalArgs=[],cflags=[]):
 	args = ["cmake",scriptPath,"-G",generator]
+	if cflags:
+		additionalArgs.append("-DCMAKE_C_FLAGS=" + " ".join(cflags))
+		additionalArgs.append("-DCMAKE_CXX_FLAGS=" + " ".join(cflags))
 	if toolsetArgs:
 		args += toolsetArgs
 	args += additionalArgs

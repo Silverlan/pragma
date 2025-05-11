@@ -1,2 +1,3 @@
-python3 build_scripts/build.py
+#!/usr/bin/env bash
+python3 build_scripts/build.py "$@"
 read -p "Press [Enter] key to continue..."

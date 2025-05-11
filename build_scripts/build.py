@@ -18,6 +18,8 @@ if platform == "linux":
 	defaultGenerator = "Ninja Multi-Config"
 else:
 	defaultGenerator = "Visual Studio 17 2022"
+	defaultToolset = "msvc"
+
 parser.add_argument('--generator', help='The generator to use.', default=defaultGenerator)
 parser.add_argument("--with-essential-client-modules", type=str2bool, nargs='?', const=True, default=True, help="Include essential modules required to run Pragma.")
 parser.add_argument("--with-common-modules", type=str2bool, nargs='?', const=True, default=True, help="Include non-essential but commonly used modules (e.g. audio and physics modules).")
@@ -48,6 +50,8 @@ parser.add_argument("--skip-repository-updates", type=str2bool, nargs='?', const
 if platform == "linux":
 	parser.add_argument("--no-sudo", type=str2bool, nargs='?', const=True, default=False, help="Will not run sudo commands. System packages will have to be installed manually.")
 	parser.add_argument("--no-confirm", type=str2bool, nargs='?', const=True, default=False, help="Disable any interaction with user (suitable for automated run).")
+else:
+	parser.add_argument('--toolset', help='The toolset to use. Supported toolsets: msvc, clang, clang-cl', default=defaultToolset)
 args,unknown = parser.parse_known_args()
 args = vars(args)
 input_args = args
@@ -86,6 +90,8 @@ if platform == "linux":
 	cxx_compiler = args["cxx_compiler"]
 	no_sudo = args["no_sudo"]
 	no_confirm = args["no_confirm"]
+else:
+	toolset = args["toolset"]
 generator = args["generator"]
 with_essential_client_modules = args["with_essential_client_modules"]
 with_common_modules = args["with_common_modules"]
@@ -136,6 +142,10 @@ print("Inputs:")
 if platform == "linux":
 	print("cxx_compiler: " +cxx_compiler)
 	print("c_compiler: " +c_compiler)
+else:
+	print("toolset: " +toolset)
+	if toolset == "clang":
+		generator = "Ninja Multi-Config"
 
 print("generator: " +generator)
 print("with_essential_client_modules: " +str(with_essential_client_modules))
@@ -160,6 +170,29 @@ if platform == "linux":
 	print("no_confirm: " +str(no_confirm))
 print("cmake_args: " +', '.join(additional_cmake_args))
 print("modules: " +', '.join(modules))
+
+toolsetArgs = None
+toolsetCFlags = None
+def cmake_configure_def_toolset(scriptPath,generator,additionalArgs=[]):
+	cmake_configure(scriptPath,generator,toolsetArgs,additionalArgs,toolsetCFlags)
+
+if platform == "win32":
+	if toolset == "msvc":
+		toolset = None # Let the compiler use the default toolset
+	elif toolset == "clang":
+		toolsetArgs = [
+			"-DCMAKE_C_COMPILER=clang.exe",
+			"-DCMAKE_CXX_COMPILER=clang++.exe",
+			"-DCMAKE_MAKE_PROGRAM=ninja.exe"
+		]
+		toolsetCFlags = ["-fexceptions", "-fcxx-exceptions", "--target=x86_64-pc-windows-msvc"]
+	elif toolset == "clang-cl":
+		toolsetArgs = [
+			"-T", "ClangCL",
+			"-A", "x64",
+			"-DCMAKE_CXX_SCAN_FOR_MODULES=ON"
+		]
+		toolsetCFlags = ["-Wno-error", "-Wno-unused-command-line-argument", "-Wno-enum-constexpr-conversion", "-fexceptions", "-fcxx-exceptions", "/EHsc"]
 
 if update:
 	os.chdir(root)
@@ -205,6 +238,8 @@ if platform == "linux":
 
 def execscript(filepath):
 	global generator
+	global toolsetArgs
+	global toolsetCFlags
 	global build_config
 	global build_directory
 	global deps_directory
@@ -221,6 +256,8 @@ def execscript(filepath):
 	g = {}
 	l = {
 		"generator": generator,
+		"toolsetArgs": toolsetArgs,
+		"toolsetCFlags": toolsetCFlags,
 		"build_config": build_config,
 		"build_directory": build_directory,
 		"deps_directory": deps_directory,
@@ -241,6 +278,7 @@ def execscript(filepath):
 		"print_warning": print_warning,
 		"git_clone": git_clone,
 		"cmake_configure": cmake_configure,
+		"cmake_configure_def_toolset": cmake_configure_def_toolset,
 		"cmake_build": cmake_build,
 		"mkdir": mkdir,
 		"http_download": http_download,
@@ -343,14 +381,13 @@ if platform == "linux":
 	zlib_lib = zlib_lib_path +"/libz.a"
 else:
 	zlib_lib_path = zlib_root +"/build/" +build_config
-	zlib_lib = zlib_lib_path +"/zlibstatic.lib"
+	zlib_lib = zlib_lib_path +"/zs.lib"
 zlib_include_dirs = zlib_root +" " +zlib_lib_path
 if not Path(zlib_root).is_dir():
 	print_msg("zlib not found. Downloading...")
-	git_clone("https://github.com/madler/zlib")
+	git_clone("https://github.com/Silverlan/zlib.git")
 	os.chdir("zlib")
-	#Bump to zlib 1.3 to fix  CVE-2022-37434
-	reset_to_commit("09155eaa2f9270dc4ed1fa13e2b4b2613e6e4851")
+	reset_to_commit("6bc8ac0") # v1.3.1
 
 	os.chdir("../")
 os.chdir("zlib")
@@ -358,12 +395,84 @@ os.chdir("zlib")
 # Build
 print_msg("Building zlib...")
 mkdir("build",cd=True)
-cmake_configure("..",generator)
-cmake_build(build_config)
+zlib_build_dir = os.getcwd()
+cmake_configure_def_toolset("..",generator,["-DZLIB_BUILD_TESTING=OFF", "-DZLIB_BUILD_MINIZIP=OFF"])
+cmake_build(build_config, ["zlib", "zlibstatic"])
 if platform == "win32":
 	zlib_conf_root = normalize_path(os.getcwd())
 cp("zconf.h","../")
 os.chdir("../..")
+
+cmake_args += [
+	"-DDEPENDENCY_ZLIB_INCLUDE=" +zlib_root,
+	"-DDEPENDENCY_ZLIB_LIBRARY=" +zlib_lib
+]
+
+########## libzip ##########
+ZLIB_SOURCE = normalize_path(zlib_root)
+ZLIB_INCLUDE = normalize_path(zlib_root)
+ZLIB_LIBPATH = normalize_path(zlib_lib_path)
+
+# Download
+os.chdir(deps_dir)
+libzip_root = os.getcwd() +"/libzip"
+if not Path(libzip_root).is_dir():
+	print_msg("libzip not found. Downloading...")
+	git_clone("https://github.com/nih-at/libzip.git")
+	os.chdir("libzip")
+	reset_to_commit("f30f529") # v1.11.3
+
+	os.chdir("../")
+os.chdir("libzip")
+
+# Build
+print_msg("Building libzip...")
+mkdir("build",cd=True)
+cmake_configure_def_toolset("..",generator,["-DLIBZIP_DO_INSTALL=OFF", "-DENABLE_BZIP2=OFF", "-DENABLE_LZMA=OFF", "-DZLIB_INCLUDE_DIR=" +ZLIB_INCLUDE,"-DZLIB_LIBRARY=" +zlib_lib])
+cmake_build(build_config)
+os.chdir(deps_dir)
+
+if platform == "linux":
+	libzip_lib_path = libzip_root +"/build/lib/"
+	libzip_lib = libzip_lib_path +"libzip.a"
+else:
+	libzip_lib_path = libzip_root +"/build/lib/" +build_config +"/"
+	libzip_lib = libzip_lib_path +"zip.lib"
+
+cmake_args += [
+	"-DDEPENDENCY_LIBZIP_INCLUDE=" +libzip_root +"/lib/",
+	"-DDEPENDENCY_LIBZIP_BUILD_INCLUDE=" +libzip_root +"/build/",
+	"-DDEPENDENCY_LIBZIP_LIBRARY=" +libzip_lib
+]
+if platform == "win32":
+	mkpath(install_dir +"/bin/")
+	cp(libzip_lib_path +"zip.dll", install_dir +"/bin/")
+
+########## libpng ##########
+# Download
+os.chdir(deps_dir)
+libpng_root = os.getcwd() +"/libpng"
+if not Path(libpng_root).is_dir():
+	print_msg("libpng not found. Downloading...")
+	git_clone("https://github.com/glennrp/libpng.git", branch = "libpng16")
+	os.chdir("libpng")
+	reset_to_commit("ea127968204cc5d10f3fc9250c306b9e8cbd9b80") # v1.6.48
+
+	os.chdir("../")
+os.chdir("libpng")
+
+# Build
+print_msg("Building libpng...")
+mkdir("build",cd=True)
+cmake_configure_def_toolset("..",generator,["-DPNG_SHARED=OFF","-DCMAKE_POLICY_VERSION_MINIMUM=3.5","-DZLIB_INCLUDE_DIR=" +ZLIB_INCLUDE,"-DZLIB_LIBRARY=" +ZLIB_LIBPATH])
+cmake_build(build_config, ["png_static"])
+os.chdir(deps_dir)
+
+cmake_args += [
+	"-DDEPENDENCY_LIBPNG_INCLUDE=" +libpng_root,
+	"-DDEPENDENCY_LIBPNG_BUILD_INCLUDE=" +libpng_root +"/build/",
+	"-DDEPENDENCY_LIBPNG_LIBRARY=" +libpng_root +"/build/" +build_config +"/libpng16_static.lib",
+]
 
 ########## icu ##########
 # Download
@@ -396,58 +505,58 @@ else:
 ########## boost ##########
 # Download
 os.chdir(deps_dir)
-#TODO: Newer versions of clang have an bound error with boost::mpl::integral_c bounds (this relied on UB on compile-time constants). See issue https://github.com/boostorg/mpl/issues/69. For now I'll bump boost to 1.81. Macports has a patch that works for 1.76 and up. Investigate.
-#Also boost is a package in vcpkg. Look if we can integrate that.
-if platform == "linux":
-	boost_root = os.getcwd() +"/boost_1_81_0"
-	if not Path(boost_root).is_dir():
-		print_msg("boost not found. Downloading...")
-		zipName = "boost_1_81_0.tar.gz"
-		boost_url0 = "https://boostorg.jfrog.io/artifactory/main/release/1.81.0/source/" +zipName
-		# Mirror in case above url goes down ( https://github.com/boostorg/boost/issues/842 )
-		boost_url1 = "https://sourceforge.net/projects/boost/files/boost/1.81.0/" +zipName
-		try:
-			http_extract(boost_url0,format="tar.gz")
-		except (URLError, HTTPError, tarfile.ReadError, tarfile.ExtractError) as e:
-			http_extract(boost_url1,format="tar.gz")
+boost_root = os.getcwd() +"/boost-1.88.0"
+if not Path(boost_root).is_dir():
+	print_msg("boost not found. Downloading...")
+	boost_url = "https://github.com/boostorg/boost/releases/download/boost-1.88.0/boost-1.88.0-cmake.tar.gz"
+	http_extract(boost_url,format="tar.gz")
+
+########## Download Official Boost Sources (Headers) ##########
+os.chdir(deps_dir)
+# Choose URL based on platform
+if platform == "win32":
+    archive_url = "https://archives.boost.io/release/1.88.0/source/boost_1_88_0.zip"
+    archive_format = "zip"
 else:
-    #TODO
-	boost_root = os.getcwd() +"/boost"
-	if not Path(boost_root).is_dir():
-		print_msg("boost not found. Downloading...")
-		git_clone("https://github.com/ClausKlein/boost-cmake.git","boost")
-		os.chdir("boost")
-		reset_to_commit("fba51e4")
-		os.chdir("../")
+    archive_url = "https://archives.boost.io/release/1.88.0/source/boost_1_88_0.tar.gz"
+    archive_format = "tar.gz"
+
+headers_extract_dir = deps_dir +"/boost-1.88.0-headers"
+if not Path(headers_extract_dir).is_dir():
+    print_msg("Official Boost headers not found. Downloading official release for headers...")
+    http_extract(archive_url, format=archive_format)
+    # After extract, the archive usually unpacks to 'boost_1_88_0'
+    unpack_root = deps_dir +"/boost_1_88_0"
+    if Path(unpack_root).is_dir():
+        Path(unpack_root).rename(headers_extract_dir)
+
+########## Merge headers into CMake-enabled boost ##########
+# Copy the single 'boost' folder with headers into the CMake tree
+src_headers = headers_extract_dir +"/boost"
+dst_headers = boost_root +"/boost"
+if Path(src_headers).is_dir():
+    if Path(dst_headers).is_dir():
+        print_msg("Removing existing 'boost' headers in CMake tree...")
+        shutil.rmtree(dst_headers)
+    print_msg("Copying official Boost headers into CMake boost tree...")
+    shutil.copytree(src_headers, dst_headers)
+else:
+    print_msg("ERROR: expected headers folder not found at {}".format(src_headers))
+    sys.exit(1)
 
 # Build
 print_msg("Building boost...")
 
 os.chdir(boost_root)
-ZLIB_SOURCE = normalize_path(zlib_root)
-ZLIB_INCLUDE = normalize_path(zlib_root)
-ZLIB_LIBPATH = normalize_path(zlib_lib_path)
-if platform == "linux":
-    #do we even need static build?
-	subprocess.run([boost_root +"/bootstrap.sh"],check=True,shell=True)
-	subprocess.run(["./b2","--without-python","cxxflags=-fPIC","cflags=-fPIC","linkflags=-fPIC","address-model=64","stage","variant=release","link=shared","runtime-link=shared","-j3"],check=True)
-	subprocess.run(["./b2","--without-python","cxxflags=-fPIC","cflags=-fPIC","linkflags=-fPIC","address-model=64","stage","variant=release","link=static","runtime-link=shared","-j3"],check=True)
 
-	print_msg("Building boost zlib libraries...")
-	subprocess.run(["./b2","cxxflags=-fPIC","cflags=-fPIC","linkflags=-fPIC","address-model=64","stage","variant=release","link=shared","runtime-link=shared","--with-iostreams","-sZLIB_SOURCE=" +ZLIB_SOURCE,"-sZLIB_INCLUDE=" +ZLIB_INCLUDE,"-sZLIB_LIBPATH=" +ZLIB_LIBPATH],check=True)
-    
-	subprocess.run(["./b2","cxxflags=-fPIC","cflags=-fPIC","linkflags=-fPIC","address-model=64","stage","variant=release","link=static","runtime-link=shared","--with-iostreams","-sZLIB_SOURCE=" +ZLIB_SOURCE,"-sZLIB_INCLUDE=" +ZLIB_INCLUDE,"-sZLIB_LIBPATH=" +ZLIB_LIBPATH],check=True)
-else:
-	mkdir("build",cd=True)
+mkdir("build",cd=True)
 
-	# boost_url = "https://boostorg.jfrog.io/artifactory/main/release/1.80.0/source/boost_1_80_0.tar.bz2"
-	# The URL above is currently unavailable, so we'll use this mirror for the time being ( https://github.com/boostorg/boost/issues/842 )
-	boost_url = "https://archives.boost.io/release/1.80.0/source/boost_1_80_0.tar.bz2"
-	cmake_configure("..",generator,["-DBOOST_DISABLE_TESTS=ON","-DZLIB_INCLUDE_DIR=" +ZLIB_INCLUDE,"-DZLIB_LIBRARY=" +ZLIB_LIBPATH,"-DBOOST_URL=" +boost_url])
-	cmake_build("Release")
-	os.chdir("../..")
+boostArgs = ["-DBOOST_DISABLE_TESTS=ON","-DZLIB_INCLUDE_DIR=" +ZLIB_INCLUDE,"-DZLIB_LIBRARY=" +ZLIB_LIBPATH]
+cmake_configure_def_toolset("..",generator,boostArgs)
+cmake_build("Release")
+os.chdir(deps_dir)
 
-	os.chdir("..")
+boost_lib_dir = boost_root +"/build/stage/lib/Release/"
 
 ########## LuaJIT ##########
 print_msg("Building LuaJIT...")
@@ -474,7 +583,7 @@ else:
 	# os.chdir(deps_dir)
 	# mkdir("luajit_build")
 	# os.chdir("luajit_build")
-	# cmake_configure(root +"/third_party_libs/luajit",generator,["-DBUILD_SHARED_LIBS=1"])
+	# cmake_configure_def_toolset(root +"/third_party_libs/luajit",generator,["-DBUILD_SHARED_LIBS=1"])
 	# cmake_build("Release")
     
 	# lua_jit_lib = normalize_path(deps_dir +"/luajit_build/src/Release/luajit.lib")
@@ -529,7 +638,7 @@ if with_swiftshader:
 		
 		print_msg("Building SwiftShader...")
 		os.chdir("build")
-		cmake_configure("..",generator)
+		cmake_configure_def_toolset("..",generator)
 		cmake_build("Release")
 	else:
 		if not Path(swiftshader_root).is_dir():
@@ -571,18 +680,6 @@ if platform == "win32":
 	mkpath(install_dir +"/bin/")
 	cp(deps_dir +"/vcpkg/installed/x64-windows/bin/7zip.dll",install_dir +"/bin/")
 
-########## zlib (for freetype) ############
-if platform == "win32":
-	os.chdir(deps_dir)
-	mkdir("zlib_build",cd=True)
-	zlib_cmake_args = [
-			"-DCMAKE_INSTALL_PREFIX="+deps_dir_fs+"/zlib_prefix",
-			"-DBUILD_SHARED_LIBS=ON"
-			]
-	cmake_configure(root+"/third_party_libs/zlib",generator,zlib_cmake_args)
-	cmake_build("Release")
-	cmake_build("Release",["install"])
-
 ########## bit7z ##########
 os.chdir(deps_dir)
 bit7z_root = normalize_path(os.getcwd() +"/bit7z")
@@ -597,7 +694,7 @@ mkdir("build",cd=True)
 bit7z_cmake_args = ["-DBIT7Z_AUTO_FORMAT=ON"]
 if platform == "linux":
 	bit7z_cmake_args.append("-DCMAKE_CXX_FLAGS=-fPIC")
-cmake_configure("..",generator,bit7z_cmake_args)
+cmake_configure_def_toolset("..",generator,bit7z_cmake_args)
 cmake_build("Release")
 if platform == "linux":
 	bit7z_lib_name = "libbit7z.a"
@@ -617,7 +714,7 @@ reset_to_commit("34ea957") # v0.8.0
 print_msg("Building cpptrace...")
 mkdir("build",cd=True)
 cpptrace_cmake_args = ["-DBUILD_SHARED_LIBS=ON"]
-cmake_configure("..",generator,cpptrace_cmake_args)
+cmake_configure_def_toolset("..",generator,cpptrace_cmake_args)
 cmake_build(build_config)
 if platform == "linux":
 	cpptrace_lib_name = "libcpptrace.so"
@@ -627,9 +724,8 @@ cpptrace_bin_dir = cpptrace_root +"/build/" +build_config +"/"
 cmake_args += ["-DDEPENDENCY_CPPTRACE_INCLUDE=" +cpptrace_root +"/include/", "-DDEPENDENCY_CPPTRACE_LIBRARY=" +cpptrace_bin_dir +cpptrace_lib_name]
 
 ########## compressonator deps ##########
-if platform == "linux":
-	execfile(root+"/external_libs/util_image/third_party_libs/compressonator/build/fetch_dependencies.py")
-
+os.chdir(root+"/external_libs/util_image/third_party_libs/compressonator")
+execfile(root+"/external_libs/util_image/third_party_libs/compressonator/build/fetch_dependencies.py")
 
 ########## freetype (built in win32, sys in linux (set in cmake)) ##########
 freetype_include_dir = ""
@@ -641,7 +737,7 @@ if platform == "win32":
 		git_clone("https://github.com/freetype/freetype")
 	freetype_root = deps_dir+"/freetype"
 	os.chdir("freetype")
-	subprocess.run(["git","reset","--hard","fbbcf50367403a6316a013b51690071198962920"],check=True)
+	subprocess.run(["git","reset","--hard","42608f77"],check=True)
 	mkdir("build",cd=True)
 	freetype_cmake_args =[
 		"-DCMAKE_MODULE_PATH="+deps_dir_fs+"/zlib_prefix",
@@ -655,7 +751,7 @@ if platform == "win32":
 	freetype_cmake_args.append("-DCMAKE_POLICY_VERSION_MINIMUM=4.0")
 
 	print_msg("Building freetype...")
-	cmake_configure(freetype_root,generator,freetype_cmake_args)
+	cmake_configure_def_toolset(freetype_root,generator,freetype_cmake_args)
 	cmake_build("Release")
 	freetype_include_dir += freetype_root+"/include"
 	freetype_lib += freetype_root+"/build/Release/freetype.lib"
@@ -711,6 +807,7 @@ def execbuildscript(filepath):
 	global cmake_args
 	global additional_build_targets
 	global generator
+	global toolsetArgs
 	global moduleUrl
 	global moduleDir
 	global build_config
@@ -739,6 +836,8 @@ def execbuildscript(filepath):
 	}
 	l = {
 		"generator": generator,
+		"toolsetArgs": toolsetArgs,
+		"toolsetCFlags": toolsetCFlags,
 		"moduleUrl": moduleUrl,
 		"moduleDir": moduleDir,
 		"build_config": build_config,
@@ -766,6 +865,7 @@ def execbuildscript(filepath):
 		"zlib_lib_dir": zlib_lib_path,
 		"zlib_include_dirs": zlib_include_dirs,
 		"boost_root": boost_root,
+		"boost_lib_dir": boost_lib_dir,
 		"geometric_tools_root": geometric_tools_root,
 		"vcpkg_root": vcpkg_root,
 
@@ -779,6 +879,7 @@ def execbuildscript(filepath):
 		"git_clone": git_clone,
 		"git_clone_commit": git_clone_commit,
 		"cmake_configure": cmake_configure,
+		"cmake_configure_def_toolset": cmake_configure_def_toolset,
 		"cmake_build": cmake_build,
 		"mkdir": mkdir,
 		"http_download": http_download,
@@ -845,7 +946,7 @@ execfile(scripts_dir +"/user_modules.py",g,l)
 if with_essential_client_modules:
 	add_pragma_module(
 		name="pr_prosper_vulkan",
-		commitSha="3d33edfca536e57ceeb903aa44b68edcac716803",
+		commitSha="51c1f830e5b98d1f085b516eb38e621ba4d277e4",
 		repositoryUrl="https://github.com/Silverlan/pr_prosper_vulkan.git"
 	)
 
@@ -1010,30 +1111,53 @@ cmake_args += [
 	"-DDEPENDENCY_LUA_LIBRARY=" +lua_jit_lib +""
 ]
 
+def find_boost_libs(lib_dir, components):
+    """
+    Scan lib_dir for Boost library files matching each component name.
+    Returns a dict: { component_name: absolute-path-to-library or None }.
+    """
+    lib_dir = Path(lib_dir)
+    if not lib_dir.is_dir():
+        raise ValueError(f"Boost lib directory not found: {lib_dir}")
+
+    # list all candidate files once
+    all_libs = [p for p in lib_dir.iterdir() if p.is_file()]
+
+    found = {}
+    for comp in components:
+        # regex to match boost_<component> in filename
+        pat = re.compile(rf"boost_{re.escape(comp)}", re.IGNORECASE)
+        matches = [p for p in all_libs if pat.search(p.name)]
+        if not matches:
+            found[comp] = None
+            continue
+
+        # prefer release (no "-gd" or "-debug")
+        release = [p for p in matches if not re.search(r"-g(d|d-)|debug", p.name, re.IGNORECASE)]
+        chosen = release[0] if release else matches[0]
+        found[comp] = chosen.resolve()
+    return found
+
+components = ["chrono", "date_time", "thread"]
+boost_libs = find_boost_libs(boost_lib_dir, components)
+
+for comp in components:
+	lib_path = boost_libs.get(comp)
+	if not lib_path:
+		raise RuntimeError(f"Could not locate Boost {comp} library in {boost_lib_dir}")
+	var_name = comp.upper()
+	cmake_args.append(f"-DDEPENDENCY_BOOST_{var_name}_LIBRARY={lib_path}")
+
+cmake_args.append("-DDEPENDENCY_BOOST_LIBRARY_LOCATION=" +boost_lib_dir)
+cmake_args.append("-DBOOST_LIBRARYDIR=" +boost_lib_dir)
+cmake_args.append("-DBOOST_ROOT=" +boost_root)
+cmake_args.append("-DDEPENDENCY_BOOST_INCLUDE=" +boost_root)
+
+
 if platform == "linux":
-	cmake_args += [
-		"-DDEPENDENCY_BOOST_INCLUDE=" +boost_root,
-		"-DDEPENDENCY_BOOST_LIBRARY_LOCATION=" +boost_root +"/stage/lib",
-		"-DDEPENDENCY_BOOST_CHRONO_LIBRARY=" +boost_root +"/stage/lib/boost_chrono.a",
-		"-DDEPENDENCY_BOOST_DATE_TIME_LIBRARY=" +boost_root +"/stage/lib/boost_date_time.a",
-		"-DDEPENDENCY_BOOST_REGEX_LIBRARY=" +boost_root +"/stage/lib/boost_regex.a",
-		"-DDEPENDENCY_BOOST_SYSTEM_LIBRARY=" +boost_root +"/stage/lib/boost_system.a",
-		"-DDEPENDENCY_BOOST_THREAD_LIBRARY=" +boost_root +"/stage/lib/boost_thread.a",
-		"-DDEPENDENCY_LIBZIP_CONF_INCLUDE=" +build_dir +"/third_party_libs/libzip"
-	]
+	cmake_args += ["-DDEPENDENCY_LIBZIP_CONF_INCLUDE=" +build_dir +"/third_party_libs/libzip"]
 else:
-	cmake_args += [
-		"-DDEPENDENCY_BOOST_INCLUDE=" +boost_root +"/build/_deps/boost-src",
-		"-DDEPENDENCY_BOOST_LIBRARY_LOCATION=" +boost_root +"/build/lib/Release",
-		"-DDEPENDENCY_BOOST_CHRONO_LIBRARY=" +boost_root +"/build/lib/Release/boost_chrono.lib",
-		"-DDEPENDENCY_BOOST_DATE_TIME_LIBRARY=" +boost_root +"/build/lib/Release/boost_date_time.lib",
-		"-DDEPENDENCY_BOOST_REGEX_LIBRARY=" +boost_root +"/build/lib/Release/boost_regex.lib",
-		"-DDEPENDENCY_BOOST_SYSTEM_LIBRARY=" +boost_root +"/build/lib/Release/boost_system.lib",
-		"-DDEPENDENCY_BOOST_THREAD_LIBRARY=" +boost_root +"/build/lib/Release/boost_thread.lib",
-		"-DBOOST_ROOT=" +boost_root +"",
-		"-DBOOST_LIBRARYDIR=" +boost_root +"/build/lib/Release/",
-		"-DZLIB_INCLUDE_DIRS=" +build_dir +"/third_party_libs/zlib " +zlib_conf_root +""
-	]
+	cmake_args += ["-DZLIB_INCLUDE_DIRS=" +build_dir +"/third_party_libs/zlib " +zlib_conf_root]
 
 cmake_args.append("-DPME_EXTERNAL_LIB_LOCATION=" +external_libs_dir)
 cmake_args.append("-DPME_EXTERNAL_LIB_BIN_LOCATION=" +external_libs_bin_dir)
@@ -1050,7 +1174,7 @@ if len(vtune_include_path) > 0 or len(vtune_library_path) > 0:
 
 cmake_args += additional_cmake_args
 cmake_args.append("-DCMAKE_POLICY_VERSION_MINIMUM=4.0")
-cmake_configure(root,generator,cmake_args)
+cmake_configure_def_toolset(root,generator,cmake_args)
 
 print_msg("Build files have been written to \"" +build_dir +"\".")
 
@@ -1060,10 +1184,9 @@ if platform == "win32":
 	# a lot of issues, so we'll copy it over to where we need it.
 	# TODO: Implement a proper solution for this
 	curDir = os.getcwd()
-	os.chdir(root +"/third_party_libs/zlib")
-	cp("zconf.h","../libzip/lib/")
-	os.chdir(root +"/third_party_libs/libzip")
-	cp(build_dir +"/third_party_libs/libzip/zipconf.h",root +"/external_libs/util_zip/include")
+	os.chdir(zlib_build_dir)
+	cp("zconf.h",libzip_root +"/lib/")
+	cp(libzip_root +"/build/zipconf.h",root +"/external_libs/util_zip/include")
 	os.chdir(curDir)
 	#
 
@@ -1133,7 +1256,8 @@ if with_lua_debugger:
 		luasocket_args.append("-DLUA_LIBRARY=" +root +"/third_party_libs/luajit/src/lua51.lib")
 	else:
 		luasocket_args.append("-DLUA_LIBRARY=" +root +"/third_party_libs/luajit/src/libluajit-p.so")
-	cmake_configure("..",generator,luasocket_args)
+	luasocket_args.append("-DCMAKE_POLICY_VERSION_MINIMUM=3.5")
+	cmake_configure_def_toolset("..",generator,luasocket_args)
 	cmake_build(build_config)
 	cp(luasocket_root +"/src/socket.lua",install_dir +"/lua/modules/")
 	mkdir(install_dir +"/modules/socket/")

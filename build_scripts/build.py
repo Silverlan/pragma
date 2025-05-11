@@ -946,7 +946,7 @@ execfile(scripts_dir +"/user_modules.py",g,l)
 if with_essential_client_modules:
 	add_pragma_module(
 		name="pr_prosper_vulkan",
-		commitSha="3d33edfca536e57ceeb903aa44b68edcac716803",
+		commitSha="51c1f830e5b98d1f085b516eb38e621ba4d277e4",
 		repositoryUrl="https://github.com/Silverlan/pr_prosper_vulkan.git"
 	)
 

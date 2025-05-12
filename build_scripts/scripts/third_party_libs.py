@@ -10,7 +10,7 @@ third_party_libs_dir = curDir +"/third_party_libs"
 os.chdir(third_party_libs_dir)
 get_submodule("7zpp","https://github.com/Silverlan/7zip-cpp.git","df81447")
 get_submodule("bvh","https://github.com/madmann91/bvh.git","6130db6")
-get_submodule("bzip2","https://github.com/libarchive/bzip2.git","1ea1ac1")
+get_submodule("bzip2","https://github.com/Silverlan/bzip2.git","6f08ffc2409d34a8f0f06ab3b0291bced4e9d08c")
 get_submodule("clip2tri","https://github.com/raptor/clip2tri.git","f62a734d22733814b8a970ed8a68a4d94c24fa5f")
 get_submodule("eigen","https://gitlab.com/libeigen/eigen.git","969c31ee")
 get_submodule("exprtk","https://github.com/ArashPartow/exprtk.git","f46bffcd6966d38a09023fb37ba9335214c9b959")

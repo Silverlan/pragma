@@ -376,11 +376,10 @@ execscript(scripts_dir +"/scripts/modules.py")
 # Download
 os.chdir(deps_dir)
 zlib_root = os.getcwd() +"/zlib"
+zlib_lib_path = zlib_root +"/build/" +build_config
 if platform == "linux":
-	zlib_lib_path = zlib_root +"/build"
 	zlib_lib = zlib_lib_path +"/libz.a"
 else:
-	zlib_lib_path = zlib_root +"/build/" +build_config
 	zlib_lib = zlib_lib_path +"/zs.lib"
 zlib_include_dirs = zlib_root +" " +zlib_lib_path
 if not Path(zlib_root).is_dir():
@@ -396,7 +395,7 @@ os.chdir("zlib")
 print_msg("Building zlib...")
 mkdir("build",cd=True)
 zlib_build_dir = os.getcwd()
-cmake_configure_def_toolset("..",generator,["-DZLIB_BUILD_TESTING=OFF", "-DZLIB_BUILD_MINIZIP=OFF"])
+cmake_configure_def_toolset("..",generator,["-DZLIB_BUILD_TESTING=OFF", "-DZLIB_BUILD_MINIZIP=OFF", "-DCMAKE_POSITION_INDEPENDENT_CODE=ON"])
 cmake_build(build_config, ["zlib", "zlibstatic"])
 if platform == "win32":
 	zlib_conf_root = normalize_path(os.getcwd())
@@ -432,11 +431,10 @@ cmake_configure_def_toolset("..",generator,["-DLIBZIP_DO_INSTALL=OFF", "-DENABLE
 cmake_build(build_config)
 os.chdir(deps_dir)
 
+libzip_lib_path = libzip_root +"/build/lib/" +build_config +"/"
 if platform == "linux":
-	libzip_lib_path = libzip_root +"/build/lib/"
-	libzip_lib = libzip_lib_path +"libzip.a"
+	libzip_lib = libzip_lib_path +"libzip.so"
 else:
-	libzip_lib_path = libzip_root +"/build/lib/" +build_config +"/"
 	libzip_lib = libzip_lib_path +"zip.lib"
 
 cmake_args += [
@@ -464,15 +462,18 @@ os.chdir("libpng")
 # Build
 print_msg("Building libpng...")
 mkdir("build",cd=True)
-cmake_configure_def_toolset("..",generator,["-DPNG_SHARED=OFF","-DCMAKE_POLICY_VERSION_MINIMUM=3.5","-DZLIB_INCLUDE_DIR=" +ZLIB_INCLUDE,"-DZLIB_LIBRARY=" +ZLIB_LIBPATH])
+cmake_configure_def_toolset("..",generator,["-DPNG_SHARED=OFF","-DCMAKE_POLICY_VERSION_MINIMUM=3.5","-DZLIB_INCLUDE_DIR=" +ZLIB_INCLUDE,"-DZLIB_LIBRARY=" +ZLIB_LIBPATH, "-DCMAKE_POSITION_INDEPENDENT_CODE=ON"])
 cmake_build(build_config, ["png_static"])
 os.chdir(deps_dir)
 
 cmake_args += [
 	"-DDEPENDENCY_LIBPNG_INCLUDE=" +libpng_root,
-	"-DDEPENDENCY_LIBPNG_BUILD_INCLUDE=" +libpng_root +"/build/",
-	"-DDEPENDENCY_LIBPNG_LIBRARY=" +libpng_root +"/build/" +build_config +"/libpng16_static.lib",
+	"-DDEPENDENCY_LIBPNG_BUILD_INCLUDE=" +libpng_root +"/build/"
 ]
+if platform == "linux":
+	cmake_args += ["-DDEPENDENCY_LIBPNG_LIBRARY=" +libpng_root +"/build/" +build_config +"/libpng16.a"]
+else:
+	cmake_args += ["-DDEPENDENCY_LIBPNG_LIBRARY=" +libpng_root +"/build/" +build_config +"/libpng16_static.lib"]
 
 ########## icu ##########
 # Download

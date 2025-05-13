@@ -8,11 +8,14 @@
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
 #include "pragma/game/c_game.h"
+
+#ifdef _MSC_VER
 namespace pragma::string {
 	class Utf8String;
 	class Utf8StringView;
 	class Utf8StringArg;
 };
+#endif
 
 #include <pragma/lua/luacallback.h>
 #include "luasystem.h"

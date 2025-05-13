@@ -7,11 +7,13 @@
 
 #include "stdafx_client.h"
 
+#ifdef _MSC_VER
 namespace pragma::string {
 	class Utf8String;
 	class Utf8StringView;
 	class Utf8StringArg;
 };
+#endif
 
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
@@ -78,6 +80,9 @@ namespace pragma::string {
 #undef FAR
 
 import pragma.locale;
+#ifndef _MSC_VER
+import pragma.string.unicode;
+#endif
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;

@@ -16,6 +16,14 @@
 #include <sharedutils/util_clock.hpp>
 #include <unordered_map>
 
+#ifdef _MSC_VER
+namespace pragma::string {
+	class Utf8String;
+};
+#else
+import pragma.string.unicode;
+#endif
+
 class ClientState;
 namespace GLFW {
 	class Joystick;
@@ -33,9 +41,6 @@ namespace prosper {
 namespace pragma::debug {
 	class GPUProfilingStage;
 	class GPUProfiler;
-};
-namespace pragma::string {
-	class Utf8String;
 };
 namespace pragma::rendering {
 	class ShaderGraphManager;

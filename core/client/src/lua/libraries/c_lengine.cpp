@@ -7,11 +7,13 @@
 
 #include "stdafx_client.h"
 
+#ifdef _MSC_VER
 namespace pragma::string {
 	class Utf8String;
 	class Utf8StringView;
 	class Utf8StringArg;
 };
+#endif
 
 #include "pragma/lua/libraries/c_lengine.h"
 #include "pragma/clientstate/clientstate.h"
@@ -41,6 +43,9 @@ namespace pragma::string {
 #include <fsys/ifile.hpp>
 
 import util_zip;
+#ifndef _MSC_VER
+import pragma.string.unicode;
+#endif
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;

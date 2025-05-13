@@ -7,11 +7,13 @@
 
 #include "stdafx_client.h"
 
+#ifdef _MSC_VER
 namespace pragma::string {
 	class Utf8String;
 	class Utf8StringView;
 	class Utf8StringArg;
 };
+#endif
 
 #include "pragma/gui/mainmenu/wimainmenu.h"
 #include "pragma/gui/mainmenu/wimainmenu_credits.hpp"

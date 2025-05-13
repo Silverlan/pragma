@@ -5,11 +5,13 @@
  * Copyright (c) 2021 Silverlan
  */
 
+#ifdef _MSC_VER
 namespace pragma::string {
 	class Utf8String;
 	class Utf8StringView;
 	class Utf8StringArg;
 };
+#endif
 #include "stdafx_cengine.h"
 #include "pragma/c_engine.h"
 #include <wgui/wgui.h>
@@ -81,6 +83,9 @@ namespace pragma::string {
 import util_zip;
 import pragma.shadergraph;
 import pragma.locale;
+#ifndef _MSC_VER
+import pragma.string.unicode;
+#endif
 
 extern "C" {
 void DLLCLIENT RunCEngine(int argc, char *argv[])

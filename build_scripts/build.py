@@ -445,6 +445,11 @@ cmake_args += [
 if platform == "win32":
 	mkpath(install_dir +"/bin/")
 	cp(libzip_lib_path +"zip.dll", install_dir +"/bin/")
+else:
+	mkpath(install_dir +"/lib/")
+	cp(libzip_lib_path +"libzip.so", install_dir +"/lib/")
+	cp(libzip_lib_path +"libzip.so.5", install_dir +"/lib/")
+	cp(libzip_lib_path +"libzip.so.5.5", install_dir +"/lib/")
 
 ########## libpng ##########
 # Download

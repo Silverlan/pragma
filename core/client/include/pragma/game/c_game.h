@@ -28,6 +28,14 @@
 #include <sharedutils/property/util_property.hpp>
 #include <sharedutils/util_shared_handle.hpp>
 
+#ifdef _MSC_VER
+namespace pragma::string {
+	class Utf8String;
+};
+#else
+import pragma.string.unicode;
+#endif
+
 static constexpr auto LOD_SWAP_DISTANCE = 500.f;
 static constexpr auto LOD_SWAP_DISTANCE_SQR = umath::pow2(LOD_SWAP_DISTANCE);
 
@@ -104,9 +112,6 @@ namespace prosper {
 };
 namespace util {
 	struct DrawSceneInfo;
-};
-namespace pragma::string {
-	class Utf8String;
 };
 #pragma warning(push)
 #pragma warning(disable : 4251)

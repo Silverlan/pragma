@@ -13,13 +13,18 @@
 #include <queue>
 #include <string_view>
 
+#ifdef _MSC_VER
+namespace pragma::string {
+	class Utf8String;
+};
+#else
+import pragma.string.unicode;
+#endif
+
 class WITextEntry;
 class WICommandLineEntry;
 class WIFrame;
 class WISnapArea;
-namespace pragma::string {
-	class Utf8String;
-};
 class DLLCLIENT WIConsole : public WIBase {
   public:
 	static WIConsole *Open();

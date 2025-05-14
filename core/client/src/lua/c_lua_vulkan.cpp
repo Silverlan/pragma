@@ -15,10 +15,7 @@
 #include <pragma/lua/classes/ldef_vector.h>
 #include <pragma/lua/classes/lerrorcode.h>
 #include <pragma/lua/classes/ldatastream.h>
-#include <pragma/lua/policies/optional_policy.hpp>
 #include <pragma/lua/policies/shared_from_this_policy.hpp>
-#include <pragma/lua/policies/pair_policy.hpp>
-#include <pragma/lua/policies/vector_policy.hpp>
 #include <pragma/lua/policies/default_parameter_policy.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/lua/converters/vector_converter_t.hpp>
@@ -1878,9 +1875,12 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defWindow.def("SetResizable", +[](prosper::Window &window, bool resizable) { window->SetResizable(resizable); });
 	defWindow.def("ClearCursor", static_cast<void (*)(prosper::Window &)>([](prosper::Window &window) { window->ClearCursor(); }));
 	defWindow.def("SetBorderColor", +[](prosper::Window &window, const Color &color) { window->SetBorderColor(color); });
+	defWindow.def("GetBorderColor", +[](prosper::Window &window) -> std::optional<Color> { return window->GetBorderColor(); });
 	defWindow.def("SetTitleBarColor", +[](prosper::Window &window, const Color &color) { window->SetTitleBarColor(color); });
+	defWindow.def("GetTitleBarColor", +[](prosper::Window &window) -> std::optional<Color> { return window->GetTitleBarColor(); });
 	defWindow.def("GetKeyState", static_cast<pragma::platform::KeyState (*)(prosper::Window &, pragma::platform::Key)>([](prosper::Window &window, pragma::platform::Key key) -> pragma::platform::KeyState { return window->GetKeyState(key); }));
-	defWindow.def("GetMouseButtonState", static_cast<pragma::platform::KeyState (*)(prosper::Window &, pragma::platform::MouseButton)>([](prosper::Window &window, pragma::platform::MouseButton mouseButton) -> pragma::platform::KeyState { return window->GetMouseButtonState(mouseButton); }));
+	defWindow.def("GetMouseButtonState",
+	  static_cast<pragma::platform::KeyState (*)(prosper::Window &, pragma::platform::MouseButton)>([](prosper::Window &window, pragma::platform::MouseButton mouseButton) -> pragma::platform::KeyState { return window->GetMouseButtonState(mouseButton); }));
 	defWindow.def("SetCursorInputMode", static_cast<void (*)(prosper::Window &, pragma::platform::CursorMode)>([](prosper::Window &window, pragma::platform::CursorMode cursorMode) { window->SetCursorInputMode(cursorMode); }));
 	defWindow.def("GetCursorInputMode", static_cast<pragma::platform::CursorMode (*)(prosper::Window &)>([](prosper::Window &window) -> pragma::platform::CursorMode { return window->GetCursorInputMode(); }));
 	defWindow.def("SetCursor", static_cast<void (*)(prosper::Window &, pragma::platform::Cursor &)>([](prosper::Window &window, pragma::platform::Cursor &cursor) { window->SetCursor(cursor); }));

@@ -10,7 +10,6 @@
 #include "pragma/entities/components/c_observable_component.hpp"
 #include "pragma/entities/components/c_observer_component.hpp"
 #include "pragma/entities/components/c_player_component.hpp"
-#include "pragma/lua/c_lentity_handles.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
 using namespace pragma;

@@ -8,7 +8,6 @@
 #include "pragma/lua/classes/ldef_entity.h"
 #include "luasystem.h"
 #include "pragma/entities/components/s_weapon_component.hpp"
-#include "pragma/lua/s_lentity_handles.hpp"
 #include "pragma/lua/s_lentity_components.hpp"
 #include "pragma/entities/components/s_character_component.hpp"
 #include "pragma/entities/components/s_ai_component.hpp"
@@ -19,9 +18,7 @@
 #include <pragma/physics/raytraces.h>
 #include <pragma/lua/lentity_components_base_types.hpp>
 #include <pragma/lua/lentity_components.hpp>
-#include <pragma/lua/lua_entity_component.hpp>
 #include <pragma/entities/components/base_actor_component.hpp>
-#include <pragma/lua/policies/game_object_policy.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
 namespace Lua {

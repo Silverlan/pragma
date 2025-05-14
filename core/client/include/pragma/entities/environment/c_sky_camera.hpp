@@ -12,7 +12,6 @@
 #include "pragma/entities/c_baseentity.h"
 #include "pragma/entities/components/c_entity_component.hpp"
 #include "pragma/entities/components/c_scene_component.hpp"
-#include "pragma/rendering/render_mesh_collection_handler.hpp"
 #include <pragma/entities/components/base_entity_component.hpp>
 
 namespace pragma {

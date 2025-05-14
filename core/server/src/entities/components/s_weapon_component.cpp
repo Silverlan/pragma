@@ -11,7 +11,6 @@
 #include "pragma/networking/enums.hpp"
 #include "pragma/entities/components/s_character_component.hpp"
 #include "pragma/entities/components/s_player_component.hpp"
-#include "pragma/lua/s_lentity_handles.hpp"
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/components/base_character_component.hpp>
 #include <pragma/entities/components/base_physics_component.hpp>

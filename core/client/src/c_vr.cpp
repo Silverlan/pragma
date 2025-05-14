@@ -7,11 +7,13 @@
 
 #include "stdafx_client.h"
 
+#ifdef _MSC_VER
 namespace pragma::string {
 	class Utf8String;
 	class Utf8StringView;
 	class Utf8StringArg;
 };
+#endif
 
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/c_engine.h"

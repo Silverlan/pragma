@@ -13,7 +13,6 @@
 #include "pragma/entities/environment/c_env_reflection_probe.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
-#include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/model/vk_mesh.h"
 #include "pragma/model/c_modelmesh.h"
 #include <shader/prosper_pipeline_create_info.hpp>

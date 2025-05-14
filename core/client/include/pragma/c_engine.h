@@ -16,6 +16,14 @@
 #include <sharedutils/util_clock.hpp>
 #include <unordered_map>
 
+#ifdef _MSC_VER
+namespace pragma::string {
+	class Utf8String;
+};
+#else
+import pragma.string.unicode;
+#endif
+
 class ClientState;
 namespace GLFW {
 	class Joystick;
@@ -33,9 +41,6 @@ namespace prosper {
 namespace pragma::debug {
 	class GPUProfilingStage;
 	class GPUProfiler;
-};
-namespace pragma::string {
-	class Utf8String;
 };
 namespace pragma::rendering {
 	class ShaderGraphManager;
@@ -103,6 +108,7 @@ class DLLCLIENT CEngine : public Engine, public pragma::RenderContext {
 	const std::string &GetDefaultFontSetName() const;
 	const FontSet &GetDefaultFontSet() const;
 	const FontSet *FindFontSet(const std::string &name) const;
+	const std::unordered_map<std::string, std::unique_ptr<FontSet>> &GetFontSets() const { return m_fontSets; }
 	virtual void Start() override;
 	virtual void Close() override;
 	virtual void ClearConsole() override;

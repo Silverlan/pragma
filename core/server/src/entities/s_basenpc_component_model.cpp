@@ -9,7 +9,6 @@
 #include "pragma/entities/components/s_animated_component.hpp"
 #include "pragma/ai/ai_schedule.h"
 #include "pragma/ai/ai_task_play_activity.h"
-#include <pragma/lua/l_entity_handles.hpp>
 
 using namespace pragma;
 

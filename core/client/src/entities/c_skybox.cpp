@@ -12,9 +12,9 @@
 #include "pragma/rendering/c_rendermode.h"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
+#include "pragma/entities/components/material_override.hpp"
 #include "pragma/rendering/shaders/c_shader_equirectangular_to_cubemap.hpp"
 #include "pragma/rendering/shaders/c_shader_cubemap_to_equirectangular.hpp"
-#include "pragma/lua/c_lentity_handles.hpp"
 #include "pragma/model/c_model.h"
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/asset/util_asset.hpp>

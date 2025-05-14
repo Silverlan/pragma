@@ -12,7 +12,6 @@
 #include "pragma/physics/movetypes.h"
 #include "pragma/entities/components/c_physics_component.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
-#include "pragma/lua/c_lentity_handles.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 

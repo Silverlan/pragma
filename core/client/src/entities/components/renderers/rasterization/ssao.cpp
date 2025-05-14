@@ -5,7 +5,6 @@
  * Copyright (c) 2021 Silverlan
  */
 
-#include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_ssao.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_ssao_blur.hpp"
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"

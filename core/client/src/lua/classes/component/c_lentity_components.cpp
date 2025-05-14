@@ -7,14 +7,11 @@
 
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
-#include "pragma/lua/c_lentity_handles.hpp"
 #include "pragma/lua/classes/components/c_lentity_components.hpp"
 #include "pragma/lua/classes/lproperty.hpp"
 #include "pragma/lua/classes/c_lcamera.h"
 #include "pragma/lua/converters/shader_converter_t.hpp"
 #include "pragma/model/c_modelmesh.h"
-#include "pragma/rendering/renderers/rasterization_renderer.hpp"
-#include "pragma/rendering/renderers/raytracing_renderer.hpp"
 #include "pragma/rendering/render_queue.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/shaders/world/c_shader_prepass.hpp"
@@ -24,10 +21,7 @@
 #include <pragma/lua/classes/ldef_color.h>
 #include <pragma/lua/classes/ldef_angle.h>
 #include <pragma/lua/classes/ldef_quaternion.h>
-#include <pragma/lua/policies/game_object_policy.hpp>
-#include <pragma/lua/policies/optional_policy.hpp>
 #include <pragma/lua/policies/shared_from_this_policy.hpp>
-#include <pragma/lua/policies/pair_policy.hpp>
 #include <pragma/lua/policies/default_parameter_policy.hpp>
 #include <pragma/lua/converters/optional_converter_t.hpp>
 #include <pragma/lua/converters/vector_converter_t.hpp>
@@ -37,7 +31,6 @@
 #include <pragma/physics/raytraces.h>
 #include <pragma/lua/lentity_components_base_types.hpp>
 #include <pragma/lua/lentity_components.hpp>
-#include <pragma/lua/lua_entity_component.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_render_pass.hpp>
 #include <prosper_descriptor_set_group.hpp>

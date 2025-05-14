@@ -19,12 +19,7 @@
 #include "pragma/entities/components/intersection_handler_component.hpp"
 #include "pragma/entities/entity_component_manager_t.hpp"
 #include "pragma/model/modelmesh.h"
-#include "pragma/lua/policies/optional_policy.hpp"
-#include "pragma/lua/policies/game_object_policy.hpp"
 #include "pragma/lua/policies/default_parameter_policy.hpp"
-#include "pragma/lua/policies/vector_policy.hpp"
-#include "pragma/lua/policies/property_policy.hpp"
-#include "pragma/lua/policies/pair_policy.hpp"
 #include "pragma/lua/policies/shared_from_this_policy.hpp"
 #include "pragma/lua/converters/vector_converter_t.hpp"
 #include "pragma/lua/converters/optional_converter_t.hpp"
@@ -443,10 +438,11 @@ static void get_dynamic_member_ids(pragma::BaseEntityComponent &c, std::vector<p
 	auto *reg = dynamic_cast<pragma::DynamicMemberRegister *>(&c);
 	if(!reg)
 		return;
+	auto offset = c.GetStaticMemberCount();
 	auto &members = reg->GetMembers();
 	memberIndices.reserve(memberIndices.size() + members.size());
-	for(auto &pair : members)
-		memberIndices.push_back(pair.first);
+	for(size_t i = 0; i < members.size(); ++i)
+		memberIndices.push_back(offset + i);
 }
 static std::vector<pragma::ComponentMemberIndex> get_dynamic_member_ids(pragma::BaseEntityComponent &c)
 {
@@ -3477,7 +3473,6 @@ void pragma::lua::base_io_component::register_class(luabind::module_ &mod)
 }
 
 #include "pragma/entities/components/base_model_component.hpp"
-#include "pragma/lua/policies/vector_policy.hpp"
 void pragma::lua::base_model_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseModelComponent>("BaseModelComponent");

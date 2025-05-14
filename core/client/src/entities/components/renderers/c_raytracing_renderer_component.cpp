@@ -8,7 +8,6 @@
 #include "stdafx_client.h"
 #include "pragma/entities/components/renderers/c_raytracing_renderer_component.hpp"
 #include "pragma/entities/c_entityfactories.h"
-#include "pragma/lua/c_lentity_handles.hpp"
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 

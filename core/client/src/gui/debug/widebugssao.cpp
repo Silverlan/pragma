@@ -8,7 +8,6 @@
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/gui/debug/widebugssao.hpp"
-#include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include <image/prosper_render_target.hpp>

@@ -7,7 +7,6 @@
 #include "stdafx_server.h"
 #include "pragma/entities/func/s_func_softphysics.hpp"
 #include "pragma/entities/s_entityfactories.h"
-#include "pragma/lua/s_lentity_handles.hpp"
 #include <sharedutils/netpacket.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>

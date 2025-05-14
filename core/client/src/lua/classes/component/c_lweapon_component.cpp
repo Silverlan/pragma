@@ -8,13 +8,11 @@
 #include "stdafx_client.h"
 #include "pragma/lua/classes/ldef_entity.h"
 #include "luasystem.h"
-#include "pragma/lua/c_lentity_handles.hpp"
 #include "pragma/lua/classes/components/c_lentity_components.hpp"
 #include "pragma/entities/components/c_weapon_component.hpp"
 #include "pragma/entities/c_viewmodel.h"
 #include <pragma/lua/lua_util_component.hpp>
 #include <pragma/lua/lua_util_component_stream.hpp>
-#include <pragma/lua/lua_entity_component.hpp>
 #include <pragma/lua/lentity_components_base_types.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 

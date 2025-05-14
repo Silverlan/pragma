@@ -6,7 +6,6 @@
 
 #include "stdafx_server.h"
 #include "pragma/game/s_game.h"
-#include "pragma/lua/s_lentity_handles.hpp"
 #include "pragma/lua/s_lentity_components.hpp"
 #include "pragma/networking/recipient_filter.hpp"
 #include "pragma/entities/point/constraints/s_point_constraint_ballsocket.h"
@@ -56,7 +55,6 @@
 #include <pragma/lua/classes/ldef_entity.h>
 #include <pragma/lua/lentity_components_base_types.hpp>
 #include <pragma/lua/lentity_components.hpp>
-#include <pragma/lua/lua_entity_component.hpp>
 #include <pragma/physics/movetypes.h>
 #include <pragma/lua/lua_call.hpp>
 #include <sharedutils/netpacket.hpp>

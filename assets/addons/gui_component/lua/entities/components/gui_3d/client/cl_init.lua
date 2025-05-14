@@ -712,7 +712,7 @@ function ents.GUI3D:ReloadRenderTarget()
 	if self.m_renderTargetDst == nil then
 		return
 	end
-	local mat = game.create_material(self.m_shaderName or (self:IsUnlit() and "unlit" or "pbr"))
+	local mat = asset.create_material(self.m_shaderName or (self:IsUnlit() and "unlit" or "pbr"))
 	mat:GetData():SetValue("int", "alpha_mode", tostring(self.m_alphaMode))
 	mat:GetData():SetValue("float", "alpha_cutoff", tostring(self.m_alphaCutoff))
 	if self:IsUnlit() == false then

@@ -7,7 +7,6 @@
 
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
-#include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/rendering/occlusion_culling/occlusion_culling_handler_inert.hpp"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/entities/components/c_render_component.hpp"

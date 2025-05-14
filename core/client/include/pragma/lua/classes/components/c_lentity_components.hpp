@@ -11,7 +11,6 @@
 #include <alsoundsystem.hpp>
 #include "pragma/game/c_game.h"
 #include <pragma/physics/raytraces.h>
-#include "pragma/lua/c_lentity_handles.hpp"
 #include <pragma/lua/lentity_components_base_types.hpp>
 #include "pragma/clientdefinitions.h"
 

@@ -54,8 +54,8 @@ function gui.WIMenuItem:SetRightText(text)
 	self:UpdateRightText()
 end
 function gui.WIMenuItem:OpenContextMenu()
-	gui.close_context_menu()
-	local pContext = gui.open_context_menu()
+	gui.close_context_menu(self)
+	local pContext = gui.open_context_menu(self)
 	if pContext ~= nil then
 		local pos = self:GetAbsolutePos()
 		pos.y = pos.y + self:GetHeight()

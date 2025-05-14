@@ -33,7 +33,6 @@
 #include "luasystem.h"
 #include <pragma/math/angle/wvquaternion.h>
 #include "pragma/lua/classes/lvector.h"
-#include "pragma/lua/libraries/lrecast.h"
 #include "pragma/lua/libraries/lmath.h"
 #include "pragma/lua/libraries/lnoise.h"
 #include "pragma/lua/libraries/lregex.h"
@@ -61,7 +60,6 @@
 #include "pragma/model/model.h"
 #include "pragma/util/util_ballistic.h"
 #include "pragma/util/util_game.hpp"
-#include <pragma/math/vector/util_winding_order.hpp>
 #include <pragma/math/util_engine_math.hpp>
 #include "pragma/game/game_coordinate_system.hpp"
 #include "pragma/util/util_variable_type.hpp"

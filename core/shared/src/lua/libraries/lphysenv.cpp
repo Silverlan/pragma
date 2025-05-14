@@ -783,7 +783,6 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	Lua::PhysObj::register_class(l, physMod);
 	Lua::PhysContact::register_class(l, physMod);
 	Lua::PhysShape::register_class(l, physMod);
-	Lua::PhysKinematicCharacterController::register_class(l, physMod);
 }
 Lua::var<bool, luabind::tableT<TraceResult>, TraceResult> Lua::physenv::raycast(lua_State *l, Game &game, const ::TraceData &traceData)
 {

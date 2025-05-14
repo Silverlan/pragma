@@ -11,7 +11,6 @@
 #include "pragma/entities/c_baseentity.h"
 #include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/lua/classes/ldef_entity.h"
-#include "pragma/lua/lua_entity_component.hpp"
 #include "luasystem.h"
 #include "pragma/model/c_model.h"
 #include "pragma/lua/libraries/c_lua_vulkan.h"

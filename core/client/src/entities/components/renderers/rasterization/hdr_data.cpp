@@ -9,7 +9,6 @@
 #include "pragma/game/c_game.h"
 #include "pragma/console/c_cvar.h"
 #include "pragma/rendering/c_msaa.h"
-#include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/entities/components/renderers/rasterization/hdr_data.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"

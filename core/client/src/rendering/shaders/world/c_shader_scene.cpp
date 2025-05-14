@@ -7,7 +7,6 @@
 
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/world/c_shader_scene.hpp"
-#include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/rendering/lighting/c_light_data_buffer_manager.hpp"
 #include "pragma/rendering/render_processor.hpp"
 #include "pragma/rendering/global_render_settings_buffer_data.hpp"

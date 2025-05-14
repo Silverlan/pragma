@@ -34,7 +34,6 @@
 #include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/c_entityfactories.h"
-#include "pragma/lua/c_lentity_handles.hpp"
 #include "pragma/gui/witexturedcubemap.hpp"
 #include "pragma/gui/wiframe.h"
 #include "pragma/gui/wislider.h"

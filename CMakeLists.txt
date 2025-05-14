@@ -153,25 +153,12 @@ if(UNIX)
     pr_set_raw_library_path(boost_thread "${DEPENDENCY_BOOST_LIBRARY_LOCATION}/libboost_thread.a" FORCE)
 endif()
 
-# ZLIB_LIBRARY is being changed by one of the external libraries, even though it shouldn't be. Until the cause is found, we'll restore the original values after
-# the external libraries have been processed.
-set(TMP_ZLIB_INCLUDE_DIR "${ZLIB_INCLUDE_DIR}")
-set(TMP_ZLIB_LIBRARY "${ZLIB_LIBRARY}")
-
 message("Processing external libraries...")
 add_subdirectory(external_libs)
 pr_set_target_folder(wgui external_libs/wgui)
 pr_set_target_folder(sample_application external_libs/wgui)
-target_include_directories(util_image PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
-target_include_directories(cmaterialsystem PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
-
-# Restore original values
-set(ZLIB_INCLUDE_DIR
-    "${TMP_ZLIB_INCLUDE_DIR}"
-    CACHE STRING "" FORCE)
-set(ZLIB_LIBRARY
-    "${TMP_ZLIB_LIBRARY}"
-    CACHE STRING "" FORCE)
+target_include_directories(util_image PUBLIC ${DEPENDENCY_ZLIB_INCLUDE})
+target_include_directories(cmaterialsystem PUBLIC ${DEPENDENCY_ZLIB_INCLUDE})
 
 message("Processing core libraries...")
 add_subdirectory(core)
@@ -182,8 +169,8 @@ add_subdirectory(modules)
 message("Processing tools...")
 add_subdirectory(tools)
 
-target_include_directories(libcurl_shared PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
-target_include_directories(materialsystem PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
+target_include_directories(libcurl_shared PRIVATE ${DEPENDENCY_ZLIB_INCLUDE})
+target_include_directories(materialsystem PRIVATE ${DEPENDENCY_ZLIB_INCLUDE})
 
 if(WIN32)
     set_target_properties(pragma PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_INSTALL_PREFIX}")
@@ -243,12 +230,12 @@ pr_install_targets(
     vorbis
     vorbisfile
     VTFLib13
-    zip
     spdlog
     mpaheader
-    zlib
-    libz2
-    KVParser)
+    bz2
+    KVParser
+    lunasvg
+    plutovg)
 
 if(WIN32)
     pr_install_files("${CMAKE_CURRENT_LIST_DIR}/third_party_libs/luajit/src/lua51.dll")

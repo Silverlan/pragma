@@ -8,7 +8,6 @@
 #include "stdafx_client.h"
 #include "pragma/model/model.h"
 #include "pragma/lua/classes/components/c_lentity_components.hpp"
-#include "pragma/lua/policies/optional_policy.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include <pragma/lua/lua_util_component.hpp>

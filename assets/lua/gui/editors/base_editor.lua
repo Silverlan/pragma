@@ -15,10 +15,15 @@ function gui.WIBaseEditor:OnVisibilityChanged(bVisible)
 	end
 end
 
+function gui.WIBaseEditor:OpenContextMenu()
+	return gui.open_context_menu(self)
+end
+
 function gui.WIBaseEditor:OnInitialize()
 	self:SetMouseInputEnabled(true)
 	self:TrapFocus(true)
 	self:RequestFocus()
+	self:SetBaseElement(true)
 
 	self.m_windowFrames = {}
 

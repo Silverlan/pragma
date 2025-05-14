@@ -12,7 +12,6 @@
 #include "pragma/entities/components/c_flex_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"
-#include "pragma/lua/c_lentity_handles.hpp"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
@@ -254,7 +253,7 @@ void CVertexAnimatedComponent::UpdateVertexAnimationBuffer(const std::shared_ptr
 		constexpr auto pipelineStages = prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::ComputeShaderBit | prosper::PipelineStageFlags::GeometryShaderBit;
 		drawCmd->RecordBufferBarrier(buf, pipelineStages, prosper::PipelineStageFlags::TransferBit, prosper::AccessFlags::ShaderReadBit, prosper::AccessFlags::TransferWriteBit);
 		drawCmd->RecordUpdateBuffer(buf, 0ull, m_vertexAnimationBufferDataCount * sizeof(m_vertexAnimationBufferData.front()), m_vertexAnimationBufferData.data());
-		drawCmd->RecordBufferBarrier(buf, prosper::PipelineStageFlags::TransferBit, pipelineStages, prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::ShaderWriteBit);
+		drawCmd->RecordBufferBarrier(buf, prosper::PipelineStageFlags::TransferBit, pipelineStages, prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::ShaderReadBit);
 	}
 }
 

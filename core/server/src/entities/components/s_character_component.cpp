@@ -8,7 +8,6 @@
 #include "pragma/entities/components/s_character_component.hpp"
 #include "pragma/entities/components/s_weapon_component.hpp"
 #include "pragma/ai/s_disposition.h"
-#include "pragma/lua/s_lentity_handles.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/networking/enums.hpp>
 #include <pragma/networking/nwm_util.h>

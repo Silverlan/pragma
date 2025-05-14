@@ -5,7 +5,6 @@
  * Copyright (c) 2021 Silverlan
  */
 
-#include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/rendering/world_environment.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/rendering/render_queue.hpp"

@@ -11,8 +11,6 @@
 #include "pragma/definitions.h"
 #include <mathutil/uvec.h>
 #include <mathutil/umath_geometry.hpp>
-#include <pragma/math/plane.h>
-#include "pragma/math/vector/util_winding_order.hpp"
 #include <optional>
 
 struct AABB;

@@ -7,7 +7,6 @@
 
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
-#include "pragma/lua/c_lentity_handles.hpp"
 #include "pragma/entities/components/c_lua_component.hpp"
 #include "pragma/entities/components/c_ownable_component.hpp"
 #include <pragma/lua/lentity_component_lua.hpp>
@@ -45,6 +44,8 @@
 #include "pragma/entities/components/c_hitbox_bvh_component.hpp"
 #include "pragma/entities/components/c_input_component.hpp"
 #include "pragma/entities/components/c_global_shader_input.hpp"
+#include "pragma/entities/components/material_override.hpp"
+#include "pragma/entities/components/material_property_override.hpp"
 #include "pragma/entities/components/liquid/c_buoyancy_component.hpp"
 #include "pragma/entities/components/liquid/c_liquid_surface_component.hpp"
 #include "pragma/entities/components/liquid/c_liquid_volume_component.hpp"
@@ -226,6 +227,7 @@ void CGame::InitializeEntityComponents(pragma::EntityComponentManager &component
 	componentManager.RegisterComponentType<pragma::CShooterComponent>("shooter", {"gameplay"});
 	componentManager.RegisterComponentType<pragma::CModelComponent>("model", {"rendering/model"});
 	componentManager.RegisterComponentType<pragma::CMaterialOverrideComponent>("material_override", {"rendering/model"});
+	componentManager.RegisterComponentType<pragma::CMaterialPropertyOverrideComponent>("material_property_override", {"rendering/model"});
 	componentManager.RegisterComponentType<pragma::CAnimatedComponent>("animated", {"animation"});
 	componentManager.RegisterComponentType<pragma::CGenericComponent>("entity", {"core", hideInEditor});
 	componentManager.RegisterComponentType<pragma::CIOComponent>("io", {"core", hideInEditor});

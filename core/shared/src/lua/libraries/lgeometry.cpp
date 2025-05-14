@@ -14,7 +14,6 @@
 #include "luasystem.h"
 #include "pragma/math/math_seb.h"
 #include "pragma/math/util_triangulate.hpp"
-#include "pragma/math/vector/util_winding_order.hpp"
 #include <clip2tri/clip2tri.h>
 //#include <Pinocchio.h>
 //#include <pinocchioApi.h>

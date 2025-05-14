@@ -8,7 +8,6 @@
 #include "stdafx_shared.h"
 #include <pragma/engine.h>
 #include "pragma/game/gamemode/gamemodemanager.h"
-#include "pragma/game/gamemode/gamemode.h"
 #include <pragma/game/game.h>
 #include "luasystem.h"
 #include "pragma/game/damageinfo.h"

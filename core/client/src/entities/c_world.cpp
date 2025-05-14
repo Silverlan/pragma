@@ -24,7 +24,6 @@
 #include "pragma/rendering/render_queue.hpp"
 #include "pragma/rendering/world_environment.hpp"
 #include "pragma/rendering/render_processor.hpp"
-#include "pragma/lua/c_lentity_handles.hpp"
 #include <buffers/prosper_buffer.hpp>
 #include <sharedutils/BS_thread_pool.hpp>
 #include <prosper_util.hpp>

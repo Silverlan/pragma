@@ -13,7 +13,6 @@
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/model/c_modelmanager.h"
-#include "pragma/lua/c_lentity_handles.hpp"
 #include <pragma/audio/alsound_type.h>
 #include <sharedutils/scope_guard.h>
 #include <pragma/entities/components/velocity_component.hpp>

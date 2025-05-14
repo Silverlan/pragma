@@ -8,7 +8,6 @@
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/particles/c_shader_particle_polyboard.hpp"
 #include "pragma/rendering/shaders/particles/c_shader_particle.hpp"
-#include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <shader/prosper_shader_t.hpp>

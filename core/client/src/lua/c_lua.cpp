@@ -7,11 +7,13 @@
 
 #include "stdafx_client.h"
 
+#ifdef _MSC_VER
 namespace pragma::string {
 	class Utf8String;
 	class Utf8StringView;
 	class Utf8StringArg;
 };
+#endif
 
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
@@ -20,7 +22,6 @@ namespace pragma::string {
 #include "pragma/lua/libraries/lents.h"
 #include "pragma/lua/libraries/c_lnetmessages.h"
 #include "pragma/lua/libraries/c_lents.h"
-#include "pragma/lua/libraries/c_lrender.h"
 #include "pragma/lua/libraries/lengine.h"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
@@ -48,15 +49,11 @@ namespace pragma::string {
 #include "pragma/lua/classes/components/c_lentity_components.hpp"
 #include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/entities/components/c_lua_component.hpp"
-#include "pragma/rendering/renderers/rasterization_renderer.hpp"
-#include "pragma/rendering/renderers/raytracing_renderer.hpp"
 #include "pragma/lua/classes/c_lentity.h"
 #include "pragma/lua/classes/c_lua_entity.h"
 #include <pragma/math/e_frustum.h>
 #include <pragma/lua/lua_util_component.hpp>
 #include <pragma/lua/classes/lproperty.hpp>
-#include <pragma/lua/lua_entity_component.hpp>
-#include <pragma/lua/sh_lua_component_wrapper.hpp>
 #include <pragma/lua/lentity_component_lua.hpp>
 #include <pragma/lua/sh_lua_component.hpp>
 #include <pragma/lua/sh_lua_component_t.hpp>
@@ -83,6 +80,9 @@ namespace pragma::string {
 #undef FAR
 
 import pragma.locale;
+#ifndef _MSC_VER
+import pragma.string.unicode;
+#endif
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
@@ -121,6 +121,9 @@ void CGame::RegisterLua()
 	auto modEngine = luabind::module_(GetLuaState(), "engine");
 	modEngine[luabind::def("get_text_size", static_cast<Vector2i (*)(lua_State *, const std::string &, const std::string &)>(Lua::engine::get_text_size)),
 	  luabind::def("get_text_size", static_cast<Vector2i (*)(lua_State *, const std::string &, const FontInfo &)>(Lua::engine::get_text_size)),
+
+	  luabind::def("get_truncated_text_length", static_cast<std::pair<size_t, size_t> (*)(lua_State *, const std::string &, const std::string &, uint32_t)>(Lua::engine::get_truncated_text_length)),
+	  luabind::def("get_truncated_text_length", static_cast<std::pair<size_t, size_t> (*)(lua_State *, const std::string &, const FontInfo &, uint32_t)>(Lua::engine::get_truncated_text_length)),
 
 	  luabind::def("poll_console_output", Lua::engine::poll_console_output), luabind::def("library_exists", Lua::engine::LibraryExists), luabind::def("load_library", Lua::engine::LoadLibrary), luabind::def("unload_library", Lua::engine::UnloadLibrary),
 	  luabind::def("is_library_loaded", Lua::engine::IsLibraryLoaded), luabind::def("get_info", Lua::engine::get_info)];
@@ -237,9 +240,6 @@ void CGame::RegisterLua()
 	  luabind::def("load_texture", static_cast<std::shared_ptr<prosper::Texture> (*)(lua_State *, const LFile &, const std::string &)>(Lua::engine::load_texture)),
 	  luabind::def("load_texture", static_cast<std::shared_ptr<prosper::Texture> (*)(lua_State *, const LFile &, util::AssetLoadFlags)>(Lua::engine::load_texture)),
 	  luabind::def("load_texture", static_cast<std::shared_ptr<prosper::Texture> (*)(lua_State *, const LFile &)>(Lua::engine::load_texture)),
-	  luabind::def("create_material", static_cast<std::shared_ptr<Material> (*)(const std::string &, const std::string &)>(Lua::engine::create_material)), luabind::def("create_material", static_cast<std::shared_ptr<Material> (*)(const std::string &)>(Lua::engine::create_material)),
-	  luabind::def("get_material", static_cast<Material *(*)(const std::string &)>(Lua::engine::get_material)), luabind::def("precache_model", static_cast<void (*)(lua_State *, const std::string &)>(Lua::engine::precache_model)),
-	  luabind::def("precache_material", static_cast<void (*)(lua_State *, const std::string &)>(Lua::engine::precache_material)), luabind::def("get_error_material", Lua::engine::get_error_material), luabind::def("clear_unused_materials", Lua::engine::clear_unused_materials),
 	  luabind::def("precache_particle_system", static_cast<bool (*)(lua_State *, const std::string &, bool)>(Lua::engine::precache_particle_system)), luabind::def("precache_particle_system", static_cast<bool (*)(lua_State *, const std::string &)>(Lua::engine::precache_particle_system)),
 	  luabind::def("load_sound_scripts", static_cast<void (*)(lua_State *, const std::string &, bool)>(Lua::engine::LoadSoundScripts)), luabind::def("load_sound_scripts", static_cast<void (*)(lua_State *, const std::string &)>(Lua::engine::LoadSoundScripts)),
 	  luabind::def("get_model", Lua::engine::get_model), luabind::def("get_number_of_scenes_queued_for_rendering", &CGame::GetNumberOfScenesQueuedForRendering), luabind::def("get_queued_scene_render_info", &CGame::GetQueuedSceneRenderInfo),

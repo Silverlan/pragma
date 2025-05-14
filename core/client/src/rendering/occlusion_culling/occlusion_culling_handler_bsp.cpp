@@ -7,7 +7,6 @@
 
 #include "stdafx_client.h"
 #include "pragma/rendering/occlusion_culling/occlusion_culling_handler_bsp.hpp"
-#include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/entities/components/c_bsp_leaf_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/components/c_render_component.hpp"

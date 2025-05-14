@@ -6,7 +6,6 @@
 
 #include "stdafx_server.h"
 #include "pragma/entities/components/liquid/s_liquid_surface_simulation_component.hpp"
-#include "pragma/lua/s_lentity_handles.hpp"
 #include "pragma/console/s_cvar.h"
 #include <pragma/physics/phys_water_surface_simulator.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>

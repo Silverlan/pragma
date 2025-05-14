@@ -239,7 +239,7 @@ function gui.WIFileDialog:OnSizeChanged(w, h)
 end
 gui.register("WIFileDialog", gui.WIFileDialog)
 
-gui.create_file_open_dialog = function(fcOnFileSelected)
+gui.create_file_open_dialog = function(fcOnFileSelected, parent)
 	local dialog, frame, fileDialog = gui.create_dialog(function()
 		local el = gui.create("WIFileDialog")
 		el:SetType(gui.WIFileDialog.TYPE_OPEN)
@@ -247,11 +247,11 @@ gui.create_file_open_dialog = function(fcOnFileSelected)
 			el:AddCallback("OnFileSelected", fcOnFileSelected)
 		end
 		return el
-	end)
+	end, parent)
 	frame:GetDragArea():SetHeight(18)
 	return fileDialog
 end
-gui.create_file_save_dialog = function(fcOnFileSelected)
+gui.create_file_save_dialog = function(fcOnFileSelected, parent)
 	local dialog, frame, fileDialog = gui.create_dialog(function()
 		local el = gui.create("WIFileDialog")
 		el:SetType(gui.WIFileDialog.TYPE_SAVE)
@@ -259,7 +259,7 @@ gui.create_file_save_dialog = function(fcOnFileSelected)
 			el:AddCallback("OnFileSelected", fcOnFileSelected)
 		end
 		return el
-	end)
+	end, parent)
 	frame:GetDragArea():SetHeight(18)
 	return fileDialog
 end

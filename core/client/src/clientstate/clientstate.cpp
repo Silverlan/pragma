@@ -38,6 +38,7 @@
 #include "pragma/networking/local_client.hpp"
 #include <pragma/lua/lua_error_handling.hpp>
 #include <pragma/lua/libraries/lutil.hpp>
+#include <pragma/lua/libraries/ludm.hpp>
 #include <luasystem_file.h>
 #include <pragma/debug/intel_vtune.hpp>
 #include <pragma/networking/enums.hpp>
@@ -55,6 +56,7 @@
 #include <prosper_command_buffer.hpp>
 #include <prosper_window.hpp>
 #include <wgui/types/wiroot.h>
+
 
 static std::unordered_map<std::string, std::shared_ptr<PtrConVar>> *conVarPtrs = NULL;
 std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &ClientState::GetConVarPtrs() { return *conVarPtrs; }
@@ -253,6 +255,9 @@ void ClientState::InitializeGUILua()
 	NetworkState::RegisterSharedLuaGlobals(GetGUILuaInterface());
 	ClientState::RegisterSharedLuaGlobals(*m_luaGUI);
 	Lua::register_shared_client_state(m_luaGUI->GetState());
+	Lua::udm::register_library(*m_luaGUI);
+	auto modAsset = luabind::module_(m_luaGUI->GetState(), "asset");
+	Lua::asset_client::register_library(*m_luaGUI, modAsset);
 
 	auto timeMod = luabind::module(m_luaGUI->GetState(), "time");
 	timeMod[luabind::def("last_think", &Lua::gui::LastThink), luabind::def("real_time", &Lua::gui::RealTime), luabind::def("delta_time", &Lua::gui::DeltaTime)];

@@ -7,7 +7,6 @@
 
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/world/c_shader_skybox.hpp"
-#include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/rendering/render_processor.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/environment/c_sky_camera.hpp"

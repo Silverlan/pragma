@@ -29,8 +29,6 @@
 #include "pragma/debug/c_debug_game_gui.h"
 #include "pragma/gui/winetgraph.h"
 #include "pragma/util/util_tga.hpp"
-#include "pragma/rendering/renderers/raytracing_renderer.hpp"
-#include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/rendering/raytracing/cycles.hpp"
 #include "pragma/util/c_util.hpp"
 #include <wgui/wgui.h>

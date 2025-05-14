@@ -6,10 +6,7 @@
  */
 
 #include "stdafx_client.h"
-#include "pragma/rendering/rendersystem.h"
 #include "pragma/rendering/shaders/world/c_shader_prepass.hpp"
-#include "pragma/rendering/renderers/rasterization_renderer.hpp"
-#include "pragma/entities/components/renderers/rasterization/culled_mesh_data.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/rendering/render_queue.hpp"
 #include "pragma/rendering/render_stats.hpp"

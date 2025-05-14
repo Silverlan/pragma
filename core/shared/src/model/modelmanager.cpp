@@ -9,7 +9,6 @@
 #include "pragma/engine.h"
 #include "pragma/model/modelmanager.h"
 #include "pragma/util/util_game.hpp"
-#include "pragma/file_formats/wmd_load.h"
 #include "pragma/asset/util_asset.hpp"
 #include <sharedutils/util_path.hpp>
 #include "pragma/model/animation/skeleton.hpp"

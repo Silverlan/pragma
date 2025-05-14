@@ -46,6 +46,13 @@ ComponentMemberInfo::ComponentMemberInfo() : m_specializationType {AttributeSpec
 ComponentMemberInfo::ComponentMemberInfo(const ComponentMemberInfo &other) { operator=(other); }
 ComponentMemberInfo &ComponentMemberInfo::operator=(const ComponentMemberInfo &other)
 {
+	// We need to make sure these are cleared before changing the type
+	m_default = std::unique_ptr<void, void (*)(void *)> {nullptr, [](void *) {}};
+	m_customSpecializationType = nullptr;
+
+	m_metaData = nullptr;
+	m_enumConverter = nullptr;
+
 	type = other.type;
 	setterFunction = other.setterFunction;
 	getterFunction = other.getterFunction;

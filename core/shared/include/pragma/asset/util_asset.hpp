@@ -35,6 +35,9 @@ namespace pragma::asset {
 	static constexpr auto FORMAT_MATERIAL_ASCII = Material::FORMAT_MATERIAL_ASCII;
 	static constexpr auto FORMAT_MATERIAL_LEGACY = Material::FORMAT_MATERIAL_LEGACY;
 
+	static constexpr auto FORMAT_SHADER_GRAPH_BINARY = "psg_b";
+	static constexpr auto FORMAT_SHADER_GRAPH_ASCII = "psg";
+
 	enum class Type : uint8_t {
 		Model = 0,
 		Map,
@@ -42,6 +45,7 @@ namespace pragma::asset {
 		Texture,
 		Sound,
 		ParticleSystem,
+		ShaderGraph,
 
 		Count
 	};
@@ -80,7 +84,10 @@ namespace pragma::asset {
 			return "sounds";
 		case Type::ParticleSystem:
 			return "particles";
+		case Type::ShaderGraph:
+			return "scripts/shader_data/graphs/object";
 		}
+		static_assert(umath::to_integral(Type::Count) == 7, "New asset type added, please update get_asset_root_directory");
 		return "";
 	}
 

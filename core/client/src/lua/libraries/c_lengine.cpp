@@ -7,11 +7,13 @@
 
 #include "stdafx_client.h"
 
+#ifdef _MSC_VER
 namespace pragma::string {
 	class Utf8String;
 	class Utf8StringView;
 	class Utf8StringArg;
 };
+#endif
 
 #include "pragma/lua/libraries/c_lengine.h"
 #include "pragma/clientstate/clientstate.h"
@@ -21,12 +23,12 @@ namespace pragma::string {
 #include "pragma/c_engine.h"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
-#include "pragma/file_formats/wmd_load.h"
 #include "pragma/lua/libraries/c_lengine.h"
 #include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/asset/util_asset.hpp"
 #include <wgui/fontmanager.h>
+#include <wgui/types/witext.h>
 #include "pragma/lua/classes/c_ldef_fontinfo.h"
 #include <texturemanager/texturemanager.h>
 #include "textureinfo.h"
@@ -34,7 +36,6 @@ namespace pragma::string {
 #include <cmaterial_manager2.hpp>
 #include <pragma/lua/libraries/lengine.h>
 #include <pragma/lua/libraries/lfile.h>
-#include <pragma/lua/lua_entity_component.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <image/prosper_render_target.hpp>
 #include <pragma/entities/environment/effects/particlesystemdata.h>
@@ -42,6 +43,9 @@ namespace pragma::string {
 #include <fsys/ifile.hpp>
 
 import util_zip;
+#ifndef _MSC_VER
+import pragma.string.unicode;
+#endif
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
@@ -71,7 +75,16 @@ void Lua::engine::register_library(lua_State *l)
 	  luabind::def("create_font", static_cast<std::shared_ptr<const FontInfo> (*)(lua_State *, const std::string &, const std::string &, FontSetFlag, uint32_t)>(Lua::engine::create_font)), luabind::def("get_font", Lua::engine::get_font),
 	  luabind::def("set_fixed_frame_delta_time_interpretation", Lua::engine::set_fixed_frame_delta_time_interpretation), luabind::def("clear_fixed_frame_delta_time_interpretation", Lua::engine::clear_fixed_frame_delta_time_interpretation),
 	  luabind::def("set_tick_delta_time_tied_to_frame_rate", Lua::engine::set_tick_delta_time_tied_to_frame_rate), luabind::def("get_window_resolution", Lua::engine::get_window_resolution), luabind::def("get_render_resolution", Lua::engine::get_render_resolution),
-	  luabind::def("get_staging_render_target", Lua::engine::get_staging_render_target), luabind::def("get_current_frame_index", &Lua::engine::get_current_frame_index), luabind::def("get_default_font_set_name", &CEngine::GetDefaultFontSetName)];
+	  luabind::def("get_staging_render_target", Lua::engine::get_staging_render_target), luabind::def("get_current_frame_index", &Lua::engine::get_current_frame_index), luabind::def("get_default_font_set_name", &CEngine::GetDefaultFontSetName),
+	  luabind::def(
+	    "get_font_sets", +[]() -> std::vector<std::string> {
+		    std::vector<std::string> fontSets;
+		    auto &fontSetMap = c_engine->GetFontSets();
+		    fontSets.reserve(fontSetMap.size());
+		    for(auto &[name, fontSet] : fontSetMap)
+			    fontSets.push_back(name);
+		    return fontSets;
+	    })];
 	modEngine[luabind::def("toggle_console", &Engine::ToggleConsole)];
 	modEngine[luabind::def(
 	  "generate_info_dump", +[](const std::string &baseName) -> std::optional<std::string> {
@@ -108,6 +121,36 @@ Vector2i Lua::engine::get_text_size(lua_State *l, const std::string &text, const
 	int h = 0;
 	FontManager::GetTextSize(text, 0u, &font, &w, &h);
 	return Vector2i {w, h};
+}
+
+std::pair<size_t, size_t> Lua::engine::get_truncated_text_length(lua_State *l, const std::string &text, const std::string &font, uint32_t maxWidth)
+{
+	auto info = FontManager::GetFont(font);
+	if(info == nullptr)
+		return {0, 0};
+	return get_truncated_text_length(l, text, *info, maxWidth);
+}
+
+std::pair<size_t, size_t> Lua::engine::get_truncated_text_length(lua_State *l, const std::string &text, const FontInfo &font, uint32_t maxWidth)
+{
+	pragma::string::Utf8String uText {text};
+	uint32_t offset = 0;
+	size_t numChars = 0;
+	uint32_t idx = 0;
+	for(auto it = uText.begin(); it != uText.end(); ++it) {
+		int w = 0;
+		int h = 0;
+		FontManager::GetTextSize(*it, idx, &font, &w, &h);
+		if(offset + w > maxWidth) {
+			numChars = idx;
+			break;
+		}
+		offset += w;
+		++numChars;
+		++idx;
+	}
+
+	return {numChars, offset};
 }
 
 void Lua::engine::precache_material(lua_State *l, const std::string &mat) { client->PrecacheMaterial(mat.c_str()); }
@@ -172,16 +215,24 @@ Material *Lua::engine::load_material(lua_State *l, const std::string &mat, bool 
 Material *Lua::engine::load_material(lua_State *l, const std::string &mat, bool reload) { return load_material(l, mat, reload, true); }
 Material *Lua::engine::load_material(lua_State *l, const std::string &mat) { return load_material(l, mat, false, true); }
 
-Material *Lua::engine::get_error_material() { return client->GetMaterialManager().GetErrorMaterial(); }
-void Lua::engine::clear_unused_materials() { client->GetMaterialManager().ClearUnused(); }
+Material *Lua::asset_client::get_error_material() { return client->GetMaterialManager().GetErrorMaterial(); }
 
-std::shared_ptr<Material> Lua::engine::create_material(const std::string &identifier, const std::string &shader)
+void Lua::asset_client::register_library(Lua::Interface &lua, luabind::module_ &modAsset)
 {
-	return client->CreateMaterial(identifier, shader);
-	;
+	modAsset[luabind::def("create_material", static_cast<std::shared_ptr<Material> (*)(const std::string &, const std::string &)>(Lua::asset_client::create_material)),
+	  luabind::def("create_material", static_cast<std::shared_ptr<Material> (*)(const std::string &)>(Lua::asset_client::create_material)), luabind::def("create_material", static_cast<std::shared_ptr<Material> (*)(const udm::AssetData &)>(Lua::asset_client::create_material)),
+	  luabind::def("get_material", static_cast<Material *(*)(const std::string &)>(Lua::asset_client::get_material)), luabind::def("precache_model", static_cast<void (*)(lua_State *, const std::string &)>(Lua::engine::precache_model)),
+	  luabind::def("precache_material", static_cast<void (*)(lua_State *, const std::string &)>(Lua::engine::precache_material)), luabind::def("get_error_material", Lua::asset_client::get_error_material)];
 }
-std::shared_ptr<Material> Lua::engine::create_material(const std::string &shader) { return client->CreateMaterial(shader); }
-Material *Lua::engine::get_material(const std::string &identifier)
+
+std::shared_ptr<Material> Lua::asset_client::create_material(const std::string &identifier, const std::string &shader) { return client->CreateMaterial(identifier, shader); }
+std::shared_ptr<Material> Lua::asset_client::create_material(const std::string &shader) { return client->CreateMaterial(shader); }
+std::shared_ptr<Material> Lua::asset_client::create_material(const udm::AssetData &data)
+{
+	std::string err;
+	return client->GetMaterialManager().CreateMaterial(data, err);
+}
+Material *Lua::asset_client::get_material(const std::string &identifier)
 {
 	auto *asset = client->GetMaterialManager().FindCachedAsset(identifier);
 	return asset ? msys::CMaterialManager::GetAssetObject(*asset).get() : nullptr;
@@ -247,7 +298,7 @@ int Lua::engine::create_particle_system(lua_State *l)
 						renderers.push_back(std::make_unique<ParticleData>(name, tObj));
 					Lua::RemoveValue(l, k); /* 2 */
 					Lua::RemoveValue(l, v); /* 1 */
-				}                           /* 0 */
+				} /* 0 */
 				Lua::RemoveValue(l, -3);
 				Lua::RemoveValue(l, -2);
 			}

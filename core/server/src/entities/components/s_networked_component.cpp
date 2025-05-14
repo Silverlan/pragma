@@ -6,7 +6,6 @@
 
 #include "stdafx_server.h"
 #include "pragma/entities/components/s_networked_component.hpp"
-#include "pragma/lua/s_lentity_handles.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <sharedutils/property/util_property_euler_angles.hpp>
 #include <pragma/entities/entity_property.hpp>

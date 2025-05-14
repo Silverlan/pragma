@@ -7,6 +7,7 @@ import shutil
 import tarfile
 import urllib.request
 import zipfile
+import shlex
 import multiprocessing
 from pathlib import Path
 from urllib.parse import urlparse
@@ -83,11 +84,25 @@ def git_clone_commit(name, path, url, commitSha, branch=None):
 	reset_to_commit(commitSha)
 	return path
 
-def cmake_configure(scriptPath,generator,additionalArgs=[]):
+def cmake_configure(scriptPath,generator,toolsetArgs=None,additionalArgs=[],cflags=[]):
 	args = ["cmake",scriptPath,"-G",generator]
+	if cflags:
+		additionalArgs.append("-DCMAKE_C_FLAGS=" + " ".join(cflags))
+		additionalArgs.append("-DCMAKE_CXX_FLAGS=" + " ".join(cflags))
+	if toolsetArgs:
+		args += toolsetArgs
 	args += additionalArgs
-	print("Running CMake configure command:", ' '.join(f'"{arg}"' for arg in args))
-	subprocess.run(args,check=True)
+	print("Running CMake configure command...")
+	# print("Running CMake configure command:", ' '.join(f'"{arg}"' for arg in args))
+	try:
+		subprocess.run(args,check=True)
+	except subprocess.CalledProcessError as e:
+		if platform == "win32":
+			cmd_line = subprocess.list2cmdline(e.cmd)
+		else:
+			cmd_line = shlex.join(e.cmd)
+		print("Configure command failed:\n\n", cmd_line)
+		raise
 
 def cmake_build(buildConfig,targets=None):
 	args = ["cmake","--build",".","--config",buildConfig]
@@ -96,8 +111,17 @@ def cmake_build(buildConfig,targets=None):
 		args += targets
 	args.append("--parallel")
 	args.append(str(multiprocessing.cpu_count()))
-	print("Running CMake build command:", ' '.join(f'"{arg}"' for arg in args))
-	subprocess.run(args,check=True)
+	print("Running CMake build command...")
+	# print("Running CMake build command:", ' '.join(f'"{arg}"' for arg in args))
+	try:
+		subprocess.run(args,check=True)
+	except subprocess.CalledProcessError as e:
+		if platform == "win32":
+			cmd_line = subprocess.list2cmdline(e.cmd)
+		else:
+			cmd_line = shlex.join(e.cmd)
+		print("Build command failed:\n\n", cmd_line)
+		raise
 
 def mkdir(dirName,cd=False):
 	if not Path(dirName).is_dir():

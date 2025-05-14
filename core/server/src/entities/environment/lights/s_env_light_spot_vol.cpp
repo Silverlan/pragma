@@ -8,7 +8,6 @@
 #include "pragma/networking/s_nwm_util.h"
 #include "pragma/entities/environment/lights/s_env_light_spot_vol.h"
 #include "pragma/entities/s_entityfactories.h"
-#include "pragma/lua/s_lentity_handles.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/networking/enums.hpp>

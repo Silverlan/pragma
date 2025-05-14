@@ -14,8 +14,8 @@
 #include <queue>
 
 extern DLLCLIENT ClientState *client;
-
-WILuaSkin::WILuaSkin(std::string id) : WISkin(id), m_lua(nullptr), m_rootClass(nullptr) {}
+#pragma optimize("", off)
+WILuaSkin::WILuaSkin() : WISkin {}, m_lua(nullptr), m_rootClass(nullptr) {}
 
 void WILuaSkin::Release(WIBase *el)
 {
@@ -147,37 +147,32 @@ void WILuaSkin::InitializeClasses(WISkinClass &cl)
 			Lua::Pop(m_lua, 1);               /* 2 */
 		}
 		Lua::Pop(m_lua, 1); /* 1 */
-	}                       /* 0 */
+	} /* 0 */
 }
 
 void WILuaSkin::InitializeBase(WILuaSkin *base)
 {
 	if(base == nullptr || m_vars.has_value() == false || base->m_vars.has_value() == false)
 		return;
-
-	m_vars->push(m_lua); /* 1 */
-	auto tThis = Lua::GetStackTop(m_lua);
-
-	base->m_vars->push(m_lua); /* 2 */
-	auto tBase = Lua::GetStackTop(m_lua);
-
-	Lua::PushNil(m_lua);                       /* 3 */
-	while(Lua::GetNextPair(m_lua, tBase) != 0) /* 4 */
-	{
-		Lua::PushValue(m_lua, -2); /* 5 */        // Push key to top of stack
-		Lua::GetTableValue(m_lua, tThis); /* 5 */ // Check if key already exists in our table
-		if(Lua::IsSet(m_lua, -1) == false) {
-			// Key does not exist yet, copy value from base table to our table
-			Lua::Pop(m_lua, 1); /* 4 */               // Pop our value from stack
-			Lua::PushValue(m_lua, -2); /* 5 */        // Push key to top of stack
-			Lua::PushValue(m_lua, -2); /* 6 */        // Push value to top of stack
-			Lua::SetTableValue(m_lua, tThis); /* 4 */ // Assign to our table
+	std::function<void(luabind::object &, luabind::object &)> mergeTable = nullptr;
+	mergeTable = [&mergeTable](luabind::object &tSrc, luabind::object &tDst) {
+		for(luabind::iterator it {tSrc}, end; it != end; ++it) {
+			auto key = it.key();
+			auto dstVal = tDst[key];
+			if(dstVal) {
+				auto val = *it;
+				if(luabind::type(val) == LUA_TTABLE && luabind::type(dstVal) == LUA_TTABLE) {
+					luabind::object oVal {val};
+					luabind::object oDstVal {dstVal};
+					mergeTable(oVal, oDstVal);
+				}
+				continue;
+			}
+			auto val = *it;
+			tDst[key] = val;
 		}
-		else
-			Lua::Pop(m_lua, 1); /* 4 */
-		Lua::Pop(m_lua, 1);     /* 3 */
-	}                           /* 2 */
-	Lua::Pop(m_lua, 2);         /* 0 */
+	};
+	mergeTable(*base->m_vars, *m_vars);
 
 	InitializeBaseClass(base->m_rootClass, m_rootClass);
 }

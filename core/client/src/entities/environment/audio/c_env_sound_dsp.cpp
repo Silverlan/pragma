@@ -10,7 +10,6 @@
 #include "pragma/entities/c_entityfactories.h"
 #include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/entities/components/c_toggle_component.hpp"
-#include "pragma/lua/c_lentity_handles.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/components/basetoggle.h>
 #include <pragma/entities/components/base_transform_component.hpp>

@@ -10,7 +10,6 @@
 #include "cmaterialmanager.h"
 #include "pragma/entities/environment/c_env_reflection_probe.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
-#include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/rendering/render_processor.hpp"
 #include "pragma/rendering/shader_material/shader_material.hpp"
 #include "pragma/rendering/shader_graph/manager.hpp"

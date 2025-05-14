@@ -7,8 +7,6 @@
 #include "stdafx_server.h"
 #include "pragma/model/s_modelmanager.h"
 #include <sharedutils/util_string.h>
-#include "pragma/file_formats/wmd.h"
-#include "pragma/file_formats/wmd_load.h"
 #include <pragma/serverstate/serverstate.h>
 
 extern DLLSERVER SGame *s_game;

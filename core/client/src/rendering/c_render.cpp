@@ -17,7 +17,6 @@
 #include "pragma/model/brush/c_brushmesh.h"
 #include "pragma/entities/components/c_player_component.hpp"
 #include <wgui/wgui.h>
-#include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/rendering/global_shader_input_manager.hpp"
 #include "pragma/console/c_cvar.h"
 #include "pragma/console/c_cvar_global_functions.h"
@@ -29,7 +28,6 @@
 #include "pragma/rendering/shaders/world/c_shader_flat.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_hdr.hpp"
 #include "pragma/rendering/shaders/particles/c_shader_particle.hpp"
-#include "pragma/rendering/rendersystem.h"
 #include "pragma/rendering/render_queue.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/rendering/global_render_settings_buffer_data.hpp"
@@ -353,6 +351,8 @@ void CGame::RenderScenes(util::DrawSceneInfo &drawSceneInfo)
 
 	auto &inputDataManager = GetGlobalShaderInputDataManager();
 	inputDataManager.UpdateBufferData(*drawSceneInfo.commandBuffer);
+
+	CallCallbacks<void, std::reference_wrapper<const util::DrawSceneInfo>>("UpdateRenderBuffers", std::ref(drawSceneInfo));
 
 	StartProfilingStage("RenderScenes");
 	util::ScopeGuard sg {[this]() {

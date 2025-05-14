@@ -16,8 +16,8 @@
 #include "pragma/lua/libraries/c_lsound.h"
 #include "pragma/lua/classes/c_lshader.h"
 #include "pragma/lua/libraries/c_lutil.h"
-#include "pragma/lua/libraries/c_linput.h"
 #include "pragma/lua/libraries/lasset.hpp"
+#include "pragma/lua/libraries/c_lengine.h"
 #include "pragma/lua/converters/gui_element_converter_t.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
@@ -39,14 +39,11 @@
 #include <pragma/debug/debug_render_info.hpp>
 #include <pragma/game/game_resources.hpp>
 #include <pragma/util/giblet_create_info.hpp>
-#include <pragma/lua/lua_entity_component.hpp>
 #include <pragma/lua/classes/ldef_entity.h>
 #include <pragma/lua/classes/thread_pool.hpp>
 #include <pragma/lua/libraries/lfile.h>
 #include <pragma/lua/libraries/lutil.hpp>
 #include <pragma/lua/policies/default_parameter_policy.hpp>
-#include <pragma/lua/policies/vector_policy.hpp>
-#include <pragma/lua/policies/optional_policy.hpp>
 #include <pragma/lua/converters/string_view_converter_t.hpp>
 #include <pragma/lua/converters/vector_converter_t.hpp>
 #include <pragma/lua/converters/pair_converter_t.hpp>
@@ -320,6 +317,14 @@ void CGame::RegisterLuaLibraries()
 
 	auto utilMod = luabind::module(GetLuaState(), "util");
 	Lua::util::register_shared(GetLuaState(), utilMod);
+
+	auto svgImageInfoDef = luabind::class_<uimg::SvgImageInfo>("SvgImageInfo");
+	svgImageInfoDef.def(luabind::constructor<>());
+	svgImageInfoDef.def_readwrite("styleSheet", &uimg::SvgImageInfo::styleSheet);
+	svgImageInfoDef.def_readwrite("width", &uimg::SvgImageInfo::width);
+	svgImageInfoDef.def_readwrite("height", &uimg::SvgImageInfo::height);
+	utilMod[svgImageInfoDef];
+
 	utilMod[luabind::def("calc_world_direction_from_2d_coordinates", Lua::util::calc_world_direction_from_2d_coordinates), luabind::def("calc_world_direction_from_2d_coordinates", Lua::util::Client::calc_world_direction_from_2d_coordinates),
 	  luabind::def("create_particle_tracer", Lua::util::Client::create_particle_tracer), luabind::def("create_muzzle_flash", Lua::util::Client::create_muzzle_flash), luabind::def("fire_bullets", static_cast<luabind::object (*)(lua_State *, BulletInfo &)>(Lua::util::fire_bullets)),
 	  luabind::def("save_image", static_cast<bool (*)(lua_State *, uimg::ImageBuffer &, std::string, uimg::TextureInfo &, bool)>(save_image)),
@@ -333,22 +338,26 @@ void CGame::RegisterLuaLibraries()
 	  luabind::def("save_image", static_cast<std::pair<bool, std::optional<std::string>> (*)(lua_State *, uimg::ImageBuffer &, std::string, uimg::ImageFormat)>(save_image)),
 	  luabind::def("save_image", static_cast<bool (*)(lua_State *, luabind::table<>, std::string, uimg::TextureInfo &, bool)>(save_image)), luabind::def("save_image", static_cast<bool (*)(lua_State *, luabind::table<>, std::string, uimg::TextureInfo &)>(save_image)),
 	  luabind::def("save_image", static_cast<bool (*)(lua_State *, prosper::IImage &, std::string, uimg::TextureInfo &)>(save_image)), luabind::def("load_image", static_cast<luabind::object (*)(lua_State *, const std::string &, bool, uimg::Format)>(load_image)),
-	  luabind::def("load_image", static_cast<luabind::object (*)(lua_State *, const std::string &, bool)>(load_image)), luabind::def("load_image", static_cast<luabind::object (*)(lua_State *, const std::string &)>(load_image)), luabind::def("screenshot", ::util::screenshot),
-	  luabind::def("capture_raytraced_screenshot", static_cast<util::ParallelJob<uimg::ImageLayerSet> (*)(lua_State *, uint32_t, uint32_t, uint32_t, bool, bool)>(capture_raytraced_screenshot)),
+	  luabind::def("load_image", static_cast<luabind::object (*)(lua_State *, const std::string &, bool)>(load_image)), luabind::def("load_image", static_cast<luabind::object (*)(lua_State *, const std::string &)>(load_image)),
+	  luabind::def("load_svg", static_cast<std::shared_ptr<uimg::ImageBuffer> (*)(const std::string &, const uimg::SvgImageInfo &)>(&::uimg::load_svg)),
+	  luabind::def(
+	    "load_svg", +[](const std::string &fileName) -> std::shared_ptr<uimg::ImageBuffer> { return ::uimg::load_svg(fileName); }),
+	  luabind::def("screenshot", ::util::screenshot), luabind::def("capture_raytraced_screenshot", static_cast<util::ParallelJob<uimg::ImageLayerSet> (*)(lua_State *, uint32_t, uint32_t, uint32_t, bool, bool)>(capture_raytraced_screenshot)),
 	  luabind::def("capture_raytraced_screenshot", static_cast<util::ParallelJob<uimg::ImageLayerSet> (*)(lua_State *, uint32_t, uint32_t, uint32_t, bool)>(capture_raytraced_screenshot)),
 	  luabind::def("capture_raytraced_screenshot", static_cast<util::ParallelJob<uimg::ImageLayerSet> (*)(lua_State *, uint32_t, uint32_t, uint32_t)>(capture_raytraced_screenshot)),
 	  luabind::def("capture_raytraced_screenshot", static_cast<util::ParallelJob<uimg::ImageLayerSet> (*)(lua_State *, uint32_t, uint32_t)>(capture_raytraced_screenshot)),
 	  luabind::def(
 	    "cubemap_to_equirectangular_texture",
-	    +[](lua_State *l, prosper::Texture &cubemap) -> luabind::object {
-		    auto *shader = static_cast<pragma::ShaderCubemapToEquirectangular *>(c_engine->GetShader("cubemap_to_equirectangular").get());
-		    if(shader == nullptr)
-			    return {};
-		    auto equiRect = shader->CubemapToEquirectangularTexture(cubemap);
-		    if(equiRect == nullptr)
-			    return {};
-		    return {l, equiRect};
-	    }),
+	    +[](lua_State *l, prosper::Texture &cubemap) -> luabind::
+	                                                   object {
+		                                                   auto *shader = static_cast<pragma::ShaderCubemapToEquirectangular *>(c_engine->GetShader("cubemap_to_equirectangular").get());
+		                                                   if(shader == nullptr)
+			                                                   return {};
+		                                                   auto equiRect = shader->CubemapToEquirectangularTexture(cubemap);
+		                                                   if(equiRect == nullptr)
+			                                                   return {};
+		                                                   return {l, equiRect};
+	                                                   }),
 	  luabind::def(
 	    "equirectangular_to_cubemap_texture", +[](lua_State *l, prosper::Texture &equiRect, uint32_t resolution) -> luabind::object {
 		    auto *shader = static_cast<pragma::ShaderEquirectangularToCubemap *>(c_engine->GetShader("equirectangular_to_cubemap").get());
@@ -622,6 +631,7 @@ void CGame::RegisterLuaLibraries()
 	modAsset[defMapExportInfo];
 
 	Lua::asset::register_library(GetLuaInterface(), false);
+	Lua::asset_client::register_library(GetLuaInterface(), modAsset);
 
 	auto defTexImportInfo = luabind::class_<pragma::asset::TextureImportInfo>("TextureImportInfo");
 	defTexImportInfo.def(luabind::constructor<>());

@@ -21,7 +21,6 @@
 #include "pragma/entities/components/liquid/c_liquid_surface_component.hpp"
 #include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
-#include "pragma/lua/c_lentity_handles.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/model/model.h>
 #include <pragma/physics/raytraces.h>

@@ -9,7 +9,6 @@
 #include "pragma/entities/environment/audio/c_env_sound.h"
 #include "pragma/entities/c_entityfactories.h"
 #include "pragma/entities/components/c_name_component.hpp"
-#include "pragma/lua/c_lentity_handles.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/components/map_component.hpp>
 #include <pragma/audio/alsoundscript.h>

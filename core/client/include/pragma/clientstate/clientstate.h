@@ -16,6 +16,14 @@
 #include "pragma/game/c_game.h"
 #include "pragma/audio/c_alsound.h"
 
+#ifdef _MSC_VER
+namespace pragma::string {
+	class Utf8String;
+};
+#else
+import pragma.string.unicode;
+#endif
+
 #undef PlaySound
 
 #pragma warning(push)
@@ -72,9 +80,6 @@ namespace pragma::networking {
 };
 namespace prosper {
 	class RenderTarget;
-};
-namespace pragma::string {
-	class Utf8String;
 };
 class DLLCLIENT ClientState : public NetworkState {
 	// For internal use only! Not to be used directly!

@@ -13,7 +13,6 @@
 #include "pragma/entities/components/c_vertex_animated_component.hpp"
 #include "pragma/console/c_cvar.h"
 #include "pragma/audio/c_alsound.h"
-#include "pragma/lua/c_lentity_handles.hpp"
 #include <stack>
 #include <pragma/model/model.h>
 #include <alsound_buffer.hpp>

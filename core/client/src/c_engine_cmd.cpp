@@ -7,11 +7,13 @@
 
 #include "stdafx_cengine.h"
 
+#ifdef _MSC_VER
 namespace pragma::string {
 	class Utf8String;
 	class Utf8StringView;
 	class Utf8StringArg;
 };
+#endif
 
 #include "pragma/c_engine.h"
 #include "pragma/audio/c_audio.hpp"
@@ -41,6 +43,9 @@ namespace pragma::string {
 #include <fsys/directory_watcher.h>
 
 import pragma.locale;
+#ifndef _MSC_VER
+import pragma.string.unicode;
+#endif
 
 extern DLLCLIENT void debug_render_stats(bool enabled, bool full, bool print, bool continuous);
 extern bool g_dumpRenderQueues;

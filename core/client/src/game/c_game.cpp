@@ -10,6 +10,7 @@
 #include "pragma/entities/c_entityfactories.h"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/lua/converters/gui_element_converter_t.hpp"
+#include "pragma/lua/c_lua_script_watcher.hpp"
 #include "pragma/input/input_binding_layer.hpp"
 #include "pragma/model/c_polymesh.h"
 #include "pragma/model/brush/c_brushmesh.h"
@@ -54,15 +55,12 @@
 #include "pragma/console/c_cvar.h"
 #include "pragma/rendering/c_rendermode.h"
 #include "pragma/rendering/shaders/post_processing/c_shader_hdr.hpp"
-#include "pragma/rendering/renderers/rasterization_renderer.hpp"
-#include "pragma/rendering/renderers/raytracing_renderer.hpp"
 #include "pragma/rendering/render_queue_worker.hpp"
 #include "pragma/rendering/global_render_settings_buffer_data.hpp"
 #include "pragma/rendering/global_shader_input_manager.hpp"
 #include "pragma/ai/c_navsystem.h"
 #include <texturemanager/texturemanager.h>
 #include <pragma/physics/environment.hpp>
-#include "pragma/rendering/rendersystem.h"
 #include "pragma/rendering/render_queue.hpp"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
@@ -190,6 +188,7 @@ CGame::CGame(NetworkState *state)
 	RegisterCallback<void, pragma::CLightDirectionalComponent *, pragma::CLightDirectionalComponent *>("OnEnvironmentLightSourceChanged");
 	RegisterCallback<void, std::reference_wrapper<const util::DrawSceneInfo>>("Render");
 	RegisterCallback<void, std::reference_wrapper<const util::DrawSceneInfo>>("PreRenderScenes");
+	RegisterCallback<void, std::reference_wrapper<const util::DrawSceneInfo>>("UpdateRenderBuffers");
 	RegisterCallback<void>("OnRenderScenes");
 	RegisterCallbackWithOptionalReturn<bool, std::reference_wrapper<const util::DrawSceneInfo>>("DrawScene");
 	RegisterCallback<void>("PostRenderScenes");
@@ -515,6 +514,8 @@ void CGame::SetRenderModeEnabled(pragma::rendering::SceneRenderPass renderMode, 
 void CGame::EnableRenderMode(pragma::rendering::SceneRenderPass renderMode) { SetRenderModeEnabled(renderMode, true); }
 void CGame::DisableRenderMode(pragma::rendering::SceneRenderPass renderMode) { SetRenderModeEnabled(renderMode, false); }
 bool CGame::IsRenderModeEnabled(pragma::rendering::SceneRenderPass renderMode) const { return m_renderModesEnabled[umath::to_integral(renderMode)]; }
+
+void CGame::InitializeLuaScriptWatcher() { m_scriptWatcher = std::make_unique<CLuaDirectoryWatcherManager>(this); }
 
 Material *CGame::GetLoadMaterial() { return m_matLoad.get(); }
 void CGame::OnEntityCreated(BaseEntity *ent)

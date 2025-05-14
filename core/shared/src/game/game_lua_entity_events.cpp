@@ -13,8 +13,6 @@
 #include "pragma/lua/classes/ldef_entity.h"
 #include "pragma/lua/classes/ldef_damageinfo.h"
 #include "pragma/lua/classes/ldef_physobj.h"
-#include "pragma/lua/l_entity_handles.hpp"
-#include "pragma/lua/lua_entity_component.hpp"
 #include "pragma/lua/classes/lproperty.hpp"
 #include "pragma/lua/converters/game_type_converters_t.hpp"
 #include "pragma/entities/entity_component_event.hpp"

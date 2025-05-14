@@ -7,7 +7,6 @@
 
 #include "stdafx_client.h"
 #include "pragma/entities/components/c_ownable_component.hpp"
-#include "pragma/lua/c_lentity_handles.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
 using namespace pragma;

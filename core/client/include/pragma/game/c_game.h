@@ -15,7 +15,6 @@
 #include "pragma/rendering/c_renderflags.h"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/lua/c_lua_gui_manager.h"
-#include "pragma/rendering/rendersystem.h"
 #include "pragma/rendering/lighting/shadows/c_shadow_type.hpp"
 #include "pragma/input/input_binding_layer_lua.hpp"
 #include "pragma/lua/c_listener_handle.hpp"
@@ -28,6 +27,14 @@
 #include <wgui/wihandle.h>
 #include <sharedutils/property/util_property.hpp>
 #include <sharedutils/util_shared_handle.hpp>
+
+#ifdef _MSC_VER
+namespace pragma::string {
+	class Utf8String;
+};
+#else
+import pragma.string.unicode;
+#endif
 
 static constexpr auto LOD_SWAP_DISTANCE = 500.f;
 static constexpr auto LOD_SWAP_DISTANCE_SQR = umath::pow2(LOD_SWAP_DISTANCE);
@@ -105,9 +112,6 @@ namespace prosper {
 };
 namespace util {
 	struct DrawSceneInfo;
-};
-namespace pragma::string {
-	class Utf8String;
 };
 #pragma warning(push)
 #pragma warning(disable : 4251)
@@ -430,6 +434,7 @@ class DLLCLIENT CGame : public Game {
 	virtual void OnEntityCreated(BaseEntity *ent) override;
 	virtual unsigned int GetFreeEntityIndex() override;
 	virtual void SetupEntity(BaseEntity *ent, unsigned int idx) override;
+	virtual void InitializeLuaScriptWatcher() override;
 	virtual std::shared_ptr<pragma::EntityComponentManager> InitializeEntityComponentManager() override;
   private:
 	std::queue<WIHandle> m_luaGUIObjects = {};

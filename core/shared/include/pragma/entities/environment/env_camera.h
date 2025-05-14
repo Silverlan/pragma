@@ -8,7 +8,6 @@
 #define __ENV_CAMERA_H__
 
 #include "pragma/entities/components/base_entity_component.hpp"
-#include "pragma/math/plane.h"
 #include <sharedutils/property/util_property.hpp>
 #include <sharedutils/property/util_property_vector.h>
 #include <sharedutils/property/util_property_matrix.hpp>

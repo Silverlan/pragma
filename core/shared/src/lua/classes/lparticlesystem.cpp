@@ -10,6 +10,4 @@
 #include "pragma/lua/classes/ldef_entity.h"
 #include "pragma/entities/environment/effects/env_particle_system.h"
 #include "luasystem.h"
-#include "pragma/lua/lua_entity_component.hpp"
-#include "pragma/lua/l_entity_handles.hpp"
 #include "pragma/lua/lentity_components.hpp"

@@ -18,12 +18,13 @@ namespace pragma {
 		std::optional<ComponentMemberIndex> GetMemberIndex(const std::string &name) const;
 		const ComponentMemberInfo *GetMemberInfo(ComponentMemberIndex idx) const;
 
-		const std::unordered_map<ComponentMemberIndex, ComponentMemberInfo> &GetMembers() const { return m_members; }
-		const std::unordered_map<std::string, ComponentMemberIndex> &GetMemberIndexMap() const { return m_memberNameToIndex; }
+		const std::vector<ComponentMemberInfo> &GetMembers() const { return m_members; }
+		const std::unordered_map<pragma::GString, ComponentMemberIndex> &GetMemberIndexMap() const { return m_memberNameToIndex; }
 	  protected:
 		friend BaseEntityComponentSystem;
 		virtual void OnMemberRegistered(const ComponentMemberInfo &memberInfo, ComponentMemberIndex index) {}
 		virtual void OnMemberRemoved(const ComponentMemberInfo &memberInfo, ComponentMemberIndex index) {}
+		size_t GetDynamicMemberStartOffset() const;
 		void ReserveMembers(uint32_t count);
 		ComponentMemberIndex RegisterMember(ComponentMemberInfo &&memberInfo);
 		ComponentMemberIndex RegisterMember(const ComponentMemberInfo &memberInfo);
@@ -32,9 +33,8 @@ namespace pragma {
 		void RemoveMember(const std::string &name);
 		void UpdateMemberNameMap();
 	  private:
-		std::unordered_map<ComponentMemberIndex, ComponentMemberInfo> m_members = {};
-		std::unordered_map<std::string, ComponentMemberIndex> m_memberNameToIndex = {};
-		uint32_t m_nextMemberIndex = std::numeric_limits<uint32_t>::max();
+		std::vector<ComponentMemberInfo> m_members = {};
+		std::unordered_map<pragma::GString, ComponentMemberIndex> m_memberNameToIndex = {};
 	};
 };
 

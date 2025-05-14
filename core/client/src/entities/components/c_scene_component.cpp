@@ -24,8 +24,6 @@
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_fog.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_hdr.hpp"
 #include "pragma/rendering/shaders/c_shader_forwardp_light_culling.hpp"
-#include "pragma/rendering/renderers/base_renderer.hpp"
-#include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/rendering/render_queue.hpp"
 #include "pragma/rendering/world_environment.hpp"
 #include "pragma/entities/c_entityfactories.h"

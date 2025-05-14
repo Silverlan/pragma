@@ -14,7 +14,6 @@
 #include "pragma/gui/widebugdepthtexture.h"
 #include "pragma/gui/widebugmsaatexture.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
-#include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"

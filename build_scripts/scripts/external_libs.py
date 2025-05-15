@@ -10,7 +10,7 @@ external_libs_dir = curDir +"/external_libs"
 os.chdir(external_libs_dir)
 get_submodule("alsoundsystem","https://github.com/Silverlan/alsoundsystem.git","cf9d6139d3a6812333cc991cceff204a9927d6d1")
 get_submodule("datasystem","https://github.com/Silverlan/datasystem.git","209e2f3f991572801e6fcc0a9f74be7796a60d45")
-get_submodule("iglfw","https://github.com/Silverlan/iglfw.git","a90f59a2f3c3638c43c4359444721ed0cb0894d0")
+get_submodule("iglfw","https://github.com/Silverlan/iglfw.git","fc537175988e6fe7bffbc6589271fd10b4e157ad")
 get_submodule("luasystem","https://github.com/Silverlan/luasystem.git","8eef5fe5593f9b9496d2d03158ecc1f485a34d7d")
 get_submodule("materialsystem","https://github.com/Silverlan/materialsystem.git","7a4123878e02257098d833018bd7acdcb8fa102f")
 get_submodule("mathutil","https://github.com/Silverlan/mathutil.git","554d67f7b621fe87fecea90269581c2ca50dadb9")
@@ -34,7 +34,7 @@ get_submodule("util_vmf","https://github.com/Silverlan/util_vmf.git","ae1c498c20
 get_submodule("util_zip","https://github.com/Silverlan/util_zip.git","71205cd")
 get_submodule("util_shadergraph","https://github.com/Silverlan/util_shadergraph.git","15231d501ca893d077c1a1de5cd173daf94fc1e5")
 get_submodule("vfilesystem","https://github.com/Silverlan/vfilesystem.git","7009bfb2d8233702493865bc5d78a59d621dc358")
-get_submodule("wgui","https://github.com/Silverlan/wgui.git","3aeadf0025eddf8a7cc3421c309b9aad67a37789")
+get_submodule("wgui","https://github.com/Silverlan/wgui.git","f34277b3a52d20f1d27077fdfe5e3325927156f5")
 get_submodule("util_unicode","https://github.com/Silverlan/util_unicode.git","5a0ac6c02f199e42d7d38d99231503cf42e26f8a")
 get_submodule("cppbezierfit","https://github.com/Silverlan/cppbezierfit.git","b1f76c0187411230ebe59fa606292b0947e730b6")
 

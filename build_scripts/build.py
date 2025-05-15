@@ -952,7 +952,7 @@ execfile(scripts_dir +"/user_modules.py",g,l)
 if with_essential_client_modules:
 	add_pragma_module(
 		name="pr_prosper_vulkan",
-		commitSha="774c50de6c03c9db121f19d8b90a0b066e4853e3",
+		commitSha="d71e88cc072963c21f560d74dfb36e1cb28bce00",
 		repositoryUrl="https://github.com/Silverlan/pr_prosper_vulkan.git"
 	)
 
@@ -1306,7 +1306,7 @@ def download_addon(name,addonName,url,commitId=None):
 curDir = os.getcwd()
 if not skip_repository_updates:
 	if with_pfm:
-		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","df19bf80d2f5c86631b6ac2277bbdd1f9005046c")
+		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","ffc957cb83701f526a25f60e92ffe4d95c3fec47")
 		download_addon("model editor","tool_model_editor","https://github.com/Silverlan/pragma_model_editor.git","a9ea4820f03be250bdf1e6951dad313561b75b17")
 
 	if with_vr:

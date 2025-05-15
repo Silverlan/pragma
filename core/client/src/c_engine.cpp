@@ -1713,6 +1713,7 @@ void CEngine::Close()
 	};
 	closeSecondaryWindows();
 
+	WGUI::GetInstance().ClearSkins(); // Should be cleared before lua states are closed
 	CloseClientState();
 	m_auxEffects.clear();
 	CloseSoundEngine(); // Has to be closed after client state (since clientstate may still have some references at this point)

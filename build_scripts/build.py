@@ -614,7 +614,7 @@ os.chdir("SPIRV-Tools")
 # the target Vulkan SDK version.
 # When updating to a newer version, the SPIRV-Headers commit below has to match
 # the one defined in https://github.com/KhronosGroup/SPIRV-Tools/blob/<SHA>/DEPS
-reset_to_commit("4d2f0b4")
+reset_to_commit("a62abcb")
 os.chdir("../../")
 
 ########## SPIRV-Headers ##########
@@ -624,7 +624,7 @@ os.chdir("SPIRV-Tools/external")
 if not Path(os.getcwd() +"/spirv-headers").is_dir():
 	git_clone("https://github.com/KhronosGroup/SPIRV-Headers", "spirv-headers")
 os.chdir("spirv-headers")
-reset_to_commit("3f17b2af6784bfa2c5aa5dbb8e0e74a607dd8b3b")
+reset_to_commit("aa6cef192b8e693916eb713e7a9ccadf06062ceb")
 os.chdir("../../")
 os.chdir("../../")
 

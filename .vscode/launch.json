@@ -6,9 +6,12 @@
             "request": "launch",
             "program": "${workspaceFolder}/build/install/pragma",
             "args": [
-                "-verbose"
+                "-verbose",
+                "-log","0","0",
+                "-enable_gfx_validation"
             ],
-            "stopAtEntry": false,
+            "stopAtEntry": true,
+            "externalConsole": false,
             "cwd": "${workspaceFolder}/build/install/",
             "environment": [
                 {
@@ -23,8 +26,11 @@
                     "name": "__GLX_VENDOR_LIBRARY_NAME",
                     "value": "nvidia"
                 },
+                {
+                    "name": "VK_INSTANCE_LAYERS",
+                    "value": "VK_LAYER_KHRONOS_validation"
+                }
             ],
-            "externalConsole": true,
             "MIMode": "gdb",
             "setupCommands": [
                 {
@@ -45,9 +51,12 @@
             "request": "launch",
             "program": "${workspaceFolder}/build/install/pfm",
             "args": [
-                "-verbose"
+                "-verbose",
+                "-log","0","0",
+                "-enable_gfx_validation"
             ],
             "stopAtEntry": true,
+            "externalConsole": false,
             "cwd": "${workspaceFolder}/build/install/",
             "environment": [
                 {
@@ -62,8 +71,11 @@
                     "name": "__GLX_VENDOR_LIBRARY_NAME",
                     "value": "nvidia"
                 },
+                {
+                    "name": "VK_INSTANCE_LAYERS",
+                    "value": "VK_LAYER_KHRONOS_validation"
+                }
             ],
-            "externalConsole": true,
             "MIMode": "gdb",
             "setupCommands": [
                 {
@@ -84,25 +96,13 @@
             "request": "launch",
             "program": "${workspaceFolder}/build/install/pragma_server",
             "args": [
-                "-verbose"
+                "-verbose",
+                "-log","0","0"
             ],
-            "stopAtEntry": false,
+            "stopAtEntry": true,
+            "externalConsole": false,
             "cwd": "${workspaceFolder}/build/install/",
-            "environment": [
-                {
-                    "name": "__NV_PRIME_RENDER_OFFLOAD",
-                    "value": "1"
-                },
-                {
-                    "name": "__VK_LAYER_NV_optimus",
-                    "value": "NVIDIA_only"
-                },
-                {
-                    "name": "__GLX_VENDOR_LIBRARY_NAME",
-                    "value": "nvidia"
-                },
-            ],
-            "externalConsole": true,
+            "environment": [],
             "MIMode": "gdb",
             "setupCommands": [
                 {

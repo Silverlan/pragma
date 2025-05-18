@@ -614,7 +614,7 @@ os.chdir("SPIRV-Tools")
 # the target Vulkan SDK version.
 # When updating to a newer version, the SPIRV-Headers commit below has to match
 # the one defined in https://github.com/KhronosGroup/SPIRV-Tools/blob/<SHA>/DEPS
-reset_to_commit("4d2f0b4")
+reset_to_commit("a62abcb")
 os.chdir("../../")
 
 ########## SPIRV-Headers ##########
@@ -624,7 +624,7 @@ os.chdir("SPIRV-Tools/external")
 if not Path(os.getcwd() +"/spirv-headers").is_dir():
 	git_clone("https://github.com/KhronosGroup/SPIRV-Headers", "spirv-headers")
 os.chdir("spirv-headers")
-reset_to_commit("3f17b2af6784bfa2c5aa5dbb8e0e74a607dd8b3b")
+reset_to_commit("aa6cef192b8e693916eb713e7a9ccadf06062ceb")
 os.chdir("../../")
 os.chdir("../../")
 
@@ -952,7 +952,7 @@ execfile(scripts_dir +"/user_modules.py",g,l)
 if with_essential_client_modules:
 	add_pragma_module(
 		name="pr_prosper_vulkan",
-		commitSha="d71e88cc072963c21f560d74dfb36e1cb28bce00",
+		commitSha="aebf59015eba68e9509faf60e4e8d1d4e07f663c",
 		repositoryUrl="https://github.com/Silverlan/pr_prosper_vulkan.git"
 	)
 
@@ -1306,7 +1306,7 @@ def download_addon(name,addonName,url,commitId=None):
 curDir = os.getcwd()
 if not skip_repository_updates:
 	if with_pfm:
-		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","ffc957cb83701f526a25f60e92ffe4d95c3fec47")
+		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","dad4d32701baa612120d887ad620b1f7834b5da4")
 		download_addon("model editor","tool_model_editor","https://github.com/Silverlan/pragma_model_editor.git","a9ea4820f03be250bdf1e6951dad313561b75b17")
 
 	if with_vr:

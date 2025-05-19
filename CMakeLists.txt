@@ -19,6 +19,11 @@ else()
     set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif()
 
+# This generates a compile_commands.json file in the build directory to help clangd parse the project
+# and provide code completion.
+# This is only useful if you are using clangd as your language server.
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 if(WIN32)
     set(BINARY_OUTPUT_DIR "bin")
     set(EXECUTABLE_OUTPUT_DIR "bin")

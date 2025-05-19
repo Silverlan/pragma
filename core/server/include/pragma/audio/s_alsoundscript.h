@@ -39,7 +39,7 @@ class DLLSERVER SALSoundScript : public ALSoundScript, virtual public SALSound {
 	virtual Vector3 GetPosition() const override;
 	virtual void SetVelocity(const Vector3 &vel) override;
 	virtual Vector3 GetVelocity() const override;
-	virtual void SetDirection(const Vector3 &dir);
+	virtual void SetDirection(const Vector3 &dir) override;
 	virtual Vector3 GetDirection() const override;
 	virtual void SetRelative(bool b) override;
 	virtual bool IsRelative() const override;

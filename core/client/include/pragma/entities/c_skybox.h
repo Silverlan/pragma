@@ -24,7 +24,7 @@ namespace pragma {
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
 
-		void SetSkyAngles(const EulerAngles &ang);
+		virtual void SetSkyAngles(const EulerAngles &ang) override;
 		const EulerAngles &GetSkyAngles() const;
 		const Vector4 &GetRenderSkyAngles() const;
 

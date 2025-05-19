@@ -34,16 +34,16 @@ namespace pragma {
 		virtual void Attack4() override;
 		virtual void Reload() override;
 		virtual void OnTick(double tDelta) override;
-		virtual void OnRemove();
+		virtual void OnRemove() override;
 		void Drop();
 		virtual void OnPickedUp(BaseEntity *ent);
 		// Ammo
-		virtual void SetPrimaryClipSize(UInt16 size);
-		virtual void SetSecondaryClipSize(UInt16 size);
-		virtual void SetMaxPrimaryClipSize(UInt16 size);
-		virtual void SetMaxSecondaryClipSize(UInt16 size);
-		virtual void SetPrimaryAmmoType(UInt32 type);
-		virtual void SetSecondaryAmmoType(UInt32 type);
+		virtual void SetPrimaryClipSize(UInt16 size) override;
+		virtual void SetSecondaryClipSize(UInt16 size) override;
+		virtual void SetMaxPrimaryClipSize(UInt16 size) override;
+		virtual void SetMaxSecondaryClipSize(UInt16 size) override;
+		virtual void SetPrimaryAmmoType(UInt32 type) override;
+		virtual void SetSecondaryAmmoType(UInt32 type) override;
 		void AddPrimaryClip(UInt16 num);
 		void AddSecondaryClip(UInt16 num);
 		void RefillPrimaryClip(UInt16 num);

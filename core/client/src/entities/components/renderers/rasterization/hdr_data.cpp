@@ -38,6 +38,7 @@
 #include <shader/prosper_shader_blur.hpp>
 #include <shader/prosper_shader_t.hpp>
 #include <image/prosper_sampler.hpp>
+#include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 
 using namespace pragma::rendering;

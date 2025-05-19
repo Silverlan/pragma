@@ -494,7 +494,7 @@ GameShaderSpecializationConstantFlag ShaderGameWorldLightingPass::GetBaseSpecial
 void ShaderGameWorldLightingPass::RecordBindScene(rendering::ShaderProcessor &shaderProcessor, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer,
   prosper::IDescriptorSet &dsRenderSettings, prosper::IDescriptorSet &dsShadows, const Vector4 &drawOrigin, ShaderGameWorld::SceneFlags &inOutSceneFlags) const
 {
-	std::array<prosper::IDescriptorSet *, 4> descSets {descSets[1] = &dsScene, descSets[2] = &dsRenderer, descSets[3] = &dsRenderSettings, descSets[5] = &dsShadows};
+	std::array<prosper::IDescriptorSet *, 4> descSets {&dsScene, &dsRenderer, &dsRenderSettings, &dsShadows};
 
 	RecordPushSceneConstants(shaderProcessor, scene, drawOrigin);
 	static const std::vector<uint32_t> dynamicOffsets {};

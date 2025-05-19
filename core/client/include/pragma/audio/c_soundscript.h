@@ -21,7 +21,7 @@ namespace al {
 class DLLCLIENT CSSEPlaySound : public SSEPlaySound {
   protected:
 	std::shared_ptr<al::IEffect> m_dspEffect = nullptr;
-	void PrecacheSound(const char *name);
+	virtual void PrecacheSound(const char *name) override;
   public:
 	CSSEPlaySound(SoundScriptManager *manager);
 	std::vector<std::shared_ptr<al::IEffect>> effects;
@@ -41,8 +41,8 @@ class DLLCLIENT CSoundScriptManager : public SoundScriptManager {
   public:
 	CSoundScriptManager();
 	virtual ~CSoundScriptManager() override;
-	bool Load(const char *fname, std::vector<std::shared_ptr<SoundScript>> *scripts = NULL);
-	SoundScriptEvent *CreateEvent(std::string name);
+	virtual bool Load(const char *fname, std::vector<std::shared_ptr<SoundScript>> *scripts = NULL) override;
+	virtual SoundScriptEvent *CreateEvent(std::string name) override;
 };
 
 #endif

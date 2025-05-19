@@ -11,7 +11,7 @@
 import panima;
 
 #pragma optimize("", off)
-void __panima_cvs_5()
+DLLNETWORK void __panima_cvs_5()
 {
 	udm::visit_ng({}, [](auto tag) {
 		using TChannel = typename decltype(tag)::type;

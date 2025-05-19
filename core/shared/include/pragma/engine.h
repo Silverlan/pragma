@@ -86,7 +86,7 @@ class DLLNETWORK Engine : public CVarHandler, public CallbackHandler {
 		std::unordered_map<std::string, ConVarArgs> m_cvarMap;
 	};
 
-	virtual std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &GetConVarPtrs();
+	virtual std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &GetConVarPtrs() override;
 	static ConVarHandle GetConVarHandle(std::string scvar);
 	//
 	class DLLNETWORK StateInstance {

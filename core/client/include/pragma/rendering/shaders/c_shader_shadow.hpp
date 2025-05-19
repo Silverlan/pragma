@@ -62,7 +62,7 @@ namespace pragma {
 		ShaderShadow(prosper::IPrContext &context, const std::string &identifier);
 		ShaderShadow(prosper::IPrContext &context, const std::string &identifier, const std::string &vsShader, const std::string &fsShader);
 
-		virtual GameShaderType GetPassType() const { return GameShaderType::ShadowPass; }
+		virtual GameShaderType GetPassType() const override { return GameShaderType::ShadowPass; }
 
 		//
 		virtual void RecordBindScene(rendering::ShaderProcessor &shaderProcessor, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer, prosper::IDescriptorSet &dsRenderSettings,
@@ -72,7 +72,7 @@ namespace pragma {
 		virtual void RecordAlphaCutoff(rendering::ShaderProcessor &shaderProcessor, float alphaCutoff) const override;
 		virtual bool RecordBindMaterial(rendering::ShaderProcessor &shaderProcessor, CMaterial &mat) const override;
 		virtual void RecordClipPlane(rendering::ShaderProcessor &shaderProcessor, const Vector4 &clipPlane) const override {}
-		virtual void RecordDrawOrigin(rendering::ShaderProcessor &shaderProcessor, const Vector4 &drawOrigin) const {}
+		virtual void RecordDrawOrigin(rendering::ShaderProcessor &shaderProcessor, const Vector4 &drawOrigin) const override {}
 		virtual void RecordDepthBias(rendering::ShaderProcessor &shaderProcessor, const Vector2 &depthBias) const override {}
 		virtual void RecordVertexAnimationOffset(rendering::ShaderProcessor &shaderProcessor, uint32_t vertexAnimationOffset) const override;
 	  protected:

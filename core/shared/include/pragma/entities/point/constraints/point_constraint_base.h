@@ -26,7 +26,7 @@ namespace pragma {
 		virtual void OnEntitySpawn() override;
 		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 		std::vector<util::TSharedHandle<physics::IConstraint>> &GetConstraints();
-		virtual void OnRemove();
+		virtual void OnRemove() override;
 	  protected:
 		std::string m_kvSource;
 		std::string m_kvTarget;

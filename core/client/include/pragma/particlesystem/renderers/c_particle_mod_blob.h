@@ -65,7 +65,7 @@ class DLLCLIENT CParticleRendererBlob : public CParticleRenderer {
 	virtual ~CParticleRendererBlob() override;
 	virtual void RecordRender(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::ParticleRenderFlags renderFlags) override;
 	virtual void RecordRenderShadow(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::CLightComponent &light, uint32_t layerId = 0) override;
-	virtual void Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values);
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
 	virtual void OnParticleSystemStarted() override;
 	virtual void OnParticleDestroyed(CParticle &particle) override;
 	virtual void OnParticleSystemStopped() override;

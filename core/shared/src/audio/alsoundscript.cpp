@@ -152,9 +152,9 @@ void ALSoundScript::InitializeEvent(SoundScriptEvent *ev)
 				als->SetAirAbsorptionFactor(m_airAbsorptionFactor);
 			if(m_orientation.first != ALSOUND_DEFAULT_ORIENTATION_AT || m_orientation.second != ALSOUND_DEFAULT_ORIENTATION_UP)
 				als->SetOrientation(m_orientation.first, m_orientation.second);
-			if(m_stereoAngles.first != ALSOUND_DEFAULT_STEREO_ANGLE_LEFT)
+			if(!umath::equals<float>(m_stereoAngles.first, ALSOUND_DEFAULT_STEREO_ANGLE_LEFT))
 				als->SetLeftStereoAngle(m_stereoAngles.first);
-			if(m_stereoAngles.second != ALSOUND_DEFAULT_STEREO_ANGLE_RIGHT)
+			if(!umath::equals<float>(m_stereoAngles.second, ALSOUND_DEFAULT_STEREO_ANGLE_RIGHT))
 				als->SetRightStereoAngle(m_stereoAngles.second);
 			if(std::get<0>(m_gainAuto) != ALSOUND_DEFAULT_DIRECT_GAIN_HF_AUTO || std::get<1>(m_gainAuto) != ALSOUND_DEFAULT_SEND_GAIN_AUTO || std::get<2>(m_gainAuto) != ALSOUND_DEFAULT_SEND_GAIN_HF_AUTO)
 				als->SetGainAuto(std::get<0>(m_gainAuto), std::get<1>(m_gainAuto), std::get<2>(m_gainAuto));

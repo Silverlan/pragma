@@ -121,7 +121,7 @@ class DLLCLIENT ClientState : public NetworkState {
   public:
 	ClientState();
 	virtual ~ClientState() override;
-	virtual bool IsClient() const;
+	virtual bool IsClient() const override;
   public:
 	virtual bool ShouldRemoveSound(ALSound &snd) override;
 	Material *LoadMaterial(const std::string &path, const std::function<void(Material *)> &onLoaded, bool bReload, bool bLoadInstantly); // TODO
@@ -130,12 +130,12 @@ class DLLCLIENT ClientState : public NetworkState {
 	bool LoadGUILuaFile(std::string f);
 	pragma::networking::IClient *GetClient();
 	virtual NwStateType GetType() const override;
-	void Think();
-	void Tick();
+	virtual void Think() override;
+	virtual void Tick() override;
 	void Draw(util::DrawSceneInfo &drawSceneInfo);
 	void Render(util::DrawSceneInfo &drawSceneInfo, std::shared_ptr<prosper::RenderTarget> &rt);
 	virtual void Close() override;
-	ConVarMap *GetConVarMap();
+	virtual ConVarMap *GetConVarMap() override;
 	bool IsConnected() const;
 	void AddGUILuaWrapperFactory(const std::function<luabind::object(lua_State *, WIBase &)> &f);
 	std::vector<std::function<luabind::object(lua_State *, WIBase &)>> &GetGUILuaWrapperFactories();
@@ -166,7 +166,7 @@ class DLLCLIENT ClientState : public NetworkState {
 	// CVars
 	void RegisterServerConVar(std::string scmd, unsigned int id);
 	virtual bool RunConsoleCommand(std::string scmd, std::vector<std::string> &argv, pragma::BasePlayerComponent *pl = nullptr, KeyState pressState = KeyState::Press, float magnitude = 1.f, const std::function<bool(ConConf *, float &)> &callback = nullptr) override;
-	ConVar *SetConVar(std::string scmd, std::string value, bool bApplyIfEqual = false);
+	virtual ConVar *SetConVar(std::string scmd, std::string value, bool bApplyIfEqual = false) override;
 	// Sockets
 	void Connect(std::string ip, std::string port = sci::DEFAULT_PORT_TCP);
 	// Peer-to-peer only!
@@ -228,8 +228,8 @@ class DLLCLIENT ClientState : public NetworkState {
 	virtual void StartGame(bool singlePlayer) override;
 	void StartNewGame(const std::string &gameMode);
 	CGame *GetGameState();
-	void EndGame();
-	bool IsGameActive();
+	virtual void EndGame() override;
+	virtual bool IsGameActive() override;
 
 	void ShowFPSCounter(bool b);
 

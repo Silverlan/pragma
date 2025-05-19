@@ -11,6 +11,7 @@
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/lua/lua_util_component.hpp>
 #include <pragma/lua/lua_util_component_stream.hpp>
+#include <pragma/lua/converters/optional_converter_t.hpp>
 #include <prosper_command_buffer.hpp>
 
 void Lua::Flex::register_class(lua_State *l, luabind::module_ &entsMod)

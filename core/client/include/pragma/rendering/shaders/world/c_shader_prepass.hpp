@@ -57,7 +57,7 @@ namespace pragma {
 		ShaderPrepassBase(prosper::IPrContext &context, const std::string &identifier, const std::string &vsShader, const std::string &fsShader);
 		ShaderPrepassBase(prosper::IPrContext &context, const std::string &identifier);
 
-		virtual GameShaderType GetPassType() const { return GameShaderType::DepthPrepass; }
+		virtual GameShaderType GetPassType() const override { return GameShaderType::DepthPrepass; }
 		virtual bool IsDepthPrepassShader() const override { return true; }
 		virtual uint32_t GetSceneDescriptorSetIndex() const override;
 

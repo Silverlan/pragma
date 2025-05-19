@@ -79,6 +79,8 @@ class DLLNETWORK Flex {
 				return d.index == other.d.index;
 			case ValueType::Value:
 				return d.value == other.d.value;
+			default:
+				break;
 			}
 			return true;
 		}

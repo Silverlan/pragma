@@ -26,7 +26,7 @@ class DLLCLIENT CALSound : public al::SoundSource, public ALSound {
 	CALSound(NetworkState *nw, const al::PSoundChannel &channel);
 	virtual ~CALSound() override;
 	virtual void OnRelease() override;
-	float GetMaxAudibleDistance() const;
+	virtual float GetMaxAudibleDistance() const override;
 	void SetPitchModifier(float mod);
 	float GetPitchModifier() const;
 	void SetVolumeModifier(float mod);

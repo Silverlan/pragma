@@ -199,7 +199,7 @@ namespace pragma {
 		virtual void SendSnapshotData(NetPacket &packet, pragma::BasePlayerComponent &pl) override;
 		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 		virtual bool ShouldTransmitSnapshotData() const override { return true; }
-		virtual bool ShouldTransmitNetData() const { return true; }
+		virtual bool ShouldTransmitNetData() const override { return true; }
 
 		// Animation
 		struct AIAnimationInfo {

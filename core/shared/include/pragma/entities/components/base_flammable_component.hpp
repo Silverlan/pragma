@@ -27,7 +27,7 @@ namespace pragma {
 		virtual util::EventReply Ignite(float duration, BaseEntity *attacker = nullptr, BaseEntity *inflictor = nullptr);
 		virtual void Extinguish();
 		virtual void SetIgnitable(bool b);
-		virtual void OnTick(double dt);
+		virtual void OnTick(double dt) override;
 
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
 		virtual void Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) override;

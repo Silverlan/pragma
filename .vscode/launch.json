@@ -52,8 +52,7 @@
             "program": "${workspaceFolder}/build/install/pfm",
             "args": [
                 "-verbose",
-                "-log","0","0",
-                "-enable_gfx_validation"
+                "-log","0","0"
             ],
             "stopAtEntry": true,
             "externalConsole": false,
@@ -70,10 +69,6 @@
                 {
                     "name": "__GLX_VENDOR_LIBRARY_NAME",
                     "value": "nvidia"
-                },
-                {
-                    "name": "VK_INSTANCE_LAYERS",
-                    "value": "VK_LAYER_KHRONOS_validation"
                 }
             ],
             "MIMode": "gdb",

@@ -145,22 +145,22 @@ class DLLSERVER SGame : public Game {
 	pragma::SPlayerComponent *GetPlayer(pragma::networking::IServerClient &session);
 	virtual void SpawnEntity(BaseEntity *ent) override;
 	void GetEntities(std::vector<SBaseEntity *> **ents);
-	void GetPlayers(std::vector<BaseEntity *> *ents);
-	void GetNPCs(std::vector<BaseEntity *> *ents);
-	void GetWeapons(std::vector<BaseEntity *> *ents);
-	void GetVehicles(std::vector<BaseEntity *> *ents);
+	void GetPlayers(std::vector<BaseEntity *> *ents) override;
+	void GetNPCs(std::vector<BaseEntity *> *ents) override;
+	void GetWeapons(std::vector<BaseEntity *> *ents) override;
+	void GetVehicles(std::vector<BaseEntity *> *ents) override;
 
 	void GetPlayers(std::vector<SBaseEntity *> *ents);
 	void GetNPCs(std::vector<SBaseEntity *> *ents);
 	void GetWeapons(std::vector<SBaseEntity *> *ents);
 	void GetVehicles(std::vector<SBaseEntity *> *ents);
 
-	void GetPlayers(std::vector<EntityHandle> *ents);
-	void GetNPCs(std::vector<EntityHandle> *ents);
-	void GetWeapons(std::vector<EntityHandle> *ents);
-	void GetVehicles(std::vector<EntityHandle> *ents);
+	void GetPlayers(std::vector<EntityHandle> *ents) override;
+	void GetNPCs(std::vector<EntityHandle> *ents) override;
+	void GetWeapons(std::vector<EntityHandle> *ents) override;
+	void GetVehicles(std::vector<EntityHandle> *ents) override;
 
-	bool RegisterNetMessage(std::string name);
+	bool RegisterNetMessage(std::string name) override;
 	void HandleLuaNetPacket(pragma::networking::IServerClient &session, NetPacket &packet);
 
 	void ReceiveUserInfo(pragma::networking::IServerClient &session, NetPacket &packet);

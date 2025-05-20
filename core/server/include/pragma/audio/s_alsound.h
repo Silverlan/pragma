@@ -54,14 +54,14 @@ class DLLSERVER SALSound : virtual public ALSound, public SALSoundBase, virtual 
 	virtual bool IsStopped() const override;
 	virtual void SetGain(float gain) override;
 	virtual float GetGain() const override;
-	void SetPosition(const Vector3 &pos, bool bDontTransmit);
+	virtual void SetPosition(const Vector3 &pos, bool bDontTransmit) override;
 	virtual void SetPosition(const Vector3 &pos) override;
 	virtual Vector3 GetPosition() const override;
-	void SetVelocity(const Vector3 &vel, bool bDontTransmit);
+	virtual void SetVelocity(const Vector3 &vel, bool bDontTransmit) override;
 	virtual void SetVelocity(const Vector3 &vel) override;
 	virtual Vector3 GetVelocity() const override;
-	void SetDirection(const Vector3 &dir, bool bDontTransmit);
-	virtual void SetDirection(const Vector3 &dir);
+	virtual void SetDirection(const Vector3 &dir, bool bDontTransmit) override;
+	virtual void SetDirection(const Vector3 &dir) override;
 	virtual Vector3 GetDirection() const override;
 	virtual void SetRelative(bool b) override;
 	virtual bool IsRelative() const override;

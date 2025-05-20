@@ -10,8 +10,13 @@
 
 #include "pragma/logging_wrapper.hpp"
 
+#ifndef SPDLOG_SHARED_LIB
 #define SPDLOG_SHARED_LIB
+#endif
+
+#ifndef SPDLOG_COMPILED_LIB
 #define SPDLOG_COMPILED_LIB
+#endif
 
 #include <spdlog/spdlog.h>
 

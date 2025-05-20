@@ -25,7 +25,7 @@ namespace pragma {
 			virtual void PlayAnimation(pragma::SAIComponent &ent) = 0;
 			bool StartTask(const Schedule *sched, pragma::SAIComponent &ent);
 			virtual void OnStopped() override;
-			void Clear();
+			virtual void Clear() override;
 			void UnlockAnimation();
 		  public:
 			TaskPlayAnimationBase(const TaskPlayAnimationBase &) = default;

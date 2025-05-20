@@ -10,6 +10,7 @@
 #include "pragma/entities/components/base_model_component.hpp"
 #include "pragma/entities/components/base_time_scale_component.hpp"
 #include "pragma/entities/components/panima_component_channel_submitter.hpp"
+#include "pragma/entities/components/panima_component_channel_submitter_def.hpp"
 #include "pragma/entities/entity_component_manager_t.hpp"
 #include "pragma/game/animation_update_manager.hpp"
 #include "pragma/model/model.h"
@@ -398,6 +399,7 @@ static bool is_vector_component(const std::string &str)
 	}
 	return false;
 }
+
 void PanimaComponent::InitializeAnimationChannelValueSubmitters(AnimationManagerData &amData)
 {
 	auto &manager = *amData.animationManager;
@@ -589,6 +591,9 @@ void PanimaComponent::InitializeAnimationChannelValueSubmitters(AnimationManager
 							}
 							break;
 						}
+					default:
+						componentIndices[idx] = idx;
+						break;
 					}
 					++idx;
 				}

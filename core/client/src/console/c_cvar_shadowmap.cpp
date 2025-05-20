@@ -9,6 +9,7 @@
 #include "pragma/console/c_cvar.h"
 #include "pragma/entities/environment/lights/c_env_light.h"
 #include "pragma/entities/environment/lights/c_env_shadow_csm.hpp"
+#include <pragma/entities/entity_component_system_t.hpp>
 #include <wgui/types/wirect.h>
 #include "pragma/gui/mainmenu/wimainmenu.h"
 #include "pragma/game/c_game_createguielement.h"
@@ -19,6 +20,7 @@
 #include <pragma/console/sh_cmd.h>
 #include <image/prosper_render_target.hpp>
 #include <wgui/types/wiroot.h>
+
 
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;

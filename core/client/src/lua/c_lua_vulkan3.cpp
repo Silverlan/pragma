@@ -9,6 +9,7 @@
 #include "pragma/c_engine.h"
 #include "pragma/lua/libraries/c_lua_vulkan.h"
 #include "pragma/lua/classes/c_lua_vulkan.hpp"
+#include <pragma/lua/converters/vector_converter_t.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <prosper_event.hpp>
 

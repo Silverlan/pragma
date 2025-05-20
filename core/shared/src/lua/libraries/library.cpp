@@ -217,7 +217,7 @@ static int32_t parse_math_expression(lua_State *l)
 static luabind::object copy_table(lua_State *l, const luabind::object &t, bool deepCopy = false)
 {
 	auto tCpy = luabind::newtable(l);
-	if(deepCopy = false) {
+	if(deepCopy == false) {
 		for(luabind::iterator i {t}, e; i != e; ++i)
 			tCpy[i.key()] = *i;
 		return tCpy;

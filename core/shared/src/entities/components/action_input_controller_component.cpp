@@ -97,7 +97,7 @@ void CEHandleActionInput::PushArguments(lua_State *l)
 
 //////////////////
 
-CEOnActionInputChanged::CEOnActionInputChanged(Action action, bool b) : action {action}, pressed {pressed} {}
+CEOnActionInputChanged::CEOnActionInputChanged(Action action, bool b) : action {action}, pressed {b} {}
 void CEOnActionInputChanged::PushArguments(lua_State *l)
 {
 	Lua::PushInt(l, umath::to_integral(action));

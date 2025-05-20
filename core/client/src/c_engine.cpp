@@ -1582,6 +1582,7 @@ CEngine::~CEngine() { m_audioAPILib = nullptr; }
 
 CEngine *pragma::get_cengine() { return c_engine; }
 ClientState *pragma::get_client_state() { return client; }
+CGame *pragma::get_client_game() { return c_game; }
 
 void CEngine::HandleLocalHostPlayerClientPacket(NetPacket &p)
 {

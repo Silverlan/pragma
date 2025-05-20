@@ -112,7 +112,7 @@ class DLLNETWORK NetworkState : public CallbackHandler, public CVarHandler {
 	MapInfo *GetMapInfo();
 	std::string GetMap();
 	virtual void Close();
-	virtual void Initialize();
+	virtual void Initialize() override;
 	virtual void Think();
 	virtual void Tick();
 	// Lua

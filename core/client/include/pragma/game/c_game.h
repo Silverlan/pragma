@@ -226,14 +226,14 @@ class DLLCLIENT CGame : public Game {
 	void OnIMEStatusChanged(prosper::Window &window, bool imeEnabled);
 
 	// Game
-	void Think();
-	void Tick();
+	virtual void Think() override;
+	virtual void Tick() override;
 	virtual bool LoadMap(const std::string &map, const Vector3 &origin = {}, std::vector<EntityHandle> *entities = nullptr) override;
 	void BuildVMF(const char *map);
-	double &ServerTime();
+	virtual double &ServerTime() override;
 	void SetServerTime(double t);
 	// Entities
-	CBaseEntity *CreateLuaEntity(std::string classname, bool bLoadIfNotExists = false);
+	virtual CBaseEntity *CreateLuaEntity(std::string classname, bool bLoadIfNotExists = false) override;
 	CBaseEntity *CreateLuaEntity(std::string classname, unsigned int idx, bool bLoadIfNotExists = false);
 	virtual CBaseEntity *GetEntity(unsigned int idx) override;
 	virtual BaseEntity *GetEntityByLocalIndex(uint32_t idx) override;
@@ -250,19 +250,19 @@ class DLLCLIENT CGame : public Game {
 
 	pragma::CGameComponent *GetGameComponent();
 	const pragma::CGameComponent *GetGameComponent() const { return const_cast<CGame *>(this)->GetGameComponent(); }
-	CBaseEntity *CreateEntity(std::string classname);
+	virtual CBaseEntity *CreateEntity(std::string classname) override;
 	template<class T>
 	T *CreateEntity();
 	template<class T>
 	T *CreateEntity(unsigned int idx);
-	void RemoveEntity(BaseEntity *ent);
+	virtual void RemoveEntity(BaseEntity *ent) override;
 	pragma::CListenerComponent *GetListener();
 	pragma::CPlayerComponent *GetLocalPlayer();
 	void GetPrimaryCameraRenderMask(::pragma::rendering::RenderMask &inclusionMask, ::pragma::rendering::RenderMask &exclusionMask) const;
 	void SetLocalPlayer(pragma::CPlayerComponent *pl);
-	void SpawnEntity(BaseEntity *ent);
+	virtual void SpawnEntity(BaseEntity *ent) override;
 	void GetEntities(std::vector<CBaseEntity *> **ents);
-	void GetEntities(std::vector<BaseEntity *> **ents);
+	virtual void GetEntities(std::vector<BaseEntity *> **ents) override;
 	void GetSharedEntities(std::vector<CBaseEntity *> **ents);
 	void GetSharedEntities(std::vector<BaseEntity *> **ents);
 
@@ -356,7 +356,7 @@ class DLLCLIENT CGame : public Game {
 	TElement *CreateGUIElement(WIBase *parent = NULL);
 	template<class TElement>
 	TElement *CreateGUIElement(WIHandle *parent);
-	void Initialize();
+	virtual void Initialize() override;
 	virtual void InitializeGame() override;
 
 	void SetViewModelFOV(float fov);
@@ -419,7 +419,7 @@ class DLLCLIENT CGame : public Game {
 	virtual void RegisterLuaEntityComponents(luabind::module_ &gameMod) override;
 	virtual void OnMapLoaded() override;
 	virtual void InitializeWorldData(pragma::asset::WorldData &worldData) override;
-	virtual void InitializeMapEntities(pragma::asset::WorldData &worldData, std::vector<EntityHandle> &outEnts);
+	virtual void InitializeMapEntities(pragma::asset::WorldData &worldData, std::vector<EntityHandle> &outEnts) override;
 
 	template<class T>
 	void GetPlayers(std::vector<T *> *ents);

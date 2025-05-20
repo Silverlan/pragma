@@ -34,6 +34,8 @@ namespace pragma {
 			return Vector3 {0.f, -1.f, 0.f};
 		case pragma::SignedAxis::NegZ:
 			return Vector3 {0.f, 0.f, -1.f};
+		default:
+			break;
 		}
 		return Vector3 {};
 	}

@@ -11,7 +11,7 @@
 
 namespace pragma {
 	struct BloomPipelineInfo {
-		BloomPipelineInfo() = default;
+		BloomPipelineInfo() = delete;
 		BloomPipelineInfo(uint32_t radius, double sigma);
 		const uint32_t radius;
 		const double sigma;

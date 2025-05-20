@@ -29,6 +29,7 @@ struct DLLNETWORK IEntityIteratorFilter {
 #pragma warning(disable : 4251)
 struct BaseEntityContainer {
 	BaseEntityContainer(std::size_t count) : count {count} {}
+	virtual ~BaseEntityContainer() {}
 	// Returns number of actual (non-NULL) items
 	std::size_t Count() const { return count; }
 	virtual std::size_t Size() const = 0;

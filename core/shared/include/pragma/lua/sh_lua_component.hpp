@@ -190,7 +190,7 @@ namespace pragma {
 		bool IsNetworked() const;
 		void SetShouldTransmitSnapshotData(bool b);
 
-		bool ShouldTransmitSnapshotData() const;
+		virtual bool ShouldTransmitSnapshotData() const override;
 
 		virtual void OnMembersChanged() override { pragma::BaseEntityComponent::OnMembersChanged(); }
 		virtual const ComponentMemberInfo *GetMemberInfo(ComponentMemberIndex idx) const override;

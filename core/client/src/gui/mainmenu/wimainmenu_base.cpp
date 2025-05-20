@@ -122,11 +122,12 @@ void WIMainMenuBase::OnElementSelected(WIMainMenuElement *el)
 {
 	for(unsigned int i = 0; i < m_elements.size(); i++) {
 		WIMainMenuElement *elCur = GetElement(i);
-		if(elCur != NULL)
+		if(elCur != NULL) {
 			if(elCur == el)
 				m_selected = i;
 			else
 				elCur->Deselect();
+		}
 	}
 }
 void WIMainMenuBase::UpdateElement(int i)

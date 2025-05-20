@@ -6,7 +6,7 @@
  */
 
 #ifndef __SPHERE_H__
-#define __SPHERE_H_
+#define __SPHERE_H__
 
 #include "pragma/networkdefinitions.h"
 #include <mathutil/glmutil.h>

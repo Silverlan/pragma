@@ -24,7 +24,7 @@ LFile::LFile() {}
 void LFile::Construct(const VFilePtr &f) { m_file = std::make_shared<fsys::File>(f); }
 void LFile::Construct(const std::shared_ptr<ufile::IFile> &f) { m_file = f; }
 
-bool LFile::Construct(const char *path, const char *mode, fsys::SearchFlags fsearchmode)
+bool LFile::Construct(const char *path, const char *mode, fsys::SearchFlags fsearchmode, std::string *optOutErr)
 {
 	auto f = FileManager::OpenFile(path, mode, nullptr, fsearchmode);
 	if(!f)
@@ -405,7 +405,7 @@ bool Lua::file::validate_write_operation(lua_State *l, std::string &path)
 	return true;
 }
 
-std::shared_ptr<LFile> Lua::file::Open(lua_State *l, std::string path, FileOpenMode openMode, fsys::SearchFlags searchFlags)
+std::pair<std::shared_ptr<LFile>, std::optional<std::string>> Lua::file::Open(lua_State *l, std::string path, FileOpenMode openMode, fsys::SearchFlags searchFlags)
 {
 	std::string mode {};
 	if((openMode & FileOpenMode::Read) != FileOpenMode::None)
@@ -415,7 +415,7 @@ std::shared_ptr<LFile> Lua::file::Open(lua_State *l, std::string path, FileOpenM
 	else if((openMode & FileOpenMode::Append) != FileOpenMode::None)
 		mode += "a";
 	else
-		return 0;
+		return std::pair<std::shared_ptr<LFile>, std::optional<std::string>> {nullptr, "Invalid file open mode"};
 	if((openMode & FileOpenMode::Binary) != FileOpenMode::None)
 		mode += "b";
 	if((openMode & FileOpenMode::Update) != FileOpenMode::None)
@@ -423,12 +423,13 @@ std::shared_ptr<LFile> Lua::file::Open(lua_State *l, std::string path, FileOpenM
 	if((openMode & (FileOpenMode::Write | FileOpenMode::Append)) != FileOpenMode::None) // Write mode
 	{
 		if(validate_write_operation(l, path) == false)
-			return 0;
+			return std::pair<std::shared_ptr<LFile>, std::optional<std::string>> {nullptr, {}};
 	}
 	auto f = std::make_shared<LFile>();
-	if(f->Construct(path.c_str(), mode.c_str(), searchFlags) == false)
-		return nullptr;
-	return f;
+	std::string errMsg;
+	if(f->Construct(path.c_str(), mode.c_str(), searchFlags, &errMsg) == false)
+		return std::pair<std::shared_ptr<LFile>, std::optional<std::string>> {nullptr, errMsg};
+	return std::pair<std::shared_ptr<LFile>, std::optional<std::string>> {f, {}};
 }
 
 bool Lua::file::CreateDir(lua_State *l, std::string path)

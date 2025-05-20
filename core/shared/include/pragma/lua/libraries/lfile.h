@@ -28,7 +28,7 @@ class DLLNETWORK LFile {
   public:
 	void Construct(const VFilePtr &f);
 	void Construct(const std::shared_ptr<ufile::IFile> &f);
-	bool Construct(const char *path, const char *mode, fsys::SearchFlags fsearchmode = fsys::SearchFlags::All);
+	bool Construct(const char *path, const char *mode, fsys::SearchFlags fsearchmode = fsys::SearchFlags::All, std::string *optOutErr = nullptr);
 	bool IsValid() const;
 	std::shared_ptr<ufile::IFile> GetHandle();
 	void Close();
@@ -127,7 +127,7 @@ namespace Lua {
 		DLLNETWORK bool validate_write_operation(lua_State *l, std::string &path, std::string &outRootPath);
 		DLLNETWORK std::string to_relative_path(const std::string &path);
 
-		DLLNETWORK std::shared_ptr<LFile> Open(lua_State *l, std::string path, FileOpenMode openMode, fsys::SearchFlags searchFlags = fsys::SearchFlags::All);
+		DLLNETWORK std::pair<std::shared_ptr<LFile>, std::optional<std::string>> Open(lua_State *l, std::string path, FileOpenMode openMode, fsys::SearchFlags searchFlags = fsys::SearchFlags::All);
 		DLLNETWORK bool CreateDir(lua_State *l, std::string path);
 		DLLNETWORK bool CreatePath(lua_State *l, std::string path);
 		DLLNETWORK bool Delete(lua_State *l, std::string path);

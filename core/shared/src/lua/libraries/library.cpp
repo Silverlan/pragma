@@ -1343,7 +1343,7 @@ void Game::RegisterLuaLibraries()
 	Lua::nav::register_library(GetLuaInterface());
 
 	auto fileMod = luabind::module(GetLuaState(), "file");
-	fileMod[luabind::def("open", Lua::file::Open), luabind::def("open", static_cast<std::shared_ptr<LFile> (*)(lua_State *, std::string, FileOpenMode)>([](lua_State *l, std::string path, FileOpenMode openMode) { return Lua::file::Open(l, path, openMode); })),
+	fileMod[luabind::def("open", Lua::file::Open), luabind::def("open", static_cast<std::pair<std::shared_ptr<LFile>, std::optional<std::string>> (*)(lua_State *, std::string, FileOpenMode)>([](lua_State *l, std::string path, FileOpenMode openMode) { return Lua::file::Open(l, path, openMode); })),
 	  luabind::def("create_directory", Lua::file::CreateDir), luabind::def("create_path", Lua::file::CreatePath),
 	  luabind::def(
 	    "create_virtual",

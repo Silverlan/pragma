@@ -88,21 +88,33 @@ function(pr_install_targets)
     endif()
 
     foreach(TARGET ${PA_UNPARSED_ARGUMENTS})
-        set(FILE_PATH "$<TARGET_FILE:${TARGET}>")
-        string(REPLACE "\\" "/" FILE_PATH ${FILE_PATH})
-        message("Adding install rule for target \"${TARGET}\" (\"${FILE_PATH}\") to \"${PA_INSTALL_DIR}\"...")
-        install(
-            FILES "${FILE_PATH}"
-            DESTINATION "${PA_INSTALL_DIR}"
-            OPTIONAL
-            COMPONENT ${PRAGMA_INSTALL_COMPONENT})
-        if(UNIX)
+        get_target_property(_type ${TARGET} TYPE)
+        if(UNIX AND _type STREQUAL "EXECUTABLE")
+            # On UNIX, we need to install the executable as a program to ensure it is executable
             install(
-                TARGETS "${TARGET}"
-                RUNTIME DESTINATION "${PA_INSTALL_DIR}"
-                LIBRARY DESTINATION "${PA_INSTALL_DIR}"
+                PROGRAMS
+                $<TARGET_FILE:${TARGET}>
+                DESTINATION "${PA_INSTALL_DIR}"
+                OPTIONAL
+                COMPONENT ${PRAGMA_INSTALL_COMPONENT}
+            )
+        else()
+            set(FILE_PATH "$<TARGET_FILE:${TARGET}>")
+            string(REPLACE "\\" "/" FILE_PATH ${FILE_PATH})
+            message("Adding install rule for target \"${TARGET}\" (\"${FILE_PATH}\") to \"${PA_INSTALL_DIR}\"...")
+            install(
+                FILES "${FILE_PATH}"
+                DESTINATION "${PA_INSTALL_DIR}"
                 OPTIONAL
                 COMPONENT ${PRAGMA_INSTALL_COMPONENT})
+            if(UNIX)
+                install(
+                    TARGETS "${TARGET}"
+                    RUNTIME DESTINATION "${PA_INSTALL_DIR}"
+                    LIBRARY DESTINATION "${PA_INSTALL_DIR}"
+                    OPTIONAL
+                    COMPONENT ${PRAGMA_INSTALL_COMPONENT})
+            endif()
         endif()
     endforeach()
 endfunction(pr_install_targets)

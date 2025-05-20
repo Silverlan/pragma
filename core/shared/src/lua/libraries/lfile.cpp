@@ -376,8 +376,9 @@ bool Lua::file::validate_write_operation(lua_State *l, std::string &path, std::s
 			return true;
 		}
 	}
-	auto fname = FileManager::GetCanonicalizedPath(Lua::get_current_file(l));
-	if(fname.length() < 8 || ustring::compare(fname.c_str(), "addons\\", false, 7) == false) {
+	auto fpath = util::FilePath(FileManager::GetCanonicalizedPath(Lua::get_current_file(l)));
+	auto fname = fpath.GetString();
+	if(fname.length() < 8 || ustring::compare(fname.c_str(), "addons/", false, 7) == false) {
 		if(Lua::get_extended_lua_modules_enabled()) {
 			outRootPath = "";
 			return true;
@@ -385,7 +386,7 @@ bool Lua::file::validate_write_operation(lua_State *l, std::string &path, std::s
 		Con::cwar << "File write-operations can only be performed by Lua-scripts inside an addon!" << Con::endl;
 		return false;
 	}
-	auto br = fname.find('\\', 8);
+	auto br = fname.find('/', 8);
 	auto prefix = ustring::substr(fname, 0, br + 1);
 	outRootPath = prefix;
 	path = FileManager::GetCanonicalizedPath(path);

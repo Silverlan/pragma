@@ -701,7 +701,10 @@ void CEngine::HandleOpenGLFallback()
 	cl->SetConVar("render_api", "opengl");
 	SaveClientConfig();
 	ShutDown();
-	util::start_process(util::get_program_name().c_str());
+	util::CommandInfo cmdInfo;
+	cmdInfo.command = util::get_program_name();
+	cmdInfo.absoluteCommandPath = false;
+	util::start_process(cmdInfo);
 }
 
 bool CEngine::Initialize(int argc, char *argv[])
@@ -1991,8 +1994,8 @@ void CEngine::Think()
 
 	pragma::RenderContext::DrawFrame();
 	CallCallbacks("Draw");
-	StopProfilingStage(); // DrawFrame
-	pragma::platform::poll_events();  // Needs to be called AFTER rendering!
+	StopProfilingStage();            // DrawFrame
+	pragma::platform::poll_events(); // Needs to be called AFTER rendering!
 	auto &windows = GetRenderContext().GetWindows();
 	for(auto it = windows.begin(); it != windows.end();) {
 		auto &window = *it;

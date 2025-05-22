@@ -168,9 +168,34 @@ function(pr_install_binary)
         file(TO_NATIVE_PATH "${DIR_PATH}/${PA_LIN}" PA_BIN_DIR)
     endif()
 
-    message("Installing binary \"${PA_BIN_DIR}\" to \"${PA_INSTALL_DIR}\"...")
-    pr_install_files(
-        "${PA_BIN_DIR}"
-        INSTALL_DIR "${PA_INSTALL_DIR}"
-    )
+    if(UNIX AND NOT APPLE)
+        # on Linux/UNIX: gather the link and all its intermediate targets
+        set(_to_install_list "${PA_BIN_DIR}")
+        set(_current        "${PA_BIN_DIR}")
+
+        # walk the symlink chain *without* collapsing it
+        while(IS_SYMLINK "${_current}")
+            file(READ_SYMLINK "${_current}" _link_dest)
+            # figure out the next path *absolutely*, but keep it as a symlink
+            get_filename_component(_dir  "${_current}" DIRECTORY)
+            get_filename_component(_next "${_dir}/${_link_dest}" ABSOLUTE)
+            list(APPEND _to_install_list "${_next}")
+            set(_current "${_next}")
+        endwhile()
+
+        # now install each file (will include the original symlink + each real target)
+        foreach(_f IN LISTS _to_install_list)
+            message(STATUS "Installing binary \"${_f}\" to \"${PA_INSTALL_DIR}\"...")
+            pr_install_files(
+                "${_f}"
+                INSTALL_DIR "${PA_INSTALL_DIR}"
+            )
+        endforeach()
+    else()
+        message(STATUS "Installing binary \"${PA_BIN_DIR}\" to \"${PA_INSTALL_DIR}\"...")
+        pr_install_files(
+            "${PA_BIN_DIR}"
+            INSTALL_DIR "${PA_INSTALL_DIR}"
+        )
+    endif()
 endfunction()

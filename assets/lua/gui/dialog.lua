@@ -30,6 +30,7 @@ gui.create_dialog = function(fCreateElement, parent, noFrame)
 	frame:SetMinSize(Vector2i(300, 200))
 	frame:SetMaxSize(Vector2i(800, 512))
 	frame:SetSize(512, 256)
+	frame:SetZPos(200000)
 
 	frame:SetAutoAlignToParent(true)
 

@@ -1001,7 +1001,7 @@ if with_pfm:
 		)
 		add_pragma_module(
 			name="pr_unirender",
-			commitSha="6b8dd711a3d16b55666e6d96f7912b771d02d7d3",
+			commitSha="ee75b1c4d98a29b231a1bb97458cb2c1b1fe0d5d",
 			repositoryUrl="https://github.com/Silverlan/pr_cycles.git"
 		)
 		add_pragma_module(

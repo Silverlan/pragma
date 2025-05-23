@@ -8,6 +8,7 @@
             "args": [
                 "-verbose",
                 "-log","0","0",
+                "-luaext",
                 "-enable_gfx_validation"
             ],
             "stopAtEntry": true,
@@ -52,7 +53,8 @@
             "program": "${workspaceFolder}/build/install/pfm",
             "args": [
                 "-verbose",
-                "-log","0","0"
+                "-log","0","0",
+                "-luaext"
             ],
             "stopAtEntry": true,
             "externalConsole": false,
@@ -92,7 +94,8 @@
             "program": "${workspaceFolder}/build/install/pragma_server",
             "args": [
                 "-verbose",
-                "-log","0","0"
+                "-log","0","0",
+                "-luaext"
             ],
             "stopAtEntry": true,
             "externalConsole": false,

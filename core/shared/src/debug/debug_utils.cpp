@@ -32,7 +32,11 @@ void pragma::debug::end_profiling_task()
 void pragma::debug::open_file_in_zerobrane(const std::string &fileName, uint32_t lineIdx)
 {
 	std::string zeroBranePath = "C:/Program Files (x86)/ZeroBraneStudio/zbstudio.exe"; // TODO: Find program path from registry?
-	util::start_process(zeroBranePath.c_str(), std::vector<std::string> {fileName + ':' + std::to_string(lineIdx)}, true);
+	util::CommandInfo cmdInfo;
+	cmdInfo.command = zeroBranePath;
+	cmdInfo.args.push_back(fileName + ':' + std::to_string(lineIdx));
+	cmdInfo.absoluteCommandPath = true;
+	util::start_process(cmdInfo);
 
 	/*
 	// Check if process is already running

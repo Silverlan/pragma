@@ -88,21 +88,33 @@ function(pr_install_targets)
     endif()
 
     foreach(TARGET ${PA_UNPARSED_ARGUMENTS})
-        set(FILE_PATH "$<TARGET_FILE:${TARGET}>")
-        string(REPLACE "\\" "/" FILE_PATH ${FILE_PATH})
-        message("Adding install rule for target \"${TARGET}\" (\"${FILE_PATH}\") to \"${PA_INSTALL_DIR}\"...")
-        install(
-            FILES "${FILE_PATH}"
-            DESTINATION "${PA_INSTALL_DIR}"
-            OPTIONAL
-            COMPONENT ${PRAGMA_INSTALL_COMPONENT})
-        if(UNIX)
+        get_target_property(_type ${TARGET} TYPE)
+        if(UNIX AND _type STREQUAL "EXECUTABLE")
+            # On UNIX, we need to install the executable as a program to ensure it is executable
             install(
-                TARGETS "${TARGET}"
-                RUNTIME DESTINATION "${PA_INSTALL_DIR}"
-                LIBRARY DESTINATION "${PA_INSTALL_DIR}"
+                PROGRAMS
+                $<TARGET_FILE:${TARGET}>
+                DESTINATION "${PA_INSTALL_DIR}"
+                OPTIONAL
+                COMPONENT ${PRAGMA_INSTALL_COMPONENT}
+            )
+        else()
+            set(FILE_PATH "$<TARGET_FILE:${TARGET}>")
+            string(REPLACE "\\" "/" FILE_PATH ${FILE_PATH})
+            message("Adding install rule for target \"${TARGET}\" (\"${FILE_PATH}\") to \"${PA_INSTALL_DIR}\"...")
+            install(
+                FILES "${FILE_PATH}"
+                DESTINATION "${PA_INSTALL_DIR}"
                 OPTIONAL
                 COMPONENT ${PRAGMA_INSTALL_COMPONENT})
+            if(UNIX)
+                install(
+                    TARGETS "${TARGET}"
+                    RUNTIME DESTINATION "${PA_INSTALL_DIR}"
+                    LIBRARY DESTINATION "${PA_INSTALL_DIR}"
+                    OPTIONAL
+                    COMPONENT ${PRAGMA_INSTALL_COMPONENT})
+            endif()
         endif()
     endforeach()
 endfunction(pr_install_targets)
@@ -156,9 +168,34 @@ function(pr_install_binary)
         file(TO_NATIVE_PATH "${DIR_PATH}/${PA_LIN}" PA_BIN_DIR)
     endif()
 
-    message("Installing binary \"${PA_BIN_DIR}\" to \"${PA_INSTALL_DIR}\"...")
-    pr_install_files(
-        "${PA_BIN_DIR}"
-        INSTALL_DIR "${PA_INSTALL_DIR}"
-    )
+    if(UNIX AND NOT APPLE)
+        # on Linux/UNIX: gather the link and all its intermediate targets
+        set(_to_install_list "${PA_BIN_DIR}")
+        set(_current        "${PA_BIN_DIR}")
+
+        # walk the symlink chain *without* collapsing it
+        while(IS_SYMLINK "${_current}")
+            file(READ_SYMLINK "${_current}" _link_dest)
+            # figure out the next path *absolutely*, but keep it as a symlink
+            get_filename_component(_dir  "${_current}" DIRECTORY)
+            get_filename_component(_next "${_dir}/${_link_dest}" ABSOLUTE)
+            list(APPEND _to_install_list "${_next}")
+            set(_current "${_next}")
+        endwhile()
+
+        # now install each file (will include the original symlink + each real target)
+        foreach(_f IN LISTS _to_install_list)
+            message(STATUS "Installing binary \"${_f}\" to \"${PA_INSTALL_DIR}\"...")
+            pr_install_files(
+                "${_f}"
+                INSTALL_DIR "${PA_INSTALL_DIR}"
+            )
+        endforeach()
+    else()
+        message(STATUS "Installing binary \"${PA_BIN_DIR}\" to \"${PA_INSTALL_DIR}\"...")
+        pr_install_files(
+            "${PA_BIN_DIR}"
+            INSTALL_DIR "${PA_INSTALL_DIR}"
+        )
+    endif()
 endfunction()

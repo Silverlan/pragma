@@ -48,11 +48,15 @@ bool LuaFunction::Call(T *ret, TARGS... args)
 		return false;
 	}
 #endif
-	auto *state = r->interpreter();
+
+	// TODO: What was this for?
+	/*auto *state = r->interpreter();
 	r->push(state);
 	auto cret = (lua_iscfunction(state, -1) == 0) ? true : false;
 	Lua::Pop(state, 1);
-	return cret;
+	return cret;*/
+
+	return true;
 }
 
 #endif

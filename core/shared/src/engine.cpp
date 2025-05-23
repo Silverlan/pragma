@@ -304,7 +304,11 @@ void Engine::Close()
 #else
 		processPath = "lib/updater";
 #endif
-		if(!::util::start_process(processPath.c_str(), "-executable=" + util::get_program_name()))
+		util::CommandInfo cmdInfo;
+		cmdInfo.command = processPath;
+		cmdInfo.absoluteCommandPath = false;
+		cmdInfo.args.push_back("-executable=" + util::get_program_name());
+		if(!::util::start_process(cmdInfo))
 			Con::cwar << "Failed to launch updater '" << processPath << "'! Please execute manually to install update." << Con::endl;
 	}
 

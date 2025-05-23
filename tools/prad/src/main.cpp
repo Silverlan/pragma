@@ -123,9 +123,12 @@ static bool launch_child_console_process(const char *childProcess, const char *a
 
 	return true;
 #else
-	std::vector<std::string> argv;
+	util::CommandInfo cmdInfo;
+	cmdInfo.command = childProcess;
+	cmdInfo.absoluteCommandPath = true;
+	std::vector<std::string> &argv = cmdInfo.args;
 	ustring::explode(args, " ", argv);
-	if(!util::start_process(childProcess, argv, true)) {
+	if(!util::start_process(cmdInfo)) {
 		std::cerr << "Command '" << fullCmd << "' has failed!" << std::endl;
 		return false;
 	}

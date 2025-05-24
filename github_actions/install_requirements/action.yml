@@ -37,9 +37,14 @@ runs:
     # For Cycles
     - name: Install Cuda (Linux)
       if: ${{ runner.os == 'Linux' && inputs.with_cuda == '1' }}
-      uses: Jimver/cuda-toolkit@v0.2.16
+      uses: Jimver/cuda-toolkit@v0.2.23
       with:
-        cuda: '12.2.0'
+        cuda: '12.8.1'
+        use-github-cache: false
+        use-local-cache: true
+        linux-local-args: '["--toolkit"]'
+        method: 'network'
+        sub-packages: '["nvcc"]'
     # TODO: Install OptiX
 
     - name: Clone setup_cuda repository (Windows)

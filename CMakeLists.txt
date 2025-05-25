@@ -143,6 +143,12 @@ set(PRAGMA_INSTALL_COMPONENT "pragma")
 set(PRAGMA_INSTALL_COMPONENT_FULL "pragma-full")
 add_custom_target(pragma-install COMMAND "${CMAKE_COMMAND}" -DCMAKE_INSTALL_COMPONENT=${PRAGMA_INSTALL_COMPONENT} -DBUILD_TYPE=${CONFIG_BUILD_TYPE} -P
                                          "${CMAKE_BINARY_DIR}/cmake_install.cmake")
+get_property(COMPONENT_LIST GLOBAL PROPERTY PRAGMA_INSTALL_COMPONENTS)
+foreach(_COMP IN LISTS COMPONENT_LIST)
+    add_custom_target(pragma-install COMMAND "${CMAKE_COMMAND}" -DCMAKE_INSTALL_COMPONENT=${_COMP} -DBUILD_TYPE=${CONFIG_BUILD_TYPE} -P
+                                         "${CMAKE_BINARY_DIR}/cmake_install.cmake")
+endforeach()
+
 add_custom_target(pragma-install-full COMMAND "${CMAKE_COMMAND}" -DCMAKE_INSTALL_COMPONENT=${PRAGMA_INSTALL_COMPONENT_FULL} -DBUILD_TYPE=${CONFIG_BUILD_TYPE}
                                               -P "${CMAKE_BINARY_DIR}/cmake_install.cmake")
 
@@ -225,7 +231,7 @@ if(WIN32)
     list(APPEND PRAGMA_INSTALL_DEPENDENCIES pragma_console)
 endif()
 add_dependencies(pragma-install ${PRAGMA_INSTALL_DEPENDENCIES})
-add_dependencies(pragma-install-full pragma iclient iserver)
+add_dependencies(pragma-install-full pragma-install)
 
 pr_install_create_directory(modules)
 
@@ -262,6 +268,7 @@ foreach(MODULE_PATH ${PR_MODULES})
         endif()
         if(EXISTS "${MODULE_PATH}/Install.cmake")
             message("Running install script for module '${MODULE_PATH}'...")
+	        pr_install_component(${MODULE_NAME})
             include("${MODULE_PATH}/Install.cmake" OPTIONAL)
         else()
             # Default behavior
@@ -282,6 +289,7 @@ foreach(MODULE_PATH ${PR_MODULES})
     get_filename_component(MODULE_NAME "${MODULE_PATH}" NAME)
     if(EXISTS "${MODULE_PATH}/Install.cmake")
         message("Running install script for tool '${MODULE_PATH}'...")
+	    pr_install_component(${MODULE_NAME})
         include("${MODULE_PATH}/Install.cmake" OPTIONAL)
     endif()
 endforeach()

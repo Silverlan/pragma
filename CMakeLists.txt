@@ -143,12 +143,6 @@ set(PRAGMA_INSTALL_COMPONENT "pragma")
 set(PRAGMA_INSTALL_COMPONENT_FULL "pragma-full")
 add_custom_target(pragma-install COMMAND "${CMAKE_COMMAND}" -DCMAKE_INSTALL_COMPONENT=${PRAGMA_INSTALL_COMPONENT} -DBUILD_TYPE=${CONFIG_BUILD_TYPE} -P
                                          "${CMAKE_BINARY_DIR}/cmake_install.cmake")
-get_property(COMPONENT_LIST GLOBAL PROPERTY PRAGMA_INSTALL_COMPONENTS)
-foreach(_COMP IN LISTS COMPONENT_LIST)
-    add_custom_target(pragma-install COMMAND "${CMAKE_COMMAND}" -DCMAKE_INSTALL_COMPONENT=${_COMP} -DBUILD_TYPE=${CONFIG_BUILD_TYPE} -P
-                                         "${CMAKE_BINARY_DIR}/cmake_install.cmake")
-endforeach()
-
 add_custom_target(pragma-install-full COMMAND "${CMAKE_COMMAND}" -DCMAKE_INSTALL_COMPONENT=${PRAGMA_INSTALL_COMPONENT_FULL} -DBUILD_TYPE=${CONFIG_BUILD_TYPE}
                                               -P "${CMAKE_BINARY_DIR}/cmake_install.cmake")
 
@@ -292,6 +286,16 @@ foreach(MODULE_PATH ${PR_MODULES})
 	    pr_install_component(${MODULE_NAME})
         include("${MODULE_PATH}/Install.cmake" OPTIONAL)
     endif()
+endforeach()
+
+# Link components to pragma-install
+get_property(COMPONENT_LIST GLOBAL PROPERTY PRAGMA_INSTALL_COMPONENTS)
+foreach(_COMP IN LISTS COMPONENT_LIST)
+    add_custom_target(pragma-install-${_COMP} COMMAND "${CMAKE_COMMAND}" -DCMAKE_INSTALL_COMPONENT=${_COMP} -DBUILD_TYPE=${CONFIG_BUILD_TYPE} -P
+                                         "${CMAKE_BINARY_DIR}/cmake_install.cmake")
+    add_dependencies(pragma-install pragma-install-${_COMP})
+
+    set_target_properties(pragma-install-${_COMP} PROPERTIES FOLDER "Hidden/Install")
 endforeach()
 
 # Install assets

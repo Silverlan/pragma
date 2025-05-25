@@ -35,6 +35,8 @@ void CInputComponent::UpdateMouseMovementDeltaValues()
 		(*window)->SetCursorPos(Vector2i(umath::round(w / 2.f), umath::round(h / 2.f)));
 		xDelta = pos.x - w / 2.f;
 		yDelta = pos.y - h / 2.f;
+		if((w % 2) != 0)
+			xDelta -= 0.5f;
 		if((h % 2) != 0)
 			yDelta -= 0.5f;
 	}

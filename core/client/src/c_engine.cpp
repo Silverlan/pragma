@@ -127,6 +127,8 @@ static const auto SEPARATE_JOYSTICK_AXES = true;
 #include "pragma/rendering/shader_graph/modules/image_texture.hpp"
 #include "pragma/rendering/shader_graph/modules/input_data.hpp"
 
+std::optional<std::string> g_waylandLibdecorPlugin;
+
 CEngine::CEngine(int argc, char *argv[])
     : Engine(argc, argv), pragma::RenderContext(), m_nearZ(pragma::BaseEnvCameraComponent::DEFAULT_NEAR_Z), //10.0f), //0.1f
       m_farZ(pragma::BaseEnvCameraComponent::DEFAULT_FAR_Z), m_fps(0), m_tFPSTime(0.f), m_tLastFrame(util::Clock::now()), m_tDeltaFrameTime(0), m_audioAPI {"fmod"}
@@ -710,9 +712,16 @@ void CEngine::HandleOpenGLFallback()
 bool CEngine::Initialize(int argc, char *argv[])
 {
 	Engine::Initialize(argc, argv);
-	if(Lua::get_extended_lua_modules_enabled()) {
-		RegisterConCommand("lc", [this](NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) { RunConsoleCommand("lua_run_cl", argv); });
+
+#ifdef __linux__
+	if(g_waylandLibdecorPlugin) {
+		auto path = util::FilePath(util::get_program_path(), "modules/graphics/vulkan/libdecor",*g_waylandLibdecorPlugin);
+		::util::set_env_variable("LIBDECOR_PLUGIN_DIR", path.GetString());
 	}
+#endif
+
+	if(Lua::get_extended_lua_modules_enabled())
+		RegisterConCommand("lc", [this](NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) { RunConsoleCommand("lua_run_cl", argv); });
 	auto &cmds = *m_clConfig;
 	auto findCmdArg = [&cmds](const std::string &cmd) -> std::optional<std::string> {
 		auto *args = cmds.Find(cmd);

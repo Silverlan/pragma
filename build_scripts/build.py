@@ -604,6 +604,28 @@ os.chdir("GeometricTools")
 reset_to_commit("bd7a27d18ac9f31641b4e1246764fe30816fae74")
 os.chdir("../../")
 
+########## OpenCV ##########
+os.chdir(deps_dir)
+opencv_root = deps_dir +"/opencv"
+if not Path(opencv_root).is_dir():
+    print_msg("opencv not found. Downloading...")
+    git_clone("https://github.com/opencv/opencv.git")
+
+os.chdir(opencv_root)
+reset_to_commit("31b0eee") # v4.11.0
+
+print_msg("Build opencv")
+mkdir("build",cd=True)
+
+cmake_configure("..",generator)
+cmake_build("Release",["opencv_imgproc","opencv_imgcodecs"])
+
+cmake_args.append("-DDEPENDENCY_OPENCV_INCLUDE=" +opencv_root +"/include")
+cmake_args.append("-DDEPENDENCY_OPENCV_MODULE_LOCATION=" +opencv_root +"/modules")
+cmake_args.append("-DDEPENDENCY_OPENCV_BUILD_INCLUDE=" +opencv_root +"/build")
+cmake_args.append("-DDEPENDENCY_OPENCV_LIBRARY_LOCATION=" +opencv_root +"/build")
+cmake_args.append("-DOpenCV_DIR=" +opencv_root +"/build")
+
 ########## SPIRV-Tools ##########
 print_msg("Downloading SPIRV-Tools...")
 os.chdir(deps_dir)

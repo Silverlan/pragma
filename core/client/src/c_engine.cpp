@@ -127,8 +127,6 @@ static const auto SEPARATE_JOYSTICK_AXES = true;
 #include "pragma/rendering/shader_graph/modules/image_texture.hpp"
 #include "pragma/rendering/shader_graph/modules/input_data.hpp"
 
-std::optional<std::string> g_waylandLibdecorPlugin;
-
 CEngine::CEngine(int argc, char *argv[])
     : Engine(argc, argv), pragma::RenderContext(), m_nearZ(pragma::BaseEnvCameraComponent::DEFAULT_NEAR_Z), //10.0f), //0.1f
       m_farZ(pragma::BaseEnvCameraComponent::DEFAULT_FAR_Z), m_fps(0), m_tFPSTime(0.f), m_tLastFrame(util::Clock::now()), m_tDeltaFrameTime(0), m_audioAPI {"fmod"}
@@ -709,6 +707,7 @@ void CEngine::HandleOpenGLFallback()
 	util::start_process(cmdInfo);
 }
 
+std::optional<std::string> g_waylandLibdecorPlugin;
 bool CEngine::Initialize(int argc, char *argv[])
 {
 	Engine::Initialize(argc, argv);

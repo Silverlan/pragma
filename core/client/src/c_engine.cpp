@@ -707,12 +707,20 @@ void CEngine::HandleOpenGLFallback()
 	util::start_process(cmdInfo);
 }
 
+std::optional<std::string> g_waylandLibdecorPlugin;
 bool CEngine::Initialize(int argc, char *argv[])
 {
 	Engine::Initialize(argc, argv);
-	if(Lua::get_extended_lua_modules_enabled()) {
-		RegisterConCommand("lc", [this](NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) { RunConsoleCommand("lua_run_cl", argv); });
+
+#ifdef __linux__
+	if(g_waylandLibdecorPlugin) {
+		auto path = util::FilePath(util::get_program_path(), "modules/graphics/vulkan/libdecor",*g_waylandLibdecorPlugin);
+		::util::set_env_variable("LIBDECOR_PLUGIN_DIR", path.GetString());
 	}
+#endif
+
+	if(Lua::get_extended_lua_modules_enabled())
+		RegisterConCommand("lc", [this](NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) { RunConsoleCommand("lua_run_cl", argv); });
 	auto &cmds = *m_clConfig;
 	auto findCmdArg = [&cmds](const std::string &cmd) -> std::optional<std::string> {
 		auto *args = cmds.Find(cmd);

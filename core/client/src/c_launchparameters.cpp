@@ -125,6 +125,14 @@ static void LPARAM_cli(const std::vector<std::string> &argv)
 		LPARAM_audio_api({"dummy"});
 }
 
+extern std::optional<std::string> g_waylandLibdecorPlugin;
+static void LPARAM_wayland_libdecor_plugin(const std::vector<std::string> &argv)
+{
+	if(argv.empty())
+		return;
+	g_waylandLibdecorPlugin = argv.front();
+}
+
 REGISTER_LAUNCH_PARAMETER_HELP(-windowed, LPARAM_windowed, "-window -startwindowed -sw", "start in windowed mode");
 REGISTER_LAUNCH_PARAMETER(-window, LPARAM_windowed);
 REGISTER_LAUNCH_PARAMETER(-startwindowed, LPARAM_windowed);
@@ -153,3 +161,4 @@ REGISTER_LAUNCH_PARAMETER_HELP(-title_bar_color, LPARAM_title_bar_color, "<hexCo
 REGISTER_LAUNCH_PARAMETER_HELP(-border_color, LPARAM_border_bar_color, "<hexColor>", "Hex color for the window border.");
 REGISTER_LAUNCH_PARAMETER_HELP(-cpu_rendering, LPARAM_cpu_rendering, "<1/0>", "If enabled, the CPU will be used for rendering instead of GPU.");
 REGISTER_LAUNCH_PARAMETER_HELP(-cli, LPARAM_cli, "<1/0>", "If enabled, will automatically enable the options needed to run Pragma in a command-line-interface-only environment.");
+REGISTER_LAUNCH_PARAMETER_HELP(-wayland_libdecor_plugin, LPARAM_wayland_libdecor_plugin, "", "If specified, this libdecor plugin will be used for window decoration drawing on Linux with wayland.");

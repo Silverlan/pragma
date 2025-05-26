@@ -751,9 +751,32 @@ else:
 cpptrace_bin_dir = cpptrace_root +"/build/" +build_config +"/"
 cmake_args += ["-DDEPENDENCY_CPPTRACE_INCLUDE=" +cpptrace_root +"/include/", "-DDEPENDENCY_CPPTRACE_LIBRARY=" +cpptrace_bin_dir +cpptrace_lib_name]
 
-########## compressonator deps ##########
-os.chdir(root+"/external_libs/util_image/third_party_libs/compressonator")
-execfile(root+"/external_libs/util_image/third_party_libs/compressonator/build/fetch_dependencies.py")
+########## compressonator ##########
+os.chdir(deps_dir)
+compressonator_root = normalize_path(os.getcwd() +"/compressonator")
+if not Path(compressonator_root).is_dir():
+	print_msg("compressonator not found. Downloading...")
+	git_clone("https://github.com/Silverlan/compressonator.git")
+os.chdir("compressonator")
+reset_to_commit("e35105d")
+
+print_msg("Fetching compressonator dependencies...")
+execfile(compressonator_root +"/build/fetch_dependencies.py")
+
+print_msg("Building compressonator...")
+mkdir("cmbuild",cd=True)
+cmake_configure_def_toolset("..",generator,["-DOpenCV_DIR=" +opencv_root +"/build", "-DOPTION_ENABLE_ALL_APPS=OFF", "-DOPTION_BUILD_CMP_SDK=ON", "-DOPTION_CMP_OPENCV=ON", "-DCMAKE_POLICY_VERSION_MINIMUM=3.5"])
+
+compressonator_targets = ["Image_DDS", "Image_KTX", "Image_TGA", "CMP_Compressonator", "CMP_Framework", "CMP_Common", "CMP_Core"]
+if platform == "win32":
+	compressonator_targets.append("Image_EXR")
+cmake_build("Release", compressonator_targets)
+
+cmake_args += [
+	"-DDEPENDENCY_COMPRESSONATOR_SOURCE_DIR=" +compressonator_root +"/",
+	"-DDEPENDENCY_COMPRESSONATOR_LIBRARY=" +compressonator_root +"/cmbuild/lib/Release/libCMP_Compressonator.so",
+	"-DUSE_COMPRESSONATOR=ON"
+]
 
 ########## freetype (built in win32, sys in linux (set in cmake)) ##########
 freetype_include_dir = ""

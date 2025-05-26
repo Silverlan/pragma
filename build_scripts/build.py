@@ -626,6 +626,8 @@ cmake_args.append("-DDEPENDENCY_OPENCV_BUILD_INCLUDE=" +opencv_root +"/build")
 cmake_args.append("-DDEPENDENCY_OPENCV_LIBRARY_LOCATION=" +opencv_root +"/build")
 cmake_args.append("-DOpenCV_DIR=" +opencv_root +"/build")
 
+os.environ["OPENCV_DIR"] = os.path.join(opencv_root, "build")
+
 ########## SPIRV-Tools ##########
 print_msg("Downloading SPIRV-Tools...")
 os.chdir(deps_dir)
@@ -773,7 +775,8 @@ if platform == "win32":
 cmake_build("Release", compressonator_targets)
 
 cmake_args += [
-	"-DDEPENDENCY_COMPRESSONATOR_SOURCE_DIR=" +compressonator_root +"/",
+	"-DDEPENDENCY_COMPRESSONATOR_SOURCE_DIR=" +compressonator_root,
+	"-DDEPENDENCY_COMPRESSONATOR_LIBRARY_DIR=" +compressonator_root +"/cmbuild/lib/Release",
 	"-DDEPENDENCY_COMPRESSONATOR_LIBRARY=" +compressonator_root +"/cmbuild/lib/Release/libCMP_Compressonator.so",
 	"-DUSE_COMPRESSONATOR=ON"
 ]

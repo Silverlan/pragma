@@ -250,6 +250,10 @@ endif()
 
 pr_install_files("${DEPENDENCY_ICU_ICUUC_BINARY}" "${DEPENDENCY_ICU_ICUDT_BINARY}")
 
+pr_install_component("core")
+message("Installing core components...")
+include("Install.cmake")
+
 # Modules
 file(GLOB PR_MODULES "modules/pr_*")
 foreach(MODULE_PATH ${PR_MODULES})

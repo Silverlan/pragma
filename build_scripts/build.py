@@ -760,7 +760,7 @@ if not Path(compressonator_root).is_dir():
 	print_msg("compressonator not found. Downloading...")
 	git_clone("https://github.com/Silverlan/compressonator.git")
 os.chdir("compressonator")
-reset_to_commit("e35105d")
+reset_to_commit("9e09840e88d85995cb4a5fde2ae891a6c2d1cc45")
 
 print_msg("Fetching compressonator dependencies...")
 execfile(compressonator_root +"/build/fetch_dependencies.py")
@@ -777,7 +777,8 @@ cmake_build("Release", compressonator_targets)
 cmake_args += [
 	"-DDEPENDENCY_COMPRESSONATOR_SOURCE_DIR=" +compressonator_root,
 	"-DDEPENDENCY_COMPRESSONATOR_LIBRARY_DIR=" +compressonator_root +"/cmbuild/lib/Release",
-	"-DDEPENDENCY_COMPRESSONATOR_LIBRARY=" +compressonator_root +"/cmbuild/lib/Release/libCMP_Compressonator.so",
+	"-DDEPENDENCY_COMPRESSONATOR_BINARY_DIR=" +compressonator_root +"/cmbuild/bin/Release",
+	"-DDEPENDENCY_COMPRESSONATOR_COMMON_DIR=" +deps_dir +"/common",
 	"-DUSE_COMPRESSONATOR=ON"
 ]
 

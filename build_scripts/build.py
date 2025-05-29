@@ -1001,7 +1001,7 @@ execfile(scripts_dir +"/user_modules.py",g,l)
 if with_essential_client_modules:
 	add_pragma_module(
 		name="pr_prosper_vulkan",
-		commitSha="539208e3140febe878f3e45da956d694fdf7ea06",
+		commitSha="aa91acce8a2e84d8601ccf1afa97446a8e72a0dd",
 		repositoryUrl="https://github.com/Silverlan/pr_prosper_vulkan.git"
 	)
 
@@ -1142,6 +1142,9 @@ os.chdir(install_dir)
 for url in modules_prebuilt:
 	print_msg("Downloading prebuilt binaries for module '" +url +"'...")
 	install_prebuilt_binaries(url)
+
+if with_pfm:
+	additional_build_targets.append("pfm")
 
 cmake_args.append("-DPRAGMA_INSTALL_CUSTOM_TARGETS=" +";".join(module_list +additional_build_targets))
 
@@ -1407,10 +1410,6 @@ if build:
 
 	os.chdir(build_dir)
 	targets = ["pragma-install-full"]
-	if with_pfm:
-		targets.append("pfm")
-	targets += additional_build_targets
-	targets.append("pragma-install")
 
 	print_msg("Running build command...")
 	cmake_build(build_config,targets)

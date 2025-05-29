@@ -777,10 +777,13 @@ cmake_build("Release", compressonator_targets)
 cmake_args += [
 	"-DDEPENDENCY_COMPRESSONATOR_SOURCE_DIR=" +compressonator_root,
 	"-DDEPENDENCY_COMPRESSONATOR_LIBRARY_DIR=" +compressonator_root +"/cmbuild/lib/Release",
-	"-DDEPENDENCY_COMPRESSONATOR_BINARY_DIR=" +compressonator_root +"/cmbuild/bin/Release",
 	"-DDEPENDENCY_COMPRESSONATOR_COMMON_DIR=" +deps_dir +"/common",
 	"-DUSE_COMPRESSONATOR=ON"
 ]
+if platform == "win32":
+	cmake_args.append("-DDEPENDENCY_COMPRESSONATOR_BINARY_DIR=" +compressonator_root +"/cmbuild/bin/Release")
+else:
+	cmake_args.append("-DDEPENDENCY_COMPRESSONATOR_BINARY_DIR=" +compressonator_root +"/cmbuild/lib/Release")
 
 ########## freetype (built in win32, sys in linux (set in cmake)) ##########
 freetype_include_dir = ""

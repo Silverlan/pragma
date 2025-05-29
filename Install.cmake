@@ -1,6 +1,6 @@
 set(INSTALL_PATH "${BINARY_OUTPUT_DIR}")
-pr_install_binary(compressonator WIN "CMP_Compressonator.dll" BIN_DIR "${DEPENDENCY_COMPRESSONATOR_BINARY_DIR}" INSTALL_DIR "${INSTALL_PATH}")
-pr_install_binary(compressonator WIN "CMP_Framework.dll" BIN_DIR "${DEPENDENCY_COMPRESSONATOR_BINARY_DIR}" INSTALL_DIR "${INSTALL_PATH}")
+pr_install_binary(compressonator WIN "CMP_Compressonator.dll" LIN "libCMP_Compressonator.so" BIN_DIR "${DEPENDENCY_COMPRESSONATOR_BINARY_DIR}" INSTALL_DIR "${INSTALL_PATH}")
+pr_install_binary(compressonator WIN "CMP_Framework.dll" LIN "libCMP_Framework.so" BIN_DIR "${DEPENDENCY_COMPRESSONATOR_BINARY_DIR}" INSTALL_DIR "${INSTALL_PATH}")
 
 if(WIN32)
     # We need to copy dxcompiler.dll and dxil.dll to bin directory. Otherwise pragma with compressonator will fail.

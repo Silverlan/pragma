@@ -1143,6 +1143,9 @@ for url in modules_prebuilt:
 	print_msg("Downloading prebuilt binaries for module '" +url +"'...")
 	install_prebuilt_binaries(url)
 
+if with_pfm:
+	additional_build_targets.append("pfm")
+
 cmake_args.append("-DPRAGMA_INSTALL_CUSTOM_TARGETS=" +";".join(module_list +additional_build_targets))
 
 print("Modules:" +', '.join(module_list))
@@ -1407,10 +1410,6 @@ if build:
 
 	os.chdir(build_dir)
 	targets = ["pragma-install-full"]
-	if with_pfm:
-		targets.append("pfm")
-	targets += additional_build_targets
-	targets.append("pragma-install")
 
 	print_msg("Running build command...")
 	cmake_build(build_config,targets)

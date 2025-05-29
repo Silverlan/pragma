@@ -145,6 +145,8 @@ add_custom_target(pragma-install COMMAND "${CMAKE_COMMAND}" -DCMAKE_INSTALL_COMP
                                          "${CMAKE_BINARY_DIR}/cmake_install.cmake")
 add_custom_target(pragma-install-full COMMAND "${CMAKE_COMMAND}" -DCMAKE_INSTALL_COMPONENT=${PRAGMA_INSTALL_COMPONENT_FULL} -DBUILD_TYPE=${CONFIG_BUILD_TYPE}
                                               -P "${CMAKE_BINARY_DIR}/cmake_install.cmake")
+add_custom_target(pragma-core)
+set_target_properties(pragma-core PROPERTIES FOLDER "Hidden")
 
 include(${CMAKE_SOURCE_DIR}/ThirdPartyLibs.cmake)
 
@@ -224,7 +226,7 @@ set(PRAGMA_INSTALL_DEPENDENCIES pragma pragma_server iclient iserver udm_convert
 if(WIN32)
     list(APPEND PRAGMA_INSTALL_DEPENDENCIES pragma_console)
 endif()
-add_dependencies(pragma-install ${PRAGMA_INSTALL_DEPENDENCIES})
+add_dependencies(pragma-core ${PRAGMA_INSTALL_DEPENDENCIES})
 add_dependencies(pragma-install-full pragma-install)
 
 pr_install_create_directory(modules)
@@ -297,6 +299,9 @@ get_property(COMPONENT_LIST GLOBAL PROPERTY PRAGMA_INSTALL_COMPONENTS)
 foreach(_COMP IN LISTS COMPONENT_LIST)
     add_custom_target(pragma-install-${_COMP} COMMAND "${CMAKE_COMMAND}" -DCMAKE_INSTALL_COMPONENT=${_COMP} -DBUILD_TYPE=${CONFIG_BUILD_TYPE} -P
                                          "${CMAKE_BINARY_DIR}/cmake_install.cmake")
+    # We need to make sure all build-targets run first, before any install targets
+    add_dependencies(pragma-install-${_COMP} pragma-core)
+
     add_dependencies(pragma-install pragma-install-${_COMP})
 
     set_target_properties(pragma-install-${_COMP} PROPERTIES FOLDER "Hidden/Install")

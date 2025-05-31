@@ -108,6 +108,7 @@ std::shared_ptr<prosper::RenderTarget> ShaderCubemap::CreateCubeMapRenderTarget(
 {
 	auto img = CreateCubeMap(width, height, flags);
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
+	imgViewCreateInfo.mipmapLevels = 1;
 	prosper::util::SamplerCreateInfo samplerCreateInfo {};
 	InitializeSamplerCreateInfo(flags, samplerCreateInfo);
 

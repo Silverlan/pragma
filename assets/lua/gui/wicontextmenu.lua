@@ -215,6 +215,40 @@ function gui.WIContextMenu:ScrollToItem(el)
 	local offset = el:GetAbsolutePos().y - elWrapper:GetAbsolutePos().y
 	scrlBar:SetScrollOffset(offset)
 end
+local function get_base_element(window)
+	local typeName = util.get_type_name(window)
+	if typeName == "Root" then
+		return window
+	end
+	if typeName ~= "Window" then
+		local el = window
+		while util.is_valid(el) do
+			if el:IsBaseElement() then
+				return el
+			end
+			el = el:GetParent()
+		end
+		local elBase = window:GetRootElement()
+		if util.is_valid(elBase) == false or util.get_type_name(elBase) ~= "Root" then
+			return
+		end
+		return elBase
+	end
+	if util.is_valid(window) == false then
+		window = gui.find_focused_window()
+		if util.is_valid(window) == false then
+			window = gui.get_primary_window()
+		end
+	end
+	if util.is_valid(window) == false then
+		return
+	end
+	local elBase = gui.get_base_element(window)
+	if util.is_valid(elBase) == false or util.get_type_name(elBase) ~= "Root" then
+		return
+	end
+	return elBase
+end
 function gui.WIContextMenu:AddItem(name, fcOnClick, keybind)
 	local pItem = gui.create("WIMenuItem", self.m_contents)
 	if pItem == nil then
@@ -235,7 +269,7 @@ function gui.WIContextMenu:AddItem(name, fcOnClick, keybind)
 				return
 			end
 		end
-		gui.close_context_menu(pItem:GetRootElement())
+		gui.close_context_menu(get_base_element(pItem))
 	end)
 	pItem:SizeToContents()
 	table.insert(self.m_tItems, pItem)
@@ -375,40 +409,6 @@ function gui.WIContextMenu:AddSubMenu(name, onClick, fPopulate)
 
 	return pItem, pSubMenu
 end
-local function get_base_element(window)
-	local typeName = util.get_type_name(window)
-	if typeName == "Root" then
-		return window
-	end
-	if typeName ~= "Window" then
-		local el = window
-		while util.is_valid(el) do
-			if el:IsBaseElement() then
-				return el
-			end
-			el = el:GetParent()
-		end
-		local elBase = window:GetRootElement()
-		if util.is_valid(elBase) == false or util.get_type_name(elBase) ~= "Root" then
-			return
-		end
-		return elBase
-	end
-	if util.is_valid(window) == false then
-		window = gui.find_focused_window()
-		if util.is_valid(window) == false then
-			window = gui.get_primary_window()
-		end
-	end
-	if util.is_valid(window) == false then
-		return
-	end
-	local elBase = gui.get_base_element(window)
-	if util.is_valid(elBase) == false or util.get_type_name(elBase) ~= "Root" then
-		return
-	end
-	return elBase
-end
 gui.close_all_context_menues = function()
 	for _, elMenu in pairs(gui.impl.contextMenu.menues) do
 		if elMenu:IsValid() then
@@ -423,7 +423,6 @@ gui.close_context_menu = function(window)
 	if util.is_valid(elBase) == false then
 		return
 	end
-
 	if util.is_valid(gui.impl.contextMenu.menues[elBase]) == false then
 		return
 	end

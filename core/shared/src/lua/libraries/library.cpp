@@ -81,6 +81,9 @@
 #include <luabind/discard_result_policy.hpp>
 #include <filesystem>
 #include <fmt/core.h>
+#ifndef _WIN32
+#include <signal.h>
+#endif
 
 import bezierfit;
 import panima;
@@ -708,7 +711,7 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 #else
 		isBreakDefined = true;
 		lua_pushtablecfunction(lua.GetState(), "debug", "breakpoint", static_cast<int (*)(lua_State *)>([](lua_State *l) -> int {
-			__builtin_trap();
+			raise(SIGTRAP);
 			return 0;
 		}))
 #endif

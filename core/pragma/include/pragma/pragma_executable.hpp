@@ -141,8 +141,7 @@ namespace pragma {
 		wrapper = {};
 		return MODULE_NULL;
 #else
-		std::string path = "lib/";
-		path += library;
+		std::string path = library;
 		std::replace(path.begin(), path.end(), '\\', '/');
 		void *hEngine = dlopen(path.c_str(), RTLD_LAZY);
 		if(hEngine == nullptr) {

@@ -567,6 +567,7 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 			mat->SetProperty("emission_factor", Vector3 {emissiveFactor.at(0), emissiveFactor.at(1), emissiveFactor.at(2)});
 
 		mat->UpdateTextures();
+		mat->SetLoaded(true);
 		auto savePath = pragma::asset::relative_path_to_absolute_path(matPathRelative, pragma::asset::Type::Material, util::CONVERT_PATH);
 		std::string err;
 		mat->Save(savePath.GetString(), err, true);

@@ -103,13 +103,8 @@ DLLNETWORK Engine *engine = NULL;
 extern std::optional<std::string> g_lpLogFile;
 extern util::LogSeverity g_lpLogLevelCon;
 extern util::LogSeverity g_lpLogLevelFile;
-
 Engine::Engine(int, char *[]) : CVarHandler(), m_logFile(nullptr), m_tickRate(Engine::DEFAULT_TICK_RATE), m_stateFlags {StateFlags::Running | StateFlags::MultiThreadedAssetLoadingEnabled}
 {
-	// TODO: File cache doesn't work with absolute paths at the moment
-	// (e.g. addons/imported/models/some_model.pmdl would return false even if the file exists)
-	filemanager::set_use_file_index_cache(true);
-
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	debug::open_domain();
 #endif
@@ -629,9 +624,40 @@ bool Engine::IsCLIOnly() const { return umath::is_flag_set(m_stateFlags, StateFl
 
 void Engine::Release() { Close(); }
 
+extern std::string g_lpUserDataDir;
+extern std::vector<std::string> g_lpResourceDirs;
 bool Engine::Initialize(int argc, char *argv[])
 {
 	InitLaunchOptions(argc, argv);
+
+	// Initialize file system
+	{
+		if(!g_lpUserDataDir.empty()) {
+			spdlog::debug("Using user-data directory '{}'...", g_lpUserDataDir);
+			filemanager::set_absolute_root_path(g_lpUserDataDir);
+			filemanager::add_custom_mount_directory(g_lpUserDataDir, true);
+
+			// If we're using a custom user-data directory, we have to add the program path as an additional mount directory
+			// filemanager::add_custom_mount_directory(util::get_program_path(), true);
+		}
+		else
+			filemanager::set_absolute_root_path(util::get_program_path());
+
+		// TODO: File cache doesn't work with absolute paths at the moment
+		// (e.g. addons/imported/models/some_model.pmdl would return false even if the file exists)
+		filemanager::set_use_file_index_cache(true);
+
+		if(!g_lpUserDataDir.empty()) {
+			// If we're using a custom user-data directory, we have to add the program path as an additional mount directory
+			filemanager::add_secondary_absolute_read_only_root_path("core", util::get_program_path());
+		}
+		size_t resDirIdx = 1;
+		for(auto &resourceDir : g_lpResourceDirs) {
+			spdlog::debug("Adding read-only resource directory '{}'...", resourceDir);
+			filemanager::add_secondary_absolute_read_only_root_path("resource" +std::to_string(resDirIdx++), resourceDir);
+		}
+	}
+	//
 
 	pragma::detail::initialize_logger(g_lpLogLevelCon, g_lpLogLevelFile, g_lpLogFile);
 	spdlog::info("Engine Version: {}", get_pretty_engine_version());

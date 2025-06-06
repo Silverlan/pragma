@@ -38,6 +38,8 @@ void CObservableComponent::ReceiveData(NetPacket &packet)
 			auto maxLimits = packet->Read<EulerAngles>();
 			data.angleLimits = {minLimits, maxLimits};
 		}
+		else
+			data.angleLimits = {};
 	}
 }
 

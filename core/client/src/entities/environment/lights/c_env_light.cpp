@@ -107,6 +107,7 @@ void CLightComponent::InitializeShadowBuffer()
 {
 	if(m_shadowBuffer != nullptr)
 		return;
+	m_shadowBufferData = std::make_unique<ShadowBufferData>();
 	m_shadowBuffer = ShadowDataBufferManager::GetInstance().Request(*this, *m_shadowBufferData);
 	BroadcastEvent(EVENT_ON_SHADOW_BUFFER_INITIALIZED, CEOnShadowBufferInitialized {*m_shadowBuffer});
 }
@@ -135,6 +136,7 @@ void CLightComponent::DestroyShadowBuffer(bool freeBuffer)
 		return;
 	auto buf = m_shadowBuffer;
 	m_shadowBuffer = nullptr;
+	m_shadowBufferData = nullptr;
 	if(freeBuffer)
 		ShadowDataBufferManager::GetInstance().Free(buf);
 }

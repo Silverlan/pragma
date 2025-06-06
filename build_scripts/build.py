@@ -50,6 +50,7 @@ parser.add_argument("--skip-repository-updates", type=str2bool, nargs='?', const
 if platform == "linux":
 	parser.add_argument("--no-sudo", type=str2bool, nargs='?', const=True, default=False, help="Will not run sudo commands. System packages will have to be installed manually.")
 	parser.add_argument("--no-confirm", type=str2bool, nargs='?', const=True, default=False, help="Disable any interaction with user (suitable for automated run).")
+	parser.add_argument("--enable-assertions", type=str2bool, nargs='?', const=True, default=False, help="Enable debug assertions.")
 else:
 	parser.add_argument('--toolset', help='The toolset to use. Supported toolsets: msvc, clang, clang-cl', default=defaultToolset)
 args,unknown = parser.parse_known_args()
@@ -90,6 +91,7 @@ if platform == "linux":
 	cxx_compiler = args["cxx_compiler"]
 	no_sudo = args["no_sudo"]
 	no_confirm = args["no_confirm"]
+	enable_assertions = args["enable_assertions"]
 else:
 	toolset = args["toolset"]
 generator = args["generator"]
@@ -168,6 +170,7 @@ print("install_directory: " +install_directory)
 if platform == "linux":
 	print("no_sudo: " +str(no_sudo))
 	print("no_confirm: " +str(no_confirm))
+	print("enable_assertions: " +str(enable_assertions))
 print("cmake_args: " +', '.join(additional_cmake_args))
 print("modules: " +', '.join(modules))
 
@@ -193,6 +196,9 @@ if platform == "win32":
 			"-DCMAKE_CXX_SCAN_FOR_MODULES=ON"
 		]
 		toolsetCFlags = ["-Wno-error", "-Wno-unused-command-line-argument", "-Wno-enum-constexpr-conversion", "-fexceptions", "-fcxx-exceptions", "/EHsc"]
+
+if platform == "linux" and enable_assertions:
+	toolsetCFlags = ["-D_GLIBCXX_ASSERTIONS"]
 
 if update:
 	os.chdir(root)
@@ -722,9 +728,11 @@ reset_to_commit("0f03717") # v4.0.10
 print_msg("Building bit7z...")
 mkdir("build",cd=True)
 bit7z_cmake_args = ["-DBIT7Z_AUTO_FORMAT=ON"]
+
+bit7z_cflags = toolsetCFlags.copy()
 if platform == "linux":
-	bit7z_cmake_args.append("-DCMAKE_CXX_FLAGS=-fPIC")
-cmake_configure_def_toolset("..",generator,bit7z_cmake_args)
+	bit7z_cflags += ["-fPIC"]
+cmake_configure("..",generator,toolsetArgs,bit7z_cmake_args,bit7z_cflags)
 cmake_build("Release")
 if platform == "linux":
 	bit7z_lib_name = "libbit7z.a"
@@ -1016,7 +1024,7 @@ if with_common_modules:
 	)
 	add_pragma_module(
 		name="pr_audio_soloud",
-		commitSha="ae89cb889a7fa89ca47cdf878cb7f91eef8ba0a3",
+		commitSha="85406137a479ea96c90b0b1c3651727b87355fbf",
 		repositoryUrl="https://github.com/Silverlan/pr_soloud.git"
 	)
 	add_pragma_module(

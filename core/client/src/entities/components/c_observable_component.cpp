@@ -23,7 +23,13 @@ void CObservableComponent::ReceiveData(NetPacket &packet)
 	for(auto i = 0u; i < numTypes; ++i) {
 		auto &data = GetCameraData(static_cast<CameraType>(i));
 		*data.enabled = packet->Read<bool>();
-		*data.localOrigin = packet->Read<Vector3>();
+
+		auto hasLocalOrigin = packet->Read<bool>();
+		if(hasLocalOrigin)
+			data.localOrigin = packet->Read<Vector3>();
+		else
+			data.localOrigin = {};
+
 		*data.offset = packet->Read<Vector3>();
 		data.rotateWithObservee = packet->Read<bool>();
 		auto hasLimits = packet->Read<bool>();

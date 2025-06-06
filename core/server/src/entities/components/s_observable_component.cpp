@@ -51,7 +51,10 @@ void SObservableComponent::SendData(NetPacket &packet, networking::ClientRecipie
 	for(auto i = 0u; i < numTypes; ++i) {
 		auto &data = GetCameraData(static_cast<CameraType>(i));
 		packet->Write<bool>(*data.enabled);
-		packet->Write<Vector3>(*data.localOrigin);
+		auto hasLocalOrigin = data.localOrigin.has_value();
+		packet->Write<bool>(hasLocalOrigin);
+		if(hasLocalOrigin)
+			packet->Write<Vector3>(*data.localOrigin);
 		packet->Write<Vector3>(*data.offset);
 		packet->Write<bool>(data.rotateWithObservee);
 		auto hasLimits = data.angleLimits.has_value();

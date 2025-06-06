@@ -268,6 +268,23 @@ REGISTER_LAUNCH_PARAMETER_HELP(-console_subsystem, LPARAM_console_subsystem, "",
 REGISTER_LAUNCH_PARAMETER_HELP(-non_interactive, LPARAM_non_interactive, "", "if enabled, terminal user inputs will be ignored");
 REGISTER_LAUNCH_PARAMETER_HELP(-disable_ansi_color_codes, LPARAM_disable_ansi_color_codes, "", "if set, no ansi color codes will be used in console/log outputs.");
 
+DLLNETWORK std::string g_lpUserDataDir {};
+static void LPARAM_user_data_dir(const std::vector<std::string> &argv)
+{
+	if(argv.empty())
+		return;
+	g_lpUserDataDir = argv.front();
+}
+DLLNETWORK std::vector<std::string> g_lpResourceDirs {};
+static void LPARAM_resource_dir(const std::vector<std::string> &argv)
+{
+	for(auto &arg : argv)
+		g_lpResourceDirs.push_back(arg);
+}
+
+REGISTER_LAUNCH_PARAMETER_HELP(-user_data_dir, LPARAM_user_data_dir, "<path>", "the location where user data should be written to. If not specified, the installation directory will be used.");
+REGISTER_LAUNCH_PARAMETER_HELP(-resource_dir, LPARAM_resource_dir, "<path>", "the location of an additional resource directory. Pragma will be able to load assets from this location, but not write to it. You can specify multiple resource locations by using this parameter multiple times.");
+
 REGISTER_LAUNCH_PARAMETER_HELP(-tcpport, LPARAM_tcpport, "<port>", "set TCP port");
 REGISTER_LAUNCH_PARAMETER_HELP(-udpport, LPARAM_udpport, "<port>", "set UDP port");
 REGISTER_LAUNCH_PARAMETER_HELP(-tcponly, LPARAM_tcponly, "", "use TCP for all communication");

@@ -760,7 +760,7 @@ if not Path(compressonator_root).is_dir():
 	print_msg("compressonator not found. Downloading...")
 	git_clone("https://github.com/Silverlan/compressonator.git")
 os.chdir("compressonator")
-reset_to_commit("9e09840e88d85995cb4a5fde2ae891a6c2d1cc45")
+reset_to_commit("45a13326f5a86fcd4b655bdd90a2b9753e34d20c")
 
 print_msg("Fetching compressonator dependencies...")
 execfile(compressonator_root +"/build/fetch_dependencies.py")
@@ -1004,7 +1004,7 @@ execfile(scripts_dir +"/user_modules.py",g,l)
 if with_essential_client_modules:
 	add_pragma_module(
 		name="pr_prosper_vulkan",
-		commitSha="aa91acce8a2e84d8601ccf1afa97446a8e72a0dd",
+		commitSha="7fe6b71bcd4769a330bbe03bf7df4ba91fdbbd67",
 		repositoryUrl="https://github.com/Silverlan/pr_prosper_vulkan.git"
 	)
 
@@ -1068,7 +1068,7 @@ if with_pfm:
 		)
 		add_pragma_module(
 			name="pr_opencv",
-			commitSha="430e1cc87e741306753d1bdc3091bd04d537d6b1",
+			commitSha="6d026734d62440366e892c7c156f6ba14e4e4497",
 			repositoryUrl="https://github.com/Silverlan/pr_opencv.git"
 		)
 
@@ -1082,7 +1082,7 @@ if with_pfm:
 if with_vr:
 	add_pragma_module(
 		name="pr_openvr",
-		commitSha="31a765d7b3df1e9eb26decb7242b80635a40ed66",
+		commitSha="e04b16f6349abde8f7a2892dd870a7701c11d70a",
 		repositoryUrl="https://github.com/Silverlan/pr_openvr.git"
 	)
 
@@ -1361,7 +1361,7 @@ def download_addon(name,addonName,url,commitId=None):
 curDir = os.getcwd()
 if not skip_repository_updates:
 	if with_pfm:
-		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","6c92b31c3fe297e0610e597bdb0f208e0336cb25")
+		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","d6ed9bf3d58e7a46b3237529031ec389d8295867")
 		download_addon("model editor","tool_model_editor","https://github.com/Silverlan/pragma_model_editor.git","a9ea4820f03be250bdf1e6951dad313561b75b17")
 
 	if with_vr:

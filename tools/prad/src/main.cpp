@@ -220,7 +220,7 @@ int main(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	auto pragmaPath = util::Path::CreatePath(util::get_program_path());
+	auto pragmaPath = util::Path::CreatePath(filemanager::get_program_write_path());
 	pragmaPath.PopBack();
 	std::cout << "Pragma installation path: " << pragmaPath.GetString() << std::endl;
 	auto rootPath = pragmaPath.GetString();

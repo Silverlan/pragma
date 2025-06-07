@@ -144,7 +144,7 @@ std::optional<std::string> CrashHandler::GenerateMiniDump(std::string &outErr) c
 		return {};
 	}
 
-	auto programPath = util::get_program_path();
+	auto programPath = filemanager::get_program_write_path();
 	auto szDumpPath = programPath + "/crashdumps/";
 	szDumpPath += m_appName + std::string(".dmp");
 
@@ -357,8 +357,11 @@ bool CrashHandler::GenerateCrashDump() const
 			zipFile = nullptr;
 
 			szResult = pragma::locale::get_text("prompt_crash_dump_saved", std::vector<std::string> {zipFileName, "crashdumps@pragma-engine.com"});
-			auto absPath = util::Path::CreatePath(util::get_program_path()) + zipFileName;
-			util::open_path_in_explorer(std::string {absPath.GetPath()}, std::string {absPath.GetFileName()});
+			std::string absPath;
+			if(filemanager::find_absolute_path(zipFileName, absPath)) {
+				auto path = util::FilePath(absPath);
+				util::open_path_in_explorer(std::string {path.GetPath()}, std::string {path.GetFileName()});
+			}
 
 			success = true;
 		}

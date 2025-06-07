@@ -58,6 +58,7 @@
 #include <sharedutils/netpacket.hpp>
 #include <sharedutils/util_file.h>
 #include <sharedutils/scope_guard.h>
+#include <sharedutils/util_path.hpp>
 #include <luainterface.hpp>
 #include <pragma/math/intersection.h>
 #include <pragma/model/modelmesh.h>
@@ -344,7 +345,7 @@ static Lua::var<bool, Lua::opt<std::string>, ::util::FunctionalParallelWorker> e
 {
 	auto path = ::util::Path::CreateFile(outputPath);
 	path.Canonicalize();
-	path = ::util::Path::CreatePath(::util::get_program_path()) + path;
+	path = ::util::Path::CreatePath(filemanager::get_program_write_path()) + path;
 
 	auto &zip = *luabind::object_cast<uzip::ZIPFile *>(ozip);
 	if(runInBackground) {
@@ -526,7 +527,16 @@ void Lua::util::register_shared_generic(lua_State *l, luabind::module_ &mod)
 	  "open", +[](const std::string &filePath, uzip::OpenMode openMode) -> std::shared_ptr<uzip::ZIPFile> {
 		  auto path = ::util::Path::CreateFile(filePath);
 		  path.Canonicalize();
-		  path = ::util::Path::CreatePath(::util::get_program_path()) + path;
+
+		  if(openMode == uzip::OpenMode::Read) {
+			std::string absPath;
+			if(!filemanager::find_absolute_path(path.GetString(), absPath))
+				return nullptr;
+			path = ::util::FilePath(absPath);
+		  }
+		  else
+		  	path = ::util::FilePath(filemanager::get_program_write_path(), path);
+
 		  auto zipFile = uzip::ZIPFile::Open(path.GetString(), openMode);
 		  if(!zipFile)
 			  return nullptr;
@@ -1804,9 +1814,9 @@ std::string Lua::util::get_addon_path(lua_State *l, const std::string &relPath)
 	std::string rpath;
 	if(FileManager::FindAbsolutePath(relPath, rpath) == false)
 		return relPath;
-	::util::Path path {relPath};
-	path.MakeRelative(::util::get_program_path());
-	return path.GetString();
+	if(!filemanager::find_relative_path(rpath, rpath))
+		return relPath;
+	return rpath;
 }
 
 std::string Lua::util::get_addon_path(lua_State *l)

@@ -27,7 +27,7 @@ bool pragma::asset::BlenderFormatHandler::Import(const std::string &outputPath, 
 
 	std::string glbMdlPath = "models/" + outputPath + ".glb";
 	auto glbPath = "addons/imported/" + glbMdlPath;
-	auto absGlbPath = util::Path::CreatePath(util::get_program_path()) + util::Path::CreateFile(glbPath);
+	auto absGlbPath = util::Path::CreatePath(filemanager::get_program_write_path()) + util::Path::CreateFile(glbPath);
 	std::vector<const char *> argv {absPath.c_str()};
 	if(!pragma::python::exec("modules/blender/scripts/format_importers/" + m_ext + ".py", argv.size(), argv.data())) {
 		auto errMsg = pragma::python::get_last_error();

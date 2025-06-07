@@ -242,18 +242,18 @@ static bool load_image(tinygltf::Image *image, const int imageIdx, std::string *
 	}
 	auto &inputData = *static_cast<GLTFInputData *>(userData);
 	auto imgPath = inputData.path + image->uri;
-	auto relImgPath = util::Path::CreateFile(imgPath);
-	relImgPath.MakeRelative(util::get_program_path());
+	std::string relImgPath = util::Path::CreateFile(imgPath).GetString();
+	filemanager::find_relative_path(relImgPath, relImgPath);
 	auto &texManager = static_cast<msys::CMaterialManager &>(client->GetMaterialManager()).GetTextureManager();
-	auto texture = texManager.LoadAsset(relImgPath.GetString(), util::AssetLoadFlags::AbsolutePath | util::AssetLoadFlags::DontCache);
+	auto texture = texManager.LoadAsset(relImgPath, util::AssetLoadFlags::AbsolutePath | util::AssetLoadFlags::DontCache);
 	if(texture == nullptr) {
 		if(outErr)
-			*outErr = "Failed to load texture '" + relImgPath.GetString() + "'!";
+			*outErr = "Failed to load texture '" + relImgPath + "'!";
 		return false;
 	}
 	if(texture->HasValidVkTexture() == false) {
 		if(outErr)
-			*outErr = "Texture '" + relImgPath.GetString() + "' has no valid VK texture!";
+			*outErr = "Texture '" + relImgPath + "' has no valid VK texture!";
 		return false;
 	}
 	if(imageIdx >= inputData.textures.size())

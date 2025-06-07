@@ -226,10 +226,10 @@ mkpath(tools)
 if platform == "linux" and (c_compiler == "clang-20" or c_compiler == "clang++-20"):
 	curDir = os.getcwd()
 	os.chdir(deps_dir)
-	clang20_root = os.getcwd() +"/LLVM-20.1.1-Linux-X64"
+	clang20_root = os.getcwd() +"/LLVM-20.1.6-Linux-X64"
 	if not Path(clang20_root).is_dir():
 		print_msg("Downloading clang-20...")
-		http_extract("https://github.com/llvm/llvm-project/releases/download/llvmorg-20.1.1/LLVM-20.1.1-Linux-X64.tar.xz",format="tar.xz")
+		http_extract("https://github.com/llvm/llvm-project/releases/download/llvmorg-20.1.6/LLVM-20.1.6-Linux-X64.tar.xz",format="tar.xz")
 	if c_compiler == "clang-20":
 		c_compiler = clang20_root +"/bin/clang"
 	if cxx_compiler == "clang++-20":
@@ -729,7 +729,9 @@ print_msg("Building bit7z...")
 mkdir("build",cd=True)
 bit7z_cmake_args = ["-DBIT7Z_AUTO_FORMAT=ON"]
 
-bit7z_cflags = toolsetCFlags.copy()
+bit7z_cflags = []
+if toolsetCFlags:
+	bit7z_cflags = toolsetCFlags.copy()
 if platform == "linux":
 	bit7z_cflags += ["-fPIC"]
 cmake_configure("..",generator,toolsetArgs,bit7z_cmake_args,bit7z_cflags)
@@ -1012,7 +1014,7 @@ execfile(scripts_dir +"/user_modules.py",g,l)
 if with_essential_client_modules:
 	add_pragma_module(
 		name="pr_prosper_vulkan",
-		commitSha="7fe6b71bcd4769a330bbe03bf7df4ba91fdbbd67",
+		commitSha="354e9384d55a13954ef8b8ddbdb435ccf640a714",
 		repositoryUrl="https://github.com/Silverlan/pr_prosper_vulkan.git"
 	)
 
@@ -1056,12 +1058,12 @@ if with_pfm:
 	if with_all_pfm_modules:
 		add_pragma_module(
 			name="pr_chromium",
-			commitSha="998a9a2b8a735a803ef0c062b6457db001978997",
+			commitSha="f6a377104a786bde897bc385d79935414585be18",
 			repositoryUrl="https://github.com/Silverlan/pr_chromium.git"
 		)
 		add_pragma_module(
 			name="pr_unirender",
-			commitSha="ad67c597a25d36ddcf8a3ec6da11cc561ef267b1",
+			commitSha="ad367b5b0ab4333c9cbda7b0b09bdd8a69ecdabb",
 			repositoryUrl="https://github.com/Silverlan/pr_cycles.git"
 		)
 		add_pragma_module(
@@ -1071,7 +1073,7 @@ if with_pfm:
 		)
 		add_pragma_module(
 			name="pr_davinci",
-			commitSha="65ffb75ab860d32e255a9d0d2009fd2006e48aee",
+			commitSha="39a1e999a1d2a48fe231860669e037ba41436663",
 			repositoryUrl="https://github.com/Silverlan/pr_davinci.git"
 		)
 		add_pragma_module(

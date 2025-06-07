@@ -211,7 +211,7 @@ int Lua::lib_export::export_scene(lua_State *l)
 
 	if(outputPath.empty() || (outputPath.front() != '/' && outputPath.front() != '\\'))
 		outputPath = '/' +outputPath;
-	outputPath = FileManager::GetProgramPath() +outputPath;
+	outputPath = util::FilePath(filemanager::get_program_write_path(), outputPath).GetString();
 	ufile::remove_extension_from_filename(outputPath);
 	// The assimp FBX exporter currently does not support lights or cameras!
 	outputPath += ".fbx";

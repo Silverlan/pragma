@@ -785,7 +785,7 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg, const std::string
 
 	auto fileName = ufile::get_file_from_filename(name) + '.' + ext;
 
-	auto writePath = FileManager::GetProgramPath() + '/' + outputPath + fileName;
+	auto writePath = util::FilePath(filemanager::get_program_write_path(), outputPath, fileName).GetString();
 	if(optOutPath)
 		*optOutPath = outputPath + fileName;
 	tinygltf::TinyGLTF writer {};

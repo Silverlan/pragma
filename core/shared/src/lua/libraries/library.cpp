@@ -1379,8 +1379,10 @@ void Game::RegisterLuaLibraries()
 			  return {};
 		  auto isPathToDir = !path.empty() && (path.back() == '/' || path.back() == '\\');
 		  auto absPath = isPathToDir ? ::util::Path::CreatePath(rpath) : ::util::Path::CreateFile(rpath);
-		  absPath.MakeRelative(util::get_program_path());
-		  return luabind::object {l, absPath.GetString()};
+		  std::string relPath;
+		  if(!filemanager::find_relative_path(absPath.GetString(), relPath))
+		  	return luabind::object {l, relPath};
+		  return {};
 	  })),
 	  luabind::def(
 	    "make_relative",

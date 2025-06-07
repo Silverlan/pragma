@@ -734,7 +734,7 @@ bool Model::Save(Game &game, std::string &outErr)
 		absFileName = "models/" + mdlName;
 	else {
 		auto path = util::Path::CreateFile(absFileName);
-		path.MakeRelative(util::get_program_path());
+		path.MakeRelative(filemanager::get_program_write_path());
 		absFileName = path.GetString();
 	}
 	return Save(game, absFileName, outErr);

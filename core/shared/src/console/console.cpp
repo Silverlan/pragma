@@ -62,29 +62,31 @@ void DebugConsole::open()
 
 	// Change the console font
 	/*if(handleOut) {
-		auto fontPath = util::get_program_path() + "\\fonts\\ubuntu\\UbuntuMono-R.ttf";
-		ustring::replace(fontPath, "/", "\\");
-		HANDLE m_stdOut = handleOut;
-		auto numFontsAdded = AddFontResourceEx(fontPath.c_str(), FR_NOT_ENUM, 0);
-		if(numFontsAdded > 0) {
-			SendNotifyMessage(HWND_BROADCAST, WM_FONTCHANGE, 0, 0);
+		std::string fontPath;
+		if(filemanager::find_absolute_path("fonts/ubuntu/UbuntuMono-R.ttf", fontPath)) {
+			ustring::replace(fontPath, "/", "\\");
+			HANDLE m_stdOut = handleOut;
+			auto numFontsAdded = AddFontResourceEx(fontPath.c_str(), FR_NOT_ENUM, 0);
+			if(numFontsAdded > 0) {
+				SendNotifyMessage(HWND_BROADCAST, WM_FONTCHANGE, 0, 0);
 
-			CONSOLE_FONT_INFOEX cfi;
-			cfi.cbSize = sizeof cfi;
-			cfi.nFont = 0;
-			cfi.dwFontSize.X = 0;
-			cfi.dwFontSize.Y = 18;
-			cfi.FontFamily = FF_DONTCARE;
-			cfi.FontWeight = FW_NORMAL;
-			wcscpy(cfi.FaceName, L"Ubuntu Mono");
-			auto res = SetCurrentConsoleFontEx(handleOut, FALSE, &cfi);
-			if(res == 0) {
-				auto errMsg = util::get_last_system_error_string();
-				spdlog::warn("Failed to set console font: {}", errMsg);
+				CONSOLE_FONT_INFOEX cfi;
+				cfi.cbSize = sizeof cfi;
+				cfi.nFont = 0;
+				cfi.dwFontSize.X = 0;
+				cfi.dwFontSize.Y = 18;
+				cfi.FontFamily = FF_DONTCARE;
+				cfi.FontWeight = FW_NORMAL;
+				wcscpy(cfi.FaceName, L"Ubuntu Mono");
+				auto res = SetCurrentConsoleFontEx(handleOut, FALSE, &cfi);
+				if(res == 0) {
+					auto errMsg = util::get_last_system_error_string();
+					spdlog::warn("Failed to set console font: {}", errMsg);
+				}
 			}
+			else
+				spdlog::warn("Failed to set console font: AddFontResourceEx failed.");
 		}
-		else
-			spdlog::warn("Failed to set console font: AddFontResourceEx failed.");
 	}*/
 
 #else

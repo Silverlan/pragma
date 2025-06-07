@@ -82,7 +82,7 @@ static std::optional<std::string> import_texture(const std::string &mdlPath, con
 		auto srcPath = fullTexFilePath.GetString();
 		auto dstPath = fullOutputPath + std::string {fullTexFilePath.GetFileName()};
 		if(isAbsPath) {
-			auto absFullPath = (util::get_program_path() + dstPath).GetString();
+			auto absFullPath = (filemanager::get_program_write_path() + dstPath).GetString();
 			auto res = filemanager::copy_system_file(srcPath, absFullPath);
 			return res ? absFullPath : std::optional<std::string> {};
 		}

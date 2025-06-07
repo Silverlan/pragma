@@ -586,9 +586,7 @@ void Lua::udm::register_library(Lua::Interface &lua)
 				return false;
 			ufile::remove_extension_from_filename(rpath);
 			rpath += ".udm";
-			auto p = util::Path::CreateFile(rpath);
-			p.MakeRelative(util::get_program_path());
-			rpath = p.GetString();
+			filemanager::find_relative_path(rpath, rpath);
 			auto fout = FileManager::OpenFile<VFilePtrReal>(rpath.c_str(),"w");
 			if(fout == nullptr)
 				return false;

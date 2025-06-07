@@ -287,10 +287,11 @@ void ResourceWatcherManager::OnResourceChanged(const util::Path &rootPath, const
 	/*std::string absPath;
 	if(FileManager::FindAbsolutePath(rootPath +'/' +path,absPath))
 	{
-		auto path = util::Path::CreateFile(absPath);
-		path.MakeRelative(util::get_program_path());
-		absPath = path.GetString();
-		filemanager::update_file_index_cache(absPath);
+		std::string path;
+		if(filemanager::find_relative_path(absPath, path)) {
+			absPath = path;
+			filemanager::update_file_index_cache(absPath);
+		}
 	}*/
 	auto ext = path.GetFileExtension();
 	if(!ext)

@@ -636,9 +636,6 @@ bool Engine::Initialize(int argc, char *argv[])
 			spdlog::debug("Using user-data directory '{}'...", g_lpUserDataDir);
 			filemanager::set_absolute_root_path(g_lpUserDataDir);
 			filemanager::add_custom_mount_directory(g_lpUserDataDir, true);
-
-			// If we're using a custom user-data directory, we have to add the program path as an additional mount directory
-			// filemanager::add_custom_mount_directory(util::get_program_path(), true);
 		}
 		else
 			filemanager::set_absolute_root_path(util::get_program_path());
@@ -982,7 +979,7 @@ void Engine::UpdateTickCount() { m_ctTick.Update(); }
 
 std::unique_ptr<uzip::ZIPFile> Engine::GenerateEngineDump(const std::string &baseName, std::string &outZipFileName, std::string &outErr)
 {
-	auto programPath = util::Path::CreatePath(util::get_program_path());
+	auto programPath = util::Path::CreatePath(filemanager::get_program_write_path());
 	outZipFileName = util::get_date_time(baseName + "_%Y-%m-%d_%H-%M-%S.zip");
 	auto zipName = programPath + outZipFileName;
 	auto zipFile = uzip::ZIPFile::Open(zipName.GetString(), uzip::OpenMode::Write);
@@ -1033,7 +1030,9 @@ void Engine::DumpDebugInformation(uzip::ZIPFile &zip) const
 	zip.AddFile("engine.txt", engineInfo.str());
 
 	auto fAddFile = [&zip](const std::string &fileName, const std::string &zipFileName) {
-		std::string path = util::get_program_path() + "/" + fileName;
+		std::string path;
+		if(!filemanager::find_absolute_path(fileName, path))
+			return;
 		std::ifstream t {path};
 		if(t.is_open()) {
 			std::stringstream buffer;

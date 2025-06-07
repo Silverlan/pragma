@@ -31,7 +31,7 @@ std::optional<std::string> Lua::GetLuaFilePath(const std::string &fname)
 	std::string fullLocalPath;
 	if(FileManager::FindLocalPath(fname, fullLocalPath) == false)
 		fullLocalPath = fname;
-	fullLocalPath = util::get_program_path() + '/' + fullLocalPath;
+	filemanager::find_absolute_path(fullLocalPath, fullLocalPath);
 	if(FileManager::ExistsSystem(fullLocalPath) == false)
 		return {};
 	return fullLocalPath;
@@ -145,14 +145,7 @@ static void transform_path(const lua_Debug &d, std::string &errPath, int32_t cur
 	auto qt1 = errPath.find_first_of('\"', qt0 + 1);
 	if(qt0 < end && qt1 < end) {
 		auto path = FileManager::GetCanonicalizedPath(Lua::get_source(d));
-
-		// Remove program path from absolute path
-		auto programPath = FileManager::GetCanonicalizedPath(util::get_program_path());
-		ustring::to_lower(programPath);
-		auto lpath = path;
-		ustring::to_lower(lpath);
-		if(ustring::substr(lpath, 0, programPath.length()) == programPath)
-			path = path.substr(programPath.length() + 1);
+		filemanager::find_relative_path(path, path);
 		strip_path_until_lua_dir(path);
 		if(path.length() > maxLuaPathLen)
 			path = "..." + path.substr(path.size() - maxLuaPathLen);

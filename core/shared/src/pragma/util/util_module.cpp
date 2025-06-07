@@ -5,6 +5,7 @@
 * Copyright (c) 2021 Silverlan
 */
 
+#include "fsys/filesystem.h"
 #include "stdafx_shared.h"
 #include "pragma/util/util_module.hpp"
 #include <sharedutils/util_file.h>
@@ -55,9 +56,10 @@ std::shared_ptr<util::Library> util::load_library_module(const std::string &lib,
 #ifdef __linux__
 	std::replace(lpath.begin(), lpath.end(), '\\', '/');
 
-	auto modPath = util::Path::CreatePath(util::get_program_path()) + util::Path::CreatePath("modules/") + util::Path::CreatePath(ufile::get_path_from_filename(lib));
 	auto linAdditionalSearchDirectories = additionalSearchDirectories;
-	linAdditionalSearchDirectories.push_back(modPath.GetString());
+	std::string modPath;
+	if(filemanager::find_absolute_path(util::DirPath("modules", ufile::get_path_from_filename(lib)).GetString(), modPath))
+		linAdditionalSearchDirectories.push_back(modPath);
 	return util::Library::Load(lpath, linAdditionalSearchDirectories, err);
 #else
 	return util::Library::Load(lpath, additionalSearchDirectories, err);

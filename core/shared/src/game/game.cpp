@@ -749,12 +749,14 @@ const MapInfo &Game::GetMapInfo() const { return m_mapInfo; }
 
 void Game::UpdatePackagePaths()
 {
-	auto path = util::Path::CreatePath(util::get_program_path());
 	std::vector<std::string> packagePaths = {};
 	auto &addons = AddonSystem::GetMountedAddons();
 	packagePaths.reserve(2 + addons.size());
-	packagePaths.push_back((path + "lua/?.lua").GetString());
-	packagePaths.push_back((path + "lua/modules/?.lua").GetString());
+
+	for(auto &path : filemanager::get_absolute_root_paths()) {
+		packagePaths.push_back(util::FilePath(path, "lua/?.lua").GetString());
+		packagePaths.push_back(util::FilePath(path, "lua/modules/?.lua").GetString());
+	}
 
 	for(auto &addonInfo : addons) {
 		auto path = util::Path::CreatePath(addonInfo.GetAbsolutePath()) + "lua/modules/?.lua";
@@ -770,7 +772,8 @@ void Game::UpdatePackagePaths()
 #else
 	std::string ext = ".so";
 #endif
-	package["cpath"] = (path + ("modules/?" + ext)).GetString();
+	auto path = util::Path::CreatePath(util::get_program_path());
+	package["cpath"] = util::FilePath(path, ("modules/?" + ext)).GetString();
 }
 
 bool Game::LoadSoundScripts(const char *file) { return m_stateNetwork->LoadSoundScripts(file, true); }

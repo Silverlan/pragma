@@ -565,7 +565,7 @@ void ModuleInstallJob::Install()
 
 			  Con::cout << "Extracting module archive '" << archivePath << "'..." << Con::endl;
 			  std::string err;
-			  if(!zip->ExtractFiles(util::get_program_path(), err)) {
+			  if(!zip->ExtractFiles(filemanager::get_program_write_path(), err)) {
 				  std::string msg = "Failed to extract module archive '" + archivePath + "'!";
 				  Con::cwar << "" << msg << Con::endl;
 				  SetStatus(util::JobStatus::Failed, msg);

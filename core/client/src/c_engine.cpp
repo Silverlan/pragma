@@ -772,6 +772,13 @@ bool CEngine::Initialize(int argc, char *argv[])
 			contextCreateInfo.extensions[std::string {key}] = availability;
 		}
 
+		auto findAbsoluteFilePath = [](const std::string &relFilePath) -> util::Path {
+			std::string strFilePath;
+			if(filemanager::find_absolute_path(relFilePath, strFilePath))
+				return util::FilePath(strFilePath);
+			return util::FilePath(util::get_program_path(), relFilePath);
+		};
+
 		std::vector<std::string> layers;
 		auto getLayerData = [&](udm::LinkedPropertyWrapper udmLayers) {
 			layers.reserve(layers.size() + udmLayers.GetSize());
@@ -796,7 +803,7 @@ bool CEngine::Initialize(int argc, char *argv[])
 							auto *a = udmValues.GetValuePtr<udm::Array>();
 							if(a) {
 								auto size = a->GetSize();
-								::udm::visit(a->GetValueType(), [a, size, &setting, &settingType](auto tag) {
+								::udm::visit(a->GetValueType(), [a, size, &setting, &settingType, &findAbsoluteFilePath](auto tag) {
 									using T = typename decltype(tag)::type;
 									if constexpr(std::is_same_v<T, udm::Boolean> || std::is_same_v<T, udm::Int32> || std::is_same_v<T, udm::Int64> || std::is_same_v<T, udm::UInt32> || std::is_same_v<T, udm::UInt64> || std::is_same_v<T, udm::Float> || std::is_same_v<T, udm::Double>) {
 										auto *values = new T[size];
@@ -810,7 +817,7 @@ bool CEngine::Initialize(int argc, char *argv[])
 											std::vector<util::Path> tmpPaths;
 											tmpPaths.reserve(size);
 											for(size_t i = 0; i < size; ++i) {
-												auto filePath = util::FilePath(util::get_program_path(), a->GetValue<std::string>(i));
+												auto filePath = findAbsoluteFilePath(a->GetValue<std::string>(i));
 												tmpPaths.push_back(filePath);
 												values[i] = filePath.GetString().c_str();
 											}
@@ -831,13 +838,13 @@ bool CEngine::Initialize(int argc, char *argv[])
 						}
 						else {
 							auto udmValue = prop["value"];
-							::udm::visit(udmValue.GetType(), [&udmValue, &setting, &settingType](auto tag) {
+							::udm::visit(udmValue.GetType(), [&udmValue, &setting, &settingType, &findAbsoluteFilePath](auto tag) {
 								using T = typename decltype(tag)::type;
 								if constexpr(std::is_same_v<T, udm::Boolean> || std::is_same_v<T, udm::Int32> || std::is_same_v<T, udm::Int64> || std::is_same_v<T, udm::UInt32> || std::is_same_v<T, udm::UInt64> || std::is_same_v<T, udm::Float> || std::is_same_v<T, udm::Double>)
 									setting.SetValues(1, &udmValue.GetValue<T>());
 								else if constexpr(std::is_same_v<T, udm::String>) {
 									if(settingType == "file") {
-										auto filePath = util::FilePath(util::get_program_path(), udmValue.GetValue<T>());
+										auto filePath = findAbsoluteFilePath(udmValue.GetValue<T>());
 										auto *str = filePath.GetString().c_str();
 										setting.SetValues(1, &str);
 									}

@@ -87,7 +87,9 @@ static bool mount_linked_addon(const std::string &pathLink, std::vector<AddonInf
 	if(is_addon_mounted(pathLink, outAddons))
 		return true;
 	std::string resolvedPath;
-	auto lnkPath = util::get_program_path() + "\\addons\\" + pathLink;
+	std::string lnkPath;
+	if(!filemanager::find_absolute_path(util::DirPath("addons", pathLink), lnkPath))
+		return false;
 	ufile::remove_extension_from_filename(lnkPath);
 	if(util::resolve_link(lnkPath, resolvedPath) == false) {
 		Con::cwar << "Unable to resolve link path for '" << lnkPath << "'! This addon will not be mounted." << Con::endl;
@@ -251,21 +253,24 @@ AddonInfo::AddonInfo(const std::string &path, const util::Version &version, cons
 const std::string &AddonInfo::GetLocalPath() const { return m_path; }
 std::string AddonInfo::GetAbsolutePath() const
 {
+	std::string absPath;
+	if(!filemanager::find_absolute_path(m_path, absPath))
+		return util::DirPath(filemanager::get_program_path(), m_path).GetString();
+
 	std::string ext;
-	if(ufile::get_extension(m_path, &ext) == false)
-		return util::get_program_path() + '\\' + m_path;
+	if(ufile::get_extension(absPath, &ext) == false)
+		return absPath;
 #ifdef _WIN32
 	std::string resolvedPath;
-	auto lnkPath = util::get_program_path() + '\\' + m_path;
+	auto lnkPath = absPath;
 	ufile::remove_extension_from_filename(lnkPath);
 	auto r = util::resolve_link(lnkPath, resolvedPath);
 	if(r == false)
-		return util::get_program_path() + '\\' + m_path;
+		return absPath;
 	return resolvedPath;
 #else
-	auto path = util::get_program_path() + '/' + m_path;
-	ufile::remove_extension_from_filename(path);
-	return path;
+	ufile::remove_extension_from_filename(absPath);
+	return absPath;
 #endif
 }
 const std::string &AddonInfo::GetUniqueId() const { return m_uniqueId; }

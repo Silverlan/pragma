@@ -226,10 +226,10 @@ mkpath(tools)
 if platform == "linux" and (c_compiler == "clang-20" or c_compiler == "clang++-20"):
 	curDir = os.getcwd()
 	os.chdir(deps_dir)
-	clang20_root = os.getcwd() +"/LLVM-20.1.1-Linux-X64"
+	clang20_root = os.getcwd() +"/LLVM-20.1.6-Linux-X64"
 	if not Path(clang20_root).is_dir():
 		print_msg("Downloading clang-20...")
-		http_extract("https://github.com/llvm/llvm-project/releases/download/llvmorg-20.1.1/LLVM-20.1.1-Linux-X64.tar.xz",format="tar.xz")
+		http_extract("https://github.com/llvm/llvm-project/releases/download/llvmorg-20.1.6/LLVM-20.1.6-Linux-X64.tar.xz",format="tar.xz")
 	if c_compiler == "clang-20":
 		c_compiler = clang20_root +"/bin/clang"
 	if cxx_compiler == "clang++-20":

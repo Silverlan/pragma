@@ -729,7 +729,9 @@ print_msg("Building bit7z...")
 mkdir("build",cd=True)
 bit7z_cmake_args = ["-DBIT7Z_AUTO_FORMAT=ON"]
 
-bit7z_cflags = toolsetCFlags.copy()
+bit7z_cflags = []
+if toolsetCFlags:
+	bit7z_cflags = toolsetCFlags.copy()
 if platform == "linux":
 	bit7z_cflags += ["-fPIC"]
 cmake_configure("..",generator,toolsetArgs,bit7z_cmake_args,bit7z_cflags)

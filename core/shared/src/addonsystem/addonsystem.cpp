@@ -88,7 +88,7 @@ static bool mount_linked_addon(const std::string &pathLink, std::vector<AddonInf
 		return true;
 	std::string resolvedPath;
 	std::string lnkPath;
-	if(!filemanager::find_absolute_path(util::DirPath("addons", pathLink), lnkPath))
+	if(!filemanager::find_absolute_path(util::DirPath("addons", pathLink).GetString(), lnkPath))
 		return false;
 	ufile::remove_extension_from_filename(lnkPath);
 	if(util::resolve_link(lnkPath, resolvedPath) == false) {

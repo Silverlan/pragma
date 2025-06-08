@@ -1384,6 +1384,13 @@ void Game::RegisterLuaLibraries()
 		  	return luabind::object {l, relPath};
 		  return {};
 	  })),
+	  luabind::def("find_path_on_disk", static_cast<luabind::object (*)(lua_State *, const std::string &)>([](lua_State *l, const std::string &path) -> luabind::object {
+		  std::string rpath;
+		  auto res = FileManager::FindAbsolutePath(path, rpath);
+		  if(res == false)
+			  return {};
+		  return luabind::object {l, rpath};
+	  })),
 	  luabind::def(
 	    "make_relative",
 	    +[](const std::string &path, const std::string &rootPath) -> std::

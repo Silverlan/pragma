@@ -279,7 +279,7 @@ DLLNETWORK std::vector<std::string> g_lpResourceDirs {};
 static void LPARAM_resource_dir(const std::vector<std::string> &argv)
 {
 	for(auto &arg : argv)
-		g_lpResourceDirs.push_back(arg);
+		g_lpResourceDirs.insert(g_lpResourceDirs.begin(), arg);
 }
 
 REGISTER_LAUNCH_PARAMETER_HELP(-user_data_dir, LPARAM_user_data_dir, "<path>", "the location where user data should be written to. If not specified, the installation directory will be used.");

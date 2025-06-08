@@ -634,8 +634,7 @@ bool Engine::Initialize(int argc, char *argv[])
 	{
 		if(!g_lpUserDataDir.empty()) {
 			spdlog::debug("Using user-data directory '{}'...", g_lpUserDataDir);
-			filemanager::set_absolute_root_path(g_lpUserDataDir);
-			filemanager::add_custom_mount_directory(g_lpUserDataDir, true);
+			filemanager::set_absolute_root_path(g_lpUserDataDir, 0 /* priority */);
 		}
 		else
 			filemanager::set_absolute_root_path(util::get_program_path());
@@ -651,7 +650,8 @@ bool Engine::Initialize(int argc, char *argv[])
 		size_t resDirIdx = 1;
 		for(auto &resourceDir : g_lpResourceDirs) {
 			spdlog::debug("Adding read-only resource directory '{}'...", resourceDir);
-			filemanager::add_secondary_absolute_read_only_root_path("resource" +std::to_string(resDirIdx++), resourceDir);
+			filemanager::add_secondary_absolute_read_only_root_path("resource" +std::to_string(resDirIdx), resourceDir, resDirIdx /* priority */);
+			++resDirIdx;
 		}
 	}
 	//

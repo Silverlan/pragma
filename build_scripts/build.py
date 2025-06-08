@@ -1280,8 +1280,8 @@ else:
 	sevenz_so_path = sevenz_root +"/CPP/7zip/Bundles/Format7zF"
 	os.chdir(sevenz_so_path)
 	subprocess.run(["make","-j","-f","../../cmpl_gcc.mak"],check=True)
-	mkpath(install_dir +"/bin")
-	cp(sevenz_so_path +"/b/g/7z.so",install_dir +"/bin/7z.so")
+	mkpath(install_dir +"/lib")
+	cp(sevenz_so_path +"/b/g/7z.so",install_dir +"/lib/7z.so")
 
 ########## install cpptrace ##########
 if platform == "win32":

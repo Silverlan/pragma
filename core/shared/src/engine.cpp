@@ -982,9 +982,10 @@ std::unique_ptr<uzip::ZIPFile> Engine::GenerateEngineDump(const std::string &bas
 	auto programPath = util::Path::CreatePath(filemanager::get_program_write_path());
 	outZipFileName = util::get_date_time(baseName + "_%Y-%m-%d_%H-%M-%S.zip");
 	auto zipName = programPath + outZipFileName;
-	auto zipFile = uzip::ZIPFile::Open(zipName.GetString(), uzip::OpenMode::Write);
+	std::string err;
+	auto zipFile = uzip::ZIPFile::Open(zipName.GetString(), err, uzip::OpenMode::Write);
 	if(!zipFile) {
-		outErr = "Failed to create dump file '" + zipName.GetString() + "'";
+		outErr = "Failed to create dump file '" + zipName.GetString() + "': " +err;
 		return nullptr;
 	}
 

@@ -555,16 +555,17 @@ void ModuleInstallJob::Install()
 	  [this, archivePath](int code) {
 		  UpdateProgress(0.9f);
 		  if(code == 0) {
-			  auto zip = uzip::ZIPFile::Open(archivePath, uzip::OpenMode::Read);
+			  std::string err;
+			  auto zip = uzip::ZIPFile::Open(archivePath, err, uzip::OpenMode::Read);
 			  if(!zip) {
-				  std::string msg = "Failed to open module archive '" + archivePath + "'!";
+				  std::string msg = "Failed to open module archive '" + archivePath + "': " +err;
 				  Con::cwar << "" << msg << Con::endl;
 				  SetStatus(util::JobStatus::Failed, msg);
 				  return;
 			  }
 
 			  Con::cout << "Extracting module archive '" << archivePath << "'..." << Con::endl;
-			  std::string err;
+			  err = {};
 			  if(!zip->ExtractFiles(filemanager::get_program_write_path(), err)) {
 				  std::string msg = "Failed to extract module archive '" + archivePath + "'!";
 				  Con::cwar << "" << msg << Con::endl;

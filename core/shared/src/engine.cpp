@@ -634,8 +634,7 @@ bool Engine::Initialize(int argc, char *argv[])
 	{
 		if(!g_lpUserDataDir.empty()) {
 			spdlog::debug("Using user-data directory '{}'...", g_lpUserDataDir);
-			filemanager::set_absolute_root_path(g_lpUserDataDir);
-			filemanager::add_custom_mount_directory(g_lpUserDataDir, true);
+			filemanager::set_absolute_root_path(g_lpUserDataDir, 0 /* priority */);
 		}
 		else
 			filemanager::set_absolute_root_path(util::get_program_path());
@@ -651,7 +650,8 @@ bool Engine::Initialize(int argc, char *argv[])
 		size_t resDirIdx = 1;
 		for(auto &resourceDir : g_lpResourceDirs) {
 			spdlog::debug("Adding read-only resource directory '{}'...", resourceDir);
-			filemanager::add_secondary_absolute_read_only_root_path("resource" +std::to_string(resDirIdx++), resourceDir);
+			filemanager::add_secondary_absolute_read_only_root_path("resource" +std::to_string(resDirIdx), resourceDir, resDirIdx /* priority */);
+			++resDirIdx;
 		}
 	}
 	//
@@ -982,9 +982,10 @@ std::unique_ptr<uzip::ZIPFile> Engine::GenerateEngineDump(const std::string &bas
 	auto programPath = util::Path::CreatePath(filemanager::get_program_write_path());
 	outZipFileName = util::get_date_time(baseName + "_%Y-%m-%d_%H-%M-%S.zip");
 	auto zipName = programPath + outZipFileName;
-	auto zipFile = uzip::ZIPFile::Open(zipName.GetString(), uzip::OpenMode::Write);
+	std::string err;
+	auto zipFile = uzip::ZIPFile::Open(zipName.GetString(), err, uzip::OpenMode::Write);
 	if(!zipFile) {
-		outErr = "Failed to create dump file '" + zipName.GetString() + "'";
+		outErr = "Failed to create dump file '" + zipName.GetString() + "': " +err;
 		return nullptr;
 	}
 

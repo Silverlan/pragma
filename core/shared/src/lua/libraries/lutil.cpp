@@ -537,9 +537,11 @@ void Lua::util::register_shared_generic(lua_State *l, luabind::module_ &mod)
 		  else
 		  	path = ::util::FilePath(filemanager::get_program_write_path(), path);
 
-		  auto zipFile = uzip::ZIPFile::Open(path.GetString(), openMode);
+		  std::string err;
+		  auto zipFile = uzip::ZIPFile::Open(path.GetString(), err, openMode);
 		  if(!zipFile)
 			  return nullptr;
+		  Con::cwar<<"Failed to open zip file '"<<path.GetString()<<"': "<<err<<Con::endl;
 		  return zipFile;
 	  })];
 	defZip.scope[luabind::def(
@@ -550,9 +552,11 @@ void Lua::util::register_shared_generic(lua_State *l, luabind::module_ &mod)
 		  auto filePath = ptr->GetFileName();
 		  if(!filePath.has_value())
 			  return nullptr;
-		  auto zipFile = uzip::ZIPFile::Open(*filePath, openMode);
+		  std::string err;
+		  auto zipFile = uzip::ZIPFile::Open(*filePath, err, openMode);
 		  if(!zipFile)
 			  return nullptr;
+		  Con::cwar<<"Failed to open zip file '"<<*filePath<<"': "<<err<<Con::endl;
 		  return zipFile;
 	  })];
 	defZip.scope[luabind::def(
@@ -591,7 +595,8 @@ void Lua::util::register_shared(lua_State *l, luabind::module_ &mod)
 	register_shared_generic(l, mod);
 	mod[luabind::def("is_valid_entity", static_cast<bool (*)(lua_State *)>(Lua::util::is_valid_entity)), luabind::def("is_valid_entity", static_cast<bool (*)(lua_State *, const luabind::object &)>(Lua::util::is_valid_entity)),
 	  luabind::def("shake_screen", static_cast<void (*)(lua_State *, const Vector3 &, float, float, float, float, float, float)>(Lua::util::shake_screen)), luabind::def("shake_screen", static_cast<void (*)(lua_State *, float, float, float, float, float)>(Lua::util::shake_screen)),
-	  luabind::def("read_scene_file", Lua::util::read_scene_file), luabind::def("get_program_path", +[]() { return ::util::Path::CreatePath(::util::get_program_path()).GetString(); })];
+	  luabind::def("read_scene_file", Lua::util::read_scene_file), luabind::def("get_program_path", +[]() { return ::util::Path::CreatePath(::util::get_program_path()).GetString(); }),
+	luabind::def("get_program_write_path", +[]() { return ::util::Path::CreatePath(filemanager::get_program_write_path()).GetString(); })];
 }
 static Lua::mult<bool, Lua::opt<std::string>> exec_python(lua_State *l, const std::string &fileName, const std::vector<std::string> &args)
 {
@@ -1733,9 +1738,12 @@ Lua::var<bool, ::util::ParallelJob<luabind::object>> Lua::util::pack_zip_archive
 		}
 	}
 
-	auto zip = uzip::ZIPFile::Open(zipFileName, uzip::OpenMode::Write);
-	if(zip == nullptr)
+	std::string err;
+	auto zip = uzip::ZIPFile::Open(zipFileName, err, uzip::OpenMode::Write);
+	if(zip == nullptr) {
+		Con::cwar<<"Failed to open zip file '"<<zipFileName<<": "<<err<<Con::endl;
 		return luabind::object {l, false};
+	}
 	auto pzip = std::shared_ptr<uzip::ZIPFile> {std::move(zip)};
 
 	struct ResultData {

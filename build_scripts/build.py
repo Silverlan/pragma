@@ -1058,7 +1058,7 @@ if with_pfm:
 	if with_all_pfm_modules:
 		add_pragma_module(
 			name="pr_chromium",
-			commitSha="f6a377104a786bde897bc385d79935414585be18",
+			commitSha="c5520b461825bbecd26d674fa708d62414303314",
 			repositoryUrl="https://github.com/Silverlan/pr_chromium.git"
 		)
 		add_pragma_module(
@@ -1280,8 +1280,8 @@ else:
 	sevenz_so_path = sevenz_root +"/CPP/7zip/Bundles/Format7zF"
 	os.chdir(sevenz_so_path)
 	subprocess.run(["make","-j","-f","../../cmpl_gcc.mak"],check=True)
-	mkpath(install_dir +"/bin")
-	cp(sevenz_so_path +"/b/g/7z.so",install_dir +"/bin/7z.so")
+	mkpath(install_dir +"/lib")
+	cp(sevenz_so_path +"/b/g/7z.so",install_dir +"/lib/7z.so")
 
 ########## install cpptrace ##########
 if platform == "win32":
@@ -1371,7 +1371,7 @@ def download_addon(name,addonName,url,commitId=None):
 curDir = os.getcwd()
 if not skip_repository_updates:
 	if with_pfm:
-		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","d6ed9bf3d58e7a46b3237529031ec389d8295867")
+		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","eb7b42cf3060a07fae2092d0d1df672d001d9cec")
 		download_addon("model editor","tool_model_editor","https://github.com/Silverlan/pragma_model_editor.git","a9ea4820f03be250bdf1e6951dad313561b75b17")
 
 	if with_vr:

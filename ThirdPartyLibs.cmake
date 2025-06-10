@@ -13,6 +13,17 @@ target_include_directories(luabind PUBLIC "${CMAKE_CURRENT_LIST_DIR}/third_party
 unset(BUILD_SHARED_LIBS CACHE)
 #
 
+# efsw
+set(VERBOSE
+    OFF
+    CACHE BOOL OFF FORCE)
+set(EFSW_INSTALL
+    OFF
+    CACHE BOOL OFF FORCE)
+pr_include_third_party_library(efsw INC "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/efsw")
+pr_set_target_folder(efsw third_party_libs)
+#
+
 # mpaheader
 pr_include_third_party_library(mpaheader)
 pr_set_target_folder(mpaheader third_party_libs)

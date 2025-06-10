@@ -325,6 +325,7 @@ void Engine::Close()
 
 	Con::set_output_callback(nullptr);
 	pragma::locale::clear();
+	filemanager::close_file_watcher();
 }
 
 static uint32_t clear_assets(NetworkState *state, pragma::asset::Type type, bool verbose)

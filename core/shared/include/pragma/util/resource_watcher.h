@@ -66,6 +66,7 @@ class DLLNETWORK ResourceWatcherManager {
 	std::unordered_map<std::string, std::function<void()>> m_watchFiles;
 	std::vector<std::shared_ptr<DirectoryWatcherCallback>> m_watchers;
 	std::unordered_map<std::string, TypeHandler> m_typeHandlers;
+	std::shared_ptr<filemanager::DirectoryWatcherManager> m_watcherManager;
 };
 
 #endif

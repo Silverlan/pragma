@@ -28,6 +28,7 @@ class GUIDebugCursorManager {
 	GUIDebugCursorManager();
 	~GUIDebugCursorManager();
 	bool Initialize();
+	void SetTargetGUIElementOverride(WIBase *el);
   private:
 	static std::string GetElementInfo(WIBase &el);
 	void Clear();
@@ -45,6 +46,7 @@ class GUIDebugCursorManager {
 	CallbackHandle m_cbOnClose = {};
 	std::weak_ptr<prosper::Window> m_curWindow {};
 	WIHandle m_hText = {};
+	WIHandle m_targetElementOverride;
 	std::array<WIHandle, 4> m_borderElements = {};
 	std::array<WIHandle, 4> m_borderElementsConstrained = {};
 	std::vector<WIHandle> m_cursorElementList = {}; // Last element is bottom-most element in hierarchy, all elements above are parents
@@ -227,6 +229,12 @@ void GUIDebugCursorManager::SelectNextChildInHierarchy()
 	}
 }
 
+void GUIDebugCursorManager::SetTargetGUIElementOverride(WIBase *el)
+{
+	m_targetElementOverride = el ? el->GetHandle() : WIHandle {};
+	SetTargetGUIElement(el, true);
+}
+
 void GUIDebugCursorManager::SetTargetGUIElement(WIBase *optEl, bool clear)
 {
 	auto dbgGUIVisible = (optEl != nullptr);
@@ -334,7 +342,8 @@ void GUIDebugCursorManager::OnThink()
 	auto *pText = static_cast<WIText *>(m_hText.get());
 	auto *pEl = gui.GetCursorGUIElement(
 	  nullptr, [this](WIBase *pEl) -> bool { return ShouldPass(*pEl); }, window);
-	SetTargetGUIElement(pEl, true);
+	if(!m_targetElementOverride.IsValid())
+		SetTargetGUIElement(pEl, true);
 
 	if(m_hText.IsValid()) {
 		int32_t x, y;
@@ -346,13 +355,26 @@ void GUIDebugCursorManager::OnThink()
 void Console::commands::debug_gui_cursor(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	static std::unique_ptr<GUIDebugCursorManager> s_dbgManager = nullptr;
-	if(s_dbgManager != nullptr) {
+	if(s_dbgManager != nullptr && argv.empty()) {
 		s_dbgManager = nullptr;
 		return;
 	}
-	s_dbgManager = std::make_unique<GUIDebugCursorManager>();
-	if(s_dbgManager->Initialize() == false)
-		s_dbgManager = nullptr;
+	if(!s_dbgManager) {
+		s_dbgManager = std::make_unique<GUIDebugCursorManager>();
+		if(s_dbgManager->Initialize() == false)
+			s_dbgManager = nullptr;
+	}
+	if(!argv.empty()) {
+		auto &elName = argv.front();
+		auto *el = WGUI::GetInstance().FindByFilter([&elName](WIBase &el) -> bool {
+			return ustring::compare(el.GetName(), elName, false);
+		});
+		if(!el) {
+			Con::cwar<<"Unable to find element by name '"<<elName<<"'!"<<Con::endl;
+			return;
+		}
+		s_dbgManager->SetTargetGUIElementOverride(el);
+	}
 }
 
 void Console::commands::debug_dump_font_glyph_map(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)

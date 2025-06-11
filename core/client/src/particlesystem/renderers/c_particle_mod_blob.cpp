@@ -391,7 +391,7 @@ void CParticleRendererBlob::UpdateAdjacentParticles(prosper::ICommandBuffer &cmd
 	SortParticleLinks();
 
 	const auto fAddLink = [](LinkContainer &cLinks, uint32_t particleIdx, float distSqr) {
-        assert(cLinks.nextLinkId < pragma::ShaderParticleBlob::MAX_BLOB_NEIGHBORS + 1);
+		assert(cLinks.nextLinkId < pragma::ShaderParticleBlob::MAX_BLOB_NEIGHBORS + 1);
 		auto it = std::find_if(cLinks.links.begin(), cLinks.links.end(), [distSqr](const Link &link) { return (distSqr < link.distSqr) ? true : false; });
 		assert(it != cLinks.links.end());
 		for(auto i = cLinks.links.size() - 1; i > (it - cLinks.links.begin()); --i)
@@ -441,7 +441,7 @@ void CParticleRendererBlob::UpdateAdjacentParticles(prosper::ICommandBuffer &cmd
 		}
 		auto &particleIds = m_adjacentParticleIds[renderIdx0];
 		std::fill(particleIds.begin() + cLinks0.nextLinkId, particleIds.end(), INVALID_BLOB_INDEX);
-		for(auto i = decltype(cLinks0.nextLinkId) {0}; i <= cLinks0.nextLinkId; ++i)
+		for(auto i = decltype(cLinks0.nextLinkId) {0}; i < cLinks0.nextLinkId; ++i)
 			particleIds[i] = m_particleSystem->TranslateParticleIndex(cLinks0.links[i].targetParticleIdx);
 	}
 	//

@@ -22,7 +22,7 @@ class DLLNETWORK LuaDirectoryWatcherManager {
 	bool IsLuaFile(const std::string &path, bool bAllowCompiled = false) const;
   public:
 	LuaDirectoryWatcherManager(Game *game);
-	bool MountDirectory(const std::string &path, bool bAbsolutePath = false);
+	bool MountDirectory(const std::string &path, bool stripBaseBath = false);
 	void Poll();
 };
 

@@ -6,6 +6,7 @@
  */
 
 #include "stdafx_shared.h"
+#include "pragma/engine.h"
 #include "pragma/lua/libraries/ldebug.h"
 #include <pragma/console/conout.h>
 #include <algorithm>
@@ -13,6 +14,8 @@
 #include <sys/ioctl.h>
 #include <linux/kd.h>
 #include <fcntl.h>
+// required for beep
+//#include <ncurses.h>
 #endif
 int Lua::debug::collectgarbage(lua_State *l)
 {
@@ -53,10 +56,14 @@ void Lua::debug::beep(lua_State *l)
 #ifdef _WIN32
 	Beep(freq, ms);
 #else
-	//HACK: This should point to console owning pragma
-	size_t fd = open("/dev/tty0", O_NONBLOCK | O_RDONLY);
-	ioctl(fd, KDMKTONE, (ms << 16 | 1193180 / freq));
-	close(fd);
+	// TODO: This does only work clientside.
+	std::vector<std::string> argv {"beep"};
+	pragma::get_engine()->RunConsoleCommand("sound_play", argv);
+
+	// Does not work
+	//initscr();
+	//::beep();
+	//endwin();
 #endif
 }
 

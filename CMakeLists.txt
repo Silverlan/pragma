@@ -242,7 +242,8 @@ pr_install_targets(
     bz2
     KVParser
     lunasvg
-    plutovg)
+    plutovg
+    efsw)
 
 if(WIN32)
     pr_install_files("${CMAKE_CURRENT_LIST_DIR}/third_party_libs/luajit/src/lua51.dll")

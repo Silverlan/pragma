@@ -27,7 +27,9 @@ decltype(EResourceWatcherCallbackType::Map) EResourceWatcherCallbackType::Map = 
 decltype(EResourceWatcherCallbackType::SoundScript) EResourceWatcherCallbackType::SoundScript = EResourceWatcherCallbackType {umath::to_integral(E::SoundScript)};
 decltype(EResourceWatcherCallbackType::Sound) EResourceWatcherCallbackType::Sound = EResourceWatcherCallbackType {umath::to_integral(E::Sound)};
 decltype(EResourceWatcherCallbackType::Count) EResourceWatcherCallbackType::Count = EResourceWatcherCallbackType {umath::to_integral(E::Count)};
-ResourceWatcherManager::ResourceWatcherManager(NetworkState *nw) : m_networkState(nw) {}
+ResourceWatcherManager::ResourceWatcherManager(NetworkState *nw)
+	: m_networkState(nw), m_watcherManager {filemanager::create_directory_watcher_manager()}
+{}
 
 void ResourceWatcherManager::Poll()
 {
@@ -317,17 +319,16 @@ bool ResourceWatcherManager::MountDirectory(const std::string &path, bool bAbsol
 		if(m_lockedCount > 0)
 			watchFlags |= DirectoryWatcherCallback::WatchFlags::StartDisabled;
 		m_watcherMutex.lock();
-		m_watchers.push_back(std::make_shared<DirectoryWatcherCallback>(
-		  path,
-		  [this, watchPaths](const std::string &fName) {
-			  for(auto &resPath : watchPaths) {
-				  if(ustring::substr(fName, 0, resPath.length()) == resPath) {
-					  OnResourceChanged(util::Path::CreatePath(resPath), util::Path::CreateFile(ustring::substr(fName, resPath.length() + 1)));
-					  break;
-				  }
-			  }
-		  },
-		  watchFlags));
+		m_watchers.reserve(m_watchers.size() +watchPaths.size());
+		for(auto &watchPath : watchPaths) {
+			auto pwatchPath = util::DirPath(watchPath);
+			m_watchers.push_back(std::make_shared<DirectoryWatcherCallback>(
+			util::DirPath(path, pwatchPath).GetString(),
+			[this, pwatchPath = std::move(pwatchPath)](const std::string &fName) {
+				OnResourceChanged(pwatchPath, fName);
+			},
+			watchFlags, m_watcherManager.get()));
+		}
 		m_watcherMutex.unlock();
 	}
 	catch(const DirectoryWatcher::ConstructException &e) {

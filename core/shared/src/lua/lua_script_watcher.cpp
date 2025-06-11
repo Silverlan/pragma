@@ -5,6 +5,7 @@
  * Copyright (c) 2021 Silverlan
  */
 
+#include "fsys/directory_watcher.h"
 #include "stdafx_shared.h"
 #include "pragma/lua/lua_script_watcher.h"
 #include "pragma/game/gamemode/gamemodemanager.h"
@@ -13,7 +14,9 @@
 #include <sharedutils/util_file.h>
 #include <luainterface.hpp>
 
-LuaDirectoryWatcherManager::LuaDirectoryWatcherManager(Game *game) : m_game(game) {}
+LuaDirectoryWatcherManager::LuaDirectoryWatcherManager(Game *game) : m_game(game) {
+	m_watcherManager = filemanager::create_directory_watcher_manager();
+}
 
 void LuaDirectoryWatcherManager::Poll()
 {
@@ -88,7 +91,7 @@ bool LuaDirectoryWatcherManager::MountDirectory(const std::string &path, bool bA
 		if(bAbsolutePath)
 			watchFlags |= DirectoryWatcherCallback::WatchFlags::AbsolutePath;
 		m_watchers.push_back(std::make_shared<DirectoryWatcherCallback>(
-		  path, [this](const std::string &fName) { OnLuaFileChanged(fName); }, watchFlags));
+		  path, [this](const std::string &fName) { OnLuaFileChanged(fName); }, watchFlags, m_watcherManager.get()));
 		return true;
 	}
 	catch(const DirectoryWatcher::ConstructException &) {

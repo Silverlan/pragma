@@ -223,7 +223,7 @@ void AddonSystem::MountAddons()
 				  MountAddon(fName, m_addons, false);
 			  }
 		  },
-		  DirectoryWatcherCallback::WatchFlags::WatchSubDirectories | DirectoryWatcherCallback::WatchFlags::WatchDirectoryChanges);
+		  DirectoryWatcherCallback::WatchFlags::WatchDirectoryChanges);
 	}
 	catch(const DirectoryWatcher::ConstructException &e) {
 		Con::cwar << "[AddonSystem] Unable to watch addons directory: " << e.what() << Con::endl;

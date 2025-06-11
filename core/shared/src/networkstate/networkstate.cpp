@@ -358,7 +358,7 @@ void NetworkState::Initialize()
 	m_resourceWatcher->MountDirectory("");
 	auto &addons = AddonSystem::GetMountedAddons();
 	for(auto &info : addons)
-		m_resourceWatcher->MountDirectory(info.GetAbsolutePath() + "/", true);
+		m_resourceWatcher->MountDirectory(info.GetLocalPath(), true);
 }
 
 bool NetworkState::IsClient() const { return false; }

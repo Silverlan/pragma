@@ -443,11 +443,14 @@ gui.open_context_menu = function(window)
 	end
 	return menu
 end
-gui.is_context_menu_open = function(elBase)
+gui.get_context_menu = function(elBase)
 	elBase = elBase or gui.get_base_element()
 	if util.is_valid(elBase) == false then
-		return false
+		return
 	end
-	return util.is_valid(gui.impl.contextMenu.menues[elBase])
+	return gui.impl.contextMenu.menues[elBase]
+end
+gui.is_context_menu_open = function(elBase)
+	return util.is_valid(gui.get_context_menu(elBase))
 end
 gui.register("WIContextMenu", gui.WIContextMenu)

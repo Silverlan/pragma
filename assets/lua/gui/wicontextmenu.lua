@@ -384,6 +384,7 @@ function gui.WIContextMenu:AddSubMenu(name, onClick, fPopulate)
 		end
 	end)
 	pSubMenu = gui.create("WIContextMenu", self:GetParent())
+	pSubMenu:SetZPos(self:GetZPos())
 	pSubMenu:SetParentMenu(self, pItem)
 	pSubMenu:AddCallback("OnCursorExited", function()
 		pSubMenu:KillFocus()
@@ -439,6 +440,7 @@ gui.open_context_menu = function(window)
 		menu:SetName("context_menu")
 		menu:RequestFocus()
 		menu:SetPos(elBase:GetCursorPos())
+		menu:SetZPos(20000)
 		gui.impl.contextMenu.menues[elBase] = menu
 	end
 	return menu

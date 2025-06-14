@@ -40,6 +40,7 @@
 #include <cmaterialmanager.h>
 #include <cmaterial.h>
 #include <udm.hpp>
+#include <tiny_gltf.h>
 #include <pragma/model/animation/skeleton.hpp>
 #include <pragma/model/animation/bone.hpp>
 
@@ -56,7 +57,6 @@ void pragma::asset::ModelExportInfo::SetAnimationList(const std::vector<std::str
 }
 std::vector<std::string> *pragma::asset::ModelExportInfo::GetAnimationList() { return m_animations.has_value() ? &*m_animations : nullptr; }
 
-#include <tiny_gltf.h>
 struct GLTFBufferData {
 	tinygltf::Accessor &accessor;
 	tinygltf::BufferView &bufferView;
@@ -321,8 +321,11 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 			absPathToFile = FileManager::GetProgramPath() + '/' + fileName;
 		}
 	}
-	else
-		absPathToFile = FileManager::GetProgramPath() + '/' + fileName;
+	else if(!filemanager::find_absolute_path(fileName, absPathToFile)) {
+		spdlog::debug("Unable to determine absolute path for '{}'!", fileName);
+		outErrMsg = "Unable to determine absolute path for '" + fileName + "'!";
+		return {};
+	}
 	auto absPath = ufile::get_path_from_filename(absPathToFile);
 
 	auto mdlName = ufile::get_file_from_filename(fileName);

@@ -10,6 +10,7 @@
 #include <sharedutils/util_pragma.hpp>
 #include <sharedutils/util_parallel_job.hpp>
 #include <sharedutils/util_ifile.hpp>
+#include <sharedutils/util_path.hpp>
 #include <mathutil/uvec.h>
 #include <mathutil/vertex.hpp>
 #include <vector>
@@ -57,6 +58,9 @@ namespace util {
 	DLLNETWORK std::optional<std::string> convert_udm_file_to_binary(const std::string &fileName, std::string &outErr);
 
 	DLLNETWORK std::pair<std::vector<double>, std::vector<double>> generate_two_pass_gaussian_blur_coefficients(uint32_t radius, double sigma, bool linear = true, bool correction = true);
+
+	DLLNETWORK util::Path get_user_data_dir();
+	DLLNETWORK std::vector<util::Path> get_resource_dirs();
 };
 
 #endif

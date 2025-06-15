@@ -382,3 +382,21 @@ std::pair<std::vector<double>, std::vector<double>> util::generate_two_pass_gaus
 	return {std::move(offsets), std::move(weights)};
 }
 //
+
+extern std::string g_lpUserDataDir;
+extern std::vector<std::string> g_lpResourceDirs;
+util::Path util::get_user_data_dir()
+{
+	if(!g_lpUserDataDir.empty())
+		return g_lpUserDataDir;
+	return util::get_program_path();
+}
+
+std::vector<util::Path> util::get_resource_dirs()
+{
+	std::vector<util::Path> paths;
+	paths.reserve(g_lpResourceDirs.size());
+	for(auto &path : g_lpResourceDirs)
+		paths.push_back(path);
+	return paths;
+}

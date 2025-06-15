@@ -60,7 +60,6 @@ function gui.WIMenuItem:OpenContextMenu()
 		local pos = self:GetAbsolutePos()
 		pos.y = pos.y + self:GetHeight()
 		pContext:SetPos(pos)
-		-- pContext:SetZPos(10000)
 		self.m_contextMenuHandler(pContext)
 		self.m_pContext = pContext
 	end

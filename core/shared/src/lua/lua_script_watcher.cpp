@@ -84,14 +84,17 @@ void LuaDirectoryWatcherManager::OnLuaFileChanged(const std::string &fName)
 	}
 }
 
-bool LuaDirectoryWatcherManager::MountDirectory(const std::string &path, bool bAbsolutePath)
+bool LuaDirectoryWatcherManager::MountDirectory(const std::string &path, bool stripBaseBath)
 {
 	try {
 		auto watchFlags = DirectoryWatcherCallback::WatchFlags::WatchSubDirectories;
-		if(bAbsolutePath)
-			watchFlags |= DirectoryWatcherCallback::WatchFlags::AbsolutePath;
+		auto basePath = util::DirPath(path);
 		m_watchers.push_back(std::make_shared<DirectoryWatcherCallback>(
-		  path, [this](const std::string &fName) { OnLuaFileChanged(fName); }, watchFlags, m_watcherManager.get()));
+		  path, [this, basePath = std::move(basePath)](const std::string &fName) {
+			auto relName = util::FilePath(fName);
+			relName.MakeRelative(basePath);
+			OnLuaFileChanged(relName.GetString());
+		}, watchFlags, m_watcherManager.get()));
 		return true;
 	}
 	catch(const DirectoryWatcher::ConstructException &) {

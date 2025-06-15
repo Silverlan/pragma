@@ -388,7 +388,7 @@ bool Game::LoadNavMesh(bool bReload)
 	return m_navMesh != nullptr;
 }
 
-void Game::InitializeMountedAddon(const AddonInfo &addonInfo) const { m_scriptWatcher->MountDirectory(addonInfo.GetAbsolutePath() + "/lua", true); }
+void Game::InitializeMountedAddon(const AddonInfo &addonInfo) const { m_scriptWatcher->MountDirectory(addonInfo.GetLocalPath() + "/lua", true); }
 
 void Game::Initialize()
 {

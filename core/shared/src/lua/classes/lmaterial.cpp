@@ -91,6 +91,14 @@ void Lua::Material::register_class(luabind::class_<::Material> &classDef)
 	classDef.def("ClearProperty", static_cast<void (::Material::*)(const std::string_view &, bool)>(&::Material::ClearProperty));
 	classDef.def("ClearProperty", static_cast<void (::Material::*)(const std::string_view &, bool)>(&::Material::ClearProperty), luabind::default_parameter_policy<3, bool {true}> {});
 	classDef.def(
+	  "SetProperty", +[](::Material &mat, const std::string_view &key, ::udm::Type type, Lua::udm_type value) {
+		  ::udm::visit(type, [&mat, &key, &value](auto tag) {
+			  using T = typename decltype(tag)::type;
+			  if constexpr(msys::is_property_type<T>)
+				  mat.SetProperty(key, Lua::udm::cast_object<T>(value));
+		  });
+	  });
+	classDef.def(
 	  "SetProperty", +[](::Material &mat, const std::string_view &key, Lua::udm_type value) {
 		  auto type = Lua::udm::determine_udm_type(value);
 		  if(type == ::udm::Type::Invalid)

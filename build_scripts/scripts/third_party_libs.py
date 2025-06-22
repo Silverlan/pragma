@@ -18,7 +18,7 @@ get_submodule("exprtk","https://github.com/ArashPartow/exprtk.git","f46bffcd6966
 get_submodule("fmt","https://github.com/fmtlib/fmt.git","a337011")
 get_submodule("freetype","https://github.com/aseprite/freetype2.git","e8ebfe9")
 get_submodule("glfw","https://github.com/Silverlan/glfw.git","8d6f5d9bc8477057dccc1190d46b0945219e2f33","feat/drag-callback")
-get_submodule("gli","https://github.com/g-truc/gli.git","779b99ac6656e4d30c3b24e96e0136a59649a869")
+get_submodule("gli","https://github.com/rwypior/gli.git","69e953ebb0570b41b3782fdbd7c7889fe04de234")
 get_submodule("glm","https://github.com/g-truc/glm.git","d58f9bcfedfdb4ef78f2c547601238b4fdbd14b8")
 get_submodule("libnoise","https://github.com/qknight/libnoise.git","9ce0737b55812f7de907e86dc633724524e3a8e8")
 get_submodule("libsamplerate","https://github.com/libsndfile/libsamplerate.git","a2eb2814150a4ada0b49ea3cc5e51170572fc606")

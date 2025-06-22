@@ -396,11 +396,11 @@ void CGame::RegisterLuaLibraries()
 	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_BC3N", umath::to_integral(uimg::TextureInfo::OutputFormat::BC3n));
 	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_BC4", umath::to_integral(uimg::TextureInfo::OutputFormat::BC4));
 	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_BC5", umath::to_integral(uimg::TextureInfo::OutputFormat::BC5));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_DXT1N", umath::to_integral(uimg::TextureInfo::OutputFormat::DXT1n));
+	// imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_DXT1N", umath::to_integral(uimg::TextureInfo::OutputFormat::DXT1n));
 	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_CTX1", umath::to_integral(uimg::TextureInfo::OutputFormat::CTX1));
 	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_BC6", umath::to_integral(uimg::TextureInfo::OutputFormat::BC6));
 	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_BC7", umath::to_integral(uimg::TextureInfo::OutputFormat::BC7));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_BC3_RGBM", umath::to_integral(uimg::TextureInfo::OutputFormat::BC3_RGBM));
+	// imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_BC3_RGBM", umath::to_integral(uimg::TextureInfo::OutputFormat::BC3_RGBM));
 	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_ETC1", umath::to_integral(uimg::TextureInfo::OutputFormat::ETC1));
 	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_ETC2_R", umath::to_integral(uimg::TextureInfo::OutputFormat::ETC2_R));
 	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_ETC2_RG", umath::to_integral(uimg::TextureInfo::OutputFormat::ETC2_RG));

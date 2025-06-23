@@ -28,6 +28,8 @@ get_submodule("lunasvg","https://github.com/sammycage/lunasvg.git","84c71c5")
 get_submodule("miniball","https://github.com/Silverlan/miniball.git","609fbf16e7a9cc3dc8f88e4d1c7a1d8ead842bb1")
 get_submodule("mpaheader","https://github.com/SlawekNowy/mpaheader.git","275d9d9")
 get_submodule("muparserx","https://github.com/Silverlan/muparserx.git","910f6128494e174c3de81bd34c3d938b47873c08")
+if platform == "win32":
+    get_submodule("nvtt","https://github.com/castano/nvidia-texture-tools.git","aeddd65f81d36d8cb7b169b469ef25156666077e")
 get_submodule("ogg","https://github.com/xiph/ogg.git","db5c7a49ce7ebda47b15b78471e78fb7f2483e22")
 get_submodule("openfbx","https://github.com/nem0/OpenFBX.git","ea1af1d81cd04c603e65042c95385370274c61af")
 get_submodule("rapidxml","https://github.com/discord/rapidxml.git","2ae4b2888165a393dfb6382168825fddf00c27b9")

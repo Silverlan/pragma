@@ -6,5 +6,6 @@ if(WIN32)
     # We need to copy dxcompiler.dll and dxil.dll to bin directory. Otherwise pragma with compressonator will fail.
     pr_install_binary(compressonator WIN "dxcompiler.dll" BIN_DIR "${DEPENDENCY_COMPRESSONATOR_COMMON_DIR}/lib/ext/dxc/bin/x64" INSTALL_DIR "${INSTALL_PATH}")
     pr_install_binary(compressonator WIN "dxil.dll" BIN_DIR "${DEPENDENCY_COMPRESSONATOR_COMMON_DIR}/lib/ext/dxc/bin/x64" INSTALL_DIR "${INSTALL_PATH}")
+else()
+    pr_install_binary(ispctc LIN "libispc_texcomp.so" INSTALL_DIR "${INSTALL_PATH}")
 endif()
-

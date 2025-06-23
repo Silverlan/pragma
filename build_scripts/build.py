@@ -764,36 +764,64 @@ cpptrace_bin_dir = cpptrace_root +"/build/" +build_config +"/"
 cmake_args += ["-DDEPENDENCY_CPPTRACE_INCLUDE=" +cpptrace_root +"/include/", "-DDEPENDENCY_CPPTRACE_LIBRARY=" +cpptrace_bin_dir +cpptrace_lib_name]
 
 ########## compressonator ##########
-os.chdir(deps_dir)
-compressonator_root = normalize_path(os.getcwd() +"/compressonator")
-if not Path(compressonator_root).is_dir():
-	print_msg("compressonator not found. Downloading...")
-	git_clone("https://github.com/Silverlan/compressonator.git")
-os.chdir("compressonator")
-reset_to_commit("45a13326f5a86fcd4b655bdd90a2b9753e34d20c")
+#os.chdir(deps_dir)
+#compressonator_root = normalize_path(os.getcwd() +"/compressonator")
+#if not Path(compressonator_root).is_dir():
+#	print_msg("compressonator not found. Downloading...")
+#	git_clone("https://github.com/Silverlan/compressonator.git")
+#os.chdir("compressonator")
+#reset_to_commit("45a13326f5a86fcd4b655bdd90a2b9753e34d20c")
+#
+#print_msg("Fetching compressonator dependencies...")
+#execfile(compressonator_root +"/build/fetch_dependencies.py")
+#
+#print_msg("Building compressonator...")
+#mkdir("cmbuild",cd=True)
+#cmake_configure_def_toolset("..",generator,["-DOpenCV_DIR=" +opencv_root +"/build", "-DOPTION_ENABLE_ALL_APPS=OFF", "-DOPTION_BUILD_CMP_SDK=ON", "-DOPTION_CMP_OPENCV=ON", "-DCMAKE_POLICY_VERSION_MINIMUM=3.5"])
+#
+#compressonator_targets = ["Image_DDS", "Image_KTX", "Image_TGA", "CMP_Compressonator", "CMP_Framework", "CMP_Common", "CMP_Core"]
+#if platform == "win32":
+#	compressonator_targets.append("Image_EXR")
+#cmake_build("Release", compressonator_targets)
+#
+#cmake_args += [
+#	"-DDEPENDENCY_COMPRESSONATOR_SOURCE_DIR=" +compressonator_root,
+#	"-DDEPENDENCY_COMPRESSONATOR_LIBRARY_DIR=" +compressonator_root +"/cmbuild/lib/Release",
+#	"-DDEPENDENCY_COMPRESSONATOR_COMMON_DIR=" +deps_dir +"/common",
+#	"-DUSE_COMPRESSONATOR=ON"
+#]
+#if platform == "win32":
+#	cmake_args.append("-DDEPENDENCY_COMPRESSONATOR_BINARY_DIR=" +compressonator_root +"/cmbuild/bin/Release")
+#else:
+#	cmake_args.append("-DDEPENDENCY_COMPRESSONATOR_BINARY_DIR=" +compressonator_root +"/cmbuild/lib/Release")
 
-print_msg("Fetching compressonator dependencies...")
-execfile(compressonator_root +"/build/fetch_dependencies.py")
+# On Windows NVTT is used
+if platform == "linux":
+	########## ISPC ##########
+	# Required for ISPCTextureCompressor
+	os.chdir(deps_dir)
+	ispc_root = normalize_path(os.getcwd() +"/ispc-v1.27.0-linux")
+	if not Path(ispc_root).is_dir():
+		print_msg("ISPC not found. Downloading...")
+		http_extract("https://github.com/ispc/ispc/releases/download/v1.27.0/ispc-v1.27.0-linux.tar.gz",format="tar.gz")
+	os.chdir(ispc_root)
 
-print_msg("Building compressonator...")
-mkdir("cmbuild",cd=True)
-cmake_configure_def_toolset("..",generator,["-DOpenCV_DIR=" +opencv_root +"/build", "-DOPTION_ENABLE_ALL_APPS=OFF", "-DOPTION_BUILD_CMP_SDK=ON", "-DOPTION_CMP_OPENCV=ON", "-DCMAKE_POLICY_VERSION_MINIMUM=3.5"])
+	########## ISPCTextureCompressor ##########
+	os.chdir(deps_dir)
+	ispctc_root = normalize_path(os.getcwd() +"/ISPCTextureCompressor")
+	if not Path(ispctc_root).is_dir():
+		print_msg("ISPCTextureCompressor not found. Downloading...")
+		git_clone("https://github.com/GameTechDev/ISPCTextureCompressor.git")
+		cp(ispc_root +"/bin/ispc",ispctc_root +"/ISPC/linux/")
+	os.chdir(ispctc_root)
+	reset_to_commit("79ddbc90334fc31edd438e68ccb0fe99b4e15aab")
 
-compressonator_targets = ["Image_DDS", "Image_KTX", "Image_TGA", "CMP_Compressonator", "CMP_Framework", "CMP_Common", "CMP_Core"]
-if platform == "win32":
-	compressonator_targets.append("Image_EXR")
-cmake_build("Release", compressonator_targets)
-
-cmake_args += [
-	"-DDEPENDENCY_COMPRESSONATOR_SOURCE_DIR=" +compressonator_root,
-	"-DDEPENDENCY_COMPRESSONATOR_LIBRARY_DIR=" +compressonator_root +"/cmbuild/lib/Release",
-	"-DDEPENDENCY_COMPRESSONATOR_COMMON_DIR=" +deps_dir +"/common",
-	"-DUSE_COMPRESSONATOR=ON"
-]
-if platform == "win32":
-	cmake_args.append("-DDEPENDENCY_COMPRESSONATOR_BINARY_DIR=" +compressonator_root +"/cmbuild/bin/Release")
-else:
-	cmake_args.append("-DDEPENDENCY_COMPRESSONATOR_BINARY_DIR=" +compressonator_root +"/cmbuild/lib/Release")
+	print_msg("Building ISPCTextureCompressor...")
+	subprocess.run(["make","-f","Makefile.linux"],check=True)
+	cmake_args += [
+		"-DDEPENDENCY_ISPCTC_INCLUDE=" +ispctc_root +"/ispc_texcomp",
+		"-DDEPENDENCY_ISPCTC_LIBRARY=" +ispctc_root +"/build/libispc_texcomp.so"
+	]
 
 ########## freetype (built in win32, sys in linux (set in cmake)) ##########
 freetype_include_dir = ""

@@ -8,4 +8,8 @@ if(WIN32)
     pr_install_binary(compressonator WIN "dxil.dll" BIN_DIR "${DEPENDENCY_COMPRESSONATOR_COMMON_DIR}/lib/ext/dxc/bin/x64" INSTALL_DIR "${INSTALL_PATH}")
 else()
     pr_install_binary(ispctc LIN "libispc_texcomp.so" INSTALL_DIR "${INSTALL_PATH}")
+
+    # libdecor
+    pr_install_files("${LIBDECOR_BUILD_DIR}/src/libdecor-0.so" INSTALL_DIR "${INSTALL_PATH}")
+    pr_install_directory("${LIBDECOR_BUILD_DIR}/src/plugins/" INSTALL_DIR "modules/graphics/vulkan/libdecor/")
 endif()

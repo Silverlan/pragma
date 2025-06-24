@@ -378,6 +378,26 @@ execscript(scripts_dir +"/scripts/third_party_libs.py")
 print_msg("Updating modules...")
 execscript(scripts_dir +"/scripts/modules.py")
 
+########## libdecor ##########
+# We need the latest version of libdecor for Wayland-support with GLFW
+if platform == "linux":
+	os.chdir(deps_dir)
+	libdecor_root = os.getcwd() +"/libdecor"
+	if not Path(libdecor_root).is_dir():
+		print_msg("libdecor not found. Downloading...")
+		git_clone("https://gitlab.freedesktop.org/libdecor/libdecor.git")
+		os.chdir("libdecor")
+		reset_to_commit("42f7a53aaaa4a06dddb0c1109d6c582bab60bfb0")
+
+		os.chdir("../")
+	os.chdir(libdecor_root)
+
+	print_msg("Building libdecor...")
+	subprocess.run(["meson", "build", "--buildtype", "release"],check=True)
+	cmake_args += ["-DLIBDECOR_BUILD_DIR=" +libdecor_root +"/build"]
+	os.chdir("build")
+	subprocess.run(["ninja"],check=True)
+
 ########## zlib ##########
 # Download
 os.chdir(deps_dir)

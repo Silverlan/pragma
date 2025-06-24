@@ -36,24 +36,30 @@ function(pr_install_files)
                 COMPONENT ${part}
             )
         else()
-            # If the file is a symlink, install both the symlink and the real file
-            message("File \"${FILE_PATH}\" is a symlink to \"${REAL_FILE_PATH}\"")
-            
-            # Install the real file (the target of the symlink)
-            install(
-                FILES "${REAL_FILE_PATH}"
-                DESTINATION "${PA_INSTALL_DIR}"
-                OPTIONAL
-                COMPONENT ${part}
-            )
+            # on Linux/UNIX: gather the link and all its intermediate targets
+            set(_to_install_list "${FILE_PATH}")
+            set(_current        "${FILE_PATH}")
 
-            # Install the symlink itself
-            install(
-                FILES "${FILE_PATH}"
-                DESTINATION "${PA_INSTALL_DIR}"
-                OPTIONAL
-                COMPONENT ${part}
-            )
+            # walk the symlink chain *without* collapsing it
+            while(IS_SYMLINK "${_current}")
+                file(READ_SYMLINK "${_current}" _link_dest)
+                # figure out the next path *absolutely*, but keep it as a symlink
+                get_filename_component(_dir  "${_current}" DIRECTORY)
+                get_filename_component(_next "${_dir}/${_link_dest}" ABSOLUTE)
+                list(APPEND _to_install_list "${_next}")
+                set(_current "${_next}")
+            endwhile()
+
+            # now install each file (will include the original symlink + each real target)
+            foreach(_f IN LISTS _to_install_list)
+                message(STATUS "Installing file \"${_f}\" to \"${PA_INSTALL_DIR}\"...")
+                install(
+                    FILES "${_f}"
+                    DESTINATION "${PA_INSTALL_DIR}"
+                    OPTIONAL
+                    COMPONENT ${part}
+                )
+            endforeach()
         endif()
     endforeach()
 endfunction(pr_install_files)

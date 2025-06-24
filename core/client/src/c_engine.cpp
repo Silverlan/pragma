@@ -713,8 +713,12 @@ bool CEngine::Initialize(int argc, char *argv[])
 	Engine::Initialize(argc, argv);
 
 #ifdef __linux__
+	if(!g_waylandLibdecorPlugin)
+		g_waylandLibdecorPlugin = "cairo";
 	if(g_waylandLibdecorPlugin) {
-		auto path = util::FilePath(util::get_program_path(), "modules/graphics/vulkan/libdecor",*g_waylandLibdecorPlugin);
+		::util::set_env_variable("GDK_BACKEND", "wayland");
+
+		auto path = util::FilePath(util::get_program_path(), "modules/graphics/vulkan/libdecor", *g_waylandLibdecorPlugin);
 		::util::set_env_variable("LIBDECOR_PLUGIN_DIR", path.GetString());
 	}
 #endif

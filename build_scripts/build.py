@@ -362,8 +362,10 @@ if platform == "linux":
 			# Ninja
 			"apt-get install ninja-build",
 
-			# Wayland
-			"apt-get install wayland-protocols"
+			# libdecor (required for Wayland)
+			"apt-get install wayland-protocols",
+			"apt-get install libdbus-1-dev",
+			"apt-get install libgtk-3-dev"
 		]
 		install_system_packages(commands, no_confirm)
 

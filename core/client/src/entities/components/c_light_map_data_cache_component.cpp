@@ -176,7 +176,7 @@ void CLightMapDataCacheComponent::ReloadCache()
 			cachedModels[mdlName] = nullptr;
 		}
 		else {
-			auto cpy = mdl->Copy(GetEntity().GetNetworkState()->GetGameState(), Model::CopyFlags::CopyMeshesBit | Model::CopyFlags::CopyUniqueIdsBit);
+			auto cpy = mdl->Copy(GetEntity().GetNetworkState()->GetGameState(), Model::CopyFlags::CopyMeshesBit | Model::CopyFlags::CopyUniqueIdsBit | Model::CopyFlags::CopyVertexData);
 			for(auto &mg : cpy->GetMeshGroups()) {
 				for(auto &mesh : mg->GetMeshes()) {
 					auto &subMeshes = mesh->GetSubMeshes();

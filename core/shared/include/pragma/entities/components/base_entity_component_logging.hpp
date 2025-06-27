@@ -9,6 +9,7 @@
 
 #include "pragma/entities/components/base_entity_component.hpp"
 #include "pragma/logging.hpp"
+#include "pragma/game/game.h"
 
 template<typename... Args>
 void pragma::BaseEntityComponent::Log(spdlog::level::level_enum level, const std::string &msg) const

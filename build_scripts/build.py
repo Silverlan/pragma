@@ -360,7 +360,10 @@ if platform == "linux":
 			"apt-get install pkg-config libfreetype-dev",
 
 			# Ninja
-			"apt-get install ninja-build"
+			"apt-get install ninja-build",
+
+			# Wayland
+			"apt-get install wayland-protocols"
 		]
 		install_system_packages(commands, no_confirm)
 

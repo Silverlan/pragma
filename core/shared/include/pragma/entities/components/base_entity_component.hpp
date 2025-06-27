@@ -98,6 +98,8 @@ namespace pragma {
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 		static void RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts);
+		template<typename TClass>
+			static spdlog::logger &get_logger();
 		enum class StateFlags : uint32_t {
 			None = 0u,
 			IsThinking = 1u,

@@ -60,4 +60,34 @@ void pragma::BaseEntityComponent::LogCritical(format_string_t<Args...> fmt, Args
 	logger.critical(fmt, std::forward<Args>(args)...);
 }
 
+template<typename TClass>
+spdlog::logger *find_logger(Game &game) {
+	std::type_index typeIndex = typeid(TClass);
+	auto &componentManager = game.GetEntityComponentManager();
+	pragma::ComponentId componentId;
+	if (componentManager.GetComponentId(typeIndex, componentId)) {
+		auto *info = componentManager.GetComponentInfo(componentId);
+		if (info)
+			return &pragma::register_logger("c_" + std::string {info->name.str});
+	}
+	return nullptr;
+}
+
+template<typename TClass>
+spdlog::logger &pragma::BaseEntityComponent::get_logger() {
+	auto *engine = pragma::get_engine();
+
+	for (auto *state : {engine->GetClientState(), engine->GetServerNetworkState()}) {
+		if (!state)
+			continue;
+		auto *game = state->GetGameState();
+		if (!game)
+			continue;
+		auto *logger = find_logger<TClass>(*game);
+		if (logger)
+			return *logger;
+	}
+	return pragma::register_logger("c_unknown");
+}
+
 #endif

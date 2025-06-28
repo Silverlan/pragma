@@ -394,6 +394,7 @@ execscript(scripts_dir +"/scripts/modules.py")
 ########## Third-Party Libraries ##########
 print_msg("Building third-party libraries...")
 use_prebuild_third_party_libs = False # TODO: Input var
+# TODO: Move this to CMake script
 if use_prebuild_third_party_libs:
 	if platform == "linux":
 		prebuilt_binary_url = "https://github.com/Silverlan/pragma-lib-linux_x64.git"
@@ -405,11 +406,6 @@ if use_prebuild_third_party_libs:
 		git_clone(prebuilt_binary_url, prebuilt_bin_dir)
 	os.chdir(prebuilt_bin_dir)
 	reset_to_commit(prebuilt_commit_sha)
-
-	for path in glob.glob(prebuilt_bin_dir +"/*"):
-		lib_name = os.path.basename(path)
-		cmake_args += ["-DDEPENDENCY_" +lib_name.upper() +"_INCLUDE=" +path +"/include/"]
-		cmake_args += ["-DDEPENDENCY_" +lib_name.upper() +"_LIB_DIR=" +path +"/lib/"]
 else:
 	execscript(scripts_dir +"/build_third_party_libs.py")
 
@@ -757,9 +753,6 @@ os.chdir(build_dir)
 
 print_msg("Running CMake configure...")
 cmake_args += [
-	"-DDEPENDENCY_GEOMETRIC_TOOLS_INCLUDE=" +deps_dir +"/GeometricTools/GTE",
-	"-DDEPENDENCY_SPIRV_TOOLS_DIR=" +deps_dir +"/SPIRV-Tools",
-	"-DBUILD_TESTING=OFF",
 	"-DCMAKE_INSTALL_PREFIX:PATH=" +install_dir +""
 ]
 
@@ -795,28 +788,6 @@ boost_root = get_library_include_dir("boost")
 boost_lib_dir = get_library_lib_dir("boost")
 boost_libs = find_boost_libs(boost_lib_dir, components)
 
-for comp in components:
-	lib_path = boost_libs.get(comp)
-	if not lib_path:
-		raise RuntimeError(f"Could not locate Boost {comp} library in {boost_lib_dir}")
-	var_name = comp.upper()
-	cmake_args.append(f"-DDEPENDENCY_BOOST_{var_name}_LIBRARY={lib_path}")
-
-cmake_args.append("-DDEPENDENCY_BOOST_LIBRARY_LOCATION=" +boost_lib_dir)
-cmake_args.append("-DBOOST_LIBRARYDIR=" +boost_lib_dir)
-cmake_args.append("-DBOOST_ROOT=" +boost_root)
-cmake_args.append("-DDEPENDENCY_BOOST_INCLUDE=" +boost_root)
-
-
-if platform == "linux":
-	cmake_args += ["-DDEPENDENCY_LIBZIP_CONF_INCLUDE=" +build_dir +"/third_party_libs/libzip"]
-else:
-	cmake_args += ["-DZLIB_INCLUDE_DIRS=" +build_dir +"/third_party_libs/zlib " +zlib_conf_root]
-
-cmake_args.append("-DPME_EXTERNAL_LIB_LOCATION=" +external_libs_dir)
-cmake_args.append("-DPME_EXTERNAL_LIB_BIN_LOCATION=" +external_libs_bin_dir)
-cmake_args.append("-DPME_THIRD_PARTY_LIB_LOCATION=" +third_party_libs_dir)
-
 if len(vtune_include_path) > 0 or len(vtune_library_path) > 0:
 	if len(vtune_include_path) > 0 and len(vtune_library_path) > 0:
 		print_msg("VTune profiler support is enabled!")
@@ -827,7 +798,6 @@ if len(vtune_include_path) > 0 or len(vtune_library_path) > 0:
 		raise argparse.ArgumentError(None,"Both the --vtune-include-path and --vtune-library-path options have to be specified to enable VTune support!")
 
 cmake_args += additional_cmake_args
-cmake_args.append("-DCMAKE_POLICY_VERSION_MINIMUM=4.0")
 cmake_configure_def_toolset(root,generator,cmake_args)
 
 print_msg("Build files have been written to \"" +build_dir +"\".")

@@ -45,8 +45,6 @@ if platform == "linux":
 	copy_prebuilt_binaries(libdecor_root +"/build/src/", "libdecor", ["libdecor-0.so.0.200.2.p"])
 	copy_prebuilt_headers(libdecor_root +"/src/", "libdecor")
 
-	cmake_args += ["-DLIBDECOR_BUILD_DIR=" +config.prebuilt_bin_dir +"/libdecor"]
-
 ########## zlib ##########
 # Download
 os.chdir(deps_dir)
@@ -80,10 +78,6 @@ if platform == "linux":
 	zlib_lib = lib_dir +"/libz.a"
 else:
 	zlib_lib = lib_dir +"/zs.lib"
-cmake_args += [
-	"-DDEPENDENCY_ZLIB_INCLUDE=" +inc_dir,
-	"-DDEPENDENCY_ZLIB_LIBRARY=" +zlib_lib
-]
 
 ########## libzip ##########
 ZLIB_SOURCE = normalize_path(zlib_root)
@@ -112,17 +106,6 @@ os.chdir(deps_dir)
 libzip_lib_path = copy_prebuilt_binaries(libzip_root +"/build/lib/" +build_config_tp +"/", "libzip")
 copy_prebuilt_headers(libzip_root +"/lib/", "libzip")
 
-if platform == "linux":
-	libzip_lib = libzip_lib_path +"libzip.so"
-else:
-	libzip_lib = libzip_lib_path +"zip.lib"
-
-cmake_args += [
-	"-DDEPENDENCY_LIBZIP_INCLUDE=" +libzip_root +"/lib/",
-	"-DDEPENDENCY_LIBZIP_BUILD_INCLUDE=" +libzip_root +"/build/",
-	"-DDEPENDENCY_LIBZIP_LIBRARY=" +libzip_lib
-]
-
 ########## libpng ##########
 # Download
 os.chdir(deps_dir)
@@ -146,15 +129,6 @@ os.chdir(deps_dir)
 libpng_lib_path = copy_prebuilt_binaries(libpng_root +"/build/" +build_config_tp +"/", "libpng")
 copy_prebuilt_headers(libpng_root, "libpng")
 
-cmake_args += [
-	"-DDEPENDENCY_LIBPNG_INCLUDE=" +libpng_root,
-	"-DDEPENDENCY_LIBPNG_BUILD_INCLUDE=" +libpng_root +"/build/"
-]
-if platform == "linux":
-	cmake_args += ["-DDEPENDENCY_LIBPNG_LIBRARY=" +libpng_lib_path +"/libpng16.a"]
-else:
-	cmake_args += ["-DDEPENDENCY_LIBPNG_LIBRARY=" +libpng_lib_path +"/libpng16_static.lib"]
-
 ########## icu ##########
 # Download
 os.chdir(deps_dir)
@@ -176,21 +150,6 @@ if platform == "win32":
 else:
 	lib_dir = copy_prebuilt_binaries(icu_root +"/icu/usr/local/lib/", "icu")
 	inc_dir = copy_prebuilt_headers(icu_root +"/icu/usr/local/include", "icu")
-
-if platform == "win32":
-	cmake_args += [
-		"-DDEPENDENCY_ICU_INCLUDE=" +inc_dir,
-		"-DDEPENDENCY_ICU_ICUUC_LIBRARY=" +lib_dir +"icuuc.lib",
-		"-DDEPENDENCY_ICU_ICUUC_BINARY=" +lib_dir +"icuuc75.dll",
-		"-DDEPENDENCY_ICU_ICUDT_BINARY=" +lib_dir +"icudt75.dll"
-	]
-else:
-	cmake_args += [
-		"-DDEPENDENCY_ICU_INCLUDE=" +inc_dir,
-		"-DDEPENDENCY_ICU_ICUUC_LIBRARY=" +lib_dir +"libicuuc.so.75",
-		"-DDEPENDENCY_ICU_ICUUC_BINARY=" +lib_dir +"libicuuc.so.75",
-		"-DDEPENDENCY_ICU_ICUDT_BINARY=" +lib_dir +"libicudata.so.75"
-	]
 
 ########## boost ##########
 # Download
@@ -420,8 +379,6 @@ else:
 lib_dir = copy_prebuilt_binaries(bit7z_root +"/lib/x64/Release/", "bit7z")
 inc_dir = copy_prebuilt_headers(bit7z_root +"/include/", "bit7z")
 
-cmake_args += ["-DDEPENDENCY_BIT7Z_INCLUDE=" +inc_dir, "-DDEPENDENCY_BIT7Z_LIBRARY=" +lib_dir +"/" +bit7z_lib_name]
-
 ########## cpptrace ##########
 os.chdir(deps_dir)
 cpptrace_root = normalize_path(os.getcwd() +"/cpptrace")
@@ -445,8 +402,6 @@ cpptrace_bin_dir = cpptrace_root +"/build/" +build_config_tp +"/"
 lib_dir = copy_prebuilt_binaries(cpptrace_bin_dir, "cpptrace")
 inc_dir = copy_prebuilt_headers(cpptrace_root +"/include/", "cpptrace")
 
-cmake_args += ["-DDEPENDENCY_CPPTRACE_INCLUDE=" +inc_dir, "-DDEPENDENCY_CPPTRACE_LIBRARY=" +lib_dir +cpptrace_lib_name]
-
 ########## compressonator ##########
 #os.chdir(deps_dir)
 #compressonator_root = normalize_path(os.getcwd() +"/compressonator")
@@ -467,17 +422,6 @@ cmake_args += ["-DDEPENDENCY_CPPTRACE_INCLUDE=" +inc_dir, "-DDEPENDENCY_CPPTRACE
 #if platform == "win32":
 #	compressonator_targets.append("Image_EXR")
 #cmake_build("Release", compressonator_targets)
-#
-#cmake_args += [
-#	"-DDEPENDENCY_COMPRESSONATOR_SOURCE_DIR=" +compressonator_root,
-#	"-DDEPENDENCY_COMPRESSONATOR_LIBRARY_DIR=" +compressonator_root +"/cmbuild/lib/Release",
-#	"-DDEPENDENCY_COMPRESSONATOR_COMMON_DIR=" +deps_dir +"/common",
-#	"-DUSE_COMPRESSONATOR=ON"
-#]
-#if platform == "win32":
-#	cmake_args.append("-DDEPENDENCY_COMPRESSONATOR_BINARY_DIR=" +compressonator_root +"/cmbuild/bin/Release")
-#else:
-#	cmake_args.append("-DDEPENDENCY_COMPRESSONATOR_BINARY_DIR=" +compressonator_root +"/cmbuild/lib/Release")
 
 # On Windows NVTT is used
 if platform == "linux":
@@ -505,11 +449,6 @@ if platform == "linux":
 
 	lib_dir = copy_prebuilt_binaries(ispctc_root +"/build", "ispctc")
 	inc_dir = copy_prebuilt_headers(ispctc_root +"/ispc_texcomp", "ispctc")
-
-	cmake_args += [
-		"-DDEPENDENCY_ISPCTC_INCLUDE=" +inc_dir,
-		"-DDEPENDENCY_ISPCTC_LIBRARY=" +lib_dir +"/libispc_texcomp.so"
-	]
 
 ########## freetype (built in win32, sys in linux (set in cmake)) ##########
 freetype_include_dir = ""

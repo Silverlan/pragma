@@ -8,11 +8,13 @@ import tarfile
 import urllib.request
 import zipfile
 import shlex
+import fnmatch
 import multiprocessing
 from pathlib import Path
 from urllib.parse import urlparse
 from sys import platform
 import argparse
+import config
 
 def init_global_vars():
 	if("--deps_dir" in  sys.argv):
@@ -346,3 +348,129 @@ if platform == "linux":
 		for cmd in packages:
 			print_msg("Running " +cmd +"...")
 			subprocess.run(["sudo"] +cmd.split() +["-y"],check=True)
+
+def copy_files(include_patterns, source_dir, dest_dir, exclude_terms=None):
+    """
+    Recursively copy files and directories from source_dir to dest_dir.
+    - Files whose basenames match any pattern in include_patterns are copied, anywhere in the tree.
+    - Directories at the top-level of source_dir whose names match any include_patterns are copied entirely (with subtree).
+    - Entries whose basenames contain any substring in exclude_terms are skipped.
+    - Symlinks are preserved; if they point inside source_dir, their targets are rewritten to point inside dest_dir.
+
+    :param include_patterns: list of glob patterns (e.g. ['*.so*', 'plugins']).
+        Patterns ending in os.sep or matching a directory basename cause full subtree copy at top-level.
+    :param source_dir: path to source directory.
+    :param dest_dir: path to destination directory.
+    :param exclude_terms: list of substrings; skip any entry whose basename contains one.
+    """
+    if exclude_terms is None:
+        exclude_terms = []
+
+    source_dir = os.path.abspath(source_dir)
+    dest_dir = os.path.abspath(dest_dir)
+    os.makedirs(dest_dir, exist_ok=True)
+
+    def is_excluded(name):
+        return any(term in name for term in exclude_terms)
+
+    # 1. Handle top-level directories matching include_patterns: copy entire subtree
+    entries = os.listdir(source_dir)
+    copied_trees = set()
+    for name in entries:
+        if is_excluded(name):
+            continue
+        src_path = os.path.join(source_dir, name)
+        if not os.path.isdir(src_path) or os.path.islink(src_path):
+            continue
+        if any(fnmatch.fnmatch(name, pat) for pat in include_patterns):
+            # copy entire directory subtree
+            dst_tree = os.path.join(dest_dir, name)
+            for root, dirs, files in os.walk(src_path, followlinks=False):
+                rel_root = os.path.relpath(root, source_dir)
+                dst_root = os.path.join(dest_dir, rel_root)
+                # skip excluded dirs
+                dirs[:] = [d for d in dirs if not is_excluded(d)]
+                os.makedirs(dst_root, exist_ok=True)
+                for fname in files:
+                    if is_excluded(fname):
+                        continue
+                    src_file = os.path.join(root, fname)
+                    rel_file = os.path.join(rel_root, fname)
+                    _copy_entry(src_file, os.path.join(dest_dir, rel_file), source_dir, dest_dir)
+            copied_trees.add(src_path)
+
+    # 2. Walk entire tree, skipping any subtrees already copied
+    for root, dirs, files in os.walk(source_dir, followlinks=False):
+        # skip into any copied top-level trees
+        # if at a copied tree, skip
+        if any(root.startswith(tree) for tree in copied_trees):
+            dirs[:] = []
+            continue
+        # filter out dirs matching exclude_terms
+        dirs[:] = [d for d in dirs if not is_excluded(d)]
+        rel_root = os.path.relpath(root, source_dir)
+        # process files matching patterns
+        for fname in files:
+            if is_excluded(fname):
+                continue
+            if any(fnmatch.fnmatch(fname, pat) for pat in include_patterns):
+                src_file = os.path.join(root, fname)
+                dst_file = os.path.join(dest_dir, rel_root, fname)
+                _copy_entry(src_file, dst_file, source_dir, dest_dir)
+
+
+def _copy_entry(src_path, dst_path, source_dir, dest_dir):
+    """
+    Copy a single file or symlink from src_path to dst_path,
+    rewriting symlink targets if they point inside source_dir.
+    """
+    os.makedirs(os.path.dirname(dst_path), exist_ok=True)
+    if os.path.islink(src_path):
+        link_target = os.readlink(src_path)
+        # resolve to absolute
+        if not os.path.isabs(link_target):
+            abs_target = os.path.abspath(os.path.join(os.path.dirname(src_path), link_target))
+        else:
+            abs_target = link_target
+        # rewrite if inside source_dir
+        if abs_target.startswith(source_dir):
+            rel_target = os.path.relpath(abs_target, source_dir)
+            new_abs = os.path.join(dest_dir, rel_target)
+            rel_link = os.path.relpath(new_abs, os.path.dirname(dst_path))
+        else:
+            rel_link = link_target
+        # remove existing and create symlink
+        if os.path.lexists(dst_path):
+            os.remove(dst_path)
+        os.symlink(rel_link, dst_path)
+    else:
+        shutil.copy2(src_path, dst_path)
+
+
+def copy_prebuilt_binaries(source_dir, lib_name, exclude_terms=None):
+	global config
+	if platform == "win32":
+		include_patterns = ["*.lib", "*.dll"]
+	else:
+		include_patterns = ["*.a", "*.so*"]
+	lib_dir = config.prebuilt_bin_dir +"/" +lib_name +"/lib/"
+	copy_files(include_patterns, source_dir, config.prebuilt_bin_dir +"/" +lib_name +"/lib/", exclude_terms)
+	config.cmake_args += ["-DDEPENDENCY_" +lib_name.upper() +"_LIB_DIR=" +lib_dir]
+	return lib_dir
+
+def copy_prebuilt_headers(source_dir, lib_name, exclude_terms=None):
+	global config
+	include_dir = config.prebuilt_bin_dir +"/" +lib_name +"/include/"
+	copy_files(["*.h", "*.hpp"], source_dir, include_dir, exclude_terms)
+	config.cmake_args += ["-DDEPENDENCY_" +lib_name.upper() +"_INCLUDE=" +include_dir]
+	return include_dir
+
+def get_library_root_dir(lib_name):
+	global config
+	return config.deps_dir +"/binaries/" +lib_name +"/"
+
+def get_library_include_dir(lib_name):
+	return get_library_root_dir(lib_name) +"include/"
+
+def get_library_lib_dir(lib_name):
+	return get_library_root_dir(lib_name) +"lib/"

@@ -232,13 +232,25 @@ if platform == "linux" and (c_compiler == "clang-20" or c_compiler == "clang++-2
 	if not Path(clang20_root).is_dir():
 		print_msg("Downloading clang-20...")
 		http_extract("https://github.com/llvm/llvm-project/releases/download/llvmorg-20.1.6/LLVM-20.1.6-Linux-X64.tar.xz",format="tar.xz")
+	os.chdir(curDir)
+
+	clang_staging_path = get_library_root_dir("clang")
+
+	copy_preserving_symlink(Path(clang20_root +"/bin/clang"), Path(clang_staging_path +"/bin"))
+	copy_preserving_symlink(Path(clang20_root +"/bin/clang++"), Path(clang_staging_path +"/bin"))
+	copy_preserving_symlink(Path(clang20_root +"/bin/clang-scan-deps"), Path(clang_staging_path +"/bin"))
+
+	copytree(clang20_root +"/include/c++", clang_staging_path +"/include/c++")
+	copytree(clang20_root +"/include/clang", clang_staging_path +"/include/clang")
+	copytree(clang20_root +"/include/clang-c", clang_staging_path +"/include/clang-c")
+	copytree(clang20_root +"/lib/clang", clang_staging_path +"/lib/clang")
+
 	if c_compiler == "clang-20":
-		c_compiler = clang20_root +"/bin/clang"
+		c_compiler = clang_staging_path +"/bin/clang"
 	if cxx_compiler == "clang++-20":
-		cxx_compiler = clang20_root +"/bin/clang++"
+		cxx_compiler = clang_staging_path +"/bin/clang++"
 	print_msg("Setting c_compiler override to '" +c_compiler +"'")
 	print_msg("Setting cxx_compiler override to '" +cxx_compiler +"'")
-	os.chdir(curDir)
 
 if platform == "linux":
 	os.environ["CC"] = c_compiler
@@ -653,7 +665,7 @@ if with_pfm:
 		)
 		add_pragma_module(
 			name="pr_unirender",
-			commitSha="74943b15e0557d9c479a6908a3054463151c8ec0",
+			commitSha="305d8b1812368938e3f1fdafeb66b30b7d1773d7",
 			repositoryUrl="https://github.com/Silverlan/pr_cycles.git"
 		)
 		add_pragma_module(

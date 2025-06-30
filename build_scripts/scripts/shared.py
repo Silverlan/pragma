@@ -370,7 +370,7 @@ def copy_preserving_symlink(src: Path, dst_dir: Path):
         link_target = os.readlink(src)
         target_path = (src.parent / link_target).resolve()
 
-        target_dst = dst_dir / target_path.Name
+        target_dst = dst_dir / target_path.name
 
         if target_dst.exists() or target_dst.is_symlink():
             target_dst.unlink()

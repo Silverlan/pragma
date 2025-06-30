@@ -67,13 +67,20 @@ function(pr_add_include_dir TARGET_NAME IDENTIFIER)
         set(VISIBILITY PUBLIC)
     endif()
 
-    pr_get_normalized_identifier_name(${IDENTIFIER})
-    pr_set_include_path(${IDENTIFIER} "")
+    if(${IDENTIFIER}_INCLUDE_DIRS)
+        message(
+            "[PR] Adding include directories ${${IDENTIFIER}_INCLUDE_DIRS} (${IDENTIFIER}) to target ${TARGET_NAME} with visibility ${VISIBILITY}"
+        )
+        target_include_directories(${TARGET_NAME} ${VISIBILITY} ${${IDENTIFIER}_INCLUDE_DIRS})
+    else()
+        pr_get_normalized_identifier_name(${IDENTIFIER})
+        pr_set_include_path(${IDENTIFIER} "")
 
-    message(
-        "[PR] Adding include directory \"${DEPENDENCY_${NORMALIZED_IDENTIFIER}_INCLUDE}\" (${NORMALIZED_IDENTIFIER}) to target ${TARGET_NAME} with visibility ${VISIBILITY}"
-    )
-    target_include_directories(${TARGET_NAME} ${VISIBILITY} ${DEPENDENCY_${NORMALIZED_IDENTIFIER}_INCLUDE})
+        message(
+            "[PR] Adding include directory \"${DEPENDENCY_${NORMALIZED_IDENTIFIER}_INCLUDE}\" (${NORMALIZED_IDENTIFIER}) to target ${TARGET_NAME} with visibility ${VISIBILITY}"
+        )
+        target_include_directories(${TARGET_NAME} ${VISIBILITY} ${DEPENDENCY_${NORMALIZED_IDENTIFIER}_INCLUDE})
+    endif()
 endfunction()
 
 function(pr_link_library TARGET_NAME IDENTIFIER)
@@ -87,13 +94,20 @@ function(pr_link_library TARGET_NAME IDENTIFIER)
         set(VISIBILITY PUBLIC)
     endif()
 
-    pr_get_normalized_identifier_name(${IDENTIFIER})
-    pr_set_library_path(${IDENTIFIER} "")
+    if(${IDENTIFIER}_LIBRARIES)
+        message(
+            "[PR] Linking libraries ${${IDENTIFIER}_LIBRARIES} (\"IDENTIFIER\") to target ${TARGET_NAME} with visibility ${VISIBILITY}"
+        )
+        target_link_libraries(${TARGET_NAME} ${VISIBILITY} ${${IDENTIFIER}_LIBRARIES})
+    else()
+        pr_get_normalized_identifier_name(${IDENTIFIER})
+        pr_set_library_path(${IDENTIFIER} "")
 
-    message(
-        "[PR] Linking library \"${DEPENDENCY_${NORMALIZED_IDENTIFIER}_LIBRARY}\" (${NORMALIZED_IDENTIFIER}) to target ${TARGET_NAME} with visibility ${VISIBILITY}"
-    )
-    target_link_libraries(${TARGET_NAME} ${VISIBILITY} ${DEPENDENCY_${NORMALIZED_IDENTIFIER}_LIBRARY})
+        message(
+            "[PR] Linking library \"${DEPENDENCY_${NORMALIZED_IDENTIFIER}_LIBRARY}\" (${NORMALIZED_IDENTIFIER}) to target ${TARGET_NAME} with visibility ${VISIBILITY}"
+        )
+        target_link_libraries(${TARGET_NAME} ${VISIBILITY} ${DEPENDENCY_${NORMALIZED_IDENTIFIER}_LIBRARY})
+    endif()
 endfunction()
 
 function(pr_include_and_link_library TARGET_NAME IDENTIFIER)
@@ -187,6 +201,32 @@ function(pr_add_external_dependency TARGET_NAME IDENTIFIER DEPENDENCY_TYPE)
 
         add_dependencies(${TARGET_NAME} ${DEPENDENCY_TARGET_NAME})
     endif()
+endfunction()
+
+function(pr_add_third_party_dependency TARGET_NAME IDENTIFIER)
+    find_package(${IDENTIFIER} REQUIRED)
+
+    if(${IDENTIFIER}_LIBRARIES)
+        set(DEPENDENCY_TYPE "LIBRARY")
+    else()
+        set(DEPENDENCY_TYPE "HEADER_ONLY")
+    endif()
+
+    list(LENGTH ARGV _argc)
+    if(_argc GREATER 2)
+        # grab args from index 2 through end
+        list(SUBLIST ARGV 2 -1 _extra_args)
+    else()
+        # no extras
+        set(_extra_args "")
+    endif()
+
+    pr_add_external_dependency(
+        ${TARGET_NAME}
+        ${IDENTIFIER}
+        ${DEPENDENCY_TYPE}
+        ${_extra_args}
+    )
 endfunction()
 
 function(pr_add_dependency TARGET_NAME DEPENDENCY_TARGET_NAME DEPENDENCY_TYPE)

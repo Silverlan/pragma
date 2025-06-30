@@ -8,11 +8,13 @@ import tarfile
 import urllib.request
 import zipfile
 import shlex
+import fnmatch
 import multiprocessing
 from pathlib import Path
 from urllib.parse import urlparse
 from sys import platform
 import argparse
+import config
 
 def init_global_vars():
 	if("--deps_dir" in  sys.argv):
@@ -92,8 +94,21 @@ def cmake_configure(scriptPath,generator,toolsetArgs=None,additionalArgs=[],cfla
 	if toolsetArgs:
 		args += toolsetArgs
 	args += additionalArgs
-	print("Running CMake configure command...")
-	# print("Running CMake configure command:", ' '.join(f'"{arg}"' for arg in args))
+	# print("Running CMake configure command...")
+
+	def _quote(arg: str) -> str:
+		# Handle -DKEY=VALUE specially
+		if arg.startswith("-D") and "=" in arg:
+			key, val = arg.split("=", 1)
+			if " " in val:
+				val = f'"{val}"'
+			return f"{key}={val}"
+		# Otherwise, only quote if there's whitespace
+		return f'"{arg}"' if " " in arg else arg
+
+	cmd = shlex.join(args)
+	print("Running CMake configure command:", cmd)
+
 	try:
 		subprocess.run(args,check=True)
 	except subprocess.CalledProcessError as e:
@@ -346,3 +361,146 @@ if platform == "linux":
 		for cmd in packages:
 			print_msg("Running " +cmd +"...")
 			subprocess.run(["sudo"] +cmd.split() +["-y"],check=True)
+
+def copy_preserving_symlink(src: Path, dst_dir: Path):
+    dst_dir.mkdir(parents=True, exist_ok=True)
+    dst = dst_dir / src.name
+
+    if src.is_symlink():
+        link_target = os.readlink(src)
+        target_path = (src.parent / link_target).resolve()
+
+        target_dst = dst_dir / target_path.name
+
+        if target_dst.exists() or target_dst.is_symlink():
+            target_dst.unlink()
+
+        shutil.copy2(target_path, target_dst)
+
+        if dst.exists() or dst.is_symlink():
+            dst.unlink()
+
+        os.symlink(target_dst.name, dst)
+
+    else:
+        # regular file: if dst exists, unlink first
+        if dst.exists() or dst.is_symlink():
+            dst.unlink()
+        shutil.copy2(src, dst)
+
+def copy_files(include_patterns, source_dir, dest_dir, exclude_terms=None):
+    if exclude_terms is None:
+        exclude_terms = []
+
+    source_dir = os.path.abspath(source_dir)
+    dest_dir = os.path.abspath(dest_dir)
+    os.makedirs(dest_dir, exist_ok=True)
+
+    def is_excluded(name):
+        return any(term in name for term in exclude_terms)
+
+    entries = os.listdir(source_dir)
+    copied_trees = set()
+    for name in entries:
+        if is_excluded(name):
+            continue
+        src_path = os.path.join(source_dir, name)
+        if not os.path.isdir(src_path) or os.path.islink(src_path):
+            continue
+        if any(fnmatch.fnmatch(name, pat) for pat in include_patterns):
+            dst_tree = os.path.join(dest_dir, name)
+            for root, dirs, files in os.walk(src_path, followlinks=False):
+                rel_root = os.path.relpath(root, source_dir)
+                dst_root = os.path.join(dest_dir, rel_root)
+                dirs[:] = [d for d in dirs if not is_excluded(d)]
+                os.makedirs(dst_root, exist_ok=True)
+                for fname in files:
+                    if is_excluded(fname):
+                        continue
+                    src_file = os.path.join(root, fname)
+                    rel_file = os.path.join(rel_root, fname)
+                    _copy_entry(src_file, os.path.join(dest_dir, rel_file), source_dir, dest_dir)
+            copied_trees.add(src_path)
+
+    for root, dirs, files in os.walk(source_dir, followlinks=False):
+        if any(root.startswith(tree) for tree in copied_trees):
+            dirs[:] = []
+            continue
+        dirs[:] = [d for d in dirs if not is_excluded(d)]
+        rel_root = os.path.relpath(root, source_dir)
+        for fname in files:
+            if is_excluded(fname):
+                continue
+            if any(fnmatch.fnmatch(fname, pat) for pat in include_patterns):
+                src_file = os.path.join(root, fname)
+                dst_file = os.path.join(dest_dir, rel_root, fname)
+                _copy_entry(src_file, dst_file, source_dir, dest_dir)
+
+
+def _copy_entry(src_path, dst_path, source_dir, dest_dir):
+    os.makedirs(os.path.dirname(dst_path), exist_ok=True)
+    if os.path.islink(src_path):
+        link_target = os.readlink(src_path)
+        if not os.path.isabs(link_target):
+            abs_target = os.path.abspath(os.path.join(os.path.dirname(src_path), link_target))
+        else:
+            abs_target = link_target
+        if abs_target.startswith(source_dir):
+            rel_target = os.path.relpath(abs_target, source_dir)
+            new_abs = os.path.join(dest_dir, rel_target)
+            rel_link = os.path.relpath(new_abs, os.path.dirname(dst_path))
+        else:
+            rel_link = link_target
+        if os.path.lexists(dst_path):
+            os.remove(dst_path)
+        os.symlink(rel_link, dst_path)
+    else:
+        shutil.copy2(src_path, dst_path)
+
+
+def copy_prebuilt_binaries(source_dir, lib_name, exclude_terms=None):
+	global config
+	if platform == "win32":
+		include_patterns = ["*.lib", "*.dll"]
+	else:
+		include_patterns = ["*.a", "*.so*"]
+	lib_dir = config.prebuilt_bin_dir +"/" +lib_name +"/lib/"
+	copy_files(include_patterns, source_dir, config.prebuilt_bin_dir +"/" +lib_name +"/lib/", exclude_terms)
+	return lib_dir
+
+def copy_prebuilt_headers(source_dir, lib_name, exclude_terms=None):
+	global config
+	include_dir = config.prebuilt_bin_dir +"/" +lib_name +"/include/"
+	copy_files(["*.h", "*.hpp", "*.ipp"], source_dir, include_dir, exclude_terms)
+	return include_dir
+
+def copy_prebuilt_directory(source_dir, lib_name=None, exclude_terms=None, dest_dir=None):
+	if dest_dir == None:
+		dest_dir = get_library_root_dir(lib_name)
+	# dirs_exist_ok is only available in python 3.8, so we'll use
+	# rsync/robocopy for now instead
+	# shutil.copytree(source_dir, dest_dir, dirs_exist_ok=True, symlinks=True)
+	mkpath(dest_dir)
+	if platform == "win32":
+		subprocess.run([
+			"robocopy",
+			f"{source_dir.rstrip(os.sep)}/",
+			f"{dest_dir.rstrip(os.sep)}/",
+			"/MIR"
+		], check=True)
+	else:
+		subprocess.run([
+			"rsync", "-a", "--links",
+			f"{source_dir.rstrip(os.sep)}/",
+			f"{dest_dir.rstrip(os.sep)}/",
+		], check=True)
+
+def get_library_root_dir(lib_name):
+	global config
+	return config.deps_dir +"/" +config.deps_staging_dir +"/" +lib_name +"/"
+
+def get_library_include_dir(lib_name):
+	return get_library_root_dir(lib_name) +"include/"
+
+def get_library_lib_dir(lib_name):
+	return get_library_root_dir(lib_name) +"lib/"

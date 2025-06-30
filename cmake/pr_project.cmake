@@ -47,6 +47,12 @@ function(pr_add_library TARGET_NAME LIB_TYPE)
     add_library(${TARGET_NAME} ${LIB_TYPE})
     message("[PR] Adding library ${TARGET_NAME}")
     pr_setup_default_project_settings(${TARGET_NAME})
+
+    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules")
+        set(_tmp "${CMAKE_MODULE_PATH}")
+        list(APPEND _tmp "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules")
+        set(CMAKE_MODULE_PATH "${_tmp}" PARENT_SCOPE)
+    endif()
 endfunction()
 
 function(pr_add_executable TARGET_NAME)
@@ -72,6 +78,12 @@ function(pr_add_executable TARGET_NAME)
 
     message("[PR] Adding executable ${TARGET_NAME}")
     pr_setup_default_project_settings(${TARGET_NAME})
+
+    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules")
+        set(_tmp "${CMAKE_MODULE_PATH}")
+        list(APPEND _tmp "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules")
+        set(CMAKE_MODULE_PATH "${_tmp}" PARENT_SCOPE)
+    endif()
 endfunction()
 
 function(pr_finalize TARGET_NAME)

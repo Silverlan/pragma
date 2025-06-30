@@ -32,9 +32,9 @@ pr_add_dependency(${PROJ_NAME} muparserx TARGET)
 target_include_directories(${PROJ_NAME} PRIVATE "../server/include/")
 target_include_directories(${PROJ_NAME} PRIVATE "../client/include/")
 
-pr_add_external_dependency(${PROJ_NAME} bvh HEADER_ONLY PUBLIC)
-pr_add_external_dependency(${PROJ_NAME} eigen HEADER_ONLY)
-pr_add_external_dependency(${PROJ_NAME} miniball HEADER_ONLY)
+pr_add_third_party_dependency(${PROJ_NAME} bvh PUBLIC)
+pr_add_third_party_dependency(${PROJ_NAME} eigen)
+pr_add_third_party_dependency(${PROJ_NAME} miniball)
 
 # Required by lnoise.cpp
 pr_add_dependency(${PROJ_NAME} noise-static TARGET)

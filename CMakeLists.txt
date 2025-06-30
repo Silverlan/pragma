@@ -19,6 +19,29 @@ else()
     set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif()
 
+# Dependencies
+set(BOOST_ROOT        "${PRAGMA_DEPS_DIR}/boost/cmake")
+set(BOOST_INCLUDEDIR  "${PRAGMA_DEPS_DIR}/boost/include")
+set(BOOST_LIBRARYDIR  "${PRAGMA_DEPS_DIR}/boost/lib")
+
+if(NOT DEFINED PRAGMA_DEPS_DIR)
+    message(FATAL_ERROR "PRAGMA_DEPS_DIR is not defined")
+endif()
+
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
+
+find_package(bit7z REQUIRED)
+find_package(boost REQUIRED)
+find_package(cpptrace REQUIRED)
+find_package(geometric_tools REQUIRED)
+find_package(icu REQUIRED)
+find_package(ispctc REQUIRED)
+find_package(libpng REQUIRED)
+find_package(libzip REQUIRED)
+find_package(luajit REQUIRED)
+find_package(zlib REQUIRED)
+#
+
 # This generates a compile_commands.json file in the build directory to help clangd parse the project
 # and provide code completion.
 # This is only useful if you are using clangd as your language server.
@@ -72,10 +95,6 @@ else()
         CACHE INTERNAL "" FORCE)
 endif()
 
-set(DEPENDENCY_PRAGMA_EXECUTABLE_INCLUDE
-    ${CMAKE_CURRENT_LIST_DIR}/core/pragma/include
-    CACHE PATH "Path to include directory.")
-
 unset(CONFIG_ENABLE_EXECUTABLE_FLAG CACHE)
 set(CONFIG_ENABLE_EXECUTABLE_FLAG
     OFF
@@ -86,46 +105,9 @@ set(WGUI_INCLUDE_DEPENDENCIES
     OFF
     CACHE BOOL "Include dependencies required to build the wgui library?")
 
-pr_set_include_path(lz4 "${CMAKE_CURRENT_LIST_DIR}/external_libs/util_source2/third_party_libs/lz4/lib" FORCE)
-pr_set_library_path(lz4)
-
-pr_set_include_path(liblzma "${CMAKE_CURRENT_LIST_DIR}/external_libs/util_bsp/third_party_libs/liblzma/include" FORCE)
-pr_set_library_path(liblzma lzma)
-
 if(UNIX)
     find_package(Freetype REQUIRED)
-    pr_set_include_path(freetype "${FREETYPE_INCLUDE_DIR_freetype2}" FORCE)
-    set(DEPENDENCY_FREETYPE_LIBRARY
-        ${FREETYPE_LIBRARIES}
-        CACHE STRING "" FORCE)
 endif()
-
-pr_set_include_path(luajit "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/luajit/src")
-pr_set_include_path(lua "${DEPENDENCY_LUAJIT_INCLUDE}")
-
-# Third-party libraries
-pr_set_include_path(gli "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/gli")
-
-pr_set_include_path(rapidxml "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/rapidxml")
-pr_set_include_path(ba2 "${CMAKE_CURRENT_LIST_DIR}/modules/pr_source/third_party/ba2lib/BA2Lib")
-
-pr_set_include_path(exprtk "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/exprtk")
-
-pr_set_include_path(miniball "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/miniball/cpp/main")
-pr_set_include_path(bvh "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/bvh/src")
-
-pr_set_library_path(luajit)
-pr_set_library_path(lua luajit)
-
-pr_set_include_path(eigen "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/eigen")
-pr_set_include_path(tinygltf "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/tinygltf")
-
-set(BOOST_INCLUDEDIR
-    ${DEPENDENCY_BOOST_INCLUDE}
-    CACHE PATH "Path to include directory." FORCE)
-set(BOOST_ROOT
-    ${DEPENDENCY_BOOST_INCLUDE}
-    CACHE PATH "Path to include directory." FORCE)
 
 if(is_multi_config)
     set(PR_MODULE_INSTALL_SUBDIR "${CONFIG_BUILD_TYPE}")
@@ -149,16 +131,6 @@ add_custom_target(pragma-core)
 set_target_properties(pragma-core PROPERTIES FOLDER "Hidden")
 
 include(${CMAKE_SOURCE_DIR}/ThirdPartyLibs.cmake)
-
-if(UNIX)
-    pr_set_raw_library_path(boost_chrono "${DEPENDENCY_BOOST_LIBRARY_LOCATION}/libboost_chrono.a" FORCE)
-    pr_set_raw_library_path(boost_date_time "${DEPENDENCY_BOOST_LIBRARY_LOCATION}/libboost_date_time.a" FORCE)
-    pr_set_raw_library_path(boost_filesystem "${DEPENDENCY_BOOST_LIBRARY_LOCATION}/libboost_filesystem.a" FORCE)
-    pr_set_raw_library_path(boost_iostreams "${DEPENDENCY_BOOST_LIBRARY_LOCATION}/libboost_iostreams.a" FORCE)
-    pr_set_raw_library_path(boost_regex "${DEPENDENCY_BOOST_LIBRARY_LOCATION}/libboost_regex.a" FORCE)
-    pr_set_raw_library_path(boost_system "${DEPENDENCY_BOOST_LIBRARY_LOCATION}/libboost_system.a" FORCE)
-    pr_set_raw_library_path(boost_thread "${DEPENDENCY_BOOST_LIBRARY_LOCATION}/libboost_thread.a" FORCE)
-endif()
 
 message("Processing external libraries...")
 add_subdirectory(external_libs)
@@ -255,7 +227,7 @@ pr_install_files("${DEPENDENCY_ICU_ICUUC_BINARY}" "${DEPENDENCY_ICU_ICUDT_BINARY
 
 pr_install_component("core")
 message("Installing core components...")
-include("Install.cmake")
+pr_include_install(".")
 
 # Modules
 file(GLOB PR_MODULES "modules/pr_*")
@@ -270,7 +242,7 @@ foreach(MODULE_PATH ${PR_MODULES})
         if(EXISTS "${MODULE_PATH}/Install.cmake")
             message("Running install script for module '${MODULE_PATH}'...")
 	        pr_install_component(${MODULE_NAME})
-            include("${MODULE_PATH}/Install.cmake" OPTIONAL)
+            pr_include_install("${MODULE_PATH}")
         else()
             # Default behavior
             message("Adding default installation rule for module \"${MODULE_PATH}\": \"${PR_MODULE_PATH_WITH_EXT}\" to \"${CMAKE_INSTALL_PREFIX}/modules/\"...")
@@ -280,6 +252,7 @@ foreach(MODULE_PATH ${PR_MODULES})
                 COMMAND ${CMAKE_COMMAND} -DInstallSrc=${PR_MODULE_PATH_WITH_EXT} -DInstallDst=\"${CMAKE_INSTALL_PREFIX}/modules/\" -P
                         ${CMAKE_CURRENT_SOURCE_DIR}/build_scripts/cmake/install_file.cmake
                 COMMENT "Copying ${PR_MODULE_PATH_WITH_EXT} to ${CMAKE_INSTALL_PREFIX}/modules/...")
+            pr_include_cmake_modules("${MODULE_PATH}")
         endif()
     endif()
 endforeach()
@@ -291,7 +264,7 @@ foreach(MODULE_PATH ${PR_MODULES})
     if(EXISTS "${MODULE_PATH}/Install.cmake")
         message("Running install script for tool '${MODULE_PATH}'...")
 	    pr_install_component(${MODULE_NAME})
-        include("${MODULE_PATH}/Install.cmake" OPTIONAL)
+        pr_include_install("${MODULE_PATH}")
     endif()
 endforeach()
 

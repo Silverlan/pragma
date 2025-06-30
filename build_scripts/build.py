@@ -304,7 +304,8 @@ def execscript(filepath):
 		
 		"cmake_args": cmake_args,
 
-		"with_swiftshader": with_swiftshader
+		"with_swiftshader": with_swiftshader,
+		"build_swiftshader": build_swiftshader
 	}
 	if platform == "linux":
 		l["c_compiler"] = c_compiler
@@ -479,7 +480,13 @@ def execbuildscript(filepath):
 	global deps_dir
 	global install_dir
 	global tools
+	global copy_files
+	global copy_prebuilt_binaries
 	global copy_prebuilt_headers
+	global copy_prebuilt_directory
+	global get_library_include_dir
+	global get_library_root_dir
+	global get_library_lib_dir
 
 	curDir = os.getcwd()
 
@@ -504,8 +511,10 @@ def execbuildscript(filepath):
 		"modules_bin_dir": modules_bin_dir,
 		"third_party_libs_bin_dir": third_party_libs_bin_dir,
 
+		"copy_files": copy_files,
 		"copy_prebuilt_binaries": copy_prebuilt_binaries,
 		"copy_prebuilt_headers": copy_prebuilt_headers,
+		"copy_prebuilt_directory": copy_prebuilt_directory,
 		"get_library_include_dir": get_library_include_dir,
 		"get_library_root_dir": get_library_root_dir,
 		"get_library_lib_dir": get_library_lib_dir,
@@ -595,7 +604,7 @@ execfile(scripts_dir +"/user_modules.py",g,l)
 if with_essential_client_modules:
 	add_pragma_module(
 		name="pr_prosper_vulkan",
-		commitSha="354e9384d55a13954ef8b8ddbdb435ccf640a714",
+		commitSha="055bcb806066993bcd8654beb6734ebfd5bcc831",
 		repositoryUrl="https://github.com/Silverlan/pr_prosper_vulkan.git"
 	)
 
@@ -628,7 +637,7 @@ if with_pfm:
 	if with_core_pfm_modules or with_all_pfm_modules:
 		add_pragma_module(
 			name="pr_curl",
-			commitSha="974c67cc76710809a9595fcfbc4167554799cd7f",
+			commitSha="bb814eb232b9724720e2317d1e19bf5803fab48c",
 			repositoryUrl="https://github.com/Silverlan/pr_curl.git"
 		)
 		add_pragma_module(
@@ -639,12 +648,12 @@ if with_pfm:
 	if with_all_pfm_modules:
 		add_pragma_module(
 			name="pr_chromium",
-			commitSha="c5520b461825bbecd26d674fa708d62414303314",
+			commitSha="e04e86f1b288b32b9750497171680777c9a5acf9",
 			repositoryUrl="https://github.com/Silverlan/pr_chromium.git"
 		)
 		add_pragma_module(
 			name="pr_unirender",
-			commitSha="ad367b5b0ab4333c9cbda7b0b09bdd8a69ecdabb",
+			commitSha="74943b15e0557d9c479a6908a3054463151c8ec0",
 			repositoryUrl="https://github.com/Silverlan/pr_cycles.git"
 		)
 		add_pragma_module(
@@ -659,7 +668,7 @@ if with_pfm:
 		)
 		add_pragma_module(
 			name="pr_opencv",
-			commitSha="6d026734d62440366e892c7c156f6ba14e4e4497",
+			commitSha="0fea1aafe829028373841bfe7cc3105ea9bb2d40",
 			repositoryUrl="https://github.com/Silverlan/pr_opencv.git"
 		)
 
@@ -673,7 +682,7 @@ if with_pfm:
 if with_vr:
 	add_pragma_module(
 		name="pr_openvr",
-		commitSha="e04b16f6349abde8f7a2892dd870a7701c11d70a",
+		commitSha="708ae9fe72c28d1a76b065473f96cbdc57eb385f",
 		repositoryUrl="https://github.com/Silverlan/pr_openvr.git"
 	)
 
@@ -798,6 +807,8 @@ if len(vtune_include_path) > 0 or len(vtune_library_path) > 0:
 		raise argparse.ArgumentError(None,"Both the --vtune-include-path and --vtune-library-path options have to be specified to enable VTune support!")
 
 cmake_args += additional_cmake_args
+cmake_args.append("-DCMAKE_POLICY_VERSION_MINIMUM=4.0")
+cmake_args.append("-DPRAGMA_DEPS_DIR=" +config.deps_dir +"/" +config.deps_staging_dir)
 cmake_configure_def_toolset(root,generator,cmake_args)
 
 print_msg("Build files have been written to \"" +build_dir +"\".")
@@ -813,28 +824,6 @@ if platform == "win32":
 	cp(libzip_root +"/build/zipconf.h",root +"/external_libs/util_zip/include")
 	os.chdir(curDir)
 	#
-
-# 7z binaries (required for bit7z)
-os.chdir(deps_dir)
-sevenz_root = normalize_path(os.getcwd() +"/7z-lib")
-if platform == "win32":
-	if not Path(sevenz_root).is_dir():
-		print_msg("7z-lib not found. Downloading...")
-		git_clone("https://github.com/Silverlan/7z-lib.git")
-	os.chdir("7z-lib")
-	reset_to_commit("1a9ec9a")
-	cp(sevenz_root +"/win-x64/7z.dll",install_dir +"/bin/")
-else:
-	if not Path(sevenz_root).is_dir():
-		print_msg("7z-lib not found. Downloading...")
-		mkdir("7z-lib",cd=True)
-		http_extract("https://7-zip.org/a/7z2408-src.tar.xz",format="tar.xz")
-	os.chdir(sevenz_root)
-	sevenz_so_path = sevenz_root +"/CPP/7zip/Bundles/Format7zF"
-	os.chdir(sevenz_so_path)
-	subprocess.run(["make","-j","-f","../../cmpl_gcc.mak"],check=True)
-	mkpath(install_dir +"/lib")
-	cp(sevenz_so_path +"/b/g/7z.so",install_dir +"/lib/7z.so")
 
 ########## Lua Extensions ##########
 lua_ext_dir = deps_dir +"/lua_extensions"

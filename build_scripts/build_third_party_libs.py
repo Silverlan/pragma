@@ -19,7 +19,7 @@ os.chdir(deps_dir)
 # TODO: Add input variable
 build_config_tp = "Release"
 
-config.prebuilt_bin_dir = deps_dir +"/binaries"
+config.prebuilt_bin_dir = deps_dir +"/" +config.deps_staging_dir
 mkpath(config.prebuilt_bin_dir)
 os.chdir(config.prebuilt_bin_dir)
 
@@ -105,6 +105,7 @@ os.chdir(deps_dir)
 
 libzip_lib_path = copy_prebuilt_binaries(libzip_root +"/build/lib/" +build_config_tp +"/", "libzip")
 copy_prebuilt_headers(libzip_root +"/lib/", "libzip")
+copy_prebuilt_headers(libzip_root +"/build/", "libzip")
 
 ########## libpng ##########
 # Download
@@ -212,12 +213,22 @@ for path in glob.glob(boost_root +"/libs/*"):
 	if os.path.isdir(include_dir):
 		copy_prebuilt_headers(include_dir, "boost")
 
+copy_prebuilt_headers(headers_extract_dir, "boost")
+
+boost_cmake_dir = get_library_root_dir("boost") +"cmake"
+mkdir(boost_cmake_dir,cd=True)
+copy_prebuilt_directory(boost_root +"/build/tmpinst/", dest_dir=boost_cmake_dir +"/")
+copy_prebuilt_directory(boost_root +"/build/export/", dest_dir=boost_cmake_dir +"/")
+shutil.copy2(boost_root +"/tools/cmake/config/BoostConfig.cmake", boost_cmake_dir +"/")
+
 ########## LuaJIT ##########
 print_msg("Building LuaJIT...")
+luajit_root = root +"/third_party_libs/luajit/"
+lua_jit_lib_dir = luajit_root +"src/"
 if platform == "linux":
 	os.chdir(root +"/third_party_libs/luajit/src")
 	subprocess.run(["make","amalg","BUILDMODE=dynamic"],check=True)
-	lua_jit_lib = normalize_path(root +"/third_party_libs/luajit/src/libluajit-p.so")
+	lua_jit_lib = normalize_path(lua_jit_lib_dir +"libluajit-p.so")
 else:
 	#devcmd_path = determine_vsdevcmd_path(deps_dir)
 	os.chdir(root +"/third_party_libs/luajit/src")
@@ -233,7 +244,7 @@ else:
 	
 	subprocess.check_call( [luajit_build_script_wrapper] )
 	#subprocess.run([devcmd_path+" -no_logo & msvcbuild.bat"],check=True)    
-	lua_jit_lib = normalize_path(root +"/third_party_libs/luajit/src/lua51.lib")
+	lua_jit_lib = normalize_path(lua_jit_lib_dir +"lua51.lib")
 	# os.chdir(deps_dir)
 	# mkdir("luajit_build")
 	# os.chdir("luajit_build")
@@ -241,6 +252,8 @@ else:
 	# cmake_build("Release")
     
 	# lua_jit_lib = normalize_path(deps_dir +"/luajit_build/src/Release/luajit.lib")
+copy_prebuilt_binaries(lua_jit_lib_dir, "luajit")
+copy_prebuilt_headers(luajit_root +"src/", "luajit")
 
 ########## GeometricTools ##########
 os.chdir(deps_dir)
@@ -252,7 +265,7 @@ os.chdir("GeometricTools")
 reset_to_commit("bd7a27d18ac9f31641b4e1246764fe30816fae74")
 os.chdir("../../")
 
-copy_prebuilt_headers(geometric_tools_root, "geometrictools")
+copy_prebuilt_headers(geometric_tools_root +"/GTE", "geometrictools")
 
 ########## OpenCV ##########
 os.chdir(deps_dir)
@@ -272,7 +285,12 @@ cmake_build("Release",["opencv_imgproc","opencv_imgcodecs"])
 
 lib_dir = opencv_root +"/build"
 copy_prebuilt_binaries(lib_dir +"/lib/" +build_config_tp, "opencv")
-inc_dir = copy_prebuilt_headers(opencv_root +"/include", "opencv")
+copy_prebuilt_headers(opencv_root +"/include", "opencv")
+copy_prebuilt_headers(lib_dir, "opencv")
+
+opencv_modules = ["video", "stitching",  "photo",  "objdetect",  "ml",  "imgproc",  "videoio",  "imgcodecs",  "highgui",  "dnn",  "flann",  "features2d",  "calib3d",  "core"]
+for module in opencv_modules:
+    copy_prebuilt_headers(opencv_root +"/modules/" +module +"/include", "opencv")
 
 ########## SPIRV-Tools ##########
 print_msg("Downloading SPIRV-Tools...")
@@ -378,6 +396,28 @@ else:
 
 lib_dir = copy_prebuilt_binaries(bit7z_root +"/lib/x64/Release/", "bit7z")
 inc_dir = copy_prebuilt_headers(bit7z_root +"/include/", "bit7z")
+
+# 7z binaries (required for bit7z)
+os.chdir(deps_dir)
+sevenz_root = normalize_path(os.getcwd() +"/7z-lib")
+if platform == "win32":
+	if not Path(sevenz_root).is_dir():
+		print_msg("7z-lib not found. Downloading...")
+		git_clone("https://github.com/Silverlan/7z-lib.git")
+	os.chdir("7z-lib")
+	reset_to_commit("1a9ec9a")
+	copy_prebuilt_binaries(sevenz_root +"/win-x64/", "7z")
+else:
+	if not Path(sevenz_root).is_dir():
+		print_msg("7z-lib not found. Downloading...")
+		mkdir("7z-lib",cd=True)
+		http_extract("https://7-zip.org/a/7z2408-src.tar.xz",format="tar.xz")
+	os.chdir(sevenz_root)
+	sevenz_so_path = sevenz_root +"/CPP/7zip/Bundles/Format7zF"
+	os.chdir(sevenz_so_path)
+	subprocess.run(["make","-j","-f","../../cmpl_gcc.mak"],check=True)
+	mkpath(install_dir +"/lib")
+	copy_prebuilt_binaries(sevenz_so_path +"/b/g/", "7z")
 
 ########## cpptrace ##########
 os.chdir(deps_dir)

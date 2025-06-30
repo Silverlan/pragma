@@ -13,24 +13,55 @@ endif()
 
 if(UNIX)
     if(ENABLE_ISPC_TEXTURE_COMPRESSOR)
-        pr_install_binary(ispctc LIN "libispc_texcomp.so" INSTALL_DIR "${INSTALL_PATH}")
+        pr_install_binaries(ispctc)
     endif()
 
     # libdecor
-    pr_install_files("${LIBDECOR_BUILD_DIR}/src/libdecor-0.so" INSTALL_DIR "${INSTALL_PATH}")
-    pr_install_directory("${LIBDECOR_BUILD_DIR}/src/plugins/" INSTALL_DIR "modules/graphics/vulkan/libdecor/")
+    find_package(libdecor REQUIRED)
+    pr_install_binaries(libdecor)
+    pr_install_directory("${libdecor_PLUGIN_DIR}" INSTALL_DIR "modules/graphics/vulkan/libdecor/")
 endif()
 
 # libzip
-pr_install_binary(libzip LIN "libzip.so" WIN "zip.dll" INSTALL_DIR "${INSTALL_PATH}")
+pr_install_binaries(libzip)
 
 # swiftshader
-pr_install_binary(swiftshader LIN "libvulkan.so.1" WIN "vulkan-1.dll" INSTALL_DIR "modules/swiftshader/")
+find_package(swiftshader)
+if(swiftshader_FOUND)
+    pr_install_binaries(swiftshader INSTALL_DIR "modules/swiftshader/")
+endif()
 
 # 7zip
 if(WIN32)
     pr_install_binary(7zip WIN "7zip.dll" INSTALL_DIR "${INSTALL_PATH}")
 endif()
 
+# 7z (required for bit7z)
+find_package(7z REQUIRED)
+pr_install_binaries(7z)
+
 # cpptrace
-pr_install_binary(cpptrace LIN "libcpptrace.so" WIN "cpptrace.dll" INSTALL_DIR "${INSTALL_PATH}")
+pr_install_binaries(cpptrace)
+
+pr_install_binaries(icu)
+
+if(TARGET util_ocio)
+    list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/external_libs/util_ocio/cmake/modules")
+    pr_install_binaries(opencolorio)
+    pr_install_binaries(openimageio)
+endif()
+
+if(TARGET util_raytracing)
+    list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/external_libs/util_raytracing/cmake/modules")
+    pr_install_binaries(openimagedenoise)
+    pr_install_binaries(openimagedenoise_device PACKAGE openimagedenoise)
+    pr_install_binaries(opensubdiv)
+endif()
+
+if(TARGET render_raytracing)
+    list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/tools/render_raytracing/cmake/modules")
+    pr_install_binaries(imath)
+    pr_install_binaries(openexr)
+    pr_install_binaries(tbb)
+    pr_install_binaries(boost_rt)
+endif()

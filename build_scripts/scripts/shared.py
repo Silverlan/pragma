@@ -94,8 +94,21 @@ def cmake_configure(scriptPath,generator,toolsetArgs=None,additionalArgs=[],cfla
 	if toolsetArgs:
 		args += toolsetArgs
 	args += additionalArgs
-	print("Running CMake configure command...")
-	# print("Running CMake configure command:", ' '.join(f'"{arg}"' for arg in args))
+	# print("Running CMake configure command...")
+
+	def _quote(arg: str) -> str:
+		# Handle -DKEY=VALUE specially
+		if arg.startswith("-D") and "=" in arg:
+			key, val = arg.split("=", 1)
+			if " " in val:
+				val = f'"{val}"'
+			return f"{key}={val}"
+		# Otherwise, only quote if there's whitespace
+		return f'"{arg}"' if " " in arg else arg
+
+	cmd = shlex.join(args)
+	print("Running CMake configure command:", cmd)
+
 	try:
 		subprocess.run(args,check=True)
 	except subprocess.CalledProcessError as e:
@@ -455,19 +468,38 @@ def copy_prebuilt_binaries(source_dir, lib_name, exclude_terms=None):
 		include_patterns = ["*.a", "*.so*"]
 	lib_dir = config.prebuilt_bin_dir +"/" +lib_name +"/lib/"
 	copy_files(include_patterns, source_dir, config.prebuilt_bin_dir +"/" +lib_name +"/lib/", exclude_terms)
-	config.cmake_args += ["-DDEPENDENCY_" +lib_name.upper() +"_LIB_DIR=" +lib_dir]
 	return lib_dir
 
 def copy_prebuilt_headers(source_dir, lib_name, exclude_terms=None):
 	global config
 	include_dir = config.prebuilt_bin_dir +"/" +lib_name +"/include/"
-	copy_files(["*.h", "*.hpp"], source_dir, include_dir, exclude_terms)
-	config.cmake_args += ["-DDEPENDENCY_" +lib_name.upper() +"_INCLUDE=" +include_dir]
+	copy_files(["*.h", "*.hpp", "*.ipp"], source_dir, include_dir, exclude_terms)
 	return include_dir
+
+def copy_prebuilt_directory(source_dir, lib_name=None, exclude_terms=None, dest_dir=None):
+	if dest_dir == None:
+		dest_dir = get_library_root_dir(lib_name)
+	# dirs_exist_ok is only available in python 3.8, so we'll use
+	# rsync/robocopy for now instead
+	# shutil.copytree(source_dir, dest_dir, dirs_exist_ok=True, symlinks=True)
+	mkpath(dest_dir)
+	if platform == "win32":
+		subprocess.run([
+			"robocopy",
+			f"{source_dir.rstrip(os.sep)}/",
+			f"{dest_dir.rstrip(os.sep)}/",
+			"/MIR"
+		], check=True)
+	else:
+		subprocess.run([
+			"rsync", "-a", "--links",
+			f"{source_dir.rstrip(os.sep)}/",
+			f"{dest_dir.rstrip(os.sep)}/",
+		], check=True)
 
 def get_library_root_dir(lib_name):
 	global config
-	return config.deps_dir +"/binaries/" +lib_name +"/"
+	return config.deps_dir +"/" +config.deps_staging_dir +"/" +lib_name +"/"
 
 def get_library_include_dir(lib_name):
 	return get_library_root_dir(lib_name) +"include/"

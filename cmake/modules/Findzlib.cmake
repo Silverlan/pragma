@@ -22,9 +22,19 @@ find_library(${PCK}_LIBRARY
 
 set(CMAKE_FIND_LIBRARY_SUFFIXES ${_old_suffixes})
 
+set(REQ_VARS ${PCK}_LIBRARY ${PCK}_INCLUDE_DIR)
+if(WIN32)
+  find_file(
+    ${PCK}_RUNTIME
+    NAMES z.dll
+    HINTS ${PRAGMA_DEPS_DIR}/zlib/bin
+  )
+  set(REQ_VARS ${REQ_VARS} ${PCK}_RUNTIME)
+endif()
+
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(${PCK}
-  REQUIRED_VARS ${PCK}_LIBRARY ${PCK}_INCLUDE_DIR
+  REQUIRED_VARS ${REQ_VARS}
 )
 
 if(${PCK}_FOUND)

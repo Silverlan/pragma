@@ -129,6 +129,7 @@ os.chdir(deps_dir)
 
 libpng_lib_path = copy_prebuilt_binaries(libpng_root +"/build/" +build_config_tp +"/", "libpng")
 copy_prebuilt_headers(libpng_root, "libpng")
+copy_prebuilt_headers(libpng_root +"/build/", "libpng")
 
 ########## icu ##########
 # Download
@@ -497,10 +498,10 @@ if platform == "win32":
 	print_msg("Downloading freetype...")
 	os.chdir(deps_dir)
 	if not Path(os.getcwd()+"/freetype").is_dir():
-		git_clone("https://github.com/freetype/freetype")
+		git_clone("https://github.com/aseprite/freetype2.git", directory="freetype")
 	freetype_root = deps_dir+"/freetype"
 	os.chdir("freetype")
-	subprocess.run(["git","reset","--hard","42608f77"],check=True)
+	subprocess.run(["git","reset","--hard","e8ebfe988b5f57bfb9a3ecb13c70d9791bce9ecf"],check=True)
 	mkdir("build",cd=True)
 	deps_dir_fs = deps_dir.replace("\\", "/")
 	freetype_cmake_args =[

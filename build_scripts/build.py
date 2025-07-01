@@ -667,7 +667,7 @@ if with_pfm:
 		)
 		add_pragma_module(
 			name="pr_unirender",
-			commitSha="69cbb48682e3ef2b3217dac58ceb517d1488458d",
+			commitSha="c18eac4ffdceb28b9c45f2c35b20acd01633f23e",
 			repositoryUrl="https://github.com/Silverlan/pr_cycles.git"
 		)
 		add_pragma_module(
@@ -826,18 +826,6 @@ cmake_args.append("-DPRAGMA_DEPS_DIR=" +config.deps_dir +"/" +config.deps_stagin
 cmake_configure_def_toolset(root,generator,cmake_args)
 
 print_msg("Build files have been written to \"" +build_dir +"\".")
-
-if platform == "win32":
-	# Hack: zlib is using a configured header which is generated during the configuration step.
-	# Unfortunately this header is in a different location than the regular header files, which causes
-	# a lot of issues, so we'll copy it over to where we need it.
-	# TODO: Implement a proper solution for this
-	curDir = os.getcwd()
-	os.chdir(zlib_build_dir)
-	cp("zconf.h",libzip_root +"/lib/")
-	cp(libzip_root +"/build/zipconf.h",root +"/external_libs/util_zip/include")
-	os.chdir(curDir)
-	#
 
 ########## Lua Extensions ##########
 lua_ext_dir = deps_dir +"/lua_extensions"

@@ -502,7 +502,7 @@ def copy_prebuilt_directory(source_dir, lib_name=None, exclude_terms=None, dest_
 			"robocopy",
 			f"{source_dir.rstrip(os.sep)}/",
 			f"{dest_dir.rstrip(os.sep)}/",
-			"/MIR"
+			"/E", "/IS", "/IT"
 		], capture_output=True)
 		if result.returncode >= 8:
 			raise RuntimeError(f"Robocopy failed: {result.returncode}")

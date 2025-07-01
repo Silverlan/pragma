@@ -22,7 +22,7 @@ if(WIN32)
     ${PCK}_RUNTIME
     NAMES zip.dll
     HINTS
-      ${PRAGMA_DEPS_DIR}/libzip/lib
+      ${PRAGMA_DEPS_DIR}/libzip/bin
   )
   set(REQ_VARS ${REQ_VARS} ${PCK}_RUNTIME)
 endif()

@@ -22,6 +22,8 @@ if(UNIX)
     pr_install_directory("${libdecor_PLUGIN_DIR}" INSTALL_DIR "modules/graphics/vulkan/libdecor/")
 endif()
 
+pr_install_binaries(luajit)
+
 # libzip
 pr_install_binaries(libzip)
 
@@ -55,5 +57,7 @@ if(TARGET util_raytracing)
     list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/external_libs/util_raytracing/cmake/modules")
     pr_install_binaries(openimagedenoise)
     pr_install_binaries(openimagedenoise_device PACKAGE openimagedenoise)
-    pr_install_binaries(opensubdiv)
+    if(UNIX)
+        pr_install_binaries(opensubdiv)
+    endif()
 endif()

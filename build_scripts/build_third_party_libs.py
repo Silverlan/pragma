@@ -502,6 +502,7 @@ if platform == "win32":
 	os.chdir("freetype")
 	subprocess.run(["git","reset","--hard","42608f77"],check=True)
 	mkdir("build",cd=True)
+	deps_dir_fs = deps_dir.replace("\\", "/")
 	freetype_cmake_args =[
 		"-DCMAKE_MODULE_PATH="+deps_dir_fs+"/zlib_prefix",
 		"-DCMAKE_PREFIX_PATH="+deps_dir_fs+"/zlib_prefix"

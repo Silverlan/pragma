@@ -457,6 +457,20 @@ def _copy_entry(src_path, dst_path, source_dir, dest_dir):
     else:
         shutil.copy2(src_path, dst_path)
 
+def move_dll_files(src: str, dst: str) -> None:
+    src = os.path.abspath(src)
+    dst = os.path.abspath(dst)
+
+    for root, dirs, files in os.walk(src):
+        rel_path = os.path.relpath(root, src)
+        for file in files:
+            if file.lower().endswith('.dll'):
+                src_file_path = os.path.join(root, file)
+                dest_dir_path = os.path.join(dst, rel_path)
+                os.makedirs(dest_dir_path, exist_ok=True)
+                dst_file_path = os.path.join(dest_dir_path, file)
+                print(f"Moving: {src_file_path} -> {dst_file_path}")
+                shutil.move(src_file_path, dst_file_path)
 
 def copy_prebuilt_binaries(source_dir, lib_name, exclude_terms=None):
 	global config
@@ -465,7 +479,9 @@ def copy_prebuilt_binaries(source_dir, lib_name, exclude_terms=None):
 	else:
 		include_patterns = ["*.a", "*.so*"]
 	lib_dir = config.prebuilt_bin_dir +"/" +lib_name +"/lib/"
-	copy_files(include_patterns, source_dir, config.prebuilt_bin_dir +"/" +lib_name +"/lib/", exclude_terms)
+	dst_dir = config.prebuilt_bin_dir +"/" +lib_name +"/lib/"
+	copy_files(include_patterns, source_dir, dst_dir, exclude_terms)
+	move_dll_files(dst_dir, config.prebuilt_bin_dir +"/" +lib_name +"/bin/")
 	return lib_dir
 
 def copy_prebuilt_headers(source_dir, lib_name, exclude_terms=None):
@@ -482,12 +498,14 @@ def copy_prebuilt_directory(source_dir, lib_name=None, exclude_terms=None, dest_
 	# shutil.copytree(source_dir, dest_dir, dirs_exist_ok=True, symlinks=True)
 	mkpath(dest_dir)
 	if platform == "win32":
-		subprocess.run([
+		result = subprocess.run([
 			"robocopy",
 			f"{source_dir.rstrip(os.sep)}/",
 			f"{dest_dir.rstrip(os.sep)}/",
 			"/MIR"
-		], check=True)
+		], capture_output=True)
+		if result.returncode >= 8:
+			raise RuntimeError(f"Robocopy failed: {result.returncode}")
 	else:
 		subprocess.run([
 			"rsync", "-a", "--links",

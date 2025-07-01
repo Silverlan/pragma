@@ -11,7 +11,7 @@ find_path(${PCK}_INCLUDE_DIR
 )
 
 find_library(${PCK}_LIBRARY
-  NAMES vulkan
+  NAMES vulkan vulkan-1
   HINTS
     ${PRAGMA_DEPS_DIR}/vulkan/lib
 )

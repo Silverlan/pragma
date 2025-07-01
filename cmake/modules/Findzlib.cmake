@@ -30,4 +30,7 @@ find_package_handle_standard_args(${PCK}
 if(${PCK}_FOUND)
   set(${PCK}_LIBRARIES   ${${PCK}_LIBRARY})
   set(${PCK}_INCLUDE_DIRS ${${PCK}_INCLUDE_DIR})
+
+  set(ZLIB_INCLUDE_DIRS ${${PCK}_INCLUDE_DIRS})
+  set(ZLIB_LIBRARIES ${${PCK}_LIBRARY})
 endif()

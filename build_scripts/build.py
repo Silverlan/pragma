@@ -662,12 +662,12 @@ if with_pfm:
 	if with_all_pfm_modules:
 		add_pragma_module(
 			name="pr_chromium",
-			commitSha="e04e86f1b288b32b9750497171680777c9a5acf9",
+			commitSha="443d5908f4a5b8805e29c279414b182b72ce42d5",
 			repositoryUrl="https://github.com/Silverlan/pr_chromium.git"
 		)
 		add_pragma_module(
 			name="pr_unirender",
-			commitSha="78842baf174638ae238780bdfab2ebc6666d924c",
+			commitSha="69cbb48682e3ef2b3217dac58ceb517d1488458d",
 			repositoryUrl="https://github.com/Silverlan/pr_cycles.git"
 		)
 		add_pragma_module(
@@ -682,21 +682,21 @@ if with_pfm:
 		)
 		add_pragma_module(
 			name="pr_opencv",
-			commitSha="0fea1aafe829028373841bfe7cc3105ea9bb2d40",
+			commitSha="ea92e0d28700fa414c70bfdb43edc7984f77a869",
 			repositoryUrl="https://github.com/Silverlan/pr_opencv.git"
 		)
 
 if with_pfm:
 	add_pragma_module(
 		name="pr_git",
-		commitSha="08b2d74f2c8641f791936a868d562e61423cc040",
+		commitSha="3f012233c6e3bad6a2bf9deb164159abe9b73986",
 		repositoryUrl="https://github.com/Silverlan/pr_git.git"
 	)
 
 if with_vr:
 	add_pragma_module(
 		name="pr_openvr",
-		commitSha="708ae9fe72c28d1a76b065473f96cbdc57eb385f",
+		commitSha="2e9547d42a8a1265d79e5656cc52cc723c14cb6e",
 		repositoryUrl="https://github.com/Silverlan/pr_openvr.git"
 	)
 

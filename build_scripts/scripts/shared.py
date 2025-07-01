@@ -495,9 +495,12 @@ def copy_prebuilt_directory(source_dir, lib_name=None, exclude_terms=None, dest_
 			f"{dest_dir.rstrip(os.sep)}/",
 		], check=True)
 
-def get_library_root_dir(lib_name):
+def get_staging_dir():
 	global config
-	return config.deps_dir +"/" +config.deps_staging_dir +"/" +lib_name +"/"
+	return config.deps_dir +"/" +config.deps_staging_dir +"/"
+
+def get_library_root_dir(lib_name):
+	return get_staging_dir() +lib_name +"/"
 
 def get_library_include_dir(lib_name):
 	return get_library_root_dir(lib_name) +"include/"

@@ -497,6 +497,7 @@ def execbuildscript(filepath):
 	global copy_prebuilt_headers
 	global copy_prebuilt_directory
 	global get_library_include_dir
+	global get_staging_dir
 	global get_library_root_dir
 	global get_library_lib_dir
 
@@ -528,6 +529,7 @@ def execbuildscript(filepath):
 		"copy_prebuilt_headers": copy_prebuilt_headers,
 		"copy_prebuilt_directory": copy_prebuilt_directory,
 		"get_library_include_dir": get_library_include_dir,
+		"get_staging_dir": get_staging_dir,
 		"get_library_root_dir": get_library_root_dir,
 		"get_library_lib_dir": get_library_lib_dir,
 
@@ -665,7 +667,7 @@ if with_pfm:
 		)
 		add_pragma_module(
 			name="pr_unirender",
-			commitSha="7cc51604439432fb18d2713567d00dfa9359a450",
+			commitSha="78842baf174638ae238780bdfab2ebc6666d924c",
 			repositoryUrl="https://github.com/Silverlan/pr_cycles.git"
 		)
 		add_pragma_module(

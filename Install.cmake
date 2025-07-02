@@ -2,6 +2,7 @@ set(INSTALL_PATH "${BINARY_OUTPUT_DIR}")
 
 if(UNIX)
     if(ENABLE_ISPC_TEXTURE_COMPRESSOR)
+        list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/external_libs/util_image/cmake/modules")
         pr_install_binaries(ispctc)
     endif()
 

@@ -118,6 +118,7 @@ function(pr_install_targets)
             install(
                 PROGRAMS
                 $<TARGET_FILE:${TARGET}>
+                OPTIONAL
                 DESTINATION "${PA_INSTALL_DIR}"
                 COMPONENT ${part}
             )
@@ -127,6 +128,7 @@ function(pr_install_targets)
             message("Adding install rule for target \"${TARGET}\" (\"${FILE_PATH}\") to \"${PA_INSTALL_DIR}\"...")
             install(
                 FILES "${FILE_PATH}"
+                OPTIONAL
                 DESTINATION "${PA_INSTALL_DIR}"
                 COMPONENT ${part})
             if(UNIX)
@@ -134,6 +136,7 @@ function(pr_install_targets)
                     TARGETS "${TARGET}"
                     RUNTIME DESTINATION "${PA_INSTALL_DIR}"
                     LIBRARY DESTINATION "${PA_INSTALL_DIR}"
+                    OPTIONAL
                     COMPONENT ${part})
             endif()
         endif()

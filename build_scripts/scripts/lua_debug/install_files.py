@@ -6,7 +6,7 @@ import shutil
 from sys import platform
 
 deps_dir = sys.argv[1]
-install_dir = sys.argv[2]
+install_dir = sys.argv[2] +"/staging"
 
 luadebug_dir = deps_dir +"/lua-debug" 
 

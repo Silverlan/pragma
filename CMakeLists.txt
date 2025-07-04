@@ -38,6 +38,7 @@ find_package(icu REQUIRED)
 find_package(libpng REQUIRED)
 find_package(libzip REQUIRED)
 find_package(luajit REQUIRED)
+find_package(lua_debugger REQUIRED)
 find_package(zlib REQUIRED)
 #
 
@@ -215,12 +216,6 @@ pr_install_targets(
     lunasvg
     plutovg
     efsw)
-
-if(WIN32)
-    pr_install_files("${CMAKE_CURRENT_LIST_DIR}/third_party_libs/luajit/src/lua51.dll")
-else()
-    pr_install_files("${CMAKE_CURRENT_LIST_DIR}/third_party_libs/luajit/src/libluajit-p.so")
-endif()
 
 pr_install_files("${DEPENDENCY_ICU_ICUUC_BINARY}" "${DEPENDENCY_ICU_ICUDT_BINARY}")
 

@@ -12,6 +12,11 @@ from scripts.shared import *
 
 parser = argparse.ArgumentParser(description='Pragma build script', allow_abbrev=False, formatter_class=argparse.ArgumentDefaultsHelpFormatter, epilog="")
 
+###### Config section
+# When using prebuilt binaries this commit will be used for the download from https://github.com/Silverlan/pragma-deps-lib
+prebuilt_commit_sha = "f845f84"
+######
+
 # See https://stackoverflow.com/a/43357954/1879228 for boolean args
 if platform == "linux":
 	parser.add_argument('--c-compiler', help='The C-compiler to use.', default='clang-20')
@@ -222,28 +227,73 @@ mkpath(deps_dir)
 mkpath(install_dir)
 mkpath(tools)
 
+config.prebuilt_bin_dir = deps_dir +"/" +config.deps_staging_dir
+
+# Use prebuilt binaries if --build-all is not set
+if build_all == False:
+    def is_commit_current(base_path: str, commit_id: str, filename: str = "commit_id.txt") -> bool:
+        target_file = Path(base_path) / filename
+        if not target_file.exists():
+            return False
+        try:
+            return target_file.read_text(encoding="utf-8").strip() == commit_id
+        except Exception:
+            return False
+
+
+    def update_commit_directory(base_path: str, commit_id: str, filename: str = "commit_id.txt") -> None:
+        base = Path(base_path)
+        if base.exists():
+            print(f"Removing directory '{base}'...")
+            shutil.rmtree(base)
+
+        print(f"Creating directory '{base}'...")
+        base.mkdir(parents=True, exist_ok=True)
+
+        target_file = base / filename
+        print(f"Writing commit ID to '{target_file}'...")
+        target_file.write_text(commit_id, encoding="utf-8")
+
+    base_path = get_staging_dir()
+    if not is_commit_current(base_path, prebuilt_commit_sha, "commit_id.txt"):
+        update_commit_directory(base_path, prebuilt_commit_sha, "commit_id.txt")
+        os.chdir(base_path)
+
+        print_msg("Downloading prebuilt third-party binaries...")
+
+        if platform == "linux":
+            prebuilt_archive_name = "lib-linux_x64.tar.gz"
+            prebuilt_archive_format = "tar.gz"
+        else:
+            prebuilt_archive_name = "lib-windows_x64.zip"
+            prebuilt_archive_format = "zip"
+
+        http_extract("https://github.com/Silverlan/pragma-deps-lib/releases/download/" +prebuilt_commit_sha +"/" +prebuilt_archive_name,format=prebuilt_archive_format)
+    else:
+        print(f"Directory '{base_path}' is already up-to-date.")
+
 ########## clang-20 ##########
 # Due to a compiler bug with C++20 Modules in clang, we have to use clang-20 for now,
 # which is not available in package managers yet.
 if platform == "linux" and (c_compiler == "clang-20" or c_compiler == "clang++-20"):
-	curDir = os.getcwd()
-	os.chdir(deps_dir)
-	clang20_root = os.getcwd() +"/LLVM-20.1.6-Linux-X64"
-	if not Path(clang20_root).is_dir():
-		print_msg("Downloading clang-20...")
-		http_extract("https://github.com/llvm/llvm-project/releases/download/llvmorg-20.1.6/LLVM-20.1.6-Linux-X64.tar.xz",format="tar.xz")
-	os.chdir(curDir)
-
 	clang_staging_path = get_library_root_dir("clang")
+	if build_all:
+		curDir = os.getcwd()
+		os.chdir(deps_dir)
+		clang20_root = os.getcwd() +"/LLVM-20.1.6-Linux-X64"
+		if not Path(clang20_root).is_dir():
+			print_msg("Downloading clang-20...")
+			http_extract("https://github.com/llvm/llvm-project/releases/download/llvmorg-20.1.6/LLVM-20.1.6-Linux-X64.tar.xz",format="tar.xz")
+		os.chdir(curDir)
 
-	copy_preserving_symlink(Path(clang20_root +"/bin/clang"), Path(clang_staging_path +"/bin"))
-	copy_preserving_symlink(Path(clang20_root +"/bin/clang++"), Path(clang_staging_path +"/bin"))
-	copy_preserving_symlink(Path(clang20_root +"/bin/clang-scan-deps"), Path(clang_staging_path +"/bin"))
+		copy_preserving_symlink(Path(clang20_root +"/bin/clang"), Path(clang_staging_path +"/bin"))
+		copy_preserving_symlink(Path(clang20_root +"/bin/clang++"), Path(clang_staging_path +"/bin"))
+		copy_preserving_symlink(Path(clang20_root +"/bin/clang-scan-deps"), Path(clang_staging_path +"/bin"))
 
-	copytree(clang20_root +"/include/c++", clang_staging_path +"/include/c++")
-	copytree(clang20_root +"/include/clang", clang_staging_path +"/include/clang")
-	copytree(clang20_root +"/include/clang-c", clang_staging_path +"/include/clang-c")
-	copytree(clang20_root +"/lib/clang", clang_staging_path +"/lib/clang")
+		copytree(clang20_root +"/include/c++", clang_staging_path +"/include/c++")
+		copytree(clang20_root +"/include/clang", clang_staging_path +"/include/clang")
+		copytree(clang20_root +"/include/clang-c", clang_staging_path +"/include/clang-c")
+		copytree(clang20_root +"/lib/clang", clang_staging_path +"/lib/clang")
 
 	if c_compiler == "clang-20":
 		c_compiler = clang_staging_path +"/bin/clang"
@@ -264,6 +314,7 @@ def execscript(filepath):
 	global build_directory
 	global deps_directory
 	global install_directory
+	global scripts_dir
 	global verbose
 	global root
 	global build_dir
@@ -271,6 +322,8 @@ def execscript(filepath):
 	global install_dir
 	global tools
 	global cmake_args
+	global with_swiftshader
+	global with_lua_debugger
 
 	curDir = os.getcwd()
 
@@ -283,6 +336,7 @@ def execscript(filepath):
 		"build_directory": build_directory,
 		"deps_directory": deps_directory,
 		"install_directory": install_directory,
+		"scripts_dir": scripts_dir,
 		"verbose": verbose,
 
 		"root": root,
@@ -317,6 +371,7 @@ def execscript(filepath):
 		"cmake_args": cmake_args,
 
 		"with_swiftshader": with_swiftshader,
+		"with_lua_debugger": with_lua_debugger,
 		"build_swiftshader": build_swiftshader
 	}
 	if platform == "linux":
@@ -406,20 +461,7 @@ execscript(scripts_dir +"/scripts/modules.py")
 
 ########## Third-Party Libraries ##########
 print_msg("Building third-party libraries...")
-use_prebuild_third_party_libs = False # TODO: Input var
-# TODO: Move this to CMake script
-if use_prebuild_third_party_libs:
-	if platform == "linux":
-		prebuilt_binary_url = "https://github.com/Silverlan/pragma-lib-linux_x64.git"
-		prebuilt_commit_sha = "42f7a53aaaa4a06dddb0c1109d6c582bab60bfb0"
-	else:
-		prebuilt_binary_url = "https://github.com/Silverlan/pragma-lib-windows_x64.git"
-		prebuilt_commit_sha = "42f7a53aaaa4a06dddb0c1109d6c582bab60bfb0"
-	if not Path(prebuilt_bin_dir).is_dir():
-		git_clone(prebuilt_binary_url, prebuilt_bin_dir)
-	os.chdir(prebuilt_bin_dir)
-	reset_to_commit(prebuilt_commit_sha)
-else:
+if build_all:
 	execscript(scripts_dir +"/build_third_party_libs.py")
 
 ########## Modules ##########
@@ -618,7 +660,7 @@ execfile(scripts_dir +"/user_modules.py",g,l)
 if with_essential_client_modules:
 	add_pragma_module(
 		name="pr_prosper_vulkan",
-		commitSha="37826be12406a491050c2cc7d5a8d0a29d023fe1",
+		commitSha="c06912f556a8d56a5ca8cdb83719a4a2e5fdb764",
 		repositoryUrl="https://github.com/Silverlan/pr_prosper_vulkan.git"
 	)
 
@@ -662,12 +704,12 @@ if with_pfm:
 	if with_all_pfm_modules:
 		add_pragma_module(
 			name="pr_chromium",
-			commitSha="443d5908f4a5b8805e29c279414b182b72ce42d5",
+			commitSha="154c64aadc3fd641f0fc461675937ec1ed41b194",
 			repositoryUrl="https://github.com/Silverlan/pr_chromium.git"
 		)
 		add_pragma_module(
 			name="pr_unirender",
-			commitSha="5fcc252d8fd7217d6a63a9187a6378a0b6328197",
+			commitSha="f86e1673f13727e567bc9d38e9548fd5b53a8e60",
 			repositoryUrl="https://github.com/Silverlan/pr_cycles.git"
 		)
 		add_pragma_module(
@@ -779,38 +821,6 @@ cmake_args += [
 	"-DCMAKE_INSTALL_PREFIX:PATH=" +install_dir +""
 ]
 
-def find_boost_libs(lib_dir, components):
-    """
-    Scan lib_dir for Boost library files matching each component name.
-    Returns a dict: { component_name: absolute-path-to-library or None }.
-    """
-    lib_dir = Path(lib_dir)
-    if not lib_dir.is_dir():
-        raise ValueError(f"Boost lib directory not found: {lib_dir}")
-
-    # list all candidate files once
-    all_libs = [p for p in lib_dir.iterdir() if p.is_file()]
-
-    found = {}
-    for comp in components:
-        # regex to match boost_<component> in filename
-        pat = re.compile(rf"boost_{re.escape(comp)}", re.IGNORECASE)
-        matches = [p for p in all_libs if pat.search(p.name)]
-        if not matches:
-            found[comp] = None
-            continue
-
-        # prefer release (no "-gd" or "-debug")
-        release = [p for p in matches if not re.search(r"-g(d|d-)|debug", p.name, re.IGNORECASE)]
-        chosen = release[0] if release else matches[0]
-        found[comp] = chosen.resolve()
-    return found
-
-components = ["chrono", "date_time", "thread"]
-boost_root = get_library_include_dir("boost")
-boost_lib_dir = get_library_lib_dir("boost")
-boost_libs = find_boost_libs(boost_lib_dir, components)
-
 if len(vtune_include_path) > 0 or len(vtune_library_path) > 0:
 	if len(vtune_include_path) > 0 and len(vtune_library_path) > 0:
 		print_msg("VTune profiler support is enabled!")
@@ -826,58 +836,6 @@ cmake_args.append("-DPRAGMA_DEPS_DIR=" +config.deps_dir +"/" +config.deps_stagin
 cmake_configure_def_toolset(root,generator,cmake_args)
 
 print_msg("Build files have been written to \"" +build_dir +"\".")
-
-########## Lua Extensions ##########
-lua_ext_dir = deps_dir +"/lua_extensions"
-mkdir(lua_ext_dir,cd=True)
-
-if with_lua_debugger:
-	# MoDebug
-	mob_debug_root = lua_ext_dir +"/MobDebug-0.80"
-	if not Path(mob_debug_root).is_dir():
-		print_msg("MobDebug not found. Downloading...")
-		if platform == "win32":
-			zipName = "0.80.zip"
-			http_extract("https://github.com/pkulchenko/MobDebug/archive/refs/tags/" +zipName)
-		else:
-			zipName = "0.80.tar.gz"
-			http_extract("https://github.com/pkulchenko/MobDebug/archive/refs/tags/" +zipName,format="tar.gz")
-	mkdir(install_dir +"/lua/modules/")
-	cp(lua_ext_dir +"/MobDebug-0.80/src/mobdebug.lua",install_dir +"/lua/modules/")
-
-	# Socket
-	curDir = os.getcwd()
-	os.chdir(lua_ext_dir)
-	luasocket_root = lua_ext_dir +"/luasocket"
-	if not Path(luasocket_root).is_dir():
-		print_msg("luasocket not found. Downloading...")
-		git_clone("https://github.com/LuaDist/luasocket.git")
-
-	print_msg("Building luasocket...")
-	os.chdir(luasocket_root)
-	mkdir("build",cd=True)
-	luasocket_args = ["-DLUA_INCLUDE_DIR=" +root +"/third_party_libs/luajit/src"]
-	if platform == "win32":
-		luasocket_args.append("-DLUA_LIBRARY=" +root +"/third_party_libs/luajit/src/lua51.lib")
-	else:
-		luasocket_args.append("-DLUA_LIBRARY=" +root +"/third_party_libs/luajit/src/libluajit-p.so")
-	luasocket_args.append("-DCMAKE_POLICY_VERSION_MINIMUM=3.5")
-	cmake_configure_def_toolset("..",generator,luasocket_args)
-	cmake_build(build_config)
-	cp(luasocket_root +"/src/socket.lua",install_dir +"/lua/modules/")
-	mkdir(install_dir +"/modules/socket/")
-	if platform == "win32":
-		cp(luasocket_root +"/build/socket/" +build_config +"/core.dll",install_dir +"/modules/socket/")
-	else:
-		cp(luasocket_root +"/build/socket/"+build_config +"/core.so",install_dir +"/modules/socket/")
-	os.chdir(curDir)
-
-########## lua-debug ##########
-if with_lua_debugger:
-	curDir = os.getcwd()
-	os.chdir(scripts_dir)
-	execscript(scripts_dir +"/scripts/build_lua_debug.py")
-	os.chdir(curDir)
 
 ########## Addons ##########
 def download_addon(name,addonName,url,commitId=None):

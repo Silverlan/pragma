@@ -19,7 +19,6 @@ os.chdir(deps_dir)
 # TODO: Add input variable
 build_config_tp = "Release"
 
-config.prebuilt_bin_dir = deps_dir +"/" +config.deps_staging_dir
 mkpath(config.prebuilt_bin_dir)
 os.chdir(config.prebuilt_bin_dir)
 
@@ -206,8 +205,6 @@ boostArgs = ["-DBOOST_DISABLE_TESTS=ON","-DZLIB_INCLUDE_DIR=" +ZLIB_INCLUDE,"-DZ
 cmake_configure_def_toolset("..",generator,boostArgs)
 cmake_build("Release")
 os.chdir(deps_dir)
-
-boost_lib_dir = copy_prebuilt_binaries(boost_root +"/build/stage/lib/Release/", "boost")
 
 for path in glob.glob(boost_root +"/libs/*"):
 	include_dir = os.path.join(path, 'include')
@@ -524,3 +521,57 @@ if platform == "win32":
 
 	freetype_include_dir += inc_dir
 	freetype_lib += lib_dir +"/freetype.lib"
+
+########## Lua Extensions ##########
+lua_ext_dir = deps_dir +"/lua_extensions"
+mkdir(lua_ext_dir,cd=True)
+
+if with_lua_debugger:
+	# MoDebug
+	mob_debug_root = lua_ext_dir +"/MobDebug-0.80"
+	if not Path(mob_debug_root).is_dir():
+		print_msg("MobDebug not found. Downloading...")
+		if platform == "win32":
+			zipName = "0.80.zip"
+			http_extract("https://github.com/pkulchenko/MobDebug/archive/refs/tags/" +zipName)
+		else:
+			zipName = "0.80.tar.gz"
+			http_extract("https://github.com/pkulchenko/MobDebug/archive/refs/tags/" +zipName,format="tar.gz")
+	res_dir = get_library_root_dir("lua_debugger") +"resources/"
+	mkpath(res_dir +"lua/modules/")
+	cp(lua_ext_dir +"/MobDebug-0.80/src/mobdebug.lua",res_dir +"lua/modules/")
+
+	# Socket
+	curDir = os.getcwd()
+	os.chdir(lua_ext_dir)
+	luasocket_root = lua_ext_dir +"/luasocket"
+	if not Path(luasocket_root).is_dir():
+		print_msg("luasocket not found. Downloading...")
+		git_clone("https://github.com/LuaDist/luasocket.git")
+
+	print_msg("Building luasocket...")
+	os.chdir(luasocket_root)
+	mkdir("build",cd=True)
+	luasocket_args = ["-DLUA_INCLUDE_DIR=" +get_library_include_dir("luajit")]
+	if platform == "win32":
+		luasocket_args.append("-DLUA_LIBRARY=" +get_library_lib_dir("luajit") +"lua51.lib")
+	else:
+		luasocket_args.append("-DLUA_LIBRARY=" +get_library_lib_dir("luajit") +"libluajit-p.so")
+	luasocket_args.append("-DCMAKE_POLICY_VERSION_MINIMUM=3.5")
+	cmake_configure_def_toolset("..",generator,luasocket_args)
+	cmake_build(build_config)
+	cp(luasocket_root +"/src/socket.lua",res_dir +"lua/modules/")
+	socket_dir = res_dir +"modules/socket/"
+	mkpath(socket_dir)
+	if platform == "win32":
+		cp(luasocket_root +"/build/socket/" +build_config +"/core.dll",socket_dir)
+	else:
+		cp(luasocket_root +"/build/socket/"+build_config +"/core.so",socket_dir)
+	os.chdir(curDir)
+
+########## lua-debug ##########
+if with_lua_debugger:
+	curDir = os.getcwd()
+	os.chdir(scripts_dir)
+	execscript(scripts_dir +"/scripts/build_lua_debug.py")
+	os.chdir(curDir)

@@ -13,8 +13,8 @@ from scripts.shared import *
 parser = argparse.ArgumentParser(description='Pragma build script', allow_abbrev=False, formatter_class=argparse.ArgumentDefaultsHelpFormatter, epilog="")
 
 ###### Config section
-# When using prebuilt binaries this commit will be used for the download from https://github.com/Silverlan/pragma-deps-lib
-prebuilt_commit_sha = "207cb33"
+# When using prebuilt binaries this tag will be used for the download from https://github.com/Silverlan/pragma-deps-lib
+prebuilt_tag = "2025-07-05"
 ######
 
 # See https://stackoverflow.com/a/43357954/1879228 for boolean args
@@ -255,8 +255,8 @@ if build_all == False:
         target_file.write_text(commit_id, encoding="utf-8")
 
     base_path = get_staging_dir()
-    if not is_commit_current(base_path, prebuilt_commit_sha, "commit_id.txt"):
-        update_commit_directory(base_path, prebuilt_commit_sha, "commit_id.txt")
+    if not is_commit_current(base_path, prebuilt_tag, "tag_id.txt"):
+        update_commit_directory(base_path, prebuilt_tag, "tag_id.txt")
         os.chdir(base_path)
 
         print_msg("Downloading prebuilt third-party binaries...")
@@ -268,7 +268,7 @@ if build_all == False:
             prebuilt_archive_name = "lib-windows_x64.zip"
             prebuilt_archive_format = "zip"
 
-        http_extract("https://github.com/Silverlan/pragma-deps-lib/releases/download/" +prebuilt_commit_sha +"/" +prebuilt_archive_name,format=prebuilt_archive_format)
+        http_extract("https://github.com/Silverlan/pragma-deps-lib/releases/download/" +prebuilt_tag +"/" +prebuilt_archive_name,format=prebuilt_archive_format)
     else:
         print(f"Directory '{base_path}' is already up-to-date.")
 

@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
+-- SPDX-License-Identifier: MIT
+
 util.register_class("gui.WIOrthoView", gui.Base)
 
 local RENDER_TARGET_SIZE = Vector2i(1024, 1024)

@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
+-- SPDX-License-Identifier: MIT
+
 util.register_class("gui.WIToolBar", gui.Base)
 function gui.WIToolBar:__init()
 	gui.Base.__init(self)

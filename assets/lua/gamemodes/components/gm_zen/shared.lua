@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
+-- SPDX-License-Identifier: MIT
+
 include_component("gm_generic")
 util.register_class("ents.GmZen", BaseEntityComponent)
 local Component = ents.GmZen

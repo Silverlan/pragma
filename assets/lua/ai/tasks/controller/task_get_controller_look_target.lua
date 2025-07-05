@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
+-- SPDX-License-Identifier: MIT
+
 util.register_class("ai.TaskGetControllerLookTarget", ai.BaseBehaviorTask)
 ai.TaskGetControllerLookTarget.RETURN_LOOK_TARGET = 0
 function ai.TaskGetControllerLookTarget:__tostring()

@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: (c) 2020 Silverlan <opensource@pragma-engine.com>
+// SPDX-License-Identifier: MIT
+
 #ifndef __PRAGMA_RENDER_STATS_HPP__
 #define __PRAGMA_RENDER_STATS_HPP__
 

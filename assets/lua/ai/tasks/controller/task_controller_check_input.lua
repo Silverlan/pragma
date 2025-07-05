@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
+-- SPDX-License-Identifier: MIT
+
 util.register_class("ai.TaskControllerCheckInput", ai.BaseBehaviorTask)
 ai.TaskControllerCheckInput.PARAM_INPUT_ACTION = 0
 function ai.TaskControllerCheckInput:__tostring()

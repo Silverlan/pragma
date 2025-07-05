@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
+-- SPDX-License-Identifier: MIT
+
 local RESULT_INITIAL = 4294967295
 local RESULT_PENDING = 0
 local RESULT_FAILED = 1

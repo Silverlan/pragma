@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
+-- SPDX-License-Identifier: MIT
+
 util.register_class("ai.TaskLookInControllerDirection", ai.BaseBehaviorTask)
 include("task_get_controller_look_target.lua")
 ai.TaskLookInControllerDirection.PARAM_LOOK_DURATION = 0

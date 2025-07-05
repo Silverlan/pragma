@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
+-- SPDX-License-Identifier: MIT
+
 gui.impl = gui.impl or {}
 gui.close_dialog = function()
 	if gui.impl.activeDialog == nil or util.is_valid(gui.impl.activeDialog) == false then

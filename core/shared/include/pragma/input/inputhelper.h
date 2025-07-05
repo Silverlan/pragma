@@ -1,9 +1,5 @@
-/* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/.
- *
- * Copyright (c) 2021 Silverlan
- */
+// SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
+// SPDX-License-Identifier: MIT
 
 #ifndef __INPUTHELPER_H__
 #define __INPUTHELPER_H__
@@ -231,14 +227,6 @@ static const std::string BIND_KEYS[]
   = {"space", "escape", "f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8", "f9", "f10", "f11", "f12", "f13", "f14", "f15", "f16", "f17", "f18", "f19", "f20", "f21", "f22", "f23", "f24", "f25", "uparrow", "downarrow", "leftarrow", "rightarrow", "lshift", "rshift", "lctrl", "rctrl", "lalt",
     "ralt", "tab", "enter", "backspace", "ins", "del", "pgup", "pgdn", "home", "end", "kp_0", "kp_1", "kp_2", "kp_3", "kp_4", "kp_5", "kp_6", "kp_7", "kp_8", "kp_9", "kp_slash", "kp_multiply", "kp_minus", "kp_plus", "kp_del", "kp_equal", "kp_enter", "kp_numlock", "capslock", "scrolllock",
     "printscreen", "pause", "lsuper", "rsuper", "'", ",", ".", "/", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "[", "\\", "]", "`", ";", "=", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z",
-
-    // Extended ASCII
-    //"€","‚","ƒ","„","…","†","‡","ˆ","‰","Š","‹","Œ","Ž","‘","’","“","”","•","–","—","˜","™","š","›","œ","ž",
-    //"Ÿ"," ","¡","¢","£","¤","¥","¦","§","¨","©","ª","«","¬","­","®","¯","°","±","²","³","´","µ","¶",
-    //"·","¸","¹","º","»","¼","½","¾","¿","À","Á","Â","Ã","Ä","Å","Æ","Ç","È","É","Ê","Ë","Ì","Í","Î","Ï","Ð","Ñ",
-    //"Ò","Ó","Ô","Õ","Ö","×","Ø","Ù","Ú","Û","Ü","Ý","Þ","ß","à","á","â","ã","ä","å","æ","ç","è","é","ê","ë","ì",
-    //"í","î","ï","ð","ñ","ò","ó","ô","õ","ö","÷","ø","ù","ú","û","ü","ý","þ","ÿ",
-    //
 
     "mouse1", "mouse2", "mouse3", "mouse4", "mouse5", "mouse6", "mouse7", "mouse8", "mouse9", "scrlup", "scrldn"};
 #endif

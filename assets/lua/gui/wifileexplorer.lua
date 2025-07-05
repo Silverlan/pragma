@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
+-- SPDX-License-Identifier: MIT
+
 include("wibasefileexplorer.lua")
 
 local Element = util.register_class("gui.WIFileExplorer", gui.Base, gui.BaseFileExplorer)

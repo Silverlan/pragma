@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
+-- SPDX-License-Identifier: MIT
+
 include("task_move_to_position.lua")
 util.register_class("ai.TaskMoveToObject", ai.TaskMoveToPosition)
 function ai.TaskMoveToObject:__tostring()

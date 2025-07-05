@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
+-- SPDX-License-Identifier: MIT
+
 util.register_class("ents.WeaponPhyscannon", BaseEntityComponent)
 
 game.load_sound_scripts("fx_weapon_physcannon.txt", true)

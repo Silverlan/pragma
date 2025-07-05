@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: (c) 2020 Silverlan <opensource@pragma-engine.com>
+// SPDX-License-Identifier: MIT
+
 #ifndef __DEBUG_RENDER_FILTER_HPP__
 #define __DEBUG_RENDER_FILTER_HPP__
 

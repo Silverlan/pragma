@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
+-- SPDX-License-Identifier: MIT
+
 util.register_class("ents.AmmoComponent", BaseEntityComponent)
 function ents.AmmoComponent:__init()
 	BaseEntityComponent.__init(self)

@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
+-- SPDX-License-Identifier: MIT
+
 util.register_class("gui.WIEditorWindow", gui.Base)
 function gui.WIEditorWindow:__init()
 	gui.Base.__init(self)

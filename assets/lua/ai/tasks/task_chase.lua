@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
+-- SPDX-License-Identifier: MIT
+
 util.register_class("ai.TaskChase", ai.BaseBehaviorTask)
 ai.TaskChase.PARAM_MOVE_ACTIVITY = 0
 function ai.TaskChase:__tostring()

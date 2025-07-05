@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
+-- SPDX-License-Identifier: MIT
+
 include("/gui/wibasehud.lua")
 
 util.register_class("gui.ZenHUD", gui.BaseHUD)

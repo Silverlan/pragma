@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
+-- SPDX-License-Identifier: MIT
+
 util.register_class("gui.WIGridView", gui.Base)
 
 local UNIT_SIZE = 7.0 -- Size of 1 world unit in screen pixels with no zoom (width and height)

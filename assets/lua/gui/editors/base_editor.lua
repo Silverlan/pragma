@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
+-- SPDX-License-Identifier: MIT
+
 include("/gui/wimenubar.lua")
 include("/gui/witoolbar.lua")
 include("/gui/wifiledialog.lua")

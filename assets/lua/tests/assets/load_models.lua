@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: (c) 2024 Silverlan <opensource@pragma-engine.com>
+-- SPDX-License-Identifier: MIT
+
 local models = { "cube", "empty", "error", "player/soldier", "maps/empty_sky/skybox_3" }
 
 for _, mdlName in ipairs(models) do

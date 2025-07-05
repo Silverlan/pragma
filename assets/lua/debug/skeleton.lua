@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
+-- SPDX-License-Identifier: MIT
+
 local function print_bone(bone, t)
 	t = t or ""
 	print(t .. bone:GetName())

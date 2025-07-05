@@ -1,10 +1,5 @@
---[[
-    Copyright (C) 2021 Silverlan
-
-    This Source Code Form is subject to the terms of the Mozilla Public
-    License, v. 2.0. If a copy of the MPL was not distributed with this
-    file, You can obtain one at http://mozilla.org/MPL/2.0/.
-]]
+-- SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
+-- SPDX-License-Identifier: MIT
 
 util.register_class_property = function(class, name, default, settings)
 	local postfix = name:sub(0, 1):upper() .. name:sub(2)

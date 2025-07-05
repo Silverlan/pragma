@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
+-- SPDX-License-Identifier: MIT
+
 util.register_class("util.UVAtlasGenerator")
 function util.UVAtlasGenerator:__init(lmUuid)
 	local r = engine.load_library("pr_xatlas")

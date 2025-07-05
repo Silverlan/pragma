@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
+-- SPDX-License-Identifier: MIT
+
 local entSpray
 local function spray()
 	local matSprayLogo = console.get_convar_string("cl_logofile")

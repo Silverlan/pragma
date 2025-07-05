@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
+-- SPDX-License-Identifier: MIT
+
 util.register_class("ai.TaskMoveToPosition", ai.BaseBehaviorTask)
 ai.TaskMoveToPosition.PARAM_MOVE_TARGET = 0
 ai.TaskMoveToPosition.PARAM_MOVE_DISTANCE = 1

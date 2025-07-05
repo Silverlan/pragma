@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
+-- SPDX-License-Identifier: MIT
+
 local g_debugElement
 console.register_command("debug_gui", function(pl, className, width, height)
 	if util.is_valid(g_debugElement) then

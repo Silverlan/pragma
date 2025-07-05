@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: (c) 2023 Silverlan <opensource@pragma-engine.com>
+// SPDX-License-Identifier: MIT
+
 #if defined(__linux) &&defined(__clang__)
 //this file is included solely beacuse some symbols never get emitted.
 

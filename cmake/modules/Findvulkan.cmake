@@ -32,4 +32,5 @@ if(${PCK}_FOUND)
   set(${PCK}_INCLUDE_DIRS ${${PCK}_INCLUDE_DIR})
 
   set(VULKAN_SDK ${${PCK}_ROOT_DIR})
+  set(VULKAN_LIBRARY ${${PCK}_LIBRARY})
 endif()

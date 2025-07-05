@@ -1,4 +1,4 @@
-[![Build Windows](https://github.com/Silverlan/pragma/actions/workflows/pragma-windows-ci.yml/badge.svg?branch=main)](https://github.com/Silverlan/pragma/actions/workflows/pragma-windows-ci.yml) [![Build Linux](https://github.com/Silverlan/pragma/actions/workflows/pragma-linux-ci.yml/badge.svg?branch=main)](https://github.com/Silverlan/pragma/actions/workflows/pragma-linux-ci.yml) [![License](https://img.shields.io/github/license/Silverlan/pragma)](#license) [![CodeFactor](https://img.shields.io/codefactor/grade/github/Silverlan/pragma)](https://www.codefactor.io/repository/github/Silverlan/pragma)
+[![Build Windows](https://github.com/Silverlan/pragma/actions/workflows/pragma-windows-ci.yml/badge.svg?branch=main)](https://github.com/Silverlan/pragma/actions/workflows/pragma-windows-ci.yml) [![Build Linux](https://github.com/Silverlan/pragma/actions/workflows/pragma-linux-ci.yml/badge.svg?branch=main)](https://github.com/Silverlan/pragma/actions/workflows/pragma-linux-ci.yml) [![License](https://img.shields.io/github/license/Silverlan/pragma)](#license)
 
 <img align="right" width="150" height="150" alt="Pragma Logo" title="Pragma Logo" src="https://wiki.pragma-engine.com/uploads/images/gallery/2022-09/scaled-1680-/pragma-logo-256.png">
 
@@ -119,6 +119,7 @@ Running the build-script with the arguments above will build and install Pragma 
 | `--cxx-compiler`                        | [Linux only] The C++-compiler to use.                                                        | `clang++-18`     |
 | `--no-sudo`                             | [Linux only] Will not run sudo commands. System packages will have to be installed manually. | `0`              |
 | `--no-confirm`                          | [Linux only] Disable any interaction with user (suitable for automated run).                 | `0`              |
+| `--enable-assertions`                   | [Linux only] Enable additional sanity assertions.                                            | `0`              |
 | `--with-essential-client-modules <1/0>` | Include essential modules required to run Pragma.                                            | `1`              |
 | `--with-common-modules <1/0>`           | Include non-essential but commonly used modules (e.g. audio and physics modules).            | `1`              |
 | `--with-pfm <1/0>`                      | Include the Pragma Filmmaker.                                                                | `0`              |

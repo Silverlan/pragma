@@ -206,6 +206,8 @@ cmake_configure_def_toolset("..",generator,boostArgs)
 cmake_build("Release")
 os.chdir(deps_dir)
 
+copy_prebuilt_binaries(boost_root +"/build/stage/lib/Release/", "boost")
+
 for path in glob.glob(boost_root +"/libs/*"):
 	include_dir = os.path.join(path, 'include')
 	if os.path.isdir(include_dir):

@@ -14,7 +14,7 @@ parser = argparse.ArgumentParser(description='Pragma build script', allow_abbrev
 
 ###### Config section
 # When using prebuilt binaries this commit will be used for the download from https://github.com/Silverlan/pragma-deps-lib
-prebuilt_commit_sha = "f845f84"
+prebuilt_commit_sha = "207cb33"
 ######
 
 # See https://stackoverflow.com/a/43357954/1879228 for boolean args
@@ -450,6 +450,7 @@ cmake_args = config.cmake_args
 additional_build_targets = []
 
 ########## submodules ##########
+os.chdir(root)
 print_msg("Updating external libraries...")
 execscript(scripts_dir +"/scripts/external_libs.py")
 

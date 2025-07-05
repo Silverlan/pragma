@@ -15,7 +15,9 @@ endif()
 pr_install_binaries(luajit)
 pr_install_binaries(libzip)
 
-pr_install_directory("${lua_debugger_RESOURCE_DIR}/" INSTALL_DIR ".")
+if(lua_debugger_RESOURCE_DIR)
+    pr_install_directory("${lua_debugger_RESOURCE_DIR}/" INSTALL_DIR ".")
+endif()
 
 if(WIN32)
     pr_install_binaries(zlib)

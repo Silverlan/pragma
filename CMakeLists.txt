@@ -38,7 +38,7 @@ find_package(icu REQUIRED)
 find_package(libpng REQUIRED)
 find_package(libzip REQUIRED)
 find_package(luajit REQUIRED)
-find_package(lua_debugger REQUIRED)
+find_package(lua_debugger)
 find_package(zlib REQUIRED)
 #
 

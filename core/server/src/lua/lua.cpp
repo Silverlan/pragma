@@ -33,8 +33,10 @@
 #include <pragma/lua/libraries/lnet.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/lua/converters/optional_converter_t.hpp>
+#include <pragma/lua/converters/vector_converter_t.hpp>
 #include <pragma/model/model.h>
 #include <pragma/networking/nwm_util.h>
+#include <pragma/util/util_game.hpp>
 #include <luainterface.hpp>
 #include <udm.hpp>
 
@@ -57,7 +59,7 @@ void SGame::RegisterLua()
 
 	auto engineMod = luabind::module(GetLuaState(), "engine");
 	engineMod[luabind::def("load_library", Lua::engine::LoadLibrary), luabind::def("unload_library", Lua::engine::UnloadLibrary), luabind::def("is_library_loaded", Lua::engine::IsLibraryLoaded), luabind::def("library_exists", Lua::engine::LibraryExists),
-	  luabind::def("get_info", Lua::engine::get_info), luabind::def("poll_console_output", Lua::engine::poll_console_output)];
+	  luabind::def("get_info", Lua::engine::get_info), luabind::def("poll_console_output", Lua::engine::poll_console_output), luabind::def("get_user_data_dir", util::get_user_data_dir), luabind::def("get_resource_dirs", util::get_resource_dirs)];
 	Lua::engine::register_shared_functions(GetLuaState(), engineMod);
 
 	Lua::RegisterLibrary(GetLuaState(), "game",

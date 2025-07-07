@@ -65,6 +65,8 @@ namespace pragma::string {
 #include <image/prosper_render_target.hpp>
 #include <pragma/lua/libraries/lfile.h>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
+#include <pragma/lua/converters/vector_converter_t.hpp>
+#include <pragma/util/util_game.hpp>
 #include <wgui/fontmanager.h>
 #include <udm.hpp>
 
@@ -122,7 +124,7 @@ void CGame::RegisterLua()
 	  luabind::def("get_truncated_text_length", static_cast<std::pair<size_t, size_t> (*)(lua_State *, const std::string &, const FontInfo &, uint32_t)>(Lua::engine::get_truncated_text_length)),
 
 	  luabind::def("poll_console_output", Lua::engine::poll_console_output), luabind::def("library_exists", Lua::engine::LibraryExists), luabind::def("load_library", Lua::engine::LoadLibrary), luabind::def("unload_library", Lua::engine::UnloadLibrary),
-	  luabind::def("is_library_loaded", Lua::engine::IsLibraryLoaded), luabind::def("get_info", Lua::engine::get_info)];
+	  luabind::def("is_library_loaded", Lua::engine::IsLibraryLoaded), luabind::def("get_info", Lua::engine::get_info), luabind::def("get_user_data_dir", util::get_user_data_dir), luabind::def("get_resource_dirs", util::get_resource_dirs)];
 
 	Lua::RegisterLibrary(GetLuaState(), "game",
 	  {
@@ -235,10 +237,10 @@ void CGame::RegisterLua()
 	  luabind::def("load_texture", static_cast<std::shared_ptr<prosper::Texture> (*)(lua_State *, const LFile &, const std::string &, util::AssetLoadFlags loadFlags)>(Lua::engine::load_texture)),
 	  luabind::def("load_texture", static_cast<std::shared_ptr<prosper::Texture> (*)(lua_State *, const LFile &, const std::string &)>(Lua::engine::load_texture)),
 	  luabind::def("load_texture", static_cast<std::shared_ptr<prosper::Texture> (*)(lua_State *, const LFile &, util::AssetLoadFlags)>(Lua::engine::load_texture)),
-	  luabind::def("load_texture", static_cast<std::shared_ptr<prosper::Texture> (*)(lua_State *, const LFile &)>(Lua::engine::load_texture)),
-	  luabind::def("precache_particle_system", static_cast<bool (*)(lua_State *, const std::string &, bool)>(Lua::engine::precache_particle_system)), luabind::def("precache_particle_system", static_cast<bool (*)(lua_State *, const std::string &)>(Lua::engine::precache_particle_system)),
-	  luabind::def("load_sound_scripts", static_cast<void (*)(lua_State *, const std::string &, bool)>(Lua::engine::LoadSoundScripts)), luabind::def("load_sound_scripts", static_cast<void (*)(lua_State *, const std::string &)>(Lua::engine::LoadSoundScripts)),
-	  luabind::def("get_model", Lua::engine::get_model), luabind::def("get_number_of_scenes_queued_for_rendering", &CGame::GetNumberOfScenesQueuedForRendering), luabind::def("get_queued_scene_render_info", &CGame::GetQueuedSceneRenderInfo),
+	  luabind::def("load_texture", static_cast<std::shared_ptr<prosper::Texture> (*)(lua_State *, const LFile &)>(Lua::engine::load_texture)), luabind::def("precache_particle_system", static_cast<bool (*)(lua_State *, const std::string &, bool)>(Lua::engine::precache_particle_system)),
+	  luabind::def("precache_particle_system", static_cast<bool (*)(lua_State *, const std::string &)>(Lua::engine::precache_particle_system)), luabind::def("load_sound_scripts", static_cast<void (*)(lua_State *, const std::string &, bool)>(Lua::engine::LoadSoundScripts)),
+	  luabind::def("load_sound_scripts", static_cast<void (*)(lua_State *, const std::string &)>(Lua::engine::LoadSoundScripts)), luabind::def("get_model", Lua::engine::get_model), luabind::def("get_number_of_scenes_queued_for_rendering", &CGame::GetNumberOfScenesQueuedForRendering),
+	  luabind::def("get_queued_scene_render_info", &CGame::GetQueuedSceneRenderInfo),
 
 	  luabind::def("set_gameplay_control_camera", &CGame::SetGameplayControlCamera), luabind::def("reset_gameplay_control_camera", &CGame::ResetGameplayControlCamera), luabind::def("get_gameplay_control_camera", &CGame::GetGameplayControlCamera),
 	  luabind::def("clear_gameplay_control_camera", &CGame::ClearGameplayControlCamera),

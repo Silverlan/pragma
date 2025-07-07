@@ -623,6 +623,7 @@ void Engine::Release() { Close(); }
 
 extern std::string g_lpUserDataDir;
 extern std::vector<std::string> g_lpResourceDirs;
+
 bool Engine::Initialize(int argc, char *argv[])
 {
 	InitLaunchOptions(argc, argv);
@@ -647,7 +648,7 @@ bool Engine::Initialize(int argc, char *argv[])
 		size_t resDirIdx = 1;
 		for(auto &resourceDir : g_lpResourceDirs) {
 			spdlog::debug("Adding read-only resource directory '{}'...", resourceDir);
-			filemanager::add_secondary_absolute_read_only_root_path("resource" +std::to_string(resDirIdx), resourceDir, resDirIdx /* priority */);
+			filemanager::add_secondary_absolute_read_only_root_path("resource" + std::to_string(resDirIdx), resourceDir, resDirIdx /* priority */);
 			++resDirIdx;
 		}
 	}
@@ -982,7 +983,7 @@ std::unique_ptr<uzip::ZIPFile> Engine::GenerateEngineDump(const std::string &bas
 	std::string err;
 	auto zipFile = uzip::ZIPFile::Open(zipName.GetString(), err, uzip::OpenMode::Write);
 	if(!zipFile) {
-		outErr = "Failed to create dump file '" + zipName.GetString() + "': " +err;
+		outErr = "Failed to create dump file '" + zipName.GetString() + "': " + err;
 		return nullptr;
 	}
 

@@ -4,6 +4,7 @@
 #include "stdafx_shared.h"
 #include "pragma/engine.h"
 #include <pragma/game/game.h>
+#include <pragma/debug/debugbreak.hpp>
 #include "pragma/lua/classes/lconvar.h"
 #include "pragma/lua/libraries/lfile.h"
 #include "pragma/lua/libraries/lboundingvolume.h"
@@ -696,21 +697,11 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	if(Lua::get_extended_lua_modules_enabled()) {
 		DLLLUA int lua_snapshot(lua_State * L);
 		lua_pushtablecfunction(lua.GetState(), "debug", "snapshot", lua_snapshot);
-#ifdef _WIN32
-#ifdef _MSC_VER
 		isBreakDefined = true;
 		lua_pushtablecfunction(lua.GetState(), "debug", "breakpoint", static_cast<int (*)(lua_State *)>([](lua_State *l) -> int {
-			__debugbreak();
+			debug_break();
 			return 0;
 		}))
-#endif
-#else
-		isBreakDefined = true;
-		lua_pushtablecfunction(lua.GetState(), "debug", "breakpoint", static_cast<int (*)(lua_State *)>([](lua_State *l) -> int {
-			raise(SIGTRAP);
-			return 0;
-		}))
-#endif
 	}
 	if(isBreakDefined == false) {
 		lua_pushtablecfunction(lua.GetState(), "debug", "breakpoint", static_cast<int (*)(lua_State *)>([](lua_State *l) -> int { return 0; }))

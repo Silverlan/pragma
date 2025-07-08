@@ -705,7 +705,7 @@ if with_pfm:
 	if with_all_pfm_modules:
 		add_pragma_module(
 			name="pr_chromium",
-			commitSha="c64b788dfeb392026e67cc13f898c3693efd6d67",
+			commitSha="0cffca3402b11723fee3e9b467d928799e72813a",
 			repositoryUrl="https://github.com/Silverlan/pr_chromium.git"
 		)
 		add_pragma_module(
@@ -864,7 +864,7 @@ def download_addon(name,addonName,url,commitId=None):
 curDir = os.getcwd()
 if not skip_repository_updates:
 	if with_pfm:
-		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","edf69a7872b611edd3a4a6bf3c0e3bd4a10db94c")
+		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","c30b39c62c6ed8119e4f5f5b493b16aa9bf18057")
 		download_addon("model editor","tool_model_editor","https://github.com/Silverlan/pragma_model_editor.git","a9ea4820f03be250bdf1e6951dad313561b75b17")
 
 	if with_vr:

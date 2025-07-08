@@ -714,7 +714,7 @@ bool CEngine::Initialize(int argc, char *argv[])
 	if(g_waylandLibdecorPlugin) {
 		::util::set_env_variable("GDK_BACKEND", "wayland");
 
-		auto path = util::FilePath(util::get_program_path(), "modules/graphics/vulkan/libdecor", *g_waylandLibdecorPlugin);
+		auto path = util::FilePath(util::get_program_path(), "modules/graphics/vulkan/libdecor/plugins", *g_waylandLibdecorPlugin);
 		::util::set_env_variable("LIBDECOR_PLUGIN_DIR", path.GetString());
 	}
 #endif

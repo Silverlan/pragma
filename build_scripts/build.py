@@ -14,7 +14,7 @@ parser = argparse.ArgumentParser(description='Pragma build script', allow_abbrev
 
 ###### Config section
 # When using prebuilt binaries this tag will be used for the download from https://github.com/Silverlan/pragma-deps-lib
-prebuilt_tag = "2025-07-05"
+prebuilt_tag = "2025-07-08"
 ######
 
 # See https://stackoverflow.com/a/43357954/1879228 for boolean args
@@ -661,7 +661,7 @@ execfile(scripts_dir +"/user_modules.py",g,l)
 if with_essential_client_modules:
 	add_pragma_module(
 		name="pr_prosper_vulkan",
-		commitSha="c2c63c0da3652783d28cb9a90ff2a3381d2e53dd",
+		commitSha="c580a9d194a875cef0ee1ee51850836e4e2bda05",
 		repositoryUrl="https://github.com/Silverlan/pr_prosper_vulkan.git"
 	)
 

@@ -1879,7 +1879,7 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	  static_cast<pragma::platform::KeyState (*)(prosper::Window &, pragma::platform::MouseButton)>([](prosper::Window &window, pragma::platform::MouseButton mouseButton) -> pragma::platform::KeyState { return window->GetMouseButtonState(mouseButton); }));
 	defWindow.def("SetCursorInputMode", static_cast<void (*)(prosper::Window &, pragma::platform::CursorMode)>([](prosper::Window &window, pragma::platform::CursorMode cursorMode) { window->SetCursorInputMode(cursorMode); }));
 	defWindow.def("GetCursorInputMode", static_cast<pragma::platform::CursorMode (*)(prosper::Window &)>([](prosper::Window &window) -> pragma::platform::CursorMode { return window->GetCursorInputMode(); }));
-	defWindow.def("SetCursor", static_cast<void (*)(prosper::Window &, pragma::platform::Cursor &)>([](prosper::Window &window, pragma::platform::Cursor &cursor) { window->SetCursor(cursor); }));
+	defWindow.def("SetCursorShape", static_cast<void (*)(prosper::Window &, pragma::platform::Cursor::Shape)>([](prosper::Window &window, pragma::platform::Cursor::Shape shape) { window->SetCursor(shape); }));
 	defWindow.def("Close", &prosper::Window::Close);
 	defWindow.def(
 	  "GetMonitor", +[](prosper::Window &window) -> const pragma::platform::Monitor * {

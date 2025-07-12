@@ -710,7 +710,7 @@ if with_pfm:
 		)
 		add_pragma_module(
 			name="pr_unirender",
-			commitSha="8b5c67fbee4694503ce8e5c7eb7efefb73bd124c",
+			commitSha="533f210f255b7d8f5c9b07a9b02674bbc64ca832",
 			repositoryUrl="https://github.com/Silverlan/pr_cycles.git"
 		)
 		add_pragma_module(
@@ -864,20 +864,20 @@ def download_addon(name,addonName,url,commitId=None):
 curDir = os.getcwd()
 if not skip_repository_updates:
 	if with_pfm:
-		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","c30b39c62c6ed8119e4f5f5b493b16aa9bf18057")
-		download_addon("model editor","tool_model_editor","https://github.com/Silverlan/pragma_model_editor.git","a9ea4820f03be250bdf1e6951dad313561b75b17")
+		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","ef4d0036af62f76f6cf1f9f164460339abd2f42c")
+		download_addon("model editor","tool_model_editor","https://github.com/Silverlan/pragma_model_editor.git","f34c235f225406374643a1a5a1b6349e1fc6c7f6")
 
 	if with_vr:
-		download_addon("VR","virtual_reality","https://github.com/Silverlan/PragmaVR.git","e4728fc7c5fa92059167b73c4f56deaa5bfa062a")
+		download_addon("VR","virtual_reality","https://github.com/Silverlan/PragmaVR.git","2d5360ac6cafefaecb5bf2b5078bad191e7ecc57")
 
 	if with_pfm:
 		download_addon("PFM Living Room Demo","pfm_demo_living_room","https://github.com/Silverlan/pfm_demo_living_room.git","4cbecad4a2d6f502b6d9709178883678101f7e2c")
 		download_addon("PFM Bedroom Demo","pfm_demo_bedroom","https://github.com/Silverlan/pfm_demo_bedroom.git","0fed1d5b54a25c3ded2ce906e7da80ca8dd2fb0d")
-		download_addon("PFM Tutorials","pfm_tutorials","https://github.com/Silverlan/pfm_tutorials.git","6a410c53a99194ae3ed9fe740306fe27150bfcf5")
+		download_addon("PFM Tutorials","pfm_tutorials","https://github.com/Silverlan/pfm_tutorials.git","a7337283cd9f6101ebb075583fb25853daef64b0")
 
 	if with_common_entities:
-		download_addon("HL","pragma_hl","https://github.com/Silverlan/pragma_hl.git","7d146f517a9d514e9c22ca918460b85b27694155")
-		download_addon("TF2","pragma_tf2","https://github.com/Silverlan/pragma_tf2.git","9cf3dc9a1a5fef4cc18b85fc2646cf4263134e9b")
+		download_addon("HL","pragma_hl","https://github.com/Silverlan/pragma_hl.git","4f42a0ab6b71b3b5b458bffca6cdc0fcb0de83ea")
+		download_addon("TF2","pragma_tf2","https://github.com/Silverlan/pragma_tf2.git","1b36edc5804c87fde129e94c38fa52b2fd845e42")
 
 	download_addon("Matcaps","matcaps","https://github.com/Silverlan/pragma_matcaps.git","304800623fc6c07901053fb41428fa2c430f2d0d")
 

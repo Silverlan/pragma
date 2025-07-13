@@ -1734,10 +1734,13 @@ Lua::var<bool, ::util::ParallelJob<luabind::object>> Lua::util::pack_zip_archive
 		}
 	}
 
+	filemanager::create_path(ufile::get_path_from_filename(zipFileName));
+	auto absFilePath = ::util::FilePath(filemanager::get_program_write_path(), zipFileName).GetString();
+
 	std::string err;
-	auto zip = uzip::ZIPFile::Open(zipFileName, err, uzip::OpenMode::Write);
+	auto zip = uzip::ZIPFile::Open(absFilePath, err, uzip::OpenMode::Write);
 	if(zip == nullptr) {
-		Con::cwar<<"Failed to open zip file '"<<zipFileName<<": "<<err<<Con::endl;
+		Con::cwar<<"Failed to open zip file '"<<absFilePath<<": "<<err<<Con::endl;
 		return luabind::object {l, false};
 	}
 	auto pzip = std::shared_ptr<uzip::ZIPFile> {std::move(zip)};

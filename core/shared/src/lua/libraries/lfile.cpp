@@ -346,6 +346,10 @@ static const std::vector<std::string> pathBlacklist {
   "cache/chromium",
   "cache/shader.cache",
   "cache/shaders",
+	"cfg/launch.cfg",
+	"cfg/engine.cfg",
+	"cfg/client.cfg",
+	"cfg/server.cfg",
 };
 bool Lua::file::validate_write_operation(lua_State *l, std::string &path, std::string &outRootPath)
 {

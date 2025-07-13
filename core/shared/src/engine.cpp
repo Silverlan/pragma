@@ -634,8 +634,18 @@ bool Engine::Initialize(int argc, char *argv[])
 			spdlog::debug("Using user-data directory '{}'...", g_lpUserDataDir);
 			filemanager::set_absolute_root_path(g_lpUserDataDir, 0 /* priority */);
 		}
-		else
-			filemanager::set_absolute_root_path(util::get_program_path());
+		else {
+			auto hasCustomUserDataDir = false;
+			ExecConfig("launch.cfg", [&](const std::string &cfg, std::vector<std::string> &args) {
+				if (cfg == "user_data_dir") {
+					hasCustomUserDataDir = true;
+					spdlog::debug("Using user-data directory '{}'...", g_lpUserDataDir);
+					filemanager::set_absolute_root_path(g_lpUserDataDir, 0 /* priority */);
+				}
+			});
+			if (hasCustomUserDataDir)
+				filemanager::set_absolute_root_path(util::get_program_path());
+		}
 
 		// TODO: File cache doesn't work with absolute paths at the moment
 		// (e.g. addons/imported/models/some_model.pmdl would return false even if the file exists)

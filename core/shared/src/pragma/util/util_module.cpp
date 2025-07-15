@@ -64,14 +64,22 @@ std::shared_ptr<util::Library> util::load_library_module(const std::string &lib,
 
 std::vector<std::string> util::get_default_additional_library_search_directories(const std::string &libModulePath)
 {
-	//prefer platform agnostic forward slash here.
 	auto brLast = libModulePath.find_last_of('/');
-	auto programPath = FileManager::GetProgramPath();
+	auto libPath = libModulePath.substr(0, brLast);
+	std::vector<std::string> paths;
+	auto &rootPaths = filemanager::get_absolute_root_paths();
+	paths.reserve(rootPaths.size() *2);
 #ifdef _WIN32
-	auto pathBin = programPath + "/bin";
+	std::string binDir = "bin";
 #else
-	auto pathBin = programPath + "/lib";
+	std::string binDir = "lib";
 #endif
-	auto pathModules = programPath + std::string("/") + libModulePath.substr(0, brLast);
-	return std::vector<std::string> {pathBin, pathModules};
+	for (auto &rootPath : rootPaths) {
+		auto binPath = util::DirPath(rootPath, binDir);
+		paths.push_back(binPath.GetString());
+
+		auto modPath = util::DirPath(rootPath, libPath);
+		paths.push_back(modPath.GetString());
+	}
+	return paths;
 }

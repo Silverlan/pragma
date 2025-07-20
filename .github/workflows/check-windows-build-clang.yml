@@ -1,8 +1,11 @@
 name: Check Windows Build (Clang)
+
+#on:
+#  push:
+#    branches-ignore:
+#      - main
 on:
-  push:
-    branches-ignore:
-      - main
+  workflow_dispatch:
 
 concurrency:
   group: check-build-win-clang-

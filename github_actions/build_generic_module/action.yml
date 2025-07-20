@@ -33,6 +33,9 @@ inputs:
     description: 'Token required for upload of debug artifacts (e.g. CMakeCache.txt).'
     required: true
     default: ''
+  branch:
+    description: 'The branch to clone Pragma from.'
+    default: 'main'
 outputs:
   build-dir:
     description: 'The directory where the build files are written to.'
@@ -50,6 +53,7 @@ runs:
       uses: Silverlan/pragma/github_actions/setup@main
       with:
         with_cuda: ${{ inputs.with-cuda }}
+        branch: ${{ inputs.branch }}
 
     # We need the latest Windows SDK
     - name: Install Windows SDK

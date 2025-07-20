@@ -483,12 +483,12 @@ def add_pragma_module(name,repositoryUrl=None,commitSha=None,branch=None,skipBui
 	}
 	module_info.append(module)
 
-def add_pragma_module_prebuilt(name,engineVersion=""):
+def add_pragma_module_prebuilt(name, engineVersion="", tag_name="latest"):
 	url = "https://github.com/" +name +"/releases/download/"
 	if len(engineVersion) > 0:
 		url = url +engineVersion +"/"
 	else:
-		url = url +"latest/"
+		url = url +tag_name +"/"
 
 	modules_prebuilt.append(url)
 
@@ -686,9 +686,9 @@ if with_common_modules:
 		commitSha="0635a9ada3e95511a493bc0e97d4dda570d6dbea",
 		repositoryUrl="https://github.com/Silverlan/pr_prosper_opengl.git"
 	)
-	add_pragma_module_prebuilt("Silverlan/pr_mount_external_prebuilt")
-	add_pragma_module_prebuilt("Silverlan/pr_rig_prebuilt")
-	add_pragma_module_prebuilt("Silverlan/pr_ik_prebuilt")
+	add_pragma_module_prebuilt("Silverlan/pr_mount_external_prebuilt", "latest")
+	add_pragma_module_prebuilt("Silverlan/pr_rig_prebuilt", "latest")
+	add_pragma_module_prebuilt("Silverlan/pr_ik_prebuilt", "latest")
 
 if with_pfm:
 	if with_core_pfm_modules or with_all_pfm_modules:
@@ -710,7 +710,7 @@ if with_pfm:
 		)
 		add_pragma_module(
 			name="pr_unirender",
-			commitSha="30377fbb1c211c1cc746f9958d289e84ade223ef",
+			commitSha="95bff2a6b01de2ac831e85412564b48ddb13f088",
 			repositoryUrl="https://github.com/Silverlan/pr_cycles.git"
 		)
 		add_pragma_module(
@@ -864,7 +864,7 @@ def download_addon(name,addonName,url,commitId=None):
 curDir = os.getcwd()
 if not skip_repository_updates:
 	if with_pfm:
-		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","095473a68413fc2d263d5b6b9cf915f226503c2d")
+		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","ae5ec15848d092b723d9ab1bf53a120462b7388f")
 		download_addon("model editor","tool_model_editor","https://github.com/Silverlan/pragma_model_editor.git","f34c235f225406374643a1a5a1b6349e1fc6c7f6")
 
 	if with_vr:
@@ -873,7 +873,7 @@ if not skip_repository_updates:
 	if with_pfm:
 		download_addon("PFM Living Room Demo","pfm_demo_living_room","https://github.com/Silverlan/pfm_demo_living_room.git","4cbecad4a2d6f502b6d9709178883678101f7e2c")
 		download_addon("PFM Bedroom Demo","pfm_demo_bedroom","https://github.com/Silverlan/pfm_demo_bedroom.git","0fed1d5b54a25c3ded2ce906e7da80ca8dd2fb0d")
-		download_addon("PFM Tutorials","pfm_tutorials","https://github.com/Silverlan/pfm_tutorials.git","a7337283cd9f6101ebb075583fb25853daef64b0")
+		download_addon("PFM Tutorials","pfm_tutorials","https://github.com/Silverlan/pfm_tutorials.git","e4de36ae6f607cbca26d1a41e0f3f841443f91e0")
 
 	if with_common_entities:
 		download_addon("HL","pragma_hl","https://github.com/Silverlan/pragma_hl.git","4f42a0ab6b71b3b5b458bffca6cdc0fcb0de83ea")

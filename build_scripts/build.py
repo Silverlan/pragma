@@ -686,9 +686,9 @@ if with_common_modules:
 		commitSha="0635a9ada3e95511a493bc0e97d4dda570d6dbea",
 		repositoryUrl="https://github.com/Silverlan/pr_prosper_opengl.git"
 	)
-	add_pragma_module_prebuilt("Silverlan/pr_mount_external_prebuilt", "latest")
-	add_pragma_module_prebuilt("Silverlan/pr_rig_prebuilt", "latest")
-	add_pragma_module_prebuilt("Silverlan/pr_ik_prebuilt", "latest")
+	add_pragma_module_prebuilt("Silverlan/pr_mount_external_prebuilt", "2025-07-20")
+	add_pragma_module_prebuilt("Silverlan/pr_rig_prebuilt", "2025-07-20")
+	add_pragma_module_prebuilt("Silverlan/pr_ik_prebuilt", "2025-07-20")
 
 if with_pfm:
 	if with_core_pfm_modules or with_all_pfm_modules:

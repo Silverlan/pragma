@@ -7,6 +7,7 @@
 #include "pragma/clientdefinitions.h"
 #include <pragma/entities/components/base_entity_component.hpp>
 
+class WIBase;
 namespace pragma {
 	class DLLCLIENT CInputComponent final : public BaseEntityComponent {
 	  public:
@@ -22,6 +23,8 @@ namespace pragma {
 	  private:
 		float m_mouseDeltaX = 0.f;
 		float m_mouseDeltaY = 0.f;
+		WIBase *m_lastFocusedElement = nullptr;
+		bool m_initialFocus = true;
 	};
 };
 

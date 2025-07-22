@@ -317,6 +317,7 @@ void Engine::RegisterConsoleCommands()
 	  [](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  if(argv.empty()) {
 			  Con::cout << "Usage: help <cvarname>" << Con::endl;
+			  Con::cout<<"Run \"list\" to get a list of all available console commands and variables." << Con::endl;
 			  return;
 		  }
 		  auto *en = pragma::get_engine();

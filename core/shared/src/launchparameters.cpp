@@ -246,6 +246,9 @@ static void LPARAM_luaext(const std::vector<std::string> &argv)
 static void LPARAM_verbose(const std::vector<std::string> &argv) { engine->SetVerbose(true); }
 static void LPARAM_console_subsystem(const std::vector<std::string> &argv) { engine->SetConsoleSubsystem(true); }
 static void LPARAM_non_interactive(const std::vector<std::string> &argv) { engine->SetNonInteractiveMode(true); }
+static void LPARAM_disable_linenoise(const std::vector<std::string> &argv) {
+	// -disable_linenoise is handled in Engine constructor
+}
 static void LPARAM_disable_ansi_color_codes(const std::vector<std::string> &argv)
 {
 	pragma::logging::set_ansi_color_codes_enabled(false);
@@ -262,6 +265,7 @@ REGISTER_LAUNCH_PARAMETER_HELP(-luaext, LPARAM_luaext, "", "enables several addi
 REGISTER_LAUNCH_PARAMETER_HELP(-verbose, LPARAM_verbose, "", "Enables additional debug messages.");
 REGISTER_LAUNCH_PARAMETER_HELP(-console_subsystem, LPARAM_console_subsystem, "", "should only be enabled if the executable was built for console/terminal only");
 REGISTER_LAUNCH_PARAMETER_HELP(-non_interactive, LPARAM_non_interactive, "", "if enabled, terminal user inputs will be ignored");
+REGISTER_LAUNCH_PARAMETER_HELP(-disable_linenoise, LPARAM_disable_linenoise, "", "if set, linenoise will not be used, which will disable auto-suggestions and hints for terminal inputs");
 REGISTER_LAUNCH_PARAMETER_HELP(-disable_ansi_color_codes, LPARAM_disable_ansi_color_codes, "", "if set, no ansi color codes will be used in console/log outputs.");
 
 DLLNETWORK std::string g_lpUserDataDir {};

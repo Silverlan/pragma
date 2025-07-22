@@ -81,10 +81,10 @@ static void KeyboardInput()
 #endif
 }
 
-void Engine::ConsoleInput(const std::string_view &line) // TODO: Make sure input-thread and engine don't access m_consoleInput at the same time?
+void Engine::ConsoleInput(const std::string_view &line, bool printLine) // TODO: Make sure input-thread and engine don't access m_consoleInput at the same time?
 {
 	std::unique_lock lock {m_consoleInputMutex};
-	m_consoleInput.push(std::string {line});
+	m_consoleInput.push({std::string {line}, printLine});
 }
 
 void Engine::ToggleConsole()
@@ -103,7 +103,9 @@ Engine::ConsoleInstance::ConsoleInstance()
 
 	auto useConsoleThread = true;
 #ifdef __linux__
-	auto useLinenoise = true; // TODO
+	auto useLinenoise = true;
+	if (engine->IsNonInteractiveMode() || engine->IsLinenoiseEnabled() == false)
+		useLinenoise = false;
 	if (useLinenoise) {
 		useConsoleThread = false;
 		pragma::console::impl::init_linenoise();
@@ -131,10 +133,13 @@ Engine::ConsoleInstance::~ConsoleInstance()
 	}
 #else
 	//It is impossible to unblock KeyboardInput by putting \n. I have to cancel the thread.
-	auto natConsoleThread = consoleThread->native_handle();
-	pthread_cancel(natConsoleThread);
+	if (consoleThread) {
+		auto natConsoleThread = consoleThread->native_handle();
+		pthread_cancel(natConsoleThread);
+	}
 #endif
-	consoleThread->join();
+	if (consoleThread)
+		consoleThread->join();
 }
 
 void Engine::OpenConsole()
@@ -159,8 +164,8 @@ DebugConsole *Engine::GetConsole() { return m_consoleInfo ? m_consoleInfo->conso
 void Engine::ProcessConsoleInput(KeyState pressState)
 {
 #ifdef __linux__
-	// TODO: Only if linenoise is enabled
-	pragma::console::impl::update_linenoise();
+	if (pragma::console::impl::is_linenoise_enabled())
+		pragma::console::impl::update_linenoise();
 #endif
 
 	m_consoleInputMutex.lock();
@@ -173,12 +178,13 @@ void Engine::ProcessConsoleInput(KeyState pressState)
 	m_consoleInputMutex.unlock();
 
 	while(consoleInput.empty() == false) {
-		auto &l = consoleInput.front();
+		auto &inputInfo = consoleInput.front();
 
 		util::set_console_color(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
-		Con::cout << "> " << l << Con::endl;
+		if (inputInfo.printLine)
+			Con::cout << "> " << inputInfo.line << Con::endl;
 		util::reset_console_color();
-		ProcessConsoleInput(l, pressState);
+		ProcessConsoleInput(inputInfo.line, pressState);
 
 		consoleInput.pop();
 	}

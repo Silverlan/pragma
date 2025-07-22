@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
+// SPDX-FileCopyrightText: (c) 2025 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_shared.h"
@@ -9,36 +9,45 @@
 
 static void completion(const char *buf, linenoiseCompletions *lc);
 static const char *hints(const char *buf, int *color, int *bold);
+static constexpr const char *HISTORY_FILE_LOCATION_RELATIVE = "cache/terminal_history.txt";
+static constexpr const char *PROMPT_PREFIX = "> ";
+static std::string get_history_file_location() {
+    return util::FilePath(filemanager::get_program_write_path(), HISTORY_FILE_LOCATION_RELATIVE).GetString();
+}
+
+static bool g_enabled = false;
+bool pragma::console::impl::is_linenoise_enabled() {
+    return g_enabled;
+}
+
 void pragma::console::impl::init_linenoise()
 {
-    char *line;
-    int async = 1;
-
+    if (g_enabled)
+        return; // Already initialized
+    g_enabled = true;
     /* Set the completion callback. This will be called every time the
      * user uses the <tab> key. */
     linenoiseSetCompletionCallback(completion);
     linenoiseSetHintsCallback(hints);
+
     linenoiseSetMultiLine(0);
 
     /* Load history from file. The history file is just a plain text file
      * where entries are separated by newlines. */
-    linenoiseHistoryLoad("history.txt"); /* Load the history at startup */
+    linenoiseHistoryLoad(get_history_file_location().c_str()); /* Load the history at startup */
+}
 
-    /* Now this is the main loop of the typical linenoise-based application.
-     * The call to linenoise() will block as long as the user types something
-     * and presses enter.
-     *
-     * The typed string is returned as a malloc() allocated string by
-     * linenoise, so the user needs to free() it. */
+void pragma::console::impl::close_linenoise() {
+    linenoiseHistorySave(get_history_file_location().c_str());
 }
 
 void pragma::console::impl::update_linenoise() {
     static struct linenoiseState ls;
     static char buf[1024];
-    static auto first = true;
-    if (first) {
-        first = false;
-        linenoiseEditStart(&ls,-1,-1,buf,sizeof(buf),"> ");
+    static auto firstLine = true;
+    if (firstLine) {
+        firstLine = false;
+        linenoiseEditStart(&ls,-1,-1,buf,sizeof(buf),PROMPT_PREFIX);
     }
 
     fd_set readfds;
@@ -51,10 +60,9 @@ void pragma::console::impl::update_linenoise() {
     tv.tv_usec = 0;
 
     retval = select(ls.ifd+1, &readfds, NULL, NULL, &tv);
-    if (retval == -1) {
-        perror("select()");
-        exit(1);
-    } else if (retval) {
+    if (retval == -1)
+        return; // Error of some kind?
+    if (retval) {
         auto *line = linenoiseEditFeed(&ls);
         /* A NULL return means: line editing is continuing.
         * Otherwise the user hit enter or stopped editing
@@ -62,35 +70,110 @@ void pragma::console::impl::update_linenoise() {
         if (line != linenoiseEditMore) {
             linenoiseEditStop(&ls);
 
-            pragma::get_engine()->ConsoleInput(line);
+            pragma::get_engine()->ConsoleInput(line, false);
             linenoiseHistoryAdd(line);
 
-            //free(line); // TODO?
-            linenoiseEditStart(&ls,-1,-1,buf,sizeof(buf),"> ");
+            linenoiseFree(const_cast<char*>(line));
+            linenoiseEditStart(&ls,-1,-1,buf,sizeof(buf),PROMPT_PREFIX);
         }
-    } else {
-        // Timeout occurred
-        //       static int counter = 0;
-        //      linenoiseHide(&ls);
-        //printf("Async output %d.\n", counter++);
-        //        linenoiseShow(&ls);
+    }
+}
+
+static void get_autocomplete_options(const std::string &cmd, std::vector<std::string> &args, uint32_t autoCompleteEntryLimit) {
+    auto *en = pragma::get_engine();
+    std::vector<std::string> subStrings {};
+    ustring::explode_whitespace(cmd, subStrings);
+    if(subStrings.empty() == false) {
+        auto *cf = en->GetConVar(subStrings.front());
+        if(cf && cf->GetType() == ConType::Command) {
+            auto &c = static_cast<ConCommand &>(*cf);
+            auto &fAutoComplete = c.GetAutoCompleteCallback();
+            if(fAutoComplete) {
+                auto arg = (subStrings.size() > 1) ? subStrings.at(1) : std::string {};
+                fAutoComplete(arg, args);
+                for(auto &arg : args)
+                    arg = subStrings.front() + " " + arg;
+                return;
+            }
+        }
+    }
+
+    std::vector<std::pair<std::string_view, float>> bestCandidates(autoCompleteEntryLimit, std::pair<std::string_view, float> {std::string_view {}, std::numeric_limits<float>::max()});
+    std::unordered_set<std::string> traversed;
+    const auto fProcessConVars = [&cmd, &bestCandidates, &traversed](const std::map<std::string, std::shared_ptr<ConConf>> &conVars) {
+        for(auto &pair : conVars) {
+            if (pair.first.length() < cmd.length())
+                continue;
+            if (!ustring::compare(pair.first.c_str(), cmd.c_str(), false, cmd.length()))
+                continue;
+            if (traversed.find(pair.first) != traversed.end())
+                continue;
+            auto percentage = ustring::calc_similarity(cmd, pair.first);
+            auto it = std::find_if(bestCandidates.begin(), bestCandidates.end(), [](const std::pair<std::string_view, float> &pair) { return pair.second == std::numeric_limits<float>::max(); });
+            if(it == bestCandidates.end())
+                it = std::find_if(bestCandidates.begin(), bestCandidates.end(), [percentage](const std::pair<std::string_view, float> &pair) { return percentage < pair.second; });
+            if(it == bestCandidates.end())
+                continue;
+            it->first = pair.first;
+            it->second = percentage;
+            traversed.insert(pair.first);
+        }
+    };
+    fProcessConVars(en->GetConVars());
+    auto *cl = en->GetClientState();
+    if(cl != nullptr)
+        fProcessConVars(cl->GetConVars());
+    auto *sv = en->GetServerNetworkState();
+    if(sv != nullptr)
+        fProcessConVars(sv->GetConVars());
+    args.reserve(bestCandidates.size());
+    for(auto &candidate : bestCandidates) {
+        if(candidate.second == std::numeric_limits<float>::max())
+            break;
+        args.push_back(std::string {candidate.first});
     }
 }
 
 void completion(const char *buf, linenoiseCompletions *lc) {
-    if (buf[0] == 'h') {
-        linenoiseAddCompletion(lc,"hello");
-        linenoiseAddCompletion(lc,"hello there");
-    }
+    std::vector<std::string> options;
+    get_autocomplete_options(buf, options,100);
+    for (auto &option : options)
+        linenoiseAddCompletion(lc, option.c_str());
 }
 
 const char *hints(const char *buf, int *color, int *bold) {
-    if (!strcasecmp(buf,"hello")) {
-        *color = 35;
+    std::string cmd {buf};
+    if (cmd.length() == 0)
+        return nullptr;
+    static std::string bestCandidate;
+    bestCandidate.clear();
+    const auto fProcessConVars = [&cmd](const std::map<std::string, std::shared_ptr<ConConf>> &conVars) {
+        for(auto &pair : conVars) {
+            if (pair.first.length() < cmd.length())
+                continue;
+            if (!bestCandidate.empty() && pair.first.length() > bestCandidate.size())
+                continue;
+            if (!ustring::compare(pair.first.c_str(), cmd.c_str(), false, cmd.length()))
+                continue;
+            bestCandidate = pair.first;
+        }
+    };
+
+    auto *en = pragma::get_engine();
+    fProcessConVars(en->GetConVars());
+    auto *cl = en->GetClientState();
+    if(cl != nullptr)
+        fProcessConVars(cl->GetConVars());
+    auto *sv = en->GetClientState();
+    if(sv != nullptr)
+        fProcessConVars(sv->GetConVars());
+    if (!bestCandidate.empty()) {
+        *color = 35; // ANSI color for purple
         *bold = 0;
-        return " World";
+        bestCandidate = bestCandidate.substr(strlen(buf));
+        return bestCandidate.c_str();
     }
-    return NULL;
+    return nullptr;
 }
 
 #endif

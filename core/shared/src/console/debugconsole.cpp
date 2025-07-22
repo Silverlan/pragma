@@ -15,6 +15,7 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <poll.h>
+#include "pragma/console/linenoise.hpp"
 #endif
 
 #ifdef __linux__
@@ -99,8 +100,19 @@ Engine::ConsoleInstance::ConsoleInstance()
 {
 	console = std::make_unique<DebugConsole>();
 	console->open();
-	consoleThread = std::make_unique<std::thread>(std::bind(&KeyboardInput));
-	util::set_thread_name(*consoleThread, "pr_console_input_listener");
+
+	auto useConsoleThread = true;
+#ifdef __linux__
+	auto useLinenoise = true; // TODO
+	if (useLinenoise) {
+		useConsoleThread = false;
+		pragma::console::impl::init_linenoise();
+	}
+#endif
+	if (useConsoleThread) {
+		consoleThread = std::make_unique<std::thread>(std::bind(&KeyboardInput));
+		util::set_thread_name(*consoleThread, "pr_console_input_listener");
+	}
 }
 
 Engine::ConsoleInstance::~ConsoleInstance()
@@ -146,6 +158,11 @@ DebugConsole *Engine::GetConsole() { return m_consoleInfo ? m_consoleInfo->conso
 
 void Engine::ProcessConsoleInput(KeyState pressState)
 {
+#ifdef __linux__
+	// TODO: Only if linenoise is enabled
+	pragma::console::impl::update_linenoise();
+#endif
+
 	m_consoleInputMutex.lock();
 	if(m_consoleInput.empty()) {
 		m_consoleInputMutex.unlock();

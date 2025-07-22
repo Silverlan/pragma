@@ -22,6 +22,8 @@ get_submodule("gli","https://github.com/Silverlan/gli.git","bd1f7de24d64c60573d9
 get_submodule("glm","https://github.com/g-truc/glm.git","d58f9bcfedfdb4ef78f2c547601238b4fdbd14b8")
 get_submodule("libnoise","https://github.com/qknight/libnoise.git","9ce0737b55812f7de907e86dc633724524e3a8e8")
 get_submodule("libsamplerate","https://github.com/libsndfile/libsamplerate.git","a2eb2814150a4ada0b49ea3cc5e51170572fc606")
+if platform == "linux":
+    get_submodule("linenoise.cpp","https://github.com/Silverlan/linenoise.cpp.git","74ae32ebf22d18a7e22afe1eeecf04171311ebcf")
 get_submodule("luabind","https://github.com/Silverlan/luabind-deboostified.git","0a84faa0ab6539428300cf7bd2fafcf47cac12c8")
 get_submodule("luajit","https://github.com/Silverlan/LuaJIT.git","95766ce","v2.1")
 get_submodule("lunasvg","https://github.com/sammycage/lunasvg.git","84c71c5")

@@ -40,6 +40,7 @@
 #ifdef __linux__
 #include <pthread.h>
 #include <fcntl.h>
+#include "pragma/console/linenoise.hpp"
 #endif
 
 import util_zip;
@@ -99,8 +100,24 @@ DLLNETWORK Engine *engine = NULL;
 extern std::optional<std::string> g_lpLogFile;
 extern util::LogSeverity g_lpLogLevelCon;
 extern util::LogSeverity g_lpLogLevelFile;
-Engine::Engine(int, char *[]) : CVarHandler(), m_logFile(nullptr), m_tickRate(Engine::DEFAULT_TICK_RATE), m_stateFlags {StateFlags::Running | StateFlags::MultiThreadedAssetLoadingEnabled}
+
+Engine::Engine(int argc, char *argv[]) : CVarHandler(), m_logFile(nullptr), m_tickRate(Engine::DEFAULT_TICK_RATE), m_stateFlags {StateFlags::Running | StateFlags::MultiThreadedAssetLoadingEnabled}
 {
+#ifdef __linux__
+	// Enable linenoise by default
+	umath::set_flag(m_stateFlags, StateFlags::UseLinenoise, true);
+
+	// -disable_linenoise launch option can be used to disable it.
+	// Since launch options are handled *after* the console is initialized, we have to
+	// check for -disable_linenoise early.
+	for (int i=0;i<argc;++i) {
+		if (ustring::compare(argv[i], "-disable_linenoise", false)) {
+			umath::set_flag(m_stateFlags, StateFlags::UseLinenoise, false);
+			break;
+		}
+	}
+#endif
+
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	debug::open_domain();
 #endif
@@ -322,6 +339,10 @@ void Engine::Close()
 	Con::set_output_callback(nullptr);
 	pragma::locale::clear();
 	filemanager::close_file_watcher();
+#ifdef __linux__
+	if (pragma::console::impl::is_linenoise_enabled())
+		pragma::console::impl::close_linenoise();
+#endif
 }
 
 static uint32_t clear_assets(NetworkState *state, pragma::asset::Type type, bool verbose)
@@ -615,6 +636,15 @@ bool Engine::IsDeveloperModeEnabled() const { return umath::is_flag_set(m_stateF
 
 void Engine::SetNonInteractiveMode(bool nonInteractiveMode) { umath::set_flag(m_stateFlags, StateFlags::NonInteractiveMode, nonInteractiveMode); }
 bool Engine::IsNonInteractiveMode() const { return umath::is_flag_set(m_stateFlags, StateFlags::NonInteractiveMode); }
+
+void Engine::SetLinenoiseEnabled(bool enabled) {
+#ifndef __linux__
+	// Linenoise is Linux-only
+	enabled = false;
+#endif
+	umath::set_flag(m_stateFlags, StateFlags::UseLinenoise, enabled);
+}
+bool Engine::IsLinenoiseEnabled() const { return umath::is_flag_set(m_stateFlags, StateFlags::UseLinenoise); }
 
 void Engine::SetCLIOnly(bool cliOnly) { umath::set_flag(m_stateFlags, StateFlags::CLIOnly, cliOnly); }
 bool Engine::IsCLIOnly() const { return umath::is_flag_set(m_stateFlags, StateFlags::CLIOnly); }

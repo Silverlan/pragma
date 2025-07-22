@@ -142,8 +142,8 @@ DLLSERVER void NET_sv_rcon(pragma::networking::IServerClient &session, NetPacket
 		Player *pl = game->GetPlayer(session);
 		if(pl == NULL)
 			return;
-		pl->PrintMessage("Bad RCON password",MESSAGE::PRINTCONSOLE);*/
-		Con::crit << "Incorrect RCON Password! (" << passCl << ")" << Con::endl; // WEAVETODO
+		pl->PrintMessage("Bad RCON password",MESSAGE::PRINTCONSOLE);*/ // TODO
+		Con::cerr << "Incorrect RCON Password! (" << passCl << ")" << Con::endl;
 		return;
 	}
 	Con::csv << "Remote console input from " << session.GetIdentifier() << ": '" << cvar << "'" << Con::endl;

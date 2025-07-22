@@ -36,6 +36,10 @@ pr_add_third_party_dependency(${PROJ_NAME} bvh PUBLIC)
 pr_add_third_party_dependency(${PROJ_NAME} eigen)
 pr_add_third_party_dependency(${PROJ_NAME} miniball)
 
+if(UNIX)
+	pr_add_dependency(${PROJ_NAME} linenoise TARGET)
+endif()
+
 # Required by lnoise.cpp
 pr_add_dependency(${PROJ_NAME} noise-static TARGET)
 pr_add_dependency(${PROJ_NAME} noiseutils-static TARGET)

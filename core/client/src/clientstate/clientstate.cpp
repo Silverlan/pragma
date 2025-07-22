@@ -324,12 +324,6 @@ void ClientState::CloseMainMenu()
 	if(menu == NULL || !menu->IsVisible())
 		return;
 	menu->SetVisible(false);
-	auto w = c_engine->GetRenderContext().GetWindowWidth();
-	auto h = c_engine->GetRenderContext().GetWindowHeight();
-	auto &window = c_engine->GetWindow();
-	if(window->IsFocused())
-		window->SetCursorPos(Vector2i(w / 2, h / 2));
-	window->SetCursorInputMode(pragma::platform::CursorMode::Disabled);
 }
 void ClientState::OpenMainMenu()
 {

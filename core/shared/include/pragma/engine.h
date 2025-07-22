@@ -128,6 +128,8 @@ class DLLNETWORK Engine : public CVarHandler, public CallbackHandler {
 		ConsoleSubsystem = RunUpdaterOnClose << 1u,
 		CLIOnly = ConsoleSubsystem << 1u,
 		NonInteractiveMode = CLIOnly << 1u,
+
+		UseLinenoise = NonInteractiveMode << 1u, // Linux only
 	};
   public:
 	DEBUGCONSOLE;
@@ -172,11 +174,14 @@ class DLLNETWORK Engine : public CVarHandler, public CallbackHandler {
 	void SetNonInteractiveMode(bool nonInteractiveMode);
 	bool IsNonInteractiveMode() const;
 
+	void SetLinenoiseEnabled(bool enabled);
+	bool IsLinenoiseEnabled() const;
+
 	void SetCLIOnly(bool cliOnly);
 	bool IsCLIOnly() const;
 
 	// Console
-	void ConsoleInput(const std::string_view &line);
+	void ConsoleInput(const std::string_view &line, bool printLine = true);
 	void ProcessConsoleInput(const std::string_view &line, KeyState pressState = KeyState::Press, float magnitude = 1.f);
 	// Lua
 	virtual NetworkState *GetNetworkState(lua_State *l);
@@ -308,7 +313,12 @@ class DLLNETWORK Engine : public CVarHandler, public CallbackHandler {
 	};
 	std::unique_ptr<ConsoleInstance> m_consoleInfo = nullptr;
 	ConsoleType m_consoleType = ConsoleType::Terminal;
-	std::queue<std::string> m_consoleInput;
+
+	struct ConsoleInputInfo {
+		std::string line;
+		bool printLine = false;
+	};
+	std::queue<ConsoleInputInfo> m_consoleInput;
 	std::mutex m_consoleInputMutex;
 
 	std::queue<ConsoleOutput> m_consoleOutput = {};

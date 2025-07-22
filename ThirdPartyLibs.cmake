@@ -29,6 +29,13 @@ pr_include_third_party_library(mpaheader)
 pr_set_target_folder(mpaheader third_party_libs)
 #
 
+if(UNIX)
+    # linenoise
+    pr_include_third_party_library(linenoise.cpp TARGET linenoise)
+    pr_set_target_folder(linenoise third_party_libs)
+    #
+endif()
+
 # VKVParser
 pr_include_third_party_library(
     vkv_parser

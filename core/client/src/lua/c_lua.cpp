@@ -124,7 +124,11 @@ void CGame::RegisterLua()
 	  luabind::def("get_truncated_text_length", static_cast<std::pair<size_t, size_t> (*)(lua_State *, const std::string &, const FontInfo &, uint32_t)>(Lua::engine::get_truncated_text_length)),
 
 	  luabind::def("poll_console_output", Lua::engine::poll_console_output), luabind::def("library_exists", Lua::engine::LibraryExists), luabind::def("load_library", Lua::engine::LoadLibrary), luabind::def("unload_library", Lua::engine::UnloadLibrary),
-	  luabind::def("is_library_loaded", Lua::engine::IsLibraryLoaded), luabind::def("get_info", Lua::engine::get_info), luabind::def("get_user_data_dir", util::get_user_data_dir), luabind::def("get_resource_dirs", util::get_resource_dirs)];
+	  luabind::def("is_library_loaded", Lua::engine::IsLibraryLoaded), luabind::def("get_info", Lua::engine::get_info), luabind::def("get_user_data_dir", util::get_user_data_dir), luabind::def("get_resource_dirs", util::get_resource_dirs),
+	  luabind::def("open_user_data_dir_in_explorer", +[]() {
+		  auto &dir = filemanager::get_absolute_primary_root_path();
+		  util::open_path_in_explorer(dir.GetString());
+	  })];
 
 	Lua::RegisterLibrary(GetLuaState(), "game",
 	  {

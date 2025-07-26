@@ -254,6 +254,11 @@ static void LPARAM_disable_ansi_color_codes(const std::vector<std::string> &argv
 	pragma::logging::set_ansi_color_codes_enabled(false);
 	Con::disable_ansi_color_codes();
 }
+bool g_lpManagedByPackageManager = false;
+static void LPARAM_managed_by_package_manager(const std::vector<std::string> &argv)
+{
+	g_lpManagedByPackageManager = true;
+}
 
 REGISTER_LAUNCH_PARAMETER_HELP(-console, LPARAM_console, "", "start with the console open");
 REGISTER_LAUNCH_PARAMETER_HELP(-dev, LPARAM_dev, "", "enable developer mode");
@@ -267,6 +272,7 @@ REGISTER_LAUNCH_PARAMETER_HELP(-console_subsystem, LPARAM_console_subsystem, "",
 REGISTER_LAUNCH_PARAMETER_HELP(-non_interactive, LPARAM_non_interactive, "", "if enabled, terminal user inputs will be ignored");
 REGISTER_LAUNCH_PARAMETER_HELP(-disable_linenoise, LPARAM_disable_linenoise, "", "if set, linenoise will not be used, which will disable auto-suggestions and hints for terminal inputs");
 REGISTER_LAUNCH_PARAMETER_HELP(-disable_ansi_color_codes, LPARAM_disable_ansi_color_codes, "", "if set, no ansi color codes will be used in console/log outputs.");
+REGISTER_LAUNCH_PARAMETER_HELP(-managed_by_package_manager, LPARAM_managed_by_package_manager, "", "if set, automatic updates are disabled.");
 
 DLLNETWORK std::string g_lpUserDataDir {};
 static void LPARAM_user_data_dir(const std::vector<std::string> &argv)

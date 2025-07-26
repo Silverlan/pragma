@@ -128,5 +128,10 @@ void Lua::engine::register_shared_functions(lua_State *l, luabind::module_ &modE
 		    path.PopFront();
 		    path = path + "addons/" + subAddon;
 		    return AddonSystem::MountAddon(path.GetString());
-	    })];
+	    }),
+	    luabind::def(
+	  "is_managed_by_package_manager", +[](lua_State *l) {
+		  return pragma::get_engine()->IsPackageManagerInstallation();
+	  })
+	    ];
 }

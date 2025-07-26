@@ -100,9 +100,12 @@ DLLNETWORK Engine *engine = NULL;
 extern std::optional<std::string> g_lpLogFile;
 extern util::LogSeverity g_lpLogLevelCon;
 extern util::LogSeverity g_lpLogLevelFile;
+extern bool g_lpManagedByPackageManager;
 
 Engine::Engine(int argc, char *argv[]) : CVarHandler(), m_logFile(nullptr), m_tickRate(Engine::DEFAULT_TICK_RATE), m_stateFlags {StateFlags::Running | StateFlags::MultiThreadedAssetLoadingEnabled}
 {
+	if (g_lpManagedByPackageManager)
+		SetPackageManagerInstallation(true);
 #ifdef __linux__
 	// Enable linenoise by default
 	umath::set_flag(m_stateFlags, StateFlags::UseLinenoise, true);
@@ -645,6 +648,9 @@ void Engine::SetLinenoiseEnabled(bool enabled) {
 	umath::set_flag(m_stateFlags, StateFlags::UseLinenoise, enabled);
 }
 bool Engine::IsLinenoiseEnabled() const { return umath::is_flag_set(m_stateFlags, StateFlags::UseLinenoise); }
+
+void Engine::SetPackageManagerInstallation(bool isPackageManagerInstallation) { umath::set_flag(m_stateFlags, StateFlags::PackageManagerInstallation, isPackageManagerInstallation); }
+bool Engine::IsPackageManagerInstallation() const { return umath::is_flag_set(m_stateFlags, StateFlags::PackageManagerInstallation); }
 
 void Engine::SetCLIOnly(bool cliOnly) { umath::set_flag(m_stateFlags, StateFlags::CLIOnly, cliOnly); }
 bool Engine::IsCLIOnly() const { return umath::is_flag_set(m_stateFlags, StateFlags::CLIOnly); }

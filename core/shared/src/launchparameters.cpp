@@ -259,6 +259,11 @@ static void LPARAM_managed_by_package_manager(const std::vector<std::string> &ar
 {
 	g_lpManagedByPackageManager = true;
 }
+bool g_lpSandboxed = false;
+static void LPARAM_sandboxed(const std::vector<std::string> &argv)
+{
+	g_lpSandboxed = true;
+}
 
 REGISTER_LAUNCH_PARAMETER_HELP(-console, LPARAM_console, "", "start with the console open");
 REGISTER_LAUNCH_PARAMETER_HELP(-dev, LPARAM_dev, "", "enable developer mode");
@@ -273,6 +278,7 @@ REGISTER_LAUNCH_PARAMETER_HELP(-non_interactive, LPARAM_non_interactive, "", "if
 REGISTER_LAUNCH_PARAMETER_HELP(-disable_linenoise, LPARAM_disable_linenoise, "", "if set, linenoise will not be used, which will disable auto-suggestions and hints for terminal inputs");
 REGISTER_LAUNCH_PARAMETER_HELP(-disable_ansi_color_codes, LPARAM_disable_ansi_color_codes, "", "if set, no ansi color codes will be used in console/log outputs.");
 REGISTER_LAUNCH_PARAMETER_HELP(-managed_by_package_manager, LPARAM_managed_by_package_manager, "", "if set, automatic updates are disabled.");
+REGISTER_LAUNCH_PARAMETER_HELP(-sandboxed, LPARAM_sandboxed, "", "if set, indicates that the application is sandboxed, and that access to the installation files is limited.");
 
 DLLNETWORK std::string g_lpUserDataDir {};
 static void LPARAM_user_data_dir(const std::vector<std::string> &argv)

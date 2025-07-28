@@ -77,7 +77,7 @@ pr_install_git_repository(matcaps "https://github.com/Silverlan/pragma_matcaps.g
 if(WITH_COMMON_MODULES)
     # Unfortunately ExternalProject_Add strips the first component of the tar.gz and there is no way to disable that behavior.
     # For this reason we have to re-add the root folder as argument here.
-    pr_install_git_release(mount_external "Silverlan/pr_mount_external_prebuilt" "modules" "2025-07-20")
-    pr_install_git_release(rig "Silverlan/pr_rig_prebuilt" "addons" "2025-07-20")
-    pr_install_git_release(ik "Silverlan/pr_ik_prebuilt" "modules" "2025-07-20")
+    pr_install_git_release(mount_external "Silverlan/pr_mount_external_prebuilt" "modules" "2025-07-28")
+    pr_install_git_release(rig "Silverlan/pr_rig_prebuilt" "addons" "2025-07-28")
+    pr_install_git_release(ik "Silverlan/pr_ik_prebuilt" "modules" "2025-07-28")
 endif()

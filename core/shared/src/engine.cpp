@@ -101,11 +101,10 @@ extern std::optional<std::string> g_lpLogFile;
 extern util::LogSeverity g_lpLogLevelCon;
 extern util::LogSeverity g_lpLogLevelFile;
 extern bool g_lpManagedByPackageManager;
+extern bool g_lpSandboxed;
 
 Engine::Engine(int argc, char *argv[]) : CVarHandler(), m_logFile(nullptr), m_tickRate(Engine::DEFAULT_TICK_RATE), m_stateFlags {StateFlags::Running | StateFlags::MultiThreadedAssetLoadingEnabled}
 {
-	if (g_lpManagedByPackageManager)
-		SetPackageManagerInstallation(true);
 #ifdef __linux__
 	// Enable linenoise by default
 	umath::set_flag(m_stateFlags, StateFlags::UseLinenoise, true);
@@ -649,8 +648,11 @@ void Engine::SetLinenoiseEnabled(bool enabled) {
 }
 bool Engine::IsLinenoiseEnabled() const { return umath::is_flag_set(m_stateFlags, StateFlags::UseLinenoise); }
 
-void Engine::SetPackageManagerInstallation(bool isPackageManagerInstallation) { umath::set_flag(m_stateFlags, StateFlags::PackageManagerInstallation, isPackageManagerInstallation); }
-bool Engine::IsPackageManagerInstallation() const { return umath::is_flag_set(m_stateFlags, StateFlags::PackageManagerInstallation); }
+void Engine::SetManagedByPackageManager(bool isPackageManagerInstallation) { umath::set_flag(m_stateFlags, StateFlags::ManagedByPackageManager, isPackageManagerInstallation); }
+bool Engine::IsManagedByPackageManager() const { return umath::is_flag_set(m_stateFlags, StateFlags::ManagedByPackageManager); }
+
+void Engine::SetSandboxed(bool sandboxed) { umath::set_flag(m_stateFlags, StateFlags::Sandboxed, sandboxed); }
+bool Engine::IsSandboxed() const { return umath::is_flag_set(m_stateFlags, StateFlags::Sandboxed); }
 
 void Engine::SetCLIOnly(bool cliOnly) { umath::set_flag(m_stateFlags, StateFlags::CLIOnly, cliOnly); }
 bool Engine::IsCLIOnly() const { return umath::is_flag_set(m_stateFlags, StateFlags::CLIOnly); }
@@ -663,6 +665,11 @@ extern std::vector<std::string> g_lpResourceDirs;
 bool Engine::Initialize(int argc, char *argv[])
 {
 	InitLaunchOptions(argc, argv);
+
+	if (g_lpManagedByPackageManager)
+		SetManagedByPackageManager(true);
+	if (g_lpSandboxed)
+		SetSandboxed(true);
 
 	// Initialize file system
 	{

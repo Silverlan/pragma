@@ -191,7 +191,7 @@ void Engine::RegisterConsoleCommands()
 		  AddTickEvent([this, map]() { StartDefaultGame(map); });
 	  },
 	  ConVarFlags::None, "Loads the given map immediately. Usage: map <mapName>",
-	  [](const std::string &arg, std::vector<std::string> &autoCompleteOptions) {
+	  [](const std::string &arg, std::vector<std::string> &autoCompleteOptions, bool exactPrefix) {
 		  std::vector<std::string> resFiles;
 		  auto exts = pragma::asset::get_supported_extensions(pragma::asset::Type::Map);
 		  for(auto &ext : exts)
@@ -200,16 +200,25 @@ void Engine::RegisterConsoleCommands()
 			  ufile::remove_extension_from_filename(f, exts);
 		  auto it = resFiles.begin();
 		  std::vector<std::string_view> similarCandidates {};
-		  ustring::gather_similar_elements(
-		    arg,
-		    [&it, &resFiles]() -> std::optional<std::string_view> {
-			    if(it == resFiles.end())
-				    return {};
-			    auto &name = *it;
-			    ++it;
-			    return name;
-		    },
-		    similarCandidates, 15);
+	  	if (exactPrefix) {
+	  		for (auto &f : resFiles) {
+	  			if (!ustring::compare(f.c_str(), arg.c_str(), false, arg.length()))
+	  				continue;
+	  			similarCandidates.push_back(f);
+	  		}
+	  	}
+	  	else {
+	  		ustring::gather_similar_elements(
+				arg,
+				[&it, &resFiles]() -> std::optional<std::string_view> {
+					if(it == resFiles.end())
+						return {};
+					auto &name = *it;
+					++it;
+					return name;
+				},
+				similarCandidates, 15);
+	  	}
 
 		  autoCompleteOptions.reserve(similarCandidates.size());
 		  for(auto &candidate : similarCandidates) {

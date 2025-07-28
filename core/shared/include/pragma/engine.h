@@ -129,7 +129,8 @@ class DLLNETWORK Engine : public CVarHandler, public CallbackHandler {
 		CLIOnly = ConsoleSubsystem << 1u,
 		NonInteractiveMode = CLIOnly << 1u,
 		UseLinenoise = NonInteractiveMode << 1u, // Linux only
-		PackageManagerInstallation = UseLinenoise << 1u,
+		ManagedByPackageManager = UseLinenoise << 1u,
+		Sandboxed = ManagedByPackageManager << 1u,
 	};
   public:
 	DEBUGCONSOLE;
@@ -177,8 +178,11 @@ class DLLNETWORK Engine : public CVarHandler, public CallbackHandler {
 	void SetLinenoiseEnabled(bool enabled);
 	bool IsLinenoiseEnabled() const;
 
-	void SetPackageManagerInstallation(bool isPackageManagerInstallation);
-	bool IsPackageManagerInstallation() const;
+	void SetManagedByPackageManager(bool isManaged);
+	bool IsManagedByPackageManager() const;
+
+	void SetSandboxed(bool sandboxed);
+	bool IsSandboxed() const;
 
 	void SetCLIOnly(bool cliOnly);
 	bool IsCLIOnly() const;

@@ -131,7 +131,11 @@ void Lua::engine::register_shared_functions(lua_State *l, luabind::module_ &modE
 	    }),
 	    luabind::def(
 	  "is_managed_by_package_manager", +[](lua_State *l) {
-		  return pragma::get_engine()->IsPackageManagerInstallation();
-	  })
+		  return pragma::get_engine()->IsManagedByPackageManager();
+	  }),
+	  luabind::def(
+		"is_application_sandboxed", +[](lua_State *l) {
+		  return pragma::get_engine()->IsSandboxed();
+		})
 	    ];
 }

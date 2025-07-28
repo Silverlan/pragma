@@ -483,15 +483,6 @@ def add_pragma_module(name,repositoryUrl=None,commitSha=None,branch=None,skipBui
 	}
 	module_info.append(module)
 
-def add_pragma_module_prebuilt(name, engineVersion="", tag_name="latest"):
-	url = "https://github.com/" +name +"/releases/download/"
-	if len(engineVersion) > 0:
-		url = url +engineVersion +"/"
-	else:
-		url = url +tag_name +"/"
-
-	modules_prebuilt.append(url)
-
 def execfile(filepath, globals=None, locals=None, args=None):
 	if globals is None:
 		globals = {}
@@ -686,9 +677,6 @@ if with_common_modules:
 		commitSha="0635a9ada3e95511a493bc0e97d4dda570d6dbea",
 		repositoryUrl="https://github.com/Silverlan/pr_prosper_opengl.git"
 	)
-	add_pragma_module_prebuilt("Silverlan/pr_mount_external_prebuilt", "2025-07-20")
-	add_pragma_module_prebuilt("Silverlan/pr_rig_prebuilt", "2025-07-20")
-	add_pragma_module_prebuilt("Silverlan/pr_ik_prebuilt", "2025-07-20")
 
 if with_pfm:
 	if with_core_pfm_modules or with_all_pfm_modules:
@@ -710,7 +698,7 @@ if with_pfm:
 		)
 		add_pragma_module(
 			name="pr_unirender",
-			commitSha="95bff2a6b01de2ac831e85412564b48ddb13f088",
+			commitSha="8b599ed0dfb41223c14a22dc6312c46d1351116c",
 			repositoryUrl="https://github.com/Silverlan/pr_cycles.git"
 		)
 		add_pragma_module(
@@ -831,6 +819,13 @@ if len(vtune_include_path) > 0 or len(vtune_library_path) > 0:
 	else:
 		raise argparse.ArgumentError(None,"Both the --vtune-include-path and --vtune-library-path options have to be specified to enable VTune support!")
 
+if with_pfm:
+	cmake_args += ["-DWITH_PFM=1"]
+if with_vr:
+	cmake_args += ["-DWITH_VR=1"]
+if with_common_entities:
+	cmake_args += ["-DWITH_COMMON_ENTITIES=1"]
+
 cmake_args += additional_cmake_args
 cmake_args.append("-DCMAKE_POLICY_VERSION_MINIMUM=4.0")
 cmake_args.append("-DPRAGMA_DEPS_DIR=" +config.deps_dir +"/" +config.deps_staging_dir)
@@ -860,28 +855,6 @@ def download_addon(name,addonName,url,commitId=None):
 		with open("git_info.txt", "w") as f:
 			f.write(f"commit: {commit_id}\n")
 	os.chdir("..")
-
-curDir = os.getcwd()
-if not skip_repository_updates:
-	if with_pfm:
-		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","9742fcd89708ccfd5d895f412dd9eee910fc21a1")
-		download_addon("model editor","tool_model_editor","https://github.com/Silverlan/pragma_model_editor.git","f34c235f225406374643a1a5a1b6349e1fc6c7f6")
-
-	if with_vr:
-		download_addon("VR","virtual_reality","https://github.com/Silverlan/PragmaVR.git","2d5360ac6cafefaecb5bf2b5078bad191e7ecc57")
-
-	if with_pfm:
-		download_addon("PFM Living Room Demo","pfm_demo_living_room","https://github.com/Silverlan/pfm_demo_living_room.git","4cbecad4a2d6f502b6d9709178883678101f7e2c")
-		download_addon("PFM Bedroom Demo","pfm_demo_bedroom","https://github.com/Silverlan/pfm_demo_bedroom.git","0fed1d5b54a25c3ded2ce906e7da80ca8dd2fb0d")
-		download_addon("PFM Tutorials","pfm_tutorials","https://github.com/Silverlan/pfm_tutorials.git","e4de36ae6f607cbca26d1a41e0f3f841443f91e0")
-
-	if with_common_entities:
-		download_addon("HL","pragma_hl","https://github.com/Silverlan/pragma_hl.git","4f42a0ab6b71b3b5b458bffca6cdc0fcb0de83ea")
-		download_addon("TF2","pragma_tf2","https://github.com/Silverlan/pragma_tf2.git","1b36edc5804c87fde129e94c38fa52b2fd845e42")
-
-	download_addon("Matcaps","matcaps","https://github.com/Silverlan/pragma_matcaps.git","304800623fc6c07901053fb41428fa2c430f2d0d")
-
-os.chdir(curDir)
 
 ########## Write Build Configuration ##########
 cfg = {}

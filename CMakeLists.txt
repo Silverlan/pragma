@@ -6,6 +6,11 @@ include(${CMAKE_SOURCE_DIR}/cmake/pr_install.cmake)
 
 project(pragma)
 
+option(WITH_PFM "Build with Pragma Filmmaker?" OFF)
+option(WITH_VR "Build with VR support?" OFF)
+option(WITH_COMMON_ENTITIES "Build with common entity scripts?" OFF)
+option(WITH_COMMON_MODULES "Build with common modules?" ON)
+
 # Global settings
 set(CMAKE_COLOR_DIAGNOSTICS ON)
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
@@ -280,6 +285,9 @@ install(
     DIRECTORY assets/
     DESTINATION "."
     COMPONENT ${PRAGMA_INSTALL_COMPONENT_FULL})
+
+message("Processing addons...")
+include(${CMAKE_SOURCE_DIR}/Addons.cmake)
 
 if(UNIX)
     add_custom_command(

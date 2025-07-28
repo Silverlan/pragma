@@ -90,7 +90,7 @@ static void get_autocomplete_options(const std::string &cmd, std::vector<std::st
             auto &fAutoComplete = c.GetAutoCompleteCallback();
             if(fAutoComplete) {
                 auto arg = (subStrings.size() > 1) ? subStrings.at(1) : std::string {};
-                fAutoComplete(arg, args);
+                fAutoComplete(arg, args, true);
                 for(auto &arg : args)
                     arg = subStrings.front() + " " + arg;
                 return;
@@ -170,8 +170,34 @@ const char *hints(const char *buf, int *color, int *bold) {
     if (!bestCandidate.empty()) {
         *color = 35; // ANSI color for purple
         *bold = 0;
-        bestCandidate = bestCandidate.substr(strlen(buf));
+        bestCandidate = ustring::substr(bestCandidate,strlen(buf));
         return bestCandidate.c_str();
+    }
+
+    auto st = cmd.find_first_not_of(ustring::WHITESPACE);
+    st = cmd.find_first_of(ustring::WHITESPACE, st);
+    if (st != std::string::npos) {
+        auto cvarName = ustring::substr(cmd,0,st);
+        ustring::remove_whitespace(cvarName);
+        auto *cf = en->GetConVar(cvarName);
+        if (cf && cf->GetType() == ConType::Command) {
+            auto &c = static_cast<ConCommand &>(*cf);
+            auto &fAutoComplete = c.GetAutoCompleteCallback();
+            if(fAutoComplete) {
+
+                auto arg = ustring::substr(cmd, cmd.find_first_not_of(ustring::WHITESPACE, st));
+                std::vector<std::string> args;
+                fAutoComplete(arg, args, true);
+                if (!args.empty()) {
+                    bestCandidate = args.front();
+                    if (ustring::compare(bestCandidate.c_str(), arg.c_str(), false, arg.length()))
+                        bestCandidate = ustring::substr(bestCandidate,arg.length());
+                    *color = 35; // ANSI color for purple
+                    *bold = 0;
+                    return bestCandidate.c_str();
+                }
+            }
+        }
     }
     return nullptr;
 }

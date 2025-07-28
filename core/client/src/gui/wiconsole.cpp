@@ -242,7 +242,7 @@ void WIConsole::Initialize()
 				auto &fAutoComplete = c.GetAutoCompleteCallback();
 				if(fAutoComplete) {
 					auto arg = (subStrings.size() > 1) ? subStrings.at(1) : std::string {};
-					fAutoComplete(arg, args);
+					fAutoComplete(arg, args, false);
 					for(auto &arg : args)
 						arg = subStrings.front() + " " + arg;
 					return;

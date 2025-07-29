@@ -170,6 +170,7 @@ function(pr_install_directory FILE_PATH)
     install(
         DIRECTORY "${FILE_PATH}"
         DESTINATION "${PA_INSTALL_DIR}"
+        USE_SOURCE_PERMISSIONS
         COMPONENT ${part} ${PA_UNPARSED_ARGUMENTS})
 endfunction(pr_install_directory)
 

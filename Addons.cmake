@@ -57,7 +57,7 @@ function(pr_install_git_release IDENTIFIER BASE_URL BASE_DIR TAG_NAME)
 endfunction()
 
 if(WITH_PFM)
-    pr_install_git_repository(pfm "https://github.com/Silverlan/pfm.git" "9742fcd89708ccfd5d895f412dd9eee910fc21a1" "addons/filmmaker")
+    pr_install_git_repository(pfm "https://github.com/Silverlan/pfm.git" "791e68722c2ec7efed5e17edd715f8e2f68ff746" "addons/filmmaker")
     pr_install_git_repository(model_editor "https://github.com/Silverlan/pragma_model_editor.git" "f34c235f225406374643a1a5a1b6349e1fc6c7f6" "addons/tool_model_editor")
 
     pr_install_git_repository(pfm_demo_living_room "https://github.com/Silverlan/pfm_demo_living_room.git" "4cbecad4a2d6f502b6d9709178883678101f7e2c" "addons/pfm_demo_living_room")

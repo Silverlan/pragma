@@ -13,10 +13,3 @@
 # add_pragma_module(
 #     name = "pr_opencv"
 # )
-
-add_pragma_module(
-    name = "pr_rig",
-    repositoryUrl = "https://github.com/Silverlan/pr_rig.git",
-    commitSha = None,
-    branch = None
-)

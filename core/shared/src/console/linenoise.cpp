@@ -64,9 +64,19 @@ void pragma::console::impl::update_linenoise() {
         return; // Error of some kind?
     if (retval) {
         auto *line = linenoiseEditFeed(&ls);
-        /* A NULL return means: line editing is continuing.
-        * Otherwise the user hit enter or stopped editing
-        * (CTRL+C/D). */
+        if (!line) {
+            if (errno == EAGAIN) {
+                // User has pressed ctrl +c
+            }
+            else if (errno == ENOENT) {
+                // User has pressed ctrl +d
+            }
+            else {
+                // Unknown I/O error
+            }
+            return;
+        }
+
         if (line != linenoiseEditMore) {
             linenoiseEditStop(&ls);
 

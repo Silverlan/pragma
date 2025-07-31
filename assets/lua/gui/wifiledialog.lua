@@ -25,6 +25,7 @@ function gui.WIFileDialog:OnInitialize()
 	self.m_pPath = pPath
 
 	local pButtonOpen = gui.create("WIButton", self)
+	pButtonOpen:SetName("apply")
 	pButtonOpen:AddCallback("OnPressed", function(pButton)
 		self:CallCallbacks("OnFileSelected", self:GetFilePath(false))
 		self:Close()
@@ -32,6 +33,7 @@ function gui.WIFileDialog:OnInitialize()
 	self.m_pButtonOpen = pButtonOpen
 
 	local pButtonCancel = gui.create("WIButton", self)
+	pButtonCancel:SetName("cancel")
 	pButtonCancel:SetText(locale.get_text("cancel"))
 	pButtonCancel:AddCallback("OnPressed", function(pButton)
 		self:Close()
@@ -44,6 +46,7 @@ function gui.WIFileDialog:OnInitialize()
 	self.m_pLbFileName = pLbFileName
 
 	local pFileName = gui.create("WITextEntry", self)
+	pFileName:SetName("filename")
 	self.m_pFileName = pFileName
 
 	local t = gui.create("WIFileExplorer", self)
@@ -245,6 +248,7 @@ gui.register("WIFileDialog", gui.WIFileDialog)
 gui.create_file_open_dialog = function(fcOnFileSelected, parent)
 	local dialog, frame, fileDialog = gui.create_dialog(function()
 		local el = gui.create("WIFileDialog")
+		el:SetName("file_dialog")
 		el:SetType(gui.WIFileDialog.TYPE_OPEN)
 		if fcOnFileSelected ~= nil then
 			el:AddCallback("OnFileSelected", fcOnFileSelected)
@@ -257,6 +261,7 @@ end
 gui.create_file_save_dialog = function(fcOnFileSelected, parent)
 	local dialog, frame, fileDialog = gui.create_dialog(function()
 		local el = gui.create("WIFileDialog")
+		el:SetName("file_dialog")
 		el:SetType(gui.WIFileDialog.TYPE_SAVE)
 		if fcOnFileSelected ~= nil then
 			el:AddCallback("OnFileSelected", fcOnFileSelected)

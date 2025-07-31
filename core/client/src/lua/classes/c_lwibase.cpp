@@ -205,6 +205,18 @@ static void debug_print_hierarchy(const ::WIBase &el, const std::string &t = "")
 	}
 }
 
+static ::WIBase *find_descendant_by_path(::WIBase &el, const std::string &strPath) {
+	auto path = util::DirPath(strPath);
+	auto *p = &el;
+	for (auto &name : path) {
+		auto *child = p->FindDescendantByName(std::string{name});
+		if (!child)
+			return nullptr;
+		p = child;
+	}
+	return p;
+}
+
 void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 {
 	classDef.def(luabind::tostring(luabind::self));
@@ -432,6 +444,7 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	classDef.def("SetBaseElement", &::WIBase::SetBaseElement);
 	classDef.def("IsBaseElement", &::WIBase::IsBaseElement);
 	classDef.def("FindDescendantByName", static_cast<::WIBase *(*)(lua_State *, ::WIBase &, const std::string &)>([](lua_State *l, ::WIBase &hPanel, const std::string &name) { return hPanel.FindDescendantByName(name); }));
+	classDef.def("FindDescendantByPath", &find_descendant_by_path);
 	classDef.def("FindDescendantsByName", static_cast<luabind::tableT<::WIBase> (*)(lua_State *, ::WIBase &, const std::string &)>([](lua_State *l, ::WIBase &hPanel, const std::string &name) -> luabind::tableT<::WIBase> {
 		std::vector<::WIHandle> children {};
 		hPanel.FindDescendantsByName(name, children);

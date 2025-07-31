@@ -112,8 +112,9 @@ Engine::Engine(int argc, char *argv[]) : CVarHandler(), m_logFile(nullptr), m_ti
 	// -disable_linenoise launch option can be used to disable it.
 	// Since launch options are handled *after* the console is initialized, we have to
 	// check for -disable_linenoise early.
+	// We also don't want linenoise enabled if -non_interactive is set.
 	for (int i=0;i<argc;++i) {
-		if (ustring::compare(argv[i], "-disable_linenoise", false)) {
+		if (ustring::compare(argv[i], "-disable_linenoise", false) || ustring::compare(argv[i], "-non_interactive", false)) {
 			umath::set_flag(m_stateFlags, StateFlags::UseLinenoise, false);
 			break;
 		}

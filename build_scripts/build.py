@@ -652,7 +652,7 @@ execfile(scripts_dir +"/user_modules.py",g,l)
 if with_essential_client_modules:
 	add_pragma_module(
 		name="pr_prosper_vulkan",
-		commitSha="c580a9d194a875cef0ee1ee51850836e4e2bda05",
+		commitSha="65e1cfa60b34586fe5f10d79aae9a631a98cb304",
 		repositoryUrl="https://github.com/Silverlan/pr_prosper_vulkan.git"
 	)
 
@@ -669,7 +669,7 @@ if with_common_modules:
 	)
 	add_pragma_module(
 		name="pr_audio_dummy",
-		commitSha="96e5b0359a770a640ebe1801a2babd888e2e8329",
+		commitSha="86a7f142bd1e1f6a24f351e7896a638edf080218",
 		repositoryUrl="https://github.com/Silverlan/pr_audio_dummy.git"
 	)
 	add_pragma_module(

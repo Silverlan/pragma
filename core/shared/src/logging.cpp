@@ -438,7 +438,7 @@ void pragma::detail::initialize_logger(::util::LogSeverity conLogLevel, ::util::
 	logger->set_level(static_cast<spdlog::level::level_enum>(pragma::logging::severity_to_spdlog_level(static_cast<::util::LogSeverity>(umath::min(umath::to_integral(conLogLevel), umath::to_integral(fileLogLevel))))));
 	spdlog::set_default_logger(logger);
 
-	spdlog::info("Logging has started with logging level {}/{}.", magic_enum::enum_name(conLogLevel), magic_enum::enum_name(fileLogLevel));
+	spdlog::info("Logging has started with logging level {} (Console) / {} (File).", magic_enum::enum_name(conLogLevel), magic_enum::enum_name(fileLogLevel));
 	if(logFile.has_value()) {
 		spdlog::info("Log will be written to file '{}'.", *logFile);
 		if(pragma::logging::detail::consoleOutputLogger)

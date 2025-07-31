@@ -160,6 +160,8 @@ DLLNETWORK void LPARAM_log(const std::vector<std::string> &argv)
 		logLevelCon = static_cast<util::LogSeverity>(util::to_int(argv[0]));
 		if(argv.size() > 1)
 			logLevelFile = static_cast<util::LogSeverity>(util::to_int(argv[1]));
+		else
+			logLevelFile = logLevelCon;
 	}
 	g_lpLogLevelCon = logLevelCon;
 	g_lpLogLevelFile = logLevelFile;

@@ -328,7 +328,7 @@ if with_swiftshader:
 			print_msg("SwiftShader not found. Downloading...")
 			git_clone("https://github.com/Silverlan/swiftshader.git")
 		os.chdir("swiftshader")
-		reset_to_commit("8f431ea")
+		reset_to_commit("dc1d9063cd83b2f72d7db157512bf687abed7c21") # Commit id should match release below
 		
 		print_msg("Building SwiftShader...")
 		os.chdir("build")
@@ -339,10 +339,11 @@ if with_swiftshader:
 			mkpath(swiftshader_bin_dir)
 			os.chdir(swiftshader_bin_dir)
 			print_msg("Downloading prebuilt SwiftShader...")
+			base_url = "https://github.com/Silverlan/swiftshader/releases/download/2025-07-31/" # Should match commit id above
 			if platform == "win32":
-				http_extract("https://github.com/Silverlan/swiftshader/releases/download/latest/swiftshader.zip")
+				http_extract(base_url +"swiftshader.zip")
 			else:
-				http_extract("https://github.com/Silverlan/swiftshader/releases/download/latest/swiftshader.tar.gz",format="tar.gz")
+				http_extract(base_url +"swiftshader.tar.gz",format="tar.gz")
 	copy_prebuilt_binaries(swiftshader_bin_dir, "swiftshader")
 
 ########## vcpkg ##########

@@ -493,6 +493,7 @@ skin["wimainmenuelement"] = {
 
 			pText:EnableShadow(true)
 			pText:SetFont(GUI:MENU_ITEM_FONT())
+			pText:SetText(pText:GetText())
 			pText:SetColorRGB(GUI.MENU_ITEM_COLOR)
 			pText:SizeToContents()
 

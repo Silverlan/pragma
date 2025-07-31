@@ -14,7 +14,7 @@ parser = argparse.ArgumentParser(description='Pragma build script', allow_abbrev
 
 ###### Config section
 # When using prebuilt binaries this tag will be used for the download from https://github.com/Silverlan/pragma-deps-lib
-prebuilt_tag = "2025-07-08"
+prebuilt_tag = "2025-07-31"
 ######
 
 # See https://stackoverflow.com/a/43357954/1879228 for boolean args

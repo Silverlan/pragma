@@ -55,6 +55,23 @@ void RenderContext::InitializeRenderAPI()
 			}
 			else
 				spdlog::error("-cpu_rendering option is only supported for Vulkan render API! Ignoring option...");
+#ifdef __linux__
+			// Unfortunately 'additionalSearchDirectories' does not work on Linux, so we'll have to load
+			// the swiftshader library manually before the render module is loaded, otherwise the system
+			// vulkan driver will be used instead of swiftshader.
+			std::string absSwiftshaderPath;
+			std::string relSwiftShaderPath = "modules/swiftshader/libvulkan.so.1";
+			if (filemanager::find_absolute_path(relSwiftShaderPath, absSwiftshaderPath)) {
+				std::string err;
+				auto libVulkan = util::Library::Load(absSwiftshaderPath, {}, &err);
+				if (libVulkan)
+					libVulkan->SetDontFreeLibraryOnDestruct();
+				else
+					spdlog::error("Failed to load swiftshader library '{}': {}. This will likely cause issues.", absSwiftshaderPath, err);
+			}
+			else
+				spdlog::error("Failed to locate swiftshader library {}! This will likely cause issues.", relSwiftShaderPath);
+#endif
 		}
 		m_graphicsAPILib = util::load_library_module(modulePath, additionalSearchDirectories, {}, &outErr);
 		return (m_graphicsAPILib != nullptr);

@@ -13,9 +13,7 @@
 #include "pragma/types.hpp"
 #include <pragma/console/conout.h>
 #include <sharedutils/util_shared_handle.hpp>
-#ifdef _WIN32
 #include <format>
-#endif
 
 class Engine;
 class NetworkState;
@@ -328,7 +326,6 @@ DLLNETWORK std::ostream &operator<<(std::ostream &os, const EntityHandle ent);
 
 DLLNETWORK bool operator==(const EntityHandle &a, const EntityHandle &b);
 
-#ifdef _WIN32
 template<>
 struct std::formatter<BaseEntity> : std::formatter<std::string> {
 	auto format(BaseEntity &ent, format_context &ctx) -> decltype(ctx.out())
@@ -338,7 +335,11 @@ struct std::formatter<BaseEntity> : std::formatter<std::string> {
 		return std::format_to(ctx.out(), "{}", ss.str());
 	}
 };
-#endif
+
+inline std::ostream& operator<<(std::ostream& os, const BaseEntity& ent) {
+	const_cast<BaseEntity&>(ent).print(os);
+	return os;
+}
 
 #include "pragma/lua/converters/entity_converter.hpp"
 

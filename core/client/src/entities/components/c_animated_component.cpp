@@ -276,9 +276,7 @@ void CAnimatedComponent::UpdateBoneMatricesMT()
 	auto &refFrame = *bindPose;
 	auto numBones = GetBoneCount();
 	if(numBones != m_processedBones.size()) {
-		Con::cwar << "Bone count mismatch between processed bones and actual bones for entity ";
-		GetEntity().print(Con::cout);
-		Con::cwar << Con::endl;
+		Con::cwar << "Bone count mismatch between processed bones and actual bones for entity " << GetEntity() << Con::endl;
 		return;
 	}
 	for(unsigned int i = 0; i < GetBoneCount(); i++) {

@@ -58,12 +58,6 @@ bool Lua::is_entity(const luabind::object &o) { return luabind::object_cast_noth
 
 static bool operator==(const BaseEntity &a, const BaseEntity &b) { return &a == &b; }
 
-static std::ostream &operator<<(std::ostream &stream, const BaseEntity &a)
-{
-	const_cast<BaseEntity &>(a).print(stream);
-	return stream;
-}
-
 template<typename T>
 bool set_member_value(lua_State *l, BaseEntity &ent, const std::string &uri, T value)
 {

@@ -243,15 +243,11 @@ void BaseTransformComponent::SetPosition(const Vector3 &pos, Bool bForceUpdate, 
 		return;
 	auto &ent = GetEntity();
 	if(std::isnan(pos.x) || std::isnan(pos.y) || std::isnan(pos.z)) {
-		Con::cwar << "NaN position (" << pos.x << "," << pos.y << "," << pos.z << ") for entity ";
-		ent.print(Con::cout);
-		Con::cwar << "! Ignoring..." << Con::endl;
+		Con::cwar << "NaN position (" << pos.x << "," << pos.y << "," << pos.z << ") for entity "<<ent<< "! Ignoring..." << Con::endl;
 		return;
 	}
 	if(std::isinf(pos.x) || std::isinf(pos.y) || std::isinf(pos.z)) {
-		Con::cwar << "inf position (" << pos.x << "," << pos.y << "," << pos.z << ") for entity ";
-		ent.print(Con::cout);
-		Con::cwar << "! Ignoring..." << Con::endl;
+		Con::cwar << "inf position (" << pos.x << "," << pos.y << "," << pos.z << ") for entity "<<ent<< "! Ignoring..." << Con::endl;
 		return;
 	}
 	m_pose.SetOrigin(pos);
@@ -282,9 +278,7 @@ void BaseTransformComponent::SetRotation(const Quat &q, pragma::CoordinateSpace 
 		return;
 	auto &ent = GetEntity();
 	if(std::isnan(q.w) || std::isnan(q.x) || std::isnan(q.y) || std::isnan(q.z)) {
-		Con::cwar << "NaN rotation (" << q.w << "," << q.x << "," << q.y << "," << q.z << ") for entity ";
-		ent.print(Con::cout);
-		Con::cwar << "! Ignoring..." << Con::endl;
+		Con::cwar << "NaN rotation (" << q.w << "," << q.x << "," << q.y << "," << q.z << ") for entity "<<ent<< "! Ignoring..." << Con::endl;
 		return;
 	}
 	m_pose.SetRotation(q);

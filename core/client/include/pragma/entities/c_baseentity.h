@@ -108,7 +108,6 @@ class DLLCLIENT CBaseEntity : public BaseEntity {
 
 inline DLLCLIENT Con::c_cout &operator<<(Con::c_cout &os, CBaseEntity &ent) { return ent.print(os); }
 
-#ifdef _WIN32
 template<>
 struct std::formatter<CBaseEntity> : std::formatter<std::string> {
 	auto format(CBaseEntity &ent, format_context &ctx) -> decltype(ctx.out())
@@ -118,6 +117,5 @@ struct std::formatter<CBaseEntity> : std::formatter<std::string> {
 		return std::format_to(ctx.out(), "{}", ss.str());
 	}
 };
-#endif
 
 #endif

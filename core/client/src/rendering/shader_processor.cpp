@@ -143,18 +143,14 @@ bool pragma::rendering::ShaderProcessor::RecordBindEntity(CBaseEntity &ent)
 	assert(descSet);
 	if(descSet == nullptr) {
 		if(VERBOSE_RENDER_OUTPUT_ENABLED) {
-			Con::cwar << "[Render] WARNING: Entity ";
-			ent.print(Con::cout);
-			Con::cwar << " has invalid render descriptor set!" << Con::endl;
+			Con::cwar << "[Render] WARNING: Entity "<<ent<< " has invalid render descriptor set!" << Con::endl;
 		}
 		return false;
 	}
 	auto sceneFlags = m_sceneFlags;
 	if(m_curShader->RecordBindEntity(*this, *renderC, *m_currentPipelineLayout, m_entityInstanceDescriptorSetIndex) == false) {
 		if(VERBOSE_RENDER_OUTPUT_ENABLED) {
-			Con::cwar << "[Render] WARNING: Failed to bind entity ";
-			ent.print(Con::cout);
-			Con::cwar << " to shader " << m_curShader->GetIdentifier() << "!" << Con::endl;
+			Con::cwar << "[Render] WARNING: Failed to bind entity "<<ent<< " to shader " << m_curShader->GetIdentifier() << "!" << Con::endl;
 		}
 		return false;
 	}
@@ -230,9 +226,7 @@ bool pragma::rendering::ShaderProcessor::RecordDraw(CModelSubMesh &mesh, pragma:
 	auto &bufferData = *m_modelC->GetRenderBufferData(meshIdx);
 	if(bufferData.renderBuffer == nullptr) {
 		if(VERBOSE_RENDER_OUTPUT_ENABLED) {
-			Con::cwar << "[Render] WARNING: Render buffer data of entity ";
-			m_modelC->GetEntity().print(Con::cout);
-			Con::cwar << " has invalid render buffer!" << Con::endl;
+			Con::cwar << "[Render] WARNING: Render buffer data of entity "<<m_modelC->GetEntity()<< " has invalid render buffer!" << Con::endl;
 		}
 		return false;
 	}
@@ -241,9 +235,7 @@ bool pragma::rendering::ShaderProcessor::RecordDraw(CModelSubMesh &mesh, pragma:
 
 	if(m_cmdBuffer.RecordBindRenderBuffer(*bufferData.renderBuffer) == false) {
 		if(VERBOSE_RENDER_OUTPUT_ENABLED) {
-			Con::cwar << "[Render] WARNING: Failed to bind render buffer of entity ";
-			m_modelC->GetEntity().print(Con::cout);
-			Con::cwar << "!" << Con::endl;
+			Con::cwar << "[Render] WARNING: Failed to bind render buffer of entity "<<m_modelC->GetEntity()<< "!" << Con::endl;
 		}
 		return false;
 	}

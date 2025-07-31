@@ -253,9 +253,7 @@ void Console::commands::debug_dump_component_properties(NetworkState *state, pra
 	if(ents.empty())
 		return;
 	auto *entTgt = ents.front();
-	Con::cout << "Properties of target entity '";
-	entTgt->print(Con::cout);
-	Con::cout << "':" << Con::endl;
+	Con::cout << "Properties of target entity '"<<*entTgt << "':" << Con::endl;
 	for(auto &c : entTgt->GetComponents()) {
 		std::vector<const pragma::ComponentMemberInfo *> memberInfos;
 		uint32_t i = 0;

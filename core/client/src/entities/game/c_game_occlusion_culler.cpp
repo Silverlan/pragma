@@ -203,10 +203,8 @@ DLLCLIENT void CMD_debug_render_octree_dynamic_find(NetworkState *state, pragma:
 	auto *culler = scene ? scene->FindOcclusionCuller() : nullptr;
 	if(culler == nullptr)
 		return;
-	Con::cout << "Searching for entity '";
 	auto *entFind = ents.front();
-	entFind->print(Con::cout);
-	Con::cout << "'..." << Con::endl;
+	Con::cout << "Searching for entity '"<<*entFind<< "'..." << Con::endl;
 
 	auto &octree = culler->GetOcclusionOctree();
 	std::function<const OcclusionOctree<CBaseEntity *>::Node *(const OcclusionOctree<CBaseEntity *>::Node &node)> iterateTree = nullptr;

@@ -389,7 +389,7 @@ static void debug_dump_scene_graph(NetworkState *nw)
 			Con::cout << "\\-- ";
 		else
 			Con::cout << "+-- ";
-		ent.print(Con::cout);
+		Con::cout<<ent;
 		Con::cout << Con::endl;
 
 		auto parentC = ent.GetComponent<pragma::ParentComponent>();

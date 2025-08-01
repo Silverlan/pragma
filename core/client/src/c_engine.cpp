@@ -684,6 +684,8 @@ extern std::optional<Color> g_borderColor;
 extern bool g_windowless;
 void register_game_shaders();
 
+bool CEngine::IsWindowless() const { return g_windowless; }
+
 void CEngine::HandleOpenGLFallback()
 {
 	if(ustring::compare(GetRenderAPI(), std::string {"opengl"}, false))

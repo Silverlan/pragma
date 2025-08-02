@@ -112,7 +112,7 @@ void CrashHandler::InitializeHandlers()
 		g_crashHandler.GenerateCrashDump();
 #else
 		// Relay exception to SetUnhandledExceptionFilter
-		std::rethrow_exception(eptr)
+		std::rethrow_exception(eptr);
 #endif
 	});
 }

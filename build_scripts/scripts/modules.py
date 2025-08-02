@@ -12,6 +12,6 @@ get_submodule("interfaces","https://github.com/Silverlan/pragma_interfaces.git",
 get_submodule("pr_audio_dummy","https://github.com/Silverlan/pr_audio_dummy.git","86a7f142bd1e1f6a24f351e7896a638edf080218")
 get_submodule("pr_curl","https://github.com/Silverlan/pr_curl.git","bb2ea373963de3d291a259dc0302ae4c8c5cb4cd")
 get_submodule("pr_prosper_opengl","https://github.com/Silverlan/pr_prosper_opengl.git","0635a9ada3e95511a493bc0e97d4dda570d6dbea")
-get_submodule("pr_prosper_vulkan","https://github.com/Silverlan/pr_prosper_vulkan.git","6f89615a15c3cda8cea83b4faf31989dacf567a2")
+get_submodule("pr_prosper_vulkan","https://github.com/Silverlan/pr_prosper_vulkan.git","4e7a114cfed4f3527887b6002c3e11df304af29f")
 
 os.chdir(curDir)

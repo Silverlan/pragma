@@ -16,10 +16,6 @@ function tests.TestManager:__init()
 	file.create_path("temp/tests")
 end
 
-function tests.TestManager:__finalize()
-	self:Clear()
-end
-
 function tests.TestManager:AddTest(name)
 	local scriptData = self.m_scripts[name]
 	if scriptData == nil then

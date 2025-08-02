@@ -4,6 +4,7 @@
 module;
 
 #include "debug/crashdump_helper.hpp"
+#include <atomic>
 
 export module pragma.debug.crashdump;
 
@@ -12,10 +13,13 @@ export namespace pragma::debug {
 	class DLLNETWORK CrashHandler {
 	  public:
 		static CrashHandler &Get();
+		static void Initialize();
 		CrashHandler();
 		~CrashHandler();
 		void SetAppName(const std::string &appName);
 	  private:
+		// May be called multiple times if re-initialization is needed
+		void InitializeHandlers();
 		bool GenerateCrashDump() const;
 		std::string m_appName;
 #ifdef _WIN32

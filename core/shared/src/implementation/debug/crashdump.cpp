@@ -30,6 +30,8 @@ import pragma.locale;
 
 using namespace pragma::debug;
 
+static spdlog::logger &LOGGER = pragma::register_logger("crash_handler");
+
 static std::string g_crashExceptionMessage = {};
 static CrashHandler g_crashHandler {};
 
@@ -39,7 +41,12 @@ const std::string &pragma::debug::get_exception_message() {
 
 CrashHandler &CrashHandler::Get() { return g_crashHandler; }
 
-CrashHandler::CrashHandler()
+void CrashHandler::Initialize() {
+	Get().InitializeHandlers();
+}
+
+CrashHandler::CrashHandler() {InitializeHandlers();}
+void CrashHandler::InitializeHandlers()
 {
 #ifdef _WIN32
 	::SetUnhandledExceptionFilter(TopLevelFilter);
@@ -77,6 +84,7 @@ CrashHandler::CrashHandler()
 #else
 	signal(
 	  SIGSEGV, +[](int sig) {
+	  	  LOGGER.critical("SIGSEV {}", sig);
 		  g_crashHandler.m_sig = sig;
 		  g_crashHandler.GenerateCrashDump();
 		  exit(1);
@@ -85,6 +93,7 @@ CrashHandler::CrashHandler()
 	// Note: set_terminate handler is called before SetUnhandledExceptionFilter.
 	// set_terminate allows us to retrieve the underlying message from the exception (if there was one)
 	std::set_terminate([]() {
+		LOGGER.critical("terminate handler invoked...");
 		auto eptr = std::current_exception();
 		if(!eptr) {
 			g_crashExceptionMessage = {};
@@ -99,8 +108,12 @@ CrashHandler::CrashHandler()
 		catch(...) {
 			g_crashExceptionMessage = "Unknown Exception";
 		}
+#ifdef __linux__
+		g_crashHandler.GenerateCrashDump();
+#else
 		// Relay exception to SetUnhandledExceptionFilter
 		std::rethrow_exception(eptr);
+#endif
 	});
 }
 
@@ -263,12 +276,15 @@ bool CrashHandler::GenerateCrashDump(EXCEPTION_POINTERS *pExceptionPointers)
 
 bool CrashHandler::GenerateCrashDump() const
 {
-	spdlog::info("Generating crashdump...");
+	std::cout<<"Generating crashdump..."<<std::endl;
+	LOGGER.info("Generating crashdump...");
 	pragma::flush_loggers();
 
+	LOGGER.debug("Loading localization files...");
 	std::string szResult;
 	pragma::locale::load("prompts.txt");
 
+	LOGGER.debug("Creating 'crashdumps' directory...");
 	FileManager::CreateDirectory("crashdumps");
 
 	// ask the user if they want to save a dump file
@@ -281,12 +297,16 @@ bool CrashHandler::GenerateCrashDump() const
 	if(!shouldShowMsBox)
 		saveDump = true;
 	else {
+		LOGGER.debug("Displaying prompt message...");
 		auto msg = pragma::locale::get_text("prompt_crash");
 		auto res = util::debug::show_message_prompt(msg, util::debug::MessageBoxButtons::YesNo, m_appName);
-		saveDump = (res == util::debug::MessageBoxButton::Yes);
+		// If res is nullopt, the message prompt most likely failed to show. In this case we'll assume yes as
+		// default answer.
+		saveDump = (res == std::nullopt || *res == util::debug::MessageBoxButton::Yes);
 	}
 
 #ifdef __linux__
+	LOGGER.debug("Generating stack backtrace...");
 	void *array[10];
 	size_t size;
 	char **symbols;
@@ -314,6 +334,7 @@ bool CrashHandler::GenerateCrashDump() const
 	if(saveDump) {
 		std::string err;
 		std::string zipFileName;
+		LOGGER.debug("Closing logger...");
 		pragma::detail::close_logger();
 		auto zipFile = Engine::GenerateEngineDump("crashdumps/crashdump", zipFileName, err);
 		if(zipFile) {
@@ -379,6 +400,10 @@ bool CrashHandler::GenerateCrashDump() const
 		engine->HandleOpenGLFallback();
 	}
 
+	// We've done all we can, just force quit at this point
+	exit(1);
+
+	// Unreachable
 	return success;
 }
 

@@ -333,6 +333,8 @@ void Engine::Close()
 
 	umath::set_flag(m_stateFlags, StateFlags::Running, false);
 	util::close_external_archive_manager();
+	m_assetManager = nullptr;
+	util::close_mount_external_library();
 	CloseServerState();
 
 	ClearCommands();

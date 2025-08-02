@@ -17,9 +17,12 @@ extern DLLNETWORK Engine *engine;
 
 static bool s_bModuleInitialized = false;
 
+static std::shared_ptr<util::Library> dllHandle = nullptr;
+void util::close_mount_external_library() {
+	dllHandle = nullptr;
+}
 static std::shared_ptr<util::Library> load_module(NetworkState *nw)
 {
-	static std::shared_ptr<util::Library> dllHandle = nullptr;
 	if(dllHandle == nullptr) {
 		std::string err;
 		dllHandle = nw->InitializeLibrary("mount_external/pr_mount_external", &err);
@@ -123,7 +126,7 @@ static bool port_model(NetworkState *nw, const std::string &path, std::string md
 
 void *util::impl::get_module_func(NetworkState *nw, const std::string &name)
 {
-	static auto dllHandle = load_module(nw);
+	static auto *dllHandle = load_module(nw).get();
 	if(dllHandle == nullptr)
 		return nullptr;
 	return dllHandle->FindSymbolAddress(name);

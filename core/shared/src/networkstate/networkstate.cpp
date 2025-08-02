@@ -587,7 +587,6 @@ bool NetworkState::UnloadLibrary(const std::string &library)
 	lib = nullptr;
 	if(it2 != m_libHandles.end())
 		m_libHandles.erase(it2);
-	s_loadedLibraries.erase(it);
 	return true;
 }
 

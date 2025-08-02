@@ -19,6 +19,7 @@ namespace util {
 		DLLNETWORK void *get_module_func(NetworkState *nw, const std::string &name);
 	};
 	DLLNETWORK std::shared_ptr<util::Library> initialize_external_archive_manager(NetworkState *nw);
+	DLLNETWORK void close_mount_external_library();
 	DLLNETWORK void close_external_archive_manager();
 	DLLNETWORK std::optional<int32_t> get_mounted_game_priority(const std::string &game);
 	DLLNETWORK void set_mounted_game_priority(const std::string &game, int32_t priority);

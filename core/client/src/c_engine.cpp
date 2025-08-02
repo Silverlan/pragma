@@ -711,13 +711,20 @@ bool CEngine::Initialize(int argc, char *argv[])
 	Engine::Initialize(argc, argv);
 
 #ifdef __linux__
-	if(!g_waylandLibdecorPlugin)
-		g_waylandLibdecorPlugin = "cairo";
-	if(g_waylandLibdecorPlugin) {
-		::util::set_env_variable("GDK_BACKEND", "wayland");
+	auto xdgSessionType = util::get_env_variable("XDG_SESSION_TYPE");
+	if (!xdgSessionType || *xdgSessionType != "x11") {
+		// TODO: This may intefere with util::debug::show_message_prompt, which uses
+		// zenity. Test this on wayland!
+		// If util::debug::show_message_prompt works on wayland after these env variables have been set, this comment
+		// can be removed.
+		if(!g_waylandLibdecorPlugin)
+			g_waylandLibdecorPlugin = "cairo";
+		if(g_waylandLibdecorPlugin) {
+			::util::set_env_variable("GDK_BACKEND", "wayland");
 
-		auto path = util::FilePath(util::get_program_path(), "modules/graphics/vulkan/libdecor/plugins", *g_waylandLibdecorPlugin);
-		::util::set_env_variable("LIBDECOR_PLUGIN_DIR", path.GetString());
+			auto path = util::FilePath(util::get_program_path(), "modules/graphics/vulkan/libdecor/plugins", *g_waylandLibdecorPlugin);
+			::util::set_env_variable("LIBDECOR_PLUGIN_DIR", path.GetString());
+		}
 	}
 #endif
 

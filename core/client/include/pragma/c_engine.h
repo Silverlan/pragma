@@ -99,6 +99,8 @@ class DLLCLIENT CEngine : public Engine, public pragma::RenderContext {
 	CallbackHandle AddGPUProfilingHandler(const std::function<void(bool)> &handler);
 	void SetGPUProfilingEnabled(bool bEnabled);
 
+	bool IsWindowless() const;
+
 	virtual bool Initialize(int argc, char *argv[]) override;
 	virtual StateInstance &GetStateInstance(NetworkState &nw) override;
 	StateInstance &GetClientStateInstance();

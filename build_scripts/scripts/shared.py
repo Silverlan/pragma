@@ -296,6 +296,18 @@ def get_submodule(directory,url,commitId=None,branch=None):
 		git_clone(url,directory,branch)
 	if commitId is not None:
 		os.chdir(absDir)
+		full_sha = subprocess.check_output(
+			["git", "rev-parse", "HEAD"], cwd=absDir
+		).decode('utf-8').strip()
+		short_current = full_sha[: len(commitId)]
+		if short_current == commitId:
+			print_msg(f"Already up-to-date at commit '{commitId}'.")
+			os.chdir(curDir)
+			return
+
+		# Reset to the requested commit
+		os.chdir(absDir)
+		print_msg(f"Resetting to commit '{commitId}'...")
 		reset_to_commit(commitId)
 	else:
 		subprocess.run(["git","pull"],check=True)

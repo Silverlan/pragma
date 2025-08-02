@@ -145,7 +145,11 @@ void RenderContext::InitializeRenderAPI()
 		LOGGER.warn(msg.str());
 	});
 	prosper::debug::set_debug_validation_callback([](prosper::DebugReportObjectTypeEXT objectType, const std::string &msg) { LOGGER_VALIDATION.error("{}", msg); });
-	pragma::platform::initialize();
+	err.clear();
+	if (!pragma::platform::initialize(err, c_engine->IsWindowless())) {
+		LOGGER.critical("Failed to initialize GLFW: {}", err);
+		throw std::runtime_error {"Failed to initialize GLFW: " +err};
+	}
 
 	if(GetRenderContext().IsValidationEnabled()) {
 		// A VkImageStencilUsageCreateInfoEXT error is caused due to a bug in Anvil: https://github.com/GPUOpen-LibrariesAndSDKs/Anvil/issues/153

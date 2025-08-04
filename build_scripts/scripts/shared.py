@@ -515,7 +515,7 @@ def copy_prebuilt_binaries(source_dir, lib_name, exclude_terms=None):
 def copy_prebuilt_headers(source_dir, lib_name, exclude_terms=None):
 	global config
 	include_dir = config.prebuilt_bin_dir +"/" +lib_name +"/include/"
-	copy_files(["*.h", "*.hpp", "*.ipp"], source_dir, include_dir, exclude_terms)
+	copy_files(["*.h", "*.hpp", "*.ipp", "*.inl"], source_dir, include_dir, exclude_terms)
 	return include_dir
 
 def sync_dirs(src: str, dst: str) -> None:

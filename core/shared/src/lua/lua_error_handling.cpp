@@ -15,6 +15,7 @@
 #include <pragma/lua/luafunction_call.h>
 #include <sharedutils/util.h>
 #include <sharedutils/util_file.h>
+#include <luabind/exception_handler.hpp>
 #include <stack>
 
 extern DLLNETWORK Engine *engine;
@@ -129,6 +130,18 @@ static void strip_path_until_lua_dir(std::string &shortSrc)
 		shortSrc = "..." + shortSrc.substr(shortSrc.size() - maxLuaPathLen);
 }
 
+static std::string get_clickable_link(const std::string& path, int line) {
+	std::string uri = "file://" + path + "#L" + std::to_string(line);
+
+	std::stringstream ss;
+	ss
+	  << "\033]8;;" << uri << "\007"
+	  << path << ":" << line
+	  << "\033]8;;\007"
+;
+	return ss.str();
+}
+
 static void transform_path(const lua_Debug &d, std::string &errPath, int32_t currentLine)
 {
 	auto start = errPath.find("[string \"");
@@ -147,7 +160,7 @@ static void transform_path(const lua_Debug &d, std::string &errPath, int32_t cur
 			path = "..." + path.substr(path.size() - maxLuaPathLen);
 
 		if(Lua::GetLuaFilePath(Lua::SCRIPT_DIRECTORY_SLASH + path))
-			path = "{[l#luafile:,\"" + path + "\"," + std::to_string(currentLine) + "]}" + path + "{[/l]}";
+			path = get_clickable_link(path, currentLine);
 		errPath = ustring::substr(errPath, 0, qt0 + 1) + path + ustring::substr(errPath, qt1);
 	}
 }

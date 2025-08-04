@@ -517,6 +517,27 @@ if platform == "linux":
 		copy_prebuilt_binaries(ispctc_root +"/build", "ispctc")
 		copy_prebuilt_headers(ispctc_root +"/ispc_texcomp", "ispctc")
 
+if platform == "linux":
+	########## sdbus-cpp ##########
+	os.chdir(deps_dir)
+	sdbus_root = normalize_path(os.getcwd() +"/sdbus-cpp")
+	commit_sha = "7fbfcec455a2af6efe3910baa3089ecba48a9d6d"
+	if not check_repository_commit(sdbus_root, commit_sha, "sdbus-cpp"): 
+		os.chdir(deps_dir)
+		if not Path(sdbus_root).is_dir():
+			print_msg("sdbus-cpp not found. Downloading...")
+			git_clone("https://github.com/Kistler-Group/sdbus-cpp.git")
+		os.chdir(sdbus_root)
+		reset_to_commit(commit_sha)
+
+		mkdir("build",cd=True)
+		sdbus_args = ["-DCMAKE_BUILD_TYPE=Release", "-DSDBUSCPP_BUILD_LIBSYSTEMD=OFF"]
+		cmake_configure_def_toolset("..",generator,sdbus_args)
+		cmake_build(build_config_tp)
+
+		copy_prebuilt_binaries(sdbus_root +"/build/" +build_config_tp, "sdbus-cpp")
+		copy_prebuilt_headers(sdbus_root +"/include", "sdbus-cpp")
+
 ########## freetype (built in win32, sys in linux (set in cmake)) ##########
 if platform == "win32":
 	print_msg("Downloading freetype...")

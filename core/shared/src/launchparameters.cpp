@@ -239,6 +239,13 @@ static void LPARAM_title(const std::vector<std::string> &argv)
 		g_customTitle = argv.front();
 }
 
+DLLNETWORK util::Path g_programIcon {"materials/logo/pragma_window_icon.png"};
+static void LPARAM_icon(const std::vector<std::string> &argv)
+{
+	if(!argv.empty())
+		g_programIcon = util::FilePath(argv.front());
+}
+
 static void LPARAM_luaext(const std::vector<std::string> &argv)
 {
 	Lua::set_extended_lua_modules_enabled(true);
@@ -307,5 +314,6 @@ REGISTER_LAUNCH_PARAMETER_HELP(-experimental_use_vkv_parser, LPARAM_USE_VKV_PARS
 
 REGISTER_LAUNCH_PARAMETER_HELP(-help, LPARAM_help, "-? /?", "show this help message");
 REGISTER_LAUNCH_PARAMETER_HELP(-title, LPARAM_title, "<title>", "changes the window title");
+REGISTER_LAUNCH_PARAMETER_HELP(-icon, LPARAM_icon, "<icon>", "changes the program icon");
 REGISTER_LAUNCH_PARAMETER(/?,LPARAM_help);
 REGISTER_LAUNCH_PARAMETER(-?,LPARAM_help);

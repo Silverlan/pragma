@@ -45,6 +45,9 @@ find_package(libzip REQUIRED)
 find_package(luajit REQUIRED)
 find_package(lua_debugger)
 find_package(zlib REQUIRED)
+if(UNIX)
+    find_package(sdbus_cpp REQUIRED)
+endif()
 #
 
 # This generates a compile_commands.json file in the build directory to help clangd parse the project
@@ -192,6 +195,7 @@ pr_install_targets(
     server
     shared
     sharedutils
+    oskit
     util_image
     util_sound
     util_unicode

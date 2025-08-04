@@ -1702,6 +1702,15 @@ Lua::Interface *CEngine::GetLuaInterface(lua_State *l)
 	return Engine::GetLuaInterface(l);
 }
 
+bool CEngine::IsProgramInFocus() const
+{
+	for (auto &window : GetRenderContext().GetWindows()) {
+		if ((*window)->IsInFocus())
+			return true;
+	}
+	return false;
+}
+
 NetworkState *CEngine::GetNetworkState(lua_State *l)
 {
 	auto *cl = static_cast<ClientState *>(GetClientState());

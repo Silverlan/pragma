@@ -442,7 +442,10 @@ if platform == "linux":
 			# libdecor (required for Wayland)
 			"apt-get install wayland-protocols",
 			"apt-get install libdbus-1-dev",
-			"apt-get install libgtk-3-dev"
+			"apt-get install libgtk-3-dev",
+
+			# Required for libsdbus-c++
+			"apt-get install meson ninja-build libcap-dev libsystemd-dev pkg-config gperf"
 		]
 		install_system_packages(commands, no_confirm)
 

@@ -10,10 +10,13 @@
 #include "pragma/entities/entity_iterator.hpp"
 #include "pragma/lua/libraries/lfile.h"
 #include "pragma/console/conout.h"
+#include "pragma/engine.h"
 #include <sharedutils/util_library.hpp>
 #include <sharedutils/util_path.hpp>
 #include <fsys/ifile.hpp>
 #include <udm.hpp>
+
+import pragma.oskit;
 
 util::ParallelJob<std::vector<Vector2> &> util::generate_lightmap_uvs(NetworkState &nwState, uint32_t atlastWidth, uint32_t atlasHeight, const std::vector<umath::Vertex> &verts, const std::vector<uint32_t> &tris)
 {
@@ -399,4 +402,24 @@ std::vector<util::Path> util::get_resource_dirs()
 	for(auto &path : g_lpResourceDirs)
 		paths.push_back(path);
 	return paths;
+}
+
+bool util::show_notification(const std::string &summary, const std::string &body)
+{
+	if (pragma::get_engine()->IsCLIOnly())
+		return false;
+	// Only show notification if program is not in focus
+	if (pragma::get_engine()->IsProgramInFocus())
+		return false;
+
+	auto iconPath = engine_info::get_icon_path();
+	std::string absIconPath;
+	filemanager::find_absolute_path(iconPath.GetString(), absIconPath);
+
+	pragma::oskit::NotificationInfo info {};
+	info.appName = engine_info::get_name();
+	info.title = summary;
+	info.appIcon = absIconPath;
+	info.body = body;
+	return pragma::oskit::show_notification(info);
 }

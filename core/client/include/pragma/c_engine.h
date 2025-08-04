@@ -88,6 +88,8 @@ class DLLCLIENT CEngine : public Engine, public pragma::RenderContext {
 	using pragma::RenderContext::DrawFrame;
 	virtual void SetAssetMultiThreadedLoadingEnabled(bool enabled) override;
 
+	virtual bool IsProgramInFocus() const override;
+
 	// Debug
 	virtual void DumpDebugInformation(uzip::ZIPFile &zip) const override;
 	pragma::debug::ProfilingStageManager<pragma::debug::GPUProfilingStage> *GetGPUProfilingStageManager();

@@ -13,6 +13,15 @@
 #define PRAGMA_DISCORD_URL "https://discord.gg/Ck5BcCz"
 #define PRAGMA_STEAM_APP_ID 947'100
 
+extern std::optional<std::string> g_customTitle;
+
+std::string engine_info::get_program_title()
+{
+	if (g_customTitle)
+		return *g_customTitle;
+	return get_name();
+}
+
 std::string engine_info::get_identifier()
 {
 	auto name = get_name();
@@ -21,6 +30,12 @@ std::string engine_info::get_identifier()
 }
 
 std::string engine_info::get_name() { return PRAGMA_ENGINE_NAME; }
+
+extern util::Path g_programIcon;
+util::Path engine_info::get_icon_path()
+{
+	return g_programIcon;
+}
 
 std::string engine_info::get_executable_name()
 {

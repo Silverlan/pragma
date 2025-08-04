@@ -18,6 +18,7 @@ pr_add_dependency(${PROJ_NAME} util_source_script TARGET)
 pr_add_dependency(${PROJ_NAME} util_smdmodel TARGET)
 pr_add_dependency(${PROJ_NAME} util_pragma_doc TARGET)
 pr_add_dependency(${PROJ_NAME} util_unicode TARGET PUBLIC)
+pr_add_dependency(${PROJ_NAME} oskit TARGET PRIVATE)
 
 pr_add_dependency(${PROJ_NAME} Recast TARGET)
 pr_add_dependency(${PROJ_NAME} Detour TARGET)

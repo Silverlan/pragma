@@ -46,6 +46,7 @@
 import util_zip;
 import pragma.pad;
 import pragma.locale;
+import pragma.oskit;
 
 const pragma::IServerState &Engine::GetServerStateInterface() const
 {
@@ -180,6 +181,11 @@ Engine::Engine(int argc, char *argv[]) : CVarHandler(), m_logFile(nullptr), m_ti
 
 pragma::asset::AssetManager &Engine::GetAssetManager() { return *m_assetManager; }
 const pragma::asset::AssetManager &Engine::GetAssetManager() const { return const_cast<Engine *>(this)->GetAssetManager(); }
+
+bool Engine::IsProgramInFocus() const
+{
+	return false;
+}
 
 void Engine::ClearConsole() { std::system("cls"); }
 
@@ -344,6 +350,7 @@ void Engine::Close()
 	Con::set_output_callback(nullptr);
 	pragma::locale::clear();
 	filemanager::close_file_watcher();
+	pragma::oskit::shutdown();
 #ifdef __linux__
 	if (pragma::console::impl::is_linenoise_enabled())
 		pragma::console::impl::close_linenoise();

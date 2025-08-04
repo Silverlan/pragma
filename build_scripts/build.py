@@ -45,6 +45,7 @@ parser.add_argument("--build-all", type=str2bool, nargs='?', const=True, default
 parser.add_argument('--build-config', help='The build configuration to use.', default='RelWithDebInfo')
 parser.add_argument('--build-directory', help='Directory to write the build files to. Can be relative or absolute.', default='build')
 parser.add_argument('--deps-directory', help='Directory to write the dependency files to. Can be relative or absolute.', default='deps')
+parser.add_argument("--deps-only", type=str2bool, nargs='?', const=True, default=False, help="Configuration, build and installation of Pragma will be skipped.")
 parser.add_argument('--install-directory', help='Installation directory. Can be relative (to build directory) or absolute.', default='install')
 parser.add_argument('--cmake-arg', help='Additional cmake argument for configuring Pragma. This parameter can be used multiple times.', action='append', default=[])
 parser.add_argument('--module', help='Custom modules to install. Use this parameter multiple times to use multiple modules. Usage example: --module pr_physx:\"https://github.com/Silverlan/pr_physx.git\"', action='append', default=[])
@@ -119,6 +120,7 @@ build_all = args["build_all"]
 build_config = args["build_config"]
 build_directory = args["build_directory"]
 deps_directory = args["deps_directory"]
+deps_only = args["deps_only"]
 install_directory = args["install_directory"]
 additional_cmake_args = args["cmake_arg"]
 skip_repository_updates = args["skip_repository_updates"]
@@ -173,6 +175,7 @@ print("build_all: " +str(build_all))
 print("build_config: " +build_config)
 print("build_directory: " +build_directory)
 print("deps_directory: " +deps_directory)
+print("deps_only: " +str(deps_only))
 print("install_directory: " +install_directory)
 if platform == "linux":
 	print("no_sudo: " +str(no_sudo))
@@ -805,103 +808,80 @@ print("Modules:" +', '.join(module_list))
 print("Additional CMake Arguments:" +', '.join(cmake_args))
 print("Additional Build Targets:" +', '.join(additional_build_targets))
 
-
-########## Configure Pragma ##########
-print_msg("Configuring Pragma...")
-os.chdir(build_dir)
-
-print_msg("Running CMake configure...")
-cmake_args += [
-	"-DCMAKE_INSTALL_PREFIX:PATH=" +install_dir +""
-]
-
-if len(vtune_include_path) > 0 or len(vtune_library_path) > 0:
-	if len(vtune_include_path) > 0 and len(vtune_library_path) > 0:
-		print_msg("VTune profiler support is enabled!")
-		cmake_args += ["-DCONFIG_BUILD_WITH_VTUNE_SUPPORT=1"]
-		cmake_args += ["-DDEPENDENCY_VTUNE_PROFILER_INCLUDE=" +vtune_include_path]
-		cmake_args += ["-DDEPENDENCY_VTUNE_PROFILER_LIBRARY=" +vtune_library_path]
-	else:
-		raise argparse.ArgumentError(None,"Both the --vtune-include-path and --vtune-library-path options have to be specified to enable VTune support!")
-
-if with_pfm:
-	cmake_args += ["-DWITH_PFM=1"]
-if with_vr:
-	cmake_args += ["-DWITH_VR=1"]
-if with_common_entities:
-	cmake_args += ["-DWITH_COMMON_ENTITIES=1"]
-
-cmake_args += additional_cmake_args
-cmake_args.append("-DCMAKE_POLICY_VERSION_MINIMUM=4.0")
-cmake_args.append("-DPRAGMA_DEPS_DIR=" +config.deps_dir +"/" +config.deps_staging_dir)
-cmake_configure_def_toolset(root,generator,cmake_args)
-
-print_msg("Build files have been written to \"" +build_dir +"\".")
-
-########## Addons ##########
-def download_addon(name,addonName,url,commitId=None):
-	print_msg("Downloading " +name +" addon...")
-	mkdir(install_dir +"/addons",cd=True)
-	if not Path(install_dir +"/addons/" +addonName).is_dir():
-		git_clone(url,addonName)
-	if commitId is not None:
-		os.chdir(install_dir +"/addons/" +addonName)
-		reset_to_commit(commitId)
-		os.chdir("..")
-
-	# Write commit SHA info for debugging purposes
-	os.chdir(install_dir +"/addons/" +addonName)
-	try:
-		commit_id = subprocess.check_output(["git", "rev-parse", "HEAD"]).decode().strip()
-	except subprocess.CalledProcessError:
-		if os.path.exists("git_info.txt"):
-			os.remove("git_info.txt")
-	else:
-		with open("git_info.txt", "w") as f:
-			f.write(f"commit: {commit_id}\n")
-	os.chdir("..")
-
-########## Write Build Configuration ##########
-cfg = {}
-cfg["args"] = {}
-for key, value in input_args.items():
-	cfg["args"][key] = value
-
-cfg["original_args"] = ' '.join(sys.argv[1:])
-
-import json
-
-if rerun:
-	# Keep the "original_args" info from the existing build_config
-	try:
-		oldCfg = None
-		with open(build_dir +"/build_config.json", "r") as file:
-			oldCfg = json.load(file)
-
-		if oldCfg:
-			if "original_args" in oldCfg:
-				cfg["original_args"] = cfg["original_args"]
-
-
-	except json.JSONDecodeError as e:
-		print("Failed to load build_config.json:", e)
-
-json.dump(cfg,open(build_dir +"/build_config.json",'w'))
-
-########## Build Pragma ##########
-if build:
-	print_msg("Building Pragma...")
-
+if not deps_only:
+	########## Configure Pragma ##########
+	print_msg("Configuring Pragma...")
 	os.chdir(build_dir)
-	targets = ["pragma-install-full"]
 
-	print_msg("Running build command...")
-	cmake_build(build_config,targets)
+	print_msg("Running CMake configure...")
+	cmake_args += [
+		"-DCMAKE_INSTALL_PREFIX:PATH=" +install_dir +""
+	]
 
-	print_msg("Build Successful! Pragma has been installed to \"" +normalize_path(install_dir) +"\".")
-	print_msg("If you make any changes to the core source code, you can build the \"pragma-install\" target to compile the changes and re-install the binaries automatically.")
-	print_msg("If you make any changes to a module, you will have to build the module target first, and then build \"pragma-install\".")
-	print_msg("")
+	if len(vtune_include_path) > 0 or len(vtune_library_path) > 0:
+		if len(vtune_include_path) > 0 and len(vtune_library_path) > 0:
+			print_msg("VTune profiler support is enabled!")
+			cmake_args += ["-DCONFIG_BUILD_WITH_VTUNE_SUPPORT=1"]
+			cmake_args += ["-DDEPENDENCY_VTUNE_PROFILER_INCLUDE=" +vtune_include_path]
+			cmake_args += ["-DDEPENDENCY_VTUNE_PROFILER_LIBRARY=" +vtune_library_path]
+		else:
+			raise argparse.ArgumentError(None,"Both the --vtune-include-path and --vtune-library-path options have to be specified to enable VTune support!")
+
+	if with_pfm:
+		cmake_args += ["-DWITH_PFM=1"]
+	if with_vr:
+		cmake_args += ["-DWITH_VR=1"]
+	if with_common_entities:
+		cmake_args += ["-DWITH_COMMON_ENTITIES=1"]
+
+	cmake_args += additional_cmake_args
+	cmake_args.append("-DCMAKE_POLICY_VERSION_MINIMUM=4.0")
+	cmake_args.append("-DPRAGMA_DEPS_DIR=" +config.deps_dir +"/" +config.deps_staging_dir)
+	cmake_configure_def_toolset(root,generator,cmake_args)
+
+	print_msg("Build files have been written to \"" +build_dir +"\".")
+
+	########## Write Build Configuration ##########
+	cfg = {}
+	cfg["args"] = {}
+	for key, value in input_args.items():
+		cfg["args"][key] = value
+
+	cfg["original_args"] = ' '.join(sys.argv[1:])
+
+	import json
+
+	if rerun:
+		# Keep the "original_args" info from the existing build_config
+		try:
+			oldCfg = None
+			with open(build_dir +"/build_config.json", "r") as file:
+				oldCfg = json.load(file)
+
+			if oldCfg:
+				if "original_args" in oldCfg:
+					cfg["original_args"] = cfg["original_args"]
+
+
+		except json.JSONDecodeError as e:
+			print("Failed to load build_config.json:", e)
+
+	json.dump(cfg,open(build_dir +"/build_config.json",'w'))
+
+	########## Build Pragma ##########
+	if build:
+		print_msg("Building Pragma...")
+
+		os.chdir(build_dir)
+		targets = ["pragma-install-full"]
+
+		print_msg("Running build command...")
+		cmake_build(build_config,targets)
+
+		print_msg("Build Successful! Pragma has been installed to \"" +normalize_path(install_dir) +"\".")
+		print_msg("If you make any changes to the core source code, you can build the \"pragma-install\" target to compile the changes and re-install the binaries automatically.")
+		print_msg("If you make any changes to a module, you will have to build the module target first, and then build \"pragma-install\".")
+		print_msg("")
 
 print_msg("All actions have been completed! Please make sure to re-run this script every time you pull any changes from the repository, and after adding any new modules.")
 

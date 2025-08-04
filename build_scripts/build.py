@@ -367,6 +367,7 @@ def execscript(filepath):
 		"str2bool": str2bool,
 		"install_prebuilt_binaries": install_prebuilt_binaries,
 		"reset_to_commit": reset_to_commit,
+		"check_repository_commit": check_repository_commit,
 		
 		"cmake_args": cmake_args,
 
@@ -599,6 +600,7 @@ def execbuildscript(filepath):
 		"str2bool": str2bool,
 		"install_prebuilt_binaries": install_prebuilt_binaries,
 		"reset_to_commit": reset_to_commit,
+		"check_repository_commit": check_repository_commit,
 		"add_pragma_module": add_pragma_module
 	}
 	if platform == "linux":

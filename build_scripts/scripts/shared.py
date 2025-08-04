@@ -276,6 +276,21 @@ def reset_to_commit(sha):
 	# subprocess.run(["git","submodule","init"],check=True)
 	# subprocess.run(["git","update","--recursive"],check=True)
 
+def check_repository_commit(path, commitId, libName=None):
+	if not os.path.isdir(path) or not os.path.isdir(os.path.join(path, '.git')):
+		return False
+	curDir = os.getcwd()
+	os.chdir(path)
+	full_sha = subprocess.check_output(
+		["git", "rev-parse", "HEAD"], cwd=path
+	).decode('utf-8').strip()
+	short_current = full_sha[: len(commitId)]
+	if short_current == commitId:
+		if libName:
+			print_msg(f"{libName} is already up-to-date at commit '{commitId}', skipping...")
+		return True
+	return False
+
 def get_submodule(directory,url,commitId=None,branch=None):
 	from scripts.shared import print_msg
 	from scripts.shared import git_clone

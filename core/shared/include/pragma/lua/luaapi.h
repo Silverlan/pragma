@@ -250,6 +250,12 @@ namespace Lua {
 	DLLNETWORK extern const luabind::object nil;
 	using object = luabind::object;
 
+	struct Exception : public std::runtime_error
+	{
+	public:
+		Exception(const std::string &err) : std::runtime_error {err} {}
+	};
+
 	class Interface;
 	DLLNETWORK void initialize_lua_state(Lua::Interface &lua);
 	DLLNETWORK void set_extended_lua_modules_enabled(bool b);

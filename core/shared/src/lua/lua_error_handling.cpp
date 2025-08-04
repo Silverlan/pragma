@@ -324,6 +324,9 @@ void Lua::HandleSyntaxError(lua_State *l, Lua::StatusCode r) { handle_syntax_err
 
 void Lua::initialize_error_handler()
 {
+	luabind::register_exception_handler<Lua::Exception>(+[](lua_State* L, const Lua::Exception &e) {
+		lua_pushstring(L, e.what());
+	});
 	luabind::set_pcall_callback([](lua_State *l) -> void {
 		Lua::PushCFunction(l, [](lua_State *l) -> int32_t {
 			if(Lua::IsString(l, -1) == false)

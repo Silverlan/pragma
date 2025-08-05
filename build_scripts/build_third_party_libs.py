@@ -257,8 +257,8 @@ else:
 	# cmake_build("Release")
     
 	# lua_jit_lib = normalize_path(deps_dir +"/luajit_build/src/Release/luajit.lib")
-	copy_prebuilt_binaries(lua_jit_lib_dir, "luajit")
-	copy_prebuilt_headers(luajit_root +"src/", "luajit")
+copy_prebuilt_binaries(lua_jit_lib_dir, "luajit")
+copy_prebuilt_headers(luajit_root +"src/", "luajit")
 
 ########## GeometricTools ##########
 os.chdir(deps_dir)

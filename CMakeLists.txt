@@ -6,6 +6,8 @@ include(${CMAKE_SOURCE_DIR}/cmake/pr_install.cmake)
 
 project(pragma)
 
+set(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY true)
+
 option(WITH_PFM "Build with Pragma Filmmaker?" OFF)
 option(WITH_VR "Build with VR support?" OFF)
 option(WITH_COMMON_ENTITIES "Build with common entity scripts?" OFF)
@@ -131,10 +133,29 @@ set(LIBRARY_OUTPUT_PATH
 
 set(PRAGMA_INSTALL_COMPONENT "pragma")
 set(PRAGMA_INSTALL_COMPONENT_FULL "pragma-full")
-add_custom_target(pragma-install COMMAND "${CMAKE_COMMAND}" -DCMAKE_INSTALL_COMPONENT=${PRAGMA_INSTALL_COMPONENT} -DBUILD_TYPE=${CONFIG_BUILD_TYPE} -P
-                                         "${CMAKE_BINARY_DIR}/cmake_install.cmake")
-add_custom_target(pragma-install-full COMMAND "${CMAKE_COMMAND}" -DCMAKE_INSTALL_COMPONENT=${PRAGMA_INSTALL_COMPONENT_FULL} -DBUILD_TYPE=${CONFIG_BUILD_TYPE}
-                                              -P "${CMAKE_BINARY_DIR}/cmake_install.cmake")
+
+add_custom_target(pragma-install
+    ALL
+    COMMAND ${CMAKE_COMMAND}
+            --install ${CMAKE_BINARY_DIR}
+            --config ${CONFIG_BUILD_TYPE}
+            --prefix "${INSTALL_PREFIX}"
+            --component pragma-install
+    COMMENT "Installing 'pragma-install' component into ${INSTALL_PREFIX}"
+    VERBATIM
+)
+
+add_custom_target(pragma-install-full
+    ALL
+    COMMAND ${CMAKE_COMMAND}
+            --install ${CMAKE_BINARY_DIR}
+            --config ${CONFIG_BUILD_TYPE}
+            --prefix "${INSTALL_PREFIX}"
+            --component pragma-install-full
+    COMMENT "Installing 'pragma-install-full' component into ${INSTALL_PREFIX}"
+    VERBATIM
+)
+
 add_custom_target(pragma-core)
 set_target_properties(pragma-core PROPERTIES FOLDER "Hidden")
 
@@ -288,24 +309,10 @@ endforeach()
 install(
     DIRECTORY assets/
     DESTINATION "."
-    COMPONENT ${PRAGMA_INSTALL_COMPONENT_FULL})
+    COMPONENT pragma-install-full)
 
 message("Processing addons...")
 include(${CMAKE_SOURCE_DIR}/Addons.cmake)
-
-if(UNIX)
-    add_custom_command(
-        TARGET pragma-install
-        POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -DINSTALL_LOCATION=${CMAKE_INSTALL_PREFIX} -P ${CMAKE_CURRENT_SOURCE_DIR}/build_scripts/cmake/patch_libraries.cmake
-        COMMENT "Patching libraries...")
-    add_custom_command(
-        TARGET pragma-install-full
-        POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -DINSTALL_LOCATION=${CMAKE_INSTALL_PREFIX} -P ${CMAKE_CURRENT_SOURCE_DIR}/build_scripts/cmake/patch_libraries.cmake
-        COMMENT "Patching libraries...")
-
-endif()
 
 pr_set_target_folder(pragma-install core)
 pr_set_target_folder(pragma-install-full core)

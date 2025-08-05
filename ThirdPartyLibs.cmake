@@ -246,6 +246,12 @@ pr_set_target_folder(throughput_test third_party_libs/libsamplerate)
 pr_set_target_folder(timewarp-file third_party_libs/libsamplerate)
 pr_set_target_folder(varispeed_test third_party_libs/libsamplerate)
 pr_set_target_folder(varispeed-play third_party_libs/libsamplerate)
+
+if(UNIX)
+    set_target_properties(lunasvg PROPERTIES
+        INSTALL_RPATH "$ORIGIN"
+    )
+endif()
 #
 
 # vtflib

@@ -9,23 +9,23 @@ function(pr_install_git_repository IDENTIFIER GIT_URL GIT_SHA INSTALL_PATH)
 
     include(ExternalProject)
     ExternalProject_Add(addon_${IDENTIFIER}
-    PREFIX            ${ADDON_PREF}
-    GIT_REPOSITORY    ${ADDON_URL}
-    GIT_TAG           ${ADDON_SHA}
+        PREFIX         ${ADDON_PREF}
+        GIT_REPOSITORY ${ADDON_URL}
+        GIT_TAG        ${ADDON_SHA}
 
-    CONFIGURE_COMMAND ""  # no CMake step
-    BUILD_COMMAND     ""  # no build step
-
-    INSTALL_COMMAND
-        ${CMAKE_COMMAND} -E copy_directory
-        ${ADDON_PREF}/src/addon_${IDENTIFIER}
-        ${CMAKE_INSTALL_PREFIX}/${INSTALL_PATH}
+        CONFIGURE_COMMAND ""
+        BUILD_COMMAND     ""
+        INSTALL_COMMAND   ""
     )
-    add_dependencies(pragma-install-full addon_${IDENTIFIER})
+    ExternalProject_Get_Property(addon_${IDENTIFIER} source_dir)
+    install(
+        DIRECTORY "${source_dir}/"
+        DESTINATION "${INSTALL_PATH}"
+        COMPONENT   pragma-install-full
+    )
 endfunction()
 
 function(pr_install_git_release IDENTIFIER BASE_URL BASE_DIR TAG_NAME)
-    set(INSTALL_PATH "")
     if(UNIX)
         set(ARCH_FILE_NAME "binaries_linux64.tar.gz")
     else()
@@ -41,19 +41,20 @@ function(pr_install_git_release IDENTIFIER BASE_URL BASE_DIR TAG_NAME)
 
     include(ExternalProject)
     ExternalProject_Add(addon_${IDENTIFIER}
-    PREFIX            ${ADDON_PREF}
-    SOURCE_DIR "${ADDON_PREF}/src/addon_${IDENTIFIER}/${BASE_DIR}"
-    URL    ${ADDON_URL}
+        PREFIX            ${ADDON_PREF}
+        SOURCE_DIR "${ADDON_PREF}/src/addon_${IDENTIFIER}/${BASE_DIR}"
+        URL    ${ADDON_URL}
 
-    CONFIGURE_COMMAND ""  # no CMake step
-    BUILD_COMMAND     ""  # no build step
-
-    INSTALL_COMMAND
-        ${CMAKE_COMMAND} -E copy_directory
-        ${ADDON_PREF}/src/addon_${IDENTIFIER}
-        ${CMAKE_INSTALL_PREFIX}/${INSTALL_PATH}
+        CONFIGURE_COMMAND ""
+        BUILD_COMMAND     ""
+        INSTALL_COMMAND   ""
     )
-    add_dependencies(pragma-install-full addon_${IDENTIFIER})
+    ExternalProject_Get_Property(addon_${IDENTIFIER} source_dir)
+    install(
+        DIRECTORY "${source_dir}/"
+        DESTINATION "${BASE_DIR}"
+        COMPONENT   pragma-install-full
+    )
 endfunction()
 
 if(WITH_PFM)

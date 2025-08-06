@@ -49,6 +49,8 @@ find_package(lua_debugger)
 find_package(zlib REQUIRED)
 if(UNIX)
     find_package(sdbus_cpp REQUIRED)
+else()
+    find_package(wintoast REQUIRED)
 endif()
 #
 

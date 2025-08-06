@@ -13,7 +13,9 @@ if(UNIX)
 endif()
 
 pr_install_binaries(luajit)
-pr_install_binaries(sdbus_cpp)
+if(UNIX)
+    pr_install_binaries(sdbus_cpp)
+endif()
 pr_install_binaries(libzip)
 
 if(lua_debugger_RESOURCE_DIR)

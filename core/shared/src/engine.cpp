@@ -351,6 +351,8 @@ void Engine::Close()
 	pragma::locale::clear();
 	filemanager::close_file_watcher();
 	pragma::oskit::shutdown();
+	FileManager::Close();
+	ds::close()
 #ifdef __linux__
 	if (pragma::console::impl::is_linenoise_enabled())
 		pragma::console::impl::close_linenoise();

@@ -8,6 +8,9 @@ on:
       branch:
         type: string
         default: '${{ github.ref_name }}'
+      pragma-branch:
+        type: string
+        default: 'main'
       os:
         type: string
         required: true
@@ -71,6 +74,7 @@ jobs:
           repository: '${{ inputs.repository }}'
           token: '${{ secrets.repository_token || github.token }}'
           ref: '${{ inputs.branch }}'
+          branch: '${{ inputs.pragma-branch }}'
           debug-artifact-token: '${{ secrets.GITHUB_TOKEN }}'
           build-args: '${{ steps.parse-args.outputs.build-args }}'
 
@@ -138,3 +142,4 @@ jobs:
           tag: '${{ steps.build_tag_name.outputs.tag_name }}'
           token: ${{ secrets.GITHUB_TOKEN }}
           files: "debug_pdb.zip"
+

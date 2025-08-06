@@ -15,7 +15,7 @@ get_submodule("luasystem","https://github.com/Silverlan/luasystem.git","8c3ed08c
 get_submodule("materialsystem","https://github.com/Silverlan/materialsystem.git","33b3400474af587fe6a1ce80f8ed07627b3b8cd8")
 get_submodule("mathutil","https://github.com/Silverlan/mathutil.git","c697dec889b30ef224b742355195ec72fc91ab79")
 get_submodule("networkmanager","https://github.com/Silverlan/networkmanager.git","3384b867ad5e5610cf69b8dbdd469cfb04c24567")
-get_submodule("oskit","https://github.com/Silverlan/oskit.git","90cd74cfb44627599edf24e6361dc0b568295859")
+get_submodule("oskit","https://github.com/Silverlan/oskit.git","41b06c61c299592229eec76a7943eefef01cf268")
 get_submodule("panima","https://github.com/Silverlan/panima.git","1267b03ac8378a8a81c30eae4e8f157d163a0aa5")
 get_submodule("prosper","https://github.com/Silverlan/prosper.git","74e5643ff1384087e15800df93b4aabb2836f1fe")
 get_submodule("sharedutils","https://github.com/Silverlan/sharedutils.git","cbbba268462c7d20c1f613523ac58f8b403fc5f2")

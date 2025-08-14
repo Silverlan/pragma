@@ -39,6 +39,10 @@ const std::string &pragma::debug::get_exception_message() {
 	return g_crashExceptionMessage;
 }
 
+bool pragma::debug::generate_crash_dump() {
+	return g_crashHandler.GenerateCrashDump();
+}
+
 CrashHandler &CrashHandler::Get() { return g_crashHandler; }
 
 void CrashHandler::Initialize() {

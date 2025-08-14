@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_cengine.h"
+#include "pragma/console/lua_run_autocomplete.hpp"
 
 #ifdef _MSC_VER
 namespace pragma::string {
@@ -83,6 +84,37 @@ void CEngine::RegisterConsoleCommands()
 			  autoCompleteOptions.push_back(fullPath);
 		  }
 	  });
+
+	conVarMap.RegisterConCommand(
+	  "lua_run_cl",
+	  [](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
+	  	  if(argv.empty()) {
+			  Con::cwar << "No argument given to execute!" << Con::endl;
+			  return;
+		  }
+		  if(!state->IsGameActive() || state->GetGameState() == nullptr) {
+			  Con::cwar << "No game is active! Lua code cannot be executed without an active game!" << Con::endl;
+			  return;
+		  }
+
+		  std::string lua = argv[0];
+		  for(auto i = 1; i < argv.size(); i++) {
+			  lua += " ";
+			  lua += argv[i];
+		  }
+		  state->GetGameState()->RunLua(lua);
+	  },
+	  ConVarFlags::None, "Runs a lua command on the client lua state.",
+	  [](const std::string &arg, std::vector<std::string> &autoCompleteOptions) {
+	  	auto *game = pragma::get_client_game();
+	  	if (!game)
+	  		return;
+	  	auto *l = game->GetLuaState();
+	  	if (!l)
+	  		return;
+	  	pragma::console::impl::lua_run_autocomplete(l, arg, autoCompleteOptions);
+	  });
+
 	conVarMap.RegisterConVar<bool>("cl_downscale_imported_high_resolution_rma_textures", true, ConVarFlags::Archive, "If enabled, imported high-resolution RMA textures will be downscaled to a more memory-friendly size.");
 	conVarMap.RegisterConVarCallback("cl_downscale_imported_high_resolution_rma_textures", std::function<void(NetworkState *, const ConVar &, bool, bool)> {[](NetworkState *nw, const ConVar &cv, bool oldVal, bool newVal) -> void {
 		//static_cast<msys::CMaterialManager&>(static_cast<ClientState*>(nw)->GetMaterialManager()).SetDownscaleImportedRMATextures(newVal);

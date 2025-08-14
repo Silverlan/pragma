@@ -18,9 +18,11 @@
 #include <luabind/exception_handler.hpp>
 #include <stack>
 
+import pragma.scripting;
+
 extern DLLNETWORK Engine *engine;
 
-static void print_lua_error_message(lua_State *l, const std::stringstream &ssMsg) { Con::cerr << Lua::GetErrorMessagePrefix(l) << Con::prefix << Con::PREFIX_LUA << Con::prefix << ssMsg.str() << Con::endl; }
+static void print_lua_error_message(lua_State *l, const std::string &msg) { Con::cerr << Lua::GetErrorMessagePrefix(l) << Con::prefix << Con::PREFIX_LUA << Con::prefix << msg << Con::endl; }
 
 static auto cvOpenEditorOnError = GetConVar("lua_open_editor_on_error");
 std::optional<std::string> Lua::GetLuaFilePath(const std::string &fname)
@@ -65,51 +67,6 @@ void Lua::OpenFileInZeroBrane(const std::string &fname, uint32_t lineId)
 		}
 	}
 }
-static bool print_code_snippet(std::stringstream &ssMsg, std::string fname, uint32_t lineId, const std::string &prefix = "")
-{
-	std::string ext;
-	if(ufile::get_extension(fname, &ext) == true && ext == Lua::FILE_EXTENSION_PRECOMPILED) {
-		//ssMsg<<"[PRECOMPILED - NO DEBUG INFORMATION AVAILABLE]";
-		return false;
-	}
-	fname = FileManager::GetNormalizedPath(fname);
-	auto br = fname.find_first_of(FileManager::GetDirectorySeparator());
-	while(br != std::string::npos && fname.substr(0, br) != Lua::SCRIPT_DIRECTORY) {
-		fname = fname.substr(br + 1);
-		br = fname.find_first_of(FileManager::GetDirectorySeparator());
-	}
-	auto f = FileManager::OpenFile(fname.c_str(), "r");
-	if(f != nullptr) {
-		// Attempt to open file in ZeroBrane
-		//if(cvOpenEditorOnError->GetBool())
-		//	open_lua_file(fname,lineId);
-
-		char c = 0;
-		uint32_t curLineId = 1;
-		auto linePrint = static_cast<uint32_t>(umath::max(static_cast<int32_t>(lineId) - 2, static_cast<int32_t>(1)));
-		auto lastLinePrint = lineId + 2;
-		while(!f->Eof() && curLineId < linePrint) {
-			f->Read(&c, 1);
-			if(c == '\n')
-				++curLineId;
-		}
-		if(!f->Eof() && curLineId == linePrint) {
-			ssMsg << prefix;
-			for(auto i = linePrint; i <= lastLinePrint; ++i) {
-				auto l = f->ReadLine();
-				if(i == lineId)
-					ssMsg << "\n  > ";
-				else
-					ssMsg << "\n    ";
-				ssMsg << l;
-				if(f->Eof())
-					break;
-			}
-			return true;
-		}
-	}
-	return false;
-}
 
 const auto maxLuaPathLen = 120u;
 static void strip_path_until_lua_dir(std::string &shortSrc)
@@ -130,18 +87,6 @@ static void strip_path_until_lua_dir(std::string &shortSrc)
 		shortSrc = "..." + shortSrc.substr(shortSrc.size() - maxLuaPathLen);
 }
 
-static std::string get_clickable_link(const std::string& path, int line) {
-	std::string uri = "file://" + path + "#L" + std::to_string(line);
-
-	std::stringstream ss;
-	ss
-	  << "\033]8;;" << uri << "\007"
-	  << path << ":" << line
-	  << "\033]8;;\007"
-;
-	return ss.str();
-}
-
 static void transform_path(const lua_Debug &d, std::string &errPath, int32_t currentLine)
 {
 	auto start = errPath.find("[string \"");
@@ -160,7 +105,7 @@ static void transform_path(const lua_Debug &d, std::string &errPath, int32_t cur
 			path = "..." + path.substr(path.size() - maxLuaPathLen);
 
 		if(Lua::GetLuaFilePath(Lua::SCRIPT_DIRECTORY_SLASH + path))
-			path = get_clickable_link(path, currentLine);
+			path = util::make_clickable_link(path, currentLine);
 		errPath = ustring::substr(errPath, 0, qt0 + 1) + path + ustring::substr(errPath, qt1);
 	}
 }
@@ -179,8 +124,10 @@ bool Lua::get_callstack(lua_State *l, std::stringstream &ss)
 				ss << "\n" << t << "...";
 				break;
 			}
-			else
-				ss << "\n" << t << level << ": " << (d.name != nullptr ? d.name : "?") << "[" << d.linedefined << ":" << d.lastlinedefined << "] [" << d.what << ":" << d.namewhat << "] : " << get_source(d) << ":" << d.currentline;
+			else {
+				auto filename = util::make_clickable_link(get_source(d), d.currentline);
+				ss << "\n" << t << level << ": " << (d.name != nullptr ? d.name : "?") << "[" << d.linedefined << ":" << d.lastlinedefined << "] [" << d.what << ":" << d.namewhat << "] : " << filename;
+			}
 		}
 		++level;
 		r = lua_getstack(l, level, &d);
@@ -188,7 +135,7 @@ bool Lua::get_callstack(lua_State *l, std::stringstream &ss)
 	return true;
 }
 
-bool Lua::PrintTraceback(lua_State *l, std::stringstream &ssOut, std::string *pOptErrMsg, std::string *optOutFormattedErrMsg)
+bool Lua::PrintTraceback(lua_State *l, std::stringstream &ssOut, const std::string *pOptErrMsg, std::string *optOutFormattedErrMsg)
 {
 	lua_Debug d {};
 	int32_t level = 1;
@@ -229,7 +176,7 @@ bool Lua::PrintTraceback(lua_State *l, std::stringstream &ssOut, std::string *pO
 		}
 		transform_path(d, errMsg, d.currentline);
 		ssOut << errMsg;
-		bNl = print_code_snippet(ssOut, get_source(d), d.currentline, ":");
+		bNl = pragma::scripting::lua::util::get_code_snippet(ssOut, get_source(d), d.currentline, ":");
 	}
 	else {
 		ssOut << errMsg;
@@ -251,35 +198,16 @@ bool Lua::PrintTraceback(lua_State *l, std::stringstream &ssOut, std::string *pO
 	return hasMsg;
 }
 
-void Lua::PrintTraceback(lua_State *l, std::string *pOptErrMsg)
+void Lua::PrintTraceback(lua_State *l, const std::string *pOptErrMsg)
 {
-	std::string errMsg;
+	std::stringstream ssTbMsg;
+	Lua::PrintTraceback(l, ssTbMsg, pOptErrMsg);
+	auto tbMsg = ssTbMsg.str();
+
 	std::stringstream ss;
-	PrintTraceback(l, ss, pOptErrMsg, &errMsg);
-	print_lua_error_message(l, ss);
-
-	std::string cause {};
-	const std::string errMsgIdentifier = "No matching overload found";
-	auto posErrOverload = errMsg.find(errMsgIdentifier);
-	if(posErrOverload != std::string::npos) {
-		// Luabind error, try to retrieve function name
-		auto posEnd = errMsg.find('(', posErrOverload + errMsgIdentifier.length());
-		auto pos = errMsg.rfind(' ', posEnd);
-		if(pos != std::string::npos && posEnd != std::string::npos)
-			cause = ustring::substr(errMsg, pos + 1, posEnd - pos - 1);
-	}
-	else {
-		auto pos = errMsg.find('\'');
-		auto posEnd = errMsg.find('\'', pos + 1);
-		if(posEnd != std::string::npos)
-			cause = ustring::substr(errMsg, pos + 1, posEnd - pos - 1);
-	}
-	if(cause.empty() == false)
-		Lua::doc::print_documentation(cause);
-
-	util::reset_console_color();
-	Con::cout << "You can use the console command 'lua_help <name>' to get more information about a specific function/library/etc." << Con::endl;
-	Con::cout << Con::endl;
+	pragma::scripting::lua::util::get_lua_doc_info(ss, tbMsg);
+	Con::cout<<ss.str();
+	Con::flush();
 }
 
 int Lua::HandleTracebackError(lua_State *l)
@@ -295,42 +223,31 @@ int Lua::HandleTracebackError(lua_State *l)
 	return 1;
 }
 
+static std::optional<std::string> format_syntax_error(const std::string &msg, Lua::StatusCode r, const std::string *optFilename)
+{
+	if(r != Lua::StatusCode::ErrorSyntax && r != Lua::StatusCode::ErrorFile)
+		return {};
+	auto errInfo = pragma::scripting::lua::util::parse_syntax_error_message(msg);
+	if (!errInfo)
+		return msg;
+	std::stringstream ssMsg;
+	pragma::scripting::lua::util::get_code_snippet(ssMsg, optFilename ? *optFilename : errInfo->first, errInfo->second, ":");
+	return ssMsg.str();
+}
+
 static void handle_syntax_error(lua_State *l, Lua::StatusCode r, const std::string *fileName)
 {
 	if(r != Lua::StatusCode::ErrorSyntax && r != Lua::StatusCode::ErrorFile)
 		return;
-	if(Lua::IsString(l, -1)) {
-		std::string err = Lua::ToString(l, -1);
-		//transform_path(err);
-		std::stringstream ssMsg;
-		auto brSt = err.find('[');
-		auto brEn = err.find(']', brSt + 1);
-		auto bErrPrinted = false;
-		if(brSt != std::string::npos && brEn != std::string::npos) {
-			auto qSt = err.find('\"', brSt);
-			auto qEn = err.find('\"', qSt + 1);
-			if(qSt != std::string::npos && qEn != std::string::npos) {
-				std::string errWithFullPath = {};
-				if(fileName != nullptr)
-					errWithFullPath = err.substr(0, qSt + 1u) + ustring::substr(*fileName, 4) + err.substr(qEn);
-				else
-					errWithFullPath = err;
-				auto f = (fileName != nullptr) ? *fileName : err.substr(qSt + 1, qEn - qSt - 1);
-				auto cSt = err.find(':', brEn + 1);
-				auto cEn = err.find(':', cSt + 1);
-				if(cSt != std::string::npos && cEn != std::string::npos) {
-					auto lineId = util::to_int(err.substr(cSt + 1, cEn - cSt - 1));
-					ssMsg << errWithFullPath;
-					bErrPrinted = true;
-					print_code_snippet(ssMsg, f, lineId, ":");
-				}
-			}
-		}
-		if(bErrPrinted == false)
-			ssMsg << err;
-		print_lua_error_message(l, ssMsg);
-	}
+	if(!Lua::IsString(l, -1))
+		return;
+	std::string err = Lua::ToString(l, -1);
+	auto msg = format_syntax_error(err, r, fileName);
+	if (!msg)
+		return;
+	print_lua_error_message(l, *msg);
 }
+
 void Lua::HandleSyntaxError(lua_State *l, Lua::StatusCode r, const std::string &fileName) { handle_syntax_error(l, r, &fileName); }
 
 void Lua::HandleSyntaxError(lua_State *l, Lua::StatusCode r) { handle_syntax_error(l, r, nullptr); }
@@ -371,7 +288,7 @@ void Lua::initialize_error_handler()
 			}
 			transform_path(d, luaMsg, d.currentline);
 			ssMsg << luaMsg;
-			auto bNl = print_code_snippet(ssMsg, (d.source != nullptr) ? get_source(d) : "", d.currentline, ":");
+			auto bNl = pragma::scripting::lua::util::get_code_snippet(ssMsg, (d.source != nullptr) ? get_source(d) : "", d.currentline, ":");
 			// if(level != 1)
 			{
 				level = 1;
@@ -398,7 +315,7 @@ void Lua::initialize_error_handler()
 					++level;
 				}
 			}
-			print_lua_error_message(l, ssMsg);
+			print_lua_error_message(l, ssMsg.str());
 			return 0;
 		});
 	});

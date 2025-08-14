@@ -39,6 +39,7 @@ namespace pragma::string {
 #include <fsys/directory_watcher.h>
 
 import pragma.locale;
+import pragma.scripting.lua;
 #ifndef _MSC_VER
 import pragma.string.unicode;
 #endif
@@ -61,14 +62,12 @@ void CEngine::RegisterConsoleCommands()
 			  Con::cwar << "No game is active! Lua code cannot be executed without an active game!" << Con::endl;
 			  return;
 		  }
-		  auto fname = argv.at(0);
-		  if(argv.size() > 1 && argv[1] == "nocache") {
-			  Lua::set_ignore_include_cache(true);
-			  state->GetGameState()->ExecuteLuaFile(fname);
-			  Lua::set_ignore_include_cache(false);
-			  return;
-		  }
-		  Lua::global::include(state->GetLuaState(), fname, nullptr, true, false);
+
+	  	auto fname = argv.at(0);
+	  	auto result = pragma::scripting::lua::include(state->GetLuaState(), fname, pragma::scripting::lua::IncludeFlags::AddToCache);
+	  	Lua::Pop(state->GetLuaState(), result.numResults);
+	  	if (result.statusCode != Lua::StatusCode::Ok)
+	  		pragma::scripting::lua::submit_error(state->GetLuaState(), result.errorMessage);
 	  },
 	  ConVarFlags::None, "Opens and executes a lua-file on the client.",
 	  [](const std::string &arg, std::vector<std::string> &autoCompleteOptions) {

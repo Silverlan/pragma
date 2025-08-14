@@ -792,6 +792,7 @@ luabind::object Lua::global::include(lua_State *l, const std::string &f, bool ig
 
 luabind::object Lua::global::include(lua_State *l, const std::string &f, std::vector<std::string> *optCache, bool reload, bool throwErr)
 {
+#if 0
 	auto *lInterface = engine->GetLuaInterface(l);
 	std::vector<std::string> *includeCache = optCache;
 	if(!includeCache)
@@ -872,11 +873,22 @@ luabind::object Lua::global::include(lua_State *l, const std::string &f, std::ve
 		//});
 		auto n = Lua::GetStackTop(l);
 		auto fileName = f;
-		auto r = Lua::IncludeFile(l, fileName, Lua::HandleTracebackError, LUA_MULTRET);
+		static std::string errMsg;
+		errMsg.clear();
+		auto r = Lua::IncludeFile(l, fileName, [](lua_State *l) -> int32_t {
+			if (Lua::IsString(l, -1))
+				errMsg = Lua::CheckString(l, -1);
+			return 0;
+		}, LUA_MULTRET);
+
 		switch(r) {
+			case Lua::StatusCode::ErrorRun:
+			if(throwErr)
+				Lua::Error(l, errMsg);
+			break;
 		case Lua::StatusCode::ErrorFile:
 			if(throwErr)
-				lua_error(l);
+				Lua::Error(l, errMsg);
 			else {
 				Con::cwar << "File not found: '" << fileName << "'!" << Con::endl;
 				return {};
@@ -884,7 +896,9 @@ luabind::object Lua::global::include(lua_State *l, const std::string &f, std::ve
 			/* unreachable */
 			break;
 		case Lua::StatusCode::ErrorSyntax:
-			Lua::HandleSyntaxError(l, r, fileName);
+			if (throwErr) {
+				Lua::Error(l, errMsg);
+			}
 			break;
 		case Lua::StatusCode::Ok:
 			{
@@ -895,6 +909,7 @@ luabind::object Lua::global::include(lua_State *l, const std::string &f, std::ve
 			}
 		}
 	}
+	#endif
 	return {};
 }
 

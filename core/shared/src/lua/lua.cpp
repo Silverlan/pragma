@@ -20,6 +20,8 @@
 #include <sharedutils/util_string.h>
 #include <sharedutils/util_file.h>
 
+import pragma.scripting.lua;
+
 extern DLLNETWORK Engine *engine;
 
 Lua::Interface &Game::GetLuaInterface() { return *m_lua; }
@@ -107,10 +109,7 @@ bool Game::RunLua(const std::string &lua, const std::string &chunkName)
 
 Lua::StatusCode Game::ProtectedLuaCall(const std::function<Lua::StatusCode(lua_State *)> &pushFuncArgs, int32_t numResults)
 {
-	auto *l = GetLuaState();
-	auto r = Lua::ProtectedCall(GetLuaState(), pushFuncArgs, numResults, Lua::HandleTracebackError);
-	Lua::HandleSyntaxError(l, r);
-	return r;
+	return pragma::scripting::lua::protected_call(GetLuaState(), pushFuncArgs, numResults);
 }
 
 const std::array<std::string, 6> &Game::GetLuaEntityDirectories() const

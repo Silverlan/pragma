@@ -40,6 +40,8 @@
 #include <pragma/emessage.h>
 #include <luainterface.hpp>
 
+import pragma.scripting.lua;
+
 #ifdef __linux__
 #define FILE_ATTRIBUTE_ARCHIVE 0x20
 #define FILE_ATTRIBUTE_COMPRESSED 0x800
@@ -60,10 +62,33 @@
 
 extern DLLNETWORK Engine *engine;
 
+static int32_t include(lua_State *l)
+{
+	std::string path = Lua::CheckString(l, 1);
+	auto ignoreGlobalCache = false;
+	if (Lua::IsSet(l, 2))
+		ignoreGlobalCache = Lua::CheckNumber(l, 2);
+	auto flags = pragma::scripting::lua::IncludeFlags::Default;
+	umath::set_flag(flags, pragma::scripting::lua::IncludeFlags::IgnoreGlobalCache, ignoreGlobalCache);
+
+	auto result = pragma::scripting::lua::include(l, path, flags);
+	if (result.statusCode != Lua::StatusCode::Ok) {
+		pragma::scripting::lua::raise_error(l); // Propagate the error on top of the stack
+		// Unreachable
+		return 0;
+	}
+
+	// Just return whatever was returned by the include call
+	return result.numResults;
+}
+
 void NetworkState::RegisterSharedLuaGlobals(Lua::Interface &lua)
 {
-	luabind::module(lua.GetState())[luabind::def("include", static_cast<luabind::object (*)(lua_State *, const std::string &, bool)>(Lua::global::include)), luabind::def("include", static_cast<luabind::object (*)(lua_State *, const std::string &)>(Lua::global::include)),
-	  luabind::def("exec", Lua::global::exec), luabind::def("get_script_path", Lua::global::get_script_path)];
+	// To make sure Lua errors are handled properly, we need to use a regular Lua binding here
+	// without luabind
+	lua_register(lua.GetState(), "include", &include);
+
+	luabind::module(lua.GetState())[luabind::def("exec", Lua::global::exec), luabind::def("get_script_path", Lua::global::get_script_path)];
 	lua_register(lua.GetState(), "toboolean", static_cast<int32_t (*)(lua_State *)>([](lua_State *l) -> int32_t {
 		if(Lua::IsBool(l, 1)) {
 			Lua::PushBool(l, Lua::CheckBool(l, 1));

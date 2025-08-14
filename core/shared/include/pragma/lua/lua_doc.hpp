@@ -6,6 +6,7 @@
 
 #include "pragma/networkdefinitions.h"
 #include <string>
+#include <sstream>
 #include <vector>
 
 #ifdef _WIN32
@@ -25,7 +26,7 @@ namespace Lua {
 		DLLNETWORK bool load_documentation_file(const std::string &fileName);
 		DLLNETWORK void clear();
 		DLLNETWORK void reset();
-		DLLNETWORK void print_documentation(const std::string &name);
+		DLLNETWORK void print_documentation(const std::string &name, std::stringstream &ss);
 		DLLNETWORK void generate_autocomplete_script();
 		DLLNETWORK void find_candidates(const std::string &name, std::vector<const pragma::doc::BaseCollectionObject *> &outCandidates, uint32_t candidateLimit);
 	};

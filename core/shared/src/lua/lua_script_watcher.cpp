@@ -10,6 +10,8 @@
 #include <sharedutils/util_file.h>
 #include <luainterface.hpp>
 
+import pragma.scripting.lua;
+
 LuaDirectoryWatcherManager::LuaDirectoryWatcherManager(Game *game) : m_game(game) {
 	m_watcherManager = filemanager::create_directory_watcher_manager();
 }
@@ -71,11 +73,12 @@ void LuaDirectoryWatcherManager::OnLuaFileChanged(const std::string &fName)
 	}
 
 	// Probably a regular Lua file; Check if it was included previously, and if so, reload it
-	auto &includeCache = m_game->GetLuaInterface().GetIncludeCache();
-	auto it = std::find_if(includeCache.begin(), includeCache.end(), [&fName](const std::string &cachedPath) { return FileManager::ComparePath(fName, cachedPath); });
-	if(it != includeCache.end()) {
-		auto lpath = *it;
-		m_game->ExecuteLuaFile(lpath);
+	auto &luaInterface = m_game->GetLuaInterface();
+	auto &includeCache = luaInterface.GetIncludeCache();
+	if (includeCache.Contains(fName)) {
+		auto res = pragma::scripting::lua::include(luaInterface.GetState(), fName, pragma::scripting::lua::IncludeFlags::IgnoreGlobalCache);
+		if (res.statusCode != Lua::StatusCode::Ok)
+			Lua::HandleLuaError(luaInterface.GetState(), res.statusCode);
 		return;
 	}
 }

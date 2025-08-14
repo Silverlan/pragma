@@ -310,7 +310,9 @@ void Engine::RegisterConsoleCommands()
 	  [](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  if(argv.empty())
 			  return;
-		  Lua::doc::print_documentation(argv.front());
+	      std::stringstream ss;
+		  Lua::doc::print_documentation(argv.front(), ss);
+		  Con::cout<<ss.str()<<Con::endl;
 	  },
 	  ConVarFlags::None, "Prints information about the specified function, library or enum (or the closest candiate). Usage: lua_help <function/library/enum>.",
 	  [](const std::string &arg, std::vector<std::string> &autoCompleteOptions) {

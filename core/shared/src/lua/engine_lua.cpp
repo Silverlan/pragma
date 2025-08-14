@@ -9,6 +9,9 @@
 #include <luainterface.hpp>
 #include <luabind/class_info.hpp>
 #include <luabind/function_introspection.hpp>
+#include <spdlog/spdlog-inl.h>
+
+import pragma.debug.crashdump;
 
 static auto s_bExtendedModules = false;
 void Lua::set_extended_lua_modules_enabled(bool b) { s_bExtendedModules = b; }
@@ -61,8 +64,8 @@ void Lua::initialize_lua_state(Lua::Interface &lua)
 	}
 	Lua::initialize_error_handler();
 	lua_atpanic(l, [](lua_State *l) -> int32_t {
-		Lua::HandleLuaError(l);
-		Con::crit << "Lua Panic!" << Con::endl;
+		spdlog::get("lua")->critical("Lua Panic!");
+		pragma::debug::generate_crash_dump();
 		return 0;
 	});
 }

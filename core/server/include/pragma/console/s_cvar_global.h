@@ -9,7 +9,6 @@
 #include <pragma/console/convars.h>
 #include "pragma/console/s_cvar_global_functions.h"
 
-REGISTER_CONCOMMAND_SV(lua_run, CMD_lua_run, ConVarFlags::None, "Runs a lua command on the server lua state.");
 REGISTER_CONCOMMAND_SV(entities, CMD_entities_sv, ConVarFlags::None, "Prints a list of all current serverside entities in the world.");
 REGISTER_CONCOMMAND_SV(list_maps, CMD_list_maps, ConVarFlags::None, "Prints a list of all available list to the console.");
 REGISTER_CONCOMMAND_SV(status, CMD_status_sv, ConVarFlags::None, "Prints information about the server to the console.");

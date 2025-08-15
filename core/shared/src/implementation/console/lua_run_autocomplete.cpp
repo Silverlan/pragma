@@ -1,25 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2025 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_shared.h"
-#include "pragma/console/lua_run_autocomplete.hpp"
 #include "pragma/lua/util.hpp"
 #include "pragma/engine.h"
 
-namespace luabind {
-	detail::function_object *get_function_object(object const &fn)
-	{
-		lua_State *L = fn.interpreter();
-		{
-			fn.push(L);
-			detail::stack_pop pop(L, 1);
-			if(!detail::is_luabind_function(L, -1)) {
-				return NULL;
-			}
-		}
-		return *touserdata<detail::function_object *>(std::get<1>(getupvalue(fn, 1)));
-	}
-}
+import pragma.scripting.lua;
+
+module pragma.console.commands;
 
 // We have to access some members of luabind::detail::class_rep which are inaccessable,
 // so we'll force them to be accessable.
@@ -48,7 +38,7 @@ static void check_autocomplete(const std::string &arg, std::vector<std::string> 
 	autoCompleteOptions.push_back(std::string {candidate});
 }
 
-static void crep_test(lua_State *l, luabind::detail::class_rep *crep, const std::string &arg, std::vector<std::string> &autoCompleteOptions)
+static void get_crep_autocomplete(lua_State *l, luabind::detail::class_rep *crep, const std::string &arg, std::vector<std::string> &autoCompleteOptions)
 {
 	crep->get_table(l);
 	luabind::object table(luabind::from_stack(l, -1));
@@ -148,7 +138,7 @@ static std::vector<std::pair<std::string, size_t>> split_chain(const std::string
 	return tokens;
 }
 
-void pragma::console::impl::lua_run_autocomplete(lua_State *l, const std::string &arg, std::vector<std::string> &autoCompleteOptions) {
+void pragma::console::commands::lua_run_autocomplete(lua_State *l, const std::string &arg, std::vector<std::string> &autoCompleteOptions) {
 	auto chain = split_chain(arg);
 	if (chain.empty())
 		return;
@@ -161,7 +151,7 @@ void pragma::console::impl::lua_run_autocomplete(lua_State *l, const std::string
 			break;
 		auto type = luabind::type(o);
 		if (type == LUA_TFUNCTION) {
-			luabind::detail::function_object *fobj = luabind::get_function_object(o);
+			luabind::detail::function_object *fobj = pragma::scripting::lua::util::get_function_object(o);
 			if (fobj) {
 				auto *functionName = fobj->name.c_str();
 				for(luabind::detail::function_object const *f = fobj; f != 0; f = f->next) {
@@ -170,7 +160,6 @@ void pragma::console::impl::lua_run_autocomplete(lua_State *l, const std::string
 					if (types.empty())
 						continue;
 					auto &type = types.front();
-					Con::cout<<"";
 					//type.crep->
 				}
 				//for(luabind::detail::function_object const *f = fobj; f != 0; f = f->next) {
@@ -187,11 +176,11 @@ void pragma::console::impl::lua_run_autocomplete(lua_State *l, const std::string
 	}*/
 
 	if (!o)
-		Con::cout<<"Invalid Obj"<<Con::endl;
+		;
 	else {
 		auto *crep = Lua::get_crep(o);
 		if (crep) {
-			crep_test(l, crep, lastSegment.first, autoCompleteOptions);
+			get_crep_autocomplete(l, crep, lastSegment.first, autoCompleteOptions);
 		}
 		else {
 			auto t = luabind::type(o);
@@ -206,7 +195,6 @@ void pragma::console::impl::lua_run_autocomplete(lua_State *l, const std::string
 					//}
 				}
 			}
-			//std::cout<<"TYPE: "<<t<<std::endl;
 		}
 		for (auto &opt : autoCompleteOptions) {
 			auto pos = opt.find(lastSegment.first);
@@ -233,55 +221,8 @@ void pragma::console::impl::lua_run_autocomplete(lua_State *l, const std::string
 				//crep->classes()
 			}
 		}*/
-
-
-		/*if (type == LUA_TUSERDATA) {
-			auto *crep = Lua::get_crep(o);
-			if(crep) {
-				crep->
-			}
-		}
-
-
-		else*/ {
-			// https://github.com/Silverlan/pr_luadoc/blob/c3315aca4cb4f693ff221662e8f7e14ab19c91b4/src/generator.cpp#L32
-			/*else if(type == LUA_TUSERDATA) {
-				auto *crep = Lua::get_crep(val);
-				if(crep)
-					AddClass(crep, path);
-			}*/
-
-
-			/*for(luabind::iterator it {o}, end; it != end; ++it) {
-				auto strKey = luabind::object_cast_nothrow<std::string>(it.key(), std::string {});
-				if (strKey.empty())
-					continue;
-				if (ustring::compare(strKey.c_str(), lastSegment.first.c_str(), false, lastSegment.first.length())) {
-					autoCompleteOptions.push_back(arg.substr(0, lastSegment.second) +strKey);
-				}
-			}*/
-		}
 	}
 
-	for (auto &opt : autoCompleteOptions) {
+	for (auto &opt : autoCompleteOptions)
 		opt = arg.substr(0, lastSegment.second) +opt;
-	}
-	/*
-	auto o = luabind::object {luabind::globals(pragma::get_client_game()->GetLuaState())[arg]};
-	if (!o)
-		return;
-	autoCompleteOptions.push_back("test");*/
-	/*
-	std::vector<std::string> resFiles;
-	auto path = Lua::SCRIPT_DIRECTORY_SLASH + arg;
-	FileManager::FindFiles((path + "*." + Lua::FILE_EXTENSION).c_str(), &resFiles, nullptr);
-	FileManager::FindFiles((path + "*." + Lua::FILE_EXTENSION_PRECOMPILED).c_str(), &resFiles, nullptr);
-	autoCompleteOptions.reserve(resFiles.size());
-	path = ufile::get_path_from_filename(path.substr(4));
-	for(auto &mapName : resFiles) {
-		auto fullPath = path + mapName;
-		ustring::replace(fullPath, "\\", "/");
-		autoCompleteOptions.push_back(fullPath);
-	}
-	*/
 }

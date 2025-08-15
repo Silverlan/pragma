@@ -22,6 +22,7 @@
 #include <prosper_render_pass.hpp>
 
 import pragma.string.unicode;
+import pragma.scripting.lua;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
@@ -314,17 +315,18 @@ void Lua::gui::register_default_skin(const std::string &vars, const std::string 
 	if(!skin)
 		return;
 	auto *l = client->GetGUILuaState();
-	auto resVars = Lua::RunString(l, "return " + vars, 1, "register_default_skin", Lua::HandleTracebackError);
+	std::string errMsg;
+	auto resVars = pragma::scripting::lua::run_string(l, "return " + vars, "register_default_skin", 1, &errMsg);
 	Lua::CheckTable(l, -1);
 	if(resVars != Lua::StatusCode::Ok) {
-		Lua::Pop(l, 1);
+		pragma::scripting::lua::raise_error(l, errMsg);
 		return;
 	}
 	auto tVars = luabind::object {luabind::from_stack(l, -1)};
 	Lua::Pop(l);
-	auto resSkinData = Lua::RunString(l, "return " + skinData, 1, "register_default_skin", Lua::HandleTracebackError);
+	auto resSkinData = pragma::scripting::lua::run_string(l, "return " + skinData, "register_default_skin", 1, &errMsg);
 	if(resSkinData != Lua::StatusCode::Ok) {
-		Lua::Pop(l, 2);
+		pragma::scripting::lua::raise_error(l, errMsg);
 		return;
 	}
 	Lua::CheckTable(l, -1);

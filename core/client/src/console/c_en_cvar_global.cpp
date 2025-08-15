@@ -12,23 +12,6 @@
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 
-#if LUA_ENABLE_RUN_GUI == 1
-void CMD_lua_run_gui(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
-{
-	if(argv.empty()) {
-		Con::cwar << "No argument given to execute!" << Con::endl;
-		return;
-	}
-	std::string lua = argv[0];
-	for(auto i = 1; i < argv.size(); i++) {
-		lua += " ";
-		lua += argv[i];
-	}
-	auto *l = static_cast<ClientState *>(state)->GetGUILuaState();
-	Lua::Execute(l, [l, &lua](int (*traceback)(lua_State *)) { return Lua::RunString(l, lua, "lua_run_gui", traceback); });
-}
-#endif
-
 DLLCLIENT void CMD_lua_reload_entity(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
 	if(argv.empty())

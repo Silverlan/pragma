@@ -1396,7 +1396,8 @@ void NET_cl_debug_ai_schedule_tree(NetPacket packet)
 		if(Lua::IsFunction(l, -1)) {
 			o.push(l);                   /* 3 */
 			fPushNode(dbgTree);          /* 4 */
-			Lua::ProtectedCall(l, 2, 0); /* 1 */
+			std::string err;
+			Lua::ProtectedCall(l, 2, 0, err); /* 1 */
 		}
 		else
 			Lua::Pop(l, 1); /* 1 */
@@ -1415,7 +1416,8 @@ void NET_cl_debug_ai_schedule_tree(NetPacket packet)
 			Lua::GetTableValue(l, tIdx);      /* 2 */
 			if(Lua::IsFunction(l, -1)) {
 				o.push(l);                   /* 3 */
-				Lua::ProtectedCall(l, 1, 0); /* 1 */
+				std::string err;
+				Lua::ProtectedCall(l, 1, 0, err); /* 1 */
 			}
 			else
 				Lua::Pop(l, 1); /* 1 */

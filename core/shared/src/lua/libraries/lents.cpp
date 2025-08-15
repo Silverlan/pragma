@@ -35,6 +35,8 @@
 #include <udm.hpp>
 #include <sharedutils/magic_enum.hpp>
 
+import pragma.scripting.lua;
+
 extern DLLNETWORK Engine *engine;
 
 enum class TypeMetaData : uint32_t { Range = 0, Coordinate, Pose, PoseComponent, Optional, Enabler, Parent, Count };
@@ -1165,7 +1167,7 @@ void Lua::ents::register_class(lua_State *l, const std::string &className, const
 	ss << "    BaseEntity.__init(self)\n";
 	ss << "end\n";
 
-	auto r = Lua::RunString(l, ss.str(), "internal");
+	auto r = pragma::scripting::lua::run_string(l, ss.str(), "register_class");
 	if(r == Lua::StatusCode::Ok) {
 		auto o = luabind::object(luabind::globals(l)[cLuaClassName]);
 		if(o) {
@@ -1175,8 +1177,6 @@ void Lua::ents::register_class(lua_State *l, const std::string &className, const
 			manager.RegisterEntity(className, o, components);
 		}
 	}
-	else
-		Lua::HandleLuaError(l);
 
 	Lua::PushNil(l);
 	Lua::SetGlobal(l, luaClassName);

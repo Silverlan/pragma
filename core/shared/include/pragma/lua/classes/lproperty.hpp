@@ -9,7 +9,6 @@
 #include "pragma/entities/entity_property.hpp"
 #include "pragma/lua/classes/lproperty_entity.hpp"
 #include "pragma/lua/lua_call.hpp"
-#include <any>
 #include <sharedutils/property/util_property.hpp>
 #include <sharedutils/property/util_property_color.hpp>
 #include <sharedutils/property/util_property_vector.h>

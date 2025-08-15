@@ -53,6 +53,7 @@
 #include <prosper_window.hpp>
 #include <wgui/types/wiroot.h>
 
+import pragma.scripting.lua;
 
 static std::unordered_map<std::string, std::shared_ptr<PtrConVar>> *conVarPtrs = NULL;
 std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &ClientState::GetConVarPtrs() { return *conVarPtrs; }
@@ -294,10 +295,10 @@ void ClientState::InitializeGUILua()
 
 	WGUILuaInterface::Initialize();
 
-	Lua::ExecuteFiles(GetGUILuaState(), "autorun/gui/", Lua::HandleTracebackError, [this](Lua::StatusCode code, const std::string &luaFile) { Lua::HandleSyntaxError(GetGUILuaState(), code, luaFile); });
+	pragma::scripting::lua::execute_files_in_directory(GetGUILuaState(), "autorun/gui/");
 	if(g_autoExecScripts.has_value()) {
 		for(auto &f : *g_autoExecScripts)
-			Lua::ExecuteFile(GetGUILuaState(), f, Lua::HandleTracebackError);
+			pragma::scripting::lua::execute_file(GetGUILuaState(), f);
 	}
 }
 

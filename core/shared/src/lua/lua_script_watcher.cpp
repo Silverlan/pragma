@@ -78,7 +78,7 @@ void LuaDirectoryWatcherManager::OnLuaFileChanged(const std::string &fName)
 	if (includeCache.Contains(fName)) {
 		auto res = pragma::scripting::lua::include(luaInterface.GetState(), fName, pragma::scripting::lua::IncludeFlags::IgnoreGlobalCache);
 		if (res.statusCode != Lua::StatusCode::Ok)
-			Lua::HandleLuaError(luaInterface.GetState(), res.statusCode);
+			pragma::scripting::lua::submit_error(luaInterface.GetState(), res.errorMessage);
 		return;
 	}
 }

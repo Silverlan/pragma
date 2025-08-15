@@ -9,6 +9,8 @@
 #include <stack>
 #include <sharedutils/util_file.h>
 
+import pragma.scripting.lua;
+
 extern DLLNETWORK Engine *engine;
 
 static void Lua::TypeError(const luabind::object &o, Type type)
@@ -40,7 +42,13 @@ Lua::StatusCode Lua::Execute(lua_State *l, const std::function<Lua::StatusCode(i
 
 void Lua::Execute(lua_State *, const std::function<void(int (*traceback)(lua_State *), void (*syntaxHandle)(lua_State *, Lua::StatusCode))> &target) { target(Lua::HandleTracebackError, Lua::HandleSyntaxError); }
 
-void Lua::HandleLuaError(lua_State *l) { Lua::HandleTracebackError(l); }
+void Lua::HandleLuaError(lua_State *l) {
+	if(!Lua::IsString(l, -1))
+		return;
+	std::string msg = Lua::ToString(l, -1);
+	msg = pragma::scripting::lua::format_error_message(l, msg, Lua::StatusCode::ErrorRun);
+	pragma::scripting::lua::submit_error(l, msg);
+}
 
 void Lua::HandleLuaError(lua_State *l, Lua::StatusCode s)
 {

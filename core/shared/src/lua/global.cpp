@@ -73,7 +73,7 @@ static int32_t include(lua_State *l)
 
 	auto result = pragma::scripting::lua::include(l, path, flags);
 	if (result.statusCode != Lua::StatusCode::Ok) {
-		pragma::scripting::lua::raise_error(l); // Propagate the error on top of the stack
+		pragma::scripting::lua::raise_error(l, result.errorMessage); // Propagate the error on top of the stack
 		// Unreachable
 		return 0;
 	}
@@ -82,13 +82,31 @@ static int32_t include(lua_State *l)
 	return result.numResults;
 }
 
+static int32_t exec(lua_State *l)
+{
+	std::string path = Lua::CheckString(l, 1);
+	std::string errMsg;
+	auto stackTop = Lua::GetStackTop(l);
+	auto statusCode = pragma::scripting::lua::execute_file(l, path, &errMsg);
+	if (statusCode != Lua::StatusCode::Ok) {
+		pragma::scripting::lua::raise_error(l, errMsg); // Propagate the error on top of the stack
+		// Unreachable
+		return 0;
+	}
+	auto numResults = Lua::GetStackTop(l) -stackTop;
+
+	// Just return whatever was returned by the include call
+	return numResults;
+}
+
 void NetworkState::RegisterSharedLuaGlobals(Lua::Interface &lua)
 {
 	// To make sure Lua errors are handled properly, we need to use a regular Lua binding here
 	// without luabind
 	lua_register(lua.GetState(), "include", &include);
+	lua_register(lua.GetState(), "exec", &exec);
 
-	luabind::module(lua.GetState())[luabind::def("exec", Lua::global::exec), luabind::def("get_script_path", Lua::global::get_script_path)];
+	luabind::module(lua.GetState())[luabind::def("get_script_path", Lua::global::get_script_path)];
 	lua_register(lua.GetState(), "toboolean", static_cast<int32_t (*)(lua_State *)>([](lua_State *l) -> int32_t {
 		if(Lua::IsBool(l, 1)) {
 			Lua::PushBool(l, Lua::CheckBool(l, 1));

@@ -65,6 +65,7 @@
 
 import se_script;
 import util_zip;
+import pragma.scripting.lua;
 
 extern DLLNETWORK Engine *engine;
 
@@ -773,167 +774,6 @@ void Lua::util::register_library(lua_State *l)
 	pragma::lua::define_custom_constructor<util::Uuid, +[](const std::string &uuid) -> util::Uuid { return util::Uuid {::util::uuid_string_to_bytes(uuid)}; }, const std::string &>(l);
 }
 
-luabind::object Lua::global::include(lua_State *l, const std::string &f) { return include(l, f, s_bIgnoreIncludeCache); }
-luabind::object Lua::global::include(lua_State *l, const std::string &f, std::vector<std::string> *optCache) { return include(l, f, optCache, false); }
-static std::vector<std::string> g_globalTmpCache;
-static uint32_t g_globalTmpCacheRecursiveCount = 0;
-luabind::object Lua::global::include(lua_State *l, const std::string &f, bool ignoreGlobalCache)
-{
-	if(ignoreGlobalCache) {
-		++g_globalTmpCacheRecursiveCount;
-		::util::ScopeGuard sg {[]() {
-			if(--g_globalTmpCacheRecursiveCount == 0)
-				g_globalTmpCache.clear();
-		}};
-		return include(l, f, &g_globalTmpCache);
-	}
-	return include(l, f, nullptr);
-}
-
-luabind::object Lua::global::include(lua_State *l, const std::string &f, std::vector<std::string> *optCache, bool reload, bool throwErr)
-{
-#if 0
-	auto *lInterface = engine->GetLuaInterface(l);
-	std::vector<std::string> *includeCache = optCache;
-	if(!includeCache)
-		includeCache = (lInterface != nullptr) ? &lInterface->GetIncludeCache() : nullptr;
-	auto fShouldInclude = [includeCache, reload](std::string fpath) -> bool {
-		if(includeCache == nullptr)
-			return true;
-		if(fpath.empty() == false) {
-			if(fpath.front() == '/' || fpath.front() == '\\')
-				fpath.erase(fpath.begin());
-			else
-				fpath = Lua::GetIncludePath(fpath);
-		}
-		fpath = FileManager::GetCanonicalizedPath(fpath);
-		auto it = std::find_if(includeCache->begin(), includeCache->end(), [fpath](const std::string &other) { return ustring::compare(fpath, other, false); });
-		if(!reload && it != includeCache->end())
-			return false;
-		if(it == includeCache->end())
-			includeCache->push_back(fpath);
-		return true;
-	};
-	auto *nw = engine->GetNetworkState(l);
-	auto *game = (nw != nullptr) ? nw->GetGameState() : nullptr;
-	std::string ext;
-	if(ufile::get_extension(f, &ext) == false) // Assume it's a directory
-	{
-		std::string relPath = f;
-		if(relPath.back() != '\\' && relPath.back() != '/')
-			relPath += "/";
-
-		auto incPath = relPath;
-		if(incPath.empty() == false) {
-			if(incPath.front() == '/' || incPath.front() == '\\')
-				incPath.erase(incPath.begin());
-			else
-				incPath = Lua::GetIncludePath(incPath);
-		}
-		incPath = Lua::SCRIPT_DIRECTORY_SLASH + incPath;
-		auto incPathLua = incPath + "*." + Lua::FILE_EXTENSION;
-		std::vector<std::string> files;
-		FileManager::FindFiles(incPathLua.c_str(), &files, nullptr);
-
-		auto incPathCLua = incPath + "*." + Lua::FILE_EXTENSION_PRECOMPILED;
-		std::vector<std::string> cfiles;
-		FileManager::FindFiles(incPathCLua.c_str(), &cfiles, nullptr);
-		files.reserve(files.size() + cfiles.size());
-
-		// Add pre-compiled Lua-files to list, but make sure there are no duplicates!
-		for(auto &cf : cfiles) {
-			auto it = std::find_if(files.begin(), files.end(), [&cf](const std::string &fother) { return ustring::compare(cf.c_str(), fother.c_str(), false, cf.length() - 5); });
-			if(it != files.end()) {
-				*it = cf; // Prefer pre-compiled files over regular files
-				continue;
-			}
-			files.push_back(cf);
-		}
-
-		for(auto &fName : files) {
-			auto fpath = relPath + fName;
-			if(fShouldInclude(fpath) == false)
-				continue;
-			auto r = Lua::IncludeFile(l, fpath, Lua::HandleTracebackError);
-			switch(r) {
-			case Lua::StatusCode::ErrorFile:
-				lua_error(l);
-				/* unreachable */
-				break;
-			case Lua::StatusCode::ErrorSyntax:
-				Lua::HandleSyntaxError(l, r, fpath);
-				break;
-			}
-		}
-		return {};
-	}
-	if(fShouldInclude(f) == true) {
-		//auto r = Lua::Execute(l,[&f,l](int(*traceback)(lua_State*)) {
-		//	return Lua::IncludeFile(l,f,traceback);
-		//});
-		auto n = Lua::GetStackTop(l);
-		auto fileName = f;
-		static std::string errMsg;
-		errMsg.clear();
-		auto r = Lua::IncludeFile(l, fileName, [](lua_State *l) -> int32_t {
-			if (Lua::IsString(l, -1))
-				errMsg = Lua::CheckString(l, -1);
-			return 0;
-		}, LUA_MULTRET);
-
-		switch(r) {
-			case Lua::StatusCode::ErrorRun:
-			if(throwErr)
-				Lua::Error(l, errMsg);
-			break;
-		case Lua::StatusCode::ErrorFile:
-			if(throwErr)
-				Lua::Error(l, errMsg);
-			else {
-				Con::cwar << "File not found: '" << fileName << "'!" << Con::endl;
-				return {};
-			}
-			/* unreachable */
-			break;
-		case Lua::StatusCode::ErrorSyntax:
-			if (throwErr) {
-				Lua::Error(l, errMsg);
-			}
-			break;
-		case Lua::StatusCode::Ok:
-			{
-				auto t = Lua::GetStackTop(l);
-				if(t <= n)
-					return Lua::nil;
-				return luabind::object {luabind::from_stack {l, t - n}};
-			}
-		}
-	}
-	#endif
-	return {};
-}
-
-luabind::object Lua::global::include(lua_State *l, const std::string &f, std::vector<std::string> *optCache, bool reload) { return include(l, f, optCache, reload, true); }
-
-luabind::object Lua::global::exec(lua_State *l, const std::string &f)
-{
-	auto n = Lua::GetStackTop(l);
-	std::string fileName = f;
-	auto r = Lua::ExecuteFile(l, fileName, Lua::HandleTracebackError, LUA_MULTRET);
-	switch(r) {
-	case Lua::StatusCode::ErrorFile:
-		lua_error(l);
-		/* unreachable */
-		break;
-	case Lua::StatusCode::ErrorSyntax:
-		Lua::HandleSyntaxError(l, r, fileName);
-		break;
-	case Lua::StatusCode::Ok:
-		return luabind::object {luabind::from_stack {l, Lua::GetStackTop(l) - n}};
-	}
-	return {};
-}
-
 std::string Lua::global::get_script_path() { return Lua::GetIncludePath(); }
 EulerAngles Lua::global::angle_rand() { return EulerAngles(umath::random(-180.f, 180.f), umath::random(-180.f, 180.f), umath::random(-180.f, 180.f)); }
 EulerAngles Lua::global::create_from_string(const std::string &str) { return EulerAngles {str}; }
@@ -1147,8 +987,9 @@ static luabind::object register_class(lua_State *l, const std::string &pclassNam
 		for(auto i = idxBaseClassStart; i <= (nParentClasses + 1); ++i) {
 			Lua::PushValue(l, -1);                                 /* 2 */
 			Lua::PushValue(l, i);                                  /* 3 */
-			if(Lua::ProtectedCall(l, 1, 0) != Lua::StatusCode::Ok) /* 1 */
-				Lua::HandleLuaError(l);
+			std::string err;
+			if(pragma::scripting::lua::protected_call(l, 1, 0, &err) != Lua::StatusCode::Ok) /* 1 */
+				pragma::scripting::lua::raise_error(l, err); // TODO: Is this okay to do here? Maybe we should throw an exception instead.
 		}
 	};
 
@@ -1229,7 +1070,8 @@ static luabind::object register_class(lua_State *l, const std::string &pclassNam
 		Lua::GetGlobal(l, className); /* +1 */
 	std::stringstream ss;
 	ss << "return class '" << className << "'";
-	auto r = Lua::RunString(l, ss.str(), 1, "internal"); /* 1 */
+	std::string err;
+	auto r = pragma::scripting::lua::run_string(l, ss.str(), "internal", 1); /* 1 */
 	luabind::object oClass {};
 	if(r == Lua::StatusCode::Ok) {
 		auto *nw = engine->GetNetworkState(l);
@@ -1269,10 +1111,9 @@ static luabind::object register_class(lua_State *l, const std::string &pclassNam
 		if(slibs.empty() == false) {
 			ss = std::stringstream {};
 			ss << slibs << "=" << className;
-			r = Lua::RunString(l, ss.str(), 1, "internal"); /* 1 */
-			if(r != Lua::StatusCode::Ok)
-				Lua::HandleLuaError(l);
-			Lua::Pop(l, 1); /* 0 */
+			r = pragma::scripting::lua::run_string(l, ss.str(), "internal", 1);
+			if(r == Lua::StatusCode::Ok)
+				Lua::Pop(l, 1); /* 0 */
 
 			Lua::PushNil(l);              /* 1 */
 			Lua::SetGlobal(l, className); /* 0 */

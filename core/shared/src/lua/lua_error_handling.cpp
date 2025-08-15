@@ -261,61 +261,9 @@ void Lua::initialize_error_handler()
 		Lua::PushCFunction(l, [](lua_State *l) -> int32_t {
 			if(Lua::IsString(l, -1) == false)
 				return 0; // This should never happen
-			std::stringstream ssMsg;
-			std::string luaMsg = Lua::ToString(l, -1);
-
-			lua_Debug d {};
-			int32_t level = 1;
-			auto bFoundSrc = false;
-			while(bFoundSrc == false && lua_getstack(l, level, &d) == 1) {
-				if(lua_getinfo(l, "Sln", &d) != 0 && (strcmp(d.what, "Lua") == 0 || strcmp(d.what, "main") == 0)) {
-					bFoundSrc = true;
-					break;
-				}
-				++level;
-			}
-
-			if(bFoundSrc == true) {
-				if(!luaMsg.empty() && luaMsg.front() != '[') {
-					std::string shortSrc = get_source(d);
-					strip_path_until_lua_dir(shortSrc);
-					shortSrc = "[string \"" + shortSrc + "\"]";
-
-					std::stringstream ssErrMsg;
-					ssErrMsg << shortSrc << ":" << d.currentline << ": " << luaMsg;
-					luaMsg = ssErrMsg.str();
-				}
-			}
-			transform_path(d, luaMsg, d.currentline);
-			ssMsg << luaMsg;
-			auto bNl = pragma::scripting::lua::util::get_code_snippet(ssMsg, (d.source != nullptr) ? get_source(d) : "", d.currentline, ":");
-			// if(level != 1)
-			{
-				level = 1;
-				if(bNl == true)
-					ssMsg << "\n\n";
-				else
-					ssMsg << ":\n";
-				ssMsg << "    Callstack:";
-				while(lua_getstack(l, level, &d) == 1) {
-					if(lua_getinfo(l, "Sln", &d) != 0) {
-						std::string t(level * 4, ' ');
-						if(level >= 10) {
-							ssMsg << t << "...";
-							break;
-						}
-						else {
-							std::string src = get_source(d);
-							strip_path_until_lua_dir(src);
-							transform_path(d, src, d.currentline);
-							src = "[string \"" + src + "\"]";
-							ssMsg << "\n" << t << level << ": " << (d.name != nullptr ? d.name : "?") << "[" << d.linedefined << ":" << d.lastlinedefined << "] [" << d.what << ":" << d.namewhat << "] : " << src << ":" << d.currentline;
-						}
-					}
-					++level;
-				}
-			}
-			print_lua_error_message(l, ssMsg.str());
+			std::string errMsg = Lua::CheckString(l, -1);
+			auto formattedMsg = pragma::scripting::lua::format_error_message(l, errMsg, Lua::StatusCode::ErrorRun, nullptr);
+			pragma::scripting::lua::submit_error(l, formattedMsg);
 			return 0;
 		});
 	});

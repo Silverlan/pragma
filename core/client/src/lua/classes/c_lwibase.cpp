@@ -43,6 +43,7 @@
 #include <pragma/debug/intel_vtune.hpp>
 
 import pragma.string.unicode;
+import pragma.scripting.lua;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
@@ -1237,7 +1238,6 @@ namespace Lua {
 		template<typename... TARGS>
 		void CallCallbacks(lua_State *l, ::WIBase &hPanel, std::string name, TARGS... args)
 		{
-
 			auto callbackPtr = std::static_pointer_cast<LuaCallbacks>(hPanel.GetUserData4());
 			if(callbackPtr == nullptr)
 				return;
@@ -1258,28 +1258,22 @@ namespace Lua {
 				else if(cbInfo.luaState == l) {
 					auto &o = cbInfo.luaFunction;
 					auto bReturn = false;
-					Lua::Execute(l, [l, &o, &hPanel, numArgs, argOffset, &bReturn, &name](int (*traceback)(lua_State *l)) {
-						auto n = Lua::GetStackTop(l);
-						auto r = Lua::CallFunction(
-						  l,
-						  [&o, &hPanel, numArgs, argOffset](lua_State *l) {
-							  o.push(l);
-							  auto obj = WGUILuaInterface::GetLuaObject(l, hPanel);
-							  obj.push(l);
-							  for(auto i = decltype(numArgs) {0}; i < numArgs; ++i) {
-								  auto arg = argOffset + i;
-								  Lua::PushValue(l, arg);
-							  }
-							  return Lua::StatusCode::Ok;
-						  },
-						  LUA_MULTRET);
-						if(r == Lua::StatusCode::Ok) {
-							auto numResults = Lua::GetStackTop(l) - n;
-							if(numResults > 0)
-								bReturn = true;
+					auto n = Lua::GetStackTop(l);
+					auto r = pragma::scripting::lua::protected_call(l, [&](lua_State *l) -> Lua::StatusCode {
+						o.push(l);
+						auto obj = WGUILuaInterface::GetLuaObject(l, hPanel);
+						obj.push(l);
+						for(auto i = decltype(numArgs) {0}; i < numArgs; ++i) {
+							auto arg = argOffset + i;
+							Lua::PushValue(l, arg);
 						}
-						return r;
-					});
+						return Lua::StatusCode::Ok;
+					}, LUA_MULTRET);
+					if(r == Lua::StatusCode::Ok) {
+						auto numResults = Lua::GetStackTop(l) - n;
+						if(numResults > 0)
+							bReturn = true;
+					}
 					if(bReturn == true)
 						break;
 					++it;

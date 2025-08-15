@@ -28,6 +28,8 @@
 import util_zip;
 import pragma.doc;
 import pragma.locale;
+import pragma.scripting.lua;
+import pragma.console.commands;
 
 static std::optional<std::string> udm_convert(const std::string &fileName)
 {
@@ -229,36 +231,22 @@ void Engine::RegisterConsoleCommands()
 	  });
 	conVarMap.RegisterConCommand(
 	  "lua_exec",
-	  [](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
-		  if(argv.empty()) {
-			  Con::cwar << "No argument given to execute!" << Con::endl;
-			  return;
-		  }
-		  if(!state->IsGameActive() || state->GetGameState() == nullptr) {
-			  Con::cwar << "No game is active! Lua code cannot be executed without an active game!" << Con::endl;
-			  return;
-		  }
-		  auto fname = argv.at(0);
-		  if(argv.size() > 1 && argv[1] == "nocache") {
-			  Lua::set_ignore_include_cache(true);
-			  state->GetGameState()->ExecuteLuaFile(fname);
-			  Lua::set_ignore_include_cache(false);
-			  return;
-		  }
-		  Lua::global::include(state->GetLuaState(), fname, nullptr, true, false);
-	  },
+	  &pragma::console::commands::lua_exec,
 	  ConVarFlags::None, "Opens and executes a lua-file on the server.",
+	  &pragma::console::commands::lua_exec_autocomplete);
+	conVarMap.RegisterConCommand(
+	  "lua_run",
+	  static_cast<void(*)(NetworkState*, pragma::BasePlayerComponent*, std::vector<std::string>&, float)>(&pragma::console::commands::lua_run),
+	  ConVarFlags::None, "Runs a lua command on the server lua state.",
 	  [](const std::string &arg, std::vector<std::string> &autoCompleteOptions) {
-		  std::vector<std::string> resFiles;
-		  auto path = Lua::SCRIPT_DIRECTORY_SLASH + arg;
-		  FileManager::FindFiles((path + "*." + Lua::FILE_EXTENSION).c_str(), &resFiles, nullptr);
-		  FileManager::FindFiles((path + "*." + Lua::FILE_EXTENSION_PRECOMPILED).c_str(), &resFiles, nullptr);
-		  autoCompleteOptions.reserve(resFiles.size());
-		  for(auto &mapName : resFiles) {
-			  auto fullPath = path.substr(4) + mapName;
-			  ustring::replace(fullPath, "\\", "/");
-			  autoCompleteOptions.push_back(fullPath);
-		  }
+	  	auto *sv = pragma::get_engine()->GetServerNetworkState();
+	  	auto *game = sv ? sv->GetGameState() : nullptr;
+	  	if (!game)
+	  		return;
+	  	auto *l = game->GetLuaState();
+	  	if (!l)
+	  		return;
+	  	pragma::console::commands::lua_run_autocomplete(l, arg, autoCompleteOptions);
 	  });
 	conVarMap.RegisterConCommand(
 	  "save",

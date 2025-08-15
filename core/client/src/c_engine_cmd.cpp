@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_cengine.h"
-#include "pragma/console/lua_run_autocomplete.hpp"
 
 #ifdef _MSC_VER
 namespace pragma::string {
@@ -41,6 +40,7 @@ namespace pragma::string {
 
 import pragma.locale;
 import pragma.scripting.lua;
+import pragma.console.commands;
 #ifndef _MSC_VER
 import pragma.string.unicode;
 #endif
@@ -54,56 +54,13 @@ void CEngine::RegisterConsoleCommands()
 	RegisterSharedConsoleCommands(conVarMap);
 	conVarMap.RegisterConCommand(
 	  "lua_exec_cl",
-	  [](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
-		  if(argv.empty()) {
-			  Con::cwar << "No argument given to execute!" << Con::endl;
-			  return;
-		  }
-		  if(!state->IsGameActive() || state->GetGameState() == nullptr) {
-			  Con::cwar << "No game is active! Lua code cannot be executed without an active game!" << Con::endl;
-			  return;
-		  }
-
-	  	auto fname = argv.at(0);
-	  	auto result = pragma::scripting::lua::include(state->GetLuaState(), fname, pragma::scripting::lua::IncludeFlags::AddToCache);
-	  	Lua::Pop(state->GetLuaState(), result.numResults);
-	  	if (result.statusCode != Lua::StatusCode::Ok)
-	  		pragma::scripting::lua::submit_error(state->GetLuaState(), result.errorMessage);
-	  },
+	  &pragma::console::commands::lua_exec,
 	  ConVarFlags::None, "Opens and executes a lua-file on the client.",
-	  [](const std::string &arg, std::vector<std::string> &autoCompleteOptions) {
-		  std::vector<std::string> resFiles;
-		  auto path = Lua::SCRIPT_DIRECTORY_SLASH + arg;
-		  FileManager::FindFiles((path + "*." + Lua::FILE_EXTENSION).c_str(), &resFiles, nullptr);
-		  FileManager::FindFiles((path + "*." + Lua::FILE_EXTENSION_PRECOMPILED).c_str(), &resFiles, nullptr);
-		  autoCompleteOptions.reserve(resFiles.size());
-		  path = ufile::get_path_from_filename(path.substr(4));
-		  for(auto &mapName : resFiles) {
-			  auto fullPath = path + mapName;
-			  ustring::replace(fullPath, "\\", "/");
-			  autoCompleteOptions.push_back(fullPath);
-		  }
-	  });
+	  &pragma::console::commands::lua_exec_autocomplete);
 
 	conVarMap.RegisterConCommand(
 	  "lua_run_cl",
-	  [](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
-	  	  if(argv.empty()) {
-			  Con::cwar << "No argument given to execute!" << Con::endl;
-			  return;
-		  }
-		  if(!state->IsGameActive() || state->GetGameState() == nullptr) {
-			  Con::cwar << "No game is active! Lua code cannot be executed without an active game!" << Con::endl;
-			  return;
-		  }
-
-		  std::string lua = argv[0];
-		  for(auto i = 1; i < argv.size(); i++) {
-			  lua += " ";
-			  lua += argv[i];
-		  }
-		  state->GetGameState()->RunLua(lua);
-	  },
+	  static_cast<void(*)(NetworkState*, pragma::BasePlayerComponent*, std::vector<std::string>&, float)>(&pragma::console::commands::lua_run),
 	  ConVarFlags::None, "Runs a lua command on the client lua state.",
 	  [](const std::string &arg, std::vector<std::string> &autoCompleteOptions) {
 	  	auto *game = pragma::get_client_game();
@@ -112,7 +69,29 @@ void CEngine::RegisterConsoleCommands()
 	  	auto *l = game->GetLuaState();
 	  	if (!l)
 	  		return;
-	  	pragma::console::impl::lua_run_autocomplete(l, arg, autoCompleteOptions);
+	  	pragma::console::commands::lua_run_autocomplete(l, arg, autoCompleteOptions);
+	  });
+
+	conVarMap.RegisterConCommand(
+	  "lua_run_gui",
+	  +[](NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv, float v) {
+		  auto *cl = pragma::get_client_state();
+		  auto *l = cl ? cl->GetGUILuaState() : nullptr;
+		  if (!l) {
+		  	Con::cwar << "GUI Lua state is not valid!" << Con::endl;
+		  	return;
+		  }
+		pragma::console::commands::lua_run(l, "lua_run_gui", pl, argv, v);
+	  },
+	  ConVarFlags::None, "Runs a lua command on the GUI lua state.",
+	  [](const std::string &arg, std::vector<std::string> &autoCompleteOptions) {
+		  auto *cl = pragma::get_client_state();
+		  if (!cl)
+		  	return;
+		  auto *l = cl->GetGUILuaState();
+		  if (!l)
+		  	return;
+		  pragma::console::commands::lua_run_autocomplete(l, arg, autoCompleteOptions);
 	  });
 
 	conVarMap.RegisterConVar<bool>("cl_downscale_imported_high_resolution_rma_textures", true, ConVarFlags::Archive, "If enabled, imported high-resolution RMA textures will be downscaled to a more memory-friendly size.");

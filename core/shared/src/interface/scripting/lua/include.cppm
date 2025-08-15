@@ -26,6 +26,8 @@ export namespace pragma::scripting::lua {
     };
 
     DLLNETWORK IncludeResult include(lua_State *l, const std::string &path, IncludeFlags flags = IncludeFlags::None);
+    DLLNETWORK void execute_files_in_directory(lua_State *l, const std::string &path);
+    DLLNETWORK Lua::StatusCode execute_file(lua_State *l, const std::string &path, std::string *optOutErrMsg = nullptr);
 };
 
 export {REGISTER_BASIC_BITWISE_OPERATORS(pragma::scripting::lua::IncludeFlags)}

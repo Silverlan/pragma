@@ -105,7 +105,7 @@ static void transform_path(const lua_Debug &d, std::string &errPath, int32_t cur
 			path = "..." + path.substr(path.size() - maxLuaPathLen);
 
 		if(Lua::GetLuaFilePath(Lua::SCRIPT_DIRECTORY_SLASH + path))
-			path = util::make_clickable_link(path, currentLine);
+			path = pragma::scripting::lua::util::make_clickable_lua_script_link(path, currentLine);
 		errPath = ustring::substr(errPath, 0, qt0 + 1) + path + ustring::substr(errPath, qt1);
 	}
 }
@@ -125,7 +125,7 @@ bool Lua::get_callstack(lua_State *l, std::stringstream &ss)
 				break;
 			}
 			else {
-				auto filename = util::make_clickable_link(get_source(d), d.currentline);
+				auto filename = pragma::scripting::lua::util::make_clickable_lua_script_link(get_source(d), d.currentline);
 				ss << "\n" << t << level << ": " << (d.name != nullptr ? d.name : "?") << "[" << d.linedefined << ":" << d.lastlinedefined << "] [" << d.what << ":" << d.namewhat << "] : " << filename;
 			}
 		}
@@ -171,7 +171,8 @@ bool Lua::PrintTraceback(lua_State *l, std::stringstream &ssOut, const std::stri
 				//open_lua_file(fname,lineId);
 			}
 			std::stringstream ssErrMsg;
-			ssErrMsg << shortSrc << ":" << d.currentline << ": " << errMsg;
+			auto lineMsg = pragma::scripting::lua::util::make_clickable_lua_script_link(shortSrc, d.currentline);
+			ssErrMsg << lineMsg<<" " << errMsg;
 			errMsg = ssErrMsg.str();
 		}
 		transform_path(d, errMsg, d.currentline);

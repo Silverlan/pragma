@@ -67,7 +67,7 @@ static int32_t include(lua_State *l)
 	std::string path = Lua::CheckString(l, 1);
 	auto ignoreGlobalCache = false;
 	if (Lua::IsSet(l, 2))
-		ignoreGlobalCache = Lua::CheckNumber(l, 2);
+		ignoreGlobalCache = Lua::CheckBool(l, 2);
 	auto flags = pragma::scripting::lua::IncludeFlags::Default;
 	umath::set_flag(flags, pragma::scripting::lua::IncludeFlags::IgnoreGlobalCache, ignoreGlobalCache);
 

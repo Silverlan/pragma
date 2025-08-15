@@ -47,6 +47,13 @@ std::optional<std::pair<std::string, int32_t>> pragma::scripting::lua::util::par
 	return std::pair<std::string, int32_t>{filename, lineId};
 }
 
+std::string pragma::scripting::lua::util::make_clickable_lua_script_link(const std::string &fileName, int32_t lineIdx)
+{
+	auto absPath = fileName;
+	filemanager::find_absolute_path(absPath, absPath);
+	return ::util::make_clickable_link(absPath, lineIdx);
+}
+
 bool pragma::scripting::lua::util::get_code_snippet(std::stringstream &outMsg, const std::string &fileName, uint32_t lineId, const std::string &prefix)
 {
 	auto fname = fileName;
@@ -62,7 +69,7 @@ bool pragma::scripting::lua::util::get_code_snippet(std::stringstream &outMsg, c
 		fname = fname.substr(br + 1);
 		br = fname.find_first_of(FileManager::GetDirectorySeparator());
 	}
-	auto f = FileManager::OpenFile(fname.c_str(), "r");
+	auto f = filemanager::open_file(fname, filemanager::FileMode::Read | filemanager::FileMode::Binary);
 	if(f != nullptr) {
 		char c = 0;
 		uint32_t curLineId = 1;
@@ -89,11 +96,6 @@ bool pragma::scripting::lua::util::get_code_snippet(std::stringstream &outMsg, c
 		}
 	}
 	return false;
-}
-
-static std::string get_clickable_link(const std::string& path, int line) {
-	auto absPath = path;
-	return util::make_clickable_link(absPath, path, line);
 }
 
 void pragma::scripting::lua::util::get_lua_doc_info(std::stringstream &outMsg, const std::string &errMsg)
@@ -151,7 +153,7 @@ std::string pragma::scripting::lua::format_error_message(lua_State *l, const std
 						filename = *optFilename;
 					else
 						filename = errInfo->first;
-					auto formattedFilename = get_clickable_link(filename, errInfo->second);
+					auto formattedFilename = util::make_clickable_lua_script_link(filename, errInfo->second);
 					ssMsg<<formattedFilename;
 					ssMsg<<" "<<formattedMsg.substr(startMsgPos);
 					auto bNl = util::get_code_snippet(ssMsg, ::util::FilePath(Lua::SCRIPT_DIRECTORY, filename).GetString(), errInfo->second, ":");

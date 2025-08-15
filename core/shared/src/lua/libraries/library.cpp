@@ -672,6 +672,9 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 #endif
 
 	auto modDebug = luabind::module_(lua.GetState(), "debug");
+	modDebug[luabind::def("format_error_message", +[](lua_State *l, const std::string &msg) -> std::string {
+		return pragma::scripting::lua::format_error_message(l, msg, Lua::StatusCode::ErrorRun);
+	})];
 	modDebug[luabind::def("move_state_to_string", Lua::debug::move_state_to_string), luabind::def("beep", Lua::debug::beep)];
 	lua_pushtablecfunction(lua.GetState(), "debug", "print", Lua::debug::print);
 	lua_pushtablecfunction(

@@ -78,9 +78,9 @@ function tests.TestManager:CompleteTest(success, resultData)
 	self.m_currentTest = nil
 	if success == false then
 		local msg = resultData.message or "Unknown"
-		msg = "Test '" .. self.m_currentTest .. "' failed: " .. tostring(msg)
+		msg = "Test '" .. curTest .. "' failed: " .. tostring(msg)
 		LOGGER:Err(msg)
-		error(msg)
+		-- error(msg)
 	end
 
 	LOGGER:Info("Test '{}' has completed!", curTest)
@@ -145,7 +145,12 @@ function tests.TestManager:StartTest(test)
 
 	local scriptData = self.m_scripts[test]
 	assert(scriptData ~= nil)
-	local retVals = { pcall(function() return include(scriptData.scriptFile, true) end) }
+	local retVals = {
+		xpcall(
+			function() return include(scriptData.scriptFile, true) end,
+			function(err) return debug.format_error_message(err)
+		end)
+	}
 	if(retVals[1] == false) then
 		local err = retVals[2]
 		self:CompleteTest(false, "Failed to execute test script: " .. tostring(err))

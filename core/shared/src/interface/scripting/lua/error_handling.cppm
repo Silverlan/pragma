@@ -24,6 +24,7 @@ export namespace pragma::scripting::lua {
     DLLNETWORK void submit_error(lua_State *l, const std::string &msg);
 
     namespace util {
+        DLLNETWORK std::string make_clickable_lua_script_link(const std::string &fileName, int32_t lineIdx);
         DLLNETWORK bool get_code_snippet(std::stringstream &outMsg, const std::string &fileName, uint32_t lineId, const std::string &prefix = "");
         DLLNETWORK void get_lua_doc_info(std::stringstream &outMsg, const std::string &errMsg);
         DLLNETWORK std::optional<std::pair<std::string, int32_t>> parse_syntax_error_message(const std::string &msg, size_t *optOutStartMsgPos = nullptr);

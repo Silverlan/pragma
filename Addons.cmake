@@ -18,6 +18,7 @@ function(pr_install_git_repository IDENTIFIER GIT_URL GIT_SHA INSTALL_PATH)
         INSTALL_COMMAND   ""
     )
     ExternalProject_Get_Property(addon_${IDENTIFIER} source_dir)
+    add_dependencies(pragma-install-full addon_${IDENTIFIER})
     install(
         DIRECTORY "${source_dir}/"
         DESTINATION "${INSTALL_PATH}"
@@ -50,6 +51,7 @@ function(pr_install_git_release IDENTIFIER BASE_URL BASE_DIR TAG_NAME)
         INSTALL_COMMAND   ""
     )
     ExternalProject_Get_Property(addon_${IDENTIFIER} source_dir)
+    add_dependencies(pragma-install-full addon_${IDENTIFIER})
     install(
         DIRECTORY "${source_dir}/"
         DESTINATION "${BASE_DIR}"

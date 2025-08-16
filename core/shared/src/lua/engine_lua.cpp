@@ -5,11 +5,11 @@
 #include "pragma/engine.h"
 #include "pragma/lua/luaapi.h"
 #include "pragma/lua/lua_error_handling.hpp"
+#include "pragma/logging.hpp"
 #include "pragma/console/conout.h"
 #include <luainterface.hpp>
 #include <luabind/class_info.hpp>
 #include <luabind/function_introspection.hpp>
-#include <spdlog/spdlog-inl.h>
 
 import pragma.debug.crashdump;
 

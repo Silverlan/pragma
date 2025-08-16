@@ -7,11 +7,12 @@ module;
 #include <string>
 #include <luasystem.h>
 #include <pragma/lua/lua_doc.hpp>
+#include <pragma/lua/lua_error_handling.hpp>
 #include <pragma/engine.h>
 #include "pragma/console/util_console_color.hpp"
 #include "pragma/logging.hpp"
 
-module pragma.scripting.lua.error_handling;
+module pragma.scripting.lua;
 
 static spdlog::logger &LOGGER = pragma::register_logger("lua");
 

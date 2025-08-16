@@ -8,7 +8,7 @@ module;
 #include <functional>
 #include <luasystem.h>
 
-export module pragma.scripting.lua.util;
+export module pragma.scripting.lua:util;
 
 export namespace pragma::scripting::lua {
     DLLNETWORK Lua::StatusCode protected_call(lua_State *l, const std::function<Lua::StatusCode(lua_State *)> &pushFuncArgs, int32_t numResults, std::string *optOutErrMsg = nullptr);

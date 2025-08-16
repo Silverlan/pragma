@@ -7,7 +7,7 @@ module;
 #include <string>
 #include <luasystem.h>
 
-export module pragma.scripting.lua.error_handling;
+export module pragma.scripting.lua:error_handling;
 
 export namespace pragma::scripting::lua {
     enum class ErrorType : uint8_t {

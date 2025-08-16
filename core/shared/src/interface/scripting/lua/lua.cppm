@@ -4,6 +4,6 @@
 module;
 
 export module pragma.scripting.lua;
-export import pragma.scripting.lua.util;
-export import pragma.scripting.lua.error_handling;
-export import pragma.scripting.lua.include;
+export import :util;
+export import :error_handling;
+export import :include;

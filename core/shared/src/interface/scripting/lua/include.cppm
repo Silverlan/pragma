@@ -5,7 +5,7 @@ module;
 
 #include "pragma/networkdefinitions.h"
 
-export module pragma.scripting.lua.include;
+export module pragma.scripting.lua:include;
 
 export namespace pragma::scripting::lua {
     struct DLLNETWORK IncludeResult {

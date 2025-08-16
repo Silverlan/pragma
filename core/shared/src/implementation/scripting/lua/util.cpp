@@ -3,9 +3,9 @@
 
 module;
 
-module pragma.scripting.lua.util;
+module pragma.scripting.lua;
 
-import pragma.scripting.lua.error_handling;
+import :error_handling;
 
 static int32_t traceback(lua_State *l) {
     if (!Lua::IsString(l, -1))

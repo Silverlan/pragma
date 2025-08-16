@@ -9,9 +9,9 @@ module;
 #include <luainterface.hpp>
 #include <stack>
 
-module pragma.scripting.lua.include;
+module pragma.scripting.lua;
 
-import pragma.scripting.lua.error_handling;
+import :error_handling;
 
 static pragma::scripting::lua::IncludeResult include_file(lua_State *l, const util::Path &fileName, pragma::scripting::lua::IncludeFlags flags, Lua::IncludeCache *optIncludeCache = nullptr);
 static pragma::scripting::lua::IncludeResult include_directory(lua_State *l, const util::Path &fullLuaPath, const util::Path &relLuaPath, pragma::scripting::lua::IncludeFlags flags, Lua::IncludeCache *optIncludeCache = nullptr)

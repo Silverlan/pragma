@@ -84,6 +84,7 @@
 
 import bezierfit;
 import panima;
+import pragma.scripting.lua;
 
 extern DLLNETWORK Engine *engine;
 

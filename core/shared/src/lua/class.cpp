@@ -336,18 +336,22 @@ static int util_file_path(lua_State *l)
 {
 	int n = lua_gettop(l); /* number of arguments */
 	int i;
-	std::vector<std::string> args;
+	std::vector<util::Path> args;
 	args.reserve(n);
-	for(i = 1; i <= n; i++)
-		args.push_back(Lua::CheckString(l, i));
+	for(i = 1; i <= n; i++) {
+		if (Lua::IsType<util::Path>(l, i))
+			args.push_back(Lua::Check<util::Path>(l, i));
+		else
+			args.push_back({Lua::CheckString(l, i)});
+	}
 	util::Path path {};
 	if(args.size() > 1) {
 		for(size_t i = 0; i < (args.size() - 1); ++i)
-			path += util::Path::CreatePath(args[i]);
-		path += util::Path::CreateFile(args.back());
+			path = util::DirPath(path, args[i]);
+		path = util::FilePath(path, args.back());
 	}
 	else if(args.size() == 1)
-		path = util::Path::CreateFile(args.back());
+		path = util::FilePath(args.back());
 
 	auto &str = path.GetString();
 	if(!str.empty() && str.front() == '/')
@@ -361,13 +365,17 @@ static int util_dir_path(lua_State *l)
 {
 	int n = lua_gettop(l); /* number of arguments */
 	int i;
-	std::vector<std::string> args;
+	std::vector<util::Path> args;
 	args.reserve(n);
-	for(i = 1; i <= n; i++)
-		args.push_back(Lua::CheckString(l, i));
+	for(i = 1; i <= n; i++) {
+		if (Lua::IsType<util::Path>(l, i))
+			args.push_back(Lua::Check<util::Path>(l, i));
+		else
+			args.push_back({Lua::CheckString(l, i)});
+	}
 	util::Path path {};
 	for(size_t i = 0; i < args.size(); ++i)
-		path += util::Path::CreatePath(args[i]);
+		path = util::DirPath(path, args[i]);
 
 	auto &str = path.GetString();
 	if(!str.empty() && str.front() == '/')

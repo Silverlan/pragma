@@ -30,6 +30,14 @@ DLLNETWORK std::optional<std::string> g_customTitle;
 extern bool g_cpuRendering;
 void RenderContext::InitializeRenderAPI()
 {
+#ifdef __linux__
+	if(c_engine->IsCLIOnly()) {
+		// Use a virtual framebuffer in CLI mode. Is addresses a sigfault error when loading the chromium module.
+		std::system("Xvfb :99 -screen 0 1280x720x24 >/dev/null 2>&1 &");
+		setenv("DISPLAY", ":99", 1);
+	}
+#endif
+
 	auto &renderAPI = GetRenderAPI();
 	auto getRenderApiPath = [](const std::string &renderAPI, std::string &outLocation, std::string &outModulePath) {
 		outLocation = pragma::rendering::get_graphics_api_module_location(renderAPI);

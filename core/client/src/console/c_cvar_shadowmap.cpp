@@ -19,6 +19,7 @@
 
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
+
 static WIHandle hGUIShadowmap;
 static int numShadowmapTargets = 0;
 static int shadowmapTargetIdx = -1;

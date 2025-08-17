@@ -102,6 +102,7 @@ class DLLCLIENT CEngine : public Engine, public pragma::RenderContext {
 	void SetGPUProfilingEnabled(bool bEnabled);
 
 	bool IsWindowless() const;
+	bool IsCPURenderingOnly() const;
 
 	virtual bool Initialize(int argc, char *argv[]) override;
 	virtual StateInstance &GetStateInstance(NetworkState &nw) override;

@@ -682,9 +682,11 @@ extern std::optional<uint32_t> g_launchParamHeight;
 extern std::optional<Color> g_titleBarColor;
 extern std::optional<Color> g_borderColor;
 extern bool g_windowless;
+extern bool g_cpuRendering;
 void register_game_shaders();
 
 bool CEngine::IsWindowless() const { return g_windowless; }
+bool CEngine::IsCPURenderingOnly() const { return g_cpuRendering; }
 
 void CEngine::HandleOpenGLFallback()
 {

@@ -254,7 +254,7 @@ void pragma::bvh::HitboxMeshBvhBuildTask::Serialize(Model &mdl)
 			udmBoneMeshes[idx]["meshUuid"] = boneMeshInfo->meshUuid;
 			udmBoneMeshes[idx].AddArray("triangleIndices", boneMeshInfo->usedTris, udm::ArrayType::Compressed);
 
-            assert(!boneMeshInfo->serializedBvh.str().empty());
+			assert(!boneMeshInfo->serializedBvh.str().empty());
 			auto &stream = boneMeshInfo->serializedBvh;
 			auto view = stream.view();
 			auto extData = boneMeshInfo->subMesh->GetExtensionData();

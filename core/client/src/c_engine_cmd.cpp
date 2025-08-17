@@ -52,24 +52,17 @@ void CEngine::RegisterConsoleCommands()
 	Engine::RegisterConsoleCommands();
 	auto &conVarMap = *console_system::client::get_convar_map();
 	RegisterSharedConsoleCommands(conVarMap);
-	conVarMap.RegisterConCommand(
-	  "lua_exec_cl",
-	  &pragma::console::commands::lua_exec,
-	  ConVarFlags::None, "Opens and executes a lua-file on the client.",
-	  &pragma::console::commands::lua_exec_autocomplete);
+	conVarMap.RegisterConCommand("lua_exec_cl", &pragma::console::commands::lua_exec, ConVarFlags::None, "Opens and executes a lua-file on the client.", &pragma::console::commands::lua_exec_autocomplete);
 
-	conVarMap.RegisterConCommand(
-	  "lua_run_cl",
-	  static_cast<void(*)(NetworkState*, pragma::BasePlayerComponent*, std::vector<std::string>&, float)>(&pragma::console::commands::lua_run),
-	  ConVarFlags::None, "Runs a lua command on the client lua state.",
+	conVarMap.RegisterConCommand("lua_run_cl", static_cast<void (*)(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)>(&pragma::console::commands::lua_run), ConVarFlags::None, "Runs a lua command on the client lua state.",
 	  [](const std::string &arg, std::vector<std::string> &autoCompleteOptions) {
-	  	auto *game = pragma::get_client_game();
-	  	if (!game)
-	  		return;
-	  	auto *l = game->GetLuaState();
-	  	if (!l)
-	  		return;
-	  	pragma::console::commands::lua_run_autocomplete(l, arg, autoCompleteOptions);
+		  auto *game = pragma::get_client_game();
+		  if(!game)
+			  return;
+		  auto *l = game->GetLuaState();
+		  if(!l)
+			  return;
+		  pragma::console::commands::lua_run_autocomplete(l, arg, autoCompleteOptions);
 	  });
 
 	conVarMap.RegisterConCommand(
@@ -77,20 +70,20 @@ void CEngine::RegisterConsoleCommands()
 	  +[](NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv, float v) {
 		  auto *cl = pragma::get_client_state();
 		  auto *l = cl ? cl->GetGUILuaState() : nullptr;
-		  if (!l) {
-		  	Con::cwar << "GUI Lua state is not valid!" << Con::endl;
-		  	return;
+		  if(!l) {
+			  Con::cwar << "GUI Lua state is not valid!" << Con::endl;
+			  return;
 		  }
-		pragma::console::commands::lua_run(l, "lua_run_gui", pl, argv, v);
+		  pragma::console::commands::lua_run(l, "lua_run_gui", pl, argv, v);
 	  },
 	  ConVarFlags::None, "Runs a lua command on the GUI lua state.",
 	  [](const std::string &arg, std::vector<std::string> &autoCompleteOptions) {
 		  auto *cl = pragma::get_client_state();
-		  if (!cl)
-		  	return;
+		  if(!cl)
+			  return;
 		  auto *l = cl->GetGUILuaState();
-		  if (!l)
-		  	return;
+		  if(!l)
+			  return;
 		  pragma::console::commands::lua_run_autocomplete(l, arg, autoCompleteOptions);
 	  });
 

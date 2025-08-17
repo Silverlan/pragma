@@ -14,7 +14,7 @@ module pragma.console.commands;
 // We have to access some members of luabind::detail::class_rep which are inaccessable,
 // so we'll force them to be accessable.
 class Luaclass_rep {
-public:
+  public:
 	luabind::type_id m_type;
 	std::vector<luabind::detail::class_rep::base_info> m_bases;
 	const char *m_name;
@@ -31,9 +31,10 @@ public:
 static_assert(sizeof(Luaclass_rep) == sizeof(luabind::detail::class_rep));
 static Luaclass_rep &access_class_rep(luabind::detail::class_rep &rep) { return reinterpret_cast<Luaclass_rep &>(rep); }
 
-static void check_autocomplete(const std::string &arg, std::vector<std::string> &autoCompleteOptions, const std::string_view &candidate) {
+static void check_autocomplete(const std::string &arg, std::vector<std::string> &autoCompleteOptions, const std::string_view &candidate)
+{
 	auto caseSensitive = true;
-	if (!ustring::compare(candidate.data(), arg.c_str(), caseSensitive, arg.length()))
+	if(!ustring::compare(candidate.data(), arg.c_str(), caseSensitive, arg.length()))
 		return;
 	autoCompleteOptions.push_back(std::string {candidate});
 }
@@ -60,62 +61,65 @@ static void get_crep_autocomplete(lua_State *l, luabind::detail::class_rep *crep
 		if(Lua::IsString(l, -1)) {
 			std::string name = Lua::CheckString(l, -1);
 			// TODO: Find argument names using LuaDoc system
-			check_autocomplete(arg, autoCompleteOptions, name +"(");
+			check_autocomplete(arg, autoCompleteOptions, name + "(");
 			Lua::Pop(l, 1);
 			//ParseLuaProperty(name, *i, result, true);
 		}
 	}
 
 	auto &staticConstants = access_class_rep(*crep).m_static_constants;
-	for (auto &[name, ltstr] : staticConstants) {
+	for(auto &[name, ltstr] : staticConstants) {
 		check_autocomplete(arg, autoCompleteOptions, name);
 	}
 }
 
 // simple trim (whitespace only)
-static std::string trim(const std::string &s) {
+static std::string trim(const std::string &s)
+{
 	auto l = s.find_first_not_of(" \t\n\r");
-	if (l == std::string::npos) return "";
+	if(l == std::string::npos)
+		return "";
 	auto r = s.find_last_not_of(" \t\n\r");
-	return s.substr(l, r-l+1);
+	return s.substr(l, r - l + 1);
 }
 
-static std::vector<std::pair<std::string, size_t>> split_chain(const std::string &expr) {
+static std::vector<std::pair<std::string, size_t>> split_chain(const std::string &expr)
+{
 	auto eq = expr.find_last_of("=");
-	if (eq != std::string::npos) {
-		auto res = split_chain(expr.substr(eq +1));
-		for (auto &[str, startPos] : res)
-			startPos += eq +1;
+	if(eq != std::string::npos) {
+		auto res = split_chain(expr.substr(eq + 1));
+		for(auto &[str, startPos] : res)
+			startPos += eq + 1;
 		return res;
 	}
 	std::vector<std::pair<std::string, size_t>> tokens;
 	std::string cur;
 	int depth = 0;
-	size_t segment_start = 0;  // index in expr where `cur` began
+	size_t segment_start = 0; // index in expr where `cur` began
 
-	for (size_t i = 0; i < expr.size(); ++i) {
+	for(size_t i = 0; i < expr.size(); ++i) {
 		char c = expr[i];
 
-		if (depth == 0 && cur.empty()) {
+		if(depth == 0 && cur.empty()) {
 			// mark the start of a new segment
 			segment_start = i;
 		}
 
 		// track paren depth
-		if (c == '(') {
+		if(c == '(') {
 			depth++;
 			cur += c;
 		}
-		else if (c == ')') {
+		else if(c == ')') {
 			depth--;
 			cur += c;
 		}
 		// split on . or : only at top level
-		else if ((c == '.' || c == ':') && depth == 0) {
+		else if((c == '.' || c == ':') && depth == 0) {
 			auto t = trim(cur);
 			// strip trailing "()"
-			if (t.size() > 2 && t.substr(t.size()-2) == "()")
-				t.erase(t.size()-2);
+			if(t.size() > 2 && t.substr(t.size() - 2) == "()")
+				t.erase(t.size() - 2);
 			tokens.emplace_back(t, segment_start);
 			cur.clear();
 		}
@@ -125,39 +129,40 @@ static std::vector<std::pair<std::string, size_t>> split_chain(const std::string
 	}
 
 	// handle the final segment
-	if (!cur.empty()) {
+	if(!cur.empty()) {
 		auto t = trim(cur);
-		if (t.size() > 2 && t.substr(t.size()-2) == "()")
-			t.erase(t.size()-2);
+		if(t.size() > 2 && t.substr(t.size() - 2) == "()")
+			t.erase(t.size() - 2);
 		tokens.emplace_back(t, segment_start);
 	}
 
-	if (!expr.empty() && (expr.back() == '.' || expr.back() == ':'))
+	if(!expr.empty() && (expr.back() == '.' || expr.back() == ':'))
 		tokens.push_back({"", expr.length()});
 
 	return tokens;
 }
 
-void pragma::console::commands::lua_run_autocomplete(lua_State *l, const std::string &arg, std::vector<std::string> &autoCompleteOptions) {
+void pragma::console::commands::lua_run_autocomplete(lua_State *l, const std::string &arg, std::vector<std::string> &autoCompleteOptions)
+{
 	auto chain = split_chain(arg);
-	if (chain.empty())
+	if(chain.empty())
 		return;
 	auto lastSegment = chain.back();
-	chain.erase(chain.end() -1);
+	chain.erase(chain.end() - 1);
 	luabind::object o {luabind::globals(l)};
-	for (auto &[el, startIdx] : chain) {
+	for(auto &[el, startIdx] : chain) {
 		o = o[el];
-		if (!o)
+		if(!o)
 			break;
 		auto type = luabind::type(o);
-		if (type == LUA_TFUNCTION) {
+		if(type == LUA_TFUNCTION) {
 			luabind::detail::function_object *fobj = pragma::scripting::lua::util::get_function_object(o);
-			if (fobj) {
+			if(fobj) {
 				auto *functionName = fobj->name.c_str();
 				for(luabind::detail::function_object const *f = fobj; f != 0; f = f->next) {
 					std::vector<luabind::detail::TypeInfo> types;
 					f->get_signature_info(l, functionName, types);
-					if (types.empty())
+					if(types.empty())
 						continue;
 					auto &type = types.front();
 					//type.crep->
@@ -175,19 +180,19 @@ void pragma::console::commands::lua_run_autocomplete(lua_State *l, const std::st
 		Lua::Pop(l);
 	}*/
 
-	if (!o)
+	if(!o)
 		;
 	else {
 		auto *crep = Lua::get_crep(o);
-		if (crep) {
+		if(crep) {
 			get_crep_autocomplete(l, crep, lastSegment.first, autoCompleteOptions);
 		}
 		else {
 			auto t = luabind::type(o);
-			if (t == LUA_TTABLE) {
+			if(t == LUA_TTABLE) {
 				for(luabind::iterator it {o}, end; it != end; ++it) {
 					auto strKey = luabind::object_cast_nothrow<std::string>(it.key(), std::string {});
-					if (strKey.empty())
+					if(strKey.empty())
 						continue;
 					check_autocomplete(lastSegment.first, autoCompleteOptions, strKey);
 					//if (ustring::compare(strKey.c_str(), lastSegment.first.c_str(), false, lastSegment.first.length())) {
@@ -196,9 +201,9 @@ void pragma::console::commands::lua_run_autocomplete(lua_State *l, const std::st
 				}
 			}
 		}
-		for (auto &opt : autoCompleteOptions) {
+		for(auto &opt : autoCompleteOptions) {
 			auto pos = opt.find(lastSegment.first);
-			if (pos != std::string::npos)
+			if(pos != std::string::npos)
 				opt = opt.substr(pos);
 		}
 		//auto o = tmp;
@@ -223,6 +228,6 @@ void pragma::console::commands::lua_run_autocomplete(lua_State *l, const std::st
 		}*/
 	}
 
-	for (auto &opt : autoCompleteOptions)
-		opt = arg.substr(0, lastSegment.second) +opt;
+	for(auto &opt : autoCompleteOptions)
+		opt = arg.substr(0, lastSegment.second) + opt;
 }

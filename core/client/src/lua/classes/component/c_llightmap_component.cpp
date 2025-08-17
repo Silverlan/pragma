@@ -81,11 +81,9 @@ void Lua::Lightmap::register_class(lua_State *l, luabind::module_ &entsMod)
 	defCLightMap.def("GetDirectionalLightmapAtlas", &pragma::CLightMapComponent::GetDirectionalLightMapAtlas);
 	defCLightMap.def("GetLightmapTexture", &pragma::CLightMapComponent::GetTexture, luabind::copy_policy<0> {});
 	defCLightMap.def("SetLightmapAtlas", &pragma::CLightMapComponent::SetLightMapAtlas);
-	defCLightMap.def(
-	  "SetLightmapAtlas", +[](lua_State *l, pragma::CLightMapComponent &hLightMapC, const std::string &path) { set_lightmap_texture(l, hLightMapC, path, false); });
+	defCLightMap.def("SetLightmapAtlas", +[](lua_State *l, pragma::CLightMapComponent &hLightMapC, const std::string &path) { set_lightmap_texture(l, hLightMapC, path, false); });
 	defCLightMap.def("SetDirectionalLightmapAtlas", &pragma::CLightMapComponent::SetDirectionalLightMapAtlas);
-	defCLightMap.def(
-	  "SetDirectionalLightmapAtlas", +[](lua_State *l, pragma::CLightMapComponent &hLightMapC, const std::string &path) { set_lightmap_texture(l, hLightMapC, path, true); });
+	defCLightMap.def("SetDirectionalLightmapAtlas", +[](lua_State *l, pragma::CLightMapComponent &hLightMapC, const std::string &path) { set_lightmap_texture(l, hLightMapC, path, true); });
 	defCLightMap.def("SetExposure", &pragma::CLightMapComponent::SetLightMapExposure);
 	defCLightMap.def("GetExposure", &pragma::CLightMapComponent::GetLightMapExposure);
 	defCLightMap.def("GetExposureProperty", &pragma::CLightMapComponent::GetLightMapExposureProperty);
@@ -171,10 +169,8 @@ void Lua::Lightmap::register_class(lua_State *l, luabind::module_ &entsMod)
 			  return luabind::object {l, res};
 		  return luabind::object {l, std::pair<bool, std::string> {res, err}};
 	  });
-	defCache.def(
-	  "SetLightmapEntity", +[](lua_State *l, pragma::LightmapDataCache &cache, const std::string &uuid) { cache.lightmapEntityId = util::uuid_string_to_bytes(uuid); });
-	defCache.def(
-	  "GetLightmapEntity", +[](lua_State *l, pragma::LightmapDataCache &cache) -> std::string { return util::uuid_to_string(cache.lightmapEntityId); });
+	defCache.def("SetLightmapEntity", +[](lua_State *l, pragma::LightmapDataCache &cache, const std::string &uuid) { cache.lightmapEntityId = util::uuid_string_to_bytes(uuid); });
+	defCache.def("GetLightmapEntity", +[](lua_State *l, pragma::LightmapDataCache &cache) -> std::string { return util::uuid_to_string(cache.lightmapEntityId); });
 	defCLightMap.scope[defCache];
 	entsMod[defCLightMap];
 	pragma::lua::define_custom_constructor<pragma::LightmapDataCache, +[]() -> std::shared_ptr<pragma::LightmapDataCache> { return std::make_shared<pragma::LightmapDataCache>(); }>(l);
@@ -186,9 +182,7 @@ void Lua::Lightmap::register_class(lua_State *l, luabind::module_ &entsMod)
 	auto defCLmCache = pragma::lua::create_entity_component_class<pragma::CLightMapDataCacheComponent, pragma::BaseEntityComponent>("LightMapDataCacheComponent");
 	defCLmCache.def("SetLightMapDataCachePath", &pragma::CLightMapDataCacheComponent::SetLightMapDataCachePath);
 	defCLmCache.def("GetLightMapDataCachePath", &pragma::CLightMapDataCacheComponent::GetLightMapDataCachePath);
-	defCLmCache.def(
-	  "GetLightMapDataCacheFilePath", +[](const pragma::CLightMapDataCacheComponent &component) -> std::string { return pragma::LightmapDataCache::GetCacheFileName(component.GetLightMapDataCachePath());
-	  });
+	defCLmCache.def("GetLightMapDataCacheFilePath", +[](const pragma::CLightMapDataCacheComponent &component) -> std::string { return pragma::LightmapDataCache::GetCacheFileName(component.GetLightMapDataCachePath()); });
 	defCLmCache.def("GetLightMapDataCache", &pragma::CLightMapDataCacheComponent::GetLightMapDataCache);
 	defCLmCache.def("ReloadCache", &pragma::CLightMapDataCacheComponent::ReloadCache);
 	entsMod[defCLmCache];

@@ -406,10 +406,10 @@ std::vector<util::Path> util::get_resource_dirs()
 
 bool util::show_notification(const std::string &summary, const std::string &body)
 {
-	if (pragma::get_engine()->IsCLIOnly())
+	if(pragma::get_engine()->IsCLIOnly())
 		return false;
 	// Only show notification if program is not in focus
-	if (pragma::get_engine()->IsProgramInFocus())
+	if(pragma::get_engine()->IsProgramInFocus())
 		return false;
 
 	auto iconPath = engine_info::get_icon_path();

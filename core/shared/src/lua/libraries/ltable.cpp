@@ -18,7 +18,7 @@ int Lua::table::has_value(lua_State *l)
 	{
 		// TODO: Compare values
 		Lua::Pop(l, 1); /* 2 */
-	}                   /* 1 */
+	} /* 1 */
 
 	Lua::Pop(l, 1); /* 0 */
 

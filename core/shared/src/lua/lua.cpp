@@ -61,10 +61,7 @@ void Game::InitializeLua()
 		Lua::debug::enable_remote_debugging(GetLuaState());
 }
 
-const pragma::lua::ClassManager &Game::GetLuaClassManager() const
-{
-	return const_cast<Game *>(this)->GetLuaClassManager();
-}
+const pragma::lua::ClassManager &Game::GetLuaClassManager() const { return const_cast<Game *>(this)->GetLuaClassManager(); }
 pragma::lua::ClassManager &Game::GetLuaClassManager() { return *m_luaClassManager; }
 
 void Game::SetupLua() { GetNetworkState()->InitializeLuaModules(GetLuaState()); }
@@ -97,10 +94,7 @@ bool Game::RunLua(const std::string &lua, const std::string &chunkName)
 	return r == Lua::StatusCode::Ok;
 }
 
-Lua::StatusCode Game::ProtectedLuaCall(const std::function<Lua::StatusCode(lua_State *)> &pushFuncArgs, int32_t numResults)
-{
-	return pragma::scripting::lua::protected_call(GetLuaState(), pushFuncArgs, numResults);
-}
+Lua::StatusCode Game::ProtectedLuaCall(const std::function<Lua::StatusCode(lua_State *)> &pushFuncArgs, int32_t numResults) { return pragma::scripting::lua::protected_call(GetLuaState(), pushFuncArgs, numResults); }
 
 const std::array<std::string, 6> &Game::GetLuaEntityDirectories() const
 {

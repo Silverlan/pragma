@@ -152,7 +152,7 @@ void SceneRenderDesc::AddRenderMeshesToRenderQueue(pragma::CRasterizationRendere
 		auto *mat = static_cast<CMaterial *>(renderBufferData[meshIdx].material.get());
 		if(mat == nullptr) {
 			if(pragma::rendering::VERBOSE_RENDER_OUTPUT_ENABLED) {
-				Con::cwar << "[RenderQueue] WARNING: Entity"<<mdlC->GetEntity() << " has invalid render material!" << Con::endl;
+				Con::cwar << "[RenderQueue] WARNING: Entity" << mdlC->GetEntity() << " has invalid render material!" << Con::endl;
 			}
 			continue;
 		}
@@ -167,7 +167,7 @@ void SceneRenderDesc::AddRenderMeshesToRenderQueue(pragma::CRasterizationRendere
 			shader = optRasterizationRenderer->GetShaderOverride(shader);
 		if(shader == nullptr) {
 			if(pragma::rendering::VERBOSE_RENDER_OUTPUT_ENABLED) {
-				Con::cwar << "[RenderQueue] WARNING: Entity"<<mdlC->GetEntity() << " has invalid render material shader!" << Con::endl;
+				Con::cwar << "[RenderQueue] WARNING: Entity" << mdlC->GetEntity() << " has invalid render material shader!" << Con::endl;
 			}
 			continue;
 		}
@@ -177,7 +177,7 @@ void SceneRenderDesc::AddRenderMeshesToRenderQueue(pragma::CRasterizationRendere
 		prosper::PipelineID pipelineId;
 		if(pipelineIdx.has_value() == false || shader->GetPipelineId(pipelineId, *pipelineIdx) == false || pipelineId == std::numeric_limits<decltype(pipelineId)>::max()) {
 			if(pragma::rendering::VERBOSE_RENDER_OUTPUT_ENABLED) {
-				Con::cwar << "[RenderQueue] WARNING: Entity"<<mdlC->GetEntity()<< " has specialization flags referring to invalid shader pipeline!" << Con::endl;
+				Con::cwar << "[RenderQueue] WARNING: Entity" << mdlC->GetEntity() << " has specialization flags referring to invalid shader pipeline!" << Con::endl;
 			}
 			continue;
 		}
@@ -193,7 +193,7 @@ void SceneRenderDesc::AddRenderMeshesToRenderQueue(pragma::CRasterizationRendere
 		auto matIdx = mat->GetIndex();
 		if(matIdx == std::numeric_limits<decltype(matIdx)>::max()) {
 			if(pragma::rendering::VERBOSE_RENDER_OUTPUT_ENABLED) {
-				Con::cwar << "[RenderQueue] WARNING: Entity"<<mdlC->GetEntity()<< " has unindexed material '" << mat->GetName() << "'!" << Con::endl;
+				Con::cwar << "[RenderQueue] WARNING: Entity" << mdlC->GetEntity() << " has unindexed material '" << mat->GetName() << "'!" << Con::endl;
 			}
 			continue;
 		}

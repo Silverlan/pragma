@@ -206,12 +206,13 @@ static void debug_print_hierarchy(const ::WIBase &el, const std::string &t = "")
 	}
 }
 
-static ::WIBase *find_descendant_by_path(::WIBase &el, const std::string &strPath) {
+static ::WIBase *find_descendant_by_path(::WIBase &el, const std::string &strPath)
+{
 	auto path = util::DirPath(strPath);
 	auto *p = &el;
-	for (auto &name : path) {
-		auto *child = p->FindDescendantByName(std::string{name});
-		if (!child)
+	for(auto &name : path) {
+		auto *child = p->FindDescendantByName(std::string {name});
+		if(!child)
 			return nullptr;
 		p = child;
 	}
@@ -1259,16 +1260,19 @@ namespace Lua {
 					auto &o = cbInfo.luaFunction;
 					auto bReturn = false;
 					auto n = Lua::GetStackTop(l);
-					auto r = pragma::scripting::lua::protected_call(l, [&](lua_State *l) -> Lua::StatusCode {
-						o.push(l);
-						auto obj = WGUILuaInterface::GetLuaObject(l, hPanel);
-						obj.push(l);
-						for(auto i = decltype(numArgs) {0}; i < numArgs; ++i) {
-							auto arg = argOffset + i;
-							Lua::PushValue(l, arg);
-						}
-						return Lua::StatusCode::Ok;
-					}, LUA_MULTRET);
+					auto r = pragma::scripting::lua::protected_call(
+					  l,
+					  [&](lua_State *l) -> Lua::StatusCode {
+						  o.push(l);
+						  auto obj = WGUILuaInterface::GetLuaObject(l, hPanel);
+						  obj.push(l);
+						  for(auto i = decltype(numArgs) {0}; i < numArgs; ++i) {
+							  auto arg = argOffset + i;
+							  Lua::PushValue(l, arg);
+						  }
+						  return Lua::StatusCode::Ok;
+					  },
+					  LUA_MULTRET);
 					if(r == Lua::StatusCode::Ok) {
 						auto numResults = Lua::GetStackTop(l) - n;
 						if(numResults > 0)

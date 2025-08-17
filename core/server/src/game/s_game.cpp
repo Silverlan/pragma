@@ -578,7 +578,7 @@ void SGame::ReceiveUserInfo(pragma::networking::IServerClient &session, NetPacke
 		OnClientConVarChanged(*pl, cmd, val);
 	}
 
-	Con::csv << "Player "<<*plEnt<< " authenticated." << Con::endl;
+	Con::csv << "Player " << *plEnt << " authenticated." << Con::endl;
 	//unsigned char clPlIdx = pl->GetIndex();
 	Con::csv << "Sending Game Information..." << Con::endl;
 

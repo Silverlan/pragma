@@ -42,7 +42,8 @@ Lua::StatusCode Lua::Execute(lua_State *l, const std::function<Lua::StatusCode(i
 
 void Lua::Execute(lua_State *, const std::function<void(int (*traceback)(lua_State *), void (*syntaxHandle)(lua_State *, Lua::StatusCode))> &target) { target(Lua::HandleTracebackError, Lua::HandleSyntaxError); }
 
-void Lua::HandleLuaError(lua_State *l) {
+void Lua::HandleLuaError(lua_State *l)
+{
 	if(!Lua::IsString(l, -1))
 		return;
 	std::string msg = Lua::ToString(l, -1);

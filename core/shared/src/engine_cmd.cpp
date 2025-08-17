@@ -202,25 +202,25 @@ void Engine::RegisterConsoleCommands()
 			  ufile::remove_extension_from_filename(f, exts);
 		  auto it = resFiles.begin();
 		  std::vector<std::string_view> similarCandidates {};
-	  	if (exactPrefix) {
-	  		for (auto &f : resFiles) {
-	  			if (!ustring::compare(f.c_str(), arg.c_str(), false, arg.length()))
-	  				continue;
-	  			similarCandidates.push_back(f);
-	  		}
-	  	}
-	  	else {
-	  		ustring::gather_similar_elements(
-				arg,
-				[&it, &resFiles]() -> std::optional<std::string_view> {
-					if(it == resFiles.end())
-						return {};
-					auto &name = *it;
-					++it;
-					return name;
-				},
-				similarCandidates, 15);
-	  	}
+		  if(exactPrefix) {
+			  for(auto &f : resFiles) {
+				  if(!ustring::compare(f.c_str(), arg.c_str(), false, arg.length()))
+					  continue;
+				  similarCandidates.push_back(f);
+			  }
+		  }
+		  else {
+			  ustring::gather_similar_elements(
+			    arg,
+			    [&it, &resFiles]() -> std::optional<std::string_view> {
+				    if(it == resFiles.end())
+					    return {};
+				    auto &name = *it;
+				    ++it;
+				    return name;
+			    },
+			    similarCandidates, 15);
+		  }
 
 		  autoCompleteOptions.reserve(similarCandidates.size());
 		  for(auto &candidate : similarCandidates) {
@@ -229,24 +229,17 @@ void Engine::RegisterConsoleCommands()
 			  autoCompleteOptions.push_back(strOption);
 		  }
 	  });
-	conVarMap.RegisterConCommand(
-	  "lua_exec",
-	  &pragma::console::commands::lua_exec,
-	  ConVarFlags::None, "Opens and executes a lua-file on the server.",
-	  &pragma::console::commands::lua_exec_autocomplete);
-	conVarMap.RegisterConCommand(
-	  "lua_run",
-	  static_cast<void(*)(NetworkState*, pragma::BasePlayerComponent*, std::vector<std::string>&, float)>(&pragma::console::commands::lua_run),
-	  ConVarFlags::None, "Runs a lua command on the server lua state.",
+	conVarMap.RegisterConCommand("lua_exec", &pragma::console::commands::lua_exec, ConVarFlags::None, "Opens and executes a lua-file on the server.", &pragma::console::commands::lua_exec_autocomplete);
+	conVarMap.RegisterConCommand("lua_run", static_cast<void (*)(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)>(&pragma::console::commands::lua_run), ConVarFlags::None, "Runs a lua command on the server lua state.",
 	  [](const std::string &arg, std::vector<std::string> &autoCompleteOptions) {
-	  	auto *sv = pragma::get_engine()->GetServerNetworkState();
-	  	auto *game = sv ? sv->GetGameState() : nullptr;
-	  	if (!game)
-	  		return;
-	  	auto *l = game->GetLuaState();
-	  	if (!l)
-	  		return;
-	  	pragma::console::commands::lua_run_autocomplete(l, arg, autoCompleteOptions);
+		  auto *sv = pragma::get_engine()->GetServerNetworkState();
+		  auto *game = sv ? sv->GetGameState() : nullptr;
+		  if(!game)
+			  return;
+		  auto *l = game->GetLuaState();
+		  if(!l)
+			  return;
+		  pragma::console::commands::lua_run_autocomplete(l, arg, autoCompleteOptions);
 	  });
 	conVarMap.RegisterConCommand(
 	  "save",
@@ -298,9 +291,9 @@ void Engine::RegisterConsoleCommands()
 	  [](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  if(argv.empty())
 			  return;
-	      std::stringstream ss;
+		  std::stringstream ss;
 		  Lua::doc::print_documentation(argv.front(), ss);
-		  Con::cout<<ss.str()<<Con::endl;
+		  Con::cout << ss.str() << Con::endl;
 	  },
 	  ConVarFlags::None, "Prints information about the specified function, library or enum (or the closest candiate). Usage: lua_help <function/library/enum>.",
 	  [](const std::string &arg, std::vector<std::string> &autoCompleteOptions) {
@@ -316,7 +309,7 @@ void Engine::RegisterConsoleCommands()
 	  [](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  if(argv.empty()) {
 			  Con::cout << "Usage: help <cvarname>" << Con::endl;
-			  Con::cout<<"Run \"list\" to get a list of all available console commands and variables." << Con::endl;
+			  Con::cout << "Run \"list\" to get a list of all available console commands and variables." << Con::endl;
 			  return;
 		  }
 		  auto *en = pragma::get_engine();
@@ -373,11 +366,9 @@ void Engine::RegisterConsoleCommands()
 			  autoCompleteOptions.push_back(std::string {candidate});
 	  });
 
-	conVarMap.RegisterConCommand(
-	  "clear_cache", [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) { ClearCache(); }, ConVarFlags::None, "Clears all of the cached engine files.");
+	conVarMap.RegisterConCommand("clear_cache", [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) { ClearCache(); }, ConVarFlags::None, "Clears all of the cached engine files.");
 
-	conVarMap.RegisterConCommand(
-	  "loc_reload", [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) { pragma::locale::reload_files(); }, ConVarFlags::None, "Reloads all localization files.");
+	conVarMap.RegisterConCommand("loc_reload", [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) { pragma::locale::reload_files(); }, ConVarFlags::None, "Reloads all localization files.");
 
 	conVarMap.RegisterConCommand(
 	  "loc_find",
@@ -405,10 +396,8 @@ void Engine::RegisterConsoleCommands()
 	  },
 	  ConVarFlags::None, "Searches for the specified text in all currently loaded text strings.");
 
-	conVarMap.RegisterConCommand(
-	  "asset_clear_unused_models", [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) { ClearUnusedAssets(pragma::asset::Type::Model, true); }, ConVarFlags::None, "Clears all unused models from memory.");
-	conVarMap.RegisterConCommand(
-	  "asset_clear_unused_materials", [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) { ClearUnusedAssets(pragma::asset::Type::Material, true); }, ConVarFlags::None, "Clears all unused materials from memory.");
+	conVarMap.RegisterConCommand("asset_clear_unused_models", [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) { ClearUnusedAssets(pragma::asset::Type::Model, true); }, ConVarFlags::None, "Clears all unused models from memory.");
+	conVarMap.RegisterConCommand("asset_clear_unused_materials", [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) { ClearUnusedAssets(pragma::asset::Type::Material, true); }, ConVarFlags::None, "Clears all unused materials from memory.");
 	conVarMap.RegisterConCommand(
 	  "asset_clear_unused",
 	  [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
@@ -443,8 +432,7 @@ void Engine::RegisterConsoleCommands()
 		  ::debug::get_domain().BeginTask(name);
 	  },
 	  ConVarFlags::None, "Start the VTune profiler.");
-	conVarMap.RegisterConCommand(
-	  "debug_vtune_prof_end", [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) { ::debug::get_domain().EndTask(); }, ConVarFlags::None, "End the VTune profiler.");
+	conVarMap.RegisterConCommand("debug_vtune_prof_end", [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) { ::debug::get_domain().EndTask(); }, ConVarFlags::None, "End the VTune profiler.");
 #endif
 	conVarMap.RegisterConCommand(
 	  "log_level_console",
@@ -554,7 +542,7 @@ void ModuleInstallJob::Install()
 			  std::string err;
 			  auto zip = uzip::ZIPFile::Open(archivePath, err, uzip::OpenMode::Read);
 			  if(!zip) {
-				  std::string msg = "Failed to open module archive '" + archivePath + "': " +err;
+				  std::string msg = "Failed to open module archive '" + archivePath + "': " + err;
 				  Con::cwar << "" << msg << Con::endl;
 				  SetStatus(util::JobStatus::Failed, msg);
 				  return;

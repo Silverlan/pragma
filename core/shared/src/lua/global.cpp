@@ -66,13 +66,13 @@ static int32_t include(lua_State *l)
 {
 	std::string path = Lua::CheckString(l, 1);
 	auto ignoreGlobalCache = false;
-	if (Lua::IsSet(l, 2))
+	if(Lua::IsSet(l, 2))
 		ignoreGlobalCache = Lua::CheckBool(l, 2);
 	auto flags = pragma::scripting::lua::IncludeFlags::Default;
 	umath::set_flag(flags, pragma::scripting::lua::IncludeFlags::IgnoreGlobalCache, ignoreGlobalCache);
 
 	auto result = pragma::scripting::lua::include(l, path, flags);
-	if (result.statusCode != Lua::StatusCode::Ok) {
+	if(result.statusCode != Lua::StatusCode::Ok) {
 		pragma::scripting::lua::raise_error(l, result.errorMessage); // Propagate the error on top of the stack
 		// Unreachable
 		return 0;
@@ -88,12 +88,12 @@ static int32_t exec(lua_State *l)
 	std::string errMsg;
 	auto stackTop = Lua::GetStackTop(l);
 	auto statusCode = pragma::scripting::lua::execute_file(l, path, &errMsg);
-	if (statusCode != Lua::StatusCode::Ok) {
+	if(statusCode != Lua::StatusCode::Ok) {
 		pragma::scripting::lua::raise_error(l, errMsg); // Propagate the error on top of the stack
 		// Unreachable
 		return 0;
 	}
-	auto numResults = Lua::GetStackTop(l) -stackTop;
+	auto numResults = Lua::GetStackTop(l) - stackTop;
 
 	// Just return whatever was returned by the include call
 	return numResults;

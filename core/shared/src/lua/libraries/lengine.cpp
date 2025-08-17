@@ -123,19 +123,12 @@ void Lua::engine::register_shared_functions(lua_State *l, luabind::module_ &modE
 	modEn[luabind::def("set_record_console_output", Lua::engine::set_record_console_output), luabind::def("get_tick_count", &Lua::engine::GetTickCount), luabind::def("shutdown", &Lua::engine::exit), luabind::def("get_working_directory", Lua::engine::get_working_directory),
 	  luabind::def("get_git_info", Lua::engine::get_git_info), luabind::def("mount_addon", static_cast<bool (*)(const std::string &)>(&AddonSystem::MountAddon)),
 	  luabind::def(
-	    "mount_sub_addon", +[](lua_State *l, const std::string &subAddon) {
+	    "mount_sub_addon",
+	    +[](lua_State *l, const std::string &subAddon) {
 		    auto path = ::util::Path::CreatePath(Lua::util::get_addon_path(l));
 		    path.PopFront();
 		    path = path + "addons/" + subAddon;
 		    return AddonSystem::MountAddon(path.GetString());
 	    }),
-	    luabind::def(
-	  "is_managed_by_package_manager", +[](lua_State *l) {
-		  return pragma::get_engine()->IsManagedByPackageManager();
-	  }),
-	  luabind::def(
-		"is_application_sandboxed", +[](lua_State *l) {
-		  return pragma::get_engine()->IsSandboxed();
-		})
-	    ];
+	  luabind::def("is_managed_by_package_manager", +[](lua_State *l) { return pragma::get_engine()->IsManagedByPackageManager(); }), luabind::def("is_application_sandboxed", +[](lua_State *l) { return pragma::get_engine()->IsSandboxed(); })];
 }

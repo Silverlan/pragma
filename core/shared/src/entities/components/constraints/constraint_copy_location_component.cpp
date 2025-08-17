@@ -54,5 +54,5 @@ void ConstraintCopyLocationComponent::ApplyConstraint()
 		m_constraintSpaceC->ApplyFilter(posDriver, posDriven, posDriver);
 
 	posDriver = uvec::lerp(posDriven, posDriver, influence);
-	const_cast<BaseEntityComponent&>(*constraintInfo->drivenObjectC).SetTransformMemberPos(constraintInfo->drivenObjectPropIdx, static_cast<umath::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), posDriver);
+	const_cast<BaseEntityComponent &>(*constraintInfo->drivenObjectC).SetTransformMemberPos(constraintInfo->drivenObjectPropIdx, static_cast<umath::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), posDriver);
 }

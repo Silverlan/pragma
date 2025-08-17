@@ -1592,8 +1592,7 @@ void Lua::register_base_entity_component(luabind::module_ &modEnts)
 	classDef.def("BindEvent", static_cast<CallbackHandle (*)(lua_State *, pragma::BaseLuaBaseEntityComponent &, uint32_t, luabind::object)>([](lua_State *l, pragma::BaseLuaBaseEntityComponent &hComponent, uint32_t eventId, luabind::object methodNameOrFunction) {
 		return hComponent.BindEvent(l, eventId, methodNameOrFunction);
 	}));
-	classDef.def(
-	  "GetEntityComponent", +[](lua_State *l, pragma::BaseLuaBaseEntityComponent &hComponent, Lua::nil_type) { return; });
+	classDef.def("GetEntityComponent", +[](lua_State *l, pragma::BaseLuaBaseEntityComponent &hComponent, Lua::nil_type) { return; });
 	classDef.def("GetEntityComponent",
 	  static_cast<pragma::ComponentHandle<pragma::BaseEntityComponent> (*)(lua_State *, pragma::BaseLuaBaseEntityComponent &, uint32_t)>(
 	    [](lua_State *l, pragma::BaseLuaBaseEntityComponent &hComponent, uint32_t componentId) -> pragma::ComponentHandle<pragma::BaseEntityComponent> { return hComponent.GetEntity().FindComponent(componentId); }));

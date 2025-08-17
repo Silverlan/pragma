@@ -89,8 +89,7 @@ void Lua::register_sv_ai_component(lua_State *l, luabind::module_ &module)
 	def.def("GetHearingStrength", &pragma::SAIComponent::GetHearingStrength);
 	def.def("CanHear", &pragma::SAIComponent::CanHear);
 	def.def("GetMemoryFragmentCount", &pragma::SAIComponent::GetMemoryFragmentCount);
-	def.def(
-	  "GetPrimaryTarget", +[](pragma::SAIComponent &c) { return const_cast<pragma::ai::Memory::Fragment *>(c.GetPrimaryTarget()); });
+	def.def("GetPrimaryTarget", +[](pragma::SAIComponent &c) { return const_cast<pragma::ai::Memory::Fragment *>(c.GetPrimaryTarget()); });
 	def.def("HasPrimaryTarget", &Lua::NPC::Server::HasPrimaryTarget);
 	def.def("GetNPCState", &pragma::SAIComponent::GetNPCState);
 	def.def("SetNPCState", &pragma::SAIComponent::SetNPCState);

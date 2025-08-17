@@ -27,31 +27,31 @@ std::vector<util::Path> util::steam::find_steam_root_paths()
 
 std::optional<std::string> util::steam::find_steam_installation_path()
 {
-		std::string rootSteamPath;
+	std::string rootSteamPath;
 #ifdef _WIN32
-		if(util::get_registry_key_value(util::HKey::CurrentUser, "SOFTWARE\\Valve\\Steam", "SteamPath", rootSteamPath) == false)
-			return {};
+	if(util::get_registry_key_value(util::HKey::CurrentUser, "SOFTWARE\\Valve\\Steam", "SteamPath", rootSteamPath) == false)
+		return {};
 #else
-		auto *pHomePath = getenv("HOME");
-		if(pHomePath != nullptr)
-			rootSteamPath = pHomePath;
+	auto *pHomePath = getenv("HOME");
+	if(pHomePath != nullptr)
+		rootSteamPath = pHomePath;
+	else
+		rootSteamPath = "";
+	rootSteamPath += "/.steam/root";
+	char rootSteamPathLink[PATH_MAX];
+	auto *result = realpath(rootSteamPath.c_str(), rootSteamPathLink);
+	if(result != nullptr) {
+		rootSteamPath = rootSteamPathLink;
+	}
+	else {
+		auto snapPath = util::DirPath(std::string {pHomePath}) + "/snap/steam/common/.local/share/Steam/";
+		if(filemanager::is_system_dir(snapPath.GetString()) == true)
+			rootSteamPath = snapPath.GetString();
 		else
-			rootSteamPath = "";
-		rootSteamPath += "/.steam/root";
-		char rootSteamPathLink[PATH_MAX];
-		auto *result = realpath(rootSteamPath.c_str(), rootSteamPathLink);
-		if(result != nullptr) {
-			rootSteamPath = rootSteamPathLink;
-		}
-		else {
-			auto snapPath = util::DirPath(std::string{pHomePath}) + "/snap/steam/common/.local/share/Steam/";
-			if(filemanager::is_system_dir(snapPath.GetString()) == true)
-				rootSteamPath = snapPath.GetString();
-			else
-				spdlog::info("Cannot find steam installation!");
-			return {};
-		}
-		//rootSteamPath += "/.local/share/Steam";
+			spdlog::info("Cannot find steam installation!");
+		return {};
+	}
+	//rootSteamPath += "/.local/share/Steam";
 #endif
 	return rootSteamPath;
 }

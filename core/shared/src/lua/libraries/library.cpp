@@ -673,9 +673,7 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 #endif
 
 	auto modDebug = luabind::module_(lua.GetState(), "debug");
-	modDebug[luabind::def("format_error_message", +[](lua_State *l, const std::string &msg) -> std::string {
-		return pragma::scripting::lua::format_error_message(l, msg, Lua::StatusCode::ErrorRun);
-	})];
+	modDebug[luabind::def("format_error_message", +[](lua_State *l, const std::string &msg) -> std::string { return pragma::scripting::lua::format_error_message(l, msg, Lua::StatusCode::ErrorRun); })];
 	modDebug[luabind::def("move_state_to_string", Lua::debug::move_state_to_string), luabind::def("beep", Lua::debug::beep)];
 	lua_pushtablecfunction(lua.GetState(), "debug", "print", Lua::debug::print);
 	lua_pushtablecfunction(
@@ -1372,7 +1370,7 @@ void Game::RegisterLuaLibraries()
 		  auto absPath = isPathToDir ? ::util::Path::CreatePath(rpath) : ::util::Path::CreateFile(rpath);
 		  std::string relPath;
 		  if(filemanager::find_relative_path(absPath.GetString(), relPath))
-		  	return luabind::object {l, relPath};
+			  return luabind::object {l, relPath};
 		  return {};
 	  })),
 	  luabind::def("find_path_on_disk", static_cast<luabind::object (*)(lua_State *, const std::string &)>([](lua_State *l, const std::string &path) -> luabind::object {

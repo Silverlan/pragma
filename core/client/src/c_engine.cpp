@@ -712,7 +712,7 @@ bool CEngine::Initialize(int argc, char *argv[])
 
 #ifdef __linux__
 	auto xdgSessionType = util::get_env_variable("XDG_SESSION_TYPE");
-	if (!xdgSessionType || *xdgSessionType != "x11") {
+	if(!xdgSessionType || *xdgSessionType != "x11") {
 		// TODO: This may intefere with util::debug::show_message_prompt, which uses
 		// zenity. Test this on wayland!
 		// If util::debug::show_message_prompt works on wayland after these env variables have been set, this comment
@@ -1704,8 +1704,8 @@ Lua::Interface *CEngine::GetLuaInterface(lua_State *l)
 
 bool CEngine::IsProgramInFocus() const
 {
-	for (auto &window : GetRenderContext().GetWindows()) {
-		if ((*window)->IsInFocus())
+	for(auto &window : GetRenderContext().GetWindows()) {
+		if((*window)->IsInFocus())
 			return true;
 	}
 	return false;

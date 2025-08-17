@@ -172,7 +172,7 @@ bool Lua::PrintTraceback(lua_State *l, std::stringstream &ssOut, const std::stri
 			}
 			std::stringstream ssErrMsg;
 			auto lineMsg = pragma::scripting::lua::util::make_clickable_lua_script_link(shortSrc, d.currentline);
-			ssErrMsg << lineMsg<<" " << errMsg;
+			ssErrMsg << lineMsg << " " << errMsg;
 			errMsg = ssErrMsg.str();
 		}
 		transform_path(d, errMsg, d.currentline);
@@ -207,7 +207,7 @@ void Lua::PrintTraceback(lua_State *l, const std::string *pOptErrMsg)
 
 	std::stringstream ss;
 	pragma::scripting::lua::util::get_lua_doc_info(ss, tbMsg);
-	Con::cout<<ss.str();
+	Con::cout << ss.str();
 	Con::flush();
 }
 
@@ -229,7 +229,7 @@ static std::optional<std::string> format_syntax_error(const std::string &msg, Lu
 	if(r != Lua::StatusCode::ErrorSyntax && r != Lua::StatusCode::ErrorFile)
 		return {};
 	auto errInfo = pragma::scripting::lua::util::parse_syntax_error_message(msg);
-	if (!errInfo)
+	if(!errInfo)
 		return msg;
 	std::stringstream ssMsg;
 	pragma::scripting::lua::util::get_code_snippet(ssMsg, optFilename ? *optFilename : errInfo->first, errInfo->second, ":");
@@ -244,7 +244,7 @@ static void handle_syntax_error(lua_State *l, Lua::StatusCode r, const std::stri
 		return;
 	std::string err = Lua::ToString(l, -1);
 	auto msg = format_syntax_error(err, r, fileName);
-	if (!msg)
+	if(!msg)
 		return;
 	print_lua_error_message(l, *msg);
 }
@@ -255,9 +255,7 @@ void Lua::HandleSyntaxError(lua_State *l, Lua::StatusCode r) { handle_syntax_err
 
 void Lua::initialize_error_handler()
 {
-	luabind::register_exception_handler<Lua::Exception>(+[](lua_State* L, const Lua::Exception &e) {
-		lua_pushstring(L, e.what());
-	});
+	luabind::register_exception_handler<Lua::Exception>(+[](lua_State *L, const Lua::Exception &e) { lua_pushstring(L, e.what()); });
 	luabind::set_pcall_callback([](lua_State *l) -> void {
 		Lua::PushCFunction(l, [](lua_State *l) -> int32_t {
 			if(Lua::IsString(l, -1) == false)

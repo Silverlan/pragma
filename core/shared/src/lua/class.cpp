@@ -339,7 +339,7 @@ static int util_file_path(lua_State *l)
 	std::vector<util::Path> args;
 	args.reserve(n);
 	for(i = 1; i <= n; i++) {
-		if (Lua::IsType<util::Path>(l, i))
+		if(Lua::IsType<util::Path>(l, i))
 			args.push_back(Lua::Check<util::Path>(l, i));
 		else
 			args.push_back({Lua::CheckString(l, i)});
@@ -368,7 +368,7 @@ static int util_dir_path(lua_State *l)
 	std::vector<util::Path> args;
 	args.reserve(n);
 	for(i = 1; i <= n; i++) {
-		if (Lua::IsType<util::Path>(l, i))
+		if(Lua::IsType<util::Path>(l, i))
 			args.push_back(Lua::Check<util::Path>(l, i));
 		else
 			args.push_back({Lua::CheckString(l, i)});

@@ -255,7 +255,8 @@ static void LPARAM_luaext(const std::vector<std::string> &argv)
 static void LPARAM_verbose(const std::vector<std::string> &argv) { engine->SetVerbose(true); }
 static void LPARAM_console_subsystem(const std::vector<std::string> &argv) { engine->SetConsoleSubsystem(true); }
 static void LPARAM_non_interactive(const std::vector<std::string> &argv) { engine->SetNonInteractiveMode(true); }
-static void LPARAM_disable_linenoise(const std::vector<std::string> &argv) {
+static void LPARAM_disable_linenoise(const std::vector<std::string> &argv)
+{
 	// -disable_linenoise is handled in Engine constructor
 }
 static void LPARAM_disable_ansi_color_codes(const std::vector<std::string> &argv)
@@ -264,15 +265,9 @@ static void LPARAM_disable_ansi_color_codes(const std::vector<std::string> &argv
 	Con::disable_ansi_color_codes();
 }
 bool g_lpManagedByPackageManager = false;
-static void LPARAM_managed_by_package_manager(const std::vector<std::string> &argv)
-{
-	g_lpManagedByPackageManager = true;
-}
+static void LPARAM_managed_by_package_manager(const std::vector<std::string> &argv) { g_lpManagedByPackageManager = true; }
 bool g_lpSandboxed = false;
-static void LPARAM_sandboxed(const std::vector<std::string> &argv)
-{
-	g_lpSandboxed = true;
-}
+static void LPARAM_sandboxed(const std::vector<std::string> &argv) { g_lpSandboxed = true; }
 
 REGISTER_LAUNCH_PARAMETER_HELP(-console, LPARAM_console, "", "start with the console open");
 REGISTER_LAUNCH_PARAMETER_HELP(-dev, LPARAM_dev, "", "enable developer mode");

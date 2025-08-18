@@ -6,8 +6,9 @@ module;
 #include "stdafx_shared.h"
 #include "pragma/lua/util.hpp"
 #include "pragma/engine.h"
+#include <interface/scripting/lua/lua.hpp>
 
-import pragma.scripting.lua;
+//import pragma.scripting.lua;
 
 module pragma.console.commands;
 

@@ -1,7 +1,9 @@
 // SPDX-FileCopyrightText: (c) 2025 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
+#include "interface/scripting/lua/error_handling.hpp"
+
+// module;
 
 #include "stdafx_shared.h"
 #include <string>
@@ -12,7 +14,7 @@ module;
 #include "pragma/console/util_console_color.hpp"
 #include "pragma/logging.hpp"
 
-module pragma.scripting.lua;
+// module pragma.scripting.lua;
 
 static spdlog::logger &LOGGER = pragma::register_logger("lua");
 

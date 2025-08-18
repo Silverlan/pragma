@@ -17,6 +17,7 @@
 #include <pragma/networking/networking_modules.hpp>
 #include <pragma/util/util_game.hpp>
 #include <pragma/debug/intel_vtune.hpp>
+#include <interface/scripting/lua/lua.hpp>
 #include <sharedutils/util_file.h>
 #include <sharedutils/util_path.hpp>
 #include <sharedutils/magic_enum.hpp>
@@ -28,7 +29,7 @@
 import util_zip;
 import pragma.doc;
 import pragma.locale;
-import pragma.scripting.lua;
+// import pragma.scripting.lua;
 import pragma.console.commands;
 
 static std::optional<std::string> udm_convert(const std::string &fileName)

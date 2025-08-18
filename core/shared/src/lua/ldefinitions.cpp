@@ -6,10 +6,11 @@
 #include "pragma/lua/ldefinitions.h"
 #include "pragma/lua/baseluaobj.h"
 #include <pragma/lua/lua_error_handling.hpp>
+#include <interface/scripting/lua/lua.hpp>
 #include <stack>
 #include <sharedutils/util_file.h>
 
-import pragma.scripting.lua;
+// import pragma.scripting.lua;
 
 extern DLLNETWORK Engine *engine;
 

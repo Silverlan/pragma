@@ -15,12 +15,13 @@
 #include <pragma/console/conout.h>
 #include <pragma/console/cvar.h>
 #include <pragma/lua/lua_error_handling.hpp>
+#include <interface/scripting/lua/lua.hpp>
 #include <luainterface.hpp>
 #include <luabind/exception_handler.hpp>
 #include <sharedutils/util_string.h>
 #include <sharedutils/util_file.h>
 
-import pragma.scripting.lua;
+//import pragma.scripting.lua;
 
 extern DLLNETWORK Engine *engine;
 

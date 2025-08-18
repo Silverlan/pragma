@@ -6,11 +6,12 @@
 #include "pragma/lua/lua_script_watcher.h"
 #include "pragma/game/gamemode/gamemodemanager.h"
 #include "pragma/lua/util.hpp"
+#include <interface/scripting/lua/lua.hpp>
 #include <sharedutils/scope_guard.h>
 #include <sharedutils/util_file.h>
 #include <luainterface.hpp>
 
-import pragma.scripting.lua;
+//import pragma.scripting.lua;
 
 LuaDirectoryWatcherManager::LuaDirectoryWatcherManager(Game *game) : m_game(game) { m_watcherManager = filemanager::create_directory_watcher_manager(); }
 

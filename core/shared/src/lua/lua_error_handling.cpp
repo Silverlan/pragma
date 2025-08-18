@@ -16,9 +16,10 @@
 #include <sharedutils/util.h>
 #include <sharedutils/util_file.h>
 #include <luabind/exception_handler.hpp>
+#include <interface/scripting/lua/lua.hpp>
 #include <stack>
 
-import pragma.scripting;
+// import pragma.scripting.lua;
 
 extern DLLNETWORK Engine *engine;
 

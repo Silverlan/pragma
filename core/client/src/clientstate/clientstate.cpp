@@ -43,6 +43,7 @@
 #include <pragma/networking/networking_modules.hpp>
 #include <pragma/engine_version.h>
 #include <pragma/logging.hpp>
+#include <interface/scripting/lua/lua.hpp>
 #include <luainterface.hpp>
 #include <alsoundsystem.hpp>
 #include <shader/prosper_pipeline_loader.hpp>
@@ -53,7 +54,7 @@
 #include <prosper_window.hpp>
 #include <wgui/types/wiroot.h>
 
-import pragma.scripting.lua;
+// import pragma.scripting.lua;
 
 static std::unordered_map<std::string, std::shared_ptr<PtrConVar>> *conVarPtrs = NULL;
 std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &ClientState::GetConVarPtrs() { return *conVarPtrs; }

@@ -59,13 +59,14 @@
 #include <pragma/math/intersection.h>
 #include <pragma/model/modelmesh.h>
 #include "pragma/model/animation/skeleton.hpp"
+#include <interface/scripting/lua/lua.hpp>
 #include <luabind/class_info.hpp>
 #include <fsys/ifile.hpp>
 #include <sharedutils/util_markup_file.hpp>
 
 import se_script;
 import util_zip;
-import pragma.scripting.lua;
+// import pragma.scripting.lua;
 
 extern DLLNETWORK Engine *engine;
 

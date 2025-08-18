@@ -32,10 +32,11 @@
 #include "pragma/lua/sh_lua_component.hpp"
 #include "pragma/lua/policies/core_policies.hpp"
 #include "pragma/lua/types/udm.hpp"
+#include <interface/scripting/lua/lua.hpp>
 #include <udm.hpp>
 #include <sharedutils/magic_enum.hpp>
 
-import pragma.scripting.lua;
+//import pragma.scripting.lua;
 
 extern DLLNETWORK Engine *engine;
 

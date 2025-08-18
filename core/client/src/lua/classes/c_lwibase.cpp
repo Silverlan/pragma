@@ -30,6 +30,7 @@
 #include <pragma/lua/converters/optional_converter_t.hpp>
 #include <pragma/lua/converters/property_converter_t.hpp>
 #include <pragma/lua/lua_call.hpp>
+#include <interface/scripting/lua/lua.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_render_pass.hpp>
 #include <prosper_swap_command_buffer.hpp>
@@ -43,7 +44,7 @@
 #include <pragma/debug/intel_vtune.hpp>
 
 import pragma.string.unicode;
-import pragma.scripting.lua;
+// import pragma.scripting.lua;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;

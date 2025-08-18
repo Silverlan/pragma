@@ -5,6 +5,7 @@
 #include "pragma/engine.h"
 #include "pragma/lua/libraries/ldebug.h"
 #include <pragma/console/conout.h>
+#include <interface/scripting/lua/lua.hpp>
 #include <algorithm>
 #ifdef __linux__
 #include <sys/ioctl.h>
@@ -14,7 +15,7 @@
 //#include <ncurses.h>
 #endif
 
-import pragma.scripting.lua;
+//import pragma.scripting.lua;
 
 int Lua::debug::collectgarbage(lua_State *l)
 {

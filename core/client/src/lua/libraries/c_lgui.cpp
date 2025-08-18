@@ -18,11 +18,12 @@
 #include <pragma/lua/util.hpp>
 #include <pragma/lua/classes/ldef_vector.h>
 #include <pragma/logging.hpp>
+#include <interface/scripting/lua/lua.hpp>
 #include <prosper_window.hpp>
 #include <prosper_render_pass.hpp>
 
 import pragma.string.unicode;
-import pragma.scripting.lua;
+//import pragma.scripting.lua;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;

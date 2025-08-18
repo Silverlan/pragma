@@ -65,6 +65,7 @@
 #include <sharedutils/util_file.h>
 #include <sharedutils/util_path.hpp>
 #include <pragma/math/intersection.h>
+#include <interface/scripting/lua/lua.hpp>
 #include <mathutil/camera.hpp>
 #include <mathutil/umath_frustum.hpp>
 #include <regex>
@@ -84,7 +85,7 @@
 
 import bezierfit;
 import panima;
-import pragma.scripting.lua;
+//import pragma.scripting.lua;
 
 extern DLLNETWORK Engine *engine;
 

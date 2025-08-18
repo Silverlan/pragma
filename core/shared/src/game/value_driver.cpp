@@ -7,7 +7,7 @@
 #include "pragma/entities/entity_component_manager_t.hpp"
 #include "pragma/lua/lua_call.hpp"
 #include "pragma/logging.hpp"
-#include <interface/scripting/lua/lua.hpp>
+#include <scripting/lua/lua.hpp>
 #include <sharedutils/util_uri.hpp>
 
 //import pragma.scripting.lua;

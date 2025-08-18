@@ -59,7 +59,7 @@
 #include <pragma/math/intersection.h>
 #include <pragma/model/modelmesh.h>
 #include "pragma/model/animation/skeleton.hpp"
-#include <interface/scripting/lua/lua.hpp>
+#include <scripting/lua/lua.hpp>
 #include <luabind/class_info.hpp>
 #include <fsys/ifile.hpp>
 #include <sharedutils/util_markup_file.hpp>

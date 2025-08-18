@@ -18,7 +18,7 @@
 #include <pragma/lua/util.hpp>
 #include <pragma/lua/classes/ldef_vector.h>
 #include <pragma/logging.hpp>
-#include <interface/scripting/lua/lua.hpp>
+#include <scripting/lua/lua.hpp>
 #include <prosper_window.hpp>
 #include <prosper_render_pass.hpp>
 

@@ -36,7 +36,7 @@
 #include "pragma/lua/libraries/lfile.h"
 #include "pragma/util/util_duration_type.hpp"
 #include "pragma/game/game_limits.h"
-#include <interface/scripting/lua/lua.hpp>
+#include <scripting/lua/lua.hpp>
 #include <sharedutils/util_enum.h>
 #include <pragma/emessage.h>
 #include <luainterface.hpp>

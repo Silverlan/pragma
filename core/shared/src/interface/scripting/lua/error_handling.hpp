@@ -3,7 +3,7 @@
 
 // module;
 
-#include "stdafx_shared.h"
+#include "pragma/networkdefinitions.h"
 #include <string>
 #include <luasystem.h>
 

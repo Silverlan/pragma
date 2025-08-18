@@ -43,7 +43,7 @@
 #include <pragma/networking/networking_modules.hpp>
 #include <pragma/engine_version.h>
 #include <pragma/logging.hpp>
-#include <interface/scripting/lua/lua.hpp>
+#include <scripting/lua/lua.hpp>
 #include <luainterface.hpp>
 #include <alsoundsystem.hpp>
 #include <shader/prosper_pipeline_loader.hpp>

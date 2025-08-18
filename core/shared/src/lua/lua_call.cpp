@@ -3,7 +3,7 @@
 
 #include "stdafx_shared.h"
 #include "pragma/lua/lua_call.hpp"
-#include <interface/scripting/lua/lua.hpp>
+#include <scripting/lua/lua.hpp>
 
 // import pragma.scripting.lua;
 

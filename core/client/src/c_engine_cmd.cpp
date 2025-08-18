@@ -33,7 +33,7 @@ namespace pragma::string {
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/components/renderers/c_rasterization_renderer_component.hpp>
-#include <interface/scripting/lua/lua.hpp>
+#include <scripting/lua/lua.hpp>
 #include <image/prosper_render_target.hpp>
 #include <shader/prosper_shader_blur.hpp>
 #include <prosper_window.hpp>

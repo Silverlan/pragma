@@ -51,6 +51,7 @@ pr_add_dependency(${PROJ_NAME} vorbis TARGET)
 pr_add_dependency(${PROJ_NAME} vorbisfile TARGET)
 
 pr_add_headers(${PROJ_NAME} "src/implementation/" PRIVATE)
+pr_add_headers(${PROJ_NAME} "src/interface" PRIVATE)
 pr_add_modules(${PROJ_NAME} "src/interface")
 
 pr_add_headers(${PROJ_NAME} "include/")

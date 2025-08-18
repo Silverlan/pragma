@@ -6,7 +6,7 @@
 #include "pragma/lua/lua_script_watcher.h"
 #include "pragma/game/gamemode/gamemodemanager.h"
 #include "pragma/lua/util.hpp"
-#include <interface/scripting/lua/lua.hpp>
+#include <scripting/lua/lua.hpp>
 #include <sharedutils/scope_guard.h>
 #include <sharedutils/util_file.h>
 #include <luainterface.hpp>

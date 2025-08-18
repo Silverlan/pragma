@@ -4,7 +4,7 @@
 module;
 
 #include "stdafx_shared.h"
-#include <interface/scripting/lua/lua.hpp>
+#include <scripting/lua/lua.hpp>
 
 // import pragma.scripting.lua;
 

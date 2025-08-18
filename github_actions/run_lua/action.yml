@@ -71,6 +71,19 @@ runs:
         echo "file.write(\"ci.txt\", \"success\")" >> ${scriptFileName}
         cat ${scriptFileName}
 
+    - name: Runner Setup
+      shell: bash
+      if: ${{ runner.os == 'Linux' }}
+      id: runner-prep
+      run: |
+        # Set up xvfb to avoid segfault issues when running chromium in CLI mode
+        # TODO: It would be better if we could do this within Pragma somehow.
+        sudo apt install xvfb
+        nohup Xvfb :99 -screen 0 1280x720x24 >/tmp/xvfb.log 2>&1 & echo $! > /tmp/xvfb.pid
+        echo "DISPLAY=:99" >> $GITHUB_ENV
+        # Wait for Xvfb
+        sleep 1
+
     - name: Run script
       shell: bash
       id: run-script
@@ -106,28 +119,32 @@ runs:
         
         exit_code=${{ steps.run-script.outputs.exit-code }}
         echo "exit-code=$exit_code" >> $GITHUB_OUTPUT
-
+    
         if [ $exit_code -ne 0 ]; then
           echo "error=exit" >> $GITHUB_OUTPUT
           exit $exit_code
         fi
-
+    
         if [ -f "${{ inputs.working-directory }}/ci_lua_error.txt" ]; then
           CI_LUA_ERROR=$(cat "${{ inputs.working-directory }}/ci_lua_error.txt")
           if [ -n "$CI_LUA_ERROR" ]; then
-            echo "lua-error=$CI_LUA_ERROR" >> $GITHUB_OUTPUT
+            # Sanitize Lua error content
+            SANITIZED_LUA_ERROR=$(echo "$CI_LUA_ERROR" | tr -d '\n\r' | sed 's/["]/ /g')
+            echo "lua-error=$SANITIZED_LUA_ERROR" >> $GITHUB_OUTPUT
           fi
         fi
-
+    
         CI_CONTENTS=$(cat "${{ inputs.working-directory }}/ci.txt")
         exit_code=$?
-
+    
         if [ $exit_code -ne 0 ]; then
           echo "error=ci_file" >> $GITHUB_OUTPUT
           exit 1
         fi
         if [ "$CI_CONTENTS" != "success" ]; then
-          echo "error=$CI_CONTENTS" >> $GITHUB_OUTPUT
+          # Sanitize content: remove newlines/carriage returns and problematic quotes
+          SANITIZED_CONTENTS=$(echo "$CI_CONTENTS" | tr -d '\n\r' | sed 's/["]/ /g')
+          echo "error=$SANITIZED_CONTENTS" >> $GITHUB_OUTPUT
           exit 2
         fi
 

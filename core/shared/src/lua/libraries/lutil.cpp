@@ -338,8 +338,18 @@ void Lua::util::register_os(lua_State *l, luabind::module_ &mod)
 	mod[luabind::def("set_prevent_os_sleep_mode", &::util::set_prevent_os_sleep_mode)];
 	mod[luabind::def("is_dark_mode", &::util::is_dark_mode)];
 
-	mod[luabind::def("show_notification", &::util::show_notification)];
-	mod[luabind::def("show_notification", +[](const std::string &msg) { return ::util::show_notification(msg, ""); })];
+	mod[luabind::def(
+	  "show_notification", +[](Engine &engine, const std::string &summary, const std::string &body) {
+		  if(engine.IsCLIOnly())
+			  return false;
+		  return ::util::show_notification(summary, body);
+	  })];
+	mod[luabind::def(
+	  "show_notification", +[](Engine &engine, const std::string &msg) {
+		  if(engine.IsCLIOnly())
+			  return false;
+		  return ::util::show_notification(msg, "");
+	  })];
 }
 
 static Lua::var<bool, Lua::opt<std::string>, ::util::FunctionalParallelWorker> extract_files(lua_State *l, Game &game, const Lua::type<uzip::ZIPFile> &ozip, const std::string &outputPath, bool runInBackground = false)

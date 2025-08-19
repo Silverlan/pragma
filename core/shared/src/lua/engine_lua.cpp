@@ -89,7 +89,7 @@ static void dump_stack(bool cl)
 	Lua::StackDump(g->GetLuaState());
 }
 namespace pragma::lua::debug {
-	// These are mainly used in the VS immediate window for debugging purposes
+	// These are mainly used in the immediate window for debugging purposes
 	DLLNETWORK void dump_traceback_cl() { ::dump_traceback(true); }
 	DLLNETWORK void dump_traceback_sv() { ::dump_traceback(false); }
 	DLLNETWORK void dump_stack_cl() { ::dump_stack(true); }

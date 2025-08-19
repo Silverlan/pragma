@@ -11,7 +11,7 @@ function util.ImageProcessor.Stage:__init(f)
 	self.m_executor = f
 end
 function util.ImageProcessor.Stage:Apply(drawCmd, dsTex, rtDst)
-	LOGGER:Info("Applying stage...")
+	LOGGER:Debug("Applying stage...")
 	self.m_executor(drawCmd, dsTex, rtDst)
 end
 function util.ImageProcessor.Stage:SetEnabled(enabled)
@@ -83,7 +83,7 @@ function util.ImageProcessor:SetStageEnabled(name, enabled)
 end
 
 function util.ImageProcessor:AcquireTexture(drawCmd)
-	LOGGER:Info("Acquiring texture...")
+	LOGGER:Debug("Acquiring texture...")
 	local curTex = self.m_curTexture
 	local prevTex = self.m_prevTexture
 	if prevTex ~= nil and #self.m_textures == 1 then
@@ -193,7 +193,7 @@ end
 
 function util.ImageProcessor:Apply(drawCmd, inputTex)
 	self:Reset()
-	LOGGER:Info("Applying image processor...")
+	LOGGER:Debug("Applying image processor...")
 	local tex
 	for _, stage in ipairs(self.m_stages) do
 		if stage:IsEnabled() then
@@ -201,11 +201,11 @@ function util.ImageProcessor:Apply(drawCmd, inputTex)
 			if rtDst == nil then
 				break
 			end
-			LOGGER:Info("Beginning render pass with render target '" .. rtDst:GetDebugName() .. "'")
+			LOGGER:Debug("Beginning render pass with render target '" .. rtDst:GetDebugName() .. "'")
 			if drawCmd:RecordBeginRenderPass(prosper.RenderPassInfo(rtDst)) then
 				stage:Apply(drawCmd, dsSrc, rtDst)
 
-				LOGGER:Info("Ending render pass")
+				LOGGER:Debug("Ending render pass")
 				drawCmd:RecordEndRenderPass()
 			end
 			tex = rtDst:GetTexture()
@@ -222,7 +222,7 @@ function util.ImageProcessor:Apply(drawCmd, inputTex)
 		LOGGER:Warn("No texture available, skipping...")
 		return
 	end
-	LOGGER:Info("Image processor applied successfully!")
+	LOGGER:Debug("Image processor applied successfully!")
 	return tex
 end
 

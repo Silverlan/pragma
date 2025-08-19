@@ -1762,7 +1762,26 @@ void Game::RegisterLuaLibraries()
 	modLog[luabind::def("set_file_log_level", &pragma::set_file_log_level)];
 	modLog[luabind::def("get_file_log_level", &pragma::get_file_log_level)];
 
-	Lua::RegisterLibraryEnums(GetLuaState(), "log", {{"SEVERITY_INFO", 0}, {"SEVERITY_WARNING", 1}, {"SEVERITY_ERROR", 2}, {"SEVERITY_CRITICAL", 3}, {"SEVERITY_DEBUG", 4}});
+	modLog[luabind::def(
+	  "set_log_level", +[](const std::string &name, ::util::LogSeverity level) -> bool {
+		  auto logger = spdlog::get(name);
+		  if(!logger)
+			  return false;
+		  logger->set_level(static_cast<spdlog::level::level_enum>(pragma::logging::severity_to_spdlog_level(level)));
+		  return true;
+	  })];
+
+	Lua::RegisterLibraryEnums(GetLuaState(), "log",
+	  {
+	    {"SEVERITY_TRACE", umath::to_integral(util::LogSeverity::Trace)},
+	    {"SEVERITY_INFO", umath::to_integral(util::LogSeverity::Info)},
+	    {"SEVERITY_WARNING", umath::to_integral(util::LogSeverity::Warning)},
+	    {"SEVERITY_ERROR", umath::to_integral(util::LogSeverity::Error)},
+	    {"SEVERITY_CRITICAL", umath::to_integral(util::LogSeverity::Critical)},
+	    {"SEVERITY_DEBUG", umath::to_integral(util::LogSeverity::Debug)},
+	    {"SEVERITY_DISABLED", umath::to_integral(util::LogSeverity::Disabled)},
+	    {"SEVERITY_COUNT", umath::to_integral(util::LogSeverity::Count)},
+	  });
 
 	auto classDefLogger = luabind::class_<spdlog::logger>("Logger");
 	modLog[classDefLogger];

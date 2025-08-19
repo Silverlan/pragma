@@ -2252,3 +2252,27 @@ REGISTER_CONVAR_CALLBACK_CL(cl_gpu_timer_queries_enabled, [](NetworkState *, con
 		return;
 	c_engine->SetGPUProfilingEnabled(enabled);
 })
+
+static void dump_traceback_gui()
+{
+	auto *en = pragma::get_cengine();
+	auto *state = en ? static_cast<ClientState *>(en->GetClientState()) : nullptr;
+	auto *l = state ? state->GetGUILuaState() : nullptr;
+	if(!l)
+		return;
+	Lua::PrintTraceback(l);
+}
+static void dump_stack_gui()
+{
+	auto *en = pragma::get_cengine();
+	auto *state = en ? static_cast<ClientState *>(en->GetClientState()) : nullptr;
+	auto *l = state ? state->GetGUILuaState() : nullptr;
+	if(!l)
+		return;
+	Lua::StackDump(l);
+}
+namespace pragma::lua::debug {
+	// These are mainly used in the immediate window for debugging purposes
+	DLLCLIENT void dump_traceback_gui() { ::dump_traceback_gui(); }
+	DLLCLIENT void dump_stack_gui() { ::dump_stack_gui(); }
+};

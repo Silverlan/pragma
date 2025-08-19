@@ -50,6 +50,7 @@ jobs:
 
       - name: Run Tests
         uses: ./pragma/github_actions/run_common_tests
+        timeout-minutes: 60
         with:
           working-directory: "${{ steps.build-pragma.outputs.install-dir }}"
           import-tests-token: ${{ secrets.PRAGMA_TESTS_IMPORT_TOKEN }}

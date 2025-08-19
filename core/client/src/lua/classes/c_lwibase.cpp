@@ -423,7 +423,7 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	classDef.def("SetSkin", &::WIBase::SetSkin);
 	classDef.def("GetSkinName", &::WIBase::GetSkinName);
 	classDef.def("ResetSkin", &::WIBase::ResetSkin);
-	classDef.def("GetStyleClasses", &::WIBase::GetStyleClasses);
+	classDef.def("GetStyleClasses", +[](::WIBase &el) -> std::vector<std::string> { return el.GetStyleClasses(); });
 	classDef.def("AddStyleClass", &::WIBase::AddStyleClass);
 	classDef.def("SetCursor", &::WIBase::SetCursor);
 	classDef.def("GetCursor", &::WIBase::GetCursor);

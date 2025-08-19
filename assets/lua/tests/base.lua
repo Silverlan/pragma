@@ -46,7 +46,7 @@ end
 
 function tests.TestManager:CompleteTest(success, resultData)
 	resultData = resultData or {}
-	if type(resultData ~= "table") then resultData = {message = resultData} end
+	if type(resultData) ~= "table" then resultData = {message = resultData} end
 	if type(resultData) == "table" and resultData.screenshot then
 		LOGGER:Info("Taking screenshot...")
 		resultData["assets"] = resultData["assets"] or {}

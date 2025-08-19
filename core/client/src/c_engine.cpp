@@ -708,9 +708,11 @@ void CEngine::HandleOpenGLFallback()
 }
 
 std::optional<std::string> g_waylandLibdecorPlugin;
+extern bool g_cli;
 bool CEngine::Initialize(int argc, char *argv[])
 {
 	Engine::Initialize(argc, argv);
+	SetCLIOnly(g_cli);
 
 #ifdef __linux__
 	auto xdgSessionType = util::get_env_variable("XDG_SESSION_TYPE");

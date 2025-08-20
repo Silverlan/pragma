@@ -149,6 +149,19 @@ config.deps_dir = deps_dir
 if not os.path.isabs(install_dir):
 	install_dir = build_dir +"/" +install_dir
 
+try:
+	branch = subprocess.check_output(
+		["git", "rev-parse", "--abbrev-ref", "HEAD"], text=True
+	).strip()
+	if branch == "HEAD":
+		branch = None  # detached
+	commit = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
+
+	branch = branch or "(detached HEAD)"
+	print("on pragma branch \"" +branch +"\", commit " +str(commit))
+except (subprocess.CalledProcessError, FileNotFoundError):
+	print("Not a git repo")
+
 print("Inputs:")
 if platform == "linux":
 	print("cxx_compiler: " +cxx_compiler)

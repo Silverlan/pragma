@@ -846,6 +846,8 @@ if not deps_only:
 		cmake_args += ["-DWITH_VR=1"]
 	if with_common_entities:
 		cmake_args += ["-DWITH_COMMON_ENTITIES=1"]
+	if with_common_modules:
+		cmake_args += ["-DWITH_COMMON_MODULES=1"]
 
 	cmake_args += additional_cmake_args
 	cmake_args.append("-DCMAKE_POLICY_VERSION_MINIMUM=4.0")

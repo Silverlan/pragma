@@ -145,12 +145,28 @@ def mkdir(dirName,cd=False):
 	if cd:
 		os.chdir(dirName)
 
+def http_download_report_hook(block_num, block_size, total_size):
+    downloaded = block_num * block_size
+    if total_size > 0:
+        percent = downloaded * 100.0 / total_size
+        if percent > 100:
+            percent = 100.0
+        bar_len = 40
+        filled = int(bar_len * downloaded / total_size)
+        bar = '=' * filled + ' ' * (bar_len - filled)
+        sys.stdout.write(
+            f"\rDownloading: [{bar}] {percent:6.2f}% "
+            f"({downloaded/1024/1024:6.2f}MB/{total_size/1024/1024:6.2f}MB)")
+    else:
+        sys.stdout.write(f"\rDownloading: {downloaded} bytes")
+    sys.stdout.flush()
+
 def http_download(url,fileName=None):
 	if not fileName:
 		a = urlparse(url)
 		fileName = os.path.basename(a.path)
 	try:
-		urllib.request.urlretrieve(url,fileName)
+		urllib.request.urlretrieve(url, fileName, reporthook=http_download_report_hook)
 	except PermissionError as e:
 		print_warning("Failed to download '" +url +"' as '" +fileName +"' (PermissionError) (cwd: " + os.getcwd() +"): {}".format(e))
 		raise

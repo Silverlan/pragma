@@ -21,7 +21,7 @@ os.chdir(config.prebuilt_bin_dir)
 if platform == "linux":
 	os.chdir(deps_dir)
 	libdecor_root = os.getcwd() +"/libdecor"
-	commit_sha = "42f7a53aaaa4a06dddb0c1109d6c582bab60bfb0"
+	commit_sha = "c4540b4a92d371b47e14fd10ff42efb3826c89b9"
 	if not check_repository_commit(libdecor_root, commit_sha, "libdecor"): 
 		if not Path(libdecor_root).is_dir():
 			print_msg("libdecor not found. Downloading...")
@@ -83,14 +83,14 @@ ZLIB_LIBPATH = normalize_path(zlib_lib_path)
 
 # Download
 os.chdir(deps_dir)
-commit_sha = "f30f529"
+commit_sha = "6f8a0cd" # v1.11.4
 libzip_root = os.getcwd() +"/libzip"
 if not check_repository_commit(libzip_root, commit_sha, "libzip"): 
 	if not Path(libzip_root).is_dir():
 		print_msg("libzip not found. Downloading...")
 		git_clone("https://github.com/nih-at/libzip.git")
 		os.chdir("libzip")
-		reset_to_commit(commit_sha) # v1.11.3
+		reset_to_commit(commit_sha)
 
 		os.chdir("../")
 	os.chdir("libzip")
@@ -109,14 +109,14 @@ if not check_repository_commit(libzip_root, commit_sha, "libzip"):
 ########## libpng ##########
 # Download
 os.chdir(deps_dir)
-commit_sha = "ea127968204cc5d10f3fc9250c306b9e8cbd9b80"
+commit_sha = "2b97891" # v1.6.50
 libpng_root = os.getcwd() +"/libpng"
 if not check_repository_commit(libpng_root, commit_sha, "libpng"):
 	if not Path(libpng_root).is_dir():
 		print_msg("libpng not found. Downloading...")
 		git_clone("https://github.com/glennrp/libpng.git", branch = "libpng16")
 		os.chdir("libpng")
-		reset_to_commit(commit_sha) # v1.6.48
+		reset_to_commit(commit_sha)
 
 		os.chdir("../")
 	os.chdir("libpng")
@@ -140,11 +140,11 @@ if not Path(icu_root).is_dir():
 	print_msg("icu not found. Downloading...")
 	mkpath(icu_root)
 	os.chdir(icu_root)
-	base_url = "https://github.com/unicode-org/icu/releases/download/release-75-1/"
+	base_url = "https://github.com/unicode-org/icu/releases/download/release-77-1/"
 	if platform == "win32":
-		http_extract(base_url +"icu4c-75_1-Win64-MSVC2022.zip")
+		http_extract(base_url +"icu4c-77_1-Win64-MSVC2022.zip")
 	else:
-		http_extract(base_url +"icu4c-75_1-Ubuntu22.04-x64.tgz",format="tar.gz")
+		http_extract(base_url +"icu4c-77_1-Ubuntu22.04-x64.tgz",format="tar.gz")
 
 if platform == "win32":
 	copy_prebuilt_binaries(icu_root +"/lib64/", "icu")
@@ -157,29 +157,29 @@ else:
 ########## boost ##########
 # Download
 os.chdir(deps_dir)
-boost_root = os.getcwd() +"/boost-1.88.0"
+boost_root = os.getcwd() +"/boost-1.89.0"
 if not Path(boost_root).is_dir():
 	print_msg("boost not found. Downloading...")
-	boost_url = "https://github.com/boostorg/boost/releases/download/boost-1.88.0/boost-1.88.0-cmake.tar.gz"
+	boost_url = "https://github.com/boostorg/boost/releases/download/boost-1.89.0/boost-1.89.0-cmake.tar.gz"
 	http_extract(boost_url,format="tar.gz")
 
 ########## Download Official Boost Sources (Headers) ##########
 os.chdir(deps_dir)
-headers_extract_dir = deps_dir +"/boost-1.88.0-headers"
+headers_extract_dir = deps_dir +"/boost-1.89.0-headers"
 if not os.path.isdir(headers_extract_dir):
 	# Choose URL based on platform
 	if platform == "win32":
-		archive_url = "https://archives.boost.io/release/1.88.0/source/boost_1_88_0.zip"
+		archive_url = "https://archives.boost.io/release/1.89.0/source/boost_1_89_0.zip"
 		archive_format = "zip"
 	else:
-		archive_url = "https://archives.boost.io/release/1.88.0/source/boost_1_88_0.tar.gz"
+		archive_url = "https://archives.boost.io/release/1.89.0/source/boost_1_89_0.tar.gz"
 		archive_format = "tar.gz"
 
 	if not Path(headers_extract_dir).is_dir():
 		print_msg("Official Boost headers not found. Downloading official release for headers...")
 		http_extract(archive_url, format=archive_format)
-		# After extract, the archive usually unpacks to 'boost_1_88_0'
-		unpack_root = deps_dir +"/boost_1_88_0"
+		# After extract, the archive usually unpacks to 'boost_1_89_0'
+		unpack_root = deps_dir +"/boost_1_89_0"
 		if Path(unpack_root).is_dir():
 			Path(unpack_root).rename(headers_extract_dir)
 
@@ -262,7 +262,7 @@ copy_prebuilt_headers(luajit_root +"src/", "luajit")
 
 ########## GeometricTools ##########
 os.chdir(deps_dir)
-commit_sha = "bd7a27d18ac9f31641b4e1246764fe30816fae74"
+commit_sha = "979d94e"
 geometric_tools_root = normalize_path(os.getcwd() +"/GeometricTools")
 if not check_repository_commit(geometric_tools_root, commit_sha, "GeometricTools"):
 	if not Path(geometric_tools_root).is_dir():
@@ -276,7 +276,7 @@ if not check_repository_commit(geometric_tools_root, commit_sha, "GeometricTools
 
 ########## OpenCV ##########
 os.chdir(deps_dir)
-commit_sha = "31b0eee"
+commit_sha = "49486f6" # v4.12.0
 opencv_root = deps_dir +"/opencv"
 if not check_repository_commit(opencv_root, commit_sha, "opencv"):
 	if not Path(opencv_root).is_dir():
@@ -284,7 +284,7 @@ if not check_repository_commit(opencv_root, commit_sha, "opencv"):
 		git_clone("https://github.com/opencv/opencv.git")
 
 	os.chdir(opencv_root)
-	reset_to_commit(commit_sha) # v4.11.0
+	reset_to_commit(commit_sha)
 
 	print_msg("Build opencv")
 	mkdir("build",cd=True)
@@ -367,7 +367,7 @@ os.chdir(deps_dir)
 if platform == "win32":
 	os.environ["VCPKG_DEFAULT_TRIPLET"] = "x64-windows"
 vcpkg_root = deps_dir +"/vcpkg"
-commit_sha = "ee2d2a1"
+commit_sha = "dd3097e" # v2025.07.25
 if not check_repository_commit(vcpkg_root, commit_sha, "vcpkg"):
 	if not Path(vcpkg_root).is_dir():
 		print_msg("vcpkg not found, downloading...")
@@ -444,14 +444,14 @@ else:
 
 ########## cpptrace ##########
 os.chdir(deps_dir)
-commit_sha = "34ea957"
+commit_sha = "3db8da8" # v1.0.4
 cpptrace_root = normalize_path(os.getcwd() +"/cpptrace")
 if not check_repository_commit(cpptrace_root, commit_sha, "cpptrace"): 
 	if not Path(cpptrace_root).is_dir():
 		print_msg("cpptrace not found. Downloading...")
 		git_clone("https://github.com/jeremy-rifkin/cpptrace.git")
 	os.chdir("cpptrace")
-	reset_to_commit(commit_sha) # v0.8.0
+	reset_to_commit(commit_sha)
 
 	print_msg("Building cpptrace...")
 	mkdir("build",cd=True)
@@ -493,10 +493,10 @@ if platform == "linux":
 	########## ISPC ##########
 	# Required for ISPCTextureCompressor
 	os.chdir(deps_dir)
-	ispc_root = normalize_path(os.getcwd() +"/ispc-v1.27.0-linux")
+	ispc_root = normalize_path(os.getcwd() +"/ispc-v1.28.0-linux")
 	if not Path(ispc_root).is_dir():
 		print_msg("ISPC not found. Downloading...")
-		http_extract("https://github.com/ispc/ispc/releases/download/v1.27.0/ispc-v1.27.0-linux.tar.gz",format="tar.gz")
+		http_extract("https://github.com/ispc/ispc/releases/download/v1.28.0/ispc-v1.28.0-linux.tar.gz",format="tar.gz")
 	os.chdir(ispc_root)
 
 	########## ISPCTextureCompressor ##########
@@ -561,7 +561,7 @@ else:
 ########## freetype (built in win32, sys in linux (set in cmake)) ##########
 if platform == "win32":
 	print_msg("Downloading freetype...")
-	commit_sha = "e8ebfe988b5f57bfb9a3ecb13c70d9791bce9ecf"
+	commit_sha = "9a2d6d9"
 	os.chdir(deps_dir)
 	if not Path(os.getcwd()+"/freetype").is_dir():
 		git_clone("https://github.com/aseprite/freetype2.git", directory="freetype")

@@ -4,7 +4,7 @@ inputs:
   with_cuda:
     description: 'Install CUDA?'
     required: true
-    default: '1'
+    default: '0'
 runs:
   using: "composite"
   steps:

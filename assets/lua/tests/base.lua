@@ -19,6 +19,7 @@ end
 function tests.TestManager:AddTest(name)
 	local scriptData = self.m_scripts[name]
 	if scriptData == nil then
+		error("Test '" .. name .. "' not found!")
 		return
 	end
 	if scriptData.scriptFile ~= nil then
@@ -32,7 +33,7 @@ function tests.TestManager:AddTest(name)
 end
 
 function tests.TestManager:Clear()
-	util.remove(self.m_cbThink)
+	util.remove({self.m_cbThink, self.m_cbTimeout, self.m_cbOnError})
 end
 
 function tests.TestManager:IsTestActive()
@@ -45,7 +46,8 @@ end
 
 function tests.TestManager:CompleteTest(success, resultData)
 	resultData = resultData or {}
-	if resultData.screenshot then
+	if type(resultData) ~= "table" then resultData = {message = resultData} end
+	if type(resultData) == "table" and resultData.screenshot then
 		LOGGER:Info("Taking screenshot...")
 		resultData["assets"] = resultData["assets"] or {}
 		-- Wait a few frames before taking the screenshot
@@ -62,6 +64,9 @@ function tests.TestManager:CompleteTest(success, resultData)
 		return
 	end
 
+	util.remove(self.m_cbTimeout)
+	util.remove(self.m_cbOnError)
+
 	if type(resultData) == "string" then
 		resultData = {
 			message = resultData,
@@ -73,9 +78,9 @@ function tests.TestManager:CompleteTest(success, resultData)
 	self.m_currentTest = nil
 	if success == false then
 		local msg = resultData.message or "Unknown"
-		msg = "Test '" .. self.m_currentTest .. "' failed: " .. tostring(msg)
+		msg = "Test '" .. curTest .. "' failed: " .. tostring(msg)
 		LOGGER:Err(msg)
-		error(msg)
+		-- error(msg)
 	end
 
 	LOGGER:Info("Test '{}' has completed!", curTest)
@@ -113,17 +118,50 @@ function tests.TestManager:GetResultAssetPaths()
 	return self.m_resultAssetPaths
 end
 
+function tests.TestManager:SetTimeout(timeout)
+	self.m_timeout = timeout
+end
+
 function tests.TestManager:StartTest(test)
 	LOGGER:Info("Starting test '{}'...", test)
 	self.m_currentTest = test
+	self:SetTimeout(10 *60) -- Default timeout: 10 minutes
 	self:CallCallbacks("OnTestStart", test)
+
+	local t = time.real_time()
+	util.remove(self.m_cbTimeout)
+	self.m_cbTimeout = game.add_callback("Think",function()
+		local dt = time.real_time() -t
+		if(dt < self.m_timeout) then return end
+		util.remove(self.m_cbTimeout)
+		self:CompleteTest(false, "Timed out!")
+	end)
+
+	util.remove(self.m_cbOnError)
+	self.m_cbOnError = game.add_event_listener("OnLuaError",function(err)
+		util.remove(self.m_cbOnError)
+		self:CompleteTest(false, "A Lua error has occurred: " .. tostring(err))
+	end)
 
 	local scriptData = self.m_scripts[test]
 	assert(scriptData ~= nil)
-	local retVals = { include(scriptData.scriptFile, true) }
-	if retVals[1] ~= nil then
-		self:CompleteTest(retVals[1], retVals[2])
+	local retVals = {
+		xpcall(
+			function() return include(scriptData.scriptFile, true) end,
+			function(err) return debug.format_error_message(err)
+		end)
+	}
+	if(retVals[1] == false) then
+		local err = retVals[2]
+		self:CompleteTest(false, "Failed to execute test script: " .. tostring(err))
+		return
 	end
+	if retVals[2] ~= nil then
+		-- Script returned immediately
+		self:CompleteTest(retVals[2], retVals[3])
+		return
+	end
+	-- Script is still executing.
 end
 
 function tests.TestManager:Start()
@@ -151,6 +189,7 @@ function tests.TestManager:LoadTests(scriptFileName)
 	local udmData, err = udm.load("scripts/" .. scriptFileName)
 	if udmData == false then
 		LOGGER:Err("Failed to load tests file '{}': {}", scriptFileName, err)
+		error("Failed to load tests file '" .. scriptFileName .. "': " .. err)
 		return
 	end
 	LOGGER:Info("Loading tests file '{}'...", scriptFileName)
@@ -171,11 +210,18 @@ end
 tests.is_test_running = function()
 	return tests.manager:IsTestActive()
 end
+tests.set_timeout = function(timeout)
+	tests.manager:SetTimeout(timeout)
+end
 tests.queue = function(name)
 	tests.manager:AddTest(name)
 end
 tests.run = function()
 	tests.manager:Start()
+end
+tests.reset = function()
+	tests.manager:Clear()
+	tests.manager = tests.TestManager()
 end
 tests.complete = function(success, resultData)
 	tests.manager:CompleteTest(success, resultData)

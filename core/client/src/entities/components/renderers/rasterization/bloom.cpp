@@ -20,7 +20,6 @@ extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
-
 void pragma::CRasterizationRendererComponent::RenderGlowObjects(const util::DrawSceneInfo &drawSceneInfo)
 {
 #if 0

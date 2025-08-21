@@ -147,7 +147,7 @@ void CGame::SetupEntity(BaseEntity *ent, unsigned int idx)
 {
 	if(idx < m_shEnts.size()) {
 		if(m_shEnts[idx] != nullptr) {
-			Con::cwar << "New entity "<<ent<<" shares server index " << idx << " with existing entity "<<*m_shEnts[idx]<<"! Removing existing..." << Con::endl;
+			Con::cwar << "New entity " << ent << " shares server index " << idx << " with existing entity " << *m_shEnts[idx] << "! Removing existing..." << Con::endl;
 			auto *entOther = GetEntity(idx);
 			RemoveEntity(entOther);
 		}

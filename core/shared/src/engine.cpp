@@ -46,6 +46,7 @@
 import util_zip;
 import pragma.pad;
 import pragma.locale;
+import pragma.oskit;
 
 const pragma::IServerState &Engine::GetServerStateInterface() const
 {
@@ -113,8 +114,8 @@ Engine::Engine(int argc, char *argv[]) : CVarHandler(), m_logFile(nullptr), m_ti
 	// Since launch options are handled *after* the console is initialized, we have to
 	// check for -disable_linenoise early.
 	// We also don't want linenoise enabled if -non_interactive is set.
-	for (int i=0;i<argc;++i) {
-		if (ustring::compare(argv[i], "-disable_linenoise", false) || ustring::compare(argv[i], "-non_interactive", false)) {
+	for(int i = 0; i < argc; ++i) {
+		if(ustring::compare(argv[i], "-disable_linenoise", false) || ustring::compare(argv[i], "-non_interactive", false)) {
 			umath::set_flag(m_stateFlags, StateFlags::UseLinenoise, false);
 			break;
 		}
@@ -180,6 +181,8 @@ Engine::Engine(int argc, char *argv[]) : CVarHandler(), m_logFile(nullptr), m_ti
 
 pragma::asset::AssetManager &Engine::GetAssetManager() { return *m_assetManager; }
 const pragma::asset::AssetManager &Engine::GetAssetManager() const { return const_cast<Engine *>(this)->GetAssetManager(); }
+
+bool Engine::IsProgramInFocus() const { return false; }
 
 void Engine::ClearConsole() { std::system("cls"); }
 
@@ -344,8 +347,11 @@ void Engine::Close()
 	Con::set_output_callback(nullptr);
 	pragma::locale::clear();
 	filemanager::close_file_watcher();
+	pragma::oskit::shutdown();
+	FileManager::Close();
+	ds::close();
 #ifdef __linux__
-	if (pragma::console::impl::is_linenoise_enabled())
+	if(pragma::console::impl::is_linenoise_enabled())
 		pragma::console::impl::close_linenoise();
 #endif
 }
@@ -642,7 +648,8 @@ bool Engine::IsDeveloperModeEnabled() const { return umath::is_flag_set(m_stateF
 void Engine::SetNonInteractiveMode(bool nonInteractiveMode) { umath::set_flag(m_stateFlags, StateFlags::NonInteractiveMode, nonInteractiveMode); }
 bool Engine::IsNonInteractiveMode() const { return umath::is_flag_set(m_stateFlags, StateFlags::NonInteractiveMode); }
 
-void Engine::SetLinenoiseEnabled(bool enabled) {
+void Engine::SetLinenoiseEnabled(bool enabled)
+{
 #ifndef __linux__
 	// Linenoise is Linux-only
 	enabled = false;
@@ -669,9 +676,9 @@ bool Engine::Initialize(int argc, char *argv[])
 {
 	InitLaunchOptions(argc, argv);
 
-	if (g_lpManagedByPackageManager)
+	if(g_lpManagedByPackageManager)
 		SetManagedByPackageManager(true);
-	if (g_lpSandboxed)
+	if(g_lpSandboxed)
 		SetSandboxed(true);
 
 	// Initialize file system

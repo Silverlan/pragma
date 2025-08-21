@@ -16,7 +16,7 @@ void Lua::register_cl_weapon_component(lua_State *l, luabind::module_ &module)
 {
 	auto def = pragma::lua::create_entity_component_class<pragma::CWeaponComponent, pragma::BaseWeaponComponent>("WeaponComponent");
 	def.def("PlayViewActivity", &pragma::CWeaponComponent::PlayViewActivity);
-	def.def("PlayViewActivity", static_cast<bool (*)(pragma::CWeaponComponent & wepComponent, Activity)>([](pragma::CWeaponComponent &wepComponent, Activity activity) { return wepComponent.PlayViewActivity(activity); }));
+	def.def("PlayViewActivity", static_cast<bool (*)(pragma::CWeaponComponent &wepComponent, Activity)>([](pragma::CWeaponComponent &wepComponent, Activity activity) { return wepComponent.PlayViewActivity(activity); }));
 	def.def("SetViewModel", &pragma::CWeaponComponent::SetViewModel);
 	def.def("GetViewModel", &pragma::CWeaponComponent::GetViewModel);
 	def.def("SetHideWorldModelInFirstPerson", &pragma::CWeaponComponent::SetHideWorldModelInFirstPerson);

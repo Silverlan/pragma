@@ -298,18 +298,12 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	cdChannel.def("GetValueType", &panima::Channel::GetValueType);
 	cdChannel.def("SetValueType", &panima::Channel::SetValueType);
 	cdChannel.def("MergeValues", &panima::Channel::MergeValues);
-	cdChannel.def(
-	  "GetInterpolation", +[](lua_State *l, panima::Channel &channel) -> panima::ChannelInterpolation { return channel.interpolation; });
-	cdChannel.def(
-	  "SetInterpolation", +[](lua_State *l, panima::Channel &channel, panima::ChannelInterpolation interp) { channel.interpolation = interp; });
-	cdChannel.def(
-	  "GetTargetPath", +[](lua_State *l, panima::Channel &channel) -> panima::ChannelPath * { return &channel.targetPath; });
-	cdChannel.def(
-	  "SetTargetPath", +[](lua_State *l, panima::Channel &channel, const std::string &path) { channel.targetPath = path; });
-	cdChannel.def(
-	  "GetTimesArray", +[](lua_State *l, panima::Channel &channel) -> ::udm::LinkedPropertyWrapper { return ::udm::LinkedPropertyWrapper {channel.GetTimesProperty()}; });
-	cdChannel.def(
-	  "GetValueArray", +[](lua_State *l, panima::Channel &channel) -> ::udm::LinkedPropertyWrapper { return ::udm::LinkedPropertyWrapper {channel.GetValueProperty()}; });
+	cdChannel.def("GetInterpolation", +[](lua_State *l, panima::Channel &channel) -> panima::ChannelInterpolation { return channel.interpolation; });
+	cdChannel.def("SetInterpolation", +[](lua_State *l, panima::Channel &channel, panima::ChannelInterpolation interp) { channel.interpolation = interp; });
+	cdChannel.def("GetTargetPath", +[](lua_State *l, panima::Channel &channel) -> panima::ChannelPath * { return &channel.targetPath; });
+	cdChannel.def("SetTargetPath", +[](lua_State *l, panima::Channel &channel, const std::string &path) { channel.targetPath = path; });
+	cdChannel.def("GetTimesArray", +[](lua_State *l, panima::Channel &channel) -> ::udm::LinkedPropertyWrapper { return ::udm::LinkedPropertyWrapper {channel.GetTimesProperty()}; });
+	cdChannel.def("GetValueArray", +[](lua_State *l, panima::Channel &channel) -> ::udm::LinkedPropertyWrapper { return ::udm::LinkedPropertyWrapper {channel.GetValueProperty()}; });
 	cdChannel.def("Resize", &panima::Channel::Resize);
 	cdChannel.def("GetSize", &panima::Channel::GetSize);
 	cdChannel.def(
@@ -367,7 +361,7 @@ void Lua::animation::register_library(Lua::Interface &lua)
 		  auto udmData = data->GetAssetData().GetData();
 		  channel.Save(udmData);
 		  std::stringstream ss;
-		  data->ToAscii(ss, ::udm::AsciiSaveFlags::Default | :: udm::AsciiSaveFlags::DontCompressLz4Arrays);
+		  data->ToAscii(ss, ::udm::AsciiSaveFlags::Default | ::udm::AsciiSaveFlags::DontCompressLz4Arrays);
 		  Con::cout << ss.str() << Con::endl;
 	  });
 	cdChannel.def(
@@ -482,19 +476,15 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	  });
 	cdChannel.def("GetValueCount", &panima::Channel::GetValueCount);
 	cdChannel.def("GetTime", &panima::Channel::GetTime);
-	cdChannel.def(
-	  "GetInterpolatedValue", +[](lua_State *l, panima::Channel &channel, float t, bool clampToBounds) -> Lua::opt<Lua::udm_ng> { return get_interpolated_value(l, channel, t, clampToBounds); });
-	cdChannel.def(
-	  "GetInterpolatedValue", +[](lua_State *l, panima::Channel &channel, float t) -> Lua::opt<Lua::udm_ng> { return get_interpolated_value(l, channel, t, true); });
+	cdChannel.def("GetInterpolatedValue", +[](lua_State *l, panima::Channel &channel, float t, bool clampToBounds) -> Lua::opt<Lua::udm_ng> { return get_interpolated_value(l, channel, t, clampToBounds); });
+	cdChannel.def("GetInterpolatedValue", +[](lua_State *l, panima::Channel &channel, float t) -> Lua::opt<Lua::udm_ng> { return get_interpolated_value(l, channel, t, true); });
 	// Default float argument not supported in clang (state: 23-09-12)
 	// cdChannel.def("Decimate", static_cast<void (panima::Channel::*)(float, float, float)>(&panima::Channel::Decimate), luabind::default_parameter_policy<4, 0.03f> {});
 	// cdChannel.def("Decimate", static_cast<void (panima::Channel::*)(float)>(&panima::Channel::Decimate), luabind::default_parameter_policy<2, 0.03f> {});
 	cdChannel.def("Decimate", static_cast<void (panima::Channel::*)(float, float, float)>(&panima::Channel::Decimate));
-	cdChannel.def(
-	  "Decimate", +[](panima::Channel &channel, float tStart, float tEnd) { return channel.Decimate(tStart, tEnd); });
+	cdChannel.def("Decimate", +[](panima::Channel &channel, float tStart, float tEnd) { return channel.Decimate(tStart, tEnd); });
 	cdChannel.def("Decimate", static_cast<void (panima::Channel::*)(float)>(&panima::Channel::Decimate));
-	cdChannel.def(
-	  "Decimate", +[](panima::Channel &channel) { return channel.Decimate(); });
+	cdChannel.def("Decimate", +[](panima::Channel &channel) { return channel.Decimate(); });
 
 	cdChannel.def(
 	  "GetValue", +[](lua_State *l, panima::Channel &channel, uint32_t idx) -> Lua::udm_ng {
@@ -536,8 +526,7 @@ void Lua::animation::register_library(Lua::Interface &lua)
 			  return {};
 		  return {std::tuple<uint32_t, uint32_t, float> {indices.first, indices.second, interpFactor}};
 	  });
-	cdChannel.def(
-	  "FindIndex", +[](lua_State *l, panima::Channel &channel, float time) -> std::optional<uint32_t> { return channel.FindValueIndex(time, panima::Channel::VALUE_EPSILON); });
+	cdChannel.def("FindIndex", +[](lua_State *l, panima::Channel &channel, float time) -> std::optional<uint32_t> { return channel.FindValueIndex(time, panima::Channel::VALUE_EPSILON); });
 	cdChannel.def("FindIndex", &panima::Channel::FindValueIndex);
 	cdChannel.def(
 	  "RemoveValueRange", +[](lua_State *l, panima::Channel &channel, uint32_t startIndex, uint32_t count) {
@@ -656,8 +645,7 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	cdManager.def(luabind::tostring(luabind::self));
 	cdManager.def(luabind::const_self == luabind::const_self);
 	cdManager.scope[luabind::def("create", static_cast<std::shared_ptr<panima::AnimationManager> (*)()>(&panima::AnimationManager::Create))];
-	cdManager.def(
-	  "GetPreviousSlice", +[](lua_State *l, panima::AnimationManager &manager) { return &manager.GetPreviousSlice(); });
+	cdManager.def("GetPreviousSlice", +[](lua_State *l, panima::AnimationManager &manager) { return &manager.GetPreviousSlice(); });
 	cdManager.def("GetCurrentAnimationId", &panima::AnimationManager::GetCurrentAnimationId);
 	cdManager.def("AddAnimationSet", &panima::AnimationManager::AddAnimationSet);
 	cdManager.def(
@@ -677,8 +665,7 @@ void Lua::animation::register_library(Lua::Interface &lua)
 
 	auto cdSlice = luabind::class_<panima::Slice>("Slice");
 	cdSlice.def(luabind::tostring(luabind::self));
-	cdSlice.def(
-	  "GetChannelValueCount", +[](lua_State *l, panima::Slice &slice) -> uint32_t { return slice.channelValues.size(); });
+	cdSlice.def("GetChannelValueCount", +[](lua_State *l, panima::Slice &slice) -> uint32_t { return slice.channelValues.size(); });
 	cdSlice.def(
 	  "GetChannelProperty", +[](lua_State *l, panima::Slice &slice, uint32_t idx) -> luabind::optional<::udm::PProperty> {
 		  if(idx >= slice.channelValues.size())
@@ -690,8 +677,7 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	auto cdAnim2 = luabind::class_<panima::Animation>("Animation");
 	cdAnim2.def(luabind::tostring(luabind::self));
 	cdAnim2.def(luabind::const_self == luabind::const_self);
-	cdAnim2.scope[luabind::def(
-	  "create", +[](lua_State *l) { return std::make_shared<panima::Animation>(); })];
+	cdAnim2.scope[luabind::def("create", +[](lua_State *l) { return std::make_shared<panima::Animation>(); })];
 	cdAnim2.scope[luabind::def(
 	  "load", +[](lua_State *l, ::udm::LinkedPropertyWrapper &prop) -> Lua::var<bool, std::shared_ptr<panima::Animation>> {
 		  auto anim = std::make_shared<panima::Animation>();
@@ -727,8 +713,7 @@ void Lua::animation::register_library(Lua::Interface &lua)
 			  return nil;
 		  return {l, channel->shared_from_this()};
 	  });
-	cdAnim2.def(
-	  "GetChannels", +[](lua_State *l, panima::Animation &anim) -> luabind::tableT<panima::Channel> { return Lua::vector_to_table<std::shared_ptr<panima::Channel>>(l, anim.GetChannels()); });
+	cdAnim2.def("GetChannels", +[](lua_State *l, panima::Animation &anim) -> luabind::tableT<panima::Channel> { return Lua::vector_to_table<std::shared_ptr<panima::Channel>>(l, anim.GetChannels()); });
 	cdAnim2.def(
 	  "FindChannel", +[](lua_State *l, panima::Animation &anim, std::string path) -> opt<std::shared_ptr<panima::Channel>> {
 		  auto *channel = anim.FindChannel(std::move(path));

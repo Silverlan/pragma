@@ -10,9 +10,9 @@ find_path(${PCK}_INCLUDE_DIR
     ${PRAGMA_DEPS_DIR}/opencv/include
 )
 
-find_library(${PCK}_LIB_CORE      NAMES opencv_core opencv_core4110      HINTS ${PRAGMA_DEPS_DIR}/opencv/lib)
-find_library(${PCK}_LIB_IMGCODECS NAMES opencv_imgcodecs opencv_imgcodecs4110 HINTS ${PRAGMA_DEPS_DIR}/opencv/lib)
-find_library(${PCK}_LIB_IMGPROC   NAMES opencv_imgproc opencv_imgproc4110   HINTS ${PRAGMA_DEPS_DIR}/opencv/lib)
+find_library(${PCK}_LIB_CORE      NAMES opencv_core opencv_core4120      HINTS ${PRAGMA_DEPS_DIR}/opencv/lib)
+find_library(${PCK}_LIB_IMGCODECS NAMES opencv_imgcodecs opencv_imgcodecs4120 HINTS ${PRAGMA_DEPS_DIR}/opencv/lib)
+find_library(${PCK}_LIB_IMGPROC   NAMES opencv_imgproc opencv_imgproc4120   HINTS ${PRAGMA_DEPS_DIR}/opencv/lib)
 
 set(REQ_VARS ${PCK}_LIB_CORE ${PCK}_LIB_IMGCODECS ${PCK}_LIB_IMGPROC ${PCK}_INCLUDE_DIR)
 

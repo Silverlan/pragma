@@ -145,6 +145,8 @@ class DLLNETWORK Engine : public CVarHandler, public CallbackHandler {
 	virtual void HandleOpenGLFallback() {};
 	void ClearCache();
 
+	virtual bool IsProgramInFocus() const;
+
 	void SetRunUpdaterOnClose(bool run);
 	bool ShouldRunUpdaterOnClose() const;
 

@@ -48,4 +48,8 @@ namespace Lua {
 	}
 };
 
+namespace pragma::lua {
+	DLLNETWORK Lua::StatusCode protected_call(lua_State *l, const std::function<Lua::StatusCode(lua_State *)> &pushFuncArgs, int32_t numResults);
+};
+
 #endif

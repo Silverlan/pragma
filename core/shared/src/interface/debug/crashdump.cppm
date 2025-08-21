@@ -10,6 +10,7 @@ export module pragma.debug.crashdump;
 
 export namespace pragma::debug {
 	DLLNETWORK const std::string &get_exception_message();
+	DLLNETWORK bool generate_crash_dump();
 	class DLLNETWORK CrashHandler {
 	  public:
 		static CrashHandler &Get();
@@ -18,6 +19,7 @@ export namespace pragma::debug {
 		~CrashHandler();
 		void SetAppName(const std::string &appName);
 	  private:
+		friend bool generate_crash_dump();
 		// May be called multiple times if re-initialization is needed
 		void InitializeHandlers();
 		bool GenerateCrashDump() const;

@@ -194,8 +194,8 @@ void pragma::bvh::BvhTree::InitializeBvh()
 void pragma::bvh::MeshBvhTree::Refit()
 {
 	bvh.refit([this](pragma::bvh::Node &node) {
-		auto begin = node.index.first_id;
-		auto end = begin + node.index.prim_count;
+		auto begin = node.index.first_id();
+		auto end = begin + node.index.prim_count();
 		for(size_t i = begin; i < end; ++i) {
 			size_t j = bvh.prim_ids[i];
 
@@ -306,7 +306,8 @@ bool pragma::bvh::MeshBvhTree::Raycast(const Vector3 &origin, const Vector3 &dir
 			pragma::bvh::PrecomputedTri tri {prim.p0, prim.p1, prim.p2};
 			if(auto hit = tri.intersect(ray)) {
 				prim_id = j;
-				std::tie(u, v) = *hit;
+				float d;
+				std::tie(d, u, v) = *hit;
 			}
 		}
 		return prim_id != invalid_id;
@@ -344,7 +345,7 @@ void pragma::bvh::debug::print_bvh_tree(pragma::bvh::Bvh &bvh)
 		auto bbox = node.get_bbox();
 		auto min = from_bvh_vector(bbox.min);
 		auto max = from_bvh_vector(bbox.max);
-		auto isLeaf = node.index.prim_count > 0;
+		auto isLeaf = node.index.prim_count() > 0;
 		ss << t;
 		if(isLeaf)
 			ss << "Leaf";
@@ -353,8 +354,8 @@ void pragma::bvh::debug::print_bvh_tree(pragma::bvh::Bvh &bvh)
 		ss << "[" << min.x << "," << min.y << "," << min.z << "][" << max.x << "," << max.y << "," << max.z << "]\n";
 		if(isLeaf)
 			return;
-		printStack(bvh.nodes[node.index.first_id], t + "\t");
-		printStack(bvh.nodes[node.index.first_id + 1], t + "\t");
+		printStack(bvh.nodes[node.index.first_id()], t + "\t");
+		printStack(bvh.nodes[node.index.first_id() + 1], t + "\t");
 	};
 	printStack(bvh.get_root(), "");
 	Con::cout << "BVH Tree:" << ss.str() << Con::endl;
@@ -370,9 +371,9 @@ void pragma::bvh::debug::draw_bvh_tree(const Game &game, pragma::bvh::Bvh &bvh, 
 restart:
 	while(!stack.is_empty()) {
 		auto top = stack.pop();
-		while(top.prim_count == 0) {
-			auto &left = bvh.nodes[top.first_id];
-			auto &right = bvh.nodes[top.first_id + 1];
+		while(top.prim_count() == 0) {
+			auto &left = bvh.nodes[top.first_id()];
+			auto &right = bvh.nodes[top.first_id() + 1];
 
 			draw_node(game, left, pose, DEFAULT_NODE_COLOR, duration);
 			draw_node(game, right, pose, DEFAULT_NODE_COLOR, duration);

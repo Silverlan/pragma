@@ -23,16 +23,14 @@ void Lua::Render::register_class(lua_State *l, luabind::module_ &entsMod)
 	defCRender.def("IsInRenderGroup", &pragma::CRenderComponent::IsInRenderGroup);
 	defCRender.def("GetSceneRenderPass", &pragma::CRenderComponent::GetSceneRenderPass);
 	defCRender.def("SetSceneRenderPass", &pragma::CRenderComponent::SetSceneRenderPass);
-	defCRender.def(
-	  "GetSceneRenderPassProperty", +[](lua_State *l, pragma::CRenderComponent &c) { Lua::Property::push(l, *c.GetSceneRenderPassProperty()); });
+	defCRender.def("GetSceneRenderPassProperty", +[](lua_State *l, pragma::CRenderComponent &c) { Lua::Property::push(l, *c.GetSceneRenderPassProperty()); });
 	defCRender.def("AddToRenderGroup", static_cast<bool (pragma::CRenderComponent::*)(const std::string &)>(&pragma::CRenderComponent::AddToRenderGroup));
 	defCRender.def("AddToRenderGroup", static_cast<void (pragma::CRenderComponent::*)(pragma::rendering::RenderGroup)>(&pragma::CRenderComponent::AddToRenderGroup));
 	defCRender.def("RemoveFromRenderGroup", static_cast<bool (pragma::CRenderComponent::*)(const std::string &)>(&pragma::CRenderComponent::RemoveFromRenderGroup));
 	defCRender.def("RemoveFromRenderGroup", static_cast<void (pragma::CRenderComponent::*)(pragma::rendering::RenderGroup)>(&pragma::CRenderComponent::RemoveFromRenderGroup));
 	defCRender.def("SetRenderGroups", &pragma::CRenderComponent::SetRenderGroups);
 	defCRender.def("GetRenderGroups", &pragma::CRenderComponent::GetRenderGroups);
-	defCRender.def(
-	  "GetRenderGroupsProperty", +[](lua_State *l, pragma::CRenderComponent &c) { Lua::Property::push(l, *c.GetRenderGroupsProperty()); });
+	defCRender.def("GetRenderGroupsProperty", +[](lua_State *l, pragma::CRenderComponent &c) { Lua::Property::push(l, *c.GetRenderGroupsProperty()); });
 	defCRender.def("GetLocalRenderBounds", &Lua::Render::GetLocalRenderBounds);
 	defCRender.def("GetLocalRenderSphereBounds", &Lua::Render::GetLocalRenderSphereBounds);
 	defCRender.def("GetAbsoluteRenderBounds", &Lua::Render::GetAbsoluteRenderBounds);
@@ -130,8 +128,7 @@ void Lua::Render::register_class(lua_State *l, luabind::module_ &entsMod)
 
 	defCRender.def("SetHidden", &pragma::CRenderComponent::SetHidden);
 	defCRender.def("IsHidden", &pragma::CRenderComponent::IsHidden);
-	defCRender.def(
-	  "SetVisible", +[](pragma::CRenderComponent &renderC, bool visible) { renderC.SetHidden(!visible); });
+	defCRender.def("SetVisible", +[](pragma::CRenderComponent &renderC, bool visible) { renderC.SetHidden(!visible); });
 	defCRender.def("IsVisible", &pragma::CRenderComponent::IsVisible);
 	defCRender.def("SetIgnoreAncestorVisibility", &pragma::CRenderComponent::SetIgnoreAncestorVisibility);
 	defCRender.def("ShouldIgnoreAncestorVisibility", &pragma::CRenderComponent::ShouldIgnoreAncestorVisibility);

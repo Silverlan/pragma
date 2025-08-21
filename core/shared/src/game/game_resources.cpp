@@ -18,9 +18,7 @@ extern DLLNETWORK Engine *engine;
 static bool s_bModuleInitialized = false;
 
 static std::shared_ptr<util::Library> dllHandle = nullptr;
-void util::close_mount_external_library() {
-	dllHandle = nullptr;
-}
+void util::close_mount_external_library() { dllHandle = nullptr; }
 static std::shared_ptr<util::Library> load_module(NetworkState *nw)
 {
 	if(dllHandle == nullptr) {

@@ -104,14 +104,14 @@ Engine::ConsoleInstance::ConsoleInstance()
 	auto useConsoleThread = true;
 #ifdef __linux__
 	auto useLinenoise = true;
-	if (engine->IsNonInteractiveMode() || engine->IsLinenoiseEnabled() == false)
+	if(engine->IsNonInteractiveMode() || engine->IsLinenoiseEnabled() == false)
 		useLinenoise = false;
-	if (useLinenoise) {
+	if(useLinenoise) {
 		useConsoleThread = false;
 		pragma::console::impl::init_linenoise();
 	}
 #endif
-	if (useConsoleThread) {
+	if(useConsoleThread) {
 		consoleThread = std::make_unique<std::thread>(std::bind(&KeyboardInput));
 		util::set_thread_name(*consoleThread, "pr_console_input_listener");
 	}
@@ -133,12 +133,12 @@ Engine::ConsoleInstance::~ConsoleInstance()
 	}
 #else
 	//It is impossible to unblock KeyboardInput by putting \n. I have to cancel the thread.
-	if (consoleThread) {
+	if(consoleThread) {
 		auto natConsoleThread = consoleThread->native_handle();
 		pthread_cancel(natConsoleThread);
 	}
 #endif
-	if (consoleThread)
+	if(consoleThread)
 		consoleThread->join();
 }
 
@@ -164,7 +164,7 @@ DebugConsole *Engine::GetConsole() { return m_consoleInfo ? m_consoleInfo->conso
 void Engine::ProcessConsoleInput(KeyState pressState)
 {
 #ifdef __linux__
-	if (pragma::console::impl::is_linenoise_enabled())
+	if(pragma::console::impl::is_linenoise_enabled())
 		pragma::console::impl::update_linenoise();
 #endif
 
@@ -181,7 +181,7 @@ void Engine::ProcessConsoleInput(KeyState pressState)
 		auto &inputInfo = consoleInput.front();
 
 		util::set_console_color(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
-		if (inputInfo.printLine)
+		if(inputInfo.printLine)
 			Con::cout << "> " << inputInfo.line << Con::endl;
 		util::reset_console_color();
 		ProcessConsoleInput(inputInfo.line, pressState);

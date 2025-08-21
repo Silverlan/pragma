@@ -5,7 +5,7 @@ if (${PCK}_FOUND)
 endif()
 
 find_path(${PCK}_INCLUDE_DIR
-  NAMES Mathematics/Math.h
+  NAMES Mathematics/Vector.h
   HINTS
     ${PRAGMA_DEPS_DIR}/geometrictools/include
 )

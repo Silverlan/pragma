@@ -166,8 +166,7 @@ bool pragma::asset::WmdFormatHandler::LoadData(ModelProcessor &processor, ModelL
 
 	//
 	// Meshes
-	LoadMeshes(
-	  ver, *mdl, [&mdlManager]() { return mdlManager.CreateMesh(); }, [&mdlManager]() { return mdlManager.CreateSubMesh(); });
+	LoadMeshes(ver, *mdl, [&mdlManager]() { return mdlManager.CreateMesh(); }, [&mdlManager]() { return mdlManager.CreateSubMesh(); });
 
 	// LOD Data
 	LoadLODData(ver, *mdl);

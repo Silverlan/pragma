@@ -55,8 +55,8 @@ void Lua::TraceData::SetFilter(lua_State *l, ::TraceData &data, luabind::object)
 			ents.push_back(v.GetHandle());
 
 			Lua::Pop(l, 1); /* 2 */
-		}                   /* 1 */
-		Lua::Pop(l, 1);     /* 0 */
+		} /* 1 */
+		Lua::Pop(l, 1); /* 0 */
 		data.SetFilter(std::move(ents));
 		return;
 	}

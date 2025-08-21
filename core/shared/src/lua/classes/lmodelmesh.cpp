@@ -135,12 +135,9 @@ void Lua::ModelSubMesh::register_class(luabind::class_<::ModelSubMesh> &classDef
 	classDef.scope[luabind::def("create_ring", static_cast<std::shared_ptr<::ModelSubMesh> (*)(Game &, const pragma::model::RingCreateInfo &)>(&pragma::model::create_ring))];
 	classDef.def("SetName", &::ModelSubMesh::SetName);
 	classDef.def("GetName", &::ModelSubMesh::GetName);
-	classDef.def(
-	  "GetUuid", +[](::ModelSubMesh &mesh) -> std::string { return ::util::uuid_to_string(mesh.GetUuid()); });
-	classDef.def(
-	  "SetUuid", +[](::ModelSubMesh &mesh, const std::string &uuid) { mesh.SetUuid(::util::uuid_string_to_bytes(uuid)); });
-	classDef.def(
-	  "SetUuid", +[](::ModelSubMesh &mesh, const Lua::util::Uuid &uuid) { mesh.SetUuid(uuid.value); }, luabind::const_ref_policy<2> {});
+	classDef.def("GetUuid", +[](::ModelSubMesh &mesh) -> std::string { return ::util::uuid_to_string(mesh.GetUuid()); });
+	classDef.def("SetUuid", +[](::ModelSubMesh &mesh, const std::string &uuid) { mesh.SetUuid(::util::uuid_string_to_bytes(uuid)); });
+	classDef.def("SetUuid", +[](::ModelSubMesh &mesh, const Lua::util::Uuid &uuid) { mesh.SetUuid(uuid.value); }, luabind::const_ref_policy<2> {});
 	classDef.def("GetSkinTextureIndex", &Lua::ModelSubMesh::GetSkinTextureIndex);
 	classDef.def("FlipTriangleWindingOrder", &Lua::ModelSubMesh::FlipTriangleWindingOrder);
 	classDef.def("GetVertexCount", &Lua::ModelSubMesh::GetVertexCount);
@@ -158,10 +155,8 @@ void Lua::ModelSubMesh::register_class(luabind::class_<::ModelSubMesh> &classDef
 	classDef.def("GetUVs", static_cast<void (*)(lua_State *, ::ModelSubMesh &)>(&Lua::ModelSubMesh::GetUVMapping));
 	classDef.def("GetUVs", static_cast<luabind::object (*)(lua_State *, ::ModelSubMesh &, const std::string &)>(&Lua::ModelSubMesh::GetUVMapping));
 	classDef.def("GetUVSetNames", &Lua::ModelSubMesh::GetUVSetNames);
-	classDef.def(
-	  "HasUvSet", +[](lua_State *l, ::ModelSubMesh &mesh, const std::string &name) { return mesh.GetUVSet(name) != nullptr; });
-	classDef.def(
-	  "HasVertexWeights", +[](lua_State *l, ::ModelSubMesh &mesh) { return !mesh.GetVertexWeights().empty(); });
+	classDef.def("HasUvSet", +[](lua_State *l, ::ModelSubMesh &mesh, const std::string &name) { return mesh.GetUVSet(name) != nullptr; });
+	classDef.def("HasVertexWeights", +[](lua_State *l, ::ModelSubMesh &mesh) { return !mesh.GetVertexWeights().empty(); });
 	classDef.def("GetNormals", &Lua::ModelSubMesh::GetNormalMapping);
 	classDef.def("GetVertexWeights", &Lua::ModelSubMesh::GetVertexWeights);
 	classDef.def("AddTriangle", static_cast<void (*)(lua_State *, ::ModelSubMesh &, const umath::Vertex &, const umath::Vertex &, const umath::Vertex &)>(&Lua::ModelSubMesh::AddTriangle));
@@ -194,8 +189,7 @@ void Lua::ModelSubMesh::register_class(luabind::class_<::ModelSubMesh> &classDef
 #ifdef _WIN32
 	classDef.def("Optimize", &::ModelSubMesh::Optimize, luabind::default_parameter_policy<2, double {umath::VERTEX_EPSILON}> {});
 #else
-	classDef.def(
-	  "Optimize", +[](::ModelSubMesh &mesh) { return mesh.Optimize(); });
+	classDef.def("Optimize", +[](::ModelSubMesh &mesh) { return mesh.Optimize(); });
 #endif
 	classDef.def("GenerateNormals", &Lua::ModelSubMesh::GenerateNormals);
 	classDef.def("NormalizeUVCoordinates", &Lua::ModelSubMesh::NormalizeUVCoordinates);
@@ -246,8 +240,7 @@ void Lua::ModelSubMesh::register_class(luabind::class_<::ModelSubMesh> &classDef
 		  verts = std::move(newVerts);
 		  vws = std::move(newVertWeights);
 	  });
-	classDef.def(
-	  "SetVertices", +[](lua_State *l, ::ModelSubMesh &mesh, std::vector<umath::Vertex> verts) { mesh.GetVertices() = std::move(verts); });
+	classDef.def("SetVertices", +[](lua_State *l, ::ModelSubMesh &mesh, std::vector<umath::Vertex> verts) { mesh.GetVertices() = std::move(verts); });
 	classDef.def(
 	  "SetIndices", +[](lua_State *l, ::ModelSubMesh &mesh, const std::vector<uint32_t> &indices) {
 		  mesh.SetIndices(indices);

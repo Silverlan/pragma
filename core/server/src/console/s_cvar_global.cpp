@@ -25,25 +25,6 @@
 extern DLLNETWORK Engine *engine;
 extern DLLSERVER ServerState *server;
 extern DLLSERVER SGame *s_game;
-DLLSERVER void CMD_lua_run(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
-{
-	if(argv.empty()) {
-		Con::cwar << "No argument given to execute!" << Con::endl;
-		return;
-	}
-	if(!state->IsGameActive() || state->GetGameState() == nullptr) {
-		Con::cwar << "No game is active! Lua code cannot be executed without an active game!" << Con::endl;
-		return;
-	}
-
-	std::string lua = argv[0];
-	for(auto i = 1; i < argv.size(); i++) {
-		lua += " ";
-		lua += argv[i];
-	}
-	state->GetGameState()->RunLua(lua);
-}
-
 void CMD_drop(NetworkState *, pragma::BasePlayerComponent *pl, std::vector<std::string> &)
 {
 	if(pl == nullptr)

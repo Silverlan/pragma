@@ -47,7 +47,7 @@ bool pragma::asset::BlenderFormatHandler::Import(const std::string &outputPath, 
 	filemanager::update_file_index_cache(absGlbPath.GetString(), true);
 
 	// Asset has been converted to glb, we can now redirect it to the gltf format handler
-	auto res = static_cast<util::FileAssetManager &>(GetAssetManager()).Import("models/" +outputPath + ".glb");
+	auto res = static_cast<util::FileAssetManager &>(GetAssetManager()).Import("models/" + outputPath + ".glb");
 	filemanager::remove_file(glbPath); // Don't need the glb anymore
 	outFilePath = outputPath;
 	return res;

@@ -6,13 +6,14 @@
 #include "pragma/lua/lua_script_watcher.h"
 #include "pragma/game/gamemode/gamemodemanager.h"
 #include "pragma/lua/util.hpp"
+#include <scripting/lua/lua.hpp>
 #include <sharedutils/scope_guard.h>
 #include <sharedutils/util_file.h>
 #include <luainterface.hpp>
 
-LuaDirectoryWatcherManager::LuaDirectoryWatcherManager(Game *game) : m_game(game) {
-	m_watcherManager = filemanager::create_directory_watcher_manager();
-}
+//import pragma.scripting.lua;
+
+LuaDirectoryWatcherManager::LuaDirectoryWatcherManager(Game *game) : m_game(game) { m_watcherManager = filemanager::create_directory_watcher_manager(); }
 
 void LuaDirectoryWatcherManager::Poll()
 {
@@ -71,11 +72,12 @@ void LuaDirectoryWatcherManager::OnLuaFileChanged(const std::string &fName)
 	}
 
 	// Probably a regular Lua file; Check if it was included previously, and if so, reload it
-	auto &includeCache = m_game->GetLuaInterface().GetIncludeCache();
-	auto it = std::find_if(includeCache.begin(), includeCache.end(), [&fName](const std::string &cachedPath) { return FileManager::ComparePath(fName, cachedPath); });
-	if(it != includeCache.end()) {
-		auto lpath = *it;
-		m_game->ExecuteLuaFile(lpath);
+	auto &luaInterface = m_game->GetLuaInterface();
+	auto &includeCache = luaInterface.GetIncludeCache();
+	if(includeCache.Contains(fName)) {
+		auto res = pragma::scripting::lua::include(luaInterface.GetState(), fName, pragma::scripting::lua::IncludeFlags::IgnoreGlobalCache);
+		if(res.statusCode != Lua::StatusCode::Ok)
+			pragma::scripting::lua::submit_error(luaInterface.GetState(), res.errorMessage);
 		return;
 	}
 }
@@ -86,11 +88,13 @@ bool LuaDirectoryWatcherManager::MountDirectory(const std::string &path, bool st
 		auto watchFlags = DirectoryWatcherCallback::WatchFlags::WatchSubDirectories;
 		auto basePath = util::DirPath(path);
 		m_watchers.push_back(std::make_shared<DirectoryWatcherCallback>(
-		  path, [this, basePath = std::move(basePath)](const std::string &fName) {
-			auto relName = util::FilePath(fName);
-			relName.MakeRelative(basePath);
-			OnLuaFileChanged(relName.GetString());
-		}, watchFlags, m_watcherManager.get()));
+		  path,
+		  [this, basePath = std::move(basePath)](const std::string &fName) {
+			  auto relName = util::FilePath(fName);
+			  relName.MakeRelative(basePath);
+			  OnLuaFileChanged(relName.GetString());
+		  },
+		  watchFlags, m_watcherManager.get()));
 		return true;
 	}
 	catch(const DirectoryWatcher::ConstructException &) {

@@ -436,9 +436,7 @@ bool CReflectionProbeComponent::SaveIBLReflectionsToFile()
 	auto &imgBrdf = m_iblData->brdfMap->GetImage();
 	auto &imgIrradiance = m_iblData->irradianceMap->GetImage();
 
-	auto fErrorHandler = [this](const std::string &errMsg) {
-		LogWarn("Unable to create IBL reflection files: {}", errMsg);
-	};
+	auto fErrorHandler = [this](const std::string &errMsg) { LogWarn("Unable to create IBL reflection files: {}", errMsg); };
 	const std::string pathBrdf = "materials/env/brdf.ktx";
 	if(FileManager::Exists(pathBrdf) == false) {
 		uimg::TextureInfo imgWriteInfo {};
@@ -554,7 +552,7 @@ bool CReflectionProbeComponent::CaptureIBLReflectionsFromScene(const std::vector
 {
 	umath::set_flag(m_stateFlags, StateFlags::BakingFailed, true); // Mark as failed until complete
 	auto pos = GetEntity().GetPosition();
-	LogInfo("Capturing reflection probe IBL reflections for probe at position ({},{},{})...",pos.x,pos.y,pos.z);
+	LogInfo("Capturing reflection probe IBL reflections for probe at position ({},{},{})...", pos.x, pos.y, pos.z);
 
 	auto *scene = c_game->GetScene();
 	if(scene == nullptr)
@@ -792,8 +790,8 @@ Material *CReflectionProbeComponent::LoadMaterial(bool &outIsDefault)
 		matPath = "maps/default_ibl." + std::string {pragma::asset::FORMAT_MATERIAL_ASCII};
 	}
 	auto *mat = client->LoadMaterial(matPath.GetString(), nullptr, false, true);
-	if (mat && !mat->IsError())
-			return mat;
+	if(mat && !mat->IsError())
+		return mat;
 	LogWarn("Failed to load material '{}'!", matPath.GetString());
 	return nullptr;
 }
@@ -815,30 +813,30 @@ bool CReflectionProbeComponent::LoadIBLReflectionsFromFile()
 	auto *pPrefilter = mat->GetTextureInfo("prefilter");
 	auto *pIrradiance = mat->GetTextureInfo("irradiance");
 	auto *pBrdf = mat->GetTextureInfo("brdf");
-	if (!pPrefilter) {
+	if(!pPrefilter) {
 		LogWarn("Material has no prefilter texture!");
 		return false;
 	}
-	if (!pIrradiance) {
+	if(!pIrradiance) {
 		LogWarn("Material has no irradiance texture!");
 		return false;
 	}
-	if (!pBrdf) {
+	if(!pBrdf) {
 		LogWarn("Material has no brdf texture!");
 		return false;
 	}
 	auto texPrefilter = std::static_pointer_cast<Texture>(pPrefilter->texture);
 	auto texIrradiance = std::static_pointer_cast<Texture>(pIrradiance->texture);
 	auto texBrdf = std::static_pointer_cast<Texture>(pBrdf->texture);
-	if (!texPrefilter || !texPrefilter->HasValidVkTexture()) {
+	if(!texPrefilter || !texPrefilter->HasValidVkTexture()) {
 		LogWarn("Prefilter texture is invalid!");
 		return false;
 	}
-	if (!texIrradiance || !texIrradiance->HasValidVkTexture()) {
+	if(!texIrradiance || !texIrradiance->HasValidVkTexture()) {
 		LogWarn("Irradiance texture is invalid!");
 		return false;
 	}
-	if (!texBrdf || !texBrdf->HasValidVkTexture()) {
+	if(!texBrdf || !texBrdf->HasValidVkTexture()) {
 		LogWarn("Brdf texture is invalid!");
 		return false;
 	}

@@ -15,6 +15,7 @@ std::optional<Color> g_titleBarColor {};
 std::optional<Color> g_borderColor {};
 bool g_cpuRendering = false;
 bool g_windowless = false;
+bool g_cli = false;
 static void LPARAM_windowed(const std::vector<std::string> &argv) { g_launchParamWindowedMode = true; }
 
 static void LPARAM_refresh(const std::vector<std::string> &argv)
@@ -115,6 +116,7 @@ static void LPARAM_cpu_rendering(const std::vector<std::string> &argv) { g_cpuRe
 
 static void LPARAM_cli(const std::vector<std::string> &argv)
 {
+	g_cli = true;
 	LPARAM_cpu_rendering(argv);
 	LPARAM_windowless(argv);
 	if(argv.empty() || util::to_boolean(argv.front()))

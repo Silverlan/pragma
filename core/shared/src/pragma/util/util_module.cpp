@@ -68,13 +68,13 @@ std::vector<std::string> util::get_default_additional_library_search_directories
 	auto libPath = libModulePath.substr(0, brLast);
 	std::vector<std::string> paths;
 	auto &rootPaths = filemanager::get_absolute_root_paths();
-	paths.reserve(rootPaths.size() *2);
+	paths.reserve(rootPaths.size() * 2);
 #ifdef _WIN32
 	std::string binDir = "bin";
 #else
 	std::string binDir = "lib";
 #endif
-	for (auto &rootPath : rootPaths) {
+	for(auto &rootPath : rootPaths) {
 		auto binPath = util::DirPath(rootPath, binDir);
 		paths.push_back(binPath.GetString());
 

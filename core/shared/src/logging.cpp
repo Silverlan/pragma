@@ -36,6 +36,8 @@ int32_t pragma::logging::severity_to_spdlog_level(util::LogSeverity severity)
 		return spdlog::level::debug;
 	case util::LogSeverity::Trace:
 		return spdlog::level::trace;
+	case util::LogSeverity::Disabled:
+		return spdlog::level::off;
 	}
 	static_assert(umath::to_integral(util::LogSeverity::Count) == 7, "Expand this list when more severity types are added!");
 	return spdlog::level::info;
@@ -374,7 +376,7 @@ static std::unordered_map<std::string, std::shared_ptr<spdlog::logger>> &get_pre
 	return g_preRegisteredLoggers;
 }
 
-spdlog::logger &pragma::register_logger(const std::string &name)
+spdlog::logger &pragma::register_logger(const std::string &name, const std::optional<::util::LogSeverity> &defaultLogLevel)
 {
 	if(g_loggerInitialized)
 		return get_logger(name);
@@ -382,6 +384,8 @@ spdlog::logger &pragma::register_logger(const std::string &name)
 	if(it != get_pre_registered_loggers().end())
 		return *it->second;
 	auto logger = std::make_shared<spdlog::logger>(name);
+	if(defaultLogLevel)
+		logger->set_level(static_cast<spdlog::level::level_enum>(pragma::logging::severity_to_spdlog_level(*defaultLogLevel)));
 	get_pre_registered_loggers()[name] = logger;
 	return *logger;
 }

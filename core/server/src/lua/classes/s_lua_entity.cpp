@@ -17,7 +17,8 @@ extern DLLSERVER SGame *s_game;
 extern DLLSERVER ServerState *server;
 
 SLuaEntity::SLuaEntity() : SBaseEntity {} {}
-void SLuaEntity::Initialize() {
+void SLuaEntity::Initialize()
+{
 	// We're skipping SBaseEntity on purpose, because it would overwrite our Lua class name
 	BaseEntity::Initialize();
 }

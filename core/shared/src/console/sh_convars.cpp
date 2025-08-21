@@ -275,8 +275,7 @@ REGISTER_ENGINE_CONCOMMAND(
   },
   ConVarFlags::None, "");
 
-REGISTER_ENGINE_CONCOMMAND(
-  clear, [](NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &) { engine->ClearConsole(); }, ConVarFlags::None, "Clears everything in the console.");
+REGISTER_ENGINE_CONCOMMAND(clear, [](NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &) { engine->ClearConsole(); }, ConVarFlags::None, "Clears everything in the console.");
 
 REGISTER_ENGINE_CONCOMMAND(
   credits,
@@ -287,8 +286,7 @@ REGISTER_ENGINE_CONCOMMAND(
   },
   ConVarFlags::None, "Prints a list of developers.");
 
-REGISTER_ENGINE_CONCOMMAND(
-  version, [](NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &) { Con::cout << get_pretty_engine_version() << Con::endl; }, ConVarFlags::None, "Prints the current engine version to the console.");
+REGISTER_ENGINE_CONCOMMAND(version, [](NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &) { Con::cout << get_pretty_engine_version() << Con::endl; }, ConVarFlags::None, "Prints the current engine version to the console.");
 
 static void debug_profiling_print(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
@@ -389,7 +387,7 @@ static void debug_dump_scene_graph(NetworkState *nw)
 			Con::cout << "\\-- ";
 		else
 			Con::cout << "+-- ";
-		Con::cout<<ent;
+		Con::cout << ent;
 		Con::cout << Con::endl;
 
 		auto parentC = ent.GetComponent<pragma::ParentComponent>();

@@ -336,8 +336,7 @@ void GUIDebugCursorManager::OnThink()
 	if(window)
 		SetWindow(*window);
 	auto *pText = static_cast<WIText *>(m_hText.get());
-	auto *pEl = gui.GetCursorGUIElement(
-	  nullptr, [this](WIBase *pEl) -> bool { return ShouldPass(*pEl); }, window);
+	auto *pEl = gui.GetCursorGUIElement(nullptr, [this](WIBase *pEl) -> bool { return ShouldPass(*pEl); }, window);
 	if(!m_targetElementOverride.IsValid())
 		SetTargetGUIElement(pEl, true);
 
@@ -362,11 +361,9 @@ void Console::commands::debug_gui_cursor(NetworkState *state, pragma::BasePlayer
 	}
 	if(!argv.empty()) {
 		auto &elName = argv.front();
-		auto *el = WGUI::GetInstance().FindByFilter([&elName](WIBase &el) -> bool {
-			return ustring::compare(el.GetName(), elName, false);
-		});
+		auto *el = WGUI::GetInstance().FindByFilter([&elName](WIBase &el) -> bool { return ustring::compare(el.GetName(), elName, false); });
 		if(!el) {
-			Con::cwar<<"Unable to find element by name '"<<elName<<"'!"<<Con::endl;
+			Con::cwar << "Unable to find element by name '" << elName << "'!" << Con::endl;
 			return;
 		}
 		s_dbgManager->SetTargetGUIElementOverride(el);

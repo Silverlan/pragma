@@ -26,8 +26,7 @@ void CRendererPpBaseComponent::Initialize()
 	auto rendererC = GetEntity().GetComponent<CRendererComponent>();
 	if(rendererC.expired())
 		return;
-	m_cbEffect = rendererC->AddPostProcessingEffect(
-	  GetIdentifier(), [this](const util::DrawSceneInfo &drawSceneInfo) { RenderEffect(drawSceneInfo); }, GetPostProcessingWeight(), [this]() { return GetFlags(); });
+	m_cbEffect = rendererC->AddPostProcessingEffect(GetIdentifier(), [this](const util::DrawSceneInfo &drawSceneInfo) { RenderEffect(drawSceneInfo); }, GetPostProcessingWeight(), [this]() { return GetFlags(); });
 }
 void CRendererPpBaseComponent::OnRemove()
 {

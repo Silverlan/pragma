@@ -5,10 +5,13 @@
 #include "pragma/engine.h"
 #include "pragma/lua/luaapi.h"
 #include "pragma/lua/lua_error_handling.hpp"
+#include "pragma/logging.hpp"
 #include "pragma/console/conout.h"
 #include <luainterface.hpp>
 #include <luabind/class_info.hpp>
 #include <luabind/function_introspection.hpp>
+
+import pragma.debug.crashdump;
 
 static auto s_bExtendedModules = false;
 void Lua::set_extended_lua_modules_enabled(bool b) { s_bExtendedModules = b; }
@@ -20,26 +23,26 @@ void Lua::initialize_lua_state(Lua::Interface &lua)
 {
 	// See http://www.lua.org/source/5.3/linit.c.html
 	auto *l = lua.GetState();
-	std::vector<luaL_Reg> loadedLibs
-	  = { {"_G", luaopen_base},
+	std::vector<luaL_Reg> loadedLibs = {
+	  {"_G", luaopen_base},
 
 #ifndef USE_LUAJIT
-		    {LUA_UTF8LIBNAME, luaopen_utf8},
-		    {LUA_COLIBNAME, luaopen_coroutine},
+	  {LUA_UTF8LIBNAME, luaopen_utf8},
+	  {LUA_COLIBNAME, luaopen_coroutine},
 #else
-		    // coroutine already included in base!
-		    {LUA_BITLIBNAME, luaopen_bit},
-		    {LUA_JITLIBNAME, luaopen_jit},
+	  // coroutine already included in base!
+	  {LUA_BITLIBNAME, luaopen_bit},
+	  {LUA_JITLIBNAME, luaopen_jit},
 #endif
-		    {LUA_TABLIBNAME, luaopen_table},
-		    {LUA_OSLIBNAME, luaopen_os},
-		    {LUA_STRLIBNAME, luaopen_string},
-		    {LUA_MATHLIBNAME, luaopen_math},
-		    {LUA_DBLIBNAME, luaopen_debug},
+	  {LUA_TABLIBNAME, luaopen_table},
+	  {LUA_OSLIBNAME, luaopen_os},
+	  {LUA_STRLIBNAME, luaopen_string},
+	  {LUA_MATHLIBNAME, luaopen_math},
+	  {LUA_DBLIBNAME, luaopen_debug},
 #if defined(LUA_COMPAT_BITLIB)
-		    {LUA_BITLIBNAME, luaopen_bit32},
+	  {LUA_BITLIBNAME, luaopen_bit32},
 #endif
-	    };
+	};
 	loadedLibs.push_back({LUA_LOADLIBNAME, luaopen_package});
 	if(s_bExtendedModules == true) {
 		loadedLibs.push_back({LUA_IOLIBNAME, luaopen_io});
@@ -61,8 +64,8 @@ void Lua::initialize_lua_state(Lua::Interface &lua)
 	}
 	Lua::initialize_error_handler();
 	lua_atpanic(l, [](lua_State *l) -> int32_t {
-		Lua::HandleLuaError(l);
-		Con::crit << "Lua Panic!" << Con::endl;
+		spdlog::get("lua")->critical("Lua Panic!");
+		pragma::debug::generate_crash_dump();
 		return 0;
 	});
 }
@@ -86,7 +89,7 @@ static void dump_stack(bool cl)
 	Lua::StackDump(g->GetLuaState());
 }
 namespace pragma::lua::debug {
-	// These are mainly used in the VS immediate window for debugging purposes
+	// These are mainly used in the immediate window for debugging purposes
 	DLLNETWORK void dump_traceback_cl() { ::dump_traceback(true); }
 	DLLNETWORK void dump_traceback_sv() { ::dump_traceback(false); }
 	DLLNETWORK void dump_stack_cl() { ::dump_stack(true); }

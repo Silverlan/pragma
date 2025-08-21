@@ -21,7 +21,7 @@ namespace pragma {
 		DLLNETWORK void set_ansi_color_codes_enabled(bool enabled);
 	};
 	DLLNETWORK spdlog::logger &get_logger(const std::string &name);
-	DLLNETWORK spdlog::logger &register_logger(const std::string &name);
+	DLLNETWORK spdlog::logger &register_logger(const std::string &name, const std::optional<::util::LogSeverity> &defaultLogLevel = {});
 	DLLNETWORK void log(const std::string &msg, ::util::LogSeverity severity = ::util::LogSeverity::Info);
 	DLLNETWORK bool is_log_level_enabled(::util::LogSeverity severity);
 	DLLNETWORK void flush_loggers();

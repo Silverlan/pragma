@@ -48,6 +48,16 @@ jobs:
         config:
           - os: ${{ inputs.os == 'windows' && 'windows-latest' || 'ubuntu-24.04' }}
     steps:
+      - name: Build Tag Name
+        id: build_tag_name
+        shell: bash
+        run: |
+          if [[ -n "${{ inputs.tag }}" ]]; then
+            echo "tag_name=${{ inputs.tag }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag_name=$(TZ='Europe/Berlin' date +%F)" >> $GITHUB_OUTPUT
+          fi
+
       - name: Get Module Info
         id: module-info
         uses: Silverlan/pr_module_template/github_actions/get_module_info@main
@@ -92,16 +102,6 @@ jobs:
               fileName="${{ steps.module-info.outputs.module_name }}.dll"
             fi
             cp "${{ steps.build-module.outputs.install-dir }}/${{ steps.module-info.outputs.install_directory }}$fileName" "release/${{ steps.module-info.outputs.install_directory }}"
-          fi
-
-      - name: Build Tag Name
-        id: build_tag_name
-        shell: bash
-        run: |
-          if [[ -n "${{ inputs.tag }}" ]]; then
-            echo "tag_name=${{ inputs.tag }}" >> "$GITHUB_OUTPUT"
-          else
-            echo "tag_name=$(TZ='Europe/Berlin' date +%F)" >> $GITHUB_OUTPUT
           fi
 
       - name: Release Binaries

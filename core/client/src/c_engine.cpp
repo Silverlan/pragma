@@ -682,9 +682,11 @@ extern std::optional<uint32_t> g_launchParamHeight;
 extern std::optional<Color> g_titleBarColor;
 extern std::optional<Color> g_borderColor;
 extern bool g_windowless;
+extern bool g_cpuRendering;
 void register_game_shaders();
 
 bool CEngine::IsWindowless() const { return g_windowless; }
+bool CEngine::IsCPURenderingOnly() const { return g_cpuRendering; }
 
 void CEngine::HandleOpenGLFallback()
 {
@@ -706,13 +708,15 @@ void CEngine::HandleOpenGLFallback()
 }
 
 std::optional<std::string> g_waylandLibdecorPlugin;
+extern bool g_cli;
 bool CEngine::Initialize(int argc, char *argv[])
 {
 	Engine::Initialize(argc, argv);
+	SetCLIOnly(g_cli);
 
 #ifdef __linux__
 	auto xdgSessionType = util::get_env_variable("XDG_SESSION_TYPE");
-	if (!xdgSessionType || *xdgSessionType != "x11") {
+	if(!xdgSessionType || *xdgSessionType != "x11") {
 		// TODO: This may intefere with util::debug::show_message_prompt, which uses
 		// zenity. Test this on wayland!
 		// If util::debug::show_message_prompt works on wayland after these env variables have been set, this comment
@@ -1702,6 +1706,15 @@ Lua::Interface *CEngine::GetLuaInterface(lua_State *l)
 	return Engine::GetLuaInterface(l);
 }
 
+bool CEngine::IsProgramInFocus() const
+{
+	for(auto &window : GetRenderContext().GetWindows()) {
+		if((*window)->IsInFocus())
+			return true;
+	}
+	return false;
+}
+
 NetworkState *CEngine::GetNetworkState(lua_State *l)
 {
 	auto *cl = static_cast<ClientState *>(GetClientState());
@@ -2239,3 +2252,27 @@ REGISTER_CONVAR_CALLBACK_CL(cl_gpu_timer_queries_enabled, [](NetworkState *, con
 		return;
 	c_engine->SetGPUProfilingEnabled(enabled);
 })
+
+static void dump_traceback_gui()
+{
+	auto *en = pragma::get_cengine();
+	auto *state = en ? static_cast<ClientState *>(en->GetClientState()) : nullptr;
+	auto *l = state ? state->GetGUILuaState() : nullptr;
+	if(!l)
+		return;
+	Lua::PrintTraceback(l);
+}
+static void dump_stack_gui()
+{
+	auto *en = pragma::get_cengine();
+	auto *state = en ? static_cast<ClientState *>(en->GetClientState()) : nullptr;
+	auto *l = state ? state->GetGUILuaState() : nullptr;
+	if(!l)
+		return;
+	Lua::StackDump(l);
+}
+namespace pragma::lua::debug {
+	// These are mainly used in the immediate window for debugging purposes
+	DLLCLIENT void dump_traceback_gui() { ::dump_traceback_gui(); }
+	DLLCLIENT void dump_stack_gui() { ::dump_stack_gui(); }
+};

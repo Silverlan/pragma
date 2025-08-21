@@ -15,9 +15,13 @@
 #include <pragma/console/conout.h>
 #include <pragma/console/cvar.h>
 #include <pragma/lua/lua_error_handling.hpp>
+#include <scripting/lua/lua.hpp>
 #include <luainterface.hpp>
+#include <luabind/exception_handler.hpp>
 #include <sharedutils/util_string.h>
 #include <sharedutils/util_file.h>
+
+//import pragma.scripting.lua;
 
 extern DLLNETWORK Engine *engine;
 
@@ -48,7 +52,7 @@ void Game::InitializeLua()
 	auto tm = std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now()).time_since_epoch();
 	std::stringstream lseed;
 	lseed << "math.randomseed(" << tm.count() << ");";
-	Lua::RunString(GetLuaState(), lseed.str(), "internal");
+	pragma::scripting::lua::run_string(GetLuaState(), lseed.str(), "initialize_random_seed");
 
 	// Add module paths
 	UpdatePackagePaths();
@@ -58,11 +62,7 @@ void Game::InitializeLua()
 		Lua::debug::enable_remote_debugging(GetLuaState());
 }
 
-const pragma::lua::ClassManager &Game::GetLuaClassManager() const
-{
-	return const_cast<Game *>(this)->GetLuaClassManager();
-	;
-}
+const pragma::lua::ClassManager &Game::GetLuaClassManager() const { return const_cast<Game *>(this)->GetLuaClassManager(); }
 pragma::lua::ClassManager &Game::GetLuaClassManager() { return *m_luaClassManager; }
 
 void Game::SetupLua() { GetNetworkState()->InitializeLuaModules(GetLuaState()); }
@@ -78,39 +78,24 @@ Lua::StatusCode Game::LoadLuaFile(std::string &fInOut, fsys::SearchFlags include
 bool Game::ExecuteLuaFile(std::string &fInOut, lua_State *optCustomLuaState)
 {
 	auto *l = optCustomLuaState ? optCustomLuaState : GetLuaState();
-	auto r = Lua::ExecuteFile(l, fInOut, Lua::HandleTracebackError);
-	Lua::HandleSyntaxError(l, r, fInOut);
+	auto r = pragma::scripting::lua::execute_file(l, fInOut);
 	return r == Lua::StatusCode::Ok;
 }
-/* Deprecated
-bool Game::IncludeLuaFile(std::string &fInOut)
-{
-	return (Lua::Execute(GetLuaState(),[this,&fInOut](int(*traceback)(lua_State*)) {
-		return Lua::IncludeFile(GetLuaState(),fInOut,traceback);
-	},GetNetworkState()->GetLuaErrorColorMode()) == Lua::StatusCode::Ok) ? true : false;
-}
-*/
+
 void Game::RunLuaFiles(const std::string &subPath)
 {
 	auto *l = GetLuaState();
-	Lua::ExecuteFiles(l, subPath, Lua::HandleTracebackError, [this, l](Lua::StatusCode code, const std::string &luaFile) { Lua::HandleSyntaxError(l, code, luaFile); });
+	pragma::scripting::lua::execute_files_in_directory(l, subPath);
 }
 
 bool Game::RunLua(const std::string &lua, const std::string &chunkName)
 {
 	auto *l = GetLuaState();
-	auto r = Lua::RunString(l, lua, chunkName, Lua::HandleTracebackError);
-	Lua::HandleSyntaxError(l, r);
+	auto r = pragma::scripting::lua::run_string(l, lua, chunkName);
 	return r == Lua::StatusCode::Ok;
 }
 
-Lua::StatusCode Game::ProtectedLuaCall(const std::function<Lua::StatusCode(lua_State *)> &pushFuncArgs, int32_t numResults)
-{
-	auto *l = GetLuaState();
-	auto r = Lua::ProtectedCall(GetLuaState(), pushFuncArgs, numResults, Lua::HandleTracebackError);
-	Lua::HandleSyntaxError(l, r);
-	return r;
-}
+Lua::StatusCode Game::ProtectedLuaCall(const std::function<Lua::StatusCode(lua_State *)> &pushFuncArgs, int32_t numResults) { return pragma::scripting::lua::protected_call(GetLuaState(), pushFuncArgs, numResults); }
 
 const std::array<std::string, 6> &Game::GetLuaEntityDirectories() const
 {

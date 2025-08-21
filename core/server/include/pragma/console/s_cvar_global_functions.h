@@ -10,8 +10,6 @@
 #include <string>
 
 class NetworkState;
-DLLSERVER void CMD_lua_run(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &);
-DLLSERVER void CMD_lua_exec(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &);
 DLLSERVER void CMD_entities_sv(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &);
 DLLSERVER void CMD_map(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &);
 DLLSERVER void CMD_list_maps(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &);

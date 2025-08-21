@@ -269,7 +269,7 @@ void Lua::asset::register_library(Lua::Interface &lua, bool extended)
 	    {"TYPE_TEXTURE", umath::to_integral(pragma::asset::Type::Texture)},
 	    {"TYPE_AUDIO", umath::to_integral(pragma::asset::Type::Sound)},
 	    {"TYPE_PARTICLE_SYSTEM", umath::to_integral(pragma::asset::Type::ParticleSystem)},
-		{"TYPE_SHADER_GRAPH", umath::to_integral(pragma::asset::Type::ShaderGraph)},
+	    {"TYPE_SHADER_GRAPH", umath::to_integral(pragma::asset::Type::ShaderGraph)},
 	    {"TYPE_COUNT", umath::to_integral(pragma::asset::Type::Count)},
 
 	    {"FORMAT_TYPE_NATIVE", umath::to_integral(pragma::asset::FormatType::Native)},

@@ -221,11 +221,13 @@ void WIMainMenuOptions::InitializeOptionsList(WIOptionsList *pList)
 	buttonReset->SetText(pragma::locale::get_text("reset_defaults"));
 	buttonReset->SizeToContents();
 	buttonReset->SetAutoCenterToParent(true);
-	buttonReset->AddCallback("OnMouseEvent", FunctionCallback<util::EventReply, pragma::platform::MouseButton, pragma::platform::KeyState, pragma::platform::Modifier>::CreateWithOptionalReturn([this](util::EventReply *reply, pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods) -> CallbackReturnType {
-		ResetDefaults(button, state, mods);
-		*reply = util::EventReply::Handled;
-		return CallbackReturnType::HasReturnValue;
-	}));
+	buttonReset->AddCallback("OnMouseEvent",
+	  FunctionCallback<util::EventReply, pragma::platform::MouseButton, pragma::platform::KeyState, pragma::platform::Modifier>::CreateWithOptionalReturn(
+	    [this](util::EventReply *reply, pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods) -> CallbackReturnType {
+		    ResetDefaults(button, state, mods);
+		    *reply = util::EventReply::Handled;
+		    return CallbackReturnType::HasReturnValue;
+	    }));
 	m_hButtonReset = buttonReset->GetHandle();
 	pRow->InsertElement(0, buttonReset);
 
@@ -233,11 +235,13 @@ void WIMainMenuOptions::InitializeOptionsList(WIOptionsList *pList)
 	buttonApply->SetText(pragma::locale::get_text("apply"));
 	buttonApply->SizeToContents();
 	buttonApply->SetAutoCenterToParent(true);
-	buttonApply->AddCallback("OnMouseEvent", FunctionCallback<util::EventReply, pragma::platform::MouseButton, pragma::platform::KeyState, pragma::platform::Modifier>::CreateWithOptionalReturn([this](util::EventReply *reply, pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods) -> CallbackReturnType {
-		Apply(button, state, mods);
-		*reply = util::EventReply::Handled;
-		return CallbackReturnType::HasReturnValue;
-	}));
+	buttonApply->AddCallback("OnMouseEvent",
+	  FunctionCallback<util::EventReply, pragma::platform::MouseButton, pragma::platform::KeyState, pragma::platform::Modifier>::CreateWithOptionalReturn(
+	    [this](util::EventReply *reply, pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods) -> CallbackReturnType {
+		    Apply(button, state, mods);
+		    *reply = util::EventReply::Handled;
+		    return CallbackReturnType::HasReturnValue;
+	    }));
 	m_hButtonApply = buttonApply->GetHandle();
 	pRow->InsertElement(1, buttonApply);
 	WIMainMenuBase::InitializeOptionsList(pList);
@@ -768,8 +772,7 @@ void WIMainMenuOptions::InitializeVideoSettings()
 	m_hMotionBlur = pList->AddSlider(pragma::locale::get_text("motion_blur"), sliderInitializer, "cl_render_motion_blur")->GetHandle();
 	//
 	// Horizontal FOV
-	pList->AddSlider(
-	  pragma::locale::get_text("horizontal_fov"), [](WISlider *pSlider) { pSlider->SetRange(60, 120); }, "cl_render_fov");
+	pList->AddSlider(pragma::locale::get_text("horizontal_fov"), [](WISlider *pSlider) { pSlider->SetRange(60, 120); }, "cl_render_fov");
 	//
 	// Brightness
 	pList->AddSlider(pragma::locale::get_text("brightness"), sliderInitializer, "cl_render_brightness");
@@ -914,22 +917,13 @@ void WIMainMenuOptions::InitializeVideoSettings()
 	m_hDynamicShadows = pList->AddToggleChoice(pragma::locale::get_text("shadow_enable_dynamic"), "cl_render_shadow_dynamic")->GetHandle();
 	//
 	// Shadow Update Frequency
-	m_hShadowUpdateFrequency = pList
-	                             ->AddSlider(
-	                               pragma::locale::get_text("shadow_update_frequency"), [](WISlider *pSlider) { pSlider->SetRange(0, 10); }, "cl_render_shadow_update_frequency")
-	                             ->GetHandle();
+	m_hShadowUpdateFrequency = pList->AddSlider(pragma::locale::get_text("shadow_update_frequency"), [](WISlider *pSlider) { pSlider->SetRange(0, 10); }, "cl_render_shadow_update_frequency")->GetHandle();
 	//
 	// PSSM Shadow Update Frequency Offset
-	m_hPssmShadowUpdateFrequencyOffset = pList
-	                                       ->AddSlider(
-	                                         pragma::locale::get_text("shadow_pssm_update_frequency_offset"), [](WISlider *pSlider) { pSlider->SetRange(0, 10); }, "cl_render_shadow_pssm_update_frequency_offset")
-	                                       ->GetHandle();
+	m_hPssmShadowUpdateFrequencyOffset = pList->AddSlider(pragma::locale::get_text("shadow_pssm_update_frequency_offset"), [](WISlider *pSlider) { pSlider->SetRange(0, 10); }, "cl_render_shadow_pssm_update_frequency_offset")->GetHandle();
 	//
 	// PSSM Split Count
-	m_hPssmSplitCount = pList
-	                      ->AddSlider(
-	                        pragma::locale::get_text("shadow_pssm_split_count"), [](WISlider *pSlider) { pSlider->SetRange(1.f, static_cast<float>(pragma::CShadowCSMComponent::MAX_CASCADE_COUNT)); }, "cl_render_shadow_pssm_split_count")
-	                      ->GetHandle();
+	m_hPssmSplitCount = pList->AddSlider(pragma::locale::get_text("shadow_pssm_split_count"), [](WISlider *pSlider) { pSlider->SetRange(1.f, static_cast<float>(pragma::CShadowCSMComponent::MAX_CASCADE_COUNT)); }, "cl_render_shadow_pssm_split_count")->GetHandle();
 	//
 	// TODO Restore defaults
 
@@ -1097,23 +1091,19 @@ void WIMainMenuOptions::InitializeAudioSettings()
 	//
 
 	// Number of rays
-	pList->AddSlider(
-	  pragma::locale::get_text("steam_audio_number_of_rays"), [](WISlider *pSlider) { pSlider->SetRange(1'024, 131'072, 1'024); }, "cl_steam_audio_number_of_rays");
+	pList->AddSlider(pragma::locale::get_text("steam_audio_number_of_rays"), [](WISlider *pSlider) { pSlider->SetRange(1'024, 131'072, 1'024); }, "cl_steam_audio_number_of_rays");
 	//
 
 	// Number of bounces
-	pList->AddSlider(
-	  pragma::locale::get_text("steam_audio_number_of_bounces"), [](WISlider *pSlider) { pSlider->SetRange(1, 32, 1); }, "cl_steam_audio_number_of_bounces");
+	pList->AddSlider(pragma::locale::get_text("steam_audio_number_of_bounces"), [](WISlider *pSlider) { pSlider->SetRange(1, 32, 1); }, "cl_steam_audio_number_of_bounces");
 	//
 
 	// Ir duration
-	pList->AddSlider(
-	  pragma::locale::get_text("steam_audio_ir_duration"), [](WISlider *pSlider) { pSlider->SetRange(0.5f, 4.0f, 0.1f); }, "cl_steam_audio_ir_duration");
+	pList->AddSlider(pragma::locale::get_text("steam_audio_ir_duration"), [](WISlider *pSlider) { pSlider->SetRange(0.5f, 4.0f, 0.1f); }, "cl_steam_audio_ir_duration");
 	//
 
 	// Ambisonics order
-	pList->AddSlider(
-	  pragma::locale::get_text("steam_audio_ambisonics_order"), [](WISlider *pSlider) { pSlider->SetRange(0, 3, 1); }, "cl_steam_audio_ambisonics_order");
+	pList->AddSlider(pragma::locale::get_text("steam_audio_ambisonics_order"), [](WISlider *pSlider) { pSlider->SetRange(0, 3, 1); }, "cl_steam_audio_ambisonics_order");
 	//
 
 	// Sound propagation delay
@@ -1131,8 +1121,7 @@ void WIMainMenuOptions::InitializeControlSettings()
 	ustring::to_upper(title);
 	pList->SetTitle(title);
 	// Mouse Sensitivity
-	pList->AddSlider(
-	  pragma::locale::get_text("mouse_sensitivity"), [](WISlider *pSlider) { pSlider->SetRange(0.f, 4.f, 0.f); }, "cl_mouse_sensitivity");
+	pList->AddSlider(pragma::locale::get_text("mouse_sensitivity"), [](WISlider *pSlider) { pSlider->SetRange(0.f, 4.f, 0.f); }, "cl_mouse_sensitivity");
 	//
 
 	// Invert Y-Axis

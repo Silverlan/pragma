@@ -86,5 +86,5 @@ void pragma::CRasterizationRendererComponent::RenderSSAO(const util::DrawSceneIn
 		drawCmd->RecordImageBarrier(ssaoInfo.renderTarget->GetTexture().GetImage(), prosper::ImageLayout::ShaderReadOnlyOptimal, prosper::ImageLayout::ColorAttachmentOptimal);
 	}
 	c_game->StopGPUProfilingStage(); // SSAO
-	c_game->StopProfilingStage(); // SSAO
+	c_game->StopProfilingStage();    // SSAO
 }

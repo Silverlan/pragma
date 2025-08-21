@@ -11,8 +11,6 @@
 #include "pragma/audio/sound_ogg.h"
 #include "pragma/audio/c_sound_load.h"
 
-
-
 template<class T, class S>
 static unsigned int stereo_to_mono(char *src, char **ptgt, unsigned int datalen, unsigned int fragmentSize = 2)
 {

@@ -186,7 +186,7 @@ void CAnimatedBvhComponent::RebuildAnimatedBvh(bool force, const std::vector<boo
 {
 	if(IsBusy()) // TODO: Cancel current rebuild if new rebuild is a *complete* rebuild and old rebuild isn't
 		return;
-		/*if(!force && m_updateLazily)
+	/*if(!force && m_updateLazily)
 	{
 		m_rebuildScheduled = true;
 		if(m_cbRebuildScheduled.IsValid())

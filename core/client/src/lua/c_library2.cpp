@@ -166,6 +166,20 @@ static void register_gui(Lua::Interface &lua)
 
 	  luabind::def("find_focused_window", static_cast<prosper::Window *(*)()>([]() -> prosper::Window * { return WGUI::GetInstance().FindFocusedWindow(); }), luabind::pointer_policy<0> {}),
 	  luabind::def("get_primary_window", static_cast<prosper::Window *(*)()>([]() -> prosper::Window * { return &c_engine->GetRenderContext().GetWindow(); }), luabind::pointer_policy<0> {}),
+		luabind::def("get_windows", +[]() -> std::vector<prosper::Window*> {
+			auto &windows = c_engine->GetRenderContext().GetWindows();
+			std::vector<prosper::Window*> pwindows;
+			pwindows.reserve(windows.size());
+			for (auto &window : windows)
+				pwindows.push_back(window.get());
+			return pwindows;
+		}),
+		luabind::def("find_window_root_element", +[](const prosper::Window &window) -> WIHandle {
+			auto *el = WGUI::GetInstance().FindWindowRootElement(window);
+			if (!el)
+				return {};
+			return el->GetHandle();
+		}),
 	  luabind::def(
 	    "get_primary_monitor", +[]() -> pragma::platform::Monitor { return pragma::platform::get_primary_monitor(); }),
 	  luabind::def("find_window_under_cursor", static_cast<prosper::Window *(*)()>([]() -> prosper::Window * { return WGUI::GetInstance().FindWindowUnderCursor(); }), luabind::pointer_policy<0> {}),

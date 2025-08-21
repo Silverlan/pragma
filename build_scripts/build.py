@@ -831,23 +831,22 @@ if not deps_only:
 		"-DCMAKE_INSTALL_PREFIX:PATH=" +install_dir +""
 	]
 
+	vtune_enabled = False
 	if len(vtune_include_path) > 0 or len(vtune_library_path) > 0:
 		if len(vtune_include_path) > 0 and len(vtune_library_path) > 0:
 			print_msg("VTune profiler support is enabled!")
-			cmake_args += ["-DCONFIG_BUILD_WITH_VTUNE_SUPPORT=1"]
+			vtune_enabled = True
 			cmake_args += ["-DDEPENDENCY_VTUNE_PROFILER_INCLUDE=" +vtune_include_path]
 			cmake_args += ["-DDEPENDENCY_VTUNE_PROFILER_LIBRARY=" +vtune_library_path]
 		else:
 			raise argparse.ArgumentError(None,"Both the --vtune-include-path and --vtune-library-path options have to be specified to enable VTune support!")
 
-	if with_pfm:
-		cmake_args += ["-DWITH_PFM=1"]
-	if with_vr:
-		cmake_args += ["-DWITH_VR=1"]
-	if with_common_entities:
-		cmake_args += ["-DWITH_COMMON_ENTITIES=1"]
-	if with_common_modules:
-		cmake_args += ["-DWITH_COMMON_MODULES=1"]
+	cmake_args += [f"-DCONFIG_BUILD_WITH_VTUNE_SUPPORT={1 if vtune_enabled else 0}"]
+
+	cmake_args += [f"-DWITH_PFM={1 if with_pfm else 0}"]
+	cmake_args += [f"-DWITH_VR={1 if with_vr else 0}"]
+	cmake_args += [f"-DWITH_COMMON_ENTITIES={1 if with_common_entities else 0}"]
+	cmake_args += [f"-DWITH_COMMON_MODULES={1 if with_common_modules else 0}"]
 
 	cmake_args += additional_cmake_args
 	cmake_args.append("-DCMAKE_POLICY_VERSION_MINIMUM=4.0")

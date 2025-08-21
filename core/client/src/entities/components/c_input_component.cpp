@@ -26,12 +26,12 @@ void CInputComponent::UpdateMouseMovementDeltaValues()
 	auto *window = WGUI::GetInstance().FindFocusedWindow();
 	if(window && window->IsValid()) {
 		auto *focusedElement = WGUI::GetInstance().GetFocusedElement(window);
-		if (!focusedElement) {
+		if(!focusedElement) {
 			auto size = (*window)->GetSize();
 			auto w = size.x;
 			auto h = size.y;
 
-			if (m_lastFocusedElement || m_initialFocus) {
+			if(m_lastFocusedElement || m_initialFocus) {
 				// We went from focused UI element to unfocused (or this is the first time, e.g.
 				// when the game was just launched)
 				// -> Recenter the mouse cursor

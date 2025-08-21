@@ -18,10 +18,7 @@
 		else                                                                                                                                                                                                                                                                                     \
 			g_NetMessages##suffix->RegisterNetMessage(name, handler);                                                                                                                                                                                                                            \
 	}                                                                                                                                                                                                                                                                                            \
-	DLLNETWORK glname##MessageMap *Get##glname##MessageMap()                                                                                                                                                                                                                                     \
-	{                                                                                                                                                                                                                                                                                            \
-		return g_NetMessages##suffix;                                                                                                                                                                                                                                                            \
-	}
+	DLLNETWORK glname##MessageMap *Get##glname##MessageMap() { return g_NetMessages##suffix; }
 
 net_newglobal(Sv, Server, pragma::networking::IServerClient &COMMA NetPacket);
 net_newglobal(Cl, Client, NetPacket);

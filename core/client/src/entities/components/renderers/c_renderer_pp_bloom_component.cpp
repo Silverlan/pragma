@@ -58,10 +58,7 @@ void CRendererPpBloomComponent::RegisterMembers(pragma::EntityComponentManager &
 	}
 }
 
-CRendererPpBloomComponent::CRendererPpBloomComponent(BaseEntity &ent) : CRendererPpBaseComponent(ent)
-{
-	SetPipelineDirty();
-}
+CRendererPpBloomComponent::CRendererPpBloomComponent(BaseEntity &ent) : CRendererPpBaseComponent(ent) { SetPipelineDirty(); }
 void CRendererPpBloomComponent::SetBloomThreshold(float threshold)
 {
 	m_bloomThreshold = threshold;
@@ -119,10 +116,7 @@ double CRendererPpBloomComponent::GetBlurSigma() const { return m_controlledBlur
 void CRendererPpBloomComponent::SetBlurAmount(int32_t blurAmount) { m_controlledBlurSettings.SetBlurAmount(blurAmount); }
 int32_t CRendererPpBloomComponent::GetBlurAmount() const { return m_controlledBlurSettings.GetBlurAmount(); }
 
-void CRendererPpBloomComponent::SetPipelineDirty()
-{
-	SetTickPolicy(pragma::TickPolicy::Always);
-}
+void CRendererPpBloomComponent::SetPipelineDirty() { SetTickPolicy(pragma::TickPolicy::Always); }
 
 void CRendererPpBloomComponent::OnTick(double dt)
 {

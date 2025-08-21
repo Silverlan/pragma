@@ -61,6 +61,8 @@ namespace util {
 
 	DLLNETWORK util::Path get_user_data_dir();
 	DLLNETWORK std::vector<util::Path> get_resource_dirs();
+
+	DLLNETWORK bool show_notification(const std::string &summary, const std::string &body);
 };
 
 #endif

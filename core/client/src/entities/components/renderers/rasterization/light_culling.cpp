@@ -122,7 +122,7 @@ void pragma::CRasterizationRendererComponent::RenderShadows(const util::DrawScen
 	  {prosper::PipelineStageFlags::EarlyFragmentTestsBit, prosper::ImageLayout::DepthStencilAttachmentOptimal, prosper::AccessFlags::DepthStencilAttachmentWriteBit});
 
 	c_game->StopGPUProfilingStage(); // CullLightSources
-	c_game->StopProfilingStage(); // CullLightSources
+	c_game->StopProfilingStage();    // CullLightSources
 
 	c_game->StartProfilingStage("Shadows");
 	c_game->StartGPUProfilingStage("Shadows");
@@ -201,5 +201,5 @@ void pragma::CRasterizationRendererComponent::RenderShadows(const util::DrawScen
 	//auto &imgDepth = textureDepth->GetImage(); // prosper TODO
 	//imgDepth->SetDrawLayout(prosper::ImageLayout::ShaderReadOnlyOptimal); // prosper TODO
 	c_game->StopGPUProfilingStage(); // Shadows
-	c_game->StopProfilingStage(); // Shadows
+	c_game->StopProfilingStage();    // Shadows
 }

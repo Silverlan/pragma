@@ -7,7 +7,10 @@
 #include "pragma/entities/entity_component_manager_t.hpp"
 #include "pragma/lua/lua_call.hpp"
 #include "pragma/logging.hpp"
+#include <scripting/lua/lua.hpp>
 #include <sharedutils/util_uri.hpp>
+
+//import pragma.scripting.lua;
 
 using namespace pragma;
 
@@ -30,7 +33,7 @@ void pragma::ValueDriverDescriptor::RebuildLuaExpression() const
 
 	auto *l = m_luaState;
 	std::string luaStr = "return function(" + argList + ") " + m_expression + " end";
-	auto r = Lua::RunString(l, luaStr, 1, "internal", &Lua::HandleTracebackError); /* 1 */
+	auto r = pragma::scripting::lua::run_string(l, luaStr, "value_driver", 1); /* 1 */
 	if(r == Lua::StatusCode::Ok) {
 		luabind::object oFunc {luabind::from_stack(l, -1)};
 		m_luaExpression = oFunc;
@@ -219,9 +222,8 @@ pragma::ValueDriver::Result pragma::ValueDriver::Apply(BaseEntity &ent)
 		Lua::Pop(l, numPushed);
 		return Result::ErrorInvalidParameterReference;
 	}
-	auto c = Lua::ProtectedCall(l, numPushed - 1, 1);
+	auto c = pragma::scripting::lua::protected_call(l, numPushed - 1, 1);
 	if(c != Lua::StatusCode::Ok) {
-		Lua::HandleLuaError(l, c);
 		spdlog::trace("Failed to execute value driver (Expr: '{}') for member '{}' of component {} of driver entity '{}': Failed to execute expression!", expression, m_memberReference.GetMemberName(), m_componentId, ent.ToString());
 		return Result::ErrorExpressionExecutionFailed;
 	}

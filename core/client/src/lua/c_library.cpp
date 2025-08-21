@@ -312,6 +312,8 @@ void CGame::RegisterLuaLibraries()
 	Lua::util::register_os(GetLuaState(), osMod);
 
 	auto utilMod = luabind::module(GetLuaState(), "util");
+	utilMod[luabind::def("is_windowless", &CEngine::IsWindowless)];
+	utilMod[luabind::def("is_cpu_rendering_only", &CEngine::IsCPURenderingOnly)];
 	Lua::util::register_shared(GetLuaState(), utilMod);
 
 	auto svgImageInfoDef = luabind::class_<uimg::SvgImageInfo>("SvgImageInfo");

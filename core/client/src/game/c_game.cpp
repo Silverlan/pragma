@@ -231,6 +231,43 @@ CGame::CGame(NetworkState *state)
 		CallLuaCallbacks<void, luabind::object, luabind::object>("OnGUIFocusChanged", oOldFocus, oNewFocus);
 	});
 
+	WGUI::GetInstance().SetUiMouseButtonCallback([this](WIBase &el, pragma::platform::MouseButton mouseButton, pragma::platform::KeyState state, pragma::platform::Modifier mods) {
+		CallCallbacks<void, WIBase *, pragma::platform::MouseButton, pragma::platform::KeyState, pragma::platform::Modifier>("OnGUIMouseButtonEvent", &el, mouseButton, state, mods);
+
+		auto *l = GetLuaState();
+		if(l == nullptr)
+			return;
+		auto oEl = WGUILuaInterface::GetLuaObject(l, el);
+		CallLuaCallbacks<void, luabind::object, pragma::platform::MouseButton, pragma::platform::KeyState, pragma::platform::Modifier>("OnGUIMouseButtonEvent", oEl, mouseButton, state, mods);
+	});
+	WGUI::GetInstance().SetUiKeyboardCallback([this](WIBase &el, pragma::platform::Key key, int scanCode, pragma::platform::KeyState state, pragma::platform::Modifier mods) {
+		CallCallbacks<void, WIBase *, pragma::platform::Key, int, pragma::platform::KeyState, pragma::platform::Modifier>("OnGUIKeyboardEvent", &el, key, scanCode, state, mods);
+
+		auto *l = GetLuaState();
+		if(l == nullptr)
+			return;
+		auto oEl = WGUILuaInterface::GetLuaObject(l, el);
+		CallLuaCallbacks<void, luabind::object, pragma::platform::Key, int, pragma::platform::KeyState, pragma::platform::Modifier>("OnGUIKeyboardEvent", oEl, key, scanCode, state, mods);
+	});
+	WGUI::GetInstance().SetUiCharCallback([this](WIBase &el, unsigned int c) {
+		CallCallbacks<void, WIBase *, unsigned int>("OnGUICharEvent", &el, c);
+
+		auto *l = GetLuaState();
+		if(l == nullptr)
+			return;
+		auto oEl = WGUILuaInterface::GetLuaObject(l, el);
+		CallLuaCallbacks<void, luabind::object, unsigned int>("OnGUICharEvent", oEl, c);
+	});
+	WGUI::GetInstance().SetUiScrollCallback([this](WIBase &el, Vector2 offset) {
+		CallCallbacks<void, WIBase *, Vector2>("OnGUIScrollEvent", &el, offset);
+
+		auto *l = GetLuaState();
+		if(l == nullptr)
+			return;
+		auto oEl = WGUILuaInterface::GetLuaObject(l, el);
+		CallLuaCallbacks<void, luabind::object, Vector2>("OnGUIScrollEvent", oEl, offset);
+	});
+
 	m_cbGPUProfilingHandle = c_engine->AddGPUProfilingHandler([this](bool profilingEnabled) {
 		if(profilingEnabled == false) {
 			m_gpuProfilingStageManager = nullptr;
@@ -271,6 +308,10 @@ void CGame::OnRemove()
 	m_renderQueueBuilder = nullptr;
 	c_engine->GetRenderContext().WaitIdle();
 	WGUI::GetInstance().SetFocusCallback(nullptr);
+	WGUI::GetInstance().SetUiMouseButtonCallback(nullptr);
+	WGUI::GetInstance().SetUiKeyboardCallback(nullptr);
+	WGUI::GetInstance().SetUiCharCallback(nullptr);
+	WGUI::GetInstance().SetUiScrollCallback(nullptr);
 	if(m_hCbDrawFrame.IsValid())
 		m_hCbDrawFrame.Remove();
 	if(m_cbGPUProfilingHandle.IsValid())

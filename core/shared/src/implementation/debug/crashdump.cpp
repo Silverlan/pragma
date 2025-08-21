@@ -35,17 +35,15 @@ static spdlog::logger &LOGGER = pragma::register_logger("crash_handler");
 static std::string g_crashExceptionMessage = {};
 static CrashHandler g_crashHandler {};
 
-const std::string &pragma::debug::get_exception_message() {
-	return g_crashExceptionMessage;
-}
+const std::string &pragma::debug::get_exception_message() { return g_crashExceptionMessage; }
+
+bool pragma::debug::generate_crash_dump() { return g_crashHandler.GenerateCrashDump(); }
 
 CrashHandler &CrashHandler::Get() { return g_crashHandler; }
 
-void CrashHandler::Initialize() {
-	Get().InitializeHandlers();
-}
+void CrashHandler::Initialize() { Get().InitializeHandlers(); }
 
-CrashHandler::CrashHandler() {InitializeHandlers();}
+CrashHandler::CrashHandler() { InitializeHandlers(); }
 void CrashHandler::InitializeHandlers()
 {
 #ifdef _WIN32
@@ -84,7 +82,7 @@ void CrashHandler::InitializeHandlers()
 #else
 	signal(
 	  SIGSEGV, +[](int sig) {
-	  	  LOGGER.critical("SIGSEV {}", sig);
+		  LOGGER.critical("SIGSEV {}", sig);
 		  g_crashHandler.m_sig = sig;
 		  g_crashHandler.GenerateCrashDump();
 		  exit(1);
@@ -276,7 +274,7 @@ bool CrashHandler::GenerateCrashDump(EXCEPTION_POINTERS *pExceptionPointers)
 
 bool CrashHandler::GenerateCrashDump() const
 {
-	std::cout<<"Generating crashdump..."<<std::endl;
+	std::cout << "Generating crashdump..." << std::endl;
 	LOGGER.info("Generating crashdump...");
 	pragma::flush_loggers();
 

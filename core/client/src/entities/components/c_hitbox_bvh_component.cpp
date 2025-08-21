@@ -227,8 +227,8 @@ void CHitboxBvhComponent::UpdateHitboxBvh()
 	auto &updatePoses = m_hitboxBvhUpdatePoses;
 	m_hitboxBvhUpdate = g_hbThreadPool->submit_task([&updatePoses, &hitboxBvh, &bvh]() {
 		bvh.refit([&bvh, &hitboxBvh, &updatePoses](pragma::bvh::Node &node) {
-			auto begin = node.index.first_id;
-			auto end = begin + node.index.prim_count;
+			auto begin = node.index.first_id();
+			auto end = begin + node.index.prim_count();
 			for(size_t i = begin; i < end; ++i) {
 				size_t j = bvh.prim_ids[i];
 

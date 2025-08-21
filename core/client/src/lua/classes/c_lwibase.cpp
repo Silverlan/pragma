@@ -30,6 +30,7 @@
 #include <pragma/lua/converters/optional_converter_t.hpp>
 #include <pragma/lua/converters/property_converter_t.hpp>
 #include <pragma/lua/lua_call.hpp>
+#include <scripting/lua/lua.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_render_pass.hpp>
 #include <prosper_swap_command_buffer.hpp>
@@ -43,6 +44,7 @@
 #include <pragma/debug/intel_vtune.hpp>
 
 import pragma.string.unicode;
+// import pragma.scripting.lua;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
@@ -205,12 +207,13 @@ static void debug_print_hierarchy(const ::WIBase &el, const std::string &t = "")
 	}
 }
 
-static ::WIBase *find_descendant_by_path(::WIBase &el, const std::string &strPath) {
+static ::WIBase *find_descendant_by_path(::WIBase &el, const std::string &strPath)
+{
 	auto path = util::DirPath(strPath);
 	auto *p = &el;
-	for (auto &name : path) {
-		auto *child = p->FindDescendantByName(std::string{name});
-		if (!child)
+	for(auto &name : path) {
+		auto *child = p->FindDescendantByName(std::string {name});
+		if(!child)
 			return nullptr;
 		p = child;
 	}
@@ -420,7 +423,7 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	classDef.def("SetSkin", &::WIBase::SetSkin);
 	classDef.def("GetSkinName", &::WIBase::GetSkinName);
 	classDef.def("ResetSkin", &::WIBase::ResetSkin);
-	classDef.def("GetStyleClasses", &::WIBase::GetStyleClasses);
+	classDef.def("GetStyleClasses", +[](::WIBase &el) -> std::vector<std::string> { return el.GetStyleClasses(); });
 	classDef.def("AddStyleClass", &::WIBase::AddStyleClass);
 	classDef.def("SetCursor", &::WIBase::SetCursor);
 	classDef.def("GetCursor", &::WIBase::GetCursor);
@@ -1237,7 +1240,6 @@ namespace Lua {
 		template<typename... TARGS>
 		void CallCallbacks(lua_State *l, ::WIBase &hPanel, std::string name, TARGS... args)
 		{
-
 			auto callbackPtr = std::static_pointer_cast<LuaCallbacks>(hPanel.GetUserData4());
 			if(callbackPtr == nullptr)
 				return;
@@ -1258,28 +1260,25 @@ namespace Lua {
 				else if(cbInfo.luaState == l) {
 					auto &o = cbInfo.luaFunction;
 					auto bReturn = false;
-					Lua::Execute(l, [l, &o, &hPanel, numArgs, argOffset, &bReturn, &name](int (*traceback)(lua_State *l)) {
-						auto n = Lua::GetStackTop(l);
-						auto r = Lua::CallFunction(
-						  l,
-						  [&o, &hPanel, numArgs, argOffset](lua_State *l) {
-							  o.push(l);
-							  auto obj = WGUILuaInterface::GetLuaObject(l, hPanel);
-							  obj.push(l);
-							  for(auto i = decltype(numArgs) {0}; i < numArgs; ++i) {
-								  auto arg = argOffset + i;
-								  Lua::PushValue(l, arg);
-							  }
-							  return Lua::StatusCode::Ok;
-						  },
-						  LUA_MULTRET);
-						if(r == Lua::StatusCode::Ok) {
-							auto numResults = Lua::GetStackTop(l) - n;
-							if(numResults > 0)
-								bReturn = true;
-						}
-						return r;
-					});
+					auto n = Lua::GetStackTop(l);
+					auto r = pragma::scripting::lua::protected_call(
+					  l,
+					  [&](lua_State *l) -> Lua::StatusCode {
+						  o.push(l);
+						  auto obj = WGUILuaInterface::GetLuaObject(l, hPanel);
+						  obj.push(l);
+						  for(auto i = decltype(numArgs) {0}; i < numArgs; ++i) {
+							  auto arg = argOffset + i;
+							  Lua::PushValue(l, arg);
+						  }
+						  return Lua::StatusCode::Ok;
+					  },
+					  LUA_MULTRET);
+					if(r == Lua::StatusCode::Ok) {
+						auto numResults = Lua::GetStackTop(l) - n;
+						if(numResults > 0)
+							bReturn = true;
+					}
 					if(bReturn == true)
 						break;
 					++it;

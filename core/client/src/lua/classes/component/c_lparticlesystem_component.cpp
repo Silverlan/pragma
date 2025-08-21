@@ -160,12 +160,9 @@ void Lua::ParticleSystem::register_class(lua_State *l, luabind::module_ &entsMod
 	defCParticleSystem.def("SetFlags", &pragma::CParticleSystemComponent::SetFlags);
 	defCParticleSystem.def("GetMaxNodes", &pragma::CParticleSystemComponent::GetMaxNodes);
 	defCParticleSystem.def("SetMaxNodes", &pragma::CParticleSystemComponent::SetMaxNodes);
-	defCParticleSystem.def(
-	  "AddInitializer", +[](lua_State *l, pragma::CParticleSystemComponent &hComponent, std::string name, luabind::object o) { return Lua::ParticleSystem::AddInitializer(l, hComponent, name, o); });
-	defCParticleSystem.def(
-	  "AddOperator", +[](lua_State *l, pragma::CParticleSystemComponent &hComponent, std::string name, luabind::object o) { return Lua::ParticleSystem::AddOperator(l, hComponent, name, o); });
-	defCParticleSystem.def(
-	  "AddRenderer", +[](lua_State *l, pragma::CParticleSystemComponent &hComponent, std::string name, luabind::object o) { return Lua::ParticleSystem::AddRenderer(l, hComponent, name, o); });
+	defCParticleSystem.def("AddInitializer", +[](lua_State *l, pragma::CParticleSystemComponent &hComponent, std::string name, luabind::object o) { return Lua::ParticleSystem::AddInitializer(l, hComponent, name, o); });
+	defCParticleSystem.def("AddOperator", +[](lua_State *l, pragma::CParticleSystemComponent &hComponent, std::string name, luabind::object o) { return Lua::ParticleSystem::AddOperator(l, hComponent, name, o); });
+	defCParticleSystem.def("AddRenderer", +[](lua_State *l, pragma::CParticleSystemComponent &hComponent, std::string name, luabind::object o) { return Lua::ParticleSystem::AddRenderer(l, hComponent, name, o); });
 	defCParticleSystem.def("RemoveInitializer", static_cast<void (*)(lua_State *, pragma::CParticleSystemComponent &, const std::string &)>([](lua_State *l, pragma::CParticleSystemComponent &hComponent, const std::string &name) { hComponent.RemoveInitializer(name); }));
 	defCParticleSystem.def("RemoveOperator", static_cast<void (*)(lua_State *, pragma::CParticleSystemComponent &, const std::string &)>([](lua_State *l, pragma::CParticleSystemComponent &hComponent, const std::string &name) { hComponent.RemoveOperator(name); }));
 	defCParticleSystem.def("RemoveRenderer", static_cast<void (*)(lua_State *, pragma::CParticleSystemComponent &, const std::string &)>([](lua_State *l, pragma::CParticleSystemComponent &hComponent, const std::string &name) { hComponent.RemoveRenderer(name); }));

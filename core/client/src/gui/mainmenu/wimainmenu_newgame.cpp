@@ -106,11 +106,13 @@ void WIMainMenuNewGame::InitializeOptionsList(WIOptionsList *pList)
 	buttonStart->SetText(pragma::locale::get_text("start_game"));
 	buttonStart->SizeToContents();
 	buttonStart->SetAutoCenterToParent(true);
-	buttonStart->AddCallback("OnMouseEvent", FunctionCallback<util::EventReply, pragma::platform::MouseButton, pragma::platform::KeyState, pragma::platform::Modifier>::CreateWithOptionalReturn([this](util::EventReply *reply, pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods) -> CallbackReturnType {
-		OnStartGame(button, state, mods);
-		*reply = util::EventReply::Handled;
-		return CallbackReturnType::HasReturnValue;
-	}));
+	buttonStart->AddCallback("OnMouseEvent",
+	  FunctionCallback<util::EventReply, pragma::platform::MouseButton, pragma::platform::KeyState, pragma::platform::Modifier>::CreateWithOptionalReturn(
+	    [this](util::EventReply *reply, pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods) -> CallbackReturnType {
+		    OnStartGame(button, state, mods);
+		    *reply = util::EventReply::Handled;
+		    return CallbackReturnType::HasReturnValue;
+	    }));
 	pRow->InsertElement(1, buttonStart);
 	WIMainMenuBase::InitializeOptionsList(pList);
 }
@@ -271,8 +273,7 @@ void WIMainMenuNewGame::InitializeGameSettings()
 	m_hRconPassword = pPassword->GetHandle();
 	//
 	// Player Count
-	auto *pMaxPlayers = pList->AddSlider(
-	  pragma::locale::get_text("max_players"), [](WISlider *pSlider) { pSlider->SetRange(1.f, 50.f, 1.f); }, "sv_maxplayers");
+	auto *pMaxPlayers = pList->AddSlider(pragma::locale::get_text("max_players"), [](WISlider *pSlider) { pSlider->SetRange(1.f, 50.f, 1.f); }, "sv_maxplayers");
 	m_hMaxPlayers = pMaxPlayers;
 	//
 	InitializeOptionsList(pList);

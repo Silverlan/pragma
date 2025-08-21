@@ -59,12 +59,14 @@
 #include <pragma/math/intersection.h>
 #include <pragma/model/modelmesh.h>
 #include "pragma/model/animation/skeleton.hpp"
+#include <scripting/lua/lua.hpp>
 #include <luabind/class_info.hpp>
 #include <fsys/ifile.hpp>
 #include <sharedutils/util_markup_file.hpp>
 
 import se_script;
 import util_zip;
+// import pragma.scripting.lua;
 
 extern DLLNETWORK Engine *engine;
 
@@ -335,6 +337,19 @@ void Lua::util::register_os(lua_State *l, luabind::module_ &mod)
 {
 	mod[luabind::def("set_prevent_os_sleep_mode", &::util::set_prevent_os_sleep_mode)];
 	mod[luabind::def("is_dark_mode", &::util::is_dark_mode)];
+
+	mod[luabind::def(
+	  "show_notification", +[](Engine &engine, const std::string &summary, const std::string &body) {
+		  if(engine.IsCLIOnly())
+			  return false;
+		  return ::util::show_notification(summary, body);
+	  })];
+	mod[luabind::def(
+	  "show_notification", +[](Engine &engine, const std::string &msg) {
+		  if(engine.IsCLIOnly())
+			  return false;
+		  return ::util::show_notification(msg, "");
+	  })];
 }
 
 static Lua::var<bool, Lua::opt<std::string>, ::util::FunctionalParallelWorker> extract_files(lua_State *l, Game &game, const Lua::type<uzip::ZIPFile> &ozip, const std::string &outputPath, bool runInBackground = false)
@@ -525,19 +540,19 @@ void Lua::util::register_shared_generic(lua_State *l, luabind::module_ &mod)
 		  path.Canonicalize();
 
 		  if(openMode == uzip::OpenMode::Read) {
-			std::string absPath;
-			if(!filemanager::find_absolute_path(path.GetString(), absPath))
-				return nullptr;
-			path = ::util::FilePath(absPath);
+			  std::string absPath;
+			  if(!filemanager::find_absolute_path(path.GetString(), absPath))
+				  return nullptr;
+			  path = ::util::FilePath(absPath);
 		  }
 		  else
-		  	path = ::util::FilePath(filemanager::get_program_write_path(), path);
+			  path = ::util::FilePath(filemanager::get_program_write_path(), path);
 
 		  std::string err;
 		  auto zipFile = uzip::ZIPFile::Open(path.GetString(), err, openMode);
 		  if(!zipFile)
 			  return nullptr;
-		  Con::cwar<<"Failed to open zip file '"<<path.GetString()<<"': "<<err<<Con::endl;
+		  Con::cwar << "Failed to open zip file '" << path.GetString() << "': " << err << Con::endl;
 		  return zipFile;
 	  })];
 	defZip.scope[luabind::def(
@@ -552,7 +567,7 @@ void Lua::util::register_shared_generic(lua_State *l, luabind::module_ &mod)
 		  auto zipFile = uzip::ZIPFile::Open(*filePath, err, openMode);
 		  if(!zipFile)
 			  return nullptr;
-		  Con::cwar<<"Failed to open zip file '"<<*filePath<<"': "<<err<<Con::endl;
+		  Con::cwar << "Failed to open zip file '" << *filePath << "': " << err << Con::endl;
 		  return zipFile;
 	  })];
 	defZip.scope[luabind::def(
@@ -591,8 +606,8 @@ void Lua::util::register_shared(lua_State *l, luabind::module_ &mod)
 	register_shared_generic(l, mod);
 	mod[luabind::def("is_valid_entity", static_cast<bool (*)(lua_State *)>(Lua::util::is_valid_entity)), luabind::def("is_valid_entity", static_cast<bool (*)(lua_State *, const luabind::object &)>(Lua::util::is_valid_entity)),
 	  luabind::def("shake_screen", static_cast<void (*)(lua_State *, const Vector3 &, float, float, float, float, float, float)>(Lua::util::shake_screen)), luabind::def("shake_screen", static_cast<void (*)(lua_State *, float, float, float, float, float)>(Lua::util::shake_screen)),
-	  luabind::def("read_scene_file", Lua::util::read_scene_file), luabind::def("get_program_path", +[]() { return ::util::Path::CreatePath(::util::get_program_path()).GetString(); }),
-	luabind::def("get_program_write_path", +[]() { return ::util::Path::CreatePath(filemanager::get_program_write_path()).GetString(); })];
+	  luabind::def("read_scene_file", Lua::util::read_scene_file), luabind::def("is_cli_only", &Engine::IsCLIOnly), luabind::def("is_sandboxed", &Engine::IsSandboxed), luabind::def("is_managed_by_package_manager", &Engine::IsManagedByPackageManager),
+	  luabind::def("get_program_path", +[]() { return ::util::Path::CreatePath(::util::get_program_path()).GetString(); }), luabind::def("get_program_write_path", +[]() { return ::util::Path::CreatePath(filemanager::get_program_write_path()).GetString(); })];
 }
 static Lua::mult<bool, Lua::opt<std::string>> exec_python(lua_State *l, const std::string &fileName, const std::vector<std::string> &args)
 {
@@ -766,152 +781,6 @@ void Lua::util::register_library(lua_State *l)
 	  });
 	utilMod[defUuid];
 	pragma::lua::define_custom_constructor<util::Uuid, +[](const std::string &uuid) -> util::Uuid { return util::Uuid {::util::uuid_string_to_bytes(uuid)}; }, const std::string &>(l);
-}
-
-luabind::object Lua::global::include(lua_State *l, const std::string &f) { return include(l, f, s_bIgnoreIncludeCache); }
-luabind::object Lua::global::include(lua_State *l, const std::string &f, std::vector<std::string> *optCache) { return include(l, f, optCache, false); }
-static std::vector<std::string> g_globalTmpCache;
-static uint32_t g_globalTmpCacheRecursiveCount = 0;
-luabind::object Lua::global::include(lua_State *l, const std::string &f, bool ignoreGlobalCache)
-{
-	if(ignoreGlobalCache) {
-		++g_globalTmpCacheRecursiveCount;
-		::util::ScopeGuard sg {[]() {
-			if(--g_globalTmpCacheRecursiveCount == 0)
-				g_globalTmpCache.clear();
-		}};
-		return include(l, f, &g_globalTmpCache);
-	}
-	return include(l, f, nullptr);
-}
-
-luabind::object Lua::global::include(lua_State *l, const std::string &f, std::vector<std::string> *optCache, bool reload, bool throwErr)
-{
-	auto *lInterface = engine->GetLuaInterface(l);
-	std::vector<std::string> *includeCache = optCache;
-	if(!includeCache)
-		includeCache = (lInterface != nullptr) ? &lInterface->GetIncludeCache() : nullptr;
-	auto fShouldInclude = [includeCache, reload](std::string fpath) -> bool {
-		if(includeCache == nullptr)
-			return true;
-		if(fpath.empty() == false) {
-			if(fpath.front() == '/' || fpath.front() == '\\')
-				fpath.erase(fpath.begin());
-			else
-				fpath = Lua::GetIncludePath(fpath);
-		}
-		fpath = FileManager::GetCanonicalizedPath(fpath);
-		auto it = std::find_if(includeCache->begin(), includeCache->end(), [fpath](const std::string &other) { return ustring::compare(fpath, other, false); });
-		if(!reload && it != includeCache->end())
-			return false;
-		if(it == includeCache->end())
-			includeCache->push_back(fpath);
-		return true;
-	};
-	auto *nw = engine->GetNetworkState(l);
-	auto *game = (nw != nullptr) ? nw->GetGameState() : nullptr;
-	std::string ext;
-	if(ufile::get_extension(f, &ext) == false) // Assume it's a directory
-	{
-		std::string relPath = f;
-		if(relPath.back() != '\\' && relPath.back() != '/')
-			relPath += "/";
-
-		auto incPath = relPath;
-		if(incPath.empty() == false) {
-			if(incPath.front() == '/' || incPath.front() == '\\')
-				incPath.erase(incPath.begin());
-			else
-				incPath = Lua::GetIncludePath(incPath);
-		}
-		incPath = Lua::SCRIPT_DIRECTORY_SLASH + incPath;
-		auto incPathLua = incPath + "*." + Lua::FILE_EXTENSION;
-		std::vector<std::string> files;
-		FileManager::FindFiles(incPathLua.c_str(), &files, nullptr);
-
-		auto incPathCLua = incPath + "*." + Lua::FILE_EXTENSION_PRECOMPILED;
-		std::vector<std::string> cfiles;
-		FileManager::FindFiles(incPathCLua.c_str(), &cfiles, nullptr);
-		files.reserve(files.size() + cfiles.size());
-
-		// Add pre-compiled Lua-files to list, but make sure there are no duplicates!
-		for(auto &cf : cfiles) {
-			auto it = std::find_if(files.begin(), files.end(), [&cf](const std::string &fother) { return ustring::compare(cf.c_str(), fother.c_str(), false, cf.length() - 5); });
-			if(it != files.end()) {
-				*it = cf; // Prefer pre-compiled files over regular files
-				continue;
-			}
-			files.push_back(cf);
-		}
-
-		for(auto &fName : files) {
-			auto fpath = relPath + fName;
-			if(fShouldInclude(fpath) == false)
-				continue;
-			auto r = Lua::IncludeFile(l, fpath, Lua::HandleTracebackError);
-			switch(r) {
-			case Lua::StatusCode::ErrorFile:
-				lua_error(l);
-				/* unreachable */
-				break;
-			case Lua::StatusCode::ErrorSyntax:
-				Lua::HandleSyntaxError(l, r, fpath);
-				break;
-			}
-		}
-		return {};
-	}
-	if(fShouldInclude(f) == true) {
-		//auto r = Lua::Execute(l,[&f,l](int(*traceback)(lua_State*)) {
-		//	return Lua::IncludeFile(l,f,traceback);
-		//});
-		auto n = Lua::GetStackTop(l);
-		auto fileName = f;
-		auto r = Lua::IncludeFile(l, fileName, Lua::HandleTracebackError, LUA_MULTRET);
-		switch(r) {
-		case Lua::StatusCode::ErrorFile:
-			if(throwErr)
-				lua_error(l);
-			else {
-				Con::cwar << "File not found: '" << fileName << "'!" << Con::endl;
-				return {};
-			}
-			/* unreachable */
-			break;
-		case Lua::StatusCode::ErrorSyntax:
-			Lua::HandleSyntaxError(l, r, fileName);
-			break;
-		case Lua::StatusCode::Ok:
-			{
-				auto t = Lua::GetStackTop(l);
-				if(t <= n)
-					return Lua::nil;
-				return luabind::object {luabind::from_stack {l, t - n}};
-			}
-		}
-	}
-	return {};
-}
-
-luabind::object Lua::global::include(lua_State *l, const std::string &f, std::vector<std::string> *optCache, bool reload) { return include(l, f, optCache, reload, true); }
-
-luabind::object Lua::global::exec(lua_State *l, const std::string &f)
-{
-	auto n = Lua::GetStackTop(l);
-	std::string fileName = f;
-	auto r = Lua::ExecuteFile(l, fileName, Lua::HandleTracebackError, LUA_MULTRET);
-	switch(r) {
-	case Lua::StatusCode::ErrorFile:
-		lua_error(l);
-		/* unreachable */
-		break;
-	case Lua::StatusCode::ErrorSyntax:
-		Lua::HandleSyntaxError(l, r, fileName);
-		break;
-	case Lua::StatusCode::Ok:
-		return luabind::object {luabind::from_stack {l, Lua::GetStackTop(l) - n}};
-	}
-	return {};
 }
 
 std::string Lua::global::get_script_path() { return Lua::GetIncludePath(); }
@@ -1125,10 +994,11 @@ static luabind::object register_class(lua_State *l, const std::string &pclassNam
 	auto nParentClasses = Lua::GetStackTop(l) - 1;
 	auto fRegisterBaseClasses = [l, nParentClasses, idxBaseClassStart]() {
 		for(auto i = idxBaseClassStart; i <= (nParentClasses + 1); ++i) {
-			Lua::PushValue(l, -1);                                 /* 2 */
-			Lua::PushValue(l, i);                                  /* 3 */
-			if(Lua::ProtectedCall(l, 1, 0) != Lua::StatusCode::Ok) /* 1 */
-				Lua::HandleLuaError(l);
+			Lua::PushValue(l, -1); /* 2 */
+			Lua::PushValue(l, i);  /* 3 */
+			std::string err;
+			if(pragma::scripting::lua::protected_call(l, 1, 0, &err) != Lua::StatusCode::Ok) /* 1 */
+				pragma::scripting::lua::raise_error(l, err);                                 // TODO: Is this okay to do here? Maybe we should throw an exception instead.
 		}
 	};
 
@@ -1209,7 +1079,8 @@ static luabind::object register_class(lua_State *l, const std::string &pclassNam
 		Lua::GetGlobal(l, className); /* +1 */
 	std::stringstream ss;
 	ss << "return class '" << className << "'";
-	auto r = Lua::RunString(l, ss.str(), 1, "internal"); /* 1 */
+	std::string err;
+	auto r = pragma::scripting::lua::run_string(l, ss.str(), "internal", 1); /* 1 */
 	luabind::object oClass {};
 	if(r == Lua::StatusCode::Ok) {
 		auto *nw = engine->GetNetworkState(l);
@@ -1249,10 +1120,9 @@ static luabind::object register_class(lua_State *l, const std::string &pclassNam
 		if(slibs.empty() == false) {
 			ss = std::stringstream {};
 			ss << slibs << "=" << className;
-			r = Lua::RunString(l, ss.str(), 1, "internal"); /* 1 */
-			if(r != Lua::StatusCode::Ok)
-				Lua::HandleLuaError(l);
-			Lua::Pop(l, 1); /* 0 */
+			r = pragma::scripting::lua::run_string(l, ss.str(), "internal", 1);
+			if(r == Lua::StatusCode::Ok)
+				Lua::Pop(l, 1); /* 0 */
 
 			Lua::PushNil(l);              /* 1 */
 			Lua::SetGlobal(l, className); /* 0 */
@@ -1740,7 +1610,7 @@ Lua::var<bool, ::util::ParallelJob<luabind::object>> Lua::util::pack_zip_archive
 	std::string err;
 	auto zip = uzip::ZIPFile::Open(absFilePath, err, uzip::OpenMode::Write);
 	if(zip == nullptr) {
-		Con::cwar<<"Failed to open zip file '"<<absFilePath<<": "<<err<<Con::endl;
+		Con::cwar << "Failed to open zip file '" << absFilePath << ": " << err << Con::endl;
 		return luabind::object {l, false};
 	}
 	auto pzip = std::shared_ptr<uzip::ZIPFile> {std::move(zip)};

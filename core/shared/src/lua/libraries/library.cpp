@@ -65,6 +65,7 @@
 #include <sharedutils/util_file.h>
 #include <sharedutils/util_path.hpp>
 #include <pragma/math/intersection.h>
+#include <scripting/lua/lua.hpp>
 #include <mathutil/camera.hpp>
 #include <mathutil/umath_frustum.hpp>
 #include <regex>
@@ -84,6 +85,7 @@
 
 import bezierfit;
 import panima;
+//import pragma.scripting.lua;
 
 extern DLLNETWORK Engine *engine;
 
@@ -672,6 +674,7 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 #endif
 
 	auto modDebug = luabind::module_(lua.GetState(), "debug");
+	modDebug[luabind::def("format_error_message", +[](lua_State *l, const std::string &msg) -> std::string { return pragma::scripting::lua::format_error_message(l, msg, Lua::StatusCode::ErrorRun); })];
 	modDebug[luabind::def("move_state_to_string", Lua::debug::move_state_to_string), luabind::def("beep", Lua::debug::beep)];
 	lua_pushtablecfunction(lua.GetState(), "debug", "print", Lua::debug::print);
 	lua_pushtablecfunction(
@@ -1368,7 +1371,7 @@ void Game::RegisterLuaLibraries()
 		  auto absPath = isPathToDir ? ::util::Path::CreatePath(rpath) : ::util::Path::CreateFile(rpath);
 		  std::string relPath;
 		  if(filemanager::find_relative_path(absPath.GetString(), relPath))
-		  	return luabind::object {l, relPath};
+			  return luabind::object {l, relPath};
 		  return {};
 	  })),
 	  luabind::def("find_path_on_disk", static_cast<luabind::object (*)(lua_State *, const std::string &)>([](lua_State *l, const std::string &path) -> luabind::object {
@@ -1759,7 +1762,26 @@ void Game::RegisterLuaLibraries()
 	modLog[luabind::def("set_file_log_level", &pragma::set_file_log_level)];
 	modLog[luabind::def("get_file_log_level", &pragma::get_file_log_level)];
 
-	Lua::RegisterLibraryEnums(GetLuaState(), "log", {{"SEVERITY_INFO", 0}, {"SEVERITY_WARNING", 1}, {"SEVERITY_ERROR", 2}, {"SEVERITY_CRITICAL", 3}, {"SEVERITY_DEBUG", 4}});
+	modLog[luabind::def(
+	  "set_log_level", +[](const std::string &name, ::util::LogSeverity level) -> bool {
+		  auto logger = spdlog::get(name);
+		  if(!logger)
+			  return false;
+		  logger->set_level(static_cast<spdlog::level::level_enum>(pragma::logging::severity_to_spdlog_level(level)));
+		  return true;
+	  })];
+
+	Lua::RegisterLibraryEnums(GetLuaState(), "log",
+	  {
+	    {"SEVERITY_TRACE", umath::to_integral(util::LogSeverity::Trace)},
+	    {"SEVERITY_INFO", umath::to_integral(util::LogSeverity::Info)},
+	    {"SEVERITY_WARNING", umath::to_integral(util::LogSeverity::Warning)},
+	    {"SEVERITY_ERROR", umath::to_integral(util::LogSeverity::Error)},
+	    {"SEVERITY_CRITICAL", umath::to_integral(util::LogSeverity::Critical)},
+	    {"SEVERITY_DEBUG", umath::to_integral(util::LogSeverity::Debug)},
+	    {"SEVERITY_DISABLED", umath::to_integral(util::LogSeverity::Disabled)},
+	    {"SEVERITY_COUNT", umath::to_integral(util::LogSeverity::Count)},
+	  });
 
 	auto classDefLogger = luabind::class_<spdlog::logger>("Logger");
 	modLog[classDefLogger];

@@ -61,10 +61,10 @@ void RenderContext::InitializeRenderAPI()
 			// vulkan driver will be used instead of swiftshader.
 			std::string absSwiftshaderPath;
 			std::string relSwiftShaderPath = "modules/swiftshader/libvulkan.so.1";
-			if (filemanager::find_absolute_path(relSwiftShaderPath, absSwiftshaderPath)) {
+			if(filemanager::find_absolute_path(relSwiftShaderPath, absSwiftshaderPath)) {
 				std::string err;
 				auto libVulkan = util::Library::Load(absSwiftshaderPath, {}, &err);
-				if (libVulkan)
+				if(libVulkan)
 					libVulkan->SetDontFreeLibraryOnDestruct();
 				else
 					spdlog::error("Failed to load swiftshader library '{}': {}. This will likely cause issues.", absSwiftshaderPath, err);
@@ -146,9 +146,9 @@ void RenderContext::InitializeRenderAPI()
 	});
 	prosper::debug::set_debug_validation_callback([](prosper::DebugReportObjectTypeEXT objectType, const std::string &msg) { LOGGER_VALIDATION.error("{}", msg); });
 	err.clear();
-	if (!pragma::platform::initialize(err, c_engine->IsWindowless())) {
+	if(!pragma::platform::initialize(err, c_engine->IsWindowless())) {
 		LOGGER.critical("Failed to initialize GLFW: {}", err);
-		throw std::runtime_error {"Failed to initialize GLFW: " +err};
+		throw std::runtime_error {"Failed to initialize GLFW: " + err};
 	}
 
 	if(GetRenderContext().IsValidationEnabled()) {

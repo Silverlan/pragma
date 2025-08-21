@@ -48,10 +48,46 @@ function(pr_add_library TARGET_NAME LIB_TYPE)
     message("[PR] Adding library ${TARGET_NAME}")
     pr_setup_default_project_settings(${TARGET_NAME})
 
+    if(UNIX)
+        set_target_properties(${TARGET_NAME} PROPERTIES
+            INSTALL_RPATH "$ORIGIN"
+        )
+    endif()
+
     if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules")
         set(_tmp "${CMAKE_MODULE_PATH}")
         list(APPEND _tmp "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules")
         set(CMAKE_MODULE_PATH "${_tmp}" PARENT_SCOPE)
+    endif()
+endfunction()
+
+function(pr_add_rpath TARGET_NAME PATH)
+    if(UNIX)
+        message("[PR] Adding RPATH \"${PATH}\" to target ${TARGET_NAME}")
+        set_property(TARGET ${TARGET_NAME} APPEND PROPERTY INSTALL_RPATH "${PATH}")
+    endif()
+endfunction()
+
+function(pr_add_module TARGET_NAME LIB_TYPE MODULE_INSTALL_PATH)
+    pr_add_library(${TARGET_NAME} ${LIB_TYPE})
+    set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" PARENT_SCOPE)
+
+    # Build rpath to main lib directory
+    if(UNIX)
+        string(REGEX REPLACE "/$" "" _path_stripped "${MODULE_INSTALL_PATH}")
+        string(REPLACE "/" ";" _parts "${_path_stripped}")
+        list(LENGTH _parts _depth)
+
+        set(_updirs "")
+        math(EXPR _count "${_depth}")
+        while(_count GREATER 0)
+            set(_updirs "${_updirs}../")
+            math(EXPR _count "${_count} - 1")
+        endwhile()
+
+        set(NEW_RPATH "$ORIGIN/${_updirs}lib")
+
+        pr_add_rpath(${TARGET_NAME} "${NEW_RPATH}")
     endif()
 endfunction()
 
@@ -74,6 +110,16 @@ function(pr_add_executable TARGET_NAME)
     else()
         # TODO: Apply icon using .desktop file
         add_executable(${TARGET_NAME})
+    endif()
+
+    if(UNIX)
+        set_target_properties(${TARGET_NAME} PROPERTIES
+            BUILD_WITH_INSTALL_RPATH TRUE
+        )
+
+        set_target_properties(${TARGET_NAME} PROPERTIES
+            INSTALL_RPATH "$ORIGIN:$ORIGIN/lib"
+        )
     endif()
 
     message("[PR] Adding executable ${TARGET_NAME}")

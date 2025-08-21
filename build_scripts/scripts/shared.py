@@ -145,12 +145,28 @@ def mkdir(dirName,cd=False):
 	if cd:
 		os.chdir(dirName)
 
+def http_download_report_hook(block_num, block_size, total_size):
+    downloaded = block_num * block_size
+    if total_size > 0:
+        percent = downloaded * 100.0 / total_size
+        if percent > 100:
+            percent = 100.0
+        bar_len = 40
+        filled = int(bar_len * downloaded / total_size)
+        bar = '=' * filled + ' ' * (bar_len - filled)
+        sys.stdout.write(
+            f"\rDownloading: [{bar}] {percent:6.2f}% "
+            f"({downloaded/1024/1024:6.2f}MB/{total_size/1024/1024:6.2f}MB)")
+    else:
+        sys.stdout.write(f"\rDownloading: {downloaded} bytes")
+    sys.stdout.flush()
+
 def http_download(url,fileName=None):
 	if not fileName:
 		a = urlparse(url)
 		fileName = os.path.basename(a.path)
 	try:
-		urllib.request.urlretrieve(url,fileName)
+		urllib.request.urlretrieve(url, fileName, reporthook=http_download_report_hook)
 	except PermissionError as e:
 		print_warning("Failed to download '" +url +"' as '" +fileName +"' (PermissionError) (cwd: " + os.getcwd() +"): {}".format(e))
 		raise
@@ -275,6 +291,21 @@ def reset_to_commit(sha):
 	subprocess.run(["git","checkout",sha,"--recurse-submodules"],check=True)
 	# subprocess.run(["git","submodule","init"],check=True)
 	# subprocess.run(["git","update","--recursive"],check=True)
+
+def check_repository_commit(path, commitId, libName=None):
+	if not os.path.isdir(path) or not os.path.isdir(os.path.join(path, '.git')):
+		return False
+	curDir = os.getcwd()
+	os.chdir(path)
+	full_sha = subprocess.check_output(
+		["git", "rev-parse", "HEAD"], cwd=path
+	).decode('utf-8').strip()
+	short_current = full_sha[: len(commitId)]
+	if short_current == commitId:
+		if libName:
+			print_msg(f"{libName} is already up-to-date at commit '{commitId}', skipping...")
+		return True
+	return False
 
 def get_submodule(directory,url,commitId=None,branch=None):
 	from scripts.shared import print_msg
@@ -500,7 +531,7 @@ def copy_prebuilt_binaries(source_dir, lib_name, exclude_terms=None):
 def copy_prebuilt_headers(source_dir, lib_name, exclude_terms=None):
 	global config
 	include_dir = config.prebuilt_bin_dir +"/" +lib_name +"/include/"
-	copy_files(["*.h", "*.hpp", "*.ipp"], source_dir, include_dir, exclude_terms)
+	copy_files(["*.h", "*.hpp", "*.ipp", "*.inl"], source_dir, include_dir, exclude_terms)
 	return include_dir
 
 def sync_dirs(src: str, dst: str) -> None:

@@ -25,7 +25,7 @@
 #include <fsys/ifile.hpp>
 
 extern DLLNETWORK Engine *engine;
-#pragma optimize("", off)
+
 template<class TPropertyWrapper>
 void clear(TPropertyWrapper &prop)
 {

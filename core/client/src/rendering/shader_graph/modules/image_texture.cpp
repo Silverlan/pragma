@@ -17,7 +17,7 @@ using namespace pragma::rendering::shader_graph;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
-#pragma optimize("", off)
+
 ImageTextureModule::ImageTextureModule(ShaderGraph &shader) : pragma::rendering::ShaderGraphModule {shader}
 {
 	//Global settings +textures?

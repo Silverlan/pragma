@@ -6,7 +6,7 @@
 #include <functional>
 #include <udm.hpp>
 #include <sharedutils/util_string.h>
-#pragma optimize("", off)
+
 std::shared_ptr<pragma::animation::Skeleton> pragma::animation::Skeleton::Load(const udm::AssetData &data, std::string &outErr)
 {
 	auto skeleton = std::make_shared<Skeleton>();

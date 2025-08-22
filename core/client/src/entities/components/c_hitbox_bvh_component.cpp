@@ -33,7 +33,6 @@ using namespace pragma;
 
 static spdlog::logger &LOGGER = pragma::register_logger("bvh");
 
-#pragma optimize("", off)
 static std::shared_ptr<pragma::bvh::HitboxBvhCache> g_hbBvhCache {};
 static std::unique_ptr<BS::thread_pool> g_hbThreadPool {};
 static size_t g_hbBvhCount = 0;

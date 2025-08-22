@@ -19,7 +19,6 @@ LINK_WGUI_TO_CLASS(WITableCell, WITableCell);
 
 extern DLLCLIENT CEngine *c_engine;
 extern ClientState *client;
-#pragma optimize("", off)
 
 WITable::SortData::SortData(WITable *t, bool bAsc, unsigned int col) : table(t), ascending(bAsc), column(col) {}
 bool WITable::SortData::operator()(const WIHandle &a, const WIHandle &b)

@@ -48,7 +48,7 @@ import pragma.string.unicode;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
-#pragma optimize("", off)
+
 template<class TStream>
 static TStream &print_ui_element(TStream &os, const ::WIBase &handle)
 {

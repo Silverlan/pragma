@@ -33,7 +33,7 @@ extern DLLCLIENT CEngine *c_engine;
 import pragma.shadergraph;
 
 using namespace pragma;
-#pragma optimize("", off)
+
 ShaderGraph::ShaderGraph(prosper::IPrContext &context, const std::shared_ptr<pragma::shadergraph::Graph> &sg, const std::string &identifier, const std::string &fsShader) : ShaderGameWorldLightingPass {context, identifier, "programs/scene/textured", fsShader}, m_shaderGraph {sg} {}
 
 ShaderGraph::~ShaderGraph() {}

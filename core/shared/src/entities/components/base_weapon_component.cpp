@@ -7,13 +7,14 @@
 #include "pragma/entities/components/base_player_component.hpp"
 #include "pragma/entities/components/base_physics_component.hpp"
 #include "pragma/entities/components/base_transform_component.hpp"
-#include "pragma/entities/components/base_shooter_component.hpp"
 #include "pragma/entities/components/base_model_component.hpp"
 #include "pragma/entities/components/base_animated_component.hpp"
 #include "pragma/entities/components/base_render_component.hpp"
 #include "pragma/entities/components/base_ownable_component.hpp"
 #include "pragma/entities/components/action_input_controller_component.hpp"
 #include "pragma/util/bulletinfo.h"
+
+import pragma.entities.components;
 
 using namespace pragma;
 
@@ -220,8 +221,8 @@ void BaseWeaponComponent::Initialize()
 		auto mdlComponent = ent.GetModelComponent();
 		m_attMuzzle = mdlComponent ? mdlComponent->LookupAttachment("muzzle") : -1;
 	});
-	BindEventUnhandled(BaseShooterComponent::EVENT_ON_FIRE_BULLETS, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		auto &evDataOnFireBullets = static_cast<pragma::CEOnFireBullets &>(evData.get());
+	BindEventUnhandled(ecs::baseShooterComponent::EVENT_ON_FIRE_BULLETS, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+		auto &evDataOnFireBullets = static_cast<pragma::ecs::events::CEOnFireBullets &>(evData.get());
 		OnFireBullets(evDataOnFireBullets.bulletInfo, evDataOnFireBullets.bulletOrigin, evDataOnFireBullets.bulletDir, evDataOnFireBullets.effectsOrigin);
 	});
 	BindEventUnhandled(BaseOwnableComponent::EVENT_ON_OWNER_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {

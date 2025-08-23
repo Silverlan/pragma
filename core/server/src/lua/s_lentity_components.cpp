@@ -149,7 +149,7 @@ void SGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	auto defSObserver = pragma::lua::create_entity_component_class<pragma::SObserverComponent, pragma::BaseObserverComponent>("ObserverComponent");
 	entsMod[defSObserver];
 
-	auto defSShooter = pragma::lua::create_entity_component_class<pragma::SShooterComponent, pragma::BaseShooterComponent>("ShooterComponent");
+	auto defSShooter = pragma::lua::create_entity_component_class<pragma::SShooterComponent, pragma::ecs::BaseShooterComponent>("ShooterComponent");
 	entsMod[defSShooter];
 
 	auto defSPhysics = pragma::lua::create_entity_component_class<pragma::SPhysicsComponent, pragma::BasePhysicsComponent>("PhysicsComponent");

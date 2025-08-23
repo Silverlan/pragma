@@ -6,10 +6,10 @@
 
 #include "pragma/serverdefinitions.h"
 #include "pragma/entities/components/s_entity_component.hpp"
-#include <pragma/entities/components/base_shooter_component.hpp>
 
-class DamageInfo;
-namespace pragma {
+import pragma.entities.components;
+
+namespace pragma::ecs {
 	class DLLSERVER SShooterComponent final : public BaseShooterComponent, public SBaseNetComponent {
 	  public:
 		SShooterComponent(BaseEntity &ent) : BaseShooterComponent(ent) {}

@@ -1,10 +1,11 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
 #include "pragma/clientstate/clientstate.h"
-#include "pragma/entities/components/c_shooter_component.hpp"
 #include "pragma/entities/components/c_transform_component.hpp"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include <pragma/physics/raytraces.h>
@@ -13,13 +14,16 @@
 #include <sharedutils/scope_guard.h>
 #include <pragma/audio/alsound_type.h>
 
+module pragma.client.entities.components.shooter;
+
 using namespace pragma;
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;
 
-void CShooterComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
-void CShooterComponent::FireBullets(const BulletInfo &bulletInfo, const Vector3 &origin, const Vector3 &effectsOrigins, const std::vector<Vector3> &destPositions, bool bTransmitToServer, std::vector<TraceResult> &outHitTargets)
+using namespace ecs::baseShooterComponent;
+void ecs::CShooterComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void ecs::CShooterComponent::FireBullets(const BulletInfo &bulletInfo, const Vector3 &origin, const Vector3 &effectsOrigins, const std::vector<Vector3> &destPositions, bool bTransmitToServer, std::vector<TraceResult> &outHitTargets)
 {
 	auto *physEnv = c_game->GetPhysicsEnvironment();
 	if(physEnv == nullptr)
@@ -98,11 +102,11 @@ void CShooterComponent::FireBullets(const BulletInfo &bulletInfo, const Vector3 
 	if(bTransmitToServer == true)
 		static_cast<CBaseEntity &>(GetEntity()).SendNetEventUDP(m_netEvFireBullets, p);
 
-	CEOnBulletsFired evData {bulletInfo, outHitTargets};
+	events::CEOnBulletsFired evData {bulletInfo, outHitTargets};
 	BroadcastEvent(EVENT_ON_BULLETS_FIRED, evData);
 }
 
-void CShooterComponent::FireBullets(const BulletInfo &bulletInfo, std::vector<TraceResult> &outHitTargets, bool bMaster)
+void ecs::CShooterComponent::FireBullets(const BulletInfo &bulletInfo, std::vector<TraceResult> &outHitTargets, bool bMaster)
 {
 	Vector3 origin {};
 	Vector3 dir {};
@@ -123,7 +127,7 @@ void CShooterComponent::FireBullets(const BulletInfo &bulletInfo, std::vector<Tr
 	}
 	FireBullets(bulletInfo, origin, effectsOrigin, GetBulletDestinations(origin, dir, bulletInfo), bTransmit, outHitTargets);
 }
-Bool CShooterComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet)
+Bool ecs::CShooterComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet)
 {
 	if(eventId == m_netEvFireBullets)
 		ReceiveBulletEvent(packet);

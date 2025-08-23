@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_shared.h"
-#include "pragma/entities/components/base_shooter_component.hpp"
 #include "pragma/entities/components/base_player_component.hpp"
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/entities/components/base_physics_component.hpp"
@@ -12,10 +13,13 @@
 #include "pragma/lua/classes/ldef_vector.h"
 #include <sharedutils/netpacket.hpp>
 
-using namespace pragma;
+module pragma.entities.components.shooter;
 
-ComponentEventId BaseShooterComponent::EVENT_ON_FIRE_BULLETS = INVALID_COMPONENT_ID;
-ComponentEventId BaseShooterComponent::EVENT_ON_BULLETS_FIRED = INVALID_COMPONENT_ID;
+using namespace pragma::ecs;
+
+pragma::ComponentEventId baseShooterComponent::EVENT_ON_FIRE_BULLETS = INVALID_COMPONENT_ID;
+pragma::ComponentEventId baseShooterComponent::EVENT_ON_BULLETS_FIRED = INVALID_COMPONENT_ID;
+using namespace baseShooterComponent;
 void BaseShooterComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	EVENT_ON_FIRE_BULLETS = registerEvent("ON_FIRE_BULLETS", ComponentEventInfo::Type::Broadcast);
@@ -66,7 +70,7 @@ void BaseShooterComponent::OnFireBullets(const BulletInfo &bulletInfo, Vector3 &
 	if(effectsOrigin != nullptr)
 		*effectsOrigin = bulletOrigin;
 
-	CEOnFireBullets evData {bulletInfo, bulletOrigin, bulletDir, effectsOrigin};
+	events::CEOnFireBullets evData {bulletInfo, bulletOrigin, bulletDir, effectsOrigin};
 	BroadcastEvent(EVENT_ON_FIRE_BULLETS, evData);
 }
 
@@ -99,8 +103,8 @@ void BaseShooterComponent::GetBulletTraceData(const BulletInfo &bulletInfo, Trac
 
 //////////////
 
-CEOnFireBullets::CEOnFireBullets(const BulletInfo &bulletInfo, Vector3 &bulletOrigin, Vector3 &bulletDir, Vector3 *effectsOrigin) : bulletInfo {bulletInfo}, bulletOrigin {bulletOrigin}, bulletDir {bulletDir}, effectsOrigin {effectsOrigin} {}
-void CEOnFireBullets::PushArguments(lua_State *l)
+events::CEOnFireBullets::CEOnFireBullets(const BulletInfo &bulletInfo, Vector3 &bulletOrigin, Vector3 &bulletDir, Vector3 *effectsOrigin) : bulletInfo {bulletInfo}, bulletOrigin {bulletOrigin}, bulletDir {bulletDir}, effectsOrigin {effectsOrigin} {}
+void events::CEOnFireBullets::PushArguments(lua_State *l)
 {
 	Lua::Push<BulletInfo *>(l, &const_cast<BulletInfo &>(bulletInfo));
 	Lua::Push<Vector3>(l, bulletOrigin);
@@ -110,8 +114,8 @@ void CEOnFireBullets::PushArguments(lua_State *l)
 	else
 		Lua::PushNil(l);
 }
-uint32_t CEOnFireBullets::GetReturnCount() { return 3; }
-void CEOnFireBullets::HandleReturnValues(lua_State *l)
+uint32_t events::CEOnFireBullets::GetReturnCount() { return 3; }
+void events::CEOnFireBullets::HandleReturnValues(lua_State *l)
 {
 	if(Lua::IsSet(l, -3))
 		bulletOrigin = *Lua::CheckVector(l, -3);
@@ -123,8 +127,8 @@ void CEOnFireBullets::HandleReturnValues(lua_State *l)
 
 //////////////
 
-CEOnBulletsFired::CEOnBulletsFired(const BulletInfo &bulletInfo, const std::vector<TraceResult> &hitTargets) : bulletInfo {bulletInfo}, hitTargets {hitTargets} {}
-void CEOnBulletsFired::PushArguments(lua_State *l)
+events::CEOnBulletsFired::CEOnBulletsFired(const BulletInfo &bulletInfo, const std::vector<TraceResult> &hitTargets) : bulletInfo {bulletInfo}, hitTargets {hitTargets} {}
+void events::CEOnBulletsFired::PushArguments(lua_State *l)
 {
 	Lua::Push<BulletInfo *>(l, &const_cast<BulletInfo &>(bulletInfo));
 

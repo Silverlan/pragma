@@ -40,6 +40,8 @@
 #include <luabind/discard_result_policy.hpp>
 #include <fmt/core.h>
 
+import pragma.entities.components;
+
 namespace Lua {
 	template<typename... Types>
 	static luabind::class_<Types..., pragma::BaseEntityComponent> create_base_entity_component_class(const char *name)
@@ -2113,10 +2115,9 @@ void pragma::lua::base_observable_component::register_class(luabind::module_ &mo
 	def.scope[defObsCamData];
 }
 
-#include "pragma/entities/components/base_shooter_component.hpp"
 #include "pragma/util/bulletinfo.h"
 namespace Lua::Shooter {
-	void FireBullets(lua_State *l, pragma::BaseShooterComponent &hEnt, const luabind::object &, bool bHitReport, bool bMaster)
+	void FireBullets(lua_State *l, pragma::ecs::BaseShooterComponent &hEnt, const luabind::object &, bool bHitReport, bool bMaster)
 	{
 		auto *bulletInfo = Lua::CheckBulletInfo(l, 2);
 
@@ -2133,16 +2134,16 @@ namespace Lua::Shooter {
 };
 void pragma::lua::base_shooter_component::register_class(luabind::module_ &mod)
 {
-	auto def = Lua::create_base_entity_component_class<pragma::BaseShooterComponent>("BaseShooterComponent");
+	auto def = Lua::create_base_entity_component_class<pragma::ecs::BaseShooterComponent>("BaseShooterComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	def.def("FireBullets",
-	  static_cast<void (*)(lua_State *, pragma::BaseShooterComponent &, const luabind::object &, bool, bool)>([](lua_State *l, pragma::BaseShooterComponent &hEnt, const luabind::object &o, bool bHitReport, bool bMaster) { Lua::Shooter::FireBullets(l, hEnt, o, bHitReport, bMaster); }));
-	def.def("FireBullets", static_cast<void (*)(lua_State *, pragma::BaseShooterComponent &, const luabind::object &, bool)>([](lua_State *l, pragma::BaseShooterComponent &hEnt, const luabind::object &o, bool bHitReport) {
+	  static_cast<void (*)(lua_State *, pragma::ecs::BaseShooterComponent &, const luabind::object &, bool, bool)>([](lua_State *l, pragma::ecs::BaseShooterComponent &hEnt, const luabind::object &o, bool bHitReport, bool bMaster) { Lua::Shooter::FireBullets(l, hEnt, o, bHitReport, bMaster); }));
+	def.def("FireBullets", static_cast<void (*)(lua_State *, pragma::ecs::BaseShooterComponent &, const luabind::object &, bool)>([](lua_State *l, pragma::ecs::BaseShooterComponent &hEnt, const luabind::object &o, bool bHitReport) {
 		Lua::Shooter::FireBullets(l, hEnt, o, bHitReport, Lua::get_bullet_master(hEnt.GetEntity()));
 	}));
 	def.def("FireBullets",
-	  static_cast<void (*)(lua_State *, pragma::BaseShooterComponent &, const luabind::object &)>([](lua_State *l, pragma::BaseShooterComponent &hEnt, const luabind::object &o) { Lua::Shooter::FireBullets(l, hEnt, o, false, Lua::get_bullet_master(hEnt.GetEntity())); }));
-	def.add_static_constant("EVENT_ON_FIRE_BULLETS", pragma::BaseShooterComponent::EVENT_ON_FIRE_BULLETS);
+	  static_cast<void (*)(lua_State *, pragma::ecs::BaseShooterComponent &, const luabind::object &)>([](lua_State *l, pragma::ecs::BaseShooterComponent &hEnt, const luabind::object &o) { Lua::Shooter::FireBullets(l, hEnt, o, false, Lua::get_bullet_master(hEnt.GetEntity())); }));
+	def.add_static_constant("EVENT_ON_FIRE_BULLETS", pragma::ecs::baseShooterComponent::EVENT_ON_FIRE_BULLETS);
 }
 
 #include "pragma/entities/components/base_physics_component.hpp"

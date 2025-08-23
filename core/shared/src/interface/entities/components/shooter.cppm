@@ -1,47 +1,47 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __BASE_SHOOTER_COMPONENT_HPP__
-#define __BASE_SHOOTER_COMPONENT_HPP__
+module;
 
+#include "pragma/networkdefinitions.h"
+#include "pragma/entities/components/base_player_component.hpp"
 #include "pragma/entities/components/base_entity_component.hpp"
 #include "pragma/entities/baseentity_handle.h"
 #include "pragma/entities/baseentity_net_event_manager.hpp"
+#include "pragma/util/bulletinfo.h"
+#include "pragma/physics/raytraces.h"
 #include <typeindex>
 #include <mathutil/uvec.h>
 
-struct BulletInfo;
-struct TraceResult;
-class TraceData;
-class NetPacket;
-class PhysObj;
-enum class RayCastHitType : uint8_t;
-namespace pragma {
-	namespace physics {
-		class ICollisionObject;
-	};
-	struct DLLNETWORK CEOnBulletsFired : public ComponentEvent {
-		CEOnBulletsFired(const BulletInfo &bulletInfo, const std::vector<TraceResult> &hitTargets);
-		virtual void PushArguments(lua_State *l) override;
-		const BulletInfo &bulletInfo;
-		const std::vector<TraceResult> &hitTargets;
-	};
-	struct DLLNETWORK CEOnFireBullets : public ComponentEvent {
-		CEOnFireBullets(const BulletInfo &bulletInfo, Vector3 &bulletOrigin, Vector3 &bulletDir, Vector3 *effectsOrigin);
-		virtual void PushArguments(lua_State *l) override;
-		const BulletInfo &bulletInfo;
-		Vector3 &bulletOrigin;
-		Vector3 &bulletDir;
-		Vector3 *effectsOrigin;
+export module pragma.entities.components.shooter;
 
-		virtual uint32_t GetReturnCount() override;
-		virtual void HandleReturnValues(lua_State *l) override;
+export namespace pragma::ecs {
+	namespace events {
+		struct DLLNETWORK CEOnBulletsFired : public ComponentEvent {
+			CEOnBulletsFired(const BulletInfo &bulletInfo, const std::vector<TraceResult> &hitTargets);
+			virtual void PushArguments(lua_State *l) override;
+			const BulletInfo &bulletInfo;
+			const std::vector<TraceResult> &hitTargets;
+		};
+		struct DLLNETWORK CEOnFireBullets : public ComponentEvent {
+			CEOnFireBullets(const BulletInfo &bulletInfo, Vector3 &bulletOrigin, Vector3 &bulletDir, Vector3 *effectsOrigin);
+			virtual void PushArguments(lua_State *l) override;
+			const BulletInfo &bulletInfo;
+			Vector3 &bulletOrigin;
+			Vector3 &bulletDir;
+			Vector3 *effectsOrigin;
+
+			virtual uint32_t GetReturnCount() override;
+			virtual void HandleReturnValues(lua_State *l) override;
+		};
 	};
-	class BasePlayerComponent;
+	
+	namespace baseShooterComponent {
+		extern DLLNETWORK ComponentEventId EVENT_ON_FIRE_BULLETS;
+		extern DLLNETWORK ComponentEventId EVENT_ON_BULLETS_FIRED;
+	};
 	class DLLNETWORK BaseShooterComponent : public BaseEntityComponent {
 	  public:
-		static ComponentEventId EVENT_ON_FIRE_BULLETS;
-		static ComponentEventId EVENT_ON_BULLETS_FIRED;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
 		virtual void Initialize() override;
@@ -64,5 +64,3 @@ namespace pragma {
 		pragma::NetEventId m_netEvFireBullets = pragma::INVALID_NET_EVENT;
 	};
 };
-
-#endif

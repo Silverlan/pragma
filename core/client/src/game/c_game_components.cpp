@@ -104,7 +104,6 @@
 #include "pragma/entities/trigger/c_trigger_touch.h"
 #include "pragma/entities/c_skybox.h"
 #include "pragma/entities/c_flashlight.h"
-#include "pragma/entities/components/c_shooter_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/entities/components/c_entity_component.hpp"
@@ -220,7 +219,7 @@ void CGame::InitializeEntityComponents(pragma::EntityComponentManager &component
 	componentManager.RegisterComponentType<pragma::CTouchComponent>("touch", {"gameplay", hideInEditor});
 	componentManager.RegisterComponentType<pragma::CSkyboxComponent>("skybox", {"world"});
 	componentManager.RegisterComponentType<pragma::CWorldComponent>("world", {"world", hideInEditor});
-	componentManager.RegisterComponentType<pragma::CShooterComponent>("shooter", {"gameplay"});
+	componentManager.RegisterComponentType<pragma::ecs::CShooterComponent>("shooter", {"gameplay"});
 	componentManager.RegisterComponentType<pragma::CModelComponent>("model", {"rendering/model"});
 	componentManager.RegisterComponentType<pragma::CMaterialOverrideComponent>("material_override", {"rendering/model"});
 	componentManager.RegisterComponentType<pragma::CMaterialPropertyOverrideComponent>("material_property_override", {"rendering/model"});

@@ -115,7 +115,6 @@
 #include "pragma/entities/trigger/c_trigger_touch.h"
 #include "pragma/entities/c_skybox.h"
 #include "pragma/entities/c_flashlight.h"
-#include "pragma/entities/components/c_shooter_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/entities/components/c_entity_component.hpp"
@@ -155,6 +154,9 @@
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <util_image_buffer.hpp>
 #include <luabind/copy_policy.hpp>
+
+import pragma.entities.components;
+import pragma.client.entities.components;
 
 namespace Lua {
 	namespace PBRConverter {
@@ -448,7 +450,7 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	auto defCObserver = pragma::lua::create_entity_component_class<pragma::CObserverComponent, pragma::BaseObserverComponent>("ObserverComponent");
 	entsMod[defCObserver];
 
-	auto defCShooter = pragma::lua::create_entity_component_class<pragma::CShooterComponent, pragma::BaseShooterComponent>("ShooterComponent");
+	auto defCShooter = pragma::lua::create_entity_component_class<pragma::ecs::CShooterComponent, pragma::ecs::BaseShooterComponent>("ShooterComponent");
 	entsMod[defCShooter];
 
 	auto defCPhysics = pragma::lua::create_entity_component_class<pragma::CPhysicsComponent, pragma::BasePhysicsComponent>("PhysicsComponent");

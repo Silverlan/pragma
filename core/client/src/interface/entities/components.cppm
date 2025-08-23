@@ -4,4 +4,5 @@
 module;
 
 export module pragma.client.entities.components;
+export import pragma.client.entities.components.shooter;
 // export import pragma.client.entities.components.material_override;

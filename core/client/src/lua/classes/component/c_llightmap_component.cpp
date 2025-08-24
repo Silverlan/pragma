@@ -7,7 +7,6 @@
 #include "pragma/lua/libraries/lfile.h"
 #include "pragma/entities/components/c_light_map_component.hpp"
 #include "pragma/entities/components/c_light_map_receiver_component.hpp"
-#include "pragma/entities/components/c_light_map_data_cache_component.hpp"
 #include "pragma/entities/components/lightmap_data_cache.hpp"
 #include <pragma/lua/converters/optional_converter_t.hpp>
 #include <pragma/lua/converters/property_converter_t.hpp>
@@ -23,6 +22,8 @@
 #include <texturemanager/texturemanager.h>
 #include <cmaterialmanager.h>
 #include <cmaterial_manager2.hpp>
+
+import pragma.client.entities.components;
 
 extern DLLCLIENT CEngine *c_engine;
 

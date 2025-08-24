@@ -6,6 +6,7 @@ module;
 export module pragma.client.entities.components;
 export import :field_angle;
 export import :hitbox_bvh;
+export import :light_map_data_cache;
 export import :lua;
 export import :optical_camera;
 export import :point_at_target;

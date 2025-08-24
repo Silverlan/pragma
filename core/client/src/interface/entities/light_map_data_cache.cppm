@@ -1,14 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2022 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_LIGHT_MAP_DATA_CACHE_COMPONENT_HPP__
-#define __C_LIGHT_MAP_DATA_CACHE_COMPONENT_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
+#include "pragma/entities/components/lightmap_data_cache.hpp"
 #include <pragma/entities/components/base_entity_component.hpp>
 
-namespace pragma {
-	struct LightmapDataCache;
+export module pragma.client.entities.components:light_map_data_cache;
+
+export namespace pragma {
 	class DLLCLIENT CLightMapDataCacheComponent final : public BaseEntityComponent {
 	  public:
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
@@ -29,5 +30,3 @@ namespace pragma {
 		bool m_lightmapDataCacheDirty = false;
 	};
 };
-
-#endif

@@ -20,7 +20,6 @@
 #include "pragma/entities/components/s_weapon_component.hpp"
 #include "pragma/entities/components/s_sound_emitter_component.hpp"
 #include <pragma/debug/intel_vtune.hpp>
-#include <pragma/entities/components/global_component.hpp>
 #include <pragma/networking/enums.hpp>
 #include <pragma/lua/lua_entity_type.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
@@ -28,6 +27,8 @@
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/game/game_lua_entity.hpp>
 #include <udm.hpp>
+
+import pragma.entities.components;
 
 extern ServerState *server;
 extern EntityClassMap<SBaseEntity> *g_ServerEntityFactories;

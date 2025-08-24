@@ -6,7 +6,6 @@
 #include "pragma/entities/entity_component_manager.hpp"
 #include "pragma/entities/components/logic_component.hpp"
 #include "pragma/entities/components/damageable_component.hpp"
-#include "pragma/entities/components/global_component.hpp"
 #include "pragma/entities/components/ik_component.hpp"
 #include "pragma/entities/components/map_component.hpp"
 #include "pragma/entities/components/submergible_component.hpp"

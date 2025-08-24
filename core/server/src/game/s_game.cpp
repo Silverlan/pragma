@@ -58,7 +58,6 @@
 #include <pragma/networking/enums.hpp>
 #include <pragma/networking/error.hpp>
 #include <pragma/entities/components/base_gamemode_component.hpp>
-#include <pragma/entities/components/global_component.hpp>
 #include <pragma/entities/components/base_name_component.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/components/base_character_component.hpp>
@@ -72,6 +71,8 @@
 #include <pragma/entities/components/velocity_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <udm.hpp>
+
+import pragma.entities.components;
 
 extern DLLNETWORK Engine *engine;
 extern EntityClassMap<SBaseEntity> *g_ServerEntityFactories;

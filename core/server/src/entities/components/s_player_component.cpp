@@ -26,10 +26,11 @@
 #include <pragma/entities/components/base_score_component.hpp>
 #include <pragma/entities/components/base_name_component.hpp>
 #include <pragma/entities/components/base_model_component.hpp>
-#include <pragma/entities/components/global_component.hpp>
 #include <pragma/entities/components/damageable_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
+
+import pragma.entities.components;
 
 using namespace pragma;
 

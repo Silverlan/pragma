@@ -31,7 +31,6 @@
 #include "pragma/entities/components/base_ownable_component.hpp"
 #include "pragma/entities/components/base_player_component.hpp"
 #include "pragma/entities/components/base_child_component.hpp"
-#include "pragma/entities/components/global_component.hpp"
 #include "pragma/entities/components/damageable_component.hpp"
 #include "pragma/entities/components/animation_driver_component.hpp"
 #include "pragma/entities/components/origin_component.hpp"

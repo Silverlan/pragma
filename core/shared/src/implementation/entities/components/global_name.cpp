@@ -1,12 +1,17 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_shared.h"
-#include "pragma/entities/components/global_component.hpp"
 #include "pragma/entities/baseentity_events.hpp"
 #include "pragma/lua/converters/game_type_converters_t.hpp"
 #include <sharedutils/datastream.h>
 #include <udm.hpp>
+
+module pragma.entities.components;
+
+import :global_name;
 
 using namespace pragma;
 

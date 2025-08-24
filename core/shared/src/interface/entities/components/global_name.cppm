@@ -1,12 +1,13 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __GLOBAL_COMPONENT_HPP__
-#define __GLOBAL_COMPONENT_HPP__
+module;
 
 #include "pragma/entities/components/base_entity_component.hpp"
 
-namespace pragma {
+export module pragma.entities.components:global_name;
+
+export namespace pragma {
 	// Note: 'GlobalComponent' cannot be used as name, otherwise there are conflicts with 'GlobalHandle' class of winbase.h
 	class DLLNETWORK GlobalNameComponent final : public BaseEntityComponent {
 	  public:
@@ -24,5 +25,3 @@ namespace pragma {
 		std::string m_globalName = {};
 	};
 };
-
-#endif

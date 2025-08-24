@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
-#include "pragma/entities/components/c_optical_camera_component.hpp"
 #include "pragma/entities/components/renderers/rasterization/hdr_data.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/entity_component_system_t.hpp"
@@ -17,6 +16,8 @@
 #include <prosper_command_buffer.hpp>
 #include <image/prosper_render_target.hpp>
 #include <image/prosper_msaa_texture.hpp>
+
+import pragma.client.entities.components;
 
 using namespace pragma::rendering;
 

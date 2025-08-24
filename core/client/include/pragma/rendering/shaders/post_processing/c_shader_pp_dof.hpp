@@ -5,7 +5,8 @@
 #define __C_SHADER_PP_DOF_HPP__
 
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_base.hpp"
-#include "pragma/entities/components/c_optical_camera_component.hpp"
+
+import pragma.client.entities.components;
 
 namespace pragma {
 	class DLLCLIENT ShaderPPDoF : public ShaderPPBase {

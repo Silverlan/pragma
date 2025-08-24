@@ -1,10 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2022 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
-#include "pragma/entities/components/c_optical_camera_component.hpp"
 #include <pragma/entities/entity_component_manager_t.hpp>
+
+module pragma.client.entities.components;
+
+import :optical_camera;
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT CEngine *c_engine;

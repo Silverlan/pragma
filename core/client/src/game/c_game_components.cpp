@@ -35,7 +35,6 @@
 #include "pragma/entities/components/c_static_bvh_cache_component.hpp"
 #include "pragma/entities/components/c_static_bvh_user_component.hpp"
 #include "pragma/entities/components/c_light_map_data_cache_component.hpp"
-#include "pragma/entities/components/c_optical_camera_component.hpp"
 #include "pragma/entities/components/c_hitbox_bvh_component.hpp"
 #include "pragma/entities/components/c_input_component.hpp"
 #include "pragma/entities/components/c_global_shader_input.hpp"

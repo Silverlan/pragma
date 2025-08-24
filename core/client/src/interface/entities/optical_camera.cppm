@@ -1,14 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2022 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_OPTICAL_CAMERA_COMPONENT_HPP__
-#define __C_OPTICAL_CAMERA_COMPONENT_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include <pragma/entities/components/base_entity_component.hpp>
 #include <unordered_set>
 
-namespace pragma {
+export module pragma.client.entities.components:optical_camera;
+
+export namespace pragma {
 	class DLLCLIENT COpticalCameraComponent final : public BaseEntityComponent {
 	  public:
 		enum class Flags : uint32_t { None = 0, DebugShowFocus = 1, EnableVignette = DebugShowFocus << 1u, PentagonBokehShape = EnableVignette << 1u, DebugShowDepth = PentagonBokehShape << 1u };
@@ -80,6 +81,6 @@ namespace pragma {
 		Flags m_flags = Flags::EnableVignette;
 	};
 };
-REGISTER_BASIC_BITWISE_OPERATORS(pragma::COpticalCameraComponent::Flags)
-
-#endif
+export {
+	REGISTER_BASIC_BITWISE_OPERATORS(pragma::COpticalCameraComponent::Flags)
+};

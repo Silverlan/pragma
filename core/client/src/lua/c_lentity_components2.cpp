@@ -9,7 +9,6 @@
 #include "pragma/entities/components/c_animated_bvh_component.hpp"
 #include "pragma/entities/components/c_static_bvh_cache_component.hpp"
 #include "pragma/entities/components/c_static_bvh_user_component.hpp"
-#include "pragma/entities/components/c_optical_camera_component.hpp"
 #include "pragma/entities/components/c_motion_blur_data_component.hpp"
 #include "pragma/entities/components/c_hitbox_bvh_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_pp_fog_component.hpp"
@@ -28,6 +27,8 @@
 #include <pragma/lua/lua_util_component_stream.hpp>
 #include <pragma/lua/lua_util_class.hpp>
 // --template-include-location
+
+import pragma.client.entities.components;
 
 extern DLLCLIENT CGame *c_game;
 

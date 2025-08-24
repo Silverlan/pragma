@@ -1,16 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2024 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __META_RIG_COMPONENT_HPP__
-#define __META_RIG_COMPONENT_HPP__
+module;
 
 #include "pragma/entities/components/base_entity_component.hpp"
+#include "pragma/model/animation/meta_rig.hpp"
 
-namespace pragma {
-	namespace animation {
-		enum class MetaRigBoneType : uint8_t;
-		struct MetaRig;
-	};
+export module pragma.entities.components:meta_rig;
+
+export namespace pragma {
 	class DLLNETWORK MetaRigComponent final : public BaseEntityComponent {
 	  public:
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
@@ -35,5 +33,3 @@ namespace pragma {
 		std::shared_ptr<animation::MetaRig> m_metaRig = nullptr;
 	};
 };
-
-#endif

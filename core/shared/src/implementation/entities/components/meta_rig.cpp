@@ -1,13 +1,18 @@
 // SPDX-FileCopyrightText: (c) 2024 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_shared.h"
-#include "pragma/entities/components/meta_rig_component.hpp"
 #include "pragma/entities/entity_component_manager_t.hpp"
 #include "pragma/entities/components/component_member_flags.hpp"
 #include "pragma/entities/components/base_animated_component.hpp"
 #include "pragma/model/animation/meta_rig.hpp"
 #include "pragma/model/model.h"
+
+module pragma.entities.components;
+
+import :meta_rig;
 
 using namespace pragma;
 

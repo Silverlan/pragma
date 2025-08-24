@@ -3,7 +3,6 @@
 
 #include "stdafx_shared.h"
 #include "pragma/entities/components/bvh_data.hpp"
-#include "pragma/entities/components/c_hitbox_bvh_component.hpp"
 #include "pragma/entities/components/intersection_handler_component.hpp"
 #include "pragma/model/model.h"
 #include "pragma/model/modelmesh.h"

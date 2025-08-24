@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: (c) 2024 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/entities/components/c_hitbox_bvh_component.hpp"
 #include "pragma/entities/components/hitbox_mesh_bvh_builder.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"
@@ -25,6 +26,10 @@
 #include <sharedutils/BS_thread_pool.hpp>
 #include <mathutil/boundingvolume.h>
 #include <bvh/v2/stack.h>
+
+module pragma.client.entities.components;
+
+import :hitbox_bvh;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;

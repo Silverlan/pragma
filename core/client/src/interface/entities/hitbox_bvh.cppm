@@ -1,16 +1,16 @@
 // SPDX-FileCopyrightText: (c) 2024 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_HITBOX_BVH_COMPONENT_HPP__
-#define __C_HITBOX_BVH_COMPONENT_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include <pragma/entities/components/base_bvh_component.hpp>
 #include "pragma/entities/components/hitbox_mesh_bvh_builder.hpp"
+#include "pragma/model/modelmesh.h"
 
-class Model;
-class ModelSubMesh;
-namespace pragma {
+export module pragma.client.entities.components:hitbox_bvh;
+
+export namespace pragma {
 	namespace bvh {
 		class ObbBvhTree;
 		struct DLLCLIENT DebugDrawInfo {
@@ -56,8 +56,7 @@ namespace pragma {
 			pragma::bvh::HitboxMeshBvhBuilder m_builder;
 		};
 	};
-	struct HitInfo;
-	struct IntersectionInfo;
+
 	class DLLCLIENT CHitboxBvhComponent final : public BaseEntityComponent {
 	  public:
 		CHitboxBvhComponent(BaseEntity &ent);
@@ -124,6 +123,6 @@ namespace pragma {
 
 	};
 };
-REGISTER_BASIC_BITWISE_OPERATORS(pragma::bvh::DebugDrawInfo::Flags)
-
-#endif
+export {
+	REGISTER_BASIC_BITWISE_OPERATORS(pragma::bvh::DebugDrawInfo::Flags)
+};

@@ -1,15 +1,16 @@
 // SPDX-FileCopyrightText: (c) 2024 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_GLOBAL_SHADER_INPUT_HPP__
-#define __C_GLOBAL_SHADER_INPUT_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/rendering/global_shader_input_manager.hpp"
 #include "pragma/entities/components/base_entity_component_member_register.hpp"
 #include <pragma/entities/components/base_entity_component.hpp>
 
-namespace pragma {
+export module pragma.client.entities.components:global_shader_input;
+
+export namespace pragma {
 	struct DLLCLIENT UdmPropertyList {
 	  public:
 		UdmPropertyList();
@@ -26,9 +27,6 @@ namespace pragma {
 		std::vector<std::string> m_indexToName;
 	};
 
-	namespace rendering {
-		class GlobalShaderInputDataManager;
-	};
 	class DLLCLIENT CGlobalShaderInputComponent final : public BaseEntityComponent, public DynamicMemberRegister {
 	  public:
 		static void RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts);
@@ -67,5 +65,3 @@ namespace pragma {
 		UdmPropertyList m_propertyList;
 	};
 };
-
-#endif

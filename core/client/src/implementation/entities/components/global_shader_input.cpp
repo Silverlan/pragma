@@ -1,10 +1,11 @@
 // SPDX-FileCopyrightText: (c) 2024 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
 #include "pragma/clientstate/clientstate.h"
-#include "pragma/entities/components/c_global_shader_input.hpp"
 #include "pragma/entities/components/base_entity_component_logging.hpp"
 #include "pragma/rendering/global_shader_input_manager.hpp"
 #include "pragma/lua/lua_util_component.hpp"
@@ -12,6 +13,10 @@
 #include <pragma/entities/entity_component_manager_t.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
+
+module pragma.client.entities.components;
+
+import :global_shader_input;
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;

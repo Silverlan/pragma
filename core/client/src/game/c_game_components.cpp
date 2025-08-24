@@ -33,7 +33,6 @@
 #include "pragma/entities/components/c_static_bvh_cache_component.hpp"
 #include "pragma/entities/components/c_static_bvh_user_component.hpp"
 #include "pragma/entities/components/c_input_component.hpp"
-#include "pragma/entities/components/c_global_shader_input.hpp"
 #include "pragma/entities/components/material_override.hpp"
 #include "pragma/entities/components/material_property_override.hpp"
 #include "pragma/entities/components/liquid/c_buoyancy_component.hpp"

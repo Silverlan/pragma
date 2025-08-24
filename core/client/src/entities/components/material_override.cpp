@@ -3,7 +3,6 @@
 
 #include "stdafx_client.h"
 #include "pragma/entities/components/material_override.hpp"
-#include "pragma/entities/components/c_time_scale_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/entity_component_manager_t.hpp"
 #include "pragma/entities/components/material_property_override.hpp"
@@ -17,6 +16,8 @@
 #include <prosper_command_buffer.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <cmaterial.h>
+
+import pragma.client.entities.components;
 
 using namespace pragma;
 ComponentEventId CMaterialOverrideComponent::EVENT_ON_MATERIAL_OVERRIDES_CLEARED = INVALID_COMPONENT_ID;

@@ -5,7 +5,6 @@
 #include "pragma/game/c_game.h"
 #include "pragma/entities/components/material_property_override.hpp"
 #include "pragma/entities/components/material_override.hpp"
-#include "pragma/entities/components/c_time_scale_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/entity_component_manager_t.hpp"
 #include "pragma/model/c_model.h"
@@ -17,6 +16,8 @@
 #include <prosper_command_buffer.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <cmaterial.h>
+
+import pragma.client.entities.components;
 
 using namespace pragma;
 void CMaterialPropertyOverrideComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { BaseModelComponent::RegisterEvents(componentManager, registerEvent); }

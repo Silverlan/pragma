@@ -38,7 +38,6 @@
 #include "pragma/entities/components/c_weapon_component.hpp"
 #include "pragma/entities/components/c_vehicle_component.hpp"
 #include "pragma/entities/components/c_character_component.hpp"
-#include "pragma/entities/components/c_time_scale_component.hpp"
 #include "pragma/entities/components/c_ai_component.hpp"
 #include <pragma/util/bulletinfo.h>
 #include <pragma/physics/raytraces.h>
@@ -56,6 +55,7 @@
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
+import pragma.client.entities.components;
 import pragma.entities.components;
 
 LINK_ENTITY_TO_CLASS(entity, CBaseEntity);

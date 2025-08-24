@@ -13,8 +13,8 @@
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/entities/components/c_transform_component.hpp"
-#include "pragma/entities/components/c_time_scale_component.hpp"
 #include "pragma/entities/components/c_attachment_component.hpp"
+#include "pragma/entities/components/base_time_scale_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include <pragma/asset/util_asset.hpp>
 #include <sprite_sheet_animation.hpp>
@@ -28,6 +28,8 @@
 #include <pragma/util/util_game.hpp>
 #include <datasystem_vector.h>
 #include <udm.hpp>
+
+import pragma.client.entities.components;
 
 using namespace pragma;
 

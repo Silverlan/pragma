@@ -8,4 +8,5 @@ export import :optical_camera;
 export import :point_at_target;
 export import :score;
 export import :shooter;
+export import :time_scale;
 // export import pragma.client.entities.components.material_override;

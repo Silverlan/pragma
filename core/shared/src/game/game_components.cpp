@@ -14,7 +14,6 @@
 #include "pragma/entities/components/usable_component.hpp"
 #include "pragma/entities/components/panima_component.hpp"
 #include "pragma/entities/components/parent_component.hpp"
-#include "pragma/entities/components/composite_component.hpp"
 #include "pragma/entities/components/movement_component.hpp"
 #include "pragma/entities/components/orientation_component.hpp"
 #include "pragma/entities/components/action_input_controller_component.hpp"
@@ -40,6 +39,8 @@
 #include "pragma/entities/components/meta_rig_component.hpp"
 #include "pragma/entities/components/basegravity.h"
 
+import pragma.entities.components;
+
 void Game::InitializeEntityComponents(pragma::EntityComponentManager &componentManager)
 {
 	constexpr auto hideInEditor = pragma::ComponentRegInfo::Flags::HideInEditor;
@@ -53,7 +54,7 @@ void Game::InitializeEntityComponents(pragma::EntityComponentManager &componentM
 	componentManager.RegisterComponentType<pragma::UsableComponent>("usable", {"gameplay"});
 	componentManager.RegisterComponentType<pragma::GlobalNameComponent>("global", {"core", hideInEditor});
 	componentManager.RegisterComponentType<pragma::PanimaComponent>("panima", {"animation"});
-	componentManager.RegisterComponentType<pragma::CompositeComponent>("composite", {"core", hideInEditor});
+	componentManager.RegisterComponentType<pragma::ecs::CompositeComponent>("composite", {"core", hideInEditor});
 	componentManager.RegisterComponentType<pragma::AnimationDriverComponent>("animation_driver", {"animation"});
 	componentManager.RegisterComponentType<pragma::OriginComponent>("origin", {"world/transform"});
 	componentManager.RegisterComponentType<pragma::ConstraintComponent>("constraint", {"animation/constraints"});

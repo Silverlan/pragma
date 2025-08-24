@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_shared.h"
-#include "pragma/entities/components/composite_component.hpp"
 #include "pragma/entities/baseentity_events.hpp"
 #include "pragma/entities/entity_component_system_t.hpp"
 #include "pragma/lua/converters/game_type_converters_t.hpp"
@@ -11,7 +12,12 @@
 #include <unordered_set>
 #include <udm.hpp>
 
-using namespace pragma;
+module pragma.entities.components;
+
+import :composite;
+
+using namespace pragma::ecs;
+using namespace compositeComponent;
 
 CompositeGroup::CompositeGroup(CompositeComponent &compositeC, const std::string &name) : m_compositeComponent {&compositeC}, m_groupName {name} {}
 CompositeGroup::~CompositeGroup() { ClearEntities(false); }
@@ -25,7 +31,7 @@ void CompositeGroup::AddEntity(BaseEntity &ent)
 	if(FindEntity(ent) != m_ents.end())
 		return;
 	m_ents[util::get_uuid_hash(ent.GetUuid())] = ent.GetHandle();
-	m_compositeComponent->BroadcastEvent(CompositeComponent::EVENT_ON_ENTITY_ADDED, CECompositeEntityChanged {*this, ent});
+	m_compositeComponent->BroadcastEvent(compositeComponent::EVENT_ON_ENTITY_ADDED, events::CECompositeEntityChanged {*this, ent});
 }
 void CompositeGroup::RemoveEntity(BaseEntity &ent)
 {
@@ -33,7 +39,7 @@ void CompositeGroup::RemoveEntity(BaseEntity &ent)
 	if(it == m_ents.end())
 		return;
 	m_ents.erase(it);
-	m_compositeComponent->BroadcastEvent(CompositeComponent::EVENT_ON_ENTITY_REMOVED, CECompositeEntityChanged {*this, ent});
+	m_compositeComponent->BroadcastEvent(compositeComponent::EVENT_ON_ENTITY_REMOVED, events::CECompositeEntityChanged {*this, ent});
 }
 CompositeGroup *CompositeGroup::FindChildGroup(const std::string &name)
 {
@@ -72,8 +78,8 @@ void CompositeGroup::ClearEntities(bool safely)
 
 ////////////////
 
-ComponentEventId CompositeComponent::EVENT_ON_ENTITY_ADDED = INVALID_COMPONENT_ID;
-ComponentEventId CompositeComponent::EVENT_ON_ENTITY_REMOVED = INVALID_COMPONENT_ID;
+pragma::ComponentEventId compositeComponent::EVENT_ON_ENTITY_ADDED = INVALID_COMPONENT_ID;
+pragma::ComponentEventId compositeComponent::EVENT_ON_ENTITY_REMOVED = INVALID_COMPONENT_ID;
 void CompositeComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	EVENT_ON_ENTITY_ADDED = registerEvent("ON_COMPOSITE_ENTITY_ADDED", ComponentEventInfo::Type::Broadcast);
@@ -145,8 +151,8 @@ void CompositeComponent::Load(udm::LinkedPropertyWrapperArg udm, uint32_t versio
 	read_group(GetEntity(), udm["rootGroup"], *m_rootGroup);
 }
 
-CECompositeEntityChanged::CECompositeEntityChanged(CompositeGroup &group, BaseEntity &ent) : ent {ent}, group {group} {}
-void CECompositeEntityChanged::PushArguments(lua_State *l)
+pragma::ecs::events::CECompositeEntityChanged::CECompositeEntityChanged(CompositeGroup &group, BaseEntity &ent) : ent {ent}, group {group} {}
+void pragma::ecs::events::CECompositeEntityChanged::PushArguments(lua_State *l)
 {
 	Lua::Push<CompositeGroup *>(l, &group);
 	ent.GetLuaObject().push(l);

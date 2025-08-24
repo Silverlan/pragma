@@ -74,7 +74,6 @@
 #include "pragma/entities/components/s_gamemode_component.hpp"
 #include "pragma/entities/components/s_game_component.hpp"
 #include "pragma/entities/environment/s_env_timescale.h"
-#include <pragma/physics/raytraces.h>
 #include <pragma/model/model.h>
 #include <pragma/model/modelmesh.h>
 #include <pragma/lua/classes/lproperty.hpp>
@@ -149,7 +148,7 @@ void SGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	auto defSObserver = pragma::lua::create_entity_component_class<pragma::SObserverComponent, pragma::BaseObserverComponent>("ObserverComponent");
 	entsMod[defSObserver];
 
-	auto defSShooter = pragma::lua::create_entity_component_class<pragma::SShooterComponent, pragma::ecs::BaseShooterComponent>("ShooterComponent");
+	auto defSShooter = pragma::lua::create_entity_component_class<pragma::ecs::SShooterComponent, pragma::ecs::BaseShooterComponent>("ShooterComponent");
 	entsMod[defSShooter];
 
 	auto defSPhysics = pragma::lua::create_entity_component_class<pragma::SPhysicsComponent, pragma::BasePhysicsComponent>("PhysicsComponent");

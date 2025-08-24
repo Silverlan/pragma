@@ -22,7 +22,6 @@
 #include "pragma/lua/lentity_components_base_types.hpp"
 #include "pragma/entities/components/panima_component.hpp"
 #include "pragma/entities/components/velocity_component.hpp"
-#include "pragma/entities/components/composite_component.hpp"
 #include "pragma/entities/components/submergible_component.hpp"
 #include "pragma/entities/components/logic_component.hpp"
 #include "pragma/entities/components/ik_component.hpp"
@@ -72,6 +71,7 @@
 #include <luabind/copy_policy.hpp>
 
 import panima;
+import pragma.entities.components;
 
 namespace Lua {
 	bool get_bullet_master(BaseEntity &ent);
@@ -463,23 +463,23 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	  });
 	entsMod[defOrientation];
 
-	auto defComposite = pragma::lua::create_entity_component_class<pragma::CompositeComponent, pragma::BaseEntityComponent>("CompositeComponent");
-	defComposite.def("ClearEntities", &pragma::CompositeComponent::ClearEntities);
-	defComposite.def("ClearEntities", &pragma::CompositeComponent::ClearEntities, luabind::default_parameter_policy<2, true> {});
+	auto defComposite = pragma::lua::create_entity_component_class<pragma::ecs::CompositeComponent, pragma::BaseEntityComponent>("CompositeComponent");
+	defComposite.def("ClearEntities", &pragma::ecs::CompositeComponent::ClearEntities);
+	defComposite.def("ClearEntities", &pragma::ecs::CompositeComponent::ClearEntities, luabind::default_parameter_policy<2, true> {});
 	defComposite.def(
-	  "ClearEntities", +[](lua_State *l, pragma::CompositeComponent &hComponent, const std::string &groupName) {
+	  "ClearEntities", +[](lua_State *l, pragma::ecs::CompositeComponent &hComponent, const std::string &groupName) {
 		  auto *group = hComponent.GetRootCompositeGroup().FindChildGroup(groupName);
 		  if(group)
 			  group->ClearEntities();
 	  });
 	defComposite.def(
-	  "ClearEntities", +[](lua_State *l, pragma::CompositeComponent &hComponent, const std::string &groupName, bool safely) {
+	  "ClearEntities", +[](lua_State *l, pragma::ecs::CompositeComponent &hComponent, const std::string &groupName, bool safely) {
 		  auto *group = hComponent.GetRootCompositeGroup().FindChildGroup(groupName);
 		  if(group)
 			  group->ClearEntities(safely);
 	  });
 	defComposite.def(
-	  "GetEntities", +[](lua_State *l, pragma::CompositeComponent &hComponent) -> luabind::tableT<BaseEntity> {
+	  "GetEntities", +[](lua_State *l, pragma::ecs::CompositeComponent &hComponent) -> luabind::tableT<BaseEntity> {
 		  auto &ents = hComponent.GetRootCompositeGroup().GetEntities();
 		  auto tEnts = luabind::newtable(l);
 		  int32_t idx = 1;
@@ -491,7 +491,7 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 		  return tEnts;
 	  });
 	defComposite.def(
-	  "GetEntities", +[](lua_State *l, pragma::CompositeComponent &hComponent, const std::string &groupName) -> luabind::tableT<BaseEntity> {
+	  "GetEntities", +[](lua_State *l, pragma::ecs::CompositeComponent &hComponent, const std::string &groupName) -> luabind::tableT<BaseEntity> {
 		  auto tEnts = luabind::newtable(l);
 		  auto *group = hComponent.GetRootCompositeGroup().FindChildGroup(groupName);
 		  if(!group)
@@ -505,29 +505,29 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 		  }
 		  return tEnts;
 	  });
-	defComposite.def("GetRootGroup", static_cast<pragma::CompositeGroup &(pragma::CompositeComponent::*)()>(&pragma::CompositeComponent::GetRootCompositeGroup));
-	defComposite.def("AddEntity", +[](lua_State *l, pragma::CompositeComponent &hComponent, BaseEntity &ent) { hComponent.GetRootCompositeGroup().AddEntity(ent); });
-	defComposite.def("AddEntity", +[](lua_State *l, pragma::CompositeComponent &hComponent, BaseEntity &ent, const std::string &groupName) { hComponent.GetRootCompositeGroup().AddChildGroup(groupName).AddEntity(ent); });
-	auto defCompositeGroup = luabind::class_<pragma::CompositeGroup>("CompositeGroup");
-	defCompositeGroup.def("AddEntity", &pragma::CompositeGroup::AddEntity);
-	defCompositeGroup.def("AddEntity", +[](lua_State *l, pragma::CompositeGroup &hComponent, BaseEntity &ent, const std::string &groupName) { hComponent.AddChildGroup(groupName).AddEntity(ent); });
-	defCompositeGroup.def("RemoveEntity", &pragma::CompositeGroup::RemoveEntity);
-	defCompositeGroup.def("ClearEntities", &pragma::CompositeGroup::ClearEntities);
-	defCompositeGroup.def("ClearEntities", &pragma::CompositeGroup::ClearEntities, luabind::default_parameter_policy<2, true> {});
+	defComposite.def("GetRootGroup", static_cast<pragma::ecs::CompositeGroup &(pragma::ecs::CompositeComponent::*)()>(&pragma::ecs::CompositeComponent::GetRootCompositeGroup));
+	defComposite.def("AddEntity", +[](lua_State *l, pragma::ecs::CompositeComponent &hComponent, BaseEntity &ent) { hComponent.GetRootCompositeGroup().AddEntity(ent); });
+	defComposite.def("AddEntity", +[](lua_State *l, pragma::ecs::CompositeComponent &hComponent, BaseEntity &ent, const std::string &groupName) { hComponent.GetRootCompositeGroup().AddChildGroup(groupName).AddEntity(ent); });
+	auto defCompositeGroup = luabind::class_<pragma::ecs::CompositeGroup>("CompositeGroup");
+	defCompositeGroup.def("AddEntity", &pragma::ecs::CompositeGroup::AddEntity);
+	defCompositeGroup.def("AddEntity", +[](lua_State *l, pragma::ecs::CompositeGroup &hComponent, BaseEntity &ent, const std::string &groupName) { hComponent.AddChildGroup(groupName).AddEntity(ent); });
+	defCompositeGroup.def("RemoveEntity", &pragma::ecs::CompositeGroup::RemoveEntity);
+	defCompositeGroup.def("ClearEntities", &pragma::ecs::CompositeGroup::ClearEntities);
+	defCompositeGroup.def("ClearEntities", &pragma::ecs::CompositeGroup::ClearEntities, luabind::default_parameter_policy<2, true> {});
 	defCompositeGroup.def(
-	  "ClearEntities", +[](lua_State *l, pragma::CompositeGroup &hComponent, const std::string &groupName) {
+	  "ClearEntities", +[](lua_State *l, pragma::ecs::CompositeGroup &hComponent, const std::string &groupName) {
 		  auto *group = hComponent.FindChildGroup(groupName);
 		  if(group)
 			  group->ClearEntities();
 	  });
 	defCompositeGroup.def(
-	  "ClearEntities", +[](lua_State *l, pragma::CompositeGroup &hComponent, const std::string &groupName, bool safely) {
+	  "ClearEntities", +[](lua_State *l, pragma::ecs::CompositeGroup &hComponent, const std::string &groupName, bool safely) {
 		  auto *group = hComponent.FindChildGroup(groupName);
 		  if(group)
 			  group->ClearEntities(safely);
 	  });
 	defCompositeGroup.def(
-	  "GetEntities", +[](lua_State *l, pragma::CompositeGroup &hComponent) -> luabind::tableT<BaseEntity> {
+	  "GetEntities", +[](lua_State *l, pragma::ecs::CompositeGroup &hComponent) -> luabind::tableT<BaseEntity> {
 		  auto &ents = hComponent.GetEntities();
 		  auto tEnts = luabind::newtable(l);
 		  int32_t idx = 1;
@@ -538,9 +538,9 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 		  }
 		  return tEnts;
 	  });
-	defCompositeGroup.def("AddChildGroup", &pragma::CompositeGroup::AddChildGroup);
+	defCompositeGroup.def("AddChildGroup", &pragma::ecs::CompositeGroup::AddChildGroup);
 	defCompositeGroup.def(
-	  "GetChildGroups", +[](lua_State *l, pragma::CompositeGroup &hComponent, const std::string &name) -> luabind::tableT<pragma::CompositeGroup> {
+	  "GetChildGroups", +[](lua_State *l, pragma::ecs::CompositeGroup &hComponent, const std::string &name) -> luabind::tableT<pragma::ecs::CompositeGroup> {
 		  auto t = luabind::newtable(l);
 		  int32_t idx = 1;
 		  for(auto &childGroup : hComponent.GetChildGroups())

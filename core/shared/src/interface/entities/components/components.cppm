@@ -4,4 +4,5 @@
 module;
 
 export module pragma.entities.components;
-export import pragma.entities.components.shooter;
+export import :composite;
+export import :shooter;

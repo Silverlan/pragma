@@ -196,7 +196,7 @@ void SGame::InitializeEntityComponents(pragma::EntityComponentManager &component
 	componentManager.RegisterComponentType<pragma::SSkyboxComponent>("skybox", {"world"});
 	componentManager.RegisterComponentType<pragma::SWorldComponent>("world", {"world", hideInEditor});
 	componentManager.RegisterComponentType<pragma::SFlashlightComponent>("flashlight", {"gameplay", hideInEditor});
-	componentManager.RegisterComponentType<pragma::SShooterComponent>("shooter", {"gameplay"});
+	componentManager.RegisterComponentType<pragma::ecs::SShooterComponent>("shooter", {"gameplay"});
 	componentManager.RegisterComponentType<pragma::SModelComponent>("model", {"rendering/model"});
 	componentManager.RegisterComponentType<pragma::SAnimatedComponent>("animated", {"animation"});
 	componentManager.RegisterComponentType<pragma::SGenericComponent>("entity", {"core", hideInEditor});

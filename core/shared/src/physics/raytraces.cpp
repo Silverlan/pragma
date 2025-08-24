@@ -120,6 +120,7 @@ TraceData::TraceData() : m_flags(RayCastFlags::Default), m_filterMask(CollisionM
 	m_tEnd.SetIdentity();
 }
 TraceData::TraceData(const TraceData &other) : m_tStart(other.m_tStart), m_tEnd(other.m_tEnd), m_flags(other.m_flags), m_bHasTarget(other.m_bHasTarget), m_shape {other.m_shape}, m_filter {other.m_filter}, m_filterMask(other.m_filterMask), m_filterGroup(other.m_filterGroup) {}
+TraceData::~TraceData() {}
 void TraceData::SetShape(const pragma::physics::IConvexShape &shape) { m_shape = std::dynamic_pointer_cast<pragma::physics::IConvexShape>(const_cast<pragma::physics::IConvexShape &>(shape).shared_from_this()); }
 const pragma::physics::IConvexShape *TraceData::GetShape() const { return m_shape.get(); }
 Vector3 TraceData::GetSourceOrigin() const
@@ -193,3 +194,4 @@ float TraceData::GetDistance() const
 bool TraceData::HasFlag(RayCastFlags flag) const { return ((UInt32(m_flags) & UInt32(flag)) != 0) ? true : false; }
 
 TraceResult::TraceResult(const TraceData &data) : fraction {1.f}, position {data.GetTargetOrigin()}, startPosition {data.GetSourceOrigin()} {}
+TraceResult::~TraceResult() {}

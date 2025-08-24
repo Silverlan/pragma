@@ -39,6 +39,7 @@ class DLLNETWORK TraceData {
   public:
 	TraceData();
 	TraceData(const TraceData &other);
+	~TraceData();
 	RayCastFlags GetFlags() const;
 	const umath::Transform &GetSource() const;
 	const umath::Transform &GetTarget() const;
@@ -96,6 +97,7 @@ struct DLLNETWORK TraceResult {
 	};
 	TraceResult() {}
 	TraceResult(const TraceData &data);
+	~TraceResult();
 	RayCastHitType hitType = RayCastHitType::None;
 	EntityHandle entity = {};
 	util::TWeakSharedHandle<pragma::physics::ICollisionObject> collisionObj = {};

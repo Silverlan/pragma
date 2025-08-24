@@ -1,13 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __COMPOSITE_COMPONENT_HPP__
-#define __COMPOSITE_COMPONENT_HPP__
+module;
 
 #include "pragma/entities/components/base_entity_component.hpp"
 #include "pragma/entities/baseentity_handle.h"
 
-namespace pragma {
+export module pragma.entities.components:composite;
+
+export namespace pragma::ecs {
 	class CompositeComponent;
 	class DLLNETWORK CompositeGroup {
 	  public:
@@ -38,10 +39,12 @@ namespace pragma {
 		CompositeComponent *m_compositeComponent = nullptr;
 	};
 
+	namespace compositeComponent {
+		extern DLLNETWORK ComponentEventId EVENT_ON_ENTITY_ADDED;
+		extern DLLNETWORK ComponentEventId EVENT_ON_ENTITY_REMOVED;
+	};
 	class DLLNETWORK CompositeComponent final : public BaseEntityComponent {
 	  public:
-		static ComponentEventId EVENT_ON_ENTITY_ADDED;
-		static ComponentEventId EVENT_ON_ENTITY_REMOVED;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
 		CompositeComponent(BaseEntity &ent);
@@ -60,12 +63,12 @@ namespace pragma {
 		std::unique_ptr<CompositeGroup> m_rootGroup = nullptr;
 	};
 
-	struct DLLNETWORK CECompositeEntityChanged : public ComponentEvent {
-		CECompositeEntityChanged(CompositeGroup &group, BaseEntity &ent);
-		virtual void PushArguments(lua_State *l) override;
-		CompositeGroup &group;
-		BaseEntity &ent;
+	namespace events {
+		struct DLLNETWORK CECompositeEntityChanged : public ComponentEvent {
+			CECompositeEntityChanged(CompositeGroup &group, BaseEntity &ent);
+			virtual void PushArguments(lua_State *l) override;
+			CompositeGroup &group;
+			BaseEntity &ent;
+		};
 	};
 };
-
-#endif

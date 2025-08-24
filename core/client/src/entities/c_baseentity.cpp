@@ -53,9 +53,10 @@
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/util/util_handled.hpp>
 #include <pragma/entities/components/base_physics_component.hpp>
-#include <pragma/entities/components/composite_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
+
+import pragma.entities.components;
 
 LINK_ENTITY_TO_CLASS(entity, CBaseEntity);
 
@@ -81,14 +82,14 @@ void CBaseEntity::OnComponentAdded(pragma::BaseEntityComponent &component)
 		m_genericComponent = &static_cast<pragma::CGenericComponent &>(component);
 	else if(typeid(component) == typeid(pragma::CChildComponent))
 		m_childComponent = &static_cast<pragma::CChildComponent &>(component);
-	else if(typeid(component) == typeid(pragma::CompositeComponent)) {
-		static_cast<pragma::CompositeComponent &>(component).AddEventCallback(pragma::CompositeComponent::EVENT_ON_ENTITY_ADDED, [this](std::reference_wrapper<pragma::ComponentEvent> e) -> util::EventReply {
-			auto &evData = static_cast<pragma::CECompositeEntityChanged &>(e.get());
+	else if(typeid(component) == typeid(pragma::ecs::CompositeComponent)) {
+		static_cast<pragma::ecs::CompositeComponent &>(component).AddEventCallback(pragma::ecs::compositeComponent::EVENT_ON_ENTITY_ADDED, [this](std::reference_wrapper<pragma::ComponentEvent> e) -> util::EventReply {
+			auto &evData = static_cast<pragma::ecs::events::CECompositeEntityChanged &>(e.get());
 			static_cast<CBaseEntity &>(evData.ent).GetSceneFlagsProperty()->Link(*GetSceneFlagsProperty()); // TODO: This skips the EVENT_ON_SCENE_FLAGS_CHANGED event
 			return util::EventReply::Unhandled;
 		});
-		static_cast<pragma::CompositeComponent &>(component).AddEventCallback(pragma::CompositeComponent::EVENT_ON_ENTITY_REMOVED, [this](std::reference_wrapper<pragma::ComponentEvent> e) -> util::EventReply {
-			auto &evData = static_cast<pragma::CECompositeEntityChanged &>(e.get());
+		static_cast<pragma::ecs::CompositeComponent &>(component).AddEventCallback(pragma::ecs::compositeComponent::EVENT_ON_ENTITY_REMOVED, [this](std::reference_wrapper<pragma::ComponentEvent> e) -> util::EventReply {
+			auto &evData = static_cast<pragma::ecs::events::CECompositeEntityChanged &>(e.get());
 			static_cast<CBaseEntity &>(evData.ent).GetSceneFlagsProperty()->Unlink(); // TODO: This skips the EVENT_ON_SCENE_FLAGS_CHANGED event
 			return util::EventReply::Unhandled;
 		});

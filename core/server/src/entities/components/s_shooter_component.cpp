@@ -13,7 +13,6 @@
 #include <pragma/util/bulletinfo.h>
 #include <sharedutils/scope_guard.h>
 #include <servermanager/interface/sv_nwm_manager.hpp>
-#include <pragma/physics/raytraces.h>
 
 using namespace pragma;
 
@@ -144,6 +143,6 @@ void ecs::SShooterComponent::FireBullets(const BulletInfo &bulletInfo, DamageInf
 			ent.SendNetEvent(m_netEvFireBullets, p, pragma::networking::Protocol::FastUnreliable);
 	}
 
-	CEOnBulletsFired evData {bulletInfo, outHitTargets};
-	BroadcastEvent(EVENT_ON_BULLETS_FIRED, evData);
+	events::CEOnBulletsFired evData {bulletInfo, outHitTargets};
+	BroadcastEvent(baseShooterComponent::EVENT_ON_BULLETS_FIRED, evData);
 }

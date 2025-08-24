@@ -1,12 +1,17 @@
 // SPDX-FileCopyrightText: (c) 2022 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/rendering/shaders/post_processing/c_shader_pp_dof.hpp"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <prosper_util.hpp>
 #include <shader/prosper_shader_copy_image.hpp>
 #include <shader/prosper_shader_t.hpp>
+
+module pragma.client.rendering.shaders;
+
+import :pp_dof;
 
 using namespace pragma;
 

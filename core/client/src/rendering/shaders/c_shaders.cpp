@@ -32,7 +32,6 @@
 #include "pragma/rendering/shaders/image/c_shader_resize_image.hpp"
 #include "pragma/rendering/shaders/image/c_shader_merge_images.hpp"
 #include "pragma/rendering/shaders/image/c_shader_merge_2d_image_into_equirectangular.hpp"
-#include "pragma/rendering/shaders/post_processing/c_shader_pp_dof.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_water.hpp"
 #include "pragma/rendering/shaders/world/c_shader_skybox.hpp"
 #include "pragma/rendering/shaders/world/c_shader_loading.hpp"
@@ -66,6 +65,8 @@
 #include "pragma/rendering/world_environment.hpp"
 #include <pragma/debug/intel_vtune.hpp>
 #include <buffers/prosper_buffer.hpp>
+
+import pragma.client.rendering.shaders;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;

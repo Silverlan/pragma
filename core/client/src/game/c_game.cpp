@@ -26,7 +26,6 @@
 #include "pragma/entities/c_listener.h"
 #include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
-#include "pragma/entities/components/c_bsp_leaf_component.hpp"
 #include "pragma/entities/components/c_toggle_component.hpp"
 #include "pragma/entities/components/c_light_map_receiver_component.hpp"
 #include "pragma/entities/components/c_light_map_component.hpp"
@@ -114,6 +113,8 @@
 #include <util_image_buffer.hpp>
 #include <udm.hpp>
 #include <prosper_window.hpp>
+
+import pragma.client.entities.components;
 
 extern EntityClassMap<CBaseEntity> *g_ClientEntityFactories;
 extern ClientEntityNetworkMap *g_ClEntityNetworkMap;

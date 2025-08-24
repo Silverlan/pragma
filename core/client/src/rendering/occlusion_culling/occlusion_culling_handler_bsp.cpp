@@ -3,7 +3,6 @@
 
 #include "stdafx_client.h"
 #include "pragma/rendering/occlusion_culling/occlusion_culling_handler_bsp.hpp"
-#include "pragma/entities/components/c_bsp_leaf_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
@@ -14,6 +13,8 @@
 #include "pragma/model/c_model.h"
 #include <pragma/math/intersection.h>
 #include <pragma/entities/entity_component_system_t.hpp>
+
+import pragma.client.entities.components;
 
 using namespace pragma;
 

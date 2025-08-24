@@ -4,6 +4,7 @@
 module;
 
 export module pragma.client.entities.components;
+export import :bsp_leaf;
 export import :field_angle;
 export import :global_shader_input;
 export import :hitbox_bvh;

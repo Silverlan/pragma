@@ -7,7 +7,6 @@
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
-#include "pragma/rendering/shaders/post_processing/c_shader_pp_dof.hpp"
 #include "pragma/rendering/world_environment.hpp"
 #include "pragma/entities/entity_component_system_t.hpp"
 #include "pragma/console/c_cvar.h"
@@ -16,6 +15,9 @@
 #include <shader/prosper_shader_blur.hpp>
 #include <image/prosper_msaa_texture.hpp>
 #include <image/prosper_render_target.hpp>
+
+import pragma.client.entities.components;
+import pragma.client.rendering.shaders;
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT CEngine *c_engine;

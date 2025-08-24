@@ -5,7 +5,6 @@
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/entities/components/c_toggle_component.hpp"
-#include "pragma/entities/components/c_field_angle_component.hpp"
 #include "pragma/entities/components/c_transform_component.hpp"
 #include "pragma/entities/c_entityfactories.h"
 #include "pragma/entities/shared_spawnflags.h"
@@ -15,6 +14,8 @@
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/entity_iterator.hpp>
+
+import pragma.client.entities.components;
 
 using namespace pragma;
 

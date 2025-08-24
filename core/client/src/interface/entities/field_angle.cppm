@@ -1,14 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2022 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_FIELD_ANGLE_COMPONENT_HPP__
-#define __C_FIELD_ANGLE_COMPONENT_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/components/c_entity_component.hpp"
 #include <pragma/entities/components/base_field_angle_component.hpp>
 
-namespace pragma {
+export module pragma.client.entities.components:field_angle;
+
+export namespace pragma {
 	class DLLCLIENT CFieldAngleComponent final : public BaseFieldAngleComponent, public CBaseNetComponent {
 	  public:
 		CFieldAngleComponent(BaseEntity &ent) : BaseFieldAngleComponent(ent) {}
@@ -19,5 +20,3 @@ namespace pragma {
 		virtual bool ShouldTransmitNetData() const override { return true; }
 	};
 };
-
-#endif

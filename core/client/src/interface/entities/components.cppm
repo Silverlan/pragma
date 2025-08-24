@@ -4,6 +4,7 @@
 module;
 
 export module pragma.client.entities.components;
+export import :lua;
 export import :optical_camera;
 export import :point_at_target;
 export import :score;

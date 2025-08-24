@@ -1,10 +1,18 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/entities/components/c_lua_component.hpp"
 #include "pragma/lua/base_lua_handle_method.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
+#include "pragma/entities/components/c_entity_component.hpp"
+#include <pragma/lua/sh_lua_component.hpp>
+#include <pragma/lua/handle_holder.hpp>
+
+module pragma.client.entities.components;
+
+import :lua;
 
 using namespace pragma;
 

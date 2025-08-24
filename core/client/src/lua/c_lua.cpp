@@ -44,7 +44,6 @@ namespace pragma::string {
 #include "pragma/lua/classes/c_lcamera.h"
 #include "pragma/lua/classes/components/c_lentity_components.hpp"
 #include "pragma/entities/components/c_player_component.hpp"
-#include "pragma/entities/components/c_lua_component.hpp"
 #include "pragma/lua/classes/c_lentity.h"
 #include "pragma/lua/classes/c_lua_entity.h"
 #include <pragma/math/e_frustum.h>
@@ -78,6 +77,7 @@ namespace pragma::string {
 #undef FAR
 
 import pragma.locale;
+import pragma.client.entities.components;
 #ifndef _MSC_VER
 import pragma.string.unicode;
 #endif

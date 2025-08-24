@@ -111,7 +111,6 @@
 #include "pragma/entities/components/c_attachment_component.hpp"
 #include "pragma/entities/components/c_child_component.hpp"
 #include "pragma/entities/components/c_generic_component.hpp"
-#include "pragma/entities/components/c_point_at_target_component.hpp"
 #include "pragma/entities/components/c_gamemode_component.hpp"
 #include "pragma/entities/components/c_game_component.hpp"
 #include "pragma/entities/environment/c_env_reflection_probe.hpp"

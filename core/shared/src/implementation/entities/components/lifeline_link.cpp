@@ -1,10 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2023 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_shared.h"
-#include "pragma/entities/components/lifeline_link_component.hpp"
 #include "pragma/entities/entity_component_manager_t.hpp"
 #include "pragma/entities/components/component_member_flags.hpp"
+
+module pragma.entities.components;
+
+import :lifeline_link;
 
 using namespace pragma;
 

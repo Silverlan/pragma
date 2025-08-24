@@ -1,12 +1,13 @@
 // SPDX-FileCopyrightText: (c) 2023 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __LIFELINE_LINK_COMPONENT_HPP__
-#define __LIFELINE_LINK_COMPONENT_HPP__
+module;
 
 #include "pragma/entities/components/base_entity_component.hpp"
 
-namespace pragma {
+export module pragma.entities.components:lifeline_link;
+
+export namespace pragma {
 	class DLLNETWORK LifelineLinkComponent final : public BaseEntityComponent {
 	  public:
 		LifelineLinkComponent(BaseEntity &ent);
@@ -21,5 +22,3 @@ namespace pragma {
 		std::vector<EntityHandle> m_entsRemove; // List of entities that should be removed when this component is removed
 	};
 };
-
-#endif

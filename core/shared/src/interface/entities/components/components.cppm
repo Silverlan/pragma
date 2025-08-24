@@ -5,4 +5,5 @@ module;
 
 export module pragma.entities.components;
 export import :composite;
+export import :lifeline_link;
 export import :shooter;

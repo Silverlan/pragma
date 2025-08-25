@@ -14,7 +14,6 @@
 #include "pragma/entities/components/c_motion_blur_data_component.hpp"
 #include "pragma/entities/entity_component_system_t.hpp"
 #include "pragma/rendering/shaders/info/c_shader_velocity_buffer.hpp"
-#include "pragma/rendering/shaders/post_processing/c_shader_pp_motion_blur.hpp"
 #include "pragma/rendering/render_processor.hpp"
 #include <pragma/entities/entity_component_manager_t.hpp>
 #include <pragma/entities/entity_iterator.hpp>
@@ -27,6 +26,8 @@
 #if MOTION_BLUR_DEBUG_ELEMENT_ENABLED == 1
 #include <wgui/types/wirect.h>
 #endif
+
+import pragma.client.rendering.shaders;
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT CEngine *c_engine;

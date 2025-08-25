@@ -19,7 +19,6 @@
 #include "pragma/entities/components/c_vehicle_component.hpp"
 //#include "shader_gaussianblur.h" // prosper TODO
 #include "pragma/rendering/world_environment.hpp"
-#include "pragma/rendering/shaders/post_processing/c_shader_hdr.hpp"
 #include "pragma/rendering/shaders/world/c_shader_flat.hpp"
 #include "pragma/rendering/shaders/particles/c_shader_particle.hpp"
 #include "pragma/rendering/render_queue.hpp"

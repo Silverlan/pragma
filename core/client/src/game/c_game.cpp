@@ -49,7 +49,6 @@
 #include <pragma/util/util_game.hpp>
 #include "pragma/console/c_cvar.h"
 #include "pragma/rendering/c_rendermode.h"
-#include "pragma/rendering/shaders/post_processing/c_shader_hdr.hpp"
 #include "pragma/rendering/render_queue_worker.hpp"
 #include "pragma/rendering/global_render_settings_buffer_data.hpp"
 #include "pragma/rendering/global_shader_input_manager.hpp"

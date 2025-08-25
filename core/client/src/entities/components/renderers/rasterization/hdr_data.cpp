@@ -10,7 +10,6 @@
 #include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/rendering/shaders/image/c_shader_calc_image_color.hpp"
 #include "pragma/rendering/shaders/particles/c_shader_particle.hpp"
-#include "pragma/rendering/shaders/post_processing/c_shader_hdr.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/entities/components/c_scene_component.hpp"

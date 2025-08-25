@@ -1,13 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_SHADER_HDR_HPP__
-#define __C_SHADER_HDR_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include <shader/prosper_shader_base_image_processing.hpp>
 
-namespace pragma {
+export module pragma.client.rendering.shaders:hdr;
+
+export namespace pragma {
 	class DLLCLIENT ShaderHDR : public prosper::ShaderBaseImageProcessing {
 	  public:
 #pragma pack(push, 1)
@@ -23,5 +24,3 @@ namespace pragma {
 		virtual void InitializeShaderResources() override;
 	};
 };
-
-#endif

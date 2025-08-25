@@ -6,4 +6,5 @@ module;
 export module pragma.client.rendering.shaders;
 export import :pp_dof;
 export import :pp_fog;
+export import :pp_light_cone;
 export import :pp_motion_blur;

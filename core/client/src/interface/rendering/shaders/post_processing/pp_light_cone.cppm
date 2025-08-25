@@ -1,13 +1,13 @@
 // SPDX-FileCopyrightText: (c) 2022 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_SHADER_PP_LIGHT_CONE_HPP__
-#define __C_SHADER_PP_LIGHT_CONE_HPP__
+export;
 
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_base.hpp"
 
-namespace pragma {
-	class CModelComponent;
+export module pragma.client.rendering.shaders:pp_light_cone;
+
+export namespace pragma {
 	class DLLCLIENT ShaderPPLightCone : public ShaderPPBase {
 	  public:
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_TEXTURE;
@@ -42,5 +42,3 @@ namespace pragma {
 		virtual void InitializeShaderResources() override;
 	};
 };
-
-#endif

@@ -20,7 +20,6 @@
 #include "pragma/entities/components/renderers/rasterization/hdr_data.hpp"
 #include "pragma/entities/entity_component_system_t.hpp"
 #include "pragma/rendering/world_environment.hpp"
-#include "pragma/rendering/shaders/post_processing/c_shader_pp_light_cone.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/model/vk_mesh.h"
 #include "pragma/console/c_cvar.h"
@@ -31,6 +30,8 @@
 #include <image/prosper_render_target.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 #include <util_image.hpp>
+
+import pragma.client.rendering.shaders;
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT CEngine *c_engine;

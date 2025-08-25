@@ -1,19 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_SHADER_SSAO_HPP__
-#define __C_SHADER_SSAO_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include <shader/prosper_shader_base_image_processing.hpp>
 
-namespace prosper {
-	class Texture;
-	class IBuffer;
-	class IDescriptorSetGroup;
-};
-namespace pragma {
-	class CSceneComponent;
+export module pragma.client.rendering.shaders:ssao;
+
+export namespace pragma {
 	class DLLCLIENT ShaderSSAO : public prosper::ShaderBaseImageProcessing {
 	  public:
 		static prosper::Format RENDER_PASS_FORMAT;
@@ -45,5 +40,3 @@ namespace pragma {
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_descSetGroupTexture = nullptr;
 	};
 };
-
-#endif

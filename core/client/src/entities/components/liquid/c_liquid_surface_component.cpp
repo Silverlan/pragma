@@ -13,7 +13,6 @@
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/console/c_cvar.h"
 #include "pragma/rendering/shaders/world/water/c_shader_water.hpp"
-#include "pragma/rendering/shaders/post_processing/c_shader_pp_water.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_hdr.hpp"
 #include "pragma/rendering/shaders/particles/c_shader_particle_2d_base.hpp"
 #include <image/prosper_render_target.hpp>

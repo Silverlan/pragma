@@ -1,12 +1,13 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_SHADER_PP_WATER_HPP__
-#define __C_SHADER_PP_WATER_HPP__
+module;
 
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_base.hpp"
 
-namespace pragma {
+export module pragma.client.rendering.shaders:pp_water;
+
+export namespace pragma {
 	class DLLCLIENT ShaderPPWater : public ShaderPPBase {
 	  public:
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_TEXTURE;
@@ -31,5 +32,3 @@ namespace pragma {
 		virtual void InitializeShaderResources() override;
 	};
 };
-
-#endif

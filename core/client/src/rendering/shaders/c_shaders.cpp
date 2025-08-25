@@ -33,7 +33,6 @@
 #include "pragma/rendering/shaders/world/c_shader_skybox.hpp"
 #include "pragma/rendering/shaders/world/c_shader_loading.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_ssao.hpp"
-#include "pragma/rendering/shaders/post_processing/c_shader_ssao_blur.hpp"
 #include "pragma/rendering/shaders/world/water/c_shader_water.hpp"
 #include "pragma/rendering/shaders/world/water/c_shader_water_splash.hpp"
 #include "pragma/rendering/shaders/world/water/c_shader_water_surface_integrate.hpp"

@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "pragma/rendering/shaders/post_processing/c_shader_ssao.hpp"
-#include "pragma/rendering/shaders/post_processing/c_shader_ssao_blur.hpp"
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"
 #include "pragma/rendering/c_ssao.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
@@ -13,6 +12,8 @@
 #include <prosper_descriptor_set_group.hpp>
 #include <image/prosper_render_target.hpp>
 #include <image/prosper_msaa_texture.hpp>
+
+import pragma.client.rendering.shaders;
 
 using namespace pragma::rendering;
 

@@ -6,7 +6,6 @@
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/rendering/c_ssao.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_ssao.hpp"
-#include "pragma/rendering/shaders/post_processing/c_shader_ssao_blur.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/console/c_cvar_global_functions.h"
@@ -19,6 +18,8 @@
 #include <image/prosper_sampler.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <shader/prosper_shader_t.hpp>
+
+import pragma.client.rendering.shaders;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;

@@ -11,3 +11,4 @@ export import :pp_fxaa;
 export import :pp_light_cone;
 export import :pp_motion_blur;
 export import :pp_water;
+export import :ssao_blur;

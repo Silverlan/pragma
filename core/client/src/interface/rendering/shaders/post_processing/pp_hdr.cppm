@@ -1,16 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_SHADER_PP_HDR_HPP__
-#define __C_SHADER_PP_HDR_HPP__
+module;
 
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_base.hpp"
 #include "pragma/rendering/c_settings.hpp"
 
-namespace pragma {
-	namespace rendering {
-		enum class ToneMapping : uint32_t;
-	};
+export module pragma.client.rendering.shaders:pp_hdr;
+
+export namespace pragma {
 	class DLLCLIENT ShaderPPHDR : public ShaderPPBase {
 	  public:
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_TEXTURE;
@@ -46,5 +44,3 @@ namespace pragma {
 		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx) override;
 	};
 };
-
-#endif

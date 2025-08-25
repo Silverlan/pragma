@@ -1,16 +1,21 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
 #include "pragma/clientstate/clientstate.h"
-#include "pragma/rendering/shaders/post_processing/c_shader_pp_hdr.hpp"
 #include "pragma/rendering/c_settings.hpp"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <shader/prosper_shader_t.hpp>
 #include <pragma/console/convars.h>
 #include <prosper_util.hpp>
 #include <shader/prosper_shader_copy_image.hpp>
+
+module pragma.client.rendering.shaders;
+
+import :pp_hdr;
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;

@@ -21,7 +21,6 @@
 #include "pragma/rendering/world_environment.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_hdr.hpp"
 #include "pragma/rendering/shaders/world/c_shader_flat.hpp"
-#include "pragma/rendering/shaders/post_processing/c_shader_pp_hdr.hpp"
 #include "pragma/rendering/shaders/particles/c_shader_particle.hpp"
 #include "pragma/rendering/render_queue.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"

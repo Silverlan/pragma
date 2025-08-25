@@ -25,7 +25,6 @@
 #include "pragma/rendering/shaders/c_shader_forwardp_light_culling.hpp"
 #include "pragma/rendering/shaders/c_shader_shadow.hpp"
 #include "pragma/rendering/shaders/image/c_shader_calc_image_color.hpp"
-#include "pragma/rendering/shaders/post_processing/c_shader_pp_hdr.hpp"
 #include "pragma/rendering/shaders/image/c_shader_clear_color.hpp"
 #include "pragma/rendering/shaders/image/c_shader_resize_image.hpp"
 #include "pragma/rendering/shaders/image/c_shader_merge_images.hpp"

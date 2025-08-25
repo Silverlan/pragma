@@ -8,6 +8,7 @@ export import :pp_bloom_blur;
 export import :pp_dof;
 export import :pp_fog;
 export import :pp_fxaa;
+export import :pp_hdr;
 export import :pp_light_cone;
 export import :pp_motion_blur;
 export import :pp_water;

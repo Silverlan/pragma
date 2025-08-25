@@ -11,7 +11,6 @@
 #include "pragma/rendering/shaders/image/c_shader_calc_image_color.hpp"
 #include "pragma/rendering/shaders/particles/c_shader_particle.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_hdr.hpp"
-#include "pragma/rendering/shaders/post_processing/c_shader_pp_fxaa.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_hdr.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"

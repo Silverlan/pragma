@@ -3,7 +3,6 @@
 
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
-#include "pragma/rendering/shaders/post_processing/c_shader_pp_fog.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_hdr.hpp"
 #include "pragma/rendering/shaders/world/c_shader_prepass.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_ssao.hpp"
@@ -24,6 +23,8 @@
 #include <image/prosper_msaa_texture.hpp>
 #include <pragma/rendering/c_sci_gpu_timer_manager.hpp>
 #include <sharedutils/scope_guard.h>
+
+import pragma.client.rendering.shaders;
 
 extern DLLCLIENT CEngine *c_engine;
 

@@ -14,7 +14,6 @@
 #include "pragma/console/c_cvar.h"
 #include "pragma/rendering/shaders/world/water/c_shader_water.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_water.hpp"
-#include "pragma/rendering/shaders/post_processing/c_shader_pp_fog.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_hdr.hpp"
 #include "pragma/rendering/shaders/particles/c_shader_particle_2d_base.hpp"
 #include <image/prosper_render_target.hpp>
@@ -28,6 +27,8 @@
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/lua/base_lua_handle_method.hpp>
+
+import pragma.client.rendering.shaders;
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;

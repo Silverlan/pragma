@@ -6,7 +6,6 @@
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/entity_component_system_t.hpp"
 #include "pragma/rendering/world_environment.hpp"
-#include "pragma/rendering/shaders/post_processing/c_shader_pp_fog.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/game/c_game.h"
 #include <pragma/console/convars.h>

@@ -7,7 +7,6 @@
 #include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
-#include "pragma/rendering/shaders/post_processing/c_shader_pp_fog.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_fxaa.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_hdr.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_ssao.hpp"
@@ -27,6 +26,8 @@
 #include <image/prosper_render_target.hpp>
 #include <image/prosper_msaa_texture.hpp>
 #include <sharedutils/util_shaderinfo.hpp>
+
+import pragma.client.rendering.shaders;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;

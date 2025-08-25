@@ -20,7 +20,6 @@
 //#include "shader_gaussianblur.h" // prosper TODO
 #include "pragma/rendering/world_environment.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_hdr.hpp"
-#include "pragma/rendering/shaders/post_processing/c_shader_pp_fog.hpp"
 #include "pragma/rendering/shaders/world/c_shader_flat.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_hdr.hpp"
 #include "pragma/rendering/shaders/particles/c_shader_particle.hpp"
@@ -62,6 +61,8 @@
 #include <pragma/entities/attribute_specialization_type.hpp>
 #include <pragma/entities/components/component_member_flags.hpp>
 #include <pragma/entities/entity_component_manager_t.hpp>
+
+import pragma.client.rendering.shaders;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;

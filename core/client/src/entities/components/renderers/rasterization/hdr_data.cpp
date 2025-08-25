@@ -14,7 +14,6 @@
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_fxaa.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_hdr.hpp"
-#include "pragma/rendering/shaders/post_processing/c_shader_pp_fog.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/debug/c_debug_game_gui.h"
@@ -36,6 +35,8 @@
 #include <image/prosper_sampler.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/entity_iterator.hpp>
+
+import pragma.client.rendering.shaders;
 
 using namespace pragma::rendering;
 

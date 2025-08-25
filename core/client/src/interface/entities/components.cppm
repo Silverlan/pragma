@@ -12,6 +12,7 @@ export import :light_map_data_cache;
 export import :lua;
 export import :optical_camera;
 export import :point_at_target;
+export import :pp_bloom;
 export import :score;
 export import :shooter;
 export import :time_scale;

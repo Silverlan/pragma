@@ -1,12 +1,17 @@
 // SPDX-FileCopyrightText: (c) 2023 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include <shader/prosper_pipeline_create_info.hpp>
-#include "pragma/rendering/shaders/post_processing/c_shader_pp_bloom_blur.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include <shader/prosper_shader_t.hpp>
 #include <pragma/util/util_game.hpp>
+
+module pragma.client.rendering.shaders;
+
+import :pp_bloom_blur;
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;

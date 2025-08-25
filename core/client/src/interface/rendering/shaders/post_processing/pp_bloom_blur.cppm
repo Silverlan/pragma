@@ -1,26 +1,22 @@
 // SPDX-FileCopyrightText: (c) 2023 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_SHADER_PP_BLOOM_BLUR_HPP__
-#define __C_SHADER_PP_BLOOM_BLUR_HPP__
+module;
 
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_base.hpp"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <shader/prosper_shader_blur.hpp>
 
-namespace pragma {
-	struct BloomPipelineInfo {
-		BloomPipelineInfo() = delete;
-		BloomPipelineInfo(uint32_t radius, double sigma);
-		const uint32_t radius;
-		const double sigma;
-		std::optional<uint32_t> pipelineIdx;
-	};
+export module pragma.client.rendering.shaders:pp_bloom_blur;
+
+import pragma.client.rendering;
+
+export namespace pragma {
 	class DLLCLIENT ShaderPPBloomBlurBase : public prosper::ShaderBlurBase {
 	  public:
 		static constexpr uint32_t MAX_SAMPLE_COUNT = 15;
-		static constexpr uint32_t DEFAULT_RADIUS = 6;
-		static constexpr double DEFAULT_SIGMA = 10;
+		static constexpr uint32_t DEFAULT_RADIUS = ControlledBlurSettings::DEFAULT_RADIUS;
+		static constexpr double DEFAULT_SIGMA = ControlledBlurSettings::DEFAULT_SIGMA;
 		ShaderPPBloomBlurBase(prosper::IPrContext &context, const std::string &identifier, const std::string &fsShader);
 
 		std::shared_ptr<BloomPipelineInfo> AddPipeline(uint32_t radius, double sigma);
@@ -48,5 +44,3 @@ namespace pragma {
 		~ShaderPPBloomBlurV();
 	};
 };
-
-#endif

@@ -1,12 +1,18 @@
 // SPDX-FileCopyrightText: (c) 2023 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
-#include "pragma/rendering/controlled_blur_settings.hpp"
-#include "pragma/rendering/shaders/post_processing/c_shader_pp_bloom_blur.hpp"
 #include "pragma/console/c_cvar.h"
 #include <shader/prosper_shader_blur.hpp>
+
+import pragma.client.rendering.shaders;
+
+module pragma.client.rendering;
+
+import :controlled_blur_settings;
 
 extern DLLCLIENT CEngine *c_engine;
 

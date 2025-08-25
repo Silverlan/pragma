@@ -1,16 +1,16 @@
 // SPDX-FileCopyrightText: (c) 2022 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_RENDERER_PP_BLOOM_COMPONENT_HPP__
-#define __C_RENDERER_PP_BLOOM_COMPONENT_HPP__
+module;
 
 #include "pragma/entities/components/renderers/c_renderer_pp_base_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
-#include "pragma/rendering/shaders/post_processing/c_shader_pp_bloom_blur.hpp"
-#include "pragma/rendering/controlled_blur_settings.hpp"
 
-namespace pragma {
-	class CRasterizationRendererComponent;
+export module pragma.client.entities.components:pp_bloom;
+
+import pragma.client.rendering;
+
+export namespace pragma {
 	class DLLCLIENT CRendererPpBloomComponent final : public CRendererPpBaseComponent {
 	  public:
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
@@ -39,5 +39,3 @@ namespace pragma {
 		float m_bloomThreshold = 1.f;
 	};
 };
-
-#endif

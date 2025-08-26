@@ -44,7 +44,6 @@
 #include "pragma/rendering/shaders/info/c_shader_velocity_buffer.hpp"
 #include "pragma/rendering/shaders/world/c_shader_eye.hpp"
 #include "pragma/rendering/shaders/world/c_shader_unlit.hpp"
-#include "pragma/rendering/shaders/c_shader_convolute_cubemap_lighting.hpp"
 #include "pragma/rendering/shaders/util/c_shader_specular_to_roughness.hpp"
 #include "pragma/rendering/shaders/util/c_shader_extract_diffuse_ambient_occlusion.hpp"
 #include "pragma/rendering/shaders/util/c_shader_compose_rma.hpp"
@@ -61,8 +60,6 @@ import pragma.client.rendering.shaders;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
-
-
 
 REGISTER_CONVAR_CALLBACK_CL(cl_render_shader_quality, [](NetworkState *, const ConVar &, int, int val) {
 	if(c_game == nullptr)

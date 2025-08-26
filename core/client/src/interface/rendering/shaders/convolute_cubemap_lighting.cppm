@@ -1,15 +1,13 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_SHADER_CONVOLUTE_CUBEMAP_LIGHTING_HPP
-#define __C_SHADER_CONVOLUTE_CUBEMAP_LIGHTING_HPP
+module;
 
 #include "pragma/rendering/shaders/c_shader_base_cubemap.hpp"
 
-namespace prosper {
-	class Texture;
-};
-namespace pragma {
+export module pragma.client.rendering.shaders:convolute_cubemap_lighting;
+
+export namespace pragma {
 	class DLLCLIENT ShaderConvoluteCubemapLighting : public ShaderCubemap {
 	  public:
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_CUBEMAP_TEXTURE;
@@ -22,5 +20,3 @@ namespace pragma {
 		virtual void InitializeShaderResources() override;
 	};
 };
-
-#endif

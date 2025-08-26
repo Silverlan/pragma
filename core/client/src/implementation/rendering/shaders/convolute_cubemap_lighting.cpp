@@ -1,15 +1,20 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
-#include "pragma/rendering/shaders/c_shader_convolute_cubemap_lighting.hpp"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <shader/prosper_shader_t.hpp>
 #include <image/prosper_sampler.hpp>
 #include <image/prosper_render_target.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <prosper_command_buffer.hpp>
+
+module pragma.client.rendering.shaders;
+
+import :convolute_cubemap_lighting;
 
 extern DLLCLIENT CEngine *c_engine;
 

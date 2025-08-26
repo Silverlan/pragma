@@ -22,6 +22,7 @@
 #include <prosper_window.hpp>
 #include <prosper_render_pass.hpp>
 
+import pragma.client.gui;
 import pragma.string.unicode;
 //import pragma.scripting.lua;
 

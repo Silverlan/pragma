@@ -37,6 +37,7 @@
 #include <alsoundsystem.hpp>
 
 import pragma.audio.util;
+import pragma.client.gui;
 import pragma.platform;
 import pragma.string.unicode;
 

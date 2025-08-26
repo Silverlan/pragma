@@ -6,7 +6,6 @@
 #include "pragma/gui/mainmenu/wimainmenu_options.h"
 #include "pragma/audio/c_audio.hpp"
 #include <wgui/types/widropdownmenu.h>
-#include "pragma/gui/wicheckbox.h"
 #include <wgui/types/wibutton.h>
 #include <wgui/types/witext.h>
 #include <wgui/types/witextentry.h>
@@ -33,6 +32,7 @@
 #include <fsys/fsys_package.hpp>
 #include <prosper_window.hpp>
 
+import pragma.client.gui;
 import pragma.pad;
 import pragma.locale;
 import pragma.string.unicode;

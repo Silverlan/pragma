@@ -43,6 +43,7 @@
 #include <luabind/copy_policy.hpp>
 #include <pragma/debug/intel_vtune.hpp>
 
+import pragma.client.gui;
 import pragma.string.unicode;
 // import pragma.scripting.lua;
 

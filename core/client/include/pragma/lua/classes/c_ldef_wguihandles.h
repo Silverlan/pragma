@@ -16,7 +16,6 @@
 #include "pragma/gui/wisilkicon.h"
 #include "pragma/gui/wiscrollcontainer.h"
 #include <wgui/types/widropdownmenu.h>
-#include "pragma/gui/wicheckbox.h"
 #include "pragma/gui/witable.h"
 #include "pragma/gui/wiframe.h"
 #include "pragma/gui/witransformable.h"

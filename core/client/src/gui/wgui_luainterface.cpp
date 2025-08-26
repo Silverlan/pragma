@@ -17,6 +17,8 @@
 #include <pragma/lua/converters/gui_element_converter_t.hpp>
 #include <pragma/lua/lua_call.hpp>
 
+import pragma.client.gui;
+
 extern ClientState *client;
 extern CGame *c_game;
 

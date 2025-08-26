@@ -5,6 +5,7 @@ module;
 
 export module pragma.client.rendering.shaders;
 export import :brdf_convolution;
+export import :compute_irradiance_map_roughness;
 export import :hdr;
 export import :pp_bloom_blur;
 export import :pp_dof;

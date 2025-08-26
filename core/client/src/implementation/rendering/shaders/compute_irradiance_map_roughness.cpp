@@ -1,9 +1,10 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
-#include "pragma/rendering/shaders/c_shader_compute_irradiance_map_roughness.hpp"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <shader/prosper_shader_t.hpp>
 #include <image/prosper_render_target.hpp>
@@ -14,6 +15,10 @@
 #include <prosper_framebuffer.hpp>
 #include <prosper_util.hpp>
 #include <buffers/prosper_buffer.hpp>
+
+module pragma.client.rendering.shaders;
+
+import :compute_irradiance_map_roughness;
 
 extern DLLCLIENT CEngine *c_engine;
 

@@ -1,15 +1,13 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_SHADER_COMPUTE_IRRADIANCE_MAP_ROUGHNESS_HPP__
-#define __C_SHADER_COMPUTE_IRRADIANCE_MAP_ROUGHNESS_HPP__
+module;
 
 #include "pragma/rendering/shaders/c_shader_base_cubemap.hpp"
 
-namespace prosper {
-	class Texture;
-};
-namespace pragma {
+export module pragma.client.rendering.shaders:compute_irradiance_map_roughness;
+
+export namespace pragma {
 	class DLLCLIENT ShaderComputeIrradianceMapRoughness : public ShaderCubemap {
 	  public:
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_IRRADIANCE;
@@ -30,5 +28,3 @@ namespace pragma {
 		virtual void InitializeShaderResources() override;
 	};
 };
-
-#endif

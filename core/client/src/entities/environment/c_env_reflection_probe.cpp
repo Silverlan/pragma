@@ -36,7 +36,6 @@
 #include "pragma/rendering/shaders/c_shader_equirectangular_to_cubemap.hpp"
 #include "pragma/rendering/shaders/c_shader_convolute_cubemap_lighting.hpp"
 #include "pragma/rendering/shaders/c_shader_compute_irradiance_map_roughness.hpp"
-#include "pragma/rendering/shaders/c_shader_brdf_convolution.hpp"
 #include "pragma/rendering/shaders/world/c_shader_pbr.hpp"
 #include "pragma/rendering/raytracing/cycles.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
@@ -46,6 +45,8 @@
 #include <pragma/entities/components/base_entity_component_logging.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <spdlog/logger.h>
+
+import pragma.client.rendering.shaders;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;

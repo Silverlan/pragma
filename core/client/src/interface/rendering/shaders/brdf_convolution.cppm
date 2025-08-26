@@ -1,16 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_SHADER_BRDF_CONVOLUTION_HPP__
-#define __C_SHADER_BRDF_CONVOLUTION_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include <shader/prosper_shader_base_image_processing.hpp>
 
-namespace prosper {
-	class Texture;
-};
-namespace pragma {
+export module pragma.client.rendering.shaders:brdf_convolution;
+
+export namespace pragma {
 	class DLLCLIENT ShaderBRDFConvolution : public prosper::ShaderBaseImageProcessing {
 	  public:
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_PREPASS;
@@ -23,5 +21,3 @@ namespace pragma {
 		virtual void InitializeShaderResources() override;
 	};
 };
-
-#endif

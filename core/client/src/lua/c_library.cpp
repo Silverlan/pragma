@@ -29,7 +29,6 @@
 #include "pragma/lua/policies/gui_element_policy.hpp"
 #include "pragma/ai/c_lai.hpp"
 #include "pragma/rendering/raytracing/cycles.hpp"
-#include "pragma/rendering/shaders/c_shader_equirectangular_to_cubemap.hpp"
 #include "pragma/asset/c_util_model.hpp"
 #include <pragma/debug/debug_render_info.hpp>
 #include <pragma/game/game_resources.hpp>

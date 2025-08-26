@@ -8,6 +8,7 @@ export import :brdf_convolution;
 export import :compute_irradiance_map_roughness;
 export import :convolute_cubemap_lighting;
 export import :cubemap_to_equirectangular;
+export import :equirectangular_to_cubemap;
 export import :forwardp_light_culling;
 export import :hdr;
 export import :pp_bloom_blur;

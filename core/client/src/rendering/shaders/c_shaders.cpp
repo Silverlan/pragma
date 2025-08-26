@@ -36,7 +36,6 @@
 #include "pragma/rendering/shaders/world/water/c_shader_water_surface_sum_edges.hpp"
 #include "pragma/rendering/shaders/world/water/c_shader_water_surface_solve_edges.hpp"
 #include "pragma/rendering/shaders/world/c_shader_light_cone.hpp"
-#include "pragma/rendering/shaders/c_shader_equirectangular_to_cubemap.hpp"
 #include "pragma/rendering/shaders/world/raytracing/c_shader_raytracing.hpp"
 #include "pragma/rendering/shaders/world/c_shader_pbr.hpp"
 #include "pragma/rendering/shaders/info/c_shader_velocity_buffer.hpp"

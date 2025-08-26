@@ -33,7 +33,6 @@
 #include "pragma/gui/witexturedcubemap.hpp"
 #include "pragma/gui/wiframe.h"
 #include "pragma/gui/wislider.h"
-#include "pragma/rendering/shaders/c_shader_equirectangular_to_cubemap.hpp"
 #include "pragma/rendering/shaders/world/c_shader_pbr.hpp"
 #include "pragma/rendering/raytracing/cycles.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"

@@ -13,7 +13,6 @@ namespace pragma::string {
 };
 #endif
 
-#include "pragma/gui/mainmenu/wimainmenu_base.h"
 #include <wgui/types/witext.h>
 
 module pragma.client.gui;

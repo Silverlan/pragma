@@ -1,14 +1,17 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
 #include "pragma/clientstate/clientstate.h"
-#include "pragma/gui/wiloadscreen.h"
 #include "pragma/gui/wiprogressbar.h"
 #include <wgui/types/witext.h>
 
-import pragma.client.gui;
+module pragma.client.gui;
+
+import :load_screen;
 import pragma.locale;
 
 extern DLLCLIENT CEngine *c_engine;

@@ -4,11 +4,11 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/gui/mainmenu/wimainmenu_base.h"
 
 export module pragma.client.gui:main_menu_new_game;
 
 import :chromium_page;
+import :main_menu_base;
 
 export {
 	class DLLCLIENT WIMainMenuNewGame : public WIMainMenuBase {

@@ -36,7 +36,6 @@ module pragma.client.gui;
 
 import :main_menu_options;
 
-import pragma.client.gui;
 import pragma.pad;
 import pragma.locale;
 import pragma.string.unicode;

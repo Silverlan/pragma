@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/gui/mainmenu/wimainmenu_base.h"
 #include <wgui/types/widropdownmenu.h>
 #include <sharedutils/util_clock.hpp>
 
@@ -12,6 +11,7 @@ export module pragma.client.gui:main_menu_options;
 
 import :chromium_page;
 import :checkbox;
+import :main_menu_base;
 
 export {
 	class DLLCLIENT WIMainMenuOptions : public WIMainMenuBase {

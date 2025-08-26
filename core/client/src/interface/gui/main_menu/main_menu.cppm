@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/gui/mainmenu/wimainmenu_base.h"
 #include <wgui/types/wirect.h>
 #include <sharedutils/functioncallback.h>
 

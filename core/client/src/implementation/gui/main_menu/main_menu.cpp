@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
-#include "pragma/gui/wiloadscreen.h"
 #include <wgui/types/witext.h>
 #include "pragma/gui/wiconsole.hpp"
 #include "pragma/gui/wiimageslideshow.h"

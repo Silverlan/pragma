@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/gui/mainmenu/wimainmenu_base.h"
 #include "pragma/addonsystem/addon_install_manager.hpp"
 #include <atomic>
 #include <mutex>
@@ -12,6 +11,7 @@ module;
 export module pragma.client.gui:main_menu_mods;
 
 import :chromium_page;
+import :main_menu_base;
 
 export {
 	class DLLCLIENT WIMainMenuMods : public WIMainMenuBase, public WIChromiumPage {

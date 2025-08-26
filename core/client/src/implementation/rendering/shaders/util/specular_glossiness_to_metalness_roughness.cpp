@@ -1,9 +1,10 @@
 // SPDX-FileCopyrightText: (c) 2020 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientstate.h"
-#include "pragma/rendering/shaders/util/c_shader_specular_glossiness_to_metalness_roughness.hpp"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <shader/prosper_shader_t.hpp>
 #include <prosper_util.hpp>
@@ -20,6 +21,10 @@
 #include <cmaterialmanager.h>
 #include <cmaterial_manager2.hpp>
 #include <texturemanager/texture.h>
+
+module pragma.client.rendering.shaders;
+
+import :specular_glossiness_to_metalness_roughness;
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;

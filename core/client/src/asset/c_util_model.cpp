@@ -8,7 +8,6 @@
 #include "pragma/asset/c_util_model.hpp"
 #include "pragma/util/util_image.hpp"
 #include "pragma/rendering/shaders/util/c_shader_compose_rma.hpp"
-#include "pragma/rendering/shaders/util/c_shader_specular_glossiness_to_metalness_roughness.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/environment/lights/c_env_light.h"
 #include "pragma/entities/environment/lights/c_env_light_spot.h"
@@ -39,6 +38,8 @@
 #include <tiny_gltf.h>
 #include <pragma/model/animation/skeleton.hpp>
 #include <pragma/model/animation/bone.hpp>
+
+import pragma.client.rendering.shaders;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;

@@ -12,7 +12,6 @@
 #include <pragma/model/animation/vertex_animation.hpp>
 #include <pragma/game/game_resources.hpp>
 #include <pragma/asset/util_asset.hpp>
-#include "pragma/rendering/shaders/util/c_shader_specular_glossiness_to_metalness_roughness.hpp"
 #include "pragma/rendering/shaders/util/c_shader_compose_rma.hpp"
 #include <cmaterial.h>
 #include <ofbx.h>

@@ -1,17 +1,16 @@
 // SPDX-FileCopyrightText: (c) 2020 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_SHADER_SPECULAR_GLOSSINESS_TO_METALNESS_ROUGHNESS_HPP__
-#define __C_SHADER_SPECULAR_GLOSSINESS_TO_METALNESS_ROUGHNESS_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include <shader/prosper_shader_base_image_processing.hpp>
 
-namespace prosper {
-	class Image;
-	class Texture;
-};
-namespace pragma {
+export module pragma.client.rendering.shaders:specular_glossiness_to_metalness_roughness;
+
+import pragma.client.entities.components;
+
+export namespace pragma {
 	class DLLCLIENT ShaderSpecularGlossinessToMetalnessRoughness : public prosper::ShaderBaseImageProcessing {
 	  public:
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_TEXTURE;
@@ -49,5 +48,3 @@ namespace pragma {
 		virtual void InitializeShaderResources() override;
 	};
 };
-
-#endif

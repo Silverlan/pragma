@@ -1,12 +1,17 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/gui/wikeyentry.h"
 #include <wgui/types/witext.h>
 #include <wgui/types/wirect.h>
 #include "pragma/input/inputhelper.h"
 #include <mathutil/umath.h>
+
+module pragma.client.gui;
+
+import :key_entry;
 
 import pragma.locale;
 

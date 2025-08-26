@@ -8,7 +8,6 @@
 #include <wgui/types/widropdownmenu.h>
 #include "pragma/gui/wislider.h"
 #include "pragma/gui/wiscrollcontainer.h"
-#include "pragma/gui/wikeyentry.h"
 #include "pragma/input/input_binding_layer.hpp"
 
 import pragma.client.gui;

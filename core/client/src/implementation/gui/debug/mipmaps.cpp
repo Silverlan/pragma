@@ -1,14 +1,19 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
 #include "pragma/game/c_game.h"
-#include "pragma/gui/widebugmipmaps.h"
 #include <prosper_util.hpp>
 #include <image/prosper_sampler.hpp>
 #include <image/prosper_image_view.hpp>
 #include <prosper_command_buffer.hpp>
+
+module pragma.client.gui;
+
+import :debug_mipmaps;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;

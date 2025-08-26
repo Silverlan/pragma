@@ -21,7 +21,6 @@
 #include "pragma/networking/iclient.hpp"
 #include <sharedutils/util.h>
 #include <sharedutils/util_string.h>
-#include "pragma/gui/widebugmipmaps.h"
 #include "pragma/debug/c_debug_game_gui.h"
 #include "pragma/util/util_tga.hpp"
 #include "pragma/rendering/raytracing/cycles.hpp"

@@ -6,7 +6,7 @@
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/console/c_cvar_global_functions.h"
 #include "pragma/debug/c_debug_game_gui.h"
-#include "pragma/gui/widebugmipmaps.h"
+#include <texturemanager/texture.h>
 #include <texture_type.h>
 #include <pragma/game/game_resources.hpp>
 #include <sharedutils/magic_enum.hpp>
@@ -14,6 +14,8 @@
 #include <wgui/fontmanager.h>
 #include <cmaterialmanager.h>
 #include <cmaterial_manager2.hpp>
+
+import pragma.client.gui;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;

@@ -30,6 +30,7 @@
 #include <pragma/lua/converters/property_converter_t.hpp>
 #include <pragma/lua/lua_call.hpp>
 #include <scripting/lua/lua.hpp>
+#include <buffers/prosper_buffer.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_render_pass.hpp>
 #include <prosper_swap_command_buffer.hpp>

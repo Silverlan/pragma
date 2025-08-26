@@ -11,7 +11,6 @@
 #include "pragma/gui/widebugdepthtexture.h"
 #include "pragma/debug/c_debug_game_gui.h"
 #include "pragma/rendering/c_cubemapside.h"
-#include "pragma/gui/debug/widebugshadowmap.hpp"
 #include <pragma/console/sh_cmd.h>
 #include <image/prosper_render_target.hpp>
 #include <wgui/types/wiroot.h>

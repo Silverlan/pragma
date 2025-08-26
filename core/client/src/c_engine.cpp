@@ -15,7 +15,6 @@ namespace pragma::string {
 #include "pragma/console/c_cvar.h"
 #include <texturemanager/texturemanager.h>
 #include "pragma/gui/wiimageslideshow.h"
-#include "pragma/gui/mainmenu/wimainmenu.h"
 #include "pragma/gui/wiconsole.hpp"
 #include "pragma/gui/wiframe.h"
 #include "pragma/asset/c_util_model.hpp"
@@ -76,6 +75,7 @@ namespace pragma::string {
 #endif
 
 import util_zip;
+import pragma.client.gui;
 import pragma.client.rendering.shaders;
 import pragma.shadergraph;
 import pragma.locale;

@@ -13,9 +13,10 @@
 #include "pragma/gui/wicommandlineentry.hpp"
 #include "pragma/gui/wisnaparea.hpp"
 #include "pragma/gui/wiframe.h"
-#include "pragma/gui/mainmenu/wimainmenu.h"
 #include <pragma/engine_info.hpp>
 #include <pragma/lua/lua_error_handling.hpp>
+
+import pragma.client.gui;
 import pragma.string.unicode;
 import pragma.locale;
 

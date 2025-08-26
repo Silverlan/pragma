@@ -1,9 +1,10 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
-#include "pragma/gui/mainmenu/wimainmenu.h"
 #include "pragma/gui/wiloadscreen.h"
 #include <wgui/types/witext.h>
 #include "pragma/gui/wiconsole.hpp"
@@ -17,7 +18,10 @@
 #define DLLSPEC_ISTEAMWORKS DLLNETWORK
 #include <pragma/game/isteamworks.hpp>
 
-import pragma.client.gui;
+module pragma.client.gui;
+
+import :main_menu;
+
 import pragma.locale;
 
 extern DLLCLIENT CEngine *c_engine;

@@ -13,7 +13,6 @@ module;
 #include "pragma/gui/wioptionslist.h"
 #include "pragma/gui/wichoicelist.h"
 #include "pragma/gui/wislider.h"
-#include "pragma/gui/mainmenu/wimainmenu.h"
 #include "pragma/gui/wimessagebox.h"
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/rendering/c_msaa.h"

@@ -11,7 +11,6 @@
 #include "pragma/model/c_modelmanager.h"
 #include "pragma/lua/classes/c_ldef_wgui.h"
 #include "pragma/lua/libraries/c_lglobal.h"
-#include "pragma/gui/mainmenu/wimainmenu.h"
 #include "pragma/c_engine.h"
 #include "pragma/console/convarhandle.h"
 #include "pragma/model/c_model.h"
@@ -54,6 +53,7 @@
 #include <prosper_window.hpp>
 #include <wgui/types/wiroot.h>
 
+import pragma.client.gui;
 // import pragma.scripting.lua;
 
 static std::unordered_map<std::string, std::shared_ptr<PtrConVar>> *conVarPtrs = NULL;

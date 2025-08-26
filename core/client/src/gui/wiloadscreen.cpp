@@ -4,11 +4,11 @@
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
 #include "pragma/clientstate/clientstate.h"
-#include "pragma/gui/mainmenu/wimainmenu.h"
 #include "pragma/gui/wiloadscreen.h"
 #include "pragma/gui/wiprogressbar.h"
 #include <wgui/types/witext.h>
 
+import pragma.client.gui;
 import pragma.locale;
 
 extern DLLCLIENT CEngine *c_engine;

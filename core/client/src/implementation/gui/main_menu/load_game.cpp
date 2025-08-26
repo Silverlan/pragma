@@ -6,7 +6,6 @@ module;
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
 #include "pragma/clientstate/clientstate.h"
-#include "pragma/gui/mainmenu/wimainmenu.h"
 
 module pragma.client.gui;
 

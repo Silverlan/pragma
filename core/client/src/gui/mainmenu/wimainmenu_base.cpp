@@ -4,13 +4,13 @@
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/gui/mainmenu/wimainmenu_base.h"
-#include "pragma/gui/mainmenu/wimainmenu.h"
 #include <pragma/string/format.h>
 #include <wgui/types/wibutton.h>
 #include "pragma/gui/wioptionslist.h"
 #include <wgui/types/witext.h>
 #include <wgui/types/wirect.h>
 
+import pragma.client.gui;
 import pragma.locale;
 import pragma.string.unicode;
 

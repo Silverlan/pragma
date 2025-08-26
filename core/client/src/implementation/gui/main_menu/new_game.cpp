@@ -9,7 +9,6 @@ module;
 #include <wgui/types/widropdownmenu.h>
 #include <wgui/types/wibutton.h>
 #include <fsys/filesystem.h>
-#include "pragma/gui/mainmenu/wimainmenu.h"
 #include <wgui/types/witextentry.h>
 #include "pragma/gui/wislider.h"
 #include "pragma/gui/wioptionslist.h"

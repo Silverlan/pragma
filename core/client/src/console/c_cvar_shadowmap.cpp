@@ -7,7 +7,6 @@
 #include "pragma/entities/environment/lights/c_env_shadow_csm.hpp"
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <wgui/types/wirect.h>
-#include "pragma/gui/mainmenu/wimainmenu.h"
 #include "pragma/game/c_game_createguielement.h"
 #include "pragma/gui/widebugdepthtexture.h"
 #include "pragma/debug/c_debug_game_gui.h"
@@ -16,6 +15,8 @@
 #include <pragma/console/sh_cmd.h>
 #include <image/prosper_render_target.hpp>
 #include <wgui/types/wiroot.h>
+
+import pragma.client.gui;
 
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;

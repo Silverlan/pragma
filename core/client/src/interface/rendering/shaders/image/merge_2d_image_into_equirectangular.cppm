@@ -1,16 +1,16 @@
 // SPDX-FileCopyrightText: (c) 2023 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_SHADER_MERGE_2D_IMAGE_INTO_EQUIRECTANGULAR_HPP__
-#define __C_SHADER_MERGE_2D_IMAGE_INTO_EQUIRECTANGULAR_HPP__
+module;
 
 #include "pragma/rendering/shaders/c_shader_base_cubemap.hpp"
 #include <shader/prosper_shader_base_image_processing.hpp>
 
-namespace prosper {
-	class Texture;
-};
-namespace pragma {
+export module pragma.client.rendering.shaders:merge_2d_image_to_equirectangular;
+
+import pragma.client.entities.components;
+
+export namespace pragma {
 	class DLLCLIENT ShaderMerge2dImageIntoEquirectangular : public prosper::ShaderBaseImageProcessing {
 	  public:
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_TEXTURE_2D;
@@ -40,5 +40,3 @@ namespace pragma {
 		virtual void InitializeShaderResources() override;
 	};
 };
-
-#endif

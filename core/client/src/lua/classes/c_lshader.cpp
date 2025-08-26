@@ -6,7 +6,6 @@
 #include "pragma/rendering/shaders/c_shader_lua.hpp"
 #include "pragma/rendering/shaders/util/c_shader_compose_rma.hpp"
 #include "pragma/rendering/shaders/image/c_shader_merge_images.hpp"
-#include "pragma/rendering/shaders/image/c_shader_merge_2d_image_into_equirectangular.hpp"
 #include "pragma/lua/converters/shader_converter_t.hpp"
 #include <pragma/lua/util.hpp>
 #include <shader/prosper_pipeline_create_info.hpp>
@@ -15,6 +14,8 @@
 #include <prosper_prepared_command_buffer.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
+
+import pragma.client.rendering.shaders;
 
 prosper::ShaderBindState *LuaShaderRecordTarget::GetBindState() const { return luabind::object_cast_nothrow<prosper::ShaderBindState *>(target, static_cast<prosper::ShaderBindState *>(nullptr)); }
 prosper::util::PreparedCommandBuffer *LuaShaderRecordTarget::GetPcb() const { return luabind::object_cast_nothrow<prosper::util::PreparedCommandBuffer *>(target, static_cast<prosper::util::PreparedCommandBuffer *>(nullptr)); }

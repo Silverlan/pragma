@@ -5,7 +5,6 @@
 #include "pragma/c_engine.h"
 #include "pragma/gui/mainmenu/wimainmenu.h"
 #include "pragma/gui/mainmenu/wimainmenu_newgame.h"
-#include "pragma/gui/mainmenu/wimainmenu_loadgame.h"
 #include "pragma/gui/mainmenu/wimainmenu_options.h"
 #include "pragma/gui/mainmenu/wimainmenu_credits.hpp"
 #include "pragma/gui/wiloadscreen.h"

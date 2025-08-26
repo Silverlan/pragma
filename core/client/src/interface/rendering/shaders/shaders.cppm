@@ -11,6 +11,7 @@ export import :convolute_cubemap_lighting;
 export import :cubemap_to_equirectangular;
 export import :depth_to_rgb;
 export import :equirectangular_to_cubemap;
+export import :extract_diffuse_ambinet_occlusion;
 export import :forwardp_light_culling;
 export import :hdr;
 export import :pp_bloom_blur;

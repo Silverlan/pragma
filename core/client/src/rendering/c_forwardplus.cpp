@@ -8,7 +8,6 @@
 #include "pragma/debug/c_debug_game_gui.h"
 #include "pragma/gui/widebugdepthtexture.h"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
-#include "pragma/rendering/shaders/c_shader_forwardp_light_culling.hpp"
 #include "pragma/rendering/shaders/c_shader_forwardp_light_indexing.hpp"
 #include "pragma/rendering/lighting/c_light_data_buffer_manager.hpp"
 #include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
@@ -24,6 +23,8 @@
 #include <buffers/prosper_uniform_resizable_buffer.hpp>
 #include <sharedutils/scope_guard.h>
 #include <pragma/entities/entity_iterator.hpp>
+
+import pragma.client.rendering.shaders;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;

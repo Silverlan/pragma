@@ -37,7 +37,6 @@
 #include "pragma/lua/libraries/c_lua_vulkan.h"
 #include "pragma/rendering/shaders/particles/c_shader_particle_polyboard.hpp"
 #include "pragma/rendering/shaders/world/c_shader_prepass.hpp"
-#include "pragma/rendering/shaders/c_shader_forwardp_light_culling.hpp"
 #include "pragma/physics/c_phys_visual_debugger.hpp"
 #include <pragma/console/sh_cmd.h>
 #include <pragma/entities/entity_component_system_t.hpp>
@@ -59,6 +58,7 @@
 #include <pragma/entities/entity_component_manager_t.hpp>
 
 import pragma.client.rendering.shaders;
+
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;

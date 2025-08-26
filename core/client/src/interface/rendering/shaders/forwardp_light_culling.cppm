@@ -1,13 +1,16 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_SHADER_FORWARDP_LIGHT_CULLING_HPP__
-#define __C_SHADER_FORWARDP_LIGHT_CULLING_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include <shader/prosper_shader.hpp>
 
-namespace pragma {
+export module pragma.client.rendering.shaders:forwardp_light_culling;
+
+import pragma.client.entities.components;
+
+export namespace pragma {
 	class DLLCLIENT ShaderForwardPLightCulling : public prosper::ShaderCompute {
 	  public:
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_LIGHTS;
@@ -34,5 +37,3 @@ namespace pragma {
 		virtual void InitializeShaderResources() override;
 	};
 };
-
-#endif

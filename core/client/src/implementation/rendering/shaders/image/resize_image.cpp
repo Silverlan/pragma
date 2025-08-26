@@ -1,9 +1,10 @@
 // SPDX-FileCopyrightText: (c) 2022 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
-#include "pragma/rendering/shaders/image/c_shader_resize_image.hpp"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <shader/prosper_shader_copy_image.hpp>
 #include <shader/prosper_shader_t.hpp>
@@ -12,6 +13,10 @@
 #include <prosper_command_buffer.hpp>
 #include <image/prosper_texture.hpp>
 #include <random>
+
+module pragma.client.rendering.shaders;
+
+import :resize_image;
 
 using namespace pragma;
 

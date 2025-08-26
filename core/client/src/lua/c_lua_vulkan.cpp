@@ -6,7 +6,6 @@
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
 #include "pragma/rendering/shaders/c_shader_lua.hpp"
-#include "pragma/rendering/shaders/image/c_shader_resize_image.hpp"
 #include <pragma/lua/classes/ldef_color.h>
 #include <pragma/lua/classes/ldef_vector.h>
 #include <pragma/lua/classes/lerrorcode.h>
@@ -45,6 +44,8 @@
 #include <luabind/copy_policy.hpp>
 #include <luabind/detail/meta.hpp>
 #include <shader/prosper_shader_blur.hpp>
+
+import pragma.client.rendering.shaders;
 
 extern CEngine *c_engine;
 

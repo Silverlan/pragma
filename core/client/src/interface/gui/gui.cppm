@@ -9,5 +9,6 @@ export import :chromium_page;
 export import :main_menu_load_game;
 export import :main_menu_mods;
 export import :main_menu_new_game;
+export import :main_menu_options;
 export import :net_graph;
 export import :server_browser;

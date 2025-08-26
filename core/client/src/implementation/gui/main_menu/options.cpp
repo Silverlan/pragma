@@ -1,9 +1,10 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
-#include "pragma/gui/mainmenu/wimainmenu_options.h"
 #include "pragma/audio/c_audio.hpp"
 #include <wgui/types/widropdownmenu.h>
 #include <wgui/types/wibutton.h>
@@ -31,6 +32,10 @@
 #include <sharedutils/util_clock.hpp>
 #include <fsys/fsys_package.hpp>
 #include <prosper_window.hpp>
+
+module pragma.client.gui;
+
+import :main_menu_options;
 
 import pragma.client.gui;
 import pragma.pad;

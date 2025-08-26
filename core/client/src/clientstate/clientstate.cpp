@@ -23,7 +23,6 @@
 #include "pragma/util/c_resource_watcher.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/console/c_cvar.h"
-#include "pragma/gui/wifps.h"
 #include <pragma/asset/util_asset.hpp>
 #include <pragma/game/game_resources.hpp>
 #include <pragma/lua/libraries/lengine.h>

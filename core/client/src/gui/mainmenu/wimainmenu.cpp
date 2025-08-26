@@ -13,7 +13,6 @@
 #include <wgui/types/witext.h>
 #include "pragma/gui/wiconsole.hpp"
 #include "pragma/gui/wiimageslideshow.h"
-#include "pragma/gui/wiserverbrowser.h"
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
 #include <pragma/engine_version.h>
@@ -23,6 +22,7 @@
 #define DLLSPEC_ISTEAMWORKS DLLNETWORK
 #include <pragma/game/isteamworks.hpp>
 
+import pragma.client.gui;
 import pragma.locale;
 
 extern DLLCLIENT CEngine *c_engine;

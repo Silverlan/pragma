@@ -1,19 +1,28 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientutil.h"
-#include "pragma/gui/wiserverbrowser.h"
 #include "pragma/gui/witable.h"
 #include <wgui/types/wibutton.h>
 #include "pragma/gui/wisilkicon.h"
+#include "pragma/gui/wiframe.h"
 #include "pragma/gui/wiscrollcontainer.h"
 #include "wms_shared.h"
 #include "wms_request_filter.h"
 #include "wms_message.h"
 #include "pragma/networking/wv_message.h"
 #include <sharedutils/util_library.hpp>
+#include "wmserverdata.h"
+#include <pragma/networking/game_server_data.hpp>
+#include <networkmanager/udp_handler/udp_message_dispatcher.h>
+#include <pragma/networking/master_server_query_dispatcher.hpp>
 
+module pragma.client.gui;
+
+import :server_browser;
 import pragma.locale;
 
 LINK_WGUI_TO_CLASS(WIServerBrowser, WIServerBrowser);

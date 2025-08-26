@@ -9,7 +9,6 @@
 #include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/console/c_cvar_global_functions.h"
 #include "pragma/debug/c_debug_game_gui.h"
-#include "pragma/gui/debug/widebugssao.hpp"
 #include "pragma/gui/widebugdepthtexture.h"
 #include <wgui/types/wirect.h>
 #include <wgui/types/wiroot.h>
@@ -18,6 +17,7 @@
 #include <prosper_descriptor_set_group.hpp>
 #include <shader/prosper_shader_t.hpp>
 
+import pragma.client.gui;
 import pragma.client.rendering.shaders;
 
 extern DLLCLIENT CEngine *c_engine;

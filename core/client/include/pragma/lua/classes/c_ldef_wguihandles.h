@@ -26,7 +26,6 @@
 #include "pragma/gui/wicontainer.h"
 #include "pragma/gui/wiconsole.hpp"
 #include "pragma/gui/widebugdepthtexture.h"
-#include "pragma/gui/debug/widebugssao.hpp"
 #include "pragma/gui/wisnaparea.hpp"
 #include "pragma/gui/wicommandlineentry.hpp"
 

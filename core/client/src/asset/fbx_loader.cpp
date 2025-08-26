@@ -14,7 +14,6 @@
 #include <pragma/asset/util_asset.hpp>
 #include "pragma/rendering/shaders/util/c_shader_specular_glossiness_to_metalness_roughness.hpp"
 #include "pragma/rendering/shaders/util/c_shader_compose_rma.hpp"
-#include "pragma/rendering/shaders/util/c_shader_combine_image_channels.hpp"
 #include <cmaterial.h>
 #include <ofbx.h>
 #include <span>
@@ -26,6 +25,7 @@
 #include <texturemanager/texture_manager2.hpp>
 
 import panima;
+import pragma.client.rendering.shaders;
 
 using namespace pragma::asset::fbx;
 extern DLLCLIENT CGame *c_game;

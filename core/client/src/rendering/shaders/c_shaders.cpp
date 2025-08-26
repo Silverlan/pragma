@@ -14,7 +14,6 @@
 #include "pragma/rendering/shaders/world/c_shader_test.hpp"
 #include "pragma/rendering/shaders/world/c_shader_prepass.hpp"
 #include "pragma/rendering/shaders/world/c_shader_noop.hpp"
-#include "pragma/rendering/shaders/c_shader_depth_to_rgb.h"
 #include "pragma/rendering/shaders/particles/c_shader_particle.hpp"
 #include "pragma/rendering/shaders/particles/c_shader_particle_model.hpp"
 #include "pragma/rendering/shaders/particles/c_shader_particle_polyboard.hpp"
@@ -56,7 +55,6 @@ import pragma.client.rendering.shaders;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
-
 
 REGISTER_CONVAR_CALLBACK_CL(cl_render_shader_quality, [](NetworkState *, const ConVar &, int, int val) {
 	if(c_game == nullptr)

@@ -1,13 +1,16 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_SHADER_DEPTH_TO_RGB_H__
-#define __C_SHADER_DEPTH_TO_RGB_H__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include <shader/prosper_shader.hpp>
 
-namespace pragma {
+export module pragma.client.rendering.shaders:depth_to_rgb;
+
+import pragma.client.entities.components;
+
+export namespace pragma {
 	class DLLCLIENT ShaderDepthToRGB : public prosper::ShaderGraphics {
 	  public:
 		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_VERTEX;
@@ -69,4 +72,3 @@ namespace pragma {
 		virtual uint32_t GetPushConstantSize() const override;
 	};
 };
-#endif

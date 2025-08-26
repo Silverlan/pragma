@@ -1,14 +1,19 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
-#include "pragma/rendering/shaders/c_shader_depth_to_rgb.h"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <shader/prosper_shader_t.hpp>
 #include <prosper_context.hpp>
 #include <prosper_util.hpp>
 #include <buffers/prosper_buffer.hpp>
+
+module pragma.client.rendering.shaders;
+
+import :depth_to_rgb;
 
 extern DLLCLIENT CEngine *c_engine;
 

@@ -5,7 +5,6 @@
 #include "pragma/c_engine.h"
 #include "pragma/game/c_game.h"
 #include "pragma/gui/widebugdepthtexture.h"
-#include "pragma/rendering/shaders/c_shader_depth_to_rgb.h"
 #include "pragma/entities/environment/c_env_camera.h"
 #include <image/prosper_render_target.hpp>
 #include <prosper_util.hpp>
@@ -13,6 +12,8 @@
 #include <image/prosper_image_view.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
+
+import pragma.client.rendering.shaders;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;

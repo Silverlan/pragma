@@ -1,9 +1,10 @@
 // SPDX-FileCopyrightText: (c) 2020 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
-#include "pragma/rendering/shaders/c_shader_cubemap_to_equirectangular.hpp"
 #include "prosper_util.hpp"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <shader/prosper_shader_t.hpp>
@@ -11,6 +12,10 @@
 #include <image/prosper_sampler.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
+
+module pragma.client.rendering.shaders;
+
+import :cubemap_to_equirectangular;
 
 extern DLLCLIENT CEngine *c_engine;
 

@@ -20,7 +20,6 @@
 #include "pragma/lua/classes/c_lshaderinfo.h"
 #include "pragma/lua/classes/lshaderinfo.h"
 #include "pragma/rendering/shader_input_data.hpp"
-#include "pragma/rendering/shaders/c_shader_cubemap_to_equirectangular.hpp"
 #include "pragma/rendering/shaders/image/c_shader_merge_images.hpp"
 #include "pragma/rendering/shaders/image/c_shader_merge_2d_image_into_equirectangular.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
@@ -81,6 +80,7 @@
 #include <cmaterial_manager2.hpp>
 #include <wgui/wgui.h>
 
+import pragma.client.rendering.shaders;
 import pragma.shadergraph;
 
 extern DLLCLIENT CEngine *c_engine;

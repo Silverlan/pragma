@@ -1,16 +1,16 @@
 // SPDX-FileCopyrightText: (c) 2020 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_SHADER_CUBEMAP_TO_EQUIRECTANGULAR_HPP__
-#define __C_SHADER_CUBEMAP_TO_EQUIRECTANGULAR_HPP__
+module;
 
 #include "pragma/rendering/shaders/c_shader_base_cubemap.hpp"
 #include <shader/prosper_shader_base_image_processing.hpp>
 
-namespace prosper {
-	class Texture;
-};
-namespace pragma {
+export module pragma.client.rendering.shaders:cubemap_to_equirectangular;
+
+import pragma.client.entities.components;
+
+export namespace pragma {
 	class DLLCLIENT ShaderCubemapToEquirectangular : public prosper::ShaderBaseImageProcessing {
 	  public:
 		enum class Pipeline : uint32_t {
@@ -36,5 +36,3 @@ namespace pragma {
 		virtual void InitializeShaderResources() override;
 	};
 };
-
-#endif

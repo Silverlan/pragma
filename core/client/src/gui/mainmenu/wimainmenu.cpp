@@ -4,7 +4,6 @@
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
 #include "pragma/gui/mainmenu/wimainmenu.h"
-#include "pragma/gui/mainmenu/wimainmenu_newgame.h"
 #include "pragma/gui/mainmenu/wimainmenu_options.h"
 #include "pragma/gui/wiloadscreen.h"
 #include <wgui/types/witext.h>

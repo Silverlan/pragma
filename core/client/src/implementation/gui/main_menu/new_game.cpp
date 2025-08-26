@@ -1,10 +1,11 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientutil.h"
 #include "pragma/c_engine.h"
-#include "pragma/gui/mainmenu/wimainmenu_newgame.h"
 #include <wgui/types/widropdownmenu.h>
 #include <wgui/types/wibutton.h>
 #include <fsys/filesystem.h>
@@ -20,6 +21,10 @@
 #include <sharedutils/util_file.h>
 #include <wgui/types/witext.h>
 #include <fsys/ifile.hpp>
+
+module pragma.client.gui;
+
+import :main_menu_new_game;
 
 import pragma.locale;
 import pragma.string.unicode;

@@ -11,6 +11,7 @@ export import :combine_image_channels;
 export import :compute_irradiance_map_roughness;
 export import :convolute_cubemap_lighting;
 export import :cubemap_to_equirectangular;
+export import :debug;
 export import :depth_to_rgb;
 export import :equirectangular_to_cubemap;
 export import :extract_diffuse_ambinet_occlusion;

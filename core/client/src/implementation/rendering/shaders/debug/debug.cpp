@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/rendering/shaders/debug/c_shader_debug.hpp"
 #include "pragma/game/game_limits.h"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <shader/prosper_shader_t.hpp>
@@ -10,6 +11,10 @@
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_command_buffer.hpp>
 #include <pragma/logging.hpp>
+
+module pragma.client.rendering.shaders;
+
+import :debug;
 
 extern DLLCLIENT CEngine *c_engine;
 

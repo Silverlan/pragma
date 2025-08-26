@@ -3,11 +3,11 @@
 
 module;
 
-#include "pragma/rendering/shaders/debug/c_shader_debug.hpp"
-
 export module pragma.client.rendering.shaders:debug_text;
 
 import pragma.client.entities.components;
+
+import :debug;
 
 export namespace pragma {
 	class DLLCLIENT ShaderDebugText : public ShaderDebug {

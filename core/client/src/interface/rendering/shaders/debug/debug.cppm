@@ -1,12 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_SHADER_DEBUG_HPP__
-#define __C_SHADER_DEBUG_HPP__
+module;
 
 #include "pragma/rendering/shaders/world/c_shader_scene.hpp"
 
-namespace pragma {
+export module pragma.client.rendering.shaders:debug;
+
+import pragma.client.entities.components;
+
+export namespace pragma {
 	class DLLCLIENT ShaderDebug : public ShaderScene {
 	  public:
 		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_VERTEX;
@@ -88,5 +91,3 @@ namespace pragma {
 		virtual void InitializeShaderResources() override;
 	};
 };
-
-#endif

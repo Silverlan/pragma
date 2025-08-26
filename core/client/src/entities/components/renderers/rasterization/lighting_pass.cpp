@@ -41,11 +41,11 @@ static auto cvDrawTranslucent = GetClientConVar("render_draw_translucent");
 #include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/rendering/shaders/world/c_shader_test.hpp"
 #include "pragma/rendering/shaders/world/c_shader_pbr.hpp"
-#include "pragma/rendering/shaders/debug/c_shader_debug.hpp"
 #include "pragma/entities/entity_iterator.hpp"
 #include "pragma/model/c_model.h"
 #include "pragma/entities/entity_instance_index_buffer.hpp"
 #include "pragma/entities/entity_component_system_t.hpp"
+import pragma.client.rendering.shaders;
 int g_dbgMode = 5;
 #endif
 

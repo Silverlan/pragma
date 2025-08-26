@@ -23,5 +23,6 @@ export import :pp_light_cone;
 export import :pp_motion_blur;
 export import :pp_water;
 export import :specular_glossiness_to_metalness_roughness;
+export import :specular_to_roughness;
 export import :ssao;
 export import :ssao_blur;

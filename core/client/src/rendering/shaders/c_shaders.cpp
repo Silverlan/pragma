@@ -39,7 +39,6 @@
 #include "pragma/rendering/shaders/info/c_shader_velocity_buffer.hpp"
 #include "pragma/rendering/shaders/world/c_shader_eye.hpp"
 #include "pragma/rendering/shaders/world/c_shader_unlit.hpp"
-#include "pragma/rendering/shaders/util/c_shader_specular_to_roughness.hpp"
 #include "pragma/rendering/shaders/util/c_shader_compose_rma.hpp"
 #include "pragma/rendering/global_render_settings_buffer_data.hpp"
 #include <pragma/console/convars.h>
@@ -49,7 +48,6 @@
 #include <buffers/prosper_buffer.hpp>
 
 import pragma.client.rendering.shaders;
-
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;

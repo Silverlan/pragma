@@ -20,7 +20,6 @@
 #include "pragma/entities/c_entityfactories.h"
 #include "pragma/entities/util/c_util_pbr_converter.hpp"
 #include "pragma/rendering/raytracing/cycles.hpp"
-#include "pragma/rendering/shaders/util/c_shader_specular_to_roughness.hpp"
 #include "pragma/rendering/shaders/util/c_shader_compose_rma.hpp"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"

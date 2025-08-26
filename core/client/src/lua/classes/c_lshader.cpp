@@ -5,7 +5,6 @@
 #include "pragma/lua/classes/c_lshader.h"
 #include "pragma/rendering/shaders/c_shader_lua.hpp"
 #include "pragma/rendering/shaders/util/c_shader_compose_rma.hpp"
-#include "pragma/rendering/shaders/image/c_shader_merge_images.hpp"
 #include "pragma/lua/converters/shader_converter_t.hpp"
 #include <pragma/lua/util.hpp>
 #include <shader/prosper_pipeline_create_info.hpp>

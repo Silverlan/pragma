@@ -1,13 +1,16 @@
 // SPDX-FileCopyrightText: (c) 2023 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_SHADER_MERGE_IMAGES_HPP__
-#define __C_SHADER_MERGE_IMAGES_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include <shader/prosper_shader_base_image_processing.hpp>
 
-namespace pragma {
+export module pragma.client.rendering.shaders:merge_images;
+
+import pragma.client.entities.components;
+
+export namespace pragma {
 	class DLLCLIENT ShaderMergeImages : public prosper::ShaderBaseImageProcessing {
 	  public:
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_TEXTURE_2D;
@@ -20,5 +23,3 @@ namespace pragma {
 		virtual void InitializeShaderResources() override;
 	};
 };
-
-#endif

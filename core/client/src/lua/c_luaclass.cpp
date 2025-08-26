@@ -20,7 +20,6 @@
 #include "pragma/lua/classes/c_lshaderinfo.h"
 #include "pragma/lua/classes/lshaderinfo.h"
 #include "pragma/rendering/shader_input_data.hpp"
-#include "pragma/rendering/shaders/image/c_shader_merge_images.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/entities/environment/lights/c_env_light.h"

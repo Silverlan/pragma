@@ -21,7 +21,6 @@
 #include "pragma/rendering/shaders/particles/c_shader_particle_animated_sprites.hpp"
 #include "pragma/rendering/shaders/particles/c_shader_particle_sprite_trail.hpp"
 #include "pragma/rendering/shaders/c_shader_shadow.hpp"
-#include "pragma/rendering/shaders/image/c_shader_calc_image_color.hpp"
 #include "pragma/rendering/shaders/image/c_shader_clear_color.hpp"
 #include "pragma/rendering/shaders/image/c_shader_resize_image.hpp"
 #include "pragma/rendering/shaders/image/c_shader_merge_images.hpp"

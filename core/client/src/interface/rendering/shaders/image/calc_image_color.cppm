@@ -1,13 +1,16 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_SHADER_CALC_IMAGE_COLOR_HPP__
-#define __C_SHADER_CALC_IMAGE_COLOR_HPP__
+export;
 
 #include "pragma/clientdefinitions.h"
 #include <shader/prosper_shader.hpp>
 
-namespace pragma {
+export module pragma.client.rendering.shaders:calc_image_color;
+
+import pragma.client.entities.components;
+
+export namespace pragma {
 	class DLLCLIENT ShaderCalcImageColor : public prosper::ShaderCompute {
 	  public:
 #pragma pack(push, 1)
@@ -26,5 +29,3 @@ namespace pragma {
 		virtual void InitializeShaderResources() override;
 	};
 };
-
-#endif

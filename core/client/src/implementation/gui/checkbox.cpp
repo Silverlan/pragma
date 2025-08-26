@@ -5,11 +5,12 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientstate.h"
-#include "pragma/gui/wisilkicon.h"
+#include <wgui/types/wirect.h>
 
 module pragma.client.gui;
 
 import :checkbox;
+import :silk_icon;
 
 extern ClientState *client;
 LINK_WGUI_TO_CLASS(WICheckbox, WICheckbox);

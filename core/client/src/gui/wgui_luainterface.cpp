@@ -5,6 +5,7 @@
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
 #include "pragma/gui/wgui_luainterface.h"
+#include "pragma/gui/wiicon.h"
 #include <wgui/wibase.h>
 #include <wgui/types/wiroot.h>
 #include "pragma/lua/classes/c_ldef_wguihandles.h"

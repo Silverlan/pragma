@@ -7,7 +7,6 @@ module;
 #include "pragma/clientstate/clientutil.h"
 #include "pragma/gui/witable.h"
 #include <wgui/types/wibutton.h>
-#include "pragma/gui/wisilkicon.h"
 #include "pragma/gui/wiframe.h"
 #include "pragma/gui/wiscrollcontainer.h"
 #include "wms_shared.h"
@@ -23,6 +22,7 @@ module;
 module pragma.client.gui;
 
 import :server_browser;
+import :silk_icon;
 import pragma.locale;
 
 LINK_WGUI_TO_CLASS(WIServerBrowser, WIServerBrowser);

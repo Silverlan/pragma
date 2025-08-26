@@ -13,7 +13,6 @@
 #include <wgui/types/witext.h>
 #include <wgui/types/witextentry.h>
 #include <wgui/types/wiscrollbar.h>
-#include "pragma/gui/wisilkicon.h"
 #include "pragma/gui/wiscrollcontainer.h"
 #include <wgui/types/widropdownmenu.h>
 #include "pragma/gui/witable.h"

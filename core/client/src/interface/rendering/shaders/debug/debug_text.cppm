@@ -1,12 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_SHADER_DEBUG_TEXT_HPP__
-#define __C_SHADER_DEBUG_TEXT_HPP__
+module;
 
 #include "pragma/rendering/shaders/debug/c_shader_debug.hpp"
 
-namespace pragma {
+export module pragma.client.rendering.shaders:debug_text;
+
+import pragma.client.entities.components;
+
+export namespace pragma {
 	class DLLCLIENT ShaderDebugText : public ShaderDebug {
 	  public:
 		ShaderDebugText(prosper::IPrContext &context, const std::string &identifier);
@@ -19,5 +22,3 @@ namespace pragma {
 		virtual void InitializeShaderResources() override;
 	};
 };
-
-#endif

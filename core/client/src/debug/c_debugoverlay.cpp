@@ -4,7 +4,6 @@
 #include "stdafx_client.h"
 #include "pragma/debug/c_debugoverlay.h"
 #include "pragma/rendering/shaders/debug/c_shader_debug.hpp"
-#include "pragma/rendering/shaders/debug/c_shader_debug_text.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/math/icosphere.h"
 #include <pragma/debug/debug_render_info.hpp>
@@ -17,6 +16,7 @@
 #include <prosper_descriptor_set_group.hpp>
 #include <pragma/math/intersection.h>
 
+import pragma.client.rendering.shaders;
 import pragma.string.unicode;
 
 extern DLLCLIENT CEngine *c_engine;

@@ -9,7 +9,6 @@
 #include "pragma/rendering/shaders/world/c_shader_wireframe.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured_alpha_transition.hpp"
 #include "pragma/rendering/shaders/debug/c_shader_debug.hpp"
-#include "pragma/rendering/shaders/debug/c_shader_debug_text.hpp"
 #include "pragma/rendering/shaders/world/c_shader_flat.hpp"
 #include "pragma/rendering/shaders/world/c_shader_test.hpp"
 #include "pragma/rendering/shaders/world/c_shader_prepass.hpp"
@@ -43,7 +42,6 @@
 #include <buffers/prosper_buffer.hpp>
 
 import pragma.client.rendering.shaders;
-
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;

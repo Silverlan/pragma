@@ -30,7 +30,6 @@
 #include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/c_entityfactories.h"
-#include "pragma/gui/witexturedcubemap.hpp"
 #include "pragma/gui/wiframe.h"
 #include "pragma/gui/wislider.h"
 #include "pragma/rendering/shaders/world/c_shader_pbr.hpp"
@@ -43,6 +42,7 @@
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <spdlog/logger.h>
 
+import pragma.client.gui;
 import pragma.client.rendering.shaders;
 
 extern DLLCLIENT CEngine *c_engine;

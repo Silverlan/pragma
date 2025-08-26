@@ -25,3 +25,4 @@ export import :main_menu_options;
 export import :net_graph;
 export import :server_browser;
 export import :silk_icon;
+export import :textured_cubemap;

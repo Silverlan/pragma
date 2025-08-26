@@ -1,9 +1,10 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
-#include "pragma/gui/wiimageslideshow.h"
 #include <cmaterialmanager.h>
 #include <cmaterial_manager2.hpp>
 #include <prosper_util.hpp>
@@ -13,6 +14,10 @@
 #include <shader/prosper_shader_blur.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_window.hpp>
+
+module pragma.client.gui;
+
+import :image_slide_show;
 
 extern DLLCLIENT CEngine *c_engine;
 

@@ -14,7 +14,6 @@ namespace pragma::string {
 #include "cmaterialmanager.h"
 #include "pragma/console/c_cvar.h"
 #include <texturemanager/texturemanager.h>
-#include "pragma/gui/wiimageslideshow.h"
 #include "pragma/gui/wiconsole.hpp"
 #include "pragma/gui/wiframe.h"
 #include "pragma/asset/c_util_model.hpp"

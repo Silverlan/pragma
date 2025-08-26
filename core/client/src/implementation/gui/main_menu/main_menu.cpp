@@ -7,7 +7,6 @@ module;
 #include "pragma/c_engine.h"
 #include <wgui/types/witext.h>
 #include "pragma/gui/wiconsole.hpp"
-#include "pragma/gui/wiimageslideshow.h"
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
 #include <pragma/engine_version.h>

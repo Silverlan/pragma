@@ -9,6 +9,7 @@ export import :choice_list;
 export import :chromium_page;
 export import :fps;
 export import :icon;
+export import :image_slide_show;
 export import :load_screen;
 export import :main_menu;
 export import :main_menu_base;

@@ -8,7 +8,6 @@
 #include "pragma/console/c_cvar_global_functions.h"
 #include "pragma/debug/c_debug_game_gui.h"
 #include "pragma/gui/widebugdepthtexture.h"
-#include "pragma/gui/widebugmsaatexture.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
@@ -20,6 +19,8 @@
 #include <image/prosper_msaa_texture.hpp>
 #include <image/prosper_sampler.hpp>
 #include <prosper_command_buffer.hpp>
+
+import pragma.client.gui;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;

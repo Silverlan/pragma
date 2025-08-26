@@ -15,7 +15,6 @@
 #include "pragma/debug/c_debug_game_gui.h"
 #include "pragma/console/c_cvar_global_functions.h"
 #include "pragma/gui/widebugdepthtexture.h"
-#include "pragma/gui/widebugmsaatexture.hpp"
 #include "pragma/rendering/c_settings.hpp"
 #include <textureinfo.h>
 #include <wgui/wgui.h>
@@ -32,6 +31,7 @@
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 
+import pragma.client.gui;
 import pragma.client.rendering.shaders;
 
 using namespace pragma::rendering;

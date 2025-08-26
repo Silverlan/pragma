@@ -13,7 +13,6 @@
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/debug/c_debugoverlay.h"
 #include "pragma/physics/c_phys_water_surface_simulator.hpp"
-#include "pragma/gui/widebugmsaatexture.hpp"
 #include "pragma/model/vk_mesh.h"
 #include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
@@ -25,6 +24,8 @@
 #include <wgui/types/wirect.h>
 #include <pragma/physics/raytraces.h>
 #include <pragma/entities/entity_component_system_t.hpp>
+
+import pragma.client.gui;
 
 extern DLLCLIENT CGame *c_game;
 

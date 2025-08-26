@@ -9,6 +9,7 @@ export import :choice_list;
 export import :chromium_page;
 export import :debug_hdr_bloom;
 export import :debug_mipmaps;
+export import :debug_msaa_texture;
 export import :debug_shadow_map;
 export import :debug_ssao;
 export import :fps;

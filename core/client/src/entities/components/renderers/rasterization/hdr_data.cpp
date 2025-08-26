@@ -14,7 +14,6 @@
 #include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/debug/c_debug_game_gui.h"
 #include "pragma/console/c_cvar_global_functions.h"
-#include "pragma/gui/widebugdepthtexture.h"
 #include "pragma/rendering/c_settings.hpp"
 #include <textureinfo.h>
 #include <wgui/wgui.h>

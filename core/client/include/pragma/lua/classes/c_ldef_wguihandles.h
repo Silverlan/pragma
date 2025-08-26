@@ -23,7 +23,6 @@
 #include "pragma/gui/wigridpanel.h"
 #include "pragma/gui/wicontainer.h"
 #include "pragma/gui/wiconsole.hpp"
-#include "pragma/gui/widebugdepthtexture.h"
 #include "pragma/gui/wisnaparea.hpp"
 #include "pragma/gui/wicommandlineentry.hpp"
 

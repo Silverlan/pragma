@@ -1,10 +1,11 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
 #include "pragma/game/c_game.h"
-#include "pragma/gui/widebugdepthtexture.h"
 #include "pragma/entities/environment/c_env_camera.h"
 #include <image/prosper_render_target.hpp>
 #include <prosper_util.hpp>
@@ -12,6 +13,10 @@
 #include <image/prosper_image_view.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
+
+module pragma.client.gui;
+
+import :debug_depth_texture;
 
 import pragma.client.rendering.shaders;
 

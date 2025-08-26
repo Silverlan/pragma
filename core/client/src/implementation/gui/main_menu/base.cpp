@@ -7,13 +7,13 @@ module;
 #include "pragma/clientstate/clientstate.h"
 #include <pragma/string/format.h>
 #include <wgui/types/wibutton.h>
-#include "pragma/gui/wioptionslist.h"
 #include <wgui/types/witext.h>
 #include <wgui/types/wirect.h>
 
 module pragma.client.gui;
 
 import :main_menu_base;
+import :options_list;
 
 import pragma.locale;
 import pragma.string.unicode;

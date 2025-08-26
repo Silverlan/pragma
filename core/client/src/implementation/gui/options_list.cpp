@@ -1,15 +1,19 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientstate.h"
-#include "pragma/gui/wioptionslist.h"
 #include <wgui/types/wirect.h>
 #include <wgui/types/widropdownmenu.h>
 #include "pragma/gui/wiscrollcontainer.h"
 #include "pragma/input/input_binding_layer.hpp"
 
-import pragma.client.gui;
+module pragma.client.gui;
+
+import :options_list;
+
 import pragma.locale;
 import pragma.string.unicode;
 

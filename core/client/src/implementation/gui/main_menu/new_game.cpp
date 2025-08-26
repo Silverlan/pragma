@@ -10,7 +10,6 @@ module;
 #include <wgui/types/wibutton.h>
 #include <fsys/filesystem.h>
 #include <wgui/types/witextentry.h>
-#include "pragma/gui/wioptionslist.h"
 #include "pragma/game/gamemode/gamemodemanager.h"
 #include <pragma/util/resource_watcher.h>
 #include <pragma/game/game_resources.hpp>
@@ -23,6 +22,7 @@ module;
 module pragma.client.gui;
 
 import :main_menu_new_game;
+import :options_list;
 import :slider;
 
 import pragma.locale;

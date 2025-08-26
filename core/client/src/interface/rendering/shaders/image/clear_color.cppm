@@ -1,13 +1,16 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_SHADER_CLEAR_COLOR_HPP__
-#define __C_SHADER_CLEAR_COLOR_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include <shader/prosper_shader.hpp>
 
-namespace pragma {
+export module pragma.client.rendering.shaders:clear_color;
+
+import pragma.client.entities.components;
+
+export namespace pragma {
 	class DLLCLIENT ShaderClearColor : public prosper::ShaderGraphics {
 	  public:
 		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_VERTEX;
@@ -28,5 +31,3 @@ namespace pragma {
 		virtual void InitializeShaderResources() override;
 	};
 };
-
-#endif

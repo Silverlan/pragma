@@ -6,6 +6,7 @@ module;
 export module pragma.client.rendering.shaders;
 export import :brdf_convolution;
 export import :calc_image_color;
+export import :clear_color;
 export import :combine_image_channels;
 export import :compute_irradiance_map_roughness;
 export import :convolute_cubemap_lighting;

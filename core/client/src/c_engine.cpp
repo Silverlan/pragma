@@ -54,7 +54,6 @@ namespace pragma::string {
 #include <pragma/entities/environment/env_camera.h>
 #include <pragma/entities/components/c_render_component.hpp>
 #include <pragma/entities/environment/effects/c_env_particle_system.h>
-#include <pragma/rendering/shaders/image/c_shader_clear_color.hpp>
 #include <pragma/rendering/shaders/image/c_shader_gradient.hpp>
 #include <pragma/logging.hpp>
 #include <wgui/types/wicontextmenu.hpp>
@@ -77,6 +76,7 @@ namespace pragma::string {
 #endif
 
 import util_zip;
+import pragma.client.rendering.shaders;
 import pragma.shadergraph;
 import pragma.locale;
 #ifndef _MSC_VER

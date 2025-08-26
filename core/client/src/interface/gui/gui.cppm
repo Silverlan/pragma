@@ -7,6 +7,7 @@ export module pragma.client.gui;
 export import :checkbox;
 export import :chromium_page;
 export import :fps;
+export import :icon;
 export import :load_screen;
 export import :main_menu;
 export import :main_menu_base;

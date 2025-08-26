@@ -4,9 +4,10 @@
 export;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/gui/wiicon.h"
 
 export module pragma.client.gui:silk_icon;
+
+import :icon;
 
 export {
 	class DLLCLIENT WISilkIcon : public WIIcon {

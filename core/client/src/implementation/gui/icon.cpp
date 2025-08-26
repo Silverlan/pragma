@@ -1,10 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientstate.h"
-#include "pragma/gui/wiicon.h"
 #include <sharedutils/util_string.h>
+
+module pragma.client.gui;
+
+import :icon;
 
 extern DLLCLIENT ClientState *client;
 LINK_WGUI_TO_CLASS(WIIcon, WIIcon);

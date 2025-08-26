@@ -6,9 +6,10 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <wgui/types/wirect.h>
 #include <wgui/types/witext.h>
-#include "pragma/gui/wilinegraph.h"
 
 export module pragma.client.gui:net_graph;
+
+import :line_graph;
 
 export {
 	class DLLCLIENT WINetGraph : public WIBase {

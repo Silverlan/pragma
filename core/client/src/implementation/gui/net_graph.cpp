@@ -6,7 +6,6 @@ module;
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
 #include "pragma/game/c_game.h"
-#include "pragma/gui/wilinegraph.h"
 #include "pragma/clientstate/clientstate.h"
 #include <wgui/types/witext.h>
 #include <pragma/networking/netmessages.h>

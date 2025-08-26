@@ -13,7 +13,6 @@ namespace pragma::string {
 
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/c_engine.h"
-#include "pragma/gui/wimessagebox.h"
 #include "pragma/console/c_cvar.h"
 #include <wgui/types/wirect.h>
 #include <wgui/types/witext.h>
@@ -23,6 +22,7 @@ namespace pragma::string {
 #include <prosper_util.hpp>
 #include <prosper_command_buffer.hpp>
 
+import pragma.client.gui;
 import pragma.locale;
 import pragma.string.unicode;
 

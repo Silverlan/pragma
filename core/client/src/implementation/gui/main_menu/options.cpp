@@ -12,7 +12,6 @@ module;
 #include <wgui/types/witextentry.h>
 #include "pragma/gui/wioptionslist.h"
 #include "pragma/gui/wislider.h"
-#include "pragma/gui/wimessagebox.h"
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/rendering/c_msaa.h"
 #include "pragma/rendering/render_apis.hpp"

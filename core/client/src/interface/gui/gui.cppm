@@ -23,6 +23,7 @@ export import :main_menu_load_game;
 export import :main_menu_mods;
 export import :main_menu_new_game;
 export import :main_menu_options;
+export import :message_box;
 export import :net_graph;
 export import :server_browser;
 export import :silk_icon;

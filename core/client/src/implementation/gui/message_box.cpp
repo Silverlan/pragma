@@ -1,12 +1,17 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/gui/wimessagebox.h"
 #include "pragma/gui/wiframe.h"
 #include <wgui/types/wirect.h>
 #include <wgui/types/witext.h>
 #include <wgui/types/wibutton.h>
+
+module pragma.client.gui;
+
+import :message_box;
 
 import pragma.locale;
 

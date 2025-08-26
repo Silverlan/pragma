@@ -5,5 +5,7 @@ module;
 
 export module pragma.client.gui;
 export import :checkbox;
+export import :chromium_page;
+export import :main_menu_mods;
 export import :net_graph;
 export import :server_browser;

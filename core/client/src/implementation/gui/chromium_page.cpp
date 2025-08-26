@@ -1,15 +1,21 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientstate.h"
-#include "pragma/gui/wichromiumpage.hpp"
 #include <wgui/wibase.h>
 #include <memory>
 #include <sharedutils/util_library.hpp>
 #ifdef PRAGMA_CHROMIUM_ENABLED
 #include <../../../modules/pr_chromium/include/util_javascript.hpp>
 #endif
+
+module pragma.client.gui;
+
+import :chromium_page;
+
 extern DLLCLIENT ClientState *client;
 
 WIChromiumPage::WIChromiumPage(WIBase *parent) : m_parent(parent) {}

@@ -1,11 +1,12 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientutil.h"
 #include "pragma/c_engine.h"
 #include "pragma/gui/mainmenu/wimainmenu.h"
-#include "pragma/gui/mainmenu/wimainmenu_mods.hpp"
 #include "pragma/util/curl_query_handler.hpp"
 #include "pragma/addonsystem/addon_install_manager.hpp"
 #include "pragma/gui/wiprogressbar.h"
@@ -13,6 +14,10 @@
 #ifdef PRAGMA_CHROMIUM_ENABLED
 #include <../../../modules/pr_chromium/include/util_javascript.hpp>
 #endif
+
+module pragma.client.gui;
+
+import :main_menu_mods;
 
 #define PAD_ADDON_VERBOSE 1
 

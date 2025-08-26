@@ -7,8 +7,6 @@ module;
 
 export module pragma.client.rendering.shaders:debug;
 
-import pragma.client.entities.components;
-
 export namespace pragma {
 	class DLLCLIENT ShaderDebug : public ShaderScene {
 	  public:

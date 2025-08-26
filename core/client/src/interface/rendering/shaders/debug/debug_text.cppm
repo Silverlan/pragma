@@ -5,8 +5,6 @@ module;
 
 export module pragma.client.rendering.shaders:debug_text;
 
-import pragma.client.entities.components;
-
 import :debug;
 
 export namespace pragma {

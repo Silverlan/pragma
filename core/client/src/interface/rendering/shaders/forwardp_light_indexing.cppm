@@ -8,8 +8,6 @@ module;
 
 export module pragma.client.rendering.shaders:forwardp_light_indexing;
 
-import pragma.client.entities.components;
-
 export namespace pragma {
 	class DLLCLIENT ShaderForwardPLightIndexing : public prosper::ShaderCompute {
 	  public:

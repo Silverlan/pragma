@@ -8,8 +8,6 @@ module;
 
 export module pragma.client.rendering.shaders:resize_image;
 
-import pragma.client.entities.components;
-
 export namespace pragma {
 	class DLLCLIENT ShaderResizeImage : public prosper::ShaderBaseImageProcessing {
 	  public:

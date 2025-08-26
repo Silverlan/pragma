@@ -8,8 +8,6 @@ export;
 
 export module pragma.client.rendering.shaders:calc_image_color;
 
-import pragma.client.entities.components;
-
 export namespace pragma {
 	class DLLCLIENT ShaderCalcImageColor : public prosper::ShaderCompute {
 	  public:

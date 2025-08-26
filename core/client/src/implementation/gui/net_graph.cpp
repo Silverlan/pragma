@@ -1,14 +1,19 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
 #include "pragma/game/c_game.h"
+#include "pragma/gui/wilinegraph.h"
 #include "pragma/clientstate/clientstate.h"
-#include "pragma/gui/winetgraph.h"
 #include <wgui/types/witext.h>
 #include <pragma/networking/netmessages.h>
 
+module pragma.client.gui;
+
+import :net_graph;
 import pragma.string.unicode;
 
 extern DLLCLIENT CEngine *c_engine;

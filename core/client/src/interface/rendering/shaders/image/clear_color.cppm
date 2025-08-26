@@ -8,8 +8,6 @@ module;
 
 export module pragma.client.rendering.shaders:clear_color;
 
-import pragma.client.entities.components;
-
 export namespace pragma {
 	class DLLCLIENT ShaderClearColor : public prosper::ShaderGraphics {
 	  public:

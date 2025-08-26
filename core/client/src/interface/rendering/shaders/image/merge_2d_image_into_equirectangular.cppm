@@ -8,8 +8,6 @@ module;
 
 export module pragma.client.rendering.shaders:merge_2d_image_to_equirectangular;
 
-import pragma.client.entities.components;
-
 export namespace pragma {
 	class DLLCLIENT ShaderMerge2dImageIntoEquirectangular : public prosper::ShaderBaseImageProcessing {
 	  public:

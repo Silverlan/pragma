@@ -8,8 +8,6 @@ module;
 
 export module pragma.client.rendering.shaders:combine_image_channels;
 
-import pragma.client.entities.components;
-
 export namespace pragma {
 	class DLLCLIENT ShaderCombineImageChannels : public prosper::ShaderBaseImageProcessing {
 	  public:

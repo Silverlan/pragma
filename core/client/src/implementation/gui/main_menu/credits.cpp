@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 
 #ifdef _MSC_VER
@@ -12,8 +14,12 @@ namespace pragma::string {
 #endif
 
 #include "pragma/gui/mainmenu/wimainmenu.h"
-#include "pragma/gui/mainmenu/wimainmenu_credits.hpp"
+#include "pragma/gui/mainmenu/wimainmenu_base.h"
 #include <wgui/types/witext.h>
+
+module pragma.client.gui;
+
+import :main_menu_credits;
 
 import pragma.locale;
 import pragma.string.unicode;

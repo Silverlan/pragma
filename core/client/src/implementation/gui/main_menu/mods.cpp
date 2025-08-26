@@ -8,7 +8,6 @@ module;
 #include "pragma/c_engine.h"
 #include "pragma/util/curl_query_handler.hpp"
 #include "pragma/addonsystem/addon_install_manager.hpp"
-#include "pragma/gui/wiprogressbar.h"
 #include <pragma/addonsystem/addonsystem.h>
 #ifdef PRAGMA_CHROMIUM_ENABLED
 #include <../../../modules/pr_chromium/include/util_javascript.hpp>
@@ -17,6 +16,7 @@ module;
 module pragma.client.gui;
 
 import :main_menu_mods;
+import :progress_bar;
 
 #define PAD_ADDON_VERBOSE 1
 

@@ -20,8 +20,6 @@
 #include "pragma/gui/witransformable.h"
 #include <wgui/types/wiarrow.h>
 #include "pragma/gui/witreelist.h"
-#include "pragma/gui/wiprogressbar.h"
-#include "pragma/gui/wislider.h"
 #include "pragma/gui/wigridpanel.h"
 #include "pragma/gui/wicontainer.h"
 #include "pragma/gui/wiconsole.hpp"

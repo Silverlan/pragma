@@ -11,7 +11,6 @@ module;
 #include <wgui/types/witext.h>
 #include <wgui/types/witextentry.h>
 #include "pragma/gui/wioptionslist.h"
-#include "pragma/gui/wislider.h"
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/rendering/c_msaa.h"
 #include "pragma/rendering/render_apis.hpp"
@@ -34,6 +33,7 @@ module pragma.client.gui;
 
 import :main_menu_options;
 import :choice_list;
+import :slider;
 
 import pragma.pad;
 import pragma.locale;

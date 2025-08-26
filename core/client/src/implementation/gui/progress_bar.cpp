@@ -2,12 +2,15 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/gui/wiprogressbar.h"
 #include <wgui/types/witext.h>
 #include <wgui/types/wirect.h>
 #include <sharedutils/util.h>
 #include <mathutil/umath.h>
 #include <sharedutils/property/util_property_color.hpp>
+
+module pragma.client.gui;
+
+import :progress_bar;
 
 import pragma.string.unicode;
 

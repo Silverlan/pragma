@@ -1,11 +1,16 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/gui/wislider.h"
 #include <wgui/types/witext.h>
 #include <wgui/types/wibutton.h>
-#include "pragma/gui/wiprogressbar.h"
+
+module pragma.client.gui;
+
+import :slider;
+import :progress_bar;
 
 LINK_WGUI_TO_CLASS(WISlider, WISlider);
 

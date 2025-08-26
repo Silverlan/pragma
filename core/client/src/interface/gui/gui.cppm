@@ -25,6 +25,8 @@ export import :main_menu_new_game;
 export import :main_menu_options;
 export import :message_box;
 export import :net_graph;
+export import :progress_bar;
 export import :server_browser;
 export import :silk_icon;
+export import :slider;
 export import :textured_cubemap;

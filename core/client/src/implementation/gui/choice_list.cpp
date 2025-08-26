@@ -1,10 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/gui/wichoicelist.h"
 #include <wgui/types/witext.h>
 #include <wgui/types/wibutton.h>
+
+module pragma.client.gui;
+
+import :choice_list;
 
 import pragma.locale;
 import pragma.string.unicode;

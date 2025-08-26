@@ -5,7 +5,6 @@
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/gui/wioptionslist.h"
 #include <wgui/types/wirect.h>
-#include "pragma/gui/wichoicelist.h"
 #include <wgui/types/widropdownmenu.h>
 #include "pragma/gui/wislider.h"
 #include "pragma/gui/wiscrollcontainer.h"

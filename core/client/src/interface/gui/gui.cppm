@@ -5,6 +5,7 @@ module;
 
 export module pragma.client.gui;
 export import :checkbox;
+export import :choice_list;
 export import :chromium_page;
 export import :fps;
 export import :icon;

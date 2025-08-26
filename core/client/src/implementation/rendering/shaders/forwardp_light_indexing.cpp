@@ -1,11 +1,16 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
-#include "pragma/rendering/shaders/c_shader_forwardp_light_indexing.hpp"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <shader/prosper_shader_t.hpp>
+
+module pragma.client.rendering.shaders;
+
+import :forwardp_light_indexing;
 
 using namespace pragma;
 

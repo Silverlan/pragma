@@ -1,22 +1,28 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
 #include <pragma/entities/baseentity.h>
 #include <pragma/entities/baseworld.h>
-#include "pragma/ai/c_navsystem.h"
 #include "Recast.h"
 #include "DetourNavMesh.h"
 #include "DetourNavMeshBuilder.h"
 #include "DetourNavMeshQuery.h"
+#include "pragma/debug/c_debugoverlay.h"
 #include "pragma/console/c_cvar.h"
 #include <pragma/console/convars.h>
 #include <pragma/physics/raytraces.h>
 #include <pragma/entities/components/base_player_component.hpp>
 #include <pragma/entities/components/base_character_component.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
+
+module pragma.client.ai;
+
+import :nav_system;
 
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;

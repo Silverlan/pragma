@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_NAVSYSTEM_H__
-#define __C_NAVSYSTEM_H__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include <pragma/ai/navsystem.h>
@@ -11,7 +10,9 @@
 #include "pragma/debug/c_debugoverlay.h"
 #include <memory>
 
-namespace pragma {
+export module pragma.client.ai:nav_system;
+
+export namespace pragma {
 	namespace nav {
 		class DLLCLIENT CMesh : public Mesh {
 		  public:
@@ -40,5 +41,3 @@ namespace pragma {
 		};
 	};
 };
-
-#endif

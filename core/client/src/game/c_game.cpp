@@ -50,7 +50,6 @@
 #include "pragma/rendering/render_queue_worker.hpp"
 #include "pragma/rendering/global_render_settings_buffer_data.hpp"
 #include "pragma/rendering/global_shader_input_manager.hpp"
-#include "pragma/ai/c_navsystem.h"
 #include <texturemanager/texturemanager.h>
 #include <pragma/physics/environment.hpp>
 #include "pragma/rendering/render_queue.hpp"
@@ -111,6 +110,7 @@
 #include <udm.hpp>
 #include <prosper_window.hpp>
 
+import pragma.client.ai;
 import pragma.client.entities.components;
 
 extern EntityClassMap<CBaseEntity> *g_ClientEntityFactories;

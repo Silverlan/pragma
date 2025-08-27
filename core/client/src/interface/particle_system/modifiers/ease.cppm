@@ -1,11 +1,31 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "stdafx_client.h"
+module;
+
+#include "pragma/clientdefinitions.h"
 #include "pragma/particlesystem/c_particle.h"
-#include "pragma/particlesystem/modifiers/c_particle_modifier_component_ease.hpp"
+#include <string>
+#include <unordered_map>
 #include <mathutil/umath.h>
 #include <pragma/math/util_easing.hpp>
+
+export module pragma.client.particle_system:modifier_ease;
+
+export class DLLCLIENT CParticleModifierComponentEase {
+  protected:
+	CParticleModifierComponentEase();
+	void Initialize(const std::unordered_map<std::string, std::string> &values);
+
+	float Ease(float t) const;
+	float EaseIn(float t) const;
+	float EaseOut(float t) const;
+	float EaseInOut(float t) const;
+  private:
+	enum class EaseFunc : uint32_t { None = 0u, In, Out, InOut };
+	umath::EaseType m_type;
+	EaseFunc m_easeFunc = EaseFunc::InOut;
+};
 
 CParticleModifierComponentEase::CParticleModifierComponentEase() : m_type {umath::EaseType::Linear} {}
 void CParticleModifierComponentEase::Initialize(const std::unordered_map<std::string, std::string> &values)

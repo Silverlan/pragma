@@ -1,11 +1,53 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "stdafx_client.h"
-#include "pragma/particlesystem/operators/c_particle_mod_radius_fade.h"
+module;
+
+#include "pragma/clientdefinitions.h"
+#include "pragma/particlesystem/c_particlemodifier.h"
+#include "pragma/particlesystem/c_particle.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include <pragma/math/util_random.hpp>
 #include <mathutil/umath_random.hpp>
+
+export module pragma.client.particle_system:operator_radius_fade;
+
+import :modifier_gradual_fade;
+
+export {
+	class DLLCLIENT CParticleOperatorRadiusFadeBase : public CParticleOperator, public CParticleModifierComponentGradualFade {
+	public:
+		virtual void Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+		virtual void Simulate(CParticle &particle, double, float strength) override;
+		virtual void OnParticleCreated(CParticle &particle) override;
+	protected:
+		CParticleOperatorRadiusFadeBase(const std::string &identifier);
+		virtual void ApplyRadius(CParticle &particle, float radius) const = 0;
+	private:
+		CParticleModifierComponentRandomVariable<std::uniform_real_distribution<float>, float> m_fRadiusStart;
+		CParticleModifierComponentRandomVariable<std::uniform_real_distribution<float>, float> m_fRadiusEnd;
+		std::unique_ptr<std::vector<float>> m_particleStartRadiuses = nullptr;
+		std::string m_identifier;
+	};
+
+	////////////////////////////
+
+	class DLLCLIENT CParticleOperatorRadiusFade : public CParticleOperatorRadiusFadeBase {
+	public:
+		CParticleOperatorRadiusFade();
+	protected:
+		virtual void ApplyRadius(CParticle &particle, float radius) const override;
+	};
+
+	////////////////////////////
+
+	class DLLCLIENT CParticleOperatorLengthFade : public CParticleOperatorRadiusFadeBase {
+	public:
+		CParticleOperatorLengthFade();
+	protected:
+		virtual void ApplyRadius(CParticle &particle, float radius) const override;
+	};
+};
 
 REGISTER_PARTICLE_OPERATOR(radius_fade, CParticleOperatorRadiusFade);
 REGISTER_PARTICLE_OPERATOR(length_fade, CParticleOperatorLengthFade);

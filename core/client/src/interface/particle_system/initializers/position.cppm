@@ -5,7 +5,6 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/particlesystem/c_particlemodifier.h"
-#include "pragma/particlesystem/modifiers/c_particle_modifier_component_random_variable.hpp"
 
 export module pragma.client.particle_system:initializer_position;
 

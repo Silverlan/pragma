@@ -6,7 +6,6 @@
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/particlesystem/c_particlemodifier.h"
-#include "pragma/particlesystem/modifiers/c_particle_modifier_component_time.hpp"
 
 class DLLCLIENT CParticleOperatorPauseEmissionBase : public CParticleOperator {
   public:

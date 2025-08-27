@@ -1,9 +1,36 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "stdafx_client.h"
+module;
+
 #include "pragma/particlesystem/c_particle.h"
-#include "pragma/particlesystem/modifiers/c_particle_modifier_component_gradual_fade.hpp"
+
+export module pragma.client.particle_system:modifier_gradual_fade;
+
+import :modifier_ease;
+import :modifier_random_variable;
+import :modifier_time;
+
+export class DLLCLIENT CParticleModifierComponentGradualFade : public CParticleModifierComponentEase, public CParticleModifierComponentTime {
+  protected:
+	CParticleModifierComponentGradualFade() = default;
+	void Initialize(const std::unordered_map<std::string, std::string> &values);
+
+	float GetStartTime(CParticle &p) const;
+	float GetEndTime(CParticle &p) const;
+	// Returns a value in [0,1] representing the current fade position (0 = start, 1 = end)
+	float GetFadeFraction(CParticle &p) const;
+	bool GetFadeFraction(CParticle &p, float &outFraction) const;
+
+	// Returns the eased fade fraction
+	float GetEasedFadeFraction(CParticle &p) const;
+	bool GetEasedFadeFraction(CParticle &p, float &outFraction) const;
+  private:
+	CParticleModifierComponentRandomVariable<std::uniform_real_distribution<float>, float> m_fStart;
+	CParticleModifierComponentRandomVariable<std::uniform_real_distribution<float>, float> m_fEnd;
+	// If false, the start and end time will be in seconds (starting at the particle creation time)
+	// If true, the start and end time will be fractions of the particle's total lifetime
+};
 
 void CParticleModifierComponentGradualFade::Initialize(const std::unordered_map<std::string, std::string> &values)
 {

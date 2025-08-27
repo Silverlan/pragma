@@ -1,38 +1,41 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_PARTICLE_MODIFIER_COMPONENT_RANDOM_VARIABLE_HPP__
-#define __C_PARTICLE_MODIFIER_COMPONENT_RANDOM_VARIABLE_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
+#include "pragma/particlesystem/c_particle.h"
 #include <string>
 #include <unordered_map>
 #include <mathutil/umath_random.hpp>
 #include <pragma/math/util_random.hpp>
 
-class CParticle;
-template<class TUniformDis, typename T>
-class DLLCLIENT CParticleModifierComponentRandomVariable {
-  public:
-	CParticleModifierComponentRandomVariable() = default;
-	CParticleModifierComponentRandomVariable(const std::string &identifier, const std::unordered_map<std::string, std::string> &values);
-	void Initialize(const std::string &identifier, const std::unordered_map<std::string, std::string> &values);
-	template<typename U = T>
-	typename std::enable_if<std::is_integral<T>::value, U>::type GetValue(CParticle &p) const;
-	template<typename U = T>
-	typename std::enable_if<std::is_floating_point<T>::value, U>::type GetValue(CParticle &p) const;
+export module pragma.client.particle_system:modifier_random_variable;
 
-	void SetRange(T min, T max);
-	void SetRange(T val);
-	void SetMin(T val);
-	void SetMax(T val);
-	T GetMin() const;
-	T GetMax() const;
-	bool IsSet() const;
-  private:
-	uint32_t m_iSeed = umath::random_int(0u, std::numeric_limits<uint32_t>::max());
-	TUniformDis m_value = TUniformDis(T(0), T(0));
-	bool m_bIsSet = false;
+export {
+	template<class TUniformDis, typename T>
+	class DLLCLIENT CParticleModifierComponentRandomVariable {
+	public:
+		CParticleModifierComponentRandomVariable() = default;
+		CParticleModifierComponentRandomVariable(const std::string &identifier, const std::unordered_map<std::string, std::string> &values);
+		void Initialize(const std::string &identifier, const std::unordered_map<std::string, std::string> &values);
+		template<typename U = T>
+		typename std::enable_if<std::is_integral<T>::value, U>::type GetValue(CParticle &p) const;
+		template<typename U = T>
+		typename std::enable_if<std::is_floating_point<T>::value, U>::type GetValue(CParticle &p) const;
+
+		void SetRange(T min, T max);
+		void SetRange(T val);
+		void SetMin(T val);
+		void SetMax(T val);
+		T GetMin() const;
+		T GetMax() const;
+		bool IsSet() const;
+	private:
+		uint32_t m_iSeed = umath::random_int(0u, std::numeric_limits<uint32_t>::max());
+		TUniformDis m_value = TUniformDis(T(0), T(0));
+		bool m_bIsSet = false;
+	};
 };
 
 template<class TUniformDis, typename T>
@@ -111,5 +114,3 @@ T CParticleModifierComponentRandomVariable<TUniformDis, T>::GetMax() const
 {
 	return m_value.max();
 }
-
-#endif

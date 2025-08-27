@@ -12,3 +12,12 @@ export import :initializer_position;
 export import :initializer_radius_random;
 export import :initializer_shoot;
 export import :initializer_speed;
+
+export import :modifier_ease;
+export import :modifier_gradual_fade;
+export import :modifier_random_color;
+export import :modifier_random_variable;
+export import :modifier_time;
+
+export import :operator_color_fade;
+export import :operator_radius_fade;

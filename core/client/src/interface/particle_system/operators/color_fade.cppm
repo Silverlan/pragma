@@ -1,9 +1,29 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "stdafx_client.h"
-#include "pragma/particlesystem/operators/c_particle_mod_color_fade.h"
+module;
+
+#include "pragma/clientdefinitions.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
+#include "pragma/particlesystem/c_particlemodifier.h"
+#include "pragma/particlesystem/c_particle.h"
+
+export module pragma.client.particle_system:operator_color_fade;
+
+import :modifier_gradual_fade;
+import :modifier_random_color;
+
+export class DLLCLIENT CParticleOperatorColorFade : public CParticleOperator, public CParticleModifierComponentGradualFade {
+  public:
+	CParticleOperatorColorFade() = default;
+	virtual void Simulate(CParticle &particle, double, float strength) override;
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+	virtual void OnParticleCreated(CParticle &particle) override;
+  private:
+	CParticleModifierComponentRandomColor m_colorStart;
+	CParticleModifierComponentRandomColor m_colorEnd;
+	std::unique_ptr<std::vector<Color>> m_particleStartColors = nullptr;
+};
 
 REGISTER_PARTICLE_OPERATOR(color_fade, CParticleOperatorColorFade);
 

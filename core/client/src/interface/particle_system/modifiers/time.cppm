@@ -1,9 +1,25 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "stdafx_client.h"
+module;
+
+#include "pragma/clientdefinitions.h"
 #include "pragma/particlesystem/c_particle.h"
-#include "pragma/particlesystem/modifiers/c_particle_modifier_component_time.hpp"
+#include <string>
+#include <unordered_map>
+#include <mathutil/umath_random.hpp>
+#include <pragma/math/util_random.hpp>
+
+export module pragma.client.particle_system:modifier_time;
+
+export class DLLCLIENT CParticleModifierComponentTime {
+  protected:
+	CParticleModifierComponentTime() = default;
+	void Initialize(const std::string &prefix, const std::unordered_map<std::string, std::string> &values);
+	float GetTime(float t, CParticle &p) const;
+  private:
+	bool m_bLifetimeFraction = false;
+};
 
 void CParticleModifierComponentTime::Initialize(const std::string &prefix, const std::unordered_map<std::string, std::string> &values)
 {

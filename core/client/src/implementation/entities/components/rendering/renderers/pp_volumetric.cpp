@@ -1,9 +1,10 @@
 // SPDX-FileCopyrightText: (c) 2022 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
-#include "pragma/entities/components/renderers/c_renderer_pp_volumetric_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/entities/components/c_player_component.hpp"
@@ -30,6 +31,10 @@
 #include <image/prosper_render_target.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 #include <util_image.hpp>
+
+module pragma.client.entities.components;
+
+import :pp_volumetric;
 
 import pragma.client.rendering.shaders;
 

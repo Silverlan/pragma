@@ -1,12 +1,12 @@
 // SPDX-FileCopyrightText: (c) 2022 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
-#include "pragma/entities/components/renderers/c_renderer_pp_dof_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
-#include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/rendering/world_environment.hpp"
 #include "pragma/entities/entity_component_system_t.hpp"
 #include "pragma/console/c_cvar.h"
@@ -16,7 +16,10 @@
 #include <image/prosper_msaa_texture.hpp>
 #include <image/prosper_render_target.hpp>
 
-import pragma.client.entities.components;
+module pragma.client.entities.components;
+
+import :pp_fog;
+
 import pragma.client.rendering.shaders;
 
 extern DLLCLIENT CGame *c_game;
@@ -24,32 +27,37 @@ extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
 
-CRendererPpDoFComponent::CRendererPpDoFComponent(BaseEntity &ent) : CRendererPpBaseComponent(ent) {}
-void CRendererPpDoFComponent::DoRenderEffect(const util::DrawSceneInfo &drawSceneInfo)
+CRendererPpFogComponent::CRendererPpFogComponent(BaseEntity &ent) : CRendererPpBaseComponent(ent) {}
+void CRendererPpFogComponent::DoRenderEffect(const util::DrawSceneInfo &drawSceneInfo)
 {
 	if(drawSceneInfo.renderStats)
-		(*drawSceneInfo.renderStats)->BeginGpuTimer(RenderStats::RenderStage::PostProcessingGpuDoF, *drawSceneInfo.commandBuffer);
-	c_game->StartGPUProfilingStage("PostProcessingDoF");
+		(*drawSceneInfo.renderStats)->BeginGpuTimer(RenderStats::RenderStage::PostProcessingGpuFog, *drawSceneInfo.commandBuffer);
+	c_game->StartGPUProfilingStage("PostProcessingFog");
 
 	util::ScopeGuard scopeGuard {[&drawSceneInfo]() {
-		c_game->StopGPUProfilingStage(); // PostProcessingDoF
+		c_game->StopGPUProfilingStage(); // PostProcessingFog
 		if(drawSceneInfo.renderStats)
-			(*drawSceneInfo.renderStats)->EndGpuTimer(RenderStats::RenderStage::PostProcessingGpuDoF, *drawSceneInfo.commandBuffer);
+			(*drawSceneInfo.renderStats)->EndGpuTimer(RenderStats::RenderStage::PostProcessingGpuFog, *drawSceneInfo.commandBuffer);
 	}};
 
 	if(drawSceneInfo.scene.expired() || m_renderer.expired())
 		return;
 	auto &scene = *drawSceneInfo.scene;
-	auto &cam = scene.GetActiveCamera();
 	auto &hdrInfo = m_renderer->GetHDRInfo();
+	auto descSetGroupFog = m_renderer->GetFogOverride();
+	if(descSetGroupFog == nullptr) {
+		auto *worldEnv = scene.GetWorldEnvironment();
+		if(worldEnv != nullptr) {
+			auto &fog = worldEnv->GetFogSettings();
+			if(fog.IsEnabled() == true)
+				descSetGroupFog = scene.GetFogDescriptorSetGroup();
+		}
+	}
 	auto &drawCmd = drawSceneInfo.commandBuffer;
-	auto &hShaderDof = c_game->GetGameShader(CGame::GameShader::PPDoF);
-	if(hShaderDof.expired() || cam.expired())
+	auto hShaderFog = c_game->GetGameShader(CGame::GameShader::PPFog);
+	if(descSetGroupFog == nullptr || hShaderFog.expired())
 		return;
-	auto opticalC = cam->GetEntity().GetComponent<pragma::COpticalCameraComponent>();
-	if(opticalC.expired())
-		return;
-	auto &shaderDoF = static_cast<pragma::ShaderPPDoF &>(*hShaderDof.get());
+	auto &shaderFog = static_cast<pragma::ShaderPPFog &>(*hShaderFog.get());
 	auto &prepass = hdrInfo.prepass;
 	auto texDepth = prepass.textureDepth;
 	if(texDepth->IsMSAATexture()) {
@@ -66,35 +74,9 @@ void CRendererPpDoFComponent::DoRenderEffect(const util::DrawSceneInfo &drawScen
 	drawCmd->RecordBufferBarrier(*scene.GetFogBuffer(), prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::FragmentShaderBit, prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::ShaderReadBit);
 	if(drawCmd->RecordBeginRenderPass(*hdrInfo.hdrPostProcessingRenderTarget) == true) {
 		prosper::ShaderBindState bindState {*drawCmd};
-		if(shaderDoF.RecordBeginDraw(bindState) == true) {
-			pragma::ShaderPPDoF::PushConstants pushConstants {};
-			pushConstants.mvp = cam->GetViewMatrix() * cam->GetProjectionMatrix();
-			pushConstants.width = scene.GetWidth();
-			pushConstants.height = scene.GetHeight();
-
-			pushConstants.focalDepth = opticalC->GetFocalDistance();
-			pushConstants.focalLength = opticalC->GetFocalLength();
-			pushConstants.fstop = opticalC->GetFStop();
-
-			pushConstants.zNear = cam->GetNearZ();
-			pushConstants.zFar = cam->GetFarZ();
-
-			pushConstants.flags = pragma::COpticalCameraComponent::Flags::None;
-			umath::set_flag(pushConstants.flags, pragma::COpticalCameraComponent::Flags::EnableVignette, opticalC->IsVignetteEnabled());
-			umath::set_flag(pushConstants.flags, pragma::COpticalCameraComponent::Flags::PentagonBokehShape, opticalC->GetPentagonBokehShape());
-			umath::set_flag(pushConstants.flags, pragma::COpticalCameraComponent::Flags::DebugShowDepth, opticalC->GetDebugShowDepth());
-			umath::set_flag(pushConstants.flags, pragma::COpticalCameraComponent::Flags::DebugShowFocus, opticalC->GetDebugShowFocus());
-			pushConstants.rings = opticalC->GetRingCount();
-			pushConstants.ringSamples = opticalC->GetRingSamples();
-			pushConstants.CoC = opticalC->GetCircleOfConfusionSize();
-			pushConstants.maxBlur = opticalC->GetMaxBlur();
-			pushConstants.dither = opticalC->GetDitherAmount();
-			pushConstants.vignIn = opticalC->GetVignettingInnerBorder();
-			pushConstants.vignOut = opticalC->GetVignettingOuterBorder();
-			pushConstants.pentagonShapeFeather = opticalC->GetPentagonShapeFeather();
-
-			shaderDoF.RecordDraw(bindState, *hdrInfo.dsgHDRPostProcessing->GetDescriptorSet(), *hdrInfo.dsgDepthPostProcessing->GetDescriptorSet(), pushConstants);
-			shaderDoF.RecordEndDraw(bindState);
+		if(shaderFog.RecordBeginDraw(bindState) == true) {
+			shaderFog.RecordDraw(bindState, *hdrInfo.dsgHDRPostProcessing->GetDescriptorSet(), *hdrInfo.dsgDepthPostProcessing->GetDescriptorSet(), *scene.GetCameraDescriptorSetGraphics(), *scene.GetFogDescriptorSetGroup()->GetDescriptorSet());
+			shaderFog.RecordEndDraw(bindState);
 		}
 		drawCmd->RecordEndRenderPass();
 	}
@@ -102,4 +84,4 @@ void CRendererPpDoFComponent::DoRenderEffect(const util::DrawSceneInfo &drawScen
 
 	hdrInfo.BlitStagingRenderTargetToMainRenderTarget(drawSceneInfo);
 }
-void CRendererPpDoFComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CRendererPpFogComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }

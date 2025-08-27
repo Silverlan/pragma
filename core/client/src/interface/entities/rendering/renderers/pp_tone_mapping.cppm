@@ -1,13 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2022 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_RENDERER_PP_TONE_MAPPING_COMPONENT_HPP__
-#define __C_RENDERER_PP_TONE_MAPPING_COMPONENT_HPP__
+module;
 
 #include "pragma/entities/components/renderers/c_renderer_pp_base_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 
-namespace pragma {
+export module pragma.client.entities.components:pp_tone_mapping;
+
+export namespace pragma {
 	class CRasterizationRendererComponent;
 	class DLLCLIENT CRendererPpToneMappingComponent final : public CRendererPpBaseComponent {
 	  public:
@@ -23,5 +24,3 @@ namespace pragma {
 		bool m_applyToHdrImage = false;
 	};
 };
-
-#endif

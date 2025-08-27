@@ -1,9 +1,10 @@
 // SPDX-FileCopyrightText: (c) 2022 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
-#include "pragma/entities/components/renderers/c_renderer_pp_tone_mapping_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/rendering/world_environment.hpp"
@@ -14,6 +15,10 @@
 #include <shader/prosper_shader_blur.hpp>
 #include <image/prosper_msaa_texture.hpp>
 #include <image/prosper_render_target.hpp>
+
+module pragma.client.entities.components;
+
+import :pp_tone_mapping;
 
 import pragma.client.rendering.shaders;
 

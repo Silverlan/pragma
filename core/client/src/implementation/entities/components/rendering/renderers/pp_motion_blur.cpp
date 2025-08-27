@@ -1,10 +1,11 @@
 // SPDX-FileCopyrightText: (c) 2022 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
 #include "pragma/entities/entity_iterator.hpp"
-#include "pragma/entities/components/renderers/c_renderer_pp_motion_blur_component.hpp"
 #include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
@@ -26,6 +27,10 @@
 #if MOTION_BLUR_DEBUG_ELEMENT_ENABLED == 1
 #include <wgui/types/wirect.h>
 #endif
+
+module pragma.client.entities.components;
+
+import :pp_motion_blur;
 
 import pragma.client.rendering.shaders;
 

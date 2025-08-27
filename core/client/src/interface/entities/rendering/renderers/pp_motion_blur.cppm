@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: (c) 2022 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_RENDERER_PP_MOTION_BLUR_COMPONENT_HPP__
-#define __C_RENDERER_PP_MOTION_BLUR_COMPONENT_HPP__
+module;
 
 #include "pragma/entities/components/renderers/c_renderer_pp_base_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
@@ -12,10 +11,9 @@
 
 #define MOTION_BLUR_DEBUG_ELEMENT_ENABLED 0
 
-namespace prosper {
-	class SwapBuffer;
-};
-namespace pragma {
+export module pragma.client.entities.components:pp_motion_blur;
+
+export namespace pragma {
 	enum class MotionBlurQuality : uint32_t { Low = 0, Medium, High };
 
 	class CMotionBlurDataComponent;
@@ -66,5 +64,3 @@ namespace pragma {
 		size_t m_lastMotionDataBufferUpdateIndex = std::numeric_limits<size_t>::max();
 	};
 };
-
-#endif

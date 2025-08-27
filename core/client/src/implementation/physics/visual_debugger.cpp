@@ -1,12 +1,18 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
-#include "pragma/physics/c_phys_visual_debugger.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include <prosper_command_buffer.hpp>
+#include <buffers/prosper_buffer.hpp>
 #include <prosper_util.hpp>
+
+module pragma.client.physics;
+
+import :visual_debugger;
 
 import pragma.client.rendering.shaders;
 

@@ -81,7 +81,6 @@
 #include "pragma/entities/environment/c_env_reflection_probe.hpp"
 #include "pragma/entities/game/c_game_shadow_manager.hpp"
 #include "pragma/rendering/c_settings.hpp"
-#include "pragma/physics/c_phys_visual_debugger.hpp"
 #include <pragma/entities/baseplayer.hpp>
 #include <pragma/util/giblet_create_info.hpp>
 #include <alsound_effect.hpp>
@@ -100,6 +99,7 @@
 #include <pragma/entities/components/action_input_controller_component.hpp>
 #include <pragma/entities/components/action_input_controller_component.hpp>
 #include <pragma/rendering/c_sci_gpu_timer_manager.hpp>
+#include <pragma/physics/visual_debugger.hpp>
 #include <pragma/level/level_info.hpp>
 #include <pragma/lua/util.hpp>
 #include <pragma/asset_types/world.hpp>
@@ -112,6 +112,7 @@
 
 import pragma.client.ai;
 import pragma.client.entities.components;
+import pragma.client.physics;
 
 extern EntityClassMap<CBaseEntity> *g_ClientEntityFactories;
 extern ClientEntityNetworkMap *g_ClEntityNetworkMap;

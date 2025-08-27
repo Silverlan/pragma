@@ -6,7 +6,6 @@ module;
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
 #include "pragma/entities/c_water_surface.hpp"
-#include "pragma/physics/c_phys_water_surface_simulator.hpp"
 #include "pragma/entities/components/liquid/base_liquid_control_component.hpp"
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
@@ -15,6 +14,8 @@ module pragma.client.entities.components;
 
 import :liquid_control;
 import :liquid_surface_simulation;
+
+import pragma.client.physics;
 
 extern DLLCLIENT CGame *c_game;
 

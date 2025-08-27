@@ -1,14 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_PHYS_WATER_SURFACE_SIMULATOR_HPP__
-#define __C_PHYS_WATER_SURFACE_SIMULATOR_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/rendering/shaders/world/water/c_shader_water_splash.hpp"
 #include <pragma/physics/phys_water_surface_simulator.hpp>
 
-class DLLCLIENT CPhysWaterSurfaceSimulator : public PhysWaterSurfaceSimulator {
+export module pragma.client.physics:water_surface_simulator;
+
+export class DLLCLIENT CPhysWaterSurfaceSimulator : public PhysWaterSurfaceSimulator {
   public:
 	CPhysWaterSurfaceSimulator(Vector2 aabbMin, Vector2 aabbMax, float originY, uint32_t spacing, float stiffness = 0.1f, float propagation = 100.f);
 	void Draw(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, CModelSubMesh &mesh);
@@ -52,5 +53,3 @@ class DLLCLIENT CPhysWaterSurfaceSimulator : public PhysWaterSurfaceSimulator {
 	std::shared_ptr<prosper::IBuffer> m_surfaceInfoBuffer = nullptr;
 	std::shared_ptr<prosper::IDescriptorSetGroup> m_descSetGroupSurfaceInfo = nullptr;
 };
-
-#endif

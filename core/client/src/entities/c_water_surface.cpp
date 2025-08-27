@@ -5,12 +5,12 @@
 #include "pragma/entities/c_water_surface.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/entities/c_entityfactories.h"
-#include "pragma/physics/c_phys_water_surface_simulator.hpp"
 #include "pragma/entities/components/liquid/c_liquid_component.hpp"
 #include "pragma/model/vk_mesh.h"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
 #include <pragma/model/model.h>
+#include <pragma/physics/phys_water_surface_simulator.hpp>
 #include <prosper_util.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
@@ -18,6 +18,7 @@
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <cmaterial.h>
 
+import pragma.client.physics;
 import pragma.client.entities.components;
 
 using namespace pragma;

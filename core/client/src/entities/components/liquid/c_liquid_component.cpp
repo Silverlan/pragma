@@ -7,7 +7,6 @@
 #include "pragma/rendering/c_rendermode.h"
 #include <pragma/physics/physobj.h>
 #include "pragma/model/c_modelmesh.h"
-#include "pragma/physics/c_phys_water_surface_simulator.hpp"
 #include "pragma/entities/baseentity_luaobject.h"
 #include "pragma/entities/c_water_surface.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
@@ -22,6 +21,7 @@
 #include <pragma/audio/alsound_type.h>
 #include <pragma/entities/entity_component_system_t.hpp>
 
+import pragma.client.physics;
 import pragma.client.entities.components;
 
 using namespace pragma;

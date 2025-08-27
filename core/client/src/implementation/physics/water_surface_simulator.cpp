@@ -1,14 +1,17 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/physics/c_phys_water_surface_simulator.hpp"
 #include "pragma/debug/c_debugoverlay.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/rendering/shaders/world/water/c_shader_water_surface.hpp"
 #include "pragma/rendering/shaders/world/water/c_shader_water_surface_integrate.hpp"
 #include "pragma/rendering/shaders/world/water/c_shader_water_surface_solve_edges.hpp"
 #include "pragma/rendering/shaders/world/water/c_shader_water_surface_sum_edges.hpp"
+#include "pragma/rendering/shaders/world/water/c_shader_water_splash.hpp"
+#include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/console/c_cvar.h"
 #include "pragma/model/vk_mesh.h"
 #include <pragma/rendering/c_sci_gpu_timer_manager.hpp>
@@ -16,6 +19,10 @@
 #include <buffers/prosper_buffer.hpp> // prosper TODO: Remove
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
+
+module pragma.client.physics;
+
+import :water_surface_simulator;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
@@ -131,7 +138,7 @@ const std::shared_ptr<prosper::IBuffer> &CPhysWaterSurfaceSimulator::GetPosition
 
 static auto cvEdgeIterationCount = GetClientConVar("cl_water_surface_simulation_edge_iteration_count");
 uint8_t CPhysWaterSurfaceSimulator::GetEdgeIterationCount() const { return cvEdgeIterationCount->GetInt(); }
-#include "pragma/entities/components/c_player_component.hpp"
+
 void CPhysWaterSurfaceSimulator::Simulate(double dt)
 {
 	if(m_bUseComputeShaders == false) {

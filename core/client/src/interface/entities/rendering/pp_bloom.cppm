@@ -3,10 +3,11 @@
 
 module;
 
-#include "pragma/entities/components/renderers/c_renderer_pp_base_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 
 export module pragma.client.entities.components:pp_bloom;
+
+import :pp_base;
 
 import pragma.client.rendering;
 

@@ -12,6 +12,7 @@ export import :light_map_data_cache;
 export import :lua;
 export import :optical_camera;
 export import :point_at_target;
+export import :pp_base;
 export import :pp_bloom;
 export import :pp_dof;
 export import :pp_fog;

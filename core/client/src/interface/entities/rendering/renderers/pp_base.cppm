@@ -1,18 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2022 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_RENDERER_PP_BASE_COMPONENT_HPP__
-#define __C_RENDERER_PP_BASE_COMPONENT_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include <pragma/entities/components/base_entity_component.hpp>
 
-namespace util {
-	struct DrawSceneInfo;
-};
-namespace pragma {
-	class CRasterizationRendererComponent;
+export module pragma.client.entities.components:pp_base;
+
+export namespace pragma {
 	class DLLCLIENT CRendererPpBaseComponent : public BaseEntityComponent {
 	  public:
 		CRendererPpBaseComponent(BaseEntity &ent);
@@ -29,5 +26,3 @@ namespace pragma {
 		CallbackHandle m_cbEffect;
 	};
 };
-
-#endif

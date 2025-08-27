@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/entities/components/renderers/c_renderer_pp_base_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include <image/prosper_render_target.hpp>
 #include <wgui/types.hpp>
@@ -12,6 +11,8 @@ module;
 #define MOTION_BLUR_DEBUG_ELEMENT_ENABLED 0
 
 export module pragma.client.entities.components:pp_motion_blur;
+
+import :pp_base;
 
 export namespace pragma {
 	enum class MotionBlurQuality : uint32_t { Low = 0, Medium, High };

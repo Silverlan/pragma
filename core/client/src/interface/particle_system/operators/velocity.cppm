@@ -1,13 +1,22 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "stdafx_client.h"
-#include "pragma/particlesystem/operators/c_particle_mod_velocity.h"
-#include <mathutil/umath.h>
-#include <pragma/math/vector/wvvector3.h>
-#include <sharedutils/util_string.h>
-#include <sharedutils/util.h>
-#include <algorithm>
+module;
+
+#include "pragma/clientdefinitions.h"
+#include "pragma/particlesystem/c_particlemodifier.h"
+
+export module pragma.client.particle_system:operator_velocity;
+
+export class DLLCLIENT CParticleOperatorVelocity : public CParticleOperator {
+  private:
+	Vector3 m_velocity = {};
+  public:
+	CParticleOperatorVelocity() = default;
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+	virtual void Simulate(CParticle &particle, double tDelta, float strength) override;
+	float GetSpeed() const;
+};
 
 REGISTER_PARTICLE_OPERATOR(velocity, CParticleOperatorVelocity);
 

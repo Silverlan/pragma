@@ -1,17 +1,30 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "stdafx_client.h"
-#include "pragma/clientstate/clientstate.h"
-#include "pragma/game/c_game.h"
-#include "pragma/particlesystem/operators/c_particle_mod_operator_texture_scrolling.hpp"
+module;
+
+#include "pragma/clientdefinitions.h"
+#include "pragma/particlesystem/c_particlemodifier.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include <mathutil/umath.h>
 #include <pragma/math/vector/wvvector3.h>
 #include <sharedutils/util_string.h>
 #include <sharedutils/util.h>
 #include <pragma/model/modelmesh.h>
-#include <algorithm>
+
+export module pragma.client.particle_system:operator_texture_scrolling;
+
+export class DLLCLIENT CParticleOperatorTextureScrolling : public CParticleOperator {
+  public:
+	CParticleOperatorTextureScrolling() = default;
+	virtual void Simulate(CParticle &particle, double, float strength) override;
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+	virtual void OnParticleCreated(CParticle &particle) override;
+  private:
+	void SetFrameOffset(CParticle &particle, Vector2 uv);
+	float m_fHorizontalSpeed = 0.f;
+	float m_fVerticalSpeed = 0.f;
+};
 
 REGISTER_PARTICLE_OPERATOR(texture_scrolling, CParticleOperatorTextureScrolling);
 

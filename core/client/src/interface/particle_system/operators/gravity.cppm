@@ -1,17 +1,26 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "stdafx_client.h"
-#include "pragma/game/c_game.h"
-#include "pragma/particlesystem/operators/c_particle_mod_gravity.h"
-#include "pragma/entities/environment/effects/c_env_particle_system.h"
-#include <mathutil/umath.h>
-#include <pragma/math/vector/wvvector3.h>
-#include <sharedutils/util_string.h>
-#include <sharedutils/util.h>
-#include <algorithm>
+module;
 
-extern DLLCLIENT CGame *c_game;
+#include "pragma/particlesystem/operators/c_particle_operator_world_base.hpp"
+#include "pragma/entities/environment/effects/c_env_particle_system.h"
+
+export module pragma.client.particle_system:operator_gravity;
+
+export class DLLCLIENT CParticleOperatorGravity : public CParticleOperatorWorldBase {
+  public:
+	CParticleOperatorGravity() = default;
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+	virtual void Simulate(CParticle &particle, double tDelta, float strength) override;
+	virtual void Simulate(double tDelta) override;
+  protected:
+	float m_gravityScale = 1.f;
+	Vector3 m_gravityForce = {0.f, -1.f, 0.f};
+	bool m_bUseCustomGravityForce = false;
+
+	Vector3 m_dtGravity = {};
+};
 
 REGISTER_PARTICLE_OPERATOR(gravity, CParticleOperatorGravity);
 
@@ -43,7 +52,7 @@ void CParticleOperatorGravity::Simulate(CParticle &particle, double tDelta, floa
 		particle.SetVelocity(particle.GetVelocity() + m_dtGravity);
 		return;
 	}
-	auto &gravity = c_game->GetGravity();
+	auto &gravity = pragma::get_client_game()->GetGravity();
 	auto &oldVel = particle.GetVelocity();
 	particle.SetVelocity(oldVel + (m_bUseCustomGravityForce ? m_gravityForce : gravity) * m_gravityScale * static_cast<float>(tDelta));
 }

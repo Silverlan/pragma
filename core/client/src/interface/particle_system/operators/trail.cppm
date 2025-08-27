@@ -1,14 +1,23 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "stdafx_client.h"
-#include "pragma/particlesystem/operators/c_particle_mod_trail.h"
+module;
+
+#include "pragma/clientdefinitions.h"
+#include "pragma/particlesystem/c_particlemodifier.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
-#include <mathutil/umath.h>
-#include <pragma/math/vector/wvvector3.h>
-#include <sharedutils/util_string.h>
-#include <sharedutils/util.h>
-#include <algorithm>
+
+export module pragma.client.particle_system:operator_trail;
+
+export class DLLCLIENT CParticleOperatorTrail : public CParticleOperator {
+  protected:
+	float m_travelTime = 1.f;
+	std::vector<uint32_t> m_particleNodes;
+  public:
+	CParticleOperatorTrail() = default;
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+	virtual void Simulate(CParticle &particle, double tDelta, float strength) override;
+};
 
 REGISTER_PARTICLE_OPERATOR(trail, CParticleOperatorTrail);
 

@@ -20,4 +20,8 @@ export import :modifier_random_variable;
 export import :modifier_time;
 
 export import :operator_color_fade;
+export import :operator_gravity;
+export import :operator_physics;
 export import :operator_radius_fade;
+export import :operator_texture_scrolling;
+export import :operator_trail;

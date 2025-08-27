@@ -1,15 +1,20 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
-#include "pragma/particlesystem/operators/c_particle_mod_physics.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include <pragma/physics/environment.hpp>
 #include <pragma/physics/shape.hpp>
 #include <pragma/physics/collisionmesh.h>
 #include <pragma/physics/collision_object.hpp>
 #include <pragma/model/model.h>
+
+module pragma.client.particle_system;
+
+import :operator_physics;
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT pragma::physics::IEnvironment *c_physEnv;

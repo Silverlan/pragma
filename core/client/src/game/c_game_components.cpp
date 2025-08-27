@@ -28,7 +28,6 @@
 #include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/entities/components/c_raytracing_component.hpp"
 #include "pragma/entities/components/c_bvh_component.hpp"
-#include "pragma/entities/components/c_animated_bvh_component.hpp"
 #include "pragma/entities/components/c_static_bvh_cache_component.hpp"
 #include "pragma/entities/components/c_static_bvh_user_component.hpp"
 #include "pragma/entities/components/c_input_component.hpp"

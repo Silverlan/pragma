@@ -5,7 +5,6 @@
 #include "pragma/game/c_game.h"
 #include "pragma/entities/components/liquid/base_buoyancy_component.hpp"
 #include "pragma/entities/components/c_bvh_component.hpp"
-#include "pragma/entities/components/c_animated_bvh_component.hpp"
 #include "pragma/entities/components/c_static_bvh_cache_component.hpp"
 #include "pragma/entities/components/c_static_bvh_user_component.hpp"
 #include "pragma/entities/components/c_motion_blur_data_component.hpp"

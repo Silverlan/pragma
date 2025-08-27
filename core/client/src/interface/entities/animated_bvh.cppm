@@ -1,13 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2022 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_ANIMATED_BVH_COMPONENT_HPP__
-#define __C_ANIMATED_BVH_COMPONENT_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include <pragma/entities/components/base_bvh_component.hpp>
 
-namespace pragma {
+export module pragma.client.entities.components:animated_bvh;
+
+export namespace pragma {
 	struct DLLCLIENT AnimatedBvhData {
 		struct DLLCLIENT AnimationBvhData {
 			std::vector<Mat4> boneMatrices;
@@ -60,5 +61,3 @@ namespace pragma {
 		std::vector<bool> m_dirtyBones;
 	};
 };
-
-#endif

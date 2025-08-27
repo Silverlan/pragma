@@ -1,10 +1,11 @@
 // SPDX-FileCopyrightText: (c) 2022 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
 #include "pragma/game/c_game.h"
-#include "pragma/entities/components/c_animated_bvh_component.hpp"
 #include "pragma/entities/components/c_bvh_component.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
@@ -14,6 +15,10 @@
 #include <pragma/lua/converters/vector_converter_t.hpp>
 #include <pragma/debug/intel_vtune.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
+
+module pragma.client.entities.components;
+
+import :animated_bvh;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;

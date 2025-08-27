@@ -6,9 +6,10 @@
 #include "pragma/entities/components/c_bvh_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"
-#include "pragma/entities/components/c_animated_bvh_component.hpp"
 #include "pragma/entities/entity_component_system_t.hpp"
 #include "pragma/model/c_modelmesh.h"
+
+import pragma.client.entities.components;
 
 extern DLLCLIENT CEngine *c_engine;
 

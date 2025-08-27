@@ -1,9 +1,10 @@
 // SPDX-FileCopyrightText: (c) 2024 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include <mathutil/umath.h>
 #include <glm/gtx/euler_angles.hpp>
-#include "asset/fbx_loader.hpp"
 #include "pragma/game/c_game.h"
 #include "pragma/clientstate/clientstate.h"
 #include <pragma/model/c_modelmesh.h>
@@ -22,6 +23,10 @@
 #include "pragma/asset/c_util_model.hpp"
 #include <cmaterial_manager2.hpp>
 #include <texturemanager/texture_manager2.hpp>
+
+module pragma.client.assets;
+
+import :fbx_loader;
 
 import panima;
 import pragma.client.rendering.shaders;

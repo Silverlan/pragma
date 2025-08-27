@@ -1,11 +1,11 @@
 // SPDX-FileCopyrightText: (c) 2024 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __PRAGMA_FBX_LOADER_HPP__
-#define __PRAGMA_FBX_LOADER_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/asset/c_util_model.hpp"
+#include <ofbx.h>
 #include <sharedutils/util_path.hpp>
 #include <mathutil/vertex.hpp>
 #include <string>
@@ -13,18 +13,9 @@
 #include <vector>
 #include <cinttypes>
 
-namespace ofbx {
-	struct IScene;
-	struct Object;
-	struct Mesh;
-	struct Material;
-	struct DVec3;
-};
-namespace pragma::animation {
-	struct Bone;
-};
-class Model;
-namespace pragma::asset::fbx {
+export module pragma.client.assets:fbx_loader;
+
+export namespace pragma::asset::fbx {
 	enum class RotationOrder : uint8_t {
 		Xyz,
 		Xzy,
@@ -82,5 +73,3 @@ namespace pragma::asset::fbx {
 		std::shared_ptr<pragma::animation::Bone> AddBone(const ofbx::Object &o);
 	};
 };
-
-#endif

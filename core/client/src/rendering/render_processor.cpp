@@ -17,7 +17,6 @@
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/model/vk_mesh.h"
-#include "pragma/debug/debug_render_filter.hpp"
 #include <pragma/logging.hpp>
 #include <sharedutils/magic_enum.hpp>
 #include <prosper_framebuffer.hpp>

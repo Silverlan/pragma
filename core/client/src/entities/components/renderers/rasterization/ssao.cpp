@@ -4,7 +4,6 @@
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"
 #include "pragma/rendering/c_ssao.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
-#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/game/c_game.h"
 #include <prosper_command_buffer.hpp>
 #include <prosper_util.hpp>
@@ -12,6 +11,7 @@
 #include <image/prosper_render_target.hpp>
 #include <image/prosper_msaa_texture.hpp>
 
+import pragma.client.entities.components;
 import pragma.client.rendering.shaders;
 
 using namespace pragma::rendering;

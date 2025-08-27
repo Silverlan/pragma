@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/rendering/c_ssao.hpp"
 #include "pragma/rendering/shaders/world/c_shader_pbr.hpp"
 #include "pragma/rendering/lighting/c_light_data_buffer_manager.hpp"
@@ -22,6 +23,10 @@
 #include <buffers/prosper_buffer.hpp>
 #include <image/prosper_render_target.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
+
+module pragma.client.entities.components;
+
+import :rasterization_renderer;
 
 import pragma.client.rendering.shaders;
 

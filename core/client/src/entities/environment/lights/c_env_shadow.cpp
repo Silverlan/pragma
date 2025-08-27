@@ -13,7 +13,6 @@
 #include "pragma/rendering/shaders/c_shader_shadow.hpp"
 #include "pragma/entities/components/c_radius_component.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
-#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/environment/lights/c_env_light_spot.h"
 #include "pragma/entities/environment/lights/c_env_light_point.h"
@@ -30,6 +29,8 @@
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/math/intersection.h>
 #include <image/prosper_render_target.hpp>
+
+import pragma.client.entities.components;
 
 using namespace pragma;
 

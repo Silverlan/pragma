@@ -8,12 +8,13 @@
 #include "pragma/rendering/shaders/particles/c_shader_particle.hpp"
 #include "pragma/rendering/shaders/world/c_shader_pbr.hpp"
 #include "pragma/rendering/shader_material/shader_material.hpp"
-#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <shader/prosper_shader_t.hpp>
 #include <prosper_command_buffer.hpp>
 #include <datasystem_vector.h>
+
+import pragma.client.entities.components;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;

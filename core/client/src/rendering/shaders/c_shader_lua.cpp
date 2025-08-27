@@ -8,7 +8,6 @@
 #include "pragma/rendering/render_processor.hpp"
 #include "pragma/rendering/shader_material/shader_material.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
-#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/lua/util.hpp>
 #include <shader/prosper_pipeline_create_info.hpp>
@@ -18,6 +17,8 @@
 #include <prosper_render_pass.hpp>
 #include <prosper_util.hpp>
 #include <wgui/wibase.h>
+
+import pragma.client.entities.components;
 
 extern DLLCLIENT CEngine *c_engine;
 

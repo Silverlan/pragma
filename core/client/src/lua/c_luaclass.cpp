@@ -21,7 +21,6 @@
 #include "pragma/lua/classes/lshaderinfo.h"
 #include "pragma/rendering/shader_input_data.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
-#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/entities/environment/lights/c_env_light.h"
 #include "pragma/entities/environment/lights/c_env_light_spot.h"
 #include "pragma/entities/environment/lights/c_env_light_point.h"
@@ -78,6 +77,7 @@
 #include <cmaterial_manager2.hpp>
 #include <wgui/wgui.h>
 
+import pragma.client.entities.components;
 import pragma.client.rendering.shaders;
 import pragma.shadergraph;
 

@@ -13,6 +13,7 @@
 #include <prosper_command_buffer.hpp>
 #include <wgui/types/wirect.h>
 
+import pragma.client.entities.components;
 import pragma.client.gui;
 
 REGISTER_PARTICLE_RENDERER(blob, CParticleRendererBlob);
@@ -454,7 +455,6 @@ void CParticleRendererBlob::UpdateAdjacentParticles(prosper::ICommandBuffer &cmd
 	UpdateDebugNeighborLinks();
 }
 
-#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/entities/environment/lights/c_env_shadow.hpp"
 void CParticleRendererBlob::PreRender(prosper::ICommandBuffer &cmd)
 {

@@ -6,7 +6,6 @@ module;
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
-#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/rendering/world_environment.hpp"
 #include "pragma/entities/entity_component_system_t.hpp"
@@ -20,6 +19,7 @@ module;
 module pragma.client.entities.components;
 
 import :pp_dof;
+import :rasterization_renderer;
 
 import pragma.client.rendering.shaders;
 

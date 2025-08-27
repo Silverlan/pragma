@@ -5,9 +5,10 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientstate.h"
-#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include <image/prosper_render_target.hpp>
+
+import pragma.client.entities.components;
 
 module pragma.client.gui;
 

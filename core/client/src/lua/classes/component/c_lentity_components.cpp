@@ -140,7 +140,6 @@
 #include "pragma/entities/components/c_light_map_component.hpp"
 #include "pragma/entities/components/c_light_map_receiver_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
-#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/entities/c_filter_entity_class.h"
 #include "pragma/entities/c_filter_entity_name.h"
 #include "pragma/entities/components/c_ownable_component.hpp"

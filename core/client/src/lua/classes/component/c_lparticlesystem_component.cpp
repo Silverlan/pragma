@@ -8,13 +8,14 @@
 #include "pragma/particlesystem/initializers/c_particle_initializer_lua.hpp"
 #include <pragma/entities/environment/effects/particlesystemdata.h>
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
-#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/lua/lua_util_component.hpp>
 #include <pragma/model/model.h>
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <buffers/prosper_buffer.hpp>
+
+import pragma.client.entities.components;
 
 extern DLLCLIENT CGame *c_game;
 

@@ -12,7 +12,6 @@
 #include "pragma/entities/components/c_observer_component.hpp"
 #include "pragma/entities/components/c_name_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
-#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include <pragma/console/convars.h>
 #include "pragma/console/c_cvar.h"
@@ -52,6 +51,7 @@
 #include <sharedutils/util_file.h>
 #include <prosper_window.hpp>
 
+import pragma.client.entities.components;
 import pragma.client.gui;
 
 extern DLLCLIENT CEngine *c_engine;

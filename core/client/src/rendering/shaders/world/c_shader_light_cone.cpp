@@ -3,7 +3,6 @@
 
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/world/c_shader_light_cone.hpp"
-#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/rendering/render_processor.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/environment/lights/c_env_light_spot_vol.h"
@@ -18,6 +17,8 @@
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <prosper_command_buffer.hpp>
 #include <cmaterial.h>
+
+import pragma.client.entities.components;
 
 using namespace pragma;
 

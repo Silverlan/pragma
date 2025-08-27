@@ -10,7 +10,6 @@
 #include "pragma/entities/environment/lights/c_env_light_directional.h"
 #include "pragma/entities/environment/lights/c_env_shadow.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
-#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/rendering/shaders/c_shader_shadow.hpp"
 #include "pragma/rendering/render_queue.hpp"
 #include "pragma/model/c_model.h"
@@ -23,6 +22,8 @@
 #include <image/prosper_render_target.hpp>
 #include <prosper_command_buffer.hpp>
 #include <cmaterial.h>
+
+import pragma.client.entities.components;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;

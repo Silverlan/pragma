@@ -5,7 +5,6 @@
 #include "pragma/entities/components/liquid/c_liquid_surface_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/game/c_game.h"
-#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/components/c_surface_component.hpp"
 #include "pragma/entities/components/c_scene_component.hpp"
@@ -26,6 +25,7 @@
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/lua/base_lua_handle_method.hpp>
 
+import pragma.client.entities.components;
 import pragma.client.rendering.shaders;
 
 extern DLLCLIENT CGame *c_game;

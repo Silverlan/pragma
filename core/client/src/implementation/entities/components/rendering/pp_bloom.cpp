@@ -6,7 +6,6 @@ module;
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
-#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/rendering/world_environment.hpp"
 #include "pragma/entities/entity_component_system_t.hpp"
 #include "pragma/console/c_cvar.h"
@@ -20,6 +19,7 @@ import pragma.client.rendering.shaders;
 module pragma.client.entities.components;
 
 import :pp_bloom;
+import :rasterization_renderer;
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT CEngine *c_engine;

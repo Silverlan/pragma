@@ -8,13 +8,14 @@
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/entities/environment/lights/c_env_shadow.hpp"
-#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/game/c_game.h"
 #include "pragma/clientstate/clientstate.h"
 #include <image/prosper_msaa_texture.hpp>
 #include <prosper_util.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <prosper_command_buffer.hpp>
+
+import pragma.client.entities.components;
 
 using namespace pragma::rendering;
 

@@ -1,14 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_RASTERIZATION_RENDERER_COMPONENT_HPP__
-#define __C_RASTERIZATION_RENDERER_COMPONENT_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include <pragma/entities/components/base_entity_component.hpp>
 #include "pragma/entities/c_baseentity.h"
 #include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/entities/components/renderers/rasterization/hdr_data.hpp"
+#include "pragma/rendering/render_processor.hpp"
 #include "pragma/rendering/c_rendermode.h"
 #include <unordered_set>
 #include <prosper_swap_command_buffer.hpp>
@@ -19,15 +19,9 @@
 
 #define DEBUG_RENDER_PERFORMANCE_TEST_ENABLED 0
 
-namespace prosper {
-	class Texture;
-	class IDescriptorSetGroup;
-	class IPrimaryCommandBuffer;
-	class IDescriptorSet;
-	class ISwapCommandBufferGroup;
-};
-class SSAOInfo;
-namespace pragma {
+export module pragma.client.entities.components:rasterization_renderer;
+
+export namespace pragma {
 	struct DLLCLIENT RendererData {
 		enum class Flags : uint32_t { None = 0u, SSAOEnabled = 1u };
 		void SetResolution(uint32_t w, uint32_t h) { vpResolution = w << 16 | (static_cast<uint16_t>(h)); }
@@ -38,21 +32,6 @@ namespace pragma {
 		float bloomThreshold = 1.f;
 	};
 
-	class ShaderGameWorldLightingPass;
-	class ShaderPrepassBase;
-	class CLightComponent;
-	class CParticleSystemComponent;
-	class CLightDirectionalComponent;
-	class CSkyCameraComponent;
-	class CSceneComponent;
-	class CRendererComponent;
-	namespace rendering {
-		class Prepass;
-		class ForwardPlusInstance;
-		class LightingStageRenderProcessor;
-		class DepthStageRenderProcessor;
-	};
-	class CLightMapComponent;
 	class DLLCLIENT CRasterizationRendererComponent final : public BaseEntityComponent {
 	  public:
 		static ComponentEventId EVENT_ON_RECORD_PREPASS;
@@ -305,12 +284,12 @@ namespace pragma {
 		const util::DrawSceneInfo &drawSceneInfo;
 	};
 };
-REGISTER_BASIC_BITWISE_OPERATORS(pragma::CRasterizationRendererComponent::StateFlags)
-REGISTER_BASIC_BITWISE_OPERATORS(pragma::RendererData::Flags)
+export {
+	REGISTER_BASIC_BITWISE_OPERATORS(pragma::CRasterizationRendererComponent::StateFlags)
+	REGISTER_BASIC_BITWISE_OPERATORS(pragma::RendererData::Flags)
 
-class DLLCLIENT CRasterizationRenderer : public CBaseEntity {
-  public:
-	virtual void Initialize() override;
+	class DLLCLIENT CRasterizationRenderer : public CBaseEntity {
+	public:
+		virtual void Initialize() override;
+	};
 };
-
-#endif

@@ -6,7 +6,6 @@ module;
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
 #include "pragma/entities/entity_iterator.hpp"
-#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/components/c_render_component.hpp"
@@ -31,6 +30,7 @@ module;
 module pragma.client.entities.components;
 
 import :pp_motion_blur;
+import :rasterization_renderer;
 
 import pragma.client.rendering.shaders;
 

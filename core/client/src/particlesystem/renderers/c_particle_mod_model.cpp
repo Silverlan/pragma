@@ -10,7 +10,6 @@
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
-#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/entities/components/c_scene_component.hpp"
@@ -20,6 +19,8 @@
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <prosper_command_buffer.hpp>
+
+import pragma.client.entities.components;
 
 REGISTER_PARTICLE_RENDERER(model, CParticleRendererModel);
 

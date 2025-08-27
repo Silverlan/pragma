@@ -13,7 +13,6 @@
 #include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
-#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/entities/environment/lights/c_env_light.h"
 #include "pragma/entities/entity_component_system_t.hpp"
 #include "pragma/debug/c_debugoverlay.h"
@@ -25,6 +24,8 @@
 #include <pragma/console/convars.h>
 #include <prosper_util.hpp>
 #include <prosper_command_buffer.hpp>
+
+import pragma.client.entities.components;
 
 using namespace pragma::rendering;
 

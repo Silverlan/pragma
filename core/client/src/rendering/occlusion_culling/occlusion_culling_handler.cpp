@@ -13,12 +13,13 @@
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
-#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/game/game_limits.h"
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/math/intersection.h>
 #include <pragma/entities/entity_component_system_t.hpp>
+
+import pragma.client.entities.components;
 
 using namespace pragma;
 

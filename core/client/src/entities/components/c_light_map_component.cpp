@@ -10,7 +10,6 @@
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/model/vk_mesh.h"
 #include "pragma/entities/entity_iterator.hpp"
-#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/entities/components/c_light_map_receiver_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
@@ -37,6 +36,8 @@
 #include <pragma/util/util_game.hpp>
 #include <fsys/ifile.hpp>
 #include <wgui/types/wiroot.h>
+
+import pragma.client.entities.components;
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;

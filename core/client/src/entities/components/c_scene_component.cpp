@@ -8,7 +8,6 @@
 #include "pragma/entities/game/c_game_occlusion_culler.hpp"
 #include "pragma/entities/environment/lights/c_env_shadow_csm.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
-#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/environment/lights/c_env_shadow.hpp"
 #include "pragma/entities/entity_instance_index_buffer.hpp"
@@ -25,6 +24,7 @@
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <prosper_command_buffer.hpp>
 
+import pragma.client.entities.components;
 import pragma.client.rendering.shaders;
 
 using namespace pragma;

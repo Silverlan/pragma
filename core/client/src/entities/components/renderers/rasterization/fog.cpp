@@ -1,7 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/entities/components/renderers/rasterization/hdr_data.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/entity_component_system_t.hpp"

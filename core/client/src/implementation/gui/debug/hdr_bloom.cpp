@@ -5,13 +5,14 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientstate.h"
-#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/components/c_scene_component.hpp"
 #include <sharedutils/util_string.h>
 #include <image/prosper_sampler.hpp>
 #include <image/prosper_render_target.hpp>
 #include <prosper_command_buffer.hpp>
+
+import pragma.client.entities.components;
 
 module pragma.client.gui;
 

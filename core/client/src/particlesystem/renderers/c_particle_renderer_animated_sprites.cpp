@@ -9,9 +9,10 @@
 #include "pragma/rendering/shaders/particles/c_shader_particle.hpp"
 #include "pragma/rendering/shaders/particles/c_shader_particle_shadow.h"
 #include "pragma/particlesystem/renderers/c_particle_renderer_rotational_buffer.hpp"
-#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
+
+import pragma.client.entities.components;
 
 REGISTER_PARTICLE_RENDERER(source_render_animated_sprites, CParticleRendererAnimatedSprites);
 

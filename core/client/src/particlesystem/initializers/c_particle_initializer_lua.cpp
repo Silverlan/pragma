@@ -3,8 +3,9 @@
 
 #include "stdafx_client.h"
 #include "pragma/particlesystem/initializers/c_particle_initializer_lua.hpp"
-#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include <prosper_command_buffer.hpp>
+
+import pragma.client.entities.components;
 
 void CParticleModifierLua::Initialize(const luabind::object &o) { m_baseLuaObj = std::shared_ptr<luabind::object>(new luabind::object(o)); }
 

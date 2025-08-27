@@ -15,7 +15,6 @@
 #include "pragma/rendering/render_stats.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
-#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/model/vk_mesh.h"
@@ -26,6 +25,8 @@
 #include <prosper_command_buffer.hpp>
 #include <cmaterial_manager2.hpp>
 #include <cmaterial.h>
+
+import pragma.client.entities.components;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;

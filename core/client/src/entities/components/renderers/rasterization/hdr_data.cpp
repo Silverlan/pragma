@@ -7,7 +7,6 @@
 #include "pragma/rendering/c_msaa.h"
 #include "pragma/entities/components/renderers/rasterization/hdr_data.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
-#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/rendering/shaders/particles/c_shader_particle.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
@@ -30,6 +29,7 @@
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 
+import pragma.client.entities.components;
 import pragma.client.gui;
 import pragma.client.rendering.shaders;
 

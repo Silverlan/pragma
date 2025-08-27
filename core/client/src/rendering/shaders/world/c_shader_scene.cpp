@@ -9,7 +9,6 @@
 #include "pragma/entities/entity_instance_index_buffer.hpp"
 #include "pragma/entities/environment/lights/c_env_shadow.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
-#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/game/game_limits.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/model/vk_mesh.h"
@@ -22,6 +21,8 @@
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <cmaterial.h>
+
+import pragma.client.entities.components;
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT CEngine *c_engine;

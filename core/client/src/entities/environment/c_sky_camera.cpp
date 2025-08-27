@@ -7,7 +7,6 @@
 #include <pragma/entities/entity_component_system_t.hpp>
 #include "pragma/entities/environment/c_sky_camera.hpp"
 #include "pragma/entities/components/c_transform_component.hpp"
-#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/components/c_toggle_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
@@ -22,6 +21,8 @@
 #include "pragma/rendering/render_queue_worker.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/baseentity_events.hpp>
+
+import pragma.client.entities.components;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;

@@ -26,7 +26,6 @@
 #include "pragma/rendering/global_render_settings_buffer_data.hpp"
 #include "pragma/entities/baseentity.h"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
-#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include <pragma/lua/luacallback.h>
 #include "pragma/entities/components/c_scene_component.hpp"
 #include "luasystem.h"
@@ -56,6 +55,7 @@
 #include <pragma/entities/components/component_member_flags.hpp>
 #include <pragma/entities/entity_component_manager_t.hpp>
 
+import pragma.client.entities.components;
 import pragma.client.gui;
 import pragma.client.rendering.shaders;
 

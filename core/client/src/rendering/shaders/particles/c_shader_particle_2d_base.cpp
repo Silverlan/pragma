@@ -5,7 +5,6 @@
 #include "pragma/rendering/shaders/particles/c_shader_particle_2d_base.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/entities/components/c_transform_component.hpp"
-#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/rendering/render_processor.hpp"
 #include "pragma/rendering/shaders/world/c_shader_prepass.hpp"
@@ -19,6 +18,8 @@
 #include <prosper_command_buffer.hpp>
 #include <datasystem_vector.h>
 #include <cmaterial.h>
+
+import pragma.client.entities.components;
 
 extern DLLCLIENT CEngine *c_engine;
 

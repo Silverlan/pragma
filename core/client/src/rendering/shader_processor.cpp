@@ -16,13 +16,14 @@
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/components/c_vertex_animated_component.hpp"
-#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/entities/environment/lights/c_env_shadow.hpp"
 #include "pragma/model/c_model.h"
 #include "pragma/logging.hpp"
 #include <cmaterial_manager2.hpp>
 #include <prosper_command_buffer.hpp>
 #include <cmaterial.h>
+
+import pragma.client.entities.components;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;

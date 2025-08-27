@@ -9,7 +9,6 @@
 #include "pragma/debug/c_debug_game_gui.h"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
-#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include <wgui/types/wirect.h>
 #include <wgui/types/wiroot.h>
@@ -19,6 +18,7 @@
 #include <image/prosper_sampler.hpp>
 #include <prosper_command_buffer.hpp>
 
+import pragma.client.entities.components;
 import pragma.client.gui;
 
 extern DLLCLIENT CEngine *c_engine;

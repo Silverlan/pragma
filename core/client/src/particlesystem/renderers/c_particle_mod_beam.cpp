@@ -8,11 +8,12 @@
 #include "pragma/rendering/shaders/particles/c_shader_particle_polyboard.hpp"
 #include "pragma/rendering/shaders/particles/c_shader_particle_polyboard_shadow.h"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
-#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include <prosper_util.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
+
+import pragma.client.entities.components;
 
 REGISTER_PARTICLE_RENDERER(beam, CParticleRendererBeam);
 

@@ -7,13 +7,14 @@
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_transform_component.hpp"
-#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/entities/game/c_game_occlusion_culler.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include <pragma/math/intersection.h>
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/logging.hpp>
+
+import pragma.client.entities.components;
 
 using namespace pragma;
 

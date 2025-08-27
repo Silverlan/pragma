@@ -1,7 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/console/c_cvar.h"
@@ -13,6 +12,8 @@
 #include <shader/prosper_shader_blur.hpp>
 #include <image/prosper_render_target.hpp>
 #include <cmaterial.h>
+
+import pragma.client.entities.components;
 
 using namespace pragma::rendering;
 

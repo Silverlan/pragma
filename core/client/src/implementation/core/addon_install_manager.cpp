@@ -1,13 +1,16 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
-#include "pragma/addonsystem/addon_install_manager.hpp"
 #include "pragma/util/curl_query_handler.hpp"
 #include <pragma/addonsystem/addonsystem.h>
 #include <sharedutils/util_file.h>
 #include <pragma/entities/entity_component_system_t.hpp>
+
+module pragma.client.core.addon_install_manager;
 
 import pragma.uva;
 import pragma.pad;

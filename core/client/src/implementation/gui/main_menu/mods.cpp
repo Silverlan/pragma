@@ -7,19 +7,19 @@ module;
 #include "pragma/clientstate/clientutil.h"
 #include "pragma/c_engine.h"
 #include "pragma/util/curl_query_handler.hpp"
-#include "pragma/addonsystem/addon_install_manager.hpp"
 #include <pragma/addonsystem/addonsystem.h>
 #ifdef PRAGMA_CHROMIUM_ENABLED
 #include <../../../modules/pr_chromium/include/util_javascript.hpp>
 #endif
+
+#define PAD_ADDON_VERBOSE 1
 
 module pragma.client.gui;
 
 import :main_menu_mods;
 import :progress_bar;
 
-#define PAD_ADDON_VERBOSE 1
-
+import pragma.client.core;
 import pragma.locale;
 
 extern DLLCLIENT CEngine *c_engine;

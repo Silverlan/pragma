@@ -1,15 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __ADDON_UPDATE_HANDLER_HPP__
-#define __ADDON_UPDATE_HANDLER_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include <vector>
 #include <atomic>
 
-class AddonInfo;
-namespace pragma {
+export module pragma.client.core.addon_install_manager;
+
+export namespace pragma {
 	class CurlQueryHandler;
 	class DLLCLIENT AddonInstallManager {
 	  public:
@@ -35,5 +35,3 @@ namespace pragma {
 		void QueryFile(const std::shared_ptr<AddonUpdateQuery> &addon, uint32_t fileId, const std::string &filePath, uint64_t fileSize, const std::function<void(int64_t, int64_t, int64_t, int64_t)> &progressCallback);
 	};
 };
-
-#endif

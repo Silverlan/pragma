@@ -1,8 +1,22 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "stdafx_client.h"
-#include "pragma/particlesystem/initializers/c_particle_initializer_speed.hpp"
+module;
+
+#include "pragma/clientdefinitions.h"
+#include "pragma/particlesystem/c_particlemodifier.h"
+#include "pragma/particlesystem/modifiers/c_particle_modifier_component_random_variable.hpp"
+
+export module pragma.client.particle_system:initializer_speed;
+
+export class DLLCLIENT CParticleInitializerSpeed : public CParticleInitializer {
+  public:
+	CParticleInitializerSpeed() = default;
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+	virtual void OnParticleCreated(CParticle &particle) override;
+  private:
+	CParticleModifierComponentRandomVariable<std::uniform_real_distribution<float>, float> m_fSpeed;
+};
 
 REGISTER_PARTICLE_INITIALIZER(speed, CParticleInitializerSpeed);
 

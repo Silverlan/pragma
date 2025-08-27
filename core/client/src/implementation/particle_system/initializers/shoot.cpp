@@ -1,9 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/particlesystem/initializers/c_particle_initializer_shoot.hpp"
+#include "pragma/particlesystem/c_particlemodifier.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
+
+module pragma.client.particle_system;
+
+import :initializer_shoot;
 
 REGISTER_PARTICLE_INITIALIZER(shoot_cone, CParticleInitializerShootCone);
 REGISTER_PARTICLE_INITIALIZER(shoot_outward, CParticleInitializerShootOutward);

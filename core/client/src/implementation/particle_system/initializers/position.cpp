@@ -1,9 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/particlesystem/initializers/c_particle_initializer_position.hpp"
+#include "pragma/particlesystem/c_particlemodifier.h"
 #include <pragma/math/intersection.h>
+
+module pragma.client.particle_system;
+
+import :initializer_position;
 
 REGISTER_PARTICLE_INITIALIZER(position_random_box, CParticleInitializerPositionRandomBox);
 REGISTER_PARTICLE_INITIALIZER(position_random_sphere, CParticleInitializerPositionRandomSphere);

@@ -5,7 +5,6 @@
 #include "pragma/game/c_game.h"
 #include "pragma/rendering/c_forwardplus.hpp"
 #include "pragma/console/c_cvar_global_functions.h"
-#include "pragma/debug/c_debug_game_gui.h"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/lighting/c_light_data_buffer_manager.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
@@ -21,6 +20,7 @@
 #include <sharedutils/scope_guard.h>
 #include <pragma/entities/entity_iterator.hpp>
 
+import pragma.client.debug;
 import pragma.client.entities.components;
 import pragma.client.gui;
 import pragma.client.rendering.shaders;

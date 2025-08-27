@@ -3,10 +3,11 @@
 
 #include "stdafx_client.h"
 #include "pragma/debug/c_debugoverlay.h"
-#include "pragma/debug/c_debug_game_gui.h"
 #include "pragma/console/c_cvar_global_functions.h"
 #include <alsoundsystem.hpp>
 #include <steam_audio/alsound_steam_audio.hpp>
+
+import pragma.client.debug;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;

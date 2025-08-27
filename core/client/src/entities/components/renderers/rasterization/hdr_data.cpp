@@ -11,7 +11,6 @@
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/entities/components/c_scene_component.hpp"
-#include "pragma/debug/c_debug_game_gui.h"
 #include "pragma/console/c_cvar_global_functions.h"
 #include "pragma/rendering/c_settings.hpp"
 #include <textureinfo.h>
@@ -29,6 +28,7 @@
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 
+import pragma.client.debug;
 import pragma.client.entities.components;
 import pragma.client.gui;
 import pragma.client.rendering.shaders;

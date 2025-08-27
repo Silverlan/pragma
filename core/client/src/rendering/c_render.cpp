@@ -29,7 +29,6 @@
 #include <pragma/lua/luacallback.h>
 #include "pragma/entities/components/c_scene_component.hpp"
 #include "luasystem.h"
-#include "pragma/debug/c_debug_game_gui.h"
 #include <pragma/lua/luafunction_call.h>
 #include "pragma/entities/environment/lights/c_env_light_spot.h"
 #include "pragma/lua/libraries/c_lua_vulkan.h"
@@ -54,6 +53,7 @@
 #include <pragma/entities/components/component_member_flags.hpp>
 #include <pragma/entities/entity_component_manager_t.hpp>
 
+import pragma.client.debug;
 import pragma.client.entities.components;
 import pragma.client.gui;
 import pragma.client.physics;

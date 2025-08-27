@@ -20,7 +20,6 @@
 #include "pragma/networking/iclient.hpp"
 #include <sharedutils/util.h>
 #include <sharedutils/util_string.h>
-#include "pragma/debug/c_debug_game_gui.h"
 #include "pragma/util/util_tga.hpp"
 #include "pragma/rendering/raytracing/cycles.hpp"
 #include "pragma/util/c_util.hpp"
@@ -51,6 +50,7 @@
 #include <sharedutils/util_file.h>
 #include <prosper_window.hpp>
 
+import pragma.client.debug;
 import pragma.client.entities.components;
 import pragma.client.gui;
 

@@ -1,11 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientstate.h"
-#include "pragma/debug/c_debug_game_gui.h"
 #include "pragma/game/c_game.h"
 #include <wgui/wibase.h>
+
+module pragma.client.debug.game_ui;
 
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;

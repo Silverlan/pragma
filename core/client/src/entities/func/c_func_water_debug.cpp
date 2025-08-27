@@ -5,7 +5,6 @@
 #include "pragma/entities/components/liquid/c_liquid_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/console/c_cvar_global_functions.h"
-#include "pragma/debug/c_debug_game_gui.h"
 #include "pragma/entities/c_water_surface.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/debug/c_debugoverlay.h"
@@ -22,6 +21,7 @@
 #include <pragma/physics/raytraces.h>
 #include <pragma/entities/entity_component_system_t.hpp>
 
+import pragma.client.debug;
 import pragma.client.entities.components;
 import pragma.client.gui;
 import pragma.client.physics;

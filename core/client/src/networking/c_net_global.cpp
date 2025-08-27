@@ -27,7 +27,6 @@
 #include <pragma/networking/nwm_util.h>
 #include "pragma/entities/environment/c_env_quake.h"
 #include "pragma/debug/c_debugoverlay.h"
-#include "pragma/debug/c_debug_game_gui.h"
 #include "pragma/gui/witreelist.h"
 #include "pragma/entities/components/c_weapon_component.hpp"
 #include "pragma/entities/c_player.hpp"
@@ -54,6 +53,7 @@
 #include <pragma/networking/enums.hpp>
 #include <pragma/util/giblet_create_info.hpp>
 
+import pragma.client.debug;
 import pragma.client.entities.components;
 
 enum class CLIENT_DROPPED;

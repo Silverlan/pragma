@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_DEBUG_GAME_GUI_H__
-#define __C_DEBUG_GAME_GUI_H__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include <sharedutils/functioncallback.h>
@@ -10,7 +9,9 @@
 #include <wgui/wibase.h>
 #include <unordered_map>
 
-struct DLLCLIENT DebugGameGUI {
+export module pragma.client.debug.game_ui;
+
+export struct DLLCLIENT DebugGameGUI {
   private:
 	std::unordered_map<std::string, CallbackHandle> m_callbacks;
 	std::vector<std::function<void(void)>> m_callOnRemove;
@@ -28,5 +29,3 @@ struct DLLCLIENT DebugGameGUI {
 	std::shared_ptr<void> GetUserData(uint32_t idx) const;
 	WIBase *GetGUIElement();
 };
-
-#endif

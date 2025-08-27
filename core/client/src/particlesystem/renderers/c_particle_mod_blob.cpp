@@ -7,12 +7,12 @@
 #include "pragma/particlesystem/renderers/c_particle_mod_blob.h"
 #include "pragma/rendering/shaders/particles/c_shader_particle_blob.hpp"
 #include "pragma/rendering/shaders/particles/c_shader_particle_blob_shadow.h"
-#include "pragma/debug/c_debug_game_gui.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <buffers/prosper_dynamic_resizable_buffer.hpp>
 #include <prosper_command_buffer.hpp>
 #include <wgui/types/wirect.h>
 
+import pragma.client.debug;
 import pragma.client.entities.components;
 import pragma.client.gui;
 

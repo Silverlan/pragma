@@ -8,12 +8,12 @@
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <wgui/types/wirect.h>
 #include "pragma/game/c_game_createguielement.h"
-#include "pragma/debug/c_debug_game_gui.h"
 #include "pragma/rendering/c_cubemapside.h"
 #include <pragma/console/sh_cmd.h>
 #include <image/prosper_render_target.hpp>
 #include <wgui/types/wiroot.h>
 
+import pragma.client.debug;
 import pragma.client.gui;
 
 

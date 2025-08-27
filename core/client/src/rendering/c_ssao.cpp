@@ -7,7 +7,6 @@
 #include "pragma/rendering/c_ssao.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/console/c_cvar_global_functions.h"
-#include "pragma/debug/c_debug_game_gui.h"
 #include <wgui/types/wirect.h>
 #include <wgui/types/wiroot.h>
 #include <image/prosper_render_target.hpp>
@@ -15,6 +14,7 @@
 #include <prosper_descriptor_set_group.hpp>
 #include <shader/prosper_shader_t.hpp>
 
+import pragma.client.debug;
 import pragma.client.entities.components;
 import pragma.client.gui;
 import pragma.client.rendering.shaders;

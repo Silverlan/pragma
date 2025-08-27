@@ -1,13 +1,16 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientstate.h"
-#include "pragma/cinematic/choreographic_scene.hpp"
 #include "pragma/entities/components/c_sound_emitter_component.hpp"
 #include "pragma/entities/components/c_flex_component.hpp"
 #include <pragma/audio/alsound_type.h>
 #include <pragma/entities/entity_component_system_t.hpp>
+
+module pragma.client.core.choreographic_scene;
 
 extern DLLCLIENT ClientState *client;
 

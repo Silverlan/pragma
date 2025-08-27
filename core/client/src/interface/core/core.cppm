@@ -5,3 +5,4 @@ module;
 
 export module pragma.client.core;
 export import pragma.client.core.addon_install_manager;
+export import pragma.client.core.choreographic_scene;

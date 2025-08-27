@@ -1,15 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __CHOREOGRAPHIC_SCENE_HPP__
-#define __CHOREOGRAPHIC_SCENE_HPP__
+module;
 
 #include <pragma/entities/baseentity_handle.h>
 
+export module pragma.client.core.choreographic_scene;
+
 import timeline_scene;
 
-class CBaseEntity;
-namespace choreography {
+export namespace choreography {
 	class Event : public uts::Event {
 	  public:
 		virtual ~Event() override = default;
@@ -77,5 +77,3 @@ namespace choreography {
 		friend uts::TimelineScene;
 	};
 };
-
-#endif

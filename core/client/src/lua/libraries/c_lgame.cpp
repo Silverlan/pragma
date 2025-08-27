@@ -32,6 +32,8 @@
 #include <cmaterial.h>
 #include <pragma/model/animation/bone.hpp>
 
+import pragma.client.core;
+
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
@@ -58,7 +60,6 @@ static btSoftBody *createSoftBody(btSoftRigidDynamicsWorld *world, btSoftBodyWor
 	return cloth;
 }
 #endif
-#include "pragma/cinematic/choreographic_scene.hpp"
 
 #ifdef ENABLE_DEPRECATED_PHYSICS
 #include <pragma/buss_ik/Node.h>

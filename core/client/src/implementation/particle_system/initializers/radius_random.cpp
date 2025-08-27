@@ -1,11 +1,17 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/particlesystem/initializers/c_particle_mod_radius_random.h"
+#include "pragma/particlesystem/c_particlemodifier.h"
 #include <mathutil/umath.h>
 #include <sharedutils/util.h>
 #include <algorithm>
+
+module pragma.client.particle_system;
+
+import :initializer_radius_random;
 
 REGISTER_PARTICLE_INITIALIZER(radius_random, CParticleInitializerRadiusRandom);
 REGISTER_PARTICLE_INITIALIZER(length_random, CParticleInitializerLengthRandom);

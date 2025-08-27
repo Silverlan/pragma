@@ -1,16 +1,22 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientstate.h"
+#include "pragma/particlesystem/c_particlemodifier.h"
 #include "pragma/game/c_game.h"
-#include "pragma/particlesystem/initializers/c_particle_mod_initial_animation_frame.hpp"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include <mathutil/umath.h>
 #include <pragma/math/vector/wvvector3.h>
 #include <sharedutils/util_string.h>
 #include <sharedutils/util.h>
 #include <algorithm>
+
+module pragma.client.particle_system;
+
+import :initializer_initial_animation_frame;
 
 REGISTER_PARTICLE_INITIALIZER(initial_animation_frame, CParticleInitializerInitialAnimationFrame);
 

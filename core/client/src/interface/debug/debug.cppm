@@ -5,3 +5,4 @@ module;
 
 export module pragma.client.debug;
 export import pragma.client.debug.game_ui;
+export import pragma.client.debug.render_debug_info;

@@ -62,7 +62,6 @@
 #include "textureinfo.h"
 #include "pragma/networking/iclient.hpp"
 #include <pragma/networking/nwm_util.h>
-#include "pragma/debug/renderdebuginfo.hpp"
 #include "pragma/game/c_game_callback.h"
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"
 #include "pragma/rendering/world_environment.hpp"
@@ -111,6 +110,7 @@
 #include <prosper_window.hpp>
 
 import pragma.client.ai;
+import pragma.client.debug;
 import pragma.client.entities.components;
 import pragma.client.physics;
 

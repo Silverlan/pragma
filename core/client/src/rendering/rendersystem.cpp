@@ -15,7 +15,6 @@
 #include "pragma/rendering/sortedrendermeshcontainer.h"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/rendering/render_stats.hpp"
-#include "pragma/debug/renderdebuginfo.hpp"
 #include "textureinfo.h"
 #include "pragma/console/c_cvar.h"
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"
@@ -26,6 +25,8 @@
 #include <pragma/model/animation/vertex_animation.hpp>
 #include <prosper_util.hpp>
 #include <image/prosper_render_target.hpp>
+
+import pragma.client.debug;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;

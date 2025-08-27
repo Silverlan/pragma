@@ -1,9 +1,12 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/debug/renderdebuginfo.hpp"
 #include "pragma/console/c_cvar_global_functions.h"
+
+module pragma.client.debug.render_debug_info;
 
 static RenderDebugInfo render_debug_info;
 void RenderDebugInfo::Reset()

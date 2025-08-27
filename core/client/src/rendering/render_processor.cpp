@@ -6,7 +6,6 @@
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
-#include "pragma/debug/renderdebuginfo.hpp"
 #include "pragma/rendering/render_processor.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
@@ -26,6 +25,7 @@
 #include <cmaterial_manager2.hpp>
 #include <cmaterial.h>
 
+import pragma.client.debug;
 import pragma.client.entities.components;
 
 extern DLLCLIENT CEngine *c_engine;

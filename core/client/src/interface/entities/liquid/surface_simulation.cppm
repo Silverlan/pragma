@@ -1,16 +1,16 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_LIQUID_SURFACE_SIMULATION_COMPONENT_HPP__
-#define __C_LIQUID_SURFACE_SIMULATION_COMPONENT_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/components/c_entity_component.hpp"
+#include "pragma/entities/components/liquid/c_liquid_component.hpp"
 #include <pragma/entities/components/liquid/base_liquid_surface_simulation_component.hpp>
 
-class PhysWaterSurfaceSimulator;
-class CWaterSurface;
-namespace pragma {
+export module pragma.client.entities.components:liquid_surface_simulation;
+
+export namespace pragma {
 	class DLLCLIENT CLiquidSurfaceSimulationComponent final : public BaseLiquidSurfaceSimulationComponent, public CBaseNetComponent {
 	  public:
 		CLiquidSurfaceSimulationComponent(BaseEntity &ent);
@@ -27,5 +27,3 @@ namespace pragma {
 		mutable EntityHandle m_hWaterSurface = {};
 	};
 };
-
-#endif

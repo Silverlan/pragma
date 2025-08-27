@@ -38,7 +38,6 @@
 #include "pragma/entities/components/liquid/c_liquid_surface_component.hpp"
 #include "pragma/entities/components/liquid/c_liquid_volume_component.hpp"
 #include "pragma/entities/components/liquid/c_liquid_control_component.hpp"
-#include "pragma/entities/components/liquid/c_liquid_surface_simulation_component.hpp"
 #include "pragma/entities/components/c_debug_hitbox_component.hpp"
 // --template-include-location
 #include "pragma/entities/environment/audio/c_env_sound_dsp.h"

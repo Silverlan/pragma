@@ -10,6 +10,7 @@ export import :global_shader_input;
 export import :hitbox_bvh;
 export import :light_map_data_cache;
 export import :liquid_buoyancy;
+export import :liquid_surface_simulation;
 export import :lua;
 export import :optical_camera;
 export import :point_at_target;

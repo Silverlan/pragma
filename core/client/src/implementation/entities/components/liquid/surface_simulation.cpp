@@ -1,14 +1,19 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
-#include "pragma/entities/components/liquid/c_liquid_surface_simulation_component.hpp"
 #include "pragma/entities/components/liquid/c_liquid_control_component.hpp"
 #include "pragma/entities/c_water_surface.hpp"
 #include "pragma/physics/c_phys_water_surface_simulator.hpp"
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
+
+module pragma.client.entities.components;
+
+import :liquid_surface_simulation;
 
 extern DLLCLIENT CGame *c_game;
 

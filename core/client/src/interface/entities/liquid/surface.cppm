@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_LIQUID_SURFACE_COMPONENT_HPP__
-#define __C_LIQUID_SURFACE_COMPONENT_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/components/c_entity_component.hpp"
@@ -10,12 +9,14 @@
 #include <pragma/types.hpp>
 #include <pragma/entities/components/liquid/base_liquid_surface_component.hpp>
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
+#include "pragma/entities/components/c_surface_component.hpp"
 #include <image/prosper_texture.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <mathutil/umath_geometry.hpp>
 
-namespace pragma {
-	class CSceneComponent;
+export module pragma.client.entities.components:liquid_surface;
+
+export namespace pragma {
 	struct DLLCLIENT WaterScene {
 		~WaterScene();
 		util::TWeakSharedHandle<pragma::CSceneComponent> sceneReflection = {};
@@ -39,7 +40,6 @@ namespace pragma {
 		util::PFloatProperty reflectiveIntensity = nullptr;
 	};
 
-	class CSurfaceComponent;
 	class DLLCLIENT CLiquidSurfaceComponent final : public BaseLiquidSurfaceComponent, public CBaseNetComponent {
 	  public:
 		CLiquidSurfaceComponent(BaseEntity &ent) : BaseLiquidSurfaceComponent(ent) {}
@@ -72,5 +72,3 @@ namespace pragma {
 		bool m_renderDataInitialized = false;
 	};
 };
-
-#endif

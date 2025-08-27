@@ -4,7 +4,6 @@
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/world/water/c_shader_water.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
-#include "pragma/entities/components/liquid/c_liquid_surface_component.hpp"
 #include "pragma/entities/components/c_surface_component.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/rendering/render_processor.hpp"
@@ -13,6 +12,8 @@
 #include <prosper_descriptor_set_group.hpp>
 #include <prosper_command_buffer.hpp>
 #include <cmaterial.h>
+
+import pragma.client.entities.components;
 
 using namespace pragma;
 

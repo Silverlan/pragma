@@ -117,7 +117,6 @@
 #include "pragma/entities/components/c_softbody_component.hpp"
 #include "pragma/entities/components/c_vertex_animated_component.hpp"
 #include "pragma/entities/components/c_debug_component.hpp"
-#include "pragma/entities/components/renderers/c_raytracing_renderer_component.hpp"
 #include "pragma/entities/components/c_eye_component.hpp"
 #include "pragma/entities/components/c_bsp_component.hpp"
 #include "pragma/entities/components/c_light_map_component.hpp"

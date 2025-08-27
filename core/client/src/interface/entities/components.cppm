@@ -20,6 +20,7 @@ export import :pp_fxaa;
 export import :pp_motion_blur;
 export import :pp_tone_mapping;
 export import :pp_volumetric;
+export import :raytracing_renderer;
 export import :score;
 export import :shooter;
 export import :time_scale;

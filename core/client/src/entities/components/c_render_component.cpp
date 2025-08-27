@@ -14,7 +14,6 @@
 #include "pragma/entities/components/c_transform_component.hpp"
 #include "pragma/entities/components/c_attachment_component.hpp"
 #include "pragma/entities/components/c_light_map_receiver_component.hpp"
-#include "pragma/entities/components/renderers/c_raytracing_renderer_component.hpp"
 #include "pragma/entities/components/intersection_handler_component.hpp"
 #include "pragma/entities/components/c_raytracing_component.hpp"
 #include "pragma/entities/components/c_bvh_component.hpp"
@@ -43,6 +42,8 @@
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/console/sh_cmd.h>
 #include <util_image.hpp>
+
+import pragma.client.entities.components;
 
 using namespace pragma;
 

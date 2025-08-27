@@ -15,7 +15,6 @@
 #include "pragma/entities/environment/lights/c_env_light_directional.h"
 #include "pragma/entities/components/c_color_component.hpp"
 #include "pragma/entities/components/c_radius_component.hpp"
-#include "c_gltf_writer.hpp"
 #include <cmaterial_manager2.hpp>
 #include <datasystem_t.hpp>
 #include <texturemanager/texture_manager2.hpp>
@@ -39,6 +38,7 @@
 #include <pragma/model/animation/skeleton.hpp>
 #include <pragma/model/animation/bone.hpp>
 
+import pragma.client.assets;
 import pragma.client.rendering.shaders;
 
 extern DLLCLIENT CEngine *c_engine;

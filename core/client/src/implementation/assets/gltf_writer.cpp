@@ -1,13 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2020 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 
 #define TINYGLTF_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
-#include "c_gltf_writer.hpp"
 #include "pragma/math/c_util_math.hpp"
+#include "pragma/asset/c_util_model.hpp"
 #include "pragma/rendering/shaders/world/c_shader_scene.hpp"
 #include <pragma/clientstate/clientstate.h>
 #include <pragma/model/model.h>
@@ -25,6 +27,11 @@
 #include <datasystem_vector.h>
 #include <pragma/model/animation/skeleton.hpp>
 #include <pragma/model/animation/bone.hpp>
+#include <tiny_gltf.h>
+
+module pragma.client.assets;
+
+import :gltf_writer;
 
 // #define ENABLE_GLTF_VALIDATION
 #define GLTF_ASSERT(c, msg)                                                                                                                                                                                                                                                                      \

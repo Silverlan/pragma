@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: (c) 2020 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_GLTF_WRITER_HPP__
-#define __C_GLTF_WRITER_HPP__
+module;
 
 #include "pragma/asset/c_util_model.hpp"
 #include <cinttypes>
@@ -11,12 +10,11 @@
 #include <mathutil/uvec.h>
 #include <tiny_gltf.h>
 #include <mathutil/umath_lighting.hpp>
+#include "pragma/model/animation/vertex_animation.hpp"
 
-class Model;
-class ModelSubMesh;
-class MeshVertexFrame;
-class Flex;
-namespace pragma::asset {
+export module pragma.client.assets:gltf_writer;
+
+export namespace pragma::asset {
 	class GLTFWriter {
 	  public:
 		struct ModelDesc {
@@ -151,5 +149,3 @@ namespace pragma::asset {
 		tinygltf::Model m_gltfMdl = {};
 	};
 };
-
-#endif

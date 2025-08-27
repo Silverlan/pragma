@@ -35,7 +35,6 @@
 #include "pragma/entities/components/c_input_component.hpp"
 #include "pragma/entities/components/material_override.hpp"
 #include "pragma/entities/components/material_property_override.hpp"
-#include "pragma/entities/components/liquid/c_buoyancy_component.hpp"
 #include "pragma/entities/components/liquid/c_liquid_surface_component.hpp"
 #include "pragma/entities/components/liquid/c_liquid_volume_component.hpp"
 #include "pragma/entities/components/liquid/c_liquid_control_component.hpp"

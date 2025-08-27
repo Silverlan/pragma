@@ -7,7 +7,6 @@
 #include "pragma/entities/components/c_bvh_component.hpp"
 #include "pragma/entities/components/c_static_bvh_cache_component.hpp"
 #include "pragma/entities/components/c_static_bvh_user_component.hpp"
-#include "pragma/entities/components/c_motion_blur_data_component.hpp"
 #include "pragma/entities/components/intersection_handler_component.hpp"
 #include "pragma/entities/components/c_debug_hitbox_component.hpp"
 #include "pragma/model/c_modelmesh.h"

@@ -115,7 +115,6 @@
 #include "pragma/entities/components/c_light_map_component.hpp"
 #include "pragma/entities/components/c_light_map_receiver_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
-#include "pragma/entities/components/c_motion_blur_data_component.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
 import pragma.client.entities.components;

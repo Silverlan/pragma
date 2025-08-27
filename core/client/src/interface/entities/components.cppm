@@ -17,6 +17,7 @@ export import :liquid_surface;
 export import :liquid_surface_simulation;
 export import :liquid_volume;
 export import :lua;
+export import :motion_blur_data;
 export import :optical_camera;
 export import :point_at_target;
 export import :pp_base;

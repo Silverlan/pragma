@@ -1,10 +1,11 @@
 // SPDX-FileCopyrightText: (c) 2022 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
 #include "pragma/c_engine.h"
-#include "pragma/entities/components/c_motion_blur_data_component.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/rendering/shaders/info/c_shader_velocity_buffer.hpp"
@@ -12,6 +13,10 @@
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/entity_component_manager_t.hpp>
 #include <buffers/prosper_uniform_resizable_buffer.hpp>
+
+module pragma.client.entities.components;
+
+import :motion_blur_data;
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT CEngine *c_engine;

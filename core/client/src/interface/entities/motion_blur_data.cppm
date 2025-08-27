@@ -1,17 +1,18 @@
 // SPDX-FileCopyrightText: (c) 2022 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_MOTION_BLUR_DATA_COMPONENT_HPP__
-#define __C_MOTION_BLUR_DATA_COMPONENT_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include <pragma/entities/components/base_entity_component.hpp>
+#include "pragma/rendering/shaders/info/c_shader_velocity_buffer.hpp"
 #include <image/prosper_render_target.hpp>
 #include <mathutil/transform.hpp>
 #include <unordered_set>
 
-namespace pragma {
-	class ShaderVelocityBuffer;
+export module pragma.client.entities.components:motion_blur_data;
+
+export namespace pragma {
 #pragma pack(push, 1)
 	struct DLLCLIENT MotionBlurCameraData {
 		Vector4 linearCameraVelocity;
@@ -47,5 +48,3 @@ namespace pragma {
 		size_t m_lastUpdateIndex = 0;
 	};
 };
-
-#endif

@@ -7,6 +7,7 @@ export module pragma.client.entities.components;
 export import :bsp_leaf;
 export import :field_angle;
 export import :global_shader_input;
+export import :health;
 export import :hitbox_bvh;
 export import :light_map_data_cache;
 export import :liquid_buoyancy;

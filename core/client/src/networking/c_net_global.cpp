@@ -34,7 +34,6 @@
 #include "pragma/entities/components/c_sound_emitter_component.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_name_component.hpp"
-#include "pragma/entities/components/c_health_component.hpp"
 #include "pragma/entities/components/c_attachment_component.hpp"
 #include "pragma/gui/wiluabase.h"
 #include <pragma/math/intersection.h>
@@ -54,6 +53,8 @@
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/networking/enums.hpp>
 #include <pragma/util/giblet_create_info.hpp>
+
+import pragma.client.entities.components;
 
 enum class CLIENT_DROPPED;
 extern DLLCLIENT CEngine *c_engine;

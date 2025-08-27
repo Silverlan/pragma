@@ -127,7 +127,6 @@
 #include "pragma/entities/components/renderers/c_renderer_pp_fog_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_pp_dof_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_pp_tone_mapping_component.hpp"
-#include "pragma/entities/components/renderers/c_renderer_pp_fxaa_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_pp_motion_blur_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_pp_volumetric_component.hpp"
 #include "pragma/entities/components/c_motion_blur_data_component.hpp"

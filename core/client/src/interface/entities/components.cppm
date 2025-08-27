@@ -13,6 +13,7 @@ export import :lua;
 export import :optical_camera;
 export import :point_at_target;
 export import :pp_bloom;
+export import :pp_fxaa;
 export import :score;
 export import :shooter;
 export import :time_scale;

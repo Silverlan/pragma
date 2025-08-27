@@ -1,13 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2022 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_RENDERER_PP_FXAA_COMPONENT_HPP__
-#define __C_RENDERER_PP_FXAA_COMPONENT_HPP__
+module;
 
 #include "pragma/entities/components/renderers/c_renderer_pp_base_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 
-namespace pragma {
+export module pragma.client.entities.components:pp_fxaa;
+
+export namespace pragma {
 	class CRasterizationRendererComponent;
 	class DLLCLIENT CRendererPpFxaaComponent final : public CRendererPpBaseComponent {
 	  public:
@@ -20,5 +21,3 @@ namespace pragma {
 		virtual void DoRenderEffect(const util::DrawSceneInfo &drawSceneInfo) override;
 	};
 };
-
-#endif

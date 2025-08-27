@@ -10,6 +10,7 @@ export import :global_shader_input;
 export import :hitbox_bvh;
 export import :light_map_data_cache;
 export import :liquid_buoyancy;
+export import :liquid_control;
 export import :liquid_surface;
 export import :liquid_surface_simulation;
 export import :liquid_volume;

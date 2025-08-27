@@ -1,14 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_LIQUID_CONTROL_COMPONENT_HPP__
-#define __C_LIQUID_CONTROL_COMPONENT_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/components/c_entity_component.hpp"
 #include <pragma/entities/components/liquid/base_liquid_control_component.hpp>
 
-namespace pragma {
+export module pragma.client.entities.components:liquid_control;
+
+export namespace pragma {
 	class DLLCLIENT CLiquidControlComponent final : public BaseLiquidControlComponent, public CBaseNetComponent {
 	  public:
 		CLiquidControlComponent(BaseEntity &ent) : BaseLiquidControlComponent(ent) {}
@@ -19,5 +20,3 @@ namespace pragma {
 		virtual bool OnBulletHit(const BulletInfo &bulletInfo, const TraceData &data, PhysObj *phys, pragma::physics::ICollisionObject *col, const LocalRayResult &result) override;
 	};
 };
-
-#endif

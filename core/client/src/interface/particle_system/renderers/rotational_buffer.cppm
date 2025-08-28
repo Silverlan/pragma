@@ -1,17 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_PARTICLE_RENDERER_ROTATIONAL_BUFFER_HPP__
-#define __C_PARTICLE_RENDERER_ROTATIONAL_BUFFER_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/particlesystem/c_particlemodifier.h"
 #include <pragma/types.hpp>
 
-namespace prosper {
-	class Buffer;
-};
-class DLLCLIENT CParticleRendererRotationalBuffer {
+export module pragma.client.particle_system:renderer_rotational_buffer;
+
+export class DLLCLIENT CParticleRendererRotationalBuffer {
   public:
 	CParticleRendererRotationalBuffer() = default;
 	void Initialize(pragma::CParticleSystemComponent &pSystem);
@@ -26,5 +24,3 @@ class DLLCLIENT CParticleRendererRotationalBuffer {
 	pragma::ComponentHandle<pragma::CParticleSystemComponent> m_hParticleSystem = {};
 	bool m_bAlignVelocity = false;
 };
-
-#endif

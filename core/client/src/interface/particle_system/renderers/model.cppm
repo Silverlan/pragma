@@ -1,17 +1,17 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_PARTICLE_MOD_MODEL_HPP__
-#define __C_PARTICLE_MOD_MODEL_HPP__
+module;
 
-#include "pragma/particlesystem/renderers/c_particle_renderer_rotational_buffer.hpp"
 #include <pragma/types.hpp>
+#include "pragma/particlesystem/c_particlemodifier.h"
+#include "pragma/entities/components/c_animated_component.hpp"
 
-namespace pragma {
-	class CAnimatedComponent;
-	class CLightComponent;
-};
-class DLLCLIENT CParticleRendererModel : public CParticleRenderer {
+export module pragma.client.particle_system:renderer_model;
+
+import :renderer_rotational_buffer;
+
+export class DLLCLIENT CParticleRendererModel : public CParticleRenderer {
   public:
 	CParticleRendererModel() = default;
 	virtual ~CParticleRendererModel() override;
@@ -39,5 +39,3 @@ class DLLCLIENT CParticleRendererModel : public CParticleRenderer {
 	CParticleRendererRotationalBuffer m_rotationalBuffer;
 	bool Update();
 };
-
-#endif

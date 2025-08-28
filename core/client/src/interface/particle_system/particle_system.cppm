@@ -37,3 +37,11 @@ export import :operator_toroidal_vortex;
 export import :operator_wander;
 export import :operator_wind;
 export import :operator_world_base;
+
+export import :renderer_animated_sprites;
+export import :renderer_beam;
+export import :renderer_blob;
+export import :renderer_model;
+export import :renderer_rotational_buffer;
+export import :renderer_sprite;
+export import :renderer_sprite_trail;

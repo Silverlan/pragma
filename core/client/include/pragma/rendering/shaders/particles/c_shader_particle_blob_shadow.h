@@ -3,6 +3,11 @@
 
 #ifndef __C_SHADER_PARTICLE_BLOB_SHADOW_H__
 #define __C_SHADER_PARTICLE_BLOB_SHADOW_H__
+
+namespace Shader {
+	class ParticleBlobShadow;
+};
+
 // prosper TODO
 #if 0
 #include "c_shader_particle_blob.h"

@@ -1,23 +1,19 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_PARTICLE_MOD_BLOB_H__
-#define __C_PARTICLE_MOD_BLOB_H__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/particlesystem/c_particlemodifier.h"
 #include "pragma/rendering/shaders/particles/c_shader_particle_blob.hpp"
+#include "pragma/rendering/shaders/particles/c_shader_particle_blob_shadow.h"
 #include "pragma/debug/c_debugoverlay.h"
 
 #define ENABLE_BLOB_DEPTH_TEST 0
 
-namespace Shader {
-	class ParticleBlobShadow;
-};
-namespace pragma {
-	class CLightComponent;
-};
-class DLLCLIENT CParticleRendererBlob : public CParticleRenderer {
+export module pragma.client.particle_system:renderer_blob;
+
+export class DLLCLIENT CParticleRendererBlob : public CParticleRenderer {
   private:
 	static bool s_bShowNeighborLinks;
 	static std::shared_ptr<prosper::IDescriptorSetGroup> s_dsParticles;
@@ -69,5 +65,3 @@ class DLLCLIENT CParticleRendererBlob : public CParticleRenderer {
 	virtual bool RequiresDepthPass() const override { return true; }
 	virtual pragma::ShaderParticleBase *GetShader() const override;
 };
-
-#endif

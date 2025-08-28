@@ -1,16 +1,21 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
-#include "pragma/particlesystem/renderers/c_particle_mod_sprite.h"
 #include "pragma/entities/environment/lights/c_env_shadow.hpp"
 #include "pragma/rendering/shaders/particles/c_shader_particle.hpp"
 #include "pragma/rendering/shaders/particles/c_shader_particle_shadow.h"
-#include "pragma/particlesystem/renderers/c_particle_renderer_rotational_buffer.hpp"
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
+
+module pragma.client.particle_system;
+
+import :renderer_sprite;
+import :renderer_rotational_buffer;
 
 import pragma.client.entities.components;
 

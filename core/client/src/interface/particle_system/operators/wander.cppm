@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/particlesystem/operators/c_particle_operator_world_base.hpp"
 #include "pragma/c_engine.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include <mathutil/umath.h>
@@ -14,6 +13,8 @@ module;
 #include <algorithm>
 
 export module pragma.client.particle_system:operator_wander;
+
+import :operator_world_base;
 
 export class DLLCLIENT CParticleOperatorWander : public CParticleOperatorWorldBase {
   public:

@@ -1,13 +1,27 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "stdafx_client.h"
-#include "pragma/particlesystem/operators/c_particle_operator_world_base.hpp"
+module;
+
+#include "pragma/clientdefinitions.h"
+#include "pragma/particlesystem/c_particlemodifier.h"
 #include <mathutil/umath.h>
 #include <pragma/math/vector/wvvector3.h>
 #include <sharedutils/util_string.h>
 #include <sharedutils/util.h>
 #include <algorithm>
+
+export module pragma.client.particle_system:operator_world_base;
+
+export class DLLCLIENT CParticleOperatorWorldBase : public CParticleOperator {
+  public:
+	bool ShouldRotateWithEmitter() const;
+  protected:
+	CParticleOperatorWorldBase() = default;
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+  private:
+	bool m_bRotateWithEmitter = false;
+};
 
 void CParticleOperatorWorldBase::Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {

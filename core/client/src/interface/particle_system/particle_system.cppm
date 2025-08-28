@@ -20,6 +20,7 @@ export import :modifier_random_variable;
 export import :modifier_time;
 
 export import :operator_angular_acceleration;
+export import :operator_animation_playback;
 export import :operator_color_fade;
 export import :operator_cylindrical_vortex;
 export import :operator_gravity;
@@ -35,3 +36,4 @@ export import :operator_trail;
 export import :operator_toroidal_vortex;
 export import :operator_wander;
 export import :operator_wind;
+export import :operator_world_base;

@@ -3,10 +3,11 @@
 
 module;
 
-#include "pragma/particlesystem/operators/c_particle_operator_world_base.hpp"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 
 export module pragma.client.particle_system:operator_gravity;
+
+import :operator_world_base;
 
 export class DLLCLIENT CParticleOperatorGravity : public CParticleOperatorWorldBase {
   public:

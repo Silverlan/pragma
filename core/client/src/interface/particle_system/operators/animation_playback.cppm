@@ -1,10 +1,23 @@
 // SPDX-FileCopyrightText: (c) 2022 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "stdafx_client.h"
-#include "pragma/particlesystem/operators/c_particle_operator_animation_playback.hpp"
+module;
+
+#include "pragma/clientdefinitions.h"
+#include "pragma/particlesystem/c_particlemodifier.h"
 #include <mathutil/umath.h>
 #include <algorithm>
+
+export module pragma.client.particle_system:operator_animation_playback;
+
+export class DLLCLIENT CParticleOperatorAnimationPlayback : public CParticleOperator {
+  public:
+	CParticleOperatorAnimationPlayback() = default;
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+	virtual void Simulate(CParticle &particle, double tDelta, float strength) override;
+  private:
+	float m_playbackSpeed = 1.f;
+};
 
 REGISTER_PARTICLE_OPERATOR(animation_playback, CParticleOperatorAnimationPlayback);
 

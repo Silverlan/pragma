@@ -1,14 +1,55 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "stdafx_client.h"
-#include "pragma/particlesystem/operators/c_particle_operator_pause_emission.hpp"
+module;
+
+#include "pragma/clientdefinitions.h"
+#include "pragma/particlesystem/c_particlemodifier.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include <mathutil/umath.h>
 #include <pragma/math/vector/wvvector3.h>
 #include <sharedutils/util_string.h>
 #include <sharedutils/util.h>
 #include <algorithm>
+
+export module pragma.client.particle_system:operator_pause_emission;
+
+export {
+	class DLLCLIENT CParticleOperatorPauseEmissionBase : public CParticleOperator {
+	public:
+		virtual void Simulate(double tDelta) override;
+		virtual void OnParticleSystemStarted() override;
+	protected:
+		CParticleOperatorPauseEmissionBase() = default;
+		virtual void Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+		virtual pragma::CParticleSystemComponent *GetTargetParticleSystem() = 0;
+	private:
+		enum class State : uint32_t { Initial = 0u, Paused, Unpaused };
+		float m_fStart = 0.f;
+		float m_fEnd = 0.f;
+		State m_state = State::Initial;
+	};
+
+	/////////////////////
+
+	class DLLCLIENT CParticleOperatorPauseEmission : public CParticleOperatorPauseEmissionBase {
+	public:
+		CParticleOperatorPauseEmission() = default;
+		virtual void Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+		virtual pragma::CParticleSystemComponent *GetTargetParticleSystem() override;
+	};
+
+	/////////////////////
+
+	class DLLCLIENT CParticleOperatorPauseChildEmission : public CParticleOperatorPauseEmissionBase {
+	public:
+		CParticleOperatorPauseChildEmission() = default;
+		virtual void Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+		virtual pragma::CParticleSystemComponent *GetTargetParticleSystem() override;
+	private:
+		util::WeakHandle<pragma::CParticleSystemComponent> m_hChildSystem = {};
+	};
+};
 
 REGISTER_PARTICLE_OPERATOR(pause_emission, CParticleOperatorPauseEmission);
 REGISTER_PARTICLE_OPERATOR(pause_child_emission, CParticleOperatorPauseChildEmission);

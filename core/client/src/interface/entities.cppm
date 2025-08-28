@@ -2,3 +2,4 @@
 // SPDX-License-Identifier: MIT
 
 export module pragma.client.entities;
+export import pragma.client.entities.components;

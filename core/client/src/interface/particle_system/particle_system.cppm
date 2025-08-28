@@ -19,8 +19,12 @@ export import :modifier_random_color;
 export import :modifier_random_variable;
 export import :modifier_time;
 
+export import :operator_angular_acceleration;
 export import :operator_color_fade;
+export import :operator_cylindrical_vortex;
 export import :operator_gravity;
+export import :operator_linear_drag;
+export import :operator_pause_emission;
 export import :operator_physics;
 export import :operator_radius_fade;
 export import :operator_texture_scrolling;

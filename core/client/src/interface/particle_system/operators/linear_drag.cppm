@@ -1,13 +1,27 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "stdafx_client.h"
-#include "pragma/particlesystem/operators/c_particle_operator_linear_drag.hpp"
+module;
+
+#include "pragma/clientdefinitions.h"
+#include "pragma/particlesystem/c_particlemodifier.h"
 #include <mathutil/umath.h>
 #include <pragma/math/vector/wvvector3.h>
 #include <sharedutils/util_string.h>
 #include <sharedutils/util.h>
-#include <algorithm>
+
+export module pragma.client.particle_system:operator_linear_drag;
+
+export class DLLCLIENT CParticleOperatorLinearDrag : public CParticleOperator {
+  public:
+	CParticleOperatorLinearDrag() = default;
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+	virtual void Simulate(CParticle &particle, double tDelta, float strength) override;
+	virtual void Simulate(double tDelta) override;
+  private:
+	float m_fAmount = 1.f;
+	float m_fTickDrag = 1.f;
+};
 
 REGISTER_PARTICLE_OPERATOR(linear_drag, CParticleOperatorLinearDrag);
 

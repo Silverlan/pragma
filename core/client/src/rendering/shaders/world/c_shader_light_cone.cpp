@@ -7,7 +7,6 @@
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/environment/lights/c_env_light_spot_vol.h"
 #include "pragma/model/c_modelmesh.h"
-#include "pragma/model/vk_mesh.h"
 #include "pragma/entities/environment/lights/c_env_light_spot_vol.h"
 #include "pragma/entities/environment/lights/c_env_light.h"
 #include <shader/prosper_pipeline_create_info.hpp>
@@ -19,6 +18,7 @@
 #include <cmaterial.h>
 
 import pragma.client.entities.components;
+import pragma.client.model;
 
 using namespace pragma;
 

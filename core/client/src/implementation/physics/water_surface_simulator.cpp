@@ -13,13 +13,13 @@ module;
 #include "pragma/rendering/shaders/world/water/c_shader_water_splash.hpp"
 #include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/console/c_cvar.h"
-#include "pragma/model/vk_mesh.h"
 #include <pragma/rendering/c_sci_gpu_timer_manager.hpp>
 #include <prosper_util.hpp>
 #include <buffers/prosper_buffer.hpp> // prosper TODO: Remove
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
 
+import pragma.client.model;
 module pragma.client.physics;
 
 import :water_surface_simulator;

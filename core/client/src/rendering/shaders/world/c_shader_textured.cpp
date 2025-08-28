@@ -11,7 +11,6 @@
 #include "pragma/console/c_cvar.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/model/c_vertex_buffer_data.hpp"
-#include "pragma/model/vk_mesh.h"
 #include "pragma/console/c_cvar_global_functions.h"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <pragma/game/game_limits.h>
@@ -31,6 +30,8 @@
 #include <util_image.hpp>
 #include <cmaterial.h>
 #include <cmaterial_manager2.hpp>
+
+import pragma.client.model;
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;

@@ -4,10 +4,11 @@
 #include "stdafx_client.h"
 #include "pragma/model/c_modelmesh.h"
 #include <mathutil/umath.h>
-#include "pragma/model/vk_mesh.h"
 #include "pragma/model/c_vertex_buffer_data.hpp"
 #include "pragma/rendering/shaders/world/c_shader_scene.hpp"
 #include <buffers/prosper_dynamic_resizable_buffer.hpp>
+
+import pragma.client.model;
 
 static constexpr uint64_t MEGABYTE = 1'024 * 1'024;
 static constexpr uint64_t GLOBAL_MESH_VERTEX_BUFFER_SIZE = MEGABYTE * 256;       // 13'107 instances per MiB

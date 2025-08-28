@@ -8,7 +8,6 @@
 #include "pragma/entities/c_water_surface.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/debug/c_debugoverlay.h"
-#include "pragma/model/vk_mesh.h"
 #include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/c_water_surface.hpp"
@@ -24,6 +23,7 @@
 import pragma.client.debug;
 import pragma.client.entities.components;
 import pragma.client.gui;
+import pragma.client.model;
 import pragma.client.physics;
 
 extern DLLCLIENT CGame *c_game;

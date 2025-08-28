@@ -9,13 +9,14 @@
 #include "pragma/entities/c_skybox.h"
 #include "pragma/model/c_vertex_buffer_data.hpp"
 #include "pragma/model/c_modelmesh.h"
-#include "pragma/model/vk_mesh.h"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <prosper_util.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <prosper_command_buffer.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <cmaterial.h>
+
+import pragma.client.model;
 
 using namespace pragma;
 

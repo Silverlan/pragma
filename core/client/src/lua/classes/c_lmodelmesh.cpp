@@ -6,9 +6,10 @@
 #include "luasystem.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/lua/libraries/c_lua_vulkan.h"
-#include "pragma/model/vk_mesh.h"
 #include <pragma/lua/classes/lmodelmesh.h>
 #include <buffers/prosper_buffer.hpp>
+
+import pragma.client.model;
 
 void Lua::ModelMesh::Client::Create(lua_State *l) { Lua::Push<std::shared_ptr<::ModelMesh>>(l, std::make_shared<::CModelMesh>()); }
 void Lua::ModelSubMesh::Client::Create(lua_State *l) { Lua::Push<std::shared_ptr<::ModelSubMesh>>(l, std::make_shared<::CModelSubMesh>()); }

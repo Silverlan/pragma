@@ -16,7 +16,6 @@
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
-#include "pragma/model/vk_mesh.h"
 #include <pragma/logging.hpp>
 #include <sharedutils/magic_enum.hpp>
 #include <prosper_framebuffer.hpp>
@@ -26,6 +25,7 @@
 
 import pragma.client.debug;
 import pragma.client.entities.components;
+import pragma.client.model;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;

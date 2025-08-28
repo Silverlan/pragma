@@ -10,7 +10,6 @@
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
-#include "pragma/model/vk_mesh.h"
 #include "pragma/model/c_vertex_buffer_data.hpp"
 #include "pragma/rendering/shaders/world/raytracing/c_shader_raytracing.hpp"
 #include "pragma/console/c_cvar.h"
@@ -22,6 +21,8 @@
 #include <material_descriptor_array.hpp>
 #include <buffers/prosper_uniform_resizable_buffer.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
+
+import pragma.client.model;
 
 using namespace pragma;
 

@@ -35,7 +35,6 @@
 #include <prosper_descriptor_set_group.hpp>
 #include <util_image_buffer.hpp>
 #include "pragma/util/util_image.hpp"
-#include "pragma/model/vk_mesh.h"
 #include <prosper_event.hpp>
 #include <prosper_window.hpp>
 #include <prosper_swap_command_buffer.hpp>
@@ -45,6 +44,7 @@
 #include <luabind/detail/meta.hpp>
 #include <shader/prosper_shader_blur.hpp>
 
+import pragma.client.model;
 import pragma.client.rendering.shaders;
 
 extern CEngine *c_engine;

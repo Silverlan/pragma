@@ -9,7 +9,6 @@
 #include "pragma/entities/environment/c_env_reflection_probe.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
-#include "pragma/model/vk_mesh.h"
 #include "pragma/model/c_modelmesh.h"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <pragma/entities/entity_iterator.hpp>
@@ -20,6 +19,8 @@
 #include <texture_type.h>
 #include <cmaterial_manager2.hpp>
 #include <cmaterial.h>
+
+import pragma.client.model;
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;

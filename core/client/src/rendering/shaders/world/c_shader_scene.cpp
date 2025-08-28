@@ -11,7 +11,6 @@
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/game/game_limits.h"
 #include "pragma/model/c_modelmesh.h"
-#include "pragma/model/vk_mesh.h"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/model/c_vertex_buffer_data.hpp"
 #include <shader/prosper_pipeline_create_info.hpp>
@@ -23,6 +22,7 @@
 #include <cmaterial.h>
 
 import pragma.client.entities.components;
+import pragma.client.model;
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT CEngine *c_engine;

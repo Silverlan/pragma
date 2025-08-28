@@ -9,18 +9,18 @@
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/entities/components/c_vertex_animated_component.hpp"
+#include "pragma/rendering/render_processor.hpp"
 #include <sharedutils/alpha_mode.hpp>
 #include <pragma/model/animation/vertex_animation.hpp>
 #include <prosper_command_buffer.hpp>
 #include <image/prosper_render_target.hpp>
 #include <pragma/model/c_vertex_buffer_data.hpp>
-#include <pragma/model/vk_mesh.h>
+
+import pragma.client.model;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
-
-#include "pragma/rendering/render_processor.hpp"
 
 pragma::rendering::DepthStageRenderProcessor::DepthStageRenderProcessor(const util::RenderPassDrawInfo &drawSceneInfo, const Vector4 &drawOrigin) : BaseRenderProcessor {drawSceneInfo, drawOrigin} { SetCountNonOpaqueMaterialsOnly(true); }
 uint32_t pragma::rendering::DepthStageRenderProcessor::Render(const pragma::rendering::RenderQueue &renderQueue, RenderPass renderPass, RenderPassStats *optStats, std::optional<uint32_t> worldRenderQueueIndex)

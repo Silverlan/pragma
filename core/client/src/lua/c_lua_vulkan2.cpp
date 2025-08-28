@@ -8,7 +8,6 @@
 #include "pragma/lua/classes/c_lua_vulkan.hpp"
 #include "pragma/lua/policies/shared_from_this_policy.hpp"
 #include "pragma/lua/converters/shader_converter_t.hpp"
-#include "pragma/model/vk_mesh.h"
 #include <pragma/lua/converters/vector_converter_t.hpp>
 #include <pragma/lua/converters/optional_converter_t.hpp>
 #include <prosper_framebuffer.hpp>
@@ -32,6 +31,8 @@
 #include <pragma/lua/types/udm.hpp>
 #include <luainterface.hpp>
 #include <sharedutils/util.h>
+
+import pragma.client.model;
 
 extern DLLCLIENT CEngine *c_engine;
 

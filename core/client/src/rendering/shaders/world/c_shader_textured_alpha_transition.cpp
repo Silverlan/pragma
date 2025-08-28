@@ -4,12 +4,13 @@
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/world/c_shader_textured_alpha_transition.hpp"
 #include "pragma/model/c_modelmesh.h"
-#include "pragma/model/vk_mesh.h"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_util.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <cmaterial.h>
+
+import pragma.client.model;
 
 using namespace pragma;
 

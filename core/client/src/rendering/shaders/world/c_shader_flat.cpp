@@ -4,7 +4,6 @@
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/world/c_shader_flat.hpp"
 #include "pragma/model/c_modelmesh.h"
-#include "pragma/model/vk_mesh.h"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
@@ -14,6 +13,8 @@
 #include <prosper_util.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <cmaterial.h>
+
+import pragma.client.model;
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT CEngine *c_engine;

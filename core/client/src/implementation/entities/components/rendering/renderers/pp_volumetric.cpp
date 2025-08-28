@@ -21,7 +21,6 @@ module;
 #include "pragma/entities/entity_component_system_t.hpp"
 #include "pragma/rendering/world_environment.hpp"
 #include "pragma/model/c_modelmesh.h"
-#include "pragma/model/vk_mesh.h"
 #include "pragma/console/c_cvar.h"
 #include <pragma/entities/entity_component_manager_t.hpp>
 #include <prosper_command_buffer.hpp>
@@ -32,6 +31,7 @@ module;
 #include <util_image.hpp>
 
 module pragma.client.entities.components;
+import pragma.client.model;
 
 import :pp_volumetric;
 import :rasterization_renderer;

@@ -1,12 +1,17 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/model/vk_mesh.h"
-#include "pragma/model/modelmesh.h"
+#include "pragma/model/c_modelmesh.h"
 #include "pragma/rendering/shaders/world/c_shader_scene.hpp"
 #include <buffers/prosper_render_buffer.hpp>
 #include <shader/prosper_pipeline_create_info.hpp>
+
+module pragma.client.model;
+
+import :render_mesh;
 
 using namespace pragma;
 

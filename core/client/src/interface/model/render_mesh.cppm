@@ -1,25 +1,17 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __VK_MESH_H__
-#define __VK_MESH_H__
+module;
 
 #include "pragma/clientdefinitions.h"
+#include "pragma/model/c_modelmesh.h"
 #include <prosper_context.hpp>
 #include <memory>
 #include <mutex>
 
-namespace prosper {
-	class IBuffer;
-	class IRenderBuffer;
-};
+export module pragma.client.model:render_mesh;
 
-class CModelSubMesh;
-namespace pragma {
-	namespace model {
-		enum class IndexType : uint8_t;
-	};
-	class ShaderEntity;
+export namespace pragma {
 	class DLLCLIENT SceneMesh {
 	  public:
 		SceneMesh();
@@ -49,4 +41,3 @@ namespace pragma {
 		pragma::model::IndexType m_indexType;
 	};
 };
-#endif

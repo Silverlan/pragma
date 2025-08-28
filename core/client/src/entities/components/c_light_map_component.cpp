@@ -8,7 +8,6 @@
 #include "pragma/console/c_cvar_global_functions.h"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
-#include "pragma/model/vk_mesh.h"
 #include "pragma/entities/entity_iterator.hpp"
 #include "pragma/entities/components/c_light_map_receiver_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
@@ -38,6 +37,7 @@
 #include <wgui/types/wiroot.h>
 
 import pragma.client.entities.components;
+import pragma.client.model;
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;

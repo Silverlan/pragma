@@ -29,7 +29,7 @@
 #include <texturemanager/texturemanager.h>
 #include "pragma/lua/classes/c_lwibase.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
-#include "pragma/networking/local_client.hpp"
+#include "pragma/networking/iclient.hpp"
 #include <pragma/lua/lua_error_handling.hpp>
 #include <pragma/lua/libraries/lutil.hpp>
 #include <pragma/lua/libraries/ludm.hpp>
@@ -53,6 +53,7 @@
 #include <wgui/types/wiroot.h>
 
 import pragma.client.gui;
+import pragma.client.networking;
 // import pragma.scripting.lua;
 
 static std::unordered_map<std::string, std::shared_ptr<PtrConVar>> *conVarPtrs = NULL;

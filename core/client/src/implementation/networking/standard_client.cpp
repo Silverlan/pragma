@@ -1,9 +1,17 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/networking/standard_client.hpp"
+#include <clientmanager/interface/cl_nwm_manager.hpp>
 #include <pragma/networking/error.hpp>
+#include <pragma/networking/enums.hpp>
+#include <pragma/networking/error.hpp>
+
+module pragma.client.networking;
+
+import :standard_client;
 
 std::string pragma::networking::StandardClient::GetIdentifier() const { return m_clientConnection->GetLocalAddress().ToString(); }
 bool pragma::networking::StandardClient::Connect(const std::string &ip, Port port, Error &outErr)

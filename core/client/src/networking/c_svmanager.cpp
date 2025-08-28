@@ -6,13 +6,14 @@
 #include "pragma/c_engine.h"
 #include "pragma/console/c_cvar_server.h"
 #include "pragma/networking/iclient.hpp"
-#include "pragma/networking/standard_client.hpp"
 #include <pragma/networking/nwm_util.h>
 #include <sharedutils/util.h>
 #include <pragma/networking/error.hpp>
 #include <pragma/networking/enums.hpp>
 #include <pragma/networking/portinfo.h>
 #include <pragma/networking/netmessages.h>
+
+import pragma.client.networking;
 
 extern DLLCLIENT CEngine *c_engine;
 struct LastConnectionInfo {

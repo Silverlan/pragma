@@ -23,7 +23,6 @@ namespace pragma::string {
 #include "pragma/debug/debug_utils.hpp"
 #include "pragma/model/c_modelmanager.h"
 #include "pragma/networking/iclient.hpp"
-#include "pragma/networking/local_client.hpp"
 #include "pragma/rendering/c_sci_gpu_timer_manager.hpp"
 #include <pragma/rendering/scene/util_draw_scene_info.hpp>
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
@@ -75,6 +74,7 @@ namespace pragma::string {
 
 import util_zip;
 import pragma.client.gui;
+import pragma.client.networking;
 import pragma.client.rendering.shaders;
 import pragma.shadergraph;
 import pragma.locale;

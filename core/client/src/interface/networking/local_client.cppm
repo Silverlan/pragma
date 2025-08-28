@@ -1,13 +1,13 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __PRAGMA_LOCAL_CLIENT_HPP__
-#define __PRAGMA_LOCAL_CLIENT_HPP__
+module;
 
 #include "pragma/networking/iclient.hpp"
 
-namespace pragma::networking {
-	class Error;
+export module pragma.client.networking:local_client;
+
+export namespace pragma::networking {
 	class DLLCLIENT LocalClient : public IClient {
 	  public:
 		virtual std::string GetIdentifier() const override;
@@ -26,5 +26,3 @@ namespace pragma::networking {
 		virtual std::string GetNetworkLayerIdentifier() const override { return "local"; }
 	};
 };
-
-#endif

@@ -1,13 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __PRAGMA_STANDARD_CLIENT_HPP__
-#define __PRAGMA_STANDARD_CLIENT_HPP__
+module;
 
 #include "pragma/networking/iclient.hpp"
 #include <clientmanager/interface/cl_nwm_manager.hpp>
 
-namespace pragma::networking {
+export module pragma.client.networking:standard_client;
+
+export namespace pragma::networking {
 	class StandardClient;
 	class NWMClientConnection : public nwm::Client, public pragma::networking::MessageTracker {
 	  public:
@@ -31,7 +32,6 @@ namespace pragma::networking {
 		StandardClient *m_client = nullptr;
 	};
 
-	class Error;
 	class DLLCLIENT StandardClient : public IClient {
 	  public:
 		virtual std::string GetIdentifier() const override;
@@ -50,5 +50,3 @@ namespace pragma::networking {
 		std::unique_ptr<NWMClientConnection> m_clientConnection = nullptr;
 	};
 };
-
-#endif

@@ -3,9 +3,11 @@
 
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientstate.h"
-#include "pragma/networking/standard_client.hpp"
+#include <clientmanager/interface/cl_nwm_manager.hpp>
 #include <iostream>
 #include <pragma/networking/netmessages.h>
+
+import pragma.client.networking;
 
 extern DLLCLIENT ClientState *client;
 

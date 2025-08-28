@@ -1,9 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
-#include "pragma/networking/local_client.hpp"
+
+module pragma.client.networking;
+
+import :local_client;
 
 extern DLLNETWORK Engine *engine;
 

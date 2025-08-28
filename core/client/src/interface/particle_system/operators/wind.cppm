@@ -1,8 +1,10 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "stdafx_client.h"
-#include "pragma/particlesystem/operators/c_particle_operator_wind.hpp"
+module;
+
+#include "pragma/clientdefinitions.h"
+#include "pragma/particlesystem/c_particlemodifier.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/entities/components/c_transform_component.hpp"
 #include <mathutil/umath.h>
@@ -10,6 +12,21 @@
 #include <sharedutils/util_string.h>
 #include <sharedutils/util.h>
 #include <algorithm>
+
+export module pragma.client.particle_system:operator_wind;
+
+export class DLLCLIENT CParticleOperatorWind : public CParticleOperator {
+  public:
+	CParticleOperatorWind() = default;
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+	virtual void Simulate(CParticle &particle, double tDelta, float strength) override;
+	virtual void Simulate(double tDelta) override;
+  private:
+	bool m_bRotateWithEmitter = false;
+	float m_fStrength = 2.f;
+	Vector3 m_vDirection = {1.f, 0.f, 0.f};
+	Vector3 m_vDelta = {};
+};
 
 REGISTER_PARTICLE_OPERATOR(wind, CParticleOperatorWind);
 

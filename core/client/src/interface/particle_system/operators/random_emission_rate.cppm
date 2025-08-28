@@ -1,14 +1,32 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "stdafx_client.h"
-#include "pragma/particlesystem/operators/c_particle_operator_random_emission_rate.hpp"
+module;
+
+#include "pragma/clientdefinitions.h"
+#include "pragma/particlesystem/c_particlemodifier.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include <mathutil/umath.h>
 #include <pragma/math/vector/wvvector3.h>
 #include <sharedutils/util_string.h>
 #include <sharedutils/util.h>
 #include <algorithm>
+
+export module pragma.client.particle_system:operator_random_emission_rate;
+
+export class DLLCLIENT CParticleOperatorRandomEmissionRate : public CParticleOperator {
+  public:
+	CParticleOperatorRandomEmissionRate() = default;
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+	virtual void Simulate(double tDelta) override;
+	virtual void OnParticleSystemStarted() override;
+  private:
+	float GetInterval() const;
+	void Reset();
+	float m_fMinimum = 0.07f;
+	float m_fMaximum = 0.2f;
+	float m_fRemaining = 0.f;
+};
 
 REGISTER_PARTICLE_OPERATOR(emission_rate_random, CParticleOperatorRandomEmissionRate);
 

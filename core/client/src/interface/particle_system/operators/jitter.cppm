@@ -1,17 +1,26 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "stdafx_client.h"
-#include "pragma/c_engine.h"
-#include "pragma/particlesystem/operators/c_particle_operator_jitter.hpp"
+module;
+
 #include <mathutil/umath.h>
+#include "pragma/particlesystem/c_particlemodifier.h"
 #include <pragma/math/vector/wvvector3.h>
 #include <sharedutils/util_string.h>
 #include <sharedutils/util.h>
 #include <pragma/math/util_noise.hpp>
 #include <algorithm>
 
-extern DLLCLIENT CEngine *c_engine;
+export module pragma.client.particle_system:operator_jitter;
+
+import :operator_wander;
+
+export class DLLCLIENT CParticleOperatorJitter : public CParticleOperatorWander {
+  public:
+	CParticleOperatorJitter() = default;
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+	virtual void Simulate(CParticle &particle, double tDelta, float strength) override;
+};
 
 REGISTER_PARTICLE_OPERATOR(jitter, CParticleOperatorJitter);
 

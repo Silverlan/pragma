@@ -1,9 +1,10 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientstate.h"
-#include "pragma/lua/libraries/c_lgame.h"
 #include "luasystem.h"
 #include <pragma/lua/classes/ldef_vector.h>
 #include "pragma/lua/classes/c_lcamera.h"
@@ -30,6 +31,8 @@
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <cmaterial.h>
 #include <pragma/model/animation/bone.hpp>
+
+module pragma.client.scripting.lua.libraries.game;
 
 import pragma.client.core;
 import pragma.client.debug;

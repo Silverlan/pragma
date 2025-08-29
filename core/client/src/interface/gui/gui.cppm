@@ -24,6 +24,7 @@ export import :image_slide_show;
 export import :key_entry;
 export import :line_graph;
 export import :load_screen;
+export import :lua_skin;
 export import :main_menu;
 export import :main_menu_base;
 export import :main_menu_load_game;

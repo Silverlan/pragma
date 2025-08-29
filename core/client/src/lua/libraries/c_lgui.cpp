@@ -11,7 +11,6 @@
 #include "luasystem.h"
 #include "pragma/lua/classes/c_ldef_wgui.h"
 #include "pragma/gui/wiluahandlewrapper.h"
-#include "pragma/gui/wiluaskin.h"
 #include "pragma/gui/wgui_luainterface.h"
 #include <pragma/lua/lua_call.hpp>
 #include <pragma/lua/util.hpp>

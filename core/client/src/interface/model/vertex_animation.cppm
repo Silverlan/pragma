@@ -1,13 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_VERTEX_ANIMATION_HPP__
-#define __C_VERTEX_ANIMATION_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include <pragma/model/animation/vertex_animation.hpp>
 
-class DLLCLIENT CVertexAnimation : public VertexAnimation {
+export module pragma.client.model:vertex_animation;
+
+export class DLLCLIENT CVertexAnimation : public VertexAnimation {
   public:
 	static std::shared_ptr<CVertexAnimation> Create();
 	static std::shared_ptr<CVertexAnimation> Create(const CVertexAnimation &other);
@@ -21,5 +22,3 @@ class DLLCLIENT CVertexAnimation : public VertexAnimation {
 	CVertexAnimation(const CVertexAnimation &other);
 	CVertexAnimation(const std::string &name);
 };
-
-#endif

@@ -1,8 +1,13 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/model/animation/c_vertex_animation.hpp"
+
+module pragma.client.model;
+
+import :vertex_animation;
 
 std::shared_ptr<CVertexAnimation> CVertexAnimation::Create() { return std::shared_ptr<CVertexAnimation>(new CVertexAnimation {}); }
 std::shared_ptr<CVertexAnimation> CVertexAnimation::Create(const CVertexAnimation &other) { return std::shared_ptr<CVertexAnimation>(new CVertexAnimation {other}); }

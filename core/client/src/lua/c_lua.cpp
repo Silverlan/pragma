@@ -17,7 +17,6 @@ namespace pragma::string {
 #include "pragma/lua/libraries/c_lgame.h"
 #include "pragma/lua/libraries/lents.h"
 #include "pragma/lua/libraries/c_lnetmessages.h"
-#include "pragma/lua/libraries/c_lents.h"
 #include "pragma/lua/libraries/lengine.h"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"

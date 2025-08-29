@@ -14,3 +14,5 @@ export import pragma.client.scripting.lua.classes.net_packet;
 export import pragma.client.scripting.lua.classes.texture;
 export import pragma.client.scripting.lua.classes.vulkan;
 export import pragma.client.scripting.lua.classes.world_environment;
+
+export import pragma.client.scripting.lua.libraries.ents;

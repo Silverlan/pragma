@@ -1,9 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientstate.h"
-#include "pragma/gui/wigridpanel.h"
+
+module pragma.client.gui;
+
+import :grid_panel;
 
 extern DLLCLIENT ClientState *client;
 LINK_WGUI_TO_CLASS(WIGridPanel, WIGridPanel);

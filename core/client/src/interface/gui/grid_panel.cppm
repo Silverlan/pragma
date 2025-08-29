@@ -1,13 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __WIGRIDPANEL_H__
-#define __WIGRIDPANEL_H__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/gui/witable.h"
 
-class DLLCLIENT WIGridPanel : public WITable {
+export module pragma.client.gui:grid_panel;
+
+export class DLLCLIENT WIGridPanel : public WITable {
   public:
 	enum class DLLCLIENT ResizeMode { FitToChildren = 0, Uniform };
   private:
@@ -25,5 +26,3 @@ class DLLCLIENT WIGridPanel : public WITable {
 	WITableCell *AddItem(WIBase *el, uint32_t row, uint32_t col);
 	uint32_t GetColumnCount() const;
 };
-
-#endif

@@ -1,11 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/lua/classes/c_llistener.h"
 #include "pragma/lua/classes/ldef_entity.h"
 #include "pragma/entities/c_listener.h"
 #include "luasystem.h"
+
+module pragma.client.scripting.lua.classes.listener;
+
 DLLCLIENT void Lua_Listener_GetGain(lua_State *l, ListenerHandle &hEnt)
 {
 	// COMPONENT TODO

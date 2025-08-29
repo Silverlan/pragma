@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/lua/classes/c_lmodel.h"
 #include "pragma/game/c_game.h"
 #include "pragma/clientstate/clientstate.h"
 #include "luasystem.h"
@@ -14,6 +15,8 @@
 #include "pragma/lua/libraries/c_lua_vulkan.h"
 #include <pragma/lua/libraries/lfile.h>
 #include <buffers/prosper_buffer.hpp>
+
+module pragma.client.scripting.lua.classes.model;
 
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;

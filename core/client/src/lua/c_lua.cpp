@@ -40,7 +40,6 @@ namespace pragma::string {
 #include "pragma/lua/libraries/c_llocale.h"
 #include "pragma/lua/libraries/lgame.h"
 #include <sharedutils/util_string.h>
-#include "pragma/lua/classes/c_lnetpacket.h"
 #include "pragma/lua/classes/c_lcamera.h"
 #include "pragma/lua/classes/components/c_lentity_components.hpp"
 #include "pragma/entities/components/c_player_component.hpp"
@@ -78,6 +77,7 @@ namespace pragma::string {
 
 import pragma.locale;
 import pragma.client.entities.components;
+import pragma.client.scripting.lua;
 #ifndef _MSC_VER
 import pragma.string.unicode;
 #endif

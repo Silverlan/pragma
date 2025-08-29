@@ -9,3 +9,6 @@ export import pragma.client.scripting.lua.classes.listener;
 export import pragma.client.scripting.lua.classes.material;
 export import pragma.client.scripting.lua.classes.model;
 export import pragma.client.scripting.lua.classes.model_mesh;
+export import pragma.client.scripting.lua.classes.net_packet;
+export import pragma.client.scripting.lua.classes.texture;
+export import pragma.client.scripting.lua.classes.world_environment;

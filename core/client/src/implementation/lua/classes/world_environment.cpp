@@ -1,11 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/lua/classes/c_lworldenvironment.hpp"
 #include "luasystem.h"
 #include <pragma/lua/classes/lproperty.hpp>
 #include <luabind/copy_policy.hpp>
+
+module pragma.client.scripting.lua.classes.world_environment;
 
 namespace Lua {
 	namespace WorldEnvironment {

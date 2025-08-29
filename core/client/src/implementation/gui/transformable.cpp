@@ -1,9 +1,10 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
-#include "pragma/gui/witransformable.h"
 #include "pragma/gui/wisnaparea.hpp"
 #include <wgui/types/witext.h>
 #include <wgui/types/wibutton.h>
@@ -11,6 +12,10 @@
 #include <wgui/types/wiroot.h>
 #include <mathutil/umath.h>
 #include <prosper_window.hpp>
+
+module pragma.client.gui;
+
+import :transformable;
 
 extern DLLCLIENT CEngine *c_engine;
 

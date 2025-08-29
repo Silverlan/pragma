@@ -39,4 +39,5 @@ export import :silk_icon;
 export import :slider;
 export import :textured_cubemap;
 export import :table;
+export import :transformable;
 export import :tree_list;

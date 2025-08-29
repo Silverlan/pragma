@@ -38,6 +38,7 @@ export import :progress_bar;
 export import :server_browser;
 export import :silk_icon;
 export import :slider;
+export import :snap_area;
 export import :textured_cubemap;
 export import :table;
 export import :transformable;

@@ -12,7 +12,6 @@ module;
 #include <wgui/types/wiscrollbar.h>
 #include "pragma/gui/wiscrollcontainer.h"
 #include "pragma/gui/wicommandlineentry.hpp"
-#include "pragma/gui/wisnaparea.hpp"
 #include <pragma/engine_info.hpp>
 #include <pragma/lua/lua_error_handling.hpp>
 
@@ -20,6 +19,7 @@ module pragma.client.gui;
 
 import :console;
 import :frame;
+import :snap_area;
 
 import pragma.string.unicode;
 import pragma.locale;

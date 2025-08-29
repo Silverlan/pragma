@@ -4,10 +4,11 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/gui/wisnaparea.hpp"
 #include <wgui/wibase.h>
 
 export module pragma.client.gui:transformable;
+
+import :snap_area;
 
 export {
 	class DLLCLIENT WITransformable : public WIBase {

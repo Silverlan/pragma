@@ -1,13 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __WISNAPAREA_HPP__
-#define __WISNAPAREA_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include <wgui/wibase.h>
 
-class DLLCLIENT WISnapArea : public WIBase {
+export module pragma.client.gui:snap_area;
+
+export class DLLCLIENT WISnapArea : public WIBase {
   public:
 	WISnapArea();
 	virtual void Initialize() override;
@@ -15,5 +16,3 @@ class DLLCLIENT WISnapArea : public WIBase {
   private:
 	WIHandle m_hTriggerArea = {};
 };
-
-#endif

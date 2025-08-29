@@ -1,11 +1,12 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
-#include "pragma/lua/libraries/c_lutil.h"
 #include "pragma/lua/classes/c_lcamera.h"
 #include "pragma/entities/point/c_point_target.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
@@ -28,6 +29,8 @@
 #include <util_image_buffer.hpp>
 #include <prosper_window.hpp>
 #include <fsys/ifile.hpp>
+
+module pragma.client.scripting.lua.libraries.util;
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;

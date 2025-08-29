@@ -1,18 +1,17 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_LUTIL_H__
-#define __C_LUTIL_H__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/c_ldefinitions.h"
 #include <sharedutils/util_parallel_job.hpp>
+#include <pragma/entities/components/lightmap_data_cache.hpp>
 #include <mathutil/uvec.h>
 
-namespace pragma {
-	struct LightmapDataCache;
-};
-namespace Lua {
+export module pragma.client.scripting.lua.libraries.util;
+
+export namespace Lua {
 	namespace util {
 		namespace Client {
 			DLLCLIENT int calc_world_direction_from_2d_coordinates(lua_State *l, pragma::CCameraComponent &hCam, const ::Vector2 &uv);
@@ -31,5 +30,3 @@ namespace Lua {
 		};
 	};
 };
-
-#endif

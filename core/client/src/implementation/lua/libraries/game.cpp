@@ -825,7 +825,7 @@ int Lua::game::Client::open_dropped_file(lua_State *l)
 		auto it = std::find_if(droppedFiles.begin(), droppedFiles.end(), [&fileName](const CEngine::DroppedFile &f) { return (f.fileName == fileName) ? true : false; });
 		if(it == droppedFiles.end()) {
 			auto &gDroppedFiles = pragma::get_dropped_files();
-			auto npath = util::Path::CreateFile(fileName).GetString();
+			auto npath = ::util::Path::CreateFile(fileName).GetString();
 			ustring::to_lower(npath);
 			auto nfileName = ufile::get_file_from_filename(npath);
 			auto it = gDroppedFiles.find(nfileName);

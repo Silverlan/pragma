@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "pragma/game/c_game.h"
 #include <image/prosper_texture.hpp>
 #include <pragma/lua/libraries/limport.hpp>
@@ -22,7 +24,6 @@
 //#include <assimp/postprocess.h>
 //#include <assimp/IOSystem.hpp>
 //#include <assimp/IOStream.hpp>
-#include "pragma/lua/libraries/c_limport.hpp"
 #include "pragma/entities/environment/lights/c_env_light.h"
 #include "pragma/entities/environment/lights/c_env_light_spot.h"
 #include "pragma/entities/environment/lights/c_env_light_point.h"
@@ -30,6 +31,8 @@
 #include "pragma/entities/components/c_color_component.hpp"
 #include "pragma/entities/components/c_radius_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
+
+module pragma.client.scripting.lua.libraries.import_lib;
 
 extern DLLCLIENT CGame *c_game;
 

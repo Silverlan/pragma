@@ -17,3 +17,4 @@ export import pragma.client.scripting.lua.classes.world_environment;
 
 export import pragma.client.scripting.lua.libraries.ents;
 export import pragma.client.scripting.lua.libraries.global;
+export import pragma.client.scripting.lua.libraries.import_lib;

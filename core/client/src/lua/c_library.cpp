@@ -23,7 +23,6 @@
 #include "pragma/audio/c_lalsound.hpp"
 #include "pragma/gui/wiluabase.h"
 #include "pragma/lua/classes/c_ldef_wgui.h"
-#include "pragma/lua/libraries/c_limport.hpp"
 #include "pragma/lua/policies/gui_element_policy.hpp"
 #include "pragma/ai/c_lai.hpp"
 #include "pragma/rendering/raytracing/cycles.hpp"

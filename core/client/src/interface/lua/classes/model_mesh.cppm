@@ -1,16 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_LMODELMESH_H__
-#define __C_LMODELMESH_H__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/c_ldefinitions.h"
 
-class ModelMesh;
-class ModelSubMesh;
+export module pragma.client.scripting.lua.classes.model_mesh;
 
-namespace Lua {
+export namespace Lua {
 	namespace ModelMesh {
 		namespace Client {
 			DLLCLIENT void Create(lua_State *l);
@@ -29,5 +27,3 @@ namespace Lua {
 		};
 	};
 };
-
-#endif

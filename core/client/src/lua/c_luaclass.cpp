@@ -30,7 +30,6 @@
 #include "pragma/lua/classes/lmodel.h"
 #include "pragma/lua/classes/c_lmodel.h"
 #include "pragma/lua/classes/lmodelmesh.h"
-#include "pragma/lua/classes/c_lmodelmesh.h"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/lua/classes/c_ltexture.h"
@@ -79,6 +78,7 @@
 
 import pragma.client.entities.components;
 import pragma.client.rendering.shaders;
+import pragma.client.scripting.lua;
 import pragma.shadergraph;
 
 extern DLLCLIENT CEngine *c_engine;

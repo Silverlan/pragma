@@ -1,13 +1,16 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/lua/classes/c_lmodelmesh.h"
 #include "luasystem.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/lua/libraries/c_lua_vulkan.h"
 #include <pragma/lua/classes/lmodelmesh.h>
 #include <buffers/prosper_buffer.hpp>
+
+module pragma.client.scripting.lua.classes.model_mesh;
 
 import pragma.client.model;
 

@@ -1,16 +1,17 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_LENTITY_H__
-#define __C_LENTITY_H__
+module;
+
 #include "pragma/clientdefinitions.h"
 #include <pragma/lua/ldefinitions.h>
+#include <pragma/networking/nwm_util.h>
+#include <pragma/networking/enums.hpp>
 #include <mathutil/glmutil.h>
-class NetPacket;
-namespace nwm {
-	enum class Protocol : uint32_t;
-};
-namespace Lua {
+
+export module pragma.client.scripting.lua.classes.entity;
+
+export namespace Lua {
 	namespace Entity {
 		namespace Client {
 			DLLCLIENT void register_class(luabind::class_<CBaseEntity, BaseEntity> &classDef);
@@ -20,5 +21,3 @@ namespace Lua {
 		};
 	};
 };
-
-#endif

@@ -1,9 +1,10 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
-#include "pragma/lua/classes/c_lentity.h"
 #include "pragma/entities/c_baseentity.h"
 #include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/lua/libraries/c_lua_vulkan.h"
@@ -16,7 +17,7 @@
 #include <pragma/networking/enums.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
-import pragma.client.scripting.lua;
+module pragma.client.scripting.lua.classes.entity;
 
 extern DLLCLIENT CEngine *c_engine;
 

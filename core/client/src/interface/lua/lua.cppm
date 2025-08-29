@@ -4,6 +4,7 @@
 module;
 
 export module pragma.client.scripting.lua;
+export import pragma.client.scripting.lua.classes.entity;
 export import pragma.client.scripting.lua.classes.gui;
 export import pragma.client.scripting.lua.classes.listener;
 export import pragma.client.scripting.lua.classes.material;

@@ -8,7 +8,6 @@
 #include "pragma/lua/classes/c_llistener.h"
 #include "pragma/lua/classes/c_lshaderinfo.h"
 #include "pragma/lua/classes/c_lshader.h"
-#include "pragma/lua/classes/c_lmaterial.h"
 #include "pragma/lua/classes/c_lpoint_rendertarget.h"
 #include "pragma/lua/converters/shader_converter_t.hpp"
 #include "pragma/rendering/shaders/c_shader_lua.hpp"

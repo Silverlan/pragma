@@ -1,16 +1,19 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
-#include "pragma/lua/classes/c_lmaterial.h"
 #include "luasystem.h"
 #include "cmaterialmanager.h"
 #include "textureinfo.h"
 #include "pragma/rendering/shaders/world/c_shader_textured_base.hpp"
 #include <cmaterial.h>
 #include <cmaterial_manager2.hpp>
+
+module pragma.client.scripting.lua.classes.material;
 
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;

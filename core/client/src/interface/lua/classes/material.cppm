@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_LMATERIAL_H__
-#define __C_LMATERIAL_H__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include "matsysdefinitions.h"
@@ -10,9 +9,9 @@
 #include <texturemanager/texturemanager.h>
 #include "pragma/lua/libraries/c_lua_vulkan.h"
 
-class Material;
-struct TextureInfo;
-namespace Lua {
+export module pragma.client.scripting.lua.classes.material;
+
+export namespace Lua {
 	namespace Material {
 		namespace Client {
 			DLLCLIENT void SetTexture(lua_State *l, ::Material *mat, const std::string &textureID, const std::string &tex);
@@ -31,5 +30,3 @@ namespace Lua {
 		DLLCLIENT uint32_t GetHeight(lua_State *l, ::TextureInfo *tex);
 	};
 };
-
-#endif

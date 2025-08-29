@@ -19,6 +19,7 @@
 #include <cmaterial.h>
 
 import pragma.client.entities.components;
+import pragma.client.scripting.lua;
 
 using namespace pragma;
 
@@ -198,7 +199,6 @@ util::EventReply CLightSpotVolComponent::HandleEvent(ComponentEventId eventId, C
 	return util::EventReply::Unhandled;
 }
 
-#include "pragma/lua/classes/c_lmaterial.h"
 void CLightSpotVolComponent::InitializeVolumetricLight()
 {
 	auto mdlComponent = GetEntity().GetComponent<CModelComponent>();

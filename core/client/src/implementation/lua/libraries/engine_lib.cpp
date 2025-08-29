@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 
 #ifdef _MSC_VER
@@ -11,7 +13,6 @@ namespace pragma::string {
 };
 #endif
 
-#include "pragma/lua/libraries/c_lengine.h"
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/input/inputhelper.h"
 #include "cmaterialmanager.h"
@@ -19,10 +20,10 @@ namespace pragma::string {
 #include "pragma/c_engine.h"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
-#include "pragma/lua/libraries/c_lengine.h"
 #include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/asset/util_asset.hpp"
+#include <pragma/util/font_set.hpp>
 #include <wgui/fontmanager.h>
 #include <wgui/types/witext.h>
 #include "pragma/lua/classes/c_ldef_fontinfo.h"
@@ -37,6 +38,8 @@ namespace pragma::string {
 #include <pragma/entities/environment/effects/particlesystemdata.h>
 #include <prosper_window.hpp>
 #include <fsys/ifile.hpp>
+
+module pragma.client.scripting.lua.libraries.engine;
 
 import util_zip;
 #ifndef _MSC_VER

@@ -13,7 +13,6 @@ namespace pragma::string {
 
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
-#include "pragma/lua/libraries/c_lengine.h"
 #include "pragma/lua/libraries/lents.h"
 #include "pragma/lua/libraries/c_lnetmessages.h"
 #include "pragma/lua/libraries/lengine.h"

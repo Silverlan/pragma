@@ -1,21 +1,17 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_LENGINE_H__
-#define __C_LENGINE_H__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include <pragma/lua/ldefinitions.h>
 #include <pragma/util/font_set.hpp>
+#include <wgui/fontmanager.h>
 #include <image/prosper_texture.hpp>
 
-class FontInfo;
-class LFile;
-enum class TextureLoadFlags : uint32_t;
-namespace util {
-	enum class AssetLoadFlags : uint32_t;
-};
-namespace Lua {
+export module pragma.client.scripting.lua.libraries.engine;
+
+export namespace Lua {
 	namespace asset_client {
 		DLLCLIENT void register_library(Lua::Interface &lua, luabind::module_ &modAsset);
 		DLLCLIENT Material *get_error_material();
@@ -58,5 +54,3 @@ namespace Lua {
 		DLLCLIENT void register_library(lua_State *l);
 	};
 };
-
-#endif

@@ -11,7 +11,6 @@
 #include "pragma/lua/classes/c_lshader.h"
 #include "pragma/lua/libraries/c_lutil.h"
 #include "pragma/lua/libraries/lasset.hpp"
-#include "pragma/lua/libraries/c_lengine.h"
 #include "pragma/lua/converters/gui_element_converter_t.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"

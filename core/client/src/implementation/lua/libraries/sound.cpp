@@ -1,15 +1,18 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
 #include <alsoundsystem.hpp>
 #include <alsoundsystem_create_effect.hpp>
 #include "pragma/game/c_game.h"
-#include "pragma/lua/libraries/c_lsound.h"
 #include "pragma/audio/c_engine_sound.hpp"
 #include "luasystem.h"
 #include <alsoundsystem.hpp>
+
+module pragma.client.scripting.lua.libraries.sound;
 
 extern DLLCLIENT CEngine *c_engine;
 

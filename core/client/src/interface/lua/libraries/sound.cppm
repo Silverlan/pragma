@@ -1,14 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_LSOUND_H__
-#define __C_LSOUND_H__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/c_ldefinitions.h"
 #include "pragma/lua/libraries/lsound.h"
 
-namespace Lua {
+export module pragma.client.scripting.lua.libraries.sound;
+
+export namespace Lua {
 	namespace sound {
 		DLLCLIENT int register_aux_effect(lua_State *l);
 		DLLCLIENT int get_aux_effect(lua_State *l);
@@ -27,5 +28,3 @@ namespace Lua {
 		DLLCLIENT int set_global_effect_parameters(lua_State *l);
 	};
 };
-
-#endif

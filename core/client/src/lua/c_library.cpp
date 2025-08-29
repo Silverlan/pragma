@@ -9,7 +9,6 @@
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/lua/libraries/c_ldebugoverlay.h"
 #include "pragma/lua/libraries/c_lgui.h"
-#include "pragma/lua/libraries/c_lsound.h"
 #include "pragma/lua/classes/c_lshader.h"
 #include "pragma/lua/libraries/c_lutil.h"
 #include "pragma/lua/libraries/lasset.hpp"

@@ -5,7 +5,6 @@
 #include "pragma/lua/libraries/c_lgui.h"
 #include "pragma/lua/classes/c_ldef_wgui.h"
 #include "pragma/gui/wiluabase.h"
-#include "pragma/lua/libraries/c_lsound.h"
 #include "pragma/lua/libraries/lsound.h"
 #include "pragma/audio/c_lalsound.hpp"
 #include "pragma/input/input_binding_layer.hpp"

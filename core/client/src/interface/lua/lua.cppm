@@ -19,3 +19,4 @@ export import pragma.client.scripting.lua.libraries.ents;
 export import pragma.client.scripting.lua.libraries.global;
 export import pragma.client.scripting.lua.libraries.import_lib;
 export import pragma.client.scripting.lua.libraries.locale;
+export import pragma.client.scripting.lua.libraries.sound;

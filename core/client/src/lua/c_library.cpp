@@ -23,7 +23,6 @@
 #include "pragma/audio/c_lalsound.hpp"
 #include "pragma/gui/wiluabase.h"
 #include "pragma/gui/wiconsole.hpp"
-#include "pragma/lua/classes/c_lwibase.h"
 #include "pragma/lua/classes/c_ldef_wgui.h"
 #include "pragma/lua/libraries/c_limport.hpp"
 #include "pragma/lua/policies/gui_element_policy.hpp"
@@ -72,6 +71,7 @@ import pragma.audio.util;
 import pragma.platform;
 import pragma.string.unicode;
 import pragma.client.rendering.shaders;
+import pragma.client.scripting.lua;
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;

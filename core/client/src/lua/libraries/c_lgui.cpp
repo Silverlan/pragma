@@ -9,7 +9,6 @@
 #include <wgui/types/wiroot.h>
 #include "pragma/game/c_game.h"
 #include "luasystem.h"
-#include "pragma/lua/classes/c_lwibase.h"
 #include "pragma/lua/classes/c_ldef_wgui.h"
 #include "pragma/gui/wiluahandlewrapper.h"
 #include "pragma/gui/wiluaskin.h"
@@ -23,6 +22,7 @@
 #include <prosper_render_pass.hpp>
 
 import pragma.client.gui;
+import pragma.client.scripting.lua;
 import pragma.string.unicode;
 //import pragma.scripting.lua;
 

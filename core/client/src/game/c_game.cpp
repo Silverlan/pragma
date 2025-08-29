@@ -18,7 +18,6 @@
 #include "pragma/gui/wiluabase.h"
 #include "luasystem.h"
 #include <wgui/wihandle.h>
-#include "pragma/lua/classes/c_lwibase.h"
 #include "cmaterialmanager.h"
 #include <cmaterial_manager2.hpp>
 //#include "shader_screen.h" // prosper TODO
@@ -113,6 +112,7 @@ import pragma.client.debug;
 import pragma.client.entities.components;
 import pragma.client.model;
 import pragma.client.physics;
+import pragma.client.scripting.lua;
 
 extern EntityClassMap<CBaseEntity> *g_ClientEntityFactories;
 extern ClientEntityNetworkMap *g_ClEntityNetworkMap;

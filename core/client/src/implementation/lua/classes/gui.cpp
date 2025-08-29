@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/lua/classes/c_lwibase.h"
 #include <wgui/wibase.h>
 #include <wgui/wihandle.h>
 #include <wgui/types/witooltip.h>
@@ -43,13 +44,15 @@
 #include <luabind/copy_policy.hpp>
 #include <pragma/debug/intel_vtune.hpp>
 
+module pragma.client.scripting.lua.classes.gui;
+
 import pragma.client.gui;
 import pragma.string.unicode;
 // import pragma.scripting.lua;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
-#pragma optimize("", off)
+
 template<class TStream>
 static TStream &print_ui_element(TStream &os, const ::WIBase &handle)
 {

@@ -1,45 +1,54 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_LWIBASE_H__
-#define __C_LWIBASE_H__
+module;
+
 #include "pragma/definitions.h"
-#include "pragma/clientstate/clientstate.h"
 #include <wgui/wibase.h>
-#include <pragma/lua/ldefinitions.h>
-class WIBase;
-class WIShape;
-class WITexturedShape;
-class WIText;
-class WITextEntry;
-class WIOutlinedRect;
-class WILine;
-class WIRoundedRect;
-class WIRoundedTexturedRect;
-class WIScrollBar;
-class WISilkIcon;
-class WIIcon;
-class WIDropDownMenu;
-class WIConsole;
-class WICheckbox;
-class WIArrow;
-class WIButton;
-class WITable;
-class WIGridPanel;
-class WITableRow;
-class WITableCell;
-class WIFrame;
-class WITransformable;
-class WITreeList;
-class WITreeListElement;
-class WIProgressBar;
-class WISlider;
-class WINumericEntry;
-class WIContainer;
-namespace prosper {
-	class Texture;
-};
-namespace Lua {
+#include <wgui/wihandle.h>
+#include <wgui/types/witooltip.h>
+#include "luasystem.h"
+#include <wgui/types/wirect.h>
+#include <wgui/types/widropdownmenu.h>
+#include <wgui/types/wiroot.h>
+#include "pragma/lua/libraries/c_gui_callbacks.hpp"
+#include "pragma/gui/wisnaparea.hpp"
+#include "pragma/lua/classes/c_ldef_wgui.h"
+#include "pragma/lua/libraries/c_lua_vulkan.h"
+#include "pragma/lua/policies/gui_element_policy.hpp"
+#include "pragma/lua/converters/gui_element_converter_t.hpp"
+#include "pragma/lua/converters/shader_converter_t.hpp"
+#include "pragma/lua/libraries/c_lgui.h"
+#include "pragma/gui/wgui_luainterface.h"
+#include <pragma/lua/classes/ldef_vector.h>
+#include <pragma/lua/classes/lproperty.hpp>
+#include <pragma/lua/policies/default_parameter_policy.hpp>
+#include <pragma/lua/policies/shared_from_this_policy.hpp>
+#include <pragma/lua/converters/pair_converter_t.hpp>
+#include <pragma/lua/converters/string_view_converter_t.hpp>
+#include <pragma/lua/converters/vector_converter_t.hpp>
+#include <pragma/lua/converters/optional_converter_t.hpp>
+#include <pragma/lua/converters/property_converter_t.hpp>
+#include <pragma/lua/lua_call.hpp>
+#include <scripting/lua/lua.hpp>
+#include <buffers/prosper_buffer.hpp>
+#include <prosper_command_buffer.hpp>
+#include <prosper_render_pass.hpp>
+#include <prosper_swap_command_buffer.hpp>
+#include <shader/prosper_shader_copy_image.hpp>
+#include <sharedutils/property/util_property_color.hpp>
+#include <sharedutils/util_hash.hpp>
+#include <luabind/out_value_policy.hpp>
+#include <util_formatted_text.hpp>
+#include <prosper_window.hpp>
+#include <luabind/copy_policy.hpp>
+#include <pragma/debug/intel_vtune.hpp>
+
+export module pragma.client.scripting.lua.classes.gui;
+
+import pragma.client.gui;
+
+export namespace Lua {
 	namespace gui {
 		DLLCLIENT void clear_lua_callbacks(lua_State *l);
 	};
@@ -228,5 +237,3 @@ namespace Lua {
 		DLLCLIENT void register_class(luabind::class_<::WIFrame, luabind::bases<::WITransformable, ::WIBase>> &classDef);
 	};
 };
-
-#endif

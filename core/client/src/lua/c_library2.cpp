@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/lua/classes/c_lwibase.h"
 #include "pragma/lua/libraries/c_lgui.h"
 #include "pragma/lua/classes/c_ldef_wgui.h"
 #include "pragma/gui/wiconsole.hpp"
@@ -38,6 +37,7 @@
 
 import pragma.audio.util;
 import pragma.client.gui;
+import pragma.client.scripting.lua;
 import pragma.platform;
 import pragma.string.unicode;
 

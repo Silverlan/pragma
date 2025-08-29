@@ -7,7 +7,6 @@
 #include "pragma/util/c_util.hpp"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
-#include "pragma/lua/libraries/c_ldebugoverlay.h"
 #include "pragma/lua/libraries/c_lgui.h"
 #include "pragma/lua/classes/c_lshader.h"
 #include "pragma/lua/libraries/c_lutil.h"
@@ -33,6 +32,7 @@
 #include <pragma/lua/classes/thread_pool.hpp>
 #include <pragma/lua/libraries/lfile.h>
 #include <pragma/lua/libraries/lutil.hpp>
+#include <pragma/debug/c_debugoverlay.h>
 #include <pragma/lua/policies/default_parameter_policy.hpp>
 #include <pragma/lua/converters/string_view_converter_t.hpp>
 #include <pragma/lua/converters/vector_converter_t.hpp>

@@ -32,7 +32,6 @@
 #include "pragma/lua/classes/c_lua_entity.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/debug/c_debugoverlay.h"
-#include "pragma/lua/libraries/c_ldebugoverlay.h"
 #include "pragma/lua/libraries/c_lutil.h"
 #include "pragma/asset/c_util_model.hpp"
 #include "pragma/rendering/shaders/util/c_shader_compose_rma.hpp"

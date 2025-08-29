@@ -1,15 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_LDEBUGOVERLAY_H__
-#define __C_LDEBUGOVERLAY_H__
+module;
+
 #include "pragma/clientdefinitions.h"
 #include <pragma/lua/ldefinitions.h>
 #include "pragma/debug/c_debugoverlay.h"
 
-struct DebugRenderInfo;
-class ModelSubMesh;
-namespace Lua {
+export module pragma.client.scripting.lua.libraries.debug_renderer;
+
+export namespace Lua {
 	namespace DebugRenderer {
 		namespace Client {
 			DLLCLIENT std::shared_ptr<::DebugRenderer::BaseObject> DrawPoints(const std::vector<Vector3> &points, const DebugRenderInfo &renderInfo);
@@ -37,5 +37,3 @@ namespace Lua {
 		};
 	};
 };
-
-#endif

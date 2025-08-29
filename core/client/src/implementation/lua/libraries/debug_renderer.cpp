@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/lua/libraries/c_ldebugoverlay.h"
 #include "pragma/debug/c_debugoverlay.h"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/lua/classes/ldef_angle.h"
@@ -12,6 +13,8 @@
 #include <pragma/model/modelmesh.h>
 #include <pragma/debug/debug_render_info.hpp>
 #include "luasystem.h"
+
+module pragma.client.scripting.lua.libraries.debug_renderer;
 
 static std::shared_ptr<DebugRenderer::BaseObject> get_dbg_object(const std::shared_ptr<DebugRenderer::BaseObject> &obj, float duration) { return (duration > 0.f) ? nullptr : obj; }
 std::shared_ptr<DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawPoints(const std::vector<Vector3> &points, const DebugRenderInfo &renderInfo) { return get_dbg_object(::DebugRenderer::DrawPoints(points, {renderInfo.color, renderInfo.duration}), renderInfo.duration); }

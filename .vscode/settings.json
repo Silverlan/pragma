@@ -89,6 +89,8 @@
         "valarray": "cpp",
         "variant": "cpp",
         "ios": "cpp",
-        "rope": "cpp"
+        "rope": "cpp",
+        "xlocale": "cpp",
+        "*.inc": "cpp"
     }
 }

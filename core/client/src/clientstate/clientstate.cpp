@@ -8,7 +8,6 @@
 #include "pragma/networking/netmessages.h"
 #include "cmaterialmanager.h"
 #include <cmaterial_manager2.hpp>
-#include "pragma/model/c_modelmanager.h"
 #include "pragma/lua/classes/c_ldef_wgui.h"
 #include "pragma/lua/libraries/c_lglobal.h"
 #include "pragma/c_engine.h"
@@ -53,6 +52,7 @@
 #include <wgui/types/wiroot.h>
 
 import pragma.client.gui;
+import pragma.client.model;
 import pragma.client.networking;
 // import pragma.scripting.lua;
 

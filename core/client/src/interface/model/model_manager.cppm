@@ -1,16 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_MODELMANAGER_H__
-#define __C_MODELMANAGER_H__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include <pragma/model/modelmanager.h>
 
-class CModel;
-class CModelMesh;
-class CModelSubMesh;
-namespace pragma::asset {
+export module pragma.client.model:model_manager;
+
+export namespace pragma::asset {
 	class DLLCLIENT CModelManager : public ModelManager {
 	  public:
 		using ModelManager::ModelManager;
@@ -19,5 +17,3 @@ namespace pragma::asset {
 	  private:
 	};
 };
-
-#endif

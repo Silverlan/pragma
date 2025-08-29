@@ -6,15 +6,18 @@
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/networking/resources.h"
 #include "pragma/entities/components/c_model_component.hpp"
+#include <pragma/model/modelmanager.h>
 #include <fsys/filesystem.h>
-#include "pragma/model/c_modelmanager.h"
 #include "pragma/model/c_modelmesh.h"
+#include "pragma/physics/collisionmesh.h"
 #include "pragma/model/c_model.h"
 #include "pragma/networking/iclient.hpp"
 #include <sharedutils/util_file.h>
 #include <sharedutils/scope_guard.h>
 #include <sharedutils/util_library.hpp>
 #include <pragma/game/game_resources.h>
+
+import pragma.client.model;
 
 #define RESOURCE_TRANSFER_VERBOSE 0
 

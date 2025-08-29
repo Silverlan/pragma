@@ -38,7 +38,6 @@
 #include "pragma/entities/util/c_util_pbr_converter.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/level/mapgeometry.h"
-#include "pragma/model/c_modelmanager.h"
 #include "pragma/gui/wiluahandlewrapper.h"
 #include "pragma/entities/c_viewmodel.h"
 #include "pragma/entities/c_viewbody.h"
@@ -112,6 +111,7 @@
 import pragma.client.ai;
 import pragma.client.debug;
 import pragma.client.entities.components;
+import pragma.client.model;
 import pragma.client.physics;
 
 extern EntityClassMap<CBaseEntity> *g_ClientEntityFactories;

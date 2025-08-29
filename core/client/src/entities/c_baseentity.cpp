@@ -7,7 +7,6 @@
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/entities/c_entityfactories.h"
 #include "cmaterialmanager.h"
-#include "pragma/model/c_modelmanager.h"
 #include "pragma/rendering/c_rendermode.h"
 #include "pragma/model/c_model.h"
 #include "pragma/model/brush/c_brushmesh.h"
@@ -56,6 +55,7 @@
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
 import pragma.client.entities.components;
+import pragma.client.model;
 import pragma.entities.components;
 
 LINK_ENTITY_TO_CLASS(entity, CBaseEntity);

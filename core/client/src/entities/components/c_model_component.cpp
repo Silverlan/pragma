@@ -14,7 +14,6 @@
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
-#include "pragma/model/c_modelmanager.h"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include <pragma/debug/intel_vtune.hpp>
 #include <shader/prosper_pipeline_loader.hpp>
@@ -25,6 +24,7 @@
 #include <cmaterial.h>
 
 import pragma.client.entities.components;
+import pragma.client.model;
 
 using namespace pragma;
 

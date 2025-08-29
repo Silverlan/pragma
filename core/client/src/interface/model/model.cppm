@@ -2,4 +2,5 @@
 // SPDX-License-Identifier: MIT
 
 export module pragma.client.model;
+export import :model_manager;
 export import :render_mesh;

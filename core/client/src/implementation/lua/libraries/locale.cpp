@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 
 #ifdef _MSC_VER
@@ -12,7 +14,8 @@ namespace pragma::string {
 #endif
 
 #include "pragma/clientstate/clientstate.h"
-#include "pragma/lua/libraries/c_llocale.h"
+
+module pragma.client.scripting.lua.libraries.locale;
 
 import pragma.locale;
 #ifndef _MSC_VER

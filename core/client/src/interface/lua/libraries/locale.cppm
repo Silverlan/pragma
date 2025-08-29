@@ -1,13 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_LLOCALE_H__
-#define __C_LLOCALE_H__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include <pragma/lua/ldefinitions.h>
 
-namespace Lua {
+export module pragma.client.scripting.lua.libraries.locale;
+
+export namespace Lua {
 	namespace Locale {
 		DLLCLIENT void set_localization(const std::string &id, const std::string &text);
 		DLLCLIENT void change_language(const std::string &lan);
@@ -23,5 +24,3 @@ namespace Lua {
 		DLLCLIENT Lua::opt<Lua::map<std::string, std::string>> parse(lua_State *l, const std::string &fileName);
 	};
 };
-
-#endif

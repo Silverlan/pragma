@@ -35,7 +35,6 @@ namespace pragma::string {
 #include <wgui/wibase.h>
 #include "pragma/lua/libraries/lray.h"
 #include "pragma/audio/c_alsound.h"
-#include "pragma/lua/libraries/c_llocale.h"
 #include "pragma/lua/libraries/lgame.h"
 #include <sharedutils/util_string.h>
 #include "pragma/lua/classes/c_lcamera.h"

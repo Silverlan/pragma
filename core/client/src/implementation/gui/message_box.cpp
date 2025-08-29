@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/gui/wiframe.h"
 #include <wgui/types/wirect.h>
 #include <wgui/types/witext.h>
 #include <wgui/types/wibutton.h>
@@ -12,6 +11,7 @@ module;
 module pragma.client.gui;
 
 import :message_box;
+import :frame;
 
 import pragma.locale;
 

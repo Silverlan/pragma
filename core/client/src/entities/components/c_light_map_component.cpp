@@ -14,7 +14,6 @@
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/entity_component_manager_t.hpp"
 #include "pragma/rendering/raytracing/cycles.hpp"
-#include "pragma/gui/wiframe.h"
 #include <pragma/util/util_tga.hpp>
 #include <pragma/logging.hpp>
 #include <pragma/level/mapgeometry.h>
@@ -37,6 +36,7 @@
 #include <wgui/types/wiroot.h>
 
 import pragma.client.entities.components;
+import pragma.client.gui;
 import pragma.client.model;
 
 extern DLLCLIENT CGame *c_game;

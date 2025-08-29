@@ -1,15 +1,19 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/gui/wiframe.h"
 #include <wgui/types/witext.h>
 #include <wgui/types/wibutton.h>
 #include <wgui/types/wirect.h>
 #include <mathutil/umath.h>
 #include <prosper_window.hpp>
 
-import pragma.client.gui;
+module pragma.client.gui;
+
+import :frame;
+
 import pragma.string.unicode;
 
 LINK_WGUI_TO_CLASS(WIFrame, WIFrame);

@@ -6,7 +6,6 @@ module;
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientutil.h"
 #include <wgui/types/wibutton.h>
-#include "pragma/gui/wiframe.h"
 #include "pragma/gui/wiscrollcontainer.h"
 #include "wms_shared.h"
 #include "wms_request_filter.h"
@@ -20,6 +19,7 @@ module;
 
 module pragma.client.gui;
 
+import :frame;
 import :server_browser;
 import :silk_icon;
 import :table;

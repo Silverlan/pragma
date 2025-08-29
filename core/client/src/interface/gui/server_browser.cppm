@@ -4,13 +4,14 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/gui/wiframe.h"
 #include "wmserverdata.h"
 #include <pragma/networking/game_server_data.hpp>
 #include <networkmanager/udp_handler/udp_message_dispatcher.h>
 #include <pragma/networking/master_server_query_dispatcher.hpp>
 
 export module pragma.client.gui:server_browser;
+
+import :frame;
 
 export {
 	namespace pragma::networking {

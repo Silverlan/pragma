@@ -17,6 +17,7 @@ export import :debug_shadow_map;
 export import :debug_ssao;
 export import :detachable;
 export import :fps;
+export import :frame;
 export import :grid_panel;
 export import :icon;
 export import :image_slide_show;

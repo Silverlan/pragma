@@ -15,7 +15,6 @@
 #include <wgui/types/wiscrollbar.h>
 #include "pragma/gui/wiscrollcontainer.h"
 #include <wgui/types/widropdownmenu.h>
-#include "pragma/gui/wiframe.h"
 #include "pragma/gui/witransformable.h"
 #include <wgui/types/wiarrow.h>
 #include "pragma/gui/wisnaparea.hpp"

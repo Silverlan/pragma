@@ -5,12 +5,13 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/gui/wicommandlineentry.hpp"
-#include "pragma/gui/wiframe.h"
 #include <wgui/wibase.h>
 #include <queue>
 #include <string_view>
 
 export module pragma.client.gui:console;
+
+import :frame;
 
 export class DLLCLIENT WIConsole : public WIBase {
   public:

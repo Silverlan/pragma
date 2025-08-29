@@ -27,7 +27,6 @@
 #include <pragma/networking/nwm_util.h>
 #include "pragma/entities/environment/c_env_quake.h"
 #include "pragma/debug/c_debugoverlay.h"
-#include "pragma/gui/witreelist.h"
 #include "pragma/entities/components/c_weapon_component.hpp"
 #include "pragma/entities/c_player.hpp"
 #include "pragma/entities/components/c_sound_emitter_component.hpp"
@@ -55,6 +54,7 @@
 
 import pragma.client.debug;
 import pragma.client.entities.components;
+import pragma.client.gui;
 
 enum class CLIENT_DROPPED;
 extern DLLCLIENT CEngine *c_engine;

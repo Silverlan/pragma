@@ -5,11 +5,12 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include <wgui/wibase.h>
-#include "pragma/gui/wicontainer.h"
 #include <unordered_map>
 #include <functional>
 
 export module pragma.client.gui:table;
+
+import :container;
 
 export
 {

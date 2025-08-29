@@ -1,8 +1,13 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/gui/wicontainer.h"
+
+module pragma.client.gui;
+
+import :container;
 
 LINK_WGUI_TO_CLASS(WIContainer, WIContainer);
 

@@ -7,6 +7,7 @@ export module pragma.client.gui;
 export import :checkbox;
 export import :choice_list;
 export import :console;
+export import :container;
 export import :chromium_page;
 export import :debug_depth_texture;
 export import :debug_hdr_bloom;

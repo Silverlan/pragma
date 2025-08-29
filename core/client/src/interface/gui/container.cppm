@@ -1,14 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __WICONTAINER_H__
-#define __WICONTAINER_H__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include <wgui/wibase.h>
 #include <unordered_map>
 
-class DLLCLIENT WIContainer : public WIBase {
+export module pragma.client.gui:container;
+
+export class DLLCLIENT WIContainer : public WIBase {
   public:
 	WIContainer();
 	enum class DLLCLIENT Padding : uint32_t { Top = 0, Right, Bottom, Left };
@@ -34,5 +35,3 @@ class DLLCLIENT WIContainer : public WIBase {
 	std::array<int32_t, 4> m_padding;
 	std::unordered_map<WIBase *, std::array<CallbackHandle, 2>> m_childCallbacks = {};
 };
-
-#endif

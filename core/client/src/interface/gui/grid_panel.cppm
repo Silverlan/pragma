@@ -4,9 +4,10 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/gui/witable.h"
 
 export module pragma.client.gui:grid_panel;
+
+import :table;
 
 export class DLLCLIENT WIGridPanel : public WITable {
   public:

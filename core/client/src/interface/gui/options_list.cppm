@@ -6,13 +6,13 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <wgui/wibase.h>
 #include <wgui/types/widropdownmenu.h>
-#include "pragma/gui/witable.h"
 
 export module pragma.client.gui:options_list;
 
 import :checkbox;
 import :choice_list;
 import :slider;
+import :table;
 
 export {
 	class DLLCLIENT WIOptionsList : public WIBase {

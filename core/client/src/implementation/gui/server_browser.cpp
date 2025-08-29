@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientutil.h"
-#include "pragma/gui/witable.h"
 #include <wgui/types/wibutton.h>
 #include "pragma/gui/wiframe.h"
 #include "pragma/gui/wiscrollcontainer.h"
@@ -23,6 +22,7 @@ module pragma.client.gui;
 
 import :server_browser;
 import :silk_icon;
+import :table;
 import pragma.locale;
 
 LINK_WGUI_TO_CLASS(WIServerBrowser, WIServerBrowser);

@@ -9,6 +9,7 @@ export import :choice_list;
 export import :console;
 export import :container;
 export import :chromium_page;
+export import :command_line_entry;
 export import :debug_depth_texture;
 export import :debug_hdr_bloom;
 export import :debug_mipmaps;

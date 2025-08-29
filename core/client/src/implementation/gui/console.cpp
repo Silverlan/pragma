@@ -10,12 +10,12 @@ module;
 #include <wgui/types/witextentry.h>
 #include <wgui/types/wirect.h>
 #include <wgui/types/wiscrollbar.h>
-#include "pragma/gui/wicommandlineentry.hpp"
 #include <pragma/engine_info.hpp>
 #include <pragma/lua/lua_error_handling.hpp>
 
 module pragma.client.gui;
 
+import :command_line_entry;
 import :console;
 import :frame;
 import :scroll_container;

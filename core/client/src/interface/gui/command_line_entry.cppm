@@ -1,13 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __WICOMMANDLINEENTRY_HPP__
-#define __WICOMMANDLINEENTRY_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include <wgui/types/witextentry.h>
 
-class DLLCLIENT WICommandLineEntry : public WITextEntry {
+export module pragma.client.gui:command_line_entry;
+
+export class DLLCLIENT WICommandLineEntry : public WITextEntry {
   public:
 	WICommandLineEntry();
 	virtual void Initialize() override;
@@ -36,5 +37,3 @@ class DLLCLIENT WICommandLineEntry : public WITextEntry {
 	bool m_bSkipAutoComplete = false;
 	bool m_bAutocompleteEnabled = true;
 };
-
-#endif

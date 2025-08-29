@@ -15,6 +15,5 @@
 #include <wgui/types/wiscrollbar.h>
 #include <wgui/types/widropdownmenu.h>
 #include <wgui/types/wiarrow.h>
-#include "pragma/gui/wicommandlineentry.hpp"
 
 #endif

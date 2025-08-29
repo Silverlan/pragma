@@ -1,12 +1,17 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/gui/wicommandlineentry.hpp"
 #include <wgui/types/wimenuitem.hpp>
 #include <wgui/types/wicontextmenu.hpp>
 #include <wgui/types/witext.h>
 #include <mathutil/umath_geometry.hpp>
+
+module pragma.client.gui;
+
+import :command_line_entry;
 
 import pragma.string.unicode;
 

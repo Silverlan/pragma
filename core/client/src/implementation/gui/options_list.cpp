@@ -7,12 +7,12 @@ module;
 #include "pragma/clientstate/clientstate.h"
 #include <wgui/types/wirect.h>
 #include <wgui/types/widropdownmenu.h>
-#include "pragma/gui/wiscrollcontainer.h"
 #include "pragma/input/input_binding_layer.hpp"
 
 module pragma.client.gui;
 
 import :options_list;
+import :scroll_container;
 
 import pragma.locale;
 import pragma.string.unicode;

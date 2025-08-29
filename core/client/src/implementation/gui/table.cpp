@@ -9,11 +9,11 @@ module;
 #include <wgui/types/witext.h>
 #include <wgui/types/wirect.h>
 #include <wgui/types/wiscrollbar.h>
-#include "pragma/gui/wiscrollcontainer.h"
 #include <prosper_window.hpp>
 
 module pragma.client.gui;
 
+import :scroll_container;
 import :table;
 
 import pragma.string.unicode;

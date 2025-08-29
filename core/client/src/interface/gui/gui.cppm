@@ -35,6 +35,7 @@ export import :message_box;
 export import :net_graph;
 export import :options_list;
 export import :progress_bar;
+export import :scroll_container;
 export import :server_browser;
 export import :silk_icon;
 export import :slider;

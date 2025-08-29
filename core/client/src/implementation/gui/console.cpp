@@ -10,7 +10,6 @@ module;
 #include <wgui/types/witextentry.h>
 #include <wgui/types/wirect.h>
 #include <wgui/types/wiscrollbar.h>
-#include "pragma/gui/wiscrollcontainer.h"
 #include "pragma/gui/wicommandlineentry.hpp"
 #include <pragma/engine_info.hpp>
 #include <pragma/lua/lua_error_handling.hpp>
@@ -19,6 +18,7 @@ module pragma.client.gui;
 
 import :console;
 import :frame;
+import :scroll_container;
 import :snap_area;
 
 import pragma.string.unicode;

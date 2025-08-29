@@ -1,11 +1,16 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/gui/wiscrollcontainer.h"
 #include <wgui/types/wiscrollbar.h>
 #include <mathutil/umath.h>
 #include <prosper_window.hpp>
+
+module pragma.client.gui;
+
+import :scroll_container;
 
 LINK_WGUI_TO_CLASS(WIScrollContainer, WIScrollContainer);
 WIScrollContainer::WIScrollContainer() : WIBase() { SetScrollInputEnabled(true); }

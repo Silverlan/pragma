@@ -1,27 +1,18 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __WICONSOLE_HPP__
-#define __WICONSOLE_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
+#include "pragma/gui/wicommandlineentry.hpp"
+#include "pragma/gui/wiframe.h"
 #include <wgui/wibase.h>
 #include <queue>
 #include <string_view>
 
-#ifdef _MSC_VER
-namespace pragma::string {
-	class Utf8String;
-};
-#else
-import pragma.string.unicode;
-#endif
+export module pragma.client.gui:console;
 
-class WITextEntry;
-class WICommandLineEntry;
-class WIFrame;
-class WISnapArea;
-class DLLCLIENT WIConsole : public WIBase {
+export class DLLCLIENT WIConsole : public WIBase {
   public:
 	static WIConsole *Open();
 	static void Close();
@@ -77,5 +68,3 @@ class DLLCLIENT WIConsole : public WIBase {
 	Vector2i m_menuConsolePos = {};
 	Vector2i m_menuConsoleSize = {};
 };
-
-#endif

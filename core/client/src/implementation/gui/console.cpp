@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
 #include "pragma/clientstate/clientstate.h"
@@ -8,7 +10,6 @@
 #include <wgui/types/witextentry.h>
 #include <wgui/types/wirect.h>
 #include <wgui/types/wiscrollbar.h>
-#include "pragma/gui/wiconsole.hpp"
 #include "pragma/gui/wiscrollcontainer.h"
 #include "pragma/gui/wicommandlineentry.hpp"
 #include "pragma/gui/wisnaparea.hpp"
@@ -16,7 +17,10 @@
 #include <pragma/engine_info.hpp>
 #include <pragma/lua/lua_error_handling.hpp>
 
-import pragma.client.gui;
+module pragma.client.gui;
+
+import :console;
+
 import pragma.string.unicode;
 import pragma.locale;
 

@@ -4,7 +4,6 @@
 #include "stdafx_client.h"
 #include "pragma/lua/libraries/c_lgui.h"
 #include "pragma/lua/classes/c_ldef_wgui.h"
-#include "pragma/gui/wiconsole.hpp"
 #include "pragma/gui/wiluabase.h"
 #include "pragma/lua/libraries/c_lsound.h"
 #include "pragma/lua/libraries/lsound.h"

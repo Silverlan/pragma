@@ -1,11 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
 #include "pragma/game/c_game.h"
-#include "pragma/lua/libraries/c_lglobal.h"
 #include "luasystem.h"
+
+module pragma.client.scripting.lua.libraries.global;
 
 extern DLLCLIENT CEngine *c_engine;
 

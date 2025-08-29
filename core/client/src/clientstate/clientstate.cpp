@@ -9,7 +9,6 @@
 #include "cmaterialmanager.h"
 #include <cmaterial_manager2.hpp>
 #include "pragma/lua/classes/c_ldef_wgui.h"
-#include "pragma/lua/libraries/c_lglobal.h"
 #include "pragma/c_engine.h"
 #include "pragma/console/convarhandle.h"
 #include "pragma/model/c_model.h"

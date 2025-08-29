@@ -1,15 +1,20 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
-#include "pragma/gui/widetachable.hpp"
 #include <wgui/types/witext.h>
 #include <wgui/types/wibutton.h>
 #include <wgui/types/wirect.h>
 #include <wgui/types/wiroot.h>
 #include <mathutil/umath.h>
 #include <prosper_window.hpp>
+
+module pragma.client.gui;
+
+import :detachable;
 
 import pragma.locale;
 

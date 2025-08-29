@@ -13,6 +13,7 @@ export import :debug_mipmaps;
 export import :debug_msaa_texture;
 export import :debug_shadow_map;
 export import :debug_ssao;
+export import :detachable;
 export import :fps;
 export import :icon;
 export import :image_slide_show;

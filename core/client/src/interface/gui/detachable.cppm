@@ -1,13 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __WIDETACHABLE_HPP__
-#define __WIDETACHABLE_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include <wgui/wibase.h>
 
-class DLLCLIENT WIDetachable : public WIBase {
+export module pragma.client.gui:detachable;
+
+export class DLLCLIENT WIDetachable : public WIBase {
   public:
 	WIDetachable();
 	virtual ~WIDetachable() override;
@@ -28,5 +29,3 @@ class DLLCLIENT WIDetachable : public WIBase {
 	};
 	std::unique_ptr<DetachedWindow> m_detachedWindow = nullptr;
 };
-
-#endif

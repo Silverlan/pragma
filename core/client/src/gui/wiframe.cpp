@@ -3,13 +3,13 @@
 
 #include "stdafx_client.h"
 #include "pragma/gui/wiframe.h"
-#include "pragma/gui/widetachable.hpp"
 #include <wgui/types/witext.h>
 #include <wgui/types/wibutton.h>
 #include <wgui/types/wirect.h>
 #include <mathutil/umath.h>
 #include <prosper_window.hpp>
 
+import pragma.client.gui;
 import pragma.string.unicode;
 
 LINK_WGUI_TO_CLASS(WIFrame, WIFrame);

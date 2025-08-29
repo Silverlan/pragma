@@ -8,7 +8,6 @@
 #include "luasystem.h"
 #include "pragma/rendering/world_environment.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
-#include "pragma/lua/libraries/c_lua_vulkan.h"
 #include "pragma/lua/classes/c_lshader.h"
 #include "pragma/rendering/shaders/world/c_shader_prepass.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
@@ -22,6 +21,7 @@
 #include <sharedutils/util_shaderinfo.hpp>
 
 import pragma.client.entities.components;
+import pragma.client.scripting.lua;
 
 extern DLLCLIENT CEngine *c_engine;
 

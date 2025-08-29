@@ -1,11 +1,13 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/lua/libraries/c_lua_vulkan.h"
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
 #include "pragma/rendering/shaders/c_shader_lua.hpp"
+#include "pragma/lua/libraries/c_lua_vulkan.h"
 #include <pragma/lua/classes/ldef_color.h>
 #include <pragma/lua/classes/ldef_vector.h>
 #include <pragma/lua/classes/lerrorcode.h>
@@ -43,6 +45,8 @@
 #include <luabind/copy_policy.hpp>
 #include <luabind/detail/meta.hpp>
 #include <shader/prosper_shader_blur.hpp>
+
+module pragma.client.scripting.lua.classes.vulkan;
 
 import pragma.client.model;
 import pragma.client.rendering.shaders;

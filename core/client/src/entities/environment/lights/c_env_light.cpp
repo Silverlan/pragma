@@ -14,12 +14,12 @@
 #include "pragma/entities/components/c_color_component.hpp"
 #include "pragma/entities/environment/lights/c_env_light.h"
 #include "pragma/entities/environment/lights/c_env_shadow.hpp"
+#include "pragma/lua/libraries/c_lua_vulkan.h"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/console/c_cvar.h"
 #include "pragma/console/c_cvar_global_functions.h"
 #include "pragma/rendering/lighting/c_light_data_buffer_manager.hpp"
-#include "pragma/lua/libraries/c_lua_vulkan.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
@@ -27,6 +27,8 @@
 #include <prosper_util.hpp>
 #include <buffers/prosper_uniform_resizable_buffer.hpp>
 #include <prosper_command_buffer.hpp>
+
+import pragma.client.scripting.lua;
 
 using namespace pragma;
 

@@ -6,7 +6,6 @@
 #include "pragma/lua/libraries/c_lgame.h"
 #include "luasystem.h"
 #include <pragma/lua/classes/ldef_vector.h>
-#include "pragma/lua/libraries/c_lua_vulkan.h"
 #include "pragma/lua/classes/c_lcamera.h"
 #include "pragma/lua/converters/shader_converter_t.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
@@ -19,6 +18,7 @@
 #include <pragma/lua/libraries/lgame.h>
 #include <pragma/lua/libraries/lfile.h>
 #include <pragma/lua/classes/ldef_color.h>
+#include <pragma/model/model.h>
 #include <prosper_command_buffer.hpp>
 #include <image/prosper_render_target.hpp>
 #include <image/prosper_texture.hpp>
@@ -33,6 +33,7 @@
 
 import pragma.client.core;
 import pragma.client.debug;
+import pragma.client.scripting.lua;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
@@ -107,7 +108,7 @@ static void get_local_bone_position(const std::function<Transform(uint32_t)> &fG
 	if(parent != nullptr)
 		apply(parent, pos, rot, scale);
 }
-static void get_local_bone_position(const std::shared_ptr<Model> &mdl, const std::function<Transform(uint32_t)> &fGetTransform, std::shared_ptr<pragma::animation::Bone> &bone, const Vector3 &fscale = {1.f, 1.f, 1.f}, Vector3 *pos = nullptr, Quat *rot = nullptr, Vector3 *scale = nullptr)
+static void get_local_bone_position(const std::shared_ptr<::Model> &mdl, const std::function<Transform(uint32_t)> &fGetTransform, std::shared_ptr<pragma::animation::Bone> &bone, const Vector3 &fscale = {1.f, 1.f, 1.f}, Vector3 *pos = nullptr, Quat *rot = nullptr, Vector3 *scale = nullptr)
 {
 	get_local_bone_position(fGetTransform, bone, fscale, pos, rot, scale);
 	if(rot == nullptr)
@@ -875,7 +876,7 @@ int Lua::game::Client::load_model(lua_State *l)
 }
 int Lua::game::Client::create_model(lua_State *l)
 {
-	std::shared_ptr<Model> mdl = nullptr;
+	std::shared_ptr<::Model> mdl = nullptr;
 	if(!Lua::IsSet(l, 1))
 		mdl = c_game->CreateModel();
 	else {
@@ -950,7 +951,7 @@ int Lua::game::Client::set_debug_render_filter(lua_State *l)
 	if(t["materialFilter"]) {
 		auto materialFilter = luabind::object {t["materialFilter"]};
 		filter->materialFilter = [materialFilter](CMaterial &mat) mutable -> bool {
-			auto r = materialFilter(static_cast<Material *>(&mat));
+			auto r = materialFilter(static_cast<::Material *>(&mat));
 			return luabind::object_cast<bool>(r);
 		};
 	}
@@ -958,7 +959,7 @@ int Lua::game::Client::set_debug_render_filter(lua_State *l)
 		auto entityFilter = luabind::object {t["entityFilter"]};
 		filter->entityFilter = [entityFilter](CBaseEntity &ent, CMaterial &mat) mutable -> bool {
 			auto &oEnt = ent.GetLuaObject();
-			auto r = entityFilter(oEnt, static_cast<Material *>(&mat));
+			auto r = entityFilter(oEnt, static_cast<::Material *>(&mat));
 			return luabind::object_cast<bool>(r);
 		};
 	}
@@ -966,7 +967,7 @@ int Lua::game::Client::set_debug_render_filter(lua_State *l)
 		auto meshFilter = luabind::object {t["meshFilter"]};
 		filter->meshFilter = [meshFilter](CBaseEntity &ent, CMaterial *mat, CModelSubMesh &mesh, pragma::RenderMeshIndex meshIdx) mutable -> bool {
 			auto &oEnt = ent.GetLuaObject();
-			auto r = meshFilter(oEnt, mat ? static_cast<Material *>(mat) : nullptr, mesh.shared_from_this(), meshIdx);
+			auto r = meshFilter(oEnt, mat ? static_cast<::Material *>(mat) : nullptr, mesh.shared_from_this(), meshIdx);
 			return luabind::object_cast<bool>(r);
 		};
 	}

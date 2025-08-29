@@ -5,13 +5,14 @@
 #include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
+#include "pragma/lua/libraries/c_lua_vulkan.h"
 #include "pragma/entities/entity_component_system_t.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
-#include "pragma/lua/libraries/c_lua_vulkan.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <prosper_command_buffer.hpp>
 
 import pragma.client.entities.components;
+import pragma.client.scripting.lua;
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT CEngine *c_engine;

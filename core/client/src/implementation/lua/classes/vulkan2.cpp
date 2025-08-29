@@ -1,11 +1,12 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include <pragma/lua/custom_constructor.hpp>
 #include <luabind/class.hpp>
 #include "pragma/lua/libraries/c_lua_vulkan.h"
-#include "pragma/lua/classes/c_lua_vulkan.hpp"
 #include "pragma/lua/policies/shared_from_this_policy.hpp"
 #include "pragma/lua/converters/shader_converter_t.hpp"
 #include <pragma/lua/converters/vector_converter_t.hpp>
@@ -31,6 +32,8 @@
 #include <pragma/lua/types/udm.hpp>
 #include <luainterface.hpp>
 #include <sharedutils/util.h>
+
+module pragma.client.scripting.lua.classes.vulkan;
 
 import pragma.client.model;
 

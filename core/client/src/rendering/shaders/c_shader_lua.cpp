@@ -3,10 +3,10 @@
 
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/c_shader_lua.hpp"
-#include "pragma/lua/libraries/c_lua_vulkan.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/rendering/render_processor.hpp"
 #include "pragma/rendering/shader_material/shader_material.hpp"
+#include "pragma/lua/libraries/c_lua_vulkan.h"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/lua/util.hpp>
@@ -19,6 +19,7 @@
 #include <wgui/wibase.h>
 
 import pragma.client.entities.components;
+import pragma.client.scripting.lua;
 
 extern DLLCLIENT CEngine *c_engine;
 

@@ -1,14 +1,32 @@
 // SPDX-FileCopyrightText: (c) 2025 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_LUA_VULKAN_HPP__
-#define __C_LUA_VULKAN_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/rendering/shaders/image/c_shader_gradient.hpp"
+#include "pragma/lua/libraries/c_lua_vulkan.h"
+#include <image/prosper_sampler.hpp>
+#include <image/prosper_image_view.hpp>
+#include <buffers/prosper_buffer.hpp>
+#include <buffers/prosper_swap_buffer.hpp>
+#include <buffers/prosper_render_buffer.hpp>
+#include <queries/prosper_timer_query.hpp>
+#include <queries/prosper_timestamp_query.hpp>
+#include <prosper_command_buffer.hpp>
+#include <prosper_framebuffer.hpp>
+#include <prosper_render_pass.hpp>
+#include <prosper_fence.hpp>
+#include <prosper_descriptor_set_group.hpp>
+#include "pragma/util/util_image.hpp"
+#include <prosper_event.hpp>
+#include <prosper_window.hpp>
+#include <prosper_swap_command_buffer.hpp>
 #include <buffers/prosper_buffer.hpp>
 
-namespace Lua {
+export module pragma.client.scripting.lua.classes.vulkan;
+
+export namespace Lua {
 	namespace Vulkan {
 		std::vector<pragma::ShaderGradient::Node> get_gradient_nodes(lua_State *l, const luabind::tableT<void> &tNodes);
 		namespace VKFramebuffer {
@@ -116,5 +134,3 @@ namespace Lua {
 		};
 	};
 };
-
-#endif

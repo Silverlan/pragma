@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include "luasystem.h"
-#include "pragma/lua/libraries/c_lua_vulkan.h"
 
 module pragma.client.scripting.lua.classes.texture;
 

@@ -12,7 +12,6 @@ module;
 #include "pragma/asset/c_util_model.hpp"
 #include <pragma/lua/classes/lmodel.h>
 #include "pragma/lua/classes/ldef_model.h"
-#include "pragma/lua/libraries/c_lua_vulkan.h"
 #include <pragma/lua/libraries/lfile.h>
 #include <buffers/prosper_buffer.hpp>
 

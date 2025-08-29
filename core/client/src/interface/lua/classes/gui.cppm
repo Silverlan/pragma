@@ -14,7 +14,6 @@ module;
 #include "pragma/lua/libraries/c_gui_callbacks.hpp"
 #include "pragma/gui/wisnaparea.hpp"
 #include "pragma/lua/classes/c_ldef_wgui.h"
-#include "pragma/lua/libraries/c_lua_vulkan.h"
 #include "pragma/lua/policies/gui_element_policy.hpp"
 #include "pragma/lua/converters/gui_element_converter_t.hpp"
 #include "pragma/lua/converters/shader_converter_t.hpp"

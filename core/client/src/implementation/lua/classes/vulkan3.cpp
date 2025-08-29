@@ -1,13 +1,39 @@
 // SPDX-FileCopyrightText: (c) 2025 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/c_engine.h"
+#include <pragma/lua/custom_constructor.hpp>
+#include <luabind/class.hpp>
 #include "pragma/lua/libraries/c_lua_vulkan.h"
-#include "pragma/lua/classes/c_lua_vulkan.hpp"
+#include "pragma/lua/policies/shared_from_this_policy.hpp"
+#include "pragma/lua/converters/shader_converter_t.hpp"
 #include <pragma/lua/converters/vector_converter_t.hpp>
+#include <pragma/lua/converters/optional_converter_t.hpp>
+#include <prosper_framebuffer.hpp>
+#include <prosper_fence.hpp>
+#include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
+#include <prosper_window.hpp>
+#include <prosper_render_pass.hpp>
+#include <prosper_prepared_command_buffer.hpp>
+#include <image/prosper_render_target.hpp>
+#include <queries/prosper_timestamp_query.hpp>
+#include <queries/prosper_timer_query.hpp>
+#include <buffers/prosper_buffer.hpp>
+#include <buffers/prosper_swap_buffer.hpp>
+#include <prosper_swap_command_buffer.hpp>
 #include <prosper_event.hpp>
+#include <sharedutils/datastream.h>
+#include "pragma/c_engine.h"
+#include <pragma/rendering/shaders/image/c_shader_gradient.hpp>
+#include <luabind/copy_policy.hpp>
+#include <pragma/lua/types/udm.hpp>
+#include <luainterface.hpp>
+#include <sharedutils/util.h>
+
+module pragma.client.scripting.lua.classes.vulkan;
 
 extern DLLCLIENT CEngine *c_engine;
 

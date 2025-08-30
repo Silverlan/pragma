@@ -8,6 +8,7 @@ module;
 #include <pragma/util/font_set.hpp>
 #include <wgui/fontmanager.h>
 #include <image/prosper_texture.hpp>
+#include <sharedutils/asset_loader/asset_load_info.hpp>
 
 export module pragma.client.scripting.lua.libraries.engine;
 

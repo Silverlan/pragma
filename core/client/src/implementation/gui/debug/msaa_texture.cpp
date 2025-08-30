@@ -6,6 +6,7 @@ module;
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
 #include "pragma/game/c_game.h"
+#include "pragma/lua/converters/gui_element_converter.hpp"
 #include <image/prosper_msaa_texture.hpp>
 #include <prosper_util.hpp>
 #include <image/prosper_sampler.hpp>

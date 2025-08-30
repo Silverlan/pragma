@@ -33,7 +33,6 @@
 #include <pragma/entities/entity_component_manager.hpp>
 #include "pragma/entities/entity_component_system.hpp"
 #ifdef _WIN32
-#include "pragma/lua/converters/gui_element_converter.hpp"
 #include "pragma/lua/converters/shader_converter.hpp"
 #endif
 #include "pragma/lua/converters/cast_conversions.hpp"
@@ -44,9 +43,6 @@
 #include <unordered_map>
 
 #ifdef __linux__
-#include <wgui/wihandle.h>
-#include "pragma/lua/policies/gui_element_policy.hpp"
-
 #include "pragma/lua/converters/cast_converter.hpp"
 #include "pragma/lua/converters/cast_converter_t.hpp"
 #ifdef _WIN32

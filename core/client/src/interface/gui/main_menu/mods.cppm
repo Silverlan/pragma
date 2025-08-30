@@ -4,6 +4,7 @@
 module;
 
 #include "pragma/clientdefinitions.h"
+#include "pragma/lua/converters/gui_element_converter.hpp"
 #include <atomic>
 #include <mutex>
 

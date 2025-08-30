@@ -4,6 +4,7 @@
 export;
 
 #include "pragma/clientdefinitions.h"
+#include "pragma/lua/converters/gui_element_converter.hpp"
 
 export module pragma.client.gui:silk_icon;
 

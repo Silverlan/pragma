@@ -7,6 +7,7 @@ module;
 #include "pragma/clientstate/clientutil.h"
 #include "pragma/c_engine.h"
 #include "pragma/util/curl_query_handler.hpp"
+#include "pragma/lua/converters/gui_element_converter.hpp"
 #include <pragma/addonsystem/addonsystem.h>
 #ifdef PRAGMA_CHROMIUM_ENABLED
 #include <../../../modules/pr_chromium/include/util_javascript.hpp>

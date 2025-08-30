@@ -11,6 +11,9 @@ module;
 #include <wgui/types/wirect.h>
 #include <wgui/types/widropdownmenu.h>
 #include <wgui/types/wiroot.h>
+#include <wgui/types/wibutton.h>
+#include <wgui/types/wiscrollbar.h>
+#include <wgui/types/wiarrow.h>
 #include "pragma/lua/classes/c_ldef_wgui.h"
 #include "pragma/lua/policies/gui_element_policy.hpp"
 #include "pragma/lua/converters/gui_element_converter_t.hpp"

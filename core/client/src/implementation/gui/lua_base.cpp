@@ -14,6 +14,8 @@ module pragma.client.gui;
 
 import :lua_base;
 
+#undef DrawState
+
 extern DLLCLIENT CGame *c_game;
 
 extern ClientState *client;

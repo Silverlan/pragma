@@ -6,14 +6,5 @@
 
 #include "pragma/clientdefinitions.h"
 #include <sharedutils/def_handle.h>
-#include <wgui/wibase.h>
-#include <wgui/wihandle.h>
-#include <wgui/types/wishape.h>
-#include <wgui/types/wirect.h>
-#include <wgui/types/witext.h>
-#include <wgui/types/witextentry.h>
-#include <wgui/types/wiscrollbar.h>
-#include <wgui/types/widropdownmenu.h>
-#include <wgui/types/wiarrow.h>
 
 #endif

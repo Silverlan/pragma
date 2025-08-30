@@ -7,6 +7,9 @@
 #include "pragma/gui/wgui_luainterface.h"
 #include <wgui/wibase.h>
 #include <wgui/types/wiroot.h>
+#include <wgui/types/witext.h>
+#include <wgui/types/wiarrow.h>
+#include <wgui/types/widropdownmenu.h>
 #include "pragma/lua/classes/c_ldef_wguihandles.h"
 #include <pragma/lua/raw_object.hpp>
 #include "pragma/gui/wiluahandlewrapper.h"

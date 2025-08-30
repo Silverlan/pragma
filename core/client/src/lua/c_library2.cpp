@@ -29,6 +29,10 @@
 #include <pragma/lua/converters/thread_pool_converter_t.hpp>
 #include <wgui/types/wiroot.h>
 #include <wgui/types/witooltip.h>
+#include <wgui/types/witext.h>
+#include <wgui/types/wiarrow.h>
+#include <wgui/types/witextentry.h>
+#include <wgui/types/widropdownmenu.h>
 #include <wgui/types/wicontentwrapper.hpp>
 #include <wgui/types/wi9slicerect.hpp>
 #include <prosper_window.hpp>

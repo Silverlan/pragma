@@ -7,6 +7,7 @@
 #include <wgui/wgui.h>
 #include <wgui/wibase.h>
 #include <wgui/types/wiroot.h>
+#include <wgui/types/witext.h>
 #include "pragma/game/c_game.h"
 #include "luasystem.h"
 #include "pragma/lua/classes/c_ldef_wgui.h"

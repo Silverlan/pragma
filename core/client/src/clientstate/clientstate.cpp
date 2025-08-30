@@ -35,6 +35,7 @@
 #include <pragma/networking/error.hpp>
 #include <pragma/networking/resources.h>
 #include <pragma/networking/networking_modules.hpp>
+#include <image/prosper_render_target.hpp>
 #include <pragma/engine_version.h>
 #include <pragma/logging.hpp>
 #include <scripting/lua/lua.hpp>

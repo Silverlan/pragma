@@ -50,7 +50,6 @@
 #include "pragma/lua/converters/cast_converter.hpp"
 #include "pragma/lua/converters/cast_converter_t.hpp"
 #ifdef _WIN32
-#include "pragma/lua/converters/gui_element_converter_t.hpp"
 #include "pragma/lua/converters/shader_converter_t.hpp"
 #endif
 #endif

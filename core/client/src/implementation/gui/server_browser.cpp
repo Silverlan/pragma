@@ -5,12 +5,12 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientutil.h"
-#include <wgui/types/wibutton.h>
 #include "wms_shared.h"
 #include "wms_request_filter.h"
 #include "wms_message.h"
 #include "pragma/networking/wv_message.h"
 #include <sharedutils/util_library.hpp>
+#include <wgui/wguifactories.h>
 #include "wmserverdata.h"
 #include <pragma/networking/game_server_data.hpp>
 #include <networkmanager/udp_handler/udp_message_dispatcher.h>
@@ -23,6 +23,8 @@ import :scroll_container;
 import :server_browser;
 import :silk_icon;
 import :table;
+
+import pragma.gui;
 import pragma.locale;
 
 LINK_WGUI_TO_CLASS(WIServerBrowser, WIServerBrowser);

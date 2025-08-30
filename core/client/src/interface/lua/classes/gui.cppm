@@ -12,7 +12,6 @@ module;
 #include <wgui/types/witext.h>
 #include <wgui/types/witextentry.h>
 #include <wgui/types/widropdownmenu.h>
-#include <wgui/types/wibutton.h>
 #include "pragma/lua/classes/c_ldef_wgui.h"
 #include "pragma/lua/policies/gui_element_policy.hpp"
 #include "pragma/lua/converters/shader_converter_t.hpp"

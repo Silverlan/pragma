@@ -6,7 +6,6 @@ module;
 #include "stdafx_client.h"
 #include "pragma/clientdefinitions.h"
 #include <wgui/types/witext.h>
-#include <wgui/types/wibutton.h>
 #include <wgui/types/wirect.h>
 #include <mathutil/umath.h>
 #include <prosper_window.hpp>
@@ -14,6 +13,8 @@ module;
 export module pragma.client.gui:frame;
 
 import :transformable;
+
+import pragma.gui;
 import pragma.platform;
 
 export

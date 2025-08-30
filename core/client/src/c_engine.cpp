@@ -50,7 +50,6 @@ namespace pragma::string {
 #include <pragma/entities/environment/effects/c_env_particle_system.h>
 #include <pragma/rendering/shaders/image/c_shader_gradient.hpp>
 #include <pragma/logging.hpp>
-#include <wgui/types/wicontextmenu.hpp>
 #include <wgui/types/witext.h>
 #include <wgui/types/witext_tags.hpp>
 #include <wgui/types/wiroot.h>
@@ -74,6 +73,7 @@ import pragma.client.gui;
 import pragma.client.model;
 import pragma.client.networking;
 import pragma.client.rendering.shaders;
+import pragma.gui;
 import pragma.shadergraph;
 import pragma.locale;
 #ifndef _MSC_VER

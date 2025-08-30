@@ -6,7 +6,6 @@ module;
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientutil.h"
 #include "pragma/c_engine.h"
-#include <wgui/types/wibutton.h>
 #include <fsys/filesystem.h>
 #include <wgui/types/witextentry.h>
 #include "pragma/game/gamemode/gamemodemanager.h"

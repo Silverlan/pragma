@@ -4,10 +4,11 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <wgui/types/wibutton.h>
 #include <wgui/wibase.h>
 
 export module pragma.client.gui:message_box;
+
+import pragma.gui;
 
 export {
 	class DLLCLIENT WIMessageBox : public WIBase {

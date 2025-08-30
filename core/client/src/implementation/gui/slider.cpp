@@ -5,12 +5,13 @@ module;
 
 #include "stdafx_client.h"
 #include <wgui/types/witext.h>
-#include <wgui/types/wibutton.h>
 
 module pragma.client.gui;
 
 import :slider;
 import :progress_bar;
+
+import pragma.gui;
 
 LINK_WGUI_TO_CLASS(WISlider, WISlider);
 

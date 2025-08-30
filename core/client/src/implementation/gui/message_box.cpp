@@ -6,13 +6,13 @@ module;
 #include "stdafx_client.h"
 #include <wgui/types/wirect.h>
 #include <wgui/types/witext.h>
-#include <wgui/types/wibutton.h>
 
 module pragma.client.gui;
 
 import :message_box;
 import :frame;
 
+import pragma.gui;
 import pragma.locale;
 
 LINK_WGUI_TO_CLASS(WIMessageBox, WIMessageBox);

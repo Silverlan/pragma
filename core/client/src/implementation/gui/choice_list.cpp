@@ -5,12 +5,12 @@ module;
 
 #include "stdafx_client.h"
 #include <wgui/types/witext.h>
-#include <wgui/types/wibutton.h>
 
 module pragma.client.gui;
 
 import :choice_list;
 
+import pragma.gui;
 import pragma.locale;
 import pragma.string.unicode;
 

@@ -6,7 +6,6 @@ module;
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
 #include <wgui/types/witext.h>
-#include <wgui/types/wibutton.h>
 #include <wgui/types/wirect.h>
 #include <wgui/types/wiroot.h>
 #include <mathutil/umath.h>
@@ -15,8 +14,9 @@ module;
 module pragma.client.gui;
 
 import :transformable;
-
 import :snap_area;
+
+import pragma.gui;
 
 extern DLLCLIENT CEngine *c_engine;
 

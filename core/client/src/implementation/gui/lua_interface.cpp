@@ -8,14 +8,13 @@ module;
 #include "pragma/game/c_game.h"
 #include <wgui/wibase.h>
 #include <wgui/types/wiroot.h>
+#include <wgui/types/wirect.h>
+#include <wgui/types/wiline.h>
 #include <wgui/types/witext.h>
-#include <wgui/types/wiarrow.h>
-#include <wgui/types/widropdownmenu.h>
 #include "pragma/lua/classes/c_ldef_wguihandles.h"
 #include <pragma/lua/raw_object.hpp>
 #include "pragma/gui/wiluahandlewrapper.h"
 #include <wgui/types/witextentry.h>
-#include <wgui/types/wi9slicerect.hpp>
 #include <pragma/lua/lua_call.hpp>
 
 module pragma.client.gui;

@@ -8,7 +8,6 @@ module;
 #include "pragma/clientstate/clientstate.h"
 #include <wgui/types/witext.h>
 #include <wgui/types/wirect.h>
-#include <wgui/types/wiscrollbar.h>
 #include <prosper_window.hpp>
 
 module pragma.client.gui;
@@ -16,6 +15,7 @@ module pragma.client.gui;
 import :scroll_container;
 import :table;
 
+import pragma.gui;
 import pragma.string.unicode;
 
 LINK_WGUI_TO_CLASS(WITable, WITable);

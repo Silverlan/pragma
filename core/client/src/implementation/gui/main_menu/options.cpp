@@ -6,7 +6,6 @@ module;
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
 #include "pragma/audio/c_audio.hpp"
-#include <wgui/types/widropdownmenu.h>
 #include <wgui/types/wibutton.h>
 #include <wgui/types/witext.h>
 #include <wgui/types/witextentry.h>
@@ -35,6 +34,7 @@ import :options_list;
 import :choice_list;
 import :slider;
 
+import pragma.gui;
 import pragma.pad;
 import pragma.locale;
 import pragma.string.unicode;

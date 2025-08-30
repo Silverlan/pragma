@@ -4,10 +4,11 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <wgui/types/wiscrollbar.h>
 #include <wgui/wibase.h>
 
 export module pragma.client.gui:scroll_container;
+
+import pragma.gui;
 
 export
 {

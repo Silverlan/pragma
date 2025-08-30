@@ -4,13 +4,14 @@
 module;
 
 #include "stdafx_client.h"
-#include <wgui/types/wiarrow.h>
 #include <wgui/types/wirect.h>
 #include <wgui/types/witext.h>
 
 module pragma.client.gui;
 
 import :tree_list;
+
+import pragma.gui;
 
 LINK_WGUI_TO_CLASS(WITreeList, WITreeList);
 LINK_WGUI_TO_CLASS(WITreeListElement, WITreeListElement);

@@ -6,7 +6,6 @@ module;
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientutil.h"
 #include "pragma/c_engine.h"
-#include <wgui/types/widropdownmenu.h>
 #include <wgui/types/wibutton.h>
 #include <fsys/filesystem.h>
 #include <wgui/types/witextentry.h>
@@ -25,6 +24,7 @@ import :main_menu_new_game;
 import :options_list;
 import :slider;
 
+import pragma.gui;
 import pragma.locale;
 import pragma.string.unicode;
 

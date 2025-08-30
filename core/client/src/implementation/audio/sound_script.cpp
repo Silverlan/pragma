@@ -1,16 +1,22 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
 #include "pragma/clientstate/clientstate.h"
+#include "pragma/audio/soundscript_events.h"
 #include "pragma/audio/c_alsound.h"
-#include "pragma/audio/c_soundscript.h"
 #include <sharedutils/util_string.h>
 #include "pragma/audio/c_sound_efx.hpp"
 #include <alsoundsystem.hpp>
 #include <algorithm>
 #include <udm.hpp>
+
+module pragma.client.audio;
+
+import :sound_script;
 
 extern DLLCLIENT CEngine *c_engine;
 extern ClientState *client;

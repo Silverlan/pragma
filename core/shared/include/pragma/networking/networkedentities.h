@@ -157,7 +157,6 @@ LINK_NETWORKED_PHYSICS_ENTITIES;
 #include "pragma/entities/func/c_func_brush.h"
 #include "pragma/entities/environment/c_env_microphone.h"
 #include "pragma/entities/func/c_func_kinematic.hpp"
-#include "pragma/entities/c_bot.h"
 #include "pragma/entities/point/c_point_target.h"
 #include "pragma/entities/c_wheel.hpp"
 #include "pragma/entities/environment/effects/c_env_smoke_trail.h"

@@ -5,6 +5,7 @@ module;
 
 export module pragma.client.entities.components;
 export import :animated_bvh;
+export import :bot;
 export import :bsp_leaf;
 export import :field_angle;
 export import :global_shader_input;

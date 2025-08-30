@@ -71,7 +71,6 @@
 #include "pragma/entities/components/liquid/c_liquid_component.hpp"
 #include "pragma/entities/func/c_funcbutton.h"
 #include "pragma/entities/game/c_game_occlusion_culler.hpp"
-#include "pragma/entities/c_bot.h"
 #include "pragma/entities/c_listener.h"
 #include "pragma/entities/c_viewbody.h"
 #include "pragma/entities/c_viewmodel.h"

@@ -17,7 +17,6 @@
 #include "pragma/input/input_binding_layer.hpp"
 #include "pragma/audio/c_laleffect.h"
 #include "pragma/audio/c_lalsound.hpp"
-#include "pragma/gui/wiluabase.h"
 #include "pragma/lua/classes/c_ldef_wgui.h"
 #include "pragma/lua/policies/gui_element_policy.hpp"
 #include "pragma/ai/c_lai.hpp"

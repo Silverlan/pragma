@@ -1,13 +1,18 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientstate.h"
-#include "pragma/gui/wiluabase.h"
 #include "luasystem.h"
 #include <wgui/wihandle.h>
 #include "pragma/lua/classes/c_ldef_wgui.h"
 #include <prosper_prepared_command_buffer.hpp>
+
+module pragma.client.gui;
+
+import :lua_base;
 
 extern DLLCLIENT CGame *c_game;
 

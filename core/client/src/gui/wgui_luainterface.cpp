@@ -13,11 +13,11 @@
 #include <wgui/types/witextentry.h>
 #include <wgui/types/witooltip.h>
 #include <wgui/types/wi9slicerect.hpp>
-#include "pragma/gui/wiluabase.h"
 #include <pragma/lua/converters/gui_element_converter_t.hpp>
 #include <pragma/lua/lua_call.hpp>
 
 import pragma.client.gui;
+import pragma.client.scripting.lua;
 
 extern ClientState *client;
 extern CGame *c_game;

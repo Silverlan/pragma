@@ -15,7 +15,6 @@
 #include "pragma/debug/c_debugoverlay.h"
 #include <wgui/wgui.h>
 #include <wgui/wibase.h>
-#include "pragma/gui/wiluabase.h"
 #include "luasystem.h"
 #include <wgui/wihandle.h>
 #include "cmaterialmanager.h"
@@ -110,6 +109,7 @@
 import pragma.client.ai;
 import pragma.client.debug;
 import pragma.client.entities.components;
+import pragma.client.gui;
 import pragma.client.model;
 import pragma.client.physics;
 import pragma.client.scripting.lua;

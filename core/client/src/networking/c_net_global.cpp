@@ -33,7 +33,6 @@
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_name_component.hpp"
 #include "pragma/entities/components/c_attachment_component.hpp"
-#include "pragma/gui/wiluabase.h"
 #include <pragma/math/intersection.h>
 #include <pragma/entities/baseentity_trace.hpp>
 #include <pragma/entities/components/map_component.hpp>
@@ -55,6 +54,7 @@
 import pragma.client.debug;
 import pragma.client.entities.components;
 import pragma.client.gui;
+import pragma.client.scripting.lua;
 
 enum class CLIENT_DROPPED;
 extern DLLCLIENT CEngine *c_engine;

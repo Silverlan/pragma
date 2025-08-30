@@ -4,7 +4,6 @@
 #include "stdafx_client.h"
 #include "pragma/lua/libraries/c_lgui.h"
 #include "pragma/lua/classes/c_ldef_wgui.h"
-#include "pragma/gui/wiluabase.h"
 #include "pragma/lua/libraries/lsound.h"
 #include "pragma/audio/c_lalsound.hpp"
 #include "pragma/input/input_binding_layer.hpp"
@@ -17,6 +16,7 @@
 #include <pragma/lua/policies/default_parameter_policy.hpp>
 #include <pragma/lua/util_logging.hpp>
 #include <pragma/input/inputhelper.h>
+#include <pragma/lua/handle_holder.hpp>
 #include <luainterface.hpp>
 #include <pragma/lua/custom_constructor.hpp>
 #include <pragma/lua/converters/string_view_converter_t.hpp>

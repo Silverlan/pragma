@@ -19,7 +19,6 @@
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/environment/lights/c_env_light.h"
 #include "pragma/entities/environment/lights/c_env_light_spot.h"
-#include "pragma/entities/c_flashlight.h"
 #include <pragma/entities/components/basetoggle.h>
 #include "pragma/entities/environment/c_env_fog_controller.h"
 #include "pragma/entities/environment/effects/c_env_explosion.h"

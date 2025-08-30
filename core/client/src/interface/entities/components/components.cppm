@@ -8,6 +8,7 @@ export import :animated_bvh;
 export import :bot;
 export import :bsp_leaf;
 export import :field_angle;
+export import :flashlight;
 export import :global_shader_input;
 export import :health;
 export import :hitbox_bvh;

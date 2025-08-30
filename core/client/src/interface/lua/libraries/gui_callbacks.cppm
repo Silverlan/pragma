@@ -4,6 +4,7 @@
 module;
 
 #include "pragma/clientdefinitions.h"
+#include <wgui/wibase.h>
 #include <pragma/lua/ldefinitions.h>
 
 export module pragma.client.scripting.lua.libraries.gui_callbacks;

@@ -3,6 +3,8 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
+
 export module pragma.client.rendering.shaders:debug_text;
 
 import :debug;

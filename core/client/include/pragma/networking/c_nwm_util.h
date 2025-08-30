@@ -5,6 +5,7 @@
 #define __C_NWM_UTIL_H__
 
 #include "pragma/clientdefinitions.h"
+#include "pragma/entities/c_baseentity.h"
 #include <pragma/networking/nwm_util.h>
 
 namespace nwm {

@@ -5,6 +5,7 @@
 #define __C_MODEL_H__
 #include "pragma/clientdefinitions.h"
 #include <pragma/model/model.h>
+#include "pragma/model/c_modelmesh.h"
 #include "material.h"
 
 class CModelMesh;

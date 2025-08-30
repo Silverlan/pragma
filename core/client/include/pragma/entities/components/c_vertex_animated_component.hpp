@@ -5,6 +5,7 @@
 #define __C_VERTEX_ANIMATED_COMPONENT_HPP__
 
 #include "pragma/clientdefinitions.h"
+#include "pragma/model/c_modelmesh.h"
 #include <pragma/entities/components/base_entity_component.hpp>
 
 namespace prosper {

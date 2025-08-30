@@ -5,6 +5,7 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/rendering/shaders/world/water/c_shader_water_splash.hpp"
+#include "pragma/model/c_modelmesh.h"
 #include <pragma/physics/phys_water_surface_simulator.hpp>
 
 export module pragma.client.physics:water_surface_simulator;

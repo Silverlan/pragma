@@ -4,6 +4,7 @@
 module;
 
 #include "pragma/clientdefinitions.h"
+#include "pragma/entities/c_listener.h"
 #include <pragma/lua/ldefinitions.h>
 
 export module pragma.client.scripting.lua.classes.listener;

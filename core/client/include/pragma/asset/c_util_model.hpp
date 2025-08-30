@@ -11,6 +11,7 @@
 #include <pragma/util/util_game.hpp>
 #include <pragma/asset/util_asset.hpp>
 #include <pragma/types.hpp>
+#include <cmaterial.h>
 #include <util_texture_info.hpp>
 #include <sharedutils/util_path.hpp>
 

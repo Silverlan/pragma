@@ -13,18 +13,13 @@
 #include <mathutil/uquat.h>
 #include <mathutil/uvec.h>
 #ifdef _WIN32
-#include "pragma/c_engine.h"
 #include <pragma/engine.h>
 #include "pragma/networkstate/networkstate.h"
-#include "pragma/clientstate/clientstate.h"
 #include <pragma/game/game.h>
-#include "pragma/game/c_game.h"
 #endif
 #include <pragma/entities/baseentity.h>
-#include "pragma/entities/c_baseentity.h"
 #include <pragma/entities/components/base_entity_component.hpp>
 #include <pragma/physics/physobj.h>
-#include <pragma/lua/luaapi.h>
 #include <pragma/audio/alsound.h>
 #include <pragma/console/convars.h>
 #include <pragma/networking/nwm_util.h>
@@ -32,20 +27,8 @@
 #include <sharedutils/util_string.h>
 #include <pragma/entities/entity_component_manager.hpp>
 #include "pragma/entities/entity_component_system.hpp"
-#ifdef _WIN32
-#include "pragma/lua/converters/shader_converter.hpp"
-#endif
-#include "pragma/lua/converters/cast_conversions.hpp"
 #include <algorithm>
 #include <vector>
 #include <string>
 #include <memory>
 #include <unordered_map>
-
-#ifdef __linux__
-#include "pragma/lua/converters/cast_converter.hpp"
-#include "pragma/lua/converters/cast_converter_t.hpp"
-#ifdef _WIN32
-#include "pragma/lua/converters/shader_converter_t.hpp"
-#endif
-#endif

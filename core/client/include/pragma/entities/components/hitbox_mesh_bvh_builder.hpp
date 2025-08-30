@@ -5,6 +5,7 @@
 #define __HITBOX_MESH_BVH_BUILDER_HPP__
 
 #include "pragma/networkdefinitions.h"
+#include "pragma/clientdefinitions.h"
 #include <pragma/util/util_thread_pool.hpp>
 #include <sharedutils/BS_thread_pool.hpp>
 #include <string>

@@ -10,8 +10,10 @@
 #include "pragma/lua/libraries/lasset.hpp"
 #include "pragma/asset/util_asset.hpp"
 #include "pragma/audio/c_laleffect.h"
+#include "pragma/clientstate/clientstate.h"
 #include "pragma/lua/converters/gui_element_converter_t.hpp"
 #include <pragma/lua/policies/core_policies.hpp>
+#include <alsound_effect.hpp>
 #include <luabind/copy_policy.hpp>
 #include <pragma/lua/policies/default_parameter_policy.hpp>
 #include <pragma/lua/util_logging.hpp>

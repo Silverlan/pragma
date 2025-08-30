@@ -4,6 +4,7 @@
 module;
 
 #include "stdafx_client.h"
+#include "pragma/clientdefinitions.h"
 #include <wgui/types/witext.h>
 #include <wgui/types/wibutton.h>
 #include <wgui/types/wirect.h>

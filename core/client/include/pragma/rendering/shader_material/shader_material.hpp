@@ -6,6 +6,7 @@
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/rendering/shader_input_data.hpp"
+#include <cmaterial.h>
 #include <udm.hpp>
 
 import pragma.shadergraph;

@@ -4,6 +4,7 @@
 #ifndef __C_ENTITY_CHARACTER_COMPONENT_MODEL_HPP__
 #define __C_ENTITY_CHARACTER_COMPONENT_MODEL_HPP__
 
+#include "pragma/clientdefinitions.h"
 #include <pragma/entities/components/base_entity_component.hpp>
 
 class CBaseEntity;

@@ -6,6 +6,7 @@
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/c_baseentity.h"
+#include <cmaterial.h>
 
 class PhysWaterSurfaceSimulator;
 namespace pragma {

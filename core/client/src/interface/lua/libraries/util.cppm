@@ -5,6 +5,9 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/c_ldefinitions.h"
+#include "pragma/entities/environment/c_env_camera.h"
+#include "pragma/entities/environment/lights/c_env_light.h"
+#include <util_image_buffer.hpp>
 #include <sharedutils/util_parallel_job.hpp>
 #include <pragma/entities/components/lightmap_data_cache.hpp>
 #include <mathutil/uvec.h>

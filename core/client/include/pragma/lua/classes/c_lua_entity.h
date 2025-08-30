@@ -5,6 +5,7 @@
 #define __C_LUA_ENTITY_H__
 
 #include "pragma/clientdefinitions.h"
+#include "pragma/entities/c_baseentity.h"
 #include <pragma/lua/luaobjectbase.h>
 #include <pragma/lua/handle_holder.hpp>
 

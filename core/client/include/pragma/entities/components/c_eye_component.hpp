@@ -6,6 +6,7 @@
 
 #include "pragma/clientdefinitions.h"
 #include <pragma/entities/components/base_entity_component.hpp>
+#include "pragma/model/c_modelmesh.h"
 #include <mathutil/transform.hpp>
 #include <mathutil/uvec.h>
 

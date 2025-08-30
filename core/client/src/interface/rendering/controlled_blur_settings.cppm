@@ -4,6 +4,7 @@
 module;
 
 #include "pragma/clientdefinitions.h"
+#include "prosper_command_buffer.hpp"
 #include <memory>
 
 export module pragma.client.rendering:controlled_blur_settings;

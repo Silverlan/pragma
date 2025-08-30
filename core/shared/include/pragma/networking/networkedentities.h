@@ -161,7 +161,6 @@ LINK_NETWORKED_PHYSICS_ENTITIES;
 #include "pragma/entities/environment/effects/c_env_smoke_trail.h"
 #include "pragma/entities/environment/effects/c_env_fire.h"
 #include "pragma/entities/components/c_game_component.hpp"
-#include "pragma/entities/c_player.hpp"
 #include "pragma/entities/c_ent_debug.hpp"
 LINK_NETWORKED_ENTITIES;
 LINK_NETWORKED_PHYSICS_ENTITIES;

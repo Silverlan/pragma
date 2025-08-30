@@ -35,6 +35,7 @@ DLLCLIENT void LinkNetworkedEntityClient(CBaseEntity *(*factory)(unsigned int))
 	g_ClEntityNetworkMap->RegisterFactory(factory);
 }
 
+import pragma.client.entities;
 import pragma.client.entities.components;
 
 #include "pragma/networking/networkedentities.h"

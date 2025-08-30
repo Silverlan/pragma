@@ -39,7 +39,6 @@
 #include "pragma/gui/wiluahandlewrapper.h"
 #include "pragma/entities/c_viewmodel.h"
 #include "pragma/entities/c_viewbody.h"
-#include "pragma/entities/c_player.hpp"
 #include <pragma/physics/physobj.h>
 #include <pragma/util/util_game.hpp>
 #include "pragma/console/c_cvar.h"
@@ -108,6 +107,7 @@
 
 import pragma.client.ai;
 import pragma.client.debug;
+import pragma.client.entities;
 import pragma.client.entities.components;
 import pragma.client.gui;
 import pragma.client.model;

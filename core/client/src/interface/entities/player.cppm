@@ -1,13 +1,25 @@
-// SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
+// SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "stdafx_client.h"
-#include "pragma/entities/c_player.hpp"
+module;
+
+#include "pragma/clientdefinitions.h"
+#include "pragma/entities/c_baseentity.h"
+#include <pragma/entities/baseplayer.hpp>
 #include "pragma/entities/c_entityfactories.h"
 #include "pragma/entities/components/c_character_component.hpp"
 #include "pragma/entities/components/c_player_component.hpp"
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
+
+export module pragma.client.entities:player;
+
+import pragma.entities.components;
+
+export class DLLCLIENT CPlayer : public CBaseEntity, public BasePlayer {
+  public:
+	virtual void Initialize() override;
+};
 
 LINK_ENTITY_TO_CLASS(player, CPlayer);
 

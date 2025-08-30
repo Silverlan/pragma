@@ -28,7 +28,6 @@
 #include "pragma/entities/environment/c_env_quake.h"
 #include "pragma/debug/c_debugoverlay.h"
 #include "pragma/entities/components/c_weapon_component.hpp"
-#include "pragma/entities/c_player.hpp"
 #include "pragma/entities/components/c_sound_emitter_component.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_name_component.hpp"
@@ -52,6 +51,7 @@
 #include <pragma/util/giblet_create_info.hpp>
 
 import pragma.client.debug;
+import pragma.client.entities;
 import pragma.client.entities.components;
 import pragma.client.gui;
 import pragma.client.scripting.lua;

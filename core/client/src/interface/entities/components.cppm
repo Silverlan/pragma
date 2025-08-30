@@ -33,5 +33,6 @@ export import :rasterization_renderer;
 export import :raytracing_renderer;
 export import :score;
 export import :shooter;
+export import :skybox;
 export import :time_scale;
 // export import pragma.client.entities.components.material_override;

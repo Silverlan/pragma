@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/entities/c_skybox.h"
 #include "pragma/entities/c_entityfactories.h"
 #include "pragma/game/c_game.h"
 #include "pragma/rendering/c_rendermode.h"
@@ -22,6 +23,10 @@
 #include <pragma/entities/entity_iterator.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <cmaterial.h>
+
+module pragma.client.entities.components;
+
+import :skybox;
 
 import pragma.client.entities.components;
 import pragma.client.rendering.shaders;

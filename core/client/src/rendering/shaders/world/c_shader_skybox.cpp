@@ -6,7 +6,6 @@
 #include "pragma/rendering/render_processor.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/environment/c_sky_camera.hpp"
-#include "pragma/entities/c_skybox.h"
 #include "pragma/model/c_vertex_buffer_data.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include <shader/prosper_pipeline_create_info.hpp>
@@ -16,6 +15,7 @@
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <cmaterial.h>
 
+import pragma.client.entities.components;
 import pragma.client.model;
 
 using namespace pragma;

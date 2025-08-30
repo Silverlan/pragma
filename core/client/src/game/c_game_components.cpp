@@ -86,7 +86,6 @@
 #include "pragma/entities/prop/c_prop_dynamic.hpp"
 #include "pragma/entities/prop/c_prop_physics.h"
 #include "pragma/entities/trigger/c_trigger_touch.h"
-#include "pragma/entities/c_skybox.h"
 #include "pragma/entities/c_flashlight.h"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"

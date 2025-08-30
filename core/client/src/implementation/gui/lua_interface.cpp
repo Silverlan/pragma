@@ -1,10 +1,11 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
-#include "pragma/gui/wgui_luainterface.h"
 #include <wgui/wibase.h>
 #include <wgui/types/wiroot.h>
 #include <wgui/types/witext.h>
@@ -16,10 +17,12 @@
 #include <wgui/types/witextentry.h>
 #include <wgui/types/witooltip.h>
 #include <wgui/types/wi9slicerect.hpp>
-#include <pragma/lua/converters/gui_element_converter_t.hpp>
 #include <pragma/lua/lua_call.hpp>
 
-import pragma.client.gui;
+module pragma.client.gui;
+
+import :lua_interface;
+
 import pragma.client.scripting.lua;
 
 extern ClientState *client;

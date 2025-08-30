@@ -7,12 +7,13 @@ module;
 #include <wgui/wibase.h>
 #include <pragma/lua/luaapi.h>
 #include <prosper_prepared_command_buffer.hpp>
-#include "pragma/gui/wgui_luainterface.h"
 #include "pragma/lua/luaobjectbase.h"
 #include <pragma/lua/lua_call.hpp>
 #include <pragma/lua/handle_holder.hpp>
 
 export module pragma.client.gui:lua_base;
+
+import :lua_interface;
 
 #define LUAGUI_CALL_MEMBER(name, numargs, numret, args, ret)                                                                                                                                                                                                                                     \
 	{                                                                                                                                                                                                                                                                                            \

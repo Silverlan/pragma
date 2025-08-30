@@ -5,7 +5,6 @@
 #include "pragma/game/c_game.h"
 #include "pragma/entities/c_entityfactories.h"
 #include "pragma/entities/environment/c_env_camera.h"
-#include "pragma/lua/converters/gui_element_converter_t.hpp"
 #include "pragma/lua/c_lua_script_watcher.hpp"
 #include "pragma/input/input_binding_layer.hpp"
 #include "pragma/model/c_polymesh.h"
@@ -55,7 +54,6 @@
 #include <pragma/lua/luacallback.h>
 #include "pragma/rendering/occlusion_culling/chc.hpp"
 #include "pragma/rendering/c_msaa.h"
-#include "pragma/gui/wgui_luainterface.h"
 #include "textureinfo.h"
 #include "pragma/networking/iclient.hpp"
 #include <pragma/networking/nwm_util.h>

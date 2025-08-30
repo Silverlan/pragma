@@ -15,7 +15,6 @@
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/audio/c_soundscript.h"
 #include "luasystem.h"
-#include "pragma/gui/wgui_luainterface.h"
 #include "pragma/lua/libraries/c_lgui.h"
 #include "pragma/util/c_resource_watcher.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"

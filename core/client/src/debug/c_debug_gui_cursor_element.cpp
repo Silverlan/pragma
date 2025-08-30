@@ -5,13 +5,14 @@
 #include "pragma/c_engine.h"
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/console/c_cvar_global_functions.h"
-#include "pragma/gui/wgui_luainterface.h"
 #include <util_image.hpp>
 #include <wgui/types/witext.h>
 #include <wgui/types/wirect.h>
 #include <wgui/types/wiroot.h>
 #include <prosper_window.hpp>
 #include <fsys/ifile.hpp>
+
+import pragma.client.gui;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;

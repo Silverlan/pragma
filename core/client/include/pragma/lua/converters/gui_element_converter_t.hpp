@@ -5,7 +5,6 @@
 #define __LUA_GUI_ELEMENT_CONVERTERS_T_HPP__
 
 #include "pragma/lua/converters/gui_element_converter.hpp"
-#include "pragma/gui/wgui_luainterface.h"
 
 template<typename T, typename TConverter>
 template<class U>

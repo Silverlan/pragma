@@ -6,12 +6,12 @@ module;
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientstate.h"
 #include <wgui/wibase.h>
-#include "pragma/gui/wgui_luainterface.h"
 #include <pragma/lua/lua_call.hpp>
 #include <queue>
 
 module pragma.client.gui;
 
+import :lua_interface;
 import :lua_skin;
 
 extern DLLCLIENT ClientState *client;

@@ -1,15 +1,16 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __WGUI_LUAINTERFACE_H__
-#define __WGUI_LUAINTERFACE_H__
+module;
 
 #include "pragma/clientdefinitions.h"
+#include "pragma/game/c_game.h"
+#include <wgui/wibase.h>
 #include "luasystem.h"
 
-class WIBase;
-class CGame;
-class DLLCLIENT WGUILuaInterface {
+export module pragma.client.gui:lua_interface;
+
+export class DLLCLIENT WGUILuaInterface {
   private:
 	static lua_State *m_guiLuaState;
 	static CallbackHandle m_cbGameStart;
@@ -27,5 +28,3 @@ class DLLCLIENT WGUILuaInterface {
 
 	static void ClearGUILuaObjects(WIBase &el);
 };
-
-#endif

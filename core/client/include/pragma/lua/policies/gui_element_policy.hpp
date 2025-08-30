@@ -8,7 +8,6 @@
 #include <luabind/detail/policy.hpp>
 #include <sharedutils/util.h>
 #include <sharedutils/util_shared_handle.hpp>
-#include "pragma/gui/wgui_luainterface.h"
 
 namespace luabind {
 	namespace detail {

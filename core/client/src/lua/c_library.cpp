@@ -10,7 +10,6 @@
 #include "pragma/lua/libraries/c_lgui.h"
 #include "pragma/lua/classes/c_lshader.h"
 #include "pragma/lua/libraries/lasset.hpp"
-#include "pragma/lua/converters/gui_element_converter_t.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/entities/components/lightmap_data_cache.hpp"

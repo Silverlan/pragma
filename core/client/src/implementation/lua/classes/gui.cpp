@@ -6,7 +6,6 @@ module;
 #include "stdafx_client.h"
 #include <wgui/wibase.h>
 #include <wgui/wihandle.h>
-#include <wgui/types/witooltip.h>
 #include "luasystem.h"
 #include <wgui/types/wirect.h>
 #include <wgui/types/widropdownmenu.h>
@@ -45,6 +44,7 @@ module pragma.client.scripting.lua.classes.gui;
 import pragma.client.scripting.lua.libraries.gui_callbacks;
 
 import pragma.client.gui;
+import pragma.gui;
 import pragma.string.unicode;
 // import pragma.scripting.lua;
 

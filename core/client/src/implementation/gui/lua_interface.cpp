@@ -15,7 +15,6 @@ module;
 #include <pragma/lua/raw_object.hpp>
 #include "pragma/gui/wiluahandlewrapper.h"
 #include <wgui/types/witextentry.h>
-#include <wgui/types/witooltip.h>
 #include <wgui/types/wi9slicerect.hpp>
 #include <pragma/lua/lua_call.hpp>
 
@@ -24,6 +23,7 @@ module pragma.client.gui;
 import :lua_interface;
 
 import pragma.client.scripting.lua;
+import pragma.gui;
 
 extern ClientState *client;
 extern CGame *c_game;

@@ -6,7 +6,6 @@ module;
 #include "pragma/definitions.h"
 #include <wgui/wibase.h>
 #include <wgui/wihandle.h>
-#include <wgui/types/witooltip.h>
 #include "luasystem.h"
 #include <wgui/types/wirect.h>
 #include <wgui/types/widropdownmenu.h>
@@ -45,6 +44,7 @@ module;
 export module pragma.client.scripting.lua.classes.gui;
 
 import pragma.client.gui;
+import pragma.gui;
 
 export namespace Lua {
 	namespace gui {

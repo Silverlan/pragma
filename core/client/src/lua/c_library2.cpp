@@ -27,7 +27,6 @@
 #include <pragma/lua/converters/optional_converter_t.hpp>
 #include <pragma/lua/converters/thread_pool_converter_t.hpp>
 #include <wgui/types/wiroot.h>
-#include <wgui/types/witooltip.h>
 #include <wgui/types/witext.h>
 #include <wgui/types/wiarrow.h>
 #include <wgui/types/witextentry.h>
@@ -41,6 +40,7 @@
 import pragma.audio.util;
 import pragma.client.gui;
 import pragma.client.scripting.lua;
+import pragma.gui;
 import pragma.platform;
 import pragma.string.unicode;
 

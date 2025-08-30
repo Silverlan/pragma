@@ -56,7 +56,6 @@
 #include <prosper_prepared_command_buffer.hpp>
 #include <luabind/copy_policy.hpp>
 #include <fsys/ifile.hpp>
-#include <wgui/types/witooltip.h>
 #include <wgui/types/wiroot.h>
 #include <wgui/types/wicontentwrapper.hpp>
 
@@ -66,6 +65,7 @@ import pragma.string.unicode;
 import pragma.client.gui;
 import pragma.client.rendering.shaders;
 import pragma.client.scripting.lua;
+import pragma.gui;
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;

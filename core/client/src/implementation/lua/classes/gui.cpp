@@ -11,7 +11,6 @@ module;
 #include <wgui/types/wirect.h>
 #include <wgui/types/widropdownmenu.h>
 #include <wgui/types/wiroot.h>
-#include "pragma/lua/libraries/c_gui_callbacks.hpp"
 #include "pragma/lua/classes/c_ldef_wgui.h"
 #include "pragma/lua/libraries/c_lua_vulkan.h"
 #include "pragma/lua/policies/gui_element_policy.hpp"
@@ -44,6 +43,8 @@ module;
 #include <pragma/debug/intel_vtune.hpp>
 
 module pragma.client.scripting.lua.classes.gui;
+
+import pragma.client.scripting.lua.libraries.gui_callbacks;
 
 import pragma.client.gui;
 import pragma.string.unicode;

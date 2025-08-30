@@ -20,6 +20,7 @@ export import pragma.client.scripting.lua.libraries.engine;
 export import pragma.client.scripting.lua.libraries.ents;
 export import pragma.client.scripting.lua.libraries.game;
 export import pragma.client.scripting.lua.libraries.global;
+export import pragma.client.scripting.lua.libraries.gui_callbacks;
 export import pragma.client.scripting.lua.libraries.import_lib;
 export import pragma.client.scripting.lua.libraries.locale;
 export import pragma.client.scripting.lua.libraries.sound;

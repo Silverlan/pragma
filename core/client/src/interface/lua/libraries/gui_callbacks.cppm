@@ -1,14 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2022 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_GUI_CALLBACKS_HPP__
-#define __C_GUI_CALLBACKS_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include <pragma/lua/ldefinitions.h>
 
-class WIBase;
-namespace Lua {
+export module pragma.client.scripting.lua.libraries.gui_callbacks;
+
+export namespace Lua {
 	namespace gui {
 		// Note: This has to be a C-function pointer, because some callbacks may be registered
 		// from binary modules which are unloaded before the client-module is unloaded, which could cause
@@ -17,5 +17,3 @@ namespace Lua {
 		DLLCLIENT void register_lua_callback(std::string className, std::string callbackName, LUA_CALLBACK fCb);
 	};
 };
-
-#endif

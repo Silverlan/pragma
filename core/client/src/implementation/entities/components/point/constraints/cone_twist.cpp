@@ -11,7 +11,7 @@ module;
 
 module pragma.client.entities.components;
 
-import :constraint_cone_twist;
+import :point_constraint_cone_twist;
 
 using namespace pragma;
 

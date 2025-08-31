@@ -11,7 +11,7 @@ module;
 
 module pragma.client.entities.components;
 
-import :constraint_slider;
+import :point_constraint_slider;
 
 using namespace pragma;
 

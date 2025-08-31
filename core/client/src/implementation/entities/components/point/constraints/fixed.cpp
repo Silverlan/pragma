@@ -11,7 +11,7 @@ module;
 
 module pragma.client.entities.components;
 
-import :constraint_fixed;
+import :point_constraint_fixed;
 
 using namespace pragma;
 

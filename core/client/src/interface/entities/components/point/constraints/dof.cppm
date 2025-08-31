@@ -8,7 +8,7 @@ module;
 #include "pragma/entities/point/constraints/point_constraint_dof.h"
 #include "pragma/entities/components/c_entity_component.hpp"
 
-export module pragma.client.entities.components:constraint_dof;
+export module pragma.client.entities.components:point_constraint_dof;
 
 export {
 	namespace pragma {

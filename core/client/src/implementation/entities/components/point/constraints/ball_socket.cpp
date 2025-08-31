@@ -11,7 +11,7 @@ module;
 
 module pragma.client.entities.components;
 
-import :constraint_ball_socket;
+import :point_constraint_ball_socket;
 
 using namespace pragma;
 

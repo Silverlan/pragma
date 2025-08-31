@@ -11,7 +11,7 @@ module;
 
 module pragma.client.entities.components;
 
-import :constraint_dof;
+import :point_constraint_dof;
 
 using namespace pragma;
 

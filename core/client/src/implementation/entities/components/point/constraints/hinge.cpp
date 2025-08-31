@@ -11,7 +11,7 @@ module;
 
 module pragma.client.entities.components;
 
-import :constraint_hinge;
+import :point_constraint_hinge;
 
 using namespace pragma;
 

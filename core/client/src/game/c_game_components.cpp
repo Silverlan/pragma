@@ -68,8 +68,6 @@
 #include "pragma/entities/c_listener.h"
 #include "pragma/entities/c_viewbody.h"
 #include "pragma/entities/c_viewmodel.h"
-#include "pragma/entities/point/c_point_rendertarget.h"
-#include "pragma/entities/point/c_point_target.h"
 #include "pragma/entities/prop/c_prop_base.hpp"
 #include "pragma/entities/prop/c_prop_dynamic.hpp"
 #include "pragma/entities/prop/c_prop_physics.h"

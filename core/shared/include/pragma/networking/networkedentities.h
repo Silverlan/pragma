@@ -136,7 +136,6 @@ LINK_NETWORKED_PHYSICS_ENTITIES;
 #include "pragma/entities/components/liquid/c_liquid_component.hpp"
 #include "pragma/entities/trigger/c_trigger_touch.h"
 #include "pragma/entities/environment/audio/c_env_soundscape.h"
-#include "pragma/entities/environment/c_env_microphone.h"
 #include "pragma/entities/c_wheel.hpp"
 #include "pragma/entities/environment/effects/c_env_smoke_trail.h"
 #include "pragma/entities/environment/effects/c_env_fire.h"

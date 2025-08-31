@@ -13,6 +13,7 @@
 #include "pragma/rendering/shaders/world/c_shader_prepass.hpp"
 #include "pragma/entities/util/c_util_pbr_converter.hpp"
 #include "pragma/entities/environment/env_timescale.h"
+#include "pragma/entities/environment/env_microphone_base.h"
 #include <pragma/lua/classes/lproperty_generic.hpp>
 #include <pragma/lua/classes/ldef_vector.h>
 #include <pragma/lua/classes/ldef_color.h>
@@ -90,7 +91,6 @@
 #include "pragma/entities/environment/lights/c_env_light_point.h"
 #include "pragma/entities/environment/lights/c_env_light_spot.h"
 #include "pragma/entities/environment/lights/c_env_light_spot_vol.h"
-#include "pragma/entities/environment/c_env_microphone.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/entities/environment/effects/c_env_smoke_trail.h"
 #include "pragma/entities/environment/audio/c_env_sound.h"

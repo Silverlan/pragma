@@ -117,7 +117,6 @@ LINK_NETWORKED_PHYSICS_ENTITIES;
 #elif DLLCLIENT_EX
 #include "pragma/entities/c_entityfactories.h"
 #include "pragma/entities/c_world.h"
-#include "pragma/entities/prop/c_prop_physics.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/entities/environment/audio/c_env_sound.h"
 #include "pragma/entities/environment/lights/c_env_light_spot.h"
@@ -139,7 +138,6 @@ LINK_NETWORKED_PHYSICS_ENTITIES;
 #include "pragma/entities/environment/lights/c_env_light_spot_vol.h"
 #include "pragma/entities/components/liquid/c_liquid_component.hpp"
 #include "pragma/entities/trigger/c_trigger_touch.h"
-#include "pragma/entities/prop/c_prop_dynamic.hpp"
 #include "pragma/entities/environment/audio/c_env_soundscape.h"
 #include "pragma/entities/environment/c_env_microphone.h"
 #include "pragma/entities/c_wheel.hpp"

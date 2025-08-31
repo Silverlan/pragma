@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/entities/prop/c_prop_physics.h"
 #include "pragma/entities/c_entityfactories.h"
 #include <pragma/physics/physobj.h>
 #include "pragma/physics/movetypes.h"
@@ -10,6 +11,10 @@
 #include "pragma/entities/components/c_render_component.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
+
+module pragma.client.entities.components;
+
+import :prop_physics;
 
 using namespace pragma;
 

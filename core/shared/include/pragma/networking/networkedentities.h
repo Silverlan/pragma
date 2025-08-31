@@ -122,7 +122,6 @@ LINK_NETWORKED_PHYSICS_ENTITIES;
 #include "pragma/entities/environment/lights/c_env_light_spot.h"
 #include "pragma/entities/environment/lights/c_env_light_directional.h"
 #include "pragma/entities/environment/lights/c_env_light_point.h"
-#include "pragma/entities/environment/c_env_decal.h"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/environment/effects/c_env_explosion.h"
 #include "pragma/entities/environment/audio/c_env_sound_dsp.h"

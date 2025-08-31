@@ -19,6 +19,8 @@ export import :forwardp_light_culling;
 export import :hdr;
 export import :merge_2d_image_to_equirectangular;
 export import :merge_images;
+export import :particle_model;
+export import :particle_model_shadow;
 export import :particle_polyboard;
 export import :particle_polyboard_shadow;
 export import :pp_bloom_blur;

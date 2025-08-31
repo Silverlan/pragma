@@ -6,12 +6,11 @@ module;
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
-#include "pragma/rendering/shaders/particles/c_shader_particle_model.hpp"
-#include "pragma/rendering/shaders/particles/c_shader_particle_model_shadow.hpp"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
+#include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/entities/components/c_scene_component.hpp"
 #include <pragma/math/intersection.h>
@@ -26,6 +25,7 @@ module pragma.client.particle_system;
 import :renderer_model;
 
 import pragma.client.entities.components;
+import pragma.client.rendering.shaders;
 
 REGISTER_PARTICLE_RENDERER(model, CParticleRendererModel);
 

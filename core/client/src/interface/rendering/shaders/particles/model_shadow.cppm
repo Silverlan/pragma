@@ -1,8 +1,10 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_SHADER_PARTICLE_MODEL_SHADOW_HPP__
-#define __C_SHADER_PARTICLE_MODEL_SHADOW_HPP__
+module;
+
+export module pragma.client.rendering.shaders:particle_model_shadow;
+
 // prosper TODO
 #if 0
 #include "c_shader_shadow.h"
@@ -31,5 +33,4 @@ namespace Shader
 		virtual void InitializeVertexDescriptions(std::vector<vk::VertexInputBindingDescription> &vertexBindingDescriptions,std::vector<vk::VertexInputAttributeDescription> &vertexAttributeDescriptions) override;
 	};
 };
-#endif
 #endif

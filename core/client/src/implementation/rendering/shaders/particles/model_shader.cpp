@@ -1,9 +1,10 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/particles/c_shader_particle_2d_base.hpp"
-#include "pragma/rendering/shaders/particles/c_shader_particle_model.hpp"
 #include "pragma/entities/entity_instance_index_buffer.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include <shader/prosper_pipeline_create_info.hpp>
@@ -11,6 +12,10 @@
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_util.hpp>
 #include <prosper_descriptor_set_group.hpp>
+
+module pragma.client.rendering.shaders;
+
+import :particle_model;
 
 using namespace pragma;
 

@@ -19,6 +19,7 @@ export import :forwardp_light_culling;
 export import :hdr;
 export import :merge_2d_image_to_equirectangular;
 export import :merge_images;
+export import :particle_animated_sprites;
 export import :particle_blob;
 export import :particle_blob_shadow;
 export import :particle_model;

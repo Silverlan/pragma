@@ -13,7 +13,6 @@
 #include "pragma/rendering/shaders/world/c_shader_prepass.hpp"
 #include "pragma/rendering/shaders/world/c_shader_noop.hpp"
 #include "pragma/rendering/shaders/particles/c_shader_particle.hpp"
-#include "pragma/rendering/shaders/particles/c_shader_particle_animated_sprites.hpp"
 #include "pragma/rendering/shaders/c_shader_shadow.hpp"
 #include "pragma/rendering/shaders/world/c_shader_skybox.hpp"
 #include "pragma/rendering/shaders/world/c_shader_loading.hpp"

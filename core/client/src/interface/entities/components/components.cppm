@@ -13,6 +13,7 @@ export import :env_microphone;
 export import :env_reflection_probe;
 export import :env_timescale;
 export import :env_weather;
+export import :env_wind;
 export import :field_angle;
 export import :flashlight;
 export import :bsp_leaf;

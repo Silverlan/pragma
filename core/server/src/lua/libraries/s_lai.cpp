@@ -11,7 +11,6 @@
 #include "pragma/ai/ai_task.h"
 #include "pragma/ai/ai_task_decorator.h"
 #include "pragma/lua/classes/s_laimemory.h"
-#include "pragma/lua/classes/s_lfaction.h"
 #include "pragma/lua/classes/s_lai_schedule.h"
 #include "pragma/entities/components/s_ai_component.hpp"
 #include "pragma/ai/ai_memory.h"

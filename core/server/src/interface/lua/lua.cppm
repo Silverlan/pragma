@@ -5,3 +5,4 @@ module;
 
 export module pragma.server.scripting.lua;
 export import pragma.server.scripting.lua.classes.ai_squad;
+export import pragma.server.scripting.lua.classes.faction;

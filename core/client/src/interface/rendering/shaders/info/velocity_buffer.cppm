@@ -1,13 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2022 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_SHADER_VELOCITY_BUFFER_HPP__
-#define __C_SHADER_VELOCITY_BUFFER_HPP__
+module;
 
 #include "pragma/rendering/shaders/world/c_shader_prepass.hpp"
+#include <texturemanager/texture.h>
 
-class Texture;
-namespace pragma {
+export module pragma.client.rendering.shaders:velocity_buffer;
+
+export namespace pragma {
 	class DLLCLIENT ShaderVelocityBuffer : public ShaderPrepassBase {
 	  public:
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_MOTION_BLUR;
@@ -28,5 +29,3 @@ namespace pragma {
 		virtual void InitializeShaderResources() override;
 	};
 };
-
-#endif

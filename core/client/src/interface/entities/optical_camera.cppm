@@ -9,11 +9,11 @@ module;
 
 export module pragma.client.entities.components:optical_camera;
 
+import pragma.client.rendering.shaders;
+
 export namespace pragma {
 	class DLLCLIENT COpticalCameraComponent final : public BaseEntityComponent {
 	  public:
-		enum class Flags : uint32_t { None = 0, DebugShowFocus = 1, EnableVignette = DebugShowFocus << 1u, PentagonBokehShape = EnableVignette << 1u, DebugShowDepth = PentagonBokehShape << 1u };
-
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 
 		void SetDebugShowFocus(bool enabled);
@@ -78,9 +78,6 @@ export namespace pragma {
 		float m_vignetteOuterBorder = 1.3f;
 		float m_pentagonShapeFeather = 0.4f;
 
-		Flags m_flags = Flags::EnableVignette;
+		ShaderPPDoF::Flags m_flags = ShaderPPDoF::Flags::EnableVignette;
 	};
-};
-export {
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::COpticalCameraComponent::Flags)
 };

@@ -1,12 +1,13 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_SHADER_PARTICLE_POLYBOARD_HPP__
-#define __C_SHADER_PARTICLE_POLYBOARD_HPP__
+module;
 
 #include "pragma/rendering/shaders/particles/c_shader_particle_2d_base.hpp"
 
-namespace pragma {
+export module pragma.client.rendering.shaders:particle_polyboard;
+
+export namespace pragma {
 	class CRasterizationRendererComponent;
 	class DLLCLIENT ShaderParticlePolyboard : public ShaderParticle2DBase {
 	  public:
@@ -36,5 +37,3 @@ namespace pragma {
 		bool Draw(pragma::CSceneComponent &scene, const pragma::CParticleSystemComponent &ps, bool bloom) = delete;
 	};
 };
-
-#endif

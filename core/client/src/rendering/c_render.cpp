@@ -31,7 +31,6 @@
 #include "luasystem.h"
 #include <pragma/lua/luafunction_call.h>
 #include "pragma/entities/environment/lights/c_env_light_spot.h"
-#include "pragma/rendering/shaders/particles/c_shader_particle_polyboard.hpp"
 #include "pragma/rendering/shaders/world/c_shader_prepass.hpp"
 #include <pragma/console/sh_cmd.h>
 #include <pragma/entities/entity_component_system_t.hpp>

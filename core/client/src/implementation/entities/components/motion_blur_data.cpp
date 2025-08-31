@@ -8,7 +8,6 @@ module;
 #include "pragma/c_engine.h"
 #include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
-#include "pragma/rendering/shaders/info/c_shader_velocity_buffer.hpp"
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/entity_component_manager_t.hpp>
@@ -17,6 +16,8 @@ module;
 module pragma.client.entities.components;
 
 import :motion_blur_data;
+
+import pragma.client.rendering.shaders;
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT CEngine *c_engine;

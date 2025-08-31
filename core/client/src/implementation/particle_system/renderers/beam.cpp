@@ -6,8 +6,6 @@ module;
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
-#include "pragma/rendering/shaders/particles/c_shader_particle_polyboard.hpp"
-#include "pragma/rendering/shaders/particles/c_shader_particle_polyboard_shadow.h"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/particlesystem/c_particlemodifier.h"
@@ -20,6 +18,7 @@ module pragma.client.particle_system;
 import :renderer_beam;
 
 import pragma.client.entities.components;
+import pragma.client.rendering.shaders;
 
 REGISTER_PARTICLE_RENDERER(beam, CParticleRendererBeam);
 

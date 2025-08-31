@@ -1,10 +1,16 @@
 // SPDX-FileCopyrightText: (c) 2022 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/rendering/shaders/info/c_shader_velocity_buffer.hpp"
+#include "pragma/game/c_game.h"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <shader/prosper_shader_t.hpp>
+
+module pragma.client.rendering.shaders;
+
+import :velocity_buffer;
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;

@@ -22,6 +22,12 @@
 #include <pragma/entities/entity_iterator.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <cmaterial.h>
+#include "pragma/console/c_cvar_global_functions.h"
+#include <cmaterial_manager2.hpp>
+#include <texturemanager/texture_manager2.hpp>
+#include <util_image.hpp>
+#include <fsys/ifile.hpp>
+#include <wgui/types/wirect.h>
 
 import pragma.client.entities.components;
 import pragma.client.rendering.shaders;
@@ -332,14 +338,8 @@ static void sky_override(NetworkState *, const ConVar &, std::string, std::strin
 }
 REGISTER_CONVAR_CALLBACK_CL(sky_override, sky_override);
 
-#include "pragma/console/c_cvar_global_functions.h"
-#include <cmaterial_manager2.hpp>
-#include <texturemanager/texture_manager2.hpp>
-#include <util_image.hpp>
-#include <fsys/ifile.hpp>
-
 enum class ConversionMode : uint8_t { CubemapToEquirectangular = 0, EquirectangularToCubemap };
-#include <wgui/types/wirect.h>
+
 static void util_convert_cubemap_equirect(std::vector<std::string> &argv, ConversionMode conversionMode)
 {
 	if(argv.empty()) {

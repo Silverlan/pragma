@@ -1,12 +1,18 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
+
+module pragma.client.rendering.shaders;
+
+import :particle_polyboard_shadow;
+
 // prosper TODO
 #if 0
 #include "pragma/c_engine.h"
 #include "pragma/game/c_game.h"
-#include "pragma/rendering/shaders/particles/c_shader_particle_polyboard_shadow.h"
 #include "cmaterialmanager.h"
 #include "pragma/model/c_side.h"
 #include "pragma/rendering/uniformbinding.h"

@@ -1,11 +1,12 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_SHADER_PARTICLE_POLYBOARD_SHADOW_H__
-#define __C_SHADER_PARTICLE_POLYBOARD_SHADOW_H__
+module;
+
+export module pragma.client.rendering.shaders:particle_polyboard_shadow;
+
 // prosper TODO
 #if 0
-#include "c_shader_particle_polyboard.h"
 #include "pragma/rendering/shaders/particles/c_shader_particle_shadow.h"
 #include <cmaterial.h>
 
@@ -39,5 +40,4 @@ namespace Shader
 		virtual uint32_t GetDescSet(ParticleBase::DescSet set) const override {return ParticleShadowBase<ParticlePolyboard>::GetDescSet(set);}
 	};
 };
-#endif
 #endif

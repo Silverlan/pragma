@@ -5,7 +5,6 @@
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/rendering/render_processor.hpp"
 #include "pragma/rendering/shaders/world/c_shader_prepass.hpp"
-#include "pragma/rendering/shaders/info/c_shader_velocity_buffer.hpp"
 #include "pragma/rendering/c_renderflags.h"
 #include "pragma/rendering/global_render_settings_buffer_data.hpp"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
@@ -18,12 +17,25 @@
 #include "pragma/debug/c_debugoverlay.h"
 #include "pragma/game/c_game.h"
 #include "pragma/console/c_cvar.h"
+#include "pragma/rendering/scene/util_draw_scene_info.hpp"
+#include "pragma/rendering/render_processor.hpp"
 #include <image/prosper_render_target.hpp>
 #include <image/prosper_msaa_texture.hpp>
 #include <pragma/lua/luafunction_call.h>
 #include <pragma/console/convars.h>
 #include <prosper_util.hpp>
+#include <pragma/entities/entity_iterator.hpp>
 #include <prosper_command_buffer.hpp>
+#include <prosper_swap_command_buffer.hpp>
+#if DEBUG_RENDER_PERFORMANCE_TEST_ENABLED == 1
+#include "pragma/entities/components/c_scene_component.hpp"
+#include "pragma/rendering/shaders/world/c_shader_test.hpp"
+#include "pragma/rendering/shaders/world/c_shader_pbr.hpp"
+#include "pragma/entities/entity_iterator.hpp"
+#include "pragma/model/c_model.h"
+#include "pragma/entities/entity_instance_index_buffer.hpp"
+#include "pragma/entities/entity_component_system_t.hpp"
+#endif
 
 import pragma.client.entities.components;
 
@@ -37,18 +49,6 @@ extern DLLCLIENT CGame *c_game;
 static auto cvDrawParticles = GetClientConVar("render_draw_particles");
 static auto cvDrawGlow = GetClientConVar("render_draw_glow");
 static auto cvDrawTranslucent = GetClientConVar("render_draw_translucent");
-
-#if DEBUG_RENDER_PERFORMANCE_TEST_ENABLED == 1
-#include "pragma/entities/components/c_scene_component.hpp"
-#include "pragma/rendering/shaders/world/c_shader_test.hpp"
-#include "pragma/rendering/shaders/world/c_shader_pbr.hpp"
-#include "pragma/entities/entity_iterator.hpp"
-#include "pragma/model/c_model.h"
-#include "pragma/entities/entity_instance_index_buffer.hpp"
-#include "pragma/entities/entity_component_system_t.hpp"
-import pragma.client.rendering.shaders;
-int g_dbgMode = 5;
-#endif
 
 void pragma::CRasterizationRendererComponent::RecordPrepass(const util::DrawSceneInfo &drawSceneInfo)
 {
@@ -287,7 +287,7 @@ void pragma::CRasterizationRendererComponent::StartLightingPassRecording(const u
 
 	m_lightingCommandBufferGroup->EndRecording();
 }
-#include <pragma/entities/entity_iterator.hpp>
+
 void pragma::CRasterizationRendererComponent::RecordLightingPass(const util::DrawSceneInfo &drawSceneInfo)
 {
 	auto &scene = const_cast<pragma::CSceneComponent &>(*drawSceneInfo.scene);

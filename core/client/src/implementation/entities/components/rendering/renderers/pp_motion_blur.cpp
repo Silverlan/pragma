@@ -12,7 +12,7 @@ module;
 #include "pragma/entities/components/c_transform_component.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/entities/entity_component_system_t.hpp"
-#include "pragma/rendering/shaders/info/c_shader_velocity_buffer.hpp"
+#include "pragma/rendering/shaders/world/c_shader_prepass.hpp"
 #include "pragma/rendering/render_processor.hpp"
 #include <pragma/entities/entity_component_manager_t.hpp>
 #include <pragma/entities/entity_iterator.hpp>

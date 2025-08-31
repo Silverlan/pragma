@@ -7,13 +7,19 @@ module;
 
 export module pragma.client.rendering.shaders:pp_dof;
 
-import pragma.client.entities.components;
-
 export namespace pragma {
 	class DLLCLIENT ShaderPPDoF : public ShaderPPBase {
 	  public:
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_TEXTURE;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_DEPTH_BUFFER;
+
+		enum class Flags : uint32_t {
+			None = 0,
+			DebugShowFocus = 1,
+			EnableVignette = DebugShowFocus << 1u,
+			PentagonBokehShape = EnableVignette << 1u,
+			DebugShowDepth = PentagonBokehShape << 1u,
+		};
 
 		enum class TextureBinding : uint32_t { SceneTexturePostToneMapping = 0, SceneTextureHdr };
 
@@ -30,7 +36,7 @@ export namespace pragma {
 			float zNear;
 			float zFar;
 
-			pragma::COpticalCameraComponent::Flags flags;
+			Flags flags;
 			int32_t rings;
 			int32_t ringSamples;
 			float CoC;
@@ -49,4 +55,8 @@ export namespace pragma {
 		virtual void InitializeShaderResources() override;
 		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx) override;
 	};
+};
+
+export {
+	REGISTER_BASIC_BITWISE_OPERATORS(pragma::ShaderPPDoF::Flags)
 };

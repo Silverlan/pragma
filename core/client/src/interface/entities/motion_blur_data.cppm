@@ -5,12 +5,13 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include <pragma/entities/components/base_entity_component.hpp>
-#include "pragma/rendering/shaders/info/c_shader_velocity_buffer.hpp"
 #include <image/prosper_render_target.hpp>
 #include <mathutil/transform.hpp>
 #include <unordered_set>
 
 export module pragma.client.entities.components:motion_blur_data;
+
+import pragma.client.rendering.shaders;
 
 export namespace pragma {
 #pragma pack(push, 1)

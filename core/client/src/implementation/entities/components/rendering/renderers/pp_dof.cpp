@@ -9,6 +9,7 @@ module;
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/rendering/world_environment.hpp"
 #include "pragma/entities/entity_component_system_t.hpp"
+#include "pragma/entities/c_baseentity.h"
 #include "pragma/console/c_cvar.h"
 #include <pragma/entities/entity_component_manager_t.hpp>
 #include <prosper_command_buffer.hpp>
@@ -83,11 +84,11 @@ void CRendererPpDoFComponent::DoRenderEffect(const util::DrawSceneInfo &drawScen
 			pushConstants.zNear = cam->GetNearZ();
 			pushConstants.zFar = cam->GetFarZ();
 
-			pushConstants.flags = pragma::COpticalCameraComponent::Flags::None;
-			umath::set_flag(pushConstants.flags, pragma::COpticalCameraComponent::Flags::EnableVignette, opticalC->IsVignetteEnabled());
-			umath::set_flag(pushConstants.flags, pragma::COpticalCameraComponent::Flags::PentagonBokehShape, opticalC->GetPentagonBokehShape());
-			umath::set_flag(pushConstants.flags, pragma::COpticalCameraComponent::Flags::DebugShowDepth, opticalC->GetDebugShowDepth());
-			umath::set_flag(pushConstants.flags, pragma::COpticalCameraComponent::Flags::DebugShowFocus, opticalC->GetDebugShowFocus());
+			pushConstants.flags = pragma::ShaderPPDoF::Flags::None;
+			umath::set_flag(pushConstants.flags, pragma::ShaderPPDoF::Flags::EnableVignette, opticalC->IsVignetteEnabled());
+			umath::set_flag(pushConstants.flags, pragma::ShaderPPDoF::Flags::PentagonBokehShape, opticalC->GetPentagonBokehShape());
+			umath::set_flag(pushConstants.flags, pragma::ShaderPPDoF::Flags::DebugShowDepth, opticalC->GetDebugShowDepth());
+			umath::set_flag(pushConstants.flags, pragma::ShaderPPDoF::Flags::DebugShowFocus, opticalC->GetDebugShowFocus());
 			pushConstants.rings = opticalC->GetRingCount();
 			pushConstants.ringSamples = opticalC->GetRingSamples();
 			pushConstants.CoC = opticalC->GetCircleOfConfusionSize();

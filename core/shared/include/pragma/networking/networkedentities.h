@@ -132,7 +132,6 @@ LINK_NETWORKED_PHYSICS_ENTITIES;
 #include "pragma/entities/environment/audio/c_env_sound_dsp_distortion.h"
 #include "pragma/entities/environment/audio/c_env_sound_dsp_echo.h"
 #include "pragma/entities/environment/audio/c_env_sound_dsp_flanger.h"
-#include "pragma/entities/environment/c_env_timescale.h"
 #include "pragma/entities/environment/c_env_fog_controller.h"
 #include "pragma/entities/environment/effects/c_env_sprite.h"
 #include "pragma/entities/environment/lights/c_env_light_spot_vol.h"

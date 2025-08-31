@@ -124,7 +124,6 @@
 #include "pragma/entities/baseflashlight.h"
 #include "pragma/entities/basebot.h"
 #include "pragma/entities/c_wheel.hpp"
-#include "pragma/entities/environment/c_env_timescale.h"
 #include "pragma/entities/util/c_util_pbr_converter.hpp"
 #include "pragma/entities/environment/lights/c_env_shadow.hpp"
 #include "pragma/entities/environment/audio/c_env_sound_probe.hpp"

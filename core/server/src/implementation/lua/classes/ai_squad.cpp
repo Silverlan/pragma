@@ -1,11 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
 #include "pragma/lua/classes/ldef_entity.h"
-#include "pragma/lua/classes/s_laisquad.h"
 #include "luasystem.h"
 #include "pragma/ai/ai_squad.h"
+
+module pragma.server.scripting.lua.classes.ai_squad;
 
 namespace Lua {
 	namespace AISquad {

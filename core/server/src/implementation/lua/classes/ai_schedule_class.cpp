@@ -1,13 +1,16 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
-#include "pragma/lua/classes/s_lai_schedule.h"
 #include "pragma/lua/classes/s_lai_behavior.h"
 #include "pragma/lua/classes/s_lentity.h"
 #include "pragma/ai/ai_schedule.h"
 #include "luasystem.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
+
+module pragma.server.scripting.lua.classes.ai_schedule;
 
 namespace Lua {
 	namespace AISchedule {

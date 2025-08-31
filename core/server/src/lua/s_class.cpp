@@ -17,7 +17,6 @@
 #include "pragma/entities/environment/effects/env_particle_system.h"
 #include "pragma/lua/classes/lmodel.h"
 #include "pragma/ai/ai_task.h"
-#include "pragma/lua/classes/s_lai_schedule.h"
 #include "pragma/lua/classes/s_lai_behavior.h"
 #include <pragma/game/damageinfo.h>
 #include "pragma/lua/classes/s_lua_entity.h"

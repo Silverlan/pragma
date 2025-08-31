@@ -1,12 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
 #include "pragma/lua/classes/ldef_entity.h"
-#include "pragma/lua/classes/s_laimemory.h"
 #include "luasystem.h"
 #include "pragma/ai/ai_memory.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
+
+module pragma.server.scripting.lua.classes.ai_memory;
 
 namespace Lua {
 	namespace AIMemoryFragment {

@@ -54,7 +54,6 @@
 #include "pragma/entities/environment/lights/c_env_light_spot_vol.h"
 #include "pragma/entities/environment/c_env_microphone.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
-#include "pragma/entities/environment/c_env_quake.h"
 #include "pragma/entities/environment/effects/c_env_smoke_trail.h"
 #include "pragma/entities/environment/audio/c_env_sound.h"
 #include "pragma/entities/environment/audio/c_env_soundscape.h"

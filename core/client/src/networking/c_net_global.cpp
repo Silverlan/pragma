@@ -24,7 +24,6 @@
 #include "pragma/entities/environment/effects/c_env_explosion.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include <pragma/networking/nwm_util.h>
-#include "pragma/entities/environment/c_env_quake.h"
 #include "pragma/debug/c_debugoverlay.h"
 #include "pragma/entities/components/c_weapon_component.hpp"
 #include "pragma/entities/components/c_sound_emitter_component.hpp"
@@ -39,6 +38,7 @@
 #include <wgui/types/witext.h>
 #include <pragma/console/sh_cmd.h>
 #include <pragma/physics/raytraces.h>
+#include "pragma/entities/environment/env_quake.h"
 #include <pragma/entities/components/basetriggergravity.hpp>
 #include <pragma/entities/components/base_physics_component.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>

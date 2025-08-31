@@ -1,10 +1,11 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
 #include "pragma/game/c_game.h"
-#include "pragma/rendering/shaders/particles/c_shader_particle_blob.hpp"
 #include "pragma/rendering/shaders/particles/c_shader_particle.hpp"
 #include "pragma/rendering/shaders/world/c_shader_pbr.hpp"
 #include "pragma/rendering/shader_material/shader_material.hpp"
@@ -13,6 +14,10 @@
 #include <shader/prosper_shader_t.hpp>
 #include <prosper_command_buffer.hpp>
 #include <datasystem_vector.h>
+
+module pragma.client.rendering.shaders;
+
+import :particle_blob;
 
 import pragma.client.entities.components;
 

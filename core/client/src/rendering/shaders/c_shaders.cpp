@@ -13,7 +13,6 @@
 #include "pragma/rendering/shaders/world/c_shader_prepass.hpp"
 #include "pragma/rendering/shaders/world/c_shader_noop.hpp"
 #include "pragma/rendering/shaders/particles/c_shader_particle.hpp"
-#include "pragma/rendering/shaders/particles/c_shader_particle_blob.hpp"
 #include "pragma/rendering/shaders/particles/c_shader_particle_animated_sprites.hpp"
 #include "pragma/rendering/shaders/particles/c_shader_particle_sprite_trail.hpp"
 #include "pragma/rendering/shaders/c_shader_shadow.hpp"
@@ -38,8 +37,6 @@
 #include <buffers/prosper_buffer.hpp>
 
 import pragma.client.rendering.shaders;
-
-
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;

@@ -1,12 +1,13 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_SHADER_PARTICLE_BLOB_HPP__
-#define __C_SHADER_PARTICLE_BLOB_HPP__
+module;
 
 #include "pragma/rendering/shaders/particles/c_shader_particle_2d_base.hpp"
 
-namespace pragma {
+export module pragma.client.rendering.shaders:particle_blob;
+
+export namespace pragma {
 	namespace rendering::shader_material {
 		struct ShaderMaterial;
 	};
@@ -43,5 +44,3 @@ namespace pragma {
 		std::unique_ptr<prosper::DescriptorSetInfo> m_materialDescSetInfo;
 	};
 };
-
-#endif

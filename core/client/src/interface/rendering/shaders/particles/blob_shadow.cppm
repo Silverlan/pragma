@@ -1,10 +1,11 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_SHADER_PARTICLE_BLOB_SHADOW_H__
-#define __C_SHADER_PARTICLE_BLOB_SHADOW_H__
+module;
 
-namespace Shader {
+export module pragma.client.rendering.shaders:particle_blob_shadow;
+
+export namespace Shader {
 	class ParticleBlobShadow;
 };
 
@@ -80,5 +81,4 @@ namespace Shader
 	};
 #endif
 };
-#endif
 #endif

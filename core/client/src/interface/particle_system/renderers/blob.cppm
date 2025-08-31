@@ -5,13 +5,13 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/particlesystem/c_particlemodifier.h"
-#include "pragma/rendering/shaders/particles/c_shader_particle_blob.hpp"
-#include "pragma/rendering/shaders/particles/c_shader_particle_blob_shadow.h"
 #include "pragma/debug/c_debugoverlay.h"
 
 #define ENABLE_BLOB_DEPTH_TEST 0
 
 export module pragma.client.particle_system:renderer_blob;
+
+import pragma.client.rendering.shaders;
 
 export class DLLCLIENT CParticleRendererBlob : public CParticleRenderer {
   private:

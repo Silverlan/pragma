@@ -9,6 +9,7 @@ export import :bot;
 export import :bsp_leaf;
 export import :env_fog_controller;
 export import :env_quake;
+export import :env_reflection_probe;
 export import :env_timescale;
 export import :env_weather;
 export import :field_angle;

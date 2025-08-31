@@ -73,7 +73,6 @@
 #include "pragma/entities/components/c_vehicle_component.hpp"
 #include "pragma/entities/components/c_ai_component.hpp"
 #include "pragma/entities/components/c_physics_component.hpp"
-#include "pragma/entities/environment/c_env_reflection_probe.hpp"
 #include "pragma/entities/game/c_game_shadow_manager.hpp"
 #include "pragma/rendering/c_settings.hpp"
 #include <pragma/entities/baseplayer.hpp>

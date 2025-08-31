@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/entity_iterator.hpp>
@@ -25,7 +27,6 @@
 #include <wgui/types/wiroot.h>
 #include <pragma/entities/baseentity_events.hpp>
 #include <pragma/console/command_options.hpp>
-#include "pragma/entities/environment/c_env_reflection_probe.hpp"
 #include "pragma/entities/components/c_transform_component.hpp"
 #include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
@@ -39,6 +40,10 @@
 #include <pragma/entities/components/base_entity_component_logging.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <spdlog/logger.h>
+
+module pragma.client.entities.components;
+
+import :env_reflection_probe;
 
 import pragma.client.gui;
 import pragma.client.rendering.shaders;
@@ -107,6 +112,11 @@ static void print_status(const uint32_t i, const uint32_t count)
 
 ////////////////
 
+CReflectionProbeComponent::CReflectionProbeComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+CReflectionProbeComponent::~CReflectionProbeComponent()
+{
+	m_raytracingJobManager = nullptr;
+}
 CReflectionProbeComponent::RaytracingJobManager::RaytracingJobManager(CReflectionProbeComponent &probe) : probe {probe} {}
 CReflectionProbeComponent::RaytracingJobManager::~RaytracingJobManager()
 {

@@ -5,9 +5,10 @@
 #include "pragma/rendering/shaders/world/c_shader_graph.hpp"
 #include "pragma/rendering/shader_graph/modules/toon.hpp"
 #include "pragma/rendering/render_processor.hpp"
-#include "pragma/entities/environment/c_env_reflection_probe.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include <prosper_command_buffer.hpp>
+
+import pragma.client.entities.components;
 
 using namespace pragma::rendering::shader_graph;
 

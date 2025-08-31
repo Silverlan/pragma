@@ -4,7 +4,6 @@
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/world/c_shader_graph.hpp"
 #include "cmaterialmanager.h"
-#include "pragma/entities/environment/c_env_reflection_probe.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/rendering/render_processor.hpp"
 #include "pragma/rendering/shader_material/shader_material.hpp"
@@ -29,6 +28,7 @@ extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CEngine *c_engine;
 
+import pragma.client.entities.components;
 import pragma.client.model;
 import pragma.shadergraph;
 

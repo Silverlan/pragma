@@ -119,7 +119,6 @@
 #include "pragma/entities/components/c_gamemode_component.hpp"
 #include "pragma/entities/components/c_game_component.hpp"
 #include "pragma/entities/point/point_target.h"
-#include "pragma/entities/environment/c_env_reflection_probe.hpp"
 #include "pragma/entities/baseflashlight.h"
 #include "pragma/entities/basebot.h"
 #include "pragma/entities/c_wheel.hpp"

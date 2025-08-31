@@ -1,12 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
-#include "pragma/lua/classes/s_lnetpacket.h"
 #include "luasystem.h"
 #include "pragma/networking/s_nwm_util.h"
 #include <pragma/lua/classes/ldef_entity.h>
 #include <pragma/lua/classes/lnetpacket.h>
+
+module pragma.server.scripting.lua.classes.net_packet;
 
 void Lua::NetPacket::Server::register_class(luabind::class_<::NetPacket> &classDef)
 {

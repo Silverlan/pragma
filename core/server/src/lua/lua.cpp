@@ -18,7 +18,6 @@
 #include "pragma/networking/iserver.hpp"
 #include "pragma/lua/classes/ldef_recipientfilter.h"
 #include "pragma/lua/classes/lrecipientfilter.h"
-#include "pragma/lua/classes/s_lnetpacket.h"
 #include "pragma/lua/s_lentity_components.hpp"
 #include "pragma/entities/components/s_player_component.hpp"
 #include "pragma/lua/s_lua_component.hpp"
@@ -39,6 +38,8 @@
 #include <pragma/util/util_game.hpp>
 #include <luainterface.hpp>
 #include <udm.hpp>
+
+import pragma.server.scripting.lua;
 
 extern DLLSERVER ServerState *server;
 

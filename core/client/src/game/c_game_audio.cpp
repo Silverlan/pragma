@@ -6,7 +6,6 @@
 #include "pragma/console/c_cvar.h"
 #include "pragma/entities/environment/audio/c_env_sound.h"
 #include "pragma/entities/environment/audio/c_env_sound_probe.hpp"
-#include "pragma/entities/func/c_func_brush.h"
 #include <pragma/entities/components/base_physics_component.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/physics/environment.hpp>
@@ -17,6 +16,8 @@
 #include <alsound_coordinate_system.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
+
+import pragma.client.entities.components;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;

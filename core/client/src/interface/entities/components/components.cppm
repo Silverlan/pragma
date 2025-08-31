@@ -7,6 +7,7 @@ export module pragma.client.entities.components;
 export import :animated_bvh;
 export import :bot;
 export import :bsp_leaf;
+export import :env_fog_controller;
 export import :env_quake;
 export import :env_timescale;
 export import :env_weather;

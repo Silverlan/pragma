@@ -25,6 +25,7 @@ export import :particle_model;
 export import :particle_model_shadow;
 export import :particle_polyboard;
 export import :particle_polyboard_shadow;
+export import :particle_sprite_trail;
 export import :pp_bloom_blur;
 export import :pp_dof;
 export import :pp_fog;

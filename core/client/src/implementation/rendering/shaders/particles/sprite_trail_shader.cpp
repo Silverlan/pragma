@@ -1,13 +1,18 @@
 // SPDX-FileCopyrightText: (c) 2022 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/rendering/shaders/particles/c_shader_particle_sprite_trail.hpp"
 #include "pragma/rendering/shaders/particles/c_shader_particle.hpp"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <shader/prosper_shader_t.hpp>
 
 #include <cmath>
+
+module pragma.client.rendering.shaders;
+
+import :particle_sprite_trail;
 
 import pragma.client.particle_system;
 

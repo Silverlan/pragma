@@ -1,12 +1,13 @@
 // SPDX-FileCopyrightText: (c) 2022 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_SHADER_PARTICLE_SPRITE_TRAIL_HPP__
-#define __C_SHADER_PARTICLE_SPRITE_TRAIL_HPP__
+module;
 
 #include "pragma/rendering/shaders/particles/c_shader_particle_2d_base.hpp"
 
-namespace pragma {
+export module pragma.client.rendering.shaders:particle_sprite_trail;
+
+export namespace pragma {
 	class DLLCLIENT ShaderParticleSpriteTrail : public ShaderParticle2DBase {
 	  public:
 #pragma pack(push, 1)
@@ -26,5 +27,3 @@ namespace pragma {
 		virtual void InitializeShaderResources() override;
 	};
 };
-
-#endif

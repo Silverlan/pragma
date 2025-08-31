@@ -34,6 +34,12 @@
 #include <pragma/lua/lua_call.hpp>
 #include <luabind/copy_policy.hpp>
 #include <image/prosper_render_target.hpp>
+#include "pragma/entities/point/constraints/point_constraint_ballsocket.h"
+#include "pragma/entities/point/constraints/point_constraint_conetwist.h"
+#include "pragma/entities/point/constraints/point_constraint_dof.h"
+#include "pragma/entities/point/constraints/point_constraint_fixed.h"
+#include "pragma/entities/point/constraints/point_constraint_hinge.h"
+#include "pragma/entities/point/constraints/point_constraint_slider.h"
 #include "pragma/entities/components/c_ai_component.hpp"
 #include "pragma/entities/components/c_character_component.hpp"
 #include "pragma/entities/components/c_color_component.hpp"
@@ -98,12 +104,6 @@
 #include "pragma/entities/c_listener.h"
 #include "pragma/entities/c_viewbody.h"
 #include "pragma/entities/c_viewmodel.h"
-#include "pragma/entities/point/constraints/c_point_constraint_ballsocket.h"
-#include "pragma/entities/point/constraints/c_point_constraint_dof.h"
-#include "pragma/entities/point/constraints/c_point_constraint_conetwist.h"
-#include "pragma/entities/point/constraints/c_point_constraint_fixed.h"
-#include "pragma/entities/point/constraints/c_point_constraint_hinge.h"
-#include "pragma/entities/point/constraints/c_point_constraint_slider.h"
 #include "pragma/entities/point/c_point_rendertarget.h"
 #include "pragma/entities/point/c_point_target.h"
 #include "pragma/entities/prop/c_prop_base.hpp"

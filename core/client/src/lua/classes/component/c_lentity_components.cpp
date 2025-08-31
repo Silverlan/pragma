@@ -96,7 +96,6 @@
 #include "pragma/entities/environment/audio/c_env_sound.h"
 #include "pragma/entities/environment/audio/c_env_soundscape.h"
 #include "pragma/entities/environment/effects/c_env_sprite.h"
-#include "pragma/entities/environment/c_sky_camera.hpp"
 #include "pragma/entities/environment/lights/c_env_shadow_csm.hpp"
 #include "pragma/entities/components/liquid/c_liquid_component.hpp"
 #include "pragma/entities/game/c_game_occlusion_culler.hpp"

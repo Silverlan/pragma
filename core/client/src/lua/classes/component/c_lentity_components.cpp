@@ -12,11 +12,13 @@
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/shaders/world/c_shader_prepass.hpp"
 #include "pragma/entities/util/c_util_pbr_converter.hpp"
+#include "pragma/entities/environment/env_timescale.h"
 #include <pragma/lua/classes/lproperty_generic.hpp>
 #include <pragma/lua/classes/ldef_vector.h>
 #include <pragma/lua/classes/ldef_color.h>
 #include <pragma/lua/classes/ldef_angle.h>
 #include <pragma/lua/classes/ldef_quaternion.h>
+#include "pragma/entities/environment/env_weather.h"
 #include <pragma/lua/policies/shared_from_this_policy.hpp>
 #include <pragma/lua/policies/default_parameter_policy.hpp>
 #include <pragma/lua/converters/optional_converter_t.hpp>
@@ -40,6 +42,7 @@
 #include "pragma/entities/point/constraints/point_constraint_fixed.h"
 #include "pragma/entities/point/constraints/point_constraint_hinge.h"
 #include "pragma/entities/point/constraints/point_constraint_slider.h"
+#include "pragma/entities/environment/env_wind.hpp"
 #include "pragma/entities/components/c_ai_component.hpp"
 #include "pragma/entities/components/c_character_component.hpp"
 #include "pragma/entities/components/c_color_component.hpp"

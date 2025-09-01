@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __S_LDEBUG_H__
-#define __S_LDEBUG_H__
+module;
 
 #include "pragma/serverdefinitions.h"
 #include <pragma/lua/ldefinitions.h>
@@ -13,7 +12,9 @@
 #include "pragma/ai/s_npcstate.h"
 #include "pragma/ai/ai_task.h"
 
-namespace Lua {
+export module pragma.server.scripting.lua.libraries.debug;
+
+export namespace Lua {
 	namespace debug {
 		namespace Server {
 			DLLSERVER std::string behavior_selector_type_to_string(pragma::ai::SelectorType selectorType);
@@ -27,5 +28,3 @@ namespace Lua {
 		};
 	};
 };
-
-#endif

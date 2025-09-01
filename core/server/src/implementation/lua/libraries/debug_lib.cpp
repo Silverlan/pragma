@@ -1,10 +1,13 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
-#include "pragma/lua/libraries/s_ldebug.h"
 #include <pragma/serverstate/serverstate.h>
 #include "luasystem.h"
+
+module pragma.server.scripting.lua.libraries.debug;
 
 std::string Lua::debug::Server::behavior_selector_type_to_string(pragma::ai::SelectorType selectorType)
 {

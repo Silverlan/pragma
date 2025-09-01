@@ -7,7 +7,6 @@
 #include <pragma/lua/libraries/lutil.hpp>
 #include "pragma/lua/libraries/s_lutil.h"
 #include "pragma/lua/libraries/s_lsound.h"
-#include "pragma/lua/libraries/s_ldebug.h"
 #include "pragma/lua/libraries/lfile.h"
 #include "pragma/model/model.h"
 #include <pragma/asset/util_asset.hpp>

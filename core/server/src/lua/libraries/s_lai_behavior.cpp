@@ -4,7 +4,6 @@
 #include "stdafx_server.h"
 #include "luasystem.h"
 #include "pragma/ai/ai_schedule.h"
-#include "pragma/lua/libraries/s_lai.h"
 #include "pragma/ai/ai_task.h"
 #include "pragma/entities/components/s_ai_component.hpp"
 #include "pragma/ai/ai_task_decorator.h"

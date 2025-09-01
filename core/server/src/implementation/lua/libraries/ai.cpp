@@ -1,9 +1,10 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
 #include "luasystem.h"
-#include "pragma/lua/libraries/s_lai.h"
 #include "pragma/ai/ai_schedule.h"
 #include "pragma/ai/s_disposition.h"
 #include "pragma/ai/s_npcstate.h"
@@ -25,7 +26,13 @@
 #include <pragma/lua/libraries/lai.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
-import pragma.server.scripting.lua;
+module pragma.server.scripting.lua.libraries.ai;
+
+import pragma.server.scripting.lua.classes.ai_behavior;
+import pragma.server.scripting.lua.classes.ai_memory;
+import pragma.server.scripting.lua.classes.ai_schedule;
+import pragma.server.scripting.lua.classes.ai_squad;
+import pragma.server.scripting.lua.classes.faction;
 
 extern DLLSERVER SGame *s_game;
 

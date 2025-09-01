@@ -4,7 +4,6 @@
 #include "stdafx_server.h"
 #include <pragma/engine.h>
 #include "pragma/game/s_game.h"
-#include "pragma/lua/libraries/s_lai.h"
 #include <pragma/lua/libraries/lutil.hpp>
 #include "pragma/lua/libraries/s_lutil.h"
 #include "pragma/lua/libraries/s_lsound.h"

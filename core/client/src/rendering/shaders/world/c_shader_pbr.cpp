@@ -4,7 +4,6 @@
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/world/c_shader_pbr.hpp"
 #include "cmaterialmanager.h"
-#include "pragma/entities/environment/c_env_reflection_probe.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/rendering/render_processor.hpp"
 #include "pragma/rendering/shader_material/shader_material.hpp"
@@ -19,6 +18,7 @@
 #include <texture_type.h>
 #include <cmaterial.h>
 
+import pragma.client.entities.components;
 import pragma.client.model;
 
 extern DLLCLIENT CGame *c_game;

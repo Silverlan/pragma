@@ -13,7 +13,6 @@ module;
 #include "pragma/rendering/render_queue.hpp"
 #include "pragma/rendering/shaders/world/c_shader_scene.hpp"
 #include "pragma/rendering/global_render_settings_buffer_data.hpp"
-#include "pragma/entities/environment/c_env_reflection_probe.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include <pragma/util/transform.h>
 #include <pragma/lua/libraries/lgame.h>
@@ -36,6 +35,7 @@ module pragma.client.scripting.lua.libraries.game;
 
 import pragma.client.core;
 import pragma.client.debug;
+import pragma.client.entities.components;
 import pragma.client.scripting.lua;
 
 extern DLLCLIENT CEngine *c_engine;

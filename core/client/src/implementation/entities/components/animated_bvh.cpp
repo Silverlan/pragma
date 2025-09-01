@@ -6,9 +6,9 @@ module;
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
 #include "pragma/game/c_game.h"
-#include "pragma/entities/components/c_bvh_component.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
+#include "pragma/entities/components/bvh_data.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/model/c_model.h"
 #include <pragma/model/animation/skeleton.hpp>
@@ -296,7 +296,7 @@ void CAnimatedBvhComponent::RebuildAnimatedBvh(bool force, const std::vector<boo
 			renderMesh->VisitIndices([this, meshIdx, &indexOffset](auto *indexDataSrc, uint32_t numIndicesSrc) {
 				auto &verts = m_animatedBvhData.meshData.at(meshIdx).transformedVerts;
 				for(auto i = decltype(numIndicesSrc) {0}; i < numIndicesSrc; i += 3)
-					m_animatedBvhData.transformedTris[(indexOffset + i) / 3] = {bvh::create_triangle(verts[indexDataSrc[i]], verts[indexDataSrc[i + 1]], verts[indexDataSrc[i + 2]])};
+					m_animatedBvhData.transformedTris[(indexOffset + i) / 3] = {pragma::bvh::create_triangle(verts[indexDataSrc[i]], verts[indexDataSrc[i + 1]], verts[indexDataSrc[i + 2]])};
 				indexOffset += numIndicesSrc;
 			});
 			++meshIdx;

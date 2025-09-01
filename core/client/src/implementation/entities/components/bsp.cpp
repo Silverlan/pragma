@@ -1,10 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
-#include "pragma/entities/components/c_bsp_component.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
+
+module pragma.client.entities.components;
+
+import :bsp;
 
 extern DLLCLIENT CEngine *c_engine;
 

@@ -5,10 +5,10 @@
 #include "pragma/game/c_game.h"
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/entities/components/c_weapon_component.hpp"
+#include "pragma/entities/components/base_character_component.hpp"
 #include "pragma/entities/c_viewmodel.h"
 #include "pragma/console/c_cvar.h"
 #include "pragma/entities/components/c_player_component.hpp"
-#include "pragma/entities/components/c_character_component.hpp"
 #include "pragma/entities/components/c_attachment_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"
@@ -21,6 +21,8 @@
 #include "pragma/entities/components/parent_component.hpp"
 #include <pragma/entities/observermode.h>
 #include <pragma/entities/entity_component_system_t.hpp>
+
+import pragma.client.entities.components;
 
 using namespace pragma;
 

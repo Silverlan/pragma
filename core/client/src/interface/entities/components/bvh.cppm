@@ -1,14 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2022 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_BVH_COMPONENT_HPP__
-#define __C_BVH_COMPONENT_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include <pragma/entities/components/base_bvh_component.hpp>
 #include <unordered_set>
 
-namespace pragma {
+export module pragma.client.entities.components:bvh;
+
+export namespace pragma {
 	namespace rendering {
 		struct RenderBufferData;
 	};
@@ -30,5 +31,3 @@ namespace pragma {
 		virtual void DoRebuildBvh() override;
 	};
 };
-
-#endif

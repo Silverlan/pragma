@@ -13,6 +13,7 @@
 #include "pragma/math/deltatransform.h"
 #include <mathutil/uquat.h>
 #include "pragma/entities/baseentity_luaobject.h"
+#include "pragma/entities/components/base_character_component.hpp"
 #include "pragma/entities/c_viewmodel.h"
 #include "pragma/entities/c_viewbody.h"
 #include "pragma/entities/components/c_scene_component.hpp"
@@ -25,7 +26,6 @@
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_observable_component.hpp"
 #include "pragma/entities/components/c_sound_emitter_component.hpp"
-#include "pragma/entities/components/c_character_component.hpp"
 #include "pragma/entities/components/c_attachment_component.hpp"
 #include "pragma/networking/c_nwm_util.h"
 #include <pragma/entities/components/submergible_component.hpp>
@@ -39,6 +39,8 @@
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/observermode.h>
+
+import pragma.client.entities.components;
 
 using namespace pragma;
 

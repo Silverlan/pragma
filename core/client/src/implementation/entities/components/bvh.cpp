@@ -1,15 +1,18 @@
 // SPDX-FileCopyrightText: (c) 2022 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
-#include "pragma/entities/components/c_bvh_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/entities/entity_component_system_t.hpp"
 #include "pragma/model/c_modelmesh.h"
 
-import pragma.client.entities.components;
+module pragma.client.entities.components;
+
+import :bvh;
 
 extern DLLCLIENT CEngine *c_engine;
 

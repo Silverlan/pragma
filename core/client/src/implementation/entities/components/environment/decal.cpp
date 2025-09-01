@@ -1,12 +1,12 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/entities/environment/c_env_decal.h"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_physics_component.hpp"
 #include "pragma/entities/components/c_static_bvh_cache_component.hpp"
-#include "pragma/entities/components/c_bvh_component.hpp"
 #include "pragma/entities/components/c_static_bvh_user_component.hpp"
 #include "pragma/entities/components/intersection_handler_component.hpp"
 #include "pragma/entities/c_entityfactories.h"
@@ -20,6 +20,10 @@
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/math/intersection.h>
+
+module pragma.client.entities.components;
+
+import :env_decal;
 
 using namespace pragma;
 

@@ -4,7 +4,8 @@
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
 #include "pragma/entities/components/c_static_bvh_user_component.hpp"
-#include "pragma/entities/components/c_bvh_component.hpp"
+
+import pragma.client.entities.components;
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT CEngine *c_engine;

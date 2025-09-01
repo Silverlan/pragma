@@ -6,7 +6,6 @@
 #include "pragma/rendering/shaders/world/c_shader_pbr.hpp"
 #include "pragma/clientstate/clientstate.h"
 #include "cmaterialmanager.h"
-#include "pragma/entities/environment/c_env_reflection_probe.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/model/c_modelmesh.h"
@@ -20,6 +19,7 @@
 #include <cmaterial_manager2.hpp>
 #include <cmaterial.h>
 
+import pragma.client.entities.components;
 import pragma.client.model;
 
 extern DLLCLIENT CGame *c_game;

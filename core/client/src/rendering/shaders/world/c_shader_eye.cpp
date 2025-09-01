@@ -4,12 +4,13 @@
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/world/c_shader_eye.hpp"
 #include "pragma/rendering/render_processor.hpp"
-#include "pragma/entities/components/c_eye_component.hpp"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
 #include <cmaterial.h>
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <prosper_command_buffer.hpp>
+
+import pragma.client.entities.components;
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;

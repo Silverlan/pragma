@@ -1,10 +1,13 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
-#include "pragma/lua/libraries/s_lengine.h"
 #include "luasystem.h"
 #include <pragma/serverstate/serverstate.h>
+
+module pragma.server.scripting.lua.libraries.engine;
 
 extern ServerState *server;
 

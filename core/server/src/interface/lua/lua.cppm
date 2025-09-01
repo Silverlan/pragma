@@ -20,3 +20,4 @@ export import pragma.server.scripting.lua.classes.resource;
 export import pragma.server.scripting.lua.libraries.ai;
 export import pragma.server.scripting.lua.libraries.debug;
 export import pragma.server.scripting.lua.libraries.debug_overlay;
+export import pragma.server.scripting.lua.libraries.engine;

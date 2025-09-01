@@ -6,7 +6,6 @@
 #include "pragma/lua/libraries/lengine.h"
 #include "pragma/lua/libraries/s_lents.h"
 #include "pragma/lua/libraries/s_lnetmessages.h"
-#include "pragma/lua/libraries/s_lengine.h"
 #include "pragma/lua/libraries/lglobal.h"
 #include "pragma/lua/libraries/s_lgame.h"
 #include "pragma/ai/ai_task.h"

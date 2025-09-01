@@ -5,7 +5,6 @@
 #include <pragma/engine.h>
 #include "pragma/game/s_game.h"
 #include <pragma/lua/libraries/lutil.hpp>
-#include "pragma/lua/libraries/s_lutil.h"
 #include "pragma/lua/libraries/s_lsound.h"
 #include "pragma/lua/libraries/lfile.h"
 #include "pragma/model/model.h"

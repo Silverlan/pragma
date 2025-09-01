@@ -22,3 +22,4 @@ export import pragma.server.scripting.lua.libraries.debug;
 export import pragma.server.scripting.lua.libraries.debug_overlay;
 export import pragma.server.scripting.lua.libraries.engine;
 export import pragma.server.scripting.lua.libraries.game;
+export import pragma.server.scripting.lua.libraries.util;

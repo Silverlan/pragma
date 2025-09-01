@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
-#include "pragma/lua/libraries/s_lutil.h"
 #include <pragma/lua/classes/ldef_color.h>
 #include <pragma/physics/raytraces.h>
 #include <pragma/lua/libraries/lutil.hpp>
@@ -11,6 +12,8 @@
 #include <pragma/util/util_splash_damage_info.hpp>
 #include <sharedutils/netpacket.hpp>
 #include <pragma/networking/enums.hpp>
+
+module pragma.server.scripting.lua.libraries.util;
 
 extern DLLSERVER ServerState *server;
 extern DLLSERVER SGame *s_game;

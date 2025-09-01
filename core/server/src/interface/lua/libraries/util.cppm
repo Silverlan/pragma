@@ -1,18 +1,17 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __S_LUTIL_H__
-#define __S_LUTIL_H__
+module;
 
 #include "pragma/serverdefinitions.h"
+#include "pragma/util/bulletinfo.h"
+#include "pragma/util/giblet_create_info.hpp"
+#include "pragma/util/util_splash_damage_info.hpp"
 #include <pragma/lua/luaapi.h>
 
-struct BulletInfo;
-struct GibletCreateInfo;
-namespace util {
-	struct SplashDamageInfo;
-};
-namespace Lua {
+export module pragma.server.scripting.lua.libraries.util;
+
+export namespace Lua {
 	namespace util {
 		namespace Server {
 			DLLSERVER luabind::object fire_bullets(lua_State *l, const BulletInfo &bulletInfo, bool hitReport);
@@ -22,5 +21,3 @@ namespace Lua {
 		};
 	};
 };
-
-#endif

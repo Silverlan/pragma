@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_server.h"
-#include "pragma/lua/classes/s_lai_behavior.h"
 #include "pragma/lua/classes/s_lentity.h"
 #include "luasystem.h"
 #include "pragma/ai/ai_schedule.h"
@@ -21,8 +20,9 @@
 #include "pragma/ai/ai_task_event.hpp"
 #include "pragma/ai/ai_task_wait.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
-
 #include <pragma/lua/ostream_operator_alias.hpp>
+
+import pragma.server.scripting.lua;
 
 extern DLLSERVER SGame *s_game;
 

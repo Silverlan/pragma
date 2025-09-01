@@ -4,13 +4,14 @@
 module;
 
 #include "stdafx_server.h"
-#include "pragma/lua/classes/s_lai_behavior.h"
 #include "pragma/lua/classes/s_lentity.h"
 #include "pragma/ai/ai_schedule.h"
 #include "luasystem.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
 module pragma.server.scripting.lua.classes.ai_schedule;
+
+import pragma.server.scripting.lua.classes.ai_behavior;
 
 namespace Lua {
 	namespace AISchedule {
@@ -108,7 +109,7 @@ void Lua::AISchedule::Cancel(lua_State *, pragma::ai::Schedule &schedule) { sche
 void Lua::AISchedule::Copy(lua_State *l, pragma::ai::Schedule &schedule)
 {
 	auto cpy = schedule.Copy();
-	Lua::Push<std::shared_ptr<pragma::ai::Schedule>>(l, cpy);
+	Lua::Push<std::shared_ptr<::pragma::ai::Schedule>>(l, cpy);
 }
 void Lua::AISchedule::HasParameter(lua_State *l, pragma::ai::Schedule &schedule, uint32_t parameterId) { Lua::PushBool(l, (schedule.GetParameter(parameterId) != nullptr) ? true : false); }
 void Lua::AISchedule::SetParameterBool(lua_State *, pragma::ai::Schedule &schedule, uint8_t idx, bool b) { schedule.SetParameter(idx, b); }

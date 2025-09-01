@@ -5,7 +5,6 @@
 #include "luasystem.h"
 #include "pragma/lua/libraries/s_lai.h"
 #include "pragma/ai/ai_schedule.h"
-#include "pragma/lua/classes/s_lai_behavior.h"
 #include "pragma/ai/s_disposition.h"
 #include "pragma/ai/s_npcstate.h"
 #include "pragma/ai/ai_task.h"

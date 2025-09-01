@@ -21,13 +21,14 @@
 #include "pragma/entities/components/c_transform_component.hpp"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/entities/components/c_surface_component.hpp"
-#include "pragma/entities/components/c_eye_component.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/components/submergible_component.hpp>
 #include <pragma/entities/components/movement_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/model/model.h>
 #include <pragma/audio/alsound_type.h>
+
+import pragma.client.entities.components;
 
 extern DLLCLIENT ClientState *client;
 

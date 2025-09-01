@@ -16,6 +16,7 @@ export import :env_sky_camera;
 export import :env_timescale;
 export import :env_weather;
 export import :env_wind;
+export import :eye;
 export import :field_angle;
 export import :flashlight;
 export import :bsp_leaf;

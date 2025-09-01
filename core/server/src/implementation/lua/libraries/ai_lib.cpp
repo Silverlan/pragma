@@ -8,9 +8,9 @@ module;
 #include "pragma/ai/ai_schedule.h"
 #include "pragma/ai/s_disposition.h"
 #include "pragma/ai/s_npcstate.h"
+#include "pragma/ai/s_factions.h"
 #include "pragma/ai/ai_task.h"
 #include "pragma/ai/ai_task_decorator.h"
-#include "pragma/entities/components/s_ai_component.hpp"
 #include "pragma/ai/ai_memory.h"
 #include "pragma/ai/ai_task_move_to_target.h"
 #include "pragma/ai/ai_task_move_random.h"
@@ -28,6 +28,7 @@ module;
 
 module pragma.server.scripting.lua.libraries.ai;
 
+import pragma.server.entities.components;
 import pragma.server.scripting.lua.classes.ai_behavior;
 import pragma.server.scripting.lua.classes.ai_memory;
 import pragma.server.scripting.lua.classes.ai_schedule;

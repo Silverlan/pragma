@@ -21,7 +21,6 @@
 #include "pragma/entities/components/s_animated_component.hpp"
 #include "pragma/entities/components/s_weapon_component.hpp"
 #include "pragma/entities/components/s_vehicle_component.hpp"
-#include "pragma/entities/components/s_ai_component.hpp"
 #include "pragma/entities/components/s_character_component.hpp"
 #include "pragma/entities/components/s_physics_component.hpp"
 #include "pragma/entities/components/s_time_scale_component.hpp"
@@ -44,6 +43,7 @@
 #include <pragma/entities/components/base_character_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
+import pragma.server.entities.components;
 import pragma.server.model_manager;
 
 extern EntityClassMap<SBaseEntity> *g_ServerEntityFactories;

@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_server.h"
-#include "pragma/entities/components/s_ai_component.hpp"
 #include "pragma/entities/components/s_player_component.hpp"
 #include "pragma/ai/ai_behavior.h"
 #include "pragma/ai/ai_schedule.h"
@@ -12,6 +11,7 @@
 #include <pragma/debug/debugbehaviortree.h>
 #include <pragma/networking/nwm_util.h>
 
+import pragma.server.entities.components;
 import pragma.server.scripting.lua;
 
 using namespace pragma;

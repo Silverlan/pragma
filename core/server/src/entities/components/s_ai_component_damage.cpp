@@ -2,9 +2,10 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_server.h"
-#include "pragma/entities/components/s_ai_component.hpp"
 #include "pragma/entities/components/s_character_component.hpp"
 #include <pragma/entities/components/base_character_component.hpp>
+
+import pragma.server.entities.components;
 
 using namespace pragma;
 

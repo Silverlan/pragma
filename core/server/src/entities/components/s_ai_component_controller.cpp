@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_server.h"
-#include "pragma/entities/components/s_ai_component.hpp"
 #include "pragma/entities/components/s_player_component.hpp"
 #include "pragma/entities/components/s_character_component.hpp"
 #include "pragma/entities/components/s_observable_component.hpp"
@@ -11,6 +10,8 @@
 #include <pragma/entities/components/base_player_component.hpp>
 #include <pragma/entities/components/action_input_controller_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
+
+import pragma.server.entities.components;
 
 using namespace pragma;
 

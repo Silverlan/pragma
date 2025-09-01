@@ -5,7 +5,6 @@
 #include "luasystem.h"
 #include "pragma/ai/ai_schedule.h"
 #include "pragma/ai/ai_task.h"
-#include "pragma/entities/components/s_ai_component.hpp"
 #include "pragma/ai/ai_task_decorator.h"
 #include "pragma/ai/ai_task_move_to_target.h"
 #include "pragma/ai/ai_task_move_random.h"
@@ -20,6 +19,7 @@
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/lua/ostream_operator_alias.hpp>
 
+import pragma.server.entities.components;
 import pragma.server.scripting.lua;
 
 extern DLLSERVER SGame *s_game;

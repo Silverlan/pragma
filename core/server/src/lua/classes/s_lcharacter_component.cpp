@@ -7,7 +7,6 @@
 #include "pragma/entities/components/s_weapon_component.hpp"
 #include "pragma/lua/s_lentity_components.hpp"
 #include "pragma/entities/components/s_character_component.hpp"
-#include "pragma/entities/components/s_ai_component.hpp"
 #include "pragma/entities/components/s_player_component.hpp"
 #include <pragma/lua/lua_util_component.hpp>
 #include <pragma/lua/classes/lproperty.hpp>
@@ -17,6 +16,8 @@
 #include <pragma/lua/lentity_components.hpp>
 #include <pragma/entities/components/base_actor_component.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
+
+import pragma.server.entities.components;
 
 namespace Lua {
 	namespace Character {

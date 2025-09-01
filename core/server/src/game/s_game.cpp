@@ -47,7 +47,6 @@
 #include <pragma/lua/luafunction_call.h>
 #include "pragma/entities/components/s_entity_component.hpp"
 #include "pragma/entities/components/s_vehicle_component.hpp"
-#include "pragma/entities/components/s_ai_component.hpp"
 #include "pragma/entities/components/s_player_component.hpp"
 #include "pragma/entities/components/s_weapon_component.hpp"
 #include "pragma/entities/components/s_character_component.hpp"
@@ -72,6 +71,7 @@
 #include <udm.hpp>
 
 import pragma.entities.components;
+import pragma.server.entities.components;
 import pragma.server.model_manager;
 import pragma.server.scripting.lua;
 

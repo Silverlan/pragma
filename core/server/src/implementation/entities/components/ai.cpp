@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
-#include "pragma/entities/components/s_ai_component.hpp"
 #include "pragma/entities/components/s_player_component.hpp"
 #include "pragma/entities/components/s_character_component.hpp"
 #include "pragma/entities/components/s_model_component.hpp"
@@ -10,6 +11,7 @@
 #include "pragma/entities/components/s_health_component.hpp"
 #include "pragma/entities/components/s_physics_component.hpp"
 #include "pragma/ai/s_npcstate.h"
+#include "pragma/entities/components/base_ai_component.hpp"
 #include "pragma/entities/s_baseentity.h"
 #include "pragma/ai/ai_squad.h"
 #include "pragma/ai/ai_schedule.h"
@@ -28,6 +30,10 @@
 #include <sharedutils/netpacket.hpp>
 #include <pragma/networking/nwm_util.h>
 #include <pragma/logging.hpp>
+
+module pragma.server.entities.components;
+
+import :ai;
 
 extern DLLSERVER SGame *s_game;
 

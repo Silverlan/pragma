@@ -8,7 +8,6 @@
 #include "pragma/ai/ai_schedule.h"
 #include "pragma/ai/ai_squad.h"
 #include "pragma/entities/player.h"
-#include "pragma/entities/components/s_ai_component.hpp"
 #include "pragma/entities/components/s_player_component.hpp"
 #include "pragma/lua/s_lentity_components.hpp"
 #include "pragma/lua/policies/default_parameter_policy.hpp"
@@ -21,6 +20,8 @@
 #include <luabind/copy_policy.hpp>
 
 #include <pragma/lua/ostream_operator_alias.hpp>
+
+import pragma.server.entities.components;
 
 namespace Lua {
 	namespace NPC {

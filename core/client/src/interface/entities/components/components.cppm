@@ -22,6 +22,7 @@ export import :env_weather;
 export import :env_wind;
 export import :eye;
 export import :field_angle;
+export import :flammable;
 export import :flashlight;
 export import :func_button;
 export import :func_kinematic;

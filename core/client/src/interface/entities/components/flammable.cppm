@@ -1,15 +1,16 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_FLAMMABLE_EMITTER_COMPONENT_HPP__
-#define __C_FLAMMABLE_EMITTER_COMPONENT_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/components/c_entity_component.hpp"
+#include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include <pragma/entities/components/base_flammable_component.hpp>
 
-namespace pragma {
-	class CParticleSystemComponent;
+export module pragma.client.entities.components:flammable;
+
+export namespace pragma {
 	class DLLCLIENT CFlammableComponent final : public BaseFlammableComponent, public CBaseNetComponent {
 	  public:
 		CFlammableComponent(BaseEntity &ent) : BaseFlammableComponent(ent) {}
@@ -39,5 +40,3 @@ namespace pragma {
 		} m_igniteInfo = {};
 	};
 };
-
-#endif

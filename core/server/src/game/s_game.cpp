@@ -42,7 +42,6 @@
 #include "pragma/ai/ai_task_look_at_target.h"
 #include "pragma/ai/ai_task_event.hpp"
 #include "pragma/lua/s_lua_script_watcher.h"
-#include "pragma/model/s_modelmanager.h"
 #include "pragma/networking/iserver.hpp"
 #include "pragma/networking/iserver_client.hpp"
 #include <pragma/lua/luafunction_call.h>
@@ -69,9 +68,11 @@
 #include <pragma/entities/components/map_component.hpp>
 #include <pragma/entities/components/velocity_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
+#include "pragma/model/modelmesh.h"
 #include <udm.hpp>
 
 import pragma.entities.components;
+import pragma.server.model_manager;
 import pragma.server.scripting.lua;
 
 extern DLLNETWORK Engine *engine;

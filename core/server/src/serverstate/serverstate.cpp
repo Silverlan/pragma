@@ -19,7 +19,6 @@
 #include <pragma/networking/enums.hpp>
 #include <pragma/networking/nwm_util.h>
 #include <pragma/console/convars.h>
-#include "pragma/model/s_modelmanager.h"
 #include "pragma/entities/components/s_resource_watcher.hpp"
 #include <pragma/asset/util_asset.hpp>
 #include "pragma/networking/networking_modules.hpp"
@@ -30,6 +29,8 @@
 #include <sharedutils/util_file.h>
 #include <sharedutils/util_library.hpp>
 #include <pragma/logging.hpp>
+
+import pragma.server.model_manager;
 
 static std::unordered_map<std::string, std::shared_ptr<PtrConVar>> *conVarPtrs = NULL;
 std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &ServerState::GetConVarPtrs() { return *conVarPtrs; }

@@ -4,7 +4,6 @@
 #include "stdafx_server.h"
 #include "pragma/entities/components/s_physics_component.hpp"
 #include "pragma/entities/components/s_player_component.hpp"
-#include "pragma/model/s_modelmanager.h"
 #include <sharedutils/scope_guard.h>
 #include <pragma/entities/components/base_character_component.hpp>
 #include <pragma/entities/components/damageable_component.hpp>
@@ -13,6 +12,8 @@
 #include <servermanager/interface/sv_nwm_manager.hpp>
 #include <pragma/networking/nwm_util.h>
 #include <pragma/networking/enums.hpp>
+
+import pragma.server.model_manager;
 
 using namespace pragma;
 

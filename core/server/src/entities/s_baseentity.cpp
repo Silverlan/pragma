@@ -14,7 +14,6 @@
 #include "pragma/entities/player.h"
 #include "pragma/networking/recipient_filter.hpp"
 #include "pragma/lua/lua_handles.hpp"
-#include "pragma/model/s_modelmanager.h"
 #include "pragma/entities/components/s_entity_component.hpp"
 #include "pragma/entities/components/s_player_component.hpp"
 #include "pragma/entities/components/s_child_component.hpp"
@@ -44,6 +43,8 @@
 #include <pragma/entities/components/base_player_component.hpp>
 #include <pragma/entities/components/base_character_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
+
+import pragma.server.model_manager;
 
 extern EntityClassMap<SBaseEntity> *g_ServerEntityFactories;
 extern ServerEntityNetworkMap *g_SvEntityNetworkMap;

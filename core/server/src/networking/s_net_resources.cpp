@@ -5,6 +5,7 @@
 #include "pragma/serverstate/serverutil.h"
 #include "pragma/networking/s_net_resources.h"
 #include "pragma/networking/resourcemanager.h"
+#include <pragma/model/modelmanager.h>
 #include <fsys/filesystem.h>
 #include "pragma/networking/resource.h"
 #include "pragma/networking/iserver.hpp"
@@ -13,7 +14,6 @@
 #include <servermanager/sv_nwm_recipientfilter.h>
 #include "pragma/networking/iserver_client.hpp"
 #include "pragma/networking/recipient_filter.hpp"
-#include "pragma/model/s_modelmanager.h"
 #include "pragma/entities/components/s_player_component.hpp"
 #include <pragma/networking/enums.hpp>
 #include <pragma/entities/components/base_player_component.hpp>
@@ -22,6 +22,8 @@
 #include <material_property_block_view.hpp>
 #include <material_manager2.hpp>
 #include <sharedutils/util_file.h>
+
+import pragma.server.model_manager;
 
 #define RESOURCE_TRANSFER_VERBOSE 0
 

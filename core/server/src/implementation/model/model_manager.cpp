@@ -1,12 +1,13 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
-#include "pragma/model/s_modelmanager.h"
 #include <sharedutils/util_string.h>
 #include <pragma/serverstate/serverstate.h>
 
-extern DLLSERVER SGame *s_game;
+module pragma.server.model_manager;
 
 /*std::shared_ptr<Model> pragma::asset::SModelManager::LoadModel(const std::string &mdlName,bool bReload,bool *outIsNewModel)
 {

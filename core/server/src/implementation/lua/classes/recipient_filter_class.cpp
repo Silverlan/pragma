@@ -1,14 +1,17 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
 #include "pragma/serverstate/serverutil.h"
-#include "pragma/lua/classes/lrecipientfilter.h"
 #include "pragma/entities/player.h"
 #include "pragma/networking/recipient_filter.hpp"
 #include "pragma/lua/classes/ldef_recipientfilter.h"
 #include "pragma/lua/classes/ldef_entity.h"
 #include "pragma/entities/components/s_player_component.hpp"
+
+module pragma.server.scripting.lua.classes.recipient_filter;
 
 extern ServerState *server;
 luabind::tableT<pragma::SPlayerComponent> Lua::RecipientFilter::GetRecipients(lua_State *l, pragma::networking::TargetRecipientFilter &rp)

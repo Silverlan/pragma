@@ -15,7 +15,6 @@ module;
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_attachment_component.hpp"
 #include "pragma/entities/components/c_transform_component.hpp"
-#include "pragma/util/util_baking.hpp"
 #include "pragma/asset/c_util_model.hpp"
 #include <pragma/lua/classes/ldef_color.h>
 #include <pragma/lua/classes/ldef_vector.h>
@@ -31,6 +30,8 @@ module;
 #include <fsys/ifile.hpp>
 
 module pragma.client.scripting.lua.libraries.util;
+
+import pragma.client.util;
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;

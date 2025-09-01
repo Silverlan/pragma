@@ -22,6 +22,8 @@ using namespace pragma;
 
 LINK_ENTITY_TO_CLASS(env_light_environment, CEnvLightDirectional);
 
+CLightDirectionalComponent::CLightDirectionalComponent(BaseEntity &ent) : BaseEnvLightDirectionalComponent(ent) {}
+bool CLightDirectionalComponent::ShouldTransmitNetData() const { return true; }
 void CLightDirectionalComponent::Initialize()
 {
 	BaseEnvLightDirectionalComponent::Initialize();

@@ -25,6 +25,7 @@ extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
 CLightSpotComponent::CLightSpotComponent(BaseEntity &ent) : BaseEnvLightSpotComponent(ent) {}
+bool CLightSpotComponent::ShouldTransmitNetData() const { return true; }
 void CLightSpotComponent::Initialize()
 {
 	BaseEnvLightSpotComponent::Initialize();

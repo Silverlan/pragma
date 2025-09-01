@@ -26,6 +26,7 @@ extern DLLCLIENT CGame *c_game;
 
 static const std::array<Vector3, 6> directions = {Vector3(1.f, 0.f, 0.f), Vector3(-1.f, 0.f, 0.f), Vector3(0.f, 1.f, 0.f), Vector3(0.f, -1.f, 0.f), Vector3(0.f, 0.f, 1.f), Vector3(0.f, 0.f, -1.f)};
 
+CLightPointComponent::CLightPointComponent(BaseEntity &ent) : BaseEnvLightPointComponent(ent) {}
 void CLightPointComponent::Initialize()
 {
 	BaseEnvLightPointComponent::Initialize();

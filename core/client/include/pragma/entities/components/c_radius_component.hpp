@@ -11,12 +11,12 @@
 namespace pragma {
 	class DLLCLIENT CRadiusComponent final : public BaseRadiusComponent, public CBaseNetComponent {
 	  public:
-		CRadiusComponent(BaseEntity &ent) : BaseRadiusComponent(ent) {}
+		CRadiusComponent(BaseEntity &ent);
 
 		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void InitializeLuaObject(lua_State *l) override;
-		virtual bool ShouldTransmitNetData() const override { return true; }
+		virtual bool ShouldTransmitNetData() const override;
 	};
 };
 

@@ -15,7 +15,7 @@ namespace pragma {
 		CLightSpotComponent(BaseEntity &ent);
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *l) override;
-		virtual bool ShouldTransmitNetData() const override { return true; }
+		virtual bool ShouldTransmitNetData() const override;
 		virtual void SetConeStartOffset(float offset) override;
 		virtual void OnEntitySpawn() override;
 	  protected:

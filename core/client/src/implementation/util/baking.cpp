@@ -1,9 +1,10 @@
 // SPDX-FileCopyrightText: (c) 2022 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
-#include "pragma/util/util_baking.hpp"
 #include "pragma/util/util_image.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/util/util_thread_pool.hpp"
@@ -21,6 +22,8 @@
 #include <sharedutils/util_baking.hpp>
 #include <util_image.hpp>
 #include <fsys/ifile.hpp>
+
+module pragma.client.util.baking;
 
 extern DLLCLIENT CEngine *c_engine;
 

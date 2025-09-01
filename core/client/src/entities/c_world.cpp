@@ -10,7 +10,6 @@
 #include "pragma/entities/components/c_physics_component.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
-#include "pragma/entities/components/c_bsp_component.hpp"
 #include "pragma/entities/components/c_light_map_component.hpp"
 #include "pragma/entities/components/c_color_component.hpp"
 #include "pragma/entities/components/c_toggle_component.hpp"
@@ -29,6 +28,7 @@
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <cmaterial.h>
 
+import pragma.client.entities.components;
 import source_engine.bsp;
 
 using namespace pragma;

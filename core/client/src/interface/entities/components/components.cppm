@@ -6,6 +6,7 @@ module;
 export module pragma.client.entities.components;
 export import :animated_bvh;
 export import :bot;
+export import :bsp;
 export import :bsp_leaf;
 export import :env_decal;
 export import :env_fog_controller;

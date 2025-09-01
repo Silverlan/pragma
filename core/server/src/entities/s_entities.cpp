@@ -6,7 +6,6 @@
 #include "pragma/entities/s_entityfactories.h"
 #include <servermanager/sv_nwm_recipientfilter.h>
 #include "pragma/entities/player.h"
-#include "pragma/lua/classes/s_lua_entity.h"
 #include "pragma/game/s_game.h"
 #include "luasystem.h"
 #include "pragma/game/s_game_entities.h"
@@ -29,6 +28,7 @@
 #include <udm.hpp>
 
 import pragma.entities.components;
+import pragma.server.scripting.lua;
 
 extern ServerState *server;
 extern EntityClassMap<SBaseEntity> *g_ServerEntityFactories;

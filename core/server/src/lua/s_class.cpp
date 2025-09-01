@@ -7,7 +7,6 @@
 #include "pragma/lua/classes/lentity.h"
 #include "pragma/lua/classes/lmodelmesh.h"
 #include "pragma/lua/classes/s_lentity.h"
-#include "pragma/lua/classes/s_lvhcwheel.h"
 #include "pragma/lua/classes/lshaderinfo.h"
 #include "pragma/lua/classes/lmaterial.h"
 #include "pragma/entities/environment/lights/env_light.h"
@@ -19,7 +18,6 @@
 #include "pragma/ai/ai_task.h"
 #include "pragma/lua/classes/s_lai_behavior.h"
 #include <pragma/game/damageinfo.h>
-#include "pragma/lua/classes/s_lua_entity.h"
 #include "pragma/physics/collision_object.hpp"
 #include <pragma/lua/converters/vector_converter_t.hpp>
 #include <pragma/lua/converters/pair_converter_t.hpp>

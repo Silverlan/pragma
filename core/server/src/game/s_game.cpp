@@ -29,7 +29,6 @@
 #include <pragma/debug/debug_performance_profiler.hpp>
 #include "pragma/game/gamemode/gamemodemanager.h"
 #include "pragma/game/s_game_callback.h"
-#include "pragma/lua/classes/s_lua_entity.h"
 #include "pragma/ai/ai_behavior.h"
 #include "pragma/ai/ai_task_move_to_target.h"
 #include "pragma/ai/ai_task_move_random.h"
@@ -73,6 +72,7 @@
 #include <udm.hpp>
 
 import pragma.entities.components;
+import pragma.server.scripting.lua;
 
 extern DLLNETWORK Engine *engine;
 extern EntityClassMap<SBaseEntity> *g_ServerEntityFactories;

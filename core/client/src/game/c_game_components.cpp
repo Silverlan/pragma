@@ -67,7 +67,6 @@
 #include "pragma/entities/components/c_entity_component.hpp"
 #include "pragma/entities/components/c_io_component.hpp"
 #include "pragma/entities/components/c_attachment_component.hpp"
-#include "pragma/entities/components/c_child_component.hpp"
 #include "pragma/entities/components/c_generic_component.hpp"
 #include "pragma/entities/components/c_gamemode_component.hpp"
 #include "pragma/entities/components/c_game_component.hpp"

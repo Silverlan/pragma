@@ -6,7 +6,6 @@
 #include "pragma/game/s_game.h"
 #include "pragma/lua/classes/lentity.h"
 #include "pragma/lua/classes/lmodelmesh.h"
-#include "pragma/lua/classes/s_lentity.h"
 #include "pragma/lua/classes/lshaderinfo.h"
 #include "pragma/lua/classes/lmaterial.h"
 #include "pragma/entities/environment/lights/env_light.h"

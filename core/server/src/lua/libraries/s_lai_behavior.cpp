@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_server.h"
-#include "pragma/lua/classes/s_lentity.h"
 #include "luasystem.h"
 #include "pragma/ai/ai_schedule.h"
 #include "pragma/lua/libraries/s_lai.h"

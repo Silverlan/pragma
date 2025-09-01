@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
-#include "pragma/lua/classes/s_lentity.h"
 #include "pragma/entities/s_baseentity.h"
 #include "luasystem.h"
 #include "pragma/networking/recipient_filter.hpp"
@@ -10,6 +11,8 @@
 #include <pragma/audio/alsound_type.h>
 #include <pragma/networking/enums.hpp>
 #include <servermanager/interface/sv_nwm_manager.hpp>
+
+module pragma.server.scripting.lua.classes.entity;
 
 void Lua::Entity::Server::register_class(luabind::class_<SBaseEntity, BaseEntity> &classDef)
 {

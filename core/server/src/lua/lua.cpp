@@ -21,7 +21,6 @@
 #include "pragma/lua/s_lentity_components.hpp"
 #include "pragma/entities/components/s_player_component.hpp"
 #include "pragma/lua/s_lua_component.hpp"
-#include "pragma/lua/classes/s_lentity.h"
 #include "pragma/lua/sh_lua_component_t.hpp"
 #include <pragma/lua/lua_util_component.hpp>
 #include <pragma/lua/classes/lentity.h>

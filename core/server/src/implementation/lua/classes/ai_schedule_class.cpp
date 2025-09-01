@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_server.h"
-#include "pragma/lua/classes/s_lentity.h"
 #include "pragma/ai/ai_schedule.h"
 #include "luasystem.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
@@ -12,6 +11,7 @@ module;
 module pragma.server.scripting.lua.classes.ai_schedule;
 
 import pragma.server.scripting.lua.classes.ai_behavior;
+import pragma.server.scripting.lua.classes.entity;
 
 namespace Lua {
 	namespace AISchedule {

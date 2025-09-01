@@ -1,10 +1,11 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
 #include "pragma/game/c_game.h"
-#include "pragma/util/c_resource_watcher.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/rendering/shader_graph/manager.hpp"
@@ -19,6 +20,8 @@
 #include <material_property_block_view.hpp>
 #include <cmaterial_manager2.hpp>
 #include <cmaterial.h>
+
+module pragma.client.util.resource_watcher;
 
 import pragma.shadergraph;
 

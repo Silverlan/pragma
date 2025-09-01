@@ -16,7 +16,6 @@
 #include "pragma/audio/c_soundscript.h"
 #include "luasystem.h"
 #include "pragma/lua/libraries/c_lgui.h"
-#include "pragma/util/c_resource_watcher.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/console/c_cvar.h"
 #include <pragma/asset/util_asset.hpp>
@@ -48,13 +47,12 @@
 #include <prosper_window.hpp>
 #include <wgui/types/wiroot.h>
 
-
 import pragma.client.gui;
 import pragma.client.model;
 import pragma.client.networking;
 import pragma.client.scripting.lua;
+import pragma.client.util;
 // import pragma.scripting.lua;
-
 static std::unordered_map<std::string, std::shared_ptr<PtrConVar>> *conVarPtrs = NULL;
 std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &ClientState::GetConVarPtrs() { return *conVarPtrs; }
 ConVarHandle ClientState::GetConVarHandle(std::string scvar)

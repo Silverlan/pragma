@@ -1,18 +1,23 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
-#include "pragma/lua/libraries/s_lgame.h"
 #include "pragma/networking/recipient_filter.hpp"
 #include <pragma/serverstate/serverstate.h>
 #include "luasystem.h"
 #include <pragma/networking/enums.hpp>
 #include <pragma/lua/classes/ldef_vector.h>
+#include "pragma/lua/luaapi.h"
 #include <pragma/lua/libraries/ltimer.h>
 #include <pragma/lua/libraries/lgame.h>
 #include <pragma/model/model.h>
 #include <servermanager/interface/sv_nwm_manager.hpp>
 #include <sharedutils/scope_guard.h>
+
+module pragma.server.scripting.lua.libraries.game;
+
 extern DLLSERVER ServerState *server;
 extern DLLSERVER SGame *s_game;
 
@@ -26,7 +31,7 @@ Vector3 Lua::game::Server::get_gravity()
 	Game *game = server->GetGameState();
 	return game->GetGravity();
 }
-LuaModelObject Lua::game::Server::load_model(lua_State *l, const std::string &name)
+luabind::object Lua::game::Server::load_model(lua_State *l, const std::string &name)
 {
 	auto mdl = s_game->LoadModel(name);
 	if(mdl == nullptr)

@@ -7,4 +7,5 @@ export module pragma.client.util;
 export import pragma.client.util.baking;
 export import pragma.client.util.image;
 export import pragma.client.util.resource_watcher;
+export import pragma.client.util.screenshot;
 export import pragma.client.util.smoke_trail;

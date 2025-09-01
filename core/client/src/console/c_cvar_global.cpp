@@ -22,7 +22,6 @@
 #include <sharedutils/util_string.h>
 #include "pragma/util/util_tga.hpp"
 #include "pragma/rendering/raytracing/cycles.hpp"
-#include "pragma/util/c_util.hpp"
 #include <wgui/wgui.h>
 #include <cmaterialmanager.h>
 #include <pragma/networking/netmessages.h>
@@ -53,6 +52,7 @@
 import pragma.client.debug;
 import pragma.client.entities.components;
 import pragma.client.gui;
+import pragma.client.util;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;

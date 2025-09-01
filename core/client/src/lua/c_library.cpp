@@ -4,7 +4,6 @@
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
-#include "pragma/util/c_util.hpp"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/lua/libraries/c_lgui.h"
@@ -65,6 +64,7 @@ import pragma.string.unicode;
 import pragma.client.gui;
 import pragma.client.rendering.shaders;
 import pragma.client.scripting.lua;
+import pragma.client.util;
 import pragma.gui;
 
 extern DLLCLIENT CGame *c_game;

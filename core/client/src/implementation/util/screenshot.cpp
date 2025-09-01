@@ -1,10 +1,11 @@
 // SPDX-FileCopyrightText: (c) 2024 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
 #include "pragma/clientstate/clientstate.h"
-#include "pragma/util/c_util.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/rendering/raytracing/cycles.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
@@ -17,6 +18,8 @@
 #include <prosper_command_buffer.hpp>
 #include <prosper_window.hpp>
 #include <fsys/ifile.hpp>
+
+module pragma.client.util.screenshot;
 
 import pragma.client.entities.components;
 

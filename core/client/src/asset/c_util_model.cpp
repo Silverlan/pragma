@@ -6,7 +6,7 @@
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/asset/c_util_model.hpp"
-#include "pragma/util/util_image.hpp"
+#include "pragma/util/resource_watcher.h"
 #include "pragma/rendering/shaders/util/c_shader_compose_rma.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/environment/lights/c_env_light.h"
@@ -25,6 +25,7 @@
 #include <sharedutils/util_path.hpp>
 #include <sharedutils/util_parallel_job.hpp>
 #include <sharedutils/util_library.hpp>
+#include <util_image_buffer.hpp>
 #include <fsys/ifile.hpp>
 #include <pragma/asset_types/world.hpp>
 #include <pragma/engine_version.h>
@@ -40,6 +41,7 @@
 
 import pragma.client.assets;
 import pragma.client.rendering.shaders;
+import pragma.client.util;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;

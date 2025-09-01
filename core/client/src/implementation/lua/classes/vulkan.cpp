@@ -36,7 +36,6 @@ module;
 #include <prosper_fence.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <util_image_buffer.hpp>
-#include "pragma/util/util_image.hpp"
 #include <prosper_event.hpp>
 #include <prosper_window.hpp>
 #include <prosper_swap_command_buffer.hpp>
@@ -50,6 +49,7 @@ module pragma.client.scripting.lua.classes.vulkan;
 
 import pragma.client.model;
 import pragma.client.rendering.shaders;
+import pragma.client.util;
 
 extern CEngine *c_engine;
 

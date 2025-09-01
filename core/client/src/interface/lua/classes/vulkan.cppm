@@ -18,13 +18,14 @@ module;
 #include <prosper_render_pass.hpp>
 #include <prosper_fence.hpp>
 #include <prosper_descriptor_set_group.hpp>
-#include "pragma/util/util_image.hpp"
 #include <prosper_event.hpp>
 #include <prosper_window.hpp>
 #include <prosper_swap_command_buffer.hpp>
 #include <buffers/prosper_buffer.hpp>
 
 export module pragma.client.scripting.lua.classes.vulkan;
+
+import pragma.client.util;
 
 export namespace Lua {
 	namespace Vulkan {

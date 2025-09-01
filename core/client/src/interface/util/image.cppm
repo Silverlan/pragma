@@ -1,19 +1,17 @@
 // SPDX-FileCopyrightText: (c) 2020 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __PRAGMA_UTIL_IMAGE_HPP__
-#define __PRAGMA_UTIL_IMAGE_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include <prosper_enums.hpp>
 #include <pragma/util/resource_watcher.h>
+#include <image/prosper_image.hpp>
 #include <util_image_buffer.hpp>
 
-namespace prosper {
-	class Image;
-};
+export module pragma.client.util.image;
 
-namespace util {
+export namespace util {
 	struct ToImageBufferInfo {
 		bool includeLayers = false;
 		bool includeMipmaps = false;
@@ -24,5 +22,3 @@ namespace util {
 	};
 	DLLCLIENT bool to_image_buffer(prosper::IImage &image, const ToImageBufferInfo &info, std::vector<std::vector<std::shared_ptr<uimg::ImageBuffer>>> &outImageBuffers);
 };
-
-#endif

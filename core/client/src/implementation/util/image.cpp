@@ -1,14 +1,17 @@
 // SPDX-FileCopyrightText: (c) 2020 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
-#include "pragma/util/util_image.hpp"
 #include "prosper_util.hpp"
 #include <prosper_command_buffer.hpp>
 #include <image/prosper_image.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_context.hpp>
+
+module pragma.client.util.image;
 
 extern DLLCLIENT CEngine *c_engine;
 static uimg::Format determine_target_format(prosper::Format format)

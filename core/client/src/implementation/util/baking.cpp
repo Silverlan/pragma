@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
-#include "pragma/util/util_image.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/util/util_thread_pool.hpp"
 #include "pragma/entities/components/lightmap_data_cache.hpp"
@@ -24,6 +23,8 @@ module;
 #include <fsys/ifile.hpp>
 
 module pragma.client.util.baking;
+
+import pragma.client.util.image;
 
 extern DLLCLIENT CEngine *c_engine;
 

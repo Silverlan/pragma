@@ -20,7 +20,6 @@
 #include <pragma/networking/nwm_util.h>
 #include "luasystem.h"
 #include <pragma/lua/luafunction_call.h>
-#include "pragma/util/util_smoke_trail.h"
 #include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/entities/components/c_entity_component.hpp"
 #include "pragma/console/c_cvar_global_functions.h"
@@ -57,6 +56,7 @@
 import pragma.client.entities.components;
 import pragma.client.model;
 import pragma.entities.components;
+import pragma.client.util;
 
 LINK_ENTITY_TO_CLASS(entity, CBaseEntity);
 

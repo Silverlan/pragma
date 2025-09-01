@@ -1,9 +1,12 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/util/util_smoke_trail.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
+
+module pragma.client.util.smoke_trail;
 
 pragma::CParticleSystemComponent *util::create_smoke_trail_particle(float distance, float speed, float minSpriteSize, float maxSpriteSize, const std::string &material)
 {

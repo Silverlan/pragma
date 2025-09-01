@@ -5,3 +5,4 @@ module;
 
 export module pragma.client.util;
 export import pragma.client.util.baking;
+export import pragma.client.util.smoke_trail;

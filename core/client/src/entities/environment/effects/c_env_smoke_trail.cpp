@@ -5,11 +5,12 @@
 #include "pragma/entities/environment/effects/c_env_smoke_trail.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/entities/c_entityfactories.h"
-#include "pragma/util/util_smoke_trail.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/components/basetoggle.h>
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
+
+import pragma.client.util;
 
 using namespace pragma;
 

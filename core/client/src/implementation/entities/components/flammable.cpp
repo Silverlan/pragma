@@ -21,6 +21,8 @@ module pragma.client.entities.components;
 
 import :flammable;
 
+import pragma.client.util;
+
 using namespace pragma;
 
 CFlammableComponent::IgniteInfo::IgniteInfo() {}

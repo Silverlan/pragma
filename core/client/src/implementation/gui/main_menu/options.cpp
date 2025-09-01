@@ -6,7 +6,6 @@ module;
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
 #include <wgui/types/widropdownmenu.h>
-#include <wgui/types/wibutton.h>
 #include <wgui/types/witext.h>
 #include <wgui/types/witextentry.h>
 #include "pragma/clientstate/clientstate.h"

@@ -8,6 +8,7 @@
 #include "pragma/entities/components/c_entity_component.hpp"
 #include <pragma/util/lookup_identifier.hpp>
 #include <pragma/entities/components/base_flex_component.hpp>
+#include <pragma/audio/c_alsound.h>
 
 struct Eyeball;
 namespace pragma {

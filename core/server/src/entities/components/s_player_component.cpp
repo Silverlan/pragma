@@ -4,7 +4,6 @@
 #include "stdafx_server.h"
 #include "pragma/serverstate/serverutil.h"
 #include "pragma/entities/components/s_player_component.hpp"
-#include "pragma/entities/components/s_character_component.hpp"
 #include "pragma/physics/collisiontypes.h"
 #include "pragma/entities/s_flashlight.h"
 #include "pragma/entities/player.h"
@@ -31,6 +30,7 @@
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
 import pragma.entities.components;
+import pragma.server.entities.components;
 
 using namespace pragma;
 

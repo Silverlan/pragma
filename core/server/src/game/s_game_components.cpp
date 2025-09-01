@@ -10,7 +10,6 @@
 #include <pragma/game/game_entity_component.hpp>
 #include <pragma/entities/entity_component_manager.hpp>
 #include <luainterface.hpp>
-#include "pragma/entities/components/s_character_component.hpp"
 #include "pragma/entities/components/s_color_component.hpp"
 #include "pragma/entities/components/s_score_component.hpp"
 #include "pragma/entities/components/s_flammable_component.hpp"

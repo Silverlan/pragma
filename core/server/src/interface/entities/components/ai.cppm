@@ -13,7 +13,6 @@ module;
 #include "pragma/ai/ai_schedule.h"
 #include "pragma/debug/debugbehaviortree.h"
 #include "pragma/entities/components/s_entity_component.hpp"
-#include "pragma/entities/components/s_character_component.hpp"
 #include "pragma/entities/components/s_player_component.hpp"
 #include "pragma/entities/components/base_actor_component.hpp"
 #include <pragma/model/animation/play_animation_flags.hpp>

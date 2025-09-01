@@ -1,14 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __S_CHARACTER_COMPONENT_HPP__
-#define __S_CHARACTER_COMPONENT_HPP__
+module;
 
 #include <pragma/entities/components/base_character_component.hpp>
 #include "pragma/serverdefinitions.h"
+#include "pragma/ai/s_factions.h"
 
-class Faction;
-namespace pragma {
+export module pragma.server.entities.components:character;
+
+export namespace pragma {
 	class DLLSERVER SCharacterComponent final : public BaseCharacterComponent {
 	  public:
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
@@ -39,5 +40,3 @@ namespace pragma {
 		bool m_bGodMode;
 	};
 };
-
-#endif

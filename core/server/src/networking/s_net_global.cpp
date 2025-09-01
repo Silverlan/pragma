@@ -15,7 +15,6 @@
 #include <pragma/engine.h>
 #include "pragma/ai/ai_schedule.h"
 #include "pragma/entities/components/s_player_component.hpp"
-#include "pragma/entities/components/s_character_component.hpp"
 #include "pragma/networking/master_server.hpp"
 #include <pragma/networking/enums.hpp>
 #include <pragma/networking/error.hpp>
@@ -27,6 +26,8 @@
 #include <pragma/entities/components/damageable_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <sharedutils/util_library.hpp>
+
+import pragma.server.entities.components;
 
 import pragma.server.entities.components;
 

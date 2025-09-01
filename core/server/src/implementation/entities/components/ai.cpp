@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_server.h"
 #include "pragma/entities/components/s_player_component.hpp"
-#include "pragma/entities/components/s_character_component.hpp"
 #include "pragma/entities/components/s_model_component.hpp"
 #include "pragma/entities/components/s_health_component.hpp"
 #include "pragma/entities/components/s_physics_component.hpp"

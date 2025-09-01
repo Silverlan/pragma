@@ -6,7 +6,6 @@
 #include "pragma/lua/s_lentity_components.hpp"
 #include "pragma/entities/components/s_sound_emitter_component.hpp"
 #include "pragma/networking/recipient_filter.hpp"
-#include "pragma/entities/components/s_character_component.hpp"
 #include "pragma/entities/components/s_color_component.hpp"
 #include "pragma/entities/components/s_score_component.hpp"
 #include "pragma/entities/components/s_flammable_component.hpp"

@@ -6,7 +6,6 @@
 #include "pragma/entities/player.h"
 #include "pragma/networking/recipient_filter.hpp"
 #include "pragma/networking/enums.hpp"
-#include "pragma/entities/components/s_character_component.hpp"
 #include "pragma/entities/components/s_player_component.hpp"
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/components/base_character_component.hpp>
@@ -20,6 +19,8 @@
 #include <servermanager/interface/sv_nwm_manager.hpp>
 #include <sharedutils/datastream.h>
 #include <pragma/networking/nwm_util.h>
+
+import pragma.server.entities.components;
 
 using namespace pragma;
 

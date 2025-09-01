@@ -1,10 +1,13 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
-#include "pragma/lua/classes/lresource.h"
 #include "pragma/serverdefinitions.h"
 #include "pragma/networking/resourcemanager.h"
+
+module pragma.server.scripting.lua.classes.resource;
 
 bool Lua::resource::add_file(const std::string &res, bool stream) { return ResourceManager::AddResource(res, stream); }
 bool Lua::resource::add_file(const std::string &res) { return add_file(res, true); }

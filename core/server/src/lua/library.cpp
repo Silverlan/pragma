@@ -4,7 +4,6 @@
 #include "stdafx_server.h"
 #include <pragma/engine.h>
 #include "pragma/game/s_game.h"
-#include "pragma/lua/classes/lresource.h"
 #include "pragma/lua/libraries/s_ldebugoverlay.h"
 #include "pragma/lua/libraries/s_lai.h"
 #include <pragma/lua/libraries/lutil.hpp>
@@ -26,6 +25,8 @@
 #include <sharedutils/asset_loader/file_asset_manager.hpp>
 #include <luainterface.hpp>
 #include <fsys/ifile.hpp>
+
+import pragma.server.scripting.lua;
 
 void SGame::RegisterLuaLibraries()
 {

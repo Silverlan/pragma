@@ -14,3 +14,4 @@ export import pragma.server.scripting.lua.classes.lua_entity;
 export import pragma.server.scripting.lua.classes.model;
 export import pragma.server.scripting.lua.classes.model_mesh;
 export import pragma.server.scripting.lua.classes.net_packet;
+export import pragma.server.scripting.lua.classes.resource;

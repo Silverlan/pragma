@@ -7,7 +7,6 @@ module;
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_physics_component.hpp"
 #include "pragma/entities/components/c_static_bvh_cache_component.hpp"
-#include "pragma/entities/components/c_bvh_component.hpp"
 #include "pragma/entities/components/c_static_bvh_user_component.hpp"
 #include "pragma/entities/components/intersection_handler_component.hpp"
 #include "pragma/entities/c_entityfactories.h"

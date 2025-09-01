@@ -8,6 +8,7 @@ export import :animated_bvh;
 export import :bot;
 export import :bsp;
 export import :bsp_leaf;
+export import :bvh;
 export import :child;
 export import :env_decal;
 export import :env_fog_controller;

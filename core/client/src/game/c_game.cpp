@@ -69,7 +69,6 @@
 #include "pragma/entities/c_entityfactories.h"
 #include "pragma/entities/components/c_weapon_component.hpp"
 #include "pragma/entities/components/c_player_component.hpp"
-#include "pragma/entities/components/c_character_component.hpp"
 #include "pragma/entities/components/c_vehicle_component.hpp"
 #include "pragma/entities/components/c_ai_component.hpp"
 #include "pragma/entities/components/c_physics_component.hpp"
@@ -93,6 +92,7 @@
 #include <pragma/entities/components/action_input_controller_component.hpp>
 #include <pragma/entities/components/action_input_controller_component.hpp>
 #include <pragma/rendering/c_sci_gpu_timer_manager.hpp>
+#include "pragma/entities/components/base_character_component.hpp"
 #include <pragma/physics/visual_debugger.hpp>
 #include <pragma/level/level_info.hpp>
 #include <pragma/lua/util.hpp>

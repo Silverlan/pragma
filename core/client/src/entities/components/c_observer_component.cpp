@@ -8,14 +8,16 @@
 #include "pragma/entities/components/c_observable_component.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_transform_component.hpp"
-#include "pragma/entities/components/c_character_component.hpp"
 #include "pragma/entities/components/c_game_component.hpp"
 #include "pragma/entities/components/c_input_component.hpp"
+#include "pragma/entities/components/base_character_component.hpp"
 #include "pragma/entities/entity_component_system_t.hpp"
 #include "pragma/model/c_model.h"
 #include "pragma/console/c_cvar.h"
 #include <pragma/physics/raytraces.h>
 #include <pragma/entities/components/orientation_component.hpp>
+
+import pragma.client.entities.components;
 
 using namespace pragma;
 

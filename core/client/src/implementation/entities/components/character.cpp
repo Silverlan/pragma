@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
 #include "pragma/entities/components/c_player_component.hpp"
@@ -15,7 +17,6 @@
 #include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/rendering/c_rendermode.h"
 #include <pragma/networking/nwm_util.h>
-#include "pragma/entities/components/c_character_component.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/entities/components/c_sound_emitter_component.hpp"
 #include "pragma/entities/components/c_transform_component.hpp"
@@ -28,7 +29,9 @@
 #include <pragma/model/model.h>
 #include <pragma/audio/alsound_type.h>
 
-import pragma.client.entities.components;
+module pragma.client.entities.components;
+
+import :character;
 
 extern DLLCLIENT ClientState *client;
 

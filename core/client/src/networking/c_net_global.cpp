@@ -11,7 +11,6 @@
 #include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"
-#include "pragma/entities/components/c_character_component.hpp"
 #include "pragma/entities/components/c_ownable_component.hpp"
 #include "pragma/entities/components/c_generic_component.hpp"
 #include "pragma/entities/components/c_transform_component.hpp"
@@ -43,6 +42,7 @@
 #include <pragma/entities/components/base_physics_component.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/components/orientation_component.hpp>
+#include "pragma/entities/components/base_character_component.hpp"
 #include <pragma/entities/components/action_input_controller_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/entity_iterator.hpp>

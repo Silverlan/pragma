@@ -16,3 +16,5 @@ export import pragma.server.scripting.lua.classes.model_mesh;
 export import pragma.server.scripting.lua.classes.net_packet;
 export import pragma.server.scripting.lua.classes.recipient_filter;
 export import pragma.server.scripting.lua.classes.resource;
+
+export import pragma.server.scripting.lua.libraries.debug_overlay;

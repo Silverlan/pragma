@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
-#include "pragma/lua/libraries/s_ldebugoverlay.h"
 #include "pragma/debug/debugoverlay.h"
 #include "pragma/lua/classes/ldef_color.h"
 #include "pragma/lua/classes/ldef_angle.h"
@@ -10,6 +11,8 @@
 #include <pragma/debug/debug_render_info.hpp>
 #include "pragma/lua/classes/ldef_plane.h"
 #include "luasystem.h"
+
+module pragma.server.scripting.lua.libraries.debug_overlay;
 
 void Lua::DebugRenderer::Server::DrawPoint(const DebugRenderInfo &renderInfo) { SDebugRenderer::DrawPoint(renderInfo.pose.GetOrigin(), renderInfo.color, renderInfo.duration); }
 void Lua::DebugRenderer::Server::DrawLine(const Vector3 &start, const Vector3 &end, const DebugRenderInfo &renderInfo) { SDebugRenderer::DrawLine(renderInfo.pose.GetOrigin() + start, renderInfo.pose.GetOrigin() + end, renderInfo.color, renderInfo.duration); }

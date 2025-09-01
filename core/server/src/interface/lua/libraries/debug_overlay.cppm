@@ -1,13 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __S_LDEBUGOVERLAY_H__
-#define __S_LDEBUGOVERLAY_H__
+module;
+
 #include "pragma/serverdefinitions.h"
+#include "pragma/debug/debug_render_info.hpp"
 #include <pragma/lua/ldefinitions.h>
 
-struct DebugRenderInfo;
-namespace Lua {
+export module pragma.server.scripting.lua.libraries.debug_overlay;
+
+export namespace Lua {
 	namespace DebugRenderer {
 		namespace Server {
 			DLLSERVER void DrawPoint(const DebugRenderInfo &renderInfo);
@@ -28,5 +30,3 @@ namespace Lua {
 		};
 	};
 };
-
-#endif

@@ -1,8 +1,12 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
-#include "pragma/lua/libraries/s_lsound.h"
+#include "pragma/lua/libraries/lsound.h"
+
+module pragma.server.scripting.lua.libraries.sound;
 
 int Lua::sound::Server::create(lua_State *l)
 {

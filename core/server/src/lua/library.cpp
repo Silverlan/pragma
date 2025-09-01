@@ -5,9 +5,9 @@
 #include <pragma/engine.h>
 #include "pragma/game/s_game.h"
 #include <pragma/lua/libraries/lutil.hpp>
-#include "pragma/lua/libraries/s_lsound.h"
 #include "pragma/lua/libraries/lfile.h"
 #include "pragma/model/model.h"
+#include "pragma/lua/libraries/lsound.h"
 #include <pragma/asset/util_asset.hpp>
 #include <pragma/debug/debug_render_info.hpp>
 #include <pragma/util/util_splash_damage_info.hpp>

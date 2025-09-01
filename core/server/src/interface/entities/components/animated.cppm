@@ -1,14 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __S_ANIMATED_COMPONENT_HPP__
-#define __S_ANIMATED_COMPONENT_HPP__
+module;
 
 #include "pragma/serverdefinitions.h"
 #include "pragma/entities/components/s_entity_component.hpp"
 #include <pragma/entities/components/base_animated_component.hpp>
 
-namespace pragma {
+export module pragma.server.entities.components:animated;
+
+export namespace pragma {
 	class DLLSERVER SAnimatedComponent final : public BaseAnimatedComponent, public SBaseNetComponent {
 	  public:
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
@@ -29,5 +30,3 @@ namespace pragma {
 		virtual void GetBaseTypeIndex(std::type_index &outTypeIndex) const override;
 	};
 };
-
-#endif

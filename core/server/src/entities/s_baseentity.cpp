@@ -18,7 +18,6 @@
 #include "pragma/entities/components/s_player_component.hpp"
 #include "pragma/entities/components/s_child_component.hpp"
 #include "pragma/entities/components/s_model_component.hpp"
-#include "pragma/entities/components/s_animated_component.hpp"
 #include "pragma/entities/components/s_weapon_component.hpp"
 #include "pragma/entities/components/s_vehicle_component.hpp"
 #include "pragma/entities/components/s_character_component.hpp"

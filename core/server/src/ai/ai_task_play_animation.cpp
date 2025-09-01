@@ -5,7 +5,7 @@
 #include "pragma/ai/ai_task_play_animation.h"
 #include "pragma/ai/ai_schedule.h"
 #include "pragma/entities/components/s_model_component.hpp"
-#include "pragma/entities/components/s_animated_component.hpp"
+#include "pragma/entities/components/base_animated_component.hpp"
 #include <pragma/entities/components/base_transform_component.hpp>
 
 import pragma.server.entities.components;

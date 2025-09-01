@@ -7,7 +7,6 @@ module;
 #include "pragma/entities/components/s_player_component.hpp"
 #include "pragma/entities/components/s_character_component.hpp"
 #include "pragma/entities/components/s_model_component.hpp"
-#include "pragma/entities/components/s_animated_component.hpp"
 #include "pragma/entities/components/s_health_component.hpp"
 #include "pragma/entities/components/s_physics_component.hpp"
 #include "pragma/ai/s_npcstate.h"
@@ -20,6 +19,7 @@ module;
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/networking/enums.hpp>
 #include <pragma/model/model.h>
+#include <pragma/entities/components/base_animated_component.hpp>
 #include <pragma/entities/components/base_character_component.hpp>
 #include <pragma/entities/components/base_player_component.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>

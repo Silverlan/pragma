@@ -1,12 +1,17 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
-#include "pragma/entities/components/s_animated_component.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/networking/enums.hpp>
 #include <pragma/networking/nwm_util.h>
 #include <pragma/networking/enums.hpp>
+
+module pragma.server.entities.components;
+
+import :animated;
 
 using namespace pragma;
 

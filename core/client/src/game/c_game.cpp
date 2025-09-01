@@ -38,7 +38,6 @@
 #include "pragma/gui/wiluahandlewrapper.h"
 #include "pragma/entities/c_viewmodel.h"
 #include "pragma/entities/c_viewbody.h"
-#include "pragma/entities/c_player.hpp"
 #include <pragma/physics/physobj.h>
 #include <pragma/util/util_game.hpp>
 #include "pragma/console/c_cvar.h"
@@ -68,11 +67,9 @@
 #include "pragma/entities/c_entityfactories.h"
 #include "pragma/entities/components/c_weapon_component.hpp"
 #include "pragma/entities/components/c_player_component.hpp"
-#include "pragma/entities/components/c_character_component.hpp"
 #include "pragma/entities/components/c_vehicle_component.hpp"
 #include "pragma/entities/components/c_ai_component.hpp"
 #include "pragma/entities/components/c_physics_component.hpp"
-#include "pragma/entities/environment/c_env_reflection_probe.hpp"
 #include "pragma/entities/game/c_game_shadow_manager.hpp"
 #include "pragma/rendering/c_settings.hpp"
 #include <pragma/entities/baseplayer.hpp>
@@ -93,6 +90,7 @@
 #include <pragma/entities/components/action_input_controller_component.hpp>
 #include <pragma/entities/components/action_input_controller_component.hpp>
 #include <pragma/rendering/c_sci_gpu_timer_manager.hpp>
+#include "pragma/entities/components/base_character_component.hpp"
 #include <pragma/physics/visual_debugger.hpp>
 #include <pragma/level/level_info.hpp>
 #include <pragma/lua/util.hpp>
@@ -106,6 +104,7 @@
 
 import pragma.client.ai;
 import pragma.client.debug;
+import pragma.client.entities;
 import pragma.client.entities.components;
 import pragma.client.gui;
 import pragma.client.model;

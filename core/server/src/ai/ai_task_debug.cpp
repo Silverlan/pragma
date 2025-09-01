@@ -5,10 +5,11 @@
 #include "pragma/ai/ai_task_debug.h"
 #include "pragma/ai/ai_schedule.h"
 #include "pragma/debug/debugoverlay.h"
-#include "pragma/entities/components/s_ai_component.hpp"
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/components/base_physics_component.hpp>
 #include <pragma/model/animation/activities.h>
+
+import pragma.server.entities.components;
 
 using namespace pragma;
 

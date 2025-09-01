@@ -5,7 +5,6 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include <pragma/lua/ldefinitions.h>
-#include "pragma/lua/classes/ldef_netpacket.h"
 
 export module pragma.client.scripting.lua.classes.net_packet;
 

@@ -12,7 +12,6 @@ namespace pragma::string {
 #endif
 
 #include "pragma/c_engine.h"
-#include "pragma/audio/c_audio.hpp"
 #include "pragma/rendering/render_processor.hpp"
 #include <pragma/asset/util_asset.hpp>
 #include <pragma/lua/libraries/ldebug.h>
@@ -38,6 +37,7 @@ namespace pragma::string {
 #include <prosper_window.hpp>
 #include <fsys/directory_watcher.h>
 
+import pragma.client.audio;
 import pragma.client.entities.components;
 import pragma.locale;
 // import pragma.scripting.lua;

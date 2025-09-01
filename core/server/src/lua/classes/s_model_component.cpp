@@ -2,11 +2,12 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_server.h"
-#include "pragma/model/s_modelmanager.h"
 #include "pragma/entities/components/s_model_component.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/networking/enums.hpp>
 #include <pragma/networking/nwm_util.h>
+
+import pragma.server.model_manager;
 
 using namespace pragma;
 

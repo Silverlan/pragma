@@ -10,6 +10,7 @@ pr_add_dependency(${PROJ_NAME} util_sound TARGET)
 
 pr_add_headers(${PROJ_NAME} "include/")
 pr_add_sources(${PROJ_NAME} "src/")
+pr_add_modules(${PROJ_NAME} "src/")
 
 pr_add_compile_definitions(${PROJ_NAME} -DWMS_STATIC PUBLIC)
 pr_add_compile_definitions(${PROJ_NAME} -DDLLSERVER_EX)

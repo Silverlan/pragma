@@ -13,7 +13,6 @@
 #include "pragma/console/convarhandle.h"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
-#include "pragma/audio/c_soundscript.h"
 #include "luasystem.h"
 #include "pragma/lua/libraries/c_lgui.h"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
@@ -47,6 +46,7 @@
 #include <prosper_window.hpp>
 #include <wgui/types/wiroot.h>
 
+import pragma.client.audio;
 import pragma.client.gui;
 import pragma.client.model;
 import pragma.client.networking;

@@ -6,8 +6,6 @@
 #include "pragma/lua/s_lentity_components.hpp"
 #include "pragma/entities/components/s_sound_emitter_component.hpp"
 #include "pragma/networking/recipient_filter.hpp"
-#include "pragma/entities/components/s_ai_component.hpp"
-#include "pragma/entities/components/s_character_component.hpp"
 #include "pragma/entities/components/s_color_component.hpp"
 #include "pragma/entities/components/s_score_component.hpp"
 #include "pragma/entities/components/s_flammable_component.hpp"
@@ -91,6 +89,8 @@
 #include <sharedutils/netpacket.hpp>
 
 #include <pragma/lua/ostream_operator_alias.hpp>
+
+import pragma.server.entities.components;
 
 void SGame::RegisterLuaEntityComponent(luabind::class_<pragma::BaseEntityComponent> &def)
 {

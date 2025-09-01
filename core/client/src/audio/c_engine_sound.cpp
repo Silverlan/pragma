@@ -3,7 +3,6 @@
 
 #include "stdafx_cengine.h"
 #include "pragma/c_engine.h"
-#include "pragma/audio/c_audio.hpp"
 #include <sharedutils/util_pragma.hpp>
 #include <sharedutils/util_library.hpp>
 #include <pragma/util/util_game.hpp>
@@ -12,20 +11,12 @@
 #include <alsoundsystem.hpp>
 #include <alsound_coordinate_system.hpp>
 
+import pragma.client.audio;
+
 extern DLLCLIENT CEngine *c_engine;
 
 const al::ISoundSystem *CEngine::GetSoundSystem() const { return const_cast<CEngine *>(this)->GetSoundSystem(); }
 al::ISoundSystem *CEngine::GetSoundSystem() { return m_soundSystem.get(); }
-
-std::vector<std::string> pragma::audio::get_available_audio_apis()
-{
-	std::vector<std::string> dirs {};
-	FileManager::FindFiles("modules/audio/*", nullptr, &dirs,
-	  fsys::SearchFlags::Local // Binary modules can only be loaded from actual files
-	);
-	return dirs;
-}
-std::string pragma::audio::get_audio_api_module_location(const std::string &audioAPI) { return "audio/" + audioAPI + "/pr_audio_" + audioAPI; }
 
 al::ISoundSystem *CEngine::InitializeSoundEngine()
 {

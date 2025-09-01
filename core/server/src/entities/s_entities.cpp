@@ -6,7 +6,6 @@
 #include "pragma/entities/s_entityfactories.h"
 #include <servermanager/sv_nwm_recipientfilter.h>
 #include "pragma/entities/player.h"
-#include "pragma/lua/classes/s_lua_entity.h"
 #include "pragma/game/s_game.h"
 #include "luasystem.h"
 #include "pragma/game/s_game_entities.h"
@@ -15,7 +14,6 @@
 #include "pragma/networking/iserver_client.hpp"
 #include "pragma/networking/recipient_filter.hpp"
 #include "pragma/entities/components/s_player_component.hpp"
-#include "pragma/entities/components/s_ai_component.hpp"
 #include "pragma/entities/components/s_vehicle_component.hpp"
 #include "pragma/entities/components/s_weapon_component.hpp"
 #include "pragma/entities/components/s_sound_emitter_component.hpp"
@@ -29,6 +27,8 @@
 #include <udm.hpp>
 
 import pragma.entities.components;
+import pragma.server.entities.components;
+import pragma.server.scripting.lua;
 
 extern ServerState *server;
 extern EntityClassMap<SBaseEntity> *g_ServerEntityFactories;

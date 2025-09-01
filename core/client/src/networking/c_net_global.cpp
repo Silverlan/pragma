@@ -11,7 +11,6 @@
 #include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"
-#include "pragma/entities/components/c_character_component.hpp"
 #include "pragma/entities/components/c_ownable_component.hpp"
 #include "pragma/entities/components/c_generic_component.hpp"
 #include "pragma/entities/components/c_transform_component.hpp"
@@ -19,16 +18,13 @@
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/environment/lights/c_env_light.h"
 #include "pragma/entities/environment/lights/c_env_light_spot.h"
-#include "pragma/entities/c_flashlight.h"
 #include <pragma/entities/components/basetoggle.h>
-#include "pragma/entities/environment/c_env_fog_controller.h"
+#include "pragma/entities/environment/env_fog_controller.h"
 #include "pragma/entities/environment/effects/c_env_explosion.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include <pragma/networking/nwm_util.h>
-#include "pragma/entities/environment/c_env_quake.h"
 #include "pragma/debug/c_debugoverlay.h"
 #include "pragma/entities/components/c_weapon_component.hpp"
-#include "pragma/entities/c_player.hpp"
 #include "pragma/entities/components/c_sound_emitter_component.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_name_component.hpp"
@@ -41,10 +37,12 @@
 #include <wgui/types/witext.h>
 #include <pragma/console/sh_cmd.h>
 #include <pragma/physics/raytraces.h>
+#include "pragma/entities/environment/env_quake.h"
 #include <pragma/entities/components/basetriggergravity.hpp>
 #include <pragma/entities/components/base_physics_component.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/components/orientation_component.hpp>
+#include "pragma/entities/components/base_character_component.hpp"
 #include <pragma/entities/components/action_input_controller_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/entity_iterator.hpp>
@@ -52,6 +50,7 @@
 #include <pragma/util/giblet_create_info.hpp>
 
 import pragma.client.debug;
+import pragma.client.entities;
 import pragma.client.entities.components;
 import pragma.client.gui;
 import pragma.client.scripting.lua;

@@ -4,26 +4,20 @@
 #include "stdafx_server.h"
 #include "pragma/game/s_game.h"
 #include "pragma/lua/libraries/lengine.h"
-#include "pragma/lua/libraries/s_lents.h"
 #include "pragma/lua/libraries/s_lnetmessages.h"
-#include "pragma/lua/libraries/s_lengine.h"
 #include "pragma/lua/libraries/lglobal.h"
-#include "pragma/lua/libraries/s_lgame.h"
 #include "pragma/ai/ai_task.h"
 #include "pragma/lua/libraries/lray.h"
 #include "pragma/lua/libraries/lgame.h"
+#include "pragma/lua/libraries/lents.h"
 #include "pragma/ai/ai_behavior.h"
 #include "pragma/networking/resourcemanager.h"
 #include "pragma/networking/recipient_filter.hpp"
 #include "pragma/networking/iserver.hpp"
 #include "pragma/lua/classes/ldef_recipientfilter.h"
-#include "pragma/lua/classes/lrecipientfilter.h"
-#include "pragma/lua/classes/s_lnetpacket.h"
 #include "pragma/lua/s_lentity_components.hpp"
 #include "pragma/entities/components/s_player_component.hpp"
 #include "pragma/lua/s_lua_component.hpp"
-#include "pragma/lua/classes/s_lentity.h"
-#include "pragma/lua/classes/s_lua_entity.h"
 #include "pragma/lua/sh_lua_component_t.hpp"
 #include <pragma/lua/lua_util_component.hpp>
 #include <pragma/lua/classes/lentity.h>
@@ -39,6 +33,8 @@
 #include <pragma/util/util_game.hpp>
 #include <luainterface.hpp>
 #include <udm.hpp>
+
+import pragma.server.scripting.lua;
 
 extern DLLSERVER ServerState *server;
 

@@ -11,7 +11,6 @@
 #include "pragma/rendering/render_queue.hpp"
 #include "pragma/lua/classes/lmaterial.h"
 #include "pragma/lua/classes/lentity.h"
-#include "pragma/entities/point/c_point_rendertarget.h"
 #include "pragma/lua/classes/lshaderinfo.h"
 #include "pragma/rendering/shader_input_data.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"

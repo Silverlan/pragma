@@ -14,6 +14,7 @@
 #include <pragma/math/intersection.h>
 #include <pragma/entities/entity_component_system_t.hpp>
 
+
 import pragma.client.entities.components;
 
 using namespace pragma;

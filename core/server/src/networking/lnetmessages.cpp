@@ -6,12 +6,11 @@
 #include "pragma/lua/lnetmessages.h"
 #include "pragma/game/s_game.h"
 #include <servermanager/sv_nwm_recipientfilter.h>
+#include "pragma/networking/nwm_util.h"
 #include "pragma/networking/recipient_filter.hpp"
-#include "pragma/lua/classes/lrecipientfilter.h"
 #include "pragma/entities/player.h"
 #include "pragma/lua/classes/ldef_recipientfilter.h"
-#include "pragma/lua/classes/ldef_netpacket.h"
-#include "pragma/lua/classes/ldef_recipientfilter.h"
+#include <sharedutils/netpacket.hpp>
 #include "pragma/lua/libraries/s_lnetmessages.h"
 #include "pragma/entities/components/s_player_component.hpp"
 #include <pragma/networking/enums.hpp>
@@ -19,7 +18,9 @@
 #include <pragma/lua/luaapi.h>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
-void SGame::HandleLuaNetPacket(pragma::networking::IServerClient &session, NetPacket &packet)
+import pragma.server.scripting.lua;
+
+void SGame::HandleLuaNetPacket(pragma::networking::IServerClient &session, ::NetPacket &packet)
 {
 	unsigned int ID = packet->Read<unsigned int>();
 	if(ID == 0)
@@ -70,9 +71,9 @@ bool Lua::net::server::register_net_message(const std::string &identifier)
 	return game->RegisterNetMessage(identifier);
 }
 
-void Lua::net::server::broadcast(pragma::networking::Protocol protocol, const std::string &identifier, NetPacket &packet)
+void Lua::net::server::broadcast(pragma::networking::Protocol protocol, const std::string &identifier, ::NetPacket &packet)
 {
-	NetPacket packetNew;
+	::NetPacket packetNew;
 	if(!NetIncludePacketID(::server, identifier, packet, packetNew)) {
 		Con::cwar << Con::PREFIX_SERVER << "Attempted to send unindexed lua net message: " << identifier << Con::endl;
 		return;
@@ -80,9 +81,9 @@ void Lua::net::server::broadcast(pragma::networking::Protocol protocol, const st
 	::server->SendPacket("luanet", packetNew, protocol);
 }
 
-static void send(lua_State *l, pragma::networking::Protocol protocol, const std::string &identifier, NetPacket &packet, const pragma::networking::TargetRecipientFilter &rp)
+static void send(lua_State *l, pragma::networking::Protocol protocol, const std::string &identifier, ::NetPacket &packet, const pragma::networking::TargetRecipientFilter &rp)
 {
-	NetPacket packetNew;
+	::NetPacket packetNew;
 	if(!NetIncludePacketID(::server, identifier, packet, packetNew)) {
 		Con::cwar << Con::PREFIX_SERVER << "Attempted to send unindexed lua net message: " << identifier << Con::endl;
 		return;
@@ -90,14 +91,14 @@ static void send(lua_State *l, pragma::networking::Protocol protocol, const std:
 	::server->SendPacket("luanet", packetNew, protocol, rp);
 }
 
-void Lua::net::server::send(lua_State *l, pragma::networking::Protocol protocol, const std::string &identifier, NetPacket &packet, const luabind::tableT<pragma::SPlayerComponent> &recipients)
+void Lua::net::server::send(lua_State *l, pragma::networking::Protocol protocol, const std::string &identifier, ::NetPacket &packet, const luabind::tableT<pragma::SPlayerComponent> &recipients)
 {
 	pragma::networking::TargetRecipientFilter rp {};
 	GetRecipients(recipients, rp);
 	::send(l, protocol, identifier, packet, rp);
 }
-void Lua::net::server::send(lua_State *l, pragma::networking::Protocol protocol, const std::string &identifier, NetPacket &packet, pragma::networking::TargetRecipientFilter &recipients) { ::send(l, protocol, identifier, packet, recipients); }
-void Lua::net::server::send(lua_State *l, pragma::networking::Protocol protocol, const std::string &identifier, NetPacket &packet, pragma::SPlayerComponent &recipient)
+void Lua::net::server::send(lua_State *l, pragma::networking::Protocol protocol, const std::string &identifier, ::NetPacket &packet, pragma::networking::TargetRecipientFilter &recipients) { ::send(l, protocol, identifier, packet, recipients); }
+void Lua::net::server::send(lua_State *l, pragma::networking::Protocol protocol, const std::string &identifier, ::NetPacket &packet, pragma::SPlayerComponent &recipient)
 {
 	pragma::networking::TargetRecipientFilter rp {};
 	GetRecipients(recipient, rp);
@@ -115,4 +116,4 @@ void Lua::net::server::receive(lua_State *l, const std::string &name, const Lua:
 	game->RegisterLuaNetMessage(name, fc);
 }
 
-DLLSERVER void NET_sv_luanet(pragma::networking::IServerClient &session, NetPacket packet) { server->HandleLuaNetPacket(session, packet); }
+DLLSERVER void NET_sv_luanet(pragma::networking::IServerClient &session, ::NetPacket packet) { server->HandleLuaNetPacket(session, packet); }

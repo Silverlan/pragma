@@ -10,8 +10,6 @@
 #include <pragma/game/game_entity_component.hpp>
 #include <pragma/entities/entity_component_manager.hpp>
 #include <luainterface.hpp>
-#include "pragma/entities/components/s_ai_component.hpp"
-#include "pragma/entities/components/s_character_component.hpp"
 #include "pragma/entities/components/s_color_component.hpp"
 #include "pragma/entities/components/s_score_component.hpp"
 #include "pragma/entities/components/s_flammable_component.hpp"
@@ -91,7 +89,6 @@
 #include "pragma/entities/s_flashlight.h"
 #include "pragma/entities/components/s_shooter_component.hpp"
 #include "pragma/entities/components/s_model_component.hpp"
-#include "pragma/entities/components/s_animated_component.hpp"
 #include "pragma/entities/components/s_entity_component.hpp"
 #include "pragma/entities/components/s_io_component.hpp"
 #include "pragma/entities/components/s_time_scale_component.hpp"
@@ -111,6 +108,8 @@
 // --template-include-location
 #include "pragma/entities/environment/s_env_timescale.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
+
+import pragma.server.entities.components;
 
 void SGame::InitializeEntityComponents(pragma::EntityComponentManager &componentManager)
 {

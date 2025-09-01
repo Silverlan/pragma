@@ -1,0 +1,26 @@
+// SPDX-FileCopyrightText: (c) 2025 Silverlan <opensource@pragma-engine.com>
+// SPDX-License-Identifier: MIT
+
+module;
+
+export module pragma.server.scripting.lua;
+export import pragma.server.scripting.lua.classes.ai_behavior;
+export import pragma.server.scripting.lua.classes.ai_memory;
+export import pragma.server.scripting.lua.classes.ai_schedule;
+export import pragma.server.scripting.lua.classes.ai_squad;
+export import pragma.server.scripting.lua.classes.entity;
+export import pragma.server.scripting.lua.classes.faction;
+export import pragma.server.scripting.lua.classes.lua_entity;
+export import pragma.server.scripting.lua.classes.model;
+export import pragma.server.scripting.lua.classes.model_mesh;
+export import pragma.server.scripting.lua.classes.net_packet;
+export import pragma.server.scripting.lua.classes.recipient_filter;
+export import pragma.server.scripting.lua.classes.resource;
+
+export import pragma.server.scripting.lua.libraries.ai;
+export import pragma.server.scripting.lua.libraries.debug;
+export import pragma.server.scripting.lua.libraries.debug_overlay;
+export import pragma.server.scripting.lua.libraries.engine;
+export import pragma.server.scripting.lua.libraries.game;
+export import pragma.server.scripting.lua.libraries.sound;
+export import pragma.server.scripting.lua.libraries.util;

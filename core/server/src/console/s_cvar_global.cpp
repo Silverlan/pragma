@@ -10,7 +10,6 @@
 #include "pragma/entities/player.h"
 #include "pragma/networking/iserver.hpp"
 #include "pragma/networking/iserver_client.hpp"
-#include "pragma/entities/components/s_character_component.hpp"
 #include "pragma/entities/components/s_player_component.hpp"
 #include <pragma/entities/components/base_name_component.hpp>
 #include <pragma/console/util_cmd.hpp>
@@ -21,6 +20,8 @@
 #include <sharedutils/util_file.h>
 #include <pragma/networking/netmessages.h>
 #include <pragma/entities/entity_iterator.hpp>
+
+import pragma.server.entities.components;
 
 extern DLLNETWORK Engine *engine;
 extern DLLSERVER ServerState *server;

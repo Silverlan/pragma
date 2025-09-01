@@ -29,7 +29,6 @@
 #include "pragma/entities/s_skybox.h"
 #include "pragma/entities/s_flashlight.h"
 #include "pragma/entities/components/s_model_component.hpp"
-#include "pragma/entities/components/s_animated_component.hpp"
 #include "pragma/entities/components/s_io_component.hpp"
 #include "pragma/entities/components/s_time_scale_component.hpp"
 #include "pragma/entities/components/s_attachment_component.hpp"
@@ -55,8 +54,9 @@
 #include <pragma/physics/movetypes.h>
 #include <pragma/lua/lua_call.hpp>
 #include <sharedutils/netpacket.hpp>
-
 #include <pragma/lua/ostream_operator_alias.hpp>
+
+import pragma.server.entities.components;
 
 #ifdef __linux__
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, BaseEntityComponent);

@@ -4,9 +4,10 @@
 #include "stdafx_server.h"
 #include "pragma/ai/ai_task_event.hpp"
 #include "pragma/ai/ai_schedule.h"
-#include "pragma/entities/components/s_ai_component.hpp"
 #include <pragma/entities/components/base_animated_component.hpp>
 #include <pragma/model/animation/activities.h>
+
+import pragma.server.entities.components;
 
 using namespace pragma;
 

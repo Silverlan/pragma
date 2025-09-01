@@ -4,10 +4,11 @@
 #include "stdafx_server.h"
 #include "pragma/ai/ai_task_play_sound.h"
 #include "pragma/ai/ai_schedule.h"
-#include "pragma/entities/components/s_ai_component.hpp"
 #include "pragma/entities/components/s_sound_emitter_component.hpp"
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/audio/alsound_type.h>
+
+import pragma.server.entities.components;
 
 using namespace pragma;
 

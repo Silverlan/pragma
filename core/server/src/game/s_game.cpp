@@ -29,7 +29,6 @@
 #include <pragma/debug/debug_performance_profiler.hpp>
 #include "pragma/game/gamemode/gamemodemanager.h"
 #include "pragma/game/s_game_callback.h"
-#include "pragma/lua/classes/s_lua_entity.h"
 #include "pragma/ai/ai_behavior.h"
 #include "pragma/ai/ai_task_move_to_target.h"
 #include "pragma/ai/ai_task_move_random.h"
@@ -43,16 +42,13 @@
 #include "pragma/ai/ai_task_look_at_target.h"
 #include "pragma/ai/ai_task_event.hpp"
 #include "pragma/lua/s_lua_script_watcher.h"
-#include "pragma/model/s_modelmanager.h"
 #include "pragma/networking/iserver.hpp"
 #include "pragma/networking/iserver_client.hpp"
 #include <pragma/lua/luafunction_call.h>
 #include "pragma/entities/components/s_entity_component.hpp"
 #include "pragma/entities/components/s_vehicle_component.hpp"
-#include "pragma/entities/components/s_ai_component.hpp"
 #include "pragma/entities/components/s_player_component.hpp"
 #include "pragma/entities/components/s_weapon_component.hpp"
-#include "pragma/entities/components/s_character_component.hpp"
 #include "pragma/entities/info/s_info_landmark.hpp"
 #include "pragma/audio/s_alsound.h"
 #include <pragma/networking/enums.hpp>
@@ -70,9 +66,13 @@
 #include <pragma/entities/components/map_component.hpp>
 #include <pragma/entities/components/velocity_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
+#include "pragma/model/modelmesh.h"
 #include <udm.hpp>
 
 import pragma.entities.components;
+import pragma.server.entities.components;
+import pragma.server.model_manager;
+import pragma.server.scripting.lua;
 
 extern DLLNETWORK Engine *engine;
 extern EntityClassMap<SBaseEntity> *g_ServerEntityFactories;

@@ -15,7 +15,6 @@ namespace pragma {
 	};
 };
 
-class SPolyMesh;
 class DLLSERVER World : public SBaseEntity {
   public:
 	virtual void Initialize() override;

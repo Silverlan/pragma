@@ -1,23 +1,17 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_SHADER_BASE_CUBEMAP_HPP__
-#define __C_SHADER_BASE_CUBEMAP_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include <mathutil/umath.h>
 #include <mathutil/umat.h>
+#include <image/prosper_render_target.hpp>
 #include <shader/prosper_shader.hpp>
 
-namespace prosper {
-	class RenderTarget;
-	class Image;
-	namespace util {
-		struct TextureCreateInfo;
-		struct SamplerCreateInfo;
-	};
-};
-namespace pragma {
+export module pragma.client.rendering.shaders:cubemap;
+
+export namespace pragma {
 	class DLLCLIENT ShaderCubemap : public prosper::ShaderGraphics {
 	  public:
 		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_VERTEX;
@@ -44,5 +38,3 @@ namespace pragma {
 		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx) override;
 	};
 };
-
-#endif

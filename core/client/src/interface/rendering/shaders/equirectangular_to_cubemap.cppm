@@ -3,9 +3,12 @@
 
 module;
 
-#include "pragma/rendering/shaders/c_shader_base_cubemap.hpp"
+#include "pragma/clientdefinitions.h"
+#include <image/prosper_texture.hpp>
 
 export module pragma.client.rendering.shaders:equirectangular_to_cubemap;
+
+import :cubemap;
 
 export namespace pragma {
 	class DLLCLIENT ShaderEquirectangularToCubemap : public ShaderCubemap {

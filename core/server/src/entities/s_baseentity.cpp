@@ -16,15 +16,6 @@
 #include "pragma/lua/lua_handles.hpp"
 #include "pragma/entities/components/s_entity_component.hpp"
 #include "pragma/entities/components/s_player_component.hpp"
-#include "pragma/entities/components/s_child_component.hpp"
-#include "pragma/entities/components/s_model_component.hpp"
-#include "pragma/entities/components/s_weapon_component.hpp"
-#include "pragma/entities/components/s_vehicle_component.hpp"
-#include "pragma/entities/components/s_physics_component.hpp"
-#include "pragma/entities/components/s_time_scale_component.hpp"
-#include "pragma/entities/components/s_name_component.hpp"
-#include "pragma/entities/components/s_transform_component.hpp"
-#include "pragma/entities/components/s_generic_component.hpp"
 #include <servermanager/sv_nwm_recipientfilter.h>
 #include <pragma/networking/nwm_util.h>
 #include <pragma/networking/enums.hpp>

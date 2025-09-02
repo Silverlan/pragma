@@ -3,12 +3,13 @@
 
 #include "stdafx_server.h"
 #include "pragma/entities/environment/s_env_camera.h"
-#include "pragma/entities/components/s_field_angle_component.hpp"
 #include "pragma/entities/s_entityfactories.h"
 #include <sharedutils/util_string.h>
 #include <pragma/networking/nwm_util.h>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
+
+import pragma.server.entities.components.field_angle;
 
 using namespace pragma;
 

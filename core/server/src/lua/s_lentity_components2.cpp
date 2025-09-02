@@ -11,8 +11,6 @@
 #include "pragma/entities/point/constraints/s_point_constraint_fixed.h"
 #include "pragma/entities/point/constraints/s_point_constraint_hinge.h"
 #include "pragma/entities/point/constraints/s_point_constraint_slider.h"
-#include "pragma/entities/components/liquid/s_liquid_control_component.hpp"
-#include "pragma/entities/components/liquid/s_liquid_surface_simulation_component.hpp"
 // --template-include-location
 #include "pragma/entities/point/s_point_path_node.h"
 #include "pragma/entities/point/s_point_rendertarget.h"
@@ -26,17 +24,14 @@
 #include "pragma/entities/trigger/s_trigger_remove.h"
 #include "pragma/entities/trigger/s_trigger_teleport.h"
 #include "pragma/entities/trigger/s_trigger_touch.h"
+#include "pragma/entities/components/base_ownable_component.hpp"
+#include "pragma/entities/components/liquid/base_liquid_control_component.hpp"
+#include "pragma/entities/components/liquid/base_liquid_surface_simulation_component.hpp"
 #include "pragma/entities/s_skybox.h"
 #include "pragma/entities/s_flashlight.h"
-#include "pragma/entities/components/s_model_component.hpp"
-#include "pragma/entities/components/s_io_component.hpp"
-#include "pragma/entities/components/s_time_scale_component.hpp"
-#include "pragma/entities/components/s_attachment_component.hpp"
-#include "pragma/entities/components/s_child_component.hpp"
-#include "pragma/entities/components/s_generic_component.hpp"
-#include "pragma/entities/components/s_point_at_target_component.hpp"
-#include "pragma/entities/components/s_ownable_component.hpp"
-#include "pragma/entities/components/s_debug_component.hpp"
+#include "pragma/entities/components/base_debug_component.hpp"
+#include "pragma/entities/components/base_io_component.hpp"
+#include "pragma/entities/components/base_point_at_target_component.hpp"
 #include "pragma/entities/info/s_info_landmark.hpp"
 #include <pragma/physics/raytraces.h>
 #include <pragma/model/model.h>
@@ -55,6 +50,7 @@
 #include <pragma/lua/lua_call.hpp>
 #include <sharedutils/netpacket.hpp>
 #include <pragma/lua/ostream_operator_alias.hpp>
+#include <pragma/entities/components/base_attachment_component.hpp>
 
 import pragma.server.entities.components;
 

@@ -5,7 +5,6 @@
 #include "pragma/ai/ai_task_look_at_target.h"
 #include "pragma/ai/ai_schedule.h"
 #include "pragma/debug/debugoverlay.h"
-#include "pragma/entities/components/s_name_component.hpp"
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/model/animation/activities.h>
 

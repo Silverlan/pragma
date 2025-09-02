@@ -12,8 +12,6 @@
 #include <pragma/networking/enums.hpp>
 #include <pragma/networking/iserver.hpp>
 #include <pragma/game/game_limits.h>
-#include "pragma/entities/components/s_name_component.hpp"
-#include "pragma/entities/components/s_io_component.hpp"
 #include <pragma/entities/components/base_player_component.hpp>
 #include <pragma/entities/components/base_character_component.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
@@ -21,6 +19,8 @@
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/console/sh_cmd.h>
 #include <pragma/networking/netmessages.h>
+
+import pragma.server.entities.components;
 
 extern DLLNETWORK Engine *engine;
 extern ServerState *server;

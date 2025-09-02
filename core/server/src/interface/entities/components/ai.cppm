@@ -20,7 +20,7 @@ module;
 #include "pragma/model/animation/play_animation_flags.hpp"
 #include <sharedutils/util_weak_handle.hpp>
 
-export module pragma.server.entities.components:ai;
+export module pragma.server.entities.components.ai;
 
 export {
 	constexpr float AI_NEXT_ENEMY_CHECK_IDLE = 0.25f;

@@ -3,10 +3,11 @@
 
 #include "stdafx_server.h"
 #include "pragma/entities/point/s_point_target.h"
-#include "pragma/entities/components/s_transform_component.hpp"
 #include "pragma/entities/s_entityfactories.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
+
+import pragma.server.entities.components;
 
 using namespace pragma;
 

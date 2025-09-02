@@ -7,7 +7,7 @@ module;
 #include "pragma/entities/components/c_entity_component.hpp"
 #include <pragma/entities/components/base_score_component.hpp>
 
-export module pragma.client.entities.components:score;
+export module pragma.client.entities.components.score;
 
 export namespace pragma {
 	class DLLCLIENT CScoreComponent final : public BaseScoreComponent, public CBaseNetComponent {

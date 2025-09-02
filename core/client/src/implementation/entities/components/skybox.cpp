@@ -30,9 +30,7 @@ module;
 #include <fsys/ifile.hpp>
 #include <wgui/types/wirect.h>
 
-module pragma.client.entities.components;
-
-import :skybox;
+module pragma.client.entities.components.skybox;
 
 import pragma.client.entities.components;
 import pragma.client.rendering.shaders;

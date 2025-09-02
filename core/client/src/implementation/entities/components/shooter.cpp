@@ -14,9 +14,7 @@ module;
 #include <sharedutils/scope_guard.h>
 #include <pragma/audio/alsound_type.h>
 
-module pragma.client.entities.components;
-
-import :shooter;
+module pragma.client.entities.components.shooter;
 
 using namespace pragma;
 

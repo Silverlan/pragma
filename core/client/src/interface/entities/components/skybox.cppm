@@ -10,7 +10,7 @@ module;
 
 import pragma.entities.components;
 
-export module pragma.client.entities.components:skybox;
+export module pragma.client.entities.components.skybox;
 
 export {
 	namespace pragma {

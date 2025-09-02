@@ -8,9 +8,7 @@ module;
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
-module pragma.client.entities.components;
-
-import :raytracing_renderer;
+module pragma.client.entities.components.raytracing_renderer;
 
 extern DLLCLIENT CEngine *c_engine;
 

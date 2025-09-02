@@ -7,7 +7,6 @@
 #include <pragma/physics/physobj.h>
 #include <sharedutils/util_string.h>
 #include "pragma/entities/baseentity_luaobject.h"
-#include "pragma/entities/components/s_model_component.hpp"
 #include <pragma/physics/phys_water_surface_simulator.hpp>
 #include <pragma/entities/components/base_physics_component.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
@@ -15,6 +14,8 @@
 #include <sharedutils/netpacket.hpp>
 #include <pragma/networking/enums.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
+
+import pragma.server.entities.components;
 
 using namespace pragma;
 

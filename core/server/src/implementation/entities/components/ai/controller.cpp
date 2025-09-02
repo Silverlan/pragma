@@ -7,7 +7,6 @@ module;
 #include "pragma/entities/components/s_player_component.hpp"
 #include "pragma/entities/components/s_observable_component.hpp"
 #include "pragma/entities/components/s_observer_component.hpp"
-#include "pragma/entities/components/s_generic_component.hpp"
 #include <pragma/entities/components/base_player_component.hpp>
 #include <pragma/entities/components/base_character_component.hpp>
 #include <pragma/entities/components/action_input_controller_component.hpp>
@@ -16,6 +15,7 @@ module;
 module pragma.server.entities.components.ai;
 
 import pragma.server.entities.components.character;
+import pragma.server.entities.components.generic;
 
 using namespace pragma;
 

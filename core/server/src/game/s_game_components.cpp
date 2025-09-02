@@ -10,8 +10,6 @@
 #include <pragma/entities/entity_component_manager.hpp>
 #include <luainterface.hpp>
 #include "pragma/entities/components/s_score_component.hpp"
-#include "pragma/entities/components/s_health_component.hpp"
-#include "pragma/entities/components/s_name_component.hpp"
 #include "pragma/entities/components/s_networked_component.hpp"
 #include "pragma/entities/components/s_observable_component.hpp"
 #include "pragma/entities/components/s_observer_component.hpp"
@@ -84,12 +82,9 @@
 #include "pragma/entities/s_skybox.h"
 #include "pragma/entities/s_flashlight.h"
 #include "pragma/entities/components/s_shooter_component.hpp"
-#include "pragma/entities/components/s_model_component.hpp"
 #include "pragma/entities/components/s_entity_component.hpp"
-#include "pragma/entities/components/s_io_component.hpp"
 #include "pragma/entities/components/s_time_scale_component.hpp"
 #include "pragma/entities/info/s_info_landmark.hpp"
-#include "pragma/entities/components/s_generic_component.hpp"
 #include "pragma/entities/components/s_point_at_target_component.hpp"
 #include "pragma/entities/components/s_surface_component.hpp"
 #include "pragma/entities/components/liquid/s_buoyancy_component.hpp"

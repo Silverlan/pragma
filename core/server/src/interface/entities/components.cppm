@@ -15,3 +15,8 @@ export import pragma.server.entities.components.field_angle;
 export import pragma.server.entities.components.flammable;
 export import pragma.server.entities.components.game;
 export import pragma.server.entities.components.gamemode;
+export import pragma.server.entities.components.health;
+export import pragma.server.entities.components.io;
+export import pragma.server.entities.components.generic;
+export import pragma.server.entities.components.name;
+export import pragma.server.entities.components.model;

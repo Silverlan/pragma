@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
-#include "pragma/entities/environment/audio/s_env_sound.h"
 #include "pragma/entities/s_entityfactories.h"
 #include <sharedutils/util_string.h>
 #include <sharedutils/util.h>
@@ -13,6 +14,8 @@
 #include <pragma/entities/components/map_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <sharedutils/netpacket.hpp>
+
+module pragma.server.entities.components.audio.sound;
 
 using namespace pragma;
 

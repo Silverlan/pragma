@@ -9,13 +9,6 @@
 #include <pragma/entities/entity_component_manager.hpp>
 #include <luainterface.hpp>
 #include "pragma/entities/components/s_player_component.hpp"
-#include "pragma/entities/environment/audio/s_env_sound_dsp.h"
-#include "pragma/entities/environment/audio/s_env_sound_dsp_chorus.h"
-#include "pragma/entities/environment/audio/s_env_sound_dsp_distortion.h"
-#include "pragma/entities/environment/audio/s_env_sound_dsp_eaxreverb.h"
-#include "pragma/entities/environment/audio/s_env_sound_dsp_echo.h"
-#include "pragma/entities/environment/audio/s_env_sound_dsp_equalizer.h"
-#include "pragma/entities/environment/audio/s_env_sound_dsp_flanger.h"
 #include "pragma/entities/environment/s_env_camera.h"
 #include "pragma/entities/environment/effects/s_env_explosion.h"
 #include "pragma/entities/environment/effects/s_env_fire.h"
@@ -30,8 +23,6 @@
 #include "pragma/entities/environment/effects/s_env_particle_system.h"
 #include "pragma/entities/environment/s_env_quake.h"
 #include "pragma/entities/environment/effects/s_env_smoke_trail.h"
-#include "pragma/entities/environment/audio/s_env_sound.h"
-#include "pragma/entities/environment/audio/s_env_soundscape.h"
 #include "pragma/entities/environment/effects/s_env_sprite.h"
 #include "pragma/entities/environment/s_env_wind.hpp"
 #include "pragma/entities/filter/s_filter_entity_class.h"

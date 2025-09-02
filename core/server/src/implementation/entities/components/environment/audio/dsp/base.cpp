@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
-#include "pragma/entities/environment/audio/s_env_sound_dsp.h"
 #include "pragma/entities/s_entityfactories.h"
 #include <sharedutils/util_string.h>
 #include <sharedutils/util.h>
@@ -11,6 +12,8 @@
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/baseentity_events.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
+
+module pragma.server.entities.components.audio.dsp.base;
 
 using namespace pragma;
 

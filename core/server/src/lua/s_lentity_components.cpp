@@ -7,7 +7,6 @@
 #include "pragma/entities/components/s_sound_emitter_component.hpp"
 #include "pragma/networking/recipient_filter.hpp"
 #include "pragma/entities/components/s_score_component.hpp"
-#include "pragma/entities/components/s_flammable_component.hpp"
 #include "pragma/entities/components/s_health_component.hpp"
 #include "pragma/entities/components/s_name_component.hpp"
 #include "pragma/entities/components/s_networked_component.hpp"
@@ -15,7 +14,6 @@
 #include "pragma/entities/components/s_observer_component.hpp"
 #include "pragma/entities/components/s_physics_component.hpp"
 #include "pragma/entities/components/s_radius_component.hpp"
-#include "pragma/entities/components/s_field_angle_component.hpp"
 #include "pragma/entities/components/s_render_component.hpp"
 #include "pragma/entities/components/s_sound_emitter_component.hpp"
 #include "pragma/entities/components/s_toggle_component.hpp"
@@ -27,6 +25,7 @@
 #include "pragma/entities/components/base_color_component.hpp"
 #include "pragma/entities/components/base_child_component.hpp"
 #include "pragma/entities/components/base_debug_component.hpp"
+#include "pragma/entities/components/base_flammable_component.hpp"
 #include "pragma/entities/environment/audio/s_env_sound_dsp.h"
 #include "pragma/entities/environment/audio/s_env_sound_dsp_chorus.h"
 #include "pragma/entities/environment/audio/s_env_sound_dsp_distortion.h"
@@ -71,8 +70,6 @@
 #include "pragma/entities/components/s_shooter_component.hpp"
 #include "pragma/entities/components/s_entity_component.hpp"
 #include "pragma/entities/components/s_time_scale_component.hpp"
-#include "pragma/entities/components/s_gamemode_component.hpp"
-#include "pragma/entities/components/s_game_component.hpp"
 #include "pragma/entities/environment/s_env_timescale.h"
 #include <pragma/model/model.h>
 #include <pragma/model/modelmesh.h>

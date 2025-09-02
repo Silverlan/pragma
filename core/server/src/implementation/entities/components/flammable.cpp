@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
-#include "pragma/entities/components/s_flammable_component.hpp"
 #include <pragma/networking/enums.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/components/damageable_component.hpp>
@@ -10,6 +11,8 @@
 #include <pragma/lua/libraries/ltimer.h>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/networking/nwm_util.h>
+
+module pragma.server.entities.components.flammable;
 
 using namespace pragma;
 

@@ -108,10 +108,12 @@
 #include "pragma/entities/s_bot.h"
 #include "pragma/entities/point/s_point_target.h"
 #include "pragma/entities/components/s_wheel_component.hpp"
-#include "pragma/entities/components/s_game_component.hpp"
 #include "pragma/entities/environment/effects/s_env_smoke_trail.h"
 #include "pragma/entities/environment/effects/s_env_fire.h"
 #include "pragma/entities/s_ent_debug.hpp"
+
+import pragma.server.entities.components;
+
 LINK_NETWORKED_ENTITIES;
 LINK_NETWORKED_PHYSICS_ENTITIES;
 #elif DLLCLIENT_EX

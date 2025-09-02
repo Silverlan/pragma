@@ -11,3 +11,7 @@ export import pragma.server.entities.components.character;
 export import pragma.server.entities.components.debug;
 export import pragma.server.entities.components.child;
 export import pragma.server.entities.components.color;
+export import pragma.server.entities.components.field_angle;
+export import pragma.server.entities.components.flammable;
+export import pragma.server.entities.components.game;
+export import pragma.server.entities.components.gamemode;

@@ -10,7 +10,6 @@
 #include <pragma/entities/entity_component_manager.hpp>
 #include <luainterface.hpp>
 #include "pragma/entities/components/s_score_component.hpp"
-#include "pragma/entities/components/s_flammable_component.hpp"
 #include "pragma/entities/components/s_health_component.hpp"
 #include "pragma/entities/components/s_name_component.hpp"
 #include "pragma/entities/components/s_networked_component.hpp"
@@ -18,7 +17,6 @@
 #include "pragma/entities/components/s_observer_component.hpp"
 #include "pragma/entities/components/s_physics_component.hpp"
 #include "pragma/entities/components/s_radius_component.hpp"
-#include "pragma/entities/components/s_field_angle_component.hpp"
 #include "pragma/entities/components/s_render_component.hpp"
 #include "pragma/entities/components/s_sound_emitter_component.hpp"
 #include "pragma/entities/components/s_toggle_component.hpp"
@@ -93,8 +91,6 @@
 #include "pragma/entities/info/s_info_landmark.hpp"
 #include "pragma/entities/components/s_generic_component.hpp"
 #include "pragma/entities/components/s_point_at_target_component.hpp"
-#include "pragma/entities/components/s_gamemode_component.hpp"
-#include "pragma/entities/components/s_game_component.hpp"
 #include "pragma/entities/components/s_surface_component.hpp"
 #include "pragma/entities/components/liquid/s_buoyancy_component.hpp"
 #include "pragma/entities/components/liquid/s_liquid_surface_component.hpp"

@@ -5,7 +5,7 @@ module;
 
 #include "pragma/entities/components/base_entity_component.hpp"
 
-export module pragma.entities.components:lifeline_link;
+export module pragma.entities.components.lifeline_link;
 
 export namespace pragma {
 	class DLLNETWORK LifelineLinkComponent final : public BaseEntityComponent {

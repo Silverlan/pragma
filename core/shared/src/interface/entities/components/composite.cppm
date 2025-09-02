@@ -6,7 +6,7 @@ module;
 #include "pragma/entities/components/base_entity_component.hpp"
 #include "pragma/entities/baseentity_handle.h"
 
-export module pragma.entities.components:composite;
+export module pragma.entities.components.composite;
 
 export namespace pragma::ecs {
 	class CompositeComponent;

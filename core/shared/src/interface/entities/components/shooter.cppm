@@ -13,7 +13,7 @@ module;
 #include <typeindex>
 #include <mathutil/uvec.h>
 
-export module pragma.entities.components:shooter;
+export module pragma.entities.components.shooter;
 
 export namespace pragma::ecs {
 	namespace events {

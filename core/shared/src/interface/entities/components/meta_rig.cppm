@@ -10,7 +10,7 @@ module;
 #include "pragma/model/animation/meta_rig.hpp"
 #include "pragma/model/model.h"
 
-export module pragma.entities.components:meta_rig;
+export module pragma.entities.components.meta_rig;
 
 export namespace pragma {
 	class DLLNETWORK MetaRigComponent final : public BaseEntityComponent {

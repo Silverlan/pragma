@@ -9,9 +9,7 @@ module;
 #include <sharedutils/datastream.h>
 #include <udm.hpp>
 
-module pragma.entities.components;
-
-import :global_name;
+module pragma.entities.components.global_name;
 
 using namespace pragma;
 

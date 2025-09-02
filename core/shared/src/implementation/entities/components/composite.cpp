@@ -12,9 +12,7 @@ module;
 #include <unordered_set>
 #include <udm.hpp>
 
-module pragma.entities.components;
-
-import :composite;
+module pragma.entities.components.composite;
 
 using namespace pragma::ecs;
 using namespace compositeComponent;

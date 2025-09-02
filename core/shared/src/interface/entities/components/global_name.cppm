@@ -5,7 +5,7 @@ module;
 
 #include "pragma/entities/components/base_entity_component.hpp"
 
-export module pragma.entities.components:global_name;
+export module pragma.entities.components.global_name;
 
 export namespace pragma {
 	// Note: 'GlobalComponent' cannot be used as name, otherwise there are conflicts with 'GlobalHandle' class of winbase.h

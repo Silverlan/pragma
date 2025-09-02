@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
 #include <pragma/entities/components/base_character_component.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
@@ -8,7 +10,9 @@
 #include "pragma/ai/ai_memory.h"
 #include <pragma/entities/entity_component_system_t.hpp>
 
-import pragma.server.entities.components;
+module pragma.server.entities.components;
+
+import :ai;
 
 using namespace pragma;
 

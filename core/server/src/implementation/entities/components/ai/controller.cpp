@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
 #include "pragma/entities/components/s_player_component.hpp"
 #include "pragma/entities/components/s_observable_component.hpp"
@@ -11,7 +13,9 @@
 #include <pragma/entities/components/action_input_controller_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
-import pragma.server.entities.components;
+module pragma.server.entities.components;
+
+import :ai;
 
 using namespace pragma;
 

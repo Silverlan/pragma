@@ -13,12 +13,11 @@ module;
 export module pragma.client.entities.components:pp_motion_blur;
 
 import :pp_base;
+import pragma.client.entities.components.motion_blur_data;
 
 export namespace pragma {
 	enum class MotionBlurQuality : uint32_t { Low = 0, Medium, High };
 
-	class CMotionBlurDataComponent;
-	struct MotionBlurTemporalData;
 	class DLLCLIENT CRendererPpMotionBlurComponent final : public CRendererPpBaseComponent {
 	  public:
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);

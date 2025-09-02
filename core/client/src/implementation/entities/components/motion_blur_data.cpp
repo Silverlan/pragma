@@ -13,9 +13,7 @@ module;
 #include <pragma/entities/entity_component_manager_t.hpp>
 #include <buffers/prosper_uniform_resizable_buffer.hpp>
 
-module pragma.client.entities.components;
-
-import :motion_blur_data;
+module pragma.client.entities.components.motion_blur_data;
 
 import pragma.client.rendering.shaders;
 

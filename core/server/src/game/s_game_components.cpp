@@ -8,9 +8,6 @@
 #include <pragma/game/game_entity_component.hpp>
 #include <pragma/entities/entity_component_manager.hpp>
 #include <luainterface.hpp>
-#include "pragma/entities/components/s_score_component.hpp"
-#include "pragma/entities/components/s_radius_component.hpp"
-#include "pragma/entities/components/s_render_component.hpp"
 #include "pragma/entities/components/s_sound_emitter_component.hpp"
 #include "pragma/entities/components/s_toggle_component.hpp"
 #include "pragma/entities/components/s_transform_component.hpp"
@@ -76,11 +73,9 @@
 #include "pragma/entities/trigger/s_trigger_touch.h"
 #include "pragma/entities/s_skybox.h"
 #include "pragma/entities/s_flashlight.h"
-#include "pragma/entities/components/s_shooter_component.hpp"
 #include "pragma/entities/components/s_entity_component.hpp"
 #include "pragma/entities/components/s_time_scale_component.hpp"
 #include "pragma/entities/info/s_info_landmark.hpp"
-#include "pragma/entities/components/s_point_at_target_component.hpp"
 #include "pragma/entities/components/s_surface_component.hpp"
 #include "pragma/entities/components/liquid/s_buoyancy_component.hpp"
 #include "pragma/entities/components/liquid/s_liquid_surface_component.hpp"

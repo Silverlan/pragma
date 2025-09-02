@@ -25,3 +25,8 @@ export import pragma.server.entities.components.observer;
 export import pragma.server.entities.components.ownable;
 export import pragma.server.entities.components.observable;
 export import pragma.server.entities.components.physics;
+export import pragma.server.entities.components.point_at_target;
+export import pragma.server.entities.components.radius;
+export import pragma.server.entities.components.render;
+export import pragma.server.entities.components.score;
+export import pragma.server.entities.components.shooter;

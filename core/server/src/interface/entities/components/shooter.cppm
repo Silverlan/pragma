@@ -1,15 +1,16 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __S_SHOOTER_COMPONENT_HPP__
-#define __S_SHOOTER_COMPONENT_HPP__
+module;
 
 #include "pragma/serverdefinitions.h"
 #include "pragma/entities/components/s_entity_component.hpp"
 
+export module pragma.server.entities.components.shooter;
+
 import pragma.entities.components;
 
-namespace pragma::ecs {
+export namespace pragma::ecs {
 	class DLLSERVER SShooterComponent final : public BaseShooterComponent, public SBaseNetComponent {
 	  public:
 		SShooterComponent(BaseEntity &ent) : BaseShooterComponent(ent) {}
@@ -24,5 +25,3 @@ namespace pragma::ecs {
 		virtual void FireBullets(const BulletInfo &bulletInfo, DamageInfo &dmgInfo, std::vector<TraceResult> &outHitTargets, const std::function<bool(DamageInfo &, BaseEntity *)> &fCallback = nullptr, bool bMaster = true);
 	};
 };
-
-#endif

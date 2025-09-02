@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
-#include "pragma/entities/components/s_shooter_component.hpp"
 #include "pragma/entities/components/s_player_component.hpp"
 #include "pragma/entities/components/base_character_component.hpp"
 #include "pragma/networking/recipient_filter.hpp"
@@ -13,6 +14,8 @@
 #include <pragma/util/bulletinfo.h>
 #include <sharedutils/scope_guard.h>
 #include <servermanager/interface/sv_nwm_manager.hpp>
+
+module pragma.server.entities.components.shooter;
 
 import pragma.server.entities.components;
 

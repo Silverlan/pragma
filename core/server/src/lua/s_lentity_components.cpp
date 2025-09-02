@@ -6,9 +6,6 @@
 #include "pragma/lua/s_lentity_components.hpp"
 #include "pragma/entities/components/s_sound_emitter_component.hpp"
 #include "pragma/networking/recipient_filter.hpp"
-#include "pragma/entities/components/s_score_component.hpp"
-#include "pragma/entities/components/s_radius_component.hpp"
-#include "pragma/entities/components/s_render_component.hpp"
 #include "pragma/entities/components/s_sound_emitter_component.hpp"
 #include "pragma/entities/components/s_toggle_component.hpp"
 #include "pragma/entities/components/s_transform_component.hpp"
@@ -23,6 +20,9 @@
 #include "pragma/entities/components/base_networked_component.hpp"
 #include "pragma/entities/components/base_observer_component.hpp"
 #include "pragma/entities/components/base_health_component.hpp"
+#include "pragma/entities/components/base_score_component.hpp"
+#include "pragma/entities/components/base_radius_component.hpp"
+#include "pragma/entities/components/base_render_component.hpp"
 #include "pragma/entities/environment/audio/s_env_sound_dsp.h"
 #include "pragma/entities/environment/audio/s_env_sound_dsp_chorus.h"
 #include "pragma/entities/environment/audio/s_env_sound_dsp_distortion.h"
@@ -64,7 +64,6 @@
 #include "pragma/entities/game_player_spawn.h"
 #include "pragma/entities/logic/s_logic_relay.h"
 #include "pragma/entities/s_bot.h"
-#include "pragma/entities/components/s_shooter_component.hpp"
 #include "pragma/entities/components/s_entity_component.hpp"
 #include "pragma/entities/components/s_time_scale_component.hpp"
 #include "pragma/entities/environment/s_env_timescale.h"
@@ -86,6 +85,7 @@
 
 #include <pragma/lua/ostream_operator_alias.hpp>
 
+import pragma.entities.components;
 import pragma.server.entities.components;
 
 void SGame::RegisterLuaEntityComponent(luabind::class_<pragma::BaseEntityComponent> &def)

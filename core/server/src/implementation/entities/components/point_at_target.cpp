@@ -1,11 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
 #include "pragma/networking/s_nwm_util.h"
-#include "pragma/entities/components/s_point_at_target_component.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/networking/enums.hpp>
+
+module pragma.server.entities.components.point_at_target;
 
 using namespace pragma;
 

@@ -65,9 +65,6 @@
 #include "pragma/entities/player.h"
 #include <pragma/entities/world.h>
 #include "pragma/entities/prop/s_prop_physics.h"
-#include "pragma/entities/environment/lights/s_env_light_spot.h"
-#include "pragma/entities/environment/lights/s_env_light_directional.h"
-#include "pragma/entities/environment/lights/s_env_light_point.h"
 #include "pragma/entities/s_skybox.h"
 #include "pragma/entities/s_flashlight.h"
 #include "pragma/entities/environment/s_env_camera.h"
@@ -76,7 +73,6 @@
 #include "pragma/entities/environment/s_env_timescale.h"
 #include "pragma/entities/environment/s_env_fog_controller.h"
 #include "pragma/entities/environment/s_env_decal.h"
-#include "pragma/entities/environment/lights/s_env_light_spot_vol.h"
 #include "pragma/entities/point/s_point_rendertarget.h"
 #include "pragma/entities/func/s_func_portal.h"
 #include "pragma/entities/trigger/s_trigger_touch.h"

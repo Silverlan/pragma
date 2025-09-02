@@ -7,7 +7,7 @@ module;
 #include "pragma/entities/components/c_entity_component.hpp"
 #include <pragma/entities/components/liquid/base_liquid_control_component.hpp>
 
-export module pragma.client.entities.components:liquid_control;
+export module pragma.client.entities.components.liquid_control;
 
 export namespace pragma {
 	class DLLCLIENT CLiquidControlComponent final : public BaseLiquidControlComponent, public CBaseNetComponent {

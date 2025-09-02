@@ -8,7 +8,7 @@ module;
 #include "pragma/entities/components/liquid/c_liquid_component.hpp"
 #include <pragma/entities/components/liquid/base_liquid_surface_simulation_component.hpp>
 
-export module pragma.client.entities.components:liquid_surface_simulation;
+export module pragma.client.entities.components.liquid_surface_simulation;
 
 export namespace pragma {
 	class DLLCLIENT CLiquidSurfaceSimulationComponent final : public BaseLiquidSurfaceSimulationComponent, public CBaseNetComponent {

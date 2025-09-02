@@ -13,9 +13,7 @@ module;
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/physics/raytraces.h>
 
-module pragma.client.entities.components;
-
-import :liquid_control;
+module pragma.client.entities.components.liquid_control;
 
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;

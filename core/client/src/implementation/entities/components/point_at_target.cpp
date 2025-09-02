@@ -7,9 +7,7 @@ module;
 #include "pragma/networking/c_nwm_util.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
-module pragma.client.entities.components;
-
-import :point_at_target;
+module pragma.client.entities.components.point_at_target;
 
 using namespace pragma;
 

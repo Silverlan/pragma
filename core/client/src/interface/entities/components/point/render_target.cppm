@@ -13,7 +13,7 @@ module;
 #include "pragma/entities/environment/c_env_camera.h"
 #include <texturemanager/texture.h>
 
-export module pragma.client.entities.components:point_render_target;
+export module pragma.client.entities.components.point_render_target;
 
 export {
 	namespace pragma {

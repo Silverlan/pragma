@@ -16,9 +16,7 @@ module;
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
-module pragma.client.entities.components;
-
-import :point_render_target;
+module pragma.client.entities.components.point_render_target;
 
 using namespace pragma;
 

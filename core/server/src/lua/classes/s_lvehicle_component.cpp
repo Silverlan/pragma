@@ -4,13 +4,15 @@
 #include "stdafx_server.h"
 #include "pragma/lua/classes/ldef_entity.h"
 #include "luasystem.h"
-#include "pragma/entities/components/s_vehicle_component.hpp"
 #include "pragma/lua/s_lentity_components.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/lua/lua_util_component.hpp>
+#include "pragma/entities/components/base_vehicle_component.hpp"
 #include <pragma/lua/lentity_components_base_types.hpp>
 
 #include <pragma/lua/ostream_operator_alias.hpp>
+
+import pragma.server.entities.components;
 
 namespace Lua {
 	namespace Vehicle {

@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
-#include "pragma/entities/components/s_weapon_component.hpp"
 #include "pragma/entities/player.h"
 #include "pragma/networking/recipient_filter.hpp"
 #include "pragma/networking/enums.hpp"
@@ -19,6 +20,8 @@
 #include <servermanager/interface/sv_nwm_manager.hpp>
 #include <sharedutils/datastream.h>
 #include <pragma/networking/nwm_util.h>
+
+module pragma.server.entities.components.weapon;
 
 import pragma.server.entities.components;
 

@@ -1,14 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __S_VEHICLE_COMPONENT_HPP__
-#define __S_VEHICLE_COMPONENT_HPP__
+module;
 
 #include "pragma/serverdefinitions.h"
 #include "pragma/entities/components/s_entity_component.hpp"
 #include <pragma/entities/components/base_vehicle_component.hpp>
 
-namespace pragma {
+export module pragma.server.entities.components.vehicle;
+
+export namespace pragma {
 	class DLLSERVER SVehicleComponent final : public BaseVehicleComponent, public SBaseSnapshotComponent {
 	  public:
 		static unsigned int GetVehicleCount();
@@ -39,5 +40,3 @@ namespace pragma {
 		static std::vector<SVehicleComponent *> s_vehicles;
 	};
 };
-
-#endif

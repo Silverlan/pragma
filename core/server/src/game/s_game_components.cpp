@@ -8,12 +8,6 @@
 #include <pragma/game/game_entity_component.hpp>
 #include <pragma/entities/entity_component_manager.hpp>
 #include <luainterface.hpp>
-#include "pragma/entities/components/s_sound_emitter_component.hpp"
-#include "pragma/entities/components/s_toggle_component.hpp"
-#include "pragma/entities/components/s_transform_component.hpp"
-#include "pragma/entities/components/s_vehicle_component.hpp"
-#include "pragma/entities/components/s_weapon_component.hpp"
-#include "pragma/entities/components/s_wheel_component.hpp"
 #include "pragma/entities/components/s_player_component.hpp"
 #include "pragma/entities/environment/audio/s_env_sound_dsp.h"
 #include "pragma/entities/environment/audio/s_env_sound_dsp_chorus.h"
@@ -39,7 +33,6 @@
 #include "pragma/entities/environment/audio/s_env_sound.h"
 #include "pragma/entities/environment/audio/s_env_soundscape.h"
 #include "pragma/entities/environment/effects/s_env_sprite.h"
-#include "pragma/entities/components/s_time_scale_component.hpp"
 #include "pragma/entities/environment/s_env_wind.hpp"
 #include "pragma/entities/filter/s_filter_entity_class.h"
 #include "pragma/entities/filter/s_filter_entity_name.h"
@@ -74,9 +67,7 @@
 #include "pragma/entities/s_skybox.h"
 #include "pragma/entities/s_flashlight.h"
 #include "pragma/entities/components/s_entity_component.hpp"
-#include "pragma/entities/components/s_time_scale_component.hpp"
 #include "pragma/entities/info/s_info_landmark.hpp"
-#include "pragma/entities/components/s_surface_component.hpp"
 #include "pragma/entities/components/liquid/s_buoyancy_component.hpp"
 #include "pragma/entities/components/liquid/s_liquid_surface_component.hpp"
 #include "pragma/entities/components/liquid/s_liquid_volume_component.hpp"

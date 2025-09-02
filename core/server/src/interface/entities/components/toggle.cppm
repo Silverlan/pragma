@@ -1,14 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __S_TOGGLE_COMPONENT_HPP__
-#define __S_TOGGLE_COMPONENT_HPP__
+module;
 
 #include "pragma/serverdefinitions.h"
 #include "pragma/entities/components/s_entity_component.hpp"
 #include <pragma/entities/components/basetoggle.h>
 
-namespace pragma {
+export module pragma.server.entities.components.toggle;
+
+export namespace pragma {
 	class DLLSERVER SToggleComponent final : public BaseToggleComponent, public SBaseNetComponent {
 	  public:
 		SToggleComponent(BaseEntity &ent) : BaseToggleComponent(ent) {}
@@ -20,5 +21,3 @@ namespace pragma {
 		virtual void InitializeLuaObject(lua_State *l) override;
 	};
 };
-
-#endif

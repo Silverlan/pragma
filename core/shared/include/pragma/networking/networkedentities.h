@@ -107,7 +107,6 @@
 #include "pragma/entities/s_npc_dragonworm.h"
 #include "pragma/entities/s_bot.h"
 #include "pragma/entities/point/s_point_target.h"
-#include "pragma/entities/components/s_wheel_component.hpp"
 #include "pragma/entities/environment/effects/s_env_smoke_trail.h"
 #include "pragma/entities/environment/effects/s_env_fire.h"
 #include "pragma/entities/s_ent_debug.hpp"

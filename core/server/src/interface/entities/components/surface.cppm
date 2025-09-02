@@ -1,14 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __S_SURFACE_COMPONENT_HPP__
-#define __S_SURFACE_COMPONENT_HPP__
+module;
 
 #include "pragma/serverdefinitions.h"
 #include "pragma/entities/components/s_entity_component.hpp"
 #include <pragma/entities/components/base_surface_component.hpp>
 
-namespace pragma {
+export module pragma.server.entities.components.surface;
+
+export namespace pragma {
 	class DLLSERVER SSurfaceComponent final : public BaseSurfaceComponent, public SBaseNetComponent {
 	  public:
 		SSurfaceComponent(BaseEntity &ent) : BaseSurfaceComponent(ent) {}
@@ -18,5 +19,3 @@ namespace pragma {
 		virtual void InitializeLuaObject(lua_State *l) override;
 	};
 };
-
-#endif

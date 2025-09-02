@@ -29,7 +29,6 @@
 #include "pragma/entities/components/base_ownable_component.hpp"
 #include "pragma/entities/s_skybox.h"
 #include "pragma/entities/s_flashlight.h"
-#include "pragma/entities/components/s_time_scale_component.hpp"
 #include "pragma/entities/components/base_debug_component.hpp"
 #include "pragma/entities/components/base_io_component.hpp"
 #include "pragma/entities/components/base_point_at_target_component.hpp"

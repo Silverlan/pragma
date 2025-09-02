@@ -5,7 +5,6 @@
 #include "pragma/entities/logic/s_logic_relay.h"
 #include "pragma/entities/s_entityfactories.h"
 #include "pragma/entities/components/base_io_component.hpp"
-#include "pragma/entities/components/s_toggle_component.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 

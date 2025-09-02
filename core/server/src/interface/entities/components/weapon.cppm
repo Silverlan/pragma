@@ -1,19 +1,18 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __S_WEAPON_COMPONENT_HPP__
-#define __S_WEAPON_COMPONENT_HPP__
+module;
 
 #include "pragma/serverdefinitions.h"
 #include "pragma/entities/components/s_entity_component.hpp"
+#include "pragma/networking/recipient_filter.hpp"
 #include <cinttypes>
 #include <vector>
 #include <pragma/entities/components/base_weapon_component.hpp>
 
-namespace nwm {
-	class RecipientFilter;
-};
-namespace pragma {
+export module pragma.server.entities.components.weapon;
+
+export namespace pragma {
 	class DLLSERVER SWeaponComponent final : public BaseWeaponComponent, public SBaseNetComponent {
 	  public:
 		static uint32_t GetWeaponCount();
@@ -64,5 +63,3 @@ namespace pragma {
 		static std::vector<SWeaponComponent *> s_weapons;
 	};
 };
-
-#endif

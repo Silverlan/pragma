@@ -11,9 +11,7 @@ module;
 #include <pragma/util/util_handled.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
-module pragma.client.entities.components;
-
-import :func_kinematic;
+module pragma.client.entities.components.func_kinematic;
 
 using namespace pragma;
 

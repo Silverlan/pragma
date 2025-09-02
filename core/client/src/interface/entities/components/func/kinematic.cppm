@@ -11,7 +11,7 @@ module;
 
 import pragma.entities.components;
 
-export module pragma.client.entities.components:func_kinematic;
+export module pragma.client.entities.components.func_kinematic;
 
 export {
 	namespace pragma {

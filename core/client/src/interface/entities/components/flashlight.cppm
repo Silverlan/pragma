@@ -10,7 +10,7 @@ module;
 
 import pragma.entities.components;
 
-export module pragma.client.entities.components:flashlight;
+export module pragma.client.entities.components.flashlight;
 
 export {
 	namespace pragma {

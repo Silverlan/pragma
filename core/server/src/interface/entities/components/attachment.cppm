@@ -1,14 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2024 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __S_ATTACHMENT_COMPONENT_HPP__
-#define __S_ATTACHMENT_COMPONENT_HPP__
+module;
 
 #include "pragma/serverdefinitions.h"
 #include "pragma/entities/components/s_entity_component.hpp"
 #include <pragma/entities/components/base_attachment_component.hpp>
 
-namespace pragma {
+export module pragma.server.entities.components:attachment;
+
+export namespace pragma {
 	class DLLSERVER SAttachmentComponent final : public BaseAttachmentComponent, public SBaseNetComponent {
 	  public:
 		SAttachmentComponent(BaseEntity &ent) : BaseAttachmentComponent(ent) {}
@@ -23,5 +24,3 @@ namespace pragma {
 		virtual AttachmentData *SetupAttachment(BaseEntity *ent, const AttachmentInfo &attInfo) override;
 	};
 };
-
-#endif

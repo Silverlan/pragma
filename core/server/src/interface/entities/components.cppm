@@ -6,4 +6,5 @@ module;
 export module pragma.server.entities.components;
 export import :ai;
 export import :animated;
+export import :attachment;
 export import :character;

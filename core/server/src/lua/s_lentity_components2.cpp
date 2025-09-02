@@ -31,7 +31,6 @@
 #include "pragma/entities/components/s_model_component.hpp"
 #include "pragma/entities/components/s_io_component.hpp"
 #include "pragma/entities/components/s_time_scale_component.hpp"
-#include "pragma/entities/components/s_attachment_component.hpp"
 #include "pragma/entities/components/s_child_component.hpp"
 #include "pragma/entities/components/s_generic_component.hpp"
 #include "pragma/entities/components/s_point_at_target_component.hpp"
@@ -55,6 +54,7 @@
 #include <pragma/lua/lua_call.hpp>
 #include <sharedutils/netpacket.hpp>
 #include <pragma/lua/ostream_operator_alias.hpp>
+#include <pragma/entities/components/base_attachment_component.hpp>
 
 import pragma.server.entities.components;
 

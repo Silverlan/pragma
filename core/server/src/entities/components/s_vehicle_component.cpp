@@ -9,7 +9,6 @@
 #include "pragma/entities/player.h"
 #include "pragma/entities/baseentity_luaobject.h"
 #include "pragma/entities/components/s_wheel_component.hpp"
-#include "pragma/entities/components/s_attachment_component.hpp"
 #include "pragma/entities/components/s_player_component.hpp"
 #include <pragma/entities/components/base_character_component.hpp>
 #include <pragma/entities/components/usable_component.hpp>
@@ -19,6 +18,8 @@
 #include <pragma/physics/environment.hpp>
 #include <pragma/networking/nwm_util.h>
 #include <pragma/networking/enums.hpp>
+
+import pragma.server.entities.components;
 
 using namespace pragma;
 

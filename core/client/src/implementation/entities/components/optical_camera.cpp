@@ -7,9 +7,7 @@ module;
 #include "pragma/game/c_game.h"
 #include <pragma/entities/entity_component_manager_t.hpp>
 
-module pragma.client.entities.components;
-
-import :optical_camera;
+module pragma.client.entities.components.optical_camera;
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT CEngine *c_engine;

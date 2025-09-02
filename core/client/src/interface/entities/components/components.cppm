@@ -41,7 +41,7 @@ export import :liquid_surface_simulation;
 export import :liquid_volume;
 export import pragma.client.entities.components.lua;
 export import pragma.client.entities.components.motion_blur_data;
-export import :optical_camera;
+export import pragma.client.entities.components.optical_camera;
 export import pragma.client.entities.components.point_at_target;
 export import pragma.client.entities.components.point_constraint_ball_socket;
 export import pragma.client.entities.components.point_constraint_cone_twist;

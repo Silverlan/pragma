@@ -33,7 +33,7 @@ export import pragma.client.entities.components.func_brush;
 export import pragma.client.entities.components.global_shader_input;
 export import pragma.client.entities.components.health;
 export import pragma.client.entities.components.hitbox_bvh;
-export import :light_map_data_cache;
+export import pragma.client.entities.components.light_map_data_cache;
 export import :liquid_buoyancy;
 export import :liquid_control;
 export import :liquid_surface;

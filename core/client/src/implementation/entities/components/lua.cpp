@@ -10,9 +10,7 @@ module;
 #include <pragma/lua/sh_lua_component.hpp>
 #include <pragma/lua/handle_holder.hpp>
 
-module pragma.client.entities.components;
-
-import :lua;
+module pragma.client.entities.components.lua;
 
 using namespace pragma;
 

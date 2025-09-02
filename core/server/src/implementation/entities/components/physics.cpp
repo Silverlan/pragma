@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
-#include "pragma/entities/components/s_physics_component.hpp"
 #include "pragma/entities/components/s_player_component.hpp"
 #include <sharedutils/scope_guard.h>
 #include <pragma/entities/components/base_character_component.hpp>
@@ -12,6 +13,8 @@
 #include <servermanager/interface/sv_nwm_manager.hpp>
 #include <pragma/networking/nwm_util.h>
 #include <pragma/networking/enums.hpp>
+
+module pragma.server.entities.components.physics;
 
 import pragma.server.model_manager;
 

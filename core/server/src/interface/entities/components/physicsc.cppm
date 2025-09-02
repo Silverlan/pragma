@@ -1,14 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __S_PHYSICS_COMPONENT_HPP__
-#define __S_PHYSICS_COMPONENT_HPP__
+module;
 
 #include "pragma/serverdefinitions.h"
 #include "pragma/entities/components/s_entity_component.hpp"
 #include <pragma/entities/components/base_physics_component.hpp>
 
-namespace pragma {
+export module pragma.server.entities.components.physics;
+
+export namespace pragma {
 	class DLLSERVER SPhysicsComponent final : public BasePhysicsComponent, public SBaseNetComponent {
 	  public:
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
@@ -36,5 +37,3 @@ namespace pragma {
 		virtual void GetBaseTypeIndex(std::type_index &outTypeIndex) const override;
 	};
 };
-
-#endif

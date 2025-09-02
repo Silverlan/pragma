@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_server.h"
 #include "pragma/entities/components/s_player_component.hpp"
-#include "pragma/entities/components/s_physics_component.hpp"
 #include "pragma/ai/s_npcstate.h"
 #include "pragma/entities/components/base_ai_component.hpp"
 #include "pragma/entities/s_baseentity.h"
@@ -35,6 +34,7 @@ import pragma.server.entities.components.animated;
 import pragma.server.entities.components.character;
 import pragma.server.entities.components.health;
 import pragma.server.entities.components.model;
+import pragma.server.entities.components.physics;
 
 extern DLLSERVER SGame *s_game;
 

@@ -20,3 +20,8 @@ export import pragma.server.entities.components.io;
 export import pragma.server.entities.components.generic;
 export import pragma.server.entities.components.name;
 export import pragma.server.entities.components.model;
+export import pragma.server.entities.components.networked;
+export import pragma.server.entities.components.observer;
+export import pragma.server.entities.components.ownable;
+export import pragma.server.entities.components.observable;
+export import pragma.server.entities.components.physics;

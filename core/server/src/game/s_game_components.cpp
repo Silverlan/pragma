@@ -4,16 +4,11 @@
 #include "stdafx_server.h"
 #include "pragma/game/s_game.h"
 #include "pragma/lua/s_lua_component.hpp"
-#include "pragma/entities/components/s_ownable_component.hpp"
 #include <pragma/lua/lentity_component_lua.hpp>
 #include <pragma/game/game_entity_component.hpp>
 #include <pragma/entities/entity_component_manager.hpp>
 #include <luainterface.hpp>
 #include "pragma/entities/components/s_score_component.hpp"
-#include "pragma/entities/components/s_networked_component.hpp"
-#include "pragma/entities/components/s_observable_component.hpp"
-#include "pragma/entities/components/s_observer_component.hpp"
-#include "pragma/entities/components/s_physics_component.hpp"
 #include "pragma/entities/components/s_radius_component.hpp"
 #include "pragma/entities/components/s_render_component.hpp"
 #include "pragma/entities/components/s_sound_emitter_component.hpp"

@@ -1,11 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2024 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
 #include "pragma/serverstate/serverutil.h"
-#include "pragma/entities/components/s_observer_component.hpp"
 #include <pragma/entities/components/base_observable_component.hpp>
 #include <pragma/networking/nwm_util.h>
+
+module pragma.server.entities.components.observer;
 
 using namespace pragma;
 

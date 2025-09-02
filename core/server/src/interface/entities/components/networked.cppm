@@ -1,14 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __S_NETWORKED_COMPONENT_HPP__
-#define __S_NETWORKED_COMPONENT_HPP__
+module;
 
 #include "pragma/serverdefinitions.h"
 #include "pragma/entities/components/s_entity_component.hpp"
 #include <pragma/entities/components/base_networked_component.hpp>
 
-namespace pragma {
+export module pragma.server.entities.components.networked;
+
+export namespace pragma {
 	class DLLSERVER SNetworkedComponent final : public BaseNetworkedComponent, public SBaseNetComponent {
 	  public:
 		SNetworkedComponent(BaseEntity &ent) : BaseNetworkedComponent(ent) {}
@@ -26,5 +27,3 @@ namespace pragma {
 #endif
 	};
 };
-
-#endif

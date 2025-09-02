@@ -1,11 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
-#include "pragma/entities/components/s_observable_component.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/networking/enums.hpp>
 #include <sharedutils/netpacket.hpp>
+
+module pragma.server.entities.components.observable;
 
 using namespace pragma;
 

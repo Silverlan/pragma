@@ -1,15 +1,16 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __S_OWNABLE_COMPONENT_HPP__
-#define __S_OWNABLE_COMPONENT_HPP__
+module;
 
 #include "pragma/serverdefinitions.h"
 #include "pragma/entities/components/s_entity_component.hpp"
 #include <pragma/entities/components/base_ownable_component.hpp>
 #include <pragma/lua/luaapi.h>
 
-namespace pragma {
+export module pragma.server.entities.components.ownable;
+
+export namespace pragma {
 	class DLLSERVER SOwnableComponent final : public BaseOwnableComponent, public SBaseNetComponent {
 	  public:
 		SOwnableComponent(BaseEntity &ent) : BaseOwnableComponent(ent) {}
@@ -22,5 +23,3 @@ namespace pragma {
 		virtual void SetOwner(BaseEntity *owner) override;
 	};
 };
-
-#endif

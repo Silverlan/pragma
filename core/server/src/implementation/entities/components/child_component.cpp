@@ -1,10 +1,13 @@
 // SPDX-FileCopyrightText: (c) 2024 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
-#include "pragma/entities/components/s_child_component.hpp"
 #include "pragma/networking/s_nwm_util.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
+
+module pragma.server.entities.components.child;
 
 using namespace pragma;
 

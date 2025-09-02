@@ -5,12 +5,10 @@
 #include "pragma/game/s_game.h"
 #include "pragma/lua/s_lua_component.hpp"
 #include "pragma/entities/components/s_ownable_component.hpp"
-#include "pragma/entities/components/s_debug_component.hpp"
 #include <pragma/lua/lentity_component_lua.hpp>
 #include <pragma/game/game_entity_component.hpp>
 #include <pragma/entities/entity_component_manager.hpp>
 #include <luainterface.hpp>
-#include "pragma/entities/components/s_color_component.hpp"
 #include "pragma/entities/components/s_score_component.hpp"
 #include "pragma/entities/components/s_flammable_component.hpp"
 #include "pragma/entities/components/s_health_component.hpp"
@@ -93,7 +91,6 @@
 #include "pragma/entities/components/s_io_component.hpp"
 #include "pragma/entities/components/s_time_scale_component.hpp"
 #include "pragma/entities/info/s_info_landmark.hpp"
-#include "pragma/entities/components/s_child_component.hpp"
 #include "pragma/entities/components/s_generic_component.hpp"
 #include "pragma/entities/components/s_point_at_target_component.hpp"
 #include "pragma/entities/components/s_gamemode_component.hpp"

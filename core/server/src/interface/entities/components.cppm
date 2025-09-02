@@ -8,3 +8,6 @@ export import pragma.server.entities.components.ai;
 export import pragma.server.entities.components.animated;
 export import pragma.server.entities.components.attachment;
 export import pragma.server.entities.components.character;
+export import pragma.server.entities.components.debug;
+export import pragma.server.entities.components.child;
+export import pragma.server.entities.components.color;

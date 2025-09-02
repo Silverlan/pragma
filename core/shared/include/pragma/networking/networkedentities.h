@@ -89,7 +89,6 @@
 #include "pragma/entities/environment/lights/s_env_light_spot_vol.h"
 #include "pragma/entities/point/s_point_rendertarget.h"
 #include "pragma/entities/func/s_func_portal.h"
-#include "pragma/entities/components/liquid/s_liquid_component.hpp"
 #include "pragma/entities/trigger/s_trigger_touch.h"
 #include "pragma/entities/func/s_func_physics.h"
 #include "pragma/entities/prop/s_prop_dynamic.hpp"

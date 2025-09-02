@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
-#include "pragma/entities/components/liquid/s_liquid_component.hpp"
 #include "pragma/entities/s_entityfactories.h"
 #include <pragma/physics/physobj.h>
 #include <sharedutils/util_string.h>
@@ -14,6 +15,8 @@
 #include <sharedutils/netpacket.hpp>
 #include <pragma/networking/enums.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
+
+module pragma.server.entities.components.liquid;
 
 import pragma.server.entities.components;
 

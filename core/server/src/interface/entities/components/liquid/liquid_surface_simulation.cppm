@@ -1,14 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __S_LIQUID_SURFACE_SIMULATION_COMPONENT_HPP__
-#define __S_LIQUID_SURFACE_SIMULATION_COMPONENT_HPP__
+module;
 
 #include "pragma/serverdefinitions.h"
 #include "pragma/entities/components/s_entity_component.hpp"
 #include <pragma/entities/components/liquid/base_liquid_surface_simulation_component.hpp>
 
-namespace pragma {
+export module pragma.server.entities.components.liquid_surface_simulation;
+
+export namespace pragma {
 	class DLLSERVER SLiquidSurfaceSimulationComponent final : public BaseLiquidSurfaceSimulationComponent, public SBaseNetComponent {
 	  public:
 		SLiquidSurfaceSimulationComponent(BaseEntity &ent);
@@ -25,5 +26,3 @@ namespace pragma {
 		virtual bool ShouldSimulateSurface() const override;
 	};
 };
-
-#endif

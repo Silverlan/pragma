@@ -11,8 +11,6 @@
 #include "pragma/entities/point/constraints/s_point_constraint_fixed.h"
 #include "pragma/entities/point/constraints/s_point_constraint_hinge.h"
 #include "pragma/entities/point/constraints/s_point_constraint_slider.h"
-#include "pragma/entities/components/liquid/s_liquid_control_component.hpp"
-#include "pragma/entities/components/liquid/s_liquid_surface_simulation_component.hpp"
 // --template-include-location
 #include "pragma/entities/point/s_point_path_node.h"
 #include "pragma/entities/point/s_point_rendertarget.h"
@@ -27,6 +25,8 @@
 #include "pragma/entities/trigger/s_trigger_teleport.h"
 #include "pragma/entities/trigger/s_trigger_touch.h"
 #include "pragma/entities/components/base_ownable_component.hpp"
+#include "pragma/entities/components/liquid/base_liquid_control_component.hpp"
+#include "pragma/entities/components/liquid/base_liquid_surface_simulation_component.hpp"
 #include "pragma/entities/s_skybox.h"
 #include "pragma/entities/s_flashlight.h"
 #include "pragma/entities/components/base_debug_component.hpp"

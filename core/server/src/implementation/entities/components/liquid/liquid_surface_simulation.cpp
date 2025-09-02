@@ -1,13 +1,16 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
-#include "pragma/entities/components/liquid/s_liquid_surface_simulation_component.hpp"
 #include "pragma/console/s_cvar.h"
 #include <pragma/physics/phys_water_surface_simulator.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/components/base_surface_component.hpp>
 #include <sharedutils/netpacket.hpp>
+
+module pragma.server.entities.components.liquid_surface_simulation;
 
 using namespace pragma;
 

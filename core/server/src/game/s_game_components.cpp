@@ -41,7 +41,6 @@
 #include "pragma/entities/func/s_func_physics.h"
 #include "pragma/entities/func/s_func_softphysics.hpp"
 #include "pragma/entities/func/s_func_portal.h"
-#include "pragma/entities/components/liquid/s_liquid_component.hpp"
 #include "pragma/entities/func/s_funcbutton.h"
 #include "pragma/entities/game_player_spawn.h"
 #include "pragma/entities/logic/s_logic_relay.h"
@@ -68,11 +67,6 @@
 #include "pragma/entities/s_flashlight.h"
 #include "pragma/entities/components/s_entity_component.hpp"
 #include "pragma/entities/info/s_info_landmark.hpp"
-#include "pragma/entities/components/liquid/s_buoyancy_component.hpp"
-#include "pragma/entities/components/liquid/s_liquid_surface_component.hpp"
-#include "pragma/entities/components/liquid/s_liquid_volume_component.hpp"
-#include "pragma/entities/components/liquid/s_liquid_control_component.hpp"
-#include "pragma/entities/components/liquid/s_liquid_surface_simulation_component.hpp"
 // --template-include-location
 #include "pragma/entities/environment/s_env_timescale.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>

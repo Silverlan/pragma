@@ -6,9 +6,7 @@ module;
 #include "stdafx_client.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
-module pragma.client.entities.components;
-
-import :health;
+module pragma.client.entities.components.health;
 
 using namespace pragma;
 

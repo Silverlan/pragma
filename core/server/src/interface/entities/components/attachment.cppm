@@ -7,7 +7,7 @@ module;
 #include "pragma/entities/components/s_entity_component.hpp"
 #include <pragma/entities/components/base_attachment_component.hpp>
 
-export module pragma.server.entities.components:attachment;
+export module pragma.server.entities.components.attachment;
 
 export namespace pragma {
 	class DLLSERVER SAttachmentComponent final : public BaseAttachmentComponent, public SBaseNetComponent {

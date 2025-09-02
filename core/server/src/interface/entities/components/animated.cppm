@@ -7,7 +7,7 @@ module;
 #include "pragma/entities/components/s_entity_component.hpp"
 #include <pragma/entities/components/base_animated_component.hpp>
 
-export module pragma.server.entities.components:animated;
+export module pragma.server.entities.components.animated;
 
 export namespace pragma {
 	class DLLSERVER SAnimatedComponent final : public BaseAnimatedComponent, public SBaseNetComponent {

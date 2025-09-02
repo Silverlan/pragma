@@ -10,9 +10,7 @@ module;
 #include "pragma/ai/ai_memory.h"
 #include <pragma/entities/entity_component_system_t.hpp>
 
-module pragma.server.entities.components;
-
-import :ai;
+module pragma.server.entities.components.ai;
 
 using namespace pragma;
 

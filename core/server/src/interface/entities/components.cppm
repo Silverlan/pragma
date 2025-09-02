@@ -4,7 +4,7 @@
 module;
 
 export module pragma.server.entities.components;
-export import :ai;
-export import :animated;
-export import :attachment;
-export import :character;
+export import pragma.server.entities.components.ai;
+export import pragma.server.entities.components.animated;
+export import pragma.server.entities.components.attachment;
+export import pragma.server.entities.components.character;

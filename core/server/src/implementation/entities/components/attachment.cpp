@@ -9,9 +9,7 @@ module;
 #include <pragma/entities/components/parent_component.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
-module pragma.server.entities.components;
-
-import :attachment;
+module pragma.server.entities.components.attachment;
 
 using namespace pragma;
 

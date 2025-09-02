@@ -10,9 +10,7 @@ module;
 #include <pragma/networking/enums.hpp>
 #include <pragma/networking/nwm_util.h>
 
-module pragma.server.entities.components;
-
-import :character;
+module pragma.server.entities.components.character;
 
 using namespace pragma;
 

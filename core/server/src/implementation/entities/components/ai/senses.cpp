@@ -8,9 +8,7 @@ module;
 #include <pragma/entities/components/base_character_component.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
 
-module pragma.server.entities.components;
-
-import :ai;
+module pragma.server.entities.components.ai;
 
 using namespace pragma;
 

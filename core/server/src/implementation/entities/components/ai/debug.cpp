@@ -13,9 +13,7 @@ module;
 #include <pragma/debug/debugbehaviortree.h>
 #include <pragma/networking/nwm_util.h>
 
-module pragma.server.entities.components;
-
-import :ai;
+module pragma.server.entities.components.ai;
 
 import pragma.server.scripting.lua;
 

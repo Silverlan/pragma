@@ -30,9 +30,10 @@ module;
 #include <pragma/networking/nwm_util.h>
 #include <pragma/logging.hpp>
 
-module pragma.server.entities.components;
+module pragma.server.entities.components.ai;
 
-import :ai;
+import pragma.server.entities.components.animated;
+import pragma.server.entities.components.character;
 
 extern DLLSERVER SGame *s_game;
 

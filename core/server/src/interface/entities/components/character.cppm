@@ -7,7 +7,7 @@ module;
 #include "pragma/serverdefinitions.h"
 #include "pragma/ai/s_factions.h"
 
-export module pragma.server.entities.components:character;
+export module pragma.server.entities.components.character;
 
 export namespace pragma {
 	class DLLSERVER SCharacterComponent final : public BaseCharacterComponent {

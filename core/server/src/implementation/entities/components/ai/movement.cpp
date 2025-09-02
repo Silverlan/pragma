@@ -10,9 +10,7 @@ module;
 #include <pragma/entities/components/base_character_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
-module pragma.server.entities.components;
-
-import :ai;
+module pragma.server.entities.components.ai;
 
 using namespace pragma;
 

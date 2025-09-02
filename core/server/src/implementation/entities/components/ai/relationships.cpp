@@ -9,9 +9,9 @@ module;
 #include "pragma/entities/components/base_character_component.hpp"
 #include <pragma/entities/baseentity_handle.h>
 
-module pragma.server.entities.components;
+module pragma.server.entities.components.ai;
 
-import :ai;
+import pragma.server.entities.components.character;
 
 using namespace pragma;
 

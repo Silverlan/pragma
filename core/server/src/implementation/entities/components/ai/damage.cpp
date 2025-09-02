@@ -6,9 +6,9 @@ module;
 #include "stdafx_server.h"
 #include <pragma/entities/components/base_character_component.hpp>
 
-module pragma.server.entities.components;
+module pragma.server.entities.components.ai;
 
-import :ai;
+import pragma.server.entities.components.character;
 
 using namespace pragma;
 

@@ -9,9 +9,7 @@ module;
 #include <pragma/networking/nwm_util.h>
 #include <pragma/networking/enums.hpp>
 
-module pragma.server.entities.components;
-
-import :animated;
+module pragma.server.entities.components.animated;
 
 using namespace pragma;
 

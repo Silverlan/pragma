@@ -30,10 +30,9 @@ module;
 #include <pragma/entities/entity_iterator.hpp>
 #include <util_image.hpp>
 
-module pragma.client.entities.components;
+module pragma.client.entities.components.pp_volumetric;
 import pragma.client.model;
 
-import :pp_volumetric;
 import pragma.client.entities.components.rasterization_renderer;
 
 import pragma.client.rendering.shaders;

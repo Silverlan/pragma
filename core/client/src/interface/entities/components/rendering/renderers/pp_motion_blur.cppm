@@ -10,9 +10,9 @@ module;
 
 #define MOTION_BLUR_DEBUG_ELEMENT_ENABLED 0
 
-export module pragma.client.entities.components:pp_motion_blur;
+export module pragma.client.entities.components.pp_motion_blur;
 
-import :pp_base;
+import pragma.client.entities.components.pp_base;
 import pragma.client.entities.components.motion_blur_data;
 
 export namespace pragma {

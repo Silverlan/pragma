@@ -5,9 +5,9 @@ module;
 
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 
-export module pragma.client.entities.components:pp_bloom;
+export module pragma.client.entities.components.pp_bloom;
 
-import :pp_base;
+import pragma.client.entities.components.pp_base;
 
 import pragma.client.rendering;
 

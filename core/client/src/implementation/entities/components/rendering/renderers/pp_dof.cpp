@@ -17,9 +17,9 @@ module;
 #include <image/prosper_msaa_texture.hpp>
 #include <image/prosper_render_target.hpp>
 
-module pragma.client.entities.components;
+module pragma.client.entities.components.pp_dof;
 
-import :pp_dof;
+import pragma.client.entities.components.optical_camera;
 import pragma.client.entities.components.rasterization_renderer;
 
 import pragma.client.rendering.shaders;

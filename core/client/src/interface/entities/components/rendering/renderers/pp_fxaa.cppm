@@ -5,9 +5,9 @@ module;
 
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 
-export module pragma.client.entities.components:pp_fxaa;
+export module pragma.client.entities.components.pp_fxaa;
 
-import :pp_base;
+import pragma.client.entities.components.pp_base;
 
 export namespace pragma {
 	class CRasterizationRendererComponent;

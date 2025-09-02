@@ -7,7 +7,7 @@ module;
 #include "pragma/entities/c_baseentity.h"
 #include "pragma/entities/environment/env_microphone_base.h"
 
-export module pragma.client.entities.components:env_microphone;
+export module pragma.client.entities.components.env_microphone;
 
 export {
 	namespace pragma {

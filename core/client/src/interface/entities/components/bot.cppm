@@ -9,7 +9,7 @@ module;
 #include "pragma/entities/basebot.h"
 #include <pragma/entities/components/base_character_component.hpp>
 
-export module pragma.client.entities.components:bot;
+export module pragma.client.entities.components.bot;
 
 export {
 	namespace pragma {

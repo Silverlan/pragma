@@ -9,7 +9,7 @@ module;
 #include "pragma/entities/components/c_entity_component.hpp"
 #include <memory>
 
-export module pragma.client.entities.components:env_timescale;
+export module pragma.client.entities.components.env_timescale;
 
 export {
 	namespace pragma {

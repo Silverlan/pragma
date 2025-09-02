@@ -16,9 +16,7 @@ module;
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/components/component_member_flags.hpp>
 
-module pragma.client.entities.components;
-
-import :eye;
+module pragma.client.entities.components.eye;
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT CEngine *c_engine;

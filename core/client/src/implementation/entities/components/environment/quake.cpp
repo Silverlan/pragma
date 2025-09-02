@@ -12,9 +12,7 @@ module;
 #include <pragma/entities/components/base_physics_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
-module pragma.client.entities.components;
-
-import :env_quake;
+module pragma.client.entities.components.env_quake;
 
 using namespace pragma;
 

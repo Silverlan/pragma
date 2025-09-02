@@ -20,7 +20,7 @@ module;
 
 #define DEBUG_RENDER_PERFORMANCE_TEST_ENABLED 0
 
-export module pragma.client.entities.components:rasterization_renderer;
+export module pragma.client.entities.components.rasterization_renderer;
 
 export namespace pragma {
 	struct DLLCLIENT RendererData {

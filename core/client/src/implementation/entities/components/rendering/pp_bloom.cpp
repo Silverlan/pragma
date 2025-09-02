@@ -19,7 +19,7 @@ import pragma.client.rendering.shaders;
 module pragma.client.entities.components;
 
 import :pp_bloom;
-import :rasterization_renderer;
+import pragma.client.entities.components.rasterization_renderer;
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT CEngine *c_engine;

@@ -6,7 +6,7 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <pragma/entities/components/base_entity_component.hpp>
 
-export module pragma.client.entities.components:bsp;
+export module pragma.client.entities.components.bsp;
 
 import source_engine.bsp;
 

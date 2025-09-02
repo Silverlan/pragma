@@ -34,7 +34,7 @@ module pragma.client.entities.components;
 import pragma.client.model;
 
 import :pp_volumetric;
-import :rasterization_renderer;
+import pragma.client.entities.components.rasterization_renderer;
 
 import pragma.client.rendering.shaders;
 

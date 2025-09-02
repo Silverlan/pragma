@@ -9,7 +9,7 @@ module;
 
 export module pragma.client.entities.components:pp_base;
 
-import :rasterization_renderer;
+import pragma.client.entities.components.rasterization_renderer;
 
 export namespace pragma {
 	class DLLCLIENT CRendererPpBaseComponent : public BaseEntityComponent {

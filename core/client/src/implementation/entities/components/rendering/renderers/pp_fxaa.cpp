@@ -19,7 +19,7 @@ module;
 module pragma.client.entities.components;
 
 import :pp_fxaa;
-import :rasterization_renderer;
+import pragma.client.entities.components.rasterization_renderer;
 
 import pragma.client.rendering.shaders;
 

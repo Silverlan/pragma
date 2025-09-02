@@ -29,9 +29,9 @@ module;
 #include <pragma/model/model.h>
 #include <pragma/audio/alsound_type.h>
 
-module pragma.client.entities.components;
+module pragma.client.entities.components.character;
 
-import :character;
+import pragma.client.entities.components.eye;
 
 extern DLLCLIENT ClientState *client;
 

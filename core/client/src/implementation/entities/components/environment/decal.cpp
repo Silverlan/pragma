@@ -21,9 +21,9 @@ module;
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/math/intersection.h>
 
-module pragma.client.entities.components;
+module pragma.client.entities.components.env_decal;
 
-import :env_decal;
+import pragma.client.entities.components.bvh;
 
 using namespace pragma;
 

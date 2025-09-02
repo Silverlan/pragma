@@ -7,7 +7,7 @@ module;
 #include "pragma/entities/components/c_entity_component.hpp"
 #include <pragma/entities/components/base_child_component.hpp>
 
-export module pragma.client.entities.components:child;
+export module pragma.client.entities.components.child;
 
 export namespace pragma {
 	class CParticleSystemComponent;

@@ -12,9 +12,7 @@ module;
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
-module pragma.client.entities.components;
-
-import :env_weather;
+module pragma.client.entities.components.env_weather;
 
 using namespace pragma;
 

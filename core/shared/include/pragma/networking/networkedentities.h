@@ -65,7 +65,6 @@
 #include "pragma/entities/player.h"
 #include <pragma/entities/world.h>
 #include "pragma/entities/prop/s_prop_physics.h"
-#include "pragma/entities/environment/effects/s_env_particle_system.h"
 #include "pragma/entities/environment/lights/s_env_light_spot.h"
 #include "pragma/entities/environment/lights/s_env_light_directional.h"
 #include "pragma/entities/environment/lights/s_env_light_point.h"
@@ -73,11 +72,9 @@
 #include "pragma/entities/s_flashlight.h"
 #include "pragma/entities/environment/s_env_camera.h"
 #include "pragma/entities/func/s_funcbutton.h"
-#include "pragma/entities/environment/effects/s_env_explosion.h"
 #include "pragma/entities/environment/s_env_quake.h"
 #include "pragma/entities/environment/s_env_timescale.h"
 #include "pragma/entities/environment/s_env_fog_controller.h"
-#include "pragma/entities/environment/effects/s_env_sprite.h"
 #include "pragma/entities/environment/s_env_decal.h"
 #include "pragma/entities/environment/lights/s_env_light_spot_vol.h"
 #include "pragma/entities/point/s_point_rendertarget.h"
@@ -98,8 +95,6 @@
 #include "pragma/entities/s_npc_dragonworm.h"
 #include "pragma/entities/s_bot.h"
 #include "pragma/entities/point/s_point_target.h"
-#include "pragma/entities/environment/effects/s_env_smoke_trail.h"
-#include "pragma/entities/environment/effects/s_env_fire.h"
 #include "pragma/entities/s_ent_debug.hpp"
 
 import pragma.server.entities.components;
@@ -128,10 +123,13 @@ LINK_NETWORKED_PHYSICS_ENTITIES;
 #include "pragma/entities/trigger/c_trigger_touch.h"
 #include "pragma/entities/environment/audio/c_env_soundscape.h"
 #include "pragma/entities/c_wheel.hpp"
-#include "pragma/entities/environment/effects/c_env_smoke_trail.h"
 #include "pragma/entities/environment/effects/c_env_fire.h"
 #include "pragma/entities/components/c_game_component.hpp"
 #include "pragma/entities/c_ent_debug.hpp"
+#include "pragma/entities/environment/effects/c_env_smoke_trail.h"
+
+import pragma.client.entities.components;
+
 LINK_NETWORKED_ENTITIES;
 LINK_NETWORKED_PHYSICS_ENTITIES;
 #endif

@@ -5,7 +5,6 @@
 #include "pragma/serverstate/serverutil.h"
 #include "pragma/entities/components/s_player_component.hpp"
 #include "pragma/physics/collisiontypes.h"
-#include "pragma/entities/s_flashlight.h"
 #include "pragma/entities/player.h"
 #include "pragma/networking/s_nwm_util.h"
 #include "pragma/networking/iserver_client.hpp"

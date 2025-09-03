@@ -16,6 +16,7 @@
 #include "pragma/entities/components/base_score_component.hpp"
 #include "pragma/entities/components/base_radius_component.hpp"
 #include "pragma/entities/components/base_render_component.hpp"
+#include "pragma/entities/basebot.h"
 #include "pragma/entities/environment/lights/env_light.h"
 #include "pragma/entities/environment/lights/env_light_spot.h"
 #include "pragma/entities/environment/lights/env_light_point.h"
@@ -50,8 +51,6 @@
 #include "pragma/entities/components/liquid/base_liquid_component.hpp"
 #include "pragma/entities/logic/logic_relay.h"
 #include <pragma/entities/basefilterentity.h>
-#include "pragma/entities/game_player_spawn.h"
-#include "pragma/entities/s_bot.h"
 #include "pragma/entities/components/s_entity_component.hpp"
 #include <pragma/model/model.h>
 #include <pragma/model/modelmesh.h>

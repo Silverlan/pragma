@@ -9,8 +9,6 @@
 #include "pragma/entities/components/base_ownable_component.hpp"
 #include "pragma/entities/components/liquid/base_liquid_control_component.hpp"
 #include "pragma/entities/components/liquid/base_liquid_surface_simulation_component.hpp"
-#include "pragma/entities/s_skybox.h"
-#include "pragma/entities/s_flashlight.h"
 #include "pragma/entities/components/base_debug_component.hpp"
 #include "pragma/entities/components/base_io_component.hpp"
 #include "pragma/entities/components/base_point_at_target_component.hpp"
@@ -18,6 +16,9 @@
 #include "pragma/entities/prop/prop_dynamic.hpp"
 #include "pragma/entities/prop/prop_physics.hpp"
 #include "pragma/entities/info/info_landmark.hpp"
+#include "pragma/entities/baseskybox.h"
+#include "pragma/entities/baseflashlight.h"
+#include "pragma/entities/basebot.h"
 #include <pragma/physics/raytraces.h>
 #include <pragma/model/model.h>
 #include <pragma/model/modelmesh.h>

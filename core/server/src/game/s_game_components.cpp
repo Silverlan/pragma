@@ -9,10 +9,6 @@
 #include <pragma/entities/entity_component_manager.hpp>
 #include <luainterface.hpp>
 #include "pragma/entities/components/s_player_component.hpp"
-#include "pragma/entities/game_player_spawn.h"
-#include "pragma/entities/s_bot.h"
-#include "pragma/entities/s_skybox.h"
-#include "pragma/entities/s_flashlight.h"
 #include "pragma/entities/components/s_entity_component.hpp"
 // --template-include-location
 #include <pragma/lua/converters/game_type_converters_t.hpp>

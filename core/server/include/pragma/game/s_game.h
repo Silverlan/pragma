@@ -5,7 +5,7 @@
 #define __S_GAME_H__
 #include <pragma/game/game.h>
 #include "pragma/serverdefinitions.h"
-#include "pragma/entities/world.h"
+#include "pragma/entities/s_baseentity.h"
 #include <vector>
 #include <unordered_map>
 #include <string>

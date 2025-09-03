@@ -102,3 +102,4 @@ export import pragma.server.entities.components.vehicle;
 export import pragma.server.entities.components.weapon;
 export import pragma.server.entities.components.wind;
 export import pragma.server.entities.components.wheel;
+export import pragma.server.entities.components.world;

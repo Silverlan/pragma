@@ -41,6 +41,7 @@
 #include "pragma/ai/ai_task_turn_to_target.h"
 #include "pragma/ai/ai_task_look_at_target.h"
 #include "pragma/ai/ai_task_event.hpp"
+#include "pragma/entities/baseworld.h"
 #include "pragma/lua/s_lua_script_watcher.h"
 #include "pragma/networking/iserver.hpp"
 #include "pragma/networking/iserver_client.hpp"

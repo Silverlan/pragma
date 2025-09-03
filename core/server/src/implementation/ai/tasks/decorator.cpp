@@ -1,11 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
 #include "pragma/ai/ai_task_decorator.h"
 #include "pragma/ai/ai_schedule.h"
 #include "pragma/debug/debugoverlay.h"
 #include <pragma/model/animation/activities.h>
+
+module pragma.server.ai.tasks.play_activity;
 
 using namespace pragma;
 

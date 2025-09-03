@@ -1,27 +1,26 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __AI_TASK_EVENT_HPP__
-#define __AI_TASK_EVENT_HPP__
+module;
 
 #include "pragma/serverdefinitions.h"
-#include "pragma/ai/ai_behavior.h"
-#include <pragma/model/animation/animation_event.h>
+#include "pragma/ai/ai_task_target.h"
 
-namespace pragma {
+export module pragma.server.ai.tasks.turn_to_target;
+
+export namespace pragma {
 	namespace ai {
-		class DLLSERVER TaskEvent : public ai::BehaviorNode {
+		class DLLSERVER TaskTurnToTarget : public TaskTarget {
+		  protected:
+			std::unique_ptr<float> m_targetAng = nullptr;
+			bool IsFacingTarget(pragma::SAIComponent &ent, const Vector3 &pos) const;
 		  public:
-			enum class Parameter : uint32_t { EventId = 0, EventArgStart };
-			using BehaviorNode::BehaviorNode;
+			TaskTurnToTarget();
+			TaskTurnToTarget(const TaskTurnToTarget &other);
 			virtual std::shared_ptr<BehaviorNode> Copy() const override { return ai::BehaviorNode::Copy<std::remove_const_t<std::remove_reference_t<decltype(*this)>>>(); }
+			virtual Result Think(const Schedule *sched, pragma::SAIComponent &ent) override;
 			virtual ai::BehaviorNode::Result Start(const Schedule *sched, pragma::SAIComponent &ent) override;
 			virtual void Print(const Schedule *sched, std::ostream &o) const override;
-
-			void SetEventId(AnimationEvent::Type eventId);
-			void SetEventArgument(uint32_t argIdx, const std::string &arg);
 		};
 	};
 };
-
-#endif

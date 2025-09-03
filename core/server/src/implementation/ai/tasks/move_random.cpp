@@ -1,12 +1,16 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
 #include "pragma/ai/ai_task_move_random.h"
 #include "pragma/ai/ai_schedule.h"
 #include "pragma/ai/navsystem.h"
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/model/animation/activities.h>
+
+module pragma.server.ai.tasks.play_activity;
 
 import pragma.server.entities.components;
 

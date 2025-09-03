@@ -3,7 +3,6 @@
 
 #include "stdafx_server.h"
 #include "pragma/audio/s_alsound.h"
-#include "pragma/audio/s_alsoundscript.h"
 #include <pragma/networking/enums.hpp>
 #include <pragma/serverstate/serverstate.h>
 #include <pragma/engine.h>
@@ -11,6 +10,8 @@
 #include <pragma/lua/luafunction_call.h>
 #include <pragma/lua/luaapi.h>
 #include <pragma/entities/components/base_transform_component.hpp>
+
+import pragma.server.audio;
 
 extern ServerState *server;
 

@@ -7,7 +7,6 @@
 #include <pragma/serverstate/serverstate.h>
 #include "pragma/audio/s_alsound.h"
 #include <pragma/audio/soundscript.h>
-#include "pragma/audio/s_alsoundscript.h"
 #include "pragma/scripts.h"
 #include <pragma/networking/enums.hpp>
 #include <fsys/filesystem.h>
@@ -23,6 +22,7 @@
 #include <pragma/logging.hpp>
 
 import pragma.audio.util;
+import pragma.server.audio;
 
 void ServerState::SendSoundSourceToClient(SALSound &sound, bool sendFullUpdate, const pragma::networking::ClientRecipientFilter *rf)
 {

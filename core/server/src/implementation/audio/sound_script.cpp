@@ -1,9 +1,12 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
-#include "pragma/audio/s_alsoundscript.h"
 #include <pragma/audio/soundscript_events.h>
+
+module pragma.server.audio.sound_script;
 
 extern DLLSERVER ServerState *server;
 

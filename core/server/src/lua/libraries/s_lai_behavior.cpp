@@ -12,7 +12,6 @@
 #include "pragma/ai/ai_task_play_sound.h"
 #include "pragma/ai/ai_task_random.h"
 #include "pragma/ai/ai_task_play_animation.h"
-#include "pragma/ai/ai_task_play_activity.h"
 #include "pragma/ai/ai_task_debug.h"
 #include "pragma/ai/ai_task_event.hpp"
 #include "pragma/ai/ai_task_wait.h"
@@ -21,6 +20,8 @@
 
 import pragma.server.entities.components;
 import pragma.server.scripting.lua;
+
+import pragma.server.ai;
 
 extern DLLSERVER SGame *s_game;
 

@@ -18,7 +18,6 @@ module;
 #include "pragma/ai/ai_task_play_sound.h"
 #include "pragma/ai/ai_task_random.h"
 #include "pragma/ai/ai_task_play_animation.h"
-#include "pragma/ai/ai_task_play_activity.h"
 #include "pragma/ai/ai_task_debug.h"
 #include "pragma/ai/ai_task_event.hpp"
 #include "pragma/ai/ai_task_wait.h"
@@ -28,6 +27,7 @@ module;
 
 module pragma.server.scripting.lua.libraries.ai;
 
+import pragma.server.ai;
 import pragma.server.entities.components;
 import pragma.server.scripting.lua.classes.ai_behavior;
 import pragma.server.scripting.lua.classes.ai_memory;

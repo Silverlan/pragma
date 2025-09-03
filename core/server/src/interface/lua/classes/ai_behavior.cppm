@@ -11,7 +11,6 @@ module;
 #include "pragma/ai/ai_task_move_random.h"
 #include "pragma/ai/ai_task_look_at_target.h"
 #include "pragma/ai/ai_task_play_animation.h"
-#include "pragma/ai/ai_task_play_activity.h"
 #include "pragma/ai/ai_task_play_sound.h"
 #include "pragma/ai/ai_task_random.h"
 #include "pragma/ai/ai_task_debug.h"
@@ -20,6 +19,8 @@ module;
 #include "pragma/ai/ai_task_wait.h"
 
 export module pragma.server.scripting.lua.classes.ai_behavior;
+
+import pragma.server.ai;
 
 export {
 	/*

@@ -32,7 +32,7 @@
 #include "pragma/ai/ai_behavior.h"
 #include "pragma/ai/ai_task_move_to_target.h"
 #include "pragma/ai/ai_task_move_random.h"
-#include "pragma/ai/ai_task_play_activity.h"
+#include "pragma/ai/ai_task_play_animation.h"
 #include "pragma/ai/ai_task_play_sound.h"
 #include "pragma/ai/ai_task_debug.h"
 #include "pragma/ai/ai_task_wait.h"
@@ -68,6 +68,7 @@
 #include <udm.hpp>
 
 import pragma.entities.components;
+import pragma.server.ai;
 import pragma.server.entities.components;
 import pragma.server.model_manager;
 import pragma.server.scripting.lua;

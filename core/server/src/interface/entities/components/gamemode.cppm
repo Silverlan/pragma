@@ -5,6 +5,7 @@ module;
 
 #include "pragma/serverdefinitions.h"
 #include <pragma/entities/components/base_gamemode_component.hpp>
+#include "pragma/entities/s_baseentity.h"
 
 export module pragma.server.entities.components.gamemode;
 

@@ -5,6 +5,7 @@ module;
 
 #include "pragma/serverdefinitions.h"
 #include "pragma/networkdefinitions.h"
+#include "pragma/entities/components/s_player_component.hpp"
 #include <pragma/lua/ldefinitions.h>
 
 export module pragma.server.scripting.lua.classes.recipient_filter;

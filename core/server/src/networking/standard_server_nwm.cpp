@@ -9,6 +9,7 @@
 #include "wms_message.h"
 #include "pragma/networking/wv_message.h"
 #include "wmserverdata.h"
+#include "pragma/serverstate/serverstate.h"
 #include "pragma/entities/components/s_player_component.hpp"
 #include <servermanager/connection/sv_nwm_tcpconnection.h>
 #include <servermanager/connection/sv_nwm_udpconnection.h>

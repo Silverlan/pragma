@@ -5,6 +5,8 @@ module;
 
 #include "pragma/serverdefinitions.h"
 #include <pragma/lua/ldefinitions.h>
+#include "pragma/entities/s_baseentity.h"
+#include <pragma/networking/enums.hpp>
 #include "pragma/lua/classes/ldef_entity.h"
 #include "pragma/networking/recipient_filter.hpp"
 

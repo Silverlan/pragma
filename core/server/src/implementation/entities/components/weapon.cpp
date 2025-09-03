@@ -19,6 +19,7 @@ module;
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <servermanager/interface/sv_nwm_manager.hpp>
 #include <sharedutils/datastream.h>
+#include "pragma/serverstate/serverstate.h"
 #include <pragma/networking/nwm_util.h>
 
 module pragma.server.entities.components.weapon;

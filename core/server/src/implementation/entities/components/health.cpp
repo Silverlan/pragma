@@ -5,6 +5,7 @@ module;
 
 #include "stdafx_server.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
+#include "pragma/serverstate/serverstate.h"
 #include <sharedutils/netpacket.hpp>
 #include <pragma/networking/nwm_util.h>
 #include <pragma/networking/enums.hpp>

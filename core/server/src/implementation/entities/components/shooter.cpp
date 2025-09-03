@@ -13,6 +13,8 @@ module;
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/util/bulletinfo.h>
 #include <sharedutils/scope_guard.h>
+#include "pragma/game/s_game.h"
+#include "pragma/serverstate/serverstate.h"
 #include <servermanager/interface/sv_nwm_manager.hpp>
 
 module pragma.server.entities.components.shooter;

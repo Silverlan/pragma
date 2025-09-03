@@ -3,6 +3,7 @@
 
 #include "stdafx_server.h"
 #include "pragma/game/s_game.h"
+#include "pragma/serverstate/serverstate.h"
 #include "pragma/lua/libraries/lengine.h"
 #include "pragma/lua/libraries/s_lnetmessages.h"
 #include "pragma/lua/libraries/lglobal.h"

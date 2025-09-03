@@ -5,6 +5,8 @@ module;
 
 #include "stdafx_server.h"
 #include "pragma/networking/s_nwm_util.h"
+#include "pragma/entities/s_baseentity.h"
+#include "pragma/networking/enums.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
 module pragma.server.entities.components.child;

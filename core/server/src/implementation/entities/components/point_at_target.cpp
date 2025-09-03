@@ -7,6 +7,7 @@ module;
 #include "pragma/networking/s_nwm_util.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/networking/enums.hpp>
+#include "pragma/entities/s_baseentity.h"
 
 module pragma.server.entities.components.point_at_target;
 

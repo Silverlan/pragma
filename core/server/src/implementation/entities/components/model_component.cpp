@@ -4,9 +4,11 @@
 module;
 
 #include "stdafx_server.h"
+#include "pragma/serverstate/serverstate.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/networking/enums.hpp>
 #include <pragma/networking/nwm_util.h>
+#include "pragma/entities/s_baseentity.h"
 
 module pragma.server.entities.components.model;
 

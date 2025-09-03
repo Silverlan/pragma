@@ -5,6 +5,7 @@ module;
 
 #include "stdafx_server.h"
 #include "pragma/audio/s_alsound.h"
+#include "pragma/serverstate/serverstate.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/components/velocity_component.hpp>

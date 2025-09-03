@@ -11,6 +11,8 @@ module;
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <servermanager/interface/sv_nwm_manager.hpp>
+#include "pragma/game/s_game.h"
+#include "pragma/serverstate/serverstate.h"
 #include <pragma/networking/nwm_util.h>
 #include <pragma/networking/enums.hpp>
 

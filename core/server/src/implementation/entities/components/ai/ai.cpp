@@ -25,6 +25,7 @@ module;
 #include <sharedutils/netpacket.hpp>
 #include <pragma/networking/nwm_util.h>
 #include <pragma/logging.hpp>
+#include "pragma/game/s_game.h"
 
 module pragma.server.entities.components.ai;
 

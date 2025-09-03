@@ -4,6 +4,8 @@
 module;
 
 #include "stdafx_server.h"
+#include "pragma/game/s_game.h"
+#include "pragma/serverstate/serverstate.h"
 #include <pragma/lua/classes/ldef_color.h>
 #include <pragma/physics/raytraces.h>
 #include <pragma/lua/libraries/lutil.hpp>

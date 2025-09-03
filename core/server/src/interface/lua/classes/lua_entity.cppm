@@ -4,6 +4,7 @@
 module;
 
 #include "pragma/serverdefinitions.h"
+#include "pragma/entities/s_baseentity.h"
 #include <pragma/lua/luaobjectbase.h>
 #include <pragma/lua/handle_holder.hpp>
 

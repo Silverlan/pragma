@@ -5,12 +5,14 @@ module;
 
 #include "stdafx_server.h"
 #include <pragma/networking/enums.hpp>
+#include "pragma/game/s_game.h"
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/components/damageable_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/lua/libraries/ltimer.h>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/networking/nwm_util.h>
+#include "pragma/entities/s_baseentity.h"
 
 module pragma.server.entities.components.flammable;
 

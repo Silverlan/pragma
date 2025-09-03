@@ -4,7 +4,9 @@
 module;
 
 #include "stdafx_server.h"
+#include "pragma/serverstate/serverstate.h"
 #include <pragma/audio/soundscript_events.h>
+#include "pragma/serverstate/serverstate.h"
 
 module pragma.server.audio.sound_script;
 

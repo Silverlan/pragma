@@ -4,6 +4,7 @@
 #include "stdafx_server.h"
 #include "luasystem.h"
 #include "pragma/ai/ai_schedule.h"
+#include "pragma/game/s_game.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/lua/ostream_operator_alias.hpp>
 

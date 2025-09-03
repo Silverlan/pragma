@@ -4,6 +4,8 @@
 #include "stdafx_server.h"
 #include "pragma/lua/s_lua_script_watcher.h"
 #include "pragma/networking/resourcemanager.h"
+#include "pragma/game/s_game.h"
+#include "pragma/serverstate/serverstate.h"
 
 extern DLLSERVER ServerState *server;
 extern DLLSERVER SGame *s_game;

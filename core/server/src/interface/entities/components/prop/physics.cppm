@@ -4,6 +4,7 @@
 module;
 
 #include "pragma/serverdefinitions.h"
+#include "pragma/entities/s_baseentity.h"
 #include <pragma/entities/prop/prop_physics.hpp>
 
 export module pragma.server.entities.components.prop.physics;

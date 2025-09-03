@@ -6,6 +6,7 @@ module;
 #include "stdafx_server.h"
 #include "pragma/ai/ai_schedule.h"
 #include "pragma/debug/debugoverlay.h"
+#include "pragma/game/s_game.h"
 #include <pragma/model/animation/activities.h>
 
 module pragma.server.ai.tasks.decorator;

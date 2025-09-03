@@ -5,6 +5,8 @@
 #include "pragma/entities/components/s_player_component.hpp"
 #include "pragma/networking/recipient_filter.hpp"
 #include "pragma/networking/iserver_client.hpp"
+#include "pragma/game/s_game.h"
+#include "pragma/serverstate/serverstate.h"
 #include <pragma/entities/components/map_component.hpp>
 #include <servermanager/interface/sv_nwm_manager.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>

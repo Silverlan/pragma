@@ -7,6 +7,7 @@ module;
 #include "luasystem.h"
 #include "pragma/ai/ai_schedule.h"
 #include "pragma/ai/ai_memory.h"
+#include "pragma/game/s_game.h"
 #include <luainterface.hpp>
 #include <pragma/lua/libraries/lai.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>

@@ -4,6 +4,7 @@
 module;
 
 #include "stdafx_server.h"
+#include "pragma/serverstate/serverstate.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/components/base_physics_component.hpp>
 #include <pragma/networking/nwm_util.h>

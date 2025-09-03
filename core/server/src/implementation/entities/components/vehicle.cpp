@@ -6,6 +6,7 @@ module;
 #include "stdafx_server.h"
 #include "pragma/entities/player.h"
 #include "pragma/entities/baseentity_luaobject.h"
+#include "pragma/game/s_game.h"
 #include "pragma/entities/components/s_player_component.hpp"
 #include <pragma/entities/components/base_character_component.hpp>
 #include <pragma/entities/components/base_wheel_component.hpp>
@@ -16,6 +17,7 @@ module;
 #include <pragma/physics/environment.hpp>
 #include <pragma/networking/nwm_util.h>
 #include <pragma/networking/enums.hpp>
+#include "pragma/entities/s_baseentity.h"
 
 module pragma.server.entities.components.vehicle;
 

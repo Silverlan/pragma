@@ -7,6 +7,7 @@ module;
 #include "pragma/entities/s_entityfactories.h"
 #include "pragma/entities/baseentity_luaobject.h"
 #include "pragma/entities/shared_spawnflags.h"
+#include "pragma/serverstate/serverstate.h"
 #include <sharedutils/util_string.h>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/networking/nwm_util.h>

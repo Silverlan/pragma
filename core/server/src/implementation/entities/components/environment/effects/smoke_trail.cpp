@@ -5,6 +5,8 @@ module;
 
 #include "stdafx_server.h"
 #include "pragma/entities/s_entityfactories.h"
+#include "pragma/game/s_game.h"
+#include "pragma/serverstate/serverstate.h"
 #include <pragma/game/damageinfo.h>
 #include <sharedutils/util_string.h>
 #include <pragma/networking/nwm_util.h>

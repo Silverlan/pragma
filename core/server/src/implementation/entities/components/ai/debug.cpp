@@ -12,6 +12,8 @@ module;
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/debug/debugbehaviortree.h>
 #include <pragma/networking/nwm_util.h>
+#include "pragma/game/s_game.h"
+#include "pragma/serverstate/serverstate.h"
 
 module pragma.server.entities.components.ai;
 

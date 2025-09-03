@@ -1,10 +1,13 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
-#include "pragma/entities/prop/s_prop_base.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <sharedutils/netpacket.hpp>
+
+module pragma.server.entities.components.prop.base;
 
 using namespace pragma;
 

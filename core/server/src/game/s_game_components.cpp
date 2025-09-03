@@ -9,18 +9,11 @@
 #include <pragma/entities/entity_component_manager.hpp>
 #include <luainterface.hpp>
 #include "pragma/entities/components/s_player_component.hpp"
-#include "pragma/entities/filter/s_filter_entity_class.h"
-#include "pragma/entities/filter/s_filter_entity_name.h"
 #include "pragma/entities/game_player_spawn.h"
-#include "pragma/entities/logic/s_logic_relay.h"
 #include "pragma/entities/s_bot.h"
-#include "pragma/entities/prop/s_prop_base.hpp"
-#include "pragma/entities/prop/s_prop_dynamic.hpp"
-#include "pragma/entities/prop/s_prop_physics.h"
 #include "pragma/entities/s_skybox.h"
 #include "pragma/entities/s_flashlight.h"
 #include "pragma/entities/components/s_entity_component.hpp"
-#include "pragma/entities/info/s_info_landmark.hpp"
 // --template-include-location
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 

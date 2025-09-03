@@ -4,8 +4,6 @@
 module;
 
 #include "stdafx_server.h"
-#include "pragma/entities/prop/s_prop_physics.h"
-#include "pragma/entities/prop/s_prop_dynamic.hpp"
 #include "pragma/entities/player.h"
 #include "pragma/entities/baseentity_luaobject.h"
 #include "pragma/entities/components/s_player_component.hpp"

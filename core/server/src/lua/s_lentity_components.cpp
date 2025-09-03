@@ -48,10 +48,9 @@
 #include "pragma/entities/components/liquid/base_liquid_volume_component.hpp"
 #include "pragma/entities/components/liquid/base_buoyancy_component.hpp"
 #include "pragma/entities/components/liquid/base_liquid_component.hpp"
-#include "pragma/entities/filter/s_filter_entity_class.h"
-#include "pragma/entities/filter/s_filter_entity_name.h"
+#include "pragma/entities/logic/logic_relay.h"
+#include <pragma/entities/basefilterentity.h>
 #include "pragma/entities/game_player_spawn.h"
-#include "pragma/entities/logic/s_logic_relay.h"
 #include "pragma/entities/s_bot.h"
 #include "pragma/entities/components/s_entity_component.hpp"
 #include <pragma/model/model.h>

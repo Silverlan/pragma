@@ -6,9 +6,6 @@
 #include "pragma/lua/s_lentity_components.hpp"
 #include "pragma/networking/recipient_filter.hpp"
 // --template-include-location
-#include "pragma/entities/prop/s_prop_base.hpp"
-#include "pragma/entities/prop/s_prop_dynamic.hpp"
-#include "pragma/entities/prop/s_prop_physics.h"
 #include "pragma/entities/components/base_ownable_component.hpp"
 #include "pragma/entities/components/liquid/base_liquid_control_component.hpp"
 #include "pragma/entities/components/liquid/base_liquid_surface_simulation_component.hpp"
@@ -17,7 +14,10 @@
 #include "pragma/entities/components/base_debug_component.hpp"
 #include "pragma/entities/components/base_io_component.hpp"
 #include "pragma/entities/components/base_point_at_target_component.hpp"
-#include "pragma/entities/info/s_info_landmark.hpp"
+#include "pragma/entities/prop/prop_base.h"
+#include "pragma/entities/prop/prop_dynamic.hpp"
+#include "pragma/entities/prop/prop_physics.hpp"
+#include "pragma/entities/info/info_landmark.hpp"
 #include <pragma/physics/raytraces.h>
 #include <pragma/model/model.h>
 #include <pragma/model/modelmesh.h>

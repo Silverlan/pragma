@@ -64,10 +64,8 @@
 #include "pragma/entities/s_entityfactories.h"
 #include "pragma/entities/player.h"
 #include <pragma/entities/world.h>
-#include "pragma/entities/prop/s_prop_physics.h"
 #include "pragma/entities/s_skybox.h"
 #include "pragma/entities/s_flashlight.h"
-#include "pragma/entities/prop/s_prop_dynamic.hpp"
 #include "pragma/entities/s_npc_dragonworm.h"
 #include "pragma/entities/s_bot.h"
 #include "pragma/entities/s_ent_debug.hpp"

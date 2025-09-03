@@ -1,11 +1,12 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __S_DISPOSITION_H__
-#define __S_DISPOSITION_H__
+module;
 
 #include "pragma/serverdefinitions.h"
 
-enum class DLLSERVER DISPOSITION : uint32_t { HATE, FEAR, NEUTRAL, LIKE, COUNT };
+export module pragma.server.ai.tasks.npc_state;
 
-#endif
+export {
+    enum class NPCSTATE : int { NONE, IDLE, ALERT, COMBAT, SCRIPT };
+};

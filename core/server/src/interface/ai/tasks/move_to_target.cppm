@@ -4,10 +4,11 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include "pragma/ai/ai_task_target.h"
 #include <pragma/model/animation/activities.h>
 
 export module pragma.server.ai.tasks.move_to_target;
+
+import pragma.server.ai.tasks.target;
 
 export namespace pragma {
 	namespace ai {

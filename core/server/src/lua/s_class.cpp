@@ -14,7 +14,6 @@
 #include "pragma/entities/environment/lights/env_light_directional.h"
 #include "pragma/entities/environment/effects/env_particle_system.h"
 #include "pragma/lua/classes/lmodel.h"
-#include "pragma/ai/ai_task.h"
 #include <pragma/game/damageinfo.h>
 #include "pragma/physics/collision_object.hpp"
 #include <pragma/lua/converters/vector_converter_t.hpp>

@@ -5,10 +5,6 @@ module;
 
 #include "pragma/serverdefinitions.h"
 #include "pragma/ai/ai_memory.h"
-#include "pragma/ai/ai_squad.h"
-#include "pragma/ai/s_factions.h"
-#include "pragma/ai/s_disposition.h"
-#include "pragma/ai/s_npcstate.h"
 #include "pragma/ai/ai_behavior.h"
 #include "pragma/ai/ai_schedule.h"
 #include "pragma/debug/debugbehaviortree.h"
@@ -21,6 +17,8 @@ module;
 #include <sharedutils/util_weak_handle.hpp>
 
 export module pragma.server.entities.components.ai;
+
+import pragma.server.ai;
 
 export {
 	constexpr float AI_NEXT_ENEMY_CHECK_IDLE = 0.25f;

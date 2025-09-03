@@ -4,9 +4,10 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include "pragma/ai/ai_task_target.h"
 
 export module pragma.server.ai.tasks.turn_to_target;
+
+import pragma.server.ai.tasks.target;
 
 export namespace pragma {
 	namespace ai {

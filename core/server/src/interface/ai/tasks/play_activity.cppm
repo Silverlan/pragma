@@ -4,10 +4,11 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include "pragma/ai/ai_task_play_animation.h"
 #include <pragma/model/animation/activities.h>
 
 export module pragma.server.ai.tasks.play_activity;
+
+import pragma.server.ai.tasks.play_animation;
 
 export namespace pragma {
 	namespace ai {

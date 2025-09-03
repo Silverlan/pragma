@@ -4,13 +4,12 @@
 module;
 
 #include "stdafx_server.h"
-#include "pragma/ai/s_disposition.h"
-#include "pragma/ai/s_factions.h"
 #include "pragma/entities/components/base_character_component.hpp"
 #include <pragma/entities/baseentity_handle.h>
 
 module pragma.server.entities.components.ai;
 
+import pragma.server.ai;
 import pragma.server.entities.components.character;
 
 using namespace pragma;

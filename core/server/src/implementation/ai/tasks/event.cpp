@@ -4,12 +4,11 @@
 module;
 
 #include "stdafx_server.h"
-#include "pragma/ai/ai_task_event.hpp"
 #include "pragma/ai/ai_schedule.h"
 #include <pragma/entities/components/base_animated_component.hpp>
 #include <pragma/model/animation/activities.h>
 
-module pragma.server.ai.tasks.play_activity;
+module pragma.server.ai.tasks.event;
 
 import pragma.server.entities.components;
 

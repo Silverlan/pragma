@@ -6,13 +6,11 @@ module;
 #include "pragma/serverdefinitions.h"
 #include <pragma/lua/ldefinitions.h>
 #include "pragma/ai/ai_behavior.h"
-#include "pragma/ai/ai_task_decorator.h"
 #include "pragma/ai/ai_memory.h"
-#include "pragma/ai/s_disposition.h"
-#include "pragma/ai/s_npcstate.h"
-#include "pragma/ai/ai_task.h"
 
 export module pragma.server.scripting.lua.libraries.debug;
+
+import pragma.server.ai;
 
 export namespace Lua {
 	namespace debug {

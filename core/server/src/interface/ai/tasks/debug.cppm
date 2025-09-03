@@ -1,13 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __AI_TASK_DEBUG_H__
-#define __AI_TASK_DEBUG_H__
+module;
 
 #include "pragma/serverdefinitions.h"
 #include "pragma/ai/ai_behavior.h"
 
-namespace pragma {
+export module pragma.server.ai.tasks.debug;
+
+export namespace pragma {
 	namespace ai {
 		class DLLSERVER TaskDebugPrint : public ai::BehaviorNode {
 		  public:
@@ -34,5 +35,3 @@ namespace pragma {
 		};
 	};
 };
-
-#endif

@@ -1,14 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __AI_TASK_PLAY_ANIMATION_H__
-#define __AI_TASK_PLAY_ANIMATION_H__
+module;
 
 #include "pragma/serverdefinitions.h"
 #include "pragma/ai/ai_behavior.h"
 #include <sharedutils/functioncallback.h>
 
-namespace pragma {
+export module pragma.server.ai.tasks.play_animation;
+
+export namespace pragma {
 	namespace ai {
 		class DLLSERVER TaskPlayAnimationBase : public ai::BehaviorNode {
 		  protected:
@@ -69,5 +70,3 @@ namespace pragma {
 		};
 	};
 };
-
-#endif

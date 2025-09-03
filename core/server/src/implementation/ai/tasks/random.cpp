@@ -4,11 +4,10 @@
 module;
 
 #include "stdafx_server.h"
-#include "pragma/ai/ai_task_random.h"
 #include "pragma/ai/ai_schedule.h"
 #include <pragma/model/animation/activities.h>
 
-module pragma.server.ai.tasks.play_activity;
+module pragma.server.ai.tasks.random;
 
 using namespace pragma;
 

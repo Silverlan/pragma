@@ -1,16 +1,17 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __AI_SQUAD_H__
-#define __AI_SQUAD_H__
+module;
 
 #include "pragma/serverdefinitions.h"
+#include "pragma/entities/baseentity.h"
 #include <string>
 #include <vector>
 #include <memory>
 
-class BaseEntity;
-class DLLSERVER AISquad : public std::enable_shared_from_this<AISquad> {
+export module pragma.server.ai.squad;
+
+export class DLLSERVER AISquad : public std::enable_shared_from_this<AISquad> {
   private:
 	static std::vector<std::shared_ptr<AISquad>> s_squads;
   protected:
@@ -25,5 +26,3 @@ class DLLSERVER AISquad : public std::enable_shared_from_this<AISquad> {
 	void Join(BaseEntity *ent);
 	void Leave(BaseEntity *ent);
 };
-
-#endif

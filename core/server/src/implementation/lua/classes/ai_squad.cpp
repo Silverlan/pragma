@@ -6,9 +6,10 @@ module;
 #include "stdafx_server.h"
 #include "pragma/lua/classes/ldef_entity.h"
 #include "luasystem.h"
-#include "pragma/ai/ai_squad.h"
 
 module pragma.server.scripting.lua.classes.ai_squad;
+
+import pragma.server.ai;
 
 namespace Lua {
 	namespace AISquad {

@@ -5,9 +5,10 @@ module;
 
 #include "pragma/serverdefinitions.h"
 #include <pragma/lua/luaapi.h>
-#include "pragma/ai/s_factions.h"
 
 export module pragma.server.scripting.lua.classes.faction;
+
+import pragma.server.ai;
 
 export namespace Lua {
 	namespace Faction {

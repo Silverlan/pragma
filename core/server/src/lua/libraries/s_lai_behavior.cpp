@@ -4,24 +4,12 @@
 #include "stdafx_server.h"
 #include "luasystem.h"
 #include "pragma/ai/ai_schedule.h"
-#include "pragma/ai/ai_task.h"
-#include "pragma/ai/ai_task_decorator.h"
-#include "pragma/ai/ai_task_move_to_target.h"
-#include "pragma/ai/ai_task_move_random.h"
-#include "pragma/ai/ai_task_look_at_target.h"
-#include "pragma/ai/ai_task_play_sound.h"
-#include "pragma/ai/ai_task_random.h"
-#include "pragma/ai/ai_task_play_animation.h"
-#include "pragma/ai/ai_task_debug.h"
-#include "pragma/ai/ai_task_event.hpp"
-#include "pragma/ai/ai_task_wait.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/lua/ostream_operator_alias.hpp>
 
+import pragma.server.ai;
 import pragma.server.entities.components;
 import pragma.server.scripting.lua;
-
-import pragma.server.ai;
 
 extern DLLSERVER SGame *s_game;
 

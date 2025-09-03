@@ -5,9 +5,10 @@ module;
 
 #include <pragma/entities/components/base_character_component.hpp>
 #include "pragma/serverdefinitions.h"
-#include "pragma/ai/s_factions.h"
 
 export module pragma.server.entities.components.character;
+
+import pragma.server.ai;
 
 export namespace pragma {
 	class DLLSERVER SCharacterComponent final : public BaseCharacterComponent {

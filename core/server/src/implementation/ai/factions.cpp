@@ -1,12 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
-#include "pragma/ai/s_factions.h"
-#include "pragma/ai/s_disposition.h"
 #include <pragma/entities/baseentity.h>
 #include <pragma/entities/baseentity_handle.h>
 #include <algorithm>
+
+module pragma.server.ai.factions;
 
 Faction::Faction(const std::string &name) : std::enable_shared_from_this<Faction>(), m_name(name), m_defaultDisp(DISPOSITION::NEUTRAL) {}
 void Faction::AddClass(std::string className)

@@ -6,7 +6,6 @@
 #include "pragma/lua/libraries/lengine.h"
 #include "pragma/lua/libraries/s_lnetmessages.h"
 #include "pragma/lua/libraries/lglobal.h"
-#include "pragma/ai/ai_task.h"
 #include "pragma/lua/libraries/lray.h"
 #include "pragma/lua/libraries/lgame.h"
 #include "pragma/lua/libraries/lents.h"
@@ -34,6 +33,7 @@
 #include <luainterface.hpp>
 #include <udm.hpp>
 
+import pragma.server.ai;
 import pragma.server.scripting.lua;
 
 extern DLLSERVER ServerState *server;

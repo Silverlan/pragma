@@ -1,10 +1,13 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
-#include "pragma/ai/ai_squad.h"
 #include <pragma/entities/baseentity.h>
 #include <pragma/entities/baseentity_handle.h>
+
+module pragma.server.ai.squad;
 
 std::vector<std::shared_ptr<AISquad>> AISquad::s_squads;
 

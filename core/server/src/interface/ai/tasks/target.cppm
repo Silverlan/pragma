@@ -1,13 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __TASK_TARGET_H__
-#define __TASK_TARGET_H__
+module;
 
 #include "pragma/serverdefinitions.h"
 #include "pragma/ai/ai_behavior.h"
 
-namespace pragma {
+export module pragma.server.ai.tasks.target;
+
+export namespace pragma {
 	namespace ai {
 		class DLLSERVER TaskTarget : public ai::BehaviorNode {
 		  protected:
@@ -21,5 +22,3 @@ namespace pragma {
 		};
 	};
 };
-
-#endif

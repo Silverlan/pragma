@@ -7,16 +7,6 @@ module;
 #include <pragma/lua/ldefinitions.h>
 #include "pragma/ai/ai_behavior.h"
 #include "pragma/lua/luaobjectbase.h"
-#include "pragma/ai/ai_task_move_to_target.h"
-#include "pragma/ai/ai_task_move_random.h"
-#include "pragma/ai/ai_task_look_at_target.h"
-#include "pragma/ai/ai_task_play_animation.h"
-#include "pragma/ai/ai_task_play_sound.h"
-#include "pragma/ai/ai_task_random.h"
-#include "pragma/ai/ai_task_debug.h"
-#include "pragma/ai/ai_task_decorator.h"
-#include "pragma/ai/ai_task_event.hpp"
-#include "pragma/ai/ai_task_wait.h"
 
 export module pragma.server.scripting.lua.classes.ai_behavior;
 

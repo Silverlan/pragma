@@ -1,16 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __AI_TASK_H__
-#define __AI_TASK_H__
+module;
 
 #include "pragma/serverdefinitions.h"
 
+export module pragma.server.ai.task_enums;
+
 // These also have to be registered in SGame constructor!
-namespace pragma {
+export namespace pragma {
 	namespace ai {
 		enum class DLLSERVER Task : uint32_t { MoveToTarget = 0, PlayAnimation, PlayActivity, PlayLayeredAnimation, PlayLayeredActivity, MoveRandom, PlaySound, DebugPrint, DebugDrawText, Decorator, Wait, TurnToTarget, Random, LookAtTarget, Event };
 	};
 };
-
-#endif

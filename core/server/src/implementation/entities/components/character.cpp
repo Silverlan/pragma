@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_server.h"
-#include "pragma/ai/s_disposition.h"
 #include "pragma/entities/components/base_weapon_component.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/networking/enums.hpp>
@@ -12,6 +11,7 @@ module;
 
 module pragma.server.entities.components.character;
 
+import pragma.server.ai;
 import pragma.server.entities.components.weapon;
 
 using namespace pragma;

@@ -1,10 +1,13 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
-#include "pragma/ai/ai_task_wait.h"
 #include "pragma/ai/ai_schedule.h"
 #include <pragma/model/animation/activities.h>
+
+module pragma.server.ai.tasks.wait;
 
 using namespace pragma;
 

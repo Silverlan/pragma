@@ -9,12 +9,6 @@
 #include <pragma/entities/entity_component_manager.hpp>
 #include <luainterface.hpp>
 #include "pragma/entities/components/s_player_component.hpp"
-#include "pragma/entities/environment/s_env_camera.h"
-#include "pragma/entities/environment/s_env_decal.h"
-#include "pragma/entities/environment/s_env_fog_controller.h"
-#include "pragma/entities/environment/s_env_microphone.h"
-#include "pragma/entities/environment/s_env_quake.h"
-#include "pragma/entities/environment/s_env_wind.hpp"
 #include "pragma/entities/filter/s_filter_entity_class.h"
 #include "pragma/entities/filter/s_filter_entity_name.h"
 #include "pragma/entities/func/s_func_brush.h"
@@ -49,7 +43,6 @@
 #include "pragma/entities/components/s_entity_component.hpp"
 #include "pragma/entities/info/s_info_landmark.hpp"
 // --template-include-location
-#include "pragma/entities/environment/s_env_timescale.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
 import pragma.server.entities.components;

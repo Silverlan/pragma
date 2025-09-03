@@ -6,9 +6,7 @@ module;
 #include "stdafx_client.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
-module pragma.client.entities.components;
-
-import :liquid_volume;
+module pragma.client.entities.components.liquid_volume;
 
 using namespace pragma;
 

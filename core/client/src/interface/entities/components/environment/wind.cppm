@@ -8,7 +8,7 @@ module;
 #include "pragma/entities/environment/env_wind.hpp"
 #include "pragma/entities/components/c_entity_component.hpp"
 
-export module pragma.client.entities.components:env_wind;
+export module pragma.client.entities.components.env_wind;
 
 export {
 	namespace pragma {

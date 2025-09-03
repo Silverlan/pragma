@@ -16,10 +16,9 @@ module;
 #include <image/prosper_msaa_texture.hpp>
 #include <image/prosper_render_target.hpp>
 
-module pragma.client.entities.components;
+module pragma.client.entities.components.pp_fxaa;
 
-import :pp_fxaa;
-import :rasterization_renderer;
+import pragma.client.entities.components.rasterization_renderer;
 
 import pragma.client.rendering.shaders;
 

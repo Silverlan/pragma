@@ -9,7 +9,7 @@ module;
 
 import pragma.entities.components;
 
-export module pragma.client.entities.components:time_scale;
+export module pragma.client.entities.components.time_scale;
 
 export namespace pragma {
 	class DLLCLIENT CTimeScaleComponent final : public BaseTimeScaleComponent, public CBaseNetComponent {

@@ -7,9 +7,7 @@ module;
 #include "pragma/c_engine.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
-module pragma.client.entities.components;
-
-import :bsp_leaf;
+module pragma.client.entities.components.bsp_leaf;
 
 extern DLLCLIENT CEngine *c_engine;
 

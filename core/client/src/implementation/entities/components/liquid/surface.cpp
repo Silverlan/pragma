@@ -27,10 +27,9 @@ module;
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/lua/base_lua_handle_method.hpp>
 
-module pragma.client.entities.components;
+module pragma.client.entities.components.liquid_surface;
 
-import :liquid_surface;
-
+import pragma.client.entities.components.rasterization_renderer;
 import pragma.client.rendering.shaders;
 
 extern DLLCLIENT CGame *c_game;

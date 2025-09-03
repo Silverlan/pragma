@@ -9,7 +9,7 @@ module;
 #include <pragma/entities/environment/env_decal.h>
 #include <mathutil/vertex.hpp>
 
-export module pragma.client.entities.components:env_decal;
+export module pragma.client.entities.components.env_decal;
 
 export {
 	namespace pragma {

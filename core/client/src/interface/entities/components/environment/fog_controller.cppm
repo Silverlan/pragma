@@ -10,7 +10,7 @@ module;
 #include "pragma/entities/components/c_entity_component.hpp"
 #include <memory>
 
-export module pragma.client.entities.components:env_fog_controller;
+export module pragma.client.entities.components.env_fog_controller;
 
 export {
 	namespace pragma {

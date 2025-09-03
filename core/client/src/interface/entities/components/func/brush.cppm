@@ -10,7 +10,7 @@ module;
 
 import pragma.entities.components;
 
-export module pragma.client.entities.components:func_brush;
+export module pragma.client.entities.components.func_brush;
 
 export {
 	namespace pragma {

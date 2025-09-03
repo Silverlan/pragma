@@ -7,7 +7,7 @@ module;
 #include <pragma/entities/components/base_entity_component.hpp>
 #include <unordered_set>
 
-export module pragma.client.entities.components:optical_camera;
+export module pragma.client.entities.components.optical_camera;
 
 import pragma.client.rendering.shaders;
 

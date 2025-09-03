@@ -7,9 +7,7 @@ module;
 #include "pragma/entities/entity_component_manager_t.hpp"
 #include "pragma/entities/components/component_member_flags.hpp"
 
-module pragma.entities.components;
-
-import :lifeline_link;
+module pragma.entities.components.lifeline_link;
 
 using namespace pragma;
 

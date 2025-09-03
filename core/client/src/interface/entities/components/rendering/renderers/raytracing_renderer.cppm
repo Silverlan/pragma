@@ -8,7 +8,7 @@ module;
 #include <pragma/entities/components/base_entity_component.hpp>
 #include <unordered_set>
 
-export module pragma.client.entities.components:raytracing_renderer;
+export module pragma.client.entities.components.raytracing_renderer;
 
 export {
 	namespace pragma {

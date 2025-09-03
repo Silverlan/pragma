@@ -13,9 +13,7 @@ module;
 #include "pragma/lua/classes/ldef_vector.h"
 #include <sharedutils/netpacket.hpp>
 
-module pragma.entities.components;
-
-import :shooter;
+module pragma.entities.components.shooter;
 
 using namespace pragma::ecs;
 

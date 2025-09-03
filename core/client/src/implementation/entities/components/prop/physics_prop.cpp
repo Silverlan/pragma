@@ -12,9 +12,7 @@ module;
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
-module pragma.client.entities.components;
-
-import :prop_physics;
+module pragma.client.entities.components.prop_physics;
 
 using namespace pragma;
 

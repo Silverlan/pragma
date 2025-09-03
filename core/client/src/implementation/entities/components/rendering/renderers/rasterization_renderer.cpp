@@ -24,9 +24,7 @@ module;
 #include <image/prosper_render_target.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
-module pragma.client.entities.components;
-
-import :rasterization_renderer;
+module pragma.client.entities.components.rasterization_renderer;
 
 import pragma.client.rendering.shaders;
 

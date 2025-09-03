@@ -10,9 +10,7 @@ module;
 #include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/model/c_model.h"
 
-module pragma.client.entities.components;
-
-import :eye;
+module pragma.client.entities.components.eye;
 
 extern DLLCLIENT CGame *c_game;
 

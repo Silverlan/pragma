@@ -15,9 +15,7 @@ module;
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/entity_component_manager_t.hpp>
 
-module pragma.client.entities.components;
-
-import :light_map_data_cache;
+module pragma.client.entities.components.light_map_data_cache;
 
 extern DLLCLIENT CGame *c_game;
 

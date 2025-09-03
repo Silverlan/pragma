@@ -7,7 +7,7 @@ module;
 #include "pragma/entities/c_baseentity.h"
 #include <pragma/entities/prop/prop_physics.hpp>
 
-export module pragma.client.entities.components:prop_physics;
+export module pragma.client.entities.components.prop_physics;
 
 export {
 	namespace pragma {

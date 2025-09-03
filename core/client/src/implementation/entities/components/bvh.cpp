@@ -10,9 +10,9 @@ module;
 #include "pragma/entities/entity_component_system_t.hpp"
 #include "pragma/model/c_modelmesh.h"
 
-module pragma.client.entities.components;
+module pragma.client.entities.components.bvh;
 
-import :bvh;
+import pragma.client.entities.components.animated_bvh;
 
 extern DLLCLIENT CEngine *c_engine;
 

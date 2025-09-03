@@ -14,9 +14,7 @@ module;
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
-module pragma.client.entities.components;
-
-import :global_shader_input;
+module pragma.client.entities.components.global_shader_input;
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;

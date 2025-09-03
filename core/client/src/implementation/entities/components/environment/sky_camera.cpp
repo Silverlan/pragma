@@ -23,9 +23,9 @@ module;
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/baseentity_events.hpp>
 
-module pragma.client.entities.components;
+module pragma.client.entities.components.env_sky_camera;
 
-import :env_sky_camera;
+import pragma.client.entities.components.rasterization_renderer;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;

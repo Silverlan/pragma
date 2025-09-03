@@ -8,7 +8,7 @@ module;
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include <pragma/entities/components/base_flammable_component.hpp>
 
-export module pragma.client.entities.components:flammable;
+export module pragma.client.entities.components.flammable;
 
 export namespace pragma {
 	class DLLCLIENT CFlammableComponent final : public BaseFlammableComponent, public CBaseNetComponent {

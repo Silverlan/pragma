@@ -12,7 +12,7 @@ module;
 #include <mathutil/transform.hpp>
 #include <mathutil/uvec.h>
 
-export module pragma.client.entities.components:eye;
+export module pragma.client.entities.components.eye;
 
 export {
 	namespace pragma {

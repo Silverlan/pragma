@@ -9,7 +9,7 @@ module;
 
 import pragma.entities.components;
 
-export module pragma.client.entities.components:func_portal;
+export module pragma.client.entities.components.func_portal;
 
 export {
 	namespace pragma {

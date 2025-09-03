@@ -12,10 +12,9 @@ module;
 #include <image/prosper_msaa_texture.hpp>
 #include <image/prosper_render_target.hpp>
 
-module pragma.client.entities.components;
+module pragma.client.entities.components.pp_base;
 
-import :pp_base;
-import :rasterization_renderer;
+import pragma.client.entities.components.rasterization_renderer;
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT CEngine *c_engine;

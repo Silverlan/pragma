@@ -12,7 +12,7 @@ module;
 #include "pragma/rendering/shaders/world/c_shader_scene.hpp"
 #include <pragma/entities/components/base_entity_component.hpp>
 
-export module pragma.client.entities.components:env_sky_camera;
+export module pragma.client.entities.components.env_sky_camera;
 
 export {
 	namespace pragma {

@@ -4,8 +4,8 @@
 module;
 
 export module pragma.entities.components;
-export import :composite;
-export import :global_name;
-export import :lifeline_link;
-export import :meta_rig;
-export import :shooter;
+export import pragma.entities.components.composite;
+export import pragma.entities.components.global_name;
+export import pragma.entities.components.lifeline_link;
+export import pragma.entities.components.meta_rig;
+export import pragma.entities.components.shooter;

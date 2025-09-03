@@ -26,9 +26,7 @@ module;
 #include <mathutil/boundingvolume.h>
 #include <bvh/v2/stack.h>
 
-module pragma.client.entities.components;
-
-import :hitbox_bvh;
+module pragma.client.entities.components.hitbox_bvh;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;

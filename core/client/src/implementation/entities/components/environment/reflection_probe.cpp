@@ -41,9 +41,7 @@ module;
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <spdlog/logger.h>
 
-module pragma.client.entities.components;
-
-import :env_reflection_probe;
+module pragma.client.entities.components.env_reflection_probe;
 
 import pragma.client.gui;
 import pragma.client.rendering.shaders;

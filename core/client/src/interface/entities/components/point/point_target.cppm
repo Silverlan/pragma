@@ -9,7 +9,7 @@ module;
 #include <pragma/entities/baseentity_handle.h>
 #include "pragma/entities/point/point_target.h"
 
-export module pragma.client.entities.components:point_target;
+export module pragma.client.entities.components.point_target;
 
 export {
 	namespace pragma {

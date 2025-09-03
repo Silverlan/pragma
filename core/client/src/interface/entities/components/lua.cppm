@@ -8,7 +8,7 @@ module;
 #include <pragma/lua/sh_lua_component.hpp>
 #include <pragma/lua/handle_holder.hpp>
 
-export module pragma.client.entities.components:lua;
+export module pragma.client.entities.components.lua;
 
 export namespace pragma {
 	class DLLCLIENT CLuaBaseEntityComponent final : public BaseLuaBaseEntityComponent, public CBaseSnapshotComponent {

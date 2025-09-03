@@ -28,8 +28,8 @@ module;
 
 module pragma.client.entities.components;
 
-import :pp_motion_blur;
-import :rasterization_renderer;
+import pragma.client.entities.components.motion_blur_data;
+import pragma.client.entities.components.rasterization_renderer;
 
 import pragma.client.rendering.shaders;
 

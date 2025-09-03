@@ -17,9 +17,7 @@ module;
 #include <pragma/model/animation/skeleton.hpp>
 #include <pragma/model/animation/bone.hpp>
 
-module pragma.client.entities.components;
-
-import :flammable;
+module pragma.client.entities.components.flammable;
 
 import pragma.client.util;
 

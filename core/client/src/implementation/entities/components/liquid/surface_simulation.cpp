@@ -10,10 +10,9 @@ module;
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
-module pragma.client.entities.components;
+module pragma.client.entities.components.liquid_surface_simulation;
 
-import :liquid_control;
-import :liquid_surface_simulation;
+import pragma.client.entities.components.liquid_control;
 
 import pragma.client.physics;
 

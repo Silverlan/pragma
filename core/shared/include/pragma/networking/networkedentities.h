@@ -67,18 +67,9 @@
 #include "pragma/entities/prop/s_prop_physics.h"
 #include "pragma/entities/s_skybox.h"
 #include "pragma/entities/s_flashlight.h"
-#include "pragma/entities/point/s_point_rendertarget.h"
-#include "pragma/entities/trigger/s_trigger_touch.h"
 #include "pragma/entities/prop/s_prop_dynamic.hpp"
-#include "pragma/entities/point/constraints/s_point_constraint_fixed.h"
-#include "pragma/entities/point/constraints/s_point_constraint_ballsocket.h"
-#include "pragma/entities/point/constraints/s_point_constraint_conetwist.h"
-#include "pragma/entities/point/constraints/s_point_constraint_slider.h"
-#include "pragma/entities/point/constraints/s_point_constraint_hinge.h"
-#include "pragma/entities/point/constraints/s_point_constraint_dof.h"
 #include "pragma/entities/s_npc_dragonworm.h"
 #include "pragma/entities/s_bot.h"
-#include "pragma/entities/point/s_point_target.h"
 #include "pragma/entities/s_ent_debug.hpp"
 
 import pragma.server.entities.components;

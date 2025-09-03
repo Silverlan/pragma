@@ -1,14 +1,17 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
-#include "pragma/entities/point/s_point_rendertarget.h"
 #include "pragma/entities/s_entityfactories.h"
 #include <sharedutils/util.h>
 #include <sharedutils/util_string.h>
 #include <sharedutils/netpacket.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
+
+module pragma.server.entities.components.point.render_target;
 
 using namespace pragma;
 

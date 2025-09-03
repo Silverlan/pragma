@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_server.h"
 #include "pragma/entities/s_entityfactories.h"
-#include "pragma/entities/point/s_point_path_node.h"
 #include <sharedutils/util_string.h>
 #include <pragma/audio/alsound.h>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
@@ -15,6 +14,8 @@ module;
 #include <pragma/entities/entity_component_system_t.hpp>
 
 module pragma.server.entities.components.func.kinematic;
+
+import pragma.server.entities.components.point.path_node;
 
 using namespace pragma;
 

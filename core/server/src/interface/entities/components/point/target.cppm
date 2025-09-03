@@ -5,21 +5,20 @@ module;
 
 #include "pragma/serverdefinitions.h"
 #include "pragma/entities/s_baseentity.h"
-#include "pragma/entities/trigger/base_trigger_hurt.hpp"
+#include "pragma/entities/point/point_target.h"
 
-export module pragma.server.entities.components.triggers.hurt;
+export module pragma.server.entities.components.point.target;
 
 export {
 	namespace pragma {
-		class DLLSERVER STriggerHurtComponent final : public BaseTriggerHurtComponent {
+		class DLLSERVER SPointTargetComponent final : public BasePointTargetComponent {
 		public:
-			STriggerHurtComponent(BaseEntity &ent) : BaseTriggerHurtComponent(ent) {}
+			SPointTargetComponent(BaseEntity &ent) : BasePointTargetComponent(ent) {}
 			virtual void InitializeLuaObject(lua_State *l) override;
 		};
 	};
 
-	class DLLSERVER TriggerHurt : public SBaseEntity {
-	protected:
+	class DLLSERVER PointTarget : public SBaseEntity {
 	public:
 		virtual void Initialize() override;
 	};

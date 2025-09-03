@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include "pragma/entities/trigger/s_trigger_touch.h"
 #include "pragma/entities/components/s_entity_component.hpp"
 #include <pragma/entities/components/liquid/base_liquid_component.hpp>
 

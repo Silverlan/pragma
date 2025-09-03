@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_server.h"
-#include "pragma/entities/trigger/s_trigger_touch.h"
 #include "pragma/entities/s_entityfactories.h"
 #include <pragma/physics/physobj.h>
 #include <pragma/physics/collisionmasks.h>

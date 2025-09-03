@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_server.h"
-#include "pragma/entities/trigger/s_trigger_hurt.h"
 #include "pragma/entities/s_entityfactories.h"
 #include <pragma/physics/physobj.h>
 #include <sharedutils/util_string.h>

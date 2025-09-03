@@ -8,7 +8,7 @@ module;
 #include <pragma/entities/components/basetoggle.h>
 #include <pragma/entities/trigger/base_trigger_touch.hpp>
 
-export module pragma.server.entities.components.triggers.gravity;
+export module pragma.server.entities.components.triggers.touch;
 
 export {
 	namespace pragma {

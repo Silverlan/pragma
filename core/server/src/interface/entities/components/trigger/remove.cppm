@@ -7,7 +7,7 @@ module;
 #include "pragma/entities/s_baseentity.h"
 #include <pragma/entities/trigger/base_trigger_remove.h>
 
-export module pragma.server.entities.components.triggers.gravity;
+export module pragma.server.entities.components.triggers.remove;
 
 export {
 	namespace pragma {

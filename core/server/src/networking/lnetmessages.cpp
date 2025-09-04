@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_server.h"
-#include "pragma/serverstate/serverutil.h"
+#include "pragma/serverstate/serverstate.h"
 #include "pragma/lua/lnetmessages.h"
 #include "pragma/game/s_game.h"
 #include <servermanager/sv_nwm_recipientfilter.h>

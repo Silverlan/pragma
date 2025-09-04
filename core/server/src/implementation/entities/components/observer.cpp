@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_server.h"
-#include "pragma/serverstate/serverutil.h"
 #include "pragma/serverstate/serverstate.h"
 #include <pragma/entities/components/base_observable_component.hpp>
 #include <pragma/networking/nwm_util.h>

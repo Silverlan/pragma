@@ -4,7 +4,7 @@
 module;
 
 #include "stdafx_server.h"
-#include "pragma/serverstate/serverutil.h"
+#include "pragma/serverstate/serverstate.h"
 #include "pragma/entities/player.h"
 #include "pragma/networking/recipient_filter.hpp"
 #include "pragma/lua/classes/ldef_recipientfilter.h"

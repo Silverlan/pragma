@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_server.h"
-#include "pragma/serverstate/serverutil.h"
+#include "pragma/serverstate/serverstate.h"
 #include "pragma/game/s_game.h"
 #include "pragma/lua/classes/lentity.h"
 #include "pragma/lua/classes/lmodelmesh.h"

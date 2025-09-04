@@ -1,11 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
-#include "pragma/entities/components/s_resource_watcher.hpp"
 #include "pragma/game/s_game.h"
 #include <pragma/ai/navsystem.h>
 #include <sharedutils/util_file.h>
+
+module pragma.server.core.resource_watcher;
 
 extern DLLSERVER SGame *s_game;
 

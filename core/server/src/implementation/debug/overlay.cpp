@@ -1,13 +1,16 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
-#include "pragma/debug/debugoverlay.h"
 #include <pragma/networking/enums.hpp>
 #include <pragma/serverstate/serverstate.h>
 #include <pragma/math/angle/wvangle.h>
 #include <pragma/networking/nwm_util.h>
 #include <mathutil/plane.hpp>
+
+module pragma.server.debug.overlay;
 
 extern DLLSERVER ServerState *server;
 

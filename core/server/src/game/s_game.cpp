@@ -11,7 +11,6 @@
 #include "pragma/networking/recipient_filter.hpp"
 #include "pragma/entities/player.h"
 #include "pragma/cacheinfo.h"
-#include "pragma/debug/debugoverlay.h"
 #include <pragma/model/brush/brushmesh.h>
 #include "pragma/level/mapgeometry.h"
 #include "pragma/game/s_game_entities.h"
@@ -58,6 +57,7 @@
 
 import pragma.entities.components;
 import pragma.server.ai;
+import pragma.server.debug;
 import pragma.server.entities.components;
 import pragma.server.model_manager;
 import pragma.server.scripting.lua;

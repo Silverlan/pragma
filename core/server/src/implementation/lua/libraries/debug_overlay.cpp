@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_server.h"
-#include "pragma/debug/debugoverlay.h"
 #include "pragma/lua/classes/ldef_color.h"
 #include "pragma/lua/classes/ldef_angle.h"
 #include <pragma/lua/classes/ldef_vector.h>
@@ -13,6 +12,8 @@ module;
 #include "luasystem.h"
 
 module pragma.server.scripting.lua.libraries.debug_overlay;
+
+import pragma.server.debug;
 
 void Lua::DebugRenderer::Server::DrawPoint(const DebugRenderInfo &renderInfo) { SDebugRenderer::DrawPoint(renderInfo.pose.GetOrigin(), renderInfo.color, renderInfo.duration); }
 void Lua::DebugRenderer::Server::DrawLine(const Vector3 &start, const Vector3 &end, const DebugRenderInfo &renderInfo) { SDebugRenderer::DrawLine(renderInfo.pose.GetOrigin() + start, renderInfo.pose.GetOrigin() + end, renderInfo.color, renderInfo.duration); }

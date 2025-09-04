@@ -1,20 +1,20 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __DEBUGOVERLAY_H__
-#define __DEBUGOVERLAY_H__
+module;
+
 #include "pragma/serverdefinitions.h"
 #include <mathutil/glmutil.h>
 #include "pragma/definitions.h"
+#include <mathutil/plane.hpp>
 #include <mathutil/color.h>
 #include <mathutil/eulerangles.h>
 
+export module pragma.server.debug.overlay;
+
 #undef DrawText
 
-namespace umath {
-	class Plane;
-};
-namespace SDebugRenderer {
+export namespace SDebugRenderer {
 	void DrawPoint(const Vector3 &pos, const Color &color, float duration = 0.f);
 	void DrawLine(const Vector3 &start, const Vector3 &end, const Color &color, float duration = 0.f);
 	void DrawBox(const Vector3 &center, const Vector3 &min, const Vector3 &max, const EulerAngles &ang, const Color &color, const Color &colorOutline, float duration = 0.f);
@@ -43,5 +43,3 @@ namespace SDebugRenderer {
 	void DrawPlane(const umath::Plane &plane, const Color &color, float duration = 0.f);
 	void DrawMesh(const std::vector<Vector3> &meshVerts, const Color &color, const Color &colorOutline, float duration = 0.f);
 };
-
-#endif

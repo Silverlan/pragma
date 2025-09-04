@@ -5,13 +5,13 @@ module;
 
 #include "stdafx_server.h"
 #include "pragma/ai/ai_schedule.h"
-#include "pragma/debug/debugoverlay.h"
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/components/base_physics_component.hpp>
 #include <pragma/model/animation/activities.h>
 
 module pragma.server.ai.tasks.debug;
 
+import pragma.server.debug;
 import pragma.server.entities.components;
 
 using namespace pragma;

@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_server.h"
 #include "pragma/ai/ai_schedule.h"
-#include "pragma/debug/debugoverlay.h"
 #include "pragma/game/s_game.h"
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>

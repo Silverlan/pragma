@@ -31,7 +31,6 @@ module;
 #include "pragma/networking/iserver.hpp"
 #include "pragma/networking/iserver_client.hpp"
 #include <pragma/lua/luafunction_call.h>
-#include "pragma/audio/s_alsound.h"
 #include <pragma/networking/enums.hpp>
 #include <pragma/networking/error.hpp>
 #include <pragma/entities/components/base_gamemode_component.hpp>
@@ -54,6 +53,7 @@ module pragma.server.game;
 
 import pragma.entities.components;
 import pragma.server.ai;
+import pragma.server.audio;
 import pragma.server.debug;
 import pragma.server.entities;
 import pragma.server.entities.components;

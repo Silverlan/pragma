@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_server.h"
-#include "pragma/audio/s_alsound.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/components/velocity_component.hpp>
@@ -13,6 +12,8 @@ module;
 #include <pragma/networking/enums.hpp>
 
 module pragma.server.entities.components.sound_emitter;
+
+import pragma.server.audio;
 
 import pragma.server.entities.base;
 import pragma.server.server_state;

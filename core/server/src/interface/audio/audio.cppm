@@ -4,4 +4,5 @@
 module;
 
 export module pragma.server.audio;
+export import pragma.server.audio.sound;
 export import pragma.server.audio.sound_script;

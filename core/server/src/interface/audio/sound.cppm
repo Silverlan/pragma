@@ -4,18 +4,36 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include "pragma/audio/alsoundscript.h"
+#include <pragma/audio/alsound.h>
+#include <pragma/audio/alsound_base.hpp>
 
-export module pragma.server.audio.sound_script;
-
-import pragma.server.audio.sound;
+export module pragma.server.audio.sound;
 
 export {
-	class DLLSERVER SALSoundScript : public ALSoundScript, virtual public SALSound {
-	protected:
-		virtual std::shared_ptr<ALSound> CreateSound(const std::string &name, ALChannel channel, ALCreateFlags createFlags) override;
-	public:
-		SALSoundScript(NetworkState *nw, unsigned int idx, SoundScript *script, NetworkState *state, const std::string &soundName, ALCreateFlags createFlags);
+	class DLLSERVER SALSoundBase {
+	  protected:
+		bool m_bShared;
+	  public:
+		SALSoundBase(bool bShared = true);
+		void SetShared(bool b);
+		bool IsShared() const;
+		virtual void SetPosition(const Vector3 &pos, bool bDontTransmit) = 0;
+		virtual void SetVelocity(const Vector3 &vel, bool bDontTransmit) = 0;
+		virtual void SetDirection(const Vector3 &dir, bool bDontTransmit) = 0;
+	};
+
+	class DLLSERVER SALSound : virtual public ALSound, public SALSoundBase, virtual public ALSoundBase {
+	  public:
+		static SALSoundBase *GetBase(ALSound *snd);
+	  protected:
+		virtual void SetState(ALState state) override;
+		void SendEvent(NetEvent evId, const std::function<void(NetPacket &)> &write = nullptr, bool bUDP = true) const;
+		uint32_t m_entityIndex = std::numeric_limits<uint32_t>::max();
+	  public:
+		SALSound(NetworkState *nw, unsigned int idx, float duration, const std::string &soundName, ALCreateFlags createFlags);
+		virtual ~SALSound() override;
+		const std::string &GetSoundName() const;
+		ALCreateFlags GetCreateFlags() const;
 		virtual ALState GetState() const override;
 		virtual unsigned int GetIndex() const override;
 		virtual void FadeIn(float time) override;
@@ -35,10 +53,13 @@ export {
 		virtual bool IsStopped() const override;
 		virtual void SetGain(float gain) override;
 		virtual float GetGain() const override;
+		virtual void SetPosition(const Vector3 &pos, bool bDontTransmit) override;
 		virtual void SetPosition(const Vector3 &pos) override;
 		virtual Vector3 GetPosition() const override;
+		virtual void SetVelocity(const Vector3 &vel, bool bDontTransmit) override;
 		virtual void SetVelocity(const Vector3 &vel) override;
 		virtual Vector3 GetVelocity() const override;
+		virtual void SetDirection(const Vector3 &dir, bool bDontTransmit) override;
 		virtual void SetDirection(const Vector3 &dir) override;
 		virtual Vector3 GetDirection() const override;
 		virtual void SetRelative(bool b) override;
@@ -93,6 +114,11 @@ export {
 		virtual void ClearRange() override;
 		virtual void SetFadeInDuration(float t) override;
 		virtual void SetFadeOutDuration(float t) override;
-		virtual void SetState(ALState state) override;
+
+		// Special index required for steam audio
+		void SetEntityMapIndex(uint32_t idx);
+	  private:
+		std::string m_soundName = "";
+		ALCreateFlags m_createFlags = ALCreateFlags::None;
 	};
 };

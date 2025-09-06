@@ -3,7 +3,6 @@
 
 #include "stdafx_server.h"
 #include <pragma/engine.h>
-#include "pragma/audio/s_alsound.h"
 #include <pragma/audio/soundscript.h>
 #include "pragma/scripts.h"
 #include <pragma/networking/enums.hpp>

@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
-#include "pragma/audio/s_alsound.h"
 #include <pragma/networking/enums.hpp>
 #include <pragma/engine.h>
 #include <pragma/networking/nwm_util.h>
@@ -10,8 +11,9 @@
 #include <pragma/lua/luaapi.h>
 #include <pragma/entities/components/base_transform_component.hpp>
 
-import pragma.server.audio;
+module pragma.server.entities.components.audio.sound;
 
+import pragma.server.audio;
 import pragma.server.server_state;
 
 extern ServerState *server;

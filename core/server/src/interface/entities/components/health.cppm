@@ -4,10 +4,11 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include "pragma/entities/components/s_entity_component.hpp"
 #include <pragma/entities/components/base_health_component.hpp>
 
 export module pragma.server.entities.components.health;
+
+import pragma.server.entities.components.entity;
 
 export namespace pragma {
 	class DLLSERVER SHealthComponent final : public BaseHealthComponent, public SBaseNetComponent {

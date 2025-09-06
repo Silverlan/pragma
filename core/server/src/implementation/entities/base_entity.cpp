@@ -12,7 +12,6 @@ module;
 #include <pragma/lua/luafunction_call.h>
 #include "pragma/networking/recipient_filter.hpp"
 #include "pragma/lua/lua_handles.hpp"
-#include "pragma/entities/components/s_entity_component.hpp"
 #include <servermanager/sv_nwm_recipientfilter.h>
 #include <pragma/networking/nwm_util.h>
 #include <pragma/networking/enums.hpp>

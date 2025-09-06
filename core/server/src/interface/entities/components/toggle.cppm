@@ -4,10 +4,11 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include "pragma/entities/components/s_entity_component.hpp"
 #include <pragma/entities/components/basetoggle.h>
 
 export module pragma.server.entities.components.toggle;
+
+import pragma.server.entities.components.entity;
 
 export namespace pragma {
 	class DLLSERVER SToggleComponent final : public BaseToggleComponent, public SBaseNetComponent {

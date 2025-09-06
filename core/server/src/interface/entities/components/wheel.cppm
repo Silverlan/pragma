@@ -4,11 +4,11 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include "pragma/entities/components/s_entity_component.hpp"
 #include <pragma/entities/components/base_wheel_component.hpp>
 
 export module pragma.server.entities.components.wheel;
 
+import pragma.server.entities.components.entity;
 import pragma.server.entities;
 
 export {

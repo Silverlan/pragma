@@ -4,10 +4,11 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include "pragma/entities/components/s_entity_component.hpp"
 #include <pragma/entities/components/base_attachment_component.hpp>
 
 export module pragma.server.entities.components.attachment;
+
+import pragma.server.entities.components.entity;
 
 export namespace pragma {
 	class DLLSERVER SAttachmentComponent final : public BaseAttachmentComponent, public SBaseNetComponent {

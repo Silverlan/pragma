@@ -4,11 +4,12 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include "pragma/entities/components/s_entity_component.hpp"
 #include <pragma/entities/components/base_vehicle_component.hpp>
 #include "pragma/input/inkeys.h"
 
 export module pragma.server.entities.components.vehicle;
+
+import pragma.server.entities.components.entity;
 
 export namespace pragma {
 	class DLLSERVER SVehicleComponent final : public BaseVehicleComponent, public SBaseSnapshotComponent {

@@ -1,14 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __S_ENTITY_COMPONENT_HPP__
-#define __S_ENTITY_COMPONENT_HPP__
+module;
 
 #include "pragma/serverdefinitions.h"
 #include <pragma/entities/entity_component_manager.hpp>
+#include <sharedutils/netpacket.hpp>
 
-class NetPacket;
-namespace pragma {
+export module pragma.server.entities.components.entity;
+
+export namespace pragma {
 	namespace networking {
 		class ClientRecipientFilter;
 	};
@@ -33,5 +34,3 @@ namespace pragma {
 		virtual void OnComponentTypeRegistered(const ComponentInfo &componentInfo) override;
 	};
 };
-
-#endif

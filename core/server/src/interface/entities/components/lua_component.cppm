@@ -4,11 +4,12 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include "pragma/entities/components/s_entity_component.hpp"
 #include <pragma/lua/sh_lua_component.hpp>
 #include <pragma/lua/handle_holder.hpp>
 
 export module pragma.server.entities.components.lua;
+
+import pragma.server.entities.components.entity;
 
 export namespace pragma {
 	class DLLSERVER SLuaBaseEntityComponent final : public BaseLuaBaseEntityComponent, public SBaseSnapshotComponent {

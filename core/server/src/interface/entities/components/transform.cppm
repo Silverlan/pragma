@@ -4,8 +4,9 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include "pragma/entities/components/s_entity_component.hpp"
 #include <pragma/entities/components/base_transform_component.hpp>
+
+import pragma.server.entities.components.entity;
 
 export module pragma.server.entities.components.transform;
 

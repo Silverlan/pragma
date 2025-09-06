@@ -4,10 +4,11 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include "pragma/entities/components/s_entity_component.hpp"
 #include <pragma/entities/components/base_generic_component.hpp>
 
 export module pragma.server.entities.components.generic;
+
+import pragma.server.entities.components.entity;
 
 export namespace pragma {
 	class DLLSERVER SGenericComponent final : public BaseGenericComponent {

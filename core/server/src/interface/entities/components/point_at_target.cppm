@@ -4,11 +4,12 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include "pragma/entities/components/s_entity_component.hpp"
 #include <pragma/entities/components/base_point_at_target_component.hpp>
 #include <pragma/lua/luaapi.h>
 
 export module pragma.server.entities.components.point_at_target;
+
+import pragma.server.entities.components.entity;
 
 export namespace pragma {
 	class DLLSERVER SPointAtTargetComponent final : public BasePointAtTargetComponent, public SBaseNetComponent {

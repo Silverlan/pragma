@@ -28,6 +28,7 @@ export import pragma.server.entities.components.effects.sprite;
 export import pragma.server.entities.components.child;
 export import pragma.server.entities.components.color;
 export import pragma.server.entities.components.decal;
+export import pragma.server.entities.components.entity;
 export import pragma.server.entities.components.field_angle;
 export import pragma.server.entities.components.filter.entity_class;
 export import pragma.server.entities.components.filter.entity_name;

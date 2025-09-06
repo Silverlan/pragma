@@ -5,11 +5,11 @@ module;
 
 #include "pragma/serverdefinitions.h"
 #include "pragma/entities/point/constraints/point_constraint_ballsocket.h"
-#include "pragma/entities/components/s_entity_component.hpp"
 
 export module pragma.server.entities.components.point.constraints.ball_socket;
 
 import pragma.server.entities;
+import pragma.server.entities.components.entity;
 
 export {
 	namespace pragma {

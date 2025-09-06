@@ -1,10 +1,13 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
-#include "pragma/entities/components/s_entity_component.hpp"
 #include <pragma/networking/enums.hpp>
 #include <sharedutils/netpacket.hpp>
+
+module pragma.server.entities.components.entity;
 
 import pragma.server.server_state;
 

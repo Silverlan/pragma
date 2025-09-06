@@ -4,12 +4,12 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include "pragma/entities/components/s_entity_component.hpp"
 #include <pragma/entities/baseskybox.h>
 
 export module pragma.server.entities.components.skybox;
 
 import pragma.server.entities;
+import pragma.server.entities.components.entity;
 
 export {
 	namespace pragma {

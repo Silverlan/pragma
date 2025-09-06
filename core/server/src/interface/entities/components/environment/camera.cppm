@@ -5,11 +5,11 @@ module;
 
 #include "pragma/serverdefinitions.h"
 #include "pragma/entities/environment/env_camera.h"
-#include "pragma/entities/components/s_entity_component.hpp"
 
 export module pragma.server.entities.components.camera;
 
 import pragma.server.entities;
+import pragma.server.entities.components.entity;
 
 export {
 	namespace pragma {

@@ -49,7 +49,6 @@
 #include "pragma/entities/components/liquid/base_liquid_component.hpp"
 #include "pragma/entities/logic/logic_relay.h"
 #include <pragma/entities/basefilterentity.h>
-#include "pragma/entities/components/s_entity_component.hpp"
 #include <pragma/model/model.h>
 #include <pragma/model/modelmesh.h>
 #include <pragma/lua/classes/lproperty.hpp>

@@ -31,7 +31,6 @@ module;
 #include "pragma/networking/iserver.hpp"
 #include "pragma/networking/iserver_client.hpp"
 #include <pragma/lua/luafunction_call.h>
-#include "pragma/entities/components/s_entity_component.hpp"
 #include "pragma/audio/s_alsound.h"
 #include <pragma/networking/enums.hpp>
 #include <pragma/networking/error.hpp>

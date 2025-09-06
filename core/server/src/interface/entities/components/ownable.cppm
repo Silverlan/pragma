@@ -4,11 +4,12 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include "pragma/entities/components/s_entity_component.hpp"
 #include <pragma/entities/components/base_ownable_component.hpp>
 #include <pragma/lua/luaapi.h>
 
 export module pragma.server.entities.components.ownable;
+
+import pragma.server.entities.components.entity;
 
 export namespace pragma {
 	class DLLSERVER SOwnableComponent final : public BaseOwnableComponent, public SBaseNetComponent {

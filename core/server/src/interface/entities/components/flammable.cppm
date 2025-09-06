@@ -4,11 +4,12 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include "pragma/entities/components/s_entity_component.hpp"
 #include <pragma/entities/components/base_flammable_component.hpp>
 #include <pragma/util/timer_handle.h>
 
 export module pragma.server.entities.components.flammable;
+
+import pragma.server.entities.components.entity;
 
 export {
 	namespace pragma {

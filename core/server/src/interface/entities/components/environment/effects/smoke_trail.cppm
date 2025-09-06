@@ -5,11 +5,11 @@ module;
 
 #include "pragma/serverdefinitions.h"
 #include "pragma/entities/environment/effects/env_smoke_trail.h"
-#include "pragma/entities/components/s_entity_component.hpp"
 
 export module pragma.server.entities.components.effects.smoke_trail;
 
 import pragma.server.entities;
+import pragma.server.entities.components.entity;
 
 export {
 	namespace pragma {

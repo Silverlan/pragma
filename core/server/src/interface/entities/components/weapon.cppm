@@ -4,13 +4,14 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include "pragma/entities/components/s_entity_component.hpp"
 #include "pragma/networking/recipient_filter.hpp"
 #include <cinttypes>
 #include <vector>
 #include <pragma/entities/components/base_weapon_component.hpp>
 
 export module pragma.server.entities.components.weapon;
+
+import pragma.server.entities.components.entity;
 
 export namespace pragma {
 	class DLLSERVER SWeaponComponent final : public BaseWeaponComponent, public SBaseNetComponent {

@@ -4,10 +4,11 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include "pragma/entities/components/s_entity_component.hpp"
 #include <pragma/entities/components/base_score_component.hpp>
 
 export module pragma.server.entities.components.score;
+
+import pragma.server.entities.components.entity;
 
 export namespace pragma {
 	class DLLSERVER SScoreComponent final : public BaseScoreComponent, public SBaseNetComponent {

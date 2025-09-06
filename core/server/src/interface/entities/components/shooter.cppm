@@ -4,11 +4,11 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include "pragma/entities/components/s_entity_component.hpp"
 
 export module pragma.server.entities.components.shooter;
 
 import pragma.entities.components;
+import pragma.server.entities.components.entity;
 
 export namespace pragma::ecs {
 	class DLLSERVER SShooterComponent final : public BaseShooterComponent, public SBaseNetComponent {

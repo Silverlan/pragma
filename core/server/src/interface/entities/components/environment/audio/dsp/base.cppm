@@ -5,11 +5,11 @@ module;
 
 #include "pragma/serverdefinitions.h"
 #include "pragma/entities/environment/audio/env_sound_dsp.h"
-#include "pragma/entities/components/s_entity_component.hpp"
 
 export module pragma.server.entities.components.audio.dsp.base;
 
 import pragma.server.entities;
+import pragma.server.entities.components.entity;
 
 export {
 	namespace pragma {

@@ -4,10 +4,11 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include "pragma/entities/components/s_entity_component.hpp"
 #include <pragma/entities/components/liquid/base_liquid_surface_simulation_component.hpp>
 
 export module pragma.server.entities.components.liquid_surface_simulation;
+
+import pragma.server.entities.components.entity;
 
 export namespace pragma {
 	class DLLSERVER SLiquidSurfaceSimulationComponent final : public BaseLiquidSurfaceSimulationComponent, public SBaseNetComponent {

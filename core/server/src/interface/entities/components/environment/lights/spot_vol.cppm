@@ -4,12 +4,12 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include "pragma/entities/components/s_entity_component.hpp"
 #include <pragma/entities/environment/lights/env_light_spot_vol.h>
 
 export module pragma.server.entities.components.lights.spot_vol;
 
 import pragma.server.entities;
+import pragma.server.entities.components.entity;
 
 export {
 	namespace pragma {

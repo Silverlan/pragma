@@ -4,12 +4,13 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include "pragma/entities/components/s_entity_component.hpp"
 #include <pragma/entities/func/basefuncsoftphysics.hpp>
 
 export module pragma.server.entities.components.func.soft_physics;
 
 import pragma.server.entities;
+
+import pragma.server.entities.components.entity;
 
 export {
 	namespace pragma {

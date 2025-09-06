@@ -4,10 +4,11 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include "pragma/entities/components/s_entity_component.hpp"
 #include <pragma/entities/components/base_observable_component.hpp>
 
 export module pragma.server.entities.components.observable;
+
+import pragma.server.entities.components.entity;
 
 export namespace pragma {
 	class DLLSERVER SObservableComponent final : public BaseObservableComponent, public SBaseNetComponent {

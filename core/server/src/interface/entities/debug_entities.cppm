@@ -4,11 +4,11 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include "pragma/entities/components/s_entity_component.hpp"
 
 export module pragma.server.entities.debug;
 
 import pragma.server.entities.base;
+import pragma.server.entities.components.entity;
 
 export {
     class DLLSERVER EntDebugText : public SBaseEntity {

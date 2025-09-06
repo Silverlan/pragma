@@ -4,13 +4,14 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include "pragma/entities/components/s_entity_component.hpp"
 #include "pragma/networking/iserver_client.hpp"
 #include <pragma/entities/components/base_player_component.hpp>
 #include <pragma/networking/ip_address.hpp>
 #include <networkmanager/wrappers/nwm_ip_address.hpp>
 
 export module pragma.server.entities.components.player;
+
+import pragma.server.entities.components.entity;
 
 export namespace pragma {
 	class DLLSERVER SPlayerComponent final : public BasePlayerComponent, public SBaseNetComponent {

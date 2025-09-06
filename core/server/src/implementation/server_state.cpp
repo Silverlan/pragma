@@ -11,7 +11,6 @@ module;
 #include "pragma/console/convarhandle.h"
 #include <pragma/audio/soundscript.h>
 #include "luasystem.h"
-#include "pragma/networking/local_server.hpp"
 #include "pragma/networking/recipient_filter.hpp"
 #include <material_manager2.hpp>
 #include <pragma/game/gamemode/gamemodemanager.h>
@@ -34,6 +33,7 @@ import pragma.server.core;
 import pragma.server.entities;
 import pragma.server.game;
 import pragma.server.model_manager;
+import pragma.server.networking;
 
 static std::unordered_map<std::string, std::shared_ptr<PtrConVar>> *conVarPtrs = NULL;
 std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &ServerState::GetConVarPtrs() { return *conVarPtrs; }

@@ -1,14 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __PRAGMA_LOCAL_SERVER_HPP__
-#define __PRAGMA_LOCAL_SERVER_HPP__
+module;
 
 #include "pragma/networking/iserver.hpp"
 #include "pragma/networking/iserver_client.hpp"
+#include "pragma/networking/error.hpp"
 
-namespace pragma::networking {
-	class Error;
+export module pragma.server.networking.local_host;
+
+export namespace pragma::networking {
 	class DLLSERVER LocalServer : public IServer {
 	  public:
 		virtual bool PollEvents(Error &outErr) override;
@@ -34,5 +35,3 @@ namespace pragma::networking {
 		virtual bool Drop(DropReason reason, pragma::networking::Error &outErr) override;
 	};
 };
-
-#endif

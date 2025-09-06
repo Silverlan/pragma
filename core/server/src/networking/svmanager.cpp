@@ -6,7 +6,6 @@
 #include "pragma/networking/iserver.hpp"
 #include "pragma/game/gamemode/gamemodemanager.h"
 #include "pragma/networking/standard_server.hpp"
-#include "pragma/networking/master_server.hpp"
 #include <pragma/networking/game_server_data.hpp>
 #include <pragma/networking/enums.hpp>
 #include <wms_shared.h>
@@ -17,6 +16,7 @@
 
 import pragma.server.entities;
 import pragma.server.game;
+import pragma.server.networking;
 import pragma.server.server_state;
 
 extern DLLNETWORK Engine *engine;

@@ -1,8 +1,11 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "pragma/networking/master_server.hpp"
+module;
+
 #include <sharedutils/util_library.hpp>
+
+module pragma.server.networking.master_server;
 
 std::unique_ptr<pragma::networking::MasterServerRegistration> pragma::networking::MasterServerRegistration::Register(const util::Library &steamworksLibrary, const GameServerInfo &serverInfo)
 {
@@ -18,7 +21,7 @@ std::unique_ptr<pragma::networking::MasterServerRegistration> pragma::networking
 	reg->m_steamworks_set_master_server_callback_events(events);
 	return reg;
 }
-pragma::networking::MasterServerRegistration::MasterServerRegistration::~MasterServerRegistration()
+pragma::networking::MasterServerRegistration::~MasterServerRegistration()
 {
 	if(m_unregister_server)
 		m_unregister_server();

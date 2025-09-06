@@ -11,7 +11,6 @@
 #include "pragma/networking/recipient_filter.hpp"
 #include <pragma/engine.h>
 #include "pragma/ai/ai_schedule.h"
-#include "pragma/networking/master_server.hpp"
 #include <pragma/networking/enums.hpp>
 #include <pragma/networking/error.hpp>
 #include <pragma/debug/debugbehaviortree.h>
@@ -26,6 +25,7 @@
 import pragma.server.entities;
 import pragma.server.entities.components;
 import pragma.server.game;
+import pragma.server.networking;
 import pragma.server.server_state;
 
 extern ServerState *server;

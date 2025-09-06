@@ -5,3 +5,4 @@ module;
 
 export module pragma.server.networking;
 export import pragma.server.networking.local_host;
+export import pragma.server.networking.master_server;

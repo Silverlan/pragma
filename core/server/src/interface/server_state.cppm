@@ -9,7 +9,6 @@ module;
 #include "pragma/networking/iserver.hpp"
 #include "pragma/networking/iserver_client.hpp"
 #include "pragma/networking/recipient_filter.hpp"
-#include "pragma/networking/master_server.hpp"
 #include "pragma/networking/enums.hpp"
 #include "pragma/util/resource_watcher.h"
 #include <pragma/input/inkeys.h>
@@ -21,6 +20,7 @@ export module pragma.server.server_state;
 
 import pragma.server.audio;
 import pragma.server.entities.components;
+import pragma.server.networking;
 import pragma.server.game;
 
 #pragma warning(push)

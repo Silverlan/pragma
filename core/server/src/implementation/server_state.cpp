@@ -19,7 +19,6 @@ module;
 #include <pragma/console/convars.h>
 #include <pragma/asset/util_asset.hpp>
 #include "pragma/networking/networking_modules.hpp"
-#include "pragma/networking/master_server.hpp"
 #include <pragma/networking/game_server_data.hpp>
 #include <pragma/networking/error.hpp>
 #include <pragma/engine_version.h>

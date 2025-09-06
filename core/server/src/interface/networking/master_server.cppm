@@ -1,21 +1,20 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __MASTER_SERVER_HPP__
-#define __MASTER_SERVER_HPP__
+module;
 
 #include "pragma/serverdefinitions.h"
+#include <sharedutils/util_library.hpp>
+#include "pragma/networking/game_server_data.hpp"
 #include <memory>
 #include <vector>
 #include <string>
 #include <functional>
 #include <cinttypes>
 
-namespace util {
-	class Library;
-};
-namespace pragma::networking {
-	struct GameServerInfo;
+export module pragma.server.networking.master_server;
+
+export namespace pragma::networking {
 	class DLLSERVER MasterServerRegistration {
 	  public:
 		using SteamId = uint64_t;
@@ -52,5 +51,3 @@ namespace pragma::networking {
 		CallbackEvents m_callbackEvents = {};
 	};
 };
-
-#endif

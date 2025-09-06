@@ -4,10 +4,11 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include "pragma/entities/s_baseentity.h"
 #include "pragma/entities/environment/env_microphone_base.h"
 
 export module pragma.server.entities.components.microphone;
+
+import pragma.server.entities;
 
 export {
 	namespace pragma {

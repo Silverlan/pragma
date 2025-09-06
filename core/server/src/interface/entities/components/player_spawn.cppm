@@ -4,10 +4,11 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include "pragma/entities/s_baseentity.h"
 #include <pragma/entities/components/base_entity_component.hpp>
 
 export module pragma.server.entities.components.player_spawn;
+
+import pragma.server.entities.base;
 
 export {
 	namespace pragma {

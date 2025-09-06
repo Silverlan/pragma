@@ -4,11 +4,11 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include "pragma/entities/s_baseentity.h"
 #include <pragma/entities/trigger/base_trigger_teleport.hpp>
 
 export module pragma.server.entities.components.triggers.teleport;
 
+import pragma.server.entities;
 import pragma.server.entities.components.triggers.touch;
 
 export {

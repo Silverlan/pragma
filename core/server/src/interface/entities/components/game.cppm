@@ -5,9 +5,10 @@ module;
 
 #include "pragma/serverdefinitions.h"
 #include <pragma/entities/components/base_game_component.hpp>
-#include "pragma/entities/s_baseentity.h"
 
 export module pragma.server.entities.components.game;
+
+import pragma.server.entities;
 
 export {
 	namespace pragma {

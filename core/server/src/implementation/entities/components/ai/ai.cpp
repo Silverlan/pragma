@@ -6,7 +6,6 @@ module;
 #include "stdafx_server.h"
 #include "pragma/entities/components/s_player_component.hpp"
 #include "pragma/entities/components/base_ai_component.hpp"
-#include "pragma/entities/s_baseentity.h"
 #include "pragma/ai/ai_schedule.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/networking/enums.hpp>
@@ -24,10 +23,10 @@ module;
 #include <pragma/networking/nwm_util.h>
 #include <pragma/logging.hpp>
 
-import pragma.server.entities;
 module pragma.server.entities.components.ai;
 
 import pragma.server.ai;
+import pragma.server.entities;
 import pragma.server.entities.components.animated;
 import pragma.server.entities.components.character;
 import pragma.server.entities.components.health;

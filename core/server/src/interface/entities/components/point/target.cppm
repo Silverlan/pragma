@@ -4,10 +4,11 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include "pragma/entities/s_baseentity.h"
 #include "pragma/entities/point/point_target.h"
 
 export module pragma.server.entities.components.point.target;
+
+import pragma.server.entities;
 
 export {
 	namespace pragma {

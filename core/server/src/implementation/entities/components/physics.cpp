@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_server.h"
 #include "pragma/entities/components/s_player_component.hpp"
-#include "pragma/entities/s_baseentity.h"
 #include <sharedutils/scope_guard.h>
 #include <pragma/entities/components/base_character_component.hpp>
 #include <pragma/entities/components/damageable_component.hpp>
@@ -17,6 +16,7 @@ module;
 
 module pragma.server.entities.components.physics;
 
+import pragma.server.entities.base;
 import pragma.server.game;
 import pragma.server.model_manager;
 import pragma.server.server_state;

@@ -5,10 +5,11 @@
 #include "pragma/lua/s_lua_component.hpp"
 #include "pragma/networking/recipient_filter.hpp"
 #include "pragma/lua/base_lua_handle_method.hpp"
-#include "pragma/entities/s_baseentity.h"
 #include <servermanager/interface/sv_nwm_manager.hpp>
 #include <pragma/entities/components/base_player_component.hpp>
 #include <pragma/networking/enums.hpp>
+
+import pragma.server.entities;
 
 using namespace pragma;
 

@@ -4,11 +4,12 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include "pragma/entities/s_baseentity.h"
 #include "pragma/entities/components/s_entity_component.hpp"
 #include <pragma/entities/func/basefunckinematic.hpp>
 
 export module pragma.server.entities.components.func.kinematic;
+
+import pragma.server.entities;
 
 export {
 	namespace pragma {

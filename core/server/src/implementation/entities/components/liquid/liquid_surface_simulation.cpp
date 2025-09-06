@@ -8,10 +8,11 @@ module;
 #include <pragma/physics/phys_water_surface_simulator.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/components/base_surface_component.hpp>
-#include "pragma/entities/s_baseentity.h"
 #include <sharedutils/netpacket.hpp>
 
 module pragma.server.entities.components.liquid_surface_simulation;
+
+import pragma.server.entities;
 
 using namespace pragma;
 

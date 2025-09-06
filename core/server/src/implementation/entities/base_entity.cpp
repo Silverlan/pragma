@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
-#include "pragma/entities/s_baseentity.h"
 #include "pragma/audio/s_alsound.h"
 #include <pragma/lua/luacallback.h>
 #include <pragma/networking/nwm_util.h>
@@ -28,6 +29,8 @@
 #include <pragma/entities/components/base_player_component.hpp>
 #include <pragma/entities/components/base_character_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
+
+module pragma.server.entities.base;
 
 import pragma.server.audio;
 import pragma.server.entities;

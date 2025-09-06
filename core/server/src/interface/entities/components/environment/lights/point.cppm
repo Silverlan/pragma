@@ -4,10 +4,11 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include "pragma/entities/s_baseentity.h"
 #include "pragma/entities/environment/lights/env_light_point.h"
 
 export module pragma.server.entities.components.lights.point;
+
+import pragma.server.entities;
 
 export {
 	namespace pragma {

@@ -5,7 +5,6 @@ module;
 
 #include <pragma/game/game.h>
 #include "pragma/serverdefinitions.h"
-#include "pragma/entities/s_baseentity.h"
 #include "pragma/entities/components/s_player_component.hpp"
 #include "pragma/networking/iserver_client.hpp"
 #include "pragma/networking/recipient_filter.hpp"
@@ -23,6 +22,8 @@ module;
 #endif
 
 export module pragma.server.game;
+
+import pragma.server.entities;
 
 #pragma warning(push)
 #pragma warning(disable : 4251)

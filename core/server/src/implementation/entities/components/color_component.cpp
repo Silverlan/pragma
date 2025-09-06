@@ -5,11 +5,12 @@ module;
 
 #include "stdafx_server.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
-#include "pragma/entities/s_baseentity.h"
 #include <pragma/networking/enums.hpp>
 #include <sharedutils/netpacket.hpp>
 
 module pragma.server.entities.components.color;
+
+import pragma.server.entities;
 
 using namespace pragma;
 

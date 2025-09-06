@@ -6,7 +6,6 @@ module;
 #include "stdafx_server.h"
 #include "pragma/entities/baseentity_luaobject.h"
 #include "pragma/entities/shared_spawnflags.h"
-#include "pragma/entities/s_baseentity.h"
 #include <sharedutils/util_string.h>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/networking/nwm_util.h>
@@ -14,6 +13,7 @@ module;
 
 module pragma.server.entities.components.lights.base;
 
+import pragma.server.entities;
 import pragma.server.server_state;
 
 using namespace pragma;

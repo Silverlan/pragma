@@ -5,11 +5,12 @@ module;
 
 #include "stdafx_server.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
-#include "pragma/entities/s_baseentity.h"
 #include <pragma/networking/enums.hpp>
 #include <pragma/networking/nwm_util.h>
 
 module pragma.server.entities.components.ownable;
+
+import pragma.server.entities;
 
 using namespace pragma;
 

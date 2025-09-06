@@ -4,10 +4,11 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include "pragma/entities/s_baseentity.h"
 #include "pragma/entities/logic/logic_relay.h"
 
 export module pragma.server.entities.components.logic.relay;
+
+import pragma.server.entities;
 
 export {
 	namespace pragma {

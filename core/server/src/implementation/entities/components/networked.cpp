@@ -8,9 +8,10 @@ module;
 #include <sharedutils/property/util_property_euler_angles.hpp>
 #include "pragma/entities/components/base_networked_component.hpp"
 #include <pragma/entities/entity_property.hpp>
-#include "pragma/entities/s_baseentity.h"
 
 module pragma.server.entities.components.networked;
+
+import pragma.server.entities;
 
 using namespace pragma;
 

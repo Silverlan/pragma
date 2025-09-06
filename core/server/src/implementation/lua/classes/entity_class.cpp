@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_server.h"
-#include "pragma/entities/s_baseentity.h"
 #include "luasystem.h"
 #include "pragma/networking/recipient_filter.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
@@ -13,6 +12,8 @@ module;
 #include <servermanager/interface/sv_nwm_manager.hpp>
 
 module pragma.server.scripting.lua.classes.entity;
+
+import pragma.server.entities;
 
 void Lua::Entity::Server::register_class(luabind::class_<SBaseEntity, BaseEntity> &classDef)
 {

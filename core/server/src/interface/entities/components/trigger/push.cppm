@@ -4,10 +4,11 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include "pragma/entities/s_baseentity.h"
 #include <pragma/entities/trigger/base_trigger_push.hpp>
 
 export module pragma.server.entities.components.triggers.push;
+
+import pragma.server.entities;
 
 export {
 	namespace pragma {

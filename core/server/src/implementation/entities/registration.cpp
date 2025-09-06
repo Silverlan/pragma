@@ -4,13 +4,13 @@
 module;
 
 #include "stdafx_server.h"
-#include "pragma/entities/s_baseentity.h"
 #include <stdexcept>
 
 #undef GetClassName
 
 module pragma.server.entities.registration;
 
+import pragma.server.entities;
 import pragma.server.game;
 import pragma.server.server_state;
 

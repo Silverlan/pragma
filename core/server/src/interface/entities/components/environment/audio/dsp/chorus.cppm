@@ -4,11 +4,11 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include "pragma/entities/s_baseentity.h"
 #include "pragma/entities/environment/audio/env_sound_dsp_chorus.h"
 
 export module pragma.server.entities.components.audio.dsp.chorus;
 
+import pragma.server.entities;
 import pragma.server.entities.components.audio.dsp.base;
 
 export {

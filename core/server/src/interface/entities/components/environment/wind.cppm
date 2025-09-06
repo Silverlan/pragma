@@ -4,11 +4,12 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include "pragma/entities/s_baseentity.h"
 #include "pragma/entities/environment/env_wind.hpp"
 #include "pragma/entities/components/s_entity_component.hpp"
 
 export module pragma.server.entities.components.wind;
+
+import pragma.server.entities;
 
 export {
 	namespace pragma {

@@ -4,13 +4,13 @@
 module;
 
 #include "stdafx_server.h"
-#include "pragma/entities/s_baseentity.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/networking/enums.hpp>
 #include <sharedutils/netpacket.hpp>
 
 module pragma.server.entities.components.toggle;
 
+import pragma.server.entities;
 import pragma.server.game;
 
 extern SGame *s_game;

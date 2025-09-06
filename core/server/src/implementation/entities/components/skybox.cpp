@@ -8,9 +8,10 @@ module;
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include "pragma/networking/enums.hpp"
 #include <sharedutils/netpacket.hpp>
-#include "pragma/entities/s_baseentity.h"
 
 module pragma.server.entities.components.skybox;
+
+import pragma.server.entities.base;
 
 using namespace pragma;
 

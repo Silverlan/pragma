@@ -8,10 +8,10 @@ module;
 #include <sharedutils/netpacket.hpp>
 #include <pragma/networking/nwm_util.h>
 #include <pragma/networking/enums.hpp>
-#include "pragma/entities/s_baseentity.h"
 
 module pragma.server.entities.components.surface;
 
+import pragma.server.entities.base;
 import pragma.server.server_state;
 
 using namespace pragma;

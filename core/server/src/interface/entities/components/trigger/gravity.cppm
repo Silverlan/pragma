@@ -4,10 +4,11 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include "pragma/entities/s_baseentity.h"
 #include <pragma/entities/components/basetriggergravity.hpp>
 
 export module pragma.server.entities.components.triggers.gravity;
+
+import pragma.server.entities;
 
 export {
 	namespace pragma {

@@ -11,10 +11,10 @@ module;
 #include <pragma/lua/libraries/ltimer.h>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/networking/nwm_util.h>
-#include "pragma/entities/s_baseentity.h"
 
 module pragma.server.entities.components.flammable;
 
+import pragma.server.entities;
 import pragma.server.game;
 
 using namespace pragma;

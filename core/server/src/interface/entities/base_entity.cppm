@@ -1,22 +1,18 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __S_BASEENTITY_H__
-#define __S_BASEENTITY_H__
+module;
 
 #include "pragma/serverdefinitions.h"
+#include "pragma/engine.h"
+#include "pragma/networking/enums.hpp"
+#include "pragma/networking/recipient_filter.hpp"
+#include <sharedutils/netpacket.hpp>
 #include <pragma/entities/baseentity.h>
 
-class Engine;
-class NetPacket;
-class TimerHandle;
-namespace pragma {
-	namespace networking {
-		enum class Protocol : uint8_t;
-		class ClientRecipientFilter;
-	};
-};
-class DLLSERVER SBaseEntity : public BaseEntity {
+export module pragma.server.entities.base;
+
+export class DLLSERVER SBaseEntity : public BaseEntity {
   public:
 	SBaseEntity();
 	virtual pragma::ComponentHandle<pragma::BaseEntityComponent> AddNetworkedComponent(const std::string &name) override;
@@ -72,16 +68,16 @@ class DLLSERVER SBaseEntity : public BaseEntity {
 	//
 };
 
-inline DLLSERVER Con::c_cout &operator<<(Con::c_cout &os, SBaseEntity &ent) { return ent.print(os); }
+export {
+    inline DLLSERVER Con::c_cout &operator<<(Con::c_cout &os, SBaseEntity &ent) { return ent.print(os); }
 
-template<>
-struct std::formatter<SBaseEntity> : std::formatter<std::string> {
-	auto format(SBaseEntity &ent, format_context &ctx) -> decltype(ctx.out())
-	{
-		std::stringstream ss;
-		ent.print(ss);
-		return std::format_to(ctx.out(), "{}", ss.str());
-	}
+    template<>
+    struct std::formatter<SBaseEntity> : std::formatter<std::string> {
+        auto format(SBaseEntity &ent, format_context &ctx) -> decltype(ctx.out())
+        {
+            std::stringstream ss;
+            ent.print(ss);
+            return std::format_to(ctx.out(), "{}", ss.str());
+        }
+    };
 };
-
-#endif

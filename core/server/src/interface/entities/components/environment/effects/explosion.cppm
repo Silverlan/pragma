@@ -4,10 +4,11 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include "pragma/entities/s_baseentity.h"
 #include "pragma/entities/environment/effects/env_explosion.h"
 
 export module pragma.server.entities.components.effects.explosion;
+
+import pragma.server.entities;
 
 export {
 	namespace pragma {

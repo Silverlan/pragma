@@ -4,11 +4,12 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include "pragma/entities/s_baseentity.h"
 #include <pragma/lua/luaobjectbase.h>
 #include <pragma/lua/handle_holder.hpp>
 
 export module pragma.server.scripting.lua.classes.lua_entity;
+
+import pragma.server.entities;
 
 export {
 	class DLLSERVER SLuaEntity : public SBaseEntity {

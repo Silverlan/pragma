@@ -4,10 +4,11 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include "pragma/entities/s_baseentity.h"
 #include "pragma/entities/func/basefuncbutton.h"
 
 export module pragma.server.entities.components.func.button;
+
+import pragma.server.entities;
 
 export {
 	namespace pragma {

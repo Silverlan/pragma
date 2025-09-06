@@ -4,11 +4,12 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include "pragma/entities/s_baseentity.h"
 #include "pragma/entities/components/s_entity_component.hpp"
 #include <pragma/entities/environment/effects/env_sprite.h>
 
 export module pragma.server.entities.components.effects.sprite;
+
+import pragma.server.entities;
 
 export {
 	namespace pragma {

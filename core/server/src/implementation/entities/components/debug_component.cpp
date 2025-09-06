@@ -6,10 +6,11 @@ module;
 #include "stdafx_server.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/networking/enums.hpp>
-#include "pragma/entities/s_baseentity.h"
 #include <sharedutils/netpacket.hpp>
 
 module pragma.server.entities.components.debug;
+
+import pragma.server.entities;
 
 using namespace pragma;
 

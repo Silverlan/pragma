@@ -9,10 +9,10 @@ module;
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <sharedutils/netpacket.hpp>
 #include <pragma/networking/enums.hpp>
-#include "pragma/entities/s_baseentity.h"
 
 module pragma.server.entities.components.lights.directional;
 
+import pragma.server.entities;
 import pragma.server.entities.components.lights.base;
 
 using namespace pragma;

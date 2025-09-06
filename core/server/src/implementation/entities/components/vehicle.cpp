@@ -15,7 +15,6 @@ module;
 #include <pragma/physics/environment.hpp>
 #include <pragma/networking/nwm_util.h>
 #include <pragma/networking/enums.hpp>
-#include "pragma/entities/s_baseentity.h"
 
 module pragma.server.entities.components.vehicle;
 

@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/entities/s_baseentity.h"
 #include <unordered_map>
 #include <functional>
 #include <typeindex>
@@ -13,6 +12,7 @@ module;
 
 export module pragma.server.entities.registration;
 
+import pragma.server.entities;
 import pragma.server.game;
 import pragma.server.server_state;
 

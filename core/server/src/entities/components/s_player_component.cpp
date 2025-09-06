@@ -11,7 +11,6 @@
 #include <pragma/networking/error.hpp>
 #include <pragma/util/util_handled.hpp>
 #include <pragma/model/model.h>
-#include "pragma/entities/s_baseentity.h"
 #include <pragma/entities/components/base_animated_component.hpp>
 #include <pragma/entities/components/base_character_component.hpp>
 #include <pragma/entities/components/base_physics_component.hpp>

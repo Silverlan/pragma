@@ -4,10 +4,11 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include "pragma/entities/s_baseentity.h"
 #include <pragma/entities/baseplayer.hpp>
 
 export module pragma.server.entities.player;
+
+import pragma.server.entities.base;
 
 export class DLLSERVER Player : public SBaseEntity, public BasePlayer {
   public:

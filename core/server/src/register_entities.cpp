@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_server.h"
-#include "pragma/entities/s_baseentity.h"
 
 import pragma.server.entities;
 import pragma.server.entities.components;

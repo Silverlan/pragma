@@ -4,10 +4,11 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include "pragma/entities/s_baseentity.h"
 #include <pragma/entities/baseworld.h>
 
 export module pragma.server.entities.components.world;
+
+import pragma.server.entities;
 
 export {
 	namespace pragma {

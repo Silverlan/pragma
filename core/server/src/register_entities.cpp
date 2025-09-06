@@ -2,8 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_server.h"
-#include "pragma/entities/s_npc_dragonworm.h"
-#include "pragma/entities/s_ent_debug.hpp"
+#include "pragma/entities/s_baseentity.h"
 
 import pragma.server.entities;
 import pragma.server.entities.components;
@@ -63,7 +62,6 @@ void register_entites()
     server_entities::register_entity<SGamemode>("gamemode");
     server_entities::register_entity<InfoLandmark>("info_landmark");
     server_entities::register_entity<LogicRelay>("logic_relay");
-    server_entities::register_entity<NPCDragonWorm>("npc_dragonworm");
     server_entities::register_entity<Player>("player");
     server_entities::register_entity<PointConstraintBallSocket>("point_constraint_ballsocket");
     server_entities::register_entity<PointConstraintConeTwist>("point_constraint_conetwist");

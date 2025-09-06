@@ -62,7 +62,6 @@
 
 #ifdef DLLSERVER_EX
 #include "pragma/entities/s_npc_dragonworm.h"
-#include "pragma/entities/s_ent_debug.hpp"
 
 import pragma.server.entities.components;
 

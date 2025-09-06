@@ -1,15 +1,16 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __S_LUA_COMPONENT_HPP__
-#define __S_LUA_COMPONENT_HPP__
+module;
 
 #include "pragma/serverdefinitions.h"
 #include "pragma/entities/components/s_entity_component.hpp"
 #include <pragma/lua/sh_lua_component.hpp>
 #include <pragma/lua/handle_holder.hpp>
 
-namespace pragma {
+export module pragma.server.entities.components.lua;
+
+export namespace pragma {
 	class DLLSERVER SLuaBaseEntityComponent final : public BaseLuaBaseEntityComponent, public SBaseSnapshotComponent {
 	  public:
 		SLuaBaseEntityComponent(BaseEntity &ent);
@@ -26,8 +27,6 @@ namespace pragma {
 	};
 };
 
-namespace pragma::lua {
+export namespace pragma::lua {
 	using SLuaBaseEntityComponentHolder = HandleHolder<SLuaBaseEntityComponent>;
 };
-
-#endif

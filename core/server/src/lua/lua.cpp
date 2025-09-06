@@ -7,13 +7,13 @@
 #include "pragma/lua/libraries/lray.h"
 #include "pragma/lua/libraries/lgame.h"
 #include "pragma/lua/libraries/lents.h"
+#include "pragma/lua/handle_holder.hpp"
 #include "pragma/ai/ai_behavior.h"
 #include "pragma/networking/resourcemanager.h"
 #include "pragma/networking/recipient_filter.hpp"
 #include "pragma/networking/iserver.hpp"
 #include "pragma/lua/classes/ldef_recipientfilter.h"
 #include "pragma/lua/s_lentity_components.hpp"
-#include "pragma/lua/s_lua_component.hpp"
 #include "pragma/lua/sh_lua_component_t.hpp"
 #include <pragma/lua/lua_util_component.hpp>
 #include <pragma/lua/classes/lentity.h>
@@ -31,6 +31,7 @@
 #include <udm.hpp>
 
 import pragma.server.ai;
+import pragma.server.entities;
 import pragma.server.entities.components;
 import pragma.server.game;
 import pragma.server.server_state;
@@ -91,7 +92,7 @@ void SGame::RegisterLua()
 	//modEnts[tmp];
 
 	// Obsolete?
-	auto classDefBase = luabind::class_<SLuaEntity, luabind::bases<SBaseEntity>, pragma::lua::SLuaEntityHolder>("BaseEntity");
+	auto classDefBase = luabind::class_<SLuaEntity, luabind::bases<SBaseEntity>, pragma::lua::HandleHolder<SLuaEntity>>("BaseEntity");
 	classDefBase.def(luabind::constructor<>());
 	// classDefBase.def(luabind::tostring(luabind::self));
 	//classDefBase.def(luabind::constructor<>());

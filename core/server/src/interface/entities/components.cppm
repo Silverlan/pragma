@@ -58,6 +58,7 @@ export import pragma.server.entities.components.liquid_surface;
 export import pragma.server.entities.components.liquid_surface_simulation;
 export import pragma.server.entities.components.liquid_volume;
 export import pragma.server.entities.components.logic.relay;
+export import pragma.server.entities.components.lua;
 export import pragma.server.entities.components.name;
 export import pragma.server.entities.components.microphone;
 export import pragma.server.entities.components.model;

@@ -7,9 +7,9 @@ module;
 #include <pragma/lua/luaobjectbase.h>
 #include <pragma/lua/handle_holder.hpp>
 
-export module pragma.server.scripting.lua.classes.lua_entity;
+export module pragma.server.entities.lua;
 
-import pragma.server.entities;
+import pragma.server.entities.base;
 
 export {
 	class DLLSERVER SLuaEntity : public SBaseEntity {
@@ -26,9 +26,5 @@ export {
 		static void default_Initialize(SBaseEntity *ent);
 	protected:
 		virtual void InitializeLuaObject(lua_State *lua) override;
-	};
-
-	namespace pragma::lua {
-		using SLuaEntityHolder = HandleHolder<SLuaEntity>;
 	};
 };

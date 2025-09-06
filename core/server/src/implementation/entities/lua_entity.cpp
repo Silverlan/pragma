@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
 #include "pragma/networking/recipient_filter.hpp"
 #include "pragma/networking/iserver_client.hpp"
@@ -10,6 +12,8 @@
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/networking/enums.hpp>
 #include <pragma/networking/nwm_util.h>
+
+module pragma.server.entities.lua;
 
 import pragma.server.entities.components;
 import pragma.server.game;

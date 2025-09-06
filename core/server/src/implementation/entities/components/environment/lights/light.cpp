@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_server.h"
-#include "pragma/entities/s_entityfactories.h"
 #include "pragma/entities/baseentity_luaobject.h"
 #include "pragma/entities/shared_spawnflags.h"
 #include "pragma/serverstate/serverstate.h"

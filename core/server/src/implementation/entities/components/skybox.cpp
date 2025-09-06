@@ -4,9 +4,9 @@
 module;
 
 #include "stdafx_server.h"
-#include "pragma/entities/s_entityfactories.h"
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
+#include "pragma/networking/enums.hpp"
 #include <sharedutils/netpacket.hpp>
 #include "pragma/entities/s_baseentity.h"
 

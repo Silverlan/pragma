@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-#pragma once
+
+module;
 
 #include "pragma/entities/s_baseentity.h"
 #include "pragma/serverstate/serverstate.h"
@@ -12,13 +13,11 @@
 #include <mutex>
 #include <optional>
 
+export module pragma.server.entities.registration;
+
 #undef GetClassName
 
-class SBaseEntity;
-class ServerState;
-class SGame;
-
-namespace server_entities {
+export namespace server_entities {
     using Factory = std::function<SBaseEntity*(ServerState*)>;
     class ServerEntityRegistry {
     public:

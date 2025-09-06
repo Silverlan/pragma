@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_server.h"
-#include "pragma/entities/s_entityfactories.h"
 #include <sharedutils/util.h>
 #include <sharedutils/util_string.h>
 #include <sharedutils/netpacket.hpp>

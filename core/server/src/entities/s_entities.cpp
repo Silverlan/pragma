@@ -3,7 +3,6 @@
 
 #include "stdafx_server.h"
 #include <pragma/serverstate/serverstate.h>
-#include "pragma/entities/s_entityfactories.h"
 #include <servermanager/sv_nwm_recipientfilter.h>
 #include "pragma/entities/player.h"
 #include "pragma/game/s_game.h"
@@ -25,6 +24,7 @@
 
 import pragma.entities.components;
 import pragma.server.entities.components;
+import pragma.server.entities.registration;
 import pragma.server.scripting.lua;
 
 extern ServerState *server;

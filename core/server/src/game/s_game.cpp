@@ -4,7 +4,6 @@
 #include "stdafx_server.h"
 #include <pragma/serverstate/serverstate.h>
 #include "pragma/game/s_game.h"
-#include "pragma/entities/s_entityfactories.h"
 #include "pragma/networking/resourcemanager.h"
 #include <fsys/filesystem.h>
 #include "luasystem.h"
@@ -59,6 +58,7 @@ import pragma.entities.components;
 import pragma.server.ai;
 import pragma.server.debug;
 import pragma.server.entities.components;
+import pragma.server.entities.registration;
 import pragma.server.model_manager;
 import pragma.server.scripting.lua;
 

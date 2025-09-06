@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_server.h"
-#include "pragma/entities/s_entityfactories.h"
 #include <pragma/ai/navsystem.h>
 #include <pragma/model/animation/activities.h>
 #include "pragma/ai/ai_schedule.h"

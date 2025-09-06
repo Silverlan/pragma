@@ -1,9 +1,17 @@
 // SPDX-FileCopyrightText: (c) 2025 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
-#include "pragma/entities/s_entityfactories.h" // for ServerState, SGame
+#include "pragma/entities/s_baseentity.h"
+#include "pragma/serverstate/serverstate.h"
+#include "pragma/game/s_game.h"
 #include <stdexcept>
+
+#undef GetClassName
+
+module pragma.server.entities.registration;
 
 using namespace server_entities;
 

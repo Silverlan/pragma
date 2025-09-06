@@ -3,11 +3,12 @@
 
 #include "stdafx_server.h"
 #include "pragma/entities/s_baseentity.h"
-#include "pragma/entities/s_entityfactories.h"
 #include "pragma/audio/s_alsound.h"
 #include <pragma/lua/luacallback.h>
 #include <pragma/networking/nwm_util.h>
 #include "luasystem.h"
+#include "pragma/game/s_game.h"
+#include "pragma/serverstate/serverstate.h"
 #include "pragma/entities/parentinfo.h"
 #include <pragma/lua/luafunction_call.h>
 #include "pragma/entities/player.h"
@@ -33,11 +34,14 @@
 
 import pragma.server.audio;
 import pragma.server.entities.components;
+import pragma.server.entities.registration;
 import pragma.server.model_manager;
 
 extern DLLNETWORK Engine *engine;
 extern ServerState *server;
 extern SGame *s_game;
+
+#undef GetClassName;
 
 SBaseEntity::SBaseEntity() : BaseEntity(), m_bShared(false), m_bSynchronized(true) {}
 

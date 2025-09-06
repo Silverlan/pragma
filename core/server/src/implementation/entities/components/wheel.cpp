@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_server.h"
 //#include "ldef_wheel.h"
-#include "pragma/entities/s_entityfactories.h"
 #include "pragma/entities/baseentity_luaobject.h"
 #include "pragma/game/s_game.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>

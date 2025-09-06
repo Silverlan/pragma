@@ -3,13 +3,13 @@
 
 #include "stdafx_server.h"
 #include <pragma/serverstate/serverstate.h>
-#include "pragma/entities/s_entityfactories.h"
 #include "pragma/game/s_game.h"
 #include "pragma/entities/player.h"
 #include "pragma/entities/s_npc_dragonworm.h"
 #include "pragma/entities/s_ent_debug.hpp"
 
 import pragma.server.entities.components;
+import pragma.server.entities.registration;
 
 void register_entites()
 {

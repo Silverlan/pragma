@@ -7,7 +7,6 @@ module;
 #include <pragma/physics/physobj.h>
 #include <sharedutils/util_string.h>
 #include <sharedutils/util.h>
-#include "pragma/entities/player.h"
 #include <pragma/entities/baseentity_events.hpp>
 #include <pragma/util/util_handled.hpp>
 #include <pragma/entities/components/basetriggergravity.hpp>
@@ -18,6 +17,7 @@ module;
 
 module pragma.server.entities.components.triggers.gravity;
 
+import pragma.server.entities;
 import pragma.server.server_state;
 
 using namespace pragma;

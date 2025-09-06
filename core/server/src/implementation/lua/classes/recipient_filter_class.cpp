@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_server.h"
-#include "pragma/entities/player.h"
 #include "pragma/networking/recipient_filter.hpp"
 #include "pragma/lua/classes/ldef_recipientfilter.h"
 #include "pragma/lua/classes/ldef_entity.h"
@@ -12,6 +11,7 @@ module;
 
 module pragma.server.scripting.lua.classes.recipient_filter;
 
+import pragma.server.entities;
 import pragma.server.server_state;
 
 extern ServerState *server;

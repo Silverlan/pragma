@@ -5,7 +5,6 @@
 #include <pragma/engine.h>
 #include "pragma/console/s_cvar_global.h"
 #include "pragma/console/cvar_global.h"
-#include "pragma/entities/player.h"
 #include "pragma/networking/iserver.hpp"
 #include "pragma/networking/iserver_client.hpp"
 #include "pragma/entities/components/s_player_component.hpp"
@@ -19,6 +18,7 @@
 #include <pragma/networking/netmessages.h>
 #include <pragma/entities/entity_iterator.hpp>
 
+import pragma.server.entities;
 import pragma.server.entities.components;
 import pragma.server.game;
 import pragma.server.server_state;

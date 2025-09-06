@@ -4,7 +4,6 @@
 #include "stdafx_server.h"
 #include "pragma/lua/s_lentity_components.hpp"
 #include "pragma/networking/recipient_filter.hpp"
-#include "pragma/entities/components/s_player_component.hpp"
 #include "pragma/entities/components/base_color_component.hpp"
 #include "pragma/entities/components/base_child_component.hpp"
 #include "pragma/entities/components/base_debug_component.hpp"
@@ -70,6 +69,7 @@
 #include <pragma/lua/ostream_operator_alias.hpp>
 
 import pragma.entities.components;
+import pragma.server.entities;
 import pragma.server.entities.components;
 import pragma.server.game;
 

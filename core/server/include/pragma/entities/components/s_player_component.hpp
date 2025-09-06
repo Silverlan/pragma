@@ -10,7 +10,6 @@
 #include <pragma/networking/ip_address.hpp>
 #include <networkmanager/wrappers/nwm_ip_address.hpp>
 
-class Player;
 namespace pragma {
 	namespace networking {
 		class IServerClient;

@@ -6,7 +6,6 @@ module;
 #include "stdafx_server.h"
 #include "pragma/networking/netmessages.h"
 #include "pragma/networking/resourcemanager.h"
-#include "pragma/entities/player.h"
 #include "pragma/networking/iserver_client.hpp"
 #include "pragma/networking/standard_server.hpp"
 #include "pragma/console/convarhandle.h"
@@ -32,6 +31,7 @@ module;
 module pragma.server.server_state;
 
 import pragma.server.core;
+import pragma.server.entities;
 import pragma.server.game;
 import pragma.server.model_manager;
 

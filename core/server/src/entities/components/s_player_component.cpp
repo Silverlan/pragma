@@ -4,7 +4,6 @@
 #include "stdafx_server.h"
 #include "pragma/entities/components/s_player_component.hpp"
 #include "pragma/physics/collisiontypes.h"
-#include "pragma/entities/player.h"
 #include "pragma/networking/s_nwm_util.h"
 #include "pragma/networking/iserver_client.hpp"
 #include "pragma/networking/recipient_filter.hpp"
@@ -12,6 +11,7 @@
 #include <pragma/networking/error.hpp>
 #include <pragma/util/util_handled.hpp>
 #include <pragma/model/model.h>
+#include "pragma/entities/s_baseentity.h"
 #include <pragma/entities/components/base_animated_component.hpp>
 #include <pragma/entities/components/base_character_component.hpp>
 #include <pragma/entities/components/base_physics_component.hpp>
@@ -25,6 +25,7 @@
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
 import pragma.entities.components;
+import pragma.server.entities;
 import pragma.server.entities.components;
 import pragma.server.server_state;
 

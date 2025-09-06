@@ -9,7 +9,6 @@
 #include "luasystem.h"
 #include "pragma/entities/parentinfo.h"
 #include <pragma/lua/luafunction_call.h>
-#include "pragma/entities/player.h"
 #include "pragma/networking/recipient_filter.hpp"
 #include "pragma/lua/lua_handles.hpp"
 #include "pragma/entities/components/s_entity_component.hpp"
@@ -31,6 +30,7 @@
 #include <pragma/entities/entity_component_system_t.hpp>
 
 import pragma.server.audio;
+import pragma.server.entities;
 import pragma.server.entities.components;
 import pragma.server.entities.registration;
 import pragma.server.game;

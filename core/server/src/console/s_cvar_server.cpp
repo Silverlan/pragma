@@ -4,7 +4,6 @@
 #include "stdafx_server.h"
 #include "pragma/console/s_cvar_server.h"
 #include <pragma/engine.h>
-#include "pragma/entities/player.h"
 #include <pragma/physics/raytraces.h>
 #include <pragma/ai/navsystem.h>
 #include <pragma/networking/nwm_util.h>
@@ -19,6 +18,7 @@
 #include <pragma/console/sh_cmd.h>
 #include <pragma/networking/netmessages.h>
 
+import pragma.server.entities;
 import pragma.server.entities.components;
 import pragma.server.game;
 import pragma.server.server_state;

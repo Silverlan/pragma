@@ -7,9 +7,9 @@
 #include "pragma/networking/resources.h"
 #include <fsys/filesystem.h>
 #include <mathutil/umath.h>
-#include "pragma/entities/player.h"
 #include <sharedutils/util_file.h>
 
+import pragma.server.entities;
 import pragma.server.game;
 import pragma.server.server_state;
 

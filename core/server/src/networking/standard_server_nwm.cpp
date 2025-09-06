@@ -4,7 +4,6 @@
 #include "stdafx_server.h"
 #include "pragma/networking/standard_server.hpp"
 #include "pragma/networking/netmessages.h"
-#include "pragma/entities/player.h"
 #include "wms_shared.h"
 #include "wms_message.h"
 #include "pragma/networking/wv_message.h"
@@ -18,6 +17,7 @@
 #include <servermanager/interface/sv_nwm_manager_create.hpp>
 #include <sharedutils/util_clock.hpp>
 
+import pragma.server.entities;
 import pragma.server.server_state;
 
 #define DEBUG_SERVER_VERBOSE 1

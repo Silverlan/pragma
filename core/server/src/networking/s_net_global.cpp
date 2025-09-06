@@ -4,7 +4,6 @@
 #include "stdafx_server.h"
 #include "pragma/networking/s_net_global.h"
 #include "pragma/networking/resourcemanager.h"
-#include "pragma/entities/player.h"
 #include "pragma/physics/movetypes.h"
 #include <pragma/networking/nwm_util.h>
 #include "pragma/networking/iserver.hpp"
@@ -25,6 +24,7 @@
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <sharedutils/util_library.hpp>
 
+import pragma.server.entities;
 import pragma.server.entities.components;
 import pragma.server.game;
 import pragma.server.server_state;

@@ -3,7 +3,6 @@
 
 #include "stdafx_server.h"
 #include <servermanager/sv_nwm_recipientfilter.h>
-#include "pragma/entities/player.h"
 #include "luasystem.h"
 #include <sharedutils/util_string.h>
 #include <pragma/networking/nwm_util.h>
@@ -20,6 +19,7 @@
 #include <udm.hpp>
 
 import pragma.entities.components;
+import pragma.server.entities;
 import pragma.server.entities.components;
 import pragma.server.entities.registration;
 import pragma.server.game;

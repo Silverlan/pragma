@@ -8,7 +8,6 @@ module;
 #include <fsys/filesystem.h>
 #include "luasystem.h"
 #include "pragma/networking/recipient_filter.hpp"
-#include "pragma/entities/player.h"
 #include "pragma/cacheinfo.h"
 #include <pragma/model/brush/brushmesh.h>
 #include "pragma/level/mapgeometry.h"
@@ -58,6 +57,7 @@ module pragma.server.game;
 import pragma.entities.components;
 import pragma.server.ai;
 import pragma.server.debug;
+import pragma.server.entities;
 import pragma.server.entities.components;
 import pragma.server.entities.registration;
 import pragma.server.game;

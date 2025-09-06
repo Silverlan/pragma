@@ -4,9 +4,9 @@
 module;
 
 #include "stdafx_server.h"
-#include "pragma/entities/player.h"
 #include "pragma/networking/recipient_filter.hpp"
 #include "pragma/networking/enums.hpp"
+#include "pragma/entities/s_baseentity.h"
 #include "pragma/entities/components/s_player_component.hpp"
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/components/base_character_component.hpp>
@@ -23,6 +23,7 @@ module;
 
 module pragma.server.entities.components.weapon;
 
+import pragma.server.entities;
 import pragma.server.entities.components;
 import pragma.server.server_state;
 

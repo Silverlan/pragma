@@ -18,7 +18,7 @@ module pragma.server.entities.components.flammable;
 
 using namespace pragma;
 
-extern DLLSERVER SGame *s_game;
+extern SGame *s_game;
 
 SFlammableComponent::IgniteInfo::IgniteInfo() : damageTimer() {}
 

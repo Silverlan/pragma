@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_server.h"
-#include "pragma/serverstate/serverstate.h"
 #include <pragma/game/damageinfo.h>
 #include <sharedutils/util_string.h>
 #include <pragma/networking/nwm_util.h>
@@ -14,9 +13,9 @@ module;
 
 module pragma.server.entities.components.effects.explosion;
 
-using namespace pragma;
+import pragma.server.server_state;
 
-extern ServerState *server;
+using namespace pragma;
 
 void SExplosionComponent::Explode()
 {

@@ -15,7 +15,7 @@ module pragma.server.entities.components.func.brush;
 
 using namespace pragma;
 
-extern DLLSERVER SGame *s_game;
+extern SGame *s_game;
 
 void SBrushComponent::Initialize() { BaseFuncBrushComponent::Initialize(); }
 void SBrushComponent::OnEntitySpawn()

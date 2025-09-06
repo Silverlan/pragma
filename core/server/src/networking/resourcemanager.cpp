@@ -9,11 +9,12 @@
 #include <mathutil/umath.h>
 #include "pragma/entities/player.h"
 #include "pragma/game/s_game.h"
-#include "pragma/serverstate/serverstate.h"
 #include <sharedutils/util_file.h>
 
-extern DLLSERVER ServerState *server;
-extern DLLSERVER SGame *s_game;
+import pragma.server.server_state;
+
+extern ServerState *server;
+extern SGame *s_game;
 
 ResourceManager::ResourceInfo::ResourceInfo(const std::string &_fileName, bool _stream) : fileName(_fileName), stream(_stream) {}
 

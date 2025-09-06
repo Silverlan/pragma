@@ -6,8 +6,7 @@
 #include "pragma/scripts.h"
 #include <fsys/filesystem.h>
 #include "pragma/serverdefinitions.h"
-class ServerState;
-extern ServerState *server;
+
 Bool NetworkState::IsSoundPrecached(const std::string &snd) const
 {
 	std::string lsnd = snd;

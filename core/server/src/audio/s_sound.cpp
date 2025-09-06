@@ -4,7 +4,6 @@
 #include "stdafx_server.h"
 #include <pragma/engine.h>
 #include "pragma/game/s_game.h"
-#include <pragma/serverstate/serverstate.h>
 #include "pragma/audio/s_alsound.h"
 #include <pragma/audio/soundscript.h>
 #include "pragma/scripts.h"
@@ -23,6 +22,8 @@
 
 import pragma.audio.util;
 import pragma.server.audio;
+
+import pragma.server.server_state;
 
 void ServerState::SendSoundSourceToClient(SALSound &sound, bool sendFullUpdate, const pragma::networking::ClientRecipientFilter *rf)
 {

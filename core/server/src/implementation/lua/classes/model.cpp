@@ -5,14 +5,14 @@ module;
 
 #include "stdafx_server.h"
 #include "luasystem.h"
-#include "pragma/serverstate/serverstate.h"
 #include <pragma/model/model.h>
 #include "pragma/lua/classes/ldef_model.h"
 #include <pragma/lua/classes/lmodel.h>
 
 module pragma.server.scripting.lua.classes.model;
+import pragma.server.server_state;
 
-extern DLLSERVER ServerState *server;
+extern ServerState *server;
 
 void Lua::Model::Server::AddMaterial(lua_State *l, ::Model &mdl, uint32_t textureGroup, const std::string &name)
 {

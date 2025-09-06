@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_server.h"
-#include "pragma/serverstate/serverstate.h"
 #include "pragma/lua/lnetmessages.h"
 #include "pragma/game/s_game.h"
 #include <servermanager/sv_nwm_recipientfilter.h>
@@ -19,6 +18,7 @@
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
 import pragma.server.scripting.lua;
+import pragma.server.server_state;
 
 void SGame::HandleLuaNetPacket(pragma::networking::IServerClient &session, ::NetPacket &packet)
 {

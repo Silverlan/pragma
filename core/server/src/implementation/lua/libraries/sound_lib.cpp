@@ -5,9 +5,10 @@ module;
 
 #include "stdafx_server.h"
 #include "pragma/lua/libraries/lsound.h"
-#include "pragma/serverstate/serverstate.h"
 
 module pragma.server.scripting.lua.libraries.sound;
+
+import pragma.server.server_state;
 
 int Lua::sound::Server::create(lua_State *l)
 {

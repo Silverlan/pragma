@@ -5,9 +5,10 @@ module;
 
 #include "stdafx_server.h"
 #include "luasystem.h"
-#include <pragma/serverstate/serverstate.h>
 
 module pragma.server.scripting.lua.libraries.engine;
+
+import pragma.server.server_state;
 
 extern ServerState *server;
 

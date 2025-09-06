@@ -15,7 +15,7 @@ import pragma.server.entities.components;
 
 using namespace pragma;
 
-extern DLLSERVER SGame *s_game;
+extern SGame *s_game;
 
 void ai::TaskLookAtTarget::SetLookDuration(float dur) { SetParameter(umath::to_integral(Parameter::LookDuration), dur); }
 void ai::TaskLookAtTarget::Print(const Schedule *sched, std::ostream &o) const

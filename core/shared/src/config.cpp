@@ -6,7 +6,6 @@
 #include "pragma/console/conout.h"
 #include "pragma/logging.hpp"
 #include <fsys/filesystem.h>
-#include <pragma/serverstate/serverstate.h>
 #include <pragma/console/convars.h>
 #include <sharedutils/util_string.h>
 
@@ -146,7 +145,7 @@ void Engine::WriteEngineConfig(VFilePtrReal f)
 
 void Engine::WriteServerConfig(VFilePtrReal f)
 {
-	auto *stateSv = GetServerState();
+	auto *stateSv = GetServerNetworkState();
 	if(stateSv != nullptr) {
 		auto &cvars = stateSv->GetConVars();
 

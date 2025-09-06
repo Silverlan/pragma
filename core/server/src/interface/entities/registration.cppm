@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/entities/s_baseentity.h"
-#include "pragma/serverstate/serverstate.h"
 #include "pragma/game/s_game.h"
 #include <unordered_map>
 #include <functional>
@@ -14,6 +13,8 @@ module;
 #include <optional>
 
 export module pragma.server.entities.registration;
+
+import pragma.server.server_state;
 
 #undef GetClassName
 

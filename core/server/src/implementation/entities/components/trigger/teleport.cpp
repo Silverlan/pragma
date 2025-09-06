@@ -14,7 +14,7 @@ module pragma.server.entities.components.triggers.teleport;
 
 using namespace pragma;
 
-extern DLLSERVER SGame *s_game;
+extern SGame *s_game;
 
 void STriggerTeleportComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 

@@ -10,7 +10,7 @@ module;
 
 module pragma.server.core.resource_watcher;
 
-extern DLLSERVER SGame *s_game;
+extern SGame *s_game;
 
 decltype(ESResourceWatcherCallbackType::NavMesh) ESResourceWatcherCallbackType::NavMesh = ESResourceWatcherCallbackType {umath::to_integral(E::NavMesh)};
 decltype(ESResourceWatcherCallbackType::Count) ESResourceWatcherCallbackType::Count = ESResourceWatcherCallbackType {umath::to_integral(E::Count)};

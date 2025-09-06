@@ -11,7 +11,7 @@ module;
 
 module pragma.server.entities.components.toggle;
 
-extern DLLSERVER SGame *s_game;
+extern SGame *s_game;
 
 using namespace pragma;
 

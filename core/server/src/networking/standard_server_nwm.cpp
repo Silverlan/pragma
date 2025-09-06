@@ -9,7 +9,6 @@
 #include "wms_message.h"
 #include "pragma/networking/wv_message.h"
 #include "wmserverdata.h"
-#include "pragma/serverstate/serverstate.h"
 #include "pragma/entities/components/s_player_component.hpp"
 #include <servermanager/connection/sv_nwm_tcpconnection.h>
 #include <servermanager/connection/sv_nwm_udpconnection.h>
@@ -19,6 +18,8 @@
 #include <servermanager/interface/sv_nwm_manager_create.hpp>
 #include <sharedutils/util_clock.hpp>
 
+import pragma.server.server_state;
+
 #define DEBUG_SERVER_VERBOSE 1
 
 #ifdef _DEBUG
@@ -27,7 +28,7 @@
 #define GET_TIMEOUT_DURATION(f) f
 #endif
 
-extern DLLSERVER ServerState *server;
+extern ServerState *server;
 
 pragma::networking::NWMActiveServer::NWMActiveServer(const std::shared_ptr<SVNWMUDPConnection> &udp, const std::shared_ptr<SVNWMTCPConnection> &tcp) : nwm::Server(udp, tcp), m_lastHeartBeat() { m_dispatcher = UDPMessageDispatcher::Create(); }
 nwm::ServerClient &pragma::networking::NWMActiveServer::GetNWMClient(StandardServerClient &cl) const { return cl.GetNWMClient(); }

@@ -5,16 +5,15 @@ module;
 
 #include "stdafx_server.h"
 #include <sharedutils/netpacket.hpp>
-#include "pragma/serverstate/serverstate.h"
+#include "pragma/entities/s_baseentity.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/networking/nwm_util.h>
 #include <pragma/networking/enums.hpp>
 
 module pragma.server.entities.components.name;
+import pragma.server.server_state;
 
 using namespace pragma;
-
-extern DLLSERVER ServerState *server;
 
 void SNameComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) { packet->WriteString(GetName()); }
 void SNameComponent::SetName(std::string name)

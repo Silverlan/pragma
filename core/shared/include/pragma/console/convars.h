@@ -35,14 +35,12 @@ namespace console {
 	}
 };
 
-class ServerState;
 #pragma warning(push)
 #pragma warning(disable : 4251)
 class DLLNETWORK ConConf {
   public:
 	friend CVarHandler;
 	friend NetworkState;
-	friend ServerState;
 	friend ConVarMap;
   protected:
 	ConConf(ConVarFlags flags = ConVarFlags::None);

@@ -8,7 +8,6 @@
 #include "pragma/lua/libraries/ldebug.h"
 #include "pragma/lua/lua_error_handling.hpp"
 #include "pragma/logging.hpp"
-#include <pragma/serverstate/serverstate.h>
 #include <pragma/console/convarhandle.h>
 #include "luasystem.h"
 #include <sharedutils/netpacket.hpp>
@@ -518,14 +517,11 @@ void Engine::ClearCache()
 	Con::cout << "Cache cleared successfully! Please restart the Engine." << Con::endl;
 }
 
-ServerState *Engine::GetServerState() const
-{
+NetworkState *Engine::GetServerNetworkState() const {
 	if(m_svInstance == nullptr)
 		return nullptr;
-	return static_cast<ServerState *>(m_svInstance->state.get());
+	return m_svInstance->state.get();
 }
-
-NetworkState *Engine::GetServerNetworkState() const { return static_cast<NetworkState *>(GetServerState()); }
 
 void Engine::EndGame()
 {
@@ -784,7 +780,7 @@ bool Engine::Initialize(int argc, char *argv[])
 		ClearCache();
 	}
 
-	ServerState *server = OpenServerState();
+	auto *server = OpenServerState();
 	if(server != nullptr && IsServerOnly())
 		LoadConfig();
 
@@ -856,7 +852,7 @@ void Engine::RunLaunchCommands()
 
 			auto *nw = GetClientState();
 			if(!nw)
-				nw = GetServerState();
+				nw = GetServerNetworkState();
 			if(nw) {
 				spdlog::info("{} game commands will be executed after map load.", remainingCommands.size());
 				auto cbOnGameStart = FunctionCallback<void>::Create(nullptr);
@@ -1162,16 +1158,16 @@ void Engine::Think()
 		sv->Think();
 }
 
-ServerState *Engine::OpenServerState()
+NetworkState *Engine::OpenServerState()
 {
 	CloseServerState();
-	std::unique_ptr<ServerState> svState;
+	std::unique_ptr<NetworkState> svState;
 	GetServerStateInterface().create_server_state(svState);
 	m_svInstance->state = std::move(svState);
 	auto *sv = GetServerNetworkState();
 	sv->Initialize();
 	UpdateAssetMultiThreadedLoadingEnabled();
-	return static_cast<ServerState *>(sv);
+	return sv;
 }
 
 void Engine::CloseServerState()
@@ -1215,7 +1211,7 @@ Engine::~Engine()
 }
 
 Engine *pragma::get_engine() { return engine; }
-ServerState *pragma::get_server_state() { return engine->GetServerStateInterface().get_server_state(); }
+NetworkState *pragma::get_server_state() { return engine->GetServerStateInterface().get_server_state(); }
 
 REGISTER_ENGINE_CONVAR_CALLBACK(debug_profiling_enabled, [](NetworkState *, const ConVar &, bool, bool enabled) {
 	if(engine == nullptr)

@@ -16,7 +16,7 @@ import pragma.server.entities.components;
 
 using namespace pragma;
 
-extern DLLSERVER SGame *s_game;
+extern SGame *s_game;
 
 void ai::TaskMoveRandom::Print(const Schedule *sched, std::ostream &o) const { o << "MoveRandom[" << GetMoveDistance(sched) << "]"; }
 void ai::TaskMoveRandom::SetMoveDistance(float dist) { SetParameter(umath::to_integral(Parameter::Distance), dist); }

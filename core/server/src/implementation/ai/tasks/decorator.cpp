@@ -12,7 +12,7 @@ module pragma.server.ai.tasks.decorator;
 
 using namespace pragma;
 
-extern DLLSERVER SGame *s_game;
+extern SGame *s_game;
 
 void ai::TaskDecorator::Initialize(const Schedule *sched)
 {

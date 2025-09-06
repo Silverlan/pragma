@@ -4,10 +4,11 @@
 module;
 
 #include "stdafx_server.h"
-#include <pragma/serverstate/serverstate.h>
 #include "luasystem.h"
 
 module pragma.server.scripting.lua.libraries.debug;
+
+import pragma.server.server_state;
 
 std::string Lua::debug::Server::behavior_selector_type_to_string(pragma::ai::SelectorType selectorType)
 {

@@ -19,12 +19,12 @@ module;
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <servermanager/interface/sv_nwm_manager.hpp>
 #include <sharedutils/datastream.h>
-#include "pragma/serverstate/serverstate.h"
 #include <pragma/networking/nwm_util.h>
 
 module pragma.server.entities.components.weapon;
 
 import pragma.server.entities.components;
+import pragma.server.server_state;
 
 using namespace pragma;
 
@@ -32,7 +32,6 @@ std::vector<SWeaponComponent *> SWeaponComponent::s_weapons;
 const std::vector<SWeaponComponent *> &SWeaponComponent::GetAll() { return s_weapons; }
 unsigned int SWeaponComponent::GetWeaponCount() { return static_cast<uint32_t>(s_weapons.size()); }
 
-extern DLLSERVER ServerState *server;
 SWeaponComponent::SWeaponComponent(BaseEntity &ent) : BaseWeaponComponent(ent) { s_weapons.push_back(this); }
 
 SWeaponComponent::~SWeaponComponent()

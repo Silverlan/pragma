@@ -28,7 +28,6 @@
 #endif
 
 class NetworkState;
-class ServerState;
 class VFilePtrInternalReal;
 class PtrConVar;
 class NetPacket;
@@ -243,11 +242,9 @@ class DLLNETWORK Engine : public CVarHandler, public CallbackHandler {
 	bool IsSinglePlayer() const;
 	bool IsActiveState(NetworkState *state);
 	bool IsServerRunning();
-	// ServerState
-	ServerState *GetServerState() const;
 	// Same as GetServerState, but returns base pointer
 	NetworkState *GetServerNetworkState() const;
-	ServerState *OpenServerState();
+	NetworkState *OpenServerState();
 	virtual NetworkState *GetClientState() const;
 	void CloseServerState();
 	void StartServer(bool singlePlayer);
@@ -373,7 +370,7 @@ REGISTER_BASIC_BITWISE_OPERATORS(Engine::StateFlags)
 
 namespace pragma {
 	DLLNETWORK Engine *get_engine();
-	DLLNETWORK ServerState *get_server_state();
+	DLLNETWORK NetworkState *get_server_state();
 };
 
 template<class T>

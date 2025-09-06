@@ -6,7 +6,6 @@
 #include "pragma/networking/recipient_filter.hpp"
 #include "pragma/networking/iserver_client.hpp"
 #include "pragma/game/s_game.h"
-#include "pragma/serverstate/serverstate.h"
 #include <pragma/entities/components/map_component.hpp>
 #include <servermanager/interface/sv_nwm_manager.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
@@ -16,8 +15,10 @@
 
 import pragma.server.scripting.lua;
 
-extern DLLSERVER SGame *s_game;
-extern DLLSERVER ServerState *server;
+import pragma.server.server_state;
+
+extern SGame *s_game;
+extern ServerState *server;
 
 SLuaEntity::SLuaEntity() : SBaseEntity {} {}
 void SLuaEntity::Initialize()

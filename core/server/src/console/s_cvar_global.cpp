@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_server.h"
-#include <pragma/serverstate/serverstate.h>
 #include <pragma/engine.h>
 #include "pragma/console/s_cvar_global.h"
 #include "pragma/game/s_game.h"
@@ -22,10 +21,11 @@
 #include <pragma/entities/entity_iterator.hpp>
 
 import pragma.server.entities.components;
+import pragma.server.server_state;
 
 extern DLLNETWORK Engine *engine;
-extern DLLSERVER ServerState *server;
-extern DLLSERVER SGame *s_game;
+extern ServerState *server;
+extern SGame *s_game;
 void CMD_drop(NetworkState *, pragma::BasePlayerComponent *pl, std::vector<std::string> &)
 {
 	if(pl == nullptr)

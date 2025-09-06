@@ -15,7 +15,7 @@ module pragma.server.entities.components.ai;
 
 using namespace pragma;
 
-extern DLLSERVER SGame *s_game;
+extern SGame *s_game;
 
 void SAIComponent::UpdateMemory()
 {

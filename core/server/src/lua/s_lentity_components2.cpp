@@ -59,7 +59,7 @@ import pragma.server.entities.components;
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, BaseEntityComponent);
 #endif
 
-extern DLLSERVER SGame *s_game;
+extern SGame *s_game;
 
 void RegisterLuaEntityComponents2_sv(lua_State *l, luabind::module_ &entsMod)
 {

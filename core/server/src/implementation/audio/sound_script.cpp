@@ -4,13 +4,13 @@
 module;
 
 #include "stdafx_server.h"
-#include "pragma/serverstate/serverstate.h"
 #include <pragma/audio/soundscript_events.h>
-#include "pragma/serverstate/serverstate.h"
 
 module pragma.server.audio.sound_script;
 
-extern DLLSERVER ServerState *server;
+import pragma.server.server_state;
+
+extern ServerState *server;
 
 SALSoundScript::SALSoundScript(NetworkState *nw, unsigned int idx, SoundScript *script, NetworkState *state, const std::string &soundName, ALCreateFlags createFlags)
     : ALSoundScript(nw, idx, script, state, umath::is_flag_set(createFlags, ALCreateFlags::Stream)), SALSound(nw, idx, 0.f, soundName, createFlags), ALSound(nw)

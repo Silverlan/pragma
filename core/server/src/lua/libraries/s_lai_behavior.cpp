@@ -12,7 +12,7 @@ import pragma.server.ai;
 import pragma.server.entities.components;
 import pragma.server.scripting.lua;
 
-extern DLLSERVER SGame *s_game;
+extern SGame *s_game;
 
 namespace Lua {
 	namespace AIBehaviorNode {

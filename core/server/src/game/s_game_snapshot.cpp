@@ -6,7 +6,6 @@
 #include "pragma/entities/components/s_player_component.hpp"
 #include "pragma/networking/iserver_client.hpp"
 #include "pragma/networking/recipient_filter.hpp"
-#include "pragma/serverstate/serverstate.h"
 #include "pragma/entities/player.h"
 #include <pragma/entities/baseplayer.hpp>
 #include <pragma/networking/snapshot_flags.hpp>
@@ -18,7 +17,9 @@
 #include <pragma/networking/nwm_util.h>
 #include <pragma/networking/enums.hpp>
 
-extern DLLSERVER ServerState *server;
+import pragma.server.server_state;
+
+extern ServerState *server;
 
 void SGame::SendSnapshot(pragma::SPlayerComponent *pl)
 {

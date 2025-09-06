@@ -22,7 +22,7 @@ import pragma.server.entities.components;
 
 using namespace pragma;
 
-extern DLLSERVER SGame *s_game;
+extern SGame *s_game;
 
 SLiquidComponent::SLiquidComponent(BaseEntity &ent) : BaseFuncLiquidComponent(ent) {}
 SLiquidComponent::~SLiquidComponent()

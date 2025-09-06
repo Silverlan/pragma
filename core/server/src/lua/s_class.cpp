@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_server.h"
-#include "pragma/serverstate/serverstate.h"
 #include "pragma/game/s_game.h"
 #include "pragma/lua/classes/lentity.h"
 #include "pragma/lua/classes/lmodelmesh.h"
@@ -31,6 +30,8 @@
 #include <pragma/entities/entity_component_system_t.hpp>
 
 import pragma.server.scripting.lua;
+
+import pragma.server.server_state;
 
 void SGame::RegisterLuaClasses()
 {

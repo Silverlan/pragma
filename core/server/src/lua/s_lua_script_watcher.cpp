@@ -5,10 +5,11 @@
 #include "pragma/lua/s_lua_script_watcher.h"
 #include "pragma/networking/resourcemanager.h"
 #include "pragma/game/s_game.h"
-#include "pragma/serverstate/serverstate.h"
 
-extern DLLSERVER ServerState *server;
-extern DLLSERVER SGame *s_game;
+import pragma.server.server_state;
+
+extern ServerState *server;
+extern SGame *s_game;
 
 void SLuaDirectoryWatcherManager::OnLuaFileChanged(const std::string &path)
 {

@@ -13,16 +13,13 @@ module;
 #include <pragma/debug/debugbehaviortree.h>
 #include <pragma/networking/nwm_util.h>
 #include "pragma/game/s_game.h"
-#include "pragma/serverstate/serverstate.h"
 
 module pragma.server.entities.components.ai;
 
 import pragma.server.scripting.lua;
+import pragma.server.server_state;
 
 using namespace pragma;
-
-extern DLLSERVER ServerState *server;
-extern DLLSERVER SGame *s_game;
 
 void SAIComponent::_debugSendNavInfo(pragma::SPlayerComponent &pl)
 {

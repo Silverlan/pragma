@@ -12,18 +12,15 @@ module;
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <servermanager/interface/sv_nwm_manager.hpp>
 #include "pragma/game/s_game.h"
-#include "pragma/serverstate/serverstate.h"
 #include <pragma/networking/nwm_util.h>
 #include <pragma/networking/enums.hpp>
 
 module pragma.server.entities.components.physics;
 
 import pragma.server.model_manager;
+import pragma.server.server_state;
 
 using namespace pragma;
-
-extern DLLSERVER ServerState *server;
-extern DLLSERVER SGame *s_game;
 
 void SPhysicsComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { BasePhysicsComponent::RegisterEvents(componentManager, registerEvent); }
 void SPhysicsComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)

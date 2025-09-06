@@ -8,7 +8,7 @@
 #include <servermanager/interface/sv_nwm_manager.hpp>
 #include <networkmanager/nwm_error_handle.h>
 
-extern DLLSERVER ServerState *server;
+import pragma.server.server_state;
 
 static void pragma_recipient_filter_to_nwm(const pragma::networking::NWMActiveServer &sv, const pragma::networking::ClientRecipientFilter &inRf, nwm::RecipientFilter &outRf)
 {

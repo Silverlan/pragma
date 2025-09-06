@@ -3,7 +3,6 @@
 
 #include "stdafx_shared.h"
 #include "pragma/engine.h"
-#include <pragma/serverstate/serverstate.h>
 #include <pragma/console/convars.h>
 
 std::string Engine::GetConVarString(const std::string &cv)
@@ -40,7 +39,7 @@ bool Engine::GetConVarBool(const std::string &cv)
 
 ConConf *Engine::GetConVar(const std::string &cv)
 {
-	ServerState *stateSv = GetServerState();
+	auto *stateSv = GetServerNetworkState();
 	auto *cvar = (stateSv != nullptr) ? stateSv->GetConVar(cv) : nullptr;
 	if(cvar == nullptr)
 		cvar = CVarHandler::GetConVar(cv);

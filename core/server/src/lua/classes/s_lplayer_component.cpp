@@ -18,6 +18,8 @@
 
 import pragma.server.entities.components;
 
+import pragma.server.server_state;
+
 namespace Lua {
 	namespace Player {
 		namespace Server {
@@ -28,8 +30,6 @@ namespace Lua {
 		};
 	};
 };
-
-extern DLLSERVER ServerState *server;
 
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, BasePlayerComponent);
 

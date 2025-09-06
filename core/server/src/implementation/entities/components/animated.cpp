@@ -4,17 +4,17 @@
 module;
 
 #include "stdafx_server.h"
+#include "pragma/entities/s_baseentity.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
-#include "pragma/serverstate/serverstate.h"
 #include <pragma/networking/enums.hpp>
 #include <pragma/networking/nwm_util.h>
 #include <pragma/networking/enums.hpp>
 
 module pragma.server.entities.components.animated;
 
-using namespace pragma;
+import pragma.server.server_state;
 
-extern DLLSERVER ServerState *server;
+using namespace pragma;
 
 void SAnimatedComponent::Initialize() { BaseAnimatedComponent::Initialize(); }
 void SAnimatedComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }

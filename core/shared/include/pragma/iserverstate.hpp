@@ -10,7 +10,7 @@
 #include <optional>
 
 class NetPacket;
-class ServerState;
+class NetworkState;
 namespace util {
 	class Library;
 };
@@ -18,12 +18,12 @@ namespace pragma {
 	struct DLLNETWORK IServerState final {
 		void Initialize(::util::Library &lib);
 		IServerState() = default;
-		void (*create_server_state)(std::unique_ptr<ServerState> &) = nullptr;
+		void (*create_server_state)(std::unique_ptr<NetworkState> &) = nullptr;
 		void (*start_server)(bool) = nullptr;
 		void (*close_server)() = nullptr;
 		bool (*is_server_running)() = nullptr;
 		void (*get_server_steam_id)(std::optional<uint64_t> &) = nullptr;
-		ServerState *(*get_server_state)() = nullptr;
+		NetworkState *(*get_server_state)() = nullptr;
 		void (*clear_server_state)() = nullptr;
 		void (*handle_local_host_player_server_packet)(NetPacket &) = nullptr;
 		bool (*connect_local_host_player_client)() = nullptr;

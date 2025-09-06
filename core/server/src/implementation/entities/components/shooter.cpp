@@ -14,17 +14,14 @@ module;
 #include <pragma/util/bulletinfo.h>
 #include <sharedutils/scope_guard.h>
 #include "pragma/game/s_game.h"
-#include "pragma/serverstate/serverstate.h"
 #include <servermanager/interface/sv_nwm_manager.hpp>
 
 module pragma.server.entities.components.shooter;
 
 import pragma.server.entities.components;
+import pragma.server.server_state;
 
 using namespace pragma;
-
-extern DLLSERVER ServerState *server;
-extern DLLSERVER SGame *s_game;
 
 Bool ecs::SShooterComponent::ReceiveNetEvent(pragma::BasePlayerComponent &pl, pragma::NetEventId eventId, NetPacket &packet)
 {

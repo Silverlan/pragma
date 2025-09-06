@@ -4,7 +4,6 @@
 #include "stdafx_shared.h"
 #include "pragma/console/debugconsole.h"
 #include "pragma/engine.h"
-#include <pragma/serverstate/serverstate.h>
 #include <sharedutils/util_string.h>
 #include <pragma/console/convars.h>
 #include <atomic>
@@ -231,7 +230,7 @@ bool Engine::RunEngineConsoleCommand(std::string scmd, std::vector<std::string> 
 bool Engine::RunConsoleCommand(std::string cmd, std::vector<std::string> &argv, KeyState pressState, float magnitude, const std::function<bool(ConConf *, float &)> &callback)
 {
 	std::transform(cmd.begin(), cmd.end(), cmd.begin(), ::tolower);
-	ServerState *stateSv = GetServerState();
+	auto *stateSv = GetServerNetworkState();
 	if(stateSv == nullptr)
 		return RunEngineConsoleCommand(cmd, argv, pressState, magnitude, callback);
 	if(stateSv == NULL || !stateSv->RunConsoleCommand(cmd, argv, nullptr, pressState, magnitude, callback)) {

@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_server.h"
 #include "pragma/game/s_game.h"
-#include "pragma/serverstate/serverstate.h"
 #include <pragma/entities/components/usable_component.hpp>
 #include <sharedutils/util_string.h>
 #include <sharedutils/util.h>
@@ -16,10 +15,9 @@ module;
 
 module pragma.server.entities.components.func.button;
 
-using namespace pragma;
+import pragma.server.server_state;
 
-extern ServerState *server;
-extern SGame *s_game;
+using namespace pragma;
 
 void SButtonComponent::Initialize()
 {

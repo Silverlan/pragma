@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_server.h"
 #include "pragma/game/s_game.h"
-#include "pragma/serverstate/serverstate.h"
 #include <pragma/lua/classes/ldef_color.h>
 #include <pragma/physics/raytraces.h>
 #include <pragma/lua/libraries/lutil.hpp>
@@ -17,8 +16,10 @@ module;
 
 module pragma.server.scripting.lua.libraries.util;
 
-extern DLLSERVER ServerState *server;
-extern DLLSERVER SGame *s_game;
+import pragma.server.server_state;
+
+extern ServerState *server;
+extern SGame *s_game;
 
 luabind::object Lua::util::Server::fire_bullets(lua_State *l, const BulletInfo &bulletInfo) { return fire_bullets(l, bulletInfo, false); }
 luabind::object Lua::util::Server::fire_bullets(lua_State *l, const BulletInfo &bulletInfo, bool hitReport)

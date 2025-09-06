@@ -8,14 +8,12 @@ module;
 #include <pragma/entities/components/base_character_component.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
 #include "pragma/game/s_game.h"
-#include "pragma/serverstate/serverstate.h"
 
 module pragma.server.entities.components.ai;
 
-using namespace pragma;
+import pragma.server.server_state;
 
-extern DLLSERVER ServerState *server;
-extern DLLSERVER SGame *s_game;
+using namespace pragma;
 
 bool SAIComponent::IsInViewCone(BaseEntity *ent, float *dist)
 {

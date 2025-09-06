@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_server.h"
-#include "pragma/serverstate/serverstate.h"
 #include "pragma/networking/s_net_resources.h"
 #include "pragma/networking/resourcemanager.h"
+#include "pragma/game/s_game.h"
 #include <pragma/model/modelmanager.h>
 #include <fsys/filesystem.h>
 #include "pragma/networking/resource.h"
@@ -24,11 +24,12 @@
 #include <sharedutils/util_file.h>
 
 import pragma.server.model_manager;
+import pragma.server.server_state;
 
 #define RESOURCE_TRANSFER_VERBOSE 0
 
-extern DLLSERVER SGame *s_game;
-extern DLLSERVER ServerState *server;
+extern SGame *s_game;
+extern ServerState *server;
 
 void ServerState::InitResourceTransfer(pragma::networking::IServerClient &session)
 {

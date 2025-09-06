@@ -3,13 +3,13 @@
 
 #include "stdafx_shared.h"
 #include "pragma/engine.h"
-#include <pragma/serverstate/serverstate.h>
 #include "pragma/console/cvar.h"
 #include <pragma/console/convars.h>
 #include <sharedutils/util.h>
 #ifdef _WIN32
 #include <Mmsystem.h>
 #endif
+
 std::string Engine::GetDate(const std::string &format) { return util::get_date_time(format); }
 
 uint64_t Engine::GetTickCount() const { return CUInt64(m_ctTick.GetTime()); }
@@ -25,5 +25,5 @@ void Engine::SetTickRate(UInt32 tickRate)
 	m_tickRate = tickRate;
 }
 bool Engine::IsRunning() { return umath::is_flag_set(m_stateFlags, StateFlags::Running); }
-bool Engine::IsGameActive() { return GetServerState()->IsGameActive(); }
+bool Engine::IsGameActive() { return GetServerNetworkState()->IsGameActive(); }
 bool Engine::IsServerOnly() { return true; }

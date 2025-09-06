@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_server.h"
-#include "pragma/serverstate/serverstate.h"
 #include "pragma/entities/player.h"
 #include "pragma/networking/netmessages.h"
 #include "pragma/networking/standard_server.hpp"
@@ -12,6 +11,8 @@
 #include <pragma/entities/components/base_player_component.hpp>
 #include <pragma/networking/error.hpp>
 #include <servermanager/interface/sv_nwm_manager.hpp>
+
+import pragma.server.server_state;
 
 extern DLLNETWORK ServerMessageMap *g_NetMessagesSv;
 

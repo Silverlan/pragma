@@ -19,7 +19,7 @@ void SFuncSoftPhysicsComponent::InitializeLuaObject(lua_State *l) { return BaseE
 
 ////////
 
-extern DLLSERVER SGame *s_game;
+extern SGame *s_game;
 
 void FuncSoftPhysics::Initialize()
 {

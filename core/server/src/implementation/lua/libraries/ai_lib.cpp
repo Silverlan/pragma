@@ -22,7 +22,7 @@ import pragma.server.scripting.lua.classes.ai_schedule;
 import pragma.server.scripting.lua.classes.ai_squad;
 import pragma.server.scripting.lua.classes.faction;
 
-extern DLLSERVER SGame *s_game;
+extern SGame *s_game;
 
 using LuaFactionObject = luabind::object;
 namespace Lua {

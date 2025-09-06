@@ -5,7 +5,7 @@ module;
 
 #include "stdafx_server.h"
 #include "pragma/audio/s_alsound.h"
-#include "pragma/serverstate/serverstate.h"
+#include "pragma/entities/s_baseentity.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/components/velocity_component.hpp>
@@ -15,9 +15,9 @@ module;
 
 module pragma.server.entities.components.sound_emitter;
 
-using namespace pragma;
+import pragma.server.server_state;
 
-extern DLLSERVER ServerState *server;
+using namespace pragma;
 
 void SSoundEmitterComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void SSoundEmitterComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)

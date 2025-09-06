@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_server.h"
-#include "pragma/serverstate/serverstate.h"
 #include "pragma/networking/s_net_global.h"
 #include "pragma/game/s_game.h"
 #include "pragma/networking/resourcemanager.h"
@@ -28,11 +27,10 @@
 #include <sharedutils/util_library.hpp>
 
 import pragma.server.entities.components;
+import pragma.server.server_state;
 
-import pragma.server.entities.components;
-
-extern DLLSERVER ServerState *server;
-extern DLLSERVER SGame *s_game;
+extern ServerState *server;
+extern SGame *s_game;
 extern DLLNETWORK Engine *engine;
 DLLSERVER void NET_sv_disconnect(pragma::networking::IServerClient &session, NetPacket packet)
 {

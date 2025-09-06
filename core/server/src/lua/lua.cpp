@@ -3,7 +3,6 @@
 
 #include "stdafx_server.h"
 #include "pragma/game/s_game.h"
-#include "pragma/serverstate/serverstate.h"
 #include "pragma/lua/libraries/lengine.h"
 #include "pragma/lua/libraries/s_lnetmessages.h"
 #include "pragma/lua/libraries/lglobal.h"
@@ -35,9 +34,10 @@
 #include <udm.hpp>
 
 import pragma.server.ai;
+import pragma.server.server_state;
 import pragma.server.scripting.lua;
 
-extern DLLSERVER ServerState *server;
+extern ServerState *server;
 
 namespace pragma {
 	// Has to be in same namespace as class, otherwise luabind can't locate it

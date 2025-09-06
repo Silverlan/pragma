@@ -3,11 +3,10 @@
 
 #include "stdafx_server.h"
 #include "pragma/entities/components/s_entity_component.hpp"
-#include "pragma/serverstate/serverstate.h"
 #include <pragma/networking/enums.hpp>
 #include <sharedutils/netpacket.hpp>
 
-extern DLLSERVER ServerState *server;
+import pragma.server.server_state;
 
 using namespace pragma;
 

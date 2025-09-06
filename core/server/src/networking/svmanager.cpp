@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_server.h"
-#include <pragma/serverstate/serverstate.h>
 #include <pragma/engine.h>
 #include "pragma/entities/player.h"
 #include "pragma/networking/iserver.hpp"
+#include "pragma/game/s_game.h"
 #include "pragma/game/gamemode/gamemodemanager.h"
 #include "pragma/networking/standard_server.hpp"
 #include "pragma/networking/master_server.hpp"
@@ -17,8 +17,10 @@
 #include <networkmanager/nwm_error_handle.h>
 #include <pragma/logging.hpp>
 
+import pragma.server.server_state;
+
 extern DLLNETWORK Engine *engine;
-extern DLLSERVER SGame *s_game;
+extern SGame *s_game;
 void ServerState::OnMasterServerRegistered(bool b, std::string reason)
 {
 	if(b == false) {

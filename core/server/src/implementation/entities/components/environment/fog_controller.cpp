@@ -8,13 +8,12 @@ module;
 #include <sharedutils/util.h>
 #include <pragma/networking/nwm_util.h>
 #include <pragma/networking/enums.hpp>
-#include "pragma/serverstate/serverstate.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
 module pragma.server.entities.components.fog_controller;
 
-extern DLLSERVER ServerState *server;
+import pragma.server.server_state;
 
 using namespace pragma;
 

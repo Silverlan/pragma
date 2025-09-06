@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_server.h"
-#include <pragma/serverstate/serverstate.h>
 #include <servermanager/sv_nwm_recipientfilter.h>
 #include "pragma/entities/player.h"
 #include "pragma/game/s_game.h"
@@ -26,6 +25,7 @@ import pragma.entities.components;
 import pragma.server.entities.components;
 import pragma.server.entities.registration;
 import pragma.server.scripting.lua;
+import pragma.server.server_state;
 
 extern ServerState *server;
 pragma::SPlayerComponent *SGame::GetPlayer(pragma::networking::IServerClient &session) { return server->GetPlayer(session); }

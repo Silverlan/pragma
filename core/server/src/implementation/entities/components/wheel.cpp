@@ -16,7 +16,7 @@ module pragma.server.entities.components.wheel;
 
 using namespace pragma;
 
-extern DLLSERVER SGame *s_game;
+extern SGame *s_game;
 
 void SWheel::Initialize()
 {

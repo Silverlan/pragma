@@ -8,7 +8,6 @@ module;
 #include <sharedutils/util_string.h>
 #include <sharedutils/util.h>
 #include "pragma/entities/player.h"
-#include "pragma/serverstate/serverstate.h"
 #include <pragma/entities/baseentity_events.hpp>
 #include <pragma/util/util_handled.hpp>
 #include <pragma/entities/components/basetriggergravity.hpp>
@@ -19,9 +18,9 @@ module;
 
 module pragma.server.entities.components.triggers.gravity;
 
-using namespace pragma;
+import pragma.server.server_state;
 
-extern DLLSERVER ServerState *server;
+using namespace pragma;
 
 void STriggerGravityComponent::Initialize()
 {

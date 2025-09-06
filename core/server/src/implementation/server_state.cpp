@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
-#include <pragma/serverstate/serverstate.h>
 #include "pragma/networking/netmessages.h"
 #include "pragma/networking/resourcemanager.h"
 #include "pragma/game/s_game.h"
@@ -28,6 +29,8 @@
 #include <sharedutils/util_file.h>
 #include <sharedutils/util_library.hpp>
 #include <pragma/logging.hpp>
+
+module pragma.server.server_state;
 
 import pragma.server.core;
 import pragma.server.model_manager;
@@ -56,7 +59,7 @@ ServerState::ServerState() : NetworkState(), m_server(nullptr)
 	engine->InitializeAssetManager(*m_modelManager);
 	pragma::asset::update_extension_cache(pragma::asset::Type::Model);
 
-	FileManager::AddCustomMountDirectory("cache", static_cast<fsys::SearchFlags>(FSYS_SEARCH_CACHE));
+	FileManager::AddCustomMountDirectory("cache", static_cast<fsys::SearchFlags>(pragma::FSYS_SEARCH_CACHE));
 
 	RegisterCallback<void, SGame *>("EndGame");
 	RegisterCallback<void, SGame *>("OnGameStart");
@@ -398,7 +401,7 @@ ConCommand *ServerState::CreateConCommand(const std::string &scmd, LuaFunction f
 	auto *cmd = NetworkState::CreateConCommand(scmd, fc, flags, help);
 	if(cmd == nullptr)
 		return nullptr;
-	cmd->m_ID = m_conCommandID;
+	//cmd->m_ID = m_conCommandID;
 	m_conCommandID++;
 	m_luaConCommands.insert(decltype(m_luaConCommands)::value_type(scmd, cmd));
 	m_conCommandIDs.insert(decltype(m_conCommandIDs)::value_type(scmd, cmd->GetID()));
@@ -462,7 +465,7 @@ REGISTER_CONVAR_CALLBACK_SV(sv_tickrate, [](NetworkState *, const ConVar &, int,
 ////////////////
 
 extern "C" {
-DLLSERVER void pr_sv_create_server_state(std::unique_ptr<ServerState> &outState) { outState = std::make_unique<ServerState>(); }
+DLLSERVER void pr_sv_create_server_state(std::unique_ptr<NetworkState> &outState) { outState = std::make_unique<ServerState>(); }
 DLLSERVER void pr_sv_start_server(bool singlePlayer)
 {
 	if(server == nullptr)

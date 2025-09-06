@@ -36,7 +36,7 @@ import pragma.server.entities.components.health;
 import pragma.server.entities.components.model;
 import pragma.server.entities.components.physics;
 
-extern DLLSERVER SGame *s_game;
+extern SGame *s_game;
 
 using namespace pragma;
 

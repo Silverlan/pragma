@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_server.h"
 #include <pragma/networking/nwm_util.h>
-#include "pragma/serverstate/serverstate.h"
 #include <pragma/networking/enums.hpp>
 #include "pragma/entities/baseentity_luaobject.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
@@ -13,7 +12,7 @@ module;
 
 module pragma.server.entities.components.effects.particle_system;
 
-extern DLLSERVER ServerState *server;
+import pragma.server.server_state;
 
 using namespace pragma;
 

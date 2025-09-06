@@ -11,6 +11,8 @@ module;
 
 module pragma.server.entities.components.quake;
 
+import pragma.server.server_state;
+
 using namespace pragma;
 
 void SQuakeComponent::Initialize() { BaseEnvQuakeComponent::Initialize(); }
@@ -29,8 +31,6 @@ void SQuakeComponent::SendData(NetPacket &packet, networking::ClientRecipientFil
 void SQuakeComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 ///////////////
-
-extern ServerState *server;
 
 void EnvQuake::Initialize()
 {

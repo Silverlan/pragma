@@ -5,7 +5,7 @@ module;
 
 #include "stdafx_server.h"
 #include "pragma/networking/recipient_filter.hpp"
-#include <pragma/serverstate/serverstate.h>
+#include "pragma/game/s_game.h"
 #include "luasystem.h"
 #include <pragma/networking/enums.hpp>
 #include <pragma/lua/classes/ldef_vector.h>
@@ -18,8 +18,10 @@ module;
 
 module pragma.server.scripting.lua.libraries.game;
 
-extern DLLSERVER ServerState *server;
-extern DLLSERVER SGame *s_game;
+import pragma.server.server_state;
+
+extern ServerState *server;
+extern SGame *s_game;
 
 void Lua::game::Server::set_gravity(const Vector3 &gravity)
 {

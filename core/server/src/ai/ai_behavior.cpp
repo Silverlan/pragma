@@ -8,7 +8,7 @@
 
 using namespace pragma;
 
-extern DLLSERVER SGame *s_game;
+extern SGame *s_game;
 
 ai::BehaviorNode::BehaviorNode(Type type, SelectorType selectorType) : std::enable_shared_from_this<BehaviorNode>(), m_bActive(false), m_type(type) { SetSelectorType(selectorType); }
 ai::BehaviorNode::BehaviorNode(SelectorType selectorType) : BehaviorNode(Type::Sequence, selectorType) {}

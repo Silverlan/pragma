@@ -5,16 +5,16 @@ module;
 
 #include "stdafx_server.h"
 #include "pragma/networking/s_nwm_util.h"
-#include "pragma/serverstate/serverstate.h"
+#include "pragma/entities/s_baseentity.h"
 #include <pragma/networking/enums.hpp>
 #include <pragma/entities/components/parent_component.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
 module pragma.server.entities.components.attachment;
 
-using namespace pragma;
+import pragma.server.server_state;
 
-extern DLLSERVER ServerState *server;
+using namespace pragma;
 
 void SAttachmentComponent::Initialize() { BaseAttachmentComponent::Initialize(); }
 void SAttachmentComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }

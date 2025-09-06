@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_server.h"
-#include <pragma/serverstate/serverstate.h>
 #include "pragma/game/s_game.h"
 #include "pragma/networking/resourcemanager.h"
 #include <fsys/filesystem.h>
@@ -61,6 +60,7 @@ import pragma.server.entities.components;
 import pragma.server.entities.registration;
 import pragma.server.model_manager;
 import pragma.server.scripting.lua;
+import pragma.server.server_state;
 
 extern DLLNETWORK Engine *engine;
 extern ServerState *server;
@@ -360,7 +360,7 @@ void SGame::UpdateLuaCache(const std::string &fName)
 	auto *l = GetLuaState();
 	auto dstPath = "cache\\" + fName;
 	auto includeFlags = fsys::SearchFlags::All;
-	auto excludeFlags = static_cast<fsys::SearchFlags>(FSYS_SEARCH_CACHE);
+	auto excludeFlags = static_cast<fsys::SearchFlags>(pragma::FSYS_SEARCH_CACHE);
 	if(FileManager::Exists(fName.c_str(), includeFlags, excludeFlags))
 		FileManager::CopyFile(fName.c_str(), dstPath.c_str()); // Compiled file already exists, just copy it
 	else {

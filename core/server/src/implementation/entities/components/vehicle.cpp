@@ -25,7 +25,7 @@ import pragma.server.entities.components;
 
 using namespace pragma;
 
-extern DLLSERVER SGame *s_game;
+extern SGame *s_game;
 
 std::vector<SVehicleComponent *> SVehicleComponent::s_vehicles;
 const std::vector<SVehicleComponent *> &SVehicleComponent::GetAll() { return s_vehicles; }

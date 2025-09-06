@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_server.h"
-#include <pragma/serverstate/serverstate.h>
 #include "pragma/entities/components/s_player_component.hpp"
 #include "pragma/physics/collisiontypes.h"
 #include "pragma/entities/player.h"
@@ -27,14 +26,13 @@
 
 import pragma.entities.components;
 import pragma.server.entities.components;
+import pragma.server.server_state;
 
 using namespace pragma;
 
 namespace pragma {
 	using ::operator<<;
 };
-
-extern ServerState *server;
 
 std::vector<SPlayerComponent *> SPlayerComponent::s_players;
 const std::vector<SPlayerComponent *> &SPlayerComponent::GetAll() { return s_players; }

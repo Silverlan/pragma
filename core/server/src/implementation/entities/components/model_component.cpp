@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_server.h"
-#include "pragma/serverstate/serverstate.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/networking/enums.hpp>
 #include <pragma/networking/nwm_util.h>
@@ -13,10 +12,9 @@ module;
 module pragma.server.entities.components.model;
 
 import pragma.server.model_manager;
+import pragma.server.server_state;
 
 using namespace pragma;
-
-extern DLLSERVER ServerState *server;
 
 void SModelComponent::Initialize() { BaseModelComponent::Initialize(); }
 void SModelComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }

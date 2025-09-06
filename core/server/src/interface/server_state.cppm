@@ -1,36 +1,32 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __SERVERSTATE_H__
-#define __SERVERSTATE_H__
+module;
+
 #include "pragma/serverdefinitions.h"
 #include <pragma/networkstate/networkstate.h>
+#include "pragma/networking/netmessages.h"
+#include "pragma/entities/components/s_player_component.hpp"
+#include "pragma/networking/iserver.hpp"
+#include "pragma/networking/iserver_client.hpp"
+#include "pragma/networking/recipient_filter.hpp"
+#include "pragma/networking/master_server.hpp"
+#include "pragma/networking/enums.hpp"
+#include "pragma/audio/s_alsound.h"
 #include "pragma/game/s_game.h"
+#include "pragma/util/resource_watcher.h"
 #include <pragma/input/inkeys.h>
 #include <pragma/networking/enums.hpp>
 #include <sharedutils/chronoutil.h>
 #include "wmserverdata.h"
 
-#define FSYS_SEARCH_CACHE 8'192
+export module pragma.server.server_state;
 
-class SVNetMessage;
-class ServerMessageMap;
-namespace pragma {
-	class SPlayerComponent;
-	namespace networking {
-		class IServer;
-		class IServerClient;
-		class ClientRecipientFilter;
-		class MasterServerRegistration;
-		enum class Protocol : uint8_t;
-	};
-};
-struct Resource;
-class SALSound;
-enum class ServerEvent : int;
+import pragma.server.audio.sound_script;
+
 #pragma warning(push)
 #pragma warning(disable : 4251)
-class DLLSERVER ServerState : public NetworkState {
+export class DLLSERVER ServerState : public NetworkState {
 	// For internal use only! Not to be used directly!
   public:
 	virtual std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &GetConVarPtrs() override;
@@ -145,4 +141,8 @@ class DLLSERVER ServerState : public NetworkState {
 	void DropClient(pragma::networking::IServerClient &session, pragma::networking::DropReason reason = pragma::networking::DropReason::Disconnected);
 };
 #pragma warning(pop)
-#endif
+export namespace pragma {
+    constexpr inline uint32_t FSYS_SEARCH_CACHE = 8'192;
+    extern DLLSERVER ServerState *server = nullptr;
+    extern DLLSERVER SGame *s_game = nullptr;
+};

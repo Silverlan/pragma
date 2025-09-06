@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_server.h"
 #include "pragma/game/s_game.h"
-#include "pragma/serverstate/serverstate.h"
 #include <pragma/game/damageinfo.h>
 #include <sharedutils/util_string.h>
 #include <pragma/networking/nwm_util.h>
@@ -14,10 +13,9 @@ module;
 
 module pragma.server.entities.components.effects.smoke_trail;
 
-using namespace pragma;
+import pragma.server.server_state;
 
-extern ServerState *server;
-extern SGame *s_game;
+using namespace pragma;
 
 void SSmokeTrailComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)
 {

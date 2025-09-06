@@ -4,17 +4,17 @@
 module;
 
 #include "stdafx_server.h"
-#include "pragma/serverstate/serverstate.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
+#include "pragma/entities/s_baseentity.h"
 #include <pragma/entities/components/base_physics_component.hpp>
 #include <pragma/networking/nwm_util.h>
 #include <pragma/networking/enums.hpp>
 
 module pragma.server.entities.components.transform;
 
-using namespace pragma;
+import pragma.server.server_state;
 
-extern DLLSERVER ServerState *server;
+using namespace pragma;
 
 void STransformComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const { outTypeIndex = std::type_index(typeid(BaseTransformComponent)); }
 void STransformComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)

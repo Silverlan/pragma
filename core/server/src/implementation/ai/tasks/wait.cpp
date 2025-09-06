@@ -12,7 +12,7 @@ module pragma.server.ai.tasks.wait;
 
 using namespace pragma;
 
-extern DLLSERVER SGame *s_game;
+extern SGame *s_game;
 
 ai::BehaviorNode::Result ai::TaskWait::Start(const Schedule *sched, pragma::SAIComponent &ent)
 {

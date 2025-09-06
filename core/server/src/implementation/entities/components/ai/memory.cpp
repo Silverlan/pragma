@@ -9,9 +9,10 @@ module;
 #include <pragma/entities/components/velocity_component.hpp>
 #include "pragma/ai/ai_memory.h"
 #include <pragma/entities/entity_component_system_t.hpp>
-#include "pragma/game/s_game.h"
 
 module pragma.server.entities.components.ai;
+
+import pragma.server.game;
 
 using namespace pragma;
 

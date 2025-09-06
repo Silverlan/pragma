@@ -13,7 +13,6 @@ module;
 #include "pragma/networking/master_server.hpp"
 #include "pragma/networking/enums.hpp"
 #include "pragma/audio/s_alsound.h"
-#include "pragma/game/s_game.h"
 #include "pragma/util/resource_watcher.h"
 #include <pragma/input/inkeys.h>
 #include <pragma/networking/enums.hpp>
@@ -23,6 +22,7 @@ module;
 export module pragma.server.server_state;
 
 import pragma.server.audio.sound_script;
+import pragma.server.game;
 
 #pragma warning(push)
 #pragma warning(disable : 4251)

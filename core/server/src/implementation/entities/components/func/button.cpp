@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_server.h"
-#include "pragma/game/s_game.h"
 #include <pragma/entities/components/usable_component.hpp>
 #include <sharedutils/util_string.h>
 #include <sharedutils/util.h>
@@ -15,6 +14,7 @@ module;
 
 module pragma.server.entities.components.func.button;
 
+import pragma.server.game;
 import pragma.server.server_state;
 
 using namespace pragma;

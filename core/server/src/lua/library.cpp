@@ -3,7 +3,6 @@
 
 #include "stdafx_server.h"
 #include <pragma/engine.h>
-#include "pragma/game/s_game.h"
 #include <pragma/lua/libraries/lutil.hpp>
 #include "pragma/lua/libraries/lfile.h"
 #include "pragma/model/model.h"
@@ -22,6 +21,7 @@
 #include <luainterface.hpp>
 #include <fsys/ifile.hpp>
 
+import pragma.server.game;
 import pragma.server.scripting.lua;
 
 void SGame::RegisterLuaLibraries()

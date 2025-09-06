@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_server.h"
-#include "pragma/game/s_game.h"
 #include <pragma/lua/classes/ldef_color.h>
 #include <pragma/physics/raytraces.h>
 #include <pragma/lua/libraries/lutil.hpp>
@@ -16,6 +15,7 @@ module;
 
 module pragma.server.scripting.lua.libraries.util;
 
+import pragma.server.game;
 import pragma.server.server_state;
 
 extern ServerState *server;

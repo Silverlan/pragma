@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_server.h"
-#include "pragma/game/s_game.h"
 #include "pragma/entities/components/s_player_component.hpp"
 #include "pragma/lua/s_ldef_memory_fragment.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
 import pragma.server.entities.components;
+import pragma.server.game;
 
 bool SGame::InvokeEntityEvent(pragma::BaseEntityComponent &component, uint32_t eventId, int32_t argsIdx, bool bInject)
 {

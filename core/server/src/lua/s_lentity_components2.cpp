@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_server.h"
-#include "pragma/game/s_game.h"
 #include "pragma/lua/s_lentity_components.hpp"
 #include "pragma/networking/recipient_filter.hpp"
 // --template-include-location
@@ -53,6 +52,7 @@
 #include <pragma/lua/ostream_operator_alias.hpp>
 #include <pragma/entities/components/base_attachment_component.hpp>
 
+import pragma.server.game;
 import pragma.server.entities.components;
 
 #ifdef __linux__

@@ -6,7 +6,6 @@ module;
 #include "stdafx_server.h"
 #include <pragma/physics/physobj.h>
 #include <sharedutils/util_string.h>
-#include "pragma/game/s_game.h"
 #include "pragma/entities/baseentity_luaobject.h"
 #include <pragma/physics/phys_water_surface_simulator.hpp>
 #include <pragma/entities/components/base_physics_component.hpp>
@@ -19,6 +18,7 @@ module;
 module pragma.server.entities.components.liquid;
 
 import pragma.server.entities.components;
+import pragma.server.game;
 
 using namespace pragma;
 

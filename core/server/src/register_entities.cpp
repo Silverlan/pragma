@@ -2,13 +2,13 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_server.h"
-#include "pragma/game/s_game.h"
 #include "pragma/entities/player.h"
 #include "pragma/entities/s_npc_dragonworm.h"
 #include "pragma/entities/s_ent_debug.hpp"
 
 import pragma.server.entities.components;
 import pragma.server.entities.registration;
+import pragma.server.game;
 import pragma.server.server_state;
 
 void register_entites()

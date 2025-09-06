@@ -4,7 +4,6 @@
 #include "stdafx_server.h"
 #include "pragma/networking/s_net_resources.h"
 #include "pragma/networking/resourcemanager.h"
-#include "pragma/game/s_game.h"
 #include <pragma/model/modelmanager.h>
 #include <fsys/filesystem.h>
 #include "pragma/networking/resource.h"
@@ -23,6 +22,7 @@
 #include <material_manager2.hpp>
 #include <sharedutils/util_file.h>
 
+import pragma.server.game;
 import pragma.server.model_manager;
 import pragma.server.server_state;
 

@@ -7,10 +7,10 @@ module;
 #include <pragma/physics/raytraces.h>
 #include <pragma/entities/components/base_character_component.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
-#include "pragma/game/s_game.h"
 
 module pragma.server.entities.components.ai;
 
+import pragma.server.game;
 import pragma.server.server_state;
 
 using namespace pragma;

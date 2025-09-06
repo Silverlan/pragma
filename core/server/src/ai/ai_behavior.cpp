@@ -4,7 +4,8 @@
 #include "stdafx_server.h"
 #include "pragma/ai/ai_behavior.h"
 #include "pragma/ai/ai_schedule.h"
-#include "pragma/game/s_game.h"
+
+import pragma.server.game;
 
 using namespace pragma;
 

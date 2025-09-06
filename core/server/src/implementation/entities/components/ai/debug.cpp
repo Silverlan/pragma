@@ -12,10 +12,10 @@ module;
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/debug/debugbehaviortree.h>
 #include <pragma/networking/nwm_util.h>
-#include "pragma/game/s_game.h"
 
 module pragma.server.entities.components.ai;
 
+import pragma.server.game;
 import pragma.server.scripting.lua;
 import pragma.server.server_state;
 

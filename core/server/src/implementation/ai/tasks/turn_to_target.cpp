@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_server.h"
 #include "pragma/ai/ai_schedule.h"
-#include "pragma/game/s_game.h"
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/model/animation/activities.h>
@@ -13,6 +12,7 @@ module;
 module pragma.server.ai.tasks.turn_to_target;
 
 import pragma.server.entities.components;
+import pragma.server.game;
 
 using namespace pragma;
 

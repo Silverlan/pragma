@@ -5,18 +5,19 @@ module;
 
 #include "stdafx_server.h"
 #include "pragma/entities/components/s_player_component.hpp"
+#include "pragma/entities/s_baseentity.h"
 #include <sharedutils/scope_guard.h>
 #include <pragma/entities/components/base_character_component.hpp>
 #include <pragma/entities/components/damageable_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <servermanager/interface/sv_nwm_manager.hpp>
-#include "pragma/game/s_game.h"
 #include <pragma/networking/nwm_util.h>
 #include <pragma/networking/enums.hpp>
 
 module pragma.server.entities.components.physics;
 
+import pragma.server.game;
 import pragma.server.model_manager;
 import pragma.server.server_state;
 

@@ -3,7 +3,6 @@
 
 #include "stdafx_server.h"
 #include "pragma/lua/lnetmessages.h"
-#include "pragma/game/s_game.h"
 #include <servermanager/sv_nwm_recipientfilter.h>
 #include "pragma/networking/nwm_util.h"
 #include "pragma/networking/recipient_filter.hpp"
@@ -17,6 +16,7 @@
 #include <pragma/lua/luaapi.h>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
+import pragma.server.game;
 import pragma.server.scripting.lua;
 import pragma.server.server_state;
 

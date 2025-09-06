@@ -5,13 +5,13 @@ module;
 
 #include "stdafx_server.h"
 #include "pragma/ai/ai_schedule.h"
-#include "pragma/game/s_game.h"
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/model/animation/activities.h>
 
 module pragma.server.ai.tasks.look_at_target;
 
 import pragma.server.entities.components;
+import pragma.server.game;
 
 using namespace pragma;
 

@@ -7,7 +7,6 @@ module;
 #include "luasystem.h"
 #include "pragma/ai/ai_schedule.h"
 #include "pragma/ai/ai_memory.h"
-#include "pragma/game/s_game.h"
 #include <luainterface.hpp>
 #include <pragma/lua/libraries/lai.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
@@ -16,6 +15,7 @@ module pragma.server.scripting.lua.libraries.ai;
 
 import pragma.server.ai;
 import pragma.server.entities.components;
+import pragma.server.game;
 import pragma.server.scripting.lua.classes.ai_behavior;
 import pragma.server.scripting.lua.classes.ai_memory;
 import pragma.server.scripting.lua.classes.ai_schedule;

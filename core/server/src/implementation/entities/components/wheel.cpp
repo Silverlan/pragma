@@ -6,13 +6,14 @@ module;
 #include "stdafx_server.h"
 //#include "ldef_wheel.h"
 #include "pragma/entities/baseentity_luaobject.h"
-#include "pragma/game/s_game.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/components/base_vehicle_component.hpp>
 #include <pragma/networking/nwm_util.h>
 #include <pragma/networking/enums.hpp>
 
 module pragma.server.entities.components.wheel;
+
+import pragma.server.game;
 
 using namespace pragma;
 

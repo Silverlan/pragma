@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
-#include "pragma/game/s_game.h"
 #include "pragma/networking/resourcemanager.h"
 #include <fsys/filesystem.h>
 #include "luasystem.h"
@@ -11,7 +12,6 @@
 #include "pragma/cacheinfo.h"
 #include <pragma/model/brush/brushmesh.h>
 #include "pragma/level/mapgeometry.h"
-#include "pragma/game/s_game_entities.h"
 #include "pragma/encryption/md5.h"
 #include <pragma/physics/physobj.h>
 #include <pragma/math/surfacematerial.h>
@@ -53,11 +53,14 @@
 #include "pragma/model/modelmesh.h"
 #include <udm.hpp>
 
+module pragma.server.game;
+
 import pragma.entities.components;
 import pragma.server.ai;
 import pragma.server.debug;
 import pragma.server.entities.components;
 import pragma.server.entities.registration;
+import pragma.server.game;
 import pragma.server.model_manager;
 import pragma.server.scripting.lua;
 import pragma.server.server_state;

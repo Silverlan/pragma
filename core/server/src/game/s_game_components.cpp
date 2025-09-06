@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_server.h"
-#include "pragma/game/s_game.h"
 #include "pragma/lua/s_lua_component.hpp"
 #include <pragma/lua/lentity_component_lua.hpp>
 #include <pragma/game/game_entity_component.hpp>
@@ -14,6 +13,7 @@
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
 import pragma.server.entities.components;
+import pragma.server.game;
 
 void SGame::InitializeEntityComponents(pragma::EntityComponentManager &componentManager)
 {

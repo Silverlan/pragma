@@ -4,11 +4,12 @@
 module;
 
 #include "stdafx_server.h"
-#include "pragma/game/s_game.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
 module pragma.server.entities.components.filter.entity_class;
+
+import pragma.server.game;
 
 using namespace pragma;
 

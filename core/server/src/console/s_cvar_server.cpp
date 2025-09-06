@@ -10,7 +10,6 @@
 #include <pragma/networking/nwm_util.h>
 #include <pragma/networking/enums.hpp>
 #include <pragma/networking/iserver.hpp>
-#include <pragma/game/s_game.h>
 #include <pragma/game/game_limits.h>
 #include <pragma/entities/components/base_player_component.hpp>
 #include <pragma/entities/components/base_character_component.hpp>
@@ -21,6 +20,7 @@
 #include <pragma/networking/netmessages.h>
 
 import pragma.server.entities.components;
+import pragma.server.game;
 import pragma.server.server_state;
 
 extern DLLNETWORK Engine *engine;

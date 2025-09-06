@@ -4,12 +4,12 @@
 #include "stdafx_server.h"
 #include "luasystem.h"
 #include "pragma/ai/ai_schedule.h"
-#include "pragma/game/s_game.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/lua/ostream_operator_alias.hpp>
 
 import pragma.server.ai;
 import pragma.server.entities.components;
+import pragma.server.game;
 import pragma.server.scripting.lua;
 
 extern SGame *s_game;

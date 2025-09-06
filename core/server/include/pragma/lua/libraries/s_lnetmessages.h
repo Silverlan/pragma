@@ -5,6 +5,8 @@
 #define __LSVNETMESSAGES_H__
 
 #include "pragma/serverdefinitions.h"
+#include "pragma/entities/components/s_player_component.hpp"
+#include "pragma/networking/enums.hpp"
 #include <sharedutils/netpacket.hpp>
 #include <pragma/lua/ldefinitions.h>
 

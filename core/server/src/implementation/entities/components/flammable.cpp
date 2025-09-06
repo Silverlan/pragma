@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_server.h"
 #include <pragma/networking/enums.hpp>
-#include "pragma/game/s_game.h"
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/components/damageable_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
@@ -15,6 +14,8 @@ module;
 #include "pragma/entities/s_baseentity.h"
 
 module pragma.server.entities.components.flammable;
+
+import pragma.server.game;
 
 using namespace pragma;
 

@@ -3,7 +3,6 @@
 
 #include "stdafx_server.h"
 #include "pragma/networking/s_net_global.h"
-#include "pragma/game/s_game.h"
 #include "pragma/networking/resourcemanager.h"
 #include "pragma/entities/player.h"
 #include "pragma/physics/movetypes.h"
@@ -27,6 +26,7 @@
 #include <sharedutils/util_library.hpp>
 
 import pragma.server.entities.components;
+import pragma.server.game;
 import pragma.server.server_state;
 
 extern ServerState *server;

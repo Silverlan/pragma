@@ -4,8 +4,8 @@
 #include "stdafx_server.h"
 #include "pragma/lua/s_lua_script_watcher.h"
 #include "pragma/networking/resourcemanager.h"
-#include "pragma/game/s_game.h"
 
+import pragma.server.game;
 import pragma.server.server_state;
 
 extern ServerState *server;

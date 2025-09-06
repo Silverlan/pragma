@@ -7,7 +7,6 @@
 #include <pragma/lua/luacallback.h>
 #include <pragma/networking/nwm_util.h>
 #include "luasystem.h"
-#include "pragma/game/s_game.h"
 #include "pragma/entities/parentinfo.h"
 #include <pragma/lua/luafunction_call.h>
 #include "pragma/entities/player.h"
@@ -34,6 +33,7 @@
 import pragma.server.audio;
 import pragma.server.entities.components;
 import pragma.server.entities.registration;
+import pragma.server.game;
 import pragma.server.model_manager;
 import pragma.server.server_state;
 

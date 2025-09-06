@@ -4,7 +4,6 @@
 #include "stdafx_server.h"
 #include <pragma/engine.h>
 #include "pragma/console/s_cvar_global.h"
-#include "pragma/game/s_game.h"
 #include "pragma/console/cvar_global.h"
 #include "pragma/entities/player.h"
 #include "pragma/networking/iserver.hpp"
@@ -21,6 +20,7 @@
 #include <pragma/entities/entity_iterator.hpp>
 
 import pragma.server.entities.components;
+import pragma.server.game;
 import pragma.server.server_state;
 
 extern DLLNETWORK Engine *engine;

@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_server.h"
-#include "pragma/game/s_game.h"
 #include <pragma/game/damageinfo.h>
 #include <sharedutils/util_string.h>
 #include <pragma/networking/nwm_util.h>
@@ -13,6 +12,7 @@ module;
 
 module pragma.server.entities.components.effects.smoke_trail;
 
+import pragma.server.game;
 import pragma.server.server_state;
 
 using namespace pragma;

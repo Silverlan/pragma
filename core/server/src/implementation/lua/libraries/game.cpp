@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_server.h"
 #include "pragma/networking/recipient_filter.hpp"
-#include "pragma/game/s_game.h"
 #include "luasystem.h"
 #include <pragma/networking/enums.hpp>
 #include <pragma/lua/classes/ldef_vector.h>
@@ -18,6 +17,7 @@ module;
 
 module pragma.server.scripting.lua.libraries.game;
 
+import pragma.server.game;
 import pragma.server.server_state;
 
 extern ServerState *server;

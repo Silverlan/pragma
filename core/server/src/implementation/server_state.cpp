@@ -6,7 +6,6 @@ module;
 #include "stdafx_server.h"
 #include "pragma/networking/netmessages.h"
 #include "pragma/networking/resourcemanager.h"
-#include "pragma/game/s_game.h"
 #include "pragma/entities/player.h"
 #include "pragma/networking/iserver_client.hpp"
 #include "pragma/networking/standard_server.hpp"
@@ -33,6 +32,7 @@ module;
 module pragma.server.server_state;
 
 import pragma.server.core;
+import pragma.server.game;
 import pragma.server.model_manager;
 
 static std::unordered_map<std::string, std::shared_ptr<PtrConVar>> *conVarPtrs = NULL;

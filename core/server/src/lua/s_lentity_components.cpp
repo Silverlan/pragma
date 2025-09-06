@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_server.h"
-#include "pragma/game/s_game.h"
 #include "pragma/lua/s_lentity_components.hpp"
 #include "pragma/networking/recipient_filter.hpp"
 #include "pragma/entities/components/s_player_component.hpp"
@@ -72,6 +71,7 @@
 
 import pragma.entities.components;
 import pragma.server.entities.components;
+import pragma.server.game;
 
 void SGame::RegisterLuaEntityComponent(luabind::class_<pragma::BaseEntityComponent> &def)
 {

@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_server.h"
-#include "pragma/game/s_game.h"
 #include "pragma/entities/components/s_player_component.hpp"
 #include "pragma/networking/iserver_client.hpp"
 #include "pragma/networking/recipient_filter.hpp"
@@ -17,6 +16,7 @@
 #include <pragma/networking/nwm_util.h>
 #include <pragma/networking/enums.hpp>
 
+import pragma.server.game;
 import pragma.server.server_state;
 
 extern ServerState *server;

@@ -8,7 +8,6 @@ module;
 #include "pragma/entities/components/base_ai_component.hpp"
 #include "pragma/entities/s_baseentity.h"
 #include "pragma/ai/ai_schedule.h"
-#include "pragma/game/s_game.h"
 #include "pragma/entities/player.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/networking/enums.hpp>
@@ -25,7 +24,6 @@ module;
 #include <sharedutils/netpacket.hpp>
 #include <pragma/networking/nwm_util.h>
 #include <pragma/logging.hpp>
-#include "pragma/game/s_game.h"
 
 module pragma.server.entities.components.ai;
 
@@ -35,6 +33,7 @@ import pragma.server.entities.components.character;
 import pragma.server.entities.components.health;
 import pragma.server.entities.components.model;
 import pragma.server.entities.components.physics;
+import pragma.server.game;
 
 extern SGame *s_game;
 

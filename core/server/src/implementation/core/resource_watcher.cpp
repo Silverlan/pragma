@@ -4,11 +4,12 @@
 module;
 
 #include "stdafx_server.h"
-#include "pragma/game/s_game.h"
 #include <pragma/ai/navsystem.h>
 #include <sharedutils/util_file.h>
 
 module pragma.server.core.resource_watcher;
+
+import pragma.server.game;
 
 extern SGame *s_game;
 

@@ -1,11 +1,17 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __S_GAME_H__
-#define __S_GAME_H__
+module;
+
 #include <pragma/game/game.h>
 #include "pragma/serverdefinitions.h"
 #include "pragma/entities/s_baseentity.h"
+#include "pragma/entities/components/s_player_component.hpp"
+#include "pragma/networking/iserver_client.hpp"
+#include "pragma/networking/recipient_filter.hpp"
+#include <udm.hpp>
+#include "pragma/cacheinfo.h"
+#include "pragma/ai/ai_behavior.h"
 #include <vector>
 #include <unordered_map>
 #include <string>
@@ -16,26 +22,11 @@
 #include "pragma/cacheinfo.h"
 #endif
 
-struct CacheInfo;
-class SBaseEntity;
-namespace pragma {
-	class SPlayerComponent;
-	namespace ai {
-		class TaskManager;
-	};
-	namespace networking {
-		class IServerClient;
-		class ClientRecipientFilter;
-	};
-};
-namespace udm {
-	struct Property;
-	using PProperty = std::shared_ptr<Property>;
-};
-enum class CLIENT_DROPPED;
+export module pragma.server.game;
+
 #pragma warning(push)
 #pragma warning(disable : 4251)
-class DLLSERVER SGame : public Game {
+export class DLLSERVER SGame : public Game {
   private:
 	std::vector<SBaseEntity *> m_ents;
 	std::unique_ptr<CacheInfo> m_luaCache = nullptr;
@@ -191,22 +182,58 @@ class DLLSERVER SGame : public Game {
 };
 #pragma warning(pop)
 
-template<class T>
-T *SGame::CreateEntity(unsigned int idx)
-{
-	if(umath::is_flag_set(m_flags, GameFlags::ClosingGame))
-		return nullptr;
-	T *ent = new T();
-	SetupEntity(ent, idx);
-	return ent;
-}
+export {
+    template<class T>
+    T *SGame::CreateEntity(unsigned int idx)
+    {
+        if(umath::is_flag_set(m_flags, GameFlags::ClosingGame))
+            return nullptr;
+        T *ent = new T();
+        SetupEntity(ent, idx);
+        return ent;
+    }
 
-template<class T>
-T *SGame::CreateEntity()
-{
-	if(umath::is_flag_set(m_flags, GameFlags::ClosingGame))
-		return nullptr;
-	return CreateEntity<T>(GetFreeEntityIndex());
-}
+    template<class T>
+    T *SGame::CreateEntity()
+    {
+        if(umath::is_flag_set(m_flags, GameFlags::ClosingGame))
+            return nullptr;
+        return CreateEntity<T>(GetFreeEntityIndex());
+    }
 
-#endif
+    template<class T>
+    void SGame::GetPlayers(std::vector<T *> *ents)
+    {
+        auto &players = pragma::SPlayerComponent::GetAll();
+        ents->reserve(ents->size() + players.size());
+        for(auto *pl : players)
+            ents->push_back(static_cast<T *>(&pl->GetEntity()));
+    }
+
+    template<class T>
+    void SGame::GetNPCs(std::vector<T *> *ents)
+    {
+        auto &npcs = pragma::SPlayerComponent::GetAll();
+        ents->reserve(ents->size() + npcs.size());
+        for(auto *npc : npcs)
+            ents->push_back(static_cast<T *>(&npc->GetEntity()));
+    }
+
+    template<class T>
+    void SGame::GetWeapons(std::vector<T *> *ents)
+    {
+        auto &weapons = pragma::SPlayerComponent::GetAll();
+        ents->reserve(ents->size() + weapons.size());
+        for(auto *wep : weapons)
+            ents->push_back(static_cast<T *>(&wep->GetEntity()));
+    }
+
+    template<class T>
+    void SGame::GetVehicles(std::vector<T *> *ents)
+    {
+        auto &vehicles = pragma::SPlayerComponent::GetAll();
+        ents->reserve(ents->size() + vehicles.size());
+        for(auto *vhc : vehicles)
+            ents->push_back(static_cast<T *>(&vhc->GetEntity()));
+    }
+}

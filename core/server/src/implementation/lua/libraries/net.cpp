@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
 #include "pragma/lua/lnetmessages.h"
 #include <servermanager/sv_nwm_recipientfilter.h>
@@ -8,43 +10,17 @@
 #include "pragma/networking/recipient_filter.hpp"
 #include "pragma/lua/classes/ldef_recipientfilter.h"
 #include <sharedutils/netpacket.hpp>
-#include "pragma/lua/libraries/s_lnetmessages.h"
 #include "pragma/entities/components/s_player_component.hpp"
 #include <pragma/networking/enums.hpp>
 #include <pragma/lua/lua_handle.hpp>
 #include <pragma/lua/luaapi.h>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
+module pragma.server.scripting.lua.libraries.net;
+
 import pragma.server.entities;
 import pragma.server.game;
-import pragma.server.scripting.lua;
 import pragma.server.server_state;
-
-void SGame::HandleLuaNetPacket(pragma::networking::IServerClient &session, ::NetPacket &packet)
-{
-	unsigned int ID = packet->Read<unsigned int>();
-	if(ID == 0)
-		return;
-	auto *pl = GetPlayer(session);
-	if(pl == nullptr)
-		return;
-	std::string *ident = GetNetMessageIdentifier(ID);
-	if(ident == nullptr)
-		return;
-	std::unordered_map<std::string, int>::iterator i = m_luaNetMessages.find(*ident);
-	if(i == m_luaNetMessages.end()) {
-		Con::cwar << Con::PREFIX_SERVER << "Unhandled lua net message: " << *ident << Con::endl;
-		return;
-	}
-	ProtectedLuaCall(
-	  [&i, &pl, &packet](lua_State *l) {
-		  lua_rawgeti(l, LUA_REGISTRYINDEX, i->second);
-		  luabind::object(l, packet).push(l);
-		  pl->PushLuaObject(l);
-		  return Lua::StatusCode::Ok;
-	  },
-	  0);
-}
 
 ////////////////////////////
 

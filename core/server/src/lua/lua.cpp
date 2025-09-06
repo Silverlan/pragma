@@ -3,7 +3,6 @@
 
 #include "stdafx_server.h"
 #include "pragma/lua/libraries/lengine.h"
-#include "pragma/lua/libraries/s_lnetmessages.h"
 #include "pragma/lua/libraries/lglobal.h"
 #include "pragma/lua/libraries/lray.h"
 #include "pragma/lua/libraries/lgame.h"

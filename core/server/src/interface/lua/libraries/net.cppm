@@ -1,22 +1,19 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __LSVNETMESSAGES_H__
-#define __LSVNETMESSAGES_H__
+module;
 
 #include "pragma/serverdefinitions.h"
 #include "pragma/entities/components/s_player_component.hpp"
+#include "pragma/networking/iserver_client.hpp"
 #include "pragma/networking/enums.hpp"
+#include "pragma/networking/recipient_filter.hpp"
 #include <sharedutils/netpacket.hpp>
 #include <pragma/lua/ldefinitions.h>
 
-namespace pragma {
-	namespace networking {
-		class IServerClient;
-		class TargetRecipientFilter;
-	};
-};
-namespace Lua::net {
+export module pragma.server.scripting.lua.libraries.net;
+
+export namespace Lua::net {
 	namespace server {
 		DLLSERVER void broadcast(pragma::networking::Protocol protocol, const std::string &identifier, ::NetPacket &packet);
 		DLLSERVER bool register_net_message(const std::string &identifier);
@@ -28,6 +25,4 @@ namespace Lua::net {
 	};
 };
 
-DLLSERVER void NET_sv_luanet(pragma::networking::IServerClient &session, NetPacket packet);
-
-#endif
+export DLLSERVER void NET_sv_luanet(pragma::networking::IServerClient &session, NetPacket packet);

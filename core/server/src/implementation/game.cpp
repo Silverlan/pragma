@@ -722,3 +722,29 @@ static CVar cvFriction = GetServerConVar("sv_friction");
 Float SGame::GetFrictionScale() const { return cvFriction->GetFloat(); }
 static CVar cvRestitution = GetServerConVar("sv_restitution");
 Float SGame::GetRestitutionScale() const { return cvRestitution->GetFloat(); }
+
+void SGame::HandleLuaNetPacket(pragma::networking::IServerClient &session, ::NetPacket &packet)
+{
+	unsigned int ID = packet->Read<unsigned int>();
+	if(ID == 0)
+		return;
+	auto *pl = GetPlayer(session);
+	if(pl == nullptr)
+		return;
+	std::string *ident = GetNetMessageIdentifier(ID);
+	if(ident == nullptr)
+		return;
+	std::unordered_map<std::string, int>::iterator i = m_luaNetMessages.find(*ident);
+	if(i == m_luaNetMessages.end()) {
+		Con::cwar << Con::PREFIX_SERVER << "Unhandled lua net message: " << *ident << Con::endl;
+		return;
+	}
+	ProtectedLuaCall(
+	  [&i, &pl, &packet](lua_State *l) {
+		  lua_rawgeti(l, LUA_REGISTRYINDEX, i->second);
+		  luabind::object(l, packet).push(l);
+		  pl->PushLuaObject(l);
+		  return Lua::StatusCode::Ok;
+	  },
+	  0);
+}

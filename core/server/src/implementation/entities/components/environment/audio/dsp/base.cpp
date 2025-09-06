@@ -17,8 +17,6 @@ module pragma.server.entities.components.audio.dsp.base;
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(env_sound_dsp, EnvSoundDsp);
-
 void SBaseSoundDspComponent::Initialize()
 {
 	BaseEnvSoundDspComponent::Initialize();

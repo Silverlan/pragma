@@ -18,9 +18,9 @@ module pragma.server.entities.components.lights.spot;
 import pragma.server.entities.components.field_angle;
 import pragma.server.entities.components.lights.base;
 
-using namespace pragma;
+extern DLLSERVER ServerState *server;
 
-LINK_ENTITY_TO_CLASS(env_light_spot, EnvLightSpot);
+using namespace pragma;
 
 void SLightSpotComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)
 {

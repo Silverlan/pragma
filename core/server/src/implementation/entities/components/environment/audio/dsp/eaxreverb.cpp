@@ -14,8 +14,6 @@ module pragma.server.entities.components.audio.dsp.eaxreverb;
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(env_sound_dsp_eaxreverb, EnvSoundDspEAXReverb);
-
 bool SSoundDspEAXReverbComponent::OnSetKeyValue(const std::string &key, const std::string &val)
 {
 	if(SBaseSoundDspComponent::OnSetKeyValue(key, val))

@@ -14,8 +14,6 @@ module pragma.server.entities.components.triggers.hurt;
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(trigger_hurt, TriggerHurt);
-
 void STriggerHurtComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void TriggerHurt::Initialize()

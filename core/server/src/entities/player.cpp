@@ -10,8 +10,6 @@
 
 import pragma.server.entities.components;
 
-LINK_ENTITY_TO_CLASS(player, Player);
-
 void Player::Initialize()
 {
 	SBaseEntity::Initialize();

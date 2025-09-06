@@ -15,8 +15,6 @@ module pragma.server.entities.components.triggers.push;
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(trigger_push, TriggerPush);
-
 void STriggerPushComponent::Initialize()
 {
 	BaseTriggerPushComponent::Initialize();

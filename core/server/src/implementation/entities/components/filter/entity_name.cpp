@@ -13,8 +13,6 @@ module pragma.server.entities.components.filter.entity_name;
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(filter_entity_name, FilterEntityName);
-
 extern SGame *s_game;
 
 void SFilterNameComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }

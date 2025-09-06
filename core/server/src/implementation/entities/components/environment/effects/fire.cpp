@@ -15,8 +15,6 @@ module pragma.server.entities.components.effects.fire;
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(env_fire, EnvFire);
-
 void SFireComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void EnvFire::Initialize()

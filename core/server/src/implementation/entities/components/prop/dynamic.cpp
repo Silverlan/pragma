@@ -14,8 +14,6 @@ module pragma.server.entities.components.prop.dynamic;
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(prop_dynamic, PropDynamic);
-
 void SPropDynamicComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void PropDynamic::Initialize()

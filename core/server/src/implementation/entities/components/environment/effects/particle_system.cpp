@@ -13,9 +13,9 @@ module;
 
 module pragma.server.entities.components.effects.particle_system;
 
-using namespace pragma;
+extern DLLSERVER ServerState *server;
 
-LINK_ENTITY_TO_CLASS(env_particle_system, EnvParticleSystem);
+using namespace pragma;
 
 void SParticleSystemComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)
 {

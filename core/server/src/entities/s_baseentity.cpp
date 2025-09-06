@@ -35,14 +35,9 @@ import pragma.server.audio;
 import pragma.server.entities.components;
 import pragma.server.model_manager;
 
-extern EntityClassMap<SBaseEntity> *g_ServerEntityFactories;
-extern ServerEntityNetworkMap *g_SvEntityNetworkMap;
-
 extern DLLNETWORK Engine *engine;
 extern ServerState *server;
 extern SGame *s_game;
-
-LINK_ENTITY_TO_CLASS(entity, SBaseEntity);
 
 SBaseEntity::SBaseEntity() : BaseEntity(), m_bShared(false), m_bSynchronized(true) {}
 
@@ -106,12 +101,12 @@ void SBaseEntity::Initialize()
 {
 	BaseEntity::Initialize();
 
-	std::string className;
-	g_ServerEntityFactories->GetClassName(typeid(*this), &className);
-	m_className = pragma::ents::register_class_name(className);
+	auto className = server_entities::ServerEntityRegistry::Instance().GetClassName(typeid(*this));
+	std::string strClassName = className ? std::string{*className} : std::string {};
+	m_className = pragma::ents::register_class_name(strClassName);
 
-	unsigned int ID = g_SvEntityNetworkMap->GetFactoryID(typeid(*this));
-	if(ID == 0)
+	auto ID = server_entities::ServerEntityRegistry::Instance().GetNetworkFactoryID(typeid(*this));
+	if(ID == std::nullopt)
 		return;
 	m_bShared = true;
 }

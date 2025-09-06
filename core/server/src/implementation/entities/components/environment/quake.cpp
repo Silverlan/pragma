@@ -14,8 +14,6 @@ module pragma.server.entities.components.quake;
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(env_quake, EnvQuake);
-
 void SQuakeComponent::Initialize() { BaseEnvQuakeComponent::Initialize(); }
 
 void SQuakeComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)

@@ -15,8 +15,6 @@ module pragma.server.entities.components.point.constraints.dof;
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(point_constraint_dof, PointConstraintDoF);
-
 void SPointConstraintDoFComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)
 {
 	packet->WriteString(m_kvSource);

@@ -16,8 +16,6 @@ module pragma.server.entities.components.triggers.touch;
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(trigger_touch, TriggerTouch);
-
 void STouchComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void TriggerTouch::Initialize()

@@ -19,8 +19,6 @@ module pragma.server.entities.components.func.button;
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(func_button, FuncButton);
-
 extern ServerState *server;
 extern SGame *s_game;
 

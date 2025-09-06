@@ -20,8 +20,6 @@ import pragma.server.entities.components.point.path_node;
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(func_kinematic, FuncKinematic);
-
 void SKinematicComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)
 {
 	packet->WriteString(m_kvFirstNode);

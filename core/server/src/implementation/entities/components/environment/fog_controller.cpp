@@ -14,9 +14,9 @@ module;
 
 module pragma.server.entities.components.fog_controller;
 
-using namespace pragma;
+extern DLLSERVER ServerState *server;
 
-LINK_ENTITY_TO_CLASS(env_fog_controller, EnvFogController);
+using namespace pragma;
 
 void SFogControllerComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void SFogControllerComponent::SetFogStart(float start)

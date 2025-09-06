@@ -18,8 +18,6 @@ import pragma.server.entities.components.lights.base;
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(env_light_environment, EnvLightDirectional);
-
 void SLightDirectionalComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)
 {
 	packet->Write<short>((*m_ambientColor)->r);

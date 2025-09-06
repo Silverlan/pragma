@@ -15,8 +15,6 @@ module pragma.server.entities.components.point.constraints.hinge;
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(point_constraint_hinge, PointConstraintHinge);
-
 void SPointConstraintHingeComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)
 {
 	packet->WriteString(m_kvSource);

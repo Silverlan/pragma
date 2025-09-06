@@ -17,8 +17,6 @@ module pragma.server.entities.components.effects.explosion;
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(env_explosion, EnvExplosion);
-
 extern ServerState *server;
 
 void SExplosionComponent::Explode()

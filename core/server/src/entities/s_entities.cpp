@@ -28,8 +28,6 @@ import pragma.server.entities.components;
 import pragma.server.scripting.lua;
 
 extern ServerState *server;
-extern EntityClassMap<SBaseEntity> *g_ServerEntityFactories;
-extern ServerEntityNetworkMap *g_SvEntityNetworkMap;
 pragma::SPlayerComponent *SGame::GetPlayer(pragma::networking::IServerClient &session) { return server->GetPlayer(session); }
 
 SBaseEntity *SGame::CreateEntity(std::string classname)
@@ -44,8 +42,8 @@ SBaseEntity *SGame::CreateEntity(std::string classname)
 	auto *entlua = CreateLuaEntity(classname);
 	if(entlua != NULL)
 		return entlua;
-	SBaseEntity *(*factory)(void) = g_ServerEntityFactories->FindFactory(classname);
-	if(factory == NULL) {
+	auto factory = server_entities::ServerEntityRegistry::Instance().FindFactory(classname);
+	if(!factory) {
 		static std::unordered_set<std::string> skipSet;
 		if(skipSet.find(classname) == skipSet.end() && LoadLuaEntityByClass(classname) == true) {
 			skipSet.insert(classname);
@@ -56,7 +54,7 @@ SBaseEntity *SGame::CreateEntity(std::string classname)
 		Con::cwar << "Unable to create entity '" << classname << "': Factory not found!" << Con::endl;
 		return NULL;
 	}
-	return factory();
+	return factory(server);
 }
 
 void SGame::RemoveEntity(BaseEntity *ent)
@@ -66,8 +64,8 @@ void SGame::RemoveEntity(BaseEntity *ent)
 	ent->SetStateFlag(BaseEntity::StateFlags::Removed);
 	auto *s_ent = static_cast<SBaseEntity *>(ent);
 	if(s_ent->IsShared()) {
-		unsigned int ID = g_SvEntityNetworkMap->GetFactoryID(typeid(*ent));
-		if(ID != 0) {
+		auto ID = server_entities::ServerEntityRegistry::Instance().GetNetworkFactoryID(typeid(*ent));
+		if(ID != std::nullopt) {
 			NetPacket p;
 			nwm::write_entity(p, ent);
 			server->SendPacket("ent_remove", p, pragma::networking::Protocol::SlowReliable);
@@ -98,17 +96,17 @@ void SGame::RemoveEntity(BaseEntity *ent)
 void SGame::SpawnEntity(BaseEntity *ent) // Don't call directly
 {
 	Game::SpawnEntity(ent);
-	unsigned int ID = g_SvEntityNetworkMap->GetFactoryID(typeid(*ent));
+	auto ID = server_entities::ServerEntityRegistry::Instance().GetNetworkFactoryID(typeid(*ent));
 
 	auto pMapComponent = ent->GetComponent<pragma::MapComponent>();
-	if(ID != 0 && (pMapComponent.valid() == false || pMapComponent->GetMapIndex() == 0)) {
+	if(ID != std::nullopt && (pMapComponent.valid() == false || pMapComponent->GetMapIndex() == 0)) {
 		pragma::networking::ClientRecipientFilter rp {[](const pragma::networking::IServerClient &client) -> bool {
 			auto *pl = client.GetPlayer();
 			return pl && pl->IsAuthed();
 		}};
 		SBaseEntity *sent = static_cast<SBaseEntity *>(ent);
 		NetPacket p;
-		p->Write<unsigned int>(ID);
+		p->Write<unsigned int>(*ID);
 		p->Write<unsigned int>(ent->GetIndex());
 		p->Write<unsigned int>(pMapComponent.valid() ? pMapComponent->GetMapIndex() : 0u);
 		sent->SendData(p, rp);

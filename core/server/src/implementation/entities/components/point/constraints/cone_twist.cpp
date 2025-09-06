@@ -15,8 +15,6 @@ module pragma.server.entities.components.point.constraints.cone_twist;
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(point_constraint_conetwist, PointConstraintConeTwist);
-
 void SPointConstraintConeTwistComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)
 {
 	packet->WriteString(m_kvSource);

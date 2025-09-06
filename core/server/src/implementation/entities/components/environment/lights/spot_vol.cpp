@@ -15,8 +15,6 @@ module pragma.server.entities.components.lights.spot_vol;
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(env_light_spot_vol, EnvLightSpotVol);
-
 void SLightSpotVolComponent::Initialize()
 {
 	BaseEnvLightSpotVolComponent::Initialize();

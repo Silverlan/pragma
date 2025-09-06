@@ -1,38 +1,66 @@
-// SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
+// SPDX-FileCopyrightText: (c) 2025 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_server.h"
-#include "pragma/entities/s_entityfactories.h"
-#include "pragma/entities/s_baseentity.h"
+#include "pragma/entities/s_entityfactories.h" // for ServerState, SGame
+#include <stdexcept>
 
-entfactory_newglobal_def(DLLSERVER, Server, SBaseEntity);
+using namespace server_entities;
 
-ServerEntityNetworkMap::ServerEntityNetworkMap() : m_factoryID(1) {}
-
-void ServerEntityNetworkMap::RegisterFactory(const std::type_info &info)
+void ServerEntityRegistry::RegisterEntity(const std::string &localName,
+                                         std::type_index type,
+                                         Factory creator)
 {
-	m_factoryIDs.insert(std::unordered_map<size_t, unsigned int>::value_type(info.hash_code(), m_factoryID));
-	m_factoryID++;
+    m_factories[type] = std::move(creator);
+    m_classNameToTypeIndex.insert(std::make_pair(localName, type));
 }
 
-void ServerEntityNetworkMap::GetFactoryIDs(std::unordered_map<size_t, unsigned int> **factories) { *factories = &m_factoryIDs; }
-
-unsigned int ServerEntityNetworkMap::GetFactoryID(const std::type_info &info)
+std::optional<std::string_view> ServerEntityRegistry::GetClassName(std::type_index type) const
 {
-	std::unordered_map<size_t, unsigned int>::iterator i = m_factoryIDs.find(info.hash_code());
-	if(i == m_factoryIDs.end())
-		return 0;
-	return i->second;
+    auto it = m_typeIndexToClassName.find(type);
+    if (it == m_typeIndexToClassName.end())
+        return {};
+    return it->second;
 }
 
-DLLSERVER ServerEntityNetworkMap *g_SvEntityNetworkMap = NULL;
-DLLSERVER void LinkNetworkedEntityServer(const std::type_info &info)
+void ServerEntityRegistry::GetRegisteredClassNames(std::vector<std::string> &outNames) const
 {
-	if(g_SvEntityNetworkMap == NULL) {
-		static ServerEntityNetworkMap map;
-		g_SvEntityNetworkMap = &map;
-	}
-	g_SvEntityNetworkMap->RegisterFactory(info);
+    outNames.reserve(outNames.size() +m_classNameToTypeIndex.size());
+    for (auto &[className, typeIndex] : m_classNameToTypeIndex)
+        outNames.push_back(className);
 }
 
-#include "pragma/networking/networkedentities.h"
+Factory ServerEntityRegistry::FindFactory(const std::string &localName) const
+{
+    auto itType = m_classNameToTypeIndex.find(localName);
+    if(itType == m_classNameToTypeIndex.end())
+        return nullptr;
+    return FindFactory(itType->second);
+}
+
+Factory ServerEntityRegistry::FindFactory(std::type_index type) const
+{
+    auto itFactory = m_factories.find(type);
+    if (itFactory == m_factories.end())
+        return nullptr;
+    auto &factory = itFactory->second;
+    return factory;
+}
+
+uint32_t ServerEntityRegistry::RegisterNetworkedEntity(std::type_index type)
+{
+    auto it = m_networkFactoryIDs.find(type);
+    if (it != m_networkFactoryIDs.end())
+        return it->second;
+    uint32_t id = m_nextNetworkFactoryID++;
+    m_networkFactoryIDs.emplace(type, id);
+    return id;
+}
+
+std::optional<uint32_t> ServerEntityRegistry::GetNetworkFactoryID(std::type_index type) const
+{
+    auto it = m_networkFactoryIDs.find(type);
+    if (it == m_networkFactoryIDs.end())
+        return std::nullopt;
+    return it->second;
+}

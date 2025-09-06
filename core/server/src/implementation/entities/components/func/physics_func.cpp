@@ -17,8 +17,6 @@ module pragma.server.entities.components.func.physics;
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(func_physics, FuncPhysics);
-
 void SFuncPhysicsComponent::Initialize()
 {
 	BaseFuncPhysicsComponent::Initialize();

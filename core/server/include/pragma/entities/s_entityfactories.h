@@ -1,52 +1,77 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
+#pragma once
 
-#ifndef __S_ENTITYFACTORIES_H__
-#define __S_ENTITYFACTORIES_H__
-#include "pragma/serverdefinitions.h"
-#include "pragma/entities/entityfactories.h"
-#include <pragma/serverstate/serverstate.h>
-class SBaseEntity;
-entfactory_newglobal_dec(DLLSERVER, Server, SBaseEntity);
+#include "pragma/entities/s_baseentity.h"
+#include "pragma/serverstate/serverstate.h"
+#include "pragma/game/s_game.h"
+#include <unordered_map>
+#include <functional>
+#include <typeindex>
+#include <string>
+#include <mutex>
+#include <optional>
 
-// Entity Link Map
+#undef GetClassName
+
 class SBaseEntity;
-extern ServerState *server;
+class ServerState;
 class SGame;
-#define LINK_ENTITY_TO_CLASS(localname, classname)                                                                                                                                                                                                                                               \
-	static SBaseEntity *CreateServer##classname##Entity()                                                                                                                                                                                                                                        \
-	{                                                                                                                                                                                                                                                                                            \
-		SGame *game = server->GetGameState();                                                                                                                                                                                                                                                    \
-		if(game == NULL)                                                                                                                                                                                                                                                                         \
-			return NULL;                                                                                                                                                                                                                                                                         \
-		return static_cast<SBaseEntity *>(game->CreateEntity<classname>());                                                                                                                                                                                                                      \
-	}                                                                                                                                                                                                                                                                                            \
-	__reg_ent_Server *__reg_ent_Server_##classname = new __reg_ent_Server(#localname, typeid(classname), &CreateServer##classname##Entity);
 
-// Network Link Map
-class DLLSERVER ServerEntityNetworkMap {
-  private:
-	std::unordered_map<size_t, unsigned int> m_factoryIDs;
-	unsigned int m_factoryID;
-  public:
-	ServerEntityNetworkMap();
-	void GetFactoryIDs(std::unordered_map<size_t, unsigned int> **factories);
-	void RegisterFactory(const std::type_info &info);
-	unsigned int GetFactoryID(const std::type_info &info);
-};
+namespace server_entities {
+    using Factory = std::function<SBaseEntity*(ServerState*)>;
+    class ServerEntityRegistry {
+    public:
+        static ServerEntityRegistry &Instance() {
+            static ServerEntityRegistry inst;
+            return inst;
+        }
 
-DLLSERVER void LinkNetworkedEntityServer(const std::type_info &info);
+        void RegisterEntity(const std::string &localName, std::type_index type, Factory creator);
+        Factory FindFactory(const std::string &localName) const;
+        Factory FindFactory(std::type_index type) const;
+        void GetRegisteredClassNames(std::vector<std::string> &outNames) const;
+        std::optional<std::string_view> GetClassName(std::type_index type) const;
+        template<class T>
+            std::optional<std::string_view> GetClassName() const
+            {
+                return GetClassName(typeid(T));
+            }
 
-class DLLSERVER __reg_ent_link_sv {
-  public:
-	__reg_ent_link_sv(const std::type_info &info)
-	{
-		LinkNetworkedEntityServer(info);
-		delete this;
-	}
-};
-#define __LINK_NETWORKED_ENTITY(classname, identifier) __reg_ent_link_sv *__reg_ent_link_sv_##identifier = new __reg_ent_link_sv(typeid(classname));
-#define _LINK_NETWORKED_ENTITY(classname, identifier) __LINK_NETWORKED_ENTITY(classname, identifier);
-#define LINK_NETWORKED_ENTITY(classname, dummy) _LINK_NETWORKED_ENTITY(classname, __COUNTER__);
+        uint32_t RegisterNetworkedEntity(std::type_index type);
+        std::optional<uint32_t> GetNetworkFactoryID(std::type_index type) const;
+    private:
+        ServerEntityRegistry() = default;
+        ~ServerEntityRegistry() = default;
+        ServerEntityRegistry(const ServerEntityRegistry&) = delete;
+        ServerEntityRegistry& operator=(const ServerEntityRegistry&) = delete;
 
-#endif
+        std::unordered_map<std::type_index, Factory> m_factories;
+        std::unordered_map<std::string, std::type_index> m_classNameToTypeIndex;
+        std::unordered_map<std::type_index, std::string> m_typeIndexToClassName;
+        std::unordered_map<std::type_index, uint32_t> m_networkFactoryIDs;
+        uint32_t m_nextNetworkFactoryID{1};
+    };
+
+    template<typename T>
+    void register_entity(const char *localName) {
+        ServerEntityRegistry::Instance().RegisterEntity(
+            std::string(localName),
+            typeid(T),
+            [](ServerState *server) -> SBaseEntity* {
+                if (!server) return
+                    nullptr;
+                SGame *game = server->GetGameState();
+                if (!game) return
+                    nullptr;
+                auto *ent = game->template CreateEntity<T>();
+                return static_cast<SBaseEntity*>(ent);
+            }
+        );
+    }
+
+    template<typename T>
+    uint32_t register_networked_entity() {
+        return ServerEntityRegistry::Instance().RegisterNetworkedEntity(typeid(T));
+    }
+}

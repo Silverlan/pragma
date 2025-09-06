@@ -63,8 +63,6 @@ import pragma.server.model_manager;
 import pragma.server.scripting.lua;
 
 extern DLLNETWORK Engine *engine;
-extern EntityClassMap<SBaseEntity> *g_ServerEntityFactories;
-extern ServerEntityNetworkMap *g_SvEntityNetworkMap;
 extern ServerState *server;
 extern SGame *s_game;
 DLLSERVER pragma::physics::IEnvironment *s_physEnv = nullptr;
@@ -116,11 +114,7 @@ SGame::~SGame() {}
 
 void SGame::GetRegisteredEntities(std::vector<std::string> &classes, std::vector<std::string> &luaClasses) const
 {
-	std::unordered_map<std::string, SBaseEntity *(*)(void)> *factories = nullptr;
-	g_ServerEntityFactories->GetFactories(&factories);
-	classes.reserve(classes.size() + factories->size());
-	for(auto &pair : *factories)
-		classes.push_back(pair.first);
+    server_entities::ServerEntityRegistry::Instance().GetRegisteredClassNames(classes);
 	GetLuaRegisteredEntities(luaClasses);
 }
 
@@ -485,10 +479,10 @@ void SGame::WriteEntityData(NetPacket &packet, SBaseEntity **ents, uint32_t entC
 		SBaseEntity *ent = ents[i];
 		if(ent != NULL && ent->IsSpawned()) {
 			auto pMapComponent = ent->GetComponent<pragma::MapComponent>();
-			unsigned int factoryID = g_SvEntityNetworkMap->GetFactoryID(typeid(*ent));
-			if(factoryID != 0) {
+		    auto factoryID = server_entities::ServerEntityRegistry::Instance().GetNetworkFactoryID(typeid(*ent));
+			if(factoryID != std::nullopt) {
 				packet->Write<Bool>(false);
-				packet->Write<unsigned int>(factoryID);
+				packet->Write<unsigned int>(*factoryID);
 				packet->Write<unsigned int>(ent->GetIndex());
 				packet->Write<unsigned int>(pMapComponent.valid() ? pMapComponent->GetMapIndex() : 0u);
 				ent->SendData(packet, rp);

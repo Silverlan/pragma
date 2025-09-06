@@ -21,7 +21,7 @@ module pragma.server.entities.components.triggers.gravity;
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(trigger_gravity, TriggerGravity);
+extern DLLSERVER ServerState *server;
 
 void STriggerGravityComponent::Initialize()
 {

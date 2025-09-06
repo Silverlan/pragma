@@ -19,8 +19,6 @@ module pragma.server.entities.components.audio.sound;
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(env_sound, EnvSound);
-
 void SSoundComponent::Initialize() { BaseEnvSoundComponent::Initialize(); }
 void SSoundComponent::OnSoundCreated(ALSound &snd)
 {

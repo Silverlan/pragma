@@ -16,8 +16,6 @@ module pragma.server.entities.components.func.brush;
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(func_brush, FuncBrush);
-
 extern DLLSERVER SGame *s_game;
 
 void SBrushComponent::Initialize() { BaseFuncBrushComponent::Initialize(); }

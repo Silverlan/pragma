@@ -15,8 +15,6 @@ module pragma.server.entities.components.point.constraints.ball_socket;
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(point_constraint_ballsocket, PointConstraintBallSocket);
-
 void SPointConstraintBallSocketComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)
 {
 	packet->WriteString(m_kvSource);

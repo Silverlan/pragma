@@ -15,8 +15,6 @@ import pragma.server.entities.components;
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(logic_relay, LogicRelay);
-
 void SLogicRelayComponent::Initialize()
 {
 	BaseLogicRelayComponent::Initialize();

@@ -24,8 +24,6 @@ using namespace pragma;
 
 extern DLLSERVER SGame *s_game;
 
-LINK_ENTITY_TO_CLASS(func_water, FuncWater);
-
 SLiquidComponent::SLiquidComponent(BaseEntity &ent) : BaseFuncLiquidComponent(ent) {}
 SLiquidComponent::~SLiquidComponent()
 {

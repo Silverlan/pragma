@@ -17,8 +17,6 @@ module pragma.server.entities.components.effects.smoke_trail;
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(env_smoke_trail, EnvSmokeTrail);
-
 extern ServerState *server;
 extern SGame *s_game;
 

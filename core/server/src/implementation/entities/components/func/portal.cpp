@@ -13,8 +13,6 @@ module pragma.server.entities.components.func.portal;
 
 using namespace pragma;
 
-// LINK_ENTITY_TO_CLASS(func_portal,FuncPortal);
-
 void SFuncPortalComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void FuncPortal::Initialize()

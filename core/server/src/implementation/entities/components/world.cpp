@@ -13,8 +13,6 @@ module pragma.server.entities.components.world;
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(world, World);
-
 void SWorldComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void World::Initialize()

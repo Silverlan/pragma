@@ -15,8 +15,6 @@ module pragma.server.entities.components.point.constraints.fixed;
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(point_constraint_fixed, PointConstraintFixed);
-
 void SPointConstraintFixedComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)
 {
 	packet->WriteString(m_kvSource);

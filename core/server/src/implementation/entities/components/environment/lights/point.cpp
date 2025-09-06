@@ -15,8 +15,6 @@ import pragma.server.entities.components.lights.base;
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(env_light_point, EnvLightPoint);
-
 void SLightPointComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void SLightPointComponent::OnEntityComponentAdded(BaseEntityComponent &component)

@@ -13,8 +13,6 @@ module pragma.server.entities.components.effects.sprite;
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(env_sprite, EnvSprite);
-
 void SSpriteComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)
 {
 	packet->WriteString(m_spritePath);

@@ -17,8 +17,6 @@ module pragma.server.entities.components.wheel;
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(vhc_wheel, SWheel);
-
 extern DLLSERVER SGame *s_game;
 
 void SWheel::Initialize()

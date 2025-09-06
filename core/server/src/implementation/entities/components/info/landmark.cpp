@@ -12,8 +12,6 @@ module pragma.server.entities.components.info.landmark;
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(info_landmark, InfoLandmark);
-
 void SInfoLandmarkComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void InfoLandmark::Initialize()

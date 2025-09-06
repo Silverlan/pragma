@@ -11,15 +11,6 @@ import pragma.server.entities.components;
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(debug_text, EntDebugText);
-LINK_ENTITY_TO_CLASS(debug_point, EntDebugPoint);
-LINK_ENTITY_TO_CLASS(debug_line, EntDebugLine);
-LINK_ENTITY_TO_CLASS(debug_box, EntDebugBox);
-LINK_ENTITY_TO_CLASS(debug_sphere, EntDebugSphere);
-LINK_ENTITY_TO_CLASS(debug_cone, EntDebugCone);
-LINK_ENTITY_TO_CLASS(debug_cylinder, EntDebugCylinder);
-LINK_ENTITY_TO_CLASS(debug_plane, EntDebugPlane);
-
 void EntDebugText::Initialize()
 {
 	SBaseEntity::Initialize();

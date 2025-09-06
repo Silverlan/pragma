@@ -3,8 +3,8 @@
 
 #include "stdafx_server.h"
 #include "pragma/networking/netmessages.h"
-#include "pragma/networking/standard_server.hpp"
 #include "pragma/networking/recipient_filter.hpp"
+#include "pragma/networking/iserver.hpp"
 #include <pragma/entities/components/base_player_component.hpp>
 #include <pragma/networking/error.hpp>
 #include <servermanager/interface/sv_nwm_manager.hpp>

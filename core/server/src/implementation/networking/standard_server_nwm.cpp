@@ -1,12 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
-#include "pragma/networking/standard_server.hpp"
 #include "pragma/networking/netmessages.h"
 #include "wms_shared.h"
 #include "wms_message.h"
 #include "pragma/networking/wv_message.h"
+#include "pragma/networking/enums.hpp"
 #include "wmserverdata.h"
 #include <servermanager/connection/sv_nwm_tcpconnection.h>
 #include <servermanager/connection/sv_nwm_udpconnection.h>
@@ -15,6 +17,8 @@
 #include <pragma/networking/error.hpp>
 #include <servermanager/interface/sv_nwm_manager_create.hpp>
 #include <sharedutils/util_clock.hpp>
+
+module pragma.server.networking.standard_server;
 
 import pragma.server.entities;
 import pragma.server.entities.components;

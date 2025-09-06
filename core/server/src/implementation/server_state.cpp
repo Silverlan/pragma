@@ -6,9 +6,10 @@ module;
 #include "stdafx_server.h"
 #include "pragma/networking/netmessages.h"
 #include "pragma/networking/resourcemanager.h"
+#include "servermanager/interface/sv_nwm_manager.hpp"
 #include "pragma/networking/iserver_client.hpp"
-#include "pragma/networking/standard_server.hpp"
 #include "pragma/console/convarhandle.h"
+#include "pragma/networking/iserver.hpp"
 #include <pragma/audio/soundscript.h>
 #include "luasystem.h"
 #include "pragma/networking/recipient_filter.hpp"

@@ -1,23 +1,21 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __PRAGMA_STANDARD_SERVER_HPP__
-#define __PRAGMA_STANDARD_SERVER_HPP__
+module;
 
 #include <pragma/networking/enums.hpp>
 #include "pragma/networking/iserver.hpp"
 #include "pragma/networking/iserver_client.hpp"
+#include "pragma/networking/enums.hpp"
 #include <servermanager/interface/sv_nwm_manager.hpp>
 #include <servermanager/interface/sv_nwm_serverclient.hpp>
 #include <networkmanager/udp_handler/udp_message_dispatcher.h>
 #include <sharedutils/util_weak_handle.hpp>
 
-namespace nwm {
-	enum class Protocol : uint32_t;
-};
-namespace pragma {
-	class SPlayerComponent;
-};
+export module pragma.server.networking.standard_server;
+
+import pragma.server.entities.components;
+
 namespace pragma::networking {
 	class StandardServer;
 	class StandardServerClient;
@@ -94,5 +92,3 @@ namespace pragma::networking {
 		mutable nwm::ServerClient *m_nwmClient = nullptr;
 	};
 };
-
-#endif

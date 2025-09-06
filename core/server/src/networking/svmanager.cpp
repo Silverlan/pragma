@@ -5,7 +5,6 @@
 #include <pragma/engine.h>
 #include "pragma/networking/iserver.hpp"
 #include "pragma/game/gamemode/gamemodemanager.h"
-#include "pragma/networking/standard_server.hpp"
 #include <pragma/networking/game_server_data.hpp>
 #include <pragma/networking/enums.hpp>
 #include <wms_shared.h>

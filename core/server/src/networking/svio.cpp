@@ -6,12 +6,12 @@
 #include "pragma/networking/standard_server.hpp"
 #include "pragma/networking/recipient_filter.hpp"
 #include "pragma/networking/master_server.hpp"
-#include "pragma/entities/components/s_player_component.hpp"
 #include <pragma/entities/components/base_player_component.hpp>
 #include <pragma/networking/error.hpp>
 #include <servermanager/interface/sv_nwm_manager.hpp>
 
 import pragma.server.entities;
+import pragma.server.entities.components;
 import pragma.server.server_state;
 
 extern DLLNETWORK ServerMessageMap *g_NetMessagesSv;

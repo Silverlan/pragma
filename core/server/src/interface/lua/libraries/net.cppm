@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include "pragma/entities/components/s_player_component.hpp"
 #include "pragma/networking/iserver_client.hpp"
 #include "pragma/networking/enums.hpp"
 #include "pragma/networking/recipient_filter.hpp"
@@ -12,6 +11,8 @@ module;
 #include <pragma/lua/ldefinitions.h>
 
 export module pragma.server.scripting.lua.libraries.net;
+
+import pragma.server.entities.components;
 
 export namespace Lua::net {
 	namespace server {

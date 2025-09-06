@@ -1,19 +1,18 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __S_PLAYER_COMPONENT_HPP__
-#define __S_PLAYER_COMPONENT_HPP__
+module;
 
 #include "pragma/serverdefinitions.h"
 #include "pragma/entities/components/s_entity_component.hpp"
+#include "pragma/networking/iserver_client.hpp"
 #include <pragma/entities/components/base_player_component.hpp>
 #include <pragma/networking/ip_address.hpp>
 #include <networkmanager/wrappers/nwm_ip_address.hpp>
 
-namespace pragma {
-	namespace networking {
-		class IServerClient;
-	};
+export module pragma.server.entities.components.player;
+
+export namespace pragma {
 	class DLLSERVER SPlayerComponent final : public BasePlayerComponent, public SBaseNetComponent {
 	  public:
 		// Same as PlayActivity, but doesn't automatically transmit to clients if called serverside
@@ -79,5 +78,3 @@ namespace pragma {
 		virtual ~SPlayerComponent() override;
 	};
 };
-
-#endif

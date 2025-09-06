@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_server.h"
-#include "pragma/entities/components/s_player_component.hpp"
 #include "pragma/entities/components/base_character_component.hpp"
 #include "pragma/networking/recipient_filter.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>

@@ -5,7 +5,6 @@
 #include "pragma/lua/classes/ldef_entity.h"
 #include "luasystem.h"
 #include "pragma/ai/ai_schedule.h"
-#include "pragma/entities/components/s_player_component.hpp"
 #include "pragma/lua/s_lentity_components.hpp"
 #include "pragma/lua/policies/default_parameter_policy.hpp"
 #include <pragma/lua/lua_util_component.hpp>

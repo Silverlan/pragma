@@ -7,7 +7,6 @@
 #include "pragma/console/cvar_global.h"
 #include "pragma/networking/iserver.hpp"
 #include "pragma/networking/iserver_client.hpp"
-#include "pragma/entities/components/s_player_component.hpp"
 #include <pragma/entities/components/base_name_component.hpp>
 #include <pragma/console/util_cmd.hpp>
 #include <pragma/entities/components/base_player_component.hpp>

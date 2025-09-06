@@ -3,8 +3,9 @@
 
 #include "stdafx_server.h"
 #include "pragma/networking/iserver_client.hpp"
-#include "pragma/entities/components/s_player_component.hpp"
 #include <pragma/networking/resource.h>
+
+import pragma.server.entities.components;
 
 pragma::networking::IServerClient::~IServerClient() { ClearResourceTransfer(); }
 bool pragma::networking::IServerClient::Drop(DropReason reason, pragma::networking::Error &outErr) { return false; }

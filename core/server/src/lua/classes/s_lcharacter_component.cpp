@@ -5,7 +5,6 @@
 #include "pragma/lua/classes/ldef_entity.h"
 #include "luasystem.h"
 #include "pragma/lua/s_lentity_components.hpp"
-#include "pragma/entities/components/s_player_component.hpp"
 #include <pragma/lua/lua_util_component.hpp>
 #include <pragma/lua/classes/lproperty.hpp>
 #include <pragma/lua/ostream_operator_alias.hpp>

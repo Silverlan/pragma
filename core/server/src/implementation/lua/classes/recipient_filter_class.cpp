@@ -7,11 +7,11 @@ module;
 #include "pragma/networking/recipient_filter.hpp"
 #include "pragma/lua/classes/ldef_recipientfilter.h"
 #include "pragma/lua/classes/ldef_entity.h"
-#include "pragma/entities/components/s_player_component.hpp"
 
 module pragma.server.scripting.lua.classes.recipient_filter;
 
 import pragma.server.entities;
+import pragma.server.entities.components;
 import pragma.server.server_state;
 
 extern ServerState *server;

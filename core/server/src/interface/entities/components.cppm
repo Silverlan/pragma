@@ -66,6 +66,7 @@ export import pragma.server.entities.components.observer;
 export import pragma.server.entities.components.ownable;
 export import pragma.server.entities.components.observable;
 export import pragma.server.entities.components.physics;
+export import pragma.server.entities.components.player;
 export import pragma.server.entities.components.player_spawn;
 export import pragma.server.entities.components.point.constraints.ball_socket;
 export import pragma.server.entities.components.point.constraints.cone_twist;

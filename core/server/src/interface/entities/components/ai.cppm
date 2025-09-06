@@ -7,9 +7,9 @@ module;
 #include "pragma/ai/ai_memory.h"
 #include "pragma/ai/ai_behavior.h"
 #include "pragma/ai/ai_schedule.h"
+#include "pragma/input/inkeys.h"
 #include "pragma/debug/debugbehaviortree.h"
 #include "pragma/entities/components/s_entity_component.hpp"
-#include "pragma/entities/components/s_player_component.hpp"
 #include "pragma/entities/components/base_actor_component.hpp"
 #include <pragma/model/animation/play_animation_flags.hpp>
 #include <pragma/entities/components/base_ai_component.hpp>
@@ -19,6 +19,7 @@ module;
 export module pragma.server.entities.components.ai;
 
 import pragma.server.ai;
+import pragma.server.entities.components.player;
 
 export {
 	constexpr float AI_NEXT_ENEMY_CHECK_IDLE = 0.25f;

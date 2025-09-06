@@ -12,7 +12,6 @@
 #include <servermanager/sv_nwm_recipientfilter.h>
 #include "pragma/networking/iserver_client.hpp"
 #include "pragma/networking/recipient_filter.hpp"
-#include "pragma/entities/components/s_player_component.hpp"
 #include <pragma/networking/enums.hpp>
 #include <pragma/entities/components/base_player_component.hpp>
 #include <pragma/entities/components/action_input_controller_component.hpp>
@@ -22,6 +21,7 @@
 #include <sharedutils/util_file.h>
 
 import pragma.server.entities;
+import pragma.server.entities.components;
 import pragma.server.game;
 import pragma.server.model_manager;
 import pragma.server.server_state;

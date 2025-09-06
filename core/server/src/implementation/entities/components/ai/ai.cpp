@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_server.h"
-#include "pragma/entities/components/s_player_component.hpp"
 #include "pragma/entities/components/base_ai_component.hpp"
 #include "pragma/ai/ai_schedule.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
@@ -31,6 +30,7 @@ import pragma.server.entities.components.animated;
 import pragma.server.entities.components.character;
 import pragma.server.entities.components.health;
 import pragma.server.entities.components.model;
+import pragma.server.entities.components.player;
 import pragma.server.entities.components.physics;
 import pragma.server.game;
 

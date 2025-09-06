@@ -13,7 +13,6 @@
 #include "pragma/networking/iserver.hpp"
 #include "pragma/lua/classes/ldef_recipientfilter.h"
 #include "pragma/lua/s_lentity_components.hpp"
-#include "pragma/entities/components/s_player_component.hpp"
 #include "pragma/lua/s_lua_component.hpp"
 #include "pragma/lua/sh_lua_component_t.hpp"
 #include <pragma/lua/lua_util_component.hpp>
@@ -32,6 +31,7 @@
 #include <udm.hpp>
 
 import pragma.server.ai;
+import pragma.server.entities.components;
 import pragma.server.game;
 import pragma.server.server_state;
 import pragma.server.scripting.lua;

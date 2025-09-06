@@ -8,7 +8,6 @@
 #include <pragma/networking/nwm_util.h>
 #include "pragma/networking/iserver_client.hpp"
 #include "pragma/networking/recipient_filter.hpp"
-#include "pragma/entities/components/s_player_component.hpp"
 #include <pragma/debug/intel_vtune.hpp>
 #include <pragma/networking/enums.hpp>
 #include <pragma/lua/lua_entity_type.hpp>

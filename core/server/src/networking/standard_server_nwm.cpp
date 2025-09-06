@@ -8,7 +8,6 @@
 #include "wms_message.h"
 #include "pragma/networking/wv_message.h"
 #include "wmserverdata.h"
-#include "pragma/entities/components/s_player_component.hpp"
 #include <servermanager/connection/sv_nwm_tcpconnection.h>
 #include <servermanager/connection/sv_nwm_udpconnection.h>
 #include <servermanager/interface/sv_nwm_serverclient.hpp>
@@ -18,6 +17,7 @@
 #include <sharedutils/util_clock.hpp>
 
 import pragma.server.entities;
+import pragma.server.entities.components;
 import pragma.server.server_state;
 
 #define DEBUG_SERVER_VERBOSE 1

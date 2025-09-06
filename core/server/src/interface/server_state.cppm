@@ -6,7 +6,6 @@ module;
 #include "pragma/serverdefinitions.h"
 #include <pragma/networkstate/networkstate.h>
 #include "pragma/networking/netmessages.h"
-#include "pragma/entities/components/s_player_component.hpp"
 #include "pragma/networking/iserver.hpp"
 #include "pragma/networking/iserver_client.hpp"
 #include "pragma/networking/recipient_filter.hpp"
@@ -22,6 +21,7 @@ module;
 export module pragma.server.server_state;
 
 import pragma.server.audio.sound_script;
+import pragma.server.entities.components;
 import pragma.server.game;
 
 #pragma warning(push)

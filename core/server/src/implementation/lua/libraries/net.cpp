@@ -10,7 +10,6 @@ module;
 #include "pragma/networking/recipient_filter.hpp"
 #include "pragma/lua/classes/ldef_recipientfilter.h"
 #include <sharedutils/netpacket.hpp>
-#include "pragma/entities/components/s_player_component.hpp"
 #include <pragma/networking/enums.hpp>
 #include <pragma/lua/lua_handle.hpp>
 #include <pragma/lua/luaapi.h>
@@ -19,6 +18,7 @@ module;
 module pragma.server.scripting.lua.libraries.net;
 
 import pragma.server.entities;
+import pragma.server.entities.components;
 import pragma.server.game;
 import pragma.server.server_state;
 

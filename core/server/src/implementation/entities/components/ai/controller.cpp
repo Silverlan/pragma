@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_server.h"
-#include "pragma/entities/components/s_player_component.hpp"
 #include <pragma/entities/components/base_player_component.hpp>
 #include <pragma/entities/components/base_character_component.hpp>
 #include <pragma/entities/components/action_input_controller_component.hpp>
@@ -14,6 +13,7 @@ module pragma.server.entities.components.ai;
 
 import pragma.server.entities.components.character;
 import pragma.server.entities.components.generic;
+import pragma.server.entities.components.player;
 import pragma.server.entities.components.observable;
 import pragma.server.entities.components.observer;
 

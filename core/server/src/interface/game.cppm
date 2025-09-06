@@ -5,7 +5,6 @@ module;
 
 #include <pragma/game/game.h>
 #include "pragma/serverdefinitions.h"
-#include "pragma/entities/components/s_player_component.hpp"
 #include "pragma/networking/iserver_client.hpp"
 #include "pragma/networking/recipient_filter.hpp"
 #include <udm.hpp>

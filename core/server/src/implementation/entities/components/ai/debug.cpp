@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_server.h"
-#include "pragma/entities/components/s_player_component.hpp"
 #include "pragma/ai/ai_behavior.h"
 #include "pragma/ai/ai_schedule.h"
 #include "pragma/networking/recipient_filter.hpp"
@@ -15,6 +14,7 @@ module;
 
 module pragma.server.entities.components.ai;
 
+import pragma.server.entities.components;
 import pragma.server.game;
 import pragma.server.scripting.lua;
 import pragma.server.server_state;

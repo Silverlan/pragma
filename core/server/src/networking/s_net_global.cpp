@@ -11,7 +11,6 @@
 #include "pragma/networking/recipient_filter.hpp"
 #include <pragma/engine.h>
 #include "pragma/ai/ai_schedule.h"
-#include "pragma/entities/components/s_player_component.hpp"
 #include "pragma/networking/master_server.hpp"
 #include <pragma/networking/enums.hpp>
 #include <pragma/networking/error.hpp>

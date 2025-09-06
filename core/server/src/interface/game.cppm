@@ -8,7 +8,6 @@ module;
 #include "pragma/networking/iserver_client.hpp"
 #include "pragma/networking/recipient_filter.hpp"
 #include <udm.hpp>
-#include "pragma/cacheinfo.h"
 #include "pragma/ai/ai_behavior.h"
 #include <vector>
 #include <unordered_map>
@@ -16,12 +15,10 @@ module;
 #include <optional>
 #include <mathutil/color.h>
 #include <sharedutils/datastream.h>
-#ifdef __linux__
-#include "pragma/cacheinfo.h"
-#endif
 
 export module pragma.server.game;
 
+import pragma.server.core.cache_info;
 import pragma.server.entities;
 
 #pragma warning(push)

@@ -1,10 +1,13 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __CACHEINFO_H__
-#define __CACHEINFO_H__
+module;
+
 #include "pragma/serverdefinitions.h"
-struct DLLSERVER CacheInfo {
+
+export module pragma.server.core.cache_info;
+
+export struct DLLSERVER CacheInfo {
 	CacheInfo() : cache(""), size(0) {}
 	CacheInfo(std::string cache, unsigned int size)
 	{
@@ -14,4 +17,3 @@ struct DLLSERVER CacheInfo {
 	std::string cache;
 	unsigned int size;
 };
-#endif

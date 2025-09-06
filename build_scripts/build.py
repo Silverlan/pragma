@@ -248,27 +248,10 @@ config.prebuilt_bin_dir = deps_dir +"/" +config.deps_staging_dir
 # Use prebuilt binaries if --build-all is not set
 if build_all == False:
     def is_commit_current(base_path: str, commit_id: str, filename: str = "commit_id.txt") -> bool:
-        target_file = Path(base_path) / filename
-        if not target_file.exists():
-            return False
-        try:
-            return target_file.read_text(encoding="utf-8").strip() == commit_id
-        except Exception:
-            return False
-
+        return check_content_version(base_path, commit_id, filename)
 
     def update_commit_directory(base_path: str, commit_id: str, filename: str = "commit_id.txt") -> None:
-        base = Path(base_path)
-        if base.exists():
-            print(f"Removing directory '{base}'...")
-            shutil.rmtree(base)
-
-        print(f"Creating directory '{base}'...")
-        base.mkdir(parents=True, exist_ok=True)
-
-        target_file = base / filename
-        print(f"Writing commit ID to '{target_file}'...")
-        target_file.write_text(commit_id, encoding="utf-8")
+        update_content_version(base_path, commit_id, filename)
 
     base_path = get_staging_dir()
     if not is_commit_current(base_path, prebuilt_tag, "tag_id.txt"):
@@ -384,6 +367,8 @@ def execscript(filepath):
 		"install_prebuilt_binaries": install_prebuilt_binaries,
 		"reset_to_commit": reset_to_commit,
 		"check_repository_commit": check_repository_commit,
+		"check_content_version": check_content_version,
+		"update_content_version": update_content_version,
 		
 		"cmake_args": cmake_args,
 
@@ -620,6 +605,8 @@ def execbuildscript(filepath):
 		"install_prebuilt_binaries": install_prebuilt_binaries,
 		"reset_to_commit": reset_to_commit,
 		"check_repository_commit": check_repository_commit,
+		"check_content_version": check_content_version,
+		"update_content_version": update_content_version,
 		"add_pragma_module": add_pragma_module
 	}
 	if platform == "linux":

@@ -605,3 +605,25 @@ def get_library_include_dir(lib_name):
 
 def get_library_lib_dir(lib_name):
 	return get_library_root_dir(lib_name) +"lib/"
+
+def check_content_version(base_path: str, contents: str, filename: str) -> bool:
+	target_file = Path(base_path) / filename
+	if not target_file.exists():
+		return False
+	try:
+		return target_file.read_text(encoding="utf-8").strip() == contents
+	except Exception:
+		return False
+
+def update_content_version(base_path: str, commit_id: str, filename: str) -> None:
+	base = Path(base_path)
+	if base.exists():
+		print(f"Removing directory '{base}'...")
+		shutil.rmtree(base)
+
+	print(f"Creating directory '{base}'...")
+	base.mkdir(parents=True, exist_ok=True)
+
+	target_file = base / filename
+	print(f"Writing content version to '{target_file}'...")
+	target_file.write_text(commit_id, encoding="utf-8")

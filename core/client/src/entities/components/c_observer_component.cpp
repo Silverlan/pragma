@@ -5,7 +5,6 @@
 #include "pragma/game/c_game.h"
 #include "pragma/c_engine.h"
 #include "pragma/entities/components/c_observer_component.hpp"
-#include "pragma/entities/components/c_observable_component.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_transform_component.hpp"
 #include "pragma/entities/components/c_game_component.hpp"

@@ -48,6 +48,7 @@ export import pragma.client.entities.components.material_override;
 export import pragma.client.entities.components.material_property_override;
 export import pragma.client.entities.components.motion_blur_data;
 export import pragma.client.entities.components.name;
+export import pragma.client.entities.components.observable;
 export import pragma.client.entities.components.optical_camera;
 export import pragma.client.entities.components.point_at_target;
 export import pragma.client.entities.components.point_constraint_ball_socket;

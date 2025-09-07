@@ -12,7 +12,6 @@
 #include "pragma/entities/components/c_attachment_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"
-#include "pragma/entities/components/c_observable_component.hpp"
 #include "pragma/entities/components/c_observer_component.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_ownable_component.hpp"

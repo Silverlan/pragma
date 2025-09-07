@@ -12,7 +12,6 @@
 #include "pragma/entities/components/c_color_component.hpp"
 #include "pragma/entities/components/c_surface_component.hpp"
 #include "pragma/entities/components/c_networked_component.hpp"
-#include "pragma/entities/components/c_observable_component.hpp"
 #include "pragma/entities/components/c_observer_component.hpp"
 #include "pragma/entities/components/c_physics_component.hpp"
 #include "pragma/entities/components/c_radius_component.hpp"

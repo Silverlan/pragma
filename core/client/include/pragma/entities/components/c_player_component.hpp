@@ -14,7 +14,6 @@
 class CBaseEntity;
 struct DeltaTransform;
 namespace pragma {
-	class CObservableComponent;
 	class DLLCLIENT CPlayerComponent final : public BasePlayerComponent, public CBaseNetComponent {
 	  private:
 		static std::vector<CPlayerComponent *> s_players;

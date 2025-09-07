@@ -1,12 +1,13 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
-#include "pragma/entities/components/c_observable_component.hpp"
-#include "pragma/entities/components/c_observer_component.hpp"
-#include "pragma/entities/components/c_player_component.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
+
+module pragma.client.entities.components.observable;
 
 using namespace pragma;
 

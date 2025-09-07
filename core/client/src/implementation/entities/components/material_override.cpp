@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: (c) 2025 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/entities/components/material_override.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/entity_component_manager_t.hpp"
 #include "pragma/entities/entity_component_system_t.hpp"
@@ -15,6 +16,8 @@
 #include <prosper_command_buffer.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <cmaterial.h>
+
+module pragma.client.entities.components.material_override;
 
 import pragma.client.entities.components;
 

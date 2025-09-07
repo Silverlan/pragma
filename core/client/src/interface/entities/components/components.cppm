@@ -40,6 +40,7 @@ export import pragma.client.entities.components.liquid_surface;
 export import pragma.client.entities.components.liquid_surface_simulation;
 export import pragma.client.entities.components.liquid_volume;
 export import pragma.client.entities.components.lua;
+export import pragma.client.entities.components.material_override;
 export import pragma.client.entities.components.material_property_override;
 export import pragma.client.entities.components.motion_blur_data;
 export import pragma.client.entities.components.optical_camera;

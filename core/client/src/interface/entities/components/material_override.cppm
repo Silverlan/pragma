@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: (c) 2025 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __PRAGMA_MATERIAL_OVERRIDE_HPP__
-#define __PRAGMA_MATERIAL_OVERRIDE_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/components/c_entity_component.hpp"
@@ -13,9 +12,11 @@
 #include <material_manager2.hpp>
 #include <queue>
 
+export module pragma.client.entities.components.material_override;
+
 import pragma.client.rendering.material_property_block;
 
-namespace pragma {
+export namespace pragma {
 	class DLLCLIENT CMaterialOverrideComponent final : public BaseEntityComponent, public DynamicMemberRegister {
 	  public:
 		static ComponentEventId EVENT_ON_MATERIAL_OVERRIDES_CLEARED;
@@ -57,5 +58,3 @@ namespace pragma {
 		CMaterial &material;
 	};
 };
-
-#endif

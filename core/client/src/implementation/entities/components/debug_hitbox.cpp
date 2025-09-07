@@ -1,11 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2024 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/entities/components/c_debug_hitbox_component.hpp"
-#include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/model/c_model.h"
 #include "pragma/debug/c_debugoverlay.h"
+#include "pragma/entities/components/base_model_component.hpp"
+
+module pragma.client.entities.components.debug_hitbox;
 
 extern DLLCLIENT CEngine *c_engine;
 

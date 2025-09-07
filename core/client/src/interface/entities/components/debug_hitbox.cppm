@@ -1,16 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2024 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_DEBUG_HITBOX_COMPONENT_HPP__
-#define __C_DEBUG_HITBOX_COMPONENT_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
+#include "pragma/debug/c_debugoverlay.h"
 #include <pragma/entities/components/base_entity_component.hpp>
 
-namespace DebugRenderer {
-	class BaseObject;
-};
-namespace pragma {
+export module pragma.client.entities.components.debug_hitbox;
+
+export namespace pragma {
 	class DLLCLIENT CDebugHitboxComponent final : public BaseEntityComponent {
 	  public:
 		CDebugHitboxComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
@@ -30,5 +29,3 @@ namespace pragma {
 		bool m_dirty = false;
 	};
 };
-
-#endif

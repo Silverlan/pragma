@@ -63,7 +63,6 @@
 #include "pragma/entities/components/c_io_component.hpp"
 #include "pragma/entities/components/c_attachment_component.hpp"
 #include "pragma/entities/components/c_generic_component.hpp"
-#include "pragma/entities/components/c_gamemode_component.hpp"
 #include "pragma/entities/components/c_game_component.hpp"
 #include "pragma/entities/c_wheel.hpp"
 #include "pragma/entities/util/c_util_pbr_converter.hpp"

@@ -1,21 +1,27 @@
 // SPDX-FileCopyrightText: (c) 2024 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
 #include "pragma/c_engine.h"
-#include "pragma/entities/components/c_observer_component.hpp"
-#include "pragma/entities/components/c_render_component.hpp"
-#include "pragma/entities/components/c_transform_component.hpp"
-#include "pragma/entities/components/c_game_component.hpp"
-#include "pragma/entities/components/base_character_component.hpp"
+#include "pragma/entities/c_baseentity.h"
 #include "pragma/entities/entity_component_system_t.hpp"
+#include "pragma/entities/components/c_render_component.hpp"
+#include "pragma/entities/components/c_game_component.hpp"
+#include "pragma/entities/components/orientation_component.hpp"
+#include "pragma/entities/components/base_character_component.hpp"
+#include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/model/c_model.h"
 #include "pragma/console/c_cvar.h"
 #include <pragma/physics/raytraces.h>
-#include <pragma/entities/components/orientation_component.hpp>
 
-import pragma.client.entities.components;
+module pragma.client.entities.components.observer;
+
+import pragma.client.entities.components.character;
+import pragma.client.entities.components.input;
+import pragma.client.entities.components.observable;
 
 using namespace pragma;
 

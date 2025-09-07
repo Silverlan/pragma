@@ -1,19 +1,20 @@
 // SPDX-FileCopyrightText: (c) 2024 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_OBSERVER_COMPONENT_HPP__
-#define __C_OBSERVER_COMPONENT_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/components/c_entity_component.hpp"
+#include "pragma/entities/c_baseentity.h"
+#include "pragma/math/deltatransform.h"
 #include <pragma/entities/components/base_observer_component.hpp>
 #include <pragma/util/util_handled.hpp>
 #include <pragma/math/deltaoffset.h>
 #include <pragma/math/deltatransform.h>
 
-class CBaseEntity;
-struct DeltaTransform;
-namespace pragma {
+export module pragma.client.entities.components.observer;
+
+export namespace pragma {
 	class DLLCLIENT CObserverComponent final : public BaseObserverComponent, public CBaseNetComponent {
 	  public:
 		static ComponentEventId EVENT_CALC_VIEW;
@@ -55,5 +56,3 @@ namespace pragma {
 		Quat &rot;
 	};
 };
-
-#endif

@@ -23,7 +23,6 @@
 #include "pragma/entities/c_listener.h"
 #include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
-#include "pragma/entities/components/c_toggle_component.hpp"
 #include "pragma/entities/components/base_gamemode_component.hpp"
 #include "pragma/entities/components/c_light_map_receiver_component.hpp"
 #include "pragma/entities/components/c_light_map_component.hpp"

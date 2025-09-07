@@ -7,7 +7,6 @@
 #include "pragma/entities/environment/lights/c_env_light.h"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
-#include "pragma/entities/components/c_toggle_component.hpp"
 #include "pragma/entities/components/c_radius_component.hpp"
 #include "pragma/entities/components/c_transform_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"

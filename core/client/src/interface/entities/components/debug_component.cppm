@@ -5,7 +5,6 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/debug/c_debugoverlay.h"
-#include "pragma/entities/components/c_toggle_component.hpp"
 #include "pragma/entities/components/c_transform_component.hpp"
 #include "pragma/entities/components/c_color_component.hpp"
 #include <pragma/entities/components/logic_component.hpp>
@@ -13,6 +12,8 @@ module;
 #include <pragma/entities/baseentity.h>
 
 export module pragma.client.entities.components.debug;
+
+import pragma.client.entities.components.toggle;
 
 export namespace pragma {
 	template<class TBaseComponent>

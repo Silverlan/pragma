@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/components/c_toggle_component.hpp"
 #include "pragma/entities/components/c_color_component.hpp"
 #include "pragma/entities/c_entityfactories.h"
 #include <pragma/networking/nwm_util.h>
@@ -12,6 +11,8 @@ module;
 #include <pragma/entities/entity_component_system_t.hpp>
 
 module pragma.client.entities.components.env_fog_controller;
+
+import pragma.client.entities.components.toggle;
 
 using namespace pragma;
 

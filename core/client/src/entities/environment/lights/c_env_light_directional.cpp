@@ -10,11 +10,12 @@
 #include "pragma/entities/components/c_color_component.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_transform_component.hpp"
-#include "pragma/entities/components/c_toggle_component.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/math/intersection.h>
 #include <pragma/entities/entity_component_system_t.hpp>
+
+import pragma.client.entities.components.toggle;
 
 extern DLLCLIENT CGame *c_game;
 

@@ -25,7 +25,6 @@
 #include "pragma/entities/components/c_weapon_component.hpp"
 #include "pragma/entities/components/c_sound_emitter_component.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
-#include "pragma/entities/components/c_name_component.hpp"
 #include "pragma/entities/components/c_attachment_component.hpp"
 #include <pragma/math/intersection.h>
 #include <pragma/entities/baseentity_trace.hpp>

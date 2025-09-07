@@ -9,9 +9,9 @@
 #include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/entities/components/c_observable_component.hpp"
 #include "pragma/entities/components/c_observer_component.hpp"
-#include "pragma/entities/components/c_name_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/components/base_character_component.hpp"
+#include "pragma/entities/components/base_name_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include <pragma/console/convars.h>
 #include "pragma/console/c_cvar.h"

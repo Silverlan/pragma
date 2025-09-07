@@ -7,9 +7,9 @@ module;
 #include "pragma/entities/components/c_entity_component.hpp"
 #include <pragma/entities/components/base_time_scale_component.hpp>
 
-import pragma.entities.components;
-
 export module pragma.client.entities.components.time_scale;
+
+import pragma.entities.components;
 
 export namespace pragma {
 	class DLLCLIENT CTimeScaleComponent final : public BaseTimeScaleComponent, public CBaseNetComponent {

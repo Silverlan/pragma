@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: (c) 2025 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __PRAGMA_MATERIAL_PROPERTY_OVERRIDE_HPP__
-#define __PRAGMA_MATERIAL_PROPERTY_OVERRIDE_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/components/c_entity_component.hpp"
@@ -10,19 +9,18 @@
 #include "pragma/rendering/shader_input_data.hpp"
 #include "pragma/rendering/shader_material/shader_material.hpp"
 #include <pragma/entities/components/base_time_scale_component.hpp>
+#include "prosper_command_buffer.hpp"
+#include "buffers/prosper_buffer.hpp"
 #include <sharedutils/util_heterogenous_lookup.hpp>
 #include <material_manager2.hpp>
 #include <udm.hpp>
 #include <queue>
 
+export module pragma.client.entities.components.material_property_override;
+
 import pragma.client.rendering.material_property_block;
 
-namespace prosper {
-	class IPrimaryCommandBuffer;
-	class IBuffer;
-};
-
-namespace pragma {
+export namespace pragma {
 	class DLLCLIENT CMaterialPropertyOverrideComponent final : public BaseEntityComponent, public DynamicMemberRegister {
 	  public:
 		static void RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts);
@@ -125,5 +123,3 @@ namespace pragma {
 		std::queue<uint32_t> m_freePropertyInfoIndices;
 	};
 };
-
-#endif

@@ -1,9 +1,10 @@
 // SPDX-FileCopyrightText: (c) 2025 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
-#include "pragma/entities/components/material_property_override.hpp"
 #include "pragma/entities/components/material_override.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/entity_component_manager_t.hpp"
@@ -17,7 +18,7 @@
 #include <buffers/prosper_buffer.hpp>
 #include <cmaterial.h>
 
-import pragma.client.entities.components;
+module pragma.client.entities.components.material_property_override;
 
 using namespace pragma;
 void CMaterialPropertyOverrideComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { BaseModelComponent::RegisterEvents(componentManager, registerEvent); }

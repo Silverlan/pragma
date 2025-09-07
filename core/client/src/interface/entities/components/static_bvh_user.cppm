@@ -1,14 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2022 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_STATIC_BVH_USER_COMPONENT_HPP__
-#define __C_STATIC_BVH_USER_COMPONENT_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include <pragma/entities/components/base_static_bvh_user_component.hpp>
 #include <unordered_set>
 
-namespace pragma {
+export module pragma.client.entities.components.static_bvh_user;
+
+export namespace pragma {
 	class DLLCLIENT CStaticBvhUserComponent final : public BaseStaticBvhUserComponent {
 	  public:
 		CStaticBvhUserComponent(BaseEntity &ent) : BaseStaticBvhUserComponent(ent) {}
@@ -18,5 +19,3 @@ namespace pragma {
 		virtual void OnEntityComponentRemoved(BaseEntityComponent &component) override;
 	};
 };
-
-#endif

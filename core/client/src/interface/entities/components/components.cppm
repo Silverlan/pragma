@@ -11,6 +11,7 @@ export import pragma.client.entities.components.bsp_leaf;
 export import pragma.client.entities.components.bvh;
 export import pragma.client.entities.components.character;
 export import pragma.client.entities.components.child;
+export import pragma.client.entities.components.debug;
 export import pragma.client.entities.components.env_decal;
 export import pragma.client.entities.components.env_fog_controller;
 export import pragma.client.entities.components.env_quake;

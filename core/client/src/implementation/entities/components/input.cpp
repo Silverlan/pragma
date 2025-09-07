@@ -1,12 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2024 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
-#include "pragma/entities/components/c_input_component.hpp"
 #include "pragma/console/c_cvar.h"
 #include <wgui/wgui.h>
 #include <prosper_window.hpp>
+
+module pragma.client.entities.components.input;
 
 using namespace pragma;
 

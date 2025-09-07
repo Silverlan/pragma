@@ -27,7 +27,6 @@
 #include "pragma/entities/components/c_raytracing_component.hpp"
 #include "pragma/entities/components/c_static_bvh_cache_component.hpp"
 #include "pragma/entities/components/c_static_bvh_user_component.hpp"
-#include "pragma/entities/components/c_input_component.hpp"
 #include "pragma/entities/components/c_debug_hitbox_component.hpp"
 // --template-include-location
 #include "pragma/entities/environment/audio/c_env_sound_dsp.h"

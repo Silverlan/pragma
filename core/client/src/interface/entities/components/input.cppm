@@ -1,14 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2024 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_INPUT_COMPONENT_HPP__
-#define __C_INPUT_COMPONENT_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
+#include "wgui/wibase.h"
 #include <pragma/entities/components/base_entity_component.hpp>
 
-class WIBase;
-namespace pragma {
+export module pragma.client.entities.components.input;
+
+export namespace pragma {
 	class DLLCLIENT CInputComponent final : public BaseEntityComponent {
 	  public:
 		CInputComponent(BaseEntity &ent);
@@ -28,4 +29,3 @@ namespace pragma {
 	};
 };
 
-#endif

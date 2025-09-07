@@ -34,6 +34,7 @@ export import pragma.client.entities.components.gamemode;
 export import pragma.client.entities.components.global_shader_input;
 export import pragma.client.entities.components.health;
 export import pragma.client.entities.components.hitbox_bvh;
+export import pragma.client.entities.components.input;
 export import pragma.client.entities.components.light_map_data_cache;
 export import pragma.client.entities.components.liquid_buoyancy;
 export import pragma.client.entities.components.liquid_control;

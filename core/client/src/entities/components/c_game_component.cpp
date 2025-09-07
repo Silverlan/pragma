@@ -3,13 +3,14 @@
 
 #include "stdafx_client.h"
 #include "pragma/entities/components/c_game_component.hpp"
-#include "pragma/entities/components/c_input_component.hpp"
 #include "pragma/entities/components/c_observer_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/c_entityfactories.h"
 #include "pragma/entities/entity_component_system_t.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include "pragma/entities/c_baseentity.h"
+
+import pragma.client.entities.components.input;
 
 using namespace pragma;
 

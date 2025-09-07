@@ -1,15 +1,16 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_PHYSICS_COMPONENT_HPP__
-#define __C_PHYSICS_COMPONENT_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/components/c_entity_component.hpp"
 #include <pragma/entities/components/base_physics_component.hpp>
 #include <pragma/networking/nwm_velocity_correction.hpp>
 
-namespace pragma {
+export module pragma.client.entities.components.physics;
+
+export namespace pragma {
 	class DLLCLIENT CPhysicsComponent final : public BasePhysicsComponent, public CBaseNetComponent, public nwm::VelocityCorrection {
 	  public:
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
@@ -31,5 +32,3 @@ namespace pragma {
 		virtual void GetBaseTypeIndex(std::type_index &outTypeIndex) const override;
 	};
 };
-
-#endif

@@ -27,7 +27,6 @@
 #include "pragma/entities/components/c_vertex_animated_component.hpp"
 #include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/entities/components/c_transform_component.hpp"
-#include "pragma/entities/components/c_physics_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/entities/components/c_weapon_component.hpp"

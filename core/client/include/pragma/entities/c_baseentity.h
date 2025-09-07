@@ -22,7 +22,6 @@ namespace pragma {
 	class BaseEntityComponent;
 	class ShaderGameWorldLightingPass;
 	class CRenderComponent;
-	class CPhysicsComponent;
 	class CSceneComponent;
 };
 namespace bounding_volume {

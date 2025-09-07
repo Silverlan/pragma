@@ -14,6 +14,7 @@
 #include "pragma/entities/util/c_util_pbr_converter.hpp"
 #include "pragma/entities/environment/env_timescale.h"
 #include "pragma/entities/environment/env_microphone_base.h"
+#include "pragma/entities/components/base_io_component.hpp"
 #include <pragma/lua/classes/lproperty_generic.hpp>
 #include <pragma/lua/classes/ldef_vector.h>
 #include <pragma/lua/classes/ldef_color.h>
@@ -107,7 +108,6 @@
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/entities/components/c_entity_component.hpp"
-#include "pragma/entities/components/c_io_component.hpp"
 #include "pragma/entities/components/c_attachment_component.hpp"
 #include "pragma/entities/components/c_game_component.hpp"
 #include "pragma/entities/point/point_target.h"

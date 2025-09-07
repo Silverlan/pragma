@@ -3,9 +3,9 @@
 
 #include "stdafx_client.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
-#include "pragma/entities/components/c_io_component.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/entities/components/c_transform_component.hpp"
+#include "pragma/entities/components/base_io_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/c_entityfactories.h"
 #include <pragma/networking/nwm_util.h>
@@ -16,6 +16,8 @@
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/environment/effects/particlesystemdata.h>
 #include <udm.hpp>
+
+import pragma.client.entities.components.io;
 
 using namespace pragma;
 

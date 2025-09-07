@@ -6,7 +6,6 @@
 #include "pragma/entities/c_entityfactories.h"
 #include "pragma/entities/baseentity_luaobject.h"
 #include <pragma/networking/nwm_util.h>
-#include "pragma/entities/components/c_radius_component.hpp"
 #include "pragma/entities/components/c_color_component.hpp"
 #include "pragma/entities/components/c_transform_component.hpp"
 #include "pragma/entities/environment/lights/c_env_shadow.hpp"

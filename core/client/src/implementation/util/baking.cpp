@@ -11,6 +11,9 @@ module;
 #include "pragma/entities/environment/lights/env_light_spot.h"
 #include "pragma/entities/environment/lights/env_light_point.h"
 #include "pragma/entities/environment/lights/env_light_directional.h"
+#include "pragma/entities/environment/lights/c_env_light_spot.h"
+#include "pragma/entities/environment/lights/c_env_light_point.h"
+#include "pragma/entities/environment/lights/c_env_light_directional.h"
 #include <mathutil/umath_geometry.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <prosper_command_buffer.hpp>
@@ -24,6 +27,7 @@ module;
 
 module pragma.client.util.baking;
 
+import pragma.client.entities.components;
 import pragma.client.util.image;
 
 extern DLLCLIENT CEngine *c_engine;
@@ -195,11 +199,6 @@ static std::shared_ptr<uimg::ImageBuffer> generate_sh_normal_map(const std::vect
 	uimg::bake_margin(*imgBuf, mask_buffer, margin);
 	return imgBuf;
 }
-
-#include "pragma/entities/environment/lights/c_env_light_spot.h"
-#include "pragma/entities/environment/lights/c_env_light_point.h"
-#include "pragma/entities/environment/lights/c_env_light_directional.h"
-#include "pragma/entities/components/c_radius_component.hpp"
 
 util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> util::baking::bake_directional_lightmap_atlas(const std::vector<::pragma::CLightComponent *> &lights, const std::vector<ModelSubMesh *> meshes, const std::vector<BaseEntity *> &entities, uint32_t width, uint32_t height,
   ::pragma::LightmapDataCache *optLightmapDataCache)

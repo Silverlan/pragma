@@ -73,6 +73,7 @@ export import pragma.client.entities.components.pp_volumetric;
 export import pragma.client.entities.components.prop_base;
 export import pragma.client.entities.components.prop_dynamic;
 export import pragma.client.entities.components.prop_physics;
+export import pragma.client.entities.components.radius;
 export import pragma.client.entities.components.rasterization_renderer;
 export import pragma.client.entities.components.raytracing_renderer;
 export import pragma.client.entities.components.score;

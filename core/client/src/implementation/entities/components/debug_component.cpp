@@ -7,12 +7,13 @@ module;
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include "pragma/debug/c_debugoverlay.h"
 #include "pragma/c_engine.h"
-#include "pragma/entities/components/c_radius_component.hpp"
 #include "pragma/entities/components/base_transform_component.hpp"
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
 module pragma.client.entities.components.debug;
+
+import pragma.client.entities.components.radius;
 
 extern DLLCLIENT CEngine *c_engine;
 

@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientstate.h"
-#include "pragma/entities/components/c_radius_component.hpp"
 #include "pragma/entities/environment/lights/c_env_shadow.hpp"
 #include "pragma/entities/environment/lights/c_env_shadow_csm.hpp"
 #include "pragma/lua/converters/gui_element_converter.hpp"
@@ -16,6 +15,8 @@ module;
 module pragma.client.gui;
 
 import :debug_shadow_map;
+
+import pragma.client.entities.components;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;

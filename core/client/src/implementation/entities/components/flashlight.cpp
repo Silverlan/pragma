@@ -9,7 +9,6 @@ module;
 #include "pragma/entities/environment/lights/c_env_light_spot.h"
 #include "pragma/entities/components/c_attachment_component.hpp"
 #include "pragma/entities/environment/lights/c_env_light_spot.h"
-#include "pragma/entities/components/c_radius_component.hpp"
 #include "pragma/entities/components/c_color_component.hpp"
 #include <pragma/audio/alsound_type.h>
 #include <pragma/entities/components/parent_component.hpp>
@@ -18,6 +17,7 @@ module;
 
 module pragma.client.entities.components.flashlight;
 
+import pragma.client.entities.components.radius;
 import pragma.client.entities.components.sound_emitter;
 
 using namespace pragma;

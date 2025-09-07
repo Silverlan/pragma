@@ -7,7 +7,6 @@
 #include "pragma/entities/environment/lights/c_env_light_spot.h"
 #include "pragma/entities/environment/lights/c_env_light_point.h"
 #include "pragma/entities/environment/lights/c_env_light_directional.h"
-#include "pragma/entities/components/c_radius_component.hpp"
 #include "pragma/entities/components/c_transform_component.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_color_component.hpp"
@@ -27,6 +26,7 @@
 #include <buffers/prosper_uniform_resizable_buffer.hpp>
 #include <prosper_command_buffer.hpp>
 
+import pragma.client.entities.components.radius;
 import pragma.client.entities.components.toggle;
 import pragma.client.scripting.lua;
 

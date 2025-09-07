@@ -1,13 +1,16 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
-#include "pragma/entities/components/c_softbody_component.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/physics/environment.hpp>
 #include <pragma/physics/collisionmesh.h>
+
+module pragma.client.entities.components.soft_body;
 
 extern DLLCLIENT CEngine *c_engine;
 

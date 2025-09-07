@@ -15,6 +15,7 @@
 #include "pragma/entities/environment/env_timescale.h"
 #include "pragma/entities/environment/env_microphone_base.h"
 #include "pragma/entities/components/base_io_component.hpp"
+#include "pragma/entities/components/base_softbody_component.hpp"
 #include <pragma/lua/classes/lproperty_generic.hpp>
 #include <pragma/lua/classes/ldef_vector.h>
 #include <pragma/lua/classes/ldef_color.h>
@@ -119,7 +120,6 @@
 #include "pragma/entities/components/liquid/base_buoyancy_component.hpp"
 #include "pragma/entities/c_water_surface.hpp"
 #include "pragma/entities/components/c_flex_component.hpp"
-#include "pragma/entities/components/c_softbody_component.hpp"
 #include "pragma/entities/components/c_vertex_animated_component.hpp"
 #include "pragma/entities/components/c_debug_component.hpp"
 #include "pragma/entities/components/c_light_map_component.hpp"

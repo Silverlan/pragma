@@ -12,7 +12,6 @@
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/entities/components/c_ownable_component.hpp"
-#include "pragma/entities/components/c_generic_component.hpp"
 #include "pragma/entities/components/c_transform_component.hpp"
 #include "pragma/entities/components/c_io_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"

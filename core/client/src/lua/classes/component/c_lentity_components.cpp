@@ -124,7 +124,6 @@
 #include "pragma/entities/environment/env_quake.h"
 #include "pragma/entities/c_filter_entity_class.h"
 #include "pragma/entities/c_filter_entity_name.h"
-#include "pragma/entities/components/c_ownable_component.hpp"
 #include <pragma/entities/components/parent_component.hpp>
 #include <pragma/lua/lua_util_component_stream.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>

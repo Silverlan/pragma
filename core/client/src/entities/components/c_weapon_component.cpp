@@ -6,6 +6,7 @@
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/entities/components/c_weapon_component.hpp"
 #include "pragma/entities/components/base_character_component.hpp"
+#include "pragma/entities/components/base_ownable_component.hpp"
 #include "pragma/entities/c_viewmodel.h"
 #include "pragma/console/c_cvar.h"
 #include "pragma/entities/components/c_player_component.hpp"
@@ -14,7 +15,6 @@
 #include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/entities/components/c_observer_component.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
-#include "pragma/entities/components/c_ownable_component.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
 #include "pragma/entities/components/parent_component.hpp"

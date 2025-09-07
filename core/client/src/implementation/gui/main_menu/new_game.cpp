@@ -4,7 +4,7 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/clientstate/clientutil.h"
+#include "pragma/clientstate/clientstate.h"
 #include "pragma/c_engine.h"
 #include <fsys/filesystem.h>
 #include <wgui/types/witextentry.h>

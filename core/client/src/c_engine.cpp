@@ -10,6 +10,7 @@ namespace pragma::string {
 #endif
 #include "stdafx_cengine.h"
 #include "pragma/c_engine.h"
+#include "pragma/clientstate/clientstate.h"
 #include <wgui/wgui.h>
 #include "cmaterialmanager.h"
 #include "pragma/console/c_cvar.h"

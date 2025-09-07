@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/clientstate/clientutil.h"
+#include "pragma/clientstate/clientstate.h"
 #include <fsys/filesystem.h>
 #include "pragma/c_engine.h"
 #include "pragma/networking/netmessages.h"

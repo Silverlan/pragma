@@ -13,6 +13,7 @@ const std::string &ConConf::GetUsageHelp() const { return m_usageHelp; }
 ConType ConConf::GetType() const { return m_type; }
 ConConf *ConConf::Copy() { return nullptr; }
 uint32_t ConConf::GetID() const { return m_ID; }
+void ConConf::SetID(uint32_t ID) { m_ID = ID; }
 ConVarFlags ConConf::GetFlags() const { return m_flags; }
 
 void ConConf::Print(const std::string &name)

@@ -55,6 +55,7 @@ class DLLNETWORK ConConf {
 	ConType GetType() const;
 	virtual ConConf *Copy();
 	uint32_t GetID() const;
+	void SetID(uint32_t ID);
 	void Print(const std::string &name);
 	ConVarFlags GetFlags() const;
 };

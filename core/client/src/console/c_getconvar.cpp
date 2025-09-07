@@ -3,6 +3,7 @@
 
 #include "stdafx_cengine.h"
 #include "pragma/c_engine.h"
+#include "pragma/clientstate/clientstate.h"
 #include <pragma/physics/physobj.h>
 #include "pragma/entities/components/c_player_component.hpp"
 #include <pragma/console/convars.h>

@@ -4,7 +4,7 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/clientstate/clientutil.h"
+#include "pragma/clientstate/clientstate.h"
 #include "pragma/c_engine.h"
 #include "pragma/util/curl_query_handler.hpp"
 #include "pragma/lua/converters/gui_element_converter.hpp"

@@ -15,9 +15,7 @@
 #include <pragma/lua/luaapi.h>
 #include <pragma/engine.h>
 #include <pragma/networkstate/networkstate.h>
-#include <pragma/clientstate/clientstate.h>
 #include <pragma/game/game.h>
-#include <pragma/game/c_game.h>
 #include <pragma/audio/alsound.h>
 #include <sharedutils/util.h>
 #include <sharedutils/util_string.h>
@@ -27,4 +25,3 @@
 #include <string>
 #include <memory>
 #include <unordered_map>
-#include "pragma/c_engine.h"

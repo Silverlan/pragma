@@ -4,7 +4,7 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/clientstate/clientutil.h"
+#include "pragma/clientstate/clientstate.h"
 #include "wms_shared.h"
 #include "wms_request_filter.h"
 #include "wms_message.h"

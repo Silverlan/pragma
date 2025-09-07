@@ -4,7 +4,6 @@
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
 #include "pragma/entities/components/liquid/base_buoyancy_component.hpp"
-#include "pragma/entities/components/c_static_bvh_cache_component.hpp"
 #include "pragma/entities/components/c_static_bvh_user_component.hpp"
 #include "pragma/entities/components/intersection_handler_component.hpp"
 #include "pragma/entities/components/c_debug_hitbox_component.hpp"

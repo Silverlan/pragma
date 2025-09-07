@@ -1,14 +1,18 @@
 // SPDX-FileCopyrightText: (c) 2022 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
-#include "pragma/entities/components/c_static_bvh_cache_component.hpp"
-#include "pragma/entities/components/c_static_bvh_user_component.hpp"
-#include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/model/modelmesh.h"
+#include "pragma/entities/components/base_static_bvh_cache_component.hpp"
+#include "pragma/entities/components/base_static_bvh_user_component.hpp"
+#include "pragma/entities/components/c_model_component.hpp"
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/entity_iterator.hpp>
+
+module pragma.client.entities.components.static_bvh_cache;
 
 import pragma.client.entities.components;
 

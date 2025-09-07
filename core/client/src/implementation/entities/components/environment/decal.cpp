@@ -5,9 +5,9 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/entities/components/c_render_component.hpp"
-#include "pragma/entities/components/c_static_bvh_cache_component.hpp"
 #include "pragma/entities/components/c_static_bvh_user_component.hpp"
 #include "pragma/entities/components/intersection_handler_component.hpp"
+#include "pragma/entities/components/base_bvh_component.hpp"
 #include "pragma/entities/c_entityfactories.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/model/c_model.h"
@@ -24,6 +24,7 @@ module pragma.client.entities.components.env_decal;
 
 import pragma.client.entities.components.bvh;
 import pragma.client.entities.components.physics;
+import pragma.client.entities.components.static_bvh_cache;
 
 using namespace pragma;
 

@@ -11,7 +11,6 @@
 #include "pragma/entities/c_water_surface.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
-#include "pragma/entities/components/c_surface_component.hpp"
 #include "pragma/entities/components/c_transform_component.hpp"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>

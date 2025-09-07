@@ -1,14 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_SURFACE_COMPONENT_HPP__
-#define __C_SURFACE_COMPONENT_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/components/c_entity_component.hpp"
 #include <pragma/entities/components/base_surface_component.hpp>
 
-namespace pragma {
+export module pragma.client.entities.components.surface;
+
+export namespace pragma {
 	class DLLCLIENT CSurfaceComponent final : public BaseSurfaceComponent, public CBaseNetComponent {
 	  public:
 		CSurfaceComponent(BaseEntity &ent) : BaseSurfaceComponent(ent) {}
@@ -19,5 +20,3 @@ namespace pragma {
 		virtual bool ShouldTransmitNetData() const override { return true; }
 	};
 };
-
-#endif

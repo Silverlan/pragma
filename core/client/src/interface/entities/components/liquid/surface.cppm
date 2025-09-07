@@ -9,13 +9,14 @@ module;
 #include <pragma/types.hpp>
 #include <pragma/entities/components/liquid/base_liquid_surface_component.hpp>
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
-#include "pragma/entities/components/c_surface_component.hpp"
 #include <cmaterial.h>
 #include <image/prosper_texture.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <mathutil/umath_geometry.hpp>
 
 export module pragma.client.entities.components.liquid_surface;
+
+import pragma.client.entities.components.surface;
 
 export namespace pragma {
 	struct DLLCLIENT WaterScene {

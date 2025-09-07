@@ -76,5 +76,6 @@ export import pragma.client.entities.components.score;
 export import pragma.client.entities.components.shooter;
 export import pragma.client.entities.components.skybox;
 export import pragma.client.entities.components.soft_body;
+export import pragma.client.entities.components.sound_emitter;
 export import pragma.client.entities.components.time_scale;
 // export import pragma.client.entities.components.material_override;

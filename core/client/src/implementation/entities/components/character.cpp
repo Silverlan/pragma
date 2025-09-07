@@ -18,7 +18,6 @@ module;
 #include "pragma/rendering/c_rendermode.h"
 #include <pragma/networking/nwm_util.h>
 #include "pragma/entities/components/c_animated_component.hpp"
-#include "pragma/entities/components/c_sound_emitter_component.hpp"
 #include "pragma/entities/components/c_transform_component.hpp"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/entities/components/c_surface_component.hpp"
@@ -32,6 +31,7 @@ module;
 module pragma.client.entities.components.character;
 
 import pragma.client.entities.components.eye;
+import pragma.client.entities.components.sound_emitter;
 
 extern DLLCLIENT ClientState *client;
 

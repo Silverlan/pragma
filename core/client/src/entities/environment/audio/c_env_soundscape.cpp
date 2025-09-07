@@ -8,13 +8,14 @@
 #include "pragma/entities/c_entityfactories.h"
 #include <pragma/networking/nwm_util.h>
 #include <pragma/physics/raytraces.h>
-#include "pragma/entities/components/c_sound_emitter_component.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/audio/alsound_type.h>
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/components/base_character_component.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
+
+import pragma.client.entities.components;
 
 using namespace pragma;
 

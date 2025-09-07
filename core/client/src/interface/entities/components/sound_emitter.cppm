@@ -1,14 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_SOUND_EMITTER_COMPONENT_HPP__
-#define __C_SOUND_EMITTER_COMPONENT_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/components/c_entity_component.hpp"
 #include <pragma/entities/components/base_sound_emitter_component.hpp>
 
-namespace pragma {
+export module pragma.client.entities.components.sound_emitter;
+
+export namespace pragma {
 	class DLLCLIENT CSoundEmitterComponent final : public BaseSoundEmitterComponent, public CBaseNetComponent {
 	  public:
 		CSoundEmitterComponent(BaseEntity &ent) : BaseSoundEmitterComponent(ent) {}
@@ -26,5 +27,3 @@ namespace pragma {
 		virtual bool ShouldRemoveSound(ALSound &snd) const override;
 	};
 };
-
-#endif

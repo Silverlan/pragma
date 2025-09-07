@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
-#include "pragma/entities/components/c_sound_emitter_component.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
@@ -19,6 +18,7 @@ module;
 
 module pragma.client.entities.components.flammable;
 
+import pragma.client.entities.components.sound_emitter;
 import pragma.client.util;
 
 using namespace pragma;

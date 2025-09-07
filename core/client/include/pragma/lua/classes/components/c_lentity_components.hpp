@@ -11,7 +11,6 @@
 #include "pragma/clientdefinitions.h"
 
 namespace pragma {
-	class CSoundEmitterComponent;
 	class CFlexComponent;
 };
 

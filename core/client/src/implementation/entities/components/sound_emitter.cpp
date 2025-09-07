@@ -1,16 +1,19 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientstate.h"
-#include "pragma/entities/components/c_sound_emitter_component.hpp"
-#include "pragma/entities/components/c_flex_component.hpp"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
+#include "pragma/entities/components/base_transform_component.hpp"
+#include "pragma/entities/components/c_flex_component.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/audio/alsound_type.h>
 #include <pragma/audio/alsoundscript.h>
-#include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
+
+module pragma.client.entities.components.sound_emitter;
 
 using namespace pragma;
 

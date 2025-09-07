@@ -3,11 +3,13 @@
 
 #include "stdafx_client.h"
 #include "pragma/lua/classes/components/c_lentity_components.hpp"
-#include "pragma/entities/components/c_sound_emitter_component.hpp"
+#include "pragma/entities/components/base_sound_emitter_component.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/lua/lua_util_component.hpp>
 #include <pragma/lua/lua_util_component_stream.hpp>
 #include <prosper_command_buffer.hpp>
+
+import pragma.client.entities.components;
 
 namespace Lua::SoundEmitter {
 	DLLNETWORK luabind::class_<pragma::BaseSoundEmitterComponent::SoundInfo> RegisterSoundInfo();

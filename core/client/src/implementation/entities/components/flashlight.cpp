@@ -7,7 +7,6 @@ module;
 #include "pragma/entities/c_entityfactories.h"
 #include "pragma/game/c_game.h"
 #include "pragma/entities/environment/lights/c_env_light_spot.h"
-#include "pragma/entities/components/c_sound_emitter_component.hpp"
 #include "pragma/entities/components/c_attachment_component.hpp"
 #include "pragma/entities/environment/lights/c_env_light_spot.h"
 #include "pragma/entities/components/c_radius_component.hpp"
@@ -18,6 +17,8 @@ module;
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
 module pragma.client.entities.components.flashlight;
+
+import pragma.client.entities.components.sound_emitter;
 
 using namespace pragma;
 

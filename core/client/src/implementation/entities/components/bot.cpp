@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/entities/c_entityfactories.h"
-#include "pragma/entities/components/c_sound_emitter_component.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/entities/components/base_character_component.hpp"
 #include "pragma/entities/components/base_ai_component.hpp"
@@ -15,6 +14,8 @@ module;
 #include <pragma/entities/entity_component_system_t.hpp>
 
 module pragma.client.entities.components.bot;
+
+import pragma.client.entities.components.sound_emitter;
 
 using namespace pragma;
 

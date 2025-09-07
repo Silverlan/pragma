@@ -8,12 +8,13 @@
 #include "luasystem.h"
 #include "pragma/entities/c_listener.h"
 #include "pragma/entities/components/c_player_component.hpp"
-#include "pragma/entities/components/c_sound_emitter_component.hpp"
 #include "pragma/game/c_game_entities.h"
 #include <sharedutils/util_string.h>
 #include <pragma/debug/intel_vtune.hpp>
 #include <pragma/game/game_lua_entity.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
+
+import pragma.client.entities.components;
 
 extern EntityClassMap<CBaseEntity> *g_ClientEntityFactories;
 pragma::CListenerComponent *CGame::GetListener()

@@ -5,12 +5,13 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientstate.h"
-#include "pragma/entities/components/c_sound_emitter_component.hpp"
 #include "pragma/entities/components/c_flex_component.hpp"
 #include <pragma/audio/alsound_type.h>
 #include <pragma/entities/entity_component_system_t.hpp>
 
 module pragma.client.core.choreographic_scene;
+
+import pragma.client.entities.components;
 
 extern DLLCLIENT ClientState *client;
 

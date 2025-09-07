@@ -1,17 +1,19 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/entities/environment/audio/c_env_sound_dsp_distortion.h"
 #include "pragma/entities/c_entityfactories.h"
 #include "pragma/c_engine.h"
 #include <alsoundsystem.hpp>
 #include "pragma/audio/c_engine_sound.hpp"
-#include "pragma/entities/components/c_player_component.hpp"
 #include <pragma/networking/nwm_util.h>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <alsoundsystem.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
+
+module pragma.client.entities.components.audio.dsp.distortion;
 
 using namespace pragma;
 

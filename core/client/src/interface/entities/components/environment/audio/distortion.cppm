@@ -1,26 +1,26 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_ENV_SOUND_DSP_EQUALIZER_H__
-#define __C_ENV_SOUND_DSP_EQUALIZER_H__
+module;
+
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/c_baseentity.h"
 #include "pragma/entities/environment/audio/c_env_sound_dsp.h"
-#include "pragma/entities/environment/audio/env_sound_dsp_equalizer.h"
+#include "pragma/entities/environment/audio/env_sound_dsp_distortion.h"
 
-namespace pragma {
-	class DLLCLIENT CSoundDspEqualizerComponent final : public CBaseSoundDspComponent, public BaseEnvSoundDspEqualizer {
+export module pragma.client.entities.components.audio.dsp.distortion;
+
+export namespace pragma {
+	class DLLCLIENT CSoundDspDistortionComponent final : public CBaseSoundDspComponent, public BaseEnvSoundDspDistortion {
 	  public:
-		CSoundDspEqualizerComponent(BaseEntity &ent) : CBaseSoundDspComponent(ent) {}
+		CSoundDspDistortionComponent(BaseEntity &ent) : CBaseSoundDspComponent(ent) {}
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void OnEntitySpawn() override;
 		virtual void InitializeLuaObject(lua_State *l) override;
 	};
 };
 
-class DLLCLIENT CEnvSoundDspEqualizer : public CBaseEntity {
+export class DLLCLIENT CEnvSoundDspDistortion : public CBaseEntity {
   public:
 	virtual void Initialize() override;
 };
-
-#endif

@@ -6,9 +6,10 @@
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/euler_angles.hpp>
 #include "pragma/c_engine.h"
+#include "pragma/clientstate/clientstate.h"
+#include "pragma/game/c_game.h"
 #include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/audio/alsound_type.h"
-#include "pragma/entities/c_entityfactories.h"
 #include "pragma/physics/collisiontypes.h"
 #include "pragma/math/deltaoffset.h"
 #include "pragma/math/deltatransform.h"

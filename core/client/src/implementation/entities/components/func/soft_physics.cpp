@@ -4,15 +4,12 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/c_entityfactories.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
 module pragma.client.entities.components.func_soft_physics;
 
 using namespace pragma;
-
-LINK_ENTITY_TO_CLASS(func_physics_softbody, CFuncSoftPhysics);
 
 void CFuncSoftPhysicsComponent::Initialize()
 {

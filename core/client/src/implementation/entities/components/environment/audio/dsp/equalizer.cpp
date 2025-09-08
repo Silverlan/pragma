@@ -4,9 +4,9 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/c_entityfactories.h"
 #include "pragma/c_engine.h"
 #include <alsoundsystem.hpp>
+#include "alsound_effect.hpp"
 #include "pragma/audio/c_engine_sound.hpp"
 #include <pragma/networking/nwm_util.h>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
@@ -18,8 +18,6 @@ module pragma.client.entities.components.audio.dsp.equalizer;
 using namespace pragma;
 
 extern DLLCLIENT CEngine *c_engine;
-
-LINK_ENTITY_TO_CLASS(env_sound_dsp_equalizer, CEnvSoundDspEqualizer);
 
 void CSoundDspEqualizerComponent::ReceiveData(NetPacket &packet)
 {

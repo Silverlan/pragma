@@ -17,12 +17,14 @@
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <sharedutils/util_library.hpp>
-#include "pragma/entities/c_entityfactories.h"
 #include "pragma/entities/util/c_util_pbr_converter.hpp"
 #include "pragma/rendering/raytracing/cycles.hpp"
 #include "pragma/rendering/shaders/util/c_shader_compose_rma.hpp"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
+#include "pragma/c_engine.h"
+#include "pragma/clientstate/clientstate.h"
+#include "pragma/game/c_game.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/components/logic_component.hpp>
 #include <util_texture_info.hpp>
@@ -39,8 +41,6 @@ extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
 using namespace pragma;
-
-LINK_ENTITY_TO_CLASS(util_pbr_converter, CUtilPBRConverter);
 
 void CPBRConverterComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 

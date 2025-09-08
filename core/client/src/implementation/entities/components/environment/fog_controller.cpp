@@ -5,7 +5,7 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/entities/components/c_color_component.hpp"
-#include "pragma/entities/c_entityfactories.h"
+#include "pragma/game/c_game.h"
 #include <pragma/networking/nwm_util.h>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
@@ -17,8 +17,6 @@ import pragma.client.entities.components.toggle;
 using namespace pragma;
 
 extern DLLCLIENT CGame *c_game;
-
-LINK_ENTITY_TO_CLASS(env_fog_controller, CEnvFogController);
 
 void CFogControllerComponent::Initialize()
 {

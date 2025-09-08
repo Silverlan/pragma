@@ -4,8 +4,9 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/c_entityfactories.h"
 #include "pragma/audio/alsound_type.h"
+#include "pragma/clientstate/clientstate.h"
+#include "pragma/game/c_game.h"
 #include <pragma/entities/environment/audio/env_sound_dsp.h>
 #include "pragma/entities/components/base_transform_component.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
@@ -20,8 +21,6 @@ using namespace pragma;
 
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
-
-LINK_ENTITY_TO_CLASS(env_sound_dsp, CEnvSoundDsp);
 
 CBaseSoundDspComponent::~CBaseSoundDspComponent() { DetachAllSoundSources(); }
 void CBaseSoundDspComponent::Initialize()

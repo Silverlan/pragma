@@ -5,8 +5,9 @@
 #include "pragma/c_engine.h"
 #include "pragma/entities/c_baseentity.h"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
-#include "pragma/entities/c_entityfactories.h"
 #include "cmaterialmanager.h"
+#include "pragma/game/c_game.h"
+#include "pragma/clientstate/clientstate.h"
 #include "pragma/rendering/c_rendermode.h"
 #include "pragma/model/c_model.h"
 #include "pragma/model/brush/c_brushmesh.h"
@@ -48,12 +49,13 @@
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
+#undef GetClassName
+
+import pragma.client.entities;
 import pragma.client.entities.components;
 import pragma.client.model;
 import pragma.entities.components;
 import pragma.client.util;
-
-LINK_ENTITY_TO_CLASS(entity, CBaseEntity);
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
@@ -113,7 +115,6 @@ void CBaseEntity::InitializeLuaObject(lua_State *lua) { pragma::BaseLuaHandle::I
 
 //////////////////////////////////
 
-extern EntityClassMap<CBaseEntity> *g_ClientEntityFactories;
 pragma::ComponentEventId CBaseEntity::EVENT_ON_SCENE_FLAGS_CHANGED = pragma::INVALID_COMPONENT_ID;
 void CBaseEntity::RegisterEvents(pragma::EntityComponentManager &componentManager) { EVENT_ON_SCENE_FLAGS_CHANGED = componentManager.RegisterEvent("ON_SCENE_FLAGS_CHANGED", typeid(BaseEntity), pragma::ComponentEventInfo::Type::Broadcast); }
 
@@ -184,9 +185,9 @@ uint32_t CBaseEntity::GetLocalIndex() const { return const_cast<CBaseEntity *>(t
 void CBaseEntity::Initialize()
 {
 	BaseEntity::Initialize();
-	std::string className;
-	g_ClientEntityFactories->GetClassName(typeid(*this), &className);
-	m_className = pragma::ents::register_class_name(className);
+	auto className = client_entities::ClientEntityRegistry::Instance().GetClassName(typeid(*this));
+	std::string strClassName = className ? std::string{*className} : std::string {};
+	m_className = pragma::ents::register_class_name(strClassName);
 }
 
 void CBaseEntity::DoSpawn()

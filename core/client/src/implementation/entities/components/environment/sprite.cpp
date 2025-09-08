@@ -4,11 +4,13 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/c_entityfactories.h"
 #include "pragma/entities/components/c_color_component.hpp"
 #include "pragma/entities/components/c_attachment_component.hpp"
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/entities/components/basetoggle.h"
+#include "pragma/c_engine.h"
+#include "pragma/clientstate/clientstate.h"
+#include "pragma/game/c_game.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/physics/raytraces.h>
 #include <pragma/entities/entity_component_system_t.hpp>
@@ -16,8 +18,6 @@ module;
 module pragma.client.entities.components.effects.sprite;
 
 using namespace pragma;
-
-LINK_ENTITY_TO_CLASS(env_sprite, CEnvSprite);
 
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;

@@ -12,7 +12,6 @@ module;
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/game/c_game_occlusion_culler.hpp"
 #include "pragma/entities/components/c_scene_component.hpp"
-#include "pragma/entities/c_entityfactories.h"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/rendering/render_queue.hpp"
 #include "pragma/rendering/render_processor.hpp"
@@ -21,6 +20,9 @@ module;
 #include "pragma/rendering/render_queue_worker.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/baseentity_events.hpp>
+#include "pragma/c_engine.h"
+#include "pragma/clientstate/clientstate.h"
+#include "pragma/game/c_game.h"
 
 module pragma.client.entities.components.env_sky_camera;
 
@@ -32,8 +34,6 @@ extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
 using namespace pragma;
-
-LINK_ENTITY_TO_CLASS(sky_camera, CSkyCamera);
 
 CSkyCameraComponent::SceneData::~SceneData()
 {

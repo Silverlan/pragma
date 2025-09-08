@@ -4,7 +4,7 @@
 #include "stdafx_client.h"
 #include "pragma/entities/c_water_surface.hpp"
 #include "pragma/model/c_modelmesh.h"
-#include "pragma/entities/c_entityfactories.h"
+#include "pragma/game/c_game.h"
 #include "pragma/entities/components/liquid/c_liquid_component.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
@@ -25,8 +25,6 @@ using namespace pragma;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
-
-LINK_ENTITY_TO_CLASS(c_water_surface, CWaterSurface);
 
 void CWaterSurfaceComponent::Initialize()
 {

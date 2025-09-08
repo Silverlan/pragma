@@ -3,7 +3,6 @@
 
 #include "stdafx_client.h"
 #include "pragma/entities/components/liquid/c_liquid_component.hpp"
-#include "pragma/entities/c_entityfactories.h"
 #include "pragma/rendering/c_rendermode.h"
 #include <pragma/physics/physobj.h>
 #include "pragma/model/c_modelmesh.h"
@@ -24,8 +23,6 @@ import pragma.client.physics;
 import pragma.client.entities.components;
 
 using namespace pragma;
-
-LINK_ENTITY_TO_CLASS(func_water, CFuncWater);
 
 extern DLLCLIENT CGame *c_game;
 

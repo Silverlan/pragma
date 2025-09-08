@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/c_entityfactories.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/components/basetoggle.h>
@@ -13,8 +12,6 @@ module;
 module pragma.client.entities.components.effects.fire;
 
 using namespace pragma;
-
-LINK_ENTITY_TO_CLASS(env_fire, CEnvFire);
 
 CFireComponent::~CFireComponent() { DestroyParticle(); }
 void CFireComponent::Initialize()

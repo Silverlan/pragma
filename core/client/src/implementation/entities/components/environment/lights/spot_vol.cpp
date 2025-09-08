@@ -4,12 +4,14 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/c_entityfactories.h"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/basetoggle.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/networking/c_nwm_util.h"
+#include "pragma/c_engine.h"
+#include "pragma/clientstate/clientstate.h"
+#include "pragma/game/c_game.h"
 #include <sharedutils/alpha_mode.hpp>
 #include <pragma/physics/raytraces.h>
 #include <pragma/model/model.h>
@@ -25,8 +27,6 @@ import pragma.client.entities.components;
 import pragma.client.scripting.lua;
 
 using namespace pragma;
-
-LINK_ENTITY_TO_CLASS(env_light_spot_vol, CEnvLightSpotVol);
 
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;

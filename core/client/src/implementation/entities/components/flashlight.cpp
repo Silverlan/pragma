@@ -4,7 +4,8 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/c_entityfactories.h"
+#include "pragma/c_engine.h"
+#include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
 #include "pragma/entities/environment/lights/c_env_light_spot.h"
 #include "pragma/entities/components/c_attachment_component.hpp"
@@ -21,8 +22,6 @@ import pragma.client.entities.components.radius;
 import pragma.client.entities.components.sound_emitter;
 
 using namespace pragma;
-
-LINK_ENTITY_TO_CLASS(flashlight, CFlashlight);
 
 extern DLLCLIENT ClientState *client;
 

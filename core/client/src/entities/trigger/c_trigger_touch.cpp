@@ -3,7 +3,6 @@
 
 #include "stdafx_client.h"
 #include "pragma/entities/trigger/c_trigger_touch.h"
-#include "pragma/entities/c_entityfactories.h"
 #include "pragma/rendering/c_rendermode.h"
 #include "pragma/entities/components/c_render_component.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
@@ -11,8 +10,6 @@
 #include <pragma/entities/entity_component_system_t.hpp>
 
 using namespace pragma;
-
-LINK_ENTITY_TO_CLASS(trigger_touch, CTriggerTouch);
 
 extern CGame *c_game;
 void CTouchComponent::Initialize() { BaseTouchComponent::Initialize(); }

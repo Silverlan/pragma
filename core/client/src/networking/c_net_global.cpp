@@ -5,7 +5,6 @@
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/c_engine.h"
 #include "pragma/networking/c_net_global.h"
-#include "pragma/entities/c_entityfactories.h"
 #include "pragma/physics/movetypes.h"
 #include "pragma/physics/collisiontypes.h"
 #include "pragma/entities/components/c_player_component.hpp"
@@ -56,22 +55,20 @@ extern DLLCLIENT CGame *c_game;
 DLLCLIENT void NET_cl_serverinfo(NetPacket packet) { client->HandleClientReceiveServerInfo(packet); }
 DLLCLIENT void NET_cl_start_resource_transfer(NetPacket packet) { client->HandleClientStartResourceTransfer(packet); }
 
-extern ClientEntityNetworkMap *g_ClEntityNetworkMap;
-
 CBaseEntity *NET_cl_ent_create(NetPacket &packet, bool bSpawn, bool bIgnoreMapInit = false)
 {
 	if(!client->IsGameActive())
 		return NULL;
 	CGame *game = client->GetGameState();
 	unsigned int factoryID = packet->Read<unsigned int>();
-	CBaseEntity *(*factory)(unsigned int) = g_ClEntityNetworkMap->GetFactory(factoryID);
-	if(factory == NULL) {
+	auto *factory = client_entities::ClientEntityRegistry::Instance().GetNetworkedFactory(factoryID);
+	if(factory == nullptr) {
 		Con::cwar << "Unable to create entity with factory ID '" << factoryID << "': Factory not found!" << Con::endl;
 		return NULL;
 	}
 	unsigned int idx = packet->Read<unsigned int>();
 	unsigned int mapIdx = packet->Read<unsigned int>();
-	CBaseEntity *ent = factory(idx);
+	CBaseEntity *ent = (*factory)(client, idx);
 	ent->ReceiveData(packet);
 	if(mapIdx == 0) {
 		if(bSpawn)

@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/c_entityfactories.h"
 #include <pragma/networking/nwm_util.h>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
@@ -12,8 +11,6 @@ module;
 module pragma.client.entities.components.env_timescale;
 
 using namespace pragma;
-
-LINK_ENTITY_TO_CLASS(env_timescale, CEnvTimescale);
 
 void CEnvTimescaleComponent::ReceiveData(NetPacket &packet)
 {

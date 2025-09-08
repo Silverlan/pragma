@@ -4,7 +4,9 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/c_entityfactories.h"
+#include "pragma/c_engine.h"
+#include "pragma/clientstate/clientstate.h"
+#include "pragma/game/c_game.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/entities/components/c_attachment_component.hpp"
 #include "pragma/entities/components/base_transform_component.hpp"
@@ -20,8 +22,6 @@ import pragma.client.entities.components.io;
 import pragma.client.entities.components.sound_emitter;
 
 using namespace pragma;
-
-LINK_ENTITY_TO_CLASS(env_explosion, CEnvExplosion);
 
 extern ClientState *client;
 extern CGame *c_game;

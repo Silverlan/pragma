@@ -4,10 +4,10 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/c_entityfactories.h"
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/entities/components/base_physics_component.hpp"
 #include "pragma/entities/components/base_model_component.hpp"
+#include "pragma/clientstate/clientstate.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/util/util_handled.hpp>
 #include <pragma/entities/baseentity_events.hpp>
@@ -18,8 +18,6 @@ module pragma.client.entities.components.audio.sound_probe;
 using namespace pragma;
 
 extern DLLCLIENT ClientState *client;
-
-LINK_ENTITY_TO_CLASS(env_sound_probe, CEnvSoundProbe);
 
 decltype(CEnvSoundProbeComponent::s_probes) CEnvSoundProbeComponent::s_probes = {};
 decltype(CEnvSoundProbeComponent::s_probeCallback) CEnvSoundProbeComponent::s_probeCallback = {};

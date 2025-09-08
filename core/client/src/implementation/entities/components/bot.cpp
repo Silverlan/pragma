@@ -4,10 +4,10 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/c_entityfactories.h"
 #include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/entities/components/base_character_component.hpp"
 #include "pragma/entities/components/base_ai_component.hpp"
+#include "pragma/clientstate/clientstate.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/audio/alsound_type.h>
 #include <pragma/entities/components/velocity_component.hpp>
@@ -18,8 +18,6 @@ module pragma.client.entities.components.bot;
 import pragma.client.entities.components.sound_emitter;
 
 using namespace pragma;
-
-LINK_ENTITY_TO_CLASS(bot, CBot);
 
 extern ClientState *client;
 

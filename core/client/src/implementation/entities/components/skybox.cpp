@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/c_entityfactories.h"
 #include "pragma/game/c_game.h"
 #include "pragma/rendering/c_rendermode.h"
 #include "pragma/entities/components/c_render_component.hpp"
@@ -28,6 +27,9 @@ module;
 #include <util_image.hpp>
 #include <fsys/ifile.hpp>
 #include <wgui/types/wirect.h>
+#include "pragma/c_engine.h"
+#include "pragma/clientstate/clientstate.h"
+#include "pragma/game/c_game.h"
 
 module pragma.client.entities.components.skybox;
 
@@ -39,8 +41,6 @@ extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
 using namespace pragma;
-
-LINK_ENTITY_TO_CLASS(skybox, CSkybox);
 
 void CSkyboxComponent::Initialize()
 {

@@ -3,14 +3,11 @@
 
 #include "stdafx_client.h"
 #include "pragma/entities/c_wheel.hpp"
-#include "pragma/entities/c_entityfactories.h"
 #include "pragma/entities/baseentity_luaobject.h"
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
 using namespace pragma;
-
-LINK_ENTITY_TO_CLASS(vhc_wheel, CWheel);
 
 void CWheel::Initialize()
 {

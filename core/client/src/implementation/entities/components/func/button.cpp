@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/c_entityfactories.h"
 #include "pragma/game/c_game.h"
 #include "pragma/rendering/c_rendermode.h"
 #include "pragma/entities/components/c_render_component.hpp"
@@ -14,8 +13,6 @@ module;
 module pragma.client.entities.components.func_button;
 
 using namespace pragma;
-
-LINK_ENTITY_TO_CLASS(func_button, CFuncButton);
 
 void CButtonComponent::Initialize()
 {

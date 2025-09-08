@@ -9,6 +9,7 @@
 #include "pragma/entities/components/c_entity_component.hpp"
 #include <sharedutils/util_parallel_job.hpp>
 #include <pragma/entities/components/base_entity_component.hpp>
+#include <cmaterial.h>
 #include <memory>
 #include <optional>
 #include <thread>

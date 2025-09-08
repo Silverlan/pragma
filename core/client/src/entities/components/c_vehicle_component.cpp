@@ -3,8 +3,8 @@
 
 #include "stdafx_client.h"
 #include "pragma/entities/components/c_vehicle_component.hpp"
-#include "pragma/entities/c_entityfactories.h"
 #include "pragma/entities/baseentity_luaobject.h"
+#include "pragma/game/c_game.h"
 #include "pragma/entities/components/base_observable_component.hpp"
 #include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"

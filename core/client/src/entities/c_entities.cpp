@@ -14,9 +14,11 @@
 #include <pragma/game/game_lua_entity.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
+import pragma.client.entities;
 import pragma.client.entities.components;
 
-extern EntityClassMap<CBaseEntity> *g_ClientEntityFactories;
+extern ClientState *client;
+
 pragma::CListenerComponent *CGame::GetListener()
 {
 	if(m_listener.expired())
@@ -42,8 +44,8 @@ CBaseEntity *CGame::CreateEntity(std::string classname)
 	CBaseEntity *entlua = CreateLuaEntity(classname);
 	if(entlua != NULL)
 		return entlua;
-	CBaseEntity *(*factory)(void) = g_ClientEntityFactories->FindFactory(classname);
-	if(factory == NULL) {
+	auto factory = client_entities::ClientEntityRegistry::Instance().FindFactory(classname);
+	if(!factory) {
 		static std::unordered_set<std::string> skipSet;
 		if(skipSet.find(classname) == skipSet.end() && LoadLuaEntityByClass(classname) == true) {
 			skipSet.insert(classname);
@@ -54,7 +56,7 @@ CBaseEntity *CGame::CreateEntity(std::string classname)
 		Con::cwar << "Unable to create entity '" << classname << "': Factory not found!" << Con::endl;
 		return NULL;
 	}
-	return factory();
+	return factory(client);
 }
 
 void CGame::RemoveEntity(BaseEntity *ent)

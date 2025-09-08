@@ -5,10 +5,10 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/audio/alsoundscript.h"
-#include "pragma/entities/c_entityfactories.h"
 #include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/entities/components/base_character_component.hpp"
+#include "pragma/game/c_game.h"
 #include <pragma/networking/nwm_util.h>
 #include <pragma/physics/raytraces.h>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
@@ -27,8 +27,6 @@ namespace pragma {
 };
 
 CSoundScapeComponent *CSoundScapeComponent::s_active = NULL;
-
-LINK_ENTITY_TO_CLASS(env_soundscape, CEnvSoundScape);
 
 extern DLLCLIENT CGame *c_game;
 

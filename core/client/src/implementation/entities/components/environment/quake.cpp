@@ -4,8 +4,10 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/c_entityfactories.h"
 #include "noise/noise.h"
+#include "pragma/c_engine.h"
+#include "pragma/clientstate/clientstate.h"
+#include "pragma/game/c_game.h"
 #include "pragma/entities/components/c_player_component.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
@@ -15,8 +17,6 @@ module;
 module pragma.client.entities.components.env_quake;
 
 using namespace pragma;
-
-LINK_ENTITY_TO_CLASS(env_quake, CEnvQuake);
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;

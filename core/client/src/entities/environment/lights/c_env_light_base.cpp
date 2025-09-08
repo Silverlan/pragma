@@ -3,7 +3,7 @@
 
 #include "stdafx_client.h"
 #include "pragma/entities/environment/lights/c_env_light.h"
-#include "pragma/entities/c_entityfactories.h"
+#include "pragma/game/c_game.h"
 #include "pragma/entities/baseentity_luaobject.h"
 #include <pragma/networking/nwm_util.h>
 #include "pragma/entities/components/c_color_component.hpp"

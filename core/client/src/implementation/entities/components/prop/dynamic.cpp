@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/c_entityfactories.h"
 #include <pragma/physics/physobj.h>
 #include "pragma/physics/movetypes.h"
 #include "pragma/entities/components/c_render_component.hpp"
@@ -16,8 +15,6 @@ module pragma.client.entities.components.prop_dynamic;
 import pragma.client.entities.components.physics;
 
 using namespace pragma;
-
-LINK_ENTITY_TO_CLASS(prop_dynamic, CPropDynamic);
 
 void CPropDynamicComponent::Initialize() { BasePropDynamicComponent::Initialize(); }
 

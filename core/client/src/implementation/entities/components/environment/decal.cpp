@@ -7,9 +7,11 @@ module;
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/intersection_handler_component.hpp"
 #include "pragma/entities/components/base_bvh_component.hpp"
-#include "pragma/entities/c_entityfactories.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/model/c_model.h"
+#include "pragma/c_engine.h"
+#include "pragma/clientstate/clientstate.h"
+#include "pragma/game/c_game.h"
 #include <pragma/physics/raytraces.h>
 #include <pragma/entities/environment/env_decal.h>
 #include <pragma/entities/components/base_transform_component.hpp>
@@ -27,8 +29,6 @@ import pragma.client.entities.components.static_bvh_cache;
 import pragma.client.entities.components.static_bvh_user;
 
 using namespace pragma;
-
-LINK_ENTITY_TO_CLASS(env_decal, CEnvDecal);
 
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;

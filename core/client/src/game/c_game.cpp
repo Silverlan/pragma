@@ -3,7 +3,6 @@
 
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
-#include "pragma/entities/c_entityfactories.h"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/lua/c_lua_script_watcher.hpp"
 #include "pragma/input/input_binding_layer.hpp"
@@ -60,7 +59,6 @@
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/shaders/c_shader_lua.hpp"
 #include "pragma/lua/classes/c_lparticle_modifiers.hpp"
-#include "pragma/entities/c_entityfactories.h"
 #include "pragma/entities/components/c_weapon_component.hpp"
 #include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/entities/components/c_vehicle_component.hpp"
@@ -96,6 +94,9 @@
 #include <util_image_buffer.hpp>
 #include <udm.hpp>
 #include <prosper_window.hpp>
+#include "pragma/c_engine.h"
+#include "pragma/clientstate/clientstate.h"
+#include "pragma/game/c_game.h"
 
 import pragma.client.ai;
 import pragma.client.debug;
@@ -106,8 +107,6 @@ import pragma.client.model;
 import pragma.client.physics;
 import pragma.client.scripting.lua;
 
-extern EntityClassMap<CBaseEntity> *g_ClientEntityFactories;
-extern ClientEntityNetworkMap *g_ClEntityNetworkMap;
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 DLLCLIENT CGame *c_game = NULL;
@@ -362,11 +361,7 @@ const pragma::rendering::GlobalShaderInputDataManager &CGame::GetGlobalShaderInp
 
 void CGame::GetRegisteredEntities(std::vector<std::string> &classes, std::vector<std::string> &luaClasses) const
 {
-	std::unordered_map<std::string, CBaseEntity *(*)(void)> *factories = nullptr;
-	g_ClientEntityFactories->GetFactories(&factories);
-	classes.reserve(classes.size() + factories->size());
-	for(auto &pair : *factories)
-		classes.push_back(pair.first);
+    client_entities::ClientEntityRegistry::Instance().GetRegisteredClassNames(classes);
 	GetLuaRegisteredEntities(luaClasses);
 }
 

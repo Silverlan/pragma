@@ -3,7 +3,6 @@
 
 #include "stdafx_client.h"
 #include "pragma/entities/environment/lights/c_env_light_spot.h"
-#include "pragma/entities/c_entityfactories.h"
 #include "pragma/entities/baseentity_luaobject.h"
 #include <pragma/networking/nwm_util.h>
 #include "pragma/entities/components/c_color_component.hpp"
@@ -17,8 +16,6 @@
 import pragma.client.entities.components;
 
 using namespace pragma;
-
-LINK_ENTITY_TO_CLASS(env_light_spot, CEnvLightSpot);
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;

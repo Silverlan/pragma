@@ -7,7 +7,6 @@ module;
 #include "pragma/rendering/c_ssao.hpp"
 #include "pragma/rendering/shaders/world/c_shader_pbr.hpp"
 #include "pragma/rendering/lighting/c_light_data_buffer_manager.hpp"
-#include "pragma/entities/c_entityfactories.h"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/components/c_light_map_component.hpp"
@@ -23,6 +22,9 @@ module;
 #include <buffers/prosper_buffer.hpp>
 #include <image/prosper_render_target.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
+#include "pragma/c_engine.h"
+#include "pragma/clientstate/clientstate.h"
+#include "pragma/game/c_game.h"
 
 module pragma.client.entities.components.rasterization_renderer;
 
@@ -30,10 +32,9 @@ import pragma.client.rendering.shaders;
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT CEngine *c_engine;
+extern DLLCLIENT ClientState *client;
 
 using namespace pragma;
-
-LINK_ENTITY_TO_CLASS(rasterization_renderer, CRasterizationRenderer);
 
 ComponentEventId CRasterizationRendererComponent::EVENT_ON_RECORD_PREPASS = INVALID_COMPONENT_ID;
 ComponentEventId CRasterizationRendererComponent::EVENT_ON_RECORD_LIGHTING_PASS = INVALID_COMPONENT_ID;

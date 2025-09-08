@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/c_entityfactories.h"
 #include "pragma/rendering/c_rendermode.h"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_scene_component.hpp"
@@ -15,8 +14,6 @@ module;
 module pragma.client.entities.components.func_portal;
 
 using namespace pragma;
-
-// LINK_ENTITY_TO_CLASS(func_portal,CFuncPortal);
 
 void CFuncPortalComponent::Initialize()
 {

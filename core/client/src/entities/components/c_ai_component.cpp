@@ -3,7 +3,6 @@
 
 #include "stdafx_client.h"
 #include "pragma/entities/components/c_ai_component.hpp"
-#include "pragma/entities/c_entityfactories.h"
 #include "pragma/entities/baseentity_luaobject.h"
 #include <pragma/entities/components/base_character_component.hpp>
 #include <pragma/entities/components/velocity_component.hpp>

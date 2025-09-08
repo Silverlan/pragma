@@ -3,7 +3,6 @@
 
 #include "stdafx_client.h"
 #include "pragma/entities/c_world.h"
-#include "pragma/entities/c_entityfactories.h"
 #include "pragma/physics/collisiontypes.h"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
@@ -389,8 +388,6 @@ void CWorldComponent::UpdateRenderMeshes()
 void CWorldComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 //////////////
-
-LINK_ENTITY_TO_CLASS(world, CWorld);
 
 void CWorld::Initialize()
 {

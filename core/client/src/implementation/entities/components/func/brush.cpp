@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/c_entityfactories.h"
 #include "pragma/game/c_game.h"
 #include "pragma/rendering/c_rendermode.h"
 #include <pragma/networking/nwm_util.h>
@@ -16,8 +15,6 @@ module;
 module pragma.client.entities.components.func_brush;
 
 using namespace pragma;
-
-LINK_ENTITY_TO_CLASS(func_brush, CFuncBrush);
 
 void CBrushComponent::Initialize()
 {

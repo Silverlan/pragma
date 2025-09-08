@@ -4,8 +4,8 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/c_entityfactories.h"
 #include "pragma/c_engine.h"
+#include "alsound_effect.hpp"
 #include <alsoundsystem.hpp>
 #include "pragma/audio/c_engine_sound.hpp"
 #include <pragma/networking/nwm_util.h>
@@ -18,8 +18,6 @@ module pragma.client.entities.components.audio.dsp.distortion;
 using namespace pragma;
 
 extern DLLCLIENT CEngine *c_engine;
-
-LINK_ENTITY_TO_CLASS(env_sound_dsp_distortion, CEnvSoundDspDistortion);
 
 void CSoundDspDistortionComponent::ReceiveData(NetPacket &packet)
 {

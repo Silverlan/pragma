@@ -4,12 +4,15 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/c_entityfactories.h"
 #include "pragma/entities/components/c_scene_component.hpp"
 #include <cmaterialmanager.h>
 #include <mathutil/umat.h>
 #include "pragma/entities/baseentity_luaobject.h"
 #include "pragma/c_engine.h"
+#include "pragma/clientstate/clientstate.h"
+#include "pragma/c_engine.h"
+#include "pragma/clientstate/clientstate.h"
+#include "pragma/game/c_game.h"
 #include <texturemanager/texturemanager.h>
 #include "textureinfo.h"
 #include <pragma/networking/nwm_util.h>
@@ -20,9 +23,9 @@ module pragma.client.entities.components.point_render_target;
 
 using namespace pragma;
 
-#pragma message("FIXME: If point_rendertarget is out of view of the local player, but one of the texture targets isn't, they won't get updated! Find a solution!")
+extern DLLCLIENT ClientState *client;
 
-// LINK_ENTITY_TO_CLASS(point_rendertarget,CPointRenderTarget);
+#pragma message("FIXME: If point_rendertarget is out of view of the local player, but one of the texture targets isn't, they won't get updated! Find a solution!")
 
 void CRenderTargetComponent::ReceiveData(NetPacket &packet)
 {

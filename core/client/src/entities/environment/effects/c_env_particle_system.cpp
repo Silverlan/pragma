@@ -7,7 +7,11 @@
 #include "pragma/entities/components/c_transform_component.hpp"
 #include "pragma/entities/components/base_io_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
-#include "pragma/entities/c_entityfactories.h"
+#include "pragma/c_engine.h"
+#include "pragma/clientstate/clientstate.h"
+#include "pragma/game/c_game.h"
+#include "pragma/clientstate/clientstate.h"
+#include "pragma/clientstate/clientstate.h"
 #include <pragma/networking/nwm_util.h>
 #include "pragma/entities/baseentity_luaobject.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
@@ -21,7 +25,7 @@ import pragma.client.entities.components.io;
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(env_particle_system, CEnvParticleSystem);
+extern DLLCLIENT ClientState *client;
 
 void CParticleSystemComponent::Initialize()
 {

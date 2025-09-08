@@ -3,7 +3,6 @@
 
 #include "stdafx_client.h"
 #include "pragma/entities/c_viewbody.h"
-#include "pragma/entities/c_entityfactories.h"
 #include "pragma/rendering/c_rendermode.h"
 #include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/entities/components/c_player_component.hpp"
@@ -16,8 +15,6 @@
 #include <pragma/entities/components/logic_component.hpp>
 
 using namespace pragma;
-
-LINK_ENTITY_TO_CLASS(viewbody, CViewBody);
 
 extern ClientState *client;
 extern CGame *c_game;

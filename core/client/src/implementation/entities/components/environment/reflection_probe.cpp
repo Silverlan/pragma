@@ -30,7 +30,6 @@ module;
 #include "pragma/entities/components/c_transform_component.hpp"
 #include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
-#include "pragma/entities/c_entityfactories.h"
 #include "pragma/rendering/shaders/world/c_shader_pbr.hpp"
 #include "pragma/rendering/raytracing/cycles.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
@@ -40,6 +39,9 @@ module;
 #include <pragma/entities/components/base_entity_component_logging.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <spdlog/logger.h>
+#include "pragma/c_engine.h"
+#include "pragma/clientstate/clientstate.h"
+#include "pragma/game/c_game.h"
 
 module pragma.client.entities.components.env_reflection_probe;
 
@@ -51,8 +53,6 @@ extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
 using namespace pragma;
-
-LINK_ENTITY_TO_CLASS(env_reflection_probe, CEnvReflectionProbe);
 
 rendering::IBLData::IBLData(const std::shared_ptr<prosper::Texture> &irradianceMap, const std::shared_ptr<prosper::Texture> &prefilterMap, const std::shared_ptr<prosper::Texture> &brdfMap) : irradianceMap {irradianceMap}, prefilterMap {prefilterMap}, brdfMap {brdfMap} {}
 

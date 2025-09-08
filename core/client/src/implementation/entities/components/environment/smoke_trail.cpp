@@ -5,7 +5,9 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
-#include "pragma/entities/c_entityfactories.h"
+#include "pragma/c_engine.h"
+#include "pragma/clientstate/clientstate.h"
+#include "pragma/game/c_game.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/components/basetoggle.h>
 #include <pragma/entities/entity_component_system_t.hpp>
@@ -15,8 +17,6 @@ module pragma.client.entities.components.effects.smoke_trail;
 import pragma.client.util;
 
 using namespace pragma;
-
-LINK_ENTITY_TO_CLASS(env_smoke_trail, CEnvSmokeTrail);
 
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;

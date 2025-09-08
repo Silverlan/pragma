@@ -3,7 +3,6 @@
 
 #include "stdafx_client.h"
 #include "pragma/entities/c_viewmodel.h"
-#include "pragma/entities/c_entityfactories.h"
 #include "pragma/rendering/c_rendermode.h"
 #include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/console/c_cvar.h"
@@ -23,8 +22,6 @@
 import pragma.client.entities.components;
 
 using namespace pragma;
-
-LINK_ENTITY_TO_CLASS(viewmodel, CViewModel);
 
 extern DLLCLIENT CGame *c_game;
 

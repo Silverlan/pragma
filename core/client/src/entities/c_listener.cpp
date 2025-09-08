@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
+#include "pragma/c_engine.h"
 #include "pragma/entities/c_listener.h"
-#include "pragma/entities/c_entityfactories.h"
 #include "pragma/entities/baseentity_luaobject.h"
 #include "pragma/entities/components/c_transform_component.hpp"
 #include <alsoundsystem.hpp>
@@ -17,8 +17,6 @@
 using namespace pragma;
 
 extern DLLCLIENT CEngine *c_engine;
-
-LINK_ENTITY_TO_CLASS(listener, CListener);
 
 void CListenerComponent::Initialize()
 {

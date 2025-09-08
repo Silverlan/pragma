@@ -6,7 +6,6 @@
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include "pragma/entities/game/c_game_shadow_manager.hpp"
-#include "pragma/entities/c_entityfactories.h"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/shaders/world/c_shader_pbr.hpp"
 #include "pragma/rendering/shaders/c_shader_shadow.hpp"
@@ -25,8 +24,6 @@ extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
 using namespace pragma;
-
-LINK_ENTITY_TO_CLASS(game_shadow_manager, CShadowManager);
 
 static CShadowManagerComponent *g_shadowManager = nullptr;
 CShadowManagerComponent *CShadowManagerComponent::GetShadowManager() { return g_shadowManager; }

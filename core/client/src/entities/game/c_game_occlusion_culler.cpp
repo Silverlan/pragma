@@ -10,7 +10,6 @@
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/entities/game/c_game_occlusion_culler.hpp"
-#include "pragma/entities/c_entityfactories.h"
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/console/sh_cmd.h>
@@ -22,8 +21,6 @@ extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
 using namespace pragma;
-
-LINK_ENTITY_TO_CLASS(game_occlusion_culler, COcclusionCuller);
 
 void COcclusionCullerComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 

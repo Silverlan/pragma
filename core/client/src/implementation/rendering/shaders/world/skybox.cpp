@@ -1,10 +1,10 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/rendering/shaders/world/c_shader_skybox.hpp"
 #include "pragma/rendering/render_processor.hpp"
-#include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/model/c_vertex_buffer_data.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include <shader/prosper_pipeline_create_info.hpp>
@@ -13,6 +13,10 @@
 #include <prosper_command_buffer.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <cmaterial.h>
+
+module pragma.client.rendering.shaders;
+
+import :world_skybox;
 
 import pragma.client.entities.components;
 import pragma.client.model;

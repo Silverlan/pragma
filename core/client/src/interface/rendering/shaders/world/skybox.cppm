@@ -1,12 +1,13 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_SHADER_SKYBOX_H__
-#define __C_SHADER_SKYBOX_H__
+module;
 
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 
-namespace pragma {
+export module pragma.client.rendering.shaders:world_skybox;
+
+export namespace pragma {
 	class DLLCLIENT ShaderSkybox : public ShaderGameWorldLightingPass {
 	  public:
 		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_VERTEX;
@@ -56,5 +57,3 @@ namespace pragma {
 		ShaderSkyboxEquirect(prosper::IPrContext &context, const std::string &identifier);
 	};
 };
-
-#endif

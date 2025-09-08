@@ -1,13 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_SHADER_LIGHT_CONE_HPP__
-#define __C_SHADER_LIGHT_CONE_HPP__
+module;
 
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
+#include "pragma/entities/components/c_render_component.hpp"
 
-namespace pragma {
-	class CRasterizationRendererComponent;
+export module pragma.client.rendering.shaders:world_light_cone;
+
+export namespace pragma {
 	class DLLCLIENT ShaderLightCone : public ShaderGameWorldLightingPass {
 	  public:
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_DEPTH_MAP;
@@ -29,5 +30,3 @@ namespace pragma {
 		int32_t m_boundLightIndex = -1;
 	};
 };
-
-#endif

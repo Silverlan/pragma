@@ -1,10 +1,10 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/rendering/shaders/world/c_shader_light_cone.hpp"
 #include "pragma/rendering/render_processor.hpp"
-#include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/entities/environment/lights/c_env_light.h"
 #include <shader/prosper_pipeline_create_info.hpp>
@@ -14,6 +14,10 @@
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <prosper_command_buffer.hpp>
 #include <cmaterial.h>
+
+module pragma.client.rendering.shaders;
+
+import :world_light_cone;
 
 import pragma.client.entities.components;
 import pragma.client.model;

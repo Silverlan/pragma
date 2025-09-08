@@ -1,13 +1,16 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_ENV_SOUNDSCAPE_H__
-#define __C_ENV_SOUNDSCAPE_H__
+module;
+
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/c_baseentity.h"
 #include "pragma/entities/environment/audio/env_soundscape.h"
+#include "pragma/entities/components/c_entity_component.hpp"
 
-namespace pragma {
+export module pragma.client.entities.components.audio.sound_scape;
+
+export namespace pragma {
 	class DLLCLIENT CSoundScapeComponent final : public BaseEnvSoundScapeComponent, public CBaseNetComponent {
 	  public:
 		CSoundScapeComponent(BaseEntity &ent) : BaseEnvSoundScapeComponent(ent) {}
@@ -29,9 +32,7 @@ namespace pragma {
 	};
 };
 
-class DLLCLIENT CEnvSoundScape : public CBaseEntity {
+export class DLLCLIENT CEnvSoundScape : public CBaseEntity {
   public:
 	virtual void Initialize() override;
 };
-
-#endif

@@ -1,16 +1,19 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/entities/environment/audio/c_env_sound_probe.hpp"
 #include "pragma/entities/c_entityfactories.h"
+#include "pragma/entities/components/base_transform_component.hpp"
+#include "pragma/entities/components/base_physics_component.hpp"
+#include "pragma/entities/components/base_model_component.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/util/util_handled.hpp>
 #include <pragma/entities/baseentity_events.hpp>
-#include <pragma/entities/components/base_transform_component.hpp>
-#include <pragma/entities/components/base_physics_component.hpp>
-#include <pragma/entities/components/base_model_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
+
+module pragma.client.entities.components.audio.sound_probe;
 
 using namespace pragma;
 

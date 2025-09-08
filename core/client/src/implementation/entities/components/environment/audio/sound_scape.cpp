@@ -1,19 +1,22 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/audio/alsoundscript.h"
-#include "pragma/entities/environment/audio/c_env_soundscape.h"
 #include "pragma/entities/c_entityfactories.h"
+#include "pragma/entities/components/c_player_component.hpp"
+#include "pragma/entities/components/base_transform_component.hpp"
+#include "pragma/entities/components/base_character_component.hpp"
 #include <pragma/networking/nwm_util.h>
 #include <pragma/physics/raytraces.h>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/audio/alsound_type.h>
-#include <pragma/entities/components/base_transform_component.hpp>
-#include <pragma/entities/components/base_character_component.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
+
+module pragma.client.entities.components.audio.sound_scape;
 
 import pragma.client.entities.components;
 

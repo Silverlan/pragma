@@ -18,6 +18,8 @@
 #include "pragma/entities/environment/env_microphone_base.h"
 #include "pragma/entities/components/base_io_component.hpp"
 #include "pragma/entities/components/base_softbody_component.hpp"
+#include "pragma/entities/environment/audio/env_soundscape.h"
+#include "pragma/entities/environment/audio/env_sound.h"
 #include "pragma/entities/environment/audio/env_sound_dsp.h"
 #include <pragma/lua/classes/lproperty_generic.hpp>
 #include <pragma/lua/classes/ldef_vector.h>
@@ -80,8 +82,6 @@
 #include "pragma/entities/environment/lights/c_env_light_spot_vol.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/entities/environment/effects/c_env_smoke_trail.h"
-#include "pragma/entities/environment/audio/c_env_sound.h"
-#include "pragma/entities/environment/audio/c_env_soundscape.h"
 #include "pragma/entities/environment/effects/c_env_sprite.h"
 #include "pragma/entities/environment/lights/c_env_shadow_csm.hpp"
 #include "pragma/entities/components/liquid/c_liquid_component.hpp"
@@ -105,7 +105,6 @@
 #include "pragma/entities/c_wheel.hpp"
 #include "pragma/entities/util/c_util_pbr_converter.hpp"
 #include "pragma/entities/environment/lights/c_env_shadow.hpp"
-#include "pragma/entities/environment/audio/c_env_sound_probe.hpp"
 #include "pragma/entities/components/c_weapon_component.hpp"
 #include "pragma/entities/components/liquid/base_buoyancy_component.hpp"
 #include "pragma/entities/c_water_surface.hpp"

@@ -4,8 +4,6 @@
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
 #include "pragma/console/c_cvar.h"
-#include "pragma/entities/environment/audio/c_env_sound.h"
-#include "pragma/entities/environment/audio/c_env_sound_probe.hpp"
 #include <pragma/entities/components/base_physics_component.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/physics/environment.hpp>

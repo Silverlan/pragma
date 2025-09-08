@@ -1,12 +1,12 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/rendering/shaders/world/c_shader_test.hpp"
 #include "pragma/rendering/shaders/world/c_shader_pbr.hpp"
 #include "pragma/clientstate/clientstate.h"
 #include "cmaterialmanager.h"
-#include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/model/c_modelmesh.h"
 #include <shader/prosper_pipeline_create_info.hpp>
@@ -18,6 +18,10 @@
 #include <texture_type.h>
 #include <cmaterial_manager2.hpp>
 #include <cmaterial.h>
+
+module pragma.client.rendering.shaders;
+
+import :world_test;
 
 import pragma.client.entities.components;
 import pragma.client.model;

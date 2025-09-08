@@ -1,13 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_SHADER_TEST_HPP__
-#define __C_SHADER_TEST_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 
-namespace pragma {
+export module pragma.client.rendering.shaders:world_test;
+
+export namespace pragma {
 	class DLLCLIENT ShaderTest : public ShaderGameWorldLightingPass {
 	  public:
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_PBR;
@@ -51,5 +52,3 @@ namespace pragma {
 		Mat4 m_testMvp;
 	};
 };
-
-#endif

@@ -6,9 +6,7 @@
 //#include "shader.h" // prosper TODO
 #include <pragma/console/convars.h>
 //#include "shader_screen.h" // prosper TODO
-#include "pragma/rendering/shaders/world/c_shader_wireframe.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured_alpha_transition.hpp"
-#include "pragma/rendering/shaders/world/c_shader_test.hpp"
 #include "pragma/rendering/shaders/world/c_shader_prepass.hpp"
 #include "pragma/rendering/shaders/particles/c_shader_particle.hpp"
 #include "pragma/rendering/shaders/c_shader_shadow.hpp"
@@ -20,7 +18,6 @@
 #include "pragma/rendering/shaders/world/water/c_shader_water_surface_solve_edges.hpp"
 #include "pragma/rendering/shaders/world/raytracing/c_shader_raytracing.hpp"
 #include "pragma/rendering/shaders/world/c_shader_pbr.hpp"
-#include "pragma/rendering/shaders/world/c_shader_unlit.hpp"
 #include "pragma/rendering/shaders/util/c_shader_compose_rma.hpp"
 #include "pragma/rendering/global_render_settings_buffer_data.hpp"
 #include <pragma/console/convars.h>

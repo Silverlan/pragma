@@ -29,7 +29,6 @@
 #include <prosper_swap_command_buffer.hpp>
 #if DEBUG_RENDER_PERFORMANCE_TEST_ENABLED == 1
 #include "pragma/entities/components/c_scene_component.hpp"
-#include "pragma/rendering/shaders/world/c_shader_test.hpp"
 #include "pragma/rendering/shaders/world/c_shader_pbr.hpp"
 #include "pragma/entities/entity_iterator.hpp"
 #include "pragma/model/c_model.h"

@@ -3,10 +3,12 @@
 
 module;
 
-#include "pragma/rendering/shaders/world/c_shader_unlit.hpp"
+#include "pragma/clientdefinitions.h"
 #include <mathutil/uvec.h>
 
 export module pragma.client.rendering.shaders:world_noop;
+
+import :world_unlit;
 
 export namespace pragma {
 	class DLLCLIENT ShaderNoop : public ShaderUnlit {

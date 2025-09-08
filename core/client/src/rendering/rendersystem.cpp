@@ -11,7 +11,6 @@
 #include "pragma/entities/entity_instance_index_buffer.hpp"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
-#include "pragma/rendering/shaders/world/c_shader_wireframe.hpp"
 #include "pragma/rendering/sortedrendermeshcontainer.h"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/rendering/render_stats.hpp"
@@ -27,6 +26,7 @@
 #include <image/prosper_render_target.hpp>
 
 import pragma.client.debug;
+import pragma.client.rendering.shaders;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;

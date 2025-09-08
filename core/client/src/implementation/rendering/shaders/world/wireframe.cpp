@@ -1,9 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/rendering/shaders/world/c_shader_wireframe.hpp"
 #include <shader/prosper_pipeline_create_info.hpp>
+#include "shader/prosper_shader.hpp"
+
+module pragma.client.rendering.shaders;
+
+import :world_wireframe;
 
 using namespace pragma;
 

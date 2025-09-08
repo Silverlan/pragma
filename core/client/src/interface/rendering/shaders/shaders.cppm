@@ -47,3 +47,6 @@ export import :world_graph;
 export import :world_light_cone;
 export import :world_loading;
 export import :world_noop;
+export import :world_test;
+export import :world_unlit;
+export import :world_wireframe;

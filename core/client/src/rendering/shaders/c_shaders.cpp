@@ -8,7 +8,6 @@
 //#include "shader_screen.h" // prosper TODO
 #include "pragma/rendering/shaders/world/c_shader_wireframe.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured_alpha_transition.hpp"
-#include "pragma/rendering/shaders/world/c_shader_flat.hpp"
 #include "pragma/rendering/shaders/world/c_shader_test.hpp"
 #include "pragma/rendering/shaders/world/c_shader_prepass.hpp"
 #include "pragma/rendering/shaders/world/c_shader_noop.hpp"

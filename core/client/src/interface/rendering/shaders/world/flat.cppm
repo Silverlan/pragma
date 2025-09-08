@@ -1,13 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_SHADER_FLAT_HPP__
-#define __C_SHADER_FLAT_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/rendering/shaders/world/c_shader_scene.hpp"
 
-namespace pragma {
+export module pragma.client.rendering.shaders:world_flat;
+
+export namespace pragma {
 	class DLLCLIENT ShaderFlat : public ShaderScene {
 	  public:
 		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_VERTEX;
@@ -26,5 +27,3 @@ namespace pragma {
 		virtual uint32_t GetCameraDescriptorSetIndex() const override { return std::numeric_limits<uint32_t>::max(); }
 	};
 };
-
-#endif

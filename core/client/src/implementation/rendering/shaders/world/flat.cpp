@@ -1,10 +1,10 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/rendering/shaders/world/c_shader_flat.hpp"
 #include "pragma/model/c_modelmesh.h"
-#include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/model/c_vertex_buffer_data.hpp"
@@ -13,6 +13,10 @@
 #include <prosper_util.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <cmaterial.h>
+
+module pragma.client.rendering.shaders;
+
+import :world_flat;
 
 import pragma.client.model;
 

@@ -1,14 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_SHADER_WATER_SPLASH_HPP__
-#define __C_SHADER_WATER_SPLASH_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include <shader/prosper_shader.hpp>
 #include <pragma/physics/phys_water_surface_simulator.hpp>
 
-namespace pragma {
+export module pragma.client.rendering.shaders:world_water_splash;
+
+export namespace pragma {
 	class DLLCLIENT ShaderWaterSplash : public prosper::ShaderCompute {
 	  public:
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_WATER_EFFECT;
@@ -21,5 +22,3 @@ namespace pragma {
 		virtual void InitializeShaderResources() override;
 	};
 };
-
-#endif

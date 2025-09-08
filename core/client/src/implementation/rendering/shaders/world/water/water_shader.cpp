@@ -1,16 +1,21 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/rendering/shaders/world/water/c_shader_water.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
-#include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/rendering/render_processor.hpp"
+#include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <prosper_util.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <prosper_command_buffer.hpp>
 #include <cmaterial.h>
+
+module pragma.client.rendering.shaders;
+
+import :world_water;
 
 import pragma.client.entities.components;
 

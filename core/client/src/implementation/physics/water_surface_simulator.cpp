@@ -6,11 +6,6 @@ module;
 #include "stdafx_client.h"
 #include "pragma/debug/c_debugoverlay.h"
 #include "pragma/model/c_modelmesh.h"
-#include "pragma/rendering/shaders/world/water/c_shader_water_surface.hpp"
-#include "pragma/rendering/shaders/world/water/c_shader_water_surface_integrate.hpp"
-#include "pragma/rendering/shaders/world/water/c_shader_water_surface_solve_edges.hpp"
-#include "pragma/rendering/shaders/world/water/c_shader_water_surface_sum_edges.hpp"
-#include "pragma/rendering/shaders/world/water/c_shader_water_splash.hpp"
 #include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/console/c_cvar.h"
 #include <pragma/rendering/c_sci_gpu_timer_manager.hpp>
@@ -19,8 +14,10 @@ module;
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
 
-import pragma.client.model;
 module pragma.client.physics;
+
+import pragma.client.model;
+import pragma.client.rendering.shaders;
 
 import :water_surface_simulator;
 

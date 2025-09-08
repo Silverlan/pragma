@@ -1,13 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_SHADER_WATER_HPP__
-#define __C_SHADER_WATER_HPP__
+module;
 
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include <pragma/types.hpp>
 
-namespace pragma {
+export module pragma.client.rendering.shaders:world_water;
+
+export namespace pragma {
 	class DLLCLIENT ShaderWater : public ShaderGameWorldLightingPass {
 	  public:
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_MATERIAL;
@@ -50,5 +51,3 @@ namespace pragma {
 		bool UpdateBindFogDensity();
 	};
 };
-
-#endif

@@ -1,12 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_SHADER_WATER_SURFACE_INTEGRATE_HPP__
-#define __C_SHADER_WATER_SURFACE_INTEGRATE_HPP__
+module;
 
-#include "pragma/rendering/shaders/world/water/c_shader_water_surface.hpp"
+#include "pragma/clientdefinitions.h"
 
-namespace pragma {
+export module pragma.client.rendering.shaders:world_water_surface_integrate;
+
+import :world_water_surface;
+
+export namespace pragma {
 	class DLLCLIENT ShaderWaterSurfaceIntegrate : public ShaderWaterSurface {
 	  public:
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_WATER_PARTICLES;
@@ -20,5 +23,3 @@ namespace pragma {
 		virtual void InitializeShaderResources() override;
 	};
 };
-
-#endif

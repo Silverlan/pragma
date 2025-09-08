@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: (c) 2024 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/rendering/shaders/world/c_shader_graph.hpp"
 #include "cmaterialmanager.h"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/rendering/render_processor.hpp"
@@ -24,13 +25,17 @@
 #include <texture_type.h>
 #include <cmaterial.h>
 
-extern DLLCLIENT CGame *c_game;
-extern DLLCLIENT ClientState *client;
-extern DLLCLIENT CEngine *c_engine;
+module pragma.client.rendering.shaders;
+
+import :world_graph;
 
 import pragma.client.entities.components;
 import pragma.client.model;
 import pragma.shadergraph;
+
+extern DLLCLIENT CGame *c_game;
+extern DLLCLIENT ClientState *client;
+extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
 #pragma optimize("", off)

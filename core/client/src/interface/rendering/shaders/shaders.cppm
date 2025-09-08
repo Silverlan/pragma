@@ -43,3 +43,4 @@ export import :ssao;
 export import :ssao_blur;
 export import :velocity_buffer;
 export import :world_eye;
+export import :world_graph;

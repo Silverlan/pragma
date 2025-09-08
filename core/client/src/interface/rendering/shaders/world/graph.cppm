@@ -1,21 +1,18 @@
 // SPDX-FileCopyrightText: (c) 2024 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_SHADER_GRAPH_HPP__
-#define __C_SHADER_GRAPH_HPP__
+module;
 
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
+#include "pragma/rendering/shader_graph/module.hpp"
+#include "pragma/rendering/shader_material/shader_material.hpp"
+#include <texturemanager/texture.h>
+
+export module pragma.client.rendering.shaders:world_graph;
 
 import pragma.shadergraph;
 
-class Texture;
-namespace pragma {
-	namespace rendering {
-		class ShaderGraphModule;
-		namespace shader_material {
-			struct ShaderMaterial;
-		};
-	};
+export namespace pragma {
 	class DLLCLIENT ShaderGraph : public ShaderGameWorldLightingPass {
 	  public:
 		ShaderGraph(prosper::IPrContext &context, const std::shared_ptr<pragma::shadergraph::Graph> &sg, const std::string &identifier, const std::string &fsShader);
@@ -49,5 +46,3 @@ namespace pragma {
 		AlphaMode m_alphaMode = AlphaMode::Opaque;
 	};
 };
-
-#endif

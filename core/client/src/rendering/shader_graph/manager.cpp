@@ -4,7 +4,8 @@
 #include "stdafx_client.h"
 #include "pragma/rendering/shader_graph/manager.hpp"
 #include "pragma/rendering/shader_graph/module.hpp"
-#include "pragma/rendering/shaders/world/c_shader_graph.hpp"
+
+import pragma.client.rendering.shaders;
 
 extern DLLCLIENT CEngine *c_engine;
 

@@ -46,3 +46,4 @@ export import :world_eye;
 export import :world_graph;
 export import :world_light_cone;
 export import :world_loading;
+export import :world_noop;

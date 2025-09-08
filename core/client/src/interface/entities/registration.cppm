@@ -4,6 +4,7 @@
 module;
 
 #include "pragma/clientstate/clientstate.h"
+#include "pragma/entities/c_baseentity.h"
 #include <unordered_map>
 #include <functional>
 #include <typeindex>
@@ -11,9 +12,9 @@ module;
 #include <mutex>
 #include <optional>
 
-export module pragma.client.entities:registration;
-
 #undef GetClassName
+
+export module pragma.client.entities:registration;
 
 export namespace client_entities {
     using Factory = std::function<CBaseEntity*(ClientState*)>;
@@ -71,6 +72,11 @@ export namespace client_entities {
 
     template<typename T>
     uint32_t register_networked_entity() {
-        return ClientEntityRegistry::Instance().RegisterNetworkedEntity(typeid(T));
+        return ClientEntityRegistry::Instance().RegisterNetworkedEntity([](ClientState *client, uint32_t idx) -> CBaseEntity* {
+            CGame *game = client->GetGameState();                                                                                                                                                                                                                                                    \
+            if(game == NULL)                                                                                                                                                                                                                                                                         \
+                return NULL;                                                                                                                                                                                                                                                                         \
+            return static_cast<CBaseEntity *>(game->CreateEntity<T>(idx));
+        });
     }
 }

@@ -7,6 +7,7 @@
 #include "pragma/networkdefinitions.h"
 #include "pragma/clientdefinitions.h"
 #include <pragma/util/util_thread_pool.hpp>
+#include "pragma/entities/components/bvh_data.hpp"
 #include <sharedutils/BS_thread_pool.hpp>
 #include <string>
 #include <memory>

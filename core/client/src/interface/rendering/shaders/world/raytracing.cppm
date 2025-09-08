@@ -1,14 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_SHADER_RAYTRACING_HPP__
-#define __C_SHADER_RAYTRACING_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/components/c_raytracing_component.hpp"
 #include <shader/prosper_shader.hpp>
 
-namespace pragma {
+export module pragma.client.rendering.shaders:world_raytracing;
+
+export namespace pragma {
 	class DLLCLIENT ShaderRayTracing : public prosper::ShaderCompute {
 	  public:
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_IMAGE_OUTPUT;
@@ -59,6 +60,6 @@ namespace pragma {
 		virtual void InitializeShaderResources() override;
 	};
 };
-REGISTER_BASIC_BITWISE_OPERATORS(pragma::ShaderRayTracing::RenderFlags)
-
-#endif
+export {
+	REGISTER_BASIC_BITWISE_OPERATORS(pragma::ShaderRayTracing::RenderFlags)
+};

@@ -11,7 +11,6 @@
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/model/c_vertex_buffer_data.hpp"
-#include "pragma/rendering/shaders/world/raytracing/c_shader_raytracing.hpp"
 #include "pragma/console/c_cvar.h"
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/entity_iterator.hpp>
@@ -23,6 +22,7 @@
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
 import pragma.client.model;
+import pragma.client.rendering.shaders;
 
 using namespace pragma;
 

@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/rendering/shaders/world/raytracing/c_shader_raytracing.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/shaders/world/c_shader_pbr.hpp"
 #include "pragma/game/game_limits.h"
@@ -10,6 +11,10 @@
 #include <shader/prosper_shader_t.hpp>
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <wgui/types/wirect.h>
+
+module pragma.client.rendering.shaders;
+
+import :world_raytracing;
 
 import pragma.client.rendering.shaders;
 

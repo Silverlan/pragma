@@ -16,7 +16,6 @@
 #include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/entities/components/c_raytracing_component.hpp"
 // --template-include-location
-#include "pragma/entities/environment/audio/c_env_sound_dsp.h"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/environment/effects/c_env_explosion.h"
 #include "pragma/entities/environment/effects/c_env_fire.h"

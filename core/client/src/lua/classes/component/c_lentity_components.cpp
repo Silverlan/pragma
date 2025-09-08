@@ -18,6 +18,7 @@
 #include "pragma/entities/environment/env_microphone_base.h"
 #include "pragma/entities/components/base_io_component.hpp"
 #include "pragma/entities/components/base_softbody_component.hpp"
+#include "pragma/entities/environment/audio/env_sound_dsp.h"
 #include <pragma/lua/classes/lproperty_generic.hpp>
 #include <pragma/lua/classes/ldef_vector.h>
 #include <pragma/lua/classes/ldef_color.h>
@@ -69,7 +70,6 @@
 #include "pragma/entities/func/basefuncsoftphysics.hpp"
 #include "pragma/entities/func/basefuncbutton.h"
 #include "pragma/entities/environment/env_fog_controller.h"
-#include "pragma/entities/environment/audio/c_env_sound_dsp.h"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/environment/effects/c_env_explosion.h"
 #include "pragma/entities/environment/effects/c_env_fire.h"

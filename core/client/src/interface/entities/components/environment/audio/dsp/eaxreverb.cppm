@@ -5,10 +5,11 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/c_baseentity.h"
-#include "pragma/entities/environment/audio/c_env_sound_dsp.h"
 #include "pragma/entities/environment/audio/env_sound_dsp_eaxreverb.h"
 
 export module pragma.client.entities.components.audio.dsp.eaxreverb;
+
+import pragma.client.entities.components.audio.dsp.base;
 
 export namespace pragma {
 	class DLLCLIENT CSoundDspEAXReverbComponent final : public CBaseSoundDspComponent, public BaseEnvSoundDspEAXReverb {

@@ -13,6 +13,7 @@ export import pragma.client.entities.components.character;
 export import pragma.client.entities.components.child;
 export import pragma.client.entities.components.debug;
 export import pragma.client.entities.components.debug_hitbox;
+export import pragma.client.entities.components.audio.dsp.base;
 export import pragma.client.entities.components.audio.dsp.chorus;
 export import pragma.client.entities.components.audio.dsp.distortion;
 export import pragma.client.entities.components.audio.dsp.eaxreverb;

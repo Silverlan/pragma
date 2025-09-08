@@ -7,6 +7,7 @@
 #include <glm/gtx/euler_angles.hpp>
 #include "pragma/c_engine.h"
 #include "pragma/entities/components/c_player_component.hpp"
+#include "pragma/audio/alsound_type.h"
 #include "pragma/entities/c_entityfactories.h"
 #include "pragma/physics/collisiontypes.h"
 #include "pragma/math/deltaoffset.h"
@@ -15,13 +16,13 @@
 #include "pragma/entities/baseentity_luaobject.h"
 #include "pragma/entities/components/base_character_component.hpp"
 #include "pragma/entities/components/base_observer_component.hpp"
+#include "pragma/entities/environment/audio/env_sound_dsp.h"
 #include "pragma/entities/c_viewmodel.h"
 #include "pragma/entities/c_viewbody.h"
 #include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/rendering/c_rendermode.h"
 #include <pragma/networking/nwm_util.h>
 #include "pragma/entities/c_listener.h"
-#include "pragma/entities/environment/audio/c_env_sound_dsp.h"
 #include "pragma/entities/components/c_weapon_component.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_attachment_component.hpp"

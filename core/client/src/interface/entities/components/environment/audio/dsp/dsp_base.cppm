@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_ENV_SOUND_DSP_H__
-#define __C_ENV_SOUND_DSP_H__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/c_baseentity.h"
@@ -10,7 +9,9 @@
 #include <pragma/entities/environment/audio/env_sound_dsp.h>
 #include <alsound_source.hpp>
 
-namespace pragma {
+export module pragma.client.entities.components.audio.dsp.base;
+
+export namespace pragma {
 	class DLLCLIENT CBaseSoundDspComponent : public BaseEnvSoundDspComponent, public CBaseNetComponent {
 	  public:
 		virtual ~CBaseSoundDspComponent() override;
@@ -46,9 +47,7 @@ namespace pragma {
 	};
 };
 
-class DLLCLIENT CEnvSoundDsp : public CBaseEntity {
+export class DLLCLIENT CEnvSoundDsp : public CBaseEntity {
   public:
 	virtual void Initialize() override;
 };
-
-#endif

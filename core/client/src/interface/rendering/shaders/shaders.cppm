@@ -42,3 +42,4 @@ export import :specular_to_roughness;
 export import :ssao;
 export import :ssao_blur;
 export import :velocity_buffer;
+export import :world_eye;

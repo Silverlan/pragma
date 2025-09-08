@@ -24,7 +24,6 @@
 #include "pragma/rendering/shaders/world/c_shader_light_cone.hpp"
 #include "pragma/rendering/shaders/world/raytracing/c_shader_raytracing.hpp"
 #include "pragma/rendering/shaders/world/c_shader_pbr.hpp"
-#include "pragma/rendering/shaders/world/c_shader_eye.hpp"
 #include "pragma/rendering/shaders/world/c_shader_unlit.hpp"
 #include "pragma/rendering/shaders/util/c_shader_compose_rma.hpp"
 #include "pragma/rendering/global_render_settings_buffer_data.hpp"

@@ -1,15 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2020 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_SHADER_EYE_HPP__
-#define __C_SHADER_EYE_HPP__
+module;
 
 #include "pragma/rendering/shaders/world/c_shader_pbr.hpp"
+#include "pragma/rendering/render_processor.hpp"
 
-namespace pragma {
-	namespace rendering {
-		class ShaderProcessor;
-	};
+export module pragma.client.rendering.shaders:world_eye;
+
+export namespace pragma {
 	class DLLCLIENT ShaderEye : public ShaderPBR {
 	  public:
 #pragma pack(push, 1)
@@ -47,5 +46,3 @@ namespace pragma {
 	  private:
 	};
 };
-
-#endif

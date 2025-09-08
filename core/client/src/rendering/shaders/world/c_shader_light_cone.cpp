@@ -5,9 +5,7 @@
 #include "pragma/rendering/shaders/world/c_shader_light_cone.hpp"
 #include "pragma/rendering/render_processor.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
-#include "pragma/entities/environment/lights/c_env_light_spot_vol.h"
 #include "pragma/model/c_modelmesh.h"
-#include "pragma/entities/environment/lights/c_env_light_spot_vol.h"
 #include "pragma/entities/environment/lights/c_env_light.h"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <buffers/prosper_buffer.hpp>

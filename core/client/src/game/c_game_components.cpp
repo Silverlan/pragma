@@ -21,7 +21,6 @@
 #include "pragma/entities/environment/lights/c_env_light_directional.h"
 #include "pragma/entities/environment/lights/c_env_light_point.h"
 #include "pragma/entities/environment/lights/c_env_light_spot.h"
-#include "pragma/entities/environment/lights/c_env_light_spot_vol.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/entities/environment/lights/c_env_shadow_csm.hpp"
 #include "pragma/entities/components/liquid/c_liquid_component.hpp"

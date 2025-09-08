@@ -1,12 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/entities/environment/lights/c_env_light_spot_vol.h"
 #include "pragma/entities/c_entityfactories.h"
-#include "pragma/model/c_modelmesh.h"
-#include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
+#include "pragma/entities/components/c_render_component.hpp"
+#include "pragma/entities/components/basetoggle.h"
+#include "pragma/model/c_modelmesh.h"
 #include "pragma/networking/c_nwm_util.h"
 #include <sharedutils/alpha_mode.hpp>
 #include <pragma/physics/raytraces.h>
@@ -16,6 +18,8 @@
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <datasystem_t.hpp>
 #include <cmaterial.h>
+
+module pragma.client.entities.components.lights.spot_vol;
 
 import pragma.client.entities.components;
 import pragma.client.scripting.lua;

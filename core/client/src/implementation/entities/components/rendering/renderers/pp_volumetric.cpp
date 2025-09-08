@@ -14,7 +14,6 @@ module;
 #include "pragma/entities/entity_iterator.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/environment/lights/c_env_light_spot.h"
-#include "pragma/entities/environment/lights/c_env_light_spot_vol.h"
 #include "pragma/entities/entity_iterator.hpp"
 #include "pragma/entities/components/renderers/rasterization/hdr_data.hpp"
 #include "pragma/entities/entity_component_system_t.hpp"
@@ -30,8 +29,9 @@ module;
 #include <util_image.hpp>
 
 module pragma.client.entities.components.pp_volumetric;
-import pragma.client.model;
 
+import pragma.client.model;
+import pragma.client.entities.components.lights.spot_vol;
 import pragma.client.entities.components.radius;
 import pragma.client.entities.components.rasterization_renderer;
 

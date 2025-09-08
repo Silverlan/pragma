@@ -7,7 +7,6 @@
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree.hpp"
 #include "pragma/game/c_game.h"
 #include "pragma/entities/c_baseentity.h"
-#include "pragma/debug/c_debugoverlay.h"
 #include <pragma/math/intersection.h>
 #include <sstream>
 

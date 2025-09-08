@@ -4,6 +4,7 @@
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/console/c_cvar.h"
+#include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
 #include <pragma/console/convars.h>
 #include <pragma/c_engine.h>

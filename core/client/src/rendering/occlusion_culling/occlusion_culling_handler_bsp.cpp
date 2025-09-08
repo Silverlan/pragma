@@ -8,13 +8,15 @@
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/components/c_transform_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
-#include "pragma/debug/c_debugoverlay.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/model/c_model.h"
+#include "pragma/c_engine.h"
+#include "pragma/clientstate/clientstate.h"
+#include "pragma/game/c_game.h"
 #include <pragma/math/intersection.h>
 #include <pragma/entities/entity_component_system_t.hpp>
 
-
+import pragma.client.debug;
 import pragma.client.entities.components;
 
 using namespace pragma;

@@ -20,6 +20,9 @@
 #include "pragma/entities/environment/lights/c_env_light_directional.h"
 #include "pragma/entities/c_wheel.hpp"
 #include "pragma/model/c_side.h"
+#include "pragma/c_engine.h"
+#include "pragma/clientstate/clientstate.h"
+#include "pragma/game/c_game.h"
 #include "pragma/lua/classes/lmodel.h"
 #include "pragma/lua/classes/lmodelmesh.h"
 #include "pragma/model/c_model.h"
@@ -30,7 +33,6 @@
 #include <pragma/game/damageinfo.h>
 #include "pragma/lua/classes/c_lua_entity.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
-#include "pragma/debug/c_debugoverlay.h"
 #include "pragma/asset/c_util_model.hpp"
 #include "pragma/rendering/shaders/util/c_shader_compose_rma.hpp"
 #include "pragma/rendering/shader_material/shader_material.hpp"
@@ -63,6 +65,7 @@
 #include <cmaterial_manager2.hpp>
 #include <wgui/wgui.h>
 
+import pragma.client.debug;
 import pragma.client.entities.components;
 import pragma.client.rendering.shaders;
 import pragma.client.scripting.lua;

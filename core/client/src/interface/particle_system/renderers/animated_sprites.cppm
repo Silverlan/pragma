@@ -5,7 +5,6 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/particlesystem/c_particlemodifier.h"
-#include "pragma/debug/c_debugoverlay.h"
 
 export module pragma.client.particle_system:renderer_animated_sprites;
 

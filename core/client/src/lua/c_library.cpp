@@ -27,7 +27,6 @@
 #include <pragma/lua/classes/thread_pool.hpp>
 #include <pragma/lua/libraries/lfile.h>
 #include <pragma/lua/libraries/lutil.hpp>
-#include <pragma/debug/c_debugoverlay.h>
 #include <pragma/lua/policies/default_parameter_policy.hpp>
 #include <pragma/lua/converters/string_view_converter_t.hpp>
 #include <pragma/lua/converters/vector_converter_t.hpp>
@@ -61,6 +60,7 @@
 import pragma.audio.util;
 import pragma.platform;
 import pragma.string.unicode;
+import pragma.client.debug;
 import pragma.client.gui;
 import pragma.client.rendering.shaders;
 import pragma.client.scripting.lua;

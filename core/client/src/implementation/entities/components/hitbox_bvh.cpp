@@ -10,7 +10,6 @@ module;
 #include "pragma/entities/components/c_render_component.hpp"
 #include <pragma/entities/components/intersection_handler_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
-#include "pragma/debug/c_debugoverlay.h"
 #include "pragma/logging.hpp"
 #include <pragma/entities/components/bvh_data.hpp>
 #include <pragma/entities/components/util_bvh.hpp>
@@ -27,6 +26,8 @@ module;
 #include <bvh/v2/stack.h>
 
 module pragma.client.entities.components.hitbox_bvh;
+
+import pragma.client.debug;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;

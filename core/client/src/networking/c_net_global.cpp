@@ -19,7 +19,6 @@
 #include <pragma/entities/components/basetoggle.h>
 #include "pragma/entities/environment/env_fog_controller.h"
 #include <pragma/networking/nwm_util.h>
-#include "pragma/debug/c_debugoverlay.h"
 #include "pragma/entities/components/c_weapon_component.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_attachment_component.hpp"

@@ -4,10 +4,12 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/debug/c_debugoverlay.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/console/c_cvar.h"
+#include "pragma/c_engine.h"
+#include "pragma/clientstate/clientstate.h"
+#include "pragma/game/c_game.h"
 #include <pragma/rendering/c_sci_gpu_timer_manager.hpp>
 #include <prosper_util.hpp>
 #include <buffers/prosper_buffer.hpp> // prosper TODO: Remove
@@ -16,6 +18,7 @@ module;
 
 module pragma.client.physics;
 
+import pragma.client.debug;
 import pragma.client.model;
 import pragma.client.rendering.shaders;
 

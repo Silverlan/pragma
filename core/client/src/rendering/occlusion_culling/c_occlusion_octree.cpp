@@ -4,9 +4,11 @@
 #include "stdafx_client.h"
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"
 #include "pragma/game/c_game.h"
+#include "pragma/debug/debug_render_info.hpp"
 #include "pragma/entities/c_baseentity.h"
-#include "pragma/debug/c_debugoverlay.h"
 #include <pragma/math/intersection.h>
+
+import pragma.client.debug;
 
 BaseOcclusionOctree::Node::Node(BaseOcclusionOctree *tree, Node *parent) : m_tree(tree), m_parent((parent != nullptr) ? parent->shared_from_this() : std::weak_ptr<BaseOcclusionOctree::Node> {}) {}
 BaseOcclusionOctree::Node::~Node() { m_tree->FreeNodeIndex(*this); }
@@ -121,9 +123,9 @@ void BaseOcclusionOctree::Node::InitializeChildren(bool bPopulateChildren)
 
 void BaseOcclusionOctree::Node::UpdateDebugObject() const
 {
-	if(m_debugObject == nullptr)
+	/*if(m_debugObject == nullptr)
 		return;
-	m_debugObject->SetVisible(GetTotalObjectCount() > 0);
+	m_debugObject->SetVisible(GetTotalObjectCount() > 0);*/
 }
 
 BaseOcclusionOctree::Node *BaseOcclusionOctree::Node::GetParent() { return m_parent.lock().get(); }
@@ -154,14 +156,14 @@ void BaseOcclusionOctree::Node::DebugPrint(const std::string &t) const
 void BaseOcclusionOctree::Node::DebugDraw(bool b, bool applyToChildren, uint32_t depth) const
 {
 	if(b == false) {
-		m_debugObject = nullptr;
+		//m_debugObject = nullptr;
 		if(m_children != nullptr) {
 			for(auto &c : *m_children)
 				c->DebugDraw(false);
 		}
 		return;
 	}
-	if(m_debugObject == nullptr) {
+	/*if(m_debugObject == nullptr) {
 		const std::array<std::pair<const Color *, const Color *>, 7> colors = {std::pair<const Color *, const Color *> {&Color::Red, &Color::Lime}, std::pair<const Color *, const Color *> {&Color::Lime, &Color::Aqua}, std::pair<const Color *, const Color *> {&Color::Aqua, &Color::Magenta},
 		  std::pair<const Color *, const Color *> {&Color::Magenta, &Color::Yellow}, std::pair<const Color *, const Color *> {&Color::Yellow, &Color::Teal}, std::pair<const Color *, const Color *> {&Color::Teal, &Color::Maroon},
 		  std::pair<const Color *, const Color *> {&Color::Maroon, &Color::Red}};
@@ -178,7 +180,7 @@ void BaseOcclusionOctree::Node::DebugDraw(bool b, bool applyToChildren, uint32_t
 			m_debugObject = DebugRenderer::DrawBox(min, max, renderInfo);
 		}
 		UpdateDebugObject();
-	}
+	}*/
 	if(applyToChildren == true && m_children != nullptr) {
 		for(auto &c : *m_children)
 			c->DebugDraw(b, applyToChildren, depth + 1);

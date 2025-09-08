@@ -6,7 +6,6 @@
 #include "pragma/c_engine.h"
 #include "pragma/model/c_side.h"
 #include <mathutil/uquat.h>
-#include "pragma/debug/c_debugoverlay.h"
 #include "pragma/rendering/c_rendermode.h"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"

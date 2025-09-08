@@ -4,10 +4,11 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/debug/c_debugoverlay.h"
 #include <pragma/entities/components/base_entity_component.hpp>
 
 export module pragma.client.entities.components.debug_hitbox;
+
+import pragma.client.debug;
 
 export namespace pragma {
 	class DLLCLIENT CDebugHitboxComponent final : public BaseEntityComponent {

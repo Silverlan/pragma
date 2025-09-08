@@ -12,7 +12,6 @@ module;
 #include "DetourNavMesh.h"
 #include "DetourNavMeshBuilder.h"
 #include "DetourNavMeshQuery.h"
-#include "pragma/debug/c_debugoverlay.h"
 #include "pragma/console/c_cvar.h"
 #include <pragma/console/convars.h>
 #include <pragma/physics/raytraces.h>
@@ -21,6 +20,7 @@ module;
 #include <pragma/entities/components/base_transform_component.hpp>
 
 module pragma.client.ai;
+import pragma.client.debug;
 
 import :nav_system;
 

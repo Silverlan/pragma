@@ -7,10 +7,11 @@ module;
 #include <pragma/ai/navsystem.h>
 #include <mathutil/glmutil.h>
 #include <sharedutils/functioncallback.h>
-#include "pragma/debug/c_debugoverlay.h"
 #include <memory>
 
 export module pragma.client.ai:nav_system;
+
+import pragma.client.debug;
 
 export namespace pragma {
 	namespace nav {

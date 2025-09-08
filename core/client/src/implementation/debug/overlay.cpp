@@ -1,10 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/debug/c_debugoverlay.h"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/math/icosphere.h"
+#include "pragma/c_engine.h"
+#include "pragma/clientstate/clientstate.h"
+#include "pragma/game/c_game.h"
 #include <pragma/debug/debug_render_info.hpp>
 #include <pragma/math/util_hermite.h>
 #include <pragma/math/e_frustum.h>
@@ -14,6 +18,8 @@
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <pragma/math/intersection.h>
+
+module pragma.client.debug.overlay;
 
 import pragma.client.rendering.shaders;
 import pragma.string.unicode;

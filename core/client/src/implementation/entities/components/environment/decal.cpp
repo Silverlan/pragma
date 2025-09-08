@@ -10,7 +10,6 @@ module;
 #include "pragma/entities/c_entityfactories.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/model/c_model.h"
-#include "pragma/debug/c_debugoverlay.h"
 #include <pragma/physics/raytraces.h>
 #include <pragma/entities/environment/env_decal.h>
 #include <pragma/entities/components/base_transform_component.hpp>
@@ -21,6 +20,7 @@ module;
 
 module pragma.client.entities.components.env_decal;
 
+import pragma.client.debug;
 import pragma.client.entities.components.bvh;
 import pragma.client.entities.components.physics;
 import pragma.client.entities.components.static_bvh_cache;

@@ -4,10 +4,13 @@
 module;
 
 #include "pragma/clientdefinitions.h"
+#include "pragma/entities/environment/c_env_camera.h"
 #include <pragma/lua/ldefinitions.h>
-#include "pragma/debug/c_debugoverlay.h"
+#include "pragma/debug/debug_render_info.hpp"
 
 export module pragma.client.scripting.lua.libraries.debug_renderer;
+
+import pragma.client.debug;
 
 export namespace Lua {
 	namespace DebugRenderer {

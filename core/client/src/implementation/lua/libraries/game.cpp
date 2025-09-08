@@ -31,6 +31,16 @@ module;
 #include <cmaterial.h>
 #include <pragma/model/animation/bone.hpp>
 
+// #define ENABLE_DEPRECATED_PHYSICS
+
+#ifdef ENABLE_DEPRECATED_PHYSICS
+#include "BulletSoftBody/btSoftRigidDynamicsWorld.h"
+#include "BulletSoftBody/btSoftBodyHelpers.h"
+#include <BulletSoftBody/btSoftBodyRigidBodyCollisionConfiguration.h>
+#endif
+
+#include <pragma/physics/environment.hpp>
+
 module pragma.client.scripting.lua.libraries.game;
 
 import pragma.client.core;
@@ -42,15 +52,6 @@ extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
-// #define ENABLE_DEPRECATED_PHYSICS
-
-#ifdef ENABLE_DEPRECATED_PHYSICS
-#include "BulletSoftBody/btSoftRigidDynamicsWorld.h"
-#include "BulletSoftBody/btSoftBodyHelpers.h"
-#include <BulletSoftBody/btSoftBodyRigidBodyCollisionConfiguration.h>
-#endif
-#include "pragma/debug/c_debugoverlay.h"
-#include <pragma/physics/environment.hpp>
 #ifdef ENABLE_DEPRECATED_PHYSICS
 static btSoftBody *createSoftBody(btSoftRigidDynamicsWorld *world, btSoftBodyWorldInfo *info, const btScalar s, const int numX, const int numY, const int fixed)
 {

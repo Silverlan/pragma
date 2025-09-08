@@ -14,7 +14,6 @@
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/environment/lights/c_env_light.h"
 #include "pragma/entities/entity_component_system_t.hpp"
-#include "pragma/debug/c_debugoverlay.h"
 #include "pragma/game/c_game.h"
 #include "pragma/console/c_cvar.h"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
@@ -36,6 +35,7 @@
 #include "pragma/entities/entity_component_system_t.hpp"
 #endif
 
+import pragma.client.debug;
 import pragma.client.entities.components;
 
 using namespace pragma::rendering;

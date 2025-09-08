@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/debug/c_debugoverlay.h"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/lua/classes/ldef_angle.h"
 #include "pragma/lua/classes/ldef_color.h"
@@ -15,6 +14,8 @@ module;
 #include "luasystem.h"
 
 module pragma.client.scripting.lua.libraries.debug_renderer;
+
+import pragma.client.debug;
 
 static std::shared_ptr<DebugRenderer::BaseObject> get_dbg_object(const std::shared_ptr<DebugRenderer::BaseObject> &obj, float duration) { return (duration > 0.f) ? nullptr : obj; }
 std::shared_ptr<DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawPoints(const std::vector<Vector3> &points, const DebugRenderInfo &renderInfo) { return get_dbg_object(::DebugRenderer::DrawPoints(points, {renderInfo.color, renderInfo.duration}), renderInfo.duration); }

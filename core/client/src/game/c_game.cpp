@@ -11,7 +11,6 @@
 #include "pragma/model/brush/c_brushmesh.h"
 #include "pragma/entities/c_world.h"
 #include "pragma/c_engine.h"
-#include "pragma/debug/c_debugoverlay.h"
 #include <wgui/wgui.h>
 #include <wgui/wibase.h>
 #include "luasystem.h"

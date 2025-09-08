@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
-#include "pragma/debug/c_debugoverlay.h"
 #include "pragma/c_engine.h"
 #include "pragma/entities/components/base_transform_component.hpp"
 #include <pragma/entities/entity_iterator.hpp>
@@ -13,6 +12,7 @@ module;
 
 module pragma.client.entities.components.debug;
 
+import pragma.client.debug;
 import pragma.client.entities.components.radius;
 
 extern DLLCLIENT CEngine *c_engine;

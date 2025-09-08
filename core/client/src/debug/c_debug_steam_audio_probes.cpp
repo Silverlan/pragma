@@ -2,8 +2,10 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/debug/c_debugoverlay.h"
 #include "pragma/console/c_cvar_global_functions.h"
+#include "pragma/c_engine.h"
+#include "pragma/clientstate/clientstate.h"
+#include "pragma/game/c_game.h"
 #include <alsoundsystem.hpp>
 #include <steam_audio/alsound_steam_audio.hpp>
 

@@ -1,11 +1,13 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_DEBUGOVERLAY_H__
-#define __C_DEBUGOVERLAY_H__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/clientstate/clientstate.h"
+#include "pragma/debug/debug_render_info.hpp"
+#include "buffers/prosper_buffer.hpp"
+#include "wgui/types/witext.h"
 #include "pragma/c_engine.h"
 #include <pragma/math/angle/wvangle.h>
 #include <mathutil/color.h>
@@ -13,13 +15,9 @@
 #include <mathutil/transform.hpp>
 #include <pragma/debug/debug_render_info.hpp>
 
-namespace prosper {
-	class Buffer;
-};
+export module pragma.client.debug.overlay;
 
-class WIText;
-struct DebugRenderInfo;
-namespace DebugRenderer {
+export namespace DebugRenderer {
 	enum class DLLCLIENT Type : uint32_t {
 		Triangles = 0,
 		Lines,
@@ -163,7 +161,6 @@ namespace DebugRenderer {
 	void ClearObjects();
 	void Render(std::shared_ptr<prosper::ICommandBuffer> &drawCmd, pragma::CCameraComponent &cam);
 };
-
-REGISTER_BASIC_BITWISE_OPERATORS(DebugRenderer::BaseObject::Flags)
-
-#endif
+export {
+	REGISTER_BASIC_BITWISE_OPERATORS(DebugRenderer::BaseObject::Flags)
+};

@@ -7,7 +7,6 @@ module;
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
 #include "pragma/entities/environment/lights/c_env_shadow.hpp"
-#include "pragma/debug/c_debugoverlay.h"
 #include "pragma/particlesystem/c_particlemodifier.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <buffers/prosper_dynamic_resizable_buffer.hpp>

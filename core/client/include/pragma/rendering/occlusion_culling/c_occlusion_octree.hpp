@@ -13,10 +13,6 @@
 #include <queue>
 #include <functional>
 
-namespace DebugRenderer {
-	class BaseObject;
-};
-
 #define ENABLE_OCCLUSION_DEBUG_MODE 0
 
 #pragma warning(push)
@@ -71,7 +67,7 @@ class BaseOcclusionOctree {
 		Vector3 m_dimensions;
 	  private:
 		// Debug
-		mutable std::shared_ptr<DebugRenderer::BaseObject> m_debugObject;
+		// mutable std::shared_ptr<DebugRenderer::BaseObject> m_debugObject;
 	};
 	virtual ~BaseOcclusionOctree();
 	// If set to true, only one reference of a object can exist in the tree at a time.

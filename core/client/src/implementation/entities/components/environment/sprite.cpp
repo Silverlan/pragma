@@ -1,15 +1,19 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/entities/environment/effects/c_env_sprite.h"
-#include "pragma/entities/components/c_attachment_component.hpp"
-#include "pragma/entities/components/c_color_component.hpp"
 #include "pragma/entities/c_entityfactories.h"
+#include "pragma/entities/components/c_color_component.hpp"
+#include "pragma/entities/components/c_attachment_component.hpp"
+#include "pragma/entities/components/base_transform_component.hpp"
+#include "pragma/entities/components/basetoggle.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/physics/raytraces.h>
-#include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
+
+module pragma.client.entities.components.effects.sprite;
 
 using namespace pragma;
 

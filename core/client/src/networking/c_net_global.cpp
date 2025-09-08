@@ -12,13 +12,12 @@
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/entities/components/c_transform_component.hpp"
+#include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/environment/lights/c_env_light.h"
 #include "pragma/entities/environment/lights/c_env_light_spot.h"
 #include <pragma/entities/components/basetoggle.h>
 #include "pragma/entities/environment/env_fog_controller.h"
-#include "pragma/entities/environment/effects/c_env_explosion.h"
-#include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include <pragma/networking/nwm_util.h>
 #include "pragma/debug/c_debugoverlay.h"
 #include "pragma/entities/components/c_weapon_component.hpp"

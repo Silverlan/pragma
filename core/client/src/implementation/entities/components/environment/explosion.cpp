@@ -1,18 +1,23 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/entities/environment/effects/c_env_explosion.h"
-#include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/entities/c_entityfactories.h"
+#include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/entities/components/c_attachment_component.hpp"
+#include "pragma/entities/components/base_transform_component.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/audio/alsound_type.h>
 #include "pragma/entities/environment/env_quake.h"
-#include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
-import pragma.client.entities.components;
+module pragma.client.entities.components.effects.explosion;
+
+import pragma.client.entities.components.env_quake;
+import pragma.client.entities.components.io;
+import pragma.client.entities.components.sound_emitter;
 
 using namespace pragma;
 

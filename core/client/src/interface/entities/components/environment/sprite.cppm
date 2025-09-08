@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_ENV_SPRITE_H__
-#define __C_ENV_SPRITE_H__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/c_baseentity.h"
@@ -10,7 +9,9 @@
 #include "pragma/entities/components/c_entity_component.hpp"
 #include <pragma/entities/environment/effects/env_sprite.h>
 
-namespace pragma {
+export module pragma.client.entities.components.effects.sprite;
+
+export namespace pragma {
 	class DLLCLIENT CSpriteComponent final : public BaseEnvSpriteComponent, public CBaseNetComponent {
 	  public:
 		CSpriteComponent(BaseEntity &ent) : BaseEnvSpriteComponent(ent) {}
@@ -37,9 +38,7 @@ namespace pragma {
 	};
 };
 
-class DLLCLIENT CEnvSprite : public CBaseEntity {
+export class DLLCLIENT CEnvSprite : public CBaseEntity {
   public:
 	virtual void Initialize() override;
 };
-
-#endif

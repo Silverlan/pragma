@@ -5,3 +5,4 @@ module;
 
 export module pragma.entities;
 export import pragma.entities.components;
+export import pragma.entities.handle_wrapper;

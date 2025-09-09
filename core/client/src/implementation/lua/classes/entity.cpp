@@ -19,7 +19,7 @@ module;
 
 module pragma.client.scripting.lua.classes.entity;
 
-extern DLLCLIENT CEngine *c_engine;
+extern CEngine *c_engine;
 
 void Lua::Entity::Client::register_class(luabind::class_<CBaseEntity, BaseEntity> &classDef)
 {

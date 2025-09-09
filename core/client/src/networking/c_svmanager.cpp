@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/c_engine.h"
 #include "pragma/console/c_cvar_server.h"
 #include "pragma/networking/iclient.hpp"
@@ -13,9 +12,10 @@
 #include <pragma/networking/portinfo.h>
 #include <pragma/networking/netmessages.h>
 
+import pragma.client.client_state;
 import pragma.client.networking;
 
-extern DLLCLIENT CEngine *c_engine;
+extern CEngine *c_engine;
 struct LastConnectionInfo {
 	std::optional<std::pair<std::string, uint16_t>> address = {};
 	std::optional<uint64_t> steamId = {};

@@ -16,7 +16,7 @@
 
 using namespace pragma;
 
-extern DLLCLIENT CEngine *c_engine;
+extern CEngine *c_engine;
 
 void CListenerComponent::Initialize()
 {

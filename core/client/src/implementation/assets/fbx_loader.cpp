@@ -6,7 +6,6 @@ module;
 #include <mathutil/umath.h>
 #include <glm/gtx/euler_angles.hpp>
 #include "pragma/game/c_game.h"
-#include "pragma/clientstate/clientstate.h"
 #include <pragma/model/c_modelmesh.h>
 #include <pragma/model/c_model.h>
 #include <pragma/model/animation/bone.hpp>
@@ -25,6 +24,7 @@ module;
 #include <texturemanager/texture_manager2.hpp>
 
 module pragma.client.assets;
+import pragma.client.client_state;
 
 import :fbx_loader;
 
@@ -32,9 +32,9 @@ import panima;
 import pragma.client.rendering.shaders;
 
 using namespace pragma::asset::fbx;
-extern DLLCLIENT CGame *c_game;
-extern DLLCLIENT ClientState *client;
-extern DLLCLIENT CEngine *c_engine;
+extern CGame *c_game;
+extern ClientState *client;
+extern CEngine *c_engine;
 
 static std::string_view to_string_view(ofbx::DataView data) { return std::string_view {(const char *)data.begin, (const char *)data.end}; }
 

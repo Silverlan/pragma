@@ -12,7 +12,7 @@ module pragma.client.rendering.shaders;
 
 import :particle_animated_sprites;
 
-extern DLLCLIENT CEngine *c_engine;
+extern CEngine *c_engine;
 
 using namespace pragma;
 

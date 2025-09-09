@@ -15,7 +15,7 @@ module pragma.client.core.addon_install_manager;
 import pragma.uva;
 import pragma.pad;
 
-extern DLLCLIENT CEngine *c_engine;
+extern CEngine *c_engine;
 
 static const std::string &get_query_url()
 {

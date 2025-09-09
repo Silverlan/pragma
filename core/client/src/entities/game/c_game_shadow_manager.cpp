@@ -19,9 +19,9 @@
 #include <image/prosper_render_target.hpp>
 #include <prosper_descriptor_set_group.hpp>
 
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT ClientState *client;
-extern DLLCLIENT CGame *c_game;
+extern CEngine *c_engine;
+extern ClientState *client;
+extern CGame *c_game;
 
 using namespace pragma;
 

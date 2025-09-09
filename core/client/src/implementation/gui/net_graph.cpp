@@ -6,18 +6,18 @@ module;
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
 #include "pragma/game/c_game.h"
-#include "pragma/clientstate/clientstate.h"
 #include <wgui/types/witext.h>
 #include <pragma/networking/netmessages.h>
 
 module pragma.client.gui;
 
 import :net_graph;
+import pragma.client.client_state;
 import pragma.string.unicode;
 
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT ClientState *client;
-extern DLLCLIENT CGame *c_game;
+extern CEngine *c_engine;
+extern ClientState *client;
+extern CGame *c_game;
 
 static const uint32_t DATA_RECORD_BACKLOG = 30;
 

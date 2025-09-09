@@ -23,7 +23,6 @@
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/c_engine.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/components/logic_component.hpp>
@@ -34,11 +33,12 @@
 #include <cmaterial_manager2.hpp>
 #include <cmaterial.h>
 
+import pragma.client.client_state;
 import pragma.client.rendering.shaders;
 
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT ClientState *client;
-extern DLLCLIENT CGame *c_game;
+extern CEngine *c_engine;
+extern ClientState *client;
+extern CGame *c_game;
 
 using namespace pragma;
 

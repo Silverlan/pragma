@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
 #include "pragma/entities/environment/lights/c_env_shadow.hpp"
 #include "pragma/rendering/shaders/particles/c_shader_particle.hpp"
@@ -17,12 +16,13 @@ module pragma.client.particle_system;
 import :renderer_animated_sprites;
 import :renderer_rotational_buffer;
 
+import pragma.client.client_state;
 import pragma.client.entities.components;
 
 REGISTER_PARTICLE_RENDERER(source_render_animated_sprites, CParticleRendererAnimatedSprites);
 
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT CGame *c_game;
+extern CEngine *c_engine;
+extern CGame *c_game;
 
 void CParticleRendererAnimatedSprites::Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {

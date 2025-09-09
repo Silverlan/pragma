@@ -7,6 +7,7 @@ module;
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
+#include "pragma/game/c_game.h"
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <image/prosper_sampler.hpp>
@@ -40,17 +41,17 @@ module;
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <spdlog/logger.h>
 #include "pragma/c_engine.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
 
 module pragma.client.entities.components.env_reflection_probe;
 
+import pragma.client.client_state;
 import pragma.client.gui;
 import pragma.client.rendering.shaders;
 
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT ClientState *client;
-extern DLLCLIENT CGame *c_game;
+extern CEngine *c_engine;
+extern ClientState *client;
+extern CGame *c_game;
 
 using namespace pragma;
 

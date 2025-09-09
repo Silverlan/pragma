@@ -19,7 +19,7 @@ module pragma.client.rendering.shaders;
 
 import :equirectangular_to_cubemap;
 
-extern DLLCLIENT CEngine *c_engine;
+extern CEngine *c_engine;
 
 using namespace pragma;
 

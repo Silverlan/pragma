@@ -11,7 +11,6 @@ namespace pragma::string {
 };
 #endif
 
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/c_engine.h"
 #include "pragma/console/c_cvar.h"
 #include <wgui/types/wirect.h>
@@ -22,13 +21,14 @@ namespace pragma::string {
 #include <prosper_util.hpp>
 #include <prosper_command_buffer.hpp>
 
+import pragma.client.client_state;
 import pragma.client.gui;
 import pragma.locale;
 import pragma.string.unicode;
 
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT ClientState *client;
-extern DLLCLIENT CGame *c_game;
+extern CEngine *c_engine;
+extern ClientState *client;
+extern CGame *c_game;
 const std::string OPENVR_MODULE_PATH = "openvr/pr_openvr";
 
 static std::string lastMessage = "";

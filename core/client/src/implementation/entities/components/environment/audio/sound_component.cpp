@@ -6,16 +6,17 @@ module;
 #include "stdafx_client.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/audio/alsoundscript.h>
-#include "pragma/clientstate/clientstate.h"
+#include "pragma/audio/c_alsound.h"
 #include <pragma/entities/entity_component_system_t.hpp>
 
 module pragma.client.entities.components.audio.sound;
 
+import pragma.client.client_state;
 import pragma.client.entities.components;
 
 using namespace pragma;
 
-extern DLLCLIENT ClientState *client;
+extern ClientState *client;
 
 static void apply_sound_identifier(ALSound &snd, const std::string &name)
 {

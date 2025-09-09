@@ -15,7 +15,7 @@ module pragma.client.rendering.shaders;
 
 import :depth_to_rgb;
 
-extern DLLCLIENT CEngine *c_engine;
+extern CEngine *c_engine;
 
 using namespace pragma;
 

@@ -4,8 +4,9 @@
 #include "stdafx_client.h"
 #include "pragma/entities/components/c_light_map_component.hpp"
 #include "pragma/entities/components/lightmap_data_cache.hpp"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/console/c_cvar_global_functions.h"
+#include "pragma/entities/entity_iterator.hpp"
+#include "pragma/game/c_game.h"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/entities/entity_iterator.hpp"
@@ -35,13 +36,14 @@
 #include <fsys/ifile.hpp>
 #include <wgui/types/wiroot.h>
 
+import pragma.client.client_state;
 import pragma.client.entities.components;
 import pragma.client.gui;
 import pragma.client.model;
 
-extern DLLCLIENT CGame *c_game;
-extern DLLCLIENT ClientState *client;
-extern DLLCLIENT CEngine *c_engine;
+extern CGame *c_game;
+extern ClientState *client;
+extern CEngine *c_engine;
 
 using namespace pragma;
 spdlog::logger &CLightMapComponent::LOGGER = pragma::register_logger("lightmap");

@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
 #include <pragma/console/convars.h>
 #include "pragma/networking/netmessages.h"
@@ -46,6 +47,8 @@
 #include <prosper_window.hpp>
 #include <wgui/types/wiroot.h>
 
+module pragma.client.client_state;
+
 import pragma.client.audio;
 import pragma.client.gui;
 import pragma.client.model;
@@ -64,9 +67,7 @@ ConVarHandle ClientState::GetConVarHandle(std::string scvar)
 	return NetworkState::GetConVarHandle(*conVarPtrs, scvar);
 }
 
-extern DLLCLIENT CEngine *c_engine;
-DLLCLIENT ClientState *client = NULL;
-extern CGame *c_game;
+extern CEngine *c_engine = nullptr;
 
 std::vector<std::string> &get_required_game_textures();
 ClientState::ClientState() : NetworkState(), m_client(nullptr), m_svInfo(nullptr), m_resDownload(nullptr), m_volMaster(1.f), m_hMainMenu(), m_luaGUI(NULL)

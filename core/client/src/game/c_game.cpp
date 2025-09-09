@@ -95,10 +95,10 @@
 #include <udm.hpp>
 #include <prosper_window.hpp>
 #include "pragma/c_engine.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
 
 import pragma.client.ai;
+import pragma.client.client_state;
 import pragma.client.debug;
 import pragma.client.entities;
 import pragma.client.entities.components;
@@ -107,9 +107,9 @@ import pragma.client.model;
 import pragma.client.physics;
 import pragma.client.scripting.lua;
 
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT ClientState *client;
-DLLCLIENT CGame *c_game = NULL;
+extern CEngine *c_engine;
+extern ClientState *client;
+extern CGame *c_game;
 DLLCLIENT pragma::physics::IEnvironment *c_physEnv = NULL;
 
 CGame::MessagePacketTracker::MessagePacketTracker() : lastInMessageId(0), outMessageId(0) { std::fill(messageTimestamps.begin(), messageTimestamps.end(), 0); }

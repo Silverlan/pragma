@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/audio/alsound_type.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
 #include <pragma/entities/environment/audio/env_sound_dsp.h>
 #include "pragma/entities/components/base_transform_component.hpp"
@@ -15,12 +14,13 @@ module;
 
 module pragma.client.entities.components.audio.dsp.base;
 
+import pragma.client.client_state;
 import pragma.client.entities.components.toggle;
 
 using namespace pragma;
 
-extern DLLCLIENT ClientState *client;
-extern DLLCLIENT CGame *c_game;
+extern ClientState *client;
+extern CGame *c_game;
 
 CBaseSoundDspComponent::~CBaseSoundDspComponent() { DetachAllSoundSources(); }
 void CBaseSoundDspComponent::Initialize()

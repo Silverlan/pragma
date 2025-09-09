@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/audio/c_alsound.h"
 #include "pragma/c_engine.h"
 #include <pragma/networking/nwm_util.h>
@@ -13,8 +12,10 @@
 #include <pragma/audio/alsound_type.h>
 #include <pragma/entities/components/base_transform_component.hpp>
 
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT ClientState *client;
+import pragma.client.client_state;
+
+extern CEngine *c_engine;
+extern ClientState *client;
 DLLCLIENT void NET_cl_snd_precache(NetPacket packet)
 {
 	std::string snd = packet->ReadString();

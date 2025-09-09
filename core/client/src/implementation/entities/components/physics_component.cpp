@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/entities/components/velocity_component.hpp"
@@ -16,12 +15,13 @@ module;
 
 module pragma.client.entities.components.physics;
 
+import pragma.client.client_state;
 import pragma.client.model;
 
 using namespace pragma;
 
-extern DLLCLIENT CGame *c_game;
-extern DLLCLIENT ClientState *client;
+extern CGame *c_game;
+extern ClientState *client;
 
 void CPhysicsComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { BasePhysicsComponent::RegisterEvents(componentManager, registerEvent); }
 void CPhysicsComponent::Initialize()

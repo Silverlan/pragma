@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
@@ -17,13 +16,14 @@ module pragma.client.particle_system;
 
 import :renderer_beam;
 
+import pragma.client.client_state;
 import pragma.client.entities.components;
 import pragma.client.rendering.shaders;
 
 REGISTER_PARTICLE_RENDERER(beam, CParticleRendererBeam);
 
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT CGame *c_game;
+extern CEngine *c_engine;
+extern CGame *c_game;
 
 CParticleRendererBeam::Node::Node(const Vector3 &o, const Color &) : origin(o), color(1.f, 0.f, 0.f, 1.f) //{c.r /255.f,c.g /255.f,c.b /255.f,c.a /255.f})
 {

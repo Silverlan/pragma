@@ -24,7 +24,7 @@ import pragma.client.model;
 
 using namespace pragma;
 
-extern DLLCLIENT CEngine *c_engine;
+extern CEngine *c_engine;
 
 decltype(ShaderLightCone::DESCRIPTOR_SET_DEPTH_MAP) ShaderLightCone::DESCRIPTOR_SET_DEPTH_MAP = {
   "DEPTH_BUFFER",

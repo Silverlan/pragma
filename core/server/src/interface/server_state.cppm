@@ -140,8 +140,10 @@ export class DLLSERVER ServerState : public NetworkState {
 	void DropClient(pragma::networking::IServerClient &session, pragma::networking::DropReason reason = pragma::networking::DropReason::Disconnected);
 };
 #pragma warning(pop)
-export namespace pragma {
-    constexpr inline uint32_t FSYS_SEARCH_CACHE = 8'192;
-    extern DLLSERVER ServerState *server = nullptr;
-    extern DLLSERVER SGame *s_game = nullptr;
+export {
+	namespace pragma {
+	    constexpr inline uint32_t FSYS_SEARCH_CACHE = 8'192;
+	};
+	extern DLLSERVER ServerState *server = nullptr;
+	extern DLLSERVER SGame *s_game = nullptr;
 };

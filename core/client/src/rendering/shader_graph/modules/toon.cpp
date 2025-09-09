@@ -12,7 +12,7 @@ import pragma.client.rendering.shaders;
 
 using namespace pragma::rendering::shader_graph;
 
-extern DLLCLIENT CEngine *c_engine;
+extern CEngine *c_engine;
 //std::shared_ptr<prosper::IDescriptorSetGroup> ToonModule::g_defaultPbrDsg = {};
 //size_t ToonModule::g_instanceCount = 0;
 ToonModule::ToonModule(ShaderGraph &shader) : pragma::rendering::ShaderGraphModule {shader}

@@ -7,7 +7,7 @@
 #include "prosper_util.hpp"
 #include <mathutil/umath.h>
 
-extern DLLCLIENT CEngine *c_engine;
+extern CEngine *c_engine;
 
 int GetMaxMSAASampleCount()
 {

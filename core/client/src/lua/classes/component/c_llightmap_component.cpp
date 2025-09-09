@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/lua/classes/components/c_lentity_components.hpp"
 #include "pragma/lua/libraries/lfile.h"
 #include "pragma/entities/components/c_light_map_component.hpp"
@@ -23,9 +22,10 @@
 #include <cmaterialmanager.h>
 #include <cmaterial_manager2.hpp>
 
+import pragma.client.client_state;
 import pragma.client.entities.components;
 
-extern DLLCLIENT CEngine *c_engine;
+extern CEngine *c_engine;
 
 static void set_lightmap_texture(lua_State *l, pragma::CLightMapComponent &hLightMapC, const std::string &path, bool directional)
 {

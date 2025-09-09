@@ -20,7 +20,7 @@ module pragma.client.rendering.shaders;
 
 import :compute_irradiance_map_roughness;
 
-extern DLLCLIENT CEngine *c_engine;
+extern CEngine *c_engine;
 
 using namespace pragma;
 

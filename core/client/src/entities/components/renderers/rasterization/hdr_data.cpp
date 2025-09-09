@@ -35,8 +35,8 @@ import pragma.client.rendering.shaders;
 
 using namespace pragma::rendering;
 
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT CGame *c_game;
+extern CEngine *c_engine;
+extern CGame *c_game;
 
 static const float EXPOSURE_FRAME_UPDATE = 0.25f; // Exposure will be updated every x seconds
 

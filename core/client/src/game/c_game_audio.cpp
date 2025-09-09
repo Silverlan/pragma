@@ -17,8 +17,8 @@
 
 import pragma.client.entities.components;
 
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT ClientState *client;
+extern CEngine *c_engine;
+extern ClientState *client;
 
 void CGame::ClearSoundCache()
 {

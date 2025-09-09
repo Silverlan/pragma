@@ -3,13 +3,14 @@
 
 #include "stdafx_client.h"
 #include "pragma/c_enginedefinitions.h"
-#include "pragma/clientstate/clientstate.h"
 #include <vorbis/vorbisfile.h>
 #include <fsys/filesystem.h>
 #include "pragma/audio/c_alsound.h"
 #include <pragma/console/conout.h>
 #include "pragma/audio/sound_ogg.h"
 #include "pragma/audio/c_sound_load.h"
+
+import pragma.client.client_state;
 
 template<class T, class S>
 static unsigned int stereo_to_mono(char *src, char **ptgt, unsigned int datalen, unsigned int fragmentSize = 2)

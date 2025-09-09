@@ -2,12 +2,13 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
 #include "pragma/networking/c_nwm_util.h"
 
-extern DLLCLIENT ClientState *client;
-extern DLLCLIENT CGame *c_game;
+import pragma.client.client_state;
+
+extern ClientState *client;
+extern CGame *c_game;
 
 static CBaseEntity *read_unique_entity(NetPacket &packet, const std::function<void(BaseEntity *)> &onCreated = nullptr, CallbackHandle *hCallback = nullptr)
 {

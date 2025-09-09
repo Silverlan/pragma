@@ -26,7 +26,7 @@ import pragma.client.gui;
 import pragma.client.model;
 import pragma.client.physics;
 
-extern DLLCLIENT CGame *c_game;
+extern CGame *c_game;
 
 void Console::commands::debug_water(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {

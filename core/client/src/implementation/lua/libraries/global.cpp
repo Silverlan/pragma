@@ -10,7 +10,7 @@ module;
 
 module pragma.client.scripting.lua.libraries.global;
 
-extern DLLCLIENT CEngine *c_engine;
+extern CEngine *c_engine;
 
 double Lua::ServerTime(lua_State *l)
 {

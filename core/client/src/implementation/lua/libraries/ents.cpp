@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/entities/c_world.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
 #include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"
@@ -20,8 +19,10 @@ module;
 
 module pragma.client.scripting.lua.libraries.ents;
 
-extern DLLCLIENT ClientState *client;
-extern DLLCLIENT CGame *c_game;
+import pragma.client.client_state;
+
+extern ClientState *client;
+extern CGame *c_game;
 
 int Lua::ents::Client::get_local_player(lua_State *l)
 {

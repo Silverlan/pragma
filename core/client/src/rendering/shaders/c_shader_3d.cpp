@@ -6,7 +6,7 @@
 #include "pragma/rendering/shaders/c_shader_3d.hpp"
 #include <shader/prosper_pipeline_create_info.hpp>
 
-extern DLLCLIENT CEngine *c_engine;
+extern CEngine *c_engine;
 
 using namespace pragma;
 

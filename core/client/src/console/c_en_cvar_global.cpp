@@ -7,10 +7,11 @@
 #include "pragma/console/c_en_cvar_global.h"
 #include <sharedutils/util_string.h>
 #include <pragma/lua/libraries/lutil.hpp>
-#include <pragma/clientstate/clientstate.h>
 
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT ClientState *client;
+import pragma.client.client_state;
+
+extern CEngine *c_engine;
+extern ClientState *client;
 
 DLLCLIENT void CMD_lua_reload_entity(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {

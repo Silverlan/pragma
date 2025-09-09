@@ -3,7 +3,6 @@
 
 #include "stdafx_client.h"
 #include "pragma/networking/c_net_resources.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/networking/resources.h"
 #include "pragma/entities/components/c_model_component.hpp"
 #include <pragma/model/modelmanager.h>
@@ -17,6 +16,7 @@
 #include <sharedutils/util_library.hpp>
 #include <pragma/game/game_resources.h>
 
+import pragma.client.client_state;
 import pragma.client.model;
 
 #define RESOURCE_TRANSFER_VERBOSE 0
@@ -116,8 +116,8 @@ void ClientState::HandleClientResourceFragment(NetPacket &packet)
 
 ////////////////////
 
-extern DLLCLIENT ClientState *client;
-extern DLLCLIENT CGame *c_game;
+extern ClientState *client;
+extern CGame *c_game;
 
 DLLCLIENT void NET_cl_resourceinfo(NetPacket packet) { client->HandleClientResource(packet); }
 DLLCLIENT void NET_cl_resourcecomplete(NetPacket packet)

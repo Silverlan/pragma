@@ -17,7 +17,7 @@ import pragma.client.entities.components;
 
 using namespace pragma;
 
-extern DLLCLIENT CGame *c_game;
+extern CGame *c_game;
 
 void CAttachmentComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void CAttachmentComponent::ReceiveData(NetPacket &packet)

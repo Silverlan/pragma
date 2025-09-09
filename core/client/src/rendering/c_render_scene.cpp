@@ -22,7 +22,7 @@
 
 import pragma.client.rendering.shaders;
 
-extern DLLCLIENT CEngine *c_engine;
+extern CEngine *c_engine;
 
 void CGame::RenderScenePresent(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, prosper::Texture &texPostHdr, prosper::IImage *optOutImage, uint32_t layerId)
 {

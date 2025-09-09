@@ -17,8 +17,8 @@ import pragma.client.debug;
 import pragma.client.gui;
 
 
-extern DLLCLIENT ClientState *client;
-extern DLLCLIENT CGame *c_game;
+extern ClientState *client;
+extern CGame *c_game;
 
 static WIHandle hGUIShadowmap;
 static int numShadowmapTargets = 0;

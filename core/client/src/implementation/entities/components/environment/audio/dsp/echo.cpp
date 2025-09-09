@@ -17,7 +17,7 @@ module pragma.client.entities.components.audio.dsp.echo;
 
 using namespace pragma;
 
-extern DLLCLIENT CEngine *c_engine;
+extern CEngine *c_engine;
 
 void CSoundDspEchoComponent::ReceiveData(NetPacket &packet)
 {

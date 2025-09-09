@@ -14,7 +14,7 @@ module pragma.client.rendering.shaders;
 
 import :particle_polyboard;
 
-extern DLLCLIENT CEngine *c_engine;
+extern CEngine *c_engine;
 
 using namespace pragma;
 

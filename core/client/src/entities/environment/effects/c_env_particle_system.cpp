@@ -8,10 +8,7 @@
 #include "pragma/entities/components/base_io_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/c_engine.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
-#include "pragma/clientstate/clientstate.h"
-#include "pragma/clientstate/clientstate.h"
 #include <pragma/networking/nwm_util.h>
 #include "pragma/entities/baseentity_luaobject.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
@@ -21,11 +18,12 @@
 #include <pragma/entities/environment/effects/particlesystemdata.h>
 #include <udm.hpp>
 
+import pragma.client.client_state;
 import pragma.client.entities.components.io;
 
 using namespace pragma;
 
-extern DLLCLIENT ClientState *client;
+extern ClientState *client;
 
 void CParticleSystemComponent::Initialize()
 {

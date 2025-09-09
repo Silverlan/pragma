@@ -15,8 +15,8 @@ import pragma.shadergraph;
 
 using namespace pragma::rendering::shader_graph;
 
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT ClientState *client;
+extern CEngine *c_engine;
+extern ClientState *client;
 #pragma optimize("", off)
 ImageTextureModule::ImageTextureModule(ShaderGraph &shader) : pragma::rendering::ShaderGraphModule {shader}
 {

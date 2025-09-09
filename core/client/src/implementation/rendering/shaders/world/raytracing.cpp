@@ -20,7 +20,7 @@ import pragma.client.rendering.shaders;
 
 using namespace pragma;
 
-extern DLLCLIENT CEngine *c_engine;
+extern CEngine *c_engine;
 
 decltype(ShaderRayTracing::DESCRIPTOR_SET_IMAGE_OUTPUT) ShaderRayTracing::DESCRIPTOR_SET_IMAGE_OUTPUT = {
   "OUTPUTS",

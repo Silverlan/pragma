@@ -4,7 +4,7 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/clientstate/clientstate.h"
+#include "pragma/c_engine.h"
 #include "wms_shared.h"
 #include "wms_request_filter.h"
 #include "wms_message.h"
@@ -24,6 +24,7 @@ import :server_browser;
 import :silk_icon;
 import :table;
 
+import pragma.client.client_state;
 import pragma.gui;
 import pragma.locale;
 
@@ -158,8 +159,8 @@ void pragma::networking::DefaultMasterServerQueryDispatcher::DoQueryServers(cons
 
 ///////////////
 
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT ClientState *client;
+extern CEngine *c_engine;
+extern ClientState *client;
 WIServerBrowser::WIServerBrowser() : WIFrame(), m_bRefreshScheduled(false)
 {
 	AddStyleClass("wiframe");

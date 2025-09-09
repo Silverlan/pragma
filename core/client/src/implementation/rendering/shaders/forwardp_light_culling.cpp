@@ -15,7 +15,7 @@ import :forwardp_light_culling;
 
 using namespace pragma;
 
-extern DLLCLIENT CEngine *c_engine;
+extern CEngine *c_engine;
 
 uint32_t ShaderForwardPLightCulling::TILE_SIZE = 16u;
 // Note: We *have* to call this descriptor set "RENDERER" because that's the same used in the scene shader

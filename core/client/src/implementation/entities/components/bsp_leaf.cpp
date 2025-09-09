@@ -9,7 +9,7 @@ module;
 
 module pragma.client.entities.components.bsp_leaf;
 
-extern DLLCLIENT CEngine *c_engine;
+extern CEngine *c_engine;
 
 using namespace pragma;
 

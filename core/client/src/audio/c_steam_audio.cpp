@@ -2,13 +2,16 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/clientstate/clientstate.h"
+#include "pragma/c_engine.h"
+#include "pragma/game/c_game.h"
 #include <alsoundsystem.hpp>
 #include <steam_audio/alsound_steam_audio.hpp>
 #include <pragma/console/convars.h>
 
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT CGame *c_game;
+import pragma.client.client_state;
+
+extern CEngine *c_engine;
+extern CGame *c_game;
 
 static void reload_sound_cache()
 {

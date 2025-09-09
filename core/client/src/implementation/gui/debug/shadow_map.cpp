@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/entities/environment/lights/c_env_shadow.hpp"
 #include "pragma/entities/environment/lights/c_env_shadow_csm.hpp"
 #include "pragma/lua/converters/gui_element_converter.hpp"
@@ -16,11 +15,12 @@ module pragma.client.gui;
 
 import :debug_shadow_map;
 
+import pragma.client.client_state;
 import pragma.client.entities.components;
 
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT ClientState *client;
-extern DLLCLIENT CGame *c_game;
+extern CEngine *c_engine;
+extern ClientState *client;
+extern CGame *c_game;
 
 LINK_WGUI_TO_CLASS(WIDebugShadowMap, WIDebugShadowMap);
 

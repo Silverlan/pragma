@@ -30,7 +30,7 @@ module pragma.client.util.baking;
 import pragma.client.entities.components;
 import pragma.client.util.image;
 
-extern DLLCLIENT CEngine *c_engine;
+extern CEngine *c_engine;
 
 // #define DEBUG_BAKE_LIGHT_WEIGHTS
 

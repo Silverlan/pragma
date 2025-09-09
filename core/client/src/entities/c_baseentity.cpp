@@ -7,7 +7,6 @@
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "cmaterialmanager.h"
 #include "pragma/game/c_game.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/rendering/c_rendermode.h"
 #include "pragma/model/c_model.h"
 #include "pragma/model/brush/c_brushmesh.h"
@@ -51,15 +50,16 @@
 
 #undef GetClassName
 
+import pragma.client.client_state;
 import pragma.client.entities;
 import pragma.client.entities.components;
 import pragma.client.model;
 import pragma.entities.components;
 import pragma.client.util;
 
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT ClientState *client;
-extern DLLCLIENT CGame *c_game;
+extern CEngine *c_engine;
+extern ClientState *client;
+extern CGame *c_game;
 
 void CBaseEntity::OnComponentAdded(pragma::BaseEntityComponent &component)
 {

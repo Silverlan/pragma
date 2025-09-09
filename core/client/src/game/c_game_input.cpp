@@ -23,7 +23,7 @@ namespace pragma::string {
 
 import pragma.string.unicode;
 
-extern DLLCLIENT CEngine *c_engine;
+extern CEngine *c_engine;
 
 Bool CGame::RawMouseInput(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods)
 {

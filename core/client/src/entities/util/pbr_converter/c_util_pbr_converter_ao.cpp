@@ -1,7 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
 #include "pragma/entities/util/c_util_pbr_converter.hpp"
 #include "pragma/rendering/shaders/util/c_shader_compose_rma.hpp"
@@ -18,11 +17,13 @@
 #include <prosper_util.hpp>
 #include <image/prosper_sampler.hpp>
 
+import pragma.client.client_state;
+
 using namespace pragma;
 
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT ClientState *client;
-extern DLLCLIENT CGame *c_game;
+extern CEngine *c_engine;
+extern ClientState *client;
+extern CGame *c_game;
 
 PBRAOBakeJob::PBRAOBakeJob(Model &mdl, Material &mat) : hModel {mdl.GetHandle()}, hMaterial {mat.GetHandle()} {}
 

@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
-#include "pragma/clientstate/clientstate.h"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <shader/prosper_shader_t.hpp>
 #include <prosper_util.hpp>
@@ -27,8 +26,10 @@ module pragma.client.rendering.shaders;
 
 import :combine_image_channels;
 
-extern DLLCLIENT CGame *c_game;
-extern DLLCLIENT ClientState *client;
+import pragma.client.client_state;
+
+extern CGame *c_game;
+extern ClientState *client;
 
 decltype(pragma::ShaderCombineImageChannels::DESCRIPTOR_SET_TEXTURE) pragma::ShaderCombineImageChannels::DESCRIPTOR_SET_TEXTURE = {
   "TEXTURES",

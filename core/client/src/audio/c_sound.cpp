@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/c_engine.h"
 #include <pragma/audio/soundscript.h>
 #include "pragma/audio/alsoundscript.h"
@@ -25,12 +24,15 @@
 #include <pragma/logging.hpp>
 #include <sharedutils/util_markup_file.hpp>
 
+#undef PlaySound
+
 import se_script;
 import pragma.audio.util;
+import pragma.client.client_state;
 
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT ClientState *client;
-extern DLLCLIENT CGame *c_game;
+extern CEngine *c_engine;
+extern ClientState *client;
+extern CGame *c_game;
 #pragma message("TODO: See DDSLoader; MAKE SURE TO RELEASE BUFFER ON ENGINE REMOVE")
 
 void Console::commands::cl_steam_audio_reload_scene(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)

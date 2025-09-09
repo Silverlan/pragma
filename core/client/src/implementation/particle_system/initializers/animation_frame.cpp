@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/particlesystem/c_particlemodifier.h"
 #include "pragma/game/c_game.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
@@ -17,6 +16,8 @@ module;
 module pragma.client.particle_system;
 
 import :initializer_initial_animation_frame;
+
+import pragma.client.client_state;
 
 REGISTER_PARTICLE_INITIALIZER(initial_animation_frame, CParticleInitializerInitialAnimationFrame);
 

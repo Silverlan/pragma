@@ -4,20 +4,21 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/lua/converters/gui_element_converter.hpp"
+#include "pragma/game/c_game.h"
 #include <image/prosper_render_target.hpp>
 
 import pragma.client.entities.components;
 
+import pragma.client.client_state;
 module pragma.client.gui;
 
 import :debug_ssao;
 
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT ClientState *client;
-extern DLLCLIENT CGame *c_game;
+extern CEngine *c_engine;
+extern ClientState *client;
+extern CGame *c_game;
 
 LINK_WGUI_TO_CLASS(WIDebugSSAO, WIDebugSSAO);
 

@@ -4,13 +4,13 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/clientstate/clientstate.h"
 #include "luasystem.h"
 #include <pragma/lua/classes/ldef_vector.h>
 #include "pragma/lua/classes/c_lcamera.h"
 #include "pragma/lua/converters/shader_converter_t.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/rendering/render_queue.hpp"
+#include "pragma/game/c_game.h"
 #include "pragma/rendering/shaders/world/c_shader_scene.hpp"
 #include "pragma/rendering/global_render_settings_buffer_data.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
@@ -43,14 +43,15 @@ module;
 
 module pragma.client.scripting.lua.libraries.game;
 
+import pragma.client.client_state;
 import pragma.client.core;
 import pragma.client.debug;
 import pragma.client.entities.components;
 import pragma.client.scripting.lua;
 
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT ClientState *client;
-extern DLLCLIENT CGame *c_game;
+extern CEngine *c_engine;
+extern ClientState *client;
+extern CGame *c_game;
 
 #ifdef ENABLE_DEPRECATED_PHYSICS
 static btSoftBody *createSoftBody(btSoftRigidDynamicsWorld *world, btSoftBodyWorldInfo *info, const btScalar s, const int numX, const int numY, const int fixed)

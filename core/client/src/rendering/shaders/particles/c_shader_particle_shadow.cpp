@@ -12,7 +12,7 @@ using namespace Shader;
 
 LINK_SHADER_TO_CLASS(ParticleShadow,particleshadow);
 
-extern DLLCLIENT CGame *c_game;
+extern CGame *c_game;
 
 ParticleShadow::ParticleShadow()
 	: ParticleShadowBase<ParticleBase>("ParticleShadow","programs/particles/particle_shadow","programs/particles/particle_shadow")

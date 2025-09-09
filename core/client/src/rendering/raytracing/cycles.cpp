@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 #include "pragma/rendering/raytracing/cycles.hpp"
-#include "pragma/clientstate/clientstate.h"
 #include <sharedutils/util_library.hpp>
+
+import pragma.client.client_state;
 
 using namespace pragma::rendering;
 

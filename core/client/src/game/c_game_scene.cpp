@@ -5,7 +5,7 @@
 #include "pragma/game/c_game.h"
 #include "pragma/entities/environment/c_env_camera.h"
 
-extern DLLCLIENT CGame *c_game;
+extern CGame *c_game;
 
 pragma::CSceneComponent *CGame::GetScene() { return m_scene.get(); }
 const pragma::CSceneComponent *CGame::GetScene() const { return const_cast<CGame *>(this)->GetScene(); }

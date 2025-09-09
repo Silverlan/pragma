@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/model/c_poly.h"
+
+import pragma.client.client_state;
 
 extern ClientState *client;
 CPoly::CPoly(NetworkState *nw) : Poly(nw) {}

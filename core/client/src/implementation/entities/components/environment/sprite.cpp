@@ -9,7 +9,6 @@ module;
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/entities/components/basetoggle.h"
 #include "pragma/c_engine.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/physics/raytraces.h>
@@ -17,10 +16,12 @@ module;
 
 module pragma.client.entities.components.effects.sprite;
 
+import pragma.client.client_state;
+
 using namespace pragma;
 
-extern DLLCLIENT ClientState *client;
-extern DLLCLIENT CGame *c_game;
+extern ClientState *client;
+extern CGame *c_game;
 
 void CSpriteComponent::Initialize() { BaseEnvSpriteComponent::Initialize(); }
 

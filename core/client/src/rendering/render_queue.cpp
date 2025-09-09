@@ -3,7 +3,6 @@
 
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/rendering/render_queue.hpp"
 #include "pragma/rendering/render_stats.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
@@ -12,11 +11,13 @@
 #include <cmaterial_manager2.hpp>
 #include <cmaterial.h>
 
+import pragma.client.client_state;
+
 using namespace pragma::rendering;
 
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT ClientState *client;
-extern DLLCLIENT CGame *c_game;
+extern CEngine *c_engine;
+extern ClientState *client;
+extern CGame *c_game;
 
 SortingKey::SortingKey(MaterialIndex material, prosper::ShaderIndex shader, bool instantiable, bool translucentKey)
 {

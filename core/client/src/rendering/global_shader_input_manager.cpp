@@ -10,7 +10,7 @@
 
 import pragma.shadergraph;
 
-extern DLLCLIENT CEngine *c_engine;
+extern CEngine *c_engine;
 pragma::rendering::GlobalShaderInputDataManager::GlobalShaderInputDataManager() { ResetInputDescriptor(); }
 
 void pragma::rendering::GlobalShaderInputDataManager::ResetInputDescriptor() { m_inputDescriptor = std::make_unique<pragma::rendering::ShaderInputDescriptor>("GlobalInputData"); }

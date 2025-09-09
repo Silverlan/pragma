@@ -18,7 +18,7 @@ import :snap_area;
 
 import pragma.gui;
 
-extern DLLCLIENT CEngine *c_engine;
+extern CEngine *c_engine;
 
 LINK_WGUI_TO_CLASS(WITransformable, WITransformable);
 

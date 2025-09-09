@@ -16,7 +16,7 @@ module pragma.client.particle_system;
 
 import :operator_physics;
 
-extern DLLCLIENT CGame *c_game;
+extern CGame *c_game;
 extern DLLCLIENT pragma::physics::IEnvironment *c_physEnv;
 
 void CParticleOperatorPhysics::Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)

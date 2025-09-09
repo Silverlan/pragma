@@ -16,8 +16,8 @@ import :visual_debugger;
 
 import pragma.client.rendering.shaders;
 
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT CGame *c_game;
+extern CEngine *c_engine;
+extern CGame *c_game;
 
 CPhysVisualDebugger::CPhysVisualDebugger() { InitializeBuffers(); }
 

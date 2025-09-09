@@ -19,7 +19,7 @@ import :particle_model;
 
 using namespace pragma;
 
-extern DLLCLIENT CEngine *c_engine;
+extern CEngine *c_engine;
 
 decltype(ShaderParticleModel::VERTEX_BINDING_PARTICLE) ShaderParticleModel::VERTEX_BINDING_PARTICLE = {prosper::VertexInputRate::Instance, sizeof(pragma::CParticleSystemComponent::ParticleData)};
 decltype(ShaderParticleModel::VERTEX_ATTRIBUTE_POSITION) ShaderParticleModel::VERTEX_ATTRIBUTE_POSITION = {pragma::ShaderParticle2DBase::VERTEX_ATTRIBUTE_POSITION, VERTEX_BINDING_PARTICLE};

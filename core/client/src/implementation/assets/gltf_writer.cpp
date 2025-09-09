@@ -11,7 +11,6 @@ module;
 #include "pragma/math/c_util_math.hpp"
 #include "pragma/asset/c_util_model.hpp"
 #include "pragma/rendering/shaders/world/c_shader_scene.hpp"
-#include <pragma/clientstate/clientstate.h>
 #include <pragma/model/model.h>
 #include <pragma/model/modelmesh.h>
 #include <pragma/model/animation/vertex_animation.hpp>
@@ -30,6 +29,7 @@ module;
 #include <tiny_gltf.h>
 
 module pragma.client.assets;
+import pragma.client.client_state;
 
 import :gltf_writer;
 
@@ -40,7 +40,7 @@ import :gltf_writer;
 		throw std::logic_error {"glTF assertion failed!"};                                                                                                                                                                                                                                       \
 	}
 
-extern DLLCLIENT ClientState *client;
+extern ClientState *client;
 
 bool pragma::asset::GLTFWriter::Export(const SceneDesc &sceneDesc, const std::string &outputFileName, const pragma::asset::ModelExportInfo &exportInfo, std::string &outErrMsg, std::string *optOutPath)
 {

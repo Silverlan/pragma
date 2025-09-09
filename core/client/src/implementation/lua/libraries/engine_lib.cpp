@@ -13,7 +13,6 @@ namespace pragma::string {
 };
 #endif
 
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/input/inputhelper.h"
 #include "cmaterialmanager.h"
 #include "luasystem.h"
@@ -42,13 +41,14 @@ namespace pragma::string {
 module pragma.client.scripting.lua.libraries.engine;
 
 import util_zip;
+import pragma.client.client_state;
 #ifndef _MSC_VER
 import pragma.string.unicode;
 #endif
 
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT ClientState *client;
-extern DLLCLIENT CGame *c_game;
+extern CEngine *c_engine;
+extern ClientState *client;
+extern CGame *c_game;
 
 std::shared_ptr<const FontInfo> Lua::engine::create_font(lua_State *l, const std::string &identifier, const std::string &fontSetName, FontSetFlag features, uint32_t size, bool reload)
 {

@@ -4,14 +4,15 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
 #include <wgui/wibase.h>
 
 module pragma.client.debug.game_ui;
 
-extern DLLCLIENT ClientState *client;
-extern DLLCLIENT CGame *c_game;
+import pragma.client.client_state;
+
+extern ClientState *client;
+extern CGame *c_game;
 
 DebugGameGUI::DebugGameGUI(const std::function<WIHandle(void)> &guiFactory) : m_guiFactory(guiFactory)
 {

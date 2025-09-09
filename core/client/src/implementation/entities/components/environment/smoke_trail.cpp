@@ -6,7 +6,6 @@ module;
 #include "stdafx_client.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/c_engine.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/components/basetoggle.h>
@@ -14,12 +13,13 @@ module;
 
 module pragma.client.entities.components.effects.smoke_trail;
 
+import pragma.client.client_state;
 import pragma.client.util;
 
 using namespace pragma;
 
-extern DLLCLIENT ClientState *client;
-extern DLLCLIENT CGame *c_game;
+extern ClientState *client;
+extern CGame *c_game;
 
 CSmokeTrailComponent::~CSmokeTrailComponent() { DestroyParticle(); }
 void CSmokeTrailComponent::Initialize()

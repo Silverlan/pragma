@@ -3,7 +3,6 @@
 
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/entities/environment/lights/c_env_shadow.hpp"
 #include "pragma/entities/game/c_game_shadow_manager.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
@@ -29,13 +28,14 @@
 #include <pragma/math/intersection.h>
 #include <image/prosper_render_target.hpp>
 
+import pragma.client.client_state;
 import pragma.client.entities.components;
 
 using namespace pragma;
 
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT ClientState *client;
-extern DLLCLIENT CGame *c_game;
+extern CEngine *c_engine;
+extern ClientState *client;
+extern CGame *c_game;
 
 CShadowComponent::CShadowComponent(BaseEntity &ent) : BaseEntityComponent {ent} {}
 

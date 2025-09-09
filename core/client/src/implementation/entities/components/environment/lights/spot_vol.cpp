@@ -10,7 +10,6 @@ module;
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/networking/c_nwm_util.h"
 #include "pragma/c_engine.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
 #include <sharedutils/alpha_mode.hpp>
 #include <pragma/physics/raytraces.h>
@@ -23,13 +22,14 @@ module;
 
 module pragma.client.entities.components.lights.spot_vol;
 
+import pragma.client.client_state;
 import pragma.client.entities.components;
 import pragma.client.scripting.lua;
 
 using namespace pragma;
 
-extern DLLCLIENT ClientState *client;
-extern DLLCLIENT CGame *c_game;
+extern ClientState *client;
+extern CGame *c_game;
 
 void CLightSpotVolComponent::Initialize()
 {

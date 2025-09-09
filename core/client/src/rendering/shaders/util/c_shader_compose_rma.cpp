@@ -4,7 +4,6 @@
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
 #include "pragma/game/c_game.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/rendering/shaders/util/c_shader_compose_rma.hpp"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <shader/prosper_shader_t.hpp>
@@ -23,8 +22,10 @@
 #include <cmaterial_manager2.hpp>
 #include <texturemanager/texture.h>
 
-extern DLLCLIENT CGame *c_game;
-extern DLLCLIENT ClientState *client;
+import pragma.client.client_state;
+
+extern CGame *c_game;
+extern ClientState *client;
 
 decltype(pragma::ShaderComposeRMA::DESCRIPTOR_SET_TEXTURE) pragma::ShaderComposeRMA::DESCRIPTOR_SET_TEXTURE = {
   "TEXTURES",

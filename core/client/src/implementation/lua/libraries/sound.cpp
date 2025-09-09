@@ -14,7 +14,7 @@ module;
 
 module pragma.client.scripting.lua.libraries.sound;
 
-extern DLLCLIENT CEngine *c_engine;
+extern CEngine *c_engine;
 
 lua_registercheck(ALEfxEaxReverbProperties, al::EfxEaxReverbProperties);
 lua_registercheck(ALEfxChorusProperties, al::EfxChorusProperties);

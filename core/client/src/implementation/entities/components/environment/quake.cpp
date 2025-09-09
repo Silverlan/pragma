@@ -6,7 +6,6 @@ module;
 #include "stdafx_client.h"
 #include "noise/noise.h"
 #include "pragma/c_engine.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
 #include "pragma/entities/components/c_player_component.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
@@ -16,10 +15,12 @@ module;
 
 module pragma.client.entities.components.env_quake;
 
+import pragma.client.client_state;
+
 using namespace pragma;
 
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT CGame *c_game;
+extern CEngine *c_engine;
+extern CGame *c_game;
 
 CQuakeComponent::~CQuakeComponent() { CancelScreenShake(); }
 void CQuakeComponent::ReceiveData(NetPacket &packet)

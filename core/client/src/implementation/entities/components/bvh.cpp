@@ -14,7 +14,7 @@ module pragma.client.entities.components.bvh;
 
 import pragma.client.entities.components.animated_bvh;
 
-extern DLLCLIENT CEngine *c_engine;
+extern CEngine *c_engine;
 
 using namespace pragma;
 

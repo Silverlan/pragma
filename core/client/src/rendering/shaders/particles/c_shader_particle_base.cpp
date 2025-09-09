@@ -10,7 +10,7 @@
 #include <shader/prosper_shader_t.hpp>
 #include <prosper_descriptor_set_group.hpp>
 
-extern DLLCLIENT CEngine *c_engine;
+extern CEngine *c_engine;
 
 using namespace pragma;
 

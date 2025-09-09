@@ -7,7 +7,7 @@
 
 import pragma.client.rendering.shaders;
 
-extern DLLCLIENT CEngine *c_engine;
+extern CEngine *c_engine;
 
 using namespace pragma::rendering;
 #pragma optimize("", off)

@@ -11,7 +11,7 @@ module pragma.client.rendering.shaders;
 
 import :extract_diffuse_ambinet_occlusion;
 
-extern DLLCLIENT CEngine *c_engine;
+extern CEngine *c_engine;
 
 using namespace pragma;
 

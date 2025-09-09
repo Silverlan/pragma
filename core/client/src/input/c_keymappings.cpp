@@ -5,7 +5,8 @@
 #include "pragma/c_engine.h"
 #include "pragma/input/inputhelper.h"
 #include "pragma/input/input_binding_layer.hpp"
-#include <pragma/clientstate/clientstate.h>
+
+import pragma.client.client_state;
 
 void CEngine::AddInputBindingLayer(const std::shared_ptr<InputBindingLayer> &layer)
 {

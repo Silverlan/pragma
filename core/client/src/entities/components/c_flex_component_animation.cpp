@@ -9,7 +9,7 @@
 
 using namespace pragma;
 
-extern DLLCLIENT CGame *c_game;
+extern CGame *c_game;
 
 void CFlexComponent::ResolveFlexAnimation(const LookupIdentifier &lookupId) const
 {

@@ -6,8 +6,9 @@
 #include "pragma/c_engine.h"
 #include <sharedutils/util_string.h>
 #include <pragma/console/convars.h>
-#include <pragma/clientstate/clientstate.h>
 #include <pragma/console/c_cvar.h>
+
+import pragma.client.client_state;
 
 extern CEngine *c_engine;
 

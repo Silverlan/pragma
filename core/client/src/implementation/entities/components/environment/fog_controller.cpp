@@ -16,7 +16,7 @@ import pragma.client.entities.components.toggle;
 
 using namespace pragma;
 
-extern DLLCLIENT CGame *c_game;
+extern CGame *c_game;
 
 void CFogControllerComponent::Initialize()
 {

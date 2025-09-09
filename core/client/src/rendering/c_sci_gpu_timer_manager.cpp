@@ -15,7 +15,7 @@
 
 using namespace pragma::debug;
 
-extern DLLCLIENT CEngine *c_engine;
+extern CEngine *c_engine;
 
 static CVar cvTimerQueries = GetClientConVar("cl_gpu_timer_queries_enabled");
 

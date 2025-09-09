@@ -23,7 +23,7 @@
 import pragma.client.entities.components;
 import pragma.client.scripting.lua;
 
-extern DLLCLIENT CEngine *c_engine;
+extern CEngine *c_engine;
 
 void Lua::Scene::UpdateBuffers(lua_State *l, pragma::CSceneComponent &scene, prosper::ICommandBuffer &hCommandBuffer)
 {

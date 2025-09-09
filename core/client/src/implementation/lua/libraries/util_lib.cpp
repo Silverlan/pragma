@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
 #include "pragma/lua/classes/c_lcamera.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
@@ -30,11 +29,12 @@ module;
 
 module pragma.client.scripting.lua.libraries.util;
 
+import pragma.client.client_state;
 import pragma.client.util;
 
-extern DLLCLIENT CGame *c_game;
-extern DLLCLIENT ClientState *client;
-extern DLLCLIENT CEngine *c_engine;
+extern CGame *c_game;
+extern ClientState *client;
+extern CEngine *c_engine;
 
 int Lua::util::Client::calc_world_direction_from_2d_coordinates(lua_State *l, pragma::CCameraComponent &hCam, const Vector2 &uv)
 {

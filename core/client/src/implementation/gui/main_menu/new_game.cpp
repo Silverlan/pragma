@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/c_engine.h"
 #include <fsys/filesystem.h>
 #include <wgui/types/witextentry.h>
@@ -23,12 +22,13 @@ import :main_menu_new_game;
 import :options_list;
 import :slider;
 
+import pragma.client.client_state;
 import pragma.gui;
 import pragma.locale;
 import pragma.string.unicode;
 
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT ClientState *client;
+extern CEngine *c_engine;
+extern ClientState *client;
 
 WIMainMenuNewGame::WIMainMenuNewGame() : WIMainMenuBase() {}
 

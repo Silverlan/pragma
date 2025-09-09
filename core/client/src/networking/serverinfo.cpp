@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/clientstate/clientstate.h"
 #include <pragma/networking/resources.h>
+
+import pragma.client.client_state;
 
 ServerInfo::~ServerInfo() { SetDownloadPath(""); }
 const std::string &ServerInfo::GetDownloadPath() const { return m_downloadPath; }

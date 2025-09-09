@@ -9,8 +9,8 @@
 
 import pragma.client.entities.components;
 
-extern DLLCLIENT CGame *c_game;
-extern DLLCLIENT CEngine *c_engine;
+extern CGame *c_game;
+extern CEngine *c_engine;
 
 pragma::CLightDirectionalComponent *CGame::GetEnvironmentLightSource() const { return const_cast<pragma::CLightDirectionalComponent *>(m_hEnvLight.get()); }
 void CGame::UpdateEnvironmentLightSource()

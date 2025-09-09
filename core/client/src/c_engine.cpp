@@ -10,7 +10,6 @@ namespace pragma::string {
 #endif
 #include "stdafx_cengine.h"
 #include "pragma/c_engine.h"
-#include "pragma/clientstate/clientstate.h"
 #include <wgui/wgui.h>
 #include "cmaterialmanager.h"
 #include "pragma/console/c_cvar.h"
@@ -70,6 +69,7 @@ namespace pragma::string {
 #endif
 
 import util_zip;
+import pragma.client.client_state;
 import pragma.client.gui;
 import pragma.client.model;
 import pragma.client.networking;
@@ -92,9 +92,9 @@ void DLLCLIENT RunCEngine(int argc, char *argv[])
 }
 }
 
-DLLCLIENT CEngine *c_engine = NULL;
-extern DLLCLIENT ClientState *client;
-extern DLLCLIENT CGame *c_game;
+extern CEngine *c_engine;
+extern ClientState *client;
+extern CGame *c_game;
 //__declspec(dllimport) std::vector<void*> _vkImgPtrs;
 decltype(CEngine::AXIS_PRESS_THRESHOLD) CEngine::AXIS_PRESS_THRESHOLD = 0.5f;
 // If set to true, each joystick axes will be split into a positive and a negative axis, which

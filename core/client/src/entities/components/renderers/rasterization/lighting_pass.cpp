@@ -40,8 +40,8 @@ import pragma.client.entities.components;
 
 using namespace pragma::rendering;
 
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT CGame *c_game;
+extern CEngine *c_engine;
+extern CGame *c_game;
 
 #define ENABLE_PARTICLE_RENDERING 1
 

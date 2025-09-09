@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/lua/libraries/c_lgui.h"
 #include <wgui/wgui.h>
 #include <wgui/wibase.h>
@@ -20,14 +19,15 @@
 #include <prosper_window.hpp>
 #include <prosper_render_pass.hpp>
 
+import pragma.client.client_state;
 import pragma.client.gui;
 import pragma.client.scripting.lua;
 import pragma.string.unicode;
 //import pragma.scripting.lua;
 
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT ClientState *client;
-extern DLLCLIENT CGame *c_game;
+extern CEngine *c_engine;
+extern ClientState *client;
+extern CGame *c_game;
 
 static void initialize_element(::WIBase &p)
 {

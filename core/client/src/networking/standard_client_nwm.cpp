@@ -2,14 +2,14 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/clientstate/clientstate.h"
 #include <clientmanager/interface/cl_nwm_manager.hpp>
 #include <iostream>
 #include <pragma/networking/netmessages.h>
 
+import pragma.client.client_state;
 import pragma.client.networking;
 
-extern DLLCLIENT ClientState *client;
+extern ClientState *client;
 
 #define DEBUG_CLIENT_VERBOSE 1
 

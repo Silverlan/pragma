@@ -11,7 +11,6 @@ namespace pragma::string {
 };
 #endif
 
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
 #include "pragma/lua/libraries/lents.h"
 #include "pragma/lua/libraries/c_lnetmessages.h"
@@ -70,14 +69,15 @@ namespace pragma::string {
 #undef FAR
 
 import pragma.locale;
+import pragma.client.client_state;
 import pragma.client.entities.components;
 import pragma.client.scripting.lua;
 #ifndef _MSC_VER
 import pragma.string.unicode;
 #endif
 
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT CGame *c_game;
+extern CEngine *c_engine;
+extern CGame *c_game;
 
 namespace pragma {
 	// Has to be in same namespace as class, otherwise luabind can't locate it

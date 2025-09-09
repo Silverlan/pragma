@@ -16,7 +16,7 @@ module pragma.client.rendering.shaders;
 
 import :merge_2d_image_to_equirectangular;
 
-extern DLLCLIENT CEngine *c_engine;
+extern CEngine *c_engine;
 
 using namespace pragma;
 

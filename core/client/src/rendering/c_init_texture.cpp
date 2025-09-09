@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/clientstate/clientstate.h"
 #include "textureinfo.h"
+#include "pragma/c_engine.h"
 #include "pragma/console/c_cvar.h"
 #include <texturemanager/texturemanager.h>
 #include <texturemanager/load/texture_loader.hpp>
@@ -11,8 +11,10 @@
 #include <cmaterial_manager2.hpp>
 #include <image/prosper_sampler.hpp>
 
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT ClientState *client;
+import pragma.client.client_state;
+
+extern CEngine *c_engine;
+extern ClientState *client;
 
 static void get_filter_mode(UInt32 filter, prosper::Filter &minFilter, prosper::Filter &magFilter, prosper::SamplerMipmapMode &mipmapMode, UInt32 &anisotropy)
 {

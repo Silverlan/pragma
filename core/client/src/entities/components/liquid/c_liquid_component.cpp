@@ -24,7 +24,7 @@ import pragma.client.entities.components;
 
 using namespace pragma;
 
-extern DLLCLIENT CGame *c_game;
+extern CGame *c_game;
 
 CLiquidComponent::CLiquidComponent(BaseEntity &ent) : BaseFuncLiquidComponent(ent) { pragma::CParticleSystemComponent::Precache("water"); }
 CLiquidComponent::~CLiquidComponent() {}

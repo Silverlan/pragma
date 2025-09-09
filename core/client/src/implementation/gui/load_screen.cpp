@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
-#include "pragma/clientstate/clientstate.h"
 #include <wgui/types/witext.h>
 
 module pragma.client.gui;
@@ -13,9 +12,10 @@ module pragma.client.gui;
 import :load_screen;
 import :progress_bar;
 
+import pragma.client.client_state;
 import pragma.locale;
 
-extern DLLCLIENT CEngine *c_engine;
+extern CEngine *c_engine;
 extern ClientState *client;
 WILoadScreen::WILoadScreen() : WIMainMenuBase() {}
 

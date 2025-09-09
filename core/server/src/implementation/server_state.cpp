@@ -47,8 +47,6 @@ ConVarHandle ServerState::GetConVarHandle(std::string scvar)
 }
 
 extern DLLNETWORK Engine *engine;
-DLLSERVER ServerState *server = nullptr;
-DLLSERVER SGame *s_game = nullptr;
 ServerState::ServerState() : NetworkState(), m_server(nullptr)
 {
 	m_alsoundID = 1;

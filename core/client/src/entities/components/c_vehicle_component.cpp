@@ -19,7 +19,7 @@ import pragma.client.entities.components.observer;
 
 using namespace pragma;
 
-extern DLLCLIENT CGame *c_game;
+extern CGame *c_game;
 
 std::vector<CVehicleComponent *> CVehicleComponent::s_vehicles;
 const std::vector<CVehicleComponent *> &CVehicleComponent::GetAll() { return s_vehicles; }

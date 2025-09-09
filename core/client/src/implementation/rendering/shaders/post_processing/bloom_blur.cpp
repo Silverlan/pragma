@@ -13,8 +13,8 @@ module pragma.client.rendering.shaders;
 
 import :pp_bloom_blur;
 
-extern DLLCLIENT CGame *c_game;
-extern DLLCLIENT ClientState *client;
+extern CGame *c_game;
+extern ClientState *client;
 
 using namespace pragma;
 

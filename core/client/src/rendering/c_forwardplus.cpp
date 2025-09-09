@@ -25,8 +25,8 @@ import pragma.client.entities.components;
 import pragma.client.gui;
 import pragma.client.rendering.shaders;
 
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT CGame *c_game;
+extern CEngine *c_engine;
+extern CGame *c_game;
 
 static void cmd_forwardplus_tile_size(NetworkState *, const ConVar &, int32_t, int32_t val)
 {

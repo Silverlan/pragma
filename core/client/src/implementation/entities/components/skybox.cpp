@@ -28,17 +28,17 @@ module;
 #include <fsys/ifile.hpp>
 #include <wgui/types/wirect.h>
 #include "pragma/c_engine.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
 
 module pragma.client.entities.components.skybox;
 
+import pragma.client.client_state;
 import pragma.client.entities.components;
 import pragma.client.rendering.shaders;
 
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT ClientState *client;
-extern DLLCLIENT CGame *c_game;
+extern CEngine *c_engine;
+extern ClientState *client;
+extern CGame *c_game;
 
 using namespace pragma;
 

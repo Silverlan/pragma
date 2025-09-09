@@ -17,7 +17,7 @@
 
 import pragma.client.entities.components;
 
-extern DLLCLIENT CGame *c_game;
+extern CGame *c_game;
 
 void RegisterLuaEntityComponents2_cl(lua_State *l, luabind::module_ &entsMod)
 {

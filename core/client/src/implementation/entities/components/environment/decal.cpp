@@ -10,7 +10,6 @@ module;
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/model/c_model.h"
 #include "pragma/c_engine.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
 #include <pragma/physics/raytraces.h>
 #include <pragma/entities/environment/env_decal.h>
@@ -22,6 +21,7 @@ module;
 
 module pragma.client.entities.components.env_decal;
 
+import pragma.client.client_state;
 import pragma.client.debug;
 import pragma.client.entities.components.bvh;
 import pragma.client.entities.components.physics;
@@ -30,8 +30,8 @@ import pragma.client.entities.components.static_bvh_user;
 
 using namespace pragma;
 
-extern DLLCLIENT ClientState *client;
-extern DLLCLIENT CGame *c_game;
+extern ClientState *client;
+extern CGame *c_game;
 
 DecalProjector::DecalProjector(const Vector3 &pos, const Quat &rot, float size) : m_pose {pos, rot}, m_size {size} {}
 const Vector3 &DecalProjector::GetPos() const { return m_pose.GetOrigin(); }

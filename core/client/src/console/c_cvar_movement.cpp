@@ -4,11 +4,12 @@
 #include "stdafx_client.h"
 #include "pragma/console/c_cvar_movement.h"
 #include "pragma/game/c_game.h"
-#include "pragma/clientstate/clientstate.h"
 #include <pragma/networking/enums.hpp>
 
-extern DLLCLIENT ClientState *client;
-extern DLLCLIENT CGame *c_game;
+import pragma.client.client_state;
+
+extern ClientState *client;
+extern CGame *c_game;
 
 void Console::commands::forward_in(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &, float magnitude)
 {

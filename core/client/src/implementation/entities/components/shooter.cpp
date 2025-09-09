@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/entities/components/c_transform_component.hpp"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include <pragma/physics/raytraces.h>
@@ -16,10 +15,12 @@ module;
 
 module pragma.client.entities.components.shooter;
 
+import pragma.client.client_state;
+
 using namespace pragma;
 
-extern DLLCLIENT CGame *c_game;
-extern DLLCLIENT ClientState *client;
+extern CGame *c_game;
+extern ClientState *client;
 
 using namespace ecs::baseShooterComponent;
 void ecs::CShooterComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }

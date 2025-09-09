@@ -21,7 +21,7 @@
 import pragma.client.entities.components;
 import pragma.client.scripting.lua;
 
-extern DLLCLIENT CEngine *c_engine;
+extern CEngine *c_engine;
 
 prosper::DescriptorSetInfo pragma::to_prosper_descriptor_set_info(const LuaDescriptorSetInfo &descSetInfo)
 {

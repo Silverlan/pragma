@@ -18,7 +18,7 @@ module pragma.client.rendering.shaders;
 
 import :cubemap;
 
-extern DLLCLIENT CEngine *c_engine;
+extern CEngine *c_engine;
 
 using namespace pragma;
 

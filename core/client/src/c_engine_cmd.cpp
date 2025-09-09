@@ -13,7 +13,6 @@ namespace pragma::string {
 
 #include "pragma/c_engine.h"
 #include "pragma/game/c_game.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/rendering/render_processor.hpp"
 #include <pragma/asset/util_asset.hpp>
 #include <pragma/lua/libraries/ldebug.h>
@@ -40,6 +39,7 @@ namespace pragma::string {
 #include <fsys/directory_watcher.h>
 
 import pragma.client.audio;
+import pragma.client.client_state;
 import pragma.client.entities.components;
 import pragma.locale;
 // import pragma.scripting.lua;

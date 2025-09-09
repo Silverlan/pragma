@@ -19,7 +19,7 @@ import se_script;
 
 using namespace pragma;
 
-extern DLLCLIENT CGame *c_game;
+extern CGame *c_game;
 
 static auto cvFlexPhonemeDrag = GetClientConVar("cl_flex_phoneme_drag");
 

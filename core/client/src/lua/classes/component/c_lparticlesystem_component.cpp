@@ -17,7 +17,7 @@
 
 import pragma.client.entities.components;
 
-extern DLLCLIENT CGame *c_game;
+extern CGame *c_game;
 
 static void register_particle_modifier(lua_State *l, pragma::LuaParticleModifierManager::Type type, const std::string &name, luabind::object oClass)
 {

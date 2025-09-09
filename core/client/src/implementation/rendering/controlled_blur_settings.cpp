@@ -14,7 +14,7 @@ module pragma.client.rendering;
 
 import :controlled_blur_settings;
 
-extern DLLCLIENT CEngine *c_engine;
+extern CEngine *c_engine;
 
 static util::WeakHandle<prosper::Shader> g_bloomBlurH {};
 static util::WeakHandle<prosper::Shader> g_bloomBlurV {};

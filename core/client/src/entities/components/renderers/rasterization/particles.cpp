@@ -19,8 +19,8 @@ import pragma.client.rendering.shaders;
 
 using namespace pragma::rendering;
 
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT CGame *c_game;
+extern CEngine *c_engine;
+extern CGame *c_game;
 
 #include "pragma/console/c_cvar.h"
 #include <pragma/entities/entity_iterator.hpp>

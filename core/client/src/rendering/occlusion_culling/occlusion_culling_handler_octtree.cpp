@@ -18,7 +18,7 @@ import pragma.client.entities.components;
 
 using namespace pragma;
 
-extern DLLCLIENT CGame *c_game;
+extern CGame *c_game;
 
 template<class T>
 void iterate_occlusion_tree(const typename OcclusionOctree<T>::Node &node, std::vector<OcclusionMeshInfo> &culledMeshes, const std::vector<umath::Plane> *optFrustumPlanes, const std::function<void(const T &)> &fObjectCallback)

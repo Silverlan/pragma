@@ -5,17 +5,17 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
-#include "pragma/clientstate/clientstate.h"
 #include <wgui/types/witext.h>
 
 module pragma.client.gui;
 
 import :fps;
 
+import pragma.client.client_state;
 import pragma.string.unicode;
 
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT ClientState *client;
+extern CEngine *c_engine;
+extern ClientState *client;
 
 LINK_WGUI_TO_CLASS(WIFPS, WIFPS);
 

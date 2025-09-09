@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/entities/components/c_animated_component.hpp"
@@ -24,14 +23,15 @@ module pragma.client.particle_system;
 
 import :renderer_model;
 
+import pragma.client.client_state;
 import pragma.client.entities.components;
 import pragma.client.rendering.shaders;
 
 REGISTER_PARTICLE_RENDERER(model, CParticleRendererModel);
 
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT ClientState *client;
-extern DLLCLIENT CGame *c_game;
+extern CEngine *c_engine;
+extern ClientState *client;
+extern CGame *c_game;
 
 decltype(CParticleRendererModel::s_rendererCount) CParticleRendererModel::s_rendererCount = 0;
 static std::shared_ptr<prosper::IBuffer> s_instanceBuffer = nullptr;

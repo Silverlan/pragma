@@ -25,7 +25,7 @@ using namespace Shader;
 
 LINK_SHADER_TO_CLASS(ParticlePolyboardShadow,particlepolyboardshadow);
 
-extern DLLCLIENT CGame *c_game;
+extern CGame *c_game;
 
 ParticlePolyboardShadow::ParticlePolyboardShadow()
 	: ParticleShadowBase<ParticlePolyboard>("particlepolyboardshadow","programs/particles/beam/particle_polyboard_shadow","programs/particles/beam/particle_polyboard_shadow","programs/particles/beam/particle_polyboard_shadow")

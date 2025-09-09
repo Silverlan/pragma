@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
 #include "pragma/entities/environment/lights/c_env_shadow.hpp"
 #include "pragma/particlesystem/c_particlemodifier.h"
@@ -17,14 +16,15 @@ module pragma.client.particle_system;
 
 import :renderer_blob;
 
+import pragma.client.client_state;
 import pragma.client.debug;
 import pragma.client.entities.components;
 import pragma.client.gui;
 
 REGISTER_PARTICLE_RENDERER(blob, CParticleRendererBlob);
 
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT CGame *c_game;
+extern CEngine *c_engine;
+extern CGame *c_game;
 
 decltype(CParticleRendererBlob::s_bShowNeighborLinks) CParticleRendererBlob::s_bShowNeighborLinks = false;
 decltype(CParticleRendererBlob::s_dsParticles) CParticleRendererBlob::s_dsParticles = nullptr;

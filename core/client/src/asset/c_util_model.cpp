@@ -4,8 +4,9 @@
 #include "stdafx_client.h"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/asset/c_util_model.hpp"
+#include "pragma/c_engine.h"
+#include "pragma/game/c_game.h"
 #include "pragma/util/resource_watcher.h"
 #include "pragma/rendering/shaders/util/c_shader_compose_rma.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
@@ -14,6 +15,7 @@
 #include "pragma/entities/environment/lights/c_env_light_point.h"
 #include "pragma/entities/environment/lights/c_env_light_directional.h"
 #include "pragma/entities/components/c_color_component.hpp"
+#include "pragma/game/game_limits.h"
 #include <cmaterial_manager2.hpp>
 #include <datasystem_t.hpp>
 #include <texturemanager/texture_manager2.hpp>
@@ -39,13 +41,14 @@
 #include <pragma/model/animation/bone.hpp>
 
 import pragma.client.assets;
+import pragma.client.client_state;
 import pragma.client.entities.components;
 import pragma.client.rendering.shaders;
 import pragma.client.util;
 
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT ClientState *client;
-extern DLLCLIENT CGame *c_game;
+extern CEngine *c_engine;
+extern ClientState *client;
+extern CGame *c_game;
 
 void pragma::asset::MapExportInfo::AddCamera(CCameraComponent &cam) { m_cameras.push_back(cam.GetHandle<CCameraComponent>()); }
 void pragma::asset::MapExportInfo::AddLightSource(CLightComponent &light) { m_lightSources.push_back(light.GetHandle<CLightComponent>()); }

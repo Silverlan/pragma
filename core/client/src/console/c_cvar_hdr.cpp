@@ -7,7 +7,7 @@
 
 import pragma.client.gui;
 
-extern DLLCLIENT CGame *c_game;
+extern CGame *c_game;
 
 void CMD_debug_hdr_bloom(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {

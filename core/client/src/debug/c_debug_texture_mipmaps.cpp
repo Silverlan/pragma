@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
+#include "pragma/c_engine.h"
 #include "pragma/clientdefinitions.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/console/c_cvar_global_functions.h"
 #include <texturemanager/texture.h>
 #include <texture_type.h>
@@ -14,11 +14,12 @@
 #include <cmaterialmanager.h>
 #include <cmaterial_manager2.hpp>
 
+import pragma.client.client_state;
 import pragma.client.debug;
 import pragma.client.gui;
 
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT ClientState *client;
+extern CEngine *c_engine;
+extern ClientState *client;
 void Console::commands::debug_font(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
 	if(argv.empty()) {

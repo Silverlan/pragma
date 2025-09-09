@@ -35,7 +35,7 @@ module;
 
 module pragma.client.scripting.lua.classes.vulkan;
 
-extern DLLCLIENT CEngine *c_engine;
+extern CEngine *c_engine;
 
 bool Lua::Vulkan::VKFramebuffer::IsValid(lua_State *l, Framebuffer &hFramebuffer) { return true; }
 #if 0

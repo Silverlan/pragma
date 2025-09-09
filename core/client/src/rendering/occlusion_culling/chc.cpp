@@ -17,8 +17,8 @@
 
 DEFINE_BASE_HANDLE(DLLCLIENT, CHCNode, CHCNode);
 
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT CGame *c_game;
+extern CEngine *c_engine;
+extern CGame *c_game;
 static const uint32_t maxPrevInvisNodeBatchSize = 50;
 
 #ifdef CHC_DEBUGGING_ENABLED

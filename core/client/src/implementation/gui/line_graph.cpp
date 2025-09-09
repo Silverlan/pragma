@@ -12,9 +12,9 @@ module pragma.client.gui;
 
 import :line_graph;
 
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT ClientState *client;
-extern DLLCLIENT CGame *c_game;
+extern CEngine *c_engine;
+extern ClientState *client;
+extern CGame *c_game;
 
 LINK_WGUI_TO_CLASS(WILineGraph, WILineGraph);
 

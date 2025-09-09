@@ -4,9 +4,10 @@
 #include "stdafx_cengine.h"
 #include "pragma/c_engine.h"
 #include <pragma/input/input_binding_layer.hpp>
-#include <pragma/clientstate/clientstate.h>
 
-extern DLLCLIENT ClientState *client;
+import pragma.client.client_state;
+
+extern ClientState *client;
 
 ClientState *CEngine::OpenClientState()
 {

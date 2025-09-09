@@ -5,17 +5,18 @@
 #include "pragma/entities/util/c_util_pbr_converter.hpp"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
-#include "pragma/clientstate/clientstate.h"
 #include "cmaterial.h"
 #include <datasystem_t.hpp>
 #include <pragma/physics/collisionmesh.h>
 #include <mathutil/transform.hpp>
 
+import pragma.client.client_state;
+
 using namespace pragma;
 
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT ClientState *client;
-extern DLLCLIENT CGame *c_game;
+extern CEngine *c_engine;
+extern ClientState *client;
+extern CGame *c_game;
 
 void CPBRConverterComponent::UpdateMetalness(Model &mdl, CMaterial &mat)
 {

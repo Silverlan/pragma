@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
 #include "luasystem.h"
 #include "cmaterialmanager.h"
@@ -15,8 +14,10 @@ module;
 
 module pragma.client.scripting.lua.classes.material;
 
-extern DLLCLIENT ClientState *client;
-extern DLLCLIENT CGame *c_game;
+import pragma.client.client_state;
+
+extern ClientState *client;
+extern CGame *c_game;
 
 void Lua::Material::Client::SetTexture(lua_State *, ::Material *mat, const std::string &textureID, const std::string &tex)
 {

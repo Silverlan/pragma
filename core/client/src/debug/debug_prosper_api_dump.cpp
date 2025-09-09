@@ -18,7 +18,7 @@ void LPARAM_enable_gfx_api_dump(const std::vector<std::string> &argv)
 #include <prosper_context.hpp>
 #include <prosper_command_buffer.hpp>
 
-extern DLLCLIENT CEngine *c_engine;
+extern CEngine *c_engine;
 
 namespace pragma::debug {
 	// These are mainly used in the VS immediate window for debugging purposes

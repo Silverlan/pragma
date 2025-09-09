@@ -7,7 +7,6 @@
 #include <glm/gtx/norm.hpp>
 #include <algorithm>
 #include <sharedutils/util_weak_handle.hpp>
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
 #include "pragma/rendering/shaders/particles/c_shader_particle.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
@@ -29,6 +28,7 @@
 #include <datasystem_vector.h>
 #include <udm.hpp>
 
+import pragma.client.client_state;
 import pragma.client.entities.components;
 
 using namespace pragma;
@@ -39,9 +39,9 @@ using namespace pragma;
 decltype(CParticleSystemComponent::s_particleData) CParticleSystemComponent::s_particleData;
 decltype(CParticleSystemComponent::s_precached) CParticleSystemComponent::s_precached;
 
-extern DLLCLIENT CGame *c_game;
-extern DLLCLIENT ClientState *client;
-extern DLLCLIENT CEngine *c_engine;
+extern CGame *c_game;
+extern ClientState *client;
+extern CEngine *c_engine;
 
 struct SpriteSheetTextureAnimationFrame {
 	Vector2 uvStart;

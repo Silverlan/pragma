@@ -49,8 +49,8 @@ namespace pragma {
 	using ::operator|=;
 };
 
-extern DLLCLIENT CGame *c_game;
-extern DLLCLIENT CEngine *c_engine;
+extern CGame *c_game;
+extern CEngine *c_engine;
 
 static std::shared_ptr<prosper::IUniformResizableBuffer> s_instanceBuffer = nullptr;
 decltype(CRenderComponent::s_ocExemptEntities) CRenderComponent::s_ocExemptEntities = {};

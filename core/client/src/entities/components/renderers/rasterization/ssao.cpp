@@ -16,7 +16,7 @@ import pragma.client.rendering.shaders;
 
 using namespace pragma::rendering;
 
-extern DLLCLIENT CGame *c_game;
+extern CGame *c_game;
 
 void pragma::CRasterizationRendererComponent::RenderSSAO(const util::DrawSceneInfo &drawSceneInfo)
 {

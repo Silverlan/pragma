@@ -11,14 +11,15 @@ module;
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include "pragma/c_engine.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
 
 module pragma.client.entities.components.env_weather;
 
+import pragma.client.client_state;
+
 using namespace pragma;
 
-extern DLLCLIENT CGame *c_game;
+extern CGame *c_game;
 
 CWeatherComponent::~CWeatherComponent()
 {

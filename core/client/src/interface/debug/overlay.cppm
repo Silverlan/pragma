@@ -4,9 +4,9 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/debug/debug_render_info.hpp"
 #include "buffers/prosper_buffer.hpp"
+#include "pragma/entities/environment/c_env_camera.h"
 #include "wgui/types/witext.h"
 #include "pragma/c_engine.h"
 #include <pragma/math/angle/wvangle.h>
@@ -16,6 +16,8 @@ module;
 #include <pragma/debug/debug_render_info.hpp>
 
 export module pragma.client.debug.overlay;
+
+import pragma.client.client_state;
 
 export namespace DebugRenderer {
 	enum class DLLCLIENT Type : uint32_t {

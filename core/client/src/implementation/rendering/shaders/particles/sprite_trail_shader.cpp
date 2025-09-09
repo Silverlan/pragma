@@ -16,7 +16,7 @@ import :particle_sprite_trail;
 
 import pragma.client.particle_system;
 
-extern DLLCLIENT CEngine *c_engine;
+extern CEngine *c_engine;
 
 using namespace pragma;
 

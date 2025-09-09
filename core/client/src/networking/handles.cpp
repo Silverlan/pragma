@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/clientstate/clientstate.h"
 #include <fsys/filesystem.h>
 #include "pragma/c_engine.h"
 #include "pragma/networking/netmessages.h"
@@ -20,8 +19,10 @@
 #include <pragma/entities/components/map_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT CGame *c_game;
+import pragma.client.client_state;
+
+extern CEngine *c_engine;
+extern CGame *c_game;
 
 void ClientState::HandlePacket(NetPacket &packet)
 {

@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
-#include "pragma/clientstate/clientstate.h"
 #include <wgui/types/witext.h>
 #include <wgui/types/wirect.h>
 #include <prosper_window.hpp>
@@ -15,6 +14,7 @@ module pragma.client.gui;
 import :scroll_container;
 import :table;
 
+import pragma.client.client_state;
 import pragma.gui;
 import pragma.string.unicode;
 
@@ -22,7 +22,7 @@ LINK_WGUI_TO_CLASS(WITable, WITable);
 LINK_WGUI_TO_CLASS(WITableRow, WITableRow);
 LINK_WGUI_TO_CLASS(WITableCell, WITableCell);
 
-extern DLLCLIENT CEngine *c_engine;
+extern CEngine *c_engine;
 extern ClientState *client;
 #pragma optimize("", off)
 

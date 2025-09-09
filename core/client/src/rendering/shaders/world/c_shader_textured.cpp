@@ -5,7 +5,6 @@
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/shader_material/shader_material.hpp"
 #include "pragma/rendering/render_processor.hpp"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_light_map_receiver_component.hpp"
 #include "pragma/console/c_cvar.h"
@@ -31,11 +30,12 @@
 #include <cmaterial.h>
 #include <cmaterial_manager2.hpp>
 
+import pragma.client.client_state;
 import pragma.client.model;
 
-extern DLLCLIENT CGame *c_game;
-extern DLLCLIENT ClientState *client;
-extern DLLCLIENT CEngine *c_engine;
+extern CGame *c_game;
+extern ClientState *client;
+extern CEngine *c_engine;
 
 using namespace pragma;
 

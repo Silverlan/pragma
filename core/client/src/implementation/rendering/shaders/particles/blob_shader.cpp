@@ -21,8 +21,8 @@ import :particle_blob;
 
 import pragma.client.entities.components;
 
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT CGame *c_game;
+extern CEngine *c_engine;
+extern CGame *c_game;
 
 using namespace pragma;
 

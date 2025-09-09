@@ -21,7 +21,7 @@
 #include "pragma/entities/c_wheel.hpp"
 #include "pragma/model/c_side.h"
 #include "pragma/c_engine.h"
-#include "pragma/clientstate/clientstate.h"
+
 #include "pragma/game/c_game.h"
 #include "pragma/lua/classes/lmodel.h"
 #include "pragma/lua/classes/lmodelmesh.h"
@@ -65,15 +65,16 @@
 #include <cmaterial_manager2.hpp>
 #include <wgui/wgui.h>
 
+import pragma.client.client_state;
 import pragma.client.debug;
 import pragma.client.entities.components;
 import pragma.client.rendering.shaders;
 import pragma.client.scripting.lua;
 import pragma.shadergraph;
 
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT ClientState *client;
-extern DLLCLIENT CGame *c_game;
+extern CEngine *c_engine;
+extern ClientState *client;
+extern CGame *c_game;
 
 static spdlog::logger &LOGGER_SG = pragma::register_logger("shadergraph");
 

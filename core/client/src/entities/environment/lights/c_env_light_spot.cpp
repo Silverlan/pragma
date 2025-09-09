@@ -17,8 +17,8 @@ import pragma.client.entities.components;
 
 using namespace pragma;
 
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT CGame *c_game;
+extern CEngine *c_engine;
+extern CGame *c_game;
 
 CLightSpotComponent::CLightSpotComponent(BaseEntity &ent) : BaseEnvLightSpotComponent(ent) {}
 bool CLightSpotComponent::ShouldTransmitNetData() const { return true; }

@@ -14,7 +14,7 @@
 
 import pragma.client.entities.components;
 
-extern DLLCLIENT CEngine *c_engine;
+extern CEngine *c_engine;
 
 CParticleModifierLua *pragma::LuaParticleModifierManager::CreateModifier(std::string className) const
 {

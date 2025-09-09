@@ -20,7 +20,7 @@ module pragma.client.gui;
 
 import :image_slide_show;
 
-extern DLLCLIENT CEngine *c_engine;
+extern CEngine *c_engine;
 
 LINK_WGUI_TO_CLASS(WIImageSlideShow, WIImageSlideShow);
 

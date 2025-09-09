@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
@@ -60,6 +59,7 @@
 import pragma.audio.util;
 import pragma.platform;
 import pragma.string.unicode;
+import pragma.client.client_state;
 import pragma.client.debug;
 import pragma.client.gui;
 import pragma.client.rendering.shaders;
@@ -67,9 +67,9 @@ import pragma.client.scripting.lua;
 import pragma.client.util;
 import pragma.gui;
 
-extern DLLCLIENT CGame *c_game;
-extern DLLCLIENT ClientState *client;
-extern DLLCLIENT CEngine *c_engine;
+extern CGame *c_game;
+extern ClientState *client;
+extern CEngine *c_engine;
 
 static std::optional<std::string> find_asset_file(const std::string &name, pragma::asset::Type type)
 {

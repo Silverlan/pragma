@@ -20,8 +20,8 @@ module pragma.client.entities.components;
 
 import pragma.client.entities.components.animated_bvh;
 
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT CGame *c_game;
+extern CEngine *c_engine;
+extern CGame *c_game;
 
 using namespace pragma;
 

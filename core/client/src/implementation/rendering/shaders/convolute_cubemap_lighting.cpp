@@ -16,7 +16,7 @@ module pragma.client.rendering.shaders;
 
 import :convolute_cubemap_lighting;
 
-extern DLLCLIENT CEngine *c_engine;
+extern CEngine *c_engine;
 
 using namespace pragma;
 

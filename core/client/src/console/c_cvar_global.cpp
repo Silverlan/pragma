@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/console/c_cvar_global.h"
 #include "pragma/game/c_game.h"
 #include "pragma/console/cvar_global.h"
@@ -49,14 +48,17 @@
 #include <sharedutils/util_file.h>
 #include <prosper_window.hpp>
 
+#undef PlaySound
+
+import pragma.client.client_state;
 import pragma.client.debug;
 import pragma.client.entities.components;
 import pragma.client.gui;
 import pragma.client.util;
 
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT ClientState *client;
-extern DLLCLIENT CGame *c_game;
+extern CEngine *c_engine;
+extern ClientState *client;
+extern CGame *c_game;
 
 DLLCLIENT void CMD_entities_cl(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {

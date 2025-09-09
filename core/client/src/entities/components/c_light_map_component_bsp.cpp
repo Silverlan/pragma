@@ -4,7 +4,6 @@
 #include "pragma/c_engine.h"
 #include "pragma/game/c_game.h"
 #include "pragma/game/game_resources.hpp"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/entities/components/c_light_map_component.hpp"
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/game/game_resources.hpp>
@@ -15,11 +14,12 @@
 #include <image/prosper_texture.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
+import pragma.client.client_state;
 import source_engine.bsp;
 
-extern DLLCLIENT CGame *c_game;
-extern DLLCLIENT ClientState *client;
-extern DLLCLIENT CEngine *c_engine;
+extern CGame *c_game;
+extern ClientState *client;
+extern CEngine *c_engine;
 
 using namespace pragma;
 

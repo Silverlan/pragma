@@ -17,7 +17,7 @@ module;
 
 module pragma.client.entities.components.light_map_data_cache;
 
-extern DLLCLIENT CGame *c_game;
+extern CGame *c_game;
 
 using namespace pragma;
 

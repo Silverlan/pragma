@@ -11,8 +11,8 @@ module pragma.client.gui;
 
 import :snap_area;
 
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT ClientState *client;
+extern CEngine *c_engine;
+extern ClientState *client;
 
 LINK_WGUI_TO_CLASS(WISnapArea, WISnapArea);
 

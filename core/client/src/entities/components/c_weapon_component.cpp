@@ -3,7 +3,6 @@
 
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/entities/components/c_weapon_component.hpp"
 #include "pragma/entities/components/base_character_component.hpp"
 #include "pragma/entities/components/base_ownable_component.hpp"
@@ -21,6 +20,7 @@
 #include <pragma/entities/observermode.h>
 #include <pragma/entities/entity_component_system_t.hpp>
 
+import pragma.client.client_state;
 import pragma.client.entities.components;
 
 using namespace pragma;
@@ -36,8 +36,8 @@ std::vector<CWeaponComponent *> CWeaponComponent::s_weapons;
 const std::vector<CWeaponComponent *> &CWeaponComponent::GetAll() { return s_weapons; }
 unsigned int CWeaponComponent::GetWeaponCount() { return CUInt32(s_weapons.size()); }
 
-extern DLLCLIENT CGame *c_game;
-extern DLLCLIENT ClientState *client;
+extern CGame *c_game;
+extern ClientState *client;
 
 CWeaponComponent::CWeaponComponent(BaseEntity &ent) : BaseWeaponComponent(ent), CBaseNetComponent() { s_weapons.push_back(this); }
 

@@ -16,8 +16,8 @@ module pragma.client.gui;
 
 import :debug_mipmaps;
 
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT CGame *c_game;
+extern CEngine *c_engine;
+extern CGame *c_game;
 
 LINK_WGUI_TO_CLASS(WIDebugMipMaps, WIDebugMipMaps);
 

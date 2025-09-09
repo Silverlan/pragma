@@ -17,7 +17,7 @@ module pragma.client.rendering.shaders;
 
 import :debug;
 
-extern DLLCLIENT CEngine *c_engine;
+extern CEngine *c_engine;
 
 using namespace pragma;
 

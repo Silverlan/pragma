@@ -10,8 +10,6 @@ module;
 #include "pragma/entities/baseentity_net_event_manager.hpp"
 #include "pragma/util/bulletinfo.h"
 #include "pragma/physics/raytraces.h"
-#include <typeindex>
-#include <mathutil/uvec.h>
 
 export module pragma.entities.components.shooter;
 

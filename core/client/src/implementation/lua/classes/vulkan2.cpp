@@ -37,7 +37,7 @@ module pragma.client.scripting.lua.classes.vulkan;
 
 import pragma.client.model;
 
-extern DLLCLIENT CEngine *c_engine;
+extern CEngine *c_engine;
 
 namespace prosper {
 	static bool operator==(const Lua::Vulkan::Framebuffer &a, const Lua::Vulkan::Framebuffer &b) { return &a == &b; }

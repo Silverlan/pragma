@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/c_engine.h"
 #include "pragma/networking/c_net_global.h"
 #include "pragma/physics/movetypes.h"
@@ -41,6 +40,7 @@
 #include <pragma/networking/enums.hpp>
 #include <pragma/util/giblet_create_info.hpp>
 
+import pragma.client.client_state;
 import pragma.client.debug;
 import pragma.client.entities;
 import pragma.client.entities.components;
@@ -48,9 +48,9 @@ import pragma.client.gui;
 import pragma.client.scripting.lua;
 
 enum class CLIENT_DROPPED;
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT ClientState *client;
-extern DLLCLIENT CGame *c_game;
+extern CEngine *c_engine;
+extern ClientState *client;
+extern CGame *c_game;
 
 DLLCLIENT void NET_cl_serverinfo(NetPacket packet) { client->HandleClientReceiveServerInfo(packet); }
 DLLCLIENT void NET_cl_start_resource_transfer(NetPacket packet) { client->HandleClientStartResourceTransfer(packet); }

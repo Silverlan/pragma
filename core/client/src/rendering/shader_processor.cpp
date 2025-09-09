@@ -3,7 +3,6 @@
 
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
 #include "pragma/rendering/render_processor.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
@@ -22,11 +21,12 @@
 #include <prosper_command_buffer.hpp>
 #include <cmaterial.h>
 
+import pragma.client.client_state;
 import pragma.client.entities.components;
 
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT ClientState *client;
-extern DLLCLIENT CGame *c_game;
+extern CEngine *c_engine;
+extern ClientState *client;
+extern CGame *c_game;
 
 bool pragma::rendering::ShaderProcessor::RecordBindScene(const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, const pragma::ShaderGameWorld &shader, bool view)
 {

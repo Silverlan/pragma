@@ -14,7 +14,7 @@ import pragma.client.entities.components.radius;
 
 using namespace pragma;
 
-extern DLLCLIENT CGame *c_game;
+extern CGame *c_game;
 
 CBaseLightComponent::CBaseLightComponent(BaseEntity &ent) : BaseEnvLightComponent(ent) {}
 

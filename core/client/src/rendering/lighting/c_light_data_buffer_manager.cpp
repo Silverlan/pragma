@@ -8,7 +8,7 @@
 #include "pragma/entities/environment/lights/c_env_light.h"
 #include "pragma/game/game_limits.h"
 
-extern DLLCLIENT CEngine *c_engine;
+extern CEngine *c_engine;
 
 using namespace pragma;
 

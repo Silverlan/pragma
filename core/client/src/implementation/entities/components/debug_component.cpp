@@ -15,7 +15,7 @@ module pragma.client.entities.components.debug;
 import pragma.client.debug;
 import pragma.client.entities.components.radius;
 
-extern DLLCLIENT CEngine *c_engine;
+extern CEngine *c_engine;
 
 using namespace pragma;
 

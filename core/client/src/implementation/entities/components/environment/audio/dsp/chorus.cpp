@@ -17,7 +17,7 @@ module pragma.client.entities.components.audio.dsp.chorus;
 
 using namespace pragma;
 
-extern DLLCLIENT CEngine *c_engine;
+extern CEngine *c_engine;
 
 void CSoundDspChorusComponent::ReceiveData(NetPacket &packet)
 {

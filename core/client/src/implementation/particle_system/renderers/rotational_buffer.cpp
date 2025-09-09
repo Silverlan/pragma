@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/model/c_modelmesh.h"
@@ -18,8 +17,10 @@ module pragma.client.particle_system;
 
 import :renderer_rotational_buffer;
 
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT CGame *c_game;
+import pragma.client.client_state;
+
+extern CEngine *c_engine;
+extern CGame *c_game;
 
 void CParticleRendererRotationalBuffer::Initialize(pragma::CParticleSystemComponent &pSystem)
 {

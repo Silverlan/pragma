@@ -12,7 +12,7 @@ module;
 
 module pragma.client.entities.components.soft_body;
 
-extern DLLCLIENT CEngine *c_engine;
+extern CEngine *c_engine;
 
 using namespace pragma;
 

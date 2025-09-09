@@ -28,7 +28,7 @@ namespace pragma {
 
 CSoundScapeComponent *CSoundScapeComponent::s_active = NULL;
 
-extern DLLCLIENT CGame *c_game;
+extern CGame *c_game;
 
 CSoundScapeComponent::~CSoundScapeComponent()
 {

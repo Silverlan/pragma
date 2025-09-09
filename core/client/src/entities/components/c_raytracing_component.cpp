@@ -26,8 +26,8 @@ import pragma.client.rendering.shaders;
 
 using namespace pragma;
 
-extern DLLCLIENT CGame *c_game;
-extern DLLCLIENT CEngine *c_engine;
+extern CGame *c_game;
+extern CEngine *c_engine;
 
 static std::shared_ptr<prosper::IUniformResizableBuffer> s_entityMeshInfoBuffer = nullptr;
 static uint32_t m_entityMeshCount = 0;

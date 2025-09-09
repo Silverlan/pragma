@@ -6,7 +6,6 @@
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/euler_angles.hpp>
 #include "pragma/c_engine.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
 #include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/audio/alsound_type.h"
@@ -40,6 +39,7 @@
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/observermode.h>
 
+import pragma.client.client_state;
 import pragma.client.entities.components;
 
 using namespace pragma;
@@ -51,7 +51,7 @@ std::vector<CPlayerComponent *> CPlayerComponent::s_players;
 const std::vector<CPlayerComponent *> &CPlayerComponent::GetAll() { return s_players; }
 unsigned int CPlayerComponent::GetPlayerCount() { return CUInt32(s_players.size()); }
 
-extern DLLCLIENT CEngine *c_engine;
+extern CEngine *c_engine;
 extern ClientState *client;
 extern CGame *c_game;
 

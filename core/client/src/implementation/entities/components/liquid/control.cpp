@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include <pragma/audio/alsound_type.h>
@@ -15,8 +14,10 @@ module;
 
 module pragma.client.entities.components.liquid_control;
 
-extern DLLCLIENT ClientState *client;
-extern DLLCLIENT CGame *c_game;
+import pragma.client.client_state;
+
+extern ClientState *client;
+extern CGame *c_game;
 
 using namespace pragma;
 

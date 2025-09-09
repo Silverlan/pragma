@@ -47,8 +47,8 @@ import pragma.gui;
 import pragma.string.unicode;
 // import pragma.scripting.lua;
 
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT CGame *c_game;
+extern CEngine *c_engine;
+extern CGame *c_game;
 
 template<class TStream>
 static TStream &print_ui_element(TStream &os, const ::WIBase &handle)
@@ -86,7 +86,7 @@ static TStream &print_ui_element(TStream &os, const ::WIBase &handle)
 DLLCLIENT Con::c_cout &operator<<(Con::c_cout &os, const ::WIBase &handle) { return print_ui_element<Con::c_cout>(os, handle); }
 DLLCLIENT std::ostream &operator<<(std::ostream &os, const ::WIBase &handle) { return print_ui_element<std::ostream>(os, handle); }
 
-extern DLLCLIENT ClientState *client;
+extern ClientState *client;
 
 static bool operator==(::WIBase &a, ::WIBase &b) { return &a == &b; }
 

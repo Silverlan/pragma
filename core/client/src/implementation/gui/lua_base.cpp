@@ -4,8 +4,8 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/clientstate/clientstate.h"
 #include "luasystem.h"
+#include "pragma/game/c_game.h"
 #include <wgui/wihandle.h>
 #include "pragma/lua/classes/c_ldef_wgui.h"
 #include <prosper_prepared_command_buffer.hpp>
@@ -14,9 +14,11 @@ module pragma.client.gui;
 
 import :lua_base;
 
+import pragma.client.client_state;
+
 #undef DrawState
 
-extern DLLCLIENT CGame *c_game;
+extern CGame *c_game;
 
 extern ClientState *client;
 WILuaBase::WILuaBase() {}

@@ -18,7 +18,7 @@ import pragma.client.entities.components;
 
 using namespace pragma;
 
-extern DLLCLIENT CGame *c_game;
+extern CGame *c_game;
 
 CCameraComponent::~CCameraComponent() {}
 void CCameraComponent::Save(udm::LinkedPropertyWrapperArg udm) { BaseEnvCameraComponent::Save(udm); }

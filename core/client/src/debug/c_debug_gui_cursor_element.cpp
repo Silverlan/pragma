@@ -3,8 +3,8 @@
 
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/console/c_cvar_global_functions.h"
+#include "prosper_util.hpp"
 #include <util_image.hpp>
 #include <wgui/types/witext.h>
 #include <wgui/types/wirect.h>
@@ -12,11 +12,12 @@
 #include <prosper_window.hpp>
 #include <fsys/ifile.hpp>
 
+import pragma.client.client_state;
 import pragma.client.gui;
 
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT ClientState *client;
-extern DLLCLIENT CGame *c_game;
+extern CEngine *c_engine;
+extern ClientState *client;
+extern CGame *c_game;
 
 import pragma.string.unicode;
 

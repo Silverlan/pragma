@@ -4,13 +4,14 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/lua/converters/gui_element_converter.hpp"
 #include <sharedutils/util_string.h>
 
 module pragma.client.gui;
 
 import :silk_icon;
+
+import pragma.client.client_state;
 
 extern ClientState *client;
 LINK_WGUI_TO_CLASS(WISilkIcon, WISilkIcon);
@@ -28,7 +29,7 @@ void WISilkIcon::Initialize()
 	SetIcon("accept");
 }
 
-struct DLLCLIENT SilkIcon {
+struct SilkIcon {
 	SilkIcon(const char *pName, unsigned int pRow, unsigned int pColumn) : name(pName), row(pRow), col(pColumn) {}
 	const char *name;
 	unsigned int row;

@@ -24,8 +24,8 @@ import pragma.client.entities.components.rasterization_renderer;
 
 import pragma.client.rendering.shaders;
 
-extern DLLCLIENT CGame *c_game;
-extern DLLCLIENT CEngine *c_engine;
+extern CGame *c_game;
+extern CEngine *c_engine;
 
 using namespace pragma;
 

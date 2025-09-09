@@ -17,7 +17,7 @@ module pragma.client.entities.components.audio.dsp.equalizer;
 
 using namespace pragma;
 
-extern DLLCLIENT CEngine *c_engine;
+extern CEngine *c_engine;
 
 void CSoundDspEqualizerComponent::ReceiveData(NetPacket &packet)
 {

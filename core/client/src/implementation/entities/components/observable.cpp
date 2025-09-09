@@ -11,7 +11,7 @@ module pragma.client.entities.components.observable;
 
 using namespace pragma;
 
-extern DLLCLIENT CGame *c_game;
+extern CGame *c_game;
 CObservableComponent::CObservableComponent(BaseEntity &ent) : BaseObservableComponent(ent) {}
 void CObservableComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void CObservableComponent::ReceiveData(NetPacket &packet)

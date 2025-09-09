@@ -9,18 +9,18 @@
 #include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/entities/environment/lights/c_env_shadow.hpp"
 #include "pragma/game/c_game.h"
-#include "pragma/clientstate/clientstate.h"
 #include <image/prosper_msaa_texture.hpp>
 #include <prosper_util.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <prosper_command_buffer.hpp>
 
+import pragma.client.client_state;
 import pragma.client.entities.components;
 
 using namespace pragma::rendering;
 
-extern DLLCLIENT CGame *c_game;
-extern DLLCLIENT ClientState *client;
+extern CGame *c_game;
+extern ClientState *client;
 
 void pragma::CRasterizationRendererComponent::CullLightSources(const util::DrawSceneInfo &drawSceneInfo)
 {

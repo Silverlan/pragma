@@ -5,6 +5,7 @@
 #define __C_LDEF_WGUI_H__
 
 #include "pragma/lua/classes/c_ldef_wguihandles.h"
+#include <wgui/wibase.h>
 
 LUA_SETUP_HANDLE_CHECK(GUIElement, ::WIBase, WIHandle);
 

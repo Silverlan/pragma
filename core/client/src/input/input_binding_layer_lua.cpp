@@ -6,7 +6,7 @@
 #include "pragma/input/input_binding_layer.hpp"
 #include "pragma/input/input_binding_layer_lua.hpp"
 
-extern DLLCLIENT CEngine *c_engine;
+extern CEngine *c_engine;
 
 pragma::LuaInputBindingLayerRegister::~LuaInputBindingLayerRegister() { Clear(); }
 void pragma::LuaInputBindingLayerRegister::Add(InputBindingLayer &layer) { m_layers.insert(&layer); }

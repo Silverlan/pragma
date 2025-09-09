@@ -15,7 +15,7 @@
 import pragma.client.debug;
 import pragma.client.entities.components;
 
-extern DLLCLIENT CGame *c_game;
+extern CGame *c_game;
 
 void Console::commands::debug_hitboxes(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {

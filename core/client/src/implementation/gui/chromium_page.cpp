@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/clientstate/clientstate.h"
 #include <wgui/wibase.h>
 #include <memory>
 #include <sharedutils/util_library.hpp>
@@ -16,7 +15,9 @@ module pragma.client.gui;
 
 import :chromium_page;
 
-extern DLLCLIENT ClientState *client;
+import pragma.client.client_state;
+
+extern ClientState *client;
 
 WIChromiumPage::WIChromiumPage(WIBase *parent) : m_parent(parent) {}
 

@@ -16,8 +16,8 @@ module pragma.client.entities.components.pp_base;
 
 import pragma.client.entities.components.rasterization_renderer;
 
-extern DLLCLIENT CGame *c_game;
-extern DLLCLIENT CEngine *c_engine;
+extern CGame *c_game;
+extern CEngine *c_engine;
 
 using namespace pragma;
 

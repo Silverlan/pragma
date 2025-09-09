@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
-#include "pragma/clientstate/clientstate.h"
 #include <wgui/types/witext.h>
 #include <wgui/types/witextentry.h>
 #include <wgui/types/wirect.h>
@@ -20,14 +19,15 @@ import :frame;
 import :scroll_container;
 import :snap_area;
 
+import pragma.client.client_state;
 import pragma.gui;
 import pragma.string.unicode;
 import pragma.locale;
 
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT ClientState *client;
+extern CEngine *c_engine;
+extern ClientState *client;
 
-extern DLLCLIENT ClientState *client;
+extern ClientState *client;
 
 static WIHandle s_hConsole = {};
 WIConsole *WIConsole::Open()

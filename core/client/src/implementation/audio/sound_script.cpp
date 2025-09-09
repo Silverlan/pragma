@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/audio/soundscript_events.h"
 #include "pragma/audio/c_alsound.h"
 #include <sharedutils/util_string.h>
@@ -18,7 +17,9 @@ module pragma.client.audio;
 
 import :sound_script;
 
-extern DLLCLIENT CEngine *c_engine;
+import pragma.client.client_state;
+
+extern CEngine *c_engine;
 extern ClientState *client;
 
 #undef CreateEvent

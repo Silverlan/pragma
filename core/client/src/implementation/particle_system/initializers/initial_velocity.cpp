@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/particlesystem/c_particlemodifier.h"
 #include "pragma/game/c_game.h"
 #include <mathutil/umath.h>
@@ -16,6 +15,8 @@ module;
 module pragma.client.particle_system;
 
 import :initializer_initial_velocity;
+
+import pragma.client.client_state;
 
 REGISTER_PARTICLE_INITIALIZER(initial_velocity, CParticleInitializerInitialVelocity);
 

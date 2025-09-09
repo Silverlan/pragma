@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
 #include <wgui/wibase.h>
 #include <wgui/types/wiroot.h>
@@ -21,6 +20,7 @@ module pragma.client.gui;
 
 import :lua_interface;
 
+import pragma.client.client_state;
 import pragma.client.scripting.lua;
 import pragma.gui;
 

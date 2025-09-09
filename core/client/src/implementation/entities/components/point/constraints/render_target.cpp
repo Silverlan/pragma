@@ -9,9 +9,7 @@ module;
 #include <mathutil/umat.h>
 #include "pragma/entities/baseentity_luaobject.h"
 #include "pragma/c_engine.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/c_engine.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
 #include <texturemanager/texturemanager.h>
 #include "textureinfo.h"
@@ -21,9 +19,11 @@ module;
 
 module pragma.client.entities.components.point_render_target;
 
+import pragma.client.client_state;
+
 using namespace pragma;
 
-extern DLLCLIENT ClientState *client;
+extern ClientState *client;
 
 #pragma message("FIXME: If point_rendertarget is out of view of the local player, but one of the texture targets isn't, they won't get updated! Find a solution!")
 

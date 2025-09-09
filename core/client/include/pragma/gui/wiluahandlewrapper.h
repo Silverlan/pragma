@@ -5,6 +5,8 @@
 #define __WILUAHANDLEWRAPPER_H__
 
 #include "pragma/clientdefinitions.h"
+#include <luabind/luabind.hpp>
+#include <wgui/types.hpp>
 
 class DLLCLIENT WILuaHandleWrapper {
   private:

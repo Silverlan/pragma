@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/c_engine.h"
 #include "pragma/util/curl_query_handler.hpp"
 #include "pragma/lua/converters/gui_element_converter.hpp"
@@ -20,11 +19,12 @@ module pragma.client.gui;
 import :main_menu_mods;
 import :progress_bar;
 
+import pragma.client.client_state;
 import pragma.client.core;
 import pragma.locale;
 
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT ClientState *client;
+extern CEngine *c_engine;
+extern ClientState *client;
 
 /////////////////////////
 

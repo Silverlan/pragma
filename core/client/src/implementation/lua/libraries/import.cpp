@@ -35,7 +35,7 @@ module pragma.client.scripting.lua.libraries.import_lib;
 
 import pragma.client.entities.components;
 
-extern DLLCLIENT CGame *c_game;
+extern CGame *c_game;
 
 #if 0
 static aiVector3D to_assimp_position(const Vector3 &pos)

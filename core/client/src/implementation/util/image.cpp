@@ -13,7 +13,7 @@ module;
 
 module pragma.client.util.image;
 
-extern DLLCLIENT CEngine *c_engine;
+extern CEngine *c_engine;
 static uimg::Format determine_target_format(prosper::Format format)
 {
 	auto targetFormat = uimg::Format::RGBA8;

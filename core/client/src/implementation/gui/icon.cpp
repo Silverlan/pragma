@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/lua/converters/gui_element_converter.hpp"
 #include <sharedutils/util_string.h>
 
@@ -12,7 +11,9 @@ module pragma.client.gui;
 
 import :icon;
 
-extern DLLCLIENT ClientState *client;
+import pragma.client.client_state;
+
+extern ClientState *client;
 LINK_WGUI_TO_CLASS(WIIcon, WIIcon);
 #define SILKICON_SPRITESHEET_WIDTH 1024
 #define SILKICON_SPRITESHEET_HEIGHT 512

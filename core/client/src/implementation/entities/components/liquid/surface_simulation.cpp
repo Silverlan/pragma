@@ -16,7 +16,7 @@ import pragma.client.entities.components.liquid_control;
 
 import pragma.client.physics;
 
-extern DLLCLIENT CGame *c_game;
+extern CGame *c_game;
 
 using namespace pragma;
 

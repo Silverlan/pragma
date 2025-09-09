@@ -9,7 +9,7 @@
 #include <prosper_util.hpp>
 #include <buffers/prosper_buffer.hpp>
 
-extern DLLCLIENT CEngine *c_engine;
+extern CEngine *c_engine;
 
 void CModel::UpdateVertexAnimationBuffer()
 {

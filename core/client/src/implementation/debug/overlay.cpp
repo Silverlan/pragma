@@ -7,7 +7,6 @@ module;
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/math/icosphere.h"
 #include "pragma/c_engine.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
 #include <pragma/debug/debug_render_info.hpp>
 #include <pragma/math/util_hermite.h>
@@ -21,12 +20,13 @@ module;
 
 module pragma.client.debug.overlay;
 
+import pragma.client.client_state;
 import pragma.client.rendering.shaders;
 import pragma.string.unicode;
 
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT ClientState *client;
-extern DLLCLIENT CGame *c_game;
+extern CEngine *c_engine;
+extern ClientState *client;
+extern CGame *c_game;
 
 namespace DebugRenderer {
 	struct RuntimeObject {

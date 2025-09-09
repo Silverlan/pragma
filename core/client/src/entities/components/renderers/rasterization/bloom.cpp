@@ -4,7 +4,6 @@
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/console/c_cvar.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
 #include <pragma/console/convars.h>
 #include <pragma/c_engine.h>
@@ -14,13 +13,14 @@
 #include <image/prosper_render_target.hpp>
 #include <cmaterial.h>
 
+import pragma.client.client_state;
 import pragma.client.entities.components;
 
 using namespace pragma::rendering;
 
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT ClientState *client;
-extern DLLCLIENT CGame *c_game;
+extern CEngine *c_engine;
+extern ClientState *client;
+extern CGame *c_game;
 
 void pragma::CRasterizationRendererComponent::RenderGlowObjects(const util::DrawSceneInfo &drawSceneInfo)
 {

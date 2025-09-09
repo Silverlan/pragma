@@ -12,7 +12,7 @@ module;
 
 module pragma.client.entities.components.eye;
 
-extern DLLCLIENT CGame *c_game;
+extern CGame *c_game;
 
 static auto g_debugPrint = false;
 void pragma::CEyeComponent::UpdateEyeballsMT()

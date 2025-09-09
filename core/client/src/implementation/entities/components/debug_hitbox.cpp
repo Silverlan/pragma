@@ -13,7 +13,7 @@ module pragma.client.entities.components.debug_hitbox;
 
 import pragma.client.debug;
 
-extern DLLCLIENT CEngine *c_engine;
+extern CEngine *c_engine;
 
 using namespace pragma;
 

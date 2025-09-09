@@ -2,12 +2,13 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/networking/iclient.hpp"
 #include <pragma/networking/error.hpp>
 #include <pragma/networking/enums.hpp>
 #include <pragma/engine.h>
 #include <pragma/networking/nwm_util.h>
+
+import pragma.client.client_state;
 
 extern DLLNETWORK Engine *engine;
 void ClientState::SendPacket(const std::string &name, NetPacket &packet, pragma::networking::Protocol protocol)

@@ -23,16 +23,16 @@ module;
 #include <image/prosper_render_target.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include "pragma/c_engine.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
 
 module pragma.client.entities.components.rasterization_renderer;
 
+import pragma.client.client_state;
 import pragma.client.rendering.shaders;
 
-extern DLLCLIENT CGame *c_game;
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT ClientState *client;
+extern CGame *c_game;
+extern CEngine *c_engine;
+extern ClientState *client;
 
 using namespace pragma;
 

@@ -18,7 +18,7 @@ import :detachable;
 import pragma.gui;
 import pragma.locale;
 
-extern DLLCLIENT CEngine *c_engine;
+extern CEngine *c_engine;
 
 LINK_WGUI_TO_CLASS(WIDetachable, WIDetachable);
 

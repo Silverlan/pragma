@@ -4,23 +4,24 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/clientstate/clientstate.h"
 #include <wgui/types/wirect.h>
 #include "pragma/input/input_binding_layer.hpp"
+#include "pragma/c_engine.h"
 
 module pragma.client.gui;
 
 import :options_list;
 import :scroll_container;
 
+import pragma.client.client_state;
 import pragma.gui;
 import pragma.locale;
 import pragma.string.unicode;
 
 LINK_WGUI_TO_CLASS(WIOptionsList, WIOptionsList);
 
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT ClientState *client;
+extern CEngine *c_engine;
+extern ClientState *client;
 
 WIOptionsList::WIOptionsList() : WIBase() {}
 

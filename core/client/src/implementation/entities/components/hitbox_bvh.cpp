@@ -29,8 +29,8 @@ module pragma.client.entities.components.hitbox_bvh;
 
 import pragma.client.debug;
 
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT CGame *c_game;
+extern CEngine *c_engine;
+extern CGame *c_game;
 
 using namespace pragma;
 

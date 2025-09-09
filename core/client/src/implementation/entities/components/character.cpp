@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/physics/collisiontypes.h"
 #include "pragma/math/deltaoffset.h"
@@ -29,11 +28,12 @@ module;
 
 module pragma.client.entities.components.character;
 
+import pragma.client.client_state;
 import pragma.client.entities.components.eye;
 import pragma.client.entities.components.sound_emitter;
 import pragma.client.entities.components.surface;
 
-extern DLLCLIENT ClientState *client;
+extern ClientState *client;
 
 using namespace pragma;
 

@@ -5,7 +5,7 @@
 #include "pragma/launchparameters.h"
 #include "pragma/c_engine.h"
 
-extern DLLCLIENT CEngine *c_engine;
+extern CEngine *c_engine;
 std::optional<bool> g_launchParamWindowedMode {};
 std::optional<int> g_launchParamRefreshRate {};
 std::optional<bool> g_launchParamNoBorder {};

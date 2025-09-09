@@ -7,7 +7,6 @@ module;
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/entities/components/base_physics_component.hpp"
 #include "pragma/entities/components/base_model_component.hpp"
-#include "pragma/clientstate/clientstate.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/util/util_handled.hpp>
 #include <pragma/entities/baseentity_events.hpp>
@@ -15,9 +14,11 @@ module;
 
 module pragma.client.entities.components.audio.sound_probe;
 
+import pragma.client.client_state;
+
 using namespace pragma;
 
-extern DLLCLIENT ClientState *client;
+extern ClientState *client;
 
 decltype(CEnvSoundProbeComponent::s_probes) CEnvSoundProbeComponent::s_probes = {};
 decltype(CEnvSoundProbeComponent::s_probeCallback) CEnvSoundProbeComponent::s_probeCallback = {};

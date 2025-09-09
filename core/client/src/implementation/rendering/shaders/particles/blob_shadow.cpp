@@ -20,7 +20,7 @@ using namespace Shader;
 
 LINK_SHADER_TO_CLASS(ParticleBlobShadow,particleblobshadow);
 
-extern DLLCLIENT CGame *c_game;
+extern CGame *c_game;
 
 ParticleBlobShadow::ParticleBlobShadow()
 	: ParticleShadowBase<ParticleBase>("ParticleBlobShadow","programs/particles/blob/particle_blob_shadow","programs/particles/blob/particle_blob_shadow")

@@ -10,7 +10,6 @@
 #include "pragma/lua/libraries/lasset.hpp"
 #include "pragma/asset/util_asset.hpp"
 #include "pragma/audio/c_laleffect.h"
-#include "pragma/clientstate/clientstate.h"
 #include <pragma/lua/policies/core_policies.hpp>
 #include <alsound_effect.hpp>
 #include <luabind/copy_policy.hpp>
@@ -39,14 +38,15 @@
 #include <alsoundsystem.hpp>
 
 import pragma.audio.util;
+import pragma.client.client_state;
 import pragma.client.gui;
 import pragma.client.scripting.lua;
 import pragma.gui;
 import pragma.platform;
 import pragma.string.unicode;
 
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT CGame *c_game;
+extern CEngine *c_engine;
+extern CGame *c_game;
 
 static int log(lua_State *l, spdlog::level::level_enum logLevel)
 {

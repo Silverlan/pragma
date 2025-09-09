@@ -12,7 +12,7 @@ import pragma.client.rendering.shaders;
 
 using namespace pragma::rendering::shader_graph;
 
-extern DLLCLIENT CEngine *c_engine;
+extern CEngine *c_engine;
 #pragma optimize("", off)
 std::shared_ptr<prosper::IDescriptorSetGroup> PbrModule::g_defaultPbrDsg = {};
 size_t PbrModule::g_instanceCount = 0;

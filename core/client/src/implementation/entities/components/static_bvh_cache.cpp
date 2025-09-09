@@ -16,8 +16,8 @@ module pragma.client.entities.components.static_bvh_cache;
 
 import pragma.client.entities.components;
 
-extern DLLCLIENT CGame *c_game;
-extern DLLCLIENT CEngine *c_engine;
+extern CGame *c_game;
+extern CEngine *c_engine;
 
 using namespace pragma;
 

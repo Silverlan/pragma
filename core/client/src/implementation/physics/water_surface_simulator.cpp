@@ -8,7 +8,6 @@ module;
 #include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/console/c_cvar.h"
 #include "pragma/c_engine.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
 #include <pragma/rendering/c_sci_gpu_timer_manager.hpp>
 #include <prosper_util.hpp>
@@ -18,14 +17,15 @@ module;
 
 module pragma.client.physics;
 
+import pragma.client.client_state;
 import pragma.client.debug;
 import pragma.client.model;
 import pragma.client.rendering.shaders;
 
 import :water_surface_simulator;
 
-extern DLLCLIENT CEngine *c_engine;
-extern DLLCLIENT CGame *c_game;
+extern CEngine *c_engine;
+extern CGame *c_game;
 
 CPhysWaterSurfaceSimulator::CPhysWaterSurfaceSimulator(Vector2 aabbMin, Vector2 aabbMax, float originY, uint32_t spacing, float stiffness, float propagation) : PhysWaterSurfaceSimulator(aabbMin, aabbMax, originY, spacing, stiffness, propagation)
 {

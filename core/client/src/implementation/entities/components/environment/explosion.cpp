@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/entities/components/c_attachment_component.hpp"
@@ -17,6 +16,7 @@ module;
 
 module pragma.client.entities.components.effects.explosion;
 
+import pragma.client.client_state;
 import pragma.client.entities.components.env_quake;
 import pragma.client.entities.components.io;
 import pragma.client.entities.components.sound_emitter;

@@ -8,7 +8,6 @@ module;
 #include <wgui/types/widropdownmenu.h>
 #include <wgui/types/witext.h>
 #include <wgui/types/witextentry.h>
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/rendering/c_msaa.h"
 #include "pragma/rendering/render_apis.hpp"
 #include "pragma/entities/environment/lights/c_env_shadow_csm.hpp"
@@ -34,11 +33,12 @@ import :choice_list;
 import :slider;
 
 import pragma.client.audio;
+import pragma.client.client_state;
 import pragma.pad;
 import pragma.locale;
 import pragma.string.unicode;
 
-extern DLLCLIENT CEngine *c_engine;
+extern CEngine *c_engine;
 extern ClientState *client;
 
 WIMainMenuOptions::WIMainMenuOptions() : WIMainMenuBase(), m_yOffset(128) {}

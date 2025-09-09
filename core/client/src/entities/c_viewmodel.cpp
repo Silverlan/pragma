@@ -23,7 +23,7 @@ import pragma.client.entities.components;
 
 using namespace pragma;
 
-extern DLLCLIENT CGame *c_game;
+extern CGame *c_game;
 
 void CViewModelComponent::Initialize()
 {

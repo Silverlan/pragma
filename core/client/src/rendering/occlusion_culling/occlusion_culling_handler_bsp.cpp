@@ -11,17 +11,17 @@
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/model/c_model.h"
 #include "pragma/c_engine.h"
-#include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
 #include <pragma/math/intersection.h>
 #include <pragma/entities/entity_component_system_t.hpp>
 
+import pragma.client.client_state;
 import pragma.client.debug;
 import pragma.client.entities.components;
 
 using namespace pragma;
 
-extern DLLCLIENT CGame *c_game;
+extern CGame *c_game;
 
 OcclusionCullingHandlerBSP::OcclusionCullingHandlerBSP(const std::shared_ptr<util::BSPTree> &bspTree) : m_bspTree {bspTree} {}
 const util::BSPTree &OcclusionCullingHandlerBSP::GetBSPTree() const { return *m_bspTree; }

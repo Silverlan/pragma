@@ -14,7 +14,7 @@
 
 import pragma.client.audio;
 
-extern DLLCLIENT CEngine *c_engine;
+extern CEngine *c_engine;
 
 const al::ISoundSystem *CEngine::GetSoundSystem() const { return const_cast<CEngine *>(this)->GetSoundSystem(); }
 al::ISoundSystem *CEngine::GetSoundSystem() { return m_soundSystem.get(); }

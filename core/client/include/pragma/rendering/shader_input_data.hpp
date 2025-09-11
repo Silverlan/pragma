@@ -5,6 +5,8 @@
 #define __PRAGMA_SHADER_INPUT_DATA_HPP__
 
 #include "pragma/clientdefinitions.h"
+#include "pragma/util/global_string_table.hpp"
+#include "pragma/console/conout.h"
 #include <udm.hpp>
 
 import pragma.shadergraph;

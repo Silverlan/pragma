@@ -7,6 +7,7 @@ module;
 #include "luasystem.h"
 #include "pragma/ai/ai_schedule.h"
 #include "pragma/ai/ai_memory.h"
+#include "pragma/model/animation/animation_event.h"
 #include <luainterface.hpp>
 #include <pragma/lua/libraries/lai.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
@@ -21,8 +22,6 @@ import pragma.server.scripting.lua.classes.ai_memory;
 import pragma.server.scripting.lua.classes.ai_schedule;
 import pragma.server.scripting.lua.classes.ai_squad;
 import pragma.server.scripting.lua.classes.faction;
-
-extern SGame *s_game;
 
 using LuaFactionObject = luabind::object;
 namespace Lua {
@@ -230,7 +229,7 @@ LuaFactionObject Lua::ai::find_faction_by_name(lua_State *l, const std::string &
 uint32_t Lua::ai::register_task(lua_State *l, const LuaClassObject &taskClass, ::pragma::ai::BehaviorNode::Type taskType, ::pragma::ai::SelectorType selectorType)
 {
 	Lua::CheckUserData(l, 1);
-	auto &taskManager = s_game->GetAITaskManager();
+	auto &taskManager = SGame::Get()->GetAITaskManager();
 	return taskManager.RegisterTask(std::bind(server::create_lua_task, l, taskClass, taskType, selectorType));
 }
 uint32_t Lua::ai::register_task(lua_State *l, const LuaClassObject &taskClass, ::pragma::ai::BehaviorNode::Type taskType) { return register_task(l, taskClass, taskType, ::pragma::ai::SelectorType::Sequential); }

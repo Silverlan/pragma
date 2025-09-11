@@ -10,8 +10,6 @@ module pragma.server.audio.sound_script;
 
 import pragma.server.server_state;
 
-extern ServerState *server;
-
 SALSoundScript::SALSoundScript(NetworkState *nw, unsigned int idx, SoundScript *script, NetworkState *state, const std::string &soundName, ALCreateFlags createFlags)
     : ALSoundScript(nw, idx, script, state, umath::is_flag_set(createFlags, ALCreateFlags::Stream)), SALSound(nw, idx, 0.f, soundName, createFlags), ALSound(nw)
 {
@@ -29,7 +27,7 @@ std::shared_ptr<ALSound> SALSoundScript::CreateSound(const std::string &name, AL
 	flags |= ALCreateFlags::DontTransmit;
 
 	flags |= createFlags;
-	return server->CreateSound(name, GetType(), flags);
+	return ServerState::Get()->CreateSound(name, GetType(), flags);
 }
 
 ALState SALSoundScript::GetState() const { return SALSound::GetState(); }

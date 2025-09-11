@@ -6,6 +6,7 @@ module;
 #include "stdafx_server.h"
 #include "pragma/ai/ai_schedule.h"
 #include <pragma/entities/components/base_transform_component.hpp>
+#include <pragma/entities/components/base_ai_component.hpp>
 
 module pragma.server.ai.tasks.target;
 
@@ -13,14 +14,14 @@ import pragma.server.entities.components;
 
 using namespace pragma;
 
-const BaseEntity *ai::TaskTarget::GetTargetEntity(const Schedule *sched, pragma::SAIComponent &ent) const
+const BaseEntity *ai::TaskTarget::GetTargetEntity(const Schedule *sched, pragma::BaseAIComponent &ent) const
 {
 	auto *target = GetParameter(sched, umath::to_integral(Parameter::Target));
 	auto type = (target != nullptr) ? target->GetType() : ai::Schedule::Parameter::Type::None;
 	if(type == ai::Schedule::Parameter::Type::Entity)
 		return target->GetEntity();
 	else if(type != ai::Schedule::Parameter::Type::Vector) {
-		auto *memFragment = ent.GetPrimaryTarget();
+		auto *memFragment = static_cast<SAIComponent&>(ent).GetPrimaryTarget();
 		if(memFragment == nullptr || memFragment->hEntity.valid() == false)
 			return nullptr;
 		return memFragment->hEntity.get();
@@ -31,12 +32,12 @@ const BaseEntity *ai::TaskTarget::GetTargetEntity(const Schedule *sched, pragma:
 void ai::TaskTarget::SetTarget(const Vector3 &target) { SetParameter(umath::to_integral(Parameter::Target), target); }
 void ai::TaskTarget::SetTarget(const EntityHandle &hEnt) { SetParameter(umath::to_integral(Parameter::Target), hEnt.get()); }
 
-bool ai::TaskTarget::GetTargetPosition(const Schedule *sched, pragma::SAIComponent &ent, Vector3 &pos) const
+bool ai::TaskTarget::GetTargetPosition(const Schedule *sched, pragma::BaseAIComponent &ent, Vector3 &pos) const
 {
 	auto *target = GetParameter(sched, umath::to_integral(Parameter::Target));
 	auto type = (target != nullptr) ? target->GetType() : ai::Schedule::Parameter::Type::None;
 	if(type != ai::Schedule::Parameter::Type::Entity && type != ai::Schedule::Parameter::Type::Vector) {
-		auto *memFragment = ent.GetPrimaryTarget();
+		auto *memFragment = static_cast<SAIComponent&>(ent).GetPrimaryTarget();
 		if(memFragment == nullptr || memFragment->hEntity.valid() == false)
 			return false;
 		auto pTrComponentEnt = memFragment->hEntity.get()->GetTransformComponent();

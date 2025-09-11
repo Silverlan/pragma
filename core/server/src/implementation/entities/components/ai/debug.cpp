@@ -44,7 +44,7 @@ void SAIComponent::_debugSendNavInfo(pragma::SPlayerComponent &pl)
 	}
 	auto *session = pl.GetClientSession();
 	if(session)
-		server->SendPacket("debug_ai_navigation", p, pragma::networking::Protocol::SlowReliable, *session);
+		ServerState::Get()->SendPacket("debug_ai_navigation", p, pragma::networking::Protocol::SlowReliable, *session);
 }
 
 void SAIComponent::_debugSendScheduleInfo(pragma::SPlayerComponent &pl, std::shared_ptr<DebugBehaviorTreeNode> &dbgTree, std::shared_ptr<::ai::Schedule> &aiSchedule, float &tLastSchedUpdate)
@@ -52,25 +52,25 @@ void SAIComponent::_debugSendScheduleInfo(pragma::SPlayerComponent &pl, std::sha
 	auto sched = GetCurrentSchedule();
 	if(sched == nullptr) {
 		if(aiSchedule != nullptr) {
-			auto tDelta = s_game->CurTime() - tLastSchedUpdate;
+			auto tDelta = SGame::Get()->CurTime() - tLastSchedUpdate;
 			if(tDelta >= 4.f) // Only actually clear schedule if schedule has been finished for at least 4 seconds
 			{
 				NetPacket p {};
 				p->Write<uint8_t>(static_cast<uint8_t>(0));
 				auto *session = pl.GetClientSession();
 				if(session)
-					server->SendPacket("debug_ai_schedule_tree", p, pragma::networking::Protocol::SlowReliable, *session);
+					ServerState::Get()->SendPacket("debug_ai_schedule_tree", p, pragma::networking::Protocol::SlowReliable, *session);
 				aiSchedule = nullptr;
 			}
 		}
 		return;
 	}
 
-	tLastSchedUpdate = s_game->CurTime();
+	tLastSchedUpdate = SGame::Get()->CurTime();
 	NetPacket p {};
 	auto bFullUpdate = (sched != aiSchedule) ? true : false;
 	if(bFullUpdate == false) {
-		auto tCur = static_cast<float>(s_game->CurTime());
+		auto tCur = static_cast<float>(SGame::Get()->CurTime());
 		std::function<int8_t(DebugBehaviorTreeNode &, const ai::BehaviorNode &, float)> fMarkChangedNodes = nullptr;
 		fMarkChangedNodes = [&fMarkChangedNodes](DebugBehaviorTreeNode &dbgNode, const ai::BehaviorNode &taskNode, float t) -> int8_t {
 			auto &childTaskNodes = taskNode.GetNodes();
@@ -175,25 +175,5 @@ void SAIComponent::_debugSendScheduleInfo(pragma::SPlayerComponent &pl, std::sha
 	}
 	auto *session = pl.GetClientSession();
 	if(session)
-		server->SendPacket("debug_ai_schedule_tree", p, pragma::networking::Protocol::SlowReliable, *session);
-}
-
-void NET_sv_debug_ai_navigation(pragma::networking::IServerClient &session, NetPacket packet)
-{
-	if(!server->CheatsEnabled() || s_game == nullptr)
-		return;
-	auto *pl = server->GetPlayer(session);
-	if(pl == nullptr)
-		return;
-	auto b = packet->Read<bool>();
-	if(b == false) {
-		auto it = std::find_if(SAIComponent::s_plDebugAiNav.begin(), SAIComponent::s_plDebugAiNav.end(), [pl](const pragma::ComponentHandle<pragma::SPlayerComponent> &sPlComponent) { return (sPlComponent.get() == pl) ? true : false; });
-		if(it != SAIComponent::s_plDebugAiNav.end())
-			SAIComponent::s_plDebugAiNav.erase(it);
-		return;
-	}
-	SAIComponent::s_plDebugAiNav.push_back(pl->GetHandle<pragma::SPlayerComponent>());
-	auto &npcs = SAIComponent::GetAll();
-	for(auto *npc : npcs)
-		npc->_debugSendNavInfo(*pl);
+		ServerState::Get()->SendPacket("debug_ai_schedule_tree", p, pragma::networking::Protocol::SlowReliable, *session);
 }

@@ -61,8 +61,6 @@
 #define FILE_ATTRIBUTE_VIRTUAL 0x10000
 #endif
 
-extern DLLNETWORK Engine *engine;
-
 static int32_t include(lua_State *l)
 {
 	std::string path = Lua::CheckString(l, 1);
@@ -273,7 +271,7 @@ void Game::RegisterLuaGlobals()
 
 	lua_register(GetLuaState(), "include_component", static_cast<int32_t (*)(lua_State *)>([](lua_State *l) -> int32_t {
 		std::string componentName = Lua::CheckString(l, 1);
-		auto *nw = engine->GetNetworkState(l);
+		auto *nw = Engine::Get()->GetNetworkState(l);
 		auto *game = nw->GetGameState();
 		Lua::PushBool(l, game->LoadLuaComponentByName(componentName));
 		return 1;
@@ -453,7 +451,7 @@ void Game::RegisterLuaGlobals()
 	auto enableShorthand = Lua::get_extended_lua_modules_enabled();
 	if(enableShorthand) {
 		luabind::globals(l)["ec"] = luabind::make_function(l, static_cast<luabind::object (*)(lua_State *, luabind::object, luabind::object)>([](lua_State *l, luabind::object o, luabind::object o2) -> luabind::object {
-			auto &nw = *engine->GetNetworkState(l);
+			auto &nw = *Engine::Get()->GetNetworkState(l);
 			auto *game = nw.GetGameState();
 			if(!game)
 				return {};
@@ -496,7 +494,7 @@ void Game::RegisterLuaGlobals()
 			return {};
 		}));
 		luabind::globals(l)["e"] = luabind::make_function(l, static_cast<luabind::object (*)(lua_State *, luabind::object)>([](lua_State *l, luabind::object o) -> luabind::object {
-			auto &nw = *engine->GetNetworkState(l);
+			auto &nw = *Engine::Get()->GetNetworkState(l);
 			auto *game = nw.GetGameState();
 			if(!game)
 				return {};

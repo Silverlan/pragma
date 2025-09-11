@@ -13,9 +13,7 @@ import pragma.server.game;
 
 using namespace pragma;
 
-extern SGame *s_game;
-
-ai::BehaviorNode::Result ai::TaskWait::Start(const Schedule *sched, pragma::SAIComponent &ent)
+ai::BehaviorNode::Result ai::TaskWait::Start(const Schedule *sched, pragma::BaseAIComponent &ent)
 {
 	BehaviorNode::Start(sched, ent);
 	auto *tParamMin = GetParameter(sched, umath::to_integral(Parameter::MinWaitTime));
@@ -25,7 +23,7 @@ ai::BehaviorNode::Result ai::TaskWait::Start(const Schedule *sched, pragma::SAIC
 	auto dur = umath::random(tParamMin->GetFloat(), tParamMax->GetFloat());
 	if(dur <= 0.f)
 		return Result::Succeeded;
-	m_tFinished = s_game->CurTime() + static_cast<double>(dur);
+	m_tFinished = SGame::Get()->CurTime() + static_cast<double>(dur);
 	return Result::Pending;
 }
 
@@ -38,12 +36,12 @@ void ai::TaskWait::Print(const Schedule *sched, std::ostream &o) const
 	o << "Wait[" << minTime << "][" << maxTime << "]";
 }
 
-ai::BehaviorNode::Result ai::TaskWait::Think(const Schedule *sched, pragma::SAIComponent &ent)
+ai::BehaviorNode::Result ai::TaskWait::Think(const Schedule *sched, pragma::BaseAIComponent &ent)
 {
 	auto r = BehaviorNode::Think(sched, ent);
 	if(r != Result::Succeeded)
 		return r;
-	auto &tCur = s_game->CurTime();
+	auto &tCur = SGame::Get()->CurTime();
 	if(tCur < m_tFinished)
 		return Result::Pending;
 	return Result::Succeeded;

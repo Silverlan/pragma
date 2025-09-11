@@ -4,17 +4,13 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include "pragma/networkdefinitions.h"
-#include <pragma/lua/ldefinitions.h>
+#include "pragma/networking/recipient_filter.hpp"
 
 export module pragma.server.scripting.lua.classes.recipient_filter;
 
 import pragma.server.entities.components;
 
-export {
-	namespace pragma::networking {
-		class TargetRecipientFilter;
-	};
+export {;
 	namespace Lua {
 		namespace RecipientFilter {
 			DLLSERVER luabind::tableT<pragma::SPlayerComponent> GetRecipients(lua_State *l, pragma::networking::TargetRecipientFilter &rp);

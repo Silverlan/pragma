@@ -37,10 +37,6 @@ import pragma.server.game;
 import pragma.server.model_manager;
 import pragma.server.server_state;
 
-extern DLLNETWORK Engine *engine;
-extern ServerState *server;
-extern SGame *s_game;
-
 #undef GetClassName;
 
 SBaseEntity::SBaseEntity() : BaseEntity(), m_bShared(false), m_bSynchronized(true) {}
@@ -48,7 +44,7 @@ SBaseEntity::SBaseEntity() : BaseEntity(), m_bShared(false), m_bSynchronized(tru
 void SBaseEntity::DoSpawn()
 {
 	BaseEntity::DoSpawn();
-	Game *game = server->GetGameState();
+	Game *game = ServerState::Get()->GetGameState();
 	game->SpawnEntity(this);
 }
 
@@ -89,7 +85,7 @@ BaseEntity *SBaseEntity::GetClientsideEntity() const
 {
 	if(IsShared() == false)
 		return nullptr;
-	auto *clState = engine->GetClientState();
+	auto *clState = Engine::Get()->GetClientState();
 	if(clState == nullptr)
 		return nullptr;
 	auto *game = clState->GetGameState();
@@ -127,7 +123,7 @@ void SBaseEntity::SendData(NetPacket &packet, pragma::networking::ClientRecipien
 	packet->Write<uint32_t>(GetSpawnFlags());
 	packet->Write(GetUuid());
 
-	auto &componentManager = s_game->GetEntityComponentManager();
+	auto &componentManager = SGame::Get()->GetEntityComponentManager();
 	auto &components = GetComponents();
 	auto offset = packet->GetOffset();
 	auto numComponents = umath::min(components.size(), static_cast<size_t>(std::numeric_limits<uint8_t>::max()));
@@ -165,11 +161,11 @@ void SBaseEntity::Remove()
 	if(umath::is_flag_set(GetStateFlags(), BaseEntity::StateFlags::Removed))
 		return;
 	BaseEntity::Remove();
-	Game *game = server->GetGameState();
+	Game *game = ServerState::Get()->GetGameState();
 	game->RemoveEntity(this);
 }
 
-NetworkState *SBaseEntity::GetNetworkState() const { return server; }
+NetworkState *SBaseEntity::GetNetworkState() const { return ServerState::Get(); }
 
 void SBaseEntity::SendNetEvent(pragma::NetEventId eventId, NetPacket &packet, pragma::networking::Protocol protocol, const pragma::networking::ClientRecipientFilter &rf)
 {
@@ -177,7 +173,7 @@ void SBaseEntity::SendNetEvent(pragma::NetEventId eventId, NetPacket &packet, pr
 		return;
 	nwm::write_entity(packet, this);
 	packet->Write<UInt32>(eventId);
-	server->SendPacket("ent_event", packet, protocol, rf);
+	ServerState::Get()->SendPacket("ent_event", packet, protocol, rf);
 }
 void SBaseEntity::SendNetEvent(pragma::NetEventId eventId, NetPacket &packet, pragma::networking::Protocol protocol)
 {

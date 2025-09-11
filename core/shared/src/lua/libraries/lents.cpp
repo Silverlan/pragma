@@ -38,8 +38,6 @@
 
 //import pragma.scripting.lua;
 
-extern DLLNETWORK Engine *engine;
-
 enum class TypeMetaData : uint32_t { Range = 0, Coordinate, Pose, PoseComponent, Optional, Enabler, Parent, Count };
 std::optional<std::type_index> type_meta_data_to_type_index(TypeMetaData eType)
 {
@@ -619,7 +617,7 @@ void Lua::ents::register_library(lua_State *l)
 
 Lua::type<BaseEntity> Lua::ents::create(lua_State *l, const std::string &classname)
 {
-	NetworkState *state = engine->GetNetworkState(l);
+	NetworkState *state = Engine::Get()->GetNetworkState(l);
 	Game *game = state->GetGameState();
 
 	auto *ent = game->CreateEntity(classname);
@@ -630,7 +628,7 @@ Lua::type<BaseEntity> Lua::ents::create(lua_State *l, const std::string &classna
 
 Lua::type<BaseEntity> Lua::ents::create_prop(lua_State *l, const std::string &mdl, const Vector3 *origin, const EulerAngles *angles, bool physicsProp = false)
 {
-	NetworkState *state = engine->GetNetworkState(l);
+	NetworkState *state = Engine::Get()->GetNetworkState(l);
 	Game *game = state->GetGameState();
 	auto *ent = game->CreateEntity(physicsProp ? "prop_physics" : "prop_dynamic");
 	if(ent == nullptr)
@@ -647,7 +645,7 @@ Lua::type<BaseEntity> Lua::ents::create_prop(lua_State *l, const std::string &md
 namespace Lua::ents {
 	Lua::type<BaseEntity> create_trigger(lua_State *l, const Vector3 &origin, const EulerAngles *angles, pragma::physics::IConvexShape *shape)
 	{
-		auto *state = engine->GetNetworkState(l);
+		auto *state = Engine::Get()->GetNetworkState(l);
 		auto *game = state->GetGameState();
 		auto *ent = game->CreateEntity("trigger_touch");
 		if(ent == nullptr)
@@ -670,7 +668,7 @@ namespace Lua::ents {
 };
 Lua::type<BaseEntity> Lua::ents::create_trigger(lua_State *l, const Vector3 &origin, float radius)
 {
-	auto *state = engine->GetNetworkState(l);
+	auto *state = Engine::Get()->GetNetworkState(l);
 	auto *game = state->GetGameState();
 	auto *phys = game->GetPhysicsEnvironment();
 	auto shape = phys->CreateSphereShape(radius, phys->GetGenericMaterial());
@@ -688,7 +686,7 @@ Lua::type<BaseEntity> Lua::ents::create_trigger(lua_State *l, const Vector3 &ori
 
 Lua::type<BaseEntity> Lua::ents::create_trigger(lua_State *l, const Vector3 &origin, const Vector3 &min, const Vector3 &max, const EulerAngles &angles)
 {
-	auto *state = engine->GetNetworkState(l);
+	auto *state = Engine::Get()->GetNetworkState(l);
 	auto *game = state->GetGameState();
 	auto *phys = game->GetPhysicsEnvironment();
 
@@ -805,7 +803,7 @@ Lua::type<BaseEntity> Lua::ents::get_random(lua_State *l)
 
 Lua::opt<std::string> Lua::ents::get_component_name(lua_State *l, pragma::ComponentId componentId)
 {
-	auto *info = engine->GetNetworkState(l)->GetGameState()->GetEntityComponentManager().GetComponentInfo(componentId);
+	auto *info = Engine::Get()->GetNetworkState(l)->GetGameState()->GetEntityComponentManager().GetComponentInfo(componentId);
 	if(info == nullptr)
 		return nil;
 	return {l, info->name};
@@ -813,14 +811,14 @@ Lua::opt<std::string> Lua::ents::get_component_name(lua_State *l, pragma::Compon
 Lua::opt<uint32_t> Lua::ents::get_component_id(lua_State *l, const std::string &componentName)
 {
 	pragma::ComponentId componentId;
-	if(engine->GetNetworkState(l)->GetGameState()->GetEntityComponentManager().GetComponentTypeId(componentName, componentId) == false)
+	if(Engine::Get()->GetNetworkState(l)->GetGameState()->GetEntityComponentManager().GetComponentTypeId(componentName, componentId) == false)
 		return nil;
 	return {l, componentId};
 }
 
 Lua::tb<Lua::type<BaseEntity>> Lua::ents::get_all(lua_State *l)
 {
-	NetworkState *state = engine->GetNetworkState(l);
+	NetworkState *state = Engine::Get()->GetNetworkState(l);
 	Game *game = state->GetGameState();
 	std::vector<BaseEntity *> *ents;
 	game->GetEntities(&ents);
@@ -901,7 +899,7 @@ Lua::tb<Lua::type<BaseEntity>> Lua::ents::get_all(lua_State *l, const tb<LuaEnti
 
 Lua::tb<Lua::type<BaseEntity>> Lua::ents::get_spawned(lua_State *l)
 {
-	NetworkState *state = engine->GetNetworkState(l);
+	NetworkState *state = Engine::Get()->GetNetworkState(l);
 	Game *game = state->GetGameState();
 	std::vector<BaseEntity *> ents;
 	game->GetSpawnedEntities(&ents);
@@ -910,7 +908,7 @@ Lua::tb<Lua::type<BaseEntity>> Lua::ents::get_spawned(lua_State *l)
 
 Lua::tb<Lua::type<BaseEntity>> Lua::ents::get_players(lua_State *l)
 {
-	auto &game = *engine->GetNetworkState(l)->GetGameState();
+	auto &game = *Engine::Get()->GetNetworkState(l)->GetGameState();
 	auto t = luabind::newtable(l);
 	auto idx = 1u;
 	EntityIterator it {game, EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending | EntityIterator::FilterFlags::Player};
@@ -921,7 +919,7 @@ Lua::tb<Lua::type<BaseEntity>> Lua::ents::get_players(lua_State *l)
 
 Lua::tb<Lua::type<BaseEntity>> Lua::ents::get_npcs(lua_State *l)
 {
-	auto &game = *engine->GetNetworkState(l)->GetGameState();
+	auto &game = *Engine::Get()->GetNetworkState(l)->GetGameState();
 	auto t = luabind::newtable(l);
 	auto idx = 1u;
 	EntityIterator it {game, EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending | EntityIterator::FilterFlags::NPC};
@@ -931,7 +929,7 @@ Lua::tb<Lua::type<BaseEntity>> Lua::ents::get_npcs(lua_State *l)
 }
 Lua::tb<Lua::type<BaseEntity>> Lua::ents::get_weapons(lua_State *l)
 {
-	auto &game = *engine->GetNetworkState(l)->GetGameState();
+	auto &game = *Engine::Get()->GetNetworkState(l)->GetGameState();
 	auto t = luabind::newtable(l);
 	auto idx = 1u;
 	EntityIterator it {game, EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending | EntityIterator::FilterFlags::Weapon};
@@ -941,7 +939,7 @@ Lua::tb<Lua::type<BaseEntity>> Lua::ents::get_weapons(lua_State *l)
 }
 Lua::tb<Lua::type<pragma::BaseVehicleComponent>> Lua::ents::get_vehicles(lua_State *l)
 {
-	auto &game = *engine->GetNetworkState(l)->GetGameState();
+	auto &game = *Engine::Get()->GetNetworkState(l)->GetGameState();
 	auto t = luabind::newtable(l);
 	auto idx = 1u;
 	EntityIterator it {game, EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending | EntityIterator::FilterFlags::Vehicle};
@@ -952,7 +950,7 @@ Lua::tb<Lua::type<pragma::BaseVehicleComponent>> Lua::ents::get_vehicles(lua_Sta
 
 Lua::opt<Lua::type<BaseEntity>> Lua::ents::get_world(lua_State *l)
 {
-	NetworkState *state = engine->GetNetworkState(l);
+	NetworkState *state = Engine::Get()->GetNetworkState(l);
 	Game *game = state->GetGameState();
 	auto *pWorld = game->GetWorld();
 	if(pWorld == nullptr)
@@ -963,7 +961,7 @@ Lua::opt<Lua::type<BaseEntity>> Lua::ents::get_world(lua_State *l)
 
 Lua::opt<Lua::type<BaseEntity>> Lua::ents::get_by_index(lua_State *l, uint32_t idx)
 {
-	NetworkState *state = engine->GetNetworkState(l);
+	NetworkState *state = Engine::Get()->GetNetworkState(l);
 	Game *game = state->GetGameState();
 	BaseEntity *ent = game->GetEntity(idx);
 	if(ent == NULL)
@@ -973,7 +971,7 @@ Lua::opt<Lua::type<BaseEntity>> Lua::ents::get_by_index(lua_State *l, uint32_t i
 
 Lua::opt<Lua::type<BaseEntity>> Lua::ents::get_by_local_index(lua_State *l, uint32_t idx)
 {
-	NetworkState *state = engine->GetNetworkState(l);
+	NetworkState *state = Engine::Get()->GetNetworkState(l);
 	Game *game = state->GetGameState();
 	BaseEntity *ent = game->GetEntityByLocalIndex(idx);
 	if(ent == NULL)
@@ -984,7 +982,7 @@ Lua::opt<Lua::type<BaseEntity>> Lua::ents::get_by_local_index(lua_State *l, uint
 Lua::opt<Lua::type<BaseEntity>> Lua::ents::find_by_unique_index(lua_State *l, const std::string &uuid)
 {
 	auto uniqueIndex = ::util::uuid_string_to_bytes(uuid);
-	auto *state = engine->GetNetworkState(l);
+	auto *state = Engine::Get()->GetNetworkState(l);
 	auto *game = state->GetGameState();
 	auto *ent = game->FindEntityByUniqueId(::util::uuid_string_to_bytes(uuid));
 	if(!ent)
@@ -1041,7 +1039,7 @@ Lua::type<EntityHandle> Lua::ents::get_null(lua_State *l)
 
 Lua::tb<Lua::type<BaseEntity>> Lua::ents::find_by_filter(lua_State *l, const std::string &name)
 {
-	auto *state = engine->GetNetworkState(l);
+	auto *state = Engine::Get()->GetNetworkState(l);
 	auto *game = state->GetGameState();
 
 	EntityIterator entIt {*game};
@@ -1051,7 +1049,7 @@ Lua::tb<Lua::type<BaseEntity>> Lua::ents::find_by_filter(lua_State *l, const std
 
 Lua::tb<Lua::type<BaseEntity>> Lua::ents::find_by_class(lua_State *l, const std::string &className)
 {
-	NetworkState *state = engine->GetNetworkState(l);
+	NetworkState *state = Engine::Get()->GetNetworkState(l);
 	Game *game = state->GetGameState();
 
 	EntityIterator entIt {*game};
@@ -1061,7 +1059,7 @@ Lua::tb<Lua::type<BaseEntity>> Lua::ents::find_by_class(lua_State *l, const std:
 
 Lua::tb<Lua::type<BaseEntity>> Lua::ents::find_by_name(lua_State *l, const std::string &name)
 {
-	NetworkState *state = engine->GetNetworkState(l);
+	NetworkState *state = Engine::Get()->GetNetworkState(l);
 	Game *game = state->GetGameState();
 
 	EntityIterator entIt {*game};
@@ -1071,7 +1069,7 @@ Lua::tb<Lua::type<BaseEntity>> Lua::ents::find_by_name(lua_State *l, const std::
 
 Lua::tb<Lua::type<BaseEntity>> Lua::ents::find_by_component(lua_State *l, const std::string &componentName)
 {
-	auto *nw = engine->GetNetworkState(l);
+	auto *nw = Engine::Get()->GetNetworkState(l);
 	auto *game = nw->GetGameState();
 
 	auto t = luabind::newtable(l);
@@ -1086,7 +1084,7 @@ Lua::tb<Lua::type<BaseEntity>> Lua::ents::find_in_aabb(lua_State *l, const Vecto
 Lua::tb<Lua::type<BaseEntity>> Lua::ents::find_in_sphere(lua_State *l, const Vector3 &origin, float radius)
 {
 	std::vector<BaseEntity *> ents;
-	NetworkState *state = engine->GetNetworkState(l);
+	NetworkState *state = Engine::Get()->GetNetworkState(l);
 
 	EntityIterator entIt {*state->GetGameState()};
 	entIt.AttachFilter<EntityIteratorFilterSphere>(origin, radius);
@@ -1096,7 +1094,7 @@ Lua::tb<Lua::type<BaseEntity>> Lua::ents::find_in_sphere(lua_State *l, const Vec
 Lua::tb<Lua::type<BaseEntity>> Lua::ents::find_in_box(lua_State *l, const Vector3 &min, const Vector3 &max)
 {
 	std::vector<BaseEntity *> ents;
-	NetworkState *state = engine->GetNetworkState(l);
+	NetworkState *state = Engine::Get()->GetNetworkState(l);
 	Game *game = state->GetGameState();
 
 	EntityIterator entIt {*game};
@@ -1106,7 +1104,7 @@ Lua::tb<Lua::type<BaseEntity>> Lua::ents::find_in_box(lua_State *l, const Vector
 
 Lua::tb<Lua::type<BaseEntity>> Lua::ents::find_in_cone(lua_State *l, const Vector3 &origin, const Vector3 &dir, float radius, float angle)
 {
-	auto *state = engine->GetNetworkState(l);
+	auto *state = Engine::Get()->GetNetworkState(l);
 	auto *game = state->GetGameState();
 
 	EntityIterator entIt {*game};
@@ -1117,14 +1115,14 @@ Lua::tb<Lua::type<BaseEntity>> Lua::ents::find_in_cone(lua_State *l, const Vecto
 Lua::opt<pragma::ComponentEventId> Lua::ents::get_event_id(lua_State *l, const std::string &name)
 {
 	pragma::ComponentEventId eventId;
-	if(engine->GetNetworkState(l)->GetGameState()->GetEntityComponentManager().GetEventId(name, eventId) == false)
+	if(Engine::Get()->GetNetworkState(l)->GetGameState()->GetEntityComponentManager().GetEventId(name, eventId) == false)
 		return nil;
 	return {l, eventId};
 }
 
 void Lua::ents::register_class(lua_State *l, const std::string &className, const Lua::classObject &classObject)
 {
-	auto *state = engine->GetNetworkState(l);
+	auto *state = Engine::Get()->GetNetworkState(l);
 	auto *game = state->GetGameState();
 	auto &manager = game->GetLuaEntityManager();
 	manager.RegisterEntity(className, const_cast<Lua::classObject &>(classObject), {});
@@ -1134,7 +1132,7 @@ void Lua::ents::register_class(lua_State *l, const std::string &className, const
 	std::vector<pragma::ComponentId> components;
 	auto numComponents = Lua::GetObjectLength(l, tComponents);
 	components.reserve(numComponents);
-	auto *state = engine->GetNetworkState(l);
+	auto *state = Engine::Get()->GetNetworkState(l);
 	auto *game = state->GetGameState();
 	auto &componentManager = game->GetEntityComponentManager();
 	for(auto i = decltype(numComponents) {0}; i < numComponents; ++i) {
@@ -1185,7 +1183,7 @@ void Lua::ents::register_class(lua_State *l, const std::string &className, const
 
 Lua::opt<pragma::NetEventId> Lua::ents::register_component_net_event(lua_State *l, pragma::ComponentId componentId, const std::string &name)
 {
-	auto *state = ::engine->GetNetworkState(l);
+	auto *state = ::Engine::Get()->GetNetworkState(l);
 	auto *game = state->GetGameState();
 	auto &componentManager = game->GetEntityComponentManager();
 	auto *componentInfo = componentManager.GetComponentInfo(componentId);
@@ -1201,7 +1199,7 @@ Lua::opt<pragma::NetEventId> Lua::ents::register_component_net_event(lua_State *
 
 Lua::opt<pragma::ComponentEventId> Lua::ents::register_component_event(lua_State *l, pragma::ComponentId componentId, const std::string &name)
 {
-	auto *state = ::engine->GetNetworkState(l);
+	auto *state = ::Engine::Get()->GetNetworkState(l);
 	auto *game = state->GetGameState();
 	auto &componentManager = game->GetEntityComponentManager();
 	auto *componentInfo = componentManager.GetComponentInfo(componentId);

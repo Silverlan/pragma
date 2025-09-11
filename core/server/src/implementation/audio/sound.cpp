@@ -11,12 +11,9 @@ module;
 #include <pragma/lua/luaapi.h>
 #include <pragma/entities/components/base_transform_component.hpp>
 
-module pragma.server.entities.components.audio.sound;
+module pragma.server.audio.sound;
 
-import pragma.server.audio;
 import pragma.server.server_state;
-
-extern ServerState *server;
 
 SALSoundBase::SALSoundBase(bool bShared) : m_bShared(bShared) {}
 bool SALSoundBase::IsShared() const { return m_bShared; }
@@ -35,7 +32,7 @@ SALSound::SALSound(NetworkState *nw, unsigned int idx, float duration, const std
 SALSound::~SALSound()
 {
 	SendEvent(NetEvent::SetIndex, [](NetPacket &p) { p->Write<uint32_t>(static_cast<uint32_t>(0)); });
-	Game *game = server->GetGameState();
+	Game *game = ServerState::Get()->GetGameState();
 	if(game == NULL)
 		return;
 	//for(int i=0;i<m_luaCallbacks.size();i++)
@@ -55,9 +52,9 @@ void SALSound::SendEvent(NetEvent evId, const std::function<void(NetPacket &)> &
 	if(write != nullptr)
 		write(p);
 	if(bUDP == true)
-		server->SendPacket("snd_ev", p, pragma::networking::Protocol::FastUnreliable);
+		ServerState::Get()->SendPacket("snd_ev", p, pragma::networking::Protocol::FastUnreliable);
 	else
-		server->SendPacket("snd_ev", p, pragma::networking::Protocol::SlowReliable);
+		ServerState::Get()->SendPacket("snd_ev", p, pragma::networking::Protocol::SlowReliable);
 }
 
 void SALSound::SetState(ALState state)
@@ -79,7 +76,7 @@ void SALSound::FadeIn(float time)
 	CancelFade();
 	if(!IsPlaying())
 		Play();
-	m_fade = std::unique_ptr<SoundFade>(new SoundFade(true, server->RealTime(), time, gain));
+	m_fade = std::unique_ptr<SoundFade>(new SoundFade(true, ServerState::Get()->RealTime(), time, gain));
 
 	SendEvent(NetEvent::FadeIn, [&time](NetPacket &p) { p->Write<float>(time); });
 }
@@ -90,7 +87,7 @@ void SALSound::FadeOut(float time)
 		return;
 	float gain = GetGain();
 	CancelFade();
-	m_fade = std::unique_ptr<SoundFade>(new SoundFade(false, server->RealTime(), time, gain));
+	m_fade = std::unique_ptr<SoundFade>(new SoundFade(false, ServerState::Get()->RealTime(), time, gain));
 
 	SendEvent(NetEvent::FadeOut, [&time](NetPacket &p) { p->Write<float>(time); });
 }
@@ -98,7 +95,7 @@ void SALSound::FadeOut(float time)
 void SALSound::Update()
 {
 	if(GetState() == ALState::Playing) {
-		double t = server->RealTime();
+		double t = ServerState::Get()->RealTime();
 		double tDelta = t - m_tLastUpdate;
 		tDelta *= GetPitch() / 1.f;
 		float dur = GetDuration();
@@ -125,7 +122,7 @@ void SALSound::Play()
 	}
 	SetState(ALState::Playing);
 	SendEvent(NetEvent::Play);
-	m_tLastUpdate = server->RealTime();
+	m_tLastUpdate = ServerState::Get()->RealTime();
 	if(m_tFadeIn > 0.f)
 		FadeIn(m_tFadeIn);
 }

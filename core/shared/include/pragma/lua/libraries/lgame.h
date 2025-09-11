@@ -5,7 +5,10 @@
 #define __LGAME_H__
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/lua/ldefinitions.h"
+#include "pragma/game/damagetype.h"
+#include "pragma/ai/navsystem.h"
+#include "pragma/game/game.h"
+#include "pragma/entities/components/base_gamemode_component.hpp"
 
 namespace Lua {
 	namespace game {

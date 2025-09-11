@@ -9,8 +9,6 @@
 #include "luasystem.h"
 #include <sharedutils/util_clock.hpp>
 
-extern DLLNETWORK Engine *engine;
-
 void Lua::NetPacket::register_class(luabind::class_<::NetPacket> &classDef)
 {
 	Lua::DataStream::register_class<::NetPacket>(classDef);
@@ -121,7 +119,7 @@ void Lua::NetPacket::ReadEntity(lua_State *l, ::NetPacket &packet)
 void Lua::NetPacket::ReadALSound(lua_State *l, ::NetPacket &packet)
 {
 	unsigned int idx = packet->Read<unsigned int>();
-	NetworkState *state = engine->GetNetworkState(l);
+	NetworkState *state = Engine::Get()->GetNetworkState(l);
 	std::shared_ptr<ALSound> als = state->GetSoundByIndex(idx);
 	if(als == NULL)
 		return;

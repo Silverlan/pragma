@@ -15,8 +15,6 @@ import pragma.server.game;
 
 using namespace pragma;
 
-extern SGame *s_game;
-
 void ai::TaskLookAtTarget::SetLookDuration(float dur) { SetParameter(umath::to_integral(Parameter::LookDuration), dur); }
 void ai::TaskLookAtTarget::Print(const Schedule *sched, std::ostream &o) const
 {
@@ -60,7 +58,7 @@ void ai::TaskLookAtTarget::Print(const Schedule *sched, std::ostream &o) const
 	}
 	o << "]";
 }
-ai::BehaviorNode::Result ai::TaskLookAtTarget::Start(const Schedule *sched, pragma::SAIComponent &npc)
+ai::BehaviorNode::Result ai::TaskLookAtTarget::Start(const Schedule *sched, pragma::BaseAIComponent &npc)
 {
 	auto r = TaskTarget::Start(sched, npc);
 	if(r == Result::Failed)
@@ -68,7 +66,7 @@ ai::BehaviorNode::Result ai::TaskLookAtTarget::Start(const Schedule *sched, prag
 	auto lookTime = std::numeric_limits<float>::max();
 	auto *param = GetParameter(sched, umath::to_integral(Parameter::LookDuration));
 	if(param != nullptr)
-		lookTime = s_game->CurTime() + param->GetFloat();
+		lookTime = SGame::Get()->CurTime() + param->GetFloat();
 
 	auto *ent = GetTargetEntity(sched, npc);
 	if(ent != nullptr)

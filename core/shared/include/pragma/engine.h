@@ -112,6 +112,7 @@ class DLLNETWORK Engine : public CVarHandler, public CallbackHandler {
 	std::atomic<bool> m_bRecordConsoleOutput = false;
 	std::mutex m_consoleOutputMutex = {};
   public:
+	static Engine *Get();
 	Engine(int argc, char *argv[]);
 	virtual ~Engine();
 

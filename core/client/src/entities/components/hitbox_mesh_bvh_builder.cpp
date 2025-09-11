@@ -10,7 +10,7 @@
 #include <pragma/entities/components/util_bvh.hpp>
 #include <pragma/model/model.h>
 #include <pragma/model/modelmesh.h>
-#pragma optimize("", off)
+
 static spdlog::logger &LOGGER = pragma::register_logger("bvh");
 
 static std::unique_ptr<pragma::bvh::MeshBvhTree> generate_mesh_bvh(ModelSubMesh &mesh, const std::vector<uint32_t> &triIndices, const umath::ScaledTransform &invPose)

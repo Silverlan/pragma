@@ -13,8 +13,6 @@
 #include <sharedutils/util_path.hpp>
 #include <udm.hpp>
 
-extern DLLNETWORK Engine *engine;
-
 static bool s_bModuleInitialized = false;
 
 static std::shared_ptr<util::Library> dllHandle = nullptr;
@@ -75,7 +73,7 @@ void util::set_mounted_game_priority(const std::string &game, int32_t priority)
 static bool port_model(NetworkState *nw, const std::string &path, std::string mdlName, const std::string &formatName,
   std::function<bool(NetworkState *, const std::function<std::shared_ptr<Model>()> &, const std::function<bool(const std::shared_ptr<Model> &, const std::string &, const std::string &)> &, const std::string &, const std::string &, std::ostream *)> ptrConvertModel)
 {
-	if(nw->IsGameActive() == false || engine->ShouldMountExternalGameResources() == false)
+	if(nw->IsGameActive() == false || Engine::Get()->ShouldMountExternalGameResources() == false)
 		return false;
 	//if(FileManager::Exists(path +mdlName) == false) // Could be in bsa archive
 	//	return false;
@@ -139,7 +137,7 @@ bool util::port_nif_model(NetworkState *nw, const std::string &path, std::string
 	  impl::get_module_func(nw, "convert_nif_model"));
 	if(ptrConvertModel == nullptr)
 		return false;
-	auto lockWatcher = engine->ScopeLockResourceWatchers();
+	auto lockWatcher = Engine::Get()->ScopeLockResourceWatchers();
 	return port_model(nw, path, mdlName, "nif",
 	  [](NetworkState *nw, const std::function<std::shared_ptr<Model>()> &fCreateModel, const std::function<bool(const std::shared_ptr<Model> &, const std::string &, const std::string &)> &fCallback, const std::string &path, const std::string &mdlName, std::ostream *optLog) -> bool {
 		  return ptrConvertModel(nw, fCreateModel, fCallback, path, mdlName);
@@ -151,7 +149,7 @@ bool util::port_hl2_particle(NetworkState *nw, const std::string &path)
 	static auto *ptrLoadParticle = reinterpret_cast<bool (*)(NetworkState &, const std::string &)>(impl::get_module_func(nw, "load_source_particle"));
 	if(ptrLoadParticle == nullptr)
 		return false;
-	auto lockWatcher = engine->ScopeLockResourceWatchers();
+	auto lockWatcher = Engine::Get()->ScopeLockResourceWatchers();
 	return ptrLoadParticle(*nw, path);
 }
 
@@ -163,7 +161,7 @@ bool util::port_source2_model(NetworkState *nw, const std::string &path, std::st
 	  impl::get_module_func(nw, "convert_source2_model"));
 	if(ptrConvertModel == nullptr)
 		return false;
-	auto lockWatcher = engine->ScopeLockResourceWatchers();
+	auto lockWatcher = Engine::Get()->ScopeLockResourceWatchers();
 	return port_model(nw, path, mdlName, "source2", ptrConvertModel);
 }
 
@@ -175,7 +173,7 @@ bool util::port_hl2_model(NetworkState *nw, const std::string &path, std::string
 	  impl::get_module_func(nw, "convert_hl2_model"));
 	if(ptrConvertModel == nullptr)
 		return false;
-	auto lockWatcher = engine->ScopeLockResourceWatchers();
+	auto lockWatcher = Engine::Get()->ScopeLockResourceWatchers();
 	return port_model(nw, path, mdlName, "HL2", ptrConvertModel);
 }
 
@@ -190,7 +188,7 @@ bool util::port_hl2_smd(NetworkState &nw, Model &mdl, VFilePtr &f, const std::st
 
 bool util::port_file(NetworkState *nw, const std::string &path, const std::optional<std::string> &optOutputPath)
 {
-	if(engine->ShouldMountExternalGameResources() == false)
+	if(Engine::Get()->ShouldMountExternalGameResources() == false)
 		return false;
 	auto outputPath = optOutputPath.has_value() ? *optOutputPath : path;
 	if(filemanager::exists(outputPath))
@@ -206,6 +204,6 @@ bool util::port_file(NetworkState *nw, const std::string &path, const std::optio
 	static auto *ptrExtractResource = dllHandle->FindSymbolAddress<bool (*)(NetworkState *, const std::string &, const std::string &)>("extract_resource");
 	if(ptrExtractResource == nullptr)
 		return false;
-	auto lockWatcher = engine->ScopeLockResourceWatchers();
+	auto lockWatcher = Engine::Get()->ScopeLockResourceWatchers();
 	return ptrExtractResource(nw, path, util::IMPORT_PATH + outputPath);
 }

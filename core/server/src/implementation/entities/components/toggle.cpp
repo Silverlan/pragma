@@ -6,14 +6,13 @@ module;
 #include "stdafx_server.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/networking/enums.hpp>
-#include <sharedutils/netpacket.hpp>
+#include "sharedutils/netpacket.hpp"
+#include "pragma/networking/recipient_filter.hpp"
 
 module pragma.server.entities.components.toggle;
 
 import pragma.server.entities;
 import pragma.server.game;
-
-extern SGame *s_game;
 
 using namespace pragma;
 

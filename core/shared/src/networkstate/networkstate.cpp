@@ -41,11 +41,10 @@ ConVarHandle NetworkState::GetConVarHandle(std::unordered_map<std::string, std::
 UInt8 NetworkState::STATE_COUNT = 0;
 
 decltype(NetworkState::s_loadedLibraries) NetworkState::s_loadedLibraries = {};
-extern DLLNETWORK Engine *engine;
 
 NetworkState::NetworkState() : CallbackHandler(), CVarHandler()
 {
-	m_ctReal.Reset(static_cast<int64_t>(engine->GetTickCount()));
+	m_ctReal.Reset(static_cast<int64_t>(Engine::Get()->GetTickCount()));
 	m_tReal = CDouble(m_ctReal());
 	m_tLast = m_tReal;
 	m_tDelta = 0;
@@ -62,13 +61,13 @@ NetworkState::NetworkState() : CallbackHandler(), CVarHandler()
 	RegisterCallback<void, std::reference_wrapper<struct ISteamworks>>("OnSteamworksInitialized");
 	RegisterCallback<void>("OnSteamworksShutdown");
 
-	m_cbProfilingHandle = engine->AddProfilingHandler([this](bool profilingEnabled) {
+	m_cbProfilingHandle = Engine::Get()->AddProfilingHandler([this](bool profilingEnabled) {
 		if(profilingEnabled == false) {
 			m_profilingStageManager = nullptr;
 			return;
 		}
 		std::string postFix = IsClient() ? " (CL)" : " (SV)";
-		auto &cpuProfiler = engine->GetProfiler();
+		auto &cpuProfiler = Engine::Get()->GetProfiler();
 		m_profilingStageManager = std::make_unique<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage>>();
 		m_profilingStageManager->InitializeProfilingStageManager(cpuProfiler);
 	});
@@ -210,7 +209,7 @@ bool NetworkState::CheatsEnabled() const
 {
 	if(!IsMultiPlayer())
 		return true;
-	return engine->GetConVarBool("sv_cheats");
+	return Engine::Get()->GetConVarBool("sv_cheats");
 }
 
 Material *NetworkState::PrecacheMaterial(const std::string &path) { return LoadMaterial(path, true, false); }
@@ -336,7 +335,7 @@ void NetworkState::Initialize()
 		spdlog::info("Initializing client state...");
 	else {
 		spdlog::info("Initializing server state...");
-		if(engine->IsServerOnly()) {
+		if(Engine::Get()->IsServerOnly()) {
 			Con::cout << "If you encounter problems, such as the server not showing up in the server browser, or clients not being able to connect to it, please make sure the following ports are forwarded:" << Con::endl;
 			Con::cout << engine_info::DEFAULT_SERVER_PORT << " (TCP): Required if the boost asio networking layer is used" << Con::endl;
 			Con::cout << engine_info::DEFAULT_SERVER_PORT << " (UDP): Required for clients to be able to connect to the server" << Con::endl;
@@ -412,7 +411,7 @@ ConVar *NetworkState::SetConVar(std::string scmd, std::string value, bool bApply
 
 void NetworkState::implFindSimilarConVars(const std::string &input, std::vector<SimilarCmdInfo> &similarCmds) const
 {
-	engine->implFindSimilarConVars(input, similarCmds);
+	Engine::Get()->implFindSimilarConVars(input, similarCmds);
 	CVarHandler::implFindSimilarConVars(input, similarCmds);
 }
 
@@ -439,7 +438,7 @@ bool NetworkState::RunConsoleCommand(std::string scmd, std::vector<std::string> 
 	auto *cv = GetConVar(scmd);
 	auto bEngine = ((cv == nullptr) ? true : false);
 	if(bEngine == true)
-		cv = engine->CVarHandler::GetConVar(scmd);
+		cv = Engine::Get()->CVarHandler::GetConVar(scmd);
 	if(cv == nullptr)
 		return false;
 	if(callback != nullptr && callback(cv, magnitude) == false)
@@ -463,7 +462,7 @@ bool NetworkState::RunConsoleCommand(std::string scmd, std::vector<std::string> 
 		if((flags & ConVarFlags::Cheat) == ConVarFlags::Cheat)
 			CHECK_CHEATS(scmd, this, true);
 		if(bEngine)
-			engine->CVarHandler::SetConVar(scmd, argv[0]);
+			Engine::Get()->CVarHandler::SetConVar(scmd, argv[0]);
 		else
 			SetConVar(scmd, argv[0]);
 		return true;
@@ -550,7 +549,7 @@ void NetworkState::InitializeDLLModule(lua_State *l, std::shared_ptr<util::Libra
 		it = m_initializedLibraries.insert(std::make_pair(l, std::vector<std::shared_ptr<util::Library>> {})).first;
 	it->second.push_back(module);
 
-	auto *luaInterface = engine->GetLuaInterface(l);
+	auto *luaInterface = Engine::Get()->GetLuaInterface(l);
 	if(luaInterface != nullptr) {
 		auto *ptrInitLua = module->FindSymbolAddress<void (*)(Lua::Interface &)>("pragma_initialize_lua");
 		if(ptrInitLua != nullptr)
@@ -573,7 +572,7 @@ bool NetworkState::UnloadLibrary(const std::string &library)
 		auto it = std::find_if(pair.second.begin(), pair.second.end(), [&lib](const std::shared_ptr<util::Library> &ptr) { return ptr.get() == lib->get(); });
 		if(it != pair.second.end()) {
 			if(ptrTerminateLua != nullptr)
-				ptrTerminateLua(*engine->GetLuaInterface(pair.first));
+				ptrTerminateLua(*Engine::Get()->GetLuaInterface(pair.first));
 			pair.second.erase(it);
 		}
 	}
@@ -666,7 +665,7 @@ void NetworkState::TerminateLuaModules(lua_State *l)
 	auto it = m_initializedLibraries.find(l);
 	if(it == m_initializedLibraries.end())
 		return;
-	auto *luaInterface = engine->GetLuaInterface(l);
+	auto *luaInterface = Engine::Get()->GetLuaInterface(l);
 	if(luaInterface != nullptr) {
 		for(auto &dllHandle : it->second) {
 			auto *ptrInitLua = dllHandle->FindSymbolAddress<void (*)(Lua::Interface &)>("pragma_terminate_lua");
@@ -712,7 +711,7 @@ ConVar *NetworkState::RegisterConVar(const std::string &scmd, const std::shared_
 	}
 	auto itNew = m_conVars.insert(decltype(m_conVars)::value_type(scmd, cvar));
 	auto *cv = static_cast<ConVar *>(itNew.first->second.get());
-	auto &cfg = engine->GetConVarConfig(GetType());
+	auto &cfg = Engine::Get()->GetConVarConfig(GetType());
 	if(cfg) {
 		// Use value from loaded config
 		auto *args = cfg->Find(scmd);

@@ -6,7 +6,7 @@
 #include <algorithm>
 #include <pragma/console/convars.h>
 #include <pragma/console/convarhandle.h>
-#pragma optimize("", off)
+
 static std::unordered_map<std::string, std::shared_ptr<PtrConVar>> *conVarPtrs = NULL;
 std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &CVarHandler::GetConVarPtrs() { return *conVarPtrs; }
 ConVarHandle CVarHandler::GetConVarHandle(std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &ptrs, std::string scvar)

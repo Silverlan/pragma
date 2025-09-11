@@ -7,8 +7,6 @@
 #include "pragma/model/model.h"
 #include <util_image_buffer.hpp>
 
-extern DLLNETWORK Engine *engine;
-
 pragma::asset::WorldData::WorldData(NetworkState &nw) : m_nw {nw}
 {
 	SetMessageLogger(nullptr); // Don't output anything by default

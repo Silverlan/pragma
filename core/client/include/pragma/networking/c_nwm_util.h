@@ -7,6 +7,7 @@
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/c_baseentity.h"
 #include <pragma/networking/nwm_util.h>
+#include <sharedutils/netpacket.hpp>
 
 namespace nwm {
 	DLLCLIENT CBaseEntity *read_unique_entity(NetPacket &packet);

@@ -12,8 +12,6 @@
 
 // import pragma.scripting.lua;
 
-extern DLLNETWORK Engine *engine;
-
 static void Lua::TypeError(const luabind::object &o, Type type)
 {
 	// TODO
@@ -60,7 +58,7 @@ void Lua::HandleLuaError(lua_State *l, Lua::StatusCode s)
 
 std::string Lua::GetErrorMessagePrefix(lua_State *l)
 {
-	auto *state = engine->GetNetworkState(l);
+	auto *state = Engine::Get()->GetNetworkState(l);
 	if(state != nullptr)
 		return state->GetMessagePrefix();
 	return "";

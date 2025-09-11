@@ -78,7 +78,6 @@ extern CGame *c_game;
 
 static spdlog::logger &LOGGER_SG = pragma::register_logger("shadergraph");
 
-#pragma optimize("", off)
 static void reload_textures(CMaterial &mat)
 {
 	std::unordered_map<std::string, std::string> textureMappings;

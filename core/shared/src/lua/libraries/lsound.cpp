@@ -12,8 +12,6 @@
 
 import se_script;
 
-extern DLLNETWORK Engine *engine;
-
 void Lua::sound::register_enums(lua_State *l)
 {
 	Lua::RegisterLibraryEnums(l, "sound",
@@ -22,7 +20,7 @@ void Lua::sound::register_enums(lua_State *l)
 
 int Lua::sound::create(lua_State *l, const std::function<std::shared_ptr<ALSound>(NetworkState *, const std::string &, ALSoundType, ALCreateFlags)> &f)
 {
-	auto *state = engine->GetNetworkState(l);
+	auto *state = Engine::Get()->GetNetworkState(l);
 	int32_t argId = 1;
 	auto *snd = Lua::CheckString(l, argId++);
 	auto type = static_cast<ALSoundType>(Lua::CheckInt(l, argId++));
@@ -44,7 +42,7 @@ int Lua::sound::create(lua_State *l)
 
 int Lua::sound::play(lua_State *l)
 {
-	auto *state = engine->GetNetworkState(l);
+	auto *state = Engine::Get()->GetNetworkState(l);
 	int32_t argId = 1;
 	auto *sndName = Lua::CheckString(l, argId++);
 	auto type = static_cast<ALSoundType>(Lua::CheckInt(l, argId++));
@@ -83,7 +81,7 @@ int Lua::sound::play(lua_State *l)
 
 int Lua::sound::is_music_playing(lua_State *l)
 {
-	auto *state = engine->GetNetworkState(l);
+	auto *state = Engine::Get()->GetNetworkState(l);
 	auto &sounds = state->GetSounds();
 	auto it = std::find_if(sounds.begin(), sounds.end(), [](ALSoundRef &rsnd) {
 		auto &snd = rsnd.get();
@@ -95,7 +93,7 @@ int Lua::sound::is_music_playing(lua_State *l)
 
 int Lua::sound::get_duration(lua_State *l)
 {
-	NetworkState *state = engine->GetNetworkState(l);
+	NetworkState *state = Engine::Get()->GetNetworkState(l);
 	std::string snd = luaL_checkstring(l, 1);
 	float dur = state->GetSoundDuration(snd);
 	Lua::PushNumber(l, dur);
@@ -104,7 +102,7 @@ int Lua::sound::get_duration(lua_State *l)
 
 int Lua::sound::get_all(lua_State *l)
 {
-	NetworkState *state = engine->GetNetworkState(l);
+	NetworkState *state = Engine::Get()->GetNetworkState(l);
 	auto &sounds = state->GetSounds();
 	lua_newtable(l);
 	int top = lua_gettop(l);
@@ -126,7 +124,7 @@ int Lua::sound::find_by_type(lua_State *l)
 	auto bExactMatch = false;
 	if(Lua::IsSet(l, 2))
 		bExactMatch = Lua::CheckBool(l, 2);
-	auto *state = engine->GetNetworkState(l);
+	auto *state = Engine::Get()->GetNetworkState(l);
 	auto &sounds = state->GetSounds();
 	auto t = Lua::CreateTable(l);
 	int32_t n = 1;
@@ -144,7 +142,7 @@ int Lua::sound::find_by_type(lua_State *l)
 
 int Lua::sound::precache(lua_State *l)
 {
-	NetworkState *state = engine->GetNetworkState(l);
+	NetworkState *state = Engine::Get()->GetNetworkState(l);
 	std::string snd = luaL_checkstring(l, 1);
 	auto mode = ALChannel::Auto;
 	if(Lua::IsSet(l, 2))
@@ -155,14 +153,14 @@ int Lua::sound::precache(lua_State *l)
 
 int Lua::sound::stop_all(lua_State *l)
 {
-	NetworkState *state = engine->GetNetworkState(l);
+	NetworkState *state = Engine::Get()->GetNetworkState(l);
 	state->StopSounds();
 	return 0;
 }
 
 int Lua::sound::load_scripts(lua_State *l)
 {
-	NetworkState *state = engine->GetNetworkState(l);
+	NetworkState *state = Engine::Get()->GetNetworkState(l);
 	std::string file = luaL_checkstring(l, 1);
 	state->LoadSoundScripts(file.c_str());
 	return 0;

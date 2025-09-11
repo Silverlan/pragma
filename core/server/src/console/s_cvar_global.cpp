@@ -22,9 +22,6 @@ import pragma.server.entities.components;
 import pragma.server.game;
 import pragma.server.server_state;
 
-extern DLLNETWORK Engine *engine;
-extern ServerState *server;
-extern SGame *s_game;
 void CMD_drop(NetworkState *, pragma::BasePlayerComponent *pl, std::vector<std::string> &)
 {
 	if(pl == nullptr)
@@ -41,7 +38,7 @@ void CMD_kick(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::st
 	pragma::SPlayerComponent *kickTarget = nullptr;
 	auto &identifier = argv.front();
 	auto name = identifier + "*";
-	EntityIterator entIt {*s_game};
+	EntityIterator entIt {*SGame::Get()};
 	entIt.AttachFilter<EntityIteratorFilterName>(name, false, false);
 	auto it = entIt.begin();
 	auto *ent = (it != entIt.end()) ? *it : nullptr;
@@ -93,7 +90,7 @@ DLLSERVER void CMD_entities_sv(NetworkState *state, pragma::BasePlayerComponent 
 {
 	if(!state->IsGameActive())
 		return;
-	auto sortedEnts = util::cmd::get_sorted_entities(*s_game, pl);
+	auto sortedEnts = util::cmd::get_sorted_entities(*SGame::Get(), pl);
 	std::optional<std::string> className = {};
 	if(argv.empty() == false)
 		className = '*' + argv.front() + '*';
@@ -130,7 +127,7 @@ DLLSERVER void CMD_status_sv(NetworkState *, pragma::BasePlayerComponent *, std:
 {
 	auto &players = pragma::SPlayerComponent::GetAll();
 	std::string ip;
-	auto *sv = server->GetServer();
+	auto *sv = ServerState::Get()->GetServer();
 	if(sv == nullptr) {
 		std::stringstream str;
 		str << "[::1]";
@@ -140,13 +137,13 @@ DLLSERVER void CMD_status_sv(NetworkState *, pragma::BasePlayerComponent *, std:
 		auto hostIp = sv->GetHostIP();
 		ip = hostIp.has_value() ? *hostIp : "Unknown";
 	}
-	auto &serverData = server->GetServerData();
+	auto &serverData = ServerState::Get()->GetServerData();
 	Con::cout << "hostname:\t" << serverData.name << Con::endl;
 	Con::cout << "udp/ip:\t\t" << ip << Con::endl;
 	Con::cout << "map:\t\t" << serverData.map << Con::endl;
 	Con::cout << "players:\t" << players.size() << " (" << serverData.maxPlayers << " max)" << Con::endl << Con::endl;
 	Con::cout << "#  userid\tname    \tconnected\tping";
-	auto bServerRunning = server->IsServerRunning();
+	auto bServerRunning = ServerState::Get()->IsServerRunning();
 	if(bServerRunning == true)
 		Con::cout << "\tadr";
 	Con::cout << Con::endl;

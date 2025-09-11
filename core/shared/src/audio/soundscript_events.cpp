@@ -12,8 +12,6 @@
 
 #undef CreateEvent
 
-extern DLLNETWORK Engine *engine;
-
 SoundScriptEventContainer::~SoundScriptEventContainer() { m_events.clear(); }
 SoundScriptEventContainer::SoundScriptEventContainer(SoundScriptManager *manager) : m_manager(manager) {}
 SoundScriptEvent *SoundScriptEventContainer::CreateEvent(std::string name)
@@ -129,7 +127,7 @@ void SSEPlaySound::Precache()
 		PrecacheSound(sources[i].c_str());
 }
 
-void SSEPlaySound::PrecacheSound(const char *name) { engine->GetServerNetworkState()->PrecacheSound(name, GetChannel()); }
+void SSEPlaySound::PrecacheSound(const char *name) { Engine::Get()->GetServerNetworkState()->PrecacheSound(name, GetChannel()); }
 void SSEPlaySound::Initialize(udm::LinkedPropertyWrapper &prop)
 {
 	SoundScriptEvent::Initialize(prop);

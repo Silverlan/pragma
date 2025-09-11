@@ -5,6 +5,7 @@ module;
 
 #include "pragma/serverdefinitions.h"
 #include <pragma/model/animation/activities.h>
+#include "pragma/ai/ai_schedule.h"
 
 export module pragma.server.ai.tasks.move_to_target;
 
@@ -18,7 +19,7 @@ export namespace pragma {
 
 			using TaskTarget::TaskTarget;
 			virtual std::shared_ptr<BehaviorNode> Copy() const override { return ai::BehaviorNode::Copy<std::remove_const_t<std::remove_reference_t<decltype(*this)>>>(); }
-			virtual Result Think(const Schedule *sched, pragma::SAIComponent &ent) override;
+			virtual Result Think(const Schedule *sched, pragma::BaseAIComponent &ent) override;
 			virtual void Print(const Schedule *sched, std::ostream &o) const override;
 
 			void SetMoveDistance(float dist);

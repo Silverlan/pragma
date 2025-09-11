@@ -6,6 +6,7 @@
 
 #include "pragma/clientdefinitions.h"
 #include <sharedutils/functioncallback.h>
+#include <mathutil/uvec.h>
 #include <array>
 #include <vector>
 #include <cinttypes>

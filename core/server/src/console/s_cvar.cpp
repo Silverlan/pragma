@@ -7,5 +7,4 @@
 
 import pragma.server.server_state;
 
-extern ServerState *server;
-ConVarHandle GetServerConVar(std::string scmd) { return server->GetConVarHandle(scmd); }
+ConVarHandle GetServerConVar(std::string scmd) { return ServerState::Get()->GetConVarHandle(scmd); }

@@ -7,7 +7,9 @@ module;
 #include "pragma/ai/ai_memory.h"
 #include "pragma/ai/ai_behavior.h"
 #include "pragma/ai/ai_schedule.h"
+#include "sharedutils/netpacket.hpp"
 #include "pragma/input/inkeys.h"
+#include "pragma/networking/recipient_filter.hpp"
 #include "pragma/debug/debugbehaviortree.h"
 #include "pragma/entities/components/base_actor_component.hpp"
 #include <pragma/model/animation/play_animation_flags.hpp>

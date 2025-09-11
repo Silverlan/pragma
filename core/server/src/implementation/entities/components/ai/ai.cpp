@@ -6,6 +6,8 @@ module;
 #include "stdafx_server.h"
 #include "pragma/entities/components/base_ai_component.hpp"
 #include "pragma/ai/ai_schedule.h"
+#include "pragma/networking/recipient_filter.hpp"
+#include "pragma/ai/ai_memory.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/networking/enums.hpp>
 #include <pragma/model/model.h>
@@ -33,8 +35,6 @@ import pragma.server.entities.components.model;
 import pragma.server.entities.components.player;
 import pragma.server.entities.components.physics;
 import pragma.server.game;
-
-extern SGame *s_game;
 
 using namespace pragma;
 
@@ -353,7 +353,7 @@ void SAIComponent::OnTick(double tDelta)
 	UpdateMemory();
 	if(m_schedule != nullptr)
 		RunSchedule();
-	auto &t = s_game->CurTime();
+	auto &t = SGame::Get()->CurTime();
 	if(t >= m_tNextEnemyCheck) {
 		SelectEnemies();
 		auto state = GetNPCState();

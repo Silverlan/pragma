@@ -5,6 +5,7 @@ module;
 
 #include "stdafx_server.h"
 #include <sharedutils/util_string.h>
+#include "pragma/networking/recipient_filter.hpp"
 #include <sharedutils/util.h>
 #include <pragma/audio/alsound.h>
 #include <pragma/lua/converters/game_type_converters_t.hpp>

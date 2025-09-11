@@ -13,8 +13,6 @@
 #include "pragma/entities/components/base_player_component.hpp"
 #include "pragma/entities/baseplayer.hpp"
 
-extern DLLNETWORK Engine *engine;
-
 void nwm::write_vector(NetPacket &packet, const Vector3 &v)
 {
 	packet->Write<float>(v.x);
@@ -66,9 +64,9 @@ static BaseEntity *read_entity(NetPacket &packet, const std::function<void(BaseE
 {
 	NetworkState *state;
 	if(!packet.IsClient())
-		state = engine->GetServerNetworkState();
+		state = Engine::Get()->GetServerNetworkState();
 	else
-		state = engine->GetClientState();
+		state = Engine::Get()->GetClientState();
 	if(state == nullptr || !state->IsGameActive())
 		return nullptr;
 	auto *game = state->GetGameState();

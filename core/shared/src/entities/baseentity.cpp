@@ -83,7 +83,6 @@ bool BaseEntity::IsStatic() const
 }
 bool BaseEntity::IsDynamic() const { return !IsStatic(); }
 
-extern DLLNETWORK Engine *engine;
 Con::c_cout &BaseEntity::print(Con::c_cout &os)
 {
 	auto *componentManager = GetComponentManager();

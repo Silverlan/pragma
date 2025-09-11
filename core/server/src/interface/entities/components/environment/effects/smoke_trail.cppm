@@ -4,6 +4,8 @@
 module;
 
 #include "pragma/serverdefinitions.h"
+#include "sharedutils/netpacket.hpp"
+#include "pragma/networking/recipient_filter.hpp"
 #include "pragma/entities/environment/effects/env_smoke_trail.h"
 
 export module pragma.server.entities.components.effects.smoke_trail;

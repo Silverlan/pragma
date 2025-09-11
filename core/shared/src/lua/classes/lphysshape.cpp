@@ -13,8 +13,6 @@
 #include "pragma/model/modelmesh.h"
 #include <luabind/out_value_policy.hpp>
 
-extern DLLNETWORK Engine *engine;
-
 void Lua::PhysShape::register_class(lua_State *l, luabind::module_ &mod)
 {
 	auto classDef = luabind::class_<pragma::physics::IShape, pragma::physics::IBase>("Shape");

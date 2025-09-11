@@ -17,8 +17,6 @@
 #include <udm.hpp>
 #include <any>
 
-extern DLLNETWORK Engine *engine;
-
 class BaseEntity;
 struct ClassMembers;
 namespace pragma {

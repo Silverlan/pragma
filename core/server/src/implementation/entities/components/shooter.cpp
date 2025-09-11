@@ -5,7 +5,11 @@ module;
 
 #include "stdafx_server.h"
 #include "pragma/entities/components/base_character_component.hpp"
+#include "pragma/entities/components/base_player_component.hpp"
+#include "sharedutils/netpacket.hpp"
 #include "pragma/networking/recipient_filter.hpp"
+#include "pragma/networking/recipient_filter.hpp"
+#include "pragma/physics/raytraces.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/networking/enums.hpp>
 #include <pragma/entities/components/damageable_component.hpp>
@@ -16,6 +20,8 @@ module;
 
 module pragma.server.entities.components.shooter;
 
+import pragma.entities.components;
+import pragma.server.entities.base;
 import pragma.server.entities.components;
 import pragma.server.game;
 import pragma.server.server_state;
@@ -51,7 +57,7 @@ void ecs::SShooterComponent::FireBullets(const BulletInfo &bulletInfo, const std
 		dmg.SetDamage(static_cast<uint16_t>(bulletInfo.damage));
 
 	if(!bulletInfo.ammoType.empty()) {
-		auto *ammoType = s_game->GetAmmoType(bulletInfo.ammoType);
+		auto *ammoType = SGame::Get()->GetAmmoType(bulletInfo.ammoType);
 		if(ammoType != nullptr) {
 			if(bCustomDamage == false)
 				dmg.SetDamage(static_cast<uint16_t>(ammoType->damage));
@@ -108,7 +114,7 @@ void ecs::SShooterComponent::FireBullets(const BulletInfo &bulletInfo, DamageInf
 		dstPositions.push_back(dst);
 
 		auto offset = outHitTargets.size();
-		auto hit = s_game->RayCast(data, &outHitTargets);
+		auto hit = SGame::Get()->RayCast(data, &outHitTargets);
 		if(hit) {
 			for(auto i = offset; i < outHitTargets.size(); ++i) {
 				auto &result = outHitTargets.at(i);
@@ -146,6 +152,6 @@ void ecs::SShooterComponent::FireBullets(const BulletInfo &bulletInfo, DamageInf
 			ent.SendNetEvent(m_netEvFireBullets, p, pragma::networking::Protocol::FastUnreliable);
 	}
 
-	events::CEOnBulletsFired evData {bulletInfo, outHitTargets};
+	ecs::events::CEOnBulletsFired evData {bulletInfo, outHitTargets};
 	BroadcastEvent(baseShooterComponent::EVENT_ON_BULLETS_FIRED, evData);
 }

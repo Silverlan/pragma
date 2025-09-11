@@ -260,7 +260,6 @@ std::ostream &BasePlayerComponent::print(std::ostream &os)
 	return os;
 }
 
-extern DLLNETWORK Engine *engine;
 BasePlayerComponent::BasePlayerComponent(BaseEntity &ent)
     : BaseEntityComponent(ent), m_portUDP(0), m_speedWalk(63.33f), m_speedRun(190), m_speedSprint(320), m_speedCrouchWalk(63.33f), m_bCrouching(false), m_standHeight(72), m_crouchHeight(36), m_standEyeLevel(64), m_crouchEyeLevel(28), m_tCrouch(0), m_bFlashlightOn(false)
 {
@@ -271,7 +270,7 @@ BasePlayerComponent::BasePlayerComponent(BaseEntity &ent)
 BasePlayerComponent::~BasePlayerComponent()
 {
 	//if(m_sprite != NULL)
-	//	server->RemoveSprite(m_sprite); // WEAVETODO
+	//	ServerState::Get()->RemoveSprite(m_sprite); // WEAVETODO
 	if(m_entFlashlight.valid())
 		m_entFlashlight->Remove();
 }

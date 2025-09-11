@@ -8,6 +8,8 @@ module;
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/components/velocity_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
+#include "sharedutils/netpacket.hpp"
+#include "pragma/networking/recipient_filter.hpp"
 #include <pragma/networking/nwm_util.h>
 #include <pragma/networking/enums.hpp>
 
@@ -55,7 +57,7 @@ std::shared_ptr<ALSound> SSoundEmitterComponent::CreateSound(std::string sndname
 	auto flags = ALCreateFlags::Mono;
 	if(sndInfo.transmit == false)
 		flags |= ALCreateFlags::DontTransmit;
-	auto ptrSnd = server->CreateSound(sndname, type, flags);
+	auto ptrSnd = ServerState::Get()->CreateSound(sndname, type, flags);
 	auto *snd = static_cast<ALSound *>(ptrSnd.get());
 	if(snd == nullptr)
 		return ptrSnd;
@@ -67,7 +69,7 @@ std::shared_ptr<ALSound> SSoundEmitterComponent::CreateSound(std::string sndname
 		NetPacket p;
 		nwm::write_entity(p, &ent);
 		p->Write<unsigned int>(snd->GetIndex());
-		server->SendPacket("ent_sound", p, pragma::networking::Protocol::FastUnreliable);
+		ServerState::Get()->SendPacket("ent_sound", p, pragma::networking::Protocol::FastUnreliable);
 	}
 	return ptrSnd;
 }

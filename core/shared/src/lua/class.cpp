@@ -80,8 +80,6 @@
 #include <sharedutils/magic_enum.hpp>
 #include <fsys/directory_watcher.h>
 
-extern DLLNETWORK Engine *engine;
-
 std::ostream &operator<<(std::ostream &out, const ALSound &snd)
 {
 	auto state = snd.GetState();

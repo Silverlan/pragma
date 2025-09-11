@@ -24,8 +24,6 @@
 #include <fsys/ifile.hpp>
 #include <textureinfo.h>
 
-extern DLLNETWORK Engine *engine;
-#pragma optimize("", off)
 Lua::udm::LuaUdmArrayIterator::LuaUdmArrayIterator(::udm::PropertyWrapper &prop) : m_property {&prop} {}
 
 template<typename T>

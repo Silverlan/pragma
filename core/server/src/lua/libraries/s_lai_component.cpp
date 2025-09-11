@@ -4,6 +4,7 @@
 #include "stdafx_server.h"
 #include "pragma/lua/classes/ldef_entity.h"
 #include "luasystem.h"
+#include "pragma/ai/ai_memory.h"
 #include "pragma/ai/ai_schedule.h"
 #include "pragma/lua/s_lentity_components.hpp"
 #include "pragma/lua/policies/default_parameter_policy.hpp"

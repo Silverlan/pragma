@@ -17,9 +17,7 @@
 #include <sharedutils/util_path.hpp>
 #include <mathutil/color.h>
 
-extern DLLNETWORK Engine *engine;
-
-void Lua::engine::exit() { ::engine->ShutDown(); }
+void Lua::engine::exit() { ::Engine::Get()->ShutDown(); }
 
 std::string Lua::engine::get_working_directory()
 {
@@ -56,7 +54,7 @@ Lua::opt<Lua::tb<void>> Lua::engine::get_git_info(lua_State *l)
 
 void Lua::engine::PrecacheModel_sv(lua_State *l, const std::string &mdlName)
 {
-	/*auto *nw = ::engine->GetNetworkState(l);
+	/*auto *nw = ::Engine::Get()->GetNetworkState(l);
 	FWMD wmd(nw->GetGameState());
 	wmd.Load<Model,ModelMesh,ModelSubMesh>(
 		nw->GetGameState(),mdlName,[nw](const std::string &mdlName) -> std::shared_ptr<Model> {
@@ -67,27 +65,27 @@ void Lua::engine::PrecacheModel_sv(lua_State *l, const std::string &mdlName)
 
 std::shared_ptr<Model> Lua::engine::get_model(lua_State *l, const std::string &mdlName)
 {
-	auto *state = ::engine->GetNetworkState(l);
+	auto *state = ::Engine::Get()->GetNetworkState(l);
 	auto *game = state->GetGameState();
 	return game->LoadModel(mdlName);
 }
 
 void Lua::engine::LoadSoundScripts(lua_State *l, const std::string &fileName, bool precache)
 {
-	NetworkState *state = ::engine->GetNetworkState(l);
+	NetworkState *state = ::Engine::Get()->GetNetworkState(l);
 	state->LoadSoundScripts(fileName.c_str(), precache);
 }
 void Lua::engine::LoadSoundScripts(lua_State *l, const std::string &fileName) { LoadSoundScripts(l, fileName, false); }
 
 bool Lua::engine::LibraryExists(lua_State *l, const std::string &library)
 {
-	auto libAbs = ::util::get_normalized_module_path(library, ::engine->GetNetworkState(l)->IsClient());
+	auto libAbs = ::util::get_normalized_module_path(library, ::Engine::Get()->GetNetworkState(l)->IsClient());
 	return FileManager::Exists(libAbs);
 }
 
 bool Lua::engine::UnloadLibrary(lua_State *l, const std::string &path)
 {
-	NetworkState *state = ::engine->GetNetworkState(l);
+	NetworkState *state = ::Engine::Get()->GetNetworkState(l);
 	std::string err;
 	return state->UnloadLibrary(path);
 }
@@ -96,7 +94,7 @@ bool Lua::engine::IsLibraryLoaded(NetworkState &nw, const std::string &path) { r
 
 Lua::var<bool, std::string> Lua::engine::LoadLibrary(lua_State *l, const std::string &path)
 {
-	NetworkState *state = ::engine->GetNetworkState(l);
+	NetworkState *state = ::Engine::Get()->GetNetworkState(l);
 	std::string err;
 	bool b = state->InitializeLibrary(path, &err, l) != nullptr;
 	if(b)
@@ -104,12 +102,12 @@ Lua::var<bool, std::string> Lua::engine::LoadLibrary(lua_State *l, const std::st
 	return luabind::object {l, err};
 }
 
-uint64_t Lua::engine::GetTickCount() { return ::engine->GetTickCount(); }
+uint64_t Lua::engine::GetTickCount() { return ::Engine::Get()->GetTickCount(); }
 
-void Lua::engine::set_record_console_output(bool record) { ::engine->SetRecordConsoleOutput(record); }
+void Lua::engine::set_record_console_output(bool record) { ::Engine::Get()->SetRecordConsoleOutput(record); }
 Lua::opt<Lua::mult<std::string, Con::MessageFlags, Lua::opt<Color>>> Lua::engine::poll_console_output(lua_State *l)
 {
-	auto output = ::engine->PollConsoleOutput();
+	auto output = ::Engine::Get()->PollConsoleOutput();
 	if(output.has_value() == false)
 		return nil;
 	luabind::object color {};

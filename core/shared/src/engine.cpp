@@ -96,7 +96,10 @@ ConVarHandle Engine::GetConVarHandle(std::string scvar)
 	return CVarHandler::GetConVarHandle(*conVarPtrs, scvar);
 }
 
-DLLNETWORK Engine *engine = NULL;
+static Engine *g_engine = nullptr;
+
+Engine *Engine::Get() { return g_engine; }
+
 extern std::optional<std::string> g_lpLogFile;
 extern util::LogSeverity g_lpLogLevelCon;
 extern util::LogSeverity g_lpLogLevelFile;
@@ -105,6 +108,8 @@ extern bool g_lpSandboxed;
 
 Engine::Engine(int argc, char *argv[]) : CVarHandler(), m_logFile(nullptr), m_tickRate(Engine::DEFAULT_TICK_RATE), m_stateFlags {StateFlags::Running | StateFlags::MultiThreadedAssetLoadingEnabled}
 {
+	g_engine = this;
+
 #ifdef __linux__
 	// Enable linenoise by default
 	umath::set_flag(m_stateFlags, StateFlags::UseLinenoise, true);
@@ -149,7 +154,6 @@ Engine::Engine(int argc, char *argv[]) : CVarHandler(), m_logFile(nullptr), m_ti
 	m_mainThreadId = std::this_thread::get_id();
 
 	m_lastTick = static_cast<long long>(m_ctTick());
-	engine = this;
 
 #ifdef __linux__
 	//setup fork handler
@@ -517,7 +521,8 @@ void Engine::ClearCache()
 	Con::cout << "Cache cleared successfully! Please restart the Engine." << Con::endl;
 }
 
-NetworkState *Engine::GetServerNetworkState() const {
+NetworkState *Engine::GetServerNetworkState() const
+{
 	if(m_svInstance == nullptr)
 		return nullptr;
 	return m_svInstance->state.get();
@@ -677,6 +682,9 @@ bool Engine::Initialize(int argc, char *argv[])
 	if(g_lpSandboxed)
 		SetSandboxed(true);
 
+	pragma::detail::initialize_logger(g_lpLogLevelCon, g_lpLogLevelFile, g_lpLogFile);
+	spdlog::info("Engine Version: {}", get_pretty_engine_version());
+
 	// Initialize file system
 	{
 		if(!g_lpUserDataDir.empty()) {
@@ -703,8 +711,6 @@ bool Engine::Initialize(int argc, char *argv[])
 	}
 	//
 
-	pragma::detail::initialize_logger(g_lpLogLevelCon, g_lpLogLevelFile, g_lpLogFile);
-	spdlog::info("Engine Version: {}", get_pretty_engine_version());
 	auto f = filemanager::open_file("git_info.txt", filemanager::FileMode::Read, nullptr, fsys::SearchFlags::Local | fsys::SearchFlags::NoMounts);
 	if(f) {
 		spdlog::info("Git Info:");
@@ -1045,8 +1051,8 @@ std::unique_ptr<uzip::ZIPFile> Engine::GenerateEngineDump(const std::string &bas
 	zipFile->AddFile("stack_backtrace.txt", util::debug::get_formatted_stack_backtrace_string());
 
 	// Write Info
-	if(engine != nullptr)
-		engine->DumpDebugInformation(*zipFile.get());
+	if(Engine::Get() != nullptr)
+		Engine::Get()->DumpDebugInformation(*zipFile.get());
 	return zipFile;
 }
 
@@ -1062,7 +1068,7 @@ void Engine::DumpDebugInformation(uzip::ZIPFile &zip) const
 		engineInfo << " x64";
 	else
 		engineInfo << " x86";
-	if(engine != nullptr)
+	if(Engine::Get() != nullptr)
 		engineInfo << "\nEngine Version: " << get_pretty_engine_version();
 
 	auto *nw = static_cast<NetworkState *>(GetServerNetworkState());
@@ -1197,7 +1203,7 @@ bool Engine::ConnectLocalHostPlayerClient() { return GetServerStateInterface().c
 
 Engine::~Engine()
 {
-	engine = nullptr;
+	g_engine = nullptr;
 	if(umath::is_flag_set(m_stateFlags, StateFlags::Running))
 		throw std::runtime_error("Engine has to be closed before it can be destroyed!");
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
@@ -1210,11 +1216,11 @@ Engine::~Engine()
 	pragma::detail::close_logger();
 }
 
-Engine *pragma::get_engine() { return engine; }
-NetworkState *pragma::get_server_state() { return engine->GetServerStateInterface().get_server_state(); }
+Engine *pragma::get_engine() { return g_engine; }
+NetworkState *pragma::get_server_state() { return Engine::Get()->GetServerStateInterface().get_server_state(); }
 
 REGISTER_ENGINE_CONVAR_CALLBACK(debug_profiling_enabled, [](NetworkState *, const ConVar &, bool, bool enabled) {
-	if(engine == nullptr)
+	if(Engine::Get() == nullptr)
 		return;
-	engine->SetProfilingEnabled(enabled);
+	Engine::Get()->SetProfilingEnabled(enabled);
 });

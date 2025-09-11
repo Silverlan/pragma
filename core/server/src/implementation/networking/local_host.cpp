@@ -4,13 +4,12 @@
 module;
 
 #include "stdafx_server.h"
+#include "pragma/networking/error.hpp"
 #include <pragma/engine.h>
-#include "pragma/networking/recipient_filter.hpp"
+#include "pragma/networking/enums.hpp"
 #include <sharedutils/util_clock.hpp>
 
 module pragma.server.networking.local_host;
-
-extern DLLNETWORK Engine *engine;
 
 bool pragma::networking::LocalServer::DoStart(Error &outErr, uint16_t port, bool useP2PIfAvailable) { return true; }
 bool pragma::networking::LocalServer::PollEvents(Error &outErr) { return true; }
@@ -30,7 +29,7 @@ bool pragma::networking::LocalServerClient::SendPacket(pragma::networking::Proto
 {
 	packet.SetTimeActivated(util::clock::to_int(util::clock::get_duration_since_start()));
 	packet->SetOffset(0);
-	engine->HandleLocalHostPlayerClientPacket(packet);
+	Engine::Get()->HandleLocalHostPlayerClientPacket(packet);
 	return true;
 }
 bool pragma::networking::LocalServerClient::Drop(DropReason reason, pragma::networking::Error &outErr)

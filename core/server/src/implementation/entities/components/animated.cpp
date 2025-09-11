@@ -8,6 +8,8 @@ module;
 #include <pragma/networking/enums.hpp>
 #include <pragma/networking/nwm_util.h>
 #include <pragma/networking/enums.hpp>
+#include "sharedutils/netpacket.hpp"
+#include "pragma/networking/recipient_filter.hpp"
 
 module pragma.server.entities.components.animated;
 
@@ -37,7 +39,7 @@ void SAnimatedComponent::PlayAnimation(int animation, FPlayAnim flags)
 		NetPacket p;
 		nwm::write_entity(p, &ent);
 		p->Write<int>(GetBaseAnimationInfo().animation);
-		server->SendPacket("ent_anim_play", p, pragma::networking::Protocol::FastUnreliable);
+		ServerState::Get()->SendPacket("ent_anim_play", p, pragma::networking::Protocol::FastUnreliable);
 	}
 }
 void SAnimatedComponent::StopLayeredAnimation(int slot)
@@ -54,7 +56,7 @@ void SAnimatedComponent::StopLayeredAnimation(int slot)
 		NetPacket p;
 		nwm::write_entity(p, &ent);
 		p->Write<int>(slot);
-		server->SendPacket("ent_anim_gesture_stop", p, pragma::networking::Protocol::SlowReliable);
+		ServerState::Get()->SendPacket("ent_anim_gesture_stop", p, pragma::networking::Protocol::SlowReliable);
 	}
 }
 void SAnimatedComponent::PlayLayeredAnimation(int slot, int animation, FPlayAnim flags)
@@ -72,6 +74,6 @@ void SAnimatedComponent::PlayLayeredAnimation(int slot, int animation, FPlayAnim
 		nwm::write_entity(p, &ent);
 		p->Write<int>(slot);
 		p->Write<int>(animInfo.animation);
-		server->SendPacket("ent_anim_gesture_play", p, pragma::networking::Protocol::SlowReliable);
+		ServerState::Get()->SendPacket("ent_anim_gesture_play", p, pragma::networking::Protocol::SlowReliable);
 	}
 }

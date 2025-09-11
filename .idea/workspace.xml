@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="BackendCodeEditorMiscSettings">
+    <option name="/Default/Environment/Hierarchy/GeneratedFilesCacheKey/Timestamp/@EntryValue" value="3" type="long" />
+    <option name="/Default/Environment/UserInterface/HierarchyView/ViewStyle/@EntryValue" value="SuperTypes" type="string" />
+    <option name="/Default/Housekeeping/FeatureSuggestion/FeatureSuggestionManager/DisabledSuggesters/=SwitchToGoToActionSuggester/@EntryIndexedValue" value="true" type="bool" />
+  </component>
+  <component name="CMakePresetLoader"><![CDATA[{
+  "useNewFormat": true
+}]]></component>
+  <component name="CMakeSettings">
+    <configurations />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="2c306bb1-9a52-410e-b5b5-511e6a3b165d" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/cmake.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/cmake.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.vscode/settings.json" beforeDir="false" afterPath="$PROJECT_DIR$/.vscode/settings.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/external_libs/alsoundsystem/src/steam_audio/ipl_scene.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/external_libs/alsoundsystem/src/steam_audio/ipl_scene.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/external_libs/sharedutils/include/sharedutils/util_shared_handle.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/external_libs/sharedutils/include/sharedutils/util_shared_handle.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/external_libs/wgui/include/wgui/wielementdata.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/external_libs/wgui/include/wgui/wielementdata.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modules/interfaces/iclient/src/implementation/core.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/modules/interfaces/iclient/src/implementation/core.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modules/interfaces/iclient/src/implementation/scene.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/modules/interfaces/iclient/src/implementation/scene.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modules/interfaces/iclient/src/interface/core.cppm" beforeDir="false" afterPath="$PROJECT_DIR$/modules/interfaces/iclient/src/interface/core.cppm" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modules/interfaces/iclient/src/interface/scene.cppm" beforeDir="false" afterPath="$PROJECT_DIR$/modules/interfaces/iclient/src/interface/scene.cppm" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modules/interfaces/ishared/src/implementation/core.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/modules/interfaces/ishared/src/implementation/core.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modules/pr_chromium/src/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/modules/pr_chromium/src/main.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modules/pr_chromium/src/wiweb.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/modules/pr_chromium/src/wiweb.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modules/pr_openvr/src/instance.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/modules/pr_openvr/src/instance.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modules/pr_openvr/src/lopenvr.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/modules/pr_openvr/src/lopenvr.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modules/pr_openvr/src/vr_eye.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/modules/pr_openvr/src/vr_eye.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modules/pr_unirender/src/implementation/3d_sky.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/modules/pr_unirender/src/implementation/3d_sky.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modules/pr_unirender/src/implementation/cache.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/modules/pr_unirender/src/implementation/cache.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modules/pr_unirender/src/implementation/particles.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/modules/pr_unirender/src/implementation/particles.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modules/pr_unirender/src/implementation/pr_cycles.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/modules/pr_unirender/src/implementation/pr_cycles.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modules/pr_unirender/src/implementation/progressive_refinement.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/modules/pr_unirender/src/implementation/progressive_refinement.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modules/pr_unirender/src/implementation/scene.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/modules/pr_unirender/src/implementation/scene.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modules/pr_unirender/src/implementation/texture.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/modules/pr_unirender/src/implementation/texture.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tools/render_raytracing" beforeDir="false" afterPath="$PROJECT_DIR$/tools/render_raytracing" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ClangdSettings">
+    <option name="formatViaClangd" value="false" />
+  </component>
+  <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:Default" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="RunManager" selected="CMake Application.Run PFM">
+    <list>
+      <item itemvalue="CMake Application.Run PFM" />
+      <item itemvalue="CMake Application.Run Pragma" />
+      <item itemvalue="Remote Debug.Flatpak Remote Debug" />
+    </list>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="2c306bb1-9a52-410e-b5b5-511e6a3b165d" name="Changes" comment="" />
+      <created>1757063719437</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1757063719437</updated>
+      <workItem from="1757063722535" duration="1014000" />
+      <workItem from="1757070357410" duration="631000" />
+      <workItem from="1757071058763" duration="571000" />
+      <workItem from="1757071681315" duration="2855000" />
+      <workItem from="1757107934855" duration="27072000" />
+      <workItem from="1757165448274" duration="92000" />
+      <workItem from="1757165580588" duration="105000" />
+      <workItem from="1757165749650" duration="14703000" />
+      <workItem from="1757185863398" duration="22000" />
+      <workItem from="1757207037180" duration="2522000" />
+      <workItem from="1757236899065" duration="30358000" />
+      <workItem from="1757294337808" duration="14770000" />
+      <workItem from="1757323055598" duration="17491000" />
+      <workItem from="1757345041630" duration="8092000" />
+      <workItem from="1757355339930" duration="2883000" />
+      <workItem from="1757376293710" duration="6486000" />
+      <workItem from="1757397097862" duration="2049000" />
+      <workItem from="1757407710373" duration="4549000" />
+      <workItem from="1757415189174" duration="5531000" />
+      <workItem from="1757420880385" duration="3945000" />
+      <workItem from="1757427302411" duration="1535000" />
+      <workItem from="1757429901673" duration="1372000" />
+      <workItem from="1757432362177" duration="3778000" />
+      <workItem from="1757440477365" duration="1313000" />
+      <workItem from="1757442233855" duration="1015000" />
+      <workItem from="1757460920712" duration="89000" />
+      <workItem from="1757461044729" duration="428000" />
+      <workItem from="1757480352036" duration="104000" />
+      <workItem from="1757480971698" duration="34000" />
+      <workItem from="1757484974092" duration="1568000" />
+      <workItem from="1757546384741" duration="141000" />
+      <workItem from="1757568277545" duration="6138000" />
+      <workItem from="1757576520050" duration="1740000" />
+      <workItem from="1757579010242" duration="1128000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="VCPKGProject">
+    <isAutomaticCheckingOnLaunch value="false" />
+    <isAutomaticFoundErrors value="true" />
+    <isAutomaticReloadCMake value="true" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>

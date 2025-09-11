@@ -7,6 +7,9 @@ module;
 #include <sharedutils/util_string.h>
 #include <sharedutils/util.h>
 #include <pragma/networking/nwm_util.h>
+#include "sharedutils/netpacket.hpp"
+#include "pragma/util/util_game.hpp"
+#include "pragma/networking/recipient_filter.hpp"
 #include <pragma/networking/enums.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
@@ -24,7 +27,7 @@ void SFogControllerComponent::SetFogStart(float start)
 	NetPacket p;
 	nwm::write_entity(p, &GetEntity());
 	p->Write<float>(m_kvFogStart);
-	server->SendPacket("env_fogcon_setstartdist", p, pragma::networking::Protocol::SlowReliable);
+	ServerState::Get()->SendPacket("env_fogcon_setstartdist", p, pragma::networking::Protocol::SlowReliable);
 }
 void SFogControllerComponent::SetFogEnd(float end)
 {
@@ -32,7 +35,7 @@ void SFogControllerComponent::SetFogEnd(float end)
 	NetPacket p;
 	nwm::write_entity(p, &GetEntity());
 	p->Write<float>(m_kvFogEnd);
-	server->SendPacket("env_fogcon_setenddist", p, pragma::networking::Protocol::SlowReliable);
+	ServerState::Get()->SendPacket("env_fogcon_setenddist", p, pragma::networking::Protocol::SlowReliable);
 }
 void SFogControllerComponent::SetMaxDensity(float density)
 {
@@ -40,7 +43,7 @@ void SFogControllerComponent::SetMaxDensity(float density)
 	NetPacket p;
 	nwm::write_entity(p, &GetEntity());
 	p->Write<float>(m_kvMaxDensity);
-	server->SendPacket("env_fogcon_setmaxdensity", p, pragma::networking::Protocol::SlowReliable);
+	ServerState::Get()->SendPacket("env_fogcon_setmaxdensity", p, pragma::networking::Protocol::SlowReliable);
 }
 void SFogControllerComponent::SetFogType(util::FogType type) { BaseEnvFogControllerComponent::SetFogType(type); }
 void SFogControllerComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)

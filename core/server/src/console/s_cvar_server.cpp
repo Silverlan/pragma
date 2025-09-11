@@ -23,9 +23,6 @@ import pragma.server.entities.components;
 import pragma.server.game;
 import pragma.server.server_state;
 
-extern DLLNETWORK Engine *engine;
-extern ServerState *server;
-extern SGame *s_game;
 DLLSERVER void CMD_sv_send(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
 	if(argv.empty())
@@ -33,16 +30,16 @@ DLLSERVER void CMD_sv_send(NetworkState *, pragma::BasePlayerComponent *, std::v
 	NetPacket packet;
 	packet->WriteString(argv[(argv.size() == 1) ? 0 : 1]);
 	if(argv.size() == 1)
-		server->SendPacket("sv_send", packet, pragma::networking::Protocol::SlowReliable);
+		ServerState::Get()->SendPacket("sv_send", packet, pragma::networking::Protocol::SlowReliable);
 	else {
-		/*server->
+		/*ServerState::Get()->
 		ClientSession *cs = GetSessionByPlayerID(atoi(argv[0]));
 		if(!cs)
 		{
 			Con::cout<<"No player with ID "<<atoi(argv[0])<<" found!"<<Con::endl;
 			return;
 		}
-		server->SendTCPMessage("sv_send",&packet,cs);*/
+		ServerState::Get()->SendTCPMessage("sv_send",&packet,cs);*/
 	}
 }
 
@@ -53,7 +50,7 @@ DLLSERVER void CMD_sv_send_udp(NetworkState *, pragma::BasePlayerComponent *, st
 	NetPacket packet;
 	packet->WriteString(argv[(argv.size() == 1) ? 0 : 1]);
 	if(argv.size() == 1)
-		server->SendPacket("sv_send", packet, pragma::networking::Protocol::FastUnreliable);
+		ServerState::Get()->SendPacket("sv_send", packet, pragma::networking::Protocol::FastUnreliable);
 	else {
 		/*ClientSession *cs = GetSessionByPlayerID(atoi(argv[0]));
 		if(!cs)
@@ -61,14 +58,14 @@ DLLSERVER void CMD_sv_send_udp(NetworkState *, pragma::BasePlayerComponent *, st
 			Con::cout<<"No player with ID "<<atoi(argv[0])<<" found!"<<Con::endl;
 			return;
 		}
-		server->SendUDPMessage("sv_send",&packet,cs);*/
+		ServerState::Get()->SendUDPMessage("sv_send",&packet,cs);*/
 	}
 }
 
 DLLSERVER void CMD_ent_input(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	CHECK_CHEATS("ent_input", state, );
-	if(s_game == NULL)
+	if(SGame::Get() == NULL)
 		return;
 	auto *activator = (pl != nullptr) ? &pl->GetEntity() : nullptr;
 	if(argv.size() >= 2) {
@@ -110,7 +107,7 @@ DLLSERVER void CMD_ent_input(NetworkState *state, pragma::BasePlayerComponent *p
 void CMD_ent_scale(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	CHECK_CHEATS("ent_scale", state, );
-	if(s_game == nullptr)
+	if(SGame::Get() == nullptr)
 		return;
 	if(argv.size() >= 2) {
 		auto ents = command::find_named_targets(state, argv[0]);
@@ -140,7 +137,7 @@ void CMD_ent_scale(NetworkState *state, pragma::BasePlayerComponent *pl, std::ve
 DLLSERVER void CMD_ent_remove(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	CHECK_CHEATS("ent_remove", state, );
-	if(s_game == NULL || pl == NULL)
+	if(SGame::Get() == NULL || pl == NULL)
 		return;
 	auto &ent = pl->GetEntity();
 	if(ent.IsCharacter() == false)
@@ -158,7 +155,7 @@ DLLSERVER void CMD_ent_remove(NetworkState *state, pragma::BasePlayerComponent *
 DLLSERVER void CMD_ent_create(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	CHECK_CHEATS("ent_create", state, );
-	if(s_game == NULL)
+	if(SGame::Get() == NULL)
 		return;
 	if(argv.empty() || pl == NULL)
 		return;
@@ -174,13 +171,13 @@ DLLSERVER void CMD_ent_create(NetworkState *state, pragma::BasePlayerComponent *
 	trData.SetTarget(origin + dir * static_cast<float>(GameLimits::MaxRayCastRange));
 	trData.SetFilter(ent);
 	trData.SetFlags(RayCastFlags::Default | RayCastFlags::InvertFilter | RayCastFlags::IgnoreDynamic);
-	auto r = s_game->RayCast(trData);
+	auto r = SGame::Get()->RayCast(trData);
 	if(r.hitType == RayCastHitType::None) {
 		Con::cwar << "No place to spawn entity!" << Con::endl;
 		return;
 	}
 	std::string className = argv[0];
-	BaseEntity *entNew = s_game->CreateEntity(className);
+	BaseEntity *entNew = SGame::Get()->CreateEntity(className);
 	if(entNew == NULL)
 		return;
 	auto pTrComponentNew = entNew->GetTransformComponent();
@@ -203,16 +200,16 @@ DLLSERVER void CMD_ent_create(NetworkState *state, pragma::BasePlayerComponent *
 
 void CMD_nav_reload(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
-	if(s_game == NULL)
+	if(SGame::Get() == NULL)
 		return;
-	s_game->LoadNavMesh(true);
+	SGame::Get()->LoadNavMesh(true);
 }
 
 DLLSERVER void CMD_nav_generate(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
-	if(s_game == NULL)
+	if(SGame::Get() == NULL)
 		return;
-	std::string map = s_game->GetMapName();
+	std::string map = SGame::Get()->GetMapName();
 	if(map.empty())
 		return;
 	std::string err;
@@ -222,7 +219,7 @@ DLLSERVER void CMD_nav_generate(NetworkState *, pragma::BasePlayerComponent *, s
 	  20.f,                            /* maxClimbHeight */
 	  45.f                             /* walkableSlopeAngle */
 	};
-	auto rcNavMesh = pragma::nav::generate(*s_game, navCfg, &err);
+	auto rcNavMesh = pragma::nav::generate(*SGame::Get(), navCfg, &err);
 	if(rcNavMesh == nullptr)
 		Con::cwar << "Unable to generate navigation mesh: " << err << Con::endl;
 	else {
@@ -231,16 +228,16 @@ DLLSERVER void CMD_nav_generate(NetworkState *, pragma::BasePlayerComponent *, s
 		std::string path = "maps\\" + map;
 		path += "." + std::string {pragma::nav::PNAV_EXTENSION_BINARY};
 		std::string err;
-		if(navMesh->Save(*s_game, path, err) == false)
+		if(navMesh->Save(*SGame::Get(), path, err) == false)
 			Con::cwar << "Unable to save navigation mesh as '" << path << "': " << err << "!" << Con::endl;
 	}
 }
 
 void CMD_heartbeat(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
-	if(server == nullptr)
+	if(ServerState::Get() == nullptr)
 		return;
-	auto *sv = server->GetServer();
+	auto *sv = ServerState::Get()->GetServer();
 	if(sv == nullptr)
 		return;
 	sv->Heartbeat();
@@ -248,7 +245,7 @@ void CMD_heartbeat(NetworkState *, pragma::BasePlayerComponent *, std::vector<st
 
 void CMD_sv_debug_netmessages(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
-	auto *sv = server->GetServer();
+	auto *sv = ServerState::Get()->GetServer();
 	if(sv == nullptr) {
 		Con::cwar << "No server is active!" << Con::endl;
 		return;

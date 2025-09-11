@@ -5,16 +5,8 @@
 #define __LENTITY_COMPONENTS_BASE_TYPES_HPP__
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/lua/classes/ldef_entity.h"
-#include "pragma/lua/classes/lphysics.h"
-#include "pragma/util/bulletinfo.h"
-#include "pragma/lua/classes/lproperty.hpp"
+#include "pragma/physics/raytraces.h"
 #include "pragma/model/animation/animation_event.h"
-#include "pragma/model/animation/animation.hpp"
-#include <sharedutils/util_weak_handle.hpp>
-#include <mathutil/plane.hpp>
-
-extern DLLNETWORK Engine *engine;
 
 namespace Lua::TraceData {
 	void FillTraceResultTable(lua_State *l, TraceResult &res);

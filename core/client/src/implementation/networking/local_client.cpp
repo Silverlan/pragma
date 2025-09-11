@@ -10,14 +10,12 @@ module pragma.client.networking;
 
 import :local_client;
 
-extern DLLNETWORK Engine *engine;
-
 std::string pragma::networking::LocalClient::GetIdentifier() const { return "localhost"; }
 bool pragma::networking::LocalClient::Connect(const std::string &ip, Port port, Error &outErr)
 {
 	if(ip != "127.0.0.1")
 		return false;
-	auto result = engine->ConnectLocalHostPlayerClient();
+	auto result = Engine::Get()->ConnectLocalHostPlayerClient();
 	if(result == false)
 		return result;
 	OnConnected();
@@ -32,7 +30,7 @@ bool pragma::networking::LocalClient::SendPacket(Protocol protocol, NetPacket &p
 {
 	packet.SetTimeActivated(util::clock::to_int(util::clock::get_duration_since_start()));
 	packet->SetOffset(0);
-	engine->HandleLocalHostPlayerServerPacket(packet);
+	Engine::Get()->HandleLocalHostPlayerServerPacket(packet);
 	OnPacketSent(protocol, packet);
 	return true;
 }

@@ -7,6 +7,8 @@ module;
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/components/base_physics_component.hpp>
 #include <pragma/networking/nwm_util.h>
+#include "sharedutils/netpacket.hpp"
+#include "pragma/networking/recipient_filter.hpp"
 #include <pragma/networking/enums.hpp>
 
 module pragma.server.entities.components.transform;
@@ -47,5 +49,5 @@ void STransformComponent::SetEyeOffset(const Vector3 &offset)
 	NetPacket p;
 	nwm::write_entity(p, &ent);
 	nwm::write_vector(p, offset);
-	server->SendPacket("ent_eyeoffset", p, pragma::networking::Protocol::SlowReliable);
+	ServerState::Get()->SendPacket("ent_eyeoffset", p, pragma::networking::Protocol::SlowReliable);
 }

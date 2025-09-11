@@ -7,6 +7,7 @@ module;
 #include <pragma/lua/ldefinitions.h>
 #include <pragma/networking/enums.hpp>
 #include "pragma/lua/classes/ldef_entity.h"
+#include "sharedutils/netpacket.hpp"
 #include "pragma/networking/recipient_filter.hpp"
 
 export module pragma.server.scripting.lua.classes.entity;

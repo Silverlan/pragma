@@ -5,6 +5,9 @@
 #include "pragma/ai/ai_schedule.h"
 #include <mathutil/umath.h>
 #include "pragma/ai/ai_behavior.h"
+#include <pragma/entities/components/base_ai_component.hpp>
+
+import pragma.server.entities.components;
 
 using namespace pragma;
 
@@ -16,7 +19,7 @@ void ai::Schedule::Cancel() const
 		return;
 	m_rootTask->Stop();
 }
-ai::BehaviorNode::Result ai::Schedule::Start(pragma::SAIComponent &ent)
+ai::BehaviorNode::Result ai::Schedule::Start(pragma::BaseAIComponent &ent)
 {
 	std::function<void(const ai::BehaviorNode &)> fResetNode = nullptr;
 	fResetNode = [&fResetNode](const ai::BehaviorNode &node) {
@@ -28,7 +31,7 @@ ai::BehaviorNode::Result ai::Schedule::Start(pragma::SAIComponent &ent)
 	fResetNode(*m_rootTask);
 	return m_rootTask->Start(this, ent);
 }
-ai::BehaviorNode::Result ai::Schedule::Think(pragma::SAIComponent &ent) const { return m_rootTask->Think(this, ent); }
+ai::BehaviorNode::Result ai::Schedule::Think(pragma::BaseAIComponent &ent) const { return m_rootTask->Think(this, static_cast<SAIComponent&>(ent)); }
 ai::BehaviorNode &ai::Schedule::GetRootNode() const { return *m_rootTask; }
 std::shared_ptr<ai::Schedule> ai::Schedule::Copy() const
 {

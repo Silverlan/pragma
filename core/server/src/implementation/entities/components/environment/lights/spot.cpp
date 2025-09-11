@@ -8,6 +8,8 @@ module;
 #include "pragma/entities/baseentity_luaobject.h"
 #include <pragma/networking/nwm_util.h>
 #include <pragma/networking/enums.hpp>
+#include "sharedutils/netpacket.hpp"
+#include "pragma/networking/recipient_filter.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
@@ -43,7 +45,7 @@ void SLightSpotComponent::SetOuterConeAngle(float ang)
 	NetPacket p;
 	nwm::write_entity(p, &ent);
 	p->Write<float>(ang);
-	server->SendPacket("env_light_spot_outercutoff_angle", p, pragma::networking::Protocol::SlowReliable);
+	ServerState::Get()->SendPacket("env_light_spot_outercutoff_angle", p, pragma::networking::Protocol::SlowReliable);
 }
 
 void SLightSpotComponent::SetBlendFraction(float ang)
@@ -55,7 +57,7 @@ void SLightSpotComponent::SetBlendFraction(float ang)
 	NetPacket p;
 	nwm::write_entity(p, &ent);
 	p->Write<float>(ang);
-	server->SendPacket("env_light_spot_innercutoff_angle", p, pragma::networking::Protocol::SlowReliable);
+	ServerState::Get()->SendPacket("env_light_spot_innercutoff_angle", p, pragma::networking::Protocol::SlowReliable);
 }
 
 void SLightSpotComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }

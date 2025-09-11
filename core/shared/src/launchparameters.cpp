@@ -134,12 +134,12 @@ DLLNETWORK void LPARAM_console(const std::vector<std::string> &argv)
 			conType = Engine::ConsoleType::GUIDetached;
 		else if(ustring::compare<std::string>(argv[0], "gui"))
 			conType = Engine::ConsoleType::GUI;
-		engine->SetConsoleType(conType);
+		Engine::Get()->SetConsoleType(conType);
 	}
-	engine->OpenConsole();
+	Engine::Get()->OpenConsole();
 }
 
-DLLNETWORK void LPARAM_dev(const std::vector<std::string> &argv) { engine->SetDeveloperMode(true); }
+DLLNETWORK void LPARAM_dev(const std::vector<std::string> &argv) { Engine::Get()->SetDeveloperMode(true); }
 
 DLLNETWORK std::optional<std::string> g_lpLogFile = pragma::DEFAULT_LOG_FILE;
 DLLNETWORK void LPARAM_log_file(const std::vector<std::string> &argv)
@@ -187,14 +187,14 @@ DLLNETWORK void LPARAM_tcpport(const std::vector<std::string> &argv)
 {
 	if(argv.empty())
 		return;
-	engine->AddLaunchConVar("net_port_tcp", argv[0]); //WEAVETODO
+	Engine::Get()->AddLaunchConVar("net_port_tcp", argv[0]); //WEAVETODO
 }
 
 DLLNETWORK void LPARAM_udpport(const std::vector<std::string> &argv)
 {
 	if(argv.empty())
 		return;
-	engine->AddLaunchConVar("net_port_udp", argv[0]); //WEAVETODO
+	Engine::Get()->AddLaunchConVar("net_port_udp", argv[0]); //WEAVETODO
 }
 
 DLLNETWORK void LPARAM_tcponly(const std::vector<std::string> &argv) {} //m_bTCPOnly = true;}//WEAVETODO
@@ -225,7 +225,7 @@ DLLNETWORK void LPARAM_USE_VKV_PARSER(const std::vector<std::string> &argv)
 
 DLLNETWORK void LPARAM_help(const std::vector<std::string> &argv)
 {
-	engine->OpenConsole();
+	Engine::Get()->OpenConsole();
 	LaunchParaMap *map = GetLaunchParaMap();
 	if(map == NULL)
 		return;
@@ -252,9 +252,9 @@ static void LPARAM_luaext(const std::vector<std::string> &argv)
 	// Lua::set_precompiled_files_enabled(false);
 }
 
-static void LPARAM_verbose(const std::vector<std::string> &argv) { engine->SetVerbose(true); }
-static void LPARAM_console_subsystem(const std::vector<std::string> &argv) { engine->SetConsoleSubsystem(true); }
-static void LPARAM_non_interactive(const std::vector<std::string> &argv) { engine->SetNonInteractiveMode(true); }
+static void LPARAM_verbose(const std::vector<std::string> &argv) { Engine::Get()->SetVerbose(true); }
+static void LPARAM_console_subsystem(const std::vector<std::string> &argv) { Engine::Get()->SetConsoleSubsystem(true); }
+static void LPARAM_non_interactive(const std::vector<std::string> &argv) { Engine::Get()->SetNonInteractiveMode(true); }
 static void LPARAM_disable_linenoise(const std::vector<std::string> &argv)
 {
 	// -disable_linenoise is handled in Engine constructor

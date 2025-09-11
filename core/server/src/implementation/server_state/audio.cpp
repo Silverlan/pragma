@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
 #include <pragma/engine.h>
 #include <pragma/audio/soundscript.h>
@@ -18,11 +20,11 @@
 #include <pragma/game/game_resources.hpp>
 #include <pragma/logging.hpp>
 
+module pragma.server.server_state;
+
 import pragma.audio.util;
 import pragma.server.audio;
 import pragma.server.game;
-
-import pragma.server.server_state;
 
 void ServerState::SendSoundSourceToClient(SALSound &sound, bool sendFullUpdate, const pragma::networking::ClientRecipientFilter *rf)
 {

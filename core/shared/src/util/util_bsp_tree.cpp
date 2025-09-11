@@ -5,8 +5,6 @@
 #include "pragma/util/util_bsp_tree.hpp"
 #include <udm.hpp>
 
-extern DLLNETWORK Engine *engine;
-
 using namespace util;
 
 std::shared_ptr<BSPTree> BSPTree::Create()

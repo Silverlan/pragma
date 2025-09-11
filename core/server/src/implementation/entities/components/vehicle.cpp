@@ -13,6 +13,8 @@ module;
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/physics/environment.hpp>
+#include "sharedutils/netpacket.hpp"
+#include "pragma/networking/recipient_filter.hpp"
 #include <pragma/networking/nwm_util.h>
 #include <pragma/networking/enums.hpp>
 
@@ -23,8 +25,6 @@ import pragma.server.entities.components;
 import pragma.server.game;
 
 using namespace pragma;
-
-extern SGame *s_game;
 
 std::vector<SVehicleComponent *> SVehicleComponent::s_vehicles;
 const std::vector<SVehicleComponent *> &SVehicleComponent::GetAll() { return s_vehicles; }

@@ -55,7 +55,7 @@ void ai::TaskMoveToTarget::Print(const Schedule *sched, std::ostream &o) const
 	}
 	o << "]";
 }
-ai::BehaviorNode::Result ai::TaskMoveToTarget::Think(const Schedule *sched, pragma::SAIComponent &ent)
+ai::BehaviorNode::Result ai::TaskMoveToTarget::Think(const Schedule *sched, pragma::BaseAIComponent &ent)
 {
 	auto r = TaskTarget::Think(sched, ent);
 	if(r != Result::Succeeded)

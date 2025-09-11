@@ -24,15 +24,13 @@
 #define DLLSPEC_ISTEAMWORKS DLLNETWORK
 #include "pragma/game/isteamworks.hpp"
 
-extern DLLNETWORK Engine *engine;
-
 //////////////// LOGGING ////////////////
 REGISTER_ENGINE_CONCOMMAND(
   log,
   [](NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv) {
 	  if(argv.empty())
 		  return;
-	  engine->WriteToLog(argv[0]);
+	  Engine::Get()->WriteToLog(argv[0]);
   },
   ConVarFlags::None, "Adds the specified message to the engine log. Usage: log <msg>.");
 REGISTER_ENGINE_CONCOMMAND(
@@ -40,7 +38,7 @@ REGISTER_ENGINE_CONCOMMAND(
   [](NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv) {
 	  if(argv.empty())
 		  return;
-	  engine->ClearCache();
+	  Engine::Get()->ClearCache();
   },
   ConVarFlags::None, "Deletes all cache files.");
 REGISTER_ENGINE_CONVAR(cache_version, udm::Type::String, "", ConVarFlags::Archive, "The engine version that the cache files are associated with. If this version doesn't match the current engine version, the cache will be cleared.");
@@ -56,8 +54,8 @@ static void cvar_steam_steamworks_enabled(bool val)
 {
 	static std::weak_ptr<util::Library> wpSteamworks = {};
 	static std::unique_ptr<ISteamworks> isteamworks = nullptr;
-	auto *nwSv = engine->GetServerNetworkState();
-	auto *nwCl = engine->GetClientState();
+	auto *nwSv = Engine::Get()->GetServerNetworkState();
+	auto *nwCl = Engine::Get()->GetClientState();
 	if(val == true) {
 		if(wpSteamworks.expired() == false && isteamworks != nullptr)
 			return;
@@ -100,33 +98,33 @@ static void cvar_steam_steamworks_enabled(bool val)
 }
 REGISTER_ENGINE_CONVAR_CALLBACK(steam_steamworks_enabled, [](NetworkState *, const ConVar &, bool prev, bool val) { cvar_steam_steamworks_enabled(val); });
 
-REGISTER_ENGINE_CONVAR_CALLBACK(sh_mount_external_game_resources, [](NetworkState *, const ConVar &, bool prev, bool val) { engine->SetMountExternalGameResources(val); });
+REGISTER_ENGINE_CONVAR_CALLBACK(sh_mount_external_game_resources, [](NetworkState *, const ConVar &, bool prev, bool val) { Engine::Get()->SetMountExternalGameResources(val); });
 REGISTER_ENGINE_CONCOMMAND(
   toggle,
   [](NetworkState *nw, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv) {
 	  if(argv.empty() == true)
 		  return;
 	  auto &cvName = argv.front();
-	  auto *cf = engine->GetConVar(cvName);
+	  auto *cf = Engine::Get()->GetConVar(cvName);
 	  if(cf == nullptr || cf->GetType() != ConType::Var)
 		  return;
 	  auto *cvar = static_cast<ConVar *>(cf);
 	  std::vector<std::string> args = {(cvar->GetBool() == true) ? "0" : "1"};
-	  engine->RunConsoleCommand(cvName, args);
+	  Engine::Get()->RunConsoleCommand(cvName, args);
   },
   ConVarFlags::None, "Toggles the specified console variable between 0 and 1.");
 
 REGISTER_ENGINE_CONVAR_CALLBACK(log_enabled, [](NetworkState *, const ConVar &, int prev, int val) {
-	//if(!engine->IsActiveState(state))
+	//if(!Engine::Get()->IsActiveState(state))
 	//	return;
 	if(prev == 0 && val != 0)
-		engine->StartLogging();
+		Engine::Get()->StartLogging();
 	else if(prev != 0 && val == 0)
-		engine->EndLogging();
+		Engine::Get()->EndLogging();
 });
 
 REGISTER_ENGINE_CONVAR_CALLBACK(log_file, [](NetworkState *state, const ConVar &, std::string prev, std::string val) {
-	//if(!engine->IsActiveState(state))
+	//if(!Engine::Get()->IsActiveState(state))
 	//	return;
 	std::string lprev = prev;
 	std::string lval = val;
@@ -136,7 +134,7 @@ REGISTER_ENGINE_CONVAR_CALLBACK(log_file, [](NetworkState *state, const ConVar &
 		return;
 	if(!state->GetConVarBool("log_enabled"))
 		return;
-	engine->StartLogging();
+	Engine::Get()->StartLogging();
 });
 
 REGISTER_SHARED_CONVAR_CALLBACK(sv_gravity, [](NetworkState *state, const ConVar &, std::string prev, std::string val) {
@@ -202,12 +200,12 @@ REGISTER_ENGINE_CONCOMMAND(lua_compile, CMD_lua_compile, ConVarFlags::None, "Ope
 REGISTER_ENGINE_CONCOMMAND(
   toggleconsole,
   [](NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &) {
-	  if(engine->IsServerOnly())
+	  if(Engine::Get()->IsServerOnly())
 		  return;
-	  if(engine->IsConsoleOpen())
-		  engine->CloseConsole();
+	  if(Engine::Get()->IsConsoleOpen())
+		  Engine::Get()->CloseConsole();
 	  else
-		  engine->OpenConsole();
+		  Engine::Get()->OpenConsole();
   },
   ConVarFlags::None, "Toggles the developer console.");
 
@@ -220,7 +218,7 @@ REGISTER_ENGINE_CONCOMMAND(
   },
   ConVarFlags::None, "Prints something to the console. Usage: echo <message>");
 
-static void CMD_exit(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &) { engine->ShutDown(); }
+static void CMD_exit(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &) { Engine::Get()->ShutDown(); }
 REGISTER_ENGINE_CONCOMMAND(exit, CMD_exit, ConVarFlags::None, "Exits the game.");
 REGISTER_ENGINE_CONCOMMAND(quit, CMD_exit, ConVarFlags::None, "Exits the game.");
 
@@ -275,7 +273,7 @@ REGISTER_ENGINE_CONCOMMAND(
   },
   ConVarFlags::None, "");
 
-REGISTER_ENGINE_CONCOMMAND(clear, [](NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &) { engine->ClearConsole(); }, ConVarFlags::None, "Clears everything in the console.");
+REGISTER_ENGINE_CONCOMMAND(clear, [](NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &) { Engine::Get()->ClearConsole(); }, ConVarFlags::None, "Clears everything in the console.");
 
 REGISTER_ENGINE_CONCOMMAND(
   credits,
@@ -335,7 +333,7 @@ static void debug_profiling_print(NetworkState *, pragma::BasePlayerComponent *,
 		}
 	};
 
-	auto &profiler = engine->GetProfiler();
+	auto &profiler = Engine::Get()->GetProfiler();
 	fPrintResults(profiler.GetRootStage(), "", true);
 
 	Con::cout << "--------------------------------------------" << Con::endl;
@@ -413,11 +411,11 @@ static void debug_dump_scene_graph(NetworkState *nw)
 
 static void debug_dump_scene_graph(NetworkState *nw, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
-	auto *sv = engine->GetServerNetworkState();
+	auto *sv = Engine::Get()->GetServerNetworkState();
 	if(sv)
 		debug_dump_scene_graph(sv);
 
-	auto *cl = engine->GetClientState();
+	auto *cl = Engine::Get()->GetClientState();
 	if(cl)
 		debug_dump_scene_graph(cl);
 }

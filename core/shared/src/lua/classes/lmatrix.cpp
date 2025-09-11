@@ -17,7 +17,6 @@
 #include "pragma/lua/classes/lvector.h"
 #include <Eigen/Eigenvalues>
 
-extern DLLNETWORK Engine *engine;
 #define LUA_MATRIX_MEMBERS_DEF(type, maxk, maxm)                                                                                                                                                                                                                                                 \
 	void Lua::Mat##type::Copy(lua_State *l, const ::Mat##type &mat)                                                                                                                                                                                                                              \
 	{                                                                                                                                                                                                                                                                                            \

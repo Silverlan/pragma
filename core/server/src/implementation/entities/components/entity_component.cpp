@@ -6,6 +6,7 @@ module;
 #include "stdafx_server.h"
 #include <pragma/networking/enums.hpp>
 #include <sharedutils/netpacket.hpp>
+#include "pragma/networking/recipient_filter.hpp"
 
 module pragma.server.entities.components.entity;
 
@@ -20,5 +21,5 @@ void SEntityComponentManager::OnComponentTypeRegistered(const ComponentInfo &com
 	NetPacket p {};
 	p->Write<ComponentId>(componentInfo.id);
 	p->WriteString(*componentInfo.name);
-	server->SendPacket("register_entity_component", p, pragma::networking::Protocol::SlowReliable);
+	ServerState::Get()->SendPacket("register_entity_component", p, pragma::networking::Protocol::SlowReliable);
 }

@@ -11,7 +11,7 @@ module pragma.server.ai.tasks.random;
 
 using namespace pragma;
 
-ai::BehaviorNode::Result ai::TaskRandom::Start(const Schedule *sched, pragma::SAIComponent &ent)
+ai::BehaviorNode::Result ai::TaskRandom::Start(const Schedule *sched, pragma::BaseAIComponent &ent)
 {
 	BehaviorNode::Start(sched, ent);
 

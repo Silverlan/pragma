@@ -12,7 +12,6 @@
 #include <vector>
 
 namespace pragma {
-	class SAIComponent;
 	namespace ai {
 		// Selectors
 		enum class DLLSERVER SelectorType { Sequential = 0, RandomShuffle };
@@ -80,8 +79,8 @@ namespace pragma {
 			std::vector<uint8_t> m_paramIds; // Parameter Id for schedule
 			virtual void OnStopped();
 			void StopTask(uint32_t taskId);
-			Result StartTask(uint32_t taskId, const Schedule *sched, pragma::SAIComponent &ent);
-			Result ThinkTask(uint32_t taskId, const Schedule *sched, pragma::SAIComponent &ent);
+			Result StartTask(uint32_t taskId, const Schedule *sched, pragma::BaseAIComponent &ent);
+			Result ThinkTask(uint32_t taskId, const Schedule *sched, pragma::BaseAIComponent &ent);
 			virtual void OnTaskComplete(const Schedule *sched, uint32_t taskId, Result result);
 			using ParameterBase::GetParameter;
 			virtual void Clear();
@@ -92,7 +91,7 @@ namespace pragma {
 			virtual std::shared_ptr<BehaviorNode> Copy() const { return Copy<BehaviorNode>(); }
 			BehaviorNode &operator=(const BehaviorNode &other) = delete;
 			virtual void Stop();
-			virtual Result Think(const Schedule *sched, pragma::SAIComponent &ent); // Returns true on complete (success or failure)
+			virtual Result Think(const Schedule *sched, pragma::BaseAIComponent &ent); // Returns true on complete (success or failure)
 			void SetType(Type type);
 			void SetSelectorType(SelectorType selectorType);
 			SelectorType GetSelectorType() const;
@@ -101,7 +100,7 @@ namespace pragma {
 			void DebugPrint(const Schedule *sched, std::stringstream &ss, const std::string &t = "") const;
 			void AddNode(const std::shared_ptr<BehaviorNode> &node);
 			const std::vector<std::shared_ptr<BehaviorNode>> &GetNodes() const;
-			virtual Result Start(const Schedule *sched, pragma::SAIComponent &ent);
+			virtual Result Start(const Schedule *sched, pragma::BaseAIComponent &ent);
 			virtual void SetScheduleParameter(uint8_t taskParamId, uint8_t scheduleParamId);
 			const BehaviorParameter *GetParameter(const Schedule *sched, uint8_t taskParamId) const;
 			DebugInfo &GetDebugInfo() const;

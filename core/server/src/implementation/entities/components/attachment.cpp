@@ -5,7 +5,11 @@ module;
 
 #include "stdafx_server.h"
 #include "pragma/networking/s_nwm_util.h"
+#include "pragma/entities/parentinfo.h"
+#include "pragma/entities/parentmode.h"
 #include <pragma/networking/enums.hpp>
+#include "sharedutils/netpacket.hpp"
+#include "pragma/networking/recipient_filter.hpp"
 #include <pragma/entities/components/parent_component.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
@@ -32,7 +36,7 @@ AttachmentData *SAttachmentComponent::SetupAttachment(BaseEntity *ent, const Att
 		p->Write<FAttachmentMode>(attInfo.flags);
 		p->Write<Vector3>(attData->offset);
 		p->Write<Quat>(attData->rotation);
-		server->SendPacket("ent_setparent", p, pragma::networking::Protocol::SlowReliable);
+		ServerState::Get()->SendPacket("ent_setparent", p, pragma::networking::Protocol::SlowReliable);
 	}
 	return attData;
 }
@@ -45,7 +49,7 @@ void SAttachmentComponent::SetAttachmentFlags(FAttachmentMode flags)
 		NetPacket p;
 		nwm::write_entity(p, &entThis);
 		p->Write<FAttachmentMode>(flags);
-		server->SendPacket("ent_setparentmode", p, pragma::networking::Protocol::SlowReliable);
+		ServerState::Get()->SendPacket("ent_setparentmode", p, pragma::networking::Protocol::SlowReliable);
 	}
 }
 

@@ -4,6 +4,8 @@
 module;
 
 #include "pragma/serverdefinitions.h"
+#include "sharedutils/netpacket.hpp"
+#include "pragma/networking/recipient_filter.hpp"
 #include "pragma/entities/environment/env_wind.hpp"
 
 export module pragma.server.entities.components.wind;

@@ -11,8 +11,6 @@
 #include "pragma/physics/phys_material.hpp"
 #include "pragma/physics/collision_object.hpp"
 
-extern DLLNETWORK Engine *engine;
-
 void Lua::PhysContact::register_class(lua_State *l, luabind::module_ &mod)
 {
 	auto classDefPoint = luabind::class_<::pragma::physics::ContactPoint>("ContactPoint");

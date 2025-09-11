@@ -9,6 +9,8 @@ module;
 #include "wms_message.h"
 #include "pragma/networking/wv_message.h"
 #include "pragma/networking/enums.hpp"
+#include "pragma/networking/nwm_message_tracker.hpp"
+#include "networkmanager/udp_handler/udp_message_dispatcher.h"
 #include "wmserverdata.h"
 #include <servermanager/connection/sv_nwm_tcpconnection.h>
 #include <servermanager/connection/sv_nwm_udpconnection.h>
@@ -31,8 +33,6 @@ import pragma.server.server_state;
 #else
 #define GET_TIMEOUT_DURATION(f) f
 #endif
-
-extern ServerState *server;
 
 pragma::networking::NWMActiveServer::NWMActiveServer(const std::shared_ptr<SVNWMUDPConnection> &udp, const std::shared_ptr<SVNWMTCPConnection> &tcp) : nwm::Server(udp, tcp), m_lastHeartBeat() { m_dispatcher = UDPMessageDispatcher::Create(); }
 nwm::ServerClient &pragma::networking::NWMActiveServer::GetNWMClient(StandardServerClient &cl) const { return cl.GetNWMClient(); }
@@ -125,7 +125,7 @@ void pragma::networking::NWMActiveServer::OnClientDropped(nwm::ServerClient *cl,
 	if(it == m_nwmToPragmaClient.end())
 		return;
 	auto *prCl = it->second;
-	auto *pl = server->GetPlayer(*prCl);
+	auto *pl = ServerState::Get()->GetPlayer(*prCl);
 	if(pl)
 		pl->GetEntity().RemoveSafely();
 #if DEBUG_SERVER_VERBOSE == 1
@@ -159,9 +159,9 @@ void pragma::networking::NWMActiveServer::PollEvents()
 }
 void pragma::networking::NWMActiveServer::Heartbeat()
 {
-	if(m_dispatcher == nullptr || !server->IsGameActive())
+	if(m_dispatcher == nullptr || !ServerState::Get()->IsGameActive())
 		return;
-	auto &data = server->GetServerData();
+	auto &data = ServerState::Get()->GetServerData();
 	DataStream body;
 	data.Write(body);
 
@@ -186,7 +186,7 @@ std::shared_ptr<nwm::ServerClient> pragma::networking::NWMActiveServer::CreateCl
 std::unique_ptr<pragma::networking::NWMActiveServer> pragma::networking::NWMActiveServer::Create(uint16_t tcpPort, uint16_t udpPort, nwm::ConnectionType conType)
 {
 	auto r = nwm::Server::Create<pragma::networking::NWMActiveServer>(tcpPort, udpPort, conType);
-	r->SetTimeoutDuration(GET_TIMEOUT_DURATION(server->GetConVarFloat("sv_timeout_duration")));
+	r->SetTimeoutDuration(GET_TIMEOUT_DURATION(ServerState::Get()->GetConVarFloat("sv_timeout_duration")));
 	r->Start();
 	return r;
 }
@@ -194,7 +194,7 @@ std::unique_ptr<pragma::networking::NWMActiveServer> pragma::networking::NWMActi
 std::unique_ptr<pragma::networking::NWMActiveServer> pragma::networking::NWMActiveServer::Create(uint16_t port, nwm::ConnectionType conType)
 {
 	auto r = nwm::Server::Create<pragma::networking::NWMActiveServer>(port, conType);
-	r->SetTimeoutDuration(GET_TIMEOUT_DURATION(server->GetConVarFloat("sv_timeout_duration")));
+	r->SetTimeoutDuration(GET_TIMEOUT_DURATION(ServerState::Get()->GetConVarFloat("sv_timeout_duration")));
 	r->Start();
 	return r;
 }
@@ -234,9 +234,9 @@ nwm::ServerClient &pragma::networking::StandardServerClient::GetNWMClient() cons
 
 static void sv_timeout_duration_callback(NetworkState *, const ConVar &, float, float val)
 {
-	if(server == nullptr)
+	if(ServerState::Get() == nullptr)
 		return;
-	auto *sv = server->GetServer();
+	auto *sv = ServerState::Get()->GetServer();
 	if(sv == nullptr)
 		return;
 	sv->SetTimeoutDuration(GET_TIMEOUT_DURATION(val));

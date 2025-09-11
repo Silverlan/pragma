@@ -16,8 +16,6 @@ import pragma.server.game;
 
 using namespace pragma;
 
-extern SGame *s_game;
-
 void ai::TaskMoveRandom::Print(const Schedule *sched, std::ostream &o) const { o << "MoveRandom[" << GetMoveDistance(sched) << "]"; }
 void ai::TaskMoveRandom::SetMoveDistance(float dist) { SetParameter(umath::to_integral(Parameter::Distance), dist); }
 void ai::TaskMoveRandom::SetMoveActivity(Activity act) { SetParameter(umath::to_integral(Parameter::MoveActivity), umath::to_integral(act)); }
@@ -30,7 +28,7 @@ float ai::TaskMoveRandom::GetMoveDistance(const Schedule *sched) const
 		dist = paramDist->GetFloat();
 	return dist;
 }
-ai::BehaviorNode::Result ai::TaskMoveRandom::Start(const Schedule *sched, pragma::SAIComponent &ent)
+ai::BehaviorNode::Result ai::TaskMoveRandom::Start(const Schedule *sched, pragma::BaseAIComponent &ent)
 {
 	BehaviorNode::Start(sched, ent);
 	auto pTrComponent = ent.GetEntity().GetTransformComponent();
@@ -42,14 +40,14 @@ ai::BehaviorNode::Result ai::TaskMoveRandom::Start(const Schedule *sched, pragma
 	auto &origin = pTrComponent->GetPosition();
 	auto endPos = origin + dir * dist;
 	Vector3 hitPos = endPos;
-	auto &navMesh = s_game->GetNavMesh();
+	auto &navMesh = SGame::Get()->GetNavMesh();
 	if(navMesh != nullptr)
 		navMesh->RayCast(origin, endPos, hitPos);
 	m_moveTarget = hitPos;
 	return Result::Pending;
 }
 
-ai::BehaviorNode::Result ai::TaskMoveRandom::Think(const Schedule *sched, pragma::SAIComponent &ent)
+ai::BehaviorNode::Result ai::TaskMoveRandom::Think(const Schedule *sched, pragma::BaseAIComponent &ent)
 {
 	auto r = BehaviorNode::Think(sched, ent);
 	if(r != Result::Succeeded)

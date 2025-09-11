@@ -26,7 +26,7 @@ void ai::TaskEvent::Print(const Schedule *sched, std::ostream &o) const
 		p = GetParameter(argIdx++);
 	}
 }
-ai::BehaviorNode::Result ai::TaskEvent::Start(const Schedule *sched, pragma::SAIComponent &aiComponent)
+ai::BehaviorNode::Result ai::TaskEvent::Start(const Schedule *sched, pragma::BaseAIComponent &aiComponent)
 {
 	BehaviorNode::Start(sched, aiComponent);
 

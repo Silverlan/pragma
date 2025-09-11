@@ -24,6 +24,7 @@ namespace ufile {
 	struct IFile;
 };
 enum class AlphaMode : uint32_t;
+class CMaterial;
 namespace pragma::asset {
 	static std::string EXPORT_PATH = "export/";
 	struct DLLCLIENT ModelExportInfo {

@@ -16,8 +16,6 @@
 const std::string PRAGMA_LOGGER_NAME = "pragma_logger";
 const std::string PRAGMA_FILE_LOGGER_NAME = "pragma_logger_file";
 
-extern DLLNETWORK Engine *engine;
-
 static bool g_ansiColorCodesEnabled = true;
 void pragma::logging::set_ansi_color_codes_enabled(bool enabled) { g_ansiColorCodesEnabled = enabled; }
 
@@ -243,7 +241,7 @@ void pragma::detail::close_logger()
 
 static void init_logger(const std::string &name, std::shared_ptr<spdlog::logger> &logger)
 {
-	if(std::this_thread::get_id() != engine->GetMainThreadId())
+	if(std::this_thread::get_id() != Engine::Get()->GetMainThreadId())
 		throw std::runtime_error {"Custom loggers must be created on the main thread!"};
 	spdlog::info("Creating logger '{}'...", name);
 	auto mainLogger = spdlog::get(PRAGMA_LOGGER_NAME);

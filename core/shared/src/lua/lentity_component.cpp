@@ -18,8 +18,6 @@
 #include <sharedutils/datastream.h>
 #include <udm.hpp>
 
-extern DLLNETWORK Engine *engine;
-
 void Game::RegisterLuaEntityComponent(luabind::class_<pragma::BaseEntityComponent> &def)
 {
 	// TODO: Remove this function

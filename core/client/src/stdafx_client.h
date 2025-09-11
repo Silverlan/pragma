@@ -32,3 +32,8 @@
 #include <string>
 #include <memory>
 #include <unordered_map>
+
+#ifdef __linux__
+#include "pragma/lua/converters/cast_converter.hpp"
+#include "pragma/lua/converters/cast_converter_t.hpp"
+#endif

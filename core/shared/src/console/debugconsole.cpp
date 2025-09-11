@@ -53,7 +53,7 @@ extern Engine *engine;
 static std::atomic_bool bCheckInput = true;
 static void KeyboardInput()
 {
-	if(engine->IsNonInteractiveMode())
+	if(Engine::Get()->IsNonInteractiveMode())
 		return;
 	//TODO: Rewrite this to use non-blocking algorythms
 	std::string line;
@@ -61,7 +61,7 @@ static void KeyboardInput()
 	while(bCheckInput) {
 		std::getline(std::cin, line);
 		if(bCheckInput)
-			engine->ConsoleInput(line);
+			Engine::Get()->ConsoleInput(line);
 	}
 #else
 	int retval;
@@ -71,7 +71,7 @@ static void KeyboardInput()
 			// Process std::string output
 			// Make sure to reset string if continuing through loop
 			if(bCheckInput)
-				engine->ConsoleInput(line);
+				Engine::Get()->ConsoleInput(line);
 
 			line = "";
 		}
@@ -103,7 +103,7 @@ Engine::ConsoleInstance::ConsoleInstance()
 	auto useConsoleThread = true;
 #ifdef __linux__
 	auto useLinenoise = true;
-	if(engine->IsNonInteractiveMode() || engine->IsLinenoiseEnabled() == false)
+	if(Engine::Get()->IsNonInteractiveMode() || Engine::Get()->IsLinenoiseEnabled() == false)
 		useLinenoise = false;
 	if(useLinenoise) {
 		useConsoleThread = false;
@@ -191,12 +191,12 @@ void Engine::ProcessConsoleInput(KeyState pressState)
 
 void Engine::ProcessConsoleInput(const std::string_view &line, KeyState pressState, float magnitude)
 {
-	ustring::get_sequence_commands(std::string {line}, [pressState, magnitude](std::string cmd, std::vector<std::string> &argv) { engine->RunConsoleCommand(cmd, argv, pressState, magnitude); });
+	ustring::get_sequence_commands(std::string {line}, [pressState, magnitude](std::string cmd, std::vector<std::string> &argv) { Engine::Get()->RunConsoleCommand(cmd, argv, pressState, magnitude); });
 }
 
 bool Engine::RunEngineConsoleCommand(std::string scmd, std::vector<std::string> &argv, KeyState pressState, float magnitude, const std::function<bool(ConConf *, float &)> &callback)
 {
-	auto *cv = engine->CVarHandler::GetConVar(scmd);
+	auto *cv = Engine::Get()->CVarHandler::GetConVar(scmd);
 	if(cv == nullptr)
 		return false;
 	if(callback != nullptr && callback(cv, magnitude) == false)

@@ -4,6 +4,8 @@
 module;
 
 #include "pragma/serverdefinitions.h"
+#include "sharedutils/netpacket.hpp"
+#include "pragma/networking/recipient_filter.hpp"
 #include <pragma/entities/components/basetoggle.h>
 
 export module pragma.server.entities.components.toggle;

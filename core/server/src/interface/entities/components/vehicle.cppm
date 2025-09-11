@@ -4,6 +4,8 @@
 module;
 
 #include "pragma/serverdefinitions.h"
+#include "sharedutils/netpacket.hpp"
+#include "pragma/networking/recipient_filter.hpp"
 #include <pragma/entities/components/base_vehicle_component.hpp>
 #include "pragma/input/inkeys.h"
 

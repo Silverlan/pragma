@@ -3,6 +3,7 @@
 
 #include "pragma/rendering/shader_material/shader_material.hpp"
 #include <pragma/logging.hpp>
+#include "sharedutils/util_string.h"
 #include <cmaterial.h>
 #include <util_image.hpp>
 #include <mpParser.h>

@@ -105,6 +105,7 @@ export class DLLSERVER ServerState : public NetworkState {
 	void ReceiveUserInput(pragma::networking::IServerClient &session, NetPacket &packet);
 	bool ConnectLocalHostPlayerClient();
   public:
+	static ServerState *Get();
 	ServerState();
 	virtual ~ServerState() override;
 	virtual msys::MaterialManager &GetMaterialManager() override;
@@ -144,6 +145,4 @@ export {
 	namespace pragma {
 	    constexpr inline uint32_t FSYS_SEARCH_CACHE = 8'192;
 	};
-	extern DLLSERVER ServerState *server = nullptr;
-	extern DLLSERVER SGame *s_game = nullptr;
 };

@@ -5,6 +5,7 @@ module;
 
 #include "stdafx_server.h"
 #include "pragma/ai/ai_schedule.h"
+#include <pragma/entities/components/base_ai_component.hpp>
 #include "pragma/entities/components/base_animated_component.hpp"
 
 module pragma.server.ai.tasks.play_activity;
@@ -13,7 +14,7 @@ import pragma.server.entities.components;
 
 using namespace pragma;
 
-int32_t ai::TaskPlayActivity::SelectAnimation(const Schedule *sched, pragma::SAIComponent &ent, uint8_t paramId)
+int32_t ai::TaskPlayActivity::SelectAnimation(const Schedule *sched, pragma::BaseAIComponent &ent, uint8_t paramId)
 {
 	auto *param = GetParameter(sched, paramId);
 	if(param == nullptr || param->GetType() != ai::Schedule::Parameter::Type::Int)
@@ -70,7 +71,7 @@ void ai::TaskPlayLayeredActivity::Print(const Schedule *sched, std::ostream &o) 
 }
 void ai::TaskPlayLayeredActivity::SetActivity(Activity activity) { SetParameter(umath::to_integral(Parameter::Activity), umath::to_integral(activity)); }
 void ai::TaskPlayLayeredActivity::SetAnimationSlot(int32_t animationSlot) { SetParameter(umath::to_integral(Parameter::AnimationSlot), animationSlot); }
-int32_t ai::TaskPlayLayeredActivity::SelectAnimation(const Schedule *sched, pragma::SAIComponent &ent, uint8_t paramId)
+int32_t ai::TaskPlayLayeredActivity::SelectAnimation(const Schedule *sched, pragma::BaseAIComponent &ent, uint8_t paramId)
 {
 	auto *param = GetParameter(sched, paramId);
 	if(param == nullptr || param->GetType() != ai::Schedule::Parameter::Type::Int)

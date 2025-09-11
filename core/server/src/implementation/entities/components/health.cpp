@@ -6,6 +6,7 @@ module;
 #include "stdafx_server.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <sharedutils/netpacket.hpp>
+#include "pragma/networking/recipient_filter.hpp"
 #include <pragma/networking/nwm_util.h>
 #include <pragma/networking/enums.hpp>
 
@@ -26,6 +27,6 @@ void SHealthComponent::SetHealth(unsigned short health)
 	NetPacket p;
 	nwm::write_entity(p, &ent);
 	p->Write<unsigned short>(health);
-	server->SendPacket("ent_sethealth", p, pragma::networking::Protocol::SlowReliable);
+	ServerState::Get()->SendPacket("ent_sethealth", p, pragma::networking::Protocol::SlowReliable);
 }
 void SHealthComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }

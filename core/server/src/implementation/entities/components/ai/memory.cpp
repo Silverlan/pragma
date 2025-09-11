@@ -16,11 +16,9 @@ import pragma.server.game;
 
 using namespace pragma;
 
-extern SGame *s_game;
-
 void SAIComponent::UpdateMemory()
 {
-	double t = s_game->CurTime();
+	double t = SGame::Get()->CurTime();
 	for(auto &fragment : m_memory.fragments) {
 		if(fragment.occupied == true) {
 			float dist;

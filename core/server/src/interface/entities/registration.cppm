@@ -61,7 +61,7 @@ export namespace server_entities {
             [](ServerState *server) -> SBaseEntity* {
                 if (!server) return
                     nullptr;
-                SGame *game = server->GetGameState();
+                SGame *game = ServerState::Get()->GetGameState();
                 if (!game) return
                     nullptr;
                 auto *ent = game->template CreateEntity<T>();

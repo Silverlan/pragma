@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
 #include <pragma/lua/lentity_component_lua.hpp>
 #include <pragma/game/game_entity_component.hpp>
@@ -9,8 +11,9 @@
 // --template-include-location
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
+module pragma.server.game;
+
 import pragma.server.entities.components;
-import pragma.server.game;
 
 void SGame::InitializeEntityComponents(pragma::EntityComponentManager &componentManager)
 {

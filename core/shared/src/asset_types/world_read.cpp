@@ -5,8 +5,6 @@
 #include "pragma/asset_types/world.hpp"
 #include "pragma/level/level_info.hpp"
 
-extern DLLNETWORK Engine *engine;
-
 void pragma::asset::Output::Read(VFilePtr &f)
 {
 	name = f->ReadString();

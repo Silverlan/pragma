@@ -6,6 +6,8 @@ module;
 #include "stdafx_server.h"
 #include <pragma/entities/components/usable_component.hpp>
 #include <sharedutils/util_string.h>
+#include "sharedutils/netpacket.hpp"
+#include "pragma/networking/recipient_filter.hpp"
 #include <sharedutils/util.h>
 #include <pragma/audio/alsound.h>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
@@ -25,7 +27,7 @@ void SButtonComponent::Initialize()
 
 	BindEvent(UsableComponent::EVENT_CAN_USE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &bCanUse = static_cast<CECanUseData &>(evData.get()).canUse;
-		bCanUse = (m_tNextUse - s_game->CurTime()) <= 0.f;
+		bCanUse = (m_tNextUse - SGame::Get()->CurTime()) <= 0.f;
 		return util::EventReply::Handled;
 	});
 

@@ -5,6 +5,8 @@ module;
 
 #include "stdafx_server.h"
 #include <sharedutils/util_string.h>
+#include "sharedutils/netpacket.hpp"
+#include "pragma/networking/recipient_filter.hpp"
 #include <pragma/networking/nwm_util.h>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/components/base_physics_component.hpp>
@@ -16,8 +18,6 @@ import pragma.server.game;
 
 using namespace pragma;
 
-extern SGame *s_game;
-
 void SBrushComponent::Initialize() { BaseFuncBrushComponent::Initialize(); }
 void SBrushComponent::OnEntitySpawn()
 {
@@ -28,7 +28,7 @@ void SBrushComponent::OnEntitySpawn()
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	if(pPhysComponent != nullptr)
 		pPhysComponent->InitializePhysics(PHYSICSTYPE::STATIC);
-	UpdateSurfaceMaterial(s_game);
+	UpdateSurfaceMaterial(SGame::Get());
 }
 void SBrushComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)
 {

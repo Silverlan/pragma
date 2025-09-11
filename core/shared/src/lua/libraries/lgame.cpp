@@ -36,10 +36,9 @@
 #include "pragma/lua/ostream_operator_alias.hpp"
 #include <pragma/math/intersection.h>
 
-extern DLLNETWORK Engine *engine;
 Lua::opt<Lua::type<CallbackHandle>> Lua::game::add_callback(lua_State *l, const std::string &identifier, const func<void> &function)
 {
-	NetworkState *state = engine->GetNetworkState(l);
+	NetworkState *state = Engine::Get()->GetNetworkState(l);
 	if(state == NULL)
 		return nil;
 	if(!state->IsGameActive())
@@ -107,7 +106,7 @@ luabind::object Lua::game::call_callbacks(lua_State *l, Game &game, const std::s
 
 void Lua::game::clear_callbacks(lua_State *l, const std::string &identifier)
 {
-	auto *state = engine->GetNetworkState(l);
+	auto *state = Engine::Get()->GetNetworkState(l);
 	auto *game = state->GetGameState();
 	auto *callbacks = game->GetLuaCallbacks(identifier);
 	if(callbacks == nullptr)
@@ -116,13 +115,13 @@ void Lua::game::clear_callbacks(lua_State *l, const std::string &identifier)
 }
 bool Lua::game::register_ammo_type(lua_State *l, const std::string &name, int32_t damage, float force, DAMAGETYPE damageType)
 {
-	auto *nw = engine->GetNetworkState(l);
+	auto *nw = Engine::Get()->GetNetworkState(l);
 	auto *game = nw->GetGameState();
 	return game->RegisterAmmoType(name, damage, force, damageType);
 }
 Lua::opt<uint32_t> Lua::game::get_ammo_type_id(lua_State *l, const std::string &name)
 {
-	auto *nw = engine->GetNetworkState(l);
+	auto *nw = Engine::Get()->GetNetworkState(l);
 	auto *game = nw->GetGameState();
 	UInt32 ammoId = 0;
 	if(game->GetAmmoType(name, &ammoId) == nullptr)
@@ -131,7 +130,7 @@ Lua::opt<uint32_t> Lua::game::get_ammo_type_id(lua_State *l, const std::string &
 }
 Lua::opt<std::string> Lua::game::get_ammo_type_name(lua_State *l, uint32_t typeId)
 {
-	auto *nw = engine->GetNetworkState(l);
+	auto *nw = Engine::Get()->GetNetworkState(l);
 	auto *game = nw->GetGameState();
 	auto *type = game->GetAmmoType(CUInt32(typeId));
 	if(type == nullptr)
@@ -140,7 +139,7 @@ Lua::opt<std::string> Lua::game::get_ammo_type_name(lua_State *l, uint32_t typeI
 }
 Lua::opt<Lua::type<pragma::BaseGamemodeComponent>> Lua::game::get_game_mode(lua_State *l)
 {
-	auto *nw = engine->GetNetworkState(l);
+	auto *nw = Engine::Get()->GetNetworkState(l);
 	auto *game = nw->GetGameState();
 	auto *ent = game->GetGameModeEntity();
 	if(ent == nullptr)
@@ -152,7 +151,7 @@ Lua::opt<Lua::type<pragma::BaseGamemodeComponent>> Lua::game::get_game_mode(lua_
 }
 Lua::opt<Vector3> Lua::game::get_light_color(lua_State *l, const Vector3 &pos)
 {
-	auto *nw = engine->GetNetworkState(l);
+	auto *nw = Engine::Get()->GetNetworkState(l);
 	auto *game = nw->GetGameState();
 	auto &componentManager = game->GetEntityComponentManager();
 	auto componentIdLight = pragma::INVALID_COMPONENT_ID;
@@ -183,7 +182,7 @@ Lua::opt<Vector3> Lua::game::get_light_color(lua_State *l, const Vector3 &pos)
 }
 float Lua::game::get_sound_intensity(lua_State *l, const Vector3 &pos)
 {
-	auto *nw = engine->GetNetworkState(l);
+	auto *nw = Engine::Get()->GetNetworkState(l);
 	auto &snds = nw->GetSounds();
 	auto totalIntensity = 0.f;
 	for(auto &rsnd : snds) {
@@ -196,19 +195,19 @@ float Lua::game::get_sound_intensity(lua_State *l, const Vector3 &pos)
 }
 float Lua::game::get_time_scale(lua_State *l)
 {
-	auto *nw = engine->GetNetworkState(l);
+	auto *nw = Engine::Get()->GetNetworkState(l);
 	auto *game = nw->GetGameState();
 	return game->GetTimeScale();
 }
 void Lua::game::set_time_scale(lua_State *l, float timeScale)
 {
-	auto *nw = engine->GetNetworkState(l);
+	auto *nw = Engine::Get()->GetNetworkState(l);
 	auto *game = nw->GetGameState();
 	game->SetTimeScale(timeScale);
 }
 bool Lua::game::is_game_mode_initialized(lua_State *l)
 {
-	auto *nw = engine->GetNetworkState(l);
+	auto *nw = Engine::Get()->GetNetworkState(l);
 	auto *game = nw->GetGameState();
 	return game->IsGameModeInitialized();
 }
@@ -222,7 +221,7 @@ std::pair<bool, int> Lua::game::load_map(lua_State *l, std::string &mapName, Bas
 	auto bNewWorld = false;
 	if(Lua::IsSet(l, 3))
 		bNewWorld = true;
-	auto *nw = engine->GetNetworkState(l);
+	auto *nw = Engine::Get()->GetNetworkState(l);
 	auto *game = nw->GetGameState();
 	std::vector<EntityHandle> entities;
 	auto r = false;
@@ -251,7 +250,7 @@ std::pair<bool, int> Lua::game::load_map(lua_State *l, std::string &mapName, Bas
 }
 Lua::opt<std::shared_ptr<pragma::nav::Mesh>> Lua::game::get_nav_mesh(lua_State *l)
 {
-	auto *nw = engine->GetNetworkState(l);
+	auto *nw = Engine::Get()->GetNetworkState(l);
 	auto *game = nw->GetGameState();
 	auto &navMesh = game->GetNavMesh();
 	if(navMesh == nullptr)
@@ -260,22 +259,22 @@ Lua::opt<std::shared_ptr<pragma::nav::Mesh>> Lua::game::get_nav_mesh(lua_State *
 }
 bool Lua::game::load_nav_mesh(lua_State *l, bool reload)
 {
-	auto *nw = engine->GetNetworkState(l);
+	auto *nw = Engine::Get()->GetNetworkState(l);
 	auto *game = nw->GetGameState();
 	return game->LoadNavMesh(reload);
 }
 bool Lua::game::is_map_loaded(lua_State *l)
 {
-	auto *nw = engine->GetNetworkState(l);
+	auto *nw = Engine::Get()->GetNetworkState(l);
 	auto *game = nw->GetGameState();
 	return game->IsMapLoaded();
 }
 std::string Lua::game::get_map_name(lua_State *l)
 {
-	auto *nw = engine->GetNetworkState(l);
+	auto *nw = Engine::Get()->GetNetworkState(l);
 	return nw->GetMap();
 }
-Game::GameFlags Lua::game::get_game_state_flags(lua_State *l) { return engine->GetNetworkState(l)->GetGameState()->GetGameFlags(); }
+Game::GameFlags Lua::game::get_game_state_flags(lua_State *l) { return Engine::Get()->GetNetworkState(l)->GetGameState()->GetGameFlags(); }
 bool Lua::game::raycast(lua_State *l, const ::TraceData &data)
 {
 	auto start = data.GetSourceOrigin();
@@ -285,7 +284,7 @@ bool Lua::game::raycast(lua_State *l, const ::TraceData &data)
 	if(d > 0.f)
 		n = n / d;
 
-	auto *nw = engine->GetNetworkState(l);
+	auto *nw = Engine::Get()->GetNetworkState(l);
 	auto *game = nw->GetGameState();
 	std::vector<BaseEntity *> *ents;
 	game->GetEntities(&ents);

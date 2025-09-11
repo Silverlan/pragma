@@ -9,7 +9,6 @@
 #include <vector>
 
 namespace pragma {
-	class SAIComponent;
 	namespace ai {
 		class DLLSERVER Schedule : public std::enable_shared_from_this<Schedule>, public ParameterBase {
 		  public:
@@ -24,14 +23,14 @@ namespace pragma {
 			static std::shared_ptr<Schedule> Create();
 			std::shared_ptr<Schedule> Copy() const;
 			BehaviorNode &GetRootNode() const;
-			ai::BehaviorNode::Result Start(pragma::SAIComponent &ent);
+			ai::BehaviorNode::Result Start(pragma::BaseAIComponent &ent);
 			void DebugPrint(std::stringstream &ss) const;
 			void SetInterruptFlags(uint32_t f);
 			void AddInterruptFlags(uint32_t f);
 			uint32_t GetInterruptFlags() const;
 
 			void Cancel() const;
-			BehaviorNode::Result Think(pragma::SAIComponent &ent) const;
+			BehaviorNode::Result Think(pragma::BaseAIComponent &ent) const;
 		};
 	};
 };

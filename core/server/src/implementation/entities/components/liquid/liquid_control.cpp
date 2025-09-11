@@ -8,6 +8,7 @@ module;
 #include <pragma/entities/components/base_physics_component.hpp>
 #include <pragma/networking/enums.hpp>
 #include <sharedutils/netpacket.hpp>
+#include "pragma/networking/recipient_filter.hpp"
 
 module pragma.server.entities.components.liquid_control;
 

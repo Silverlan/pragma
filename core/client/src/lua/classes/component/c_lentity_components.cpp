@@ -620,7 +620,7 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	Lua::SoundEmitter::register_class(l, entsMod);
 	entsMod[defCWorld];
 
-	auto &componentManager = engine->GetNetworkState(l)->GetGameState()->GetEntityComponentManager();
+	auto &componentManager = Engine::Get()->GetNetworkState(l)->GetGameState()->GetEntityComponentManager();
 
 	auto defCToggle = pragma::lua::create_entity_component_class<pragma::CToggleComponent, pragma::BaseToggleComponent>("ToggleComponent");
 	entsMod[defCToggle];

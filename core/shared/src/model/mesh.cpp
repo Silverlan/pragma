@@ -7,8 +7,6 @@
 #include "pragma/model/mesh.h"
 #include "materialmanager.h"
 
-extern DLLNETWORK Engine *engine;
-
 Con::c_cout &operator<<(Con::c_cout &os, const Mesh &mesh)
 {
 	os << "Mesh[" << &mesh << "] [" << mesh.m_numVerts << "]";
@@ -30,7 +28,7 @@ unsigned int Mesh::GetVertexBuffer() { return m_bufVertex; }
 
 Material *Mesh::GetMaterial() { return m_material; }
 void Mesh::SetMaterial(Material *material) { m_material = material; }
-void Mesh::SetMaterial(const char *texture) { m_material = engine->GetServerNetworkState()->LoadMaterial(texture); }
+void Mesh::SetMaterial(const char *texture) { m_material = Engine::Get()->GetServerNetworkState()->LoadMaterial(texture); }
 
 unsigned int Mesh::GetVertexCount() { return m_numVerts; }
 

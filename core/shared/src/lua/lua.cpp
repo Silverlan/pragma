@@ -23,8 +23,6 @@
 
 //import pragma.scripting.lua;
 
-extern DLLNETWORK Engine *engine;
-
 Lua::Interface &Game::GetLuaInterface() { return *m_lua; }
 lua_State *Game::GetLuaState() { return (m_lua != nullptr) ? m_lua->GetState() : nullptr; }
 
@@ -57,7 +55,7 @@ void Game::InitializeLua()
 	// Add module paths
 	UpdatePackagePaths();
 
-	auto remDeb = engine->GetRemoteDebugging();
+	auto remDeb = Engine::Get()->GetRemoteDebugging();
 	if((remDeb == 1 && IsServer()) == true || (remDeb == 2 && IsClient() == true))
 		Lua::debug::enable_remote_debugging(GetLuaState());
 }

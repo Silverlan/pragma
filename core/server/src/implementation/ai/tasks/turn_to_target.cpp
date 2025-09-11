@@ -6,6 +6,7 @@ module;
 #include "stdafx_server.h"
 #include "pragma/ai/ai_schedule.h"
 #include <pragma/entities/components/base_transform_component.hpp>
+#include <pragma/entities/components/base_ai_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/model/animation/activities.h>
 
@@ -16,15 +17,13 @@ import pragma.server.game;
 
 using namespace pragma;
 
-extern SGame *s_game;
-
 ai::TaskTurnToTarget::TaskTurnToTarget() : TaskTarget() {}
 ai::TaskTurnToTarget::TaskTurnToTarget(const TaskTurnToTarget &other) : TaskTarget(other)
 {
 	if(other.m_targetAng != nullptr)
 		m_targetAng = std::make_unique<float>(*other.m_targetAng);
 }
-ai::BehaviorNode::Result ai::TaskTurnToTarget::Start(const Schedule *sched, pragma::SAIComponent &ent)
+ai::BehaviorNode::Result ai::TaskTurnToTarget::Start(const Schedule *sched, pragma::BaseAIComponent &ent)
 {
 	auto r = TaskTarget::Start(sched, ent);
 	if(r == Result::Failed)
@@ -38,7 +37,7 @@ ai::BehaviorNode::Result ai::TaskTurnToTarget::Start(const Schedule *sched, prag
 	return ai::BehaviorNode::Result::Pending;
 }
 
-bool ai::TaskTurnToTarget::IsFacingTarget(pragma::SAIComponent &ai, const Vector3 &pos) const
+bool ai::TaskTurnToTarget::IsFacingTarget(pragma::BaseAIComponent &ai, const Vector3 &pos) const
 {
 	if(m_targetAng == nullptr)
 		return false;
@@ -90,7 +89,7 @@ void ai::TaskTurnToTarget::Print(const Schedule *sched, std::ostream &o) const
 	o << "]";
 }
 
-ai::BehaviorNode::Result ai::TaskTurnToTarget::Think(const Schedule *sched, pragma::SAIComponent &ent)
+ai::BehaviorNode::Result ai::TaskTurnToTarget::Think(const Schedule *sched, pragma::BaseAIComponent &ent)
 {
 	auto r = TaskTarget::Think(sched, ent);
 	if(r != Result::Succeeded)

@@ -11,8 +11,6 @@
 #include <sharedutils/datastream.h>
 #include <udm.hpp>
 
-extern DLLNETWORK Engine *engine;
-
 void pragma::asset::Output::Write(VFilePtrReal &f)
 {
 	auto lname = name;

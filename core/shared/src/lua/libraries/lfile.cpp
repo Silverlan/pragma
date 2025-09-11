@@ -11,8 +11,6 @@
 #include <sharedutils/util_path.hpp>
 #include <fsys/ifile.hpp>
 
-extern DLLNETWORK Engine *engine;
-
 static bool is_permitted_root_dir(const std::string_view &str) { return str == "cache" or str == "temp"; }
 
 LFile::LFile() {}
@@ -467,7 +465,7 @@ bool Lua::file::DeleteDir(lua_State *l, std::string ppath)
 
 std::shared_ptr<LFile> Lua::file::open_external_asset_file(lua_State *l, const std::string &path, const std::optional<std::string> &game)
 {
-	auto dllHandle = util::initialize_external_archive_manager(engine->GetNetworkState(l));
+	auto dllHandle = util::initialize_external_archive_manager(Engine::Get()->GetNetworkState(l));
 	if(dllHandle == nullptr)
 		return nullptr;
 	auto *fOpenFile = dllHandle->FindSymbolAddress<void (*)(const std::string &, VFilePtr &, const std::optional<std::string> &)>("open_archive_file");
@@ -486,7 +484,7 @@ void Lua::file::find_external_game_resource_files(lua_State *l, const std::strin
 {
 	outFiles = luabind::newtable(l);
 	outDirs = luabind::newtable(l);
-	auto dllHandle = util::initialize_external_archive_manager(engine->GetNetworkState(l));
+	auto dllHandle = util::initialize_external_archive_manager(Engine::Get()->GetNetworkState(l));
 	if(dllHandle == nullptr)
 		return;
 	auto *fFindFiles = dllHandle->FindSymbolAddress<void (*)(const std::string &, std::vector<std::string> *, std::vector<std::string> *)>("find_files");

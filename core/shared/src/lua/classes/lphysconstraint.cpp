@@ -11,8 +11,6 @@
 
 // #define ENABLE_DEPRECATED_PHYSICS
 
-extern DLLNETWORK Engine *engine;
-
 namespace Lua {
 	namespace PhysConstraint {
 		static void IsValid(lua_State *l, pragma::physics::IConstraint *hConstraint);

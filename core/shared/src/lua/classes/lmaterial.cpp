@@ -74,7 +74,7 @@ void Lua::Material::register_class(luabind::class_<::Material> &classDef)
 		  auto result = mat.Save(fname, err);
 		  if(result == false)
 			  return luabind::object {l, err};
-		  engine->PollResourceWatchers();
+		  Engine::Get()->PollResourceWatchers();
 		  return luabind::object {l, result};
 	  });
 	classDef.def("IsError", &::Material::IsError);

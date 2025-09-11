@@ -6,6 +6,7 @@
 
 #include "pragma/lua/luaapi.h"
 #include "pragma/lua/types/udm.hpp"
+#include "pragma/entities/components/base_sound_emitter_component.hpp"
 
 namespace pragma {
 	class ChildComponent;
@@ -21,6 +22,10 @@ namespace pragma::lua {
 	DLLNETWORK bool set_member_value(lua_State *l, pragma::BaseEntityComponent &component, const pragma::ComponentMemberInfo &memberInfo, const pragma::EntityURef &eref);
 	DLLNETWORK bool set_member_value(lua_State *l, pragma::BaseEntityComponent &component, const pragma::ComponentMemberInfo &memberInfo, const pragma::MultiEntityURef &eref);
 	DLLNETWORK bool set_member_value(lua_State *l, pragma::BaseEntityComponent &component, const pragma::ComponentMemberInfo &memberInfo, const pragma::EntityUComponentMemberRef &eref);
+};
+
+namespace Lua::SoundEmitter {
+	DLLNETWORK luabind::class_<pragma::BaseSoundEmitterComponent::SoundInfo> RegisterSoundInfo();
 };
 
 #endif

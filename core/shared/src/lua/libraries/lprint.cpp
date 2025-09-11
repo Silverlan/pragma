@@ -101,12 +101,11 @@ int Lua::console::print_table(lua_State *l, std::string tab, int idx)
 
 int Lua::console::print_table(lua_State *l) { return print_table(l, ""); }
 
-extern DLLNETWORK Engine *engine;
 int Lua::console::msg(lua_State *l, int st)
 {
 	int argc = lua_gettop(l);
 	if(argc > 0) {
-		NetworkState *state = engine->GetNetworkState(l);
+		NetworkState *state = Engine::Get()->GetNetworkState(l);
 		if(state == NULL)
 			::util::set_console_color(::util::ConsoleColorFlags::White | ::util::ConsoleColorFlags::Intensity);
 		else if(state->IsServer())
@@ -127,7 +126,7 @@ int Lua::console::msg(lua_State *l, int st)
 int Lua::debug::print(lua_State *l)
 {
 	auto flags = ::util::ConsoleColorFlags::None;
-	if(engine->GetNetworkState(l)->IsClient())
+	if(Engine::Get()->GetNetworkState(l)->IsClient())
 		flags |= ::util::ConsoleColorFlags::BackgroundMagenta;
 	else
 		flags |= ::util::ConsoleColorFlags::BackgroundCyan;

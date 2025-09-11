@@ -6,6 +6,8 @@ module;
 #include "stdafx_server.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/networking/enums.hpp>
+#include "sharedutils/netpacket.hpp"
+#include "pragma/networking/recipient_filter.hpp"
 #include <pragma/networking/nwm_util.h>
 
 module pragma.server.entities.components.model;
@@ -27,7 +29,7 @@ void SModelComponent::OnModelChanged(const std::shared_ptr<Model> &model)
 		NetPacket p;
 		nwm::write_entity(p, &ent);
 		p->WriteString(GetModelName());
-		server->SendPacket("ent_model", p, pragma::networking::Protocol::SlowReliable);
+		ServerState::Get()->SendPacket("ent_model", p, pragma::networking::Protocol::SlowReliable);
 	}
 }
 
@@ -59,7 +61,7 @@ void SModelComponent::SetSkin(unsigned int skin)
 	NetPacket p;
 	nwm::write_entity(p, &ent);
 	p->Write<unsigned int>(skin);
-	server->SendPacket("ent_skin", p, pragma::networking::Protocol::SlowReliable);
+	ServerState::Get()->SendPacket("ent_skin", p, pragma::networking::Protocol::SlowReliable);
 }
 
 void SModelComponent::SetMaxDrawDistance(float maxDist)

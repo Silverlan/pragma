@@ -4,6 +4,7 @@
 module;
 
 #include <sharedutils/util_library.hpp>
+#include "pragma/networking/game_server_data.hpp"
 
 module pragma.server.networking.master_server;
 

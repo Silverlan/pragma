@@ -25,5 +25,3 @@ export namespace Lua::net {
 		DLLSERVER int register_event(lua_State *l);
 	};
 };
-
-export DLLSERVER void NET_sv_luanet(pragma::networking::IServerClient &session, NetPacket packet);

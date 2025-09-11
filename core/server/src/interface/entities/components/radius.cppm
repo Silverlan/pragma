@@ -4,6 +4,8 @@
 module;
 
 #include "pragma/serverdefinitions.h"
+#include "sharedutils/netpacket.hpp"
+#include "pragma/networking/recipient_filter.hpp"
 #include <pragma/entities/components/base_radius_component.hpp>
 
 export module pragma.server.entities.components.radius;

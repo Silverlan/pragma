@@ -5,6 +5,7 @@ module;
 
 #include "stdafx_server.h"
 #include "pragma/ai/ai_schedule.h"
+#include <pragma/entities/components/base_ai_component.hpp>
 #include "pragma/entities/components/base_animated_component.hpp"
 #include "pragma/entities/components/base_model_component.hpp"
 #include <pragma/entities/components/base_transform_component.hpp>
@@ -24,7 +25,7 @@ void ai::TaskPlayAnimationBase::Clear()
 	if(m_cbOnAnimationComplete.IsValid())
 		m_cbOnAnimationComplete.Remove();
 }
-int32_t ai::TaskPlayAnimationBase::SelectAnimation(const Schedule *sched, pragma::SAIComponent &ent, uint8_t paramId)
+int32_t ai::TaskPlayAnimationBase::SelectAnimation(const Schedule *sched, pragma::BaseAIComponent &ent, uint8_t paramId)
 {
 	auto *param = GetParameter(sched, paramId);
 	if(param == nullptr)
@@ -75,7 +76,7 @@ void ai::TaskPlayAnimationBase::Print(const Schedule *sched, std::ostream &o) co
 	}
 	o << "]";
 }
-ai::BehaviorNode::Result ai::TaskPlayAnimationBase::Think(const Schedule *sched, pragma::SAIComponent &ent)
+ai::BehaviorNode::Result ai::TaskPlayAnimationBase::Think(const Schedule *sched, pragma::BaseAIComponent &ent)
 {
 	if(m_resultState != Result::Pending)
 		return m_resultState;
@@ -84,7 +85,7 @@ ai::BehaviorNode::Result ai::TaskPlayAnimationBase::Think(const Schedule *sched,
 	return Result::Succeeded;
 }
 
-bool ai::TaskPlayAnimationBase::StartTask(const Schedule *sched, pragma::SAIComponent &ent)
+bool ai::TaskPlayAnimationBase::StartTask(const Schedule *sched, pragma::BaseAIComponent &ent)
 {
 	BehaviorNode::Start(sched, ent);
 	m_resultState = Result::Pending;
@@ -96,14 +97,14 @@ bool ai::TaskPlayAnimationBase::StartTask(const Schedule *sched, pragma::SAIComp
 		return false;
 	}
 	m_targetNpc = &ent;
-	ent.LockAnimation(true);
+	static_cast<SAIComponent&>(ent).LockAnimation(true);
 	return true;
 }
 
 void ai::TaskPlayAnimationBase::UnlockAnimation()
 {
 	if(m_targetNpc != nullptr)
-		m_targetNpc->LockAnimation(false);
+		static_cast<SAIComponent&>(*m_targetNpc).LockAnimation(false);
 	m_targetNpc = nullptr;
 }
 
@@ -117,7 +118,7 @@ void ai::TaskPlayAnimationBase::OnStopped()
 ////////////////////////////////////
 
 ai::TaskPlayAnimation::TaskPlayAnimation(SelectorType selectorType) : TaskPlayAnimationBase(selectorType) {}
-bool ai::TaskPlayAnimation::GetFaceTarget(const Schedule *sched, pragma::SAIComponent &ent, Vector3 &tgt) const
+bool ai::TaskPlayAnimation::GetFaceTarget(const Schedule *sched, pragma::BaseAIComponent &ent, Vector3 &tgt) const
 {
 	auto *param = GetParameter(sched, umath::to_integral(Parameter::FaceTarget));
 	if(param == nullptr)
@@ -138,7 +139,7 @@ bool ai::TaskPlayAnimation::GetFaceTarget(const Schedule *sched, pragma::SAIComp
 		}
 	}
 	else if(type == ai::Schedule::Parameter::Type::Bool && param->GetBool() == true) {
-		auto *fragment = ent.GetPrimaryTarget();
+		auto *fragment = static_cast<SAIComponent&>(ent).GetPrimaryTarget();
 		if(fragment == nullptr || !fragment->hEntity.valid())
 			return false;
 		auto pTrComponentTgt = fragment->hEntity.get()->GetTransformComponent();
@@ -150,19 +151,19 @@ bool ai::TaskPlayAnimation::GetFaceTarget(const Schedule *sched, pragma::SAIComp
 	return false;
 }
 
-int32_t ai::TaskPlayAnimation::GetAnimation(pragma::SAIComponent &ent) const
+int32_t ai::TaskPlayAnimation::GetAnimation(pragma::BaseAIComponent &ent) const
 {
 	auto animComponent = ent.GetEntity().GetAnimatedComponent();
 	return animComponent.valid() ? animComponent->GetAnimation() : -1;
 }
 
-void ai::TaskPlayAnimation::PlayAnimation(pragma::SAIComponent &ent)
+void ai::TaskPlayAnimation::PlayAnimation(pragma::BaseAIComponent &ent)
 {
 	ent.StopMoving();
 
 	pragma::SAIComponent::AIAnimationInfo info {};
 	info.SetPlayAsSchedule(false);
-	ent.PlayAnimation(m_animation, info);
+	static_cast<SAIComponent&>(ent).PlayAnimation(m_animation, info);
 }
 
 void ai::TaskPlayAnimation::SetAnimation(int32_t animation) { SetParameter(umath::to_integral(Parameter::Animation), animation); }
@@ -171,7 +172,7 @@ void ai::TaskPlayAnimation::SetFaceTarget(const Vector3 &target) { SetParameter(
 void ai::TaskPlayAnimation::SetFaceTarget(BaseEntity &ent) { SetParameter(umath::to_integral(Parameter::FaceTarget), &ent); }
 void ai::TaskPlayAnimation::SetFacePrimaryTarget() { SetParameter(umath::to_integral(Parameter::FaceTarget), true); }
 
-ai::BehaviorNode::Result ai::TaskPlayAnimation::Think(const Schedule *sched, pragma::SAIComponent &ent)
+ai::BehaviorNode::Result ai::TaskPlayAnimation::Think(const Schedule *sched, pragma::BaseAIComponent &ent)
 {
 	auto r = TaskPlayAnimationBase::Think(sched, ent);
 	if(r == Result::Pending) {
@@ -182,7 +183,7 @@ ai::BehaviorNode::Result ai::TaskPlayAnimation::Think(const Schedule *sched, pra
 	return r;
 }
 
-ai::BehaviorNode::Result ai::TaskPlayAnimation::Start(const Schedule *sched, pragma::SAIComponent &ent)
+ai::BehaviorNode::Result ai::TaskPlayAnimation::Start(const Schedule *sched, pragma::BaseAIComponent &ent)
 {
 	if(StartTask(sched, ent) == false)
 		return Result::Failed;
@@ -205,12 +206,12 @@ ai::BehaviorNode::Result ai::TaskPlayAnimation::Start(const Schedule *sched, pra
 ////////////////////////////////////
 
 ai::TaskPlayLayeredAnimation::TaskPlayLayeredAnimation(ai::SelectorType selectorType) : TaskPlayAnimationBase(selectorType) {}
-int32_t ai::TaskPlayLayeredAnimation::GetAnimation(pragma::SAIComponent &ent) const
+int32_t ai::TaskPlayLayeredAnimation::GetAnimation(pragma::BaseAIComponent &ent) const
 {
 	auto animComponent = ent.GetEntity().GetAnimatedComponent();
 	return animComponent.valid() ? animComponent->GetLayeredAnimation(m_slot) : -1;
 }
-void ai::TaskPlayLayeredAnimation::PlayAnimation(pragma::SAIComponent &ent)
+void ai::TaskPlayLayeredAnimation::PlayAnimation(pragma::BaseAIComponent &ent)
 {
 	auto animComponent = ent.GetEntity().GetAnimatedComponent();
 	if(animComponent.expired())
@@ -220,7 +221,7 @@ void ai::TaskPlayLayeredAnimation::PlayAnimation(pragma::SAIComponent &ent)
 void ai::TaskPlayLayeredAnimation::SetAnimation(int32_t animation) { SetParameter(umath::to_integral(Parameter::Animation), animation); }
 void ai::TaskPlayLayeredAnimation::SetAnimation(const std::string &animation) { SetParameter(umath::to_integral(Parameter::Animation), animation); }
 void ai::TaskPlayLayeredAnimation::SetAnimationSlot(int32_t animationSlot) { SetParameter(umath::to_integral(Parameter::AnimationSlot), animationSlot); }
-ai::BehaviorNode::Result ai::TaskPlayLayeredAnimation::Start(const ai::Schedule *sched, pragma::SAIComponent &ent)
+ai::BehaviorNode::Result ai::TaskPlayLayeredAnimation::Start(const ai::Schedule *sched, pragma::BaseAIComponent &ent)
 {
 	auto *param = GetParameter(sched, umath::to_integral(Parameter::AnimationSlot));
 	if(param != nullptr && param->GetType() == ai::Schedule::Parameter::Type::Int)

@@ -7,8 +7,6 @@
 #include <pragma/console/s_cvar.h>
 #include <pragma/math/intersection.h>
 
-extern DLLNETWORK Engine *engine;
-
 // See http://www.randygaul.net/wp-content/uploads/2014/02/RigidBodies_WaterSurface.pdf for surface simulation algorithms
 
 PhysWaterSurfaceSimulator::SplashInfo::SplashInfo(const Vector3 &_origin, float _radius, float _force, uint32_t _width, uint32_t _length) : origin(_origin.x, _origin.y, _origin.z), radius(_radius), radiusSqr(umath::pow2(_radius)), force(_force), width(_width), length(_length) {}
@@ -183,7 +181,7 @@ void PhysWaterSurfaceSimulator::SimulateWaves(double dt)
 	std::copy(m_threadParticleHeights.begin(), m_threadParticleHeights.end(), m_particleHeights.begin());
 	m_heightMutex.unlock();
 }
-uint8_t PhysWaterSurfaceSimulator::GetEdgeIterationCount() const { return engine->GetServerNetworkState()->GetConVarInt("sv_water_surface_simulation_edge_iteration_count"); }
+uint8_t PhysWaterSurfaceSimulator::GetEdgeIterationCount() const { return Engine::Get()->GetServerNetworkState()->GetConVarInt("sv_water_surface_simulation_edge_iteration_count"); }
 Vector3 PhysWaterSurfaceSimulator::CalcParticlePosition(const SurfaceInfo &surfInfo, const std::vector<float> &heights, std::size_t ptIdx) const
 {
 	auto c = GetParticleCoordinates(surfInfo, ptIdx);

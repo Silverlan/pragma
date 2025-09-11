@@ -34,7 +34,6 @@ std::string Con::PREFIX_CLIENT = Con::COLOR_RESET + "[" + Con::COLOR_CLIENT + "c
 std::string Con::PREFIX_LUA = Con::COLOR_RESET + "[" + Con::COLOR_LUA + "lua" + Con::COLOR_RESET + "] ";
 std::string Con::PREFIX_GUI = Con::COLOR_RESET + "[" + Con::COLOR_GUI + "gui" + Con::COLOR_RESET + "] ";
 
-extern DLLNETWORK Engine *engine;
 static CVar cvLog = GetConVar("log_enabled");
 
 void Con::disable_ansi_color_codes()
@@ -50,23 +49,23 @@ void Con::disable_ansi_color_codes()
 
 int Con::GetLogLevel()
 {
-	if(engine == NULL || !engine->IsRunning())
+	if(Engine::Get() == NULL || !Engine::Get()->IsRunning())
 		return 0;
 	return cvLog->GetInt();
 }
 
 void Con::WriteToLog(std::stringstream &ss)
 {
-	if(engine == NULL)
+	if(Engine::Get() == NULL)
 		return;
 	WriteToLog(ss.str());
 }
 
 void Con::WriteToLog(std::string str)
 {
-	if(engine == NULL)
+	if(Engine::Get() == NULL)
 		return;
-	engine->WriteToLog(str);
+	Engine::Get()->WriteToLog(str);
 }
 
 void Con::set_output_callback(const std::function<void(const std::string_view &, MessageFlags, const ::Color *)> &callback) { detail::outputCallback = callback; }

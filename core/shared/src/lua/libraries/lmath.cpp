@@ -16,7 +16,6 @@
 #include <mathutil/umath_frustum.hpp>
 #include <mathutil/perlin_noise.hpp>
 
-extern DLLNETWORK Engine *engine;
 double Lua::math::perlin_noise(const Vector3 &v)
 {
 	umath::PerlinNoise p;

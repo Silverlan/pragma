@@ -5,9 +5,9 @@ module;
 
 #include "pragma/serverdefinitions.h"
 #include "pragma/networking/iserver_client.hpp"
+#include "pragma/networking/recipient_filter.hpp"
 #include <pragma/entities/components/base_player_component.hpp>
 #include <pragma/networking/ip_address.hpp>
-#include <networkmanager/wrappers/nwm_ip_address.hpp>
 
 export module pragma.server.entities.components.player;
 

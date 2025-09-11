@@ -9,6 +9,7 @@ module;
 #include "servermanager/interface/sv_nwm_manager.hpp"
 #include "pragma/networking/iserver_client.hpp"
 #include "pragma/console/convarhandle.h"
+#include "wmserverdata.h"
 #include "pragma/networking/iserver.hpp"
 #include <pragma/audio/soundscript.h>
 #include "luasystem.h"
@@ -46,15 +47,16 @@ ConVarHandle ServerState::GetConVarHandle(std::string scvar)
 	return NetworkState::GetConVarHandle(*conVarPtrs, scvar);
 }
 
-extern DLLNETWORK Engine *engine;
+static ServerState *g_server = nullptr;
+ServerState *ServerState::Get() { return g_server; }
 ServerState::ServerState() : NetworkState(), m_server(nullptr)
 {
 	m_alsoundID = 1;
-	server = this;
+	g_server = this;
 	m_soundScriptManager = std::make_unique<SoundScriptManager>();
 
 	m_modelManager = std::make_unique<pragma::asset::SModelManager>(*this);
-	engine->InitializeAssetManager(*m_modelManager);
+	Engine::Get()->InitializeAssetManager(*m_modelManager);
 	pragma::asset::update_extension_cache(pragma::asset::Type::Model);
 
 	FileManager::AddCustomMountDirectory("cache", static_cast<fsys::SearchFlags>(pragma::FSYS_SEARCH_CACHE));
@@ -227,8 +229,8 @@ void ServerState::Initialize()
 bool ServerState::LoadSoundScripts(const char *file, bool bPrecache)
 {
 	auto r = NetworkState::LoadSoundScripts(file, bPrecache);
-	if(s_game != nullptr && r != false)
-		s_game->RegisterGameResource(SoundScriptManager::GetSoundScriptPath() + std::string(file));
+	if(SGame::Get() != nullptr && r != false)
+		SGame::Get()->RegisterGameResource(SoundScriptManager::GetSoundScriptPath() + std::string(file));
 	return r;
 }
 
@@ -236,8 +238,8 @@ void ServerState::InitializeResourceManager() { m_resourceWatcher = std::make_un
 
 void ServerState::Close()
 {
-	engine->SaveEngineConfig();
-	engine->SaveServerConfig();
+	Engine::Get()->SaveEngineConfig();
+	Engine::Get()->SaveServerConfig();
 	NetworkState::Close();
 }
 
@@ -288,8 +290,6 @@ void ServerState::EndGame()
 	game = nullptr;
 	m_game = nullptr;
 
-	s_game = nullptr;
-
 	NetworkState::EndGame();
 	ClearConCommands();
 }
@@ -311,7 +311,6 @@ void ServerState::StartGame(bool singlePlayer)
 		          game->OnRemove();
 		          delete game;
 	          }};
-	s_game = static_cast<SGame *>(m_game.get());
 
 	// Register sound-scripts as game resources
 	for(auto &f : m_soundScriptManager->GetSoundScriptFiles())
@@ -363,10 +362,10 @@ ConVar *ServerState::SetConVar(std::string scmd, std::string value, bool bApplyI
 		return nullptr;
 	auto flags = cvar->GetFlags();
 	if(((flags & ConVarFlags::Replicated) == ConVarFlags::Replicated || (flags & ConVarFlags::Notify) == ConVarFlags::Notify)) {
-		auto *cl = engine->GetClientState();
+		auto *cl = Engine::Get()->GetClientState();
 		if(cl != nullptr) {
 			// This is a locally hosted game, just inform the client directly
-			engine->SetReplicatedConVar(scmd, cvar->GetString());
+			Engine::Get()->SetReplicatedConVar(scmd, cvar->GetString());
 			return cvar;
 		}
 		NetPacket p;
@@ -377,7 +376,7 @@ ConVar *ServerState::SetConVar(std::string scmd, std::string value, bool bApplyI
 	return cvar;
 }
 
-pragma::SPlayerComponent *ServerState::GetPlayer(const pragma::networking::IServerClient &session) { return session.GetPlayer(); }
+pragma::SPlayerComponent *ServerState::GetPlayer(const pragma::networking::IServerClient &session) { return static_cast<pragma::SPlayerComponent*>(session.GetPlayer()); }
 bool ServerState::IsServer() const { return true; }
 ConVarMap *ServerState::GetConVarMap() { return console_system::server::get_convar_map(); }
 
@@ -391,6 +390,8 @@ void ServerState::ClearConCommands()
 	else
 		m_conCommandID = map->GetConVarCount() + 1;
 }
+
+bool ServerState::IsClientAuthenticationRequired() const { return IsMultiPlayer() && ServerState::Get()->GetConVarBool("sv_require_authentication"); }
 
 ConCommand *ServerState::CreateConCommand(const std::string &scmd, LuaFunction fc, ConVarFlags flags, const std::string &help)
 {
@@ -450,14 +451,14 @@ Material *ServerState::LoadMaterial(const std::string &path, bool precache, bool
 	return mat;
 }
 
-msys::MaterialManager &ServerState::GetMaterialManager() { return *engine->GetServerStateInstance().materialManager; }
+msys::MaterialManager &ServerState::GetMaterialManager() { return *Engine::Get()->GetServerStateInstance().materialManager; }
 ModelSubMesh *ServerState::CreateSubMesh() const { return new ModelSubMesh; }
 ModelMesh *ServerState::CreateMesh() const { return new ModelMesh; }
 
 REGISTER_CONVAR_CALLBACK_SV(sv_tickrate, [](NetworkState *, const ConVar &, int, int val) {
 	if(val < 0)
 		val = 0;
-	engine->SetTickRate(val);
+	Engine::Get()->SetTickRate(val);
 });
 
 ////////////////
@@ -466,42 +467,42 @@ extern "C" {
 DLLSERVER void pr_sv_create_server_state(std::unique_ptr<NetworkState> &outState) { outState = std::make_unique<ServerState>(); }
 DLLSERVER void pr_sv_start_server(bool singlePlayer)
 {
-	if(server == nullptr)
+	if(ServerState::Get() == nullptr)
 		return;
-	server->StartServer(singlePlayer);
+	ServerState::Get()->StartServer(singlePlayer);
 }
 DLLSERVER void pr_sv_close_server()
 {
-	if(server == nullptr)
+	if(ServerState::Get() == nullptr)
 		return;
-	server->CloseServer();
+	ServerState::Get()->CloseServer();
 }
 DLLSERVER bool pr_sv_is_server_running()
 {
-	if(server == nullptr)
+	if(ServerState::Get() == nullptr)
 		return false;
-	return server->IsServerRunning();
+	return ServerState::Get()->IsServerRunning();
 }
 DLLSERVER void pr_sv_get_server_steam_id(std::optional<uint64_t> &outSteamId)
 {
 	outSteamId = {};
-	if(server == nullptr)
+	if(ServerState::Get() == nullptr)
 		return;
-	auto *sv = server->GetServer();
+	auto *sv = ServerState::Get()->GetServer();
 	outSteamId = sv ? sv->GetSteamId() : std::optional<uint64_t> {};
 }
-DLLSERVER ServerState *pr_sv_get_server_state() { return server; }
-DLLSERVER void pr_sv_clear_server_state() { server = nullptr; }
+DLLSERVER ServerState *pr_sv_get_server_state() { return ServerState::Get(); }
+DLLSERVER void pr_sv_clear_server_state() { g_server = nullptr; }
 DLLSERVER void pr_sv_handle_local_host_player_server_packet(NetPacket &packet)
 {
-	if(server == nullptr)
+	if(ServerState::Get() == nullptr)
 		return;
-	server->HandlePacket(*server->GetLocalClient(), packet);
+	ServerState::Get()->HandlePacket(*ServerState::Get()->GetLocalClient(), packet);
 }
 DLLSERVER bool pr_sv_connect_local_host_player_client()
 {
-	if(server == nullptr)
+	if(ServerState::Get() == nullptr)
 		return false;
-	return server->ConnectLocalHostPlayerClient();
+	return ServerState::Get()->ConnectLocalHostPlayerClient();
 }
 }

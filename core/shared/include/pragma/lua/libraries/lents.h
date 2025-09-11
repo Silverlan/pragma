@@ -10,8 +10,6 @@
 #include "pragma/entities/entity_iterator.hpp"
 #include "pragma/lua/class_manager.hpp"
 
-extern DLLNETWORK Engine *engine;
-
 class LuaEntityIterator;
 class LuaEntityComponentIterator;
 using LuaEntityObject = luabind::object;
@@ -81,7 +79,7 @@ namespace Lua {
 			auto o = luabind::object(luabind::from_stack(l, idxClass));
 			if(!o)
 				return 0;
-			auto *state = ::engine->GetNetworkState(l);
+			auto *state = ::Engine::Get()->GetNetworkState(l);
 			auto *game = state->GetGameState();
 			auto &manager = game->GetLuaEntityManager();
 

@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
 #include "pragma/lua/libraries/lengine.h"
 #include "pragma/lua/libraries/lglobal.h"
@@ -30,14 +32,13 @@
 #include <luainterface.hpp>
 #include <udm.hpp>
 
+module pragma.server.game;
+
 import pragma.server.ai;
 import pragma.server.entities;
 import pragma.server.entities.components;
-import pragma.server.game;
 import pragma.server.server_state;
 import pragma.server.scripting.lua;
-
-extern ServerState *server;
 
 namespace pragma {
 	// Has to be in same namespace as class, otherwise luabind can't locate it
@@ -163,7 +164,7 @@ void SGame::RegisterLua()
 
 	auto classDefClRp = luabind::class_<pragma::networking::ClientRecipientFilter>("ClientRecipientFilter");
 	classDefClRp.def("GetRecipients", static_cast<void (*)(lua_State *, pragma::networking::ClientRecipientFilter &)>([](lua_State *l, pragma::networking::ClientRecipientFilter &rp) {
-		auto *sv = server->GetServer();
+		auto *sv = ServerState::Get()->GetServer();
 		if(sv == nullptr)
 			return;
 		auto t = Lua::CreateTable(l);
@@ -171,7 +172,7 @@ void SGame::RegisterLua()
 		for(auto &cl : sv->GetClients()) {
 			if(rp(*cl) == false)
 				continue;
-			auto *pl = server->GetPlayer(*cl);
+			auto *pl = ServerState::Get()->GetPlayer(*cl);
 			if(pl == nullptr)
 				continue;
 			Lua::PushInt(l, idx++);

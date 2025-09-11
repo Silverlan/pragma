@@ -15,8 +15,6 @@
 #include <fsys/ifile.hpp>
 #include <sharedutils/magic_enum.hpp>
 
-extern DLLNETWORK Engine *engine;
-
 static std::unordered_map<pragma::asset::Type, std::string> g_assetTypeToIdentifier;
 static std::unordered_map<std::string, pragma::asset::Type> g_identifierToAssetType;
 static void init_asset_type_maps()
@@ -82,19 +80,19 @@ void Lua::asset::register_library(Lua::Interface &lua, bool extended)
 			return numCleared;
 		}),
 		luabind::def("clear_unused_models",static_cast<uint32_t(*)(lua_State*)>([](lua_State *l) -> uint32_t {
-			auto *nw = engine->GetNetworkState(l);
+			auto *nw = Engine::Get()->GetNetworkState(l);
 			return nw->GetModelManager().ClearUnused();
 		})),
 		luabind::def("clear_flagged_models",static_cast<uint32_t(*)(lua_State*)>([](lua_State *l) -> uint32_t {
-			auto *nw = engine->GetNetworkState(l);
+			auto *nw = Engine::Get()->GetNetworkState(l);
 			return nw->GetModelManager().ClearFlagged();
 		})),
 		luabind::def("flag_model_for_cache_removal",static_cast<void(*)(lua_State*,Model&)>([](lua_State *l,Model &mdl) {
-			auto *nw = engine->GetNetworkState(l);
+			auto *nw = Engine::Get()->GetNetworkState(l);
 			nw->GetModelManager().FlagForRemoval(mdl);
 		})),
 		luabind::def("clear_unused_materials",static_cast<uint32_t(*)(lua_State*)>([](lua_State *l) -> uint32_t {
-			auto *nw = engine->GetNetworkState(l);
+			auto *nw = Engine::Get()->GetNetworkState(l);
 			return nw->GetMaterialManager().ClearUnused();
 		})),
 		luabind::def("get_type_identifier",&get_asset_identifier_from_type),
@@ -177,20 +175,20 @@ void Lua::asset::register_library(Lua::Interface &lua, bool extended)
 		luabind::def("find_file",Lua::asset::find_file),
 		luabind::def("is_loaded",Lua::asset::is_loaded),
 		luabind::def("wait_until_loaded",+[](lua_State *l,const std::string &name,pragma::asset::Type type) -> bool {
-			auto *manager = engine->GetNetworkState(l)->GetAssetManager(type);
+			auto *manager = Engine::Get()->GetNetworkState(l)->GetAssetManager(type);
 			if(!manager)
 				return false;
 			return manager->WaitUntilAssetLoaded(name);
 		}),
 		luabind::def("wait_until_all_pending_jobs_complete",+[](lua_State *l,const std::string &name,pragma::asset::Type type) {
-			auto *manager = engine->GetNetworkState(l)->GetAssetManager(type);
+			auto *manager = Engine::Get()->GetNetworkState(l)->GetAssetManager(type);
 			if(!manager)
 				return;
 			manager->WaitForAllPendingCompleted();
 		}),
 		luabind::def("precache",+[](lua_State *l,const std::string &name,pragma::asset::Type type)
 			-> Lua::var<bool,std::pair<util::FileAssetManager::PreloadResult::Result,std::optional<util::AssetLoadJobId>>> {
-			auto *manager = engine->GetNetworkState(l)->GetAssetManager(type);
+			auto *manager = Engine::Get()->GetNetworkState(l)->GetAssetManager(type);
 			if(!manager)
 				return luabind::object{l,false};
 			auto result = manager->PreloadAsset(name);
@@ -203,14 +201,14 @@ void Lua::asset::register_library(Lua::Interface &lua, bool extended)
 		}),
 		luabind::def("get_asset_state",+[](lua_State *l,const std::string &name,pragma::asset::Type type)
 			-> Lua::opt<util::AssetState> {
-			auto *manager = engine->GetNetworkState(l)->GetAssetManager(type);
+			auto *manager = Engine::Get()->GetNetworkState(l)->GetAssetManager(type);
 			if(!manager)
 				return luabind::object{};
 			auto result = manager->GetAssetState(name);
 			return luabind::object{l,result};
 		}),
 		luabind::def("normalize_asset_name",+[](lua_State *l,const std::string &name,pragma::asset::Type type) -> std::string {
-			auto *manager = engine->GetNetworkState(l)->GetAssetManager(type);
+			auto *manager = Engine::Get()->GetNetworkState(l)->GetAssetManager(type);
 			if(!manager)
 				return name;
 			return manager->ToCacheIdentifier(name);
@@ -241,7 +239,7 @@ void Lua::asset::register_library(Lua::Interface &lua, bool extended)
 			return tFiles;
 		}),
 		luabind::def("poll",+[](lua_State *l,pragma::asset::Type type) {
-			auto *manager = engine->GetNetworkState(l)->GetAssetManager(type);
+			auto *manager = Engine::Get()->GetNetworkState(l)->GetAssetManager(type);
 			if(!manager)
 				return;
 			manager->Poll();
@@ -250,7 +248,7 @@ void Lua::asset::register_library(Lua::Interface &lua, bool extended)
 			auto n = umath::to_integral(pragma::asset::Type::Count);
 			for(auto i=decltype(n){0u};i<n;++i)
 			{
-				auto *manager = engine->GetNetworkState(l)->GetAssetManager(static_cast<pragma::asset::Type>(i));
+				auto *manager = Engine::Get()->GetNetworkState(l)->GetAssetManager(static_cast<pragma::asset::Type>(i));
 				if(!manager)
 					continue;
 				manager->Poll();
@@ -306,12 +304,12 @@ void Lua::asset::register_library(Lua::Interface &lua, bool extended)
 }
 bool Lua::asset::exists(lua_State *l, const std::string &name, pragma::asset::Type type)
 {
-	auto *nw = engine->GetNetworkState(l);
+	auto *nw = Engine::Get()->GetNetworkState(l);
 	return pragma::asset::exists(name, type);
 }
 Lua::opt<std::string> Lua::asset::find_file(lua_State *l, const std::string &name, pragma::asset::Type type)
 {
-	auto *nw = engine->GetNetworkState(l);
+	auto *nw = Engine::Get()->GetNetworkState(l);
 	auto path = pragma::asset::find_file(name, type);
 	if(path.has_value() == false)
 		return nil;
@@ -319,13 +317,13 @@ Lua::opt<std::string> Lua::asset::find_file(lua_State *l, const std::string &nam
 }
 bool Lua::asset::is_loaded(lua_State *l, const std::string &name, pragma::asset::Type type)
 {
-	auto *nw = engine->GetNetworkState(l);
+	auto *nw = Engine::Get()->GetNetworkState(l);
 	return pragma::asset::is_loaded(*nw, name, type);
 }
 Lua::tb<std::string> Lua::asset::get_supported_import_file_extensions(lua_State *l, pragma::asset::Type type)
 {
 	auto t = luabind::newtable(l);
-	auto &assetManager = engine->GetAssetManager();
+	auto &assetManager = Engine::Get()->GetAssetManager();
 	auto n = assetManager.GetImporterCount(type);
 	int32_t idx = 1;
 	for(auto i = decltype(n) {0u}; i < n; ++i) {
@@ -360,7 +358,7 @@ Lua::tb<std::string> Lua::asset::get_supported_import_file_extensions(lua_State 
 Lua::tb<std::string> Lua::asset::get_supported_export_file_extensions(lua_State *l, pragma::asset::Type type)
 {
 	auto t = luabind::newtable(l);
-	auto &assetManager = engine->GetAssetManager();
+	auto &assetManager = Engine::Get()->GetAssetManager();
 	auto n = assetManager.GetExporterCount(type);
 	int32_t idx = 1;
 	for(auto i = decltype(n) {0u}; i < n; ++i) {

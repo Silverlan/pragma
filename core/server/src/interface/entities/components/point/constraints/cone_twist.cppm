@@ -4,6 +4,8 @@
 module;
 
 #include "pragma/serverdefinitions.h"
+#include "sharedutils/netpacket.hpp"
+#include "pragma/networking/recipient_filter.hpp"
 #include "pragma/entities/point/constraints/point_constraint_conetwist.h"
 
 export module pragma.server.entities.components.point.constraints.cone_twist;

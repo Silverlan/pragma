@@ -14,8 +14,6 @@ import pragma.server.game;
 
 using namespace pragma;
 
-extern SGame *s_game;
-
 ai::Memory::Fragment::Fragment() : hEntity(), lastSeen(0.f), visible(false), lastCheck(0.f), occupied(false), lastHeared(0.f) { lastDistance = std::numeric_limits<float>::max(); }
 
 void ai::Memory::Fragment::Clear()
@@ -44,7 +42,7 @@ void ai::Memory::Fragment::UpdateVisibility(float dist)
 	lastVelocity = pVelComponent.valid() ? pVelComponent->GetVelocity() : Vector3 {};
 
 	lastDistance = dist;
-	lastSeen = CFloat(s_game->CurTime());
+	lastSeen = CFloat(SGame::Get()->CurTime());
 	lastHeared = lastSeen; // TODO
 	lastCheck = lastSeen;
 }
@@ -69,7 +67,7 @@ void ai::Memory::Memorize(const BaseEntity &ent, MemoryType memType, const Vecto
 	fragment.lastPosition = pos;
 	fragment.lastVelocity = vel;
 	fragment.lastDistance = dist;
-	fragment.lastCheck = CFloat(s_game->CurTime());
+	fragment.lastCheck = CFloat(SGame::Get()->CurTime());
 	switch(memType) {
 	case MemoryType::Visual:
 		{

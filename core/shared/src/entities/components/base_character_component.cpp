@@ -36,10 +36,6 @@
 
 using namespace pragma;
 
-extern DLLNETWORK Engine *engine;
-
-//////////////////
-
 void BaseCharacterComponent::InitializeController()
 {
 	//auto &ent = GetEntity();

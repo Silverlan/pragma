@@ -6,8 +6,6 @@
 #include "pragma/util/util_python.hpp"
 #include <sharedutils/util_library.hpp>
 
-extern DLLNETWORK Engine *engine;
-
 struct IPythonWrapper final {
 	IPythonWrapper(util::Library &lib);
 	IPythonWrapper() = default;
@@ -37,9 +35,9 @@ static IPythonWrapper *get_py_wrapper()
 	initialized = true;
 
 	// Which networkstate we use doesn't really matter
-	auto *nw = engine->GetServerNetworkState();
+	auto *nw = Engine::Get()->GetServerNetworkState();
 	if(!nw)
-		nw = engine->GetClientState();
+		nw = Engine::Get()->GetClientState();
 	if(!nw)
 		return nullptr;
 	std::string err;

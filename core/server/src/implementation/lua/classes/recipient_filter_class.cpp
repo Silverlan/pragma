@@ -14,7 +14,6 @@ import pragma.server.entities;
 import pragma.server.entities.components;
 import pragma.server.server_state;
 
-extern ServerState *server;
 luabind::tableT<pragma::SPlayerComponent> Lua::RecipientFilter::GetRecipients(lua_State *l, pragma::networking::TargetRecipientFilter &rp)
 {
 	auto &recipients = rp.GetRecipients();
@@ -24,7 +23,7 @@ luabind::tableT<pragma::SPlayerComponent> Lua::RecipientFilter::GetRecipients(lu
 		auto &rp = recipients.at(i);
 		if(rp.expired())
 			continue;
-		auto *pl = server->GetPlayer(*rp);
+		auto *pl = ServerState::Get()->GetPlayer(*rp);
 		if(!pl)
 			continue;
 		t[idx++] = pl->GetLuaObject();

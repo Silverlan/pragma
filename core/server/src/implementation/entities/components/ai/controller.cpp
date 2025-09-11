@@ -4,10 +4,11 @@
 module;
 
 #include "stdafx_server.h"
+#include "pragma/entities/observermode.h"
+#include "pragma/entities/entity_component_system_t.hpp"
 #include <pragma/entities/components/base_player_component.hpp>
 #include <pragma/entities/components/base_character_component.hpp>
 #include <pragma/entities/components/action_input_controller_component.hpp>
-#include <pragma/entities/entity_component_system_t.hpp>
 
 module pragma.server.entities.components.ai;
 

@@ -6,5 +6,4 @@
 #include <pragma/console/convarhandle.h>
 #include "pragma/engine.h"
 
-extern DLLNETWORK Engine *engine;
-ConVarHandle GetEngineConVar(std::string scmd) { return engine->GetConVarHandle(scmd); }
+ConVarHandle GetEngineConVar(std::string scmd) { return Engine::Get()->GetConVarHandle(scmd); }

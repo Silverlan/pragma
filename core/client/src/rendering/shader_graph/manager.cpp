@@ -10,7 +10,7 @@ import pragma.client.rendering.shaders;
 extern CEngine *c_engine;
 
 using namespace pragma::rendering;
-#pragma optimize("", off)
+
 std::shared_ptr<pragma::shadergraph::Graph> ShaderGraphTypeManager::RegisterGraph(const std::string &identifier, std::shared_ptr<pragma::shadergraph::Graph> graph)
 {
 	auto it = m_graphs.find(identifier);

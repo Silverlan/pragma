@@ -4,6 +4,7 @@
 module;
 
 #include "pragma/serverdefinitions.h"
+#include "pragma/ai/ai_behavior.h"
 #include <pragma/model/animation/activities.h>
 
 export module pragma.server.ai.tasks.play_activity;
@@ -14,7 +15,7 @@ export namespace pragma {
 	namespace ai {
 		class DLLSERVER TaskPlayActivity : public TaskPlayAnimation {
 		  protected:
-			virtual int32_t SelectAnimation(const Schedule *sched, pragma::SAIComponent &ent, uint8_t paramId = 0) override;
+			virtual int32_t SelectAnimation(const Schedule *sched, pragma::BaseAIComponent &ent, uint8_t paramId = 0) override;
 		  public:
 			enum class Parameter : uint32_t { Activity = umath::to_integral(TaskPlayAnimation::Parameter::Animation), FaceTarget = umath::to_integral(TaskPlayAnimation::Parameter::FaceTarget) };
 			using TaskPlayAnimation::TaskPlayAnimation;
@@ -28,7 +29,7 @@ export namespace pragma {
 
 		class DLLSERVER TaskPlayLayeredActivity : public TaskPlayLayeredAnimation {
 		  protected:
-			virtual int32_t SelectAnimation(const Schedule *sched, pragma::SAIComponent &ent, uint8_t paramId = 0) override;
+			virtual int32_t SelectAnimation(const Schedule *sched, pragma::BaseAIComponent &ent, uint8_t paramId = 0) override;
 		  public:
 			enum class Parameter : uint32_t { Activity = umath::to_integral(TaskPlayLayeredAnimation::Parameter::Animation), AnimationSlot = umath::to_integral(TaskPlayLayeredAnimation::Parameter::AnimationSlot) };
 			using TaskPlayLayeredAnimation::TaskPlayLayeredAnimation;

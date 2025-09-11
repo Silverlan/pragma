@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
 #include <pragma/engine.h>
 #include <pragma/lua/libraries/lutil.hpp>
@@ -21,7 +23,8 @@
 #include <luainterface.hpp>
 #include <fsys/ifile.hpp>
 
-import pragma.server.game;
+module pragma.server.game;
+
 import pragma.server.scripting.lua;
 
 void SGame::RegisterLuaLibraries()

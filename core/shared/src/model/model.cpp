@@ -24,8 +24,6 @@
 #include <sharedutils/util_ifile.hpp>
 #include <stack>
 
-extern DLLNETWORK Engine *engine;
-
 std::shared_ptr<ModelMeshGroup> ModelMeshGroup::Create(const std::string &name) { return std::shared_ptr<ModelMeshGroup>(new ModelMeshGroup {name}); }
 std::shared_ptr<ModelMeshGroup> ModelMeshGroup::Create(const ModelMeshGroup &other)
 {
@@ -779,7 +777,7 @@ bool Model::FindMaterial(const std::string &texture, std::string &matPath, bool 
 		}
 	}
 	static auto bSkipPort = false;
-	if(bSkipPort == true || engine->ShouldMountExternalGameResources() == false)
+	if(bSkipPort == true || Engine::Get()->ShouldMountExternalGameResources() == false)
 		return false;
 	if(importIfNotFound) {
 		// Material not found; Attempt to port
@@ -1015,7 +1013,7 @@ void Model::LoadMaterials(const std::vector<uint32_t> &textureGroupIds, bool pre
 		// Loading materials may require saving materials / textures, which can trigger the resource watcher,
 		// so we'll disable it temporarily. This is a bit of a messy solution...
 		// TODO: Remove this once the VMT/VMAT conversion code has been removed from the material system!
-		resWatcherLock = std::move(engine->ScopeLockResourceWatchers());
+		resWatcherLock = std::move(Engine::Get()->ScopeLockResourceWatchers());
 	}
 
 	auto &meta = GetMetaInfo();

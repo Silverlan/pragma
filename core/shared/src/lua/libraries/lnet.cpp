@@ -7,8 +7,6 @@
 #include "pragma/networking/enums.hpp"
 #include <networkmanager/interface/nwm_manager.hpp>
 
-extern DLLNETWORK Engine *engine;
-
 void Lua::net::RegisterLibraryEnums(lua_State *l)
 {
 	Lua::RegisterLibraryEnums(l, "net",
@@ -20,7 +18,7 @@ void Lua::net::RegisterLibraryEnums(lua_State *l)
 
 pragma::NetEventId Lua::net::register_event(lua_State *l, const std::string &name)
 {
-	auto *nw = engine->GetNetworkState(l);
+	auto *nw = Engine::Get()->GetNetworkState(l);
 	auto *game = nw->GetGameState();
 	return game->SetupNetEvent(name);
 }

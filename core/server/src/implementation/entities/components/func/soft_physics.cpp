@@ -5,6 +5,8 @@ module;
 
 #include "stdafx_server.h"
 #include <sharedutils/netpacket.hpp>
+#include "pragma/physics/physsoftbodyinfo.hpp"
+#include "pragma/networking/recipient_filter.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
@@ -19,8 +21,6 @@ void SFuncSoftPhysicsComponent::SendData(NetPacket &packet, networking::ClientRe
 void SFuncSoftPhysicsComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 ////////
-
-extern SGame *s_game;
 
 void FuncSoftPhysics::Initialize()
 {

@@ -12,7 +12,7 @@
 struct Resource;
 class NetPacket;
 namespace pragma {
-	class SPlayerComponent;
+	class BasePlayerComponent;
 };
 namespace pragma::networking {
 	enum class DropReason : int8_t;
@@ -34,8 +34,8 @@ namespace pragma::networking {
 
 		enum class TransferState : uint32_t { Initial = 0, Started, Complete };
 
-		pragma::SPlayerComponent *GetPlayer() const;
-		void SetPlayer(pragma::SPlayerComponent &pl);
+		pragma::BasePlayerComponent *GetPlayer() const;
+		void SetPlayer(pragma::BasePlayerComponent &pl);
 		const std::vector<std::shared_ptr<Resource>> &GetResourceTransfer() const;
 		bool AddResource(const std::string &fileName, bool stream = true);
 		void RemoveResource(uint32_t i);
@@ -57,7 +57,7 @@ namespace pragma::networking {
 	  protected:
 		IServerClient() = default;
 	  private:
-		mutable pragma::ComponentHandle<pragma::SPlayerComponent> m_player = {};
+		mutable pragma::ComponentHandle<pragma::BasePlayerComponent> m_player = {};
 		bool m_bTransferring = false;
 		std::vector<std::shared_ptr<Resource>> m_resourceTransfer;
 		TransferState m_initialResourceTransferState = TransferState::Initial;

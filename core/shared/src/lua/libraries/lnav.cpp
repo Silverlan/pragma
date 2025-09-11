@@ -10,15 +10,13 @@
 #include "pragma/lua/libraries/lfile.h"
 #include <luainterface.hpp>
 
-extern DLLNETWORK Engine *engine;
-
 lua_registercheck(NavConfig, pragma::nav::Config);
 
 void Lua::nav::register_library(Lua::Interface &lua)
 {
 	auto &modNav = lua.RegisterLibrary("nav");
 	modNav[luabind::def("generate", static_cast<void (*)(lua_State *)>([](lua_State *l) {
-		auto &nw = *engine->GetNetworkState(l);
+		auto &nw = *Engine::Get()->GetNetworkState(l);
 		auto &game = *nw.GetGameState();
 		std::string err;
 		std::shared_ptr<RcNavMesh> mesh = nullptr;
@@ -106,7 +104,7 @@ void Lua::nav::register_library(Lua::Interface &lua)
 		Lua::Push(l, navMesh);
 	})),
 	  luabind::def("load", static_cast<opt<std::shared_ptr<pragma::nav::Mesh>> (*)(lua_State *)>([](lua_State *l) -> opt<std::shared_ptr<pragma::nav::Mesh>> {
-		  auto &nw = *engine->GetNetworkState(l);
+		  auto &nw = *Engine::Get()->GetNetworkState(l);
 		  auto &game = *nw.GetGameState();
 		  std::string fname = Lua::CheckString(l, 1);
 		  pragma::nav::Config config;
@@ -150,7 +148,7 @@ void Lua::nav::register_library(Lua::Interface &lua)
 			Lua::PushString(l, "This file operation is not allowed!");
 			return;
 		}
-		auto &nw = *engine->GetNetworkState(l);
+		auto &nw = *Engine::Get()->GetNetworkState(l);
 		auto &game = *nw.GetGameState();
 		std::string err;
 		auto r = navMesh.Save(game, outName, err);

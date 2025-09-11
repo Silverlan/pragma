@@ -16,8 +16,6 @@
 #include "luasystem.h"
 #include "pragma/physics/shape.hpp"
 
-extern DLLNETWORK Engine *engine;
-
 void Lua::TraceData::SetSource(lua_State *l, ::TraceData &data, const pragma::physics::IConvexShape &shape) { data.SetShape(shape); }
 void Lua::TraceData::SetFlags(lua_State *, ::TraceData &data, unsigned int flags) { data.SetFlags(static_cast<RayCastFlags>(flags)); }
 void Lua::TraceData::SetCollisionFilterMask(lua_State *, ::TraceData &data, unsigned int mask) { data.SetCollisionFilterMask(static_cast<CollisionMask>(mask)); }

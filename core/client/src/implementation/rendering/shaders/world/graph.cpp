@@ -38,7 +38,7 @@ extern ClientState *client;
 extern CEngine *c_engine;
 
 using namespace pragma;
-#pragma optimize("", off)
+
 ShaderGraph::ShaderGraph(prosper::IPrContext &context, const std::shared_ptr<pragma::shadergraph::Graph> &sg, const std::string &identifier, const std::string &fsShader) : ShaderGameWorldLightingPass {context, identifier, "programs/scene/textured", fsShader}, m_shaderGraph {sg} {}
 
 ShaderGraph::~ShaderGraph() {}

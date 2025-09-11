@@ -4,6 +4,8 @@
 module;
 
 #include "pragma/serverdefinitions.h"
+#include "sharedutils/netpacket.hpp"
+#include "pragma/networking/recipient_filter.hpp"
 #include "pragma/entities/environment/audio/env_sound_dsp_eaxreverb.h"
 
 export module pragma.server.entities.components.audio.dsp.eaxreverb;

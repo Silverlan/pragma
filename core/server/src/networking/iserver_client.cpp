@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_server.h"
+#include <pragma/entities/components/base_player_component.hpp>
 #include "pragma/networking/iserver_client.hpp"
 #include <pragma/networking/resource.h>
 
@@ -17,13 +18,13 @@ std::optional<pragma::networking::IPAddress> pragma::networking::IServerClient::
 		return {};
 	return pragma::networking::IPAddress {*ip, *port};
 }
-pragma::SPlayerComponent *pragma::networking::IServerClient::GetPlayer() const { return m_player.get(); }
+pragma::BasePlayerComponent *pragma::networking::IServerClient::GetPlayer() const { return m_player.get(); }
 void pragma::networking::IServerClient::SetTransferComplete(bool b) { m_bTransferring = !b; }
 bool pragma::networking::IServerClient::IsTransferring() const { return m_bTransferring; }
 bool pragma::networking::IServerClient::IsInitialResourceTransferComplete() const { return (m_initialResourceTransferState == TransferState::Complete) ? true : false; }
 void pragma::networking::IServerClient::SetInitialResourceTransferState(TransferState state) { m_initialResourceTransferState = state; }
 pragma::networking::IServerClient::TransferState pragma::networking::IServerClient::GetInitialResourceTransferState() { return m_initialResourceTransferState; }
-void pragma::networking::IServerClient::SetPlayer(pragma::SPlayerComponent &pl) { m_player = pl.GetHandle<pragma::SPlayerComponent>(); }
+void pragma::networking::IServerClient::SetPlayer(pragma::BasePlayerComponent &pl) { m_player = pl.GetHandle<pragma::BasePlayerComponent>(); }
 const std::vector<std::shared_ptr<Resource>> &pragma::networking::IServerClient::GetResourceTransfer() const { return m_resourceTransfer; }
 bool pragma::networking::IServerClient::AddResource(const std::string &fileName, bool stream)
 {

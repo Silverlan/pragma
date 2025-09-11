@@ -1,15 +1,19 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
 #include "pragma/lua/s_lentity_components.hpp"
 #include "pragma/networking/recipient_filter.hpp"
+
 // --template-include-location
 #include "pragma/entities/components/base_ownable_component.hpp"
 #include "pragma/entities/components/liquid/base_liquid_control_component.hpp"
 #include "pragma/entities/components/liquid/base_liquid_surface_simulation_component.hpp"
 #include "pragma/entities/components/base_debug_component.hpp"
 #include "pragma/entities/components/base_io_component.hpp"
+#include "pragma/entities/baseworld.h"
 #include "pragma/entities/components/base_point_at_target_component.hpp"
 #include "pragma/entities/prop/prop_base.h"
 #include "pragma/entities/prop/prop_dynamic.hpp"
@@ -52,14 +56,13 @@
 #include <pragma/lua/ostream_operator_alias.hpp>
 #include <pragma/entities/components/base_attachment_component.hpp>
 
-import pragma.server.game;
+module pragma.server.game;
+
 import pragma.server.entities.components;
 
 #ifdef __linux__
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, BaseEntityComponent);
 #endif
-
-extern SGame *s_game;
 
 void RegisterLuaEntityComponents2_sv(lua_State *l, luabind::module_ &entsMod)
 {
@@ -186,7 +189,7 @@ void RegisterLuaEntityComponents2_sv(lua_State *l, luabind::module_ &entsMod)
 	auto defLiquidSurfaceSimulation = pragma::lua::create_entity_component_class<pragma::SLiquidSurfaceSimulationComponent, pragma::BaseLiquidSurfaceSimulationComponent>("LiquidSurfaceSimulationComponent");
 	entsMod[defLiquidSurfaceSimulation];
 
-	s_game->GetEntityComponentManager().RegisterLuaBindings(l, entsMod);
+	SGame::Get()->GetEntityComponentManager().RegisterLuaBindings(l, entsMod);
 
 	// --template-component-register-location
 }

@@ -4,9 +4,10 @@
 module;
 
 #include "stdafx_server.h"
-#include <pragma/lua/converters/game_type_converters_t.hpp>
+#include "sharedutils/netpacket.hpp"
 #include <pragma/networking/nwm_util.h>
 #include <pragma/networking/enums.hpp>
+#include "pragma/networking/recipient_filter.hpp"
 
 module pragma.server.entities.components.render;
 
@@ -26,7 +27,7 @@ void SRenderComponent::SetUnlit(bool b)
 	NetPacket p;
 	nwm::write_entity(p, &ent);
 	p->Write<bool>(b);
-	server->SendPacket("ent_setunlit", p, pragma::networking::Protocol::SlowReliable);
+	ServerState::Get()->SendPacket("ent_setunlit", p, pragma::networking::Protocol::SlowReliable);
 }
 void SRenderComponent::SetCastShadows(bool b)
 {
@@ -37,5 +38,5 @@ void SRenderComponent::SetCastShadows(bool b)
 	NetPacket p;
 	nwm::write_entity(p, &ent);
 	p->Write<bool>(b);
-	server->SendPacket("ent_setcastshadows", p, pragma::networking::Protocol::SlowReliable);
+	ServerState::Get()->SendPacket("ent_setcastshadows", p, pragma::networking::Protocol::SlowReliable);
 }

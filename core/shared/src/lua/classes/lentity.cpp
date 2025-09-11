@@ -52,8 +52,6 @@
 
 import panima;
 
-extern DLLNETWORK Engine *engine;
-
 bool Lua::is_entity(const luabind::object &o) { return luabind::object_cast_nothrow<EntityHandle *>(o, static_cast<EntityHandle *>(nullptr)); }
 
 static bool operator==(const BaseEntity &a, const BaseEntity &b) { return &a == &b; }
@@ -244,7 +242,7 @@ void Lua::Entity::register_class(luabind::class_<BaseEntity> &classDef)
 	classDef.def("ClearComponents", &BaseEntity::ClearComponents);
 	classDef.def("HasComponent", +[](Lua::nil_type) -> bool { return false; }); // Return false if no component id was specified
 	classDef.def("HasComponent", static_cast<bool (*)(lua_State *, BaseEntity &, const std::string &)>([](lua_State *l, BaseEntity &ent, const std::string &name) {
-		auto *nw = engine->GetNetworkState(l);
+		auto *nw = Engine::Get()->GetNetworkState(l);
 		auto *game = nw->GetGameState();
 		auto &componentManager = game->GetEntityComponentManager();
 		auto componentId = pragma::INVALID_COMPONENT_ID;

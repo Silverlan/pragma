@@ -4,6 +4,8 @@
 module;
 
 #include "stdafx_server.h"
+#include "sharedutils/netpacket.hpp"
+#include "pragma/networking/recipient_filter.hpp"
 #include <pragma/physics/physobj.h>
 #include "pragma/physics/movetypes.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>

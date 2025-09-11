@@ -8,4 +8,4 @@
 #include <pragma/console/convars.h>
 
 extern Engine *engine;
-ConVarHandle GetConVar(std::string scmd) { return engine->GetConVarHandle(scmd); }
+ConVarHandle GetConVar(std::string scmd) { return Engine::Get()->GetConVarHandle(scmd); }

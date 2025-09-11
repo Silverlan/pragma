@@ -62,8 +62,6 @@
 #include <luainterface.hpp>
 #include <udm.hpp>
 
-extern DLLNETWORK Engine *engine;
-
 std::optional<std::string> Lua::VarToString(lua_State *lua, int n)
 {
 	auto t = GetType(lua, n);
@@ -188,7 +186,6 @@ void Lua::TableDump(lua_State *lua, int n)
 
 ////////////////
 
-extern DLLNETWORK Engine *engine;
 Game::Game(NetworkState *state)
 {
 	m_stateNetwork = state;
@@ -336,8 +333,8 @@ void Game::SetGameMode(const std::string &gameMode)
 
 void Game::SetupEntity(BaseEntity *) {}
 
-bool Game::IsMultiPlayer() const { return engine->IsMultiPlayer(); }
-bool Game::IsSinglePlayer() const { return engine->IsSinglePlayer(); }
+bool Game::IsMultiPlayer() const { return Engine::Get()->IsMultiPlayer(); }
+bool Game::IsSinglePlayer() const { return Engine::Get()->IsSinglePlayer(); }
 
 const pragma::physics::IEnvironment *Game::GetPhysicsEnvironment() const { return const_cast<Game *>(this)->GetPhysicsEnvironment(); }
 pragma::physics::IEnvironment *Game::GetPhysicsEnvironment() { return m_physEnvironment.get(); }
@@ -540,13 +537,13 @@ void Game::InitializeGame()
 		}
 	}
 
-	m_cbProfilingHandle = engine->AddProfilingHandler([this](bool profilingEnabled) {
+	m_cbProfilingHandle = Engine::Get()->AddProfilingHandler([this](bool profilingEnabled) {
 		if(profilingEnabled == false) {
 			m_profilingStageManager = nullptr;
 			return;
 		}
 		std::string postFix = IsClient() ? " (CL)" : " (SV)";
-		auto &cpuProfiler = engine->GetProfiler();
+		auto &cpuProfiler = Engine::Get()->GetProfiler();
 		m_profilingStageManager = std::make_unique<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage>>();
 		m_profilingStageManager->InitializeProfilingStageManager(cpuProfiler);
 	});
@@ -625,7 +622,7 @@ void Game::Tick()
 		m_tDeltaTick = 0.0f; // First tick is essentially 'skipped' to avoid physics errors after the world has been loaded
 	}
 	else
-		m_tDeltaTick = (1.f / engine->GetTickRate()) * GetTimeScale(); //m_tCur -m_tLastTick;
+		m_tDeltaTick = (1.f / Engine::Get()->GetTickRate()) * GetTimeScale(); //m_tCur -m_tLastTick;
 	for(auto *ent : m_baseEnts) {
 		if(ent != nullptr && ent->IsSpawned())
 			ent->ResetStateChangeFlags();

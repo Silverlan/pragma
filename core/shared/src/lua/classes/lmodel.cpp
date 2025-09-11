@@ -41,8 +41,6 @@
 
 import panima;
 
-extern DLLNETWORK Engine *engine;
-
 void Lua::ModelMeshGroup::register_class(luabind::class_<::ModelMeshGroup> &classDef)
 {
 	classDef.scope[luabind::def("Create", &Create)];
@@ -384,7 +382,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	classDef.def("GetTextureGroup", &Lua::Model::GetTextureGroup);
 	classDef.def("SaveLegacy", &Lua::Model::Save);
 	classDef.def("Save", static_cast<void (*)(lua_State *, ::Model &, udm::AssetData &)>([](lua_State *l, ::Model &mdl, udm::AssetData &assetData) {
-		auto *nw = engine->GetNetworkState(l);
+		auto *nw = Engine::Get()->GetNetworkState(l);
 		auto *game = nw ? nw->GetGameState() : nullptr;
 		if(game == nullptr)
 			return;
@@ -396,7 +394,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 			Lua::PushBool(l, result);
 	}));
 	classDef.def("Save", static_cast<void (*)(lua_State *, ::Model &)>([](lua_State *l, ::Model &mdl) {
-		auto *nw = engine->GetNetworkState(l);
+		auto *nw = Engine::Get()->GetNetworkState(l);
 		auto *game = nw ? nw->GetGameState() : nullptr;
 		if(game == nullptr)
 			return;
@@ -409,7 +407,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	}));
 	classDef.def(
 	  "Save", +[](lua_State *l, ::Engine *engine, ::Model &mdl, const std::string &fname) {
-		  auto *nw = engine->GetNetworkState(l);
+		  auto *nw = Engine::Get()->GetNetworkState(l);
 		  auto *game = nw ? nw->GetGameState() : nullptr;
 		  if(game == nullptr)
 			  return;
@@ -418,7 +416,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 		  if(result == false)
 			  Lua::PushString(l, err);
 		  else {
-			  engine->PollResourceWatchers();
+			  Engine::Get()->PollResourceWatchers();
 			  Lua::PushBool(l, result);
 		  }
 	  });
@@ -2057,7 +2055,7 @@ void Lua::Model::SetMaterial(lua_State *l, ::Model &mdl, uint32_t matId, ::Mater
 void Lua::Model::GetMaterials(lua_State *l, ::Model &mdl)
 {
 	//Lua::CheckModel(l,1);
-	auto *nw = engine->GetNetworkState(l);
+	auto *nw = Engine::Get()->GetNetworkState(l);
 	auto &matManager = nw->GetMaterialManager();
 	auto t = Lua::CreateTable(l);
 	uint32_t idx = 1;
@@ -2261,21 +2259,21 @@ void Lua::Model::Save(lua_State *l, ::Model &mdl, const std::string &name)
 		Lua::PushBool(l, false);
 		return;
 	}
-	auto r = mdl.SaveLegacy(engine->GetNetworkState(l)->GetGameState(), mdlName, rootPath);
+	auto r = mdl.SaveLegacy(Engine::Get()->GetNetworkState(l)->GetGameState(), mdlName, rootPath);
 	Lua::PushBool(l, r);
 }
 
 void Lua::Model::Copy(lua_State *l, ::Model &mdl)
 {
 	//Lua::CheckModel(l,1);
-	auto cpy = mdl.Copy(engine->GetNetworkState(l)->GetGameState());
+	auto cpy = mdl.Copy(Engine::Get()->GetNetworkState(l)->GetGameState());
 	Lua::Push<decltype(cpy)>(l, cpy);
 }
 
 void Lua::Model::Copy(lua_State *l, ::Model &mdl, uint32_t copyFlags)
 {
 	//Lua::CheckModel(l,1);
-	auto cpy = mdl.Copy(engine->GetNetworkState(l)->GetGameState(), static_cast<::Model::CopyFlags>(copyFlags));
+	auto cpy = mdl.Copy(Engine::Get()->GetNetworkState(l)->GetGameState(), static_cast<::Model::CopyFlags>(copyFlags));
 	Lua::Push<decltype(cpy)>(l, cpy);
 }
 
@@ -2315,7 +2313,7 @@ void Lua::Model::LoadMaterials(lua_State *l, ::Model &mdl) { LoadMaterials(l, md
 void Lua::Model::LoadMaterials(lua_State *l, ::Model &mdl, bool bReload)
 {
 	//Lua::CheckModel(l,1);
-	auto *nw = engine->GetNetworkState(l);
+	auto *nw = Engine::Get()->GetNetworkState(l);
 	mdl.LoadMaterials(bReload);
 }
 void Lua::Model::AddTexturePath(lua_State *, ::Model &mdl, const std::string &path)

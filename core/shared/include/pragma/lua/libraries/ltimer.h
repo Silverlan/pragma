@@ -4,6 +4,7 @@
 #ifndef __LTIMER_H__
 #define __LTIMER_H__
 #include "pragma/networkdefinitions.h"
+#include "pragma/util/timertypes.h"
 #include <sharedutils/functioncallback.h>
 
 class TimerHandle;

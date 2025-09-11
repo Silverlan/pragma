@@ -14,8 +14,6 @@
 #include <pragma/lua/converters/pair_converter_t.hpp>
 #include <pragma/lua/converters/vector_converter_t.hpp>
 
-extern DLLNETWORK Engine *engine;
-
 void Lua::ModelMesh::register_class(luabind::class_<::ModelMesh> &classDef)
 {
 	classDef.def(luabind::const_self == luabind::const_self);
@@ -294,7 +292,7 @@ void Lua::ModelSubMesh::register_class(luabind::class_<::ModelSubMesh> &classDef
 	  });
 	classDef.def(
 	  "Save", +[](lua_State *l, ::ModelSubMesh &mesh, udm::AssetData &assetData) {
-		  auto *nw = engine->GetNetworkState(l);
+		  auto *nw = Engine::Get()->GetNetworkState(l);
 		  auto *game = nw ? nw->GetGameState() : nullptr;
 		  if(game == nullptr)
 			  return;
@@ -484,13 +482,13 @@ void Lua::ModelSubMesh::NormalizeUVCoordinates(lua_State *l, ::ModelSubMesh &mdl
 void Lua::ModelSubMesh::ClipAgainstPlane(lua_State *l, ::ModelSubMesh &mdl, const Vector3 &n, double d) { ClipAgainstPlane(l, mdl, n, d, false); }
 void Lua::ModelSubMesh::ClipAgainstPlane(lua_State *l, ::ModelSubMesh &mdl, const Vector3 &n, double d, bool bSplitCoverMeshes)
 {
-	auto clippedMeshA = engine->GetNetworkState(l)->GetGameState()->CreateModelSubMesh();
-	auto clippedMeshB = engine->GetNetworkState(l)->GetGameState()->CreateModelSubMesh();
+	auto clippedMeshA = Engine::Get()->GetNetworkState(l)->GetGameState()->CreateModelSubMesh();
+	auto clippedMeshB = Engine::Get()->GetNetworkState(l)->GetGameState()->CreateModelSubMesh();
 	std::shared_ptr<::ModelSubMesh> clippedCoverA = nullptr;
 	std::shared_ptr<::ModelSubMesh> clippedCoverB = nullptr;
 	if(bSplitCoverMeshes) {
-		clippedCoverA = engine->GetNetworkState(l)->GetGameState()->CreateModelSubMesh();
-		clippedCoverB = engine->GetNetworkState(l)->GetGameState()->CreateModelSubMesh();
+		clippedCoverA = Engine::Get()->GetNetworkState(l)->GetGameState()->CreateModelSubMesh();
+		clippedCoverB = Engine::Get()->GetNetworkState(l)->GetGameState()->CreateModelSubMesh();
 	}
 	mdl.ClipAgainstPlane(n, d, *clippedMeshA, *clippedMeshB, nullptr, clippedCoverA.get(), clippedCoverB.get());
 	Lua::Push<std::shared_ptr<::ModelSubMesh>>(l, clippedMeshA);
@@ -513,13 +511,13 @@ void Lua::ModelSubMesh::ClipAgainstPlane(lua_State *l, ::ModelSubMesh &mdl, cons
 		boneMatrices.push_back(m);
 		Lua::Pop(l, 1);
 	}
-	auto clippedMeshA = engine->GetNetworkState(l)->GetGameState()->CreateModelSubMesh();
-	auto clippedMeshB = engine->GetNetworkState(l)->GetGameState()->CreateModelSubMesh();
+	auto clippedMeshA = Engine::Get()->GetNetworkState(l)->GetGameState()->CreateModelSubMesh();
+	auto clippedMeshB = Engine::Get()->GetNetworkState(l)->GetGameState()->CreateModelSubMesh();
 	std::shared_ptr<::ModelSubMesh> clippedCoverA = nullptr;
 	std::shared_ptr<::ModelSubMesh> clippedCoverB = nullptr;
 	if(bSplitCoverMeshes) {
-		clippedCoverA = engine->GetNetworkState(l)->GetGameState()->CreateModelSubMesh();
-		clippedCoverB = engine->GetNetworkState(l)->GetGameState()->CreateModelSubMesh();
+		clippedCoverA = Engine::Get()->GetNetworkState(l)->GetGameState()->CreateModelSubMesh();
+		clippedCoverB = Engine::Get()->GetNetworkState(l)->GetGameState()->CreateModelSubMesh();
 	}
 	mdl.ClipAgainstPlane(n, d, *clippedMeshA, *clippedMeshB, &boneMatrices, clippedCoverA.get(), clippedCoverB.get());
 	Lua::Push<std::shared_ptr<::ModelSubMesh>>(l, clippedMeshA);

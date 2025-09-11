@@ -5,6 +5,8 @@ module;
 
 #include "stdafx_server.h"
 #include <pragma/game/damageinfo.h>
+#include "sharedutils/netpacket.hpp"
+#include "pragma/networking/recipient_filter.hpp"
 #include <sharedutils/util_string.h>
 #include <pragma/networking/nwm_util.h>
 #include <pragma/networking/enums.hpp>
@@ -23,7 +25,7 @@ void SExplosionComponent::Explode()
 	if(ent.IsShared()) {
 		NetPacket p;
 		nwm::write_entity(p, &ent);
-		server->SendPacket("envexplosion_explode", p, pragma::networking::Protocol::SlowReliable);
+		ServerState::Get()->SendPacket("envexplosion_explode", p, pragma::networking::Protocol::SlowReliable);
 	}
 	BaseEnvExplosionComponent::Explode();
 }

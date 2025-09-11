@@ -27,8 +27,6 @@
 #include "pragma/model/animation/skeleton.hpp"
 #include "pragma/model/animation/bone.hpp"
 
-extern DLLNETWORK Engine *engine;
-
 int Lua::import::import_wad(lua_State *l)
 {
 	auto &f = *Lua::CheckFile(l, 1);
@@ -88,7 +86,7 @@ int Lua::import::import_wrci(lua_State *l)
 		auto pos = f.Read<Vector3>();
 		auto rot = f.Read<Quat>();
 	}
-	auto *game = engine->GetNetworkState(l)->GetGameState();
+	auto *game = Engine::Get()->GetNetworkState(l)->GetGameState();
 	auto numMeshes = f.Read<uint8_t>();
 	for(auto i = decltype(numMeshes) {0}; i < numMeshes; ++i) {
 		auto colMesh = CollisionMesh::Create(game);
@@ -187,7 +185,7 @@ int Lua::import::import_wrmi(lua_State *l)
 		rootBones.insert(std::make_pair(boneId, bone));
 		fReadChildBones(bone);
 	}
-	auto *nw = engine->GetNetworkState(l);
+	auto *nw = Engine::Get()->GetNetworkState(l);
 	auto mesh = std::shared_ptr<ModelMesh>(nw->CreateMesh());
 	meshGroup->AddMesh(mesh);
 	auto numMeshes = f.Read<uint32_t>();
@@ -279,7 +277,7 @@ int Lua::import::import_wrmi(lua_State *l)
 
 int Lua::import::import_smd(lua_State *l)
 {
-	auto &nw = *engine->GetNetworkState(l);
+	auto &nw = *Engine::Get()->GetNetworkState(l);
 	std::string smdFileName = Lua::CheckString(l, 1);
 	/*if(Lua::file::validate_write_operation(l,smdFileName) == false)
 	{
@@ -843,7 +841,7 @@ int Lua::import::import_model_asset(lua_State *l)
 
 	Lua::Push<std::shared_ptr<pragma::animation::Skeleton>>(l,skeleton);
 	Lua::Push<std::shared_ptr<Frame>>(l,referencePose);
-	return ::import_model_asset(*engine->GetNetworkState(l),f);
+	return ::import_model_asset(*Engine::Get()->GetNetworkState(l),f);
 #endif
 	return 0;
 }

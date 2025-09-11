@@ -20,9 +20,6 @@ import pragma.server.game;
 import pragma.server.scripting.lua;
 import pragma.server.server_state;
 
-extern SGame *s_game;
-extern ServerState *server;
-
 SLuaEntity::SLuaEntity() : SBaseEntity {} {}
 void SLuaEntity::Initialize()
 {
@@ -48,7 +45,7 @@ void SLuaEntity::DoSpawn()
 		auto pMapComponent = GetComponent<pragma::MapComponent>();
 		p->Write<unsigned int>(pMapComponent.valid() ? pMapComponent->GetMapIndex() : 0u);
 		SendData(p, rf);
-		server->SendPacket("ent_create_lua", p, pragma::networking::Protocol::SlowReliable, rf);
+		ServerState::Get()->SendPacket("ent_create_lua", p, pragma::networking::Protocol::SlowReliable, rf);
 	}
 }
 void SLuaEntity::Remove()
@@ -57,7 +54,7 @@ void SLuaEntity::Remove()
 		// TODO: Do we need this? (If so, why?)
 		NetPacket p;
 		nwm::write_entity(p, this);
-		server->SendPacket("ent_remove", p, pragma::networking::Protocol::SlowReliable);
+		ServerState::Get()->SendPacket("ent_remove", p, pragma::networking::Protocol::SlowReliable);
 	}
 	SBaseEntity::Remove();
 }

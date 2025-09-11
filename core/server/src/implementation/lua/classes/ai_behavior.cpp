@@ -1,18 +1,20 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
 #include "luasystem.h"
 #include "pragma/ai/ai_schedule.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/lua/ostream_operator_alias.hpp>
 
+module pragma.server.scripting.lua.classes.ai_behavior;
+
 import pragma.server.ai;
 import pragma.server.entities.components;
 import pragma.server.game;
-import pragma.server.scripting.lua;
-
-extern SGame *s_game;
+import pragma.server.scripting.lua.libraries.ai;
 
 namespace Lua {
 	namespace AIBehaviorNode {
@@ -137,7 +139,7 @@ void AILuaBehaviorNode::Stop()
 	pragma::ai::BehaviorNode::Stop();
 	CallLuaMember<void>("Stop");
 }
-pragma::ai::BehaviorNode::Result AILuaBehaviorNode::Think(const pragma::ai::Schedule *sched, pragma::SAIComponent &ent)
+pragma::ai::BehaviorNode::Result AILuaBehaviorNode::Think(const pragma::ai::Schedule *sched, pragma::BaseAIComponent &ent)
 {
 	auto r = pragma::ai::BehaviorNode::Think(sched, ent);
 	if(r == Result::Pending)
@@ -147,7 +149,7 @@ pragma::ai::BehaviorNode::Result AILuaBehaviorNode::Think(const pragma::ai::Sche
 		r = static_cast<pragma::ai::BehaviorNode::Result>(luaResult);
 	return r;
 }
-pragma::ai::BehaviorNode::Result AILuaBehaviorNode::Start(const pragma::ai::Schedule *sched, pragma::SAIComponent &ent)
+pragma::ai::BehaviorNode::Result AILuaBehaviorNode::Start(const pragma::ai::Schedule *sched, pragma::BaseAIComponent &ent)
 {
 	auto r = pragma::ai::BehaviorNode::Start(sched, ent);
 	auto luaResult = umath::to_integral(pragma::ai::BehaviorNode::Result::Succeeded);
@@ -167,14 +169,14 @@ AILuaBehaviorNodeWrapper::AILuaBehaviorNodeWrapper(uint32_t nodeType) : AILuaBeh
 
 AILuaBehaviorNodeWrapper::AILuaBehaviorNodeWrapper() : AILuaBehaviorNodeWrapper(umath::to_integral(pragma::ai::BehaviorNode::Type::Sequence)) {}
 
-uint32_t AILuaBehaviorNodeWrapper::Start(std::shared_ptr<pragma::ai::Schedule> &, pragma::SAIComponent &) { return umath::to_integral(pragma::ai::BehaviorNode::Result::Succeeded); }
-uint32_t AILuaBehaviorNodeWrapper::default_Start(lua_State *, AILuaBehaviorNodeWrapper &, std::shared_ptr<pragma::ai::Schedule> &, pragma::SAIComponent &) { return umath::to_integral(pragma::ai::BehaviorNode::Result::Succeeded); }
+uint32_t AILuaBehaviorNodeWrapper::Start(std::shared_ptr<pragma::ai::Schedule> &, pragma::BaseAIComponent &) { return umath::to_integral(pragma::ai::BehaviorNode::Result::Succeeded); }
+uint32_t AILuaBehaviorNodeWrapper::default_Start(lua_State *, AILuaBehaviorNodeWrapper &, std::shared_ptr<pragma::ai::Schedule> &, pragma::BaseAIComponent &) { return umath::to_integral(pragma::ai::BehaviorNode::Result::Succeeded); }
 
 void AILuaBehaviorNodeWrapper::Stop() {}
 void AILuaBehaviorNodeWrapper::default_Stop(lua_State *, AILuaBehaviorNodeWrapper &) {}
 
-uint32_t AILuaBehaviorNodeWrapper::Think(std::shared_ptr<pragma::ai::Schedule> &, pragma::SAIComponent &, std::underlying_type_t<pragma::ai::BehaviorNode::Result>) { return umath::to_integral(pragma::ai::BehaviorNode::Result::Succeeded); }
-uint32_t AILuaBehaviorNodeWrapper::default_Think(lua_State *, AILuaBehaviorNodeWrapper &, std::shared_ptr<pragma::ai::Schedule> &, pragma::SAIComponent &, std::underlying_type_t<pragma::ai::BehaviorNode::Result>) { return umath::to_integral(pragma::ai::BehaviorNode::Result::Succeeded); }
+uint32_t AILuaBehaviorNodeWrapper::Think(std::shared_ptr<pragma::ai::Schedule> &, pragma::BaseAIComponent &, std::underlying_type_t<pragma::ai::BehaviorNode::Result>) { return umath::to_integral(pragma::ai::BehaviorNode::Result::Succeeded); }
+uint32_t AILuaBehaviorNodeWrapper::default_Think(lua_State *, AILuaBehaviorNodeWrapper &, std::shared_ptr<pragma::ai::Schedule> &, pragma::BaseAIComponent &, std::underlying_type_t<pragma::ai::BehaviorNode::Result>) { return umath::to_integral(pragma::ai::BehaviorNode::Result::Succeeded); }
 
 void AILuaBehaviorNodeWrapper::OnTaskComplete(std::shared_ptr<pragma::ai::Schedule> &schedule, uint32_t taskId, std::underlying_type_t<pragma::ai::BehaviorNode::Result> result) {}
 void AILuaBehaviorNodeWrapper::default_OnTaskComplete(lua_State *l, AILuaBehaviorNodeWrapper &wrapper, std::shared_ptr<pragma::ai::Schedule> &schedule, uint32_t taskId, std::underlying_type_t<pragma::ai::BehaviorNode::Result> result) {}
@@ -406,7 +408,7 @@ static void create_task(lua_State *l, pragma::ai::BehaviorNode &task, luabind::o
 	}
 	else {
 		auto taskId = Lua::CheckInt(l, aiTaskTypeParamOffset);
-		auto &taskManager = s_game->GetAITaskManager();
+		auto &taskManager = SGame::Get()->GetAITaskManager();
 		auto newTask = taskManager.CreateTask(static_cast<uint32_t>(taskId));
 
 		if(taskType != nullptr)
@@ -434,7 +436,7 @@ void Lua::AIBehaviorNode::CreateTask(lua_State *l, ai::TaskWrapper &task, luabin
 
 void Lua::AIBehaviorNode::CreateDecoratedTask(lua_State *l, ai::TaskWrapper &task, uint32_t decoratorType, luabind::object o, uint32_t taskType, uint32_t selectorType)
 {
-	auto &taskManager = s_game->GetAITaskManager();
+	auto &taskManager = SGame::Get()->GetAITaskManager();
 	auto newTask = taskManager.CreateTask(umath::to_integral(pragma::ai::Task::Decorator));
 	task->AddNode(newTask);
 	newTask->SetParameter(0, static_cast<int32_t>(decoratorType));
@@ -445,7 +447,7 @@ void Lua::AIBehaviorNode::CreateDecoratedTask(lua_State *l, ai::TaskWrapper &tas
 }
 void Lua::AIBehaviorNode::CreateDecoratedTask(lua_State *l, ai::TaskWrapper &task, uint32_t decoratorType, luabind::object o, uint32_t taskType)
 {
-	auto &taskManager = s_game->GetAITaskManager();
+	auto &taskManager = SGame::Get()->GetAITaskManager();
 	auto newTask = taskManager.CreateTask(umath::to_integral(pragma::ai::Task::Decorator));
 	task->AddNode(newTask);
 	newTask->SetParameter(0, static_cast<int32_t>(decoratorType));
@@ -455,7 +457,7 @@ void Lua::AIBehaviorNode::CreateDecoratedTask(lua_State *l, ai::TaskWrapper &tas
 }
 void Lua::AIBehaviorNode::CreateDecoratedTask(lua_State *l, ai::TaskWrapper &task, uint32_t decoratorType, luabind::object o)
 {
-	auto &taskManager = s_game->GetAITaskManager();
+	auto &taskManager = SGame::Get()->GetAITaskManager();
 	auto newTask = taskManager.CreateTask(umath::to_integral(pragma::ai::Task::Decorator));
 	task->AddNode(newTask);
 	newTask->SetParameter(0, static_cast<int32_t>(decoratorType));

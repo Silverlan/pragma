@@ -61,7 +61,6 @@
 	LINK_NETWORKED_ENTITY(SGameEntity, CGameEntity);
 
 #ifdef DLLSERVER_EX
-#include "pragma/entities/s_npc_dragonworm.h"
 
 import pragma.server.entities.components;
 

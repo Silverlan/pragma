@@ -1,9 +1,12 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
 #include "pragma/networking/iserver_client.hpp"
 #include "pragma/networking/recipient_filter.hpp"
+#include "pragma/input/inkeys.h"
 #include <pragma/entities/baseplayer.hpp>
 #include <pragma/networking/snapshot_flags.hpp>
 #include <pragma/entities/components/velocity_component.hpp>
@@ -14,12 +17,11 @@
 #include <pragma/networking/nwm_util.h>
 #include <pragma/networking/enums.hpp>
 
+module pragma.server.game;
+
 import pragma.server.entities;
 import pragma.server.entities.components;
-import pragma.server.game;
 import pragma.server.server_state;
-
-extern ServerState *server;
 
 void SGame::SendSnapshot(pragma::SPlayerComponent *pl)
 {
@@ -165,7 +167,7 @@ void SGame::SendSnapshot(pragma::SPlayerComponent *pl)
 		}
 	}
 	packet->Write<unsigned char>(numPlayersValid, &posNumPls);
-	server->SendPacket("snapshot", packet, pragma::networking::Protocol::FastUnreliable, *session);
+	ServerState::Get()->SendPacket("snapshot", packet, pragma::networking::Protocol::FastUnreliable, *session);
 }
 
 void SGame::SendSnapshot()

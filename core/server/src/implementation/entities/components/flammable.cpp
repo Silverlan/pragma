@@ -5,6 +5,9 @@ module;
 
 #include "stdafx_server.h"
 #include <pragma/networking/enums.hpp>
+#include "sharedutils/netpacket.hpp"
+#include "pragma/game/damagetype.h"
+#include "pragma/networking/recipient_filter.hpp"
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/components/damageable_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
@@ -19,8 +22,6 @@ import pragma.server.game;
 
 using namespace pragma;
 
-extern SGame *s_game;
-
 SFlammableComponent::IgniteInfo::IgniteInfo() : damageTimer() {}
 
 SFlammableComponent::IgniteInfo::~IgniteInfo() { Clear(); }
@@ -28,7 +29,7 @@ SFlammableComponent::IgniteInfo::~IgniteInfo() { Clear(); }
 void SFlammableComponent::IgniteInfo::Clear()
 {
 	if(damageTimer != nullptr && damageTimer->IsValid())
-		damageTimer->GetTimer()->Remove(s_game);
+		damageTimer->GetTimer()->Remove(SGame::Get());
 	hAttacker = EntityHandle {};
 	hInflictor = EntityHandle {};
 }
@@ -68,8 +69,8 @@ util::EventReply SFlammableComponent::Ignite(float duration, BaseEntity *attacke
 	if(IsOnFire() && m_igniteInfo.damageTimer != nullptr && m_igniteInfo.damageTimer->IsValid())
 		t = m_igniteInfo.damageTimer->GetTimer();
 	if(t == nullptr) {
-		t = s_game->CreateTimer(0.5f, reps, FunctionCallback<void>::Create([this]() { ApplyIgnitionDamage(); }));
-		t->Start(s_game);
+		t = SGame::Get()->CreateTimer(0.5f, reps, FunctionCallback<void>::Create([this]() { ApplyIgnitionDamage(); }));
+		t->Start(SGame::Get());
 	}
 	else if(reps > t->GetRepetitionsLeft())
 		t->SetRepetitions(reps);

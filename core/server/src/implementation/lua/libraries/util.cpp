@@ -18,9 +18,6 @@ module pragma.server.scripting.lua.libraries.util;
 import pragma.server.game;
 import pragma.server.server_state;
 
-extern ServerState *server;
-extern SGame *s_game;
-
 luabind::object Lua::util::Server::fire_bullets(lua_State *l, const BulletInfo &bulletInfo) { return fire_bullets(l, bulletInfo, false); }
 luabind::object Lua::util::Server::fire_bullets(lua_State *l, const BulletInfo &bulletInfo, bool hitReport)
 {
@@ -90,10 +87,10 @@ luabind::object Lua::util::Server::fire_bullets(lua_State *l, const BulletInfo &
 		packet->Write<Vector3>(n);
 		packet->Write<int32_t>(surfaceMaterial);
 	}
-	server->SendPacket("fire_bullet", packet, pragma::networking::Protocol::FastUnreliable);
+	ServerState::Get()->SendPacket("fire_bullet", packet, pragma::networking::Protocol::FastUnreliable);
 	return r;
 }
 
-void Lua::util::Server::create_giblet(lua_State *l, const GibletCreateInfo &gibletInfo) { s_game->CreateGiblet(gibletInfo); }
+void Lua::util::Server::create_giblet(lua_State *l, const GibletCreateInfo &gibletInfo) { SGame::Get()->CreateGiblet(gibletInfo); }
 
 void Lua::util::Server::create_explosion(lua_State *l, const ::util::SplashDamageInfo &splashDamageInfo) { Lua::util::splash_damage(l, splashDamageInfo); }

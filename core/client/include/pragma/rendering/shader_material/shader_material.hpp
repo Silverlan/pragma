@@ -6,6 +6,7 @@
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/rendering/shader_input_data.hpp"
+#include "pragma/util/global_string_table.hpp"
 #include <cmaterial.h>
 #include <udm.hpp>
 

@@ -6,31 +6,30 @@
 #include "pragma/lua/libraries/ltime.hpp"
 #include "pragma/util/util_duration_type.hpp"
 
-extern DLLNETWORK Engine *engine;
 double Lua::time::cur_time(lua_State *l)
 {
-	NetworkState *state = engine->GetNetworkState(l);
+	NetworkState *state = Engine::Get()->GetNetworkState(l);
 	Game *game = state->GetGameState();
 	return game->CurTime();
 }
 
 double Lua::time::real_time(lua_State *l)
 {
-	NetworkState *state = engine->GetNetworkState(l);
+	NetworkState *state = Engine::Get()->GetNetworkState(l);
 	Game *game = state->GetGameState();
 	return game->RealTime();
 }
 
 double Lua::time::delta_time(lua_State *l)
 {
-	NetworkState *state = engine->GetNetworkState(l);
+	NetworkState *state = Engine::Get()->GetNetworkState(l);
 	Game *game = state->GetGameState();
 	return game->DeltaTickTime();
 }
 
 uint64_t Lua::time::time_since_epoch(lua_State *l)
 {
-	NetworkState *state = engine->GetNetworkState(l);
+	NetworkState *state = Engine::Get()->GetNetworkState(l);
 	Game *game = state->GetGameState();
 	return std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
 }

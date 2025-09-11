@@ -76,7 +76,7 @@ template<typename TClass>
 spdlog::logger &pragma::BaseEntityComponent::get_logger() {
 	auto *engine = pragma::get_engine();
 
-	for (auto *state : {engine->GetClientState(), engine->GetServerNetworkState()}) {
+	for (auto *state : {Engine::Get()->GetClientState(), Engine::Get()->GetServerNetworkState()}) {
 		if (!state)
 			continue;
 		auto *game = state->GetGameState();

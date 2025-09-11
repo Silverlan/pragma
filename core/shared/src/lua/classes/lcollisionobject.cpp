@@ -12,8 +12,6 @@
 
 #include "pragma/lua/ostream_operator_alias.hpp"
 
-extern DLLNETWORK Engine *engine;
-
 namespace Lua {
 	namespace PhysCollisionObj {
 		static void IsValid(lua_State *l, pragma::physics::ICollisionObject *hPhys);

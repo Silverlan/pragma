@@ -13,8 +13,6 @@ import pragma.server.game;
 
 using namespace pragma;
 
-extern SGame *s_game;
-
 void ai::TaskDecorator::Initialize(const Schedule *sched)
 {
 	if(m_bInitialized == true)
@@ -43,7 +41,7 @@ void ai::TaskDecorator::OnParameterChanged(uint8_t paramId)
 	}
 }
 
-ai::BehaviorNode::Result ai::TaskDecorator::Start(const Schedule *sched, pragma::SAIComponent &ent)
+ai::BehaviorNode::Result ai::TaskDecorator::Start(const Schedule *sched, pragma::BaseAIComponent &ent)
 {
 	m_bRestartTaskOnThink = false;
 	Initialize(sched);
@@ -83,7 +81,7 @@ void ai::TaskDecorator::Stop()
 		m_count = 0;
 }
 
-ai::BehaviorNode::Result ai::TaskDecorator::Think(const Schedule *sched, pragma::SAIComponent &ent)
+ai::BehaviorNode::Result ai::TaskDecorator::Think(const Schedule *sched, pragma::BaseAIComponent &ent)
 {
 	if(m_bRestartTaskOnThink == true)
 		return Start(sched, ent);

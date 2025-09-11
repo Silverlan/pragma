@@ -5,6 +5,8 @@ module;
 
 #include "stdafx_server.h"
 #include <pragma/networking/nwm_util.h>
+#include "sharedutils/netpacket.hpp"
+#include "pragma/networking/recipient_filter.hpp"
 #include <pragma/networking/enums.hpp>
 #include "pragma/entities/baseentity_luaobject.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
@@ -29,7 +31,7 @@ void SParticleSystemComponent::SetContinuous(bool b)
 	NetPacket p;
 	nwm::write_entity(p, &GetEntity());
 	p->Write<bool>(b);
-	server->SendPacket("env_prtsys_setcontinuous", p, pragma::networking::Protocol::SlowReliable);
+	ServerState::Get()->SendPacket("env_prtsys_setcontinuous", p, pragma::networking::Protocol::SlowReliable);
 }
 
 void SParticleSystemComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }

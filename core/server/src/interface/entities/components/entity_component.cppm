@@ -4,15 +4,13 @@
 module;
 
 #include "pragma/serverdefinitions.h"
+#include "pragma/networking/recipient_filter.hpp"
 #include <pragma/entities/entity_component_manager.hpp>
 #include <sharedutils/netpacket.hpp>
 
 export module pragma.server.entities.components.entity;
 
 export namespace pragma {
-	namespace networking {
-		class ClientRecipientFilter;
-	};
 	class DLLSERVER SBaseNetComponent : public BaseNetComponent {
 	  public:
 		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) = 0;

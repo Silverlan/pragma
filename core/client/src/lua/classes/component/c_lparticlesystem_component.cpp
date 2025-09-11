@@ -551,13 +551,13 @@ void Lua::ParticleSystem::register_class(lua_State *l, luabind::module_ &entsMod
 
 			Lua::Pop(l, 1);
 		}
-		auto mdl = pragma::CParticleSystemComponent::GenerateModel(static_cast<CGame &>(*engine->GetNetworkState(l)->GetGameState()), particleSystems);
+		auto mdl = pragma::CParticleSystemComponent::GenerateModel(static_cast<CGame &>(*Engine::Get()->GetNetworkState(l)->GetGameState()), particleSystems);
 		if(mdl == nullptr)
 			return;
 		Lua::Push(l, mdl);
 	}))];
 	defCParticleSystem.scope[luabind::def("read_header_data", static_cast<void (*)(lua_State *, const std::string &)>([](lua_State *l, const std::string &name) {
-		auto fileHeader = pragma::CParticleSystemComponent::ReadHeader(*engine->GetNetworkState(l), name);
+		auto fileHeader = pragma::CParticleSystemComponent::ReadHeader(*Engine::Get()->GetNetworkState(l), name);
 		if(fileHeader.has_value() == false)
 			return;
 		auto t = Lua::CreateTable(l);

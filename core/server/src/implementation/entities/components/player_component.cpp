@@ -12,6 +12,11 @@ module;
 #include <pragma/networking/error.hpp>
 #include <pragma/util/util_handled.hpp>
 #include <pragma/model/model.h>
+#include "sharedutils/netpacket.hpp"
+#include "pragma/input/inkeys.h"
+#include "pragma/emessage.h"
+#include "pragma/entities/observermode.h"
+#include "pragma/networking/recipient_filter.hpp"
 #include <pragma/entities/components/base_animated_component.hpp>
 #include <pragma/entities/components/base_character_component.hpp>
 #include <pragma/entities/components/base_physics_component.hpp>
@@ -29,6 +34,7 @@ module pragma.server.entities.components.player;
 import pragma.entities.components;
 import pragma.server.entities;
 import pragma.server.entities.components;
+import pragma.server.game;
 import pragma.server.server_state;
 
 using namespace pragma;
@@ -87,7 +93,7 @@ bool SPlayerComponent::SendResource(const std::string &fileName) const
 	if(m_session.expired())
 		return false;
 	auto r = m_session->AddResource(fileName);
-	server->InitResourceTransfer(*m_session);
+	ServerState::Get()->InitResourceTransfer(*m_session);
 	return r;
 }
 
@@ -173,7 +179,7 @@ void SPlayerComponent::Kick(const std::string &)
 {
 	auto *session = GetClientSession();
 	if(session != nullptr)
-		server->DropClient(*session, pragma::networking::DropReason::Kicked);
+		ServerState::Get()->DropClient(*session, pragma::networking::DropReason::Kicked);
 	else {
 		auto &ent = static_cast<SBaseEntity &>(GetEntity());
 		ent.RemoveSafely();
@@ -193,7 +199,7 @@ void SPlayerComponent::OnEntitySpawn()
 
 void SPlayerComponent::InitializeFlashlight()
 {
-	SGame *game = server->GetGameState();
+	SGame *game = ServerState::Get()->GetGameState();
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	auto charComponent = ent.GetCharacterComponent();
 	auto pTrComponent = ent.GetTransformComponent();
@@ -265,8 +271,8 @@ void SPlayerComponent::Initialize()
 	BasePlayerComponent::Initialize();
 
 	BindEventUnhandled(DamageableComponent::EVENT_ON_TAKE_DAMAGE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnTakeDamage(static_cast<CEOnTakeDamage &>(evData.get()).damageInfo); });
-	BindEventUnhandled(BaseScoreComponent::EVENT_ON_SCORE_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { server->UpdatePlayerScore(*this, static_cast<CEOnScoreChanged &>(evData.get()).score); });
-	BindEventUnhandled(BaseNameComponent::EVENT_ON_NAME_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { server->UpdatePlayerName(*this, static_cast<CEOnNameChanged &>(evData.get()).name); });
+	BindEventUnhandled(BaseScoreComponent::EVENT_ON_SCORE_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { ServerState::Get()->UpdatePlayerScore(*this, static_cast<CEOnScoreChanged &>(evData.get()).score); });
+	BindEventUnhandled(BaseNameComponent::EVENT_ON_NAME_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { ServerState::Get()->UpdatePlayerName(*this, static_cast<CEOnNameChanged &>(evData.get()).name); });
 }
 
 void SPlayerComponent::OnSetSlopeLimit(float limit)
@@ -276,7 +282,7 @@ void SPlayerComponent::OnSetSlopeLimit(float limit)
 		NetPacket p;
 		nwm::write_entity(p, &ent);
 		p->Write<float>(limit);
-		server->SendPacket("pl_slopelimit", p, pragma::networking::Protocol::SlowReliable);
+		ServerState::Get()->SendPacket("pl_slopelimit", p, pragma::networking::Protocol::SlowReliable);
 	}
 }
 void SPlayerComponent::OnSetStepOffset(float offset)
@@ -286,7 +292,7 @@ void SPlayerComponent::OnSetStepOffset(float offset)
 		NetPacket p;
 		nwm::write_entity(p, &ent);
 		p->Write<float>(offset);
-		server->SendPacket("pl_stepoffset", p, pragma::networking::Protocol::SlowReliable);
+		ServerState::Get()->SendPacket("pl_stepoffset", p, pragma::networking::Protocol::SlowReliable);
 	}
 }
 
@@ -335,7 +341,7 @@ void SPlayerComponent::SetWalkSpeed(float speed)
 		NetPacket p;
 		nwm::write_entity(p, &ent);
 		p->Write<float>(speed);
-		server->SendPacket("pl_speed_walk", p, pragma::networking::Protocol::SlowReliable);
+		ServerState::Get()->SendPacket("pl_speed_walk", p, pragma::networking::Protocol::SlowReliable);
 	}
 }
 
@@ -347,7 +353,7 @@ void SPlayerComponent::SetRunSpeed(float speed)
 		NetPacket p;
 		nwm::write_entity(p, &ent);
 		p->Write<float>(speed);
-		server->SendPacket("pl_speed_run", p, pragma::networking::Protocol::SlowReliable);
+		ServerState::Get()->SendPacket("pl_speed_run", p, pragma::networking::Protocol::SlowReliable);
 	}
 }
 
@@ -359,7 +365,7 @@ void SPlayerComponent::SetCrouchedWalkSpeed(float speed)
 		NetPacket p;
 		nwm::write_entity(p, &ent);
 		p->Write<float>(speed);
-		server->SendPacket("pl_speed_crouch_walk", p, pragma::networking::Protocol::SlowReliable);
+		ServerState::Get()->SendPacket("pl_speed_crouch_walk", p, pragma::networking::Protocol::SlowReliable);
 	}
 }
 
@@ -371,7 +377,7 @@ void SPlayerComponent::SetStandHeight(float height)
 		NetPacket p;
 		nwm::write_entity(p, &ent);
 		p->Write<float>(height);
-		server->SendPacket("pl_height_stand", p, pragma::networking::Protocol::SlowReliable);
+		ServerState::Get()->SendPacket("pl_height_stand", p, pragma::networking::Protocol::SlowReliable);
 	}
 }
 void SPlayerComponent::SetCrouchHeight(float height)
@@ -382,7 +388,7 @@ void SPlayerComponent::SetCrouchHeight(float height)
 		NetPacket p;
 		nwm::write_entity(p, &ent);
 		p->Write<float>(height);
-		server->SendPacket("pl_height_crouch", p, pragma::networking::Protocol::SlowReliable);
+		ServerState::Get()->SendPacket("pl_height_crouch", p, pragma::networking::Protocol::SlowReliable);
 	}
 }
 void SPlayerComponent::SetStandEyeLevel(float eyelevel)
@@ -393,7 +399,7 @@ void SPlayerComponent::SetStandEyeLevel(float eyelevel)
 		NetPacket p;
 		nwm::write_entity(p, &ent);
 		p->Write<float>(eyelevel);
-		server->SendPacket("pl_eyelevel_stand", p, pragma::networking::Protocol::SlowReliable);
+		ServerState::Get()->SendPacket("pl_eyelevel_stand", p, pragma::networking::Protocol::SlowReliable);
 	}
 }
 void SPlayerComponent::SetCrouchEyeLevel(float eyelevel)
@@ -404,7 +410,7 @@ void SPlayerComponent::SetCrouchEyeLevel(float eyelevel)
 		NetPacket p;
 		nwm::write_entity(p, &ent);
 		p->Write<float>(eyelevel);
-		server->SendPacket("pl_eyelevel_crouch", p, pragma::networking::Protocol::SlowReliable);
+		ServerState::Get()->SendPacket("pl_eyelevel_crouch", p, pragma::networking::Protocol::SlowReliable);
 	}
 }
 
@@ -423,7 +429,7 @@ void SPlayerComponent::SetSprintSpeed(float speed)
 		NetPacket p;
 		nwm::write_entity(p, &ent);
 		p->Write<float>(speed);
-		server->SendPacket("pl_speed_sprint", p, pragma::networking::Protocol::SlowReliable);
+		ServerState::Get()->SendPacket("pl_speed_sprint", p, pragma::networking::Protocol::SlowReliable);
 	}
 }
 void SPlayerComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const { outTypeIndex = std::type_index(typeid(BasePlayerComponent)); }

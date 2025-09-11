@@ -7,6 +7,7 @@ module;
 #include <pragma/physics/raytraces.h>
 #include <pragma/entities/components/base_character_component.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
+#include "pragma/ai/ai_memory.h"
 
 module pragma.server.entities.components.ai;
 
@@ -37,7 +38,7 @@ bool SAIComponent::IsInViewCone(BaseEntity *ent, float *dist)
 		if(d <= m_maxViewDist) {
 			auto data = charComponent->GetAimTraceData();
 			data.SetTarget(posEnt);
-			auto res = s_game->RayCast(data);
+			auto res = SGame::Get()->RayCast(data);
 			if(res.hitType == RayCastHitType::None || res.entity.get() == ent)
 				return true;
 		}
@@ -76,8 +77,8 @@ void SAIComponent::Listen(std::vector<TargetInfo> &targets)
 		return;
 	auto hearingIntensity = 1.f - umath::clamp(GetHearingStrength(), 0.f, 1.f);
 	auto &pos = pTrComponent->GetPosition();
-	auto &sounds = server->GetSounds();
-	auto &t = s_game->CurTime();
+	auto &sounds = ServerState::Get()->GetSounds();
+	auto &t = SGame::Get()->CurTime();
 	for(auto &rsnd : sounds) {
 		auto &snd = rsnd.get();
 		if(snd.IsPlaying() == false || snd.IsRelative() == true)
@@ -97,7 +98,7 @@ void SAIComponent::Listen(std::vector<TargetInfo> &targets)
 					}
 				}
 				else if(fragment != nullptr) {
-					fragment->lastHeared = static_cast<float>(s_game->CurTime());
+					fragment->lastHeared = static_cast<float>(SGame::Get()->CurTime());
 					if(fragment->visible == false) // Don't bother updating if we can see the target.
 					{
 						auto bUpdatePos = ((t - fragment->lastSeen) >= AI_LISTEN_VISIBILITY_THRESHOLD) ? true : false; // We haven't seen the target in a while?

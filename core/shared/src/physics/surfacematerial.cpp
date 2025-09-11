@@ -15,8 +15,6 @@
 #include <algorithm>
 #include <udm.hpp>
 
-extern DLLNETWORK Engine *engine;
-
 SurfaceMaterialManager::SurfaceMaterialManager(pragma::physics::IEnvironment &env) : m_physEnv {env}
 {
 	auto &genericPhysMat = env.GetGenericMaterial();

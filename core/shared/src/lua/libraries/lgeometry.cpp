@@ -9,6 +9,7 @@
 #include <pragma/math/intersection.h>
 #include "luasystem.h"
 #include "pragma/math/math_seb.h"
+#include "pragma/model/modelmesh.h"
 #include "pragma/math/util_triangulate.hpp"
 #include <clip2tri/clip2tri.h>
 //#include <Pinocchio.h>
@@ -242,9 +243,6 @@ def splitViaDelaunay(points, maxLength):
         splitViaDelaunay(points, maxLength)
 		*/
 }
-
-#include "pragma/model/modelmesh.h"
-extern DLLNETWORK Engine *engine;
 
 /*#include "vhcl.h"
 #include <sb/SBScene.h>

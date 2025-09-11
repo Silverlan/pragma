@@ -13,9 +13,6 @@ import pragma.server.entities;
 import pragma.server.game;
 import pragma.server.server_state;
 
-extern ServerState *server;
-extern SGame *s_game;
-
 ResourceManager::ResourceInfo::ResourceInfo(const std::string &_fileName, bool _stream) : fileName(_fileName), stream(_stream) {}
 
 decltype(ResourceManager::m_resources) ResourceManager::m_resources;
@@ -46,7 +43,7 @@ const ResourceManager::ResourceInfo *ResourceManager::FindResource(const std::st
 
 bool ResourceManager::AddResource(std::string res, bool stream)
 {
-	if(server->IsSinglePlayer())
+	if(ServerState::Get()->IsSinglePlayer())
 		return false; // We don't need resources in SinglePlayer
 	res = FileManager::GetCanonicalizedPath(res);
 	auto checkName = res;
@@ -75,7 +72,7 @@ bool ResourceManager::AddResource(std::string res, bool stream)
 	m_resources.push_back({res, stream});
 
 	// Send resource to all connected clients
-	server->SendResourceFile(res);
+	ServerState::Get()->SendResourceFile(res);
 	//
 	return true;
 }

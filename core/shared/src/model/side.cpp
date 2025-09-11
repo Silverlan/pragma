@@ -9,7 +9,6 @@
 #include <pragma/math/intersection.h>
 
 const double EPSILON = 4.9406564584125e-2;
-extern DLLNETWORK Engine *engine;
 
 Side::Side() { m_triangles.push_back({}); }
 void Side::Update()

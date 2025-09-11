@@ -6,6 +6,8 @@ module;
 #include "stdafx_server.h"
 #include <pragma/physics/physobj.h>
 #include <sharedutils/util_string.h>
+#include "sharedutils/netpacket.hpp"
+#include "pragma/networking/recipient_filter.hpp"
 #include <sharedutils/util.h>
 #include <pragma/entities/baseentity_events.hpp>
 #include <pragma/util/util_handled.hpp>
@@ -53,7 +55,7 @@ void STriggerGravityComponent::OnResetGravity(BaseEntity *ent, GravitySettings &
 	p->Write<Vector3>((settings.dir != nullptr) ? *settings.dir : Vector3 {});
 	p->Write<float>((settings.force != nullptr) ? *settings.force : 0.f);
 	p->Write<Vector3>((settings.dirMove != nullptr) ? *settings.dirMove : Vector3 {});
-	server->SendPacket("ent_trigger_gravity_onstarttouch", p, pragma::networking::Protocol::SlowReliable);
+	ServerState::Get()->SendPacket("ent_trigger_gravity_onstarttouch", p, pragma::networking::Protocol::SlowReliable);
 }
 
 void STriggerGravityComponent::OnStartTouch(BaseEntity *ent)
@@ -69,7 +71,7 @@ void STriggerGravityComponent::OnStartTouch(BaseEntity *ent)
 	p->Write<uint32_t>(entThis.GetSpawnFlags());
 	p->Write<Vector3>(m_kvGravityDir);
 	p->Write<float>(m_kvGravityForce);
-	server->SendPacket("ent_trigger_gravity_onstarttouch", p, pragma::networking::Protocol::SlowReliable);
+	ServerState::Get()->SendPacket("ent_trigger_gravity_onstarttouch", p, pragma::networking::Protocol::SlowReliable);
 }
 
 ////////////

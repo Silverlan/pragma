@@ -16,7 +16,7 @@ import pragma.server.entities.components;
 
 using namespace pragma;
 
-ai::BehaviorNode::Result ai::TaskDebugPrint::Start(const Schedule *sched, pragma::SAIComponent &ent)
+ai::BehaviorNode::Result ai::TaskDebugPrint::Start(const Schedule *sched, pragma::BaseAIComponent &ent)
 {
 	BehaviorNode::Start(sched, ent);
 	std::string msg;
@@ -42,7 +42,7 @@ void ai::TaskDebugPrint::Print(const Schedule *sched, std::ostream &o) const
 
 ////////////////////
 
-ai::BehaviorNode::Result ai::TaskDebugDrawText::Start(const Schedule *sched, pragma::SAIComponent &aiComponent)
+ai::BehaviorNode::Result ai::TaskDebugDrawText::Start(const Schedule *sched, pragma::BaseAIComponent &aiComponent)
 {
 	BehaviorNode::Start(sched, aiComponent);
 	std::string msg;

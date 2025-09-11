@@ -20,6 +20,7 @@ export module pragma.server.game;
 
 import pragma.server.core.cache_info;
 import pragma.server.entities;
+import pragma.server.entities.components;
 
 #pragma warning(push)
 #pragma warning(disable : 4251)
@@ -79,6 +80,7 @@ export class DLLSERVER SGame : public Game {
 	virtual void Think() override;
 	virtual void Tick() override;
 	virtual void Initialize() override;
+	static SGame *Get();
 	SGame(NetworkState *state);
 	virtual ~SGame() override;
 	virtual void OnRemove() override;
@@ -179,58 +181,56 @@ export class DLLSERVER SGame : public Game {
 };
 #pragma warning(pop)
 
-export {
-    template<class T>
-    T *SGame::CreateEntity(unsigned int idx)
-    {
-        if(umath::is_flag_set(m_flags, GameFlags::ClosingGame))
-            return nullptr;
-        T *ent = new T();
-        SetupEntity(ent, idx);
-        return ent;
-    }
+template<class T>
+T *SGame::CreateEntity(unsigned int idx)
+{
+    if(umath::is_flag_set(m_flags, GameFlags::ClosingGame))
+        return nullptr;
+    T *ent = new T();
+    SetupEntity(ent, idx);
+    return ent;
+}
 
-    template<class T>
-    T *SGame::CreateEntity()
-    {
-        if(umath::is_flag_set(m_flags, GameFlags::ClosingGame))
-            return nullptr;
-        return CreateEntity<T>(GetFreeEntityIndex());
-    }
+template<class T>
+T *SGame::CreateEntity()
+{
+    if(umath::is_flag_set(m_flags, GameFlags::ClosingGame))
+        return nullptr;
+    return CreateEntity<T>(GetFreeEntityIndex());
+}
 
-    template<class T>
-    void SGame::GetPlayers(std::vector<T *> *ents)
-    {
-        auto &players = pragma::SPlayerComponent::GetAll();
-        ents->reserve(ents->size() + players.size());
-        for(auto *pl : players)
-            ents->push_back(static_cast<T *>(&pl->GetEntity()));
-    }
+template<class T>
+void SGame::GetPlayers(std::vector<T *> *ents)
+{
+    auto &players = pragma::SPlayerComponent::GetAll();
+    ents->reserve(ents->size() + players.size());
+    for(auto *pl : players)
+        ents->push_back(static_cast<T *>(&pl->GetEntity()));
+}
 
-    template<class T>
-    void SGame::GetNPCs(std::vector<T *> *ents)
-    {
-        auto &npcs = pragma::SPlayerComponent::GetAll();
-        ents->reserve(ents->size() + npcs.size());
-        for(auto *npc : npcs)
-            ents->push_back(static_cast<T *>(&npc->GetEntity()));
-    }
+template<class T>
+void SGame::GetNPCs(std::vector<T *> *ents)
+{
+    auto &npcs = pragma::SPlayerComponent::GetAll();
+    ents->reserve(ents->size() + npcs.size());
+    for(auto *npc : npcs)
+        ents->push_back(static_cast<T *>(&npc->GetEntity()));
+}
 
-    template<class T>
-    void SGame::GetWeapons(std::vector<T *> *ents)
-    {
-        auto &weapons = pragma::SPlayerComponent::GetAll();
-        ents->reserve(ents->size() + weapons.size());
-        for(auto *wep : weapons)
-            ents->push_back(static_cast<T *>(&wep->GetEntity()));
-    }
+template<class T>
+void SGame::GetWeapons(std::vector<T *> *ents)
+{
+    auto &weapons = pragma::SPlayerComponent::GetAll();
+    ents->reserve(ents->size() + weapons.size());
+    for(auto *wep : weapons)
+        ents->push_back(static_cast<T *>(&wep->GetEntity()));
+}
 
-    template<class T>
-    void SGame::GetVehicles(std::vector<T *> *ents)
-    {
-        auto &vehicles = pragma::SPlayerComponent::GetAll();
-        ents->reserve(ents->size() + vehicles.size());
-        for(auto *vhc : vehicles)
-            ents->push_back(static_cast<T *>(&vhc->GetEntity()));
-    }
+template<class T>
+void SGame::GetVehicles(std::vector<T *> *ents)
+{
+    auto &vehicles = pragma::SPlayerComponent::GetAll();
+    ents->reserve(ents->size() + vehicles.size());
+    for(auto *vhc : vehicles)
+        ents->push_back(static_cast<T *>(&vhc->GetEntity()));
 }

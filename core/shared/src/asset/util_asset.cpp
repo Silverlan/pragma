@@ -12,8 +12,6 @@
 #include <fsys/ifile.hpp>
 #include <udm.hpp>
 
-extern DLLNETWORK Engine *engine;
-
 bool pragma::asset::exists(const std::string &name, Type type) { return find_file(name, type).has_value(); }
 std::optional<std::string> pragma::asset::determine_format_from_data(ufile::IFile &f, Type type)
 {
@@ -205,9 +203,9 @@ void pragma::asset::update_extension_cache(Type type)
 		}
 	}
 
-	auto *nw = engine->GetClientState();
+	auto *nw = Engine::Get()->GetClientState();
 	if(!nw)
-		nw = engine->GetServerNetworkState();
+		nw = Engine::Get()->GetServerNetworkState();
 	if(!nw)
 		return;
 
@@ -307,8 +305,8 @@ std::optional<std::string> pragma::asset::find_file(const std::string &name, Typ
 		}
 	case Type::Material:
 		{
-			auto *sv = engine->GetServerNetworkState();
-			auto *cl = engine->GetClientState();
+			auto *sv = Engine::Get()->GetServerNetworkState();
+			auto *cl = Engine::Get()->GetClientState();
 			auto *nw = sv ? sv : cl; // Doesn't matter which one
 			return nw ? nw->GetMaterialManager().FindAssetFilePath(name) : std::optional<std::string> {};
 		}

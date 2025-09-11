@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
 #include "pragma/lua/classes/lentity.h"
 #include "pragma/lua/classes/lmodelmesh.h"
@@ -28,9 +30,9 @@
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
-import pragma.server.game;
+module pragma.server.game;
+
 import pragma.server.scripting.lua;
-import pragma.server.server_state;
 
 void SGame::RegisterLuaClasses()
 {

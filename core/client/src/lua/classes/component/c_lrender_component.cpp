@@ -6,6 +6,7 @@
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/model/c_modelmesh.h"
+#include <pragma/lua/classes/lproperty.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/lua/converters/optional_converter_t.hpp>
 #include <pragma/lua/lua_util_component.hpp>

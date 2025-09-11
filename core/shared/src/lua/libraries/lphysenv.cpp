@@ -36,8 +36,6 @@
 
 #include <luabind/detail/type_traits.hpp>
 
-extern DLLNETWORK Engine *engine;
-
 // #define ENABLE_DEPRECATED_PHYSICS
 
 namespace Lua {
@@ -491,7 +489,7 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	classTreeIkTree.scope[luabind::def("Create", static_cast<std::shared_ptr<Tree> (*)(lua_State *)>([](lua_State *l) { return std::make_shared<Tree>(); }))];
 #ifdef ENABLE_DEPRECATED_PHYSICS
 	classTreeIkTree.def("Draw", static_cast<void (*)(lua_State *, Tree &)>([](lua_State *l, Tree &tree) {
-		auto *game = engine->GetNetworkState(l)->GetGameState();
+		auto *game = Engine::Get()->GetNetworkState(l)->GetGameState();
 		auto fGetLocalTransform = [](const Node *node, btTransform &act) {
 			btVector3 axis = btVector3(node->v.x, node->v.y, node->v.z);
 			btQuaternion rot(0, 0, 0, 1);
@@ -1019,7 +1017,7 @@ luabind::tableT<SurfaceMaterial> Lua::physenv::get_surface_materials(lua_State *
 void Lua::physenv::create_character_controller(lua_State *)
 {
 	/*
-	NetworkState *state = engine->GetNetworkState(l);
+	NetworkState *state = Engine::Get()->GetNetworkState(l);
 	Game *game = state->GetGameState();
 	btTransform startTransform;
 	startTransform.setIdentity();

@@ -4,6 +4,7 @@
 module;
 
 #include "pragma/serverdefinitions.h"
+#include "pragma/networking/recipient_filter.hpp"
 #include <pragma/lua/sh_lua_component.hpp>
 #include <pragma/lua/handle_holder.hpp>
 

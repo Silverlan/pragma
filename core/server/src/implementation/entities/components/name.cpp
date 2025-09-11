@@ -7,6 +7,8 @@ module;
 #include <sharedutils/netpacket.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/networking/nwm_util.h>
+#include "sharedutils/netpacket.hpp"
+#include "pragma/networking/recipient_filter.hpp"
 #include <pragma/networking/enums.hpp>
 
 module pragma.server.entities.components.name;
@@ -26,6 +28,6 @@ void SNameComponent::SetName(std::string name)
 	NetPacket p;
 	nwm::write_entity(p, &ent);
 	p->WriteString(name);
-	server->SendPacket("ent_setname", p, pragma::networking::Protocol::SlowReliable);
+	ServerState::Get()->SendPacket("ent_setname", p, pragma::networking::Protocol::SlowReliable);
 }
 void SNameComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }

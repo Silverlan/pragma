@@ -10,7 +10,11 @@ module;
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <servermanager/interface/sv_nwm_manager.hpp>
+#include "pragma/entities/components/base_physics_component.hpp"
 #include <pragma/networking/nwm_util.h>
+#include "sharedutils/netpacket.hpp"
+#include "pragma/physics/movetypes.h"
+#include "pragma/networking/recipient_filter.hpp"
 #include <pragma/networking/enums.hpp>
 
 module pragma.server.entities.components.physics;
@@ -39,7 +43,7 @@ void SPhysicsComponent::SetKinematic(bool b)
 		NetPacket p;
 		nwm::write_entity(p, &ent);
 		p->Write<bool>(b);
-		server->SendPacket("ent_setkinematic", p, pragma::networking::Protocol::SlowReliable);
+		ServerState::Get()->SendPacket("ent_setkinematic", p, pragma::networking::Protocol::SlowReliable);
 	}
 }
 
@@ -52,7 +56,7 @@ void SPhysicsComponent::SetMoveType(MOVETYPE movetype)
 	NetPacket p;
 	nwm::write_entity(p, &ent);
 	p->Write<unsigned char>(static_cast<unsigned char>(movetype));
-	server->SendPacket("ent_movetype", p, pragma::networking::Protocol::SlowReliable);
+	ServerState::Get()->SendPacket("ent_movetype", p, pragma::networking::Protocol::SlowReliable);
 }
 void SPhysicsComponent::OnPhysicsInitialized()
 {
@@ -62,7 +66,7 @@ void SPhysicsComponent::OnPhysicsInitialized()
 		NetPacket p;
 		nwm::write_entity(p, &ent);
 		p->Write<unsigned int>(static_cast<unsigned int>(m_physicsType));
-		server->SendPacket("ent_phys_init", p, pragma::networking::Protocol::SlowReliable);
+		ServerState::Get()->SendPacket("ent_phys_init", p, pragma::networking::Protocol::SlowReliable);
 	}
 }
 void SPhysicsComponent::OnPhysicsDestroyed()
@@ -72,7 +76,7 @@ void SPhysicsComponent::OnPhysicsDestroyed()
 	if(ent.IsShared()) {
 		NetPacket p;
 		nwm::write_entity(p, &ent);
-		server->SendPacket("ent_phys_destroy", p, pragma::networking::Protocol::SlowReliable);
+		ServerState::Get()->SendPacket("ent_phys_destroy", p, pragma::networking::Protocol::SlowReliable);
 	}
 }
 void SPhysicsComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const { outTypeIndex = std::type_index(typeid(BasePhysicsComponent)); }
@@ -105,7 +109,7 @@ void SPhysicsComponent::SetCollisionType(COLLISIONTYPE collisiontype)
 	NetPacket p;
 	nwm::write_entity(p, &ent);
 	p->Write<unsigned char>(static_cast<unsigned char>(collisiontype));
-	server->SendPacket("ent_collisiontype", p, pragma::networking::Protocol::SlowReliable);
+	ServerState::Get()->SendPacket("ent_collisiontype", p, pragma::networking::Protocol::SlowReliable);
 }
 
 void SPhysicsComponent::SetCollisionFilter(CollisionMask filterGroup, CollisionMask filterMask)
@@ -117,7 +121,7 @@ void SPhysicsComponent::SetCollisionFilter(CollisionMask filterGroup, CollisionM
 		nwm::write_entity(p, &ent);
 		p->Write<unsigned int>(static_cast<unsigned int>(filterGroup));
 		p->Write<unsigned int>(static_cast<unsigned int>(filterMask));
-		server->SendPacket("ent_setcollisionfilter", p, pragma::networking::Protocol::SlowReliable);
+		ServerState::Get()->SendPacket("ent_setcollisionfilter", p, pragma::networking::Protocol::SlowReliable);
 	}
 }
 

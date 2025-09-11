@@ -8,6 +8,7 @@ module;
 #include <pragma/entities/environment/env_decal.h>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <sharedutils/netpacket.hpp>
+#include "pragma/networking/recipient_filter.hpp"
 
 module pragma.server.entities.components.decal;
 

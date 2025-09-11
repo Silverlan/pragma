@@ -3,6 +3,7 @@
 
 #include "stdafx_client.h"
 #include "pragma/entities/components/c_entity_character_component_model.hpp"
+#include "pragma/entities/components/base_entity_component.hpp"
 #include "pragma/entities/c_baseentity.h"
 
 using namespace pragma;

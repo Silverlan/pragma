@@ -12,8 +12,6 @@
 #include <pragma/lua/luaapi.h>
 #include <luabind/copy_policy.hpp>
 
-extern DLLNETWORK Engine *engine;
-
 void Lua::CollisionMesh::register_class(luabind::class_<::CollisionMesh> &classDef)
 {
 	classDef.def(luabind::tostring(luabind::self));
@@ -85,13 +83,13 @@ void Lua::CollisionMesh::register_class(luabind::class_<::CollisionMesh> &classD
 	classDef.add_static_constant("FSOFTBODY_ANCHOR_RIGID", umath::to_integral(::CollisionMesh::SoftBodyAnchor::Flags::Rigid));
 	classDef.add_static_constant("FSOFTBODY_ANCHOR_DISABLE_COLLISIONS", umath::to_integral(::CollisionMesh::SoftBodyAnchor::Flags::DisableCollisions));
 }
-std::shared_ptr<::CollisionMesh> Lua::CollisionMesh::Create(lua_State *l) { return ::CollisionMesh::Create(engine->GetNetworkState(l)->GetGameState()); }
+std::shared_ptr<::CollisionMesh> Lua::CollisionMesh::Create(lua_State *l) { return ::CollisionMesh::Create(Engine::Get()->GetNetworkState(l)->GetGameState()); }
 std::shared_ptr<::CollisionMesh> Lua::CollisionMesh::CreateBox(lua_State *l, const Vector3 &cmin, const Vector3 &cmax)
 {
 	auto min = cmin;
 	auto max = cmax;
 	uvec::to_min_max(min, max);
-	auto mesh = ::CollisionMesh::Create(engine->GetNetworkState(l)->GetGameState());
+	auto mesh = ::CollisionMesh::Create(Engine::Get()->GetNetworkState(l)->GetGameState());
 	mesh->AddVertex(min);
 	mesh->AddVertex(Vector3(max.x, min.y, min.z));
 	mesh->AddVertex(Vector3(max.x, min.y, max.z));

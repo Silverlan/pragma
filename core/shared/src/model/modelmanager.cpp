@@ -12,8 +12,6 @@
 #include <fsys/ifile.hpp>
 #include <pragma/debug/intel_vtune.hpp>
 
-extern DLLNETWORK Engine *engine;
-
 pragma::asset::IModelFormatHandler::IModelFormatHandler(util::IAssetManager &assetManager) : util::IAssetFormatHandler {assetManager} {}
 bool pragma::asset::IModelFormatHandler::LoadData(ModelProcessor &processor, ModelLoadInfo &info)
 {
@@ -113,7 +111,7 @@ static const std::vector<std::string> &get_model_extensions()
 	static std::vector<std::string> extensions {};
 	if(extensions.empty()) {
 		extensions = pragma::asset::get_supported_extensions(pragma::asset::Type::Model, pragma::asset::FormatType::All);
-		auto &assetManager = engine->GetAssetManager();
+		auto &assetManager = Engine::Get()->GetAssetManager();
 		auto numImporters = assetManager.GetImporterCount(pragma::asset::Type::Model);
 		for(auto i = decltype(numImporters) {0u}; i < numImporters; ++i) {
 			auto *importerInfo = assetManager.GetImporterInfo(pragma::asset::Type::Model, i);

@@ -1,12 +1,16 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
 #include "pragma/lua/s_lentity_components.hpp"
+#include "pragma/lua/classes/entity_components.hpp"
 #include "pragma/networking/recipient_filter.hpp"
 #include "pragma/entities/components/base_color_component.hpp"
 #include "pragma/entities/components/base_child_component.hpp"
 #include "pragma/entities/components/base_debug_component.hpp"
+#include "pragma/entities/components/base_game_component.hpp"
 #include "pragma/entities/components/base_flammable_component.hpp"
 #include "pragma/entities/components/base_networked_component.hpp"
 #include "pragma/entities/components/base_observer_component.hpp"
@@ -14,6 +18,7 @@
 #include "pragma/entities/components/base_score_component.hpp"
 #include "pragma/entities/components/base_radius_component.hpp"
 #include "pragma/entities/components/base_render_component.hpp"
+#include "pragma/entities/components/base_gamemode_component.hpp"
 #include "pragma/entities/basebot.h"
 #include "pragma/entities/environment/lights/env_light.h"
 #include "pragma/entities/environment/lights/env_light_spot.h"
@@ -67,10 +72,11 @@
 
 #include <pragma/lua/ostream_operator_alias.hpp>
 
+module pragma.server.game;
+
 import pragma.entities.components;
 import pragma.server.entities;
 import pragma.server.entities.components;
-import pragma.server.game;
 
 void SGame::RegisterLuaEntityComponent(luabind::class_<pragma::BaseEntityComponent> &def)
 {
@@ -78,9 +84,6 @@ void SGame::RegisterLuaEntityComponent(luabind::class_<pragma::BaseEntityCompone
 	// TODO: Remove this function
 }
 void RegisterLuaEntityComponents2_sv(lua_State *l, luabind::module_ &entsMod);
-namespace Lua::SoundEmitter {
-	DLLNETWORK luabind::class_<pragma::BaseSoundEmitterComponent::SoundInfo> RegisterSoundInfo();
-};
 
 #ifdef __linux__
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, BaseEntityComponent);

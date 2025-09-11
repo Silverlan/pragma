@@ -6,8 +6,11 @@ module;
 #include "stdafx_server.h"
 #include "pragma/entities/baseentity_luaobject.h"
 #include "pragma/entities/shared_spawnflags.h"
+#include "pragma/entities/environment/lights/env_light.h"
 #include <sharedutils/util_string.h>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
+#include "sharedutils/netpacket.hpp"
+#include "pragma/networking/recipient_filter.hpp"
 #include <pragma/networking/nwm_util.h>
 #include <pragma/networking/enums.hpp>
 

@@ -15,8 +15,6 @@
 import pragma.uva;
 import pragma.pad;
 
-extern DLLNETWORK Engine *engine;
-
 decltype(AddonSystem::m_addons) AddonSystem::m_addons;
 decltype(AddonSystem::m_addonWatcher) AddonSystem::m_addonWatcher = nullptr;
 
@@ -34,10 +32,10 @@ pragma::pad::PADPackage *AddonSystem::LoadPADPackage(const std::string &path)
 static void update_package_paths()
 {
 
-	auto *sv = engine->GetServerNetworkState();
+	auto *sv = Engine::Get()->GetServerNetworkState();
 	if(sv != nullptr && sv->IsGameActive())
 		sv->GetGameState()->UpdatePackagePaths();
-	auto *cl = engine->GetClientState();
+	auto *cl = Engine::Get()->GetClientState();
 	if(cl != nullptr && cl->IsGameActive())
 		cl->GetGameState()->UpdatePackagePaths();
 }
@@ -45,10 +43,10 @@ static void load_autorun_scripts(const std::function<void(const std::string &, s
 {
 	std::vector<Game *> games;
 	games.reserve(2);
-	auto *sv = engine->GetServerNetworkState();
+	auto *sv = Engine::Get()->GetServerNetworkState();
 	if(sv != nullptr && sv->IsGameActive())
 		games.push_back(sv->GetGameState());
-	auto *cl = engine->GetClientState();
+	auto *cl = Engine::Get()->GetClientState();
 	if(cl != nullptr && cl->IsGameActive())
 		games.push_back(cl->GetGameState());
 	for(auto *game : games) {
@@ -138,8 +136,8 @@ bool AddonSystem::MountAddon(const std::string &paddonPath, std::vector<AddonInf
 	if(it != outAddons.end()) {
 		// Inform the game states about the newly mounted addons
 		auto &addonInfo = *it;
-		auto *sv = engine->GetServerNetworkState();
-		auto *cl = engine->GetClientState();
+		auto *sv = Engine::Get()->GetServerNetworkState();
+		auto *cl = Engine::Get()->GetClientState();
 		std::vector<Game *> gameStates = {sv ? sv->GetGameState() : nullptr, cl ? cl->GetGameState() : nullptr};
 		for(auto *game : gameStates) {
 			if(!game)

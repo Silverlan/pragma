@@ -87,8 +87,6 @@ import bezierfit;
 import panima;
 //import pragma.scripting.lua;
 
-extern DLLNETWORK Engine *engine;
-
 static std::ostream &operator<<(std::ostream &out, const CallbackHandle &hCallback)
 {
 	out << "Callback[";
@@ -241,7 +239,7 @@ namespace umath {
 bool Lua::util::start_debugger_server(lua_State *l)
 {
 	std::string fileName = "start_debugger_server.lua";
-	return engine->GetNetworkState(l)->GetGameState()->ExecuteLuaFile(fileName);
+	return Engine::Get()->GetNetworkState(l)->GetGameState()->ExecuteLuaFile(fileName);
 }
 
 #ifdef __linux__
@@ -747,7 +745,7 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	    {"invoke_change_callbacks",
 	      +[](lua_State *l) -> int {
 		      std::string cvarName = Lua::CheckString(l, 1);
-		      auto *nw = engine->GetNetworkState(l);
+		      auto *nw = Engine::Get()->GetNetworkState(l);
 		      if(nw)
 			      nw->InvokeConVarChangeCallbacks(cvarName);
 		      return 0;
@@ -768,7 +766,7 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	  luabind::def("is_open", &Engine::IsConsoleOpen), luabind::def("toggle", &Engine::ToggleConsole), luabind::def("open", &Engine::OpenConsole), luabind::def("close", &Engine::CloseConsole)];
 
 	static const auto fGetConVarName = [](lua_State *l, ConVar &cvar) -> std::string {
-		auto *nw = engine->GetNetworkState(l);
+		auto *nw = Engine::Get()->GetNetworkState(l);
 		auto &conVars = nw->GetConVars();
 		auto it = std::find_if(conVars.begin(), conVars.end(), [&cvar](const std::pair<std::string, std::shared_ptr<ConConf>> &pair) { return pair.second.get() == &cvar; });
 		if(it == conVars.end())
@@ -784,7 +782,7 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	classDefConVar.def("GetDefault", &ConVar::GetDefault, luabind::copy_policy<0> {});
 	classDefConVar.def("GetHelpText", &ConVar::GetHelpText);
 	classDefConVar.def("AddChangeCallback", static_cast<void (*)(lua_State *, ConVar &, const Lua::func<void, Lua::var<std::string, int32_t, float, bool>> &)>([](lua_State *l, ConVar &cvar, const Lua::func<void, Lua::var<std::string, int32_t, float, bool>> &function) {
-		engine->GetNetworkState(l)->GetGameState()->AddConVarCallback(fGetConVarName(l, cvar), function);
+		Engine::Get()->GetNetworkState(l)->GetGameState()->AddConVarCallback(fGetConVarName(l, cvar), function);
 	}));
 	classDefConVar.def("GetName", static_cast<std::string (*)(lua_State *, ConVar &)>([](lua_State *l, ConVar &cvar) { return fGetConVarName(l, cvar); }));
 	consoleMod[classDefConVar];
@@ -1279,7 +1277,7 @@ void Game::RegisterLuaLibraries()
 	Lua::RegisterLibrary(l, "import",
 	  {{"import_wrci", Lua::import::import_wrci}, {"import_wad", Lua::import::import_wad}, {"import_wrmi", Lua::import::import_wrmi}, {"import_smd", Lua::import::import_smd}, {"import_obj", Lua::import::import_obj}, {"import_model_asset", Lua::import::import_model_asset},
 	    {"export_model_asset", Lua::import::export_model_asset}, {"import_file", +[](lua_State *l) {
-		                                                              auto *nw = engine->GetNetworkState(l);
+		                                                              auto *nw = Engine::Get()->GetNetworkState(l);
 		                                                              std::string path = Lua::CheckString(l, 1);
 		                                                              auto res = util::port_file(nw, path);
 		                                                              Lua::PushBool(l, res);

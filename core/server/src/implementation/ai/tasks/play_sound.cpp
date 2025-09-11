@@ -5,6 +5,7 @@ module;
 
 #include "stdafx_server.h"
 #include "pragma/ai/ai_schedule.h"
+#include <pragma/entities/components/base_ai_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/audio/alsound_type.h>
 
@@ -14,7 +15,7 @@ import pragma.server.entities.components;
 
 using namespace pragma;
 
-ai::BehaviorNode::Result ai::TaskPlaySound::Start(const Schedule *sched, pragma::SAIComponent &ent)
+ai::BehaviorNode::Result ai::TaskPlaySound::Start(const Schedule *sched, pragma::BaseAIComponent &ent)
 {
 	auto *sndName = GetSoundName(sched);
 	if(sndName == nullptr)

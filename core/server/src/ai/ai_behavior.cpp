@@ -5,11 +5,10 @@
 #include "pragma/ai/ai_behavior.h"
 #include "pragma/ai/ai_schedule.h"
 
+import pragma.server.entities.components;
 import pragma.server.game;
 
 using namespace pragma;
-
-extern SGame *s_game;
 
 ai::BehaviorNode::BehaviorNode(Type type, SelectorType selectorType) : std::enable_shared_from_this<BehaviorNode>(), m_bActive(false), m_type(type) { SetSelectorType(selectorType); }
 ai::BehaviorNode::BehaviorNode(SelectorType selectorType) : BehaviorNode(Type::Sequence, selectorType) {}
@@ -46,7 +45,7 @@ void ai::BehaviorNode::Stop()
 {
 	if(IsActive() == false)
 		return;
-	m_debugInfo.lastEndTime = s_game->CurTime();
+	m_debugInfo.lastEndTime = SGame::Get()->CurTime();
 	m_bActive = false;
 	for(auto &child : m_childNodes) {
 		if(child->IsActive() == true)
@@ -80,7 +79,7 @@ void ai::BehaviorNode::BehaviorNode::SetScheduleParameter(uint8_t taskParamId, u
 		m_paramIds.resize(taskParamId + 1, std::numeric_limits<uint8_t>::max());
 	m_paramIds[taskParamId] = scheduleParamId;
 }
-ai::BehaviorNode::Result ai::BehaviorNode::BehaviorNode::StartTask(uint32_t taskId, const Schedule *sched, pragma::SAIComponent &ent)
+ai::BehaviorNode::Result ai::BehaviorNode::BehaviorNode::StartTask(uint32_t taskId, const Schedule *sched, pragma::BaseAIComponent &ent)
 {
 	if(taskId >= m_childNodes.size())
 		return ai::BehaviorNode::Result::Succeeded;
@@ -89,7 +88,7 @@ ai::BehaviorNode::Result ai::BehaviorNode::BehaviorNode::StartTask(uint32_t task
 	taskChild->m_debugInfo.lastResult = r;
 	return r;
 }
-ai::BehaviorNode::Result ai::BehaviorNode::BehaviorNode::ThinkTask(uint32_t taskId, const Schedule *sched, pragma::SAIComponent &ent)
+ai::BehaviorNode::Result ai::BehaviorNode::BehaviorNode::ThinkTask(uint32_t taskId, const Schedule *sched, pragma::BaseAIComponent &ent)
 {
 	if(taskId >= m_childNodes.size())
 		return ai::BehaviorNode::Result::Succeeded;
@@ -100,7 +99,7 @@ ai::BehaviorNode::Result ai::BehaviorNode::BehaviorNode::ThinkTask(uint32_t task
 }
 void ai::BehaviorNode::DebugPrint(const Schedule *sched, std::stringstream &ss, const std::string &t) const
 {
-	auto &taskManager = s_game->GetAITaskManager();
+	auto &taskManager = SGame::Get()->GetAITaskManager();
 	const auto &type = typeid(*this);
 	auto id = taskManager.GetTaskId(type);
 	ss << t << "[";
@@ -110,10 +109,10 @@ void ai::BehaviorNode::DebugPrint(const Schedule *sched, std::stringstream &ss, 
 		node->DebugPrint(sched, ss, t + "\t");
 }
 ai::BehaviorNode::Type ai::BehaviorNode::GetType() const { return m_type; }
-ai::BehaviorNode::Result ai::BehaviorNode::Start(const Schedule *sched, pragma::SAIComponent &ent)
+ai::BehaviorNode::Result ai::BehaviorNode::Start(const Schedule *sched, pragma::BaseAIComponent &ent)
 {
 	m_selector->Reset(static_cast<uint32_t>(m_childNodes.size()));
-	m_debugInfo.lastStartTime = s_game->CurTime();
+	m_debugInfo.lastStartTime = SGame::Get()->CurTime();
 
 	static auto executionIndex = 0ull;
 	m_debugInfo.executionIndex = executionIndex++; // Used to determine which task was executed last (for debugging purposes only!)
@@ -137,7 +136,7 @@ ai::BehaviorNode::Result ai::BehaviorNode::Start(const Schedule *sched, pragma::
 	return r;
 	//return StartTask(m_selector->GetCurrentTask(),sched,ent);
 }
-ai::BehaviorNode::Result ai::BehaviorNode::Think(const Schedule *sched, pragma::SAIComponent &ent)
+ai::BehaviorNode::Result ai::BehaviorNode::Think(const Schedule *sched, pragma::BaseAIComponent &ent)
 {
 	auto r = Result::Succeeded;
 	auto currentTask = m_selector->GetCurrentTask();

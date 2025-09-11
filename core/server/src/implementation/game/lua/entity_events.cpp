@@ -1,12 +1,18 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
+#include "pragma/ai/ai_behavior.h"
+#include "pragma/input/inkeys.h"
 #include "pragma/lua/s_ldef_memory_fragment.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
+module pragma.server.game;
+
+import pragma.server.ai;
 import pragma.server.entities.components;
-import pragma.server.game;
 
 bool SGame::InvokeEntityEvent(pragma::BaseEntityComponent &component, uint32_t eventId, int32_t argsIdx, bool bInject)
 {

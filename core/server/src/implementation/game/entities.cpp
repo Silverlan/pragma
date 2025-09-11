@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
 #include <servermanager/sv_nwm_recipientfilter.h>
 #include "luasystem.h"
@@ -9,6 +11,7 @@
 #include "pragma/lua/handle_holder.hpp"
 #include "pragma/networking/iserver_client.hpp"
 #include "pragma/networking/recipient_filter.hpp"
+#include "pragma/entities/components/base_player_component.hpp"
 #include <pragma/debug/intel_vtune.hpp>
 #include <pragma/networking/enums.hpp>
 #include <pragma/lua/lua_entity_type.hpp>
@@ -18,16 +21,16 @@
 #include <pragma/game/game_lua_entity.hpp>
 #include <udm.hpp>
 
+module pragma.server.game;
+
 import pragma.entities.components;
 import pragma.server.entities;
 import pragma.server.entities.components;
 import pragma.server.entities.registration;
-import pragma.server.game;
 import pragma.server.scripting.lua;
 import pragma.server.server_state;
 
-extern ServerState *server;
-pragma::SPlayerComponent *SGame::GetPlayer(pragma::networking::IServerClient &session) { return server->GetPlayer(session); }
+pragma::SPlayerComponent *SGame::GetPlayer(pragma::networking::IServerClient &session) { return ServerState::Get()->GetPlayer(session); }
 
 SBaseEntity *SGame::CreateEntity(std::string classname)
 {
@@ -53,7 +56,7 @@ SBaseEntity *SGame::CreateEntity(std::string classname)
 		Con::cwar << "Unable to create entity '" << classname << "': Factory not found!" << Con::endl;
 		return NULL;
 	}
-	return factory(server);
+	return factory(ServerState::Get());
 }
 
 void SGame::RemoveEntity(BaseEntity *ent)
@@ -67,7 +70,7 @@ void SGame::RemoveEntity(BaseEntity *ent)
 		if(ID != std::nullopt) {
 			NetPacket p;
 			nwm::write_entity(p, ent);
-			server->SendPacket("ent_remove", p, pragma::networking::Protocol::SlowReliable);
+			ServerState::Get()->SendPacket("ent_remove", p, pragma::networking::Protocol::SlowReliable);
 		}
 	}
 	if(ent->IsPlayer())
@@ -101,7 +104,7 @@ void SGame::SpawnEntity(BaseEntity *ent) // Don't call directly
 	if(ID != std::nullopt && (pMapComponent.valid() == false || pMapComponent->GetMapIndex() == 0)) {
 		pragma::networking::ClientRecipientFilter rp {[](const pragma::networking::IServerClient &client) -> bool {
 			auto *pl = client.GetPlayer();
-			return pl && pl->IsAuthed();
+			return pl && static_cast<pragma::SPlayerComponent*>(pl)->IsAuthed();
 		}};
 		SBaseEntity *sent = static_cast<SBaseEntity *>(ent);
 		NetPacket p;
@@ -109,7 +112,7 @@ void SGame::SpawnEntity(BaseEntity *ent) // Don't call directly
 		p->Write<unsigned int>(ent->GetIndex());
 		p->Write<unsigned int>(pMapComponent.valid() ? pMapComponent->GetMapIndex() : 0u);
 		sent->SendData(p, rp);
-		server->SendPacket("ent_create", p, pragma::networking::Protocol::SlowReliable, rp);
+		ServerState::Get()->SendPacket("ent_create", p, pragma::networking::Protocol::SlowReliable, rp);
 	}
 	auto hEnt = ent->GetHandle();
 	CallCallbacks<void, BaseEntity *>("OnEntitySpawned", ent); // TODO: Call this after transmission for lua-entities has finished (Entity:OnPostSpawn)

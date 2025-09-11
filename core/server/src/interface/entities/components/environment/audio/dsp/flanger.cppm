@@ -4,6 +4,8 @@
 module;
 
 #include "pragma/serverdefinitions.h"
+#include "sharedutils/netpacket.hpp"
+#include "pragma/networking/recipient_filter.hpp"
 #include "pragma/entities/environment/audio/env_sound_dsp_flanger.h"
 
 export module pragma.server.entities.components.audio.dsp.flanger;

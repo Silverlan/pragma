@@ -16,7 +16,6 @@
 #include "pragma/audio/c_lalsound.hpp"
 #include "pragma/lua/classes/c_ldef_wgui.h"
 #include "pragma/lua/policies/gui_element_policy.hpp"
-#include "pragma/ai/c_lai.hpp"
 #include "pragma/rendering/raytracing/cycles.hpp"
 #include "pragma/asset/c_util_model.hpp"
 #include <pragma/debug/debug_render_info.hpp>

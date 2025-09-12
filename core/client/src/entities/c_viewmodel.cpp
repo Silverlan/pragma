@@ -11,7 +11,6 @@
 #include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/components/c_attachment_component.hpp"
-#include "pragma/entities/components/c_transform_component.hpp"
 #include "pragma/entities/components/base_character_component.hpp"
 #include <pragma/model/model.h>
 #include <pragma/entities/entity_component_system_t.hpp>

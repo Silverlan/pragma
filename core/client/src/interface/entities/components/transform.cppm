@@ -1,14 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_TRANSFORM_COMPONENT_HPP__
-#define __C_TRANSFORM_COMPONENT_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/components/c_entity_component.hpp"
 #include <pragma/entities/components/base_transform_component.hpp>
 
-namespace pragma {
+export module pragma.client.entities.components.transform;
+
+export namespace pragma {
 	class DLLCLIENT CTransformComponent final : public BaseTransformComponent, public CBaseNetComponent {
 	  public:
 		CTransformComponent(BaseEntity &ent) : BaseTransformComponent(ent) {}
@@ -20,5 +21,3 @@ namespace pragma {
 		virtual void GetBaseTypeIndex(std::type_index &outTypeIndex) const override;
 	};
 };
-
-#endif

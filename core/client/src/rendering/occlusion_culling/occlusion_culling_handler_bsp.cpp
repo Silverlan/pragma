@@ -5,7 +5,7 @@
 #include "pragma/rendering/occlusion_culling/occlusion_culling_handler_bsp.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
-#include "pragma/entities/components/c_transform_component.hpp"
+#include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/model/c_model.h"

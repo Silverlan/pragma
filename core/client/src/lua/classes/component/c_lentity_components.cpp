@@ -59,7 +59,6 @@
 #include "pragma/rendering/world_environment.hpp"
 #include "pragma/entities/environment/env_wind.hpp"
 #include "pragma/entities/components/c_ai_component.hpp"
-#include "pragma/entities/components/c_transform_component.hpp"
 #include "pragma/entities/components/c_vehicle_component.hpp"
 #include "pragma/entities/components/c_weapon_component.hpp"
 #include "pragma/entities/components/c_player_component.hpp"

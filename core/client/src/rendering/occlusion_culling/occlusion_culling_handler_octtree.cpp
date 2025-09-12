@@ -5,8 +5,8 @@
 #include "pragma/rendering/occlusion_culling/occlusion_culling_handler_octtree.hpp"
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
-#include "pragma/entities/components/c_transform_component.hpp"
 #include "pragma/entities/game/c_game_occlusion_culler.hpp"
+#include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include <pragma/math/intersection.h>
 #include <pragma/entities/entity_iterator.hpp>

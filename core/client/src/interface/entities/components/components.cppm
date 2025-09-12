@@ -106,6 +106,7 @@ export import pragma.client.entities.components.static_bvh_cache;
 export import pragma.client.entities.components.static_bvh_user;
 export import pragma.client.entities.components.surface;
 export import pragma.client.entities.components.time_scale;
+export import pragma.client.entities.components.transform;
 export import pragma.client.entities.components.toggle;
 export import pragma.client.entities.components.vertex_animated;
 // export import pragma.client.entities.components.material_override;

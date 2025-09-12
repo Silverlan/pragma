@@ -7,7 +7,6 @@ module;
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
-#include "pragma/entities/components/c_transform_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/game/c_game_occlusion_culler.hpp"
@@ -28,6 +27,7 @@ module pragma.client.entities.components.env_sky_camera;
 import pragma.client.client_state;
 import pragma.client.entities.components.rasterization_renderer;
 import pragma.client.entities.components.toggle;
+import pragma.client.entities.components.transform;
 
 extern CEngine *c_engine;
 extern ClientState *client;

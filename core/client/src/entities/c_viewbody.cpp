@@ -8,7 +8,6 @@
 #include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
-#include "pragma/entities/components/c_transform_component.hpp"
 #include "pragma/entities/parentinfo.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
@@ -16,6 +15,7 @@
 
 import pragma.client.client_state;
 import pragma.client.entities.components.render;
+import pragma.client.entities.components.transform;
 
 using namespace pragma;
 

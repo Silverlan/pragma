@@ -28,7 +28,6 @@ module;
 #include <wgui/types/wiroot.h>
 #include <pragma/entities/baseentity_events.hpp>
 #include <pragma/console/command_options.hpp>
-#include "pragma/entities/components/c_transform_component.hpp"
 #include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/rendering/shaders/world/c_shader_pbr.hpp"
@@ -45,6 +44,7 @@ module;
 module pragma.client.entities.components.env_reflection_probe;
 
 import pragma.client.client_state;
+import pragma.client.entities.components.transform;
 import pragma.client.gui;
 import pragma.client.math;
 import pragma.client.rendering.shaders;

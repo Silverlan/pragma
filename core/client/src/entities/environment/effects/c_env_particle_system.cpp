@@ -4,7 +4,6 @@
 #include "stdafx_client.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/entities/components/c_animated_component.hpp"
-#include "pragma/entities/components/c_transform_component.hpp"
 #include "pragma/entities/components/base_io_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/c_engine.h"
@@ -20,6 +19,7 @@
 
 import pragma.client.client_state;
 import pragma.client.entities.components.io;
+import pragma.client.entities.components.transform;
 
 using namespace pragma;
 

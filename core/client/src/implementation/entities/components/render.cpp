@@ -9,7 +9,6 @@ module;
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
-#include "pragma/entities/components/c_transform_component.hpp"
 #include "pragma/entities/components/c_attachment_component.hpp"
 #include "pragma/entities/components/c_light_map_receiver_component.hpp"
 #include "pragma/entities/components/intersection_handler_component.hpp"
@@ -44,6 +43,7 @@ module pragma.client.entities.components.render;
 import pragma.client.entities.components.color;
 import pragma.client.entities.components.raytracing;
 import pragma.client.entities.components.soft_body;
+import pragma.client.entities.components.transform;
 import pragma.client.entities.components.vertex_animated;
 
 using namespace pragma;

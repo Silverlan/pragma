@@ -7,9 +7,9 @@
 #include "pragma/entities/environment/lights/c_env_light_spot.h"
 #include "pragma/entities/environment/lights/c_env_light_point.h"
 #include "pragma/entities/environment/lights/c_env_light_directional.h"
-#include "pragma/entities/components/c_transform_component.hpp"
 #include "pragma/entities/environment/lights/c_env_light.h"
 #include "pragma/entities/environment/lights/c_env_shadow.hpp"
+#include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/lua/libraries/c_lua_vulkan.h"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
@@ -28,6 +28,7 @@ import pragma.client.entities.components.color;
 import pragma.client.entities.components.radius;
 import pragma.client.entities.components.render;
 import pragma.client.entities.components.toggle;
+import pragma.client.entities.components.transform;
 import pragma.client.scripting.lua;
 
 using namespace pragma;

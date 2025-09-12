@@ -5,8 +5,8 @@
 #include "pragma/game/c_game.h"
 #include "pragma/rendering/occlusion_culling/occlusion_culling_handler_inert.hpp"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
+#include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
-#include "pragma/entities/components/c_transform_component.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include <pragma/entities/entity_iterator.hpp>
 

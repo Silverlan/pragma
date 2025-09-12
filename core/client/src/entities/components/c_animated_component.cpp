@@ -6,7 +6,7 @@
 #include "pragma/game/game_limits.h"
 #include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/entities/components/c_attachment_component.hpp"
-#include "pragma/entities/components/c_transform_component.hpp"
+#include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/lua/libraries/c_lua_vulkan.h"
 #include "pragma/model/c_vertex_buffer_data.hpp"

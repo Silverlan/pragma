@@ -5,7 +5,6 @@
 #include "pragma/c_engine.h"
 #include "pragma/entities/c_listener.h"
 #include "pragma/entities/baseentity_luaobject.h"
-#include "pragma/entities/components/c_transform_component.hpp"
 #include <alsoundsystem.hpp>
 #include <alsound_listener.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
@@ -13,6 +12,8 @@
 #include <pragma/entities/components/velocity_component.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
+
+import pragma.client.entities.components.transform;
 
 using namespace pragma;
 

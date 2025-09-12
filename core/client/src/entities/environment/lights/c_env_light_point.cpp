@@ -4,7 +4,6 @@
 #include "stdafx_client.h"
 #include "pragma/entities/environment/lights/c_env_light_point.h"
 #include "pragma/entities/baseentity_luaobject.h"
-#include "pragma/entities/components/c_transform_component.hpp"
 #include "pragma/entities/environment/lights/c_env_shadow.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/rendering/c_cubemapside.h"
@@ -15,6 +14,7 @@
 
 import pragma.client.entities.components.radius;
 import pragma.client.entities.components.render;
+import pragma.client.entities.components.transform;
 
 using namespace pragma;
 

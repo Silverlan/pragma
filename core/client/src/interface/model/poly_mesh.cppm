@@ -6,10 +6,11 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/model/polymesh.h"
 #include "pragma/model/brush/c_brushmesh.h"
-#include "pragma/model/c_poly.h"
 #include "pragma/model/c_side.h"
 
 export module pragma.client.model:poly_mesh;
+
+import :poly;
 
 export {
 	class DLLCLIENT CPolyMesh : public PolyMesh {

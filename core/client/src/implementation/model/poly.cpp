@@ -1,8 +1,13 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/model/c_poly.h"
+
+module pragma.client.model;
+
+import :poly;
 
 import pragma.client.client_state;
 

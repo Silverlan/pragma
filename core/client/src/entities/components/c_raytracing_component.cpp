@@ -4,7 +4,6 @@
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
 #include "pragma/c_engine.h"
-#include "pragma/entities/components/c_raytracing_component.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
@@ -23,6 +22,8 @@
 
 import pragma.client.model;
 import pragma.client.rendering.shaders;
+
+import pragma.client.entities.components;
 
 using namespace pragma;
 

@@ -14,7 +14,6 @@
 #include "pragma/entities/components/c_vehicle_component.hpp"
 #include "pragma/entities/components/c_weapon_component.hpp"
 #include "pragma/entities/components/c_player_component.hpp"
-#include "pragma/entities/components/c_raytracing_component.hpp"
 // --template-include-location
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/environment/lights/c_env_light.h"

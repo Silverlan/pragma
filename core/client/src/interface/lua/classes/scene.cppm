@@ -12,7 +12,6 @@ module;
 #include "pragma/lua/policies/shared_from_this_policy.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/entities/game/c_game_shadow_manager.hpp"
-#include "pragma/entities/components/c_raytracing_component.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include "luabind/copy_policy.hpp"
 #include "prosper_render_pass.hpp"

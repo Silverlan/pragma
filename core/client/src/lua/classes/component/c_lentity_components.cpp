@@ -64,7 +64,6 @@
 #include "pragma/entities/components/c_vehicle_component.hpp"
 #include "pragma/entities/components/c_weapon_component.hpp"
 #include "pragma/entities/components/c_player_component.hpp"
-#include "pragma/entities/components/c_raytracing_component.hpp"
 #include "pragma/entities/components/liquid/base_liquid_volume_component.hpp"
 #include "pragma/entities/components/liquid/base_liquid_surface_component.hpp"
 #include "pragma/entities/components/base_score_component.hpp"

@@ -93,6 +93,7 @@ export import pragma.client.entities.components.prop_dynamic;
 export import pragma.client.entities.components.prop_physics;
 export import pragma.client.entities.components.radius;
 export import pragma.client.entities.components.rasterization_renderer;
+export import pragma.client.entities.components.raytracing;
 export import pragma.client.entities.components.raytracing_renderer;
 export import pragma.client.entities.components.score;
 export import pragma.client.entities.components.shooter;

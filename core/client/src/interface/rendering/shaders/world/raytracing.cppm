@@ -4,10 +4,11 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/entities/components/c_raytracing_component.hpp"
 #include <shader/prosper_shader.hpp>
 
 export module pragma.client.rendering.shaders:world_raytracing;
+
+import pragma.client.entities.components.raytracing;
 
 export namespace pragma {
 	class DLLCLIENT ShaderRayTracing : public prosper::ShaderCompute {

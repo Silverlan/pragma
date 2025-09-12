@@ -1,17 +1,18 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_RAYTRACING_COMPONENT_HPP__
-#define __C_RAYTRACING_COMPONENT_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/rendering/c_rendermode.h"
 #include <pragma/entities/components/base_entity_component.hpp>
+#include <material_descriptor_array.hpp>
 #include <shader/prosper_descriptor_array_manager.hpp>
 #include <buffers/prosper_buffer.hpp>
 
-class MaterialDescriptorArrayManager;
-namespace pragma {
+export module pragma.client.entities.components.raytracing;
+
+export namespace pragma {
 	class DLLCLIENT CRaytracingComponent final : public BaseEntityComponent {
 	  public:
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
@@ -73,7 +74,7 @@ namespace pragma {
 		StateFlags m_stateFlags = StateFlags::None;
 	};
 };
-REGISTER_BASIC_BITWISE_OPERATORS(pragma::CRaytracingComponent::StateFlags)
-REGISTER_BASIC_BITWISE_OPERATORS(pragma::CRaytracingComponent::SubMeshRenderInfoBufferData::Flags)
-
-#endif
+export {
+	REGISTER_BASIC_BITWISE_OPERATORS(pragma::CRaytracingComponent::StateFlags)
+	REGISTER_BASIC_BITWISE_OPERATORS(pragma::CRaytracingComponent::SubMeshRenderInfoBufferData::Flags)
+};

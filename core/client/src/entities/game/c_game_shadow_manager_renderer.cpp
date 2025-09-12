@@ -5,7 +5,6 @@
 #include "pragma/entities/game/c_game_shadow_manager.hpp"
 #include "pragma/entities/game/c_game_occlusion_culler.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
-#include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/entities/environment/lights/c_env_light_directional.h"
 #include "pragma/entities/environment/lights/c_env_shadow.hpp"

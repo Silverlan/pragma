@@ -7,10 +7,10 @@ module;
 #include "pragma/entities/components/hitbox_mesh_bvh_builder.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"
-#include "pragma/entities/components/c_render_component.hpp"
 #include <pragma/entities/components/intersection_handler_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include "pragma/logging.hpp"
+#include "pragma/c_engine.h"
 #include <pragma/entities/components/bvh_data.hpp>
 #include <pragma/entities/components/util_bvh.hpp>
 #include <pragma/debug/intel_vtune.hpp>
@@ -28,6 +28,7 @@ module;
 module pragma.client.entities.components.hitbox_bvh;
 
 import pragma.client.debug;
+import pragma.client.entities.components.render;
 
 extern CEngine *c_engine;
 extern CGame *c_game;

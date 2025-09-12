@@ -1,9 +1,10 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
-#include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/rendering/shaders/world/c_shader_scene.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"
@@ -39,7 +40,11 @@
 #include <pragma/console/sh_cmd.h>
 #include <util_image.hpp>
 
-import pragma.client.entities.components;
+module pragma.client.entities.components.render;
+
+import pragma.client.entities.components.raytracing;
+import pragma.client.entities.components.soft_body;
+import pragma.client.entities.components.vertex_animated;
 
 using namespace pragma;
 

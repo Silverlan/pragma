@@ -8,7 +8,6 @@ module;
 #include "pragma/c_engine.h"
 #include "pragma/entities/c_baseentity.h"
 #include "pragma/entities/entity_component_system_t.hpp"
-#include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_game_component.hpp"
 #include "pragma/entities/components/orientation_component.hpp"
 #include "pragma/entities/components/base_character_component.hpp"
@@ -22,6 +21,7 @@ module pragma.client.entities.components.observer;
 import pragma.client.entities.components.character;
 import pragma.client.entities.components.input;
 import pragma.client.entities.components.observable;
+import pragma.client.entities.components.render;
 
 using namespace pragma;
 

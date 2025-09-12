@@ -11,7 +11,6 @@
 #include "pragma/rendering/shaders/c_shader_shadow.hpp"
 #include "pragma/entities/entity_instance_index_buffer.hpp"
 #include "pragma/entities/components/c_scene_component.hpp"
-#include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/environment/lights/c_env_shadow.hpp"
 #include "pragma/model/c_model.h"

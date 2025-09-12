@@ -25,7 +25,6 @@
 #include "pragma/entities/components/c_light_map_receiver_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/components/c_player_component.hpp"
-#include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/entities/components/c_transform_component.hpp"
 #include "pragma/entities/components/c_vehicle_component.hpp"

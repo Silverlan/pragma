@@ -3,8 +3,9 @@
 
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
-#include "pragma/entities/components/c_render_component.hpp"
 #include <pragma/lua/classes/ldef_vector.h>
+
+import pragma.client.entities.components;
 
 bool CGame::InvokeEntityEvent(pragma::BaseEntityComponent &component, uint32_t eventId, int32_t argsIdx, bool bInject)
 {

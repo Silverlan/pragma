@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
-#include "pragma/entities/components/c_render_component.hpp"
 
 export module pragma.client.rendering.shaders:world_light_cone;
 

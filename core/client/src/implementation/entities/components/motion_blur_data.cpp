@@ -7,7 +7,6 @@ module;
 #include "pragma/game/c_game.h"
 #include "pragma/c_engine.h"
 #include "pragma/entities/components/c_animated_component.hpp"
-#include "pragma/entities/components/c_render_component.hpp"
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/entity_component_manager_t.hpp>
@@ -15,6 +14,7 @@ module;
 
 module pragma.client.entities.components.motion_blur_data;
 
+import pragma.client.entities.components.render;
 import pragma.client.rendering.shaders;
 
 extern CGame *c_game;

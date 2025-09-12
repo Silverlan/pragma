@@ -7,7 +7,6 @@
 #include "pragma/entities/environment/lights/c_env_light_directional.h"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/components/c_transform_component.hpp"
-#include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/console/c_cvar.h"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"

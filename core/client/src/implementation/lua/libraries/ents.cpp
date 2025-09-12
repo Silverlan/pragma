@@ -14,12 +14,12 @@ module;
 #include "pragma/lua/classes/ldef_material.h"
 #include <texturemanager/texturemanager.h>
 #include "luasystem.h"
-#include "pragma/entities/components/c_render_component.hpp"
 #include <buffers/prosper_uniform_resizable_buffer.hpp>
 
 module pragma.client.scripting.lua.libraries.ents;
 
 import pragma.client.client_state;
+import pragma.client.entities.components.render;
 
 extern ClientState *client;
 extern CGame *c_game;

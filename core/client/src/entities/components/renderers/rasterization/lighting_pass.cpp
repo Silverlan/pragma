@@ -8,7 +8,6 @@
 #include "pragma/rendering/c_renderflags.h"
 #include "pragma/rendering/global_render_settings_buffer_data.hpp"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
-#include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"

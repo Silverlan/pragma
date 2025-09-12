@@ -5,11 +5,12 @@
 #include "pragma/game/c_game.h"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/global_render_settings_buffer_data.hpp"
-#include "pragma/entities/components/c_render_component.hpp"
 #include <prosper_util.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <buffers/prosper_uniform_resizable_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
+
+import pragma.client.entities.components;
 
 extern CEngine *c_engine;
 

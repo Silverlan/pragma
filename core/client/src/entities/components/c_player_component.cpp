@@ -24,7 +24,6 @@
 #include <pragma/networking/nwm_util.h>
 #include "pragma/entities/c_listener.h"
 #include "pragma/entities/components/c_weapon_component.hpp"
-#include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_attachment_component.hpp"
 #include "pragma/networking/c_nwm_util.h"
 #include <pragma/entities/components/submergible_component.hpp>

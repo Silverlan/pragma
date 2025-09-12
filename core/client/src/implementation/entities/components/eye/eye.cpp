@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
-#include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/entities/components/c_flex_component.hpp"
@@ -17,6 +16,8 @@ module;
 #include <pragma/entities/components/component_member_flags.hpp>
 
 module pragma.client.entities.components.eye;
+
+import pragma.client.entities.components.render;
 
 extern CGame *c_game;
 extern CEngine *c_engine;

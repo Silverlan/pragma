@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
-#include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_flex_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"
@@ -24,6 +23,8 @@ module;
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
 module pragma.client.entities.components.vertex_animated;
+
+import pragma.client.entities.components.render;
 
 extern CEngine *c_engine;
 

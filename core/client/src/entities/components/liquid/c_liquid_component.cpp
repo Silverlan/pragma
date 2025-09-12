@@ -8,7 +8,6 @@
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/entities/baseentity_luaobject.h"
 #include "pragma/entities/c_water_surface.hpp"
-#include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/components/c_transform_component.hpp"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"

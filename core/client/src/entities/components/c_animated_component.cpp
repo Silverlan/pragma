@@ -5,7 +5,6 @@
 #include "pragma/c_engine.h"
 #include "pragma/game/game_limits.h"
 #include "pragma/entities/components/c_animated_component.hpp"
-#include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_attachment_component.hpp"
 #include "pragma/entities/components/c_transform_component.hpp"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"

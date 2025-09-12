@@ -12,7 +12,6 @@
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/environment/lights/c_env_shadow.hpp"
 #include "pragma/entities/entity_instance_index_buffer.hpp"
-#include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/console/c_cvar.h"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/shaders/c_shader_shadow.hpp"

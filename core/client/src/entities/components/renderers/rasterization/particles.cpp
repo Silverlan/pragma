@@ -13,6 +13,11 @@
 #include <prosper_command_buffer.hpp>
 #include <image/prosper_render_target.hpp>
 #include <image/prosper_msaa_texture.hpp>
+#include "pragma/console/c_cvar.h"
+#include <pragma/entities/entity_iterator.hpp>
+#include "pragma/entities/environment/effects/c_env_particle_system.h"
+#include "pragma/rendering/shaders/particles/c_shader_particle_2d_base.hpp"
+#include <prosper_descriptor_set_group.hpp>
 
 import pragma.client.entities.components;
 import pragma.client.rendering.shaders;
@@ -22,13 +27,7 @@ using namespace pragma::rendering;
 extern CEngine *c_engine;
 extern CGame *c_game;
 
-#include "pragma/console/c_cvar.h"
-#include <pragma/entities/entity_iterator.hpp>
-#include "pragma/entities/environment/effects/c_env_particle_system.h"
-
 static auto cvDrawParticles = GetClientConVar("render_draw_particles");
-#include "pragma/rendering/shaders/particles/c_shader_particle_2d_base.hpp"
-#include <prosper_descriptor_set_group.hpp>
 void pragma::CRasterizationRendererComponent::RenderParticles(prosper::ICommandBuffer &cmd, const util::DrawSceneInfo &drawSceneInfo, bool depthPass, prosper::IPrimaryCommandBuffer *primCmdBuffer)
 {
 	assert(!depthPass || primCmdBuffer != nullptr);

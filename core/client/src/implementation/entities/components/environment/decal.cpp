@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/intersection_handler_component.hpp"
 #include "pragma/entities/components/base_bvh_component.hpp"
 #include "pragma/model/c_modelmesh.h"
@@ -25,6 +24,7 @@ import pragma.client.client_state;
 import pragma.client.debug;
 import pragma.client.entities.components.bvh;
 import pragma.client.entities.components.physics;
+import pragma.client.entities.components.render;
 import pragma.client.entities.components.static_bvh_cache;
 import pragma.client.entities.components.static_bvh_user;
 

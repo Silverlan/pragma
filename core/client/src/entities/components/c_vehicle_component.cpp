@@ -10,12 +10,12 @@
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/c_viewmodel.h"
 #include "pragma/entities/c_viewbody.h"
-#include "pragma/entities/components/c_render_component.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/input/inkeys.h>
 
 import pragma.client.entities.components.observable;
 import pragma.client.entities.components.observer;
+import pragma.client.entities.components.render;
 
 using namespace pragma;
 

@@ -8,7 +8,6 @@ module;
 #include "pragma/game/c_game.h"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/components/c_scene_component.hpp"
-#include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/console/c_cvar.h"
 #include "pragma/rendering/shaders/particles/c_shader_particle_2d_base.hpp"
@@ -28,6 +27,7 @@ module;
 module pragma.client.entities.components.liquid_surface;
 
 import pragma.client.entities.components.rasterization_renderer;
+import pragma.client.entities.components.render;
 import pragma.client.entities.components.surface;
 import pragma.client.rendering.shaders;
 

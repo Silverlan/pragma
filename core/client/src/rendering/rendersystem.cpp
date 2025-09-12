@@ -17,7 +17,6 @@
 #include "textureinfo.h"
 #include "pragma/console/c_cvar.h"
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"
-#include "pragma/entities/components/c_render_component.hpp"
 #include <cmaterial.h>
 #include <pragma/rendering/c_sci_gpu_timer_manager.hpp>
 #include <pragma/model/animation/vertex_animation.hpp>

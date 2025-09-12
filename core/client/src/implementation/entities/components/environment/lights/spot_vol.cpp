@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/entities/components/c_model_component.hpp"
-#include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/basetoggle.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/networking/c_nwm_util.h"

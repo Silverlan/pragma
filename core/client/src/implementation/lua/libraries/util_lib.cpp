@@ -9,7 +9,6 @@ module;
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "luasystem.h"
-#include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_attachment_component.hpp"
 #include "pragma/entities/components/c_transform_component.hpp"
 #include <pragma/lua/classes/ldef_color.h>
@@ -30,6 +29,7 @@ module pragma.client.scripting.lua.libraries.util;
 
 import pragma.client.assets;
 import pragma.client.client_state;
+import pragma.client.entities.components.render;
 import pragma.client.util;
 
 extern CGame *c_game;

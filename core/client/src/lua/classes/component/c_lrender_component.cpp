@@ -3,8 +3,8 @@
 
 #include "stdafx_client.h"
 #include "pragma/lua/classes/components/c_lentity_components.hpp"
-#include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"
+#include "pragma/entities/components/base_render_component.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include <pragma/lua/classes/lproperty.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
@@ -14,6 +14,8 @@
 #include <prosper_command_buffer.hpp>
 #include <buffers/prosper_swap_buffer.hpp>
 #include <pragma/math/intersection.h>
+
+import pragma.client.entities.components.render;
 
 void Lua::Render::register_class(lua_State *l, luabind::module_ &entsMod)
 {

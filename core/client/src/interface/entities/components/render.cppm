@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_RENDER_COMPONENT_HPP__
-#define __C_RENDER_COMPONENT_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/components/c_entity_component.hpp"
@@ -10,6 +9,16 @@
 #include "pragma/rendering/shaders/world/c_shader_scene.hpp"
 #include "pragma/rendering/c_rendermode.h"
 #include "pragma/rendering/c_model_render_buffer_data.hpp"
+#include "buffers/prosper_uniform_resizable_buffer.hpp"
+#include "pragma/rendering/shaders/world/c_shader_textured.hpp"
+#include "prosper_descriptor_set_group.hpp"
+#include "buffers/prosper_buffer.hpp"
+#include "pragma/model/modelmesh.h"
+#include "pragma/math/intersection.h"
+#include "pragma/entities/components/c_model_component.hpp"
+#include "pragma/entities/components/c_animated_component.hpp"
+#include "pragma/entities/components/c_attachment_component.hpp"
+#include "pragma/entities/components/c_light_map_receiver_component.hpp"
 #include <pragma/util/orientedpoint.h>
 #include <pragma/math/sphere.h>
 #include <pragma/entities/components/base_render_component.hpp>
@@ -19,23 +28,9 @@
 
 #define ENTITY_RENDER_BUFFER_USE_STORAGE_BUFFER 1
 
-class ModelSubMesh;
-class ModelMesh;
-namespace prosper {
-	class IUniformResizableBuffer;
-	class IDescriptorSet;
-	class IDescriptorSetGroup;
-	class IBuffer;
-};
-namespace Intersection {
-	struct LineMeshResult;
-};
-namespace pragma {
-	class CModelComponent;
-	class CAnimatedComponent;
-	class CAttachmentComponent;
-	class CLightMapReceiverComponent;
-	enum class GameShaderSpecialization : uint32_t;
+export module pragma.client.entities.components.render;
+
+export namespace pragma {
 	using RenderMeshIndex = uint32_t;
 	using RenderBufferIndex = uint32_t;
 	class DLLCLIENT CRenderComponent final : public BaseRenderComponent, public CBaseNetComponent {
@@ -302,6 +297,6 @@ namespace pragma {
 		const Sphere &sphere;
 	};
 };
-REGISTER_BASIC_BITWISE_OPERATORS(pragma::CRenderComponent::StateFlags)
-
-#endif
+export {
+	REGISTER_BASIC_BITWISE_OPERATORS(pragma::CRenderComponent::StateFlags)
+};

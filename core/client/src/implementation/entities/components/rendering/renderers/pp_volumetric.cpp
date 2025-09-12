@@ -10,7 +10,6 @@ module;
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/components/c_transform_component.hpp"
 #include "pragma/entities/components/c_color_component.hpp"
-#include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/entity_iterator.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/environment/lights/c_env_light_spot.h"
@@ -34,6 +33,7 @@ import pragma.client.model;
 import pragma.client.entities.components.lights.spot_vol;
 import pragma.client.entities.components.radius;
 import pragma.client.entities.components.rasterization_renderer;
+import pragma.client.entities.components.render;
 
 import pragma.client.rendering.shaders;
 

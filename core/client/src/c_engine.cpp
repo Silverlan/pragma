@@ -45,7 +45,6 @@ namespace pragma::string {
 #include <prosper_command_buffer.hpp>
 #include <prosper_swap_command_buffer.hpp>
 #include <pragma/entities/environment/env_camera.h>
-#include <pragma/entities/components/c_render_component.hpp>
 #include <pragma/entities/environment/effects/c_env_particle_system.h>
 #include <pragma/rendering/shaders/image/c_shader_gradient.hpp>
 #include <pragma/logging.hpp>
@@ -70,6 +69,7 @@ namespace pragma::string {
 import util_zip;
 import pragma.client.assets;
 import pragma.client.client_state;
+import pragma.client.entities.components;
 import pragma.client.gui;
 import pragma.client.model;
 import pragma.client.networking;

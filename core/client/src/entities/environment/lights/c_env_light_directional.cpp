@@ -7,7 +7,6 @@
 #include "pragma/entities/baseentity_luaobject.h"
 #include "pragma/rendering/world_environment.hpp"
 #include "pragma/entities/components/c_color_component.hpp"
-#include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_transform_component.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/game/c_game.h"
@@ -15,6 +14,7 @@
 #include <pragma/math/intersection.h>
 #include <pragma/entities/entity_component_system_t.hpp>
 
+import pragma.client.entities.components.render;
 import pragma.client.entities.components.toggle;
 
 extern CGame *c_game;

@@ -25,7 +25,6 @@ namespace pragma::string {
 #include <pragma/util/font_set.hpp>
 #include <wgui/fontmanager.h>
 #include <wgui/types/witext.h>
-#include "pragma/lua/classes/c_ldef_fontinfo.h"
 #include <texturemanager/texturemanager.h>
 #include "textureinfo.h"
 #include "pragma/lua/classes/components/c_lentity_components.hpp"

@@ -38,7 +38,6 @@ export module pragma.client.scripting.lua.bindings.scene;
 
 import pragma.client.entities.components;
 
-
 export namespace pragma::scripting::lua::bindings {
 	void register_renderers(lua_State *l, luabind::module_ &entsMod) {
 		auto defRenderer = pragma::lua::create_entity_component_class<pragma::CRendererComponent, pragma::BaseEntityComponent>("RendererComponent");

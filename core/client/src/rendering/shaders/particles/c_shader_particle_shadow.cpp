@@ -5,7 +5,6 @@
 // prosper TODO
 #if 0
 #include "pragma/game/c_game.h"
-#include "pragma/rendering/shaders/particles/c_shader_particle_shadow.h"
 #include <shader/prosper_pipeline_create_info.hpp>
 
 using namespace Shader;

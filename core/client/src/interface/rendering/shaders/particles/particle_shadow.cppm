@@ -1,8 +1,10 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_SHADER_PARTICLE_SHADOW_H__
-#define __C_SHADER_PARTICLE_SHADOW_H__
+module;
+
+export module pragma.client.rendering.shaders:particle_shadow;
+
 // prosper TODO
 #if 0
 #include "pragma/rendering/shaders/world/c_shader_textured.h"
@@ -112,5 +114,4 @@ template<class TBase>
 	}
 	return ParticleBase::GetDescSet(set);
 }
-#endif
 #endif

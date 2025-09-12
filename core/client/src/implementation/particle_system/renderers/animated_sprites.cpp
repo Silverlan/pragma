@@ -7,7 +7,6 @@ module;
 #include "pragma/game/c_game.h"
 #include "pragma/entities/environment/lights/c_env_shadow.hpp"
 #include "pragma/rendering/shaders/particles/c_shader_particle.hpp"
-#include "pragma/rendering/shaders/particles/c_shader_particle_shadow.h"
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
 

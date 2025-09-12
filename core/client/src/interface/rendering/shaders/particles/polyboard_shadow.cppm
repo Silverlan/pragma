@@ -7,7 +7,6 @@ export module pragma.client.rendering.shaders:particle_polyboard_shadow;
 
 // prosper TODO
 #if 0
-#include "pragma/rendering/shaders/particles/c_shader_particle_shadow.h"
 #include <cmaterial.h>
 
 namespace Shader

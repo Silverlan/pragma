@@ -1,14 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __WILUAHANDLEWRAPPER_H__
-#define __WILUAHANDLEWRAPPER_H__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include <luabind/luabind.hpp>
 #include <wgui/types.hpp>
 
-class DLLCLIENT WILuaHandleWrapper {
+export module pragma.client.gui:lua_handle_wrapper;
+
+export class DLLCLIENT WILuaHandleWrapper {
   private:
 	WILuaHandleWrapper() {}
   public:
@@ -30,5 +31,3 @@ class DLLCLIENT WILuaHandleWrapper {
 	WIHandle *handle;
 	bool lua; // Has this been created through lua? This is used to clean up all lua-created GUI Elements when the game ends
 };
-
-#endif

@@ -12,7 +12,6 @@ module;
 #include <wgui/types/witext.h>
 #include "pragma/lua/classes/c_ldef_wguihandles.h"
 #include <pragma/lua/raw_object.hpp>
-#include "pragma/gui/wiluahandlewrapper.h"
 #include <wgui/types/witextentry.h>
 #include <pragma/lua/lua_call.hpp>
 

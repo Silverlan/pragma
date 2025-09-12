@@ -10,7 +10,6 @@ module;
 #include "pragma/networking/enums.hpp"
 #include "image/prosper_render_target.hpp"
 #include "pragma/networking/iclient.hpp"
-#include "pragma/gui/wiluahandlewrapper.h"
 #include <pragma/networking/portinfo.h>
 #include "pragma/rendering/game_world_shader_settings.hpp"
 #include "pragma/game/c_game.h"

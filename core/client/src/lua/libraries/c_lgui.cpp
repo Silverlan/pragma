@@ -10,7 +10,6 @@
 #include "pragma/game/c_game.h"
 #include "luasystem.h"
 #include "pragma/lua/classes/c_ldef_wgui.h"
-#include "pragma/gui/wiluahandlewrapper.h"
 #include <pragma/lua/lua_call.hpp>
 #include <pragma/lua/util.hpp>
 #include <pragma/lua/classes/ldef_vector.h>

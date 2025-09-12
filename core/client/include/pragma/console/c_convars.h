@@ -11,7 +11,6 @@
 #define __C_CONVARS_H__
 #include "pragma/networkdefinitions.h"
 #include <pragma/console/convars.h>
-#include "pragma/console/cengine_convars.h"
 #include "pragma/console/c_cvar_server.h"
 #include "pragma/console/c_cvar_global.h"
 #include "pragma/console/c_cvar_movement.h"

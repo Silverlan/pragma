@@ -28,7 +28,6 @@
 #include "pragma/entities/util/c_util_pbr_converter.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/level/mapgeometry.h"
-#include "pragma/gui/wiluahandlewrapper.h"
 #include "pragma/entities/c_viewmodel.h"
 #include "pragma/entities/c_viewbody.h"
 #include <pragma/physics/physobj.h>

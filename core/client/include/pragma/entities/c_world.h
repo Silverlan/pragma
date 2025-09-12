@@ -61,7 +61,6 @@ namespace pragma {
 };
 #pragma warning(pop)
 
-class CPolyMesh;
 class ModelMesh;
 class CHC;
 template<class T>

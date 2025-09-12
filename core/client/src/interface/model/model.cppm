@@ -3,5 +3,6 @@
 
 export module pragma.client.model;
 export import :model_manager;
+export import :poly_mesh;
 export import :render_mesh;
 export import :vertex_animation;

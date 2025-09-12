@@ -6,7 +6,6 @@
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/lua/c_lua_script_watcher.hpp"
 #include "pragma/input/input_binding_layer.hpp"
-#include "pragma/model/c_polymesh.h"
 #include "pragma/model/brush/c_brushmesh.h"
 #include "pragma/entities/c_world.h"
 #include "pragma/c_engine.h"

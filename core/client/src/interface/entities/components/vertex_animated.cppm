@@ -1,18 +1,16 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_VERTEX_ANIMATED_COMPONENT_HPP__
-#define __C_VERTEX_ANIMATED_COMPONENT_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/model/c_modelmesh.h"
+#include "buffers/prosper_dynamic_resizable_buffer.hpp"
 #include <pragma/entities/components/base_entity_component.hpp>
 
-namespace prosper {
-	class IDynamicResizableBuffer;
-	class IBuffer;
-};
-namespace pragma {
+export module pragma.client.entities.components.vertex_animated;
+
+export namespace pragma {
 	DLLCLIENT void initialize_vertex_animation_buffer();
 	DLLCLIENT void clear_vertex_animation_buffer();
 	DLLCLIENT const std::shared_ptr<prosper::IDynamicResizableBuffer> &get_vertex_animation_buffer();
@@ -63,5 +61,3 @@ namespace pragma {
 		void DestroyVertexAnimationBuffer();
 	};
 };
-
-#endif

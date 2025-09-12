@@ -13,7 +13,6 @@
 #include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
-#include "pragma/entities/components/c_vertex_animated_component.hpp"
 #include "pragma/entities/environment/lights/c_env_shadow.hpp"
 #include "pragma/model/c_model.h"
 #include "pragma/logging.hpp"

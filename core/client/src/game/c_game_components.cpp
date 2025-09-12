@@ -39,7 +39,6 @@
 #include "pragma/entities/components/c_weapon_component.hpp"
 #include "pragma/entities/c_water_surface.hpp"
 #include "pragma/entities/components/c_flex_component.hpp"
-#include "pragma/entities/components/c_vertex_animated_component.hpp"
 #include "pragma/entities/components/c_light_map_component.hpp"
 #include "pragma/entities/components/c_light_map_receiver_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"

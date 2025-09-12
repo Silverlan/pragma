@@ -29,7 +29,6 @@
 #include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/entities/components/c_transform_component.hpp"
 #include "pragma/entities/components/c_vehicle_component.hpp"
-#include "pragma/entities/components/c_vertex_animated_component.hpp"
 #include "pragma/entities/components/c_weapon_component.hpp"
 #include "pragma/entities/components/hitbox_mesh_bvh_builder.hpp"
 #include "pragma/entities/components/lightmap_data_cache.hpp"

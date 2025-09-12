@@ -8,7 +8,6 @@
 #include "pragma/rendering/render_stats.hpp"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
-#include "pragma/entities/components/c_vertex_animated_component.hpp"
 #include "pragma/rendering/render_processor.hpp"
 #include <sharedutils/alpha_mode.hpp>
 #include <pragma/model/animation/vertex_animation.hpp>
@@ -16,6 +15,7 @@
 #include <image/prosper_render_target.hpp>
 #include <pragma/model/c_vertex_buffer_data.hpp>
 
+import pragma.client.entities.components;
 import pragma.client.model;
 
 extern CEngine *c_engine;

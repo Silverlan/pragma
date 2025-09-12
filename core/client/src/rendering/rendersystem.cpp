@@ -18,7 +18,6 @@
 #include "pragma/console/c_cvar.h"
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
-#include "pragma/entities/components/c_vertex_animated_component.hpp"
 #include <cmaterial.h>
 #include <pragma/rendering/c_sci_gpu_timer_manager.hpp>
 #include <pragma/model/animation/vertex_animation.hpp>
@@ -26,6 +25,7 @@
 #include <image/prosper_render_target.hpp>
 
 import pragma.client.debug;
+import pragma.client.entities.components;
 import pragma.client.rendering.shaders;
 
 extern CEngine *c_engine;

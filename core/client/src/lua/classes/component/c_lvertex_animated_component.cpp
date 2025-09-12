@@ -3,13 +3,14 @@
 
 #include "stdafx_client.h"
 #include "pragma/lua/classes/components/c_lentity_components.hpp"
-#include "pragma/entities/components/c_vertex_animated_component.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/lua/lua_util_component.hpp>
 #include <pragma/lua/lua_util_component_stream.hpp>
 #include "pragma/model/c_modelmesh.h"
 #include <prosper_command_buffer.hpp>
 #include <buffers/prosper_swap_buffer.hpp>
+
+import pragma.client.entities.components;
 
 void Lua::VertexAnimated::register_class(lua_State *l, luabind::module_ &entsMod)
 {

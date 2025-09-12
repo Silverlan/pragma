@@ -8,8 +8,6 @@ module;
 #define TINYGLTF_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
-#include "pragma/math/c_util_math.hpp"
-#include "pragma/asset/c_util_model.hpp"
 #include "pragma/rendering/shaders/world/c_shader_scene.hpp"
 #include <pragma/model/model.h>
 #include <pragma/model/modelmesh.h>
@@ -305,7 +303,7 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg, const std::string
 	ufile::remove_extension_from_filename(outputPath);
 	outputPath += '/';
 	m_exportPath = outputPath;
-	outputPath = EXPORT_PATH + m_exportPath;
+	outputPath = std::string{EXPORT_PATH} + m_exportPath;
 
 	// Note: These values are for reserving space. They don't
 	// have to be accurate, but they *have* to be larger than (or equal to) the

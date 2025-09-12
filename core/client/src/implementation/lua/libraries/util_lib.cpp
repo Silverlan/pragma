@@ -13,7 +13,6 @@ module;
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_attachment_component.hpp"
 #include "pragma/entities/components/c_transform_component.hpp"
-#include "pragma/asset/c_util_model.hpp"
 #include <pragma/lua/classes/ldef_color.h>
 #include <pragma/lua/classes/ldef_vector.h>
 #include <pragma/lua/classes/ldef_quaternion.h>
@@ -22,6 +21,7 @@ module;
 #include <pragma/lua/classes/ldef_material.h>
 #include <pragma/util/giblet_create_info.hpp>
 #include <pragma/asset_types/world.hpp>
+#include <util_texture_info.hpp>
 #include <pragma/model/model.h>
 #include <util_image_buffer.hpp>
 #include <prosper_window.hpp>
@@ -29,6 +29,7 @@ module;
 
 module pragma.client.scripting.lua.libraries.util;
 
+import pragma.client.assets;
 import pragma.client.client_state;
 import pragma.client.util;
 

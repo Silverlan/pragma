@@ -6,6 +6,7 @@ module;
 #include <mathutil/umath.h>
 #include <glm/gtx/euler_angles.hpp>
 #include "pragma/game/c_game.h"
+#include "sharedutils/util_pragma.hpp"
 #include <pragma/model/c_modelmesh.h>
 #include <pragma/model/c_model.h>
 #include <pragma/model/animation/bone.hpp>
@@ -19,7 +20,6 @@ module;
 #include <util_image.hpp>
 #include <util_image_buffer.hpp>
 #include <fsys/ifile.hpp>
-#include "pragma/asset/c_util_model.hpp"
 #include <cmaterial_manager2.hpp>
 #include <texturemanager/texture_manager2.hpp>
 

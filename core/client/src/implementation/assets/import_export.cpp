@@ -1,19 +1,23 @@
 // SPDX-FileCopyrightText: (c) 2020 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
-#include "pragma/asset/c_util_model.hpp"
 #include "pragma/c_engine.h"
 #include "pragma/game/c_game.h"
+#include "pragma/util/util_game.hpp"
 #include "pragma/util/resource_watcher.h"
+#include "pragma/rendering/raytracing/cycles.hpp"
 #include "pragma/rendering/shaders/util/c_shader_compose_rma.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/environment/lights/c_env_light.h"
 #include "pragma/entities/environment/lights/c_env_light_spot.h"
 #include "pragma/entities/environment/lights/c_env_light_point.h"
 #include "pragma/entities/environment/lights/c_env_light_directional.h"
+#include "pragma/asset/util_asset.hpp"
 #include "pragma/entities/components/c_color_component.hpp"
 #include "pragma/game/game_limits.h"
 #include <cmaterial_manager2.hpp>
@@ -40,7 +44,11 @@
 #include <pragma/model/animation/skeleton.hpp>
 #include <pragma/model/animation/bone.hpp>
 
-import pragma.client.assets;
+module pragma.client.assets;
+
+import :import_export;
+import :gltf_writer;
+
 import pragma.client.client_state;
 import pragma.client.entities.components;
 import pragma.client.rendering.shaders;
@@ -1670,7 +1678,7 @@ bool pragma::asset::export_model(::Model &mdl, const ModelExportInfo &exportInfo
 bool pragma::asset::export_animation(Model &mdl, const std::string &animName, const ModelExportInfo &exportInfo, std::string &outErrMsg, const std::optional<std::string> &modelName) { return GLTFWriter::Export(mdl, animName, exportInfo, outErrMsg, modelName); }
 bool pragma::asset::export_texture(uimg::ImageBuffer &imgBuf, ModelExportInfo::ImageFormat imageFormat, const std::string &outputPath, std::string &outErrMsg, bool normalMap, bool srgb, uimg::TextureInfo::AlphaMode alphaMode, std::string *optOutOutputPath)
 {
-	std::string inOutPath = EXPORT_PATH + outputPath;
+	std::string inOutPath = std::string{EXPORT_PATH} + outputPath;
 	auto success = save_image(imgBuf, imageFormat, inOutPath, normalMap, srgb, alphaMode);
 	if(optOutOutputPath)
 		*optOutOutputPath = inOutPath;
@@ -1692,7 +1700,7 @@ bool pragma::asset::export_texture(const std::string &texturePath, ModelExportIn
 	ufile::remove_extension_from_filename(imgPath);
 	if(optExportPath)
 		imgPath = (util::Path::CreatePath(*optExportPath) + imgPath).GetString();
-	auto imgOutputPath = EXPORT_PATH + imgPath;
+	auto imgOutputPath = std::string{EXPORT_PATH} + imgPath;
 
 	auto exportSuccess = false;
 	if(imageFormat == ModelExportInfo::ImageFormat::DDS || imageFormat == ModelExportInfo::ImageFormat::KTX) {

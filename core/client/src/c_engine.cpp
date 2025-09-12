@@ -14,7 +14,6 @@ namespace pragma::string {
 #include "cmaterialmanager.h"
 #include "pragma/console/c_cvar.h"
 #include <texturemanager/texturemanager.h>
-#include "pragma/asset/c_util_model.hpp"
 #include <pragma/engine_init.hpp>
 #include <pragma/console/convars.h>
 #include "pragma/console/engine_cvar.h"
@@ -69,6 +68,7 @@ namespace pragma::string {
 #endif
 
 import util_zip;
+import pragma.client.assets;
 import pragma.client.client_state;
 import pragma.client.gui;
 import pragma.client.model;
@@ -77,9 +77,7 @@ import pragma.client.rendering.shaders;
 import pragma.gui;
 import pragma.shadergraph;
 import pragma.locale;
-#ifndef _MSC_VER
 import pragma.string.unicode;
-#endif
 
 extern "C" {
 void DLLCLIENT RunCEngine(int argc, char *argv[])

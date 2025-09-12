@@ -17,7 +17,6 @@
 #include "pragma/lua/classes/c_ldef_wgui.h"
 #include "pragma/lua/policies/gui_element_policy.hpp"
 #include "pragma/rendering/raytracing/cycles.hpp"
-#include "pragma/asset/c_util_model.hpp"
 #include <pragma/debug/debug_render_info.hpp>
 #include <pragma/game/game_resources.hpp>
 #include <pragma/util/giblet_create_info.hpp>
@@ -39,6 +38,7 @@
 #include <pragma/input/inputhelper.h>
 #include <sharedutils/util_file.h>
 #include <sharedutils/util_path.hpp>
+#include "pragma/asset/util_asset.hpp"
 #include <util_image.hpp>
 #include <util_image_buffer.hpp>
 #include <util_texture_info.hpp>
@@ -58,6 +58,7 @@
 import pragma.audio.util;
 import pragma.platform;
 import pragma.string.unicode;
+import pragma.client.assets;
 import pragma.client.client_state;
 import pragma.client.debug;
 import pragma.client.gui;

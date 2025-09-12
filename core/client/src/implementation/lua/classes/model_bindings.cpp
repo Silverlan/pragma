@@ -8,7 +8,6 @@ module;
 #include "luasystem.h"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
-#include "pragma/asset/c_util_model.hpp"
 #include <pragma/lua/classes/lmodel.h>
 #include "pragma/lua/classes/ldef_model.h"
 #include <pragma/lua/libraries/lfile.h>
@@ -16,6 +15,7 @@ module;
 
 module pragma.client.scripting.lua.classes.model;
 
+import pragma.client.assets;
 import pragma.client.client_state;
 
 extern ClientState *client;

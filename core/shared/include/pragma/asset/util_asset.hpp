@@ -64,8 +64,8 @@ namespace pragma::asset {
 	DLLNETWORK std::optional<std::string> determine_format_from_filename(const std::string_view &fileName, Type type);
 	DLLNETWORK std::optional<Type> determine_type_from_extension(const std::string_view &ext);
 	DLLNETWORK bool matches_format(const std::string_view &format0, const std::string_view &format1);
-	DLLNETWORK util::Path relative_path_to_absolute_path(const util::Path &relPath, Type type, const std::optional<std::string> &rootPath = {});
-	DLLNETWORK util::Path absolute_path_to_relative_path(const util::Path &absPath, Type type);
+	DLLNETWORK ::util::Path relative_path_to_absolute_path(const ::util::Path &relPath, Type type, const std::optional<std::string> &rootPath = {});
+	DLLNETWORK ::util::Path absolute_path_to_relative_path(const ::util::Path &absPath, Type type);
 	DLLNETWORK std::optional<std::string> get_udm_format_extension(Type type, bool binary);
 	constexpr const char *get_asset_root_directory(Type type)
 	{

@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: (c) 2020 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_PRAGMA_ASSET_UTIL_MODEL_HPP__
-#define __C_PRAGMA_ASSET_UTIL_MODEL_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/rendering/raytracing/cycles.hpp"
@@ -10,23 +9,19 @@
 #include "pragma/entities/environment/c_env_camera.h"
 #include <pragma/util/util_game.hpp>
 #include <pragma/asset/util_asset.hpp>
+#include "image/prosper_image.hpp"
+#include "sharedutils/alpha_mode.hpp"
+#include "prosper_enums.hpp"
+#include "pragma/model/model.h"
 #include <pragma/types.hpp>
 #include <cmaterial.h>
 #include <util_texture_info.hpp>
 #include <sharedutils/util_path.hpp>
 
-class Model;
-namespace prosper {
-	class IImage;
-	enum class Format : uint32_t;
-};
-namespace ufile {
-	struct IFile;
-};
-enum class AlphaMode : uint32_t;
-class CMaterial;
-namespace pragma::asset {
-	static std::string EXPORT_PATH = "export/";
+export module pragma.client.assets:import_export;
+
+export namespace pragma::asset {
+	constexpr std::string_view EXPORT_PATH = "export/";
 	struct DLLCLIENT ModelExportInfo {
 		enum class ImageFormat : uint8_t {
 			PNG = 0,
@@ -128,5 +123,3 @@ namespace pragma::asset {
 
 	DLLCLIENT uimg::TextureInfo get_texture_info(bool isGreyScale, bool isNormalMap, AlphaMode alphaMode = AlphaMode::Opaque);
 };
-
-#endif

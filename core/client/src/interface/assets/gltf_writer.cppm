@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/asset/c_util_model.hpp"
 #include <cinttypes>
 #include <string>
 #include <unordered_map>
@@ -13,6 +12,8 @@ module;
 #include "pragma/model/animation/vertex_animation.hpp"
 
 export module pragma.client.assets:gltf_writer;
+
+import :import_export;
 
 export namespace pragma::asset {
 	class GLTFWriter {

@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/asset/c_util_model.hpp"
 #include <ofbx.h>
 #include <sharedutils/util_path.hpp>
 #include <mathutil/vertex.hpp>
@@ -14,6 +13,8 @@ module;
 #include <cinttypes>
 
 export module pragma.client.assets:fbx_loader;
+
+import :import_export;
 
 export namespace pragma::asset::fbx {
 	enum class RotationOrder : uint8_t {

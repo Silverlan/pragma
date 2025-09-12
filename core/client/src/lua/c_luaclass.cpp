@@ -31,7 +31,6 @@
 #include <pragma/game/damageinfo.h>
 #include "pragma/lua/classes/c_lua_entity.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
-#include "pragma/asset/c_util_model.hpp"
 #include "pragma/rendering/shaders/util/c_shader_compose_rma.hpp"
 #include "pragma/rendering/shader_material/shader_material.hpp"
 #include "pragma/rendering/shader_graph/manager.hpp"
@@ -63,6 +62,7 @@
 #include <cmaterial_manager2.hpp>
 #include <wgui/wgui.h>
 
+import pragma.client.assets;
 import pragma.client.client_state;
 import pragma.client.debug;
 import pragma.client.entities.components;

@@ -29,7 +29,6 @@
 #include "luasystem.h"
 #include "textureinfo.h"
 #include <pragma/game/damageinfo.h>
-#include "pragma/lua/classes/c_lua_entity.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/rendering/shaders/util/c_shader_compose_rma.hpp"
 #include "pragma/rendering/shader_material/shader_material.hpp"

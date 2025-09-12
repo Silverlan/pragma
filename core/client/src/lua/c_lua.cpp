@@ -2,15 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-
-#ifdef _MSC_VER
-namespace pragma::string {
-	class Utf8String;
-	class Utf8StringView;
-	class Utf8StringArg;
-};
-#endif
-
 #include "pragma/game/c_game.h"
 #include "pragma/lua/libraries/lents.h"
 #include "pragma/lua/libraries/c_lnetmessages.h"
@@ -19,6 +10,7 @@ namespace pragma::string {
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/rendering/c_rendermode.h"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
+#include <pragma/lua/handle_holder.hpp>
 #include <pragma/lua/converters/optional_converter_t.hpp>
 #include <pragma/lua/converters/pair_converter_t.hpp>
 #include <pragma/lua/classes/lentity.h>
@@ -36,7 +28,6 @@ namespace pragma::string {
 #include <sharedutils/util_string.h>
 #include "pragma/lua/classes/components/c_lentity_components.hpp"
 #include "pragma/entities/components/c_player_component.hpp"
-#include "pragma/lua/classes/c_lua_entity.h"
 #include <pragma/math/e_frustum.h>
 #include <pragma/lua/lua_util_component.hpp>
 #include <pragma/lua/classes/lproperty.hpp>
@@ -69,11 +60,10 @@ namespace pragma::string {
 
 import pragma.locale;
 import pragma.client.client_state;
+import pragma.client.entities;
 import pragma.client.entities.components;
 import pragma.client.scripting.lua;
-#ifndef _MSC_VER
 import pragma.string.unicode;
-#endif
 
 extern CEngine *c_engine;
 extern CGame *c_game;
@@ -278,7 +268,7 @@ void CGame::RegisterLua()
 	//auto tmp = luabind::class_<EntityHandle>("EntityOld");
 	//modEnts[tmp];
 
-	auto classDefBase = luabind::class_<CLuaEntity, luabind::bases<CBaseEntity>, pragma::lua::CLuaEntityHolder>("BaseEntity");
+	auto classDefBase = luabind::class_<CLuaEntity, luabind::bases<CBaseEntity>, pragma::lua::HandleHolder<CLuaEntity>>("BaseEntity");
 	classDefBase.def(luabind::constructor<>());
 	// classDefBase.def(luabind::tostring(luabind::self));
 	//classDefBase.def(luabind::constructor<>());

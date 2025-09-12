@@ -4,8 +4,8 @@
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
 #include "pragma/entities/entityfactories.h"
-#include "pragma/lua/classes/c_lua_entity.h"
 #include "luasystem.h"
+#include <pragma/lua/handle_holder.hpp>
 #include "pragma/entities/c_listener.h"
 #include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/game/c_game_entities.h"
@@ -131,7 +131,7 @@ CBaseEntity *CGame::CreateLuaEntity(std::string classname, unsigned int idx, boo
 	util::ScopeGuard sgVtune {[]() { debug::get_domain().EndTask(); }};
 #endif
 	luabind::object oClass {};
-	auto *ent = static_cast<CBaseEntity *>(Game::CreateLuaEntity<CLuaEntity, pragma::lua::CLuaEntityHolder>(classname, oClass, bLoadIfNotExists));
+	auto *ent = static_cast<CBaseEntity *>(Game::CreateLuaEntity<CLuaEntity, pragma::lua::HandleHolder<CLuaEntity>>(classname, oClass, bLoadIfNotExists));
 	if(ent == nullptr)
 		return nullptr;
 	SetupEntity(ent, idx);

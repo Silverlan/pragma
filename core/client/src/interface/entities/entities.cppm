@@ -4,5 +4,6 @@
 module;
 
 export module pragma.client.entities;
+export import :lua;
 export import :player;
 export import :registration;

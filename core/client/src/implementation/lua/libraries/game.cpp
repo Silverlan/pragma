@@ -6,7 +6,6 @@ module;
 #include "stdafx_client.h"
 #include "luasystem.h"
 #include <pragma/lua/classes/ldef_vector.h>
-#include "pragma/lua/classes/c_lcamera.h"
 #include "pragma/lua/converters/shader_converter_t.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/rendering/render_queue.hpp"

@@ -34,7 +34,6 @@ namespace pragma::string {
 #include "pragma/audio/c_alsound.h"
 #include "pragma/lua/libraries/lgame.h"
 #include <sharedutils/util_string.h>
-#include "pragma/lua/classes/c_lcamera.h"
 #include "pragma/lua/classes/components/c_lentity_components.hpp"
 #include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/lua/classes/c_lua_entity.h"

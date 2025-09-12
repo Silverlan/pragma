@@ -6,6 +6,7 @@ module;
 export module pragma.client.scripting.lua;
 
 export import pragma.client.scripting.lua.bindings.audio;
+export import pragma.client.scripting.lua.bindings.scene;
 
 export import pragma.client.scripting.lua.classes.entity;
 export import pragma.client.scripting.lua.classes.gui;

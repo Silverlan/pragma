@@ -5,7 +5,6 @@
 #include "pragma/game/c_game.h"
 #include "pragma/lua/classes/components/c_lentity_components.hpp"
 #include "pragma/lua/classes/lproperty.hpp"
-#include "pragma/lua/classes/c_lcamera.h"
 #include "pragma/lua/converters/shader_converter_t.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/rendering/render_queue.hpp"
@@ -56,6 +55,7 @@
 #include "pragma/entities/point/constraints/point_constraint_hinge.h"
 #include "pragma/entities/point/constraints/point_constraint_slider.h"
 #include "pragma/entities/components/base_networked_component.hpp"
+#include "pragma/rendering/world_environment.hpp"
 #include "pragma/entities/environment/env_wind.hpp"
 #include "pragma/entities/components/c_ai_component.hpp"
 #include "pragma/entities/components/c_color_component.hpp"
@@ -102,6 +102,7 @@
 #include "pragma/entities/point/point_target.h"
 #include "pragma/entities/baseflashlight.h"
 #include "pragma/entities/basebot.h"
+#include "pragma/model/model.h"
 #include "pragma/entities/c_wheel.hpp"
 #include "pragma/entities/util/c_util_pbr_converter.hpp"
 #include "pragma/entities/environment/lights/c_env_shadow.hpp"
@@ -116,6 +117,7 @@
 #include "pragma/entities/environment/env_quake.h"
 #include "pragma/entities/c_filter_entity_class.h"
 #include "pragma/entities/c_filter_entity_name.h"
+#include "pragma/model/model.h"
 #include <pragma/entities/components/parent_component.hpp>
 #include <pragma/lua/lua_util_component_stream.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
@@ -124,13 +126,14 @@
 
 import pragma.entities.components;
 import pragma.client.entities.components;
+import pragma.client.scripting.lua;
 
 namespace Lua {
 	namespace PBRConverter {
-		static void GenerateAmbientOcclusionMaps(lua_State *l, pragma::CPBRConverterComponent &hComponent, Model &mdl, uint32_t width, uint32_t height, uint32_t samples, bool rebuild) { hComponent.GenerateAmbientOcclusionMaps(mdl, width, height, samples, rebuild); }
-		static void GenerateAmbientOcclusionMaps(lua_State *l, pragma::CPBRConverterComponent &hComponent, Model &mdl, uint32_t width, uint32_t height, uint32_t samples) { hComponent.GenerateAmbientOcclusionMaps(mdl, width, height, samples); }
-		static void GenerateAmbientOcclusionMaps(lua_State *l, pragma::CPBRConverterComponent &hComponent, Model &mdl, uint32_t width, uint32_t height) { hComponent.GenerateAmbientOcclusionMaps(mdl, width, height); }
-		static void GenerateAmbientOcclusionMaps(lua_State *l, pragma::CPBRConverterComponent &hComponent, Model &mdl) { hComponent.GenerateAmbientOcclusionMaps(mdl); }
+		static void GenerateAmbientOcclusionMaps(lua_State *l, pragma::CPBRConverterComponent &hComponent, ::Model &mdl, uint32_t width, uint32_t height, uint32_t samples, bool rebuild) { hComponent.GenerateAmbientOcclusionMaps(mdl, width, height, samples, rebuild); }
+		static void GenerateAmbientOcclusionMaps(lua_State *l, pragma::CPBRConverterComponent &hComponent, ::Model &mdl, uint32_t width, uint32_t height, uint32_t samples) { hComponent.GenerateAmbientOcclusionMaps(mdl, width, height, samples); }
+		static void GenerateAmbientOcclusionMaps(lua_State *l, pragma::CPBRConverterComponent &hComponent, ::Model &mdl, uint32_t width, uint32_t height) { hComponent.GenerateAmbientOcclusionMaps(mdl, width, height); }
+		static void GenerateAmbientOcclusionMaps(lua_State *l, pragma::CPBRConverterComponent &hComponent, ::Model &mdl) { hComponent.GenerateAmbientOcclusionMaps(mdl); }
 
 		static void GenerateAmbientOcclusionMaps(lua_State *l, pragma::CPBRConverterComponent &hComponent, BaseEntity &ent, uint32_t width, uint32_t height, uint32_t samples, bool rebuild) { hComponent.GenerateAmbientOcclusionMaps(ent, width, height, samples, rebuild); }
 		static void GenerateAmbientOcclusionMaps(lua_State *l, pragma::CPBRConverterComponent &hComponent, BaseEntity &ent, uint32_t width, uint32_t height, uint32_t samples) { hComponent.GenerateAmbientOcclusionMaps(ent, width, height, samples); }
@@ -220,7 +223,7 @@ namespace Lua {
 				for(auto j = decltype(numSubMeshes) {0u}; j < numSubMeshes; ++j) {
 					Lua::PushInt(l, j + 1);            /* 1 */
 					Lua::GetTableValue(l, tSubMeshes); /* 1 */
-					auto &mesh = Lua::Check<ModelSubMesh>(l, -1);
+					auto &mesh = Lua::Check<::ModelSubMesh>(l, -1);
 					meshData.subMeshes.push_back(&mesh);
 					Lua::Pop(l, 1); /* 0 */
 				}
@@ -250,115 +253,6 @@ static bool reflection_probe_capture_ibl_reflections_from_scene(lua_State *l, pr
 static bool reflection_probe_capture_ibl_reflections_from_scene(lua_State *l, pragma::CReflectionProbeComponent &hRp, luabind::table<> tEnts) { return reflection_probe_capture_ibl_reflections_from_scene(l, hRp, tEnts, false); }
 static bool reflection_probe_capture_ibl_reflections_from_scene(lua_State *l, pragma::CReflectionProbeComponent &hRp, bool renderJob) { return hRp.CaptureIBLReflectionsFromScene(nullptr, renderJob); }
 static bool reflection_probe_capture_ibl_reflections_from_scene(lua_State *l, pragma::CReflectionProbeComponent &hRp) { return hRp.CaptureIBLReflectionsFromScene(); }
-
-static void register_renderer_bindings(luabind::module_ &entsMod)
-{
-	auto defRenderer = pragma::lua::create_entity_component_class<pragma::CRendererComponent, pragma::BaseEntityComponent>("RendererComponent");
-	defRenderer.def("GetWidth", &pragma::CRendererComponent::GetWidth);
-	defRenderer.def("GetHeight", &pragma::CRendererComponent::GetHeight);
-	defRenderer.def("InitializeRenderTarget",
-	  static_cast<void (*)(lua_State *, pragma::CRendererComponent &, pragma::CSceneComponent &, uint32_t, uint32_t, bool)>([](lua_State *l, pragma::CRendererComponent &renderer, pragma::CSceneComponent &scene, uint32_t width, uint32_t height, bool reload) {
-		  if(reload == false && width == renderer.GetWidth() && height == renderer.GetHeight())
-			  return;
-		  renderer.ReloadRenderTarget(scene, width, height);
-	  }));
-	defRenderer.def("InitializeRenderTarget", static_cast<void (*)(lua_State *, pragma::CRendererComponent &, pragma::CSceneComponent &, uint32_t, uint32_t)>([](lua_State *l, pragma::CRendererComponent &renderer, pragma::CSceneComponent &scene, uint32_t width, uint32_t height) {
-		if(width == renderer.GetWidth() && height == renderer.GetHeight())
-			return;
-		renderer.ReloadRenderTarget(scene, width, height);
-	}));
-	defRenderer.def("GetSceneTexture", &pragma::CRendererComponent::GetSceneTexture, luabind::shared_from_this_policy<0> {});
-	defRenderer.def("GetPresentationTexture", &pragma::CRendererComponent::GetPresentationTexture, luabind::shared_from_this_policy<0> {});
-	defRenderer.def("GetHDRPresentationTexture", &pragma::CRendererComponent::GetHDRPresentationTexture, luabind::shared_from_this_policy<0> {});
-	entsMod[defRenderer];
-
-	auto defRaster = pragma::lua::create_entity_component_class<pragma::CRasterizationRendererComponent, pragma::BaseEntityComponent>("RasterizationRendererComponent");
-	defRaster.add_static_constant("EVENT_ON_RECORD_PREPASS", pragma::CRasterizationRendererComponent::EVENT_ON_RECORD_PREPASS);
-	defRaster.add_static_constant("EVENT_ON_RECORD_LIGHTING_PASS", pragma::CRasterizationRendererComponent::EVENT_ON_RECORD_LIGHTING_PASS);
-	defRaster.add_static_constant("EVENT_PRE_EXECUTE_PREPASS", pragma::CRasterizationRendererComponent::EVENT_PRE_EXECUTE_PREPASS);
-	defRaster.add_static_constant("EVENT_POST_EXECUTE_PREPASS", pragma::CRasterizationRendererComponent::EVENT_POST_EXECUTE_PREPASS);
-	defRaster.add_static_constant("EVENT_PRE_EXECUTE_LIGHTING_PASS", pragma::CRasterizationRendererComponent::EVENT_PRE_EXECUTE_LIGHTING_PASS);
-	defRaster.add_static_constant("EVENT_POST_EXECUTE_LIGHTING_PASS", pragma::CRasterizationRendererComponent::EVENT_POST_EXECUTE_LIGHTING_PASS);
-	defRaster.add_static_constant("EVENT_PRE_PREPASS", pragma::CRasterizationRendererComponent::EVENT_PRE_PREPASS);
-	defRaster.add_static_constant("EVENT_POST_PREPASS", pragma::CRasterizationRendererComponent::EVENT_POST_PREPASS);
-	defRaster.add_static_constant("EVENT_PRE_LIGHTING_PASS", pragma::CRasterizationRendererComponent::EVENT_PRE_LIGHTING_PASS);
-	defRaster.add_static_constant("EVENT_POST_LIGHTING_PASS", pragma::CRasterizationRendererComponent::EVENT_POST_LIGHTING_PASS);
-	defRaster.def("GetPrepassDepthTexture", &Lua::RasterizationRenderer::GetPrepassDepthTexture);
-	defRaster.def("GetPrepassNormalTexture", &Lua::RasterizationRenderer::GetPrepassNormalTexture);
-	defRaster.def("GetRenderTarget", &Lua::RasterizationRenderer::GetRenderTarget);
-	defRaster.def("BeginRenderPass", static_cast<bool (*)(lua_State *, pragma::CRasterizationRendererComponent &, const ::util::DrawSceneInfo &, prosper::IRenderPass &)>(&Lua::RasterizationRenderer::BeginRenderPass));
-	defRaster.def("BeginRenderPass", static_cast<bool (*)(lua_State *, pragma::CRasterizationRendererComponent &, const ::util::DrawSceneInfo &)>(&Lua::RasterizationRenderer::BeginRenderPass));
-	defRaster.def("EndRenderPass", &pragma::CRasterizationRendererComponent::EndRenderPass);
-	defRaster.def("GetPrepassShader", &pragma::CRasterizationRendererComponent::GetPrepassShader);
-	defRaster.def("SetShaderOverride", &pragma::CRasterizationRendererComponent::SetShaderOverride);
-	defRaster.def("ClearShaderOverride", &pragma::CRasterizationRendererComponent::ClearShaderOverride);
-	defRaster.def("SetPrepassMode", &pragma::CRasterizationRendererComponent::SetPrepassMode);
-	defRaster.def("GetPrepassMode", &pragma::CRasterizationRendererComponent::GetPrepassMode);
-	defRaster.def("SetSSAOEnabled", &pragma::CRasterizationRendererComponent::SetSSAOEnabled);
-	defRaster.def("IsSSAOEnabled", &pragma::CRasterizationRendererComponent::IsSSAOEnabled);
-	defRaster.def("GetLightSourceDescriptorSet", static_cast<std::shared_ptr<prosper::IDescriptorSetGroup> (*)(lua_State *, pragma::CRasterizationRendererComponent &)>([](lua_State *l, pragma::CRasterizationRendererComponent &renderer) -> std::shared_ptr<prosper::IDescriptorSetGroup> {
-		auto *ds = pragma::CShadowManagerComponent::GetShadowManager()->GetDescriptorSet();
-		if(ds == nullptr)
-			return nullptr;
-		return ds->GetDescriptorSetGroup().shared_from_this();
-	}));
-	defRaster.def("GetPostPrepassDepthTexture",
-	  static_cast<std::shared_ptr<prosper::Texture> (*)(lua_State *, pragma::CRasterizationRendererComponent &)>([](lua_State *l, pragma::CRasterizationRendererComponent &renderer) -> std::shared_ptr<prosper::Texture> { return renderer.GetPrepass().textureDepth; }));
-	defRaster.def("GetPostProcessingDepthDescriptorSet",
-	  static_cast<std::shared_ptr<prosper::IDescriptorSetGroup> (*)(lua_State *, pragma::CRasterizationRendererComponent &)>(
-	    [](lua_State *l, pragma::CRasterizationRendererComponent &renderer) -> std::shared_ptr<prosper::IDescriptorSetGroup> { return renderer.GetHDRInfo().dsgDepthPostProcessing; }));
-	defRaster.def("GetPostProcessingHDRColorDescriptorSet",
-	  static_cast<std::shared_ptr<prosper::IDescriptorSetGroup> (*)(lua_State *, pragma::CRasterizationRendererComponent &)>(
-	    [](lua_State *l, pragma::CRasterizationRendererComponent &renderer) -> std::shared_ptr<prosper::IDescriptorSetGroup> { return renderer.GetHDRInfo().dsgHDRPostProcessing; }));
-#if 0
-	defRaster.def("GetStagingRenderTarget",static_cast<void(*)(lua_State*,pragma::CRasterizationRendererComponent&)>([](lua_State *l,pragma::CRasterizationRendererComponent &renderer) {
-		
-		auto &rt = renderer.GetHDRInfo().hdrPostProcessingRenderTarget;
-		if(rt == nullptr)
-			return;
-		Lua::Push(l,rt);
-		}));
-	defRaster.def("BlitStagingRenderTargetToMainRenderTarget",static_cast<void(*)(lua_State*,pragma::CRasterizationRendererComponent&,const util::DrawSceneInfo&)>([](lua_State *l,pragma::CRasterizationRendererComponent &renderer,const util::DrawSceneInfo &drawSceneInfo) {
-		
-		renderer.GetHDRInfo().BlitStagingRenderTargetToMainRenderTarget(drawSceneInfo);
-	}));
-#endif
-	defRaster.def("GetBloomTexture", static_cast<std::shared_ptr<prosper::Texture> (*)(lua_State *, pragma::CRasterizationRendererComponent &)>([](lua_State *l, pragma::CRasterizationRendererComponent &renderer) -> std::shared_ptr<prosper::Texture> {
-		auto &rt = renderer.GetHDRInfo().bloomBlurRenderTarget;
-		if(rt == nullptr)
-			return nullptr;
-		return rt->GetTexture().shared_from_this();
-	}));
-#if 0
-	defRaster.def("GetGlowTexture",static_cast<void(*)(lua_State*,pragma::CRasterizationRendererComponent&)>([](lua_State *l,pragma::CRasterizationRendererComponent &renderer) {
-		
-		auto &rt = renderer.GetGlowInfo().renderTarget;
-		if(rt == nullptr)
-			return;
-		Lua::Push(l,rt->GetTexture().shared_from_this());
-	}));
-#endif
-	defRaster.def("GetRenderTargetTextureDescriptorSet",
-	  static_cast<std::shared_ptr<prosper::IDescriptorSetGroup> (*)(lua_State *, pragma::CRasterizationRendererComponent &)>(
-	    [](lua_State *l, pragma::CRasterizationRendererComponent &renderer) -> std::shared_ptr<prosper::IDescriptorSetGroup> { return renderer.GetHDRInfo().dsgHDRPostProcessing; }));
-	defRaster.def("ReloadPresentationRenderTarget", &pragma::CRasterizationRendererComponent::ReloadPresentationRenderTarget);
-	defRaster.def("RecordPrepass", &pragma::CRasterizationRendererComponent::RecordPrepass);
-	defRaster.def("RecordLightingPass", &pragma::CRasterizationRendererComponent::RecordLightingPass);
-	defRaster.def("ExecutePrepass", &pragma::CRasterizationRendererComponent::ExecutePrepass);
-	defRaster.def("ExecuteLightingPass", &pragma::CRasterizationRendererComponent::ExecuteLightingPass);
-	defRaster.def("GetPrepassCommandBufferRecorder", &pragma::CRasterizationRendererComponent::GetPrepassCommandBufferRecorder, luabind::copy_policy<0> {});
-	defRaster.def("GetShadowCommandBufferRecorder", &pragma::CRasterizationRendererComponent::GetShadowCommandBufferRecorder, luabind::copy_policy<0> {});
-	defRaster.def("GetLightingPassCommandBufferRecorder", &pragma::CRasterizationRendererComponent::GetLightingPassCommandBufferRecorder, luabind::copy_policy<0> {});
-	defRaster.def("UpdatePrepassRenderBuffers", &pragma::CRasterizationRendererComponent::UpdatePrepassRenderBuffers);
-	defRaster.def("UpdateLightingPassRenderBuffers", &pragma::CRasterizationRendererComponent::UpdateLightingPassRenderBuffers);
-	defRaster.add_static_constant("PREPASS_MODE_DISABLED", umath::to_integral(pragma::CRasterizationRendererComponent::PrepassMode::NoPrepass));
-	defRaster.add_static_constant("PREPASS_MODE_DEPTH_ONLY", umath::to_integral(pragma::CRasterizationRendererComponent::PrepassMode::DepthOnly));
-	defRaster.add_static_constant("PREPASS_MODE_EXTENDED", umath::to_integral(pragma::CRasterizationRendererComponent::PrepassMode::Extended));
-	entsMod[defRaster];
-
-	auto defRaytracing = pragma::lua::create_entity_component_class<pragma::CRaytracingComponent, pragma::BaseEntityComponent>("RaytracingRendererComponent");
-	entsMod[defRaytracing];
-}
 
 namespace pragma {
 	template<typename T>
@@ -529,7 +423,7 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	// defCEye.add_static_constant("EVENT_ON_BLINK",pragma::CEyeComponent::EVENT_ON_BLINK);
 	entsMod[defCEye];
 
-	register_renderer_bindings(entsMod);
+	pragma::scripting::lua::bindings::register_renderers(l, entsMod);
 
 	auto defCScene = pragma::lua::create_entity_component_class<pragma::CSceneComponent, pragma::BaseEntityComponent>("SceneComponent");
 	defCScene.add_static_constant("OCCLUSION_CULLING_METHOD_BRUTE_FORCE", umath::to_integral(SceneRenderDesc::OcclusionCullingMethod::BruteForce));
@@ -565,8 +459,18 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defCScene.def("GetSize", static_cast<std::pair<uint32_t, uint32_t> (*)(const pragma::CSceneComponent &)>([](const pragma::CSceneComponent &scene) -> std::pair<uint32_t, uint32_t> { return {scene.GetWidth(), scene.GetHeight()}; }));
 	defCScene.def("Resize", &pragma::CSceneComponent::Resize);
 	// defCScene.def("BeginDraw",&pragma::CSceneComponent::BeginDraw);
-	defCScene.def("UpdateBuffers", &Lua::Scene::UpdateBuffers);
-	defCScene.def("GetWorldEnvironment", &Lua::Scene::GetWorldEnvironment);
+	defCScene.def("UpdateBuffers", +[](lua_State *l, pragma::CSceneComponent &scene, prosper::ICommandBuffer &hCommandBuffer) {
+		if(hCommandBuffer.IsPrimary() == false)
+			return;
+		auto pCmdBuffer = std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(hCommandBuffer.shared_from_this());
+		scene.UpdateBuffers(pCmdBuffer);
+	});
+	defCScene.def("GetWorldEnvironment", +[](lua_State *l, pragma::CSceneComponent &scene) -> std::shared_ptr<WorldEnvironment> {
+		auto *worldEnv = scene.GetWorldEnvironment();
+		if(worldEnv == nullptr)
+			return nullptr;
+		return worldEnv->shared_from_this();
+	});
 	defCScene.def("SetWorldEnvironment", &pragma::CSceneComponent::SetWorldEnvironment);
 	defCScene.def("ClearWorldEnvironment", &pragma::CSceneComponent::ClearWorldEnvironment);
 	defCScene.def("InitializeRenderTarget", &pragma::CSceneComponent::ReloadRenderTarget);
@@ -850,10 +754,10 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	entsMod[defCSkyCamera];
 
 	auto defCPBRConverter = pragma::lua::create_entity_component_class<pragma::CPBRConverterComponent, pragma::BaseEntityComponent>("PBRConverterComponent");
-	defCPBRConverter.def("GenerateAmbientOcclusionMaps", static_cast<void (*)(lua_State *, pragma::CPBRConverterComponent &, Model &, uint32_t, uint32_t, uint32_t, bool)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
-	defCPBRConverter.def("GenerateAmbientOcclusionMaps", static_cast<void (*)(lua_State *, pragma::CPBRConverterComponent &, Model &, uint32_t, uint32_t, uint32_t)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
-	defCPBRConverter.def("GenerateAmbientOcclusionMaps", static_cast<void (*)(lua_State *, pragma::CPBRConverterComponent &, Model &, uint32_t, uint32_t)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
-	defCPBRConverter.def("GenerateAmbientOcclusionMaps", static_cast<void (*)(lua_State *, pragma::CPBRConverterComponent &, Model &)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
+	defCPBRConverter.def("GenerateAmbientOcclusionMaps", static_cast<void (*)(lua_State *, pragma::CPBRConverterComponent &, ::Model &, uint32_t, uint32_t, uint32_t, bool)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
+	defCPBRConverter.def("GenerateAmbientOcclusionMaps", static_cast<void (*)(lua_State *, pragma::CPBRConverterComponent &, ::Model &, uint32_t, uint32_t, uint32_t)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
+	defCPBRConverter.def("GenerateAmbientOcclusionMaps", static_cast<void (*)(lua_State *, pragma::CPBRConverterComponent &, ::Model &, uint32_t, uint32_t)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
+	defCPBRConverter.def("GenerateAmbientOcclusionMaps", static_cast<void (*)(lua_State *, pragma::CPBRConverterComponent &, ::Model &)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
 	defCPBRConverter.def("GenerateAmbientOcclusionMaps", static_cast<void (*)(lua_State *, pragma::CPBRConverterComponent &, BaseEntity &, uint32_t, uint32_t, uint32_t, bool)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
 	defCPBRConverter.def("GenerateAmbientOcclusionMaps", static_cast<void (*)(lua_State *, pragma::CPBRConverterComponent &, BaseEntity &, uint32_t, uint32_t, uint32_t)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
 	defCPBRConverter.def("GenerateAmbientOcclusionMaps", static_cast<void (*)(lua_State *, pragma::CPBRConverterComponent &, BaseEntity &, uint32_t, uint32_t)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));

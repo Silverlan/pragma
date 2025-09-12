@@ -4,6 +4,7 @@
 #include "stdafx_client.h"
 #include "pragma/audio/c_lalsound.hpp"
 #include "pragma/audio/c_alsound.h"
+#include "pragma/audio/c_lalsound.hpp"
 #include <pragma/lua/converters/pair_converter_t.hpp>
 
 import se_script;

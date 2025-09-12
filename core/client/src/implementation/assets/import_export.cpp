@@ -18,7 +18,6 @@ module;
 #include "pragma/entities/environment/lights/c_env_light_point.h"
 #include "pragma/entities/environment/lights/c_env_light_directional.h"
 #include "pragma/asset/util_asset.hpp"
-#include "pragma/entities/components/c_color_component.hpp"
 #include "pragma/game/game_limits.h"
 #include <cmaterial_manager2.hpp>
 #include <datasystem_t.hpp>

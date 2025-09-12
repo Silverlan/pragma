@@ -8,12 +8,13 @@ module;
 #include "pragma/entities/environment/lights/c_env_light_point.h"
 #include "pragma/entities/environment/lights/c_env_light_spot.h"
 #include "pragma/entities/environment/lights/c_env_light_directional.h"
-#include "pragma/entities/components/c_color_component.hpp"
 #include <mathutil/umath_lighting.hpp>
 #include <mathutil/umat.h>
 #include <array>
 
 export module pragma.client.math;
+
+import pragma.client.entities.components.color;
 
 export namespace pragma::math {
 	DLLCLIENT const std::array<Mat4, 6> &get_cubemap_view_matrices();

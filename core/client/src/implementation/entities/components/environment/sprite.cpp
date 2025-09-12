@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/components/c_color_component.hpp"
 #include "pragma/entities/components/c_attachment_component.hpp"
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/entities/components/basetoggle.h"
@@ -16,6 +15,7 @@ module;
 
 module pragma.client.entities.components.effects.sprite;
 
+import pragma.client.entities.components.color;
 import pragma.client.client_state;
 
 using namespace pragma;

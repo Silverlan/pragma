@@ -8,7 +8,6 @@
 #include <pragma/entities/entity_component_manager.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include "pragma/entities/components/c_ai_component.hpp"
-#include "pragma/entities/components/c_color_component.hpp"
 #include "pragma/entities/components/c_transform_component.hpp"
 #include "pragma/entities/components/c_vehicle_component.hpp"
 #include "pragma/entities/components/c_weapon_component.hpp"

@@ -28,7 +28,6 @@ module;
 #include "pragma/entities/environment/lights/c_env_light_spot.h"
 #include "pragma/entities/environment/lights/c_env_light_point.h"
 #include "pragma/entities/environment/lights/c_env_light_directional.h"
-#include "pragma/entities/components/c_color_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 
 module pragma.client.scripting.lua.libraries.import_lib;

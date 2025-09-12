@@ -6,7 +6,6 @@
 #include "pragma/entities/environment/lights/c_env_shadow_csm.hpp"
 #include "pragma/entities/baseentity_luaobject.h"
 #include "pragma/rendering/world_environment.hpp"
-#include "pragma/entities/components/c_color_component.hpp"
 #include "pragma/entities/components/c_transform_component.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/game/c_game.h"

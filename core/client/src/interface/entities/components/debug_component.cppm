@@ -5,7 +5,6 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/components/c_transform_component.hpp"
-#include "pragma/entities/components/c_color_component.hpp"
 #include "pragma/debug/debug_render_info.hpp"
 #include <pragma/entities/components/logic_component.hpp>
 #include <pragma/entities/components/base_debug_component.hpp>
@@ -14,6 +13,7 @@ module;
 export module pragma.client.entities.components.debug;
 
 import pragma.client.debug;
+import pragma.client.entities.components.color;
 import pragma.client.entities.components.toggle;
 
 export namespace pragma {

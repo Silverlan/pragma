@@ -6,7 +6,6 @@
 #include <pragma/audio/soundscript.h>
 #include "pragma/audio/alsoundscript.h"
 #include <fsys/filesystem.h>
-#include "pragma/audio/c_sound_load.h"
 #include <pragma/lua/luacallback.h>
 #include "pragma/audio/c_alsound.h"
 #include <pragma/audio/alsound_type.h>

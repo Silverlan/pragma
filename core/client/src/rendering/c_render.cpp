@@ -4,12 +4,10 @@
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
 #include "pragma/c_engine.h"
-#include "pragma/model/c_side.h"
 #include <mathutil/uquat.h>
 #include "pragma/rendering/c_rendermode.h"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
-#include "pragma/model/brush/c_brushmesh.h"
 #include "pragma/entities/components/c_player_component.hpp"
 #include <wgui/wgui.h>
 #include "pragma/rendering/global_shader_input_manager.hpp"
@@ -52,6 +50,7 @@
 import pragma.client.debug;
 import pragma.client.entities.components;
 import pragma.client.gui;
+import pragma.client.model;
 import pragma.client.physics;
 import pragma.client.rendering.shaders;
 import pragma.client.scripting.lua;

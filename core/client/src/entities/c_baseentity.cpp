@@ -9,7 +9,6 @@
 #include "pragma/game/c_game.h"
 #include "pragma/rendering/c_rendermode.h"
 #include "pragma/model/c_model.h"
-#include "pragma/model/brush/c_brushmesh.h"
 #include <pragma/math/intersection.h>
 #include "pragma/entities/baseentity_luaobject.h"
 #include "pragma/entities/parentinfo.h"

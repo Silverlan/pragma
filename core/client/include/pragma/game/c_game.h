@@ -48,17 +48,8 @@ class WIBase;
 using WIHandle = util::TWeakSharedHandle<WIBase>;
 
 class CBaseEntity;
-class ShaderScreen;
-class CBrushMesh;
-class CModelMesh;
-class CSide;
-class CBaseLuaEntity;
 class CMaterial;
-enum class ShadowType : uint8_t;
 class WorldEnvironment;
-template<class T>
-class OcclusionOctree;
-enum class UniformBinding : uint32_t;
 namespace al {
 	class IEffect;
 };
@@ -73,9 +64,6 @@ namespace pragma {
 	class CGameComponent;
 	namespace debug {
 		class GPUProfilingStage;
-	};
-	namespace physics {
-		class IVisualDebugger;
 	};
 	namespace rendering {
 		class RenderQueueBuilder;

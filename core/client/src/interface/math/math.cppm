@@ -1,13 +1,28 @@
-// SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
+// SPDX-FileCopyrightText: (c) 2025 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "pragma/math/c_util_math.hpp"
+module;
+
+#include "pragma/clientdefinitions.h"
 #include "pragma/entities/environment/lights/c_env_light.h"
-#include "pragma/entities/environment/lights/c_env_light_directional.h"
 #include "pragma/entities/environment/lights/c_env_light_point.h"
 #include "pragma/entities/environment/lights/c_env_light_spot.h"
+#include "pragma/entities/environment/lights/c_env_light_directional.h"
 #include "pragma/entities/components/c_color_component.hpp"
-#include <pragma/entities/environment/lights/env_light.h>
+#include <mathutil/umath_lighting.hpp>
+#include <mathutil/umat.h>
+#include <array>
+
+export module pragma.client.math;
+
+export namespace pragma::math {
+	DLLCLIENT const std::array<Mat4, 6> &get_cubemap_view_matrices();
+	DLLCLIENT const Mat4 &get_cubemap_projection_matrix(float aspectRatio = 1.f, float nearZ = 0.1f, float farZ = 10.f);
+
+	namespace cycles {
+		Watt get_light_power(const CLightComponent &light);
+	};
+};
 
 const std::array<Mat4, 6> &pragma::math::get_cubemap_view_matrices()
 {

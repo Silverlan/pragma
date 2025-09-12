@@ -34,7 +34,6 @@ module;
 #include "pragma/rendering/shaders/world/c_shader_pbr.hpp"
 #include "pragma/rendering/raytracing/cycles.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
-#include "pragma/math/c_util_math.hpp"
 #include "pragma/console/c_cvar_global_functions.h"
 #include <pragma/entities/entity_component_manager_t.hpp>
 #include <pragma/entities/components/base_entity_component_logging.hpp>
@@ -47,6 +46,7 @@ module pragma.client.entities.components.env_reflection_probe;
 
 import pragma.client.client_state;
 import pragma.client.gui;
+import pragma.client.math;
 import pragma.client.rendering.shaders;
 
 extern CEngine *c_engine;

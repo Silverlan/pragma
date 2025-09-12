@@ -52,7 +52,6 @@
 #include "pragma/game/c_game_callback.h"
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"
 #include "pragma/rendering/world_environment.hpp"
-#include "pragma/audio/c_sound_efx.hpp"
 #include <pragma/lua/luafunction_call.h>
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/shaders/c_shader_lua.hpp"
@@ -96,6 +95,7 @@
 #include "pragma/game/c_game.h"
 
 import pragma.client.ai;
+import pragma.client.audio;
 import pragma.client.client_state;
 import pragma.client.debug;
 import pragma.client.entities;

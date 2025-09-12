@@ -8,7 +8,6 @@ module;
 #include "pragma/audio/soundscript_events.h"
 #include "pragma/audio/c_alsound.h"
 #include <sharedutils/util_string.h>
-#include "pragma/audio/c_sound_efx.hpp"
 #include <alsoundsystem.hpp>
 #include <algorithm>
 #include <udm.hpp>

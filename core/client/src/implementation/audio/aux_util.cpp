@@ -1,15 +1,20 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include <alsoundsystem.hpp>
 #include <alsoundsystem_create_effect.hpp>
-#include "pragma/audio/c_sound_efx.hpp"
 #include "pragma/audio/c_engine_sound.hpp"
 #include "pragma/console/c_cvar_global_functions.h"
 #include <pragma/c_engine.h>
 #include <alsound_effect.hpp>
 #include <udm.hpp>
+
+module pragma.client.audio;
+
+import :aux_util;
 
 extern CEngine *c_engine;
 

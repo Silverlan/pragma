@@ -59,7 +59,7 @@ namespace pragma {
 		void UpdateWorldShadowCasters(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, pragma::CLightComponent &light);
 		void UpdateEntityShadowCasters(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, pragma::CLightComponent &light);
 		RenderResultFlags RenderShadows(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, pragma::CLightComponent &light, uint32_t layerId, const Mat4 &depthMVP, pragma::ShaderShadow &shader, bool bTranslucent);
-		void RenderCSMShadows(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, pragma::CLightDirectionalComponent &light, bool drawParticleShadows);
+		void RenderCSMShadows(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, pragma::BaseEnvLightDirectionalComponent &light, bool drawParticleShadows);
 
 		std::vector<ShadowRenderInfo> m_shadowCasters = {};
 

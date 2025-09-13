@@ -11,7 +11,6 @@ module;
 #include "pragma/entities/components/c_light_map_component.hpp"
 #include "pragma/entities/environment/lights/c_env_shadow_csm.hpp"
 #include "pragma/entities/environment/lights/c_env_light.h"
-#include "pragma/entities/environment/lights/c_env_light_directional.h"
 #include "pragma/entities/environment/c_env_camera.h"
 #include <image/prosper_msaa_texture.hpp>
 #include <pragma/logging.hpp>
@@ -27,6 +26,7 @@ module;
 module pragma.client.entities.components.rasterization_renderer;
 
 import pragma.client.client_state;
+import pragma.client.entities.components.lights.directional;
 import pragma.client.rendering.shaders;
 
 extern CGame *c_game;
@@ -224,12 +224,12 @@ void CRasterizationRendererComponent::InitializeLightDescriptorSets()
 	}
 }
 
-void CRasterizationRendererComponent::UpdateCSMDescriptorSet(pragma::CLightDirectionalComponent &lightSource)
+void CRasterizationRendererComponent::UpdateCSMDescriptorSet(pragma::BaseEnvLightDirectionalComponent &lightSource)
 {
 	auto *dsLights = GetRendererDescriptorSet();
 	if(dsLights == nullptr)
 		return;
-	auto *pShadowMap = lightSource.GetShadowMap();
+	auto *pShadowMap = static_cast<CLightDirectionalComponent&>(lightSource).GetShadowMap();
 	auto texture = pShadowMap ? pShadowMap->GetDepthTexture() : nullptr;
 	if(texture == nullptr)
 		return;

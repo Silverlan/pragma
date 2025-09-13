@@ -4,7 +4,6 @@
 #include "stdafx_client.h"
 #include "pragma/entities/game/c_game_shadow_manager.hpp"
 #include "pragma/rendering/shaders/c_shader_shadow.hpp"
-#include "pragma/entities/environment/lights/c_env_light_directional.h"
 #include "pragma/entities/environment/lights/c_env_shadow_csm.hpp"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/entities/environment/c_env_camera.h"
@@ -21,7 +20,7 @@ using namespace pragma;
 extern CEngine *c_engine;
 extern CGame *c_game;
 
-void ShadowRenderer::RenderCSMShadows(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, pragma::CLightDirectionalComponent &light, bool drawParticleShadows)
+void ShadowRenderer::RenderCSMShadows(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, pragma::BaseEnvLightDirectionalComponent &light, bool drawParticleShadows)
 {
 #if 0
 	auto pLightComponent = light.GetEntity().GetComponent<pragma::CLightComponent>();

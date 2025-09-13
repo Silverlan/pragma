@@ -65,7 +65,7 @@ namespace pragma {
 
 		const Mat4 &GetStaticPendingViewProjectionMatrix(uint32_t layer) const;
 		const std::shared_ptr<prosper::RenderTarget> &GetStaticPendingRenderTarget() const;
-		void RenderBatch(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, pragma::CLightDirectionalComponent &light);
+		void RenderBatch(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, pragma::BaseEnvLightDirectionalComponent &light);
 
 		std::shared_ptr<prosper::IFramebuffer> GetFramebuffer(pragma::CLightComponent::ShadowMapType smType, uint32_t layer = 0) const;
 		prosper::IRenderPass *GetRenderPass(pragma::CLightComponent::ShadowMapType smType) const;

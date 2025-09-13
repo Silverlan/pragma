@@ -6,7 +6,6 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/environment/lights/c_env_light.h"
 #include "pragma/entities/environment/lights/c_env_light_spot.h"
-#include "pragma/entities/environment/lights/c_env_light_directional.h"
 #include <mathutil/umath_lighting.hpp>
 #include <mathutil/umat.h>
 #include <array>
@@ -14,6 +13,7 @@ module;
 export module pragma.client.math;
 
 import pragma.client.entities.components.color;
+import pragma.client.entities.components.lights.directional;
 import pragma.client.entities.components.lights.point;
 
 export namespace pragma::math {

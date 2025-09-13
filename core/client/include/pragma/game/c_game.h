@@ -80,7 +80,7 @@ namespace pragma {
 	class BaseWorldComponent;
 	class CListenerComponent;
 	class CParticleSystemComponent;
-	class CLightDirectionalComponent;
+	class BaseEnvLightDirectionalComponent;
 	class CCameraComponent;
 	class CSceneComponent;
 };
@@ -353,7 +353,7 @@ class DLLCLIENT CGame : public Game {
 	const util::WeakHandle<prosper::Shader> &GetGameShader(GameShader shader) const;
 
 	// Lights
-	pragma::CLightDirectionalComponent *GetEnvironmentLightSource() const;
+	pragma::BaseEnvLightDirectionalComponent *GetEnvironmentLightSource() const;
 	void UpdateEnvironmentLightSource();
 
 	// Inputs
@@ -497,7 +497,7 @@ class DLLCLIENT CGame : public Game {
 	util::TWeakSharedHandle<pragma::CSceneComponent> m_scene = util::TWeakSharedHandle<pragma::CSceneComponent> {};
 	std::shared_ptr<WorldEnvironment> m_worldEnvironment = nullptr;
 
-	void OnEnvironmentLightSourceChanged(pragma::CLightDirectionalComponent *oldSource, pragma::CLightDirectionalComponent *newSource);
+	void OnEnvironmentLightSourceChanged(pragma::BaseEnvLightDirectionalComponent *oldSource, pragma::BaseEnvLightDirectionalComponent *newSource);
 
 	void UpdateShaderTimeData();
 
@@ -514,7 +514,7 @@ class DLLCLIENT CGame : public Game {
 	std::vector<CBaseEntity *> m_shEnts;
 	std::vector<CBaseEntity *> m_entsOccluded;
 	std::vector<BaseEntity *> m_shBaseEnts;
-	util::TWeakSharedHandle<pragma::CLightDirectionalComponent> m_hEnvLight = util::TWeakSharedHandle<pragma::CLightDirectionalComponent> {};
+	util::TWeakSharedHandle<pragma::BaseEnvLightDirectionalComponent> m_hEnvLight = util::TWeakSharedHandle<pragma::BaseEnvLightDirectionalComponent> {};
 	util::TWeakSharedHandle<pragma::CListenerComponent> m_listener = util::TWeakSharedHandle<pragma::CListenerComponent> {};
 	util::TWeakSharedHandle<pragma::CPlayerComponent> m_plLocal = util::TWeakSharedHandle<pragma::CPlayerComponent> {};
 	util::TWeakSharedHandle<pragma::CViewModelComponent> m_viewModel = util::TWeakSharedHandle<pragma::CViewModelComponent> {};

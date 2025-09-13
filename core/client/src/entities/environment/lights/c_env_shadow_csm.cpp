@@ -4,7 +4,6 @@
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
 #include "pragma/entities/environment/lights/c_env_shadow_csm.hpp"
-#include "pragma/entities/environment/lights/c_env_light_directional.h"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/console/c_cvar.h"
@@ -280,7 +279,7 @@ void CShadowCSMComponent::UpdateFrustum(pragma::CCameraComponent &cam, const Mat
 		UpdateFrustum(i, cam, matView, dir);
 }
 
-void CShadowCSMComponent::RenderBatch(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, pragma::CLightDirectionalComponent &light)
+void CShadowCSMComponent::RenderBatch(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, pragma::BaseEnvLightDirectionalComponent &light)
 {
 #if 0
 	auto pLightComponent = light.GetEntity().GetComponent<pragma::CLightComponent>();

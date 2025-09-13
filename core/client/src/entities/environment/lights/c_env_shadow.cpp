@@ -12,7 +12,6 @@
 #include "pragma/rendering/shaders/c_shader_shadow.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/environment/lights/c_env_light_spot.h"
-#include "pragma/entities/environment/lights/c_env_light_directional.h"
 #include "pragma/entities/game/c_game_occlusion_culler.hpp"
 #include "pragma/rendering/render_queue_instancer.hpp"
 #include "pragma/rendering/render_queue_worker.hpp"

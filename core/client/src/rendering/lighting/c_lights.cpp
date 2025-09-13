@@ -3,7 +3,7 @@
 
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
-#include "pragma/entities/environment/lights/c_env_light_directional.h"
+#include "pragma/entities/environment/lights/env_light_directional.h"
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
@@ -12,7 +12,7 @@ import pragma.client.entities.components;
 extern CGame *c_game;
 extern CEngine *c_engine;
 
-pragma::CLightDirectionalComponent *CGame::GetEnvironmentLightSource() const { return const_cast<pragma::CLightDirectionalComponent *>(m_hEnvLight.get()); }
+pragma::BaseEnvLightDirectionalComponent *CGame::GetEnvironmentLightSource() const { return const_cast<pragma::BaseEnvLightDirectionalComponent *>(m_hEnvLight.get()); }
 void CGame::UpdateEnvironmentLightSource()
 {
 	auto *oldLightSource = m_hEnvLight.get();
@@ -25,7 +25,7 @@ void CGame::UpdateEnvironmentLightSource()
 		auto pLightDirComponent = ent->GetComponent<pragma::CLightDirectionalComponent>();
 		pLightDirComponent->ReloadShadowCommandBuffers();
 		if(pLightDirComponent.get() != oldLightSource) {
-			m_hEnvLight = pLightDirComponent->GetHandle<pragma::CLightDirectionalComponent>();
+			m_hEnvLight = pLightDirComponent->GetHandle<pragma::BaseEnvLightDirectionalComponent>();
 			OnEnvironmentLightSourceChanged(oldLightSource, pLightDirComponent.get());
 		}
 		return;
@@ -35,7 +35,7 @@ void CGame::UpdateEnvironmentLightSource()
 	m_hEnvLight = decltype(m_hEnvLight) {};
 	OnEnvironmentLightSourceChanged(oldLightSource, nullptr);
 }
-void CGame::OnEnvironmentLightSourceChanged(pragma::CLightDirectionalComponent *oldSource, pragma::CLightDirectionalComponent *newSource)
+void CGame::OnEnvironmentLightSourceChanged(pragma::BaseEnvLightDirectionalComponent *oldSource, pragma::BaseEnvLightDirectionalComponent *newSource)
 {
-	CallCallbacks<void, pragma::CLightDirectionalComponent *, pragma::CLightDirectionalComponent *>("OnEnvironmentLightSourceChanged", oldSource, newSource);
+	CallCallbacks<void, pragma::CLightDirectionalComponent *, pragma::CLightDirectionalComponent *>("OnEnvironmentLightSourceChanged", static_cast<pragma::CLightDirectionalComponent*>(oldSource), static_cast<pragma::CLightDirectionalComponent*>(newSource));
 }

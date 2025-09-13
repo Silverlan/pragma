@@ -26,7 +26,6 @@ module;
 //#include <assimp/IOStream.hpp>
 #include "pragma/entities/environment/lights/c_env_light.h"
 #include "pragma/entities/environment/lights/c_env_light_spot.h"
-#include "pragma/entities/environment/lights/c_env_light_directional.h"
 #include "pragma/entities/environment/c_env_camera.h"
 
 module pragma.client.scripting.lua.libraries.import_lib;

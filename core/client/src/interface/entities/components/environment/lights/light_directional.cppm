@@ -1,17 +1,18 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_ENV_LIGHT_DIRECTIONAL_H__
-#define __C_ENV_LIGHT_DIRECTIONAL_H__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/c_baseentity.h"
+#include "pragma/entities/environment/lights/c_env_shadow_csm.hpp"
 #include "pragma/entities/environment/lights/c_env_light.h"
 #include "pragma/entities/environment/lights/env_light_directional.h"
 #include <pragma/util/mvpbase.h>
 
-namespace pragma {
-	class CShadowCSMComponent;
+export module pragma.client.entities.components.lights.directional;
+
+export namespace pragma {
 	class DLLCLIENT CLightDirectionalComponent final : public BaseEnvLightDirectionalComponent, public CBaseNetComponent, public MVPBias<1> {
 	  public:
 		CLightDirectionalComponent(BaseEntity &ent);
@@ -43,9 +44,7 @@ namespace pragma {
 	};
 };
 
-class DLLCLIENT CEnvLightDirectional : public CBaseEntity {
+export class DLLCLIENT CEnvLightDirectional : public CBaseEntity {
   public:
 	virtual void Initialize() override;
 };
-
-#endif

@@ -6,7 +6,7 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <pragma/entities/components/base_entity_component.hpp>
 #include "pragma/entities/c_baseentity.h"
-#include "pragma/entities/environment/lights/c_env_light_directional.h"
+#include "pragma/entities/environment/lights/env_light_directional.h"
 #include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/entities/components/renderers/rasterization/hdr_data.hpp"
 #include "pragma/rendering/render_processor.hpp"
@@ -181,7 +181,7 @@ export namespace pragma {
 		prosper::IDescriptorSet *GetLightSourceDescriptorSetCompute() const;
 
 		prosper::Shader *GetWireframeShader() const;
-		void UpdateCSMDescriptorSet(pragma::CLightDirectionalComponent &lightSource);
+		void UpdateCSMDescriptorSet(pragma::BaseEnvLightDirectionalComponent &lightSource);
 
 		uint32_t GetWidth() const;
 		uint32_t GetHeight() const;

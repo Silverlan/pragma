@@ -9,6 +9,15 @@
 #include <pragma/entities/components/movement_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
+#include "pragma/lua/classes/ldef_entity.h"
+#include "pragma/entities/components/c_ai_component.hpp"
+#include "luasystem.h"
+#include "pragma/lua/classes/components/c_lentity_components.hpp"
+#include <pragma/lua/lua_util_component_stream.hpp>
+#include <pragma/lua/lua_util_component.hpp>
+#include <pragma/model/model.h>
+#include <pragma/lua/classes/lproperty.hpp>
+#include <pragma/lua/lentity_components_base_types.hpp>
 
 import pragma.client.entities.components;
 
@@ -138,4 +147,10 @@ util::EventReply CAIComponent::HandleEvent(ComponentEventId eventId, ComponentEv
 	if(BaseAIComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
 		return util::EventReply::Handled;
 	return util::EventReply::Unhandled;
+}
+
+void CAIComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts)
+{
+	auto def = pragma::lua::create_entity_component_class<pragma::CAIComponent, pragma::BaseAIComponent>("AIComponent");
+	modEnts[def];
 }

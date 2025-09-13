@@ -7,16 +7,6 @@
 #include <pragma/lua/ldefinitions.h>
 #include "pragma/lua/classes/components/c_lentity_components.hpp"
 
-namespace pragma {
-	class BaseEnvParticleSystemComponent;
-};
-namespace Lua {
-	namespace ParticleSystemModifier {
-		void register_particle_class(luabind::class_<pragma::CParticleSystemComponent, pragma::BaseEnvParticleSystemComponent> &defPtc);
-		void register_modifier_class(luabind::class_<pragma::CParticleSystemComponent, pragma::BaseEnvParticleSystemComponent> &defPtc);
-	};
-};
-
 class CParticleModifierLua;
 namespace pragma {
 	class DLLCLIENT LuaParticleModifierManager {

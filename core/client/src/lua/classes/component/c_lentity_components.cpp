@@ -129,57 +129,6 @@ namespace Lua {
 		static void GenerateAmbientOcclusionMaps(lua_State *l, pragma::CPBRConverterComponent &hComponent, BaseEntity &ent, uint32_t width, uint32_t height) { hComponent.GenerateAmbientOcclusionMaps(ent, width, height); }
 		static void GenerateAmbientOcclusionMaps(lua_State *l, pragma::CPBRConverterComponent &hComponent, BaseEntity &ent) { hComponent.GenerateAmbientOcclusionMaps(ent); }
 	};
-	namespace ParticleSystem {
-		static std::string get_key_value(lua_State *l, const luabind::object &value)
-		{
-			auto type = luabind::type(value);
-			switch(type) {
-			case LUA_TNUMBER:
-				return std::to_string(luabind::object_cast<double>(value));
-			case LUA_TBOOLEAN:
-				return luabind::object_cast<bool>(value) ? "1" : "0";
-			case LUA_TUSERDATA:
-				{
-					auto *v4 = luabind::object_cast_nothrow<Vector4 *>(value, static_cast<Vector4 *>(nullptr));
-					if(v4)
-						return std::to_string(v4->x) + " " + std::to_string(v4->y) + " " + std::to_string(v4->z) + " " + std::to_string(v4->w);
-
-					auto *v3 = luabind::object_cast_nothrow<Vector3 *>(value, static_cast<Vector3 *>(nullptr));
-					if(v3)
-						return std::to_string(v3->x) + " " + std::to_string(v3->y) + " " + std::to_string(v3->z);
-
-					auto *v2 = luabind::object_cast_nothrow<Vector2 *>(value, static_cast<Vector2 *>(nullptr));
-					if(v2)
-						return std::to_string(v2->x) + " " + std::to_string(v2->y);
-
-					auto *v4i = luabind::object_cast_nothrow<Vector4i *>(value, static_cast<Vector4i *>(nullptr));
-					if(v4i)
-						return std::to_string(v4i->x) + " " + std::to_string(v4i->y) + " " + std::to_string(v4i->z) + " " + std::to_string(v4i->w);
-
-					auto *v3i = luabind::object_cast_nothrow<Vector3i *>(value, static_cast<Vector3i *>(nullptr));
-					if(v3i)
-						return std::to_string(v3i->x) + " " + std::to_string(v3i->y) + " " + std::to_string(v3i->z);
-
-					auto *v2i = luabind::object_cast_nothrow<Vector2i *>(value, static_cast<Vector2i *>(nullptr));
-					if(v2i)
-						return std::to_string(v2i->x) + " " + std::to_string(v2i->y);
-
-					auto *col = luabind::object_cast_nothrow<Color *>(value, static_cast<Color *>(nullptr));
-					if(col)
-						return std::to_string(col->r) + " " + std::to_string(col->g) + " " + std::to_string(col->b) + " " + std::to_string(col->a);
-
-					auto *ang = luabind::object_cast_nothrow<EulerAngles *>(value, static_cast<EulerAngles *>(nullptr));
-					if(ang)
-						return std::to_string(ang->p) + " " + std::to_string(ang->y) + " " + std::to_string(ang->r);
-
-					auto *rot = luabind::object_cast_nothrow<Quat *>(value, static_cast<Quat *>(nullptr));
-					if(rot)
-						return std::to_string(rot->w) + " " + std::to_string(rot->x) + " " + std::to_string(rot->y) + " " + std::to_string(rot->z);
-				}
-			}
-			return luabind::object_cast<std::string>(value);
-		}
-	};
 	namespace Decal {
 		static void create_from_projection(lua_State *l, pragma::CDecalComponent &hComponent, luabind::object tMeshes, const umath::ScaledTransform &pose)
 		{
@@ -259,11 +208,6 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 {
 	Game::RegisterLuaEntityComponents(entsMod);
 	auto *l = GetLuaState();
-	Lua::register_cl_ai_component(l, entsMod);
-	Lua::register_cl_character_component(l, entsMod);
-	Lua::register_cl_player_component(l, entsMod);
-	Lua::register_cl_vehicle_component(l, entsMod);
-	Lua::register_cl_weapon_component(l, entsMod);
 
 	auto defCGamemode = pragma::lua::create_entity_component_class<pragma::CGamemodeComponent, pragma::BaseGamemodeComponent>("GamemodeComponent");
 	entsMod[defCGamemode];
@@ -603,8 +547,6 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	auto defCMicrophone = pragma::lua::create_entity_component_class<pragma::CMicrophoneComponent, pragma::BaseEnvMicrophoneComponent>("MicrophoneComponent");
 	entsMod[defCMicrophone];
 
-	Lua::ParticleSystem::register_class(l, entsMod);
-
 	auto defCQuake = pragma::lua::create_entity_component_class<pragma::CQuakeComponent, pragma::BaseEnvQuakeComponent>("QuakeComponent");
 	entsMod[defCQuake];
 
@@ -867,54 +809,4 @@ std::optional<float> Lua::Flex::CalcFlexValue(pragma::CFlexComponent &hEnt, uint
 	if(hEnt.CalcFlexValue(flexId, val) == false)
 		return {};
 	return val;
-}
-
-//////////////
-
-void Lua::ParticleSystem::Stop(lua_State *l, pragma::CParticleSystemComponent &hComponent, bool bStopImmediately)
-{
-	if(bStopImmediately == true)
-		hComponent.Stop();
-	else
-		hComponent.Die();
-}
-CParticleInitializer *Lua::ParticleSystem::AddInitializer(lua_State *l, pragma::CParticleSystemComponent &hComponent, std::string name, const luabind::map<std::string, void> &keyValues)
-{
-	std::unordered_map<std::string, std::string> values;
-	for(luabind::iterator i {keyValues}, end; i != end; ++i) {
-		auto key = luabind::object_cast<std::string>(i.key());
-		std::string val = Lua::ParticleSystem::get_key_value(l, *i);
-
-		ustring::to_lower(key);
-		values[key] = val;
-	}
-
-	return hComponent.AddInitializer(name, values);
-}
-CParticleOperator *Lua::ParticleSystem::AddOperator(lua_State *l, pragma::CParticleSystemComponent &hComponent, std::string name, const luabind::map<std::string, void> &keyValues)
-{
-	std::unordered_map<std::string, std::string> values;
-	for(luabind::iterator i {keyValues}, end; i != end; ++i) {
-		auto key = luabind::object_cast<std::string>(i.key());
-		std::string val = Lua::ParticleSystem::get_key_value(l, *i);
-
-		ustring::to_lower(key);
-		values[key] = val;
-	}
-
-	return hComponent.AddOperator(name, values);
-	;
-}
-CParticleRenderer *Lua::ParticleSystem::AddRenderer(lua_State *l, pragma::CParticleSystemComponent &hComponent, std::string name, const luabind::map<std::string, void> &keyValues)
-{
-	std::unordered_map<std::string, std::string> values;
-	for(luabind::iterator i {keyValues}, end; i != end; ++i) {
-		auto key = luabind::object_cast<std::string>(i.key());
-		std::string val = Lua::ParticleSystem::get_key_value(l, *i);
-
-		ustring::to_lower(key);
-		values[key] = val;
-	}
-
-	return hComponent.AddRenderer(name, values);
 }

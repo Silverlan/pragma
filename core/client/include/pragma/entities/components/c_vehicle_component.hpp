@@ -13,6 +13,8 @@ class CBaseEntity;
 namespace pragma {
 	class DLLCLIENT CVehicleComponent final : public BaseVehicleComponent, public CBaseSnapshotComponent {
 	  public:
+		static void RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts);
+		
 		CVehicleComponent(BaseEntity &ent);
 		virtual ~CVehicleComponent() override;
 		static unsigned int GetVehicleCount();

@@ -18,6 +18,12 @@
 #include "pragma/entities/components/parent_component.hpp"
 #include <pragma/entities/observermode.h>
 #include <pragma/entities/entity_component_system_t.hpp>
+#include "pragma/lua/classes/ldef_entity.h"
+#include "luasystem.h"
+#include "pragma/lua/classes/components/c_lentity_components.hpp"
+#include <pragma/lua/lua_util_component.hpp>
+#include <pragma/lua/lua_util_component_stream.hpp>
+#include <pragma/lua/lentity_components_base_types.hpp>
 
 import pragma.client.client_state;
 import pragma.client.entities.components;
@@ -411,4 +417,22 @@ void CEAttachToOwner::PushArguments(lua_State *l)
 	owner.GetLuaObject().push(l);
 	if(viewModel)
 		viewModel->PushLuaObject(l);
+}
+
+void CWeaponComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts)
+{
+	auto def = pragma::lua::create_entity_component_class<pragma::CWeaponComponent, pragma::BaseWeaponComponent>("WeaponComponent");
+	def.def("PlayViewActivity", &pragma::CWeaponComponent::PlayViewActivity);
+	def.def("PlayViewActivity", static_cast<bool (*)(pragma::CWeaponComponent &wepComponent, Activity)>([](pragma::CWeaponComponent &wepComponent, Activity activity) { return wepComponent.PlayViewActivity(activity); }));
+	def.def("SetViewModel", &pragma::CWeaponComponent::SetViewModel);
+	def.def("GetViewModel", &pragma::CWeaponComponent::GetViewModel);
+	def.def("SetHideWorldModelInFirstPerson", &pragma::CWeaponComponent::SetHideWorldModelInFirstPerson);
+	def.def("GetHideWorldModelInFirstPerson", &pragma::CWeaponComponent::GetHideWorldModelInFirstPerson);
+	def.def("IsInFirstPersonMode", &pragma::CWeaponComponent::IsInFirstPersonMode);
+	def.def("SetViewModelOffset", &pragma::CWeaponComponent::SetViewModelOffset);
+	def.def("GetViewModelOffset", &pragma::CWeaponComponent::GetViewModelOffset);
+	def.def("SetViewFOV", &pragma::CWeaponComponent::SetViewFOV);
+	def.def("GetViewFOV", &pragma::CWeaponComponent::GetViewFOV);
+	def.add_static_constant("EVENT_ATTACH_TO_OWNER", pragma::CWeaponComponent::EVENT_ATTACH_TO_OWNER);
+	modEnts[def];
 }

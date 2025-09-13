@@ -37,6 +37,14 @@
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/observermode.h>
+#include "pragma/entities/components/c_player_component.hpp"
+#include "pragma/lua/classes/ldef_entity.h"
+#include "luasystem.h"
+#include "pragma/lua/classes/components/c_lentity_components.hpp"
+#include <pragma/lua/classes/lproperty_generic.hpp>
+#include <pragma/lua/lua_util_component.hpp>
+#include <pragma/lua/lua_util_component_stream.hpp>
+#include <pragma/lua/lentity_components_base_types.hpp>
 
 import pragma.client.client_state;
 import pragma.client.entities.components;
@@ -588,4 +596,11 @@ void CPlayerComponent::OnSetCharacterOrientation(const Vector3 &up)
 		//refRot.get() = uquat::get_inverse(rotRel) *uquat::slerp(newRotCur,rotDst,c_engine->GetDeltaFrameTime() *4.f);
 		// TODO: Remove callback on complete!
 	}));*/
+}
+
+void CPlayerComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts)
+{
+	auto def = pragma::lua::create_entity_component_class<pragma::CPlayerComponent, pragma::BasePlayerComponent>("PlayerComponent");
+	def.def("IsInFirstPersonMode", &pragma::CPlayerComponent::IsInFirstPersonMode);
+	modEnts[def];
 }

@@ -13,6 +13,7 @@ export namespace pragma {
 	class DLLCLIENT CCharacterComponent final : public BaseCharacterComponent, public CBaseNetComponent {
 	  public:
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+		static void RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts);
 		CCharacterComponent(BaseEntity &ent);
 		virtual void Initialize() override;
 		virtual void ReceiveData(NetPacket &packet) override;

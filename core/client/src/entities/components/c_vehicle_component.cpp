@@ -12,6 +12,13 @@
 #include "pragma/entities/c_viewbody.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/input/inkeys.h>
+#include "pragma/lua/classes/ldef_entity.h"
+#include "luasystem.h"
+#include "pragma/lua/classes/components/c_lentity_components.hpp"
+#include <pragma/lua/classes/lproperty_generic.hpp>
+#include <pragma/lua/lua_util_component.hpp>
+#include <pragma/lua/lua_util_component_stream.hpp>
+#include <pragma/lua/lentity_components_base_types.hpp>
 
 import pragma.client.entities.components.observable;
 import pragma.client.entities.components.observer;
@@ -177,4 +184,10 @@ Bool CVehicleComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &p
 	else
 		return false;
 	return true;
+}
+
+void CVehicleComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts)
+{
+	auto def = pragma::lua::create_entity_component_class<pragma::CVehicleComponent, pragma::BaseVehicleComponent>("VehicleComponent");
+	modEnts[def];
 }

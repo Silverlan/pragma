@@ -331,19 +331,19 @@ int Lua::engine::create_particle_system(lua_State *l)
 			for(auto &initializer : initializers) {
 				Lua::PushString(l, initializer->name); /* 2 */
 				initializer->table.push(l);            /* 3 */
-				Lua::ParticleSystem::AddInitializer(l, *particle, initializer->name, initializer->table);
+				particle->AddInitializer(initializer->name, pragma::get_particle_key_values(l, initializer->table));
 				Lua::Pop(l, 2); /* 1 */
 			}
 			for(auto &op : operators) {
 				Lua::PushString(l, op->name); /* 2 */
 				op->table.push(l);            /* 3 */
-				Lua::ParticleSystem::AddOperator(l, *particle, op->name, op->table);
+				particle->AddOperator(op->name, pragma::get_particle_key_values(l, op->table));
 				Lua::Pop(l, 2); /* 1 */
 			}
 			for(auto &renderer : renderers) {
 				Lua::PushString(l, renderer->name); /* 2 */
 				renderer->table.push(l);            /* 3 */
-				Lua::ParticleSystem::AddRenderer(l, *particle, renderer->name, renderer->table);
+				particle->AddRenderer(renderer->name, pragma::get_particle_key_values(l, renderer->table));
 				Lua::Pop(l, 2); /* 1 */
 			}
 

@@ -19,6 +19,8 @@ namespace pragma {
 		static std::vector<CPlayerComponent *> s_players;
 		const float VIEW_BODY_OFFSET = -20.f;
 	  public:
+		static void RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts);
+		
 		CPlayerComponent(BaseEntity &ent);
 		virtual ~CPlayerComponent() override;
 		virtual bool ShouldTransmitNetData() const override { return true; }

@@ -14,23 +14,7 @@ namespace pragma {
 	class CFlexComponent;
 };
 
-class CParticleInitializer;
-class CParticleOperator;
-class CParticleRenderer;
 namespace Lua {
-	DLLCLIENT void register_cl_ai_component(lua_State *l, luabind::module_ &module);
-	DLLCLIENT void register_cl_character_component(lua_State *l, luabind::module_ &module);
-	DLLCLIENT void register_cl_player_component(lua_State *l, luabind::module_ &module);
-	DLLCLIENT void register_cl_vehicle_component(lua_State *l, luabind::module_ &module);
-	DLLCLIENT void register_cl_weapon_component(lua_State *l, luabind::module_ &module);
-
-	namespace ParticleSystem {
-		DLLCLIENT void Stop(lua_State *l, pragma::CParticleSystemComponent &hComponent, bool bStopImmediately);
-		DLLCLIENT void register_class(lua_State *l, luabind::module_ &entsMod);
-		DLLCLIENT CParticleInitializer *AddInitializer(lua_State *l, pragma::CParticleSystemComponent &hComponent, std::string name, const luabind::map<std::string, void> &keyValues);
-		DLLCLIENT CParticleOperator *AddOperator(lua_State *l, pragma::CParticleSystemComponent &hComponent, std::string name, const luabind::map<std::string, void> &keyValues);
-		DLLCLIENT CParticleRenderer *AddRenderer(lua_State *l, pragma::CParticleSystemComponent &hComponent, std::string name, const luabind::map<std::string, void> &keyValues);
-	}
 	namespace ModelDef {
 		DLLCLIENT void register_class(lua_State *l, luabind::module_ &entsMod);
 	};

@@ -27,11 +27,14 @@ namespace pragma {
 		std::vector<std::string> particleSystemNames {};
 		std::vector<uint64_t> particleSystemOffsets {};
 	};
+	DLLCLIENT std::unordered_map<std::string, std::string> get_particle_key_values(lua_State *l, const luabind::map<std::string, void> &keyValues);
 	enum class ParticleRenderFlags : uint32_t { None = 0u, Bloom = 1u, DepthOnly = Bloom << 1u };
 	class CParticleSystemComponent;
 	class CSceneComponent;
 	class DLLCLIENT CParticleSystemComponent final : public BaseEnvParticleSystemComponent, public CBaseNetComponent, public CParticleSystemBaseKeyValues {
 	  public:
+		static void RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts);
+
 		static const uint32_t PARTICLE_DATA_SIZE;
 		static const uint32_t VERTEX_COUNT;
 		static bool Save(const std::string &fileName, const std::vector<pragma::CParticleSystemComponent *> &particleSystems);

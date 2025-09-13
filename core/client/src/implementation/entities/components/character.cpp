@@ -25,6 +25,17 @@ module;
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/model/model.h>
 #include <pragma/audio/alsound_type.h>
+#include "pragma/lua/classes/ldef_entity.h"
+#include "luasystem.h"
+#include "pragma/entities/components/c_weapon_component.hpp"
+#include "pragma/lua/classes/components/c_lentity_components.hpp"
+#include <pragma/physics/raytraces.h>
+#include <pragma/lua/lua_util_component.hpp>
+#include <pragma/lua/classes/lproperty.hpp>
+#include <pragma/lua/lentity_components_base_types.hpp>
+#include <pragma/lua/lentity_components.hpp>
+#include <pragma/lua/lua_util_component_stream.hpp>
+#include <pragma/entities/components/base_actor_component.hpp>
 
 module pragma.client.entities.components.character;
 
@@ -135,4 +146,10 @@ Bool CCharacterComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket 
 	else
 		return CBaseNetComponent::ReceiveNetEvent(eventId, packet);
 	return true;
+}
+
+void CCharacterComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts)
+{
+	auto def = pragma::lua::create_entity_component_class<pragma::CCharacterComponent, pragma::BaseCharacterComponent>("CharacterComponent");
+	modEnts[def];
 }

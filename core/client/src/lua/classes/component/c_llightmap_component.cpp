@@ -5,7 +5,6 @@
 #include "pragma/lua/classes/components/c_lentity_components.hpp"
 #include "pragma/lua/libraries/lfile.h"
 #include "pragma/entities/components/c_light_map_component.hpp"
-#include "pragma/entities/components/c_light_map_receiver_component.hpp"
 #include "pragma/entities/components/lightmap_data_cache.hpp"
 #include <pragma/lua/converters/optional_converter_t.hpp>
 #include <pragma/lua/converters/property_converter_t.hpp>

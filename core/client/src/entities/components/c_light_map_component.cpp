@@ -10,7 +10,6 @@
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/entities/entity_iterator.hpp"
-#include "pragma/entities/components/c_light_map_receiver_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/entity_component_manager_t.hpp"

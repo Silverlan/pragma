@@ -1,10 +1,11 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
 #include "pragma/game/c_game.h"
-#include "pragma/entities/components/c_light_map_receiver_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/components/c_light_map_component.hpp"
 #include "pragma/entities/components/lightmap_data_cache.hpp"
@@ -15,6 +16,8 @@
 #include <buffers/prosper_buffer.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/logging.hpp>
+
+module pragma.client.entities.components.light_map_receiver;
 
 import pragma.client.entities.components;
 import pragma.client.model;

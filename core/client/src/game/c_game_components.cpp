@@ -32,7 +32,6 @@
 #include "pragma/entities/components/c_weapon_component.hpp"
 #include "pragma/entities/components/c_flex_component.hpp"
 #include "pragma/entities/components/c_light_map_component.hpp"
-#include "pragma/entities/components/c_light_map_receiver_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 

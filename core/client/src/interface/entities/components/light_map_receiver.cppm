@@ -1,16 +1,17 @@
 // SPDX-FileCopyrightText: (c) 2020 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_LIGHT_MAP_RECEIVER_COMPONENT_HPP__
-#define __C_LIGHT_MAP_RECEIVER_COMPONENT_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
+#include "pragma/entities/components/lightmap_data_cache.hpp"
+#include "pragma/entities/components/c_light_map_component.hpp"
 #include <pragma/entities/components/base_entity_component.hpp>
 #include <pragma/entities/c_world.h>
 
-namespace pragma {
-	struct LightmapDataCache;
-	class CLightMapComponent;
+export module pragma.client.entities.components.light_map_receiver;
+
+export namespace pragma {
 	class DLLCLIENT CLightMapReceiverComponent final : public BaseEntityComponent {
 	  public:
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
@@ -51,6 +52,6 @@ namespace pragma {
 		StateFlags m_stateFlags = StateFlags::RenderMeshBufferIndexTableDirty;
 	};
 };
-REGISTER_BASIC_BITWISE_OPERATORS(pragma::CLightMapReceiverComponent::StateFlags)
-
-#endif
+export {
+	REGISTER_BASIC_BITWISE_OPERATORS(pragma::CLightMapReceiverComponent::StateFlags)
+};

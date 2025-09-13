@@ -23,7 +23,6 @@ namespace pragma {
 	class CRenderComponent;
 	class CVertexAnimatedComponent;
 	class CModelComponent;
-	class CLightMapReceiverComponent;
 	class CRasterizationRendererComponent;
 	class ShaderTextured3DBase;
 	enum class ShaderGameWorldPipeline : uint32_t;
@@ -83,7 +82,7 @@ namespace pragma::rendering {
 		const CRasterizationRendererComponent *m_rendererC = nullptr;
 		pragma::CVertexAnimatedComponent *m_vertexAnimC = nullptr;
 		pragma::CModelComponent *m_modelC = nullptr;
-		pragma::CLightMapReceiverComponent *m_lightMapReceiverC = nullptr;
+		void *m_lightMapReceiverC = nullptr;
 		ShaderGameWorld::SceneFlags m_sceneFlags = ShaderGameWorld::SceneFlags::None;
 
 		PassType m_passType = PassType::Generic;

@@ -102,7 +102,6 @@
 #include "pragma/entities/components/liquid/base_buoyancy_component.hpp"
 #include "pragma/entities/components/c_flex_component.hpp"
 #include "pragma/entities/components/c_light_map_component.hpp"
-#include "pragma/entities/components/c_light_map_receiver_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/environment/env_quake.h"
 #include "pragma/entities/c_filter_entity_class.h"

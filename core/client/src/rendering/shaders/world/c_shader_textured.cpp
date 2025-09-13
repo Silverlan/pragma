@@ -5,7 +5,6 @@
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/shader_material/shader_material.hpp"
 #include "pragma/rendering/render_processor.hpp"
-#include "pragma/entities/components/c_light_map_receiver_component.hpp"
 #include "pragma/console/c_cvar.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/model/c_vertex_buffer_data.hpp"

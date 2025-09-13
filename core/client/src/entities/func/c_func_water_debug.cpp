@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/entities/components/liquid/c_liquid_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/console/c_cvar_global_functions.h"
 #include "pragma/game/c_game.h"

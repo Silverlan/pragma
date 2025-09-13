@@ -12,7 +12,6 @@
 #include "pragma/entities/environment/lights/c_env_light.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/entities/environment/lights/c_env_shadow_csm.hpp"
-#include "pragma/entities/components/liquid/c_liquid_component.hpp"
 #include "pragma/entities/game/c_game_occlusion_culler.hpp"
 #include "pragma/entities/c_listener.h"
 #include "pragma/entities/c_viewbody.h"

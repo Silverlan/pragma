@@ -1,15 +1,16 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_LIQUID_COMPONENT_HPP__
-#define __C_LIQUID_COMPONENT_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/trigger/c_trigger_touch.h"
 #include "pragma/entities/components/c_entity_component.hpp"
 #include <pragma/entities/components/liquid/base_liquid_component.hpp>
 
-namespace pragma {
+export module pragma.client.entities.components.liquid;
+
+export namespace pragma {
 	class DLLCLIENT CLiquidComponent final : public BaseFuncLiquidComponent, public CBaseNetComponent {
 	  public:
 		CLiquidComponent(BaseEntity &ent);
@@ -29,9 +30,7 @@ namespace pragma {
 	};
 };
 
-class DLLCLIENT CFuncWater : public CBaseEntity {
+export class DLLCLIENT CFuncWater : public CBaseEntity {
   public:
 	virtual void Initialize() override;
 };
-
-#endif

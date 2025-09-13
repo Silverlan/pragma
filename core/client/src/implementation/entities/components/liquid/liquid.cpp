@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/entities/components/liquid/c_liquid_component.hpp"
 #include "pragma/rendering/c_rendermode.h"
 #include <pragma/physics/physobj.h>
 #include "pragma/model/c_modelmesh.h"
@@ -16,8 +17,10 @@
 #include <pragma/audio/alsound_type.h>
 #include <pragma/entities/entity_component_system_t.hpp>
 
+module pragma.client.entities.components.liquid;
+
+import pragma.client.entities.components.liquid_surface;
 import pragma.client.physics;
-import pragma.client.entities.components;
 
 using namespace pragma;
 

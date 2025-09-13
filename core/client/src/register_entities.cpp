@@ -21,7 +21,6 @@
 #include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/entities/components/hitbox_mesh_bvh_builder.hpp"
 #include "pragma/entities/components/lightmap_data_cache.hpp"
-#include "pragma/entities/components/liquid/c_liquid_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/components/renderers/rasterization/hdr_data.hpp"
 #include "pragma/entities/environment/c_env_camera.h"

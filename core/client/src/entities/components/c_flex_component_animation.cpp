@@ -141,3 +141,4 @@ void CFlexComponent::MaintainFlexAnimations(float dt)
 		++it;
 	}
 }
+

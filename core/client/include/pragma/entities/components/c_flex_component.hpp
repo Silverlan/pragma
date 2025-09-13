@@ -16,6 +16,7 @@ namespace pragma {
 	  public:
 		static ComponentEventId EVENT_ON_FLEX_CONTROLLERS_UPDATED;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+		static void RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts);
 
 		struct FlexAnimationData {
 			uint32_t flexAnimationId = std::numeric_limits<uint32_t>::max();

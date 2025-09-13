@@ -66,6 +66,7 @@ export namespace pragma {
 		static ComponentEventId EVENT_ON_DEPTH_BIAS_CHANGED;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
+		static void RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts);
 
 		CRenderComponent(BaseEntity &ent);
 		const prosper::IBuffer *GetRenderBuffer() const;

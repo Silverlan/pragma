@@ -421,6 +421,7 @@ void CEAttachToOwner::PushArguments(lua_State *l)
 
 void CWeaponComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts)
 {
+	BaseWeaponComponent::RegisterLuaBindings(l, modEnts);
 	auto def = pragma::lua::create_entity_component_class<pragma::CWeaponComponent, pragma::BaseWeaponComponent>("WeaponComponent");
 	def.def("PlayViewActivity", &pragma::CWeaponComponent::PlayViewActivity);
 	def.def("PlayViewActivity", static_cast<bool (*)(pragma::CWeaponComponent &wepComponent, Activity)>([](pragma::CWeaponComponent &wepComponent, Activity activity) { return wepComponent.PlayViewActivity(activity); }));

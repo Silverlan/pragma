@@ -188,6 +188,7 @@ Bool CVehicleComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &p
 
 void CVehicleComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts)
 {
+	BaseVehicleComponent::RegisterLuaBindings(l, modEnts);
 	auto def = pragma::lua::create_entity_component_class<pragma::CVehicleComponent, pragma::BaseVehicleComponent>("VehicleComponent");
 	modEnts[def];
 }

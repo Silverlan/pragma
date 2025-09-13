@@ -697,6 +697,7 @@ static void register_modifier_class(luabind::class_<pragma::CParticleSystemCompo
 
 void CParticleSystemComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts)
 {
+	BaseEnvParticleSystemComponent::RegisterLuaBindings(l, modEnts);
 	auto defCParticleSystem = pragma::lua::create_entity_component_class<pragma::CParticleSystemComponent, pragma::BaseEnvParticleSystemComponent>("ParticleSystemComponent");
 
 	defCParticleSystem.add_static_constant("SF_PARTICLE_SYSTEM_CONTINUOUS", SF_PARTICLE_SYSTEM_CONTINUOUS);

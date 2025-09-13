@@ -27,6 +27,7 @@ namespace pragma {
 		static ComponentEventId EVENT_ON_BONE_MATRICES_UPDATED;
 		static ComponentEventId EVENT_ON_BONE_BUFFER_INITIALIZED;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+		static void RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts);
 
 		CAnimatedComponent(BaseEntity &ent) : BaseAnimatedComponent(ent) {}
 

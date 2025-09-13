@@ -447,14 +447,7 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 
 	entsMod[defCScene];
 
-	Lua::Render::register_class(l, entsMod);
-	Lua::ModelDef::register_class(l, entsMod);
-	Lua::Animated::register_class(l, entsMod);
-	Lua::Flex::register_class(l, entsMod);
 	Lua::BSP::register_class(l, entsMod, defCWorld);
-	Lua::Lightmap::register_class(l, entsMod);
-	Lua::VertexAnimated::register_class(l, entsMod);
-	Lua::SoundEmitter::register_class(l, entsMod);
 	entsMod[defCWorld];
 
 	auto &componentManager = Engine::Get()->GetNetworkState(l)->GetGameState()->GetEntityComponentManager();

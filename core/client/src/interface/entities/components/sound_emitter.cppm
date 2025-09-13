@@ -12,6 +12,8 @@ export module pragma.client.entities.components.sound_emitter;
 export namespace pragma {
 	class DLLCLIENT CSoundEmitterComponent final : public BaseSoundEmitterComponent, public CBaseNetComponent {
 	  public:
+	    static void RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts);
+
 		CSoundEmitterComponent(BaseEntity &ent) : BaseSoundEmitterComponent(ent) {}
 		// Sounds
 		virtual std::shared_ptr<ALSound> CreateSound(std::string sndname, ALSoundType type, const SoundInfo &sndInfo = {}) override;

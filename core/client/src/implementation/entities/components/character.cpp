@@ -150,6 +150,7 @@ Bool CCharacterComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket 
 
 void CCharacterComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts)
 {
+	BaseCharacterComponent::RegisterLuaBindings(l, modEnts);
 	auto def = pragma::lua::create_entity_component_class<pragma::CCharacterComponent, pragma::BaseCharacterComponent>("CharacterComponent");
 	modEnts[def];
 }

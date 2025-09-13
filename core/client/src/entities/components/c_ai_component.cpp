@@ -151,6 +151,7 @@ util::EventReply CAIComponent::HandleEvent(ComponentEventId eventId, ComponentEv
 
 void CAIComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts)
 {
+	BaseAIComponent::RegisterLuaBindings(l, modEnts);
 	auto def = pragma::lua::create_entity_component_class<pragma::CAIComponent, pragma::BaseAIComponent>("AIComponent");
 	modEnts[def];
 }

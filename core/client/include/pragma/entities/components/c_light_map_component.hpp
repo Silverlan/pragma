@@ -22,6 +22,19 @@ namespace spdlog {
 };
 namespace pragma {
 	struct LightmapDataCache;
+	struct DLLCLIENT LightmapBakeSettings {
+		std::optional<uint32_t> width {};
+		std::optional<uint32_t> height {};
+		std::optional<pragma::rendering::cycles::SceneInfo::ColorTransform> colorTransform {};
+		float exposure = 1.f;
+		float skyStrength = 0.3f;
+		float globalLightIntensityFactor = 1.f;
+		std::string sky = "skies/dusk379.hdr";
+		uint32_t samples = 1'225;
+		bool denoise = true;
+		bool createAsRenderJob = false;
+		bool rebuildUvAtlas = false;
+	};
 	class DLLCLIENT CLightMapComponent final : public BaseEntityComponent {
 	  public:
 		enum class Texture : uint32_t {
@@ -32,21 +45,9 @@ namespace pragma {
 
 			Count
 		};
-		struct DLLCLIENT LightmapBakeSettings {
-			std::optional<uint32_t> width {};
-			std::optional<uint32_t> height {};
-			std::optional<pragma::rendering::cycles::SceneInfo::ColorTransform> colorTransform {};
-			float exposure = 1.f;
-			float skyStrength = 0.3f;
-			float globalLightIntensityFactor = 1.f;
-			std::string sky = "skies/dusk379.hdr";
-			uint32_t samples = 1'225;
-			bool denoise = true;
-			bool createAsRenderJob = false;
-			bool rebuildUvAtlas = false;
-		};
 		static spdlog::logger &LOGGER;
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
+		static void RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts);
 		static std::shared_ptr<prosper::IDynamicResizableBuffer> GenerateLightmapUVBuffers(std::vector<std::shared_ptr<prosper::IBuffer>> &outMeshLightMapUvBuffers);
 		static std::shared_ptr<prosper::Texture> CreateLightmapTexture(uimg::ImageBuffer &imgBuf);
 		static bool BakeLightmaps(const LightmapBakeSettings &bakeSettings);

@@ -21,6 +21,9 @@ module;
 #include <prosper_descriptor_set_group.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
+#include "pragma/lua/classes/components/c_lentity_components.hpp"
+#include <pragma/lua/lua_util_component.hpp>
+#include <pragma/lua/lua_util_component_stream.hpp>
 
 module pragma.client.entities.components.vertex_animated;
 
@@ -307,4 +310,35 @@ bool CVertexAnimatedComponent::GetLocalVertexPosition(const ModelSubMesh &subMes
 		}
 	}
 	return true;
+}
+
+void CVertexAnimatedComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts)
+{
+	auto defCVertexAnimated = pragma::lua::create_entity_component_class<pragma::CVertexAnimatedComponent, pragma::BaseEntityComponent>("VertexAnimatedComponent");
+	defCVertexAnimated.def("UpdateVertexAnimationBuffer", static_cast<void (*)(lua_State *, pragma::CVertexAnimatedComponent &, std::shared_ptr<prosper::ICommandBuffer> &)>([](lua_State *l, pragma::CVertexAnimatedComponent &hAnim, std::shared_ptr<prosper::ICommandBuffer> &drawCmd) {
+		if(drawCmd->IsPrimary() == false)
+			return;
+		hAnim.UpdateVertexAnimationBuffer(std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(drawCmd));
+	}));
+	defCVertexAnimated.def("GetVertexAnimationBuffer", &pragma::CVertexAnimatedComponent::GetVertexAnimationBuffer);
+	defCVertexAnimated.def("GetVertexAnimationBufferMeshOffset",
+	  static_cast<Lua::opt<luabind::mult<uint32_t, uint32_t>> (*)(lua_State *, pragma::CVertexAnimatedComponent &, std::shared_ptr<::ModelSubMesh> &)>(
+	    [](lua_State *l, pragma::CVertexAnimatedComponent &hAnim, std::shared_ptr<::ModelSubMesh> &subMesh) -> Lua::opt<luabind::mult<uint32_t, uint32_t>> {
+		    uint32_t offset;
+		    uint32_t animCount;
+		    auto b = hAnim.GetVertexAnimationBufferMeshOffset(static_cast<CModelSubMesh &>(*subMesh), offset, animCount);
+		    if(b == false)
+			    return luabind::object {};
+		    return luabind::mult<uint32_t, uint32_t> {l, offset, animCount};
+	    }));
+	defCVertexAnimated.def("GetLocalVertexPosition",
+	  static_cast<Lua::opt<luabind::mult<Vector3, Vector3>> (*)(lua_State *, pragma::CVertexAnimatedComponent &, std::shared_ptr<::ModelSubMesh> &, uint32_t)>(
+	    [](lua_State *l, pragma::CVertexAnimatedComponent &hAnim, std::shared_ptr<::ModelSubMesh> &subMesh, uint32_t vertexId) -> Lua::opt<luabind::mult<Vector3, Vector3>> {
+		    Vector3 pos, n;
+		    auto b = hAnim.GetLocalVertexPosition(static_cast<CModelSubMesh &>(*subMesh), vertexId, pos, &n);
+		    if(b == false)
+			    return luabind::object {};
+		    return luabind::mult<Vector3, Vector3> {l, pos, n};
+	    }));
+	modEnts[defCVertexAnimated];
 }

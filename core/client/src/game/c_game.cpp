@@ -24,7 +24,6 @@
 #include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/entities/components/c_game_component.hpp"
 #include "pragma/entities/game/c_game_occlusion_culler.hpp"
-#include "pragma/entities/util/c_util_pbr_converter.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/level/mapgeometry.h"
 #include "pragma/entities/c_viewmodel.h"

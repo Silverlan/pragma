@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "pragma/game/c_game.h"
-#include "pragma/entities/util/c_util_pbr_converter.hpp"
 #include "pragma/rendering/shaders/util/c_shader_compose_rma.hpp"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
@@ -16,6 +17,9 @@
 #include <util_texture_info.hpp>
 #include <prosper_util.hpp>
 #include <image/prosper_sampler.hpp>
+#include "util_image_buffer.hpp"
+
+module pragma.client.entities.components.util_pbr_converter;
 
 import pragma.client.client_state;
 

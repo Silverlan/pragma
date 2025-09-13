@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/entities/c_water_surface.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/game/c_game.h"
 #include "pragma/entities/components/liquid/c_liquid_component.hpp"
@@ -15,6 +16,8 @@
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <cmaterial.h>
+
+module pragma.client.entities.components.water_surface;
 
 import pragma.client.model;
 import pragma.client.physics;
@@ -77,7 +80,7 @@ void CWaterSurfaceComponent::UpdateSurfaceMesh()
 	sim->Draw(drawCmd, *cmesh);
 }
 
-void CWaterSurfaceComponent::SetWaterObject(CLiquidSurfaceSimulationComponent *ent)
+void CWaterSurfaceComponent::SetWaterObject(BaseLiquidSurfaceSimulationComponent *ent)
 {
 	// TODO
 	//m_hFuncWater = (ent != nullptr) ? ent->GetHandle<CWaterComponent>() : pragma::ComponentHandle<CWaterComponent>{};

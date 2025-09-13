@@ -1,14 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_UTIL_PBR_CONVERTER_HPP__
-#define __C_UTIL_PBR_CONVERTER_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/c_baseentity.h"
 #include "pragma/entities/components/c_entity_component.hpp"
 #include <sharedutils/util_parallel_job.hpp>
 #include <pragma/entities/components/base_entity_component.hpp>
+#include "image/prosper_texture.hpp"
+#include "util_image_buffer.hpp"
 #include <cmaterial.h>
 #include <memory>
 #include <optional>
@@ -18,15 +19,9 @@
 #include <mutex>
 #include <unordered_set>
 
-namespace prosper {
-	class Texture;
-	class IImage;
-};
-namespace uimg {
-	class ImageBuffer;
-	struct ImageLayerSet;
-};
-namespace pragma {
+export module pragma.client.entities.components.util_pbr_converter;
+
+export namespace pragma {
 	namespace rendering::cycles {
 		class Scene;
 	};
@@ -94,9 +89,7 @@ namespace pragma {
 	};
 };
 
-class DLLCLIENT CUtilPBRConverter : public CBaseEntity {
+export class DLLCLIENT CUtilPBRConverter : public CBaseEntity {
   public:
 	virtual void Initialize() override;
 };
-
-#endif

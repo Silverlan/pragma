@@ -7,7 +7,6 @@
 #include <pragma/physics/physobj.h>
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/entities/baseentity_luaobject.h"
-#include "pragma/entities/c_water_surface.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>

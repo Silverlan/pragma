@@ -9,7 +9,6 @@
 #include "pragma/entities/c_listener.h"
 #include "pragma/entities/c_viewbody.h"
 #include "pragma/entities/c_viewmodel.h"
-#include "pragma/entities/c_water_surface.hpp"
 #include "pragma/entities/c_wheel.hpp"
 #include "pragma/entities/c_world.h"
 #include "pragma/entities/entity_instance_index_buffer.hpp"
@@ -40,7 +39,6 @@
 #include "pragma/entities/game/c_game_occlusion_culler.hpp"
 #include "pragma/entities/game/c_game_shadow_manager.hpp"
 #include "pragma/entities/trigger/c_trigger_touch.h"
-#include "pragma/entities/util/c_util_pbr_converter.hpp"
 
 import pragma.client.entities;
 import pragma.client.entities.components;

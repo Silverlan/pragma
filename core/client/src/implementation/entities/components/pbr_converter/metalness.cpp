@@ -1,14 +1,40 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "pragma/game/c_game.h"
-#include "pragma/entities/util/c_util_pbr_converter.hpp"
+module;
+
+#include "stdafx_client.h"
+#include <pragma/entities/entity_component_system_t.hpp>
+#include <pragma/entities/entity_iterator.hpp>
+#include <pragma/entities/entity_component_system_t.hpp>
+#include <pragma/math/intersection.h>
+#include <pragma/physics/collisionmesh.h>
+#include <pragma/asset/util_asset.hpp>
+#include <pragma/game/game_resources.hpp>
+#include <sharedutils/util_file.h>
+#include <image/prosper_image.hpp>
+#include <image/prosper_render_target.hpp>
+#include <image/prosper_sampler.hpp>
+#include <prosper_util.hpp>
+#include <prosper_command_buffer.hpp>
+#include <prosper_descriptor_set_group.hpp>
+#include <sharedutils/util_library.hpp>
+#include "pragma/rendering/raytracing/cycles.hpp"
+#include "pragma/rendering/shaders/util/c_shader_compose_rma.hpp"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
-#include "cmaterial.h"
+#include "pragma/c_engine.h"
+#include "pragma/game/c_game.h"
+#include <pragma/lua/converters/game_type_converters_t.hpp>
+#include <pragma/entities/components/logic_component.hpp>
+#include <util_texture_info.hpp>
+#include <pragma/model/modelmanager.h>
 #include <datasystem_t.hpp>
-#include <pragma/physics/collisionmesh.h>
-#include <mathutil/transform.hpp>
+#include <cmaterialmanager.h>
+#include <cmaterial_manager2.hpp>
+#include <cmaterial.h>
+
+module pragma.client.entities.components.util_pbr_converter;
 
 import pragma.client.client_state;
 

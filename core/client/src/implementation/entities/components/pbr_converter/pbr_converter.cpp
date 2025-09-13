@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/entity_iterator.hpp>
@@ -17,7 +19,6 @@
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <sharedutils/util_library.hpp>
-#include "pragma/entities/util/c_util_pbr_converter.hpp"
 #include "pragma/rendering/raytracing/cycles.hpp"
 #include "pragma/rendering/shaders/util/c_shader_compose_rma.hpp"
 #include "pragma/model/c_model.h"
@@ -32,6 +33,8 @@
 #include <cmaterialmanager.h>
 #include <cmaterial_manager2.hpp>
 #include <cmaterial.h>
+
+module pragma.client.entities.components.util_pbr_converter;
 
 import pragma.client.client_state;
 import pragma.client.rendering.shaders;

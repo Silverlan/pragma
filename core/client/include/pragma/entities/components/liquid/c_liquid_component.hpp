@@ -9,7 +9,6 @@
 #include "pragma/entities/components/c_entity_component.hpp"
 #include <pragma/entities/components/liquid/base_liquid_component.hpp>
 
-class CWaterSurface;
 namespace pragma {
 	class DLLCLIENT CLiquidComponent final : public BaseFuncLiquidComponent, public CBaseNetComponent {
 	  public:
@@ -30,7 +29,6 @@ namespace pragma {
 	};
 };
 
-class CWaterSurface;
 class DLLCLIENT CFuncWater : public CBaseEntity {
   public:
 	virtual void Initialize() override;

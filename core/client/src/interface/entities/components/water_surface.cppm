@@ -1,16 +1,18 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_WATER_SURFACE_HPP__
-#define __C_WATER_SURFACE_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/c_baseentity.h"
+#include "pragma/physics/phys_water_surface_simulator.hpp"
+#include "pragma/entities/components/liquid/base_liquid_surface_simulation_component.hpp"
+#include "pragma/entities/components/liquid/c_liquid_component.hpp"
 #include <cmaterial.h>
 
-class PhysWaterSurfaceSimulator;
-namespace pragma {
-	class CLiquidSurfaceSimulationComponent;
+export module pragma.client.entities.components.water_surface;
+
+export namespace pragma {
 	class DLLCLIENT CWaterSurfaceComponent final : public BaseEntityComponent {
 	  public:
 		CWaterSurfaceComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
@@ -19,7 +21,7 @@ namespace pragma {
 		virtual ~CWaterSurfaceComponent() override;
 		void SetSurfaceSimulator(const std::shared_ptr<PhysWaterSurfaceSimulator> &simulator);
 		CMaterial *GetWaterMaterial() const;
-		void SetWaterObject(CLiquidSurfaceSimulationComponent *ent);
+		void SetWaterObject(BaseLiquidSurfaceSimulationComponent *ent);
 		CModelSubMesh *GetWaterSurfaceMesh() const;
 		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual void OnEntitySpawn() override;
@@ -27,18 +29,14 @@ namespace pragma {
 		std::shared_ptr<PhysWaterSurfaceSimulator> m_surfaceSimulator = nullptr;
 		mutable std::weak_ptr<CModelSubMesh> m_waterSurfaceMesh = {};
 		CallbackHandle m_cbRenderSurface = {};
-		ComponentHandle<CLiquidSurfaceSimulationComponent> m_hFuncWater = {};
+		ComponentHandle<BaseLiquidSurfaceSimulationComponent> m_hFuncWater = {};
 		void UpdateSurfaceMesh();
 		void InitializeSurface();
 		void DestroySurface();
 	};
 };
 
-class PhysWaterSurfaceSimulator;
-class CFuncWater;
-class DLLCLIENT CWaterSurface : public CBaseEntity {
+export class DLLCLIENT CWaterSurface : public CBaseEntity {
   public:
 	virtual void Initialize() override;
 };
-
-#endif

@@ -10,6 +10,8 @@ module;
 
 export module pragma.client.entities.components.liquid_surface_simulation;
 
+import pragma.client.entities.components.water_surface;
+
 export namespace pragma {
 	class DLLCLIENT CLiquidSurfaceSimulationComponent final : public BaseLiquidSurfaceSimulationComponent, public CBaseNetComponent {
 	  public:

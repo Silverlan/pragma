@@ -50,7 +50,6 @@
 #include <pragma/lua/luafunction_call.h>
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/shaders/c_shader_lua.hpp"
-#include "pragma/lua/classes/c_lparticle_modifiers.hpp"
 #include "pragma/entities/game/c_game_shadow_manager.hpp"
 #include "pragma/rendering/c_settings.hpp"
 #include <pragma/entities/baseplayer.hpp>
@@ -93,6 +92,7 @@ import pragma.client.entities;
 import pragma.client.entities.components;
 import pragma.client.gui;
 import pragma.client.model;
+import pragma.client.particle_system;
 import pragma.client.physics;
 import pragma.client.scripting.lua;
 
@@ -942,7 +942,7 @@ WIBase *CGame::CreateGUIElement(std::string name, WIHandle *hParent)
 }
 LuaGUIManager &CGame::GetLuaGUIManager() { return m_luaGUIElements; }
 pragma::LuaShaderManager &CGame::GetLuaShaderManager() { return *m_luaShaderManager; }
-pragma::LuaParticleModifierManager &CGame::GetLuaParticleModifierManager() { return *m_luaParticleModifierManager; }
+pragma::cxxm_LuaParticleModifierManager &CGame::GetLuaParticleModifierManager() { return *static_cast<pragma::cxxm_LuaParticleModifierManager*>(m_luaParticleModifierManager.get()); }
 pragma::LuaInputBindingLayerRegister &CGame::GetLuaInputBindingLayerRegister() { return *m_luaInputBindingLayerRegister; }
 
 void CGame::SetUp()

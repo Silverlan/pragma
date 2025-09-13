@@ -60,6 +60,14 @@ namespace GLFW {
 	enum class Modifier : uint32_t;
 };
 
+// These are only used for the transition phase to c++20 modules to resolve
+// some predeclaration issues. Once the transition is complete, these types should be
+// reverted to the actual types.
+namespace pragma {
+    struct cxxm_LuaParticleModifierManager {};
+    using cxxm_LuaParticleModifierManager_vp = void;
+};
+
 namespace pragma {
 	class CGameComponent;
 	namespace debug {
@@ -73,7 +81,6 @@ namespace pragma {
 		struct GlobalRenderSettingsBufferData;
 	};
 	class LuaShaderManager;
-	class LuaParticleModifierManager;
 	class CPlayerComponent;
 	class CViewModelComponent;
 	class CViewBodyComponent;
@@ -292,7 +299,7 @@ class DLLCLIENT CGame : public Game {
 	float GetAlphaScale();
 	LuaGUIManager &GetLuaGUIManager();
 	pragma::LuaShaderManager &GetLuaShaderManager();
-	pragma::LuaParticleModifierManager &GetLuaParticleModifierManager();
+	pragma::cxxm_LuaParticleModifierManager &GetLuaParticleModifierManager();
 	pragma::LuaInputBindingLayerRegister &GetLuaInputBindingLayerRegister();
 	Material *GetLoadMaterial();
 	virtual bool RunLua(const std::string &lua) override;
@@ -457,7 +464,7 @@ class DLLCLIENT CGame : public Game {
 
 	LuaGUIManager m_luaGUIElements = {};
 	std::shared_ptr<pragma::LuaShaderManager> m_luaShaderManager = nullptr;
-	std::shared_ptr<pragma::LuaParticleModifierManager> m_luaParticleModifierManager = nullptr;
+	std::shared_ptr<pragma::cxxm_LuaParticleModifierManager_vp> m_luaParticleModifierManager = nullptr;
 	double m_tServer = 0.0;
 	LuaCallbackHandler m_inputCallbackHandler;
 	std::unique_ptr<pragma::LuaInputBindingLayerRegister> m_luaInputBindingLayerRegister {};

@@ -13,6 +13,8 @@ export import :initializer_radius_random;
 export import :initializer_shoot;
 export import :initializer_speed;
 
+export import :lua_particle_modifier_manager;
+
 export import :modifier_ease;
 export import :modifier_gradual_fade;
 export import :modifier_random_color;

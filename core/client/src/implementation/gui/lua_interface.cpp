@@ -10,6 +10,7 @@ module;
 #include <wgui/types/wirect.h>
 #include <wgui/types/wiline.h>
 #include <wgui/types/witext.h>
+#include <luabind/copy_policy.hpp>
 #include "pragma/lua/classes/c_ldef_wguihandles.h"
 #include <pragma/lua/raw_object.hpp>
 #include <wgui/types/witextentry.h>
@@ -308,7 +309,7 @@ luabind::object cast_to_type(lua_State *l, ::WIBase &el)
 {
 	return pragma::lua::raw_object_to_luabind_object(l, util::weak_shared_handle_cast<::WIBase, T>(el.GetHandle()));
 }
-#include <luabind/copy_policy.hpp>
+
 luabind::object WGUILuaInterface::CreateLuaObject(lua_State *l, WIBase &p)
 {
 	for(auto &f : client->GetGUILuaWrapperFactories()) {

@@ -10,6 +10,8 @@ module;
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/rendering/render_queue.hpp"
 #include "pragma/game/c_game.h"
+#include <pragma/model/model.h>
+#include <pragma/lua/classes/ldef_quaternion.h>
 #include "pragma/rendering/shaders/world/c_shader_scene.hpp"
 #include "pragma/rendering/global_render_settings_buffer_data.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
@@ -30,12 +32,24 @@ module;
 #include <cmaterial.h>
 #include <pragma/model/animation/bone.hpp>
 
+#include <pragma/physics/collisionmesh.h>
+#include "pragma/rendering/occlusion_culling/occlusion_culling_handler_bsp.hpp"
+
 // #define ENABLE_DEPRECATED_PHYSICS
 
 #ifdef ENABLE_DEPRECATED_PHYSICS
 #include "BulletSoftBody/btSoftRigidDynamicsWorld.h"
 #include "BulletSoftBody/btSoftBodyHelpers.h"
 #include <BulletSoftBody/btSoftBodyRigidBodyCollisionConfiguration.h>
+#endif
+
+#ifdef ENABLE_DEPRECATED_PHYSICS
+#include <pragma/buss_ik/Node.h>
+#include <pragma/buss_ik/Tree.h>
+#include <pragma/buss_ik/Jacobian.h>
+#include <pragma/buss_ik/VectorRn.h>
+#include <Bullet3Common/b3AlignedObjectArray.h>
+#include <pragma/physics/shape.hpp>
 #endif
 
 #include <pragma/physics/environment.hpp>
@@ -67,14 +81,6 @@ static btSoftBody *createSoftBody(btSoftRigidDynamicsWorld *world, btSoftBodyWor
 #endif
 
 #ifdef ENABLE_DEPRECATED_PHYSICS
-#include <pragma/buss_ik/Node.h>
-#include <pragma/buss_ik/Tree.h>
-#include <pragma/buss_ik/Jacobian.h>
-#include <pragma/buss_ik/VectorRn.h>
-#include <Bullet3Common/b3AlignedObjectArray.h>
-#endif
-
-#ifdef ENABLE_DEPRECATED_PHYSICS
 static void update_vehicle(Vehicle_Car *vhc)
 {
 	vhc->ControlInput(-1);
@@ -88,8 +94,7 @@ static void update_vehicle(Vehicle_Car *vhc)
 #endif
 
 enum Method { IK_JACOB_TRANS = 0, IK_PURE_PSEUDO, IK_DLS, IK_SDLS, IK_DLS_SVD };
-#include <pragma/model/model.h>
-#include <pragma/lua/classes/ldef_quaternion.h>
+
 static void get_local_bone_position(const std::function<Transform(uint32_t)> &fGetTransform, std::shared_ptr<pragma::animation::Bone> &bone, const Vector3 &fscale = {1.f, 1.f, 1.f}, Vector3 *pos = nullptr, Quat *rot = nullptr, Vector3 *scale = nullptr)
 {
 	std::function<void(std::shared_ptr<pragma::animation::Bone> &, Vector3 *, Quat *, Vector3 *)> apply;
@@ -129,7 +134,6 @@ static void get_local_bone_position(const std::shared_ptr<::Model> &mdl, const s
 }
 
 #ifdef ENABLE_DEPRECATED_PHYSICS
-#include <pragma/physics/shape.hpp>
 // Source: BenchmarkDemo.cpp from Bullet source code
 class RagDoll {
   public:
@@ -396,8 +400,6 @@ class RagDoll {
 	virtual ~RagDoll() {}
 };
 
-#include <pragma/physics/collisionmesh.h>
-#include "pragma/rendering/occlusion_culling/occlusion_culling_handler_bsp.hpp"
 int Lua::game::Client::test(lua_State *l)
 {
 	/*auto &point = c_game->GetLocalPlayer()->GetEntity().GetPosition();

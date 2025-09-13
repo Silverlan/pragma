@@ -1,14 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2020 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_LPARTICLE_MODIFIERS_HPP__
-#define __C_LPARTICLE_MODIFIERS_HPP__
+module;
 
 #include <pragma/lua/ldefinitions.h>
+#include "pragma/particlesystem/initializers/c_particle_initializer_lua.hpp"
 #include "pragma/lua/classes/components/c_lentity_components.hpp"
 
-class CParticleModifierLua;
-namespace pragma {
+export module pragma.client.particle_system:lua_particle_modifier_manager;
+
+export namespace pragma {
 	class DLLCLIENT LuaParticleModifierManager {
 	  public:
 		enum class Type : uint8_t {
@@ -30,5 +31,3 @@ namespace pragma {
 		std::unordered_map<std::string, ModifierInfo> m_modifiers;
 	};
 };
-
-#endif

@@ -18,7 +18,6 @@
 #include <pragma/entities/environment/effects/particlesystemdata.h>
 #include <udm.hpp>
 #include "pragma/lua/classes/components/c_lentity_components.hpp"
-#include "pragma/lua/classes/c_lparticle_modifiers.hpp"
 #include "pragma/particlesystem/initializers/c_particle_initializer_lua.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include <pragma/lua/lua_util_component.hpp>
@@ -31,6 +30,7 @@ import pragma.client.client_state;
 import pragma.client.entities.components.io;
 import pragma.client.entities.components.rasterization_renderer;
 import pragma.client.entities.components.transform;
+import pragma.client.particle_system;
 
 using namespace pragma;
 
@@ -322,7 +322,7 @@ bool CParticleSystemComponent::LoadFromAssetData(CParticleSystemData &ptData, co
 static void register_particle_modifier(lua_State *l, pragma::LuaParticleModifierManager::Type type, const std::string &name, luabind::object oClass)
 {
 	Lua::CheckUserData(l, 2);
-	auto &particleModMan = c_game->GetLuaParticleModifierManager();
+	auto &particleModMan = reinterpret_cast<LuaParticleModifierManager&>(c_game->GetLuaParticleModifierManager());
 	if(particleModMan.RegisterModifier(type, name, oClass) == false)
 		return;
 
@@ -332,7 +332,7 @@ static void register_particle_modifier(lua_State *l, pragma::LuaParticleModifier
 	switch(type) {
 	case pragma::LuaParticleModifierManager::Type::Initializer:
 		map->AddInitializer(name, [name](pragma::CParticleSystemComponent &psc, const std::unordered_map<std::string, std::string> &keyValues) -> std::unique_ptr<CParticleInitializer, void (*)(CParticleInitializer *)> {
-			auto &particleModMan = c_game->GetLuaParticleModifierManager();
+			auto &particleModMan = reinterpret_cast<LuaParticleModifierManager&>(c_game->GetLuaParticleModifierManager());
 			auto *modifier = dynamic_cast<CParticleInitializer *>(particleModMan.CreateModifier(name));
 			if(modifier == nullptr)
 				return std::unique_ptr<CParticleInitializer, void (*)(CParticleInitializer *)>(nullptr, [](CParticleInitializer *p) {});
@@ -343,7 +343,7 @@ static void register_particle_modifier(lua_State *l, pragma::LuaParticleModifier
 		break;
 	case pragma::LuaParticleModifierManager::Type::Operator:
 		map->AddOperator(name, [name](pragma::CParticleSystemComponent &psc, const std::unordered_map<std::string, std::string> &keyValues) -> std::unique_ptr<CParticleOperator, void (*)(CParticleOperator *)> {
-			auto &particleModMan = c_game->GetLuaParticleModifierManager();
+			auto &particleModMan = reinterpret_cast<LuaParticleModifierManager&>(c_game->GetLuaParticleModifierManager());
 			auto *modifier = dynamic_cast<CParticleOperator *>(particleModMan.CreateModifier(name));
 			if(modifier == nullptr)
 				return std::unique_ptr<CParticleOperator, void (*)(CParticleOperator *)>(nullptr, [](CParticleOperator *p) {});
@@ -354,7 +354,7 @@ static void register_particle_modifier(lua_State *l, pragma::LuaParticleModifier
 		break;
 	case pragma::LuaParticleModifierManager::Type::Renderer:
 		map->AddRenderer(name, [name](pragma::CParticleSystemComponent &psc, const std::unordered_map<std::string, std::string> &keyValues) -> std::unique_ptr<CParticleRenderer, void (*)(CParticleRenderer *)> {
-			auto &particleModMan = c_game->GetLuaParticleModifierManager();
+			auto &particleModMan = reinterpret_cast<LuaParticleModifierManager&>(c_game->GetLuaParticleModifierManager());
 			auto *modifier = dynamic_cast<CParticleRenderer *>(particleModMan.CreateModifier(name));
 			if(modifier == nullptr)
 				return std::unique_ptr<CParticleRenderer, void (*)(CParticleRenderer *)>(nullptr, [](CParticleRenderer *p) {});

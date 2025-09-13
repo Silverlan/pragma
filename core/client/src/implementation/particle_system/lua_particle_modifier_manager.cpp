@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: (c) 2020 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/lua/classes/c_lparticle_modifiers.hpp"
 #include "pragma/particlesystem/c_particlemodifier.h"
 #include "pragma/particlesystem/initializers/c_particle_initializer_lua.hpp"
 #include "pragma/rendering/shaders/c_shader_lua.hpp"
@@ -11,6 +12,10 @@
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <prosper_command_buffer.hpp>
 #include <luasystem.h>
+
+module pragma.client.particle_system;
+
+import :lua_particle_modifier_manager;
 
 import pragma.client.entities.components;
 

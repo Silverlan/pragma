@@ -11,7 +11,6 @@ module;
 #include "pragma/entities/environment/lights/env_light_spot.h"
 #include "pragma/entities/environment/lights/env_light_point.h"
 #include "pragma/entities/environment/lights/env_light_directional.h"
-#include "pragma/entities/environment/lights/c_env_light_spot.h"
 #include <mathutil/umath_geometry.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <prosper_command_buffer.hpp>

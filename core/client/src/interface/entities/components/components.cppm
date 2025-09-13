@@ -56,6 +56,7 @@ export import pragma.client.entities.components.input;
 export import pragma.client.entities.components.io;
 export import pragma.client.entities.components.lights.directional;
 export import pragma.client.entities.components.lights.point;
+export import pragma.client.entities.components.lights.spot;
 export import pragma.client.entities.components.lights.spot_vol;
 export import pragma.client.entities.components.light_map_data_cache;
 export import pragma.client.entities.components.liquid_buoyancy;

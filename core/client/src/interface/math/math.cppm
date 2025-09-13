@@ -5,7 +5,6 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/environment/lights/c_env_light.h"
-#include "pragma/entities/environment/lights/c_env_light_spot.h"
 #include <mathutil/umath_lighting.hpp>
 #include <mathutil/umat.h>
 #include <array>
@@ -15,6 +14,7 @@ export module pragma.client.math;
 import pragma.client.entities.components.color;
 import pragma.client.entities.components.lights.directional;
 import pragma.client.entities.components.lights.point;
+import pragma.client.entities.components.lights.spot;
 
 export namespace pragma::math {
 	DLLCLIENT const std::array<Mat4, 6> &get_cubemap_view_matrices();

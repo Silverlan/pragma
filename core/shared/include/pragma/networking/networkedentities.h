@@ -69,7 +69,6 @@ LINK_NETWORKED_PHYSICS_ENTITIES;
 #elif DLLCLIENT_EX
 #include "pragma/entities/c_world.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
-#include "pragma/entities/environment/lights/c_env_light_spot.h"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/components/liquid/c_liquid_component.hpp"
 #include "pragma/entities/trigger/c_trigger_touch.h"

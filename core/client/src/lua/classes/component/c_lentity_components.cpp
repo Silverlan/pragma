@@ -76,7 +76,6 @@
 #include "pragma/entities/environment/env_fog_controller.h"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/environment/lights/c_env_light.h"
-#include "pragma/entities/environment/lights/c_env_light_spot.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/entities/environment/lights/c_env_shadow_csm.hpp"
 #include "pragma/entities/components/liquid/c_liquid_component.hpp"

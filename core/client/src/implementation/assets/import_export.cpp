@@ -14,7 +14,7 @@ module;
 #include "pragma/rendering/shaders/util/c_shader_compose_rma.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/environment/lights/c_env_light.h"
-#include "pragma/entities/environment/lights/c_env_light_spot.h"
+#include "pragma/entities/environment/lights/env_light_spot.h"
 #include "pragma/asset/util_asset.hpp"
 #include "pragma/game/game_limits.h"
 #include <cmaterial_manager2.hpp>

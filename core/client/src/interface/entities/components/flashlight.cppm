@@ -6,7 +6,6 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/c_baseentity.h"
 #include <pragma/entities/baseflashlight.h>
-#include "pragma/entities/environment/lights/c_env_light_spot.h"
 
 import pragma.entities.components;
 

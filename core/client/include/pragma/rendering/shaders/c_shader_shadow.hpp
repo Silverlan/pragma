@@ -7,7 +7,6 @@
 #include "pragma/rendering/shaders/world/c_shader_scene.hpp"
 
 namespace pragma {
-	class CLightSpotComponent;
 	class CLightComponent;
 	class DLLCLIENT ShaderShadow : public ShaderGameWorld {
 	  public:

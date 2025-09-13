@@ -54,7 +54,6 @@
 #include "pragma/lua/classes/c_lparticle_modifiers.hpp"
 #include "pragma/entities/components/c_weapon_component.hpp"
 #include "pragma/entities/components/c_player_component.hpp"
-#include "pragma/entities/components/c_vehicle_component.hpp"
 #include "pragma/entities/components/c_ai_component.hpp"
 #include "pragma/entities/game/c_game_shadow_manager.hpp"
 #include "pragma/rendering/c_settings.hpp"

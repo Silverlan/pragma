@@ -26,7 +26,6 @@
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/entities/components/c_weapon_component.hpp"
-#include "pragma/entities/components/c_vehicle_component.hpp"
 #include "pragma/entities/components/c_ai_component.hpp"
 #include <pragma/util/bulletinfo.h>
 #include <pragma/physics/raytraces.h>

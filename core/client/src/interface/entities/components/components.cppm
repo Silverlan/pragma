@@ -113,6 +113,7 @@ export import pragma.client.entities.components.time_scale;
 export import pragma.client.entities.components.transform;
 export import pragma.client.entities.components.toggle;
 export import pragma.client.entities.components.util_pbr_converter;
+export import pragma.client.entities.components.vehicle;
 export import pragma.client.entities.components.vertex_animated;
 export import pragma.client.entities.components.water_surface;
 // export import pragma.client.entities.components.material_override;

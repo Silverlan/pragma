@@ -1,16 +1,16 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_VEHICLE_COMPONENT_HPP__
-#define __C_VEHICLE_COMPONENT_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/components/c_entity_component.hpp"
 #include <pragma/entities/components/base_vehicle_component.hpp>
 #include <pragma/util/util_handled.hpp>
 
-class CBaseEntity;
-namespace pragma {
+export module pragma.client.entities.components.vehicle;
+
+export namespace pragma {
 	class DLLCLIENT CVehicleComponent final : public BaseVehicleComponent, public CBaseSnapshotComponent {
 	  public:
 		static void RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts);
@@ -36,5 +36,3 @@ namespace pragma {
 		static std::vector<CVehicleComponent *> s_vehicles;
 	};
 };
-
-#endif

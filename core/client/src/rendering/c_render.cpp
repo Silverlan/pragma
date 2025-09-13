@@ -13,7 +13,6 @@
 #include "pragma/rendering/global_shader_input_manager.hpp"
 #include "pragma/console/c_cvar.h"
 #include "pragma/console/c_cvar_global_functions.h"
-#include "pragma/entities/components/c_vehicle_component.hpp"
 //#include "shader_gaussianblur.h" // prosper TODO
 #include "pragma/rendering/world_environment.hpp"
 #include "pragma/rendering/shaders/particles/c_shader_particle.hpp"

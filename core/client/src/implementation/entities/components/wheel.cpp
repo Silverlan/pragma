@@ -1,11 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/entities/c_wheel.hpp"
 #include "pragma/entities/baseentity_luaobject.h"
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
+
+module pragma.client.entities.components.wheel;
 
 using namespace pragma;
 

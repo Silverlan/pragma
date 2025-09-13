@@ -23,7 +23,6 @@
 #include "pragma/entities/components/c_entity_component.hpp"
 #include "pragma/entities/components/c_attachment_component.hpp"
 #include "pragma/entities/components/c_game_component.hpp"
-#include "pragma/entities/c_wheel.hpp"
 #include "pragma/entities/environment/lights/c_env_shadow.hpp"
 #include "pragma/entities/components/c_flex_component.hpp"
 #include "pragma/entities/components/c_light_map_component.hpp"

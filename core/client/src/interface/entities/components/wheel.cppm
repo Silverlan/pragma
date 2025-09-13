@@ -1,15 +1,16 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_WHEEL_HPP__
-#define __C_WHEEL_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/c_baseentity.h"
 #include "pragma/entities/components/c_entity_component.hpp"
 #include <pragma/entities/components/base_wheel_component.hpp>
 
-namespace pragma {
+export module pragma.client.entities.components.wheel;
+
+export namespace pragma {
 	class DLLCLIENT CWheelComponent final : public BaseWheelComponent, public CBaseSnapshotComponent {
 	  public:
 		CWheelComponent(BaseEntity &ent) : BaseWheelComponent(ent) {}
@@ -22,9 +23,7 @@ namespace pragma {
 	};
 };
 
-class DLLCLIENT CWheel : public CBaseEntity {
+export class DLLCLIENT CWheel : public CBaseEntity {
   public:
 	virtual void Initialize() override;
 };
-
-#endif

@@ -72,7 +72,6 @@ LINK_NETWORKED_PHYSICS_ENTITIES;
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/components/liquid/c_liquid_component.hpp"
 #include "pragma/entities/trigger/c_trigger_touch.h"
-#include "pragma/entities/c_wheel.hpp"
 #include "pragma/entities/components/c_game_component.hpp"
 #include "pragma/entities/c_ent_debug.hpp"
 

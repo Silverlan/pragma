@@ -1,13 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include <mathutil/umath.h>
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/euler_angles.hpp>
 #include "pragma/c_engine.h"
 #include "pragma/game/c_game.h"
-#include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/audio/alsound_type.h"
 #include "pragma/physics/collisiontypes.h"
 #include "pragma/math/deltaoffset.h"
@@ -36,7 +37,6 @@
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/observermode.h>
-#include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/lua/classes/ldef_entity.h"
 #include "luasystem.h"
 #include "pragma/lua/classes/components/c_lentity_components.hpp"
@@ -44,6 +44,8 @@
 #include <pragma/lua/lua_util_component.hpp>
 #include <pragma/lua/lua_util_component_stream.hpp>
 #include <pragma/lua/lentity_components_base_types.hpp>
+
+module pragma.client.entities.components.player;
 
 import pragma.client.client_state;
 import pragma.client.entities.components;

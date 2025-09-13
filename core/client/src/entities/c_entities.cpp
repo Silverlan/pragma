@@ -7,12 +7,10 @@
 #include "luasystem.h"
 #include <pragma/lua/handle_holder.hpp>
 #include "pragma/entities/c_listener.h"
-#include "pragma/entities/components/c_player_component.hpp"
 #include <sharedutils/util_string.h>
 #include <pragma/debug/intel_vtune.hpp>
 #include <pragma/game/game_lua_entity.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
-#include "pragma/entities/components/c_player_component.hpp"
 
 import pragma.client.entities;
 import pragma.client.entities.components;

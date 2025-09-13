@@ -6,7 +6,6 @@ module;
 #include "stdafx_client.h"
 #include "pragma/entities/c_world.h"
 #include "pragma/game/c_game.h"
-#include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/entities/c_viewbody.h"
 #include "pragma/entities/c_listener.h"
@@ -19,6 +18,7 @@ module;
 module pragma.client.scripting.lua.libraries.ents;
 
 import pragma.client.client_state;
+import pragma.client.entities.components.player;
 import pragma.client.entities.components.render;
 
 extern ClientState *client;

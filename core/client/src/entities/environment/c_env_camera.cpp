@@ -4,7 +4,6 @@
 #include "stdafx_client.h"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/game/c_game.h"
-#include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/entities/shared_spawnflags.h"
 #include <pragma/networking/nwm_util.h>
 #include <pragma/lua/converters/game_type_converters_t.hpp>

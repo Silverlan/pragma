@@ -6,12 +6,12 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/c_baseentity.h"
 #include <pragma/entities/baseplayer.hpp>
-#include "pragma/entities/components/c_player_component.hpp"
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
 export module pragma.client.entities:player;
 
+import pragma.client.entities.components;
 import pragma.entities.components;
 
 export class DLLCLIENT CPlayer : public CBaseEntity, public BasePlayer {

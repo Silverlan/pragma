@@ -7,7 +7,6 @@ module;
 #include "noise/noise.h"
 #include "pragma/c_engine.h"
 #include "pragma/game/c_game.h"
-#include "pragma/entities/components/c_player_component.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/components/base_physics_component.hpp>
@@ -16,6 +15,7 @@ module;
 module pragma.client.entities.components.env_quake;
 
 import pragma.client.client_state;
+import pragma.client.entities.components.player;
 
 using namespace pragma;
 

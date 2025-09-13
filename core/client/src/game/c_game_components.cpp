@@ -7,7 +7,6 @@
 #include <pragma/game/game_entity_component.hpp>
 #include <pragma/entities/entity_component_manager.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
-#include "pragma/entities/components/c_player_component.hpp"
 // --template-include-location
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/environment/lights/c_env_light.h"

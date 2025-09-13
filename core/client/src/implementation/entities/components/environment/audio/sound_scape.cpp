@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/audio/alsoundscript.h"
-#include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/entities/components/base_character_component.hpp"
 #include "pragma/game/c_game.h"

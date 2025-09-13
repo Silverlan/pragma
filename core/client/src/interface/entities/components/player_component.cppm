@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_PLAYER_COMPONENT_HPP__
-#define __C_PLAYER_COMPONENT_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/components/c_entity_component.hpp"
@@ -11,9 +10,9 @@
 #include <pragma/math/deltaoffset.h>
 #include <pragma/math/deltatransform.h>
 
-class CBaseEntity;
-struct DeltaTransform;
-namespace pragma {
+export module pragma.client.entities.components.player;
+
+export namespace pragma {
 	class DLLCLIENT CPlayerComponent final : public BasePlayerComponent, public CBaseNetComponent {
 	  private:
 		static std::vector<CPlayerComponent *> s_players;
@@ -65,5 +64,3 @@ namespace pragma {
 		virtual void GetBaseTypeIndex(std::type_index &outTypeIndex) const override;
 	};
 };
-
-#endif

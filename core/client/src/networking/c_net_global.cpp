@@ -6,7 +6,6 @@
 #include "pragma/networking/c_net_global.h"
 #include "pragma/physics/movetypes.h"
 #include "pragma/physics/collisiontypes.h"
-#include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
@@ -27,6 +26,7 @@
 #include "pragma/entities/environment/env_quake.h"
 #include <pragma/entities/components/basetriggergravity.hpp>
 #include <pragma/entities/components/base_physics_component.hpp>
+#include <pragma/entities/components/base_player_component.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/components/orientation_component.hpp>
 #include "pragma/entities/components/base_character_component.hpp"

@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
-#include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/physics/collisiontypes.h"
 #include "pragma/math/deltaoffset.h"

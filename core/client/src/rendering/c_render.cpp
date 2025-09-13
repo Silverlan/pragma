@@ -8,7 +8,6 @@
 #include "pragma/rendering/c_rendermode.h"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
-#include "pragma/entities/components/c_player_component.hpp"
 #include <wgui/wgui.h>
 #include "pragma/rendering/global_shader_input_manager.hpp"
 #include "pragma/console/c_cvar.h"
@@ -21,6 +20,7 @@
 #include "pragma/rendering/global_render_settings_buffer_data.hpp"
 #include "pragma/entities/baseentity.h"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
+#include "pragma/entities/components/base_player_component.hpp"
 #include <pragma/lua/luacallback.h>
 #include "pragma/entities/components/c_scene_component.hpp"
 #include "luasystem.h"

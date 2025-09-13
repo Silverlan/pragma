@@ -8,11 +8,14 @@
 #include <pragma/lua/handle_holder.hpp>
 #include "pragma/entities/c_listener.h"
 #include "pragma/entities/components/c_player_component.hpp"
-#include "pragma/game/c_game_entities.h"
 #include <sharedutils/util_string.h>
 #include <pragma/debug/intel_vtune.hpp>
 #include <pragma/game/game_lua_entity.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
+#include "pragma/entities/components/c_player_component.hpp"
+#include "pragma/entities/components/c_ai_component.hpp"
+#include "pragma/entities/components/c_vehicle_component.hpp"
+#include "pragma/entities/components/c_weapon_component.hpp"
 
 import pragma.client.entities;
 import pragma.client.entities.components;
@@ -196,6 +199,42 @@ void CGame::SetupEntity(BaseEntity *ent, unsigned int idx)
 	OnEntityCreated(cEnt);
 }
 unsigned int CGame::GetFreeEntityIndex() { return 0; }
+
+template<class T>
+void CGame::GetPlayers(std::vector<T *> *ents)
+{
+	auto &players = pragma::CPlayerComponent::GetAll();
+	ents->reserve(ents->size() + players.size());
+	for(auto *pl : players)
+		ents->push_back(&pl->GetEntity());
+}
+
+template<class T>
+void CGame::GetNPCs(std::vector<T *> *ents)
+{
+	auto &npcs = pragma::CAIComponent::GetAll();
+	ents->reserve(ents->size() + npcs.size());
+	for(auto *npc : npcs)
+		ents->push_back(&npc->GetEntity());
+}
+
+template<class T>
+void CGame::GetWeapons(std::vector<T *> *ents)
+{
+	auto &weapons = pragma::CWeaponComponent::GetAll();
+	ents->reserve(ents->size() + weapons.size());
+	for(auto *wp : weapons)
+		ents->push_back(&wp->GetEntity());
+}
+
+template<class T>
+void CGame::GetVehicles(std::vector<T *> *ents)
+{
+	auto &vehicles = pragma::CVehicleComponent::GetAll();
+	ents->reserve(ents->size() + vehicles.size());
+	for(auto *vhc : vehicles)
+		ents->push_back(&vhc->GetEntity());
+}
 
 void CGame::GetPlayers(std::vector<BaseEntity *> *ents) { GetPlayers<BaseEntity>(ents); }
 void CGame::GetNPCs(std::vector<BaseEntity *> *ents) { GetNPCs<BaseEntity>(ents); }

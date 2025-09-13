@@ -1,9 +1,10 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
-#include "pragma/entities/components/c_weapon_component.hpp"
 #include "pragma/entities/components/base_character_component.hpp"
 #include "pragma/entities/components/base_ownable_component.hpp"
 #include "pragma/entities/components/base_observer_component.hpp"
@@ -24,6 +25,8 @@
 #include <pragma/lua/lua_util_component.hpp>
 #include <pragma/lua/lua_util_component_stream.hpp>
 #include <pragma/lua/lentity_components_base_types.hpp>
+
+module pragma.client.entities.components.weapon;
 
 import pragma.client.client_state;
 import pragma.client.entities.components;

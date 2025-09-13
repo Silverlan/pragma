@@ -1,22 +1,20 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_WEAPON_COMPONENT_HPP__
-#define __C_WEAPON_COMPONENT_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/components/c_entity_component.hpp"
+#include "pragma/entities/c_viewmodel.h"
+#include "pragma/model/animation/animation_event.h"
+#include "pragma/entities/components/base_observer_component.hpp"
 #include <pragma/entities/components/base_weapon_component.hpp>
 #include <pragma/model/animation/play_animation_flags.hpp>
 #include <optional>
 
-namespace nwm {
-	class RecipientFilter;
-};
-struct AnimationEvent;
-namespace pragma {
-	class CViewModelComponent;
-	class BaseObserverComponent;
+export module pragma.client.entities.components.weapon;
+
+export namespace pragma {
 	class DLLCLIENT CWeaponComponent final : public BaseWeaponComponent, public CBaseNetComponent {
 	  public:
 		static ComponentEventId EVENT_ATTACH_TO_OWNER;
@@ -87,6 +85,6 @@ namespace pragma {
 		CViewModelComponent *viewModel = nullptr;
 	};
 };
-REGISTER_BASIC_BITWISE_OPERATORS(pragma::CWeaponComponent::StateFlags)
-
-#endif
+export {
+	REGISTER_BASIC_BITWISE_OPERATORS(pragma::CWeaponComponent::StateFlags)
+};

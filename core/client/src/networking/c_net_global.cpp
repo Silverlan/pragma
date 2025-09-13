@@ -15,7 +15,6 @@
 #include <pragma/entities/components/basetoggle.h>
 #include "pragma/entities/environment/env_fog_controller.h"
 #include <pragma/networking/nwm_util.h>
-#include "pragma/entities/components/c_weapon_component.hpp"
 #include "pragma/entities/components/c_attachment_component.hpp"
 #include <pragma/math/intersection.h>
 #include <pragma/entities/baseentity_trace.hpp>

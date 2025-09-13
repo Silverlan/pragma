@@ -8,7 +8,6 @@
 #include <pragma/entities/entity_component_manager.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include "pragma/entities/components/c_ai_component.hpp"
-#include "pragma/entities/components/c_weapon_component.hpp"
 #include "pragma/entities/components/c_player_component.hpp"
 // --template-include-location
 #include "pragma/entities/environment/c_env_camera.h"
@@ -28,7 +27,6 @@
 #include "pragma/entities/components/c_game_component.hpp"
 #include "pragma/entities/c_wheel.hpp"
 #include "pragma/entities/environment/lights/c_env_shadow.hpp"
-#include "pragma/entities/components/c_weapon_component.hpp"
 #include "pragma/entities/components/c_flex_component.hpp"
 #include "pragma/entities/components/c_light_map_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"

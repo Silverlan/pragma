@@ -1,9 +1,10 @@
 // SPDX-FileCopyrightText: (c) 2024 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
-#include "pragma/entities/components/c_attachment_component.hpp"
 #include "pragma/entities/components/base_character_component.hpp"
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
@@ -12,7 +13,7 @@
 #include <pragma/entities/components/parent_component.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
-import pragma.client.entities.components;
+module pragma.client.entities.components.attachment;
 
 using namespace pragma;
 

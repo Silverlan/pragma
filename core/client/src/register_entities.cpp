@@ -12,7 +12,6 @@
 #include "pragma/entities/c_world.h"
 #include "pragma/entities/entity_instance_index_buffer.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"
-#include "pragma/entities/components/c_attachment_component.hpp"
 #include "pragma/entities/components/c_entity_character_component_model.hpp"
 #include "pragma/entities/components/c_entity_component.hpp"
 #include "pragma/entities/components/c_flex_component.hpp"

@@ -6,6 +6,7 @@
 #include "pragma/networking/c_net_global.h"
 #include "pragma/physics/movetypes.h"
 #include "pragma/physics/collisiontypes.h"
+#include "pragma/entities/parentmode.h"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
@@ -14,7 +15,6 @@
 #include <pragma/entities/components/basetoggle.h>
 #include "pragma/entities/environment/env_fog_controller.h"
 #include <pragma/networking/nwm_util.h>
-#include "pragma/entities/components/c_attachment_component.hpp"
 #include <pragma/math/intersection.h>
 #include <pragma/entities/baseentity_trace.hpp>
 #include <pragma/entities/components/map_component.hpp>

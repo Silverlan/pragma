@@ -9,8 +9,8 @@ module;
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
+#include "pragma/entities/parentmode.h"
 #include "luasystem.h"
-#include "pragma/entities/components/c_attachment_component.hpp"
 #include <pragma/lua/classes/ldef_color.h>
 #include <pragma/lua/classes/ldef_vector.h>
 #include <pragma/lua/classes/ldef_quaternion.h>

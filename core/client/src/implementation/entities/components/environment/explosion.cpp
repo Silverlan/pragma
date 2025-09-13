@@ -7,9 +7,9 @@ module;
 #include "pragma/c_engine.h"
 #include "pragma/game/c_game.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
-#include "pragma/entities/components/c_attachment_component.hpp"
 #include "pragma/entities/components/base_transform_component.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
+#include "pragma/entities/parentmode.h"
 #include <pragma/audio/alsound_type.h>
 #include "pragma/entities/environment/env_quake.h"
 #include <pragma/entities/entity_component_system_t.hpp>
@@ -17,6 +17,7 @@ module;
 module pragma.client.entities.components.effects.explosion;
 
 import pragma.client.client_state;
+import pragma.client.entities.components.attachment;
 import pragma.client.entities.components.env_quake;
 import pragma.client.entities.components.io;
 import pragma.client.entities.components.sound_emitter;

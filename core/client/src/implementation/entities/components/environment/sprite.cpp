@@ -4,9 +4,9 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/components/c_attachment_component.hpp"
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/entities/components/basetoggle.h"
+#include "pragma/entities/parentmode.h"
 #include "pragma/c_engine.h"
 #include "pragma/game/c_game.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
@@ -15,6 +15,7 @@ module;
 
 module pragma.client.entities.components.effects.sprite;
 
+import pragma.client.entities.components.attachment;
 import pragma.client.entities.components.color;
 import pragma.client.client_state;
 

@@ -9,7 +9,6 @@ module;
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
-#include "pragma/entities/components/c_attachment_component.hpp"
 #include "pragma/entities/components/intersection_handler_component.hpp"
 #include "pragma/entities/game/c_game_occlusion_culler.hpp"
 #include "pragma/model/c_vertex_buffer_data.hpp"

@@ -10,6 +10,7 @@ module;
 #include "pragma/c_engine.h"
 #include "pragma/game/c_game.h"
 #include "pragma/audio/alsound_type.h"
+#include "pragma/entities/parentmode.h"
 #include "pragma/physics/collisiontypes.h"
 #include "pragma/math/deltaoffset.h"
 #include "pragma/math/deltatransform.h"
@@ -24,7 +25,6 @@ module;
 #include "pragma/rendering/c_rendermode.h"
 #include <pragma/networking/nwm_util.h>
 #include "pragma/entities/c_listener.h"
-#include "pragma/entities/components/c_attachment_component.hpp"
 #include "pragma/networking/c_nwm_util.h"
 #include <pragma/entities/components/submergible_component.hpp>
 #include <pragma/physics/raytraces.h>

@@ -8,7 +8,6 @@
 #include "pragma/game/c_game.h"
 #include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
-#include "pragma/entities/components/c_attachment_component.hpp"
 #include "pragma/entities/components/base_player_component.hpp"
 #include "pragma/entities/components/base_character_component.hpp"
 #include <pragma/model/model.h>

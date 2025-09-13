@@ -17,7 +17,6 @@ module;
 #include "pragma/math/intersection.h"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"
-#include "pragma/entities/components/c_attachment_component.hpp"
 #include <pragma/util/orientedpoint.h>
 #include <pragma/math/sphere.h>
 #include <pragma/entities/components/base_render_component.hpp>
@@ -29,6 +28,7 @@ module;
 
 export module pragma.client.entities.components.render;
 
+import pragma.client.entities.components.attachment;
 import pragma.client.entities.components.light_map_receiver;
 
 export namespace pragma {

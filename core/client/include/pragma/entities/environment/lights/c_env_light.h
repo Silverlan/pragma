@@ -14,7 +14,6 @@ class CModelMesh;
 class Scene;
 namespace pragma {
 	class CLightSpotComponent;
-	class CLightPointComponent;
 	class CLightDirectionalComponent;
 	class COcclusionCullerComponent;
 	struct DLLCLIENT CEShouldPassEntity : public ComponentEvent {

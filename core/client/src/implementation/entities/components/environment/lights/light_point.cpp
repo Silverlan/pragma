@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/entities/environment/lights/c_env_light_point.h"
 #include "pragma/entities/baseentity_luaobject.h"
 #include "pragma/entities/environment/lights/c_env_shadow.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
@@ -11,6 +12,8 @@
 #include <pragma/math/intersection.h>
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
+
+module pragma.client.entities.components.lights.point;
 
 import pragma.client.entities.components.radius;
 import pragma.client.entities.components.render;

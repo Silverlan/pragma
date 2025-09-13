@@ -1,8 +1,8 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_ENV_LIGHT_POINT_H__
-#define __C_ENV_LIGHT_POINT_H__
+module;
+
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/c_baseentity.h"
 #include "pragma/entities/environment/lights/c_env_light.h"
@@ -11,7 +11,9 @@
 #include <mathutil/plane.hpp>
 #include <pragma/util/mvpbase.h>
 
-namespace pragma {
+export module pragma.client.entities.components.lights.point;
+
+export namespace pragma {
 	class DLLCLIENT CLightPointComponent final : public BaseEnvLightPointComponent, public MVPBias<6> {
 	  public:
 		CLightPointComponent(BaseEntity &ent);
@@ -32,9 +34,7 @@ namespace pragma {
 	};
 };
 
-class DLLCLIENT CEnvLightPoint : public CBaseEntity {
+export class DLLCLIENT CEnvLightPoint : public CBaseEntity {
   public:
 	virtual void Initialize() override;
 };
-
-#endif

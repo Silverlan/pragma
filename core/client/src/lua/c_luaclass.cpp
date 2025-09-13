@@ -16,7 +16,6 @@
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/environment/lights/c_env_light.h"
 #include "pragma/entities/environment/lights/c_env_light_spot.h"
-#include "pragma/entities/environment/lights/c_env_light_point.h"
 #include "pragma/entities/environment/lights/c_env_light_directional.h"
 #include "pragma/entities/c_wheel.hpp"
 #include "pragma/c_engine.h"

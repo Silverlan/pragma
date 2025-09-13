@@ -12,7 +12,6 @@
 #include "pragma/entities/c_wheel.hpp"
 #include "pragma/entities/c_world.h"
 #include "pragma/entities/entity_instance_index_buffer.hpp"
-#include "pragma/entities/components/c_ai_component.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/entities/components/c_attachment_component.hpp"
 #include "pragma/entities/components/c_entity_character_component_model.hpp"

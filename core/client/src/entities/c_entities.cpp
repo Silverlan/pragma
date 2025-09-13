@@ -13,7 +13,6 @@
 #include <pragma/game/game_lua_entity.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include "pragma/entities/components/c_player_component.hpp"
-#include "pragma/entities/components/c_ai_component.hpp"
 
 import pragma.client.entities;
 import pragma.client.entities.components;

@@ -1,16 +1,17 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/entities/components/c_ai_component.hpp"
 #include "pragma/entities/baseentity_luaobject.h"
 #include <pragma/entities/components/base_character_component.hpp>
+#include <pragma/entities/components/base_ai_component.hpp>
 #include <pragma/entities/components/velocity_component.hpp>
 #include <pragma/entities/components/movement_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include "pragma/lua/classes/ldef_entity.h"
-#include "pragma/entities/components/c_ai_component.hpp"
 #include "luasystem.h"
 #include "pragma/lua/classes/components/c_lentity_components.hpp"
 #include <pragma/lua/lua_util_component_stream.hpp>
@@ -19,7 +20,7 @@
 #include <pragma/lua/classes/lproperty.hpp>
 #include <pragma/lua/lentity_components_base_types.hpp>
 
-import pragma.client.entities.components;
+module pragma.client.entities.components.ai;
 
 using namespace pragma;
 

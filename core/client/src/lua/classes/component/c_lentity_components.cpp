@@ -57,7 +57,6 @@
 #include "pragma/entities/components/base_networked_component.hpp"
 #include "pragma/rendering/world_environment.hpp"
 #include "pragma/entities/environment/env_wind.hpp"
-#include "pragma/entities/components/c_ai_component.hpp"
 #include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/entities/components/liquid/base_liquid_volume_component.hpp"
 #include "pragma/entities/components/liquid/base_liquid_surface_component.hpp"

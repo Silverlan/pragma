@@ -4,6 +4,7 @@
 module;
 
 export module pragma.client.entities.components;
+export import pragma.client.entities.components.ai;
 export import pragma.client.entities.components.animated_bvh;
 export import pragma.client.entities.components.bot;
 export import pragma.client.entities.components.bsp;

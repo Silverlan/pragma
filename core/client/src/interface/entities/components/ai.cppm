@@ -1,16 +1,16 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_AI_COMPONENT_HPP__
-#define __C_AI_COMPONENT_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/components/c_entity_component.hpp"
 #include <pragma/entities/components/base_ai_component.hpp>
 #include <pragma/util/util_handled.hpp>
 
-class CBaseEntity;
-namespace pragma {
+export module pragma.client.entities.components.ai;
+
+export namespace pragma {
 	class DLLCLIENT CAIComponent final : public BaseAIComponent, public CBaseSnapshotComponent {
 	  private:
 		static std::vector<CAIComponent *> s_npcs;
@@ -34,5 +34,3 @@ namespace pragma {
 		virtual void ReceiveSnapshotData(NetPacket &packet) override;
 	};
 };
-
-#endif

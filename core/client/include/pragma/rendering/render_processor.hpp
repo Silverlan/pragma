@@ -22,7 +22,6 @@ namespace pragma {
 	class ShaderGameWorld;
 	class CRenderComponent;
 	class CVertexAnimatedComponent;
-	class CModelComponent;
 	class CRasterizationRendererComponent;
 	class ShaderTextured3DBase;
 	enum class ShaderGameWorldPipeline : uint32_t;
@@ -81,7 +80,7 @@ namespace pragma::rendering {
 		const pragma::CSceneComponent *m_sceneC = nullptr;
 		const CRasterizationRendererComponent *m_rendererC = nullptr;
 		pragma::CVertexAnimatedComponent *m_vertexAnimC = nullptr;
-		pragma::CModelComponent *m_modelC = nullptr;
+		pragma::BaseModelComponent *m_modelC = nullptr;
 		void *m_lightMapReceiverC = nullptr;
 		ShaderGameWorld::SceneFlags m_sceneFlags = ShaderGameWorld::SceneFlags::None;
 

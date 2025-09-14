@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_ENV_SHADOW_CSM_HPP__
-#define __C_ENV_SHADOW_CSM_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/c_baseentity.h"
@@ -10,15 +9,16 @@
 #include "pragma/entities/game/c_game_shadow_manager.hpp"
 #include "pragma/entities/environment/lights/c_env_shadow.hpp"
 #include "pragma/entities/environment/lights/c_env_light.h"
+#include "pragma/entities/environment/c_env_camera.h"
+#include "prosper_command_buffer.hpp"
+#include "pragma/model/modelmesh.h"
 #include <pragma/entities/components/base_entity_component.hpp>
 #include <mathutil/boundingvolume.h>
 #include <mathutil/plane.hpp>
 
-class ModelSubMesh;
-namespace prosper {
-	class PrimaryCommandBuffer;
-};
-namespace pragma {
+export module pragma.client.entities.components.lights.shadow_csm;
+
+export namespace pragma {
 	struct DLLCLIENT FrustumSplit {
 		FrustumSplit();
 		float neard;
@@ -40,7 +40,6 @@ namespace pragma {
 		float radius = 0.f;
 	};
 
-	class CCameraComponent;
 	class DLLCLIENT CShadowCSMComponent final : public BaseEntityComponent {
 	  public:
 		static constexpr uint32_t MAX_CASCADE_COUNT = 4;
@@ -130,5 +129,3 @@ namespace pragma {
 		void InitializeDepthTextures(uint32_t size);
 	};
 };
-
-#endif

@@ -1,9 +1,10 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
-#include "pragma/entities/environment/lights/c_env_shadow_csm.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/console/c_cvar.h"
@@ -20,6 +21,9 @@
 #include <image/prosper_sampler.hpp>
 #include <image/prosper_render_target.hpp>
 #include <prosper_command_buffer.hpp>
+
+module pragma.client.entities.components.lights.shadow_csm;
+
 
 using namespace pragma;
 

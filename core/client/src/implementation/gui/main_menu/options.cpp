@@ -10,9 +10,9 @@ module;
 #include <wgui/types/witextentry.h>
 #include "pragma/rendering/c_msaa.h"
 #include "pragma/rendering/render_apis.hpp"
-#include "pragma/entities/environment/lights/c_env_shadow_csm.hpp"
 #include <sharedutils/util_string.h>
 #include "pragma/rendering/c_settings.hpp"
+#include <prosper_util.hpp>
 #include <pragma/addonsystem/addonsystem.h>
 #include <pragma/physics/environment.hpp>
 #include <pragma/networking/networking_modules.hpp>
@@ -34,6 +34,7 @@ import :slider;
 
 import pragma.client.audio;
 import pragma.client.client_state;
+import pragma.client.entities.components;
 import pragma.pad;
 import pragma.locale;
 import pragma.string.unicode;

@@ -1,12 +1,16 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/entities/environment/lights/c_env_shadow_csm.hpp"
 #include "pragma/console/c_cvar.h"
+#include "pragma/c_engine.h"
 #include <image/prosper_render_target.hpp>
 #include <prosper_render_pass.hpp>
 #include <prosper_framebuffer.hpp>
+
+module pragma.client.entities.components.lights.shadow_csm;
 
 using namespace pragma;
 

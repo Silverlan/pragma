@@ -5,12 +5,13 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/c_baseentity.h"
-#include "pragma/entities/environment/lights/c_env_shadow_csm.hpp"
 #include "pragma/entities/environment/lights/c_env_light.h"
 #include "pragma/entities/environment/lights/env_light_directional.h"
 #include <pragma/util/mvpbase.h>
 
 export module pragma.client.entities.components.lights.directional;
+
+import pragma.client.entities.components.lights.shadow_csm;
 
 export namespace pragma {
 	class DLLCLIENT CLightDirectionalComponent final : public BaseEnvLightDirectionalComponent, public CBaseNetComponent, public MVPBias<1> {

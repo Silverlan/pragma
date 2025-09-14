@@ -4,8 +4,8 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/environment/lights/c_env_shadow_csm.hpp"
 #include "pragma/entities/components/base_transform_component.hpp"
+#include "pragma/entities/environment/lights/c_env_light.h"
 #include "pragma/entities/baseentity_luaobject.h"
 #include "pragma/rendering/world_environment.hpp"
 #include "pragma/model/c_modelmesh.h"

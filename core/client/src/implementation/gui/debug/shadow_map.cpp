@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/entities/environment/lights/c_env_shadow.hpp"
-#include "pragma/entities/environment/lights/c_env_shadow_csm.hpp"
 #include "pragma/lua/converters/gui_element_converter.hpp"
 #include "pragma/rendering/c_cubemapside.h"
 #include <image/prosper_render_target.hpp>

@@ -4,7 +4,6 @@
 #include "stdafx_client.h"
 #include "pragma/console/c_cvar.h"
 #include "pragma/entities/environment/lights/c_env_light.h"
-#include "pragma/entities/environment/lights/c_env_shadow_csm.hpp"
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <wgui/types/wirect.h>
 #include "pragma/game/c_game_createguielement.h"
@@ -14,8 +13,8 @@
 #include <wgui/types/wiroot.h>
 
 import pragma.client.debug;
+import pragma.client.entities.components;
 import pragma.client.gui;
-
 
 extern ClientState *client;
 extern CGame *c_game;

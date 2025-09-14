@@ -11,7 +11,6 @@
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/environment/lights/c_env_light.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
-#include "pragma/entities/environment/lights/c_env_shadow_csm.hpp"
 #include "pragma/entities/game/c_game_occlusion_culler.hpp"
 #include "pragma/entities/c_listener.h"
 #include "pragma/entities/trigger/c_trigger_touch.h"

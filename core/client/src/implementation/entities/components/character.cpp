@@ -12,7 +12,6 @@ module;
 #include <mathutil/uquat.h>
 #include "pragma/entities/baseentity_luaobject.h"
 #include "pragma/entities/c_viewmodel.h"
-#include "pragma/entities/c_viewbody.h"
 #include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/rendering/c_rendermode.h"
 #include <pragma/networking/nwm_util.h>

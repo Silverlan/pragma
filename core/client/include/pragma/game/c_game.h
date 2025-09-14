@@ -83,7 +83,6 @@ namespace pragma {
 	class LuaShaderManager;
 	class CPlayerComponent;
 	class CViewModelComponent;
-	class CViewBodyComponent;
 	class BaseWorldComponent;
 	class CListenerComponent;
 	class CParticleSystemComponent;
@@ -323,7 +322,8 @@ class DLLCLIENT CGame : public Game {
 
 	void UpdateEntityModel(CBaseEntity *ent);
 	pragma::CViewModelComponent *GetViewModel();
-	pragma::CViewBodyComponent *GetViewBody();
+	template<typename TCPPM>
+	    TCPPM *GetViewBody();
 	void ReloadRenderFrameBuffer();
 
 	void RenderScenes(util::DrawSceneInfo &drawSceneInfo);
@@ -525,7 +525,7 @@ class DLLCLIENT CGame : public Game {
 	util::TWeakSharedHandle<pragma::CListenerComponent> m_listener = util::TWeakSharedHandle<pragma::CListenerComponent> {};
 	util::TWeakSharedHandle<pragma::CPlayerComponent> m_plLocal = util::TWeakSharedHandle<pragma::CPlayerComponent> {};
 	util::TWeakSharedHandle<pragma::CViewModelComponent> m_viewModel = util::TWeakSharedHandle<pragma::CViewModelComponent> {};
-	util::TWeakSharedHandle<pragma::CViewBodyComponent> m_viewBody = util::TWeakSharedHandle<pragma::CViewBodyComponent> {};
+	util::TWeakSharedHandle<pragma::BaseEntityComponent> m_viewBody = util::TWeakSharedHandle<pragma::BaseEntityComponent> {};
 	util::TWeakSharedHandle<pragma::CCameraComponent> m_primaryCamera = util::TWeakSharedHandle<pragma::CCameraComponent> {};
 
 	util::TWeakSharedHandle<pragma::CSceneComponent> m_renderScene = util::TWeakSharedHandle<pragma::CSceneComponent> {};

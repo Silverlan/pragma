@@ -10,7 +10,6 @@ module;
 #include "pragma/entities/components/base_player_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/c_viewmodel.h"
-#include "pragma/entities/c_viewbody.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/input/inkeys.h>
 #include "pragma/lua/classes/ldef_entity.h"
@@ -26,6 +25,7 @@ module pragma.client.entities.components.vehicle;
 import pragma.client.entities.components.observable;
 import pragma.client.entities.components.observer;
 import pragma.client.entities.components.render;
+import pragma.client.entities.components.view_body;
 
 using namespace pragma;
 
@@ -122,7 +122,7 @@ void CVehicleComponent::ClearDriver()
 		auto plComponent = entDriver->GetPlayerComponent();
 		if(plComponent->IsLocalPlayer()) {
 			c_game->EnableRenderMode(pragma::rendering::SceneRenderPass::View);
-			auto *vb = c_game->GetViewBody();
+			auto *vb = c_game->GetViewBody<pragma::CViewBodyComponent>();
 			if(vb != nullptr) {
 				auto pRenderComponent = static_cast<CBaseEntity &>(vb->GetEntity()).GetRenderComponent();
 				if(pRenderComponent)
@@ -150,7 +150,7 @@ void CVehicleComponent::SetDriver(BaseEntity *ent)
 	if(!ent->IsPlayer() || !ent->GetPlayerComponent()->IsLocalPlayer())
 		return;
 	c_game->DisableRenderMode(pragma::rendering::SceneRenderPass::View);
-	auto *vb = c_game->GetViewBody();
+	auto *vb = c_game->GetViewBody<pragma::CViewBodyComponent>();
 	if(vb != nullptr) {
 		auto pRenderComponent = static_cast<CBaseEntity &>(vb->GetEntity()).GetRenderComponent();
 		if(pRenderComponent)

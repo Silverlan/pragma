@@ -20,7 +20,6 @@ module;
 #include "pragma/entities/components/base_observer_component.hpp"
 #include "pragma/entities/environment/audio/env_sound_dsp.h"
 #include "pragma/entities/c_viewmodel.h"
-#include "pragma/entities/c_viewbody.h"
 #include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/rendering/c_rendermode.h"
 #include <pragma/networking/nwm_util.h>
@@ -365,7 +364,7 @@ void CPlayerComponent::SetLocalPlayer(bool b)
 			vmEnt.Spawn();
 	}
 	auto &ent = GetEntity();
-	auto *body = c_game->GetViewBody();
+	auto *body = c_game->GetViewBody<pragma::CViewBodyComponent>();
 	if(body != nullptr) {
 		auto &entBody = body->GetEntity();
 		auto pTrComponent = ent.GetTransformComponent();

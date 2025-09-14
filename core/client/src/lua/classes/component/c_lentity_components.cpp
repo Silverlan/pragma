@@ -83,7 +83,6 @@
 #include "pragma/entities/prop/prop_physics.hpp"
 #include "pragma/entities/baseskybox.h"
 #include "pragma/entities/c_listener.h"
-#include "pragma/entities/c_viewbody.h"
 #include "pragma/entities/c_viewmodel.h"
 #include "pragma/entities/trigger/c_trigger_touch.h"
 #include "pragma/entities/components/c_model_component.hpp"

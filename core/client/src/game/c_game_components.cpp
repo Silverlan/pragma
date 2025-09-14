@@ -14,7 +14,6 @@
 #include "pragma/entities/environment/lights/c_env_shadow_csm.hpp"
 #include "pragma/entities/game/c_game_occlusion_culler.hpp"
 #include "pragma/entities/c_listener.h"
-#include "pragma/entities/c_viewbody.h"
 #include "pragma/entities/c_viewmodel.h"
 #include "pragma/entities/trigger/c_trigger_touch.h"
 #include "pragma/entities/components/c_model_component.hpp"

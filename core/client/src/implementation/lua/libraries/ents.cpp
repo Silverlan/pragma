@@ -7,7 +7,6 @@ module;
 #include "pragma/entities/c_world.h"
 #include "pragma/game/c_game.h"
 #include "pragma/entities/components/c_animated_component.hpp"
-#include "pragma/entities/c_viewbody.h"
 #include "pragma/entities/c_listener.h"
 #include "pragma/entities/c_viewmodel.h"
 #include "pragma/lua/classes/ldef_material.h"
@@ -20,6 +19,7 @@ module pragma.client.scripting.lua.libraries.ents;
 import pragma.client.client_state;
 import pragma.client.entities.components.player;
 import pragma.client.entities.components.render;
+import pragma.client.entities.components.view_body;
 
 extern ClientState *client;
 extern CGame *c_game;
@@ -52,7 +52,7 @@ int Lua::ents::Client::get_view_model(lua_State *l)
 
 int Lua::ents::Client::get_view_body(lua_State *l)
 {
-	auto *vb = c_game->GetViewBody();
+	auto *vb = c_game->GetViewBody<pragma::CViewBodyComponent>();
 	if(vb == nullptr)
 		return 0;
 	vb->GetEntity().GetLuaObject().push(l);

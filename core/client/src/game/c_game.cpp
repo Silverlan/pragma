@@ -25,7 +25,6 @@
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/level/mapgeometry.h"
 #include "pragma/entities/c_viewmodel.h"
-#include "pragma/entities/c_viewbody.h"
 #include <pragma/physics/physobj.h>
 #include <pragma/util/util_game.hpp>
 #include "pragma/console/c_cvar.h"
@@ -548,12 +547,14 @@ pragma::CViewModelComponent *CGame::GetViewModel()
 	return m_viewModel.get();
 }
 
-pragma::CViewBodyComponent *CGame::GetViewBody()
+template<typename TCPPM>
+TCPPM *CGame::GetViewBody()
 {
 	if(m_viewBody.expired())
 		return NULL;
-	return m_viewBody.get();
+	return static_cast<TCPPM*>(m_viewBody.get());
 }
+template pragma::CViewBodyComponent* CGame::GetViewBody<pragma::CViewBodyComponent>();
 
 static void shader_handler(Material *mat)
 {
@@ -955,7 +956,7 @@ void CGame::SetUp()
 	m_viewModel = vm->GetComponent<pragma::CViewModelComponent>();
 
 	CViewBody *body = CreateEntity<CViewBody>();
-	m_viewBody = body->GetComponent<pragma::CViewBodyComponent>();
+	m_viewBody = body->GetComponent<pragma::CViewBodyComponent>()->GetHandle();
 
 	auto *entPbrConverter = CreateEntity<CUtilPBRConverter>();
 	entPbrConverter->Spawn();

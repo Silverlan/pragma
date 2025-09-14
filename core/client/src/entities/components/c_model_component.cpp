@@ -16,7 +16,6 @@
 #include <buffers/prosper_render_buffer.hpp>
 #include <cmaterial_manager2.hpp>
 #include <cmaterial.h>
-#include "pragma/lua/classes/components/c_lentity_components.hpp"
 #include <pragma/lua/converters/cast_converter_t.hpp>
 #include <pragma/lua/converters/vector_converter_t.hpp>
 #include <pragma/lua/policies/default_parameter_policy.hpp>

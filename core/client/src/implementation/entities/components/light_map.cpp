@@ -34,7 +34,6 @@ module;
 #include <pragma/util/util_game.hpp>
 #include <fsys/ifile.hpp>
 #include <wgui/types/wiroot.h>
-#include "pragma/lua/classes/components/c_lentity_components.hpp"
 #include "pragma/lua/libraries/lfile.h"
 #include <pragma/lua/converters/optional_converter_t.hpp>
 #include <pragma/lua/converters/property_converter_t.hpp>

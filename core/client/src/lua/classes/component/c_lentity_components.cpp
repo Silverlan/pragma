@@ -3,7 +3,6 @@
 
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
-#include "pragma/lua/classes/components/c_lentity_components.hpp"
 #include "pragma/entities/components/liquid/base_liquid_component.hpp"
 #include "pragma/lua/classes/lproperty.hpp"
 #include "pragma/lua/converters/shader_converter_t.hpp"
@@ -191,6 +190,78 @@ namespace pragma {
 		return ::operator<<(os, static_cast<const pragma::BaseEntityComponent &>(component));
 	}
 };
+
+static void bsp_register_class(lua_State *l, luabind::module_ &entsMod, luabind::class_<pragma::CWorldComponent, pragma::BaseWorldComponent> &defWorld)
+{
+	auto defBspTree = luabind::class_<::util::BSPTree>("BSPTree");
+	defBspTree.def("IsValid", static_cast<void (*)(lua_State *, ::util::BSPTree &)>([](lua_State *l, ::util::BSPTree &tree) { Lua::PushBool(l, tree.IsValid()); }));
+	defBspTree.def("IsClusterVisible", static_cast<void (*)(lua_State *, ::util::BSPTree &, uint32_t, uint32_t)>([](lua_State *l, ::util::BSPTree &tree, uint32_t clusterSrc, uint32_t clusterDst) { Lua::PushBool(l, tree.IsClusterVisible(clusterSrc, clusterDst)); }));
+	defBspTree.def("GetRootNode", static_cast<void (*)(lua_State *, ::util::BSPTree &)>([](lua_State *l, ::util::BSPTree &tree) {
+		auto &node = tree.GetRootNode();
+		Lua::Push(l, &node);
+	}));
+	defBspTree.def("GetNodes", static_cast<void (*)(lua_State *, ::util::BSPTree &)>([](lua_State *l, ::util::BSPTree &tree) {
+		auto &nodes = tree.GetNodes();
+		auto t = Lua::CreateTable(l);
+		auto idx = 1;
+		for(auto &node : nodes) {
+			Lua::PushInt(l, idx++);
+			Lua::Push(l, node);
+			Lua::SetTableValue(l, t);
+		}
+	}));
+	defBspTree.def("GetClusterVisibility", static_cast<void (*)(lua_State *, ::util::BSPTree &)>([](lua_State *l, ::util::BSPTree &tree) {
+		auto &clusterVisibility = tree.GetClusterVisibility();
+		auto t = Lua::CreateTable(l);
+		auto idx = 1;
+		for(auto vis : clusterVisibility) {
+			Lua::PushInt(l, idx++);
+			Lua::PushInt(l, vis);
+			Lua::SetTableValue(l, t);
+		}
+	}));
+	defBspTree.def("GetClusterCount", static_cast<void (*)(lua_State *, ::util::BSPTree &)>([](lua_State *l, ::util::BSPTree &tree) { Lua::PushInt(l, tree.GetClusterCount()); }));
+	defBspTree.def("FindLeafNode", static_cast<void (*)(lua_State *, ::util::BSPTree &, const Vector3 &)>([](lua_State *l, ::util::BSPTree &tree, const Vector3 &origin) {
+		auto *node = tree.FindLeafNode(origin);
+		if(node == nullptr)
+			return;
+		Lua::Push(l, &node);
+	}));
+	defBspTree.def("FindLeafNodesInAABB", static_cast<luabind::object (*)(lua_State *, ::util::BSPTree &, const Vector3 &, const Vector3 &)>([](lua_State *l, ::util::BSPTree &tree, const Vector3 &min, const Vector3 &max) -> luabind::object {
+		auto nodes = tree.FindLeafNodesInAabb(min, max);
+		auto t = luabind::newtable(l);
+		int32_t idx = 1;
+		for(auto &n : nodes)
+			t[idx++] = n;
+		return t;
+	}));
+
+	auto defBspNode = luabind::class_<::util::BSPTree::Node>("Node");
+	defBspNode.def("GetIndex", static_cast<::util::BSPTree::ChildIndex (*)(lua_State *, ::util::BSPTree::Node &)>([](lua_State *l, ::util::BSPTree::Node &node) -> ::util::BSPTree::ChildIndex { return node.index; }));
+	defBspNode.def("IsLeaf", static_cast<void (*)(lua_State *, ::util::BSPTree::Node &)>([](lua_State *l, ::util::BSPTree::Node &node) { Lua::PushBool(l, node.leaf); }));
+	defBspNode.def("GetBounds", static_cast<void (*)(lua_State *, ::util::BSPTree::Node &)>([](lua_State *l, ::util::BSPTree::Node &node) {
+		Lua::Push<Vector3>(l, node.min);
+		Lua::Push<Vector3>(l, node.max);
+	}));
+	defBspNode.def("GetChildren", static_cast<void (*)(lua_State *, ::util::BSPTree::Node &)>([](lua_State *l, ::util::BSPTree::Node &node) {
+		auto t = Lua::CreateTable(l);
+		auto idx = 1;
+		for(auto &child : node.children) {
+			Lua::PushInt(l, idx++);
+			Lua::Push(l, child);
+		}
+	}));
+	defBspNode.def("GetCluster", static_cast<void (*)(lua_State *, ::util::BSPTree::Node &)>([](lua_State *l, ::util::BSPTree::Node &node) { Lua::PushInt(l, node.cluster); }));
+	defBspNode.def("GetVisibleLeafAreaBounds", static_cast<void (*)(lua_State *, ::util::BSPTree::Node &)>([](lua_State *l, ::util::BSPTree::Node &node) {
+		Lua::Push<Vector3>(l, node.minVisible);
+		Lua::Push<Vector3>(l, node.maxVisible);
+	}));
+	defBspNode.def("GetInternalNodePlane", static_cast<void (*)(lua_State *, ::util::BSPTree::Node &)>([](lua_State *l, ::util::BSPTree::Node &node) { Lua::Push<umath::Plane>(l, node.plane); }));
+	defBspNode.def("GetInternalNodeFirstFaceIndex", static_cast<void (*)(lua_State *, ::util::BSPTree::Node &)>([](lua_State *l, ::util::BSPTree::Node &node) { Lua::PushInt(l, node.firstFace); }));
+	defBspNode.def("GetInternalNodeFaceCount", static_cast<void (*)(lua_State *, ::util::BSPTree::Node &)>([](lua_State *l, ::util::BSPTree::Node &node) { Lua::PushInt(l, node.numFaces); }));
+	defBspTree.scope[defBspNode];
+	defWorld.scope[defBspTree];
+}
 
 void RegisterLuaEntityComponents2_cl(lua_State *l, luabind::module_ &entsMod);
 void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
@@ -436,7 +507,7 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 
 	entsMod[defCScene];
 
-	Lua::BSP::register_class(l, entsMod, defCWorld);
+	bsp_register_class(l, entsMod, defCWorld);
 	entsMod[defCWorld];
 
 	auto &componentManager = Engine::Get()->GetNetworkState(l)->GetGameState()->GetEntityComponentManager();
@@ -763,32 +834,4 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	entsMod[defCGeneric];
 
 	RegisterLuaEntityComponents2_cl(l, entsMod);
-}
-
-//////////////
-
-std::optional<float> Lua::Flex::GetFlexController(pragma::CFlexComponent &hEnt, uint32_t flexId)
-{
-	auto val = 0.f;
-	if(hEnt.GetFlexController(flexId, val) == false)
-		return {};
-	return val;
-}
-std::optional<float> Lua::Flex::GetFlexController(pragma::CFlexComponent &hEnt, const std::string &flexController)
-{
-	auto flexId = 0u;
-	auto mdlComponent = hEnt.GetEntity().GetModelComponent();
-	if(!mdlComponent || mdlComponent->LookupFlexController(flexController, flexId) == false)
-		return {};
-	auto val = 0.f;
-	if(hEnt.GetFlexController(flexId, val) == false)
-		return {};
-	return val;
-}
-std::optional<float> Lua::Flex::CalcFlexValue(pragma::CFlexComponent &hEnt, uint32_t flexId)
-{
-	auto val = 0.f;
-	if(hEnt.CalcFlexValue(flexId, val) == false)
-		return {};
-	return val;
 }

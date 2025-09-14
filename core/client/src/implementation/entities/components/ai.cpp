@@ -13,7 +13,6 @@ module;
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include "pragma/lua/classes/ldef_entity.h"
 #include "luasystem.h"
-#include "pragma/lua/classes/components/c_lentity_components.hpp"
 #include <pragma/lua/lua_util_component_stream.hpp>
 #include <pragma/lua/lua_util_component.hpp>
 #include <pragma/model/model.h>

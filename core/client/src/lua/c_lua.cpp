@@ -26,7 +26,6 @@
 #include "pragma/audio/c_alsound.h"
 #include "pragma/lua/libraries/lgame.h"
 #include <sharedutils/util_string.h>
-#include "pragma/lua/classes/components/c_lentity_components.hpp"
 #include <pragma/math/e_frustum.h>
 #include <pragma/lua/lua_util_component.hpp>
 #include <pragma/lua/classes/lproperty.hpp>

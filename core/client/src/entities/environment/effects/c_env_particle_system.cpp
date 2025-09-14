@@ -17,7 +17,6 @@
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/environment/effects/particlesystemdata.h>
 #include <udm.hpp>
-#include "pragma/lua/classes/components/c_lentity_components.hpp"
 #include "pragma/particlesystem/initializers/c_particle_initializer_lua.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include <pragma/lua/lua_util_component.hpp>

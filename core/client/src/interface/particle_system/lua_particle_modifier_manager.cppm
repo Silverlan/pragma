@@ -5,7 +5,6 @@ module;
 
 #include <pragma/lua/ldefinitions.h>
 #include "pragma/particlesystem/initializers/c_particle_initializer_lua.hpp"
-#include "pragma/lua/classes/components/c_lentity_components.hpp"
 
 export module pragma.client.particle_system:lua_particle_modifier_manager;
 

@@ -12,7 +12,6 @@
 #include <alsound_buffer.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
-#include "pragma/lua/classes/components/c_lentity_components.hpp"
 #include <pragma/lua/lua_util_component.hpp>
 #include <pragma/lua/lua_util_component_stream.hpp>
 #include <pragma/lua/converters/optional_converter_t.hpp>
@@ -359,6 +358,34 @@ void CFlexComponent::UpdateSoundPhonemes(CALSound &snd)
 		}
 	}
 }
+
+namespace Lua::Flex {
+    std::optional<float> GetFlexController(pragma::CFlexComponent &hEnt, uint32_t flexId)
+    {
+        auto val = 0.f;
+        if(hEnt.GetFlexController(flexId, val) == false)
+            return {};
+        return val;
+    }
+    std::optional<float> GetFlexController(pragma::CFlexComponent &hEnt, const std::string &flexController)
+    {
+        auto flexId = 0u;
+        auto mdlComponent = hEnt.GetEntity().GetModelComponent();
+        if(!mdlComponent || mdlComponent->LookupFlexController(flexController, flexId) == false)
+            return {};
+        auto val = 0.f;
+        if(hEnt.GetFlexController(flexId, val) == false)
+            return {};
+        return val;
+    }
+    std::optional<float> CalcFlexValue(pragma::CFlexComponent &hEnt, uint32_t flexId)
+    {
+        auto val = 0.f;
+        if(hEnt.CalcFlexValue(flexId, val) == false)
+            return {};
+        return val;
+    }
+};
 
 void CFlexComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts)
 {

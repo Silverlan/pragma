@@ -19,7 +19,6 @@ module;
 #include <pragma/entities/entity_component_system_t.hpp>
 #include "pragma/lua/classes/ldef_entity.h"
 #include "luasystem.h"
-#include "pragma/lua/classes/components/c_lentity_components.hpp"
 #include <pragma/lua/lua_util_component.hpp>
 #include <pragma/lua/lua_util_component_stream.hpp>
 #include <pragma/lua/lentity_components_base_types.hpp>

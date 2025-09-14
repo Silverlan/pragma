@@ -7,7 +7,6 @@
 #include "pragma/rendering/render_processor.hpp"
 #include "pragma/rendering/global_render_settings_buffer_data.hpp"
 #include "pragma/entities/entity_instance_index_buffer.hpp"
-#include "pragma/entities/environment/lights/c_env_shadow.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/game/game_limits.h"
 #include "pragma/model/c_modelmesh.h"

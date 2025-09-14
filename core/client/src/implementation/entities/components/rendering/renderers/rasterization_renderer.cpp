@@ -26,6 +26,7 @@ module pragma.client.entities.components.rasterization_renderer;
 
 import pragma.client.client_state;
 import pragma.client.entities.components.lights.directional;
+import pragma.client.entities.components.lights.shadow;
 import pragma.client.rendering.shaders;
 
 extern CGame *c_game;

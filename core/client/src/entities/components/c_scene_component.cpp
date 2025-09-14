@@ -9,7 +9,6 @@
 #include "pragma/game/c_game.h"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
-#include "pragma/entities/environment/lights/c_env_shadow.hpp"
 #include "pragma/entities/entity_instance_index_buffer.hpp"
 #include "pragma/console/c_cvar.h"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
@@ -422,7 +421,7 @@ void CSceneComponent::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 		for(auto &hLight : m_previouslyVisibleShadowedLights) {
 			if(hLight.expired())
 				continue;
-			auto *shadowC = hLight->GetShadowComponent();
+			auto *shadowC = hLight->GetShadowComponent<pragma::CShadowComponent>();
 			if(shadowC == nullptr)
 				continue;
 			shadowC->GetRenderer().BuildRenderQueues(drawSceneInfo);

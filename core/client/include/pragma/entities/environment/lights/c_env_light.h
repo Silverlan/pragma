@@ -47,11 +47,10 @@ namespace pragma {
 		uint32_t index;
 		Mat4 *transformation = nullptr;
 	};
-	class CShadowComponent;
 	struct DLLCLIENT CEHandleShadowMap : public ComponentEvent {
 		CEHandleShadowMap();
 		virtual void PushArguments(lua_State *l) override;
-		CShadowComponent *resultShadow = nullptr;
+		BaseEntityComponent *resultShadow = nullptr;
 	};
 	struct DLLCLIENT CEOnShadowBufferInitialized : public ComponentEvent {
 		CEOnShadowBufferInitialized(prosper::IBuffer &shadowBuffer);
@@ -107,8 +106,10 @@ namespace pragma {
 
 		CLightComponent(BaseEntity &ent);
 		virtual ~CLightComponent() override;
-		CShadowComponent *GetShadowComponent();
-		const CShadowComponent *GetShadowComponent() const;
+		template<typename TCPPM>
+			TCPPM *GetShadowComponent();
+		template<typename TCPPM>
+			const TCPPM *GetShadowComponent() const;
 		bool HasShadowsEnabled() const;
 		Mat4 &GetTransformationMatrix(unsigned int j);
 		virtual void Initialize() override;
@@ -117,7 +118,8 @@ namespace pragma {
 		virtual bool ShouldPass(const CBaseEntity &ent, uint32_t &renderFlags);
 		virtual bool ShouldPass(const CBaseEntity &ent, const CModelMesh &mesh, uint32_t &renderFlags);
 		virtual bool ShouldPass(const Model &mdl, const CModelSubMesh &mesh);
-		pragma::ComponentHandle<CShadowComponent> GetShadowMap(ShadowMapType type) const;
+		template<typename TCPPM>
+			pragma::ComponentHandle<TCPPM> GetShadowMap(ShadowMapType type) const;
 		bool ShouldRender();
 		void UpdateTransformationMatrix(const Mat4 &biasMatrix, const Mat4 &viewMatrix, const Mat4 &projectionMatrix);
 		virtual void OnEntitySpawn() override;
@@ -202,10 +204,11 @@ namespace pragma {
 		StateFlags m_stateFlags;
 		double m_tTurnedOff = 0.0;
 		uint64_t m_lastThink = std::numeric_limits<uint64_t>::max();
-		ComponentHandle<CShadowComponent> m_shadowMapStatic = {};
-		ComponentHandle<CShadowComponent> m_shadowMapDynamic = {};
-		CShadowComponent *m_shadowComponent = nullptr;
-		void InitializeShadowMap(CShadowComponent &sm);
+		ComponentHandle<BaseEntityComponent> m_shadowMapStatic = {};
+		ComponentHandle<BaseEntityComponent> m_shadowMapDynamic = {};
+		BaseEntityComponent *m_shadowComponent = nullptr;
+		template<typename TCPPM>
+			void InitializeShadowMap(TCPPM &sm);
 		virtual void InitializeShadowMap();
 	};
 };

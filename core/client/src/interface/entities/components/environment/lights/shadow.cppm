@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_ENV_SHADOW_HPP__
-#define __C_ENV_SHADOW_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/c_baseentity.h"
@@ -10,16 +9,13 @@
 #include "pragma/entities/components/c_entity_component.hpp"
 #include "pragma/entities/game/c_game_shadow_manager.hpp"
 #include "pragma/rendering/render_queue.hpp"
+#include "image/prosper_render_target.hpp"
 #include <pragma/entities/components/base_entity_component.hpp>
 #include <pragma/indexmap.h>
 
-namespace prosper {
-	class Framebuffer;
-	class RenderPass;
-	class RenderTarget;
-	class Texture;
-};
-namespace pragma {
+export module pragma.client.entities.components.lights.shadow;
+
+export namespace pragma {
 	class DLLCLIENT LightShadowRenderer {
 	  public:
 		enum class RenderState { NoRenderRequired = 0, RenderRequiredOnChange, RenderRequired };
@@ -90,5 +86,3 @@ namespace pragma {
 		std::unique_ptr<LightShadowRenderer> m_lightShadowRenderer = nullptr;
 	};
 };
-
-#endif

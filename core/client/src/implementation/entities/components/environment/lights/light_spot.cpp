@@ -5,8 +5,9 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/entities/baseentity_luaobject.h"
+#include "pragma/c_engine.h"
+#include "pragma/entities/environment/lights/c_env_light.h"
 #include <pragma/networking/nwm_util.h>
-#include "pragma/entities/environment/lights/c_env_shadow.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/components/base_field_angle_component.hpp>

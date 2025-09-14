@@ -6,7 +6,6 @@
 #include "pragma/rendering/render_queue.hpp"
 #include "pragma/entities/environment/lights/c_env_light.h"
 #include "pragma/entities/components/c_animated_component.hpp"
-#include "pragma/entities/environment/lights/c_env_shadow.hpp"
 #include "pragma/game/c_game.h"
 #include <image/prosper_msaa_texture.hpp>
 #include <prosper_util.hpp>
@@ -84,8 +83,8 @@ void pragma::CRasterizationRendererComponent::CullLightSources(const util::DrawS
 
 						// Determine light sources that should actually cast shadows
 						if(l->ShouldCastShadows()) {
-							auto *shadowC = l->GetShadowComponent();
-							auto hSm = l->GetShadowMap(pragma::CLightComponent::ShadowMapType::Dynamic);
+							auto *shadowC = l->GetShadowComponent<pragma::CShadowComponent>();
+							auto hSm = l->GetShadowMap<pragma::CShadowComponent>(pragma::CLightComponent::ShadowMapType::Dynamic);
 							if(hSm.valid() && hSm->HasRenderTarget()) {
 								// Request render target for light sources that already had one before.
 								// This will make sure the shadow map is the same as before, which increases the likelihood
@@ -143,7 +142,7 @@ void pragma::CRasterizationRendererComponent::RenderShadows(const util::DrawScen
 		std::queue<uint32_t> lightSourcesWaitingForRenderQueues;
 		for(auto i = decltype(m_visShadowedLights.size()) {0u}; i < m_visShadowedLights.size(); ++i) {
 			auto *l = m_visShadowedLights[i].get();
-			auto hSm = l->GetShadowMap(pragma::CLightComponent::ShadowMapType::Dynamic);
+			auto hSm = l->GetShadowMap<pragma::CShadowComponent>(pragma::CLightComponent::ShadowMapType::Dynamic);
 			if(hSm.valid() && hSm->HasRenderTarget() == false)
 				hSm->RequestRenderTarget();
 
@@ -157,7 +156,7 @@ void pragma::CRasterizationRendererComponent::RenderShadows(const util::DrawScen
 			// In the meantime, any shadowed lights that don't have a render queue ready yet
 			// will start generating one now, which should be complete by the time the other
 			// light sources have completed rendering their shadow maps.
-			auto *shadowC = l->GetShadowComponent();
+			auto *shadowC = l->GetShadowComponent<pragma::CShadowComponent>();
 			auto &renderer = shadowC->GetRenderer();
 			if(renderer.IsRenderQueueComplete())
 				lightSourcesReadyForShadowRendering.push(i);
@@ -178,7 +177,7 @@ void pragma::CRasterizationRendererComponent::RenderShadows(const util::DrawScen
 			// Note: Always have to re-render if render target has changed!!
 			// Also do the same below
 			auto &lightC = m_visShadowedLights.at(idx);
-			auto &renderer = lightC->GetShadowComponent()->GetRenderer();
+			auto &renderer = lightC->GetShadowComponent<pragma::CShadowComponent>()->GetRenderer();
 			renderer.Render(drawSceneInfo);
 		}
 
@@ -189,7 +188,7 @@ void pragma::CRasterizationRendererComponent::RenderShadows(const util::DrawScen
 			// Render remaining light sources. If their render queues are still not
 			// completed, we'll have no choice but to wait.
 			auto &lightC = m_visShadowedLights.at(idx);
-			auto &renderer = lightC->GetShadowComponent()->GetRenderer();
+			auto &renderer = lightC->GetShadowComponent<pragma::CShadowComponent>()->GetRenderer();
 			renderer.Render(drawSceneInfo);
 		}
 

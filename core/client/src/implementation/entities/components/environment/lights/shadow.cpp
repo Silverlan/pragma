@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
 #include "pragma/entities/game/c_game_shadow_manager.hpp"
@@ -22,6 +24,8 @@
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/math/intersection.h>
 #include <image/prosper_render_target.hpp>
+
+module pragma.client.entities.components.lights.shadow;
 
 import pragma.client.client_state;
 import pragma.client.entities.components;

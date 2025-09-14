@@ -5,9 +5,10 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/entities/baseentity_luaobject.h"
-#include "pragma/entities/environment/lights/c_env_shadow.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
+#include "pragma/entities/environment/lights/c_env_light.h"
 #include "pragma/rendering/c_cubemapside.h"
+#include "pragma/c_engine.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/math/intersection.h>
 #include <pragma/entities/components/base_transform_component.hpp>
@@ -15,6 +16,7 @@ module;
 
 module pragma.client.entities.components.lights.point;
 
+import pragma.client.entities.components.lights.shadow;
 import pragma.client.entities.components.radius;
 import pragma.client.entities.components.render;
 import pragma.client.entities.components.transform;

@@ -4,9 +4,9 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/environment/lights/c_env_shadow.hpp"
 #include "pragma/lua/converters/gui_element_converter.hpp"
 #include "pragma/rendering/c_cubemapside.h"
+#include "pragma/c_engine.h"
 #include <image/prosper_render_target.hpp>
 #include <sharedutils/util_string.h>
 
@@ -58,7 +58,7 @@ void WIDebugShadowMap::DoUpdate()
 	if(pLight == nullptr)
 		return;
 	prosper::Texture *depthTexture = nullptr;
-	auto hShadow = lightSource.GetShadowMap(m_shadowMapType);
+	auto hShadow = lightSource.GetShadowMap<pragma::CShadowComponent>(m_shadowMapType);
 	auto hShadowCsm = lightSource.GetEntity().GetComponent<pragma::CShadowCSMComponent>();
 	if(hShadow.valid())
 		depthTexture = hShadow->GetDepthTexture();

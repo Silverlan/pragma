@@ -5,7 +5,6 @@
 #include "pragma/game/c_game.h"
 #include "pragma/entities/environment/lights/c_env_light.h"
 #include "pragma/entities/environment/lights/c_env_light.h"
-#include "pragma/entities/environment/lights/c_env_shadow.hpp"
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/lua/libraries/c_lua_vulkan.h"
 #include "pragma/model/c_model.h"
@@ -24,6 +23,7 @@
 import pragma.client.entities.components.color;
 import pragma.client.entities.components.lights.directional;
 import pragma.client.entities.components.lights.point;
+import pragma.client.entities.components.lights.shadow;
 import pragma.client.entities.components.lights.spot;
 import pragma.client.entities.components.radius;
 import pragma.client.entities.components.render;
@@ -298,8 +298,8 @@ void CLightComponent::SetShadowType(ShadowType type)
 	if(GetEffectiveShadowType() != ShadowType::None)
 		InitializeShadowMap();
 	else {
-		m_shadowMapStatic = ComponentHandle<CShadowComponent> {};
-		m_shadowMapDynamic = ComponentHandle<CShadowComponent> {};
+		m_shadowMapStatic = ComponentHandle<BaseEntityComponent> {};
+		m_shadowMapDynamic = ComponentHandle<BaseEntityComponent> {};
 	}
 	UpdateShadowTypes(); // Has to be called AFTER the shadowmap has been initialized!
 }
@@ -337,11 +337,13 @@ void CLightComponent::SetShadowMapIndex(uint32_t idx, ShadowMapType smType)
 	}
 }
 
-void CLightComponent::InitializeShadowMap(CShadowComponent &sm)
+template<typename TCPPM>
+	void CLightComponent::InitializeShadowMap(TCPPM &sm)
 {
-	sm.SetTextureReloadCallback([this]() { UpdateShadowTypes(); });
+	static_cast<CShadowComponent&>(sm).SetTextureReloadCallback([this]() { UpdateShadowTypes(); });
 	UpdateShadowTypes();
 }
+template void CLightComponent::InitializeShadowMap(CShadowComponent &sm);
 
 void CLightComponent::InitializeShadowMap()
 {
@@ -349,17 +351,17 @@ void CLightComponent::InitializeShadowMap()
 		return;
 	CEHandleShadowMap ceData {};
 	if(BroadcastEvent(EVENT_HANDLE_SHADOW_MAP, ceData) == util::EventReply::Unhandled)
-		m_shadowMapStatic = GetEntity().AddComponent<CShadowComponent>(true);
+		m_shadowMapStatic = GetEntity().AddComponent<CShadowComponent>(true)->GetHandle();
 	else if(ceData.resultShadow)
-		m_shadowMapStatic = ceData.resultShadow->GetHandle<CShadowComponent>();
+		m_shadowMapStatic = ceData.resultShadow->GetHandle();
 	if(m_shadowMapStatic.valid())
 		InitializeShadowMap(*m_shadowMapStatic);
 	if(GetEffectiveShadowType() == ShadowType::Full) {
 		CEHandleShadowMap ceData {};
 		if(BroadcastEvent(EVENT_HANDLE_SHADOW_MAP, ceData) == util::EventReply::Unhandled)
-			m_shadowMapDynamic = GetEntity().AddComponent<CShadowComponent>(true);
+			m_shadowMapDynamic = GetEntity().AddComponent<CShadowComponent>(true)->GetHandle();
 		else if(ceData.resultShadow)
-			m_shadowMapDynamic = ceData.resultShadow->GetHandle<CShadowComponent>();
+			m_shadowMapDynamic = ceData.resultShadow->GetHandle();
 		if(m_shadowMapDynamic.valid())
 			InitializeShadowMap(*m_shadowMapDynamic);
 	}
@@ -569,10 +571,26 @@ pragma::LightBufferData &CLightComponent::GetBufferData() { return m_bufferData;
 const pragma::ShadowBufferData *CLightComponent::GetShadowBufferData() const { return const_cast<CLightComponent *>(this)->GetShadowBufferData(); }
 pragma::ShadowBufferData *CLightComponent::GetShadowBufferData() { return m_shadowBufferData.get(); }
 
-pragma::ComponentHandle<CShadowComponent> CLightComponent::GetShadowMap(ShadowMapType type) const { return (type == ShadowMapType::Dynamic) ? m_shadowMapDynamic : m_shadowMapStatic; }
+template<typename TCPPM>
+pragma::ComponentHandle<TCPPM> CLightComponent::GetShadowMap(ShadowMapType type) const {
+    if(type == ShadowMapType::Dynamic) {
+        if(m_shadowMapDynamic.expired())
+            return pragma::ComponentHandle<TCPPM> {};
+        return const_cast<BaseEntityComponent*>(m_shadowMapDynamic.get())->GetHandle<TCPPM>();
+    }
+    if(m_shadowMapStatic.expired())
+        return pragma::ComponentHandle<TCPPM> {};
+    return const_cast<BaseEntityComponent*>(m_shadowMapStatic.get())->GetHandle<TCPPM>();
+}
+template pragma::ComponentHandle<CShadowComponent> CLightComponent::GetShadowMap(ShadowMapType type) const;
 
-pragma::CShadowComponent *CLightComponent::GetShadowComponent() { return m_shadowComponent; }
-const pragma::CShadowComponent *CLightComponent::GetShadowComponent() const { return const_cast<CLightComponent *>(this)->GetShadowComponent(); }
+template<typename TCPPM>
+	TCPPM *CLightComponent::GetShadowComponent() { return static_cast<TCPPM*>(m_shadowComponent); }
+template CShadowComponent *CLightComponent::GetShadowComponent();
+template<typename TCPPM>
+	const TCPPM *CLightComponent::GetShadowComponent() const { return const_cast<CLightComponent *>(this)->GetShadowComponent<TCPPM>(); }
+template const CShadowComponent *CLightComponent::GetShadowComponent() const;
+
 bool CLightComponent::HasShadowsEnabled() const { return m_shadowComponent && GetEffectiveShadowType() != ShadowType::None; }
 
 Mat4 &CLightComponent::GetTransformationMatrix(unsigned int j)

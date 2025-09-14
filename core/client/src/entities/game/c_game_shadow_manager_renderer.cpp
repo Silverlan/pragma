@@ -6,7 +6,6 @@
 #include "pragma/entities/game/c_game_occlusion_culler.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
-#include "pragma/entities/environment/lights/c_env_shadow.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/rendering/shaders/c_shader_shadow.hpp"
 #include "pragma/rendering/render_queue.hpp"
@@ -161,7 +160,7 @@ bool ShadowRenderer::UpdateShadowCasters(std::shared_ptr<prosper::IPrimaryComman
 	// TODO: Remove me
 #if 0
 	m_shadowCasters.clear();
-	auto hShadowMap = light.GetShadowMap(smType);
+	auto hShadowMap = light.GetShadowMap<pragma::CShadowComponent>(smType);
 	if(hShadowMap.expired())
 		return false;
 	auto frameId = c_engine->GetRenderContext().GetLastFrameId();
@@ -262,7 +261,7 @@ ShadowRenderer::RenderResultFlags ShadowRenderer::RenderShadows(std::shared_ptr<
 static CVar cvParticleQuality = GetClientConVar("cl_render_particle_quality");
 void ShadowRenderer::RenderShadows(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, pragma::CLightComponent &light, pragma::CLightComponent::ShadowMapType smType, pragma::LightType type, bool drawParticleShadows)
 {
-	auto hShadowMap = light.GetShadowMap(smType);
+	auto hShadowMap = light.GetShadowMap<pragma::CShadowComponent>(smType);
 	if(hShadowMap.expired() || light.GetEffectiveShadowType() == pragma::BaseEnvLightComponent::ShadowType::None || UpdateShadowCasters(drawCmd, light, smType) == false)
 		return;
 	auto &shader = (type != pragma::LightType::Spot) ? static_cast<pragma::ShaderShadow &>(*m_shader.get()) : static_cast<pragma::ShaderShadow &>(*m_shaderSpot.get());

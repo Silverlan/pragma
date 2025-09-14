@@ -45,7 +45,7 @@ static bool get_shadow_map(NetworkState *nw, std::vector<std::string> &argv, pra
 		Con::cwar << "Entity '" << ent->GetClass() << "'(" << argv.front() << ") has no light attached!" << Con::endl;
 		return false;
 	}
-	auto hShadowmap = (*light)->GetShadowMap(smType);
+	auto hShadowmap = (*light)->GetShadowMap<pragma::CShadowComponent>(smType);
 	if(hShadowmap.expired() && (*light)->GetEntity().HasComponent<pragma::CShadowCSMComponent>() == false) {
 		Con::cwar << "Invalid shadowmap for this entity!" << Con::endl;
 		return false;

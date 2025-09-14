@@ -160,7 +160,7 @@ void CParticleRendererModel::PostSimulate(double tDelta)
 
 bool CParticleRendererModel::Update()
 {
-	auto *cam = c_game->GetRenderCamera();
+	auto *cam = c_game->GetRenderCamera<pragma::CCameraComponent>();
 	if(m_rotationalBuffer.Update() == false || cam == nullptr)
 		return false;
 	// Update meshes

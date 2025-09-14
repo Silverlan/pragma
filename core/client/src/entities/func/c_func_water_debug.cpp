@@ -86,7 +86,7 @@ void Console::commands::debug_water(NetworkState *state, pragma::BasePlayerCompo
 				if(hWater.valid() == false)
 					return;
 				auto *entWater = static_cast<CFuncWater *>(hWater.get());
-				auto *cam = c_game->GetRenderCamera();
+				auto *cam = c_game->GetRenderCamera<pragma::CCameraComponent>();
 				// Update debug depth GUI element
 				if(hDepthTex.IsValid() && cam != nullptr) {
 					auto *pDepthTex = static_cast<WIDebugDepthTexture *>(hDepthTex.get());

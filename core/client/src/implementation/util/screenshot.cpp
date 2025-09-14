@@ -49,7 +49,7 @@ void util::rt_screenshot(CGame &game, uint32_t width, uint32_t height, const RtS
 {
 	FileManager::CreateDirectory("screenshots");
 
-	auto *pCam = game.GetRenderCamera();
+	auto *pCam = game.GetRenderCamera<pragma::CCameraComponent>();
 	Con::cout << "Taking raytraced screenshot..." << Con::endl;
 	Con::cout << "Preparing scene for raytracing..." << Con::endl;
 

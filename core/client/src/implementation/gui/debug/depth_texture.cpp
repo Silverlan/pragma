@@ -155,7 +155,7 @@ void WIDebugDepthTexture::DoUpdate()
 	auto nearZ = pragma::BaseEnvCameraComponent::DEFAULT_NEAR_Z;
 	auto farZ = pragma::BaseEnvCameraComponent::DEFAULT_FAR_Z;
 	if(c_game) {
-		auto *cam = c_game->GetPrimaryCamera();
+		auto *cam = c_game->GetPrimaryCamera<pragma::CCameraComponent>();
 		if(cam) {
 			nearZ = cam->GetNearZ();
 			farZ = cam->GetFarZ();

@@ -424,7 +424,7 @@ void CShadowCSMComponent::RenderBatch(std::shared_ptr<prosper::IPrimaryCommandBu
 		}
 		drawCmd->RecordEndRenderPass();
 	}
-	auto *cam = c_game->GetPrimaryCamera();
+	auto *cam = c_game->GetPrimaryCamera<pragma::CCameraComponent>();
 	auto camPos = cam ? cam->GetEntity().GetPosition() : Vector3{};
 	for(auto layer=decltype(numLayers){0};layer<numLayers;++layer)
 	{

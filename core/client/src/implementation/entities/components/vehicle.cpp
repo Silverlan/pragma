@@ -129,7 +129,7 @@ void CVehicleComponent::ClearDriver()
 					pRenderComponent->SetSceneRenderPass(pragma::rendering::SceneRenderPass::View);
 			}
 
-			auto *cam = c_game->GetPrimaryCamera();
+			auto *cam = c_game->GetPrimaryCamera<pragma::CCameraComponent>();
 			if(cam) {
 				auto observerC = cam->GetEntity().GetComponent<CObserverComponent>();
 				if(observerC.valid()) {

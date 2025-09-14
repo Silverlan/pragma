@@ -358,7 +358,7 @@ static std::shared_ptr<DebugRenderer::BaseObject> draw_text(WIText *el, const Ve
 	auto *ptrO = o.get();
 	auto hEl = el->GetHandle();
 	auto cb = c_game->AddCallback("Render", FunctionCallback<>::Create([pos, szUnits, hEl, ptrO]() {
-		auto *cam = c_game->GetRenderCamera();
+		auto *cam = c_game->GetRenderCamera<pragma::CCameraComponent>();
 		if(!hEl.IsValid() || cam == nullptr)
 			return;
 		auto *el = static_cast<const WIText *>(hEl.get());

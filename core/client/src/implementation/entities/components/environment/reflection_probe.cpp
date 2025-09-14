@@ -84,7 +84,7 @@ void Console::commands::map_build_reflection_probes(NetworkState *state, pragma:
 		CReflectionProbeComponent *probeClosest = nullptr;
 		auto dClosest = std::numeric_limits<float>::max();
 		Vector3 origin {};
-		if(auto *cam = c_game->GetRenderCamera())
+		if(auto *cam = c_game->GetRenderCamera<pragma::CCameraComponent>())
 			origin = cam->GetEntity().GetPosition();
 		for(const auto *entProbe : entIt) {
 			auto d = uvec::distance_sqr(origin, entProbe->GetPosition());
@@ -978,7 +978,7 @@ void Console::commands::debug_pbr_ibl(NetworkState *state, pragma::BasePlayerCom
 		return;
 	}
 
-	auto *cam = c_game->GetRenderCamera();
+	auto *cam = c_game->GetRenderCamera<pragma::CCameraComponent>();
 	if(cam)
 		c_game->DrawLine(cam->GetEntity().GetPosition(), entClosest->GetPosition(), Color::Red, 30.f);
 

@@ -187,7 +187,7 @@ int Lua::lib_export::export_scene(lua_State *l)
 	// Export camera
 	// Note: Assimp seems to be practically unusable for importing/exporting anything other than mesh geometry or animations.
 	// We'll probably have to write our own exporter at some point instead.
-	auto *cam = c_game->GetRenderCamera();
+	auto *cam = c_game->GetRenderCamera<pragma::CCameraComponent>();
 	auto camNodeIndex = nodeIdx;
 	scene->mNumCameras = 1;
 	scene->mCameras = new aiCamera*[1];

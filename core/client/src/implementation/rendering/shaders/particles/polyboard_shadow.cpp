@@ -78,7 +78,7 @@ void ParticlePolyboardShadow::Draw(CParticleSystem *particle,const Vulkan::Buffe
 	drawCmd->SetScissor(wShadow,hShadow);
 	drawCmd->SetViewport(wShadow,hShadow);
 
-	auto &cam = *c_game->GetRenderCamera();
+	auto &cam = *c_game->GetRenderCamera<pragma::CCameraComponent>();
 	auto &v = cam.GetViewMatrix();
 	auto vp = cam.GetProjectionMatrix() *v;
 	Vulkan::Std140LayoutBlockData gsPushConstants(21);

@@ -637,14 +637,15 @@ float CGame::GetViewModelFOV() const { return *m_viewFov; }
 float CGame::GetViewModelFOVRad() const { return umath::deg_to_rad(*m_viewFov); }
 Mat4 CGame::GetViewModelProjectionMatrix() const
 {
-	auto *cam = GetPrimaryCamera();
+	auto *cam = GetPrimaryCamera<pragma::CCameraComponent>();
 	auto aspectRatio = cam ? cam->GetAspectRatio() : 1.f;
 	auto nearZ = cam ? cam->GetNearZ() : pragma::BaseEnvCameraComponent::DEFAULT_NEAR_Z;
 	auto farZ = cam ? cam->GetFarZ() : pragma::BaseEnvCameraComponent::DEFAULT_FAR_Z;
 	return pragma::BaseEnvCameraComponent::CalcProjectionMatrix(*m_viewFov, aspectRatio, nearZ, farZ);
 }
 
-pragma::CCameraComponent *CGame::CreateCamera(float aspectRatio, float fov, float nearZ, float farZ)
+template<typename TCPPM>
+TCPPM *CGame::CreateCamera(float aspectRatio, float fov, float nearZ, float farZ)
 {
 	auto *cam = CreateEntity<CEnvCamera>();
 	auto whCamComponent = cam ? cam->GetComponent<pragma::CCameraComponent>() : pragma::ComponentHandle<pragma::CCameraComponent> {};
@@ -663,7 +664,8 @@ pragma::CCameraComponent *CGame::CreateCamera(float aspectRatio, float fov, floa
 	return pCameraComponent;
 }
 
-pragma::CCameraComponent *CGame::CreateCamera(uint32_t width, uint32_t height, float fov, float nearZ, float farZ) { return CreateCamera(width / static_cast<float>(height), fov, nearZ, farZ); }
+template<typename TCPPM>
+TCPPM *CGame::CreateCamera(uint32_t width, uint32_t height, float fov, float nearZ, float farZ) { return CreateCamera<TCPPM>(width / static_cast<float>(height), fov, nearZ, farZ); }
 
 void CGame::InitializeGame() // Called by NET_cl_resourcecomplete
 {
@@ -711,13 +713,13 @@ void CGame::InitializeGame() // Called by NET_cl_resourcecomplete
 
 	Resize(false);
 
-	auto *cam = CreateCamera(scene->GetWidth(), scene->GetHeight(), GetConVarFloat("cl_render_fov"), c_engine->GetNearZ(), c_engine->GetFarZ());
+	auto *cam = CreateCamera<pragma::CCameraComponent>(scene->GetWidth(), scene->GetHeight(), GetConVarFloat("cl_render_fov"), c_engine->GetNearZ(), c_engine->GetFarZ());
 	if(cam) {
 		auto toggleC = cam->GetEntity().GetComponent<pragma::CToggleComponent>();
 		if(toggleC.valid())
 			toggleC->TurnOn();
 		scene->SetActiveCamera(*cam);
-		m_primaryCamera = cam->GetHandle<pragma::CCameraComponent>();
+		m_primaryCamera = cam->GetHandle();
 
 		cam->GetEntity().AddComponent<pragma::CObserverComponent>();
 	}
@@ -746,7 +748,7 @@ void CGame::Resize(bool reloadRenderTarget)
 {
 	if(reloadRenderTarget)
 		ReloadRenderFrameBuffer();
-	auto *cam = GetRenderCamera();
+	auto *cam = GetRenderCamera<pragma::CCameraComponent>();
 	if(cam != nullptr) {
 		cam->SetAspectRatio(c_engine->GetWindow().GetAspectRatio());
 		cam->UpdateMatrices();
@@ -772,36 +774,43 @@ template<typename TCPPM>
 TCPPM *CGame::GetRenderScene() { return static_cast<pragma::CSceneComponent*>(m_renderScene.get()); }
 template<typename TCPPM>
 const TCPPM *CGame::GetRenderScene() const { return const_cast<CGame *>(this)->GetRenderScene<pragma::CSceneComponent>(); }
-pragma::CCameraComponent *CGame::GetRenderCamera() const
+template<typename TCPPM>
+TCPPM *CGame::GetRenderCamera() const
 {
 	if(m_renderScene.expired())
 		return nullptr;
 	return const_cast<pragma::CCameraComponent *>(static_cast<const pragma::CSceneComponent*>(m_renderScene.get())->GetActiveCamera().get());
 }
-void CGame::SetGameplayControlCamera(pragma::CCameraComponent &cam)
+template<typename TCPPM>
+void CGame::SetGameplayControlCamera(TCPPM &cam)
 {
-	m_controlCamera = cam.GetHandle<pragma::CCameraComponent>();
+	m_controlCamera = cam.GetHandle<pragma::BaseEntityComponent>();
 	m_stateFlags &= ~StateFlags::DisableGamplayControlCamera;
 }
+template void CGame::SetGameplayControlCamera(pragma::CCameraComponent&);
 void CGame::ResetGameplayControlCamera()
 {
-	m_controlCamera = pragma::ComponentHandle<pragma::CCameraComponent> {};
+	m_controlCamera = pragma::ComponentHandle<pragma::BaseEntityComponent> {};
 	m_stateFlags &= ~StateFlags::DisableGamplayControlCamera;
 }
 void CGame::ClearGameplayControlCamera()
 {
-	m_controlCamera = pragma::ComponentHandle<pragma::CCameraComponent> {};
+	m_controlCamera = pragma::ComponentHandle<pragma::BaseEntityComponent> {};
 	m_stateFlags |= StateFlags::DisableGamplayControlCamera;
 }
-pragma::CCameraComponent *CGame::GetGameplayControlCamera()
+template<typename TCPPM>
+TCPPM *CGame::GetGameplayControlCamera()
 {
 	if(m_controlCamera.valid())
-		return m_controlCamera.get();
+		return static_cast<pragma::CCameraComponent*>(m_controlCamera.get());
 	if(umath::is_flag_set(m_stateFlags, StateFlags::DisableGamplayControlCamera))
 		return nullptr;
-	return GetRenderCamera();
+	return GetRenderCamera<TCPPM>();
 }
-pragma::CCameraComponent *CGame::GetPrimaryCamera() const { return const_cast<pragma::CCameraComponent *>(m_primaryCamera.get()); }
+template pragma::CCameraComponent* CGame::GetGameplayControlCamera();
+template<typename TCPPM>
+TCPPM *CGame::GetPrimaryCamera() const { return const_cast<pragma::CCameraComponent *>(static_cast<const pragma::CCameraComponent*>(m_primaryCamera.get())); }
+template pragma::CCameraComponent *CGame::GetPrimaryCamera<pragma::CCameraComponent>() const;
 
 void CGame::SetMaterialOverride(Material *mat) { m_matOverride = mat; }
 Material *CGame::GetMaterialOverride() { return m_matOverride; }
@@ -1020,7 +1029,7 @@ void CGame::Think()
 {
 	Game::Think();
 	auto *scene = GetRenderScene<pragma::CSceneComponent>();
-	auto *cam = GetPrimaryCamera();
+	auto *cam = GetPrimaryCamera<pragma::CCameraComponent>();
 
 	double tDelta = m_stateNetwork->DeltaTime();
 	m_tServer += DeltaTime();
@@ -1307,7 +1316,7 @@ void CGame::SetLocalPlayer(pragma::CPlayerComponent *pl)
 	m_plLocal = pl->GetHandle<pragma::CPlayerComponent>();
 	pl->SetLocalPlayer(true);
 
-	auto *cam = GetPrimaryCamera();
+	auto *cam = GetPrimaryCamera<pragma::CCameraComponent>();
 	if(cam) {
 		auto observerC = cam->GetEntity().GetComponent<pragma::CObserverComponent>();
 		auto observableC = pl->GetEntity().GetComponent<pragma::CObservableComponent>();
@@ -1659,7 +1668,8 @@ void CGame::DrawPlane(const Vector3 &n, float dist, const Color &color, float du
 void CGame::DrawMesh(const std::vector<Vector3> &meshVerts, const Color &color, const Color &colorOutline, float duration) { DebugRenderer::DrawMesh(meshVerts, {color, colorOutline, duration}); }
 static auto cvRenderPhysics = GetClientConVar("debug_physics_draw");
 static auto cvSvRenderPhysics = GetClientConVar("sv_debug_physics_draw");
-void CGame::RenderDebugPhysics(std::shared_ptr<prosper::ICommandBuffer> &drawCmd, pragma::CCameraComponent &cam)
+template<typename TCPPM>
+	void CGame::RenderDebugPhysics(std::shared_ptr<prosper::ICommandBuffer> &drawCmd, TCPPM &cam)
 {
 	if(cvRenderPhysics->GetBool()) {
 		auto *physEnv = GetPhysicsEnvironment();
@@ -1677,6 +1687,7 @@ void CGame::RenderDebugPhysics(std::shared_ptr<prosper::ICommandBuffer> &drawCmd
 			static_cast<CPhysVisualDebugger &>(*pVisualDebugger).Render(drawCmd, cam);
 	}
 }
+template void CGame::RenderDebugPhysics<pragma::CCameraComponent>(std::shared_ptr<prosper::ICommandBuffer>&, pragma::CCameraComponent&);
 
 bool CGame::LoadAuxEffects(const std::string &fname)
 {

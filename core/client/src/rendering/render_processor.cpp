@@ -40,7 +40,7 @@ void set_debug_render_filter(std::unique_ptr<DebugRenderFilter> filter) { g_debu
 static std::string nanoseconds_to_ms(std::chrono::nanoseconds t) { return std::to_string(static_cast<long double>(t.count()) / static_cast<long double>(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::milliseconds {1}).count())) + "ms"; }
 static void print_pass_stats(const RenderPassStats &stats, bool full)
 {
-	auto *cam = c_game->GetRenderCamera();
+	auto *cam = c_game->GetRenderCamera<pragma::CCameraComponent>();
 	struct EntityData {
 		EntityHandle hEntity {};
 		float distance = 0.f;

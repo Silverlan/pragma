@@ -67,7 +67,7 @@ void CParticleRendererAnimatedSprites::RecordRenderShadow(prosper::ICommandBuffe
 	auto &shader = static_cast<Shader::ParticleShadow&>(*hShader.get());
 	if(shader.BeginDraw() == false)
 		return;
-	//auto &cam = *c_game->GetRenderCamera();
+	//auto &cam = *c_game->GetRenderCamera<pragma::CCameraComponent>();
 	shader.Draw(m_particleSystem,light,layerId);
 	shader.EndDraw();*/ // prosper TODO
 }

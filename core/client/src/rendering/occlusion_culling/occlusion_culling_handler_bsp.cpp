@@ -96,7 +96,7 @@ static void debug_bsp_nodes(NetworkState *, const ConVar &, int32_t, int32_t val
 		Con::cwar << "Scene does not have BSP tree!" << Con::endl;
 		return;
 	}
-	auto *cam = c_game->GetRenderCamera();
+	auto *cam = c_game->GetRenderCamera<pragma::CCameraComponent>();
 	auto &camPos = cam ? cam->GetEntity().GetPosition() : uvec::ORIGIN;
 	auto *pCurrentNode = bspTree->FindLeafNode(camPos);
 	if(pCurrentNode == nullptr) {

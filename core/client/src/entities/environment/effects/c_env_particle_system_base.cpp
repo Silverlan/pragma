@@ -1478,7 +1478,7 @@ const SpriteSheetAnimation *CParticleSystemComponent::GetSpriteSheetAnimation() 
 
 void CParticleSystemComponent::Simulate(double tDelta)
 {
-	auto *cam = c_game->GetPrimaryCamera();
+	auto *cam = c_game->GetPrimaryCamera<pragma::CCameraComponent>();
 	if(!IsActiveOrPaused() || cam == nullptr)
 		return;
 	util::ScopeGuard sg {[this, tDelta]() { m_simulationTime += tDelta; }}; // Increment simulation time once this tick is complete

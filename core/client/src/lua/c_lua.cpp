@@ -229,7 +229,7 @@ void CGame::RegisterLua()
 	  luabind::def("load_sound_scripts", static_cast<void (*)(lua_State *, const std::string &)>(Lua::engine::LoadSoundScripts)), luabind::def("get_model", Lua::engine::get_model), luabind::def("get_number_of_scenes_queued_for_rendering", &CGame::GetNumberOfScenesQueuedForRendering),
 	  luabind::def("get_queued_scene_render_info", &CGame::GetQueuedSceneRenderInfo),
 
-	  luabind::def("set_gameplay_control_camera", &CGame::SetGameplayControlCamera), luabind::def("reset_gameplay_control_camera", &CGame::ResetGameplayControlCamera), luabind::def("get_gameplay_control_camera", &CGame::GetGameplayControlCamera),
+	  luabind::def("set_gameplay_control_camera", &CGame::SetGameplayControlCamera<pragma::CCameraComponent>), luabind::def("reset_gameplay_control_camera", &CGame::ResetGameplayControlCamera), luabind::def("get_gameplay_control_camera", &CGame::GetGameplayControlCamera<pragma::CCameraComponent>),
 	  luabind::def("clear_gameplay_control_camera", &CGame::ClearGameplayControlCamera),
 	  luabind::def(
 	    "get_primary_camera_render_mask", +[]() -> std::pair<::pragma::rendering::RenderMask, ::pragma::rendering::RenderMask> {
@@ -247,7 +247,7 @@ void CGame::RegisterLua()
 		                                                                                                                                                                        auto fov = Lua::CheckNumber(l, 2);
 		                                                                                                                                                                        auto nearZ = Lua::CheckNumber(l, 3);
 		                                                                                                                                                                        auto farZ = Lua::CheckNumber(l, 4);
-		                                                                                                                                                                        auto *cam = c_game->CreateCamera(aspectRatio, fov, nearZ, farZ);
+		                                                                                                                                                                        auto *cam = c_game->CreateCamera<pragma::CCameraComponent>(aspectRatio, fov, nearZ, farZ);
 		                                                                                                                                                                        if(cam == nullptr)
 			                                                                                                                                                                        return 0;
 		                                                                                                                                                                        cam->PushLuaObject(l);

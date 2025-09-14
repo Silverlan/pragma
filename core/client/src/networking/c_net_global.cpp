@@ -1170,9 +1170,9 @@ void CMD_debug_draw_line(NetworkState *state, pragma::BasePlayerComponent *pl, s
 		Con::cwar << "No active game!" << Con::endl;
 		return;
 	}
-	auto *cam = c_game->GetRenderCamera();
+	auto *cam = c_game->GetRenderCamera<pragma::CCameraComponent>();
 	if(!cam)
-		cam = c_game->GetPrimaryCamera();
+		cam = c_game->GetPrimaryCamera<pragma::CCameraComponent>();
 	if(!cam) {
 		Con::cwar << "No active camera found!" << Con::endl;
 		return;
@@ -1204,7 +1204,7 @@ void CMD_debug_aim_info(NetworkState *state, pragma::BasePlayerComponent *pl, st
 			break;
 		}
 	}
-	cam = cam ? cam : c_game->GetPrimaryCamera();
+	cam = cam ? cam : c_game->GetPrimaryCamera<pragma::CCameraComponent>();
 	if(cam == nullptr)
 		return;
 	auto trC = cam->GetEntity().GetComponent<pragma::CTransformComponent>();

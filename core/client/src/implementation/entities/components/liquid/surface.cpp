@@ -315,13 +315,13 @@ void CLiquidSurfaceComponent::InitializeWaterScene(const Vector3 &refPos, const 
 	auto &shaderPPWater = static_cast<pragma::ShaderPPWater &>(*whShaderPPWater.get());
 	m_shaderPpWater = shaderPPWater.GetHandle();
 
-	auto *cam = c_game->GetPrimaryCamera();
+	auto *cam = c_game->GetPrimaryCamera<pragma::CCameraComponent>();
 	auto width = scene->GetWidth() / 2u;
 	auto height = scene->GetHeight() / 2u;
 	auto fov = cam ? cam->GetFOV() : pragma::BaseEnvCameraComponent::DEFAULT_FOV;
 	auto nearZ = cam ? cam->GetNearZ() : pragma::BaseEnvCameraComponent::DEFAULT_NEAR_Z;
 	auto farZ = cam ? cam->GetFarZ() : pragma::BaseEnvCameraComponent::DEFAULT_FAR_Z; // TODO: shared Property?
-	auto *camReflection = c_game->CreateCamera(width, height, fov, nearZ, farZ);
+	auto *camReflection = c_game->CreateCamera<pragma::CCameraComponent>(width, height, fov, nearZ, farZ);
 	if(camReflection == nullptr)
 		return;
 	m_waterScene = std::make_unique<WaterScene>();

@@ -143,7 +143,7 @@ void CParticleSystemComponent::Clear()
 #include <pragma/model/modelmesh.h>
 std::shared_ptr<Model> CParticleSystemComponent::GenerateModel(CGame &game, const std::vector<const CParticleSystemComponent *> &particleSystems)
 {
-	auto *cam = game.GetRenderCamera();
+	auto *cam = game.GetRenderCamera<pragma::CCameraComponent>();
 	if(cam == nullptr)
 		return nullptr;
 	std::unordered_set<const CParticleSystemComponent *> particleSystemList {};

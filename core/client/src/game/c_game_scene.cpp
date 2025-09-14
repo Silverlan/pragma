@@ -19,7 +19,7 @@ static void cl_fov_callback(NetworkState *, const ConVar &, float, float val)
 {
 	if(c_game == nullptr)
 		return;
-	auto *cam = c_game->GetPrimaryCamera();
+	auto *cam = c_game->GetPrimaryCamera<pragma::CCameraComponent>();
 	if(cam == nullptr)
 		return;
 	cam->SetFOV(CFloat(val));

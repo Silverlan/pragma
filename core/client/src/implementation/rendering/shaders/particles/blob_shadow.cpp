@@ -67,7 +67,7 @@ bool ParticleBlobShadow::BeginDraw(Vulkan::CommandBufferObject *cmdBuffer,const 
 	auto &context = *m_context.get();
 	auto &layout = GetPipeline()->GetPipelineLayout();
 
-	auto &cam = *c_game->GetRenderCamera();
+	auto &cam = *c_game->GetRenderCamera<pragma::CCameraComponent>();
 	auto &drawCmd = context.GetDrawCmd();
 
 	// Bind particle buffer

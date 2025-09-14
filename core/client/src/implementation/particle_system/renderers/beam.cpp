@@ -130,7 +130,7 @@ void CParticleRendererBeam::RecordRenderShadow(prosper::ICommandBuffer &drawCmd,
 	auto &shader = static_cast<Shader::ParticlePolyboardShadow&>(*hShader.get());
 	if(shader.BeginDraw() == false)
 		return;
-	//auto &cam = *c_game->GetRenderCamera();
+	//auto &cam = *c_game->GetRenderCamera<pragma::CCameraComponent>();
 	shader.Draw(m_particleSystem,m_vertexBuffer,m_indexBuffer,m_indexCount,m_particleSystem->GetRadius(),m_curvature,light,layerId);
 	shader.EndDraw();*/ // prosper TODO
 }

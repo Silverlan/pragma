@@ -314,7 +314,7 @@ void CLightDirectionalComponent::UpdateFrustum(uint32_t frustumId)
 	auto hShadow = GetEntity().GetComponent<CShadowCSMComponent>();
 	if(hShadow.expired())
 		return;
-	auto *cam = c_game->GetPrimaryCamera();
+	auto *cam = c_game->GetPrimaryCamera<pragma::CCameraComponent>();
 	hShadow->UpdateFrustum(frustumId, *cam, GetViewMatrix(), pTrComponent->GetForward());
 }
 
@@ -329,6 +329,6 @@ void CLightDirectionalComponent::UpdateFrustum()
 	auto hShadow = GetEntity().GetComponent<CShadowCSMComponent>();
 	if(hShadow.expired())
 		return;
-	auto *cam = c_game->GetPrimaryCamera();
+	auto *cam = c_game->GetPrimaryCamera<pragma::CCameraComponent>();
 	hShadow->UpdateFrustum(*cam, GetViewMatrix(), pTrComponent->GetForward());
 }

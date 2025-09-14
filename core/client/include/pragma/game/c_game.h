@@ -85,7 +85,6 @@ namespace pragma {
 	class BaseWorldComponent;
 	class CParticleSystemComponent;
 	class BaseEnvLightDirectionalComponent;
-	class CCameraComponent;
 };
 namespace uimg {
 	class ImageBuffer;
@@ -270,7 +269,8 @@ class DLLCLIENT CGame : public Game {
 	virtual void DrawBox(const Vector3 &origin, const Vector3 &start, const Vector3 &end, const EulerAngles &ang, const Color &colorOutline, const std::optional<Color> &fillColor, float duration = 0.f) override;
 	virtual void DrawPlane(const Vector3 &n, float dist, const Color &color, float duration = 0.f) override;
 	virtual void DrawMesh(const std::vector<Vector3> &meshVerts, const Color &color, const Color &colorOutline, float duration = 0.f) override;
-	void RenderDebugPhysics(std::shared_ptr<prosper::ICommandBuffer> &drawCmd, pragma::CCameraComponent &cam);
+	template<typename TCPPM>
+	    void RenderDebugPhysics(std::shared_ptr<prosper::ICommandBuffer> &drawCmd, TCPPM &cam);
 
 	using Game::LoadNavMesh;
 
@@ -306,9 +306,12 @@ class DLLCLIENT CGame : public Game {
 	// Returns the number of lost snapshot packets within the last second
 	uint32_t GetLostPacketCount();
 
-	pragma::CCameraComponent *CreateCamera(uint32_t width, uint32_t height, float fov, float nearZ, float farZ);
-	pragma::CCameraComponent *CreateCamera(float aspectRatio, float fov, float nearZ, float farZ);
-	pragma::CCameraComponent *GetPrimaryCamera() const;
+    template<typename TCPPM>
+	    TCPPM *CreateCamera(uint32_t width, uint32_t height, float fov, float nearZ, float farZ);
+    template<typename TCPPM>
+	    TCPPM *CreateCamera(float aspectRatio, float fov, float nearZ, float farZ);
+    template<typename TCPPM>
+	    TCPPM *GetPrimaryCamera() const;
 	template<typename TCPPM>
 	    const TCPPM *GetScene() const;
     template<typename TCPPM>
@@ -391,11 +394,14 @@ class DLLCLIENT CGame : public Game {
 	    TCPPM *GetRenderScene();
     template<typename TCPPM>
 	    const TCPPM *GetRenderScene() const;
-	pragma::CCameraComponent *GetRenderCamera() const;
-	void SetGameplayControlCamera(pragma::CCameraComponent &cam);
+    template<typename TCPPM>
+	    TCPPM *GetRenderCamera() const;
+    template<typename TCPPM>
+	    void SetGameplayControlCamera(TCPPM &cam);
 	void ClearGameplayControlCamera();
 	void ResetGameplayControlCamera();
-	pragma::CCameraComponent *GetGameplayControlCamera();
+    template<typename TCPPM>
+	    TCPPM *GetGameplayControlCamera();
 
 	pragma::rendering::GlobalShaderInputDataManager &GetGlobalShaderInputDataManager();
 	const pragma::rendering::GlobalShaderInputDataManager &GetGlobalShaderInputDataManager() const;
@@ -496,7 +502,7 @@ class DLLCLIENT CGame : public Game {
 	Material *m_matOverride = nullptr;
 	bool m_bMainRenderPass = true;
 	std::weak_ptr<prosper::IPrimaryCommandBuffer> m_currentDrawCmd = {};
-	pragma::ComponentHandle<pragma::CCameraComponent> m_controlCamera {};
+	pragma::ComponentHandle<pragma::BaseEntityComponent> m_controlCamera {};
 
 	std::array<util::WeakHandle<prosper::Shader>, umath::to_integral(GameShader::Count)> m_gameShaders = {};
 	StateFlags m_stateFlags = StateFlags::None;
@@ -530,7 +536,7 @@ class DLLCLIENT CGame : public Game {
 	util::TWeakSharedHandle<pragma::CPlayerComponent> m_plLocal = util::TWeakSharedHandle<pragma::CPlayerComponent> {};
 	util::TWeakSharedHandle<pragma::BaseEntityComponent> m_viewModel = util::TWeakSharedHandle<pragma::BaseEntityComponent> {};
 	util::TWeakSharedHandle<pragma::BaseEntityComponent> m_viewBody = util::TWeakSharedHandle<pragma::BaseEntityComponent> {};
-	util::TWeakSharedHandle<pragma::CCameraComponent> m_primaryCamera = util::TWeakSharedHandle<pragma::CCameraComponent> {};
+	util::TWeakSharedHandle<pragma::BaseEntityComponent> m_primaryCamera = util::TWeakSharedHandle<pragma::BaseEntityComponent> {};
 
 	util::TWeakSharedHandle<pragma::BaseEntityComponent> m_renderScene = util::TWeakSharedHandle<pragma::BaseEntityComponent> {};
 

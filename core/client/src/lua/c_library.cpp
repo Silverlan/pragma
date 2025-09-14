@@ -265,7 +265,7 @@ static luabind::object load_image(lua_State *l, const std::string &fileName) { r
 static util::ParallelJob<uimg::ImageLayerSet> capture_raytraced_screenshot(lua_State *l, uint32_t width, uint32_t height, uint32_t samples, bool hdrOutput, bool denoise)
 {
 	pragma::rendering::cycles::RenderImageInfo renderImgInfo {};
-	auto *pCam = c_game->GetRenderCamera();
+	auto *pCam = c_game->GetRenderCamera<pragma::CCameraComponent>();
 	if(pCam) {
 		renderImgInfo.camPose = pCam->GetEntity().GetPose();
 		renderImgInfo.viewProjectionMatrix = pCam->GetProjectionMatrix() * pCam->GetViewMatrix();

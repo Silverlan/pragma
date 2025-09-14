@@ -1081,7 +1081,7 @@ int Lua::game::Client::get_scene_by_index(lua_State *l)
 }
 int Lua::game::Client::get_scene_camera(lua_State *l)
 {
-	auto *cam = c_game->GetPrimaryCamera();
+	auto *cam = c_game->GetPrimaryCamera<pragma::CCameraComponent>();
 	if(cam == nullptr)
 		return 0;
 	cam->PushLuaObject(l);
@@ -1107,7 +1107,7 @@ int Lua::game::Client::flush_setup_command_buffer(lua_State *l)
 }
 int Lua::game::Client::get_camera_position(lua_State *l)
 {
-	auto *cam = c_game->GetPrimaryCamera();
+	auto *cam = c_game->GetPrimaryCamera<pragma::CCameraComponent>();
 	if(cam == nullptr) {
 		Lua::Push<Vector3>(l, Vector3 {});
 		Lua::Push<Quat>(l, Quat {});

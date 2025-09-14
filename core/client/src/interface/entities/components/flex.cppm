@@ -1,17 +1,18 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_FLEX_CONTROLLER_HPP__
-#define __C_FLEX_CONTROLLER_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/components/c_entity_component.hpp"
+#include "pragma/model/model.h"
 #include <pragma/util/lookup_identifier.hpp>
 #include <pragma/entities/components/base_flex_component.hpp>
 #include <pragma/audio/c_alsound.h>
 
-struct Eyeball;
-namespace pragma {
+export module pragma.client.entities.components.flex;
+
+export namespace pragma {
 	class DLLCLIENT CFlexComponent final : public BaseFlexComponent {
 	  public:
 		static ComponentEventId EVENT_ON_FLEX_CONTROLLERS_UPDATED;
@@ -76,5 +77,3 @@ namespace pragma {
 		std::vector<FlexAnimationData> m_flexAnimations;
 	};
 };
-
-#endif

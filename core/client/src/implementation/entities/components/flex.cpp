@@ -1,12 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
-#include "pragma/entities/components/c_flex_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/console/c_cvar.h"
 #include "pragma/audio/c_alsound.h"
+#include "pragma/entities/components/base_flex_component.hpp"
 #include <stack>
 #include <pragma/model/model.h>
 #include <alsound_buffer.hpp>
@@ -16,6 +18,8 @@
 #include <pragma/lua/lua_util_component_stream.hpp>
 #include <pragma/lua/converters/optional_converter_t.hpp>
 #include <prosper_command_buffer.hpp>
+
+module pragma.client.entities.components.flex;
 
 import pragma.client.entities.components;
 import se_script;

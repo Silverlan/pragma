@@ -90,7 +90,6 @@
 #include "pragma/entities/basebot.h"
 #include "pragma/model/model.h"
 #include "pragma/entities/components/liquid/base_buoyancy_component.hpp"
-#include "pragma/entities/components/c_flex_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/environment/env_quake.h"
 #include "pragma/model/model.h"

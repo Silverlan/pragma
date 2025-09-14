@@ -6,13 +6,14 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/model/model.h"
 #include "pragma/model/c_modelmesh.h"
-#include "pragma/entities/components/c_flex_component.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"
 #include <pragma/entities/components/base_entity_component.hpp>
 #include <mathutil/transform.hpp>
 #include <mathutil/uvec.h>
 
 export module pragma.client.entities.components.eye;
+
+import pragma.client.entities.components.flex;
 
 export {
 	namespace pragma {

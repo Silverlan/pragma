@@ -45,6 +45,7 @@ export import pragma.client.entities.components.filter_entity_class;
 export import pragma.client.entities.components.filter_entity_name;
 export import pragma.client.entities.components.flammable;
 export import pragma.client.entities.components.flashlight;
+export import pragma.client.entities.components.flex;
 export import pragma.client.entities.components.func_button;
 export import pragma.client.entities.components.func_kinematic;
 export import pragma.client.entities.components.func_physics;

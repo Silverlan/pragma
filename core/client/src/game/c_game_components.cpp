@@ -16,7 +16,6 @@
 #include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/entities/components/c_entity_component.hpp"
 #include "pragma/entities/components/c_game_component.hpp"
-#include "pragma/entities/components/c_flex_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 

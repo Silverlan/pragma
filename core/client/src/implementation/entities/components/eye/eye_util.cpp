@@ -6,7 +6,6 @@ module;
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
 #include "pragma/entities/components/c_model_component.hpp"
-#include "pragma/entities/components/c_flex_component.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/model/c_model.h"
 

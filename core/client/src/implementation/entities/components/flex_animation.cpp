@@ -1,11 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
-#include "pragma/entities/components/c_flex_component.hpp"
 #include <pragma/model/animation/flex_animation.hpp>
 #include <pragma/model/model.h>
+
+module pragma.client.entities.components.flex;
 
 using namespace pragma;
 

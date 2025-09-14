@@ -1,13 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_SHADER_SHADOW_HPP__
-#define __C_SHADER_SHADOW_HPP__
+module;
 
 #include "pragma/rendering/shaders/world/c_shader_scene.hpp"
+#include "pragma/entities/environment/lights/c_env_light.h"
 
-namespace pragma {
-	class CLightComponent;
+export module pragma.client.rendering.shaders:shadow;
+
+export namespace pragma {
 	class DLLCLIENT ShaderShadow : public ShaderGameWorld {
 	  public:
 		static prosper::Format RENDER_PASS_DEPTH_FORMAT;
@@ -111,5 +112,3 @@ namespace pragma {
 		//bool BindMaterial(CMaterial &mat);
 	};
 };
-
-#endif

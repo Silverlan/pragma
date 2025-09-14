@@ -11,7 +11,6 @@
 #include "pragma/entities/entity_instance_index_buffer.hpp"
 #include "pragma/console/c_cvar.h"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
-#include "pragma/rendering/shaders/c_shader_shadow.hpp"
 #include "pragma/rendering/render_queue.hpp"
 #include "pragma/rendering/world_environment.hpp"
 #include <sharedutils/property/util_property_color.hpp>

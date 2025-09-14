@@ -10,7 +10,6 @@ module;
 #include "pragma/console/c_cvar.h"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
-#include "pragma/rendering/shaders/c_shader_shadow.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/global_render_settings_buffer_data.hpp"
 #include <pragma/math/math_seb.h>
@@ -24,6 +23,7 @@ module;
 
 module pragma.client.entities.components.lights.shadow_csm;
 
+import pragma.client.rendering.shaders;
 
 using namespace pragma;
 

@@ -9,7 +9,6 @@ module;
 #include <pragma/entities/entity_component_system_t.hpp>
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/shaders/world/c_shader_pbr.hpp"
-#include "pragma/rendering/shaders/c_shader_shadow.hpp"
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/logging.hpp>

@@ -8,7 +8,6 @@
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/shaders/world/c_shader_pbr.hpp"
 #include "pragma/rendering/shaders/world/c_shader_prepass.hpp"
-#include "pragma/rendering/shaders/c_shader_shadow.hpp"
 #include "pragma/entities/entity_instance_index_buffer.hpp"
 #include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"

@@ -6,6 +6,7 @@
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include "pragma/entities/components/c_model_component.hpp"
+#include "pragma/entities/baseworld.h"
 #include "pragma/entities/game/c_game_occlusion_culler.hpp"
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/entities/components/base_player_component.hpp"

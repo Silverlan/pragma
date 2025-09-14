@@ -67,7 +67,6 @@ import pragma.server.entities.components;
 LINK_NETWORKED_ENTITIES;
 LINK_NETWORKED_PHYSICS_ENTITIES;
 #elif DLLCLIENT_EX
-#include "pragma/entities/c_world.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/components/c_game_component.hpp"

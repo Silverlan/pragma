@@ -1,31 +1,24 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_WORLD_H__
-#define __C_WORLD_H__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/c_baseentity.h"
+#include "pragma/model/render_mesh_group.hpp"
+#include "pragma/rendering/occlusion_culling/chc.hpp"
+#include "buffers/prosper_buffer.hpp"
+#include "pragma/rendering/render_queue.hpp"
 #include <pragma/entities/baseworld.h>
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree.hpp"
 #include <pragma/util/util_bsp_tree.hpp>
 #include <unordered_map>
 
+export module pragma.client.entities.components.world;
+
 #pragma warning(push)
 #pragma warning(disable : 4251)
-namespace prosper {
-	class Buffer;
-};
-namespace util {
-	class BSPTree;
-};
-class CHC;
-namespace pragma {
-	using RenderMeshIndex = uint32_t;
-	using RenderMeshGroup = std::pair<RenderMeshIndex, RenderMeshIndex>; // Start index +count
-	namespace rendering {
-		class RenderQueue;
-	};
+export namespace pragma {
 	class DLLCLIENT CWorldComponent final : public BaseWorldComponent {
 	  public:
 		CWorldComponent(BaseEntity &ent) : BaseWorldComponent(ent) {}
@@ -61,15 +54,9 @@ namespace pragma {
 };
 #pragma warning(pop)
 
-class ModelMesh;
-class CHC;
-template<class T>
-class OcclusionOctree;
-class DLLCLIENT CWorld : public CBaseEntity {
+export class DLLCLIENT CWorld : public CBaseEntity {
   public:
 	virtual void Initialize() override;
 	virtual Con::c_cout &print(Con::c_cout &) override;
 	virtual std::ostream &print(std::ostream &) override;
 };
-
-#endif

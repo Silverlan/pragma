@@ -6,7 +6,6 @@
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/lua/c_lua_script_watcher.hpp"
 #include "pragma/input/input_binding_layer.hpp"
-#include "pragma/entities/c_world.h"
 #include "pragma/c_engine.h"
 #include <wgui/wgui.h>
 #include <wgui/wibase.h>

@@ -134,4 +134,5 @@ export import pragma.client.entities.components.view_model;
 export import pragma.client.entities.components.water_surface;
 export import pragma.client.entities.components.weapon;
 export import pragma.client.entities.components.wheel;
+export import pragma.client.entities.components.world;
 // export import pragma.client.entities.components.material_override;

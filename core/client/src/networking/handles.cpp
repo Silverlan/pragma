@@ -5,12 +5,12 @@
 #include <fsys/filesystem.h>
 #include "pragma/c_engine.h"
 #include "pragma/networking/netmessages.h"
+#include "pragma/entities/c_baseentity.h"
 #include <pragma/networking/nwm_util.h>
 #include "pragma/networking/iclient.hpp"
 #include <sharedutils/util_string.h>
 #include <sharedutils/util_library.hpp>
 #include "pragma/entities/components/c_entity_component.hpp"
-#include "pragma/entities/c_world.h"
 #include <pragma/networking/enums.hpp>
 #include <pragma/networking/resources.h>
 #include <pragma/lua/lua_script_watcher.h>
@@ -20,6 +20,7 @@
 #include <pragma/entities/entity_component_system_t.hpp>
 
 import pragma.client.client_state;
+import pragma.client.entities.components.world;
 
 extern CEngine *c_engine;
 extern CGame *c_game;

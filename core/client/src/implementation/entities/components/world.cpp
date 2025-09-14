@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/entities/c_world.h"
 #include "pragma/physics/collisiontypes.h"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
@@ -20,6 +21,8 @@
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <cmaterial.h>
+
+module pragma.client.entities.components.world;
 
 import pragma.client.entities.components;
 import source_engine.bsp;

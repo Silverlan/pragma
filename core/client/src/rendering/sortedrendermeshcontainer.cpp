@@ -4,7 +4,9 @@
 #include "stdafx_client.h"
 #include "pragma/rendering/sortedrendermeshcontainer.h"
 #include "pragma/entities/components/c_model_component.hpp"
+#include "pragma/entities/c_baseentity.h"
 #include "pragma/model/c_modelmesh.h"
+
 #include <pragma/model/model.h>
 
 EntityMeshContainer::EntityMeshContainer(CBaseEntity *ent) : entity(ent), m_end(m_meshes.begin()) {}

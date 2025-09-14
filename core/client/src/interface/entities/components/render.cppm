@@ -5,7 +5,6 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/components/c_entity_component.hpp"
-#include "pragma/entities/c_world.h"
 #include "pragma/rendering/shaders/world/c_shader_scene.hpp"
 #include "pragma/rendering/c_rendermode.h"
 #include "pragma/rendering/c_model_render_buffer_data.hpp"
@@ -30,6 +29,7 @@ export module pragma.client.entities.components.render;
 import pragma.client.entities.components.animated;
 import pragma.client.entities.components.attachment;
 import pragma.client.entities.components.light_map_receiver;
+import pragma.client.entities.components.world;
 
 export namespace pragma {
 	using RenderMeshIndex = uint32_t;

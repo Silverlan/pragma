@@ -12,6 +12,7 @@ module;
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/console/c_cvar.h"
+#include "pragma/entities/baseworld.h"
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"
 #include <pragma/math/intersection.h>
 #include <pragma/entities/entity_iterator.hpp>

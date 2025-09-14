@@ -7,7 +7,6 @@ module;
 #include "pragma/c_engine.h"
 #include "pragma/game/c_game.h"
 #include "pragma/entities/components/c_model_component.hpp"
-#include "pragma/entities/components/lightmap_data_cache.hpp"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
 #include <pragma/entities/entity_component_system_t.hpp>

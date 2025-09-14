@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/entities/components/lightmap_data_cache.hpp"
 #include "buffers/prosper_dynamic_resizable_buffer.hpp"
 #include "pragma/rendering/raytracing/cycles.hpp"
 #include "pragma/logging.hpp"
@@ -15,6 +14,7 @@ module;
 
 export module pragma.client.entities.components.light_map;
 
+import pragma.client.rendering.lightmap_data_cache;
 import source_engine.bsp;
 
 export namespace pragma {

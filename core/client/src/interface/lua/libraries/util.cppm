@@ -9,10 +9,11 @@ module;
 #include "pragma/entities/environment/lights/c_env_light.h"
 #include <util_image_buffer.hpp>
 #include <sharedutils/util_parallel_job.hpp>
-#include <pragma/entities/components/lightmap_data_cache.hpp>
 #include <mathutil/uvec.h>
 
 export module pragma.client.scripting.lua.libraries.util;
+
+import pragma.client.rendering.lightmap_data_cache;
 
 export namespace Lua {
 	namespace util {

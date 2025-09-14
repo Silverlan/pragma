@@ -7,7 +7,6 @@ module;
 #include "pragma/c_engine.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/util/util_thread_pool.hpp"
-#include "pragma/entities/components/lightmap_data_cache.hpp"
 #include "pragma/entities/environment/lights/env_light_spot.h"
 #include "pragma/entities/environment/lights/env_light_point.h"
 #include "pragma/entities/environment/lights/env_light_directional.h"

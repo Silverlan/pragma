@@ -1,8 +1,12 @@
 // SPDX-FileCopyrightText: (c) 2022 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/entities/components/lightmap_data_cache.hpp"
+#include "sharedutils/util_hash.hpp"
+
+module pragma.client.rendering.lightmap_data_cache;
 
 using namespace pragma;
 

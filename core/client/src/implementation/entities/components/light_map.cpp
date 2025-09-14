@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/components/lightmap_data_cache.hpp"
 #include "pragma/console/c_cvar_global_functions.h"
 #include "pragma/entities/entity_iterator.hpp"
 #include "pragma/game/c_game.h"
@@ -37,7 +36,6 @@ module;
 #include <wgui/types/wiroot.h>
 #include "pragma/lua/classes/components/c_lentity_components.hpp"
 #include "pragma/lua/libraries/lfile.h"
-#include "pragma/entities/components/lightmap_data_cache.hpp"
 #include <pragma/lua/converters/optional_converter_t.hpp>
 #include <pragma/lua/converters/property_converter_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>

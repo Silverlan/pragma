@@ -1,19 +1,20 @@
 // SPDX-FileCopyrightText: (c) 2022 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __LIGHTMAP_DATA_CACHE_HPP__
-#define __LIGHTMAP_DATA_CACHE_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include <sharedutils/util_hash.hpp>
 
-namespace pragma {
-	struct LmUuid {
+export module pragma.client.rendering.lightmap_data_cache;
+
+export namespace pragma {
+	struct DLLCLIENT LmUuid {
 		util::Uuid uuid;
 		bool operator==(const LmUuid &other) const { return uuid == other.uuid; }
 	};
 };
-namespace std {
+export namespace std {
 	template<>
 	struct hash<pragma::LmUuid> {
 		std::size_t operator()(const pragma::LmUuid &k) const
@@ -30,7 +31,7 @@ namespace std {
 	};
 }
 
-namespace pragma {
+export namespace pragma {
 	struct DLLCLIENT LightmapDataCache : public std::enable_shared_from_this<LightmapDataCache> {
 		static constexpr auto PLMD_IDENTIFIER = "PLMD";
 		static constexpr udm::Version PLMD_VERSION = 1;
@@ -57,5 +58,3 @@ namespace pragma {
 		bool LoadFromAssetData(const udm::AssetData &data, std::string &outErr);
 	};
 };
-
-#endif

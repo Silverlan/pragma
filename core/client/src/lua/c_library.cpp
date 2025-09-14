@@ -10,7 +10,6 @@
 #include "pragma/lua/libraries/lasset.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
-#include "pragma/entities/components/lightmap_data_cache.hpp"
 #include "pragma/input/input_binding_layer.hpp"
 #include "pragma/lua/classes/c_ldef_wgui.h"
 #include "pragma/lua/policies/gui_element_policy.hpp"

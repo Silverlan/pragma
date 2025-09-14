@@ -6,7 +6,6 @@ module;
 #include "stdafx_client.h"
 #include "pragma/entities/c_world.h"
 #include "pragma/game/c_game.h"
-#include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/lua/classes/ldef_material.h"
 #include <texturemanager/texturemanager.h>
 #include "luasystem.h"

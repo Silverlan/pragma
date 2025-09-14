@@ -4,9 +4,9 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/entities/components/base_character_component.hpp"
 #include "pragma/entities/components/base_ai_component.hpp"
+#include "pragma/entities/components/base_animated_component.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/audio/alsound_type.h>
 #include <pragma/entities/components/velocity_component.hpp>
@@ -15,6 +15,7 @@ module;
 module pragma.client.entities.components.bot;
 
 import pragma.client.client_state;
+import pragma.client.entities.components.animated;
 import pragma.client.entities.components.sound_emitter;
 
 using namespace pragma;

@@ -1,20 +1,20 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_ANIMATED_COMPONENT_HPP__
-#define __C_ANIMATED_COMPONENT_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/components/c_entity_component.hpp"
+#include "buffers/prosper_buffer.hpp"
+#include "prosper_descriptor_set_group.hpp"
+#include "pragma/model/model.h"
 #include <pragma/entities/components/base_animated_component.hpp>
 #include <buffers/prosper_uniform_resizable_buffer.hpp>
 
+export module pragma.client.entities.components.animated;
+
 struct Eyeball;
-namespace prosper {
-	class IBuffer;
-	class IDescriptorSetGroup;
-};
-namespace pragma {
+export namespace pragma {
 	void initialize_articulated_buffers();
 	void clear_articulated_buffers();
 	const std::shared_ptr<prosper::IUniformResizableBuffer> &get_instance_bone_buffer();
@@ -83,6 +83,6 @@ namespace pragma {
 		std::shared_ptr<prosper::IBuffer> buffer;
 	};
 };
-REGISTER_BASIC_BITWISE_OPERATORS(pragma::CAnimatedComponent::StateFlags)
-
-#endif
+export {
+	REGISTER_BASIC_BITWISE_OPERATORS(pragma::CAnimatedComponent::StateFlags)
+};

@@ -6,7 +6,6 @@ module;
 #include "stdafx_client.h"
 #include "pragma/entities/components/hitbox_mesh_bvh_builder.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
-#include "pragma/entities/components/c_animated_component.hpp"
 #include <pragma/entities/components/intersection_handler_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include "pragma/logging.hpp"
@@ -28,6 +27,7 @@ module;
 module pragma.client.entities.components.hitbox_bvh;
 
 import pragma.client.debug;
+import pragma.client.entities.components.animated;
 import pragma.client.entities.components.render;
 
 extern CEngine *c_engine;

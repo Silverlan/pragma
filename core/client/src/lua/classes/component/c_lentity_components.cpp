@@ -82,7 +82,6 @@
 #include "pragma/entities/prop/prop_physics.hpp"
 #include "pragma/entities/baseskybox.h"
 #include "pragma/entities/components/c_model_component.hpp"
-#include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/entities/components/c_entity_component.hpp"
 #include "pragma/entities/components/c_game_component.hpp"
 #include "pragma/entities/point/point_target.h"

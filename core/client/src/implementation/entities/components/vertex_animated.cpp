@@ -6,7 +6,6 @@ module;
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
 #include "pragma/entities/components/c_model_component.hpp"
-#include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"

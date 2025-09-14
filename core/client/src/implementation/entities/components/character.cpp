@@ -6,6 +6,7 @@ module;
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
 #include "pragma/entities/components/base_transform_component.hpp"
+#include "pragma/entities/components/base_animated_component.hpp"
 #include "pragma/physics/collisiontypes.h"
 #include "pragma/math/deltaoffset.h"
 #include "pragma/math/deltatransform.h"
@@ -14,7 +15,6 @@ module;
 #include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/rendering/c_rendermode.h"
 #include <pragma/networking/nwm_util.h>
-#include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/components/submergible_component.hpp>
@@ -35,6 +35,7 @@ module;
 module pragma.client.entities.components.character;
 
 import pragma.client.client_state;
+import pragma.client.entities.components.animated;
 import pragma.client.entities.components.eye;
 import pragma.client.entities.components.sound_emitter;
 import pragma.client.entities.components.surface;

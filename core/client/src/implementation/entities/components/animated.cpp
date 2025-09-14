@@ -1,10 +1,11 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
 #include "pragma/game/game_limits.h"
-#include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/lua/libraries/c_lua_vulkan.h"
@@ -23,7 +24,10 @@
 #include <pragma/lua/converters/vector_converter_t.hpp>
 #include <pragma/lua/lua_util_component_stream.hpp>
 
-import pragma.client.entities.components;
+module pragma.client.entities.components.animated;
+
+import pragma.client.entities.components.render;
+import pragma.client.entities.components.vertex_animated;
 import pragma.client.scripting.lua;
 
 extern CEngine *c_engine;

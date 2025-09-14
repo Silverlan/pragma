@@ -3,8 +3,8 @@
 
 #include "stdafx_client.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
-#include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/entities/components/base_io_component.hpp"
+#include "pragma/entities/components/base_animated_component.hpp"
 #include "pragma/rendering/shaders/c_shader_lua.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/c_engine.h"
@@ -26,6 +26,7 @@
 #include <buffers/prosper_buffer.hpp>
 
 import pragma.client.client_state;
+import pragma.client.entities.components.animated;
 import pragma.client.entities.components.io;
 import pragma.client.entities.components.rasterization_renderer;
 import pragma.client.entities.components.transform;

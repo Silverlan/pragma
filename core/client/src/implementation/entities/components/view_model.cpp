@@ -7,10 +7,10 @@ module;
 #include "pragma/rendering/c_rendermode.h"
 #include "pragma/console/c_cvar.h"
 #include "pragma/game/c_game.h"
-#include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/components/base_player_component.hpp"
 #include "pragma/entities/components/base_character_component.hpp"
+#include "pragma/entities/components/base_animated_component.hpp"
 #include <pragma/model/model.h>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/components/logic_component.hpp>
@@ -19,6 +19,7 @@ module;
 
 module pragma.client.entities.components.view_model;
 
+import pragma.client.entities.components.animated;
 import pragma.client.entities.components.attachment;
 import pragma.client.entities.components.character;
 import pragma.client.entities.components.player;

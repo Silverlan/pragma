@@ -13,7 +13,6 @@
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/entities/game/c_game_occlusion_culler.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
-#include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/entities/components/c_entity_component.hpp"
 #include "pragma/entities/components/c_game_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"

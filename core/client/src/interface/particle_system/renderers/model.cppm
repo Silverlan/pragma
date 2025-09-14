@@ -5,10 +5,10 @@ module;
 
 #include <pragma/types.hpp>
 #include "pragma/particlesystem/c_particlemodifier.h"
-#include "pragma/entities/components/c_animated_component.hpp"
 
 export module pragma.client.particle_system:renderer_model;
 
+import pragma.client.entities.components.animated;
 import :renderer_rotational_buffer;
 
 export class DLLCLIENT CParticleRendererModel : public CParticleRenderer {

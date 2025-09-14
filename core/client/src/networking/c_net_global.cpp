@@ -8,7 +8,6 @@
 #include "pragma/physics/collisiontypes.h"
 #include "pragma/entities/parentmode.h"
 #include "pragma/entities/components/c_model_component.hpp"
-#include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/environment/lights/c_env_light.h"

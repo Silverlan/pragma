@@ -4,6 +4,7 @@
 #include "stdafx_client.h"
 #include "pragma/rendering/shader_graph/modules/pbr.hpp"
 #include "pragma/rendering/render_processor.hpp"
+#include "pragma/c_engine.h"
 #include "pragma/entities/environment/c_env_camera.h"
 #include <prosper_command_buffer.hpp>
 

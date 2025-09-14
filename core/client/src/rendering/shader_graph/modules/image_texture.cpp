@@ -5,6 +5,7 @@
 #include "pragma/rendering/shader_graph/modules/image_texture.hpp"
 #include "pragma/rendering/shader_graph/nodes/image_texture.hpp"
 #include "pragma/rendering/render_processor.hpp"
+#include "pragma/c_engine.h"
 #include <pragma/util/global_string_table.hpp>
 #include <cmaterial_manager2.hpp>
 #include <texturemanager/texture_manager2.hpp>

@@ -5,6 +5,7 @@ module;
 
 #include "stdafx_client.h"
 #include "cmaterialmanager.h"
+#include "pragma/game/c_game.h"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/rendering/render_processor.hpp"
 #include "pragma/rendering/shader_material/shader_material.hpp"

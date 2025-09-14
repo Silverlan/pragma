@@ -6,6 +6,7 @@ module;
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
 #include "pragma/entities/environment/lights/c_env_shadow.hpp"
+#include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/rendering/shaders/particles/c_shader_particle.hpp"
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>

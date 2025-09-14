@@ -209,7 +209,7 @@ void ShaderParticle2DBase::GetParticleSystemOrientationInfo(const Mat4 &matrix, 
 }
 
 void ShaderParticle2DBase::GetParticleSystemOrientationInfo(const Mat4 &matrix, const pragma::CParticleSystemComponent &particle, pragma::CParticleSystemComponent::OrientationType orientationType, Vector3 &up, Vector3 &right, float &nearZ, float &farZ, const Material *material,
-  const pragma::CCameraComponent *cam) const
+  const pragma::BaseEnvCameraComponent *cam) const
 {
 	auto camNearZ = 0.f;
 	auto camFarZ = 0.f;
@@ -224,7 +224,7 @@ void ShaderParticle2DBase::GetParticleSystemOrientationInfo(const Mat4 &matrix, 
 	GetParticleSystemOrientationInfo(matrix, particle, orientationType, up, right, nearZ, farZ, material, camNearZ, camFarZ);
 }
 
-void ShaderParticle2DBase::GetParticleSystemOrientationInfo(const Mat4 &matrix, const pragma::CParticleSystemComponent &particle, Vector3 &up, Vector3 &right, float &nearZ, float &farZ, const Material *material, const pragma::CCameraComponent *cam) const
+void ShaderParticle2DBase::GetParticleSystemOrientationInfo(const Mat4 &matrix, const pragma::CParticleSystemComponent &particle, Vector3 &up, Vector3 &right, float &nearZ, float &farZ, const Material *material, const pragma::BaseEnvCameraComponent *cam) const
 {
 	return GetParticleSystemOrientationInfo(matrix, particle, particle.GetOrientationType(), up, right, nearZ, farZ, material, cam);
 }

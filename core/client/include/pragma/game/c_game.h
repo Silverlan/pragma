@@ -6,9 +6,8 @@
 
 #include "pragma/c_enginedefinitions.h"
 #include "pragma/clientdefinitions.h"
-#include "pragma/entities/c_world.h"
-#include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/rendering/c_renderflags.h"
+#include "pragma/entities/c_baseentity.h"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/lua/c_lua_gui_manager.h"
 #include "pragma/rendering/lighting/shadows/c_shadow_type.hpp"

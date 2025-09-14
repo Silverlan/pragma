@@ -7,6 +7,7 @@ module;
 #include "pragma/game/c_game.h"
 #include "pragma/entities/entity_iterator.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
+#include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/entities/entity_component_system_t.hpp"

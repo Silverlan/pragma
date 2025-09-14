@@ -7,7 +7,6 @@
 #include "pragma/clientdefinitions.h"
 #include "pragma/rendering/shaders/c_shader_3d.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured_base.hpp"
-#include "pragma/entities/components/c_scene_component.hpp"
 #include <shader/prosper_shader.hpp>
 
 class CModelSubMesh;
@@ -15,6 +14,8 @@ namespace prosper {
 	class IRenderBuffer;
 };
 namespace pragma {
+    class CRenderComponent;
+    class CLightComponent;
 	using RenderMeshIndex = uint32_t;
 	class CSceneComponent;
 	class SceneMesh;

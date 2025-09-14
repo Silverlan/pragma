@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
+#include "pragma/c_engine.h"
 #include "pragma/rendering/shader_graph/modules/toon.hpp"
 #include "pragma/rendering/render_processor.hpp"
 #include "pragma/entities/environment/c_env_camera.h"

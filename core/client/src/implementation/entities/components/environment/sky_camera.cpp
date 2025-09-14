@@ -12,6 +12,7 @@ module;
 #include "pragma/entities/game/c_game_occlusion_culler.hpp"
 #include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
+#include "pragma/entities/c_world.h"
 #include "pragma/rendering/render_queue.hpp"
 #include "pragma/rendering/render_processor.hpp"
 #include "pragma/rendering/shaders/world/c_shader_prepass.hpp"

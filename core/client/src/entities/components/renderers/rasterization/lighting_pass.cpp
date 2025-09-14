@@ -5,6 +5,7 @@
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/rendering/render_processor.hpp"
 #include "pragma/rendering/shaders/world/c_shader_prepass.hpp"
+#include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/rendering/c_renderflags.h"
 #include "pragma/rendering/global_render_settings_buffer_data.hpp"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"

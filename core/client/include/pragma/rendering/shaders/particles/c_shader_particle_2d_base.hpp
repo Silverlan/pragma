@@ -6,6 +6,7 @@
 
 #include "pragma/rendering/shaders/particles/c_shader_particle_base.hpp"
 #include "pragma/rendering/c_alpha_mode.hpp"
+#include "pragma/entities/environment/env_camera.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 
 namespace pragma {
@@ -95,8 +96,8 @@ namespace pragma {
 		void RegisterDefaultGfxPipelineDescriptorSetGroups();
 
 		void GetParticleSystemOrientationInfo(const Mat4 &matrix, const CParticleSystemComponent &particle, CParticleSystemComponent::OrientationType orientationType, Vector3 &up, Vector3 &right, float &nearZ, float &farZ, const Material *material = nullptr,
-		  const pragma::CCameraComponent *cam = nullptr) const;
-		virtual void GetParticleSystemOrientationInfo(const Mat4 &matrix, const CParticleSystemComponent &particle, Vector3 &up, Vector3 &right, float &nearZ, float &farZ, const Material *material = nullptr, const pragma::CCameraComponent *cam = nullptr) const;
+		  const pragma::BaseEnvCameraComponent *cam = nullptr) const;
+		virtual void GetParticleSystemOrientationInfo(const Mat4 &matrix, const CParticleSystemComponent &particle, Vector3 &up, Vector3 &right, float &nearZ, float &farZ, const Material *material = nullptr, const pragma::BaseEnvCameraComponent *cam = nullptr) const;
 	};
 };
 

@@ -17,6 +17,7 @@ module;
 #include <prosper_command_buffer.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <image/prosper_image.hpp>
+#include <prosper_util.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <cmaterial.h>

@@ -5,6 +5,7 @@
 #define __C_SHADER_TEXTURED_HPP__
 
 #include "pragma/rendering/shaders/world/c_shader_scene.hpp"
+#include "pragma/entities/components/c_scene_component.hpp"
 #include <sharedutils/alpha_mode.hpp>
 
 namespace prosper {

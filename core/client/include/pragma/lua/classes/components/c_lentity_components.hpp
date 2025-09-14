@@ -8,6 +8,7 @@
 #include "pragma/game/c_game.h"
 #include <pragma/physics/raytraces.h>
 #include <pragma/lua/lentity_components_base_types.hpp>
+#include "pragma/entities/c_world.h"
 #include "pragma/clientdefinitions.h"
 
 namespace pragma {

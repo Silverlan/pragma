@@ -4,6 +4,7 @@
 #include "stdafx_client.h"
 #include "pragma/rendering/shader_graph/manager.hpp"
 #include "pragma/rendering/shader_graph/module.hpp"
+#include "pragma/c_engine.h"
 
 import pragma.client.rendering.shaders;
 

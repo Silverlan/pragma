@@ -16,6 +16,7 @@ module;
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_window.hpp>
+#include <prosper_util.hpp>
 #include <fsys/ifile.hpp>
 
 module pragma.client.util.screenshot;

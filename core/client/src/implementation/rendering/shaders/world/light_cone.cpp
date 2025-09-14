@@ -6,6 +6,7 @@ module;
 #include "stdafx_client.h"
 #include "pragma/rendering/render_processor.hpp"
 #include "pragma/model/c_modelmesh.h"
+#include "pragma/c_engine.h"
 #include "pragma/entities/environment/lights/c_env_light.h"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <buffers/prosper_buffer.hpp>

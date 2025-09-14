@@ -20,7 +20,6 @@
 namespace pragma {
 	class CSceneComponent;
 	class CRenderComponent;
-	class CLightMapComponent;
 	class EntityComponentManager;
 	class CCameraComponent;
 	class OcclusionCullingHandler;
@@ -219,7 +218,8 @@ namespace pragma {
 		void ClearWorldEnvironment();
 
 		void LinkWorldEnvironment(CSceneComponent &other);
-		void SetLightMap(pragma::CLightMapComponent &lightMapC);
+		template<typename TCPPM>
+			void SetLightMap(TCPPM &lightMapC);
 
 		void SetRenderer(CRendererComponent *renderer);
 		CRendererComponent *GetRenderer();
@@ -249,7 +249,6 @@ namespace pragma {
 		void RecordRenderCommandBuffers(const ::util::DrawSceneInfo &drawSceneInfo);
 		void UpdateRenderData();
 	  private:
-		static float CalcLightMapPowExposure(pragma::CLightMapComponent &lightMapC);
 		void InitializeShadowDescriptorSet();
 		void UpdateRendererLightMap();
 		// CSM Data
@@ -267,7 +266,7 @@ namespace pragma {
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_shadowDsg = nullptr;
 
 		std::vector<ComponentHandle<pragma::CLightComponent>> m_previouslyVisibleShadowedLights;
-		ComponentHandle<pragma::CLightMapComponent> m_lightMap = {};
+		ComponentHandle<pragma::BaseEntityComponent> m_lightMap = {};
 		ComponentHandle<pragma::CCameraComponent> m_camera = {};
 		std::shared_ptr<prosper::IBuffer> m_cameraBuffer = nullptr;
 		std::shared_ptr<prosper::IBuffer> m_cameraViewBuffer = nullptr;

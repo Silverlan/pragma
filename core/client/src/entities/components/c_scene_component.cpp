@@ -479,25 +479,28 @@ void CSceneComponent::SetWorldEnvironment(WorldEnvironment &env)
 	m_fogData.flags = fog.IsEnabled();
 	c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_fogBuffer, 0ull, m_fogData);
 }
-void CSceneComponent::SetLightMap(pragma::CLightMapComponent &lightMapC)
+template<typename TCPPM>
+	void CSceneComponent::SetLightMap(TCPPM &lightMapC)
 {
 	auto &renderSettings = GetRenderSettings();
-	m_lightMap = lightMapC.GetHandle<pragma::CLightMapComponent>();
+	m_lightMap = lightMapC.GetHandle();
 	auto &prop = lightMapC.GetLightMapExposureProperty();
 	UpdateRenderSettings();
 	UpdateRendererLightMap();
 }
+template void CSceneComponent::SetLightMap(pragma::CLightMapComponent &lightMapC);
 void CSceneComponent::UpdateRendererLightMap()
 {
 	if(m_renderer.expired() || m_lightMap.expired())
 		return;
-	auto &texLightMap = m_lightMap->GetLightMap();
+    auto *lightMapC = static_cast<CLightMapComponent*>(m_lightMap.get());
+	auto &texLightMap = lightMapC->GetLightMap();
 	if(texLightMap == nullptr)
 		return;
 	// TODO: Not ideal to have this here; How to handle this in a better way?
 	auto raster = m_renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>();
 	if(raster.valid())
-		raster->SetLightMap(*m_lightMap);
+		raster->SetLightMap(*lightMapC);
 }
 void CSceneComponent::UpdateRenderSettings()
 {

@@ -19,7 +19,6 @@ module;
 #include "pragma/entities/components/base_character_component.hpp"
 #include "pragma/entities/components/base_observer_component.hpp"
 #include "pragma/entities/environment/audio/env_sound_dsp.h"
-#include "pragma/entities/c_viewmodel.h"
 #include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/rendering/c_rendermode.h"
 #include <pragma/networking/nwm_util.h>

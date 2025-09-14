@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/entities/c_viewmodel.h"
 #include "pragma/rendering/c_rendermode.h"
 #include "pragma/console/c_cvar.h"
 #include "pragma/game/c_game.h"
@@ -16,7 +17,14 @@
 #include <pragma/entities/components/parent_component.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
-import pragma.client.entities.components;
+module pragma.client.entities.components.view_model;
+
+import pragma.client.entities.components.attachment;
+import pragma.client.entities.components.character;
+import pragma.client.entities.components.player;
+import pragma.client.entities.components.render;
+import pragma.client.entities.components.transform;
+import pragma.client.entities.components.weapon;
 
 using namespace pragma;
 
@@ -53,7 +61,7 @@ void CViewModelComponent::Initialize()
 			animComponent->PlayActivity(Activity::VmIdle);
 	});
 	BindEventUnhandled(CAnimatedComponent::EVENT_ON_ANIMATION_RESET, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		auto *wepC = GetWeapon();
+		auto *wepC = static_cast<pragma::CWeaponComponent*>(GetWeapon());
 		if(wepC)
 			wepC->UpdateDeployState();
 	});
@@ -90,7 +98,7 @@ float CViewModelComponent::GetViewFOV() const
 		return cvViewFov->GetFloat();
 	return m_viewFov;
 }
-CPlayerComponent *CViewModelComponent::GetPlayer()
+BasePlayerComponent *CViewModelComponent::GetPlayer()
 {
 	auto &ent = GetEntity();
 	auto pAttComponent = ent.GetComponent<CAttachmentComponent>();
@@ -99,7 +107,7 @@ CPlayerComponent *CViewModelComponent::GetPlayer()
 		return nullptr;
 	return static_cast<pragma::CPlayerComponent *>(parent->GetPlayerComponent().get());
 }
-CWeaponComponent *CViewModelComponent::GetWeapon()
+BaseWeaponComponent *CViewModelComponent::GetWeapon()
 {
 	auto *pl = GetPlayer();
 	if(pl == nullptr)
@@ -118,7 +126,7 @@ void CViewModelComponent::SetViewModelOffset(const Vector3 &offset)
 	auto *pl = GetPlayer();
 	if(pl == nullptr)
 		return;
-	pl->UpdateViewModelTransform();
+	static_cast<CPlayerComponent*>(pl)->UpdateViewModelTransform();
 }
 const Vector3 &CViewModelComponent::GetViewModelOffset() const { return m_viewModelOffset; }
 void CViewModelComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }

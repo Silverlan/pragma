@@ -24,7 +24,6 @@
 #include "pragma/entities/game/c_game_occlusion_culler.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/level/mapgeometry.h"
-#include "pragma/entities/c_viewmodel.h"
 #include <pragma/physics/physobj.h>
 #include <pragma/util/util_game.hpp>
 #include "pragma/console/c_cvar.h"

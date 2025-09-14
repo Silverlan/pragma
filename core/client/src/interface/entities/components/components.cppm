@@ -120,6 +120,7 @@ export import pragma.client.entities.components.util_pbr_converter;
 export import pragma.client.entities.components.vehicle;
 export import pragma.client.entities.components.vertex_animated;
 export import pragma.client.entities.components.view_body;
+export import pragma.client.entities.components.view_model;
 export import pragma.client.entities.components.water_surface;
 export import pragma.client.entities.components.weapon;
 export import pragma.client.entities.components.wheel;

@@ -5,7 +5,6 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/components/c_entity_component.hpp"
-#include "pragma/entities/c_viewmodel.h"
 #include "pragma/model/animation/animation_event.h"
 #include "pragma/entities/components/base_observer_component.hpp"
 #include <pragma/entities/components/base_weapon_component.hpp>
@@ -13,6 +12,8 @@ module;
 #include <optional>
 
 export module pragma.client.entities.components.weapon;
+
+import pragma.client.entities.components.view_model;
 
 export namespace pragma {
 	class DLLCLIENT CWeaponComponent final : public BaseWeaponComponent, public CBaseNetComponent {

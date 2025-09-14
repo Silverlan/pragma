@@ -7,7 +7,6 @@
 #include "pragma/entities/c_filter_entity_class.h"
 #include "pragma/entities/c_filter_entity_name.h"
 #include "pragma/entities/c_listener.h"
-#include "pragma/entities/c_viewmodel.h"
 #include "pragma/entities/c_world.h"
 #include "pragma/entities/entity_instance_index_buffer.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"

@@ -9,7 +9,6 @@ module;
 #include "pragma/entities/components/base_ownable_component.hpp"
 #include "pragma/entities/components/base_observer_component.hpp"
 #include "pragma/entities/parentmode.h"
-#include "pragma/entities/c_viewmodel.h"
 #include "pragma/console/c_cvar.h"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"

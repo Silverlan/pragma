@@ -1,13 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_SHADER_PARTICLE_HPP__
-#define __C_SHADER_PARTICLE_HPP__
+module;
 
 #include "pragma/rendering/shaders/particles/c_shader_particle_2d_base.hpp"
+#include "pragma/entities/environment/effects/c_env_particle_system.h"
 
-namespace pragma {
-	class CParticleSystemComponent;
+export module pragma.client.rendering.shaders:particle;
+
+export namespace pragma {
 	class DLLCLIENT ShaderParticle : public ShaderParticle2DBase {
 	  public:
 		ShaderParticle(prosper::IPrContext &context, const std::string &identifier);
@@ -28,5 +29,3 @@ namespace pragma {
 		virtual void InitializeShaderResources() override;
 	};
 };
-
-#endif

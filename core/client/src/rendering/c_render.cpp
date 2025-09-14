@@ -14,13 +14,13 @@
 #include "pragma/console/c_cvar_global_functions.h"
 //#include "shader_gaussianblur.h" // prosper TODO
 #include "pragma/rendering/world_environment.hpp"
-#include "pragma/rendering/shaders/particles/c_shader_particle.hpp"
 #include "pragma/rendering/render_queue.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/rendering/global_render_settings_buffer_data.hpp"
 #include "pragma/entities/baseentity.h"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/components/base_player_component.hpp"
+#include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include <pragma/lua/luacallback.h>
 #include "pragma/entities/components/c_scene_component.hpp"
 #include "luasystem.h"

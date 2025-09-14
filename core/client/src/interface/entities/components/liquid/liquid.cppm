@@ -4,8 +4,8 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/entities/trigger/c_trigger_touch.h"
 #include "pragma/entities/components/c_entity_component.hpp"
+#include "pragma/entities/c_baseentity.h"
 #include <pragma/entities/components/liquid/base_liquid_component.hpp>
 
 export module pragma.client.entities.components.liquid;

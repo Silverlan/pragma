@@ -119,6 +119,7 @@ export import pragma.client.entities.components.static_bvh_user;
 export import pragma.client.entities.components.surface;
 export import pragma.client.entities.components.time_scale;
 export import pragma.client.entities.components.transform;
+export import pragma.client.entities.components.trigger_touch;
 export import pragma.client.entities.components.toggle;
 export import pragma.client.entities.components.util_pbr_converter;
 export import pragma.client.entities.components.vehicle;

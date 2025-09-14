@@ -23,7 +23,6 @@
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/entities/environment/lights/c_env_light.h"
 #include "pragma/entities/game/c_game_occlusion_culler.hpp"
-#include "pragma/entities/trigger/c_trigger_touch.h"
 
 import pragma.client.entities;
 import pragma.client.entities.components;

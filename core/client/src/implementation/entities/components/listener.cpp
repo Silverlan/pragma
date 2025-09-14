@@ -1,9 +1,10 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
-#include "pragma/entities/c_listener.h"
 #include "pragma/entities/baseentity_luaobject.h"
 #include <alsoundsystem.hpp>
 #include <alsound_listener.hpp>
@@ -12,6 +13,8 @@
 #include <pragma/entities/components/velocity_component.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
+
+module pragma.client.entities.components.listener;
 
 import pragma.client.entities.components.transform;
 

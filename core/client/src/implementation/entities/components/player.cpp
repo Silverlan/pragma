@@ -22,7 +22,6 @@ module;
 #include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/rendering/c_rendermode.h"
 #include <pragma/networking/nwm_util.h>
-#include "pragma/entities/c_listener.h"
 #include "pragma/networking/c_nwm_util.h"
 #include <pragma/entities/components/submergible_component.hpp>
 #include <pragma/physics/raytraces.h>

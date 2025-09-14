@@ -16,7 +16,6 @@
 #include <cmaterial_manager2.hpp>
 //#include "shader_screen.h" // prosper TODO
 #include "pragma/lua/classes/c_ldef_wgui.h"
-#include "pragma/entities/c_listener.h"
 #include "pragma/entities/components/base_gamemode_component.hpp"
 #include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/entities/components/c_game_component.hpp"

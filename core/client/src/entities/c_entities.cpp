@@ -6,7 +6,6 @@
 #include "pragma/entities/entityfactories.h"
 #include "luasystem.h"
 #include <pragma/lua/handle_holder.hpp>
-#include "pragma/entities/c_listener.h"
 #include <sharedutils/util_string.h>
 #include <pragma/debug/intel_vtune.hpp>
 #include <pragma/game/game_lua_entity.hpp>

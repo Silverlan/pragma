@@ -12,7 +12,6 @@
 #include "pragma/lua/c_lua_gui_manager.h"
 #include "pragma/rendering/lighting/shadows/c_shadow_type.hpp"
 #include "pragma/input/input_binding_layer_lua.hpp"
-#include "pragma/lua/c_listener_handle.hpp"
 #include <material.h>
 #include <pragma/game/game.h>
 #include <pragma/input/inkeys.h>

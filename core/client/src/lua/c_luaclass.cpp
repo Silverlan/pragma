@@ -3,7 +3,6 @@
 
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
-#include "pragma/entities/c_listener.h"
 #include "pragma/lua/classes/c_lshader.h"
 #include "pragma/lua/converters/shader_converter_t.hpp"
 #include "pragma/rendering/shaders/c_shader_lua.hpp"

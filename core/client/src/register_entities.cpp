@@ -3,7 +3,6 @@
 
 #include "stdafx_client.h"
 #include "pragma/entities/c_baseentity.h"
-#include "pragma/entities/c_ent_debug.hpp"
 #include "pragma/entities/entity_instance_index_buffer.hpp"
 #include "pragma/entities/components/c_entity_character_component_model.hpp"
 #include "pragma/entities/components/c_entity_component.hpp"

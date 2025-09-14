@@ -70,7 +70,6 @@ LINK_NETWORKED_PHYSICS_ENTITIES;
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/components/c_game_component.hpp"
-#include "pragma/entities/c_ent_debug.hpp"
 
 import pragma.client.entities.components;
 

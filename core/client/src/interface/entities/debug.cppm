@@ -1,65 +1,64 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_ENT_DEBUG_HPP__
-#define __C_ENT_DEBUG_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/c_baseentity.h"
 #include "pragma/entities/components/c_entity_component.hpp"
 
-class DLLCLIENT CEntDebugText : public CBaseEntity {
+export module pragma.client.entities:debug;
+
+export class DLLCLIENT CEntDebugText : public CBaseEntity {
   public:
 	virtual void Initialize() override;
 };
 
 ////////////////
 
-class DLLCLIENT CEntDebugPoint : public CBaseEntity {
+export class DLLCLIENT CEntDebugPoint : public CBaseEntity {
   public:
 	virtual void Initialize() override;
 };
 
 ////////////////
 
-class DLLCLIENT CEntDebugLine : public CBaseEntity {
+export class DLLCLIENT CEntDebugLine : public CBaseEntity {
   public:
 	virtual void Initialize() override;
 };
 
 ////////////////
 
-class DLLCLIENT CEntDebugBox : public CBaseEntity {
+export class DLLCLIENT CEntDebugBox : public CBaseEntity {
   public:
 	virtual void Initialize() override;
 };
 
 ////////////////
 
-class DLLCLIENT CEntDebugSphere : public CBaseEntity {
+export class DLLCLIENT CEntDebugSphere : public CBaseEntity {
   public:
 	virtual void Initialize() override;
 };
 
 ////////////////
 
-class DLLCLIENT CEntDebugCone : public CBaseEntity {
+export class DLLCLIENT CEntDebugCone : public CBaseEntity {
   public:
 	virtual void Initialize() override;
 };
 
 ////////////////
 
-class DLLCLIENT CEntDebugCylinder : public CBaseEntity {
+export class DLLCLIENT CEntDebugCylinder : public CBaseEntity {
   public:
 	virtual void Initialize() override;
 };
 
 ////////////////
 
-class DLLCLIENT CEntDebugPlane : public CBaseEntity {
+export class DLLCLIENT CEntDebugPlane : public CBaseEntity {
   public:
 	virtual void Initialize() override;
 };
-
-#endif

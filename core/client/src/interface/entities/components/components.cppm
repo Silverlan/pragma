@@ -27,6 +27,7 @@ export import pragma.client.entities.components.audio.sound;
 export import pragma.client.entities.components.audio.sound_probe;
 export import pragma.client.entities.components.audio.sound_scape;
 export import pragma.client.entities.components.color;
+export import pragma.client.entities.components.debug;
 export import pragma.client.entities.components.effects.explosion;
 export import pragma.client.entities.components.effects.fire;
 export import pragma.client.entities.components.effects.smoke_trail;

@@ -58,6 +58,7 @@
 #include "pragma/entities/point/constraints/point_constraint_fixed.h"
 #include "pragma/entities/point/constraints/point_constraint_hinge.h"
 #include "pragma/entities/point/constraints/point_constraint_slider.h"
+#include "pragma/entities/basefilterentity.h"
 #include "pragma/entities/components/base_networked_component.hpp"
 #include "pragma/rendering/world_environment.hpp"
 #include "pragma/entities/environment/env_wind.hpp"
@@ -94,8 +95,6 @@
 #include "pragma/entities/components/c_flex_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/environment/env_quake.h"
-#include "pragma/entities/c_filter_entity_class.h"
-#include "pragma/entities/c_filter_entity_name.h"
 #include "pragma/model/model.h"
 #include <pragma/entities/components/parent_component.hpp>
 #include <pragma/lua/lua_util_component_stream.hpp>

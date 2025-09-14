@@ -41,6 +41,8 @@ export import pragma.client.entities.components.env_weather;
 export import pragma.client.entities.components.env_wind;
 export import pragma.client.entities.components.eye;
 export import pragma.client.entities.components.field_angle;
+export import pragma.client.entities.components.filter_entity_class;
+export import pragma.client.entities.components.filter_entity_name;
 export import pragma.client.entities.components.flammable;
 export import pragma.client.entities.components.flashlight;
 export import pragma.client.entities.components.func_button;

@@ -4,8 +4,6 @@
 #include "stdafx_client.h"
 #include "pragma/entities/c_baseentity.h"
 #include "pragma/entities/c_ent_debug.hpp"
-#include "pragma/entities/c_filter_entity_class.h"
-#include "pragma/entities/c_filter_entity_name.h"
 #include "pragma/entities/c_listener.h"
 #include "pragma/entities/c_world.h"
 #include "pragma/entities/entity_instance_index_buffer.hpp"

@@ -6,7 +6,6 @@ module;
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
 #include "pragma/audio/soundscript_events.h"
-#include "pragma/audio/c_alsound.h"
 #include <sharedutils/util_string.h>
 #include <alsoundsystem.hpp>
 #include <algorithm>

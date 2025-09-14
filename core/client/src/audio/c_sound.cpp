@@ -7,7 +7,6 @@
 #include "pragma/audio/alsoundscript.h"
 #include <fsys/filesystem.h>
 #include <pragma/lua/luacallback.h>
-#include "pragma/audio/c_alsound.h"
 #include <pragma/audio/alsound_type.h>
 #include "luasystem.h"
 #include <pragma/lua/luafunction_call.h>
@@ -27,6 +26,7 @@
 
 import se_script;
 import pragma.audio.util;
+import pragma.client.audio;
 import pragma.client.client_state;
 
 extern CEngine *c_engine;

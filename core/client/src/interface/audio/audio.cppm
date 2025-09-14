@@ -9,6 +9,7 @@ module;
 
 export module pragma.client.audio;
 export import :aux_util;
+export import :sound;
 export import :sound_script;
 
 export namespace pragma::audio {

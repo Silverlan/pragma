@@ -6,6 +6,7 @@
 #include "pragma/lua/libraries/lents.h"
 #include "pragma/lua/libraries/c_lnetmessages.h"
 #include "pragma/lua/libraries/lengine.h"
+#include "alsound_types.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/rendering/c_rendermode.h"
@@ -23,7 +24,6 @@
 #include <wgui/wgui.h>
 #include <wgui/wibase.h>
 #include "pragma/lua/libraries/lray.h"
-#include "pragma/audio/c_alsound.h"
 #include "pragma/lua/libraries/lgame.h"
 #include <sharedutils/util_string.h>
 #include <pragma/math/e_frustum.h>

@@ -1,16 +1,22 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/audio/c_alsound.h"
 #include "pragma/c_engine.h"
 #include <pragma/networking/nwm_util.h>
 #include <pragma/logging.hpp>
 #include "pragma/console/c_cvar.h"
 #include "pragma/networking/c_nwm_util.h"
 #include "luasystem.h"
+#include "alsound_types.hpp";
 #include <pragma/audio/alsound_type.h>
 #include <pragma/entities/components/base_transform_component.hpp>
+
+module pragma.client.audio;
+
+import :sound;
 
 import pragma.client.client_state;
 

@@ -5,7 +5,6 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/classes/lalsound.h"
-#include "pragma/audio/c_alsound.h"
 #include "pragma/lua/c_ldefinitions.h"
 #include "alsoundsystem.hpp"
 #include "alsound_effect.hpp"
@@ -13,6 +12,7 @@ module;
 
 export module pragma.client.scripting.lua.bindings.audio;
 
+import pragma.client.audio;
 import se_script;
 
 export namespace pragma::scripting::lua::bindings {

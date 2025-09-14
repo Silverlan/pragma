@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_ALSOUND_H__
-#define __C_ALSOUND_H__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include <pragma/audio/alsound.h>
@@ -11,10 +10,11 @@
 #include <vector>
 #include <alsound_source.hpp>
 
-class ClientState;
+export module pragma.client.audio:sound;
+
 #pragma warning(push)
 #pragma warning(disable : 4251)
-class DLLCLIENT CALSound : public al::SoundSource, public ALSound {
+export class DLLCLIENT CALSound : public al::SoundSource, public ALSound {
   public:
 	static ALSound *FindByServerIndex(uint32_t idx);
 	static void SetIndex(ALSound *snd, uint32_t idx);
@@ -108,8 +108,8 @@ class DLLCLIENT CALSound : public al::SoundSource, public ALSound {
 	bool AddEffect(al::IEffect &effect, uint32_t &slotId, float gain);
 	void RemoveEffect(al::IEffect &effect);
 	void RemoveEffect(uint32_t slotId);
-  protected:
-	friend ClientState;
+
+	void UpdateVolume();
   protected:
 	static std::unordered_map<uint32_t, std::weak_ptr<ALSound>> s_svIndexedSounds; // Sounds created by the server
 	float m_modPitch = 1.f;
@@ -117,9 +117,6 @@ class DLLCLIENT CALSound : public al::SoundSource, public ALSound {
 	float m_pitch = 1.f;
 	bool m_bTerminated = false;
 	virtual void UpdateState() override;
-	void UpdateVolume();
 	void UpdatePitch();
 };
 #pragma warning(pop)
-
-#endif

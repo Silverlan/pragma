@@ -8,7 +8,6 @@
 #include "pragma/rendering/sortedrendermeshcontainer.h"
 #include <sharedutils/property/util_property.hpp>
 
-class CALSound;
 class Engine;
 class NetPacket;
 namespace pragma::rendering {

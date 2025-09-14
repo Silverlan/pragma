@@ -27,7 +27,6 @@ module;
 #include <prosper_event.hpp>
 #include <sharedutils/datastream.h>
 #include "pragma/c_engine.h"
-#include <pragma/rendering/shaders/image/c_shader_gradient.hpp>
 #include <luabind/copy_policy.hpp>
 #include <pragma/lua/types/udm.hpp>
 #include <luainterface.hpp>
@@ -287,7 +286,7 @@ bool Lua::Vulkan::VKCommandBuffer::RecordDrawGradient(lua_State *l, CommandBuffe
 		return false;
 	auto nodes = get_gradient_nodes(l, lnodes);
 	auto primCmd = std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(hCommandBuffer.shared_from_this());
-	return pragma::util::record_draw_gradient(c_engine->GetRenderContext(), primCmd, rt, dir, nodes);
+	return pragma::record_draw_gradient(c_engine->GetRenderContext(), primCmd, rt, dir, nodes);
 }
 bool Lua::Vulkan::VKCommandBuffer::StartRecording(lua_State *l, CommandBuffer &hCommandBuffer, bool oneTimeSubmit, bool simultaneousUseAllowed)
 {

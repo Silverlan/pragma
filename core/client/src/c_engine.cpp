@@ -46,7 +46,6 @@ namespace pragma::string {
 #include <prosper_swap_command_buffer.hpp>
 #include <pragma/entities/environment/env_camera.h>
 #include <pragma/entities/environment/effects/c_env_particle_system.h>
-#include <pragma/rendering/shaders/image/c_shader_gradient.hpp>
 #include <pragma/logging.hpp>
 #include <wgui/types/witext.h>
 #include <wgui/types/witext_tags.hpp>

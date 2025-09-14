@@ -17,6 +17,7 @@ export import :depth_to_rgb;
 export import :equirectangular_to_cubemap;
 export import :extract_diffuse_ambinet_occlusion;
 export import :forwardp_light_culling;
+export import :gradient;
 export import :hdr;
 export import :merge_2d_image_to_equirectangular;
 export import :merge_images;

@@ -27,7 +27,6 @@ module;
 #include <prosper_event.hpp>
 #include <sharedutils/datastream.h>
 #include "pragma/c_engine.h"
-#include <pragma/rendering/shaders/image/c_shader_gradient.hpp>
 #include <luabind/copy_policy.hpp>
 #include <pragma/lua/types/udm.hpp>
 #include <luainterface.hpp>

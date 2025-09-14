@@ -38,7 +38,6 @@ module;
 #include <prosper_event.hpp>
 #include <prosper_window.hpp>
 #include <prosper_swap_command_buffer.hpp>
-#include <pragma/rendering/shaders/image/c_shader_gradient.hpp>
 #include <wgui/wgui.h>
 #include <luabind/copy_policy.hpp>
 #include <luabind/detail/meta.hpp>
@@ -622,7 +621,7 @@ std::shared_ptr<prosper::Texture> Lua::Vulkan::create_gradient_texture(lua_State
 	rt->SetDebugName("lua_gradient");
 
 	auto &setupCmd = context.GetSetupCommandBuffer();
-	pragma::util::record_draw_gradient(context, setupCmd, *rt, dir, nodes);
+	pragma::record_draw_gradient(context, setupCmd, *rt, dir, nodes);
 	context.FlushSetupCommandBuffer();
 	return texture;
 }

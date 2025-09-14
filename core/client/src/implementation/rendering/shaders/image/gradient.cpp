@@ -1,9 +1,10 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
-#include "pragma/rendering/shaders/image/c_shader_gradient.hpp"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <shader/prosper_shader_copy_image.hpp>
 #include <shader/prosper_shader_t.hpp>
@@ -12,6 +13,10 @@
 #include <prosper_command_buffer.hpp>
 #include <image/prosper_texture.hpp>
 #include <random>
+
+module pragma.client.rendering.shaders;
+
+import :gradient;
 
 using namespace pragma;
 
@@ -55,7 +60,7 @@ bool ShaderGradient::RecordDraw(prosper::ShaderBindState &bindState, const PushC
 
 /////////////////////////
 
-bool pragma::util::record_draw_gradient(prosper::IPrContext &context, const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer, prosper::RenderTarget &rt, const Vector2 &dir, const std::vector<ShaderGradient::Node> &nodes)
+bool pragma::record_draw_gradient(prosper::IPrContext &context, const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer, prosper::RenderTarget &rt, const Vector2 &dir, const std::vector<ShaderGradient::Node> &nodes)
 {
 	if(s_shaderGradient == nullptr)
 		return false;

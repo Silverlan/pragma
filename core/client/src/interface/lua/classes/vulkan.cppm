@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/rendering/shaders/image/c_shader_gradient.hpp"
 #include "pragma/lua/libraries/c_lua_vulkan.h"
 #include <image/prosper_sampler.hpp>
 #include <image/prosper_image_view.hpp>
@@ -25,6 +24,7 @@ module;
 
 export module pragma.client.scripting.lua.classes.vulkan;
 
+import pragma.client.rendering.shaders;
 import pragma.client.util;
 
 export namespace Lua {

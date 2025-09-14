@@ -57,6 +57,7 @@ export import pragma.client.entities.components.health;
 export import pragma.client.entities.components.hitbox_bvh;
 export import pragma.client.entities.components.input;
 export import pragma.client.entities.components.io;
+export import pragma.client.entities.components.light_map;
 export import pragma.client.entities.components.light_map_receiver;
 export import pragma.client.entities.components.lights.directional;
 export import pragma.client.entities.components.lights.point;

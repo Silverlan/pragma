@@ -9,7 +9,6 @@ module;
 #include "pragma/entities/environment/lights/env_light_directional.h"
 #include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/entities/components/renderers/rasterization/hdr_data.hpp"
-#include "pragma/entities/components/c_light_map_component.hpp"
 #include "pragma/rendering/render_processor.hpp"
 #include "pragma/rendering/c_rendermode.h"
 #include <unordered_set>
@@ -22,6 +21,8 @@ module;
 #define DEBUG_RENDER_PERFORMANCE_TEST_ENABLED 0
 
 export module pragma.client.entities.components.rasterization_renderer;
+
+import pragma.client.entities.components.light_map;
 
 export namespace pragma {
 	struct DLLCLIENT RendererData {

@@ -1,27 +1,23 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_LIGHT_MAP_COMPONENT_HPP__
-#define __C_LIGHT_MAP_COMPONENT_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
+#include "pragma/entities/components/lightmap_data_cache.hpp"
+#include "buffers/prosper_dynamic_resizable_buffer.hpp"
 #include "pragma/rendering/raytracing/cycles.hpp"
+#include "pragma/logging.hpp"
 #include <cmaterial_manager2.hpp>
 #include <pragma/entities/components/base_entity_component.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <image/prosper_texture.hpp>
 
-namespace prosper {
-	class IDynamicResizableBuffer;
-};
-namespace util::bsp {
-	struct LightMapInfo;
-};
-namespace spdlog {
-	class logger;
-};
-namespace pragma {
-	struct LightmapDataCache;
+export module pragma.client.entities.components.light_map;
+
+import source_engine.bsp;
+
+export namespace pragma {
 	struct DLLCLIENT LightmapBakeSettings {
 		std::optional<uint32_t> width {};
 		std::optional<uint32_t> height {};
@@ -107,5 +103,3 @@ namespace pragma {
 		std::shared_ptr<prosper::IDynamicResizableBuffer> m_meshLightMapUvBuffer = nullptr;
 	};
 };
-
-#endif

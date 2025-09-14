@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/entities/components/c_light_map_component.hpp"
 #include "pragma/entities/components/lightmap_data_cache.hpp"
 #include "pragma/console/c_cvar_global_functions.h"
 #include "pragma/entities/entity_iterator.hpp"
@@ -36,7 +37,6 @@
 #include <wgui/types/wiroot.h>
 #include "pragma/lua/classes/components/c_lentity_components.hpp"
 #include "pragma/lua/libraries/lfile.h"
-#include "pragma/entities/components/c_light_map_component.hpp"
 #include "pragma/entities/components/lightmap_data_cache.hpp"
 #include <pragma/lua/converters/optional_converter_t.hpp>
 #include <pragma/lua/converters/property_converter_t.hpp>
@@ -50,6 +50,8 @@
 #include <texturemanager/texturemanager.h>
 #include <cmaterialmanager.h>
 #include <cmaterial_manager2.hpp>
+
+module pragma.client.entities.components.light_map;
 
 import pragma.client.client_state;
 import pragma.client.entities.components;

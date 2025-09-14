@@ -9,7 +9,6 @@ module;
 #include <pragma/entities/baseentity_handle.h>
 #include <pragma/lua/classes/ldef_entity.h>
 #include <pragma/lua/libraries/lfile.h>
-#include <pragma/entities/components/c_light_map_component.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/model/model.h>

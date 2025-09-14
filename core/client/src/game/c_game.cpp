@@ -18,7 +18,6 @@
 #include "pragma/lua/classes/c_ldef_wgui.h"
 #include "pragma/entities/c_listener.h"
 #include "pragma/entities/components/base_gamemode_component.hpp"
-#include "pragma/entities/components/c_light_map_component.hpp"
 #include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/entities/components/c_game_component.hpp"
 #include "pragma/entities/game/c_game_occlusion_culler.hpp"

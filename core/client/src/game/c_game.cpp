@@ -48,7 +48,6 @@
 #include <pragma/lua/luafunction_call.h>
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/shaders/c_shader_lua.hpp"
-#include "pragma/entities/game/c_game_shadow_manager.hpp"
 #include "pragma/rendering/c_settings.hpp"
 #include <pragma/entities/baseplayer.hpp>
 #include <pragma/util/giblet_create_info.hpp>

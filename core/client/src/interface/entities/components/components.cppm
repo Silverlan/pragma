@@ -49,6 +49,7 @@ export import pragma.client.entities.components.func_physics;
 export import pragma.client.entities.components.func_portal;
 export import pragma.client.entities.components.func_soft_physics;
 export import pragma.client.entities.components.func_brush;
+export import pragma.client.entities.components.game_shadow_manager;
 export import pragma.client.entities.components.gamemode;
 export import pragma.client.entities.components.generic;
 export import pragma.client.entities.components.global_shader_input;

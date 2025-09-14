@@ -7,7 +7,6 @@
 #include "pragma/entities/components/liquid/base_liquid_component.hpp"
 #include "pragma/lua/classes/lproperty.hpp"
 #include "pragma/lua/converters/shader_converter_t.hpp"
-#include "pragma/entities/game/c_game_shadow_manager.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/rendering/render_queue.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"

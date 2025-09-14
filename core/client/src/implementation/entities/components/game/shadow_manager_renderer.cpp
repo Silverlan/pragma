@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/entities/game/c_game_shadow_manager.hpp"
 #include "pragma/entities/game/c_game_occlusion_culler.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
@@ -19,6 +20,8 @@
 #include <image/prosper_render_target.hpp>
 #include <prosper_command_buffer.hpp>
 #include <cmaterial.h>
+
+module pragma.client.entities.components.game_shadow_manager;
 
 import pragma.client.entities.components;
 

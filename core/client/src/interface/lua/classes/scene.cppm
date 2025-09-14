@@ -7,11 +7,11 @@ module;
 #include "pragma/c_enginedefinitions.h"
 #include "pragma/lua/c_ldefinitions.h"
 #include "pragma/model/modelmesh.h"
+#include "pragma/rendering/occlusion_culling/c_occlusion_octree.hpp"
 #include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/lua/policies/shared_from_this_policy.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
-#include "pragma/entities/game/c_game_shadow_manager.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include "luabind/copy_policy.hpp"
 #include "prosper_render_pass.hpp"

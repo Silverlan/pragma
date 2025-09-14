@@ -1,29 +1,23 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_GAME_SHADOW_MANAGER_HPP__
-#define __C_GAME_SHADOW_MANAGER_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/c_baseentity.h"
 #include "pragma/entities/components/c_entity_component.hpp"
 #include "pragma/entities/environment/lights/c_env_light.h"
+#include "pragma/rendering/shaders/c_shader_shadow.hpp"
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree.hpp"
+#include "image/prosper_render_target.hpp"
+#include "sharedutils/util_pragma.hpp"
+#include "prosper_command_buffer.hpp"
+#include "prosper_descriptor_set_group.hpp"
 #include <pragma/entities/components/base_entity_component.hpp>
 
-namespace prosper {
-	class PrimaryCommandBuffer;
-	class RenderTarget;
-	class DescriptorSetGroup;
-	class Shader;
-};
-namespace Anvil {
-	class DescriptorSet;
-};
-namespace pragma {
-	enum class LightType : uint8_t;
-};
-namespace pragma {
+export module pragma.client.entities.components.game_shadow_manager;
+
+export namespace pragma {
 	struct ShadowRenderInfo {
 		const CBaseEntity *entity = nullptr;
 		const CModelSubMesh *mesh = nullptr;
@@ -31,7 +25,6 @@ namespace pragma {
 		Material *material = nullptr;
 	};
 
-	class ShaderShadow;
 	class DLLCLIENT ShadowRenderer {
 	  public:
 		ShadowRenderer();
@@ -120,11 +113,11 @@ namespace pragma {
 		util::WeakHandle<prosper::Shader> m_whShadowShader = {};
 	};
 };
-REGISTER_BASIC_BITWISE_OPERATORS(pragma::ShadowRenderer::RenderResultFlags)
+export {
+	REGISTER_BASIC_BITWISE_OPERATORS(pragma::ShadowRenderer::RenderResultFlags)
+};
 
-class DLLCLIENT CShadowManager : public CBaseEntity {
+export class DLLCLIENT CShadowManager : public CBaseEntity {
   public:
 	virtual void Initialize() override;
 };
-
-#endif

@@ -1,11 +1,12 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
-#include "pragma/entities/game/c_game_shadow_manager.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/shaders/world/c_shader_pbr.hpp"
 #include "pragma/rendering/shaders/c_shader_shadow.hpp"
@@ -18,6 +19,8 @@
 #include <image/prosper_sampler.hpp>
 #include <image/prosper_render_target.hpp>
 #include <prosper_descriptor_set_group.hpp>
+
+module pragma.client.entities.components.game_shadow_manager;
 
 extern CEngine *c_engine;
 extern ClientState *client;

@@ -17,12 +17,14 @@ import pragma.client.entities.components;
 
 extern ClientState *client;
 
-pragma::CListenerComponent *CGame::GetListener()
+template<typename TCPPM>
+TCPPM *CGame::GetListener()
 {
 	if(m_listener.expired())
 		return NULL;
-	return m_listener.get();
+	return static_cast<pragma::CListenerComponent*>(m_listener.get());
 }
+template pragma::CListenerComponent* CGame::GetListener<pragma::CListenerComponent>();
 pragma::CPlayerComponent *CGame::GetLocalPlayer()
 {
 	if(m_plLocal.expired())
@@ -173,7 +175,7 @@ void CGame::SetupEntity(BaseEntity *ent, unsigned int idx)
 		clIdx = CUInt32(m_ents.size()) - 1;
 	}
 	auto *cEnt = static_cast<CBaseEntity *>(ent);
-	auto *scene = GetScene();
+	auto *scene = GetScene<pragma::CSceneComponent>();
 	if(scene)
 		cEnt->AddToScene(*scene); // Add to default scene automatically
 	cEnt->Construct(idx, clIdx);

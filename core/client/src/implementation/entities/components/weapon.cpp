@@ -285,7 +285,7 @@ void CWeaponComponent::UpdateOwnerAttachment()
 		auto *plComponent = static_cast<CPlayerComponent *>(owner->GetPlayerComponent().get());
 		auto charComponent = owner->GetCharacterComponent();
 		if(plComponent->IsLocalPlayer() && charComponent.valid() && charComponent->GetActiveWeapon() == &ent && IsInFirstPersonMode() == true) {
-			auto *vm = game->GetViewModel();
+			auto *vm = game->GetViewModel<pragma::CViewModelComponent>();
 			if(vm == nullptr)
 				return;
 			cVm = vm;
@@ -379,7 +379,7 @@ pragma::CViewModelComponent *CWeaponComponent::GetViewModel()
 	if(parent == NULL)
 		return NULL;
 	CGame *game = client->GetGameState();
-	auto *vm = game->GetViewModel();
+	auto *vm = game->GetViewModel<pragma::CViewModelComponent>();
 	if(vm == nullptr || &vm->GetEntity() != parent)
 		return NULL;
 	return vm;

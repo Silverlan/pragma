@@ -358,7 +358,7 @@ static void cmd_debug_occlusion_culling_freeze_camera(NetworkState *, const ConV
 	g_debugFreezeCamData = {};
 	if(val == false)
 		return;
-	auto *scene = c_game->GetRenderScene();
+	auto *scene = c_game->GetRenderScene<pragma::CSceneComponent>();
 	if(scene == nullptr)
 		return;
 	auto &cam = scene->GetActiveCamera();

@@ -7,8 +7,13 @@
 
 extern CGame *c_game;
 
-pragma::CSceneComponent *CGame::GetScene() { return m_scene.get(); }
-const pragma::CSceneComponent *CGame::GetScene() const { return const_cast<CGame *>(this)->GetScene(); }
+template<typename TCPPM>
+TCPPM *CGame::GetScene() { return static_cast<pragma::CSceneComponent*>(m_scene.get()); }
+template pragma::CSceneComponent* CGame::GetScene<pragma::CSceneComponent>();
+
+template<typename TCPPM>
+const TCPPM *CGame::GetScene() const { return const_cast<CGame *>(this)->GetScene<TCPPM>(); }
+template const pragma::CSceneComponent* CGame::GetScene<pragma::CSceneComponent>() const;
 
 static void cl_fov_callback(NetworkState *, const ConVar &, float, float val)
 {

@@ -89,7 +89,7 @@ static void debug_bsp_nodes(NetworkState *, const ConVar &, int32_t, int32_t val
 {
 	if(c_game == nullptr)
 		return;
-	auto *scene = c_game->GetScene();
+	auto *scene = c_game->GetScene<pragma::CSceneComponent>();
 	auto *world = c_game->GetWorld();
 	auto bspTree = world ? static_cast<CWorldComponent *>(world)->GetBSPTree() : nullptr;
 	if(bspTree == nullptr) {
@@ -234,7 +234,7 @@ static void debug_bsp_lock_callback(NetworkState *, const ConVar &, int32_t, int
 {
 	if(c_game == nullptr)
 		return;
-	auto *scene = c_game->GetScene();
+	auto *scene = c_game->GetScene<pragma::CSceneComponent>();
 	auto *world = c_game->GetWorld();
 	auto bspTree = world ? static_cast<CWorldComponent *>(world)->GetBSPTree() : nullptr;
 	if(true) //bspTree == nullptr)

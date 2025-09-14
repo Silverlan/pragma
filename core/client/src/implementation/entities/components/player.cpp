@@ -309,7 +309,7 @@ void CPlayerComponent::OnUpdateMatrices(Mat4 &transformMatrix)
 
 void CPlayerComponent::UpdateViewModelTransform()
 {
-	auto *vm = c_game->GetViewModel();
+	auto *vm = c_game->GetViewModel<pragma::CViewModelComponent>();
 	if(vm == nullptr)
 		return;
 	auto &vmEnt = vm->GetEntity();
@@ -335,7 +335,7 @@ void CPlayerComponent::UpdateViewModelTransform()
 
 void CPlayerComponent::UpdateViewFOV()
 {
-	auto *vm = c_game->GetViewModel();
+	auto *vm = c_game->GetViewModel<pragma::CViewModelComponent>();
 	if(vm == nullptr)
 		return;
 	c_game->SetViewModelFOV(vm->GetViewFOV());
@@ -355,7 +355,7 @@ void CPlayerComponent::SetLocalPlayer(bool b)
 
 	if(b == false)
 		return;
-	auto *vm = c_game->GetViewModel();
+	auto *vm = c_game->GetViewModel<pragma::CViewModelComponent>();
 	if(vm != nullptr) {
 		auto &vmEnt = vm->GetEntity();
 		UpdateViewModelTransform();
@@ -385,7 +385,7 @@ void CPlayerComponent::SetLocalPlayer(bool b)
 		if(!entBody.IsSpawned())
 			entBody.Spawn();
 	}
-	auto *listener = c_game->GetListener();
+	auto *listener = c_game->GetListener<pragma::CListenerComponent>();
 	if(listener != nullptr) {
 		auto &entListener = listener->GetEntity();
 		auto pTrComponent = ent.GetTransformComponent();
@@ -410,8 +410,8 @@ bool CPlayerComponent::ShouldDraw() const
 	if(!IsLocalPlayer())
 		return true;
 #pragma message("TODO: Find a better way to enable rendering, if being rendered through anything but the main camera (e.g. reflections)!")
-	auto *scene = c_game->GetScene();
-	if(c_game->GetRenderScene() != scene)
+	auto *scene = c_game->GetScene<pragma::CSceneComponent>();
+	if(c_game->GetRenderScene<pragma::CSceneComponent>() != scene)
 		return true;
 	if(!m_observableComponent)
 		return true;

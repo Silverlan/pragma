@@ -31,7 +31,7 @@ void WIDebugSSAO::DoUpdate()
 	WITexturedRect::DoUpdate();
 	if(c_game == nullptr)
 		return;
-	auto *scene = c_game->GetScene();
+	auto *scene = c_game->GetScene<pragma::CSceneComponent>();
 	auto *renderer = scene ? dynamic_cast<pragma::CRasterizationRendererComponent *>(scene->GetRenderer()) : nullptr;
 	if(renderer == nullptr)
 		return;

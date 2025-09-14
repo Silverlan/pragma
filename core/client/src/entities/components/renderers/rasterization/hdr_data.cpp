@@ -523,7 +523,7 @@ void Console::commands::debug_render_scene(NetworkState *state, pragma::BasePlay
 	static WIHandle hTexture = {};
 	static WIHandle hBloomTexture = {};
 	dbg = std::make_unique<DebugGameGUI>([size]() {
-		auto *scene = c_game->GetScene();
+		auto *scene = c_game->GetScene<pragma::CSceneComponent>();
 		auto *renderer = scene ? scene->GetRenderer() : nullptr;
 		auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : pragma::ComponentHandle<pragma::CRasterizationRendererComponent> {};
 

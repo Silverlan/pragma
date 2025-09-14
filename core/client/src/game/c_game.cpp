@@ -139,7 +139,7 @@ namespace pragma::rendering {
 };
 static auto cvWorkerThreadCount = GetClientConVar("render_queue_worker_thread_count");
 CGame::CGame(NetworkState *state)
-    : Game(state), m_tServer(0), m_renderScene(util::TWeakSharedHandle<pragma::CSceneComponent> {}), m_matOverride(NULL), m_colScale(1, 1, 1, 1),
+    : Game(state), m_tServer(0), m_renderScene(util::TWeakSharedHandle<pragma::BaseEntityComponent> {}), m_matOverride(NULL), m_colScale(1, 1, 1, 1),
       //m_shaderOverride(NULL), // prosper TODO
       m_matLoad(), m_scene(nullptr),
       /*m_dummyVertexBuffer(nullptr),*/ m_tLastClientUpdate(0.0), // prosper TODO
@@ -540,12 +540,14 @@ void CGame::OnEntityCreated(BaseEntity *ent)
 
 pragma::CGameComponent *CGame::GetGameComponent() { return m_gameComponent.get(); }
 
-pragma::CViewModelComponent *CGame::GetViewModel()
+template<typename TCPPM>
+TCPPM *CGame::GetViewModel()
 {
 	if(m_viewModel.expired())
 		return NULL;
-	return m_viewModel.get();
+	return static_cast<TCPPM*>(m_viewModel.get());
 }
+template pragma::CViewModelComponent* CGame::GetViewModel<pragma::CViewModelComponent>();
 
 template<typename TCPPM>
 TCPPM *CGame::GetViewBody()
@@ -683,38 +685,38 @@ void CGame::InitializeGame() // Called by NET_cl_resourcecomplete
 
 	m_globalRenderSettingsBufferData = std::make_unique<pragma::rendering::GlobalRenderSettingsBufferData>();
 	auto *scene = pragma::CSceneComponent::Create(pragma::CSceneComponent::CreateInfo {});
-	if(scene) {
-		scene->GetEntity().SetName("scene_game");
-		m_scene = scene->GetHandle<pragma::CSceneComponent>();
-		m_scene->SetDebugMode(static_cast<pragma::SceneDebugMode>(GetConVarInt("render_debug_mode")));
-		SetViewModelFOV(GetConVarFloat("cl_fov_viewmodel"));
+	if(!scene)
+		throw std::runtime_error {"Failed to create scene."};
+	scene->GetEntity().SetName("scene_game");
+	m_scene = scene->GetHandle();
+	scene->SetDebugMode(static_cast<pragma::SceneDebugMode>(GetConVarInt("render_debug_mode")));
+	SetViewModelFOV(GetConVarFloat("cl_fov_viewmodel"));
 
-		auto *entRenderer = CreateEntity<CRasterizationRenderer>();
-		if(entRenderer) {
-			auto rasterization = entRenderer->GetComponent<pragma::CRasterizationRendererComponent>();
-			if(rasterization.valid()) {
-				auto *renderer = rasterization->GetRendererComponent();
-				if(renderer) {
-					m_scene->SetRenderer(renderer);
-					rasterization->SetSSAOEnabled(GetConVarBool("cl_render_ssao"));
-					m_scene->ReloadRenderTarget(static_cast<uint32_t>(resolution.x), static_cast<uint32_t>(resolution.y));
-					m_scene->SetWorldEnvironment(GetWorldEnvironment());
-				}
+	auto *entRenderer = CreateEntity<CRasterizationRenderer>();
+	if(entRenderer) {
+		auto rasterization = entRenderer->GetComponent<pragma::CRasterizationRendererComponent>();
+		if(rasterization.valid()) {
+			auto *renderer = rasterization->GetRendererComponent();
+			if(renderer) {
+				scene->SetRenderer(renderer);
+				rasterization->SetSSAOEnabled(GetConVarBool("cl_render_ssao"));
+				scene->ReloadRenderTarget(static_cast<uint32_t>(resolution.x), static_cast<uint32_t>(resolution.y));
+				scene->SetWorldEnvironment(GetWorldEnvironment());
 			}
-			entRenderer->Spawn();
 		}
-
-		SetRenderScene(*scene);
+		entRenderer->Spawn();
 	}
+
+	SetRenderScene(*scene);
 
 	Resize(false);
 
-	auto *cam = CreateCamera(m_scene->GetWidth(), m_scene->GetHeight(), GetConVarFloat("cl_render_fov"), c_engine->GetNearZ(), c_engine->GetFarZ());
+	auto *cam = CreateCamera(scene->GetWidth(), scene->GetHeight(), GetConVarFloat("cl_render_fov"), c_engine->GetNearZ(), c_engine->GetFarZ());
 	if(cam) {
 		auto toggleC = cam->GetEntity().GetComponent<pragma::CToggleComponent>();
 		if(toggleC.valid())
 			toggleC->TurnOn();
-		m_scene->SetActiveCamera(*cam);
+		scene->SetActiveCamera(*cam);
 		m_primaryCamera = cam->GetHandle<pragma::CCameraComponent>();
 
 		cam->GetEntity().AddComponent<pragma::CObserverComponent>();
@@ -763,15 +765,18 @@ uint32_t CGame::GetNumberOfScenesQueuedForRendering() const { return m_sceneRend
 util::DrawSceneInfo *CGame::GetQueuedSceneRenderInfo(uint32_t i) { return (i < m_sceneRenderQueue.size()) ? &m_sceneRenderQueue[i] : nullptr; }
 void CGame::QueueForRendering(const util::DrawSceneInfo &drawSceneInfo) { m_sceneRenderQueue.push_back(drawSceneInfo); }
 const std::vector<util::DrawSceneInfo> &CGame::GetQueuedRenderScenes() const { return m_sceneRenderQueue; }
-void CGame::SetRenderScene(pragma::CSceneComponent &scene) { m_renderScene = scene.GetHandle<pragma::CSceneComponent>(); }
+template<typename TCPPM>
+void CGame::SetRenderScene(TCPPM &scene) { m_renderScene = scene.GetHandle(); }
 void CGame::ResetRenderScene() { m_renderScene = m_scene; }
-pragma::CSceneComponent *CGame::GetRenderScene() { return m_renderScene.get(); }
-const pragma::CSceneComponent *CGame::GetRenderScene() const { return const_cast<CGame *>(this)->GetRenderScene(); }
+template<typename TCPPM>
+TCPPM *CGame::GetRenderScene() { return static_cast<pragma::CSceneComponent*>(m_renderScene.get()); }
+template<typename TCPPM>
+const TCPPM *CGame::GetRenderScene() const { return const_cast<CGame *>(this)->GetRenderScene<pragma::CSceneComponent>(); }
 pragma::CCameraComponent *CGame::GetRenderCamera() const
 {
 	if(m_renderScene.expired())
 		return nullptr;
-	return const_cast<pragma::CCameraComponent *>(m_renderScene->GetActiveCamera().get());
+	return const_cast<pragma::CCameraComponent *>(static_cast<const pragma::CSceneComponent*>(m_renderScene.get())->GetActiveCamera().get());
 }
 void CGame::SetGameplayControlCamera(pragma::CCameraComponent &cam)
 {
@@ -950,10 +955,10 @@ void CGame::SetUp()
 {
 	Game::SetUp();
 	CListener *listener = CreateEntity<CListener>();
-	m_listener = listener->GetComponent<pragma::CListenerComponent>();
+	m_listener = listener->GetComponent<pragma::CListenerComponent>()->GetHandle();
 
 	CViewModel *vm = CreateEntity<CViewModel>();
-	m_viewModel = vm->GetComponent<pragma::CViewModelComponent>();
+	m_viewModel = vm->GetComponent<pragma::CViewModelComponent>()->GetHandle();
 
 	CViewBody *body = CreateEntity<CViewBody>();
 	m_viewBody = body->GetComponent<pragma::CViewBodyComponent>()->GetHandle();
@@ -1006,14 +1011,15 @@ uint32_t CGame::GetMSAASampleCount()
 }
 void CGame::ReloadRenderFrameBuffer()
 {
-	if(m_scene.valid())
-		m_scene->ReloadRenderTarget(m_scene->GetWidth(), m_scene->GetHeight());
+	auto *scene = GetScene<pragma::CSceneComponent>();
+	if(scene)
+		scene->ReloadRenderTarget(scene->GetWidth(), scene->GetHeight());
 }
 
 void CGame::Think()
 {
 	Game::Think();
-	auto *scene = GetRenderScene();
+	auto *scene = GetRenderScene<pragma::CSceneComponent>();
 	auto *cam = GetPrimaryCamera();
 
 	double tDelta = m_stateNetwork->DeltaTime();
@@ -1104,19 +1110,19 @@ std::shared_ptr<ModelSubMesh> CGame::CreateModelSubMesh() const { return std::ma
 
 Float CGame::GetHDRExposure() const
 {
-	auto *renderer = m_scene->GetRenderer();
+	auto *renderer = GetScene<pragma::CSceneComponent>()->GetRenderer();
 	auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : pragma::ComponentHandle<pragma::CRasterizationRendererComponent> {};
 	return raster.valid() ? raster->GetHDRExposure() : 0.f;
 }
 Float CGame::GetMaxHDRExposure() const
 {
-	auto *renderer = m_scene->GetRenderer();
+	auto *renderer = GetScene<pragma::CSceneComponent>()->GetRenderer();
 	auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : pragma::ComponentHandle<pragma::CRasterizationRendererComponent> {};
 	return raster.valid() ? raster->GetMaxHDRExposure() : 0.f;
 }
 void CGame::SetMaxHDRExposure(Float exposure)
 {
-	auto *renderer = m_scene->GetRenderer();
+	auto *renderer = GetScene<pragma::CSceneComponent>()->GetRenderer();
 	auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : pragma::ComponentHandle<pragma::CRasterizationRendererComponent> {};
 	if(raster.expired())
 		return;
@@ -1127,7 +1133,7 @@ void CGame::OnMapLoaded()
 {
 	Game::OnMapLoaded();
 
-	auto *scene = GetRenderScene();
+	auto *scene = GetRenderScene<pragma::CSceneComponent>();
 	if(scene)
 		scene->UpdateRenderData();
 
@@ -1215,7 +1221,7 @@ void CGame::InitializeWorldData(pragma::asset::WorldData &worldData)
 		auto &tex = *static_cast<Texture *>(texture.get());
 		auto lightmapAtlas = tex.GetVkTexture();
 		//auto lightmapAtlas = pragma::CLightMapComponent::CreateLightmapTexture(img->GetWidth(),img->GetHeight(),static_cast<uint16_t*>(img->GetData()));
-		auto *scene = GetScene();
+		auto *scene = GetScene<pragma::CSceneComponent>();
 		auto *renderer = scene ? scene->GetRenderer() : nullptr;
 		if(renderer != nullptr) {
 			scene->GetSceneRenderDesc().ReloadOcclusionCullingHandler(); // Required if BSP occlusion culling is specified
@@ -1245,7 +1251,7 @@ void CGame::InitializeWorldData(pragma::asset::WorldData &worldData)
 					// lightMapC->SetLightMapIntensity(worldData.GetLightMapIntensity());
 					lightMapC->SetLightMapExposure(worldData.GetLightMapExposure());
 					lightMapC->InitializeLightMapData(lightmapAtlas, globalLightmapUvBuffer, buffers);
-					auto *scene = GetRenderScene();
+					auto *scene = GetRenderScene<pragma::CSceneComponent>();
 					if(scene)
 						scene->SetLightMap(*lightMapC);
 				}

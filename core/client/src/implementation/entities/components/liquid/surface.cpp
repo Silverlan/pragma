@@ -104,7 +104,7 @@ void CLiquidSurfaceComponent::OnEntitySpawn()
 		auto evId = GetComponentManager().FindEventId("render_target", "on_render_scene_initialized");
 		auto rtC = entRt->FindComponent("render_target");
 		if(rtC.valid() && evId.has_value()) {
-			auto &cam = c_game->GetRenderScene()->GetActiveCamera();
+			auto &cam = c_game->GetRenderScene<pragma::CSceneComponent>()->GetActiveCamera();
 			if(cam.valid())
 				rtC->CallLuaMethod<void>("SetCamera", cam->GetLuaObject());
 
@@ -299,7 +299,7 @@ void CLiquidSurfaceComponent::InitializeWaterScene(const Vector3 &refPos, const 
 	if(mat == nullptr || pragma::ShaderWater::DESCRIPTOR_SET_WATER.IsValid() == false || pragma::ShaderPPFog::DESCRIPTOR_SET_FOG.IsValid() == false)
 		return;
 	auto whShader = mat->GetPrimaryShader();
-	auto *scene = c_game->GetScene();
+	auto *scene = c_game->GetScene<pragma::CSceneComponent>();
 	if(scene == nullptr)
 		return;
 	auto renderer = dynamic_cast<pragma::CRendererComponent *>(scene->GetRenderer());
@@ -446,9 +446,9 @@ void CLiquidSurfaceComponent::RenderPostProcessingOverlay(const util::DrawSceneI
 	auto renderFlags = drawSceneInfo.renderFlags;
 	if(cvDrawWater->GetBool() == false || (renderFlags & RenderFlags::Water) == RenderFlags::None)
 		return;
-	if(c_game->GetRenderScene() != c_game->GetScene())
+	if(c_game->GetRenderScene<pragma::CSceneComponent>() != c_game->GetScene<pragma::CSceneComponent>())
 		return;
-	auto *scene = c_game->GetRenderScene();
+	auto *scene = c_game->GetRenderScene<pragma::CSceneComponent>();
 	auto *renderer = scene->GetRenderer();
 	auto rasterC = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : pragma::ComponentHandle<pragma::CRasterizationRendererComponent> {};
 	auto camScene = scene ? scene->GetActiveCamera() : pragma::ComponentHandle<pragma::CCameraComponent> {};

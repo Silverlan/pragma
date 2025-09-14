@@ -34,7 +34,7 @@ int Lua::ents::Client::get_local_player(lua_State *l)
 }
 int Lua::ents::Client::get_listener(lua_State *l)
 {
-	auto *listener = c_game->GetListener();
+	auto *listener = c_game->GetListener<pragma::CListenerComponent>();
 	if(listener == nullptr)
 		return 0;
 	listener->PushLuaObject(l);
@@ -43,7 +43,7 @@ int Lua::ents::Client::get_listener(lua_State *l)
 
 int Lua::ents::Client::get_view_model(lua_State *l)
 {
-	auto *vm = c_game->GetViewModel();
+	auto *vm = c_game->GetViewModel<pragma::CViewModelComponent>();
 	if(vm == nullptr)
 		return 0;
 	vm->GetEntity().GetLuaObject().push(l);

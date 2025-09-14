@@ -295,7 +295,7 @@ void Console::commands::debug_render_depth_buffer(NetworkState *state, pragma::B
 			scene = sceneC.get();
 		}
 		else
-			scene = c_game->GetScene();
+			scene = c_game->GetScene<pragma::CSceneComponent>();
 		auto *renderer = scene ? scene->GetRenderer() : nullptr;
 		auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : pragma::ComponentHandle<pragma::CRasterizationRendererComponent> {};
 		if(raster.expired())
@@ -383,7 +383,7 @@ void CGame::RenderScenes(util::DrawSceneInfo &drawSceneInfo)
 	}
 
 	if(drawSceneInfo.scene.expired()) {
-		auto *sceneC = GetRenderScene();
+		auto *sceneC = GetRenderScene<pragma::CSceneComponent>();
 		drawSceneInfo.scene = sceneC ? sceneC->GetHandle<pragma::CSceneComponent>() : pragma::ComponentHandle<pragma::CSceneComponent> {};
 	}
 	auto &scene = drawSceneInfo.scene;

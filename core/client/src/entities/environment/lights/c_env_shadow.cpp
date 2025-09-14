@@ -469,7 +469,7 @@ void LightShadowRenderer::Render(const util::DrawSceneInfo &drawSceneInfo)
 	auto &light = *m_hLight;
 	auto *smRt = shadowC->GetDepthRenderTarget();
 	auto &tex = smRt->GetTexture();
-	auto *scene = c_game->GetScene();
+	auto *scene = c_game->GetScene<pragma::CSceneComponent>();
 	auto *renderer = scene ? scene->GetRenderer() : nullptr;
 
 	auto &drawCmd = drawSceneInfo.commandBuffer;

@@ -280,7 +280,7 @@ void ShadowRenderer::RenderShadows(std::shared_ptr<prosper::IPrimaryCommandBuffe
 
 	auto *smRt = hShadowMap->GetDepthRenderTarget();
 	auto &tex = smRt->GetTexture();
-	auto *scene = c_game->GetScene();
+	auto *scene = c_game->GetScene<pragma::CSceneComponent>();
 	auto *renderer = scene ? scene->GetRenderer() : nullptr;
 	auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : pragma::ComponentHandle<pragma::CRasterizationRendererComponent> {};
 	if(raster.expired())
@@ -302,7 +302,7 @@ void ShadowRenderer::RenderShadows(std::shared_ptr<prosper::IPrimaryCommandBuffe
 		//if(umath::is_flag_set(renderResultFlags,RenderResultFlags::TranslucentPending) && shaderTransparent != nullptr)
 		//	RenderShadows(drawCmd,light,layerId,depthMVP,shader,true); // Draw translucent shadows
 		if(drawParticleShadows == true && renderer) {
-			auto *scene = c_game->GetRenderScene();
+			auto *scene = c_game->GetRenderScene<pragma::CSceneComponent>();
 			// TODO: Only culled particles
 			EntityIterator entIt {*c_game};
 			entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CParticleSystemComponent>>();

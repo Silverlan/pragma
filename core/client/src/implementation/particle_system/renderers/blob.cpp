@@ -192,7 +192,7 @@ void CParticleRendererBlob::OnParticleSystemStarted()
 	}
 #if ENABLE_BLOB_DEPTH_TEST == 1
 	// Incomplete; For testing purposes only!
-	auto &scene = c_game->GetRenderScene();
+	auto &scene = c_game->GetRenderScene<pragma::CSceneComponent>();
 	auto &sceneDepth = scene->GetDepthTexture();
 	auto &sceneTex = scene->GetRenderTexture();
 	auto samples = sceneDepth->GetSampleCount();
@@ -247,7 +247,7 @@ void CParticleRendererBlob::OnParticleSystemStarted()
 		r->SetSize(512, 512);
 		r->SetX(512);
 		r->SetTexture(depthTex);
-		auto &scene = c_game->GetRenderScene();
+		auto &scene = c_game->GetRenderScene<pragma::CSceneComponent>();
 		r->Update(scene->GetZNear(), scene->GetZFar());
 		return r->GetHandle();
 	});
@@ -256,7 +256,7 @@ void CParticleRendererBlob::OnParticleSystemStarted()
 		auto *el = d->GetGUIElement();
 		if(el == nullptr)
 			return;
-		auto &scene = c_game->GetRenderScene();
+		auto &scene = c_game->GetRenderScene<pragma::CSceneComponent>();
 		static_cast<WIDebugDepthTexture *>(el)->Update(scene->GetZNear(), scene->GetZFar());
 	}));
 #endif

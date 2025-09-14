@@ -82,13 +82,10 @@ namespace pragma {
 	};
 	class LuaShaderManager;
 	class CPlayerComponent;
-	class CViewModelComponent;
 	class BaseWorldComponent;
-	class CListenerComponent;
 	class CParticleSystemComponent;
 	class BaseEnvLightDirectionalComponent;
 	class CCameraComponent;
-	class CSceneComponent;
 };
 namespace uimg {
 	class ImageBuffer;
@@ -246,7 +243,8 @@ class DLLCLIENT CGame : public Game {
 	template<class T>
 	T *CreateEntity(unsigned int idx);
 	virtual void RemoveEntity(BaseEntity *ent) override;
-	pragma::CListenerComponent *GetListener();
+	template<typename TCPPM>
+	    TCPPM *GetListener();
 	pragma::CPlayerComponent *GetLocalPlayer();
 	void GetPrimaryCameraRenderMask(::pragma::rendering::RenderMask &inclusionMask, ::pragma::rendering::RenderMask &exclusionMask) const;
 	void SetLocalPlayer(pragma::CPlayerComponent *pl);
@@ -311,8 +309,10 @@ class DLLCLIENT CGame : public Game {
 	pragma::CCameraComponent *CreateCamera(uint32_t width, uint32_t height, float fov, float nearZ, float farZ);
 	pragma::CCameraComponent *CreateCamera(float aspectRatio, float fov, float nearZ, float farZ);
 	pragma::CCameraComponent *GetPrimaryCamera() const;
-	const pragma::CSceneComponent *GetScene() const;
-	pragma::CSceneComponent *GetScene();
+	template<typename TCPPM>
+	    const TCPPM *GetScene() const;
+    template<typename TCPPM>
+	    TCPPM *GetScene();
 	const WorldEnvironment &GetWorldEnvironment() const;
 	WorldEnvironment &GetWorldEnvironment();
 
@@ -321,7 +321,8 @@ class DLLCLIENT CGame : public Game {
 	void RequestResource(const std::string &fileName);
 
 	void UpdateEntityModel(CBaseEntity *ent);
-	pragma::CViewModelComponent *GetViewModel();
+	template<typename TCPPM>
+	    TCPPM *GetViewModel();
 	template<typename TCPPM>
 	    TCPPM *GetViewBody();
 	void ReloadRenderFrameBuffer();
@@ -383,10 +384,13 @@ class DLLCLIENT CGame : public Game {
 	util::DrawSceneInfo *GetQueuedSceneRenderInfo(uint32_t i);
 	void QueueForRendering(const util::DrawSceneInfo &drawSceneInfo);
 	void RenderScenes(const std::vector<util::DrawSceneInfo> &drawSceneInfos);
-	void SetRenderScene(pragma::CSceneComponent &scene);
+	template<typename TCPPM>
+	    void SetRenderScene(TCPPM &scene);
 	void ResetRenderScene();
-	pragma::CSceneComponent *GetRenderScene();
-	const pragma::CSceneComponent *GetRenderScene() const;
+	template<typename TCPPM>
+	    TCPPM *GetRenderScene();
+    template<typename TCPPM>
+	    const TCPPM *GetRenderScene() const;
 	pragma::CCameraComponent *GetRenderCamera() const;
 	void SetGameplayControlCamera(pragma::CCameraComponent &cam);
 	void ClearGameplayControlCamera();
@@ -501,7 +505,7 @@ class DLLCLIENT CGame : public Game {
 	std::unique_ptr<pragma::rendering::GlobalRenderSettingsBufferData> m_globalRenderSettingsBufferData;
 
 	// Scene
-	util::TWeakSharedHandle<pragma::CSceneComponent> m_scene = util::TWeakSharedHandle<pragma::CSceneComponent> {};
+	util::TWeakSharedHandle<pragma::BaseEntityComponent> m_scene = util::TWeakSharedHandle<pragma::BaseEntityComponent> {};
 	std::shared_ptr<WorldEnvironment> m_worldEnvironment = nullptr;
 
 	void OnEnvironmentLightSourceChanged(pragma::BaseEnvLightDirectionalComponent *oldSource, pragma::BaseEnvLightDirectionalComponent *newSource);
@@ -522,13 +526,13 @@ class DLLCLIENT CGame : public Game {
 	std::vector<CBaseEntity *> m_entsOccluded;
 	std::vector<BaseEntity *> m_shBaseEnts;
 	util::TWeakSharedHandle<pragma::BaseEnvLightDirectionalComponent> m_hEnvLight = util::TWeakSharedHandle<pragma::BaseEnvLightDirectionalComponent> {};
-	util::TWeakSharedHandle<pragma::CListenerComponent> m_listener = util::TWeakSharedHandle<pragma::CListenerComponent> {};
+	util::TWeakSharedHandle<pragma::BaseEntityComponent> m_listener = util::TWeakSharedHandle<pragma::BaseEntityComponent> {};
 	util::TWeakSharedHandle<pragma::CPlayerComponent> m_plLocal = util::TWeakSharedHandle<pragma::CPlayerComponent> {};
-	util::TWeakSharedHandle<pragma::CViewModelComponent> m_viewModel = util::TWeakSharedHandle<pragma::CViewModelComponent> {};
+	util::TWeakSharedHandle<pragma::BaseEntityComponent> m_viewModel = util::TWeakSharedHandle<pragma::BaseEntityComponent> {};
 	util::TWeakSharedHandle<pragma::BaseEntityComponent> m_viewBody = util::TWeakSharedHandle<pragma::BaseEntityComponent> {};
 	util::TWeakSharedHandle<pragma::CCameraComponent> m_primaryCamera = util::TWeakSharedHandle<pragma::CCameraComponent> {};
 
-	util::TWeakSharedHandle<pragma::CSceneComponent> m_renderScene = util::TWeakSharedHandle<pragma::CSceneComponent> {};
+	util::TWeakSharedHandle<pragma::BaseEntityComponent> m_renderScene = util::TWeakSharedHandle<pragma::BaseEntityComponent> {};
 
 	// Map
 	virtual std::shared_ptr<pragma::nav::Mesh> LoadNavMesh(const std::string &fname) override;

@@ -60,7 +60,7 @@ void CAttachmentComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const
 
 void CAttachmentComponent::UpdateViewAttachmentOffset(BaseEntity *ent, pragma::BaseCharacterComponent &pl, Vector3 &pos, Quat &rot, Bool bYawOnly) const
 {
-	auto *scene = c_game->GetRenderScene();
+	auto *scene = c_game->GetRenderScene<pragma::CSceneComponent>();
 	auto cam = scene ? scene->GetActiveCamera() : pragma::ComponentHandle<pragma::CCameraComponent> {};
 	if(cam.expired())
 		return;

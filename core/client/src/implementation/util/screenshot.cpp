@@ -114,7 +114,7 @@ std::optional<std::string> util::screenshot(CGame &game)
 {
 	FileManager::CreateDirectory("screenshots");
 
-	auto scene = game.GetScene();
+	auto scene = game.GetScene<pragma::CSceneComponent>();
 	std::shared_ptr<prosper::IImage> imgScreenshot = nullptr;
 	std::shared_ptr<prosper::IBuffer> bufScreenshot = nullptr;
 	{

@@ -38,7 +38,7 @@ WIDebugHDRBloom::~WIDebugHDRBloom()
 void WIDebugHDRBloom::UpdateBloomImage()
 {
 	auto &drawCmd = c_engine->GetDrawCommandBuffer();
-	auto *scene = c_game->GetRenderScene();
+	auto *scene = c_game->GetRenderScene<pragma::CSceneComponent>();
 	auto *renderer = scene ? dynamic_cast<pragma::CRendererComponent *>(scene->GetRenderer()) : nullptr;
 	if(renderer == nullptr)
 		return;

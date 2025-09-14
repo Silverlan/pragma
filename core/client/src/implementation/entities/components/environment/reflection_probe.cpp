@@ -559,7 +559,7 @@ bool CReflectionProbeComponent::CaptureIBLReflectionsFromScene(const std::vector
 	auto pos = GetEntity().GetPosition();
 	LogInfo("Capturing reflection probe IBL reflections for probe at position ({},{},{})...", pos.x, pos.y, pos.z);
 
-	auto *scene = c_game->GetScene();
+	auto *scene = c_game->GetScene<pragma::CSceneComponent>();
 	if(scene == nullptr)
 		return false;
 	auto hCam = scene->GetActiveCamera();

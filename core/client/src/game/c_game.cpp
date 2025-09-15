@@ -34,7 +34,6 @@
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
 #include <pragma/lua/luacallback.h>
-#include "pragma/rendering/occlusion_culling/chc.hpp"
 #include "pragma/rendering/c_msaa.h"
 #include "textureinfo.h"
 #include "pragma/networking/iclient.hpp"

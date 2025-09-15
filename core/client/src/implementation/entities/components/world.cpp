@@ -161,7 +161,7 @@ void CWorldComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 		static_cast<CModelComponent &>(component).SetAutoLodEnabled(false);
 }
 std::shared_ptr<OcclusionOctree<std::shared_ptr<ModelMesh>>> CWorldComponent::GetMeshTree() const { return m_meshTree; };
-std::shared_ptr<CHC> CWorldComponent::GetCHCController() const { return m_chcController; }
+std::shared_ptr<::CHC> CWorldComponent::GetCHCController() const { return m_chcController; }
 
 const pragma::rendering::RenderQueue *CWorldComponent::GetClusterRenderQueue(::util::BSPTree::ClusterIndex clusterIndex, bool translucent) const
 {

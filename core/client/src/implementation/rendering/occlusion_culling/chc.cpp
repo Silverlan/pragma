@@ -1,10 +1,11 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/console/c_cvar.h"
 #include <pragma/console/convars.h>
-#include "pragma/rendering/occlusion_culling/chc.hpp"
 #include <pragma/math/intersection.h>
 #include "pragma/game/c_game.h"
 #include "pragma/entities/c_baseentity.h"
@@ -14,6 +15,10 @@
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/game/c_game_createguielement.h"
+
+module pragma.client.rendering.occlusion_culling;
+
+import :chc;
 
 DEFINE_BASE_HANDLE(DLLCLIENT, CHCNode, CHCNode);
 

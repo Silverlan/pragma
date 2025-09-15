@@ -6,7 +6,6 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/c_baseentity.h"
 #include "pragma/model/render_mesh_group.hpp"
-#include "pragma/rendering/occlusion_culling/chc.hpp"
 #include "buffers/prosper_buffer.hpp"
 #include "pragma/rendering/render_queue.hpp"
 #include <pragma/entities/baseworld.h>
@@ -15,6 +14,8 @@ module;
 #include <unordered_map>
 
 export module pragma.client.entities.components.world;
+
+import pragma.client.rendering.occlusion_culling;
 
 #pragma warning(push)
 #pragma warning(disable : 4251)
@@ -26,7 +27,7 @@ export namespace pragma {
 		virtual void OnEntitySpawn() override;
 		void ReloadMeshCache();
 		std::shared_ptr<OcclusionOctree<std::shared_ptr<ModelMesh>>> GetMeshTree() const;
-		std::shared_ptr<CHC> GetCHCController() const;
+		std::shared_ptr<::CHC> GetCHCController() const;
 		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual void OnTick(double tDelta) override;
 
@@ -44,7 +45,7 @@ export namespace pragma {
 		std::vector<std::shared_ptr<rendering::RenderQueue>> m_clusterRenderTranslucentQueues;
 		std::unordered_map<uint32_t, bool> m_lodBaseMeshIds;
 		std::shared_ptr<OcclusionOctree<std::shared_ptr<ModelMesh>>> m_meshTree;
-		std::shared_ptr<CHC> m_chcController;
+		std::shared_ptr<::CHC> m_chcController;
 
 		std::shared_ptr<util::BSPTree> m_bspTree = nullptr;
 		std::vector<std::vector<RenderMeshIndex>> m_meshesPerCluster;

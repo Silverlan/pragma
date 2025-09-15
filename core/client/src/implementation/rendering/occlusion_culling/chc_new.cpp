@@ -1,8 +1,13 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/rendering/occlusion_culling/chc_new.hpp"
+
+module pragma.client.rendering.occlusion_culling;
+
+import :chc_new;
 
 #if 0
 static const uint32_t maxPrevInvisNodesBatchSize = 50; // Recommended range: [20,80]

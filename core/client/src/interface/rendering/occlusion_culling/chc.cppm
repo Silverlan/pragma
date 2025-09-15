@@ -1,10 +1,12 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __CHC_HPP__
-#define __CHC_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
+#include "pragma/model/modelmesh.h"
+#include "pragma/entities/c_baseentity.h"
+#include "pragma/entities/environment/c_env_camera.h"
 #include <pragma/types.hpp>
 #include <sharedutils/def_handle.h>
 #include <sharedutils/functioncallback.h>
@@ -16,12 +18,16 @@
 
 #define CHC_DEBUGGING_ENABLED 0
 
-class CHC;
-class CHCNode;
-DECLARE_BASE_HANDLE(DLLCLIENT, CHCNode, CHCNode);
+export module pragma.client.rendering.occlusion_culling:chc;
+
+export {
+	class CHC;
+	class CHCNode;
+	DECLARE_BASE_HANDLE(DLLCLIENT, CHCNode, CHCNode);
+};
 #pragma warning(push)
 #pragma warning(disable : 4251)
-class DLLCLIENT CHCNode {
+export class DLLCLIENT CHCNode {
   public:
 	friend CHC;
   protected:
@@ -48,7 +54,7 @@ class DLLCLIENT CHCNode {
 	const Vector3 &GetMax() const;
 };
 
-class DLLCLIENT CHCQuery {
+export class DLLCLIENT CHCQuery {
   public:
 	friend CHC;
   protected:
@@ -64,12 +70,7 @@ class DLLCLIENT CHCQuery {
 	uint32_t GetResult() const;
 };
 
-class ModelMesh;
-class CBaseEntity;
-namespace pragma {
-	class CCameraComponent;
-};
-class DLLCLIENT CHC {
+export class DLLCLIENT CHC {
   public:
 	friend CHCNode;
   private:
@@ -135,5 +136,3 @@ class DLLCLIENT CHC {
 	std::vector<pragma::OcclusionMeshInfo> &PerformCulling();
 };
 #pragma warning(pop)
-
-#endif

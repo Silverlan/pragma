@@ -5,7 +5,6 @@
 #include "pragma/game/c_game.h"
 #include "pragma/rendering/occlusion_culling/occlusion_culling_handler_chc.hpp"
 #include "pragma/entities/baseworld.h"
-#include "pragma/rendering/occlusion_culling/chc.hpp"
 
 import pragma.client.entities.components.world;
 

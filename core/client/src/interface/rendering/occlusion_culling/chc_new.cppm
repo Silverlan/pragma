@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __CHC_NEW_HPP__
-#define __CHC_NEW_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/rendering/occlusion_culling/occlusion_culling_handler.hpp"
@@ -15,7 +14,9 @@
 
 #define CHC_DEBUGGING_ENABLED 0
 
-namespace pragma {
+export module pragma.client.rendering.occlusion_culling:chc_new;
+
+export namespace pragma {
 #pragma warning(push)
 #pragma warning(disable : 4251)
 	class CHC;
@@ -83,5 +84,3 @@ namespace pragma {
 	};
 #pragma warning(pop)
 };
-
-#endif

@@ -7,11 +7,12 @@ module;
 #include "pragma/entities/c_baseentity.h"
 #include "pragma/entities/environment/lights/c_env_light.h"
 #include "pragma/entities/environment/lights/env_light_point.h"
-#include "pragma/rendering/c_cubemapside.h"
 #include <mathutil/plane.hpp>
 #include <pragma/util/mvpbase.h>
 
 export module pragma.client.entities.components.lights.point;
+
+import pragma.client.rendering.cube_map_side;
 
 export namespace pragma {
 	class DLLCLIENT CLightPointComponent final : public BaseEnvLightPointComponent, public MVPBias<6> {

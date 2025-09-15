@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/lua/converters/gui_element_converter.hpp"
-#include "pragma/rendering/c_cubemapside.h"
 #include "pragma/c_engine.h"
 #include <image/prosper_render_target.hpp>
 #include <sharedutils/util_string.h>

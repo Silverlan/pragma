@@ -3,6 +3,7 @@
 
 export module pragma.client.rendering;
 export import :controlled_blur_settings;
+export import pragma.client.rendering.cube_map_side;
 export import pragma.client.rendering.lightmap_data_cache;
 export import pragma.client.rendering.material_property_block;
 export import pragma.client.rendering.occlusion_culling;

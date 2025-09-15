@@ -7,7 +7,6 @@ module;
 #include "pragma/entities/baseentity_luaobject.h"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/environment/lights/c_env_light.h"
-#include "pragma/rendering/c_cubemapside.h"
 #include "pragma/c_engine.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/math/intersection.h>

@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
-#include "pragma/rendering/shader_graph/nodes/image_texture.hpp"
 #include "pragma/rendering/render_processor.hpp"
 #include "pragma/rendering/shader_material/shader_material.hpp"
 #include "pragma/rendering/global_shader_input_manager.hpp"

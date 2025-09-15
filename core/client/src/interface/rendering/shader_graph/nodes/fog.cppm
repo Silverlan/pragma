@@ -6,9 +6,11 @@
 
 #include "pragma/clientdefinitions.h"
 
+export module pragma.client.rendering.shader_graph:node_fog;
+
 import pragma.shadergraph;
 
-namespace pragma::rendering::shader_graph {
+export namespace pragma::rendering::shader_graph {
 	class DLLCLIENT FogNode : public pragma::shadergraph::Node {
 	  public:
 		static constexpr const char *OUT_COLOR = "color";

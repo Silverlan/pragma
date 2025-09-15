@@ -1,17 +1,18 @@
 // SPDX-FileCopyrightText: (c) 2024 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __PRAGMA_BASE_SHADER_GRAPH_NODES_INPUT_PARAMETER_HPP__
-#define __PRAGMA_BASE_SHADER_GRAPH_NODES_INPUT_PARAMETER_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include <cinttypes>
 #include <string_view>
 #include <string>
 
+export module pragma.client.rendering.shader_graph:node_input_parameter;
+
 import pragma.shadergraph;
 
-namespace pragma::rendering::shader_graph {
+export namespace pragma::rendering::shader_graph {
 	class DLLCLIENT BaseInputParameterNode : public pragma::shadergraph::Node {
 	  public:
 		enum class Scope : uint32_t {
@@ -132,5 +133,3 @@ namespace pragma::rendering::shader_graph {
 	using InputParameterStringNode = InputParameterNode<udm::String>;
 	using InputParameterTransformNode = InputParameterNode<udm::Mat4>;
 };
-
-#endif

@@ -1,14 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2024 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __PRAGMA_SHADER_GRAPH_NODES_LIGHTMAP_HPP__
-#define __PRAGMA_SHADER_GRAPH_NODES_LIGHTMAP_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 
+export module pragma.client.rendering.shader_graph:node_lightmap;
+
 import pragma.shadergraph;
 
-namespace pragma::rendering::shader_graph {
+export namespace pragma::rendering::shader_graph {
 	class DLLCLIENT LightmapNode : public pragma::shadergraph::Node {
 	  public:
 		static constexpr const char *OUT_LIGHT_MAP = "lightMap";
@@ -20,5 +21,3 @@ namespace pragma::rendering::shader_graph {
 		virtual std::string DoEvaluate(const pragma::shadergraph::Graph &graph, const pragma::shadergraph::GraphNode &instance) const override;
 	};
 };
-
-#endif

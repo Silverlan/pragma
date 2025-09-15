@@ -11,9 +11,6 @@ module;
 #include "pragma/rendering/shader_material/shader_material.hpp"
 #include "pragma/rendering/shader_graph/manager.hpp"
 #include "pragma/rendering/shader_graph/module.hpp"
-#include "pragma/rendering/shader_graph/nodes/shader_material.hpp"
-#include "pragma/rendering/shader_graph/nodes/input_parameter.hpp"
-#include "pragma/rendering/shader_graph/nodes/scene_output.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <pragma/entities/entity_iterator.hpp>

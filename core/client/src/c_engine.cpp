@@ -1,18 +1,12 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifdef _MSC_VER
-namespace pragma::string {
-	class Utf8String;
-	class Utf8StringView;
-	class Utf8StringArg;
-};
-#endif
 #include "stdafx_cengine.h"
 #include "pragma/c_engine.h"
 #include <wgui/wgui.h>
 #include "cmaterialmanager.h"
 #include "pragma/console/c_cvar.h"
+#include "pragma/rendering/shader_material/shader_material.hpp"
 #include <texturemanager/texturemanager.h>
 #include <pragma/engine_init.hpp>
 #include <pragma/console/convars.h>
@@ -59,6 +53,9 @@ namespace pragma::string {
 #include <prosper_window.hpp>
 #include <fsys/ifile.hpp>
 #include <pragma/util/font_set.hpp>
+#include <prosper_util.hpp>
+#include <buffers/prosper_buffer.hpp>
+#include <buffers/prosper_dynamic_resizable_buffer.hpp>
 #ifdef _WIN32
 
 #include <dwmapi.h>
@@ -99,21 +96,6 @@ decltype(CEngine::AXIS_PRESS_THRESHOLD) CEngine::AXIS_PRESS_THRESHOLD = 0.5f;
 // If set to true, each joystick axes will be split into a positive and a negative axis, which
 // can be bound individually
 static const auto SEPARATE_JOYSTICK_AXES = true;
-
-#include "pragma/rendering/shader_graph/nodes/scene_output.hpp"
-#include "pragma/rendering/shader_graph/nodes/shader_material.hpp"
-#include "pragma/rendering/shader_graph/nodes/fog.hpp"
-#include "pragma/rendering/shader_graph/nodes/lightmap.hpp"
-#include "pragma/rendering/shader_graph/nodes/object.hpp"
-#include "pragma/rendering/shader_graph/nodes/time.hpp"
-#include "pragma/rendering/shader_graph/nodes/pbr.hpp"
-#include "pragma/rendering/shader_graph/nodes/toon.hpp"
-#include "pragma/rendering/shader_graph/nodes/image_texture.hpp"
-#include "pragma/rendering/shader_graph/nodes/texture_coordinate.hpp"
-#include "pragma/rendering/shader_graph/nodes/vector_transform.hpp"
-#include "pragma/rendering/shader_graph/nodes/geometry.hpp"
-#include "pragma/rendering/shader_graph/nodes/material_texture.hpp"
-#include "pragma/rendering/shader_graph/nodes/input_parameter.hpp"
 
 CEngine::CEngine(int argc, char *argv[])
     : Engine(argc, argv), pragma::RenderContext(), m_nearZ(pragma::BaseEnvCameraComponent::DEFAULT_NEAR_Z), //10.0f), //0.1f
@@ -1980,9 +1962,6 @@ std::chrono::nanoseconds CEngine::GetGpuExecutionTime(uint32_t swapchainIdx, GPU
 	return m_gpuExecTimes[GetPerformanceTimerIndex(swapchainIdx, timer)];
 }
 
-#include <prosper_util.hpp>
-#include <buffers/prosper_buffer.hpp>
-#include <buffers/prosper_dynamic_resizable_buffer.hpp>
 void CEngine::Think()
 {
 	pragma::platform::poll_joystick_events();

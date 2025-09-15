@@ -1,11 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2025 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/rendering/shader_graph/nodes/toon.hpp"
 #include "pragma/rendering/shader_material/shader_material.hpp"
-#include "pragma/rendering/shader_graph/nodes/image_texture.hpp"
-#include "pragma/rendering/shader_graph/nodes/shader_material.hpp"
+
+module pragma.client.rendering.shader_graph;
+
+import :node_toon;
 
 using namespace pragma::rendering::shader_graph;
 ToonNode::ToonNode(const std::string_view &type) : Node {type, pragma::shadergraph::CATEGORY_SHADER}

@@ -1,14 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2024 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __PRAGMA_SHADER_GRAPH_NODES_CAMERA_HPP__
-#define __PRAGMA_SHADER_GRAPH_NODES_CAMERA_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 
+export module pragma.client.rendering.shader_graph:node_camera;
+
 import pragma.shadergraph;
 
-namespace pragma::rendering::shader_graph {
+export namespace pragma::rendering::shader_graph {
 	class DLLCLIENT CameraNode : public pragma::shadergraph::Node {
 	  public:
 		static constexpr const char *OUT_POSITION = "position";
@@ -37,6 +38,4 @@ layout(std140, LAYOUT_ID(SCENE, RENDER_SETTINGS)) uniform RenderSettings
 	int shaderQuality; // 1 = lowest, 10 = highest
 }
 u_renderSettings;
-#endif
-
 #endif

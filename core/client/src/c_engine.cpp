@@ -102,7 +102,6 @@ static const auto SEPARATE_JOYSTICK_AXES = true;
 
 #include "pragma/rendering/shader_graph/nodes/scene_output.hpp"
 #include "pragma/rendering/shader_graph/nodes/shader_material.hpp"
-#include "pragma/rendering/shader_graph/nodes/camera.hpp"
 #include "pragma/rendering/shader_graph/nodes/fog.hpp"
 #include "pragma/rendering/shader_graph/nodes/lightmap.hpp"
 #include "pragma/rendering/shader_graph/nodes/object.hpp"

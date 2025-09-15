@@ -9,7 +9,6 @@ module;
 #include <pragma/entities/entity_component_system_t.hpp>
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
-#include "pragma/entities/game/c_game_occlusion_culler.hpp"
 #include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/rendering/render_queue.hpp"
@@ -25,6 +24,7 @@ module;
 module pragma.client.entities.components.env_sky_camera;
 
 import pragma.client.client_state;
+import pragma.client.entities.components.game_occlusion_culler;
 import pragma.client.entities.components.rasterization_renderer;
 import pragma.client.entities.components.toggle;
 import pragma.client.entities.components.transform;
@@ -98,7 +98,7 @@ void CSkyCameraComponent::BuildSkyMeshRenderQueues(const pragma::CSceneComponent
 	}
 
 	auto &hCam = scene.GetActiveCamera();
-	auto *culler = scene.FindOcclusionCuller();
+	auto *culler = scene.FindOcclusionCuller<COcclusionCullerComponent>();
 	if(culler && hCam.valid()) {
 		auto vp = hCam->GetProjectionMatrix() * hCam->GetViewMatrix();
 		auto &dynOctree = culler->GetOcclusionOctree();

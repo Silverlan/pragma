@@ -5,7 +5,6 @@
 #include "pragma/rendering/occlusion_culling/occlusion_culling_handler_octtree.hpp"
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
-#include "pragma/entities/game/c_game_occlusion_culler.hpp"
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include <pragma/math/intersection.h>
@@ -56,7 +55,7 @@ void OcclusionCullingHandlerOctTree::PerformCulling(pragma::CSceneComponent &sce
 			culledMeshesOut.push_back({*static_cast<CBaseEntity *>(&pRenderComponent->GetEntity()), *static_cast<CModelMesh *>(mesh.get())});
 	}
 
-	auto *culler = scene.FindOcclusionCuller();
+	auto *culler = scene.FindOcclusionCuller<pragma::COcclusionCullerComponent>();
 	if(culler) {
 		auto &dynOctree = culler->GetOcclusionOctree();
 		auto &root = dynOctree.GetRootNode();

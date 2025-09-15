@@ -21,6 +21,7 @@
 #include <prosper_command_buffer.hpp>
 
 import pragma.client.entities.components.color;
+import pragma.client.entities.components.game_occlusion_culler;
 import pragma.client.entities.components.lights.directional;
 import pragma.client.entities.components.lights.point;
 import pragma.client.entities.components.lights.shadow;
@@ -185,11 +186,13 @@ CSceneComponent *CLightComponent::FindShadowScene() const
 	auto lowestBit = static_cast<int32_t>(sceneFlags) & -static_cast<int32_t>(sceneFlags);
 	return CSceneComponent::GetByIndex(CSceneComponent::GetSceneIndex(lowestBit));
 }
-COcclusionCullerComponent *CLightComponent::FindShadowOcclusionCuller() const
+template<typename TCPPM>
+    TCPPM *CLightComponent::FindShadowOcclusionCuller() const
 {
 	auto *scene = FindShadowScene();
-	return scene ? scene->FindOcclusionCuller() : nullptr;
+	return scene ? scene->FindOcclusionCuller<TCPPM>() : nullptr;
 }
+template COcclusionCullerComponent *CLightComponent::FindShadowOcclusionCuller() const;
 
 bool CLightComponent::IsInCone(const CBaseEntity &ent, const Vector3 &dir, float angle) const
 {

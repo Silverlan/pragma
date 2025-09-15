@@ -3,7 +3,6 @@
 
 #include "stdafx_client.h"
 #include "pragma/entities/components/c_scene_component.hpp"
-#include "pragma/entities/game/c_game_occlusion_culler.hpp"
 #include "pragma/game/c_game.h"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
@@ -187,7 +186,7 @@ void CSceneComponent::Link(const CSceneComponent &other, bool linkCamera)
 
 	// m_sceneRenderDesc.SetOcclusionCullingHandler(const_cast<pragma::OcclusionCullingHandler&>(other.m_sceneRenderDesc.GetOcclusionCullingHandler()).shared_from_this());
 
-	auto *occlusionCuller = const_cast<CSceneComponent &>(other).FindOcclusionCuller();
+	auto *occlusionCuller = const_cast<CSceneComponent &>(other).FindOcclusionCuller<COcclusionCullerComponent>();
 	if(occlusionCuller)
 		static_cast<CBaseEntity &>(occlusionCuller->GetEntity()).AddToScene(*this);
 
@@ -284,7 +283,8 @@ void CSceneComponent::InitializeFogBuffer()
 	m_fogBuffer = c_engine->GetRenderContext().CreateBuffer(createInfo, &m_cameraData);
 	m_fogBuffer->SetDebugName("fog_buf");
 }
-pragma::COcclusionCullerComponent *CSceneComponent::FindOcclusionCuller()
+template<typename TCPPM>
+TCPPM *CSceneComponent::FindOcclusionCuller()
 {
 	EntityIterator entIt {*c_game};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::COcclusionCullerComponent>>();
@@ -293,7 +293,10 @@ pragma::COcclusionCullerComponent *CSceneComponent::FindOcclusionCuller()
 	auto *ent = (it != entIt.end()) ? *it : nullptr;
 	return ent ? ent->GetComponent<pragma::COcclusionCullerComponent>().get() : nullptr;
 }
-const pragma::COcclusionCullerComponent *CSceneComponent::FindOcclusionCuller() const { return const_cast<CSceneComponent *>(this)->FindOcclusionCuller(); }
+template pragma::COcclusionCullerComponent *CSceneComponent::FindOcclusionCuller();
+template<typename TCPPM>
+const TCPPM *CSceneComponent::FindOcclusionCuller() const { return const_cast<CSceneComponent *>(this)->FindOcclusionCuller<TCPPM>(); }
+template const pragma::COcclusionCullerComponent *CSceneComponent::FindOcclusionCuller() const;
 const std::shared_ptr<prosper::IBuffer> &CSceneComponent::GetFogBuffer() const { return m_fogBuffer; }
 void CSceneComponent::UpdateCameraBuffer(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, bool bView)
 {

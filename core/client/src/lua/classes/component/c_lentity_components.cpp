@@ -76,7 +76,6 @@
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/environment/lights/c_env_light.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
-#include "pragma/entities/game/c_game_occlusion_culler.hpp"
 #include "pragma/entities/prop/prop_base.h"
 #include "pragma/entities/prop/prop_dynamic.hpp"
 #include "pragma/entities/prop/prop_physics.hpp"

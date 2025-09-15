@@ -10,7 +10,6 @@ module;
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/components/intersection_handler_component.hpp"
-#include "pragma/entities/game/c_game_occlusion_culler.hpp"
 #include "pragma/model/c_vertex_buffer_data.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/console/c_cvar_global_functions.h"
@@ -44,6 +43,7 @@ module;
 module pragma.client.entities.components.render;
 
 import pragma.client.entities.components.color;
+import pragma.client.entities.components.game_occlusion_culler;
 import pragma.client.entities.components.raytracing;
 import pragma.client.entities.components.soft_body;
 import pragma.client.entities.components.transform;

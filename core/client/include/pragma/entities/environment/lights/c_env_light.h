@@ -13,7 +13,6 @@ class CBaseEntity;
 class CModelMesh;
 class Scene;
 namespace pragma {
-	class COcclusionCullerComponent;
 	struct DLLCLIENT CEShouldPassEntity : public ComponentEvent {
 		CEShouldPassEntity(const CBaseEntity &entity, uint32_t &renderFlags);
 		virtual void PushArguments(lua_State *l) override;
@@ -138,7 +137,8 @@ namespace pragma {
 
 		// A shadowed light source may only be assigned to one scene / one scene slot
 		CSceneComponent *FindShadowScene() const;
-		COcclusionCullerComponent *FindShadowOcclusionCuller() const;
+		template<typename TCPPM>
+			TCPPM *FindShadowOcclusionCuller() const;
 
 		virtual void SetLightIntensityType(LightIntensityType type) override;
 		virtual void SetLightIntensity(float intensity, LightIntensityType type) override;

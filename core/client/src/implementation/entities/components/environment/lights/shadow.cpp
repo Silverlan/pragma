@@ -10,7 +10,6 @@ module;
 #include "pragma/rendering/render_queue.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
-#include "pragma/entities/game/c_game_occlusion_culler.hpp"
 #include "pragma/rendering/render_queue_instancer.hpp"
 #include "pragma/rendering/render_queue_worker.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
@@ -362,7 +361,7 @@ void LightShadowRenderer::BuildRenderQueues(const util::DrawSceneInfo &drawScene
 				  SceneRenderDesc::AddRenderMeshesToRenderQueue(rasterizer, drawSceneInfo.renderFlags, *pRenderComponent, fGetRenderQueue, scene, *hCam, vp, nullptr);
 			  }
 
-			  auto *culler = scene.FindOcclusionCuller();
+			  auto *culler = scene.FindOcclusionCuller<pragma::COcclusionCullerComponent>();
 			  if(culler) {
 				  auto &dynOctree = culler->GetOcclusionOctree();
 				  SceneRenderDesc::CollectRenderMeshesFromOctree(rasterizer, drawSceneInfo.renderFlags, drawSceneInfo.clipPlane.has_value(), dynOctree, scene, *hCam, vp, renderMask, fGetRenderQueue, fShouldCull, nullptr, nullptr, lodBias,

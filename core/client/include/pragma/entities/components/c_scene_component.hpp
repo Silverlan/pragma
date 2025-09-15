@@ -24,7 +24,6 @@ namespace pragma {
 	class CCameraComponent;
 	class OcclusionCullingHandler;
 	class CParticleSystemComponent;
-	class COcclusionCullerComponent;
 	class CRasterizationRendererComponent;
 	class CRendererComponent;
 	class ShaderGameWorldLightingPass;
@@ -234,8 +233,10 @@ namespace pragma {
 		void SetParticleSystemColorFactor(const Vector4 &colorFactor);
 		const Vector4 &GetParticleSystemColorFactor() const;
 
-		pragma::COcclusionCullerComponent *FindOcclusionCuller();
-		const pragma::COcclusionCullerComponent *FindOcclusionCuller() const;
+		template<typename TCPPM>
+			TCPPM *FindOcclusionCuller();
+		template<typename TCPPM>
+			const TCPPM *FindOcclusionCuller() const;
 		SceneIndex GetSceneIndex() const;
 		bool IsValid() const;
 		CSceneComponent *GetParentScene();

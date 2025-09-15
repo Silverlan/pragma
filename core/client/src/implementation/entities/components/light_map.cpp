@@ -47,6 +47,8 @@ module;
 #include <texturemanager/texturemanager.h>
 #include <cmaterialmanager.h>
 #include <cmaterial_manager2.hpp>
+#include "cmaterialmanager.h"
+#include <wgui/types/wirect.h>
 
 module pragma.client.entities.components.light_map;
 
@@ -350,8 +352,6 @@ std::shared_ptr<prosper::Texture> CLightMapComponent::CreateLightmapTexture(uimg
 	return c_engine->GetRenderContext().CreateTexture({}, *img, imgViewCreateInfo, samplerCreateInfo);
 }
 
-#include "cmaterialmanager.h"
-#include <wgui/types/wirect.h>
 static void generate_lightmap_uv_atlas(BaseEntity &ent, uint32_t width, uint32_t height, const std::function<void(bool)> &callback)
 {
 	Con::cout << "Generating lightmap uv atlas... This may take a few minutes!" << Con::endl;

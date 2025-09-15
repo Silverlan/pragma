@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/game/c_game_occlusion_culler.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
@@ -119,7 +118,7 @@ void ShadowRenderer::UpdateEntityShadowCasters(std::shared_ptr<prosper::IPrimary
 	auto *scene = light.FindShadowScene();
 	if(scene == nullptr)
 		return;
-	auto *culler = scene->FindOcclusionCuller();
+	auto *culler = scene->FindOcclusionCuller<pragma::COcclusionCullerComponent>();
 	if(culler == nullptr)
 		return;
 	auto &octree = culler->GetOcclusionOctree();

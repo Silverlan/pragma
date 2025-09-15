@@ -7,7 +7,6 @@
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/baseworld.h"
-#include "pragma/entities/game/c_game_occlusion_culler.hpp"
 #include "pragma/rendering/occlusion_culling/occlusion_culling_handler_brute_force.hpp"
 #include "pragma/rendering/occlusion_culling/occlusion_culling_handler_bsp.hpp"
 #include "pragma/rendering/occlusion_culling/occlusion_culling_handler_chc.hpp"
@@ -718,7 +717,7 @@ void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 				  t = std::chrono::steady_clock::now();
 
 			  // Now we just need the remaining entities, for which we'll use the scene octree
-			  auto *culler = m_scene.FindOcclusionCuller();
+			  auto *culler = m_scene.FindOcclusionCuller<pragma::COcclusionCullerComponent>();
 			  if(culler) {
 				  // Some entities are exempt from occlusion culling altogether, we'll handle them here
 				  for(auto *pRenderComponent : pragma::CRenderComponent::GetEntitiesExemptFromOcclusionCulling()) {

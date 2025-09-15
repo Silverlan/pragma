@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: (c) 2020 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_GAME_OCCLUSION_CULLER_HPP__
-#define __C_GAME_OCCLUSION_CULLER_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/c_baseentity.h"
@@ -10,7 +9,9 @@
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree.hpp"
 #include <pragma/entities/components/base_entity_component.hpp>
 
-namespace pragma {
+export module pragma.client.entities.components.game_occlusion_culler;
+
+export namespace pragma {
 	class DLLCLIENT COcclusionCullerComponent final : public BaseEntityComponent {
 	  public:
 		COcclusionCullerComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
@@ -29,9 +30,7 @@ namespace pragma {
 	};
 };
 
-class DLLCLIENT COcclusionCuller : public CBaseEntity {
+export class DLLCLIENT COcclusionCuller : public CBaseEntity {
   public:
 	virtual void Initialize() override;
 };
-
-#endif

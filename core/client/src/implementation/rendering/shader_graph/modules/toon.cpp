@@ -1,12 +1,17 @@
 // SPDX-FileCopyrightText: (c) 2025 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
-#include "pragma/rendering/shader_graph/modules/toon.hpp"
 #include "pragma/rendering/render_processor.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include <prosper_command_buffer.hpp>
+
+module pragma.client.rendering.shader_graph;
+
+import :module_toon;
 
 import pragma.client.entities.components;
 import pragma.client.rendering.shaders;

@@ -23,6 +23,7 @@ namespace pragma::string {
 #include <pragma/rendering/scene/util_draw_scene_info.hpp>
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/shader_graph/manager.hpp"
+#include "pragma/rendering/shader_graph/module.hpp"
 #include <pragma/entities/environment/lights/c_env_light.h>
 #include <pragma/input/input_binding_layer.hpp>
 #include <pragma/lua/lua_error_handling.hpp>
@@ -114,9 +115,6 @@ static const auto SEPARATE_JOYSTICK_AXES = true;
 #include "pragma/rendering/shader_graph/nodes/geometry.hpp"
 #include "pragma/rendering/shader_graph/nodes/material_texture.hpp"
 #include "pragma/rendering/shader_graph/nodes/input_parameter.hpp"
-#include "pragma/rendering/shader_graph/modules/pbr.hpp"
-#include "pragma/rendering/shader_graph/modules/toon.hpp"
-#include "pragma/rendering/shader_graph/modules/input_data.hpp"
 
 CEngine::CEngine(int argc, char *argv[])
     : Engine(argc, argv), pragma::RenderContext(), m_nearZ(pragma::BaseEnvCameraComponent::DEFAULT_NEAR_Z), //10.0f), //0.1f

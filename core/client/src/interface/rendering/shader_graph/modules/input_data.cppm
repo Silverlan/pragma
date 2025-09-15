@@ -1,23 +1,18 @@
 // SPDX-FileCopyrightText: (c) 2024 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __PRAGMA_SHADER_GRAPH_MODULES_INPUT_DATA_HPP__
-#define __PRAGMA_SHADER_GRAPH_MODULES_INPUT_DATA_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/rendering/shader_graph/module.hpp"
+#include "pragma/rendering/global_shader_input_manager.hpp"
+#include "buffers/prosper_buffer.hpp"
+
+export module pragma.client.rendering.shader_graph:module_input_data;
 
 import pragma.shadergraph;
 
-namespace prosper {
-	class IBuffer;
-};
-
-namespace pragma::rendering {
-	class GlobalShaderInputDataManager;
-};
-
-namespace pragma::rendering::shader_graph {
+export namespace pragma::rendering::shader_graph {
 	class DLLCLIENT InputDataModule : public pragma::rendering::ShaderGraphModule {
 	  public:
 		InputDataModule(ShaderGraph &shader);
@@ -35,5 +30,3 @@ namespace pragma::rendering::shader_graph {
 		std::vector<const pragma::shadergraph::GraphNode *> m_imageTextureNodes;
 	};
 };
-
-#endif

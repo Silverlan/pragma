@@ -1,9 +1,10 @@
 // SPDX-FileCopyrightText: (c) 2024 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
-#include "pragma/rendering/shader_graph/modules/input_data.hpp"
 #include "pragma/rendering/shader_graph/nodes/image_texture.hpp"
 #include "pragma/rendering/render_processor.hpp"
 #include "pragma/rendering/shader_material/shader_material.hpp"
@@ -16,6 +17,10 @@
 #include <buffers/prosper_buffer.hpp>
 #include <buffers/prosper_buffer_create_info.hpp>
 #include <prosper_command_buffer.hpp>
+
+module pragma.client.rendering.shader_graph;
+
+import :module_input_data;
 
 import pragma.client.client_state;
 import pragma.client.rendering.shaders;

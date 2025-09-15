@@ -1,15 +1,16 @@
 // SPDX-FileCopyrightText: (c) 2024 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __PRAGMA_SHADER_GRAPH_MODULES_IMAGE_TEXTURE_HPP__
-#define __PRAGMA_SHADER_GRAPH_MODULES_IMAGE_TEXTURE_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/rendering/shader_graph/module.hpp"
 
+export module pragma.client.rendering.shader_graph:module_image_texture;
+
 import pragma.shadergraph;
 
-namespace pragma::rendering::shader_graph {
+export namespace pragma::rendering::shader_graph {
 	class DLLCLIENT ImageTextureModule : public pragma::rendering::ShaderGraphModule {
 	  public:
 		enum class PBRBinding : uint32_t {
@@ -28,5 +29,3 @@ namespace pragma::rendering::shader_graph {
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_dsg;
 	};
 };
-
-#endif

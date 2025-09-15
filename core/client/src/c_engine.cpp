@@ -72,6 +72,7 @@ import pragma.client.entities.components;
 import pragma.client.gui;
 import pragma.client.model;
 import pragma.client.networking;
+import pragma.client.rendering.shader_graph;
 import pragma.client.rendering.shaders;
 import pragma.gui;
 import pragma.shadergraph;
@@ -115,7 +116,6 @@ static const auto SEPARATE_JOYSTICK_AXES = true;
 #include "pragma/rendering/shader_graph/nodes/input_parameter.hpp"
 #include "pragma/rendering/shader_graph/modules/pbr.hpp"
 #include "pragma/rendering/shader_graph/modules/toon.hpp"
-#include "pragma/rendering/shader_graph/modules/image_texture.hpp"
 #include "pragma/rendering/shader_graph/modules/input_data.hpp"
 
 CEngine::CEngine(int argc, char *argv[])

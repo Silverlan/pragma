@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: (c) 2024 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/rendering/shader_graph/modules/image_texture.hpp"
 #include "pragma/rendering/shader_graph/nodes/image_texture.hpp"
 #include "pragma/rendering/render_processor.hpp"
 #include "pragma/c_engine.h"
@@ -11,6 +12,10 @@
 #include <texturemanager/texture_manager2.hpp>
 #include <texturemanager/texture.h>
 #include <prosper_command_buffer.hpp>
+
+module pragma.client.rendering.shader_graph;
+
+import :module_image_texture;
 
 import pragma.shadergraph;
 

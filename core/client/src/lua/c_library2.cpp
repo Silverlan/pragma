@@ -2,12 +2,13 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/lua/libraries/c_lgui.h"
 #include "pragma/lua/classes/c_ldef_wgui.h"
 #include "pragma/lua/libraries/lsound.h"
 #include "pragma/input/input_binding_layer.hpp"
 #include "pragma/lua/libraries/lasset.hpp"
 #include "pragma/asset/util_asset.hpp"
+#include "pragma/input/input_binding_layer_lua.hpp"
+#include "pragma/c_engine.h"
 #include <pragma/lua/policies/core_policies.hpp>
 #include <alsound_effect.hpp>
 #include <luabind/copy_policy.hpp>

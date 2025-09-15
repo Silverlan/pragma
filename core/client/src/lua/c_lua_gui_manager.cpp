@@ -3,7 +3,6 @@
 
 #include "stdafx_client.h"
 #include "pragma/lua/c_lua_gui_manager.h"
-#include "pragma/lua/libraries/c_lgui.h"
 
 void LuaGUIManager::RegisterGUIElement(std::string className, luabind::object &o)
 {

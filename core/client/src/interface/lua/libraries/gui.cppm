@@ -1,19 +1,18 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef _C_LGUI_H__
-#define _C_LGUI_H__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/game/c_game.h"
 #include <wgui/wibase.h>
+#include "prosper_command_buffer.hpp"
 #include <image/prosper_image.hpp>
 #include <pragma/lua/ldefinitions.h>
 
-namespace prosper {
-	class ICommandBuffer;
-};
-namespace Lua {
+export module pragma.client.scripting.lua.libraries.gui;
+
+export namespace Lua {
 	namespace gui {
 		struct DrawToTextureInfo {
 			bool enableMsaa = false;
@@ -84,5 +83,3 @@ namespace Lua {
 		DLLCLIENT float LastThink(lua_State *l);
 	};
 };
-
-#endif

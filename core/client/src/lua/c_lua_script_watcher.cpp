@@ -3,7 +3,9 @@
 
 #include "stdafx_client.h"
 #include "pragma/lua/c_lua_script_watcher.hpp"
-#include "pragma/lua/libraries/c_lgui.h"
+
+import pragma.client.scripting.lua;
+
 void CLuaDirectoryWatcherManager::OnLuaFileChanged(const std::string &path)
 {
 	auto filePath = util::FilePath(path);

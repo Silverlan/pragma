@@ -5,7 +5,6 @@
 #include "pragma/game/c_game.h"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
-#include "pragma/lua/libraries/c_lgui.h"
 #include "pragma/lua/classes/c_lshader.h"
 #include "pragma/lua/libraries/lasset.hpp"
 #include "pragma/entities/environment/c_env_camera.h"

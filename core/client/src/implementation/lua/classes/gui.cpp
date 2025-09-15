@@ -7,13 +7,13 @@ module;
 #include <wgui/wibase.h>
 #include <wgui/wihandle.h>
 #include "luasystem.h"
+#include "pragma/game/c_game.h"
 #include <wgui/types/wirect.h>
 #include <wgui/types/wiroot.h>
 #include "pragma/lua/classes/c_ldef_wgui.h"
 #include "pragma/lua/libraries/c_lua_vulkan.h"
 #include "pragma/lua/policies/gui_element_policy.hpp"
 #include "pragma/lua/converters/shader_converter_t.hpp"
-#include "pragma/lua/libraries/c_lgui.h"
 #include <pragma/lua/classes/ldef_vector.h>
 #include <pragma/lua/classes/lproperty.hpp>
 #include <pragma/lua/policies/default_parameter_policy.hpp>
@@ -40,6 +40,7 @@ module;
 
 module pragma.client.scripting.lua.classes.gui;
 
+import pragma.client.scripting.lua.libraries.gui;
 import pragma.client.scripting.lua.libraries.gui_callbacks;
 
 import pragma.client.gui;

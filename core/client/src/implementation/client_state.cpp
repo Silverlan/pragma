@@ -15,7 +15,6 @@ module;
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
 #include "luasystem.h"
-#include "pragma/lua/libraries/c_lgui.h"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/console/c_cvar.h"
 #include <pragma/asset/util_asset.hpp>

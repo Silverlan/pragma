@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/lua/libraries/c_lgui.h"
 #include <wgui/wgui.h>
 #include <wgui/wibase.h>
 #include <wgui/types/wiroot.h>
@@ -17,6 +18,8 @@
 #include <scripting/lua/lua.hpp>
 #include <prosper_window.hpp>
 #include <prosper_render_pass.hpp>
+
+module pragma.client.scripting.lua.libraries.gui;
 
 import pragma.client.client_state;
 import pragma.client.gui;

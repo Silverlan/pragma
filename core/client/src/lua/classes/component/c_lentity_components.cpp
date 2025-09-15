@@ -437,8 +437,6 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defCScene.def("GetActiveCamera", static_cast<pragma::ComponentHandle<pragma::CCameraComponent> &(pragma::CSceneComponent::*)()>(&pragma::CSceneComponent::GetActiveCamera));
 	defCScene.def("SetActiveCamera", static_cast<void (pragma::CSceneComponent::*)(pragma::CCameraComponent &)>(&pragma::CSceneComponent::SetActiveCamera));
 	defCScene.def("SetActiveCamera", static_cast<void (pragma::CSceneComponent::*)()>(&pragma::CSceneComponent::SetActiveCamera));
-	defCScene.def("SetOcclusionCullingMethod",
-	  static_cast<void (*)(lua_State *, pragma::CSceneComponent &, uint32_t)>([](lua_State *l, pragma::CSceneComponent &scene, uint32_t method) { scene.GetSceneRenderDesc().SetOcclusionCullingMethod(static_cast<SceneRenderDesc::OcclusionCullingMethod>(method)); }));
 	defCScene.def("SetExclusionRenderMask", &pragma::CSceneComponent::SetExclusionRenderMask);
 	defCScene.def("GetExclusionRenderMask", &pragma::CSceneComponent::GetExclusionRenderMask);
 	defCScene.def("SetInclusionRenderMask", &pragma::CSceneComponent::SetInclusionRenderMask);

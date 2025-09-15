@@ -1226,7 +1226,6 @@ void CGame::InitializeWorldData(pragma::asset::WorldData &worldData)
 		auto *scene = GetScene<pragma::CSceneComponent>();
 		auto *renderer = scene ? scene->GetRenderer() : nullptr;
 		if(renderer != nullptr) {
-			scene->GetSceneRenderDesc().ReloadOcclusionCullingHandler(); // Required if BSP occlusion culling is specified
 			if(lightmapAtlas != nullptr) {
 				auto *entWorld = c_game->GetWorld();
 				auto lightMapC = entWorld ? entWorld->GetEntity().GetComponent<pragma::CLightMapComponent>() : pragma::ComponentHandle<pragma::CLightMapComponent> {};

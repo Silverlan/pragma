@@ -545,7 +545,7 @@ CHCNode *CHC::GetNode(unsigned int idx)
 	return m_nodes.at(idx).get();
 }
 
-std::vector<pragma::OcclusionMeshInfo> &CHC::PerformCulling()
+std::vector<CHCMeshInfo> &CHC::PerformCulling()
 {
 	if(m_octree.expired() == true)
 		return m_renderMeshes;

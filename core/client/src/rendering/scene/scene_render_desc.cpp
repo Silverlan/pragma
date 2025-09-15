@@ -7,11 +7,6 @@
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/baseworld.h"
-#include "pragma/rendering/occlusion_culling/occlusion_culling_handler_brute_force.hpp"
-#include "pragma/rendering/occlusion_culling/occlusion_culling_handler_bsp.hpp"
-#include "pragma/rendering/occlusion_culling/occlusion_culling_handler_chc.hpp"
-#include "pragma/rendering/occlusion_culling/occlusion_culling_handler_inert.hpp"
-#include "pragma/rendering/occlusion_culling/occlusion_culling_handler_octtree.hpp"
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/rendering/render_processor.hpp"
@@ -43,50 +38,8 @@ SceneRenderDesc::SceneRenderDesc(pragma::CSceneComponent &scene) : m_scene {scen
 		prefix += name + '_';
 	for(uint32_t i = 0; auto &renderQueue : m_renderQueues)
 		renderQueue = pragma::rendering::RenderQueue::Create(prefix + std::string {magic_enum::enum_name(static_cast<RenderQueueId>(i++))});
-	ReloadOcclusionCullingHandler();
 }
-SceneRenderDesc::~SceneRenderDesc() { m_occlusionCullingHandler = nullptr; }
-
-const pragma::OcclusionCullingHandler &SceneRenderDesc::GetOcclusionCullingHandler() const { return const_cast<SceneRenderDesc *>(this)->GetOcclusionCullingHandler(); }
-pragma::OcclusionCullingHandler &SceneRenderDesc::GetOcclusionCullingHandler() { return *m_occlusionCullingHandler; }
-void SceneRenderDesc::SetOcclusionCullingHandler(const std::shared_ptr<pragma::OcclusionCullingHandler> &handler) { m_occlusionCullingHandler = handler; }
-void SceneRenderDesc::SetOcclusionCullingMethod(OcclusionCullingMethod method)
-{
-	switch(method) {
-	case OcclusionCullingMethod::BruteForce: /* Brute-force */
-		m_occlusionCullingHandler = std::make_shared<pragma::OcclusionCullingHandlerBruteForce>();
-		break;
-	case OcclusionCullingMethod::CHCPP: /* CHC++ */
-		m_occlusionCullingHandler = std::make_shared<pragma::OcclusionCullingHandlerCHC>();
-		break;
-	case OcclusionCullingMethod::BSP: /* BSP */
-		{
-			auto *world = c_game->GetWorld();
-			if(world) {
-				auto &entWorld = world->GetEntity();
-				auto pWorldComponent = entWorld.GetComponent<pragma::CWorldComponent>();
-				auto bspTree = pWorldComponent.valid() ? pWorldComponent->GetBSPTree() : nullptr;
-				if(bspTree != nullptr && bspTree->GetNodes().size() > 1u) {
-					m_occlusionCullingHandler = std::make_shared<pragma::OcclusionCullingHandlerBSP>(bspTree);
-					break;
-				}
-			}
-		}
-	case OcclusionCullingMethod::Octree: /* Octtree */
-		m_occlusionCullingHandler = std::make_shared<pragma::OcclusionCullingHandlerOctTree>();
-		break;
-	case OcclusionCullingMethod::Inert: /* Off */
-	default:
-		m_occlusionCullingHandler = std::make_shared<pragma::OcclusionCullingHandlerInert>();
-		break;
-	}
-	m_occlusionCullingHandler->Initialize();
-}
-void SceneRenderDesc::ReloadOcclusionCullingHandler()
-{
-	//auto occlusionCullingMode = static_cast<OcclusionCullingMethod>(c_game->GetConVarInt("cl_render_occlusion_culling"));
-	//SetOcclusionCullingMethod(occlusionCullingMode);
-}
+SceneRenderDesc::~SceneRenderDesc() {}
 
 static auto cvDrawGlow = GetClientConVar("render_draw_glow");
 static auto cvDrawTranslucent = GetClientConVar("render_draw_translucent");

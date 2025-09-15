@@ -6,12 +6,12 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/model/modelmesh.h"
 #include "pragma/entities/c_baseentity.h"
+#include "pragma/rendering/occlusion_culling/c_occlusion_octree.hpp"
+#include "pragma/model/c_modelmesh.h"
 #include "pragma/entities/environment/c_env_camera.h"
 #include <pragma/types.hpp>
 #include <sharedutils/def_handle.h>
 #include <sharedutils/functioncallback.h>
-#include "pragma/rendering/occlusion_culling/c_occlusion_octree.hpp"
-#include "pragma/rendering/occlusion_culling/occlusion_culling_handler.hpp"
 #include <wgui/wibase.h>
 #include <wgui/wihandle.h>
 #include <queue>
@@ -25,6 +25,13 @@ export {
 	class CHCNode;
 	DECLARE_BASE_HANDLE(DLLCLIENT, CHCNode, CHCNode);
 };
+
+struct DLLCLIENT CHCMeshInfo {
+	CHCMeshInfo(CBaseEntity &ent, CModelMesh &mesh);
+	CModelMesh *mesh;
+	EntityHandle hEntity;
+};
+
 #pragma warning(push)
 #pragma warning(disable : 4251)
 export class DLLCLIENT CHCNode {
@@ -103,7 +110,7 @@ export class DLLCLIENT CHC {
 	std::queue<CHCNodeHandle> m_visQueue;
 	std::queue<CHCNodeHandle> m_invisQueue;
 	std::vector<umath::Plane> m_frustumPlanes;
-	std::vector<pragma::OcclusionMeshInfo> m_renderMeshes;
+	std::vector<CHCMeshInfo> m_renderMeshes;
 	std::vector<std::shared_ptr<CHCNode>> m_nodes;
 	CallbackHandle m_cbOnNodeCreated;
 	CallbackHandle m_cbOnNodeDestroyed;
@@ -133,6 +140,6 @@ export class DLLCLIENT CHC {
 	void SetDrawDebugTexture(bool b);
 	bool GetDrawDebugTexture();
 #endif
-	std::vector<pragma::OcclusionMeshInfo> &PerformCulling();
+	std::vector<CHCMeshInfo> &PerformCulling();
 };
 #pragma warning(pop)

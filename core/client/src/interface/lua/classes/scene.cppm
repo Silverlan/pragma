@@ -32,6 +32,7 @@ module;
 #include <prosper_descriptor_set_group.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <sharedutils/util_shaderinfo.hpp>
+#include "pragma/rendering/occlusion_culling/c_occlusion_octree.hpp"
 
 export module pragma.client.scripting.lua.bindings.scene;
 

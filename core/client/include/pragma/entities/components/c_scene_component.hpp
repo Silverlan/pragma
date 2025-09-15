@@ -22,7 +22,6 @@ namespace pragma {
 	class CRenderComponent;
 	class EntityComponentManager;
 	class CCameraComponent;
-	class OcclusionCullingHandler;
 	class CParticleSystemComponent;
 	class CRasterizationRendererComponent;
 	class CRendererComponent;
@@ -78,11 +77,6 @@ class DLLCLIENT SceneRenderDesc {
 
 	SceneRenderDesc(pragma::CSceneComponent &scene);
 	~SceneRenderDesc();
-	const pragma::OcclusionCullingHandler &GetOcclusionCullingHandler() const;
-	pragma::OcclusionCullingHandler &GetOcclusionCullingHandler();
-	void SetOcclusionCullingHandler(const std::shared_ptr<pragma::OcclusionCullingHandler> &handler);
-	void SetOcclusionCullingMethod(OcclusionCullingMethod method);
-	void ReloadOcclusionCullingHandler();
 
 	void BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo, const std::function<void()> &fBuildAdditionalQueues);
 	void BuildRenderQueueInstanceLists(pragma::rendering::RenderQueue &renderQueue);
@@ -100,9 +94,6 @@ class DLLCLIENT SceneRenderDesc {
 	  const std::function<bool(const Vector3 &, const Vector3 &)> &fShouldCull, pragma::GameShaderSpecializationConstantFlag baseSpecializationFlags = static_cast<pragma::GameShaderSpecializationConstantFlag>(0));
 	void CollectRenderMeshesFromOctree(pragma::CRasterizationRendererComponent *optRasterizationRenderer, RenderFlags renderFlags, bool enableClipping, const OcclusionOctree<CBaseEntity *> &tree, const pragma::CSceneComponent &scene, const pragma::CCameraComponent &cam, const Mat4 &vp,
 	  pragma::rendering::RenderMask renderMask, const std::vector<umath::Plane> &frustumPlanes, const std::vector<util::BSPTree *> *bspTrees = nullptr, const std::vector<util::BSPTree::Node *> *bspLeafNodes = nullptr);
-
-	// TODO: Remove these, they're obsolete
-	std::shared_ptr<pragma::OcclusionCullingHandler> m_occlusionCullingHandler = nullptr;
 
 	std::vector<WorldMeshVisibility> m_worldMeshVisibility;
 	std::array<std::shared_ptr<pragma::rendering::RenderQueue>, umath::to_integral(RenderQueueId::Count)> m_renderQueues;

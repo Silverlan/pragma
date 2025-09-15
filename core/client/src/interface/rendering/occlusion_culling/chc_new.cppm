@@ -4,7 +4,7 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/rendering/occlusion_culling/occlusion_culling_handler.hpp"
+#include "pragma/model/c_modelmesh.h"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree.hpp"
 #include <sharedutils/util_weak_handle.hpp>
@@ -54,7 +54,6 @@ export namespace pragma {
 		void SetDrawDebugTexture(bool b);
 		bool GetDrawDebugTexture();
 #endif
-		std::vector<pragma::OcclusionMeshInfo> &PerformCulling();
 	  protected:
 		CHCNode *GetNode(uint32_t idx);
 	  private:

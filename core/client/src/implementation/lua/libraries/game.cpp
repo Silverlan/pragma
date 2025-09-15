@@ -33,7 +33,6 @@ module;
 #include <pragma/model/animation/bone.hpp>
 
 #include <pragma/physics/collisionmesh.h>
-#include "pragma/rendering/occlusion_culling/occlusion_culling_handler_bsp.hpp"
 
 // #define ENABLE_DEPRECATED_PHYSICS
 

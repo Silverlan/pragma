@@ -289,12 +289,6 @@ void Lua::gui::register_element(const std::string &className, const Lua::classOb
 
 ::WIBase *Lua::gui::get_focused_element(lua_State *l, prosper::Window &window) { return WGUI::GetInstance().GetFocusedElement(&window); }
 
-bool Lua::gui::load_skin(const std::string &skinName)
-{
-	auto luaPath = Lua::find_script_file("gui/skins/" + skinName);
-	return luaPath && c_game->ExecuteLuaFile(*luaPath, client->GetGUILuaState());
-}
-
 static bool register_skin(lua_State *l, const std::string &skin, const luabind::tableT<void> &vars, const luabind::tableT<void> &skinData, const std::string *baseName)
 {
 	if(l != client->GetGUILuaState()) {

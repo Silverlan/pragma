@@ -3,7 +3,10 @@
 
 module;
 
+#include <pragma/c_engine.h>
+#include "pragma/game/c_game.h"
 #include "pragma/lua/converters/gui_element_converter.hpp"
+#include "pragma/lua/util.hpp"
 
 export module pragma.client.gui;
 export import :checkbox;
@@ -50,3 +53,8 @@ export import :textured_cubemap;
 export import :table;
 export import :transformable;
 export import :tree_list;
+
+export {
+    bool load_skin(const std::string &skinName);
+};
+

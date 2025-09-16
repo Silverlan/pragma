@@ -4,7 +4,6 @@
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
 #include "pragma/entities/environment/c_env_camera.h"
-#include "pragma/lua/c_lua_script_watcher.hpp"
 #include "pragma/input/input_binding_layer.hpp"
 #include "pragma/c_engine.h"
 #include <wgui/wgui.h>

@@ -30,3 +30,5 @@ export import pragma.client.scripting.lua.libraries.import_lib;
 export import pragma.client.scripting.lua.libraries.locale;
 export import pragma.client.scripting.lua.libraries.sound;
 export import pragma.client.scripting.lua.libraries.util;
+
+export import pragma.client.scripting.lua.script_watcher;

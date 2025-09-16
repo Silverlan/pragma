@@ -1,10 +1,13 @@
 // SPDX-FileCopyrightText: (c) 2025 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "stdafx_client.h"
-#include "pragma/lua/c_lua_script_watcher.hpp"
+module;
 
-import pragma.client.scripting.lua;
+#include "stdafx_client.h"
+
+module pragma.client.scripting.lua.script_watcher;
+
+import pragma.client.gui;
 
 void CLuaDirectoryWatcherManager::OnLuaFileChanged(const std::string &path)
 {
@@ -18,7 +21,7 @@ void CLuaDirectoryWatcherManager::OnLuaFileChanged(const std::string &path)
 			if(it != end) {
 				std::string skinName {*it};
 				ufile::remove_extension_from_filename(skinName, std::array<std::string, 1> {"lua"});
-				Lua::gui::load_skin(skinName);
+				load_skin(skinName);
 			}
 		}
 	}

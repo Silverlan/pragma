@@ -26,6 +26,7 @@ module pragma.client.entities.components.env_sky_camera;
 import pragma.client.client_state;
 import pragma.client.entities.components.game_occlusion_culler;
 import pragma.client.entities.components.rasterization_renderer;
+import pragma.client.entities.components.render;
 import pragma.client.entities.components.toggle;
 import pragma.client.entities.components.transform;
 import pragma.client.entities.components.world;
@@ -121,7 +122,7 @@ void CSkyCameraComponent::BuildRenderQueues(const util::DrawSceneInfo &drawScene
 {
 	if(drawSceneInfo.scene.expired())
 		return;
-	auto *renderer = drawSceneInfo.scene->GetRenderer();
+	auto *renderer = drawSceneInfo.scene->GetRenderer<pragma::CRendererComponent>();
 	auto hRasterizer = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : pragma::ComponentHandle<pragma::CRasterizationRendererComponent> {};
 	if(hRasterizer.expired())
 		return;
@@ -184,7 +185,7 @@ void CSkyCameraComponent::UpdateScenes()
 		sceneData->renderQueue = pragma::rendering::RenderQueue::Create("sky_camera");
 		sceneData->renderQueueTranslucent = pragma::rendering::RenderQueue::Create("sky_camera_translucent");
 
-		auto *renderer = scene->GetRenderer();
+		auto *renderer = scene->GetRenderer<pragma::CRendererComponent>();
 		if(!renderer)
 			continue;
 		auto rasterizationC = renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>();

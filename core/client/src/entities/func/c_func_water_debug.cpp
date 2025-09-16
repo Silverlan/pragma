@@ -53,7 +53,7 @@ void Console::commands::debug_water(NetworkState *state, pragma::BasePlayerCompo
 				if(pWaterComponent.valid() == false || pWaterComponent->IsWaterSceneValid() == false)
 					return WIHandle {};
 				auto &waterScene = pWaterComponent->GetWaterScene();
-				auto *renderer = waterScene.sceneReflection.valid() ? dynamic_cast<const pragma::CRasterizationRendererComponent *>(waterScene.sceneReflection->GetRenderer()) : nullptr;
+				auto *renderer = waterScene.sceneReflection.valid() ? dynamic_cast<const pragma::CRasterizationRendererComponent *>(waterScene.sceneReflection->GetRenderer<pragma::CRendererComponent>()) : nullptr;
 				if(renderer == nullptr)
 					return WIHandle {};
 				// Debug GUI

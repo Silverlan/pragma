@@ -93,7 +93,7 @@ void Console::commands::debug_ssao(NetworkState *state, pragma::BasePlayerCompon
 	pEl->SetName(name);
 
 	auto *scene = c_game->GetScene<pragma::CSceneComponent>();
-	auto *renderer = scene ? scene->GetRenderer() : nullptr;
+	auto *renderer = scene ? scene->GetRenderer<pragma::CRendererComponent>() : nullptr;
 	auto rasterizer = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : pragma::ComponentHandle<pragma::CRasterizationRendererComponent> {};
 	if(rasterizer.expired())
 		return;

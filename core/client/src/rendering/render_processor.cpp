@@ -286,7 +286,7 @@ pragma::rendering::BaseRenderProcessor::BaseRenderProcessor(const util::RenderPa
     : m_drawSceneInfo {drawSceneInfo}, m_drawOrigin {drawOrigin}, m_shaderProcessor {*drawSceneInfo.commandBuffer, umath::is_flag_set(drawSceneInfo.drawSceneInfo.flags, util::DrawSceneInfo::Flags::Reflection) ? PassType::Reflection : PassType::Generic}
 {
 	auto &scene = drawSceneInfo.drawSceneInfo.scene;
-	auto *renderer = scene->GetRenderer();
+	auto *renderer = scene->GetRenderer<pragma::CRendererComponent>();
 	auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : pragma::ComponentHandle<pragma::CRasterizationRendererComponent> {};
 	m_renderer = raster.get();
 }
@@ -378,7 +378,7 @@ bool pragma::rendering::BaseRenderProcessor::BindShader(prosper::PipelineID pipe
 
 	auto &scene = *m_drawSceneInfo.drawSceneInfo.scene;
 	auto bView = (m_camType == CameraType::View) ? true : false;
-	auto *renderer = scene.GetRenderer();
+	auto *renderer = scene.GetRenderer<pragma::CRendererComponent>();
 	auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : ComponentHandle<pragma::CRasterizationRendererComponent> {};
 	if(raster.expired()) {
 		if(VERBOSE_RENDER_OUTPUT_ENABLED)
@@ -404,7 +404,7 @@ void pragma::rendering::BaseRenderProcessor::SetCameraType(CameraType camType)
 	if(umath::is_flag_set(m_stateFlags, StateFlags::ShaderBound) == false || m_shaderScene == nullptr)
 		return;
 	auto &scene = *m_drawSceneInfo.drawSceneInfo.scene.get();
-	auto *renderer = scene.GetRenderer();
+	auto *renderer = scene.GetRenderer<pragma::CRendererComponent>();
 	if(renderer == nullptr)
 		return;
 	//m_shaderScene->BindSceneCamera(scene,*static_cast<pragma::CRasterizationRendererComponent*>(renderer),camType == CameraType::View);

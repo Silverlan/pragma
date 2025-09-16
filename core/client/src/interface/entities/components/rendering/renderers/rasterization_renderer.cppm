@@ -188,8 +188,10 @@ export namespace pragma {
 		uint32_t GetWidth() const;
 		uint32_t GetHeight() const;
 
-		CRendererComponent *GetRendererComponent() { return m_rendererComponent; }
-		const CRendererComponent *GetRendererComponent() const { return const_cast<CRasterizationRendererComponent *>(this)->GetRendererComponent(); }
+		template<typename TCPPM>
+			TCPPM *GetRendererComponent();
+		template<typename TCPPM>
+			const TCPPM *GetRendererComponent() const;
 
 		void StartPrepassRecording(const util::DrawSceneInfo &drawSceneInfo);
 		void StartLightingPassRecording(const util::DrawSceneInfo &drawSceneInfo);
@@ -238,7 +240,7 @@ export namespace pragma {
 		std::shared_ptr<prosper::ISwapCommandBufferGroup> m_lightingCommandBufferGroup = nullptr;
 
 		StateFlags m_stateFlags;
-		CRendererComponent *m_rendererComponent = nullptr;
+		BaseEntityComponent *m_rendererComponent = nullptr;
 
 		prosper::SampleCountFlags m_sampleCount = prosper::SampleCountFlags::e1Bit;
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_descSetGroupFogOverride = nullptr;

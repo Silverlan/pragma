@@ -287,7 +287,7 @@ void CRendererPpMotionBlurComponent::ExecuteVelocityPass(const util::DrawSceneIn
 	auto *velShader = pragma::get_velocity_buffer_shader();
 	if(!velShader)
 		return;
-	auto *renderer = drawSceneInfo.scene->GetRenderer();
+	auto *renderer = drawSceneInfo.scene->GetRenderer<pragma::CRendererComponent>();
 	assert(renderer != nullptr);
 	auto motionBlurC = renderer->GetEntity().GetComponent<CRendererPpMotionBlurComponent>();
 	if(motionBlurC.expired())
@@ -313,7 +313,7 @@ void CRendererPpMotionBlurComponent::RenderPostProcessing(const util::DrawSceneI
 
 	if(!shaderMotionBlur)
 		return;
-	auto rasterC = scene.GetRenderer()->GetEntity().GetComponent<CRasterizationRendererComponent>();
+	auto rasterC = scene.GetRenderer<pragma::CRendererComponent>()->GetEntity().GetComponent<CRasterizationRendererComponent>();
 	if(rasterC.expired())
 		return;
 	auto &hdrInfo = rasterC->GetHDRInfo();

@@ -120,7 +120,7 @@ std::optional<std::string> util::screenshot(CGame &game)
 	std::shared_ptr<prosper::IBuffer> bufScreenshot = nullptr;
 	{
 		// Just use the last rendered image
-		auto *renderer = scene ? dynamic_cast<::pragma::CRendererComponent *>(scene->GetRenderer()) : nullptr;
+		auto *renderer = scene ? dynamic_cast<::pragma::CRendererComponent *>(scene->GetRenderer<pragma::CRendererComponent>()) : nullptr;
 		if(renderer == nullptr) {
 			Con::cwar << "No scene renderer found!" << Con::endl;
 			return {};

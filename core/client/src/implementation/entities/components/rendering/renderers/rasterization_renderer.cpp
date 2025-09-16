@@ -316,8 +316,8 @@ void CRasterizationRendererComponent::SetSSAOEnabled(bool b)
 	m_hdrInfo.ssaoInfo.Clear();
 	UpdateRenderSettings();*/
 }
-uint32_t CRasterizationRendererComponent::GetWidth() const { return m_rendererComponent ? m_rendererComponent->GetWidth() : 0; }
-uint32_t CRasterizationRendererComponent::GetHeight() const { return m_rendererComponent ? m_rendererComponent->GetHeight() : 0; }
+uint32_t CRasterizationRendererComponent::GetWidth() const { return m_rendererComponent ? static_cast<pragma::CRendererComponent*>(m_rendererComponent)->GetWidth() : 0; }
+uint32_t CRasterizationRendererComponent::GetHeight() const { return m_rendererComponent ? static_cast<pragma::CRendererComponent*>(m_rendererComponent)->GetHeight() : 0; }
 void CRasterizationRendererComponent::UpdateRenderSettings()
 {
 	auto &tileInfo = m_rendererData.tileInfo;

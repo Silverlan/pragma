@@ -695,7 +695,7 @@ void CGame::InitializeGame() // Called by NET_cl_resourcecomplete
 	if(entRenderer) {
 		auto rasterization = entRenderer->GetComponent<pragma::CRasterizationRendererComponent>();
 		if(rasterization.valid()) {
-			auto *renderer = rasterization->GetRendererComponent();
+			auto *renderer = rasterization->GetRendererComponent<pragma::CRendererComponent>();
 			if(renderer) {
 				scene->SetRenderer(renderer);
 				rasterization->SetSSAOEnabled(GetConVarBool("cl_render_ssao"));
@@ -1116,19 +1116,19 @@ std::shared_ptr<ModelSubMesh> CGame::CreateModelSubMesh() const { return std::ma
 
 Float CGame::GetHDRExposure() const
 {
-	auto *renderer = GetScene<pragma::CSceneComponent>()->GetRenderer();
+	auto *renderer = GetScene<pragma::CSceneComponent>()->GetRenderer<pragma::CRendererComponent>();
 	auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : pragma::ComponentHandle<pragma::CRasterizationRendererComponent> {};
 	return raster.valid() ? raster->GetHDRExposure() : 0.f;
 }
 Float CGame::GetMaxHDRExposure() const
 {
-	auto *renderer = GetScene<pragma::CSceneComponent>()->GetRenderer();
+	auto *renderer = GetScene<pragma::CSceneComponent>()->GetRenderer<pragma::CRendererComponent>();
 	auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : pragma::ComponentHandle<pragma::CRasterizationRendererComponent> {};
 	return raster.valid() ? raster->GetMaxHDRExposure() : 0.f;
 }
 void CGame::SetMaxHDRExposure(Float exposure)
 {
-	auto *renderer = GetScene<pragma::CSceneComponent>()->GetRenderer();
+	auto *renderer = GetScene<pragma::CSceneComponent>()->GetRenderer<pragma::CRendererComponent>();
 	auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : pragma::ComponentHandle<pragma::CRasterizationRendererComponent> {};
 	if(raster.expired())
 		return;
@@ -1228,7 +1228,7 @@ void CGame::InitializeWorldData(pragma::asset::WorldData &worldData)
 		auto lightmapAtlas = tex.GetVkTexture();
 		//auto lightmapAtlas = pragma::CLightMapComponent::CreateLightmapTexture(img->GetWidth(),img->GetHeight(),static_cast<uint16_t*>(img->GetData()));
 		auto *scene = GetScene<pragma::CSceneComponent>();
-		auto *renderer = scene ? scene->GetRenderer() : nullptr;
+		auto *renderer = scene ? scene->GetRenderer<pragma::CRendererComponent>() : nullptr;
 		if(renderer != nullptr) {
 			if(lightmapAtlas != nullptr) {
 				auto *entWorld = c_game->GetWorld();

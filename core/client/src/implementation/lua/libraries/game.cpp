@@ -985,7 +985,7 @@ int Lua::game::Client::queue_scene_for_rendering(lua_State *l)
 	c_game->QueueForRendering(drawSceneInfo);
 #if 0
 	auto scene = drawSceneInfo.scene.valid() ? drawSceneInfo.scene.get() : c_game->GetRenderScene<pragma::CSceneComponent>();
-	auto *renderer = scene ? scene->GetRenderer() : nullptr;
+	auto *renderer = scene ? scene->GetRenderer<pragma::CRendererComponent>() : nullptr;
 	if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
 		return 0;
 	auto cmdBuffer = drawSceneInfo.commandBuffer;

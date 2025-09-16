@@ -229,7 +229,7 @@ void pragma::CRasterizationRendererComponent::Render(const util::DrawSceneInfo &
 	c_game->StartProfilingStage("PostProcessing");
 	c_game->StartGPUProfilingStage("PostProcessing");
 
-	auto *renderer = scene.GetRenderer();
+	auto *renderer = scene.GetRenderer<pragma::CRendererComponent>();
 	auto &postProcessing = renderer->GetPostProcessingEffects();
 	auto applyToneMapped = !umath::is_flag_set(drawSceneInfo.renderFlags, RenderFlags::HDR);
 	for(auto &pp : postProcessing) {

@@ -39,7 +39,7 @@ static void cmd_forwardplus_tile_size(NetworkState *, const ConVar &, int32_t, i
 		auto &prepass = c.GetPrepass();
 		c_engine->GetRenderContext().WaitIdle();
 		fp.Initialize(c_engine->GetRenderContext(), c.GetWidth(), c.GetHeight(), *prepass.textureDepth);
-		auto cRenderer = c.GetRendererComponent();
+		auto cRenderer = c.GetRendererComponent<pragma::CRendererComponent>();
 		if(cRenderer)
 			cRenderer->UpdateRenderSettings();
 	}

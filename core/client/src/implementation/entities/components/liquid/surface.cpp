@@ -141,10 +141,10 @@ void CLiquidSurfaceComponent::OnEntitySpawn()
 					return util::EventReply::Unhandled;
 				});
 			}
-			/*auto rasterC = c_game->GetRenderScene()->GetRenderer()->GetEntity().GetComponent<CRasterizationRendererComponent>();
+			/*auto rasterC = c_game->GetRenderScene()->GetRenderer<pragma::CRendererComponent>()->GetEntity().GetComponent<CRasterizationRendererComponent>();
 			rasterC->AddEventCallback(CRasterizationRendererComponent::EVENT_MT_BEGIN_RECORD_WATER,
 				[](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-					//auto *tex = c_game->GetRenderScene()->GetRenderer()->GetHDRPresentationTexture();
+					//auto *tex = c_game->GetRenderScene()->GetRenderer<pragma::CRendererComponent>()->GetHDRPresentationTexture();
 					//	m_waterScene->texScene
 				return util::EventReply::Unhandled;
 			});*/
@@ -302,7 +302,7 @@ void CLiquidSurfaceComponent::InitializeWaterScene(const Vector3 &refPos, const 
 	auto *scene = c_game->GetScene<pragma::CSceneComponent>();
 	if(scene == nullptr)
 		return;
-	auto renderer = dynamic_cast<pragma::CRendererComponent *>(scene->GetRenderer());
+	auto renderer = dynamic_cast<pragma::CRendererComponent *>(scene->GetRenderer<pragma::CRendererComponent>());
 	if(!whShader || renderer == nullptr)
 		return;
 	auto rasterC = renderer->GetEntity().GetComponent<CRasterizationRendererComponent>();
@@ -449,7 +449,7 @@ void CLiquidSurfaceComponent::RenderPostProcessingOverlay(const util::DrawSceneI
 	if(c_game->GetRenderScene<pragma::CSceneComponent>() != c_game->GetScene<pragma::CSceneComponent>())
 		return;
 	auto *scene = c_game->GetRenderScene<pragma::CSceneComponent>();
-	auto *renderer = scene->GetRenderer();
+	auto *renderer = scene->GetRenderer<pragma::CRendererComponent>();
 	auto rasterC = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : pragma::ComponentHandle<pragma::CRasterizationRendererComponent> {};
 	auto camScene = scene ? scene->GetActiveCamera() : pragma::ComponentHandle<pragma::CCameraComponent> {};
 	if(rasterC.expired() || camScene.expired())

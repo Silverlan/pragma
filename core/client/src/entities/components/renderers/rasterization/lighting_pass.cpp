@@ -255,6 +255,14 @@ void pragma::CRasterizationRendererComponent::ExecuteLightingPass(const util::Dr
 
 	c_game->StopProfilingStage(); // ExecuteLightingPass
 }
+template<typename TCPPM>
+	TCPPM *pragma::CRasterizationRendererComponent::GetRendererComponent() { return static_cast<TCPPM*>(m_rendererComponent); }
+template pragma::CRendererComponent *pragma::CRasterizationRendererComponent::GetRendererComponent();
+
+template<typename TCPPM>
+	const TCPPM *pragma::CRasterizationRendererComponent::GetRendererComponent() const { return const_cast<CRasterizationRendererComponent *>(this)->GetRendererComponent<pragma::CRendererComponent>(); }
+template const pragma::CRendererComponent *pragma::CRasterizationRendererComponent::GetRendererComponent() const;
+
 void pragma::CRasterizationRendererComponent::StartPrepassRecording(const util::DrawSceneInfo &drawSceneInfo)
 {
 	auto &prepass = GetPrepass();
@@ -469,7 +477,7 @@ void pragma::CRasterizationRendererComponent::RecordLightingPass(const util::Dra
 						auto *test = static_cast<pragma::ShaderTest *>(shader.get());
 						if(test->BeginDraw(pcmd, {})) // && test->BindEntity(static_cast<CBaseEntity&>(*ent)))
 						{
-							test->BindSceneCamera(scene, static_cast<pragma::CRasterizationRendererComponent &>(*scene.GetRenderer()), false);
+							test->BindSceneCamera(scene, static_cast<pragma::CRasterizationRendererComponent &>(*scene.GetRenderer<pragma::CRendererComponent>()), false);
 							auto instanceBuffer = CSceneComponent::GetEntityInstanceIndexBuffer()->GetBuffer();
 							//test->Draw(static_cast<CModelSubMesh&>(*mesh),0u,*instanceBuffer);
 							test->DrawTest(*dbgBuffer, *instBuffer, vertCount);
@@ -501,7 +509,7 @@ void pragma::CRasterizationRendererComponent::RecordLightingPass(const util::Dra
 					test->BindEntity();
 					test->BindLights();
 					test->BindMaterial();
-					test->BindSceneCamera(scene,static_cast<pragma::CRasterizationRendererComponent&>(*scene.GetRenderer()),false);
+					test->BindSceneCamera(scene,static_cast<pragma::CRasterizationRendererComponent&>(*scene.GetRenderer<pragma::CRendererComponent>()),false);
 					auto instanceBuffer = CSceneComponent::GetEntityInstanceIndexBuffer()->GetBuffer();
 					test->Draw(static_cast<CModelSubMesh&>(*subMesh),0u,*instanceBuffer);
 					//test->DrawTest(*dbgBuffer,vertCount);

@@ -33,7 +33,7 @@ void WIDebugSSAO::DoUpdate()
 	if(c_game == nullptr)
 		return;
 	auto *scene = c_game->GetScene<pragma::CSceneComponent>();
-	auto *renderer = scene ? dynamic_cast<pragma::CRasterizationRendererComponent *>(scene->GetRenderer()) : nullptr;
+	auto *renderer = scene ? dynamic_cast<pragma::CRasterizationRendererComponent *>(scene->GetRenderer<pragma::CRendererComponent>()) : nullptr;
 	if(renderer == nullptr)
 		return;
 	auto &ssaoInfo = renderer->GetSSAOInfo();

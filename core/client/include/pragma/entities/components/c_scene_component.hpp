@@ -24,7 +24,6 @@ namespace pragma {
 	class CCameraComponent;
 	class CParticleSystemComponent;
 	class CRasterizationRendererComponent;
-	class CRendererComponent;
 	class ShaderGameWorldLightingPass;
 	struct OcclusionMeshInfo;
 	using RenderMeshIndex = uint32_t;
@@ -211,9 +210,12 @@ namespace pragma {
 		template<typename TCPPM>
 			void SetLightMap(TCPPM &lightMapC);
 
-		void SetRenderer(CRendererComponent *renderer);
-		CRendererComponent *GetRenderer();
-		const CRendererComponent *GetRenderer() const;
+		template<typename TCPPM>
+			void SetRenderer(TCPPM *renderer);
+		template<typename TCPPM>
+			TCPPM *GetRenderer();
+		template<typename TCPPM>
+			const TCPPM *GetRenderer() const;
 
 		SceneDebugMode GetDebugMode() const;
 		void SetDebugMode(SceneDebugMode debugMode);
@@ -283,7 +285,7 @@ namespace pragma {
 		CallbackHandle m_cbLink {};
 
 		StateFlags m_stateFlags = StateFlags::None;
-		ComponentHandle<CRendererComponent> m_renderer = ComponentHandle<CRendererComponent> {};
+		ComponentHandle<BaseEntityComponent> m_renderer = ComponentHandle<BaseEntityComponent> {};
 		SceneRenderDesc m_sceneRenderDesc;
 
 		void UpdateCameraBuffer(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, bool bView = false);

@@ -19,6 +19,7 @@
 #include <pragma/rendering/c_sci_gpu_timer_manager.hpp>
 #include <sharedutils/scope_guard.h>
 
+import pragma.client.entities.components.render;
 import pragma.client.rendering.shaders;
 
 extern CEngine *c_engine;
@@ -52,7 +53,7 @@ void CGame::RenderScene(const util::DrawSceneInfo &drawSceneInfo)
 	CallLuaCallbacks<void, const util::DrawSceneInfo *>("PreRenderScene", &drawSceneInfo);
 
 	auto &scene = drawSceneInfo.scene;
-	auto *renderer = const_cast<pragma::CSceneComponent *>(scene.get())->GetRenderer();
+	auto *renderer = const_cast<pragma::CSceneComponent *>(scene.get())->GetRenderer<pragma::CRendererComponent>();
 	if(renderer) {
 		prosper::Texture *presentationTexture = nullptr;
 		if(umath::is_flag_set(drawSceneInfo.renderFlags, RenderFlags::HDR))

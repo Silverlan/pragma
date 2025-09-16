@@ -181,7 +181,7 @@ void CSceneComponent::Link(const CSceneComponent &other, bool linkCamera)
 	else
 		SetActiveCamera();
 
-	auto *renderer = const_cast<CSceneComponent &>(other).GetRenderer();
+	auto *renderer = const_cast<CSceneComponent &>(other).GetRenderer<pragma::CRendererComponent>();
 	SetRenderer(renderer);
 
 	// m_sceneRenderDesc.SetOcclusionCullingHandler(const_cast<pragma::OcclusionCullingHandler&>(other.m_sceneRenderDesc.GetOcclusionCullingHandler()).shared_from_this());
@@ -243,7 +243,7 @@ void CSceneComponent::InitializeRenderSettingsBuffer()
 	m_renderSettings.shaderQuality = cvShaderQuality->GetInt();
 
 	if(m_renderer.valid())
-		m_renderer->UpdateRenderSettings();
+		static_cast<pragma::CRendererComponent*>(m_renderer.get())->UpdateRenderSettings();
 
 	prosper::util::BufferCreateInfo createInfo {};
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
@@ -311,7 +311,7 @@ void CSceneComponent::UpdateCameraBuffer(std::shared_ptr<prosper::IPrimaryComman
 	m_cameraData.VP = p * v;
 
 	if(bView == false && m_renderer.valid())
-		m_renderer->UpdateCameraData(*this, m_cameraData);
+		static_cast<pragma::CRendererComponent*>(m_renderer.get())->UpdateCameraData(*this, m_cameraData);
 
 	drawCmd->RecordBufferBarrier(*bufCam, prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::GeometryShaderBit | prosper::PipelineStageFlags::ComputeShaderBit, prosper::PipelineStageFlags::TransferBit,
 	  prosper::AccessFlags::ShaderReadBit, prosper::AccessFlags::TransferWriteBit);
@@ -339,11 +339,11 @@ void CSceneComponent::UpdateBuffers(std::shared_ptr<prosper::IPrimaryCommandBuff
 	// prosper TODO: Move camPos to camera buffer, and don't update render settings buffer every frame (update when needed instead)
 
 	if(m_renderer.valid())
-		m_renderer->UpdateRendererBuffer(drawCmd);
+		static_cast<pragma::CRendererComponent*>(m_renderer.get())->UpdateRendererBuffer(drawCmd);
 }
 void CSceneComponent::RecordRenderCommandBuffers(const util::DrawSceneInfo &drawSceneInfo)
 {
-	auto *renderer = GetRenderer();
+	auto *renderer = GetRenderer<pragma::CRendererComponent>();
 	if(renderer == nullptr)
 		return;
 	renderer->RecordCommandBuffers(drawSceneInfo);
@@ -512,7 +512,7 @@ void CSceneComponent::UpdateRenderSettings()
 		flags |= FRenderSetting::Unlit;
 	m_renderSettings.flags = umath::to_integral(flags);
 	if(m_renderer.valid())
-		m_renderer->UpdateRenderSettings();
+		static_cast<pragma::CRendererComponent*>(m_renderer.get())->UpdateRenderSettings();
 }
 void CSceneComponent::ClearWorldEnvironment()
 {
@@ -561,15 +561,23 @@ void CSceneComponent::UpdateRenderData()
 	UpdateRendererLightMap();
 }
 
-void CSceneComponent::SetRenderer(CRendererComponent *renderer)
+template<typename TCPPM>
+	void CSceneComponent::SetRenderer(TCPPM *renderer)
 {
-	m_renderer = renderer ? renderer->GetHandle<CRendererComponent>() : pragma::ComponentHandle<CRendererComponent> {};
+	m_renderer = renderer ? renderer->GetHandle() : pragma::ComponentHandle<BaseEntityComponent> {};
 	UpdateRenderSettings();
 	UpdateRendererLightMap();
 	BroadcastEvent(EVENT_ON_RENDERER_CHANGED);
 }
-pragma::CRendererComponent *CSceneComponent::GetRenderer() { return m_renderer.get(); }
-const pragma::CRendererComponent *CSceneComponent::GetRenderer() const { return const_cast<CSceneComponent *>(this)->GetRenderer(); }
+template void CSceneComponent::SetRenderer(pragma::CRendererComponent *renderer);
+
+template<typename TCPPM>
+	TCPPM *CSceneComponent::GetRenderer() { return static_cast<TCPPM*>(m_renderer.get()); }
+template pragma::CRendererComponent *CSceneComponent::GetRenderer();
+
+template<typename TCPPM>
+	const TCPPM *CSceneComponent::GetRenderer() const { return const_cast<CSceneComponent *>(this)->GetRenderer<pragma::CRendererComponent>(); }
+template const pragma::CRendererComponent *CSceneComponent::GetRenderer() const;
 
 SceneDebugMode CSceneComponent::GetDebugMode() const { return m_debugMode; }
 void CSceneComponent::SetDebugMode(SceneDebugMode debugMode) { m_debugMode = debugMode; }
@@ -591,8 +599,8 @@ CSceneComponent *CSceneComponent::GetParentScene()
 
 CSceneComponent::SceneIndex CSceneComponent::GetSceneIndex() const { return m_sceneIndex; }
 
-uint32_t CSceneComponent::GetWidth() const { return m_renderer.valid() ? m_renderer->GetWidth() : 0; }
-uint32_t CSceneComponent::GetHeight() const { return m_renderer.valid() ? m_renderer->GetHeight() : 0; }
+uint32_t CSceneComponent::GetWidth() const { return m_renderer.valid() ? static_cast<const pragma::CRendererComponent*>(m_renderer.get())->GetWidth() : 0; }
+uint32_t CSceneComponent::GetHeight() const { return m_renderer.valid() ? static_cast<const pragma::CRendererComponent*>(m_renderer.get())->GetHeight() : 0; }
 
 //const Vulkan::DescriptorSet &CSceneComponent::GetBloomGlowDescriptorSet() const {return m_descSetBloomGlow;} // prosper TODO
 
@@ -600,7 +608,7 @@ void CSceneComponent::ReloadRenderTarget(uint32_t width, uint32_t height)
 {
 	umath::set_flag(m_stateFlags, StateFlags::ValidRenderer, false);
 
-	if(m_renderer.expired() || m_renderer->ReloadRenderTarget(*this, width, height) == false)
+	if(m_renderer.expired() || static_cast<pragma::CRendererComponent*>(m_renderer.get())->ReloadRenderTarget(*this, width, height) == false)
 		return;
 
 	umath::set_flag(m_stateFlags, StateFlags::ValidRenderer, true);

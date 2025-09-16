@@ -261,7 +261,7 @@ void LightShadowRenderer::BuildRenderQueues(const util::DrawSceneInfo &drawScene
 	if(m_requiresRenderQueueUpdate == false || ent.IsInScene(scene) == false || shadowC == nullptr)
 		return;
 
-	auto *renderer = drawSceneInfo.scene->GetRenderer();
+	auto *renderer = drawSceneInfo.scene->GetRenderer<pragma::CRendererComponent>();
 	auto hRasterizer = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : pragma::ComponentHandle<pragma::CRasterizationRendererComponent> {};
 	if(hRasterizer.expired())
 		return;
@@ -470,7 +470,7 @@ void LightShadowRenderer::Render(const util::DrawSceneInfo &drawSceneInfo)
 	auto *smRt = shadowC->GetDepthRenderTarget();
 	auto &tex = smRt->GetTexture();
 	auto *scene = c_game->GetScene<pragma::CSceneComponent>();
-	auto *renderer = scene ? scene->GetRenderer() : nullptr;
+	auto *renderer = scene ? scene->GetRenderer<pragma::CRendererComponent>() : nullptr;
 
 	auto &drawCmd = drawSceneInfo.commandBuffer;
 	auto &img = tex.GetImage();

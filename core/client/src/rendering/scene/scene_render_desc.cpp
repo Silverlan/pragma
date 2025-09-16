@@ -528,7 +528,7 @@ void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 		renderQueue->Clear();
 	m_worldRenderQueues.clear();
 
-	auto *renderer = drawSceneInfo.scene->GetRenderer();
+	auto *renderer = drawSceneInfo.scene->GetRenderer<pragma::CRendererComponent>();
 	auto hRasterizer = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : pragma::ComponentHandle<pragma::CRasterizationRendererComponent> {};
 	auto &hCam = m_scene.GetActiveCamera();
 	if(hCam.expired() || hRasterizer.expired()) {

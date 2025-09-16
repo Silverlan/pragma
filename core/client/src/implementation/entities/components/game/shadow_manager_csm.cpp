@@ -200,7 +200,7 @@ void ShadowRenderer::RenderCSMShadows(std::shared_ptr<prosper::IPrimaryCommandBu
 				return bRetTranslucent;
 			};
 			auto *scene = c_game->GetRenderScene<pragma::CSceneComponent>();
-			auto *renderer = scene ? scene->GetRenderer() : nullptr;
+			auto *renderer = scene ? scene->GetRenderer<pragma::CRendererComponent>() : nullptr;
 			if(renderer && renderer->IsRasterizationRenderer() && shaderCsm.RecordBeginDraw(drawCmd) == true)
 			{
 				shaderCsm.RecordBindLight(*pLightComponent);

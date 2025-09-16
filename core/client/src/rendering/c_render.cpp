@@ -296,7 +296,7 @@ void Console::commands::debug_render_depth_buffer(NetworkState *state, pragma::B
 		}
 		else
 			scene = c_game->GetScene<pragma::CSceneComponent>();
-		auto *renderer = scene ? scene->GetRenderer() : nullptr;
+		auto *renderer = scene ? scene->GetRenderer<pragma::CRendererComponent>() : nullptr;
 		auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : pragma::ComponentHandle<pragma::CRasterizationRendererComponent> {};
 		if(raster.expired())
 			return WIHandle {};
@@ -651,14 +651,14 @@ void CGame::RenderScenes(const std::vector<util::DrawSceneInfo> &drawSceneInfos)
 				static_cast<prosper::IPrimaryCommandBuffer *>(drawCmd.get())->StartRecording();
 			if(cvClearScene->GetBool() == true || drawWorld == 2 || drawSceneInfo.clearColor.has_value()) {
 				auto clearCol = drawSceneInfo.clearColor.has_value() ? drawSceneInfo.clearColor->ToVector4() : Color(cvClearSceneColor->GetString()).ToVector4();
-				auto &hdrImg = scene->GetRenderer()->GetSceneTexture()->GetImage();
+				auto &hdrImg = scene->GetRenderer<pragma::CRendererComponent>()->GetSceneTexture()->GetImage();
 				drawCmd->RecordImageBarrier(hdrImg, prosper::ImageLayout::ColorAttachmentOptimal, prosper::ImageLayout::TransferDstOptimal);
 				drawCmd->RecordClearImage(hdrImg, prosper::ImageLayout::TransferDstOptimal, {{clearCol.r, clearCol.g, clearCol.b, clearCol.a}});
 				drawCmd->RecordImageBarrier(hdrImg, prosper::ImageLayout::TransferDstOptimal, prosper::ImageLayout::ColorAttachmentOptimal);
 			}
 
 			// Update Exposure
-			auto *renderer = scene->GetRenderer();
+			auto *renderer = scene->GetRenderer<pragma::CRendererComponent>();
 			auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : pragma::ComponentHandle<pragma::CRasterizationRendererComponent> {};
 			if(raster.valid()) {
 				//c_engine->StartGPUTimer(GPUTimerEvent::UpdateExposure); // prosper TODO

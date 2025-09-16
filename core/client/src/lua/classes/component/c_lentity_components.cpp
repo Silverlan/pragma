@@ -472,8 +472,8 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defCScene.def("Link", &pragma::CSceneComponent::Link, luabind::default_parameter_policy<3, true> {});
 	defCScene.def("Link", &pragma::CSceneComponent::Link);
 	// defCScene.def("BuildRenderQueue",&pragma::CSceneComponent::BuildRenderQueue);
-	defCScene.def("GetRenderer", static_cast<pragma::CRendererComponent *(pragma::CSceneComponent::*)()>(&pragma::CSceneComponent::GetRenderer));
-	defCScene.def("SetRenderer", &pragma::CSceneComponent::SetRenderer);
+	defCScene.def("GetRenderer", static_cast<pragma::CRendererComponent *(pragma::CSceneComponent::*)()>(&pragma::CSceneComponent::GetRenderer<pragma::CRendererComponent>));
+	defCScene.def("SetRenderer", &pragma::CSceneComponent::SetRenderer<pragma::CRendererComponent>);
 	defCScene.def("GetSceneIndex", static_cast<pragma::CSceneComponent::SceneIndex (pragma::CSceneComponent::*)() const>(&pragma::CSceneComponent::GetSceneIndex));
 	defCScene.def("SetParticleSystemColorFactor", &pragma::CSceneComponent::SetParticleSystemColorFactor);
 	defCScene.def("GetParticleSystemColorFactor", &pragma::CSceneComponent::GetParticleSystemColorFactor, luabind::copy_policy<0> {});

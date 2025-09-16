@@ -526,11 +526,17 @@ void CGame::OnEntityCreated(BaseEntity *ent)
 	Game::OnEntityCreated(ent);
 	if(typeid(*ent) == typeid(CGameEntity)) {
 		m_entGame = ent->GetHandle();
-		m_gameComponent = ent->GetComponent<pragma::CGameComponent>();
+		m_gameComponent = ent->GetComponent<pragma::CGameComponent>()->GetHandle();
 	}
 }
 
-pragma::CGameComponent *CGame::GetGameComponent() { return m_gameComponent.get(); }
+template<typename TCPPM>
+	const TCPPM *CGame::GetGameComponent() const { return const_cast<CGame *>(this)->GetGameComponent<TCPPM>(); }
+template const pragma::CGameComponent *CGame::GetGameComponent() const;
+
+template<typename TCPPM>
+	TCPPM *CGame::GetGameComponent() { return static_cast<TCPPM*>(m_gameComponent.get()); }
+template pragma::CGameComponent *CGame::GetGameComponent();
 
 template<typename TCPPM>
 TCPPM *CGame::GetViewModel()
@@ -1026,11 +1032,11 @@ void CGame::Think()
 	double tDelta = m_stateNetwork->DeltaTime();
 	m_tServer += DeltaTime();
 	if(m_gameComponent.valid())
-		m_gameComponent->UpdateFrame(cam);
+		static_cast<pragma::CGameComponent*>(m_gameComponent.get())->UpdateFrame(cam);
 	CallCallbacks<void>("Think");
 	CallLuaCallbacks("Think");
 	if(m_gameComponent.valid())
-		m_gameComponent->UpdateCamera(cam);
+		static_cast<pragma::CGameComponent*>(m_gameComponent.get())->UpdateCamera(cam);
 
 	if(scene)
 		SetRenderScene(*scene);

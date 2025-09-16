@@ -67,7 +67,6 @@ namespace pragma {
 };
 
 namespace pragma {
-	class CGameComponent;
 	namespace debug {
 		class GPUProfilingStage;
 	};
@@ -232,8 +231,10 @@ class DLLCLIENT CGame : public Game {
 	virtual void GetWeapons(std::vector<EntityHandle> *ents) override;
 	virtual void GetVehicles(std::vector<EntityHandle> *ents) override;
 
-	pragma::CGameComponent *GetGameComponent();
-	const pragma::CGameComponent *GetGameComponent() const { return const_cast<CGame *>(this)->GetGameComponent(); }
+	template<typename TCPPM>
+		TCPPM *GetGameComponent();
+	template<typename TCPPM>
+		const TCPPM *GetGameComponent() const;
 	virtual CBaseEntity *CreateEntity(std::string classname) override;
 	template<class T>
 	T *CreateEntity();
@@ -524,7 +525,7 @@ class DLLCLIENT CGame : public Game {
 	pragma::rendering::RenderMask m_thirdPersonRenderMask = pragma::rendering::RenderMask::None;
 
 	// Entities
-	pragma::ComponentHandle<pragma::CGameComponent> m_gameComponent;
+	pragma::ComponentHandle<pragma::BaseEntityComponent> m_gameComponent;
 	std::vector<CBaseEntity *> m_ents;
 	std::vector<CBaseEntity *> m_shEnts;
 	std::vector<CBaseEntity *> m_entsOccluded;

@@ -17,7 +17,6 @@
 #include "pragma/lua/classes/c_ldef_wgui.h"
 #include "pragma/entities/components/base_gamemode_component.hpp"
 #include "pragma/entities/components/c_scene_component.hpp"
-#include "pragma/entities/components/c_game_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/level/mapgeometry.h"
 #include <pragma/physics/physobj.h>

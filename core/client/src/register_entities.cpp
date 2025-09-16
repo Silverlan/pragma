@@ -6,7 +6,6 @@
 #include "pragma/entities/entity_instance_index_buffer.hpp"
 #include "pragma/entities/components/c_entity_character_component_model.hpp"
 #include "pragma/entities/components/c_entity_component.hpp"
-#include "pragma/entities/components/c_game_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/entities/components/hitbox_mesh_bvh_builder.hpp"

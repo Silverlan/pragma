@@ -1,11 +1,12 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
 #include "pragma/console/c_cvar.h"
 #include "pragma/rendering/c_msaa.h"
-#include "pragma/entities/components/renderers/rasterization/hdr_data.hpp"
 #include "pragma/rendering/shaders/particles/c_shader_particle_2d_base.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
@@ -27,8 +28,10 @@
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 
+module pragma.client.entities.components.rasterization_renderer;
+
 import pragma.client.debug;
-import pragma.client.entities.components;
+import pragma.client.entities.components.renderer;
 import pragma.client.gui;
 import pragma.client.rendering.shaders;
 

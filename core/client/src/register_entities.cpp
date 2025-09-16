@@ -9,7 +9,6 @@
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/entities/components/hitbox_mesh_bvh_builder.hpp"
-#include "pragma/entities/components/renderers/rasterization/hdr_data.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/entities/environment/lights/c_env_light.h"

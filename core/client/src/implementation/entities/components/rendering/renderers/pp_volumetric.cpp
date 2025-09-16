@@ -10,7 +10,6 @@ module;
 #include "pragma/entities/entity_iterator.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/entity_iterator.hpp"
-#include "pragma/entities/components/renderers/rasterization/hdr_data.hpp"
 #include "pragma/entities/entity_component_system_t.hpp"
 #include "pragma/rendering/world_environment.hpp"
 #include "pragma/model/c_modelmesh.h"

@@ -3,7 +3,6 @@
 
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
-#include "pragma/entities/components/renderers/rasterization/hdr_data.hpp"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/rendering/shaders/world/c_shader_prepass.hpp"
 #include "pragma/rendering/c_settings.hpp"

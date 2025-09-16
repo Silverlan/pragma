@@ -3,9 +3,11 @@
 
 module;
 
-#include "pragma/networking/iclient.hpp"
+#include "pragma/clientdefinitions.h"
 
 export module pragma.client.networking:local_client;
+
+import :iclient;
 
 export namespace pragma::networking {
 	class DLLCLIENT LocalClient : public IClient {

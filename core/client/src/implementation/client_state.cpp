@@ -22,7 +22,6 @@ module;
 #include <pragma/lua/libraries/lengine.h>
 #include <texturemanager/texturemanager.h>
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
-#include "pragma/networking/iclient.hpp"
 #include <pragma/lua/lua_error_handling.hpp>
 #include <pragma/lua/libraries/lutil.hpp>
 #include <pragma/lua/libraries/ludm.hpp>
@@ -55,6 +54,7 @@ import pragma.client.networking;
 import pragma.client.scripting.lua;
 import pragma.client.util;
 // import pragma.scripting.lua;
+
 static std::unordered_map<std::string, std::shared_ptr<PtrConVar>> *conVarPtrs = NULL;
 std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &ClientState::GetConVarPtrs() { return *conVarPtrs; }
 ConVarHandle ClientState::GetConVarHandle(std::string scvar)

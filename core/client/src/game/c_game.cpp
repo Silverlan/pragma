@@ -35,7 +35,6 @@
 #include <pragma/lua/luacallback.h>
 #include "pragma/rendering/c_msaa.h"
 #include "textureinfo.h"
-#include "pragma/networking/iclient.hpp"
 #include <pragma/networking/nwm_util.h>
 #include "pragma/game/c_game_callback.h"
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"

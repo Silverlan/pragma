@@ -12,7 +12,6 @@
 #include <pragma/console/convars.h>
 #include "pragma/console/engine_cvar.h"
 #include "pragma/debug/debug_utils.hpp"
-#include "pragma/networking/iclient.hpp"
 #include "pragma/rendering/c_sci_gpu_timer_manager.hpp"
 #include <pragma/rendering/scene/util_draw_scene_info.hpp>
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"

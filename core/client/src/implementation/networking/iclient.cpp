@@ -1,8 +1,13 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/networking/iclient.hpp"
+
+module pragma.client.networking;
+
+import :iclient;
 
 std::optional<pragma::networking::IPAddress> pragma::networking::IClient::GetIPAddress() const
 {

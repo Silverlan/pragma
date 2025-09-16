@@ -4,7 +4,6 @@
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
 #include "pragma/console/c_cvar_server.h"
-#include "pragma/networking/iclient.hpp"
 #include <pragma/networking/nwm_util.h>
 #include <sharedutils/util.h>
 #include <pragma/networking/error.hpp>

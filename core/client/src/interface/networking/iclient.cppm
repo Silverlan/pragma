@@ -1,19 +1,19 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __PRAGMA_ICLIENT_HPP__
-#define __PRAGMA_ICLIENT_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include <pragma/networking/enums.hpp>
 #include <pragma/networking/nwm_message_tracker.hpp>
 #include <pragma/networking/ip_address.hpp>
+#include "pragma/networking/error.hpp"
 #include <string>
 #include <optional>
 
-namespace pragma::networking {
-	class Error;
+export module pragma.client.networking:iclient;
 
+export namespace pragma::networking {
 	class DLLCLIENT ClientEventInterface {
 	  public:
 		std::function<void()> onConnected = nullptr;
@@ -56,5 +56,3 @@ namespace pragma::networking {
 		ClientEventInterface m_eventInterface = {};
 	};
 };
-
-#endif

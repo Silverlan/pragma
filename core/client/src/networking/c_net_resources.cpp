@@ -10,7 +10,6 @@
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/physics/collisionmesh.h"
 #include "pragma/model/c_model.h"
-#include "pragma/networking/iclient.hpp"
 #include <sharedutils/util_file.h>
 #include <sharedutils/scope_guard.h>
 #include <sharedutils/util_library.hpp>

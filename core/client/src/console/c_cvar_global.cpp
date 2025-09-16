@@ -5,7 +5,6 @@
 #include "pragma/console/c_cvar_global.h"
 #include "pragma/game/c_game.h"
 #include "pragma/console/cvar_global.h"
-#include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/components/base_character_component.hpp"
 #include "pragma/entities/components/base_name_component.hpp"
 #include "pragma/entities/components/base_observable_component.hpp"

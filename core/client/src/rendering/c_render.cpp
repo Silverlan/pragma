@@ -18,7 +18,6 @@
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/rendering/global_render_settings_buffer_data.hpp"
 #include "pragma/entities/baseentity.h"
-#include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/components/base_player_component.hpp"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include <pragma/lua/luacallback.h>

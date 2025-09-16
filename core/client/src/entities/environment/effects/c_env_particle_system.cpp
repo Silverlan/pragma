@@ -18,7 +18,6 @@
 #include <pragma/entities/environment/effects/particlesystemdata.h>
 #include <udm.hpp>
 #include "pragma/particlesystem/initializers/c_particle_initializer_lua.hpp"
-#include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include <pragma/lua/lua_util_component.hpp>
 #include <pragma/model/model.h>
 #include <prosper_command_buffer.hpp>

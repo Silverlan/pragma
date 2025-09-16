@@ -7,7 +7,6 @@ module;
 #include "pragma/rendering/c_ssao.hpp"
 #include "pragma/rendering/shaders/world/c_shader_pbr.hpp"
 #include "pragma/rendering/lighting/c_light_data_buffer_manager.hpp"
-#include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/environment/lights/c_env_light.h"
 #include "pragma/entities/environment/c_env_camera.h"
 #include <image/prosper_msaa_texture.hpp>
@@ -26,6 +25,7 @@ module pragma.client.entities.components.rasterization_renderer;
 import pragma.client.client_state;
 import pragma.client.entities.components.lights.directional;
 import pragma.client.entities.components.lights.shadow;
+import pragma.client.entities.components.renderer;
 import pragma.client.rendering.shaders;
 
 extern CGame *c_game;

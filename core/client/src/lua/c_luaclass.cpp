@@ -12,7 +12,6 @@
 #include "pragma/lua/classes/lentity.h"
 #include "pragma/lua/classes/lshaderinfo.h"
 #include "pragma/rendering/shader_input_data.hpp"
-#include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/environment/lights/c_env_light.h"
 #include "pragma/c_engine.h"
 

@@ -3,7 +3,7 @@
 
 module;
 
-#include "pragma/entities/components/renderers/c_renderer_component.hpp"
+#include "pragma/clientdefinitions.h"
 #include <image/prosper_render_target.hpp>
 #include <wgui/types.hpp>
 #include <mathutil/transform.hpp>

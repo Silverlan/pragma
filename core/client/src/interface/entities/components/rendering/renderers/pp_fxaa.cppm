@@ -3,7 +3,7 @@
 
 module;
 
-#include "pragma/entities/components/renderers/c_renderer_component.hpp"
+#include "pragma/clientdefinitions.h"
 
 export module pragma.client.entities.components.pp_fxaa;
 

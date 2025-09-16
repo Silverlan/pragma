@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_RENDERER_COMPONENT_HPP__
-#define __C_RENDERER_COMPONENT_HPP__
+module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
@@ -10,7 +9,9 @@
 #include <pragma/entities/components/base_entity_component.hpp>
 #include <unordered_set>
 
-namespace pragma {
+export module pragma.client.entities.components.renderer;
+
+export namespace pragma {
 	struct DLLCLIENT PostProcessingEffectData {
 		enum class Flags : uint32_t { None = 0, ToneMapped = 1 };
 		std::string name;
@@ -131,6 +132,6 @@ namespace pragma {
 	using CEGetPresentationTexture = CEGetSceneTexture;
 	using CEGetHdrPresentationTexture = CEGetSceneTexture;
 };
-REGISTER_BASIC_BITWISE_OPERATORS(pragma::PostProcessingEffectData::Flags)
-
-#endif
+export {
+	REGISTER_BASIC_BITWISE_OPERATORS(pragma::PostProcessingEffectData::Flags)
+};

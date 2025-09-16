@@ -12,7 +12,6 @@
 #include "pragma/rendering/shaders/world/c_shader_prepass.hpp"
 #include "pragma/rendering/render_stats.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
-#include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include <pragma/logging.hpp>
 #include <sharedutils/magic_enum.hpp>

@@ -8,7 +8,6 @@
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/console/c_cvar.h"
 #include "pragma/entities/components/c_scene_component.hpp"
-#include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/rendering/c_settings.hpp"
 #include <shader/prosper_shader_blur.hpp>
 #include <prosper_util.hpp>
@@ -20,6 +19,7 @@
 #include <sharedutils/scope_guard.h>
 
 import pragma.client.entities.components.render;
+import pragma.client.entities.components.renderer;
 import pragma.client.rendering.shaders;
 
 extern CEngine *c_engine;

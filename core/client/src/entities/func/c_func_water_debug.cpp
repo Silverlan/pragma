@@ -7,7 +7,6 @@
 #include "pragma/game/c_game.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/entities/components/c_scene_component.hpp"
-#include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include <pragma/entities/components/base_player_component.hpp>
 #include <pragma/console/sh_cmd.h>
 #include <pragma/physics/phys_water_surface_simulator.hpp>

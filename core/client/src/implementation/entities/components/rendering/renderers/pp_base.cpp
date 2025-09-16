@@ -4,7 +4,7 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/components/renderers/c_renderer_component.hpp"
+#include "pragma/game/c_game.h"
 #include "pragma/rendering/world_environment.hpp"
 #include "pragma/entities/entity_component_system_t.hpp"
 #include <pragma/entities/entity_component_manager_t.hpp>
@@ -40,6 +40,7 @@ void CRendererPpBaseComponent::OnRemove()
 		m_cbEffect.Remove();
 }
 void CRendererPpBaseComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+pragma::PostProcessingEffectData::Flags CRendererPpBaseComponent::GetFlags() const { return PostProcessingEffectData::Flags::None; }
 void CRendererPpBaseComponent::RenderEffect(const util::DrawSceneInfo &drawSceneInfo)
 {
 	if(drawSceneInfo.scene.expired() || m_renderer.expired())

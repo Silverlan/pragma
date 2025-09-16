@@ -9,7 +9,6 @@ module;
 #include "pragma/rendering/render_processor.hpp"
 #include "pragma/rendering/render_queue.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
-#include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/rendering/render_queue_instancer.hpp"
 #include "pragma/rendering/render_queue_worker.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>

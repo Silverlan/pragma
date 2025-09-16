@@ -6,7 +6,6 @@
 #include "pragma/console/c_cvar.h"
 #include "pragma/rendering/c_msaa.h"
 #include "pragma/entities/components/renderers/rasterization/hdr_data.hpp"
-#include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/rendering/shaders/particles/c_shader_particle_2d_base.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"

@@ -8,7 +8,6 @@ module;
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include <pragma/types.hpp>
 #include <pragma/entities/components/liquid/base_liquid_surface_component.hpp>
-#include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include <cmaterial.h>
 #include <image/prosper_texture.hpp>
 #include <buffers/prosper_buffer.hpp>
@@ -16,6 +15,7 @@ module;
 
 export module pragma.client.entities.components.liquid_surface;
 
+import pragma.client.entities.components.renderer;
 import pragma.client.entities.components.surface;
 
 export namespace pragma {

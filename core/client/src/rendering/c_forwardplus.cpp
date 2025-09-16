@@ -7,7 +7,6 @@
 #include "pragma/console/c_cvar_global_functions.h"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/lighting/c_light_data_buffer_manager.hpp"
-#include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/environment/lights/c_env_light.h"
 #include "pragma/game/game_limits.h"
 #include "pragma/console/c_cvar.h"

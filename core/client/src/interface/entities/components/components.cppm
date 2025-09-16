@@ -117,6 +117,7 @@ export import pragma.client.entities.components.rasterization_renderer;
 export import pragma.client.entities.components.raytracing;
 export import pragma.client.entities.components.raytracing_renderer;
 export import pragma.client.entities.components.render;
+export import pragma.client.entities.components.renderer;
 export import pragma.client.entities.components.score;
 export import pragma.client.entities.components.shooter;
 export import pragma.client.entities.components.skybox;

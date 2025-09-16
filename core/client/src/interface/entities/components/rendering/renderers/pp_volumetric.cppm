@@ -3,7 +3,8 @@
 
 module;
 
-#include "pragma/entities/components/renderers/c_renderer_component.hpp"
+#include "pragma/clientdefinitions.h"
+#include "image/prosper_render_target.hpp"
 
 export module pragma.client.entities.components.pp_volumetric;
 

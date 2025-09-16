@@ -7,7 +7,6 @@
 #include "pragma/rendering/render_processor.hpp"
 #include "pragma/rendering/shader_material/shader_material.hpp"
 #include "pragma/lua/libraries/c_lua_vulkan.h"
-#include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/lua/util.hpp>
 #include <shader/prosper_pipeline_create_info.hpp>

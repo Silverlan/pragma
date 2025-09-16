@@ -4,12 +4,13 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/entities/components/renderers/c_renderer_component.hpp"
+#include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include <pragma/entities/components/base_entity_component.hpp>
 
 export module pragma.client.entities.components.pp_base;
 
 import pragma.client.entities.components.rasterization_renderer;
+import pragma.client.entities.components.renderer;
 
 export namespace pragma {
 	class DLLCLIENT CRendererPpBaseComponent : public BaseEntityComponent {
@@ -20,7 +21,7 @@ export namespace pragma {
 		virtual void OnRemove() override;
 		virtual std::string GetIdentifier() const = 0;
 		virtual uint32_t GetPostProcessingWeight() const = 0;
-		virtual PostProcessingEffectData::Flags GetFlags() const { return PostProcessingEffectData::Flags::None; }
+		virtual PostProcessingEffectData::Flags GetFlags() const;
 	  protected:
 		void RenderEffect(const util::DrawSceneInfo &drawSceneInfo);
 		virtual void DoRenderEffect(const util::DrawSceneInfo &drawSceneInfo) = 0;

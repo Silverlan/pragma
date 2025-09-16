@@ -4,7 +4,6 @@
 #include "stdafx_client.h"
 #include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/game/c_game.h"
-#include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/entity_instance_index_buffer.hpp"
 #include "pragma/console/c_cvar.h"

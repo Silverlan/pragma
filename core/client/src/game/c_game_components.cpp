@@ -13,7 +13,6 @@
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/components/c_entity_component.hpp"
-#include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
 import pragma.client.entities.components;

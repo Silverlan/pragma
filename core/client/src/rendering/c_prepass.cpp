@@ -7,7 +7,6 @@
 #include "pragma/rendering/shaders/world/c_shader_prepass.hpp"
 #include "pragma/console/c_cvar_global_functions.h"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
-#include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include <wgui/types/wirect.h>
 #include <wgui/types/wiroot.h>

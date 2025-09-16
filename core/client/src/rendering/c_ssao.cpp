@@ -4,7 +4,6 @@
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
 #include "pragma/rendering/c_ssao.hpp"
-#include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/console/c_cvar_global_functions.h"
 #include <wgui/types/wirect.h>
 #include <wgui/types/wiroot.h>

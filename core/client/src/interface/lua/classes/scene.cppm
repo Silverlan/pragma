@@ -26,7 +26,6 @@ module;
 #include "luasystem.h"
 #include "pragma/lua/classes/c_lshader.h"
 #include "pragma/rendering/shaders/world/c_shader_prepass.hpp"
-#include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include <pragma/lua/classes/ldef_entity.h>
 #include <prosper_descriptor_set_group.hpp>

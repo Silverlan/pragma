@@ -1,17 +1,23 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/entities/components/c_scene_component.hpp"
-#include "pragma/entities/components/renderers/c_renderer_component.hpp"
-#include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/lua/libraries/c_lua_vulkan.h"
 #include "pragma/entities/entity_component_system_t.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <prosper_command_buffer.hpp>
 
-import pragma.client.entities.components;
+module pragma.client.entities.components.renderer;
+
+import pragma.client.entities.components.pp_bloom;
+import pragma.client.entities.components.pp_dof;
+import pragma.client.entities.components.pp_fog;
+import pragma.client.entities.components.pp_fxaa;
+import pragma.client.entities.components.pp_tone_mapping;
 import pragma.client.scripting.lua;
 
 extern CGame *c_game;

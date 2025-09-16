@@ -6,6 +6,7 @@
 #include "pragma/rendering/shader_material/shader_material.hpp"
 #include "pragma/rendering/render_processor.hpp"
 #include "pragma/console/c_cvar.h"
+#include "pragma/game/c_game.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/model/c_vertex_buffer_data.hpp"
 #include "pragma/console/c_cvar_global_functions.h"

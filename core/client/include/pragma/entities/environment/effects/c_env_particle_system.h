@@ -16,7 +16,6 @@
 #include <optional>
 
 class CParticleSystemData;
-class CGame;
 namespace udm {
 	struct LinkedPropertyWrapper;
 };
@@ -59,7 +58,7 @@ namespace pragma {
 		static CParticleSystemComponent *Create(const std::string &fname, CParticleSystemComponent *parent = nullptr, bool bRecordKeyValues = false, bool bAutoSpawn = true);
 		static CParticleSystemComponent *Create(const std::unordered_map<std::string, std::string> &values, CParticleSystemComponent *parent = nullptr, bool bRecordKeyValues = false, bool bAutoSpawn = true);
 		static CParticleSystemComponent *Create(CParticleSystemComponent *parent = nullptr, bool bAutoSpawn = true);
-		static std::shared_ptr<Model> GenerateModel(CGame &game, const std::vector<const CParticleSystemComponent *> &particleSystems);
+		static std::shared_ptr<Model> GenerateModel(Game &game, const std::vector<const CParticleSystemComponent *> &particleSystems);
 
 		enum class OrientationType : uint8_t {
 			Aligned = 0,

@@ -3,6 +3,7 @@
 
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
+#include "pragma/game/c_game.h"
 #include <pragma/audio/soundscript.h>
 #include "pragma/audio/alsoundscript.h"
 #include <fsys/filesystem.h>

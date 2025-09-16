@@ -4,6 +4,7 @@
 module;
 
 #include "stdafx_client.h"
+#include "pragma/game/c_game.h"
 #include "pragma/rendering/render_processor.hpp"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"

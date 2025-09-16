@@ -7,6 +7,7 @@ module;
 #include "pragma/rendering/c_rendermode.h"
 #include <pragma/physics/physobj.h>
 #include "pragma/model/c_modelmesh.h"
+#include "pragma/game/c_game.h"
 #include "pragma/entities/baseentity_luaobject.h"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"

@@ -9,6 +9,7 @@
 #include "pragma/rendering/shader_material/shader_material.hpp"
 #include "pragma/model/c_vertex_buffer_data.hpp"
 #include "pragma/model/c_modelmesh.h"
+#include "pragma/game/c_game.h"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <shader/prosper_shader_t.hpp>
 #include <prosper_command_buffer.hpp>

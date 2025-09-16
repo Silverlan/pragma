@@ -7,6 +7,7 @@
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/baseworld.h"
+#include "pragma/game/c_game.h"
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/rendering/render_processor.hpp"

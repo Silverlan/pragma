@@ -6,6 +6,7 @@
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/rendering/render_queue.hpp"
 #include "pragma/rendering/render_stats.hpp"
+#include "pragma/game/c_game.h"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/rendering/render_processor.hpp"

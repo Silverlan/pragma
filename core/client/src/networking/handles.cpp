@@ -4,6 +4,7 @@
 #include "stdafx_client.h"
 #include <fsys/filesystem.h>
 #include "pragma/c_engine.h"
+#include "pragma/game/c_game.h"
 #include "pragma/networking/netmessages.h"
 #include "pragma/entities/c_baseentity.h"
 #include <pragma/networking/nwm_util.h>

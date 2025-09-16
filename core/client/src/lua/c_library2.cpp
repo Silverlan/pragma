@@ -4,6 +4,7 @@
 #include "stdafx_client.h"
 #include "pragma/lua/classes/c_ldef_wgui.h"
 #include "pragma/lua/libraries/lsound.h"
+#include "pragma/game/c_game.h"
 #include "pragma/input/input_binding_layer.hpp"
 #include "pragma/lua/libraries/lasset.hpp"
 #include "pragma/asset/util_asset.hpp"

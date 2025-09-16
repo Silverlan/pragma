@@ -5,6 +5,7 @@
 #include "pragma/c_engine.h"
 #include <wgui/wgui.h>
 #include "cmaterialmanager.h"
+#include "pragma/game/c_game.h"
 #include "pragma/console/c_cvar.h"
 #include "pragma/rendering/shader_material/shader_material.hpp"
 #include <texturemanager/texturemanager.h>
@@ -1586,7 +1587,7 @@ CEngine::~CEngine() { m_audioAPILib = nullptr; }
 
 CEngine *pragma::get_cengine() { return c_engine; }
 ClientState *pragma::get_client_state() { return client; }
-CGame *pragma::get_client_game() { return c_game; }
+Game *pragma::get_client_game() { return c_game; }
 
 void CEngine::HandleLocalHostPlayerClientPacket(NetPacket &p)
 {

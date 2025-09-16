@@ -10,6 +10,7 @@ module;
 #include <pragma/entities/entity_component_system_t.hpp>
 #include "pragma/logging.hpp"
 #include "pragma/c_engine.h"
+#include "pragma/game/c_game.h"
 #include <pragma/entities/components/bvh_data.hpp>
 #include <pragma/entities/components/util_bvh.hpp>
 #include <pragma/debug/intel_vtune.hpp>

@@ -61,9 +61,9 @@ Vector3 util::DrawSceneInfo::GetPvsOrigin() const
 	return cam->GetEntity().GetPosition();
 }
 
-::pragma::rendering::RenderMask util::DrawSceneInfo::GetRenderMask(CGame &game) const
+::pragma::rendering::RenderMask util::DrawSceneInfo::GetRenderMask(Game &game) const
 {
-	auto mask = game.GetInclusiveRenderMasks();
+	auto mask = static_cast<CGame&>(game).GetInclusiveRenderMasks();
 	mask |= inclusionMask;
 	mask &= ~exclusionMask;
 	return mask;

@@ -6,6 +6,7 @@ module;
 #include "stdafx_client.h"
 #include "pragma/console/c_cvar.h"
 #include "pragma/c_engine.h"
+#include "pragma/game/c_game.h"
 #include <image/prosper_render_target.hpp>
 #include <prosper_render_pass.hpp>
 #include <prosper_framebuffer.hpp>

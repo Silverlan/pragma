@@ -5,6 +5,7 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
+#include "pragma/game/c_game.h"
 #include "pragma/game/game_limits.h"
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"

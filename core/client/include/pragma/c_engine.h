@@ -21,7 +21,6 @@ import pragma.string.unicode;
 #endif
 
 class ClientState;
-class CGame;
 namespace GLFW {
 	class Joystick;
 };
@@ -316,7 +315,7 @@ REGISTER_BASIC_BITWISE_OPERATORS(CEngine::StateFlags)
 namespace pragma {
 	DLLCLIENT CEngine *get_cengine();
 	DLLCLIENT ClientState *get_client_state();
-	DLLCLIENT CGame *get_client_game();
+	DLLCLIENT Game *get_client_game();
 };
 #pragma warning(pop)
 

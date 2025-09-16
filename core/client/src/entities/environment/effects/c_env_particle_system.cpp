@@ -8,6 +8,9 @@
 #include "pragma/rendering/shaders/c_shader_lua.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/c_engine.h"
+#include "pragma/rendering/shaders/particles/c_shader_particle_2d_base.hpp"
+#include <pragma/model/model.h>
+#include <pragma/model/modelmesh.h>
 #include "pragma/game/c_game.h"
 #include <pragma/networking/nwm_util.h>
 #include "pragma/entities/baseentity_luaobject.h"
@@ -137,12 +140,9 @@ void CParticleSystemComponent::Clear()
 	umath::set_flag(m_flags, Flags::Setup, false);
 }
 
-#include "pragma/rendering/shaders/particles/c_shader_particle_2d_base.hpp"
-#include <pragma/model/model.h>
-#include <pragma/model/modelmesh.h>
-std::shared_ptr<Model> CParticleSystemComponent::GenerateModel(CGame &game, const std::vector<const CParticleSystemComponent *> &particleSystems)
+std::shared_ptr<Model> CParticleSystemComponent::GenerateModel(Game &game, const std::vector<const CParticleSystemComponent *> &particleSystems)
 {
-	auto *cam = game.GetRenderCamera<pragma::CCameraComponent>();
+	auto *cam = static_cast<CGame&>(game).GetRenderCamera<pragma::CCameraComponent>();
 	if(cam == nullptr)
 		return nullptr;
 	std::unordered_set<const CParticleSystemComponent *> particleSystemList {};

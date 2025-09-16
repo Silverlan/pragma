@@ -4,6 +4,7 @@
 module;
 
 #include "stdafx_client.h"
+#include "pragma/game/c_game.h"
 #include "pragma/rendering/shaders/world/c_shader_scene.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/render_processor.hpp"

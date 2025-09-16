@@ -27,6 +27,7 @@ namespace pragma::string {
 #include <wgui/types/witext.h>
 #include <texturemanager/texturemanager.h>
 #include "textureinfo.h"
+#include "pragma/game/c_game.h"
 #include <cmaterial_manager2.hpp>
 #include <pragma/lua/libraries/lengine.h>
 #include <pragma/lua/libraries/lfile.h>

@@ -3,6 +3,7 @@
 
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
+#include "pragma/game/c_game.h"
 #include "pragma/console/c_cvar_global_functions.h"
 #include "prosper_util.hpp"
 #include <util_image.hpp>

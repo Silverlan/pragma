@@ -4,6 +4,8 @@
 module;
 
 #include "stdafx_client.h"
+#include "pragma/c_engine.h"
+#include "pragma/game/c_game.h"
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
@@ -18,7 +20,6 @@ module;
 module pragma.client.entities.components.game_occlusion_culler;
 
 import pragma.client.entities.components;
-
 
 extern CEngine *c_engine;
 extern ClientState *client;

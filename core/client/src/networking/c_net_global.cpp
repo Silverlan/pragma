@@ -3,6 +3,7 @@
 
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
+#include "pragma/game/c_game.h"
 #include "pragma/networking/c_net_global.h"
 #include "pragma/physics/movetypes.h"
 #include "pragma/physics/collisiontypes.h"

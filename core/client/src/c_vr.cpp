@@ -12,6 +12,7 @@ namespace pragma::string {
 #endif
 
 #include "pragma/c_engine.h"
+#include "pragma/game/c_game.h"
 #include "pragma/console/c_cvar.h"
 #include <wgui/types/wirect.h>
 #include <wgui/types/witext.h>

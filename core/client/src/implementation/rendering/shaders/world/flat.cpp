@@ -5,6 +5,7 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/model/c_modelmesh.h"
+#include "pragma/game/c_game.h"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/model/c_vertex_buffer_data.hpp"

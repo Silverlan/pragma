@@ -5,7 +5,6 @@
 #define __C_OCCLUSION_OCTREE_IMPL_HPP__
 
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree.hpp"
-#include "pragma/game/c_game.h"
 #include <mathutil/uvec.h>
 #include "pragma/entities/c_baseentity.h"
 #include <pragma/math/intersection.h>

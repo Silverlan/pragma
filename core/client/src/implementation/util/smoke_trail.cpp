@@ -4,14 +4,14 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/environment/effects/c_env_particle_system.h"
+
 
 module pragma.client.util.smoke_trail;
 
-pragma::CParticleSystemComponent *util::create_smoke_trail_particle(float distance, float speed, float minSpriteSize, float maxSpriteSize, const std::string &material)
+pragma::ecs::CParticleSystemComponent *util::create_smoke_trail_particle(float distance, float speed, float minSpriteSize, float maxSpriteSize, const std::string &material)
 {
 	std::unordered_map<std::string, std::string> values = {{"maxparticles", "150"}, {"emission_rate", "50"}, {"material", material}, {"sort_particles", "1"}};
-	auto *pt = ::pragma::CParticleSystemComponent::Create(values);
+	auto *pt = ::pragma::ecs::CParticleSystemComponent::Create(values);
 	if(pt == nullptr)
 		return nullptr;
 	auto lifeTime = distance / speed;

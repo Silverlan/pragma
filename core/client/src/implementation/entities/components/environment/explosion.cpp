@@ -6,7 +6,6 @@ module;
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
 #include "pragma/game/c_game.h"
-#include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/entities/components/base_transform_component.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include "pragma/entities/parentmode.h"
@@ -20,6 +19,7 @@ import pragma.client.client_state;
 import pragma.client.entities.components.attachment;
 import pragma.client.entities.components.env_quake;
 import pragma.client.entities.components.io;
+import pragma.client.entities.components.particle_system;
 import pragma.client.entities.components.sound_emitter;
 
 using namespace pragma;
@@ -30,7 +30,7 @@ extern CGame *c_game;
 void CExplosionComponent::Initialize()
 {
 	BaseEnvExplosionComponent::Initialize();
-	pragma::CParticleSystemComponent::Precache("explosion");
+	pragma::ecs::CParticleSystemComponent::Precache("explosion");
 	client->LoadSoundScripts("fx.udm");
 }
 
@@ -40,7 +40,7 @@ void CExplosionComponent::Explode()
 #pragma message("TODO: Apply damage to all ents within range -> Serverside")
 #pragma message("TODO: Leave a scorch mark!")
 	auto &ent = GetEntity();
-	auto *particle = pragma::CParticleSystemComponent::Create("explosion");
+	auto *particle = pragma::ecs::CParticleSystemComponent::Create("explosion");
 	if(particle != NULL) {
 		auto pTrComponent = ent.GetTransformComponent();
 		auto pTrComponentPt = particle->GetEntity().GetTransformComponent();

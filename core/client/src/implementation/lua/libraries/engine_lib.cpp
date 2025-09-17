@@ -20,7 +20,6 @@ namespace pragma::string {
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/entities/components/c_scene_component.hpp"
-#include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/asset/util_asset.hpp"
 #include <pragma/util/font_set.hpp>
 #include <wgui/fontmanager.h>
@@ -41,6 +40,7 @@ module pragma.client.scripting.lua.libraries.engine;
 
 import util_zip;
 import pragma.client.client_state;
+import pragma.client.entities.components.particle_system;
 #ifndef _MSC_VER
 import pragma.string.unicode;
 #endif
@@ -240,18 +240,18 @@ int Lua::engine::create_particle_system(lua_State *l)
 {
 	std::unordered_map<std::string, std::string> values;
 	std::vector<std::string> children;
-	pragma::CParticleSystemComponent *particle;
+	pragma::ecs::CParticleSystemComponent *particle;
 	auto bRecordKeyvalues = false;
 	if(Lua::IsSet(l, 3))
 		bRecordKeyvalues = Lua::CheckBool(l, 3);
 	if(Lua::IsString(l, 1)) {
 		std::string name = Lua::CheckString(l, 1);
-		pragma::CParticleSystemComponent *parent = NULL;
+		pragma::ecs::CParticleSystemComponent *parent = NULL;
 		if(Lua::IsSet(l, 2)) {
-			auto &hParent = Lua::Check<pragma::CParticleSystemComponent>(l, 2);
+			auto &hParent = Lua::Check<pragma::ecs::CParticleSystemComponent>(l, 2);
 			parent = &hParent;
 		}
-		particle = pragma::CParticleSystemComponent::Create(name, parent, bRecordKeyvalues);
+		particle = pragma::ecs::CParticleSystemComponent::Create(name, parent, bRecordKeyvalues);
 	}
 	else {
 		struct ParticleData {
@@ -319,31 +319,31 @@ int Lua::engine::create_particle_system(lua_State *l)
 			else
 				Lua::Pop(l, 2);
 		}
-		pragma::CParticleSystemComponent *parent = NULL;
+		pragma::ecs::CParticleSystemComponent *parent = NULL;
 		if(Lua::IsSet(l, 2)) {
-			auto &hParent = Lua::Check<pragma::CParticleSystemComponent>(l, 2);
+			auto &hParent = Lua::Check<pragma::ecs::CParticleSystemComponent>(l, 2);
 			parent = &hParent;
 		}
-		particle = pragma::CParticleSystemComponent::Create(values, parent, bRecordKeyvalues);
+		particle = pragma::ecs::CParticleSystemComponent::Create(values, parent, bRecordKeyvalues);
 		if(particle != nullptr) {
 			particle->PushLuaObject(l); /* 1 */
 
 			for(auto &initializer : initializers) {
 				Lua::PushString(l, initializer->name); /* 2 */
 				initializer->table.push(l);            /* 3 */
-				particle->AddInitializer(initializer->name, pragma::get_particle_key_values(l, initializer->table));
+				particle->AddInitializer(initializer->name, pragma::ecs::get_particle_key_values(l, initializer->table));
 				Lua::Pop(l, 2); /* 1 */
 			}
 			for(auto &op : operators) {
 				Lua::PushString(l, op->name); /* 2 */
 				op->table.push(l);            /* 3 */
-				particle->AddOperator(op->name, pragma::get_particle_key_values(l, op->table));
+				particle->AddOperator(op->name, pragma::ecs::get_particle_key_values(l, op->table));
 				Lua::Pop(l, 2); /* 1 */
 			}
 			for(auto &renderer : renderers) {
 				Lua::PushString(l, renderer->name); /* 2 */
 				renderer->table.push(l);            /* 3 */
-				particle->AddRenderer(renderer->name, pragma::get_particle_key_values(l, renderer->table));
+				particle->AddRenderer(renderer->name, pragma::ecs::get_particle_key_values(l, renderer->table));
 				Lua::Pop(l, 2); /* 1 */
 			}
 
@@ -353,12 +353,12 @@ int Lua::engine::create_particle_system(lua_State *l)
 	if(particle == NULL)
 		return 0;
 	for(unsigned int i = 0; i < children.size(); i++)
-		pragma::CParticleSystemComponent::Create(children[i], particle, bRecordKeyvalues);
+		pragma::ecs::CParticleSystemComponent::Create(children[i], particle, bRecordKeyvalues);
 	particle->PushLuaObject(l);
 	return 1;
 }
 
-bool Lua::engine::precache_particle_system(lua_State *l, const std::string &particle, bool reload) { return pragma::CParticleSystemComponent::Precache(particle, reload); }
+bool Lua::engine::precache_particle_system(lua_State *l, const std::string &particle, bool reload) { return pragma::ecs::CParticleSystemComponent::Precache(particle, reload); }
 bool Lua::engine::precache_particle_system(lua_State *l, const std::string &particle) { return precache_particle_system(l, particle, false); }
 
 int Lua::engine::save_particle_system(lua_State *l)
@@ -378,14 +378,14 @@ int Lua::engine::save_particle_system(lua_State *l)
 
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, t);
-		auto bParticleSystem = Lua::IsType<::util::WeakHandle<pragma::CParticleSystemComponent>>(l, -1);
+		auto bParticleSystem = Lua::IsType<::util::WeakHandle<pragma::ecs::CParticleSystemComponent>>(l, -1);
 		Lua::Pop(l, 1);
 		if(bParticleSystem) {
 			auto numParticleSystems = Lua::GetObjectLength(l, t);
-			std::vector<pragma::CParticleSystemComponent *> particleSystems;
+			std::vector<pragma::ecs::CParticleSystemComponent *> particleSystems;
 			particleSystems.reserve(numParticleSystems);
-			std::function<void(const pragma::CParticleSystemComponent &)> fIncludeChildren = nullptr;
-			fIncludeChildren = [&particleSystems, &fIncludeChildren](const pragma::CParticleSystemComponent &ps) {
+			std::function<void(const pragma::ecs::CParticleSystemComponent &)> fIncludeChildren = nullptr;
+			fIncludeChildren = [&particleSystems, &fIncludeChildren](const pragma::ecs::CParticleSystemComponent &ps) {
 				auto &children = ps.GetChildren();
 				particleSystems.reserve(particleSystems.size() + children.size());
 				for(auto &hChild : children) {
@@ -403,7 +403,7 @@ int Lua::engine::save_particle_system(lua_State *l)
 			for(auto i = decltype(numParticleSystems) {0u}; i < numParticleSystems; ++i) {
 				Lua::PushInt(l, i + 1u);
 				Lua::GetTableValue(l, t);
-				auto &ps = Lua::Check<pragma::CParticleSystemComponent>(l, -1);
+				auto &ps = Lua::Check<pragma::ecs::CParticleSystemComponent>(l, -1);
 				if(ps.IsRecordingKeyValues() == false)
 					Con::cwar << "Cannot save particle system '" << ps.GetParticleSystemName() << "', which wasn't created with the \"record key-values\" flag set! Skipping..." << Con::endl;
 				else {
@@ -421,7 +421,7 @@ int Lua::engine::save_particle_system(lua_State *l)
 			FileManager::CreatePath(ufile::get_path_from_filename(name).c_str());
 			auto f = FileManager::OpenFile<VFilePtrReal>(name.c_str(), "wb");
 			if(f != NULL)
-				Lua::PushBool(l, pragma::CParticleSystemComponent::Save(f, particleSystems));
+				Lua::PushBool(l, pragma::ecs::CParticleSystemComponent::Save(f, particleSystems));
 			else
 				Lua::PushBool(l, false);
 			return 1;

@@ -3,9 +3,10 @@
 
 module;
 
-#include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/c_engine.h"
 #include "pragma/game/c_game.h"
+#include "pragma/particlesystem/c_particlemodifier.h"
+#include "pragma/entities/environment/effects/c_env_particle_system.h"
 
 export module pragma.client.particle_system:operator_gravity;
 

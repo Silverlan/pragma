@@ -945,6 +945,7 @@ template<typename TCPPM>
 		*particle = reinterpret_cast<TCPPM*>(pt);
 }
 template void CGame::CreateGiblet(const GibletCreateInfo &info, pragma::CParticleSystemComponent **particle);
+template void CGame::CreateGiblet(const GibletCreateInfo &info, pragma::ecs::CParticleSystemComponent **particle);
 
 void CGame::CreateGiblet(const GibletCreateInfo &info) { CreateGiblet<pragma::CParticleSystemComponent>(info, nullptr); }
 

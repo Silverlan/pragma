@@ -37,9 +37,9 @@ void CFlammableComponent::IgniteInfo::Clear()
 
 CFlammableComponent::IgniteInfo::~IgniteInfo() { Clear(); }
 
-CFlammableComponent::IgniteInfo::Particle::Particle(CParticleSystemComponent &pt, uint32_t _boneId) : hParticle(std::static_pointer_cast<CParticleSystemComponent>(pt.shared_from_this())), boneId(_boneId) {}
+CFlammableComponent::IgniteInfo::Particle::Particle(pragma::ecs::CParticleSystemComponent &pt, uint32_t _boneId) : hParticle(std::static_pointer_cast<pragma::ecs::CParticleSystemComponent>(pt.shared_from_this())), boneId(_boneId) {}
 
-CFlammableComponent::IgniteInfo::Particle::Particle(CParticleSystemComponent &pt, const Vector3 &_offset) : hParticle(std::static_pointer_cast<CParticleSystemComponent>(pt.shared_from_this())), offset(_offset), boneId(0) {}
+CFlammableComponent::IgniteInfo::Particle::Particle(pragma::ecs::CParticleSystemComponent &pt, const Vector3 &_offset) : hParticle(std::static_pointer_cast<pragma::ecs::CParticleSystemComponent>(pt.shared_from_this())), offset(_offset), boneId(0) {}
 
 //////////////////////////////////
 
@@ -189,7 +189,7 @@ util::EventReply CFlammableComponent::Ignite(float duration, BaseEntity *attacke
 		auto pos = info.position;
 		uvec::rotate(&pos, rot);
 		pos += origin;
-		auto *pt = CParticleSystemComponent::Create(values);
+		auto *pt = pragma::ecs::CParticleSystemComponent::Create(values);
 		if(pt != nullptr) {
 			pt->AddRenderer("sprite", {});
 			pt->AddInitializer("radius_random", radiusRandom);

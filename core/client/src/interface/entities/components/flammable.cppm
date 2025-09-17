@@ -5,10 +5,11 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/components/c_entity_component.hpp"
-#include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include <pragma/entities/components/base_flammable_component.hpp>
 
 export module pragma.client.entities.components.flammable;
+
+import pragma.client.entities.components.particle_system;
 
 export namespace pragma {
 	class DLLCLIENT CFlammableComponent final : public BaseFlammableComponent, public CBaseNetComponent {
@@ -28,9 +29,9 @@ export namespace pragma {
 			IgniteInfo();
 			~IgniteInfo();
 			struct Particle {
-				Particle(pragma::CParticleSystemComponent &pt, uint32_t boneId = 0);
-				Particle(pragma::CParticleSystemComponent &pt, const Vector3 &offset);
-				util::WeakHandle<CParticleSystemComponent> hParticle;
+				Particle(pragma::ecs::CParticleSystemComponent &pt, uint32_t boneId = 0);
+				Particle(pragma::ecs::CParticleSystemComponent &pt, const Vector3 &offset);
+				util::WeakHandle<pragma::ecs::CParticleSystemComponent> hParticle;
 				uint32_t boneId;
 				Vector3 offset;
 			};

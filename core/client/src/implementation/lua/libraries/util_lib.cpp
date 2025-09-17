@@ -6,7 +6,6 @@ module;
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
 #include "pragma/game/c_game.h"
-#include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/parentmode.h"
@@ -29,6 +28,7 @@ module pragma.client.scripting.lua.libraries.util;
 
 import pragma.client.assets;
 import pragma.client.client_state;
+import pragma.client.entities.components.particle_system;
 import pragma.client.entities.components.render;
 import pragma.client.util;
 
@@ -58,7 +58,7 @@ int Lua::util::Client::create_particle_tracer(lua_State *l)
 	auto *mat = Lua::IsSet(l, 7) ? Lua::CheckString(l, 7) : BulletInfo::DEFAULT_TRACER_MATERIAL.c_str();
 	auto bloomScale = Lua::IsSet(l, 8) ? Lua::CheckNumber(l, 8) : BulletInfo::DEFAULT_TRACER_BLOOM;
 
-	auto *particle = c_game->CreateParticleTracer<pragma::CParticleSystemComponent>(start, end, static_cast<float>(radius), *col, static_cast<float>(length), static_cast<float>(speed), mat, static_cast<float>(bloomScale));
+	auto *particle = c_game->CreateParticleTracer<pragma::ecs::CParticleSystemComponent>(start, end, static_cast<float>(radius), *col, static_cast<float>(length), static_cast<float>(speed), mat, static_cast<float>(bloomScale));
 	if(particle == nullptr)
 		return 0;
 	particle->PushLuaObject(l);
@@ -83,7 +83,7 @@ int Lua::util::Client::create_muzzle_flash(lua_State *l)
 				relRot = *Lua::CheckQuaternion(l, 4);
 		}
 		std::string particleName = "muzzleflash0" + std::to_string(umath::random(1, 6));
-		auto *pt = pragma::CParticleSystemComponent::Create(particleName);
+		auto *pt = pragma::ecs::CParticleSystemComponent::Create(particleName);
 		if(pt == nullptr)
 			return 0;
 		auto pRenderComponent = static_cast<CBaseEntity *>(&ent)->GetRenderComponent();
@@ -110,7 +110,7 @@ int Lua::util::Client::create_muzzle_flash(lua_State *l)
 	auto &pos = *Lua::CheckVector(l, 1);
 	auto &rot = *Lua::CheckQuaternion(l, 2);
 	std::string particleName = "muzzleflash0" + std::to_string(umath::random(1, 6));
-	auto *pt = pragma::CParticleSystemComponent::Create(particleName);
+	auto *pt = pragma::ecs::CParticleSystemComponent::Create(particleName);
 	if(pt == nullptr)
 		return 0;
 	auto pTrComponent = pt->GetEntity().GetTransformComponent();
@@ -126,7 +126,7 @@ int Lua::util::Client::create_muzzle_flash(lua_State *l)
 
 luabind::object Lua::util::Client::create_giblet(GibletCreateInfo &createInfo)
 {
-	pragma::CParticleSystemComponent *particle = nullptr;
+	pragma::ecs::CParticleSystemComponent *particle = nullptr;
 	c_game->CreateGiblet(createInfo, &particle);
 	if(particle == nullptr)
 		return {};

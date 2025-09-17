@@ -7,7 +7,6 @@ module;
 #include "pragma/c_engine.h"
 #include "pragma/game/c_game.h"
 #include "pragma/entities/components/c_model_component.hpp"
-#include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/rendering/render_queue.hpp"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
@@ -307,9 +306,9 @@ void ShadowRenderer::RenderShadows(std::shared_ptr<prosper::IPrimaryCommandBuffe
 			auto *scene = c_game->GetRenderScene<pragma::CSceneComponent>();
 			// TODO: Only culled particles
 			EntityIterator entIt {*c_game};
-			entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CParticleSystemComponent>>();
+			entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::ecs::CParticleSystemComponent>>();
 			for(auto *ent : entIt) {
-				auto p = ent->GetComponent<pragma::CParticleSystemComponent>();
+				auto p = ent->GetComponent<pragma::ecs::CParticleSystemComponent>();
 				if(p.valid() && p->GetCastShadows() == true)
 					p->RecordRenderShadow(*drawCmd, *scene, *raster, &light, layerId);
 			}

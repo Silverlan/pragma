@@ -487,7 +487,7 @@ static std::string get_key_value(lua_State *l, const luabind::object &value)
 	return luabind::object_cast<std::string>(value);
 }
 
-std::unordered_map<std::string, std::string> pragma::get_particle_key_values(lua_State *l, const luabind::map<std::string, void> &keyValues)
+std::unordered_map<std::string, std::string> pragma::ecs::get_particle_key_values(lua_State *l, const luabind::map<std::string, void> &keyValues)
 {
 	std::unordered_map<std::string, std::string> values;
 	for(luabind::iterator i {keyValues}, end; i != end; ++i) {

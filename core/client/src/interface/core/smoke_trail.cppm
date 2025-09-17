@@ -4,11 +4,12 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include <string>
 
 export module pragma.client.util.smoke_trail;
 
+import pragma.client.entities.components.particle_system;
+
 export namespace util {
-	DLLCLIENT ::pragma::CParticleSystemComponent *create_smoke_trail_particle(float distance, float speed, float minSpriteSize, float maxSpriteSize, const std::string &material = "particles/smoke_sprites_dense");
+	DLLCLIENT ::pragma::ecs::CParticleSystemComponent *create_smoke_trail_particle(float distance, float speed, float minSpriteSize, float maxSpriteSize, const std::string &material = "particles/smoke_sprites_dense");
 };

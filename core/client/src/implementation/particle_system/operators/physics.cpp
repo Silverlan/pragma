@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
-#include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include <pragma/physics/environment.hpp>
 #include <pragma/physics/shape.hpp>
 #include <pragma/physics/collisionmesh.h>

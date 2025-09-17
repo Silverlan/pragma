@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
 #include "pragma/entities/parentmode.h"
@@ -16,6 +15,7 @@ module pragma.client.entities.components.env_weather;
 
 import pragma.client.client_state;
 import pragma.client.entities.components.attachment;
+import pragma.client.entities.components.particle_system;
 import pragma.client.entities.components.player;
 
 using namespace pragma;
@@ -30,14 +30,14 @@ CWeatherComponent::~CWeatherComponent()
 void CWeatherComponent::Initialize()
 {
 	BaseEnvWeatherComponent::Initialize();
-	CParticleSystemComponent::Precache("weather");
+	pragma::ecs::CParticleSystemComponent::Precache("weather");
 }
 void CWeatherComponent::OnEntitySpawn()
 {
 	BaseEnvWeatherComponent::OnEntitySpawn();
 	auto *pl = c_game->GetLocalPlayer();
 	if(pl != NULL) {
-		auto *pt = CParticleSystemComponent::Create({{"particle", "snow"}});
+		auto *pt = pragma::ecs::CParticleSystemComponent::Create({{"particle", "snow"}});
 		if(pt != nullptr) {
 			auto &plEnt = pl->GetEntity();
 			auto &ent = pt->GetEntity();

@@ -7,7 +7,6 @@ module;
 #include "pragma/c_engine.h"
 #include "pragma/game/c_game.h"
 #include "pragma/entities/components/c_model_component.hpp"
-#include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/rendering/shader_graph/manager.hpp"
 #include "pragma/console/c_cvar.h"
 #include <texture_load_flags.hpp>
@@ -23,6 +22,7 @@ module;
 
 module pragma.client.util.resource_watcher;
 
+import pragma.client.entities.components.particle_system;
 import pragma.shadergraph;
 
 extern CEngine *c_engine;
@@ -139,13 +139,13 @@ void CResourceWatcherManager::OnResourceChanged(const util::Path &rootPath, cons
 	auto assetType = pragma::asset::determine_type_from_extension(ext);
 	if(assetType.has_value()) {
 		if(*assetType == pragma::asset::Type::ParticleSystem) {
-			if(pragma::CParticleSystemComponent::IsParticleFilePrecached(strPath) == false)
+			if(pragma::ecs::CParticleSystemComponent::IsParticleFilePrecached(strPath) == false)
 				return;
 #if RESOURCE_WATCHER_VERBOSE > 0
 			auto ptPath = "particles\\" + strPath;
 			Con::cout << "[ResourceWatcher] Particle has changed: " << ptPath << ". Attempting to reload..." << Con::endl;
 #endif
-			pragma::CParticleSystemComponent::Precache(strPath, true);
+			pragma::ecs::CParticleSystemComponent::Precache(strPath, true);
 			CallChangeCallbacks(ECResourceWatcherCallbackType::ParticleSystem, strPath, ext);
 		}
 	}

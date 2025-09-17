@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
-#include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/entities/components/base_transform_component.hpp"
 #include <pragma/physics/raytraces.h>
 #include <pragma/physics/environment.hpp>
@@ -16,6 +15,7 @@ module;
 module pragma.client.entities.components.shooter;
 
 import pragma.client.client_state;
+import pragma.client.entities.components.particle_system;
 
 using namespace pragma;
 
@@ -57,7 +57,7 @@ void ecs::CShooterComponent::FireBullets(const BulletInfo &bulletInfo, const Vec
 				p->Write<Vector3>(destPositions[i]);
 			const auto minTracerDistance = 80.f; // Don't show a tracer if the distance is less than this, otherwise the tracer might look odd when close to a wall.
 			if(bulletInfo.tracerCount > 0 && (i % bulletInfo.tracerCount) == 0 && l > minTracerDistance)
-				c_game->CreateParticleTracer(effectsOrigins, hitPos, bulletInfo.tracerRadius, bulletInfo.tracerColor, bulletInfo.tracerLength, bulletInfo.tracerSpeed, bulletInfo.tracerMaterial, bulletInfo.tracerBloom);
+				c_game->CreateParticleTracer<pragma::ecs::CParticleSystemComponent>(effectsOrigins, hitPos, bulletInfo.tracerRadius, bulletInfo.tracerColor, bulletInfo.tracerLength, bulletInfo.tracerSpeed, bulletInfo.tracerMaterial, bulletInfo.tracerBloom);
 			if(result.hitType != RayCastHitType::None) {
 				auto *col = result.collisionObj.Get();
 				if(col != nullptr) {
@@ -69,7 +69,7 @@ void ecs::CShooterComponent::FireBullets(const BulletInfo &bulletInfo, const Vec
 						if(particleEffect.empty() && surfaceMaterialGeneric != nullptr)
 							particleEffect = surfaceMaterialGeneric->GetImpactParticleEffect();
 						if(!particleEffect.empty()) {
-							auto *pt = CParticleSystemComponent::Create(particleEffect);
+							auto *pt = pragma::ecs::CParticleSystemComponent::Create(particleEffect);
 							if(pt != nullptr) {
 								auto pTrComponent = pt->GetEntity().GetTransformComponent();
 								if(pTrComponent != nullptr) {

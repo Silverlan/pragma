@@ -187,7 +187,7 @@ DLLCLIENT void NET_cl_fire_bullet(NetPacket packet)
 		auto n = packet->Read<Vector3>();
 		auto surfaceMaterialId = packet->Read<int32_t>();
 		if(numTracer > 0 && (i % numTracer) == 0)
-			c_game->CreateParticleTracer(start, p, trRadius, trColor, trLength, trSpeed, trMat, trBloom);
+			c_game->CreateParticleTracer<pragma::ecs::CParticleSystemComponent>(start, p, trRadius, trColor, trLength, trSpeed, trMat, trBloom);
 
 		auto *surfaceMaterial = (surfaceMaterialId != -1) ? c_game->GetSurfaceMaterial(surfaceMaterialId) : nullptr;
 		auto *surfaceMaterialGeneric = c_game->GetSurfaceMaterial(0);

@@ -15,7 +15,6 @@ module;
 #include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/rendering/c_rendermode.h"
 #include <pragma/networking/nwm_util.h>
-#include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/components/submergible_component.hpp>
 #include <pragma/entities/components/movement_component.hpp>
@@ -37,6 +36,7 @@ module pragma.client.entities.components.character;
 import pragma.client.client_state;
 import pragma.client.entities.components.animated;
 import pragma.client.entities.components.eye;
+import pragma.client.entities.components.particle_system;
 import pragma.client.entities.components.sound_emitter;
 import pragma.client.entities.components.surface;
 
@@ -99,7 +99,7 @@ void CCharacterComponent::CreateWaterSplash()
 		auto pos = pTrComponent->GetPosition();
 		pos = pSurfC->ProjectToSurface(pos);
 		client->PlayWorldSound("fx.water_slosh", ALSoundType::Effect, pos);
-		auto *pt = pragma::CParticleSystemComponent::Create("watersplash");
+		auto *pt = pragma::ecs::CParticleSystemComponent::Create("watersplash");
 		if(pt != nullptr) {
 			auto pTrComponent = pt->GetEntity().GetTransformComponent();
 			if(pTrComponent != nullptr) {

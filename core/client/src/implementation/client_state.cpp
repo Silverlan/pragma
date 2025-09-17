@@ -21,7 +21,6 @@ module;
 #include <pragma/game/game_resources.hpp>
 #include <pragma/lua/libraries/lengine.h>
 #include <texturemanager/texturemanager.h>
-#include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include <pragma/lua/lua_error_handling.hpp>
 #include <pragma/lua/libraries/lutil.hpp>
 #include <pragma/lua/libraries/ludm.hpp>
@@ -48,6 +47,7 @@ module;
 module pragma.client.client_state;
 
 import pragma.client.audio;
+import pragma.client.entities.components;
 import pragma.client.gui;
 import pragma.client.model;
 import pragma.client.networking;
@@ -375,7 +375,7 @@ void ClientState::Close()
 	client = NULL;
 	m_modelManager->Clear();
 	GetMaterialManager().ClearUnused();
-	pragma::CParticleSystemComponent::ClearCache();
+	pragma::ecs::CParticleSystemComponent::ClearCache();
 }
 
 void ClientState::implFindSimilarConVars(const std::string &input, std::vector<SimilarCmdInfo> &similarCmds) const

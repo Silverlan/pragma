@@ -8,7 +8,6 @@ module;
 #include "pragma/game/c_game.h"
 #include "pragma/game/game_limits.h"
 #include "pragma/entities/components/base_transform_component.hpp"
-#include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/lua/libraries/c_lua_vulkan.h"
 #include "pragma/model/c_vertex_buffer_data.hpp"
 #include <pragma/model/model.h>
@@ -27,6 +26,7 @@ module;
 
 module pragma.client.entities.components.animated;
 
+import pragma.client.entities.components.particle_system;
 import pragma.client.entities.components.render;
 import pragma.client.entities.components.vertex_animated;
 import pragma.client.scripting.lua;
@@ -184,7 +184,7 @@ void CAnimatedComponent::ResetAnimation(const std::shared_ptr<Model> &mdl)
 		case ObjectAttachment::Type::ParticleSystem:
 			auto itParticleFile = objAttachment.keyValues.find("particle_file");
 			if(itParticleFile != objAttachment.keyValues.end())
-				CParticleSystemComponent::Precache(itParticleFile->second);
+				pragma::ecs::CParticleSystemComponent::Precache(itParticleFile->second);
 			auto itParticle = objAttachment.keyValues.find("particle");
 			if(itParticle != objAttachment.keyValues.end()) {
 				Vector3 translation {};
@@ -202,7 +202,7 @@ void CAnimatedComponent::ResetAnimation(const std::shared_ptr<Model> &mdl)
 				if(itAngles != objAttachment.keyValues.end())
 					rotation = uquat::create(EulerAngles(itAngles->second));
 
-				auto *pt = CParticleSystemComponent::Create(itParticle->second);
+				auto *pt = pragma::ecs::CParticleSystemComponent::Create(itParticle->second);
 				if(pt != nullptr) {
 					auto &entPt = pt->GetEntity();
 					auto pAttachableComponent = entPt.AddComponent<CAttachmentComponent>();

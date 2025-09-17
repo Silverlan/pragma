@@ -80,7 +80,6 @@ namespace pragma {
 	class LuaShaderManager;
 	class CPlayerComponent;
 	class BaseWorldComponent;
-	class CParticleSystemComponent;
 	class BaseEnvLightDirectionalComponent;
 };
 namespace uimg {
@@ -172,7 +171,8 @@ class DLLCLIENT CGame : public Game {
 	virtual void RegisterLuaClasses() override;
 	void HandleLuaNetPacket(NetPacket &packet);
 	void SendUserInput();
-	void CreateGiblet(const GibletCreateInfo &info, pragma::CParticleSystemComponent **particle);
+	template<typename TCPPM>
+		void CreateGiblet(const GibletCreateInfo &info, TCPPM **particle);
 	virtual pragma::BaseEntityComponent *CreateLuaEntityComponent(BaseEntity &ent, std::string classname) override;
 	virtual void CreateGiblet(const GibletCreateInfo &info) override;
 	virtual std::shared_ptr<ModelMesh> CreateModelMesh() const override;
@@ -258,7 +258,8 @@ class DLLCLIENT CGame : public Game {
 	virtual Float GetFrictionScale() const override;
 	virtual Float GetRestitutionScale() const override;
 
-	pragma::CParticleSystemComponent *CreateParticleTracer(const Vector3 &start, const Vector3 &end, float radius = BulletInfo::DEFAULT_TRACER_RADIUS, const Color &col = BulletInfo::DEFAULT_TRACER_COLOR, float length = BulletInfo::DEFAULT_TRACER_LENGTH,
+	template<typename TCPPM>
+	TCPPM *CreateParticleTracer(const Vector3 &start, const Vector3 &end, float radius = BulletInfo::DEFAULT_TRACER_RADIUS, const Color &col = BulletInfo::DEFAULT_TRACER_COLOR, float length = BulletInfo::DEFAULT_TRACER_LENGTH,
 	  float speed = BulletInfo::DEFAULT_TRACER_SPEED, const std::string &material = BulletInfo::DEFAULT_TRACER_MATERIAL, float bloomScale = BulletInfo::DEFAULT_TRACER_BLOOM);
 
 	virtual bool IsPhysicsSimulationEnabled() const override;

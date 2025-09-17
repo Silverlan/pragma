@@ -58,7 +58,7 @@ int Lua::util::Client::create_particle_tracer(lua_State *l)
 	auto *mat = Lua::IsSet(l, 7) ? Lua::CheckString(l, 7) : BulletInfo::DEFAULT_TRACER_MATERIAL.c_str();
 	auto bloomScale = Lua::IsSet(l, 8) ? Lua::CheckNumber(l, 8) : BulletInfo::DEFAULT_TRACER_BLOOM;
 
-	auto *particle = c_game->CreateParticleTracer(start, end, static_cast<float>(radius), *col, static_cast<float>(length), static_cast<float>(speed), mat, static_cast<float>(bloomScale));
+	auto *particle = c_game->CreateParticleTracer<pragma::CParticleSystemComponent>(start, end, static_cast<float>(radius), *col, static_cast<float>(length), static_cast<float>(speed), mat, static_cast<float>(bloomScale));
 	if(particle == nullptr)
 		return 0;
 	particle->PushLuaObject(l);

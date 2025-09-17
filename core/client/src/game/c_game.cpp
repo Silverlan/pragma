@@ -49,7 +49,6 @@
 #include <pragma/networking/enums.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/components/base_physics_component.hpp>
-#include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include <pragma/entities/components/velocity_component.hpp>
 #include <prosper_util.hpp>
 #include <image/prosper_sampler.hpp>
@@ -461,17 +460,18 @@ void CGame::InitializeWorldEnvironment() { m_worldEnvironment = WorldEnvironment
 void CGame::SetRenderClipPlane(const Vector4 &clipPlane) { m_clipPlane = clipPlane; }
 const Vector4 &CGame::GetRenderClipPlane() const { return m_clipPlane; }
 
-pragma::CParticleSystemComponent *CGame::CreateParticleTracer(const Vector3 &start, const Vector3 &end, float radius, const Color &col, float length, float speed, const std::string &material, float bloomScale)
+template<typename TCPPM>
+TCPPM *CGame::CreateParticleTracer(const Vector3 &start, const Vector3 &end, float radius, const Color &col, float length, float speed, const std::string &material, float bloomScale)
 {
 	std::stringstream ssColor;
 	ssColor << col.r << " " << col.g << " " << col.b << " " << col.a;
 	std::unordered_map<std::string, std::string> values {{"maxparticles", "1"}, {"max_node_count", "2"}, {"emission_rate", "10000"}, {"material", material}, {"radius", std::to_string(radius)}, {"color", ssColor.str()}, {"sort_particles", "0"}, {"bloom_scale", std::to_string(bloomScale)}};
-	auto *particle = pragma::CParticleSystemComponent::Create(values, nullptr);
+	auto *particle = pragma::ecs::CParticleSystemComponent::Create(values, nullptr);
 	if(particle == nullptr)
 		return nullptr;
 	std::unordered_map<std::string, std::string> beamValues {{"node_start", "1"}, {"node_end", "2"}, {"curvature", "0.0"}};
 	particle->AddRenderer("beam", beamValues);
-	auto hParticle = particle->GetHandle<pragma::CParticleSystemComponent>();
+	auto hParticle = particle->GetHandle<pragma::ecs::CParticleSystemComponent>();
 
 	auto dir = end - start;
 	auto prevDist = uvec::length(dir);
@@ -509,8 +509,10 @@ pragma::CParticleSystemComponent *CGame::CreateParticleTracer(const Vector3 &sta
 		prevDist = dist;
 	});
 	c_game->AddCallback("Think", cb);
-	return particle;
+	return reinterpret_cast<TCPPM*>(particle);
 }
+template pragma::CParticleSystemComponent *CGame::CreateParticleTracer(const Vector3 &start, const Vector3 &end, float radius, const Color &col, float length, float speed, const std::string &material, float bloomScale);
+template pragma::ecs::CParticleSystemComponent *CGame::CreateParticleTracer(const Vector3 &start, const Vector3 &end, float radius, const Color &col, float length, float speed, const std::string &material, float bloomScale);
 
 void CGame::SetRenderModeEnabled(pragma::rendering::SceneRenderPass renderMode, bool bEnabled) { m_renderModesEnabled[umath::to_integral(renderMode)] = bEnabled; }
 void CGame::EnableRenderMode(pragma::rendering::SceneRenderPass renderMode) { SetRenderModeEnabled(renderMode, true); }
@@ -596,13 +598,13 @@ void CGame::Initialize()
 	pragma::CRenderComponent::InitializeBuffers();
 	pragma::CLightComponent::InitializeBuffers();
 	CModelSubMesh::InitializeBuffers();
-	pragma::CParticleSystemComponent::InitializeBuffers();
+	pragma::ecs::CParticleSystemComponent::InitializeBuffers();
 
 	InitShaders();
 
-	pragma::CParticleSystemComponent::Precache("impact");
-	pragma::CParticleSystemComponent::Precache("muzzleflash");
-	pragma::CParticleSystemComponent::Precache("explosion");
+	pragma::ecs::CParticleSystemComponent::Precache("impact");
+	pragma::ecs::CParticleSystemComponent::Precache("muzzleflash");
+	pragma::ecs::CParticleSystemComponent::Precache("explosion");
 
 	// Initialize Scene (Has to be initialized AFTER shaders!)
 
@@ -896,13 +898,14 @@ uint32_t CGame::GetLOD(float dist, uint32_t maxLod) const
 	return static_cast<uint32_t>(lod);
 }
 
-void CGame::CreateGiblet(const GibletCreateInfo &info, pragma::CParticleSystemComponent **particle)
+template<typename TCPPM>
+	void CGame::CreateGiblet(const GibletCreateInfo &info, TCPPM **particle)
 {
 	if(particle != nullptr)
 		*particle = nullptr;
 	if(info.lifetime <= 0.f)
 		return;
-	auto *pt = pragma::CParticleSystemComponent::Create({{"maxparticles", "1"}, {"emission_rate", "10000"}, {"cast_shadows", "1"}, {"radius", std::to_string(info.scale)},
+	auto *pt = pragma::ecs::CParticleSystemComponent::Create({{"maxparticles", "1"}, {"emission_rate", "10000"}, {"cast_shadows", "1"}, {"radius", std::to_string(info.scale)},
 	  {"world_rotation", std::to_string(info.rotation.w) + " " + std::to_string(info.rotation.x) + " " + std::to_string(info.rotation.y) + " " + std::to_string(info.rotation.z)}});
 	if(pt == nullptr)
 		return;
@@ -939,10 +942,11 @@ void CGame::CreateGiblet(const GibletCreateInfo &info, pragma::CParticleSystemCo
 	pt->SetRemoveOnComplete(true);
 	pt->Start();
 	if(particle != nullptr)
-		*particle = pt;
+		*particle = reinterpret_cast<TCPPM*>(pt);
 }
+template void CGame::CreateGiblet(const GibletCreateInfo &info, pragma::CParticleSystemComponent **particle);
 
-void CGame::CreateGiblet(const GibletCreateInfo &info) { CreateGiblet(info, nullptr); }
+void CGame::CreateGiblet(const GibletCreateInfo &info) { CreateGiblet<pragma::CParticleSystemComponent>(info, nullptr); }
 
 WIBase *CGame::CreateGUIElement(std::string name, WIHandle *hParent)
 {

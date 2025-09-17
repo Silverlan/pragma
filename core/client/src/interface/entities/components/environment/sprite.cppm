@@ -5,11 +5,12 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/c_baseentity.h"
-#include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/entities/components/c_entity_component.hpp"
 #include <pragma/entities/environment/effects/env_sprite.h>
 
 export module pragma.client.entities.components.effects.sprite;
+
+import pragma.client.entities.components.particle_system;
 
 export namespace pragma {
 	class DLLCLIENT CSpriteComponent final : public BaseEnvSpriteComponent, public CBaseNetComponent {
@@ -21,7 +22,7 @@ export namespace pragma {
 		virtual void OnTick(double dt) override;
 		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 
-		void SetOrientationType(CParticleSystemComponent::OrientationType orientationType);
+		void SetOrientationType(ecs::CParticleSystemComponent::OrientationType orientationType);
 		virtual void StartParticle();
 		virtual void StopParticle();
 		virtual void InitializeLuaObject(lua_State *l) override;
@@ -32,9 +33,9 @@ export namespace pragma {
 		void StopAndRemoveEntity();
 	  protected:
 		void UpdateColor();
-		ComponentHandle<CParticleSystemComponent> m_hParticle = {};
+		ComponentHandle<ecs::CParticleSystemComponent> m_hParticle = {};
 		CallbackHandle m_hCbRenderCallback;
-		CParticleSystemComponent::OrientationType m_orientationType = CParticleSystemComponent::OrientationType::Aligned;
+		ecs::CParticleSystemComponent::OrientationType m_orientationType = ecs::CParticleSystemComponent::OrientationType::Aligned;
 	};
 };
 

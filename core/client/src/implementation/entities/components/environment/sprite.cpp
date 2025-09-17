@@ -56,7 +56,7 @@ void CSpriteComponent::UpdateColor()
 		m_hParticle->SetColorFactor(colorFactor);
 }
 
-void CSpriteComponent::SetOrientationType(pragma::CParticleSystemComponent::OrientationType orientationType) { m_orientationType = orientationType; }
+void CSpriteComponent::SetOrientationType(pragma::ecs::CParticleSystemComponent::OrientationType orientationType) { m_orientationType = orientationType; }
 
 util::EventReply CSpriteComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
@@ -107,7 +107,7 @@ void CSpriteComponent::StartParticle()
 		values.insert(std::make_pair("black_to_alpha", "1"));
 	if(spawnFlags & umath::to_integral(SpawnFlags::NoSoftParticles))
 		values.insert(std::make_pair("soft_particles", "0"));
-	auto *pt = pragma::CParticleSystemComponent::Create(values);
+	auto *pt = pragma::ecs::CParticleSystemComponent::Create(values);
 	if(pt == nullptr)
 		return;
 	pt->AddInitializer("radius_random", std::unordered_map<std::string, std::string> {{"radius_min", std::to_string(m_size)}, {"radius_max", std::to_string(m_size)}});
@@ -153,7 +153,7 @@ void CSpriteComponent::StartParticle()
 		pTrComponentPt->SetRotation(pTrComponent->GetRotation());
 	}
 	pt->Start();
-	m_hParticle = pt->GetHandle<pragma::CParticleSystemComponent>();
+	m_hParticle = pt->GetHandle<pragma::ecs::CParticleSystemComponent>();
 
 	UpdateColor();
 }

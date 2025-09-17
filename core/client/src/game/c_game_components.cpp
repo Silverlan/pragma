@@ -10,7 +10,6 @@
 // --template-include-location
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/environment/lights/c_env_light.h"
-#include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/components/c_entity_component.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
@@ -62,7 +61,7 @@ void CGame::InitializeEntityComponents(pragma::EntityComponentManager &component
 	componentManager.RegisterComponentType<pragma::CLightSpotComponent>("light_spot", {"rendering/lighting"});
 	componentManager.RegisterComponentType<pragma::CLightSpotVolComponent>("light_spot_volume", {"rendering/lighting"});
 	componentManager.RegisterComponentType<pragma::CMicrophoneComponent>("microphone", {"audio"});
-	componentManager.RegisterComponentType<pragma::CParticleSystemComponent>("particle_system", {"rendering/effects"});
+	componentManager.RegisterComponentType<pragma::ecs::CParticleSystemComponent>("particle_system", {"rendering/effects"});
 	componentManager.RegisterComponentType<pragma::CQuakeComponent>("quake", {"gameplay/effects"});
 	componentManager.RegisterComponentType<pragma::CSmokeTrailComponent>("smoke_trail", {"rendering/effects"});
 	componentManager.RegisterComponentType<pragma::CSoundComponent>("sound", {"audio"});

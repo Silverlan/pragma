@@ -5,6 +5,7 @@
 #include "pragma/entities/entity_component_system_t.hpp"
 #include "pragma/rendering/world_environment.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
+#include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/game/c_game.h"
 #include <pragma/console/convars.h>
 #include <prosper_util.hpp>
@@ -14,7 +15,6 @@
 #include <image/prosper_msaa_texture.hpp>
 #include "pragma/console/c_cvar.h"
 #include <pragma/entities/entity_iterator.hpp>
-#include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/rendering/shaders/particles/c_shader_particle_2d_base.hpp"
 #include <prosper_descriptor_set_group.hpp>
 

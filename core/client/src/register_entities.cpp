@@ -10,7 +10,6 @@
 #include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/entities/components/hitbox_mesh_bvh_builder.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
-#include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/entities/environment/lights/c_env_light.h"
 
 import pragma.client.entities;
@@ -39,7 +38,7 @@ void register_entites()
 	client_entities::register_entity<CEnvLightSpot>("env_light_spot");
 	client_entities::register_entity<CEnvLightSpotVol>("env_light_spot_vol");
 	client_entities::register_entity<CEnvMicrophone>("env_microphone");
-	client_entities::register_entity<CEnvParticleSystem>("env_particle_system");
+	client_entities::register_entity<pragma::ecs::CEnvParticleSystem>("env_particle_system");
 	client_entities::register_entity<CEnvQuake>("env_quake");
 	client_entities::register_entity<CEnvReflectionProbe>("env_reflection_probe");
 	client_entities::register_entity<CEnvSmokeTrail>("env_smoke_trail");
@@ -99,7 +98,7 @@ void register_entites()
     // Note: These have to match the serverside registrations in the exact same order!
     client_entities::register_networked_entity<CWorld>();
 	client_entities::register_networked_entity<CPropPhysics>();
-	client_entities::register_networked_entity<CEnvParticleSystem>();
+	client_entities::register_networked_entity<pragma::ecs::CEnvParticleSystem>();
 	client_entities::register_networked_entity<CEnvSound>();
 	client_entities::register_networked_entity<CEnvLightSpot>();
 	client_entities::register_networked_entity<CEnvLightDirectional>();

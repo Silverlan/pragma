@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/c_engine.h"
 #include "pragma/game/c_game.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
@@ -25,7 +24,7 @@ CSmokeTrailComponent::~CSmokeTrailComponent() { DestroyParticle(); }
 void CSmokeTrailComponent::Initialize()
 {
 	BaseEnvSmokeTrailComponent::Initialize();
-	pragma::CParticleSystemComponent::Precache("smoke.wpt");
+	pragma::ecs::CParticleSystemComponent::Precache("smoke.wpt");
 }
 void CSmokeTrailComponent::OnEntitySpawn()
 {
@@ -61,7 +60,7 @@ void CSmokeTrailComponent::InitializeParticle()
 	if(pt == nullptr)
 		return;
 	pt->Start();
-	m_hParticle = pt->GetHandle<pragma::CParticleSystemComponent>();
+	m_hParticle = pt->GetHandle<pragma::ecs::CParticleSystemComponent>();
 }
 
 void CSmokeTrailComponent::DestroyParticle()

@@ -10,8 +10,9 @@ module;
 
 export module pragma.client.entities.components.effects.fire;
 
+import pragma.client.entities.components.particle_system;
+
 export namespace pragma {
-	class CParticleSystemComponent;
 	class DLLCLIENT CFireComponent final : public BaseEnvFireComponent, public CBaseNetComponent {
 	  public:
 		CFireComponent(BaseEntity &ent) : BaseEnvFireComponent(ent) {}
@@ -22,7 +23,7 @@ export namespace pragma {
 		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
 	  protected:
-		ComponentHandle<CParticleSystemComponent> m_hParticle;
+		ComponentHandle<ecs::CParticleSystemComponent> m_hParticle;
 		void InitializeParticle();
 		void DestroyParticle();
 	};

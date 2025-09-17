@@ -10,8 +10,9 @@ module;
 
 export module pragma.client.entities.components.effects.smoke_trail;
 
+import pragma.client.entities.components.particle_system;
+
 export namespace pragma {
-	class CParticleSystemComponent;
 	class DLLCLIENT CSmokeTrailComponent final : public BaseEnvSmokeTrailComponent, public CBaseNetComponent {
 	  public:
 		CSmokeTrailComponent(BaseEntity &ent) : BaseEnvSmokeTrailComponent(ent) {}
@@ -23,7 +24,7 @@ export namespace pragma {
 		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void OnEntitySpawn() override;
 	  protected:
-		ComponentHandle<CParticleSystemComponent> m_hParticle = {};
+		ComponentHandle<ecs::CParticleSystemComponent> m_hParticle = {};
 		void InitializeParticle();
 		void DestroyParticle();
 	};

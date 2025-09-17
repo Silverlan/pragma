@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/components/basetoggle.h>
 #include <pragma/entities/entity_component_system_t.hpp>
@@ -17,7 +16,7 @@ CFireComponent::~CFireComponent() { DestroyParticle(); }
 void CFireComponent::Initialize()
 {
 	BaseEnvFireComponent::Initialize();
-	pragma::CParticleSystemComponent::Precache("fire.wpt");
+	pragma::ecs::CParticleSystemComponent::Precache("fire.wpt");
 }
 void CFireComponent::ReceiveData(NetPacket &packet) { m_fireType = packet->ReadString(); }
 util::EventReply CFireComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
@@ -36,12 +35,12 @@ void CFireComponent::InitializeParticle()
 	auto *pToggleComponent = static_cast<pragma::BaseToggleComponent *>(ent.FindComponent("toggle").get());
 	if((pToggleComponent != nullptr && pToggleComponent->IsTurnedOn() == false) || m_hParticle.valid() == true)
 		return;
-	auto *pt = pragma::CParticleSystemComponent::Create(m_fireType);
+	auto *pt = pragma::ecs::CParticleSystemComponent::Create(m_fireType);
 	if(pt == nullptr)
 		return;
 	pt->SetContinuous(true);
 	pt->Start();
-	m_hParticle = pt->GetHandle<pragma::CParticleSystemComponent>();
+	m_hParticle = pt->GetHandle<pragma::ecs::CParticleSystemComponent>();
 }
 
 void CFireComponent::DestroyParticle()

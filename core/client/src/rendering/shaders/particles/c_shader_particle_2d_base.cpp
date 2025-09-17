@@ -4,6 +4,7 @@
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/particles/c_shader_particle_2d_base.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
+#include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/rendering/render_processor.hpp"
@@ -174,7 +175,7 @@ void ShaderParticle2DBase::InitializeRenderPass(std::shared_ptr<prosper::IRender
 
 bool ShaderParticle2DBase::ShouldInitializePipeline(uint32_t pipelineIdx) { return ShaderSceneLit::ShouldInitializePipeline(GetBasePipelineIndex(pipelineIdx)); }
 
-void ShaderParticle2DBase::GetParticleSystemOrientationInfo(const Mat4 &matrix, const CParticleSystemComponent &particle, CParticleSystemComponent::OrientationType orientationType, Vector3 &up, Vector3 &right, float &nearZ, float &farZ, const Material *material, float camNearZ,
+void ShaderParticle2DBase::GetParticleSystemOrientationInfo(const Mat4 &matrix, const CParticleSystemComponent &particle, ParticleOrientationType orientationType, Vector3 &up, Vector3 &right, float &nearZ, float &farZ, const Material *material, float camNearZ,
   float camFarZ) const
 {
 	auto pTrComponent = particle.GetEntity().GetTransformComponent();
@@ -182,7 +183,7 @@ void ShaderParticle2DBase::GetParticleSystemOrientationInfo(const Mat4 &matrix, 
 
 	nearZ = camNearZ;
 	farZ = camFarZ;
-	if(orientationType != pragma::CParticleSystemComponent::OrientationType::World) {
+	if(orientationType != pragma::ParticleOrientationType::World) {
 		right = Vector3(matrix[0][0], matrix[1][0], matrix[2][0]);
 		uvec::normalize(&right);
 	}
@@ -196,10 +197,10 @@ void ShaderParticle2DBase::GetParticleSystemOrientationInfo(const Mat4 &matrix, 
 	}
 
 	switch(orientationType) {
-	case pragma::CParticleSystemComponent::OrientationType::World:
+	case pragma::ParticleOrientationType::World:
 		up = uquat::up(rot);
 		break;
-	case pragma::CParticleSystemComponent::OrientationType::Upright:
+	case pragma::ParticleOrientationType::Upright:
 		up = uquat::forward(rot);
 		break;
 	default:
@@ -208,7 +209,7 @@ void ShaderParticle2DBase::GetParticleSystemOrientationInfo(const Mat4 &matrix, 
 	}
 }
 
-void ShaderParticle2DBase::GetParticleSystemOrientationInfo(const Mat4 &matrix, const pragma::CParticleSystemComponent &particle, pragma::CParticleSystemComponent::OrientationType orientationType, Vector3 &up, Vector3 &right, float &nearZ, float &farZ, const Material *material,
+void ShaderParticle2DBase::GetParticleSystemOrientationInfo(const Mat4 &matrix, const pragma::CParticleSystemComponent &particle, pragma::ParticleOrientationType orientationType, Vector3 &up, Vector3 &right, float &nearZ, float &farZ, const Material *material,
   const pragma::BaseEnvCameraComponent *cam) const
 {
 	auto camNearZ = 0.f;
@@ -259,7 +260,7 @@ bool ShaderParticle2DBase::RecordBindScene(prosper::ICommandBuffer &cmd, const p
 	return cmd.RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics, layout, GetSceneDescriptorSetIndex(), descSets, dynamicOffsets);
 }
 
-bool ShaderParticle2DBase::RecordDraw(prosper::ShaderBindState &bindState, pragma::CSceneComponent &scene, const CRasterizationRendererComponent &renderer, const pragma::CParticleSystemComponent &ps, pragma::CParticleSystemComponent::OrientationType orientationType,
+bool ShaderParticle2DBase::RecordDraw(prosper::ShaderBindState &bindState, pragma::CSceneComponent &scene, const CRasterizationRendererComponent &renderer, const pragma::CParticleSystemComponent &ps, pragma::ParticleOrientationType orientationType,
   ParticleRenderFlags ptRenderFlags)
 {
 	if(RecordParticleMaterial(bindState, renderer, ps) == false)
@@ -416,18 +417,18 @@ Vector3 ShaderParticle2DBase::DoCalcVertexPosition(const pragma::CParticleSystem
 	Vector3 right {};
 	Vector3 up {};
 	switch(orientation) {
-	case pragma::CParticleSystemComponent::OrientationType::Upright:
+	case pragma::ParticleOrientationType::Upright:
 		{
 			auto dir = camUpWs; // 'camUp_ws' is the particle world-rotation if this orientation type is selected
 			right = uvec::cross(normalize(particleCenterWs - camPos), dir);
 			up = -dir;
 			break;
 		}
-	case pragma::CParticleSystemComponent::OrientationType::Static:
+	case pragma::ParticleOrientationType::Static:
 		right = uvec::UP;
 		up = camUpWs;
 		break;
-	case pragma::CParticleSystemComponent::OrientationType::World:
+	case pragma::ParticleOrientationType::World:
 		up = -uvec::get_normal(camUpWs);
 		right = -uvec::get_normal(camRightWs);
 		vsize = Vector2 {nearZ, farZ};

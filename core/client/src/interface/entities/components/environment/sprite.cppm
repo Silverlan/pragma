@@ -22,7 +22,7 @@ export namespace pragma {
 		virtual void OnTick(double dt) override;
 		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 
-		void SetOrientationType(ecs::CParticleSystemComponent::OrientationType orientationType);
+		void SetOrientationType(ecs::ParticleOrientationType orientationType);
 		virtual void StartParticle();
 		virtual void StopParticle();
 		virtual void InitializeLuaObject(lua_State *l) override;
@@ -35,7 +35,7 @@ export namespace pragma {
 		void UpdateColor();
 		ComponentHandle<ecs::CParticleSystemComponent> m_hParticle = {};
 		CallbackHandle m_hCbRenderCallback;
-		ecs::CParticleSystemComponent::OrientationType m_orientationType = ecs::CParticleSystemComponent::OrientationType::Aligned;
+		ecs::ParticleOrientationType m_orientationType = ecs::ParticleOrientationType::Aligned;
 	};
 };
 

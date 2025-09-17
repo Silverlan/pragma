@@ -134,7 +134,7 @@ void ShaderParticleAnimatedSprites::InitializeGfxPipeline(prosper::GraphicsPipel
 	ShaderParticleBase::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
 }
 
-bool ShaderParticleAnimatedSprites::RecordDraw(prosper::ShaderBindState &bindState, pragma::CSceneComponent &scene, const CRasterizationRendererComponent &renderer, const CParticleSystemComponent &ps, CParticleSystemComponent::OrientationType orientationType,
+bool ShaderParticleAnimatedSprites::RecordDraw(prosper::ShaderBindState &bindState, pragma::CSceneComponent &scene, const CRasterizationRendererComponent &renderer, const CParticleSystemComponent &ps, ParticleOrientationType orientationType,
   ParticleRenderFlags renderFlags)
 {
 	PushConstants pushConstants {};

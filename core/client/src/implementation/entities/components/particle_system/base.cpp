@@ -438,7 +438,7 @@ const auto PARTICLE_ANIM_BUFFER_INSTANCE_SIZE = sizeof(Vector2) * 2;
 	else if(ustring::compare<std::string>(key, "sort_particles"))
 		umath::set_flag(m_flags, Flags::SortParticles, ::util::to_boolean(value));
 	else if(ustring::compare<std::string>(key, "orientation_type"))
-		m_orientationType = static_cast<OrientationType>(::util::to_int(value));
+		m_orientationType = static_cast<ParticleOrientationType>(::util::to_int(value));
 	else if(ustring::compare<std::string>(key, "color"))
 		m_initialColor = Color(value);
 	else if(ustring::compare<std::string>(key, "loop"))
@@ -769,8 +769,8 @@ std::pair<Vector3, Vector3> ecs::CParticleSystemComponent::CalcRenderBounds() co
 	return bounds;
 }
 
-ecs::CParticleSystemComponent::OrientationType ecs::CParticleSystemComponent::GetOrientationType() const { return m_orientationType; }
-void ecs::CParticleSystemComponent::SetOrientationType(OrientationType type) { m_orientationType = type; }
+ecs::ParticleOrientationType ecs::CParticleSystemComponent::GetOrientationType() const { return m_orientationType; }
+void ecs::CParticleSystemComponent::SetOrientationType(ParticleOrientationType type) { m_orientationType = type; }
 
 void ecs::CParticleSystemComponent::SetRadius(float r)
 {

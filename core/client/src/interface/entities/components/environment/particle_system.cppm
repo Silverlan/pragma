@@ -29,6 +29,15 @@ export namespace pragma::ecs {
 	};
 	DLLCLIENT std::unordered_map<std::string, std::string> get_particle_key_values(lua_State *l, const luabind::map<std::string, void> &keyValues);
 	enum class ParticleRenderFlags : uint32_t { None = 0u, Bloom = 1u, DepthOnly = Bloom << 1u };
+	enum class ParticleOrientationType : uint8_t {
+		Aligned = 0,
+		Upright,
+		Static,
+		World,
+		Billboard,
+
+		Velocity // Velocity is a special enum that shouldn't be set directly
+	};
 	class DLLCLIENT CParticleSystemComponent final : public BaseEnvParticleSystemComponent, public CBaseNetComponent, public CParticleSystemBaseKeyValues {
 	  public:
 		static void RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts);
@@ -59,15 +68,6 @@ export namespace pragma::ecs {
 		static CParticleSystemComponent *Create(CParticleSystemComponent *parent = nullptr, bool bAutoSpawn = true);
 		static std::shared_ptr<Model> GenerateModel(Game &game, const std::vector<const CParticleSystemComponent *> &particleSystems);
 
-		enum class OrientationType : uint8_t {
-			Aligned = 0,
-			Upright,
-			Static,
-			World,
-			Billboard,
-
-			Velocity // Velocity is a special enum that shouldn't be set directly
-		};
 		enum class Flags : uint32_t {
 			None = 0u,
 			SoftParticles = 1u,
@@ -160,8 +160,8 @@ export namespace pragma::ecs {
 		void SetMaterial(Material *mat);
 		void SetMaterial(const char *mat);
 		Material *GetMaterial() const;
-		OrientationType GetOrientationType() const;
-		void SetOrientationType(OrientationType type);
+		ParticleOrientationType GetOrientationType() const;
+		void SetOrientationType(ParticleOrientationType type);
 		void SetNodeTarget(uint32_t node, CBaseEntity *ent);
 		void SetNodeTarget(uint32_t node, const Vector3 &pos);
 		uint32_t GetNodeCount() const;
@@ -374,7 +374,7 @@ export namespace pragma::ecs {
 		double m_tStartTime = 0.0;
 		float m_radius = 0.f;
 		float m_extent = 0.f;
-		OrientationType m_orientationType = OrientationType::Aligned;
+		ParticleOrientationType m_orientationType = ParticleOrientationType::Aligned;
 
 		std::shared_ptr<prosper::IBuffer> m_bufParticles = nullptr;
 		std::shared_ptr<prosper::IBuffer> m_bufParticleAnimData = nullptr;

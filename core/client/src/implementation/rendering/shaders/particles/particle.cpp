@@ -36,5 +36,5 @@ bool ShaderParticleRotational::RecordWorldRotationBuffer(prosper::ShaderBindStat
 void ShaderParticleRotational::GetParticleSystemOrientationInfo(const Mat4 &matrix, const pragma::CParticleSystemComponent &particle, Vector3 &up, Vector3 &right, float &nearZ, float &farZ, const Material *material, const pragma::BaseEnvCameraComponent *cam) const
 {
 	auto orType = particle.GetOrientationType();
-	return ShaderParticle2DBase::GetParticleSystemOrientationInfo(matrix, particle, (orType == pragma::CParticleSystemComponent::OrientationType::Aligned) ? orType : pragma::CParticleSystemComponent::OrientationType::World, up, right, nearZ, farZ, material, cam);
+	return ShaderParticle2DBase::GetParticleSystemOrientationInfo(matrix, particle, (orType == pragma::ParticleOrientationType::Aligned) ? orType : pragma::ParticleOrientationType::World, up, right, nearZ, farZ, material, cam);
 }

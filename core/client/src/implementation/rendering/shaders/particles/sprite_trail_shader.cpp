@@ -84,7 +84,7 @@ void ShaderParticleSpriteTrail::InitializeGfxPipeline(prosper::GraphicsPipelineC
 	ShaderParticleBase::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
 }
 
-bool ShaderParticleSpriteTrail::RecordDraw(prosper::ShaderBindState &bindState, pragma::CSceneComponent &scene, const CRasterizationRendererComponent &r, const CParticleSystemComponent &ps, CParticleSystemComponent::OrientationType orientationType, ParticleRenderFlags renderFlags)
+bool ShaderParticleSpriteTrail::RecordDraw(prosper::ShaderBindState &bindState, pragma::CSceneComponent &scene, const CRasterizationRendererComponent &r, const CParticleSystemComponent &ps, ParticleOrientationType orientationType, ParticleRenderFlags renderFlags)
 {
 	auto &renderers = ps.GetRenderers();
 	if(renderers.empty())

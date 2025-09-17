@@ -20,6 +20,7 @@
 #include <pragma/physics/physobj.h>
 #include <pragma/util/util_game.hpp>
 #include "pragma/console/c_cvar.h"
+#include "pragma/entities/components/c_entity_component.hpp"
 #include "pragma/rendering/c_rendermode.h"
 #include "pragma/rendering/render_queue_worker.hpp"
 #include "pragma/rendering/global_render_settings_buffer_data.hpp"
@@ -48,6 +49,7 @@
 #include <pragma/networking/enums.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/components/base_physics_component.hpp>
+#include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include <pragma/entities/components/velocity_component.hpp>
 #include <prosper_util.hpp>
 #include <image/prosper_sampler.hpp>

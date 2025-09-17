@@ -5,7 +5,9 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
+#include "pragma/cxxmodules.hpp"
 #include "pragma/entities/components/c_scene_component.hpp"
+#include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/particlesystem/c_particlemodifier.h"
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
@@ -69,7 +71,8 @@ void CParticleRendererSprite::RecordRender(prosper::ICommandBuffer &drawCmd, pra
 	auto &dsRenderSettings = c_game->GetGlobalRenderSettingsDescriptorSet();
 	auto *dsShadows = pragma::CShadowComponent::GetDescriptorSet();
 	shader->RecordBindScene(bindState.commandBuffer, *layout, scene, renderer, *dsScene, *dsRenderer, dsRenderSettings, *dsShadows);
-	shader->RecordDraw(bindState, scene, renderer, *m_particleSystem, (m_rotationalBuffer != nullptr && m_rotationalBuffer->ShouldRotationAlignVelocity()) ? pragma::CParticleSystemComponent::OrientationType::Velocity : m_particleSystem->GetOrientationType(), renderFlags);
+	auto orientationType = (m_rotationalBuffer != nullptr && m_rotationalBuffer->ShouldRotationAlignVelocity()) ? pragma::ParticleOrientationType::Velocity : m_particleSystem->GetOrientationType();
+	shader->RecordDraw(bindState, scene, renderer, *m_particleSystem, orientationType, renderFlags);
 	shader->RecordEndDraw(bindState);
 }
 

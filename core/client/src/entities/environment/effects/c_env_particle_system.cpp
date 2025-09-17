@@ -860,7 +860,7 @@ void CParticleSystemComponent::RegisterLuaBindings(lua_State *l, luabind::module
 		Lua::Push<Material *>(l, mat);
 	}));
 	defCParticleSystem.def("SetOrientationType", static_cast<void (*)(lua_State *, pragma::CParticleSystemComponent &, uint32_t)>([](lua_State *l, pragma::CParticleSystemComponent &hComponent, uint32_t orientationType) {
-		hComponent.SetOrientationType(static_cast<pragma::CParticleSystemComponent::OrientationType>(orientationType));
+		hComponent.SetOrientationType(static_cast<pragma::ParticleOrientationType>(orientationType));
 	}));
 	defCParticleSystem.def("GetOrientationType", static_cast<void (*)(lua_State *, pragma::CParticleSystemComponent &)>([](lua_State *l, pragma::CParticleSystemComponent &hComponent) { Lua::PushInt(l, umath::to_integral(hComponent.GetOrientationType())); }));
 	defCParticleSystem.def("IsContinuous", static_cast<void (*)(lua_State *, pragma::CParticleSystemComponent &)>([](lua_State *l, pragma::CParticleSystemComponent &hComponent) { Lua::PushBool(l, hComponent.IsContinuous()); }));
@@ -1059,11 +1059,11 @@ void CParticleSystemComponent::RegisterLuaBindings(lua_State *l, luabind::module
 		Lua::PushInt(l,animData->fps);
 	}));
 #endif
-	defCParticleSystem.add_static_constant("ORIENTATION_TYPE_ALIGNED", umath::to_integral(pragma::CParticleSystemComponent::OrientationType::Aligned));
-	defCParticleSystem.add_static_constant("ORIENTATION_TYPE_UPRIGHT", umath::to_integral(pragma::CParticleSystemComponent::OrientationType::Upright));
-	defCParticleSystem.add_static_constant("ORIENTATION_TYPE_STATIC", umath::to_integral(pragma::CParticleSystemComponent::OrientationType::Static));
-	defCParticleSystem.add_static_constant("ORIENTATION_TYPE_WORLD", umath::to_integral(pragma::CParticleSystemComponent::OrientationType::World));
-	defCParticleSystem.add_static_constant("ORIENTATION_TYPE_BILLBOARD", umath::to_integral(pragma::CParticleSystemComponent::OrientationType::Billboard));
+	defCParticleSystem.add_static_constant("ORIENTATION_TYPE_ALIGNED", umath::to_integral(pragma::ParticleOrientationType::Aligned));
+	defCParticleSystem.add_static_constant("ORIENTATION_TYPE_UPRIGHT", umath::to_integral(pragma::ParticleOrientationType::Upright));
+	defCParticleSystem.add_static_constant("ORIENTATION_TYPE_STATIC", umath::to_integral(pragma::ParticleOrientationType::Static));
+	defCParticleSystem.add_static_constant("ORIENTATION_TYPE_WORLD", umath::to_integral(pragma::ParticleOrientationType::World));
+	defCParticleSystem.add_static_constant("ORIENTATION_TYPE_BILLBOARD", umath::to_integral(pragma::ParticleOrientationType::Billboard));
 
 	defCParticleSystem.add_static_constant("ALPHA_MODE_ADDITIVE", umath::to_integral(pragma::ParticleAlphaMode::Additive));
 	defCParticleSystem.add_static_constant("ALPHA_MODE_ADDITIVE_BY_COLOR", umath::to_integral(pragma::ParticleAlphaMode::AdditiveByColor));

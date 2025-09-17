@@ -5,6 +5,7 @@
 #include "pragma/rendering/shaders/c_shader_lua.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/rendering/render_processor.hpp"
+#include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/rendering/shader_material/shader_material.hpp"
 #include "pragma/lua/libraries/c_lua_vulkan.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>

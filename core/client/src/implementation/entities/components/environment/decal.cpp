@@ -255,7 +255,7 @@ void CDecalComponent::Initialize()
 	/*auto &ent = static_cast<CBaseEntity&>(GetEntity());
 	auto pSpriteComponent = ent.AddComponent<pragma::CSpriteComponent>();
 	if(pSpriteComponent.valid())
-		pSpriteComponent->SetOrientationType(pragma::CParticleSystemComponent::OrientationType::World);*/
+		pSpriteComponent->SetOrientationType(pragma::ParticleOrientationType::World);*/
 }
 
 void CDecalComponent::OnEntitySpawn()

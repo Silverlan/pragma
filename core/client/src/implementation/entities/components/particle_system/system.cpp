@@ -184,7 +184,7 @@ std::shared_ptr<Model> ecs::CParticleSystemComponent::GenerateModel(Game &game, 
 		if(skinTexIdx.has_value() == false)
 			continue;
 		auto orientationType = pts->GetOrientationType();
-		pShader->GetParticleSystemOrientationInfo(cam->GetProjectionMatrix() * cam->GetViewMatrix(), *CXXM_RCAST(const pragma::CParticleSystemComponent*, pts), CXXM_SCAST(pragma::CParticleSystemComponent::OrientationType, orientationType), camUpWs, camRightWs, ptNearZ, ptFarZ, mat, nearZ, farZ);
+		pShader->GetParticleSystemOrientationInfo(cam->GetProjectionMatrix() * cam->GetViewMatrix(), *CXXM_RCAST(const pragma::CParticleSystemComponent*, pts), CXXM_SCAST(pragma::ParticleOrientationType, orientationType), camUpWs, camRightWs, ptNearZ, ptFarZ, mat, nearZ, farZ);
 
 		auto *spriteSheetAnim = pts->GetSpriteSheetAnimation();
 		auto &particles = pts->GetRenderParticleData();
@@ -878,7 +878,7 @@ void ecs::CParticleSystemComponent::RegisterLuaBindings(lua_State *l, luabind::m
 		Lua::Push<Material *>(l, mat);
 	}));
 	defCParticleSystem.def("SetOrientationType", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, uint32_t)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t orientationType) {
-		hComponent.SetOrientationType(static_cast<pragma::ecs::CParticleSystemComponent::OrientationType>(orientationType));
+		hComponent.SetOrientationType(static_cast<pragma::ecs::ParticleOrientationType>(orientationType));
 	}));
 	defCParticleSystem.def("GetOrientationType", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushInt(l, umath::to_integral(hComponent.GetOrientationType())); }));
 	defCParticleSystem.def("IsContinuous", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushBool(l, hComponent.IsContinuous()); }));
@@ -1077,11 +1077,11 @@ void ecs::CParticleSystemComponent::RegisterLuaBindings(lua_State *l, luabind::m
 		Lua::PushInt(l,animData->fps);
 	}));
 #endif
-	defCParticleSystem.add_static_constant("ORIENTATION_TYPE_ALIGNED", umath::to_integral(pragma::ecs::CParticleSystemComponent::OrientationType::Aligned));
-	defCParticleSystem.add_static_constant("ORIENTATION_TYPE_UPRIGHT", umath::to_integral(pragma::ecs::CParticleSystemComponent::OrientationType::Upright));
-	defCParticleSystem.add_static_constant("ORIENTATION_TYPE_STATIC", umath::to_integral(pragma::ecs::CParticleSystemComponent::OrientationType::Static));
-	defCParticleSystem.add_static_constant("ORIENTATION_TYPE_WORLD", umath::to_integral(pragma::ecs::CParticleSystemComponent::OrientationType::World));
-	defCParticleSystem.add_static_constant("ORIENTATION_TYPE_BILLBOARD", umath::to_integral(pragma::ecs::CParticleSystemComponent::OrientationType::Billboard));
+	defCParticleSystem.add_static_constant("ORIENTATION_TYPE_ALIGNED", umath::to_integral(pragma::ecs::ParticleOrientationType::Aligned));
+	defCParticleSystem.add_static_constant("ORIENTATION_TYPE_UPRIGHT", umath::to_integral(pragma::ecs::ParticleOrientationType::Upright));
+	defCParticleSystem.add_static_constant("ORIENTATION_TYPE_STATIC", umath::to_integral(pragma::ecs::ParticleOrientationType::Static));
+	defCParticleSystem.add_static_constant("ORIENTATION_TYPE_WORLD", umath::to_integral(pragma::ecs::ParticleOrientationType::World));
+	defCParticleSystem.add_static_constant("ORIENTATION_TYPE_BILLBOARD", umath::to_integral(pragma::ecs::ParticleOrientationType::Billboard));
 
 	defCParticleSystem.add_static_constant("ALPHA_MODE_ADDITIVE", umath::to_integral(pragma::ParticleAlphaMode::Additive));
 	defCParticleSystem.add_static_constant("ALPHA_MODE_ADDITIVE_BY_COLOR", umath::to_integral(pragma::ParticleAlphaMode::AdditiveByColor));

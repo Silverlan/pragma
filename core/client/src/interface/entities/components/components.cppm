@@ -90,6 +90,7 @@ export import pragma.client.entities.components.observable;
 export import pragma.client.entities.components.observer;
 export import pragma.client.entities.components.optical_camera;
 export import pragma.client.entities.components.ownable;
+export import pragma.client.entities.components.particle_system;
 export import pragma.client.entities.components.physics;
 export import pragma.client.entities.components.player;
 export import pragma.client.entities.components.point_at_target;

@@ -4,8 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/c_engine.h"
-#include "pragma/game/c_game.h"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <prosper_descriptor_set_group.hpp>
 
@@ -14,8 +12,8 @@ module pragma.client.rendering.shaders;
 import :world_noop;
 
 import pragma.client.client_state;
+import pragma.client.engine;
 
-extern CGame *c_game;
 extern ClientState *client;
 extern CEngine *c_engine;
 

@@ -4,7 +4,6 @@
 #include "stdafx_client.h"
 // prosper TODO
 #if 0
-#include "pragma/game/c_game.h"
 #include <shader/prosper_pipeline_create_info.hpp>
 
 using namespace Shader;

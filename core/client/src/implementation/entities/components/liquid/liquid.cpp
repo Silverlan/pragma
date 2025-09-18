@@ -5,9 +5,9 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/rendering/c_rendermode.h"
+#include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include <pragma/physics/physobj.h>
 #include "pragma/model/c_modelmesh.h"
-#include "pragma/game/c_game.h"
 #include "pragma/entities/baseentity_luaobject.h"
 #include "pragma/entities/components/c_model_component.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
@@ -26,9 +26,7 @@ import pragma.client.physics;
 
 using namespace pragma;
 
-extern CGame *c_game;
-
-CLiquidComponent::CLiquidComponent(BaseEntity &ent) : BaseFuncLiquidComponent(ent) { pragma::ecs::CParticleSystemComponent::Precache("water"); }
+CLiquidComponent::CLiquidComponent(BaseEntity &ent) : BaseFuncLiquidComponent(ent) { pragma::CParticleSystemComponent::Precache("water"); }
 CLiquidComponent::~CLiquidComponent() {}
 void CLiquidComponent::Initialize()
 {

@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 #include "pragma/rendering/shaders/world/c_shader_prepass.hpp"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/rendering/c_settings.hpp"
@@ -20,7 +19,10 @@
 #include <image/prosper_msaa_texture.hpp>
 #include <sharedutils/util_shaderinfo.hpp>
 
+import pragma.client.client_state;
+import pragma.client.engine;
 import pragma.client.entities.components;
+import pragma.client.game;
 import pragma.client.rendering.shaders;
 
 extern CEngine *c_engine;

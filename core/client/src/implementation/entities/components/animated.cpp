@@ -4,8 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/c_engine.h"
-#include "pragma/game/c_game.h"
 #include "pragma/game/game_limits.h"
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/lua/libraries/c_lua_vulkan.h"
@@ -26,6 +24,7 @@ module;
 
 module pragma.client.entities.components.animated;
 
+import pragma.client.engine;
 import pragma.client.entities.components.particle_system;
 import pragma.client.entities.components.render;
 import pragma.client.entities.components.vertex_animated;
@@ -34,8 +33,6 @@ import pragma.client.scripting.lua;
 extern CEngine *c_engine;
 
 using namespace pragma;
-
-extern CGame *c_game;
 
 ComponentEventId CAnimatedComponent::EVENT_ON_SKELETON_UPDATED = INVALID_COMPONENT_ID;
 ComponentEventId CAnimatedComponent::EVENT_ON_BONE_MATRICES_UPDATED = INVALID_COMPONENT_ID;

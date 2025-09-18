@@ -6,12 +6,11 @@ module;
 #include "stdafx_client.h"
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
-#include "pragma/c_engine.h"
-#include "pragma/game/c_game.h"
 
 module pragma.client.entities.components.raytracing_renderer;
 
 import pragma.client.client_state;
+import pragma.client.engine;
 
 extern CEngine *c_engine;
 

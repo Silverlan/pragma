@@ -6,7 +6,6 @@
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/rendering/render_queue.hpp"
 #include "pragma/rendering/render_stats.hpp"
-#include "pragma/game/c_game.h"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/rendering/render_processor.hpp"
@@ -16,12 +15,13 @@
 #include <image/prosper_render_target.hpp>
 #include <pragma/model/c_vertex_buffer_data.hpp>
 
+import pragma.client.client_state;
+import pragma.client.engine;
 import pragma.client.entities.components;
 import pragma.client.model;
 
 extern CEngine *c_engine;
 extern ClientState *client;
-extern CGame *c_game;
 
 pragma::rendering::DepthStageRenderProcessor::DepthStageRenderProcessor(const util::RenderPassDrawInfo &drawSceneInfo, const Vector4 &drawOrigin) : BaseRenderProcessor {drawSceneInfo, drawOrigin} { SetCountNonOpaqueMaterialsOnly(true); }
 uint32_t pragma::rendering::DepthStageRenderProcessor::Render(const pragma::rendering::RenderQueue &renderQueue, RenderPass renderPass, RenderPassStats *optStats, std::optional<uint32_t> worldRenderQueueIndex)

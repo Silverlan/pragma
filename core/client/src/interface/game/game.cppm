@@ -1,103 +1,78 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_GAME_H__
-#define __C_GAME_H__
+module;
 
 #include "pragma/c_enginedefinitions.h"
 #include "pragma/clientdefinitions.h"
 #include "pragma/rendering/c_renderflags.h"
 #include "pragma/entities/c_baseentity.h"
+#include "pragma/rendering/c_sci_gpu_timer_manager.hpp"
+#include "pragma/rendering/world_environment.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/lua/c_lua_gui_manager.h"
+#include "alsound_effect.hpp"
+#include "pragma/entities/baseworld.h"
+#include "pragma/rendering/game_world_shader_settings.hpp"
 #include "pragma/rendering/lighting/shadows/c_shadow_type.hpp"
 #include "pragma/input/input_binding_layer_lua.hpp"
-#include <material.h>
+#include "pragma/rendering/shaders/c_shader_lua.hpp"
+#include "pragma/rendering/global_render_settings_buffer_data.hpp"
+#include "pragma/rendering/render_queue.hpp"
+#include "pragma/rendering/global_shader_input_manager.hpp"
+#include "pragma/entities/environment/lights/env_light_directional.h"
+#include "alsound_effect.hpp"
+#include <cmaterial.h>
+#include "util_image_buffer.hpp"
+#include "wgui/wibase.h"
+#include "image/prosper_image.hpp"
+#include "prosper_command_buffer.hpp"
+#include "pragma/entities/environment/effects/c_env_particle_system.h"
+#include "pragma/rendering/render_queue_worker.hpp"
 #include <pragma/game/game.h>
 #include <pragma/input/inkeys.h>
 #include <mathutil/color.h>
 #include <pragma/util/bulletinfo.h>
+#include "pragma/rendering/scene/util_draw_scene_info.hpp"
+#include "prosper_descriptor_set_group.hpp"
 #include <queue>
 #include <wgui/wihandle.h>
 #include <sharedutils/property/util_property.hpp>
 #include <sharedutils/util_shared_handle.hpp>
+#include <alsoundsystem.hpp>
+#include <alsoundsystem_create_effect.hpp>
 
-#ifdef _MSC_VER
-namespace pragma::string {
-	class Utf8String;
-};
-#else
+export module pragma.client.game;
+
+import pragma.client.entities.components.player;
+import pragma.platform;
 import pragma.string.unicode;
-#endif
 
-static constexpr auto LOD_SWAP_DISTANCE = 500.f;
-static constexpr auto LOD_SWAP_DISTANCE_SQR = umath::pow2(LOD_SWAP_DISTANCE);
+export {
+	inline constexpr auto LOD_SWAP_DISTANCE = 500.f;
+	inline constexpr auto LOD_SWAP_DISTANCE_SQR = umath::pow2(LOD_SWAP_DISTANCE);
 
-struct DLLCLIENT KeyAction {
-	KeyAction(int key, int action)
-	{
-		this->key = key;
-		this->action = action;
-	}
-	int key, action;
-};
-
-class WIBase;
-using WIHandle = util::TWeakSharedHandle<WIBase>;
-
-class CBaseEntity;
-class CMaterial;
-class WorldEnvironment;
-namespace al {
-	class IEffect;
-};
-namespace GLFW {
-	enum class MouseButton : uint32_t;
-	enum class Key : int32_t;
-	enum class KeyState : uint32_t;
-	enum class Modifier : uint32_t;
+	struct DLLCLIENT KeyAction {
+		KeyAction(int key, int action)
+		{
+			this->key = key;
+			this->action = action;
+		}
+		int key, action;
+	};
 };
 
 // These are only used for the transition phase to c++20 modules to resolve
 // some predeclaration issues. Once the transition is complete, these types should be
 // reverted to the actual types.
-namespace pragma {
+export namespace pragma {
     struct cxxm_LuaParticleModifierManager {};
     using cxxm_LuaParticleModifierManager_vp = void;
 };
 
-namespace pragma {
-	namespace debug {
-		class GPUProfilingStage;
-	};
-	namespace rendering {
-		class RenderQueueBuilder;
-		class RenderQueueWorkerManager;
-		class GlobalShaderInputDataManager;
-		struct GameWorldShaderSettings;
-		struct GlobalRenderSettingsBufferData;
-	};
-	class LuaShaderManager;
-	class CPlayerComponent;
-	class BaseWorldComponent;
-	class BaseEnvLightDirectionalComponent;
-};
-namespace uimg {
-	class ImageBuffer;
-	struct TextureInfo;
-};
-namespace prosper {
-	class DescriptorSetGroup;
-	class IImage;
-	class IDescriptorSet;
-	class ICommandBuffer;
-};
-namespace util {
-	struct DrawSceneInfo;
-};
 #pragma warning(push)
 #pragma warning(disable : 4251)
-class DLLCLIENT CGame : public Game {
+export class DLLCLIENT CGame : public Game {
   public:
 	CGame(NetworkState *state);
 	virtual ~CGame() override;
@@ -183,8 +158,6 @@ class DLLCLIENT CGame : public Game {
 	bool StopGPUProfilingStage();
 	pragma::debug::ProfilingStageManager<pragma::debug::GPUProfilingStage> *GetGPUProfilingStageManager();
 
-	template<class TEfxProperties>
-	std::shared_ptr<al::IEffect> CreateAuxEffect(const std::string &name, const TEfxProperties &props);
 	std::shared_ptr<al::IEffect> GetAuxEffect(const std::string &name);
 
 	pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage> *GetProfilingStageManager();
@@ -549,27 +522,51 @@ class DLLCLIENT CGame : public Game {
 	virtual void InitializeEntityComponents(pragma::EntityComponentManager &componentManager) override;
 	void InitializeWorldEnvironment();
 };
-REGISTER_BASIC_BITWISE_OPERATORS(CGame::SoundCacheFlags);
-REGISTER_BASIC_BITWISE_OPERATORS(CGame::GameShader);
-REGISTER_BASIC_BITWISE_OPERATORS(CGame::StateFlags)
+export {
+	REGISTER_BASIC_BITWISE_OPERATORS(CGame::SoundCacheFlags)
+	REGISTER_BASIC_BITWISE_OPERATORS(CGame::GameShader)
+	REGISTER_BASIC_BITWISE_OPERATORS(CGame::StateFlags)
+}
 #pragma warning(pop)
 
-template<class T>
-T *CGame::CreateEntity(unsigned int idx)
-{
-	if(umath::is_flag_set(m_flags, GameFlags::ClosingGame))
-		return nullptr;
-	T *ent = new T();
-	SetupEntity(ent, idx);
-	return ent;
-}
+export {
+	template<class T>
+	T *CGame::CreateEntity(unsigned int idx)
+	{
+		if(umath::is_flag_set(m_flags, GameFlags::ClosingGame))
+			return nullptr;
+		T *ent = new T();
+		SetupEntity(ent, idx);
+		return ent;
+	}
 
-template<class T>
-T *CGame::CreateEntity()
-{
-	if(umath::is_flag_set(m_flags, GameFlags::ClosingGame))
-		return nullptr;
-	return CreateEntity<T>(GetFreeEntityIndex());
-}
+	template<class T>
+	T *CGame::CreateEntity()
+	{
+		if(umath::is_flag_set(m_flags, GameFlags::ClosingGame))
+			return nullptr;
+		return CreateEntity<T>(GetFreeEntityIndex());
+	}
 
-#endif
+	template<class TElement>
+	TElement *CGame::CreateGUIElement(WIBase *parent)
+	{
+		TElement *p = WGUI::GetInstance().Create<TElement>(parent);
+		if(p == nullptr)
+			return nullptr;
+		//InitializeGUIElement(p);
+		return p;
+	}
+	template<class TElement>
+	TElement *CGame::CreateGUIElement(WIHandle *hParent)
+	{
+		WIBase *pParent = nullptr;
+		if(hParent != nullptr && hParent->IsValid())
+			pParent = hParent->get();
+		return CreateGUIElement<TElement>(pParent);
+	}
+
+	namespace pragma {
+		DLLCLIENT CGame *get_client_game();
+	};
+};

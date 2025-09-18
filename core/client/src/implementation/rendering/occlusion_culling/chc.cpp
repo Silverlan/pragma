@@ -7,18 +7,19 @@ module;
 #include "pragma/console/c_cvar.h"
 #include <pragma/console/convars.h>
 #include <pragma/math/intersection.h>
-#include "pragma/game/c_game.h"
 #include "pragma/entities/c_baseentity.h"
 #include <wgui/types/wirect.h>
 #include "pragma/entities/c_baseentity.h"
 #include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/model/c_modelmesh.h"
-#include "pragma/game/c_game_createguielement.h"
 
 module pragma.client.rendering.occlusion_culling;
 
 import :chc;
+
+import pragma.client.engine;
+import pragma.client.game;
 
 DEFINE_BASE_HANDLE(DLLCLIENT, CHCNode, CHCNode);
 

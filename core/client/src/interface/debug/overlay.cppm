@@ -8,7 +8,6 @@ module;
 #include "buffers/prosper_buffer.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "wgui/types/witext.h"
-#include "pragma/c_engine.h"
 #include <pragma/math/angle/wvangle.h>
 #include <mathutil/color.h>
 #include <mathutil/glmutil.h>
@@ -18,6 +17,7 @@ module;
 export module pragma.client.debug.overlay;
 
 import pragma.client.client_state;
+import pragma.client.engine;
 
 export namespace DebugRenderer {
 	enum class DLLCLIENT Type : uint32_t {

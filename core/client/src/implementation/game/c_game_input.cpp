@@ -1,18 +1,9 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/c_engine.h"
-#include "pragma/game/c_game.h"
-
-#ifdef _MSC_VER
-namespace pragma::string {
-	class Utf8String;
-	class Utf8StringView;
-	class Utf8StringArg;
-};
-#endif
-
 #include <pragma/lua/luacallback.h>
 #include "luasystem.h"
 #include <pragma/lua/luafunction_call.h>
@@ -21,6 +12,9 @@ namespace pragma::string {
 #include <sharedutils/scope_guard.h>
 #include <prosper_window.hpp>
 
+module pragma.client.game;
+
+import pragma.client.engine;
 import pragma.string.unicode;
 
 extern CEngine *c_engine;

@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 #include <pragma/lua/lentity_component_lua.hpp>
 #include <pragma/game/game_entity_component.hpp>
 #include <pragma/entities/entity_component_manager.hpp>
@@ -13,6 +14,8 @@
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/components/c_entity_component.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
+
+module pragma.client.game;
 
 import pragma.client.entities.components;
 

@@ -4,19 +4,9 @@
 module;
 
 #include "stdafx_client.h"
-
-#ifdef _MSC_VER
-namespace pragma::string {
-	class Utf8String;
-	class Utf8StringView;
-	class Utf8StringArg;
-};
-#endif
-
 #include "pragma/input/inputhelper.h"
 #include "cmaterialmanager.h"
 #include "luasystem.h"
-#include "pragma/c_engine.h"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/entities/components/c_scene_component.hpp"
@@ -26,7 +16,6 @@ namespace pragma::string {
 #include <wgui/types/witext.h>
 #include <texturemanager/texturemanager.h>
 #include "textureinfo.h"
-#include "pragma/game/c_game.h"
 #include <cmaterial_manager2.hpp>
 #include <pragma/lua/libraries/lengine.h>
 #include <pragma/lua/libraries/lfile.h>
@@ -40,10 +29,9 @@ module pragma.client.scripting.lua.libraries.engine;
 
 import util_zip;
 import pragma.client.client_state;
+import pragma.client.engine;
 import pragma.client.entities.components.particle_system;
-#ifndef _MSC_VER
-import pragma.string.unicode;
-#endif
+import pragma.client.game;
 
 extern CEngine *c_engine;
 extern ClientState *client;

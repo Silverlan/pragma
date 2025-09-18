@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 #include "pragma/console/c_cvar.h"
 #include <pragma/entities/components/base_physics_component.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
@@ -15,6 +16,10 @@
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
+module pragma.client.game;
+
+import pragma.client.client_state;
+import pragma.client.engine;
 import pragma.client.entities.components;
 
 extern CEngine *c_engine;

@@ -17,12 +17,11 @@ module;
 #include "pragma/rendering/render_queue_worker.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/baseentity_events.hpp>
-#include "pragma/c_engine.h"
-#include "pragma/game/c_game.h"
 
 module pragma.client.entities.components.env_sky_camera;
 
 import pragma.client.client_state;
+import pragma.client.engine;
 import pragma.client.entities.components.game_occlusion_culler;
 import pragma.client.entities.components.rasterization_renderer;
 import pragma.client.entities.components.render;
@@ -30,6 +29,7 @@ import pragma.client.entities.components.renderer;
 import pragma.client.entities.components.toggle;
 import pragma.client.entities.components.transform;
 import pragma.client.entities.components.world;
+import pragma.client.game;
 
 extern CEngine *c_engine;
 extern ClientState *client;

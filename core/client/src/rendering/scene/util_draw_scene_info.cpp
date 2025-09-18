@@ -2,11 +2,12 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/components/c_scene_component.hpp"
 #include <prosper_command_buffer.hpp>
+
+import pragma.client.game;
 
 using namespace pragma::rendering;
 

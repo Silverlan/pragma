@@ -4,10 +4,11 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/game/c_game.h"
 #include <util_image.hpp>
 
 export module pragma.client.util.screenshot;
+
+import pragma.client.game;
 
 export namespace util {
 	struct RtScreenshotSettings {

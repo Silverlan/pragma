@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/environment/lights/c_env_light.h"
 #include "pragma/entities/entity_iterator.hpp"
@@ -25,12 +24,13 @@ module;
 module pragma.client.entities.components.pp_volumetric;
 
 import pragma.client.model;
+import pragma.client.engine;
 import pragma.client.entities.components.color;
 import pragma.client.entities.components.lights.spot_vol;
 import pragma.client.entities.components.radius;
 import pragma.client.entities.components.rasterization_renderer;
 import pragma.client.entities.components.render;
-
+import pragma.client.game;
 import pragma.client.rendering.shaders;
 
 extern CGame *c_game;

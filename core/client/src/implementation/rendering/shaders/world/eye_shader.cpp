@@ -4,11 +4,9 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 #include "pragma/rendering/render_processor.hpp"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
-#include "pragma/c_engine.h"
 #include <cmaterial.h>
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <prosper_command_buffer.hpp>
@@ -18,9 +16,9 @@ module pragma.client.rendering.shaders;
 import :world_eye;
 
 import pragma.client.client_state;
+import pragma.client.engine;
 import pragma.client.entities.components;
 
-extern CGame *c_game;
 extern ClientState *client;
 extern CEngine *c_engine;
 

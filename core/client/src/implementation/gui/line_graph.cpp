@@ -4,17 +4,17 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/c_engine.h"
-#include "pragma/game/c_game.h"
 #include <wgui/types/wirect.h>
 
 module pragma.client.gui;
 
 import :line_graph;
 
+import pragma.client.client_state;
+import pragma.client.engine;
+
 extern CEngine *c_engine;
 extern ClientState *client;
-extern CGame *c_game;
 
 LINK_WGUI_TO_CLASS(WILineGraph, WILineGraph);
 

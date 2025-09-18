@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 #include "pragma/entities/components/base_character_component.hpp"
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
@@ -15,6 +14,8 @@ module;
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
 module pragma.client.entities.components.attachment;
+
+import pragma.client.game;
 
 using namespace pragma;
 

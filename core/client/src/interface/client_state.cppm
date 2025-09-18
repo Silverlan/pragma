@@ -8,17 +8,19 @@ module;
 #include <pragma/networkstate/networkstate.h>
 #include "pragma/networking/netmessages.h"
 #include "pragma/networking/enums.hpp"
+#include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "alsound_buffer.hpp"
+#include "wgui/types.hpp"
 #include "image/prosper_render_target.hpp"
 #include <pragma/networking/portinfo.h>
 #include "pragma/rendering/game_world_shader_settings.hpp"
-#include "pragma/game/c_game.h"
 
 #undef PlaySound
 
 export module pragma.client.client_state;
 
 import pragma.client.audio;
+import pragma.client.game;
 import pragma.client.gui;
 import pragma.client.networking;
 import pragma.string.unicode;

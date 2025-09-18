@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/rendering/c_rendermode.h"
-#include "pragma/game/c_game.h"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/parentinfo.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
@@ -21,7 +20,6 @@ import pragma.client.entities.components.transform;
 using namespace pragma;
 
 extern ClientState *client;
-extern CGame *c_game;
 
 void CViewBodyComponent::Initialize()
 {

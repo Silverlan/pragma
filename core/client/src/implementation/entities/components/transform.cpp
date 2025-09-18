@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 #include "pragma/console/c_cvar.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <stack>
@@ -12,8 +11,6 @@ module;
 module pragma.client.entities.components.transform;
 
 using namespace pragma;
-
-extern CGame *c_game;
 
 void CTransformComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void CTransformComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const { outTypeIndex = std::type_index(typeid(BaseTransformComponent)); }

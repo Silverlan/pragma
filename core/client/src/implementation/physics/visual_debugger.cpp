@@ -4,9 +4,9 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 #include "pragma/entities/environment/c_env_camera.h"
 #include <prosper_command_buffer.hpp>
+#include "shader/prosper_shader.hpp"
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_util.hpp>
 
@@ -14,6 +14,8 @@ module pragma.client.physics;
 
 import :visual_debugger;
 
+import pragma.client.engine;
+import pragma.client.game;
 import pragma.client.rendering.shaders;
 
 extern CEngine *c_engine;

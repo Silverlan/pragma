@@ -4,7 +4,6 @@
 #include "stdafx_cengine.h"
 #include "pragma/rendering/c_sci_gpu_timer_manager.hpp"
 #include "pragma/rendering/c_gpu_swapchain_timer.hpp"
-#include "pragma/c_engine.h"
 #include <pragma/console/c_cvar.h>
 #include <pragma/console/convars.h>
 #include <pragma/console/c_cvar_global_functions.h>
@@ -12,6 +11,8 @@
 #include <queries/prosper_timer_query.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_util.hpp>
+
+import pragma.client.engine;
 
 using namespace pragma::debug;
 

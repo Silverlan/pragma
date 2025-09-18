@@ -1,9 +1,12 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 #include <pragma/lua/classes/ldef_vector.h>
+
+module pragma.client.game;
 
 import pragma.client.entities.components;
 

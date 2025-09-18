@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/c_engine.h"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <shader/prosper_shader_t.hpp>
 #include <image/prosper_render_target.hpp>
@@ -19,6 +18,8 @@ module;
 module pragma.client.rendering.shaders;
 
 import :compute_irradiance_map_roughness;
+
+import pragma.client.engine;
 
 extern CEngine *c_engine;
 

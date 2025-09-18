@@ -4,8 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/c_engine.h"
-#include "pragma/game/c_game.h"
 #include "pragma/entities/environment/lights/c_env_light.h"
 #include <pragma/audio/alsound_type.h>
 #include <pragma/entities/components/parent_component.hpp>
@@ -15,6 +13,7 @@ module;
 module pragma.client.entities.components.flashlight;
 
 import pragma.client.client_state;
+import pragma.client.engine;
 import pragma.client.entities.components.attachment;
 import pragma.client.entities.components.radius;
 import pragma.client.entities.components.sound_emitter;

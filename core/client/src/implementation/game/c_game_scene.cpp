@@ -1,10 +1,13 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/components/c_scene_component.hpp"
+
+module pragma.client.game;
 
 extern CGame *c_game;
 

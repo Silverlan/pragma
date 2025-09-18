@@ -4,8 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/particlesystem/c_particlemodifier.h"
-#include "pragma/game/c_game.h"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
@@ -17,6 +15,7 @@ module;
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <prosper_command_buffer.hpp>
+#include "pragma/particlesystem/c_particlemodifier.h"
 
 module pragma.client.particle_system;
 
@@ -24,6 +23,7 @@ import :renderer_model;
 
 import pragma.client.client_state;
 import pragma.client.entities.components;
+import pragma.client.game;
 import pragma.client.rendering.shaders;
 
 REGISTER_PARTICLE_RENDERER(model, CParticleRendererModel);

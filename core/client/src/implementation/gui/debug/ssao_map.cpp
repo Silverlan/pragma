@@ -6,12 +6,13 @@ module;
 #include "stdafx_client.h"
 #include "pragma/lua/converters/gui_element_converter.hpp"
 #include "pragma/entities/components/c_scene_component.hpp"
-#include "pragma/game/c_game.h"
 #include <image/prosper_render_target.hpp>
 
 import pragma.client.entities.components;
 
 import pragma.client.client_state;
+import pragma.client.engine;
+import pragma.client.game;
 module pragma.client.gui;
 
 import :debug_ssao;

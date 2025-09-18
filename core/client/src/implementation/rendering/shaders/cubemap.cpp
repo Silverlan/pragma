@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/c_engine.h"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <shader/prosper_shader_t.hpp>
 #include <image/prosper_sampler.hpp>
@@ -17,6 +16,7 @@ module pragma.client.rendering.shaders;
 
 import :cubemap;
 
+import pragma.client.engine;
 import pragma.client.math;
 
 extern CEngine *c_engine;

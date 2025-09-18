@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/entities/components/c_scene_component.hpp"
@@ -19,7 +18,6 @@ import :renderer_rotational_buffer;
 import pragma.client.client_state;
 
 extern CEngine *c_engine;
-extern CGame *c_game;
 
 void CParticleRendererRotationalBuffer::Initialize(pragma::CParticleSystemComponent &pSystem)
 {

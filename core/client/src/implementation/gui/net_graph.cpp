@@ -4,8 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/c_engine.h"
-#include "pragma/game/c_game.h"
 #include <wgui/types/witext.h>
 #include <pragma/networking/netmessages.h>
 
@@ -13,6 +11,8 @@ module pragma.client.gui;
 
 import :net_graph;
 import pragma.client.client_state;
+import pragma.client.engine;
+import pragma.client.game;
 import pragma.string.unicode;
 
 extern CEngine *c_engine;

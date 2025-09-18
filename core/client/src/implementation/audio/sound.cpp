@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/c_engine.h"
 #include <pragma/networking/nwm_util.h>
 #include <pragma/logging.hpp>
 #include "pragma/console/c_cvar.h"
@@ -19,6 +18,7 @@ module pragma.client.audio;
 import :sound;
 
 import pragma.client.client_state;
+import pragma.client.engine;
 
 extern CEngine *c_engine;
 extern ClientState *client;

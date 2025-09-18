@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/c_engine.h"
 #include "pragma/console/c_cvar_server.h"
 #include <pragma/networking/nwm_util.h>
 #include <sharedutils/util.h>
@@ -12,6 +11,7 @@
 #include <pragma/networking/netmessages.h>
 
 import pragma.client.client_state;
+import pragma.client.engine;
 import pragma.client.networking;
 
 extern CEngine *c_engine;

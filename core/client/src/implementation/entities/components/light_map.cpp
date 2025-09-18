@@ -6,7 +6,6 @@ module;
 #include "stdafx_client.h"
 #include "pragma/console/c_cvar_global_functions.h"
 #include "pragma/entities/entity_iterator.hpp"
-#include "pragma/game/c_game.h"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/entities/entity_iterator.hpp"
@@ -52,7 +51,9 @@ module;
 module pragma.client.entities.components.light_map;
 
 import pragma.client.client_state;
+import pragma.client.engine;
 import pragma.client.entities.components;
+import pragma.client.game;
 import pragma.client.gui;
 import pragma.client.model;
 

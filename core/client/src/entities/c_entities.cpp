@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 #include "pragma/entities/entityfactories.h"
 #include "luasystem.h"
 #include <pragma/lua/handle_holder.hpp>
@@ -11,8 +10,10 @@
 #include <pragma/game/game_lua_entity.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
+import pragma.client.client_state;
 import pragma.client.entities;
 import pragma.client.entities.components;
+import pragma.client.game;
 
 extern ClientState *client;
 

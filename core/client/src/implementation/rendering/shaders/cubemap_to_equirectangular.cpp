@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/c_engine.h"
 #include "prosper_util.hpp"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <shader/prosper_shader_t.hpp>
@@ -16,6 +15,8 @@ module;
 module pragma.client.rendering.shaders;
 
 import :cubemap_to_equirectangular;
+
+import pragma.client.engine;
 
 extern CEngine *c_engine;
 

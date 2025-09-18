@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/entities/environment/c_env_camera.h"
-#include "pragma/game/c_game.h"
 #include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/console/c_cvar.h"
@@ -25,9 +24,12 @@ module;
 
 module pragma.client.entities.components.liquid_surface;
 
+import pragma.client.client_state;
+import pragma.client.engine;
 import pragma.client.entities.components.rasterization_renderer;
 import pragma.client.entities.components.render;
 import pragma.client.entities.components.surface;
+import pragma.client.game;
 import pragma.client.rendering.shaders;
 
 extern CGame *c_game;

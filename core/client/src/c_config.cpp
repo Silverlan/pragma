@@ -2,27 +2,16 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_cengine.h"
-#include "pragma/c_engine.h"
 #include <pragma/console/convars.h>
 #include "pragma/input/input_binding_layer.hpp"
 #include <sharedutils/util_debug.h>
-
-#ifdef _MSC_VER
-namespace pragma::string {
-	class Utf8String;
-	class Utf8StringView;
-	class Utf8StringArg;
-};
-#endif
-
 #include <fsys/filesystem.h>
 #include "pragma/input/inputhelper.h"
 #include <pragma/logging.hpp>
 
+import pragma.client.engine;
 import pragma.locale;
-#ifndef _MSC_VER
 import pragma.string.unicode;
-#endif
 
 void CEngine::SaveClientConfig()
 {

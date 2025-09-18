@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/model/c_modelmesh.h"
-#include "pragma/game/c_game.h"
 #include "pragma/entities/components/c_model_component.hpp"
 #include <pragma/model/model.h>
 #include <pragma/physics/phys_water_surface_simulator.hpp>
@@ -18,9 +17,11 @@ module;
 
 module pragma.client.entities.components.water_surface;
 
+import pragma.client.engine;
+import pragma.client.entities.components;
+import pragma.client.game;
 import pragma.client.model;
 import pragma.client.physics;
-import pragma.client.entities.components;
 
 using namespace pragma;
 

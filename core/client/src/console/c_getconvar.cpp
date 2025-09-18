@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_cengine.h"
-#include "pragma/c_engine.h"
 #include <pragma/physics/physobj.h>
 #include <pragma/console/convars.h>
 
 import pragma.client.client_state;
 import pragma.client.entities.components;
+import pragma.client.engine;
 
 ConConf *CEngine::GetConVar(const std::string &cv)
 {

@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/global_render_settings_buffer_data.hpp"
 #include <prosper_util.hpp>
@@ -10,6 +11,9 @@
 #include <buffers/prosper_uniform_resizable_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
 
+module pragma.client.game;
+
+import pragma.client.engine;
 import pragma.client.entities.components;
 
 extern CEngine *c_engine;

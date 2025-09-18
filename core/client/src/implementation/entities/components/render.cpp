@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 #include "pragma/entities/baseworld.h"
 #include "pragma/rendering/shaders/world/c_shader_scene.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
@@ -42,6 +41,7 @@ module;
 
 module pragma.client.entities.components.render;
 
+import pragma.client.engine;
 import pragma.client.entities.components.color;
 import pragma.client.entities.components.game_occlusion_culler;
 import pragma.client.entities.components.raytracing;
@@ -49,6 +49,7 @@ import pragma.client.entities.components.soft_body;
 import pragma.client.entities.components.transform;
 import pragma.client.entities.components.vertex_animated;
 import pragma.client.entities.components.world;
+import pragma.client.game;
 
 using namespace pragma;
 

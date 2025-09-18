@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
-#include "pragma/c_engine.h"
 #include <mathutil/uquat.h>
 #include "pragma/rendering/c_rendermode.h"
 #include "pragma/model/c_model.h"
@@ -44,8 +42,11 @@
 #include <pragma/entities/components/component_member_flags.hpp>
 #include <pragma/entities/entity_component_manager_t.hpp>
 
+import pragma.client.client_state;
 import pragma.client.debug;
+import pragma.client.engine;
 import pragma.client.entities.components;
+import pragma.client.game;
 import pragma.client.gui;
 import pragma.client.model;
 import pragma.client.physics;

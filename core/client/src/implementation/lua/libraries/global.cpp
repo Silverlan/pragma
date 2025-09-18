@@ -4,11 +4,11 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/c_engine.h"
-#include "pragma/game/c_game.h"
 #include "luasystem.h"
 
 module pragma.client.scripting.lua.libraries.global;
+
+import pragma.client.engine;
 
 extern CEngine *c_engine;
 

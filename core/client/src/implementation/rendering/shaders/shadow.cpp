@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 #include "pragma/rendering/shaders/world/c_shader_scene.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/render_processor.hpp"
@@ -21,12 +20,12 @@ module pragma.client.rendering.shaders;
 
 import :shadow;
 
+import pragma.client.engine;
 import pragma.client.entities.components;
 
 using namespace pragma;
 
 extern CEngine *c_engine;
-extern CGame *c_game;
 
 static auto SHADOW_DEPTH_BIAS_CONSTANT = 1.25f;
 static auto SHADOW_DEPTH_BIAS_SLOPE = 1.75f;

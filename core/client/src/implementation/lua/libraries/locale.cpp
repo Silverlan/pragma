@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 
 #ifdef _MSC_VER
 namespace pragma::string {
@@ -23,7 +22,6 @@ import pragma.string.unicode;
 #endif
 
 extern ClientState *client;
-extern CGame *c_game;
 
 void Lua::Locale::change_language(const std::string &lan) { pragma::locale::set_language(lan); }
 

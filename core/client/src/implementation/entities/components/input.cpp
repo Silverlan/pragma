@@ -4,16 +4,15 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 #include "pragma/console/c_cvar.h"
 #include <wgui/wgui.h>
 #include <prosper_window.hpp>
 
+import pragma.client.engine;
 module pragma.client.entities.components.input;
 
 using namespace pragma;
 
-extern CGame *c_game;
 extern CEngine *c_engine;
 
 CInputComponent::CInputComponent(BaseEntity &ent) : BaseEntityComponent {ent} {}

@@ -3,7 +3,6 @@
 
 #include "stdafx_client.h"
 #include "pragma/console/c_cvar_global.h"
-#include "pragma/game/c_game.h"
 #include "pragma/console/cvar_global.h"
 #include "pragma/entities/components/base_character_component.hpp"
 #include "pragma/entities/components/base_name_component.hpp"
@@ -50,7 +49,9 @@
 
 import pragma.client.client_state;
 import pragma.client.debug;
+import pragma.client.engine;
 import pragma.client.entities.components;
+import pragma.client.game;
 import pragma.client.gui;
 import pragma.client.util;
 

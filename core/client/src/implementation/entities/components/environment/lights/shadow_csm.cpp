@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/console/c_cvar.h"
@@ -23,9 +22,13 @@ module;
 
 module pragma.client.entities.components.lights.shadow_csm;
 
+import pragma.client.game;
 import pragma.client.rendering.shaders;
 
 using namespace pragma;
+
+import pragma.client.client_state;
+import pragma.client.engine;
 
 extern CEngine *c_engine;
 extern ClientState *client;

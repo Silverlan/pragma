@@ -4,13 +4,16 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <shader/prosper_shader_t.hpp>
 
 module pragma.client.rendering.shaders;
 
 import :velocity_buffer;
+
+import pragma.client.client_state;
+import pragma.client.engine;
+import pragma.client.game;
 
 extern CGame *c_game;
 extern ClientState *client;

@@ -23,8 +23,6 @@ module;
 #include "pragma/rendering/shaders/util/c_shader_compose_rma.hpp"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
-#include "pragma/c_engine.h"
-#include "pragma/game/c_game.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/components/logic_component.hpp>
 #include <util_texture_info.hpp>
@@ -37,6 +35,8 @@ module;
 module pragma.client.entities.components.util_pbr_converter;
 
 import pragma.client.client_state;
+import pragma.client.engine;
+import pragma.client.game;
 import pragma.client.rendering.shaders;
 
 extern CEngine *c_engine;

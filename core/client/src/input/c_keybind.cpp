@@ -3,12 +3,14 @@
 
 #include "stdafx_cengine.h"
 #include "pragma/c_enginedefinitions.h"
-#include "pragma/c_engine.h"
+#include "pragma/input/c_keybind.h"
 #include <sharedutils/util_string.h>
 #include <pragma/console/convars.h>
 #include <pragma/console/c_cvar.h>
 
 import pragma.client.client_state;
+
+import pragma.client.engine;
 
 extern CEngine *c_engine;
 

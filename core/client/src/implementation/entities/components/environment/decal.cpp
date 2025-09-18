@@ -8,8 +8,6 @@ module;
 #include "pragma/entities/components/base_bvh_component.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/model/c_model.h"
-#include "pragma/c_engine.h"
-#include "pragma/game/c_game.h"
 #include <pragma/physics/raytraces.h>
 #include <pragma/entities/environment/env_decal.h>
 #include <pragma/entities/components/base_transform_component.hpp>
@@ -22,11 +20,13 @@ module pragma.client.entities.components.env_decal;
 
 import pragma.client.client_state;
 import pragma.client.debug;
+import pragma.client.engine;
 import pragma.client.entities.components.bvh;
 import pragma.client.entities.components.physics;
 import pragma.client.entities.components.render;
 import pragma.client.entities.components.static_bvh_cache;
 import pragma.client.entities.components.static_bvh_user;
+import pragma.client.game;
 
 using namespace pragma;
 

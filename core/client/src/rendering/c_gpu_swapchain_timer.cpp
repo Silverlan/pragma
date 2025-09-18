@@ -2,12 +2,13 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_cengine.h"
-#include "pragma/c_engine.h"
 #include "pragma/rendering/c_gpu_swapchain_timer.hpp"
 #include "pragma/rendering/c_sci_gpu_timer_manager.hpp"
 #include <queries/prosper_query_pool.hpp>
 #include <queries/prosper_pipeline_statistics_query.hpp>
 #include <prosper_command_buffer.hpp>
+
+import pragma.client.engine;
 
 using namespace pragma::debug;
 

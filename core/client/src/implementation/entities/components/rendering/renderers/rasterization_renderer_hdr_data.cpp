@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 #include "pragma/console/c_cvar.h"
 #include "pragma/rendering/c_msaa.h"
 #include "pragma/rendering/shaders/particles/c_shader_particle_2d_base.hpp"
@@ -31,7 +30,10 @@ module;
 module pragma.client.entities.components.rasterization_renderer;
 
 import pragma.client.debug;
+import pragma.client.engine;
 import pragma.client.entities.components.renderer;
+import pragma.client.entities.components;
+import pragma.client.game;
 import pragma.client.gui;
 import pragma.client.rendering.shaders;
 

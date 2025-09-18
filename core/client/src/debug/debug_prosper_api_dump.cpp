@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/c_engine.h"
 #include <debug/api_dump_recorder.hpp>
 
 void LPARAM_enable_gfx_api_dump(const std::vector<std::string> &argv)
@@ -17,6 +16,8 @@ void LPARAM_enable_gfx_api_dump(const std::vector<std::string> &argv)
 #ifdef PR_DEBUG_API_DUMP
 #include <prosper_context.hpp>
 #include <prosper_command_buffer.hpp>
+
+import pragma.client.engine;
 
 extern CEngine *c_engine;
 

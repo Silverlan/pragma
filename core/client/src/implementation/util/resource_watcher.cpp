@@ -4,8 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/c_engine.h"
-#include "pragma/game/c_game.h"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/rendering/shader_graph/manager.hpp"
 #include "pragma/console/c_cvar.h"
@@ -22,7 +20,9 @@ module;
 
 module pragma.client.util.resource_watcher;
 
+import pragma.client.engine;
 import pragma.client.entities.components.particle_system;
+import pragma.client.game;
 import pragma.shadergraph;
 
 extern CEngine *c_engine;

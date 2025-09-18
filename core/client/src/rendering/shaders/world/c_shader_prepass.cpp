@@ -9,7 +9,6 @@
 #include "pragma/rendering/shader_material/shader_material.hpp"
 #include "pragma/model/c_vertex_buffer_data.hpp"
 #include "pragma/model/c_modelmesh.h"
-#include "pragma/game/c_game.h"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <shader/prosper_shader_t.hpp>
 #include <prosper_command_buffer.hpp>
@@ -17,13 +16,13 @@
 #include <cmaterial.h>
 
 import pragma.client.client_state;
+import pragma.client.engine;
 import pragma.client.model;
 
 using namespace pragma;
 
 extern CEngine *c_engine;
 extern ClientState *client;
-extern CGame *c_game;
 
 decltype(ShaderPrepassBase::VERTEX_BINDING_RENDER_BUFFER_INDEX) ShaderPrepassBase::VERTEX_BINDING_RENDER_BUFFER_INDEX = {prosper::VertexInputRate::Instance};
 decltype(ShaderPrepassBase::VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX) ShaderPrepassBase::VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX = {ShaderEntity::VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX, VERTEX_BINDING_RENDER_BUFFER_INDEX};

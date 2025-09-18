@@ -7,7 +7,6 @@ module;
 #include <wgui/wibase.h>
 #include <wgui/wihandle.h>
 #include "luasystem.h"
-#include "pragma/game/c_game.h"
 #include <wgui/types/wirect.h>
 #include <wgui/types/wiroot.h>
 #include "pragma/lua/classes/c_ldef_wgui.h"
@@ -43,7 +42,9 @@ module pragma.client.scripting.lua.classes.gui;
 import pragma.client.scripting.lua.libraries.gui;
 import pragma.client.scripting.lua.libraries.gui_callbacks;
 
+import pragma.client.game;
 import pragma.client.gui;
+import pragma.client.engine;
 import pragma.gui;
 import pragma.string.unicode;
 // import pragma.scripting.lua;

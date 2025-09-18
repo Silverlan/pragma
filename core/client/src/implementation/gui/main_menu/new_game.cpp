@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/c_engine.h"
 #include <fsys/filesystem.h>
 #include <wgui/types/witextentry.h>
 #include "pragma/game/gamemode/gamemodemanager.h"
@@ -23,6 +22,7 @@ import :options_list;
 import :slider;
 
 import pragma.client.client_state;
+import pragma.client.engine;
 import pragma.gui;
 import pragma.locale;
 import pragma.string.unicode;

@@ -9,7 +9,6 @@ module;
 #include "pragma/entities/baseentity_luaobject.h"
 #include "pragma/rendering/world_environment.hpp"
 #include "pragma/model/c_modelmesh.h"
-#include "pragma/game/c_game.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/math/intersection.h>
 #include <pragma/entities/entity_component_system_t.hpp>
@@ -19,6 +18,7 @@ module pragma.client.entities.components.lights.directional;
 import pragma.client.entities.components.render;
 import pragma.client.entities.components.toggle;
 import pragma.client.entities.components.transform;
+import pragma.client.game;
 
 extern CGame *c_game;
 

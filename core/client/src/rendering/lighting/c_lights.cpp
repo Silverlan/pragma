@@ -2,12 +2,13 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 #include "pragma/entities/environment/lights/env_light_directional.h"
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
+import pragma.client.engine;
 import pragma.client.entities.components;
+import pragma.client.game;
 
 extern CGame *c_game;
 extern CEngine *c_engine;

@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/c_engine.h"
 #include <wgui/types/witext.h>
 #include <wgui/types/witextentry.h>
 #include <wgui/types/wirect.h>
@@ -20,6 +19,7 @@ import :scroll_container;
 import :snap_area;
 
 import pragma.client.client_state;
+import pragma.client.engine;
 import pragma.gui;
 import pragma.string.unicode;
 import pragma.locale;

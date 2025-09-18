@@ -5,8 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/entities/baseentity_luaobject.h"
-#include "pragma/c_engine.h"
-#include "pragma/game/c_game.h"
 #include "pragma/entities/environment/lights/c_env_light.h"
 #include <pragma/networking/nwm_util.h>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
@@ -16,12 +14,12 @@ module;
 
 module pragma.client.entities.components.lights.spot;
 
+import pragma.client.engine;
 import pragma.client.entities.components;
 
 using namespace pragma;
 
 extern CEngine *c_engine;
-extern CGame *c_game;
 
 CLightSpotComponent::CLightSpotComponent(BaseEntity &ent) : BaseEnvLightSpotComponent(ent) {}
 bool CLightSpotComponent::ShouldTransmitNetData() const { return true; }

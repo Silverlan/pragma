@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 #include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
@@ -17,6 +16,7 @@ module pragma.client.entities.components.light_map_data_cache;
 
 import pragma.client.entities.components.light_map_receiver;
 import pragma.client.entities.components.light_map;
+import pragma.client.game;
 
 extern CGame *c_game;
 

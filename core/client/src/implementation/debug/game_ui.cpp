@@ -4,12 +4,12 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 #include <wgui/wibase.h>
 
 module pragma.client.debug.game_ui;
 
 import pragma.client.client_state;
+import pragma.client.game;
 
 extern ClientState *client;
 extern CGame *c_game;

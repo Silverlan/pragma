@@ -3,8 +3,6 @@
 
 #include "stdafx_client.h"
 #include <fsys/filesystem.h>
-#include "pragma/c_engine.h"
-#include "pragma/game/c_game.h"
 #include "pragma/networking/netmessages.h"
 #include "pragma/entities/c_baseentity.h"
 #include <pragma/networking/nwm_util.h>
@@ -20,7 +18,9 @@
 #include <pragma/entities/entity_component_system_t.hpp>
 
 import pragma.client.client_state;
+import pragma.client.engine;
 import pragma.client.entities.components.world;
+import pragma.client.game;
 
 extern CEngine *c_engine;
 extern CGame *c_game;

@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/model/c_model.h"
@@ -26,7 +25,9 @@
 #include <luabind/copy_policy.hpp>
 
 import pragma.client.client_state;
+import pragma.client.engine;
 import pragma.client.entities.components;
+import pragma.client.game;
 import pragma.client.model;
 
 using namespace pragma;

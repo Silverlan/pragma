@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/rendering/render_processor.hpp"
-#include "pragma/c_engine.h"
 #include <pragma/util/global_string_table.hpp>
 #include <cmaterial_manager2.hpp>
 #include <texturemanager/texture_manager2.hpp>
@@ -17,6 +16,9 @@ module pragma.client.rendering.shader_graph;
 import :module_image_texture;
 
 import pragma.shadergraph;
+
+import pragma.client.client_state;
+import pragma.client.engine;
 
 using namespace pragma::rendering::shader_graph;
 

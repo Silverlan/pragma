@@ -2,11 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/c_engine.h"
 #include "pragma/entities/c_baseentity.h"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "cmaterialmanager.h"
-#include "pragma/game/c_game.h"
 #include "pragma/rendering/c_rendermode.h"
 #include "pragma/model/c_model.h"
 #include <pragma/math/intersection.h>
@@ -42,9 +40,11 @@
 #undef GetClassName
 
 import pragma.client.client_state;
+import pragma.client.engine;
 import pragma.client.entities;
 import pragma.client.entities.components;
 import pragma.client.model;
+import pragma.client.game;
 import pragma.entities.components;
 import pragma.client.util;
 

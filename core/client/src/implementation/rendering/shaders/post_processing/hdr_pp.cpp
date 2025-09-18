@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 #include "pragma/rendering/c_settings.hpp"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <shader/prosper_shader_t.hpp>
@@ -18,7 +17,6 @@ import :pp_hdr;
 
 import pragma.client.client_state;
 
-extern CGame *c_game;
 extern ClientState *client;
 
 using namespace pragma;

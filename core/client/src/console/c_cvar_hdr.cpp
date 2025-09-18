@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 #include <wgui/types/wiroot.h>
 
+import pragma.client.game;
 import pragma.client.gui;
 
 extern CGame *c_game;

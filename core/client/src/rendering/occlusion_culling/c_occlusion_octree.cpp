@@ -3,7 +3,6 @@
 
 #include "stdafx_client.h"
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"
-#include "pragma/game/c_game.h"
 #include "pragma/debug/debug_render_info.hpp"
 #include "pragma/entities/c_baseentity.h"
 #include <pragma/math/intersection.h>

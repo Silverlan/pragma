@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/c_engine.h"
 #include <wgui/types/witext.h>
 #include <wgui/types/wirect.h>
 #include <wgui/types/wiroot.h>
@@ -15,6 +14,7 @@ module pragma.client.gui;
 
 import :detachable;
 
+import pragma.client.engine;
 import pragma.gui;
 import pragma.locale;
 

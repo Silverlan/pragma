@@ -6,8 +6,6 @@ module;
 #include "stdafx_client.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/console/c_cvar.h"
-#include "pragma/c_engine.h"
-#include "pragma/game/c_game.h"
 #include <pragma/rendering/c_sci_gpu_timer_manager.hpp>
 #include <prosper_util.hpp>
 #include <buffers/prosper_buffer.hpp> // prosper TODO: Remove
@@ -18,6 +16,8 @@ module pragma.client.physics;
 
 import pragma.client.client_state;
 import pragma.client.debug;
+import pragma.client.engine;
+import pragma.client.game;
 import pragma.client.model;
 import pragma.client.rendering.shaders;
 

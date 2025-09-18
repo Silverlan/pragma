@@ -3,7 +3,8 @@
 
 #include "stdafx_cengine.h"
 #include "pragma/launchparameters.h"
-#include "pragma/c_engine.h"
+
+import pragma.client.engine;
 
 extern CEngine *c_engine;
 std::optional<bool> g_launchParamWindowedMode {};

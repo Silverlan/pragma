@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/c_engine.h"
 #include "pragma/util/curl_query_handler.hpp"
 #include "pragma/lua/converters/gui_element_converter.hpp"
 #include <pragma/addonsystem/addonsystem.h>
@@ -21,6 +20,7 @@ import :progress_bar;
 
 import pragma.client.client_state;
 import pragma.client.core;
+import pragma.client.engine;
 import pragma.locale;
 
 extern CEngine *c_engine;

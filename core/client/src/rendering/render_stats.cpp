@@ -6,6 +6,8 @@
 #include <queries/prosper_query_pool.hpp>
 #include <queries/prosper_timer_query.hpp>
 
+import pragma.client.engine;
+
 extern CEngine *c_engine;
 
 RenderStats::RenderStats()

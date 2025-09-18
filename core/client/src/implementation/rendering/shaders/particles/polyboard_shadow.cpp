@@ -4,21 +4,14 @@
 module;
 
 #include "stdafx_client.h"
-
-module pragma.client.rendering.shaders;
-
-import :particle_polyboard_shadow;
-
-// prosper TODO
-#if 0
-#include "pragma/c_engine.h"
-#include "pragma/game/c_game.h"
 #include "cmaterialmanager.h"
-#include "pragma/rendering/uniformbinding.h"
-#include "pragma/rendering/lighting/c_light_ranged.h"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <textureinfo.h>
 #include <cmaterial.h>
+
+module pragma.client.rendering.shaders;
+#if 0
+import :particle_polyboard_shadow;
 
 using namespace Shader;
 

@@ -5,7 +5,6 @@ module;
 
 #include <mathutil/umath.h>
 #include <glm/gtx/euler_angles.hpp>
-#include "pragma/game/c_game.h"
 #include "sharedutils/util_pragma.hpp"
 #include <pragma/model/c_modelmesh.h>
 #include <pragma/model/c_model.h>
@@ -25,6 +24,8 @@ module;
 
 module pragma.client.assets;
 import pragma.client.client_state;
+import pragma.client.engine;
+import pragma.client.game;
 
 import :fbx_loader;
 

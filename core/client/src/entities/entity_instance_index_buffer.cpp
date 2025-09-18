@@ -2,9 +2,10 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/c_engine.h"
 #include "pragma/entities/entity_instance_index_buffer.hpp"
 #include "pragma/game/game_limits.h"
+
+import pragma.client.engine;
 
 using namespace pragma;
 

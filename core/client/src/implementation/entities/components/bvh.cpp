@@ -4,13 +4,13 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/c_engine.h"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/entity_component_system_t.hpp"
 #include "pragma/model/c_modelmesh.h"
 
 module pragma.client.entities.components.bvh;
 
+import pragma.client.engine;
 import pragma.client.entities.components.animated;
 import pragma.client.entities.components.animated_bvh;
 

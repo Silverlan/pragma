@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 #include <pragma/networking/nwm_util.h>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
@@ -13,6 +12,7 @@ module pragma.client.entities.components.env_fog_controller;
 
 import pragma.client.entities.components.color;
 import pragma.client.entities.components.toggle;
+import pragma.client.game;
 
 using namespace pragma;
 

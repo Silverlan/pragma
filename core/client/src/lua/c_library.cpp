@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/lua/classes/c_lshader.h"
 #include "pragma/lua/libraries/lasset.hpp"
+#include "pragma/util/bulletinfo.h"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/input/input_binding_layer.hpp"
@@ -57,6 +57,8 @@ import pragma.string.unicode;
 import pragma.client.assets;
 import pragma.client.client_state;
 import pragma.client.debug;
+import pragma.client.engine;
+import pragma.client.game;
 import pragma.client.gui;
 import pragma.client.rendering.shaders;
 import pragma.client.scripting.lua;

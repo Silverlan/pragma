@@ -4,12 +4,14 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/c_engine.h"
 #include <wgui/types/witext.h>
 
 module pragma.client.gui;
 
 import :snap_area;
+
+import pragma.client.client_state;
+import pragma.client.engine;
 
 extern CEngine *c_engine;
 extern ClientState *client;

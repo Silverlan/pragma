@@ -16,6 +16,8 @@
 #include <prosper_render_pass.hpp>
 #include <prosper_descriptor_set_group.hpp>
 
+import pragma.client.engine;
+
 extern CEngine *c_engine;
 
 void Lua::GraphicsPipelineCreateInfo::SetBlendingProperties(lua_State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo, const Vector4 &blendingProperties) { pipelineInfo.SetBlendingProperties(reinterpret_cast<const float *>(&blendingProperties)); }

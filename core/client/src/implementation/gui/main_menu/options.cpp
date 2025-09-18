@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/c_engine.h"
 #include <wgui/types/widropdownmenu.h>
 #include <wgui/types/witext.h>
 #include <wgui/types/witextentry.h>
@@ -34,6 +33,7 @@ import :slider;
 
 import pragma.client.audio;
 import pragma.client.client_state;
+import pragma.client.engine;
 import pragma.client.entities.components;
 import pragma.pad;
 import pragma.locale;

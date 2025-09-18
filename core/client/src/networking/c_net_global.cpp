@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/c_engine.h"
-#include "pragma/game/c_game.h"
 #include "pragma/networking/c_net_global.h"
 #include "pragma/physics/movetypes.h"
 #include "pragma/physics/collisiontypes.h"
@@ -38,8 +36,10 @@
 
 import pragma.client.client_state;
 import pragma.client.debug;
+import pragma.client.engine;
 import pragma.client.entities;
 import pragma.client.entities.components;
+import pragma.client.game;
 import pragma.client.gui;
 import pragma.client.scripting.lua;
 

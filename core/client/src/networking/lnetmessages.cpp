@@ -4,12 +4,12 @@
 #include "stdafx_client.h"
 #include "pragma/lua/lnetmessages.h"
 #include "pragma/lua/libraries/c_lnetmessages.h"
-#include "pragma/game/c_game.h"
 #include "pragma/lua/classes/ldef_netpacket.h"
 #include <pragma/networking/enums.hpp>
 #include <networkmanager/interface/nwm_manager.hpp>
 
 import pragma.client.client_state;
+import pragma.client.game;
 
 void CGame::HandleLuaNetPacket(NetPacket &packet)
 {

@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 #include <pragma/entities/baseentity.h>
 #include <pragma/entities/baseworld.h>
 #include "Recast.h"
@@ -22,6 +21,7 @@ module pragma.client.ai;
 
 import pragma.client.client_state;
 import pragma.client.debug;
+import pragma.client.game;
 
 import :nav_system;
 

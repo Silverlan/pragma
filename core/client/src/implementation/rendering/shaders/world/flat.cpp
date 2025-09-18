@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/model/c_modelmesh.h"
-#include "pragma/game/c_game.h"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/model/c_vertex_buffer_data.hpp"
@@ -19,9 +18,9 @@ module pragma.client.rendering.shaders;
 
 import :world_flat;
 
+import pragma.client.engine;
 import pragma.client.model;
 
-extern CGame *c_game;
 extern CEngine *c_engine;
 
 using namespace pragma;

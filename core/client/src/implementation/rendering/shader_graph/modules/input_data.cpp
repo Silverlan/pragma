@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 #include "pragma/rendering/render_processor.hpp"
 #include "pragma/rendering/shader_material/shader_material.hpp"
 #include "pragma/rendering/global_shader_input_manager.hpp"
@@ -22,6 +21,8 @@ module pragma.client.rendering.shader_graph;
 import :module_input_data;
 
 import pragma.client.client_state;
+import pragma.client.engine;
+import pragma.client.game;
 import pragma.client.rendering.shaders;
 
 using namespace pragma::rendering::shader_graph;

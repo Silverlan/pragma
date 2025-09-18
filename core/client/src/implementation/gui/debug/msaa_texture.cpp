@@ -4,8 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/c_engine.h"
-#include "pragma/game/c_game.h"
 #include "pragma/lua/converters/gui_element_converter.hpp"
 #include <image/prosper_msaa_texture.hpp>
 #include <prosper_util.hpp>
@@ -15,8 +13,9 @@ module pragma.client.gui;
 
 import :debug_msaa_texture;
 
+import pragma.client.engine;
+
 extern CEngine *c_engine;
-extern CGame *c_game;
 
 LINK_WGUI_TO_CLASS(widebugmsaatexture, WIDebugMSAATexture);
 

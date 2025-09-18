@@ -8,15 +8,15 @@ module;
 #include <pragma/entities/components/base_transform_component.hpp>
 #include "pragma/entities/parentmode.h"
 #include <pragma/entities/entity_component_system_t.hpp>
-#include "pragma/c_engine.h"
-#include "pragma/game/c_game.h"
 
 module pragma.client.entities.components.env_weather;
 
 import pragma.client.client_state;
+import pragma.client.engine;
 import pragma.client.entities.components.attachment;
 import pragma.client.entities.components.particle_system;
 import pragma.client.entities.components.player;
+import pragma.client.game;
 
 using namespace pragma;
 

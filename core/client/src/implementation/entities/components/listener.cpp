@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/c_engine.h"
 #include "pragma/entities/baseentity_luaobject.h"
 #include <alsoundsystem.hpp>
 #include <alsound_listener.hpp>
@@ -16,6 +15,7 @@ module;
 
 module pragma.client.entities.components.listener;
 
+import pragma.client.engine;
 import pragma.client.entities.components.transform;
 
 using namespace pragma;

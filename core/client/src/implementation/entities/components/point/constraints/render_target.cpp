@@ -8,9 +8,6 @@ module;
 #include <cmaterialmanager.h>
 #include <mathutil/umat.h>
 #include "pragma/entities/baseentity_luaobject.h"
-#include "pragma/c_engine.h"
-#include "pragma/c_engine.h"
-#include "pragma/game/c_game.h"
 #include <texturemanager/texturemanager.h>
 #include "textureinfo.h"
 #include <pragma/networking/nwm_util.h>
@@ -20,6 +17,7 @@ module;
 module pragma.client.entities.components.point_render_target;
 
 import pragma.client.client_state;
+import pragma.client.engine;
 
 using namespace pragma;
 

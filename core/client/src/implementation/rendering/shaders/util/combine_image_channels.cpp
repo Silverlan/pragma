@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <shader/prosper_shader_t.hpp>
 #include <prosper_util.hpp>
@@ -28,7 +27,6 @@ import :combine_image_channels;
 
 import pragma.client.client_state;
 
-extern CGame *c_game;
 extern ClientState *client;
 
 decltype(pragma::ShaderCombineImageChannels::DESCRIPTOR_SET_TEXTURE) pragma::ShaderCombineImageChannels::DESCRIPTOR_SET_TEXTURE = {

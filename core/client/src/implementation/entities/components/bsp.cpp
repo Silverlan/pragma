@@ -4,10 +4,11 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/c_engine.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
 module pragma.client.entities.components.bsp;
+
+import pragma.client.engine;
 
 extern CEngine *c_engine;
 

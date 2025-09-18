@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 #include "pragma/rendering/world_environment.hpp"
 #include "pragma/entities/entity_component_system_t.hpp"
 #include <pragma/entities/entity_component_manager_t.hpp>
@@ -14,9 +13,9 @@ module;
 
 module pragma.client.entities.components.pp_base;
 
+import pragma.client.engine;
 import pragma.client.entities.components.rasterization_renderer;
 
-extern CGame *c_game;
 extern CEngine *c_engine;
 
 using namespace pragma;

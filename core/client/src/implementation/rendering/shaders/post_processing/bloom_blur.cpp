@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include <shader/prosper_shader_t.hpp>
@@ -13,8 +12,8 @@ module;
 module pragma.client.rendering.shaders;
 
 import :pp_bloom_blur;
+import pragma.client.client_state;
 
-extern CGame *c_game;
 extern ClientState *client;
 
 using namespace pragma;

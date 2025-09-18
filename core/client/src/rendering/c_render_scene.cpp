@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 #include "pragma/rendering/shaders/world/c_shader_prepass.hpp"
 #include "pragma/rendering/world_environment.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
@@ -18,8 +17,10 @@
 #include <pragma/rendering/c_sci_gpu_timer_manager.hpp>
 #include <sharedutils/scope_guard.h>
 
+import pragma.client.engine;
 import pragma.client.entities.components.render;
 import pragma.client.entities.components.renderer;
+import pragma.client.game;
 import pragma.client.rendering.shaders;
 
 extern CEngine *c_engine;

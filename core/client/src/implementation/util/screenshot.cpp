@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 #include "pragma/rendering/raytracing/cycles.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include <util_image.hpp>
@@ -21,6 +20,7 @@ module;
 module pragma.client.util.screenshot;
 
 import pragma.client.client_state;
+import pragma.client.engine;
 import pragma.client.entities.components;
 
 extern CEngine *c_engine;

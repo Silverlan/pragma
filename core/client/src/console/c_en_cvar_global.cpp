@@ -3,12 +3,12 @@
 
 #include "stdafx_cengine.h"
 #include <fsys/filesystem.h>
-#include "pragma/c_engine.h"
 #include "pragma/console/c_en_cvar_global.h"
 #include <sharedutils/util_string.h>
 #include <pragma/lua/libraries/lutil.hpp>
 
 import pragma.client.client_state;
+import pragma.client.engine;
 
 extern CEngine *c_engine;
 extern ClientState *client;

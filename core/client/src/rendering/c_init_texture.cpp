@@ -3,7 +3,6 @@
 
 #include "stdafx_client.h"
 #include "textureinfo.h"
-#include "pragma/c_engine.h"
 #include "pragma/console/c_cvar.h"
 #include <texturemanager/texturemanager.h>
 #include <texturemanager/load/texture_loader.hpp>
@@ -12,6 +11,7 @@
 #include <image/prosper_sampler.hpp>
 
 import pragma.client.client_state;
+import pragma.client.engine;
 
 extern CEngine *c_engine;
 extern ClientState *client;

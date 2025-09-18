@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/c_engine.h"
 #include "pragma/clientdefinitions.h"
 #include "pragma/console/c_cvar_global_functions.h"
 #include <texturemanager/texture.h>
@@ -16,6 +15,7 @@
 
 import pragma.client.client_state;
 import pragma.client.debug;
+import pragma.client.engine;
 import pragma.client.gui;
 
 extern CEngine *c_engine;

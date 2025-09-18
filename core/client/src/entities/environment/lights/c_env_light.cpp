@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 #include "pragma/entities/environment/lights/c_env_light.h"
 #include "pragma/entities/environment/lights/c_env_light.h"
 #include "pragma/entities/components/base_transform_component.hpp"
@@ -20,6 +19,8 @@
 #include <buffers/prosper_uniform_resizable_buffer.hpp>
 #include <prosper_command_buffer.hpp>
 
+import pragma.client.client_state;
+import pragma.client.engine;
 import pragma.client.entities.components.color;
 import pragma.client.entities.components.game_occlusion_culler;
 import pragma.client.entities.components.lights.directional;
@@ -30,6 +31,7 @@ import pragma.client.entities.components.radius;
 import pragma.client.entities.components.render;
 import pragma.client.entities.components.toggle;
 import pragma.client.entities.components.transform;
+import pragma.client.game;
 import pragma.client.scripting.lua;
 
 using namespace pragma;

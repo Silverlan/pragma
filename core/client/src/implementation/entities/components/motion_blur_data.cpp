@@ -4,8 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
-#include "pragma/c_engine.h"
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/entity_component_manager_t.hpp>
@@ -13,7 +11,9 @@ module;
 
 module pragma.client.entities.components.motion_blur_data;
 
+import pragma.client.engine;
 import pragma.client.entities.components.render;
+import pragma.client.game;
 import pragma.client.rendering.shaders;
 
 extern CGame *c_game;

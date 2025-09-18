@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 #include "pragma/particlesystem/c_particlemodifier.h"
 #include <prosper_util.hpp>
 #include <buffers/prosper_buffer.hpp>
@@ -16,6 +15,7 @@ import :renderer_beam;
 
 import pragma.client.client_state;
 import pragma.client.entities.components;
+import pragma.client.game;
 import pragma.client.rendering.shaders;
 
 REGISTER_PARTICLE_RENDERER(beam, CParticleRendererBeam);

@@ -17,15 +17,15 @@ module;
 #include <buffers/prosper_buffer.hpp>
 #include <image/prosper_render_target.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
-#include "pragma/c_engine.h"
-#include "pragma/game/c_game.h"
 
 module pragma.client.entities.components.rasterization_renderer;
 
 import pragma.client.client_state;
+import pragma.client.engine;
 import pragma.client.entities.components.lights.directional;
 import pragma.client.entities.components.lights.shadow;
 import pragma.client.entities.components.renderer;
+import pragma.client.game;
 import pragma.client.rendering.shaders;
 
 extern CGame *c_game;

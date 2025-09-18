@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/c_engine.h"
-#include "pragma/game/c_game.h"
 #include "pragma/console/c_cvar_global_functions.h"
 #include "prosper_util.hpp"
 #include <util_image.hpp>
@@ -14,6 +12,8 @@
 #include <fsys/ifile.hpp>
 
 import pragma.client.client_state;
+import pragma.client.engine;
+import pragma.client.game;
 import pragma.client.gui;
 
 extern CEngine *c_engine;

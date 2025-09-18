@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/c_engine.h"
 #include "pragma/entities/c_baseentity.h"
 #include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/lua/libraries/c_lua_vulkan.h"
@@ -18,6 +17,8 @@ module;
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
 module pragma.client.scripting.lua.classes.entity;
+
+import pragma.client.engine;
 
 extern CEngine *c_engine;
 

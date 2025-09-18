@@ -1,11 +1,11 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_cengine.h"
-#include "pragma/c_engine.h"
 #include <wgui/wgui.h>
 #include "cmaterialmanager.h"
-#include "pragma/game/c_game.h"
 #include "pragma/console/c_cvar.h"
 #include "pragma/rendering/shader_material/shader_material.hpp"
 #include <texturemanager/texturemanager.h>
@@ -63,10 +63,13 @@
 
 #endif
 
+module pragma.client.engine;
+
 import util_zip;
 import pragma.client.assets;
 import pragma.client.client_state;
 import pragma.client.entities.components;
+import pragma.client.game;
 import pragma.client.gui;
 import pragma.client.model;
 import pragma.client.networking;
@@ -1587,7 +1590,7 @@ CEngine::~CEngine() { m_audioAPILib = nullptr; }
 
 CEngine *pragma::get_cengine() { return c_engine; }
 ClientState *pragma::get_client_state() { return client; }
-Game *pragma::get_client_game() { return c_game; }
+CGame *pragma::get_client_game() { return c_game; }
 
 void CEngine::HandleLocalHostPlayerClientPacket(NetPacket &p)
 {

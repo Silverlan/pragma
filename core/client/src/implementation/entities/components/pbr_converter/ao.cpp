@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/game/c_game.h"
 #include "pragma/rendering/shaders/util/c_shader_compose_rma.hpp"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
@@ -22,12 +21,12 @@ module;
 module pragma.client.entities.components.util_pbr_converter;
 
 import pragma.client.client_state;
+import pragma.client.engine;
 
 using namespace pragma;
 
 extern CEngine *c_engine;
 extern ClientState *client;
-extern CGame *c_game;
 
 PBRAOBakeJob::PBRAOBakeJob(Model &mdl, Material &mat) : hModel {mdl.GetHandle()}, hMaterial {mat.GetHandle()} {}
 

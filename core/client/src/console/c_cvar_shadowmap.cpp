@@ -6,13 +6,14 @@
 #include "pragma/entities/environment/lights/c_env_light.h"
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <wgui/types/wirect.h>
-#include "pragma/game/c_game_createguielement.h"
 #include <pragma/console/sh_cmd.h>
 #include <image/prosper_render_target.hpp>
 #include <wgui/types/wiroot.h>
 
+import pragma.client.client_state;
 import pragma.client.debug;
 import pragma.client.entities.components;
+import pragma.client.game;
 import pragma.client.gui;
 
 extern ClientState *client;

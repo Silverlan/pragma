@@ -4,13 +4,12 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 
 module pragma.client.entities.components.static_bvh_user;
 
+import pragma.client.engine;
 import pragma.client.entities.components;
 
-extern CGame *c_game;
 extern CEngine *c_engine;
 
 using namespace pragma;

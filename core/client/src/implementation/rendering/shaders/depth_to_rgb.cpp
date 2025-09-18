@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/c_engine.h"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <shader/prosper_shader_t.hpp>
 #include <prosper_context.hpp>
@@ -14,6 +13,8 @@ module;
 module pragma.client.rendering.shaders;
 
 import :depth_to_rgb;
+
+import pragma.client.engine;
 
 extern CEngine *c_engine;
 

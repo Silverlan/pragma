@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/c_engine.h"
-#include "pragma/game/c_game.h"
 #include <pragma/audio/soundscript.h>
 #include "pragma/audio/alsoundscript.h"
 #include <fsys/filesystem.h>
@@ -29,6 +27,8 @@ import se_script;
 import pragma.audio.util;
 import pragma.client.audio;
 import pragma.client.client_state;
+import pragma.client.engine;
+import pragma.client.game;
 
 extern CEngine *c_engine;
 extern ClientState *client;

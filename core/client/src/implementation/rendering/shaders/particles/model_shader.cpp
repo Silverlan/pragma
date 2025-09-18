@@ -7,7 +7,6 @@ module;
 #include "pragma/rendering/shaders/particles/c_shader_particle_2d_base.hpp"
 #include "pragma/entities/entity_instance_index_buffer.hpp"
 #include "pragma/model/c_modelmesh.h"
-#include "pragma/c_engine.h"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <shader/prosper_shader_t.hpp>
 #include <buffers/prosper_buffer.hpp>
@@ -17,6 +16,8 @@ module;
 module pragma.client.rendering.shaders;
 
 import :particle_model;
+
+import pragma.client.engine;
 
 using namespace pragma;
 

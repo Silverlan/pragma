@@ -4,10 +4,11 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 #include "pragma/model/c_model.h"
 
 module pragma.client.entities.components.eye;
+
+import pragma.client.game;
 
 extern CGame *c_game;
 

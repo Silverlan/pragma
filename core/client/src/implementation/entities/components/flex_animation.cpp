@@ -4,15 +4,12 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 #include <pragma/model/animation/flex_animation.hpp>
 #include <pragma/model/model.h>
 
 module pragma.client.entities.components.flex;
 
 using namespace pragma;
-
-extern CGame *c_game;
 
 void CFlexComponent::ResolveFlexAnimation(const LookupIdentifier &lookupId) const
 {

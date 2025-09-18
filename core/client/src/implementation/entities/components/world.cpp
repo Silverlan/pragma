@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 #include "pragma/physics/collisiontypes.h"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
@@ -25,7 +24,9 @@ module;
 
 module pragma.client.entities.components.world;
 
+import pragma.client.engine;
 import pragma.client.entities.components;
+import pragma.client.game;
 import source_engine.bsp;
 
 using namespace pragma;

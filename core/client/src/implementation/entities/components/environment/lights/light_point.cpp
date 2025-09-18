@@ -7,8 +7,6 @@ module;
 #include "pragma/entities/baseentity_luaobject.h"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/environment/lights/c_env_light.h"
-#include "pragma/c_engine.h"
-#include "pragma/game/c_game.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/math/intersection.h>
 #include <pragma/entities/components/base_transform_component.hpp>
@@ -16,6 +14,7 @@ module;
 
 module pragma.client.entities.components.lights.point;
 
+import pragma.client.engine;
 import pragma.client.entities.components.lights.shadow;
 import pragma.client.entities.components.radius;
 import pragma.client.entities.components.render;
@@ -24,7 +23,6 @@ import pragma.client.entities.components.transform;
 using namespace pragma;
 
 extern CEngine *c_engine;
-extern CGame *c_game;
 
 static const std::array<Vector3, 6> directions = {Vector3(1.f, 0.f, 0.f), Vector3(-1.f, 0.f, 0.f), Vector3(0.f, 1.f, 0.f), Vector3(0.f, -1.f, 0.f), Vector3(0.f, 0.f, 1.f), Vector3(0.f, 0.f, -1.f)};
 

@@ -4,8 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/c_engine.h"
-#include "pragma/game/c_game.h"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/lua/converters/gui_element_converter.hpp"
 #include <image/prosper_render_target.hpp>
@@ -18,7 +16,8 @@ module;
 module pragma.client.gui;
 
 import :debug_depth_texture;
-
+import pragma.client.engine;
+import pragma.client.game;
 import pragma.client.rendering.shaders;
 
 extern CEngine *c_engine;

@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_cengine.h"
-#include "pragma/c_engine.h"
 #include "pragma/input/inputhelper.h"
 #include "pragma/input/input_binding_layer.hpp"
 
 import pragma.client.client_state;
+import pragma.client.engine;
 
 void CEngine::AddInputBindingLayer(const std::shared_ptr<InputBindingLayer> &layer)
 {

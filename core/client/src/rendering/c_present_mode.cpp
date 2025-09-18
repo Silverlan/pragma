@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/c_engine.h"
 #include <prosper_window.hpp>
+
+import pragma.client.engine;
 
 extern CEngine *c_engine;
 

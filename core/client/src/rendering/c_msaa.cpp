@@ -2,10 +2,11 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/c_engine.h"
 #include "pragma/rendering/c_msaa.h"
 #include "prosper_util.hpp"
 #include <mathutil/umath.h>
+
+import pragma.client.engine;
 
 extern CEngine *c_engine;
 

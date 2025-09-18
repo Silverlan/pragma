@@ -3,10 +3,10 @@
 
 #include "stdafx_client.h"
 #include "pragma/console/c_cvar_movement.h"
-#include "pragma/game/c_game.h"
 #include <pragma/networking/enums.hpp>
 
 import pragma.client.client_state;
+import pragma.client.game;
 
 extern ClientState *client;
 extern CGame *c_game;

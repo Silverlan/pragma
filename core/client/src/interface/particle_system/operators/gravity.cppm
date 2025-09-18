@@ -3,14 +3,14 @@
 
 module;
 
-#include "pragma/c_engine.h"
-#include "pragma/game/c_game.h"
-#include "pragma/particlesystem/c_particlemodifier.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 
 export module pragma.client.particle_system:operator_gravity;
 
 import :operator_world_base;
+
+import pragma.client.engine;
+import pragma.client.game;
 
 export class DLLCLIENT CParticleOperatorGravity : public CParticleOperatorWorldBase {
   public:

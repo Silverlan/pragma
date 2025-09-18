@@ -7,8 +7,6 @@ module;
 #include <mathutil/umath.h>
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/euler_angles.hpp>
-#include "pragma/c_engine.h"
-#include "pragma/game/c_game.h"
 #include "pragma/audio/alsound_type.h"
 #include "pragma/entities/parentmode.h"
 #include "pragma/physics/collisiontypes.h"
@@ -44,7 +42,9 @@ module;
 module pragma.client.entities.components.player;
 
 import pragma.client.client_state;
+import pragma.client.engine;
 import pragma.client.entities.components;
+import pragma.client.game;
 
 using namespace pragma;
 

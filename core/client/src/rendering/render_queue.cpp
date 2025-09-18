@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 #include "pragma/rendering/render_queue.hpp"
 #include "pragma/rendering/render_stats.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
@@ -11,7 +10,9 @@
 #include <cmaterial.h>
 
 import pragma.client.client_state;
+import pragma.client.engine;
 import pragma.client.entities.components.render;
+import pragma.client.game;
 
 using namespace pragma::rendering;
 

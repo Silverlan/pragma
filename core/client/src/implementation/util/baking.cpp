@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/c_engine.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/util/util_thread_pool.hpp"
 #include "pragma/entities/environment/lights/env_light_spot.h"
@@ -23,6 +22,7 @@ module;
 
 module pragma.client.util.baking;
 
+import pragma.client.engine;
 import pragma.client.entities.components;
 import pragma.client.util.image;
 

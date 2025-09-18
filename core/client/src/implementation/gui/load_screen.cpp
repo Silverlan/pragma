@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/c_engine.h"
 #include <wgui/types/witext.h>
 
 module pragma.client.gui;
@@ -13,6 +12,7 @@ import :load_screen;
 import :progress_bar;
 
 import pragma.client.client_state;
+import pragma.client.engine;
 import pragma.locale;
 
 extern CEngine *c_engine;

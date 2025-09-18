@@ -6,15 +6,14 @@ module;
 #include "stdafx_client.h"
 #include <alsoundsystem.hpp>
 #include <alsoundsystem_create_effect.hpp>
-#include "pragma/audio/c_engine_sound.hpp"
 #include "pragma/console/c_cvar_global_functions.h"
-#include <pragma/c_engine.h>
 #include <alsound_effect.hpp>
 #include <udm.hpp>
 
 module pragma.client.audio;
 
 import :aux_util;
+import pragma.client.engine;
 
 extern CEngine *c_engine;
 

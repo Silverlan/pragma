@@ -9,9 +9,7 @@ export module pragma.client.rendering.shaders:particle_shadow;
 #if 0
 #include "pragma/rendering/shaders/world/c_shader_textured.h"
 #include "pragma/rendering/c_entitymeshinfo.h"
-#include "pragma/rendering/lighting/c_light_ranged.h"
 #include "pragma/rendering/shaders/particles/c_shader_particle_base.h"
-#include "pragma/rendering/uniformbinding.h"
 
 namespace Shader
 {

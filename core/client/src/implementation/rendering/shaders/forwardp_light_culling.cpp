@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/c_engine.h"
 #include "pragma/rendering/lighting/c_light_data_buffer_manager.hpp"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <shader/prosper_shader_t.hpp>
@@ -12,6 +11,8 @@ module;
 module pragma.client.rendering.shaders;
 
 import :forwardp_light_culling;
+
+import pragma.client.engine;
 
 using namespace pragma;
 

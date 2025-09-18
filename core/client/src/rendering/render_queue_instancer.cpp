@@ -2,13 +2,13 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 #include "pragma/rendering/render_queue_instancer.hpp"
 #include "pragma/rendering/render_queue.hpp"
 #include "pragma/entities/entity_instance_index_buffer.hpp"
 #include "pragma/console/c_cvar.h"
 
 import pragma.client.entities.components.render;
+import pragma.client.game;
 
 using namespace pragma;
 

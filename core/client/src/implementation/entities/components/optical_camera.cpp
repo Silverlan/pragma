@@ -4,12 +4,12 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 #include <pragma/entities/entity_component_manager_t.hpp>
 
 module pragma.client.entities.components.optical_camera;
 
-extern CGame *c_game;
+import pragma.client.engine;
+
 extern CEngine *c_engine;
 
 using namespace pragma;

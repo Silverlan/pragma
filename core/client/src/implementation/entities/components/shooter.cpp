@@ -4,10 +4,10 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 #include "pragma/entities/components/base_transform_component.hpp"
 #include <pragma/physics/raytraces.h>
 #include <pragma/physics/environment.hpp>
+#include "pragma/util/bulletinfo.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <sharedutils/scope_guard.h>
 #include <pragma/audio/alsound_type.h>
@@ -16,6 +16,7 @@ module pragma.client.entities.components.shooter;
 
 import pragma.client.client_state;
 import pragma.client.entities.components.particle_system;
+import pragma.client.game;
 
 using namespace pragma;
 

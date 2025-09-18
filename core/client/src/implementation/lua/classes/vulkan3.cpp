@@ -26,13 +26,14 @@ module;
 #include <prosper_swap_command_buffer.hpp>
 #include <prosper_event.hpp>
 #include <sharedutils/datastream.h>
-#include "pragma/c_engine.h"
 #include <luabind/copy_policy.hpp>
 #include <pragma/lua/types/udm.hpp>
 #include <luainterface.hpp>
 #include <sharedutils/util.h>
 
 module pragma.client.scripting.lua.classes.vulkan;
+
+import pragma.client.engine;
 
 extern CEngine *c_engine;
 

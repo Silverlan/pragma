@@ -2,9 +2,10 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/c_engine.h"
 #include "pragma/input/input_binding_layer.hpp"
 #include "pragma/input/input_binding_layer_lua.hpp"
+
+import pragma.client.engine;
 
 extern CEngine *c_engine;
 

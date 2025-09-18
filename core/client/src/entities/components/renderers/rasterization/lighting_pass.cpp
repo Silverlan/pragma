@@ -10,7 +10,6 @@
 #include "pragma/rendering/global_render_settings_buffer_data.hpp"
 #include "pragma/entities/environment/lights/c_env_light.h"
 #include "pragma/entities/entity_component_system_t.hpp"
-#include "pragma/game/c_game.h"
 #include "pragma/console/c_cvar.h"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/rendering/render_processor.hpp"
@@ -32,7 +31,9 @@
 #endif
 
 import pragma.client.debug;
+import pragma.client.engine;
 import pragma.client.entities.components;
+import pragma.client.game;
 
 using namespace pragma::rendering;
 

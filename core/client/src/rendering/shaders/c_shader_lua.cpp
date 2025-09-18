@@ -18,6 +18,7 @@
 #include <prosper_util.hpp>
 #include <wgui/wibase.h>
 
+import pragma.client.engine;
 import pragma.client.entities.components;
 import pragma.client.scripting.lua;
 

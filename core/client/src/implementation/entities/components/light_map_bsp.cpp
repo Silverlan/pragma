@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/c_engine.h"
-#include "pragma/game/c_game.h"
 #include "pragma/game/game_resources.hpp"
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/game/game_resources.hpp>
@@ -18,6 +16,8 @@ module;
 module pragma.client.entities.components.light_map;
 
 import pragma.client.client_state;
+import pragma.client.engine;
+import pragma.client.game;
 import source_engine.bsp;
 
 extern CGame *c_game;

@@ -4,10 +4,11 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 #include "pragma/entities/components/base_character_component.hpp"
 #include "pragma/entities/components/base_ownable_component.hpp"
 #include "pragma/entities/components/base_observer_component.hpp"
+#include "pragma/util/bulletinfo.h"
+#include "pragma/entities/c_baseentity.h"
 #include "pragma/entities/parentmode.h"
 #include "pragma/console/c_cvar.h"
 #include "pragma/entities/components/c_model_component.hpp"
@@ -26,6 +27,7 @@ module pragma.client.entities.components.weapon;
 
 import pragma.client.client_state;
 import pragma.client.entities.components;
+import pragma.client.game;
 
 using namespace pragma;
 

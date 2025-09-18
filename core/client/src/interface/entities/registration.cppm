@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/entities/c_baseentity.h"
-#include "pragma/game/c_game.h"
 #include <unordered_map>
 #include <functional>
 #include <typeindex>
@@ -17,6 +16,7 @@ module;
 export module pragma.client.entities:registration;
 
 import pragma.client.client_state;
+import pragma.client.game;
 
 export namespace client_entities {
     using Factory = std::function<CBaseEntity*(ClientState*)>;

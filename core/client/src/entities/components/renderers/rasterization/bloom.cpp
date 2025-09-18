@@ -4,9 +4,7 @@
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/console/c_cvar.h"
-#include "pragma/game/c_game.h"
 #include <pragma/console/convars.h>
-#include <pragma/c_engine.h>
 #include <prosper_util.hpp>
 #include <prosper_command_buffer.hpp>
 #include <shader/prosper_shader_blur.hpp>
@@ -14,7 +12,9 @@
 #include <cmaterial.h>
 
 import pragma.client.client_state;
+import pragma.client.engine;
 import pragma.client.entities.components;
+import pragma.client.game;
 
 using namespace pragma::rendering;
 

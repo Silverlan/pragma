@@ -4,8 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/c_engine.h"
-#include "pragma/game/c_game.h"
 #include "pragma/entities/components/base_transform_component.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include "pragma/entities/parentmode.h"
@@ -16,11 +14,13 @@ module;
 module pragma.client.entities.components.effects.explosion;
 
 import pragma.client.client_state;
+import pragma.client.engine;
 import pragma.client.entities.components.attachment;
 import pragma.client.entities.components.env_quake;
 import pragma.client.entities.components.io;
 import pragma.client.entities.components.particle_system;
 import pragma.client.entities.components.sound_emitter;
+import pragma.client.game;
 
 using namespace pragma;
 

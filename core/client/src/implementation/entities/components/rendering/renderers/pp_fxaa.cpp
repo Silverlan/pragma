@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 #include "pragma/rendering/world_environment.hpp"
 #include "pragma/entities/entity_component_system_t.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
@@ -18,8 +17,9 @@ module;
 
 module pragma.client.entities.components.pp_fxaa;
 
+import pragma.client.engine;
 import pragma.client.entities.components.rasterization_renderer;
-
+import pragma.client.game;
 import pragma.client.rendering.shaders;
 
 extern CGame *c_game;

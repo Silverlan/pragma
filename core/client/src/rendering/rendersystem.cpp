@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/c_engine.h"
-#include "pragma/game/c_game.h"
 #include "pragma/rendering/render_queue.hpp"
 #include "cmaterialmanager.h"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
@@ -23,13 +21,14 @@
 #include <prosper_util.hpp>
 #include <image/prosper_render_target.hpp>
 
+import pragma.client.client_state;
 import pragma.client.debug;
+import pragma.client.engine;
 import pragma.client.entities.components;
 import pragma.client.rendering.shaders;
 
 extern CEngine *c_engine;
 extern ClientState *client;
-extern CGame *c_game;
 
 // Disables rendering of meshes and shadows; For debug purposes only!
 #define DEBUG_RENDER_DISABLED 0

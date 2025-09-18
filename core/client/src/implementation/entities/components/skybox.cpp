@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 #include "pragma/rendering/c_rendermode.h"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/model/c_model.h"
@@ -27,13 +26,13 @@ module;
 #include <util_image.hpp>
 #include <fsys/ifile.hpp>
 #include <wgui/types/wirect.h>
-#include "pragma/c_engine.h"
-#include "pragma/game/c_game.h"
 
 module pragma.client.entities.components.skybox;
 
 import pragma.client.client_state;
+import pragma.client.engine;
 import pragma.client.entities.components;
+import pragma.client.game;
 import pragma.client.rendering.shaders;
 
 extern CEngine *c_engine;

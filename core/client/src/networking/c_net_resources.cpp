@@ -16,6 +16,7 @@
 #include <pragma/game/game_resources.h>
 
 import pragma.client.client_state;
+import pragma.client.game;
 import pragma.client.model;
 
 #define RESOURCE_TRANSFER_VERBOSE 0

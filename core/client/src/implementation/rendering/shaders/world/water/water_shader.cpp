@@ -17,6 +17,7 @@ module pragma.client.rendering.shaders;
 
 import :world_water;
 
+import pragma.client.engine;
 import pragma.client.entities.components;
 
 using namespace pragma;

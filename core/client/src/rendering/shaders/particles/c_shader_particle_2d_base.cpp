@@ -20,6 +20,7 @@
 #include <datasystem_vector.h>
 #include <cmaterial.h>
 
+import pragma.client.engine;
 import pragma.client.entities.components;
 
 extern CEngine *c_engine;

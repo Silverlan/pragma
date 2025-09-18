@@ -4,10 +4,9 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/c_engine.h"
-#include "pragma/game/c_game.h"
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
+#include "pragma/util/bulletinfo.h"
 #include "pragma/entities/parentmode.h"
 #include "luasystem.h"
 #include <pragma/lua/classes/ldef_color.h>
@@ -28,8 +27,10 @@ module pragma.client.scripting.lua.libraries.util;
 
 import pragma.client.assets;
 import pragma.client.client_state;
+import pragma.client.engine;
 import pragma.client.entities.components.particle_system;
 import pragma.client.entities.components.render;
+import pragma.client.game;
 import pragma.client.util;
 
 extern CGame *c_game;

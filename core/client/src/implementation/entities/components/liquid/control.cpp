@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 #include <pragma/audio/alsound_type.h>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/components/base_physics_component.hpp>
@@ -15,6 +14,7 @@ module pragma.client.entities.components.liquid_control;
 
 import pragma.client.client_state;
 import pragma.client.entities.components.particle_system;
+import pragma.client.game;
 
 extern ClientState *client;
 extern CGame *c_game;

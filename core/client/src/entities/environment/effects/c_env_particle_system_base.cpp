@@ -7,7 +7,6 @@
 #include <glm/gtx/norm.hpp>
 #include <algorithm>
 #include <sharedutils/util_weak_handle.hpp>
-#include "pragma/game/c_game.h"
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/rendering/shaders/particles/c_shader_particle_2d_base.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
@@ -29,7 +28,9 @@
 #include <udm.hpp>
 
 import pragma.client.client_state;
+import pragma.client.engine;
 import pragma.client.entities.components;
+import pragma.client.game;
 
 using namespace pragma;
 

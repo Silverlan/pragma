@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/world/c_shader_scene.hpp"
-#include "pragma/c_engine.h"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <shader/prosper_shader_copy_image.hpp>
 #include <prosper_util.hpp>
@@ -18,6 +17,8 @@ module;
 module pragma.client.rendering.shaders;
 
 import :ssao;
+
+import pragma.client.engine;
 
 using namespace pragma;
 

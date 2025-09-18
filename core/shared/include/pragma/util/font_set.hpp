@@ -11,8 +11,6 @@
 #include <string_view>
 #include <vector>
 
-import pragma.string.unicode;
-
 enum class FontSetFlag : uint8_t {
 	None = 0,
 	Bold = 1,

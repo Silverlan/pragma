@@ -4,13 +4,14 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/c_engine.h"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <shader/prosper_shader_t.hpp>
 
 module pragma.client.rendering.shaders;
 
 import :forwardp_light_indexing;
+
+import pragma.client.engine;
 
 using namespace pragma;
 

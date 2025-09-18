@@ -7,7 +7,6 @@ module;
 #include "pragma/audio/alsoundscript.h"
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/entities/components/base_character_component.hpp"
-#include "pragma/game/c_game.h"
 #include <pragma/networking/nwm_util.h>
 #include <pragma/physics/raytraces.h>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
@@ -18,6 +17,7 @@ module;
 module pragma.client.entities.components.audio.sound_scape;
 
 import pragma.client.entities.components;
+import pragma.client.game;
 
 using namespace pragma;
 

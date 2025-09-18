@@ -6,8 +6,6 @@ module;
 #include "stdafx_client.h"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/math/icosphere.h"
-#include "pragma/c_engine.h"
-#include "pragma/game/c_game.h"
 #include <pragma/debug/debug_render_info.hpp>
 #include <pragma/math/util_hermite.h>
 #include <pragma/math/e_frustum.h>
@@ -21,6 +19,8 @@ module;
 module pragma.client.debug.overlay;
 
 import pragma.client.client_state;
+import pragma.client.engine;
+import pragma.client.game;
 import pragma.client.rendering.shaders;
 import pragma.string.unicode;
 

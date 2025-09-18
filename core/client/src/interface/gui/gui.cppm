@@ -3,8 +3,6 @@
 
 module;
 
-#include <pragma/c_engine.h>
-#include "pragma/game/c_game.h"
 #include "pragma/lua/converters/gui_element_converter.hpp"
 #include "pragma/lua/util.hpp"
 

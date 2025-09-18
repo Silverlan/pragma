@@ -5,19 +5,19 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/console/c_cvar.h"
-#include "pragma/c_engine.h"
-#include "pragma/game/c_game.h"
 #include <image/prosper_render_target.hpp>
 #include <prosper_render_pass.hpp>
 #include <prosper_framebuffer.hpp>
 
 module pragma.client.entities.components.lights.shadow_csm;
 
+import pragma.client.client_state;
+import pragma.client.engine;
+
 using namespace pragma;
 
 extern CEngine *c_engine;
 extern ClientState *client;
-extern CGame *c_game;
 
 CShadowCSMComponent::TextureSet::TextureSet() {}
 

@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 #include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/lua/libraries/c_lua_vulkan.h"
 #include "pragma/entities/entity_component_system_t.hpp"
@@ -14,6 +13,7 @@ module;
 
 module pragma.client.entities.components.renderer;
 
+import pragma.client.engine;
 import pragma.client.entities.components.pp_bloom;
 import pragma.client.entities.components.pp_dof;
 import pragma.client.entities.components.pp_fog;
@@ -21,7 +21,6 @@ import pragma.client.entities.components.pp_fxaa;
 import pragma.client.entities.components.pp_tone_mapping;
 import pragma.client.scripting.lua;
 
-extern CGame *c_game;
 extern CEngine *c_engine;
 
 using namespace pragma;

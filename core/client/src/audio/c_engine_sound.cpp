@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_cengine.h"
-#include "pragma/c_engine.h"
 #include <sharedutils/util_pragma.hpp>
 #include <sharedutils/util_library.hpp>
 #include <pragma/util/util_game.hpp>
@@ -12,6 +11,7 @@
 #include <alsound_coordinate_system.hpp>
 
 import pragma.client.audio;
+import pragma.client.engine;
 
 extern CEngine *c_engine;
 

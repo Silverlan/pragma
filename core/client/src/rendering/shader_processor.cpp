@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/c_engine.h"
-#include "pragma/game/c_game.h"
 #include "pragma/rendering/render_processor.hpp"
+#include "pragma/game/game_limits.h"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/shaders/world/c_shader_pbr.hpp"
 #include "pragma/rendering/shaders/world/c_shader_prepass.hpp"
@@ -18,7 +17,9 @@
 #include <cmaterial.h>
 
 import pragma.client.client_state;
+import pragma.client.engine;
 import pragma.client.entities.components;
+import pragma.client.game;
 
 extern CEngine *c_engine;
 extern ClientState *client;

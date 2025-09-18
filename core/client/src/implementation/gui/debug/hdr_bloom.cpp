@@ -6,7 +6,6 @@ module;
 #include "stdafx_client.h"
 #include "pragma/lua/converters/gui_element_converter.hpp"
 #include "pragma/entities/components/c_scene_component.hpp"
-#include "pragma/game/c_game.h"
 #include <sharedutils/util_string.h>
 #include <image/prosper_sampler.hpp>
 #include <image/prosper_render_target.hpp>
@@ -17,7 +16,9 @@ module pragma.client.gui;
 import :debug_hdr_bloom;
 
 import pragma.client.client_state;
+import pragma.client.engine;
 import pragma.client.entities.components;
+import pragma.client.game;
 
 extern CEngine *c_engine;
 extern ClientState *client;

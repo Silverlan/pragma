@@ -5,7 +5,6 @@
 #include "pragma/rendering/shaders/world/c_shader_scene.hpp"
 #include "pragma/rendering/lighting/c_light_data_buffer_manager.hpp"
 #include "pragma/rendering/render_processor.hpp"
-#include "pragma/game/c_game.h"
 #include "pragma/rendering/global_render_settings_buffer_data.hpp"
 #include "pragma/entities/entity_instance_index_buffer.hpp"
 #include "pragma/game/game_limits.h"
@@ -19,10 +18,11 @@
 #include <prosper_descriptor_set_group.hpp>
 #include <cmaterial.h>
 
+import pragma.client.client_state;
+import pragma.client.engine;
 import pragma.client.entities.components;
 import pragma.client.model;
 
-extern CGame *c_game;
 extern CEngine *c_engine;
 
 using namespace pragma;

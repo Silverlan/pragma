@@ -1,11 +1,11 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/input/input_binding_layer.hpp"
-#include "pragma/c_engine.h"
 #include <wgui/wgui.h>
 #include <wgui/wibase.h>
 #include "luasystem.h"
@@ -70,13 +70,14 @@
 #include <util_image_buffer.hpp>
 #include <udm.hpp>
 #include <prosper_window.hpp>
-#include "pragma/c_engine.h"
-#include "pragma/game/c_game.h"
+
+module pragma.client.game;
 
 import pragma.client.ai;
 import pragma.client.audio;
 import pragma.client.client_state;
 import pragma.client.debug;
+import pragma.client.engine;
 import pragma.client.entities;
 import pragma.client.entities.components;
 import pragma.client.gui;

@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/c_engine.h"
 #include <wgui/types/witext.h>
 #include <wgui/types/wirect.h>
 #include <prosper_window.hpp>
@@ -15,6 +14,7 @@ import :scroll_container;
 import :table;
 
 import pragma.client.client_state;
+import pragma.client.engine;
 import pragma.gui;
 import pragma.string.unicode;
 

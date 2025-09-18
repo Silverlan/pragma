@@ -4,13 +4,11 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 #include <pragma/console/convars.h>
 #include "pragma/networking/netmessages.h"
 #include "cmaterialmanager.h"
 #include <cmaterial_manager2.hpp>
 #include "pragma/lua/classes/c_ldef_wgui.h"
-#include "pragma/c_engine.h"
 #include "pragma/console/convarhandle.h"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
@@ -47,6 +45,7 @@ module;
 module pragma.client.client_state;
 
 import pragma.client.audio;
+import pragma.client.engine;
 import pragma.client.entities.components;
 import pragma.client.gui;
 import pragma.client.model;
@@ -54,6 +53,7 @@ import pragma.client.networking;
 import pragma.client.scripting.lua;
 import pragma.client.util;
 // import pragma.scripting.lua;
+
 
 static std::unordered_map<std::string, std::shared_ptr<PtrConVar>> *conVarPtrs = NULL;
 std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &ClientState::GetConVarPtrs() { return *conVarPtrs; }

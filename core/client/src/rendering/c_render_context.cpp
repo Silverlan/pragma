@@ -4,7 +4,6 @@
 #include "stdafx_cengine.h"
 #include "pragma/rendering/c_render_context.hpp"
 #include "pragma/rendering/render_apis.hpp"
-#include "pragma/c_engine.h"
 #include "pragma/debug/debug_utils.hpp"
 #include <prosper_util.hpp>
 #include <debug/prosper_debug.hpp>
@@ -18,6 +17,8 @@
 #include <spdlog/pattern_formatter.h>
 #include <sharedutils/magic_enum.hpp>
 #include <cmaterial_manager2.hpp>
+
+import pragma.client.engine;
 
 using namespace pragma;
 

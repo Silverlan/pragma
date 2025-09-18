@@ -5,7 +5,6 @@
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/rendering/render_queue.hpp"
 #include "pragma/entities/environment/lights/c_env_light.h"
-#include "pragma/game/c_game.h"
 #include <image/prosper_msaa_texture.hpp>
 #include <prosper_util.hpp>
 #include <prosper_descriptor_set_group.hpp>
@@ -13,6 +12,7 @@
 
 import pragma.client.client_state;
 import pragma.client.entities.components;
+import pragma.client.game;
 
 using namespace pragma::rendering;
 

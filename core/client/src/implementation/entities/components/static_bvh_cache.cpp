@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 #include "pragma/model/modelmesh.h"
 #include "pragma/entities/components/base_static_bvh_cache_component.hpp"
 #include "pragma/entities/components/base_static_bvh_user_component.hpp"
@@ -14,9 +13,9 @@ module;
 
 module pragma.client.entities.components.static_bvh_cache;
 
+import pragma.client.engine;
 import pragma.client.entities.components;
 
-extern CGame *c_game;
 extern CEngine *c_engine;
 
 using namespace pragma;

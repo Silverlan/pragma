@@ -9,10 +9,10 @@ module pragma.client.rendering.shaders;
 
 import :particle_model_shadow;
 
+import pragma.client.engine;
+
 // prosper TODO
 #if 0
-#include "pragma/c_engine.h"
-#include "pragma/game/c_game.h"
 #include "pragma/model/c_modelmesh.h"
 #include <shader/prosper_pipeline_create_info.hpp>
 
@@ -21,7 +21,6 @@ using namespace Shader;
 LINK_SHADER_TO_CLASS(ParticleModelShadow,particlemodelshadow);
 
 extern CEngine *c_engine;
-extern CGame *c_game;
 
 ParticleModelShadow::ParticleModelShadow()
 	: Shadow("particlemodelshadow","programs/particles/model/particle_model_shadow","programs/particles/model/particle_model_shadow")

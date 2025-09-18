@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/c_engine.h"
 #include "wms_shared.h"
 #include "wms_request_filter.h"
 #include "wms_message.h"
@@ -25,6 +24,7 @@ import :silk_icon;
 import :table;
 
 import pragma.client.client_state;
+import pragma.client.engine;
 import pragma.gui;
 import pragma.locale;
 

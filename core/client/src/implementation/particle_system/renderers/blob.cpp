@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 #include "pragma/particlesystem/c_particlemodifier.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <buffers/prosper_dynamic_resizable_buffer.hpp>
@@ -18,6 +17,7 @@ import :renderer_blob;
 import pragma.client.client_state;
 import pragma.client.debug;
 import pragma.client.entities.components;
+import pragma.client.game;
 import pragma.client.gui;
 
 REGISTER_PARTICLE_RENDERER(blob, CParticleRendererBlob);

@@ -2,13 +2,15 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 #include "pragma/entities/components/liquid/base_liquid_component.hpp"
 #include "pragma/lua/classes/lproperty.hpp"
+#include "pragma/entities/environment/lights/env_light.h"
 #include "pragma/lua/converters/shader_converter_t.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/rendering/render_queue.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
+#include "pragma/entities/environment/lights/env_light.h"
+#include "pragma/rendering/lighting/shadows/c_shadow_type.hpp"
 #include "pragma/rendering/shaders/world/c_shader_prepass.hpp"
 #include "pragma/entities/environment/env_timescale.h"
 #include "pragma/entities/components/base_debug_component.hpp"
@@ -97,6 +99,7 @@
 
 import pragma.entities.components;
 import pragma.client.entities.components;
+import pragma.client.game;
 import pragma.client.scripting.lua;
 
 namespace Lua {

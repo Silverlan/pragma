@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/c_engine.h"
 #include "pragma/lua/converters/gui_element_converter.hpp"
 #include <cmaterialmanager.h>
 #include <cmaterial_manager2.hpp>
@@ -19,6 +18,7 @@ module;
 module pragma.client.gui;
 
 import :image_slide_show;
+import pragma.client.engine;
 
 extern CEngine *c_engine;
 

@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/game/c_game.h"
 #include <wgui/wibase.h>
 #include "luasystem.h"
 

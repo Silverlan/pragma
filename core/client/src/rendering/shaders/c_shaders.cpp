@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 //#include "shader.h" // prosper TODO
 #include <pragma/console/convars.h>
 //#include "shader_screen.h" // prosper TODO
@@ -17,8 +16,9 @@
 #include <pragma/debug/intel_vtune.hpp>
 #include <buffers/prosper_buffer.hpp>
 
+import pragma.client.engine;
 import pragma.client.rendering.shaders;
-
+import pragma.client.game;
 
 extern CEngine *c_engine;
 extern CGame *c_game;

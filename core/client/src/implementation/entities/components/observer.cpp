@@ -4,8 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
-#include "pragma/c_engine.h"
 #include "pragma/entities/c_baseentity.h"
 #include "pragma/entities/entity_component_system_t.hpp"
 #include "pragma/entities/components/orientation_component.hpp"
@@ -17,11 +15,13 @@ module;
 
 module pragma.client.entities.components.observer;
 
+import pragma.client.engine;
 import pragma.client.entities.components.character;
 import pragma.client.entities.components.game;
 import pragma.client.entities.components.input;
 import pragma.client.entities.components.observable;
 import pragma.client.entities.components.render;
+import pragma.client.game;
 
 using namespace pragma;
 

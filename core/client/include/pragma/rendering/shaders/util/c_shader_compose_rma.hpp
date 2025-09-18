@@ -7,6 +7,7 @@
 #include "pragma/clientdefinitions.h"
 #include <shader/prosper_shader_base_image_processing.hpp>
 #include "pragma/rendering/shaders/util/c_shader_compose_rma.hpp"
+#include "util_image_buffer.hpp"
 
 namespace prosper {
 	class Image;

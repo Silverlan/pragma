@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 #include "pragma/lua/classes/ldef_material.h"
 #include <texturemanager/texturemanager.h>
 #include "luasystem.h"
@@ -18,6 +17,7 @@ import pragma.client.entities.components.player;
 import pragma.client.entities.components.render;
 import pragma.client.entities.components.view_body;
 import pragma.client.entities.components.view_model;
+import pragma.client.game;
 
 extern ClientState *client;
 extern CGame *c_game;

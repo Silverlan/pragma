@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/c_engine.h"
-#include "pragma/game/c_game.h"
 #include "pragma/rendering/shaders/util/c_shader_compose_rma.hpp"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <shader/prosper_shader_t.hpp>
@@ -23,6 +21,8 @@
 #include <texturemanager/texture.h>
 
 import pragma.client.client_state;
+import pragma.client.engine;
+import pragma.client.game;
 
 extern CGame *c_game;
 extern ClientState *client;

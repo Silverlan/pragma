@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/rendering/world_environment.hpp"
@@ -19,9 +18,10 @@ module;
 
 module pragma.client.entities.components.pp_dof;
 
+import pragma.client.engine;
 import pragma.client.entities.components.optical_camera;
 import pragma.client.entities.components.rasterization_renderer;
-
+import pragma.client.game;
 import pragma.client.rendering.shaders;
 
 extern CGame *c_game;

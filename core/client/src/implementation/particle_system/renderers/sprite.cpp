@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 #include "pragma/cxxmodules.hpp"
 #include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
@@ -19,6 +18,7 @@ import :renderer_rotational_buffer;
 
 import pragma.client.client_state;
 import pragma.client.entities.components;
+import pragma.client.game;
 
 REGISTER_PARTICLE_RENDERER(sprite, CParticleRendererSprite);
 

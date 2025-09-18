@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/c_engine.h"
 #include "pragma/rendering/global_shader_input_manager.hpp"
 #include "pragma/rendering/shader_graph/manager.hpp"
 #include <prosper_command_buffer.hpp>
 
+import pragma.client.engine;
 import pragma.client.rendering.shader_graph;
 import pragma.shadergraph;
 

@@ -16,6 +16,7 @@ module pragma.client.rendering.shaders;
 
 import :world_raytracing;
 
+import pragma.client.engine;
 import pragma.client.rendering.shaders;
 
 using namespace pragma;

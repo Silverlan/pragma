@@ -12,6 +12,8 @@
 
 import pragma.client.model;
 
+import pragma.client.engine;
+
 using namespace pragma;
 
 extern CEngine *c_engine;

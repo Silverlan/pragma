@@ -4,16 +4,16 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/c_engine.h"
 #include <alsoundsystem.hpp>
 #include "alsound_effect.hpp"
-#include "pragma/audio/c_engine_sound.hpp"
 #include <pragma/networking/nwm_util.h>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <alsoundsystem.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
 module pragma.client.entities.components.audio.dsp.equalizer;
+
+import pragma.client.engine;
 
 using namespace pragma;
 

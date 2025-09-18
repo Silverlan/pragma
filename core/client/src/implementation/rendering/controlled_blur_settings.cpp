@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/c_engine.h"
 #include "pragma/console/c_cvar.h"
 #include <shader/prosper_shader_blur.hpp>
 
@@ -13,6 +12,8 @@ import pragma.client.rendering.shaders;
 module pragma.client.rendering;
 
 import :controlled_blur_settings;
+
+import pragma.client.engine;
 
 extern CEngine *c_engine;
 

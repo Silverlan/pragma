@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 #include "pragma/rendering/c_forwardplus.hpp"
 #include "pragma/console/c_cvar_global_functions.h"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
@@ -20,7 +19,9 @@
 #include <pragma/entities/entity_iterator.hpp>
 
 import pragma.client.debug;
+import pragma.client.engine;
 import pragma.client.entities.components;
+import pragma.client.game;
 import pragma.client.gui;
 import pragma.client.rendering.shaders;
 

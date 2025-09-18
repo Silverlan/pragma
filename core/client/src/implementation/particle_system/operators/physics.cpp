@@ -4,7 +4,7 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
+#include "pragma/clientdefinitions.h"
 #include <pragma/physics/environment.hpp>
 #include <pragma/physics/shape.hpp>
 #include <pragma/physics/collisionmesh.h>
@@ -14,6 +14,8 @@ module;
 module pragma.client.particle_system;
 
 import :operator_physics;
+
+import pragma.client.game;
 
 extern CGame *c_game;
 extern DLLCLIENT pragma::physics::IEnvironment *c_physEnv;

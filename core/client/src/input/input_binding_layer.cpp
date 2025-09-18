@@ -2,9 +2,10 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/c_engine.h"
 #include "pragma/input/input_binding_layer.hpp"
 #include "pragma/input/inputhelper.h"
+
+import pragma.client.engine;
 
 bool InputBindingLayer::Save(const std::vector<std::shared_ptr<InputBindingLayer>> &layers, udm::AssetDataArg outData, std::string &outErr)
 {

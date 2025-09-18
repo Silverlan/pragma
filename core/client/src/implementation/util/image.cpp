@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/c_engine.h"
 #include "prosper_util.hpp"
 #include <prosper_command_buffer.hpp>
 #include <image/prosper_image.hpp>
@@ -12,6 +11,8 @@ module;
 #include <prosper_context.hpp>
 
 module pragma.client.util.image;
+
+import pragma.client.engine;
 
 extern CEngine *c_engine;
 static uimg::Format determine_target_format(prosper::Format format)

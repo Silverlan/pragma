@@ -6,7 +6,6 @@
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/baseentity_handle.h"
-#include "pragma/c_engine.h"
 #include <pragma/entities/baseentity.h>
 #include <queries/prosper_timer_query.hpp>
 #include <material.h>
@@ -45,8 +44,8 @@ struct BaseSceneStatsTimerList {
 	~BaseSceneStatsTimerList()
 	{
 		for(auto &timer : gpuTimers) {
-			if(timer)
-				pragma::get_cengine()->GetRenderContext().KeepResourceAliveUntilPresentationComplete(timer);
+			//if(timer)
+			//	pragma::get_cengine()->GetRenderContext().KeepResourceAliveUntilPresentationComplete(timer);
 		}
 	}
 	void SetTime(TTimer timer, std::chrono::nanoseconds s) { timers[umath::to_integral(timer)] = s; }

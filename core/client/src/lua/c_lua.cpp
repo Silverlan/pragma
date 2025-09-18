@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 #include "pragma/lua/libraries/lents.h"
 #include "pragma/lua/libraries/c_lnetmessages.h"
 #include "pragma/lua/libraries/lengine.h"
@@ -58,8 +57,10 @@
 
 import pragma.locale;
 import pragma.client.client_state;
+import pragma.client.engine;
 import pragma.client.entities;
 import pragma.client.entities.components;
+import pragma.client.game;
 import pragma.client.scripting.lua;
 import pragma.string.unicode;
 

@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/c_engine.h"
 #include <wgui/types/witext.h>
 
 module pragma.client.gui;
@@ -12,6 +11,7 @@ module pragma.client.gui;
 import :fps;
 
 import pragma.client.client_state;
+import pragma.client.engine;
 import pragma.string.unicode;
 
 extern CEngine *c_engine;

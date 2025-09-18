@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 #include "pragma/rendering/shaders/c_shader_lua.hpp"
 #include "pragma/lua/libraries/c_lua_vulkan.h"
 #include <pragma/lua/classes/ldef_color.h>
@@ -46,6 +45,7 @@ module;
 module pragma.client.scripting.lua.classes.vulkan;
 
 import pragma.client.client_state;
+import pragma.client.engine;
 import pragma.client.model;
 import pragma.client.rendering.shaders;
 import pragma.client.util;

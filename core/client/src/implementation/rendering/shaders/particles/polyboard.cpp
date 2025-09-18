@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/c_engine.h"
 #include "pragma/entities/environment/c_env_camera.h"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <shader/prosper_shader_t.hpp>
@@ -13,6 +12,8 @@ module;
 module pragma.client.rendering.shaders;
 
 import :particle_polyboard;
+
+import pragma.client.engine;
 
 extern CEngine *c_engine;
 

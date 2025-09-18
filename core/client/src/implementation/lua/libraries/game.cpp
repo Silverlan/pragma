@@ -9,7 +9,6 @@ module;
 #include "pragma/lua/converters/shader_converter_t.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/rendering/render_queue.hpp"
-#include "pragma/game/c_game.h"
 #include <pragma/model/model.h>
 #include <pragma/lua/classes/ldef_quaternion.h>
 #include "pragma/rendering/shaders/world/c_shader_scene.hpp"
@@ -58,7 +57,9 @@ module pragma.client.scripting.lua.libraries.game;
 import pragma.client.client_state;
 import pragma.client.core;
 import pragma.client.debug;
+import pragma.client.engine;
 import pragma.client.entities.components;
+import pragma.client.game;
 import pragma.client.scripting.lua;
 
 extern CEngine *c_engine;

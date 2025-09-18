@@ -2,17 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_cengine.h"
-
-#ifdef _MSC_VER
-namespace pragma::string {
-	class Utf8String;
-	class Utf8StringView;
-	class Utf8StringArg;
-};
-#endif
-
-#include "pragma/c_engine.h"
-#include "pragma/game/c_game.h"
 #include "pragma/rendering/render_processor.hpp"
 #include <pragma/asset/util_asset.hpp>
 #include <pragma/lua/libraries/ldebug.h>
@@ -40,7 +29,9 @@ namespace pragma::string {
 
 import pragma.client.audio;
 import pragma.client.client_state;
+import pragma.client.engine;
 import pragma.client.entities.components;
+import pragma.client.game;
 import pragma.locale;
 // import pragma.scripting.lua;
 import pragma.console.commands;

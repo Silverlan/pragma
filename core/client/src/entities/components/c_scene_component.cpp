@@ -3,10 +3,10 @@
 
 #include "stdafx_client.h"
 #include "pragma/entities/components/c_scene_component.hpp"
-#include "pragma/game/c_game.h"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/entity_instance_index_buffer.hpp"
 #include "pragma/console/c_cvar.h"
+#include "pragma/game/game_limits.h"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/render_queue.hpp"
 #include "pragma/rendering/world_environment.hpp"
@@ -16,7 +16,9 @@
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <prosper_command_buffer.hpp>
 
+import pragma.client.engine;
 import pragma.client.entities.components;
+import pragma.client.game;
 import pragma.client.rendering.shaders;
 
 using namespace pragma;

@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 #include "pragma/entities/components/c_entity_component.hpp"
+
+import pragma.client.game;
 
 extern CGame *c_game;
 

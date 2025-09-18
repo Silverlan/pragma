@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/game/c_game.h"
 #include <image/prosper_texture.hpp>
 #include <pragma/lua/libraries/limport.hpp>
 #include <pragma/entities/baseentity_handle.h>
@@ -29,6 +28,7 @@ module;
 module pragma.client.scripting.lua.libraries.import_lib;
 
 import pragma.client.entities.components;
+import pragma.client.game;
 
 extern CGame *c_game;
 

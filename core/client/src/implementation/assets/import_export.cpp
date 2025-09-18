@@ -6,8 +6,6 @@ module;
 #include "stdafx_client.h"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
-#include "pragma/c_engine.h"
-#include "pragma/game/c_game.h"
 #include "pragma/util/util_game.hpp"
 #include "pragma/util/resource_watcher.h"
 #include "pragma/rendering/raytracing/cycles.hpp"
@@ -47,7 +45,9 @@ import :import_export;
 import :gltf_writer;
 
 import pragma.client.client_state;
+import pragma.client.engine;
 import pragma.client.entities.components;
+import pragma.client.game;
 import pragma.client.rendering.shaders;
 import pragma.client.util;
 

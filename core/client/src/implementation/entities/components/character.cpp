@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/c_engine.h"
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/entities/components/base_animated_component.hpp"
 #include "pragma/physics/collisiontypes.h"
@@ -34,6 +33,7 @@ module;
 module pragma.client.entities.components.character;
 
 import pragma.client.client_state;
+import pragma.client.engine;
 import pragma.client.entities.components.animated;
 import pragma.client.entities.components.eye;
 import pragma.client.entities.components.particle_system;

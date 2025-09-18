@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/game/c_game.h"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/entities/components/velocity_component.hpp"
@@ -16,6 +15,7 @@ module;
 module pragma.client.entities.components.physics;
 
 import pragma.client.client_state;
+import pragma.client.game;
 import pragma.client.model;
 
 using namespace pragma;

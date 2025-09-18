@@ -7,8 +7,6 @@ module;
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/entities/components/basetoggle.h"
 #include "pragma/entities/parentmode.h"
-#include "pragma/c_engine.h"
-#include "pragma/game/c_game.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/physics/raytraces.h>
 #include <pragma/entities/entity_component_system_t.hpp>
@@ -18,11 +16,11 @@ module pragma.client.entities.components.effects.sprite;
 import pragma.client.entities.components.attachment;
 import pragma.client.entities.components.color;
 import pragma.client.client_state;
+import pragma.client.engine;
 
 using namespace pragma;
 
 extern ClientState *client;
-extern CGame *c_game;
 
 void CSpriteComponent::Initialize() { BaseEnvSpriteComponent::Initialize(); }
 

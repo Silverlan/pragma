@@ -4,13 +4,14 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/c_engine.h"
 #include "pragma/model/c_modelmesh.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/physics/environment.hpp>
 #include <pragma/physics/collisionmesh.h>
 
 module pragma.client.entities.components.soft_body;
+
+import pragma.client.engine;
 
 extern CEngine *c_engine;
 

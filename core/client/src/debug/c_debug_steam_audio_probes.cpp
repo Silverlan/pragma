@@ -3,16 +3,14 @@
 
 #include "stdafx_client.h"
 #include "pragma/console/c_cvar_global_functions.h"
-#include "pragma/c_engine.h"
-#include "pragma/game/c_game.h"
 #include <alsoundsystem.hpp>
 #include <steam_audio/alsound_steam_audio.hpp>
 
 import pragma.client.client_state;
 import pragma.client.debug;
+import pragma.client.engine;
 
 extern CEngine *c_engine;
-extern CGame *c_game;
 
 #if ALSYS_STEAM_AUDIO_SUPPORT_ENABLED == 1
 static std::unique_ptr<DebugGameGUI> dbgSoundProbeBoxes = nullptr;

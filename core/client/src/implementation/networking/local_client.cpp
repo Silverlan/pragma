@@ -4,11 +4,15 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/c_engine.h"
+#include <sharedutils/util_clock.hpp>
 
 module pragma.client.networking;
 
 import :local_client;
+
+import pragma.client.engine;
+
+extern DLLNETWORK Engine *engine;
 
 std::string pragma::networking::LocalClient::GetIdentifier() const { return "localhost"; }
 bool pragma::networking::LocalClient::Connect(const std::string &ip, Port port, Error &outErr)

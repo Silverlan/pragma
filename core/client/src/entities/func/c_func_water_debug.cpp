@@ -4,7 +4,6 @@
 #include "stdafx_client.h"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/console/c_cvar_global_functions.h"
-#include "pragma/game/c_game.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/entities/components/c_scene_component.hpp"
 #include <pragma/entities/components/base_player_component.hpp>
@@ -18,6 +17,7 @@
 
 import pragma.client.debug;
 import pragma.client.entities.components;
+import pragma.client.game;
 import pragma.client.gui;
 import pragma.client.model;
 import pragma.client.physics;

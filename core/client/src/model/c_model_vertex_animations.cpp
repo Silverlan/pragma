@@ -2,12 +2,13 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/c_engine.h"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
 #include <pragma/model/animation/vertex_animation.hpp>
 #include <prosper_util.hpp>
 #include <buffers/prosper_buffer.hpp>
+
+import pragma.client.engine;
 
 extern CEngine *c_engine;
 

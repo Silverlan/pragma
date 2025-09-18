@@ -2,17 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-
-#ifdef _MSC_VER
-namespace pragma::string {
-	class Utf8String;
-	class Utf8StringView;
-	class Utf8StringArg;
-};
-#endif
-
-#include "pragma/c_engine.h"
-#include "pragma/game/c_game.h"
 #include "pragma/console/c_cvar.h"
 #include <wgui/types/wirect.h>
 #include <wgui/types/witext.h>
@@ -23,6 +12,8 @@ namespace pragma::string {
 #include <prosper_command_buffer.hpp>
 
 import pragma.client.client_state;
+import pragma.client.engine;
+import pragma.client.game;
 import pragma.client.gui;
 import pragma.locale;
 import pragma.string.unicode;

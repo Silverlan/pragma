@@ -4,15 +4,13 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/c_engine.h"
 #include <alsoundsystem.hpp>
 #include <alsoundsystem_create_effect.hpp>
-#include "pragma/game/c_game.h"
-#include "pragma/audio/c_engine_sound.hpp"
 #include "luasystem.h"
-#include <alsoundsystem.hpp>
 
 module pragma.client.scripting.lua.libraries.sound;
+
+import pragma.client.engine;
 
 extern CEngine *c_engine;
 

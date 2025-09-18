@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include "cmaterialmanager.h"
-#include "pragma/game/c_game.h"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/rendering/render_processor.hpp"
 #include "pragma/rendering/shader_material/shader_material.hpp"
@@ -27,11 +26,12 @@ module pragma.client.rendering.shaders;
 
 import :world_graph;
 
+import pragma.client.client_state;
+import pragma.client.engine;
 import pragma.client.entities.components;
 import pragma.client.model;
 import pragma.shadergraph;
 
-extern CGame *c_game;
 extern ClientState *client;
 extern CEngine *c_engine;
 

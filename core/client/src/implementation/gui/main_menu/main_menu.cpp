@@ -4,9 +4,7 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/c_engine.h"
 #include <wgui/types/witext.h>
-#include "pragma/game/c_game.h"
 #include <pragma/engine_version.h>
 #include <pragma/audio/alsound_type.h>
 #include <pragma/engine_info.hpp>
@@ -21,6 +19,8 @@ module pragma.client.gui;
 import :main_menu;
 
 import pragma.client.client_state;
+import pragma.client.engine;
+import pragma.client.game;
 import pragma.locale;
 
 extern CEngine *c_engine;

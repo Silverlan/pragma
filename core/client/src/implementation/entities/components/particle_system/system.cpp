@@ -9,12 +9,10 @@ module;
 #include "pragma/entities/components/base_animated_component.hpp"
 #include "pragma/rendering/shaders/c_shader_lua.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
-#include "pragma/c_engine.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/rendering/shaders/particles/c_shader_particle_2d_base.hpp"
 #include <pragma/model/model.h>
 #include <pragma/model/modelmesh.h>
-#include "pragma/game/c_game.h"
 #include <pragma/networking/nwm_util.h>
 #include "pragma/entities/baseentity_luaobject.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
@@ -37,6 +35,7 @@ import pragma.client.entities.components.animated;
 import pragma.client.entities.components.io;
 import pragma.client.entities.components.rasterization_renderer;
 import pragma.client.entities.components.transform;
+import pragma.client.game;
 import pragma.client.particle_system;
 
 using namespace pragma;

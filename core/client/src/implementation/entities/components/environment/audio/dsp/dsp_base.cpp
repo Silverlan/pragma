@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/audio/alsound_type.h"
-#include "pragma/game/c_game.h"
 #include <pragma/entities/environment/audio/env_sound_dsp.h>
 #include "pragma/entities/components/base_transform_component.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
@@ -16,6 +15,7 @@ module pragma.client.entities.components.audio.dsp.base;
 
 import pragma.client.client_state;
 import pragma.client.entities.components.toggle;
+import pragma.client.game;
 
 using namespace pragma;
 

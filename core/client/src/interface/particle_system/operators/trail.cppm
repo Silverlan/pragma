@@ -4,8 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/particlesystem/c_particlemodifier.h"
-#include "pragma/entities/environment/effects/c_env_particle_system.h"
 
 export module pragma.client.particle_system:operator_trail;
 

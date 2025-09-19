@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/rendering/shaders/particles/c_shader_particle_2d_base.hpp"
-#include "pragma/entities/environment/effects/c_env_particle_system.h"
 
 export module pragma.client.rendering.shaders:particle;
 

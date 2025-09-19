@@ -4,10 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/entities/c_baseentity.h"
-#include "pragma/entities/components/c_entity_component.hpp"
-#include "pragma/entities/environment/lights/c_env_light.h"
-#include "pragma/rendering/occlusion_culling/c_occlusion_octree.hpp"
 #include "image/prosper_render_target.hpp"
 #include "sharedutils/util_pragma.hpp"
 #include "prosper_command_buffer.hpp"

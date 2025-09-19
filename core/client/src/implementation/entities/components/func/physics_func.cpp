@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/rendering/c_rendermode.h"
 #include "pragma/physics/movetypes.h"
 #include <pragma/physics/physobj.h>
 #include <pragma/networking/nwm_util.h>

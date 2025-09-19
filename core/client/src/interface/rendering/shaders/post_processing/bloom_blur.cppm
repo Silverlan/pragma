@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/rendering/shaders/post_processing/c_shader_pp_base.hpp"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <shader/prosper_shader_blur.hpp>
 

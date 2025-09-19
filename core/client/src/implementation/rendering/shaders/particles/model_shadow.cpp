@@ -13,7 +13,6 @@ import pragma.client.engine;
 
 // prosper TODO
 #if 0
-#include "pragma/model/c_modelmesh.h"
 #include <shader/prosper_pipeline_create_info.hpp>
 
 using namespace Shader;

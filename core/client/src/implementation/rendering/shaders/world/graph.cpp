@@ -5,12 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include "cmaterialmanager.h"
-#include "pragma/entities/environment/c_env_camera.h"
-#include "pragma/rendering/render_processor.hpp"
-#include "pragma/rendering/shader_material/shader_material.hpp"
-#include "pragma/rendering/shader_graph/manager.hpp"
-#include "pragma/rendering/shader_graph/module.hpp"
-#include "pragma/model/c_modelmesh.h"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>

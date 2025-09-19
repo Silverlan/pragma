@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/math/icosphere.h"
 #include <pragma/debug/debug_render_info.hpp>
 #include <pragma/math/util_hermite.h>

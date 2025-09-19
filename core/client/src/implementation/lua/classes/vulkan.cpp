@@ -4,8 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/rendering/shaders/c_shader_lua.hpp"
-#include "pragma/lua/libraries/c_lua_vulkan.h"
 #include <pragma/lua/classes/ldef_color.h>
 #include <pragma/lua/classes/ldef_vector.h>
 #include <pragma/lua/classes/lerrorcode.h>

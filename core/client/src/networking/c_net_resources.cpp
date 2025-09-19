@@ -4,12 +4,9 @@
 #include "stdafx_client.h"
 #include "pragma/networking/c_net_resources.h"
 #include "pragma/networking/resources.h"
-#include "pragma/entities/components/c_model_component.hpp"
 #include <pragma/model/modelmanager.h>
 #include <fsys/filesystem.h>
-#include "pragma/model/c_modelmesh.h"
 #include "pragma/physics/collisionmesh.h"
-#include "pragma/model/c_model.h"
 #include <sharedutils/util_file.h>
 #include <sharedutils/scope_guard.h>
 #include <sharedutils/util_library.hpp>

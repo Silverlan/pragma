@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/particlesystem/c_particle.h"
 #include <string>
 #include <unordered_map>
 #include <mathutil/umath.h>

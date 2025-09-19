@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/c_baseentity.h"
 #include "pragma/entities/entity_component_system_t.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 

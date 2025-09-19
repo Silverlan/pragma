@@ -4,12 +4,8 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/entities/c_baseentity.h"
-#include "pragma/model/render_mesh_group.hpp"
 #include "buffers/prosper_buffer.hpp"
-#include "pragma/rendering/render_queue.hpp"
 #include <pragma/entities/baseworld.h>
-#include "pragma/rendering/occlusion_culling/c_occlusion_octree.hpp"
 #include <pragma/util/util_bsp_tree.hpp>
 #include <unordered_map>
 

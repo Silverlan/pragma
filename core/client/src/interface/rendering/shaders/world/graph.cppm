@@ -3,9 +3,6 @@
 
 module;
 
-#include "pragma/rendering/shaders/world/c_shader_textured.hpp"
-#include "pragma/rendering/shader_graph/module.hpp"
-#include "pragma/rendering/shader_material/shader_material.hpp"
 #include <texturemanager/texture.h>
 
 export module pragma.client.rendering.shaders:world_graph;

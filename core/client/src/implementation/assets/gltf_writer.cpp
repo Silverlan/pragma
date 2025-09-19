@@ -8,7 +8,6 @@ module;
 #define TINYGLTF_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
-#include "pragma/rendering/shaders/world/c_shader_scene.hpp"
 #include <pragma/model/model.h>
 #include <pragma/model/modelmesh.h>
 #include <pragma/model/animation/vertex_animation.hpp>

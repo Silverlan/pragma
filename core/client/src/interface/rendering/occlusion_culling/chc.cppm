@@ -5,10 +5,6 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/model/modelmesh.h"
-#include "pragma/entities/c_baseentity.h"
-#include "pragma/rendering/occlusion_culling/c_occlusion_octree.hpp"
-#include "pragma/model/c_modelmesh.h"
-#include "pragma/entities/environment/c_env_camera.h"
 #include <pragma/types.hpp>
 #include <sharedutils/def_handle.h>
 #include <sharedutils/functioncallback.h>

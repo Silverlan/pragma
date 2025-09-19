@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/particlesystem/c_particlemodifier.h"
 
 #define ENABLE_BLOB_DEPTH_TEST 0
 

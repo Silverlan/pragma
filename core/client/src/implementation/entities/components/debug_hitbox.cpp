@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/model/c_model.h"
 #include "pragma/debug/debug_render_info.hpp"
 #include "pragma/entities/components/base_model_component.hpp"
 

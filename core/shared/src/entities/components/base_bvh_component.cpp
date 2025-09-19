@@ -9,7 +9,6 @@
 #include "pragma/entities/components/intersection_handler_component.hpp"
 #include "pragma/entities/entity_component_system_t.hpp"
 #include "pragma/entities/entity_component_manager_t.hpp"
-#include "pragma/model/c_modelmesh.h"
 #include "pragma/debug/intel_vtune.hpp"
 #include <bvh/v2/stack.h>
 

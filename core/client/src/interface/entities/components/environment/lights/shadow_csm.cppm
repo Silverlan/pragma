@@ -4,10 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/entities/c_baseentity.h"
-#include "pragma/entities/components/c_entity_component.hpp"
-#include "pragma/entities/environment/lights/c_env_light.h"
-#include "pragma/entities/environment/c_env_camera.h"
 #include "prosper_command_buffer.hpp"
 #include "pragma/model/modelmesh.h"
 #include <pragma/entities/components/base_entity_component.hpp>

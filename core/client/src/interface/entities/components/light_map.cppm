@@ -5,7 +5,6 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include "buffers/prosper_dynamic_resizable_buffer.hpp"
-#include "pragma/rendering/raytracing/cycles.hpp"
 #include "pragma/logging.hpp"
 #include <cmaterial_manager2.hpp>
 #include <pragma/entities/components/base_entity_component.hpp>

@@ -4,12 +4,8 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/c_baseentity.h"
-#include "pragma/entities/components/c_scene_component.hpp"
-#include "pragma/lua/libraries/c_lua_vulkan.h"
 #include "pragma/lua/classes/ldef_entity.h"
 #include "luasystem.h"
-#include "pragma/model/c_model.h"
 #include <sharedutils/netpacket.hpp>
 #include <networkmanager/interface/nwm_manager.hpp>
 #include <pragma/networking/nwm_util.h>

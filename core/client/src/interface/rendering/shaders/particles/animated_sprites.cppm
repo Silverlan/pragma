@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/rendering/shaders/particles/c_shader_particle_2d_base.hpp"
 
 export module pragma.client.rendering.shaders:particle_animated_sprites;
 

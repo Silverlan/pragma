@@ -4,8 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/model/c_model.h"
-#include "pragma/model/c_modelmesh.h"
 #include "pragma/entities/components/velocity_component.hpp"
 #include <pragma/audio/alsound_type.h>
 #include <sharedutils/scope_guard.h>

@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/rendering/shaders/post_processing/c_shader_pp_base.hpp"
-#include "pragma/rendering/c_settings.hpp"
 
 export module pragma.client.rendering.shaders:pp_hdr;
 

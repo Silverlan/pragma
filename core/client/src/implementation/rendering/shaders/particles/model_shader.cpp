@@ -4,9 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/rendering/shaders/particles/c_shader_particle_2d_base.hpp"
-#include "pragma/entities/entity_instance_index_buffer.hpp"
-#include "pragma/model/c_modelmesh.h"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <shader/prosper_shader_t.hpp>
 #include <buffers/prosper_buffer.hpp>

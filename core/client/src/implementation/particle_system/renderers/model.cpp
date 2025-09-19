@@ -4,18 +4,12 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/components/c_model_component.hpp"
-#include "pragma/entities/environment/c_env_camera.h"
-#include "pragma/rendering/shaders/world/c_shader_textured.hpp"
-#include "pragma/model/c_modelmesh.h"
-#include "pragma/entities/components/c_scene_component.hpp"
 #include <pragma/math/intersection.h>
 #include <pragma/model/model.h>
 #include <prosper_util.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <prosper_command_buffer.hpp>
-#include "pragma/particlesystem/c_particlemodifier.h"
 
 module pragma.client.particle_system;
 

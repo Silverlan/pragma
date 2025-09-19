@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/definitions.h"
-#include "pragma/rendering/world_environment.hpp"
 #include <pragma/lua/ldefinitions.h>
 
 export module pragma.client.scripting.lua.classes.world_environment;

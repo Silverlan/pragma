@@ -7,10 +7,7 @@ module;
 #include <wgui/types/widropdownmenu.h>
 #include <wgui/types/witext.h>
 #include <wgui/types/witextentry.h>
-#include "pragma/rendering/c_msaa.h"
-#include "pragma/rendering/render_apis.hpp"
 #include <sharedutils/util_string.h>
-#include "pragma/rendering/c_settings.hpp"
 #include <prosper_util.hpp>
 #include <pragma/addonsystem/addonsystem.h>
 #include <pragma/physics/environment.hpp>

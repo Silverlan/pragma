@@ -6,9 +6,6 @@ module;
 #include "stdafx_client.h"
 #include "pragma/entities/components/base_character_component.hpp"
 #include "pragma/entities/components/base_transform_component.hpp"
-#include "pragma/entities/environment/c_env_camera.h"
-#include "pragma/entities/components/c_scene_component.hpp"
-#include "pragma/networking/c_nwm_util.h"
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/components/parent_component.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>

@@ -4,9 +4,7 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/rendering/c_rendermode.h"
 #include "pragma/console/c_cvar.h"
-#include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/components/base_player_component.hpp"
 #include "pragma/entities/components/base_character_component.hpp"
 #include "pragma/entities/components/base_animated_component.hpp"

@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/networking/c_nwm_util.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
 module pragma.client.entities.components.point_at_target;

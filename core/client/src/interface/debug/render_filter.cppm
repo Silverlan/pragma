@@ -4,8 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/rendering/shaders/world/c_shader_scene.hpp"
-#include "pragma/entities/c_baseentity.h"
 #include <functional>
 
 export module pragma.client.debug.render_filter;

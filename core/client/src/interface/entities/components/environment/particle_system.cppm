@@ -4,15 +4,8 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/entities/c_baseentity.h"
-#include "pragma/rendering/c_rendermode.h"
-#include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/entities/environment/effects/particlesystemdata.h"
 #include "pragma/entities/environment/effects/env_particle_system.h"
-#include "pragma/entities/components/c_entity_component.hpp"
-#include "pragma/particlesystem/c_particle.h"
-#include "pragma/rendering/c_alpha_mode.hpp"
-#include "pragma/particlesystem/c_particlemodifier.h"
 #include <mathutil/transform.hpp>
 #include <udm.hpp>
 #include <fsys/vfileptr.h>

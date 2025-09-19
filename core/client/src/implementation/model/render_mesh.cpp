@@ -4,8 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/model/c_modelmesh.h"
-#include "pragma/rendering/shaders/world/c_shader_scene.hpp"
 #include <buffers/prosper_render_buffer.hpp>
 #include <shader/prosper_pipeline_create_info.hpp>
 

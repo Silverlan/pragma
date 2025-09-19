@@ -4,8 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/entities/c_baseentity.h"
-#include "pragma/entities/components/c_entity_component.hpp"
 #include <pragma/entities/func/basefunckinematic.hpp>
 #include <pragma/entities/entity_component_manager.hpp>
 

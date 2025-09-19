@@ -4,9 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/model/c_modelmesh.h"
-#include "pragma/entities/environment/c_env_camera.h"
-#include "pragma/rendering/occlusion_culling/c_occlusion_octree.hpp"
 #include <sharedutils/util_weak_handle.hpp>
 #include <queue>
 #include <vector>

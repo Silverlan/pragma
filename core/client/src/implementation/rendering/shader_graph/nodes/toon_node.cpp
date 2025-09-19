@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/rendering/shader_material/shader_material.hpp"
 
 module pragma.client.rendering.shader_graph;
 

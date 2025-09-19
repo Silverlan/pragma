@@ -4,9 +4,7 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/model/c_modelmesh.h"
 #include <sharedutils/util_parallel_job.hpp>
-#include "pragma/entities/environment/lights/c_env_light.h"
 #include <util_image_buffer.hpp>
 #include <mathutil/umath_lighting.hpp>
 #include <vector>

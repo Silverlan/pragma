@@ -4,7 +4,6 @@
 module;
 
 #include <pragma/entities/baseentity_handle.h>
-#include "pragma/entities/c_baseentity.h"
 
 export module pragma.client.core.choreographic_scene;
 

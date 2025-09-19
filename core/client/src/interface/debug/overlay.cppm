@@ -4,9 +4,7 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/debug/debug_render_info.hpp"
 #include "buffers/prosper_buffer.hpp"
-#include "pragma/entities/environment/c_env_camera.h"
 #include "wgui/types/witext.h"
 #include <pragma/math/angle/wvangle.h>
 #include <mathutil/color.h>

@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include <pragma/types.hpp>
 
 export module pragma.client.rendering.shaders:world_water;

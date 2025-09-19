@@ -6,8 +6,6 @@ module;
 #include "stdafx_client.h"
 #include "pragma/game/game_limits.h"
 #include "pragma/entities/components/base_transform_component.hpp"
-#include "pragma/lua/libraries/c_lua_vulkan.h"
-#include "pragma/model/c_vertex_buffer_data.hpp"
 #include <pragma/model/model.h>
 #include <pragma/logging.hpp>
 #include <prosper_util.hpp>
@@ -16,7 +14,6 @@ module;
 #include <buffers/prosper_swap_buffer.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
-#include "pragma/model/c_modelmesh.h"
 #include <pragma/lua/lua_util_component.hpp>
 #include <pragma/lua/converters/optional_converter_t.hpp>
 #include <pragma/lua/converters/vector_converter_t.hpp>

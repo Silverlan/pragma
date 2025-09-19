@@ -4,9 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/components/c_model_component.hpp"
-#include "pragma/model/c_model.h"
-#include "pragma/model/c_modelmesh.h"
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/entity_component_manager_t.hpp>
 #include <buffers/prosper_buffer.hpp>

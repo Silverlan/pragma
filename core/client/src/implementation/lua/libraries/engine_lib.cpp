@@ -7,9 +7,6 @@ module;
 #include "pragma/input/inputhelper.h"
 #include "cmaterialmanager.h"
 #include "luasystem.h"
-#include "pragma/model/c_model.h"
-#include "pragma/model/c_modelmesh.h"
-#include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/asset/util_asset.hpp"
 #include <pragma/util/font_set.hpp>
 #include <wgui/fontmanager.h>

@@ -4,10 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/model/c_modelmesh.h"
-#include "pragma/entities/environment/c_env_camera.h"
-#include "pragma/rendering/shaders/world/c_shader_textured.hpp"
-#include "pragma/model/c_vertex_buffer_data.hpp"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_util.hpp>

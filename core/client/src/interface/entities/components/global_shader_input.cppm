@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/rendering/global_shader_input_manager.hpp"
 #include "pragma/entities/components/base_entity_component_member_register.hpp"
 #include <pragma/entities/components/base_entity_component.hpp>
 

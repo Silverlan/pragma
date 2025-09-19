@@ -7,13 +7,8 @@ module;
 #include "luasystem.h"
 #include <pragma/lua/classes/ldef_vector.h>
 #include "pragma/lua/converters/shader_converter_t.hpp"
-#include "pragma/rendering/scene/util_draw_scene_info.hpp"
-#include "pragma/rendering/render_queue.hpp"
 #include <pragma/model/model.h>
 #include <pragma/lua/classes/ldef_quaternion.h>
-#include "pragma/rendering/shaders/world/c_shader_scene.hpp"
-#include "pragma/rendering/global_render_settings_buffer_data.hpp"
-#include "pragma/entities/environment/c_env_camera.h"
 #include <pragma/util/transform.h>
 #include <pragma/lua/libraries/lgame.h>
 #include <pragma/lua/libraries/lfile.h>

@@ -4,7 +4,6 @@
 module;
 
 #include <pragma/types.hpp>
-#include "pragma/particlesystem/c_particlemodifier.h"
 
 export module pragma.client.particle_system:renderer_model;
 

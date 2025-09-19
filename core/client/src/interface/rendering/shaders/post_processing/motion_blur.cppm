@@ -3,7 +3,6 @@
 
 export
 
-#include "pragma/rendering/shaders/post_processing/c_shader_pp_base.hpp"
 
 export module pragma.client.rendering.shaders:pp_motion_blur;
 

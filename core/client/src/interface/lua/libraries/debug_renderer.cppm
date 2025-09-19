@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/entities/environment/c_env_camera.h"
 #include <pragma/lua/ldefinitions.h>
 #include "pragma/debug/debug_render_info.hpp"
 

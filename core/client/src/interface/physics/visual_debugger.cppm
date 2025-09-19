@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/entities/environment/c_env_camera.h"
 #include <pragma/physics/visual_debugger.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <memory>

@@ -6,8 +6,6 @@ module;
 #include "stdafx_client.h"
 #include "pragma/entities/components/intersection_handler_component.hpp"
 #include "pragma/entities/components/base_bvh_component.hpp"
-#include "pragma/model/c_modelmesh.h"
-#include "pragma/model/c_model.h"
 #include <pragma/physics/raytraces.h>
 #include <pragma/entities/environment/env_decal.h>
 #include <pragma/entities/components/base_transform_component.hpp>

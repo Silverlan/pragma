@@ -5,12 +5,7 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/entities/baseworld.h"
-#include "pragma/rendering/shaders/world/c_shader_scene.hpp"
-#include "pragma/rendering/shaders/world/c_shader_textured.hpp"
-#include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/components/intersection_handler_component.hpp"
-#include "pragma/model/c_vertex_buffer_data.hpp"
-#include "pragma/model/c_modelmesh.h"
 #include "pragma/console/c_cvar_global_functions.h"
 #include <pragma/debug/intel_vtune.hpp>
 #include <pragma/lua/classes/ldef_mat4.h>

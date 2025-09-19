@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/particlesystem/c_particlemodifier.h"
 #include <mathutil/umath.h>
 #include <pragma/math/vector/wvvector3.h>
 

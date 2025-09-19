@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/networking/c_nwm_util.h"
 
 import pragma.client.client_state;
 import pragma.client.game;

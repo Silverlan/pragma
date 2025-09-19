@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/entities/c_baseentity.h"
 #include "pragma/entities/func/basefuncbutton.h"
 
 import pragma.entities.components;

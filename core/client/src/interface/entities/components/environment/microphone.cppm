@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/entities/c_baseentity.h"
 #include "pragma/entities/environment/env_microphone_base.h"
 
 export module pragma.client.entities.components.env_microphone;

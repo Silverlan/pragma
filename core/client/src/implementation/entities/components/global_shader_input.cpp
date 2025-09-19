@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/entities/components/base_entity_component_logging.hpp"
-#include "pragma/rendering/global_shader_input_manager.hpp"
 #include "pragma/lua/lua_util_component.hpp"
 #include "pragma/game/gamemode/gamemodemanager.h"
 #include <pragma/entities/entity_component_manager_t.hpp>

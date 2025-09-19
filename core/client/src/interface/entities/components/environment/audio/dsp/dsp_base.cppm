@@ -4,8 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/entities/c_baseentity.h"
-#include "pragma/entities/components/c_entity_component.hpp"
 #include <pragma/entities/environment/audio/env_sound_dsp.h>
 #include <alsound_source.hpp>
 

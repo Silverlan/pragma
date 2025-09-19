@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/model/c_modelmesh.h"
 #include <pragma/physics/phys_water_surface_simulator.hpp>
 #include <prosper_command_buffer.hpp>
 

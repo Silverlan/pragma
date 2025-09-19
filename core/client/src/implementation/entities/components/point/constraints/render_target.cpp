@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/components/c_scene_component.hpp"
 #include <cmaterialmanager.h>
 #include <mathutil/umat.h>
 #include "pragma/entities/baseentity_luaobject.h"

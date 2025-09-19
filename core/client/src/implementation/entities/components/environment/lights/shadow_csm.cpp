@@ -4,13 +4,7 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/components/base_transform_component.hpp"
-#include "pragma/console/c_cvar.h"
-#include "pragma/model/c_model.h"
-#include "pragma/model/c_modelmesh.h"
-#include "pragma/rendering/shaders/world/c_shader_textured.hpp"
-#include "pragma/rendering/global_render_settings_buffer_data.hpp"
 #include <pragma/math/math_seb.h>
 #include <pragma/math/e_frustum.h>
 #include <pragma/entities/entity_iterator.hpp>

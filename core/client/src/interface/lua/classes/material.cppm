@@ -5,7 +5,6 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include "matsysdefinitions.h"
-#include "pragma/lua/libraries/c_lua_vulkan.h"
 #include <pragma/lua/ldefinitions.h>
 #include <texturemanager/texturemanager.h>
 

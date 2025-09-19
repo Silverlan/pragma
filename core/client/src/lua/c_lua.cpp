@@ -3,13 +3,8 @@
 
 #include "stdafx_client.h"
 #include "pragma/lua/libraries/lents.h"
-#include "pragma/lua/libraries/c_lnetmessages.h"
 #include "pragma/lua/libraries/lengine.h"
 #include "alsound_types.hpp"
-#include "pragma/entities/environment/c_env_camera.h"
-#include "pragma/entities/environment/effects/c_env_particle_system.h"
-#include "pragma/rendering/c_rendermode.h"
-#include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include <pragma/lua/handle_holder.hpp>
 #include <pragma/lua/converters/optional_converter_t.hpp>
 #include <pragma/lua/converters/pair_converter_t.hpp>
@@ -17,8 +12,6 @@
 #include <pragma/lua/classes/ldef_entity.h>
 #include <mathutil/glmutil.h>
 #include "luasystem.h"
-#include "pragma/rendering/shaders/world/c_shader_textured.hpp"
-#include "pragma/model/c_modelmesh.h"
 #include "cmaterialmanager.h"
 #include <wgui/wgui.h>
 #include <wgui/wibase.h>

@@ -6,13 +6,10 @@ module;
 #include <mathutil/umath.h>
 #include <glm/gtx/euler_angles.hpp>
 #include "sharedutils/util_pragma.hpp"
-#include <pragma/model/c_modelmesh.h>
-#include <pragma/model/c_model.h>
 #include <pragma/model/animation/bone.hpp>
 #include <pragma/model/animation/vertex_animation.hpp>
 #include <pragma/game/game_resources.hpp>
 #include <pragma/asset/util_asset.hpp>
-#include "pragma/rendering/shaders/util/c_shader_compose_rma.hpp"
 #include <cmaterial.h>
 #include <ofbx.h>
 #include <span>

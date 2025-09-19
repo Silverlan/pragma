@@ -4,12 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/environment/c_env_camera.h"
-#include "pragma/rendering/render_processor.hpp"
-#include "pragma/rendering/render_queue.hpp"
-#include "pragma/rendering/scene/util_draw_scene_info.hpp"
-#include "pragma/rendering/render_queue_instancer.hpp"
-#include "pragma/rendering/render_queue_worker.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <prosper_render_pass.hpp>
 #include <prosper_framebuffer.hpp>

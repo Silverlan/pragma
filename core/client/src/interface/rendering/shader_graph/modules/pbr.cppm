@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/rendering/shader_graph/module.hpp"
 
 export module pragma.client.rendering.shader_graph:module_pbr;
 

@@ -4,13 +4,8 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/components/c_model_component.hpp"
-#include "pragma/rendering/render_queue.hpp"
-#include "pragma/model/c_model.h"
-#include "pragma/model/c_modelmesh.h"
 #include "pragma/console/c_cvar.h"
 #include "pragma/entities/baseworld.h"
-#include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"
 #include <pragma/math/intersection.h>
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>

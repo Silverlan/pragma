@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include <pragma/entities/components/base_entity_component.hpp>
 
 export module pragma.client.entities.components.pp_base;

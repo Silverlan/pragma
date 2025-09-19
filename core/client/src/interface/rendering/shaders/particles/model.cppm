@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/rendering/shaders/world/c_shader_textured.hpp"
-#include "pragma/rendering/shaders/particles/c_shader_particle_base.hpp"
 
 export module pragma.client.rendering.shaders:particle_model;
 

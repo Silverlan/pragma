@@ -4,10 +4,7 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/entities/c_baseentity.h"
 #include "pragma/entities/environment/env_fog_controller.h"
-#include "pragma/rendering/world_environment.hpp"
-#include "pragma/entities/components/c_entity_component.hpp"
 #include <memory>
 
 export module pragma.client.entities.components.env_fog_controller;

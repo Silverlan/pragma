@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include <wgui/types/wirect.h>
-#include "pragma/input/input_binding_layer.hpp"
 
 module pragma.client.gui;
 

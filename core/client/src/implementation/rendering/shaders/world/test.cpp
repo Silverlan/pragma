@@ -4,10 +4,7 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/rendering/shaders/world/c_shader_pbr.hpp"
 #include "cmaterialmanager.h"
-#include "pragma/entities/environment/c_env_camera.h"
-#include "pragma/model/c_modelmesh.h"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>

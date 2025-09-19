@@ -5,21 +5,8 @@ module;
 
 #include "pragma/c_enginedefinitions.h"
 #include "pragma/clientdefinitions.h"
-#include "pragma/rendering/c_renderflags.h"
-#include "pragma/entities/c_baseentity.h"
-#include "pragma/rendering/c_sci_gpu_timer_manager.hpp"
-#include "pragma/rendering/world_environment.hpp"
-#include "pragma/rendering/scene/util_draw_scene_info.hpp"
-#include "pragma/lua/c_lua_gui_manager.h"
 #include "alsound_effect.hpp"
 #include "pragma/entities/baseworld.h"
-#include "pragma/rendering/game_world_shader_settings.hpp"
-#include "pragma/rendering/lighting/shadows/c_shadow_type.hpp"
-#include "pragma/input/input_binding_layer_lua.hpp"
-#include "pragma/rendering/shaders/c_shader_lua.hpp"
-#include "pragma/rendering/global_render_settings_buffer_data.hpp"
-#include "pragma/rendering/render_queue.hpp"
-#include "pragma/rendering/global_shader_input_manager.hpp"
 #include "pragma/entities/environment/lights/env_light_directional.h"
 #include "alsound_effect.hpp"
 #include <cmaterial.h>
@@ -27,13 +14,10 @@ module;
 #include "wgui/wibase.h"
 #include "image/prosper_image.hpp"
 #include "prosper_command_buffer.hpp"
-#include "pragma/entities/environment/effects/c_env_particle_system.h"
-#include "pragma/rendering/render_queue_worker.hpp"
 #include <pragma/game/game.h>
 #include <pragma/input/inkeys.h>
 #include <mathutil/color.h>
 #include <pragma/util/bulletinfo.h>
-#include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "prosper_descriptor_set_group.hpp"
 #include <queue>
 #include <wgui/wihandle.h>

@@ -4,8 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/rendering/shader_graph/module.hpp"
-#include "pragma/rendering/global_shader_input_manager.hpp"
 #include "buffers/prosper_buffer.hpp"
 
 export module pragma.client.rendering.shader_graph:module_input_data;

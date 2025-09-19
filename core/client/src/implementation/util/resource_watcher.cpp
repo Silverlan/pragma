@@ -4,8 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/components/c_model_component.hpp"
-#include "pragma/rendering/shader_graph/manager.hpp"
 #include "pragma/console/c_cvar.h"
 #include <texture_load_flags.hpp>
 #include <sharedutils/util_file.h>

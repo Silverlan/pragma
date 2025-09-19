@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/model/c_modelmesh.h"
 #include "pragma/util/util_thread_pool.hpp"
 #include "pragma/entities/environment/lights/env_light_spot.h"
 #include "pragma/entities/environment/lights/env_light_point.h"
@@ -15,7 +14,6 @@ module;
 #include <image/prosper_image.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <mathutil/umath_lighting.hpp>
-#include <pragma/entities/environment/lights/c_env_light.h>
 #include <sharedutils/util_baking.hpp>
 #include <util_image.hpp>
 #include <fsys/ifile.hpp>

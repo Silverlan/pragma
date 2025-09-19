@@ -4,9 +4,7 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/entities/c_baseentity.h"
 #include "pragma/entities/point/constraints/point_constraint_hinge.h"
-#include "pragma/entities/components/c_entity_component.hpp"
 
 export module pragma.client.entities.components.point_constraint_hinge;
 

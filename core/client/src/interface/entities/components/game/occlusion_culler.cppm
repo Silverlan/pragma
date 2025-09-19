@@ -4,9 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/entities/c_baseentity.h"
-#include "pragma/entities/components/c_entity_component.hpp"
-#include "pragma/rendering/occlusion_culling/c_occlusion_octree.hpp"
 #include <pragma/entities/components/base_entity_component.hpp>
 
 export module pragma.client.entities.components.game_occlusion_culler;

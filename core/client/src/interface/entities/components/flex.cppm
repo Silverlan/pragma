@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/entities/components/c_entity_component.hpp"
 #include "pragma/model/model.h"
 #include <pragma/util/lookup_identifier.hpp>
 #include <pragma/entities/components/base_flex_component.hpp>

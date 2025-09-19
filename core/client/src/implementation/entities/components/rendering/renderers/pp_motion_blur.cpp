@@ -5,11 +5,7 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/entities/entity_iterator.hpp"
-#include "pragma/entities/components/c_scene_component.hpp"
-#include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/entity_component_system_t.hpp"
-#include "pragma/rendering/shaders/world/c_shader_prepass.hpp"
-#include "pragma/rendering/render_processor.hpp"
 #include <pragma/entities/entity_component_manager_t.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 #include <image/prosper_render_target.hpp>

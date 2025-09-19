@@ -4,16 +4,12 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/components/hitbox_mesh_bvh_builder.hpp"
-#include "pragma/entities/components/c_model_component.hpp"
 #include <pragma/entities/components/intersection_handler_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include "pragma/logging.hpp"
 #include <pragma/entities/components/bvh_data.hpp>
 #include <pragma/entities/components/util_bvh.hpp>
 #include <pragma/debug/intel_vtune.hpp>
-#include "pragma/model/c_model.h"
-#include "pragma/model/c_modelmesh.h"
 #include <pragma/model/animation/skeleton.hpp>
 #include <pragma/model/animation/bone.hpp>
 #include <pragma/model/animation/skeleton.hpp>

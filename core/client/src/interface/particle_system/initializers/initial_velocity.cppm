@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/particlesystem/c_particlemodifier.h"
 #include <optional>
 
 export module pragma.client.particle_system:initializer_initial_velocity;

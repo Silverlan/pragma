@@ -2,14 +2,11 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/console/c_cvar_global.h"
-#include "pragma/console/cvar_global.h"
 #include "pragma/entities/components/base_character_component.hpp"
 #include "pragma/entities/components/base_name_component.hpp"
 #include "pragma/entities/components/base_observable_component.hpp"
 #include "pragma/entities/components/base_observer_component.hpp"
 #include "pragma/entities/components/base_player_component.hpp"
-#include "pragma/entities/environment/c_env_camera.h"
 #include <pragma/console/convars.h>
 #include "pragma/console/c_cvar.h"
 #include <pragma/lua/luacallback.h>
@@ -17,7 +14,6 @@
 #include <sharedutils/util.h>
 #include <sharedutils/util_string.h>
 #include "pragma/util/util_tga.hpp"
-#include "pragma/rendering/raytracing/cycles.hpp"
 #include <wgui/wgui.h>
 #include <cmaterialmanager.h>
 #include <pragma/networking/netmessages.h>

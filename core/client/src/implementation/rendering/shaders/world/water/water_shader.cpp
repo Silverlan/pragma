@@ -4,9 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/environment/c_env_camera.h"
-#include "pragma/rendering/render_processor.hpp"
-#include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <prosper_util.hpp>
 #include <prosper_descriptor_set_group.hpp>

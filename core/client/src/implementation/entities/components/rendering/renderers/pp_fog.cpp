@@ -4,8 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/rendering/world_environment.hpp"
-#include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/entities/entity_component_system_t.hpp"
 #include "pragma/console/c_cvar.h"
 #include <pragma/entities/entity_component_manager_t.hpp>

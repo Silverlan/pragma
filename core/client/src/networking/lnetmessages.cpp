@@ -3,7 +3,6 @@
 
 #include "stdafx_client.h"
 #include "pragma/lua/lnetmessages.h"
-#include "pragma/lua/libraries/c_lnetmessages.h"
 #include "pragma/lua/classes/ldef_netpacket.h"
 #include <pragma/networking/enums.hpp>
 #include <networkmanager/interface/nwm_manager.hpp>

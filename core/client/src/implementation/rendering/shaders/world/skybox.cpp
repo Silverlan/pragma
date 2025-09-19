@@ -4,9 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/rendering/render_processor.hpp"
-#include "pragma/model/c_vertex_buffer_data.hpp"
-#include "pragma/model/c_modelmesh.h"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <prosper_util.hpp>
 #include <prosper_descriptor_set_group.hpp>

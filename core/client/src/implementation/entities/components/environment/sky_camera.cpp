@@ -7,14 +7,6 @@ module;
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
-#include "pragma/entities/environment/c_env_camera.h"
-#include "pragma/entities/components/c_scene_component.hpp"
-#include "pragma/rendering/scene/util_draw_scene_info.hpp"
-#include "pragma/rendering/render_queue.hpp"
-#include "pragma/rendering/render_processor.hpp"
-#include "pragma/rendering/shaders/world/c_shader_prepass.hpp"
-#include "pragma/rendering/shaders/world/c_shader_textured.hpp"
-#include "pragma/rendering/render_queue_worker.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/baseentity_events.hpp>
 

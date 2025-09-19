@@ -4,10 +4,8 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/entity_component_system_t.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
-#include "pragma/entities/c_baseentity.h"
 
 module pragma.client.entities.components.game;
 

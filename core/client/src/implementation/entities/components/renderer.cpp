@@ -4,10 +4,7 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/components/c_scene_component.hpp"
-#include "pragma/lua/libraries/c_lua_vulkan.h"
 #include "pragma/entities/entity_component_system_t.hpp"
-#include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <prosper_command_buffer.hpp>
 

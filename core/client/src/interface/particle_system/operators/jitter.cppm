@@ -4,7 +4,6 @@
 module;
 
 #include <mathutil/umath.h>
-#include "pragma/particlesystem/c_particlemodifier.h"
 #include <pragma/math/vector/wvvector3.h>
 #include <sharedutils/util_string.h>
 #include <sharedutils/util.h>

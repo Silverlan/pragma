@@ -27,12 +27,7 @@ module;
 #include <wgui/types/wiroot.h>
 #include <pragma/entities/baseentity_events.hpp>
 #include <pragma/console/command_options.hpp>
-#include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/components/base_player_component.hpp"
-#include "pragma/rendering/shaders/world/c_shader_pbr.hpp"
-#include "pragma/rendering/raytracing/cycles.hpp"
-#include "pragma/rendering/scene/util_draw_scene_info.hpp"
-#include "pragma/console/c_cvar_global_functions.h"
 #include <pragma/entities/entity_component_manager_t.hpp>
 #include <pragma/entities/components/base_entity_component_logging.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>

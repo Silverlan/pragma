@@ -7,7 +7,6 @@ module;
 #include "pragma/entities/baseentity_luaobject.h"
 #include "pragma/entities/components/base_observable_component.hpp"
 #include "pragma/entities/components/base_player_component.hpp"
-#include "pragma/entities/environment/c_env_camera.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/input/inkeys.h>
 #include "pragma/lua/classes/ldef_entity.h"

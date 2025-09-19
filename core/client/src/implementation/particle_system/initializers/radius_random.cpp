@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/particlesystem/c_particlemodifier.h"
 #include <mathutil/umath.h>
 #include <sharedutils/util.h>
 #include <algorithm>

@@ -4,12 +4,8 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/rendering/c_rendermode.h"
-#include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include <pragma/physics/physobj.h>
-#include "pragma/model/c_modelmesh.h"
 #include "pragma/entities/baseentity_luaobject.h"
-#include "pragma/entities/components/c_model_component.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/model/model.h>
 #include <pragma/physics/raytraces.h>

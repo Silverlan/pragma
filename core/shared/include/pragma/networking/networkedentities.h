@@ -67,7 +67,6 @@ import pragma.server.entities.components;
 LINK_NETWORKED_ENTITIES;
 LINK_NETWORKED_PHYSICS_ENTITIES;
 #elif DLLCLIENT_EX
-#include "pragma/entities/environment/c_env_camera.h"
 
 import pragma.client.entities.components;
 

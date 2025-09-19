@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/entities/c_baseentity.h"
 #include "pragma/entities/basebot.h"
 #include <pragma/entities/components/base_character_component.hpp>
 

@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/particlesystem/c_particlemodifier.h"
 #include <pragma/types.hpp>
 
 export module pragma.client.particle_system:renderer_rotational_buffer;

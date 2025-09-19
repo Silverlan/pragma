@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/entities/c_baseentity.h"
 #include "pragma/physics/phys_water_surface_simulator.hpp"
 #include "pragma/entities/components/liquid/base_liquid_surface_simulation_component.hpp"
 #include <cmaterial.h>

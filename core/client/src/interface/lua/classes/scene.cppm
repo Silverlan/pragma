@@ -7,16 +7,11 @@ module;
 #include "pragma/c_enginedefinitions.h"
 #include "pragma/lua/c_ldefinitions.h"
 #include "pragma/model/modelmesh.h"
-#include "pragma/rendering/occlusion_culling/c_occlusion_octree.hpp"
-#include "pragma/entities/components/c_scene_component.hpp"
-#include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/lua/policies/shared_from_this_policy.hpp"
-#include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include "luabind/copy_policy.hpp"
 #include "prosper_render_pass.hpp"
 #include "prosper_command_buffer.hpp"
-#include "pragma/rendering/world_environment.hpp"
 #include <image/prosper_texture.hpp>
 #include "cmaterial.h"
 #include <mathutil/glmutil.h>
@@ -24,14 +19,10 @@ module;
 #include "pragma/lua/classes/ldef_plane.h"
 #include "pragma/lua/lua_util_component.hpp"
 #include "luasystem.h"
-#include "pragma/lua/classes/c_lshader.h"
-#include "pragma/rendering/shaders/world/c_shader_prepass.hpp"
-#include "pragma/model/c_modelmesh.h"
 #include <pragma/lua/classes/ldef_entity.h>
 #include <prosper_descriptor_set_group.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <sharedutils/util_shaderinfo.hpp>
-#include "pragma/rendering/occlusion_culling/c_occlusion_octree.hpp"
 
 export module pragma.client.scripting.lua.bindings.scene;
 

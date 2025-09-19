@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include <mathutil/uvec.h>
 
 export module pragma.client.rendering.shaders:world_unlit;

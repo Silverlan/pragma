@@ -4,10 +4,7 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/entities/components/c_entity_component.hpp"
 #include "pragma/entities/components/base_entity_component_member_register.hpp"
-#include "pragma/rendering/shader_input_data.hpp"
-#include "pragma/rendering/shader_material/shader_material.hpp"
 #include <pragma/entities/components/base_time_scale_component.hpp>
 #include <material_manager2.hpp>
 #include <queue>

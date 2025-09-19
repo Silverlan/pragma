@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/model/c_modelmesh.h"
 #include <prosper_context.hpp>
 #include <memory>
 #include <mutex>

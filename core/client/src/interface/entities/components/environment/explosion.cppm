@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/entities/c_baseentity.h"
 #include "pragma/entities/environment/effects/env_explosion.h"
 
 export module pragma.client.entities.components.effects.explosion;

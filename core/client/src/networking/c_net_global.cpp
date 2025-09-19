@@ -6,10 +6,6 @@
 #include "pragma/physics/movetypes.h"
 #include "pragma/physics/collisiontypes.h"
 #include "pragma/entities/parentmode.h"
-#include "pragma/entities/components/c_model_component.hpp"
-#include "pragma/entities/environment/effects/c_env_particle_system.h"
-#include "pragma/entities/environment/c_env_camera.h"
-#include "pragma/entities/environment/lights/c_env_light.h"
 #include <pragma/entities/components/basetoggle.h>
 #include "pragma/entities/environment/env_fog_controller.h"
 #include <pragma/networking/nwm_util.h>

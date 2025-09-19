@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/entities/components/c_scene_component.hpp"
 #include <shader/prosper_shader_base_image_processing.hpp>
 
 export module pragma.client.rendering.shaders:ssao;

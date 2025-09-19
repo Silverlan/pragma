@@ -7,7 +7,6 @@ module;
 #include <pragma/networking/nwm_util.h>
 #include <pragma/logging.hpp>
 #include "pragma/console/c_cvar.h"
-#include "pragma/networking/c_nwm_util.h"
 #include "luasystem.h"
 #include "alsound_types.hpp";
 #include <pragma/audio/alsound_type.h>

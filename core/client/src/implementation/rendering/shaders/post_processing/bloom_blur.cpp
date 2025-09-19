@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include <shader/prosper_pipeline_create_info.hpp>
-#include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include <shader/prosper_shader_t.hpp>
 #include <pragma/util/util_game.hpp>
 

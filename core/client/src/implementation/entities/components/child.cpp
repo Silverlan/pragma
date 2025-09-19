@@ -3,7 +3,6 @@
 
 #include "stdafx_client.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
-#include "pragma/networking/c_nwm_util.h"
 
 module pragma.client.entities.components.child;
 

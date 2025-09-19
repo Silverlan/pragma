@@ -6,7 +6,6 @@
 #include "pragma/entities/components/base_static_bvh_user_component.hpp"
 #include "pragma/entities/components/base_bvh_component.hpp"
 #include "pragma/entities/components/intersection_handler_component.hpp"
-#include "pragma/model/c_modelmesh.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/lua/converters/optional_converter_t.hpp>
 #include <pragma/lua/lua_util_component.hpp>

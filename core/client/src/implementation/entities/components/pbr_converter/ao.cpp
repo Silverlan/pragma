@@ -3,10 +3,6 @@
 
 module;
 
-#include "pragma/rendering/shaders/util/c_shader_compose_rma.hpp"
-#include "pragma/model/c_model.h"
-#include "pragma/model/c_modelmesh.h"
-#include "pragma/rendering/raytracing/cycles.hpp"
 #include "cmaterial.h"
 #include <pragma/physics/collisionmesh.h>
 #include <mathutil/transform.hpp>

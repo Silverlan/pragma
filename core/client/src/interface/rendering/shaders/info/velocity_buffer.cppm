@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/rendering/shaders/world/c_shader_prepass.hpp"
 #include <texturemanager/texture.h>
 
 export module pragma.client.rendering.shaders:velocity_buffer;

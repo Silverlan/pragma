@@ -4,9 +4,7 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/entities/c_baseentity.h"
 #include "pragma/entities/func/basefuncphysics.h"
-#include "pragma/entities/components/c_entity_component.hpp"
 
 import pragma.entities.components;
 

@@ -4,8 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/entities/c_baseentity.h"
-#include "pragma/entities/environment/lights/c_env_light.h"
 #include "pragma/entities/environment/lights/env_light_point.h"
 #include <mathutil/plane.hpp>
 #include <pragma/util/mvpbase.h>

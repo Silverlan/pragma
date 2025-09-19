@@ -7,9 +7,6 @@ export module pragma.client.rendering.shaders:particle_shadow;
 
 // prosper TODO
 #if 0
-#include "pragma/rendering/shaders/world/c_shader_textured.h"
-#include "pragma/rendering/c_entitymeshinfo.h"
-#include "pragma/rendering/shaders/particles/c_shader_particle_base.h"
 
 namespace Shader
 {

@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/rendering/render_processor.hpp"
 #include <pragma/util/global_string_table.hpp>
 #include <cmaterial_manager2.hpp>
 #include <texturemanager/texture_manager2.hpp>

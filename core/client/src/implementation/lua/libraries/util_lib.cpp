@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/entities/components/base_transform_component.hpp"
-#include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/util/bulletinfo.h"
 #include "pragma/entities/parentmode.h"
 #include "luasystem.h"

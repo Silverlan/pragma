@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/lua/converters/gui_element_converter.hpp"
 #include <image/prosper_render_target.hpp>
 #include <prosper_util.hpp>

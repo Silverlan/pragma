@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/lua/converters/gui_element_converter.hpp"
-#include "pragma/entities/components/c_scene_component.hpp"
 #include <sharedutils/util_string.h>
 #include <image/prosper_sampler.hpp>
 #include <image/prosper_render_target.hpp>

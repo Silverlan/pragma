@@ -4,14 +4,8 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/model/c_model.h"
-#include "pragma/model/c_modelmesh.h"
 #include "pragma/util/util_game.hpp"
 #include "pragma/util/resource_watcher.h"
-#include "pragma/rendering/raytracing/cycles.hpp"
-#include "pragma/rendering/shaders/util/c_shader_compose_rma.hpp"
-#include "pragma/entities/environment/c_env_camera.h"
-#include "pragma/entities/environment/lights/c_env_light.h"
 #include "pragma/entities/environment/lights/env_light_spot.h"
 #include "pragma/asset/util_asset.hpp"
 #include "pragma/game/game_limits.h"

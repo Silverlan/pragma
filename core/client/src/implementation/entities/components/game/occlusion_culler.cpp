@@ -7,11 +7,9 @@ module;
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
-#include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/baseworld.h"
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/entities/components/base_player_component.hpp"
-#include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/console/sh_cmd.h>
 

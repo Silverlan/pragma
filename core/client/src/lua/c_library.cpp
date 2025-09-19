@@ -2,17 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/model/c_model.h"
-#include "pragma/model/c_modelmesh.h"
-#include "pragma/lua/classes/c_lshader.h"
 #include "pragma/lua/libraries/lasset.hpp"
 #include "pragma/util/bulletinfo.h"
-#include "pragma/entities/environment/c_env_camera.h"
-#include "pragma/entities/environment/effects/c_env_particle_system.h"
-#include "pragma/input/input_binding_layer.hpp"
-#include "pragma/lua/classes/c_ldef_wgui.h"
 #include "pragma/lua/policies/gui_element_policy.hpp"
-#include "pragma/rendering/raytracing/cycles.hpp"
 #include <pragma/debug/debug_render_info.hpp>
 #include <pragma/game/game_resources.hpp>
 #include <pragma/util/giblet_create_info.hpp>

@@ -2,32 +2,19 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/lua/classes/c_lshader.h"
 #include "pragma/lua/converters/shader_converter_t.hpp"
-#include "pragma/rendering/shaders/c_shader_lua.hpp"
-#include "pragma/rendering/render_processor.hpp"
-#include "pragma/rendering/render_queue.hpp"
 #include "pragma/lua/classes/lmaterial.h"
 #include "pragma/lua/classes/lentity.h"
 #include "pragma/lua/classes/lshaderinfo.h"
-#include "pragma/rendering/shader_input_data.hpp"
-#include "pragma/entities/environment/lights/c_env_light.h"
 #include "pragma/lua/classes/lmodel.h"
 #include "pragma/lua/classes/lmodelmesh.h"
-#include "pragma/model/c_model.h"
-#include "pragma/model/c_modelmesh.h"
 #include "luasystem.h"
 #include "textureinfo.h"
 #include <pragma/game/damageinfo.h>
-#include "pragma/entities/environment/effects/c_env_particle_system.h"
-#include "pragma/rendering/shaders/util/c_shader_compose_rma.hpp"
-#include "pragma/rendering/shader_material/shader_material.hpp"
-#include "pragma/rendering/shader_graph/manager.hpp"
 #include "pragma/lua/libraries/ludm.hpp"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <wgui/fontmanager.h>
 #include <wgui/shaders/wishader_textured.hpp>
-#include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include <pragma/lua/converters/pair_converter_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/lua/converters/optional_converter_t.hpp>

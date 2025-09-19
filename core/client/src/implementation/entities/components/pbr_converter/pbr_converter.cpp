@@ -19,10 +19,6 @@ module;
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <sharedutils/util_library.hpp>
-#include "pragma/rendering/raytracing/cycles.hpp"
-#include "pragma/rendering/shaders/util/c_shader_compose_rma.hpp"
-#include "pragma/model/c_model.h"
-#include "pragma/model/c_modelmesh.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/components/logic_component.hpp>
 #include <util_texture_info.hpp>

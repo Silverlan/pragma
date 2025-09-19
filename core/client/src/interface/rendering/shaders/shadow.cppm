@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/rendering/shaders/world/c_shader_scene.hpp"
-#include "pragma/entities/environment/lights/c_env_light.h"
 
 export module pragma.client.rendering.shaders:shadow;
 

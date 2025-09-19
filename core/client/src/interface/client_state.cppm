@@ -8,12 +8,10 @@ module;
 #include <pragma/networkstate/networkstate.h>
 #include "pragma/networking/netmessages.h"
 #include "pragma/networking/enums.hpp"
-#include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "alsound_buffer.hpp"
 #include "wgui/types.hpp"
 #include "image/prosper_render_target.hpp"
 #include <pragma/networking/portinfo.h>
-#include "pragma/rendering/game_world_shader_settings.hpp"
 
 #undef PlaySound
 

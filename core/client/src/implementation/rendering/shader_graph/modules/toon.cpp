@@ -4,8 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/rendering/render_processor.hpp"
-#include "pragma/entities/environment/c_env_camera.h"
 #include <prosper_command_buffer.hpp>
 
 module pragma.client.rendering.shader_graph;

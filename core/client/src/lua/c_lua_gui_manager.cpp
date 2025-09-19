@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/lua/c_lua_gui_manager.h"
 
 void LuaGUIManager::RegisterGUIElement(std::string className, luabind::object &o)
 {

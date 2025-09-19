@@ -4,15 +4,9 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/console/c_cvar.h"
 #include <pragma/console/convars.h>
 #include <pragma/math/intersection.h>
-#include "pragma/entities/c_baseentity.h"
 #include <wgui/types/wirect.h>
-#include "pragma/entities/c_baseentity.h"
-#include "pragma/entities/components/c_scene_component.hpp"
-#include "pragma/entities/environment/c_env_camera.h"
-#include "pragma/model/c_modelmesh.h"
 
 module pragma.client.rendering.occlusion_culling;
 

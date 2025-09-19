@@ -5,8 +5,6 @@
 #define __LUA_SHADER_CONVERTERS_T_HPP__
 
 #include "pragma/lua/converters/shader_converter.hpp"
-#include "pragma/rendering/shaders/c_shader_lua.hpp"
-#include "pragma/rendering/shaders/util/c_shader_compose_rma.hpp"
 
 namespace pragma {
 	class ShaderEntity;

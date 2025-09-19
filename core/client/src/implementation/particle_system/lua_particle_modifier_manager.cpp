@@ -4,9 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/particlesystem/c_particlemodifier.h"
-#include "pragma/particlesystem/initializers/c_particle_initializer_lua.hpp"
-#include "pragma/rendering/shaders/c_shader_lua.hpp"
 
 #include "pragma/lua/converters/shader_converter_t.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>

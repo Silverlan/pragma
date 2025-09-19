@@ -4,11 +4,7 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/entities/c_baseentity.h"
-#include "pragma/entities/components/c_entity_component.hpp"
-#include "pragma/entities/environment/c_env_camera.h"
 #include <pragma/entities/components/base_game_component.hpp>
-#include "pragma/entities/c_baseentity.h"
 
 export module pragma.client.entities.components.game;
 

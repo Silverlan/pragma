@@ -4,11 +4,9 @@
 #include "stdafx_client.h"
 #include <fsys/filesystem.h>
 #include "pragma/networking/netmessages.h"
-#include "pragma/entities/c_baseentity.h"
 #include <pragma/networking/nwm_util.h>
 #include <sharedutils/util_string.h>
 #include <sharedutils/util_library.hpp>
-#include "pragma/entities/components/c_entity_component.hpp"
 #include <pragma/networking/enums.hpp>
 #include <pragma/networking/resources.h>
 #include <pragma/lua/lua_script_watcher.h>

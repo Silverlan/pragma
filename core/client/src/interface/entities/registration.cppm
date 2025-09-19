@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/entities/c_baseentity.h"
 #include <unordered_map>
 #include <functional>
 #include <typeindex>

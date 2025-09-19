@@ -15,7 +15,6 @@ import pragma.client.game;
 // prosper TODO
 #if 0
 #include <shader/prosper_pipeline_create_info.hpp>
-#include "pragma/rendering/shaders/particles/c_shader_particle_blob_shadow.h"
 
 using namespace Shader;
 

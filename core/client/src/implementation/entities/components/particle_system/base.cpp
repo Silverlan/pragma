@@ -10,13 +10,8 @@ module;
 #include <glm/gtx/norm.hpp>
 #include <algorithm>
 #include <sharedutils/util_weak_handle.hpp>
-#include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/entities/components/base_transform_component.hpp"
-#include "pragma/rendering/shaders/particles/c_shader_particle_2d_base.hpp"
-#include "pragma/rendering/shaders/world/c_shader_textured.hpp"
-#include "pragma/rendering/shaders/particles/c_shader_particle_base.hpp"
 #include "pragma/entities/components/base_time_scale_component.hpp"
-#include "pragma/entities/environment/c_env_camera.h"
 #include <pragma/asset/util_asset.hpp>
 #include <sprite_sheet_animation.hpp>
 #include <buffers/prosper_dynamic_resizable_buffer.hpp>

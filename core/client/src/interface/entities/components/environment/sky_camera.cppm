@@ -4,12 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/entities/c_baseentity.h"
-#include "pragma/entities/components/c_entity_component.hpp"
-#include "pragma/entities/components/c_scene_component.hpp"
-#include "pragma/rendering/render_processor.hpp"
-#include "pragma/rendering/render_queue.hpp"
-#include "pragma/rendering/shaders/world/c_shader_scene.hpp"
 #include <pragma/entities/components/base_entity_component.hpp>
 
 export module pragma.client.entities.components.env_sky_camera;

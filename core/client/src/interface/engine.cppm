@@ -6,15 +6,10 @@ module;
 #include "pragma/c_enginedefinitions.h"
 #include <pragma/engine.h>
 #include "pragma/launchparameters.h"
-#include "pragma/rendering/c_render_context.hpp"
-#include "pragma/input/c_keybind.h"
 #include <sharedutils/util_clock.hpp>
 #include "image/prosper_render_target.hpp"
 #include "queries/prosper_timer_query.hpp"
-#include "pragma/rendering/c_sci_gpu_timer_manager.hpp"
-#include "pragma/rendering/shader_graph/manager.hpp"
 #include "queries/prosper_query_pool.hpp"
-#include "pragma/input/input_binding_layer.hpp"
 #include "prosper_command_buffer.hpp"
 #include "pragma/util/font_set.hpp"
 #include <unordered_map>

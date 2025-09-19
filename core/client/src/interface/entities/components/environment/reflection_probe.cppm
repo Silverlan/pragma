@@ -4,9 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/entities/c_baseentity.h"
-#include "pragma/entities/components/c_entity_component.hpp"
-#include "pragma/entities/components/c_scene_component.hpp"
 #include "sharedutils/util_parallel_job.hpp"
 #include <image/prosper_texture.hpp>
 #include <util_image_buffer.hpp>

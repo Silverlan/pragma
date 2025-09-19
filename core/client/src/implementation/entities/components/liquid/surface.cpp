@@ -4,11 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/environment/c_env_camera.h"
-#include "pragma/entities/components/c_scene_component.hpp"
-#include "pragma/entities/components/c_model_component.hpp"
-#include "pragma/console/c_cvar.h"
-#include "pragma/rendering/shaders/particles/c_shader_particle_2d_base.hpp"
 #include <image/prosper_render_target.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>

@@ -7,10 +7,6 @@ module;
 #include "pragma/cxxmodules.hpp"
 #include "pragma/entities/components/base_io_component.hpp"
 #include "pragma/entities/components/base_animated_component.hpp"
-#include "pragma/rendering/shaders/c_shader_lua.hpp"
-#include "pragma/entities/environment/c_env_camera.h"
-#include "pragma/entities/environment/effects/c_env_particle_system.h"
-#include "pragma/rendering/shaders/particles/c_shader_particle_2d_base.hpp"
 #include <pragma/model/model.h>
 #include <pragma/model/modelmesh.h>
 #include <pragma/networking/nwm_util.h>
@@ -19,9 +15,7 @@ module;
 #include <pragma/entities/baseentity_events.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
-#include <pragma/entities/environment/effects/particlesystemdata.h>
 #include <udm.hpp>
-#include "pragma/particlesystem/initializers/c_particle_initializer_lua.hpp"
 #include <pragma/lua/lua_util_component.hpp>
 #include <pragma/model/model.h>
 #include <prosper_command_buffer.hpp>

@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/entities/c_baseentity.h"
 #include <pragma/lua/luaobjectbase.h>
 
 export module pragma.client.entities:lua;

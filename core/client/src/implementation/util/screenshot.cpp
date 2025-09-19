@@ -4,8 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/rendering/raytracing/cycles.hpp"
-#include "pragma/entities/environment/c_env_camera.h"
 #include <util_image.hpp>
 #include <util_image_buffer.hpp>
 #include <image/prosper_sampler.hpp>

@@ -5,14 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/physics/collisiontypes.h"
-#include "pragma/model/c_model.h"
-#include "pragma/model/c_modelmesh.h"
-#include "pragma/entities/components/c_model_component.hpp"
-#include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"
-#include "pragma/rendering/shaders/world/c_shader_textured.hpp"
-#include "pragma/rendering/render_queue.hpp"
-#include "pragma/rendering/world_environment.hpp"
-#include "pragma/rendering/render_processor.hpp"
 #include <buffers/prosper_buffer.hpp>
 #include <sharedutils/BS_thread_pool.hpp>
 #include <prosper_util.hpp>

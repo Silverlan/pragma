@@ -4,8 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/model/c_modelmesh.h"
-#include "pragma/entities/components/c_model_component.hpp"
 #include <pragma/model/model.h>
 #include <pragma/physics/phys_water_surface_simulator.hpp>
 #include <prosper_util.hpp>

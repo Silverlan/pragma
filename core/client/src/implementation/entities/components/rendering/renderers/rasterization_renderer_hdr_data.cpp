@@ -5,13 +5,7 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/console/c_cvar.h"
-#include "pragma/rendering/c_msaa.h"
-#include "pragma/rendering/shaders/particles/c_shader_particle_2d_base.hpp"
-#include "pragma/rendering/shaders/world/c_shader_textured.hpp"
-#include "pragma/rendering/scene/util_draw_scene_info.hpp"
-#include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/console/c_cvar_global_functions.h"
-#include "pragma/rendering/c_settings.hpp"
 #include <textureinfo.h>
 #include <wgui/wgui.h>
 #include <image/prosper_msaa_texture.hpp>

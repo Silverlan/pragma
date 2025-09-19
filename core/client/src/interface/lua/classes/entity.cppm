@@ -4,9 +4,7 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/entities/c_baseentity.h"
 #include <pragma/lua/ldefinitions.h>
-#include "pragma/entities/c_baseentity.h"
 #include <pragma/networking/nwm_util.h>
 #include <pragma/networking/enums.hpp>
 #include <mathutil/glmutil.h>

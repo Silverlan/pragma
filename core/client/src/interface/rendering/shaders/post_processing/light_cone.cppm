@@ -3,8 +3,6 @@
 
 export;
 
-#include "pragma/rendering/shaders/post_processing/c_shader_pp_base.hpp"
-#include "pragma/model/c_modelmesh.h"
 
 export module pragma.client.rendering.shaders:pp_light_cone;
 

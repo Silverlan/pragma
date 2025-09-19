@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/particlesystem/c_particlemodifier.h"
 #include <pragma/math/intersection.h>
 
 module pragma.client.particle_system;

@@ -4,9 +4,7 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/model/c_modelmesh.h"
 #include "pragma/console/c_cvar.h"
-#include <pragma/rendering/c_sci_gpu_timer_manager.hpp>
 #include <prosper_util.hpp>
 #include <buffers/prosper_buffer.hpp> // prosper TODO: Remove
 #include <prosper_command_buffer.hpp>

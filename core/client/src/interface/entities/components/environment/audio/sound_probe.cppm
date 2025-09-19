@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/entities/c_baseentity.h"
 #include <pragma/entities/components/base_entity_component.hpp>
 
 export module pragma.client.entities.components.audio.sound_probe;

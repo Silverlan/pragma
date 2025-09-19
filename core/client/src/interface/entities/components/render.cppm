@@ -4,17 +4,11 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/entities/components/c_entity_component.hpp"
-#include "pragma/rendering/shaders/world/c_shader_scene.hpp"
-#include "pragma/rendering/c_rendermode.h"
-#include "pragma/rendering/c_model_render_buffer_data.hpp"
 #include "buffers/prosper_uniform_resizable_buffer.hpp"
-#include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "prosper_descriptor_set_group.hpp"
 #include "buffers/prosper_buffer.hpp"
 #include "pragma/model/modelmesh.h"
 #include "pragma/math/intersection.h"
-#include "pragma/entities/components/c_model_component.hpp"
 #include <pragma/util/orientedpoint.h>
 #include <pragma/math/sphere.h>
 #include <pragma/entities/components/base_render_component.hpp>

@@ -4,11 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/entities/c_baseentity.h"
-#include "pragma/rendering/scene/util_draw_scene_info.hpp"
-#include "pragma/entities/components/c_entity_component.hpp"
-#include "pragma/entities/environment/lights/c_env_light.h"
-#include "pragma/rendering/render_queue.hpp"
 #include "image/prosper_render_target.hpp"
 #include <pragma/entities/components/base_entity_component.hpp>
 #include <pragma/indexmap.h>

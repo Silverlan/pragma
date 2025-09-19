@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/rendering/shaders/post_processing/c_shader_pp_base.hpp"
 #include <prosper_descriptor_set_group.hpp>
 #include <cmaterial.h>
 

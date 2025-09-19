@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/entities/components/c_entity_component.hpp"
 #include <pragma/entities/components/base_health_component.hpp>
 
 export module pragma.client.entities.components.health;

@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/environment/c_env_camera.h"
 #include <prosper_command_buffer.hpp>
 #include "shader/prosper_shader.hpp"
 #include <buffers/prosper_buffer.hpp>

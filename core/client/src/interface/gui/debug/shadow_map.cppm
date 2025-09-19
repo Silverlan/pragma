@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/entities/environment/lights/c_env_light.h"
 #include "wgui/wibase.h"
 #include <sharedutils/util_shared_handle.hpp>
 

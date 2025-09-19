@@ -4,9 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/particlesystem/c_particlemodifier.h"
-#include "pragma/particlesystem/c_particle.h"
-#include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include <pragma/math/util_random.hpp>
 #include <mathutil/umath_random.hpp>
 

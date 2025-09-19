@@ -6,12 +6,8 @@ module;
 #include "stdafx_client.h"
 #include "pragma/console/c_cvar_global_functions.h"
 #include "pragma/entities/entity_iterator.hpp"
-#include "pragma/model/c_model.h"
-#include "pragma/model/c_modelmesh.h"
 #include "pragma/entities/entity_iterator.hpp"
-#include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/entity_component_manager_t.hpp"
-#include "pragma/rendering/raytracing/cycles.hpp"
 #include <pragma/util/util_tga.hpp>
 #include <pragma/logging.hpp>
 #include <pragma/level/mapgeometry.h>

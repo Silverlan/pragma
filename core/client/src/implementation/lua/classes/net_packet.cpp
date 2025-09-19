@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include "luasystem.h"
-#include "pragma/networking/c_nwm_util.h"
 #include <pragma/lua/classes/ldef_entity.h>
 #include <pragma/lua/classes/lnetpacket.h>
 #include <pragma/lua/lua_call.hpp>

@@ -5,7 +5,6 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include <pragma/entities/components/base_bvh_component.hpp>
-#include "pragma/entities/components/hitbox_mesh_bvh_builder.hpp"
 #include "pragma/model/modelmesh.h"
 
 export module pragma.client.entities.components.hitbox_bvh;

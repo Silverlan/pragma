@@ -3,7 +3,6 @@
 
 #include "stdafx_client.h"
 #include "pragma/console/c_cvar.h"
-#include "pragma/entities/environment/lights/c_env_light.h"
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <wgui/types/wirect.h>
 #include <pragma/console/sh_cmd.h>

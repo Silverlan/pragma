@@ -4,11 +4,7 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/environment/c_env_camera.h"
-#include "pragma/entities/components/c_model_component.hpp"
 #include <pragma/entities/entity_iterator.hpp>
-#include <pragma/model/c_model.h>
-#include <pragma/model/c_modelmesh.h>
 #include <prosper_command_buffer.hpp>
 #include <image/prosper_texture.hpp>
 

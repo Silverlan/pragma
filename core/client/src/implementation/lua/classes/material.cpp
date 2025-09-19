@@ -7,7 +7,6 @@ module;
 #include "luasystem.h"
 #include "cmaterialmanager.h"
 #include "textureinfo.h"
-#include "pragma/rendering/shaders/world/c_shader_textured_base.hpp"
 #include <cmaterial.h>
 #include <cmaterial_manager2.hpp>
 

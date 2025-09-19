@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/particlesystem/c_particle.h"
 
 export module pragma.client.particle_system:modifier_gradual_fade;
 

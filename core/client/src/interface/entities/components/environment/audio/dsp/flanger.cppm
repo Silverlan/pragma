@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/entities/c_baseentity.h"
 #include "pragma/entities/environment/audio/env_sound_dsp_flanger.h"
 
 export module pragma.client.entities.components.audio.dsp.flanger;

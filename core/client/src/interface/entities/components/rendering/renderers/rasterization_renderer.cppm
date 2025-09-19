@@ -5,22 +5,14 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include <pragma/entities/components/base_entity_component.hpp>
-#include "pragma/entities/c_baseentity.h"
 #include "pragma/entities/environment/lights/env_light_directional.h"
-#include "pragma/entities/components/c_scene_component.hpp"
 
-#include "pragma/rendering/render_processor.hpp"
-#include "pragma/rendering/c_rendermode.h"
 #include <unordered_set>
 #include <prosper_swap_command_buffer.hpp>
 #include <mathutil/plane.hpp>
 #include <sharedutils/util_weak_handle.hpp>
 #include <string>
 #include <vector>
-#include "pragma/rendering/c_ssao.hpp"
-#include "pragma/rendering/c_prepass.hpp"
-#include "pragma/rendering/c_forwardplus.hpp"
-#include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "image/prosper_render_target.hpp"
 #include "prosper_command_buffer.hpp"
 #include <cinttypes>

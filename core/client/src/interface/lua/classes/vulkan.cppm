@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/lua/libraries/c_lua_vulkan.h"
 #include <image/prosper_sampler.hpp>
 #include <image/prosper_image_view.hpp>
 #include <buffers/prosper_buffer.hpp>

@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/entities/c_baseentity.h"
 #include "alsound_listener.hpp"
 
 export module pragma.client.entities.components.listener;

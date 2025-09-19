@@ -5,8 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/entities/components/base_transform_component.hpp"
-#include "pragma/model/c_modelmesh.h"
-#include "pragma/entities/components/c_scene_component.hpp"
 #include <prosper_util.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>

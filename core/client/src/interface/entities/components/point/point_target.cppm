@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/c_enginedefinitions.h"
-#include "pragma/entities/c_baseentity.h"
 #include "pragma/entities/point/point_target.h"
 
 export module pragma.client.entities.components.point_target;

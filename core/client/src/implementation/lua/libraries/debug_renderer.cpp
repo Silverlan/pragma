@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/lua/classes/ldef_angle.h"
 #include "pragma/lua/classes/ldef_color.h"
 #include <pragma/lua/classes/ldef_vector.h>

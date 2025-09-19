@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/model/c_modelmesh.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/physics/environment.hpp>
 #include <pragma/physics/collisionmesh.h>

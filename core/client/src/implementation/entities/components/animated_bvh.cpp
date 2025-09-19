@@ -4,10 +4,7 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/components/bvh_data.hpp"
-#include "pragma/model/c_modelmesh.h"
-#include "pragma/model/c_model.h"
 #include <pragma/model/animation/skeleton.hpp>
 #include <pragma/lua/converters/vector_converter_t.hpp>
 #include <pragma/debug/intel_vtune.hpp>

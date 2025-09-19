@@ -4,13 +4,9 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/entity_component_manager_t.hpp"
 #include "pragma/entities/entity_component_system_t.hpp"
-#include "pragma/model/c_model.h"
 #include "pragma/lua/lua_util_component.hpp"
-#include "pragma/rendering/global_shader_input_manager.hpp"
-#include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include <pragma/asset/util_asset.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <prosper_command_buffer.hpp>

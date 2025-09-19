@@ -4,8 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/model/c_model.h"
-#include "pragma/model/c_modelmesh.h"
 #include <pragma/debug/intel_vtune.hpp>
 
 module pragma.client.model;

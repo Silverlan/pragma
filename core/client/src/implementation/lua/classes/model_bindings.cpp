@@ -5,8 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include "luasystem.h"
-#include "pragma/model/c_model.h"
-#include "pragma/model/c_modelmesh.h"
 #include <pragma/lua/classes/lmodel.h>
 #include "pragma/lua/classes/ldef_model.h"
 #include <pragma/lua/libraries/lfile.h>

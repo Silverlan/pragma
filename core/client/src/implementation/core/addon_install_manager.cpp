@@ -11,12 +11,10 @@ module;
 
 module pragma.client;
 
-
 import :core.addon_install_manager;
 import :engine;
 import pragma.uva;
 import pragma.pad;
-
 
 static const std::string &get_query_url()
 {

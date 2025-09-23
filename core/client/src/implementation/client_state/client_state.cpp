@@ -19,6 +19,7 @@ module;
 #include <pragma/lua/lua_error_handling.hpp>
 #include <pragma/lua/libraries/lutil.hpp>
 #include <pragma/lua/libraries/ludm.hpp>
+#include "pragma/lua/policies/gui_element_policy.hpp"
 #include <luasystem_file.h>
 #include <pragma/debug/intel_vtune.hpp>
 #include <pragma/networking/enums.hpp>
@@ -40,7 +41,6 @@ module;
 #include <wgui/types/wiroot.h>
 
 module pragma.client;
-
 
 import :client_state;
 import :audio;
@@ -235,7 +235,6 @@ Lua::Interface &ClientState::GetGUILuaInterface() { return *m_luaGUI; }
 //__declspec(dllimport) void test_lua_policies(lua_State *l);
 std::optional<std::vector<std::string>> g_autoExecScripts {};
 
-#include "pragma/lua/policies/gui_element_policy.hpp"
 void ClientState::InitializeGUILua()
 {
 	m_luaGUI = std::make_shared<Lua::Interface>();

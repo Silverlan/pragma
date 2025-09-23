@@ -5,6 +5,7 @@ module;
 
 #include "stdafx_cengine.h"
 #include "pragma/input/inputhelper.h"
+#include "pragma/console/c_cvar_keymappings.h"
 
 module pragma.client;
 
@@ -57,7 +58,6 @@ std::shared_ptr<InputBindingLayer> CEngine::GetCoreInputBindingLayer() { return 
 
 ////////////////////////////
 
-#include "pragma/console/c_cvar_keymappings.h"
 DLLCLIENT void CMD_bind_keys(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
 	for(int i = 0; i < (sizeof(BIND_KEYS) / sizeof(BIND_KEYS[0])); i++)

@@ -51,6 +51,7 @@ module;
 #include <udm.hpp>
 #include <prosper_window.hpp>
 #include "pragma/console/c_cvar.h"
+#include <pragma/physics/controller.hpp>
 
 module pragma.client;
 
@@ -1421,7 +1422,6 @@ uint32_t CGame::GetLostPacketCount()
 	return static_cast<uint32_t>(m_lostPackets.size());
 }
 
-#include <pragma/physics/controller.hpp>
 void CGame::ReceiveSnapshot(NetPacket &packet)
 {
 	//Con::ccl<<"Received snapshot.."<<Con::endl;

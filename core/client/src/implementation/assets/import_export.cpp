@@ -33,6 +33,7 @@ module;
 #include <tiny_gltf.h>
 #include <pragma/model/animation/skeleton.hpp>
 #include <pragma/model/animation/bone.hpp>
+#include <image/prosper_image.hpp>
 
 module pragma.client;
 
@@ -1952,8 +1953,6 @@ bool pragma::asset::export_texture_as_vtf(const std::string &fileName, const std
 		return false;
 	return fExportVtf(fileName, fGetImgData, width, height, szPerPixel, numLayers, numMipmaps, cubemap, texInfo, errorHandler, absoluteFileName);
 }
-
-#include <image/prosper_image.hpp>
 
 std::optional<prosper::Format> pragma::asset::vtf_format_to_prosper(VtfInfo::Format format)
 {

@@ -7,7 +7,6 @@ module;
 
 module pragma.client;
 
-
 import :client_state;
 Bool ClientState::RawMouseInput(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods)
 {

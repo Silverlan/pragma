@@ -27,7 +27,6 @@ module;
 
 module pragma.client;
 
-
 import :client_state;
 import se_script;
 import pragma.audio.util;

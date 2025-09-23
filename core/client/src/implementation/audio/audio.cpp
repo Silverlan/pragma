@@ -7,7 +7,6 @@ module;
 
 module pragma.client;
 
-
 import :audio;
 std::vector<std::string> pragma::audio::get_available_audio_apis()
 {

@@ -8,7 +8,6 @@ module;
 
 module pragma.client;
 
-
 import :gui;
 import :client_state;
 import :engine;

@@ -6,8 +6,10 @@ module;
 #include "stdafx_client.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
-module pragma.client.entities.components.health;
+module pragma.client;
 
+
+import :entities.components.health;
 using namespace pragma;
 
 void CHealthComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }

@@ -13,18 +13,16 @@ module;
 
 #define PAD_ADDON_VERBOSE 1
 
-module pragma.client.gui;
+module pragma.client;
 
-import :main_menu_mods;
-import :progress_bar;
+import :gui.main_menu_mods;
+import :gui.progress_bar;
 
-import pragma.client.client_state;
-import pragma.client.core;
-import pragma.client.engine;
+import :client_state;
+import :core;
+import :engine;
 import pragma.locale;
 
-extern CEngine *c_engine;
-extern ClientState *client;
 
 /////////////////////////
 

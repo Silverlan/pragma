@@ -6,17 +6,16 @@ module;
 #include "stdafx_client.h"
 #include <prosper_command_buffer.hpp>
 
-module pragma.client.rendering.shader_graph;
+module pragma.client;
 
-import :module_toon;
+import :rendering.shader_graph.module_toon;
 
-import pragma.client.engine;
-import pragma.client.entities.components;
-import pragma.client.rendering.shaders;
+import :engine;
+import :entities.components;
+import :rendering.shaders;
 
 using namespace pragma::rendering::shader_graph;
 
-extern CEngine *c_engine;
 //std::shared_ptr<prosper::IDescriptorSetGroup> ToonModule::g_defaultPbrDsg = {};
 //size_t ToonModule::g_instanceCount = 0;
 ToonModule::ToonModule(ShaderGraph &shader) : pragma::rendering::ShaderGraphModule {shader}
@@ -37,7 +36,7 @@ void ToonModule::InitializeGfxPipelineDescriptorSets()
 {
 	/*m_shader.AddDescriptorSetGroup(m_pbrDescSetInfo);
 	if(!g_defaultPbrDsg) {
-		auto &context = c_engine->GetRenderContext();
+		auto &context = pragma::get_cengine()->GetRenderContext();
 		g_defaultPbrDsg = context.CreateDescriptorSetGroup(m_pbrDescSetInfo);
 		auto &dummyTex = context.GetDummyTexture();
 		auto &dummyCubemapTex = context.GetDummyCubemapTexture();

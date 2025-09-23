@@ -4,6 +4,7 @@
 module;
 
 #include "stdafx_client.h"
+#include "pragma/clientdefinitions.h"
 #include "pragma/entities/entity_iterator.hpp"
 #include "pragma/entities/entity_component_system_t.hpp"
 #include <pragma/entities/entity_component_manager_t.hpp>
@@ -18,16 +19,15 @@ module;
 #include <wgui/types/wirect.h>
 #endif
 
-module pragma.client.entities.components;
+module pragma.client;
 
-import pragma.client.engine;
-import pragma.client.entities.components.motion_blur_data;
-import pragma.client.entities.components.rasterization_renderer;
-import pragma.client.game;
-import pragma.client.rendering.shaders;
+import :entities.components.rasterization_renderer;
+import :entities.components;
+import :engine;
+import :entities.components.motion_blur_data;
+import :game;
+import :rendering.shaders;
 
-extern CGame *c_game;
-extern CEngine *c_engine;
 
 using namespace pragma;
 
@@ -92,8 +92,8 @@ CRendererPpMotionBlurComponent::CRendererPpMotionBlurComponent(BaseEntity &ent) 
 	static auto g_shadersRegistered = false;
 	if(!g_shadersRegistered) {
 		g_shadersRegistered = true;
-		c_engine->GetShaderManager().RegisterShader("velocity_buffer", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderVelocityBuffer(context, identifier); });
-		c_engine->GetShaderManager().RegisterShader("pp_motion_blur", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderPPMotionBlur(context, identifier); });
+		pragma::get_cengine()->GetShaderManager().RegisterShader("velocity_buffer", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderVelocityBuffer(context, identifier); });
+		pragma::get_cengine()->GetShaderManager().RegisterShader("pp_motion_blur", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderPPMotionBlur(context, identifier); });
 	}
 }
 void CRendererPpMotionBlurComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
@@ -107,7 +107,7 @@ void CRendererPpMotionBlurComponent::ReloadVelocityTexture()
 	auto cRenderer = GetEntity().GetComponent<CRasterizationRendererComponent>();
 	if(rendererC.expired() || cRenderer.expired())
 		return;
-	c_engine->GetRenderContext().WaitIdle();
+	pragma::get_cengine()->GetRenderContext().WaitIdle();
 
 	prosper::util::ImageCreateInfo createInfo {};
 	createInfo.width = rendererC->GetWidth();
@@ -115,7 +115,7 @@ void CRendererPpMotionBlurComponent::ReloadVelocityTexture()
 	createInfo.format = prosper::Format::R32G32B32A32_SFloat;
 	createInfo.usage = prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::ColorAttachmentBit;
 
-	auto &context = c_engine->GetRenderContext();
+	auto &context = pragma::get_cengine()->GetRenderContext();
 	auto img = context.CreateImage(createInfo);
 	auto tex = context.CreateTexture({}, *img, prosper::util::ImageViewCreateInfo {}, prosper::util::SamplerCreateInfo {});
 	auto rt = context.CreateRenderTarget({tex, cRenderer->GetPrepass().textureDepth}, shader->GetRenderPass());
@@ -131,7 +131,7 @@ void CRendererPpMotionBlurComponent::ReloadVelocityTexture()
 	if(m_debugTex.IsValid())
 		m_debugTex.Remove();
 	m_debugTex = el->GetHandle();
-	luabind::globals(c_game->GetLuaState())["_el"] = el->GetHandle();
+	luabind::globals(pragma::get_cgame()->GetLuaState())["_el"] = el->GetHandle();
 #endif
 }
 
@@ -140,7 +140,7 @@ void CRendererPpMotionBlurComponent::Initialize()
 	CRendererPpBaseComponent::Initialize();
 
 	auto *velShader = pragma::get_velocity_buffer_shader();
-	auto *shaderMotionBlur = static_cast<pragma::ShaderPPMotionBlur *>(c_engine->GetShader("pp_motion_blur").get());
+	auto *shaderMotionBlur = static_cast<pragma::ShaderPPMotionBlur *>(pragma::get_cengine()->GetShader("pp_motion_blur").get());
 	if(!velShader || !shaderMotionBlur)
 		return;
 	BindEventUnhandled(pragma::CRasterizationRendererComponent::EVENT_ON_RECORD_PREPASS, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
@@ -161,7 +161,7 @@ void CRendererPpMotionBlurComponent::Initialize()
 		ReloadVelocityTexture();
 	});
 
-	auto &context = c_engine->GetRenderContext();
+	auto &context = pragma::get_cengine()->GetRenderContext();
 	m_swapCmd = context.CreateSwapCommandBufferGroup(context.GetWindow());
 
 	m_velocityTexDsg = shaderMotionBlur->CreateDescriptorSetGroup(pragma::ShaderPPMotionBlur::DESCRIPTOR_SET_TEXTURE_VELOCITY.setIndex);
@@ -244,7 +244,7 @@ void CRendererPpMotionBlurComponent::DoUpdatePoses(const CMotionBlurDataComponen
 	m_lastMotionDataBufferUpdateIndex = lastUpdateIdx;
 
 	auto *velShader = pragma::get_velocity_buffer_shader();
-	EntityIterator entIt {*c_game};
+	EntityIterator entIt {*pragma::get_cgame()};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CRenderComponent>>();
 	for(auto *ent : entIt) {
 		auto &r = *static_cast<CBaseEntity *>(ent)->GetRenderComponent();
@@ -304,7 +304,7 @@ void CRendererPpMotionBlurComponent::RenderPostProcessing(const util::DrawSceneI
 		return;
 	auto &scene = *drawSceneInfo.scene;
 	auto &drawCmd = drawSceneInfo.commandBuffer;
-	auto *shaderMotionBlur = static_cast<pragma::ShaderPPMotionBlur *>(c_engine->GetShader("pp_motion_blur").get());
+	auto *shaderMotionBlur = static_cast<pragma::ShaderPPMotionBlur *>(pragma::get_cengine()->GetShader("pp_motion_blur").get());
 
 	if(!shaderMotionBlur)
 		return;

@@ -6,8 +6,10 @@ module;
 #include "stdafx_client.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
-module pragma.client.entities.components.name;
+module pragma.client;
 
+
+import :entities.components.name;
 using namespace pragma;
 
 void CNameComponent::ReceiveData(NetPacket &packet)

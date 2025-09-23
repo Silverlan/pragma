@@ -11,13 +11,12 @@ module;
 #include <prosper_descriptor_set_group.hpp>
 #include <prosper_command_buffer.hpp>
 
-module pragma.client.rendering.shaders;
+module pragma.client;
 
-import :convolute_cubemap_lighting;
+import :rendering.shaders.convolute_cubemap_lighting;
 
-import pragma.client.engine;
+import :engine;
 
-extern CEngine *c_engine;
 
 using namespace pragma;
 
@@ -49,7 +48,7 @@ std::shared_ptr<prosper::Texture> ShaderConvoluteCubemapLighting::ConvoluteCubem
 	auto rt = CreateCubeMapRenderTarget(w, h);
 
 	// Shader input
-	auto dsg = c_engine->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_CUBEMAP_TEXTURE);
+	auto dsg = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_CUBEMAP_TEXTURE);
 	dsg->GetDescriptorSet()->SetBindingTexture(cubemap, 0u);
 
 	PushConstants pushConstants {};
@@ -65,7 +64,7 @@ std::shared_ptr<prosper::Texture> ShaderConvoluteCubemapLighting::ConvoluteCubem
 	// So, instead, we render each triangle of the cube separately for each individual layer.
 	for(uint8_t layerId = 0u; layerId < 6u; ++layerId) {
 		for(uint32_t i = 0u; i < numVerts; i += 3) {
-			auto &setupCmd = c_engine->GetSetupCommandBuffer();
+			auto &setupCmd = pragma::get_cengine()->GetSetupCommandBuffer();
 			util::ScopeGuard sgCmd {[this]() { GetContext().FlushSetupCommandBuffer(); }};
 			prosper::util::ImageSubresourceRange range {};
 			range.baseArrayLayer = layerId;

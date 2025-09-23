@@ -10,13 +10,12 @@ module;
 #include <image/prosper_image_view.hpp>
 #include <prosper_command_buffer.hpp>
 
-module pragma.client.gui;
+module pragma.client;
 
-import :debug_mipmaps;
+import :gui.debug_mipmaps;
 
-import pragma.client.engine;
+import :engine;
 
-extern CEngine *c_engine;
 
 LINK_WGUI_TO_CLASS(WIDebugMipMaps, WIDebugMipMaps);
 
@@ -112,7 +111,7 @@ void WIDebugMipMaps::SetTexture(const std::shared_ptr<prosper::Texture> &texture
 		if(cb.IsValid())
 			cb.Remove();
 	});
-	c_engine->AddCallback("DrawFrame", cb);
+	pragma::get_cengine()->AddCallback("DrawFrame", cb);
 	if(!keepSize)
 		SetSize(wContext, hOffset + height);
 }

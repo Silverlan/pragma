@@ -6,7 +6,7 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <wgui/wibase.h>
 
-export module pragma.client.gui:scroll_container;
+export module pragma.client:gui.scroll_container;
 
 import pragma.gui;
 

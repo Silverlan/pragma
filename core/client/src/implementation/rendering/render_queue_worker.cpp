@@ -5,8 +5,11 @@ module;
 
 #include "stdafx_client.h"
 
-module pragma.client.rendering.render_queue_worker;
+#undef AddJob
 
+module pragma.client;
+
+import :rendering.render_queue_worker;
 using namespace pragma::rendering;
 
 RenderQueueWorker::RenderQueueWorker(RenderQueueWorkerManager &manager) : m_manager {manager} { StartThread(); }

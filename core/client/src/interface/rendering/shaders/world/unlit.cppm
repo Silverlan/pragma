@@ -3,9 +3,12 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include <mathutil/uvec.h>
 
-export module pragma.client.rendering.shaders:world_unlit;
+export module pragma.client:rendering.shaders.world_unlit;
+
+import :rendering.shaders.textured;
 
 export namespace pragma {
 	class DLLCLIENT ShaderUnlit : public ShaderGameWorldLightingPass {

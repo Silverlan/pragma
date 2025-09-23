@@ -7,8 +7,7 @@ module;
 #include "wgui/wibase.h"
 #include <pragma/entities/components/base_entity_component.hpp>
 
-export module pragma.client.entities.components.input;
-
+export module pragma.client:entities.components.input;
 export namespace pragma {
 	class DLLCLIENT CInputComponent final : public BaseEntityComponent {
 	  public:

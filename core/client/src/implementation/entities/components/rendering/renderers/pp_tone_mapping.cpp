@@ -12,15 +12,14 @@ module;
 #include <image/prosper_msaa_texture.hpp>
 #include <image/prosper_render_target.hpp>
 
-module pragma.client.entities.components.pp_tone_mapping;
+module pragma.client;
 
-import pragma.client.engine;
-import pragma.client.entities.components.rasterization_renderer;
-import pragma.client.game;
-import pragma.client.rendering.shaders;
+import :entities.components.rasterization_renderer;
+import :entities.components.pp_tone_mapping;
+import :engine;
+import :game;
+import :rendering.shaders;
 
-extern CGame *c_game;
-extern CEngine *c_engine;
 
 using namespace pragma;
 
@@ -32,15 +31,15 @@ void CRendererPpToneMappingComponent::DoRenderEffect(const util::DrawSceneInfo &
 {
 	if(drawSceneInfo.renderStats)
 		(*drawSceneInfo.renderStats)->BeginGpuTimer(RenderStats::RenderStage::PostProcessingGpuToneMapping, *drawSceneInfo.commandBuffer);
-	c_game->StartGPUProfilingStage("PostProcessingHDR");
+	pragma::get_cgame()->StartGPUProfilingStage("PostProcessingHDR");
 
 	util::ScopeGuard scopeGuard {[&drawSceneInfo]() {
-		c_game->StopGPUProfilingStage(); // PostProcessingHDR
+		pragma::get_cgame()->StopGPUProfilingStage(); // PostProcessingHDR
 		if(drawSceneInfo.renderStats)
 			(*drawSceneInfo.renderStats)->EndGpuTimer(RenderStats::RenderStage::PostProcessingGpuToneMapping, *drawSceneInfo.commandBuffer);
 	}};
 
-	auto hShaderTonemapping = c_game->GetGameShader(CGame::GameShader::PPTonemapping);
+	auto hShaderTonemapping = pragma::get_cgame()->GetGameShader(CGame::GameShader::PPTonemapping);
 	if(hShaderTonemapping.expired() || m_renderer.expired())
 		return;
 	auto &hdrInfo = m_renderer->GetHDRInfo();

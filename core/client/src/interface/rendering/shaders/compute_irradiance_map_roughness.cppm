@@ -6,9 +6,9 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "prosper_descriptor_set_group.hpp"
 
-export module pragma.client.rendering.shaders:compute_irradiance_map_roughness;
+export module pragma.client:rendering.shaders.compute_irradiance_map_roughness;
 
-import :cubemap;
+import :rendering.shaders.cubemap;
 
 export namespace pragma {
 	class DLLCLIENT ShaderComputeIrradianceMapRoughness : public ShaderCubemap {

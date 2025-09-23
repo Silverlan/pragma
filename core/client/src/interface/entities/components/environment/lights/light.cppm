@@ -5,8 +5,15 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/environment/lights/env_light.h"
+#include "buffers/prosper_uniform_resizable_buffer.hpp"
 
-export module pragma.client.entities.components.lights.light;
+export module pragma.client:entities.components.lights.light;
+
+import :entities.base_entity;
+import :entities.components.entity;
+import :model.mesh;
+import :rendering.enums;
+import :rendering.light_data;
 
 export namespace pragma {
 	struct DLLCLIENT CEShouldPassEntity : public ComponentEvent {
@@ -97,7 +104,6 @@ export namespace pragma {
 		virtual void SetBaked(bool baked) override;
 
 		enum class StateFlags : uint32_t { None = 0u, StaticUpdateRequired = 1u, DynamicUpdateRequired = StaticUpdateRequired << 1u, FullUpdateRequired = StaticUpdateRequired << 1u, AddToGameScene = FullUpdateRequired << 1u, EnableMorphTargetsInShadows = AddToGameScene << 1u };
-		enum class ShadowMapType : uint8_t { Static = 0, Dynamic };
 
 		CLightComponent(BaseEntity &ent);
 		virtual ~CLightComponent() override;
@@ -109,12 +115,12 @@ export namespace pragma {
 		Mat4 &GetTransformationMatrix(unsigned int j);
 		virtual void Initialize() override;
 		virtual void OnTick(double dt) override;
-		bool ShouldUpdateRenderPass(ShadowMapType smType) const;
+		bool ShouldUpdateRenderPass(rendering::ShadowMapType smType) const;
 		virtual bool ShouldPass(const CBaseEntity &ent, uint32_t &renderFlags);
 		virtual bool ShouldPass(const CBaseEntity &ent, const CModelMesh &mesh, uint32_t &renderFlags);
 		virtual bool ShouldPass(const Model &mdl, const CModelSubMesh &mesh);
 		template<typename TCPPM>
-			pragma::ComponentHandle<TCPPM> GetShadowMap(ShadowMapType type) const;
+			pragma::ComponentHandle<TCPPM> GetShadowMap(rendering::ShadowMapType type) const;
 		bool ShouldRender();
 		void UpdateTransformationMatrix(const Mat4 &biasMatrix, const Mat4 &viewMatrix, const Mat4 &projectionMatrix);
 		virtual void OnEntitySpawn() override;
@@ -149,8 +155,8 @@ export namespace pragma {
 		const ShadowBufferData *GetShadowBufferData() const;
 		ShadowBufferData *GetShadowBufferData();
 
-		void SetShadowMapIndex(uint32_t idx, ShadowMapType smType);
-		uint32_t GetShadowMapIndex(ShadowMapType smType) const;
+		void SetShadowMapIndex(uint32_t idx, rendering::ShadowMapType smType);
+		uint32_t GetShadowMapIndex(rendering::ShadowMapType smType) const;
 		virtual void SetShadowType(ShadowType type) override;
 
 		virtual void SetFalloffExponent(float falloffExponent) override;

@@ -21,13 +21,13 @@ module;
 #include <cmaterial_manager2.hpp>
 #include <texturemanager/texture.h>
 
-module pragma.client.rendering.shaders;
+module pragma.client;
 
-import :specular_glossiness_to_metalness_roughness;
 
-import pragma.client.client_state;
+import :rendering.shaders.specular_glossiness_to_metalness_roughness;
 
-extern ClientState *client;
+import :client_state;
+
 
 decltype(pragma::ShaderSpecularGlossinessToMetalnessRoughness::DESCRIPTOR_SET_TEXTURE) pragma::ShaderSpecularGlossinessToMetalnessRoughness::DESCRIPTOR_SET_TEXTURE = {
   "TEXTURES",
@@ -47,7 +47,7 @@ std::optional<pragma::ShaderSpecularGlossinessToMetalnessRoughness::MetalnessRou
 	imgCreateInfo.usage = prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::TransferSrcBit | prosper::ImageUsageFlags::SampledBit;
 
 	auto fGetWhiteTex = [&context]() -> prosper::Texture * {
-		auto tex = static_cast<msys::CMaterialManager &>(client->GetMaterialManager()).GetTextureManager().LoadAsset("white");
+		auto tex = static_cast<msys::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager()).GetTextureManager().LoadAsset("white");
 		if(tex == nullptr)
 			return nullptr;
 		return tex->GetVkTexture().get();

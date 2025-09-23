@@ -6,7 +6,10 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/environment/audio/env_soundscape.h"
 
-export module pragma.client.entities.components.audio.sound_scape;
+export module pragma.client:entities.components.audio.sound_scape;
+
+import :entities.base_entity;
+import :entities.components.entity;
 
 export namespace pragma {
 	class DLLCLIENT CSoundScapeComponent final : public BaseEnvSoundScapeComponent, public CBaseNetComponent {

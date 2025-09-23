@@ -8,11 +8,12 @@ module;
 #include <alsoundsystem_create_effect.hpp>
 #include "luasystem.h"
 
-module pragma.client.scripting.lua.libraries.sound;
+module pragma.client;
 
-import pragma.client.engine;
 
-extern CEngine *c_engine;
+import :scripting.lua.libraries.sound;
+import :engine;
+
 
 lua_registercheck(ALEfxEaxReverbProperties, al::EfxEaxReverbProperties);
 lua_registercheck(ALEfxChorusProperties, al::EfxChorusProperties);
@@ -29,7 +30,7 @@ lua_registercheck(ALEfxEqualizer, al::EfxEqualizer);
 
 int Lua::sound::set_distance_model(lua_State *l)
 {
-	auto *soundSys = c_engine->GetSoundSystem();
+	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
 	if(soundSys == nullptr)
 		return 0;
 	auto distanceModel = Lua::CheckInt(l, 1);
@@ -38,7 +39,7 @@ int Lua::sound::set_distance_model(lua_State *l)
 }
 int Lua::sound::get_distance_model(lua_State *l)
 {
-	auto *soundSys = c_engine->GetSoundSystem();
+	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
 	auto distanceModel = al::DistanceModel::LinearClamped;
 	if(soundSys != nullptr)
 		distanceModel = soundSys->GetDistanceModel();
@@ -51,29 +52,29 @@ int Lua::sound::register_aux_effect(lua_State *l)
 	auto *name = Lua::CheckString(l, 1);
 	al::PEffect effect = nullptr;
 	if(Lua::IsALEfxEaxReverbProperties(l, 2))
-		effect = c_engine->CreateAuxEffect(name, *Lua::CheckALEfxEaxReverbProperties(l, 2));
+		effect = pragma::get_cengine()->CreateAuxEffect(name, *Lua::CheckALEfxEaxReverbProperties(l, 2));
 	else if(Lua::IsALEfxChorusProperties(l, 2))
-		effect = c_engine->CreateAuxEffect(name, *Lua::CheckALEfxChorusProperties(l, 2));
+		effect = pragma::get_cengine()->CreateAuxEffect(name, *Lua::CheckALEfxChorusProperties(l, 2));
 	else if(Lua::IsALEfxDistortionProperties(l, 2))
-		effect = c_engine->CreateAuxEffect(name, *Lua::CheckALEfxDistortionProperties(l, 2));
+		effect = pragma::get_cengine()->CreateAuxEffect(name, *Lua::CheckALEfxDistortionProperties(l, 2));
 	else if(Lua::IsALEfxEchoProperties(l, 2))
-		effect = c_engine->CreateAuxEffect(name, *Lua::CheckALEfxEchoProperties(l, 2));
+		effect = pragma::get_cengine()->CreateAuxEffect(name, *Lua::CheckALEfxEchoProperties(l, 2));
 	else if(Lua::IsALEfxFlangerProperties(l, 2))
-		effect = c_engine->CreateAuxEffect(name, *Lua::CheckALEfxFlangerProperties(l, 2));
+		effect = pragma::get_cengine()->CreateAuxEffect(name, *Lua::CheckALEfxFlangerProperties(l, 2));
 	else if(Lua::IsALEfxFrequencyShifterProperties(l, 2))
-		effect = c_engine->CreateAuxEffect(name, *Lua::CheckALEfxFrequencyShifterProperties(l, 2));
+		effect = pragma::get_cengine()->CreateAuxEffect(name, *Lua::CheckALEfxFrequencyShifterProperties(l, 2));
 	else if(Lua::IsALEfxVocalMorpherProperties(l, 2))
-		effect = c_engine->CreateAuxEffect(name, *Lua::CheckALEfxVocalMorpherProperties(l, 2));
+		effect = pragma::get_cengine()->CreateAuxEffect(name, *Lua::CheckALEfxVocalMorpherProperties(l, 2));
 	else if(Lua::IsALEfxPitchShifterProperties(l, 2))
-		effect = c_engine->CreateAuxEffect(name, *Lua::CheckALEfxPitchShifterProperties(l, 2));
+		effect = pragma::get_cengine()->CreateAuxEffect(name, *Lua::CheckALEfxPitchShifterProperties(l, 2));
 	else if(Lua::IsALEfxRingModulatorProperties(l, 2))
-		effect = c_engine->CreateAuxEffect(name, *Lua::CheckALEfxRingModulatorProperties(l, 2));
+		effect = pragma::get_cengine()->CreateAuxEffect(name, *Lua::CheckALEfxRingModulatorProperties(l, 2));
 	else if(Lua::IsALEfxAutoWahProperties(l, 2))
-		effect = c_engine->CreateAuxEffect(name, *Lua::CheckALEfxAutoWahProperties(l, 2));
+		effect = pragma::get_cengine()->CreateAuxEffect(name, *Lua::CheckALEfxAutoWahProperties(l, 2));
 	else if(Lua::IsALEfxCompressor(l, 2))
-		effect = c_engine->CreateAuxEffect(name, *Lua::CheckALEfxCompressor(l, 2));
+		effect = pragma::get_cengine()->CreateAuxEffect(name, *Lua::CheckALEfxCompressor(l, 2));
 	else
-		effect = c_engine->CreateAuxEffect(name, *Lua::CheckALEfxEqualizer(l, 2));
+		effect = pragma::get_cengine()->CreateAuxEffect(name, *Lua::CheckALEfxEqualizer(l, 2));
 	if(effect == nullptr)
 		return 0;
 	Lua::Push<al::PEffect>(l, effect);
@@ -83,7 +84,7 @@ int Lua::sound::register_aux_effect(lua_State *l)
 int Lua::sound::get_aux_effect(lua_State *l)
 {
 	auto *name = Lua::CheckString(l, 1);
-	auto effect = c_engine->GetAuxEffect(name);
+	auto effect = pragma::get_cengine()->GetAuxEffect(name);
 	if(effect == nullptr)
 		return 0;
 	Lua::Push<al::PEffect>(l, effect);
@@ -92,7 +93,7 @@ int Lua::sound::get_aux_effect(lua_State *l)
 
 int Lua::sound::is_supported(lua_State *l)
 {
-	auto *soundSys = c_engine->GetSoundSystem();
+	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
 	if(soundSys == nullptr)
 		Lua::PushBool(l, false);
 	else {
@@ -105,45 +106,45 @@ int Lua::sound::is_supported(lua_State *l)
 
 int Lua::sound::get_doppler_factor(lua_State *l)
 {
-	auto *soundSys = c_engine->GetSoundSystem();
+	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
 	Lua::PushNumber(l, (soundSys != nullptr) ? soundSys->GetDopplerFactor() : 0.f);
 	return 1;
 }
 int Lua::sound::set_doppler_factor(lua_State *l)
 {
-	auto *soundSys = c_engine->GetSoundSystem();
+	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
 	if(soundSys != nullptr)
 		soundSys->SetDopplerFactor(Lua::CheckNumber(l, 1));
 	return 0;
 }
 int Lua::sound::get_speed_of_sound(lua_State *l)
 {
-	auto *soundSys = c_engine->GetSoundSystem();
+	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
 	Lua::PushNumber(l, (soundSys != nullptr) ? soundSys->GetSpeedOfSound() : 0.f);
 	return 1;
 }
 int Lua::sound::set_speed_of_sound(lua_State *l)
 {
-	auto *soundSys = c_engine->GetSoundSystem();
+	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
 	if(soundSys != nullptr)
 		soundSys->SetSpeedOfSound(Lua::CheckNumber(l, 1));
 	return 0;
 }
 int Lua::sound::get_device_name(lua_State *l)
 {
-	auto *soundSys = c_engine->GetSoundSystem();
+	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
 	Lua::PushString(l, (soundSys != nullptr) ? soundSys->GetDeviceName() : "");
 	return 1;
 }
 int Lua::sound::add_global_effect(lua_State *l)
 {
-	auto *soundSys = c_engine->GetSoundSystem();
+	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
 	if(soundSys == nullptr)
 		Lua::PushBool(l, false);
 	else {
 		int32_t argId = 1;
 		auto *name = Lua::CheckString(l, argId++);
-		auto effect = c_engine->GetAuxEffect(name);
+		auto effect = pragma::get_cengine()->GetAuxEffect(name);
 		if(effect == nullptr)
 			Lua::PushBool(l, false);
 		else {
@@ -166,11 +167,11 @@ int Lua::sound::add_global_effect(lua_State *l)
 }
 int Lua::sound::remove_global_effect(lua_State *l)
 {
-	auto *soundSys = c_engine->GetSoundSystem();
+	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
 	if(soundSys == nullptr)
 		return 0;
 	auto *name = Lua::CheckString(l, 1);
-	auto effect = c_engine->GetAuxEffect(name);
+	auto effect = pragma::get_cengine()->GetAuxEffect(name);
 	if(effect == nullptr)
 		return 0;
 	soundSys->RemoveGlobalEffect(*effect);
@@ -178,12 +179,12 @@ int Lua::sound::remove_global_effect(lua_State *l)
 }
 int Lua::sound::set_global_effect_parameters(lua_State *l)
 {
-	auto *soundSys = c_engine->GetSoundSystem();
+	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
 	if(soundSys == nullptr)
 		return 0;
 	int32_t argId = 1;
 	auto *name = Lua::CheckString(l, argId++);
-	auto effect = c_engine->GetAuxEffect(name);
+	auto effect = pragma::get_cengine()->GetAuxEffect(name);
 	if(effect == nullptr)
 		return 0;
 	al::EffectParams params {};

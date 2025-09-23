@@ -5,13 +5,12 @@ module;
 
 #include "stdafx_client.h"
 
-module pragma.client.model;
+module pragma.client;
 
-import :poly;
+import :model.poly;
 
-import pragma.client.client_state;
+import :client_state;
 
-extern ClientState *client;
 CPoly::CPoly(NetworkState *nw) : Poly(nw) {}
 
 void CPoly::SortVertices()
@@ -25,7 +24,7 @@ void CPoly::SortVertices()
 void CPoly::SetTextureData(std::string texture, Vector3 nu, Vector3 nv, float ou, float ov, float su, float sv, float rot)
 {
 	Poly::SetTextureData(texture, nu, nv, ou, ov, su, sv, rot);
-	SetMaterial(client->LoadMaterial(texture.c_str()));
+	SetMaterial(pragma::get_client_state()->LoadMaterial(texture.c_str()));
 }
 
 void CPoly::CalculateTextureAxes()

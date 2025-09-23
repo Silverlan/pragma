@@ -5,8 +5,9 @@ module;
 
 #include "pragma/clientdefinitions.h"
 
-export module pragma.client.rendering.shader_graph:module_pbr;
+export module pragma.client:rendering.shader_graph.module_pbr;
 
+import :rendering.shader_graph.module;
 import pragma.shadergraph;
 
 export namespace pragma::rendering::shader_graph {

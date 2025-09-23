@@ -5,22 +5,22 @@ module;
 
 #include "pragma/clientdefinitions.h"
 
-export module pragma.client.particle_system:initializer_speed;
+export module pragma.client:particle_system.initializer_speed;
 
-import :modifier_random_variable;
+import :particle_system.modifier_random_variable;
+import :particle_system.modifier;
 
+export namespace pragma::ecs {class CParticleSystemComponent;}
 export class DLLCLIENT CParticleInitializerSpeed : public CParticleInitializer {
   public:
 	CParticleInitializerSpeed() = default;
-	virtual void Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+	virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
 	virtual void OnParticleCreated(CParticle &particle) override;
   private:
 	CParticleModifierComponentRandomVariable<std::uniform_real_distribution<float>, float> m_fSpeed;
 };
 
-REGISTER_PARTICLE_INITIALIZER(speed, CParticleInitializerSpeed);
-
-void CParticleInitializerSpeed::Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void CParticleInitializerSpeed::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleInitializer::Initialize(pSystem, values);
 	m_fSpeed.Initialize("speed", values);

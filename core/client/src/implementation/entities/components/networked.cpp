@@ -8,8 +8,10 @@ module;
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/entity_property.hpp>
 
-module pragma.client.entities.components.networked;
+module pragma.client;
 
+
+import :entities.components.networked;
 using namespace pragma;
 
 void CNetworkedComponent::ReceiveData(NetPacket &packet)

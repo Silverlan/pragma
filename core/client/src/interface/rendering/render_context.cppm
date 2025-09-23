@@ -10,8 +10,7 @@ module;
 #include <memory>
 #include <optional>
 
-export module pragma.client.rendering.render_context;
-
+export module pragma.client:rendering.render_context;
 import pragma.platform;
 
 #undef CreateWindow

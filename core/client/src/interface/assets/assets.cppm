@@ -3,7 +3,7 @@
 
 module;
 
-export module pragma.client.assets;
-export import :import_export;
-import :gltf_writer;
-import :fbx_loader;
+export module pragma.client:assets;
+export import :assets.import_export;
+import :assets.gltf_writer;
+import :assets.fbx_loader;

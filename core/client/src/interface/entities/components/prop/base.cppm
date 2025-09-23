@@ -7,7 +7,10 @@ module;
 #include <pragma/entities/prop/prop_base.h>
 #include <pragma/physics/movetypes.h>
 
-export module pragma.client.entities.components.prop_base;
+export module pragma.client:entities.components.prop_base;
+
+import :entities.base_entity;
+import :entities.components.entity;
 
 export {
 	namespace pragma {

@@ -10,15 +10,14 @@ module;
 #include <mathutil/umath.h>
 #include <prosper_window.hpp>
 
-module pragma.client.gui;
+module pragma.client;
 
-import :detachable;
+import :gui.detachable;
 
-import pragma.client.engine;
+import :engine;
 import pragma.gui;
 import pragma.locale;
 
-extern CEngine *c_engine;
 
 LINK_WGUI_TO_CLASS(WIDetachable, WIDetachable);
 
@@ -61,7 +60,7 @@ void WIDetachable::Detach()
 	settings.height = h;
 	settings.title = pragma::locale::get_text("console");
 	m_detachedWindow = std::unique_ptr<DetachedWindow> {new DetachedWindow {}};
-	m_detachedWindow->window = c_engine->CreateWindow(settings);
+	m_detachedWindow->window = pragma::get_cengine()->CreateWindow(settings);
 	if(!m_detachedWindow->window)
 		return;
 	CallCallbacks("OnDetaching");

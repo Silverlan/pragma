@@ -6,7 +6,7 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <mathutil/uvec.h>
 
-export module pragma.client.rendering.shaders:textured_uniform_data;
+export module pragma.client:rendering.shaders.textured_uniform_data;
 
 export namespace pragma {
 #pragma pack(push, 1)

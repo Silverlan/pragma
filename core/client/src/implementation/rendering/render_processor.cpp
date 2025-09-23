@@ -4,6 +4,7 @@
 module;
 
 #include "stdafx_client.h"
+#include "pragma/clientdefinitions.h"
 #include <pragma/logging.hpp>
 #include <sharedutils/magic_enum.hpp>
 #include <prosper_framebuffer.hpp>
@@ -11,30 +12,28 @@ module;
 #include <cmaterial_manager2.hpp>
 #include <cmaterial.h>
 
-module pragma.client.rendering.render_processor;
+module pragma.client;
 
-import pragma.client.client_state;
-import pragma.client.debug;
-import pragma.client.engine;
-import pragma.client.entities.components;
-import pragma.client.game;
-import pragma.client.model;
 
-extern CEngine *c_engine;
-extern ClientState *client;
-extern CGame *c_game;
+import :rendering.render_processor;
+import :client_state;
+import :debug;
+import :engine;
+import :entities.components;
+import :game;
+import :model;
+
 
 static bool g_collectRenderStats = false;
 static CallbackHandle g_cbPreRenderScene = {};
 static CallbackHandle g_cbPostRenderScene = {};
 static std::unique_ptr<DebugRenderFilter> g_debugRenderFilter = nullptr;
-DLLCLIENT bool pragma::rendering::VERBOSE_RENDER_OUTPUT_ENABLED = false;
 
 void set_debug_render_filter(std::unique_ptr<DebugRenderFilter> filter) { g_debugRenderFilter = std::move(filter); }
 static std::string nanoseconds_to_ms(std::chrono::nanoseconds t) { return std::to_string(static_cast<long double>(t.count()) / static_cast<long double>(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::milliseconds {1}).count())) + "ms"; }
 static void print_pass_stats(const RenderPassStats &stats, bool full)
 {
-	auto *cam = c_game->GetRenderCamera<pragma::CCameraComponent>();
+	auto *cam = pragma::get_cgame()->GetRenderCamera<pragma::CCameraComponent>();
 	struct EntityData {
 		EntityHandle hEntity {};
 		float distance = 0.f;
@@ -199,8 +198,8 @@ DLLCLIENT void debug_render_stats(bool enabled, bool full, bool print, bool cont
 		return;
 	auto stats = std::make_shared<RenderStatsQueue>();
 	auto first = true;
-	g_cbPreRenderScene = c_game->AddCallback("OnRenderScenes", FunctionCallback<void>::Create([stats, first, full, print]() mutable {
-		auto swapchainIdx = c_engine->GetRenderContext().GetLastAcquiredPrimaryWindowSwapchainImageIndex();
+	g_cbPreRenderScene = pragma::get_cgame()->AddCallback("OnRenderScenes", FunctionCallback<void>::Create([stats, first, full, print]() mutable {
+		auto swapchainIdx = pragma::get_cengine()->GetRenderContext().GetLastAcquiredPrimaryWindowSwapchainImageIndex();
 		if(swapchainIdx >= stats->frameStats.size())
 			return;
 		auto &fstats = stats->frameStats[swapchainIdx];
@@ -210,13 +209,13 @@ DLLCLIENT void debug_render_stats(bool enabled, bool full, bool print, bool cont
 				if(print)
 					frameStats.Print(full);
 
-				auto *l = c_game->GetLuaState();
+				auto *l = pragma::get_cgame()->GetLuaState();
 				auto t = luabind::newtable(l);
 				auto tTimes = luabind::newtable(l);
-				tTimes["gui"] = c_engine->GetGpuExecutionTime(swapchainIdx, CEngine::GPUTimer::GUI).count() / static_cast<long double>(1'000'000.0);
-				tTimes["scene"] = c_engine->GetGpuExecutionTime(swapchainIdx, CEngine::GPUTimer::Scene).count() / static_cast<long double>(1'000'000.0);
-				tTimes["frame"] = c_engine->GetGpuExecutionTime(swapchainIdx, CEngine::GPUTimer::Frame).count() / static_cast<long double>(1'000'000.0);
-				tTimes["present"] = c_engine->GetGpuExecutionTime(swapchainIdx, CEngine::GPUTimer::Present).count() / static_cast<long double>(1'000'000.0);
+				tTimes["gui"] = pragma::get_cengine()->GetGpuExecutionTime(swapchainIdx, CEngine::GPUTimer::GUI).count() / static_cast<long double>(1'000'000.0);
+				tTimes["scene"] = pragma::get_cengine()->GetGpuExecutionTime(swapchainIdx, CEngine::GPUTimer::Scene).count() / static_cast<long double>(1'000'000.0);
+				tTimes["frame"] = pragma::get_cengine()->GetGpuExecutionTime(swapchainIdx, CEngine::GPUTimer::Frame).count() / static_cast<long double>(1'000'000.0);
+				tTimes["present"] = pragma::get_cengine()->GetGpuExecutionTime(swapchainIdx, CEngine::GPUTimer::Present).count() / static_cast<long double>(1'000'000.0);
 				t["numberOfScenes"] = frameStats.stats.size();
 				t["times"] = tTimes;
 				auto tStats = luabind::newtable(l);
@@ -236,7 +235,7 @@ DLLCLIENT void debug_render_stats(bool enabled, bool full, bool print, bool cont
 					td["scene"] = "accumulated";
 					tStats[i++] = td;
 				}
-				c_game->CallLuaCallbacks<void, luabind::object>("OnFrameRenderStatsAvailable", t);
+				pragma::get_cgame()->CallLuaCallbacks<void, luabind::object>("OnFrameRenderStatsAvailable", t);
 			}
 			fstats.pop();
 		}
@@ -251,14 +250,14 @@ DLLCLIENT void debug_render_stats(bool enabled, bool full, bool print, bool cont
 			return;
 		}
 		first = false;
-		for(auto &drawSceneInfo : c_game->GetQueuedRenderScenes()) {
+		for(auto &drawSceneInfo : pragma::get_cgame()->GetQueuedRenderScenes()) {
 			drawSceneInfo.renderStats = std::make_unique<RenderStats>();
 			drawSceneInfo.renderStats->swapchainImageIndex = swapchainIdx;
 		}
 	}));
-	g_cbPostRenderScene = c_game->AddCallback("PostRenderScenes", FunctionCallback<void>::Create([full, stats]() {
-		auto swapchainIdx = c_engine->GetRenderContext().GetLastAcquiredPrimaryWindowSwapchainImageIndex();
-		auto &renderScenes = c_game->GetQueuedRenderScenes();
+	g_cbPostRenderScene = pragma::get_cgame()->AddCallback("PostRenderScenes", FunctionCallback<void>::Create([full, stats]() {
+		auto swapchainIdx = pragma::get_cengine()->GetRenderContext().GetLastAcquiredPrimaryWindowSwapchainImageIndex();
+		auto &renderScenes = pragma::get_cgame()->GetQueuedRenderScenes();
 		FrameRenderStats frameStats {};
 		for(auto &drawSceneInfo : renderScenes) {
 			if(drawSceneInfo.renderStats == nullptr || drawSceneInfo.scene.expired())
@@ -346,7 +345,7 @@ bool pragma::rendering::BaseRenderProcessor::BindShader(prosper::PipelineID pipe
 	if(pipelineId == m_curPipeline)
 		return umath::is_flag_set(m_stateFlags, StateFlags::ShaderBound);
 	uint32_t pipelineIdx;
-	auto *shader = c_engine->GetRenderContext().GetShaderPipeline(pipelineId, pipelineIdx);
+	auto *shader = pragma::get_cengine()->GetRenderContext().GetShaderPipeline(pipelineId, pipelineIdx);
 	assert(shader);
 	pipelineIdx = TranslateBasePipelineIndexToPassPipelineIndex(*shader, pipelineIdx, m_shaderProcessor.GetPassType());
 	UnbindShader();
@@ -624,15 +623,15 @@ uint32_t pragma::rendering::BaseRenderProcessor::Render(const pragma::rendering:
 	}
 
 	auto &scene = *m_drawSceneInfo.drawSceneInfo.scene;
-	auto &referenceShader = isDepthPass ? c_game->GetGameShader(CGame::GameShader::Prepass) : c_game->GetGameShader(CGame::GameShader::Pbr);
+	auto &referenceShader = isDepthPass ? pragma::get_cgame()->GetGameShader(CGame::GameShader::Prepass) : pragma::get_cgame()->GetGameShader(CGame::GameShader::Pbr);
 	auto view = (m_camType == CameraType::View) ? true : false;
 	if(referenceShader.expired())
 		return 0;
 	RecordViewport();
 
-	auto &shaderManager = c_engine->GetShaderManager();
-	auto &context = c_engine->GetRenderContext();
-	auto &matManager = client->GetMaterialManager();
+	auto &shaderManager = pragma::get_cengine()->GetShaderManager();
+	auto &context = pragma::get_cengine()->GetRenderContext();
+	auto &matManager = pragma::get_client_state()->GetMaterialManager();
 	auto &sceneRenderDesc = m_drawSceneInfo.drawSceneInfo.scene->GetSceneRenderDesc();
 	uint32_t numShaderInvocations = 0;
 	const RenderQueue::InstanceSet *curInstanceSet = nullptr;
@@ -677,7 +676,7 @@ uint32_t pragma::rendering::BaseRenderProcessor::Render(const pragma::rendering:
 		else {
 			if(item.pipelineId != m_prepassCurScenePipeline) {
 				uint32_t pipelineIdx;
-				auto *shader = dynamic_cast<pragma::ShaderGameWorldLightingPass *>(c_engine->GetRenderContext().GetShaderPipeline(item.pipelineId, pipelineIdx));
+				auto *shader = dynamic_cast<pragma::ShaderGameWorldLightingPass *>(pragma::get_cengine()->GetRenderContext().GetShaderPipeline(item.pipelineId, pipelineIdx));
 				if(pass == RenderPass::Prepass)
 					m_prepassIsCurScenePipelineTranslucent = shader && shader->IsTranslucentPipeline(pipelineIdx);
 				m_prepassCurScenePipeline = item.pipelineId;

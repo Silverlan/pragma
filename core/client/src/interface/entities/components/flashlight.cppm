@@ -6,9 +6,9 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <pragma/entities/baseflashlight.h>
 
-import pragma.entities.components;
+export module pragma.client:entities.components.flashlight;
 
-export module pragma.client.entities.components.flashlight;
+import :entities.base_entity;
 
 export {
 	namespace pragma {

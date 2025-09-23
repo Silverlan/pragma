@@ -3,6 +3,9 @@
 
 module;
 
-export module pragma.client.core;
-export import pragma.client.core.addon_install_manager;
-export import pragma.client.core.choreographic_scene;
+export module pragma.client:core;
+export import :core.addon_install_manager;
+export import :core.choreographic_scene;
+export import :core.input_binding_layer;
+export import :core.key_bind;
+export import :core.lua_input_binding_layer_register;

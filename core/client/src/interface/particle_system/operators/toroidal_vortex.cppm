@@ -3,20 +3,22 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include <mathutil/umath.h>
 #include <pragma/math/vector/wvvector3.h>
 #include <sharedutils/util_string.h>
 #include <sharedutils/util.h>
 #include <algorithm>
 
-export module pragma.client.particle_system:operator_toroidal_vortex;
+export module pragma.client:particle_system.operator_toroidal_vortex;
 
-import :operator_world_base;
+import :particle_system.operator_world_base;
 
+export namespace pragma::ecs {class CParticleSystemComponent;}
 export class DLLCLIENT CParticleOperatorToroidalVortex : public CParticleOperatorWorldBase {
   public:
 	CParticleOperatorToroidalVortex() = default;
-	virtual void Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+	virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
 	virtual void Simulate(CParticle &particle, double tDelta, float strength) override;
 	virtual void Simulate(double tDelta) override;
   private:
@@ -32,9 +34,7 @@ export class DLLCLIENT CParticleOperatorToroidalVortex : public CParticleOperato
 	Quat m_dtRotation = uquat::identity();
 };
 
-REGISTER_PARTICLE_OPERATOR(toroidal_vortex, CParticleOperatorToroidalVortex);
-
-void CParticleOperatorToroidalVortex::Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void CParticleOperatorToroidalVortex::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleOperatorWorldBase::Initialize(pSystem, values);
 	for(auto it = values.begin(); it != values.end(); it++) {

@@ -6,9 +6,9 @@ module;
 #include "stdafx_client.h"
 #include <sharedutils/alpha_mode.hpp>
 
-module pragma.client.rendering.shader_graph;
+module pragma.client;
 
-import :node_scene_output;
+import :rendering.shader_graph.node_scene_output;
 
 using namespace pragma::rendering::shader_graph;
 

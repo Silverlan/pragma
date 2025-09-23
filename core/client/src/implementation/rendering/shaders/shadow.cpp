@@ -10,16 +10,16 @@ module;
 #include <prosper_command_buffer.hpp>
 #include <cmaterial.h>
 
-module pragma.client.rendering.shaders;
+module pragma.client;
 
-import :shadow;
 
-import pragma.client.engine;
-import pragma.client.entities.components;
+import :rendering.shaders.shadow;
+
+import :engine;
+import :entities.components;
 
 using namespace pragma;
 
-extern CEngine *c_engine;
 
 static auto SHADOW_DEPTH_BIAS_CONSTANT = 1.25f;
 static auto SHADOW_DEPTH_BIAS_SLOPE = 1.75f;

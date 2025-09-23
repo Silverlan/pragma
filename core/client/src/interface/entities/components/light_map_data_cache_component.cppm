@@ -6,9 +6,8 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <pragma/entities/components/base_entity_component.hpp>
 
-export module pragma.client.entities.components.light_map_data_cache;
-
-import pragma.client.rendering.lightmap_data_cache;
+export module pragma.client:entities.components.light_map_data_cache;
+import :rendering.lightmap_data_cache;
 
 export namespace pragma {
 	class DLLCLIENT CLightMapDataCacheComponent final : public BaseEntityComponent {

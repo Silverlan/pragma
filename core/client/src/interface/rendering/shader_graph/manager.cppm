@@ -8,8 +8,9 @@ module;
 #include <unordered_map>
 #include <memory>
 
-export module pragma.client.rendering.shader_graph:manager;
+export module pragma.client:rendering.shader_graph.manager;
 
+import :rendering.shader_graph.module;
 import pragma.shadergraph;
 
 export namespace pragma::rendering {

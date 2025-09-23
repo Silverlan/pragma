@@ -6,9 +6,8 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/environment/audio/env_sound_dsp_equalizer.h"
 
-export module pragma.client.entities.components.audio.dsp.equalizer;
-
-import pragma.client.entities.components.audio.dsp.base;
+export module pragma.client:entities.components.audio.dsp.equalizer;
+import :entities.components.audio.dsp.base;
 
 export namespace pragma {
 	class DLLCLIENT CSoundDspEqualizerComponent final : public CBaseSoundDspComponent, public BaseEnvSoundDspEqualizer {

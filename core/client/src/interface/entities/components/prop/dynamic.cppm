@@ -6,7 +6,9 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <pragma/entities/prop/prop_dynamic.hpp>
 
-export module pragma.client.entities.components.prop_dynamic;
+export module pragma.client:entities.components.prop_dynamic;
+
+import :entities.base_entity;
 
 export {
 	namespace pragma {

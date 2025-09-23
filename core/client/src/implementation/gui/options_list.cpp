@@ -6,21 +6,19 @@ module;
 #include "stdafx_client.h"
 #include <wgui/types/wirect.h>
 
-module pragma.client.gui;
+module pragma.client;
 
-import :options_list;
-import :scroll_container;
+import :gui.options_list;
+import :gui.scroll_container;
 
-import pragma.client.client_state;
-import pragma.client.engine;
+import :client_state;
+import :engine;
 import pragma.gui;
 import pragma.locale;
 import pragma.string.unicode;
 
 LINK_WGUI_TO_CLASS(WIOptionsList, WIOptionsList);
 
-extern CEngine *c_engine;
-extern ClientState *client;
 
 WIOptionsList::WIOptionsList() : WIBase() {}
 
@@ -119,7 +117,7 @@ WICheckbox *WIOptionsList::AddToggleChoice(const std::string &name, const std::s
 	row->SetValue(0, name);
 	auto hCheckbox = CreateChild<WICheckbox>();
 	auto *pCheckbox = hCheckbox.get<WICheckbox>();
-	if((translator2 == nullptr) ? c_engine->GetConVarBool(cvarName) : translator2(c_engine->GetConVarString(cvarName)))
+	if((translator2 == nullptr) ? pragma::get_cengine()->GetConVarBool(cvarName) : translator2(pragma::get_cengine()->GetConVarString(cvarName)))
 		pCheckbox->SetChecked(true);
 	auto hOptions = GetHandle();
 	pCheckbox->AddCallback("OnChange", FunctionCallback<void, bool>::Create([hOptions, cvarName, translator](bool bChecked) mutable {
@@ -151,7 +149,7 @@ WIChoiceList *WIOptionsList::AddChoiceList(const std::string &name, T list, cons
 		initializer(pChoiceList);
 	auto hOptions = GetHandle();
 	if(cvarName.empty() == false) {
-		pChoiceList->SelectChoice(client->GetConVarString(cvarName));
+		pChoiceList->SelectChoice(pragma::get_client_state()->GetConVarString(cvarName));
 		pChoiceList->AddCallback("OnSelect", FunctionCallback<void, uint32_t, std::reference_wrapper<std::string>>::Create([hOptions, cvarName](uint32_t, std::reference_wrapper<std::string> value) mutable {
 			if(!hOptions.IsValid())
 				return;
@@ -186,7 +184,7 @@ WIDropDownMenu *WIOptionsList::AddDropDownMenu(const std::string &name, T list, 
 		initializer(pDropDownMenu);
 	if(!cvarName.empty()) {
 		auto hOptions = GetHandle();
-		pDropDownMenu->SelectOption(client->GetConVarString(cvarName));
+		pDropDownMenu->SelectOption(pragma::get_client_state()->GetConVarString(cvarName));
 		pDropDownMenu->AddCallback("OnOptionSelected", FunctionCallback<void, uint32_t>::Create([hOptions, pDropDownMenu, cvarName](uint32_t optionIdx) mutable {
 			if(!hOptions.IsValid())
 				return;
@@ -204,13 +202,14 @@ WIDropDownMenu *WIOptionsList::AddDropDownMenu(const std::string &name, const st
 std::unordered_map<std::string, std::string> &WIOptionsList::GetUpdateConVars() { return m_updateCvars; }
 void WIOptionsList::RunUpdateConVars(bool bClear)
 {
+	auto *client = pragma::get_client_state();
 	for(auto it = m_updateCvars.begin(); it != m_updateCvars.end(); ++it) {
 		std::vector<std::string> argv = {it->second};
 		client->RunConsoleCommand(it->first, argv);
 	}
 	if(bClear == true)
 		m_updateCvars.clear();
-	auto coreLayer = c_engine->GetCoreInputBindingLayer();
+	auto coreLayer = pragma::get_cengine()->GetCoreInputBindingLayer();
 	for(char i = 0; i < 2; i++) {
 		for(auto it = m_keyBindingsErase[i].begin(); it != m_keyBindingsErase[i].end(); ++it) {
 			auto &cmd = it->first;
@@ -240,7 +239,7 @@ WITextEntry *WIOptionsList::AddTextEntry(const std::string &name, const std::str
 	row->SetValue(0, name);
 	if(!cvarName.empty()) {
 		auto hOptions = GetHandle();
-		pTextEntry->SetText(client->GetConVarString(cvarName));
+		pTextEntry->SetText(pragma::get_client_state()->GetConVarString(cvarName));
 		pTextEntry->AddCallback("OnTextChanged", FunctionCallback<void, std::reference_wrapper<const pragma::string::Utf8String>, bool>::Create([hOptions, cvarName](std::reference_wrapper<const pragma::string::Utf8String> text, bool) mutable {
 			if(!hOptions.IsValid())
 				return;
@@ -265,7 +264,7 @@ WISlider *WIOptionsList::AddSlider(const std::string &name, const std::function<
 		initializer(pSlider);
 	if(!cvarName.empty()) {
 		auto hOptions = GetHandle();
-		pSlider->SetValue(client->GetConVarFloat(cvarName));
+		pSlider->SetValue(pragma::get_client_state()->GetConVarFloat(cvarName));
 		pSlider->AddCallback("OnChange", FunctionCallback<void, float, float>::Create([hOptions, cvarName](float, float value) mutable {
 			if(!hOptions.IsValid())
 				return;
@@ -281,7 +280,7 @@ void WIOptionsList::AddKeyBinding(const std::string &keyName, const std::string 
 	if(row == nullptr)
 		return;
 	std::vector<pragma::platform::Key> mappedKeys {};
-	c_engine->GetMappedKeys(cvarName, mappedKeys, 2u);
+	pragma::get_cengine()->GetMappedKeys(cvarName, mappedKeys, 2u);
 	auto key1 = (mappedKeys.size() > 0) ? mappedKeys.at(0) : static_cast<pragma::platform::Key>(-1);
 	auto key2 = (mappedKeys.size() > 1) ? mappedKeys.at(1) : static_cast<pragma::platform::Key>(-1);
 	row->SetValue(0, keyName);

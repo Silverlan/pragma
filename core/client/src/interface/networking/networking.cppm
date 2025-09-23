@@ -3,7 +3,8 @@
 
 module;
 
-export module pragma.client.networking;
-export import :iclient;
-export import :local_client;
-export import :standard_client;
+export module pragma.client:networking;
+export import :networking.iclient;
+export import :networking.local_client;
+export import :networking.standard_client;
+export import :networking.util;

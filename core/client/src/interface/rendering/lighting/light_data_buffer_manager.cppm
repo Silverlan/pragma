@@ -12,15 +12,16 @@ module;
 
 #define USE_LIGHT_SOURCE_UNIFORM_BUFFER 1
 
-#if USE_LIGHT_SOURCE_UNIFORM_BUFFER == 1
-#define LIGHT_SOURCE_BUFFER_TYPE prosper::DescriptorType::UniformBuffer
-#else
-#define LIGHT_SOURCE_BUFFER_TYPE prosper::DescriptorType::StorageBuffer
-#endif
+export module pragma.client:rendering.light_data_buffer_manager;
 
-export module pragma.client.rendering.light_data_buffer_manager;
+import :entities.components.lights.light;
 
 export namespace pragma {
+#if USE_LIGHT_SOURCE_UNIFORM_BUFFER == 1
+	constexpr auto LIGHT_SOURCE_BUFFER_TYPE = prosper::DescriptorType::UniformBuffer;
+#else
+	constexpr auto LIGHT_SOURCE_BUFFER_TYPE = prosper::DescriptorType::StorageBuffer;
+#endif
 	class BaseLightBufferManager {
 	  public:
 		BaseLightBufferManager(const BaseLightBufferManager &) = delete;

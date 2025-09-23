@@ -6,10 +6,13 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <pragma/entities/components/base_entity_component.hpp>
 
-export module pragma.client.entities.components.light_map_receiver;
+export module pragma.client:entities.components.light_map_receiver;
 
-import pragma.client.entities.components.light_map;
-import pragma.client.rendering.lightmap_data_cache;
+import :entities.base_entity;
+import :entities.components.light_map;
+import :entities.components.render;
+import :model.mesh;
+import :rendering.lightmap_data_cache;
 
 export namespace pragma {
 	class DLLCLIENT CLightMapReceiverComponent final : public BaseEntityComponent {

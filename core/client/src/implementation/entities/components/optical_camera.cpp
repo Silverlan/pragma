@@ -6,11 +6,12 @@ module;
 #include "stdafx_client.h"
 #include <pragma/entities/entity_component_manager_t.hpp>
 
-module pragma.client.entities.components.optical_camera;
+module pragma.client;
 
-import pragma.client.engine;
 
-extern CEngine *c_engine;
+import :entities.components.optical_camera;
+import :engine;
+
 
 using namespace pragma;
 

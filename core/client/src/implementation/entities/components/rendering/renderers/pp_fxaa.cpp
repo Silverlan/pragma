@@ -12,15 +12,14 @@ module;
 #include <image/prosper_msaa_texture.hpp>
 #include <image/prosper_render_target.hpp>
 
-module pragma.client.entities.components.pp_fxaa;
+module pragma.client;
 
-import pragma.client.engine;
-import pragma.client.entities.components.rasterization_renderer;
-import pragma.client.game;
-import pragma.client.rendering.shaders;
+import :entities.components.rasterization_renderer;
+import :entities.components.pp_fxaa;
+import :engine;
+import :game;
+import :rendering.shaders;
 
-extern CGame *c_game;
-extern CEngine *c_engine;
 
 using namespace pragma;
 
@@ -41,11 +40,11 @@ void CRendererPpFxaaComponent::DoRenderEffect(const util::DrawSceneInfo &drawSce
 
 	if(static_cast<pragma::rendering::AntiAliasing>(cvAntiAliasing->GetInt()) != pragma::rendering::AntiAliasing::FXAA || m_renderer.expired())
 		return;
-	c_game->StartGPUProfilingStage("PostProcessingFXAA");
+	pragma::get_cgame()->StartGPUProfilingStage("PostProcessingFXAA");
 
 	auto &drawCmd = drawSceneInfo.commandBuffer;
 	auto &hdrInfo = m_renderer->GetHDRInfo();
-	auto whShaderPPFXAA = c_game->GetGameShader(CGame::GameShader::PPFXAA);
+	auto whShaderPPFXAA = pragma::get_cgame()->GetGameShader(CGame::GameShader::PPFXAA);
 	if(whShaderPPFXAA.valid() == true) {
 		auto &shaderFXAA = static_cast<pragma::ShaderPPFXAA &>(*whShaderPPFXAA.get());
 		auto &prepass = hdrInfo.prepass;
@@ -87,6 +86,6 @@ void CRendererPpFxaaComponent::DoRenderEffect(const util::DrawSceneInfo &drawSce
 		if(srcImg)
 			drawCmd->RecordImageBarrier(*srcImg, prosper::ImageLayout::ShaderReadOnlyOptimal, prosper::ImageLayout::ColorAttachmentOptimal);
 	}
-	c_game->StopGPUProfilingStage(); // PostProcessingFXAA
+	pragma::get_cgame()->StopGPUProfilingStage(); // PostProcessingFXAA
 }
 void CRendererPpFxaaComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }

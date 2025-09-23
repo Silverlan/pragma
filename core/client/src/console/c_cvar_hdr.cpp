@@ -4,16 +4,14 @@
 #include "stdafx_client.h"
 #include <wgui/types/wiroot.h>
 
-import pragma.client.game;
-import pragma.client.gui;
+import pragma.client;
 
-extern CGame *c_game;
 
 void CMD_debug_hdr_bloom(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
 	auto &wgui = WGUI::GetInstance();
 	auto *pRoot = wgui.GetBaseElement();
-	if(c_game == nullptr || argv.empty() || pRoot == nullptr)
+	if(pragma::get_cgame() == nullptr || argv.empty() || pRoot == nullptr)
 		return;
 	const std::string name = "debug_hdr_bloom";
 	auto *pEl = pRoot->FindDescendantByName(name);

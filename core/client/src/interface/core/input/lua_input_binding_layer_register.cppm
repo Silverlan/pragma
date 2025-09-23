@@ -7,7 +7,9 @@ module;
 #include <string>
 #include <unordered_set>
 
-export module pragma.client.core.lua_input_binding_layer_register;
+export module pragma.client:core.lua_input_binding_layer_register;
+
+import :core.input_binding_layer;
 
 export namespace pragma {
 	struct DLLCLIENT LuaInputBindingLayerRegister {

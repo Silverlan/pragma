@@ -6,7 +6,9 @@
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/game/game.h"
+#include "pragma/entities/baseentity.h"
 #include "pragma/entities/entity_component_manager.hpp"
+#include <typeindex>
 #include <vector>
 
 class BaseEntity;

@@ -5,9 +5,10 @@ module;
 
 #include "stdafx_client.h"
 
-module pragma.client.rendering.shaders;
+module pragma.client;
 
-import :particle_shadow;
+
+import :rendering.shaders.particle_shadow;
 
 // prosper TODO
 #if 0
@@ -17,7 +18,6 @@ using namespace Shader;
 
 LINK_SHADER_TO_CLASS(ParticleShadow,particleshadow);
 
-extern CGame *c_game;
 
 ParticleShadow::ParticleShadow()
 	: ParticleShadowBase<ParticleBase>("ParticleShadow","programs/particles/particle_shadow","programs/particles/particle_shadow")
@@ -73,13 +73,13 @@ void ParticleShadow::Draw(CParticleSystem *particle,CLightBase *light,uint32_t l
 		auto *descSet = particle->GetAnimationDescriptorSet();
 		drawCmd->BindDescriptorSet(static_cast<uint32_t>(DescSet::Animation),layout,*descSet);
 	}
-	//auto &scene = c_game->GetRenderScene();
+	//auto &scene = pragma::get_cgame()->GetRenderScene();
 	drawCmd->BindDescriptorSet(static_cast<uint32_t>(DescSet::ParticleMap),layout,descTexture);
 
 	std::vector<Vulkan::BufferObject*> buffers = {
 		particle->GetVertexBuffer(),
 		*particle->GetParticleBuffer(),
-		(bAnimated == true) ? *particle->GetAnimationStartBuffer() : c_game->GetDummyVertexBuffer()
+		(bAnimated == true) ? *particle->GetAnimationStartBuffer() : pragma::get_cgame()->GetDummyVertexBuffer()
 	};
 	drawCmd->BindVertexBuffer(buffers);
 	drawCmd->Draw(CParticleSystem::VERTEX_COUNT,particle->GetRenderParticleCount());

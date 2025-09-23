@@ -3,8 +3,11 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 
-export module pragma.client.rendering.shaders:particle_blob;
+export module pragma.client:rendering.shaders.particle_blob;
+
+import :rendering.shaders.particle_2d_base;
 
 export namespace pragma {
 	namespace rendering::shader_material {
@@ -29,7 +32,7 @@ export namespace pragma {
 
 		ShaderParticleBlob(prosper::IPrContext &context, const std::string &identifier);
 		virtual uint32_t GetSceneDescriptorSetIndex() const override;
-		bool RecordDraw(prosper::ShaderBindState &bindState, pragma::CSceneComponent &scene, const CRasterizationRendererComponent &renderer, const CParticleSystemComponent &ps, ParticleOrientationType orientationType, ParticleRenderFlags renderFlags,
+		bool RecordDraw(prosper::ShaderBindState &bindState, pragma::CSceneComponent &scene, const CRasterizationRendererComponent &renderer, const ecs::CParticleSystemComponent &ps, ecs::ParticleOrientationType orientationType, ecs::ParticleRenderFlags renderFlags,
 		  prosper::IBuffer &blobIndexBuffer, prosper::IDescriptorSet &dsParticles, uint32_t particleBufferOffset);
 		virtual bool RecordBindScene(prosper::ICommandBuffer &cmd, const prosper::IShaderPipelineLayout &layout, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer,
 		  prosper::IDescriptorSet &dsRenderSettings, prosper::IDescriptorSet &dsShadows) const override;
@@ -38,7 +41,7 @@ export namespace pragma {
 		virtual void GetShaderPreprocessorDefinitions(std::unordered_map<std::string, std::string> &outDefinitions, std::string &outPrefixCode) override;
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
 		virtual void InitializeShaderResources() override;
-		virtual bool RecordParticleMaterial(prosper::ShaderBindState &bindState, const CRasterizationRendererComponent &renderer, const CParticleSystemComponent &ps) const override;
+		virtual bool RecordParticleMaterial(prosper::ShaderBindState &bindState, const CRasterizationRendererComponent &renderer, const ecs::CParticleSystemComponent &ps) const override;
 		std::shared_ptr<rendering::shader_material::ShaderMaterial> m_shaderMaterial;
 		std::unique_ptr<prosper::DescriptorSetInfo> m_materialDescSetInfo;
 	};

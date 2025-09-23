@@ -13,15 +13,15 @@ module;
 #include <prosper_descriptor_set_group.hpp>
 #include <random>
 
-module pragma.client.rendering.shaders;
+module pragma.client;
 
-import :ssao;
 
-import pragma.client.engine;
+import :rendering.shaders.ssao;
+
+import :engine;
 
 using namespace pragma;
 
-extern CEngine *c_engine;
 
 decltype(ShaderSSAO::RENDER_PASS_FORMAT) ShaderSSAO::RENDER_PASS_FORMAT = prosper::Format::R8_UNorm;
 decltype(ShaderSSAO::DESCRIPTOR_SET_PREPASS) ShaderSSAO::DESCRIPTOR_SET_PREPASS = {
@@ -58,7 +58,7 @@ ShaderSSAO::ShaderSSAO(prosper::IPrContext &context, const std::string &identifi
 	bufferCreateInfo.usageFlags = prosper::BufferUsageFlags::UniformBufferBit;
 	bufferCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	bufferCreateInfo.size = size;
-	m_kernelBuffer = c_engine->GetRenderContext().CreateBuffer(bufferCreateInfo, ssaoKernel.data());
+	m_kernelBuffer = pragma::get_cengine()->GetRenderContext().CreateBuffer(bufferCreateInfo, ssaoKernel.data());
 	m_kernelBuffer->SetDebugName("ssao_kernel_buf");
 
 	// Generate kernel rotations
@@ -93,10 +93,10 @@ ShaderSSAO::ShaderSSAO(prosper::IPrContext &context, const std::string &identifi
 	imgCreateInfo.usage = prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::TransferDstBit;
 	auto noiseImage = context.CreateImage(imgCreateInfo);
 
-	auto &setupCmd = c_engine->GetSetupCommandBuffer();
+	auto &setupCmd = pragma::get_cengine()->GetSetupCommandBuffer();
 	setupCmd->RecordBlitImage({}, *stagingImage, *noiseImage);
 	setupCmd->RecordImageBarrier(*noiseImage, prosper::ImageLayout::TransferDstOptimal, prosper::ImageLayout::ShaderReadOnlyOptimal);
-	c_engine->FlushSetupCommandBuffer();
+	pragma::get_cengine()->FlushSetupCommandBuffer();
 
 	prosper::util::SamplerCreateInfo samplerCreateInfo {};
 	samplerCreateInfo.addressModeU = samplerCreateInfo.addressModeV = samplerCreateInfo.addressModeW = prosper::SamplerAddressMode::Repeat;
@@ -116,8 +116,8 @@ void ShaderSSAO::OnPipelineInitialized(uint32_t pipelineIdx)
 	prosper::ShaderBaseImageProcessing::OnPipelineInitialized(pipelineIdx);
 	if(pipelineIdx != 0u)
 		return;
-	m_descSetGroupKernel = c_engine->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_SAMPLE_BUFFER);
-	m_descSetGroupTexture = c_engine->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_NOISE_TEXTURE);
+	m_descSetGroupKernel = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_SAMPLE_BUFFER);
+	m_descSetGroupTexture = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_NOISE_TEXTURE);
 
 	m_descSetGroupKernel->GetDescriptorSet()->SetBindingUniformBuffer(*m_kernelBuffer, 0u);
 	m_descSetGroupTexture->GetDescriptorSet()->SetBindingTexture(*m_noiseTexture, 0u);

@@ -15,17 +15,16 @@ module;
 #include <cmaterial_manager2.hpp>
 #include <cmaterial.h>
 
-module pragma.client.rendering.shaders;
+module pragma.client;
 
-import :world_test;
 
-import pragma.client.client_state;
-import pragma.client.engine;
-import pragma.client.entities.components;
-import pragma.client.model;
+import :rendering.shaders.world_test;
 
-extern ClientState *client;
-extern CEngine *c_engine;
+import :client_state;
+import :engine;
+import :entities.components;
+import :model;
+
 
 using namespace pragma;
 
@@ -142,7 +141,7 @@ void ShaderTest::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipe
 
 static bool bind_texture(Material &mat, prosper::IDescriptorSet &ds, TextureInfo *texInfo, uint32_t bindingIndex, Texture *optDefaultTex = nullptr)
 {
-	auto &matManager = static_cast<msys::CMaterialManager &>(client->GetMaterialManager());
+	auto &matManager = static_cast<msys::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager());
 	auto &texManager = matManager.GetTextureManager();
 
 	std::shared_ptr<Texture> tex = nullptr;
@@ -159,7 +158,7 @@ static bool bind_texture(Material &mat, prosper::IDescriptorSet &ds, TextureInfo
 
 static bool bind_default_texture(prosper::IDescriptorSet &ds, const std::string &defaultTexName, uint32_t bindingIndex)
 {
-	auto &matManager = static_cast<msys::CMaterialManager &>(client->GetMaterialManager());
+	auto &matManager = static_cast<msys::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager());
 	auto &texManager = matManager.GetTextureManager();
 	auto ptrTex = texManager.LoadAsset(defaultTexName);
 	if(ptrTex == nullptr)
@@ -171,7 +170,7 @@ static bool bind_default_texture(prosper::IDescriptorSet &ds, const std::string 
 
 static bool bind_texture(Material &mat, prosper::IDescriptorSet &ds, TextureInfo *texInfo, uint32_t bindingIndex, const std::string &defaultTexName)
 {
-	auto &matManager = static_cast<msys::CMaterialManager &>(client->GetMaterialManager());
+	auto &matManager = static_cast<msys::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager());
 	auto &texManager = matManager.GetTextureManager();
 
 	std::shared_ptr<Texture> tex = nullptr;

@@ -9,9 +9,10 @@ module;
 #include <shader/prosper_shader_copy_image.hpp>
 #include <shader/prosper_shader_t.hpp>
 
-module pragma.client.rendering.shaders;
+module pragma.client;
 
-import :pp_motion_blur;
+
+import :rendering.shaders.pp_motion_blur;
 
 using namespace pragma;
 

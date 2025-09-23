@@ -6,9 +6,10 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <pragma/entities/components/liquid/base_liquid_surface_simulation_component.hpp>
 
-export module pragma.client.entities.components.liquid_surface_simulation;
+export module pragma.client:entities.components.liquid_surface_simulation;
 
-import pragma.client.entities.components.water_surface;
+import :entities.components.entity;
+import :entities.components.water_surface;
 
 export namespace pragma {
 	class DLLCLIENT CLiquidSurfaceSimulationComponent final : public BaseLiquidSurfaceSimulationComponent, public CBaseNetComponent {

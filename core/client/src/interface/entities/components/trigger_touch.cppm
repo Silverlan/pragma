@@ -7,7 +7,9 @@ module;
 #include "pragma/entities/trigger/base_trigger_touch.hpp"
 #include <pragma/entities/trigger/base_trigger_touch.hpp>
 
-export module pragma.client.entities.components.trigger_touch;
+export module pragma.client:entities.components.trigger_touch;
+
+import :entities.base_entity;
 
 export namespace pragma {
 	class DLLCLIENT CTouchComponent final : public BaseTouchComponent {

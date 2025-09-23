@@ -6,7 +6,9 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <pragma/entities/components/base_observable_component.hpp>
 
-export module pragma.client.entities.components.observable;
+export module pragma.client:entities.components.observable;
+
+import :entities.components.entity;
 
 export namespace pragma {
 	class DLLCLIENT CObservableComponent final : public BaseObservableComponent, public CBaseNetComponent {

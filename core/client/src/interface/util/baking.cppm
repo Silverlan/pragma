@@ -9,9 +9,10 @@ module;
 #include <mathutil/umath_lighting.hpp>
 #include <vector>
 
-export module pragma.client.util.baking;
+export module pragma.client:util.baking;
 
-import pragma.client.rendering.lightmap_data_cache;
+import :entities.components.lights.light;
+import :rendering.lightmap_data_cache;
 
 export
 {

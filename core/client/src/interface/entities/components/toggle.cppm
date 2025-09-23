@@ -6,7 +6,9 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <pragma/entities/components/basetoggle.h>
 
-export module pragma.client.entities.components.toggle;
+export module pragma.client:entities.components.toggle;
+
+import :entities.components.entity;
 
 export namespace pragma {
 	class DLLCLIENT CToggleComponent final : public BaseToggleComponent, public CBaseNetComponent {

@@ -10,9 +10,10 @@ module;
 #include <prosper_util.hpp>
 #include <buffers/prosper_buffer.hpp>
 
-module pragma.client.rendering.shaders;
+module pragma.client;
 
-import :clear_color;
+
+import :rendering.shaders.clear_color;
 
 using namespace pragma;
 

@@ -6,11 +6,15 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "prosper_command_buffer.hpp"
 #include "pragma/model/modelmesh.h"
+#include "pragma/entities/environment/lights/env_light_directional.h"
 #include <pragma/entities/components/base_entity_component.hpp>
 #include <mathutil/boundingvolume.h>
 #include <mathutil/plane.hpp>
 
-export module pragma.client.entities.components.lights.shadow_csm;
+export module pragma.client:entities.components.lights.shadow_csm;
+
+import :entities.components.camera;
+import :entities.components.lights.light;
 
 export namespace pragma {
 	struct DLLCLIENT FrustumSplit {
@@ -60,12 +64,12 @@ export namespace pragma {
 		const std::shared_ptr<prosper::RenderTarget> &GetStaticPendingRenderTarget() const;
 		void RenderBatch(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, pragma::BaseEnvLightDirectionalComponent &light);
 
-		std::shared_ptr<prosper::IFramebuffer> GetFramebuffer(pragma::CLightComponent::ShadowMapType smType, uint32_t layer = 0) const;
-		prosper::IRenderPass *GetRenderPass(pragma::CLightComponent::ShadowMapType smType) const;
-		const std::shared_ptr<prosper::RenderTarget> &GetRenderTarget(pragma::CLightComponent::ShadowMapType smType) const;
+		std::shared_ptr<prosper::IFramebuffer> GetFramebuffer(pragma::rendering::ShadowMapType smType, uint32_t layer = 0) const;
+		prosper::IRenderPass *GetRenderPass(pragma::rendering::ShadowMapType smType) const;
+		const std::shared_ptr<prosper::RenderTarget> &GetRenderTarget(pragma::rendering::ShadowMapType smType) const;
 
 		prosper::Texture *GetDepthTexture() const;
-		prosper::Texture *GetDepthTexture(pragma::CLightComponent::ShadowMapType smType) const;
+		prosper::Texture *GetDepthTexture(pragma::rendering::ShadowMapType smType) const;
 
 		void FreeRenderTarget();
 
@@ -119,7 +123,7 @@ export namespace pragma {
 		std::array<TextureSet, 2> m_textureSets; // 0 = Used for static geometry (Rarely moving and not animated); 1 = Used for dynamic geometry
 
 		void UpdateSplitDistances(float nd, float fd);
-		void InitializeTextureSet(TextureSet &set, pragma::CLightComponent::ShadowMapType smType);
+		void InitializeTextureSet(TextureSet &set, pragma::rendering::ShadowMapType smType);
 		void InitializeDepthTextures(uint32_t size);
 	};
 };

@@ -11,7 +11,7 @@ module;
 #include <atomic>
 #include <mathutil/umath.h>
 
-export module pragma.client.gui:image_slide_show;
+export module pragma.client:gui.image_slide_show;
 
 export {
 	class DLLCLIENT WIImageSlideShow : public WIBase {

@@ -7,18 +7,15 @@ module;
 #include "pragma/lua/converters/gui_element_converter.hpp"
 #include <image/prosper_render_target.hpp>
 
-import pragma.client.entities.components;
+module pragma.client;
 
-import pragma.client.client_state;
-import pragma.client.engine;
-import pragma.client.game;
-module pragma.client.gui;
+import :entities.components;
 
-import :debug_ssao;
+import :gui.debug_ssao;
 
-extern CEngine *c_engine;
-extern ClientState *client;
-extern CGame *c_game;
+import :client_state;
+import :engine;
+import :game;
 
 LINK_WGUI_TO_CLASS(WIDebugSSAO, WIDebugSSAO);
 
@@ -29,9 +26,9 @@ void WIDebugSSAO::SetUseBlurredSSAOImage(bool b) { m_bUseBlurVariant = b; }
 void WIDebugSSAO::DoUpdate()
 {
 	WITexturedRect::DoUpdate();
-	if(c_game == nullptr)
+	if(pragma::get_cgame() == nullptr)
 		return;
-	auto *scene = c_game->GetScene<pragma::CSceneComponent>();
+	auto *scene = pragma::get_cgame()->GetScene<pragma::CSceneComponent>();
 	auto *renderer = scene ? dynamic_cast<pragma::CRasterizationRendererComponent *>(scene->GetRenderer<pragma::CRendererComponent>()) : nullptr;
 	if(renderer == nullptr)
 		return;

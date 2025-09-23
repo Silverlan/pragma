@@ -10,9 +10,11 @@ module;
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
-module pragma.client.entities.components.func_physics;
+module pragma.client;
 
-import pragma.client.entities.components.render;
+
+import :entities.components.func_physics;
+import :entities.components.render;
 
 using namespace pragma;
 

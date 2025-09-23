@@ -6,10 +6,10 @@ module;
 #include "stdafx_client.h"
 #include <pragma/debug/intel_vtune.hpp>
 
-module pragma.client.model;
+module pragma.client;
 
-import :model_manager;
-
-import pragma.client.client_state;
+import :model.model_class;
+import :model.model_manager;
+import :client_state;
 
 std::shared_ptr<Model> pragma::asset::CModelManager::CreateModel(uint32_t numBones, const std::string &mdlName) { return Model::Create<CModel>(&m_nw, numBones, mdlName); }

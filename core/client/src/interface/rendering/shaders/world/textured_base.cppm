@@ -5,8 +5,9 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include "prosper_descriptor_set_group.hpp"
+#include "cmaterial.h"
 
-export module pragma.client.rendering.shaders:textured_base;
+export module pragma.client:rendering.shaders.textured_base;
 
 export namespace pragma {
 	class DLLCLIENT ShaderTexturedBase {

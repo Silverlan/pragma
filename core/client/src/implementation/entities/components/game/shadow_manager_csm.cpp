@@ -8,15 +8,16 @@ module;
 #include <prosper_command_buffer.hpp>
 #include <image/prosper_texture.hpp>
 
-module pragma.client.entities.components.game_shadow_manager;
+module pragma.client;
 
-import pragma.client.engine;
-import pragma.client.entities.components.renderer;
-import pragma.client.game;
+
+import :entities.components.game_shadow_manager;
+import :engine;
+import :entities.components.renderer;
+import :game;
 
 using namespace pragma;
 
-extern CGame *c_game;
 
 void ShadowRenderer::RenderCSMShadows(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, pragma::BaseEnvLightDirectionalComponent &light, bool drawParticleShadows)
 {
@@ -29,17 +30,17 @@ void ShadowRenderer::RenderCSMShadows(std::shared_ptr<prosper::IPrimaryCommandBu
 		return;
 	auto &shaderCsm = static_cast<pragma::ShaderShadowCSM&>(*m_shaderCSM);
 	auto *shaderCsmTransparent = static_cast<pragma::ShaderShadowCSMTransparent*>(m_shaderCSMTransparent.expired() == false ? m_shaderCSMTransparent.get() : nullptr);
-	auto *cam = c_game->GetRenderCamera<pragma::CCameraComponent>();
+	auto *cam = pragma::get_cgame()->GetRenderCamera<pragma::CCameraComponent>();
 	auto &posCam = cam ? cam->GetEntity().GetPosition() : uvec::ORIGIN;
 	auto &csm = *hShadowMap;
 
-	auto frameId = c_engine->GetRenderContext().GetLastFrameId();
+	auto frameId = pragma::get_cengine()->GetRenderContext().GetLastFrameId();
 	if(csm.GetLastUpdateFrameId() == frameId)
 		return;
 	csm.SetLastUpdateFrameId(frameId);
 
-	const std::array<pragma::CLightComponent::ShadowMapType,1> renderPasses = {pragma::CLightComponent::ShadowMapType::Dynamic};
-	auto &staticDepthImg = csm.GetDepthTexture(pragma::CLightComponent::ShadowMapType::Static)->GetImage();
+	const std::array<pragma::rendering::ShadowMapType,1> renderPasses = {pragma::rendering::ShadowMapType::Dynamic};
+	auto &staticDepthImg = csm.GetDepthTexture(pragma::rendering::ShadowMapType::Static)->GetImage();
 	csm.RenderBatch(drawCmd,light);
 
 	// Render dynamic objects
@@ -50,7 +51,7 @@ void ShadowRenderer::RenderCSMShadows(std::shared_ptr<prosper::IPrimaryCommandBu
 		auto *tex = csm.GetDepthTexture(rp);
 		if(tex == nullptr)
 			continue;
-		auto bDynamic = (rp == pragma::CLightComponent::ShadowMapType::Dynamic) ? true : false;
+		auto bDynamic = (rp == pragma::rendering::ShadowMapType::Dynamic) ? true : false;
 		if(bDynamic == true)
 			;//staticDepthImg->SetDrawLayout(prosper::ImageLayout::TransferSrcOptimal);
 		else
@@ -68,7 +69,7 @@ void ShadowRenderer::RenderCSMShadows(std::shared_ptr<prosper::IPrimaryCommandBu
 
 		m_shadowCasters.clear();
 
-		EntityIterator entIt {*c_game};
+		EntityIterator entIt {*pragma::get_cgame()};
 		entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CRenderComponent>>();
 		for(auto *ent : entIt)
 		{
@@ -196,7 +197,7 @@ void ShadowRenderer::RenderCSMShadows(std::shared_ptr<prosper::IPrimaryCommandBu
 				}
 				return bRetTranslucent;
 			};
-			auto *scene = c_game->GetRenderScene<pragma::CSceneComponent>();
+			auto *scene = pragma::get_cgame()->GetRenderScene<pragma::CSceneComponent>();
 			auto *renderer = scene ? scene->GetRenderer<pragma::CRendererComponent>() : nullptr;
 			if(renderer && renderer->IsRasterizationRenderer() && shaderCsm.RecordBeginDraw(drawCmd) == true)
 			{
@@ -206,11 +207,11 @@ void ShadowRenderer::RenderCSMShadows(std::shared_ptr<prosper::IPrimaryCommandBu
 				if(drawParticleShadows == true)
 				{
 					// TODO: Only culled particles
-					EntityIterator entIt {*c_game};
-					entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CParticleSystemComponent>>();
+					EntityIterator entIt {*pragma::get_cgame()};
+					entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::ecs::CParticleSystemComponent>>();
 					for(auto *ent : entIt)
 					{
-						auto p = ent->GetComponent<pragma::CParticleSystemComponent>();
+						auto p = ent->GetComponent<pragma::ecs::CParticleSystemComponent>();
 						if(p.valid() && p->GetCastShadows() == true)
 							p->RecordRenderShadow(drawCmd, *scene, *static_cast<pragma::CRasterizationRendererComponent *>(renderer), pLightComponent.get(), layer);
 					}

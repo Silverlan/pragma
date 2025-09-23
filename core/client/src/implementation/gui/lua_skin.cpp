@@ -8,14 +8,13 @@ module;
 #include <pragma/lua/lua_call.hpp>
 #include <queue>
 
-module pragma.client.gui;
+module pragma.client;
 
-import :lua_interface;
-import :lua_skin;
+import :gui.lua_interface;
+import :gui.lua_skin;
 
-import pragma.client.client_state;
+import :client_state;
 
-extern ClientState *client;
 #pragma optimize("", off)
 WILuaSkin::WILuaSkin() : WISkin {}, m_lua(nullptr), m_rootClass(nullptr) {}
 

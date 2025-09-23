@@ -14,15 +14,15 @@ module;
 #include <image/prosper_sampler.hpp>
 #include "util_image_buffer.hpp"
 
-module pragma.client.entities.components.util_pbr_converter;
+module pragma.client;
 
-import pragma.client.client_state;
-import pragma.client.engine;
+
+import :entities.components.util_pbr_converter;
+import :client_state;
+import :engine;
 
 using namespace pragma;
 
-extern CEngine *c_engine;
-extern ClientState *client;
 
 PBRAOBakeJob::PBRAOBakeJob(Model &mdl, Material &mat) : hModel {mdl.GetHandle()}, hMaterial {mat.GetHandle()} {}
 
@@ -57,9 +57,9 @@ void CPBRConverterComponent::ProcessQueue()
 	sceneInfo.samples = item.samples;
 
 	if(item.hEntity.valid())
-		item.job = rendering::cycles::bake_ambient_occlusion(*client, sceneInfo, *item.hEntity.get(), itMat - mats.begin() /* materialIndex */);
+		item.job = rendering::cycles::bake_ambient_occlusion(*pragma::get_client_state(), sceneInfo, *item.hEntity.get(), itMat - mats.begin() /* materialIndex */);
 	else
-		item.job = rendering::cycles::bake_ambient_occlusion(*client, sceneInfo, *item.hModel.get(), itMat - mats.begin() /* materialIndex */);
+		item.job = rendering::cycles::bake_ambient_occlusion(*pragma::get_client_state(), sceneInfo, *item.hModel.get(), itMat - mats.begin() /* materialIndex */);
 	if(item.job.IsValid() == false)
 		return;
 	auto hMat = item.hMaterial;
@@ -75,7 +75,7 @@ void CPBRConverterComponent::ProcessQueue()
 		WriteAOMap(*hMdl.get(), static_cast<CMaterial &>(*hMat.get()), *imgBuffer, imgBuffer->GetWidth(), imgBuffer->GetHeight());
 	});
 	item.job.Start();
-	c_engine->AddParallelJob(item.job, "Ambient Occlusion");
+	pragma::get_cengine()->AddParallelJob(item.job, "Ambient Occlusion");
 }
 
 void CPBRConverterComponent::UpdateAmbientOcclusion(Model &mdl, const AmbientOcclusionInfo &aoInfo, BaseEntity *optEnt)
@@ -109,13 +109,13 @@ void CPBRConverterComponent::WriteAOMap(Model &mdl, CMaterial &mat, uimg::ImageB
 {
 	Con::cout << "Ambient occlusion map has been generated for material '" << mat.GetName() << "' of model '" << mdl.GetName() << "'! Combining with RMA map..." << Con::endl;
 
-	auto *shader = static_cast<pragma::ShaderComposeRMA *>(c_engine->GetShader("compose_rma").get());
+	auto *shader = static_cast<pragma::ShaderComposeRMA *>(pragma::get_cengine()->GetShader("compose_rma").get());
 	if(shader == nullptr)
 		return;
 	auto *texInfoRMA = mat.GetRMAMap();
 	if(texInfoRMA == nullptr)
 		return;
-	auto resWatcherLock = c_engine->ScopeLockResourceWatchers();
+	auto resWatcherLock = pragma::get_cengine()->ScopeLockResourceWatchers();
 	auto rmaName = texInfoRMA->name;
 	ufile::remove_extension_from_filename(rmaName);
 
@@ -130,7 +130,7 @@ void CPBRConverterComponent::WriteAOMap(Model &mdl, CMaterial &mat, uimg::ImageB
 		requiresSave = true;
 	}
 
-	shader->InsertAmbientOcclusion(c_engine->GetRenderContext(), rmaName, imgBuffer);
+	shader->InsertAmbientOcclusion(pragma::get_cengine()->GetRenderContext(), rmaName, imgBuffer);
 
 	if(requiresSave) {
 		mat.UpdateTextures();

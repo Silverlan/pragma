@@ -7,9 +7,9 @@ module;
 #include <wgui/wibase.h>
 #include <mathutil/umath.h>
 
-export module pragma.client.gui:slider;
+export module pragma.client:gui.slider;
 
-import :progress_bar;
+import :gui.progress_bar;
 
 export {
 	class DLLCLIENT WISlider : public WIProgressBar {

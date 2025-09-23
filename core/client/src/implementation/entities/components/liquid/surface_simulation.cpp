@@ -8,15 +8,16 @@ module;
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
-module pragma.client.entities.components.liquid_surface_simulation;
+module pragma.client;
 
-import pragma.client.entities.components.liquid_control;
-import pragma.client.entities.components.water_surface;
-import pragma.client.game;
 
-import pragma.client.physics;
+import :entities.components.liquid_surface_simulation;
+import :entities.components.liquid_control;
+import :entities.components.water_surface;
+import :game;
 
-extern CGame *c_game;
+import :physics;
+
 
 using namespace pragma;
 
@@ -82,13 +83,13 @@ CWaterSurface *CLiquidSurfaceSimulationComponent::GetSurfaceEntity() const { ret
 
 void CLiquidSurfaceSimulationComponent::ReloadSurfaceSimulator()
 {
-	SetSpacing(c_game->GetConVarInt("cl_water_surface_simulation_spacing"));
+	SetSpacing(pragma::get_cgame()->GetConVarInt("cl_water_surface_simulation_spacing"));
 	BaseLiquidSurfaceSimulationComponent::ReloadSurfaceSimulator();
 	if(m_hWaterSurface.valid())
 		m_hWaterSurface->Remove();
 	if(m_physSurfaceSim == nullptr)
 		return;
-	auto *entSurface = c_game->CreateEntity<CWaterSurface>();
+	auto *entSurface = pragma::get_cgame()->CreateEntity<CWaterSurface>();
 	if(entSurface == nullptr)
 		return;
 	auto &ent = GetEntity();

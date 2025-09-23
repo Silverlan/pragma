@@ -8,9 +8,9 @@ module;
 #include <unordered_map>
 #include <functional>
 
-export module pragma.client.gui:table;
+export module pragma.client:gui.table;
 
-import :container;
+import :gui.container;
 
 export
 {

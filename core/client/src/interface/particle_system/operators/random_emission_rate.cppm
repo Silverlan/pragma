@@ -10,12 +10,15 @@ module;
 #include <sharedutils/util.h>
 #include <algorithm>
 
-export module pragma.client.particle_system:operator_random_emission_rate;
+export module pragma.client:particle_system.operator_random_emission_rate;
+
+import :entities.components.particle_system;
+import :particle_system.modifier;
 
 export class DLLCLIENT CParticleOperatorRandomEmissionRate : public CParticleOperator {
   public:
 	CParticleOperatorRandomEmissionRate() = default;
-	virtual void Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+	virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
 	virtual void Simulate(double tDelta) override;
 	virtual void OnParticleSystemStarted() override;
   private:
@@ -26,9 +29,7 @@ export class DLLCLIENT CParticleOperatorRandomEmissionRate : public CParticleOpe
 	float m_fRemaining = 0.f;
 };
 
-REGISTER_PARTICLE_OPERATOR(emission_rate_random, CParticleOperatorRandomEmissionRate);
-
-void CParticleOperatorRandomEmissionRate::Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void CParticleOperatorRandomEmissionRate::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleOperator::Initialize(pSystem, values);
 	for(auto &pair : values) {

@@ -3,6 +3,7 @@
 
 #include "stdafx_shared.h"
 #include "pragma/entities/components/base_bvh_component.hpp"
+#include "pragma/model/modelmesh.h"
 #include "pragma/entities/components/base_model_component.hpp"
 #include "pragma/entities/components/base_animated_component.hpp"
 #include "pragma/entities/components/base_static_bvh_cache_component.hpp"

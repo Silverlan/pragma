@@ -6,7 +6,7 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <wgui/types/witextentry.h>
 
-export module pragma.client.gui:command_line_entry;
+export module pragma.client:gui.command_line_entry;
 
 export class DLLCLIENT WICommandLineEntry : public WITextEntry {
   public:

@@ -9,9 +9,9 @@ module;
 #include "pragma/input/inputhelper.h"
 #include <mathutil/umath.h>
 
-module pragma.client.gui;
+module pragma.client;
 
-import :key_entry;
+import :gui.key_entry;
 
 import pragma.locale;
 

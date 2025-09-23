@@ -13,18 +13,16 @@ module;
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <cmaterial.h>
 
-module pragma.client.entities.components.water_surface;
+module pragma.client;
 
-import pragma.client.engine;
-import pragma.client.entities.components;
-import pragma.client.game;
-import pragma.client.model;
-import pragma.client.physics;
+import :entities.components.water_surface;
+import :engine;
+import :game;
+import :model;
+import :physics;
 
 using namespace pragma;
 
-extern CEngine *c_engine;
-extern CGame *c_game;
 
 void CWaterSurfaceComponent::Initialize()
 {
@@ -71,7 +69,7 @@ void CWaterSurfaceComponent::UpdateSurfaceMesh()
 
 	if(sim == nullptr)
 		return;
-	auto drawCmd = c_game->GetCurrentDrawCommandBuffer();
+	auto drawCmd = pragma::get_cgame()->GetCurrentDrawCommandBuffer();
 	if(drawCmd == nullptr)
 		return;
 	auto *cmesh = static_cast<CModelSubMesh *>(m_waterSurfaceMesh.lock().get());
@@ -121,7 +119,7 @@ void CWaterSurfaceComponent::InitializeSurface()
 	auto &simTriangles = sim.GetTriangleIndices();
 	if(simTriangles.empty() == true)
 		return;
-	auto mdl = c_game->CreateModel();
+	auto mdl = pragma::get_cgame()->CreateModel();
 	auto meshGroup = mdl->GetMeshGroup(0);
 
 	auto subMesh = std::make_shared<CModelSubMesh>();
@@ -159,12 +157,12 @@ void CWaterSurfaceComponent::InitializeSurface()
 	bufCreateInfo.usageFlags = prosper::BufferUsageFlags::VertexBufferBit;
 	bufCreateInfo.size = verts.size() * sizeof(verts.front());
 	bufCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
-	auto vertBuffer = c_engine->GetRenderContext().CreateBuffer(bufCreateInfo, verts.data());
+	auto vertBuffer = pragma::get_cengine()->GetRenderContext().CreateBuffer(bufCreateInfo, verts.data());
 
 	auto &indexData = subMesh->GetIndexData();
 	bufCreateInfo.size = indexData.size();
 	bufCreateInfo.usageFlags = prosper::BufferUsageFlags::IndexBufferBit;
-	auto indexBuffer = c_engine->GetRenderContext().CreateBuffer(bufCreateInfo, indexData.data());
+	auto indexBuffer = pragma::get_cengine()->GetRenderContext().CreateBuffer(bufCreateInfo, indexData.data());
 
 	auto &vkMesh = subMesh->GetSceneMesh();
 	vkMesh->SetVertexBuffer(vertBuffer); //sim.GetPositionBuffer());
@@ -173,7 +171,7 @@ void CWaterSurfaceComponent::InitializeSurface()
 
 	m_waterSurfaceMesh = subMesh;
 
-	m_cbRenderSurface = c_game->AddCallback("PreRenderScenes", FunctionCallback<void>::Create([this]() {
+	m_cbRenderSurface = pragma::get_cgame()->AddCallback("PreRenderScenes", FunctionCallback<void>::Create([this]() {
 		if(m_surfaceSimulator == nullptr)
 			return;
 		auto *sim = static_cast<CPhysWaterSurfaceSimulator *>(m_surfaceSimulator.get());

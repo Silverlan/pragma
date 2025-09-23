@@ -7,7 +7,10 @@ module;
 #include <pragma/entities/environment/lights/env_light_spot.h>
 #include <pragma/util/mvpbase.h>
 
-export module pragma.client.entities.components.lights.spot;
+export module pragma.client:entities.components.lights.spot;
+
+import :entities.base_entity;
+import :entities.components.entity;
 
 export namespace pragma {
 	class DLLCLIENT CLightSpotComponent final : public BaseEnvLightSpotComponent, public CBaseNetComponent, public MVPBias<1> {

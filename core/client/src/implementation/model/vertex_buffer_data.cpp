@@ -7,9 +7,9 @@ module;
 #include <mathutil/vertex.hpp>
 #include <pragma/types.hpp>
 
-module pragma.client.model;
+module pragma.client;
 
-import :vertex_buffer_data;
+import :model.vertex_buffer_data;
 
 VertexBufferData::VertexBufferData(const Vector3 &position, const Vector2 &uv, const Vector3 &normal, const Vector3 &tangent, const Vector3 &biTangent) : position {position}, uv {uv}, normal {normal}, tangent {tangent}, biTangent {biTangent} {}
 VertexBufferData::VertexBufferData(const Vector3 &position, const Vector2 &uv, const Vector3 &normal) : VertexBufferData {position, uv, normal, {}, {}} {}

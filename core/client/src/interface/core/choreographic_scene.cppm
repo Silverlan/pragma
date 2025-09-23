@@ -5,8 +5,9 @@ module;
 
 #include <pragma/entities/baseentity_handle.h>
 
-export module pragma.client.core.choreographic_scene;
+export module pragma.client:core.choreographic_scene;
 
+import :entities.base_entity;
 import timeline_scene;
 
 export namespace choreography {

@@ -16,18 +16,17 @@ module;
 #include <texture_type.h>
 #include <cmaterial.h>
 
-module pragma.client.rendering.shaders;
+module pragma.client;
 
-import :world_graph;
 
-import pragma.client.client_state;
-import pragma.client.engine;
-import pragma.client.entities.components;
-import pragma.client.model;
+import :rendering.shaders.world_graph;
+
+import :client_state;
+import :engine;
+import :entities.components;
+import :model;
 import pragma.shadergraph;
 
-extern ClientState *client;
-extern CEngine *c_engine;
 
 using namespace pragma;
 
@@ -75,7 +74,7 @@ const pragma::shadergraph::Graph *ShaderGraph::GetGraph() const { return m_shade
 
 void ShaderGraph::InitializeShaderResources()
 {
-	auto &graphManager = c_engine->GetShaderGraphManager();
+	auto &graphManager = pragma::get_cengine()->GetShaderGraphManager();
 	auto *graph = GetGraph();
 	if(graph) {
 		auto *shaderMat = find_shader_material(*graph);

@@ -8,9 +8,11 @@ module;
 #include <pragma/lua/classes/lmodelmesh.h>
 #include <buffers/prosper_buffer.hpp>
 
-module pragma.client.scripting.lua.classes.model_mesh;
+module pragma.client;
 
-import pragma.client.model;
+
+import :scripting.lua.classes.model_mesh;
+import :model;
 
 void Lua::ModelMesh::Client::Create(lua_State *l) { Lua::Push<std::shared_ptr<::ModelMesh>>(l, std::make_shared<::CModelMesh>()); }
 void Lua::ModelSubMesh::Client::Create(lua_State *l) { Lua::Push<std::shared_ptr<::ModelSubMesh>>(l, std::make_shared<::CModelSubMesh>()); }

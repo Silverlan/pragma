@@ -22,21 +22,20 @@ module;
 #include <prosper_window.hpp>
 #include <fsys/ifile.hpp>
 
-module pragma.client.scripting.lua.libraries.engine;
+module pragma.client;
 
+
+import :scripting.lua.libraries.engine;
 import util_zip;
-import pragma.client.client_state;
-import pragma.client.engine;
-import pragma.client.entities.components.particle_system;
-import pragma.client.game;
+import :client_state;
+import :engine;
+import :entities.components.particle_system;
+import :game;
 
-extern CEngine *c_engine;
-extern ClientState *client;
-extern CGame *c_game;
 
 std::shared_ptr<const FontInfo> Lua::engine::create_font(lua_State *l, const std::string &identifier, const std::string &fontSetName, FontSetFlag features, uint32_t size, bool reload)
 {
-	auto *fontSet = c_engine->FindFontSet(fontSetName);
+	auto *fontSet = pragma::get_cengine()->FindFontSet(fontSetName);
 	if(!fontSet)
 		return nullptr;
 	auto *fontFileData = fontSet->FindFontFileCandidate(features);
@@ -62,7 +61,7 @@ void Lua::engine::register_library(lua_State *l)
 	  luabind::def(
 	    "get_font_sets", +[]() -> std::vector<std::string> {
 		    std::vector<std::string> fontSets;
-		    auto &fontSetMap = c_engine->GetFontSets();
+		    auto &fontSetMap = pragma::get_cengine()->GetFontSets();
 		    fontSets.reserve(fontSetMap.size());
 		    for(auto &[name, fontSet] : fontSetMap)
 			    fontSets.push_back(name);
@@ -136,19 +135,19 @@ std::pair<size_t, size_t> Lua::engine::get_truncated_text_length(lua_State *l, c
 	return {numChars, offset};
 }
 
-void Lua::engine::precache_material(lua_State *l, const std::string &mat) { client->PrecacheMaterial(mat.c_str()); }
+void Lua::engine::precache_material(lua_State *l, const std::string &mat) { pragma::get_client_state()->PrecacheMaterial(mat.c_str()); }
 
-void Lua::engine::precache_model(lua_State *l, const std::string &mdl) { c_game->PrecacheModel(mdl); }
+void Lua::engine::precache_model(lua_State *l, const std::string &mdl) { pragma::get_cgame()->PrecacheModel(mdl); }
 
-std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua_State *l, const std::string &name, util::AssetLoadFlags loadFlags)
+std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua_State *l, const std::string &name, ::util::AssetLoadFlags loadFlags)
 {
-	auto &texManager = static_cast<msys::CMaterialManager &>(client->GetMaterialManager()).GetTextureManager();
+	auto &texManager = static_cast<msys::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager()).GetTextureManager();
 	auto tex = texManager.LoadAsset(name, loadFlags);
-	if(tex == nullptr || std::static_pointer_cast<Texture>(tex)->HasValidVkTexture() == false)
+	if(tex == nullptr || std::static_pointer_cast<::Texture>(tex)->HasValidVkTexture() == false)
 		return nullptr;
-	return std::static_pointer_cast<Texture>(tex)->GetVkTexture();
+	return std::static_pointer_cast<::Texture>(tex)->GetVkTexture();
 }
-std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua_State *l, const std::string &name) { return load_texture(l, name, util::AssetLoadFlags::None); }
+std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua_State *l, const std::string &name) { return load_texture(l, name, ::util::AssetLoadFlags::None); }
 
 static std::optional<std::string> get_extension(const LFile &file)
 {
@@ -161,7 +160,7 @@ static std::optional<std::string> get_extension(const LFile &file)
 	std::string ext;
 	return ufile::get_extension(*path, &ext) ? ext : std::optional<std::string> {};
 }
-std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua_State *l, const LFile &file, const std::string &cacheName, util::AssetLoadFlags loadFlags)
+std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua_State *l, const LFile &file, const std::string &cacheName, ::util::AssetLoadFlags loadFlags)
 {
 	auto *lf = Lua::CheckFile(l, 1);
 	if(lf == nullptr)
@@ -169,15 +168,15 @@ std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua_State *l, const 
 	auto ext = get_extension(file);
 	if(!ext.has_value())
 		return nullptr;
-	auto &texManager = static_cast<msys::CMaterialManager &>(client->GetMaterialManager()).GetTextureManager();
+	auto &texManager = static_cast<msys::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager()).GetTextureManager();
 	auto f = std::make_unique<ufile::FileWrapper>(const_cast<LFile &>(file).GetHandle());
-	auto tex = texManager.LoadAsset("", std::move(f), *ext, std::make_unique<msys::TextureLoadInfo>(loadFlags | util::AssetLoadFlags::DontCache));
-	if(tex == nullptr || std::static_pointer_cast<Texture>(tex)->HasValidVkTexture() == false)
+	auto tex = texManager.LoadAsset("", std::move(f), *ext, std::make_unique<msys::TextureLoadInfo>(loadFlags | ::util::AssetLoadFlags::DontCache));
+	if(tex == nullptr || std::static_pointer_cast<::Texture>(tex)->HasValidVkTexture() == false)
 		return nullptr;
-	return std::static_pointer_cast<Texture>(tex)->GetVkTexture();
+	return std::static_pointer_cast<::Texture>(tex)->GetVkTexture();
 }
-std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua_State *l, const LFile &file, const std::string &cacheName) { return load_texture(l, file, cacheName, util::AssetLoadFlags::None); }
-std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua_State *l, const LFile &file, util::AssetLoadFlags loadFlags)
+std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua_State *l, const LFile &file, const std::string &cacheName) { return load_texture(l, file, cacheName, ::util::AssetLoadFlags::None); }
+std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua_State *l, const LFile &file, ::util::AssetLoadFlags loadFlags)
 {
 	auto *lf = Lua::CheckFile(l, 1);
 	if(lf == nullptr)
@@ -185,39 +184,39 @@ std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua_State *l, const 
 	auto ext = get_extension(file);
 	if(!ext.has_value())
 		return nullptr;
-	auto &texManager = static_cast<msys::CMaterialManager &>(client->GetMaterialManager()).GetTextureManager();
+	auto &texManager = static_cast<msys::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager()).GetTextureManager();
 	auto f = std::make_unique<ufile::FileWrapper>(const_cast<LFile &>(file).GetHandle());
 	auto tex = texManager.LoadAsset("", std::move(f), *ext, std::make_unique<msys::TextureLoadInfo>(loadFlags));
-	if(tex == nullptr || std::static_pointer_cast<Texture>(tex)->HasValidVkTexture() == false)
+	if(tex == nullptr || std::static_pointer_cast<::Texture>(tex)->HasValidVkTexture() == false)
 		return nullptr;
-	return std::static_pointer_cast<Texture>(tex)->GetVkTexture();
+	return std::static_pointer_cast<::Texture>(tex)->GetVkTexture();
 }
-std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua_State *l, const LFile &file) { return load_texture(l, file, util::AssetLoadFlags::None); }
+std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua_State *l, const LFile &file) { return load_texture(l, file, ::util::AssetLoadFlags::None); }
 
-Material *Lua::engine::load_material(lua_State *l, const std::string &mat, bool reload, bool loadInstantly) { return client->LoadMaterial(mat, nullptr, reload, loadInstantly); }
+Material *Lua::engine::load_material(lua_State *l, const std::string &mat, bool reload, bool loadInstantly) { return pragma::get_client_state()->LoadMaterial(mat, nullptr, reload, loadInstantly); }
 Material *Lua::engine::load_material(lua_State *l, const std::string &mat, bool reload) { return load_material(l, mat, reload, true); }
 Material *Lua::engine::load_material(lua_State *l, const std::string &mat) { return load_material(l, mat, false, true); }
 
-Material *Lua::asset_client::get_error_material() { return client->GetMaterialManager().GetErrorMaterial(); }
+Material *Lua::asset_client::get_error_material() { return pragma::get_client_state()->GetMaterialManager().GetErrorMaterial(); }
 
 void Lua::asset_client::register_library(Lua::Interface &lua, luabind::module_ &modAsset)
 {
-	modAsset[luabind::def("create_material", static_cast<std::shared_ptr<Material> (*)(const std::string &, const std::string &)>(Lua::asset_client::create_material)),
-	  luabind::def("create_material", static_cast<std::shared_ptr<Material> (*)(const std::string &)>(Lua::asset_client::create_material)), luabind::def("create_material", static_cast<std::shared_ptr<Material> (*)(const udm::AssetData &)>(Lua::asset_client::create_material)),
-	  luabind::def("get_material", static_cast<Material *(*)(const std::string &)>(Lua::asset_client::get_material)), luabind::def("precache_model", static_cast<void (*)(lua_State *, const std::string &)>(Lua::engine::precache_model)),
+	modAsset[luabind::def("create_material", static_cast<std::shared_ptr<::Material> (*)(const std::string &, const std::string &)>(Lua::asset_client::create_material)),
+	  luabind::def("create_material", static_cast<std::shared_ptr<::Material> (*)(const std::string &)>(Lua::asset_client::create_material)), luabind::def("create_material", static_cast<std::shared_ptr<::Material> (*)(const udm::AssetData &)>(Lua::asset_client::create_material)),
+	  luabind::def("get_material", static_cast<::Material *(*)(const std::string &)>(Lua::asset_client::get_material)), luabind::def("precache_model", static_cast<void (*)(lua_State *, const std::string &)>(Lua::engine::precache_model)),
 	  luabind::def("precache_material", static_cast<void (*)(lua_State *, const std::string &)>(Lua::engine::precache_material)), luabind::def("get_error_material", Lua::asset_client::get_error_material)];
 }
 
-std::shared_ptr<Material> Lua::asset_client::create_material(const std::string &identifier, const std::string &shader) { return client->CreateMaterial(identifier, shader); }
-std::shared_ptr<Material> Lua::asset_client::create_material(const std::string &shader) { return client->CreateMaterial(shader); }
+std::shared_ptr<Material> Lua::asset_client::create_material(const std::string &identifier, const std::string &shader) { return pragma::get_client_state()->CreateMaterial(identifier, shader); }
+std::shared_ptr<Material> Lua::asset_client::create_material(const std::string &shader) { return pragma::get_client_state()->CreateMaterial(shader); }
 std::shared_ptr<Material> Lua::asset_client::create_material(const udm::AssetData &data)
 {
 	std::string err;
-	return client->GetMaterialManager().CreateMaterial(data, err);
+	return pragma::get_client_state()->GetMaterialManager().CreateMaterial(data, err);
 }
 Material *Lua::asset_client::get_material(const std::string &identifier)
 {
-	auto *asset = client->GetMaterialManager().FindCachedAsset(identifier);
+	auto *asset = pragma::get_client_state()->GetMaterialManager().FindCachedAsset(identifier);
 	return asset ? msys::CMaterialManager::GetAssetObject(*asset).get() : nullptr;
 }
 
@@ -554,14 +553,14 @@ int Lua::engine::save_particle_system(lua_State *l)
 	Lua::PushBool(l, pragma::asset::save_particle_system(name, particles, rootPath));
 	return 1;
 }
-std::shared_ptr<prosper::RenderTarget> Lua::engine::get_staging_render_target() { return c_engine->GetRenderContext().GetWindow().GetStagingRenderTarget(); }
-void Lua::engine::set_fixed_frame_delta_time_interpretation(uint16_t fps) { c_engine->SetFixedFrameDeltaTimeInterpretationByFPS(fps); }
-void Lua::engine::clear_fixed_frame_delta_time_interpretation() { c_engine->SetFixedFrameDeltaTimeInterpretation({}); }
-void Lua::engine::set_tick_delta_time_tied_to_frame_rate(bool tieToFrameRate) { c_engine->SetTickDeltaTimeTiedToFrameRate(tieToFrameRate); }
+std::shared_ptr<prosper::RenderTarget> Lua::engine::get_staging_render_target() { return pragma::get_cengine()->GetRenderContext().GetWindow().GetStagingRenderTarget(); }
+void Lua::engine::set_fixed_frame_delta_time_interpretation(uint16_t fps) { pragma::get_cengine()->SetFixedFrameDeltaTimeInterpretationByFPS(fps); }
+void Lua::engine::clear_fixed_frame_delta_time_interpretation() { pragma::get_cengine()->SetFixedFrameDeltaTimeInterpretation({}); }
+void Lua::engine::set_tick_delta_time_tied_to_frame_rate(bool tieToFrameRate) { pragma::get_cengine()->SetTickDeltaTimeTiedToFrameRate(tieToFrameRate); }
 Vector2i Lua::engine::get_window_resolution()
 {
-	auto &window = c_engine->GetRenderContext().GetWindow();
+	auto &window = pragma::get_cengine()->GetRenderContext().GetWindow();
 	return window.IsValid() ? window->GetSize() : Vector2i {};
 }
-Vector2i Lua::engine::get_render_resolution() { return c_engine->GetRenderResolution(); }
-uint32_t Lua::engine::get_current_frame_index() { return c_engine->GetRenderContext().GetLastFrameId(); }
+Vector2i Lua::engine::get_render_resolution() { return pragma::get_cengine()->GetRenderResolution(); }
+uint32_t Lua::engine::get_current_frame_index() { return pragma::get_cengine()->GetRenderContext().GetLastFrameId(); }

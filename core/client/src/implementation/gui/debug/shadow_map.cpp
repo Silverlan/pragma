@@ -8,18 +8,15 @@ module;
 #include <image/prosper_render_target.hpp>
 #include <sharedutils/util_string.h>
 
-module pragma.client.gui;
+module pragma.client;
 
-import :debug_shadow_map;
+import :gui.debug_shadow_map;
 
-import pragma.client.client_state;
-import pragma.client.engine;
-import pragma.client.entities.components;
-import pragma.client.game;
+import :client_state;
+import :engine;
+import :entities.components;
+import :game;
 
-extern CEngine *c_engine;
-extern ClientState *client;
-extern CGame *c_game;
 
 LINK_WGUI_TO_CLASS(WIDebugShadowMap, WIDebugShadowMap);
 
@@ -35,7 +32,7 @@ void WIDebugShadowMap::SetContrastFactor(float contrastFactor)
 		el->SetContrastFactor(contrastFactor);
 	}
 }
-void WIDebugShadowMap::SetShadowMapType(pragma::CLightComponent::ShadowMapType type) { m_shadowMapType = type; }
+void WIDebugShadowMap::SetShadowMapType(pragma::rendering::ShadowMapType type) { m_shadowMapType = type; }
 float WIDebugShadowMap::GetContrastFactor() const { return m_contrastFactor; }
 
 void WIDebugShadowMap::SetShadowMapSize(uint32_t w, uint32_t h) { m_shadowMapSize = {w, h}; }
@@ -50,7 +47,7 @@ void WIDebugShadowMap::DoUpdate()
 			continue;
 		hEl->Remove();
 	}
-	if(c_game == nullptr || m_lightHandle.expired())
+	if(pragma::get_cgame() == nullptr || m_lightHandle.expired())
 		return;
 	auto &lightSource = *m_lightHandle;
 	auto type = pragma::LightType::Undefined;

@@ -7,7 +7,9 @@ module;
 #include <pragma/entities/components/base_physics_component.hpp>
 #include <pragma/networking/nwm_velocity_correction.hpp>
 
-export module pragma.client.entities.components.physics;
+export module pragma.client:entities.components.physics;
+
+import :entities.components.entity;
 
 export namespace pragma {
 	class DLLCLIENT CPhysicsComponent final : public BasePhysicsComponent, public CBaseNetComponent, public nwm::VelocityCorrection {

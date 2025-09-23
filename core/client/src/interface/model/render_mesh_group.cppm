@@ -5,7 +5,7 @@ module;
 
 #include "pragma/clientdefinitions.h"
 
-export module pragma.client.model:render_mesh_group;
+export module pragma.client:model.render_mesh_group;
 
 export namespace pragma {
 	using RenderMeshIndex = uint32_t;

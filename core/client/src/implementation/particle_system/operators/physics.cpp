@@ -11,16 +11,15 @@ module;
 #include <pragma/physics/collision_object.hpp>
 #include <pragma/model/model.h>
 
-module pragma.client.particle_system;
+module pragma.client;
 
-import :operator_physics;
+import :particle_system.operator_physics;
 
-import pragma.client.game;
+import :game;
 
-extern CGame *c_game;
 extern DLLCLIENT pragma::physics::IEnvironment *c_physEnv;
 
-void CParticleOperatorPhysics::Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void CParticleOperatorPhysics::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleOperator::Initialize(pSystem, values);
 	for(auto it = values.begin(); it != values.end(); it++) {
@@ -138,7 +137,7 @@ void CParticleOperatorPhysics::PostSimulate(CParticle &particle, double)
 
 //////////////////////////////
 
-void CParticleOperatorPhysicsSphere::Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void CParticleOperatorPhysicsSphere::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleOperatorPhysics::Initialize(pSystem, values);
 	for(auto it = values.begin(); it != values.end(); it++) {
@@ -153,7 +152,7 @@ std::shared_ptr<pragma::physics::IShape> CParticleOperatorPhysicsSphere::CreateS
 
 //////////////////////////////
 
-void CParticleOperatorPhysicsBox::Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void CParticleOperatorPhysicsBox::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleOperatorPhysics::Initialize(pSystem, values);
 	for(auto it = values.begin(); it != values.end(); it++) {
@@ -168,7 +167,7 @@ std::shared_ptr<pragma::physics::IShape> CParticleOperatorPhysicsBox::CreateShap
 
 //////////////////////////////
 
-void CParticleOperatorPhysicsCylinder::Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void CParticleOperatorPhysicsCylinder::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleOperatorPhysics::Initialize(pSystem, values);
 	for(auto it = values.begin(); it != values.end(); it++) {
@@ -185,14 +184,14 @@ std::shared_ptr<pragma::physics::IShape> CParticleOperatorPhysicsCylinder::Creat
 
 //////////////////////////////
 
-void CParticleOperatorPhysicsModel::Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void CParticleOperatorPhysicsModel::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleOperatorPhysics::Initialize(pSystem, values);
 	for(auto &pair : values) {
 		auto key = pair.first;
 		ustring::to_lower(key);
 		if(key == "model") {
-			m_model = c_game->LoadModel(pair.second);
+			m_model = pragma::get_cgame()->LoadModel(pair.second);
 			break;
 		}
 	}

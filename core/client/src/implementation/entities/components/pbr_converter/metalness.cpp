@@ -28,17 +28,16 @@ module;
 #include <cmaterial_manager2.hpp>
 #include <cmaterial.h>
 
-module pragma.client.entities.components.util_pbr_converter;
+module pragma.client;
 
-import pragma.client.client_state;
-import pragma.client.engine;
-import pragma.client.game;
+
+import :entities.components.util_pbr_converter;
+import :client_state;
+import :engine;
+import :game;
 
 using namespace pragma;
 
-extern CEngine *c_engine;
-extern ClientState *client;
-extern CGame *c_game;
 
 void CPBRConverterComponent::UpdateMetalness(Model &mdl, CMaterial &mat)
 {
@@ -143,7 +142,7 @@ void CPBRConverterComponent::UpdateMetalness(Model &mdl, CMaterial &mat)
 		auto &surfMats = colMesh->GetSurfaceMaterials();
 		if(surfMatIdx == -1 && surfMats.empty() == false)
 			surfMatIdx = surfMats.front();
-		auto *surfMat = c_game->GetSurfaceMaterial(surfMatIdx);
+		auto *surfMat = pragma::get_cgame()->GetSurfaceMaterial(surfMatIdx);
 		if(surfMat == nullptr)
 			continue;
 		++numSurfMats;
@@ -192,12 +191,12 @@ void CPBRConverterComponent::UpdateMetalness(Model &mdl, CMaterial &mat)
 	if(accGlass > 0.5f)
 		ApplyMiscMaterialProperties(mat, *surfMatGlass, "glass");
 
-	auto resWatcherLock = c_engine->ScopeLockResourceWatchers();
+	auto resWatcherLock = pragma::get_cengine()->ScopeLockResourceWatchers();
 
 	mat.UpdateTextures();
 	std::string err;
 	if(mat.Save(err))
-		client->LoadMaterial(mat.GetName(), nullptr, true, true); // Reload material immediately
+		pragma::get_client_state()->LoadMaterial(mat.GetName(), nullptr, true, true); // Reload material immediately
 }
 
 void CPBRConverterComponent::UpdateMetalness(Model &mdl)

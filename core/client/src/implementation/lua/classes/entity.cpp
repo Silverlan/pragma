@@ -12,11 +12,12 @@ module;
 #include <pragma/networking/enums.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
-module pragma.client.scripting.lua.classes.entity;
+module pragma.client;
 
-import pragma.client.engine;
 
-extern CEngine *c_engine;
+import :scripting.lua.classes.entity;
+import :engine;
+
 
 void Lua::Entity::Client::register_class(luabind::class_<CBaseEntity, BaseEntity> &classDef)
 {

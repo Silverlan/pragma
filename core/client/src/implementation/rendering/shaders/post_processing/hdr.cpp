@@ -8,9 +8,10 @@ module;
 #include <shader/prosper_shader_copy_image.hpp>
 #include <shader/prosper_shader_t.hpp>
 
-module pragma.client.rendering.shaders;
+module pragma.client;
 
-import :hdr;
+
+import :rendering.shaders.hdr;
 
 using namespace pragma;
 

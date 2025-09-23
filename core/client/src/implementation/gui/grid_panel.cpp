@@ -6,13 +6,12 @@ module;
 #include "stdafx_client.h"
 #include "pragma/lua/converters/gui_element_converter.hpp"
 
-module pragma.client.gui;
+module pragma.client;
 
-import :grid_panel;
+import :gui.grid_panel;
 
-import pragma.client.client_state;
+import :client_state;
 
-extern ClientState *client;
 LINK_WGUI_TO_CLASS(WIGridPanel, WIGridPanel);
 
 WIGridPanel::WIGridPanel() : WITable(), m_resizeMode(ResizeMode::FitToChildren), m_numColumns(0) {}

@@ -9,8 +9,10 @@ module;
 #include <pragma/lua/sh_lua_component.hpp>
 #include <pragma/lua/handle_holder.hpp>
 
-module pragma.client.entities.components.lua;
+module pragma.client;
 
+
+import :entities.components.lua;
 using namespace pragma;
 
 CLuaBaseEntityComponent::CLuaBaseEntityComponent(BaseEntity &ent) : BaseLuaBaseEntityComponent(ent), CBaseSnapshotComponent() {}

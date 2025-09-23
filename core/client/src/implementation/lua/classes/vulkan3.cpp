@@ -7,7 +7,6 @@ module;
 #include <pragma/lua/custom_constructor.hpp>
 #include <luabind/class.hpp>
 #include "pragma/lua/policies/shared_from_this_policy.hpp"
-#include "pragma/lua/converters/shader_converter_t.hpp"
 #include <pragma/lua/converters/vector_converter_t.hpp>
 #include <pragma/lua/converters/optional_converter_t.hpp>
 #include <prosper_framebuffer.hpp>
@@ -30,11 +29,11 @@ module;
 #include <luainterface.hpp>
 #include <sharedutils/util.h>
 
-module pragma.client.scripting.lua.classes.vulkan;
+module pragma.client;
 
-import pragma.client.engine;
+import :scripting.lua.classes.vulkan;
+import :engine;
 
-extern CEngine *c_engine;
 
 bool Lua::Vulkan::VKFramebuffer::IsValid(lua_State *l, Framebuffer &hFramebuffer) { return true; }
 #if 0
@@ -286,7 +285,7 @@ bool Lua::Vulkan::VKCommandBuffer::RecordDrawGradient(lua_State *l, CommandBuffe
 		return false;
 	auto nodes = get_gradient_nodes(l, lnodes);
 	auto primCmd = std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(hCommandBuffer.shared_from_this());
-	return pragma::record_draw_gradient(c_engine->GetRenderContext(), primCmd, rt, dir, nodes);
+	return pragma::record_draw_gradient(pragma::get_cengine()->GetRenderContext(), primCmd, rt, dir, nodes);
 }
 bool Lua::Vulkan::VKCommandBuffer::StartRecording(lua_State *l, CommandBuffer &hCommandBuffer, bool oneTimeSubmit, bool simultaneousUseAllowed)
 {

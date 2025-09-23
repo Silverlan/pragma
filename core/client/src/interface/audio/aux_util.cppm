@@ -10,7 +10,7 @@ module;
 #include <string>
 #include <memory>
 
-export module pragma.client.audio:aux_util;
+export module pragma.client:audio.aux_util;
 
 export namespace al {
 	DLLCLIENT std::shared_ptr<al::IEffect> create_aux_effect(const std::string &type, udm::LinkedPropertyWrapper &prop);

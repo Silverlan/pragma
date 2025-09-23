@@ -12,11 +12,12 @@ module;
 #include <alsoundsystem.hpp>
 #include <alsound_coordinate_system.hpp>
 
-module pragma.client.engine;
+module pragma.client;
 
-import pragma.client.audio;
 
-extern CEngine *c_engine;
+import :engine;
+import :audio;
+
 
 const al::ISoundSystem *CEngine::GetSoundSystem() const { return const_cast<CEngine *>(this)->GetSoundSystem(); }
 al::ISoundSystem *CEngine::GetSoundSystem() { return m_soundSystem.get(); }
@@ -72,7 +73,7 @@ al::ISoundSystem *CEngine::InitializeSoundEngine()
 	if(m_soundSystem == nullptr)
 		throw std::runtime_error {"Unable to load audio implementation library: " + err + "!"};
 	m_soundSystem->SetSoundSourceFactory([](const al::PSoundChannel &channel) -> al::PSoundSource {
-		return std::shared_ptr<CALSound> {new CALSound {c_engine->GetClientState(), channel}, [](CALSound *snd) {
+		return std::shared_ptr<CALSound> {new CALSound {pragma::get_cengine()->GetClientState(), channel}, [](CALSound *snd) {
 			                                  snd->OnRelease();
 			                                  delete snd;
 		                                  }};

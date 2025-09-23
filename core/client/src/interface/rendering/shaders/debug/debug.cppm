@@ -3,8 +3,11 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 
-export module pragma.client.rendering.shaders:debug;
+export module pragma.client:rendering.shaders.debug;
+
+import :rendering.shaders.scene;
 
 export namespace pragma {
 	class DLLCLIENT ShaderDebug : public ShaderScene {

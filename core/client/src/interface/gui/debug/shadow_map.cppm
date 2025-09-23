@@ -3,10 +3,13 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include "wgui/wibase.h"
 #include <sharedutils/util_shared_handle.hpp>
 
-export module pragma.client.gui:debug_shadow_map;
+export module pragma.client:gui.debug_shadow_map;
+
+import :entities.components.lights.light;
 
 export {
 	class DLLCLIENT WIDebugShadowMap : public WIBase {
@@ -19,13 +22,13 @@ export {
 		void SetContrastFactor(float contrastFactor);
 		float GetContrastFactor() const;
 
-		void SetShadowMapType(pragma::CLightComponent::ShadowMapType type);
+		void SetShadowMapType(pragma::rendering::ShadowMapType type);
 	private:
 		virtual void DoUpdate() override;
 		std::vector<WIHandle> m_shadowMapImages = {};
 		util::TWeakSharedHandle<pragma::CLightComponent> m_lightHandle = {};
 		Vector2i m_shadowMapSize = {256, 256};
 		float m_contrastFactor = 1.f;
-		pragma::CLightComponent::ShadowMapType m_shadowMapType = pragma::CLightComponent::ShadowMapType::Static;
+		pragma::rendering::ShadowMapType m_shadowMapType = pragma::rendering::ShadowMapType::Static;
 	};
 };

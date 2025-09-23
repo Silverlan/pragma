@@ -5,7 +5,9 @@ module;
 
 #include "pragma/clientdefinitions.h"
 
-export module pragma.client.rendering.shaders:world_test;
+export module pragma.client:rendering.shaders.world_test;
+
+import :rendering.shaders.textured;
 
 export namespace pragma {
 	class DLLCLIENT ShaderTest : public ShaderGameWorldLightingPass {

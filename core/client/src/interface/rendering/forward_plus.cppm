@@ -10,7 +10,9 @@ module;
 #include <cinttypes>
 #include <memory>
 
-export module pragma.client.rendering.forward_plus;
+export module pragma.client:rendering.forward_plus;
+
+import :entities.components.scene;
 
 #pragma warning(push)
 #pragma warning(disable : 4251)

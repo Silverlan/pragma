@@ -17,16 +17,14 @@ module;
 #include <pragma/entities/components/base_character_component.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
 
-module pragma.client.ai;
+module pragma.client;
 
-import pragma.client.client_state;
-import pragma.client.debug;
-import pragma.client.game;
 
-import :nav_system;
+import :ai;
+import :client_state;
+import :debug;
+import :game;
 
-extern ClientState *client;
-extern CGame *c_game;
 
 std::shared_ptr<pragma::nav::CMesh> pragma::nav::CMesh::Create(const std::shared_ptr<RcNavMesh> &rcMesh, const Config &config) { return Mesh::Create<CMesh>(rcMesh, config); }
 std::shared_ptr<pragma::nav::CMesh> pragma::nav::CMesh::Load(Game &game, const std::string &fname) { return Mesh::Load<CMesh>(game, fname); }
@@ -88,7 +86,7 @@ void pragma::nav::CMesh::ShowNavMeshes(bool b)
 		m_dbgNavMesh = nullptr;
 		return;
 	}
-	if(c_game == nullptr)
+	if(get_cgame() == nullptr)
 		return;
 	auto &navMesh = GetRcNavMesh();
 	if(navMesh == nullptr)
@@ -218,9 +216,9 @@ void pragma::nav::CMesh::Clear()
 
 static auto cvShowNavMeshes = GetClientConVar("debug_nav_show_meshes");
 REGISTER_CONVAR_CALLBACK_CL(debug_nav_show_meshes, [](NetworkState *, const ConVar &, bool, bool val) {
-	if(c_game == NULL || c_game->LoadNavMesh() == false)
+	if(pragma::get_cgame() == NULL || pragma::get_cgame()->LoadNavMesh() == false)
 		return;
-	auto &navMesh = c_game->GetNavMesh();
+	auto &navMesh = pragma::get_cgame()->GetNavMesh();
 	if(navMesh == nullptr)
 		return;
 	static_cast<pragma::nav::CMesh &>(*navMesh).ShowNavMeshes(val);
@@ -231,9 +229,9 @@ REGISTER_CONVAR_CALLBACK_CL(debug_nav_show_meshes, [](NetworkState *, const ConV
 void CMD_debug_nav_path_start(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &)
 {
 	CHECK_CHEATS("debug_nav_path_start", state, );
-	if(c_game == nullptr || c_game->LoadNavMesh() == false || pl == nullptr)
+	if(pragma::get_cgame() == nullptr || pragma::get_cgame()->LoadNavMesh() == false || pl == nullptr)
 		return;
-	auto &navMesh = c_game->GetNavMesh();
+	auto &navMesh = pragma::get_cgame()->GetNavMesh();
 	if(navMesh == nullptr)
 		return;
 	auto &ent = pl->GetEntity();
@@ -249,7 +247,7 @@ void CMD_debug_nav_path_start(NetworkState *state, pragma::BasePlayerComponent *
 	data.SetFlags(RayCastFlags::Default | RayCastFlags::InvertFilter);
 	data.SetSource(origin);
 	data.SetTarget(origin + dir * 65'536.f);
-	auto r = c_game->RayCast(data);
+	auto r = pragma::get_cgame()->RayCast(data);
 	if(r.hitType == RayCastHitType::None)
 		return;
 	static_cast<pragma::nav::CMesh &>(*navMesh).SetDebugPathStart(r.position);
@@ -258,9 +256,9 @@ void CMD_debug_nav_path_start(NetworkState *state, pragma::BasePlayerComponent *
 void CMD_debug_nav_path_end(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &)
 {
 	CHECK_CHEATS("debug_nav_path_end", state, );
-	if(c_game == nullptr || c_game->LoadNavMesh() == false || pl == nullptr)
+	if(pragma::get_cgame() == nullptr || pragma::get_cgame()->LoadNavMesh() == false || pl == nullptr)
 		return;
-	auto &navMesh = c_game->GetNavMesh();
+	auto &navMesh = pragma::get_cgame()->GetNavMesh();
 	if(navMesh == nullptr)
 		return;
 	auto &ent = pl->GetEntity();
@@ -276,7 +274,7 @@ void CMD_debug_nav_path_end(NetworkState *state, pragma::BasePlayerComponent *pl
 	data.SetFlags(RayCastFlags::Default | RayCastFlags::InvertFilter);
 	data.SetSource(origin);
 	data.SetTarget(origin + dir * 65'536.f);
-	auto r = c_game->RayCast(data);
+	auto r = pragma::get_cgame()->RayCast(data);
 	if(r.hitType == RayCastHitType::None)
 		return;
 	static_cast<pragma::nav::CMesh &>(*navMesh).SetDebugPathEnd(r.position);

@@ -6,17 +6,17 @@ module;
 #include "stdafx_client.h"
 #include <wgui/wibase.h>
 
-module pragma.client.debug.game_ui;
+module pragma.client;
 
-import pragma.client.client_state;
-import pragma.client.game;
 
-extern ClientState *client;
-extern CGame *c_game;
+import :debug.game_ui;
+import :client_state;
+import :game;
+
 
 DebugGameGUI::DebugGameGUI(const std::function<WIHandle(void)> &guiFactory) : m_guiFactory(guiFactory)
 {
-	m_initCallback = client->AddCallback("OnGameStart", FunctionCallback<void, CGame *>::Create([this](CGame *) { Initialize(); }));
+	m_initCallback = pragma::get_client_state()->AddCallback("OnGameStart", FunctionCallback<void, CGame *>::Create([this](CGame *) { Initialize(); }));
 	Initialize();
 }
 
@@ -47,7 +47,7 @@ WIBase *DebugGameGUI::GetGUIElement() { return m_guiElement.get(); }
 
 void DebugGameGUI::Initialize()
 {
-	if(c_game == nullptr)
+	if(pragma::get_cgame() == nullptr)
 		return;
 	if(m_guiFactory == nullptr)
 		return;
@@ -67,5 +67,5 @@ void DebugGameGUI::AddCallback(const std::string &identifier, const CallbackHand
 	if(it != m_callbacks.end() && it->second.IsValid())
 		it->second.Remove();
 	m_callbacks[identifier] = hCallback;
-	c_game->AddCallback(identifier, hCallback);
+	pragma::get_cgame()->AddCallback(identifier, hCallback);
 }

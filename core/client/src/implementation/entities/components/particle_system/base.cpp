@@ -25,12 +25,12 @@ module;
 #include <datasystem_vector.h>
 #include <udm.hpp>
 
-module pragma.client.entities.components.particle_system;
+module pragma.client;
 
-import pragma.client.client_state;
-import pragma.client.engine;
-import pragma.client.entities.components;
-import pragma.client.game;
+import :entities.components.particle_system;
+import :client_state;
+import :engine;
+import :game;
 
 using namespace pragma;
 
@@ -40,9 +40,6 @@ using namespace pragma;
 decltype(ecs::CParticleSystemComponent::s_particleData) ecs::CParticleSystemComponent::s_particleData;
 decltype(ecs::CParticleSystemComponent::s_precached) ecs::CParticleSystemComponent::s_precached;
 
-extern CGame *c_game;
-extern ClientState *client;
-extern CEngine *c_engine;
 
 struct SpriteSheetTextureAnimationFrame {
 	Vector2 uvStart;
@@ -56,7 +53,7 @@ ecs::CParticleSystemComponent::Node::Node(const Vector3 &pos) : position(pos), b
 
 ecs::CParticleSystemComponent *ecs::CParticleSystemComponent::Create(const std::string &fname, ecs::CParticleSystemComponent *parent, bool bRecordKeyValues, bool bAutoSpawn)
 {
-	auto *entChild = c_game->CreateEntity<CEnvParticleSystem>();
+	auto *entChild = pragma::get_cgame()->CreateEntity<CEnvParticleSystem>();
 	if(entChild == nullptr)
 		return nullptr;
 	auto pParticleSysComponent = entChild->GetComponent<ecs::CParticleSystemComponent>();
@@ -70,7 +67,7 @@ ecs::CParticleSystemComponent *ecs::CParticleSystemComponent::Create(const std::
 }
 ecs::CParticleSystemComponent *ecs::CParticleSystemComponent::Create(const std::unordered_map<std::string, std::string> &values, ecs::CParticleSystemComponent *parent, bool bRecordKeyValues, bool bAutoSpawn)
 {
-	auto *entChild = c_game->CreateEntity<CEnvParticleSystem>();
+	auto *entChild = pragma::get_cgame()->CreateEntity<CEnvParticleSystem>();
 	if(entChild == nullptr)
 		return nullptr;
 	auto pParticleSysComponent = entChild->GetComponent<ecs::CParticleSystemComponent>();
@@ -84,7 +81,7 @@ ecs::CParticleSystemComponent *ecs::CParticleSystemComponent::Create(const std::
 }
 ecs::CParticleSystemComponent *ecs::CParticleSystemComponent::Create(ecs::CParticleSystemComponent *parent, bool bAutoSpawn)
 {
-	auto *entChild = c_game->CreateEntity<CEnvParticleSystem>();
+	auto *entChild = pragma::get_cgame()->CreateEntity<CEnvParticleSystem>();
 	if(entChild == nullptr)
 		return nullptr;
 	auto pParticleSysComponent = entChild->GetComponent<ecs::CParticleSystemComponent>();
@@ -286,7 +283,7 @@ bool ecs::CParticleSystemComponent::PrecacheLegacy(std::string fname, bool bRelo
 				auto val = f->ReadString();
 				settings.insert(std::remove_reference<decltype(settings)>::type::value_type(key, val));
 				if(key == "material")
-					client->LoadMaterial(val.c_str());
+					pragma::get_client_state()->LoadMaterial(val.c_str());
 			}
 			std::array<std::vector<CParticleModifierData> *, 3> params = {&data->initializers, &data->operators, &data->renderers};
 			for(int32_t i = 0; i < 3; ++i) {
@@ -426,7 +423,7 @@ const auto PARTICLE_ANIM_BUFFER_INSTANCE_SIZE = sizeof(Vector2) * 2;
 	else if(ustring::compare<std::string>(key, "random_start_frame"))
 		umath::set_flag(m_flags, Flags::RandomStartFrame, ::util::to_boolean(value));
 	else if(ustring::compare<std::string>(key, "material"))
-		SetMaterial(client->LoadMaterial(value));
+		SetMaterial(pragma::get_client_state()->LoadMaterial(value));
 	else if(ustring::compare<std::string>(key, "radius"))
 		SetRadius(::util::to_float(value));
 	else if(ustring::compare<std::string>(key, "extent"))
@@ -679,7 +676,7 @@ void ecs::CParticleSystemComponent::InitializeBuffers()
 		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 		createInfo.size = instanceSize * maxInstanceCount;
 		createInfo.usageFlags = prosper::BufferUsageFlags::VertexBufferBit | prosper::BufferUsageFlags::TransferDstBit | prosper::BufferUsageFlags::StorageBufferBit;
-		s_particleBuffer = c_engine->GetRenderContext().CreateDynamicResizableBuffer(createInfo, instanceSize * maxInstanceCount, 0.05f);
+		s_particleBuffer = pragma::get_cengine()->GetRenderContext().CreateDynamicResizableBuffer(createInfo, instanceSize * maxInstanceCount, 0.05f);
 		s_particleBuffer->SetDebugName("particle_instance_buf");
 	}
 	if(s_animStartBuffer == nullptr) {
@@ -690,7 +687,7 @@ void ecs::CParticleSystemComponent::InitializeBuffers()
 		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 		createInfo.size = instanceSize * maxInstanceCount;
 		createInfo.usageFlags = prosper::BufferUsageFlags::VertexBufferBit | prosper::BufferUsageFlags::TransferDstBit;
-		s_animStartBuffer = c_engine->GetRenderContext().CreateDynamicResizableBuffer(createInfo, instanceSize * maxInstanceCount, 0.01f);
+		s_animStartBuffer = pragma::get_cengine()->GetRenderContext().CreateDynamicResizableBuffer(createInfo, instanceSize * maxInstanceCount, 0.01f);
 		s_animStartBuffer->SetDebugName("particle_anim_start_buf");
 	}
 	if(s_animBuffer == nullptr) {
@@ -701,7 +698,7 @@ void ecs::CParticleSystemComponent::InitializeBuffers()
 		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::DeviceLocal;
 		createInfo.size = instanceSize * maxInstanceCount;
 		createInfo.usageFlags = prosper::BufferUsageFlags::StorageBufferBit | prosper::BufferUsageFlags::TransferDstBit;
-		s_animBuffer = c_engine->GetRenderContext().CreateDynamicResizableBuffer(createInfo, instanceSize * maxInstanceCount, 0.01f);
+		s_animBuffer = pragma::get_cengine()->GetRenderContext().CreateDynamicResizableBuffer(createInfo, instanceSize * maxInstanceCount, 0.01f);
 		s_animBuffer->SetDebugName("particle_anim_data_buf");
 	}
 }
@@ -782,7 +779,7 @@ float ecs::CParticleSystemComponent::GetRadius() const { return m_radius; }
 float ecs::CParticleSystemComponent::GetExtent() const { return m_extent; }
 
 void ecs::CParticleSystemComponent::SetMaterial(Material *mat) { m_material = mat ? mat->GetHandle() : msys::MaterialHandle {}; }
-void ecs::CParticleSystemComponent::SetMaterial(const char *mat) { SetMaterial(client->LoadMaterial(mat)); }
+void ecs::CParticleSystemComponent::SetMaterial(const char *mat) { SetMaterial(pragma::get_client_state()->LoadMaterial(mat)); }
 Material *ecs::CParticleSystemComponent::GetMaterial() const { return m_material.get(); }
 
 CParticleInitializer *ecs::CParticleSystemComponent::AddInitializer(std::string identifier, const std::unordered_map<std::string, std::string> &values)
@@ -794,7 +791,7 @@ CParticleInitializer *ecs::CParticleSystemComponent::AddInitializer(std::string 
 		Con::cwar << "Attempted to create unknown particle initializer '" << identifier << "'! Ignoring..." << Con::endl;
 		return nullptr;
 	}
-	auto initializer = factory(*CXXM_RCAST(pragma::CParticleSystemComponent*, this), values);
+	auto initializer = factory(*CXXM_RCAST(pragma::ecs::CParticleSystemComponent*, this), values);
 	if(initializer == nullptr)
 		return nullptr;
 	if(IsRecordingKeyValues())
@@ -811,7 +808,7 @@ CParticleOperator *ecs::CParticleSystemComponent::AddOperator(std::string identi
 		Con::cwar << "Attempted to create unknown particle operator '" << identifier << "'! Ignoring..." << Con::endl;
 		return nullptr;
 	}
-	auto op = factory(*CXXM_RCAST(pragma::CParticleSystemComponent*, this), values);
+	auto op = factory(*CXXM_RCAST(pragma::ecs::CParticleSystemComponent*, this), values);
 	if(op == nullptr)
 		return nullptr;
 	if(IsRecordingKeyValues())
@@ -828,7 +825,7 @@ CParticleRenderer *ecs::CParticleSystemComponent::AddRenderer(std::string identi
 		Con::cwar << "Attempted to create unknown particle renderer '" << identifier << "'! Ignoring..." << Con::endl;
 		return nullptr;
 	}
-	auto op = factory(*CXXM_RCAST(pragma::CParticleSystemComponent*, this), values);
+	auto op = factory(*CXXM_RCAST(pragma::ecs::CParticleSystemComponent*, this), values);
 	if(op == nullptr)
 		return nullptr;
 	if(IsRecordingKeyValues())
@@ -1003,7 +1000,7 @@ void ecs::CParticleSystemComponent::Start()
 	m_state = State::Active;
 	m_tLastEmission = 0.0;
 	m_tLifeTime = 0.0;
-	m_tStartTime = c_game->RealTime();
+	m_tStartTime = pragma::get_cgame()->RealTime();
 	m_currentParticleLimit = m_particleLimit;
 
 	// Children have to be started before operators are initialized,
@@ -1101,7 +1098,7 @@ void ecs::CParticleSystemComponent::Start()
 					}
 					m_bufSpriteSheet = s_animBuffer->AllocateBuffer(frames.size() * sizeof(frames.front()), frames.data());
 
-					m_descSetGroupAnimation = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderParticle2DBase::DESCRIPTOR_SET_ANIMATION);
+					m_descSetGroupAnimation = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderParticle2DBase::DESCRIPTOR_SET_ANIMATION);
 					m_descSetGroupAnimation->GetDescriptorSet()->SetBindingUniformBuffer(*m_bufSpriteSheet, 0u);
 				}
 			}
@@ -1326,11 +1323,11 @@ void ecs::CParticleSystemComponent::ResumeEmission()
 }
 void ecs::CParticleSystemComponent::SetAlwaysSimulate(bool b) { umath::set_flag(m_flags, Flags::AlwaysSimulate, b); }
 
-void ecs::CParticleSystemComponent::RecordRender(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, ParticleRenderFlags renderFlags)
+void ecs::CParticleSystemComponent::RecordRender(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, ecs::ParticleRenderFlags renderFlags)
 {
-	if(umath::is_flag_set(renderFlags, ParticleRenderFlags::Bloom) && IsBloomEnabled() == false)
+	if(umath::is_flag_set(renderFlags, ecs::ParticleRenderFlags::Bloom) && IsBloomEnabled() == false)
 		return;
-	m_tLastEmission = c_game->RealTime();
+	m_tLastEmission = pragma::get_cgame()->RealTime();
 	if(IsActiveOrPaused() == false) {
 		if(umath::is_flag_set(m_flags, Flags::Dying))
 			Stop();
@@ -1351,7 +1348,7 @@ void ecs::CParticleSystemComponent::RecordRender(prosper::ICommandBuffer &drawCm
 
 	if(m_bufParticles != nullptr) {
 		for(auto &r : m_renderers)
-			r->RecordRender(drawCmd, scene, renderer, CXXM_SCAST(pragma::ParticleRenderFlags, renderFlags));
+			r->RecordRender(drawCmd, scene, renderer, CXXM_SCAST(pragma::ecs::ParticleRenderFlags, renderFlags));
 	}
 	umath::set_flag(m_flags, Flags::RendererBufferUpdateRequired, false);
 }
@@ -1480,7 +1477,7 @@ const SpriteSheetAnimation *ecs::CParticleSystemComponent::GetSpriteSheetAnimati
 
 void ecs::CParticleSystemComponent::Simulate(double tDelta)
 {
-	auto *cam = c_game->GetPrimaryCamera<pragma::CCameraComponent>();
+	auto *cam = pragma::get_cgame()->GetPrimaryCamera<pragma::CCameraComponent>();
 	if(!IsActiveOrPaused() || cam == nullptr)
 		return;
 	util::ScopeGuard sg {[this, tDelta]() { m_simulationTime += tDelta; }}; // Increment simulation time once this tick is complete
@@ -1743,13 +1740,13 @@ void ecs::CParticleSystemComponent::Simulate(double tDelta)
 	auto bUpdateBuffers = (bStatic == false || m_numRenderParticles != m_numPrevRenderParticles) ? true : false;
 	m_numPrevRenderParticles = m_numRenderParticles;
 	if(bufParticles != nullptr && bUpdateBuffers == true && m_numRenderParticles > 0u) {
-		c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(bufParticles, 0ull, m_numRenderParticles * sizeof(ParticleData), m_instanceData.data());
+		pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(bufParticles, 0ull, m_numRenderParticles * sizeof(ParticleData), m_instanceData.data());
 		umath::set_flag(m_flags, Flags::RendererBufferUpdateRequired, true);
 	}
 	if(IsAnimated()) {
 		auto &particleAnimBuffer = GetParticleAnimationBuffer();
 		if(particleAnimBuffer != nullptr && m_numRenderParticles > 0u)
-			c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(particleAnimBuffer, 0ull, m_numRenderParticles * sizeof(ParticleAnimationData), m_particleAnimData.data());
+			pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(particleAnimBuffer, 0ull, m_numRenderParticles * sizeof(ParticleAnimationData), m_particleAnimData.data());
 	}
 	for(auto &r : m_renderers)
 		r->PostSimulate(tDelta);

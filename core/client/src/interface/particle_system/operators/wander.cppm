@@ -3,6 +3,8 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
+#include "pragma/entities/environment/effects/env_particle_system.h"
 #include <mathutil/umath.h>
 #include <pragma/math/vector/wvvector3.h>
 #include <sharedutils/util_string.h>
@@ -10,16 +12,17 @@ module;
 #include <pragma/math/util_noise.hpp>
 #include <algorithm>
 
-export module pragma.client.particle_system:operator_wander;
+export module pragma.client:particle_system.operator_wander;
 
-import :operator_world_base;
+import :entities.components.particle_system;
+import :particle_system.operator_world_base;
 
-import pragma.client.engine;
+import :engine;
 
 export class DLLCLIENT CParticleOperatorWander : public CParticleOperatorWorldBase {
   public:
 	CParticleOperatorWander() = default;
-	virtual void Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+	virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
 	virtual void Simulate(CParticle &particle, double tDelta, float strength) override;
 	virtual void Simulate(double tDelta) override;
 	virtual void OnParticleCreated(CParticle &particle) override;
@@ -32,9 +35,7 @@ export class DLLCLIENT CParticleOperatorWander : public CParticleOperatorWorldBa
 	float m_dtStrength = 0.f;
 };
 
-REGISTER_PARTICLE_OPERATOR(wander, CParticleOperatorWander);
-
-void CParticleOperatorWander::Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void CParticleOperatorWander::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleOperatorWorldBase::Initialize(pSystem, values);
 	for(auto it = values.begin(); it != values.end(); it++) {
@@ -46,7 +47,7 @@ void CParticleOperatorWander::Initialize(pragma::CParticleSystemComponent &pSyst
 			m_fFrequency = util::to_float(it->second);
 	}
 
-	m_hashCodes.resize(pSystem.GetMaxParticleCount());
+	m_hashCodes.resize(static_cast<pragma::ecs::CParticleSystemComponent&>(pSystem).GetMaxParticleCount());
 }
 void CParticleOperatorWander::OnParticleCreated(CParticle &particle) { m_hashCodes.at(particle.GetIndex()) = umath::random(1, std::numeric_limits<int32_t>::max()); }
 void CParticleOperatorWander::Simulate(double tDelta)

@@ -13,13 +13,8 @@
 #include <cmaterialmanager.h>
 #include <cmaterial_manager2.hpp>
 
-import pragma.client.client_state;
-import pragma.client.debug;
-import pragma.client.engine;
-import pragma.client.gui;
+import pragma.client;
 
-extern CEngine *c_engine;
-extern ClientState *client;
 void Console::commands::debug_font(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
 	if(argv.empty()) {
@@ -75,7 +70,7 @@ void Console::commands::debug_texture_mipmaps(NetworkState *, pragma::BasePlayer
 		return;
 	}
 	auto &texPath = argv.front();
-	auto &materialManager = static_cast<msys::CMaterialManager &>(client->GetMaterialManager());
+	auto &materialManager = static_cast<msys::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager());
 	auto &textureManager = materialManager.GetTextureManager();
 	auto a = textureManager.FindCachedAsset(texPath);
 	auto asset = a ? msys::TextureManager::GetAssetObject(*a) : nullptr;

@@ -5,8 +5,10 @@ module;
 
 #include "stdafx_client.h"
 
-module pragma.client.client_state;
+module pragma.client;
 
+
+import :client_state;
 Bool ClientState::RawMouseInput(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods)
 {
 	auto *game = GetGameState();

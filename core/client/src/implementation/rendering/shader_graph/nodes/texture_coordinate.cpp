@@ -5,9 +5,9 @@ module;
 
 #include "stdafx_client.h"
 
-module pragma.client.rendering.shader_graph;
+module pragma.client;
 
-import :node_texture_coordinate;
+import :rendering.shader_graph.node_texture_coordinate;
 
 using namespace pragma::rendering::shader_graph;
 

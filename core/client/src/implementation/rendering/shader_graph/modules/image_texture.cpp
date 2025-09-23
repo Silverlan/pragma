@@ -10,19 +10,17 @@ module;
 #include <texturemanager/texture.h>
 #include <prosper_command_buffer.hpp>
 
-module pragma.client.rendering.shader_graph;
+module pragma.client;
 
-import :module_image_texture;
+import :rendering.shader_graph.module_image_texture;
 
 import pragma.shadergraph;
 
-import pragma.client.client_state;
-import pragma.client.engine;
+import :client_state;
+import :engine;
 
 using namespace pragma::rendering::shader_graph;
 
-extern CEngine *c_engine;
-extern ClientState *client;
 #pragma optimize("", off)
 ImageTextureModule::ImageTextureModule(ShaderGraph &shader) : pragma::rendering::ShaderGraphModule {shader}
 {
@@ -50,10 +48,10 @@ void ImageTextureModule::InitializeGfxPipelineDescriptorSets()
 
 	//m_shader.AddDescriptorSetGroup(m_descSetInfo);
 
-	/*auto &context = c_engine->GetRenderContext();
+	/*auto &context = pragma::get_cengine()->GetRenderContext();
 	auto dsg = context.CreateDescriptorSetGroup(m_descSetInfo);
 	auto &ds = *dsg->GetDescriptorSet(0);
-	auto &texManager = static_cast<msys::CMaterialManager &>(client->GetMaterialManager()).GetTextureManager();
+	auto &texManager = static_cast<msys::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager()).GetTextureManager();
 	uint32_t bindingIdx = 0;
 	for(auto *node : m_nodes) {
 		std::string fileName;

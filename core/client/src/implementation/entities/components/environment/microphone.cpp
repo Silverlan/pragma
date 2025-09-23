@@ -7,8 +7,10 @@ module;
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
-module pragma.client.entities.components.env_microphone;
+module pragma.client;
 
+
+import :entities.components.env_microphone;
 using namespace pragma;
 
 void CMicrophoneComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }

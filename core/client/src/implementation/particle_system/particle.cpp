@@ -6,9 +6,9 @@ module;
 #include "stdafx_client.h"
 #include <mathutil/umath_random.hpp>
 
-export module pragma.client.particle_system;
+module pragma.client;
 
-import :particle;
+import :particle_system.particle;
 
 void CParticleSystemBaseKeyValues::RecordKeyValues(const std::unordered_map<std::string, std::string> &values) { m_keyValues = std::make_unique<std::unordered_map<std::string, std::string>>(values); }
 bool CParticleSystemBaseKeyValues::IsRecordingKeyValues() const { return m_keyValues != nullptr; }

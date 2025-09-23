@@ -7,9 +7,9 @@ module;
 #include "prosper_command_buffer.hpp"
 #include <memory>
 
-export module pragma.client.rendering:controlled_blur_settings;
+export module pragma.client:rendering.controlled_blur_settings;
 
-import :bloom_pipeline_info;
+import :rendering.bloom_pipeline_info;
 
 export namespace pragma {
 	struct DLLCLIENT ControlledBlurSettings {

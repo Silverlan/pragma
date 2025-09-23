@@ -5,6 +5,7 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/clientdefinitions.h"
+#include "pragma/model/model.h"
 #include <pragma/util/util_thread_pool.hpp>
 #include "pragma/entities/components/bvh_data.hpp"
 #include <sharedutils/BS_thread_pool.hpp>
@@ -13,7 +14,7 @@ module;
 #include <vector>
 #include <unordered_map>
 
-export module pragma.client.model:hitbox_mesh_bvh_builder;
+export module pragma.client:model.hitbox_mesh_bvh_builder;
 
 export namespace pragma::bvh {
 	class DLLCLIENT HitboxMeshBvhBuildTask {

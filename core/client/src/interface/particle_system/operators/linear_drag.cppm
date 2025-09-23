@@ -9,12 +9,15 @@ module;
 #include <sharedutils/util_string.h>
 #include <sharedutils/util.h>
 
-export module pragma.client.particle_system:operator_linear_drag;
+export module pragma.client:particle_system.operator_linear_drag;
 
+import :particle_system.modifier;
+
+export namespace pragma::ecs {class CParticleSystemComponent;}
 export class DLLCLIENT CParticleOperatorLinearDrag : public CParticleOperator {
   public:
 	CParticleOperatorLinearDrag() = default;
-	virtual void Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+	virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
 	virtual void Simulate(CParticle &particle, double tDelta, float strength) override;
 	virtual void Simulate(double tDelta) override;
   private:
@@ -22,9 +25,7 @@ export class DLLCLIENT CParticleOperatorLinearDrag : public CParticleOperator {
 	float m_fTickDrag = 1.f;
 };
 
-REGISTER_PARTICLE_OPERATOR(linear_drag, CParticleOperatorLinearDrag);
-
-void CParticleOperatorLinearDrag::Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void CParticleOperatorLinearDrag::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleOperator::Initialize(pSystem, values);
 	for(auto it = values.begin(); it != values.end(); it++) {

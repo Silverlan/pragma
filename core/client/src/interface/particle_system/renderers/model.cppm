@@ -3,19 +3,26 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
+#include "prosper_descriptor_set_group.hpp"
 #include <pragma/types.hpp>
 
-export module pragma.client.particle_system:renderer_model;
+export module pragma.client:particle_system.renderer_model;
 
-import pragma.client.entities.components.animated;
-import :renderer_rotational_buffer;
+import :entities.components.animated;
+import :particle_system.modifier;
+import :particle_system.renderer_rotational_buffer;
 
+export namespace pragma {
+	enum class ParticleRenderFlags : uint32_t;
+	namespace ecs {class CParticleSystemComponent;}
+};
 export class DLLCLIENT CParticleRendererModel : public CParticleRenderer {
   public:
 	CParticleRendererModel() = default;
 	virtual ~CParticleRendererModel() override;
-	virtual void Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
-	virtual void RecordRender(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::ParticleRenderFlags renderFlags) override;
+	virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+	virtual void RecordRender(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::ecs::ParticleRenderFlags renderFlags) override;
 	virtual void RecordRenderShadow(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::CLightComponent &light, uint32_t layerId = 0) override;
 	virtual void PostSimulate(double tDelta) override;
 	virtual void OnParticleCreated(CParticle &particle) override;

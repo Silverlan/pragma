@@ -1,10 +1,13 @@
 // SPDX-FileCopyrightText: (c) 2022 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-export
+module;
 
+#include "pragma/clientdefinitions.h"
 
-export module pragma.client.rendering.shaders:pp_motion_blur;
+export module pragma.client:rendering.shaders.pp_motion_blur;
+
+import :rendering.shaders.base;
 
 export namespace pragma {
 	class DLLCLIENT ShaderPPMotionBlur : public ShaderPPBase {

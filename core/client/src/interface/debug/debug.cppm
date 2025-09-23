@@ -3,8 +3,9 @@
 
 module;
 
-export module pragma.client.debug;
-export import pragma.client.debug.game_ui;
-export import pragma.client.debug.overlay;
-export import pragma.client.debug.render_debug_info;
-export import pragma.client.debug.render_filter;
+export module pragma.client:debug;
+export import :debug.enums;
+export import :debug.game_ui;
+export import :debug.overlay;
+export import :debug.render_debug_info;
+export import :debug.render_filter;

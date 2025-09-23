@@ -5,18 +5,14 @@ module;
 
 #include "stdafx_client.h"
 
-#include "pragma/lua/converters/shader_converter_t.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <prosper_command_buffer.hpp>
 #include <luasystem.h>
 
-module pragma.client.particle_system;
+module pragma.client;
 
-import :lua_particle_modifier_manager;
-
-import pragma.client.entities.components;
-
-extern CEngine *c_engine;
+import :particle_system.lua_particle_modifier_manager;
+import :entities.components;
 
 CParticleModifierLua *pragma::LuaParticleModifierManager::CreateModifier(std::string className) const
 {

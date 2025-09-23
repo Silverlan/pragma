@@ -6,7 +6,9 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <pragma/entities/components/base_gamemode_component.hpp>
 
-export module pragma.client.entities.components.gamemode;
+export module pragma.client:entities.components.gamemode;
+
+import :entities.base_entity;
 
 export namespace pragma {
 	class DLLCLIENT CGamemodeComponent final : public BaseGamemodeComponent {

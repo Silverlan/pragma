@@ -6,10 +6,10 @@ module;
 #include "stdafx_client.h"
 #include <wgui/types/witext.h>
 
-module pragma.client.gui;
+module pragma.client;
 
-import :slider;
-import :progress_bar;
+import :gui.slider;
+import :gui.progress_bar;
 
 import pragma.gui;
 

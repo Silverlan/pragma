@@ -6,9 +6,9 @@ module;
 #include "stdafx_client.h"
 #include <mathutil/umath.h>
 
-module pragma.client.model;
+module pragma.client;
 
-import :side;
+import :model.side;
 
 CSide::CSide() : Side() {}
 

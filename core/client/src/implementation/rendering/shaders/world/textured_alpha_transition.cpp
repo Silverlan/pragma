@@ -10,16 +10,16 @@ module;
 #include <prosper_descriptor_set_group.hpp>
 #include <cmaterial.h>
 
-module pragma.client.rendering.shaders;
+module pragma.client;
 
-import :textured_alpha_transition;
 
-import pragma.client.engine;
-import pragma.client.model;
+import :rendering.shaders.textured_alpha_transition;
+
+import :engine;
+import :model;
 
 using namespace pragma;
 
-extern CEngine *c_engine;
 
 decltype(ShaderTexturedAlphaTransition::VERTEX_BINDING_ALPHA) ShaderTexturedAlphaTransition::VERTEX_BINDING_ALPHA = {prosper::VertexInputRate::Vertex};
 decltype(ShaderTexturedAlphaTransition::VERTEX_ATTRIBUTE_ALPHA) ShaderTexturedAlphaTransition::VERTEX_ATTRIBUTE_ALPHA = {VERTEX_BINDING_ALPHA, prosper::Format::R32G32_SFloat};

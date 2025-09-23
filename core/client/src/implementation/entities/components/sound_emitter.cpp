@@ -14,15 +14,16 @@ module;
 #include <pragma/lua/lua_util_component_stream.hpp>
 #include <prosper_command_buffer.hpp>
 
-module pragma.client.entities.components.sound_emitter;
+module pragma.client;
 
-import pragma.client.client_state;
-import pragma.client.entities.components.flex;
-import pragma.client.entities.components.particle_system;
+
+import :entities.components.sound_emitter;
+import :client_state;
+import :entities.components.flex;
+import :entities.components.particle_system;
 
 using namespace pragma;
 
-extern ClientState *client;
 
 void CSoundEmitterComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 bool CSoundEmitterComponent::ShouldRemoveSound(ALSound &snd) const { return (BaseSoundEmitterComponent::ShouldRemoveSound(snd) /* && snd.GetIndex() == 0*/) ? true : false; }
@@ -32,7 +33,7 @@ void CSoundEmitterComponent::AddSound(std::shared_ptr<ALSound> snd) { Initialize
 void CSoundEmitterComponent::PrecacheSounds()
 {
 	BaseSoundEmitterComponent::PrecacheSounds();
-	client->PrecacheSound("fx.fire_small", ALChannel::Mono);
+	pragma::get_client_state()->PrecacheSound("fx.fire_small", ALChannel::Mono);
 	pragma::ecs::CParticleSystemComponent::Precache("fire");
 }
 
@@ -41,7 +42,7 @@ void CSoundEmitterComponent::ReceiveData(NetPacket &packet)
 	auto numSounds = packet->Read<uint8_t>();
 	for(auto i = decltype(numSounds) {0}; i < numSounds; ++i) {
 		auto sndIdx = packet->Read<uint32_t>();
-		auto snd = client->GetSoundByIndex(sndIdx);
+		auto snd = pragma::get_client_state()->GetSoundByIndex(sndIdx);
 		if(snd == nullptr)
 			continue;
 		AddSound(snd);
@@ -50,7 +51,7 @@ void CSoundEmitterComponent::ReceiveData(NetPacket &packet)
 
 std::shared_ptr<ALSound> CSoundEmitterComponent::CreateSound(std::string sndname, ALSoundType type, const SoundInfo &sndInfo)
 {
-	std::shared_ptr<ALSound> snd = client->CreateSound(sndname, type, ALCreateFlags::Mono);
+	std::shared_ptr<ALSound> snd = pragma::get_client_state()->CreateSound(sndname, type, ALCreateFlags::Mono);
 	if(snd == NULL)
 		return snd;
 	InitializeSound(snd);

@@ -10,12 +10,12 @@ module;
 #include <image/prosper_msaa_texture.hpp>
 #include <image/prosper_render_target.hpp>
 
-module pragma.client.entities.components.pp_base;
+module pragma.client;
 
-import pragma.client.engine;
-import pragma.client.entities.components.rasterization_renderer;
+import :entities.components.rasterization_renderer;
+import :entities.components.pp_base;
+import :engine;
 
-extern CEngine *c_engine;
 
 using namespace pragma;
 
@@ -32,7 +32,7 @@ void CRendererPpBaseComponent::Initialize()
 }
 void CRendererPpBaseComponent::OnRemove()
 {
-	c_engine->GetRenderContext().WaitIdle();
+	pragma::get_cengine()->GetRenderContext().WaitIdle();
 	BaseEntityComponent::OnRemove();
 	if(m_cbEffect.IsValid())
 		m_cbEffect.Remove();

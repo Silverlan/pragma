@@ -6,7 +6,7 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <shader/prosper_shader.hpp>
 
-export module pragma.client.rendering.shaders:clear_color;
+export module pragma.client:rendering.shaders.clear_color;
 
 export namespace pragma {
 	class DLLCLIENT ShaderClearColor : public prosper::ShaderGraphics {

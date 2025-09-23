@@ -8,13 +8,14 @@ module;
 #include <prosper_util.hpp>
 #include <buffers/prosper_buffer.hpp>
 
-module pragma.client.model;
+module pragma.client;
+
 
 import :model;
+import :model;
 
-import pragma.client.engine;
+import :engine;
 
-extern CEngine *c_engine;
 
 void CModel::UpdateVertexAnimationBuffer()
 {
@@ -22,7 +23,7 @@ void CModel::UpdateVertexAnimationBuffer()
 	auto &vertexAnimations = GetVertexAnimations();
 	if(vertexAnimations.empty()) {
 		if(m_vertexAnimationBuffer)
-			c_engine->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_vertexAnimationBuffer);
+			pragma::get_cengine()->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_vertexAnimationBuffer);
 		m_vertexAnimationBuffer = nullptr;
 		return;
 	}
@@ -91,8 +92,8 @@ void CModel::UpdateVertexAnimationBuffer()
 	createInfo.size = vertexAnimData.size() * sizeof(vertexAnimData.front());
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::DeviceLocal;
 	if(m_vertexAnimationBuffer)
-		c_engine->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_vertexAnimationBuffer);
-	m_vertexAnimationBuffer = c_engine->GetRenderContext().CreateBuffer(createInfo, vertexAnimData.data());
+		pragma::get_cengine()->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_vertexAnimationBuffer);
+	m_vertexAnimationBuffer = pragma::get_cengine()->GetRenderContext().CreateBuffer(createInfo, vertexAnimData.data());
 }
 const std::shared_ptr<prosper::IBuffer> &CModel::GetVertexAnimationBuffer() const { return m_vertexAnimationBuffer; }
 bool CModel::GetVertexAnimationBufferFrameOffset(uint32_t vaIdx, CModelSubMesh &subMesh, uint32_t frameId, uint64_t &offset) const

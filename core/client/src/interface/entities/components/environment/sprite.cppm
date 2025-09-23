@@ -6,10 +6,13 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <pragma/entities/environment/effects/env_sprite.h>
 
-export module pragma.client.entities.components.effects.sprite;
+export module pragma.client:entities.components.effects.sprite;
 
-import pragma.client.entities.components.particle_system;
+import :entities.base_entity;
+import :entities.components.entity;
+import :particle_system.enums;
 
+export namespace pragma::ecs {class CParticleSystemComponent;}
 export namespace pragma {
 	class DLLCLIENT CSpriteComponent final : public BaseEnvSpriteComponent, public CBaseNetComponent {
 	  public:

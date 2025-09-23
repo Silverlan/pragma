@@ -19,7 +19,9 @@ module;
 #include <pragma/lua/classes/lproperty.hpp>
 #include <pragma/lua/lentity_components_base_types.hpp>
 
-module pragma.client.entities.components.ai;
+module pragma.client;
+
+import :entities.components.ai;
 
 using namespace pragma;
 

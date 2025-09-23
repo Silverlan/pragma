@@ -7,8 +7,7 @@ module;
 #include <pragma/entities/components/base_static_bvh_cache_component.hpp>
 #include <unordered_set>
 
-export module pragma.client.entities.components.static_bvh_cache;
-
+export module pragma.client:entities.components.static_bvh_cache;
 export namespace pragma {
 	class DLLCLIENT CStaticBvhCacheComponent final : public BaseStaticBvhCacheComponent {
 	  public:

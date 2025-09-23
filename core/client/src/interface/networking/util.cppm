@@ -7,7 +7,9 @@ module;
 #include <pragma/networking/nwm_util.h>
 #include <sharedutils/netpacket.hpp>
 
-export module pragma.client.networking:util;
+export module pragma.client:networking.util;
+
+import :entities.base_entity;
 
 export namespace nwm {
 	DLLCLIENT CBaseEntity *read_unique_entity(NetPacket &packet);

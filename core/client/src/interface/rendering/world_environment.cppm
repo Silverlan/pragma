@@ -9,8 +9,7 @@ module;
 #include <mathutil/glmutil.h>
 #include <memory>
 
-export module pragma.client.rendering.world_environment;
-
+export module pragma.client:rendering.world_environment;
 export class DLLCLIENT WorldEnvironment : public std::enable_shared_from_this<WorldEnvironment> {
   public:
 	static std::shared_ptr<WorldEnvironment> Create();

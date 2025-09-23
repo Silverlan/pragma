@@ -7,24 +7,20 @@ module;
 #include "pragma/console/c_cvar.h"
 #include <shader/prosper_shader_blur.hpp>
 
-import pragma.client.rendering.shaders;
+module pragma.client;
 
-module pragma.client.rendering;
+import :rendering.controlled_blur_settings;
 
-import :controlled_blur_settings;
-
-import pragma.client.engine;
-
-extern CEngine *c_engine;
+import :engine;
 
 static util::WeakHandle<prosper::Shader> g_bloomBlurH {};
 static util::WeakHandle<prosper::Shader> g_bloomBlurV {};
 static void init_shaders()
 {
 	if(g_bloomBlurH.expired())
-		g_bloomBlurH = c_engine->GetShader("pp_bloom_blur_h");
+		g_bloomBlurH = pragma::get_cengine()->GetShader("pp_bloom_blur_h");
 	if(g_bloomBlurV.expired())
-		g_bloomBlurV = c_engine->GetShader("pp_bloom_blur_v");
+		g_bloomBlurV = pragma::get_cengine()->GetShader("pp_bloom_blur_v");
 }
 
 pragma::ControlledBlurSettings::ControlledBlurSettings() { init_shaders(); }
@@ -62,7 +58,7 @@ void pragma::ControlledBlurSettings::SetShaderPipelineDirty()
 
 void pragma::ControlledBlurSettings::UpdateShaderPipelines()
 {
-	c_engine->GetRenderContext().WaitIdle(true);
+	pragma::get_cengine()->GetRenderContext().WaitIdle(true);
 	init_shaders();
 	if(g_bloomBlurH.valid()) {
 		m_bloomPipelineInfoH = static_cast<ShaderPPBloomBlurBase *>(g_bloomBlurH.get())->AddPipeline(m_radius, m_sigma);
@@ -88,6 +84,6 @@ void pragma::ControlledBlurSettings::RecordBlur(const std::shared_ptr<prosper::I
 	shaderInfo.shaderVPipeline = *m_bloomPipelineInfoV->pipelineIdx;
 
 	for(auto i = decltype(blurAmount) {0}; i < blurAmount; ++i) {
-		prosper::util::record_blur_image(c_engine->GetRenderContext(), cmd, blurSet, {Vector4(1.f, 1.f, 1.f, 1.f), blurSize, kernelSize}, 1u, &shaderInfo);
+		prosper::util::record_blur_image(pragma::get_cengine()->GetRenderContext(), cmd, blurSet, {Vector4(1.f, 1.f, 1.f, 1.f), blurSize, kernelSize}, 1u, &shaderInfo);
 	}
 }

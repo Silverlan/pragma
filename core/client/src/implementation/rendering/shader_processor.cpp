@@ -10,16 +10,14 @@ module;
 #include <prosper_command_buffer.hpp>
 #include <cmaterial.h>
 
-module pragma.client.rendering.render_processor;
+module pragma.client;
 
-import pragma.client.client_state;
-import pragma.client.engine;
-import pragma.client.entities.components;
-import pragma.client.game;
-
-extern CEngine *c_engine;
-extern ClientState *client;
-extern CGame *c_game;
+import :rendering.render_processor;
+import :client_state;
+import :engine;
+import :entities.components;
+import :game;
+import :model.model_class;
 
 bool pragma::rendering::ShaderProcessor::RecordBindScene(const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, const pragma::ShaderGameWorld &shader, bool view)
 {
@@ -30,7 +28,7 @@ bool pragma::rendering::ShaderProcessor::RecordBindScene(const pragma::CSceneCom
 	}
 	auto *dsScene = view ? scene.GetViewCameraDescriptorSet() : scene.GetCameraDescriptorSetGraphics();
 	auto *dsRenderer = renderer.GetRendererDescriptorSet();
-	auto &dsRenderSettings = c_game->GetGlobalRenderSettingsDescriptorSet();
+	auto &dsRenderSettings = pragma::get_cgame()->GetGlobalRenderSettingsDescriptorSet();
 	auto *dsShadows = pragma::CShadowComponent::GetDescriptorSet();
 	assert(dsScene);
 	assert(dsRenderer);
@@ -44,7 +42,7 @@ bool pragma::rendering::ShaderProcessor::RecordBindScene(const pragma::CSceneCom
 void pragma::rendering::ShaderProcessor::SetDrawOrigin(const Vector4 &drawOrigin) { m_drawOrigin = drawOrigin; }
 bool pragma::rendering::ShaderProcessor::RecordBindShader(const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, bool view, ShaderGameWorld::SceneFlags sceneFlags, pragma::ShaderGameWorld &shader, uint32_t pipelineIdx)
 {
-	auto &context = c_engine->GetRenderContext();
+	auto &context = pragma::get_cengine()->GetRenderContext();
 	m_curShader = &shader;
 	auto matDsIdx = m_curShader->GetMaterialDescriptorSetIndex();
 	m_currentPipelineLayout = context.GetShaderPipelineLayout(shader, pipelineIdx);
@@ -94,7 +92,7 @@ bool pragma::rendering::ShaderProcessor::RecordBindMaterial(CMaterial &mat)
 	if(m_curShader->RecordBindMaterial(*this, mat) == false) {
 		if(!m_materialDescSetBound) {
 			m_materialDescSetBound = true;
-			auto *errMat = client->GetMaterialManager().GetErrorMaterial();
+			auto *errMat = pragma::get_client_state()->GetMaterialManager().GetErrorMaterial();
 			if(!errMat)
 				return false;
 			// Bind a dummy material

@@ -18,19 +18,18 @@ module;
 #include <prosper_window.hpp>
 #include <prosper_render_pass.hpp>
 
-module pragma.client.scripting.lua.libraries.gui;
+module pragma.client;
 
-import pragma.client.client_state;
-import pragma.client.engine;
-import pragma.client.game;
-import pragma.client.gui;
-import pragma.client.scripting.lua;
+
+import :scripting.lua.libraries.gui;
+import :client_state;
+import :engine;
+import :game;
+import :gui;
+import :scripting.lua;
 import pragma.string.unicode;
 //import pragma.scripting.lua;
 
-extern CEngine *c_engine;
-extern ClientState *client;
-extern CGame *c_game;
 
 static void initialize_element(::WIBase &p)
 {
@@ -190,7 +189,7 @@ Lua::opt<Lua::mult<Lua::type<::WIBase>, Lua::type<::WIBase>, Lua::type<::WIBase>
 
 void Lua::gui::register_element(const std::string &className, const Lua::classObject &classData)
 {
-	auto &manager = c_game->GetLuaGUIManager();
+	auto &manager = pragma::get_cgame()->GetLuaGUIManager();
 	manager.RegisterGUIElement(className, const_cast<Lua::classObject &>(classData));
 }
 
@@ -292,7 +291,7 @@ void Lua::gui::register_element(const std::string &className, const Lua::classOb
 
 static bool register_skin(lua_State *l, const std::string &skin, const luabind::tableT<void> &vars, const luabind::tableT<void> &skinData, const std::string *baseName)
 {
-	if(l != client->GetGUILuaState()) {
+	if(l != pragma::get_client_state()->GetGUILuaState()) {
 		Lua::Error(l, "Attempted to register GUI skin with client lua state! This is not allowed, skins can only be registered with GUI lua state!");
 		return false;
 	}
@@ -312,7 +311,7 @@ void Lua::gui::register_default_skin(const std::string &vars, const std::string 
 	auto *skin = dynamic_cast<WILuaSkin *>(WGUI::GetInstance().GetSkin("default"));
 	if(!skin)
 		return;
-	auto *l = client->GetGUILuaState();
+	auto *l = pragma::get_client_state()->GetGUILuaState();
 	std::string errMsg;
 	auto resVars = pragma::scripting::lua::run_string(l, "return " + vars, "register_default_skin", 1, &errMsg);
 	Lua::CheckTable(l, -1);
@@ -360,7 +359,7 @@ void Lua::gui::set_cursor_input_mode(pragma::platform::CursorMode mode) { WGUI::
 
 std::shared_ptr<prosper::IImage> Lua::gui::create_color_image(uint32_t w, uint32_t h, prosper::ImageUsageFlags usageFlags, prosper::ImageLayout initialLayout, bool msaa)
 {
-	auto &context = c_engine->GetRenderContext();
+	auto &context = pragma::get_cengine()->GetRenderContext();
 	auto &rtStaging = context.GetWindow().GetStagingRenderTarget();
 	auto &texCol = rtStaging->GetTexture();
 	auto *texStencil = rtStaging->GetTexture(1);
@@ -378,7 +377,7 @@ std::shared_ptr<prosper::IImage> Lua::gui::create_color_image(uint32_t w, uint32
 
 std::shared_ptr<prosper::RenderTarget> Lua::gui::create_render_target(uint32_t w, uint32_t h, bool enableMsaa, bool enableSampling)
 {
-	auto &context = c_engine->GetRenderContext();
+	auto &context = pragma::get_cengine()->GetRenderContext();
 	auto &rtStaging = context.GetWindow().GetStagingRenderTarget();
 	auto *texStencil = rtStaging->GetTexture(1);
 	if(!texStencil)
@@ -414,7 +413,7 @@ bool Lua::gui::inject_mouse_input(pragma::platform::MouseButton button, pragma::
 	auto &gui = WGUI::GetInstance();
 
 	gui.GetMousePos(cursorPos.x, cursorPos.y);
-	auto &window = c_engine->GetWindow();
+	auto &window = pragma::get_cengine()->GetWindow();
 	window->SetCursorPos({pCursorPos.x, pCursorPos.y});
 
 	auto b = gui.HandleMouseInput(window, static_cast<pragma::platform::MouseButton>(button), static_cast<pragma::platform::KeyState>(state), static_cast<pragma::platform::Modifier>(mods));
@@ -425,17 +424,17 @@ bool Lua::gui::inject_mouse_input(pragma::platform::MouseButton button, pragma::
 {
 	Vector2i cursorPos = {};
 	auto &gui = WGUI::GetInstance();
-	auto &window = c_engine->GetWindow();
+	auto &window = pragma::get_cengine()->GetWindow();
 	return gui.HandleMouseInput(window, static_cast<pragma::platform::MouseButton>(button), static_cast<pragma::platform::KeyState>(state), static_cast<pragma::platform::Modifier>(mods));
 }
 bool Lua::gui::inject_keyboard_input(pragma::platform::Key key, pragma::platform::KeyState state, pragma::platform::Modifier mods)
 {
-	auto &window = c_engine->GetWindow();
+	auto &window = pragma::get_cengine()->GetWindow();
 	return WGUI::GetInstance().HandleKeyboardInput(window, key, 0, state, mods);
 }
 bool Lua::gui::inject_char_input(const std::string &c)
 {
-	auto &window = c_engine->GetWindow();
+	auto &window = pragma::get_cengine()->GetWindow();
 	auto b = false;
 	if(!c.empty())
 		b = WGUI::GetInstance().HandleCharInput(window, c.front());
@@ -447,7 +446,7 @@ bool Lua::gui::inject_scroll_input(lua_State *l, const Vector2 &offset, const ::
 	auto &gui = WGUI::GetInstance();
 
 	gui.GetMousePos(cursorPos.x, cursorPos.y);
-	auto &window = c_engine->GetWindow();
+	auto &window = pragma::get_cengine()->GetWindow();
 	window->SetCursorPos({pCursorPos.x, pCursorPos.y});
 
 	auto b = gui.HandleScrollInput(window, offset);
@@ -458,12 +457,12 @@ bool Lua::gui::inject_scroll_input(lua_State *l, const Vector2 &offset)
 {
 	Vector2i cursorPos = {};
 	auto &gui = WGUI::GetInstance();
-	auto &window = c_engine->GetWindow();
+	auto &window = pragma::get_cengine()->GetWindow();
 	return gui.HandleScrollInput(window, offset);
 }
 
-float Lua::gui::RealTime(lua_State *l) { return client->RealTime(); }
+float Lua::gui::RealTime(lua_State *l) { return pragma::get_client_state()->RealTime(); }
 
-float Lua::gui::DeltaTime(lua_State *l) { return client->DeltaTime(); }
+float Lua::gui::DeltaTime(lua_State *l) { return pragma::get_client_state()->DeltaTime(); }
 
-float Lua::gui::LastThink(lua_State *l) { return client->LastThink(); }
+float Lua::gui::LastThink(lua_State *l) { return pragma::get_client_state()->LastThink(); }

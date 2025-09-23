@@ -8,7 +8,10 @@ module;
 #include "pragma/entities/components/liquid/base_liquid_surface_simulation_component.hpp"
 #include <cmaterial.h>
 
-export module pragma.client.entities.components.water_surface;
+export module pragma.client:entities.components.water_surface;
+
+import :entities.base_entity;
+import :model.mesh;
 
 export namespace pragma {
 	class DLLCLIENT CWaterSurfaceComponent final : public BaseEntityComponent {

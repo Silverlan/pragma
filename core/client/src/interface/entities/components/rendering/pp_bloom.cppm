@@ -5,11 +5,10 @@ module;
 
 #include "pragma/clientdefinitions.h"
 
-export module pragma.client.entities.components.pp_bloom;
+export module pragma.client:entities.components.pp_bloom;
+import :entities.components.pp_base;
 
-import pragma.client.entities.components.pp_base;
-
-import pragma.client.rendering;
+import :rendering;
 
 export namespace pragma {
 	class DLLCLIENT CRendererPpBloomComponent final : public CRendererPpBaseComponent {

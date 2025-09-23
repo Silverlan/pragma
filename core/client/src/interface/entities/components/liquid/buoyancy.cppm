@@ -6,7 +6,9 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <pragma/entities/components/liquid/base_buoyancy_component.hpp>
 
-export module pragma.client.entities.components.liquid_buoyancy;
+export module pragma.client:entities.components.liquid_buoyancy;
+
+import :entities.components.entity;
 
 export namespace pragma {
 	class DLLCLIENT CBuoyancyComponent final : public BaseBuoyancyComponent, public CBaseNetComponent {

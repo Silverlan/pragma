@@ -6,8 +6,7 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <sharedutils/util_hash.hpp>
 
-export module pragma.client.rendering.lightmap_data_cache;
-
+export module pragma.client:rendering.lightmap_data_cache;
 export namespace pragma {
 	struct DLLCLIENT LmUuid {
 		util::Uuid uuid;

@@ -6,7 +6,10 @@ module;
 #include "stdafx_client.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
-module pragma.client.entities.components.point_at_target;
+module pragma.client;
+
+import :entities.components.point_at_target;
+import :networking.util;
 
 using namespace pragma;
 

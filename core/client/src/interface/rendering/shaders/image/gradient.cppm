@@ -7,7 +7,7 @@ module;
 #include <shader/prosper_shader_base_image_processing.hpp>
 #include <array>
 
-export module pragma.client.rendering.shaders:gradient;
+export module pragma.client:rendering.shaders.gradient;
 
 export namespace pragma {
 	class DLLCLIENT ShaderGradient : public prosper::ShaderBaseImageProcessing {

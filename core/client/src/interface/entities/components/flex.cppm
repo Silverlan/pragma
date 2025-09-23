@@ -8,9 +8,8 @@ module;
 #include <pragma/util/lookup_identifier.hpp>
 #include <pragma/entities/components/base_flex_component.hpp>
 
-export module pragma.client.entities.components.flex;
-
-import pragma.client.audio;
+export module pragma.client:entities.components.flex;
+import :audio;
 
 export namespace pragma {
 	class DLLCLIENT CFlexComponent final : public BaseFlexComponent {

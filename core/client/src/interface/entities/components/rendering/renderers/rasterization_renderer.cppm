@@ -23,12 +23,20 @@ module;
 
 #define DEBUG_RENDER_PERFORMANCE_TEST_ENABLED 0
 
-export module pragma.client.entities.components.rasterization_renderer;
-
-import pragma.client.entities.components.light_map;
+export module pragma.client:entities.components.rasterization_renderer;
+import :entities.components.light_map;
+import :rendering.draw_scene_info;
+import :rendering.forward_plus;
+import :rendering.prepass;
+import :rendering.render_processor;
+import :rendering.ssao;
 
 export namespace pragma {
+	class ShaderGameWorldLightingPass;
 	class CRasterizationRendererComponent;
+	namespace ecs {
+		class CParticleSystemComponent;
+	}
 };
 export namespace pragma::rendering {
 	class DLLCLIENT HDRData {
@@ -273,7 +281,7 @@ export namespace pragma {
 		pragma::ShaderPrepassBase &GetPrepassShader() const;
 
 		// Render
-		void RecordRenderParticleSystems(prosper::ICommandBuffer &cmd, const util::DrawSceneInfo &drawSceneInfo, const std::vector<pragma::CParticleSystemComponent *> &particles, pragma::rendering::SceneRenderPass renderMode, bool depthPass, Bool bloom = false);
+		void RecordRenderParticleSystems(prosper::ICommandBuffer &cmd, const util::DrawSceneInfo &drawSceneInfo, const std::vector<pragma::ecs::CParticleSystemComponent *> &particles, pragma::rendering::SceneRenderPass renderMode, bool depthPass, Bool bloom = false);
 
 		// Renders all meshes from m_glowInfo.tmpGlowMeshes, and clears the container when done
 		void RenderGlowMeshes(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, const CSceneComponent &scene, pragma::rendering::SceneRenderPass renderMode);
@@ -307,7 +315,7 @@ export namespace pragma {
 		void RecordPrepass(const util::DrawSceneInfo &drawSceneInfo);
 		void ExecutePrepass(const util::DrawSceneInfo &drawSceneInfo);
 
-		const std::vector<pragma::CParticleSystemComponent *> &GetCulledParticles() const { return m_culledParticles; }
+		const std::vector<pragma::ecs::CParticleSystemComponent *> &GetCulledParticles() const { return m_culledParticles; }
 
 		const std::shared_ptr<prosper::ISwapCommandBufferGroup> &GetPrepassCommandBufferRecorder() const { return m_prepassCommandBufferGroup; }
 		const std::shared_ptr<prosper::ISwapCommandBufferGroup> &GetShadowCommandBufferRecorder() const { return m_shadowCommandBufferGroup; }
@@ -354,7 +362,7 @@ export namespace pragma {
 
 		std::vector<pragma::CLightComponent *> m_visLightSources;
 		std::vector<ComponentHandle<pragma::CLightComponent>> m_visShadowedLights;
-		std::vector<pragma::CParticleSystemComponent *> m_culledParticles;
+		std::vector<pragma::ecs::CParticleSystemComponent *> m_culledParticles;
 
 		// HDR
 		rendering::HDRData m_hdrInfo;

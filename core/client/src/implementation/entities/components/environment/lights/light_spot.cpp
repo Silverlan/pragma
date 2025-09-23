@@ -10,15 +10,15 @@ module;
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/components/base_field_angle_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
+#include "prosper_includes.hpp"
 
-module pragma.client.entities.components.lights.spot;
+module pragma.client;
 
-import pragma.client.engine;
-import pragma.client.entities.components;
+import :entities.components.lights.spot;
+import :engine;
 
 using namespace pragma;
 
-extern CEngine *c_engine;
 
 CLightSpotComponent::CLightSpotComponent(BaseEntity &ent) : BaseEnvLightSpotComponent(ent) {}
 bool CLightSpotComponent::ShouldTransmitNetData() const { return true; }
@@ -60,7 +60,7 @@ void CLightSpotComponent::SetFieldAngleComponent(BaseFieldAngleComponent &c)
 		bufferData.outerConeHalfAngle = static_cast<umath::Radian>(umath::deg_to_rad(newAng.get() / 2.f));
 		auto &renderBuffer = pLightComponent->GetRenderBuffer();
 		if(renderBuffer != nullptr)
-			c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(renderBuffer, offsetof(LightBufferData, outerConeHalfAngle), bufferData.outerConeHalfAngle);
+			pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(renderBuffer, offsetof(LightBufferData, outerConeHalfAngle), bufferData.outerConeHalfAngle);
 		UpdateInnerConeAngle();
 
 		if(pLightComponent->GetLightIntensityType() == CBaseLightComponent::LightIntensityType::Lumen) {
@@ -79,7 +79,7 @@ void CLightSpotComponent::UpdateInnerConeAngle()
 	bufferData.innerConeHalfAngle = umath::deg_to_rad(CalcInnerConeAngle(GetOuterConeAngle(), GetBlendFraction()) / 2.f);
 	auto &renderBuffer = pLightComponent->GetRenderBuffer();
 	if(renderBuffer != nullptr)
-		c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(renderBuffer, offsetof(LightBufferData, innerConeHalfAngle), bufferData.innerConeHalfAngle);
+		pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(renderBuffer, offsetof(LightBufferData, innerConeHalfAngle), bufferData.innerConeHalfAngle);
 }
 Bool CLightSpotComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet)
 {
@@ -142,7 +142,7 @@ void CLightSpotComponent::SetConeStartOffset(float offset)
 	bufferData.direction.w = offset;
 	auto &renderBuffer = pLightComponent->GetRenderBuffer();
 	if(renderBuffer != nullptr)
-		c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(renderBuffer, offsetof(LightBufferData, direction) + offsetof(Vector4, w), offset);
+		pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(renderBuffer, offsetof(LightBufferData, direction) + offsetof(Vector4, w), offset);
 }
 void CLightSpotComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void CLightSpotComponent::UpdateTransformMatrix()
@@ -154,7 +154,7 @@ void CLightSpotComponent::UpdateTransformMatrix()
 	if(shadowBuffer == nullptr)
 		return;
 	std::array<Mat4, 3> matrices = {GetBiasTransformationMatrix(), GetViewMatrix(), GetProjectionMatrix()};
-	c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(shadowBuffer, 0ull, matrices);
+	pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(shadowBuffer, 0ull, matrices);
 }
 void CLightSpotComponent::UpdateProjectionMatrix()
 {

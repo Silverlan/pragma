@@ -3,6 +3,6 @@
 
 module;
 
-export module pragma.client.physics;
-export import :visual_debugger;
-export import :water_surface_simulator;
+export module pragma.client:physics;
+export import :physics.visual_debugger;
+export import :physics.water_surface_simulator;

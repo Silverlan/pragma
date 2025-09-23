@@ -6,9 +6,10 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/func/basefuncbrush.h"
 
-import pragma.entities.components;
+export module pragma.client:entities.components.func_brush;
 
-export module pragma.client.entities.components.func_brush;
+import :entities.base_entity;
+import :entities.components.entity;
 
 export {
 	namespace pragma {

@@ -10,13 +10,14 @@ module;
 #include <pragma/entities/components/parent_component.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
-module pragma.client.entities.components.attachment;
+module pragma.client;
 
-import pragma.client.game;
+import :entities.components.attachment;
+import :game;
+import :networking.util;
 
 using namespace pragma;
 
-extern CGame *c_game;
 
 void CAttachmentComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void CAttachmentComponent::ReceiveData(NetPacket &packet)
@@ -59,7 +60,7 @@ void CAttachmentComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const
 
 void CAttachmentComponent::UpdateViewAttachmentOffset(BaseEntity *ent, pragma::BaseCharacterComponent &pl, Vector3 &pos, Quat &rot, Bool bYawOnly) const
 {
-	auto *scene = c_game->GetRenderScene<pragma::CSceneComponent>();
+	auto *scene = pragma::get_cgame()->GetRenderScene<pragma::CSceneComponent>();
 	auto cam = scene ? scene->GetActiveCamera() : pragma::ComponentHandle<pragma::CCameraComponent> {};
 	if(cam.expired())
 		return;

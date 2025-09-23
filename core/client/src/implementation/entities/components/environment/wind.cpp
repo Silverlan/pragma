@@ -7,8 +7,10 @@ module;
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
-module pragma.client.entities.components.env_wind;
+module pragma.client;
 
+
+import :entities.components.env_wind;
 using namespace pragma;
 
 void CWindComponent::ReceiveData(NetPacket &packet)

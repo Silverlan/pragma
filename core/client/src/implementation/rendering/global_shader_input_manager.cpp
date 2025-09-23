@@ -5,14 +5,18 @@ module;
 
 #include "stdafx_client.h"
 #include <prosper_command_buffer.hpp>
+#include "prosper_enums.hpp"
+#include "prosper_util.hpp"
+#include "buffers/prosper_buffer_create_info.hpp"
 
-module pragma.client.rendering.global_shader_input_manager;
+module pragma.client;
 
-import pragma.client.engine;
-import pragma.client.rendering.shader_graph;
+
+import :rendering.global_shader_input_manager;
+import :engine;
+import :rendering.shader_graph;
 import pragma.shadergraph;
 
-extern CEngine *c_engine;
 pragma::rendering::GlobalShaderInputDataManager::GlobalShaderInputDataManager() { ResetInputDescriptor(); }
 
 void pragma::rendering::GlobalShaderInputDataManager::ResetInputDescriptor() { m_inputDescriptor = std::make_unique<pragma::rendering::ShaderInputDescriptor>("GlobalInputData"); }
@@ -106,7 +110,7 @@ void pragma::rendering::GlobalShaderInputDataManager::PopulateProperties(const p
 
 void pragma::rendering::GlobalShaderInputDataManager::ClearBuffer()
 {
-	c_engine->GetRenderContext().WaitIdle();
+	pragma::get_cengine()->GetRenderContext().WaitIdle();
 	m_inputDataBuffer = nullptr;
 	m_dirtyTracker.Clear();
 }
@@ -172,6 +176,6 @@ void pragma::rendering::GlobalShaderInputDataManager::ReallocateBuffer()
 	bufCreateInfo.size = bufferSize;
 	bufCreateInfo.usageFlags = prosper::BufferUsageFlags::TransferSrcBit | prosper::BufferUsageFlags::TransferDstBit | prosper::BufferUsageFlags::UniformBufferBit;
 	bufCreateInfo.flags |= prosper::util::BufferCreateInfo::Flags::Persistent;
-	m_inputDataBuffer = c_engine->GetRenderContext().CreateBuffer(bufCreateInfo, m_inputData->data.data());
+	m_inputDataBuffer = pragma::get_cengine()->GetRenderContext().CreateBuffer(bufCreateInfo, m_inputData->data.data());
 	m_inputDataBuffer->SetPermanentlyMapped(true, prosper::IBuffer::MapFlags::WriteBit);
 }

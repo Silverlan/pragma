@@ -10,17 +10,15 @@ module;
 #include <alsound_effect.hpp>
 #include <udm.hpp>
 
-module pragma.client.audio;
+module pragma.client;
 
-import :aux_util;
-import pragma.client.engine;
-
-extern CEngine *c_engine;
+import :audio.aux_util;
+import :engine;
 
 static uint32_t s_globalEffectId = std::numeric_limits<uint32_t>::max();
 void Console::commands::debug_audio_aux_effect(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
-	auto *soundSys = c_engine->GetSoundSystem();
+	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
 	if(soundSys == nullptr) {
 		Con::cwar << "Sound engine hasn't been initialized!" << Con::endl;
 		return;
@@ -34,7 +32,7 @@ void Console::commands::debug_audio_aux_effect(NetworkState *state, pragma::Base
 		return;
 	}
 	auto &dspName = argv.front();
-	auto effect = c_engine->GetAuxEffect(dspName);
+	auto effect = pragma::get_cengine()->GetAuxEffect(dspName);
 	if(effect == nullptr) {
 		Con::cwar << "No auxiliary effect found with name '" << dspName << "'!" << Con::endl;
 		return;
@@ -58,7 +56,7 @@ namespace al {
 
 std::shared_ptr<al::IEffect> al::create_aux_effect(const std::string *name, const std::string &type, udm::LinkedPropertyWrapper &prop)
 {
-	auto *soundSys = c_engine->GetSoundSystem();
+	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
 	if(soundSys == nullptr)
 		return nullptr;
 	if(type == "reverb") {
@@ -77,7 +75,7 @@ std::shared_ptr<al::IEffect> al::create_aux_effect(const std::string *name, cons
 		prop["air_absorption_gainhf"](props.flAirAbsorptionGainHF);
 		prop["room_rolloff_factor"](props.flRoomRolloffFactor);
 		prop["decay_hflimit"](props.iDecayHFLimit);
-		return (name != nullptr) ? c_engine->CreateAuxEffect(*name, props) : soundSys->CreateEffect(props);
+		return (name != nullptr) ? pragma::get_cengine()->CreateAuxEffect(*name, props) : soundSys->CreateEffect(props);
 	}
 	else if(type == "chorus") {
 		al::EfxChorusProperties props {};
@@ -88,7 +86,7 @@ std::shared_ptr<al::IEffect> al::create_aux_effect(const std::string *name, cons
 
 		prop["waveform"](props.iWaveform);
 		prop["phase"](props.iPhase);
-		return (name != nullptr) ? c_engine->CreateAuxEffect(*name, props) : soundSys->CreateEffect(props);
+		return (name != nullptr) ? pragma::get_cengine()->CreateAuxEffect(*name, props) : soundSys->CreateEffect(props);
 	}
 	else if(type == "distortion") {
 		al::EfxDistortionProperties props {};
@@ -97,7 +95,7 @@ std::shared_ptr<al::IEffect> al::create_aux_effect(const std::string *name, cons
 		prop["lowpass_cutoff"](props.flLowpassCutoff);
 		prop["eqcenter"](props.flEQCenter);
 		prop["eqbandwidth"](props.flEQBandwidth);
-		return (name != nullptr) ? c_engine->CreateAuxEffect(*name, props) : soundSys->CreateEffect(props);
+		return (name != nullptr) ? pragma::get_cengine()->CreateAuxEffect(*name, props) : soundSys->CreateEffect(props);
 	}
 	else if(type == "echo") {
 		al::EfxEchoProperties props {};
@@ -106,7 +104,7 @@ std::shared_ptr<al::IEffect> al::create_aux_effect(const std::string *name, cons
 		prop["damping"](props.flDamping);
 		prop["feedback"](props.flFeedback);
 		prop["spread"](props.flSpread);
-		return (name != nullptr) ? c_engine->CreateAuxEffect(*name, props) : soundSys->CreateEffect(props);
+		return (name != nullptr) ? pragma::get_cengine()->CreateAuxEffect(*name, props) : soundSys->CreateEffect(props);
 	}
 	else if(type == "flanger") {
 		al::EfxFlangerProperties props {};
@@ -117,7 +115,7 @@ std::shared_ptr<al::IEffect> al::create_aux_effect(const std::string *name, cons
 
 		prop["waveform"](props.iWaveform);
 		prop["phase"](props.iPhase);
-		return (name != nullptr) ? c_engine->CreateAuxEffect(*name, props) : soundSys->CreateEffect(props);
+		return (name != nullptr) ? pragma::get_cengine()->CreateAuxEffect(*name, props) : soundSys->CreateEffect(props);
 	}
 	else if(type == "frequency_shifter") {
 		al::EfxFrequencyShifterProperties props {};
@@ -125,7 +123,7 @@ std::shared_ptr<al::IEffect> al::create_aux_effect(const std::string *name, cons
 
 		prop["left_direction"](props.iLeftDirection);
 		prop["right_direction"](props.iRightDirection);
-		return (name != nullptr) ? c_engine->CreateAuxEffect(*name, props) : soundSys->CreateEffect(props);
+		return (name != nullptr) ? pragma::get_cengine()->CreateAuxEffect(*name, props) : soundSys->CreateEffect(props);
 	}
 	else if(type == "vocal_morpher") {
 		al::EfxVocalMorpherProperties props {};
@@ -157,13 +155,13 @@ std::shared_ptr<al::IEffect> al::create_aux_effect(const std::string *name, cons
 			else
 				prop[key](*pair.second);
 		}
-		return (name != nullptr) ? c_engine->CreateAuxEffect(*name, props) : soundSys->CreateEffect(props);
+		return (name != nullptr) ? pragma::get_cengine()->CreateAuxEffect(*name, props) : soundSys->CreateEffect(props);
 	}
 	else if(type == "pitch_shifter") {
 		al::EfxPitchShifterProperties props {};
 		prop["coarse_tune"](props.iCoarseTune);
 		prop["fine_tune"](props.iFineTune);
-		return (name != nullptr) ? c_engine->CreateAuxEffect(*name, props) : soundSys->CreateEffect(props);
+		return (name != nullptr) ? pragma::get_cengine()->CreateAuxEffect(*name, props) : soundSys->CreateEffect(props);
 	}
 	else if(type == "ring_modulator") {
 		al::EfxRingModulatorProperties props {};
@@ -171,7 +169,7 @@ std::shared_ptr<al::IEffect> al::create_aux_effect(const std::string *name, cons
 		prop["highpass_cutoff"](props.flHighpassCutoff);
 
 		prop["waveform"](props.iWaveform);
-		return (name != nullptr) ? c_engine->CreateAuxEffect(*name, props) : soundSys->CreateEffect(props);
+		return (name != nullptr) ? pragma::get_cengine()->CreateAuxEffect(*name, props) : soundSys->CreateEffect(props);
 	}
 	else if(type == "autowah") {
 		al::EfxAutoWahProperties props {};
@@ -179,12 +177,12 @@ std::shared_ptr<al::IEffect> al::create_aux_effect(const std::string *name, cons
 		prop["release_time"](props.flReleaseTime);
 		prop["resonance"](props.flResonance);
 		prop["peak_gain"](props.flPeakGain);
-		return (name != nullptr) ? c_engine->CreateAuxEffect(*name, props) : soundSys->CreateEffect(props);
+		return (name != nullptr) ? pragma::get_cengine()->CreateAuxEffect(*name, props) : soundSys->CreateEffect(props);
 	}
 	else if(type == "compressor") {
 		al::EfxCompressor props {};
 		prop["onoff"](props.iOnOff);
-		return (name != nullptr) ? c_engine->CreateAuxEffect(*name, props) : soundSys->CreateEffect(props);
+		return (name != nullptr) ? pragma::get_cengine()->CreateAuxEffect(*name, props) : soundSys->CreateEffect(props);
 	}
 	else if(type == "equalizer") {
 		al::EfxEqualizer props {};
@@ -198,7 +196,7 @@ std::shared_ptr<al::IEffect> al::create_aux_effect(const std::string *name, cons
 		prop["mid2_width"](props.flMid2Width);
 		prop["high_gain"](props.flHighGain);
 		prop["high_cutoff"](props.flHighCutoff);
-		return (name != nullptr) ? c_engine->CreateAuxEffect(*name, props) : soundSys->CreateEffect(props);
+		return (name != nullptr) ? pragma::get_cengine()->CreateAuxEffect(*name, props) : soundSys->CreateEffect(props);
 	}
 	else if(type == "eaxreverb") {
 		al::EfxEaxReverbProperties props {};
@@ -232,7 +230,7 @@ std::shared_ptr<al::IEffect> al::create_aux_effect(const std::string *name, cons
 			if(!val.empty())
 				ustring::string_to_array<float>(val, pair.second, atof, 3);
 		}
-		return (name != nullptr) ? c_engine->CreateAuxEffect(*name, props) : soundSys->CreateEffect(props);
+		return (name != nullptr) ? pragma::get_cengine()->CreateAuxEffect(*name, props) : soundSys->CreateEffect(props);
 	}
 	return nullptr;
 }

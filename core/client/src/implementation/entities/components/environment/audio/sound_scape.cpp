@@ -14,10 +14,10 @@ module;
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
-module pragma.client.entities.components.audio.sound_scape;
+module pragma.client;
 
-import pragma.client.entities.components;
-import pragma.client.game;
+import :entities.components.audio.sound_scape;
+import :game;
 
 using namespace pragma;
 
@@ -27,7 +27,6 @@ namespace pragma {
 
 CSoundScapeComponent *CSoundScapeComponent::s_active = NULL;
 
-extern CGame *c_game;
 
 CSoundScapeComponent::~CSoundScapeComponent()
 {
@@ -48,10 +47,10 @@ void CSoundScapeComponent::OnTick(double dt)
 		return;
 	auto &entThis = GetEntity();
 	auto pTrComponent = entThis.GetTransformComponent();
-	SetNextTick(c_game->CurTime() + 0.25f);
+	SetNextTick(pragma::get_cgame()->CurTime() + 0.25f);
 	if(pTrComponent != nullptr && IsPlayerInRange()) {
 		if(s_active != this) {
-			auto *pl = c_game->GetLocalPlayer();
+			auto *pl = pragma::get_cgame()->GetLocalPlayer();
 			auto &ent = pl->GetEntity();
 			auto charComponentEnt = ent.GetCharacterComponent();
 			auto pTrComponentEnt = ent.GetTransformComponent();
@@ -60,7 +59,7 @@ void CSoundScapeComponent::OnTick(double dt)
 				tr.SetSource(charComponentEnt.valid() ? charComponentEnt->GetEyePosition() : pTrComponentEnt->GetPosition());
 				tr.SetTarget(pTrComponent->GetPosition());
 				tr.SetFlags(RayCastFlags::Default | RayCastFlags::IgnoreDynamic);
-				auto result = c_game->RayCast(tr);
+				auto result = pragma::get_cgame()->RayCast(tr);
 				if(result.hitType == RayCastHitType::None)
 					StartSoundScape();
 			}
@@ -74,7 +73,7 @@ void CSoundScapeComponent::OnEntitySpawn()
 {
 	BaseEnvSoundScapeComponent::OnEntitySpawn();
 	for(auto &pair : m_positions) {
-		EntityIterator itEnt {*c_game};
+		EntityIterator itEnt {*pragma::get_cgame()};
 		itEnt.AttachFilter<EntityIteratorFilterEntity>(pair.second);
 		auto it = itEnt.begin();
 		if(it != itEnt.end())
@@ -97,7 +96,7 @@ void CSoundScapeComponent::OnEntitySpawn()
 		snd->SetRelative(true);
 		m_sound = snd;
 	}
-	SetNextTick(c_game->CurTime() + umath::random(0.f, 0.25f)); // Spread out think time between entities
+	SetNextTick(pragma::get_cgame()->CurTime() + umath::random(0.f, 0.25f)); // Spread out think time between entities
 }
 
 void CSoundScapeComponent::ReceiveData(NetPacket &packet)
@@ -152,7 +151,7 @@ void CSoundScapeComponent::StopSoundScape()
 
 bool CSoundScapeComponent::IsPlayerInRange()
 {
-	auto *pl = c_game->GetLocalPlayer();
+	auto *pl = pragma::get_cgame()->GetLocalPlayer();
 	if(pl == NULL)
 		return false;
 	auto &ent = GetEntity();

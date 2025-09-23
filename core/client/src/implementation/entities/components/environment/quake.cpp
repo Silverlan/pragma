@@ -10,17 +10,17 @@ module;
 #include <pragma/entities/components/base_physics_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
-module pragma.client.entities.components.env_quake;
+module pragma.client;
 
-import pragma.client.client_state;
-import pragma.client.engine;
-import pragma.client.entities.components.player;
-import pragma.client.game;
+
+import :entities.components.env_quake;
+import :client_state;
+import :engine;
+import :entities.components.player;
+import :game;
 
 using namespace pragma;
 
-extern CEngine *c_engine;
-extern CGame *c_game;
 
 CQuakeComponent::~CQuakeComponent() { CancelScreenShake(); }
 void CQuakeComponent::ReceiveData(NetPacket &packet)
@@ -41,10 +41,10 @@ void CQuakeComponent::StartShake()
 	if(ShouldShakeView() == false)
 		return;
 	auto perlin = std::make_shared<noise::module::Perlin>();
-	perlin->SetSeed(CInt32(c_engine->GetTickCount()));
-	m_tStartShake = CFloat(c_game->CurTime());
+	perlin->SetSeed(CInt32(pragma::get_cengine()->GetTickCount()));
+	m_tStartShake = CFloat(pragma::get_cgame()->CurTime());
 	m_cbScreenShake
-	  = c_game->AddCallback("CalcView", FunctionCallback<void, std::reference_wrapper<Vector3>, std::reference_wrapper<Quat>, std::reference_wrapper<Quat>>::Create([this, perlin](std::reference_wrapper<Vector3> refPos, std::reference_wrapper<Quat>, std::reference_wrapper<Quat>) {
+	  = pragma::get_cgame()->AddCallback("CalcView", FunctionCallback<void, std::reference_wrapper<Vector3>, std::reference_wrapper<Quat>, std::reference_wrapper<Quat>>::Create([this, perlin](std::reference_wrapper<Vector3> refPos, std::reference_wrapper<Quat>, std::reference_wrapper<Quat>) {
 		    auto &pos = refPos.get();
 		    //auto &rot = refRot.get();
 
@@ -60,7 +60,7 @@ void CQuakeComponent::StartShake()
 		    auto frequency = m_frequency;
 		    auto amplitude = m_amplitude;
 
-		    auto &t = c_game->CurTime();
+		    auto &t = pragma::get_cgame()->CurTime();
 		    auto tDelta = t - m_tStartShake;
 		    if(tDelta >= duration) {
 			    if(ShouldRemoveOnComplete())
@@ -69,7 +69,7 @@ void CQuakeComponent::StartShake()
 			    return;
 		    }
 		    auto bGlobal = IsGlobal();
-		    auto *pl = c_game->GetLocalPlayer();
+		    auto *pl = pragma::get_cgame()->GetLocalPlayer();
 		    if(pl == nullptr || (radius == 0.f && bGlobal == false))
 			    return;
 		    auto &ent = pl->GetEntity();

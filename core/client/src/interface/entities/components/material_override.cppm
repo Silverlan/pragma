@@ -6,12 +6,12 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/components/base_entity_component_member_register.hpp"
 #include <pragma/entities/components/base_time_scale_component.hpp>
+#include "cmaterial.h"
 #include <material_manager2.hpp>
 #include <queue>
 
-export module pragma.client.entities.components.material_override;
-
-import pragma.client.rendering.material_property_block;
+export module pragma.client:entities.components.material_override;
+import :rendering.material_property_block;
 
 export namespace pragma {
 	class DLLCLIENT CMaterialOverrideComponent final : public BaseEntityComponent, public DynamicMemberRegister {

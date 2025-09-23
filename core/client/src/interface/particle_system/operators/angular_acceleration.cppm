@@ -7,20 +7,21 @@ module;
 #include <mathutil/umath.h>
 #include <pragma/math/vector/wvvector3.h>
 
-export module pragma.client.particle_system:operator_angular_acceleration;
+export module pragma.client:particle_system.operator_angular_acceleration;
 
+import :particle_system.modifier;
+
+export namespace pragma::ecs {class CParticleSystemComponent;}
 export class DLLCLIENT CParticleOperatorAngularAcceleration : public CParticleOperator {
   public:
 	CParticleOperatorAngularAcceleration() = default;
-	virtual void Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+	virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
 	virtual void Simulate(CParticle &particle, double tDelta, float strength) override;
   private:
 	Vector3 m_vAcceleration = {};
 };
 
-REGISTER_PARTICLE_OPERATOR(angular_acceleration, CParticleOperatorAngularAcceleration);
-
-void CParticleOperatorAngularAcceleration::Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void CParticleOperatorAngularAcceleration::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleOperator::Initialize(pSystem, values);
 	for(auto &pair : values) {

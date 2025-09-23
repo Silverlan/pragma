@@ -6,7 +6,7 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <wgui/wibase.h>
 
-export module pragma.client.gui:message_box;
+export module pragma.client:gui.message_box;
 
 import pragma.gui;
 

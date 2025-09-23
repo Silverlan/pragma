@@ -7,6 +7,8 @@
 #include "pragma/entities/components/base_observable_component.hpp"
 #include "pragma/entities/components/base_observer_component.hpp"
 #include "pragma/entities/components/base_player_component.hpp"
+#include "pragma/console/c_cvar_global_functions.h"
+#include "pragma/string/format.h"
 #include <pragma/console/convars.h>
 #include "pragma/console/c_cvar.h"
 #include <pragma/lua/luacallback.h>
@@ -43,23 +45,14 @@
 
 #undef PlaySound
 
-import pragma.client.client_state;
-import pragma.client.debug;
-import pragma.client.engine;
-import pragma.client.entities.components;
-import pragma.client.game;
-import pragma.client.gui;
-import pragma.client.util;
+import pragma.client;
 
-extern CEngine *c_engine;
-extern ClientState *client;
-extern CGame *c_game;
 
 DLLCLIENT void CMD_entities_cl(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	if(!state->IsGameActive())
 		return;
-	auto sortedEnts = util::cmd::get_sorted_entities(*c_game, pl);
+	auto sortedEnts = util::cmd::get_sorted_entities(*pragma::get_cgame(), pl);
 	std::optional<std::string> className = {};
 	if(argv.empty() == false)
 		className = '*' + argv.front() + '*';
@@ -223,17 +216,18 @@ DLLCLIENT void CMD_sound_play(NetworkState *, pragma::BasePlayerComponent *, std
 {
 	if(argv.empty())
 		return;
+	auto *client = pragma::get_client_state();
 	if(client->PrecacheSound(argv[0]) == false)
 		return;
 	client->PlaySound(argv[0], ALSoundType::GUI, ALCreateFlags::None);
 }
 
-DLLCLIENT void CMD_sound_stop(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &) { client->StopSounds(); }
+DLLCLIENT void CMD_sound_stop(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &) { pragma::get_client_state()->StopSounds(); }
 
 DLLCLIENT void CMD_status_cl(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
 	auto &players = pragma::CPlayerComponent::GetAll();
-	auto *cl = client->GetClient();
+	auto *cl = pragma::get_client_state()->GetClient();
 	if(cl == nullptr) {
 		Con::cwar << "Not connected to a server!" << Con::endl;
 		return;
@@ -264,7 +258,7 @@ DLLCLIENT void CMD_status_cl(NetworkState *, pragma::BasePlayerComponent *, std:
 #ifdef _DEBUG
 void CMD_cl_dump_sounds(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
-	auto &sounds = client->GetSounds();
+	auto &sounds = pragma::get_client_state()->GetSounds();
 	for(auto &sndInfo : sounds) {
 		auto &snd = sndInfo.sound;
 		if(sndInfo.container == false) {
@@ -297,7 +291,7 @@ void CMD_cl_dump_sounds(NetworkState *, pragma::BasePlayerComponent *, std::vect
 				}
 				Con::cout << "; Source: ";
 				std::string name;
-				if(client->GetSoundName(buf, name) == true)
+				if(pragma::get_client_state()->GetSoundName(buf, name) == true)
 					Con::cout << name;
 				else
 					Con::cout << "Unknown";
@@ -330,7 +324,7 @@ void CMD_cl_dump_netmessages(NetworkState *, pragma::BasePlayerComponent *, std:
 
 void CMD_screenshot(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
-	auto *game = client->GetGameState();
+	auto *game = pragma::get_client_state()->GetGameState();
 	if(game == nullptr)
 		return;
 
@@ -339,7 +333,7 @@ void CMD_screenshot(NetworkState *, pragma::BasePlayerComponent *, std::vector<s
 
 	auto mode = pragma::console::get_command_option_parameter_value(commandOptions, "mode");
 	if(ustring::compare<std::string>(mode, "raytracing", false)) {
-		auto resolution = c_engine->GetRenderResolution();
+		auto resolution = pragma::get_cengine()->GetRenderResolution();
 		auto width = util::to_uint(pragma::console::get_command_option_parameter_value(commandOptions, "width", std::to_string(resolution.x)));
 		auto height = util::to_uint(pragma::console::get_command_option_parameter_value(commandOptions, "height", std::to_string(resolution.y)));
 
@@ -404,15 +398,15 @@ void CMD_screenshot(NetworkState *, pragma::BasePlayerComponent *, std::vector<s
 DLLCLIENT void CMD_shader_reload(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
 	if(argv.empty()) {
-		auto &shaderManager = c_engine->GetShaderManager();
+		auto &shaderManager = pragma::get_cengine()->GetShaderManager();
 		for(auto &pair : shaderManager.GetShaderNameToIndexTable()) {
 			Con::cout << "Reloading shader '" << pair.first << "'..." << Con::endl;
-			c_engine->ReloadShader(pair.first);
+			pragma::get_cengine()->ReloadShader(pair.first);
 		}
 		Con::cout << "All shaders have been reloaded!" << Con::endl;
 		return;
 	}
-	c_engine->ReloadShader(argv.front());
+	pragma::get_cengine()->ReloadShader(argv.front());
 }
 
 void CMD_shader_optimize(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
@@ -424,7 +418,7 @@ void CMD_shader_optimize(NetworkState *state, pragma::BasePlayerComponent *pl, s
 		return;
 	}
 	auto &shaderName = argv.front();
-	auto &renderContext = c_engine->GetRenderContext();
+	auto &renderContext = pragma::get_cengine()->GetRenderContext();
 	if(renderContext.GetAPIAbbreviation() != "VK") {
 		Con::cwar << "Shader optimization only supported for Vulkan!" << Con::endl;
 		return;
@@ -485,7 +479,7 @@ void CMD_shader_optimize(NetworkState *state, pragma::BasePlayerComponent *pl, s
 
 void CMD_shader_list(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
-	auto &shaderManager = c_engine->GetShaderManager();
+	auto &shaderManager = pragma::get_cengine()->GetShaderManager();
 	std::vector<std::shared_ptr<prosper::Shader>> shaderList;
 	auto shaders = shaderManager.GetShaders();
 	shaderList.reserve(shaders.size());
@@ -510,7 +504,7 @@ void CMD_shader_list(NetworkState *, pragma::BasePlayerComponent *, std::vector<
 
 DLLCLIENT void CMD_flashlight_toggle(NetworkState *, pragma::BasePlayerComponent *pl, std::vector<std::string> &)
 {
-	CGame *game = client->GetGameState();
+	CGame *game = pragma::get_client_state()->GetGameState();
 	if(game == NULL)
 		return;
 	if(pl == NULL)
@@ -521,7 +515,7 @@ DLLCLIENT void CMD_flashlight_toggle(NetworkState *, pragma::BasePlayerComponent
 void CMD_debug_ai_schedule_print(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	CHECK_CHEATS("debug_ai_schedule_print", state, );
-	if(c_game == nullptr || pl == nullptr)
+	if(pragma::get_cgame() == nullptr || pl == nullptr)
 		return;
 	auto charComponent = pl->GetEntity().GetCharacterComponent();
 	if(charComponent.expired())
@@ -541,7 +535,7 @@ void CMD_debug_ai_schedule_print(NetworkState *state, pragma::BasePlayerComponen
 	Con::cout << "Querying schedule data for NPC " << *npc << "..." << Con::endl;
 	NetPacket p;
 	nwm::write_entity(p, npc);
-	client->SendPacket("debug_ai_schedule_print", p, pragma::networking::Protocol::SlowReliable);
+	pragma::get_client_state()->SendPacket("debug_ai_schedule_print", p, pragma::networking::Protocol::SlowReliable);
 }
 
 DLLCLIENT void CMD_reloadmaterial(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
@@ -550,7 +544,7 @@ DLLCLIENT void CMD_reloadmaterial(NetworkState *state, pragma::BasePlayerCompone
 	if(argv.empty())
 		return;
 	Con::cout << "Reloading '" << argv[0] << "'..." << Con::endl;
-	client->LoadMaterial(argv[0].c_str(), nullptr, true);
+	pragma::get_client_state()->LoadMaterial(argv[0].c_str(), nullptr, true);
 }
 
 DLLCLIENT void CMD_reloadmaterials(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &) { CHECK_CHEATS("reloadmaterials", state, ); }
@@ -586,7 +580,7 @@ void Console::commands::cl_find(NetworkState *state, pragma::BasePlayerComponent
 		Con::cout << "- " << name << Con::endl;
 }
 
-void CMD_fps(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &) { Con::cout << "FPS: " << util::round_string(c_engine->GetFPS(), 0) << Con::endl << "Frame Time: " << util::round_string(c_engine->GetFrameTime(), 2) << "ms" << Con::endl; }
+void CMD_fps(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &) { Con::cout << "FPS: " << util::round_string(pragma::get_cengine()->GetFPS(), 0) << Con::endl << "Frame Time: " << util::round_string(pragma::get_cengine()->GetFrameTime(), 2) << "ms" << Con::endl; }
 
 static void write_to_file(const std::string &fileName, const std::optional<std::string> &contents)
 {
@@ -602,32 +596,32 @@ static void write_to_file(const std::string &fileName, const std::optional<std::
 }
 void Console::commands::vk_dump_limits(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
-	auto limits = c_engine->GetRenderContext().DumpLimits();
+	auto limits = pragma::get_cengine()->GetRenderContext().DumpLimits();
 	write_to_file("vk_limits.txt", limits);
 }
 void Console::commands::vk_dump_features(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
-	auto limits = c_engine->GetRenderContext().DumpFeatures();
+	auto limits = pragma::get_cengine()->GetRenderContext().DumpFeatures();
 	write_to_file("vk_features.txt", limits);
 }
 void Console::commands::vk_dump_format_properties(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
-	auto limits = c_engine->GetRenderContext().DumpFormatProperties();
+	auto limits = pragma::get_cengine()->GetRenderContext().DumpFormatProperties();
 	write_to_file("vk_format_properties.txt", limits);
 }
 void Console::commands::vk_dump_image_format_properties(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
-	auto limits = c_engine->GetRenderContext().DumpImageFormatProperties();
+	auto limits = pragma::get_cengine()->GetRenderContext().DumpImageFormatProperties();
 	write_to_file("vk_image_format_properties.txt", limits);
 }
 void Console::commands::vk_dump_layers(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
-	auto limits = c_engine->GetRenderContext().DumpLayers();
+	auto limits = pragma::get_cengine()->GetRenderContext().DumpLayers();
 	write_to_file("vk_layers.txt", limits);
 }
 void Console::commands::vk_dump_extensions(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
-	auto limits = c_engine->GetRenderContext().DumpExtensions();
+	auto limits = pragma::get_cengine()->GetRenderContext().DumpExtensions();
 	write_to_file("vk_extensions.txt", limits);
 }
 /*static void print_memory_stats(std::stringstream &ss,Vulkan::MemoryManager::StatInfo &info)
@@ -648,7 +642,7 @@ void Console::commands::vk_dump_extensions(NetworkState *, pragma::BasePlayerCom
 }*/ // prosper TODO
 void Console::commands::vk_dump_memory_stats(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
-	/*auto &context = c_engine->GetRenderContext();
+	/*auto &context = pragma::get_cengine()->GetRenderContext();
 	auto &memoryMan = context.GetMemoryManager();
 	auto stats = memoryMan.GetStatistics();
 	auto f = FileManager::OpenFile<VFilePtrReal>("vk_memory_stats.txt","w");
@@ -680,7 +674,7 @@ void Console::commands::vk_print_memory_stats(NetworkState *state, pragma::BaseP
 	//bool prosper::util::get_memory_stats(IPrContext &context,MemoryPropertyFlags memPropFlags,DeviceSize &outAvailableSize,DeviceSize &outAllocatedSize)
 	prosper::DeviceSize availableSize,allocatedSize;
 	std::vector<uint32_t> memIndices;
-	auto r = prosper::util::get_memory_stats(c_engine->GetRenderContext(),prosper::MemoryPropertyFlags::DeviceLocalBit,availableSize,allocatedSize,&memIndices);
+	auto r = prosper::util::get_memory_stats(pragma::get_cengine()->GetRenderContext(),prosper::MemoryPropertyFlags::DeviceLocalBit,availableSize,allocatedSize,&memIndices);
 	if(r == false)
 	{
 		Con::cwar<<"No device local memory types found!"<<Con::endl;
@@ -705,7 +699,7 @@ void Console::commands::vk_print_memory_stats(NetworkState *state, pragma::BaseP
 		{
 			uint64_t allocatedSize = 0ull;
 			uint64_t totalSize = 0ull;
-			memTracker.GetMemoryStats(c_engine->GetRenderContext(),idx,allocatedSize,totalSize,pair.first);
+			memTracker.GetMemoryStats(pragma::get_cengine()->GetRenderContext(),idx,allocatedSize,totalSize,pair.first);
 			allocatedSizeOfType += allocatedSize;
 
 			memTracker.GetResources(idx,resources,pair.first);
@@ -804,7 +798,7 @@ void Console::commands::vk_print_memory_stats(NetworkState *state, pragma::BaseP
 	}
 	std::cout<<ss.str()<<std::endl;
 
-	/*auto &context = c_engine->GetRenderContext();
+	/*auto &context = pragma::get_cengine()->GetRenderContext();
 	auto &memoryMan = context.GetMemoryManager();
 	auto stats = memoryMan.GetStatistics();
 	if(argv.empty())

@@ -5,9 +5,9 @@ module;
 
 #include "stdafx_client.h"
 
-module pragma.client.rendering.shader_graph;
+module pragma.client;
 
-import :node_vector_transform;
+import :rendering.shader_graph.node_vector_transform;
 
 using namespace pragma::rendering::shader_graph;
 

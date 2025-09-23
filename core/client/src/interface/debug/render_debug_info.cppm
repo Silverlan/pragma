@@ -8,8 +8,7 @@ module;
 #include <chrono>
 #include <memory>
 
-export module pragma.client.debug.render_debug_info;
-
+export module pragma.client:debug.render_debug_info;
 export {
 	class DLLCLIENT RenderDebugInfo {
 	public:

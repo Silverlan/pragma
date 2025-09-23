@@ -8,15 +8,16 @@ module;
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
-module pragma.client.entities.components.env_fog_controller;
+module pragma.client;
 
-import pragma.client.entities.components.color;
-import pragma.client.entities.components.toggle;
-import pragma.client.game;
+
+import :entities.components.env_fog_controller;
+import :entities.components.color;
+import :entities.components.toggle;
+import :game;
 
 using namespace pragma;
 
-extern CGame *c_game;
 
 void CFogControllerComponent::Initialize()
 {
@@ -64,7 +65,7 @@ void CFogControllerComponent::ReceiveData(NetPacket &packet)
 }
 WorldEnvironment::Fog &CFogControllerComponent::GetFog()
 {
-	auto &worldEnv = c_game->GetWorldEnvironment();
+	auto &worldEnv = pragma::get_cgame()->GetWorldEnvironment();
 	return worldEnv.GetFogSettings();
 }
 void CFogControllerComponent::SetFogStart(float start)

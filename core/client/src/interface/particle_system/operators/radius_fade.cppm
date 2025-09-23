@@ -7,14 +7,16 @@ module;
 #include <pragma/math/util_random.hpp>
 #include <mathutil/umath_random.hpp>
 
-export module pragma.client.particle_system:operator_radius_fade;
+export module pragma.client:particle_system.operator_radius_fade;
 
-import :modifier_gradual_fade;
+import :entities.components.particle_system;
+import :particle_system.modifier;
+import :particle_system.modifier_gradual_fade;
 
 export {
 	class DLLCLIENT CParticleOperatorRadiusFadeBase : public CParticleOperator, public CParticleModifierComponentGradualFade {
 	public:
-		virtual void Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+		virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
 		virtual void Simulate(CParticle &particle, double, float strength) override;
 		virtual void OnParticleCreated(CParticle &particle) override;
 	protected:
@@ -46,11 +48,8 @@ export {
 	};
 };
 
-REGISTER_PARTICLE_OPERATOR(radius_fade, CParticleOperatorRadiusFade);
-REGISTER_PARTICLE_OPERATOR(length_fade, CParticleOperatorLengthFade);
-
 CParticleOperatorRadiusFadeBase::CParticleOperatorRadiusFadeBase(const std::string &identifier) : CParticleOperator {}, m_identifier {identifier} {}
-void CParticleOperatorRadiusFadeBase::Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void CParticleOperatorRadiusFadeBase::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleOperator::Initialize(pSystem, values);
 	CParticleModifierComponentGradualFade::Initialize(values);
@@ -67,7 +66,7 @@ void CParticleOperatorRadiusFadeBase::Initialize(pragma::CParticleSystemComponen
 	// If no start radius has been specified, the previous known radius of the particle has to be used as start radius.
 	// Since that radius cannot be known beforehand, we need to store it.
 	if(m_fRadiusStart.IsSet() == false)
-		m_particleStartRadiuses = std::make_unique<std::vector<float>>(pSystem.GetMaxParticleCount(), std::numeric_limits<float>::max());
+		m_particleStartRadiuses = std::make_unique<std::vector<float>>(static_cast<pragma::ecs::CParticleSystemComponent&>(pSystem).GetMaxParticleCount(), std::numeric_limits<float>::max());
 }
 void CParticleOperatorRadiusFadeBase::OnParticleCreated(CParticle &particle)
 {

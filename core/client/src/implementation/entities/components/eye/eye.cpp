@@ -5,17 +5,19 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/entities/components/base_animated_component.hpp"
+#include "pragma/entities/components/base_model_component.hpp"
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/entity_component_manager_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/components/component_member_flags.hpp>
 
-module pragma.client.entities.components.eye;
+module pragma.client;
 
-import pragma.client.engine;
-import pragma.client.entities.components.render;
 
-extern CEngine *c_engine;
+import :entities.components.eye;
+import :engine;
+import :entities.components.render;
+
 
 using namespace pragma;
 

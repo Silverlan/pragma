@@ -6,7 +6,7 @@
 
 #include "pragma/clientdefinitions.h"
 
-export module pragma.client.rendering.shader_graph:node_fog;
+export module pragma.client:rendering.shader_graph.node_fog;
 
 import pragma.shadergraph;
 

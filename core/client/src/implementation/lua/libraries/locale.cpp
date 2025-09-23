@@ -13,15 +13,16 @@ namespace pragma::string {
 };
 #endif
 
-module pragma.client.scripting.lua.libraries.locale;
+module pragma.client;
 
-import pragma.client.client_state;
+
+import :scripting.lua.libraries.locale;
+import :client_state;
 import pragma.locale;
 #ifndef _MSC_VER
 import pragma.string.unicode;
 #endif
 
-extern ClientState *client;
 
 void Lua::Locale::change_language(const std::string &lan) { pragma::locale::set_language(lan); }
 

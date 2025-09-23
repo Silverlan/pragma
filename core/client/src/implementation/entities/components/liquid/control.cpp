@@ -10,14 +10,14 @@ module;
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/physics/raytraces.h>
 
-module pragma.client.entities.components.liquid_control;
+module pragma.client;
 
-import pragma.client.client_state;
-import pragma.client.entities.components.particle_system;
-import pragma.client.game;
 
-extern ClientState *client;
-extern CGame *c_game;
+import :entities.components.liquid_control;
+import :client_state;
+import :entities.components.particle_system;
+import :game;
+
 
 using namespace pragma;
 
@@ -50,7 +50,7 @@ bool CLiquidControlComponent::OnBulletHit(const BulletInfo &bulletInfo, const Tr
 	auto hitPos = srcOrigin + dir * (dist * static_cast<float>(result.friction));
 
 	auto surfMatId = col->GetSurfaceMaterial();
-	auto *surfMat = c_game->GetSurfaceMaterial(surfMatId);
+	auto *surfMat = pragma::get_cgame()->GetSurfaceMaterial(surfMatId);
 	if(surfMat != nullptr) {
 		auto &ptEffect = surfMat->GetImpactParticleEffect();
 		if(ptEffect.empty() == false) {
@@ -72,7 +72,7 @@ bool CLiquidControlComponent::OnBulletHit(const BulletInfo &bulletInfo, const Tr
 
 		auto &bulletImpactSnd = surfMat->GetBulletImpactSound();
 		if(bulletImpactSnd.empty() == false) {
-			auto snd = client->CreateSound(bulletImpactSnd, ALSoundType::Effect | ALSoundType::Physics, ALCreateFlags::Mono);
+			auto snd = pragma::get_client_state()->CreateSound(bulletImpactSnd, ALSoundType::Effect | ALSoundType::Physics, ALCreateFlags::Mono);
 			if(snd != nullptr) {
 				snd->SetPosition(hitPos);
 				snd->SetType(ALSoundType::Effect);

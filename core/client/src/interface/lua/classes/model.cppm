@@ -6,9 +6,8 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/c_ldefinitions.h"
 
-export module pragma.client.scripting.lua.classes.model;
-
-import pragma.client.assets;
+export module pragma.client:scripting.lua.classes.model;
+import :assets;
 
 export namespace Lua {
 	namespace Model {

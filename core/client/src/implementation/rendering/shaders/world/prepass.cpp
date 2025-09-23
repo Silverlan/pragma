@@ -10,18 +10,17 @@ module;
 #include <prosper_util.hpp>
 #include <cmaterial.h>
 
-module pragma.client.rendering.shaders;
+module pragma.client;
 
-import :prepass;
 
-import pragma.client.client_state;
-import pragma.client.engine;
-import pragma.client.model;
+import :rendering.shaders.prepass;
+
+import :client_state;
+import :engine;
+import :model;
 
 using namespace pragma;
 
-extern CEngine *c_engine;
-extern ClientState *client;
 
 decltype(ShaderPrepassBase::VERTEX_BINDING_RENDER_BUFFER_INDEX) ShaderPrepassBase::VERTEX_BINDING_RENDER_BUFFER_INDEX = {prosper::VertexInputRate::Instance};
 decltype(ShaderPrepassBase::VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX) ShaderPrepassBase::VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX = {ShaderEntity::VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX, VERTEX_BINDING_RENDER_BUFFER_INDEX};
@@ -73,7 +72,7 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderPrepassBase::InitializeMater
 	auto diffuseTexture = std::static_pointer_cast<Texture>(diffuseMap->texture);
 	if(diffuseTexture->HasValidVkTexture() == false)
 		return nullptr;
-	auto descSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_MATERIAL);
+	auto descSetGroup = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_MATERIAL);
 	mat.SetDescriptorSetGroup(*this, descSetGroup);
 	auto &descSet = *descSetGroup->GetDescriptorSet();
 	descSet.SetBindingTexture(*diffuseTexture->GetVkTexture(), umath::to_integral(MaterialBinding::AlbedoMap));
@@ -214,7 +213,7 @@ void ShaderPrepass::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &p
 	if(isReflection)
 		prosper::util::set_graphics_pipeline_cull_mode_flags(pipelineInfo, prosper::CullModeFlags::FrontBit);
 
-	if(client->GetGameWorldShaderSettings().ssaoEnabled)
+	if(pragma::get_client_state()->GetGameWorldShaderSettings().ssaoEnabled)
 		enableNormalOutput = true;
 	AddSpecializationConstant(pipelineInfo, prosper::ShaderStageFlags::FragmentBit, umath::to_integral(SpecializationConstant::EnableAlphaTest), static_cast<uint32_t>(enableAlphaTest));
 	AddSpecializationConstant(pipelineInfo, prosper::ShaderStageFlags::FragmentBit, umath::to_integral(SpecializationConstant::EnableNormalOutput), static_cast<uint32_t>(enableNormalOutput));

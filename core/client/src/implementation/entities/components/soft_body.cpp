@@ -8,11 +8,12 @@ module;
 #include <pragma/physics/environment.hpp>
 #include <pragma/physics/collisionmesh.h>
 
-module pragma.client.entities.components.soft_body;
+module pragma.client;
 
-import pragma.client.engine;
 
-extern CEngine *c_engine;
+import :entities.components.soft_body;
+import :engine;
+
 
 using namespace pragma;
 
@@ -33,7 +34,7 @@ bool CSoftBodyComponent::InitializeSoftBodyData()
 	//m_softBodyBuffers = std::make_unique<std::vector<Vulkan::SwapBuffer>>(); // prosper TODO
 
 	auto &meshes = m_softBodyData->meshes;
-	auto &context = c_engine->GetRenderContext();
+	auto &context = pragma::get_cengine()->GetRenderContext();
 	for(auto &mesh : meshes)
 	{
 		for(auto &subMesh : mesh->GetSubMeshes())
@@ -58,7 +59,7 @@ void CSoftBodyComponent::ReleaseSoftBodyData()
 {
 	/*if(m_softBodyData != nullptr)
 	{
-		auto &context = c_engine->GetRenderContext();
+		auto &context = pragma::get_cengine()->GetRenderContext();
 		for(auto &buf : m_softBodyData->meshes)
 			const_cast<Vulkan::Context&>(context).ReleaseResourceSafely(buf);
 		if(m_softBodyBuffers != nullptr)

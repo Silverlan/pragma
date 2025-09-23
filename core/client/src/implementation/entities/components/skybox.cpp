@@ -12,6 +12,7 @@ module;
 #include <util_texture_info.hpp>
 #include <prosper_command_buffer.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
+#include "pragma/entities/components/base_model_component.hpp"
 #include <image/prosper_image.hpp>
 #include <prosper_util.hpp>
 #include <pragma/entities/entity_iterator.hpp>
@@ -24,17 +25,14 @@ module;
 #include <fsys/ifile.hpp>
 #include <wgui/types/wirect.h>
 
-module pragma.client.entities.components.skybox;
+module pragma.client;
 
-import pragma.client.client_state;
-import pragma.client.engine;
-import pragma.client.entities.components;
-import pragma.client.game;
-import pragma.client.rendering.shaders;
+import :entities.components.skybox;
+import :client_state;
+import :engine;
+import :game;
+import :rendering.shaders;
 
-extern CEngine *c_engine;
-extern ClientState *client;
-extern CGame *c_game;
 
 using namespace pragma;
 
@@ -106,7 +104,7 @@ bool CSkyboxComponent::CreateCubemapFromIndividualTextures(const std::string &ma
 	uint32_t largestHeight = 0u;
 	for(auto i = decltype(sidePostfixes.size()) {0u}; i < sidePostfixes.size(); ++i) {
 		auto &sidePostFix = sidePostfixes.at(i);
-		auto *matSide = client->LoadMaterial(matName + postfix + sidePostFix, nullptr, false, true);
+		auto *matSide = pragma::get_client_state()->LoadMaterial(matName + postfix + sidePostFix, nullptr, false, true);
 		if(matSide == nullptr)
 			return false;
 		auto *diffuseMapSide = matSide->GetDiffuseMap();
@@ -139,7 +137,7 @@ bool CSkyboxComponent::CreateCubemapFromIndividualTextures(const std::string &ma
 	imgCreateInfo.postCreateLayout = prosper::ImageLayout::TransferDstOptimal;
 	imgCreateInfo.tiling = prosper::ImageTiling::Optimal;
 	imgCreateInfo.usage = prosper::ImageUsageFlags::TransferSrcBit;
-	auto imgCubemap = c_engine->GetRenderContext().CreateImage(imgCreateInfo);
+	auto imgCubemap = pragma::get_cengine()->GetRenderContext().CreateImage(imgCreateInfo);
 	auto numMipmaps = imgCubemap->GetMipmapCount();
 
 	struct ImageBufferInfo {
@@ -176,9 +174,9 @@ bool CSkyboxComponent::CreateCubemapFromIndividualTextures(const std::string &ma
 	bufCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUToCPU;
 	bufCreateInfo.size = offset;
 	bufCreateInfo.usageFlags = prosper::BufferUsageFlags::TransferDstBit;
-	auto buf = c_engine->GetRenderContext().CreateBuffer(bufCreateInfo);
+	auto buf = pragma::get_cengine()->GetRenderContext().CreateBuffer(bufCreateInfo);
 
-	auto &setupCmd = c_engine->GetSetupCommandBuffer();
+	auto &setupCmd = pragma::get_cengine()->GetSetupCommandBuffer();
 	for(auto &imgBufferInfo : imageBufferInfos) {
 		auto &img = cubemapImages.at(imgBufferInfo.layerIndex);
 
@@ -201,7 +199,7 @@ bool CSkyboxComponent::CreateCubemapFromIndividualTextures(const std::string &ma
 		setupCmd->RecordCopyImageToBuffer(copyInfo, *imgCubemap, prosper::ImageLayout::TransferSrcOptimal, *buf);
 		setupCmd->RecordImageBarrier(*imgCubemap, prosper::ImageLayout::TransferSrcOptimal, prosper::ImageLayout::TransferDstOptimal, range);
 	}
-	c_engine->FlushSetupCommandBuffer();
+	pragma::get_cengine()->FlushSetupCommandBuffer();
 
 	std::vector<std::vector<std::shared_ptr<uimg::ImageBuffer>>> cubemapBuffers {};
 	cubemapBuffers.resize(numLayers);
@@ -233,14 +231,14 @@ bool CSkyboxComponent::CreateCubemapFromIndividualTextures(const std::string &ma
 	imgWriteInfo.wrapMode = uimg::TextureInfo::WrapMode::Clamp;
 	auto fullPath = "addons/converted/materials/" + matName;
 	auto szPerPixel = prosper::util::get_byte_size(prosper::Format::R8G8B8A8_UNorm);
-	if(c_game->SaveImage(ptrCubemapBuffers, largestWidth, largestHeight, szPerPixel, fullPath, imgWriteInfo, true)) {
+	if(pragma::get_cgame()->SaveImage(ptrCubemapBuffers, largestWidth, largestHeight, szPerPixel, fullPath, imgWriteInfo, true)) {
 		Con::cout << "Skybox cubemap texture saved as '" << fullPath << "'! Generating material..." << Con::endl;
-		auto mat = client->CreateMaterial("skybox");
+		auto mat = pragma::get_client_state()->CreateMaterial("skybox");
 		mat->SetTextureProperty("skybox", matName);
 		auto savePath = pragma::asset::relative_path_to_absolute_path(matName, pragma::asset::Type::Material, util::CONVERT_PATH);
 		std::string err;
 		if(mat->Save(savePath.GetString(), err, true)) {
-			client->LoadMaterial(matName, nullptr, true, true);
+			pragma::get_client_state()->LoadMaterial(matName, nullptr, true, true);
 			Con::cout << "Skybox material saved as '" << (matName + ".wmi") << "'" << Con::endl;
 			return true;
 		}
@@ -274,7 +272,7 @@ void CSkyboxComponent::ValidateMaterials()
 				auto &img = vkTex->GetImage();
 				if(img.IsCubemap() == false) {
 					// Equirectangular skybox; We need to convert it to a skybox
-					auto *shader = static_cast<pragma::ShaderEquirectangularToCubemap *>(c_engine->GetShader("equirectangular_to_cubemap").get());
+					auto *shader = static_cast<pragma::ShaderEquirectangularToCubemap *>(pragma::get_cengine()->GetShader("equirectangular_to_cubemap").get());
 					if(shader) {
 						constexpr uint32_t resolution = 1024;
 						auto tex = shader->EquirectangularTextureToCubemap(*vkTex, resolution);
@@ -323,12 +321,12 @@ void CSkybox::Initialize()
 
 static void sky_override(NetworkState *, const ConVar &, std::string, std::string skyMat)
 {
-	if(c_game == nullptr)
+	if(pragma::get_cgame() == nullptr)
 		return;
 	CMaterial *matSky = nullptr;
 	if(skyMat.empty() == false)
-		matSky = static_cast<CMaterial *>(client->LoadMaterial(skyMat, nullptr, false, true));
-	EntityIterator entIt {*c_game};
+		matSky = static_cast<CMaterial *>(pragma::get_client_state()->LoadMaterial(skyMat, nullptr, false, true));
+	EntityIterator entIt {*pragma::get_cgame()};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CSkyboxComponent>>();
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CModelComponent>>();
 	for(auto *ent : entIt)
@@ -357,7 +355,7 @@ static void util_convert_cubemap_equirect(std::vector<std::string> &argv, Conver
 		return;
 	}
 
-	auto &matMan = static_cast<msys::CMaterialManager &>(client->GetMaterialManager());
+	auto &matMan = static_cast<msys::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager());
 	auto tex = matMan.GetTextureManager().LoadAsset(fileName, util::AssetLoadFlags::DontCache | util::AssetLoadFlags::IgnoreCache);
 	if(!tex) {
 		Con::cwar << "Texture '" << fileName << "' could not be loaded!" << Con::endl;
@@ -383,7 +381,7 @@ static void util_convert_cubemap_equirect(std::vector<std::string> &argv, Conver
 	auto outputFileName = util::Path::CreateFile(absPath);
 	outputFileName.RemoveFileExtension(pragma::asset::get_supported_extensions(pragma::asset::Type::Texture));
 	if(conversionMode == ConversionMode::EquirectangularToCubemap) {
-		auto *shader = static_cast<pragma::ShaderEquirectangularToCubemap *>(c_engine->GetShader("equirectangular_to_cubemap").get());
+		auto *shader = static_cast<pragma::ShaderEquirectangularToCubemap *>(pragma::get_cengine()->GetShader("equirectangular_to_cubemap").get());
 		if(!shader) {
 			Con::cwar << "Invalid shader!" << Con::endl;
 			return;
@@ -405,7 +403,7 @@ static void util_convert_cubemap_equirect(std::vector<std::string> &argv, Conver
 		return;
 	}
 
-	auto *shader = static_cast<pragma::ShaderCubemapToEquirectangular *>(c_engine->GetShader("cubemap_to_equirectangular").get());
+	auto *shader = static_cast<pragma::ShaderCubemapToEquirectangular *>(pragma::get_cengine()->GetShader("cubemap_to_equirectangular").get());
 	if(!shader) {
 		Con::cwar << "Invalid shader!" << Con::endl;
 		return;

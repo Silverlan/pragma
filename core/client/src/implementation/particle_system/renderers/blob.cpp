@@ -9,20 +9,16 @@ module;
 #include <prosper_command_buffer.hpp>
 #include <wgui/types/wirect.h>
 
-module pragma.client.particle_system;
+module pragma.client;
 
-import :renderer_blob;
+import :particle_system.renderer_blob;
 
-import pragma.client.client_state;
-import pragma.client.debug;
-import pragma.client.entities.components;
-import pragma.client.game;
-import pragma.client.gui;
+import :client_state;
+import :debug;
+import :entities.components;
+import :game;
+import :gui;
 
-REGISTER_PARTICLE_RENDERER(blob, CParticleRendererBlob);
-
-extern CEngine *c_engine;
-extern CGame *c_game;
 
 decltype(CParticleRendererBlob::s_bShowNeighborLinks) CParticleRendererBlob::s_bShowNeighborLinks = false;
 decltype(CParticleRendererBlob::s_dsParticles) CParticleRendererBlob::s_dsParticles = nullptr;
@@ -30,7 +26,7 @@ decltype(CParticleRendererBlob::s_activeBlobRendererCount) CParticleRendererBlob
 decltype(CParticleRendererBlob::s_shader) CParticleRendererBlob::s_shader = nullptr;
 decltype(CParticleRendererBlob::s_shadowShader) CParticleRendererBlob::s_shadowShader = nullptr;
 
-void CParticleRendererBlob::Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void CParticleRendererBlob::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleRenderer::Initialize(pSystem, values);
 	auto bHasShininess = false;
@@ -60,7 +56,7 @@ CParticleRendererBlob::~CParticleRendererBlob() { ShowDebugNeighborLinks(false);
 pragma::ShaderParticleBase *CParticleRendererBlob::GetShader() const
 {
 	if(!s_shader) {
-		auto hShader = c_engine->GetShader("particle_blob");
+		auto hShader = pragma::get_cengine()->GetShader("particle_blob");
 		if(hShader.valid())
 			s_shader = static_cast<pragma::ShaderParticleBlob *>(hShader.get());
 	}
@@ -155,19 +151,19 @@ void CParticleRendererBlob::SetShowNeighborLinks(bool b) { s_bShowNeighborLinks 
 
 void CParticleRendererBlob::OnParticleSystemStarted()
 {
-	auto &context = c_engine->GetRenderContext();
+	auto &context = pragma::get_cengine()->GetRenderContext();
 	if(s_activeBlobRendererCount++ == 0) {
 		auto *shader = static_cast<pragma::ShaderParticleBlob *>(GetShader());
 		if(shader) {
 			// Generate a descriptor set for our particle storage buffer
 			s_dsParticles = shader->CreateDescriptorSetGroup(pragma::ShaderParticleBlob::DESCRIPTOR_SET_PARTICLE_DATA.setIndex);
 			if(s_dsParticles) {
-				s_dsParticles->GetDescriptorSet()->SetBindingDynamicStorageBuffer(*pragma::CParticleSystemComponent::GetGlobalParticleBuffer(), 0 /* bindingIndex */
+				s_dsParticles->GetDescriptorSet()->SetBindingDynamicStorageBuffer(*pragma::ecs::CParticleSystemComponent::GetGlobalParticleBuffer(), 0 /* bindingIndex */
 				);
 			}
 		}
 #if 0
-		hShader = c_engine->GetShader("particle_blob_shadow");
+		hShader = pragma::get_cengine()->GetShader("particle_blob_shadow");
 		if(hShader.valid())
 			s_shadowShader = static_cast<pragma::ShaderParticleBlobShadow*>(hShader.get());
 #endif
@@ -190,7 +186,7 @@ void CParticleRendererBlob::OnParticleSystemStarted()
 	}
 #if ENABLE_BLOB_DEPTH_TEST == 1
 	// Incomplete; For testing purposes only!
-	auto &scene = c_game->GetRenderScene<pragma::CSceneComponent>();
+	auto &scene = pragma::get_cgame()->GetRenderScene<pragma::CSceneComponent>();
 	auto &sceneDepth = scene->GetDepthTexture();
 	auto &sceneTex = scene->GetRenderTexture();
 	auto samples = sceneDepth->GetSampleCount();
@@ -207,7 +203,7 @@ void CParticleRendererBlob::OnParticleSystemStarted()
 	auto fb = Vulkan::Framebuffer::Create(context, rp, depthTex->GetWidth(), depthTex->GetHeight(), {renderTex->GetImageView(), depthTex->GetImageView()});
 	m_rtTransparent = Vulkan::RenderTarget::Create(renderTex, depthTex, fb);
 	//m_rtTransparent = Vulkan::RenderTarget::Create(sceneTex,depthTex,fb);
-	c_game->AddCallback("DrawScene",
+	pragma::get_cgame()->AddCallback("DrawScene",
 	  FunctionCallback<bool, std::reference_wrapper<const Vulkan::RenderPass>, std::reference_wrapper<const Vulkan::Framebuffer>, std::reference_wrapper<const Vulkan::CommandBuffer>>::Create(
 	    [this, depthImage, renderTex](std::reference_wrapper<const Vulkan::RenderPass> &rpScene, std::reference_wrapper<const Vulkan::Framebuffer> &fbScene, std::reference_wrapper<const Vulkan::CommandBuffer> &drawCmd) {
 		    renderTex->GetImage()->SetDrawLayout(prosper::ImageLayout::ColorAttachmentOptimal);
@@ -245,7 +241,7 @@ void CParticleRendererBlob::OnParticleSystemStarted()
 		r->SetSize(512, 512);
 		r->SetX(512);
 		r->SetTexture(depthTex);
-		auto &scene = c_game->GetRenderScene<pragma::CSceneComponent>();
+		auto &scene = pragma::get_cgame()->GetRenderScene<pragma::CSceneComponent>();
 		r->Update(scene->GetZNear(), scene->GetZFar());
 		return r->GetHandle();
 	});
@@ -254,7 +250,7 @@ void CParticleRendererBlob::OnParticleSystemStarted()
 		auto *el = d->GetGUIElement();
 		if(el == nullptr)
 			return;
-		auto &scene = c_game->GetRenderScene<pragma::CSceneComponent>();
+		auto &scene = pragma::get_cgame()->GetRenderScene<pragma::CSceneComponent>();
 		static_cast<WIDebugDepthTexture *>(el)->Update(scene->GetZNear(), scene->GetZFar());
 	}));
 #endif
@@ -262,7 +258,7 @@ void CParticleRendererBlob::OnParticleSystemStarted()
 
 REGISTER_CONVAR_CALLBACK_CL(debug_particle_blob_show_neighbor_links, [](NetworkState *state, const ConVar &, bool, bool val) {
 	CHECK_CHEATS("debug_particle_blob_show_neighbor_links", state, );
-	if(c_game == nullptr)
+	if(pragma::get_cgame() == nullptr)
 		return;
 	CParticleRendererBlob::SetShowNeighborLinks(val);
 });
@@ -271,7 +267,7 @@ void CParticleRendererBlob::OnParticleSystemStopped()
 {
 	if(--s_activeBlobRendererCount == 0) // Release the descriptor set when it's not needed anymore
 	{
-		auto &context = c_engine->GetRenderContext();
+		auto &context = pragma::get_cengine()->GetRenderContext();
 		context.KeepResourceAliveUntilPresentationComplete(s_dsParticles); // Keep descriptor set alive until it's definitely not in use anymore
 		s_dsParticles = nullptr;
 	}
@@ -325,7 +321,7 @@ void CParticleRendererBlob::OnParticleDestroyed(CParticle &particle)
 
 void CParticleRendererBlob::UpdateAdjacentParticles(prosper::ICommandBuffer &cmd, prosper::IBuffer &blobIndexBuffer)
 {
-	auto frameId = c_engine->GetRenderContext().GetLastFrameId();
+	auto frameId = pragma::get_cengine()->GetRenderContext().GetLastFrameId();
 	if(m_lastFrame == frameId)
 		return;
 	m_lastFrame = frameId;
@@ -464,7 +460,7 @@ void CParticleRendererBlob::PreRender(prosper::ICommandBuffer &cmd)
 	auto &blobIndexBuffer = *m_adjacentBlobBuffer;
 	UpdateAdjacentParticles(cmd, blobIndexBuffer);
 }
-void CParticleRendererBlob::RecordRender(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::ParticleRenderFlags renderFlags)
+void CParticleRendererBlob::RecordRender(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::ecs::ParticleRenderFlags renderFlags)
 {
 	auto *shader = static_cast<pragma::ShaderParticleBlob *>(GetShader());
 	prosper::ShaderBindState bindState {drawCmd};
@@ -475,11 +471,11 @@ void CParticleRendererBlob::RecordRender(prosper::ICommandBuffer &drawCmd, pragm
 		return;
 	auto &blobIndexBuffer = *m_adjacentBlobBuffer;
 
-	auto layout = c_engine->GetRenderContext().GetShaderPipelineLayout(*shader, *pipelineIdx);
+	auto layout = pragma::get_cengine()->GetRenderContext().GetShaderPipelineLayout(*shader, *pipelineIdx);
 	assert(layout != nullptr);
 	auto *dsScene = scene.GetCameraDescriptorSetGraphics();
 	auto *dsRenderer = renderer.GetRendererDescriptorSet();
-	auto &dsRenderSettings = c_game->GetGlobalRenderSettingsDescriptorSet();
+	auto &dsRenderSettings = pragma::get_cgame()->GetGlobalRenderSettingsDescriptorSet();
 	auto *dsShadows = pragma::CShadowComponent::GetDescriptorSet();
 	shader->RecordBindScene(bindState.commandBuffer, *layout, scene, renderer, *dsScene, *dsRenderer, dsRenderSettings, *dsShadows);
 	shader->RecordDraw(bindState, scene, renderer, *m_particleSystem, m_particleSystem->GetOrientationType(), renderFlags, blobIndexBuffer, *s_dsParticles->GetDescriptorSet(), m_particleSystem->GetParticleBuffer()->GetStartOffset());
@@ -489,7 +485,7 @@ void CParticleRendererBlob::RecordRender(prosper::ICommandBuffer &drawCmd, pragm
 void CParticleRendererBlob::RecordRenderShadow(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::CLightComponent &light, uint32_t layerId)
 {
 	/*auto &shader = *s_shadowShader;
-	auto &context = c_engine->GetRenderContext();
+	auto &context = pragma::get_cengine()->GetRenderContext();
 	auto swapIdx = context.GetFrameSwapIndex();
 	auto &blobIndexBuffer = *m_adjacentBlobBuffer->GetBuffer(swapIdx);
 	UpdateAdjacentParticles(blobIndexBuffer);

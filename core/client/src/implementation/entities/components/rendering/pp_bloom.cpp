@@ -11,15 +11,14 @@ module;
 #include <image/prosper_msaa_texture.hpp>
 #include <image/prosper_render_target.hpp>
 
-module pragma.client.entities.components.pp_bloom;
+module pragma.client;
 
-import pragma.client.entities.components.rasterization_renderer;
-import pragma.client.engine;
-import pragma.client.game;
-import pragma.client.rendering.shaders;
+import :entities.components.pp_bloom;
+import :entities.components.rasterization_renderer;
+import :engine;
+import :game;
+import :rendering.shaders;
 
-extern CGame *c_game;
-extern CEngine *c_engine;
 
 using namespace pragma;
 
@@ -87,7 +86,7 @@ void CRendererPpBloomComponent::DoRenderEffect(const util::DrawSceneInfo &drawSc
 	if(!m_controlledBlurSettings.IsValid())
 		return;
 
-	c_game->StartGPUProfilingStage("PostProcessingBloom");
+	pragma::get_cgame()->StartGPUProfilingStage("PostProcessingBloom");
 	auto &hdrInfo = m_renderer->GetHDRInfo();
 	auto bloomTexMsaa = hdrInfo.sceneRenderTarget->GetTexture(1u);
 	auto &drawCmd = drawSceneInfo.commandBuffer;
@@ -100,7 +99,7 @@ void CRendererPpBloomComponent::DoRenderEffect(const util::DrawSceneInfo &drawSc
 	m_controlledBlurSettings.RecordBlur(drawCmd, *hdrInfo.bloomBlurSet);
 	drawCmd->RecordImageBarrier(hdrInfo.bloomTexture->GetImage(), prosper::ImageLayout::TransferSrcOptimal, prosper::ImageLayout::ColorAttachmentOptimal);
 	// drawCmd->RecordImageBarrier(hdrInfo.bloomBlurRenderTarget->GetTexture().GetImage(), prosper::ImageLayout::ColorAttachmentOptimal, prosper::ImageLayout::ShaderReadOnlyOptimal);
-	c_game->StopGPUProfilingStage(); // PostProcessingBloom
+	pragma::get_cgame()->StopGPUProfilingStage(); // PostProcessingBloom
 }
 void CRendererPpBloomComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 

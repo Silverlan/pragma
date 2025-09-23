@@ -9,20 +9,20 @@ module;
 
 #include <cmath>
 
-module pragma.client.rendering.shaders;
+module pragma.client;
 
-import :particle_sprite_trail;
 
-import pragma.client.engine;
-import pragma.client.particle_system;
+import :rendering.shaders.particle_sprite_trail;
 
-extern CEngine *c_engine;
+import :engine;
+import :particle_system;
+
 
 using namespace pragma;
 
 ShaderParticleSpriteTrail::ShaderParticleSpriteTrail(prosper::IPrContext &context, const std::string &identifier) : ShaderParticle2DBase(context, identifier, "programs/pfm/particles/particle_sprite_trail", "programs/particles/particle") {}
 
-Vector3 ShaderParticleSpriteTrail::DoCalcVertexPosition(const pragma::CParticleSystemComponent &ptc, uint32_t ptIdx, uint32_t localVertIdx, const Vector3 &camPos, const Vector3 &camUpWs, const Vector3 &camRightWs, float nearZ, float farZ) const
+Vector3 ShaderParticleSpriteTrail::DoCalcVertexPosition(const pragma::ecs::CParticleSystemComponent &ptc, uint32_t ptIdx, uint32_t localVertIdx, const Vector3 &camPos, const Vector3 &camUpWs, const Vector3 &camRightWs, float nearZ, float farZ) const
 {
 	// Note: This has to match the calculations performed in the vertex shader
 	auto &renderers = ptc.GetRenderers();
@@ -32,7 +32,7 @@ Vector3 ShaderParticleSpriteTrail::DoCalcVertexPosition(const pragma::CParticleS
 	if(typeid(*renderer) != typeid(CParticleRendererSpriteTrail))
 		return camPos;
 	auto &rendererSt = *static_cast<CParticleRendererSpriteTrail *>(renderer.get());
-	auto *pt = const_cast<pragma::CParticleSystemComponent &>(ptc).GetParticle(ptIdx);
+	auto *pt = const_cast<pragma::ecs::CParticleSystemComponent &>(ptc).GetParticle(ptIdx);
 	auto &ptWorldPos = pt->GetPosition();
 	auto &ptPrevWorldPos = pt->GetPrevPos();
 	auto dtPosWs = ptPrevWorldPos - ptWorldPos;
@@ -84,7 +84,7 @@ void ShaderParticleSpriteTrail::InitializeGfxPipeline(prosper::GraphicsPipelineC
 	ShaderParticleBase::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
 }
 
-bool ShaderParticleSpriteTrail::RecordDraw(prosper::ShaderBindState &bindState, pragma::CSceneComponent &scene, const CRasterizationRendererComponent &r, const CParticleSystemComponent &ps, ParticleOrientationType orientationType, ParticleRenderFlags renderFlags)
+bool ShaderParticleSpriteTrail::RecordDraw(prosper::ShaderBindState &bindState, pragma::CSceneComponent &scene, const CRasterizationRendererComponent &r, const ecs::CParticleSystemComponent &ps, ecs::ParticleOrientationType orientationType, ecs::ParticleRenderFlags renderFlags)
 {
 	auto &renderers = ps.GetRenderers();
 	if(renderers.empty())

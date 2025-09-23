@@ -15,17 +15,15 @@ module;
 #include <wgui/types/witextentry.h>
 #include <pragma/lua/lua_call.hpp>
 
-module pragma.client.gui;
+module pragma.client;
 
-import :lua_interface;
+import :gui.lua_interface;
 
-import pragma.client.client_state;
-import pragma.client.game;
-import pragma.client.scripting.lua;
+import :client_state;
+import :game;
+import :scripting.lua;
 import pragma.gui;
 
-extern ClientState *client;
-extern CGame *c_game;
 
 CallbackHandle WGUILuaInterface::m_cbGameStart;
 CallbackHandle WGUILuaInterface::m_cbLuaReleased;
@@ -33,9 +31,9 @@ lua_State *WGUILuaInterface::m_guiLuaState = nullptr;
 
 static std::optional<util::EventReply> GUI_Callback_OnMouseEvent(WIBase &p, pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods)
 {
-	lua_State *luaStates[2] = {client->GetGUILuaState(), NULL};
-	if(c_game != NULL)
-		luaStates[1] = c_game->GetLuaState();
+	lua_State *luaStates[2] = {pragma::get_client_state()->GetGUILuaState(), NULL};
+	if(pragma::get_cgame() != nullptr)
+		luaStates[1] = pragma::get_cgame()->GetLuaState();
 	std::optional<util::EventReply> reply {};
 	for(char i = 0; i < 2; i++) {
 		if(luaStates[i] != NULL) {
@@ -76,9 +74,9 @@ static std::optional<util::EventReply> GUI_Callback_OnMouseEvent(WIBase &p, prag
 
 static std::optional<util::EventReply> GUI_Callback_OnKeyEvent(WIBase &p, pragma::platform::Key key, int scanCode, pragma::platform::KeyState state, pragma::platform::Modifier mods)
 {
-	lua_State *luaStates[2] = {client->GetGUILuaState(), NULL};
-	if(c_game != NULL)
-		luaStates[1] = c_game->GetLuaState();
+	lua_State *luaStates[2] = {pragma::get_client_state()->GetGUILuaState(), NULL};
+	if(pragma::get_cgame() != nullptr)
+		luaStates[1] = pragma::get_cgame()->GetLuaState();
 	std::optional<util::EventReply> reply {};
 	for(char i = 0; i < 2; i++) {
 		if(luaStates[i] != NULL) {
@@ -119,9 +117,9 @@ static std::optional<util::EventReply> GUI_Callback_OnKeyEvent(WIBase &p, pragma
 
 static std::optional<util::EventReply> GUI_Callback_OnCharEvent(WIBase &p, int c, pragma::platform::Modifier mods)
 {
-	lua_State *luaStates[2] = {client->GetGUILuaState(), NULL};
-	if(c_game != NULL)
-		luaStates[1] = c_game->GetLuaState();
+	lua_State *luaStates[2] = {pragma::get_client_state()->GetGUILuaState(), NULL};
+	if(pragma::get_cgame() != nullptr)
+		luaStates[1] = pragma::get_cgame()->GetLuaState();
 	std::optional<util::EventReply> reply {};
 	for(char i = 0; i < 2; i++) {
 		if(luaStates[i] != NULL) {
@@ -161,9 +159,9 @@ static std::optional<util::EventReply> GUI_Callback_OnCharEvent(WIBase &p, int c
 
 static std::optional<util::EventReply> GUI_Callback_OnScroll(WIBase &p, Vector2 offset, bool offsetAsPixels)
 {
-	lua_State *luaStates[2] = {client->GetGUILuaState(), NULL};
-	if(c_game != NULL)
-		luaStates[1] = c_game->GetLuaState();
+	lua_State *luaStates[2] = {pragma::get_client_state()->GetGUILuaState(), NULL};
+	if(pragma::get_cgame() != nullptr)
+		luaStates[1] = pragma::get_cgame()->GetLuaState();
 	std::optional<util::EventReply> reply {};
 	for(char i = 0; i < 2; i++) {
 		if(luaStates[i] != NULL) {
@@ -201,7 +199,7 @@ static std::optional<util::EventReply> GUI_Callback_OnScroll(WIBase &p, Vector2 
 	return reply;
 }
 
-void WGUILuaInterface::OnGameStart() { m_cbLuaReleased = c_game->AddCallback("OnLuaReleased", FunctionCallback<void, lua_State *>::Create(&WGUILuaInterface::OnGameLuaReleased)); }
+void WGUILuaInterface::OnGameStart() { m_cbLuaReleased = pragma::get_cgame()->AddCallback("OnLuaReleased", FunctionCallback<void, lua_State *>::Create(&WGUILuaInterface::OnGameLuaReleased)); }
 
 void WGUILuaInterface::OnGameLuaReleased(lua_State *)
 {
@@ -251,6 +249,7 @@ void WGUILuaInterface::OnGUIDestroy(WIBase &el)
 
 void WGUILuaInterface::Initialize()
 {
+	auto *client = pragma::get_client_state();
 	m_guiLuaState = client->GetGUILuaState();
 	WGUI::GetInstance().SetRemoveCallback(&OnGUIDestroy);
 	m_cbGameStart = client->AddCallback("OnGameStart", FunctionCallback<>::Create(&WGUILuaInterface::OnGameStart));
@@ -312,7 +311,7 @@ luabind::object cast_to_type(lua_State *l, ::WIBase &el)
 
 luabind::object WGUILuaInterface::CreateLuaObject(lua_State *l, WIBase &p)
 {
-	for(auto &f : client->GetGUILuaWrapperFactories()) {
+	for(auto &f : pragma::get_client_state()->GetGUILuaWrapperFactories()) {
 		auto r = f(l, p);
 		if(r)
 			return r;

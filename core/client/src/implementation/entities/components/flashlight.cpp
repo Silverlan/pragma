@@ -9,23 +9,24 @@ module;
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
-module pragma.client.entities.components.flashlight;
+module pragma.client;
 
-import pragma.client.client_state;
-import pragma.client.engine;
-import pragma.client.entities.components.attachment;
-import pragma.client.entities.components.radius;
-import pragma.client.entities.components.sound_emitter;
+
+import :entities.components.flashlight;
+import :client_state;
+import :engine;
+import :entities.components.attachment;
+import :entities.components.radius;
+import :entities.components.sound_emitter;
 
 using namespace pragma;
 
-extern ClientState *client;
 
 void CFlashlightComponent::Initialize()
 {
 	BaseFlashlightComponent::Initialize();
-	client->PrecacheSound("fx\\flashlight_on.wav");
-	client->PrecacheSound("fx\\flashlight_off.wav");
+	pragma::get_client_state()->PrecacheSound("fx\\flashlight_on.wav");
+	pragma::get_client_state()->PrecacheSound("fx\\flashlight_off.wav");
 
 	auto &ent = GetEntity();
 	BindEvent(CLightComponent::EVENT_SHOULD_PASS_ENTITY, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {

@@ -5,8 +5,10 @@ module;
 
 #include "stdafx_client.h"
 
-module pragma.client.rendering.render_apis;
+module pragma.client;
 
+
+import :rendering.render_apis;
 std::vector<std::string> pragma::rendering::get_available_graphics_apis()
 {
 	std::vector<std::string> dirs {};

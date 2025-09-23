@@ -3,8 +3,11 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 
-export module pragma.client.rendering.shaders:world_loading;
+export module pragma.client:rendering.shaders.world_loading;
+
+import :rendering.shaders.textured;
 
 export namespace pragma {
 	class DLLCLIENT ShaderLoading : public ShaderGameWorldLightingPass {

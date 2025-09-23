@@ -7,9 +7,10 @@ module;
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <shader/prosper_shader_t.hpp>
 
-module pragma.client.rendering.shaders;
+module pragma.client;
 
-import :world_water_splash;
+
+import :rendering.shaders.world_water_splash;
 
 using namespace pragma;
 

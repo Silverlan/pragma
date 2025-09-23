@@ -4,15 +4,17 @@
 module;
 
 #include "stdafx_client.h"
+#include "pragma/model/modelupdateflags.hpp"
 #include <pragma/networking/enums.hpp>
 
-module pragma.client.model;
+module pragma.client;
+
 
 import :model;
+import :model;
 
-import pragma.client.client_state;
+import :client_state;
 
-extern ClientState *client;
 
 CModel::CModel(NetworkState *nw, unsigned int numBones, const std::string &name) : Model(nw, numBones, name) {}
 
@@ -26,7 +28,7 @@ void CModel::OnMaterialMissing(const std::string &matName)
 	NetPacket p {};
 	p->WriteString(GetName());
 	p->WriteString(matName);
-	client->SendPacket("query_model_texture", p, pragma::networking::Protocol::FastUnreliable);
+	pragma::get_client_state()->SendPacket("query_model_texture", p, pragma::networking::Protocol::FastUnreliable);
 }
 
 void CModel::PrecacheTexture(uint32_t texId, bool bReload) { Model::PrecacheTexture(texId, bReload); }

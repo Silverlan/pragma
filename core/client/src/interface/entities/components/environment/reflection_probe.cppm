@@ -10,7 +10,9 @@ module;
 #include <prosper_descriptor_set_group.hpp>
 #include <pragma/entities/components/base_entity_component.hpp>
 
-export module pragma.client.entities.components.env_reflection_probe;
+export module pragma.client:entities.components.env_reflection_probe;
+
+import :entities.components.scene;
 
 export {
 	namespace pragma {

@@ -7,11 +7,8 @@
 #include <sharedutils/util_string.h>
 #include <pragma/lua/libraries/lutil.hpp>
 
-import pragma.client.client_state;
-import pragma.client.engine;
+import pragma.client;
 
-extern CEngine *c_engine;
-extern ClientState *client;
 
 DLLCLIENT void CMD_lua_reload_entity(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
@@ -37,11 +34,11 @@ DLLCLIENT void CMD_lua_reload_weapon(NetworkState *state, pragma::BasePlayerComp
 
 DLLCLIENT void CMD_lua_reload_entities(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
-	NetworkState *server = c_engine->GetServerNetworkState();
+	NetworkState *server = pragma::get_cengine()->GetServerNetworkState();
 	Game *sgame = server->GetGameState();
 	if(sgame != NULL)
 		sgame->LoadLuaEntities("entities");
-	NetworkState *client = c_engine->GetClientState();
+	NetworkState *client = pragma::get_cengine()->GetClientState();
 	Game *cgame = client->GetGameState();
 	if(cgame != NULL)
 		cgame->LoadLuaEntities("entities");
@@ -49,11 +46,11 @@ DLLCLIENT void CMD_lua_reload_entities(NetworkState *, pragma::BasePlayerCompone
 
 DLLCLIENT void CMD_lua_reload_weapons(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
-	NetworkState *server = c_engine->GetServerNetworkState();
+	NetworkState *server = pragma::get_cengine()->GetServerNetworkState();
 	Game *sgame = server->GetGameState();
 	if(sgame != NULL)
 		sgame->LoadLuaEntities("weapons");
-	NetworkState *client = c_engine->GetClientState();
+	NetworkState *client = pragma::get_cengine()->GetClientState();
 	Game *cgame = client->GetGameState();
 	if(cgame != NULL)
 		cgame->LoadLuaEntities("weapons");

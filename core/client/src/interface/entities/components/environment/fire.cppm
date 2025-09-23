@@ -6,10 +6,12 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/environment/effects/env_fire.h"
 
-export module pragma.client.entities.components.effects.fire;
+export module pragma.client:entities.components.effects.fire;
 
-import pragma.client.entities.components.particle_system;
+import :entities.base_entity;
+import :entities.components.entity;
 
+export namespace pragma::ecs {class CParticleSystemComponent;}
 export namespace pragma {
 	class DLLCLIENT CFireComponent final : public BaseEnvFireComponent, public CBaseNetComponent {
 	  public:

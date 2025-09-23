@@ -9,14 +9,15 @@ module;
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
-module pragma.client.entities.components.lights.light;
+module pragma.client;
 
-import pragma.client.entities.components.radius;
-import pragma.client.game;
+
+import :entities.components.lights.light;
+import :entities.components.radius;
+import :game;
 
 using namespace pragma;
 
-extern CGame *c_game;
 
 CBaseLightComponent::CBaseLightComponent(BaseEntity &ent) : BaseEnvLightComponent(ent) {}
 
@@ -63,7 +64,7 @@ void CBaseLightComponent::OnEntitySpawn()
 }
 void CBaseLightComponent::InitializeLightSource()
 {
-	//auto &scene = c_game->GetScene();
+	//auto &scene = pragma::get_cgame()->GetScene();
 	//scene->AddLight(m_light.get()); // prosper TODO
 }
 

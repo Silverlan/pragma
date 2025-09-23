@@ -4,25 +4,29 @@
 module;
 
 #include "pragma/clientdefinitions.h"
+#include "pragma/entities/environment/effects/env_particle_system.h"
 #include <mathutil/umath.h>
 #include <pragma/math/vector/wvvector3.h>
 #include <sharedutils/util_string.h>
 #include <sharedutils/util.h>
 #include <algorithm>
 
-export module pragma.client.particle_system:operator_world_base;
+export module pragma.client:particle_system.operator_world_base;
+
+import :entities.components.particle_system;
+import :particle_system.modifier;
 
 export class DLLCLIENT CParticleOperatorWorldBase : public CParticleOperator {
   public:
 	bool ShouldRotateWithEmitter() const;
   protected:
 	CParticleOperatorWorldBase() = default;
-	virtual void Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+	virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
   private:
 	bool m_bRotateWithEmitter = false;
 };
 
-void CParticleOperatorWorldBase::Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void CParticleOperatorWorldBase::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleOperator::Initialize(pSystem, values);
 	for(auto it = values.begin(); it != values.end(); it++) {

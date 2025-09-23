@@ -10,8 +10,7 @@ module;
 #include <image/prosper_texture.hpp>
 #include <sharedutils/asset_loader/asset_load_info.hpp>
 
-export module pragma.client.scripting.lua.libraries.engine;
-
+export module pragma.client:scripting.lua.libraries.engine;
 export namespace Lua {
 	namespace asset_client {
 		DLLCLIENT void register_library(Lua::Interface &lua, luabind::module_ &modAsset);

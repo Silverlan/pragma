@@ -5,9 +5,8 @@ module;
 
 #include "pragma/clientdefinitions.h"
 
-export module pragma.client.entities.components.pp_tone_mapping;
-
-import pragma.client.entities.components.pp_base;
+export module pragma.client:entities.components.pp_tone_mapping;
+import :entities.components.pp_base;
 
 export namespace pragma {
 	class CRasterizationRendererComponent;

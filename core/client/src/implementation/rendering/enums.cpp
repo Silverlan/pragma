@@ -4,9 +4,12 @@
 module;
 
 #include "stdafx_client.h"
+#include "prosper_enums.hpp"
+#include "prosper_util.hpp"
 
-module pragma.client.rendering.enums;
+module pragma.client;
 
+import :rendering.enums;
 bool pragma::premultiply_alpha(Vector4 &color, pragma::ParticleAlphaMode alphaMode)
 {
 	switch(alphaMode) {
@@ -31,7 +34,7 @@ bool pragma::premultiply_alpha(Vector4 &color, pragma::ParticleAlphaMode alphaMo
 
 int GetMaxMSAASampleCount()
 {
-	auto props = c_engine->GetRenderContext().GetPhysicalDeviceImageFormatProperties(
+	auto props = pragma::get_cengine()->GetRenderContext().GetPhysicalDeviceImageFormatProperties(
 	  {prosper::ImageCreateFlags {}, prosper::Format::R16G16B16A16_SFloat, prosper::ImageType::e2D, prosper::ImageTiling::Optimal, prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::TransferSrcBit});
 	if(props.has_value() == false) {
 		Con::cwar << "Unable to retrieve max MSAA sample count! Setting sample count to 1..." << Con::endl;

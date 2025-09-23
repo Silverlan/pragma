@@ -7,7 +7,9 @@ module;
 #include <pragma/entities/components/base_vehicle_component.hpp>
 #include <pragma/util/util_handled.hpp>
 
-export module pragma.client.entities.components.vehicle;
+export module pragma.client:entities.components.vehicle;
+
+import :entities.components.entity;
 
 export namespace pragma {
 	class DLLCLIENT CVehicleComponent final : public BaseVehicleComponent, public CBaseSnapshotComponent {

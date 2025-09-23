@@ -5,9 +5,11 @@ module;
 
 #include <sharedutils/util_library.hpp>
 
-module pragma.client.rendering.cycles;
+module pragma.client;
 
-import pragma.client.client_state;
+
+import :rendering.cycles;
+import :client_state;
 
 using namespace pragma::rendering;
 

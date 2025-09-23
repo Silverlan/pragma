@@ -10,15 +10,13 @@ module;
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/logging.hpp>
 
-module pragma.client.entities.components.light_map_receiver;
+module pragma.client;
 
-import pragma.client.client_state;
-import pragma.client.engine;
-import pragma.client.entities.components;
-import pragma.client.model;
+import :entities.components.light_map_receiver;
+import :client_state;
+import :engine;
+import :model;
 
-extern ClientState *client;
-extern CEngine *c_engine;
 
 using namespace pragma;
 
@@ -222,7 +220,7 @@ void CLightMapReceiverComponent::UpdateMeshLightmapUvBuffers(CLightMapComponent 
 			if(pUvBuffer != nullptr)
 				pLightMapUvBuffer = pUvBuffer;
 			else
-				pLightMapUvBuffer = c_engine->GetRenderContext().GetDummyBuffer().get();
+				pLightMapUvBuffer = pragma::get_cengine()->GetRenderContext().GetDummyBuffer().get();
 			mdlC->SetLightmapUvBuffer(*static_cast<CModelSubMesh *>(subMesh.get()), pLightMapUvBuffer->shared_from_this());
 		}
 	}

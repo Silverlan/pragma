@@ -7,7 +7,7 @@ module;
 #include <wgui/wibase.h>
 #include <mathutil/umath.h>
 
-export module pragma.client.gui:choice_list;
+export module pragma.client:gui.choice_list;
 
 export {
 	class DLLCLIENT WIChoiceList : public WIBase {

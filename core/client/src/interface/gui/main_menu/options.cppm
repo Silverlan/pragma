@@ -7,11 +7,11 @@ module;
 #include <wgui/types.hpp>
 #include <sharedutils/util_clock.hpp>
 
-export module pragma.client.gui:main_menu_options;
+export module pragma.client:gui.main_menu_options;
 
-import :chromium_page;
-import :checkbox;
-import :main_menu_base;
+import :gui.chromium_page;
+import :gui.checkbox;
+import :gui.main_menu_base;
 
 import pragma.gui;
 

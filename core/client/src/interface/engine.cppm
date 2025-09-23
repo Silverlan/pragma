@@ -16,9 +16,10 @@ module;
 #include "alsoundsystem.hpp"
 #include "alsound_effect.hpp"
 
-export module pragma.client.engine;
-
-import pragma.client.client_state;
+export module pragma.client:engine;
+import :client_state;
+import :rendering.render_context;
+import :rendering.shader_graph.manager;
 import pragma.string.unicode;
 
 #pragma warning(push)
@@ -314,7 +315,6 @@ export {
 
 	namespace pragma {
 		DLLCLIENT CEngine *get_cengine();
-		DLLCLIENT ClientState *get_client_state();
 	};
 };
 #pragma warning(pop)

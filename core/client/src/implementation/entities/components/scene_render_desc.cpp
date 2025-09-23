@@ -9,17 +9,19 @@ module;
 #include <sharedutils/alpha_mode.hpp>
 #include <sharedutils/util_hash.hpp>
 #include <pragma/entities/entity_iterator.hpp>
+#include "mathutil/umath_geometry.hpp"
 #include <cmaterial.h>
+#include "pragma/console/c_cvar.h"
 
-module pragma.client.entities.components.scene;
+#undef AddJob
 
-import pragma.client.client_state;
-import pragma.client.engine;
-import pragma.client.game;
+module pragma.client;
 
-extern CEngine *c_engine;
-extern ClientState *client;
-extern CGame *c_game;
+import :entities.components.scene;
+import :client_state;
+import :engine;
+import :game;
+import :rendering.render_queue_instancer;
 
 SceneRenderDesc::SceneRenderDesc(pragma::CSceneComponent &scene) : m_scene {scene}
 {
@@ -87,7 +89,7 @@ void SceneRenderDesc::AddRenderMeshesToRenderQueue(pragma::CRasterizationRendere
 	auto renderMode = renderC.GetSceneRenderPass();
 	auto baseShaderSpecializationFlags = mdlC->GetBaseShaderSpecializationFlags() | baseSpecializationFlags;
 	auto isBaseTranslucent = umath::is_flag_set(baseShaderSpecializationFlags, pragma::GameShaderSpecializationConstantFlag::EnableTranslucencyBit);
-	auto &context = c_engine->GetRenderContext();
+	auto &context = pragma::get_cengine()->GetRenderContext();
 	auto renderTranslucent = umath::is_flag_set(renderFlags, RenderFlags::Translucent);
 	for(auto meshIdx = lodGroup.first; meshIdx < lodGroup.first + lodGroup.second; ++meshIdx) {
 		if(fShouldCull && ShouldCull(renderC, meshIdx, fShouldCull))
@@ -222,7 +224,7 @@ void SceneRenderDesc::CollectRenderMeshesFromOctree(pragma::CRasterizationRender
 		for(auto i = decltype(numBatches) {0u}; i < numBatches; ++i) {
 			auto iStart = i * numEntitiesPerWorkerJob;
 			auto iEnd = umath::min(static_cast<size_t>(iStart + numEntitiesPerWorkerJob), numObjects);
-			c_game->GetRenderQueueWorkerManager().AddJob([iStart, iEnd, shouldConsiderEntity, renderMask, optRasterizationRenderer, &objs, renderFlags, getRenderQueue, &scene, &cam, vp, fShouldCull, lodBias, baseSpecializationFlags]() {
+			pragma::get_cgame()->GetRenderQueueWorkerManager().AddJob([iStart, iEnd, shouldConsiderEntity, renderMask, optRasterizationRenderer, &objs, renderFlags, getRenderQueue, &scene, &cam, vp, fShouldCull, lodBias, baseSpecializationFlags]() {
 				// Note: We don't add individual items directly to the render queue, because that would invoke
 				// a mutex lock which can stall all of the worker threads.
 				// Instead we'll collect the entire batch of items, then add all of them to the render queue at once.
@@ -302,7 +304,7 @@ static void cmd_debug_occlusion_culling_freeze_camera(NetworkState *, const ConV
 	g_debugFreezeCamData = {};
 	if(val == false)
 		return;
-	auto *scene = c_game->GetRenderScene<pragma::CSceneComponent>();
+	auto *scene = pragma::get_cgame()->GetRenderScene<pragma::CSceneComponent>();
 	if(scene == nullptr)
 		return;
 	auto &cam = scene->GetActiveCamera();
@@ -347,7 +349,7 @@ void SceneRenderDesc::BuildRenderQueueInstanceLists(pragma::rendering::RenderQue
 		pragma::rendering::RenderQueue &renderQueue,EntityIndex entIdx,uint32_t numMeshes,pragma::rendering::RenderQueueItemSortPair *sortItem
 	) {
 		// New entity
-		auto *ent = static_cast<CBaseEntity*>(c_game->GetEntityByLocalIndex(entIdx));
+		auto *ent = static_cast<CBaseEntity*>(pragma::get_cgame()->GetEntityByLocalIndex(entIdx));
 		auto *renderC = ent ? ent ->GetRenderComponent() : nullptr;
 		if(instantiableEntityList.size() > 1 && curEntityHash != prevEntityHash)
 		{
@@ -365,7 +367,7 @@ void SceneRenderDesc::BuildRenderQueueInstanceLists(pragma::rendering::RenderQue
 				renderBufferIndices.reserve(instantiableEntityList.size());
 				for(auto &entIdx : instantiableEntityList)
 				{
-					auto renderBufferIndex = static_cast<CBaseEntity*>(c_game->GetEntityByLocalIndex(entIdx))->GetRenderComponent()->GetRenderBufferIndex();
+					auto renderBufferIndex = static_cast<CBaseEntity*>(pragma::get_cgame()->GetEntityByLocalIndex(entIdx))->GetRenderComponent()->GetRenderBufferIndex();
 					renderBufferIndices.push_back(*renderBufferIndex);
 				}
 				auto &instanceIndexBuffer = pragma::CSceneComponent::GetEntityInstanceIndexBuffer();
@@ -430,7 +432,7 @@ void SceneRenderDesc::BuildRenderQueueInstanceLists(pragma::rendering::RenderQue
 		renderBufferIndices.reserve(instantiableEntityList.size());
 		for(auto &entIdx : instantiableEntityList)
 		{
-			auto renderBufferIndex = static_cast<CBaseEntity*>(c_game->GetEntityByLocalIndex(entIdx))->GetRenderComponent()->GetRenderBufferIndex();
+			auto renderBufferIndex = static_cast<CBaseEntity*>(pragma::get_cgame()->GetEntityByLocalIndex(entIdx))->GetRenderComponent()->GetRenderBufferIndex();
 			renderBufferIndices.push_back(*renderBufferIndex);
 		}
 		
@@ -532,19 +534,19 @@ void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 
 	auto &cam = *hCam;
 	auto &rasterizer = *hRasterizer;
-	// c_game->StartProfilingStage(CGame::CPUProfilingPhase::BuildRenderQueue);
+	// pragma::get_cgame()->StartProfilingStage(CGame::CPUProfilingPhase::BuildRenderQueue);
 	auto &posCam = g_debugFreezeCamData.has_value() ? g_debugFreezeCamData->pos : drawSceneInfo.pvsOrigin.has_value() ? *drawSceneInfo.pvsOrigin : cam.GetEntity().GetPosition();
 
-	auto renderMask = drawSceneInfo.GetRenderMask(*c_game);
+	auto renderMask = drawSceneInfo.GetRenderMask(*pragma::get_cgame());
 	renderMask |= drawSceneInfo.scene->GetInclusionRenderMask();
 	renderMask |= drawSceneInfo.scene->GetExclusionRenderMask();
 	auto tStart = std::chrono::steady_clock::now();
-	c_game->GetRenderQueueBuilder().Append(
+	pragma::get_cgame()->GetRenderQueueBuilder().Append(
 	  [this, &rasterizer, &cam, posCam, &drawSceneInfo, renderMask]() {
 		  ++g_activeRenderQueueThreads;
 		  auto *stats = drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->renderQueueBuilderStats : nullptr;
 		  if(stats) {
-			  auto &queueWorkerManager = c_game->GetRenderQueueWorkerManager();
+			  auto &queueWorkerManager = pragma::get_cgame()->GetRenderQueueWorkerManager();
 			  auto numWorkers = queueWorkerManager.GetWorkerCount();
 			  stats->workerStats.resize(numWorkers);
 			  for(auto i = decltype(numWorkers) {0u}; i < numWorkers; ++i)
@@ -584,7 +586,7 @@ void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 		  if(stats)
 			  t = std::chrono::steady_clock::now();
 
-		  EntityIterator entItWorld {*c_game};
+		  EntityIterator entItWorld {*pragma::get_cgame()};
 		  entItWorld.AttachFilter<TEntityIteratorFilterComponent<pragma::CWorldComponent>>();
 		  bspLeafNodes.reserve(entItWorld.GetCount());
 		  bspTrees.reserve(entItWorld.GetCount());
@@ -675,7 +677,7 @@ void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 			  }
 			  else {
 				  // No occlusion culler available; We'll have to iterate ALL renderable entities
-				  EntityIterator entIt {*c_game};
+				  EntityIterator entIt {*pragma::get_cgame()};
 				  entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CRenderComponent>>();
 				  for(auto *ent : entIt) {
 					  if(ShouldConsiderEntity(*static_cast<CBaseEntity *>(ent), m_scene, drawSceneInfo.renderFlags, renderMask) == false)
@@ -709,7 +711,7 @@ void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 				  (*stats)->AddTime(RenderQueueBuilderStats::Timer::QueueInstancing, std::chrono::steady_clock::now() - t);
 			  renderQueue->Unlock();
 		  }
-		  // c_game->StopProfilingStage(CGame::CPUProfilingPhase::BuildRenderQueue);
+		  // pragma::get_cgame()->StopProfilingStage(CGame::CPUProfilingPhase::BuildRenderQueue);
 	  });
 
 	if(fBuildAdditionalQueues)
@@ -717,13 +719,13 @@ void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 
 	// As the last operation, we'll wait until all render queues have been built.
 	// No further operations must be appended to the render queue builder after this!
-	c_game->GetRenderQueueBuilder().Append(
+	pragma::get_cgame()->GetRenderQueueBuilder().Append(
 	  [this, &rasterizer, &cam, posCam, &drawSceneInfo, renderMask]() {
 		  auto *stats = drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->renderQueueBuilderStats : nullptr;
 		  std::chrono::steady_clock::time_point t;
 		  if(stats)
 			  t = std::chrono::steady_clock::now();
-		  c_game->GetRenderQueueWorkerManager().WaitForCompletion();
+		  pragma::get_cgame()->GetRenderQueueWorkerManager().WaitForCompletion();
 		  if(stats)
 			  (*stats)->AddTime(RenderQueueBuilderStats::Timer::WorkerWait, std::chrono::steady_clock::now() - t);
 	  },
@@ -735,7 +737,7 @@ void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 			  t = std::chrono::steady_clock::now();
 		  if(stats) {
 			  (*stats)->AddTime(RenderQueueBuilderStats::Timer::TotalExecution, std::chrono::steady_clock::now() - tStart);
-			  auto &queueWorkerManager = c_game->GetRenderQueueWorkerManager();
+			  auto &queueWorkerManager = pragma::get_cgame()->GetRenderQueueWorkerManager();
 			  auto numWorkers = queueWorkerManager.GetWorkerCount();
 			  for(auto i = decltype(numWorkers) {0u}; i < numWorkers; ++i)
 				  queueWorkerManager.GetWorker(i).SetStats(nullptr);

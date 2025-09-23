@@ -9,9 +9,10 @@ module;
 #include <shader/prosper_shader_t.hpp>
 #include <prosper_util.hpp>
 
-module pragma.client.rendering.shaders;
+module pragma.client;
 
-import :pp_fog;
+
+import :rendering.shaders.pp_fog;
 
 using namespace pragma;
 

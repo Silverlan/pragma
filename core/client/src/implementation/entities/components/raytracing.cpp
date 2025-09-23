@@ -14,19 +14,16 @@ module;
 #include <buffers/prosper_uniform_resizable_buffer.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
-module pragma.client.entities.components.raytracing;
+module pragma.client;
 
-import pragma.client.engine;
-import pragma.client.game;
-import pragma.client.model;
-import pragma.client.rendering.shaders;
-
-import pragma.client.entities.components;
+import :entities.components.raytracing;
+import :engine;
+import :game;
+import :model;
+import :rendering.shaders;
 
 using namespace pragma;
 
-extern CGame *c_game;
-extern CEngine *c_engine;
 
 static std::shared_ptr<prosper::IUniformResizableBuffer> s_entityMeshInfoBuffer = nullptr;
 static uint32_t m_entityMeshCount = 0;
@@ -46,10 +43,10 @@ bool CRaytracingComponent::InitializeBuffers()
 	createInfo.size = instanceSize * instanceCount;
 	createInfo.usageFlags = prosper::BufferUsageFlags::StorageBufferBit | prosper::BufferUsageFlags::TransferSrcBit | prosper::BufferUsageFlags::TransferDstBit;
 	m_entityMeshCount = 0;
-	s_entityMeshInfoBuffer = c_engine->GetRenderContext().CreateUniformResizableBuffer(createInfo, instanceSize, instanceSize * maxInstanceCount, 0.1f);
+	s_entityMeshInfoBuffer = pragma::get_cengine()->GetRenderContext().CreateUniformResizableBuffer(createInfo, instanceSize, instanceSize * maxInstanceCount, 0.1f);
 	s_entityMeshInfoBuffer->SetDebugName("entity_mesh_info_buf");
 
-	s_gameSceneDsg = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderRayTracing::DESCRIPTOR_SET_GAME_SCENE);
+	s_gameSceneDsg = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderRayTracing::DESCRIPTOR_SET_GAME_SCENE);
 	s_materialDescriptorArrayManager = prosper::DescriptorArrayManager::Create<MaterialDescriptorArrayManager>(s_gameSceneDsg, umath::to_integral(pragma::ShaderRayTracing::GameSceneBinding::TextureArray));
 
 	auto &ds = *s_gameSceneDsg->GetDescriptorSet();
@@ -225,11 +222,11 @@ void CRaytracingComponent::InitializeBufferUpdateCallback()
 
 static void cmd_render_technique(NetworkState *, const ConVar &, int32_t, int32_t val)
 {
-	if(c_game == nullptr)
+	if(pragma::get_cgame() == nullptr)
 		return;
 	enum class RenderingTechnique : uint8_t { Rasterization, Raytracing };
 
-	EntityIterator entIt {*c_game};
+	EntityIterator entIt {*pragma::get_cgame()};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<CRenderComponent>>();
 	auto technique = static_cast<RenderingTechnique>(val);
 	switch(technique) {

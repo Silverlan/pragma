@@ -12,9 +12,9 @@ module;
 #include <pragma/model/model.h>
 #include <pragma/model/modelmesh.h>
 
-module pragma.client.model;
+module pragma.client;
 
-import :hitbox_mesh_bvh_builder;
+import :model.hitbox_mesh_bvh_builder;
 
 static spdlog::logger &LOGGER = pragma::register_logger("bvh");
 

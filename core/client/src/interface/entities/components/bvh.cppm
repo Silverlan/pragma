@@ -7,8 +7,7 @@ module;
 #include <pragma/entities/components/base_bvh_component.hpp>
 #include <unordered_set>
 
-export module pragma.client.entities.components.bvh;
-
+export module pragma.client:entities.components.bvh;
 export namespace pragma {
 	namespace rendering {
 		struct RenderBufferData;

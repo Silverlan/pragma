@@ -20,11 +20,12 @@ module;
 #include <prosper_window.hpp>
 #include <prosper_swap_command_buffer.hpp>
 #include <buffers/prosper_buffer.hpp>
+#include "pragma/lua/types/udm.hpp"
 
-export module pragma.client.scripting.lua.classes.vulkan;
-
-import pragma.client.rendering.shaders;
-import pragma.client.util;
+export module pragma.client:scripting.lua.classes.vulkan;
+import :rendering.shaders;
+import :scripting.lua.libraries.vulkan;
+import :util;
 
 export namespace Lua {
 	namespace Vulkan {

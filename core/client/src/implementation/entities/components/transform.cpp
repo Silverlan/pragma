@@ -8,8 +8,10 @@ module;
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <stack>
 
-module pragma.client.entities.components.transform;
+module pragma.client;
 
+
+import :entities.components.transform;
 using namespace pragma;
 
 void CTransformComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }

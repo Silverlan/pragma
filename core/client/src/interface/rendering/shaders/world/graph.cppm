@@ -3,10 +3,13 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include <texturemanager/texture.h>
 
-export module pragma.client.rendering.shaders:world_graph;
+export module pragma.client:rendering.shaders.world_graph;
 
+import :rendering.shader_graph.module;
+import :rendering.shaders.textured;
 import pragma.shadergraph;
 
 export namespace pragma {
@@ -26,7 +29,6 @@ export namespace pragma {
 		std::shared_ptr<pragma::rendering::shader_material::ShaderMaterial> GenerateShaderMaterial();
 		virtual void InitializeShaderMaterial() override;
 
-		using ShaderGameWorldLightingPass::RecordDraw;
 		virtual void OnPipelinesInitialized() override;
 		virtual void ClearShaderResources() override;
 		virtual void InitializeShaderResources() override;

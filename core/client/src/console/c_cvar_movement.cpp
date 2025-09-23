@@ -5,11 +5,8 @@
 #include "pragma/console/c_cvar_movement.h"
 #include <pragma/networking/enums.hpp>
 
-import pragma.client.client_state;
-import pragma.client.game;
+import pragma.client;
 
-extern ClientState *client;
-extern CGame *c_game;
 
 void Console::commands::forward_in(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &, float magnitude)
 {
@@ -275,6 +272,7 @@ void Console::commands::hurtme(NetworkState *state, pragma::BasePlayerComponent 
 
 void Console::commands::give_weapon(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
+	auto *client = pragma::get_client_state();
 	if(argv.empty() || !client->IsGameActive())
 		return;
 	CHECK_CHEATS("give_weapon", state, );
@@ -285,6 +283,7 @@ void Console::commands::give_weapon(NetworkState *state, pragma::BasePlayerCompo
 
 void Console::commands::strip_weapons(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
+	auto *client = pragma::get_client_state();
 	if(!client->IsGameActive())
 		return;
 	CHECK_CHEATS("strip_weapons", state, );
@@ -306,6 +305,7 @@ void Console::commands::previous_weapon(NetworkState *state, pragma::BasePlayerC
 
 void Console::commands::give_ammo(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
+	auto *client = pragma::get_client_state();
 	if(argv.empty() || !client->IsGameActive())
 		return;
 	uint32_t amount = (argv.size() > 1) ? util::to_int(argv[1]) : 50;
@@ -335,16 +335,16 @@ static void update_turn_callbacks()
 		return;
 	}
 	if(!cbCalcView.IsValid()) {
-		cbCalcView = c_game->AddCallback("CalcView", FunctionCallback<void, std::reference_wrapper<Vector3>, std::reference_wrapper<Quat>, std::reference_wrapper<Quat>>::Create([](std::reference_wrapper<Vector3>, std::reference_wrapper<Quat> rot, std::reference_wrapper<Quat> rotMod) {
+		cbCalcView = pragma::get_cgame()->AddCallback("CalcView", FunctionCallback<void, std::reference_wrapper<Vector3>, std::reference_wrapper<Quat>, std::reference_wrapper<Quat>>::Create([](std::reference_wrapper<Vector3>, std::reference_wrapper<Quat> rot, std::reference_wrapper<Quat> rotMod) {
 			const auto tFactor = 0.016f; // 60 FPS as reference
-			auto t = c_game->DeltaRealTime() / tFactor;
+			auto t = pragma::get_cgame()->DeltaRealTime() / tFactor;
 			EulerAngles angVertical(-turn_speeds.up + turn_speeds.down, 0.f, 0.f);
 			EulerAngles angHorizontal(0.f, -turn_speeds.right + turn_speeds.left, 0.f);
 			rot.get() = uquat::create(angHorizontal * t) * rot.get() * uquat::create(angVertical * t);
 		}));
 	}
 	if(!cbGameEnd.IsValid()) {
-		cbGameEnd = c_game->AddCallback("OnGameEnd", FunctionCallback<void, CGame *>::Create([](CGame *) {
+		cbGameEnd = pragma::get_cgame()->AddCallback("OnGameEnd", FunctionCallback<void, CGame *>::Create([](CGame *) {
 			turn_speeds.left = 0.f;
 			turn_speeds.right = 0.f;
 			turn_speeds.up = 0.f;
@@ -356,6 +356,7 @@ static void update_turn_callbacks()
 
 void Console::commands::turn_left_in(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float magnitude)
 {
+	auto *client = pragma::get_client_state();
 	if(!client->IsGameActive())
 		return;
 	turn_speeds.left = (!argv.empty() ? ustring::to_float(argv.front()) : defaultTurnSpeed) * magnitude;
@@ -363,6 +364,7 @@ void Console::commands::turn_left_in(NetworkState *, pragma::BasePlayerComponent
 }
 void Console::commands::turn_left_out(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
+	auto *client = pragma::get_client_state();
 	if(!client->IsGameActive())
 		return;
 	turn_speeds.left = 0.f;
@@ -370,6 +372,7 @@ void Console::commands::turn_left_out(NetworkState *, pragma::BasePlayerComponen
 }
 void Console::commands::turn_right_in(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float magnitude)
 {
+	auto *client = pragma::get_client_state();
 	if(!client->IsGameActive())
 		return;
 	turn_speeds.right = (!argv.empty() ? ustring::to_float(argv.front()) : defaultTurnSpeed) * magnitude;
@@ -377,6 +380,7 @@ void Console::commands::turn_right_in(NetworkState *, pragma::BasePlayerComponen
 }
 void Console::commands::turn_right_out(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
+	auto *client = pragma::get_client_state();
 	if(!client->IsGameActive())
 		return;
 	turn_speeds.right = 0.f;
@@ -384,6 +388,7 @@ void Console::commands::turn_right_out(NetworkState *, pragma::BasePlayerCompone
 }
 void Console::commands::turn_up_in(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float magnitude)
 {
+	auto *client = pragma::get_client_state();
 	if(!client->IsGameActive())
 		return;
 	turn_speeds.up = (!argv.empty() ? ustring::to_float(argv.front()) : defaultTurnSpeed) * magnitude;
@@ -391,6 +396,7 @@ void Console::commands::turn_up_in(NetworkState *, pragma::BasePlayerComponent *
 }
 void Console::commands::turn_up_out(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
+	auto *client = pragma::get_client_state();
 	if(!client->IsGameActive())
 		return;
 	turn_speeds.up = 0.f;
@@ -398,6 +404,7 @@ void Console::commands::turn_up_out(NetworkState *, pragma::BasePlayerComponent 
 }
 void Console::commands::turn_down_in(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float magnitude)
 {
+	auto *client = pragma::get_client_state();
 	if(!client->IsGameActive())
 		return;
 	turn_speeds.down = (!argv.empty() ? ustring::to_float(argv.front()) : defaultTurnSpeed) * magnitude;
@@ -405,6 +412,7 @@ void Console::commands::turn_down_in(NetworkState *, pragma::BasePlayerComponent
 }
 void Console::commands::turn_down_out(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
+	auto *client = pragma::get_client_state();
 	if(!client->IsGameActive())
 		return;
 	turn_speeds.down = 0.f;

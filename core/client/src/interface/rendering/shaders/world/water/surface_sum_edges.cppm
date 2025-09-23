@@ -6,7 +6,7 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <shader/prosper_shader.hpp>
 
-export module pragma.client.rendering.shaders:world_water_surface_sum_edges;
+export module pragma.client:rendering.shaders.world_water_surface_sum_edges;
 
 export namespace pragma {
 	class DLLCLIENT ShaderWaterSurfaceSumEdges : public prosper::ShaderCompute {

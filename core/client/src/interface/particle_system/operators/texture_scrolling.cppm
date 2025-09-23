@@ -10,13 +10,18 @@ module;
 #include <sharedutils/util.h>
 #include <pragma/model/modelmesh.h>
 
-export module pragma.client.particle_system:operator_texture_scrolling;
+#include "../../../../../../modules/pr_unirender/src/interface/definitions.hpp"
+
+export module pragma.client:particle_system.operator_texture_scrolling;
+
+import :entities.components.particle_system;
+import :particle_system.modifier;
 
 export class DLLCLIENT CParticleOperatorTextureScrolling : public CParticleOperator {
   public:
 	CParticleOperatorTextureScrolling() = default;
 	virtual void Simulate(CParticle &particle, double, float strength) override;
-	virtual void Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+	virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
 	virtual void OnParticleCreated(CParticle &particle) override;
   private:
 	void SetFrameOffset(CParticle &particle, Vector2 uv);
@@ -24,9 +29,7 @@ export class DLLCLIENT CParticleOperatorTextureScrolling : public CParticleOpera
 	float m_fVerticalSpeed = 0.f;
 };
 
-REGISTER_PARTICLE_OPERATOR(texture_scrolling, CParticleOperatorTextureScrolling);
-
-void CParticleOperatorTextureScrolling::Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void CParticleOperatorTextureScrolling::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleOperator::Initialize(pSystem, values);
 	for(auto &pair : values) {
@@ -37,7 +40,7 @@ void CParticleOperatorTextureScrolling::Initialize(pragma::CParticleSystemCompon
 		else if(key == "vertical_speed")
 			m_fVerticalSpeed = util::to_float(pair.second);
 	}
-	pSystem.SetTextureScrollingEnabled(true);
+	static_cast<pragma::ecs::CParticleSystemComponent&>(pSystem).SetTextureScrollingEnabled(true);
 }
 void CParticleOperatorTextureScrolling::SetFrameOffset(CParticle &particle, Vector2 uv)
 {

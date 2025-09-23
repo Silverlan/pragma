@@ -9,9 +9,8 @@ module;
 #include <mathutil/transform.hpp>
 #include <unordered_set>
 
-export module pragma.client.entities.components.motion_blur_data;
-
-import pragma.client.rendering.shaders;
+export module pragma.client:entities.components.motion_blur_data;
+import :rendering.shaders;
 
 export namespace pragma {
 #pragma pack(push, 1)

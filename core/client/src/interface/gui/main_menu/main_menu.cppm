@@ -7,9 +7,9 @@ module;
 #include <wgui/types/wirect.h>
 #include <sharedutils/functioncallback.h>
 
-export module pragma.client.gui:main_menu;
+export module pragma.client:gui.main_menu;
 
-import :chromium_page;
+import :gui.chromium_page;
 
 export {
 	class DLLCLIENT WIMainMenu : public WIBase {

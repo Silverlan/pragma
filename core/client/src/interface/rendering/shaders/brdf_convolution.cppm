@@ -6,7 +6,7 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <shader/prosper_shader_base_image_processing.hpp>
 
-export module pragma.client.rendering.shaders:brdf_convolution;
+export module pragma.client:rendering.shaders.brdf_convolution;
 
 export namespace pragma {
 	class DLLCLIENT ShaderBRDFConvolution : public prosper::ShaderBaseImageProcessing {

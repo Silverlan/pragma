@@ -5,18 +5,18 @@ module;
 
 #include "pragma/clientdefinitions.h"
 
-export module pragma.client.particle_system:operator_color_fade;
+export module pragma.client:particle_system.operator_color_fade;
 
-import :modifier_gradual_fade;
-import :modifier_random_color;
-
-import pragma.client.entities.components.particle_system;
+import :entities.components.particle_system;
+import :particle_system.modifier;
+import :particle_system.modifier_gradual_fade;
+import :particle_system.modifier_random_color;
 
 export class DLLCLIENT CParticleOperatorColorFade : public CParticleOperator, public CParticleModifierComponentGradualFade {
   public:
 	CParticleOperatorColorFade() = default;
 	virtual void Simulate(CParticle &particle, double, float strength) override;
-	virtual void Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+	virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
 	virtual void OnParticleCreated(CParticle &particle) override;
   private:
 	CParticleModifierComponentRandomColor m_colorStart;
@@ -24,9 +24,7 @@ export class DLLCLIENT CParticleOperatorColorFade : public CParticleOperator, pu
 	std::unique_ptr<std::vector<Color>> m_particleStartColors = nullptr;
 };
 
-REGISTER_PARTICLE_OPERATOR(color_fade, CParticleOperatorColorFade);
-
-void CParticleOperatorColorFade::Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void CParticleOperatorColorFade::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleOperator::Initialize(pSystem, values);
 	CParticleModifierComponentGradualFade::Initialize(values);
@@ -37,7 +35,7 @@ void CParticleOperatorColorFade::Initialize(pragma::CParticleSystemComponent &pS
 	                                   // If no start color has been specified, the previous known color of the particle has to be used as start color.
 	                                   // Since that color cannot be known beforehand, we need to store it.
 	if(m_colorStart.IsSet() == false)
-		m_particleStartColors = std::make_unique<std::vector<Color>>(pSystem.GetMaxParticleCount(), Color(std::numeric_limits<int16_t>::max(), 0, 0, 0));
+		m_particleStartColors = std::make_unique<std::vector<Color>>(static_cast<pragma::ecs::CParticleSystemComponent&>(pSystem).GetMaxParticleCount(), Color(std::numeric_limits<int16_t>::max(), 0, 0, 0));
 }
 void CParticleOperatorColorFade::OnParticleCreated(CParticle &particle)
 {

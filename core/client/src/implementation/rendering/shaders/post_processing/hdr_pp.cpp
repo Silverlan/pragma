@@ -10,13 +10,13 @@ module;
 #include <prosper_util.hpp>
 #include <shader/prosper_shader_copy_image.hpp>
 
-module pragma.client.rendering.shaders;
+module pragma.client;
 
-import :pp_hdr;
 
-import pragma.client.client_state;
+import :rendering.shaders.pp_hdr;
 
-extern ClientState *client;
+import :client_state;
+
 
 using namespace pragma;
 
@@ -50,7 +50,7 @@ void ShaderPPHDR::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pip
 {
 	ShaderGraphics::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
 
-	auto &settings = client->GetGameWorldShaderSettings();
+	auto &settings = pragma::get_client_state()->GetGameWorldShaderSettings();
 	AddSpecializationConstant(pipelineInfo, prosper::ShaderStageFlags::FragmentBit, 0u /* constantId */, static_cast<uint32_t>(settings.bloomEnabled));
 
 	auto fxaaEnabled = (settings.fxaaEnabled && static_cast<Pipeline>(pipelineIdx) != Pipeline::HDR);

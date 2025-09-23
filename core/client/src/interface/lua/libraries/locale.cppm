@@ -6,8 +6,7 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <pragma/lua/ldefinitions.h>
 
-export module pragma.client.scripting.lua.libraries.locale;
-
+export module pragma.client:scripting.lua.libraries.locale;
 export namespace Lua {
 	namespace Locale {
 		DLLCLIENT void set_localization(const std::string &id, const std::string &text);

@@ -13,25 +13,23 @@ module;
 #include <prosper_command_buffer.hpp>
 #include <cmaterial.h>
 
-module pragma.client.entities.components.game_shadow_manager;
+module pragma.client;
 
-import pragma.client.engine;
-import pragma.client.entities.components;
-import pragma.client.game;
+import :entities.components.game_shadow_manager;
+import :engine;
+import :game;
 
-extern CEngine *c_engine;
-extern CGame *c_game;
 
 using namespace pragma;
 
 ShadowRenderer::ShadowRenderer()
 {
-	m_shader = c_game->GetGameShader(CGame::GameShader::Shadow);
-	m_shaderTransparent = c_game->GetGameShader(CGame::GameShader::ShadowTransparent);
-	m_shaderSpot = c_game->GetGameShader(CGame::GameShader::ShadowSpot);
-	m_shaderSpotTransparent = c_game->GetGameShader(CGame::GameShader::ShadowTransparentSpot);
-	m_shaderCSM = c_game->GetGameShader(CGame::GameShader::ShadowCSM);
-	m_shaderCSMTransparent = c_game->GetGameShader(CGame::GameShader::ShadowCSMTransparent);
+	m_shader = pragma::get_cgame()->GetGameShader(CGame::GameShader::Shadow);
+	m_shaderTransparent = pragma::get_cgame()->GetGameShader(CGame::GameShader::ShadowTransparent);
+	m_shaderSpot = pragma::get_cgame()->GetGameShader(CGame::GameShader::ShadowSpot);
+	m_shaderSpotTransparent = pragma::get_cgame()->GetGameShader(CGame::GameShader::ShadowTransparentSpot);
+	m_shaderCSM = pragma::get_cgame()->GetGameShader(CGame::GameShader::ShadowCSM);
+	m_shaderCSMTransparent = pragma::get_cgame()->GetGameShader(CGame::GameShader::ShadowCSMTransparent);
 
 	m_octreeCallbacks.nodeCallback = [this](const OcclusionOctree<std::shared_ptr<ModelMesh>>::Node &node) -> bool {
 		auto &bounds = node.GetWorldBounds();
@@ -89,7 +87,7 @@ void ShadowRenderer::UpdateWorldShadowCasters(std::shared_ptr<prosper::IPrimaryC
 	auto *scene = light.FindShadowScene();
 	if(scene == nullptr)
 		return;
-	auto *pWorld = c_game->GetWorld();
+	auto *pWorld = pragma::get_cgame()->GetWorld();
 	if(pWorld == nullptr)
 		return;
 	auto &entWorld = static_cast<CBaseEntity &>(pWorld->GetEntity());
@@ -152,7 +150,7 @@ void ShadowRenderer::UpdateEntityShadowCasters(std::shared_ptr<prosper::IPrimary
 	  });
 }
 
-bool ShadowRenderer::UpdateShadowCasters(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, pragma::CLightComponent &light, pragma::CLightComponent::ShadowMapType smType)
+bool ShadowRenderer::UpdateShadowCasters(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, pragma::CLightComponent &light, pragma::rendering::ShadowMapType smType)
 {
 	// TODO: Remove me
 #if 0
@@ -160,7 +158,7 @@ bool ShadowRenderer::UpdateShadowCasters(std::shared_ptr<prosper::IPrimaryComman
 	auto hShadowMap = light.GetShadowMap<pragma::CShadowComponent>(smType);
 	if(hShadowMap.expired())
 		return false;
-	auto frameId = c_engine->GetRenderContext().GetLastFrameId();
+	auto frameId = pragma::get_cengine()->GetRenderContext().GetLastFrameId();
 	if(hShadowMap->GetLastFrameRendered() == frameId)
 		return false;
 	auto wpRt = hShadowMap->RequestRenderTarget();
@@ -175,7 +173,7 @@ bool ShadowRenderer::UpdateShadowCasters(std::shared_ptr<prosper::IPrimaryComman
 
 	if(hShadowMap->IsDirty() == false)
 	{
-		if(smType == pragma::CLightComponent::ShadowMapType::Static)
+		if(smType == pragma::rendering::ShadowMapType::Static)
 		{
 			// Skip rendering; We've already rendered the static shadow map, no need to do it again since nothing has changed.
 			return false;
@@ -196,10 +194,10 @@ bool ShadowRenderer::UpdateShadowCasters(std::shared_ptr<prosper::IPrimaryComman
 	// TODO: Also render static props here!
 	switch(smType)
 	{
-	case pragma::CLightComponent::ShadowMapType::Static:
+	case pragma::rendering::ShadowMapType::Static:
 		UpdateWorldShadowCasters(drawCmd,light);
 		break;
-	case pragma::CLightComponent::ShadowMapType::Dynamic:
+	case pragma::rendering::ShadowMapType::Dynamic:
 		UpdateEntityShadowCasters(drawCmd,light);
 		break;
 	}
@@ -256,7 +254,7 @@ ShadowRenderer::RenderResultFlags ShadowRenderer::RenderShadows(std::shared_ptr<
 }
 
 static CVar cvParticleQuality = GetClientConVar("cl_render_particle_quality");
-void ShadowRenderer::RenderShadows(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, pragma::CLightComponent &light, pragma::CLightComponent::ShadowMapType smType, pragma::LightType type, bool drawParticleShadows)
+void ShadowRenderer::RenderShadows(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, pragma::CLightComponent &light, pragma::rendering::ShadowMapType smType, pragma::LightType type, bool drawParticleShadows)
 {
 	auto hShadowMap = light.GetShadowMap<pragma::CShadowComponent>(smType);
 	if(hShadowMap.expired() || light.GetEffectiveShadowType() == pragma::BaseEnvLightComponent::ShadowType::None || UpdateShadowCasters(drawCmd, light, smType) == false)
@@ -276,7 +274,7 @@ void ShadowRenderer::RenderShadows(std::shared_ptr<prosper::IPrimaryCommandBuffe
 
 	auto *smRt = hShadowMap->GetDepthRenderTarget();
 	auto &tex = smRt->GetTexture();
-	auto *scene = c_game->GetScene<pragma::CSceneComponent>();
+	auto *scene = pragma::get_cgame()->GetScene<pragma::CSceneComponent>();
 	auto *renderer = scene ? scene->GetRenderer<pragma::CRendererComponent>() : nullptr;
 	auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : pragma::ComponentHandle<pragma::CRasterizationRendererComponent> {};
 	if(raster.expired())
@@ -298,9 +296,9 @@ void ShadowRenderer::RenderShadows(std::shared_ptr<prosper::IPrimaryCommandBuffe
 		//if(umath::is_flag_set(renderResultFlags,RenderResultFlags::TranslucentPending) && shaderTransparent != nullptr)
 		//	RenderShadows(drawCmd,light,layerId,depthMVP,shader,true); // Draw translucent shadows
 		if(drawParticleShadows == true && renderer) {
-			auto *scene = c_game->GetRenderScene<pragma::CSceneComponent>();
+			auto *scene = pragma::get_cgame()->GetRenderScene<pragma::CSceneComponent>();
 			// TODO: Only culled particles
-			EntityIterator entIt {*c_game};
+			EntityIterator entIt {*pragma::get_cgame()};
 			entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::ecs::CParticleSystemComponent>>();
 			for(auto *ent : entIt) {
 				auto p = ent->GetComponent<pragma::ecs::CParticleSystemComponent>();
@@ -326,6 +324,6 @@ void ShadowRenderer::RenderShadows(std::shared_ptr<prosper::IPrimaryCommandBuffe
 	}
 	if(m_shader.expired() || m_shaderSpot.expired())
 		return;
-	RenderShadows(drawCmd, light, pragma::CLightComponent::ShadowMapType::Static, type, bDrawParticleShadows);
-	RenderShadows(drawCmd, light, pragma::CLightComponent::ShadowMapType::Dynamic, type, bDrawParticleShadows);
+	RenderShadows(drawCmd, light, pragma::rendering::ShadowMapType::Static, type, bDrawParticleShadows);
+	RenderShadows(drawCmd, light, pragma::rendering::ShadowMapType::Dynamic, type, bDrawParticleShadows);
 }

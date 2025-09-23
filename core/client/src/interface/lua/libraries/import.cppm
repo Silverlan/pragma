@@ -5,8 +5,7 @@ module;
 
 #include "pragma/clientdefinitions.h"
 
-export module pragma.client.scripting.lua.libraries.import_lib;
-
+export module pragma.client:scripting.lua.libraries.import_lib;
 export namespace Lua {
 	namespace lib_export {
 		DLLCLIENT int export_scene(lua_State *l);

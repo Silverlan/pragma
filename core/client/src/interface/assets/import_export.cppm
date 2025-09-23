@@ -15,7 +15,11 @@ module;
 #include <util_texture_info.hpp>
 #include <sharedutils/util_path.hpp>
 
-export module pragma.client.assets:import_export;
+export module pragma.client:assets.import_export;
+
+import :entities.components.camera;
+import :entities.components.lights.light;
+import :rendering.cycles;
 
 export namespace pragma::asset {
 	constexpr std::string_view EXPORT_PATH = "export/";

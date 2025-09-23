@@ -13,15 +13,15 @@ module;
 #include <image/prosper_texture.hpp>
 #include <random>
 
-module pragma.client.rendering.shaders;
+module pragma.client;
 
-import :resize_image;
 
-import pragma.client.engine;
+import :rendering.shaders.resize_image;
+
+import :engine;
 
 using namespace pragma;
 
-extern CEngine *c_engine;
 ShaderResizeImage::ShaderResizeImage(prosper::IPrContext &context, const std::string &identifier) : prosper::ShaderBaseImageProcessing(context, identifier, "programs/image/resize_image") { SetPipelineCount(umath::to_integral(Filter::Count) * umath::to_integral(RenderPass::Count)); }
 
 ShaderResizeImage::~ShaderResizeImage() {}

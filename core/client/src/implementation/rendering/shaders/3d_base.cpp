@@ -6,13 +6,12 @@ module;
 #include "stdafx_client.h"
 #include <shader/prosper_pipeline_create_info.hpp>
 
-module pragma.client.rendering.shaders;
+module pragma.client;
 
-import :base_3d;
+import :rendering.shaders.base_3d;
 
-import pragma.client.engine;
+import :engine;
 
-extern CEngine *c_engine;
 
 using namespace pragma;
 

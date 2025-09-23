@@ -6,8 +6,7 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <pragma/entities/components/base_io_component.hpp>
 
-export module pragma.client.entities.components.io;
-
+export module pragma.client:entities.components.io;
 export namespace pragma {
 	class DLLCLIENT CIOComponent final : public BaseIOComponent {
 	  public:

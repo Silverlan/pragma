@@ -7,13 +7,12 @@ module;
 #include "pragma/lua/converters/gui_element_converter.hpp"
 #include <sharedutils/util_string.h>
 
-module pragma.client.gui;
+module pragma.client;
 
-import :icon;
+import :gui.icon;
 
-import pragma.client.client_state;
+import :client_state;
 
-extern ClientState *client;
 LINK_WGUI_TO_CLASS(WIIcon, WIIcon);
 #define SILKICON_SPRITESHEET_WIDTH 1024
 #define SILKICON_SPRITESHEET_HEIGHT 512

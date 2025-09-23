@@ -9,9 +9,9 @@ module;
 #include <mathutil/umath.h>
 #include <prosper_window.hpp>
 
-module pragma.client.gui;
+module pragma.client;
 
-import :frame;
+import :gui.frame;
 
 import pragma.gui;
 import pragma.string.unicode;

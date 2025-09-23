@@ -11,18 +11,15 @@ module;
 #include <image/prosper_render_target.hpp>
 #include <cmaterial.h>
 
-module pragma.client.entities.components.rasterization_renderer:bloom;
+module pragma.client;
 
-import pragma.client.client_state;
-import pragma.client.engine;
-import pragma.client.entities.components;
-import pragma.client.game;
+import :entities.components.rasterization_renderer;
+import :client_state;
+import :engine;
+import :game;
 
 using namespace pragma::rendering;
 
-extern CEngine *c_engine;
-extern ClientState *client;
-extern CGame *c_game;
 
 void pragma::CRasterizationRendererComponent::RenderGlowObjects(const util::DrawSceneInfo &drawSceneInfo)
 {
@@ -31,7 +28,7 @@ void pragma::CRasterizationRendererComponent::RenderGlowObjects(const util::Draw
 	if(glowInfo.bGlowScheduled == false || drawSceneInfo.scene.expired())
 		return;
 	auto &scene = *drawSceneInfo.scene;
-	c_game->StartProfilingStage(CGame::GPUProfilingPhase::PostProcessingGlow);
+	pragma::get_cgame()->StartProfilingStage(CGame::GPUProfilingPhase::PostProcessingGlow);
 	auto &drawCmd = drawSceneInfo.commandBuffer;
 	drawCmd->RecordBeginRenderPass(*glowInfo.renderTarget,{
 		prosper::ClearValue{prosper::ClearColorValue{std::array<float,4>{0.f,0.f,0.f,1.f}}},
@@ -63,7 +60,7 @@ void pragma::CRasterizationRendererComponent::RenderGlowObjects(const util::Draw
 	auto &blurImg = glowInfo.blurSet->GetFinalRenderTarget()->GetTexture().GetImage();
 	for(auto i=decltype(blurAmount){0u};i<blurAmount;++i)
 	{
-		prosper::util::record_blur_image(c_engine->GetRenderContext(),drawCmd,*glowInfo.blurSet,{
+		prosper::util::record_blur_image(pragma::get_cengine()->GetRenderContext(),drawCmd,*glowInfo.blurSet,{
 			Vector4(1.f,1.f,1.f,1.f), /* color scale */
 			1.75f, /* blur size */
 			3 /* kernel size */
@@ -71,7 +68,7 @@ void pragma::CRasterizationRendererComponent::RenderGlowObjects(const util::Draw
 	}
 
 	drawCmd->RecordImageBarrier(glowInfo.renderTarget->GetTexture().GetImage(),prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
-	c_game->StopProfilingStage(CGame::GPUProfilingPhase::PostProcessingGlow);
+	pragma::get_cgame()->StopProfilingStage(CGame::GPUProfilingPhase::PostProcessingGlow);
 #endif
 }
 
@@ -110,6 +107,7 @@ void pragma::CRasterizationRendererComponent::RenderGlowMeshes(std::shared_ptr<p
 //
 static void cmd_render_bloom_enabled(NetworkState *, const ConVar &, bool, bool enabled)
 {
+	auto *client = pragma::get_client_state();
 	if(client == nullptr)
 		return;
 	client->UpdateGameWorldShaderSettings();

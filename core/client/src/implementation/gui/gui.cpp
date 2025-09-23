@@ -6,11 +6,13 @@ module;
 #include "stdafx_client.h"
 #include "pragma/lua/util.hpp"
 
-module pragma.client.gui;
+module pragma.client;
 
-import pragma.client.client_state;
-import pragma.client.engine;
-import pragma.client.game;
+
+import :gui;
+import :client_state;
+import :engine;
+import :game;
 
 bool load_skin(const std::string &skinName)
 {

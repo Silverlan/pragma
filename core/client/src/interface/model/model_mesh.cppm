@@ -8,7 +8,11 @@ module;
 #include <pragma/model/modelmesh.h>
 #include <memory>
 
-export module pragma.client.model:mesh;
+export module pragma.client:model.mesh;
+
+import :model.render_mesh;
+import :model.vertex_buffer_data;
+import :rendering.shaders.scene;
 
 export class DLLCLIENT CModelSubMesh : public ModelSubMesh {
   public:

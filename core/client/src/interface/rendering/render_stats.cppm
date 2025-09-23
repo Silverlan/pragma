@@ -13,7 +13,9 @@ module;
 #include <chrono>
 #include <unordered_set>
 
-export module pragma.client.rendering.render_stats;
+export module pragma.client:rendering.render_stats;
+
+import :model.mesh;
 
 export {
 	template<typename TCounter>

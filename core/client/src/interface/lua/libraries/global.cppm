@@ -6,8 +6,7 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <pragma/lua/ldefinitions.h>
 
-export module pragma.client.scripting.lua.libraries.global;
-
+export module pragma.client:scripting.lua.libraries.global;
 export namespace Lua {
 	DLLCLIENT double ServerTime(lua_State *l);
 	DLLCLIENT double FrameTime(lua_State *l);

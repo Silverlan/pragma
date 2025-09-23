@@ -15,12 +15,11 @@ module;
 
 #undef PlaySound
 
-export module pragma.client.client_state;
-
-import pragma.client.audio;
-import pragma.client.game;
-import pragma.client.gui;
-import pragma.client.networking;
+export module pragma.client:client_state;
+import :audio;
+import :game;
+import :gui;
+import :networking;
 import pragma.string.unicode;
 
 #pragma warning(push)
@@ -234,9 +233,9 @@ export {
 
 		void ReadEntityData(NetPacket &packet);
 	};
+
+    namespace pragma {
+		DLLCLIENT ClientState *get_client_state();
+	};
 };
 #pragma warning(pop)
-export {
-	extern DLLCLIENT ClientState *client = nullptr;
-	extern DLLCLIENT CGame *c_game = nullptr;
-};

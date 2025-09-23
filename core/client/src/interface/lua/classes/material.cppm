@@ -8,7 +8,9 @@ module;
 #include <pragma/lua/ldefinitions.h>
 #include <texturemanager/texturemanager.h>
 
-export module pragma.client.scripting.lua.classes.material;
+export module pragma.client:scripting.lua.classes.material;
+
+import :scripting.lua.libraries.vulkan;
 
 export namespace Lua {
 	namespace Material {

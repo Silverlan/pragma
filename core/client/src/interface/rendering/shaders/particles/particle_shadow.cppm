@@ -3,7 +3,7 @@
 
 module;
 
-export module pragma.client.rendering.shaders:particle_shadow;
+export module pragma.client:rendering.shaders.particle_shadow;
 
 // prosper TODO
 #if 0
@@ -65,7 +65,7 @@ template<class TBase>
 {
 	Base::InitializeShaderPipelines(context);
 
-	auto &timeBuffer = *c_game->GetUniformBlockSwapBuffer(UniformBinding::Time);
+	auto &timeBuffer = *pragma::get_cgame()->GetUniformBlockSwapBuffer(UniformBinding::Time);
 	GetPipeline()->SetBuffer(umath::to_integral(DescSet::Time),timeBuffer,umath::to_integral(Binding::Time));
 }
 

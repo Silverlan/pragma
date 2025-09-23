@@ -9,14 +9,14 @@ module;
 #include <sharedutils/util_string.h>
 #include <sharedutils/util.h>
 
-export module pragma.client.particle_system:operator_cylindrical_vortex;
+export module pragma.client:particle_system.operator_cylindrical_vortex;
 
-import :operator_world_base;
+import :particle_system.operator_world_base;
 
 export class DLLCLIENT CParticleOperatorCylindricalVortex : public CParticleOperatorWorldBase {
   public:
 	CParticleOperatorCylindricalVortex() = default;
-	virtual void Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+	virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
 	virtual void Simulate(CParticle &particle, double tDelta, float strength) override;
 	virtual void Simulate(double tDelta) override;
   private:
@@ -30,9 +30,7 @@ export class DLLCLIENT CParticleOperatorCylindricalVortex : public CParticleOper
 	Quat m_dtRotation = uquat::identity();
 };
 
-REGISTER_PARTICLE_OPERATOR(cylindrical_vortex, CParticleOperatorCylindricalVortex);
-
-void CParticleOperatorCylindricalVortex::Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void CParticleOperatorCylindricalVortex::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleOperatorWorldBase::Initialize(pSystem, values);
 	for(auto it = values.begin(); it != values.end(); it++) {

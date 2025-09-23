@@ -11,9 +11,9 @@ module;
 #include <mathutil/umath_lighting.hpp>
 #include "pragma/model/animation/vertex_animation.hpp"
 
-export module pragma.client.assets:gltf_writer;
+export module pragma.client:assets.gltf_writer;
 
-import :import_export;
+import :assets.import_export;
 
 export namespace pragma::asset {
 	class GLTFWriter {

@@ -11,9 +11,9 @@ module;
 #include <buffers/prosper_buffer.hpp>
 #include <image/prosper_texture.hpp>
 
-export module pragma.client.entities.components.light_map;
-
-import pragma.client.rendering.lightmap_data_cache;
+export module pragma.client:entities.components.light_map;
+import :rendering.cycles;
+import :rendering.lightmap_data_cache;
 import source_engine.bsp;
 
 export namespace pragma {

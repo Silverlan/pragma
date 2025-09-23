@@ -9,16 +9,15 @@ module;
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <wgui/types/wirect.h>
 
-module pragma.client.rendering.shaders;
+module pragma.client;
 
-import :world_raytracing;
 
-import pragma.client.engine;
-import pragma.client.rendering.shaders;
+import :rendering.shaders.world_raytracing;
+
+import :engine;
 
 using namespace pragma;
 
-extern CEngine *c_engine;
 
 decltype(ShaderRayTracing::DESCRIPTOR_SET_IMAGE_OUTPUT) ShaderRayTracing::DESCRIPTOR_SET_IMAGE_OUTPUT = {
   "OUTPUTS",

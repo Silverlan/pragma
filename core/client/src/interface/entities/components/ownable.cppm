@@ -7,7 +7,9 @@ module;
 #include <pragma/entities/components/base_ownable_component.hpp>
 #include <pragma/lua/luaapi.h>
 
-export module pragma.client.entities.components.ownable;
+export module pragma.client:entities.components.ownable;
+
+import :entities.components.entity;
 
 export namespace pragma {
 	class DLLCLIENT COwnableComponent final : public BaseOwnableComponent, public CBaseNetComponent {

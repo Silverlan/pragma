@@ -4,6 +4,7 @@
 module;
 
 #include "stdafx_client.h"
+#include "pragma/console/conout.h"
 #include <util_image.hpp>
 #include <util_image_buffer.hpp>
 #include <image/prosper_sampler.hpp>
@@ -15,14 +16,14 @@ module;
 #include <prosper_util.hpp>
 #include <fsys/ifile.hpp>
 
-module pragma.client.util.screenshot;
+module pragma.client;
 
-import pragma.client.client_state;
-import pragma.client.engine;
-import pragma.client.entities.components;
 
-extern CEngine *c_engine;
-extern ClientState *client;
+import :util.screenshot;
+import :client_state;
+import :engine;
+import :entities.components;
+
 
 static std::string get_screenshot_name(Game *game, uimg::ImageFormat format)
 {
@@ -53,7 +54,7 @@ void util::rt_screenshot(CGame &game, uint32_t width, uint32_t height, const RtS
 
 	// A raytracing screenshot has been requested; We'll have to re-render the scene with raytracing enabled
 
-	auto resolution = c_engine->GetRenderResolution();
+	auto resolution = pragma::get_cengine()->GetRenderResolution();
 	::pragma::rendering::cycles::SceneInfo sceneInfo {};
 	sceneInfo.width = width;
 	sceneInfo.height = height;
@@ -77,7 +78,7 @@ void util::rt_screenshot(CGame &game, uint32_t width, uint32_t height, const RtS
 	sceneInfo.skyAngles = settings.skyAngles;
 
 	Con::cout << "Executing raytracer... This may take a few minutes!" << Con::endl;
-	auto job = ::pragma::rendering::cycles::render_image(*client, sceneInfo, renderImgInfo);
+	auto job = ::pragma::rendering::cycles::render_image(*pragma::get_client_state(), sceneInfo, renderImgInfo);
 	if(job.IsValid()) {
 		job.SetCompletionHandler([format, quality, toneMapping](util::ParallelWorker<uimg::ImageLayerSet> &worker) {
 			if(worker.IsSuccessful() == false) {
@@ -85,6 +86,7 @@ void util::rt_screenshot(CGame &game, uint32_t width, uint32_t height, const RtS
 				return;
 			}
 
+            auto *client = pragma::get_client_state();
 			auto path = get_screenshot_name(client ? client->GetGameState() : nullptr, format);
 			Con::cout << "Raytracing complete! Saving screenshot as '" << path << "'..." << Con::endl;
 			auto fp = FileManager::OpenFile<VFilePtrReal>(path.c_str(), "wb");
@@ -104,7 +106,7 @@ void util::rt_screenshot(CGame &game, uint32_t width, uint32_t height, const RtS
 			// util::tga::write_tga(f,imgBuffer->GetWidth(),imgBuffer->GetHeight(),static_cast<uint8_t*>(imgBuffer->GetData()));
 		});
 		job.Start();
-		c_engine->AddParallelJob(job, "Raytraced screenshot");
+		pragma::get_cengine()->AddParallelJob(job, "Raytraced screenshot");
 	}
 }
 
@@ -136,26 +138,26 @@ std::optional<std::string> util::screenshot(CGame &game)
 			rt = rasterC->GetHDRInfo().toneMappedRenderTarget;
 			break;
 		case ImageStage::ScreenOutput:
-			rt = c_engine->GetRenderContext().GetWindow().GetStagingRenderTarget();
+			rt = pragma::get_cengine()->GetRenderContext().GetWindow().GetStagingRenderTarget();
 			break;
 		}
 		if(rt == nullptr) {
 			Con::cwar << "Scene render target is invalid!" << Con::endl;
 			return {};
 		}
-		c_engine->GetRenderContext().WaitIdle(); // Make sure rendering is complete
+		pragma::get_cengine()->GetRenderContext().WaitIdle(); // Make sure rendering is complete
 
 		auto &img = rt->GetTexture().GetImage();
 		imgScreenshot = img.shared_from_this();
 
 		auto bufSize = img.GetWidth() * img.GetHeight() * prosper::util::get_byte_size(img.GetFormat());
 		auto extents = img.GetExtents();
-		bufScreenshot = c_engine->GetRenderContext().AllocateTemporaryBuffer(bufSize);
+		bufScreenshot = pragma::get_cengine()->GetRenderContext().AllocateTemporaryBuffer(bufSize);
 
 		// TODO: Check if image formats are compatible (https://www.khronos.org/registry/vulkan/specs/1.1-extensions/html/vkspec.html#features-formats-compatibility)
 		// before issuing the copy command
 		uint32_t queueFamilyIndex;
-		auto cmdBuffer = c_engine->GetRenderContext().AllocatePrimaryLevelCommandBuffer(prosper::QueueFamilyType::Universal, queueFamilyIndex);
+		auto cmdBuffer = pragma::get_cengine()->GetRenderContext().AllocatePrimaryLevelCommandBuffer(prosper::QueueFamilyType::Universal, queueFamilyIndex);
 		cmdBuffer->StartRecording();
 		cmdBuffer->RecordImageBarrier(img, prosper::ImageLayout::ColorAttachmentOptimal, prosper::ImageLayout::TransferSrcOptimal);
 		cmdBuffer->RecordCopyImageToBuffer({}, img, prosper::ImageLayout::TransferDstOptimal, *bufScreenshot);
@@ -163,7 +165,7 @@ std::optional<std::string> util::screenshot(CGame &game)
 		// Note: Blit can't be used because some Nvidia GPUs don't support blitting for images with linear tiling
 		//.RecordBlitImage(**cmdBuffer,{},**img,**imgDst);
 		cmdBuffer->StopRecording();
-		c_engine->GetRenderContext().SubmitCommandBuffer(*cmdBuffer, true);
+		pragma::get_cengine()->GetRenderContext().SubmitCommandBuffer(*cmdBuffer, true);
 	}
 	if(bufScreenshot == nullptr) {
 		Con::cwar << "Failed to create screenshot image buffer!" << Con::endl;

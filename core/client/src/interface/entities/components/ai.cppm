@@ -7,7 +7,9 @@ module;
 #include <pragma/entities/components/base_ai_component.hpp>
 #include <pragma/util/util_handled.hpp>
 
-export module pragma.client.entities.components.ai;
+export module pragma.client:entities.components.ai;
+
+import :entities.components.entity;
 
 export namespace pragma {
 	class DLLCLIENT CAIComponent final : public BaseAIComponent, public CBaseSnapshotComponent {

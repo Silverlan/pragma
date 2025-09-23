@@ -7,7 +7,6 @@ module;
 #include <pragma/lua/custom_constructor.hpp>
 #include <luabind/class.hpp>
 #include "pragma/lua/policies/shared_from_this_policy.hpp"
-#include "pragma/lua/converters/shader_converter_t.hpp"
 #include <pragma/lua/converters/vector_converter_t.hpp>
 #include <pragma/lua/converters/optional_converter_t.hpp>
 #include <prosper_framebuffer.hpp>
@@ -24,18 +23,20 @@ module;
 #include <buffers/prosper_swap_buffer.hpp>
 #include <prosper_swap_command_buffer.hpp>
 #include <prosper_event.hpp>
+#include "prosper_util.hpp"
 #include <sharedutils/datastream.h>
 #include <luabind/copy_policy.hpp>
 #include <pragma/lua/types/udm.hpp>
 #include <luainterface.hpp>
 #include <sharedutils/util.h>
 
-module pragma.client.scripting.lua.classes.vulkan;
+module pragma.client;
 
-import pragma.client.engine;
-import pragma.client.model;
 
-extern CEngine *c_engine;
+import :scripting.lua.classes.vulkan;
+import :engine;
+import :model;
+
 
 namespace prosper {
 	static bool operator==(const Lua::Vulkan::Framebuffer &a, const Lua::Vulkan::Framebuffer &b) { return &a == &b; }
@@ -165,7 +166,7 @@ static void pcb_recordBufferBarrier(prosper::util::PreparedCommandBuffer &pcb, L
 	pcb.PushCommand(
 	  [pbuf](const prosper::util::PreparedCommandBufferRecordState &recordState) -> bool {
 		  auto &cmdBuf = recordState.commandBuffer;
-		  c_engine->GetRenderContext().KeepResourceAliveUntilPresentationComplete(pbuf);
+		  pragma::get_cengine()->GetRenderContext().KeepResourceAliveUntilPresentationComplete(pbuf);
 		  auto size = recordState.GetArgument<uint32_t>(5);
 		  auto lsize = (size != std::numeric_limits<uint32_t>::max()) ? static_cast<uint64_t>(size) : std::numeric_limits<uint64_t>::max();
 		  return cmdBuf.RecordBufferBarrier(*pbuf, recordState.GetArgument<prosper::PipelineStageFlags>(0), recordState.GetArgument<prosper::PipelineStageFlags>(1), recordState.GetArgument<prosper::AccessFlags>(2), recordState.GetArgument<prosper::AccessFlags>(3),
@@ -395,7 +396,7 @@ bool Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffers(
 	defVkCommandBuffer.def("StartRecording", &Lua::Vulkan::VKCommandBuffer::StartRecording);
 	defVkCommandBuffer.def("SetDebugName", static_cast<void (*)(lua_State *, Lua::Vulkan::CommandBuffer &, const std::string &)>([](lua_State *l, Lua::Vulkan::CommandBuffer &cb, const std::string &name) { Lua::Vulkan::VKContextObject::SetDebugName(l, cb, name); }));
 	defVkCommandBuffer.def("GetDebugName", static_cast<std::string (*)(lua_State *, Lua::Vulkan::CommandBuffer &)>([](lua_State *l, Lua::Vulkan::CommandBuffer &cb) { return Lua::Vulkan::VKContextObject::GetDebugName(l, cb); }));
-	defVkCommandBuffer.def("Flush", static_cast<void (*)(lua_State *, Lua::Vulkan::CommandBuffer &)>([](lua_State *l, Lua::Vulkan::CommandBuffer &cb) { c_engine->GetRenderContext().FlushCommandBuffer(cb); }));
+	defVkCommandBuffer.def("Flush", static_cast<void (*)(lua_State *, Lua::Vulkan::CommandBuffer &)>([](lua_State *l, Lua::Vulkan::CommandBuffer &cb) { pragma::get_cengine()->GetRenderContext().FlushCommandBuffer(cb); }));
 	prosperMod[defVkCommandBuffer];
 
 	auto devVkBuffer = luabind::class_<Lua::Vulkan::Buffer>("Buffer");

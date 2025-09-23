@@ -8,17 +8,17 @@ module;
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <prosper_command_buffer.hpp>
 
-module pragma.client.entities.components.renderer;
+module pragma.client;
 
-import pragma.client.engine;
-import pragma.client.entities.components.pp_bloom;
-import pragma.client.entities.components.pp_dof;
-import pragma.client.entities.components.pp_fog;
-import pragma.client.entities.components.pp_fxaa;
-import pragma.client.entities.components.pp_tone_mapping;
-import pragma.client.scripting.lua;
 
-extern CEngine *c_engine;
+import :entities.components.renderer;
+import :engine;
+import :entities.components.pp_bloom;
+import :entities.components.pp_dof;
+import :entities.components.pp_fog;
+import :entities.components.pp_fxaa;
+import :entities.components.pp_tone_mapping;
+import :scripting.lua.libraries.vulkan;
 
 using namespace pragma;
 

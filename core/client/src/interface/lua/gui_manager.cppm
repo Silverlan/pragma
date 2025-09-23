@@ -7,8 +7,7 @@ module;
 #include <pragma/lua/luaapi.h>
 #include <unordered_map>
 
-export module pragma.client.scripting.lua.gui_manager;
-
+export module pragma.client:scripting.lua.gui_manager;
 export {
 	#pragma warning(push)
 	#pragma warning(disable : 4251)

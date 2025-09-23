@@ -5,7 +5,9 @@ module;
 
 #include "pragma/clientdefinitions.h"
 
-export module pragma.client.rendering.shaders:world_flat;
+export module pragma.client:rendering.shaders.world_flat;
+
+import :rendering.shaders.scene;
 
 export namespace pragma {
 	class DLLCLIENT ShaderFlat : public ShaderScene {

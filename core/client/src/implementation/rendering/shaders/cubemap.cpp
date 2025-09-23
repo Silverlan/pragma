@@ -12,14 +12,13 @@ module;
 #include <prosper_command_buffer.hpp>
 #include <buffers/prosper_buffer.hpp>
 
-module pragma.client.rendering.shaders;
+module pragma.client;
 
-import :cubemap;
+import :rendering.shaders.cubemap;
 
-import pragma.client.engine;
-import pragma.client.math;
+import :engine;
+import :math;
 
-extern CEngine *c_engine;
 
 using namespace pragma;
 
@@ -78,7 +77,7 @@ std::shared_ptr<prosper::IBuffer> ShaderCubemap::CreateCubeMesh(uint32_t &outNum
 	bufCreateInfo.size = verts.size() * sizeof(verts.front());
 	bufCreateInfo.usageFlags = prosper::BufferUsageFlags::VertexBufferBit;
 	outNumVerts = verts.size();
-	return c_engine->GetRenderContext().CreateBuffer(bufCreateInfo, verts.data());
+	return pragma::get_cengine()->GetRenderContext().CreateBuffer(bufCreateInfo, verts.data());
 }
 std::shared_ptr<prosper::IImage> ShaderCubemap::CreateCubeMap(uint32_t width, uint32_t height, prosper::util::ImageCreateInfo::Flags flags) const
 {
@@ -93,7 +92,7 @@ std::shared_ptr<prosper::IImage> ShaderCubemap::CreateCubeMap(uint32_t width, ui
 	createInfo.usage = prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::TransferSrcBit | prosper::ImageUsageFlags::TransferDstBit;
 	createInfo.postCreateLayout = prosper::ImageLayout::ShaderReadOnlyOptimal;
 
-	return c_engine->GetRenderContext().CreateImage(createInfo);
+	return pragma::get_cengine()->GetRenderContext().CreateImage(createInfo);
 }
 void ShaderCubemap::InitializeSamplerCreateInfo(prosper::util::ImageCreateInfo::Flags flags, prosper::util::SamplerCreateInfo &inOutSamplerCreateInfo)
 {
@@ -116,11 +115,11 @@ std::shared_ptr<prosper::RenderTarget> ShaderCubemap::CreateCubeMapRenderTarget(
 
 	prosper::util::TextureCreateInfo texCreateInfo {};
 	InitializeTextureCreateInfo(texCreateInfo);
-	auto tex = c_engine->GetRenderContext().CreateTexture(texCreateInfo, *img, imgViewCreateInfo, samplerCreateInfo);
+	auto tex = pragma::get_cengine()->GetRenderContext().CreateTexture(texCreateInfo, *img, imgViewCreateInfo, samplerCreateInfo);
 
 	prosper::util::RenderTargetCreateInfo rtCreateInfo {};
 	rtCreateInfo.useLayerFramebuffers = true;
-	return c_engine->GetRenderContext().CreateRenderTarget({tex}, GetRenderPass(), rtCreateInfo);
+	return pragma::get_cengine()->GetRenderContext().CreateRenderTarget({tex}, GetRenderPass(), rtCreateInfo);
 }
 
 const Mat4 &ShaderCubemap::GetProjectionMatrix(float aspectRatio) const { return pragma::math::get_cubemap_projection_matrix(aspectRatio); }

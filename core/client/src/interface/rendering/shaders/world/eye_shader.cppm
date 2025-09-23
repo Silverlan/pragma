@@ -3,8 +3,11 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 
-export module pragma.client.rendering.shaders:world_eye;
+export module pragma.client:rendering.shaders.world_eye;
+
+import :rendering.shaders.pbr;
 
 export namespace pragma {
 	class DLLCLIENT ShaderEye : public ShaderPBR {

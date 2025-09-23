@@ -9,22 +9,22 @@ module;
 #include "luasystem.h"
 #include <buffers/prosper_uniform_resizable_buffer.hpp>
 
-module pragma.client.scripting.lua.libraries.ents;
+module pragma.client;
 
-import pragma.client.client_state;
-import pragma.client.entities.components.listener;
-import pragma.client.entities.components.player;
-import pragma.client.entities.components.render;
-import pragma.client.entities.components.view_body;
-import pragma.client.entities.components.view_model;
-import pragma.client.game;
 
-extern ClientState *client;
-extern CGame *c_game;
+import :scripting.lua.libraries.ents;
+import :client_state;
+import :entities.components.listener;
+import :entities.components.player;
+import :entities.components.render;
+import :entities.components.view_body;
+import :entities.components.view_model;
+import :game;
+
 
 int Lua::ents::Client::get_local_player(lua_State *l)
 {
-	auto *pl = c_game->GetLocalPlayer();
+	auto *pl = pragma::get_cgame()->GetLocalPlayer();
 	if(pl == nullptr)
 		return 0;
 	pl->PushLuaObject(l);
@@ -32,7 +32,7 @@ int Lua::ents::Client::get_local_player(lua_State *l)
 }
 int Lua::ents::Client::get_listener(lua_State *l)
 {
-	auto *listener = c_game->GetListener<pragma::CListenerComponent>();
+	auto *listener = pragma::get_cgame()->GetListener<pragma::CListenerComponent>();
 	if(listener == nullptr)
 		return 0;
 	listener->PushLuaObject(l);
@@ -41,7 +41,7 @@ int Lua::ents::Client::get_listener(lua_State *l)
 
 int Lua::ents::Client::get_view_model(lua_State *l)
 {
-	auto *vm = c_game->GetViewModel<pragma::CViewModelComponent>();
+	auto *vm = pragma::get_cgame()->GetViewModel<pragma::CViewModelComponent>();
 	if(vm == nullptr)
 		return 0;
 	vm->GetEntity().GetLuaObject().push(l);
@@ -50,7 +50,7 @@ int Lua::ents::Client::get_view_model(lua_State *l)
 
 int Lua::ents::Client::get_view_body(lua_State *l)
 {
-	auto *vb = c_game->GetViewBody<pragma::CViewBodyComponent>();
+	auto *vb = pragma::get_cgame()->GetViewBody<pragma::CViewBodyComponent>();
 	if(vb == nullptr)
 		return 0;
 	vb->GetEntity().GetLuaObject().push(l);

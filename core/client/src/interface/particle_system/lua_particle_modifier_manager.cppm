@@ -3,9 +3,11 @@
 
 module;
 
-#include <pragma/lua/ldefinitions.h>
+#include "pragma/clientdefinitions.h"
 
-export module pragma.client.particle_system:lua_particle_modifier_manager;
+export module pragma.client:particle_system.lua_particle_modifier_manager;
+
+import :particle_system.initializer_lua;
 
 export namespace pragma {
 	class DLLCLIENT LuaParticleModifierManager {

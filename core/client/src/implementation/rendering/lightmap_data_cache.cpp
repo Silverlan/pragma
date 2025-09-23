@@ -6,8 +6,10 @@ module;
 #include "stdafx_client.h"
 #include "sharedutils/util_hash.hpp"
 
-module pragma.client.rendering.lightmap_data_cache;
+module pragma.client;
 
+
+import :rendering.lightmap_data_cache;
 using namespace pragma;
 
 size_t LightmapDataCache::CalcPoseHash(const umath::Transform &pose)

@@ -9,15 +9,15 @@ module;
 #include <pragma/entities/entity_component_manager_t.hpp>
 #include <buffers/prosper_uniform_resizable_buffer.hpp>
 
-module pragma.client.entities.components.motion_blur_data;
+module pragma.client;
 
-import pragma.client.engine;
-import pragma.client.entities.components.render;
-import pragma.client.game;
-import pragma.client.rendering.shaders;
 
-extern CGame *c_game;
-extern CEngine *c_engine;
+import :entities.components.motion_blur_data;
+import :engine;
+import :entities.components.render;
+import :game;
+import :rendering.shaders;
+
 
 using namespace pragma;
 
@@ -25,7 +25,7 @@ static pragma::ShaderVelocityBuffer *g_velocityBufferShader = nullptr;
 pragma::ShaderVelocityBuffer *pragma::get_velocity_buffer_shader()
 {
 	if(!g_velocityBufferShader)
-		g_velocityBufferShader = static_cast<pragma::ShaderVelocityBuffer *>(c_engine->GetShader("velocity_buffer").get());
+		g_velocityBufferShader = static_cast<pragma::ShaderVelocityBuffer *>(pragma::get_cengine()->GetShader("velocity_buffer").get());
 	return g_velocityBufferShader;
 }
 
@@ -57,7 +57,7 @@ void CMotionBlurDataComponent::UpdateEntityPoses()
 		m_motionBlurData.cameraData.angularCameraVelocity = {angVel, 0.f};
 	}
 
-	EntityIterator entIt {*c_game};
+	EntityIterator entIt {*pragma::get_cgame()};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CRenderComponent>>();
 	for(auto *ent : entIt) {
 		auto &r = *static_cast<CBaseEntity *>(ent)->GetRenderComponent();

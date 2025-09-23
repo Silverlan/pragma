@@ -6,9 +6,8 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/environment/audio/env_sound_dsp_chorus.h"
 
-export module pragma.client.entities.components.audio.dsp.chorus;
-
-import pragma.client.entities.components.audio.dsp.base;
+export module pragma.client:entities.components.audio.dsp.chorus;
+import :entities.components.audio.dsp.base;
 
 export namespace pragma {
 	class DLLCLIENT CSoundDspChorusComponent final : public CBaseSoundDspComponent, public BaseEnvSoundDspChorus {

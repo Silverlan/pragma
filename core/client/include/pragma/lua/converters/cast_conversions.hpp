@@ -7,14 +7,6 @@
 #include <pragma/lua/converters/cast_converter.hpp>
 #include <type_traits>
 
-class Material;
-class CMaterial;
-class Model;
-class CModel;
-class ModelMesh;
-class CModelMesh;
-class ModelSubMesh;
-class CModelSubMesh;
 namespace luabind {
 	template<typename T>
 	using base_type = typename std::remove_cv_t<std::remove_pointer_t<std::remove_reference_t<T>>>;

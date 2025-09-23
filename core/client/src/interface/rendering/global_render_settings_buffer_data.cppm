@@ -10,8 +10,7 @@ module;
 
 // #define PRAGMA_ENABLE_SHADER_DEBUG_PRINT
 
-export module pragma.client.rendering.global_render_settings_buffer_data;
-
+export module pragma.client:rendering.global_render_settings_buffer_data;
 export namespace pragma::rendering {
 	// These have to match the enums in shaders/debug/debug_print.glsl
 	enum class GlslType : uint32_t {

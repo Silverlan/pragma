@@ -4,14 +4,18 @@
 module;
 
 #include "pragma/clientdefinitions.h"
+#include "buffers/prosper_buffer.hpp"
 
-export module pragma.client.particle_system:renderer_beam;
+export module pragma.client:particle_system.renderer_beam;
 
+import :particle_system.modifier;
+
+export namespace pragma::ecs {class CParticleSystemComponent;}
 export class DLLCLIENT CParticleRendererBeam : public CParticleRenderer {
   public:
 	CParticleRendererBeam() = default;
-	virtual void Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
-	virtual void RecordRender(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::ParticleRenderFlags renderFlags) override;
+	virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+	virtual void RecordRender(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::ecs::ParticleRenderFlags renderFlags) override;
 	virtual void RecordRenderShadow(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::CLightComponent &light, uint32_t layerId = 0) override;
 	virtual void OnParticleSystemStopped() override;
 	virtual void PostSimulate(double tDelta) override;

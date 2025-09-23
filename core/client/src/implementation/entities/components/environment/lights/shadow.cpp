@@ -14,18 +14,16 @@ module;
 #include <pragma/math/intersection.h>
 #include <image/prosper_render_target.hpp>
 
-module pragma.client.entities.components.lights.shadow;
+module pragma.client;
 
-import pragma.client.client_state;
-import pragma.client.engine;
-import pragma.client.entities.components;
-import pragma.client.game;
+import :entities.components.lights.shadow;
+import :client_state;
+import :engine;
+import :game;
+import :rendering.render_queue_instancer;
 
 using namespace pragma;
 
-extern CEngine *c_engine;
-extern ClientState *client;
-extern CGame *c_game;
 
 CShadowComponent::CShadowComponent(BaseEntity &ent) : BaseEntityComponent {ent} {}
 
@@ -40,9 +38,9 @@ void CShadowComponent::Initialize()
 
 static void reload_all_shadow_maps()
 {
-	if(c_game == nullptr)
+	if(pragma::get_cgame() == nullptr)
 		return;
-	EntityIterator entIt {*c_game};
+	EntityIterator entIt {*pragma::get_cgame()};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<CShadowComponent>>();
 	for(auto *ent : entIt) {
 		auto shadowC = ent->GetComponent<pragma::CShadowComponent>();
@@ -53,6 +51,7 @@ static void reload_all_shadow_maps()
 static void cmd_render_shadow_quality(NetworkState *, const ConVar &, int, int quality)
 {
 	reload_all_shadow_maps();
+	auto *client = pragma::get_client_state();
 	if(client == nullptr)
 		return;
 	client->UpdateGameWorldShaderSettings();
@@ -131,7 +130,7 @@ std::weak_ptr<CShadowManagerComponent::RenderTarget> CShadowComponent::RequestRe
 	auto *shadowManager = CShadowManagerComponent::GetShadowManager();
 	if(shadowManager == nullptr)
 		return std::weak_ptr<CShadowManagerComponent::RenderTarget> {};
-	auto priority = c_engine->GetRenderContext().GetLastFrameId();
+	auto priority = pragma::get_cengine()->GetRenderContext().GetLastFrameId();
 	if(m_hRt.valid()) {
 		// We'll keep our current render target; Just update the priority
 		shadowManager->UpdatePriority(*m_hRt->lock(), priority);
@@ -186,7 +185,7 @@ void CShadowComponent::RenderShadows(const util::DrawSceneInfo &drawSceneInfo)
 LightShadowRenderer::LightShadowRenderer(CLightComponent &l) : m_hLight {l.GetHandle<CLightComponent>()}
 {
 	auto &ent = static_cast<CBaseEntity &>(l.GetEntity());
-	m_cbPreRenderScenes = c_game->AddCallback("PreRenderScenes", FunctionCallback<void>::Create([this]() {
+	m_cbPreRenderScenes = pragma::get_cgame()->AddCallback("PreRenderScenes", FunctionCallback<void>::Create([this]() {
 		m_requiresRenderQueueUpdate = true;
 		m_renderState = RenderState::RenderRequiredOnChange;
 		for(auto &renderQueue : m_renderQueues)
@@ -272,10 +271,10 @@ void LightShadowRenderer::BuildRenderQueues(const util::DrawSceneInfo &drawScene
 		renderQueue->Lock();
 	}
 
-	auto renderMask = drawSceneInfo.GetRenderMask(*c_game);
+	auto renderMask = drawSceneInfo.GetRenderMask(*pragma::get_cgame());
 	// TODO: Use separate shadow queue builder thread
 	auto lodBias = cvLodBias->GetInt();
-	c_game->GetRenderQueueBuilder().Append(
+	pragma::get_cgame()->GetRenderQueueBuilder().Append(
 	  [this, &drawSceneInfo, rasterizer, &scene, &light, &ent, lodBias, renderMask]() {
 		  for(auto &renderQueue : m_renderQueues)
 			  renderQueue->instanceSets.clear();
@@ -306,7 +305,7 @@ void LightShadowRenderer::BuildRenderQueues(const util::DrawSceneInfo &drawScene
 			  auto &posCam = hCam->GetEntity().GetPosition();
 			  auto vp = hCam->GetProjectionMatrix() * hCam->GetViewMatrix();
 			  std::vector<util::BSPTree::Node *> bspLeafNodes;
-			  EntityIterator entItWorld {*c_game};
+			  EntityIterator entItWorld {*pragma::get_cgame()};
 			  entItWorld.AttachFilter<TEntityIteratorFilterComponent<pragma::CWorldComponent>>();
 			  bspLeafNodes.reserve(entItWorld.GetCount());
 			  for(auto *entWorld : entItWorld) {
@@ -364,7 +363,7 @@ void LightShadowRenderer::BuildRenderQueues(const util::DrawSceneInfo &drawScene
 		  }
 	  },
 	  [this, &drawSceneInfo, &ent]() {
-		  c_game->GetRenderQueueWorkerManager().WaitForCompletion();
+		  pragma::get_cgame()->GetRenderQueueWorkerManager().WaitForCompletion();
 		  // Sorting is technically not necessary, we only use it to lower the number of material state changes (for translucent meshes)
 		  auto &mainRenderQueue = m_renderQueues.front();
 		  mainRenderQueue->Sort();
@@ -385,7 +384,7 @@ void LightShadowRenderer::BuildRenderQueues(const util::DrawSceneInfo &drawScene
 				  auto fShouldCull = [&planes](const Vector3 &min, const Vector3 &max) -> bool { return umath::intersection::aabb_in_plane_mesh(min, max, planes.begin(), planes.end()) == umath::intersection::Intersect::Outside; };
 				  for(auto it = renderQueue->queue.begin(); it != renderQueue->queue.end();) {
 					  auto &item = *it;
-					  auto *ent = static_cast<CBaseEntity *>(c_game->GetEntityByLocalIndex(item.entity));
+					  auto *ent = static_cast<CBaseEntity *>(pragma::get_cgame()->GetEntityByLocalIndex(item.entity));
 					  auto *renderC = ent->GetRenderComponent();
 					  if(SceneRenderDesc::ShouldCull(*renderC, fShouldCull) == false || SceneRenderDesc::ShouldCull(*renderC, item.mesh, fShouldCull) == false) {
 						  ++it;
@@ -442,11 +441,11 @@ void LightShadowRenderer::Render(const util::DrawSceneInfo &drawSceneInfo)
 
 	auto wpRt = shadowC->RequestRenderTarget();
 	if(wpRt.expired() == true) {
-		m_hLight->SetShadowMapIndex(std::numeric_limits<uint32_t>::max(), pragma::CLightComponent::ShadowMapType::Dynamic);
+		m_hLight->SetShadowMapIndex(std::numeric_limits<uint32_t>::max(), pragma::rendering::ShadowMapType::Dynamic);
 		return;
 	}
 	auto rt = wpRt.lock();
-	m_hLight->SetShadowMapIndex(rt->index, pragma::CLightComponent::ShadowMapType::Dynamic);
+	m_hLight->SetShadowMapIndex(rt->index, pragma::rendering::ShadowMapType::Dynamic);
 
 	//auto &shader = (type != pragma::LightType::Spot) ? static_cast<pragma::ShaderShadow&>(*m_shader.get()) : static_cast<pragma::ShaderShadow&>(*m_shaderSpot.get());
 	//pragma::ShaderShadowTransparent *shaderTransparent = nullptr;
@@ -456,14 +455,14 @@ void LightShadowRenderer::Render(const util::DrawSceneInfo &drawSceneInfo)
 	//	shaderTransparent = static_cast<pragma::ShaderShadowTransparent*>(m_shaderSpotTransparent.expired() == false ? m_shaderSpotTransparent.get() : nullptr);
 
 	// TODO
-	auto *shader = static_cast<pragma::ShaderShadow *>(c_engine->GetShader("shadow").get());
+	auto *shader = static_cast<pragma::ShaderShadow *>(pragma::get_cengine()->GetShader("shadow").get());
 	if(shader == nullptr)
 		return;
 
 	auto &light = *m_hLight;
 	auto *smRt = shadowC->GetDepthRenderTarget();
 	auto &tex = smRt->GetTexture();
-	auto *scene = c_game->GetScene<pragma::CSceneComponent>();
+	auto *scene = pragma::get_cgame()->GetScene<pragma::CSceneComponent>();
 	auto *renderer = scene ? scene->GetRenderer<pragma::CRendererComponent>() : nullptr;
 
 	auto &drawCmd = drawSceneInfo.commandBuffer;

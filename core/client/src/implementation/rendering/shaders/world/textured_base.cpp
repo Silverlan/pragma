@@ -7,9 +7,10 @@ module;
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <cmaterial.h>
 
-module pragma.client.rendering.shaders;
+module pragma.client;
 
-import :textured_base;
+
+import :rendering.shaders.textured_base;
 
 using namespace pragma;
 

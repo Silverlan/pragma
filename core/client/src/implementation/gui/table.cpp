@@ -8,13 +8,13 @@ module;
 #include <wgui/types/wirect.h>
 #include <prosper_window.hpp>
 
-module pragma.client.gui;
+module pragma.client;
 
-import :scroll_container;
-import :table;
+import :gui.scroll_container;
+import :gui.table;
 
-import pragma.client.client_state;
-import pragma.client.engine;
+import :client_state;
+import :engine;
 import pragma.gui;
 import pragma.string.unicode;
 
@@ -22,8 +22,6 @@ LINK_WGUI_TO_CLASS(WITable, WITable);
 LINK_WGUI_TO_CLASS(WITableRow, WITableRow);
 LINK_WGUI_TO_CLASS(WITableCell, WITableCell);
 
-extern CEngine *c_engine;
-extern ClientState *client;
 
 WITable::SortData::SortData(WITable *t, bool bAsc, unsigned int col) : table(t), ascending(bAsc), column(col) {}
 bool WITable::SortData::operator()(const WIHandle &a, const WIHandle &b)

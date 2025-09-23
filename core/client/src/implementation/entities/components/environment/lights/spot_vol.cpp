@@ -14,18 +14,17 @@ module;
 #include <datasystem_t.hpp>
 #include <cmaterial.h>
 
-module pragma.client.entities.components.lights.spot_vol;
+module pragma.client;
 
-import pragma.client.client_state;
-import pragma.client.engine;
-import pragma.client.entities.components;
-import pragma.client.game;
-import pragma.client.scripting.lua;
+import :entities.components.lights.spot_vol;
+import :client_state;
+import :engine;
+import :game;
+import :networking.util;
+import :scripting.lua;
 
 using namespace pragma;
 
-extern ClientState *client;
-extern CGame *c_game;
 
 void CLightSpotVolComponent::Initialize()
 {
@@ -35,7 +34,7 @@ void CLightSpotVolComponent::Initialize()
 	if(pRenderComponent.valid()) {
 		// TODO
 		/*FlagCallbackForRemoval(pRenderComponent->BindEventUnhandled(CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-			auto *scene = c_game->GetScene();
+			auto *scene = pragma::get_cgame()->GetScene();
 			auto *renderer = scene ? scene->GetRenderer<pragma::CRendererComponent>() : nullptr;
 			if(renderer != nullptr && renderer->IsRasterizationRenderer())
 				static_cast<pragma::CRasterizationRendererComponent*>(renderer)->SetFrameDepthBufferSamplingRequired();
@@ -207,10 +206,10 @@ void CLightSpotVolComponent::InitializeVolumetricLight()
 	if(!newMeshes)
 		return;
 	m_model = nullptr;
-	auto mdl = c_game->CreateModel();
+	auto mdl = pragma::get_cgame()->CreateModel();
 	auto group = mdl->AddMeshGroup("reference");
 
-	auto mat = client->CreateMaterial("lightcone", "noop");
+	auto mat = pragma::get_client_state()->CreateMaterial("lightcone", "noop");
 	auto *cmat = static_cast<CMaterial *>(mat.get());
 	cmat->SetProperty("alpha_mode", AlphaMode::Blend);
 	cmat->SetProperty("cone_height", CalcEndRadius());

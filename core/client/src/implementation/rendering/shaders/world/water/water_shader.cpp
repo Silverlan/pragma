@@ -10,16 +10,16 @@ module;
 #include <prosper_command_buffer.hpp>
 #include <cmaterial.h>
 
-module pragma.client.rendering.shaders;
+module pragma.client;
 
-import :world_water;
 
-import pragma.client.engine;
-import pragma.client.entities.components;
+import :rendering.shaders.world_water;
+
+import :engine;
+import :entities.components;
 
 using namespace pragma;
 
-extern CEngine *c_engine;
 
 decltype(ShaderWater::DESCRIPTOR_SET_MATERIAL) ShaderWater::DESCRIPTOR_SET_MATERIAL = {
   "MATERIAL",

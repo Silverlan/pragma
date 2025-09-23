@@ -9,7 +9,9 @@ module;
 #include <shader/prosper_descriptor_array_manager.hpp>
 #include <buffers/prosper_buffer.hpp>
 
-export module pragma.client.entities.components.raytracing;
+export module pragma.client:entities.components.raytracing;
+
+import :rendering.enums;
 
 export namespace pragma {
 	class DLLCLIENT CRaytracingComponent final : public BaseEntityComponent {

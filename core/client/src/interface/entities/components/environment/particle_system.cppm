@@ -6,12 +6,21 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/environment/effects/particlesystemdata.h"
 #include "pragma/entities/environment/effects/env_particle_system.h"
+#include "buffers/prosper_dynamic_resizable_buffer.hpp"
+#include "sprite_sheet_animation.hpp"
 #include <mathutil/transform.hpp>
 #include <udm.hpp>
 #include <fsys/vfileptr.h>
 #include <optional>
 
-export module pragma.client.entities.components.particle_system;
+export module pragma.client:entities.components.particle_system;
+
+import :entities.base_entity;
+import :entities.components.entity;
+import :particle_system.enums;
+import :particle_system.modifier;
+import :particle_system.particle;
+import :rendering.enums;
 
 export namespace pragma::ecs {
 	struct DLLCLIENT ParticleSystemFileHeader {
@@ -21,16 +30,6 @@ export namespace pragma::ecs {
 		std::vector<uint64_t> particleSystemOffsets {};
 	};
 	DLLCLIENT std::unordered_map<std::string, std::string> get_particle_key_values(lua_State *l, const luabind::map<std::string, void> &keyValues);
-	enum class ParticleRenderFlags : uint32_t { None = 0u, Bloom = 1u, DepthOnly = Bloom << 1u };
-	enum class ParticleOrientationType : uint8_t {
-		Aligned = 0,
-		Upright,
-		Static,
-		World,
-		Billboard,
-
-		Velocity // Velocity is a special enum that shouldn't be set directly
-	};
 	class DLLCLIENT CParticleSystemComponent final : public BaseEnvParticleSystemComponent, public CBaseNetComponent, public CParticleSystemBaseKeyValues {
 	  public:
 		static void RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts);

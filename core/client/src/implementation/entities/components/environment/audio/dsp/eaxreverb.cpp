@@ -11,13 +11,14 @@ module;
 #include <alsoundsystem.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
-module pragma.client.entities.components.audio.dsp.eaxreverb;
+module pragma.client;
 
-import pragma.client.engine;
+
+import :entities.components.audio.dsp.eaxreverb;
+import :engine;
 
 using namespace pragma;
 
-extern CEngine *c_engine;
 
 void CSoundDspEAXReverbComponent::ReceiveData(NetPacket &packet)
 {
@@ -49,7 +50,7 @@ void CSoundDspEAXReverbComponent::ReceiveData(NetPacket &packet)
 void CSoundDspEAXReverbComponent::OnEntitySpawn()
 {
 	//BaseEnvSoundDspEAXReverb::OnEntitySpawn(); // Not calling BaseEnvSoundDspEAXReverb::OnEntitySpawn() to skip the dsp effect lookup
-	auto *soundSys = c_engine->GetSoundSystem();
+	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
 	if(soundSys == nullptr)
 		return;
 	al::EfxEaxReverbProperties props {};

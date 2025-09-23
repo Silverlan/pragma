@@ -5,9 +5,10 @@ module;
 
 #include "stdafx_client.h"
 
-module pragma.client.game;
+module pragma.client;
 
-extern CGame *c_game;
+
+import :game;
 
 template<typename TCPPM>
 TCPPM *CGame::GetScene() { return static_cast<pragma::CSceneComponent*>(m_scene.get()); }
@@ -19,9 +20,9 @@ template const pragma::CSceneComponent* CGame::GetScene<pragma::CSceneComponent>
 
 static void cl_fov_callback(NetworkState *, const ConVar &, float, float val)
 {
-	if(c_game == nullptr)
+	if(pragma::get_cgame() == nullptr)
 		return;
-	auto *cam = c_game->GetPrimaryCamera<pragma::CCameraComponent>();
+	auto *cam = pragma::get_cgame()->GetPrimaryCamera<pragma::CCameraComponent>();
 	if(cam == nullptr)
 		return;
 	cam->SetFOV(CFloat(val));
@@ -32,8 +33,8 @@ REGISTER_CONVAR_CALLBACK_CL(cl_render_fov, cl_fov_callback)
 
 static void cl_fov_viewmodel_callback(NetworkState *, const ConVar &, int, int val)
 {
-	if(c_game == nullptr)
+	if(pragma::get_cgame() == nullptr)
 		return;
-	c_game->SetViewModelFOV(CFloat(val));
+	pragma::get_cgame()->SetViewModelFOV(CFloat(val));
 }
 REGISTER_CONVAR_CALLBACK_CL(cl_fov_viewmodel, cl_fov_viewmodel_callback)

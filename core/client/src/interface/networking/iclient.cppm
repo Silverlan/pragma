@@ -11,7 +11,7 @@ module;
 #include <string>
 #include <optional>
 
-export module pragma.client.networking:iclient;
+export module pragma.client:networking.iclient;
 
 export namespace pragma::networking {
 	class DLLCLIENT ClientEventInterface {

@@ -6,6 +6,8 @@ module;
 #include "stdafx_client.h"
 #include "pragma/game/c_game_callback.h"
 
-module pragma.client.game;
+module pragma.client;
 
+
+import :game;
 DEFINE_STATIC_GAME_CALLBACKS(DLLCLIENT, client);

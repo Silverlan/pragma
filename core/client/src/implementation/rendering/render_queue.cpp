@@ -7,18 +7,17 @@ module;
 #include <cmaterial_manager2.hpp>
 #include <cmaterial.h>
 
-module pragma.client.rendering.render_queue;
+module pragma.client;
 
-import pragma.client.client_state;
-import pragma.client.engine;
-import pragma.client.entities.components.render;
-import pragma.client.game;
+
+import :rendering.render_queue;
+import :client_state;
+import :engine;
+import :entities.components.render;
+import :game;
 
 using namespace pragma::rendering;
 
-extern CEngine *c_engine;
-extern ClientState *client;
-extern CGame *c_game;
 
 SortingKey::SortingKey(MaterialIndex material, prosper::ShaderIndex shader, bool instantiable, bool translucentKey)
 {
@@ -85,8 +84,8 @@ RenderQueueItem::RenderQueueItem(CBaseEntity &ent, RenderMeshIndex meshIdx, CMat
 	}
 }
 
-CMaterial *RenderQueueItem::GetMaterial() const { return static_cast<CMaterial *>(client->GetMaterialManager().GetAsset(material)->assetObject.get()); }
-CBaseEntity *RenderQueueItem::GetEntity() const { return static_cast<CBaseEntity *>(c_game->GetEntityByLocalIndex(entity)); }
+CMaterial *RenderQueueItem::GetMaterial() const { return static_cast<CMaterial *>(pragma::get_client_state()->GetMaterialManager().GetAsset(material)->assetObject.get()); }
+CBaseEntity *RenderQueueItem::GetEntity() const { return static_cast<CBaseEntity *>(pragma::get_cgame()->GetEntityByLocalIndex(entity)); }
 CModelSubMesh *RenderQueueItem::GetMesh() const
 {
 	auto *ent = GetEntity();
@@ -98,7 +97,7 @@ CModelSubMesh *RenderQueueItem::GetMesh() const
 }
 prosper::ShaderGraphics *RenderQueueItem::GetShader(uint32_t &outPipelineIndex) const
 {
-	auto *shader = c_engine->GetRenderContext().GetShaderPipeline(pipelineId, outPipelineIndex);
+	auto *shader = pragma::get_cengine()->GetRenderContext().GetShaderPipeline(pipelineId, outPipelineIndex);
 	return shader && shader->IsGraphicsShader() ? static_cast<prosper::ShaderGraphics *>(shader) : nullptr;
 }
 

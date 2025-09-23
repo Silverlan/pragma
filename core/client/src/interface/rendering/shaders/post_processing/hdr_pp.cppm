@@ -3,8 +3,12 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 
-export module pragma.client.rendering.shaders:pp_hdr;
+export module pragma.client:rendering.shaders.pp_hdr;
+
+import :rendering.enums;
+import :rendering.shaders.base;
 
 export namespace pragma {
 	class DLLCLIENT ShaderPPHDR : public ShaderPPBase {

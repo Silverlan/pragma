@@ -9,18 +9,20 @@ module;
 #include <pragma/math/intersection.h>
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
+#include "prosper_includes.hpp"
 
-module pragma.client.entities.components.lights.point;
+module pragma.client;
 
-import pragma.client.engine;
-import pragma.client.entities.components.lights.shadow;
-import pragma.client.entities.components.radius;
-import pragma.client.entities.components.render;
-import pragma.client.entities.components.transform;
+
+import :entities.components.lights.point;
+import :engine;
+import :entities.components.lights.shadow;
+import :entities.components.radius;
+import :entities.components.render;
+import :entities.components.transform;
 
 using namespace pragma;
 
-extern CEngine *c_engine;
 
 static const std::array<Vector3, 6> directions = {Vector3(1.f, 0.f, 0.f), Vector3(-1.f, 0.f, 0.f), Vector3(0.f, 1.f, 0.f), Vector3(0.f, -1.f, 0.f), Vector3(0.f, 0.f, 1.f), Vector3(0.f, 0.f, -1.f)};
 
@@ -196,5 +198,5 @@ void CLightPointComponent::UpdateTransformationMatrix(unsigned int j) // TODO Th
 	if(shadowBuffer == nullptr)
 		return;
 	std::array<Mat4, 3> matrices = {GetBiasTransformationMatrix(), GetViewMatrix(4), GetProjectionMatrix()};
-	c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(shadowBuffer, 0ull, matrices);
+	pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(shadowBuffer, 0ull, matrices);
 }

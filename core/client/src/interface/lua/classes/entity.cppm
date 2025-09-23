@@ -9,7 +9,9 @@ module;
 #include <pragma/networking/enums.hpp>
 #include <mathutil/glmutil.h>
 
-export module pragma.client.scripting.lua.classes.entity;
+export module pragma.client:scripting.lua.classes.entity;
+
+import :entities.base_entity;
 
 export namespace Lua {
 	namespace Entity {

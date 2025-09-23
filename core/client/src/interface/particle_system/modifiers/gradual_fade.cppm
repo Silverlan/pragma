@@ -3,12 +3,13 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 
-export module pragma.client.particle_system:modifier_gradual_fade;
+export module pragma.client:particle_system.modifier_gradual_fade;
 
-import :modifier_ease;
-import :modifier_random_variable;
-import :modifier_time;
+import :particle_system.modifier_ease;
+import :particle_system.modifier_random_variable;
+import :particle_system.modifier_time;
 
 export class DLLCLIENT CParticleModifierComponentGradualFade : public CParticleModifierComponentEase, public CParticleModifierComponentTime {
   protected:

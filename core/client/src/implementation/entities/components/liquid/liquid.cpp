@@ -13,16 +13,18 @@ module;
 #include <pragma/audio/alsound_type.h>
 #include <pragma/entities/entity_component_system_t.hpp>
 
-module pragma.client.entities.components.liquid;
+module pragma.client;
 
-import pragma.client.entities.components.liquid_surface;
-import pragma.client.entities.components.particle_system;
-import pragma.client.particle_system;
-import pragma.client.physics;
+
+import :entities.components.liquid;
+import :entities.components.liquid_surface;
+import :entities.components.particle_system;
+import :particle_system;
+import :physics;
 
 using namespace pragma;
 
-CLiquidComponent::CLiquidComponent(BaseEntity &ent) : BaseFuncLiquidComponent(ent) { pragma::CParticleSystemComponent::Precache("water"); }
+CLiquidComponent::CLiquidComponent(BaseEntity &ent) : BaseFuncLiquidComponent(ent) { pragma::ecs::CParticleSystemComponent::Precache("water"); }
 CLiquidComponent::~CLiquidComponent() {}
 void CLiquidComponent::Initialize()
 {

@@ -6,15 +6,13 @@ module;
 #include "stdafx_client.h"
 #include "pragma/lua/converters/gui_element_converter.hpp"
 
-module pragma.client.gui;
+module pragma.client;
 
-import :main_menu_load_game;
-import pragma.client.client_state;
-import pragma.client.engine;
+import :gui.main_menu_load_game;
+import :client_state;
+import :engine;
 import pragma.locale;
 
-extern CEngine *c_engine;
-extern ClientState *client;
 WIMainMenuLoadGame::WIMainMenuLoadGame() : WIMainMenuBase() {}
 
 WIMainMenuLoadGame::~WIMainMenuLoadGame() {}

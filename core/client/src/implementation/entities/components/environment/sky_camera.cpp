@@ -10,22 +10,21 @@ module;
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/baseentity_events.hpp>
 
-module pragma.client.entities.components.env_sky_camera;
+module pragma.client;
 
-import pragma.client.client_state;
-import pragma.client.engine;
-import pragma.client.entities.components.game_occlusion_culler;
-import pragma.client.entities.components.rasterization_renderer;
-import pragma.client.entities.components.render;
-import pragma.client.entities.components.renderer;
-import pragma.client.entities.components.toggle;
-import pragma.client.entities.components.transform;
-import pragma.client.entities.components.world;
-import pragma.client.game;
 
-extern CEngine *c_engine;
-extern ClientState *client;
-extern CGame *c_game;
+import :entities.components.env_sky_camera;
+import :client_state;
+import :engine;
+import :entities.components.game_occlusion_culler;
+import :entities.components.rasterization_renderer;
+import :entities.components.render;
+import :entities.components.renderer;
+import :entities.components.toggle;
+import :entities.components.transform;
+import :entities.components.world;
+import :game;
+
 
 using namespace pragma;
 
@@ -65,7 +64,7 @@ void CSkyCameraComponent::BuildSkyMeshRenderQueues(const pragma::CSceneComponent
 {
 	auto &pos = GetEntity().GetPosition();
 
-	EntityIterator entItWorld {*c_game};
+	EntityIterator entItWorld {*pragma::get_cgame()};
 	entItWorld.AttachFilter<TEntityIteratorFilterComponent<pragma::CWorldComponent>>();
 	std::vector<util::BSPTree::Node *> bspLeafNodes;
 	bspLeafNodes.reserve(entItWorld.GetCount());
@@ -106,7 +105,7 @@ void CSkyCameraComponent::BuildSkyMeshRenderQueues(const pragma::CSceneComponent
 		  nullptr, &trees, &bspLeafNodes, 0, nullptr, pragma::GameShaderSpecializationConstantFlag::None //Enable3dOriginBit
 		);
 		if(waitForRenderQueues)
-			c_game->GetRenderQueueWorkerManager().WaitForCompletion();
+			pragma::get_cgame()->GetRenderQueueWorkerManager().WaitForCompletion();
 	}
 }
 
@@ -123,9 +122,9 @@ void CSkyCameraComponent::BuildRenderQueues(const util::DrawSceneInfo &drawScene
 	sceneData.renderQueue->Lock();
 	sceneData.renderQueueTranslucent->Lock();
 
-	auto renderMask = drawSceneInfo.GetRenderMask(*c_game);
+	auto renderMask = drawSceneInfo.GetRenderMask(*pragma::get_cgame());
 	auto &rasterizer = *hRasterizer;
-	c_game->GetRenderQueueBuilder().Append(
+	pragma::get_cgame()->GetRenderQueueBuilder().Append(
 	  [this, &rasterizer, &drawSceneInfo, &sceneData, renderMask]() {
 		  auto &scene = *drawSceneInfo.scene.get();
 		  // Build render queues

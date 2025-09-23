@@ -7,17 +7,17 @@ module;
 #include "luasystem.h"
 #include <wgui/wihandle.h>
 #include "pragma/lua/classes/c_ldef_wgui.h"
+#include "sharedutils/util_string.h"
 #include <prosper_prepared_command_buffer.hpp>
 
-module pragma.client.gui;
+module pragma.client;
 
-import :lua_base;
+import :gui.lua_base;
 
-import pragma.client.client_state;
+import :client_state;
 
 #undef DrawState
 
-extern ClientState *client;
 WILuaBase::WILuaBase() {}
 
 WILuaBase::~WILuaBase() {}
@@ -185,19 +185,18 @@ void WILuaBase::Render(const DrawInfo &drawInfo, wgui::DrawState &drawState, con
 		// one container for the draw arguments, we have to secure it
 		// with a mutex. Since the same UI element is usually not rendered multiple times in parallel,
 		// it's unlikely this will cause a significant negative performance impact.
-		using namespace ustring::string_switch;
 		std::scoped_lock lock {m_renderData->drawArgMutex};
-		drawArgs.SetArgumentValue(hash("x"), drawInfo.offset.x);
-		drawArgs.SetArgumentValue(hash("y"), drawInfo.offset.y);
-		drawArgs.SetArgumentValue(hash("w"), drawInfo.size.x);
-		drawArgs.SetArgumentValue(hash("h"), drawInfo.size.y);
-		drawArgs.SetArgumentValue(hash("stencilPipeline"), umath::to_integral(stencilPipeline));
-		drawArgs.SetArgumentValue(hash("testStencilLevel"), testStencilLevel);
-		drawArgs.SetArgumentValue(hash("msaa"), umath::is_flag_set(drawInfo.flags, DrawInfo::Flags::Msaa));
-		drawArgs.SetArgumentValue(hash("matDraw"), matDraw);
-		drawArgs.SetArgumentValue(hash("scale"), scale);
-		drawArgs.SetArgumentValue(hash("viewportSize"), wgui::ElementData::ToViewportSize(drawInfo.size));
-		m_renderData->userData.Set(hash("guiDrawState"), drawState);
+		drawArgs.SetArgumentValue(ustring::string_switch::hash("x"), drawInfo.offset.x);
+		drawArgs.SetArgumentValue(ustring::string_switch::hash("y"), drawInfo.offset.y);
+		drawArgs.SetArgumentValue(ustring::string_switch::hash("w"), drawInfo.size.x);
+		drawArgs.SetArgumentValue(ustring::string_switch::hash("h"), drawInfo.size.y);
+		drawArgs.SetArgumentValue(ustring::string_switch::hash("stencilPipeline"), umath::to_integral(stencilPipeline));
+		drawArgs.SetArgumentValue(ustring::string_switch::hash("testStencilLevel"), testStencilLevel);
+		drawArgs.SetArgumentValue(ustring::string_switch::hash("msaa"), umath::is_flag_set(drawInfo.flags, DrawInfo::Flags::Msaa));
+		drawArgs.SetArgumentValue(ustring::string_switch::hash("matDraw"), matDraw);
+		drawArgs.SetArgumentValue(ustring::string_switch::hash("scale"), scale);
+		drawArgs.SetArgumentValue(ustring::string_switch::hash("viewportSize"), wgui::ElementData::ToViewportSize(drawInfo.size));
+		m_renderData->userData.Set(ustring::string_switch::hash("guiDrawState"), drawState);
 		m_renderData->renderCommandBuffer->RecordCommands(*drawInfo.commandBuffer, drawArgs, m_renderData->userData);
 	}
 }

@@ -6,15 +6,11 @@ module;
 #include "stdafx_client.h"
 #include <pragma/math/intersection.h>
 
-module pragma.client.particle_system;
+module pragma.client;
 
-import :initializer_position;
+import :particle_system.initializer_position;
 
-REGISTER_PARTICLE_INITIALIZER(position_random_box, CParticleInitializerPositionRandomBox);
-REGISTER_PARTICLE_INITIALIZER(position_random_sphere, CParticleInitializerPositionRandomSphere);
-REGISTER_PARTICLE_INITIALIZER(position_random_circle, CParticleInitializerPositionRandomCircle);
-
-void CParticleInitializerPositionRandomBox::Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void CParticleInitializerPositionRandomBox::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleInitializer::Initialize(pSystem, values);
 	for(auto it = values.begin(); it != values.end(); it++) {
@@ -47,7 +43,7 @@ void CParticleInitializerPositionRandomBox::OnParticleCreated(CParticle &particl
 
 //////////////////////////////
 
-void CParticleInitializerPositionRandomSphere::Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void CParticleInitializerPositionRandomSphere::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleInitializer::Initialize(pSystem, values);
 	for(auto it = values.begin(); it != values.end(); it++) {
@@ -89,7 +85,7 @@ void CParticleInitializerPositionRandomSphere::OnParticleCreated(CParticle &part
 
 //////////////////////////////
 
-void CParticleInitializerPositionRandomCircle::Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void CParticleInitializerPositionRandomCircle::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleInitializer::Initialize(pSystem, values);
 	for(auto &pair : values) {

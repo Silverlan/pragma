@@ -5,7 +5,9 @@ module;
 
 #include "pragma/clientdefinitions.h"
 
-export module pragma.client.particle_system:initializer_initial_animation_frame;
+export module pragma.client:particle_system.initializer_initial_animation_frame;
+
+import :particle_system.modifier;
 
 export class DLLCLIENT CParticleInitializerInitialAnimationFrame : public CParticleInitializer {
   private:
@@ -13,6 +15,6 @@ export class DLLCLIENT CParticleInitializerInitialAnimationFrame : public CParti
 	float m_maxFrame = 1.f;
   public:
 	CParticleInitializerInitialAnimationFrame() = default;
-	virtual void Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+	virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
 	virtual void OnParticleCreated(CParticle &particle) override;
 };

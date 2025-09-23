@@ -10,8 +10,7 @@ module;
 #include <cinttypes>
 #include <array>
 
-export module pragma.client.rendering.light_data;
-
+export module pragma.client:rendering.light_data;
 export namespace pragma {
 #pragma pack(push, 1)
 	struct LightBufferData {

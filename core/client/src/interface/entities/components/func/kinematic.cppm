@@ -7,9 +7,10 @@ module;
 #include <pragma/entities/func/basefunckinematic.hpp>
 #include <pragma/entities/entity_component_manager.hpp>
 
-import pragma.entities.components;
+export module pragma.client:entities.components.func_kinematic;
 
-export module pragma.client.entities.components.func_kinematic;
+import :entities.base_entity;
+import :entities.components.entity;
 
 export {
 	namespace pragma {

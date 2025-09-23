@@ -6,11 +6,11 @@ module;
 #include "stdafx_client.h"
 #include <sharedutils/util_clock.hpp>
 
-module pragma.client.networking;
+module pragma.client;
 
-import :local_client;
+import :networking.local_client;
 
-import pragma.client.engine;
+import :engine;
 
 extern DLLNETWORK Engine *engine;
 

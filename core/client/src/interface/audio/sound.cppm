@@ -10,7 +10,7 @@ module;
 #include <vector>
 #include <alsound_source.hpp>
 
-export module pragma.client.audio:sound;
+export module pragma.client:audio.sound;
 
 #pragma warning(push)
 #pragma warning(disable : 4251)

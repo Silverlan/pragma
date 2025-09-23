@@ -6,7 +6,10 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/environment/env_wind.hpp"
 
-export module pragma.client.entities.components.env_wind;
+export module pragma.client:entities.components.env_wind;
+
+import :entities.base_entity;
+import :entities.components.entity;
 
 export {
 	namespace pragma {

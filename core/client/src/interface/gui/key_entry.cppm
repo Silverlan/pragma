@@ -7,7 +7,7 @@ module;
 #include <wgui/types/witextentry.h>
 #include <unordered_map>
 
-export module pragma.client.gui:key_entry;
+export module pragma.client:gui.key_entry;
 
 export {
 	class DLLCLIENT WIKeyEntry : public WITextEntryBase {

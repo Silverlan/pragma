@@ -3,10 +3,11 @@
 
 module;
 
-#include "pragma/definitions.h"
-#include <pragma/lua/ldefinitions.h>
+#include "pragma/clientdefinitions.h"
 
-export module pragma.client.scripting.lua.classes.world_environment;
+export module pragma.client:scripting.lua.classes.world_environment;
+
+import :rendering.world_environment;
 
 export namespace Lua {
 	namespace WorldEnvironment {

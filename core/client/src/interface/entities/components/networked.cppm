@@ -6,7 +6,9 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <pragma/entities/components/base_networked_component.hpp>
 
-export module pragma.client.entities.components.networked;
+export module pragma.client:entities.components.networked;
+
+import :entities.components.entity;
 
 export namespace pragma {
 	class DLLCLIENT CNetworkedComponent final : public BaseNetworkedComponent, public CBaseNetComponent {

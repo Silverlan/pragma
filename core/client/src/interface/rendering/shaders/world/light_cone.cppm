@@ -3,8 +3,11 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 
-export module pragma.client.rendering.shaders:world_light_cone;
+export module pragma.client:rendering.shaders.world_light_cone;
+
+import :rendering.shaders.textured;
 
 export namespace pragma {
 	class DLLCLIENT ShaderLightCone : public ShaderGameWorldLightingPass {

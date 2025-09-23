@@ -8,19 +8,19 @@ module;
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
-module pragma.client.game;
+module pragma.client;
 
-import pragma.client.engine;
-import pragma.client.entities.components;
 
-extern CGame *c_game;
-extern CEngine *c_engine;
+import :game;
+import :engine;
+import :entities.components;
+
 
 pragma::BaseEnvLightDirectionalComponent *CGame::GetEnvironmentLightSource() const { return const_cast<pragma::BaseEnvLightDirectionalComponent *>(m_hEnvLight.get()); }
 void CGame::UpdateEnvironmentLightSource()
 {
 	auto *oldLightSource = m_hEnvLight.get();
-	EntityIterator entIt {*c_game};
+	EntityIterator entIt {*pragma::get_cgame()};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CLightDirectionalComponent>>();
 	for(auto *ent : entIt) {
 		auto pToggleComponent = ent->GetComponent<pragma::CToggleComponent>();

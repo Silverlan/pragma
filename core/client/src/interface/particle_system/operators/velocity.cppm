@@ -5,21 +5,22 @@ module;
 
 #include "pragma/clientdefinitions.h"
 
-export module pragma.client.particle_system:operator_velocity;
+export module pragma.client:particle_system.operator_velocity;
 
+import :particle_system.modifier;
+
+export namespace pragma::ecs {class CParticleSystemComponent;}
 export class DLLCLIENT CParticleOperatorVelocity : public CParticleOperator {
   private:
 	Vector3 m_velocity = {};
   public:
 	CParticleOperatorVelocity() = default;
-	virtual void Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+	virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
 	virtual void Simulate(CParticle &particle, double tDelta, float strength) override;
 	float GetSpeed() const;
 };
 
-REGISTER_PARTICLE_OPERATOR(velocity, CParticleOperatorVelocity);
-
-void CParticleOperatorVelocity::Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void CParticleOperatorVelocity::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleOperator::Initialize(pSystem, values);
 	for(auto it = values.begin(); it != values.end(); it++) {

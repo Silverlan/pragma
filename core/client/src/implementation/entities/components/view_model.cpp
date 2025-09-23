@@ -14,15 +14,17 @@ module;
 #include <pragma/entities/components/parent_component.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
-module pragma.client.entities.components.view_model;
+module pragma.client;
 
-import pragma.client.entities.components.animated;
-import pragma.client.entities.components.attachment;
-import pragma.client.entities.components.character;
-import pragma.client.entities.components.player;
-import pragma.client.entities.components.render;
-import pragma.client.entities.components.transform;
-import pragma.client.entities.components.weapon;
+
+import :entities.components.view_model;
+import :entities.components.animated;
+import :entities.components.attachment;
+import :entities.components.character;
+import :entities.components.player;
+import :entities.components.render;
+import :entities.components.transform;
+import :entities.components.weapon;
 
 using namespace pragma;
 

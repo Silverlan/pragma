@@ -9,7 +9,7 @@ module;
 #include <mathutil/umath.h>
 #include <pragma/math/util_easing.hpp>
 
-export module pragma.client.particle_system:modifier_ease;
+export module pragma.client:particle_system.modifier_ease;
 
 export class DLLCLIENT CParticleModifierComponentEase {
   protected:

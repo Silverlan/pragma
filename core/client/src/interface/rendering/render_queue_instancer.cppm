@@ -6,7 +6,9 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <sharedutils/util_hash.hpp>
 
-export module pragma.client.rendering.render_queue_instancer;
+export module pragma.client:rendering.render_queue_instancer;
+
+import :rendering.render_queue;
 
 export namespace pragma::rendering {
 	class DLLCLIENT RenderQueueInstancer {

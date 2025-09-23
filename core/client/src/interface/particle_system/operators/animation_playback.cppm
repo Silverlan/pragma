@@ -7,20 +7,21 @@ module;
 #include <mathutil/umath.h>
 #include <algorithm>
 
-export module pragma.client.particle_system:operator_animation_playback;
+export module pragma.client:particle_system.operator_animation_playback;
 
+import :particle_system.modifier;
+
+export namespace pragma::ecs {class CParticleSystemComponent;}
 export class DLLCLIENT CParticleOperatorAnimationPlayback : public CParticleOperator {
   public:
 	CParticleOperatorAnimationPlayback() = default;
-	virtual void Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+	virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
 	virtual void Simulate(CParticle &particle, double tDelta, float strength) override;
   private:
 	float m_playbackSpeed = 1.f;
 };
 
-REGISTER_PARTICLE_OPERATOR(animation_playback, CParticleOperatorAnimationPlayback);
-
-void CParticleOperatorAnimationPlayback::Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void CParticleOperatorAnimationPlayback::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleOperator::Initialize(pSystem, values);
 	for(auto &pair : values) {

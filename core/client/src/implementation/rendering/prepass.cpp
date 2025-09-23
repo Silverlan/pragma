@@ -13,16 +13,16 @@ module;
 #include <image/prosper_sampler.hpp>
 #include <prosper_command_buffer.hpp>
 
-module pragma.client.rendering.prepass;
+module pragma.client;
 
-import pragma.client.debug;
-import pragma.client.engine;
-import pragma.client.entities.components;
-import pragma.client.game;
-import pragma.client.gui;
 
-extern CEngine *c_engine;
-extern CGame *c_game;
+import :rendering.prepass;
+import :debug;
+import :engine;
+import :entities.components;
+import :game;
+import :gui;
+
 
 bool pragma::rendering::Prepass::Initialize(prosper::IPrContext &context, uint32_t width, uint32_t height, prosper::SampleCountFlags samples, bool bExtended)
 {
@@ -72,7 +72,7 @@ void pragma::rendering::Prepass::SetUseExtendedPrepass(bool b, bool bForceReload
 		return;
 	m_bExtended = b;
 
-	auto &context = c_engine->GetRenderContext();
+	auto &context = pragma::get_cengine()->GetRenderContext();
 	context.WaitIdle();
 
 	auto &imgDepth = textureDepth->GetImage();
@@ -80,7 +80,7 @@ void pragma::rendering::Prepass::SetUseExtendedPrepass(bool b, bool bForceReload
 	auto width = extents.width;
 	auto height = extents.height;
 
-	auto whShaderPrepass = c_engine->GetShader("prepass");
+	auto whShaderPrepass = pragma::get_cengine()->GetShader("prepass");
 	if(whShaderPrepass.expired())
 		return;
 
@@ -127,7 +127,7 @@ void pragma::rendering::Prepass::SetUseExtendedPrepass(bool b, bool bForceReload
 	prosper::util::RenderPassCreateInfo rpInfo {{pragma::ShaderPrepass::get_normal_render_pass_attachment_info(sampleCount), pragma::ShaderPrepass::get_depth_render_pass_attachment_info(sampleCount)}};
 	for(auto &att : rpInfo.attachments)
 		att.loadOp = prosper::AttachmentLoadOp::Load;
-	subsequentRenderPass = c_engine->GetRenderContext().CreateRenderPass(rpInfo);
+	subsequentRenderPass = pragma::get_cengine()->GetRenderContext().CreateRenderPass(rpInfo);
 }
 
 prosper::RenderTarget &pragma::rendering::Prepass::BeginRenderPass(const util::DrawSceneInfo &drawSceneInfo, prosper::IRenderPass *optRenderPass, bool secondaryCommandBuffers)
@@ -142,7 +142,7 @@ void Console::commands::debug_prepass(NetworkState *state, pragma::BasePlayerCom
 {
 	auto &wgui = WGUI::GetInstance();
 	auto *pRoot = wgui.GetBaseElement();
-	if(c_game == nullptr || argv.empty() || pRoot == nullptr)
+	if(pragma::get_cgame() == nullptr || argv.empty() || pRoot == nullptr)
 		return;
 	const std::string name = "debug_ssao";
 	auto *pEl = pRoot->FindDescendantByName(name);
@@ -159,7 +159,7 @@ void Console::commands::debug_prepass(NetworkState *state, pragma::BasePlayerCom
 		return;
 	pEl->SetName(name);
 
-	auto *scene = c_game->GetScene<pragma::CSceneComponent>();
+	auto *scene = pragma::get_cgame()->GetScene<pragma::CSceneComponent>();
 	auto *renderer = scene ? scene->GetRenderer<pragma::CRendererComponent>() : nullptr;
 	auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : pragma::ComponentHandle<pragma::CRasterizationRendererComponent> {};
 	if(raster.expired())

@@ -6,11 +6,8 @@
 #include <alsoundsystem.hpp>
 #include <steam_audio/alsound_steam_audio.hpp>
 
-import pragma.client.client_state;
-import pragma.client.debug;
-import pragma.client.engine;
+import pragma.client;
 
-extern CEngine *c_engine;
 
 #if ALSYS_STEAM_AUDIO_SUPPORT_ENABLED == 1
 static std::unique_ptr<DebugGameGUI> dbgSoundProbeBoxes = nullptr;
@@ -20,7 +17,7 @@ static void debug_steam_audio_probe_boxes(NetworkState *state, ConVar *, bool, b
 		dbgSoundProbeBoxes = nullptr;
 		return;
 	}
-	auto *sndSys = c_engine->GetSoundSystem();
+	auto *sndSys = pragma::get_cengine()->GetSoundSystem();
 	if(sndSys == nullptr)
 		return;
 	auto *iplScene = sndSys->GetSteamAudioScene();
@@ -50,7 +47,7 @@ REGISTER_CONVAR_CALLBACK_CL(debug_steam_audio_probe_boxes, debug_steam_audio_pro
 
 void Console::commands::debug_steam_audio_dump_scene(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
-	auto *sndSys = c_engine->GetSoundSystem();
+	auto *sndSys = pragma::get_cengine()->GetSoundSystem();
 	if(sndSys == nullptr) {
 		Con::cwar << "Unable to dump steam audio scene: No sound system found!" << Con::endl;
 		return;
@@ -61,8 +58,8 @@ void Console::commands::debug_steam_audio_dump_scene(NetworkState *state, pragma
 		return;
 	}
 	std::string mapName = "unknown";
-	auto *client = c_engine->GetClientState();
-	auto *game = (client != nullptr) ? static_cast<CGame *>(client->GetGameState()) : nullptr;
+	auto *client = pragma::get_cengine()->GetClientState();
+	auto *game = (pragma::get_client_state() != nullptr) ? static_cast<CGame *>(pragma::get_client_state()->GetGameState()) : nullptr;
 	if(game != nullptr)
 		mapName = game->GetMapName();
 

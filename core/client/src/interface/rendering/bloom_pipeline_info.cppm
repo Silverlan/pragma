@@ -8,7 +8,7 @@ module;
 #include <cinttypes>
 #include <optional>
 
-export module pragma.client.rendering:bloom_pipeline_info;
+export module pragma.client:rendering.bloom_pipeline_info;
 
 export namespace pragma {
 	struct BloomPipelineInfo {

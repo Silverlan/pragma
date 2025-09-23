@@ -6,6 +6,7 @@ module;
 #include "stdafx_client.h"
 #include "pragma/console/c_cvar.h"
 #include "pragma/entities/components/base_flex_component.hpp"
+#include "pragma/entities/components/base_model_component.hpp"
 #include <stack>
 #include <pragma/model/model.h>
 #include <alsound_buffer.hpp>
@@ -16,15 +17,14 @@ module;
 #include <pragma/lua/converters/optional_converter_t.hpp>
 #include <prosper_command_buffer.hpp>
 
-module pragma.client.entities.components.flex;
+module pragma.client;
 
-import pragma.client.entities.components;
-import pragma.client.game;
+import :entities.components.flex;
+import :game;
 import se_script;
 
 using namespace pragma;
 
-extern CGame *c_game;
 
 static auto cvFlexPhonemeDrag = GetClientConVar("cl_flex_phoneme_drag");
 
@@ -39,7 +39,7 @@ void CFlexComponent::InitializeLuaObject(lua_State *l) { return BaseEntityCompon
 void CFlexComponent::UpdateFlexControllers(float dt)
 {
 	// TODO: Update every frame!
-	auto t = c_game->CurTime();
+	auto t = pragma::get_cgame()->CurTime();
 	MaintainFlexAnimations(dt);
 	auto flexDrag = cvFlexPhonemeDrag->GetFloat();
 	for(auto &pair : m_flexControllers) {
@@ -192,7 +192,7 @@ void CFlexComponent::SetFlexController(uint32_t flexId, float val, float duratio
 		it = m_flexControllers.insert(std::make_pair(flexId, FlexControllerInfo {})).first;
 	auto &flexInfo = it->second;
 	flexInfo.targetValue = val;
-	flexInfo.endTime = (duration > 0.f) ? c_game->CurTime() + duration : 0.f;
+	flexInfo.endTime = (duration > 0.f) ? pragma::get_cgame()->CurTime() + duration : 0.f;
 	//InitializeVertexAnimationBuffer();
 
 	//if(m_vertexAnimationBuffer == nullptr) // prosper TODO

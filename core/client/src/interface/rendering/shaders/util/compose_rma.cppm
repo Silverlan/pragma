@@ -7,7 +7,7 @@ module;
 #include <shader/prosper_shader_base_image_processing.hpp>
 #include "util_image_buffer.hpp"
 
-export module pragma.client.rendering.shaders:compose_rma;
+export module pragma.client:rendering.shaders.compose_rma;
 
 export namespace pragma {
 	class DLLCLIENT ShaderComposeRMA : public prosper::ShaderBaseImageProcessing {

@@ -6,7 +6,9 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/environment/env_weather.h"
 
-export module pragma.client.entities.components.env_weather;
+export module pragma.client:entities.components.env_weather;
+
+import :entities.base_entity;
 
 export {
 	namespace pragma {

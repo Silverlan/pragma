@@ -3,8 +3,9 @@
 
 module;
 
-export module pragma.client.entities;
-export import :debug;
-export import :lua;
-export import :player;
-export import :registration;
+export module pragma.client:entities;
+export import :entities.base_entity;
+export import :entities.debug;
+export import :entities.lua;
+export import :entities.player;
+export import :entities.registration;

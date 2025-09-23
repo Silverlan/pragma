@@ -12,23 +12,21 @@ module;
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
 
-module pragma.client.gui;
+module pragma.client;
 
-import :debug_depth_texture;
-import pragma.client.engine;
-import pragma.client.game;
-import pragma.client.rendering.shaders;
+import :gui.debug_depth_texture;
+import :engine;
+import :game;
+import :rendering.shaders;
 
-extern CEngine *c_engine;
-extern CGame *c_game;
 
 LINK_WGUI_TO_CLASS(widebugdepthtexture, WIDebugDepthTexture);
 
 WIDebugDepthTexture::WIDebugDepthTexture() : WIBase(), m_imageLayer(0)
 {
-	m_whDepthToRgbShader = c_engine->GetShader("debug_depth_to_rgb");
-	m_whCubeDepthToRgbShader = c_engine->GetShader("debug_cube_depth_to_rgb");
-	m_whCsmDepthToRgbShader = c_engine->GetShader("debug_csm_depth_to_rgb");
+	m_whDepthToRgbShader = pragma::get_cengine()->GetShader("debug_depth_to_rgb");
+	m_whCubeDepthToRgbShader = pragma::get_cengine()->GetShader("debug_cube_depth_to_rgb");
+	m_whCsmDepthToRgbShader = pragma::get_cengine()->GetShader("debug_csm_depth_to_rgb");
 }
 
 WIDebugDepthTexture::~WIDebugDepthTexture()
@@ -52,7 +50,7 @@ void WIDebugDepthTexture::SetTexture(prosper::Texture &texture, prosper::util::B
 	auto &shader = static_cast<prosper::ShaderGraphics &>(*m_whDepthToRgbShader.get());
 	auto &inputImg = texture.GetImage();
 	auto extents = inputImg.GetExtents();
-	auto &context = c_engine->GetRenderContext();
+	auto &context = pragma::get_cengine()->GetRenderContext();
 	prosper::util::ImageCreateInfo imgCreateInfo {};
 	imgCreateInfo.format = prosper::Format::R8G8B8A8_UNorm;
 	imgCreateInfo.width = extents.width;
@@ -103,7 +101,7 @@ void WIDebugDepthTexture::Setup(float nearZ, float farZ)
 {
 	if(m_depthToRgbCallback.IsValid())
 		m_depthToRgbCallback.Remove();
-	m_depthToRgbCallback = c_engine->AddCallback("DrawFrame", FunctionCallback<void, std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>>::Create([this, nearZ, farZ](std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>> refDrawCmd) {
+	m_depthToRgbCallback = pragma::get_cengine()->AddCallback("DrawFrame", FunctionCallback<void, std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>>::Create([this, nearZ, farZ](std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>> refDrawCmd) {
 		auto &drawCmd = refDrawCmd.get();
 		if(m_whDepthToRgbShader.expired() || m_srcDepthTex == nullptr || m_renderTarget == nullptr || m_dsgSceneDepthTex == nullptr)
 			return;
@@ -152,8 +150,8 @@ void WIDebugDepthTexture::DoUpdate()
 {
 	auto nearZ = pragma::BaseEnvCameraComponent::DEFAULT_NEAR_Z;
 	auto farZ = pragma::BaseEnvCameraComponent::DEFAULT_FAR_Z;
-	if(c_game) {
-		auto *cam = c_game->GetPrimaryCamera<pragma::CCameraComponent>();
+	if(pragma::get_cgame()) {
+		auto *cam = pragma::get_cgame()->GetPrimaryCamera<pragma::CCameraComponent>();
 		if(cam) {
 			nearZ = cam->GetNearZ();
 			farZ = cam->GetFarZ();

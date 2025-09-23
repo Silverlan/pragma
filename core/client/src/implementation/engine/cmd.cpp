@@ -4,6 +4,7 @@
 module;
 
 #include "stdafx_cengine.h"
+#include "pragma/clientdefinitions.h"
 #include <pragma/asset/util_asset.hpp>
 #include <pragma/lua/libraries/ldebug.h>
 #include <pragma/lua/libraries/lutil.hpp>
@@ -27,13 +28,15 @@ module;
 #include <prosper_window.hpp>
 #include <fsys/directory_watcher.h>
 
-module pragma.client.engine;
+module pragma.client;
 
-import pragma.client.audio;
-import pragma.client.client_state;
-import pragma.client.engine;
-import pragma.client.entities.components;
-import pragma.client.game;
+import :engine;
+import :audio;
+import :client_state;
+import :engine;
+import :entities.components;
+import :game;
+import :rendering.render_apis;
 import pragma.locale;
 // import pragma.scripting.lua;
 import pragma.console.commands;
@@ -41,7 +44,7 @@ import pragma.console.commands;
 import pragma.string.unicode;
 #endif
 
-extern DLLCLIENT void debug_render_stats(bool enabled, bool full, bool print, bool continuous);
+DLLCLIENT void debug_render_stats(bool enabled, bool full, bool print, bool continuous);
 extern bool g_dumpRenderQueues;
 void CEngine::RegisterConsoleCommands()
 {

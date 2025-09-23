@@ -6,7 +6,7 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <shader/prosper_shader_base_image_processing.hpp>
 
-export module pragma.client.rendering.shaders:specular_to_roughness;
+export module pragma.client:rendering.shaders.specular_to_roughness;
 
 export namespace pragma {
 	class DLLCLIENT ShaderSpecularToRoughness : public prosper::ShaderBaseImageProcessing {

@@ -7,15 +7,14 @@ module;
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <prosper_descriptor_set_group.hpp>
 
-module pragma.client.rendering.shaders;
+module pragma.client;
 
-import :world_noop;
 
-import pragma.client.client_state;
-import pragma.client.engine;
+import :rendering.shaders.world_noop;
 
-extern ClientState *client;
-extern CEngine *c_engine;
+import :client_state;
+import :engine;
+
 
 using namespace pragma;
 

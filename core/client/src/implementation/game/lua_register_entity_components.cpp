@@ -1,11 +1,13 @@
 // SPDX-FileCopyrightText: (c) 2020 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/entities/components/liquid/base_liquid_component.hpp"
+#include "pragma/entities/components/base_field_angle_component.hpp"
 #include "pragma/lua/classes/lproperty.hpp"
 #include "pragma/entities/environment/lights/env_light.h"
-#include "pragma/lua/converters/shader_converter_t.hpp"
 #include "pragma/entities/environment/lights/env_light.h"
 #include "pragma/entities/environment/env_timescale.h"
 #include "pragma/entities/components/base_debug_component.hpp"
@@ -18,6 +20,7 @@
 #include "pragma/entities/components/base_radius_component.hpp"
 #include "pragma/entities/components/base_attachment_component.hpp"
 #include "pragma/entities/environment/env_microphone_base.h"
+#include "pragma/entities/environment/env_camera.h"
 #include "pragma/entities/components/base_io_component.hpp"
 #include "pragma/entities/components/base_observable_component.hpp"
 #include "pragma/entities/components/base_color_component.hpp"
@@ -86,10 +89,11 @@
 #include <util_image_buffer.hpp>
 #include <luabind/copy_policy.hpp>
 
-import pragma.entities.components;
-import pragma.client.entities.components;
-import pragma.client.game;
-import pragma.client.scripting.lua;
+module pragma.client;
+
+import :game;
+import :scripting.lua.bindings.scene;
+import pragma.entities.components.shooter;
 
 namespace Lua {
 	namespace PBRConverter {
@@ -410,8 +414,8 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defCScene.add_static_constant("OCCLUSION_CULLING_METHOD_BSP", umath::to_integral(SceneRenderDesc::OcclusionCullingMethod::BSP));
 	defCScene.add_static_constant("OCCLUSION_CULLING_METHOD_OCTREE", umath::to_integral(SceneRenderDesc::OcclusionCullingMethod::Octree));
 	defCScene.add_static_constant("OCCLUSION_CULLING_METHOD_INERT", umath::to_integral(SceneRenderDesc::OcclusionCullingMethod::Inert));
-	defCScene.add_static_constant("EVENT_ON_ACTIVE_CAMERA_CHANGED", pragma::CSceneComponent::CSceneComponent::EVENT_ON_ACTIVE_CAMERA_CHANGED);
-	defCScene.add_static_constant("EVENT_ON_RENDERER_CHANGED", pragma::CSceneComponent::CSceneComponent::EVENT_ON_RENDERER_CHANGED);
+	defCScene.add_static_constant("EVENT_ON_ACTIVE_CAMERA_CHANGED", pragma::CSceneComponent::EVENT_ON_ACTIVE_CAMERA_CHANGED);
+	defCScene.add_static_constant("EVENT_ON_RENDERER_CHANGED", pragma::CSceneComponent::EVENT_ON_RENDERER_CHANGED);
 	defCScene.add_static_constant("DEBUG_MODE_NONE", umath::to_integral(pragma::SceneDebugMode::None));
 	defCScene.add_static_constant("DEBUG_MODE_AMBIENT_OCCLUSION", umath::to_integral(pragma::SceneDebugMode::AmbientOcclusion));
 	defCScene.add_static_constant("DEBUG_MODE_ALBEDO", umath::to_integral(pragma::SceneDebugMode::Albedo));
@@ -468,7 +472,7 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defCScene.def("GetSceneIndex", static_cast<pragma::CSceneComponent::SceneIndex (pragma::CSceneComponent::*)() const>(&pragma::CSceneComponent::GetSceneIndex));
 	defCScene.def("SetParticleSystemColorFactor", &pragma::CSceneComponent::SetParticleSystemColorFactor);
 	defCScene.def("GetParticleSystemColorFactor", &pragma::CSceneComponent::GetParticleSystemColorFactor, luabind::copy_policy<0> {});
-	//defCScene.def("GetRenderParticleSystems",static_cast<std::vector<pragma::CParticleSystemComponent*>(*)(lua_State*,pragma::CSceneComponent&)>([](lua_State *l,pragma::CSceneComponent &scene) -> std::vector<pragma::CParticleSystemComponent*> {
+	//defCScene.def("GetRenderParticleSystems",static_cast<std::vector<pragma::ecs::CParticleSystemComponent*>(*)(lua_State*,pragma::CSceneComponent&)>([](lua_State *l,pragma::CSceneComponent &scene) -> std::vector<pragma::ecs::CParticleSystemComponent*> {
 	//	return scene.GetSceneRenderDesc().GetCulledParticles();
 	//}));
 	defCScene.def(

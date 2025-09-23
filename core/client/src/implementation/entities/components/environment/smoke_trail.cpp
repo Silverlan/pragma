@@ -8,15 +8,16 @@ module;
 #include <pragma/entities/components/basetoggle.h>
 #include <pragma/entities/entity_component_system_t.hpp>
 
-module pragma.client.entities.components.effects.smoke_trail;
+module pragma.client;
 
-import pragma.client.client_state;
-import pragma.client.engine;
-import pragma.client.util;
+
+import :entities.components.effects.smoke_trail;
+import :client_state;
+import :engine;
+import :util;
 
 using namespace pragma;
 
-extern ClientState *client;
 
 CSmokeTrailComponent::~CSmokeTrailComponent() { DestroyParticle(); }
 void CSmokeTrailComponent::Initialize()

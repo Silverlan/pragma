@@ -3,18 +3,19 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 
-export module pragma.client.particle_system:operator_gravity;
+export module pragma.client:particle_system.operator_gravity;
 
-import :operator_world_base;
+import :particle_system.operator_world_base;
 
-import pragma.client.engine;
-import pragma.client.game;
+import :engine;
+import :game;
 
 export class DLLCLIENT CParticleOperatorGravity : public CParticleOperatorWorldBase {
   public:
 	CParticleOperatorGravity() = default;
-	virtual void Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+	virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
 	virtual void Simulate(CParticle &particle, double tDelta, float strength) override;
 	virtual void Simulate(double tDelta) override;
   protected:
@@ -25,9 +26,7 @@ export class DLLCLIENT CParticleOperatorGravity : public CParticleOperatorWorldB
 	Vector3 m_dtGravity = {};
 };
 
-REGISTER_PARTICLE_OPERATOR(gravity, CParticleOperatorGravity);
-
-void CParticleOperatorGravity::Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void CParticleOperatorGravity::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleOperatorWorldBase::Initialize(pSystem, values);
 	for(auto it = values.begin(); it != values.end(); it++) {

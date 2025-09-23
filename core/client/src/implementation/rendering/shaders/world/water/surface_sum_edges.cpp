@@ -6,9 +6,10 @@ module;
 #include "stdafx_client.h"
 #include <shader/prosper_pipeline_create_info.hpp>
 
-module pragma.client.rendering.shaders;
+module pragma.client;
 
-import :world_water_surface_sum_edges;
+
+import :rendering.shaders.world_water_surface_sum_edges;
 
 using namespace pragma;
 

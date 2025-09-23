@@ -6,8 +6,7 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <pragma/lua/ldefinitions.h>
 
-export module pragma.client.scripting.lua.libraries.ai;
-
+export module pragma.client:scripting.lua.libraries.ai;
 export namespace Lua {
 	namespace ai {
 		namespace client {

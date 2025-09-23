@@ -24,9 +24,8 @@ module;
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <sharedutils/util_shaderinfo.hpp>
 
-export module pragma.client.scripting.lua.bindings.scene;
-
-import pragma.client.entities.components;
+export module pragma.client:scripting.lua.bindings.scene;
+import :entities.components;
 
 export namespace pragma::scripting::lua::bindings {
 	void register_renderers(lua_State *l, luabind::module_ &entsMod) {

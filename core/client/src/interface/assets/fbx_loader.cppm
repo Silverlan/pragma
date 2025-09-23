@@ -12,9 +12,9 @@ module;
 #include <vector>
 #include <cinttypes>
 
-export module pragma.client.assets:fbx_loader;
+export module pragma.client:assets.fbx_loader;
 
-import :import_export;
+import :assets.import_export;
 
 export namespace pragma::asset::fbx {
 	enum class RotationOrder : uint8_t {

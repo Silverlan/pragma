@@ -3,12 +3,13 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <shader/prosper_shader_blur.hpp>
 
-export module pragma.client.rendering.shaders:pp_bloom_blur;
+export module pragma.client:rendering.shaders.pp_bloom_blur;
 
-import pragma.client.rendering;
+import :rendering.controlled_blur_settings;
 
 export namespace pragma {
 	class DLLCLIENT ShaderPPBloomBlurBase : public prosper::ShaderBlurBase {

@@ -8,7 +8,7 @@ module;
 #include "luasystem.h"
 #include <optional>
 
-export module pragma.client.gui:lua_skin;
+export module pragma.client:gui.lua_skin;
 
 export {
 	struct DLLCLIENT WISkinClass {

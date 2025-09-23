@@ -3,9 +3,12 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include <pragma/types.hpp>
 
-export module pragma.client.rendering.shaders:world_water;
+export module pragma.client:rendering.shaders.world_water;
+
+import :rendering.shaders.textured;
 
 export namespace pragma {
 	class DLLCLIENT ShaderWater : public ShaderGameWorldLightingPass {

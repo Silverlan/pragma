@@ -5,9 +5,8 @@ module;
 
 #include "pragma/clientdefinitions.h"
 
-export module pragma.client.entities.components.pp_fxaa;
-
-import pragma.client.entities.components.pp_base;
+export module pragma.client:entities.components.pp_fxaa;
+import :entities.components.pp_base;
 
 export namespace pragma {
 	class CRasterizationRendererComponent;

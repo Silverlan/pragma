@@ -8,9 +8,9 @@ module;
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
-export module pragma.client.entities:player;
+export module pragma.client:entities.player;
 
-import pragma.client.entities.components;
+import :entities.components;
 import pragma.entities.components;
 
 export class DLLCLIENT CPlayer : public CBaseEntity, public BasePlayer {

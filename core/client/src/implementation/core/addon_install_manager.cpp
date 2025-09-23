@@ -9,13 +9,14 @@ module;
 #include <sharedutils/util_file.h>
 #include <pragma/entities/entity_component_system_t.hpp>
 
-module pragma.client.core.addon_install_manager;
+module pragma.client;
 
-import pragma.client.engine;
+
+import :core.addon_install_manager;
+import :engine;
 import pragma.uva;
 import pragma.pad;
 
-extern CEngine *c_engine;
 
 static const std::string &get_query_url()
 {
@@ -71,7 +72,7 @@ void pragma::AddonInstallManager::QueryFile(const std::shared_ptr<AddonUpdateQue
 						  memcpy(header->packageId.data(), uniqueId.data(), header->packageId.size());
 					  }
 					  else {
-						  auto *padManager = c_engine->GetPADPackageManager();
+						  auto *padManager = pragma::get_cengine()->GetPADPackageManager();
 						  pad = (padManager != nullptr) ? padManager->GetPackage(addon->addonPath) : nullptr;
 						  if(pad != nullptr)
 							  archFile = pad->GetArchiveFile();

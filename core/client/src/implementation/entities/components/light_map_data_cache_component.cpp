@@ -5,17 +5,19 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/logging.hpp"
+#include "pragma/model/model.h"
 #include <pragma/entities/components/base_model_component.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/entity_component_manager_t.hpp>
 
-module pragma.client.entities.components.light_map_data_cache;
+module pragma.client;
 
-import pragma.client.entities.components.light_map_receiver;
-import pragma.client.entities.components.light_map;
-import pragma.client.game;
 
-extern CGame *c_game;
+import :entities.components.light_map_data_cache;
+import :entities.components.light_map_receiver;
+import :entities.components.light_map;
+import :game;
+
 
 using namespace pragma;
 
@@ -63,7 +65,7 @@ void CLightMapDataCacheComponent::InitializeUvBuffers()
 	CLightMapComponent::LOGGER.info("Initializing lightmap uv buffers from cache for {} entities...", m_lightmapDataCache->cacheData.size());
 	uint32_t numInitialized = 0;
 	for(auto &pair : m_lightmapDataCache->cacheData) {
-		EntityIterator entIt {*c_game};
+		EntityIterator entIt {*pragma::get_cgame()};
 		entIt.AttachFilter<EntityIteratorFilterUuid>(pair.first.uuid);
 		auto it = entIt.begin();
 		if(it == entIt.end())
@@ -80,7 +82,7 @@ void CLightMapDataCacheComponent::InitializeUvBuffers()
 	auto globalLightmapUvBuffer = pragma::CLightMapComponent::GenerateLightmapUVBuffers(buffers);
 
 	if(globalLightmapUvBuffer) {
-		EntityIterator entIt {*c_game};
+		EntityIterator entIt {*pragma::get_cgame()};
 		entIt.AttachFilter<EntityIteratorFilterUuid>(m_lightmapDataCache->lightmapEntityId);
 		auto it = entIt.begin();
 		if(it != entIt.end()) {
@@ -91,7 +93,7 @@ void CLightMapDataCacheComponent::InitializeUvBuffers()
 				// lightMapC->SetLightMapIntensity(worldData.GetLightMapIntensity());
 				// lightMapC->SetLightMapExposure(worldData.GetLightMapExposure());
 				lightMapC->InitializeLightMapData(nullptr, globalLightmapUvBuffer, buffers, nullptr, true);
-				auto *scene = c_game->GetRenderScene<pragma::CSceneComponent>();
+				auto *scene = pragma::get_cgame()->GetRenderScene<pragma::CSceneComponent>();
 				if(scene)
 					scene->SetLightMap(*lightMapC);
 				else
@@ -120,7 +122,7 @@ void CLightMapDataCacheComponent::ReloadCache()
 	}
 	std::unordered_map<std::string, std::shared_ptr<Model>> cachedModels;
 	for(auto &pair : m_lightmapDataCache->cacheData) {
-		EntityIterator entIt {*c_game, EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
+		EntityIterator entIt {*pragma::get_cgame(), EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
 		entIt.AttachFilter<EntityIteratorFilterUuid>(pair.first.uuid);
 
 		auto it = entIt.begin();

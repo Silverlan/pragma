@@ -5,12 +5,12 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include <pragma/entities/baseentity.h>
+#include "mathutil/umath_geometry.hpp"
 #include <sharedutils/property/util_property.hpp>
 
-export module pragma.client.entities:base_entity;
+export module pragma.client:entities.base_entity;
 
-#pragma warning(push)
-#pragma warning(disable : 4251)
+export namespace pragma {class CRenderComponent; class CSceneComponent;};
 export class DLLCLIENT CBaseEntity : public BaseEntity {
   public:
 	static pragma::ComponentEventId EVENT_ON_SCENE_FLAGS_CHANGED;
@@ -85,7 +85,6 @@ export class DLLCLIENT CBaseEntity : public BaseEntity {
 	util::PUInt32Property m_sceneFlags = nullptr;
 	pragma::CRenderComponent *m_renderComponent = nullptr;
 };
-#pragma warning(pop)
 
 export {
 	inline DLLCLIENT Con::c_cout &operator<<(Con::c_cout &os, CBaseEntity &ent) { return ent.print(os); }

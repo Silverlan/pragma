@@ -5,11 +5,12 @@ module;
 
 #include "stdafx_client.h"
 
-module pragma.client.entities.components.eye;
+module pragma.client;
 
-import pragma.client.game;
 
-extern CGame *c_game;
+import :entities.components.eye;
+import :game;
+
 
 static auto g_debugPrint = false;
 void pragma::CEyeComponent::UpdateEyeballsMT()
@@ -74,8 +75,8 @@ Vector3 pragma::CEyeComponent::ClampViewTarget(const Vector3 &viewTarget) const
 	if(flexC.expired() || mdlC.expired() || mdl == nullptr)
 		return Vector3 {};
 	// Test
-	/*auto t = std::fmodf(c_game->RealTime(),6.0) /6.0;
-	auto t2 = std::fmodf(c_game->RealTime(),3.0) /3.0;
+	/*auto t = std::fmodf(pragma::get_cgame()->RealTime(),6.0) /6.0;
+	auto t2 = std::fmodf(pragma::get_cgame()->RealTime(),3.0) /3.0;
 	auto s = umath::sin(t *umath::pi *2);
 	auto s2 = umath::sin(t2 *umath::pi *2);
 	auto f = 1.0;

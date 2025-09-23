@@ -6,7 +6,7 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <shader/prosper_shader.hpp>
 
-export module pragma.client.rendering.shaders:forwardp_light_indexing;
+export module pragma.client:rendering.shaders.forwardp_light_indexing;
 
 export namespace pragma {
 	class DLLCLIENT ShaderForwardPLightIndexing : public prosper::ShaderCompute {

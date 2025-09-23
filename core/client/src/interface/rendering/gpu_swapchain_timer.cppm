@@ -9,8 +9,7 @@ module;
 #include <queries/prosper_pipeline_statistics_query.hpp>
 #include <chrono>
 
-export module pragma.client.rendering.gpu_swapchain_timer;
-
+export module pragma.client:rendering.gpu_swapchain_timer;
 export namespace pragma {
 	namespace debug {
 		class DLLCLIENT GPUSwapchainTimer : public Timer {

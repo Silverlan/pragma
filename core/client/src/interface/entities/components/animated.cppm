@@ -10,9 +10,10 @@ module;
 #include <pragma/entities/components/base_animated_component.hpp>
 #include <buffers/prosper_uniform_resizable_buffer.hpp>
 
-export module pragma.client.entities.components.animated;
+export module pragma.client:entities.components.animated;
 
-struct Eyeball;
+import :entities.components.entity;
+
 export namespace pragma {
 	void initialize_articulated_buffers();
 	void clear_articulated_buffers();

@@ -18,13 +18,14 @@ module;
 #include <sharedutils/magic_enum.hpp>
 #include <cmaterial_manager2.hpp>
 
-module pragma.client.rendering.render_context;
+module pragma.client;
 
-import pragma.client.engine;
+import :rendering.render_apis;
+import :rendering.render_context;
+import :engine;
 
 using namespace pragma;
 
-extern CEngine *c_engine;
 static spdlog::logger &LOGGER = pragma::register_logger("prosper");
 static spdlog::logger &LOGGER_VALIDATION = pragma::register_logger("prosper_validation");
 
@@ -150,7 +151,7 @@ void RenderContext::InitializeRenderAPI()
 	});
 	prosper::debug::set_debug_validation_callback([](prosper::DebugReportObjectTypeEXT objectType, const std::string &msg) { LOGGER_VALIDATION.error("{}", msg); });
 	err.clear();
-	if(!pragma::platform::initialize(err, c_engine->IsWindowless())) {
+	if(!pragma::platform::initialize(err, pragma::get_cengine()->IsWindowless())) {
 		LOGGER.critical("Failed to initialize GLFW: {}", err);
 		throw std::runtime_error {"Failed to initialize GLFW: " + err};
 	}

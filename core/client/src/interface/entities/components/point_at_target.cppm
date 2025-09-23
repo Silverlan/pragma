@@ -7,7 +7,9 @@ module;
 #include <pragma/entities/components/base_point_at_target_component.hpp>
 #include <pragma/lua/luaapi.h>
 
-export module pragma.client.entities.components.point_at_target;
+export module pragma.client:entities.components.point_at_target;
+
+import :entities.components.entity;
 
 export namespace pragma {
 	class DLLCLIENT CPointAtTargetComponent final : public BasePointAtTargetComponent, public CBaseNetComponent {

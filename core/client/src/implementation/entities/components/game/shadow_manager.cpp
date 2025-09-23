@@ -17,12 +17,12 @@ module;
 #include <image/prosper_render_target.hpp>
 #include <prosper_descriptor_set_group.hpp>
 
-import pragma.client.engine;
-import pragma.client.client_state;
-module pragma.client.entities.components.game_shadow_manager;
+module pragma.client;
 
-extern CEngine *c_engine;
-extern ClientState *client;
+import :engine;
+import :client_state;
+
+import :entities.components.game_shadow_manager;
 
 using namespace pragma;
 
@@ -44,8 +44,8 @@ void CShadowManagerComponent::Initialize()
 	if(m_descSetGroup != nullptr || pragma::ShaderPBR::DESCRIPTOR_SET_SHADOWS.IsValid() == false)
 		return;
 	g_shadowManager = this;
-	m_whShadowShader = c_engine->GetShader("shadow");
-	m_descSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderPBR::DESCRIPTOR_SET_SHADOWS);
+	m_whShadowShader = pragma::get_cengine()->GetShader("shadow");
+	m_descSetGroup = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderPBR::DESCRIPTOR_SET_SHADOWS);
 
 	auto *descSet = m_descSetGroup->GetDescriptorSet();
 
@@ -55,11 +55,11 @@ void CShadowManagerComponent::Initialize()
 	auto arraySizeShadows = pragma::ShaderPBR::DESCRIPTOR_SET_SHADOWS.bindings.at(umath::to_integral(pragma::ShaderPBR::ShadowBinding::ShadowMaps)).descriptorArraySize;
 	auto arraySizeCubeShadows = pragma::ShaderPBR::DESCRIPTOR_SET_SHADOWS.bindings.at(umath::to_integral(pragma::ShaderPBR::ShadowBinding::ShadowCubeMaps)).descriptorArraySize;
 
-	auto &dummyTex = c_engine->GetRenderContext().GetDummyTexture();
+	auto &dummyTex = pragma::get_cengine()->GetRenderContext().GetDummyTexture();
 	for(auto i = decltype(arraySizeShadows) {0u}; i < arraySizeShadows; ++i)
 		descSet->SetBindingArrayTexture(*dummyTex, umath::to_integral(pragma::ShaderSceneLit::ShadowBinding::ShadowMaps), i);
 
-	auto &dummyCubeTex = c_engine->GetRenderContext().GetDummyCubemapTexture();
+	auto &dummyCubeTex = pragma::get_cengine()->GetRenderContext().GetDummyCubemapTexture();
 	for(auto i = decltype(arraySizeCubeShadows) {0u}; i < arraySizeCubeShadows; ++i)
 		descSet->SetBindingArrayTexture(*dummyCubeTex, umath::to_integral(pragma::ShaderSceneLit::ShadowBinding::ShadowCubeMaps), i);
 	descSet->Update();
@@ -69,7 +69,7 @@ void CShadowManagerComponent::OnRemove()
 {
 	BaseEntityComponent::OnRemove();
 
-	c_engine->GetRenderContext().WaitIdle();
+	pragma::get_cengine()->GetRenderContext().WaitIdle();
 	ClearRenderTargets();
 	m_descSetGroup = nullptr;
 	m_whShadowShader = {};
@@ -118,7 +118,7 @@ CShadowManagerComponent::RtHandle CShadowManagerComponent::RequestRenderTarget(T
 	createInfo.postCreateLayout = prosper::ImageLayout::ShaderReadOnlyOptimal;
 	if(type == Type::Cube)
 		createInfo.flags = prosper::util::ImageCreateInfo::Flags::Cubemap;
-	auto img = c_engine->GetRenderContext().CreateImage(createInfo);
+	auto img = pragma::get_cengine()->GetRenderContext().CreateImage(createInfo);
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
 	prosper::util::SamplerCreateInfo samplerCreateInfo {};
 	//samplerCreateInfo.compareEnable = true; // When enabled, causes strange behavior on Nvidia cards when doing texture lookups
@@ -130,12 +130,12 @@ CShadowManagerComponent::RtHandle CShadowManagerComponent::RequestRenderTarget(T
 
 	prosper::util::TextureCreateInfo texCreateInfo {};
 	texCreateInfo.flags = prosper::util::TextureCreateInfo::Flags::CreateImageViewForEachLayer;
-	auto depthTexture = c_engine->GetRenderContext().CreateTexture(texCreateInfo, *img, imgViewCreateInfo, samplerCreateInfo);
+	auto depthTexture = pragma::get_cengine()->GetRenderContext().CreateTexture(texCreateInfo, *img, imgViewCreateInfo, samplerCreateInfo);
 
 	auto rt = std::make_shared<RenderTarget>();
 	prosper::util::RenderTargetCreateInfo rtCreateInfo {};
 	rtCreateInfo.useLayerFramebuffers = true;
-	rt->renderTarget = c_engine->GetRenderContext().CreateRenderTarget({depthTexture}, static_cast<prosper::ShaderGraphics *>(m_whShadowShader.get())->GetRenderPass(), rtCreateInfo);
+	rt->renderTarget = pragma::get_cengine()->GetRenderContext().CreateRenderTarget({depthTexture}, static_cast<prosper::ShaderGraphics *>(m_whShadowShader.get())->GetRenderPass(), rtCreateInfo);
 	rt->renderTarget->SetDebugName("shadowmap_rt");
 	set.buffers.push_back({});
 	auto &data = set.buffers.back();

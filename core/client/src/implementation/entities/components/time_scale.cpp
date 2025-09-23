@@ -6,8 +6,10 @@ module;
 #include "stdafx_client.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
-module pragma.client.entities.components.time_scale;
+module pragma.client;
 
+
+import :entities.components.time_scale;
 using namespace pragma;
 
 void CTimeScaleComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }

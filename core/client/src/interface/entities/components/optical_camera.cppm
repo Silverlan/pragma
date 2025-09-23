@@ -7,9 +7,8 @@ module;
 #include <pragma/entities/components/base_entity_component.hpp>
 #include <unordered_set>
 
-export module pragma.client.entities.components.optical_camera;
-
-import pragma.client.rendering.shaders;
+export module pragma.client:entities.components.optical_camera;
+import :rendering.shaders;
 
 export namespace pragma {
 	class DLLCLIENT COpticalCameraComponent final : public BaseEntityComponent {

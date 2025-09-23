@@ -8,8 +8,15 @@ module;
 #include <memory>
 #include <mutex>
 
-export module pragma.client.model:render_mesh;
+export module pragma.client:model.render_mesh;
 
+import :rendering.shaders.scene;
+
+namespace pragma::model {
+	enum class IndexType;
+};
+
+export class CModelSubMesh;
 export namespace pragma {
 	class DLLCLIENT SceneMesh {
 	  public:

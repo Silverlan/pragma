@@ -6,7 +6,9 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <pragma/lua/luaobjectbase.h>
 
-export module pragma.client.entities:lua;
+export module pragma.client:entities.lua;
+
+import :entities.base_entity;
 
 export {
 	class DLLCLIENT CLuaEntity : public CBaseEntity {

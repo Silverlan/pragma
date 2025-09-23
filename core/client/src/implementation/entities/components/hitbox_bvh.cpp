@@ -17,16 +17,18 @@ module;
 #include <pragma/asset/util_asset.hpp>
 #include <sharedutils/BS_thread_pool.hpp>
 #include <mathutil/boundingvolume.h>
+#include "mathutil/umath_geometry.hpp"
 #include <bvh/v2/stack.h>
 
-module pragma.client.entities.components.hitbox_bvh;
+module pragma.client;
 
-import pragma.client.engine;
-import pragma.client.debug;
-import pragma.client.entities.components.animated;
-import pragma.client.entities.components.render;
 
-extern CEngine *c_engine;
+import :entities.components.hitbox_bvh;
+import :engine;
+import :debug;
+import :entities.components.animated;
+import :entities.components.render;
+
 
 using namespace pragma;
 

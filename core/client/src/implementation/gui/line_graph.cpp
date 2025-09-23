@@ -6,15 +6,13 @@ module;
 #include "stdafx_client.h"
 #include <wgui/types/wirect.h>
 
-module pragma.client.gui;
+module pragma.client;
 
-import :line_graph;
+import :gui.line_graph;
 
-import pragma.client.client_state;
-import pragma.client.engine;
+import :client_state;
+import :engine;
 
-extern CEngine *c_engine;
-extern ClientState *client;
 
 LINK_WGUI_TO_CLASS(WILineGraph, WILineGraph);
 

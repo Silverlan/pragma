@@ -12,31 +12,31 @@ module;
 #include <pragma/debug/intel_vtune.hpp>
 #include <buffers/prosper_buffer.hpp>
 
-module pragma.client.game;
+module pragma.client;
 
-import pragma.client.engine;
-import pragma.client.rendering.shaders;
 
-extern CEngine *c_engine;
-extern CGame *c_game;
+import :game;
+import :engine;
+import :rendering.shaders;
+
 
 REGISTER_CONVAR_CALLBACK_CL(cl_render_shader_quality, [](NetworkState *, const ConVar &, int, int val) {
-	if(c_game == nullptr)
+	if(pragma::get_cgame() == nullptr)
 		return;
-	c_game->GetWorldEnvironment().SetShaderQuality(val);
+	pragma::get_cgame()->GetWorldEnvironment().SetShaderQuality(val);
 });
 
 static void CVAR_CALLBACK_cl_render_shadow_resolution(NetworkState *, const ConVar &, int, int val)
 {
-	if(c_game == nullptr)
+	if(pragma::get_cgame() == nullptr)
 		return;
-	c_game->GetWorldEnvironment().SetShadowResolution(val);
+	pragma::get_cgame()->GetWorldEnvironment().SetShadowResolution(val);
 }
 REGISTER_CONVAR_CALLBACK_CL(cl_render_shadow_resolution, CVAR_CALLBACK_cl_render_shadow_resolution);
 
 void register_game_shaders()
 {
-	auto &shaderManager = c_engine->GetShaderManager();
+	auto &shaderManager = pragma::get_cengine()->GetShaderManager();
 	shaderManager.RegisterShader("clear_color", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderClearColor(context, identifier); });
 	shaderManager.RegisterShader("prepass", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderPrepass(context, identifier); });
 
@@ -127,7 +127,7 @@ void CGame::InitShaders()
 	util::ScopeGuard sgVtune {[]() { debug::get_domain().EndTask(); }};
 #endif
 
-	auto &shaderManager = c_engine->GetShaderManager();
+	auto &shaderManager = pragma::get_cengine()->GetShaderManager();
 	pragma::ShaderScene::SetRenderPassSampleCount(static_cast<prosper::SampleCountFlags>(GetMSAASampleCount()));
 
 	m_gameShaders.at(umath::to_integral(GameShader::Debug)) = shaderManager.GetShader("debug");
@@ -162,6 +162,6 @@ void CGame::InitShaders()
 
 void CGame::UpdateShaderTimeData()
 {
-	c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_globalRenderSettingsBufferData->timeBuffer, 0ull,
+	pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_globalRenderSettingsBufferData->timeBuffer, 0ull,
 	  pragma::ShaderGameWorldLightingPass::TimeData {static_cast<float>(CurTime()), static_cast<float>(DeltaTime()), static_cast<float>(RealTime()), static_cast<float>(DeltaRealTime())});
 }

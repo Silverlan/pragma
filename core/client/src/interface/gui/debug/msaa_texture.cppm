@@ -6,7 +6,7 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <wgui/types/wirect.h>
 
-export module pragma.client.gui:debug_msaa_texture;
+export module pragma.client:gui.debug_msaa_texture;
 
 export {
 	class DLLCLIENT WIDebugMSAATexture : public WIBase {

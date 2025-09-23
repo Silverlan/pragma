@@ -4,15 +4,18 @@
 module;
 
 #include "stdafx_client.h"
+#include "pragma/clientdefinitions.h"
 #include <algorithm>
 #include <mathutil/umath.h>
 #include <pragma/math/vector/wvvector3.h>
 #include <sharedutils/util.h>
 #include <sharedutils/util_string.h>
+#include "pragma/entities/environment/effects/env_particle_system.h"
 
-export module pragma.client.particle_system;
+module pragma.client;
 
-import :lua_particle_modifier_manager;
+import :entities.components.particle_system;
+import :particle_system.lua_particle_modifier_manager;
 
 class DLLCLIENT CParticleInitializerLifetimeRandom : public CParticleInitializer {
   private:
@@ -20,7 +23,7 @@ class DLLCLIENT CParticleInitializerLifetimeRandom : public CParticleInitializer
 	float m_lifeMax = 0.f;
   public:
 	CParticleInitializerLifetimeRandom() = default;
-	virtual void Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override
+	virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override
 	{
 		CParticleInitializer::Initialize(pSystem, values);
 		for(auto it = values.begin(); it != values.end(); it++) {
@@ -34,7 +37,6 @@ class DLLCLIENT CParticleInitializerLifetimeRandom : public CParticleInitializer
 	}
 	virtual void OnParticleCreated(CParticle &particle) override { particle.SetLife(umath::random(m_lifeMin, m_lifeMax)); }
 };
-REGISTER_PARTICLE_INITIALIZER(lifetime_random, CParticleInitializerLifetimeRandom);
 
 class DLLCLIENT CParticleInitializerColorRandom : public CParticleInitializer {
   private:
@@ -43,7 +45,7 @@ class DLLCLIENT CParticleInitializerColorRandom : public CParticleInitializer {
 	std::unique_ptr<Color> m_colorC = nullptr;
   public:
 	CParticleInitializerColorRandom() = default;
-	virtual void Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override
+	virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override
 	{
 		CParticleInitializer::Initialize(pSystem, values);
 		for(auto it = values.begin(); it != values.end(); it++) {
@@ -65,7 +67,6 @@ class DLLCLIENT CParticleInitializerColorRandom : public CParticleInitializer {
 		particle.SetColor(col);
 	}
 };
-REGISTER_PARTICLE_INITIALIZER(color_random, CParticleInitializerColorRandom);
 
 class DLLCLIENT CParticleInitializerAlphaRandom : public CParticleInitializer {
   private:
@@ -73,7 +74,7 @@ class DLLCLIENT CParticleInitializerAlphaRandom : public CParticleInitializer {
 	float m_alphaMax = 255.f;
   public:
 	CParticleInitializerAlphaRandom() = default;
-	virtual void Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override
+	virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override
 	{
 		CParticleInitializer::Initialize(pSystem, values);
 		for(auto it = values.begin(); it != values.end(); it++) {
@@ -91,7 +92,6 @@ class DLLCLIENT CParticleInitializerAlphaRandom : public CParticleInitializer {
 		col.a = umath::random(m_alphaMin, m_alphaMax) / 255.f;
 	}
 };
-REGISTER_PARTICLE_INITIALIZER(alpha_random, CParticleInitializerAlphaRandom);
 
 class DLLCLIENT CParticleInitializerRotationRandom : public CParticleInitializer {
   private:
@@ -103,7 +103,7 @@ class DLLCLIENT CParticleInitializerRotationRandom : public CParticleInitializer
 	bool m_bUseQuaternionRotation = false;
   public:
 	CParticleInitializerRotationRandom() = default;
-	virtual void Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override
+	virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override
 	{
 		CParticleInitializer::Initialize(pSystem, values);
 		for(auto it = values.begin(); it != values.end(); it++) {
@@ -133,20 +133,19 @@ class DLLCLIENT CParticleInitializerRotationRandom : public CParticleInitializer
 		particle.SetRotation(umath::random(m_planarRotMin, m_planarRotMax));
 	}
 };
-REGISTER_PARTICLE_INITIALIZER(rotation_random, CParticleInitializerRotationRandom);
 
 ///////////////////////
 
-void CParticleModifier::Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void CParticleModifier::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
-	m_particleSystem = &pSystem;
+	m_particleSystem = &static_cast<pragma::ecs::CParticleSystemComponent&>(pSystem);
 	RecordKeyValues(values);
 }
 
 int32_t CParticleModifier::GetPriority() const { return m_priority; }
 void CParticleModifier::SetPriority(int32_t priority) { m_priority = priority; }
 
-pragma::CParticleSystemComponent &CParticleModifier::GetParticleSystem() const { return *m_particleSystem; }
+pragma::ecs::CParticleSystemComponent &CParticleModifier::GetParticleSystem() const { return *m_particleSystem; }
 
 void CParticleModifier::OnParticleCreated(CParticle &) {}
 void CParticleModifier::OnParticleSystemStarted() {}
@@ -159,7 +158,7 @@ const std::string &CParticleModifier::GetName() const { return m_name; }
 
 ///////////////////////
 
-void CParticleOperator::Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void CParticleOperator::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleModifier::Initialize(pSystem, values);
 	for(auto &pair : values) {
@@ -238,7 +237,7 @@ DLLCLIENT ParticleModifierMap *GetParticleModifierMap() { return g_ParticleModif
 void ParticleModifierMap::AddInitializer(std::string name, const TParticleModifierFactory<CParticleInitializer> &fc)
 {
 	StringToLower(name);
-	m_initializers.insert(std::make_pair(name, TParticleModifierFactory<CParticleInitializer> {[fc, name](pragma::CParticleSystemComponent &c, const std::unordered_map<std::string, std::string> &keyvalues) -> std::unique_ptr<CParticleInitializer, void (*)(CParticleInitializer *)> {
+	m_initializers.insert(std::make_pair(name, TParticleModifierFactory<CParticleInitializer> {[fc, name](pragma::ecs::CParticleSystemComponent &c, const std::unordered_map<std::string, std::string> &keyvalues) -> std::unique_ptr<CParticleInitializer, void (*)(CParticleInitializer *)> {
 		auto initializer = fc(c, keyvalues);
 		if(initializer)
 			initializer->SetType(name);
@@ -248,7 +247,7 @@ void ParticleModifierMap::AddInitializer(std::string name, const TParticleModifi
 void ParticleModifierMap::AddOperator(std::string name, const TParticleModifierFactory<CParticleOperator> &fc)
 {
 	StringToLower(name);
-	m_operators.insert(std::make_pair(name, TParticleModifierFactory<CParticleOperator> {[fc, name](pragma::CParticleSystemComponent &c, const std::unordered_map<std::string, std::string> &keyvalues) -> std::unique_ptr<CParticleOperator, void (*)(CParticleOperator *)> {
+	m_operators.insert(std::make_pair(name, TParticleModifierFactory<CParticleOperator> {[fc, name](pragma::ecs::CParticleSystemComponent &c, const std::unordered_map<std::string, std::string> &keyvalues) -> std::unique_ptr<CParticleOperator, void (*)(CParticleOperator *)> {
 		auto op = fc(c, keyvalues);
 		if(op)
 			op->SetType(name);
@@ -258,7 +257,7 @@ void ParticleModifierMap::AddOperator(std::string name, const TParticleModifierF
 void ParticleModifierMap::AddRenderer(std::string name, const TParticleModifierFactory<CParticleRenderer> &fc)
 {
 	StringToLower(name);
-	m_renderers.insert(std::make_pair(name, TParticleModifierFactory<CParticleRenderer> {[fc, name](pragma::CParticleSystemComponent &c, const std::unordered_map<std::string, std::string> &keyvalues) -> std::unique_ptr<CParticleRenderer, void (*)(CParticleRenderer *)> {
+	m_renderers.insert(std::make_pair(name, TParticleModifierFactory<CParticleRenderer> {[fc, name](pragma::ecs::CParticleSystemComponent &c, const std::unordered_map<std::string, std::string> &keyvalues) -> std::unique_ptr<CParticleRenderer, void (*)(CParticleRenderer *)> {
 		auto renderer = fc(c, keyvalues);
 		if(renderer)
 			renderer->SetType(name);

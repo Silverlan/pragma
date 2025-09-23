@@ -10,9 +10,9 @@ module;
 #include <mathutil/umath.h>
 #include <sharedutils/property/util_property_color.hpp>
 
-module pragma.client.gui;
+module pragma.client;
 
-import :progress_bar;
+import :gui.progress_bar;
 
 import pragma.string.unicode;
 

@@ -6,8 +6,9 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "buffers/prosper_buffer.hpp"
 
-export module pragma.client.rendering.shader_graph:module_input_data;
+export module pragma.client:rendering.shader_graph.module_input_data;
 
+import :rendering.shader_graph.module;
 import pragma.shadergraph;
 
 export namespace pragma::rendering::shader_graph {

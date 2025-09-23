@@ -9,13 +9,14 @@ module;
 #include <pragma/console/convars.h>
 #include <pragma/console/c_cvar.h>
 
-module pragma.client.core.key_bind;
+module pragma.client;
 
-import pragma.client.client_state;
 
-import pragma.client.engine;
+import :core.key_bind;
+import :client_state;
 
-extern CEngine *c_engine;
+import :engine;
+
 
 KeyBind::KeyBind() : m_type(Type::Invalid) { Initialize(); }
 
@@ -54,7 +55,7 @@ std::optional<luabind::function<>> KeyBind::GetFunction() const { return m_funct
 // Deprecated (Replaced by "toggle" console command)
 /*DLLCLIENT void KeyBind_CmdToggle(std::string cmd,std::vector<std::string>&)
 {
-	auto *cf = c_engine->GetConVar(cmd);
+	auto *cf = pragma::get_cengine()->GetConVar(cmd);
 	if(cf == nullptr)
 		return;
 	if(cf->GetType() != ConType::Var)
@@ -63,12 +64,12 @@ std::optional<luabind::function<>> KeyBind::GetFunction() const { return m_funct
 	if(cvar->GetBool() == true)
 	{
 		std::vector<std::string> args = {"0"};
-		c_engine->RunConsoleCommand(cmd,args);
+		pragma::get_cengine()->RunConsoleCommand(cmd,args);
 	}
 	else
 	{
 		std::vector<std::string> args = {"1"};
-		c_engine->RunConsoleCommand(cmd,args);
+		pragma::get_cengine()->RunConsoleCommand(cmd,args);
 	}
 }*/
 void KeyBind::Initialize()
@@ -98,14 +99,14 @@ bool KeyBind::Execute(pragma::platform::KeyState inputState, pragma::platform::K
 			auto bExecutedCmd = false;
 			for(auto &info : m_cmds) {
 				auto bActionCmd = (info.cmd.empty() == false && info.cmd.front() == '+') ? true : false;
-				c_engine->RunConsoleCommand(info.cmd, info.argv, static_cast<KeyState>(pressState), magnitude, [&info, &bExecutedCmd, pressState, bReleased, bAxisInput, bNegativeAxis, bActionCmd](ConConf *cf, float &magnitude) -> bool {
+				pragma::get_cengine()->RunConsoleCommand(info.cmd, info.argv, static_cast<KeyState>(pressState), magnitude, [&info, &bExecutedCmd, pressState, bReleased, bAxisInput, bNegativeAxis, bActionCmd](ConConf *cf, float &magnitude) -> bool {
 					auto cmdReleased = bReleased;
 					auto flags = cf->GetFlags();
 					auto bSingleAxis = ((flags & ConVarFlags::JoystickAxisSingle) != ConVarFlags::None) ? true : false;
 					if(bNegativeAxis == true) {
 						if(bAxisInput == false || bSingleAxis == false)
 							return false;
-						magnitude = c_engine->GetRawJoystickAxisMagnitude();
+						magnitude = pragma::get_cengine()->GetRawJoystickAxisMagnitude();
 					}
 
 					if(bSingleAxis == true)
@@ -115,7 +116,7 @@ bool KeyBind::Execute(pragma::platform::KeyState inputState, pragma::platform::K
 						auto invalidKeyState = (pressState == pragma::platform::KeyState::Invalid) ? true : false;
 
 						if((flags & ConVarFlags::JoystickAxisContinuous) != ConVarFlags::None && (cmdReleased == true || invalidKeyState == true))
-							cmdReleased = (c_engine->IsValidAxisInput(magnitude) == false) ? true : false; // Input won't count as 'released' unless joystick axis is at home position (near 0)
+							cmdReleased = (pragma::get_cengine()->IsValidAxisInput(magnitude) == false) ? true : false; // Input won't count as 'released' unless joystick axis is at home position (near 0)
 						else if(invalidKeyState == true) {
 							bExecutedCmd = true; // Special case; Don't execute other commands
 							return false;        // Axis is held down, but command doesn't react to below-threshold inputs, and previous state wasn't pressed; Skip the command
@@ -123,7 +124,7 @@ bool KeyBind::Execute(pragma::platform::KeyState inputState, pragma::platform::K
 					}
 					if(bActionCmd == true) {
 						if(cmdReleased == true) {
-							c_engine->RunConsoleCommand('-' + info.cmd.substr(1), info.argv, static_cast<KeyState>(pressState));
+							pragma::get_cengine()->RunConsoleCommand('-' + info.cmd.substr(1), info.argv, static_cast<KeyState>(pressState));
 							return false; // Block this command, since we're calling "-" instead
 						}
 					}
@@ -140,7 +141,7 @@ bool KeyBind::Execute(pragma::platform::KeyState inputState, pragma::platform::K
 		{
 			if(pressState != pragma::platform::KeyState::Press && pressState != pragma::platform::KeyState::Release)
 				return false;
-			auto *clState = static_cast<ClientState *>(c_engine->GetClientState());
+			auto *clState = static_cast<ClientState *>(pragma::get_cengine()->GetClientState());
 			if(clState == NULL)
 				return false;
 			auto *game = clState->GetGameState();

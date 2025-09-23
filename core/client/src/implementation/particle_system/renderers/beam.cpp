@@ -8,27 +8,23 @@ module;
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
 
-module pragma.client.particle_system;
+module pragma.client;
 
-import :renderer_beam;
+import :particle_system.renderer_beam;
 
-import pragma.client.client_state;
-import pragma.client.entities.components;
-import pragma.client.game;
-import pragma.client.rendering.shaders;
+import :client_state;
+import :entities.components;
+import :game;
+import :rendering.shaders;
 
-REGISTER_PARTICLE_RENDERER(beam, CParticleRendererBeam);
-
-extern CEngine *c_engine;
-extern CGame *c_game;
 
 CParticleRendererBeam::Node::Node(const Vector3 &o, const Color &) : origin(o), color(1.f, 0.f, 0.f, 1.f) //{c.r /255.f,c.g /255.f,c.b /255.f,c.a /255.f})
 {
 }
-void CParticleRendererBeam::Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void CParticleRendererBeam::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleRenderer::Initialize(pSystem, values);
-	m_shader = c_engine->GetShader("particlepolyboard");
+	m_shader = pragma::get_cengine()->GetShader("particlepolyboard");
 	for(auto &it : values) {
 		auto key = it.first;
 		ustring::to_lower(key);
@@ -61,12 +57,12 @@ void CParticleRendererBeam::Initialize(pragma::CParticleSystemComponent &pSystem
 	createInfo.usageFlags = prosper::BufferUsageFlags::VertexBufferBit | prosper::BufferUsageFlags::TransferDstBit;
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	createInfo.size = m_nodeOrigins.size() * sizeof(Node);
-	m_vertexBuffer = c_engine->GetRenderContext().CreateBuffer(createInfo, m_nodeOrigins.data());
+	m_vertexBuffer = pragma::get_cengine()->GetRenderContext().CreateBuffer(createInfo, m_nodeOrigins.data());
 
 	createInfo.usageFlags = prosper::BufferUsageFlags::IndexBufferBit;
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	createInfo.size = sizeof(uint16_t) * indices.size();
-	m_indexBuffer = c_engine->GetRenderContext().CreateBuffer(createInfo, indices.data());
+	m_indexBuffer = pragma::get_cengine()->GetRenderContext().CreateBuffer(createInfo, indices.data());
 }
 pragma::ShaderParticleBase *CParticleRendererBeam::GetShader() const { return static_cast<pragma::ShaderParticlePolyboard *>(m_shader.get()); }
 void CParticleRendererBeam::PostSimulate(double tDelta)
@@ -85,7 +81,7 @@ void CParticleRendererBeam::UpdateNodes()
 		if(color != nullptr)
 			m_nodeOrigins[i].color = {color->r / 255.f, color->g / 255.f, color->b / 255.f, color->a / 255.f};
 	}
-	c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_vertexBuffer, 0ull, m_vertexBuffer->GetSize(), m_nodeOrigins.data());
+	pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_vertexBuffer, 0ull, m_vertexBuffer->GetSize(), m_nodeOrigins.data());
 }
 
 std::pair<Vector3, Vector3> CParticleRendererBeam::GetRenderBounds() const
@@ -103,7 +99,7 @@ std::pair<Vector3, Vector3> CParticleRendererBeam::GetRenderBounds() const
 	return bounds;
 }
 
-void CParticleRendererBeam::RecordRender(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::ParticleRenderFlags renderFlags)
+void CParticleRendererBeam::RecordRender(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::ecs::ParticleRenderFlags renderFlags)
 {
 #if 0
 	if(m_shader.expired())
@@ -113,7 +109,7 @@ void CParticleRendererBeam::RecordRender(prosper::ICommandBuffer &drawCmd, pragm
 		return;
 	shader->BindLights(*renderer.GetLightSourceDescriptorSet());
 	shader->BindSceneCamera(scene,renderer,(GetParticleSystem().GetSceneRenderPass() == pragma::rendering::SceneRenderPass::View) ? true : false);
-	shader->BindRenderSettings(c_game->GetGlobalRenderSettingsDescriptorSet());
+	shader->BindRenderSettings(pragma::get_cgame()->GetGlobalRenderSettingsDescriptorSet());
 	shader->Draw(scene,renderer,*m_particleSystem,*m_vertexBuffer,*m_indexBuffer,m_indexCount,GetParticleSystem().GetRadius(),m_curvature); // TODO: bloom
 	shader->EndDraw();
 #endif
@@ -121,13 +117,13 @@ void CParticleRendererBeam::RecordRender(prosper::ICommandBuffer &drawCmd, pragm
 
 void CParticleRendererBeam::RecordRenderShadow(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::CLightComponent &light, uint32_t layerId)
 {
-	/*static auto hShader = c_engine->GetShader("particlepolyboardshadow");
+	/*static auto hShader = pragma::get_cengine()->GetShader("particlepolyboardshadow");
 	if(!hShader.IsValid())
 		return;
 	auto &shader = static_cast<Shader::ParticlePolyboardShadow&>(*hShader.get());
 	if(shader.BeginDraw() == false)
 		return;
-	//auto &cam = *c_game->GetRenderCamera<pragma::CCameraComponent>();
+	//auto &cam = *pragma::get_cgame()->GetRenderCamera<pragma::CCameraComponent>();
 	shader.Draw(m_particleSystem,m_vertexBuffer,m_indexBuffer,m_indexCount,m_particleSystem->GetRadius(),m_curvature,light,layerId);
 	shader.EndDraw();*/ // prosper TODO
 }

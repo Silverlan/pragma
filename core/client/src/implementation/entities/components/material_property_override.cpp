@@ -12,10 +12,12 @@ module;
 #include <buffers/prosper_buffer.hpp>
 #include <cmaterial.h>
 
-module pragma.client.entities.components.material_property_override;
+module pragma.client;
 
-import pragma.client.engine;
-import pragma.client.entities.components.material_override;
+
+import :entities.components.material_property_override;
+import :engine;
+import :entities.components.material_override;
 
 using namespace pragma;
 void CMaterialPropertyOverrideComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { BaseModelComponent::RegisterEvents(componentManager, registerEvent); }

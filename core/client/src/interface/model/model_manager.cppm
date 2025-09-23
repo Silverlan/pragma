@@ -6,7 +6,7 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <pragma/model/modelmanager.h>
 
-export module pragma.client.model:model_manager;
+export module pragma.client:model.model_manager;
 
 export namespace pragma::asset {
 	class DLLCLIENT CModelManager : public ModelManager {

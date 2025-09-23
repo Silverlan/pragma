@@ -6,8 +6,10 @@ module;
 #include "stdafx_client.h"
 #include "pragma/console/c_cvar_global_functions.h"
 
-module pragma.client.debug.render_debug_info;
+module pragma.client;
 
+
+import :debug.render_debug_info;
 static RenderDebugInfo render_debug_info;
 void RenderDebugInfo::Reset()
 {

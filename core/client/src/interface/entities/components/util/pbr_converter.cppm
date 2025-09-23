@@ -17,7 +17,9 @@ module;
 #include <mutex>
 #include <unordered_set>
 
-export module pragma.client.entities.components.util_pbr_converter;
+export module pragma.client:entities.components.util_pbr_converter;
+
+import :entities.base_entity;
 
 export namespace pragma {
 	namespace rendering::cycles {

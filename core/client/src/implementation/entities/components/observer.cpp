@@ -11,15 +11,17 @@ module;
 #include "pragma/console/c_cvar.h"
 #include <pragma/physics/raytraces.h>
 
-module pragma.client.entities.components.observer;
+module pragma.client;
 
-import pragma.client.engine;
-import pragma.client.entities.components.character;
-import pragma.client.entities.components.game;
-import pragma.client.entities.components.input;
-import pragma.client.entities.components.observable;
-import pragma.client.entities.components.render;
-import pragma.client.game;
+
+import :entities.components.observer;
+import :engine;
+import :entities.components.character;
+import :entities.components.game;
+import :entities.components.input;
+import :entities.components.observable;
+import :entities.components.render;
+import :game;
 
 using namespace pragma;
 

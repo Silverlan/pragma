@@ -10,17 +10,17 @@ module;
 #include <prosper_util.hpp>
 #include <prosper_descriptor_set_group.hpp>
 
-module pragma.client.rendering.shaders;
+module pragma.client;
 
-import :particle_model;
 
-import pragma.client.engine;
+import :rendering.shaders.particle_model;
+
+import :engine;
 
 using namespace pragma;
 
-extern CEngine *c_engine;
 
-decltype(ShaderParticleModel::VERTEX_BINDING_PARTICLE) ShaderParticleModel::VERTEX_BINDING_PARTICLE = {prosper::VertexInputRate::Instance, sizeof(pragma::CParticleSystemComponent::ParticleData)};
+decltype(ShaderParticleModel::VERTEX_BINDING_PARTICLE) ShaderParticleModel::VERTEX_BINDING_PARTICLE = {prosper::VertexInputRate::Instance, sizeof(pragma::ecs::CParticleSystemComponent::ParticleData)};
 decltype(ShaderParticleModel::VERTEX_ATTRIBUTE_POSITION) ShaderParticleModel::VERTEX_ATTRIBUTE_POSITION = {pragma::ShaderParticle2DBase::VERTEX_ATTRIBUTE_POSITION, VERTEX_BINDING_PARTICLE};
 decltype(ShaderParticleModel::VERTEX_ATTRIBUTE_RADIUS) ShaderParticleModel::VERTEX_ATTRIBUTE_RADIUS = {pragma::ShaderParticle2DBase::VERTEX_ATTRIBUTE_RADIUS, VERTEX_BINDING_PARTICLE};
 decltype(ShaderParticleModel::VERTEX_ATTRIBUTE_PREVPOS) ShaderParticleModel::VERTEX_ATTRIBUTE_PREVPOS = {pragma::ShaderParticle2DBase::VERTEX_ATTRIBUTE_PREVPOS, VERTEX_BINDING_PARTICLE};
@@ -78,13 +78,13 @@ void ShaderParticleModel::InitializeShaderResources()
 	AddDescriptorSetGroup(DESCRIPTOR_SET_BONE_MATRICES);
 }
 void ShaderParticleModel::InitializeGfxPipelinePushConstantRanges() { AttachPushConstantRange(0u, sizeof(ShaderGameWorldLightingPass::PushConstants) + sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit); }
-bool ShaderParticleModel::RecordParticleSystem(prosper::ShaderBindState &bindState, pragma::CParticleSystemComponent &pSys) const
+bool ShaderParticleModel::RecordParticleSystem(prosper::ShaderBindState &bindState, pragma::ecs::CParticleSystemComponent &pSys) const
 {
 	auto &descSet = const_cast<ShaderParticleModel *>(this)->GetAnimationDescriptorSet(pSys);
 	auto r = RecordBindDescriptorSet(bindState, descSet, DESCRIPTOR_SET_ANIMATION.setIndex);
 	if(r == false)
 		return r;
-	PushConstants pushConstants {umath::to_integral(GetRenderFlags(pSys, ParticleRenderFlags::None)), // TODO: Use correct particle render flags
+	PushConstants pushConstants {umath::to_integral(GetRenderFlags(pSys, ecs::ParticleRenderFlags::None)), // TODO: Use correct particle render flags
 	  umath::to_integral(pSys.GetAlphaMode())};
 	return RecordPushConstants(bindState, sizeof(pushConstants), &pushConstants, sizeof(ShaderGameWorldLightingPass::PushConstants));
 }
@@ -104,7 +104,7 @@ bool ShaderParticleModel::Draw(CModelSubMesh &mesh, uint32_t numInstances, uint3
 	return false;
 }
 
-bool ShaderParticleModel::RecordBeginDraw(prosper::ShaderBindState &bindState, const Vector4 &clipPlane, pragma::CParticleSystemComponent &pSys, const Vector4 &drawOrigin, ShaderScene::RecordFlags recordFlags) const
+bool ShaderParticleModel::RecordBeginDraw(prosper::ShaderBindState &bindState, const Vector4 &clipPlane, pragma::ecs::CParticleSystemComponent &pSys, const Vector4 &drawOrigin, ShaderScene::RecordFlags recordFlags) const
 {
 #if 0
 	return ShaderGameWorldLightingPass::RecordBeginDraw(

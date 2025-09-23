@@ -10,8 +10,10 @@ module;
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <udm.hpp>
 
-module pragma.client.entities.components.particle_system;
+module pragma.client;
 
+
+import :entities.components.particle_system;
 using namespace pragma;
 
 // See c_lengine.cpp as well

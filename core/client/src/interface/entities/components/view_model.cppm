@@ -5,7 +5,9 @@ module;
 
 #include "pragma/clientdefinitions.h"
 
-export module pragma.client.entities.components.view_model;
+export module pragma.client:entities.components.view_model;
+
+import :entities.base_entity;
 
 export namespace pragma {
 	class DLLCLIENT CViewModelComponent final : public BaseEntityComponent {

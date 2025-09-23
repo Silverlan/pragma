@@ -34,17 +34,19 @@ module;
 #include <pragma/lua/lua_util_component.hpp>
 #include <pragma/lua/lua_util_component_stream.hpp>
 
-module pragma.client.entities.components.render;
+module pragma.client;
 
-import pragma.client.engine;
-import pragma.client.entities.components.color;
-import pragma.client.entities.components.game_occlusion_culler;
-import pragma.client.entities.components.raytracing;
-import pragma.client.entities.components.soft_body;
-import pragma.client.entities.components.transform;
-import pragma.client.entities.components.vertex_animated;
-import pragma.client.entities.components.world;
-import pragma.client.game;
+
+import :entities.components.render;
+import :engine;
+import :entities.components.color;
+import :entities.components.game_occlusion_culler;
+import :entities.components.raytracing;
+import :entities.components.soft_body;
+import :entities.components.transform;
+import :entities.components.vertex_animated;
+import :entities.components.world;
+import :game;
 
 using namespace pragma;
 
@@ -52,8 +54,6 @@ namespace pragma {
 	using ::operator|=;
 };
 
-extern CGame *c_game;
-extern CEngine *c_engine;
 
 static std::shared_ptr<prosper::IUniformResizableBuffer> s_instanceBuffer = nullptr;
 decltype(CRenderComponent::s_ocExemptEntities) CRenderComponent::s_ocExemptEntities = {};
@@ -99,7 +99,7 @@ CRenderComponent::CRenderComponent(BaseEntity &ent)
 void CRenderComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void CRenderComponent::InitializeBuffers()
 {
-	auto instanceSize = sizeof(pragma::ShaderEntity::InstanceData);
+	auto instanceSize = sizeof(pragma::rendering::InstanceData);
 	auto instanceCount = 32'768u;
 	auto maxInstanceCount = instanceCount * 100u;
 	prosper::util::BufferCreateInfo createInfo {};
@@ -118,10 +118,10 @@ void CRenderComponent::InitializeBuffers()
 	createInfo.usageFlags |= prosper::BufferUsageFlags::UniformBufferBit | prosper::BufferUsageFlags::StorageBufferBit;
 #endif
 	constexpr prosper::DeviceSize alignment = 256; // See https://vulkan.gpuinfo.org/displaydevicelimit.php?name=minUniformBufferOffsetAlignment
-	auto internalAlignment = c_engine->GetRenderContext().CalcBufferAlignment(prosper::BufferUsageFlags::UniformBufferBit | prosper::BufferUsageFlags::StorageBufferBit);
+	auto internalAlignment = pragma::get_cengine()->GetRenderContext().CalcBufferAlignment(prosper::BufferUsageFlags::UniformBufferBit | prosper::BufferUsageFlags::StorageBufferBit);
 	if(internalAlignment > alignment)
 		throw std::runtime_error {"Unsupported minimum uniform buffer alignment (" + std::to_string(internalAlignment) + "!"};
-	s_instanceBuffer = c_engine->GetRenderContext().CreateUniformResizableBuffer(createInfo, instanceSize, instanceSize * maxInstanceCount, 0.1f, nullptr, alignment);
+	s_instanceBuffer = pragma::get_cengine()->GetRenderContext().CreateUniformResizableBuffer(createInfo, instanceSize, instanceSize * maxInstanceCount, 0.1f, nullptr, alignment);
 	s_instanceBuffer->SetDebugName("entity_instance_data_buf");
 	if constexpr(USE_HOST_MEMORY_FOR_RENDER_DATA)
 		s_instanceBuffer->SetPermanentlyMapped(true, prosper::IBuffer::MapFlags::WriteBit | prosper::IBuffer::MapFlags::Unsynchronized);
@@ -132,16 +132,6 @@ void CRenderComponent::InitializeBuffers()
 const prosper::IBuffer *CRenderComponent::GetRenderBuffer() const { return m_renderBuffer.get(); }
 std::optional<RenderBufferIndex> CRenderComponent::GetRenderBufferIndex() const { return m_renderBuffer ? m_renderBuffer->GetBaseIndex() : std::optional<RenderBufferIndex> {}; }
 prosper::IDescriptorSet *CRenderComponent::GetRenderDescriptorSet() const { return (m_renderDescSetGroup != nullptr) ? m_renderDescSetGroup->GetDescriptorSet() : nullptr; }
-void CRenderComponent::ClearRenderObjects()
-{
-	/*std::unordered_map<unsigned int,RenderInstance*>::iterator it;
-	for(it=m_renderInstances.begin();it!=m_renderInstances.end();it++)
-	{
-		RenderInstance *instance = it->second;
-		instance->Remove();
-	}
-	m_renderInstances.clear();*/ // Vulkan TODO
-}
 CRenderComponent::StateFlags CRenderComponent::GetStateFlags() const { return m_stateFlags; }
 util::EventReply CRenderComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
@@ -223,15 +213,14 @@ void CRenderComponent::Initialize()
 }
 CRenderComponent::~CRenderComponent()
 {
-	ClearRenderObjects();
 	auto it = std::find(s_ocExemptEntities.begin(), s_ocExemptEntities.end(), this);
 	if(it != s_ocExemptEntities.end())
 		s_ocExemptEntities.erase(it);
 
 	if(m_renderBuffer != nullptr)
-		c_engine->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_renderBuffer);
+		pragma::get_cengine()->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_renderBuffer);
 	if(m_renderDescSetGroup != nullptr)
-		c_engine->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_renderDescSetGroup);
+		pragma::get_cengine()->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_renderDescSetGroup);
 }
 void CRenderComponent::OnRemove()
 {
@@ -245,7 +234,7 @@ void CRenderComponent::OnEntitySpawn()
 	BaseRenderComponent::OnEntitySpawn();
 	UpdateRenderMeshes();
 
-	EntityIterator entIt {*c_game};
+	EntityIterator entIt {*pragma::get_cgame()};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::COcclusionCullerComponent>>();
 	for(auto *ent : entIt) {
 		auto occlusionCullerC = ent->GetComponent<pragma::COcclusionCullerComponent>();
@@ -447,7 +436,7 @@ void CRenderComponent::ClearRenderOffsetTransform()
 const umath::ScaledTransform *CRenderComponent::GetRenderOffsetTransform() const { return m_renderOffset.has_value() ? &*m_renderOffset : nullptr; }
 bool CRenderComponent::IsInPvs(const Vector3 &camPos) const
 {
-	for(auto &c : c_game->GetWorldComponents()) {
+	for(auto &c : pragma::get_cgame()->GetWorldComponents()) {
 		if(c.expired())
 			continue;
 		if(IsInPvs(camPos, static_cast<const CWorldComponent &>(*c)))
@@ -504,7 +493,7 @@ void CRenderComponent::UpdateRenderMeshes()
 	auto &ent = static_cast<CBaseEntity &>(GetEntity());
 	if(!ent.IsSpawned())
 		return;
-	c_game->UpdateEntityModel(&ent);
+	pragma::get_cgame()->UpdateEntityModel(&ent);
 	auto *mdlComponent = GetModelComponent();
 	auto mdl = mdlComponent ? mdlComponent->GetModel() : nullptr;
 #if 0
@@ -659,7 +648,7 @@ void CRenderComponent::UpdateRenderBuffers(const std::shared_ptr<prosper::IPrima
 			color = pColorComponent->GetColor();
 		color = Vector4 {uimg::linear_to_srgb(reinterpret_cast<Vector3 &>(color)), color.w};
 
-		auto renderFlags = pragma::ShaderEntity::InstanceData::RenderFlags::None;
+		auto renderFlags = pragma::rendering::InstanceData::RenderFlags::None;
 		auto *pMdlComponent = GetModelComponent();
 		auto bWeighted = pMdlComponent && static_cast<const pragma::CModelComponent &>(*pMdlComponent).IsWeighted();
 		auto *animC = GetAnimatedComponent();
@@ -668,7 +657,7 @@ void CRenderComponent::UpdateRenderBuffers(const std::shared_ptr<prosper::IPrima
 		// something other than GameShaderSpecialization::Animated, otherwise there may be rendering artifacts.
 		// (Usually z-fighting because the prepass and lighting pass shaders will perform different calculations.)
 		if(bWeighted == true && animC && !m_lightMapReceiverComponent) // && animC->ShouldUpdateBones())
-			renderFlags |= pragma::ShaderEntity::InstanceData::RenderFlags::Weighted;
+			renderFlags |= pragma::rendering::InstanceData::RenderFlags::Weighted;
 		auto &m = GetTransformationMatrix();
 		m_instanceData.modelMatrix = m;
 		m_instanceData.color = color;
@@ -686,12 +675,12 @@ void CRenderComponent::UpdateRenderBuffers(const std::shared_ptr<prosper::IPrima
 	CEOnUpdateRenderBuffers evData {drawCmd};
 	InvokeEventCallbacks(EVENT_ON_UPDATE_RENDER_BUFFERS, evData);
 }
-const pragma::ShaderEntity::InstanceData &CRenderComponent::GetInstanceData() const { return m_instanceData; }
+const pragma::rendering::InstanceData &CRenderComponent::GetInstanceData() const { return m_instanceData; }
 void CRenderComponent::UpdateRenderDataMT(const CSceneComponent &scene, const CCameraComponent &cam, const Mat4 &vp)
 {
 	m_renderDataMutex.lock();
 	// Note: This is called from the render thread, which is why we can't update the render buffers here
-	auto frameId = c_engine->GetRenderContext().GetLastFrameId();
+	auto frameId = pragma::get_cengine()->GetRenderContext().GetLastFrameId();
 	if(m_lastRender == frameId) {
 		m_renderDataMutex.unlock();
 		return; // Only update once per frame
@@ -848,12 +837,12 @@ void CRenderComponent::InitializeRenderBuffers()
 	if(m_renderBuffer != nullptr || pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_INSTANCE.IsValid() == false || *m_renderPass == rendering::SceneRenderPass::None)
 		return;
 
-	c_engine->GetRenderContext().WaitIdle();
+	pragma::get_cengine()->GetRenderContext().WaitIdle();
 	umath::set_flag(m_stateFlags, StateFlags::RenderBufferDirty);
 	m_renderBuffer = s_instanceBuffer->AllocateBuffer();
 	if(!m_renderBuffer)
 		return;
-	m_renderDescSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_INSTANCE);
+	m_renderDescSetGroup = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_INSTANCE);
 	m_renderDescSetGroup->GetDescriptorSet()->SetBindingUniformBuffer(*m_renderBuffer, umath::to_integral(pragma::ShaderGameWorldLightingPass::InstanceBinding::Instance));
 	UpdateBoneBuffer();
 	m_renderDescSetGroup->GetDescriptorSet()->Update();
@@ -872,18 +861,18 @@ void CRenderComponent::UpdateBoneBuffer()
 	auto *buf = static_cast<pragma::CAnimatedComponent &>(*pAnimComponent).GetBoneBuffer();
 	if(!buf)
 		return;
-	c_engine->GetRenderContext().WaitIdle();
+	pragma::get_cengine()->GetRenderContext().WaitIdle();
 	m_renderDescSetGroup->GetDescriptorSet()->SetBindingUniformBuffer(const_cast<prosper::IBuffer &>(*buf), umath::to_integral(pragma::ShaderGameWorldLightingPass::InstanceBinding::BoneMatrices));
 	m_renderDescSetGroup->GetDescriptorSet()->Update();
 }
 void CRenderComponent::ClearRenderBuffers()
 {
 	if(m_renderBuffer)
-		c_engine->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_renderBuffer);
+		pragma::get_cengine()->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_renderBuffer);
 	m_renderBuffer = nullptr;
 
 	if(m_renderDescSetGroup)
-		c_engine->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_renderDescSetGroup);
+		pragma::get_cengine()->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_renderDescSetGroup);
 	m_renderDescSetGroup = nullptr;
 }
 pragma::rendering::RenderGroup CRenderComponent::GetRenderGroups() const { return *m_renderGroups; }
@@ -954,12 +943,6 @@ std::vector<std::shared_ptr<ModelMesh>> &CRenderComponent::GetLODMeshes()
 	}
 	return static_cast<pragma::CModelComponent &>(*pMdlComponent).GetLODMeshes();
 }
-bool CRenderComponent::RenderCallback(RenderObject *o, CBaseEntity *ent, pragma::CCameraComponent *cam, pragma::ShaderGameWorldLightingPass *shader, Material *mat)
-{
-	auto pRenderComponent = ent->GetRenderComponent();
-	return pRenderComponent && pRenderComponent->RenderCallback(o, cam, shader, mat);
-}
-bool CRenderComponent::RenderCallback(RenderObject *, pragma::CCameraComponent *cam, pragma::ShaderGameWorldLightingPass *, Material *) { return ShouldDraw(); }
 const std::vector<CRenderComponent *> &CRenderComponent::GetEntitiesExemptFromOcclusionCulling() { return s_ocExemptEntities; }
 const std::shared_ptr<prosper::IUniformResizableBuffer> &CRenderComponent::GetInstanceBuffer() { return s_instanceBuffer; }
 void CRenderComponent::ClearBuffers()
@@ -1082,7 +1065,7 @@ void Console::commands::debug_entity_render_buffer(NetworkState *state, pragma::
 		Con::cwar << "Target entity has no render component!" << Con::endl;
 	}
 	else {
-		auto printInstanceData = [](const pragma::ShaderEntity::InstanceData &instanceData) {
+		auto printInstanceData = [](const pragma::rendering::InstanceData &instanceData) {
 			Con::cout << "modelMatrix: " << umat::to_string(instanceData.modelMatrix) << Con::endl;
 			Con::cout << "color: " << instanceData.color << Con::endl;
 			Con::cout << "renderFlags: " << magic_enum::enum_name(instanceData.renderFlags) << Con::endl;
@@ -1094,7 +1077,7 @@ void Console::commands::debug_entity_render_buffer(NetworkState *state, pragma::
 		printInstanceData(instanceData);
 
 		auto *buf = renderC->GetRenderBuffer();
-		pragma::ShaderEntity::InstanceData bufData;
+		pragma::rendering::InstanceData bufData;
 		if(!buf || !buf->Read(0, sizeof(bufData), &bufData))
 			Con::cwar << "Failed to read buffer data!" << Con::endl;
 		else {

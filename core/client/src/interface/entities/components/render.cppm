@@ -18,13 +18,24 @@ module;
 
 #define ENTITY_RENDER_BUFFER_USE_STORAGE_BUFFER 1
 
-export module pragma.client.entities.components.render;
+export module pragma.client:entities.components.render;
 
-import pragma.client.entities.components.animated;
-import pragma.client.entities.components.attachment;
-import pragma.client.entities.components.light_map_receiver;
-import pragma.client.entities.components.world;
+import :entities.components.entity;
+import :model.render_mesh_group;
+import :rendering.enums;
+import :rendering.entity_instance_data;
+import :rendering.model_render_buffer_data;
 
+export class CBaseEntity;
+export namespace pragma {
+	class CCameraComponent;
+	class CSceneComponent;
+	class CModelComponent;
+	class CAttachmentComponent;
+	class CAnimatedComponent;
+	class CLightMapReceiverComponent;
+	class CWorldComponent;
+};
 export namespace pragma {
 	using RenderMeshIndex = uint32_t;
 	using RenderBufferIndex = uint32_t;
@@ -177,7 +188,7 @@ export namespace pragma {
 		bool IsInPvs(const Vector3 &camPos, const CWorldComponent &world) const;
 		bool IsInPvs(const Vector3 &camPos) const;
 
-		const pragma::ShaderEntity::InstanceData &GetInstanceData() const;
+		const pragma::rendering::InstanceData &GetInstanceData() const;
 
 		void SetTranslucencyPassDistanceOverride(double distance);
 		void ClearTranslucencyPassDistanceOverride();
@@ -201,9 +212,6 @@ export namespace pragma {
 		void UpdateMatrices();
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 		virtual void OnEntityComponentRemoved(BaseEntityComponent &component) override;
-		void ClearRenderObjects();
-		static bool RenderCallback(RenderObject *o, CBaseEntity *ent, pragma::CCameraComponent *cam, pragma::ShaderGameWorldLightingPass *shader, Material *mat);
-		bool RenderCallback(RenderObject *o, pragma::CCameraComponent *cam, pragma::ShaderGameWorldLightingPass *shader, Material *mat);
 		void UpdateRenderMeshes();
 		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 
@@ -234,14 +242,12 @@ export namespace pragma {
 		  = static_cast<StateFlags>(umath::to_integral(StateFlags::RenderBufferDirty) | umath::to_integral(StateFlags::EnableDepthPass) | umath::to_integral(StateFlags::RenderBoundsDirty) | umath::to_integral(StateFlags::ShouldDraw) | umath::to_integral(StateFlags::ShouldDrawShadow));
 		std::atomic<uint64_t> m_lastRender = 0ull;
 		std::mutex m_renderDataMutex;
-		std::unordered_map<unsigned int, RenderInstance *> m_renderInstances;
-		std::unique_ptr<SortedRenderMeshContainer> m_renderMeshContainer = nullptr;
 		static std::vector<CRenderComponent *> s_ocExemptEntities;
 	  private:
 		void UpdateAbsoluteRenderBounds();
 		void UpdateAbsoluteSphereRenderBounds();
 		void UpdateAbsoluteAABBRenderBounds();
-		pragma::ShaderEntity::InstanceData m_instanceData {};
+		pragma::rendering::InstanceData m_instanceData {};
 		std::shared_ptr<prosper::IBuffer> m_renderBuffer = nullptr;
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_renderDescSetGroup = nullptr;
 		std::optional<double> m_translucencyPassDistanceOverrideSqr {};

@@ -11,16 +11,17 @@ module;
 #include <pragma/physics/raytraces.h>
 #include <pragma/entities/entity_component_system_t.hpp>
 
-module pragma.client.entities.components.effects.sprite;
+module pragma.client;
 
-import pragma.client.entities.components.attachment;
-import pragma.client.entities.components.color;
-import pragma.client.client_state;
-import pragma.client.engine;
+
+import :entities.components.effects.sprite;
+import :entities.components.attachment;
+import :entities.components.color;
+import :client_state;
+import :engine;
 
 using namespace pragma;
 
-extern ClientState *client;
 
 void CSpriteComponent::Initialize() { BaseEnvSpriteComponent::Initialize(); }
 

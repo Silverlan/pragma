@@ -7,9 +7,9 @@ module;
 #include <clientmanager/interface/cl_nwm_manager.hpp>
 #include "pragma/networking/nwm_message_tracker.hpp"
 
-export module pragma.client.networking:standard_client;
+export module pragma.client:networking.standard_client;
 
-import :iclient;
+import :networking.iclient;
 
 export namespace pragma::networking {
 	class StandardClient;

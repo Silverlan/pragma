@@ -6,8 +6,10 @@ module;
 #include "stdafx_client.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
-module pragma.client.entities.components.color;
+module pragma.client;
 
+
+import :entities.components.color;
 using namespace pragma;
 
 void CColorComponent::ReceiveData(NetPacket &packet) { *m_color = packet->Read<Vector4>(); }

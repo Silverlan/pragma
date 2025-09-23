@@ -5,16 +5,17 @@ module;
 
 #include "stdafx_client.h"
 
-module pragma.client.entities.components.entity;
+module pragma.client;
 
-import pragma.client.game;
 
-extern CGame *c_game;
+import :entities.components.entity;
+import :game;
+
 
 using namespace pragma;
 
 decltype(CEntityComponentManager::INVALID_COMPONENT) CEntityComponentManager::INVALID_COMPONENT = std::numeric_limits<decltype(CEntityComponentManager::INVALID_COMPONENT)>::max();
-NetEventId CBaseNetComponent::FindNetEvent(const std::string &evName) const { return c_game->FindNetEvent(evName); }
+NetEventId CBaseNetComponent::FindNetEvent(const std::string &evName) const { return pragma::get_cgame()->FindNetEvent(evName); }
 
 const std::vector<ComponentId> &CEntityComponentManager::GetServerComponentIdToClientComponentIdTable() const { return const_cast<CEntityComponentManager *>(this)->GetServerComponentIdToClientComponentIdTable(); }
 std::vector<ComponentId> &CEntityComponentManager::GetServerComponentIdToClientComponentIdTable() { return m_svComponentToClComponentTable; }

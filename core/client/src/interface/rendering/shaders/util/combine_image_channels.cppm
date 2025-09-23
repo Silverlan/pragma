@@ -6,7 +6,7 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <shader/prosper_shader_base_image_processing.hpp>
 
-export module pragma.client.rendering.shaders:combine_image_channels;
+export module pragma.client:rendering.shaders.combine_image_channels;
 
 export namespace pragma {
 	class DLLCLIENT ShaderCombineImageChannels : public prosper::ShaderBaseImageProcessing {

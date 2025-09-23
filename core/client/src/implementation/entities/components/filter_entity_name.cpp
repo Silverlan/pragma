@@ -7,8 +7,10 @@ module;
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
-module pragma.client.entities.components.filter_entity_name;
+module pragma.client;
 
+
+import :entities.components.filter_entity_name;
 using namespace pragma;
 
 void CFilterNameComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }

@@ -7,11 +7,12 @@ module;
 
 #define ENABLE_BLOB_DEPTH_TEST 0
 
-export module pragma.client.particle_system:renderer_blob;
+export module pragma.client:particle_system.renderer_blob;
 
-import pragma.client.rendering.shaders;
+import :particle_system.modifier;
+import :rendering.shaders;
 
-import pragma.client.debug;
+import :debug;
 
 export class DLLCLIENT CParticleRendererBlob : public CParticleRenderer {
   private:
@@ -55,9 +56,9 @@ export class DLLCLIENT CParticleRendererBlob : public CParticleRenderer {
 
 	CParticleRendererBlob() = default;
 	virtual ~CParticleRendererBlob() override;
-	virtual void RecordRender(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::ParticleRenderFlags renderFlags) override;
+	virtual void RecordRender(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::ecs::ParticleRenderFlags renderFlags) override;
 	virtual void RecordRenderShadow(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::CLightComponent &light, uint32_t layerId = 0) override;
-	virtual void Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+	virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
 	virtual void OnParticleSystemStarted() override;
 	virtual void OnParticleDestroyed(CParticle &particle) override;
 	virtual void OnParticleSystemStopped() override;

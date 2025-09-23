@@ -6,7 +6,9 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <pragma/entities/components/liquid/base_liquid_volume_component.hpp>
 
-export module pragma.client.entities.components.liquid_volume;
+export module pragma.client:entities.components.liquid_volume;
+
+import :entities.components.entity;
 
 export namespace pragma {
 	class DLLCLIENT CLiquidVolumeComponent final : public BaseLiquidVolumeComponent, public CBaseNetComponent {

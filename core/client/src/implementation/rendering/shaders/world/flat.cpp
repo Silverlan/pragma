@@ -10,14 +10,14 @@ module;
 #include <prosper_descriptor_set_group.hpp>
 #include <cmaterial.h>
 
-module pragma.client.rendering.shaders;
+module pragma.client;
 
-import :world_flat;
 
-import pragma.client.engine;
-import pragma.client.model;
+import :rendering.shaders.world_flat;
 
-extern CEngine *c_engine;
+import :engine;
+import :model;
+
 
 using namespace pragma;
 

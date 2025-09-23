@@ -3,10 +3,21 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
+#include "prosper_prepared_command_buffer.hpp"
 
-export module pragma.client.scripting.lua.classes.shader;
+export module pragma.client:scripting.lua.classes.shader;
+
+import :rendering.shaders.lua;
+import :scripting.lua.libraries.vulkan;
 
 export {
+	// LuaShaderRecordTarget converter
+	struct LuaShaderRecordTarget {
+		luabind::object target;
+		prosper::ShaderBindState *GetBindState() const;
+		prosper::util::PreparedCommandBuffer *GetPcb() const;
+	};
 	namespace luabind {
 		template<>
 		struct DLLNETWORK default_converter<LuaShaderRecordTarget> : native_converter_base<LuaShaderRecordTarget> {

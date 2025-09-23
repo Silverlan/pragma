@@ -6,10 +6,10 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/converters/gui_element_converter.hpp"
 
-export module pragma.client.gui:main_menu_new_game;
+export module pragma.client:gui.main_menu_new_game;
 
-import :chromium_page;
-import :main_menu_base;
+import :gui.chromium_page;
+import :gui.main_menu_base;
 
 export {
 	class DLLCLIENT WIMainMenuNewGame : public WIMainMenuBase {

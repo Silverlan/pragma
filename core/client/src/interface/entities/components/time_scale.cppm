@@ -6,9 +6,9 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <pragma/entities/components/base_time_scale_component.hpp>
 
-export module pragma.client.entities.components.time_scale;
+export module pragma.client:entities.components.time_scale;
 
-import pragma.entities.components;
+import :entities.components.entity;
 
 export namespace pragma {
 	class DLLCLIENT CTimeScaleComponent final : public BaseTimeScaleComponent, public CBaseNetComponent {

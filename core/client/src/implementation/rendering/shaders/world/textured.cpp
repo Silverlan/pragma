@@ -6,6 +6,7 @@ module;
 #include "stdafx_client.h"
 #include "pragma/console/c_cvar.h"
 #include "pragma/console/c_cvar_global_functions.h"
+#include "texturemanager/texture_manager2.hpp"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <pragma/game/game_limits.h>
 #include <pragma/logging.hpp>
@@ -25,16 +26,15 @@ module;
 #include <cmaterial.h>
 #include <cmaterial_manager2.hpp>
 
-module pragma.client.rendering.shaders;
+module pragma.client;
 
-import :textured;
 
-import pragma.client.client_state;
-import pragma.client.engine;
-import pragma.client.model;
+import :rendering.shaders.textured;
 
-extern ClientState *client;
-extern CEngine *c_engine;
+import :client_state;
+import :engine;
+import :model;
+
 
 using namespace pragma;
 
@@ -92,7 +92,7 @@ static void initialize_material_settings_cache()
 	bufCreateInfo.size = matSize * count; // ~64 MiB
 	bufCreateInfo.usageFlags = prosper::BufferUsageFlags::TransferSrcBit | prosper::BufferUsageFlags::TransferDstBit | prosper::BufferUsageFlags::UniformBufferBit;
 	bufCreateInfo.flags |= prosper::util::BufferCreateInfo::Flags::Persistent;
-	g_materialSettingsBuffer = c_engine->GetRenderContext().CreateUniformResizableBuffer(bufCreateInfo, matSize, matSize * count, 0.05f);
+	g_materialSettingsBuffer = pragma::get_cengine()->GetRenderContext().CreateUniformResizableBuffer(bufCreateInfo, matSize, matSize * count, 0.05f);
 	g_materialSettingsBuffer->SetPermanentlyMapped(true, prosper::IBuffer::MapFlags::WriteBit);
 }
 ShaderGameWorldLightingPass::ShaderGameWorldLightingPass(prosper::IPrContext &context, const std::string &identifier, const std::string &vsShader, const std::string &fsShader, const std::string &gsShader) : ShaderGameWorld(context, identifier, vsShader, fsShader, gsShader)
@@ -317,7 +317,7 @@ void ShaderGameWorldLightingPass::InitializeGfxPipeline(prosper::GraphicsPipelin
 	ShaderSpecializationManager::AddSpecializationConstant(*this, pipelineInfo, pipelineIdx, prosper::ShaderStageFlags::VertexBit, GameShaderSpecializationConstantFlag::EnableMorphTargetAnimationBit);
 
 	// Properties
-	auto &shaderSettings = client->GetGameWorldShaderSettings();
+	auto &shaderSettings = pragma::get_client_state()->GetGameWorldShaderSettings();
 	auto fSetPropertyValue = [this, &pipelineInfo](GameShaderSpecializationPropertyIndex prop, auto value) { ShaderGameWorld::AddSpecializationConstant(pipelineInfo, prosper::ShaderStageFlags::FragmentBit, umath::to_integral(prop), sizeof(value), &value); };
 	fSetPropertyValue(GameShaderSpecializationPropertyIndex::ShadowQuality, shaderSettings.shadowQuality);
 	fSetPropertyValue(GameShaderSpecializationPropertyIndex::DebugModeEnabled, static_cast<uint32_t>(shaderSettings.debugModeEnabled));
@@ -330,7 +330,7 @@ void ShaderGameWorldLightingPass::InitializeGfxPipeline(prosper::GraphicsPipelin
 
 std::shared_ptr<Texture> ShaderGameWorldLightingPass::GetTexture(const std::string &texName, bool load)
 {
-	auto &matManager = static_cast<msys::CMaterialManager &>(client->GetMaterialManager());
+	auto &matManager = static_cast<msys::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager());
 	auto &texManager = matManager.GetTextureManager();
 	auto *asset = texManager.FindCachedAsset(texName);
 	if(load && !asset) {
@@ -367,7 +367,7 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderGameWorldLightingPass::Initi
 {
 	if(!m_shaderMaterial)
 		return nullptr;
-	auto descSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(descSetInfo);
+	auto descSetGroup = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(descSetInfo);
 	mat.SetDescriptorSetGroup(*this, descSetGroup);
 	auto &descSet = *descSetGroup->GetDescriptorSet();
 	auto materialFlags = pragma::rendering::shader_material::MaterialFlags::None;
@@ -412,7 +412,7 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderGameWorldLightingPass::Initi
 		}
 
 		using namespace ustring::string_switch_ci;
-		switch(hash(shaderTexInfo.name)) {
+		switch(ustring::string_switch_ci::hash(shaderTexInfo.name)) {
 		case "normal_map"_:
 			materialFlags |= pragma::rendering::shader_material::MaterialFlags::HasNormalMap;
 			break;
@@ -608,7 +608,7 @@ void Console::commands::debug_print_shader_material_data(NetworkState *state, pr
 		return;
 	}
 	auto &matName = argv.front();
-	auto *mat = client->LoadMaterial(matName);
+	auto *mat = pragma::get_client_state()->LoadMaterial(matName);
 	if(!mat) {
 		Con::cwar << "Failed to load material '" << matName << "'!" << Con::endl;
 		return;

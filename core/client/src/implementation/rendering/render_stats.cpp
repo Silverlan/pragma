@@ -7,16 +7,17 @@ module;
 #include <queries/prosper_query_pool.hpp>
 #include <queries/prosper_timer_query.hpp>
 
-module pragma.client.rendering.render_stats;
+module pragma.client;
 
-import pragma.client.engine;
 
-extern CEngine *c_engine;
+import :rendering.render_stats;
+import :engine;
+
 
 RenderStats::RenderStats()
 {
 	auto numTimers = umath::to_integral(RenderStage::GpuCount) + umath::to_integral(RenderPassStats::Timer::GpuCount) * passes.size();
-	queryPool = c_engine->GetRenderContext().CreateQueryPool(prosper::QueryType::Timestamp, numTimers * 2);
+	queryPool = pragma::get_cengine()->GetRenderContext().CreateQueryPool(prosper::QueryType::Timestamp, numTimers * 2);
 	if(queryPool) {
 		stageTimes.SetGpuTimerStart(RenderStage::GpuStart);
 		stageTimes.gpuTimers.resize(umath::to_integral(RenderStage::GpuCount));
@@ -34,5 +35,5 @@ RenderStats::RenderStats()
 RenderStats::~RenderStats()
 {
 	if(queryPool)
-		c_engine->GetRenderContext().KeepResourceAliveUntilPresentationComplete(queryPool);
+		pragma::get_cengine()->GetRenderContext().KeepResourceAliveUntilPresentationComplete(queryPool);
 }

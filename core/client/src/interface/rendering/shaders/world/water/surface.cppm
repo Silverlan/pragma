@@ -6,7 +6,7 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <shader/prosper_shader.hpp>
 
-export module pragma.client.rendering.shaders:world_water_surface;
+export module pragma.client:rendering.shaders.world_water_surface;
 
 export namespace pragma {
 	class DLLCLIENT ShaderWaterSurface : public prosper::ShaderCompute {

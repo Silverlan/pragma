@@ -7,9 +7,9 @@ module;
 #include <shader/prosper_shader_base_image_processing.hpp>
 #include <prosper_descriptor_set_group.hpp>
 
-export module pragma.client.rendering.shaders:merge_2d_image_to_equirectangular;
+export module pragma.client:rendering.shaders.merge_2d_image_to_equirectangular;
 
-import :cubemap;
+import :rendering.shaders.cubemap;
 
 export namespace pragma {
 	class DLLCLIENT ShaderMerge2dImageIntoEquirectangular : public prosper::ShaderBaseImageProcessing {

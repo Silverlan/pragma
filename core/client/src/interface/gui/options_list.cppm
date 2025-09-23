@@ -7,12 +7,12 @@ module;
 #include <wgui/types/widropdownmenu.h>
 #include <wgui/wibase.h>
 
-export module pragma.client.gui:options_list;
+export module pragma.client:gui.options_list;
 
-import :checkbox;
-import :choice_list;
-import :slider;
-import :table;
+import :gui.checkbox;
+import :gui.choice_list;
+import :gui.slider;
+import :gui.table;
 
 import pragma.gui;
 

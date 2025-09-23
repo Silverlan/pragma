@@ -12,18 +12,17 @@ module;
 #include <image/prosper_msaa_texture.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 #include <prosper_descriptor_set_group.hpp>
+#include "pragma/console/c_cvar.h"
 
-module pragma.client.entities.components.rasterization_renderer:particles;
+module pragma.client;
 
-import pragma.client.engine;
-import pragma.client.entities.components;
-import pragma.client.game;
-import pragma.client.rendering.shaders;
+import :entities.components.rasterization_renderer;
+import :engine;
+import :game;
+import :rendering.shaders;
 
 using namespace pragma::rendering;
 
-extern CEngine *c_engine;
-extern CGame *c_game;
 
 static auto cvDrawParticles = GetClientConVar("render_draw_particles");
 void pragma::CRasterizationRendererComponent::RenderParticles(prosper::ICommandBuffer &cmd, const util::DrawSceneInfo &drawSceneInfo, bool depthPass, prosper::IPrimaryCommandBuffer *primCmdBuffer)
@@ -32,23 +31,23 @@ void pragma::CRasterizationRendererComponent::RenderParticles(prosper::ICommandB
 	// TODO: Only render particles if they're visible
 	auto &culledParticles = m_culledParticles;
 	culledParticles.clear();
-	EntityIterator entIt {*c_game};
-	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CParticleSystemComponent>>();
+	EntityIterator entIt {*pragma::get_cgame()};
+	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::ecs::CParticleSystemComponent>>();
 	culledParticles.reserve(entIt.GetCount());
 	for(auto *ent : entIt) {
-		auto *ptrC = ent->GetComponent<pragma::CParticleSystemComponent>().get();
+		auto *ptrC = ent->GetComponent<pragma::ecs::CParticleSystemComponent>().get();
 		auto &renderers = ptrC->GetRenderers();
 		auto *renderer = !renderers.empty() ? renderers.front().get() : nullptr;
 		if(!renderer)
 			continue;
 		if(depthPass && !renderer->RequiresDepthPass())
 			continue;
-		culledParticles.push_back(ent->GetComponent<pragma::CParticleSystemComponent>().get());
+		culledParticles.push_back(ent->GetComponent<pragma::ecs::CParticleSystemComponent>().get());
 	}
 	auto bShouldDrawParticles = (drawSceneInfo.renderFlags & RenderFlags::Particles) == RenderFlags::Particles && cvDrawParticles->GetBool() == true && culledParticles.empty() == false;
 	if(!bShouldDrawParticles)
 		return;
-	c_game->StartGPUProfilingStage("Particles");
+	pragma::get_cgame()->StartGPUProfilingStage("Particles");
 	///InvokeEventCallbacks(EVENT_MT_BEGIN_RECORD_PARTICLES,evDataLightingStage);
 
 	auto &hdrInfo = GetHDRInfo();
@@ -101,5 +100,5 @@ void pragma::CRasterizationRendererComponent::RenderParticles(prosper::ICommandB
 	}
 
 	//InvokeEventCallbacks(EVENT_MT_END_RECORD_PARTICLES,evDataLightingStage);
-	c_game->StopGPUProfilingStage(); // Particles
+	pragma::get_cgame()->StopGPUProfilingStage(); // Particles
 }

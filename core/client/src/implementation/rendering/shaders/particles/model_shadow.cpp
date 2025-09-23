@@ -5,11 +5,12 @@ module;
 
 #include "stdafx_client.h"
 
-module pragma.client.rendering.shaders;
+module pragma.client;
 
-import :particle_model_shadow;
 
-import pragma.client.engine;
+import :rendering.shaders.particle_model_shadow;
+
+import :engine;
 
 // prosper TODO
 #if 0
@@ -19,7 +20,6 @@ using namespace Shader;
 
 LINK_SHADER_TO_CLASS(ParticleModelShadow,particlemodelshadow);
 
-extern CEngine *c_engine;
 
 ParticleModelShadow::ParticleModelShadow()
 	: Shadow("particlemodelshadow","programs/particles/model/particle_model_shadow","programs/particles/model/particle_model_shadow")
@@ -42,7 +42,7 @@ void ParticleModelShadow::BindInstanceDescriptorSet(Vulkan::CommandBufferObject 
 
 void ParticleModelShadow::DrawTest(CModelSubMesh *mesh,uint32_t instanceCount)
 {
-	auto &context = c_engine->GetRenderContext();
+	auto &context = pragma::get_cengine()->GetRenderContext();
 	Shadow::DrawTest(context.GetDrawCmd(),mesh,[instanceCount](const Vulkan::CommandBufferObject *drawCmd,uint32_t triangleVertexCount) {
 		drawCmd->DrawIndexed(0,triangleVertexCount,0,instanceCount);
 	});

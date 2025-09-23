@@ -8,9 +8,9 @@ module;
 #include <wgui/types/witext.h>
 #include <mathutil/umath_geometry.hpp>
 
-module pragma.client.gui;
+module pragma.client;
 
-import :command_line_entry;
+import :gui.command_line_entry;
 
 import pragma.gui;
 import pragma.string.unicode;

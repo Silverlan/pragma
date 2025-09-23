@@ -7,7 +7,7 @@ module;
 #include <wgui/wibase.h>
 #include <unordered_map>
 
-export module pragma.client.gui:container;
+export module pragma.client:gui.container;
 
 export class DLLCLIENT WIContainer : public WIBase {
   public:

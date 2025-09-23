@@ -10,15 +10,13 @@ module;
 #include <sharedutils/util.h>
 #include <algorithm>
 
-module pragma.client.particle_system;
+module pragma.client;
 
-import :initializer_initial_animation_frame;
+import :particle_system.initializer_initial_animation_frame;
 
-import pragma.client.client_state;
+import :client_state;
 
-REGISTER_PARTICLE_INITIALIZER(initial_animation_frame, CParticleInitializerInitialAnimationFrame);
-
-void CParticleInitializerInitialAnimationFrame::Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void CParticleInitializerInitialAnimationFrame::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleInitializer::Initialize(pSystem, values);
 	for(auto it = values.begin(); it != values.end(); it++) {

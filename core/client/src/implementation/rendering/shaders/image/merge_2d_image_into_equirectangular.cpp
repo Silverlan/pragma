@@ -11,13 +11,13 @@ module;
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
 
-module pragma.client.rendering.shaders;
+module pragma.client;
 
-import :merge_2d_image_to_equirectangular;
 
-import pragma.client.engine;
+import :rendering.shaders.merge_2d_image_to_equirectangular;
 
-extern CEngine *c_engine;
+import :engine;
+
 
 using namespace pragma;
 
@@ -45,8 +45,8 @@ bool ShaderMerge2dImageIntoEquirectangular::RecordDraw(prosper::ICommandBuffer &
 	pushConstants.xFactor = range / 360.f;
 	pushConstants.cubeFace = cubeFace;
 
-	auto vertBuffer = c_engine->GetRenderContext().GetCommonBufferCache().GetSquareVertexBuffer();
-	auto uvBuffer = c_engine->GetRenderContext().GetCommonBufferCache().GetSquareUvBuffer();
+	auto vertBuffer = pragma::get_cengine()->GetRenderContext().GetCommonBufferCache().GetSquareVertexBuffer();
+	auto uvBuffer = pragma::get_cengine()->GetRenderContext().GetCommonBufferCache().GetSquareUvBuffer();
 	auto numVerts = prosper::CommonBufferCache::GetSquareVertexCount();
 
 	auto success = false;

@@ -7,11 +7,11 @@ module;
 #include "pragma/debug/debug_render_info.hpp"
 #include <pragma/math/intersection.h>
 
-module pragma.client.rendering.occlusion_culling;
+module pragma.client;
 
-import :octree;
+import :rendering.occlusion_culling.octree;
 
-import pragma.client.debug;
+import :debug;
 
 BaseOcclusionOctree::Node::Node(BaseOcclusionOctree *tree, Node *parent) : m_tree(tree), m_parent((parent != nullptr) ? parent->shared_from_this() : std::weak_ptr<BaseOcclusionOctree::Node> {}) {}
 BaseOcclusionOctree::Node::~Node() { m_tree->FreeNodeIndex(*this); }

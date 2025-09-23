@@ -6,12 +6,14 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <optional>
 
-export module pragma.client.particle_system:initializer_initial_velocity;
+export module pragma.client:particle_system.initializer_initial_velocity;
+
+import :particle_system.modifier;
 
 export class DLLCLIENT CParticleInitializerInitialVelocity : public CParticleInitializer {
   public:
 	CParticleInitializerInitialVelocity() = default;
-	virtual void Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+	virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
 	virtual void OnParticleCreated(CParticle &particle) override;
 	float GetSpeed() const;
   private:

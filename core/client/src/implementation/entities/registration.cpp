@@ -8,9 +8,9 @@ module;
 
 #undef GetClassName
 
-module pragma.client.entities;
+module pragma.client;
 
-import :registration;
+import :entities.registration;
 
 using namespace client_entities;
 

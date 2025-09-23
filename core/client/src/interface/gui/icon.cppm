@@ -6,7 +6,7 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <wgui/types/wirect.h>
 
-export module pragma.client.gui:icon;
+export module pragma.client:gui.icon;
 
 export {
 	class DLLCLIENT WIIcon : public WITexturedRect {

@@ -6,14 +6,13 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <pragma/entities/environment/env_camera.h>
 #include <mathutil/transform.hpp>
-#include <sharedutils/util_weak_handle.hpp>
 #include <sharedutils/util_parallel_job.hpp>
-#include <sharedutils/functioncallback.h>
-#include <memory>
+#include "util_image_buffer.hpp"
 #include <functional>
 
-export module pragma.client.rendering.cycles;
+export module pragma.client:rendering.cycles;
 
+export class ClientState;
 export namespace pragma::rendering::cycles {
 	struct DLLCLIENT SceneInfo {
 		enum class DeviceType : uint8_t { CPU = 0, GPU };

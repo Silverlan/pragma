@@ -11,14 +11,8 @@
 #include <prosper_window.hpp>
 #include <fsys/ifile.hpp>
 
-import pragma.client.client_state;
-import pragma.client.engine;
-import pragma.client.game;
-import pragma.client.gui;
+import pragma.client;
 
-extern CEngine *c_engine;
-extern ClientState *client;
-extern CGame *c_game;
 
 import pragma.string.unicode;
 
@@ -106,7 +100,7 @@ bool GUIDebugCursorManager::Initialize()
 		hEl = el->GetHandle();
 	}
 
-	m_cbScroll = c_engine->AddCallback("OnScrollInput", FunctionCallback<bool, std::reference_wrapper<prosper::Window>, Vector2>::CreateWithOptionalReturn([this](bool *reply, std::reference_wrapper<prosper::Window> window, Vector2 scrollAmount) -> CallbackReturnType {
+	m_cbScroll = pragma::get_cengine()->AddCallback("OnScrollInput", FunctionCallback<bool, std::reference_wrapper<prosper::Window>, Vector2>::CreateWithOptionalReturn([this](bool *reply, std::reference_wrapper<prosper::Window> window, Vector2 scrollAmount) -> CallbackReturnType {
 		if(scrollAmount.y == 0.f)
 			return CallbackReturnType::NoReturnValue;
 		*reply = true;
@@ -116,7 +110,7 @@ bool GUIDebugCursorManager::Initialize()
 			SelectNextChildInHierarchy();
 		return CallbackReturnType::HasReturnValue;
 	}));
-	m_cbMiddleMouse = c_engine->AddCallback("OnMouseInput",
+	m_cbMiddleMouse = pragma::get_cengine()->AddCallback("OnMouseInput",
 	  FunctionCallback<bool, std::reference_wrapper<prosper::Window>, pragma::platform::MouseButton, pragma::platform::KeyState, pragma::platform::Modifier>::CreateWithOptionalReturn(
 	    [this](bool *reply, std::reference_wrapper<prosper::Window> window, pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods) -> CallbackReturnType {
 		    if(button == pragma::platform::MouseButton::Middle) {
@@ -125,7 +119,7 @@ bool GUIDebugCursorManager::Initialize()
 				    auto &hEl = m_cursorElementList.front();
 				    if(hEl.IsValid()) {
 					    auto *el = hEl.get();
-					    auto *cl = c_engine->GetClientState();
+					    auto *cl = pragma::get_cengine()->GetClientState();
 					    auto *game = cl ? cl->GetGameState() : nullptr;
 					    if(game) {
 						    auto *l = game->GetLuaState();
@@ -142,8 +136,8 @@ bool GUIDebugCursorManager::Initialize()
 		    }
 		    return CallbackReturnType::NoReturnValue;
 	    }));
+	auto *client = pragma::get_client_state();
 	m_cbOnClose = client->AddCallback("OnClose", FunctionCallback<void>::Create([this]() { Clear(); }));
-
 	m_cbThink = client->AddCallback("Think", FunctionCallback<void>::Create([this]() { OnThink(); }));
 	return true;
 }
@@ -265,7 +259,7 @@ void GUIDebugCursorManager::SetTargetGUIElement(WIBase *optEl, bool clear)
 		Con::cout << pText->GetText().cpp_str() << Con::endl;
 	}
 
-	auto *l = c_game->GetLuaState();
+	auto *l = pragma::get_cgame()->GetLuaState();
 	if(l) {
 		// Assign element to global 'debug_ui_element' Lua variable
 		auto o = WGUILuaInterface::GetLuaObject(l, el);
@@ -427,7 +421,7 @@ void Console::commands::debug_font_glyph_map(NetworkState *state, pragma::BasePl
 	}
 	auto &glyphImg = glyphMap->GetImage();
 	auto aspectRatio = glyphImg.GetWidth() / static_cast<float>(glyphImg.GetHeight());
-	auto w = c_engine->GetRenderResolution().x;
+	auto w = pragma::get_cengine()->GetRenderResolution().x;
 	auto h = umath::round(w / aspectRatio);
 	auto scale = 5.f;
 	w *= scale;

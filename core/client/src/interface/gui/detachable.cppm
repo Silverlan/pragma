@@ -6,7 +6,7 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <wgui/wibase.h>
 
-export module pragma.client.gui:detachable;
+export module pragma.client:gui.detachable;
 
 export class DLLCLIENT WIDetachable : public WIBase {
   public:

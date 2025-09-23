@@ -5,12 +5,11 @@ module;
 
 #include "stdafx_client.h"
 
-module pragma.client.entities.components.static_bvh_user;
+module pragma.client;
 
-import pragma.client.engine;
-import pragma.client.entities.components;
+import :entities.components.static_bvh_user;
+import :engine;
 
-extern CEngine *c_engine;
 
 using namespace pragma;
 

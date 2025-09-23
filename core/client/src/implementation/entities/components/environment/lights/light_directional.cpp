@@ -10,14 +10,15 @@ module;
 #include <pragma/math/intersection.h>
 #include <pragma/entities/entity_component_system_t.hpp>
 
-module pragma.client.entities.components.lights.directional;
+module pragma.client;
 
-import pragma.client.entities.components.render;
-import pragma.client.entities.components.toggle;
-import pragma.client.entities.components.transform;
-import pragma.client.game;
 
-extern CGame *c_game;
+import :entities.components.lights.directional;
+import :entities.components.render;
+import :entities.components.toggle;
+import :entities.components.transform;
+import :game;
+
 
 using namespace pragma;
 
@@ -138,12 +139,12 @@ void CLightDirectionalComponent::Initialize()
 	BindEventUnhandled(BaseToggleComponent::EVENT_ON_TURN_ON, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		if(GetEntity().IsSpawned() == false)
 			return;
-		c_game->UpdateEnvironmentLightSource();
+		pragma::get_cgame()->UpdateEnvironmentLightSource();
 	});
 	BindEventUnhandled(BaseToggleComponent::EVENT_ON_TURN_OFF, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		if(GetEntity().IsSpawned() == false)
 			return;
-		c_game->UpdateEnvironmentLightSource();
+		pragma::get_cgame()->UpdateEnvironmentLightSource();
 	});
 }
 void CLightDirectionalComponent::SetShadowDirty()
@@ -157,7 +158,7 @@ void CLightDirectionalComponent::OnEntitySpawn()
 	BaseEnvLightDirectionalComponent::OnEntitySpawn();
 	auto pToggleComponent = GetEntity().GetComponent<CToggleComponent>();
 	if(pToggleComponent.expired() || pToggleComponent->IsTurnedOn())
-		c_game->UpdateEnvironmentLightSource();
+		pragma::get_cgame()->UpdateEnvironmentLightSource();
 }
 CShadowCSMComponent *CLightDirectionalComponent::GetShadowMap() { return m_shadowMap.get(); }
 void CLightDirectionalComponent::ReceiveData(NetPacket &packet)
@@ -203,8 +204,8 @@ void CLightDirectionalComponent::UpdateAmbientColor()
 	auto pToggleComponent = GetEntity().GetComponent<CToggleComponent>();
 	if(pToggleComponent.valid() && pToggleComponent->IsTurnedOn() == false)
 		return;
-	// c_game->GetWorldEnvironment().SetAmbientColor((*m_ambientColor)->ToVector4());
-	c_game->SetMaxHDRExposure(m_maxExposure);
+	// pragma::get_cgame()->GetWorldEnvironment().SetAmbientColor((*m_ambientColor)->ToVector4());
+	pragma::get_cgame()->SetMaxHDRExposure(m_maxExposure);
 }
 void CLightDirectionalComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
@@ -224,10 +225,10 @@ void CLightDirectionalComponent::RenderStaticWorldGeometry()
 	// prosper TODO
 #if 0
 	m_cmdShadowBuffers.clear();
-	auto *entWorld = c_game->GetWorld();
+	auto *entWorld = pragma::get_cgame()->GetWorld();
 	if(entWorld == nullptr)
 		return;
-	auto hShaderShadow = c_engine->GetShader("shadowcsmstatic");
+	auto hShaderShadow = pragma::get_cengine()->GetShader("shadowcsmstatic");
 	if(!hShaderShadow.IsValid())
 		return;
 	auto hMdl = entWorld->GetModel();
@@ -241,7 +242,7 @@ void CLightDirectionalComponent::RenderStaticWorldGeometry()
 	if(tex == nullptr)
 		return;
 	auto &shaderShadow = static_cast<Shader::ShadowCSMStatic&>(*hShaderShadow.get());
-	//auto &context = c_engine->GetRenderContext();
+	//auto &context = pragma::get_cengine()->GetRenderContext();
 
 	//auto &renderPass = shadow->GetRenderPass(CLightBase::RenderPass::Dynamic);
 	//auto &img = tex->GetImage();
@@ -311,7 +312,7 @@ void CLightDirectionalComponent::UpdateFrustum(uint32_t frustumId)
 	auto hShadow = GetEntity().GetComponent<CShadowCSMComponent>();
 	if(hShadow.expired())
 		return;
-	auto *cam = c_game->GetPrimaryCamera<pragma::CCameraComponent>();
+	auto *cam = pragma::get_cgame()->GetPrimaryCamera<pragma::CCameraComponent>();
 	hShadow->UpdateFrustum(frustumId, *cam, GetViewMatrix(), pTrComponent->GetForward());
 }
 
@@ -326,6 +327,6 @@ void CLightDirectionalComponent::UpdateFrustum()
 	auto hShadow = GetEntity().GetComponent<CShadowCSMComponent>();
 	if(hShadow.expired())
 		return;
-	auto *cam = c_game->GetPrimaryCamera<pragma::CCameraComponent>();
+	auto *cam = pragma::get_cgame()->GetPrimaryCamera<pragma::CCameraComponent>();
 	hShadow->UpdateFrustum(*cam, GetViewMatrix(), pTrComponent->GetForward());
 }

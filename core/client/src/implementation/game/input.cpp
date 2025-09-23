@@ -12,12 +12,13 @@ module;
 #include <sharedutils/scope_guard.h>
 #include <prosper_window.hpp>
 
-module pragma.client.game;
+module pragma.client;
 
-import pragma.client.engine;
+
+import :game;
+import :engine;
 import pragma.string.unicode;
 
-extern CEngine *c_engine;
 
 Bool CGame::RawMouseInput(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods)
 {
@@ -91,7 +92,7 @@ void CGame::OnFilesDropped(std::vector<std::string> &files)
 {
 	auto *l = GetLuaState();
 	auto t = Lua::CreateTable(l);
-	auto &droppedFiles = c_engine->GetDroppedFiles();
+	auto &droppedFiles = pragma::get_cengine()->GetDroppedFiles();
 	for(auto i = decltype(droppedFiles.size()) {0}; i < droppedFiles.size(); ++i) {
 		Lua::PushInt(l, i + 1);
 		Lua::PushString(l, droppedFiles[i].fileName);

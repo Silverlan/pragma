@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include <mathutil/umath.h>
 #include <pragma/math/vector/wvvector3.h>
 #include <sharedutils/util_string.h>
@@ -10,20 +11,19 @@ module;
 #include <pragma/math/util_noise.hpp>
 #include <algorithm>
 
-export module pragma.client.particle_system:operator_jitter;
+export module pragma.client:particle_system.operator_jitter;
 
-import :operator_wander;
+import :particle_system.operator_wander;
 
+export namespace pragma::ecs {class CParticleSystemComponent;}
 export class DLLCLIENT CParticleOperatorJitter : public CParticleOperatorWander {
   public:
 	CParticleOperatorJitter() = default;
-	virtual void Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+	virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
 	virtual void Simulate(CParticle &particle, double tDelta, float strength) override;
 };
 
-REGISTER_PARTICLE_OPERATOR(jitter, CParticleOperatorJitter);
-
-void CParticleOperatorJitter::Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) { CParticleOperatorWander::Initialize(pSystem, values); }
+void CParticleOperatorJitter::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) { CParticleOperatorWander::Initialize(pSystem, values); }
 void CParticleOperatorJitter::Simulate(CParticle &particle, double tDelta, float strength)
 {
 	CParticleOperatorWorldBase::Simulate(particle, tDelta, strength);

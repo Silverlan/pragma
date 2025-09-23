@@ -6,12 +6,12 @@ module;
 #include "stdafx_client.h"
 #include <mathutil/umath.h>
 #include <buffers/prosper_dynamic_resizable_buffer.hpp>
+#include "pragma/model/modelupdateflags.hpp"
 
-module pragma.client.model;
+module pragma.client;
 
-import :model_mesh;
-
-import pragma.client.engine;
+import :model.mesh;
+import :engine;
 
 static constexpr uint64_t MEGABYTE = 1'024 * 1'024;
 static constexpr uint64_t GLOBAL_MESH_VERTEX_BUFFER_SIZE = MEGABYTE * 256;       // 13'107 instances per MiB
@@ -19,7 +19,6 @@ static constexpr uint64_t GLOBAL_MESH_VERTEX_WEIGHT_BUFFER_SIZE = MEGABYTE * 32;
 static constexpr uint64_t GLOBAL_MESH_ALPHA_BUFFER_SIZE = MEGABYTE * 16;         // 131'072 instances per MiB
 static constexpr uint64_t GLOBAL_MESH_INDEX_BUFFER_SIZE = MEGABYTE * 32;         // 524'288 instances per MiB
 
-extern CEngine *c_engine;
 
 CModelMesh::CModelMesh() : ModelMesh() {}
 std::shared_ptr<ModelMesh> CModelMesh::Copy() const { return std::make_shared<CModelMesh>(*this); }
@@ -66,7 +65,7 @@ void CModelSubMesh::InitializeBuffers()
 #ifdef ENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER
 	createInfo.usageFlags |= prosper::BufferUsageFlags::StorageBufferBit;
 #endif
-	s_vertexBuffer = c_engine->GetRenderContext().CreateDynamicResizableBuffer(createInfo, createInfo.size * 4u, 0.05f);
+	s_vertexBuffer = pragma::get_cengine()->GetRenderContext().CreateDynamicResizableBuffer(createInfo, createInfo.size * 4u, 0.05f);
 	s_vertexBuffer->SetDebugName("mesh_vertex_data_buf");
 	s_vertexBuffer->SetPermanentlyMapped(true, prosper::IBuffer::MapFlags::WriteBit);
 
@@ -76,7 +75,7 @@ void CModelSubMesh::InitializeBuffers()
 #ifdef ENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER
 	createInfo.usageFlags |= prosper::BufferUsageFlags::StorageBufferBit;
 #endif
-	s_vertexWeightBuffer = c_engine->GetRenderContext().CreateDynamicResizableBuffer(createInfo, createInfo.size * 4u, 0.025f);
+	s_vertexWeightBuffer = pragma::get_cengine()->GetRenderContext().CreateDynamicResizableBuffer(createInfo, createInfo.size * 4u, 0.025f);
 	s_vertexWeightBuffer->SetDebugName("mesh_vertex_weight_data_buf");
 	s_vertexWeightBuffer->SetPermanentlyMapped(true, prosper::IBuffer::MapFlags::WriteBit);
 
@@ -86,7 +85,7 @@ void CModelSubMesh::InitializeBuffers()
 #ifdef ENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER
 	createInfo.usageFlags |= prosper::BufferUsageFlags::StorageBufferBit;
 #endif
-	s_alphaBuffer = c_engine->GetRenderContext().CreateDynamicResizableBuffer(createInfo, createInfo.size * 4u, 0.025f);
+	s_alphaBuffer = pragma::get_cengine()->GetRenderContext().CreateDynamicResizableBuffer(createInfo, createInfo.size * 4u, 0.025f);
 	s_alphaBuffer->SetDebugName("mesh_alpha_data_buf");
 	s_alphaBuffer->SetPermanentlyMapped(true, prosper::IBuffer::MapFlags::WriteBit);
 
@@ -96,7 +95,7 @@ void CModelSubMesh::InitializeBuffers()
 #ifdef ENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER
 	createInfo.usageFlags |= prosper::BufferUsageFlags::StorageBufferBit;
 #endif
-	s_indexBuffer = c_engine->GetRenderContext().CreateDynamicResizableBuffer(createInfo, createInfo.size * 4u, 0.025f);
+	s_indexBuffer = pragma::get_cengine()->GetRenderContext().CreateDynamicResizableBuffer(createInfo, createInfo.size * 4u, 0.025f);
 	s_indexBuffer->SetDebugName("mesh_index_data_buf");
 	s_indexBuffer->SetPermanentlyMapped(true, prosper::IBuffer::MapFlags::WriteBit);
 }
@@ -155,8 +154,8 @@ void CModelSubMesh::Update(ModelUpdateFlags flags)
 	if((flags & ModelUpdateFlags::CalculateTangents) != ModelUpdateFlags::None)
 		ComputeTangentBasis();
 
-	//auto &renderState = c_engine->GetRenderContext();
-	//auto &context = c_engine->GetRenderContext();
+	//auto &renderState = pragma::get_cengine()->GetRenderContext();
+	//auto &context = pragma::get_cengine()->GetRenderContext();
 
 	if((flags & ModelUpdateFlags::UpdateIndexBuffer) != ModelUpdateFlags::None) {
 		auto &indexData = GetIndexData();

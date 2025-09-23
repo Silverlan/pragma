@@ -6,8 +6,7 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <pragma/lua/ldefinitions.h>
 
-export module pragma.client.scripting.lua.classes.net_packet;
-
+export module pragma.client:scripting.lua.classes.net_packet;
 export namespace Lua {
 	namespace NetPacket {
 		namespace Client {

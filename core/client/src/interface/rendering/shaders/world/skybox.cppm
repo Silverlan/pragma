@@ -3,8 +3,11 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 
-export module pragma.client.rendering.shaders:world_skybox;
+export module pragma.client:rendering.shaders.world_skybox;
+
+import :rendering.shaders.textured;
 
 export namespace pragma {
 	class DLLCLIENT ShaderSkybox : public ShaderGameWorldLightingPass {

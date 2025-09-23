@@ -7,10 +7,11 @@ module;
 #include <vector>
 #include <string>
 
-export module pragma.client.audio;
-export import :aux_util;
-export import :sound;
-export import :sound_script;
+export module pragma.client:audio;
+
+export import :audio.aux_util;
+export import :audio.sound;
+export import :audio.sound_script;
 
 export namespace pragma::audio {
 	DLLCLIENT std::vector<std::string> get_available_audio_apis();

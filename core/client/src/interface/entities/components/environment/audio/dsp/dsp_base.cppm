@@ -7,7 +7,10 @@ module;
 #include <pragma/entities/environment/audio/env_sound_dsp.h>
 #include <alsound_source.hpp>
 
-export module pragma.client.entities.components.audio.dsp.base;
+export module pragma.client:entities.components.audio.dsp.base;
+
+import :entities.base_entity;
+import :entities.components.entity;
 
 export namespace pragma {
 	class DLLCLIENT CBaseSoundDspComponent : public BaseEnvSoundDspComponent, public CBaseNetComponent {

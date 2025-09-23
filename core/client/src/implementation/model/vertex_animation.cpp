@@ -5,9 +5,9 @@ module;
 
 #include "stdafx_client.h"
 
-module pragma.client.model;
+module pragma.client;
 
-import :vertex_animation;
+import :model.vertex_animation;
 
 std::shared_ptr<CVertexAnimation> CVertexAnimation::Create() { return std::shared_ptr<CVertexAnimation>(new CVertexAnimation {}); }
 std::shared_ptr<CVertexAnimation> CVertexAnimation::Create(const CVertexAnimation &other) { return std::shared_ptr<CVertexAnimation>(new CVertexAnimation {other}); }

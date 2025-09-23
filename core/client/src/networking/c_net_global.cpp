@@ -30,25 +30,16 @@
 #include <pragma/networking/enums.hpp>
 #include <pragma/util/giblet_create_info.hpp>
 
-import pragma.client.client_state;
-import pragma.client.debug;
-import pragma.client.engine;
-import pragma.client.entities;
-import pragma.client.entities.components;
-import pragma.client.game;
-import pragma.client.gui;
-import pragma.client.scripting.lua;
+import pragma.client;
 
 enum class CLIENT_DROPPED;
-extern CEngine *c_engine;
-extern ClientState *client;
-extern CGame *c_game;
 
-DLLCLIENT void NET_cl_serverinfo(NetPacket packet) { client->HandleClientReceiveServerInfo(packet); }
-DLLCLIENT void NET_cl_start_resource_transfer(NetPacket packet) { client->HandleClientStartResourceTransfer(packet); }
+DLLCLIENT void NET_cl_serverinfo(NetPacket packet) { pragma::get_client_state()->HandleClientReceiveServerInfo(packet); }
+DLLCLIENT void NET_cl_start_resource_transfer(NetPacket packet) { pragma::get_client_state()->HandleClientStartResourceTransfer(packet); }
 
 CBaseEntity *NET_cl_ent_create(NetPacket &packet, bool bSpawn, bool bIgnoreMapInit = false)
 {
+	auto *client = pragma::get_client_state();
 	if(!client->IsGameActive())
 		return NULL;
 	CGame *game = client->GetGameState();
@@ -83,7 +74,7 @@ DLLCLIENT void NET_cl_ent_create(NetPacket packet) { NET_cl_ent_create(packet, t
 
 DLLCLIENT void NET_cl_ent_remove(NetPacket packet)
 {
-	if(!client->IsGameActive())
+	if(!pragma::get_client_state()->IsGameActive())
 		return;
 	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
 	if(ent == NULL)
@@ -93,6 +84,7 @@ DLLCLIENT void NET_cl_ent_remove(NetPacket packet)
 
 CBaseEntity *NET_cl_ent_create_lua(NetPacket &packet, bool bSpawn, bool bIgnoreMapInit = false)
 {
+	auto *client = pragma::get_client_state();
 	if(!client->IsGameActive())
 		return nullptr;
 
@@ -128,6 +120,7 @@ DLLCLIENT void NET_cl_ent_create_lua(NetPacket packet) { NET_cl_ent_create_lua(p
 
 DLLCLIENT void NET_game_timescale(NetPacket packet)
 {
+	auto *client = pragma::get_client_state();
 	if(!client->IsGameActive())
 		return;
 	float timeScale = packet->Read<float>();
@@ -137,19 +130,19 @@ DLLCLIENT void NET_game_timescale(NetPacket packet)
 
 DLLCLIENT void NET_cl_create_giblet(NetPacket packet)
 {
-	if(!client->IsGameActive())
+	if(!pragma::get_client_state()->IsGameActive())
 		return;
 	auto info = packet->Read<GibletCreateInfo>();
-	c_game->CreateGiblet(info);
+	pragma::get_cgame()->CreateGiblet(info);
 }
 
 DLLCLIENT void NET_cl_register_entity_component(NetPacket packet)
 {
-	if(!client->IsGameActive())
+	if(!pragma::get_client_state()->IsGameActive())
 		return;
 	auto svComponentId = packet->Read<pragma::ComponentId>();
 	auto name = packet->ReadString();
-	auto &componentManager = static_cast<pragma::CEntityComponentManager &>(c_game->GetEntityComponentManager());
+	auto &componentManager = static_cast<pragma::CEntityComponentManager &>(pragma::get_cgame()->GetEntityComponentManager());
 	auto &svComponentToClComponent = componentManager.GetServerComponentIdToClientComponentIdTable();
 	auto clComponentId = componentManager.PreRegisterComponentType(name);
 	if(svComponentId >= svComponentToClComponent.size())
@@ -159,6 +152,7 @@ DLLCLIENT void NET_cl_register_entity_component(NetPacket packet)
 
 DLLCLIENT void NET_cl_fire_bullet(NetPacket packet)
 {
+	auto *client = pragma::get_client_state();
 	if(!client->IsGameActive())
 		return;
 	auto numTracer = packet->Read<uint8_t>();
@@ -183,16 +177,16 @@ DLLCLIENT void NET_cl_fire_bullet(NetPacket packet)
 		auto n = packet->Read<Vector3>();
 		auto surfaceMaterialId = packet->Read<int32_t>();
 		if(numTracer > 0 && (i % numTracer) == 0)
-			c_game->CreateParticleTracer<pragma::ecs::CParticleSystemComponent>(start, p, trRadius, trColor, trLength, trSpeed, trMat, trBloom);
+			pragma::get_cgame()->CreateParticleTracer<pragma::ecs::CParticleSystemComponent>(start, p, trRadius, trColor, trLength, trSpeed, trMat, trBloom);
 
-		auto *surfaceMaterial = (surfaceMaterialId != -1) ? c_game->GetSurfaceMaterial(surfaceMaterialId) : nullptr;
-		auto *surfaceMaterialGeneric = c_game->GetSurfaceMaterial(0);
+		auto *surfaceMaterial = (surfaceMaterialId != -1) ? pragma::get_cgame()->GetSurfaceMaterial(surfaceMaterialId) : nullptr;
+		auto *surfaceMaterialGeneric = pragma::get_cgame()->GetSurfaceMaterial(0);
 		if(surfaceMaterial != nullptr || surfaceMaterialGeneric != nullptr) {
 			auto particleEffect = (surfaceMaterial != nullptr) ? surfaceMaterial->GetImpactParticleEffect() : "";
 			if(particleEffect.empty() && surfaceMaterialGeneric != nullptr)
 				particleEffect = surfaceMaterialGeneric->GetImpactParticleEffect();
 			if(!particleEffect.empty()) {
-				auto *pt = pragma::CParticleSystemComponent::Create(particleEffect);
+				auto *pt = pragma::ecs::CParticleSystemComponent::Create(particleEffect);
 				if(pt != nullptr) {
 					auto pTrComponent = pt->GetEntity().GetTransformComponent();
 					if(pTrComponent != nullptr) {
@@ -223,6 +217,7 @@ DLLCLIENT void NET_cl_fire_bullet(NetPacket packet)
 
 DLLCLIENT void NET_cl_ent_sound(NetPacket packet)
 {
+	auto *client = pragma::get_client_state();
 	if(!client->IsGameActive())
 		return;
 	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
@@ -240,7 +235,7 @@ DLLCLIENT void NET_cl_ent_sound(NetPacket packet)
 
 DLLCLIENT void NET_cl_ent_setunlit(NetPacket packet)
 {
-	if(!client->IsGameActive())
+	if(!pragma::get_client_state()->IsGameActive())
 		return;
 	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
 	if(ent == NULL)
@@ -254,7 +249,7 @@ DLLCLIENT void NET_cl_ent_setunlit(NetPacket packet)
 
 DLLCLIENT void NET_cl_ent_setcastshadows(NetPacket packet)
 {
-	if(!client->IsGameActive())
+	if(!pragma::get_client_state()->IsGameActive())
 		return;
 	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
 	if(ent == NULL)
@@ -268,7 +263,7 @@ DLLCLIENT void NET_cl_ent_setcastshadows(NetPacket packet)
 
 DLLCLIENT void NET_cl_ent_sethealth(NetPacket packet)
 {
-	if(!client->IsGameActive())
+	if(!pragma::get_client_state()->IsGameActive())
 		return;
 	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
 	if(ent == NULL)
@@ -282,7 +277,7 @@ DLLCLIENT void NET_cl_ent_sethealth(NetPacket packet)
 
 DLLCLIENT void NET_cl_ent_setname(NetPacket packet)
 {
-	if(!client->IsGameActive())
+	if(!pragma::get_client_state()->IsGameActive())
 		return;
 	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
 	if(ent == NULL)
@@ -296,7 +291,7 @@ DLLCLIENT void NET_cl_ent_setname(NetPacket packet)
 
 DLLCLIENT void NET_cl_ent_model(NetPacket packet)
 {
-	if(!client->IsGameActive())
+	if(!pragma::get_client_state()->IsGameActive())
 		return;
 	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
 	if(ent == NULL)
@@ -310,7 +305,7 @@ DLLCLIENT void NET_cl_ent_model(NetPacket packet)
 
 DLLCLIENT void NET_cl_ent_skin(NetPacket packet)
 {
-	if(!client->IsGameActive())
+	if(!pragma::get_client_state()->IsGameActive())
 		return;
 	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
 	if(ent == NULL)
@@ -323,7 +318,7 @@ DLLCLIENT void NET_cl_ent_skin(NetPacket packet)
 
 DLLCLIENT void NET_cl_ent_anim_play(NetPacket packet)
 {
-	if(!client->IsGameActive())
+	if(!pragma::get_client_state()->IsGameActive())
 		return;
 	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
 	if(ent == NULL)
@@ -336,7 +331,7 @@ DLLCLIENT void NET_cl_ent_anim_play(NetPacket packet)
 
 DLLCLIENT void NET_cl_ent_anim_gesture_play(NetPacket packet)
 {
-	if(!client->IsGameActive())
+	if(!pragma::get_client_state()->IsGameActive())
 		return;
 	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
 	if(ent == NULL)
@@ -350,7 +345,7 @@ DLLCLIENT void NET_cl_ent_anim_gesture_play(NetPacket packet)
 
 DLLCLIENT void NET_cl_ent_anim_gesture_stop(NetPacket packet)
 {
-	if(!client->IsGameActive())
+	if(!pragma::get_client_state()->IsGameActive())
 		return;
 	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
 	if(ent == NULL)
@@ -363,7 +358,7 @@ DLLCLIENT void NET_cl_ent_anim_gesture_stop(NetPacket packet)
 
 DLLCLIENT void NET_cl_ent_setparent(NetPacket packet)
 {
-	if(!client->IsGameActive())
+	if(!pragma::get_client_state()->IsGameActive())
 		return;
 	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
 	if(ent == NULL)
@@ -386,7 +381,7 @@ DLLCLIENT void NET_cl_ent_setparent(NetPacket packet)
 
 DLLCLIENT void NET_cl_ent_setparentmode(NetPacket packet)
 {
-	if(!client->IsGameActive())
+	if(!pragma::get_client_state()->IsGameActive())
 		return;
 	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
 	if(ent == NULL)
@@ -399,7 +394,7 @@ DLLCLIENT void NET_cl_ent_setparentmode(NetPacket packet)
 
 DLLCLIENT void NET_cl_ent_phys_init(NetPacket packet)
 {
-	if(!client->IsGameActive())
+	if(!pragma::get_client_state()->IsGameActive())
 		return;
 	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
 	if(ent == NULL)
@@ -413,7 +408,7 @@ DLLCLIENT void NET_cl_ent_phys_init(NetPacket packet)
 
 DLLCLIENT void NET_cl_ent_phys_destroy(NetPacket packet)
 {
-	if(!client->IsGameActive())
+	if(!pragma::get_client_state()->IsGameActive())
 		return;
 	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
 	if(ent == NULL)
@@ -426,14 +421,14 @@ DLLCLIENT void NET_cl_ent_phys_destroy(NetPacket packet)
 
 void NET_cl_ent_event(NetPacket packet)
 {
-	if(!client->IsGameActive())
+	if(!pragma::get_client_state()->IsGameActive())
 		return;
 	packet->SetOffset(packet->GetDataSize() - sizeof(UInt32) - sizeof(unsigned int));
 	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
 	if(ent == nullptr)
 		return;
 	auto eventId = packet->Read<UInt32>();
-	auto localId = c_game->SharedNetEventIdToLocal(eventId);
+	auto localId = pragma::get_cgame()->SharedNetEventIdToLocal(eventId);
 	if(localId == std::numeric_limits<pragma::NetEventId>::max()) {
 		Con::cwar << "Unknown net event with shared id " << eventId << "!" << Con::endl;
 		return;
@@ -444,7 +439,7 @@ void NET_cl_ent_event(NetPacket packet)
 
 DLLCLIENT void NET_cl_ent_movetype(NetPacket packet)
 {
-	if(!client->IsGameActive())
+	if(!pragma::get_client_state()->IsGameActive())
 		return;
 	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
 	if(ent == NULL)
@@ -458,7 +453,7 @@ DLLCLIENT void NET_cl_ent_movetype(NetPacket packet)
 
 DLLCLIENT void NET_cl_pl_toggle_noclip(NetPacket packet)
 {
-	if(!client->IsGameActive())
+	if(!pragma::get_client_state()->IsGameActive())
 		return;
 	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
 	if(ent == NULL)
@@ -480,7 +475,7 @@ DLLCLIENT void NET_cl_pl_toggle_noclip(NetPacket packet)
 
 DLLCLIENT void NET_cl_ent_collisiontype(NetPacket packet)
 {
-	if(!client->IsGameActive())
+	if(!pragma::get_client_state()->IsGameActive())
 		return;
 	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
 	if(ent == NULL)
@@ -494,7 +489,7 @@ DLLCLIENT void NET_cl_ent_collisiontype(NetPacket packet)
 
 DLLCLIENT void NET_cl_ent_eyeoffset(NetPacket packet)
 {
-	if(!client->IsGameActive())
+	if(!pragma::get_client_state()->IsGameActive())
 		return;
 	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
 	if(ent == NULL)
@@ -508,6 +503,7 @@ DLLCLIENT void NET_cl_ent_eyeoffset(NetPacket packet)
 
 DLLCLIENT void NET_cl_game_start(NetPacket packet)
 {
+	auto *client = pragma::get_client_state();
 	float timeScale = packet->Read<float>();
 	auto gameMode = packet->ReadString();
 	client->StartNewGame(gameMode);
@@ -519,6 +515,7 @@ DLLCLIENT void NET_cl_game_start(NetPacket packet)
 
 DLLCLIENT void NET_cl_game_timescale(NetPacket packet)
 {
+	auto *client = pragma::get_client_state();
 	if(!client->IsGameActive())
 		return;
 	float timeScale = packet->Read<float>();
@@ -527,29 +524,30 @@ DLLCLIENT void NET_cl_game_timescale(NetPacket packet)
 }
 
 // Map has been changed by server
-DLLCLIENT void NET_cl_map_ready(NetPacket packet) { client->RequestServerInfo(); }
+DLLCLIENT void NET_cl_map_ready(NetPacket packet) { pragma::get_client_state()->RequestServerInfo(); }
 
 DLLCLIENT void NET_cl_map_load(NetPacket packet)
 {
-	if(c_game == nullptr)
+	if(pragma::get_cgame() == nullptr)
 		return;
 	auto mapName = packet->ReadString();
 	auto origin = packet->Read<Vector3>();
 	//auto startIdx = packet->Read<uint32_t>();
-	//c_game->SetEntityMapIndexStart(startIdx);
-	client->ReadEntityData(packet);
+	//pragma::get_cgame()->SetEntityMapIndexStart(startIdx);
+	pragma::get_client_state()->ReadEntityData(packet);
 	auto bNewWorld = packet->Read<bool>();
 	auto r = false;
 	if(bNewWorld == false)
-		r = c_game->Game::LoadMap(mapName.c_str(), origin);
+		r = pragma::get_cgame()->Game::LoadMap(mapName.c_str(), origin);
 	else
-		r = c_game->LoadMap(mapName.c_str(), origin);
+		r = pragma::get_cgame()->LoadMap(mapName.c_str(), origin);
 	if(r == false)
 		Con::cwar << "Unable to load map '" << mapName << "'! Ignoring..." << Con::endl;
 }
 
 DLLCLIENT void NET_cl_pl_local(NetPacket packet)
 {
+	auto *client = pragma::get_client_state();
 	if(!client->IsGameActive())
 		return;
 	auto *pl = static_cast<pragma::CPlayerComponent *>(nwm::read_player(packet));
@@ -561,6 +559,7 @@ DLLCLIENT void NET_cl_pl_local(NetPacket packet)
 
 DLLCLIENT void NET_cl_game_ready(NetPacket packet)
 {
+	auto *client = pragma::get_client_state();
 	if(!client->IsGameActive())
 		return;
 	client->SetGameReady();
@@ -568,6 +567,7 @@ DLLCLIENT void NET_cl_game_ready(NetPacket packet)
 
 DLLCLIENT void NET_cl_snapshot(NetPacket packet)
 {
+	auto *client = pragma::get_client_state();
 	if(!client->IsGameActive())
 		return;
 	CGame *game = client->GetGameState();
@@ -578,21 +578,21 @@ DLLCLIENT void NET_cl_cvar_set(NetPacket packet)
 {
 	std::string cvar = packet->ReadString();
 	std::string val = packet->ReadString();
-	c_engine->SetReplicatedConVar(cvar, val);
+	pragma::get_cengine()->SetReplicatedConVar(cvar, val);
 }
 
 DLLCLIENT void NET_cl_luacmd_reg(NetPacket packet)
 {
 	std::string scmd = packet->ReadString();
 	unsigned int id = packet->Read<unsigned int>();
-	client->RegisterServerConVar(scmd, id);
+	pragma::get_client_state()->RegisterServerConVar(scmd, id);
 }
 
 DLLCLIENT void NET_cl_playerinput(NetPacket packet)
 {
 	if(packet->GetDataSize() == sizeof(uint8_t)) {
 		auto id = packet->Read<uint8_t>();
-		c_game->OnReceivedPlayerInputResponse(id);
+		pragma::get_cgame()->OnReceivedPlayerInputResponse(id);
 		return;
 	}
 	auto *pl = nwm::read_player(packet);
@@ -852,7 +852,7 @@ void NET_cl_wep_sec_ammo_type(NetPacket packet)
 	wep->GetWeaponComponent()->SetSecondaryAmmoType(type);
 }
 
-DLLCLIENT void NET_cl_gameinfo(NetPacket packet) { client->HandleReceiveGameInfo(packet); }
+DLLCLIENT void NET_cl_gameinfo(NetPacket packet) { pragma::get_client_state()->HandleReceiveGameInfo(packet); }
 
 DLLCLIENT void NET_cl_sv_send(NetPacket packet)
 {
@@ -981,6 +981,7 @@ DLLCLIENT void NET_cl_env_prtsys_setcontinuous(NetPacket packet)
 
 void NET_cl_client_dropped(NetPacket packet)
 {
+	auto *client = pragma::get_client_state();
 	if(!client->IsGameActive())
 		return;
 	auto *pl = nwm::read_player(packet);
@@ -992,6 +993,7 @@ void NET_cl_client_dropped(NetPacket packet)
 
 void NET_cl_client_ready(NetPacket packet)
 {
+	auto *client = pragma::get_client_state();
 	if(!client->IsGameActive())
 		return;
 	auto *pl = nwm::read_player(packet);
@@ -1002,6 +1004,7 @@ void NET_cl_client_ready(NetPacket packet)
 
 void NET_cl_client_joined(NetPacket packet)
 {
+	auto *client = pragma::get_client_state();
 	if(!client->IsGameActive())
 		return;
 	auto *pl = nwm::read_player(packet);
@@ -1012,12 +1015,13 @@ void NET_cl_client_joined(NetPacket packet)
 
 void NET_cl_create_explosion(NetPacket packet)
 {
+	auto *client = pragma::get_client_state();
 	if(!client->IsGameActive())
 		return;
 	auto origin = packet->Read<Vector3>();
 	auto radius = packet->Read<float>();
 
-	auto *pt = pragma::CParticleSystemComponent::Create("explosion");
+	auto *pt = pragma::ecs::CParticleSystemComponent::Create("explosion");
 	if(pt != nullptr) {
 		auto pTrComponent = pt->GetEntity().GetTransformComponent();
 		if(pTrComponent != nullptr)
@@ -1033,7 +1037,7 @@ void NET_cl_create_explosion(NetPacket packet)
 		snd->Play();
 	}
 
-	auto *entQuake = c_game->CreateEntity<CEnvQuake>();
+	auto *entQuake = pragma::get_cgame()->CreateEntity<CEnvQuake>();
 	if(entQuake != nullptr) {
 		auto *pQuakeComponent = static_cast<pragma::BaseEnvQuakeComponent *>(entQuake->FindComponent("quake").get());
 		auto pTrComponent = entQuake->GetTransformComponent();
@@ -1080,7 +1084,7 @@ struct NavDebugInfo {
 static std::unordered_map<const CBaseEntity *, NavDebugInfo> s_aiNavDebugObjects {};
 void NET_cl_debug_ai_navigation(NetPacket packet)
 {
-	if(!client->IsGameActive())
+	if(!pragma::get_client_state()->IsGameActive())
 		return;
 	auto *npc = static_cast<CBaseEntity *>(nwm::read_entity(packet));
 	if(npc == nullptr)
@@ -1115,7 +1119,7 @@ void NET_cl_debug_ai_navigation(NetPacket packet)
 
 void NET_cl_debug_ai_schedule_print(NetPacket packet)
 {
-	if(!client->IsGameActive())
+	if(!pragma::get_client_state()->IsGameActive())
 		return;
 	auto b = packet->Read<bool>();
 	if(b == false)
@@ -1132,7 +1136,7 @@ void CMD_debug_ai_schedule(NetworkState *state, pragma::BasePlayerComponent *pl,
 {
 	dbgAiSchedule = nullptr;
 	CHECK_CHEATS("debug_ai_schedule", state, );
-	if(c_game == nullptr || pl == nullptr)
+	if(pragma::get_cgame() == nullptr || pl == nullptr)
 		return;
 	auto &ent = pl->GetEntity();
 	if(ent.IsCharacter() == false)
@@ -1153,7 +1157,7 @@ void CMD_debug_ai_schedule(NetworkState *state, pragma::BasePlayerComponent *pl,
 	Con::cout << "Querying schedule data for NPC " << *npc << "..." << Con::endl;
 	NetPacket p;
 	nwm::write_entity(p, npc);
-	client->SendPacket("debug_ai_schedule_tree", p, pragma::networking::Protocol::SlowReliable);
+	pragma::get_client_state()->SendPacket("debug_ai_schedule_tree", p, pragma::networking::Protocol::SlowReliable);
 }
 
 void CMD_debug_draw_line(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
@@ -1162,23 +1166,23 @@ void CMD_debug_draw_line(NetworkState *state, pragma::BasePlayerComponent *pl, s
 		Con::cwar << "No position has been specified!" << Con::endl;
 		return;
 	}
-	if(!c_game) {
+	if(!pragma::get_cgame()) {
 		Con::cwar << "No active game!" << Con::endl;
 		return;
 	}
-	auto *cam = c_game->GetRenderCamera<pragma::CCameraComponent>();
+	auto *cam = pragma::get_cgame()->GetRenderCamera<pragma::CCameraComponent>();
 	if(!cam)
-		cam = c_game->GetPrimaryCamera<pragma::CCameraComponent>();
+		cam = pragma::get_cgame()->GetPrimaryCamera<pragma::CCameraComponent>();
 	if(!cam) {
 		Con::cwar << "No active camera found!" << Con::endl;
 		return;
 	}
 	auto srcPos = cam->GetEntity().GetPosition();
 	auto tgtPos = uvec::create(argv.front());
-	c_game->DrawLine(srcPos, tgtPos, Color::White, 12.f);
-	c_game->DrawLine(tgtPos, tgtPos + uvec::RIGHT, Color::Red, 12.f);
-	c_game->DrawLine(tgtPos, tgtPos + uvec::UP, Color::Lime, 12.f);
-	c_game->DrawLine(tgtPos, tgtPos + uvec::FORWARD, Color::Blue, 12.f);
+	pragma::get_cgame()->DrawLine(srcPos, tgtPos, Color::White, 12.f);
+	pragma::get_cgame()->DrawLine(tgtPos, tgtPos + uvec::RIGHT, Color::Red, 12.f);
+	pragma::get_cgame()->DrawLine(tgtPos, tgtPos + uvec::UP, Color::Lime, 12.f);
+	pragma::get_cgame()->DrawLine(tgtPos, tgtPos + uvec::FORWARD, Color::Blue, 12.f);
 }
 
 void CMD_debug_aim_info(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
@@ -1200,7 +1204,7 @@ void CMD_debug_aim_info(NetworkState *state, pragma::BasePlayerComponent *pl, st
 			break;
 		}
 	}
-	cam = cam ? cam : c_game->GetPrimaryCamera<pragma::CCameraComponent>();
+	cam = cam ? cam : pragma::get_cgame()->GetPrimaryCamera<pragma::CCameraComponent>();
 	if(cam == nullptr)
 		return;
 	auto trC = cam->GetEntity().GetComponent<pragma::CTransformComponent>();
@@ -1211,7 +1215,7 @@ void CMD_debug_aim_info(NetworkState *state, pragma::BasePlayerComponent *pl, st
 	trData.SetFilter(entPl);
 
 	TraceResult res {};
-	EntityIterator entIt {*c_game};
+	EntityIterator entIt {*pragma::get_cgame()};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CRenderComponent>>();
 	std::optional<Intersection::LineMeshResult> closestMesh {};
 	BaseEntity *entClosest = nullptr;
@@ -1240,7 +1244,7 @@ void CMD_debug_aim_info(NetworkState *state, pragma::BasePlayerComponent *pl, st
 		}
 	}
 	else
-		res = c_game->RayCast(trData);
+		res = pragma::get_cgame()->RayCast(trData);
 
 	if(res.hitType == RayCastHitType::None) {
 		Con::cout << "Nothing found in player aim direction!" << Con::endl;
@@ -1262,7 +1266,7 @@ void CMD_debug_aim_info(NetworkState *state, pragma::BasePlayerComponent *pl, st
 
 void NET_cl_debug_ai_schedule_tree(NetPacket packet)
 {
-	if(!client->IsGameActive())
+	if(!pragma::get_client_state()->IsGameActive())
 		return;
 	const auto bUseGraphicVisualization = true;
 	auto updateState = packet->Read<uint8_t>();
@@ -1318,7 +1322,7 @@ void NET_cl_debug_ai_schedule_tree(NetPacket packet)
 	};
 
 	const auto fUpdateGraphicalGUI = [](DebugBehaviorTreeNode &dbgTree, WILuaBase &pElLua) {
-		auto *l = c_game->GetLuaState();
+		auto *l = pragma::get_cgame()->GetLuaState();
 		auto t = Lua::CreateTable(l);
 		std::function<void(DebugBehaviorTreeNode &)> fPushNode = nullptr;
 		fPushNode = [l, &fPushNode](DebugBehaviorTreeNode &node) {
@@ -1390,7 +1394,7 @@ void NET_cl_debug_ai_schedule_tree(NetPacket packet)
 		auto *pEl = dbgAiSchedule->GetGUIElement();
 		if(pEl != nullptr) {
 			auto *pElLua = static_cast<WILuaBase *>(pEl);
-			auto *l = c_game->GetLuaState();
+			auto *l = pragma::get_cgame()->GetLuaState();
 			auto o = pElLua->GetLuaObject();
 			o.push(l); /* 1 */
 			auto tIdx = Lua::GetStackTop(l);
@@ -1535,7 +1539,7 @@ void NET_cl_debug_ai_schedule_tree(NetPacket packet)
 		pTreeList->SetSize(1024, 1024); // TODO: Size to contents
 	}
 	else {
-		auto *pGraphics = dynamic_cast<WILuaBase *>(c_game->CreateGUIElement("WIDebugBehaviorTree"));
+		auto *pGraphics = dynamic_cast<WILuaBase *>(pragma::get_cgame()->CreateGUIElement("WIDebugBehaviorTree"));
 		if(pGraphics == nullptr)
 			return;
 		fUpdateGraphicalGUI(*dbgTree, *pGraphics);
@@ -1575,10 +1579,10 @@ void NET_cl_cmd_call_response(NetPacket packet)
 void NET_cl_add_shared_component(NetPacket packet)
 {
 	auto *ent = nwm::read_entity(packet);
-	if(ent == nullptr || c_game == nullptr)
+	if(ent == nullptr || pragma::get_cgame() == nullptr)
 		return;
 	auto componentId = packet->Read<pragma::ComponentId>();
-	auto &componentManager = static_cast<pragma::CEntityComponentManager &>(c_game->GetEntityComponentManager());
+	auto &componentManager = static_cast<pragma::CEntityComponentManager &>(pragma::get_cgame()->GetEntityComponentManager());
 	auto &componentTypes = componentManager.GetRegisteredComponentTypes();
 	auto &svComponentToClComponentTable = componentManager.GetServerComponentIdToClientComponentIdTable();
 	if(componentId >= svComponentToClComponentTable.size())
@@ -1588,11 +1592,11 @@ void NET_cl_add_shared_component(NetPacket packet)
 
 REGISTER_CONVAR_CALLBACK_CL(debug_ai_navigation, [](NetworkState *state, const ConVar &, bool, bool val) {
 	CHECK_CHEATS("debug_ai_navigation", state, );
-	if(c_game == nullptr)
+	if(pragma::get_cgame() == nullptr)
 		return;
 	if(val == false)
 		s_aiNavDebugObjects.clear();
 	NetPacket p {};
 	p->Write<bool>(val);
-	client->SendPacket("debug_ai_navigation", p, pragma::networking::Protocol::SlowReliable);
+	pragma::get_client_state()->SendPacket("debug_ai_navigation", p, pragma::networking::Protocol::SlowReliable);
 });

@@ -36,12 +36,13 @@ module;
 #include <pragma/lua/lua_util_component_stream.hpp>
 #include <pragma/lua/lentity_components_base_types.hpp>
 
-module pragma.client.entities.components.player;
+module pragma.client;
 
-import pragma.client.client_state;
-import pragma.client.engine;
-import pragma.client.entities.components;
-import pragma.client.game;
+import :entities.components.player;
+import :client_state;
+import :engine;
+import :game;
+import :networking.util;
 
 using namespace pragma;
 
@@ -52,9 +53,6 @@ std::vector<CPlayerComponent *> CPlayerComponent::s_players;
 const std::vector<CPlayerComponent *> &CPlayerComponent::GetAll() { return s_players; }
 unsigned int CPlayerComponent::GetPlayerCount() { return CUInt32(s_players.size()); }
 
-extern CEngine *c_engine;
-extern ClientState *client;
-extern CGame *c_game;
 
 Con::c_cout &CPlayerComponent::print(Con::c_cout &os)
 {
@@ -97,7 +95,7 @@ CPlayerComponent::CPlayerComponent(BaseEntity &ent) : BasePlayerComponent(ent), 
 		auto pSoundEmitterComponent = ent.GetComponent<CSoundEmitterComponent>();
 		if(pSoundEmitterComponent.valid()) {
 			if(m_sndUnderwater == nullptr) {
-				m_sndUnderwater = client->CreateSound("fx.underwater", ALSoundType::Effect, ALCreateFlags::Mono);
+				m_sndUnderwater = pragma::get_client_state()->CreateSound("fx.underwater", ALSoundType::Effect, ALCreateFlags::Mono);
 				m_sndUnderwater->SetRelative(true);
 			}
 			if(m_sndUnderwater != nullptr) {
@@ -182,7 +180,7 @@ void CPlayerComponent::OnWaterSubmerged()
 {
 	if(IsLocalPlayer() == false || m_cbUnderwaterDsp.valid() == true)
 		return;
-	auto *entDsp = c_game->CreateEntity<CEnvSoundDsp>();
+	auto *entDsp = pragma::get_cgame()->CreateEntity<CEnvSoundDsp>();
 	if(entDsp == nullptr)
 		return;
 	auto *pDspComponent = static_cast<pragma::BaseEnvSoundDspComponent *>(entDsp->FindComponent("sound_dsp").get());
@@ -205,10 +203,10 @@ void CPlayerComponent::OnWaterEmerged()
 
 void CPlayerComponent::ApplyViewRotationOffset(const EulerAngles &ang, float dur)
 {
-	auto tStart = c_game->CurTime();
+	auto tStart = pragma::get_cgame()->CurTime();
 	auto cb = FunctionCallback<void, std::reference_wrapper<Vector3>, std::reference_wrapper<Quat>>::Create(nullptr);
 	static_cast<Callback<void, std::reference_wrapper<Vector3>, std::reference_wrapper<Quat>> *>(cb.get())->SetFunction([cb, tStart, ang, dur](std::reference_wrapper<Vector3>, std::reference_wrapper<Quat> rot) mutable {
-		auto &t = c_game->CurTime();
+		auto &t = pragma::get_cgame()->CurTime();
 		auto tDelta = umath::min(static_cast<float>(t - tStart), dur);
 		auto sc = static_cast<float>(umath::sin(tDelta / (dur / 2.f) * M_PI_2));
 		EulerAngles rotOffset {static_cast<float>(umath::approach_angle(0.f, ang.p, umath::abs(ang.p) * sc)), static_cast<float>(umath::approach_angle(0.f, ang.y, umath::abs(ang.y) * sc)), static_cast<float>(umath::approach_angle(0.f, ang.r, umath::abs(ang.r) * sc))};
@@ -220,10 +218,10 @@ void CPlayerComponent::ApplyViewRotationOffset(const EulerAngles &ang, float dur
 				rot.get() = rot.get() *uquat::create(ang);
 				cb.Remove();
 			});
-			c_game->AddCallback("CalcView",cb);*/ // Makes sure the camera rotation STAYS at the designated rotation (Works, but only reasonable for pitch-axis, and at half the duration -> Useless?)
+			pragma::get_cgame()->AddCallback("CalcView",cb);*/ // Makes sure the camera rotation STAYS at the designated rotation (Works, but only reasonable for pitch-axis, and at half the duration -> Useless?)
 		}
 	});
-	c_game->AddCallback("CalcViewOffset", cb);
+	pragma::get_cgame()->AddCallback("CalcViewOffset", cb);
 }
 
 bool CPlayerComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet)
@@ -303,7 +301,7 @@ void CPlayerComponent::OnUpdateMatrices(Mat4 &transformMatrix)
 
 void CPlayerComponent::UpdateViewModelTransform()
 {
-	auto *vm = c_game->GetViewModel<pragma::CViewModelComponent>();
+	auto *vm = pragma::get_cgame()->GetViewModel<pragma::CViewModelComponent>();
 	if(vm == nullptr)
 		return;
 	auto &vmEnt = vm->GetEntity();
@@ -329,10 +327,10 @@ void CPlayerComponent::UpdateViewModelTransform()
 
 void CPlayerComponent::UpdateViewFOV()
 {
-	auto *vm = c_game->GetViewModel<pragma::CViewModelComponent>();
+	auto *vm = pragma::get_cgame()->GetViewModel<pragma::CViewModelComponent>();
 	if(vm == nullptr)
 		return;
-	c_game->SetViewModelFOV(vm->GetViewFOV());
+	pragma::get_cgame()->SetViewModelFOV(vm->GetViewFOV());
 }
 
 void CPlayerComponent::SetLocalPlayer(bool b)
@@ -349,7 +347,7 @@ void CPlayerComponent::SetLocalPlayer(bool b)
 
 	if(b == false)
 		return;
-	auto *vm = c_game->GetViewModel<pragma::CViewModelComponent>();
+	auto *vm = pragma::get_cgame()->GetViewModel<pragma::CViewModelComponent>();
 	if(vm != nullptr) {
 		auto &vmEnt = vm->GetEntity();
 		UpdateViewModelTransform();
@@ -358,7 +356,7 @@ void CPlayerComponent::SetLocalPlayer(bool b)
 			vmEnt.Spawn();
 	}
 	auto &ent = GetEntity();
-	auto *body = c_game->GetViewBody<pragma::CViewBodyComponent>();
+	auto *body = pragma::get_cgame()->GetViewBody<pragma::CViewBodyComponent>();
 	if(body != nullptr) {
 		auto &entBody = body->GetEntity();
 		auto pTrComponent = ent.GetTransformComponent();
@@ -379,7 +377,7 @@ void CPlayerComponent::SetLocalPlayer(bool b)
 		if(!entBody.IsSpawned())
 			entBody.Spawn();
 	}
-	auto *listener = c_game->GetListener<pragma::CListenerComponent>();
+	auto *listener = pragma::get_cgame()->GetListener<pragma::CListenerComponent>();
 	if(listener != nullptr) {
 		auto &entListener = listener->GetEntity();
 		auto pTrComponent = ent.GetTransformComponent();
@@ -404,8 +402,8 @@ bool CPlayerComponent::ShouldDraw() const
 	if(!IsLocalPlayer())
 		return true;
 #pragma message("TODO: Find a better way to enable rendering, if being rendered through anything but the main camera (e.g. reflections)!")
-	auto *scene = c_game->GetScene<pragma::CSceneComponent>();
-	if(c_game->GetRenderScene<pragma::CSceneComponent>() != scene)
+	auto *scene = pragma::get_cgame()->GetScene<pragma::CSceneComponent>();
+	if(pragma::get_cgame()->GetRenderScene<pragma::CSceneComponent>() != scene)
 		return true;
 	if(!m_observableComponent)
 		return true;
@@ -563,7 +561,7 @@ void CPlayerComponent::OnSetCharacterOrientation(const Vector3 &up)
 	charComponent->SetViewOrientation(rotDst);
 	//
 
-	/*m_cbCalcOrientationView = c_game->AddCallback("CalcView",FunctionCallback<void,std::reference_wrapper<Vector3>,std::reference_wrapper<Quat>>::Create([this,up](std::reference_wrapper<Vector3> refPos,std::reference_wrapper<Quat> refRot) {
+	/*m_cbCalcOrientationView = pragma::get_cgame()->AddCallback("CalcView",FunctionCallback<void,std::reference_wrapper<Vector3>,std::reference_wrapper<Quat>>::Create([this,up](std::reference_wrapper<Vector3> refPos,std::reference_wrapper<Quat> refRot) {
 		//SetUpDirection(up);
 		auto &ent = GetEntity();
 		auto charComponent = ent.GetCharacterComponent();
@@ -587,7 +585,7 @@ void CPlayerComponent::OnSetCharacterOrientation(const Vector3 &up)
 			rotDst = uquat::create(ang);
 		}
 
-		//refRot.get() = uquat::get_inverse(rotRel) *uquat::slerp(newRotCur,rotDst,c_engine->GetDeltaFrameTime() *4.f);
+		//refRot.get() = uquat::get_inverse(rotRel) *uquat::slerp(newRotCur,rotDst,pragma::get_cengine()->GetDeltaFrameTime() *4.f);
 		// TODO: Remove callback on complete!
 	}));*/
 }

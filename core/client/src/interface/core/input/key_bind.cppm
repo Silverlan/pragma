@@ -8,8 +8,7 @@ module;
 #include <memory>
 #include <vector>
 
-export module pragma.client.core.key_bind;
-
+export module pragma.client:core.key_bind;
 import pragma.platform;
 
 #pragma warning(push)

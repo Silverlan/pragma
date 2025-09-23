@@ -25,23 +25,22 @@ module;
 
 #undef PlaySound
 
-module pragma.client.client_state;
+module pragma.client;
 
+
+import :client_state;
 import se_script;
 import pragma.audio.util;
-import pragma.client.audio;
-import pragma.client.engine;
-import pragma.client.game;
+import :audio;
+import :engine;
+import :game;
 
-extern CEngine *c_engine;
-extern ClientState *client;
-extern CGame *c_game;
 #pragma message("TODO: See DDSLoader; MAKE SURE TO RELEASE BUFFER ON ENGINE REMOVE")
 
 void Console::commands::cl_steam_audio_reload_scene(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 #if ALSYS_STEAM_AUDIO_SUPPORT_ENABLED == 1
-	if(c_game == nullptr)
+	if(pragma::get_cgame() == nullptr)
 		return;
 	auto cacheFlags = CGame::SoundCacheFlags::All;
 	auto spacing = 1'024.f;
@@ -61,7 +60,7 @@ void Console::commands::cl_steam_audio_reload_scene(NetworkState *state, pragma:
 			}
 		}
 	}
-	c_game->ReloadSoundCache(true, cacheFlags, spacing);
+	pragma::get_cgame()->ReloadSoundCache(true, cacheFlags, spacing);
 #endif
 }
 void Console::commands::debug_audio_sounds(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
@@ -92,11 +91,12 @@ void Console::commands::debug_audio_sounds(NetworkState *state, pragma::BasePlay
 			          << ") (Vel: " << snd.GetVelocity() << ")" << Con::endl;
 		}
 	};
-	auto *server = c_engine->GetServerNetworkState();
+	auto *server = pragma::get_cengine()->GetServerNetworkState();
 	if(server != nullptr) {
 		Con::cout << "Serverside sounds:" << Con::endl;
 		fPrint(server);
 	}
+	auto *client = pragma::get_client_state();
 	if(client != nullptr) {
 		Con::cout << "Clientside sounds:" << Con::endl;
 		fPrint(client);
@@ -106,7 +106,7 @@ void Console::commands::debug_audio_sounds(NetworkState *state, pragma::BasePlay
 static auto cvAudioStreaming = GetClientConVar("cl_audio_streaming_enabled");
 bool ClientState::PrecacheSound(std::string snd, std::pair<al::ISoundBuffer *, al::ISoundBuffer *> *buffers, ALChannel mode, bool bLoadInstantly)
 {
-	auto *soundSys = c_engine->GetSoundSystem();
+	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
 	if(soundSys == nullptr)
 		return false;
 	snd = FileManager::GetCanonicalizedPath(snd);
@@ -134,8 +134,8 @@ bool ClientState::PrecacheSound(std::string snd, std::pair<al::ISoundBuffer *, a
 		}
 		if(bPort == false) {
 			spdlog::warn("Unable to precache sound '{}': File not found!", snd);
-			if(c_game != nullptr)
-				c_game->RequestResource(path);
+			if(pragma::get_cgame() != nullptr)
+				pragma::get_cgame()->RequestResource(path);
 			return false;
 		}
 	}
@@ -197,8 +197,8 @@ bool ClientState::PrecacheSound(std::string snd, ALChannel mode)
 bool ClientState::LoadSoundScripts(const char *file, bool bPrecache)
 {
 	auto r = NetworkState::LoadSoundScripts(file, bPrecache);
-	if(r == false && c_game != nullptr)
-		c_game->RequestResource(SoundScriptManager::GetSoundScriptPath() + std::string(file));
+	if(r == false && pragma::get_cgame() != nullptr)
+		pragma::get_cgame()->RequestResource(SoundScriptManager::GetSoundScriptPath() + std::string(file));
 	return r;
 }
 
@@ -206,7 +206,7 @@ void ClientState::IndexSound(std::shared_ptr<ALSound> snd, unsigned int idx) { C
 
 void ClientState::StopSounds()
 {
-	auto *soundSys = c_engine->GetSoundSystem();
+	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
 	if(soundSys == nullptr)
 		return;
 	soundSys->StopSounds();
@@ -216,7 +216,7 @@ void ClientState::StopSound(std::shared_ptr<ALSound> pSnd) { pSnd->Stop(); }
 
 std::shared_ptr<ALSound> ClientState::CreateSound(std::string snd, ALSoundType type, ALCreateFlags flags)
 {
-	auto *soundSys = c_engine->GetSoundSystem();
+	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
 	if(soundSys == nullptr)
 		return nullptr;
 	auto normPath = FileManager::GetNormalizedPath(snd);
@@ -284,7 +284,7 @@ void ClientState::InitializeSound(CALSound &snd)
 
 std::shared_ptr<ALSound> ClientState::CreateSound(al::ISoundBuffer &buffer, ALSoundType type)
 {
-	auto *soundSys = c_engine->GetSoundSystem();
+	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
 	if(soundSys == nullptr)
 		return nullptr;
 	auto snd = std::static_pointer_cast<CALSound>(soundSys->CreateSource(buffer));
@@ -299,7 +299,7 @@ std::shared_ptr<ALSound> ClientState::CreateSound(al::ISoundBuffer &buffer, ALSo
 
 std::shared_ptr<ALSound> ClientState::CreateSound(al::Decoder &decoder, ALSoundType type)
 {
-	auto *soundSys = c_engine->GetSoundSystem();
+	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
 	if(soundSys == nullptr)
 		return nullptr;
 	auto snd = std::static_pointer_cast<CALSound>(soundSys->CreateSource(decoder));
@@ -369,7 +369,7 @@ std::shared_ptr<ALSound> ClientState::PlayWorldSound(std::string snd, ALSoundTyp
 
 void ClientState::UpdateSounds()
 {
-	auto *soundSys = c_engine->GetSoundSystem();
+	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
 	if(soundSys != nullptr) {
 		for(auto &snd : soundSys->GetSources()) {
 			auto *source = static_cast<CALSound *>(snd.get())->GetSource();
@@ -418,32 +418,37 @@ float ClientState::GetSoundVolume(ALSoundType type)
 std::unordered_map<ALSoundType, float> &ClientState::GetSoundVolumes() { return m_volTypes; }
 
 REGISTER_CONVAR_CALLBACK_CL(cl_audio_master_volume, [](NetworkState *, const ConVar &, float, float vol) {
+	auto *client = pragma::get_client_state();
 	if(client == nullptr)
 		return;
 	client->SetMasterSoundVolume(vol);
 })
 
-REGISTER_CONVAR_CALLBACK_CL(cl_audio_hrtf_enabled, [](NetworkState *, const ConVar &, bool, bool bEnabled) { c_engine->SetHRTFEnabled(bEnabled); })
+REGISTER_CONVAR_CALLBACK_CL(cl_audio_hrtf_enabled, [](NetworkState *, const ConVar &, bool, bool bEnabled) { pragma::get_cengine()->SetHRTFEnabled(bEnabled); })
 
 REGISTER_CONVAR_CALLBACK_CL(cl_effects_volume, [](NetworkState *, const ConVar &, float, float vol) {
+	auto *client = pragma::get_client_state();
 	if(client == nullptr)
 		return;
 	client->SetSoundVolume(ALSoundType::Effect, vol);
 })
 
 REGISTER_CONVAR_CALLBACK_CL(cl_music_volume, [](NetworkState *, const ConVar &, float, float vol) {
+	auto *client = pragma::get_client_state();
 	if(client == nullptr)
 		return;
 	client->SetSoundVolume(ALSoundType::Music, vol);
 })
 
 REGISTER_CONVAR_CALLBACK_CL(cl_voice_volume, [](NetworkState *, const ConVar &, float, float vol) {
+	auto *client = pragma::get_client_state();
 	if(client == nullptr)
 		return;
 	client->SetSoundVolume(ALSoundType::Voice, vol);
 })
 
 REGISTER_CONVAR_CALLBACK_CL(cl_gui_volume, [](NetworkState *, const ConVar &, float, float vol) {
+	auto *client = pragma::get_client_state();
 	if(client == nullptr)
 		return;
 	client->SetSoundVolume(ALSoundType::GUI, vol);

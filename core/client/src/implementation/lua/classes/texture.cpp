@@ -6,8 +6,10 @@ module;
 #include "stdafx_client.h"
 #include "luasystem.h"
 
-module pragma.client.scripting.lua.classes.texture;
+module pragma.client;
 
+
+import :scripting.lua.classes.texture;
 std::shared_ptr<prosper::Texture> Lua::Texture::GetVkTexture(lua_State *l, ::Texture &tex)
 {
 	if(tex.HasValidVkTexture() == false)

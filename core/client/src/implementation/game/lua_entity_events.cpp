@@ -6,9 +6,11 @@ module;
 #include "stdafx_client.h"
 #include <pragma/lua/classes/ldef_vector.h>
 
-module pragma.client.game;
+module pragma.client;
 
-import pragma.client.entities.components;
+
+import :game;
+import :entities.components;
 
 bool CGame::InvokeEntityEvent(pragma::BaseEntityComponent &component, uint32_t eventId, int32_t argsIdx, bool bInject)
 {

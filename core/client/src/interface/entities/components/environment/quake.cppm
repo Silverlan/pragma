@@ -6,7 +6,10 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/environment/env_quake.h"
 
-export module pragma.client.entities.components.env_quake;
+export module pragma.client:entities.components.env_quake;
+
+import :entities.base_entity;
+import :entities.components.entity;
 
 export {
 	namespace pragma {

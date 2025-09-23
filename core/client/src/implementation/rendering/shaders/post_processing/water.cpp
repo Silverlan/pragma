@@ -11,15 +11,15 @@ module;
 #include <prosper_descriptor_set_group.hpp>
 #include <cmaterial.h>
 
-module pragma.client.rendering.shaders;
+module pragma.client;
 
-import :pp_water;
 
-import pragma.client.engine;
+import :rendering.shaders.pp_water;
+
+import :engine;
 
 using namespace pragma;
 
-extern CEngine *c_engine;
 
 decltype(ShaderPPWater::DESCRIPTOR_SET_TEXTURE) ShaderPPWater::DESCRIPTOR_SET_TEXTURE = {&ShaderPPFog::DESCRIPTOR_SET_TEXTURE};
 decltype(ShaderPPWater::DESCRIPTOR_SET_DEPTH_BUFFER) ShaderPPWater::DESCRIPTOR_SET_DEPTH_BUFFER = {&ShaderPPFog::DESCRIPTOR_SET_DEPTH_BUFFER};
@@ -52,7 +52,7 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderPPWater::InitializeMaterialD
 	auto *dudvMap = mat.GetTextureInfo(Material::DUDV_MAP_IDENTIFIER);
 	if(dudvMap == nullptr || dudvMap->texture == nullptr)
 		return nullptr;
-	auto descSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_REFRACTION_MAP);
+	auto descSetGroup = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_REFRACTION_MAP);
 	mat.SetDescriptorSetGroup(*this, descSetGroup);
 	auto &descSet = *descSetGroup->GetDescriptorSet();
 	auto texture = std::static_pointer_cast<Texture>(dudvMap->texture);

@@ -6,9 +6,9 @@ module;
 #include "stdafx_client.h"
 #include <wgui/types/witext.h>
 
-module pragma.client.gui;
+module pragma.client;
 
-import :choice_list;
+import :gui.choice_list;
 
 import pragma.gui;
 import pragma.locale;

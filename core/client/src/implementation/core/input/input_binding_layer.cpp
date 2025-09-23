@@ -6,9 +6,11 @@ module;
 #include "stdafx_client.h"
 #include "pragma/input/inputhelper.h"
 
-module pragma.client.core.input_binding_layer;
+module pragma.client;
 
-import pragma.client.engine;
+
+import :core.input_binding_layer;
+import :engine;
 
 bool InputBindingLayer::Save(const std::vector<std::shared_ptr<InputBindingLayer>> &layers, udm::AssetDataArg outData, std::string &outErr)
 {

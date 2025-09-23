@@ -6,8 +6,11 @@ module;
 #include "stdafx_client.h"
 
 
-module pragma.client.util.smoke_trail;
+module pragma.client;
 
+
+
+import :util.smoke_trail;
 pragma::ecs::CParticleSystemComponent *util::create_smoke_trail_particle(float distance, float speed, float minSpriteSize, float maxSpriteSize, const std::string &material)
 {
 	std::unordered_map<std::string, std::string> values = {{"maxparticles", "150"}, {"emission_rate", "50"}, {"material", material}, {"sort_particles", "1"}};

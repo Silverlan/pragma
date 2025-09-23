@@ -5,9 +5,10 @@ module;
 
 #include "pragma/clientdefinitions.h"
 
-export module pragma.client.rendering.shaders:debug_text;
+export module pragma.client:rendering.shaders.debug_text;
 
 import :debug;
+import :rendering.shaders.debug;
 
 export namespace pragma {
 	class DLLCLIENT ShaderDebugText : public ShaderDebug {

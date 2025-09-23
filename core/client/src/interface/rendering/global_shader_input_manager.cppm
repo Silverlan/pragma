@@ -8,8 +8,9 @@ module;
 #include <string>
 #include <vector>
 
-export module pragma.client.rendering.global_shader_input_manager;
+export module pragma.client:rendering.global_shader_input_manager;
 
+import :rendering.shader_input_data;
 import pragma.shadergraph;
 
 export namespace pragma::rendering {

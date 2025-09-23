@@ -9,8 +9,10 @@ module;
 #include <util_image.hpp>
 #include <mpParser.h>
 
-module pragma.client.rendering.shader_material;
+module pragma.client;
 
+
+import :rendering.shader_material;
 static spdlog::logger &LOGGER = pragma::register_logger("shader_material");
 
 using namespace pragma::rendering::shader_material;

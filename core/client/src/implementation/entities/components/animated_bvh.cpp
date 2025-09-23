@@ -10,12 +10,12 @@ module;
 #include <pragma/debug/intel_vtune.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
-module pragma.client.entities.components;
+module pragma.client;
 
-import pragma.client.engine;
-import pragma.client.entities.components.animated_bvh;
+import :entities.components.animated_bvh;
+import :entities.components.model;
+import :engine;
 
-extern CEngine *c_engine;
 
 using namespace pragma;
 
@@ -208,7 +208,7 @@ void CAnimatedBvhComponent::RebuildAnimatedBvh(bool force, const std::vector<boo
 		m_rebuildScheduled = true;
 		if(m_cbRebuildScheduled.IsValid())
 			m_cbRebuildScheduled.Remove();
-		m_cbRebuildScheduled = c_engine->AddCallback("Think", FunctionCallback<void>::Create([this]() { RebuildAnimatedBvh(); }));
+		m_cbRebuildScheduled = pragma::get_cengine()->AddCallback("Think", FunctionCallback<void>::Create([this]() { RebuildAnimatedBvh(); }));
 		return;
 	}
 	if(m_cbRebuildScheduled.IsValid())

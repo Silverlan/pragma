@@ -8,8 +8,10 @@ module;
 #include <pragma/lua/classes/lproperty.hpp>
 #include <luabind/copy_policy.hpp>
 
-module pragma.client.scripting.lua.classes.world_environment;
+module pragma.client;
 
+
+import :scripting.lua.classes.world_environment;
 namespace Lua {
 	namespace WorldEnvironment {
 		static void SetAmbientColor(lua_State *l, ::WorldEnvironment &worldEnv, const Vector4 &ambientColor);
@@ -35,7 +37,7 @@ namespace Lua {
 		static void IsFogEnabled(lua_State *l, ::WorldEnvironment &worldEnv);
 		static void SetFogDensity(lua_State *l, ::WorldEnvironment &worldEnv, float density);
 		static void GetFogDensity(lua_State *l, ::WorldEnvironment &worldEnv);
-		static void SetFogType(lua_State *l, ::WorldEnvironment &worldEnv, util::FogType type);
+		static void SetFogType(lua_State *l, ::WorldEnvironment &worldEnv, ::util::FogType type);
 		static void GetFogType(lua_State *l, ::WorldEnvironment &worldEnv);
 		static void GetFogFarDistance(lua_State *l, ::WorldEnvironment &worldEnv);
 	};
@@ -74,9 +76,9 @@ void Lua::WorldEnvironment::register_class(luabind::class_<::WorldEnvironment> &
 	classDef.def("GetFogTypeProperty", static_cast<void (*)(lua_State *, std::shared_ptr<::WorldEnvironment> &)>([](lua_State *l, std::shared_ptr<::WorldEnvironment> &pEnv) { Lua::Property::push(l, *pEnv->GetFogSettings().GetTypeProperty()); }));
 	classDef.def("GetFogEnabledProperty", static_cast<void (*)(lua_State *, std::shared_ptr<::WorldEnvironment> &)>([](lua_State *l, std::shared_ptr<::WorldEnvironment> &pEnv) { Lua::Property::push(l, *pEnv->GetFogSettings().GetEnabledProperty()); }));
 
-	classDef.add_static_constant("FOG_TYPE_LINEAR", umath::to_integral(util::FogType::Linear));
-	classDef.add_static_constant("FOG_TYPE_EXPONENTIAL", umath::to_integral(util::FogType::Exponential));
-	classDef.add_static_constant("FOG_TYPE_EXPONENTIAL2", umath::to_integral(util::FogType::Exponential2));
+	classDef.add_static_constant("FOG_TYPE_LINEAR", umath::to_integral(::util::FogType::Linear));
+	classDef.add_static_constant("FOG_TYPE_EXPONENTIAL", umath::to_integral(::util::FogType::Exponential));
+	classDef.add_static_constant("FOG_TYPE_EXPONENTIAL2", umath::to_integral(::util::FogType::Exponential2));
 }
 
 ////////////////////////////////
@@ -131,7 +133,7 @@ void Lua::WorldEnvironment::GetFogDensity(lua_State *l, ::WorldEnvironment &worl
 	auto &fog = worldEnv.GetFogSettings();
 	Lua::PushNumber(l, fog.GetMaxDensity());
 }
-void Lua::WorldEnvironment::SetFogType(lua_State *l, ::WorldEnvironment &worldEnv, util::FogType type)
+void Lua::WorldEnvironment::SetFogType(lua_State *l, ::WorldEnvironment &worldEnv, ::util::FogType type)
 {
 	auto &fog = worldEnv.GetFogSettings();
 	fog.SetType(type);

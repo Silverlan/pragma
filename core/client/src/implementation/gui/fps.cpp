@@ -6,16 +6,14 @@ module;
 #include "stdafx_client.h"
 #include <wgui/types/witext.h>
 
-module pragma.client.gui;
+module pragma.client;
 
-import :fps;
+import :gui.fps;
 
-import pragma.client.client_state;
-import pragma.client.engine;
+import :client_state;
+import :engine;
 import pragma.string.unicode;
 
-extern CEngine *c_engine;
-extern ClientState *client;
 
 LINK_WGUI_TO_CLASS(WIFPS, WIFPS);
 
@@ -48,12 +46,12 @@ void WIFPS::Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd
 	WIBase::Think(drawCmd);
 	if(!m_text.IsValid())
 		return;
-	auto &tCur = client->RealTime();
+	auto &tCur = pragma::get_client_state()->RealTime();
 	if(tCur - m_tLastUpdate > 0.75) {
 		m_tLastUpdate = tCur;
-		auto fps = c_engine->GetFPS();
+		auto fps = pragma::get_cengine()->GetFPS();
 		if(fps != m_fpsLast) {
-			auto frameTime = c_engine->GetFrameTime();
+			auto frameTime = pragma::get_cengine()->GetFrameTime();
 			m_fpsLast = fps;
 			auto strFps = util::round_string(fps, 0);
 			auto l = strFps.length();

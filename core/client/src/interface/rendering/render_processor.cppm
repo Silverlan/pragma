@@ -4,10 +4,16 @@
 module;
 
 #include "pragma/clientdefinitions.h"
+#include "prosper_command_buffer.hpp"
 #include <mathutil/uvec.h>
 
-export module pragma.client.rendering.render_processor;
+export module pragma.client:rendering.render_processor;
 
+import :entities.components.scene;
+
+export namespace pragma {
+	class CVertexAnimatedComponent;
+};
 export namespace pragma::rendering {
 	enum class PassType : uint32_t {
 		Generic = 0u,

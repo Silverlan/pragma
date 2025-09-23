@@ -9,9 +9,10 @@ module;
 #include <pragma/util/util_bsp_tree.hpp>
 #include <unordered_map>
 
-export module pragma.client.entities.components.world;
+export module pragma.client:entities.components.world;
 
-import pragma.client.rendering.occlusion_culling;
+import :rendering.occlusion_culling;
+import :rendering.render_queue;
 
 #pragma warning(push)
 #pragma warning(disable : 4251)

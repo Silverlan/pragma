@@ -8,7 +8,7 @@ module;
 #include <string>
 #include <mathutil/uvec.h>
 
-export module pragma.client.gui:chromium_page;
+export module pragma.client:gui.chromium_page;
 
 namespace pragma {
 	class JSValue;

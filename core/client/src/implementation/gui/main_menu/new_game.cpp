@@ -15,20 +15,18 @@ module;
 #include <wgui/types/witext.h>
 #include <fsys/ifile.hpp>
 
-module pragma.client.gui;
+module pragma.client;
 
-import :main_menu_new_game;
-import :options_list;
-import :slider;
+import :gui.main_menu_new_game;
+import :gui.options_list;
+import :gui.slider;
 
-import pragma.client.client_state;
-import pragma.client.engine;
+import :client_state;
+import :engine;
 import pragma.gui;
 import pragma.locale;
 import pragma.string.unicode;
 
-extern CEngine *c_engine;
-extern ClientState *client;
 
 WIMainMenuNewGame::WIMainMenuNewGame() : WIMainMenuBase() {}
 
@@ -70,9 +68,9 @@ void WIMainMenuNewGame::OnStartGame(pragma::platform::MouseButton button, pragma
 	}
 	if(map.empty())
 		return;
-	c_engine->EndGame();
+	pragma::get_cengine()->EndGame();
 	pOptionsList->RunUpdateConVars(false);
-	c_engine->StartDefaultGame(map, maxPlayers <= 1);
+	pragma::get_cengine()->StartDefaultGame(map, maxPlayers <= 1);
 }
 
 void WIMainMenuNewGame::Initialize()
@@ -140,8 +138,8 @@ void WIMainMenuNewGame::ReloadMapList()
 		uniqueFiles.insert(std::move(f));
 	}
 
-	if(c_engine->GetConVarBool("sh_mount_external_game_resources")) {
-		auto dllHandle = util::initialize_external_archive_manager(client);
+	if(pragma::get_cengine()->GetConVarBool("sh_mount_external_game_resources")) {
+		auto dllHandle = util::initialize_external_archive_manager(pragma::get_client_state());
 		if(dllHandle) {
 			auto *fFindFiles = dllHandle->FindSymbolAddress<void (*)(const std::string &, std::vector<std::string> *, std::vector<std::string> *)>("find_files");
 			if(fFindFiles) {
@@ -261,7 +259,7 @@ void WIMainMenuNewGame::InitializeGameSettings()
 	pMap->SetName("map");
 	m_hMapList = pMap->GetHandle();
 
-	auto &resourceWatcher = client->GetResourceWatcher();
+	auto &resourceWatcher = pragma::get_client_state()->GetResourceWatcher();
 	if(m_cbMapListReload.IsValid())
 		m_cbMapListReload.Remove();
 	m_cbMapListReload = resourceWatcher.AddChangeCallback(EResourceWatcherCallbackType::Map, [this](std::reference_wrapper<const std::string> fileName, std::reference_wrapper<const std::string> ext) { ReloadMapList(); });

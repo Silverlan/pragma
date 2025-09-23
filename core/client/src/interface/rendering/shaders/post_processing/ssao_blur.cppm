@@ -6,7 +6,7 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <shader/prosper_shader_base_image_processing.hpp>
 
-export module pragma.client.rendering.shaders:ssao_blur;
+export module pragma.client:rendering.shaders.ssao_blur;
 
 export namespace pragma {
 	class DLLCLIENT ShaderSSAOBlur : public prosper::ShaderBaseImageProcessing {

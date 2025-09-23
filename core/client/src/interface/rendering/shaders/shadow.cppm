@@ -3,9 +3,17 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
+#include "cmaterial.h"
 
-export module pragma.client.rendering.shaders:shadow;
+export module pragma.client:rendering.shaders.shadow;
 
+import :rendering.shaders.scene;
+
+export namespace pragma {
+	class CSceneComponent;
+	class CLightComponent;
+};
 export namespace pragma {
 	class DLLCLIENT ShaderShadow : public ShaderGameWorld {
 	  public:

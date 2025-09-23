@@ -12,13 +12,12 @@ module;
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
 
-module pragma.client.rendering.shaders;
+module pragma.client;
 
-import :cubemap_to_equirectangular;
+import :rendering.shaders.cubemap_to_equirectangular;
 
-import pragma.client.engine;
+import :engine;
 
-extern CEngine *c_engine;
 
 using namespace pragma;
 
@@ -50,7 +49,7 @@ std::shared_ptr<prosper::IImage> ShaderCubemapToEquirectangular::CreateEquirecta
 	createInfo.usage = prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::TransferSrcBit | prosper::ImageUsageFlags::TransferDstBit;
 	createInfo.postCreateLayout = prosper::ImageLayout::ShaderReadOnlyOptimal;
 
-	return c_engine->GetRenderContext().CreateImage(createInfo);
+	return pragma::get_cengine()->GetRenderContext().CreateImage(createInfo);
 }
 
 std::shared_ptr<prosper::RenderTarget> ShaderCubemapToEquirectangular::CreateEquirectangularRenderTarget(uint32_t width, uint32_t height, prosper::util::ImageCreateInfo::Flags flags, bool hdr) const
@@ -63,11 +62,11 @@ std::shared_ptr<prosper::RenderTarget> ShaderCubemapToEquirectangular::CreateEqu
 
 	prosper::util::TextureCreateInfo texCreateInfo {};
 	//InitializeTextureCreateInfo(texCreateInfo);
-	auto tex = c_engine->GetRenderContext().CreateTexture(texCreateInfo, *img, imgViewCreateInfo, samplerCreateInfo);
+	auto tex = pragma::get_cengine()->GetRenderContext().CreateTexture(texCreateInfo, *img, imgViewCreateInfo, samplerCreateInfo);
 
 	prosper::util::RenderTargetCreateInfo rtCreateInfo {};
 	//rtCreateInfo.useLayerFramebuffers = true;
-	auto rt = c_engine->GetRenderContext().CreateRenderTarget({tex}, GetRenderPass(), rtCreateInfo);
+	auto rt = pragma::get_cengine()->GetRenderContext().CreateRenderTarget({tex}, GetRenderPass(), rtCreateInfo);
 	if(rt)
 		rt->SetDebugName("equirectangular_render_target");
 	return rt;
@@ -82,18 +81,18 @@ std::shared_ptr<prosper::Texture> ShaderCubemapToEquirectangular::CubemapToEquir
 	auto format = cubemap.GetImage().GetFormat();
 
 	// Shader input
-	auto dsg = c_engine->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_TEXTURE);
+	auto dsg = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_TEXTURE);
 	dsg->GetDescriptorSet()->SetBindingTexture(cubemap, 0u);
 
 	// Shader execution
-	auto &setupCmd = c_engine->GetSetupCommandBuffer();
+	auto &setupCmd = pragma::get_cengine()->GetSetupCommandBuffer();
 	if(cubemapLayout != prosper::ImageLayout::ShaderReadOnlyOptimal)
 		setupCmd->RecordImageBarrier(cubemap.GetImage(), cubemapLayout, prosper::ImageLayout::ShaderReadOnlyOptimal);
 	setupCmd->RecordImageBarrier(rt->GetTexture().GetImage(), prosper::ImageLayout::ShaderReadOnlyOptimal, prosper::ImageLayout::ColorAttachmentOptimal);
 	auto success = true;
 
-	auto vertBuffer = c_engine->GetRenderContext().GetCommonBufferCache().GetSquareVertexBuffer();
-	auto uvBuffer = c_engine->GetRenderContext().GetCommonBufferCache().GetSquareUvBuffer();
+	auto vertBuffer = pragma::get_cengine()->GetRenderContext().GetCommonBufferCache().GetSquareVertexBuffer();
+	auto uvBuffer = pragma::get_cengine()->GetRenderContext().GetCommonBufferCache().GetSquareUvBuffer();
 	auto numVerts = prosper::CommonBufferCache::GetSquareVertexCount();
 
 	if(setupCmd->RecordBeginRenderPass(*rt) == false)

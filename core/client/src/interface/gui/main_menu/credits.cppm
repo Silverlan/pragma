@@ -7,10 +7,10 @@ module;
 #include <wgui/types/wirect.h>
 #include <wgui/types/witext.h>
 
-export module pragma.client.gui:main_menu_credits;
+export module pragma.client:gui.main_menu_credits;
 
-import :chromium_page;
-import :main_menu_base;
+import :gui.chromium_page;
+import :gui.main_menu_base;
 
 export {
 	class DLLCLIENT WIMainMenuCredits : public WIMainMenuBase {

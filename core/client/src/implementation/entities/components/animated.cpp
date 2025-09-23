@@ -19,15 +19,14 @@ module;
 #include <pragma/lua/converters/vector_converter_t.hpp>
 #include <pragma/lua/lua_util_component_stream.hpp>
 
-module pragma.client.entities.components.animated;
+module pragma.client;
 
-import pragma.client.engine;
-import pragma.client.entities.components.particle_system;
-import pragma.client.entities.components.render;
-import pragma.client.entities.components.vertex_animated;
-import pragma.client.scripting.lua;
-
-extern CEngine *c_engine;
+import :entities.components.animated;
+import :engine;
+import :entities.components.particle_system;
+import :entities.components.render;
+import :entities.components.vertex_animated;
+import :scripting.lua.libraries.vulkan;
 
 using namespace pragma;
 
@@ -63,7 +62,7 @@ void pragma::initialize_articulated_buffers()
 #ifdef ENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER
 	createInfo.usageFlags |= prosper::BufferUsageFlags::StorageBufferBit;
 #endif
-	s_instanceBoneBuffer = c_engine->GetRenderContext().CreateUniformResizableBuffer(createInfo, instanceSize, instanceSize * maxInstanceCount, 0.05f);
+	s_instanceBoneBuffer = pragma::get_cengine()->GetRenderContext().CreateUniformResizableBuffer(createInfo, instanceSize, instanceSize * maxInstanceCount, 0.05f);
 	s_instanceBoneBuffer->SetDebugName("entity_anim_bone_buf");
 
 	if constexpr(CRenderComponent::USE_HOST_MEMORY_FOR_RENDER_DATA)

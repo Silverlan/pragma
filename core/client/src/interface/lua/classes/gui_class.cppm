@@ -14,7 +14,6 @@ module;
 #include <wgui/types/widropdownmenu.h>
 #include "pragma/lua/classes/c_ldef_wgui.h"
 #include "pragma/lua/policies/gui_element_policy.hpp"
-#include "pragma/lua/converters/shader_converter_t.hpp"
 #include <pragma/lua/classes/ldef_vector.h>
 #include <pragma/lua/classes/lproperty.hpp>
 #include <pragma/lua/policies/default_parameter_policy.hpp>
@@ -39,9 +38,8 @@ module;
 #include <luabind/copy_policy.hpp>
 #include <pragma/debug/intel_vtune.hpp>
 
-export module pragma.client.scripting.lua.classes.gui;
-
-import pragma.client.gui;
+export module pragma.client:scripting.lua.classes.gui;
+import :gui;
 import pragma.gui;
 
 export namespace Lua {

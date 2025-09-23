@@ -8,8 +8,10 @@ module;
 #include <pragma/lua/libraries/lai.hpp>
 #include <luainterface.hpp>
 
-module pragma.client.scripting.lua.libraries.ai;
+module pragma.client;
 
+
+import :scripting.lua.libraries.ai;
 void Lua::ai::client::register_library(Lua::Interface &lua)
 {
 	auto &modAi = lua.RegisterLibrary("ai");

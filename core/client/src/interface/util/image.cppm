@@ -9,8 +9,7 @@ module;
 #include <image/prosper_image.hpp>
 #include <util_image_buffer.hpp>
 
-export module pragma.client.util.image;
-
+export module pragma.client:util.image;
 export namespace util {
 	struct ToImageBufferInfo {
 		bool includeLayers = false;

@@ -5,9 +5,9 @@ module;
 
 #include "stdafx_client.h"
 
-module pragma.client.rendering.shader_graph;
+module pragma.client;
 
-import :node_toon;
+import :rendering.shader_graph.node_toon;
 
 using namespace pragma::rendering::shader_graph;
 ToonNode::ToonNode(const std::string_view &type) : Node {type, pragma::shadergraph::CATEGORY_SHADER}

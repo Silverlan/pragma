@@ -14,24 +14,22 @@ module;
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <cmaterial.h>
 
-module pragma.client.entities.components.world;
+module pragma.client;
 
-import pragma.client.engine;
-import pragma.client.entities.components;
-import pragma.client.game;
+import :entities.components.world;
+import :engine;
+import :game;
 import source_engine.bsp;
 
 using namespace pragma;
 
-extern CEngine *c_engine;
-extern CGame *c_game;
 
 void CWorldComponent::Initialize()
 {
 	BaseWorldComponent::Initialize();
 
 	BindEventUnhandled(CModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		c_game->UpdateEnvironmentLightSource();
+		pragma::get_cgame()->UpdateEnvironmentLightSource();
 
 		m_lodBaseMeshIds.clear();
 		auto &ent = GetEntity();
@@ -66,14 +64,14 @@ void CWorldComponent::Initialize()
 #if 0
 	BindEventUnhandled(CColorComponent::EVENT_ON_COLOR_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		auto &onColorChangedData = static_cast<pragma::CEOnColorChanged &>(evData.get());
-		EntityIterator entIt {*c_game};
+		EntityIterator entIt {*pragma::get_cgame()};
 		entIt.AttachFilter<TEntityIteratorFilterComponent<CLightDirectionalComponent>>();
 		for(auto *ent : entIt) {
 			auto pToggleComponent = ent->GetComponent<CToggleComponent>();
 			if(pToggleComponent.valid() && pToggleComponent->IsTurnedOn())
 				return; // Ambient color already defined by environmental light entity
 		}
-		c_game->GetWorldEnvironment().SetAmbientColor(onColorChangedData.color.ToVector4());
+		pragma::get_cgame()->GetWorldEnvironment().SetAmbientColor(onColorChangedData.color.ToVector4());
 	});
 #endif
 	//BindEventUnhandled(CModelComponent::EVENT_ON_RENDER_MESHES_UPDATED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
@@ -100,7 +98,7 @@ void CWorldComponent::OnTick(double tDelta)
 }
 void CWorldComponent::ReloadCHCController()
 {
-	/*auto &scene = c_game->GetScene();
+	/*auto &scene = pragma::get_cgame()->GetScene();
 	auto &cam = scene->GetCamera();
 	m_chcController = std::make_shared<CHC>(*cam);
 	m_chcController->Reset(m_meshTree);*/ // prosper TODO
@@ -165,7 +163,7 @@ const pragma::rendering::RenderQueue *CWorldComponent::GetClusterRenderQueue(::u
 
 void CWorldComponent::RebuildRenderQueues()
 {
-	c_game->UpdateEnvironmentLightSource();
+	pragma::get_cgame()->UpdateEnvironmentLightSource();
 
 	m_lodBaseMeshIds.clear();
 	auto &ent = GetEntity();
@@ -274,7 +272,7 @@ void CWorldComponent::BuildOfflineRenderQueues(bool rebuild)
 	clusterRenderTranslucentQueues.resize(numClusters);
 	BS::thread_pool tp {std::thread::hardware_concurrency()};
 	std::atomic<bool> failure {false};
-	auto &context = c_engine->GetRenderContext();
+	auto &context = pragma::get_cengine()->GetRenderContext();
 	tp.submit_blocks<size_t>(0u, meshesPerClusters.size(), [&](size_t start, size_t end) {
 		for(auto clusterIdx = start; clusterIdx < end; ++clusterIdx) {
 			if(failure == true)

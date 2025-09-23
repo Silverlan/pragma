@@ -6,7 +6,9 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/environment/effects/env_explosion.h"
 
-export module pragma.client.entities.components.effects.explosion;
+export module pragma.client:entities.components.effects.explosion;
+
+import :entities.base_entity;
 
 export namespace pragma {
 	class DLLCLIENT CExplosionComponent final : public BaseEnvExplosionComponent {

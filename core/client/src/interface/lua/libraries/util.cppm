@@ -9,9 +9,11 @@ module;
 #include <sharedutils/util_parallel_job.hpp>
 #include <mathutil/uvec.h>
 
-export module pragma.client.scripting.lua.libraries.util;
+export module pragma.client:scripting.lua.libraries.util;
 
-import pragma.client.rendering.lightmap_data_cache;
+import :entities.components.camera;
+import :entities.components.lights.light;
+import :rendering.lightmap_data_cache;
 
 export namespace Lua {
 	namespace util {

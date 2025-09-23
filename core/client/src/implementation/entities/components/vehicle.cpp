@@ -16,17 +16,18 @@ module;
 #include <pragma/lua/lua_util_component_stream.hpp>
 #include <pragma/lua/lentity_components_base_types.hpp>
 
-module pragma.client.entities.components.vehicle;
+module pragma.client;
 
-import pragma.client.entities.components.observable;
-import pragma.client.entities.components.observer;
-import pragma.client.entities.components.render;
-import pragma.client.entities.components.view_body;
-import pragma.client.game;
+
+import :entities.components.vehicle;
+import :entities.components.observable;
+import :entities.components.observer;
+import :entities.components.render;
+import :entities.components.view_body;
+import :game;
 
 using namespace pragma;
 
-extern CGame *c_game;
 
 std::vector<CVehicleComponent *> CVehicleComponent::s_vehicles;
 const std::vector<CVehicleComponent *> &CVehicleComponent::GetAll() { return s_vehicles; }
@@ -118,15 +119,15 @@ void CVehicleComponent::ClearDriver()
 	if(entDriver != nullptr && entDriver->IsPlayer()) {
 		auto plComponent = entDriver->GetPlayerComponent();
 		if(plComponent->IsLocalPlayer()) {
-			c_game->EnableRenderMode(pragma::rendering::SceneRenderPass::View);
-			auto *vb = c_game->GetViewBody<pragma::CViewBodyComponent>();
+			pragma::get_cgame()->EnableRenderMode(pragma::rendering::SceneRenderPass::View);
+			auto *vb = pragma::get_cgame()->GetViewBody<pragma::CViewBodyComponent>();
 			if(vb != nullptr) {
 				auto pRenderComponent = static_cast<CBaseEntity &>(vb->GetEntity()).GetRenderComponent();
 				if(pRenderComponent)
 					pRenderComponent->SetSceneRenderPass(pragma::rendering::SceneRenderPass::View);
 			}
 
-			auto *cam = c_game->GetPrimaryCamera<pragma::CCameraComponent>();
+			auto *cam = pragma::get_cgame()->GetPrimaryCamera<pragma::CCameraComponent>();
 			if(cam) {
 				auto observerC = cam->GetEntity().GetComponent<CObserverComponent>();
 				if(observerC.valid()) {
@@ -146,8 +147,8 @@ void CVehicleComponent::SetDriver(BaseEntity *ent)
 	BaseVehicleComponent::SetDriver(ent);
 	if(!ent->IsPlayer() || !ent->GetPlayerComponent()->IsLocalPlayer())
 		return;
-	c_game->DisableRenderMode(pragma::rendering::SceneRenderPass::View);
-	auto *vb = c_game->GetViewBody<pragma::CViewBodyComponent>();
+	pragma::get_cgame()->DisableRenderMode(pragma::rendering::SceneRenderPass::View);
+	auto *vb = pragma::get_cgame()->GetViewBody<pragma::CViewBodyComponent>();
 	if(vb != nullptr) {
 		auto pRenderComponent = static_cast<CBaseEntity &>(vb->GetEntity()).GetRenderComponent();
 		if(pRenderComponent)

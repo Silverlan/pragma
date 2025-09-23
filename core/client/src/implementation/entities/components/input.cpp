@@ -8,12 +8,12 @@ module;
 #include <wgui/wgui.h>
 #include <prosper_window.hpp>
 
-import pragma.client.engine;
-module pragma.client.entities.components.input;
+module pragma.client;
 
+import :engine;
+import :entities.components.input;
 using namespace pragma;
 
-extern CEngine *c_engine;
 
 CInputComponent::CInputComponent(BaseEntity &ent) : BaseEntityComponent {ent} {}
 CInputComponent::~CInputComponent() {}

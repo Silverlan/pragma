@@ -10,6 +10,7 @@ module;
 #include "pragma/console/c_cvar_global_functions.h"
 //#include "shader_gaussianblur.h" // prosper TODO
 #include "pragma/entities/baseentity.h"
+#include "pragma/model/modelmesh.h"
 #include "pragma/entities/components/base_player_component.hpp"
 #include <pragma/lua/luacallback.h>
 #include "luasystem.h"
@@ -32,21 +33,20 @@ module;
 #include <pragma/entities/components/component_member_flags.hpp>
 #include <pragma/entities/entity_component_manager_t.hpp>
 
-module pragma.client.game;
+module pragma.client;
 
-import pragma.client.client_state;
-import pragma.client.debug;
-import pragma.client.engine;
-import pragma.client.entities.components;
-import pragma.client.gui;
-import pragma.client.model;
-import pragma.client.physics;
-import pragma.client.rendering.shaders;
-import pragma.client.scripting.lua;
 
-extern CEngine *c_engine;
-extern ClientState *client;
-extern CGame *c_game;
+import :game;
+import :client_state;
+import :debug;
+import :engine;
+import :entities.components;
+import :gui;
+import :model;
+import :physics;
+import :rendering.shaders;
+import :scripting.lua;
+
 
 static void CVAR_CALLBACK_render_vsync_enabled(NetworkState *, const ConVar &, int, int val) { pragma::platform::set_swap_interval((val == 0) ? 0 : 1); }
 REGISTER_CONVAR_CALLBACK_CL(render_vsync_enabled, CVAR_CALLBACK_render_vsync_enabled);
@@ -59,14 +59,14 @@ static void CVAR_CALLBACK_debug_physics_draw(NetworkState *, const ConVar &, int
 		cbDrawPhysics.Remove();
 	if(cbDrawPhysicsEnd.IsValid())
 		cbDrawPhysicsEnd.Remove();
-	//auto *physEnv = c_game->GetPhysicsEnvironment();
+	//auto *physEnv = pragma::get_cgame()->GetPhysicsEnvironment();
 	Game *game;
 	if(serverside) {
-		auto *nw = c_engine->GetServerNetworkState();
+		auto *nw = pragma::get_cengine()->GetServerNetworkState();
 		game = nw ? nw->GetGameState() : nullptr;
 	}
 	else
-		game = c_game;
+		game = pragma::get_cgame();
 	if(game == nullptr)
 		return;
 	auto *physEnv = game->GetPhysicsEnvironment();
@@ -83,14 +83,14 @@ static void CVAR_CALLBACK_debug_physics_draw(NetworkState *, const ConVar &, int
 		visDebugger->SetDebugMode(pragma::physics::IVisualDebugger::DebugMode::None);
 		return;
 	}*/
-	cbDrawPhysics = c_game->AddCallback("Think", FunctionCallback<>::Create([serverside]() {
+	cbDrawPhysics = pragma::get_cgame()->AddCallback("Think", FunctionCallback<>::Create([serverside]() {
 		Game *game;
 		if(serverside) {
-			auto *nw = c_engine->GetServerNetworkState();
+			auto *nw = pragma::get_cengine()->GetServerNetworkState();
 			game = nw ? nw->GetGameState() : nullptr;
 		}
 		else
-			game = c_game;
+			game = pragma::get_cgame();
 		if(game == nullptr)
 			return;
 		auto *physEnv = game->GetPhysicsEnvironment();
@@ -116,7 +116,7 @@ static void CVAR_CALLBACK_debug_physics_draw(NetworkState *, const ConVar &, int
 #endif
 		}
 	}));
-	cbDrawPhysicsEnd = c_game->AddCallback("OnGameEnd", FunctionCallback<>::Create([]() {
+	cbDrawPhysicsEnd = pragma::get_cgame()->AddCallback("OnGameEnd", FunctionCallback<>::Create([]() {
 		cbDrawPhysics.Remove();
 		cbDrawPhysicsEnd.Remove();
 	}));
@@ -142,7 +142,7 @@ void Console::commands::debug_render_validation_error_enabled(NetworkState *stat
 	auto enabled = true;
 	if(argv.size() > 1)
 		enabled = util::to_boolean(argv[1]);
-	c_engine->SetValidationErrorDisabled(id, !enabled);
+	pragma::get_cengine()->SetValidationErrorDisabled(id, !enabled);
 }
 
 static void print_component_properties(const pragma::ComponentMemberInfo &memberInfo, pragma::BaseEntityComponent &component)
@@ -261,7 +261,7 @@ void Console::commands::debug_dump_component_properties(NetworkState *state, pra
 
 void Console::commands::debug_render_depth_buffer(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
-	c_engine->GetRenderContext().WaitIdle();
+	pragma::get_cengine()->GetRenderContext().WaitIdle();
 	static std::unique_ptr<DebugGameGUI> dbg = nullptr;
 	if(dbg) {
 		dbg = nullptr;
@@ -286,7 +286,7 @@ void Console::commands::debug_render_depth_buffer(NetworkState *state, pragma::B
 			scene = sceneC.get();
 		}
 		else
-			scene = c_game->GetScene<pragma::CSceneComponent>();
+			scene = pragma::get_cgame()->GetScene<pragma::CSceneComponent>();
 		auto *renderer = scene ? scene->GetRenderer<pragma::CRendererComponent>() : nullptr;
 		auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : pragma::ComponentHandle<pragma::CRasterizationRendererComponent> {};
 		if(raster.expired())
@@ -339,10 +339,10 @@ void CGame::RenderScenes(util::DrawSceneInfo &drawSceneInfo)
 	// only be updated if visible (?)
 	auto &cmd = *drawSceneInfo.commandBuffer;
 	EntityIterator itParticles {*this};
-	itParticles.AttachFilter<TEntityIteratorFilterComponent<pragma::CParticleSystemComponent>>();
+	itParticles.AttachFilter<TEntityIteratorFilterComponent<pragma::ecs::CParticleSystemComponent>>();
 	for(auto *ent : itParticles) {
 		auto &tDelta = DeltaTime();
-		auto pt = ent->GetComponent<pragma::CParticleSystemComponent>();
+		auto pt = ent->GetComponent<pragma::ecs::CParticleSystemComponent>();
 		if(pt.valid() && pt->GetParent() == nullptr && pt->ShouldAutoSimulate()) {
 			pt->Simulate(tDelta);
 
@@ -572,14 +572,14 @@ void CGame::RenderScenes(const std::vector<util::DrawSceneInfo> &drawSceneInfos)
 				drawSceneInfo.renderFlags &= ~RenderFlags::Particles;
 
 			if(drawSceneInfo.commandBuffer == nullptr)
-				drawSceneInfo.commandBuffer = c_engine->GetRenderContext().GetWindow().GetDrawCommandBuffer();
+				drawSceneInfo.commandBuffer = pragma::get_cengine()->GetRenderContext().GetWindow().GetDrawCommandBuffer();
 			// Modify render flags depending on console variables
 			auto &renderFlags = drawSceneInfo.renderFlags;
 			auto drawWorld = cvDrawWorld->GetBool();
 			if(drawWorld == false)
 				umath::set_flag(renderFlags, RenderFlags::World, false);
 
-			auto *pl = c_game->GetLocalPlayer();
+			auto *pl = pragma::get_cgame()->GetLocalPlayer();
 			if(pl == nullptr || pl->IsInFirstPersonMode() == false)
 				umath::set_flag(renderFlags, RenderFlags::View, false);
 
@@ -652,11 +652,11 @@ void CGame::RenderScenes(const std::vector<util::DrawSceneInfo> &drawSceneInfos)
 			auto *renderer = scene->GetRenderer<pragma::CRendererComponent>();
 			auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : pragma::ComponentHandle<pragma::CRasterizationRendererComponent> {};
 			if(raster.valid()) {
-				//c_engine->StartGPUTimer(GPUTimerEvent::UpdateExposure); // prosper TODO
-				auto frame = c_engine->GetRenderContext().GetLastFrameId();
+				//pragma::get_cengine()->StartGPUTimer(GPUTimerEvent::UpdateExposure); // prosper TODO
+				auto frame = pragma::get_cengine()->GetRenderContext().GetLastFrameId();
 				if(frame > 0)
 					raster->GetHDRInfo().UpdateExposure();
-				//c_engine->StopGPUTimer(GPUTimerEvent::UpdateExposure); // prosper TODO
+				//pragma::get_cengine()->StopGPUTimer(GPUTimerEvent::UpdateExposure); // prosper TODO
 			}
 			// TODO
 #if 0

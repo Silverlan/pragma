@@ -4,21 +4,20 @@
 module;
 
 #include "stdafx_client.h"
+#include "pragma/console/c_cvar.h"
 #include <pragma/console/convars.h>
 #include <pragma/math/intersection.h>
 #include <wgui/types/wirect.h>
 
-module pragma.client.rendering.occlusion_culling;
+module pragma.client;
 
-import :chc;
+import :rendering.occlusion_culling.chc;
 
-import pragma.client.engine;
-import pragma.client.game;
+import :engine;
+import :game;
 
 DEFINE_BASE_HANDLE(DLLCLIENT, CHCNode, CHCNode);
 
-extern CEngine *c_engine;
-extern CGame *c_game;
 static const uint32_t maxPrevInvisNodeBatchSize = 50;
 
 #ifdef CHC_DEBUGGING_ENABLED
@@ -113,7 +112,7 @@ void CHC::OnRenderNodeDestroyed(std::reference_wrapper<const BaseOcclusionOctree
 #ifdef CHC_DEBUGGING_ENABLED
 void CHC::DebugRender(CHCNode *, bool)
 {
-	/*static ShaderOcclusion *shader = static_cast<ShaderOcclusion*>(c_game->GetShader("occlusion"));
+	/*static ShaderOcclusion *shader = static_cast<ShaderOcclusion*>(pragma::get_cgame()->GetShader("occlusion"));
 	auto *renderNode = node->GetRenderNode();
 	auto buffer = renderNode->GetBuffer();
 	auto bufFramePrev = OpenGL::GetInt(GL_FRAMEBUFFER_BINDING);
@@ -122,7 +121,7 @@ void CHC::DebugRender(CHCNode *, bool)
 	unsigned int frameBuffer = chc_debug_draw->GetDebugQueryFrameBuffer();
 	unsigned int texture = chc_debug_draw->GetDebugQueryDepthTexture();
 	unsigned int elBuffer = chc_debug_draw->m_octree->GetVertexIndexBuffer();
-	Camera *cam = c_game->GetRenderTarget();
+	Camera *cam = pragma::get_cgame()->GetRenderTarget();
 	OpenGL::BindFrameBuffer(frameBuffer);
 	int w,h;
 	OpenGL::GetViewportSize(&w,&h);
@@ -132,30 +131,30 @@ void CHC::DebugRender(CHCNode *, bool)
 
 	// Screen
 	OpenGL::SetColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_FALSE);
-	static ShaderDebugDepthBuffer *shaderDepth = static_cast<ShaderDebugDepthBuffer*>(c_game->GetShader("debugdepthbuffer"));
+	static ShaderDebugDepthBuffer *shaderDepth = static_cast<ShaderDebugDepthBuffer*>(pragma::get_cgame()->GetShader("debugdepthbuffer"));
 	unsigned int frameBufferScreen = chc_debug_draw->GetDebugQueryScreenFrameBuffer();
 	//unsigned int textureScreen = chc_debug_draw->GetDebugQueryScreenDepthTexture();
 	OpenGL::BindFrameBuffer(frameBufferScreen);
-	shaderDepth->Render(GL_TEXTURE_2D,texture,c_game->GetScreenVertexBuffer(),CUInt32(cam->GetZNear()),1024);//cam->GetZFar());
+	shaderDepth->Render(GL_TEXTURE_2D,texture,pragma::get_cgame()->GetScreenVertexBuffer(),CUInt32(cam->GetZNear()),1024);//cam->GetZFar());
 
 	OpenGL::SetColorMask(GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE);
 	//
 
 	// Overhead
 	Camera *camDebug = chc_debug_draw->GetDebugQueryOverheadCamera();
-	c_game->SetRenderTarget(camDebug);
-	c_game->BindRenderTarget(camDebug);
+	pragma::get_cgame()->SetRenderTarget(camDebug);
+	pragma::get_cgame()->BindRenderTarget(camDebug);
 
 	if(node->IsVisible())
 		OpenGL::SetColorMask(GL_TRUE,GL_TRUE,(node->IsLeaf() == true) ? GL_FALSE : GL_TRUE,GL_FALSE);
 	else
 		OpenGL::SetColorMask(GL_TRUE,GL_FALSE,GL_FALSE,GL_FALSE);
-	static ShaderDebug *shaderDebug = static_cast<ShaderDebug*>(c_game->GetShader("debug"));
+	static ShaderDebug *shaderDebug = static_cast<ShaderDebug*>(pragma::get_cgame()->GetShader("debug"));
 	auto frameBufferOverhead = chc_debug_draw->GetDebugQueryOverheadFrameBuffer();
 	OpenGL::BindFrameBuffer(frameBufferOverhead);
 	shaderDebug->Render(buffer,elBuffer,36,GL_LINES,Vector4(1.f,1.f,1.f,1.f));
-	c_game->SetRenderTarget(cam);
-	c_game->BindRenderTarget(cam);
+	pragma::get_cgame()->SetRenderTarget(cam);
+	pragma::get_cgame()->BindRenderTarget(cam);
 	OpenGL::SetColorMask(GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE);
 	//
 	OpenGL::Disable(GL_CULL_FACE);
@@ -204,7 +203,7 @@ void CHC::DebugRender()
 			OpenGL::BindBuffer(m_debugMeshVertexBuffer);
 			OpenGL::BindBufferSubData(0,sizeof(Vector3) *8,&verts[0][0]);
 
-			static ShaderDebug *shader = static_cast<ShaderDebug*>(c_game->GetShader("debug"));
+			static ShaderDebug *shader = static_cast<ShaderDebug*>(pragma::get_cgame()->GetShader("debug"));
 			shader->Render(m_debugMeshVertexBuffer,indexBuffer,36,GL_TRIANGLES,ent->IsWorld() ? colWorld : col);
 		}
 	}
@@ -252,7 +251,7 @@ void CHC::SetDrawDebugTexture(bool b)
 
 			m_debugQueryDepthOverheadFrameBuffer->AttachTexture(m_debugQueryDepthOverheadScreenTexture.get());
 
-			auto &scene = c_game->GetScene();
+			auto &scene = pragma::get_cgame()->GetScene();
 			auto &cam = scene->camera;
 			m_debugQueryDepthOverheadCamera = Camera::Create(*cam.get());
 			auto *debugCamera = m_debugQueryDepthOverheadCamera.get();
@@ -282,17 +281,17 @@ void CHC::SetDrawDebugTexture(bool b)
 			OpenGL::BindFrameBuffer(0);
 			//
 
-			WIRect *bg = c_game->CreateGUIElement<WIRect>();
+			WIRect *bg = pragma::get_cgame()->CreateGUIElement<WIRect>();
 			bg->SetColor(0.f,0.f,0.f,1.f);
 			bg->SetSize(Vector2i(size *2,size));
 			bg->SetPos(Vector2i(size,0));
 
-			WITexturedRect *rect = c_game->CreateGUIElement<WITexturedRect>(bg);
+			WITexturedRect *rect = pragma::get_cgame()->CreateGUIElement<WITexturedRect>(bg);
 			rect->SetSize(Vector2i(size,size));
 			rect->SetPos(Vector2i(0,0));
 			//rect->SetTexture(m_debugQueryDepthScreenTexture.get()); // Vulkan TODO
 
-			WITexturedRect *rectOverhead = c_game->CreateGUIElement<WITexturedRect>(bg);
+			WITexturedRect *rectOverhead = pragma::get_cgame()->CreateGUIElement<WITexturedRect>(bg);
 			rectOverhead->SetSize(Vector2i(size,size));
 			rectOverhead->SetPos(Vector2i(size,0));
 			//rectOverhead->SetTexture(m_debugQueryDepthOverheadScreenTexture.get()); // Vulkan TODO
@@ -396,14 +395,14 @@ void CHC::IssueMultiQueries()
 {
 	// prosper TODO
 #if 0
-	static auto hShader = c_engine->GetShader("occlusion");
+	static auto hShader = pragma::get_cengine()->GetShader("occlusion");
 	if(hShader.IsValid() == false)
 		return;
 	if(m_invisQueue.empty())
 		return;
 
 		// Occlusion Query Test
-	auto &context = c_engine->GetRenderContext();
+	auto &context = pragma::get_cengine()->GetRenderContext();
 	auto &drawCmd = context.GetDrawCmd();
 
 	if(pool == nullptr)
@@ -549,7 +548,7 @@ std::vector<CHCMeshInfo> &CHC::PerformCulling()
 		//auto bufFramePrev = OpenGL::GetInt(GL_FRAMEBUFFER_BINDING);
 		/*glClearDepth(1.f);
 
-		auto &scene = c_game->GetScene();
+		auto &scene = pragma::get_cgame()->GetScene();
 		auto &camScene = scene->camera;
 		Vector3 debugPos = camScene->GetPos();
 		auto forward = camScene->GetForward();
@@ -563,11 +562,11 @@ std::vector<CHCMeshInfo> &CHC::PerformCulling()
 		camDebug->SetPos(debugPos);
 		camDebug->UpdateViewMatrix();*/ // prosper TODO
 
-		/*static ShaderDebug *shader = static_cast<ShaderDebug*>(c_game->GetShader("debug"));
+		/*static ShaderDebug *shader = static_cast<ShaderDebug*>(pragma::get_cgame()->GetShader("debug"));
 		m_debugQueryDepthOverheadFrameBuffer->Bind();
-		auto *cam = c_game->GetRenderTarget();
-		c_game->SetRenderTarget(camDebug);
-		c_game->BindRenderTarget(camDebug);
+		auto *cam = pragma::get_cgame()->GetRenderTarget();
+		pragma::get_cgame()->SetRenderTarget(camDebug);
+		pragma::get_cgame()->BindRenderTarget(camDebug);
 
 		std::vector<Vector3> points;
 		Vector3 viewDir = camDebug->GetForward();
@@ -590,13 +589,13 @@ std::vector<CHCMeshInfo> &CHC::PerformCulling()
 		shader->Render(m_debugFrustumBuffer,4,GL_QUADS,Vector4(1.f,0.f,0.f,1.f)); // Doesn't render view frustum; Why?
 		//OpenGL::SetColorMask(GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE);
 
-		c_game->SetRenderTarget(cam);
-		c_game->BindRenderTarget(cam);
+		pragma::get_cgame()->SetRenderTarget(cam);
+		pragma::get_cgame()->BindRenderTarget(cam);
 
 		OpenGL::BindFrameBuffer(bufFramePrev);*/ // Vulkan TODO
 	}
 #endif
-	//static ShaderOcclusion *shader = static_cast<ShaderOcclusion*>(c_game->GetShader("occlusion"));
+	//static ShaderOcclusion *shader = static_cast<ShaderOcclusion*>(pragma::get_cgame()->GetShader("occlusion"));
 	//shader->PrepareBatchRendering(m_octree->GetVertexIndexBuffer()); // Vulkan TODO
 
 	UpdateFrustum();
@@ -747,7 +746,7 @@ const Vector3 &CHCNode::GetMax() const
 }
 void CHCNode::Render()
 {
-	//auto &context = c_engine->GetRenderContext();
+	//auto &context = pragma::get_cengine()->GetRenderContext();
 	//auto &drawCmd = context.GetDrawCmd();
 	//drawCmd->Draw(vertCount); // prosper TODO
 }
@@ -763,7 +762,7 @@ const BaseOcclusionOctree::Node *CHCNode::GetRenderNode() const
 CHCQuery::CHCQuery(const CHCNode &node) : m_hNode(node.GetHandle()), m_queryId(std::numeric_limits<decltype(m_queryId)>::max())
 {
 	/*pool->RequestFreeQuery(m_queryId);
-	auto &context = c_engine->GetRenderContext();
+	auto &context = pragma::get_cengine()->GetRenderContext();
 	auto &drawCmd = context.GetDrawCmd();
 	drawCmd->ResetQueryPool(pool,1,m_queryId);*/ // prosper TODO
 }
@@ -782,7 +781,7 @@ uint32_t CHCQuery::GetResult() const
 
 bool CHCQuery::GetResult(uint32_t &r) const
 {
-	/*auto &context = c_engine->GetRenderContext();
+	/*auto &context = pragma::get_cengine()->GetRenderContext();
 	auto &drawCmd = context.GetDrawCmd();
 	std::vector<uint32_t> queryResult(2);
 	auto err = drawCmd->GetQueryPoolResults(pool,queryResult,vk::QueryResultFlagBits::eWithAvailability,m_queryId); // TODO: This might refer to whatever query had been executed previously, not the new query. This can be avoided with a fence or event.
@@ -807,7 +806,7 @@ void CHCQuery::Run()
 #if 0
 	if(m_hNode.IsValid() == false)
 		return;
-	auto &context = c_engine->GetRenderContext();
+	auto &context = pragma::get_cengine()->GetRenderContext();
 	auto &drawCmd = context.GetDrawCmd();
 	auto *node = m_hNode.get();
 	drawCmd->BeginQuery(pool,m_queryId,vk::QueryControlFlagBits::ePrecise);

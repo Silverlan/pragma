@@ -3,29 +3,25 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
+#include "shader/prosper_shader.hpp"
+#include "buffers/prosper_buffer.hpp"
+#include "prosper_structs.hpp"
 #include <sharedutils/alpha_mode.hpp>
 
-export module pragma.client.rendering.shaders:textured;
+export module pragma.client:rendering.shaders.textured;
 
+export import :rendering.shaders.textured_enums;
+
+import :debug.enums;
+import :entities.components.rasterization_renderer;
+import :entities.components.scene;
+import :rendering.shader_input_data;
+import :rendering.shader_material_enums;
+import :rendering.shaders.scene;
+
+export namespace pragma::rendering::shader_material {struct ShaderMaterial;};
 export namespace pragma {
-	const float DefaultParallaxHeightScale = 0.025f;
-	const uint16_t DefaultParallaxSteps = 16;
-	const float DefaultAlphaDiscardThreshold = 0.99f;
-
-	enum class GameShaderSpecializationConstantFlag : uint32_t {
-		None = 0u,
-
-		// Static
-		EnableLightMapsBit = 1u,
-		EnableAnimationBit = EnableLightMapsBit << 1u,
-		EnableMorphTargetAnimationBit = EnableAnimationBit << 1u,
-
-		EnableTranslucencyBit = EnableMorphTargetAnimationBit << 1u,
-
-		PermutationCount = (EnableTranslucencyBit << 1u) - 1,
-		Last = EnableTranslucencyBit
-	};
-
 	class DLLCLIENT ShaderSpecializationManager {
 	  public:
 		using PassTypeIndex = uint32_t;
@@ -70,18 +66,6 @@ export namespace pragma {
 		// Per pass-type
 		std::vector<PassTypeInfo> m_passTypeSpecializationToPipelineIdx;
 	};
-
-	enum class GameShaderSpecializationPropertyIndex : uint32_t {
-		Start = umath::get_least_significant_set_bit_index_c(umath::to_integral(GameShaderSpecializationConstantFlag::Last)) + 1,
-		ShadowQuality = Start,
-		DebugModeEnabled,
-		BloomOutputEnabled,
-		EnableSsao,
-		EnableIbl,
-		EnableDynamicLighting,
-		EnableDynamicShadows
-	};
-	enum class GameShaderSpecialization : uint32_t { Generic = 0, Lightmapped, Animated, Count };
 
 	class DLLCLIENT ShaderGameWorldLightingPass : public ShaderGameWorld, public ShaderSpecializationManager {
 	  public:
@@ -196,7 +180,4 @@ export namespace pragma {
 		std::optional<std::string> m_shaderMaterialName = "pbr";
 		std::shared_ptr<rendering::shader_material::ShaderMaterial> m_shaderMaterial;
 	};
-};
-export {
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::GameShaderSpecializationConstantFlag)
 };

@@ -10,16 +10,16 @@ module;
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
-module pragma.client.entities.components.physics;
+module pragma.client;
 
-import pragma.client.client_state;
-import pragma.client.game;
-import pragma.client.model;
+
+import :entities.components.physics;
+import :client_state;
+import :game;
+import :model;
 
 using namespace pragma;
 
-extern CGame *c_game;
-extern ClientState *client;
 
 void CPhysicsComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { BasePhysicsComponent::RegisterEvents(componentManager, registerEvent); }
 void CPhysicsComponent::Initialize()
@@ -69,7 +69,7 @@ void CPhysicsComponent::OnEntitySpawn()
 void CPhysicsComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void CPhysicsComponent::PrePhysicsSimulate()
 {
-	auto dt = c_game->DeltaTime();
+	auto dt = pragma::get_cgame()->DeltaTime();
 	if(dt > 0.0 && GetPhysicsType() != PHYSICSTYPE::SOFTBODY) {
 		auto pVelComponent = GetEntity().GetComponent<pragma::VelocityComponent>();
 		if(pVelComponent.valid())
@@ -79,7 +79,7 @@ void CPhysicsComponent::PrePhysicsSimulate()
 }
 bool CPhysicsComponent::PostPhysicsSimulate()
 {
-	auto dt = c_game->DeltaTime();
+	auto dt = pragma::get_cgame()->DeltaTime();
 	if(dt > 0.0 && GetPhysicsType() != PHYSICSTYPE::SOFTBODY) {
 		auto pVelComponent = GetEntity().GetComponent<pragma::VelocityComponent>();
 		if(pVelComponent.valid())

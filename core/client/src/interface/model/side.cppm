@@ -7,7 +7,7 @@ module;
 #include <pragma/model/side.h>
 #include "material.h"
 
-export module pragma.client.model:side;
+export module pragma.client:model.side;
 
 export {
   class DLLCLIENT CSide : public Side {

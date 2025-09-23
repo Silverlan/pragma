@@ -7,10 +7,10 @@ module;
 #include <wgui/types/wirect.h>
 #include <wgui/types/witext.h>
 
-module pragma.client.gui;
+module pragma.client;
 
-import :message_box;
-import :frame;
+import :gui.message_box;
+import :gui.frame;
 
 import pragma.gui;
 import pragma.locale;

@@ -6,7 +6,9 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "alsound_listener.hpp"
 
-export module pragma.client.entities.components.listener;
+export module pragma.client:entities.components.listener;
+
+import :entities.base_entity;
 
 export namespace pragma {
 	class DLLCLIENT CListenerComponent final : public BaseEntityComponent {

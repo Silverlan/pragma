@@ -4,9 +4,15 @@
 module;
 
 #include "pragma/clientdefinitions.h"
+#include "cmaterial.h"
 #include <functional>
 
-export module pragma.client.debug.render_filter;
+export module pragma.client:debug.render_filter;
+
+import :entities.base_entity;
+import :model.mesh;
+import :model.render_mesh_group;
+import :rendering.shaders.scene;
 
 export struct DLLCLIENT DebugRenderFilter {
 	std::function<bool(pragma::ShaderGameWorld &)> shaderFilter = nullptr;

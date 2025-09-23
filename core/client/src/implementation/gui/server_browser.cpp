@@ -15,16 +15,16 @@ module;
 #include <networkmanager/udp_handler/udp_message_dispatcher.h>
 #include <pragma/networking/master_server_query_dispatcher.hpp>
 
-module pragma.client.gui;
+module pragma.client;
 
-import :frame;
-import :scroll_container;
-import :server_browser;
-import :silk_icon;
-import :table;
+import :gui.frame;
+import :gui.scroll_container;
+import :gui.server_browser;
+import :gui.silk_icon;
+import :gui.table;
 
-import pragma.client.client_state;
-import pragma.client.engine;
+import :client_state;
+import :engine;
 import pragma.gui;
 import pragma.locale;
 
@@ -159,14 +159,12 @@ void pragma::networking::DefaultMasterServerQueryDispatcher::DoQueryServers(cons
 
 ///////////////
 
-extern CEngine *c_engine;
-extern ClientState *client;
 WIServerBrowser::WIServerBrowser() : WIFrame(), m_bRefreshScheduled(false)
 {
 	AddStyleClass("wiframe");
 	Refresh();
 
-	auto libSteamworks = client->InitializeLibrary("steamworks/pr_steamworks");
+	auto libSteamworks = pragma::get_client_state()->InitializeLibrary("steamworks/pr_steamworks");
 	if(libSteamworks == nullptr)
 		return;
 	auto *fInitMasterServerQueryDispatcher = libSteamworks->FindSymbolAddress<void (*)(std::unique_ptr<pragma::networking::IMasterServerQueryDispatcher, void (*)(pragma::networking::IMasterServerQueryDispatcher *)> &)>("initialize_master_server_query_dispatcher");
@@ -217,13 +215,13 @@ void WIServerBrowser::OnServerDoubleClick(unsigned int idx)
 	if(idx >= m_servers.size())
 		return;
 	auto &svInfo = m_servers.at(idx);
-	client->SetConVar("net_library", svInfo.queryResult.serverInfo.networkLayerIdentifier);
+	pragma::get_client_state()->SetConVar("net_library", svInfo.queryResult.serverInfo.networkLayerIdentifier);
 	if(svInfo.queryResult.serverInfo.peer2peer && svInfo.queryResult.serverInfo.steamId.has_value()) {
 		auto steamId = *svInfo.queryResult.serverInfo.steamId;
-		c_engine->Connect(steamId);
+		pragma::get_cengine()->Connect(steamId);
 		return;
 	}
-	c_engine->Connect(svInfo.queryResult.ip, std::to_string(svInfo.queryResult.serverInfo.port));
+	pragma::get_cengine()->Connect(svInfo.queryResult.ip, std::to_string(svInfo.queryResult.serverInfo.port));
 }
 
 void WIServerBrowser::DisplayMessage(std::string msg)
@@ -325,7 +323,7 @@ void WIServerBrowser::DoRefresh()
 {
 	m_bRefreshScheduled = false;
 	if(m_msQueryDispatcher) {
-		pragma::networking::IMasterServerQueryDispatcher::Filter filter {client->GetConVarString("networking_library")};
+		pragma::networking::IMasterServerQueryDispatcher::Filter filter {pragma::get_client_state()->GetConVarString("networking_library")};
 		m_msQueryDispatcher->QueryServers(filter);
 	}
 }

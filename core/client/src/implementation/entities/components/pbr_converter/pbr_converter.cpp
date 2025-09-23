@@ -28,16 +28,15 @@ module;
 #include <cmaterial_manager2.hpp>
 #include <cmaterial.h>
 
-module pragma.client.entities.components.util_pbr_converter;
+module pragma.client;
 
-import pragma.client.client_state;
-import pragma.client.engine;
-import pragma.client.game;
-import pragma.client.rendering.shaders;
 
-extern CEngine *c_engine;
-extern ClientState *client;
-extern CGame *c_game;
+import :entities.components.util_pbr_converter;
+import :client_state;
+import :engine;
+import :game;
+import :rendering.shaders;
+
 
 using namespace pragma;
 
@@ -134,7 +133,8 @@ void CPBRConverterComponent::OnEntitySpawn()
 {
 	BaseEntityComponent::OnEntitySpawn();
 
-	m_cbOnModelLoaded = c_game->AddCallback("OnModelLoaded", FunctionCallback<void, std::reference_wrapper<std::shared_ptr<Model>>>::Create([this](std::reference_wrapper<std::shared_ptr<Model>> mdl) { ScheduleModelUpdate(*mdl.get(), true); }));
+	auto *client = pragma::get_client_state();
+	m_cbOnModelLoaded = pragma::get_cgame()->AddCallback("OnModelLoaded", FunctionCallback<void, std::reference_wrapper<std::shared_ptr<Model>>>::Create([this](std::reference_wrapper<std::shared_ptr<Model>> mdl) { ScheduleModelUpdate(*mdl.get(), true); }));
 	m_cbOnMaterialLoaded = client->AddCallback("OnMaterialLoaded", FunctionCallback<void, CMaterial *>::Create([this](CMaterial *mat) {
 		if(ShouldConvertMaterial(*mat) == false)
 			return;
@@ -195,17 +195,17 @@ bool CPBRConverterComponent::ConvertToPBR(CMaterial &matTraditional)
 {
 	if(!matTraditional.HasPropertyBlock("rma_info"))
 		return false;
-	auto resWatcherLock = c_engine->ScopeLockResourceWatchers();
+	auto resWatcherLock = pragma::get_cengine()->ScopeLockResourceWatchers();
 	Con::cout << "Converting material '" << matTraditional.GetName() << "' to PBR..." << Con::endl;
 	m_convertedMaterials.insert(matTraditional.GetName());
-	auto &setupCmd = c_engine->GetSetupCommandBuffer();
+	auto &setupCmd = pragma::get_cengine()->GetSetupCommandBuffer();
 
 	auto matName = matTraditional.GetName();
 	ufile::remove_extension_from_filename(matName);
 
 	std::string surfMatName;
 	auto hasSurfaceMaterial = matTraditional.GetProperty("surfacematerial", &surfMatName);
-	auto *surfMat = hasSurfaceMaterial ? c_game->GetSurfaceMaterial(surfMatName) : nullptr;
+	auto *surfMat = hasSurfaceMaterial ? pragma::get_cgame()->GetSurfaceMaterial(surfMatName) : nullptr;
 
 	auto fSetMaterialValue = [&matTraditional]<typename T>(CMaterial &mat, const std::string &path, const T &value) {
 		if(mat.GetPropertyType(path) == msys::PropertyType::None)
@@ -224,7 +224,7 @@ bool CPBRConverterComponent::ConvertToPBR(CMaterial &matTraditional)
 		}
 	}
 
-	auto *shaderComposeRMA = static_cast<pragma::ShaderComposeRMA *>(c_engine->GetShader("compose_rma").get());
+	auto *shaderComposeRMA = static_cast<pragma::ShaderComposeRMA *>(pragma::get_cengine()->GetShader("compose_rma").get());
 	if(shaderComposeRMA == nullptr)
 		return false;
 
@@ -248,7 +248,7 @@ bool CPBRConverterComponent::ConvertToPBR(CMaterial &matTraditional)
 
 	std::string rmaMapName = "";
 	if(roughnessMap || metalnessMap || aoMap) {
-		auto rmaMap = shaderComposeRMA->ComposeRMA(c_engine->GetRenderContext(), roughnessMap, metalnessMap, aoMap, flags);
+		auto rmaMap = shaderComposeRMA->ComposeRMA(pragma::get_cengine()->GetRenderContext(), roughnessMap, metalnessMap, aoMap, flags);
 
 		rmaMapName = matName + "_rma";
 		uimg::TextureInfo imgWriteInfo {};
@@ -257,7 +257,7 @@ bool CPBRConverterComponent::ConvertToPBR(CMaterial &matTraditional)
 		imgWriteInfo.flags = uimg::TextureInfo::Flags::GenerateMipmaps;
 		imgWriteInfo.inputFormat = uimg::TextureInfo::InputFormat::R8G8B8A8_UInt;
 		imgWriteInfo.outputFormat = uimg::TextureInfo::OutputFormat::ColorMap;
-		c_game->SaveImage(*rmaMap, "addons/converted/materials/" + rmaMapName, imgWriteInfo);
+		pragma::get_cgame()->SaveImage(*rmaMap, "addons/converted/materials/" + rmaMapName, imgWriteInfo);
 
 		if(metalnessMap)
 			matTraditional.ClearProperty("rma_info/requires_metalness_update");
@@ -306,6 +306,7 @@ bool CPBRConverterComponent::ConvertToPBR(CMaterial &matTraditional)
 	// Overwrite old material with new PBR settings
 	std::string err;
 	auto savePath = pragma::asset::relative_path_to_absolute_path(matTraditional.GetName(), pragma::asset::Type::Material, util::CONVERT_PATH);
+	auto *client = pragma::get_client_state();
 	if(matTraditional.Save(savePath.GetString(), err, true))
 		client->LoadMaterial(matName, nullptr, true, true); // Reload material immediately
 	static_cast<msys::CMaterialManager &>(client->GetMaterialManager()).GetTextureManager().ClearUnused();
@@ -314,12 +315,12 @@ bool CPBRConverterComponent::ConvertToPBR(CMaterial &matTraditional)
 }
 std::shared_ptr<prosper::Texture> CPBRConverterComponent::ConvertSpecularMapToRoughness(prosper::Texture &specularMap)
 {
-	auto *shaderSpecularToRoughness = static_cast<pragma::ShaderSpecularToRoughness *>(c_engine->GetShader("specular_to_roughness").get());
+	auto *shaderSpecularToRoughness = static_cast<pragma::ShaderSpecularToRoughness *>(pragma::get_cengine()->GetShader("specular_to_roughness").get());
 	if(shaderSpecularToRoughness == nullptr)
 		return nullptr;
-	auto &setupCmd = c_engine->GetSetupCommandBuffer();
+	auto &setupCmd = pragma::get_cengine()->GetSetupCommandBuffer();
 	// Specular descriptor set
-	auto dsgSpecular = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderSpecularToRoughness::DESCRIPTOR_SET_TEXTURE);
+	auto dsgSpecular = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderSpecularToRoughness::DESCRIPTOR_SET_TEXTURE);
 	dsgSpecular->GetDescriptorSet()->SetBindingTexture(specularMap, 0u);
 
 	// Initialize roughness image
@@ -327,11 +328,11 @@ std::shared_ptr<prosper::Texture> CPBRConverterComponent::ConvertSpecularMapToRo
 	createInfoRoughness.format = prosper::Format::R8G8B8A8_UNorm;
 	createInfoRoughness.postCreateLayout = prosper::ImageLayout::ColorAttachmentOptimal;
 	createInfoRoughness.usage = prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::ColorAttachmentBit;
-	auto roughnessMap = c_engine->GetRenderContext().CreateImage(createInfoRoughness);
+	auto roughnessMap = pragma::get_cengine()->GetRenderContext().CreateImage(createInfoRoughness);
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
 	prosper::util::SamplerCreateInfo samplerCreateInfo {};
-	auto roughnessTex = c_engine->GetRenderContext().CreateTexture({}, *roughnessMap, imgViewCreateInfo, samplerCreateInfo);
-	auto roughnessRt = c_engine->GetRenderContext().CreateRenderTarget({roughnessTex}, shaderSpecularToRoughness->GetRenderPass());
+	auto roughnessTex = pragma::get_cengine()->GetRenderContext().CreateTexture({}, *roughnessMap, imgViewCreateInfo, samplerCreateInfo);
+	auto roughnessRt = pragma::get_cengine()->GetRenderContext().CreateRenderTarget({roughnessTex}, shaderSpecularToRoughness->GetRenderPass());
 
 	// Specular to roughness
 	if(setupCmd->RecordBeginRenderPass(*roughnessRt) == true) {
@@ -342,7 +343,7 @@ std::shared_ptr<prosper::Texture> CPBRConverterComponent::ConvertSpecularMapToRo
 		}
 		setupCmd->RecordEndRenderPass();
 	}
-	c_engine->FlushSetupCommandBuffer();
+	pragma::get_cengine()->FlushSetupCommandBuffer();
 	return roughnessTex;
 }
 

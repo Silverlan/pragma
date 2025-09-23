@@ -12,20 +12,17 @@ module;
 #include <buffers/prosper_buffer_create_info.hpp>
 #include <prosper_command_buffer.hpp>
 
-module pragma.client.rendering.shader_graph;
+module pragma.client;
 
-import :module_input_data;
+import :rendering.shader_graph.module_input_data;
 
-import pragma.client.client_state;
-import pragma.client.engine;
-import pragma.client.game;
-import pragma.client.rendering.shaders;
+import :client_state;
+import :engine;
+import :game;
+import :rendering.shaders;
 
 using namespace pragma::rendering::shader_graph;
 
-extern CEngine *c_engine;
-extern ClientState *client;
-extern CGame *c_game;
 
 InputDataModule::InputDataModule(ShaderGraph &shader) : pragma::rendering::ShaderGraphModule {shader} {}
 InputDataModule::~InputDataModule() {}
@@ -60,7 +57,7 @@ void InputDataModule::InitializeShaderResources()
 
 void InputDataModule::GetShaderPreprocessorDefinitions(std::unordered_map<std::string, std::string> &outDefinitions, std::string &outPrefixCode)
 {
-	//auto &inputDataManager = c_game->GetGlobalShaderInputDataManager();
+	//auto &inputDataManager = pragma::get_cgame()->GetGlobalShaderInputDataManager();
 
 	std::ostringstream code;
 	//code << "\nlayout(LAYOUT_ID(SHADER_GRAPH, GLOBAL_INPUT_DATA)) uniform GlobalInputData\n";
@@ -85,10 +82,10 @@ void InputDataModule::GetShaderPreprocessorDefinitions(std::unordered_map<std::s
 
 void InputDataModule::InitializeGfxPipelineDescriptorSets()
 {
-	//auto &inputDataManager = c_game->GetGlobalShaderInputDataManager();
+	//auto &inputDataManager = pragma::get_cgame()->GetGlobalShaderInputDataManager();
 
 	// TODO:
-	auto &graphManager = c_engine->GetShaderGraphManager();
+	auto &graphManager = pragma::get_cengine()->GetShaderGraphManager();
 	auto &typeManagers = graphManager.GetShaderGraphTypeManagers();
 	auto it = typeManagers.find("object");
 	if(it == typeManagers.end())
@@ -96,12 +93,12 @@ void InputDataModule::InitializeGfxPipelineDescriptorSets()
 	auto &typeManager = *it->second;
 	//for(auto &[name, graphData] : typeManager.GetGraphs())
 	//	inputDataManager.PopulateProperties(*graphData->GetGraph());
-	auto cmd = c_engine->GetRenderContext().GetSetupCommandBuffer();
+	auto cmd = pragma::get_cengine()->GetRenderContext().GetSetupCommandBuffer();
 	//inputDataManager.UpdateBufferData(*cmd);
-	c_engine->GetRenderContext().FlushSetupCommandBuffer();
+	pragma::get_cengine()->GetRenderContext().FlushSetupCommandBuffer();
 
 	m_shader.AddDescriptorSetGroup(m_globalInputDataDsInfo);
-	auto &context = c_engine->GetRenderContext();
+	auto &context = pragma::get_cengine()->GetRenderContext();
 	//
 
 	// TODO: One per shader
@@ -110,13 +107,13 @@ void InputDataModule::InitializeGfxPipelineDescriptorSets()
 	constexpr uint32_t BINDING_IDX = 0;
 	//auto buf = inputDataManager.GetBuffer();
 	//if(!buf)
-	//	buf = c_engine->GetRenderContext().GetDummyBuffer();
+	//	buf = pragma::get_cengine()->GetRenderContext().GetDummyBuffer();
 	// TODO: Each shader should have its own global input buffer.
 	// Alternativly: Push-constants?
 	//ds.SetBindingUniformBuffer(*buf, BINDING_IDX);
 
 	// Image texture nodes
-	auto &texManager = static_cast<msys::CMaterialManager &>(client->GetMaterialManager()).GetTextureManager();
+	auto &texManager = static_cast<msys::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager()).GetTextureManager();
 	uint32_t bindingIdx = 1; // Binding 0 is global input data
 	for(auto *node : m_imageTextureNodes) {
 		std::string fileName;

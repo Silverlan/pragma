@@ -5,14 +5,17 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/game/game_limits.h"
+#include "prosper_util.hpp"
+#include "buffers/prosper_buffer_create_info.hpp"
 
-module pragma.client.rendering.entity_instance_index_buffer;
+module pragma.client;
 
-import pragma.client.engine;
+
+import :rendering.entity_instance_index_buffer;
+import :engine;
 
 using namespace pragma;
 
-extern CEngine *c_engine;
 
 rendering::EntityInstanceIndexBuffer::EntityInstanceIndexBuffer()
 {
@@ -22,7 +25,7 @@ rendering::EntityInstanceIndexBuffer::EntityInstanceIndexBuffer()
 	bufCreateInfo.size = umath::to_integral(GameLimits::MaxEntityInstanceCount) * sizeof(RenderBufferIndex);
 	bufCreateInfo.usageFlags = prosper::BufferUsageFlags::VertexBufferBit;
 
-	m_buffer = c_engine->GetRenderContext().CreateDynamicResizableBuffer(bufCreateInfo, bufCreateInfo.size);
+	m_buffer = pragma::get_cengine()->GetRenderContext().CreateDynamicResizableBuffer(bufCreateInfo, bufCreateInfo.size);
 	m_buffer->SetPermanentlyMapped(true, prosper::IBuffer::MapFlags::WriteBit);
 
 	auto id = SINGLE_INSTANCE_RENDER_BUFFER_INDEX;
@@ -35,7 +38,7 @@ rendering::EntityInstanceIndexBuffer::~EntityInstanceIndexBuffer()
 	m_buffer = nullptr;
 }
 
-prosper::FrameIndex rendering::EntityInstanceIndexBuffer::GetCurrentFrameIndex() const { return c_engine->GetRenderContext().GetLastFrameId(); }
+prosper::FrameIndex rendering::EntityInstanceIndexBuffer::GetCurrentFrameIndex() const { return pragma::get_cengine()->GetRenderContext().GetLastFrameId(); }
 
 void rendering::EntityInstanceIndexBuffer::UpdateAndClearUnusedBuffers()
 {

@@ -7,8 +7,7 @@ module;
 #include <memory>
 #include <image/prosper_texture.hpp>
 
-export module pragma.client.rendering.ssao;
-
+export module pragma.client:rendering.ssao;
 #pragma warning(push)
 #pragma warning(disable : 4251)
 export struct DLLCLIENT SSAOInfo {

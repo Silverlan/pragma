@@ -13,9 +13,9 @@ module;
 #include <buffers/prosper_buffer.hpp>
 #include <cmaterial.h>
 
-module pragma.client.entities.components.material_override;
+module pragma.client;
 
-import pragma.client.entities.components;
+import :entities.components.material_override;
 
 using namespace pragma;
 ComponentEventId CMaterialOverrideComponent::EVENT_ON_MATERIAL_OVERRIDES_CLEARED = INVALID_COMPONENT_ID;

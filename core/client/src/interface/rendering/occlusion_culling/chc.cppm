@@ -14,7 +14,11 @@ module;
 
 #define CHC_DEBUGGING_ENABLED 0
 
-export module pragma.client.rendering.occlusion_culling:chc;
+export module pragma.client:rendering.occlusion_culling.chc;
+
+import :entities.base_entity;
+import :model.mesh;
+import :rendering.occlusion_culling.octree;
 
 export {
 	class CHC;
@@ -73,6 +77,7 @@ export class DLLCLIENT CHCQuery {
 	uint32_t GetResult() const;
 };
 
+export namespace pragma {class CCameraComponent;};
 export class DLLCLIENT CHC {
   public:
 	friend CHCNode;

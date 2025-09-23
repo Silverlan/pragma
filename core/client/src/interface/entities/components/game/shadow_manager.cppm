@@ -10,11 +10,11 @@ module;
 #include "prosper_descriptor_set_group.hpp"
 #include <pragma/entities/components/base_entity_component.hpp>
 
-export module pragma.client.entities.components.game_shadow_manager;
-
-import pragma.client.rendering.shaders;
+export module pragma.client:entities.components.game_shadow_manager;
+import :rendering.shaders;
 
 export namespace pragma {
+    class CLightComponent;
 	struct ShadowRenderInfo {
 		const CBaseEntity *entity = nullptr;
 		const CModelSubMesh *mesh = nullptr;
@@ -44,8 +44,8 @@ export namespace pragma {
 			Vector3 position;
 			float radius;
 		};
-		void RenderShadows(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, pragma::CLightComponent &light, pragma::CLightComponent::ShadowMapType smType, pragma::LightType type, bool drawParticleShadows);
-		bool UpdateShadowCasters(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, pragma::CLightComponent &light, pragma::CLightComponent::ShadowMapType smType);
+		void RenderShadows(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, pragma::CLightComponent &light, pragma::rendering::ShadowMapType smType, pragma::LightType type, bool drawParticleShadows);
+		bool UpdateShadowCasters(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, pragma::CLightComponent &light, pragma::rendering::ShadowMapType smType);
 		void UpdateWorldShadowCasters(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, pragma::CLightComponent &light);
 		void UpdateEntityShadowCasters(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, pragma::CLightComponent &light);
 		RenderResultFlags RenderShadows(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, pragma::CLightComponent &light, uint32_t layerId, const Mat4 &depthMVP, pragma::ShaderShadow &shader, bool bTranslucent);

@@ -5,9 +5,9 @@ module;
 
 #include "pragma/clientdefinitions.h"
 
-export module pragma.client.rendering.shaders:world_water_surface_solve_edges;
+export module pragma.client:rendering.shaders.world_water_surface_solve_edges;
 
-import :world_water_surface_sum_edges;
+import :rendering.shaders.world_water_surface_sum_edges;
 
 export namespace pragma {
 	class DLLCLIENT ShaderWaterSurfaceSolveEdges : public ShaderWaterSurfaceSumEdges {

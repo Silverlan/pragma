@@ -6,9 +6,8 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "image/prosper_render_target.hpp"
 
-export module pragma.client.entities.components.pp_volumetric;
-
-import pragma.client.entities.components.pp_base;
+export module pragma.client:entities.components.pp_volumetric;
+import :entities.components.pp_base;
 
 export namespace pragma {
 	class CRasterizationRendererComponent;

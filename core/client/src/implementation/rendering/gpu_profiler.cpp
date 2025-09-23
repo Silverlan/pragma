@@ -11,14 +11,16 @@ module;
 #include <queries/prosper_timer_query.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_util.hpp>
+#include "sharedutils/util_clock.hpp"
 
-module pragma.client.rendering.gpu_profiler;
+module pragma.client;
 
-import pragma.client.engine;
+
+import :rendering.gpu_profiler;
+import :engine;
 
 using namespace pragma::debug;
 
-extern CEngine *c_engine;
 
 static CVar cvTimerQueries = GetClientConVar("cl_gpu_timer_queries_enabled");
 
@@ -60,11 +62,11 @@ void GPUProfiler::InitializeQueries()
 {
 	if(m_timerQueryPool != nullptr || m_statsQueryPool != nullptr)
 		return;
-	auto swapchainImageCount = c_engine->GetRenderContext().GetPrimaryWindowSwapchainImageCount();
+	auto swapchainImageCount = pragma::get_cengine()->GetRenderContext().GetPrimaryWindowSwapchainImageCount();
 	const auto maxTimestampQueryCount = 200u; // Note: Every timer requires 2 timestamps
 	const auto maxStatisticsQueryCount = 100u;
-	m_timerQueryPool = c_engine->GetRenderContext().CreateQueryPool(prosper::QueryType::Timestamp, maxTimestampQueryCount);
-	m_statsQueryPool = c_engine->GetRenderContext().CreateQueryPool(prosper::QueryPipelineStatisticFlags::InputAssemblyVerticesBit | prosper::QueryPipelineStatisticFlags::InputAssemblyPrimitivesBit | prosper::QueryPipelineStatisticFlags::VertexShaderInvocationsBit
+	m_timerQueryPool = pragma::get_cengine()->GetRenderContext().CreateQueryPool(prosper::QueryType::Timestamp, maxTimestampQueryCount);
+	m_statsQueryPool = pragma::get_cengine()->GetRenderContext().CreateQueryPool(prosper::QueryPipelineStatisticFlags::InputAssemblyVerticesBit | prosper::QueryPipelineStatisticFlags::InputAssemblyPrimitivesBit | prosper::QueryPipelineStatisticFlags::VertexShaderInvocationsBit
 	    | prosper::QueryPipelineStatisticFlags::GeometryShaderInvocationsBit | prosper::QueryPipelineStatisticFlags::GeometryShaderPrimitivesBit | prosper::QueryPipelineStatisticFlags::ClippingInvocationsBit | prosper::QueryPipelineStatisticFlags::ClippingPrimitivesBit
 	    | prosper::QueryPipelineStatisticFlags::FragmentShaderInvocationsBit | prosper::QueryPipelineStatisticFlags::TessellationControlShaderPatchesBit | prosper::QueryPipelineStatisticFlags::TessellationEvaluationShaderInvocationsBit
 	    | prosper::QueryPipelineStatisticFlags::ComputeShaderInvocationsBit,
@@ -119,7 +121,7 @@ void Console::commands::cl_gpu_timer_queries_dump(NetworkState *state, pragma::B
 			fPrintResults(*wpChild.lock(), t + (bRoot ? "" : "\t"), false);
 		}
 	};
-	auto &profiler = c_engine->GetGPUProfiler();
+	auto &profiler = pragma::get_cengine()->GetGPUProfiler();
 	fPrintResults(profiler.GetRootStage(), "", true);
 	Con::cout << "--------------------------------------------" << Con::endl;
 }

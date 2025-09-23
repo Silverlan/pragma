@@ -6,10 +6,9 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <pragma/entities/components/base_entity_component.hpp>
 
-export module pragma.client.entities.components.pp_base;
-
-import pragma.client.entities.components.rasterization_renderer;
-import pragma.client.entities.components.renderer;
+export module pragma.client:entities.components.pp_base;
+import :entities.components.rasterization_renderer;
+import :entities.components.renderer;
 
 export namespace pragma {
 	class DLLCLIENT CRendererPpBaseComponent : public BaseEntityComponent {

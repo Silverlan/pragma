@@ -3,8 +3,11 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 
-export module pragma.client.rendering.shaders:pp_fxaa;
+export module pragma.client:rendering.shaders.pp_fxaa;
+
+import :rendering.shaders.base;
 
 export namespace pragma {
 	class DLLCLIENT ShaderPPFXAA : public ShaderPPBase {

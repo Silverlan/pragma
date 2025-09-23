@@ -10,18 +10,15 @@ module;
 #include <image/prosper_render_target.hpp>
 #include <prosper_command_buffer.hpp>
 
-module pragma.client.gui;
+module pragma.client;
 
-import :debug_hdr_bloom;
+import :gui.debug_hdr_bloom;
 
-import pragma.client.client_state;
-import pragma.client.engine;
-import pragma.client.entities.components;
-import pragma.client.game;
+import :client_state;
+import :engine;
+import :entities.components;
+import :game;
 
-extern CEngine *c_engine;
-extern ClientState *client;
-extern CGame *c_game;
 
 LINK_WGUI_TO_CLASS(WIDebugHDRBloom, WIDebugHDRBloom);
 
@@ -36,8 +33,8 @@ WIDebugHDRBloom::~WIDebugHDRBloom()
 
 void WIDebugHDRBloom::UpdateBloomImage()
 {
-	auto &drawCmd = c_engine->GetDrawCommandBuffer();
-	auto *scene = c_game->GetRenderScene<pragma::CSceneComponent>();
+	auto &drawCmd = pragma::get_cengine()->GetDrawCommandBuffer();
+	auto *scene = pragma::get_cgame()->GetRenderScene<pragma::CSceneComponent>();
 	auto *renderer = scene ? dynamic_cast<pragma::CRendererComponent *>(scene->GetRenderer<pragma::CRendererComponent>()) : nullptr;
 	if(renderer == nullptr)
 		return;
@@ -58,7 +55,7 @@ void WIDebugHDRBloom::UpdateBloomImage()
 void WIDebugHDRBloom::DoUpdate()
 {
 	WITexturedRect::DoUpdate();
-	if(c_game == nullptr)
+	if(pragma::get_cgame() == nullptr)
 		return;
 	prosper::util::ImageCreateInfo imgCreateInfo {};
 	imgCreateInfo.width = GetWidth();
@@ -66,15 +63,15 @@ void WIDebugHDRBloom::DoUpdate()
 	imgCreateInfo.format = prosper::Format::R8G8B8A8_UNorm;
 	imgCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	imgCreateInfo.usage = prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::TransferDstBit;
-	auto img = c_engine->GetRenderContext().CreateImage(imgCreateInfo);
+	auto img = pragma::get_cengine()->GetRenderContext().CreateImage(imgCreateInfo);
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
 	prosper::util::SamplerCreateInfo samplerCreateInfo {};
-	auto tex = c_engine->GetRenderContext().CreateTexture({}, *img, imgViewCreateInfo, samplerCreateInfo);
+	auto tex = pragma::get_cengine()->GetRenderContext().CreateTexture({}, *img, imgViewCreateInfo, samplerCreateInfo);
 	prosper::util::RenderPassCreateInfo rpInfo {};
 	rpInfo.attachments.push_back({img->GetFormat(), prosper::ImageLayout::ColorAttachmentOptimal, prosper::AttachmentLoadOp::Load, prosper::AttachmentStoreOp::Store, img->GetSampleCount(), prosper::ImageLayout::ColorAttachmentOptimal});
 	rpInfo.subPasses.push_back({prosper::util::RenderPassCreateInfo::SubPass {{0ull}}});
-	auto rp = c_engine->GetRenderContext().CreateRenderPass(rpInfo);
-	m_renderTarget = c_engine->GetRenderContext().CreateRenderTarget({tex}, rp, {});
-	m_cbRenderHDRMap = c_game->AddCallback("PostRenderScenes", FunctionCallback<>::Create(std::bind(&WIDebugHDRBloom::UpdateBloomImage, this)));
+	auto rp = pragma::get_cengine()->GetRenderContext().CreateRenderPass(rpInfo);
+	m_renderTarget = pragma::get_cengine()->GetRenderContext().CreateRenderTarget({tex}, rp, {});
+	m_cbRenderHDRMap = pragma::get_cgame()->AddCallback("PostRenderScenes", FunctionCallback<>::Create(std::bind(&WIDebugHDRBloom::UpdateBloomImage, this)));
 	SetTexture(m_renderTarget->GetTexture());
 }

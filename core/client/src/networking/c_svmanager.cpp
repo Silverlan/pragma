@@ -10,11 +10,8 @@
 #include <pragma/networking/portinfo.h>
 #include <pragma/networking/netmessages.h>
 
-import pragma.client.client_state;
-import pragma.client.engine;
-import pragma.client.networking;
+import pragma.client;
 
-extern CEngine *c_engine;
 struct LastConnectionInfo {
 	std::optional<std::pair<std::string, uint16_t>> address = {};
 	std::optional<uint64_t> steamId = {};
@@ -61,12 +58,12 @@ void ClientState::Connect(uint64_t steamId)
 
 ///////////////////////////
 
-extern ClientState *client;
 DLLCLIENT void CMD_cl_rcon(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
+	auto *client = pragma::get_client_state();
 	if(!client->IsConnected() || argv.empty())
 		return;
-	std::string pass = c_engine->GetConVarString("rcon_password");
+	std::string pass = pragma::get_cengine()->GetConVarString("rcon_password");
 	NetPacket p;
 	p->WriteString(pass);
 	p->WriteString(argv[0]);
@@ -110,7 +107,7 @@ DLLCLIENT void CMD_connect(NetworkState *state, pragma::BasePlayerComponent *pl,
 		else if(address.find('.') == std::string::npos) // SteamId
 		{
 			auto steamId = util::to_uint64(address);
-			c_engine->Connect(steamId);
+			pragma::get_cengine()->Connect(steamId);
 			return;
 		}
 		else {
@@ -136,13 +133,13 @@ DLLCLIENT void CMD_connect(NetworkState *state, pragma::BasePlayerComponent *pl,
 		}
 		if(port.empty())
 			port = sci::DEFAULT_PORT_TCP;
-		c_engine->Connect(ip, port);
+		pragma::get_cengine()->Connect(ip, port);
 		return;
 	}
-	c_engine->Connect(argv[0], argv[1]);
+	pragma::get_cengine()->Connect(argv[0], argv[1]);
 }
 
-DLLCLIENT void CMD_disconnect(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &) { c_engine->EndGame(); }
+DLLCLIENT void CMD_disconnect(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &) { pragma::get_cengine()->EndGame(); }
 
 DLLCLIENT void CMD_cl_send(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
@@ -150,7 +147,7 @@ DLLCLIENT void CMD_cl_send(NetworkState *, pragma::BasePlayerComponent *, std::v
 		return;
 	NetPacket packet;
 	packet->WriteString(argv[0]);
-	client->SendPacket("cl_send", packet, pragma::networking::Protocol::SlowReliable);
+	pragma::get_client_state()->SendPacket("cl_send", packet, pragma::networking::Protocol::SlowReliable);
 }
 
 DLLCLIENT void CMD_cl_send_udp(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
@@ -159,12 +156,12 @@ DLLCLIENT void CMD_cl_send_udp(NetworkState *, pragma::BasePlayerComponent *, st
 		return;
 	NetPacket packet;
 	packet->WriteString(argv[0]);
-	client->SendPacket("cl_send", packet, pragma::networking::Protocol::FastUnreliable);
+	pragma::get_client_state()->SendPacket("cl_send", packet, pragma::networking::Protocol::FastUnreliable);
 }
 
 void CMD_cl_debug_netmessages(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
-	auto *cl = client->GetClient();
+	auto *cl = pragma::get_client_state()->GetClient();
 	if(cl == nullptr) {
 		Con::cwar << "No client is active!" << Con::endl;
 		return;

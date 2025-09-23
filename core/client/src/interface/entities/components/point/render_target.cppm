@@ -9,7 +9,12 @@ module;
 #include "pragma/entities/point/point_rendertarget.h"
 #include <texturemanager/texture.h>
 
-export module pragma.client.entities.components.point_render_target;
+export module pragma.client:entities.components.point_render_target;
+
+import :entities.base_entity;
+import :entities.components.camera;
+import :entities.components.entity;
+import :rendering.enums;
 
 export {
 	namespace pragma {

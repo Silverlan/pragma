@@ -10,9 +10,9 @@ module;
 #include <mathutil/umath.h>
 #include <prosper_window.hpp>
 
-export module pragma.client.gui:frame;
+export module pragma.client:gui.frame;
 
-import :transformable;
+import :gui.transformable;
 
 import pragma.gui;
 import pragma.platform;

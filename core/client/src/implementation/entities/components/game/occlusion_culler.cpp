@@ -4,6 +4,7 @@
 module;
 
 #include "stdafx_client.h"
+#include "pragma/clientdefinitions.h"
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
@@ -13,15 +14,13 @@ module;
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/console/sh_cmd.h>
 
-module pragma.client.entities.components.game_occlusion_culler;
+module pragma.client;
 
-import pragma.client.client_state;
-import pragma.client.engine;
-import pragma.client.entities.components;
-import pragma.client.game;
+import :entities.components.game_occlusion_culler;
+import :client_state;
+import :engine;
+import :game;
 
-extern ClientState *client;
-extern CGame *c_game;
 
 using namespace pragma;
 
@@ -40,7 +39,7 @@ void COcclusionCullerComponent::Initialize()
 	m_occlusionOctree->SetSingleReferenceMode(true);
 	m_occlusionOctree->SetToStringCallback([](CBaseEntity *ent) -> std::string { return std::string {*ent->GetClass()} + " " + std::to_string(ent->GetIndex()); });
 
-	EntityIterator entIt {*c_game};
+	EntityIterator entIt {*pragma::get_cgame()};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CRenderComponent>>();
 	for(auto *ent : entIt)
 		AddEntity(static_cast<CBaseEntity &>(*ent));
@@ -162,9 +161,9 @@ void COcclusionCuller::Initialize()
 
 DLLCLIENT void CMD_debug_render_octree_static_print(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
-	if(c_game == nullptr)
+	if(pragma::get_cgame() == nullptr)
 		return;
-	auto *entWorld = c_game->GetWorld();
+	auto *entWorld = pragma::get_cgame()->GetWorld();
 	if(entWorld == nullptr) {
 		Con::cwar << "No world entity found!" << Con::endl;
 		return;
@@ -179,9 +178,9 @@ DLLCLIENT void CMD_debug_render_octree_static_print(NetworkState *, pragma::Base
 
 DLLCLIENT void CMD_debug_render_octree_dynamic_print(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
-	if(c_game == nullptr)
+	if(pragma::get_cgame() == nullptr)
 		return;
-	auto *scene = c_game->GetScene<pragma::CSceneComponent>();
+	auto *scene = pragma::get_cgame()->GetScene<pragma::CSceneComponent>();
 	auto *culler = scene ? scene->FindOcclusionCuller<pragma::COcclusionCullerComponent>() : nullptr;
 	if(culler == nullptr)
 		return;
@@ -191,7 +190,7 @@ DLLCLIENT void CMD_debug_render_octree_dynamic_print(NetworkState *state, pragma
 
 DLLCLIENT void CMD_debug_render_octree_dynamic_find(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
-	if(c_game == NULL || pl == NULL)
+	if(pragma::get_client_state() == NULL || pl == NULL)
 		return;
 	auto &entPl = pl->GetEntity();
 	if(entPl.IsCharacter() == false)
@@ -200,7 +199,7 @@ DLLCLIENT void CMD_debug_render_octree_dynamic_find(NetworkState *state, pragma:
 	auto ents = command::find_target_entity(state, *charComponent, argv);
 	if(ents.empty())
 		return;
-	auto *scene = c_game->GetScene<pragma::CSceneComponent>();
+	auto *scene = pragma::get_cgame()->GetScene<pragma::CSceneComponent>();
 	auto *culler = scene ? scene->FindOcclusionCuller<pragma::COcclusionCullerComponent>() : nullptr;
 	if(culler == nullptr)
 		return;
@@ -236,9 +235,9 @@ DLLCLIENT void CMD_debug_render_octree_dynamic_find(NetworkState *state, pragma:
 
 static void CVAR_CALLBACK_debug_render_octree_static_draw(NetworkState *, const ConVar &, bool, bool val)
 {
-	if(c_game == nullptr)
+	if(pragma::get_cgame() == nullptr)
 		return;
-	auto *entWorld = c_game->GetWorld();
+	auto *entWorld = pragma::get_cgame()->GetWorld();
 	if(entWorld == nullptr) {
 		Con::cwar << "No world entity found!" << Con::endl;
 		return;
@@ -249,7 +248,7 @@ static void CVAR_CALLBACK_debug_render_octree_static_draw(NetworkState *, const 
 		return;
 	}
 	meshTree->SetDebugModeEnabled(val);
-	/*if(c_game == nullptr)
+	/*if(pragma::get_cgame() == nullptr)
 	return;
 	auto mode = OcclusionCulling::GetMode();
 	if(mode != OcclusionCulling::Mode::CHC)
@@ -270,9 +269,9 @@ REGISTER_CONVAR_CALLBACK_CL(debug_render_octree_static_draw, CVAR_CALLBACK_debug
 
 static void CVAR_CALLBACK_debug_render_octree_dynamic_draw(NetworkState *, const ConVar &, bool, bool val)
 {
-	if(c_game == nullptr)
+	if(pragma::get_cgame() == nullptr)
 		return;
-	auto *scene = c_game->GetScene<pragma::CSceneComponent>();
+	auto *scene = pragma::get_cgame()->GetScene<pragma::CSceneComponent>();
 	auto *culler = scene ? scene->FindOcclusionCuller<pragma::COcclusionCullerComponent>() : nullptr;
 	if(culler == nullptr)
 		return;

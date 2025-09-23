@@ -6,7 +6,9 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <pragma/entities/components/base_entity_component.hpp>
 
-export module pragma.client.entities.components.audio.sound_probe;
+export module pragma.client:entities.components.audio.sound_probe;
+
+import :entities.base_entity;
 
 export namespace pragma {
 	class DLLCLIENT CEnvSoundProbeComponent final : public BaseEntityComponent {

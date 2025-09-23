@@ -12,15 +12,14 @@ module;
 #include <image/prosper_msaa_texture.hpp>
 #include <image/prosper_render_target.hpp>
 
-module pragma.client.entities.components.pp_fog;
+module pragma.client;
 
-import pragma.client.engine;
-import pragma.client.entities.components.rasterization_renderer;
-import pragma.client.game;
-import pragma.client.rendering.shaders;
+import :entities.components.rasterization_renderer;
+import :entities.components.pp_fog;
+import :engine;
+import :game;
+import :rendering.shaders;
 
-extern CGame *c_game;
-extern CEngine *c_engine;
 
 using namespace pragma;
 
@@ -29,10 +28,10 @@ void CRendererPpFogComponent::DoRenderEffect(const util::DrawSceneInfo &drawScen
 {
 	if(drawSceneInfo.renderStats)
 		(*drawSceneInfo.renderStats)->BeginGpuTimer(RenderStats::RenderStage::PostProcessingGpuFog, *drawSceneInfo.commandBuffer);
-	c_game->StartGPUProfilingStage("PostProcessingFog");
+	pragma::get_cgame()->StartGPUProfilingStage("PostProcessingFog");
 
 	util::ScopeGuard scopeGuard {[&drawSceneInfo]() {
-		c_game->StopGPUProfilingStage(); // PostProcessingFog
+		pragma::get_cgame()->StopGPUProfilingStage(); // PostProcessingFog
 		if(drawSceneInfo.renderStats)
 			(*drawSceneInfo.renderStats)->EndGpuTimer(RenderStats::RenderStage::PostProcessingGpuFog, *drawSceneInfo.commandBuffer);
 	}};
@@ -51,7 +50,7 @@ void CRendererPpFogComponent::DoRenderEffect(const util::DrawSceneInfo &drawScen
 		}
 	}
 	auto &drawCmd = drawSceneInfo.commandBuffer;
-	auto hShaderFog = c_game->GetGameShader(CGame::GameShader::PPFog);
+	auto hShaderFog = pragma::get_cgame()->GetGameShader(CGame::GameShader::PPFog);
 	if(descSetGroupFog == nullptr || hShaderFog.expired())
 		return;
 	auto &shaderFog = static_cast<pragma::ShaderPPFog &>(*hShaderFog.get());

@@ -6,7 +6,7 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <shader/prosper_shader_base_image_processing.hpp>
 
-export module pragma.client.rendering.shaders:extract_diffuse_ambinet_occlusion;
+export module pragma.client:rendering.shaders.extract_diffuse_ambinet_occlusion;
 
 export namespace pragma {
 	class DLLCLIENT ShaderExtractDiffuseAmbientOcclusion : public prosper::ShaderBaseImageProcessing {

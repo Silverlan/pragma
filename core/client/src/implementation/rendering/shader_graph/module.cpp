@@ -5,9 +5,9 @@ module;
 
 #include "stdafx_client.h"
 
-export module pragma.client.rendering.shader_graph;
+module pragma.client;
 
-import :module;
+import :rendering.shader_graph.module;
 
 using namespace pragma::rendering;
 

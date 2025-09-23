@@ -9,7 +9,9 @@ module;
 #include <mathutil/umath_random.hpp>
 #include <pragma/math/util_random.hpp>
 
-export module pragma.client.particle_system:modifier_random_variable;
+export module pragma.client:particle_system.modifier_random_variable;
+
+import :particle_system.particle;
 
 export {
 	template<class TUniformDis, typename T>

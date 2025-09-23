@@ -11,13 +11,14 @@ module;
 #include <alsoundsystem.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
-module pragma.client.entities.components.audio.dsp.equalizer;
+module pragma.client;
 
-import pragma.client.engine;
+
+import :entities.components.audio.dsp.equalizer;
+import :engine;
 
 using namespace pragma;
 
-extern CEngine *c_engine;
 
 void CSoundDspEqualizerComponent::ReceiveData(NetPacket &packet)
 {
@@ -36,7 +37,7 @@ void CSoundDspEqualizerComponent::ReceiveData(NetPacket &packet)
 void CSoundDspEqualizerComponent::OnEntitySpawn()
 {
 	//BaseEnvSoundDspEqualizer::OnEntitySpawn(); // Not calling BaseEnvSoundDspEqualizer::OnEntitySpawn() to skip the dsp effect lookup
-	auto *soundSys = c_engine->GetSoundSystem();
+	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
 	if(soundSys == nullptr)
 		return;
 	al::EfxEqualizer props {};

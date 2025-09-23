@@ -6,9 +6,8 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <pragma/entities/components/base_entity_component.hpp>
 
-export module pragma.client.entities.components.debug_hitbox;
-
-import pragma.client.debug;
+export module pragma.client:entities.components.debug_hitbox;
+import :debug;
 
 export namespace pragma {
 	class DLLCLIENT CDebugHitboxComponent final : public BaseEntityComponent {

@@ -6,9 +6,9 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <wgui/types/witext.h>
 
-export module pragma.client.gui:tree_list;
+export module pragma.client:gui.tree_list;
 
-import :table;
+import :gui.table;
 
 export
 {

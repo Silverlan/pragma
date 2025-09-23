@@ -6,17 +6,18 @@ module;
 #include "stdafx_client.h"
 #include "luasystem.h"
 
-module pragma.client.scripting.lua.libraries.global;
+module pragma.client;
 
-import pragma.client.engine;
 
-extern CEngine *c_engine;
+import :scripting.lua.libraries.global;
+import :engine;
+
 
 double Lua::ServerTime(lua_State *l)
 {
-	NetworkState *state = c_engine->GetNetworkState(l);
+	NetworkState *state = pragma::get_cengine()->GetNetworkState(l);
 	Game *game = state->GetGameState();
 	return game->ServerTime();
 }
 
-double Lua::FrameTime(lua_State *l) { return c_engine->GetDeltaFrameTime(); }
+double Lua::FrameTime(lua_State *l) { return pragma::get_cengine()->GetDeltaFrameTime(); }

@@ -9,14 +9,8 @@
 #include <image/prosper_render_target.hpp>
 #include <wgui/types/wiroot.h>
 
-import pragma.client.client_state;
-import pragma.client.debug;
-import pragma.client.entities.components;
-import pragma.client.game;
-import pragma.client.gui;
+import pragma.client;
 
-extern ClientState *client;
-extern CGame *c_game;
 
 static WIHandle hGUIShadowmap;
 static int numShadowmapTargets = 0;
@@ -26,7 +20,7 @@ static int shadowmapHeight;
 static CallbackHandle cbRenderShadowMap;
 static CallbackHandle cbReleaseShadowMap;
 static CVar cvShadowmapSize = GetClientConVar("cl_render_shadow_resolution");
-static bool get_shadow_map(NetworkState *nw, std::vector<std::string> &argv, pragma::CLightComponent **light, pragma::CLightComponent::ShadowMapType smType)
+static bool get_shadow_map(NetworkState *nw, std::vector<std::string> &argv, pragma::CLightComponent **light, pragma::rendering::ShadowMapType smType)
 {
 	if(argv.empty())
 		return false;
@@ -61,15 +55,15 @@ void CMD_debug_light_shadowmap(NetworkState *nw, pragma::BasePlayerComponent *, 
 	if(pEl != nullptr)
 		pEl->Remove();
 
-	//auto smType = pragma::CLightComponent::ShadowMapType::Static;
+	//auto smType = pragma::rendering::ShadowMapType::Static;
 	//if(argv.size() > 1 && util::to_boolean(argv.at(1)))
-	//	smType = pragma::CLightComponent::ShadowMapType::Dynamic;
-	auto smType = pragma::CLightComponent::ShadowMapType::Dynamic;
+	//	smType = pragma::rendering::ShadowMapType::Dynamic;
+	auto smType = pragma::rendering::ShadowMapType::Dynamic;
 
 	pragma::CLightComponent *light;
 	if(get_shadow_map(nw, argv, &light, smType) == false)
 		return;
-	if(c_game == nullptr || argv.empty() || pRoot == nullptr)
+	if(pragma::get_cgame() == nullptr || argv.empty() || pRoot == nullptr)
 		return;
 	auto *pElSm = wgui.Create<WIDebugShadowMap>();
 	if(pElSm == nullptr)

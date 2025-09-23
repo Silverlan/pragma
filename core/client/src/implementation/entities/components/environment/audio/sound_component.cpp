@@ -8,15 +8,14 @@ module;
 #include <pragma/audio/alsoundscript.h>
 #include <pragma/entities/entity_component_system_t.hpp>
 
-module pragma.client.entities.components.audio.sound;
+module pragma.client;
 
-import pragma.client.audio;
-import pragma.client.client_state;
-import pragma.client.entities.components;
+import :entities.components.audio.sound;
+import :audio;
+import :client_state;
 
 using namespace pragma;
 
-extern ClientState *client;
 
 static void apply_sound_identifier(ALSound &snd, const std::string &name)
 {
@@ -52,7 +51,7 @@ void CSoundComponent::ReceiveData(NetPacket &packet)
 {
 	m_kvMaxDistance = packet->Read<float>();
 	auto soundIdx = packet->Read<uint32_t>();
-	auto snd = client->GetSoundByIndex(soundIdx);
+	auto snd = pragma::get_client_state()->GetSoundByIndex(soundIdx);
 	if(snd != nullptr) {
 		snd->SetSource(&GetEntity());
 		m_wpSound = snd;

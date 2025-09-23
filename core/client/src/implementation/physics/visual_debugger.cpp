@@ -9,16 +9,14 @@ module;
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_util.hpp>
 
-module pragma.client.physics;
+module pragma.client;
 
-import :visual_debugger;
+import :physics.visual_debugger;
 
-import pragma.client.engine;
-import pragma.client.game;
-import pragma.client.rendering.shaders;
+import :engine;
+import :game;
+import :rendering.shaders;
 
-extern CEngine *c_engine;
-extern CGame *c_game;
 
 CPhysVisualDebugger::CPhysVisualDebugger() { InitializeBuffers(); }
 
@@ -26,7 +24,7 @@ void CPhysVisualDebugger::Render(std::shared_ptr<prosper::ICommandBuffer> &drawC
 {
 	auto vp = cam.GetProjectionMatrix() * cam.GetViewMatrix();
 	auto m = umat::identity();
-	auto &whDebugShader = c_game->GetGameShader(CGame::GameShader::DebugVertex);
+	auto &whDebugShader = pragma::get_cgame()->GetGameShader(CGame::GameShader::DebugVertex);
 	auto &shader = static_cast<pragma::ShaderDebugVertexColor &>(*whDebugShader.get());
 	prosper::ShaderBindState bindState {*drawCmd};
 	if(shader.RecordBeginDraw(bindState, pragma::ShaderDebugVertexColor::Pipeline::Line) == true) {
@@ -54,13 +52,13 @@ void CPhysVisualDebugger::Reset()
 }
 void CPhysVisualDebugger::Flush()
 {
-	c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_lineBuffer.buffer, 0, m_lineBuffer.GetDataSize(), m_lineBuffer.vertices.data());
-	c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_pointBuffer.buffer, 0, m_pointBuffer.GetDataSize(), m_pointBuffer.vertices.data());
-	c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_triangleBuffer.buffer, 0, m_triangleBuffer.GetDataSize(), m_triangleBuffer.vertices.data());
+	pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_lineBuffer.buffer, 0, m_lineBuffer.GetDataSize(), m_lineBuffer.vertices.data());
+	pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_pointBuffer.buffer, 0, m_pointBuffer.GetDataSize(), m_pointBuffer.vertices.data());
+	pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_triangleBuffer.buffer, 0, m_triangleBuffer.GetDataSize(), m_triangleBuffer.vertices.data());
 
-	c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_lineBuffer.colorBuffer, 0, m_lineBuffer.GetColorDataSize(), m_lineBuffer.vertexColors.data());
-	c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_pointBuffer.colorBuffer, 0, m_pointBuffer.GetColorDataSize(), m_pointBuffer.vertexColors.data());
-	c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_triangleBuffer.colorBuffer, 0, m_triangleBuffer.GetColorDataSize(), m_triangleBuffer.vertexColors.data());
+	pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_lineBuffer.colorBuffer, 0, m_lineBuffer.GetColorDataSize(), m_lineBuffer.vertexColors.data());
+	pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_pointBuffer.colorBuffer, 0, m_pointBuffer.GetColorDataSize(), m_pointBuffer.vertexColors.data());
+	pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_triangleBuffer.colorBuffer, 0, m_triangleBuffer.GetColorDataSize(), m_triangleBuffer.vertexColors.data());
 }
 void CPhysVisualDebugger::InitializeBuffers()
 {
@@ -72,7 +70,7 @@ void CPhysVisualDebugger::InitializeBuffers()
 	createInfo.usageFlags = prosper::BufferUsageFlags::VertexBufferBit | prosper::BufferUsageFlags::TransferDstBit;
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::CPUToGPU;
 	createInfo.flags |= prosper::util::BufferCreateInfo::Flags::Persistent;
-	m_debugBuffer = c_engine->GetRenderContext().CreateBuffer(createInfo);
+	m_debugBuffer = pragma::get_cengine()->GetRenderContext().CreateBuffer(createInfo);
 	m_debugBuffer->SetPermanentlyMapped(true, prosper::IBuffer::MapFlags::WriteBit);
 
 	constexpr auto colorBufferSize
@@ -81,7 +79,7 @@ void CPhysVisualDebugger::InitializeBuffers()
 	constexpr auto colorBufferSizeMb = colorBufferSize / 1024 / 1024;
 	createInfo.size = colorBufferSize;
 
-	m_colorBuffer = c_engine->GetRenderContext().CreateBuffer(createInfo);
+	m_colorBuffer = pragma::get_cengine()->GetRenderContext().CreateBuffer(createInfo);
 	m_colorBuffer->SetPermanentlyMapped(true, prosper::IBuffer::MapFlags::WriteBit);
 
 	prosper::DeviceSize offset = 0;

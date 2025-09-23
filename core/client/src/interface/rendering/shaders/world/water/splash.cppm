@@ -7,7 +7,7 @@ module;
 #include <shader/prosper_shader.hpp>
 #include <pragma/physics/phys_water_surface_simulator.hpp>
 
-export module pragma.client.rendering.shaders:world_water_splash;
+export module pragma.client:rendering.shaders.world_water_splash;
 
 export namespace pragma {
 	class DLLCLIENT ShaderWaterSplash : public prosper::ShaderCompute {

@@ -5,9 +5,9 @@ module;
 
 #include "stdafx_client.h"
 
-module pragma.client.networking;
+module pragma.client;
 
-import :iclient;
+import :networking.iclient;
 
 std::optional<pragma::networking::IPAddress> pragma::networking::IClient::GetIPAddress() const
 {

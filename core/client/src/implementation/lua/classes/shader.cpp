@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/lua/converters/shader_converter_t.hpp"
 #include <pragma/lua/util.hpp>
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <shader/prosper_shader_flip_image.hpp>
@@ -13,9 +12,10 @@ module;
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
 
-module pragma.client.scripting.lua.classes.shader;
+module pragma.client;
 
-import pragma.client.rendering.shaders;
+import :scripting.lua.classes.shader;
+import :rendering.shaders;
 
 prosper::ShaderBindState *LuaShaderRecordTarget::GetBindState() const { return luabind::object_cast_nothrow<prosper::ShaderBindState *>(target, static_cast<prosper::ShaderBindState *>(nullptr)); }
 prosper::util::PreparedCommandBuffer *LuaShaderRecordTarget::GetPcb() const { return luabind::object_cast_nothrow<prosper::util::PreparedCommandBuffer *>(target, static_cast<prosper::util::PreparedCommandBuffer *>(nullptr)); }
@@ -159,7 +159,7 @@ void Lua::Shader::RecordPushConstants(lua_State *l, prosper::Shader &shader, pro
 			  return shader.RecordPushConstants(*recordState.shaderBindState, sizeof(value), &value, offset);
 		  });
 	  },
-	  util::make_vector<prosper::util::PreparedCommand::Argument>(Lua::Vulkan::make_pcb_arg(value, type)));
+	  ::util::make_vector<prosper::util::PreparedCommand::Argument>(Lua::Vulkan::make_pcb_arg(value, type)));
 }
 void Lua::Shader::RecordPushConstants(lua_State *l, prosper::Shader &shader, const LuaShaderRecordTarget &recordTarget, ::DataStream &ds, uint32_t offset)
 {

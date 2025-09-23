@@ -15,9 +15,9 @@ namespace pragma::string {
 
 #include <wgui/types/witext.h>
 
-module pragma.client.gui;
+module pragma.client;
 
-import :main_menu_credits;
+import :gui.main_menu_credits;
 
 import pragma.locale;
 import pragma.string.unicode;

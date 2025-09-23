@@ -3,5 +3,5 @@
 
 module;
 
-export module pragma.client.ai;
-export import :nav_system;
+export module pragma.client:ai;
+export import :ai.nav_system;

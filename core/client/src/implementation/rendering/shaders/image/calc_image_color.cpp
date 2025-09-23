@@ -7,9 +7,10 @@ module;
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <shader/prosper_shader_t.hpp>
 
-module pragma.client.rendering.shaders;
+module pragma.client;
 
-import :calc_image_color;
+
+import :rendering.shaders.calc_image_color;
 
 using namespace pragma;
 

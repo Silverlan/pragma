@@ -14,6 +14,7 @@ module;
 #include "wgui/wibase.h"
 #include "image/prosper_image.hpp"
 #include "prosper_command_buffer.hpp"
+#include "pragma/entities/baseentity.h"
 #include <pragma/game/game.h>
 #include <pragma/input/inkeys.h>
 #include <mathutil/color.h>
@@ -26,9 +27,18 @@ module;
 #include <alsoundsystem.hpp>
 #include <alsoundsystem_create_effect.hpp>
 
-export module pragma.client.game;
-
-import pragma.client.entities.components.player;
+export module pragma.client:game;
+import :core.lua_input_binding_layer_register;
+import :entities.base_entity;
+import :entities.components.player;
+import :rendering.enums;
+import :rendering.game_world_shader_settings;
+import :rendering.global_render_settings_buffer_data;
+import :rendering.global_shader_input_manager;
+import :rendering.gpu_profiler;
+import :rendering.render_queue_worker;
+import :rendering.shaders.lua;
+import :scripting.lua.gui_manager;
 import pragma.platform;
 import pragma.string.unicode;
 
@@ -56,6 +66,7 @@ export namespace pragma {
 
 #pragma warning(push)
 #pragma warning(disable : 4251)
+export class CBaseEntity;
 export class DLLCLIENT CGame : public Game {
   public:
 	CGame(NetworkState *state);
@@ -176,7 +187,7 @@ export class DLLCLIENT CGame : public Game {
 	virtual CBaseEntity *CreateLuaEntity(std::string classname, bool bLoadIfNotExists = false) override;
 	CBaseEntity *CreateLuaEntity(std::string classname, unsigned int idx, bool bLoadIfNotExists = false);
 	virtual CBaseEntity *GetEntity(unsigned int idx) override;
-	virtual BaseEntity *GetEntityByLocalIndex(uint32_t idx) override;
+	virtual CBaseEntity *GetEntityByLocalIndex(uint32_t idx) override;
 	CBaseEntity *GetEntityByClientIndex(unsigned int idx);
 	virtual void GetPlayers(std::vector<BaseEntity *> *ents) override;
 	virtual void GetNPCs(std::vector<BaseEntity *> *ents) override;
@@ -510,6 +521,10 @@ export {
 	REGISTER_BASIC_BITWISE_OPERATORS(CGame::SoundCacheFlags)
 	REGISTER_BASIC_BITWISE_OPERATORS(CGame::GameShader)
 	REGISTER_BASIC_BITWISE_OPERATORS(CGame::StateFlags)
+
+	namespace pragma {
+		DLLCLIENT CGame *get_cgame();
+	};
 }
 #pragma warning(pop)
 

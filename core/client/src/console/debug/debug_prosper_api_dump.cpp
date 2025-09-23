@@ -17,9 +17,8 @@ void LPARAM_enable_gfx_api_dump(const std::vector<std::string> &argv)
 #include <prosper_context.hpp>
 #include <prosper_command_buffer.hpp>
 
-import pragma.client.engine;
+import :engine;
 
-extern CEngine *c_engine;
 
 namespace pragma::debug {
 	// These are mainly used in the VS immediate window for debugging purposes
@@ -48,7 +47,7 @@ namespace pragma::debug {
 	}
 	DLLCLIENT void dump_api_dump_recorder_f()
 	{
-		auto &apiDumpRecorder = c_engine->GetRenderContext().GetApiDumpRecorder();
+		auto &apiDumpRecorder = pragma::get_cengine()->GetRenderContext().GetApiDumpRecorder();
 
 		std::stringstream ss;
 		apiDumpRecorder.Print(ss);
@@ -73,7 +72,7 @@ namespace pragma::debug {
 	}
 	DLLCLIENT void dump_api_dump_recorder_calltrace_main(uint64_t cmdIdx, int32_t recordIdx)
 	{
-		auto &apiDumpRecorder = c_engine->GetRenderContext().GetApiDumpRecorder();
+		auto &apiDumpRecorder = pragma::get_cengine()->GetRenderContext().GetApiDumpRecorder();
 
 		std::stringstream ss;
 		apiDumpRecorder.PrintCallTrace(cmdIdx, ss, recordIdx);
@@ -81,7 +80,7 @@ namespace pragma::debug {
 	}
 	DLLCLIENT void dump_api_dump_recorder_calltrace_main(uint64_t cmdIdx)
 	{
-		auto &apiDumpRecorder = c_engine->GetRenderContext().GetApiDumpRecorder();
+		auto &apiDumpRecorder = pragma::get_cengine()->GetRenderContext().GetApiDumpRecorder();
 
 		std::stringstream ss;
 		apiDumpRecorder.PrintCallTrace(cmdIdx, ss);

@@ -12,20 +12,18 @@ module;
 #include <pragma/audio/alsound_type.h>
 #include <pragma/entities/components/base_transform_component.hpp>
 
-module pragma.client.audio;
+module pragma.client;
 
-import :sound;
+import :audio.sound;
+import :client_state;
+import :engine;
+import :networking.util;
 
-import pragma.client.client_state;
-import pragma.client.engine;
-
-extern CEngine *c_engine;
-extern ClientState *client;
 DLLCLIENT void NET_cl_snd_precache(NetPacket packet)
 {
 	std::string snd = packet->ReadString();
 	auto mode = packet->Read<uint8_t>();
-	client->PrecacheSound(snd, static_cast<ALChannel>(mode));
+	pragma::get_client_state()->PrecacheSound(snd, static_cast<ALChannel>(mode));
 }
 
 DLLCLIENT void NET_cl_snd_create(NetPacket packet)
@@ -34,6 +32,7 @@ DLLCLIENT void NET_cl_snd_create(NetPacket packet)
 	auto type = packet->Read<ALSoundType>();
 	unsigned int idx = packet->Read<unsigned int>();
 	auto createFlags = packet->Read<ALCreateFlags>();
+	auto *client = pragma::get_client_state();
 	auto as = client->CreateSound(snd, ALSoundType::Generic, createFlags);
 	if(as == nullptr)
 		return;
@@ -121,7 +120,7 @@ DLLCLIENT void NET_cl_snd_ev(NetPacket packet)
 {
 	unsigned char ev = packet->Read<unsigned char>();
 	unsigned int idx = packet->Read<unsigned int>();
-	std::shared_ptr<ALSound> as = client->GetSoundByIndex(idx);
+	std::shared_ptr<ALSound> as = pragma::get_client_state()->GetSoundByIndex(idx);
 	if(as == NULL)
 		return;
 	switch(static_cast<ALSound::NetEvent>(ev)) {
@@ -464,10 +463,11 @@ void CALSound::UpdateVolume()
 	if(m_bTerminated == true)
 		return;
 	auto gain = m_gain;
-	if(c_engine->IsWindowFocused() == false && cvAlwaysPlay->GetBool() == false)
+	if(pragma::get_cengine()->IsWindowFocused() == false && cvAlwaysPlay->GetBool() == false)
 		gain = 0.f;
 	else {
 		gain *= GetVolumeModifier();
+		auto *client = pragma::get_client_state();
 		auto &volumes = client->GetSoundVolumes();
 		auto minGain = 1.f;
 		for(auto it = volumes.begin(); it != volumes.end(); ++it) {
@@ -520,7 +520,7 @@ void CALSound::Update()
 		CheckStateChange(old);
 	}
 	else if(m_fade != nullptr) {
-		auto t = client->RealTime() - m_fade->start;
+		auto t = pragma::get_client_state()->RealTime() - m_fade->start;
 		if(t >= m_fade->duration)
 			CancelFade();
 		else {
@@ -559,7 +559,7 @@ void CALSound::FadeIn(float time)
 	CancelFade();
 	if(!IsPlaying())
 		Play();
-	m_fade = std::unique_ptr<SoundFade>(new SoundFade(true, client->RealTime(), time, gain));
+	m_fade = std::unique_ptr<SoundFade>(new SoundFade(true, pragma::get_client_state()->RealTime(), time, gain));
 }
 
 void CALSound::FadeOut(float time)
@@ -568,7 +568,7 @@ void CALSound::FadeOut(float time)
 		return;
 	float gain = GetGain();
 	CancelFade();
-	m_fade = std::unique_ptr<SoundFade>(new SoundFade(false, client->RealTime(), time, gain));
+	m_fade = std::unique_ptr<SoundFade>(new SoundFade(false, pragma::get_client_state()->RealTime(), time, gain));
 }
 
 void CALSound::UpdateState()
@@ -987,21 +987,21 @@ const ALSound::EffectParams &CALSound::GetDirectFilter() const
 }
 bool CALSound::AddEffect(const std::string &effectName, const EffectParams &params)
 {
-	auto effect = c_engine->GetAuxEffect(effectName);
+	auto effect = pragma::get_cengine()->GetAuxEffect(effectName);
 	if(effect == nullptr)
 		return false;
 	return (*this)->AddEffect(*effect, reinterpret_cast<const al::EffectParams &>(params));
 }
 void CALSound::RemoveEffect(const std::string &effectName)
 {
-	auto effect = c_engine->GetAuxEffect(effectName);
+	auto effect = pragma::get_cengine()->GetAuxEffect(effectName);
 	if(effect == nullptr)
 		return;
 	(*this)->RemoveEffect(*effect);
 }
 void CALSound::SetEffectParameters(const std::string &effectName, const EffectParams &params)
 {
-	auto effect = c_engine->GetAuxEffect(effectName);
+	auto effect = pragma::get_cengine()->GetAuxEffect(effectName);
 	if(effect == nullptr)
 		return;
 	(*this)->SetEffectParameters(*effect, reinterpret_cast<const al::EffectParams &>(params));
@@ -1015,4 +1015,4 @@ void CALSound::SetType(ALSoundType type)
 	UpdateVolume();
 }
 
-REGISTER_CONVAR_CALLBACK_CL(cl_audio_always_play, [](NetworkState *, const ConVar &, bool, bool) { client->UpdateSoundVolume(); })
+REGISTER_CONVAR_CALLBACK_CL(cl_audio_always_play, [](NetworkState *, const ConVar &, bool, bool) { pragma::get_client_state()->UpdateSoundVolume(); })

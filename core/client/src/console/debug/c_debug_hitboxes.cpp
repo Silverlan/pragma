@@ -10,11 +10,8 @@
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
-import pragma.client.debug;
-import pragma.client.game;
-import pragma.client.entities.components;
+import pragma.client;
 
-extern CGame *c_game;
 
 void Console::commands::debug_hitboxes(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
@@ -30,7 +27,7 @@ void Console::commands::debug_hitboxes(NetworkState *state, pragma::BasePlayerCo
 			ent->RemoveComponent<pragma::CDebugHitboxComponent>();
 		return;
 	}
-	if(c_game == nullptr || pl == nullptr)
+	if(pragma::get_cgame() == nullptr || pl == nullptr)
 		return;
 	auto charComponent = pl->GetEntity().GetCharacterComponent();
 	if(charComponent.expired())

@@ -8,9 +8,9 @@ module;
 #include <mathutil/umath.h>
 #include <prosper_window.hpp>
 
-module pragma.client.gui;
+module pragma.client;
 
-import :scroll_container;
+import :gui.scroll_container;
 
 import pragma.gui;
 

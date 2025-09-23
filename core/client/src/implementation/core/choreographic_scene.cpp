@@ -7,12 +7,13 @@ module;
 #include <pragma/audio/alsound_type.h>
 #include <pragma/entities/entity_component_system_t.hpp>
 
-module pragma.client.core.choreographic_scene;
+module pragma.client;
 
-import pragma.client.client_state;
-import pragma.client.entities.components;
 
-extern ClientState *client;
+import :core.choreographic_scene;
+import :client_state;
+import :entities.components;
+
 
 choreography::Scene::Scene() : uts::TimelineScene() {}
 choreography::Channel::Channel(uts::TimelineScene &scene, const std::string &name) : uts::Channel(scene, name) {}

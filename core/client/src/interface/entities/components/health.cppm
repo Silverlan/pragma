@@ -6,7 +6,9 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <pragma/entities/components/base_health_component.hpp>
 
-export module pragma.client.entities.components.health;
+export module pragma.client:entities.components.health;
+
+import :entities.components.entity;
 
 export namespace pragma {
 	class DLLCLIENT CHealthComponent final : public BaseHealthComponent, public CBaseNetComponent {

@@ -3,8 +3,11 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 
-export module pragma.client.rendering.shaders:world_wireframe;
+export module pragma.client:rendering.shaders.world_wireframe;
+
+import :rendering.shaders.pbr;
 
 export namespace pragma {
 	class DLLCLIENT ShaderWireframe : public ShaderPBR {

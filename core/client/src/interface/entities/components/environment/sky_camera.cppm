@@ -6,7 +6,12 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <pragma/entities/components/base_entity_component.hpp>
 
-export module pragma.client.entities.components.env_sky_camera;
+export module pragma.client:entities.components.env_sky_camera;
+
+import :entities.base_entity;
+import :rendering.enums;
+import :rendering.render_processor;
+import :rendering.render_queue;
 
 export {
 	namespace pragma {

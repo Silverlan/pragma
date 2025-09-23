@@ -7,9 +7,8 @@ module;
 #include <pragma/lua/ldefinitions.h>
 #include "pragma/debug/debug_render_info.hpp"
 
-export module pragma.client.scripting.lua.libraries.debug_renderer;
-
-import pragma.client.debug;
+export module pragma.client:scripting.lua.libraries.debug_renderer;
+import :debug;
 
 export namespace Lua {
 	namespace DebugRenderer {

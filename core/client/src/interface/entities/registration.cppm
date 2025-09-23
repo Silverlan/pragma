@@ -12,10 +12,10 @@ module;
 
 #undef GetClassName
 
-export module pragma.client.entities:registration;
+export module pragma.client:entities.registration;
 
-import pragma.client.client_state;
-import pragma.client.game;
+import :client_state;
+import :game;
 
 export namespace client_entities {
     using Factory = std::function<CBaseEntity*(ClientState*)>;

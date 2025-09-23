@@ -6,7 +6,10 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <pragma/entities/components/base_entity_component.hpp>
 
-export module pragma.client.entities.components.game_occlusion_culler;
+export module pragma.client:entities.components.game_occlusion_culler;
+
+import :entities.base_entity;
+import :rendering.occlusion_culling.octree;
 
 export namespace pragma {
 	class DLLCLIENT COcclusionCullerComponent final : public BaseEntityComponent {

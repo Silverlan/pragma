@@ -9,7 +9,7 @@ module;
 #include <image/prosper_render_target.hpp>
 #include <shader/prosper_shader.hpp>
 
-export module pragma.client.rendering.shaders:cubemap;
+export module pragma.client:rendering.shaders.cubemap;
 
 export namespace pragma {
 	class DLLCLIENT ShaderCubemap : public prosper::ShaderGraphics {

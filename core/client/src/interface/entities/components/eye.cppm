@@ -9,10 +9,10 @@ module;
 #include <mathutil/transform.hpp>
 #include <mathutil/uvec.h>
 
-export module pragma.client.entities.components.eye;
-
-import pragma.client.entities.components.animated;
-import pragma.client.entities.components.flex;
+export module pragma.client:entities.components.eye;
+import :entities.components.animated;
+import :entities.components.flex;
+import :model.mesh;
 
 export {
 	namespace pragma {

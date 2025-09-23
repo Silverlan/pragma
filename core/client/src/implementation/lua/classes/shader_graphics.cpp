@@ -14,11 +14,12 @@ module;
 #include <prosper_render_pass.hpp>
 #include <prosper_descriptor_set_group.hpp>
 
-module pragma.client.scripting.lua.classes.shader;
+module pragma.client;
 
-import pragma.client.engine;
 
-extern CEngine *c_engine;
+import :scripting.lua.classes.shader;
+import :engine;
+
 
 void Lua::GraphicsPipelineCreateInfo::SetBlendingProperties(lua_State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo, const Vector4 &blendingProperties) { pipelineInfo.SetBlendingProperties(reinterpret_cast<const float *>(&blendingProperties)); }
 void Lua::GraphicsPipelineCreateInfo::SetCommonAlphaBlendProperties(lua_State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo) { prosper::util::set_generic_alpha_color_blend_attachment_properties(pipelineInfo); }
@@ -414,7 +415,7 @@ void Lua::GraphicsPipelineCreateInfo::IsRasterizerDiscardEnabled(lua_State *l, p
 void Lua::GraphicsPipelineCreateInfo::IsSampleMaskEnabled(lua_State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo) { Lua::PushBool(l, pipelineInfo.IsSampleMaskEnabled()); }
 void Lua::Shader::Graphics::AttachVertexAttribute(lua_State *l, pragma::LuaShaderWrapperGraphicsBase &shader, const pragma::LuaVertexBinding &binding, luabind::object attributes)
 {
-	auto vertexAttributes = Lua::get_table_values<pragma::LuaVertexAttribute>(l, 3u, [](lua_State *l, int32_t idx) { return *Lua::CheckVertexAttribute(l, idx); });
+	auto vertexAttributes = Lua::get_table_values<pragma::LuaVertexAttribute>(l, 3u, [](lua_State *l, int32_t idx) { return Lua::Check<pragma::LuaVertexAttribute>(l, idx); });
 	shader.AttachVertexAttribute(binding, vertexAttributes);
 }
 void Lua::GraphicsPipelineCreateInfo::AddSpecializationConstant(lua_State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t shaderStage, uint32_t constantId, ::DataStream &ds)
@@ -583,7 +584,7 @@ void Lua::Shader::Graphics::GetRenderPass(lua_State *l, prosper::ShaderGraphics 
 }
 void Lua::Shader::Scene3D::GetRenderPass(lua_State *l, uint32_t pipelineIdx)
 {
-	auto &rp = prosper::ShaderGraphics::GetRenderPass<pragma::ShaderScene>(c_engine->GetRenderContext(), pipelineIdx);
+	auto &rp = prosper::ShaderGraphics::GetRenderPass<pragma::ShaderScene>(pragma::get_cengine()->GetRenderContext(), pipelineIdx);
 	if(rp == nullptr)
 		return;
 	Lua::Push(l, rp);

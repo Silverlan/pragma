@@ -3,10 +3,10 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include "stdafx_client.h"
 #include "luasystem.h"
 #include <pragma/lua/classes/ldef_vector.h>
-#include "pragma/lua/converters/shader_converter_t.hpp"
 #include <pragma/model/model.h>
 #include <pragma/lua/classes/ldef_quaternion.h>
 #include <pragma/util/transform.h>
@@ -47,19 +47,18 @@ module;
 
 #include <pragma/physics/environment.hpp>
 
-module pragma.client.scripting.lua.libraries.game;
+module pragma.client;
 
-import pragma.client.client_state;
-import pragma.client.core;
-import pragma.client.debug;
-import pragma.client.engine;
-import pragma.client.entities.components;
-import pragma.client.game;
-import pragma.client.scripting.lua;
 
-extern CEngine *c_engine;
-extern ClientState *client;
-extern CGame *c_game;
+import :scripting.lua.libraries.game;
+import :client_state;
+import :core;
+import :debug;
+import :engine;
+import :entities.components;
+import :game;
+import :scripting.lua;
+
 
 #ifdef ENABLE_DEPRECATED_PHYSICS
 static btSoftBody *createSoftBody(btSoftRigidDynamicsWorld *world, btSoftBodyWorldInfo *info, const btScalar s, const int numX, const int numY, const int fixed)
@@ -84,7 +83,7 @@ static void update_vehicle(Vehicle_Car *vhc)
 	auto origin = uvec::create(t.getOrigin() / PhysEnv::WORLD_SCALE);
 	auto axis = uvec::create(t.getRotation().getAxis());
 	uvec::normalize(&axis);
-	c_game->DrawLine(origin, origin + axis * 400.f, Color::Red, 0.5f);
+	pragma::get_cgame()->DrawLine(origin, origin + axis * 400.f, Color::Red, 0.5f);
 }
 #endif
 
@@ -184,7 +183,7 @@ class RagDoll {
 		if(isDynamic)
 			shape->CalculateLocalInertia(mass, &localInertia);
 
-		auto *body = c_game->GetPhysicsEnvironment()->CreateRigidBody(mass, shape, localInertia);
+		auto *body = pragma::get_cgame()->GetPhysicsEnvironment()->CreateRigidBody(mass, shape, localInertia);
 
 		body->Spawn();
 		body->SetCollisionFilterGroup(CollisionMask::Dynamic | CollisionMask::Generic);
@@ -195,17 +194,17 @@ class RagDoll {
 	RagDoll(btDynamicsWorld *ownerWorld, const btVector3 &positionOffset, btScalar scale) : m_ownerWorld(ownerWorld)
 	{
 		// Setup the geometry
-		m_shapes[BODYPART_PELVIS] = c_game->GetPhysicsEnvironment()->CreateConvexShape(new btCapsuleShape(btScalar(0.15) * scale, btScalar(0.20) * scale));
-		m_shapes[BODYPART_SPINE] = c_game->GetPhysicsEnvironment()->CreateConvexShape(new btCapsuleShape(btScalar(0.15) * scale, btScalar(0.28) * scale));
-		m_shapes[BODYPART_HEAD] = c_game->GetPhysicsEnvironment()->CreateConvexShape(new btCapsuleShape(btScalar(0.10) * scale, btScalar(0.05) * scale));
-		m_shapes[BODYPART_LEFT_UPPER_LEG] = c_game->GetPhysicsEnvironment()->CreateConvexShape(new btCapsuleShape(btScalar(0.07) * scale, btScalar(0.45) * scale));
-		m_shapes[BODYPART_LEFT_LOWER_LEG] = c_game->GetPhysicsEnvironment()->CreateConvexShape(new btCapsuleShape(btScalar(0.05) * scale, btScalar(0.37) * scale));
-		m_shapes[BODYPART_RIGHT_UPPER_LEG] = c_game->GetPhysicsEnvironment()->CreateConvexShape(new btCapsuleShape(btScalar(0.07) * scale, btScalar(0.45) * scale));
-		m_shapes[BODYPART_RIGHT_LOWER_LEG] = c_game->GetPhysicsEnvironment()->CreateConvexShape(new btCapsuleShape(btScalar(0.05) * scale, btScalar(0.37) * scale));
-		m_shapes[BODYPART_LEFT_UPPER_ARM] = c_game->GetPhysicsEnvironment()->CreateConvexShape(new btCapsuleShape(btScalar(0.05) * scale, btScalar(0.33) * scale));
-		m_shapes[BODYPART_LEFT_LOWER_ARM] = c_game->GetPhysicsEnvironment()->CreateConvexShape(new btCapsuleShape(btScalar(0.04) * scale, btScalar(0.25) * scale));
-		m_shapes[BODYPART_RIGHT_UPPER_ARM] = c_game->GetPhysicsEnvironment()->CreateConvexShape(new btCapsuleShape(btScalar(0.05) * scale, btScalar(0.33) * scale));
-		m_shapes[BODYPART_RIGHT_LOWER_ARM] = c_game->GetPhysicsEnvironment()->CreateConvexShape(new btCapsuleShape(btScalar(0.04) * scale, btScalar(0.25) * scale));
+		m_shapes[BODYPART_PELVIS] = pragma::get_cgame()->GetPhysicsEnvironment()->CreateConvexShape(new btCapsuleShape(btScalar(0.15) * scale, btScalar(0.20) * scale));
+		m_shapes[BODYPART_SPINE] = pragma::get_cgame()->GetPhysicsEnvironment()->CreateConvexShape(new btCapsuleShape(btScalar(0.15) * scale, btScalar(0.28) * scale));
+		m_shapes[BODYPART_HEAD] = pragma::get_cgame()->GetPhysicsEnvironment()->CreateConvexShape(new btCapsuleShape(btScalar(0.10) * scale, btScalar(0.05) * scale));
+		m_shapes[BODYPART_LEFT_UPPER_LEG] = pragma::get_cgame()->GetPhysicsEnvironment()->CreateConvexShape(new btCapsuleShape(btScalar(0.07) * scale, btScalar(0.45) * scale));
+		m_shapes[BODYPART_LEFT_LOWER_LEG] = pragma::get_cgame()->GetPhysicsEnvironment()->CreateConvexShape(new btCapsuleShape(btScalar(0.05) * scale, btScalar(0.37) * scale));
+		m_shapes[BODYPART_RIGHT_UPPER_LEG] = pragma::get_cgame()->GetPhysicsEnvironment()->CreateConvexShape(new btCapsuleShape(btScalar(0.07) * scale, btScalar(0.45) * scale));
+		m_shapes[BODYPART_RIGHT_LOWER_LEG] = pragma::get_cgame()->GetPhysicsEnvironment()->CreateConvexShape(new btCapsuleShape(btScalar(0.05) * scale, btScalar(0.37) * scale));
+		m_shapes[BODYPART_LEFT_UPPER_ARM] = pragma::get_cgame()->GetPhysicsEnvironment()->CreateConvexShape(new btCapsuleShape(btScalar(0.05) * scale, btScalar(0.33) * scale));
+		m_shapes[BODYPART_LEFT_LOWER_ARM] = pragma::get_cgame()->GetPhysicsEnvironment()->CreateConvexShape(new btCapsuleShape(btScalar(0.04) * scale, btScalar(0.25) * scale));
+		m_shapes[BODYPART_RIGHT_UPPER_ARM] = pragma::get_cgame()->GetPhysicsEnvironment()->CreateConvexShape(new btCapsuleShape(btScalar(0.05) * scale, btScalar(0.33) * scale));
+		m_shapes[BODYPART_RIGHT_LOWER_ARM] = pragma::get_cgame()->GetPhysicsEnvironment()->CreateConvexShape(new btCapsuleShape(btScalar(0.04) * scale, btScalar(0.25) * scale));
 
 		// Setup all the rigid bodies
 		btTransform offset;
@@ -272,7 +271,7 @@ class RagDoll {
 		// Now setup the constraints
 		PhysHinge *hingeC;
 		PhysConeTwist *coneC;
-		auto *physEnv = c_game->GetPhysicsEnvironment();
+		auto *physEnv = pragma::get_cgame()->GetPhysicsEnvironment();
 
 		btTransform localA, localB;
 
@@ -397,10 +396,10 @@ class RagDoll {
 
 int Lua::game::Client::test(lua_State *l)
 {
-	/*auto &point = c_game->GetLocalPlayer()->GetEntity().GetPosition();
+	/*auto &point = pragma::get_cgame()->GetLocalPlayer()->GetEntity().GetPosition();
 	pragma::OcclusionCullingHandlerBSP ocHandler {};
 	std::vector<pragma::OcclusionMeshInfo> renderMeshes {};
-	ocHandler.PerformCulling(*c_game->GetScene(),renderMeshes);
+	ocHandler.PerformCulling(*pragma::get_cgame()->GetScene(),renderMeshes);
 	auto *pNode = ocHandler.FindLeafNode(point);*/
 	/*auto t = Lua::CreateTable(l);
 	auto idx = 1u;
@@ -426,12 +425,12 @@ int Lua::game::Client::test(lua_State *l)
 	if(true)
 		return 0;
 
-	auto *world = c_game->GetPhysicsEnvironment()->GetWorld();
+	auto *world = pragma::get_cgame()->GetPhysicsEnvironment()->GetWorld();
 	auto offset = btVector3 {0.f, 0.f, 0.f};
 	auto scale = 3.5;
 	/*auto *ragdoll = new RagDoll(world,offset,scale);
 
-	auto cbThink = c_game->AddCallback("Think",FunctionCallback<>::Create([ragdoll]() {
+	auto cbThink = pragma::get_cgame()->AddCallback("Think",FunctionCallback<>::Create([ragdoll]() {
 		static auto f = Vector3{0.f,-600.f,0.f};
 		for(auto &hBody : ragdoll->m_bodies)
 		{
@@ -442,7 +441,7 @@ int Lua::game::Client::test(lua_State *l)
 		}
 	}));*/
 
-	auto mdl = c_game->LoadModel("breen.wmd");
+	auto mdl = pragma::get_cgame()->LoadModel("breen.wmd");
 	static std::vector<PhysRigidBody *> rigidBodies {};
 	if(rigidBodies.empty() == true) {
 		if(mdl != nullptr) {
@@ -454,7 +453,7 @@ int Lua::game::Client::test(lua_State *l)
 				Vector3 localInertia(0, 0, 0);
 				shape->CalculateLocalInertia(mass, &localInertia);
 
-				auto *body = c_game->GetPhysicsEnvironment()->CreateRigidBody(mass, shape, localInertia);
+				auto *body = pragma::get_cgame()->GetPhysicsEnvironment()->CreateRigidBody(mass, shape, localInertia);
 
 				body->Spawn();
 				body->SetPos(colMesh->GetOrigin());
@@ -481,7 +480,7 @@ int Lua::game::Client::test(lua_State *l)
 
 				auto posTgt = posConstraint + dstBody->GetOrigin();
 				posConstraint = posConstraint + srcBody->GetOrigin();
-				auto *c = c_game->GetPhysicsEnvironment()->CreateFixedConstraint(srcBody, posConstraint, uquat::identity(), dstBody, posTgt, uquat::identity());
+				auto *c = pragma::get_cgame()->GetPhysicsEnvironment()->CreateFixedConstraint(srcBody, posConstraint, uquat::identity(), dstBody, posTgt, uquat::identity());
 				if(c != nullptr)
 					c->SetCollisionsEnabled(joint.collide);
 			}
@@ -490,7 +489,7 @@ int Lua::game::Client::test(lua_State *l)
 	else {
 		for(auto *pRigidBody : rigidBodies)
 			pRigidBody->SetMass(mdl->GetMass());
-		auto cbThink = c_game->AddCallback("Think", FunctionCallback<>::Create([]() {
+		auto cbThink = pragma::get_cgame()->AddCallback("Think", FunctionCallback<>::Create([]() {
 			static auto f = Vector3 {0.f, -600.f, 0.f};
 			for(auto *body : rigidBodies) {
 				auto localForce = f * body->GetMass();
@@ -503,7 +502,7 @@ int Lua::game::Client::test(lua_State *l)
 #if 0
 	if(true)
 	{
-		EntityIterator entIt {*c_game};
+		EntityIterator entIt {*pragma::get_cgame()};
 		entIt.AttachFilter<EntityIteratorFilterClass>("prop_physics");
 		auto it = entIt.begin();
 		auto *ent = (it != entIt.end()) ? *it : nullptr;
@@ -552,8 +551,8 @@ int Lua::game::Client::test(lua_State *l)
 		/*auto *ike = new InverseKinematicsExample(IK_JACOB_TRANS);
 		ike->initPhysics();
 
-		c_game->AddCallback("Tick",FunctionCallback<void>::Create([ike]() {
-			ike->stepSimulation(c_game->DeltaTime());
+		pragma::get_cgame()->AddCallback("Tick",FunctionCallback<void>::Create([ike]() {
+			ike->stepSimulation(pragma::get_cgame()->DeltaTime());
 			ike->renderScene();
 		}));*/
 		/*#define RADIAN(X)	((X)*RadiansToDegrees)
@@ -600,9 +599,9 @@ int Lua::game::Client::test(lua_State *l)
 		ikTree->Init();
 		ikTree->Compute();
 
-		c_game->AddCallback("Tick",FunctionCallback<void>::Create([ikTree,jacobian,m_ikNodes]() {
+		pragma::get_cgame()->AddCallback("Tick",FunctionCallback<void>::Create([ikTree,jacobian,m_ikNodes]() {
 			int m_ikMethod = IK_DLS;
-			DoUpdateStep(c_game->DeltaTime(),*ikTree,jacobian.get(),m_ikMethod);
+			DoUpdateStep(pragma::get_cgame()->DeltaTime(),*ikTree,jacobian.get(),m_ikMethod);
 
 			btTransform act;
 			getLocalTransform(ikTree->GetRoot(), act);
@@ -615,8 +614,8 @@ int Lua::game::Client::test(lua_State *l)
 	if(true)
 	{
 		auto *vhc = new Vehicle_Car();
-		vhc->InitVehicle(c_game->GetPhysicsEnvironment(),Vector3());
-		c_game->AddCallback("Tick",FunctionCallback<void>::Create([vhc]() {
+		vhc->InitVehicle(pragma::get_cgame()->GetPhysicsEnvironment(),Vector3());
+		pragma::get_cgame()->AddCallback("Tick",FunctionCallback<void>::Create([vhc]() {
 			update_vehicle(vhc);
 		}));
 		return 0;
@@ -624,7 +623,7 @@ int Lua::game::Client::test(lua_State *l)
 
 	if(true)
 	{
-		client->LoadSoundScripts("level_sounds_trainyard.udm",false);
+		pragma::get_client_state()->LoadSoundScripts("level_sounds_trainyard.udm",false);
 		auto scene = choreography::Scene::Create<choreography::Scene>();
 		auto channel = scene->AddChannel<choreography::Channel>("Test");
 
@@ -668,7 +667,7 @@ int Lua::game::Client::test(lua_State *l)
 										auto ev = channel->AddEvent<choreography::AudioEvent>(sndName);
 										ev->SetTimeRange(startTime,endTime);
 
-										EntityIterator entIt {*c_game};
+										EntityIterator entIt {*pragma::get_cgame()};
 										entIt.AttachFilter<EntityIteratorFilterClass>("prop_dynamic");
 										auto it = entIt.begin();
 										auto *ent = (it != entIt.end()) ? *it : nullptr;
@@ -741,7 +740,7 @@ int Lua::game::Client::test(lua_State *l)
 										auto ev = channel->AddEvent<choreography::FacialFlexEvent>();
 										ev->SetTimeRange(startTime,endTime);
 
-										EntityIterator entIt{*c_game};
+										EntityIterator entIt{*pragma::get_cgame()};
 										entIt.AttachFilter<EntityIteratorFilterClass>("prop_dynamic");
 										auto it = entIt.begin();
 										auto *ent = (it != entIt.end()) ? *it : nullptr;
@@ -761,8 +760,8 @@ int Lua::game::Client::test(lua_State *l)
 		//se_script::
 
 		scene->Play();
-		c_game->AddCallback("Think",FunctionCallback<void>::Create([scene,channel]() {
-			scene->Tick(c_game->DeltaTime());
+		pragma::get_cgame()->AddCallback("Think",FunctionCallback<void>::Create([scene,channel]() {
+			scene->Tick(pragma::get_cgame()->DeltaTime());
 		}));
 	}
 	static btSoftBody *softBody = nullptr;
@@ -782,11 +781,11 @@ int Lua::game::Client::test(lua_State *l)
 			softBodyWorldInfo->m_sparsesdf.Initialize();
 	
 		*/
-		softBody = createSoftBody(c_game->GetPhysicsEnvironment()->GetWorld(),c_game->GetPhysicsEnvironment()->GetBtSoftBodyWorldInfo(),4.f,32,32,1);
+		softBody = createSoftBody(pragma::get_cgame()->GetPhysicsEnvironment()->GetWorld(),pragma::get_cgame()->GetPhysicsEnvironment()->GetBtSoftBodyWorldInfo(),4.f,32,32,1);
 
-		c_game->AddCallback("Tick",FunctionCallback<void>::Create([]() {
+		pragma::get_cgame()->AddCallback("Tick",FunctionCallback<void>::Create([]() {
 			softBody->activate(true);
-			//m_dynamicsWorld->stepSimulation(c_game->DeltaTickTime(),1,c_game->DeltaTickTime());
+			//m_dynamicsWorld->stepSimulation(pragma::get_cgame()->DeltaTickTime(),1,pragma::get_cgame()->DeltaTickTime());
 		}));
 	}
 	auto &nodes = softBody->m_nodes;
@@ -815,7 +814,7 @@ namespace pragma {
 };
 int Lua::game::Client::open_dropped_file(lua_State *l)
 {
-	auto &droppedFiles = c_engine->GetDroppedFiles();
+	auto &droppedFiles = pragma::get_cengine()->GetDroppedFiles();
 	const CEngine::DroppedFile *pf = nullptr;
 	std::optional<std::string> fullPath {};
 	if(Lua::IsString(l, 1)) {
@@ -855,12 +854,12 @@ int Lua::game::Client::open_dropped_file(lua_State *l)
 int Lua::game::Client::set_gravity(lua_State *l)
 {
 	Vector3 *gravity = Lua::CheckVector(l, 1);
-	c_game->SetGravity(*gravity);
+	pragma::get_cgame()->SetGravity(*gravity);
 	return 0;
 }
 int Lua::game::Client::get_gravity(lua_State *l)
 {
-	Lua::Push<Vector3>(l, c_game->GetGravity());
+	Lua::Push<Vector3>(l, pragma::get_cgame()->GetGravity());
 	return 1;
 }
 int Lua::game::Client::load_model(lua_State *l)
@@ -869,7 +868,7 @@ int Lua::game::Client::load_model(lua_State *l)
 	auto reload = false;
 	if(Lua::IsSet(l, 2))
 		reload = Lua::CheckBool(l, 2);
-	auto mdl = c_game->LoadModel(name, reload);
+	auto mdl = pragma::get_cgame()->LoadModel(name, reload);
 	if(mdl == nullptr)
 		return 0;
 	Lua::Push<decltype(mdl)>(l, mdl);
@@ -879,17 +878,17 @@ int Lua::game::Client::create_model(lua_State *l)
 {
 	std::shared_ptr<::Model> mdl = nullptr;
 	if(!Lua::IsSet(l, 1))
-		mdl = c_game->CreateModel();
+		mdl = pragma::get_cgame()->CreateModel();
 	else {
 		if(Lua::IsBool(l, 1)) {
 			auto bAddReference = true;
 			if(Lua::IsSet(l, 1))
 				bAddReference = Lua::CheckBool(l, 1);
-			mdl = c_game->CreateModel(bAddReference);
+			mdl = pragma::get_cgame()->CreateModel(bAddReference);
 		}
 		else {
 			std::string name = Lua::CheckString(l, 1);
-			mdl = c_game->CreateModel(name);
+			mdl = pragma::get_cgame()->CreateModel(name);
 		}
 	}
 	if(mdl == nullptr)
@@ -900,14 +899,14 @@ int Lua::game::Client::create_model(lua_State *l)
 int Lua::game::Client::get_action_input(lua_State *l)
 {
 	auto input = Lua::CheckInt(l, 1);
-	Lua::PushBool(l, c_game->GetActionInput(static_cast<Action>(input)));
+	Lua::PushBool(l, pragma::get_cgame()->GetActionInput(static_cast<Action>(input)));
 	return 1;
 }
 int Lua::game::Client::set_action_input(lua_State *l)
 {
 	auto input = Lua::CheckInt(l, 1);
 	auto pressed = Lua::CheckBool(l, 2);
-	c_game->SetActionInput(static_cast<Action>(input), pressed);
+	pragma::get_cgame()->SetActionInput(static_cast<Action>(input), pressed);
 	return 0;
 }
 int Lua::game::Client::update_render_buffers(lua_State *l)
@@ -929,7 +928,7 @@ int Lua::game::Client::render_scenes(lua_State *l)
 		auto *drawSceneInfo = luabind::object_cast<::util::DrawSceneInfo *>(val);
 		scenes.push_back(*drawSceneInfo);
 	}
-	c_game->RenderScenes(scenes);
+	pragma::get_cgame()->RenderScenes(scenes);
 	return 0;
 }
 extern void set_debug_render_filter(std::unique_ptr<DebugRenderFilter> filter);
@@ -978,9 +977,9 @@ int Lua::game::Client::set_debug_render_filter(lua_State *l)
 int Lua::game::Client::queue_scene_for_rendering(lua_State *l)
 {
 	auto &drawSceneInfo = Lua::Check<::util::DrawSceneInfo>(l, 1);
-	c_game->QueueForRendering(drawSceneInfo);
+	pragma::get_cgame()->QueueForRendering(drawSceneInfo);
 #if 0
-	auto scene = drawSceneInfo.scene.valid() ? drawSceneInfo.scene.get() : c_game->GetRenderScene<pragma::CSceneComponent>();
+	auto scene = drawSceneInfo.scene.valid() ? drawSceneInfo.scene.get() : pragma::get_cgame()->GetRenderScene<pragma::CSceneComponent>();
 	auto *renderer = scene ? scene->GetRenderer<pragma::CRendererComponent>() : nullptr;
 	if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
 		return 0;
@@ -988,7 +987,7 @@ int Lua::game::Client::queue_scene_for_rendering(lua_State *l)
 	if(cmdBuffer == nullptr || cmdBuffer->IsPrimary() == false)
 		return 0;
 	auto *clearColor = drawSceneInfo.clearColor.has_value() ? &drawSceneInfo.clearColor.value() : nullptr;
-	c_game->SetRenderScene(*scene);
+	pragma::get_cgame()->SetRenderScene(*scene);
 
 	if(clearColor != nullptr)
 	{
@@ -1001,8 +1000,8 @@ int Lua::game::Client::queue_scene_for_rendering(lua_State *l)
 	}
 
 	auto primCmdBuffer = std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(cmdBuffer);
-	c_game->RenderScene(drawSceneInfo);
-	c_game->ResetRenderScene();
+	pragma::get_cgame()->RenderScene(drawSceneInfo);
+	pragma::get_cgame()->ResetRenderScene();
 #endif
 	return 0;
 }
@@ -1010,13 +1009,13 @@ DLLCLIENT void debug_render_stats(bool enabled, bool full, bool print, bool cont
 int Lua::game::Client::set_render_stats_enabled(lua_State *l)
 {
 	auto enabled = Lua::CheckBool(l, 1);
-	c_engine->SetGpuPerformanceTimersEnabled(enabled);
+	pragma::get_cengine()->SetGpuPerformanceTimersEnabled(enabled);
 	debug_render_stats(enabled, false, false, true);
 	return 0;
 }
 int Lua::game::Client::get_queued_render_scenes(lua_State *l)
 {
-	auto &renderScenes = c_game->GetQueuedRenderScenes();
+	auto &renderScenes = pragma::get_cgame()->GetQueuedRenderScenes();
 	auto t = luabind::newtable(l);
 	int32_t i = 1;
 	for(auto &renderScene : renderScenes)
@@ -1041,7 +1040,7 @@ int Lua::game::Client::create_scene(lua_State *l)
 }
 int Lua::game::Client::get_render_scene(lua_State *l)
 {
-	auto *scene = c_game->GetRenderScene<pragma::CSceneComponent>();
+	auto *scene = pragma::get_cgame()->GetRenderScene<pragma::CSceneComponent>();
 	if(scene == nullptr)
 		return 0;
 	scene->GetLuaObject().push(l);
@@ -1049,7 +1048,7 @@ int Lua::game::Client::get_render_scene(lua_State *l)
 }
 int Lua::game::Client::get_render_scene_camera(lua_State *l)
 {
-	auto *scene = c_game->GetRenderScene<pragma::CSceneComponent>();
+	auto *scene = pragma::get_cgame()->GetRenderScene<pragma::CSceneComponent>();
 	if(scene == nullptr)
 		return 0;
 	auto &cam = scene->GetActiveCamera();
@@ -1060,7 +1059,7 @@ int Lua::game::Client::get_render_scene_camera(lua_State *l)
 }
 int Lua::game::Client::get_scene(lua_State *l)
 {
-	auto *scene = c_game->GetScene<pragma::CSceneComponent>();
+	auto *scene = pragma::get_cgame()->GetScene<pragma::CSceneComponent>();
 	if(scene == nullptr)
 		return 0;
 	scene->GetLuaObject().push(l);
@@ -1076,7 +1075,7 @@ int Lua::game::Client::get_scene_by_index(lua_State *l)
 }
 int Lua::game::Client::get_scene_camera(lua_State *l)
 {
-	auto *cam = c_game->GetPrimaryCamera<pragma::CCameraComponent>();
+	auto *cam = pragma::get_cgame()->GetPrimaryCamera<pragma::CCameraComponent>();
 	if(cam == nullptr)
 		return 0;
 	cam->PushLuaObject(l);
@@ -1085,24 +1084,24 @@ int Lua::game::Client::get_scene_camera(lua_State *l)
 
 int Lua::game::Client::get_draw_command_buffer(lua_State *l)
 {
-	auto &drawCmd = c_engine->GetDrawCommandBuffer();
+	auto &drawCmd = pragma::get_cengine()->GetDrawCommandBuffer();
 	Lua::Push(l, std::static_pointer_cast<prosper::ICommandBuffer>(drawCmd));
 	return 1;
 }
 int Lua::game::Client::get_setup_command_buffer(lua_State *l)
 {
-	auto &setupCmd = c_engine->GetSetupCommandBuffer();
+	auto &setupCmd = pragma::get_cengine()->GetSetupCommandBuffer();
 	Lua::Push<std::shared_ptr<prosper::ICommandBuffer>>(l, setupCmd);
 	return 1;
 }
 int Lua::game::Client::flush_setup_command_buffer(lua_State *l)
 {
-	c_engine->FlushSetupCommandBuffer();
+	pragma::get_cengine()->FlushSetupCommandBuffer();
 	return 0;
 }
 int Lua::game::Client::get_camera_position(lua_State *l)
 {
-	auto *cam = c_game->GetPrimaryCamera<pragma::CCameraComponent>();
+	auto *cam = pragma::get_cgame()->GetPrimaryCamera<pragma::CCameraComponent>();
 	if(cam == nullptr) {
 		Lua::Push<Vector3>(l, Vector3 {});
 		Lua::Push<Quat>(l, Quat {});
@@ -1114,36 +1113,36 @@ int Lua::game::Client::get_camera_position(lua_State *l)
 }
 int Lua::game::Client::get_render_clip_plane(lua_State *l)
 {
-	Lua::Push<Vector4>(l, c_game->GetRenderClipPlane());
+	Lua::Push<Vector4>(l, pragma::get_cgame()->GetRenderClipPlane());
 	return 1;
 }
 int Lua::game::Client::set_render_clip_plane(lua_State *l)
 {
 	auto *clipPlane = Lua::CheckVector4(l, 1);
-	c_game->SetRenderClipPlane(*clipPlane);
+	pragma::get_cgame()->SetRenderClipPlane(*clipPlane);
 	return 0;
 }
 int Lua::game::Client::get_debug_buffer(lua_State *l)
 {
-	auto &renderSettings = c_game->GetGlobalRenderSettingsBufferData();
+	auto &renderSettings = pragma::get_cgame()->GetGlobalRenderSettingsBufferData();
 	Lua::Push(l, renderSettings.debugBuffer);
 	return 1;
 }
 int Lua::game::Client::get_time_buffer(lua_State *l)
 {
-	auto &renderSettings = c_game->GetGlobalRenderSettingsBufferData();
+	auto &renderSettings = pragma::get_cgame()->GetGlobalRenderSettingsBufferData();
 	Lua::Push(l, renderSettings.timeBuffer);
 	return 1;
 }
 int Lua::game::Client::get_csm_buffer(lua_State *l)
 {
-	auto &renderSettings = c_game->GetGlobalRenderSettingsBufferData();
+	auto &renderSettings = pragma::get_cgame()->GetGlobalRenderSettingsBufferData();
 	Lua::Push(l, renderSettings.csmBuffer);
 	return 1;
 }
 int Lua::game::Client::get_render_settings_descriptor_set(lua_State *l)
 {
-	auto &renderSettings = c_game->GetGlobalRenderSettingsBufferData();
+	auto &renderSettings = pragma::get_cgame()->GetGlobalRenderSettingsBufferData();
 	Lua::Push(l, renderSettings.descSetGroup);
 	return 1;
 }
@@ -1158,6 +1157,6 @@ int Lua::game::Client::build_reflection_probes(lua_State *l)
 	auto rebuild = false;
 	if(Lua::IsSet(l, 1))
 		rebuild = Lua::CheckBool(l, 1);
-	pragma::CReflectionProbeComponent::BuildAllReflectionProbes(*c_game, rebuild);
+	pragma::CReflectionProbeComponent::BuildAllReflectionProbes(*pragma::get_cgame(), rebuild);
 	return 0;
 }

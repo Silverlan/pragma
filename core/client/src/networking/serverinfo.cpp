@@ -4,7 +4,7 @@
 #include "stdafx_client.h"
 #include <pragma/networking/resources.h>
 
-import pragma.client.client_state;
+import pragma.client;
 
 ServerInfo::~ServerInfo() { SetDownloadPath(""); }
 const std::string &ServerInfo::GetDownloadPath() const { return m_downloadPath; }

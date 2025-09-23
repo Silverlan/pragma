@@ -8,7 +8,7 @@ module;
 #include <string_view>
 #include <string>
 
-export module pragma.client.rendering.shader_graph:node_input_parameter;
+export module pragma.client:rendering.shader_graph.node_input_parameter;
 
 import pragma.shadergraph;
 

@@ -7,7 +7,9 @@ module;
 #include <string>
 #include <unordered_map>
 
-export module pragma.client.core.input_binding_layer;
+export module pragma.client:core.input_binding_layer;
+
+import :core.key_bind;
 
 export struct DLLCLIENT InputBindingLayer {
 	static bool Save(const std::vector<std::shared_ptr<InputBindingLayer>> &layers, udm::AssetDataArg outData, std::string &outErr);

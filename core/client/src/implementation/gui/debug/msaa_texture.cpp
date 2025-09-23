@@ -9,13 +9,12 @@ module;
 #include <prosper_util.hpp>
 #include <image/prosper_sampler.hpp>
 
-module pragma.client.gui;
+module pragma.client;
 
-import :debug_msaa_texture;
+import :gui.debug_msaa_texture;
 
-import pragma.client.engine;
+import :engine;
 
-extern CEngine *c_engine;
 
 LINK_WGUI_TO_CLASS(widebugmsaatexture, WIDebugMSAATexture);
 
@@ -52,7 +51,7 @@ void WIDebugMSAATexture::UpdateResolvedTexture()
 	}
 	auto &msaaImg = m_msaaTexture->GetImage();
 	auto extents = msaaImg.GetExtents();
-	auto &context = c_engine->GetRenderContext();
+	auto &context = pragma::get_cengine()->GetRenderContext();
 	prosper::util::ImageCreateInfo resolvedImgCreateInfo {};
 	resolvedImgCreateInfo.width = extents.width;
 	resolvedImgCreateInfo.height = extents.height;
@@ -78,6 +77,6 @@ void WIDebugMSAATexture::DoUpdate()
 	WIBase::DoUpdate();
 	if(!m_hTextureRect.IsValid())
 		return;
-	auto &context = c_engine->GetRenderContext();
+	auto &context = pragma::get_cengine()->GetRenderContext();
 	// TODO
 }

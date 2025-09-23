@@ -8,8 +8,10 @@ module;
 #include <pragma/entities/components/basetoggle.h>
 #include <pragma/entities/entity_component_system_t.hpp>
 
-module pragma.client.entities.components.effects.fire;
+module pragma.client;
 
+
+import :entities.components.effects.fire;
 using namespace pragma;
 
 CFireComponent::~CFireComponent() { DestroyParticle(); }

@@ -12,8 +12,7 @@ module;
 #include <image/prosper_render_target.hpp>
 #include <image/prosper_sampler.hpp>
 
-export module pragma.client.scripting.lua.libraries.vulkan;
-
+export module pragma.client:scripting.lua.libraries.vulkan;
 export namespace Lua {
 	namespace Vulkan {
 		struct DLLCLIENT PreparedCommandLuaArg {

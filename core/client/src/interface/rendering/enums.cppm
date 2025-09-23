@@ -6,11 +6,16 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <mathutil/umath.h>
 
-export module pragma.client.rendering.enums;
-
+export module pragma.client:rendering.enums;
 export {
 	enum class ShadowType : uint8_t { None = 0, StaticOnly = 1, Full = StaticOnly | 2 };
 	REGISTER_BASIC_ARITHMETIC_OPERATORS(ShadowType);
+
+    namespace pragma::rendering {
+        DLLCLIENT bool VERBOSE_RENDER_OUTPUT_ENABLED = false;
+
+        enum class ShadowMapType : uint8_t { Static = 0, Dynamic };
+    };
 
 	enum class RenderFlags : uint32_t {
 		None = 0,
@@ -40,8 +45,10 @@ export {
 	};
 	REGISTER_BASIC_BITWISE_OPERATORS_2WAY(pragma::rendering::RenderMask)
 
-	enum class AntiAliasing : uint8_t { None = 0u, MSAA, FXAA };
-	enum class ToneMapping : uint32_t { None = 0u, GammaCorrection, Reinhard, HejilRichard, Uncharted, Aces, GranTurismo };
+	namespace pragma::rendering {
+		enum class AntiAliasing : uint8_t { None = 0u, MSAA, FXAA };
+		enum class ToneMapping : uint32_t { None = 0u, GammaCorrection, Reinhard, HejilRichard, Uncharted, Aces, GranTurismo };
+	};
 
 	DLLCLIENT int GetMaxMSAASampleCount();
 	DLLCLIENT unsigned char ClampMSAASampleCount(unsigned int *samples);

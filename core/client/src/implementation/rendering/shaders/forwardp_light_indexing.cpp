@@ -7,15 +7,13 @@ module;
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <shader/prosper_shader_t.hpp>
 
-module pragma.client.rendering.shaders;
+module pragma.client;
 
-import :forwardp_light_indexing;
+import :rendering.shaders.forwardp_light_indexing;
 
-import pragma.client.engine;
+import :engine;
 
 using namespace pragma;
-
-extern CEngine *c_engine;
 
 decltype(ShaderForwardPLightIndexing::DESCRIPTOR_SET_VISIBLE_LIGHT) ShaderForwardPLightIndexing::DESCRIPTOR_SET_VISIBLE_LIGHT = {
   "VISIBLE_LIGHT",

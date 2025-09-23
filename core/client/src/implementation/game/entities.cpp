@@ -12,14 +12,15 @@ module;
 #include <pragma/game/game_lua_entity.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
-module pragma.client.game;
+module pragma.client;
 
-import pragma.client.client_state;
-import pragma.client.entities;
-import pragma.client.entities.components;
-import pragma.client.game;
 
-extern ClientState *client;
+import :game;
+import :client_state;
+import :entities;
+import :entities.components;
+import :game;
+
 
 template<typename TCPPM>
 TCPPM *CGame::GetListener()
@@ -60,7 +61,7 @@ CBaseEntity *CGame::CreateEntity(std::string classname)
 		Con::cwar << "Unable to create entity '" << classname << "': Factory not found!" << Con::endl;
 		return NULL;
 	}
-	return factory(client);
+	return factory(pragma::get_client_state());
 }
 
 void CGame::RemoveEntity(BaseEntity *ent)
@@ -119,7 +120,7 @@ CBaseEntity *CGame::GetEntity(unsigned int idx)
 	return m_shEnts[idx];
 }
 
-BaseEntity *CGame::GetEntityByLocalIndex(uint32_t idx) { return GetEntityByClientIndex(idx); }
+CBaseEntity *CGame::GetEntityByLocalIndex(uint32_t idx) { return GetEntityByClientIndex(idx); }
 
 CBaseEntity *CGame::GetEntityByClientIndex(unsigned int idx)
 {

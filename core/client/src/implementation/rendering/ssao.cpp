@@ -12,26 +12,25 @@ module;
 #include <prosper_descriptor_set_group.hpp>
 #include <shader/prosper_shader_t.hpp>
 
-module pragma.client.rendering.ssao;
+module pragma.client;
 
-import pragma.client.client_state;
-import pragma.client.debug;
-import pragma.client.engine;
-import pragma.client.entities.components;
-import pragma.client.game;
-import pragma.client.gui;
-import pragma.client.rendering.shaders;
 
-extern CEngine *c_engine;
-extern ClientState *client;
-extern CGame *c_game;
+import :rendering.ssao;
+import :client_state;
+import :debug;
+import :engine;
+import :entities.components;
+import :game;
+import :gui;
+import :rendering.shaders;
+
 
 bool SSAOInfo::Initialize(prosper::IPrContext &context, uint32_t width, uint32_t height, prosper::SampleCountFlags samples, const std::shared_ptr<prosper::Texture> &texNorm, const std::shared_ptr<prosper::Texture> &texDepth)
 {
 	if(pragma::ShaderSSAO::DESCRIPTOR_SET_PREPASS.IsValid() == false || pragma::ShaderSSAOBlur::DESCRIPTOR_SET_TEXTURE.IsValid() == false)
 		return false;
-	shader = c_engine->GetShader("ssao");
-	shaderBlur = c_engine->GetShader("ssao_blur");
+	shader = pragma::get_cengine()->GetShader("ssao");
+	shaderBlur = pragma::get_cengine()->GetShader("ssao_blur");
 
 	prosper::util::ImageCreateInfo imgCreateInfo {};
 	imgCreateInfo.format = pragma::ShaderSSAO::RENDER_PASS_FORMAT;
@@ -44,7 +43,7 @@ bool SSAOInfo::Initialize(prosper::IPrContext &context, uint32_t width, uint32_t
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
 	prosper::util::SamplerCreateInfo samplerCreateInfo {};
 	auto tex = context.CreateTexture({}, *img, imgViewCreateInfo, samplerCreateInfo);
-	auto rp = prosper::ShaderGraphics::GetRenderPass<pragma::ShaderSSAO>(c_engine->GetRenderContext());
+	auto rp = prosper::ShaderGraphics::GetRenderPass<pragma::ShaderSSAO>(pragma::get_cengine()->GetRenderContext());
 	renderTarget = context.CreateRenderTarget({tex}, rp);
 	renderTarget->SetDebugName("ssao_rt");
 
@@ -53,12 +52,12 @@ bool SSAOInfo::Initialize(prosper::IPrContext &context, uint32_t width, uint32_t
 	auto texBlur = context.CreateTexture({}, *imgBlur, imgViewCreateInfo, samplerCreateInfo);
 	renderTargetBlur = context.CreateRenderTarget({texBlur}, rp);
 	renderTargetBlur->SetDebugName("ssao_blur_rt");
-	descSetGroupPrepass = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderSSAO::DESCRIPTOR_SET_PREPASS);
+	descSetGroupPrepass = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderSSAO::DESCRIPTOR_SET_PREPASS);
 	auto &descSetPrepass = *descSetGroupPrepass->GetDescriptorSet();
 	descSetPrepass.SetBindingTexture(*texNorm, umath::to_integral(pragma::ShaderSSAO::PrepassBinding::NormalBuffer));
 	descSetPrepass.SetBindingTexture(*texDepth, umath::to_integral(pragma::ShaderSSAO::PrepassBinding::DepthBuffer));
 
-	descSetGroupOcclusion = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderSSAOBlur::DESCRIPTOR_SET_TEXTURE);
+	descSetGroupOcclusion = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderSSAOBlur::DESCRIPTOR_SET_TEXTURE);
 	descSetGroupOcclusion->GetDescriptorSet()->SetBindingTexture(renderTarget->GetTexture(), 0u);
 	return true;
 }
@@ -78,7 +77,7 @@ void Console::commands::debug_ssao(NetworkState *state, pragma::BasePlayerCompon
 {
 	auto &wgui = WGUI::GetInstance();
 	auto *pRoot = wgui.GetBaseElement();
-	if(c_game == nullptr || argv.empty() || pRoot == nullptr)
+	if(pragma::get_cgame() == nullptr || argv.empty() || pRoot == nullptr)
 		return;
 	const std::string name = "debug_ssao";
 	auto *pEl = pRoot->FindDescendantByName(name);
@@ -95,7 +94,7 @@ void Console::commands::debug_ssao(NetworkState *state, pragma::BasePlayerCompon
 		return;
 	pEl->SetName(name);
 
-	auto *scene = c_game->GetScene<pragma::CSceneComponent>();
+	auto *scene = pragma::get_cgame()->GetScene<pragma::CSceneComponent>();
 	auto *renderer = scene ? scene->GetRenderer<pragma::CRendererComponent>() : nullptr;
 	auto rasterizer = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : pragma::ComponentHandle<pragma::CRasterizationRendererComponent> {};
 	if(rasterizer.expired())
@@ -144,6 +143,7 @@ void Console::commands::debug_ssao(NetworkState *state, pragma::BasePlayerCompon
 
 static void cl_render_ssao_callback(NetworkState *, const ConVar &, bool, bool val)
 {
+	auto *client = pragma::get_client_state();
 	if(client == nullptr)
 		return;
 	client->UpdateGameWorldShaderSettings();

@@ -10,9 +10,10 @@ module;
 #include <pragma/model/animation/play_animation_flags.hpp>
 #include <optional>
 
-export module pragma.client.entities.components.weapon;
+export module pragma.client:entities.components.weapon;
 
-import pragma.client.entities.components.view_model;
+import :entities.components.entity;
+import :entities.components.view_model;
 
 export namespace pragma {
 	class DLLCLIENT CWeaponComponent final : public BaseWeaponComponent, public CBaseNetComponent {

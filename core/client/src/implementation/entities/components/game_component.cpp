@@ -7,10 +7,12 @@ module;
 #include "pragma/entities/entity_component_system_t.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
-module pragma.client.entities.components.game;
+module pragma.client;
 
-import pragma.client.entities.components.input;
-import pragma.client.entities.components.observer;
+
+import :entities.components.game;
+import :entities.components.input;
+import :entities.components.observer;
 
 using namespace pragma;
 

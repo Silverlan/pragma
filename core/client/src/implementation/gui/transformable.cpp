@@ -10,15 +10,14 @@ module;
 #include <mathutil/umath.h>
 #include <prosper_window.hpp>
 
-module pragma.client.gui;
+module pragma.client;
 
-import :transformable;
-import :snap_area;
+import :gui.transformable;
+import :gui.snap_area;
 
-import pragma.client.engine;
+import :engine;
 import pragma.gui;
 
-extern CEngine *c_engine;
 
 LINK_WGUI_TO_CLASS(WITransformable, WITransformable);
 

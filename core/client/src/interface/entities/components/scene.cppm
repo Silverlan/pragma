@@ -10,9 +10,16 @@ module;
 #include <mathutil/plane.hpp>
 #include <cinttypes>
 
-export module pragma.client.entities.components.scene;
+export module pragma.client:entities.components.scene;
 
-import pragma.client.entities.components.render;
+import :debug.enums;
+import :entities.components.render;
+import :rendering.draw_scene_info;
+import :rendering.entity_instance_index_buffer;
+import :rendering.occlusion_culling.octree;
+import :rendering.render_queue;
+import :rendering.shaders.textured_uniform_data;
+import :rendering.world_environment;
 
 export class DLLCLIENT SceneRenderDesc {
   public:
@@ -78,31 +85,6 @@ export class DLLCLIENT SceneRenderDesc {
 };
 
 export namespace pragma {
-	enum class SceneDebugMode : uint32_t {
-		None = 0,
-		AmbientOcclusion,
-		Albedo,
-		Metalness,
-		Roughness,
-		DiffuseLighting,
-		Normal,
-		NormalMap,
-		Reflectance,
-		IBLPrefilter,
-		IBLIrradiance,
-		Emission,
-		Lightmap,
-		LightmapUv,
-		Unlit,
-		CsmShowCascades,
-		ShadowMapDepth,
-		ForwardPlusHeatmap,
-		Specular,
-		IndirectLightmap,
-		DirectionalLightmap,
-
-		Count
-	};
 	class DLLCLIENT CSceneComponent final : public BaseEntityComponent {
 	  public:
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);

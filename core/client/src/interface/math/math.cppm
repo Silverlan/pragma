@@ -8,12 +8,11 @@ module;
 #include <mathutil/umat.h>
 #include <array>
 
-export module pragma.client.math;
-
-import pragma.client.entities.components.color;
-import pragma.client.entities.components.lights.directional;
-import pragma.client.entities.components.lights.point;
-import pragma.client.entities.components.lights.spot;
+export module pragma.client:math;
+import :entities.components.color;
+import :entities.components.lights.directional;
+import :entities.components.lights.point;
+import :entities.components.lights.spot;
 
 export namespace pragma::math {
 	DLLCLIENT const std::array<Mat4, 6> &get_cubemap_view_matrices();

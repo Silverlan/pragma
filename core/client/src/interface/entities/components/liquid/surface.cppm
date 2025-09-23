@@ -11,10 +11,9 @@ module;
 #include <buffers/prosper_buffer.hpp>
 #include <mathutil/umath_geometry.hpp>
 
-export module pragma.client.entities.components.liquid_surface;
-
-import pragma.client.entities.components.renderer;
-import pragma.client.entities.components.surface;
+export module pragma.client:entities.components.liquid_surface;
+import :entities.components.renderer;
+import :entities.components.surface;
 
 export namespace pragma {
 	struct DLLCLIENT WaterScene {

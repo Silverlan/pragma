@@ -5,6 +5,7 @@
 #include "pragma/lua/libraries/lasset.hpp"
 #include "pragma/util/bulletinfo.h"
 #include "pragma/lua/policies/gui_element_policy.hpp"
+#include "texture_load_flags.hpp"
 #include <pragma/debug/debug_render_info.hpp>
 #include <pragma/game/game_resources.hpp>
 #include <pragma/util/giblet_create_info.hpp>
@@ -42,24 +43,13 @@
 #include <fsys/ifile.hpp>
 #include <wgui/types/wiroot.h>
 #include <wgui/types/wicontentwrapper.hpp>
+#include "texturemanager/texture.h"
 
 import pragma.audio.util;
+import pragma.client;
 import pragma.platform;
 import pragma.string.unicode;
-import pragma.client.assets;
-import pragma.client.client_state;
-import pragma.client.debug;
-import pragma.client.engine;
-import pragma.client.game;
-import pragma.client.gui;
-import pragma.client.rendering.shaders;
-import pragma.client.scripting.lua;
-import pragma.client.util;
 import pragma.gui;
-
-extern CGame *c_game;
-extern ClientState *client;
-extern CEngine *c_engine;
 
 static std::optional<std::string> find_asset_file(const std::string &name, pragma::asset::Type type)
 {
@@ -85,7 +75,7 @@ static bool is_asset_loaded(NetworkState &nw, const std::string &name, pragma::a
 		}
 	case pragma::asset::Type::ParticleSystem:
 		{
-			return pragma::CParticleSystemComponent::IsParticleFilePrecached(name);
+			return pragma::ecs::CParticleSystemComponent::IsParticleFilePrecached(name);
 		}
 	}
 	return is_loaded(nw, name, type);
@@ -97,7 +87,7 @@ static std::optional<uint32_t> save_image(lua_State *l, uimg::ImageBuffer &imgBu
 		return {};
 	auto pImgBuffer = imgBuffer.shared_from_this();
 	auto task = [pImgBuffer, fileName = std::move(fileName), imgWriteInfo, cubemap]() -> pragma::lua::LuaThreadPool::ResultHandler {
-		auto result = c_game->SaveImage(*pImgBuffer, fileName, imgWriteInfo, cubemap);
+		auto result = pragma::get_cgame()->SaveImage(*pImgBuffer, fileName, imgWriteInfo, cubemap);
 		return [result](lua_State *l) { luabind::object {l, result}.push(l); };
 	};
 	if(tw.IsPool())
@@ -110,7 +100,7 @@ static bool save_image(lua_State *l, uimg::ImageBuffer &imgBuffer, std::string f
 {
 	if(Lua::file::validate_write_operation(l, fileName) == false)
 		return false;
-	return c_game->SaveImage(imgBuffer, fileName, imgWriteInfo, cubemap);
+	return pragma::get_cgame()->SaveImage(imgBuffer, fileName, imgWriteInfo, cubemap);
 }
 
 static std::vector<std::string> &get_image_file_extensions()
@@ -195,7 +185,7 @@ static bool save_image(lua_State *l, prosper::IImage &img, std::string fileName,
 {
 	if(Lua::file::validate_write_operation(l, fileName) == false)
 		return false;
-	return c_game->SaveImage(img, fileName, imgWriteInfo);
+	return pragma::get_cgame()->SaveImage(img, fileName, imgWriteInfo);
 }
 
 static luabind::object load_image(lua_State *l, const std::string &fileName, bool loadAsynch, const std::optional<uimg::Format> &targetFormat)
@@ -257,7 +247,7 @@ static luabind::object load_image(lua_State *l, const std::string &fileName) { r
 static util::ParallelJob<uimg::ImageLayerSet> capture_raytraced_screenshot(lua_State *l, uint32_t width, uint32_t height, uint32_t samples, bool hdrOutput, bool denoise)
 {
 	pragma::rendering::cycles::RenderImageInfo renderImgInfo {};
-	auto *pCam = c_game->GetRenderCamera<pragma::CCameraComponent>();
+	auto *pCam = pragma::get_cgame()->GetRenderCamera<pragma::CCameraComponent>();
 	if(pCam) {
 		renderImgInfo.camPose = pCam->GetEntity().GetPose();
 		renderImgInfo.viewProjectionMatrix = pCam->GetProjectionMatrix() * pCam->GetViewMatrix();
@@ -271,7 +261,7 @@ static util::ParallelJob<uimg::ImageLayerSet> capture_raytraced_screenshot(lua_S
 	sceneInfo.samples = samples;
 	sceneInfo.denoise = denoise;
 	sceneInfo.hdrOutput = hdrOutput;
-	return pragma::rendering::cycles::render_image(*client, sceneInfo, renderImgInfo);
+	return pragma::rendering::cycles::render_image(*pragma::get_client_state(), sceneInfo, renderImgInfo);
 }
 static util::ParallelJob<uimg::ImageLayerSet> capture_raytraced_screenshot(lua_State *l, uint32_t width, uint32_t height, uint32_t samples, bool hdrOutput) { return capture_raytraced_screenshot(l, width, height, samples, hdrOutput, true); }
 static util::ParallelJob<uimg::ImageLayerSet> capture_raytraced_screenshot(lua_State *l, uint32_t width, uint32_t height, uint32_t samples) { return capture_raytraced_screenshot(l, width, height, samples, false, true); }
@@ -331,7 +321,7 @@ void CGame::RegisterLuaLibraries()
 	    "cubemap_to_equirectangular_texture",
 	    +[](lua_State *l, prosper::Texture &cubemap) -> luabind::
 	                                                   object {
-		                                                   auto *shader = static_cast<pragma::ShaderCubemapToEquirectangular *>(c_engine->GetShader("cubemap_to_equirectangular").get());
+		                                                   auto *shader = static_cast<pragma::ShaderCubemapToEquirectangular *>(pragma::get_cengine()->GetShader("cubemap_to_equirectangular").get());
 		                                                   if(shader == nullptr)
 			                                                   return {};
 		                                                   auto equiRect = shader->CubemapToEquirectangularTexture(cubemap);
@@ -341,7 +331,7 @@ void CGame::RegisterLuaLibraries()
 	                                                   }),
 	  luabind::def(
 	    "equirectangular_to_cubemap_texture", +[](lua_State *l, prosper::Texture &equiRect, uint32_t resolution) -> luabind::object {
-		    auto *shader = static_cast<pragma::ShaderEquirectangularToCubemap *>(c_engine->GetShader("equirectangular_to_cubemap").get());
+		    auto *shader = static_cast<pragma::ShaderEquirectangularToCubemap *>(pragma::get_cengine()->GetShader("equirectangular_to_cubemap").get());
 		    if(shader == nullptr)
 			    return {};
 		    auto tex = shader->EquirectangularTextureToCubemap(equiRect, resolution);
@@ -485,7 +475,7 @@ void CGame::RegisterLuaLibraries()
 	    {"exists", static_cast<int32_t (*)(lua_State *)>([](lua_State *l) -> int32_t {
 		     std::string name = Lua::CheckString(l, 1);
 		     auto type = static_cast<pragma::asset::Type>(Lua::CheckInt(l, 2));
-		     auto *nw = c_engine->GetNetworkState(l);
+		     auto *nw = pragma::get_cengine()->GetNetworkState(l);
 		     auto fileName = find_asset_file(name, type);
 		     Lua::PushBool(l, fileName.has_value());
 		     return 1;
@@ -493,7 +483,7 @@ void CGame::RegisterLuaLibraries()
 	    {"find_file", static_cast<int32_t (*)(lua_State *)>([](lua_State *l) -> int32_t {
 		     std::string name = Lua::CheckString(l, 1);
 		     auto type = static_cast<pragma::asset::Type>(Lua::CheckInt(l, 2));
-		     auto *nw = c_engine->GetNetworkState(l);
+		     auto *nw = pragma::get_cengine()->GetNetworkState(l);
 		     auto fileName = find_asset_file(name, type);
 		     if(fileName.has_value() == false)
 			     return 0;
@@ -503,7 +493,7 @@ void CGame::RegisterLuaLibraries()
 	    {"is_loaded", static_cast<int32_t (*)(lua_State *)>([](lua_State *l) -> int32_t {
 		     std::string name = Lua::CheckString(l, 1);
 		     auto type = static_cast<pragma::asset::Type>(Lua::CheckInt(l, 2));
-		     auto *nw = c_engine->GetNetworkState(l);
+		     auto *nw = pragma::get_cengine()->GetNetworkState(l);
 		     Lua::PushBool(l, is_asset_loaded(*nw, name, type));
 		     return 1;
 	     })},
@@ -534,7 +524,7 @@ void CGame::RegisterLuaLibraries()
 	     })}});
 
 	auto modAsset = luabind::module_(GetLuaState(), "asset");
-	modAsset[luabind::def("clear_unused_textures", static_cast<uint32_t (*)()>([]() -> uint32_t { return static_cast<msys::CMaterialManager &>(client->GetMaterialManager()).GetTextureManager().ClearUnused(); })),
+	modAsset[luabind::def("clear_unused_textures", static_cast<uint32_t (*)()>([]() -> uint32_t { return static_cast<msys::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager()).GetTextureManager().ClearUnused(); })),
 
 	  luabind::def(
 	    "load",
@@ -562,7 +552,7 @@ void CGame::RegisterLuaLibraries()
 		    case pragma::asset::Type::Material:
 			    return luabind::object {l, std::static_pointer_cast<Material>(asset)};
 		    case pragma::asset::Type::Texture:
-			    return luabind::object {l, std::static_pointer_cast<Texture>(asset)};
+			    return luabind::object {l, std::static_pointer_cast<::Texture>(asset)};
 		    }
 		    return luabind::object {};
 	    }),
@@ -580,14 +570,14 @@ void CGame::RegisterLuaLibraries()
 		    case pragma::asset::Type::Material:
 			    return luabind::object {l, std::static_pointer_cast<Material>(asset)};
 		    case pragma::asset::Type::Texture:
-			    return luabind::object {l, std::static_pointer_cast<Texture>(asset)};
+			    return luabind::object {l, std::static_pointer_cast<::Texture>(asset)};
 		    }
 		    return luabind::object {};
 	    }),
 	  luabind::def(
 	    "reload",
 	    +[](lua_State *l, const std::string &name, pragma::asset::Type type) -> Lua::var<bool, luabind::object> {
-		    auto *manager = c_engine->GetNetworkState(l)->GetAssetManager(type);
+		    auto *manager = pragma::get_cengine()->GetNetworkState(l)->GetAssetManager(type);
 		    if(!manager)
 			    return luabind::object {l, false};
 		    auto asset = manager->ReloadAsset(name);
@@ -597,7 +587,7 @@ void CGame::RegisterLuaLibraries()
 		    case pragma::asset::Type::Material:
 			    return luabind::object {l, std::static_pointer_cast<Material>(asset)};
 		    case pragma::asset::Type::Texture:
-			    return luabind::object {l, std::static_pointer_cast<Texture>(asset)};
+			    return luabind::object {l, std::static_pointer_cast<::Texture>(asset)};
 		    }
 		    return luabind::object {};
 	    }),

@@ -3,9 +3,12 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include <texturemanager/texture.h>
 
-export module pragma.client.rendering.shaders:velocity_buffer;
+export module pragma.client:rendering.shaders.velocity_buffer;
+
+import :rendering.shaders.prepass;
 
 export namespace pragma {
 	class DLLCLIENT ShaderVelocityBuffer : public ShaderPrepassBase {

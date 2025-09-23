@@ -18,13 +18,14 @@ module;
 #include <util_image.hpp>
 #include <fsys/ifile.hpp>
 
-module pragma.client.util.baking;
+module pragma.client;
 
-import pragma.client.engine;
-import pragma.client.entities.components;
-import pragma.client.util.image;
 
-extern CEngine *c_engine;
+import :util.baking;
+import :engine;
+import :entities.components;
+import :util.image;
+
 
 // #define DEBUG_BAKE_LIGHT_WEIGHTS
 

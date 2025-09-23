@@ -8,7 +8,9 @@ module;
 #include <buffers/prosper_buffer.hpp>
 #include <memory>
 
-export module pragma.client.physics:visual_debugger;
+export module pragma.client:physics.visual_debugger;
+
+import :entities.components.camera;
 
 export {
 	class DLLCLIENT CPhysVisualDebugger : public pragma::physics::IVisualDebugger {

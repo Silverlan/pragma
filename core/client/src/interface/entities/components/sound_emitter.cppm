@@ -6,7 +6,9 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <pragma/entities/components/base_sound_emitter_component.hpp>
 
-export module pragma.client.entities.components.sound_emitter;
+export module pragma.client:entities.components.sound_emitter;
+
+import :entities.components.entity;
 
 export namespace pragma {
 	class DLLCLIENT CSoundEmitterComponent final : public BaseSoundEmitterComponent, public CBaseNetComponent {

@@ -7,7 +7,9 @@ module;
 #include <pragma/entities/components/base_bvh_component.hpp>
 #include "pragma/model/modelmesh.h"
 
-export module pragma.client.entities.components.hitbox_bvh;
+export module pragma.client:entities.components.hitbox_bvh;
+
+import :model.hitbox_mesh_bvh_builder;
 
 export namespace pragma {
 	namespace bvh {

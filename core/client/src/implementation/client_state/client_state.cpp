@@ -39,16 +39,18 @@ module;
 #include <prosper_window.hpp>
 #include <wgui/types/wiroot.h>
 
-module pragma.client.client_state;
+module pragma.client;
 
-import pragma.client.audio;
-import pragma.client.engine;
-import pragma.client.entities.components;
-import pragma.client.gui;
-import pragma.client.model;
-import pragma.client.networking;
-import pragma.client.scripting.lua;
-import pragma.client.util;
+
+import :client_state;
+import :audio;
+import :engine;
+import :entities.components;
+import :gui;
+import :model;
+import :networking;
+import :scripting.lua;
+import :util;
 // import pragma.scripting.lua;
 
 
@@ -63,17 +65,19 @@ ConVarHandle ClientState::GetConVarHandle(std::string scvar)
 	return NetworkState::GetConVarHandle(*conVarPtrs, scvar);
 }
 
-extern CEngine *c_engine = nullptr;
+static ClientState *g_client = nullptr;
+
+ClientState *pragma::get_client_state() { return g_client; }
 
 std::vector<std::string> &get_required_game_textures();
 ClientState::ClientState() : NetworkState(), m_client(nullptr), m_svInfo(nullptr), m_resDownload(nullptr), m_volMaster(1.f), m_hMainMenu(), m_luaGUI(NULL)
 {
-	client = this;
+	g_client = this;
 	m_soundScriptManager = std::make_unique<CSoundScriptManager>();
 
 	m_modelManager = std::make_unique<pragma::asset::CModelManager>(*this);
 	// m_modelManager->SetVerbose(true);
-	c_engine->InitializeAssetManager(*m_modelManager);
+	pragma::get_cengine()->InitializeAssetManager(*m_modelManager);
 	pragma::asset::update_extension_cache(pragma::asset::Type::Model);
 
 	auto &gui = WGUI::GetInstance();
@@ -102,7 +106,7 @@ ClientState::~ClientState()
 	Disconnect();
 	FileManager::RemoveCustomMountDirectory("downloads");
 
-	c_engine->GetSoundSystem()->SetOnReleaseSoundCallback(nullptr);
+	pragma::get_cengine()->GetSoundSystem()->SetOnReleaseSoundCallback(nullptr);
 
 	ClearCommands();
 }
@@ -151,7 +155,7 @@ void ClientState::InitializeGameClient(bool singlePlayerLocalGame)
 		}
 		else
 			spdlog::error("Unable to initialize networking system '{}': {}", netLibName, err);
-		if(m_client == nullptr)
+		if(m_client != nullptr)
 			ResetGameClient();
 	}
 	else
@@ -179,14 +183,14 @@ void ClientState::Initialize()
 	}*/
 	NetworkState::Initialize();
 
-	c_engine->GetSoundSystem()->SetOnReleaseSoundCallback([this](const al::SoundSource &snd) {
+	pragma::get_cengine()->GetSoundSystem()->SetOnReleaseSoundCallback([this](const al::SoundSource &snd) {
 		auto it = std::find_if(m_sounds.begin(), m_sounds.end(), [&snd](const ALSoundRef &sndOther) { return (static_cast<CALSound *>(&sndOther.get()) == &snd) ? true : false; });
 		if(it == m_sounds.end())
 			return;
 		m_sounds.erase(it);
 	});
 
-	c_engine->LoadClientConfig();
+	pragma::get_cengine()->LoadClientConfig();
 	InitializeGUILua();
 	auto &gui = WGUI::GetInstance();
 	m_hMainMenu = gui.Create<WIMainMenu>()->GetHandle();
@@ -194,7 +198,7 @@ void ClientState::Initialize()
 	UpdateGameWorldShaderSettings();
 
 #if ALSYS_STEAM_AUDIO_SUPPORT_ENABLED == 1
-	auto *soundSys = c_engine->GetSoundSystem();
+	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
 	if(soundSys != nullptr)
 		soundSys->SetSteamAudioEnabled(cvSteamAudioEnabled->GetBool()); // See also CGame::ReloadSoundCache
 #endif
@@ -219,6 +223,7 @@ void ClientState::ShowFPSCounter(bool b)
 }
 
 REGISTER_CONVAR_CALLBACK_CL(cl_show_fps, [](NetworkState *, const ConVar &, bool, bool val) {
+	auto *client = pragma::get_client_state();
 	if(client == nullptr)
 		return;
 	client->ShowFPSCounter(val);
@@ -326,7 +331,7 @@ void ClientState::OpenMainMenu()
 	WIMainMenu *menu = GetMainMenu();
 	if(menu == NULL)
 		return;
-	auto &window = c_engine->GetWindow();
+	auto &window = pragma::get_cengine()->GetWindow();
 	window->SetCursorInputMode(pragma::platform::CursorMode::Normal);
 	menu->SetVisible(true);
 }
@@ -348,8 +353,8 @@ NwStateType ClientState::GetType() const { return NwStateType::Client; }
 
 void ClientState::Close()
 {
-	c_engine->GetRenderContext().GetPipelineLoader().Stop();
-	c_engine->SaveClientConfig();
+	pragma::get_cengine()->GetRenderContext().GetPipelineLoader().Stop();
+	pragma::get_cengine()->SaveClientConfig();
 	NetworkState::Close();
 
 	if(m_hMainMenu.IsValid())
@@ -369,7 +374,7 @@ void ClientState::Close()
 	for(itHandles = conVarPtrs.begin(); itHandles != conVarPtrs.end(); itHandles++)
 		itHandles->second->set(NULL);
 	StopSounds();
-	client = NULL;
+	g_client = nullptr;
 	m_modelManager->Clear();
 	GetMaterialManager().ClearUnused();
 	pragma::ecs::CParticleSystemComponent::ClearCache();
@@ -417,7 +422,7 @@ bool ClientState::RunConsoleCommand(std::string scmd, std::vector<std::string> &
 		// No client exists and this is probably a serverside command.
 		// In this case, we'll redirect the command to the server directly
 		// (if this is a locally hosted game)
-		auto *svState = c_engine->GetServerNetworkState();
+		auto *svState = pragma::get_cengine()->GetServerNetworkState();
 		if(svState)
 			svState->RunConsoleCommand(scmd, argv, nullptr, pressState, magnitude, nullptr);
 		return true;
@@ -477,7 +482,7 @@ void ClientState::Render(util::DrawSceneInfo &drawSceneInfo, std::shared_ptr<pro
 	drawSceneInfo.outputImage = rt->GetTexture().GetImage().shared_from_this();
 	CallCallbacks<void, std::reference_wrapper<const util::DrawSceneInfo>, std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>>>("PreRender", std::ref(drawSceneInfo), std::ref(rt));
 	if(m_game != nullptr) {
-		auto &context = c_engine->GetRenderContext();
+		auto &context = pragma::get_cengine()->GetRenderContext();
 		context.GetPipelineLoader().Flush(); // Make sure all shaders have been loaded and initialized
 
 		m_game->CallCallbacks<void, std::reference_wrapper<const util::DrawSceneInfo>, std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>>>("PreRender", std::ref(drawSceneInfo), std::ref(rt));
@@ -521,7 +526,6 @@ void ClientState::EndGame()
 	game = nullptr;
 	m_game = nullptr;
 
-	c_game = nullptr;
 	NetworkState::EndGame();
 	m_conCommandIDs.clear();
 	if(m_hMainMenu.IsValid()) {
@@ -613,6 +617,7 @@ void ClientState::SendUserInfo()
 	// TODO: Allow client to override steam user name?
 	packet->WriteString(name);
 
+    auto *client = pragma::get_client_state();
 	auto &convars = client->GetConVars();
 	unsigned int numUserInfo = 0;
 	auto sz = packet->GetOffset();
@@ -657,10 +662,10 @@ void ClientState::StartNewGame(const std::string &gameMode)
 
 ConVarMap *ClientState::GetConVarMap() { return console_system::client::get_convar_map(); }
 
-bool ClientState::IsMultiPlayer() const { return c_engine->IsMultiPlayer(); }
-bool ClientState::IsSinglePlayer() const { return c_engine->IsSinglePlayer(); }
+bool ClientState::IsMultiPlayer() const { return pragma::get_cengine()->IsMultiPlayer(); }
+bool ClientState::IsSinglePlayer() const { return pragma::get_cengine()->IsSinglePlayer(); }
 
-msys::MaterialManager &ClientState::GetMaterialManager() { return *c_engine->GetClientStateInstance().materialManager; }
+msys::MaterialManager &ClientState::GetMaterialManager() { return *pragma::get_cengine()->GetClientStateInstance().materialManager; }
 ModelSubMesh *ClientState::CreateSubMesh() const { return new CModelSubMesh; }
 ModelMesh *ClientState::CreateMesh() const { return new CModelMesh; }
 
@@ -678,7 +683,7 @@ static void init_shader(Material *mat)
 		return;
 	auto *info = mat->GetShaderInfo();
 	if(info != nullptr) {
-		auto shader = c_engine->GetShader(info->GetIdentifier());
+		auto shader = pragma::get_cengine()->GetShader(info->GetIdentifier());
 		const_cast<util::ShaderInfo *>(info)->SetShader(std::make_shared<::util::WeakHandle<prosper::Shader>>(shader));
 	}
 }
@@ -805,8 +810,8 @@ Material *ClientState::LoadMaterial(const std::string &path, const std::function
 			if(b == true)
 				return mat;
 		}
-		if(c_game)
-			c_game->RequestResource(path);
+		if(pragma::get_cgame())
+			pragma::get_cgame()->RequestResource(path);
 		spdlog::warn("Unable to load material '{}': File not found!", path);
 	}
 	else if(bShaderInitialized.use_count() > 1)
@@ -859,5 +864,5 @@ bool ClientState::GetServerConVarIdentifier(uint32_t id, std::string &cvar)
 REGISTER_CONVAR_CALLBACK_CL(sv_tickrate, [](NetworkState *, const ConVar &, int, int val) {
 	if(val < 0)
 		val = 0;
-	c_engine->SetTickRate(val);
+	pragma::get_cengine()->SetTickRate(val);
 });

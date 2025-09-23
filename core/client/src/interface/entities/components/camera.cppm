@@ -6,7 +6,9 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/environment/env_camera.h"
 
-export module pragma.client.entities.components.camera;
+export module pragma.client:entities.components.camera;
+
+import :entities.base_entity;
 
 export namespace pragma {
 	class DLLCLIENT CCameraComponent final : public BaseEnvCameraComponent {

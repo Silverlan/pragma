@@ -13,14 +13,14 @@ module;
 #include <image/prosper_texture.hpp>
 #include <random>
 
-module pragma.client.rendering.shaders;
+module pragma.client;
 
-import :gradient;
-import pragma.client.engine;
+
+import :rendering.shaders.gradient;
+import :engine;
 
 using namespace pragma;
 
-extern CEngine *c_engine;
 
 static bool get_line_line_intersection(const Vector2 &p0, const Vector2 &p1, const Vector2 &p3, Vector2 &intersection)
 {

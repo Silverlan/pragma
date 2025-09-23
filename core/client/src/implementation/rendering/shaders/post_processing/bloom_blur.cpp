@@ -8,12 +8,12 @@ module;
 #include <shader/prosper_shader_t.hpp>
 #include <pragma/util/util_game.hpp>
 
-module pragma.client.rendering.shaders;
+module pragma.client;
 
-import :pp_bloom_blur;
-import pragma.client.client_state;
 
-extern ClientState *client;
+import :rendering.shaders.pp_bloom_blur;
+import :client_state;
+
 
 using namespace pragma;
 

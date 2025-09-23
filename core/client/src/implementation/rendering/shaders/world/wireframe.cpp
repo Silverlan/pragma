@@ -7,9 +7,10 @@ module;
 #include <shader/prosper_pipeline_create_info.hpp>
 #include "shader/prosper_shader.hpp"
 
-module pragma.client.rendering.shaders;
+module pragma.client;
 
-import :world_wireframe;
+
+import :rendering.shaders.world_wireframe;
 
 using namespace pragma;
 

@@ -5,14 +5,13 @@ module;
 
 #include "stdafx_client.h"
 
-module pragma.client.rendering.shader_graph;
+module pragma.client;
 
-import :manager;
+import :rendering.shader_graph.manager;
 
-import pragma.client.engine;
-import pragma.client.rendering.shaders;
+import :engine;
+import :rendering.shaders;
 
-extern CEngine *c_engine;
 
 using namespace pragma::rendering;
 
@@ -30,7 +29,7 @@ std::shared_ptr<pragma::shadergraph::Graph> ShaderGraphTypeManager::RegisterGrap
 	auto fragFilePath = util::FilePath(ShaderGraphManager::GetShaderFilePath(m_typeName, identifier));
 	fragFilePath.PopFront();
 	auto strFragFilePath = fragFilePath.GetString();
-	auto &shaderManager = c_engine->GetShaderManager();
+	auto &shaderManager = pragma::get_cengine()->GetShaderManager();
 	auto shader = shaderManager.GetShader(identifier);
 	auto graphData = std::make_shared<ShaderGraphData>(m_typeName, identifier, graph);
 	if(shader.valid()) {

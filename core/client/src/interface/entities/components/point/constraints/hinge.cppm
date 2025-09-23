@@ -6,7 +6,10 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/point/constraints/point_constraint_hinge.h"
 
-export module pragma.client.entities.components.point_constraint_hinge;
+export module pragma.client:entities.components.point_constraint_hinge;
+
+import :entities.base_entity;
+import :entities.components.entity;
 
 export {
 	namespace pragma {

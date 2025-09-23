@@ -6,7 +6,7 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <pragma/model/brush/brushmesh.h>
 
-export module pragma.client.model:brush_mesh;
+export module pragma.client:model.brush_mesh;
 
 export class DLLCLIENT CBrushMesh : public BrushMesh {
   public:

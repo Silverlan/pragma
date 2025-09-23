@@ -6,6 +6,7 @@ module;
 #include "stdafx_client.h"
 #include "pragma/entities/components/intersection_handler_component.hpp"
 #include "pragma/entities/components/base_bvh_component.hpp"
+#include "pragma/model/modelupdateflags.hpp"
 #include <pragma/physics/raytraces.h>
 #include <pragma/entities/environment/env_decal.h>
 #include <pragma/entities/components/base_transform_component.hpp>
@@ -14,22 +15,22 @@ module;
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/math/intersection.h>
 
-module pragma.client.entities.components.env_decal;
+module pragma.client;
 
-import pragma.client.client_state;
-import pragma.client.debug;
-import pragma.client.engine;
-import pragma.client.entities.components.bvh;
-import pragma.client.entities.components.physics;
-import pragma.client.entities.components.render;
-import pragma.client.entities.components.static_bvh_cache;
-import pragma.client.entities.components.static_bvh_user;
-import pragma.client.game;
+
+import :entities.components.env_decal;
+import :client_state;
+import :debug;
+import :engine;
+import :entities.components.bvh;
+import :entities.components.physics;
+import :entities.components.render;
+import :entities.components.static_bvh_cache;
+import :entities.components.static_bvh_user;
+import :game;
 
 using namespace pragma;
 
-extern ClientState *client;
-extern CGame *c_game;
 
 DecalProjector::DecalProjector(const Vector3 &pos, const Quat &rot, float size) : m_pose {pos, rot}, m_size {size} {}
 const Vector3 &DecalProjector::GetPos() const { return m_pose.GetOrigin(); }
@@ -111,7 +112,7 @@ bool DecalProjector::GenerateDecalMesh(const std::vector<MeshData> &meshDatas, s
 
 	// umath::Plane p {n,d};
 	// p = GetPose() *p;
-	// c_game->DrawPlane(p.GetNormal(),p.GetDistance(),Color{0,0,255,64},12.f);
+	// pragma::get_cgame()->DrawPlane(p.GetNormal(),p.GetDistance(),Color{0,0,255,64},12.f);
 
 	struct TriangleInfo {
 		std::array<uint32_t, 3> originalMeshVertexIndex = {};
@@ -253,7 +254,7 @@ void CDecalComponent::Initialize()
 	/*auto &ent = static_cast<CBaseEntity&>(GetEntity());
 	auto pSpriteComponent = ent.AddComponent<pragma::CSpriteComponent>();
 	if(pSpriteComponent.valid())
-		pSpriteComponent->SetOrientationType(pragma::ParticleOrientationType::World);*/
+		pSpriteComponent->SetOrientationType(pragma::ecs::ParticleOrientationType::World);*/
 }
 
 void CDecalComponent::OnEntitySpawn()
@@ -271,7 +272,7 @@ void CDecalComponent::OnEntitySpawn()
 	tr.SetSource(pos);
 	tr.SetTarget(pos +dir *18.f);
 	tr.SetFlags(RayCastFlags::Default | RayCastFlags::IgnoreDynamic);
-	auto r = c_game->RayCast(tr);
+	auto r = pragma::get_cgame()->RayCast(tr);
 	if(r.hitType != RayCastHitType::None)
 	{
 		pTrComponent->SetPosition(r.position +dir *-std::numeric_limits<float>::epsilon());
@@ -326,7 +327,7 @@ bool CDecalComponent::ApplyDecal(const std::vector<DecalProjector::MeshData> &me
 
 bool CDecalComponent::ApplyDecal(DecalProjector &projector, const std::vector<DecalProjector::MeshData> &meshDatas)
 {
-	auto *mat = client->LoadMaterial(GetMaterial());
+	auto *mat = pragma::get_client_state()->LoadMaterial(GetMaterial());
 	if(mat == nullptr)
 		return false;
 	std::vector<umath::Vertex> verts;
@@ -340,15 +341,15 @@ bool CDecalComponent::ApplyDecal(DecalProjector &projector, const std::vector<De
 	for(auto &v : verts)
 		v.position = invPose * v.position;
 
-	auto mdl = c_game->CreateModel();
+	auto mdl = pragma::get_cgame()->CreateModel();
 	auto meshGroup = mdl->GetMeshGroup(0);
-	auto subMesh = c_game->CreateModelSubMesh();
+	auto subMesh = pragma::get_cgame()->CreateModelSubMesh();
 	subMesh->GetVertices() = std::move(verts);
 	subMesh->SetIndices(tris);
 	subMesh->SetSkinTextureIndex(0);
 	subMesh->GenerateNormals();
 
-	auto mesh = c_game->CreateModelMesh();
+	auto mesh = pragma::get_cgame()->CreateModelMesh();
 	mesh->AddSubMesh(subMesh);
 	meshGroup->AddMesh(mesh);
 	mdl->AddMaterial(0, mat);
@@ -369,7 +370,7 @@ bool CDecalComponent::ApplyDecal(DecalProjector &projector, const std::vector<De
 bool CDecalComponent::ApplyDecal()
 {
 	m_decalDirty = false;
-	auto *mat = client->LoadMaterial(GetMaterial());
+	auto *mat = pragma::get_client_state()->LoadMaterial(GetMaterial());
 	if(mat == nullptr)
 		return false;
 	std::vector<CBaseEntity *> targetEnts {};
@@ -380,7 +381,7 @@ bool CDecalComponent::ApplyDecal()
 	projectorAABB.first += projectorOrigin;
 	projectorAABB.second += projectorOrigin;
 
-	// c_game->DrawBox(projectorAABB.first,projectorAABB.second,{},Color::Red,12.f);
+	// pragma::get_cgame()->DrawBox(projectorAABB.first,projectorAABB.second,{},Color::Red,12.f);
 
 	pragma::PrimitiveIntersectionInfo bvhIntersectInfo {};
 	std::vector<DecalProjector::MeshData> meshDatas {};
@@ -408,7 +409,7 @@ bool CDecalComponent::ApplyDecal()
 	};
 
 	{
-		EntityIterator entIt {*c_game};
+		EntityIterator entIt {*pragma::get_cgame()};
 		entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CStaticBvhCacheComponent>>();
 		for(auto *ent : entIt) {
 			auto bvhC = ent->GetComponent<pragma::CStaticBvhCacheComponent>();
@@ -417,7 +418,7 @@ bool CDecalComponent::ApplyDecal()
 	}
 
 	{
-		EntityIterator entIt {*c_game};
+		EntityIterator entIt {*pragma::get_cgame()};
 		entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CBvhComponent>>();
 		for(auto *ent : entIt) {
 			auto bvhC = ent->GetComponent<pragma::CBvhComponent>();

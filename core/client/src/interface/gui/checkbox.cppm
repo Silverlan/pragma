@@ -6,7 +6,7 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <wgui/types/wirect.h>
 
-export module pragma.client.gui:checkbox;
+export module pragma.client:gui.checkbox;
 
 export {
 	class DLLCLIENT WICheckbox : public WIRect {

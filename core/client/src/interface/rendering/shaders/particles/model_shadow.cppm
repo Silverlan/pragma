@@ -3,7 +3,7 @@
 
 module;
 
-export module pragma.client.rendering.shaders:particle_model_shadow;
+export module pragma.client:rendering.shaders.particle_model_shadow;
 
 // prosper TODO
 #if 0

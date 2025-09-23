@@ -6,9 +6,9 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/converters/gui_element_converter.hpp"
 
-export module pragma.client.gui:load_screen;
+export module pragma.client:gui.load_screen;
 
-import :main_menu_base;
+import :gui.main_menu_base;
 
 export {
 	class DLLCLIENT WILoadScreen : public WIMainMenuBase {

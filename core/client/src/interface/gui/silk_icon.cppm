@@ -6,9 +6,9 @@ export;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/converters/gui_element_converter.hpp"
 
-export module pragma.client.gui:silk_icon;
+export module pragma.client:gui.silk_icon;
 
-import :icon;
+import :gui.icon;
 
 export {
 	class DLLCLIENT WISilkIcon : public WIIcon {

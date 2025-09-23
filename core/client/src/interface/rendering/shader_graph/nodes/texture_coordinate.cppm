@@ -5,7 +5,7 @@ module;
 
 #include "pragma/clientdefinitions.h"
 
-export module pragma.client.rendering.shader_graph:node_texture_coordinate;
+export module pragma.client:rendering.shader_graph.node_texture_coordinate;
 
 import pragma.shadergraph;
 

@@ -4,9 +4,8 @@
 #include "stdafx_cengine.h"
 #include "pragma/launchparameters.h"
 
-import pragma.client.engine;
+import pragma.client;
 
-extern CEngine *c_engine;
 std::optional<bool> g_launchParamWindowedMode {};
 std::optional<int> g_launchParamRefreshRate {};
 std::optional<bool> g_launchParamNoBorder {};
@@ -44,11 +43,11 @@ static void LPARAM_h(const std::vector<std::string> &argv)
 	g_launchParamHeight = atoi(argv[0].c_str());
 }
 
-static void LPARAM_fullbright(const std::vector<std::string> &argv) { c_engine->UseFullbrightShader(true); }
+static void LPARAM_fullbright(const std::vector<std::string> &argv) { pragma::get_cengine()->UseFullbrightShader(true); }
 
-static void LPARAM_vk_enable_validation(const std::vector<std::string> &argv) { c_engine->SetGfxAPIValidationEnabled(true); }
+static void LPARAM_vk_enable_validation(const std::vector<std::string> &argv) { pragma::get_cengine()->SetGfxAPIValidationEnabled(true); }
 
-static void LPARAM_vk_enable_gfx_diagnostics(const std::vector<std::string> &argv) { c_engine->SetGfxDiagnosticsModeEnabled(true); }
+static void LPARAM_vk_enable_gfx_diagnostics(const std::vector<std::string> &argv) { pragma::get_cengine()->SetGfxDiagnosticsModeEnabled(true); }
 
 void LPARAM_enable_gfx_api_dump(const std::vector<std::string> &argv);
 
@@ -56,14 +55,14 @@ static void LPARAM_render_api(const std::vector<std::string> &argv)
 {
 	if(argv.empty())
 		return;
-	c_engine->SetRenderAPI(argv.front());
+	pragma::get_cengine()->SetRenderAPI(argv.front());
 }
 
 static void LPARAM_audio_api(const std::vector<std::string> &argv)
 {
 	if(argv.empty())
 		return;
-	c_engine->SetAudioAPI(argv.front());
+	pragma::get_cengine()->SetAudioAPI(argv.front());
 }
 
 extern std::optional<std::vector<std::string>> g_autoExecScripts;

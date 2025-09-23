@@ -15,20 +15,19 @@ module;
 #include <pragma/entities/entity_iterator.hpp>
 #include <util_image.hpp>
 
-module pragma.client.entities.components.pp_volumetric;
+module pragma.client;
 
-import pragma.client.model;
-import pragma.client.engine;
-import pragma.client.entities.components.color;
-import pragma.client.entities.components.lights.spot_vol;
-import pragma.client.entities.components.radius;
-import pragma.client.entities.components.rasterization_renderer;
-import pragma.client.entities.components.render;
-import pragma.client.game;
-import pragma.client.rendering.shaders;
+import :entities.components.rasterization_renderer;
+import :entities.components.pp_volumetric;
+import :model;
+import :engine;
+import :entities.components.color;
+import :entities.components.lights.spot_vol;
+import :entities.components.radius;
+import :entities.components.render;
+import :game;
+import :rendering.shaders;
 
-extern CGame *c_game;
-extern CEngine *c_engine;
 
 using namespace pragma;
 
@@ -37,7 +36,7 @@ CRendererPpVolumetricComponent::CRendererPpVolumetricComponent(BaseEntity &ent) 
 	static auto g_shadersRegistered = false;
 	if(!g_shadersRegistered) {
 		g_shadersRegistered = true;
-		c_engine->GetShaderManager().RegisterShader("pp_light_cone", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderPPLightCone(context, identifier); });
+		pragma::get_cengine()->GetShaderManager().RegisterShader("pp_light_cone", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderPPLightCone(context, identifier); });
 	}
 }
 static util::WeakHandle<prosper::Shader> g_shader {};
@@ -45,7 +44,7 @@ void CRendererPpVolumetricComponent::OnEntitySpawn()
 {
 	CRendererPpBaseComponent::OnEntitySpawn();
 	if(g_shader.expired())
-		g_shader = c_engine->GetShader("pp_light_cone");
+		g_shader = pragma::get_cengine()->GetShader("pp_light_cone");
 	ReloadRenderTarget();
 }
 
@@ -53,7 +52,7 @@ void CRendererPpVolumetricComponent::ReloadRenderTarget()
 {
 	if(m_renderer.expired())
 		return;
-	c_engine->GetRenderContext().WaitIdle();
+	pragma::get_cengine()->GetRenderContext().WaitIdle();
 	auto &hdrInfo = m_renderer->GetHDRInfo();
 	if(!hdrInfo.sceneRenderTarget)
 		return;
@@ -64,7 +63,7 @@ void CRendererPpVolumetricComponent::ReloadRenderTarget()
 		return;
 	auto *shaderLightCone = static_cast<pragma::ShaderPPLightCone *>(g_shader.get());
 	if(shaderLightCone && shaderLightCone->IsValid())
-		m_renderTarget = c_engine->GetRenderContext().CreateRenderTarget({hdrInfo.sceneRenderTarget->GetTexture(0)->shared_from_this(), hdrInfo.bloomTexture, hdrInfo.prepass.textureDepth}, shaderLightCone->GetRenderPass());
+		m_renderTarget = pragma::get_cengine()->GetRenderContext().CreateRenderTarget({hdrInfo.sceneRenderTarget->GetTexture(0)->shared_from_this(), hdrInfo.bloomTexture, hdrInfo.prepass.textureDepth}, shaderLightCone->GetRenderPass());
 }
 void CRendererPpVolumetricComponent::Initialize()
 {
@@ -97,7 +96,7 @@ void CRendererPpVolumetricComponent::DoRenderEffect(const util::DrawSceneInfo &d
 	pushConstants.SetResolution(m_renderTarget->GetTexture().GetImage().GetWidth(), m_renderTarget->GetTexture().GetImage().GetHeight());
 	auto &frustumPlanes = cam->GetFrustumPlanes();
 
-	EntityIterator entIt {*c_game, EntityIterator::FilterFlags::Default};
+	EntityIterator entIt {*pragma::get_cgame(), EntityIterator::FilterFlags::Default};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CLightSpotVolComponent>>();
 	std::vector<BaseEntity *> ents;
 	ents.reserve(entIt.GetCount());

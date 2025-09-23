@@ -5,9 +5,9 @@ module;
 
 #include "pragma/clientdefinitions.h"
 
-export module pragma.client.networking:local_client;
+export module pragma.client:networking.local_client;
 
-import :iclient;
+import :networking.iclient;
 
 export namespace pragma::networking {
 	class DLLCLIENT LocalClient : public IClient {

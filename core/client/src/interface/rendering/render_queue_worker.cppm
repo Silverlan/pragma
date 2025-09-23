@@ -12,9 +12,12 @@ module;
 
 #undef AddJob
 
-export module pragma.client.rendering.render_queue_worker;
+export module pragma.client:rendering.render_queue_worker;
+
+import :rendering.render_stats;
 
 export namespace pragma::rendering {
+	class RenderQueueWorker;
 	class RenderQueueWorkerManager {
 	  public:
 		using Job = std::function<void(void)>;

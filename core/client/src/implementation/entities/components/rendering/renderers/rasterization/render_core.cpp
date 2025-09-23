@@ -14,29 +14,26 @@ module;
 #include <image/prosper_msaa_texture.hpp>
 #include <sharedutils/util_shaderinfo.hpp>
 
-module pragma.client.entities.components.rasterization_renderer:render_core;
+module pragma.client;
 
-import pragma.client.client_state;
-import pragma.client.engine;
-import pragma.client.entities.components;
-import pragma.client.game;
-import pragma.client.rendering.shaders;
-
-extern CEngine *c_engine;
-extern ClientState *client;
-extern CGame *c_game;
+import :entities.components.rasterization_renderer;
+import :client_state;
+import :engine;
+import :game;
+import :particle_system.enums;
+import :rendering.shaders;
 
 using namespace pragma::rendering;
 
-void pragma::CRasterizationRendererComponent::RecordRenderParticleSystems(prosper::ICommandBuffer &cmd, const util::DrawSceneInfo &drawSceneInfo, const std::vector<pragma::CParticleSystemComponent *> &particles, pragma::rendering::SceneRenderPass renderMode, bool depthPass, Bool bloom)
+void pragma::CRasterizationRendererComponent::RecordRenderParticleSystems(prosper::ICommandBuffer &cmd, const util::DrawSceneInfo &drawSceneInfo, const std::vector<pragma::ecs::CParticleSystemComponent *> &particles, pragma::rendering::SceneRenderPass renderMode, bool depthPass, Bool bloom)
 {
 	auto depthOnly = umath::is_flag_set(drawSceneInfo.renderFlags, RenderFlags::ParticleDepth);
 	if((depthOnly && bloom) || drawSceneInfo.scene.expired())
 		return;
 	auto &scene = *drawSceneInfo.scene;
-	auto renderFlags = ParticleRenderFlags::None;
-	umath::set_flag(renderFlags, ParticleRenderFlags::DepthOnly, depthOnly || depthPass);
-	umath::set_flag(renderFlags, ParticleRenderFlags::Bloom, bloom);
+	auto renderFlags = ecs::ParticleRenderFlags::None;
+	umath::set_flag(renderFlags, ecs::ParticleRenderFlags::DepthOnly, depthOnly || depthPass);
+	umath::set_flag(renderFlags, ecs::ParticleRenderFlags::Bloom, bloom);
 	for(auto *particle : particles) {
 		if(particle != nullptr && particle->IsActive() == true && particle->GetSceneRenderPass() == renderMode && particle->GetParent() == nullptr) {
 			if(bloom && !particle->IsBloomEnabled())
@@ -86,17 +83,17 @@ void pragma::CRasterizationRendererComponent::Render(const util::DrawSceneInfo &
 		// This is a workaround until the actual issue is found.
 		// Unfortunately the OpenGL debug output doesn't give any useful information.
 		umath::set_flag(m_stateFlags, StateFlags::InitialRender, false);
-		if(c_engine->GetRenderAPI() == "opengl")
+		if(pragma::get_cengine()->GetRenderAPI() == "opengl")
 			return;
 	}
 	auto &scene = const_cast<pragma::CSceneComponent &>(*drawSceneInfo.scene);
-	c_game->CallCallbacks<void, std::reference_wrapper<const util::DrawSceneInfo>>("OnPreRender", drawSceneInfo);
-	// c_game->CallLuaCallbacks<void,RasterizationRenderer*>("PrepareRendering",this);
+	pragma::get_cgame()->CallCallbacks<void, std::reference_wrapper<const util::DrawSceneInfo>>("OnPreRender", drawSceneInfo);
+	// pragma::get_cgame()->CallLuaCallbacks<void,RasterizationRenderer*>("PrepareRendering",this);
 
 	// scene.GetSceneRenderDesc().BuildRenderQueue(drawSceneInfo);
 
 	// Prepass
-	c_game->StartGPUProfilingStage("Scene");
+	pragma::get_cgame()->StartGPUProfilingStage("Scene");
 
 	auto &drawCmd = drawSceneInfo.commandBuffer;
 	auto &sceneRenderDesc = drawSceneInfo.scene->GetSceneRenderDesc();
@@ -141,7 +138,7 @@ void pragma::CRasterizationRendererComponent::Render(const util::DrawSceneInfo &
 
 		if((drawSceneInfo.renderFlags &FRender::View) != FRender::None)
 			CSceneComponent::UpdateRenderBuffers(drawCmd,*sceneRenderDesc.GetRenderQueue(RenderMode::View,false /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::Prepass) : nullptr);
-		c_game->CallLuaCallbacks<void,const util::DrawSceneInfo*>("UpdateRenderBuffers",&drawSceneInfo);
+		pragma::get_cgame()->CallLuaCallbacks<void,const util::DrawSceneInfo*>("UpdateRenderBuffers",&drawSceneInfo);
 	}
 #endif
 
@@ -207,9 +204,9 @@ void pragma::CRasterizationRendererComponent::Render(const util::DrawSceneInfo &
 		(*drawSceneInfo.renderStats)->SetTime(RenderStats::RenderStage::LightingPassExecutionCpu, std::chrono::steady_clock::now() - t);
 		drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::LightingPass)->EndGpuTimer(RenderPassStats::Timer::GpuExecution, *drawSceneInfo.commandBuffer);
 	}
-	c_game->StopGPUProfilingStage(); // Scene
+	pragma::get_cgame()->StopGPUProfilingStage(); // Scene
 
-	c_game->CallCallbacks<void, std::reference_wrapper<const util::DrawSceneInfo>>("RenderPostLightingPass", drawSceneInfo);
+	pragma::get_cgame()->CallCallbacks<void, std::reference_wrapper<const util::DrawSceneInfo>>("RenderPostLightingPass", drawSceneInfo);
 
 	// Particles
 	if(drawSceneInfo.renderStats)
@@ -223,8 +220,8 @@ void pragma::CRasterizationRendererComponent::Render(const util::DrawSceneInfo &
 		(*drawSceneInfo.renderStats)->BeginGpuTimer(RenderStats::RenderStage::PostProcessingGpu, *drawSceneInfo.commandBuffer);
 		t = std::chrono::steady_clock::now();
 	}
-	c_game->StartProfilingStage("PostProcessing");
-	c_game->StartGPUProfilingStage("PostProcessing");
+	pragma::get_cgame()->StartProfilingStage("PostProcessing");
+	pragma::get_cgame()->StartGPUProfilingStage("PostProcessing");
 
 	auto *renderer = scene.GetRenderer<pragma::CRendererComponent>();
 	auto &postProcessing = renderer->GetPostProcessingEffects();
@@ -243,11 +240,11 @@ void pragma::CRasterizationRendererComponent::Render(const util::DrawSceneInfo &
 		drawCmd->RecordImageBarrier(GetHDRInfo().sceneRenderTarget->GetTexture().GetImage(), prosper::ImageLayout::ColorAttachmentOptimal, prosper::ImageLayout::TransferSrcOptimal);
 	}
 
-	c_game->CallCallbacks<void, std::reference_wrapper<const util::DrawSceneInfo>>("RenderPostProcessing", drawSceneInfo);
-	c_game->CallLuaCallbacks<void, const util::DrawSceneInfo *>("RenderPostProcessing", &drawSceneInfo);
+	pragma::get_cgame()->CallCallbacks<void, std::reference_wrapper<const util::DrawSceneInfo>>("RenderPostProcessing", drawSceneInfo);
+	pragma::get_cgame()->CallLuaCallbacks<void, const util::DrawSceneInfo *>("RenderPostProcessing", &drawSceneInfo);
 
-	c_game->StopGPUProfilingStage(); // PostProcessing
-	c_game->StopProfilingStage();    // PostProcessing
+	pragma::get_cgame()->StopGPUProfilingStage(); // PostProcessing
+	pragma::get_cgame()->StopProfilingStage();    // PostProcessing
 	if(drawSceneInfo.renderStats) {
 		(*drawSceneInfo.renderStats)->SetTime(RenderStats::RenderStage::PostProcessingExecutionCpu, std::chrono::steady_clock::now() - t);
 		(*drawSceneInfo.renderStats)->EndGpuTimer(RenderStats::RenderStage::PostProcessingGpu, *drawSceneInfo.commandBuffer);

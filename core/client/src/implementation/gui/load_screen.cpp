@@ -6,17 +6,15 @@ module;
 #include "stdafx_client.h"
 #include <wgui/types/witext.h>
 
-module pragma.client.gui;
+module pragma.client;
 
-import :load_screen;
-import :progress_bar;
+import :gui.load_screen;
+import :gui.progress_bar;
 
-import pragma.client.client_state;
-import pragma.client.engine;
+import :client_state;
+import :engine;
 import pragma.locale;
 
-extern CEngine *c_engine;
-extern ClientState *client;
 WILoadScreen::WILoadScreen() : WIMainMenuBase() {}
 
 WILoadScreen::~WILoadScreen() {}

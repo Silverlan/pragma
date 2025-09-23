@@ -7,7 +7,11 @@ module;
 #include <material_manager2.hpp>
 #include <pragma/entities/environment/lights/env_light_spot_vol.h>
 
-export module pragma.client.entities.components.lights.spot_vol;
+export module pragma.client:entities.components.lights.spot_vol;
+
+import :entities.base_entity;
+import :entities.components.entity;
+import :model.mesh;
 
 export namespace pragma {
 	class DLLCLIENT CLightSpotVolComponent final : public BaseEnvLightSpotVolComponent, public CBaseNetComponent {

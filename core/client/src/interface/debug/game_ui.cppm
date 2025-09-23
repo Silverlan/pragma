@@ -9,8 +9,7 @@ module;
 #include <wgui/wibase.h>
 #include <unordered_map>
 
-export module pragma.client.debug.game_ui;
-
+export module pragma.client:debug.game_ui;
 export struct DLLCLIENT DebugGameGUI {
   private:
 	std::unordered_map<std::string, CallbackHandle> m_callbacks;

@@ -8,8 +8,7 @@ module;
 #include "pragma/console/conout.h"
 #include <udm.hpp>
 
-export module pragma.client.rendering.shader_input_data;
-
+export module pragma.client:rendering.shader_input_data;
 import pragma.shadergraph;
 
 export namespace pragma::rendering {

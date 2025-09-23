@@ -21,16 +21,15 @@ module;
 #include <cmaterial_manager2.hpp>
 #include <texturemanager/texture.h>
 
-module pragma.client.rendering.shaders;
+module pragma.client;
 
-import :compose_rma;
 
-import pragma.client.client_state;
-import pragma.client.engine;
-import pragma.client.game;
+import :rendering.shaders.compose_rma;
 
-extern CGame *c_game;
-extern ClientState *client;
+import :client_state;
+import :engine;
+import :game;
+
 
 decltype(pragma::ShaderComposeRMA::DESCRIPTOR_SET_TEXTURE) pragma::ShaderComposeRMA::DESCRIPTOR_SET_TEXTURE = {
   "TEXTURES",
@@ -49,7 +48,7 @@ std::shared_ptr<prosper::IImage> pragma::ShaderComposeRMA::ComposeRMA(prosper::I
 	imgCreateInfo.usage = prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::TransferSrcBit | prosper::ImageUsageFlags::SampledBit;
 
 	auto fGetWhiteTex = [&context]() -> prosper::Texture * {
-		auto tex = static_cast<msys::CMaterialManager &>(client->GetMaterialManager()).GetTextureManager().LoadAsset("white");
+		auto tex = static_cast<msys::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager()).GetTextureManager().LoadAsset("white");
 		if(tex == nullptr)
 			return nullptr;
 		return tex->GetVkTexture().get();
@@ -105,7 +104,7 @@ std::shared_ptr<prosper::IImage> pragma::ShaderComposeRMA::ComposeRMA(prosper::I
 }
 bool pragma::ShaderComposeRMA::InsertAmbientOcclusion(prosper::IPrContext &context, const std::string &rmaInputPath, prosper::IImage &aoImg, const std::string *optRmaOutputPath)
 {
-	auto &texManager = static_cast<msys::CMaterialManager &>(client->GetMaterialManager()).GetTextureManager();
+	auto &texManager = static_cast<msys::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager()).GetTextureManager();
 	auto rmaTexInfo = texManager.LoadAsset(rmaInputPath);
 	if(rmaTexInfo == nullptr || rmaTexInfo->HasValidVkTexture() == false)
 		return false;
@@ -133,7 +132,7 @@ bool pragma::ShaderComposeRMA::InsertAmbientOcclusion(prosper::IPrContext &conte
 
 	Con::cout << "Writing RMA texture file '" << rmaOutputPath << "'..." << Con::endl;
 	// TODO: RMA should overwrite the existing one
-	return c_game->SaveImage(*newRMA, "addons/converted/" + matName, imgWriteInfo);
+	return pragma::get_cgame()->SaveImage(*newRMA, "addons/converted/" + matName, imgWriteInfo);
 }
 bool pragma::ShaderComposeRMA::InsertAmbientOcclusion(prosper::IPrContext &context, const std::string &rmaInputPath, uimg::ImageBuffer &imgBuffer, const std::string *optRmaOutputPath)
 {

@@ -21,19 +21,16 @@ module;
 #include <prosper_command_buffer.hpp>
 #include <luabind/copy_policy.hpp>
 
-module pragma.client.entities.components.model;
+module pragma.client;
 
-import pragma.client.client_state;
-import pragma.client.engine;
-import pragma.client.entities.components;
-import pragma.client.game;
-import pragma.client.model;
+import :entities.components.model;
+import :client_state;
+import :engine;
+import :game;
+import :model;
 
 using namespace pragma;
 
-extern CEngine *c_engine;
-extern CGame *c_game;
-extern ClientState *client;
 
 ComponentEventId CModelComponent::EVENT_ON_RENDER_MESHES_UPDATED = INVALID_COMPONENT_ID;
 ComponentEventId CModelComponent::EVENT_ON_GAME_SHADER_SPECIALIZATION_CONSTANT_FLAGS_UPDATED = INVALID_COMPONENT_ID;
@@ -110,7 +107,7 @@ CMaterial *CModelComponent::GetRenderMaterial(uint32_t idx, uint32_t skin) const
 			return matOverride;
 	}
 	auto *mat = static_cast<CMaterial *>(mdl->GetMaterial(idx));
-	return mat ? mat : static_cast<CMaterial *>(client->GetMaterialManager().GetErrorMaterial());
+	return mat ? mat : static_cast<CMaterial *>(pragma::get_client_state()->GetMaterialManager().GetErrorMaterial());
 }
 CMaterial *CModelComponent::GetRenderMaterial(uint32_t idx) const { return GetRenderMaterial(idx, GetSkin()); }
 
@@ -218,17 +215,17 @@ void CModelComponent::AddRenderMesh(CModelSubMesh &mesh, CMaterial &mat, pragma:
 
 void CModelComponent::UpdateRenderBufferList()
 {
-	if(std::this_thread::get_id() != c_engine->GetMainThreadId()) {
+	if(std::this_thread::get_id() != pragma::get_cengine()->GetMainThreadId()) {
 		Con::cwar << "Attempted to update render meshes from non-main thread, this is illegal!" << Con::endl;
 		return;
 	}
 	umath::set_flag(m_stateFlags, StateFlags::RenderBufferListUpdateRequired, false);
 	for(auto &bufData : m_lodMeshRenderBufferData)
-		c_engine->GetRenderContext().KeepResourceAliveUntilPresentationComplete(bufData.renderBuffer);
+		pragma::get_cengine()->GetRenderContext().KeepResourceAliveUntilPresentationComplete(bufData.renderBuffer);
 	m_lodMeshRenderBufferData.clear();
 	m_lodMeshRenderBufferData.reserve(m_lodRenderMeshes.size());
 	auto depthPrepassEnabled = IsDepthPrepassEnabled();
-	c_engine->GetRenderContext().GetPipelineLoader().Flush();
+	pragma::get_cengine()->GetRenderContext().GetPipelineLoader().Flush();
 	for(auto i = decltype(m_lodRenderMeshes.size()) {0u}; i < m_lodRenderMeshes.size(); ++i) {
 		auto &mesh = static_cast<CModelSubMesh &>(*m_lodRenderMeshes[i]);
 		auto *mat = GetRenderMaterial(mesh.GetSkinTextureIndex());
@@ -248,7 +245,7 @@ void CModelComponent::UpdateRenderBufferList()
 				auto lightmapUvIndex = umath::to_integral(pragma::ShaderGameWorldLightingPass::VertexBinding::LightmapUv);
 				if(lightmapUvIndex < newBuffers.size()) {
 					newBuffers[lightmapUvIndex] = uvBuffer.get();
-					renderBuffer = c_engine->GetRenderContext().CreateRenderBuffer(renderBuffer->GetPipelineCreateInfo(), newBuffers, renderBuffer->GetOffsets(), indexBuffer ? std::optional<prosper::IndexBufferInfo> {*indexBuffer} : std::optional<prosper::IndexBufferInfo> {});
+					renderBuffer = pragma::get_cengine()->GetRenderContext().CreateRenderBuffer(renderBuffer->GetPipelineCreateInfo(), newBuffers, renderBuffer->GetOffsets(), indexBuffer ? std::optional<prosper::IndexBufferInfo> {*indexBuffer} : std::optional<prosper::IndexBufferInfo> {});
 				}
 			}
 
@@ -280,7 +277,7 @@ void CModelComponent::UpdateRenderMeshes(bool requireBoundingVolumeUpdate)
 {
 	if(umath::is_flag_set(m_stateFlags, StateFlags::RenderMeshUpdateRequired | StateFlags::RenderBufferListUpdateRequired) == false)
 		return;
-	if(std::this_thread::get_id() != c_engine->GetMainThreadId()) {
+	if(std::this_thread::get_id() != pragma::get_cengine()->GetMainThreadId()) {
 		Con::cwar << "Attempted to update render meshes from non-main thread, this is illegal!" << Con::endl;
 		return;
 	}
@@ -352,7 +349,7 @@ void CModelComponent::UpdateLOD(const CSceneComponent &scene, const CCameraCompo
 	auto numLods = mdl->GetLODCount();
 	if(numLods <= 1 && m_maxDrawDistance == 0.f)
 		return;
-	auto t = c_game->CurTime();
+	auto t = pragma::get_cgame()->CurTime();
 	if(t < m_tNextLodUpdate)
 		return;
 	// Updating LODs is relatively expensive, but there's really no reason to update them every frame,
@@ -400,7 +397,7 @@ void CModelComponent::UpdateLOD(const CSceneComponent &scene, const CCameraCompo
 		}
 		break;
 	}
-	lod += c_game->GetLODBias();
+	lod += pragma::get_cgame()->GetLODBias();
 	if(m_lod == lod)
 		return;
 	UpdateLOD(lod);

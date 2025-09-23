@@ -5,9 +5,10 @@ module;
 
 #include "pragma/clientdefinitions.h"
 
-import pragma.entities.components;
+export module pragma.client:entities.components.shooter;
 
-export module pragma.client.entities.components.shooter;
+import :entities.components.entity;
+import pragma.entities.components.shooter;
 
 export namespace pragma::ecs {
 	class DLLCLIENT CShooterComponent final : public BaseShooterComponent, public CBaseNetComponent {

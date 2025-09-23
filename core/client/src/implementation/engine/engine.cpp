@@ -8,6 +8,7 @@ module;
 #include "cmaterialmanager.h"
 #include "pragma/console/c_cvar.h"
 #include <texturemanager/texturemanager.h>
+#include "pragma/debug/debug_performance_profiler.hpp"
 #include <pragma/engine_init.hpp>
 #include <pragma/console/convars.h>
 #include "pragma/console/engine_cvar.h"
@@ -53,18 +54,20 @@ module;
 
 #endif
 
-module pragma.client.engine;
+module pragma.client;
 
+
+import :engine;
 import util_zip;
-import pragma.client.assets;
-import pragma.client.client_state;
-import pragma.client.entities.components;
-import pragma.client.game;
-import pragma.client.gui;
-import pragma.client.model;
-import pragma.client.networking;
-import pragma.client.rendering.shader_graph;
-import pragma.client.rendering.shaders;
+import :assets;
+import :client_state;
+import :entities.components;
+import :game;
+import :gui;
+import :model;
+import :networking;
+import :rendering.shader_graph;
+import :rendering.shaders;
 import pragma.gui;
 import pragma.shadergraph;
 import pragma.locale;
@@ -81,20 +84,18 @@ void DLLCLIENT RunCEngine(int argc, char *argv[])
 }
 }
 
-extern CEngine *c_engine;
-extern ClientState *client;
-extern CGame *c_game;
 //__declspec(dllimport) std::vector<void*> _vkImgPtrs;
 decltype(CEngine::AXIS_PRESS_THRESHOLD) CEngine::AXIS_PRESS_THRESHOLD = 0.5f;
 // If set to true, each joystick axes will be split into a positive and a negative axis, which
 // can be bound individually
 static const auto SEPARATE_JOYSTICK_AXES = true;
 
+static CEngine *g_engine = nullptr;
 CEngine::CEngine(int argc, char *argv[])
     : Engine(argc, argv), pragma::RenderContext(), m_nearZ(pragma::BaseEnvCameraComponent::DEFAULT_NEAR_Z), //10.0f), //0.1f
       m_farZ(pragma::BaseEnvCameraComponent::DEFAULT_FAR_Z), m_fps(0), m_tFPSTime(0.f), m_tLastFrame(util::Clock::now()), m_tDeltaFrameTime(0), m_audioAPI {"fmod"}
 {
-	c_engine = this;
+	g_engine = this;
 	RegisterCallback<void, std::reference_wrapper<const pragma::platform::Joystick>, bool>("OnJoystickStateChanged");
 	RegisterCallback<void, std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>>("DrawFrame");
 	RegisterCallback<void>("PreDrawGUI");
@@ -115,7 +116,7 @@ CEngine::CEngine(int argc, char *argv[])
 			m_profilingStageManager = nullptr;
 			return;
 		}
-		auto &cpuProfiler = c_engine->GetProfiler();
+		auto &cpuProfiler = pragma::get_cengine()->GetProfiler();
 		m_cpuProfilingStageManager = std::make_unique<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage>>();
 		m_cpuProfilingStageManager->InitializeProfilingStageManager(cpuProfiler);
 	});
@@ -244,7 +245,7 @@ void CEngine::DumpDebugInformation(uzip::ZIPFile &zip) const
 	engineInfo << "Render API: " << GetRenderAPI();
 	zip.AddFile("engine_cl.txt", engineInfo.str());
 
-	auto &context = c_engine->GetRenderContext();
+	auto &context = pragma::get_cengine()->GetRenderContext();
 	auto layers = context.DumpLayers();
 	if(layers)
 		zip.AddFile("prosper_layers.txt", *layers);
@@ -341,6 +342,7 @@ void CEngine::MouseInput(prosper::Window &window, pragma::platform::MouseButton 
 	auto handled = false;
 	if(CallCallbacksWithOptionalReturn<bool, std::reference_wrapper<prosper::Window>, pragma::platform::MouseButton, pragma::platform::KeyState, pragma::platform::Modifier>("OnMouseInput", handled, window, button, state, mods) == CallbackReturnType::HasReturnValue && handled == true)
 		return;
+	auto *client = pragma::get_client_state();
 	if(client != nullptr && client->RawMouseInput(button, state, mods) == false)
 		return;
 	if(WGUI::GetInstance().HandleMouseInput(window, button, state, mods))
@@ -430,7 +432,7 @@ void CEngine::JoystickAxisInput(prosper::Window &window, const pragma::platform:
 static auto cvAxisInputThreshold = GetClientConVar("cl_controller_axis_input_threshold");
 bool CEngine::IsValidAxisInput(float axisInput) const
 {
-	if(!client)
+	if(!pragma::get_client_state())
 		return false;
 	return (umath::abs(axisInput) > cvAxisInputThreshold->GetFloat()) ? true : false;
 }
@@ -464,6 +466,7 @@ void CEngine::KeyboardInput(prosper::Window &window, pragma::platform::Key key, 
 	if(CallCallbacksWithOptionalReturn<bool, std::reference_wrapper<prosper::Window>, pragma::platform::Key, int, pragma::platform::KeyState, pragma::platform::Modifier, float>("OnKeyboardInput", handled, window, key, scanCode, state, mods, magnitude) == CallbackReturnType::HasReturnValue
 	  && handled == true)
 		return;
+	auto *client = pragma::get_client_state();
 	if(client != nullptr && client->RawKeyboardInput(key, scanCode, state, mods, magnitude) == false)
 		return;
 	if(key == pragma::platform::Key::Escape) // Escape key is hardcoded
@@ -499,6 +502,7 @@ void CEngine::CharInput(prosper::Window &window, unsigned int c)
 	auto handled = false;
 	if(CallCallbacksWithOptionalReturn<bool, std::reference_wrapper<prosper::Window>, unsigned int>("OnCharInput", handled, window, c) == CallbackReturnType::HasReturnValue && handled == true)
 		return;
+	auto *client = pragma::get_client_state();
 	if(client != nullptr && client->RawCharInput(c) == false)
 		return;
 	if(WGUI::GetInstance().HandleCharInput(window, c))
@@ -511,6 +515,7 @@ void CEngine::ScrollInput(prosper::Window &window, Vector2 offset)
 	auto handled = false;
 	if(CallCallbacksWithOptionalReturn<bool, std::reference_wrapper<prosper::Window>, Vector2>("OnScrollInput", handled, window, offset) == CallbackReturnType::HasReturnValue && handled == true)
 		return;
+	auto *client = pragma::get_client_state();
 	if(client != nullptr && client->RawScrollInput(offset) == false)
 		return;
 	if(WGUI::GetInstance().HandleScrollInput(window, offset))
@@ -530,6 +535,7 @@ void CEngine::ScrollInput(prosper::Window &window, Vector2 offset)
 void CEngine::OnWindowFocusChanged(prosper::Window &window, bool bFocused)
 {
 	umath::set_flag(m_stateFlags, StateFlags::WindowFocused, bFocused);
+	auto *client = pragma::get_client_state();
 	if(client != nullptr)
 		client->UpdateSoundVolume();
 }
@@ -542,7 +548,8 @@ namespace pragma {
 const std::vector<CEngine::DroppedFile> &CEngine::GetDroppedFiles() const { return m_droppedFiles; }
 void CEngine::OnFilesDropped(prosper::Window &window, std::vector<std::string> &files)
 {
-	if(client == nullptr)
+	auto *client = pragma::get_client_state();
+	if(client != nullptr)
 		return;
 
 	m_droppedFiles.reserve(files.size());
@@ -592,7 +599,8 @@ void CEngine::OnFilesDropped(prosper::Window &window, std::vector<std::string> &
 }
 void CEngine::OnDragEnter(prosper::Window &window)
 {
-	if(client == nullptr)
+	auto *client = pragma::get_client_state();
+	if(client != nullptr)
 		return;
 	if(WGUI::GetInstance().HandleFileDragEnter(window))
 		return;
@@ -600,7 +608,8 @@ void CEngine::OnDragEnter(prosper::Window &window)
 }
 void CEngine::OnDragExit(prosper::Window &window)
 {
-	if(client == nullptr)
+	auto *client = pragma::get_client_state();
+	if(client != nullptr)
 		return;
 	if(WGUI::GetInstance().HandleFileDragExit(window))
 		return;
@@ -608,19 +617,22 @@ void CEngine::OnDragExit(prosper::Window &window)
 }
 bool CEngine::OnWindowShouldClose(prosper::Window &window)
 {
-	if(client == nullptr)
+	auto *client = pragma::get_client_state();
+	if(client != nullptr)
 		return true;
 	return client->OnWindowShouldClose(window);
 }
 void CEngine::OnPreedit(prosper::Window &window, const pragma::string::Utf8String &preeditString, const std::vector<int> &blockSizes, int focusedBlock, int caret)
 {
-	if(client == nullptr)
+	auto *client = pragma::get_client_state();
+	if(client != nullptr)
 		return;
 	client->OnPreedit(window, preeditString, blockSizes, focusedBlock, caret);
 }
 void CEngine::OnIMEStatusChanged(prosper::Window &window, bool imeEnabled)
 {
-	if(client == nullptr)
+	auto *client = pragma::get_client_state();
+	if(client != nullptr)
 		return;
 	WGUI::GetInstance().HandleIMEStatusChanged(window, imeEnabled);
 	client->OnIMEStatusChanged(window, imeEnabled);
@@ -1396,10 +1408,10 @@ std::shared_ptr<prosper::Window> CEngine::CreateWindow(prosper::WindowSettings &
 {
 	if(settings.width == 0 || settings.height == 0)
 		return nullptr;
-	auto &mainWindowCreateInfo = c_engine->GetRenderContext().GetWindow().GetWindowSettings();
+	auto &mainWindowCreateInfo = pragma::get_cengine()->GetRenderContext().GetWindow().GetWindowSettings();
 	settings.flags = mainWindowCreateInfo.flags;
 	settings.api = mainWindowCreateInfo.api;
-	auto window = c_engine->GetRenderContext().CreateWindow(settings);
+	auto window = pragma::get_cengine()->GetRenderContext().CreateWindow(settings);
 	if(!window)
 		return nullptr;
 
@@ -1515,9 +1527,9 @@ void CEngine::SetControllersEnabled(bool b)
 		}
 		JoystickAxisInput(GetWindow(), joystick, axisId + axisOffset, mods, newVal, newVal - oldVal);
 	});
-	pragma::platform::set_joystick_state_callback([this](const pragma::platform::Joystick &joystick, bool bConnected) { c_engine->CallCallbacks<void, std::reference_wrapper<const pragma::platform::Joystick>, bool>("OnJoystickStateChanged", std::ref(joystick), bConnected); });
+	pragma::platform::set_joystick_state_callback([this](const pragma::platform::Joystick &joystick, bool bConnected) { pragma::get_cengine()->CallCallbacks<void, std::reference_wrapper<const pragma::platform::Joystick>, bool>("OnJoystickStateChanged", std::ref(joystick), bConnected); });
 }
-REGISTER_CONVAR_CALLBACK_CL(cl_controller_enabled, [](NetworkState *state, const ConVar &cv, bool oldVal, bool newVal) { c_engine->SetControllersEnabled(newVal); });
+REGISTER_CONVAR_CALLBACK_CL(cl_controller_enabled, [](NetworkState *state, const ConVar &cv, bool oldVal, bool newVal) { pragma::get_cengine()->SetControllersEnabled(newVal); });
 
 float CEngine::GetRawJoystickAxisMagnitude() const { return m_rawInputJoystickMagnitude; }
 
@@ -1578,14 +1590,12 @@ void CEngine::ReloadShaderPipelines()
 
 CEngine::~CEngine() { m_audioAPILib = nullptr; }
 
-CEngine *pragma::get_cengine() { return c_engine; }
-ClientState *pragma::get_client_state() { return client; }
-CGame *pragma::get_client_game() { return c_game; }
+CEngine *pragma::get_cengine() { return g_engine; }
 
 void CEngine::HandleLocalHostPlayerClientPacket(NetPacket &p)
 {
 	auto *client = GetClientState();
-	if(client == nullptr)
+	if(client != nullptr)
 		return;
 	auto *cl = static_cast<ClientState *>(client)->GetClient();
 	if(cl == nullptr)
@@ -1600,9 +1610,9 @@ void CEngine::Connect(const std::string &ip, const std::string &port)
 		return;
 	cl->Disconnect();
 	if(ip != "localhost")
-		c_engine->CloseServerState();
+		pragma::get_cengine()->CloseServerState();
 	else {
-		auto steamId = c_engine->GetServerSteamId();
+		auto steamId = pragma::get_cengine()->GetServerSteamId();
 		if(steamId.has_value()) {
 			// Listen server is peer-to-peer; Connect via steam ID
 			cl->Connect(*steamId);
@@ -1618,7 +1628,7 @@ void CEngine::Connect(uint64_t steamId)
 	if(cl == NULL)
 		return;
 	cl->Disconnect();
-	c_engine->CloseServerState();
+	pragma::get_cengine()->CloseServerState();
 	cl->Connect(steamId);
 }
 
@@ -1727,7 +1737,7 @@ void CEngine::Close()
 	CloseSoundEngine(); // Has to be closed after client state (since clientstate may still have some references at this point)
 	m_clInstance = nullptr;
 	WGUI::Close(); // Has to be closed after client state
-	c_engine = nullptr;
+	g_engine = nullptr;
 	pragma::RenderContext::Release();
 
 	Engine::Close();
@@ -1742,7 +1752,7 @@ void CEngine::OnClose()
 	pragma::CRenderComponent::ClearBuffers();
 	pragma::CLightComponent::ClearBuffers();
 	CModelSubMesh::ClearBuffers();
-	pragma::CParticleSystemComponent::ClearBuffers();
+	pragma::ecs::CParticleSystemComponent::ClearBuffers();
 }
 
 static auto cvFpsDecayFactor = GetClientConVar("cl_fps_decay_factor");
@@ -1835,8 +1845,8 @@ void CEngine::DrawScene(std::shared_ptr<prosper::RenderTarget> &rt)
 
 		WGUI::GetInstance().BeginDraw();
 		CallCallbacks<void>("PreRecordGUI");
-		if(c_game != nullptr)
-			c_game->PreGUIRecord();
+		if(pragma::get_cgame() != nullptr)
+			pragma::get_cgame()->PreGUIRecord();
 		auto &context = GetRenderContext();
 		for(auto &window : context.GetWindows()) {
 			if(!window || window->IsValid() == false || window->GetState() != prosper::Window::State::Active)
@@ -1853,8 +1863,8 @@ void CEngine::DrawScene(std::shared_ptr<prosper::RenderTarget> &rt)
 			swapCmdGroup.EndRecording();
 		}
 		CallCallbacks<void>("PostRecordGUI");
-		if(c_game != nullptr)
-			c_game->PostGUIRecord();
+		if(pragma::get_cgame() != nullptr)
+			pragma::get_cgame()->PostGUIRecord();
 
 		StopProfilingStage(); // GUI
 		StopProfilingStage(); // RecordGUI
@@ -1887,8 +1897,8 @@ void CEngine::DrawScene(std::shared_ptr<prosper::RenderTarget> &rt)
 	if(drawGui) {
 		StartProfilingStage("ExecuteGUIDrawCalls");
 		CallCallbacks<void>("PreDrawGUI");
-		if(c_game != nullptr)
-			c_game->PreGUIDraw();
+		if(pragma::get_cgame() != nullptr)
+			pragma::get_cgame()->PreGUIDraw();
 
 		auto &primWindowCmd = GetWindow().GetDrawCommandBuffer();
 		if(perfTimers) {
@@ -1912,8 +1922,8 @@ void CEngine::DrawScene(std::shared_ptr<prosper::RenderTarget> &rt)
 			m_gpuTimers[idx]->End(*primWindowCmd);
 		}
 		CallCallbacks<void>("PostDrawGUI");
-		if(c_game != nullptr)
-			c_game->PostGUIDraw();
+		if(pragma::get_cgame() != nullptr)
+			pragma::get_cgame()->PostGUIDraw();
 		WGUI::GetInstance().EndDraw();
 		StopProfilingStage(); // ExecuteGUIDrawCalls
 	}
@@ -1929,10 +1939,10 @@ void CEngine::SetGpuPerformanceTimersEnabled(bool enabled)
 	umath::set_flag(m_stateFlags, StateFlags::EnableGpuPerformanceTimers, enabled);
 
 	if(enabled == false) {
-		c_engine->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_gpuTimerPool);
+		pragma::get_cengine()->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_gpuTimerPool);
 		m_gpuTimerPool = nullptr;
 		for(auto &t : m_gpuTimers) {
-			c_engine->GetRenderContext().KeepResourceAliveUntilPresentationComplete(t);
+			pragma::get_cengine()->GetRenderContext().KeepResourceAliveUntilPresentationComplete(t);
 			t = nullptr;
 		}
 		for(auto &t : m_gpuExecTimes)
@@ -2167,12 +2177,12 @@ CEngine::DroppedFile::DroppedFile(const std::string &rootPath, const std::string
 REGISTER_CONVAR_CALLBACK_CL(cl_render_monitor, [](NetworkState *, const ConVar &, int32_t, int32_t monitor) {
 	auto monitors = pragma::platform::get_monitors();
 	if(monitor < monitors.size() && monitor >= 0)
-		c_engine->GetWindow().SetMonitor(monitors[monitor]);
+		pragma::get_cengine()->GetWindow().SetMonitor(monitors[monitor]);
 })
 
 REGISTER_CONVAR_CALLBACK_CL(cl_render_window_mode, [](NetworkState *, const ConVar &, int32_t, int32_t val) {
-	c_engine->GetWindow().SetWindowedMode(val != 0);
-	c_engine->GetWindow().SetNoBorder(val == 2);
+	pragma::get_cengine()->GetWindow().SetWindowedMode(val != 0);
+	pragma::get_cengine()->GetWindow().SetNoBorder(val == 2);
 })
 
 REGISTER_CONVAR_CALLBACK_CL(cl_window_resolution, [](NetworkState *, const ConVar &, std::string, std::string val) {
@@ -2183,9 +2193,9 @@ REGISTER_CONVAR_CALLBACK_CL(cl_window_resolution, [](NetworkState *, const ConVa
 	auto x = util::to_int(vals[0]);
 	auto y = util::to_int(vals[1]);
 	Vector2i resolution(x, y);
-	c_engine->GetWindow().SetResolution(resolution);
-	auto *client = static_cast<ClientState *>(c_engine->GetClientState());
-	if(client == nullptr)
+	pragma::get_cengine()->GetWindow().SetResolution(resolution);
+	auto *client = static_cast<ClientState *>(pragma::get_cengine()->GetClientState());
+	if(client != nullptr)
 		return;
 	auto &wgui = WGUI::GetInstance();
 	auto *el = wgui.GetBaseElement();
@@ -2202,19 +2212,19 @@ REGISTER_CONVAR_CALLBACK_CL(cl_render_resolution, [](NetworkState *, const ConVa
 	std::vector<std::string> vals;
 	ustring::explode(val, "x", vals);
 	if(vals.size() < 2) {
-		c_engine->SetRenderResolution({});
+		pragma::get_cengine()->SetRenderResolution({});
 		return;
 	}
 	auto x = util::to_int(vals[0]);
 	auto y = util::to_int(vals[1]);
 	Vector2i resolution(x, y);
-	c_engine->SetRenderResolution(resolution);
+	pragma::get_cengine()->SetRenderResolution(resolution);
 })
 
 REGISTER_CONVAR_CALLBACK_CL(cl_gpu_timer_queries_enabled, [](NetworkState *, const ConVar &, bool, bool enabled) {
-	if(c_engine == nullptr)
+	if(pragma::get_cengine() == nullptr)
 		return;
-	c_engine->SetGPUProfilingEnabled(enabled);
+	pragma::get_cengine()->SetGPUProfilingEnabled(enabled);
 })
 
 static void dump_traceback_gui()

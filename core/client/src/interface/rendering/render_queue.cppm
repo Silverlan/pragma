@@ -7,7 +7,12 @@ module;
 #include <cmaterialmanager.h>
 #include <shader/prosper_shader.hpp>
 
-export module pragma.client.rendering.rener_queue;
+export module pragma.client:rendering.render_queue;
+
+import :entities.components.camera;
+import :model.mesh;
+import :model.render_mesh_group;
+import :rendering.render_stats;
 
 export namespace pragma::rendering {
 	struct SortingKey {

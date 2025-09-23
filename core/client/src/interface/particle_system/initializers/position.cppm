@@ -5,13 +5,15 @@ module;
 
 #include "pragma/clientdefinitions.h"
 
-export module pragma.client.particle_system:initializer_position;
+export module pragma.client:particle_system.initializer_position;
+
+import :particle_system.modifier;
 
 export {
 	class DLLCLIENT CParticleInitializerPositionRandomBox : public CParticleInitializer {
 	public:
 		CParticleInitializerPositionRandomBox() = default;
-		virtual void Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+		virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
 		virtual void OnParticleCreated(CParticle &particle) override;
 	private:
 		Vector3 m_min = {};
@@ -25,7 +27,7 @@ export {
 	class DLLCLIENT CParticleInitializerPositionRandomSphere : public CParticleInitializer {
 	public:
 		CParticleInitializerPositionRandomSphere() = default;
-		virtual void Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+		virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
 		virtual void OnParticleCreated(CParticle &particle) override;
 	private:
 		float m_distMin = 0.f;
@@ -39,7 +41,7 @@ export {
 	class DLLCLIENT CParticleInitializerPositionRandomCircle : public CParticleInitializer {
 	public:
 		CParticleInitializerPositionRandomCircle() = default;
-		virtual void Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+		virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
 		virtual void OnParticleCreated(CParticle &particle) override;
 	private:
 		Vector3 m_vAxis = Vector3(0.f, 1.f, 0.f);

@@ -3,6 +3,7 @@
 
 #include "stdafx_client.h"
 #include <pragma/entities/components/base_player_component.hpp>
+#include "pragma/console/c_cvar_global_functions.h"
 #include <pragma/console/sh_cmd.h>
 #include <pragma/physics/phys_water_surface_simulator.hpp>
 #include <image/prosper_render_target.hpp>
@@ -11,21 +12,15 @@
 #include <pragma/physics/raytraces.h>
 #include <pragma/entities/entity_component_system_t.hpp>
 
-import pragma.client.debug;
-import pragma.client.entities.components;
-import pragma.client.game;
-import pragma.client.gui;
-import pragma.client.model;
-import pragma.client.physics;
+import pragma.client;
 
-extern CGame *c_game;
 
 void Console::commands::debug_water(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 
 	static std::unique_ptr<DebugGameGUI> dbg = nullptr;
 	dbg = nullptr;
-	if(c_game == nullptr || pl == nullptr)
+	if(pragma::get_cgame() == nullptr || pl == nullptr)
 		return;
 	auto charComponent = pl->GetEntity().GetCharacterComponent();
 	auto ents = command::find_target_entity(state, *charComponent, argv, [](TraceData &trData) { trData.SetCollisionFilterMask(trData.GetCollisionFilterGroup() | CollisionMask::Water | CollisionMask::WaterSurface); });
@@ -81,7 +76,7 @@ void Console::commands::debug_water(NetworkState *state, pragma::BasePlayerCompo
 				if(hWater.valid() == false)
 					return;
 				auto *entWater = static_cast<CFuncWater *>(hWater.get());
-				auto *cam = c_game->GetRenderCamera<pragma::CCameraComponent>();
+				auto *cam = pragma::get_cgame()->GetRenderCamera<pragma::CCameraComponent>();
 				// Update debug depth GUI element
 				if(hDepthTex.IsValid() && cam != nullptr) {
 					auto *pDepthTex = static_cast<WIDebugDepthTexture *>(hDepthTex.get());

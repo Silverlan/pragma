@@ -10,15 +10,11 @@ module;
 #include <algorithm>
 #include <udm.hpp>
 
-module pragma.client.audio;
+module pragma.client;
 
-import :sound_script;
-
-import pragma.client.client_state;
-import pragma.client.engine;
-
-extern CEngine *c_engine;
-extern ClientState *client;
+import :audio.sound_script;
+import :client_state;
+import :engine;
 
 #undef CreateEvent
 
@@ -42,15 +38,15 @@ SSESound *CSSEPlaySound::CreateSound(double tStart, const std::function<std::sha
 		cs->AddEffect(*effect);
 	return s;
 }
-void CSSEPlaySound::PrecacheSound(const char *name) { client->PrecacheSound(name, GetChannel()); }
+void CSSEPlaySound::PrecacheSound(const char *name) { pragma::get_client_state()->PrecacheSound(name, GetChannel()); }
 void CSSEPlaySound::Initialize(udm::LinkedPropertyWrapper &prop)
 {
 	SSEPlaySound::Initialize(prop);
 	std::string dsp;
 	prop["dsp"](dsp);
 	if(dsp.empty() == false)
-		m_dspEffect = c_engine->GetAuxEffect(dsp);
-	auto *soundSys = c_engine->GetSoundSystem();
+		m_dspEffect = pragma::get_cengine()->GetAuxEffect(dsp);
+	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
 	if(soundSys == nullptr)
 		return;
 	for(auto &type : al::get_aux_types()) {

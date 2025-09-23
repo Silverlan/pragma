@@ -19,20 +19,19 @@ module;
 #include <cmaterial_manager2.hpp>
 #include <texturemanager/texture_manager2.hpp>
 
-module pragma.client.assets;
-import pragma.client.client_state;
-import pragma.client.engine;
-import pragma.client.game;
+module pragma.client;
 
-import :fbx_loader;
+import :assets.fbx_loader;
+
+import :assets;
+import :client_state;
+import :engine;
+import :game;
 
 import panima;
-import pragma.client.rendering.shaders;
+import :rendering.shaders;
 
 using namespace pragma::asset::fbx;
-extern CGame *c_game;
-extern ClientState *client;
-extern CEngine *c_engine;
 
 static std::string_view to_string_view(ofbx::DataView data) { return std::string_view {(const char *)data.begin, (const char *)data.end}; }
 
@@ -43,7 +42,7 @@ static std::shared_ptr<prosper::Texture> load_texture_image(const std::string &m
 		fullTexFilePath = mdlPath + fullTexFilePath;
 	auto ext = fullTexFilePath.GetFileExtension();
 	if(ext && (*ext == "dds" || *ext == "ktx")) {
-		auto &texManager = static_cast<msys::CMaterialManager &>(client->GetMaterialManager()).GetTextureManager();
+		auto &texManager = static_cast<msys::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager()).GetTextureManager();
 		auto tex = texManager.LoadAsset(fullTexFilePath.GetString(), util::AssetLoadFlags::AbsolutePath | util::AssetLoadFlags::DontCache | util::AssetLoadFlags::IgnoreCache);
 		if(!tex)
 			return nullptr;
@@ -59,11 +58,11 @@ static std::shared_ptr<prosper::Texture> load_texture_image(const std::string &m
 	if(!imgBuf)
 		return nullptr;
 	imgBuf->SwapChannels(uimg::Channel::Red, uimg::Channel::Blue);
-	auto img = c_engine->GetRenderContext().CreateImage(*imgBuf);
+	auto img = pragma::get_cengine()->GetRenderContext().CreateImage(*imgBuf);
 	prosper::util::TextureCreateInfo texCreateInfo {};
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
 	prosper::util::SamplerCreateInfo samplerCreateInfo {};
-	return c_engine->GetRenderContext().CreateTexture(texCreateInfo, *img, imgViewCreateInfo, samplerCreateInfo);
+	return pragma::get_cengine()->GetRenderContext().CreateTexture(texCreateInfo, *img, imgViewCreateInfo, samplerCreateInfo);
 }
 
 static std::optional<std::string> import_texture(const std::string &mdlPath, const std::string &mdlName, const std::string &texPath, bool isAbsPath)
@@ -107,7 +106,7 @@ static std::optional<std::string> import_texture(const std::string &mdlPath, con
 	fullOutputPath += util::DirPath(mdlName);
 	auto outputFilePath = fullOutputPath + texFileName;
 	outputFilePath.RemoveFileExtension(importExtensions);
-	auto res = c_game->SaveImage(*img, outputFilePath.GetString(), texInfo);
+	auto res = pragma::get_cgame()->SaveImage(*img, outputFilePath.GetString(), texInfo);
 	return res ? outputFilePath.GetString() : std::optional<std::string> {};
 }
 
@@ -200,7 +199,7 @@ std::optional<uint32_t> FbxImporter::LoadMaterial(const ofbx::Material &fbxMat, 
 	auto relMatPath = matFilePath;
 	relMatPath.MakeRelative(util::CONVERT_PATH);
 	relMatPath.MakeRelative(std::string {pragma::asset::get_asset_root_directory(pragma::asset::Type::Material)});
-	auto mat = client->CreateMaterial(relMatPath.GetString(), "pbr");
+	auto mat = pragma::get_client_state()->CreateMaterial(relMatPath.GetString(), "pbr");
 	auto *cmat = static_cast<CMaterial *>(mat.get());
 
 	auto importAndAssignTexture = [&importTexture, cmat](ofbx::Texture::TextureType etex, const std::string &matIdentifier) -> std::optional<std::string> {
@@ -230,8 +229,8 @@ std::optional<uint32_t> FbxImporter::LoadMaterial(const ofbx::Material &fbxMat, 
 	//dataBlock->AddValue("float", "roughness_factor", std::to_string(pbrMetallicRoughness.roughnessFactor));
 	//dataBlock->AddValue("float", "metalness_factor", std::to_string(pbrMetallicRoughness.metallicFactor));
 
-	auto *combine = static_cast<pragma::ShaderCombineImageChannels *>(c_engine->GetShader("combine_image_channels").get());
-	auto *rma = static_cast<pragma::ShaderSpecularGlossinessToMetalnessRoughness *>(c_engine->GetShader("specular_glossiness_to_metalness_roughness").get());
+	auto *combine = static_cast<pragma::ShaderCombineImageChannels *>(pragma::get_cengine()->GetShader("combine_image_channels").get());
+	auto *rma = static_cast<pragma::ShaderSpecularGlossinessToMetalnessRoughness *>(pragma::get_cengine()->GetShader("specular_glossiness_to_metalness_roughness").get());
 	if(combine && rma) {
 		auto specularMap = loadTexture(ofbx::Texture::TextureType::SPECULAR);
 		auto shininessMap = loadTexture(ofbx::Texture::TextureType::SHININESS);
@@ -239,7 +238,7 @@ std::optional<uint32_t> FbxImporter::LoadMaterial(const ofbx::Material &fbxMat, 
 		auto reflectionMap = loadTexture(ofbx::Texture::TextureType::REFLECTION); // TODO
 
 		if(specularMap || shininessMap || ambientMap) {
-			auto tex = static_cast<msys::CMaterialManager &>(client->GetMaterialManager()).GetTextureManager().LoadAsset("white");
+			auto tex = static_cast<msys::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager()).GetTextureManager().LoadAsset("white");
 			if(tex) {
 				auto whiteMap = tex->GetVkTexture();
 				if(!specularMap)
@@ -247,13 +246,13 @@ std::optional<uint32_t> FbxImporter::LoadMaterial(const ofbx::Material &fbxMat, 
 				if(!shininessMap)
 					shininessMap = whiteMap;
 
-				auto &context = c_engine->GetRenderContext();
+				auto &context = pragma::get_cengine()->GetRenderContext();
 				pragma::ShaderCombineImageChannels::PushConstants pushConstants {};
 				pushConstants.alphaChannel = umath::to_integral(uimg::Channel::Red);
 				auto specularGlossinessMap = combine->CombineImageChannels(context, *specularMap, *specularMap, *specularMap, *shininessMap, pushConstants);
 				if(specularGlossinessMap) {
 					pragma::ShaderSpecularGlossinessToMetalnessRoughness::PushConstants pushConstants {};
-					auto metallicRoughnessSet = rma->ConvertToMetalnessRoughness(c_engine->GetRenderContext(), nullptr, specularGlossinessMap.get(), pushConstants, ambientMap.get());
+					auto metallicRoughnessSet = rma->ConvertToMetalnessRoughness(pragma::get_cengine()->GetRenderContext(), nullptr, specularGlossinessMap.get(), pushConstants, ambientMap.get());
 					if(metallicRoughnessSet.has_value()) {
 						auto texPath = matFilePath;
 						texPath.MakeRelative(util::CONVERT_PATH);
@@ -277,7 +276,7 @@ std::optional<std::string> FbxImporter::Finalize(std::string &outErr)
 	m_model->Update(ModelUpdateFlags::All);
 	std::string mdlPath = m_mdlName;
 	auto fullMdlPath = util::FilePath(::util::CONVERT_PATH, pragma::asset::get_asset_root_directory(pragma::asset::Type::Model), m_outputPath, mdlPath);
-	if(!m_model->Save(*c_game, fullMdlPath.GetString(), outErr)) {
+	if(!m_model->Save(*pragma::get_cgame(), fullMdlPath.GetString(), outErr)) {
 		Con::cerr << "Error saving model: " << outErr << Con::endl;
 		return {};
 	}
@@ -507,11 +506,11 @@ bool FbxImporter::LoadMeshes(std::string &outErr)
 		umath::ScaledTransform pose {transformMatrix};
 		auto scale = pose.GetScale();
 		pose.SetScale(uvec::IDENTITY_SCALE);
-		auto mesh = c_game->CreateModelMesh();
+		auto mesh = pragma::get_cgame()->CreateModelMesh();
 		for(int partition_idx = 0; partition_idx < geom.getPartitionCount(); ++partition_idx) {
 			const ofbx::GeometryPartition &partition = geom.getPartition(partition_idx);
 
-			auto subMesh = c_game->CreateModelSubMesh();
+			auto subMesh = pragma::get_cgame()->CreateModelSubMesh();
 			auto &verts = subMesh->GetVertices();
 
 			auto *mat = (fbxMesh.getMaterialCount() > 0) ? fbxMesh.getMaterial(partition_idx) : nullptr;
@@ -1047,7 +1046,7 @@ bool FbxImporter::LoadAnimations(std::string &outErr)
 
 std::optional<pragma::asset::AssetImportResult> FbxImporter::Load(std::string &outErr)
 {
-	auto mdl = c_game->CreateModel(false);
+	auto mdl = pragma::get_cgame()->CreateModel(false);
 	m_model = mdl;
 	mdl->GetBaseMeshes() = {0u};
 	mdl->CreateTextureGroup();

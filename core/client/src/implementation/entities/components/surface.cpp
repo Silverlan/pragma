@@ -6,8 +6,10 @@ module;
 #include "stdafx_client.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
-module pragma.client.entities.components.surface;
+module pragma.client;
 
+
+import :entities.components.surface;
 using namespace pragma;
 
 void CSurfaceComponent::ReceiveData(NetPacket &packet) { m_plane = packet->Read<Vector4>(); }

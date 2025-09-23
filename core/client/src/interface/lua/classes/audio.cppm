@@ -10,9 +10,8 @@ module;
 #include "alsound_effect.hpp"
 #include "alsound_buffer.hpp"
 
-export module pragma.client.scripting.lua.bindings.audio;
-
-import pragma.client.audio;
+export module pragma.client:scripting.lua.bindings.audio;
+import :audio;
 import se_script;
 
 export namespace pragma::scripting::lua::bindings {

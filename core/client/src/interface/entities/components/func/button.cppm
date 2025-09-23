@@ -6,9 +6,9 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/func/basefuncbutton.h"
 
-import pragma.entities.components;
+export module pragma.client:entities.components.func_button;
 
-export module pragma.client.entities.components.func_button;
+import :entities.base_entity;
 
 export {
 	namespace pragma {

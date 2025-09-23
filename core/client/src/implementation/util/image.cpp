@@ -10,11 +10,12 @@ module;
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_context.hpp>
 
-module pragma.client.util.image;
+module pragma.client;
 
-import pragma.client.engine;
 
-extern CEngine *c_engine;
+import :util.image;
+import :engine;
+
 static uimg::Format determine_target_format(prosper::Format format)
 {
 	auto targetFormat = uimg::Format::RGBA8;

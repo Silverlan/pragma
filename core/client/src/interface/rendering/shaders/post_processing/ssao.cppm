@@ -6,8 +6,9 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <shader/prosper_shader_base_image_processing.hpp>
 
-export module pragma.client.rendering.shaders:ssao;
+export module pragma.client:rendering.shaders.ssao;
 
+export namespace pragma {class CSceneComponent;};
 export namespace pragma {
 	class DLLCLIENT ShaderSSAO : public prosper::ShaderBaseImageProcessing {
 	  public:

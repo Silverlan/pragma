@@ -7,7 +7,7 @@ module;
 #include <pragma/audio/soundscript.h>
 #include <alsound_effect.hpp>
 
-export module pragma.client.audio:sound_script;
+export module pragma.client:audio.sound_script;
 
 export {
 	class DLLCLIENT CSSEPlaySound : public SSEPlaySound {

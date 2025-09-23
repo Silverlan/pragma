@@ -44,18 +44,15 @@ module;
 #include "cmaterialmanager.h"
 #include <wgui/types/wirect.h>
 
-module pragma.client.entities.components.light_map;
+module pragma.client;
 
-import pragma.client.client_state;
-import pragma.client.engine;
-import pragma.client.entities.components;
-import pragma.client.game;
-import pragma.client.gui;
-import pragma.client.model;
+import :entities.components.light_map;
+import :client_state;
+import :engine;
+import :game;
+import :gui;
+import :model;
 
-extern CGame *c_game;
-extern ClientState *client;
-extern CEngine *c_engine;
 
 using namespace pragma;
 spdlog::logger &CLightMapComponent::LOGGER = pragma::register_logger("lightmap");
@@ -101,7 +98,7 @@ void CLightMapComponent::InitializeLightMapData(const std::shared_ptr<prosper::T
 	m_meshLightMapUvBuffer = lightMapUvBuffer;
 	m_meshLightMapUvBuffers = meshUvBuffers;
 
-	EntityIterator entIt {*c_game, EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
+	EntityIterator entIt {*pragma::get_cgame(), EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CLightMapReceiverComponent>>();
 	for(auto *ent : entIt) {
 		auto lightMapReceiverC = ent->GetComponent<pragma::CLightMapReceiverComponent>();
@@ -128,7 +125,7 @@ void CLightMapComponent::InitializeFromMaterial()
 		LOGGER.warn("No lightmap material specified!");
 		return;
 	}
-	auto *mat = client->LoadMaterial(m_lightMapMaterialName);
+	auto *mat = pragma::get_client_state()->LoadMaterial(m_lightMapMaterialName);
 	if(!mat) {
 		LOGGER.error("Unable to load lightmap material '{}'!", m_lightMapMaterialName);
 		return;
@@ -179,7 +176,7 @@ bool CLightMapComponent::HasValidLightMap() const { return m_textures[umath::to_
 void CLightMapComponent::SetLightMapMaterial(const std::string &matName)
 {
 	m_lightMapMaterialName = matName;
-	client->PrecacheMaterial(m_lightMapMaterialName);
+	pragma::get_client_state()->PrecacheMaterial(m_lightMapMaterialName);
 	if(GetEntity().IsSpawned())
 		InitializeFromMaterial();
 }
@@ -228,7 +225,7 @@ void CLightMapComponent::UpdateLightmapUvBuffers()
 	auto *cache = GetLightmapDataCache();
 
 	auto &uvBuffers = GetMeshLightMapUvBuffers();
-	EntityIterator entIt {*c_game, EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
+	EntityIterator entIt {*pragma::get_cgame(), EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CLightMapReceiverComponent>>();
 	for(auto *ent : entIt) {
 		auto lightMapReceiverC = ent->GetComponent<pragma::CLightMapReceiverComponent>();
@@ -258,11 +255,11 @@ std::shared_ptr<prosper::IDynamicResizableBuffer> CLightMapComponent::GenerateLi
 	prosper::util::BufferCreateInfo bufCreateInfo {};
 	bufCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	bufCreateInfo.usageFlags = prosper::BufferUsageFlags::VertexBufferBit | prosper::BufferUsageFlags::TransferSrcBit | prosper::BufferUsageFlags::TransferDstBit; // Transfer flags are required for mapping GPUBulk buffers
-	auto alignment = c_engine->GetRenderContext().CalcBufferAlignment(bufCreateInfo.usageFlags);
+	auto alignment = pragma::get_cengine()->GetRenderContext().CalcBufferAlignment(bufCreateInfo.usageFlags);
 	auto requiredBufferSize = 0ull;
 
 	// Collect all meshes that have lightmap uv coordinates
-	EntityIterator entIt {*c_game, EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
+	EntityIterator entIt {*pragma::get_cgame(), EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CLightMapReceiverComponent>>();
 
 	// Calculate required buffer size
@@ -284,7 +281,7 @@ std::shared_ptr<prosper::IDynamicResizableBuffer> CLightMapComponent::GenerateLi
 
 	// Generate the lightmap uv buffer
 	bufCreateInfo.size = requiredBufferSize;
-	auto lightMapUvBuffer = c_engine->GetRenderContext().CreateDynamicResizableBuffer(bufCreateInfo, bufCreateInfo.size, 0.2f);
+	auto lightMapUvBuffer = pragma::get_cengine()->GetRenderContext().CreateDynamicResizableBuffer(bufCreateInfo, bufCreateInfo.size, 0.2f);
 	if(!lightMapUvBuffer) {
 		LOGGER.error("Unable to create lightmap uv buffer!");
 		return nullptr;
@@ -324,19 +321,19 @@ std::shared_ptr<prosper::Texture> CLightMapComponent::CreateLightmapTexture(uimg
 	lightMapCreateInfo.usage = prosper::ImageUsageFlags::TransferSrcBit;
 	lightMapCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::HostCoherent | prosper::MemoryFeatureFlags::HostAccessable;
 	lightMapCreateInfo.tiling = prosper::ImageTiling::Linear;
-	auto imgStaging = c_engine->GetRenderContext().CreateImage(lightMapCreateInfo, static_cast<const uint8_t *>(imgBuf.GetData()));
+	auto imgStaging = pragma::get_cengine()->GetRenderContext().CreateImage(lightMapCreateInfo, static_cast<const uint8_t *>(imgBuf.GetData()));
 
 	lightMapCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	lightMapCreateInfo.tiling = prosper::ImageTiling::Optimal;
 	lightMapCreateInfo.postCreateLayout = prosper::ImageLayout::TransferDstOptimal;
 	lightMapCreateInfo.usage = prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::TransferDstBit;
-	auto img = c_engine->GetRenderContext().CreateImage(lightMapCreateInfo);
+	auto img = pragma::get_cengine()->GetRenderContext().CreateImage(lightMapCreateInfo);
 
-	auto &setupCmd = c_engine->GetSetupCommandBuffer();
+	auto &setupCmd = pragma::get_cengine()->GetSetupCommandBuffer();
 	if(setupCmd->RecordBlitImage({}, *imgStaging, *img) == false)
 		; // TODO: Print warning
 	setupCmd->RecordImageBarrier(*img, prosper::ImageLayout::TransferDstOptimal, prosper::ImageLayout::ShaderReadOnlyOptimal);
-	c_engine->FlushSetupCommandBuffer();
+	pragma::get_cengine()->FlushSetupCommandBuffer();
 
 	prosper::util::SamplerCreateInfo samplerCreateInfo {};
 	samplerCreateInfo.minFilter = prosper::Filter::Linear;
@@ -345,7 +342,7 @@ std::shared_ptr<prosper::Texture> CLightMapComponent::CreateLightmapTexture(uimg
 	samplerCreateInfo.addressModeV = prosper::SamplerAddressMode::ClampToEdge;
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
 	imgViewCreateInfo.swizzleAlpha = prosper::ComponentSwizzle::One; // We don't use the alpha channel
-	return c_engine->GetRenderContext().CreateTexture({}, *img, imgViewCreateInfo, samplerCreateInfo);
+	return pragma::get_cengine()->GetRenderContext().CreateTexture({}, *img, imgViewCreateInfo, samplerCreateInfo);
 }
 
 static void generate_lightmap_uv_atlas(BaseEntity &ent, uint32_t width, uint32_t height, const std::function<void(bool)> &callback)
@@ -392,7 +389,7 @@ static void generate_lightmap_uv_atlas(BaseEntity &ent, uint32_t width, uint32_t
 
 	std::vector<Vector2> newLightmapUvs {};
 	newLightmapUvs.reserve(numVerts);
-	auto job = util::generate_lightmap_uvs(*client, width, height, verts, tris);
+	auto job = util::generate_lightmap_uvs(*pragma::get_client_state(), width, height, verts, tris);
 	if(job.IsValid() == false) {
 		callback(false);
 		return;
@@ -435,7 +432,7 @@ static void generate_lightmap_uv_atlas(BaseEntity &ent, uint32_t width, uint32_t
 		callback(true);
 	});
 	job.Start();
-	c_engine->AddParallelJob(job, "Lightmap UV Atlas");
+	pragma::get_cengine()->AddParallelJob(job, "Lightmap UV Atlas");
 }
 
 bool CLightMapComponent::ImportLightmapAtlas(uimg::ImageBuffer &imgBuffer)
@@ -457,10 +454,10 @@ bool CLightMapComponent::ImportLightmapAtlas(uimg::ImageBuffer &imgBuffer)
 	texInfo.flags = uimg::TextureInfo::Flags::GenerateMipmaps;
 	//	auto f = FileManager::OpenFile<VFilePtrReal>("materials/maps/sfm_gtav_mp_apa_06/lightmap_atlas.dds","wb");
 	//	if(f)
-	auto mapName = c_game->GetMapName();
+	auto mapName = pragma::get_cgame()->GetMapName();
 	Con::cout << "Lightmap atlas save result: " << uimg::save_texture("materials/maps/" + mapName + "/lightmap_atlas.dds", imgBuffer, texSaveInfo) << Con::endl;
 
-	EntityIterator entIt {*c_game};
+	EntityIterator entIt {*pragma::get_cgame()};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CLightMapComponent>>();
 	auto it = entIt.begin();
 	if(it == entIt.end())
@@ -500,7 +497,7 @@ static void generate_lightmaps(uint32_t width, uint32_t height, uint32_t sampleC
 	// sceneInfo.renderer = "luxcorerender";
 	sceneInfo.renderer = "cycles";
 
-	auto job = pragma::rendering::cycles::bake_lightmaps(*client, sceneInfo);
+	auto job = pragma::rendering::cycles::bake_lightmaps(*pragma::get_client_state(), sceneInfo);
 	if(sceneInfo.renderJob)
 		return;
 	if(job.IsValid() == false) {
@@ -522,7 +519,7 @@ static void generate_lightmaps(uint32_t width, uint32_t height, uint32_t sampleC
 		CLightMapComponent::ImportLightmapAtlas(*imgBuffer);
 	});
 	job.Start();
-	c_engine->AddParallelJob(job, "Baked lightmaps");
+	pragma::get_cengine()->AddParallelJob(job, "Baked lightmaps");
 }
 
 bool CLightMapComponent::ImportLightmapAtlas(VFilePtr fp)
@@ -543,7 +540,7 @@ bool CLightMapComponent::ImportLightmapAtlas(const std::string &path)
 
 bool CLightMapComponent::BakeLightmaps(const LightmapBakeSettings &bakeSettings)
 {
-	EntityIterator entIt {*c_game};
+	EntityIterator entIt {*pragma::get_cgame()};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CLightMapComponent>>();
 	auto it = entIt.begin();
 	if(it == entIt.end()) {
@@ -553,7 +550,7 @@ bool CLightMapComponent::BakeLightmaps(const LightmapBakeSettings &bakeSettings)
 	auto *ent = *it;
 	auto lightmapC = ent->GetComponent<pragma::CLightMapComponent>();
 
-	//auto resolution = c_engine->GetRenderResolution();
+	//auto resolution = pragma::get_cengine()->GetRenderResolution();
 	auto &lightMap = lightmapC->GetLightMap();
 	Vector2i resolution {2'048, 2'048};
 	if(lightMap) {
@@ -605,7 +602,7 @@ void Console::commands::map_rebuild_lightmaps(NetworkState *state, pragma::BaseP
 
 static void set_lightmap_texture(lua_State *l, pragma::CLightMapComponent &hLightMapC, const std::string &path, bool directional)
 {
-	auto *nw = c_engine->GetNetworkState(l);
+	auto *nw = pragma::get_cengine()->GetNetworkState(l);
 
 	auto &texManager = static_cast<msys::CMaterialManager &>(static_cast<ClientState *>(nw)->GetMaterialManager()).GetTextureManager();
 	auto texture = texManager.LoadAsset(path);
@@ -615,7 +612,7 @@ static void set_lightmap_texture(lua_State *l, pragma::CLightMapComponent &hLigh
 	if(vkTex == nullptr)
 		return;
 	prosper::util::SamplerCreateInfo samplerCreateInfo {};
-	auto sampler = c_engine->GetRenderContext().CreateSampler(samplerCreateInfo);
+	auto sampler = pragma::get_cengine()->GetRenderContext().CreateSampler(samplerCreateInfo);
 	vkTex->SetSampler(*sampler);
 	if(directional)
 		hLightMapC.SetDirectionalLightMapAtlas(vkTex);

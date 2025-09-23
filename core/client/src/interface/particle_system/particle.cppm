@@ -8,7 +8,7 @@ module;
 #include <mathutil/color.h>
 #include <random>
 
-export module pragma.client.particle_system:particle;
+export module pragma.client:particle_system.particle;
 
 export {
 	#pragma warning(push)

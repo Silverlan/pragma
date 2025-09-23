@@ -9,26 +9,25 @@ module;
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
 
-module pragma.client.particle_system;
+module pragma.client;
 
-import :renderer_rotational_buffer;
+import :particle_system.renderer_rotational_buffer;
 
-import pragma.client.client_state;
+import :client_state;
 
-extern CEngine *c_engine;
 
-void CParticleRendererRotationalBuffer::Initialize(pragma::CParticleSystemComponent &pSystem)
+void CParticleRendererRotationalBuffer::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem)
 {
-	m_hParticleSystem = pSystem.GetHandle<pragma::CParticleSystemComponent>();
+	m_hParticleSystem = pSystem.GetHandle<pragma::ecs::CParticleSystemComponent>();
 
-	auto maxParticles = pSystem.GetMaxParticleCount();
+	auto maxParticles = static_cast<pragma::ecs::CParticleSystemComponent&>(pSystem).GetMaxParticleCount();
 	m_rotations.resize(maxParticles);
 
 	prosper::util::BufferCreateInfo createInfo {};
 	createInfo.size = m_rotations.size() * sizeof(m_rotations.front());
 	createInfo.usageFlags = prosper::BufferUsageFlags::VertexBufferBit | prosper::BufferUsageFlags::TransferDstBit;
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
-	m_rotBuffer = c_engine->GetRenderContext().CreateBuffer(createInfo, m_rotations.data());
+	m_rotBuffer = pragma::get_cengine()->GetRenderContext().CreateBuffer(createInfo, m_rotations.data());
 }
 
 void CParticleRendererRotationalBuffer::SetRotationAlignVelocity(bool b) { m_bAlignVelocity = b; }
@@ -37,7 +36,7 @@ const std::shared_ptr<prosper::IBuffer> &CParticleRendererRotationalBuffer::GetB
 
 bool CParticleRendererRotationalBuffer::Update()
 {
-	//auto frameId = c_engine->GetRenderContext().GetLastFrameId();
+	//auto frameId = pragma::get_cengine()->GetRenderContext().GetLastFrameId();
 	if(/*frameId == m_lastFrameUpdate || */ m_hParticleSystem.expired())
 		return false;
 	//m_lastFrameUpdate = frameId;
@@ -69,7 +68,7 @@ bool CParticleRendererRotationalBuffer::Update()
 				m_rotations.at(i) = Quat {0.f, vel.x, vel.y, vel.z};
 			}
 		}
-		c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_rotBuffer, 0ull, numParticles * sizeof(m_rotations.front()), m_rotations.data());
+		pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_rotBuffer, 0ull, numParticles * sizeof(m_rotations.front()), m_rotations.data());
 	}
 	return true;
 }

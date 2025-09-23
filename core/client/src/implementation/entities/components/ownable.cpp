@@ -6,8 +6,10 @@ module;
 #include "stdafx_client.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
-module pragma.client.entities.components.ownable;
+module pragma.client;
 
+
+import :entities.components.ownable;
 using namespace pragma;
 
 void COwnableComponent::ReceiveData(NetPacket &packet) { SetOwner(nwm::read_entity(packet)); }

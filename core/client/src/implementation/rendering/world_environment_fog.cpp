@@ -6,8 +6,10 @@ module;
 #include "stdafx_client.h"
 #include <sharedutils/property/util_property_color.hpp>
 
-module pragma.client.rendering.world_environment;
+module pragma.client;
 
+
+import :rendering.world_environment;
 WorldEnvironment::Fog::Fog()
 {
 	m_color = std::make_shared<util::ColorProperty>(Color::White);

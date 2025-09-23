@@ -11,27 +11,27 @@ module;
 #include "pragma/entities/environment/env_quake.h"
 #include <pragma/entities/entity_component_system_t.hpp>
 
-module pragma.client.entities.components.effects.explosion;
+module pragma.client;
 
-import pragma.client.client_state;
-import pragma.client.engine;
-import pragma.client.entities.components.attachment;
-import pragma.client.entities.components.env_quake;
-import pragma.client.entities.components.io;
-import pragma.client.entities.components.particle_system;
-import pragma.client.entities.components.sound_emitter;
-import pragma.client.game;
+
+import :entities.components.effects.explosion;
+import :client_state;
+import :engine;
+import :entities.components.attachment;
+import :entities.components.env_quake;
+import :entities.components.io;
+import :entities.components.particle_system;
+import :entities.components.sound_emitter;
+import :game;
 
 using namespace pragma;
 
-extern ClientState *client;
-extern CGame *c_game;
 
 void CExplosionComponent::Initialize()
 {
 	BaseEnvExplosionComponent::Initialize();
 	pragma::ecs::CParticleSystemComponent::Precache("explosion");
-	client->LoadSoundScripts("fx.udm");
+	pragma::get_client_state()->LoadSoundScripts("fx.udm");
 }
 
 void CExplosionComponent::Explode()
@@ -54,7 +54,7 @@ void CExplosionComponent::Explode()
 	if(pSoundEmitterComponent.valid())
 		pSoundEmitterComponent->EmitSound("fx.explosion", ALSoundType::Effect, 1.f);
 	auto radius = 500.f;
-	auto *entQuake = c_game->CreateEntity<CEnvQuake>();
+	auto *entQuake = pragma::get_cgame()->CreateEntity<CEnvQuake>();
 	if(entQuake != nullptr) {
 		auto *pQuakeComponent = static_cast<pragma::CQuakeComponent *>(entQuake->FindComponent("quake").get());
 		if(pQuakeComponent != nullptr) {

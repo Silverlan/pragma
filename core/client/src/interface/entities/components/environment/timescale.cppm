@@ -7,7 +7,10 @@ module;
 #include "pragma/entities/environment/env_timescale.h"
 #include <memory>
 
-export module pragma.client.entities.components.env_timescale;
+export module pragma.client:entities.components.env_timescale;
+
+import :entities.base_entity;
+import :entities.components.entity;
 
 export {
 	namespace pragma {

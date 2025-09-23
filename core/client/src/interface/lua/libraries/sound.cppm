@@ -7,8 +7,7 @@ module;
 #include "pragma/lua/c_ldefinitions.h"
 #include "pragma/lua/libraries/lsound.h"
 
-export module pragma.client.scripting.lua.libraries.sound;
-
+export module pragma.client:scripting.lua.libraries.sound;
 export namespace Lua {
 	namespace sound {
 		DLLCLIENT int register_aux_effect(lua_State *l);

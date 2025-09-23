@@ -9,7 +9,9 @@ module;
 #include <array>
 #include <set>
 
-export module pragma.client.rendering.gpu_profiler;
+export module pragma.client:rendering.gpu_profiler;
+
+import :rendering.gpu_swapchain_timer;
 
 export namespace pragma {
 	namespace debug {

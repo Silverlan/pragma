@@ -13,15 +13,15 @@ module;
 #include <image/prosper_texture.hpp>
 #include <random>
 
-module pragma.client.rendering.shaders;
+module pragma.client;
 
-import :merge_images;
 
-import pragma.client.engine;
+import :rendering.shaders.merge_images;
+
+import :engine;
 
 using namespace pragma;
 
-extern CEngine *c_engine;
 
 decltype(ShaderMergeImages::DESCRIPTOR_SET_TEXTURE_2D) ShaderMergeImages::DESCRIPTOR_SET_TEXTURE_2D = {
   "TEXTURE2",

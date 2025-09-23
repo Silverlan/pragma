@@ -5,12 +5,13 @@ module;
 
 #include "stdafx_client.h"
 
-module pragma.client.rendering.shaders;
+module pragma.client;
 
-import :particle_blob_shadow;
 
-import pragma.client.engine;
-import pragma.client.game;
+import :rendering.shaders.particle_blob_shadow;
+
+import :engine;
+import :game;
 
 // prosper TODO
 #if 0
@@ -20,7 +21,6 @@ using namespace Shader;
 
 LINK_SHADER_TO_CLASS(ParticleBlobShadow,particleblobshadow);
 
-extern CGame *c_game;
 
 ParticleBlobShadow::ParticleBlobShadow()
 	: ParticleShadowBase<ParticleBase>("ParticleBlobShadow","programs/particles/blob/particle_blob_shadow","programs/particles/blob/particle_blob_shadow")
@@ -67,7 +67,7 @@ bool ParticleBlobShadow::BeginDraw(Vulkan::CommandBufferObject *cmdBuffer,const 
 	auto &context = *m_context.get();
 	auto &layout = GetPipeline()->GetPipelineLayout();
 
-	auto &cam = *c_game->GetRenderCamera<pragma::CCameraComponent>();
+	auto &cam = *pragma::get_cgame()->GetRenderCamera<pragma::CCameraComponent>();
 	auto &drawCmd = context.GetDrawCmd();
 
 	// Bind particle buffer

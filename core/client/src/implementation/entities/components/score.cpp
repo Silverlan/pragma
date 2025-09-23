@@ -6,8 +6,10 @@ module;
 #include "stdafx_client.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
-module pragma.client.entities.components.score;
+module pragma.client;
 
+
+import :entities.components.score;
 using namespace pragma;
 
 void CScoreComponent::ReceiveData(NetPacket &packet) { *m_score = packet->Read<Score>(); }

@@ -6,8 +6,10 @@ module;
 #include <pragma/logging.hpp>
 #include <mpParser.h>
 
-module pragma.client.rendering.shader_input_data;
+module pragma.client;
 
+
+import :rendering.shader_input_data;
 using namespace pragma::rendering;
 
 static spdlog::logger &LOGGER = pragma::register_logger("shader");

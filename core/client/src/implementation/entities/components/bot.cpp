@@ -12,15 +12,16 @@ module;
 #include <pragma/entities/components/velocity_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
-module pragma.client.entities.components.bot;
+module pragma.client;
 
-import pragma.client.client_state;
-import pragma.client.entities.components.animated;
-import pragma.client.entities.components.sound_emitter;
+
+import :entities.components.bot;
+import :client_state;
+import :entities.components.animated;
+import :entities.components.sound_emitter;
 
 using namespace pragma;
 
-extern ClientState *client;
 
 void CBotComponent::Initialize()
 {

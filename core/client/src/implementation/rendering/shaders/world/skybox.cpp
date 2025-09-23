@@ -11,17 +11,17 @@ module;
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <cmaterial.h>
 
-module pragma.client.rendering.shaders;
+module pragma.client;
 
-import :world_skybox;
 
-import pragma.client.engine;
-import pragma.client.entities.components;
-import pragma.client.model;
+import :rendering.shaders.world_skybox;
+
+import :engine;
+import :entities.components;
+import :model;
 
 using namespace pragma;
 
-extern CEngine *c_engine;
 
 decltype(ShaderSkybox::VERTEX_BINDING_VERTEX) ShaderSkybox::VERTEX_BINDING_VERTEX = {prosper::VertexInputRate::Vertex, sizeof(VertexBufferData)};
 decltype(ShaderSkybox::VERTEX_ATTRIBUTE_POSITION) ShaderSkybox::VERTEX_ATTRIBUTE_POSITION = {ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_POSITION, VERTEX_BINDING_VERTEX};

@@ -6,7 +6,7 @@
 #include "pragma/debug/debug_render_info.hpp"
 #include <pragma/networking/nwm_util.h>
 
-import pragma.client.debug;
+import pragma.client;
 
 void NET_cl_debug_drawpoint(NetPacket packet)
 {

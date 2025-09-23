@@ -8,13 +8,14 @@ module;
 #include <queries/prosper_pipeline_statistics_query.hpp>
 #include <prosper_command_buffer.hpp>
 
-module pragma.client.rendering.gpu_profiler;
+module pragma.client;
 
-import pragma.client.engine;
+
+import :rendering.gpu_profiler;
+import :engine;
 
 using namespace pragma::debug;
 
-extern CEngine *c_engine;
 
 std::shared_ptr<GPUSwapchainTimer> GPUSwapchainTimer::Create(prosper::IQueryPool &timerQueryPool, prosper::IQueryPool &statsQueryPool, prosper::PipelineStageFlags stage) { return std::shared_ptr<GPUSwapchainTimer>(new GPUSwapchainTimer {timerQueryPool, statsQueryPool, stage}); }
 GPUSwapchainTimer::GPUSwapchainTimer(prosper::IQueryPool &timerQueryPool, prosper::IQueryPool &statsQueryPool, prosper::PipelineStageFlags stage) : m_stage {stage}, m_wpTimerQueryPool {timerQueryPool.shared_from_this()}, m_wpStatsQueryPool {statsQueryPool.shared_from_this()} {}
@@ -37,7 +38,7 @@ bool GPUSwapchainTimer::Start()
 	auto *pStatsQuery = GetStatisticsQuery();
 	if(pTimerQuery == nullptr || pStatsQuery == nullptr)
 		return false;
-	auto &drawCmd = c_engine->GetDrawCommandBuffer();
+	auto &drawCmd = pragma::get_cengine()->GetDrawCommandBuffer();
 	auto r = pTimerQuery->Begin(*drawCmd) && pStatsQuery->RecordBegin(*drawCmd);
 	if(r == true)
 		m_bHasStartedAtLeastOnce = true;
@@ -49,7 +50,7 @@ bool GPUSwapchainTimer::Stop()
 	auto *pStatsQuery = GetStatisticsQuery();
 	if(pTimerQuery == nullptr || pStatsQuery == nullptr)
 		return false;
-	auto &drawCmd = c_engine->GetDrawCommandBuffer();
+	auto &drawCmd = pragma::get_cengine()->GetDrawCommandBuffer();
 	return pTimerQuery->End(*drawCmd) && pStatsQuery->RecordEnd(*drawCmd);
 }
 bool GPUSwapchainTimer::Reset()
@@ -58,7 +59,7 @@ bool GPUSwapchainTimer::Reset()
 	auto *pStatsQuery = GetStatisticsQuery();
 	if(pTimerQuery == nullptr || pStatsQuery == nullptr)
 		return false;
-	auto &drawCmd = c_engine->GetDrawCommandBuffer();
+	auto &drawCmd = pragma::get_cengine()->GetDrawCommandBuffer();
 	return pTimerQuery->Reset(*drawCmd) && pStatsQuery->Reset(*drawCmd);
 }
 std::unique_ptr<ProfilerResult> GPUSwapchainTimer::GetResult() const
@@ -72,7 +73,7 @@ std::unique_ptr<ProfilerResult> GPUSwapchainTimer::GetResult() const
 prosper::TimerQuery *GPUSwapchainTimer::GetTimerQuery()
 {
 	InitializeQueries();
-	auto index = c_engine->GetRenderContext().GetLastAcquiredPrimaryWindowSwapchainImageIndex();
+	auto index = pragma::get_cengine()->GetRenderContext().GetLastAcquiredPrimaryWindowSwapchainImageIndex();
 	if(index >= m_swapchainTimers.size())
 		return nullptr;
 	return m_swapchainTimers.at(index).timerQuery.get();
@@ -81,7 +82,7 @@ prosper::TimerQuery *GPUSwapchainTimer::GetTimerQuery()
 prosper::PipelineStatisticsQuery *GPUSwapchainTimer::GetStatisticsQuery()
 {
 	InitializeQueries();
-	auto index = c_engine->GetRenderContext().GetLastAcquiredPrimaryWindowSwapchainImageIndex();
+	auto index = pragma::get_cengine()->GetRenderContext().GetLastAcquiredPrimaryWindowSwapchainImageIndex();
 	if(index >= m_swapchainTimers.size())
 		return nullptr;
 	return m_swapchainTimers.at(index).statsQuery.get();
@@ -89,7 +90,7 @@ prosper::PipelineStatisticsQuery *GPUSwapchainTimer::GetStatisticsQuery()
 
 void GPUSwapchainTimer::InitializeQueries()
 {
-	auto index = c_engine->GetRenderContext().GetLastAcquiredPrimaryWindowSwapchainImageIndex();
+	auto index = pragma::get_cengine()->GetRenderContext().GetLastAcquiredPrimaryWindowSwapchainImageIndex();
 	if(index < m_swapchainTimers.size())
 		return;
 	auto timerPool = m_wpTimerQueryPool.lock();

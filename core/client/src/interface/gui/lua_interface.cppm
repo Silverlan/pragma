@@ -7,7 +7,7 @@ module;
 #include <wgui/wibase.h>
 #include "luasystem.h"
 
-export module pragma.client.gui:lua_interface;
+export module pragma.client:gui.lua_interface;
 
 export class DLLCLIENT WGUILuaInterface {
   private:

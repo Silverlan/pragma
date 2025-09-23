@@ -11,15 +11,14 @@ module;
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
-module pragma.client.entities.components.global_shader_input;
+module pragma.client;
 
-import pragma.client.client_state;
-import pragma.client.engine;
-import pragma.client.game;
 
-extern CGame *c_game;
-extern ClientState *client;
-extern CEngine *c_engine;
+import :entities.components.global_shader_input;
+import :client_state;
+import :engine;
+import :game;
+
 
 using namespace pragma;
 UdmPropertyList::UdmPropertyList() : m_properties {udm::Property::Create<udm::Element>()} {}
@@ -98,7 +97,7 @@ const std::string *UdmPropertyList::GetPropertyName(size_t index) const { return
 void CGlobalShaderInputComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts)
 {
 	// TODO: This should be moved to a more appropriate location
-	client->RegisterConCommand("debug_print_shader_input_properties", +[](NetworkState *nw, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv, float) { CGlobalShaderInputComponent::DebugPrintProperties(); });
+	pragma::get_client_state()->RegisterConCommand("debug_print_shader_input_properties", +[](NetworkState *nw, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv, float) { CGlobalShaderInputComponent::DebugPrintProperties(); });
 
 	auto def = pragma::lua::create_entity_component_class<pragma::CGlobalShaderInputComponent, pragma::BaseEntityComponent>("GlobalShaderInputComponent");
 	modEnts[def];
@@ -116,11 +115,11 @@ void CGlobalShaderInputComponent::RegisterMembers(pragma::EntityComponentManager
 
 void CGlobalShaderInputComponent::DebugPrintProperties()
 {
-	if(!c_game) {
+	if(!pragma::get_cgame()) {
 		Con::cwar << "No game instance available" << Con::endl;
 		return;
 	}
-	auto &inputDataManager = c_game->GetGlobalShaderInputDataManager();
+	auto &inputDataManager = pragma::get_cgame()->GetGlobalShaderInputDataManager();
 	auto &descriptor = inputDataManager.GetDescriptor();
 	auto &buf = inputDataManager.GetBuffer();
 	auto &propMap = descriptor.GetPropertyMap();
@@ -190,7 +189,7 @@ std::optional<ComponentMemberIndex> CGlobalShaderInputComponent::DoGetMemberInde
 	return std::optional<ComponentMemberIndex> {};
 }
 
-rendering::GlobalShaderInputDataManager &CGlobalShaderInputComponent::GetInputManager() { return c_game->GetGlobalShaderInputDataManager(); }
+rendering::GlobalShaderInputDataManager &CGlobalShaderInputComponent::GetInputManager() { return pragma::get_cgame()->GetGlobalShaderInputDataManager(); }
 
 void CGlobalShaderInputComponent::OnEntitySpawn()
 {
@@ -301,7 +300,7 @@ void CGlobalShaderInputComponent::UpdateMembers()
 				prop->defaultValue.Set(defVal);
 		});
 
-		c_game->GetGlobalShaderInputDataManager().AddProperty(std::move(prop));
+		pragma::get_cgame()->GetGlobalShaderInputDataManager().AddProperty(std::move(prop));
 		RegisterMember(std::move(memberInfo));
 	}
 
@@ -310,7 +309,7 @@ void CGlobalShaderInputComponent::UpdateMembers()
 
 void CGlobalShaderInputComponent::SyncShaderVarsToProperties()
 {
-	auto &inputManager = c_game->GetGlobalShaderInputDataManager();
+	auto &inputManager = pragma::get_cgame()->GetGlobalShaderInputDataManager();
 	auto &descriptor = inputManager.GetDescriptor();
 	for(auto &prop : descriptor.properties) {
 		auto idx = BaseEntityComponent::GetMemberIndex(prop->name);

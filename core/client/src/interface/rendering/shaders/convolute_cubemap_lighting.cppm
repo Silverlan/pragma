@@ -6,9 +6,9 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "prosper_descriptor_set_group.hpp"
 
-export module pragma.client.rendering.shaders:convolute_cubemap_lighting;
+export module pragma.client:rendering.shaders.convolute_cubemap_lighting;
 
-import :cubemap;
+import :rendering.shaders.cubemap;
 
 export namespace pragma {
 	class DLLCLIENT ShaderConvoluteCubemapLighting : public ShaderCubemap {

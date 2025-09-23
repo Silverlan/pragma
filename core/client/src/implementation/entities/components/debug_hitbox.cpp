@@ -7,12 +7,13 @@ module;
 #include "pragma/debug/debug_render_info.hpp"
 #include "pragma/entities/components/base_model_component.hpp"
 
-module pragma.client.entities.components.debug_hitbox;
+module pragma.client;
 
-import pragma.client.debug;
-import pragma.client.engine;
 
-extern CEngine *c_engine;
+import :entities.components.debug_hitbox;
+import :debug;
+import :engine;
+
 
 using namespace pragma;
 

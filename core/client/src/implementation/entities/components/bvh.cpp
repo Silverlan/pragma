@@ -6,13 +6,13 @@ module;
 #include "stdafx_client.h"
 #include "pragma/entities/entity_component_system_t.hpp"
 
-module pragma.client.entities.components.bvh;
+module pragma.client;
 
-import pragma.client.engine;
-import pragma.client.entities.components.animated;
-import pragma.client.entities.components.animated_bvh;
-
-extern CEngine *c_engine;
+import :engine;
+import :entities.components.animated;
+import :entities.components.animated_bvh;
+import :entities.components.bvh;
+import :entities.components.model;
 
 using namespace pragma;
 

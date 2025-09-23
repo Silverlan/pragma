@@ -10,13 +10,13 @@ module;
 #include <shader/prosper_shader_t.hpp>
 #include <prosper_descriptor_set_group.hpp>
 
-module pragma.client.rendering.shaders;
+module pragma.client;
 
-import :particle_base;
 
-import pragma.client.engine;
+import :rendering.shaders.particle_base;
 
-extern CEngine *c_engine;
+import :engine;
+
 
 using namespace pragma;
 
@@ -28,12 +28,12 @@ decltype(ShaderParticleBase::DESCRIPTOR_SET_ANIMATION) ShaderParticleBase::DESCR
     prosper::DescriptorSetInfo::Binding {"ANIMATION_DATA", prosper::DescriptorType::StorageBuffer, prosper::ShaderStageFlags::FragmentBit},
   },
 };
-prosper::IDescriptorSet &ShaderParticleBase::GetAnimationDescriptorSet(const pragma::CParticleSystemComponent &ps)
+prosper::IDescriptorSet &ShaderParticleBase::GetAnimationDescriptorSet(const pragma::ecs::CParticleSystemComponent &ps)
 {
-	auto *animDescSet = const_cast<pragma::CParticleSystemComponent &>(ps).GetAnimationDescriptorSet();
+	auto *animDescSet = const_cast<pragma::ecs::CParticleSystemComponent &>(ps).GetAnimationDescriptorSet();
 	if(animDescSet == nullptr) {
 		if(m_dummyAnimDescSetGroup == nullptr)
-			m_dummyAnimDescSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(GetAnimationDescriptorSetInfo());
+			m_dummyAnimDescSetGroup = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(GetAnimationDescriptorSetInfo());
 		animDescSet = m_dummyAnimDescSetGroup->GetDescriptorSet();
 	}
 	return *animDescSet;
@@ -125,7 +125,7 @@ void Console::commands::debug_particle_alpha_mode(NetworkState *state, pragma::B
 	if(argv.size() > 5)
 		g_customAlphaBlendMode.opAlpha = name_to_blend_op(argv.at(5));
 
-	for(auto &hShader : c_engine->GetShaderManager().GetShaders()) {
+	for(auto &hShader : pragma::get_cengine()->GetShaderManager().GetShaders()) {
 		auto *ptShader = dynamic_cast<ShaderParticleBase *>(hShader.get());
 		if(ptShader == nullptr)
 			continue;
@@ -200,7 +200,7 @@ void ShaderParticleBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreateIn
 }
 static auto cvParticleQuality = GetClientConVar("cl_render_particle_quality");
 uint32_t ShaderParticleBase::GetDepthPipelineIndex() { return GetParticlePipelineCount() - 1; }
-ShaderParticleBase::RenderFlags ShaderParticleBase::GetRenderFlags(const pragma::CParticleSystemComponent &particle, ParticleRenderFlags ptRenderFlags) const
+ShaderParticleBase::RenderFlags ShaderParticleBase::GetRenderFlags(const pragma::ecs::CParticleSystemComponent &particle, pragma::ecs::ParticleRenderFlags ptRenderFlags) const
 {
 	auto renderFlags = (particle.IsAnimated() == true) ? RenderFlags::Animated : RenderFlags::None;
 	if(cvParticleQuality->GetInt() <= 1)
@@ -212,13 +212,13 @@ ShaderParticleBase::RenderFlags ShaderParticleBase::GetRenderFlags(const pragma:
 	if(particle.GetEffectiveAlphaMode() == ParticleAlphaMode::AdditiveByColor)
 		renderFlags |= RenderFlags::AdditiveBlendByColor;
 
-	if(umath::is_flag_set(ptRenderFlags, ParticleRenderFlags::DepthOnly))
+	if(umath::is_flag_set(ptRenderFlags, ecs::ParticleRenderFlags::DepthOnly))
 		renderFlags |= RenderFlags::DepthPass;
 	return renderFlags;
 }
 uint32_t ShaderParticleBase::GetBasePipelineIndex(uint32_t pipelineIdx) const { return pipelineIdx / umath::to_integral(ParticleAlphaMode::Count); }
 pragma::ParticleAlphaMode ShaderParticleBase::GetAlphaMode(uint32_t pipelineIdx) const { return static_cast<ParticleAlphaMode>(pipelineIdx % umath::to_integral(ParticleAlphaMode::Count)); }
-pragma::ParticleAlphaMode ShaderParticleBase::GetRenderAlphaMode(const pragma::CParticleSystemComponent &particle) const
+pragma::ParticleAlphaMode ShaderParticleBase::GetRenderAlphaMode(const pragma::ecs::CParticleSystemComponent &particle) const
 {
 	if(particle.IsAlphaPremultiplied())
 		return pragma::ParticleAlphaMode::Premultiplied;

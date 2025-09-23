@@ -12,13 +12,14 @@ module;
 #include <pragma/entities/baseentity_events.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
-module pragma.client.entities.components.audio.sound_probe;
+module pragma.client;
 
-import pragma.client.client_state;
+
+import :entities.components.audio.sound_probe;
+import :client_state;
 
 using namespace pragma;
 
-extern ClientState *client;
 
 decltype(CEnvSoundProbeComponent::s_probes) CEnvSoundProbeComponent::s_probes = {};
 decltype(CEnvSoundProbeComponent::s_probeCallback) CEnvSoundProbeComponent::s_probeCallback = {};
@@ -66,7 +67,7 @@ void CEnvSoundProbeComponent::OnEntitySpawn()
 		pPhysComponent->GetCollisionBounds(&min, &max);
 	s_probes.push_back({origin + min, origin + max, Placement::UniformFloor, m_spacing, m_heightAboveFloor});
 	if(s_probeCallback.IsValid() == false) {
-		s_probeCallback = client->AddCallback("EndGame", FunctionCallback<void, CGame *>::Create([](CGame *game) {
+		s_probeCallback = pragma::get_client_state()->AddCallback("EndGame", FunctionCallback<void, CGame *>::Create([](CGame *game) {
 			CEnvSoundProbeComponent::ClearProbes();
 			s_probeCallback.Remove();
 		}));

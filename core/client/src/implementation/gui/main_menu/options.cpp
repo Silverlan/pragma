@@ -21,23 +21,22 @@ module;
 #include <fsys/fsys_package.hpp>
 #include <prosper_window.hpp>
 
-module pragma.client.gui;
+module pragma.client;
 
-import :main_menu_options;
-import :options_list;
-import :choice_list;
-import :slider;
+import :gui.main_menu_options;
+import :gui.options_list;
+import :gui.choice_list;
+import :gui.slider;
 
-import pragma.client.audio;
-import pragma.client.client_state;
-import pragma.client.engine;
-import pragma.client.entities.components;
+import :audio;
+import :client_state;
+import :engine;
+import :entities.components;
+import :rendering.render_apis;
 import pragma.pad;
 import pragma.locale;
 import pragma.string.unicode;
 
-extern CEngine *c_engine;
-extern ClientState *client;
 
 WIMainMenuOptions::WIMainMenuOptions() : WIMainMenuBase(), m_yOffset(128) {}
 
@@ -58,13 +57,14 @@ void WIMainMenuOptions::ApplyWindowSize()
 	int w = atoi(res[0].c_str());
 	int h = atoi(res[1].c_str());
 
-	c_engine->GetWindow().SetResolution(Vector2i(w, h));
+	pragma::get_cengine()->GetWindow().SetResolution(Vector2i(w, h));
 }
 
 void WIMainMenuOptions::ApplyOptions()
 {
 	if(m_hActive.IsValid())
 		static_cast<WIOptionsList *>(m_hActive.get())->RunUpdateConVars();
+	auto *client = pragma::get_client_state();
 	if(m_hAntiAliasing.IsValid()) {
 		auto *pChoice = static_cast<WIChoiceList *>(m_hAntiAliasing.get())->GetSelectedChoice();
 		if(pChoice->value == "fxaa") {
@@ -348,7 +348,7 @@ void WIMainMenuOptions::UpdateMemoryUsage()
 	m_tLastMemoryUsageUpdate = t;
 	if(m_hGPUMemoryUsage.IsValid() && m_hActive.get() == m_hVideoSettings.get()) {
 		/*auto *pSlider = static_cast<WISlider*>(m_hGPUMemoryUsage.get());
-		auto &context = c_engine->GetRenderContext();
+		auto &context = pragma::get_cengine()->GetRenderContext();
 		auto &memManager = context.GetMemoryManager();
 		auto stats = memManager.GetStatistics();
 		auto allocatedMemory = 0ull;
@@ -358,7 +358,8 @@ void WIMainMenuOptions::UpdateMemoryUsage()
 	}
 
 	std::array<WIHandle, 3> luaMemUsageSliders = {m_hLuaMemoryUsageGUI, m_hLuaMemoryUsageClient, m_hLuaMemoryUsageServer};
-	auto *svState = c_engine->GetServerNetworkState();
+	auto *svState = pragma::get_cengine()->GetServerNetworkState();
+	auto *client = pragma::get_client_state();
 	std::array<lua_State *, 3> luaMemUsageStates = {client->GetGUILuaState(), client->GetLuaState(), (svState != nullptr) ? svState->GetLuaState() : nullptr};
 	for(auto i = decltype(luaMemUsageSliders.size()) {0}; i < luaMemUsageSliders.size(); ++i) {
 		auto &hSlider = luaMemUsageSliders.at(i);
@@ -531,7 +532,7 @@ void WIMainMenuOptions::InitializeVideoSettings()
 			break;
 		}
 
-		if(c_engine->GetRenderContext().GetPhysicalDeviceVendor() == prosper::Vendor::Nvidia)
+		if(pragma::get_cengine()->GetRenderContext().GetPhysicalDeviceVendor() == prosper::Vendor::Nvidia)
 			antiAliasing = 0; // TODO: Anti-Aliasing causes crashes on some modern Nvidia GPUs (Something to do with depth-image) FIXME
 		if(el->m_hTexQuality.IsValid())
 			static_cast<WIChoiceList *>(el->m_hTexQuality.get())->SelectChoice(textureQuality);
@@ -589,7 +590,7 @@ void WIMainMenuOptions::InitializeVideoSettings()
 		  auto primaryMonitor = pragma::platform::get_primary_monitor();
 		  if(monitor == nullptr)
 			  monitor = &primaryMonitor;
-		  //GLWindow *window = c_engine->GetWindow();
+		  //GLWindow *window = pragma::get_cengine()->GetWindow();
 		  std::vector<pragma::platform::Monitor::VideoMode> modes;
 		  if(monitor != nullptr) {
 			  auto videoModes = monitor->GetSupportedVideoModes();
@@ -661,7 +662,7 @@ void WIMainMenuOptions::InitializeVideoSettings()
 	// TODO
 #if 0
 	auto *pDeviceMenu = pList->AddDropDownMenu(pragma::locale::get_text("physical_device"),[](WIDropDownMenu *pMenu) {
-		auto deviceList = prosper::util::get_available_vendor_devices(c_engine->GetRenderContext());
+		auto deviceList = prosper::util::get_available_vendor_devices(pragma::get_cengine()->GetRenderContext());
 		for(auto &devInfo : deviceList)
 			pMenu->AddOption(devInfo.deviceName,std::to_string(umath::to_integral(devInfo.vendor)) +"," +std::to_string(devInfo.deviceId));
 		
@@ -730,14 +731,14 @@ void WIMainMenuOptions::InitializeVideoSettings()
 	auto *antiAlias = pList->AddChoiceList(pragma::locale::get_text("anti_aliasing"), aaChoices, "", "cl_render_anti_aliasing");
 	m_hAntiAliasing = antiAlias->GetHandle();
 	if(antiAlias != nullptr) {
-		auto antiAliasingType = static_cast<pragma::rendering::AntiAliasing>(client->GetConVarInt("cl_render_anti_aliasing"));
+		auto antiAliasingType = static_cast<pragma::rendering::AntiAliasing>(pragma::get_client_state()->GetConVarInt("cl_render_anti_aliasing"));
 		switch(antiAliasingType) {
 		case pragma::rendering::AntiAliasing::FXAA:
 			antiAlias->SelectChoice("fxaa");
 			break;
 		case pragma::rendering::AntiAliasing::MSAA:
 			{
-				auto msaaSamples = client->GetConVarInt("cl_render_msaa_samples");
+				auto msaaSamples = pragma::get_client_state()->GetConVarInt("cl_render_msaa_samples");
 				//antiAlias->SelectChoice("msaa" +std::to_string(static_cast<int32_t>(sqrt(msaaSamples))));
 				break;
 			}
@@ -787,7 +788,7 @@ void WIMainMenuOptions::InitializeVideoSettings()
 		  pList->AddChoice(pragma::locale::get_text("texfilter_bilinear_filtering"), "1");
 		  pList->AddChoice(pragma::locale::get_text("texfilter_trilinear_filtering"), "2");
 
-		  auto limits = c_engine->GetRenderContext().GetPhysicalDeviceLimits();
+		  auto limits = pragma::get_cengine()->GetRenderContext().GetPhysicalDeviceLimits();
 		  std::vector<int> anisotropy;
 		  auto maxAnisotropy = limits.maxSamplerAnisotropy;
 		  if(maxAnisotropy >= 2.f) {
@@ -830,16 +831,16 @@ void WIMainMenuOptions::InitializeVideoSettings()
 	auto *presentMode = pList->AddChoiceList(
 	  pragma::locale::get_text("present_mode"),
 	  [](WIChoiceList *pList) {
-		  auto limits = c_engine->GetRenderContext().GetPhysicalDeviceLimits();
+		  auto limits = pragma::get_cengine()->GetRenderContext().GetPhysicalDeviceLimits();
 		  auto maxImageCount = limits.maxSurfaceImageCount;
 		  if(maxImageCount > 0) {
-			  if(c_engine->GetRenderContext().IsPresentationModeSupported(prosper::PresentModeKHR::Immediate))
+			  if(pragma::get_cengine()->GetRenderContext().IsPresentationModeSupported(prosper::PresentModeKHR::Immediate))
 				  pList->AddChoice(pragma::locale::get_text("immediate"), "0");
 			  if(maxImageCount > 1) {
-				  if(c_engine->GetRenderContext().IsPresentationModeSupported(prosper::PresentModeKHR::Fifo))
+				  if(pragma::get_cengine()->GetRenderContext().IsPresentationModeSupported(prosper::PresentModeKHR::Fifo))
 					  pList->AddChoice(pragma::locale::get_text("fifo"), "1");
 				  if(maxImageCount > 2) {
-					  if(c_engine->GetRenderContext().IsPresentationModeSupported(prosper::PresentModeKHR::Mailbox))
+					  if(pragma::get_cengine()->GetRenderContext().IsPresentationModeSupported(prosper::PresentModeKHR::Mailbox))
 						  pList->AddChoice(pragma::locale::get_text("mailbox"), "2");
 				  }
 			  }
@@ -948,7 +949,7 @@ void WIMainMenuOptions::InitializeVideoSettings()
 	pRow = pList->AddHeaderRow();
 	pRow->SetValue(0,pragma::locale::get_text("gpu_memory_statistics"));
 	m_hGPUMemoryUsage = pList->AddSlider(pragma::locale::get_text("gpu_memory_current_usage"),[](WISlider *pSlider) {
-		auto memProps = prosper::util::get_physical_device_memory_properties(c_engine->GetRenderContext());
+		auto memProps = prosper::util::get_physical_device_memory_properties(pragma::get_cengine()->GetRenderContext());
 		if(memProps.has_value() == false)
 			return;
 		auto totalSize = 0ull;
@@ -978,7 +979,7 @@ void WIMainMenuOptions::InitializeVideoSettings()
 
 	InitializeOptionsList(pList);
 
-	if(client->GetConVarInt("cl_render_preset") < 0) {
+	if(pragma::get_client_state()->GetConVarInt("cl_render_preset") < 0) {
 		pListPreset->SelectChoice(3);
 		if(m_hButtonApply.IsValid()) {
 			SetActiveMenu(m_hVideoSettings);
@@ -989,7 +990,7 @@ void WIMainMenuOptions::InitializeVideoSettings()
 		}
 	}
 
-	auto showAdvancedOptions = c_engine->IsDeveloperModeEnabled();
+	auto showAdvancedOptions = pragma::get_cengine()->IsDeveloperModeEnabled();
 	if(showAdvancedOptions == false) {
 		pList->GetRow("cl_render_vsync_enabled")->SetVisible(false);
 		pList->GetRow("cl_material_streaming_enabled")->SetVisible(false);
@@ -1156,7 +1157,7 @@ void WIMainMenuOptions::InitializeControlSettings()
 
 	auto *pCheckbox = pList->AddToggleChoice(pragma::locale::get_text("enable_controllers"), "cl_controller_enabled");
 	// Has to be applied immediately, otherwise controller keys can't be bound before applying the settings first
-	pCheckbox->AddCallback("OnChange", FunctionCallback<void>::Create([pCheckbox]() { c_engine->SetControllersEnabled(pCheckbox->IsChecked()); }));
+	pCheckbox->AddCallback("OnChange", FunctionCallback<void>::Create([pCheckbox]() { pragma::get_cengine()->SetControllersEnabled(pCheckbox->IsChecked()); }));
 
 	auto *pRow = pList->AddHeaderRow();
 	pRow->SetValue(0, pragma::locale::get_text("action"));

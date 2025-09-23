@@ -6,7 +6,9 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <shader/prosper_shader.hpp>
 
-export module pragma.client.rendering.shaders:prepass;
+export module pragma.client:rendering.shaders.prepass;
+
+import :rendering.shaders.scene;
 
 export namespace pragma {
 	class DLLCLIENT ShaderPrepassBase : public ShaderGameWorld {

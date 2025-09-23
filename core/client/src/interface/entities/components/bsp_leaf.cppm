@@ -7,8 +7,7 @@ module;
 #include <pragma/entities/components/base_entity_component.hpp>
 #include <unordered_set>
 
-export module pragma.client.entities.components.bsp_leaf;
-
+export module pragma.client:entities.components.bsp_leaf;
 export namespace pragma {
 	class DLLCLIENT CBSPLeafComponent final : public BaseEntityComponent {
 	  public:

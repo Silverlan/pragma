@@ -7,8 +7,7 @@ module;
 #include <string>
 #include <vector>
 
-export module pragma.client.rendering.render_apis;
-
+export module pragma.client:rendering.render_apis;
 export namespace pragma::rendering {
 	constexpr std::string_view RENDERING_API_MODULE_LOCATION = "graphics";
 	DLLCLIENT std::vector<std::string> get_available_graphics_apis();

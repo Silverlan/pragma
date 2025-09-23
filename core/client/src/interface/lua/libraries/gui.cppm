@@ -9,9 +9,8 @@ module;
 #include <image/prosper_image.hpp>
 #include <pragma/lua/ldefinitions.h>
 
-export module pragma.client.scripting.lua.libraries.gui;
-
-import pragma.client.game;
+export module pragma.client:scripting.lua.libraries.gui;
+import :game;
 
 export namespace Lua {
 	namespace gui {

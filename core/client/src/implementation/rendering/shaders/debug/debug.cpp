@@ -12,13 +12,13 @@ module;
 #include <prosper_command_buffer.hpp>
 #include <pragma/logging.hpp>
 
-module pragma.client.rendering.shaders;
+module pragma.client;
 
-import :debug;
 
-import pragma.client.engine;
+import :rendering.shaders.debug;
 
-extern CEngine *c_engine;
+import :engine;
+
 
 using namespace pragma;
 
@@ -95,9 +95,9 @@ bool ShaderDebug::RecordDraw(prosper::ShaderBindState &bindState, const std::vec
 	PushConstants pushConstants {mvp, color};
 	if(RecordBindVertexBuffers(bindState, buffers) == false || RecordPushConstants(bindState, pushConstants) == false)
 		return false;
-	//c_engine->StartGPUTimer(GPUTimerEvent::DebugMesh); // prosper TODO
+	//pragma::get_cengine()->StartGPUTimer(GPUTimerEvent::DebugMesh); // prosper TODO
 	auto r = ShaderGraphics::RecordDraw(bindState, vertexCount);
-	//c_engine->StopGPUTimer(GPUTimerEvent::DebugMesh); // prosper TODO
+	//pragma::get_cengine()->StopGPUTimer(GPUTimerEvent::DebugMesh); // prosper TODO
 	return r;
 }
 
@@ -128,7 +128,7 @@ void ShaderDebugTexture::InitializeShaderResources()
 }
 bool ShaderDebugTexture::RecordDraw(prosper::ShaderBindState &bindState, prosper::IDescriptorSet &descSetTexture, const ShaderDebug::PushConstants &pushConstants) const
 {
-	auto buf = c_engine->GetRenderContext().GetCommonBufferCache().GetSquareVertexBuffer();
+	auto buf = pragma::get_cengine()->GetRenderContext().GetCommonBufferCache().GetSquareVertexBuffer();
 	return RecordBindVertexBuffer(bindState, *buf) && RecordBindDescriptorSet(bindState, descSetTexture, DESCRIPTOR_SET_TEXTURE.setIndex) && RecordPushConstants(bindState, pushConstants) && ShaderGraphics::RecordDraw(bindState, prosper::CommonBufferCache::GetSquareVertexCount());
 }
 

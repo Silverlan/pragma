@@ -9,15 +9,14 @@ module;
 #include <image/prosper_render_target.hpp>
 #include <image/prosper_msaa_texture.hpp>
 
-module pragma.client.entities.components.rasterization_renderer:ssao;
+module pragma.client;
 
-import pragma.client.entities.components;
-import pragma.client.game;
-import pragma.client.rendering.shaders;
+import :entities.components.rasterization_renderer;
+import :game;
+import :rendering.shaders;
 
 using namespace pragma::rendering;
 
-extern CGame *c_game;
 
 void pragma::CRasterizationRendererComponent::RenderSSAO(const util::DrawSceneInfo &drawSceneInfo)
 {
@@ -27,8 +26,8 @@ void pragma::CRasterizationRendererComponent::RenderSSAO(const util::DrawSceneIn
 	if(IsSSAOEnabled() == false || shaderSSAO == nullptr || shaderSSAOBlur == nullptr || drawSceneInfo.scene.expired())
 		return;
 	auto &scene = *drawSceneInfo.scene;
-	c_game->StartProfilingStage("SSAO");
-	c_game->StartGPUProfilingStage("SSAO");
+	pragma::get_cgame()->StartProfilingStage("SSAO");
+	pragma::get_cgame()->StartGPUProfilingStage("SSAO");
 	// Pre-render depths, positions and normals (Required for SSAO)
 	//auto *renderInfo  = scene.GetSceneRenderDesc().GetRenderInfo(RenderMode::World);
 	auto &drawCmd = drawSceneInfo.commandBuffer;
@@ -86,6 +85,6 @@ void pragma::CRasterizationRendererComponent::RenderSSAO(const util::DrawSceneIn
 
 		drawCmd->RecordImageBarrier(ssaoInfo.renderTarget->GetTexture().GetImage(), prosper::ImageLayout::ShaderReadOnlyOptimal, prosper::ImageLayout::ColorAttachmentOptimal);
 	}
-	c_game->StopGPUProfilingStage(); // SSAO
-	c_game->StopProfilingStage();    // SSAO
+	pragma::get_cgame()->StopGPUProfilingStage(); // SSAO
+	pragma::get_cgame()->StopProfilingStage();    // SSAO
 }

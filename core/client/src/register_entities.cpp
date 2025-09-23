@@ -3,8 +3,7 @@
 
 #include "stdafx_client.h"
 
-import pragma.client.entities;
-import pragma.client.entities.components;
+import pragma.client;
 
 void register_entites()
 {

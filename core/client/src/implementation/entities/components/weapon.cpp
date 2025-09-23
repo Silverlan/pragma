@@ -21,11 +21,11 @@ module;
 #include <pragma/lua/lua_util_component_stream.hpp>
 #include <pragma/lua/lentity_components_base_types.hpp>
 
-module pragma.client.entities.components.weapon;
+module pragma.client;
 
-import pragma.client.client_state;
-import pragma.client.entities.components;
-import pragma.client.game;
+import :entities.components.weapon;
+import :client_state;
+import :game;
 
 using namespace pragma;
 
@@ -40,8 +40,6 @@ std::vector<CWeaponComponent *> CWeaponComponent::s_weapons;
 const std::vector<CWeaponComponent *> &CWeaponComponent::GetAll() { return s_weapons; }
 unsigned int CWeaponComponent::GetWeaponCount() { return CUInt32(s_weapons.size()); }
 
-extern CGame *c_game;
-extern ClientState *client;
 
 CWeaponComponent::CWeaponComponent(BaseEntity &ent) : BaseWeaponComponent(ent), CBaseNetComponent() { s_weapons.push_back(this); }
 
@@ -137,7 +135,7 @@ void CWeaponComponent::Initialize()
 		auto renderMode = pRenderComponent.valid() ? pRenderComponent->GetSceneRenderPass() : pragma::rendering::SceneRenderPass::None;
 		if(renderMode != pragma::rendering::SceneRenderPass::None) {
 			if(renderMode == pragma::rendering::SceneRenderPass::View) {
-				auto *pl = c_game->GetLocalPlayer();
+				auto *pl = pragma::get_cgame()->GetLocalPlayer();
 				auto *plComponent = static_cast<CPlayerComponent *>(pl->GetEntity().GetPlayerComponent().get());
 				if(pl->IsInFirstPersonMode() == false) {
 					shouldDrawData.shouldDraw = false;
@@ -276,7 +274,7 @@ void CWeaponComponent::UpdateOwnerAttachment()
 			pAttComponent->ClearAttachment();
 		return;
 	}
-	auto *game = client->GetGameState();
+	auto *game = pragma::get_client_state()->GetGameState();
 	CViewModelComponent *cVm = nullptr;
 	if(owner->IsPlayer()) {
 		auto *plComponent = static_cast<CPlayerComponent *>(owner->GetPlayerComponent().get());
@@ -364,7 +362,7 @@ void CWeaponComponent::Holster()
 	auto *vm = GetViewModel();
 	if(vm == NULL)
 		return;
-	CGame *game = client->GetGameState();
+	CGame *game = pragma::get_client_state()->GetGameState();
 	PlayViewActivity(Activity::VmHolster);
 }
 
@@ -375,7 +373,7 @@ pragma::CViewModelComponent *CWeaponComponent::GetViewModel()
 	BaseEntity *parent = m_hTarget.get();
 	if(parent == NULL)
 		return NULL;
-	CGame *game = client->GetGameState();
+	CGame *game = pragma::get_client_state()->GetGameState();
 	auto *vm = game->GetViewModel<pragma::CViewModelComponent>();
 	if(vm == nullptr || &vm->GetEntity() != parent)
 		return NULL;

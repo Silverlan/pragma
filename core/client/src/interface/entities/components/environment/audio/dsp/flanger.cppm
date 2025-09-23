@@ -6,9 +6,8 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/environment/audio/env_sound_dsp_flanger.h"
 
-export module pragma.client.entities.components.audio.dsp.flanger;
-
-import pragma.client.entities.components.audio.dsp.base;
+export module pragma.client:entities.components.audio.dsp.flanger;
+import :entities.components.audio.dsp.base;
 
 export namespace pragma {
 	class DLLCLIENT CSoundDspFlangerComponent final : public CBaseSoundDspComponent, public BaseEnvSoundDspFlanger {

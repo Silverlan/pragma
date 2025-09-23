@@ -7,12 +7,12 @@ module;
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
-module pragma.client.entities.components.raytracing_renderer;
+module pragma.client;
 
-import pragma.client.client_state;
-import pragma.client.engine;
+import :entities.components.raytracing_renderer;
+import :client_state;
+import :engine;
 
-extern CEngine *c_engine;
 
 using namespace pragma;
 

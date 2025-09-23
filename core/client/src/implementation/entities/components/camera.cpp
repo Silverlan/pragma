@@ -12,14 +12,13 @@ module;
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 
-module pragma.client.entities.components.camera;
+module pragma.client;
 
-import pragma.client.entities.components;
-import pragma.client.game;
+import :entities.components.camera;
+import :game;
 
 using namespace pragma;
 
-extern CGame *c_game;
 
 CCameraComponent::~CCameraComponent() {}
 void CCameraComponent::Save(udm::LinkedPropertyWrapperArg udm) { BaseEnvCameraComponent::Save(udm); }
@@ -52,16 +51,16 @@ void CCameraComponent::UpdateState()
 		return;
 	auto toggleC = GetEntity().GetComponent<CToggleComponent>();
 	if(toggleC.expired() || toggleC->IsTurnedOn()) {
-		auto *renderScene = c_game->GetRenderScene<pragma::CSceneComponent>();
+		auto *renderScene = pragma::get_cgame()->GetRenderScene<pragma::CSceneComponent>();
 		if(renderScene && static_cast<CBaseEntity &>(GetEntity()).IsInScene(*renderScene))
 			renderScene->SetActiveCamera(*this);
 		return;
 	}
 
-	auto *renderScene = c_game->GetRenderScene<pragma::CSceneComponent>();
+	auto *renderScene = pragma::get_cgame()->GetRenderScene<pragma::CSceneComponent>();
 	if(renderScene) {
 		if(renderScene->GetActiveCamera().get() == this) {
-			EntityIterator entIt {*c_game};
+			EntityIterator entIt {*pragma::get_cgame()};
 			entIt.AttachFilter<TEntityIteratorFilterComponent<CCameraComponent>>();
 			for(auto *ent : entIt) {
 				auto toggleC = ent->GetComponent<CToggleComponent>();

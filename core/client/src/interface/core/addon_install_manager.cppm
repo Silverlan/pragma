@@ -7,8 +7,7 @@ module;
 #include <vector>
 #include <atomic>
 
-export module pragma.client.core.addon_install_manager;
-
+export module pragma.client:core.addon_install_manager;
 export namespace pragma {
 	class CurlQueryHandler;
 	class DLLCLIENT AddonInstallManager {

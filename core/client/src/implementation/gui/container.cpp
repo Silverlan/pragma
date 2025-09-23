@@ -6,9 +6,9 @@ module;
 #include "stdafx_client.h"
 #include "pragma/lua/converters/gui_element_converter.hpp"
 
-module pragma.client.gui;
+module pragma.client;
 
-import :container;
+import :gui.container;
 
 LINK_WGUI_TO_CLASS(WIContainer, WIContainer);
 

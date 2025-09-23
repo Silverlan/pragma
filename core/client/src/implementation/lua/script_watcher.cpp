@@ -5,9 +5,11 @@ module;
 
 #include "stdafx_client.h"
 
-module pragma.client.scripting.lua.script_watcher;
+module pragma.client;
 
-import pragma.client.gui;
+
+import :scripting.lua.script_watcher;
+import :gui;
 
 void CLuaDirectoryWatcherManager::OnLuaFileChanged(const std::string &path)
 {

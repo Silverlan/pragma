@@ -9,12 +9,13 @@ module;
 #include <buffers/prosper_uniform_resizable_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
 
-module pragma.client.game;
+module pragma.client;
 
-import pragma.client.engine;
-import pragma.client.entities.components;
 
-extern CEngine *c_engine;
+import :game;
+import :engine;
+import :entities.components;
+
 
 prosper::IDescriptorSet &CGame::GetGlobalRenderSettingsDescriptorSet() { return *m_globalRenderSettingsBufferData->descSetGroup->GetDescriptorSet(); }
 pragma::rendering::GlobalRenderSettingsBufferData &CGame::GetGlobalRenderSettingsBufferData() { return *m_globalRenderSettingsBufferData; }
@@ -26,7 +27,7 @@ pragma::rendering::GlobalRenderSettingsBufferData::GlobalRenderSettingsBufferDat
 	createInfo.usageFlags = prosper::BufferUsageFlags::UniformBufferBit | prosper::BufferUsageFlags::TransferDstBit | prosper::BufferUsageFlags::TransferSrcBit;
 	createInfo.size = sizeof(pragma::ShaderGameWorldLightingPass::DebugData);
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
-	debugBuffer = c_engine->GetRenderContext().CreateBuffer(createInfo, &debugData);
+	debugBuffer = pragma::get_cengine()->GetRenderContext().CreateBuffer(createInfo, &debugData);
 	debugBuffer->SetDebugName("render_settings_debug_buf");
 
 	pragma::ShaderGameWorldLightingPass::CSMData csmData {
@@ -35,18 +36,18 @@ pragma::rendering::GlobalRenderSettingsBufferData::GlobalRenderSettingsBufferDat
 	  0                                                                         // Cascade Count
 	};
 	createInfo.size = sizeof(pragma::ShaderGameWorldLightingPass::CSMData);
-	csmBuffer = c_engine->GetRenderContext().CreateBuffer(createInfo, &csmData);
+	csmBuffer = pragma::get_cengine()->GetRenderContext().CreateBuffer(createInfo, &csmData);
 	csmBuffer->SetDebugName("csm_data_buf");
 
 	pragma::ShaderGameWorldLightingPass::TimeData timeData {0.f, 0.f, 0.f, 0.f};
 	createInfo.size = sizeof(timeData);
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
-	timeBuffer = c_engine->GetRenderContext().CreateBuffer(createInfo, &timeData);
+	timeBuffer = pragma::get_cengine()->GetRenderContext().CreateBuffer(createInfo, &timeData);
 	timeBuffer->SetDebugName("time_data_buf");
 
 	if(pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_RENDER_SETTINGS.IsValid() == false)
 		return;
-	descSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_RENDER_SETTINGS);
+	descSetGroup = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_RENDER_SETTINGS);
 	auto &descSet = *descSetGroup->GetDescriptorSet();
 	descSet.SetBindingUniformBuffer(*debugBuffer, umath::to_integral(pragma::ShaderScene::RenderSettingsBinding::Debug));
 	descSet.SetBindingUniformBuffer(*timeBuffer, umath::to_integral(pragma::ShaderScene::RenderSettingsBinding::Time));
@@ -66,7 +67,7 @@ pragma::rendering::GlobalRenderSettingsBufferData::GlobalRenderSettingsBufferDat
 		createInfo.size = sizeof(DebugPrintData);
 		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUToCPU;
 		createInfo.flags = prosper::util::BufferCreateInfo::Flags::Persistent;
-		debugPrintBuffer = c_engine->GetRenderContext().CreateBuffer(createInfo, &initialDebugPrintData);
+		debugPrintBuffer = pragma::get_cengine()->GetRenderContext().CreateBuffer(createInfo, &initialDebugPrintData);
 		debugPrintBuffer->SetDebugName("render_settings_debug_print_buf");
 		debugPrintBuffer->SetPermanentlyMapped(true, prosper::IBuffer::MapFlags::ReadBit);
 		descSet.SetBindingStorageBuffer(*debugPrintBuffer, umath::to_integral(pragma::ShaderScene::RenderSettingsBinding::DebugPrint));

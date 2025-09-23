@@ -9,9 +9,9 @@ module;
 #include <pragma/networking/enums.hpp>
 #include <pragma/networking/error.hpp>
 
-module pragma.client.networking;
+module pragma.client;
 
-import :standard_client;
+import :networking.standard_client;
 
 std::string pragma::networking::StandardClient::GetIdentifier() const { return m_clientConnection->GetLocalAddress().ToString(); }
 bool pragma::networking::StandardClient::Connect(const std::string &ip, Port port, Error &outErr)

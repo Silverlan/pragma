@@ -9,15 +9,16 @@ module;
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/components/logic_component.hpp>
 
-module pragma.client.entities.components.view_body;
+module pragma.client;
 
-import pragma.client.client_state;
-import pragma.client.entities.components.render;
-import pragma.client.entities.components.transform;
+
+import :entities.components.view_body;
+import :client_state;
+import :entities.components.render;
+import :entities.components.transform;
 
 using namespace pragma;
 
-extern ClientState *client;
 
 void CViewBodyComponent::Initialize()
 {

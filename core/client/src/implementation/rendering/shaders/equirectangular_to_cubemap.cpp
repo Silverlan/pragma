@@ -14,13 +14,11 @@ module;
 #include <util_image_buffer.hpp>
 #include <fsys/ifile.hpp>
 
-module pragma.client.rendering.shaders;
+module pragma.client;
 
-import :equirectangular_to_cubemap;
+import :rendering.shaders.equirectangular_to_cubemap;
 
-import pragma.client.engine;
-
-extern CEngine *c_engine;
+import :engine;
 
 using namespace pragma;
 
@@ -64,7 +62,7 @@ std::shared_ptr<prosper::Texture> ShaderEquirectangularToCubemap::LoadEquirectan
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::CPUToGPU;
 	createInfo.usage = prosper::ImageUsageFlags::TransferDstBit | prosper::ImageUsageFlags::SampledBit;
 
-	auto &context = c_engine->GetRenderContext();
+	auto &context = pragma::get_cengine()->GetRenderContext();
 	auto img = context.CreateImage(createInfo, reinterpret_cast<uint8_t *>(imgBuffer->GetData()));
 
 	prosper::util::TextureCreateInfo texCreateInfo {};
@@ -83,7 +81,7 @@ std::shared_ptr<prosper::Texture> ShaderEquirectangularToCubemap::Equirectangula
 	auto rt = CreateCubeMapRenderTarget(resolution, resolution, prosper::util::ImageCreateInfo::Flags::FullMipmapChain);
 
 	// Shader input
-	auto dsg = c_engine->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_EQUIRECTANGULAR_TEXTURE);
+	auto dsg = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_EQUIRECTANGULAR_TEXTURE);
 	dsg->GetDescriptorSet()->SetBindingTexture(equirectangularTexture, 0u);
 
 	PushConstants pushConstants {};
@@ -94,7 +92,7 @@ std::shared_ptr<prosper::Texture> ShaderEquirectangularToCubemap::Equirectangula
 	auto vertexBuffer = CreateCubeMesh(numVerts);
 
 	// Shader execution
-	auto &setupCmd = c_engine->GetSetupCommandBuffer();
+	auto &setupCmd = pragma::get_cengine()->GetSetupCommandBuffer();
 	auto success = true;
 	for(uint8_t layerId = 0u; layerId < 6u; ++layerId) {
 		setupCmd->RecordImageBarrier(rt->GetTexture().GetImage(), prosper::ImageLayout::ShaderReadOnlyOptimal, prosper::ImageLayout::ColorAttachmentOptimal, prosper::util::ImageSubresourceRange {layerId});

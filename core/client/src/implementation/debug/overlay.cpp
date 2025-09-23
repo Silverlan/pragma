@@ -15,17 +15,16 @@ module;
 #include <prosper_descriptor_set_group.hpp>
 #include <pragma/math/intersection.h>
 
-module pragma.client.debug.overlay;
+module pragma.client;
 
-import pragma.client.client_state;
-import pragma.client.engine;
-import pragma.client.game;
-import pragma.client.rendering.shaders;
+
+import :debug.overlay;
+import :client_state;
+import :engine;
+import :game;
+import :rendering.shaders;
 import pragma.string.unicode;
 
-extern CEngine *c_engine;
-extern ClientState *client;
-extern CGame *c_game;
 
 namespace DebugRenderer {
 	struct RuntimeObject {
@@ -33,7 +32,7 @@ namespace DebugRenderer {
 		std::shared_ptr<DebugRenderer::BaseObject> obj;
 		double time;
 	};
-	RuntimeObject::RuntimeObject(const std::shared_ptr<DebugRenderer::BaseObject> &o, float duration) : obj(o), time(client->RealTime() + duration) {}
+	RuntimeObject::RuntimeObject(const std::shared_ptr<DebugRenderer::BaseObject> &o, float duration) : obj(o), time(pragma::get_client_state()->RealTime() + duration) {}
 }
 
 static void init_debug_object(DebugRenderer::BaseObject &o, const DebugRenderInfo &renderInfo) { o.SetIgnoreDepth(renderInfo.ignoreDepthBuffer); }
@@ -51,7 +50,7 @@ static void cleanup()
 	if(++g_lastCleanupN < 1'000)
 		return;
 	g_lastCleanupN = 0;
-	auto &t = client->RealTime();
+	auto &t = pragma::get_client_state()->RealTime();
 	for(auto &pair : s_debugObjects) {
 		auto &objs = pair.second;
 		size_t i = 0;
@@ -147,9 +146,9 @@ DebugRenderer::WorldObject::WorldObject(const Vector4 &color) : BaseObject(), m_
 DebugRenderer::WorldObject::~WorldObject()
 {
 	if(m_vertexBuffer != nullptr)
-		c_engine->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_vertexBuffer);
+		pragma::get_cengine()->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_vertexBuffer);
 	if(m_colorBuffer != nullptr)
-		c_engine->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_colorBuffer);
+		pragma::get_cengine()->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_colorBuffer);
 }
 DebugRenderer::ObjectType DebugRenderer::WorldObject::GetType() const { return ObjectType::World; }
 const Vector4 &DebugRenderer::WorldObject::GetColor() const { return m_color; }
@@ -193,12 +192,12 @@ bool DebugRenderer::WorldObject::InitializeBuffers()
 	m_vertexCount = 0;
 	if(m_vertices.empty())
 		return false;
-	m_vertexBuffer = c_engine->GetRenderContext().AllocateTemporaryBuffer(util::size_of_container(m_vertices), sizeof(Vector4), m_vertices.data());
+	m_vertexBuffer = pragma::get_cengine()->GetRenderContext().AllocateTemporaryBuffer(util::size_of_container(m_vertices), sizeof(Vector4), m_vertices.data());
 	m_vertexCount = m_vertices.size();
 
 	if(m_colors.empty())
 		return true;
-	m_colorBuffer = c_engine->GetRenderContext().AllocateTemporaryBuffer(util::size_of_container(m_colors), sizeof(Vector4), m_colors.data());
+	m_colorBuffer = pragma::get_cengine()->GetRenderContext().AllocateTemporaryBuffer(util::size_of_container(m_colors), sizeof(Vector4), m_colors.data());
 	return true;
 }
 
@@ -206,14 +205,14 @@ void DebugRenderer::WorldObject::UpdateVertexBuffer()
 {
 	if(m_vertexBuffer == nullptr)
 		return;
-	c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_vertexBuffer, 0ull, m_vertices.size() * sizeof(m_vertices.front()), m_vertices.data());
+	pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_vertexBuffer, 0ull, m_vertices.size() * sizeof(m_vertices.front()), m_vertices.data());
 }
 
 void DebugRenderer::WorldObject::UpdateColorBuffer()
 {
 	if(m_colorBuffer == nullptr)
 		return;
-	c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_colorBuffer, 0ull, m_colors.size() * sizeof(m_colors.front()), m_colors.data());
+	pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_colorBuffer, 0ull, m_colors.size() * sizeof(m_colors.front()), m_colors.data());
 }
 
 ///////////////////////////
@@ -224,16 +223,16 @@ DebugRenderer::TextObject::TextObject(WIText *elText) : BaseObject(), m_hText(el
 		if(pragma::ShaderDebugTexture::DESCRIPTOR_SET_TEXTURE.IsValid() == false)
 			return;
 		if(m_descSetGroupText != nullptr)
-			c_engine->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_descSetGroupText);
+			pragma::get_cengine()->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_descSetGroupText);
 		auto &tex = rt.get()->GetTexture();
-		m_descSetGroupText = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderDebugTexture::DESCRIPTOR_SET_TEXTURE);
+		m_descSetGroupText = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderDebugTexture::DESCRIPTOR_SET_TEXTURE);
 		m_descSetGroupText->GetDescriptorSet()->SetBindingTexture(tex, 0u);
 	}));
 }
 DebugRenderer::TextObject::~TextObject()
 {
 	if(m_descSetGroupText != nullptr)
-		c_engine->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_descSetGroupText);
+		pragma::get_cengine()->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_descSetGroupText);
 	if(m_hText.IsValid())
 		m_hText->Remove();
 	if(m_hCbRender.IsValid())
@@ -336,7 +335,7 @@ std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawBox(const Vector3 
 }
 static WIText *create_text_element(const std::string &text)
 {
-	auto *el = static_cast<WIText *>(c_game->CreateGUIElement("WIText"));
+	auto *el = static_cast<WIText *>(pragma::get_cgame()->CreateGUIElement("WIText"));
 	if(el == nullptr)
 		return nullptr;
 	el->SetText(text);
@@ -356,8 +355,8 @@ static std::shared_ptr<DebugRenderer::BaseObject> draw_text(WIText *el, const Ve
 	o->SetPos(pos);
 	auto *ptrO = o.get();
 	auto hEl = el->GetHandle();
-	auto cb = c_game->AddCallback("Render", FunctionCallback<>::Create([pos, szUnits, hEl, ptrO]() {
-		auto *cam = c_game->GetRenderCamera<pragma::CCameraComponent>();
+	auto cb = pragma::get_cgame()->AddCallback("Render", FunctionCallback<>::Create([pos, szUnits, hEl, ptrO]() {
+		auto *cam = pragma::get_cgame()->GetRenderCamera<pragma::CCameraComponent>();
 		if(!hEl.IsValid() || cam == nullptr)
 			return;
 		auto *el = static_cast<const WIText *>(hEl.get());
@@ -374,9 +373,9 @@ static std::shared_ptr<DebugRenderer::BaseObject> draw_text(WIText *el, const Ve
 
 		auto *ds = ptrO->GetTextDescriptorSet();
 		if(ds != nullptr) {
-			auto *pShader = static_cast<pragma::ShaderDebugTexture *>(c_game->GetGameShader(CGame::GameShader::DebugTexture).get());
+			auto *pShader = static_cast<pragma::ShaderDebugTexture *>(pragma::get_cgame()->GetGameShader(CGame::GameShader::DebugTexture).get());
 			if(pShader != nullptr) {
-				auto drawCmd = c_game->GetCurrentDrawCommandBuffer();
+				auto drawCmd = pragma::get_cgame()->GetCurrentDrawCommandBuffer();
 				prosper::ShaderBindState bindState {*drawCmd};
 				if(pShader->RecordBeginDraw(bindState) == true) {
 					pragma::ShaderDebug::PushConstants pushConstants {m, Vector4 {1.f, 1.f, 1.f, 1.f}};
@@ -630,8 +629,8 @@ void DebugRenderer::Render(std::shared_ptr<prosper::ICommandBuffer> &drawCmd, pr
 {
 	if(s_debugObjects.empty())
 		return;
-	auto &whDebugShader = c_game->GetGameShader(CGame::GameShader::Debug);
-	auto &whDebugVertexShader = c_game->GetGameShader(CGame::GameShader::DebugVertex);
+	auto &whDebugShader = pragma::get_cgame()->GetGameShader(CGame::GameShader::Debug);
+	auto &whDebugVertexShader = pragma::get_cgame()->GetGameShader(CGame::GameShader::DebugVertex);
 	if(whDebugShader.expired() || whDebugVertexShader.expired())
 		return;
 	const std::unordered_map<DebugRenderer::Type, pragma::ShaderDebug::Pipeline> shaderPipeline = {
@@ -641,7 +640,7 @@ void DebugRenderer::Render(std::shared_ptr<prosper::ICommandBuffer> &drawCmd, pr
 	  {DebugRenderer::Type::Points, pragma::ShaderDebug::Pipeline::Point},
 	  {DebugRenderer::Type::PointsVertex, pragma::ShaderDebug::Pipeline::Vertex},
 	};
-	auto &t = client->RealTime();
+	auto &t = pragma::get_client_state()->RealTime();
 
 	auto vp = cam.GetProjectionMatrix() * cam.GetViewMatrix();
 	auto *shader = static_cast<pragma::ShaderDebug *>(whDebugShader.get());

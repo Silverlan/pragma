@@ -5,9 +5,9 @@ module;
 
 #include "stdafx_client.h"
 
-module pragma.client.rendering.occlusion_culling;
+module pragma.client;
 
-import :chc_new;
+import :rendering.occlusion_culling.chc_new;
 
 #if 0
 static const uint32_t maxPrevInvisNodesBatchSize = 50; // Recommended range: [20,80]

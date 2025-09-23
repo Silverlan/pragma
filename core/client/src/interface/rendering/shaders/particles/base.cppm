@@ -3,9 +3,15 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
+#include "prosper_descriptor_set_group.hpp"
 
-export module pragma.client.rendering.shaders:particle_base;
+export module pragma.client:rendering.shaders.particle_base;
 
+import :particle_system.enums;
+import :rendering.enums;
+
+export namespace pragma::ecs {class CParticleSystemComponent;};
 export namespace pragma {
 	class DLLCLIENT ShaderParticleBase {
 	  public:
@@ -13,15 +19,15 @@ export namespace pragma {
 		static uint32_t PIPELINE_COUNT;
 
 		ShaderParticleBase() = default;
-		RenderFlags GetRenderFlags(const CParticleSystemComponent &particle, ParticleRenderFlags ptRenderFlags) const;
+		RenderFlags GetRenderFlags(const ecs::CParticleSystemComponent &particle, ecs::ParticleRenderFlags ptRenderFlags) const;
 		static uint32_t GetDepthPipelineIndex();
 	  protected:
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_ANIMATION;
 		virtual prosper::DescriptorSetInfo &GetAnimationDescriptorSetInfo() const = 0;
-		prosper::IDescriptorSet &GetAnimationDescriptorSet(const CParticleSystemComponent &ps);
+		prosper::IDescriptorSet &GetAnimationDescriptorSet(const ecs::CParticleSystemComponent &ps);
 		uint32_t GetBasePipelineIndex(uint32_t pipelineIdx) const;
 		pragma::ParticleAlphaMode GetAlphaMode(uint32_t pipelineIdx) const;
-		pragma::ParticleAlphaMode GetRenderAlphaMode(const CParticleSystemComponent &particle) const;
+		pragma::ParticleAlphaMode GetRenderAlphaMode(const ecs::CParticleSystemComponent &particle) const;
 		static uint32_t GetParticlePipelineCount();
 		void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx);
 	  private:

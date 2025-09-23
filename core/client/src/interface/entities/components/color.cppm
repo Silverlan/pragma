@@ -6,7 +6,9 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <pragma/entities/components/base_color_component.hpp>
 
-export module pragma.client.entities.components.color;
+export module pragma.client:entities.components.color;
+
+import :entities.components.entity;
 
 export namespace pragma {
 	class DLLCLIENT CColorComponent final : public BaseColorComponent, public CBaseNetComponent {

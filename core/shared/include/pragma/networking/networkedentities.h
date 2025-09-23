@@ -68,7 +68,7 @@ LINK_NETWORKED_ENTITIES;
 LINK_NETWORKED_PHYSICS_ENTITIES;
 #elif DLLCLIENT_EX
 
-import pragma.client.entities.components;
+import :entities.components;
 
 LINK_NETWORKED_ENTITIES;
 LINK_NETWORKED_PHYSICS_ENTITIES;

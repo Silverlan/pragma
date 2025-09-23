@@ -6,9 +6,11 @@ module;
 #include "stdafx_client.h"
 #include <prosper_command_buffer.hpp>
 
-module pragma.client.rendering.draw_scene_info;
+module pragma.client;
 
-import pragma.client.game;
+
+import :rendering.draw_scene_info;
+import :game;
 
 using namespace pragma::rendering;
 

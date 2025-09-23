@@ -6,7 +6,7 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <shader/prosper_shader.hpp>
 
-export module pragma.client.rendering.shaders:base_3d;
+export module pragma.client:rendering.shaders.base_3d;
 
 export namespace pragma {
 	class DLLCLIENT Shader3DBase : public prosper::ShaderGraphics {

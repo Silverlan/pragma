@@ -4,11 +4,17 @@
 module;
 
 #include <pragma/clientdefinitions.h>
+#include "cmaterial.h"
 
-export module pragma.client.rendering.shader_graph:module;
+export module pragma.client:rendering.shader_graph.module;
 
+import :entities.components.rasterization_renderer;
+import :entities.components.scene;
+import :model.mesh;
+import :rendering.render_processor;
 import pragma.shadergraph;
 
+namespace pragma {class ShaderGraph;};
 export namespace pragma::rendering {
 	class DLLCLIENT ShaderGraphModule {
 	  public:

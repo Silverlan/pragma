@@ -4,7 +4,10 @@
 #include "stdafx_client.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
-module pragma.client.entities.components.child;
+module pragma.client;
+
+import :entities.components.child;
+import :networking.util;
 
 using namespace pragma;
 

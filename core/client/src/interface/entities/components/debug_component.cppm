@@ -8,114 +8,141 @@ module;
 #include "pragma/entities/components/base_transform_component.hpp"
 #include <pragma/entities/components/logic_component.hpp>
 #include <pragma/entities/components/base_debug_component.hpp>
+#include "mathutil/color.h"
+#include "mathutil/uvec.h"
 #include <pragma/entities/baseentity.h>
 
-export module pragma.client.entities.components.debug;
-
-import pragma.client.debug;
-import pragma.client.entities.components.color;
-import pragma.client.entities.components.toggle;
-import pragma.client.entities.components.transform;
+export module pragma.client:entities.components.debug;
+import :debug;
+import :entities.components.color;
+import :entities.components.toggle;
+import :entities.components.transform;
 
 export namespace pragma {
 	template<class TBaseComponent>
 	class DLLCLIENT TCBaseDebugComponent : public TBaseComponent {
 	  public:
-		TCBaseDebugComponent(BaseEntity &ent) : TBaseComponent(ent) {}
-		virtual void Initialize() override
-		{
-			TBaseComponent::Initialize();
-			auto &ent = this->GetEntity();
-			ent.template AddComponent<LogicComponent>();
+		TCBaseDebugComponent(BaseEntity &ent);
+		virtual void Initialize() override;
+		virtual void OnEntitySpawn() override;
+		virtual void OnRemove() override;
+		void SetColorOverride(const Color &color);
+		void ClearColorOverride();
+		const std::optional<Color> &GetColorOverride() const;
 
-			this->BindEventUnhandled(CToggleComponent::EVENT_ON_TURN_ON, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { ReloadDebugObject(); });
-			this->BindEventUnhandled(CToggleComponent::EVENT_ON_TURN_OFF, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { ReloadDebugObject(); });
-		}
-		virtual void OnEntitySpawn() override
-		{
-			TBaseComponent::OnEntitySpawn();
-			ReloadDebugObject();
-		}
-		virtual void OnRemove() override
-		{
-			TBaseComponent::OnRemove();
-			m_debugObject = nullptr;
-		}
-		void SetColorOverride(const Color &color) { m_colorOverride = color; }
-		void ClearColorOverride() { m_colorOverride = {}; }
-		const std::optional<Color> &GetColorOverride() const { return m_colorOverride; }
-
-		void SetIgnoreDepthBuffer(bool ignoreDepthBuffer)
-		{
-			m_ignoreDepthBuffer = ignoreDepthBuffer;
-			ReloadDebugObject();
-		}
-		bool ShouldIgnoreDepthBuffer() const { return m_ignoreDepthBuffer; }
+		void SetIgnoreDepthBuffer(bool ignoreDepthBuffer);
+		bool ShouldIgnoreDepthBuffer() const;
 	  protected:
-		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override
-		{
-			TBaseComponent::OnEntityComponentAdded(component);
-			if(typeid(component) == typeid(CColorComponent)) {
-				if(m_colorCallback.IsValid())
-					m_colorCallback.Remove();
-				m_colorCallback = static_cast<CColorComponent &>(component).GetColorProperty()->AddCallback([this](std::reference_wrapper<const Vector4> oldColor, std::reference_wrapper<const Vector4> color) { ReloadDebugObject(); });
-			}
-			else if(typeid(component) == typeid(CTransformComponent)) {
-				if(m_poseCallback.IsValid())
-					m_poseCallback.Remove();
-				auto &trC = static_cast<CTransformComponent &>(component);
-				m_poseCallback = trC.AddEventCallback(CTransformComponent::EVENT_ON_POSE_CHANGED, [this, &trC](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-					if(umath::is_flag_set(static_cast<pragma::CEOnPoseChanged &>(evData.get()).changeFlags, pragma::TransformChangeFlags::PositionChanged) == false)
-						return util::EventReply::Unhandled;
-					if(m_debugObject != nullptr)
-						m_debugObject->SetPos(trC.GetPosition());
-					return util::EventReply::Unhandled;
-				});
-			}
-		}
-		virtual void OnEntityComponentRemoved(BaseEntityComponent &component) override
-		{
-			TBaseComponent::OnEntityComponentRemoved(component);
-			if(typeid(component) == typeid(CColorComponent)) {
-				if(m_colorCallback.IsValid())
-					m_colorCallback.Remove();
-			}
-			else if(typeid(component) == typeid(CTransformComponent)) {
-				if(m_poseCallback.IsValid())
-					m_poseCallback.Remove();
-			}
-		}
-		void ReloadDebugObject()
-		{
-			m_debugObject = nullptr;
-			auto &ent = this->GetEntity();
-			auto pToggleComponent = ent.template GetComponent<CToggleComponent>();
-			if(pToggleComponent.valid() && pToggleComponent->IsTurnedOn() == false)
-				return;
-			auto color = Color::White.ToVector4();
-			if(m_colorOverride)
-				color = m_colorOverride->ToVector4();
-			else {
-				auto pColorComponent = ent.template GetComponent<CColorComponent>();
-				if(pColorComponent.valid())
-					color = pColorComponent->GetColor();
-			}
-			auto pTrComponent = ent.template GetComponent<CTransformComponent>();
-			auto pos = Vector3 {};
-			if(pTrComponent.valid())
-				pos = pTrComponent->GetPosition();
-			DebugRenderInfo renderInfo {color};
-			renderInfo.pose.SetOrigin(pos);
-			renderInfo.ignoreDepthBuffer = ShouldIgnoreDepthBuffer();
-			ReloadDebugObject(color, pos, renderInfo);
-		}
-		virtual void ReloadDebugObject(Color color, const Vector3 &pos, DebugRenderInfo renderInfo) = 0;
+		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
+		virtual void OnEntityComponentRemoved(BaseEntityComponent &component) override;
+		void ReloadDebugObject();
+		virtual void DoReloadDebugObject(class Color color, const Vector3 &pos, struct DebugRenderInfo renderInfo) = 0;
 		std::shared_ptr<DebugRenderer::BaseObject> m_debugObject = nullptr;
 		std::optional<Color> m_colorOverride {};
 		bool m_ignoreDepthBuffer = false;
 		CallbackHandle m_poseCallback = {};
 		CallbackHandle m_colorCallback = {};
 	};
+
+    template<class TBaseComponent>
+        TCBaseDebugComponent<TBaseComponent>::TCBaseDebugComponent(BaseEntity &ent) : TBaseComponent(ent) {}
+    template<class TBaseComponent>
+        void TCBaseDebugComponent<TBaseComponent>::Initialize()
+    {
+        TBaseComponent::Initialize();
+        auto &ent = this->GetEntity();
+        ent.template AddComponent<LogicComponent>();
+
+        this->BindEventUnhandled(CToggleComponent::EVENT_ON_TURN_ON, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { ReloadDebugObject(); });
+        this->BindEventUnhandled(CToggleComponent::EVENT_ON_TURN_OFF, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { ReloadDebugObject(); });
+    }
+    template<class TBaseComponent>
+        void TCBaseDebugComponent<TBaseComponent>::OnEntitySpawn()
+    {
+        TBaseComponent::OnEntitySpawn();
+        ReloadDebugObject();
+    }
+    template<class TBaseComponent>
+        void TCBaseDebugComponent<TBaseComponent>::OnRemove()
+    {
+        TBaseComponent::OnRemove();
+        m_debugObject = nullptr;
+    }
+    template<class TBaseComponent>
+        void TCBaseDebugComponent<TBaseComponent>::SetColorOverride(const Color &color) { m_colorOverride = color; }
+    template<class TBaseComponent>
+        void TCBaseDebugComponent<TBaseComponent>::ClearColorOverride() { m_colorOverride = {}; }
+    template<class TBaseComponent>
+        const std::optional<Color> &TCBaseDebugComponent<TBaseComponent>::GetColorOverride() const { return m_colorOverride; }
+
+    template<class TBaseComponent>
+        void TCBaseDebugComponent<TBaseComponent>::SetIgnoreDepthBuffer(bool ignoreDepthBuffer)
+    {
+        m_ignoreDepthBuffer = ignoreDepthBuffer;
+        ReloadDebugObject();
+    }
+    template<class TBaseComponent>
+        bool TCBaseDebugComponent<TBaseComponent>::ShouldIgnoreDepthBuffer() const { return m_ignoreDepthBuffer; }
+    template<class TBaseComponent>
+        void TCBaseDebugComponent<TBaseComponent>::OnEntityComponentAdded(BaseEntityComponent &component)
+    {
+        TBaseComponent::OnEntityComponentAdded(component);
+        if(typeid(component) == typeid(CColorComponent)) {
+            if(m_colorCallback.IsValid())
+                m_colorCallback.Remove();
+            m_colorCallback = static_cast<CColorComponent &>(component).GetColorProperty()->AddCallback([this](std::reference_wrapper<const Vector4> oldColor, std::reference_wrapper<const Vector4> color) { ReloadDebugObject(); });
+        }
+        else if(typeid(component) == typeid(CTransformComponent)) {
+            if(m_poseCallback.IsValid())
+                m_poseCallback.Remove();
+            auto &trC = static_cast<CTransformComponent &>(component);
+            m_poseCallback = trC.AddEventCallback(CTransformComponent::EVENT_ON_POSE_CHANGED, [this, &trC](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+                if(umath::is_flag_set(static_cast<pragma::CEOnPoseChanged &>(evData.get()).changeFlags, pragma::TransformChangeFlags::PositionChanged) == false)
+                    return util::EventReply::Unhandled;
+                if(m_debugObject != nullptr)
+                    m_debugObject->SetPos(trC.GetPosition());
+                return util::EventReply::Unhandled;
+            });
+        }
+    }
+    template<class TBaseComponent>
+        void TCBaseDebugComponent<TBaseComponent>::OnEntityComponentRemoved(BaseEntityComponent &component)
+    {
+        TBaseComponent::OnEntityComponentRemoved(component);
+        if(typeid(component) == typeid(CColorComponent)) {
+            if(m_colorCallback.IsValid())
+                m_colorCallback.Remove();
+        }
+        else if(typeid(component) == typeid(CTransformComponent)) {
+            if(m_poseCallback.IsValid())
+                m_poseCallback.Remove();
+        }
+    }
+    template<class TBaseComponent>
+        void TCBaseDebugComponent<TBaseComponent>::ReloadDebugObject()
+    {
+        m_debugObject = nullptr;
+        auto &ent = this->GetEntity();
+        auto pToggleComponent = ent.template GetComponent<CToggleComponent>();
+        if(pToggleComponent.valid() && pToggleComponent->IsTurnedOn() == false)
+            return;
+        auto color = Color::White.ToVector4();
+        if(m_colorOverride)
+            color = m_colorOverride->ToVector4();
+        else {
+            auto pColorComponent = ent.template GetComponent<CColorComponent>();
+            if(pColorComponent.valid())
+                color = pColorComponent->GetColor();
+        }
+        auto pTrComponent = ent.template GetComponent<CTransformComponent>();
+        auto pos = Vector3 {};
+        if(pTrComponent.valid())
+            pos = pTrComponent->GetPosition();
+        DebugRenderInfo renderInfo {color};
+        renderInfo.pose.SetOrigin(pos);
+        renderInfo.ignoreDepthBuffer = ShouldIgnoreDepthBuffer();
+        DoReloadDebugObject(color, pos, renderInfo);
+    }
 
 	////////////////
 
@@ -129,8 +156,7 @@ export namespace pragma {
 		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void InitializeLuaObject(lua_State *l) override;
 	  protected:
-		virtual void ReloadDebugObject(Color color, const Vector3 &pos, DebugRenderInfo renderInfo) override;
-		using TCBaseDebugComponent<BaseDebugTextComponent>::ReloadDebugObject;
+		virtual void DoReloadDebugObject(Color color, const Vector3 &pos, DebugRenderInfo renderInfo) override;
 		std::string m_text = {};
 	};
 
@@ -151,8 +177,7 @@ export namespace pragma {
 		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
 	  protected:
-		virtual void ReloadDebugObject(Color color, const Vector3 &pos, DebugRenderInfo renderInfo) override;
-		using TCBaseDebugComponent<BaseDebugPointComponent>::ReloadDebugObject;
+		virtual void DoReloadDebugObject(Color color, const Vector3 &pos, DebugRenderInfo renderInfo) override;
 	};
 
 	////////////////
@@ -164,8 +189,7 @@ export namespace pragma {
 		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
 	  protected:
-		virtual void ReloadDebugObject(Color color, const Vector3 &pos, DebugRenderInfo renderInfo) override;
-		using TCBaseDebugComponent<BaseDebugLineComponent>::ReloadDebugObject;
+		virtual void DoReloadDebugObject(Color color, const Vector3 &pos, DebugRenderInfo renderInfo) override;
 	};
 
 	////////////////
@@ -179,8 +203,7 @@ export namespace pragma {
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void InitializeLuaObject(lua_State *l) override;
 	  protected:
-		virtual void ReloadDebugObject(Color color, const Vector3 &pos, DebugRenderInfo renderInfo) override;
-		using TCBaseDebugComponent<BaseDebugBoxComponent>::ReloadDebugObject;
+		virtual void DoReloadDebugObject(Color color, const Vector3 &pos, DebugRenderInfo renderInfo) override;
 	};
 
 	////////////////
@@ -191,8 +214,7 @@ export namespace pragma {
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void InitializeLuaObject(lua_State *l) override;
 	  protected:
-		virtual void ReloadDebugObject(Color color, const Vector3 &pos, DebugRenderInfo renderInfo) override;
-		using TCBaseDebugComponent<BaseDebugSphereComponent>::ReloadDebugObject;
+		virtual void DoReloadDebugObject(Color color, const Vector3 &pos, DebugRenderInfo renderInfo) override;
 	};
 
 	////////////////
@@ -207,8 +229,7 @@ export namespace pragma {
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void InitializeLuaObject(lua_State *l) override;
 	  protected:
-		virtual void ReloadDebugObject(Color color, const Vector3 &pos, DebugRenderInfo renderInfo) override;
-		using TCBaseDebugComponent<BaseDebugConeComponent>::ReloadDebugObject;
+		virtual void DoReloadDebugObject(Color color, const Vector3 &pos, DebugRenderInfo renderInfo) override;
 	};
 
 	////////////////
@@ -222,8 +243,7 @@ export namespace pragma {
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void InitializeLuaObject(lua_State *l) override;
 	  protected:
-		virtual void ReloadDebugObject(Color color, const Vector3 &pos, DebugRenderInfo renderInfo) override;
-		using TCBaseDebugComponent<BaseDebugCylinderComponent>::ReloadDebugObject;
+		virtual void DoReloadDebugObject(Color color, const Vector3 &pos, DebugRenderInfo renderInfo) override;
 	};
 
 	////////////////
@@ -235,7 +255,6 @@ export namespace pragma {
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
 	  protected:
-		virtual void ReloadDebugObject(Color color, const Vector3 &pos, DebugRenderInfo renderInfo) override;
-		using TCBaseDebugComponent<BaseDebugPlaneComponent>::ReloadDebugObject;
+		virtual void DoReloadDebugObject(Color color, const Vector3 &pos, DebugRenderInfo renderInfo) override;
 	};
 };

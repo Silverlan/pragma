@@ -6,11 +6,11 @@ module;
 #include "stdafx_client.h"
 #include <prosper_command_buffer.hpp>
 
-export module pragma.client.particle_system;
+module pragma.client;
 
-import :initializer_lua;
+import :particle_system.initializer_lua;
 
-import pragma.client.entities.components;
+import :entities.components;
 
 void CParticleModifierLua::Initialize(const luabind::object &o) { m_baseLuaObj = std::shared_ptr<luabind::object>(new luabind::object(o)); }
 
@@ -30,7 +30,7 @@ void CParticleOperatorLua::Simulate(double tDelta) { TParticleModifierLua<CParti
 
 //////////////
 
-void CParticleRendererLua::RecordRender(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::ParticleRenderFlags renderFlags)
+void CParticleRendererLua::RecordRender(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::ecs::ParticleRenderFlags renderFlags)
 {
 	// No longer supported
 	//CallLuaMember<void,std::reference_wrapper<prosper::ICommandBuffer>,luabind::object,luabind::object,uint32_t>(

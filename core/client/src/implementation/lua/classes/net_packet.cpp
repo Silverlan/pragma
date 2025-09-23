@@ -9,7 +9,10 @@ module;
 #include <pragma/lua/classes/lnetpacket.h>
 #include <pragma/lua/lua_call.hpp>
 
-module pragma.client.scripting.lua.classes.net_packet;
+module pragma.client;
+
+import :networking.util;
+import :scripting.lua.classes.net_packet;
 
 void Lua::NetPacket::Client::register_class(luabind::class_<::NetPacket> &classDef)
 {

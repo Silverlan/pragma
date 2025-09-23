@@ -13,11 +13,8 @@
 #include <pragma/lua/lua_util_class.hpp>
 // --template-include-location
 
-import pragma.client.entities.components;
+import pragma.client;
 
-import pragma.client.game;
-
-extern CGame *c_game;
 
 void RegisterLuaEntityComponents2_cl(lua_State *l, luabind::module_ &entsMod)
 {
@@ -155,7 +152,7 @@ void RegisterLuaEntityComponents2_cl(lua_State *l, luabind::module_ &entsMod)
 	defMotionBlurData.def("UpdatePoses", &pragma::CMotionBlurDataComponent::UpdateEntityPoses);
 	entsMod[defMotionBlurData];
 
-	c_game->GetEntityComponentManager().RegisterLuaBindings(l, entsMod);
+	pragma::get_cgame()->GetEntityComponentManager().RegisterLuaBindings(l, entsMod);
 
 	// --template-component-register-location
 }

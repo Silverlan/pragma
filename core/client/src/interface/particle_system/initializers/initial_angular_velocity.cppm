@@ -5,8 +5,11 @@ module;
 
 #include "pragma/clientdefinitions.h"
 
-export module pragma.client.particle_system:initializer_initial_angular_velocity;
+export module pragma.client:particle_system.initializer_initial_angular_velocity;
 
+import :particle_system.modifier;
+
+export namespace pragma::ecs {class CParticleSystemComponent;}
 export class DLLCLIENT CParticleInitializerInitialAngularVelocity : public CParticleInitializer {
   private:
 	Vector3 m_direction = {};
@@ -21,6 +24,6 @@ export class DLLCLIENT CParticleInitializerInitialAngularVelocity : public CPart
 	std::unique_ptr<RandomVelocity> m_randomVelocity = nullptr;
   public:
 	CParticleInitializerInitialAngularVelocity() = default;
-	virtual void Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+	virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
 	virtual void OnParticleCreated(CParticle &particle) override;
 };

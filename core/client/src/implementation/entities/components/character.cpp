@@ -28,17 +28,18 @@ module;
 #include <pragma/lua/lua_util_component_stream.hpp>
 #include <pragma/entities/components/base_actor_component.hpp>
 
-module pragma.client.entities.components.character;
+module pragma.client;
 
-import pragma.client.client_state;
-import pragma.client.engine;
-import pragma.client.entities.components.animated;
-import pragma.client.entities.components.eye;
-import pragma.client.entities.components.particle_system;
-import pragma.client.entities.components.sound_emitter;
-import pragma.client.entities.components.surface;
 
-extern ClientState *client;
+import :entities.components.character;
+import :client_state;
+import :engine;
+import :entities.components.animated;
+import :entities.components.eye;
+import :entities.components.particle_system;
+import :entities.components.sound_emitter;
+import :entities.components.surface;
+
 
 using namespace pragma;
 
@@ -96,7 +97,7 @@ void CCharacterComponent::CreateWaterSplash()
 	if(pSoundEmitterComponent.valid() && pTrComponent != nullptr && pSurfC.valid()) {
 		auto pos = pTrComponent->GetPosition();
 		pos = pSurfC->ProjectToSurface(pos);
-		client->PlayWorldSound("fx.water_slosh", ALSoundType::Effect, pos);
+		pragma::get_client_state()->PlayWorldSound("fx.water_slosh", ALSoundType::Effect, pos);
 		auto *pt = pragma::ecs::CParticleSystemComponent::Create("watersplash");
 		if(pt != nullptr) {
 			auto pTrComponent = pt->GetEntity().GetTransformComponent();

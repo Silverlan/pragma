@@ -10,12 +10,12 @@ module;
 #include <pragma/lua/libraries/lfile.h>
 #include <buffers/prosper_buffer.hpp>
 
-module pragma.client.scripting.lua.classes.model;
+module pragma.client;
 
-import pragma.client.assets;
-import pragma.client.client_state;
-
-extern ClientState *client;
+import :model.model_class;
+import :scripting.lua.classes.model;
+import :assets;
+import :client_state;
 
 std::shared_ptr<Model> Lua::Model::Client::create_generic_model(Game &game, ::ModelSubMesh &subMesh)
 {
@@ -58,13 +58,13 @@ void Lua::Model::Client::ExportAnimation(lua_State *l, ::Model &mdl, const std::
 void Lua::Model::Client::AddMaterial(lua_State *l, ::Model &mdl, uint32_t textureGroup, const std::string &name)
 {
 	//Lua::CheckModel(l,1);
-	auto *mat = client->LoadMaterial(name);
+	auto *mat = pragma::get_client_state()->LoadMaterial(name);
 	Lua::Model::AddMaterial(l, mdl, textureGroup, mat);
 }
 void Lua::Model::Client::SetMaterial(lua_State *l, ::Model &mdl, uint32_t texIdx, const std::string &name)
 {
 	//Lua::CheckModel(l,1);
-	auto *mat = client->LoadMaterial(name);
+	auto *mat = pragma::get_client_state()->LoadMaterial(name);
 	Lua::Model::SetMaterial(l, mdl, texIdx, mat);
 }
 void Lua::Model::Client::GetVertexAnimationBuffer(lua_State *l, ::Model &mdl)

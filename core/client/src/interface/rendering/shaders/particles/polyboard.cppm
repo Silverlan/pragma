@@ -3,8 +3,11 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 
-export module pragma.client.rendering.shaders:particle_polyboard;
+export module pragma.client:rendering.shaders.particle_polyboard;
+
+import :rendering.shaders.particle_2d_base;
 
 export namespace pragma {
 	class CRasterizationRendererComponent;
@@ -28,11 +31,11 @@ export namespace pragma {
 			float viewportH;
 		};
 #pragma pack(pop)
-		bool Draw(pragma::CSceneComponent &scene, const CRasterizationRendererComponent &renderer, const pragma::CParticleSystemComponent &ps, prosper::IBuffer &vertexBuffer, prosper::IBuffer &indexBuffer, uint32_t numIndices, float radius, float curvature);
+		bool Draw(pragma::CSceneComponent &scene, const CRasterizationRendererComponent &renderer, const pragma::ecs::CParticleSystemComponent &ps, prosper::IBuffer &vertexBuffer, prosper::IBuffer &indexBuffer, uint32_t numIndices, float radius, float curvature);
 	  protected:
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
 		virtual void InitializeShaderResources() override;
 	  private:
-		bool Draw(pragma::CSceneComponent &scene, const pragma::CParticleSystemComponent &ps, bool bloom) = delete;
+		bool Draw(pragma::CSceneComponent &scene, const pragma::ecs::CParticleSystemComponent &ps, bool bloom) = delete;
 	};
 };

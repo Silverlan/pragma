@@ -13,19 +13,17 @@ module;
 #include <image/prosper_render_target.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
-module pragma.client.entities.components.rasterization_renderer;
+module pragma.client;
 
-import pragma.client.client_state;
-import pragma.client.engine;
-import pragma.client.entities.components.lights.directional;
-import pragma.client.entities.components.lights.shadow;
-import pragma.client.entities.components.renderer;
-import pragma.client.game;
-import pragma.client.rendering.shaders;
+import :entities.components.rasterization_renderer;
+import :client_state;
+import :engine;
+import :entities.components.lights.directional;
+import :entities.components.lights.shadow;
+import :entities.components.renderer;
+import :game;
+import :rendering.shaders;
 
-extern CGame *c_game;
-extern CEngine *c_engine;
-extern ClientState *client;
 
 using namespace pragma;
 
@@ -92,7 +90,7 @@ void CRasterizationRendererComponent::UpdateLightmap(CLightMapComponent &lightMa
 		CLightMapComponent::LOGGER.warn("Lightmap has no valid lightmap texture!");
 		return;
 	}
-	for(auto &renderer : EntityCIterator<CRasterizationRendererComponent> {*c_game})
+	for(auto &renderer : EntityCIterator<CRasterizationRendererComponent> {*pragma::get_cgame()})
 		renderer.SetLightMap(lightMapC);
 	g_lightmapC = lightMapC.GetHandle<CLightMapComponent>();
 }
@@ -107,7 +105,7 @@ void CRasterizationRendererComponent::UpdateLightmap()
 
 CRasterizationRendererComponent::CRasterizationRendererComponent(BaseEntity &ent) : BaseEntityComponent {ent}, m_hdrInfo {*this}, m_stateFlags {StateFlags::PrepassEnabled | StateFlags::InitialRender}
 {
-	m_whShaderWireframe = c_engine->GetShader("wireframe");
+	m_whShaderWireframe = pragma::get_cengine()->GetShader("wireframe");
 
 	InitializeCommandBufferGroups();
 
@@ -115,9 +113,9 @@ CRasterizationRendererComponent::CRasterizationRendererComponent(BaseEntity &ent
 	bufCreateInfo.size = sizeof(m_rendererData);
 	bufCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::DeviceLocal;
 	bufCreateInfo.usageFlags = prosper::BufferUsageFlags::UniformBufferBit;
-	m_rendererBuffer = c_engine->GetRenderContext().CreateBuffer(bufCreateInfo, &m_rendererData);
+	m_rendererBuffer = pragma::get_cengine()->GetRenderContext().CreateBuffer(bufCreateInfo, &m_rendererData);
 
-	auto *shaderPbr = static_cast<pragma::ShaderPBR *>(c_engine->GetShader("pbr").get());
+	auto *shaderPbr = static_cast<pragma::ShaderPBR *>(pragma::get_cengine()->GetShader("pbr").get());
 	assert(shaderPbr);
 	if(shaderPbr) {
 		m_descSetGroupRenderer = shaderPbr->CreateDescriptorSetGroup(pragma::ShaderPBR::DESCRIPTOR_SET_RENDERER.setIndex);
@@ -129,7 +127,7 @@ CRasterizationRendererComponent::CRasterizationRendererComponent(BaseEntity &ent
 
 CRasterizationRendererComponent::~CRasterizationRendererComponent()
 {
-	auto &renderContext = c_engine->GetRenderContext();
+	auto &renderContext = pragma::get_cengine()->GetRenderContext();
 	renderContext.KeepResourceAliveUntilPresentationComplete(m_prepassCommandBufferGroup);
 	renderContext.KeepResourceAliveUntilPresentationComplete(m_shadowCommandBufferGroup);
 	renderContext.KeepResourceAliveUntilPresentationComplete(m_lightingCommandBufferGroup);
@@ -183,7 +181,7 @@ prosper::IDescriptorSet *CRasterizationRendererComponent::GetLightSourceDescript
 
 void CRasterizationRendererComponent::InitializeCommandBufferGroups()
 {
-	auto &context = c_engine->GetRenderContext();
+	auto &context = pragma::get_cengine()->GetRenderContext();
 	auto &window = context.GetWindow();
 	std::string dbgPrefix;
 	auto uuid = GetEntity().GetUuid();
@@ -207,7 +205,7 @@ void CRasterizationRendererComponent::InitializeLightDescriptorSets()
 		ds.SetBindingStorageBuffer(const_cast<prosper::IUniformResizableBuffer &>(bufShadowData), umath::to_integral(pragma::ShaderGameWorldLightingPass::RendererBinding::ShadowData));
 #endif
 
-		m_dsgLightsCompute = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderForwardPLightCulling::DESCRIPTOR_SET_LIGHTS);
+		m_dsgLightsCompute = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderForwardPLightCulling::DESCRIPTOR_SET_LIGHTS);
 #if USE_LIGHT_SOURCE_UNIFORM_BUFFER == 1
 		m_dsgLightsCompute->GetDescriptorSet()->SetBindingUniformBuffer(const_cast<prosper::IUniformResizableBuffer &>(bufLightSources), umath::to_integral(pragma::ShaderForwardPLightCulling::LightBinding::LightBuffers));
 		m_dsgLightsCompute->GetDescriptorSet()->SetBindingUniformBuffer(const_cast<prosper::IUniformResizableBuffer &>(bufShadowData), umath::to_integral(pragma::ShaderForwardPLightCulling::LightBinding::ShadowData));
@@ -264,7 +262,7 @@ bool CRasterizationRendererComponent::ReloadRenderTarget(uint32_t width, uint32_
 		auto &ds = *m_descSetGroupRenderer->GetDescriptorSet();
 		ds.SetBindingTexture(*ssaoBlurTexResolved, umath::to_integral(pragma::ShaderScene::RendererBinding::SSAOMap));
 	}
-	auto &dummyTex = c_engine->GetRenderContext().GetDummyTexture();
+	auto &dummyTex = pragma::get_cengine()->GetRenderContext().GetDummyTexture();
 	auto &ds = *m_descSetGroupRenderer->GetDescriptorSet();
 	ds.SetBindingTexture(*dummyTex, umath::to_integral(pragma::ShaderScene::RendererBinding::LightMapDiffuse));
 	ds.SetBindingTexture(*dummyTex, umath::to_integral(pragma::ShaderScene::RendererBinding::LightMapDiffuseIndirect));
@@ -294,7 +292,7 @@ void CRasterizationRendererComponent::OnEntityComponentRemoved(BaseEntityCompone
 		m_rendererComponent = nullptr;
 }
 
-bool CRasterizationRendererComponent::IsSSAOEnabled() const { return umath::is_flag_set(m_stateFlags, StateFlags::SSAOEnabled) && client->GetGameWorldShaderSettings().ssaoEnabled; }
+bool CRasterizationRendererComponent::IsSSAOEnabled() const { return umath::is_flag_set(m_stateFlags, StateFlags::SSAOEnabled) && pragma::get_client_state()->GetGameWorldShaderSettings().ssaoEnabled; }
 void CRasterizationRendererComponent::SetSSAOEnabled(bool b)
 {
 	umath::set_flag(m_stateFlags, StateFlags::SSAOEnabled, b);
@@ -304,8 +302,8 @@ void CRasterizationRendererComponent::SetSSAOEnabled(bool b)
 	/*m_hdrInfo.prepass.SetUseExtendedPrepass(b);
 	if(b == true)
 	{
-	auto &context = c_engine->GetRenderContext();
-	m_hdrInfo.ssaoInfo.Initialize(context,GetWidth(),GetHeight(),static_cast<Anvil::SampleCountFlagBits>(c_game->GetMSAASampleCount()),m_hdrInfo.prepass.texturePositions,m_hdrInfo.prepass.textureNormals,m_hdrInfo.prepass.textureDepth);
+	auto &context = pragma::get_cengine()->GetRenderContext();
+	m_hdrInfo.ssaoInfo.Initialize(context,GetWidth(),GetHeight(),static_cast<Anvil::SampleCountFlagBits>(pragma::get_cgame()->GetMSAASampleCount()),m_hdrInfo.prepass.texturePositions,m_hdrInfo.prepass.textureNormals,m_hdrInfo.prepass.textureDepth);
 	}
 	else
 	m_hdrInfo.ssaoInfo.Clear();
@@ -325,13 +323,13 @@ void CRasterizationRendererComponent::UpdateRenderSettings()
 }
 void CRasterizationRendererComponent::SetShaderOverride(const std::string &srcShaderId, const std::string &shaderOverrideId)
 {
-	auto hSrcShader = c_engine->GetShader(srcShaderId);
+	auto hSrcShader = pragma::get_cengine()->GetShader(srcShaderId);
 	if(hSrcShader.get()->GetBaseTypeHashCode() != pragma::ShaderGameWorldLightingPass::HASH_TYPE)
 		return;
 	auto *srcShader = dynamic_cast<pragma::ShaderGameWorldLightingPass *>(hSrcShader.get());
 	if(srcShader == nullptr)
 		return;
-	auto hDstShader = c_engine->GetShader(shaderOverrideId);
+	auto hDstShader = pragma::get_cengine()->GetShader(shaderOverrideId);
 	auto dstShader = dynamic_cast<pragma::ShaderGameWorldLightingPass *>(hDstShader.get());
 	if(dstShader == nullptr)
 		return;
@@ -348,7 +346,7 @@ pragma::ShaderGameWorldLightingPass *CRasterizationRendererComponent::GetShaderO
 }
 void CRasterizationRendererComponent::ClearShaderOverride(const std::string &srcShaderId)
 {
-	auto hSrcShader = c_engine->GetShader(srcShaderId);
+	auto hSrcShader = pragma::get_cengine()->GetShader(srcShaderId);
 	auto *srcShader = dynamic_cast<pragma::ShaderGameWorldLightingPass *>(hSrcShader.get());
 	if(srcShader == nullptr)
 		return;
@@ -474,7 +472,7 @@ void CRasterizationRendererComponent::SetLightMap(pragma::CLightMapComponent &li
 	}
 	auto &ds = *m_descSetGroupRenderer->GetDescriptorSet();
 
-	auto &dummyTex = c_engine->GetRenderContext().GetDummyTexture();
+	auto &dummyTex = pragma::get_cengine()->GetRenderContext().GetDummyTexture();
 	auto getTex = [&dummyTex](const std::shared_ptr<prosper::Texture> &tex) { return tex ? tex : dummyTex; };
 	ds.SetBindingTexture(*getTex(m_lightMapInfo.lightMapTexture), umath::to_integral(pragma::ShaderScene::RendererBinding::LightMapDiffuse));
 	ds.SetBindingTexture(*getTex(m_lightMapInfo.lightMapIndirectTexture), umath::to_integral(pragma::ShaderScene::RendererBinding::LightMapDiffuseIndirect));
@@ -547,15 +545,15 @@ void CRasterizationRenderer::Initialize()
 
 static void cl_render_ssao_callback(NetworkState *, const ConVar &, bool, bool enabled)
 {
-	if(c_game == nullptr)
+	if(pragma::get_cgame() == nullptr)
 		return;
-	auto &gameWorldShaderSettings = client->GetGameWorldShaderSettings();
+	auto &gameWorldShaderSettings = pragma::get_client_state()->GetGameWorldShaderSettings();
 	if(gameWorldShaderSettings.ssaoEnabled == enabled)
 		return;
 	gameWorldShaderSettings.ssaoEnabled = enabled;
-	auto &context = c_engine->GetRenderContext();
+	auto &context = pragma::get_cengine()->GetRenderContext();
 	context.WaitIdle();
-	for(auto &c : EntityCIterator<CRasterizationRendererComponent> {*c_game})
+	for(auto &c : EntityCIterator<CRasterizationRendererComponent> {*pragma::get_cgame()})
 		c.SetSSAOEnabled(enabled);
 }
 REGISTER_CONVAR_CALLBACK_CL(cl_render_ssao, cl_render_ssao_callback);

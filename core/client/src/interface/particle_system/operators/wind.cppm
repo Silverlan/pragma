@@ -11,12 +11,15 @@ module;
 #include <sharedutils/util.h>
 #include <algorithm>
 
-export module pragma.client.particle_system:operator_wind;
+export module pragma.client:particle_system.operator_wind;
+
+import :entities.components.particle_system;
+import :particle_system.modifier;
 
 export class DLLCLIENT CParticleOperatorWind : public CParticleOperator {
   public:
 	CParticleOperatorWind() = default;
-	virtual void Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+	virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
 	virtual void Simulate(CParticle &particle, double tDelta, float strength) override;
 	virtual void Simulate(double tDelta) override;
   private:
@@ -26,9 +29,7 @@ export class DLLCLIENT CParticleOperatorWind : public CParticleOperator {
 	Vector3 m_vDelta = {};
 };
 
-REGISTER_PARTICLE_OPERATOR(wind, CParticleOperatorWind);
-
-void CParticleOperatorWind::Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void CParticleOperatorWind::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleOperator::Initialize(pSystem, values);
 	for(auto it = values.begin(); it != values.end(); it++) {

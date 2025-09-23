@@ -7,9 +7,9 @@ module;
 #include <wgui/wibase.h>
 #include <sharedutils/functioncallback.h>
 
-export module pragma.client.gui:main_menu_base;
+export module pragma.client:gui.main_menu_base;
 
-import :options_list;
+import :gui.options_list;
 
 export {
 	class WIMainMenuElement;

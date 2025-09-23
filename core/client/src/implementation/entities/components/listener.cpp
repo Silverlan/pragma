@@ -13,14 +13,15 @@ module;
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
-module pragma.client.entities.components.listener;
+module pragma.client;
 
-import pragma.client.engine;
-import pragma.client.entities.components.transform;
+
+import :entities.components.listener;
+import :engine;
+import :entities.components.transform;
 
 using namespace pragma;
 
-extern CEngine *c_engine;
 
 void CListenerComponent::Initialize()
 {
@@ -28,7 +29,7 @@ void CListenerComponent::Initialize()
 
 	auto &ent = GetEntity();
 	ent.AddComponent<pragma::CTransformComponent>();
-	auto *soundSys = c_engine->GetSoundSystem();
+	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
 	if(soundSys == nullptr) {
 		ent.RemoveSafely();
 		return;

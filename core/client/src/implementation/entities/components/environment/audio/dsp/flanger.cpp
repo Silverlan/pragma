@@ -11,13 +11,14 @@ module;
 #include <alsoundsystem.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
-module pragma.client.entities.components.audio.dsp.flanger;
+module pragma.client;
 
-import pragma.client.engine;
+
+import :entities.components.audio.dsp.flanger;
+import :engine;
 
 using namespace pragma;
 
-extern CEngine *c_engine;
 
 void CSoundDspFlangerComponent::ReceiveData(NetPacket &packet)
 {
@@ -32,7 +33,7 @@ void CSoundDspFlangerComponent::ReceiveData(NetPacket &packet)
 void CSoundDspFlangerComponent::OnEntitySpawn()
 {
 	//BaseEnvSoundDspFlanger::OnEntitySpawn(); // Not calling BaseEnvSoundDspFlanger::OnEntitySpawn() to skip the dsp effect lookup
-	auto *soundSys = c_engine->GetSoundSystem();
+	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
 	if(soundSys == nullptr)
 		return;
 	al::EfxFlangerProperties props {};

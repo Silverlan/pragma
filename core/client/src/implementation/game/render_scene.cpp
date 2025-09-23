@@ -13,14 +13,15 @@ module;
 #include <image/prosper_msaa_texture.hpp>
 #include <sharedutils/scope_guard.h>
 
-module pragma.client.game;
+module pragma.client;
 
-import pragma.client.engine;
-import pragma.client.entities.components.render;
-import pragma.client.entities.components.renderer;
-import pragma.client.rendering.shaders;
 
-extern CEngine *c_engine;
+import :game;
+import :engine;
+import :entities.components.render;
+import :entities.components.renderer;
+import :rendering.shaders;
+
 
 void CGame::RenderScenePresent(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, prosper::Texture &texPostHdr, prosper::IImage *optOutImage, uint32_t layerId)
 {

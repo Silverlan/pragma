@@ -13,14 +13,15 @@ module;
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
-module pragma.client.entities.components.point_render_target;
+module pragma.client;
 
-import pragma.client.client_state;
-import pragma.client.engine;
+
+import :entities.components.point_render_target;
+import :client_state;
+import :engine;
 
 using namespace pragma;
 
-extern ClientState *client;
 
 #pragma message("FIXME: If point_rendertarget is out of view of the local player, but one of the texture targets isn't, they won't get updated! Find a solution!")
 
@@ -51,7 +52,7 @@ void CRenderTargetComponent::GetRenderSize(float *w, float *h)
 
 void CRenderTargetComponent::SetRenderMaterial(Material *mat) { m_matRender = mat; }
 Material *CRenderTargetComponent::GetRenderMaterial() { return m_matRender; }
-void CRenderTargetComponent::SetRenderMaterial(std::string mat) { SetRenderMaterial(client->LoadMaterial(mat.c_str())); }
+void CRenderTargetComponent::SetRenderMaterial(std::string mat) { SetRenderMaterial(pragma::get_client_state()->LoadMaterial(mat.c_str())); }
 
 void CRenderTargetComponent::SetRefreshRate(float f) { m_kvRefreshRate = f; }
 float CRenderTargetComponent::GetRefreshRate() { return m_kvRefreshRate; }

@@ -14,17 +14,19 @@ module;
 #include <prosper_descriptor_set_group.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
+#include "pragma/entities/components/base_model_component.hpp"
 #include <pragma/lua/lua_util_component.hpp>
 #include <pragma/lua/lua_util_component_stream.hpp>
 
-module pragma.client.entities.components.vertex_animated;
+module pragma.client;
 
-import pragma.client.entities.components.flex;
-import pragma.client.entities.components.render;
 
-import pragma.client.engine;
+import :entities.components.vertex_animated;
+import :entities.components.flex;
+import :entities.components.render;
 
-extern CEngine *c_engine;
+import :engine;
+import :model.model_class;
 
 using namespace pragma;
 
@@ -32,7 +34,7 @@ static std::shared_ptr<prosper::IDynamicResizableBuffer> g_vertexAnimationBuffer
 const std::shared_ptr<prosper::IDynamicResizableBuffer> &pragma::get_vertex_animation_buffer() { return g_vertexAnimationBuffer; }
 void pragma::initialize_vertex_animation_buffer()
 {
-	auto alignment = c_engine->GetRenderContext().CalcBufferAlignment(prosper::BufferUsageFlags::StorageBufferBit);
+	auto alignment = pragma::get_cengine()->GetRenderContext().CalcBufferAlignment(prosper::BufferUsageFlags::StorageBufferBit);
 	if(alignment > 0 && (sizeof(CVertexAnimatedComponent::VertexAnimationData) % alignment) != 0) {
 		Con::cwar << "Minimum storage buffer alignment is " << alignment << ", but only alignment values of <=" << sizeof(CVertexAnimatedComponent::VertexAnimationData) << " are supported! Morph target animations will be disabled!" << Con::endl;
 		return;
@@ -47,7 +49,7 @@ void pragma::initialize_vertex_animation_buffer()
 	createInfo.usageFlags |= prosper::BufferUsageFlags::StorageBufferBit;
 #endif
 
-	g_vertexAnimationBuffer = c_engine->GetRenderContext().CreateDynamicResizableBuffer(createInfo, createInfo.size * 5 /* 5 MiB */, 0.05f);
+	g_vertexAnimationBuffer = pragma::get_cengine()->GetRenderContext().CreateDynamicResizableBuffer(createInfo, createInfo.size * 5 /* 5 MiB */, 0.05f);
 	g_vertexAnimationBuffer->SetDebugName("entity_vertex_anim_bone_buf");
 	g_vertexAnimationBuffer->SetPermanentlyMapped(true, prosper::IBuffer::MapFlags::WriteBit | prosper::IBuffer::MapFlags::Unsynchronized);
 	assert(g_vertexAnimationBuffer->GetAlignment() == 0 || (sizeof(CVertexAnimatedComponent::VertexAnimationData) % g_vertexAnimationBuffer->GetAlignment()) == 0);
@@ -128,7 +130,7 @@ void CVertexAnimatedComponent::DestroyVertexAnimationBuffer()
 	auto whRenderComponent = ent.GetComponent<CRenderComponent>();
 	auto *pRenderDescSet = whRenderComponent.valid() ? whRenderComponent->GetRenderDescriptorSet() : nullptr;
 	if(pRenderDescSet) {
-		pRenderDescSet->SetBindingStorageBuffer(*c_engine->GetRenderContext().GetDummyBuffer(), umath::to_integral(pragma::ShaderGameWorldLightingPass::InstanceBinding::VertexAnimationFrameData)); // Reset buffer
+		pRenderDescSet->SetBindingStorageBuffer(*pragma::get_cengine()->GetRenderContext().GetDummyBuffer(), umath::to_integral(pragma::ShaderGameWorldLightingPass::InstanceBinding::VertexAnimationFrameData)); // Reset buffer
 		pRenderDescSet->Update();
 	}
 }

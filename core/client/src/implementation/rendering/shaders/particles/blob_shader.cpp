@@ -9,16 +9,15 @@ module;
 #include <prosper_command_buffer.hpp>
 #include <datasystem_vector.h>
 
-module pragma.client.rendering.shaders;
+module pragma.client;
 
-import :particle_blob;
 
-import pragma.client.engine;
-import pragma.client.entities.components;
-import pragma.client.game;
+import :rendering.shaders.particle_blob;
 
-extern CEngine *c_engine;
-extern CGame *c_game;
+import :engine;
+import :entities.components;
+import :game;
+
 
 using namespace pragma;
 
@@ -57,7 +56,7 @@ void ShaderParticleBlob::GetShaderPreprocessorDefinitions(std::unordered_map<std
 
 std::shared_ptr<prosper::IDescriptorSetGroup> ShaderParticleBlob::InitializeMaterialDescriptorSet(CMaterial &mat)
 {
-	auto descSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(*m_materialDescSetInfo);
+	auto descSetGroup = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(*m_materialDescSetInfo);
 	if(!descSetGroup)
 		return nullptr;
 	pragma::rendering::ShaderInputData materialData {*m_shaderMaterial};
@@ -68,7 +67,7 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderParticleBlob::InitializeMate
 	return descSetGroup;
 }
 
-bool ShaderParticleBlob::RecordParticleMaterial(prosper::ShaderBindState &bindState, const CRasterizationRendererComponent &renderer, const pragma::CParticleSystemComponent &ps) const
+bool ShaderParticleBlob::RecordParticleMaterial(prosper::ShaderBindState &bindState, const CRasterizationRendererComponent &renderer, const pragma::ecs::CParticleSystemComponent &ps) const
 {
 	auto *mat = static_cast<CMaterial *>(ps.GetMaterial());
 	if(mat == nullptr)
@@ -82,7 +81,7 @@ bool ShaderParticleBlob::RecordParticleMaterial(prosper::ShaderBindState &bindSt
 	auto *descSetDepth = renderer.GetDepthDescriptorSet();
 	if(descSetDepth == nullptr)
 		return false;
-	auto &animDescSet = const_cast<ShaderParticleBlob *>(this)->GetAnimationDescriptorSet(const_cast<pragma::CParticleSystemComponent &>(ps));
+	auto &animDescSet = const_cast<ShaderParticleBlob *>(this)->GetAnimationDescriptorSet(const_cast<pragma::ecs::CParticleSystemComponent &>(ps));
 	return RecordBindDescriptorSets(bindState, {&descSetTexture}, m_materialDescSetInfo->setIndex);
 }
 
@@ -121,15 +120,15 @@ bool ShaderParticleBlob::RecordBindScene(prosper::ICommandBuffer &cmd, const pro
 	return ShaderParticle2DBase::RecordBindScene(cmd, layout, scene, renderer, dsScene, dsRenderer, dsRenderSettings, dsShadows);
 }
 
-bool ShaderParticleBlob::RecordDraw(prosper::ShaderBindState &bindState, pragma::CSceneComponent &scene, const CRasterizationRendererComponent &renderer, const pragma::CParticleSystemComponent &ps, pragma::ParticleOrientationType orientationType,
-  ParticleRenderFlags ptRenderFlags, prosper::IBuffer &blobIndexBuffer, prosper::IDescriptorSet &dsParticles, uint32_t particleBufferOffset)
+bool ShaderParticleBlob::RecordDraw(prosper::ShaderBindState &bindState, pragma::CSceneComponent &scene, const CRasterizationRendererComponent &renderer, const pragma::ecs::CParticleSystemComponent &ps, pragma::ecs::ParticleOrientationType orientationType,
+  ecs::ParticleRenderFlags ptRenderFlags, prosper::IBuffer &blobIndexBuffer, prosper::IDescriptorSet &dsParticles, uint32_t particleBufferOffset)
 {
 	if(RecordParticleMaterial(bindState, renderer, ps) == false)
 		return false;
 	auto &cam = scene.GetActiveCamera();
 
 	auto colorFactor = scene.GetParticleSystemColorFactor();
-	if(umath::is_flag_set(ptRenderFlags, ParticleRenderFlags::Bloom)) {
+	if(umath::is_flag_set(ptRenderFlags, ecs::ParticleRenderFlags::Bloom)) {
 		auto bloomColorFactor = ps.GetEffectiveBloomColorFactor();
 		if(bloomColorFactor.has_value())
 			colorFactor *= *bloomColorFactor;
@@ -146,8 +145,8 @@ bool ShaderParticleBlob::RecordDraw(prosper::ShaderBindState &bindState, pragma:
 	}
 
 	auto renderFlags = GetRenderFlags(ps, ptRenderFlags);
-	auto width = c_engine->GetRenderContext().GetWindowWidth();
-	auto height = c_engine->GetRenderContext().GetWindowHeight();
+	auto width = pragma::get_cengine()->GetRenderContext().GetWindowWidth();
+	auto height = pragma::get_cengine()->GetRenderContext().GetWindowHeight();
 	assert(width <= std::numeric_limits<uint16_t>::max() && height <= std::numeric_limits<uint16_t>::max());
 
 	auto viewportSize = static_cast<uint32_t>(width);
@@ -169,7 +168,7 @@ bool ShaderParticleBlob::RecordDraw(prosper::ShaderBindState &bindState, pragma:
 		return false;
 	if(RecordBindDescriptorSet(bindState, dsParticles, DESCRIPTOR_SET_PARTICLE_DATA.setIndex, {particleBufferOffset}) == false)
 		return false;
-	auto &shaderPbr = c_game->GetGameShader(CGame::GameShader::Pbr);
+	auto &shaderPbr = pragma::get_cgame()->GetGameShader(CGame::GameShader::Pbr);
 	assert(shaderPbr.valid());
 
 	float iblStrength = 1.f;
@@ -182,6 +181,6 @@ bool ShaderParticleBlob::RecordDraw(prosper::ShaderBindState &bindState, pragma:
 
 	auto ptAnimBuffer = ps.GetParticleAnimationBuffer();
 	if(ptAnimBuffer == nullptr)
-		ptAnimBuffer = c_engine->GetRenderContext().GetDummyBuffer();
-	return RecordBindVertexBuffers(bindState, {ps.GetParticleBuffer().get(), ptAnimBuffer.get(), &blobIndexBuffer}) == true && ShaderSceneLit::RecordDraw(bindState, pragma::CParticleSystemComponent::VERTEX_COUNT, ps.GetRenderParticleCount()) == true;
+		ptAnimBuffer = pragma::get_cengine()->GetRenderContext().GetDummyBuffer();
+	return RecordBindVertexBuffers(bindState, {ps.GetParticleBuffer().get(), ptAnimBuffer.get(), &blobIndexBuffer}) == true && ShaderSceneLit::RecordDraw(bindState, pragma::ecs::CParticleSystemComponent::VERTEX_COUNT, ps.GetRenderParticleCount()) == true;
 }

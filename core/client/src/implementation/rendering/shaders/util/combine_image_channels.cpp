@@ -21,13 +21,13 @@ module;
 #include <cmaterial_manager2.hpp>
 #include <texturemanager/texture.h>
 
-module pragma.client.rendering.shaders;
+module pragma.client;
 
-import :combine_image_channels;
 
-import pragma.client.client_state;
+import :rendering.shaders.combine_image_channels;
 
-extern ClientState *client;
+import :client_state;
+
 
 decltype(pragma::ShaderCombineImageChannels::DESCRIPTOR_SET_TEXTURE) pragma::ShaderCombineImageChannels::DESCRIPTOR_SET_TEXTURE = {
   "TEXTURES",

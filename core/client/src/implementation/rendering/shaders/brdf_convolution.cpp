@@ -10,13 +10,12 @@ module;
 #include <image/prosper_render_target.hpp>
 #include <prosper_command_buffer.hpp>
 
-module pragma.client.rendering.shaders;
+module pragma.client;
 
-import :brdf_convolution;
+import :rendering.shaders.brdf_convolution;
 
-import pragma.client.engine;
+import :engine;
 
-extern CEngine *c_engine;
 
 using namespace pragma;
 
@@ -41,7 +40,7 @@ std::shared_ptr<prosper::Texture> ShaderBRDFConvolution::CreateBRDFConvolutionMa
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	createInfo.tiling = prosper::ImageTiling::Optimal;
 	createInfo.usage = prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::SampledBit;
-	auto img = c_engine->GetRenderContext().CreateImage(createInfo);
+	auto img = pragma::get_cengine()->GetRenderContext().CreateImage(createInfo);
 
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
 	prosper::util::SamplerCreateInfo samplerCreateInfo {};
@@ -49,12 +48,12 @@ std::shared_ptr<prosper::Texture> ShaderBRDFConvolution::CreateBRDFConvolutionMa
 	samplerCreateInfo.addressModeV = prosper::SamplerAddressMode::ClampToEdge;
 	samplerCreateInfo.minFilter = prosper::Filter::Linear;
 	samplerCreateInfo.magFilter = prosper::Filter::Linear;
-	auto tex = c_engine->GetRenderContext().CreateTexture({}, *img, imgViewCreateInfo, samplerCreateInfo);
-	auto rt = c_engine->GetRenderContext().CreateRenderTarget({tex}, GetRenderPass());
+	auto tex = pragma::get_cengine()->GetRenderContext().CreateTexture({}, *img, imgViewCreateInfo, samplerCreateInfo);
+	auto rt = pragma::get_cengine()->GetRenderContext().CreateRenderTarget({tex}, GetRenderPass());
 
-	auto vertBuffer = c_engine->GetRenderContext().GetCommonBufferCache().GetSquareVertexBuffer();
-	auto uvBuffer = c_engine->GetRenderContext().GetCommonBufferCache().GetSquareUvBuffer();
-	auto &setupCmd = c_engine->GetSetupCommandBuffer();
+	auto vertBuffer = pragma::get_cengine()->GetRenderContext().GetCommonBufferCache().GetSquareVertexBuffer();
+	auto uvBuffer = pragma::get_cengine()->GetRenderContext().GetCommonBufferCache().GetSquareUvBuffer();
+	auto &setupCmd = pragma::get_cengine()->GetSetupCommandBuffer();
 	auto success = false;
 	if(setupCmd->RecordBeginRenderPass(*rt)) {
 		prosper::ShaderBindState bindState {*setupCmd};
@@ -64,6 +63,6 @@ std::shared_ptr<prosper::Texture> ShaderBRDFConvolution::CreateBRDFConvolutionMa
 		}
 		setupCmd->RecordEndRenderPass();
 	}
-	c_engine->FlushSetupCommandBuffer();
+	pragma::get_cengine()->FlushSetupCommandBuffer();
 	return success ? tex : nullptr;
 }

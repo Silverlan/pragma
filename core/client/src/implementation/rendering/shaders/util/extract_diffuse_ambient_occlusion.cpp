@@ -6,13 +6,13 @@ module;
 #include "stdafx_client.h"
 #include <shader/prosper_pipeline_create_info.hpp>
 
-module pragma.client.rendering.shaders;
+module pragma.client;
 
-import :extract_diffuse_ambinet_occlusion;
 
-import pragma.client.engine;
+import :rendering.shaders.extract_diffuse_ambinet_occlusion;
 
-extern CEngine *c_engine;
+import :engine;
+
 
 using namespace pragma;
 

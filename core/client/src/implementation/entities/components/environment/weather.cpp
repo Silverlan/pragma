@@ -9,18 +9,19 @@ module;
 #include "pragma/entities/parentmode.h"
 #include <pragma/entities/entity_component_system_t.hpp>
 
-module pragma.client.entities.components.env_weather;
+module pragma.client;
 
-import pragma.client.client_state;
-import pragma.client.engine;
-import pragma.client.entities.components.attachment;
-import pragma.client.entities.components.particle_system;
-import pragma.client.entities.components.player;
-import pragma.client.game;
+
+import :entities.components.env_weather;
+import :client_state;
+import :engine;
+import :entities.components.attachment;
+import :entities.components.particle_system;
+import :entities.components.player;
+import :game;
 
 using namespace pragma;
 
-extern CGame *c_game;
 
 CWeatherComponent::~CWeatherComponent()
 {
@@ -35,7 +36,7 @@ void CWeatherComponent::Initialize()
 void CWeatherComponent::OnEntitySpawn()
 {
 	BaseEnvWeatherComponent::OnEntitySpawn();
-	auto *pl = c_game->GetLocalPlayer();
+	auto *pl = pragma::get_cgame()->GetLocalPlayer();
 	if(pl != NULL) {
 		auto *pt = pragma::ecs::CParticleSystemComponent::Create({{"particle", "snow"}});
 		if(pt != nullptr) {

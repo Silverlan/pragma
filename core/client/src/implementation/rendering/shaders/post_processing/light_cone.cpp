@@ -10,10 +10,10 @@ module;
 #include <prosper_command_buffer.hpp>
 #include <shader/prosper_shader_copy_image.hpp>
 
-import pragma.client.model;
-module pragma.client.rendering.shaders;
+module pragma.client;
 
-import :pp_light_cone;
+import :model;
+import :rendering.shaders.pp_light_cone;
 
 using namespace pragma;
 

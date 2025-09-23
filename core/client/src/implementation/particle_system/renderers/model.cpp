@@ -11,32 +11,27 @@ module;
 #include <prosper_descriptor_set_group.hpp>
 #include <prosper_command_buffer.hpp>
 
-module pragma.client.particle_system;
+module pragma.client;
 
-import :renderer_model;
+import :particle_system.renderer_model;
 
-import pragma.client.client_state;
-import pragma.client.entities.components;
-import pragma.client.game;
-import pragma.client.rendering.shaders;
+import :client_state;
+import :entities.components;
+import :game;
+import :rendering.shaders;
 
-REGISTER_PARTICLE_RENDERER(model, CParticleRendererModel);
-
-extern CEngine *c_engine;
-extern ClientState *client;
-extern CGame *c_game;
 
 decltype(CParticleRendererModel::s_rendererCount) CParticleRendererModel::s_rendererCount = 0;
 static std::shared_ptr<prosper::IBuffer> s_instanceBuffer = nullptr;
 static std::shared_ptr<prosper::IBuffer> s_instanceBufferAnimated = nullptr;
 static std::shared_ptr<prosper::IDescriptorSetGroup> s_instanceDescSetGroup = nullptr;
-void CParticleRendererModel::Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void CParticleRendererModel::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleRenderer::Initialize(pSystem, values);
 	m_rotationalBuffer.Initialize(pSystem);
 
 	auto skin = 0u;
-	m_shader = c_engine->GetShader("particlemodel");
+	m_shader = pragma::get_cengine()->GetShader("particlemodel");
 	std::unordered_map<uint32_t, uint32_t> bodyGroups;
 	std::string mdl;
 	for(auto &pair : values) {
@@ -62,18 +57,18 @@ void CParticleRendererModel::Initialize(pragma::CParticleSystemComponent &pSyste
 	auto fCreateAnimatedComponent = [this, &pSystem]() { return pSystem.GetEntity().AddComponent<pragma::CAnimatedComponent>(true); };
 
 	if(s_rendererCount++ == 0 && pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_INSTANCE.IsValid()) {
-		pragma::ShaderEntity::InstanceData instanceData {umat::identity(), Vector4(1.f, 1.f, 1.f, 1.f), pragma::ShaderEntity::InstanceData::RenderFlags::None};
+		pragma::rendering::InstanceData instanceData {umat::identity(), Vector4(1.f, 1.f, 1.f, 1.f), pragma::rendering::InstanceData::RenderFlags::None};
 		prosper::util::BufferCreateInfo createInfo {};
 		createInfo.size = sizeof(instanceData);
 		createInfo.usageFlags = prosper::BufferUsageFlags::UniformBufferBit;
 		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 
-		s_instanceDescSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_INSTANCE);
-		s_instanceBuffer = c_engine->GetRenderContext().CreateBuffer(createInfo, &instanceData);
+		s_instanceDescSetGroup = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_INSTANCE);
+		s_instanceBuffer = pragma::get_cengine()->GetRenderContext().CreateBuffer(createInfo, &instanceData);
 		s_instanceDescSetGroup->GetDescriptorSet()->SetBindingUniformBuffer(*s_instanceBuffer, 0u);
 
-		instanceData.renderFlags = pragma::ShaderEntity::InstanceData::RenderFlags::Weighted;
-		s_instanceBufferAnimated = c_engine->GetRenderContext().CreateBuffer(createInfo, &instanceData);
+		instanceData.renderFlags = pragma::rendering::InstanceData::RenderFlags::Weighted;
+		s_instanceBufferAnimated = pragma::get_cengine()->GetRenderContext().CreateBuffer(createInfo, &instanceData);
 	}
 
 	auto bAnimated = !m_animation.empty();
@@ -81,7 +76,7 @@ void CParticleRendererModel::Initialize(pragma::CParticleSystemComponent &pSyste
 		m_particleComponents.push_back(ParticleModelComponent {fCreateAnimatedComponent(), nullptr});
 	else // We need one model component per particle (expensive!!)
 	{
-		auto maxParticles = pSystem.GetMaxParticleCount();
+		auto maxParticles = static_cast<pragma::ecs::CParticleSystemComponent&>(pSystem).GetMaxParticleCount();
 		m_particleComponents.reserve(maxParticles);
 		for(auto i = decltype(maxParticles) {0u}; i < maxParticles; ++i)
 			m_particleComponents.push_back(ParticleModelComponent {fCreateAnimatedComponent(), nullptr});
@@ -91,7 +86,7 @@ void CParticleRendererModel::Initialize(pragma::CParticleSystemComponent &pSyste
 			auto wpBoneBuffer = ptComponent.animatedComponent->GetBoneBuffer();
 			if(wpBoneBuffer) {
 				// If we are animated, we have to create a unique descriptor set
-				ptComponent.instanceDescSetGroupAnimated = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_INSTANCE);
+				ptComponent.instanceDescSetGroupAnimated = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_INSTANCE);
 				ptComponent.instanceDescSetGroupAnimated->GetDescriptorSet()->SetBindingUniformBuffer(*s_instanceBufferAnimated, 0u);
 				ptComponent.instanceDescSetGroupAnimated->GetDescriptorSet()->SetBindingUniformBuffer(const_cast<prosper::IBuffer &>(*wpBoneBuffer), umath::to_integral(pragma::ShaderGameWorldLightingPass::InstanceBinding::BoneMatrices));
 			}
@@ -138,7 +133,7 @@ void CParticleRendererModel::PostSimulate(double tDelta)
 	// Update animation
 	if(IsAnimated() == false)
 		return;
-	auto &drawCmd = c_engine->GetDrawCommandBuffer();
+	auto &drawCmd = pragma::get_cengine()->GetDrawCommandBuffer();
 	auto numRenderParticles = GetParticleSystem().GetRenderParticleCount();
 	for(auto i = decltype(numRenderParticles) {0u}; i < numRenderParticles; ++i) {
 		auto ptIdx = GetParticleSystem().TranslateBufferIndex(i);
@@ -146,14 +141,14 @@ void CParticleRendererModel::PostSimulate(double tDelta)
 		auto &animComponent = ptComponent.animatedComponent;
 		if(animComponent.expired())
 			continue;
-		animComponent->MaintainAnimations(c_game->DeltaTime());
+		animComponent->MaintainAnimations(pragma::get_cgame()->DeltaTime());
 		animComponent->UpdateBoneBuffer(*drawCmd);
 	}
 }
 
 bool CParticleRendererModel::Update()
 {
-	auto *cam = c_game->GetRenderCamera<pragma::CCameraComponent>();
+	auto *cam = pragma::get_cgame()->GetRenderCamera<pragma::CCameraComponent>();
 	if(m_rotationalBuffer.Update() == false || cam == nullptr)
 		return false;
 	// Update meshes
@@ -167,7 +162,7 @@ bool CParticleRendererModel::Update()
 	auto mdlComponent = GetParticleSystem().GetEntity().GetModelComponent();
 	if(mdlComponent && mdlComponent->HasModel()) {
 		auto &mdl = mdlComponent->GetModel();
-		auto lod = c_game->GetLOD(dist, mdl->GetLODCount());
+		auto lod = pragma::get_cgame()->GetLOD(dist, mdl->GetLODCount());
 		if(static_cast<pragma::CModelComponent &>(*mdlComponent).GetLOD() != lod)
 			bSuccessful = false;
 		static_cast<pragma::CModelComponent &>(*mdlComponent).UpdateLOD(lod);
@@ -175,7 +170,7 @@ bool CParticleRendererModel::Update()
 	return bSuccessful;
 }
 
-void CParticleRendererModel::RecordRender(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::ParticleRenderFlags renderFlags)
+void CParticleRendererModel::RecordRender(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::ecs::ParticleRenderFlags renderFlags)
 {
 #if 0
 	if(m_shader.expired())
@@ -183,7 +178,7 @@ void CParticleRendererModel::RecordRender(prosper::ICommandBuffer &drawCmd, prag
 	auto *shader = static_cast<pragma::ShaderParticleModel*>(m_shader.get());
 	auto animBuffer = GetParticleSystem().GetParticleAnimationBuffer();
 	if(animBuffer == nullptr)
-		animBuffer = c_engine->GetRenderContext().GetDummyBuffer();
+		animBuffer = pragma::get_cengine()->GetRenderContext().GetDummyBuffer();
 	if(
 		shader->BeginDraw(drawCmd,{},GetParticleSystem()) == false || 
 		shader->BindParticleBuffers(*GetParticleSystem().GetParticleBuffer(),*m_rotationalBuffer.GetBuffer(),*animBuffer) == false || 
@@ -192,7 +187,7 @@ void CParticleRendererModel::RecordRender(prosper::ICommandBuffer &drawCmd, prag
 		return;
 	shader->BindLights(*renderer.GetLightSourceDescriptorSet());
 	shader->BindSceneCamera(scene,renderer,(GetParticleSystem().GetSceneRenderPass() == pragma::rendering::SceneRenderPass::View) ? true : false);
-	shader->BindRenderSettings(c_game->GetGlobalRenderSettingsDescriptorSet());
+	shader->BindRenderSettings(pragma::get_cgame()->GetGlobalRenderSettingsDescriptorSet());
 
 	auto mdlComponent = GetParticleSystem().GetEntity().GetModelComponent();
 	if(mdlComponent && mdlComponent->HasModel())
@@ -243,7 +238,7 @@ void CParticleRendererModel::RecordRenderShadow(prosper::ICommandBuffer &drawCmd
 {
 	/*if(s_instanceDescSet == nullptr)
 		return;
-	static auto hShader = c_engine->GetShader("particlemodelshadow");
+	static auto hShader = pragma::get_cengine()->GetShader("particlemodelshadow");
 	if(!hShader.IsValid())
 		return;
 	auto *shadowMap = light->GetShadowMap();
@@ -254,7 +249,7 @@ void CParticleRendererModel::RecordRenderShadow(prosper::ICommandBuffer &drawCmd
 	auto *depthTex = shadowMap->GetDepthTexture();
 	auto w = (*depthTex)->GetWidth();
 	auto h = (*depthTex)->GetHeight();
-	auto &context = c_engine->GetRenderContext();
+	auto &context = pragma::get_cengine()->GetRenderContext();
 	auto &drawCmd = context.GetDrawCmd();
 	auto &shader = static_cast<Shader::ParticleModelShadow&>(*hShader.get());
 	if(shader.BeginDrawTest(*m_particleSystem->GetParticleBuffer(),m_rotBuffer,drawCmd,light,w,h) == false)

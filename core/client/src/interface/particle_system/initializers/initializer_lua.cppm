@@ -6,7 +6,12 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <pragma/lua/luaobjectbase.h>
 
-export module pragma.client.particle_system:initializer_lua;
+export module pragma.client:particle_system.initializer_lua;
+
+import :entities.components.particle_system;
+import :particle_system.modifier;
+import :particle_system.enums;
+import :particle_system.particle;
 
 export {
 	class DLLCLIENT CParticleModifierLua : public LuaObjectBase {
@@ -22,7 +27,7 @@ export {
 	template<class TModifier>
 	class TParticleModifierLua : public TModifier, public CParticleModifierLua {
 	public:
-		virtual void Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+		virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
 		virtual void OnParticleCreated(CParticle &particle) override;
 		virtual void OnParticleDestroyed(CParticle &particle) override;
 		virtual void OnParticleSystemStarted() override;
@@ -45,7 +50,7 @@ export {
 	};
 
 	template<class TModifier>
-	void TParticleModifierLua<TModifier>::Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+	void TParticleModifierLua<TModifier>::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 	{
 		TModifier::Initialize(pSystem, values);
 		// RecordKeyValues(values);
@@ -97,7 +102,7 @@ export {
 	class DLLCLIENT CParticleRendererLua : public TParticleModifierLua<CParticleRenderer> {
 	public:
 		CParticleRendererLua() = default;
-		virtual void RecordRender(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::ParticleRenderFlags renderFlags) override;
+		virtual void RecordRender(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::ecs::ParticleRenderFlags renderFlags) override;
 		virtual void RecordRenderShadow(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::CLightComponent &light, uint32_t layerId = 0) override;
 		virtual pragma::ShaderParticleBase *GetShader() const override;
 		void SetShader(pragma::ShaderParticleBase *shader);

@@ -33,22 +33,18 @@ module;
 
 #undef GetClassName
 
-module pragma.client.entities;
+module pragma.client;
 
-import :base_entity;
+import :entities.base_entity;
 
-import pragma.client.client_state;
-import pragma.client.engine;
-import pragma.client.entities;
-import pragma.client.entities.components;
-import pragma.client.model;
-import pragma.client.game;
+import :client_state;
+import :engine;
+import :entities.components;
+import :model;
+import :game;
 import pragma.entities.components;
-import pragma.client.util;
+import :util;
 
-extern CEngine *c_engine;
-extern ClientState *client;
-extern CGame *c_game;
 
 void CBaseEntity::OnComponentAdded(pragma::BaseEntityComponent &component)
 {
@@ -113,7 +109,7 @@ BaseEntity *CBaseEntity::GetServersideEntity() const
 {
 	if(IsClientsideOnly() == true)
 		return nullptr;
-	auto *svState = c_engine->GetServerNetworkState();
+	auto *svState = pragma::get_cengine()->GetServerNetworkState();
 	if(svState == nullptr)
 		return nullptr;
 	auto *game = svState->GetGameState();
@@ -182,7 +178,7 @@ void CBaseEntity::Initialize()
 void CBaseEntity::DoSpawn()
 {
 	BaseEntity::DoSpawn();
-	c_game->SpawnEntity(this);
+	pragma::get_cgame()->SpawnEntity(this);
 }
 
 Bool CBaseEntity::ReceiveNetEvent(UInt32 eventId, NetPacket &p)
@@ -203,7 +199,7 @@ void CBaseEntity::ReceiveData(NetPacket &packet)
 	m_spawnFlags = packet->Read<uint32_t>();
 	SetUuid(packet->Read<util::Uuid>());
 
-	auto &componentManager = static_cast<pragma::CEntityComponentManager &>(c_game->GetEntityComponentManager());
+	auto &componentManager = static_cast<pragma::CEntityComponentManager &>(pragma::get_cgame()->GetEntityComponentManager());
 	auto &componentTypes = componentManager.GetRegisteredComponentTypes();
 	auto &svComponentToClComponentTable = componentManager.GetServerComponentIdToClientComponentIdTable();
 	auto numComponents = packet->Read<uint8_t>();
@@ -262,11 +258,11 @@ void CBaseEntity::Remove()
 		return;
 	BaseEntity::Remove();
 	SceneRenderDesc::AssertRenderQueueThreadInactive();
-	Game *game = client->GetGameState();
+	Game *game = pragma::get_client_state()->GetGameState();
 	game->RemoveEntity(this);
 }
 
-NetworkState *CBaseEntity::GetNetworkState() const { return client; }
+NetworkState *CBaseEntity::GetNetworkState() const { return pragma::get_client_state(); }
 
 bool CBaseEntity::IsClientsideOnly() const { return (GetIndex() == 0) ? true : false; }
 
@@ -283,14 +279,14 @@ void CBaseEntity::SendNetEventTCP(UInt32 eventId, NetPacket &data) const
 {
 	if(IsClientsideOnly() || !IsSpawned())
 		return;
-	eventId = c_game->LocalNetEventIdToShared(eventId);
+	eventId = pragma::get_cgame()->LocalNetEventIdToShared(eventId);
 	if(eventId == std::numeric_limits<pragma::NetEventId>::max()) {
 		Con::cwar << "Attempted to send net event " << eventId << " which has no known serverside id associated!" << Con::endl;
 		return;
 	}
 	nwm::write_entity(data, this);
 	data->Write<UInt32>(eventId);
-	client->SendPacket("ent_event", data, pragma::networking::Protocol::SlowReliable);
+	pragma::get_client_state()->SendPacket("ent_event", data, pragma::networking::Protocol::SlowReliable);
 }
 void CBaseEntity::SendNetEventUDP(UInt32 eventId) const
 {
@@ -304,14 +300,14 @@ void CBaseEntity::SendNetEventUDP(UInt32 eventId, NetPacket &data) const
 	if(IsClientsideOnly() || !IsSpawned())
 		return;
 	;
-	eventId = c_game->LocalNetEventIdToShared(eventId);
+	eventId = pragma::get_cgame()->LocalNetEventIdToShared(eventId);
 	if(eventId == std::numeric_limits<pragma::NetEventId>::max()) {
 		Con::cwar << "Attempted to send net event " << eventId << " which has no known serverside id associated!" << Con::endl;
 		return;
 	}
 	nwm::write_entity(data, this);
 	data->Write<UInt32>(eventId);
-	client->SendPacket("ent_event", data, pragma::networking::Protocol::FastUnreliable);
+	pragma::get_client_state()->SendPacket("ent_event", data, pragma::networking::Protocol::FastUnreliable);
 }
 pragma::ComponentHandle<pragma::BaseAnimatedComponent> CBaseEntity::GetAnimatedComponent() const
 {

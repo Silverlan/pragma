@@ -16,19 +16,19 @@ module;
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
-module pragma.client.game;
+module pragma.client;
 
-import pragma.client.client_state;
-import pragma.client.engine;
-import pragma.client.entities.components;
 
-extern CEngine *c_engine;
-extern ClientState *client;
+import :game;
+import :client_state;
+import :engine;
+import :entities.components;
+
 
 void CGame::ClearSoundCache()
 {
 #if ALSYS_STEAM_AUDIO_SUPPORT_ENABLED == 1
-	auto *soundSys = c_engine->GetSoundSystem();
+	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
 	if(soundSys != nullptr)
 		soundSys->ClearSteamAudioScene();
 #endif
@@ -58,7 +58,7 @@ static void steam_audio_message_callback(ipl::Scene::LoadStage stage, float prog
 static void steam_audio_error_callback(IPLerror err) { Con::cwar << "[STEAM AUDIO] Error trying to finalize scene: " << err << Con::endl; }
 static void steam_audio_finalized_callback()
 {
-	auto *soundSys = c_engine->GetSoundSystem();
+	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
 	if(soundSys == nullptr)
 		return;
 	soundSys->SetSteamAudioEnabled(true);
@@ -80,7 +80,7 @@ void CGame::ReloadSoundCache(bool bReloadBakedCache, SoundCacheFlags cacheFlags,
 	auto map = GetMapName();
 	if(map.empty())
 		return;
-	auto *soundSys = c_engine->GetSoundSystem();
+	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
 	if(soundSys != nullptr) {
 		auto *iplScene = soundSys->InitializeSteamAudioScene();
 		if(iplScene != nullptr) {
@@ -232,7 +232,7 @@ void CGame::ReloadSoundCache(bool bReloadBakedCache, SoundCacheFlags cacheFlags,
 					fAddEntityMeshes(entBrush);
 				}
 
-				/*auto &sounds = client->GetSounds();
+				/*auto &sounds = pragma::get_client_state()->GetSounds();
 				for(auto &sndRef : sounds)
 				{
 					auto *snd = static_cast<CALSound*>(&sndRef.get());

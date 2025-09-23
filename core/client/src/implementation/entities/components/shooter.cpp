@@ -12,22 +12,22 @@ module;
 #include <sharedutils/scope_guard.h>
 #include <pragma/audio/alsound_type.h>
 
-module pragma.client.entities.components.shooter;
+module pragma.client;
 
-import pragma.client.client_state;
-import pragma.client.entities.components.particle_system;
-import pragma.client.game;
+
+import :entities.components.shooter;
+import :client_state;
+import :entities.components.particle_system;
+import :game;
 
 using namespace pragma;
 
-extern CGame *c_game;
-extern ClientState *client;
 
 using namespace ecs::baseShooterComponent;
 void ecs::CShooterComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void ecs::CShooterComponent::FireBullets(const BulletInfo &bulletInfo, const Vector3 &origin, const Vector3 &effectsOrigins, const std::vector<Vector3> &destPositions, bool bTransmitToServer, std::vector<TraceResult> &outHitTargets)
 {
-	auto *physEnv = c_game->GetPhysicsEnvironment();
+	auto *physEnv = pragma::get_cgame()->GetPhysicsEnvironment();
 	if(physEnv == nullptr)
 		return;
 
@@ -58,13 +58,13 @@ void ecs::CShooterComponent::FireBullets(const BulletInfo &bulletInfo, const Vec
 				p->Write<Vector3>(destPositions[i]);
 			const auto minTracerDistance = 80.f; // Don't show a tracer if the distance is less than this, otherwise the tracer might look odd when close to a wall.
 			if(bulletInfo.tracerCount > 0 && (i % bulletInfo.tracerCount) == 0 && l > minTracerDistance)
-				c_game->CreateParticleTracer<pragma::ecs::CParticleSystemComponent>(effectsOrigins, hitPos, bulletInfo.tracerRadius, bulletInfo.tracerColor, bulletInfo.tracerLength, bulletInfo.tracerSpeed, bulletInfo.tracerMaterial, bulletInfo.tracerBloom);
+				pragma::get_cgame()->CreateParticleTracer<pragma::ecs::CParticleSystemComponent>(effectsOrigins, hitPos, bulletInfo.tracerRadius, bulletInfo.tracerColor, bulletInfo.tracerLength, bulletInfo.tracerSpeed, bulletInfo.tracerMaterial, bulletInfo.tracerBloom);
 			if(result.hitType != RayCastHitType::None) {
 				auto *col = result.collisionObj.Get();
 				if(col != nullptr) {
 					auto surfaceMaterialId = col->GetSurfaceMaterial();
-					auto *surfaceMaterial = (surfaceMaterialId != -1) ? c_game->GetSurfaceMaterial(surfaceMaterialId) : nullptr;
-					auto *surfaceMaterialGeneric = c_game->GetSurfaceMaterial(0);
+					auto *surfaceMaterial = (surfaceMaterialId != -1) ? pragma::get_cgame()->GetSurfaceMaterial(surfaceMaterialId) : nullptr;
+					auto *surfaceMaterialGeneric = pragma::get_cgame()->GetSurfaceMaterial(0);
 					if(surfaceMaterial != nullptr || surfaceMaterialGeneric != nullptr) {
 						auto particleEffect = (surfaceMaterial != nullptr) ? surfaceMaterial->GetImpactParticleEffect() : "";
 						if(particleEffect.empty() && surfaceMaterialGeneric != nullptr)
@@ -90,7 +90,7 @@ void ecs::CShooterComponent::FireBullets(const BulletInfo &bulletInfo, const Vec
 						if(sndEffect.empty() && surfaceMaterialGeneric != nullptr)
 							sndEffect = surfaceMaterialGeneric->GetBulletImpactSound();
 						if(!sndEffect.empty()) {
-							auto snd = client->CreateSound(sndEffect, ALSoundType::Effect | ALSoundType::Physics, ALCreateFlags::Mono);
+							auto snd = pragma::get_client_state()->CreateSound(sndEffect, ALSoundType::Effect | ALSoundType::Physics, ALCreateFlags::Mono);
 							if(snd != nullptr) {
 								snd->SetPosition(result.position);
 								snd->Play();

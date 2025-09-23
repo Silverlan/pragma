@@ -10,9 +10,9 @@ module;
 #include <pragma/networking/master_server_query_dispatcher.hpp>
 #include "pragma/lua/converters/gui_element_converter.hpp"
 
-export module pragma.client.gui:server_browser;
+export module pragma.client:gui.server_browser;
 
-import :frame;
+import :gui.frame;
 
 export {
 	namespace pragma::networking {

@@ -5,7 +5,7 @@ module;
 
 #include "pragma/clientdefinitions.h"
 
-export module pragma.client.rendering.shader_graph:node_vector_transform;
+export module pragma.client:rendering.shader_graph.node_vector_transform;
 
 import pragma.shadergraph;
 

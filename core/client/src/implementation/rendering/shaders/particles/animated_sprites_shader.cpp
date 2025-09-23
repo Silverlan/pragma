@@ -7,13 +7,13 @@ module;
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <shader/prosper_shader_t.hpp>
 
-module pragma.client.rendering.shaders;
+module pragma.client;
 
-import :particle_animated_sprites;
 
-import pragma.client.engine;
+import :rendering.shaders.particle_animated_sprites;
 
-extern CEngine *c_engine;
+import :engine;
+
 
 using namespace pragma;
 
@@ -53,10 +53,10 @@ static Vector3 rotate_vector(const Vector3 &v, const Mat4 &m) { return Vector3 {
 
 ShaderParticleAnimatedSprites::ShaderParticleAnimatedSprites(prosper::IPrContext &context, const std::string &identifier) : ShaderParticle2DBase(context, identifier, "programs/pfm/particles/particle_animated_sprites", "programs/particles/particle") {}
 
-Vector3 ShaderParticleAnimatedSprites::DoCalcVertexPosition(const pragma::CParticleSystemComponent &ptc, uint32_t ptIdx, uint32_t localVertIdx, const Vector3 &camPos, const Vector3 &camUpWs, const Vector3 &camRightWs, float nearZ, float farZ) const
+Vector3 ShaderParticleAnimatedSprites::DoCalcVertexPosition(const pragma::ecs::CParticleSystemComponent &ptc, uint32_t ptIdx, uint32_t localVertIdx, const Vector3 &camPos, const Vector3 &camUpWs, const Vector3 &camRightWs, float nearZ, float farZ) const
 {
 	// Note: This has to match the calculations performed in the vertex shader
-	auto *pt = const_cast<pragma::CParticleSystemComponent &>(ptc).GetParticle(ptIdx);
+	auto *pt = const_cast<pragma::ecs::CParticleSystemComponent &>(ptc).GetParticle(ptIdx);
 	auto ptWorldPos = pt->GetPosition();
 	// bool useCamBias = (u_instance.cameraBias != 0.0);
 	// TODO
@@ -135,8 +135,8 @@ void ShaderParticleAnimatedSprites::InitializeGfxPipeline(prosper::GraphicsPipel
 	ShaderParticleBase::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
 }
 
-bool ShaderParticleAnimatedSprites::RecordDraw(prosper::ShaderBindState &bindState, pragma::CSceneComponent &scene, const CRasterizationRendererComponent &renderer, const CParticleSystemComponent &ps, ParticleOrientationType orientationType,
-  ParticleRenderFlags renderFlags)
+bool ShaderParticleAnimatedSprites::RecordDraw(prosper::ShaderBindState &bindState, pragma::CSceneComponent &scene, const CRasterizationRendererComponent &renderer, const ecs::CParticleSystemComponent &ps, ecs::ParticleOrientationType orientationType,
+  ecs::ParticleRenderFlags renderFlags)
 {
 	PushConstants pushConstants {};
 	pushConstants.camBias = 0.f;

@@ -7,11 +7,11 @@ module;
 #include <wgui/wibase.h>
 #include <wgui/wihandle.h>
 #include "luasystem.h"
+#include "cmaterial.h"
 #include <wgui/types/wirect.h>
 #include <wgui/types/wiroot.h>
 #include "pragma/lua/classes/c_ldef_wgui.h"
 #include "pragma/lua/policies/gui_element_policy.hpp"
-#include "pragma/lua/converters/shader_converter_t.hpp"
 #include <pragma/lua/classes/ldef_vector.h>
 #include <pragma/lua/classes/lproperty.hpp>
 #include <pragma/lua/policies/default_parameter_policy.hpp>
@@ -20,7 +20,6 @@ module;
 #include <pragma/lua/converters/string_view_converter_t.hpp>
 #include <pragma/lua/converters/vector_converter_t.hpp>
 #include <pragma/lua/converters/optional_converter_t.hpp>
-#include <pragma/lua/converters/property_converter_t.hpp>
 #include <pragma/lua/lua_call.hpp>
 #include <scripting/lua/lua.hpp>
 #include <buffers/prosper_buffer.hpp>
@@ -35,21 +34,24 @@ module;
 #include <prosper_window.hpp>
 #include <luabind/copy_policy.hpp>
 #include <pragma/debug/intel_vtune.hpp>
+#include "pragma/lua/converters/property_converter_t.hpp"
 
-module pragma.client.scripting.lua.classes.gui;
+module pragma.client;
 
-import pragma.client.scripting.lua.libraries.gui;
-import pragma.client.scripting.lua.libraries.gui_callbacks;
+import :scripting.lua.classes.gui;
+import :scripting.lua.libraries.gui;
+import :scripting.lua.libraries.gui_callbacks;
+import :scripting.lua.libraries.vulkan;
 
-import pragma.client.game;
-import pragma.client.gui;
-import pragma.client.engine;
+import :game;
+import :gui;
+import :engine;
 import pragma.gui;
 import pragma.string.unicode;
 // import pragma.scripting.lua;
 
-extern CEngine *c_engine;
-extern CGame *c_game;
+
+
 
 template<class TStream>
 static TStream &print_ui_element(TStream &os, const ::WIBase &handle)
@@ -87,7 +89,6 @@ static TStream &print_ui_element(TStream &os, const ::WIBase &handle)
 DLLCLIENT Con::c_cout &operator<<(Con::c_cout &os, const ::WIBase &handle) { return print_ui_element<Con::c_cout>(os, handle); }
 DLLCLIENT std::ostream &operator<<(std::ostream &os, const ::WIBase &handle) { return print_ui_element<std::ostream>(os, handle); }
 
-extern ClientState *client;
 
 static bool operator==(::WIBase &a, ::WIBase &b) { return &a == &b; }
 
@@ -160,7 +161,7 @@ static void record_draw_ui(WIBase &el, Lua::Vulkan::CommandBufferRecorder &cmdBu
 
 static std::shared_ptr<prosper::Texture> draw_to_texture(WIBase &el, const Lua::gui::DrawToTextureInfo &info)
 {
-	auto &context = c_engine->GetRenderContext();
+	auto &context = pragma::get_cengine()->GetRenderContext();
 	auto w = info.width.has_value() ? *info.width : el.GetWidth();
 	auto h = info.height.has_value() ? *info.height : el.GetHeight();
 	auto rt = Lua::gui::create_render_target(w, h, info.enableMsaa, !info.enableMsaa);
@@ -621,7 +622,7 @@ void Lua::WIShape::register_class(luabind::class_<::WIShape, ::WIBase> &classDef
 
 void Lua::WITexturedShape::register_class(luabind::class_<::WITexturedShape, luabind::bases<::WIShape, ::WIBase>> &classDef)
 {
-	classDef.def("SetMaterial", static_cast<void (::WITexturedShape::*)(Material *)>(&::WITexturedShape::SetMaterial));
+	classDef.def("SetMaterial", static_cast<void (::WITexturedShape::*)(::Material *)>(&::WITexturedShape::SetMaterial));
 	classDef.def("SetMaterial", static_cast<void (::WITexturedShape::*)(const std::string &)>(&::WITexturedShape::SetMaterial));
 	classDef.def("GetMaterial", &::WITexturedShape::GetMaterial);
 	classDef.def("SetTexture", static_cast<void (*)(::WITexturedShape &, prosper::Texture &)>([](::WITexturedShape &shape, prosper::Texture &tex) { shape.SetTexture(tex); }));
@@ -937,12 +938,12 @@ void Lua::WIText::register_class(luabind::class_<::WIText, ::WIBase> &classDef)
 	classDef.def("AreTagsEnabled", &::WIText::AreTagsEnabled);
 	classDef.def("PopFrontLine", &::WIText::PopFrontLine);
 	classDef.def("PopBackLine", &::WIText::PopBackLine);
-	classDef.def("RemoveText", static_cast<bool (::WIBase::*)(util::text::LineIndex, util::text::CharOffset, util::text::TextLength)>(&::WIText::RemoveText));
-	classDef.def("RemoveText", static_cast<bool (::WIBase::*)(util::text::TextOffset, util::text::TextLength)>(&::WIText::RemoveText));
+	classDef.def("RemoveText", static_cast<bool (::WIBase::*)(::util::text::LineIndex, ::util::text::CharOffset, ::util::text::TextLength)>(&::WIText::RemoveText));
+	classDef.def("RemoveText", static_cast<bool (::WIBase::*)(::util::text::TextOffset, ::util::text::TextLength)>(&::WIText::RemoveText));
 	classDef.def("RemoveLine", &::WIText::RemoveLine);
-	classDef.def("InsertText", static_cast<bool (*)(::WIText &, const std::string &, util::text::LineIndex)>([](::WIText &hPanel, const std::string &text, util::text::LineIndex lineIdx) { return hPanel.InsertText(text, lineIdx); }));
+	classDef.def("InsertText", static_cast<bool (*)(::WIText &, const std::string &, ::util::text::LineIndex)>([](::WIText &hPanel, const std::string &text, ::util::text::LineIndex lineIdx) { return hPanel.InsertText(text, lineIdx); }));
 	classDef.def("InsertText",
-	  static_cast<bool (*)(::WIText &, const std::string &, util::text::LineIndex, util::text::CharOffset)>([](::WIText &hPanel, const std::string &text, util::text::LineIndex lineIdx, util::text::CharOffset charOffset) { return hPanel.InsertText(text, lineIdx, charOffset); }));
+	  static_cast<bool (*)(::WIText &, const std::string &, ::util::text::LineIndex, ::util::text::CharOffset)>([](::WIText &hPanel, const std::string &text, ::util::text::LineIndex lineIdx, ::util::text::CharOffset charOffset) { return hPanel.InsertText(text, lineIdx, charOffset); }));
 	classDef.def("SetMaxLineCount", +[](lua_State *l, ::WIText &hPanel, uint32_t c) { hPanel.GetFormattedTextObject().SetMaxLineCount(c); });
 	classDef.def("GetMaxLineCount", +[](lua_State *l, ::WIText &hPanel) { return hPanel.GetFormattedTextObject().GetMaxLineCount(); });
 	classDef.def("AppendText", +[](::WIText &el, const std::string &text) { return el.AppendText(text); });
@@ -951,7 +952,7 @@ void Lua::WIText::register_class(luabind::class_<::WIText, ::WIBase> &classDef)
 		Lua::PushBool(l, hPanel.MoveText(lineIdx, startOffset, len, targetLineIdx, targetCharOffset));
 	}));
 	classDef.def("Clear", &::WIText::Clear);
-	classDef.def("Substr", +[](::WIText &el, util::text::TextOffset startOffset, util::text::TextLength len) { return el.Substr(startOffset, len); });
+	classDef.def("Substr", +[](::WIText &el, ::util::text::TextOffset startOffset, ::util::text::TextLength len) { return el.Substr(startOffset, len); });
 	classDef.add_static_constant("AUTO_BREAK_NONE", umath::to_integral(::WIText::AutoBreak::NONE));
 	classDef.add_static_constant("AUTO_BREAK_ANY", umath::to_integral(::WIText::AutoBreak::ANY));
 	classDef.add_static_constant("AUTO_BREAK_WHITESPACE", umath::to_integral(::WIText::AutoBreak::WHITESPACE));
@@ -1075,7 +1076,7 @@ void Lua::WIBase::SetSize(lua_State *l, ::WIBase &hPanel, Vector2 size) { hPanel
 void Lua::WIBase::SetSize(lua_State *l, ::WIBase &hPanel, float x, float y) { hPanel.SetSize(CInt32(x), CInt32(y)); }
 void Lua::WIBase::Wrap(lua_State *l, ::WIBase &hPanel, const std::string &wrapperClassName)
 {
-	auto *el = c_game->CreateGUIElement(wrapperClassName);
+	auto *el = pragma::get_cgame()->CreateGUIElement(wrapperClassName);
 	if(el == nullptr)
 		return;
 	auto hWrapper = el->GetHandle();

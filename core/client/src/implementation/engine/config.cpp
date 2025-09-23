@@ -10,8 +10,10 @@ module;
 #include "pragma/input/inputhelper.h"
 #include <pragma/logging.hpp>
 
-module pragma.client.engine;
+module pragma.client;
 
+
+import :engine;
 import pragma.locale;
 import pragma.string.unicode;
 

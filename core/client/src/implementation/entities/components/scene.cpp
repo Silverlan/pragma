@@ -10,24 +10,24 @@ module;
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <prosper_command_buffer.hpp>
+#include "buffers/prosper_buffer_create_info.hpp"
+#include "pragma/console/c_cvar.h"
 
-module pragma.client.entities.components.scene;
+module pragma.client;
 
-import pragma.client.engine;
-import pragma.client.entities.components;
-import pragma.client.game;
-import pragma.client.rendering.shaders;
+import :entities.components.scene;
+import :engine;
+import :game;
+import :rendering.shaders;
 
 using namespace pragma;
 
-extern CGame *c_game;
-extern CEngine *c_engine;
 
 CSceneComponent::CSMCascadeDescriptor::CSMCascadeDescriptor() {}
 
 ///////////////////////////
 
-CSceneComponent::CreateInfo::CreateInfo() : sampleCount {static_cast<prosper::SampleCountFlags>(c_game->GetMSAASampleCount())} {}
+CSceneComponent::CreateInfo::CreateInfo() : sampleCount {static_cast<prosper::SampleCountFlags>(pragma::get_cgame()->GetMSAASampleCount())} {}
 
 ///////////////////////////
 
@@ -51,7 +51,7 @@ void CSceneComponent::UpdateRenderBuffers(const std::shared_ptr<prosper::IPrimar
 		if(item.entity == curEntity)
 			continue;
 		curEntity = item.entity;
-		auto *ent = static_cast<CBaseEntity *>(c_game->GetEntityByLocalIndex(item.entity));
+		auto *ent = static_cast<CBaseEntity *>(pragma::get_cgame()->GetEntityByLocalIndex(item.entity));
 		assert(ent);
 		if(!ent) {
 			// TODO: This should be unreachable, but there are cases where the entity does
@@ -98,7 +98,7 @@ CSceneComponent *CSceneComponent::Create(const CreateInfo &createInfo, CSceneCom
 			return nullptr;
 		sceneIndex = (it - g_sceneUseCount.begin());
 	}
-	auto *scene = c_game->CreateEntity<CScene>();
+	auto *scene = pragma::get_cgame()->CreateEntity<CScene>();
 	if(scene == nullptr)
 		return nullptr;
 	auto sceneC = scene->GetComponent<CSceneComponent>();
@@ -122,7 +122,7 @@ CSceneComponent::CSceneComponent(BaseEntity &ent) : BaseEntityComponent {ent}, m
 CSceneComponent::~CSceneComponent()
 {
 	ClearWorldEnvironment();
-	//c_engine->FlushCommandBuffers(); // We need to make sure all rendering commands have been completed, in case this scene is still in use somewhere // prosper TODO
+	//pragma::get_cengine()->FlushCommandBuffers(); // We need to make sure all rendering commands have been completed, in case this scene is still in use somewhere // prosper TODO
 }
 void CSceneComponent::OnRemove()
 {
@@ -140,7 +140,7 @@ void CSceneComponent::OnRemove()
 
 		// Clear all entities from this scene
 		std::vector<CBaseEntity *> *ents;
-		c_game->GetEntities(&ents);
+		pragma::get_cgame()->GetEntities(&ents);
 		for(auto *ent : *ents) {
 			if(ent == nullptr)
 				continue;
@@ -209,7 +209,7 @@ void CSceneComponent::Link(const CSceneComponent &other, bool linkCamera)
 void CSceneComponent::InitializeShadowDescriptorSet()
 {
 	if(pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_SHADOWS.IsValid()) {
-		auto &context = c_engine->GetRenderContext();
+		auto &context = pragma::get_cengine()->GetRenderContext();
 		m_shadowDsg = context.CreateDescriptorSetGroup(pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_SHADOWS);
 		auto &cubeTex = context.GetDummyCubemapTexture();
 		auto n = umath::to_integral(GameLimits::MaxActiveShadowCubeMaps);
@@ -247,7 +247,7 @@ void CSceneComponent::InitializeRenderSettingsBuffer()
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	createInfo.size = sizeof(m_renderSettings);
 	createInfo.usageFlags = prosper::BufferUsageFlags::UniformBufferBit | prosper::BufferUsageFlags::TransferDstBit;
-	m_renderSettingsBuffer = c_engine->GetRenderContext().CreateBuffer(createInfo, &m_renderSettings);
+	m_renderSettingsBuffer = pragma::get_cengine()->GetRenderContext().CreateBuffer(createInfo, &m_renderSettings);
 	m_renderSettingsBuffer->SetDebugName("render_settings_buf");
 	UpdateRenderSettings();
 	//
@@ -263,12 +263,12 @@ void CSceneComponent::InitializeCameraBuffer()
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	createInfo.size = sizeof(m_cameraData);
 	createInfo.usageFlags = prosper::BufferUsageFlags::UniformBufferBit | prosper::BufferUsageFlags::TransferDstBit;
-	m_cameraBuffer = c_engine->GetRenderContext().CreateBuffer(createInfo, &m_cameraData);
+	m_cameraBuffer = pragma::get_cengine()->GetRenderContext().CreateBuffer(createInfo, &m_cameraData);
 	m_cameraBuffer->SetDebugName("camera_buf");
 	//
 
 	// View Camera
-	m_cameraViewBuffer = c_engine->GetRenderContext().CreateBuffer(createInfo, &m_cameraData);
+	m_cameraViewBuffer = pragma::get_cengine()->GetRenderContext().CreateBuffer(createInfo, &m_cameraData);
 	m_cameraViewBuffer->SetDebugName("camera_view_buf");
 	//
 }
@@ -278,13 +278,13 @@ void CSceneComponent::InitializeFogBuffer()
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	createInfo.size = sizeof(m_fogData);
 	createInfo.usageFlags = prosper::BufferUsageFlags::UniformBufferBit | prosper::BufferUsageFlags::TransferDstBit;
-	m_fogBuffer = c_engine->GetRenderContext().CreateBuffer(createInfo, &m_cameraData);
+	m_fogBuffer = pragma::get_cengine()->GetRenderContext().CreateBuffer(createInfo, &m_cameraData);
 	m_fogBuffer->SetDebugName("fog_buf");
 }
 template<typename TCPPM>
 TCPPM *CSceneComponent::FindOcclusionCuller()
 {
-	EntityIterator entIt {*c_game};
+	EntityIterator entIt {*pragma::get_cgame()};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::COcclusionCullerComponent>>();
 	entIt.AttachFilter<EntityIteratorFilterUser>([this](BaseEntity &ent, std::size_t index) -> bool { return static_cast<CBaseEntity &>(ent).IsInScene(*this); });
 	auto it = entIt.begin();
@@ -303,7 +303,7 @@ void CSceneComponent::UpdateCameraBuffer(std::shared_ptr<prosper::IPrimaryComman
 		return;
 	auto &bufCam = (bView == true) ? GetViewCameraBuffer() : GetCameraBuffer();
 	auto &v = cam->GetViewMatrix();
-	auto &p = (bView == true) ? pragma::CCameraComponent::CalcProjectionMatrix(c_game->GetViewModelFOVRad(), cam->GetAspectRatio(), cam->GetNearZ(), cam->GetFarZ()) : cam->GetProjectionMatrix();
+	auto &p = (bView == true) ? pragma::CCameraComponent::CalcProjectionMatrix(pragma::get_cgame()->GetViewModelFOVRad(), cam->GetAspectRatio(), cam->GetNearZ(), cam->GetFarZ()) : cam->GetProjectionMatrix();
 	m_cameraData.V = v;
 	m_cameraData.P = p;
 	m_cameraData.VP = p * v;
@@ -348,7 +348,7 @@ void CSceneComponent::RecordRenderCommandBuffers(const util::DrawSceneInfo &draw
 }
 void CSceneComponent::InitializeDescriptorSetLayouts()
 {
-	/*auto &context = c_engine->GetRenderContext();
+	/*auto &context = pragma::get_cengine()->GetRenderContext();
 	m_descSetLayoutCamGraphics = Vulkan::DescriptorSetLayout::Create(context,{
 		{prosper::DescriptorType::UniformBuffer,prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit}, // Camera
 		{prosper::DescriptorType::UniformBuffer,prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit}, // Render Settings
@@ -363,22 +363,22 @@ void CSceneComponent::InitializeSwapDescriptorBuffers()
 {
 	if(pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_SCENE.IsValid() == false || pragma::ShaderPPFog::DESCRIPTOR_SET_FOG.IsValid() == false)
 		return;
-	m_camDescSetGroupGraphics = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_SCENE);
+	m_camDescSetGroupGraphics = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_SCENE);
 	auto &descSetGraphics = *m_camDescSetGroupGraphics->GetDescriptorSet();
 	descSetGraphics.SetBindingUniformBuffer(*m_cameraBuffer, umath::to_integral(pragma::ShaderGameWorldLightingPass::SceneBinding::Camera));
 	descSetGraphics.SetBindingUniformBuffer(*m_renderSettingsBuffer, umath::to_integral(pragma::ShaderGameWorldLightingPass::SceneBinding::RenderSettings));
 
-	m_camDescSetGroupCompute = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderForwardPLightCulling::DESCRIPTOR_SET_SCENE);
+	m_camDescSetGroupCompute = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderForwardPLightCulling::DESCRIPTOR_SET_SCENE);
 	auto &descSetCompute = *m_camDescSetGroupCompute->GetDescriptorSet();
 	descSetCompute.SetBindingUniformBuffer(*m_cameraBuffer, umath::to_integral(pragma::ShaderForwardPLightCulling::CameraBinding::Camera));
 	descSetCompute.SetBindingUniformBuffer(*m_renderSettingsBuffer, umath::to_integral(pragma::ShaderForwardPLightCulling::CameraBinding::RenderSettings));
 
-	m_camViewDescSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_SCENE);
+	m_camViewDescSetGroup = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_SCENE);
 	auto &descSetViewGraphics = *m_camViewDescSetGroup->GetDescriptorSet();
 	descSetViewGraphics.SetBindingUniformBuffer(*m_cameraViewBuffer, umath::to_integral(pragma::ShaderGameWorldLightingPass::SceneBinding::Camera));
 	descSetViewGraphics.SetBindingUniformBuffer(*m_renderSettingsBuffer, umath::to_integral(pragma::ShaderGameWorldLightingPass::SceneBinding::RenderSettings));
 
-	m_fogDescSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderPPFog::DESCRIPTOR_SET_FOG);
+	m_fogDescSetGroup = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderPPFog::DESCRIPTOR_SET_FOG);
 	m_fogDescSetGroup->GetDescriptorSet()->SetBindingUniformBuffer(*m_fogBuffer, 0u);
 }
 const std::shared_ptr<prosper::IBuffer> &CSceneComponent::GetRenderSettingsBuffer() const { return m_renderSettingsBuffer; }
@@ -447,27 +447,27 @@ void CSceneComponent::SetWorldEnvironment(WorldEnvironment &env)
 	auto &fog = m_worldEnvironment->GetFogSettings();
 	m_envCallbacks.push_back(fog.GetColorProperty()->AddCallback([this](std::reference_wrapper<const Color> oldVal, std::reference_wrapper<const Color> newVal) {
 		m_fogData.color = newVal.get().ToVector4();
-		c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_fogBuffer, offsetof(FogData, color), m_fogData.color);
+		pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_fogBuffer, offsetof(FogData, color), m_fogData.color);
 	}));
 	m_envCallbacks.push_back(fog.GetStartProperty()->AddCallback([this](std::reference_wrapper<const float> oldVal, std::reference_wrapper<const float> newVal) {
 		m_fogData.start = newVal.get();
-		c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_fogBuffer, offsetof(FogData, start), m_fogData.start);
+		pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_fogBuffer, offsetof(FogData, start), m_fogData.start);
 	}));
 	m_envCallbacks.push_back(fog.GetEndProperty()->AddCallback([this](std::reference_wrapper<const float> oldVal, std::reference_wrapper<const float> newVal) {
 		m_fogData.end = newVal.get();
-		c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_fogBuffer, offsetof(FogData, end), m_fogData.end);
+		pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_fogBuffer, offsetof(FogData, end), m_fogData.end);
 	}));
 	m_envCallbacks.push_back(fog.GetMaxDensityProperty()->AddCallback([this](std::reference_wrapper<const float> oldVal, std::reference_wrapper<const float> newVal) {
 		m_fogData.density = newVal.get();
-		c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_fogBuffer, offsetof(FogData, density), m_fogData.density);
+		pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_fogBuffer, offsetof(FogData, density), m_fogData.density);
 	}));
 	m_envCallbacks.push_back(fog.GetTypeProperty()->AddCallback([this](std::reference_wrapper<const uint8_t> oldVal, std::reference_wrapper<const uint8_t> newVal) {
 		m_fogData.type = static_cast<uint32_t>(newVal.get());
-		c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_fogBuffer, offsetof(FogData, type), m_fogData.type);
+		pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_fogBuffer, offsetof(FogData, type), m_fogData.type);
 	}));
 	m_envCallbacks.push_back(fog.GetEnabledProperty()->AddCallback([this](std::reference_wrapper<const bool> oldVal, std::reference_wrapper<const bool> newVal) {
 		m_fogData.flags = static_cast<uint32_t>(newVal.get());
-		c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_fogBuffer, offsetof(FogData, flags), m_fogData.flags);
+		pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_fogBuffer, offsetof(FogData, flags), m_fogData.flags);
 	}));
 	m_fogData.color = fog.GetColor().ToVector4();
 	m_fogData.start = fog.GetStart();
@@ -475,7 +475,7 @@ void CSceneComponent::SetWorldEnvironment(WorldEnvironment &env)
 	m_fogData.density = fog.GetMaxDensity();
 	m_fogData.type = umath::to_integral(fog.GetType());
 	m_fogData.flags = fog.IsEnabled();
-	c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_fogBuffer, 0ull, m_fogData);
+	pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_fogBuffer, 0ull, m_fogData);
 }
 template<typename TCPPM>
 	void CSceneComponent::SetLightMap(TCPPM &lightMapC)

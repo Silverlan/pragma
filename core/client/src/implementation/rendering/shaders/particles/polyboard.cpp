@@ -8,13 +8,13 @@ module;
 #include <shader/prosper_shader_t.hpp>
 #include <buffers/prosper_buffer.hpp>
 
-module pragma.client.rendering.shaders;
+module pragma.client;
 
-import :particle_polyboard;
 
-import pragma.client.engine;
+import :rendering.shaders.particle_polyboard;
 
-extern CEngine *c_engine;
+import :engine;
+
 
 using namespace pragma;
 
@@ -47,7 +47,7 @@ void ShaderParticlePolyboard::InitializeGfxPipeline(prosper::GraphicsPipelineCre
 	pipelineInfo.SetPrimitiveTopology(prosper::PrimitiveTopology::LineListWithAdjacency);
 }
 
-bool ShaderParticlePolyboard::Draw(pragma::CSceneComponent &scene, const CRasterizationRendererComponent &renderer, const pragma::CParticleSystemComponent &ps, prosper::IBuffer &vertexBuffer, prosper::IBuffer &indexBuffer, uint32_t numIndices, float radius, float curvature)
+bool ShaderParticlePolyboard::Draw(pragma::CSceneComponent &scene, const CRasterizationRendererComponent &renderer, const pragma::ecs::CParticleSystemComponent &ps, prosper::IBuffer &vertexBuffer, prosper::IBuffer &indexBuffer, uint32_t numIndices, float radius, float curvature)
 {
 #if 0
 	if(BindParticleMaterial(renderer,ps) == false)
@@ -58,8 +58,8 @@ bool ShaderParticlePolyboard::Draw(pragma::CSceneComponent &scene, const CRaster
 			}) == false ||
 		RecordPushConstants(FragmentPushConstants{
 			static_cast<int32_t>(GetRenderFlags(ps,ParticleRenderFlags::None)), // TODO: Use correct particle render flags
-			static_cast<float>(c_engine->GetRenderContext().GetWindowWidth()),
-			static_cast<float>(c_engine->GetRenderContext().GetWindowHeight())
+			static_cast<float>(pragma::get_cengine()->GetRenderContext().GetWindowWidth()),
+			static_cast<float>(pragma::get_cengine()->GetRenderContext().GetWindowHeight())
 		},sizeof(GeometryPushConstants)) == false
 		)
 		return false;

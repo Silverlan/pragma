@@ -6,7 +6,9 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <pragma/entities/components/base_character_component.hpp>
 
-export module pragma.client.entities.components.character;
+export module pragma.client:entities.components.character;
+
+import :entities.components.entity;
 
 export namespace pragma {
 	class DLLCLIENT CCharacterComponent final : public BaseCharacterComponent, public CBaseNetComponent {

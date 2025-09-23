@@ -5,14 +5,11 @@ module;
 
 #include "stdafx_client.h"
 
-module pragma.client.particle_system;
+module pragma.client;
 
-import :initializer_shoot;
+import :particle_system.initializer_shoot;
 
-REGISTER_PARTICLE_INITIALIZER(shoot_cone, CParticleInitializerShootCone);
-REGISTER_PARTICLE_INITIALIZER(shoot_outward, CParticleInitializerShootOutward);
-
-void CParticleInitializerShootCone::Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void CParticleInitializerShootCone::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleInitializer::Initialize(pSystem, values);
 	m_fMinAngle.Initialize("angle_min", values);
@@ -41,7 +38,7 @@ void CParticleInitializerShootCone::OnParticleCreated(CParticle &particle)
 
 /////////////////////////
 
-void CParticleInitializerShootOutward::Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void CParticleInitializerShootOutward::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleInitializer::Initialize(pSystem, values);
 	for(auto &pair : values) {

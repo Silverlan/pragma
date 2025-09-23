@@ -14,10 +14,12 @@ module;
 #include <pragma/model/animation/skeleton.hpp>
 #include <pragma/model/animation/bone.hpp>
 
-module pragma.client.entities.components.flammable;
+module pragma.client;
 
-import pragma.client.entities.components.sound_emitter;
-import pragma.client.util;
+
+import :entities.components.flammable;
+import :entities.components.sound_emitter;
+import :util;
 
 using namespace pragma;
 

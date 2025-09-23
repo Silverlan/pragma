@@ -6,7 +6,9 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <pragma/entities/components/base_field_angle_component.hpp>
 
-export module pragma.client.entities.components.field_angle;
+export module pragma.client:entities.components.field_angle;
+
+import :entities.components.entity;
 
 export namespace pragma {
 	class DLLCLIENT CFieldAngleComponent final : public BaseFieldAngleComponent, public CBaseNetComponent {

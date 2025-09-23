@@ -6,10 +6,11 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <pragma/entities/components/base_flammable_component.hpp>
 
-export module pragma.client.entities.components.flammable;
+export module pragma.client:entities.components.flammable;
 
-import pragma.client.entities.components.particle_system;
+import :entities.components.entity;
 
+export namespace pragma::ecs {class CParticleSystemComponent;}
 export namespace pragma {
 	class DLLCLIENT CFlammableComponent final : public BaseFlammableComponent, public CBaseNetComponent {
 	  public:

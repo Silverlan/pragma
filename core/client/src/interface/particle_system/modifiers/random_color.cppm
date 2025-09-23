@@ -3,10 +3,11 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 
-export module pragma.client.particle_system:modifier_random_color;
+export module pragma.client:particle_system.modifier_random_color;
 
-import :modifier_random_variable;
+import :particle_system.modifier_random_variable;
 
 export {
 	class DLLCLIENT CParticleModifierComponentRandomColor {

@@ -7,7 +7,7 @@ module;
 #include <luabind/luabind.hpp>
 #include <wgui/types.hpp>
 
-export module pragma.client.gui:lua_handle_wrapper;
+export module pragma.client:gui.lua_handle_wrapper;
 
 export class DLLCLIENT WILuaHandleWrapper {
   private:

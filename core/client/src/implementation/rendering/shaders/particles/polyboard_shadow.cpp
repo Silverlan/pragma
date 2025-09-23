@@ -9,15 +9,15 @@ module;
 #include <textureinfo.h>
 #include <cmaterial.h>
 
-module pragma.client.rendering.shaders;
-#if 0
-import :particle_polyboard_shadow;
+module pragma.client;
 
+import :rendering.shaders.particle_polyboard_shadow;
+
+#if 0
 using namespace Shader;
 
 LINK_SHADER_TO_CLASS(ParticlePolyboardShadow,particlepolyboardshadow);
 
-extern CGame *c_game;
 
 ParticlePolyboardShadow::ParticlePolyboardShadow()
 	: ParticleShadowBase<ParticlePolyboard>("particlepolyboardshadow","programs/particles/beam/particle_polyboard_shadow","programs/particles/beam/particle_polyboard_shadow","programs/particles/beam/particle_polyboard_shadow")
@@ -71,7 +71,7 @@ void ParticlePolyboardShadow::Draw(CParticleSystem *particle,const Vulkan::Buffe
 	drawCmd->SetScissor(wShadow,hShadow);
 	drawCmd->SetViewport(wShadow,hShadow);
 
-	auto &cam = *c_game->GetRenderCamera<pragma::CCameraComponent>();
+	auto &cam = *pragma::get_cgame()->GetRenderCamera<pragma::CCameraComponent>();
 	auto &v = cam.GetViewMatrix();
 	auto vp = cam.GetProjectionMatrix() *v;
 	Vulkan::Std140LayoutBlockData gsPushConstants(21);

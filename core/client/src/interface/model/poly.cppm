@@ -7,7 +7,7 @@ module;
 #include "pragma/model/poly.h"
 #include "cmaterialmanager.h"
 
-export module pragma.client.model:poly;
+export module pragma.client:model.poly;
 
 export class DLLCLIENT CPoly : public Poly {
   private:

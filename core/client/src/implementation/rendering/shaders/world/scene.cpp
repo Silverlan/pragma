@@ -13,16 +13,15 @@ module;
 #include <prosper_descriptor_set_group.hpp>
 #include <cmaterial.h>
 
-export module pragma.client.rendering.shaders;
+module pragma.client;
 
-import :scene;
+import :rendering.shaders.scene;
 
-import pragma.client.client_state;
-import pragma.client.engine;
-import pragma.client.entities.components;
-import pragma.client.model;
-
-extern CEngine *c_engine;
+import :client_state;
+import :engine;
+import :entities.components;
+import :model;
+import :rendering.light_data_buffer_manager;
 
 using namespace pragma;
 
@@ -44,9 +43,9 @@ decltype(ShaderScene::DESCRIPTOR_SET_SCENE) ShaderScene::DESCRIPTOR_SET_SCENE = 
 decltype(ShaderScene::DESCRIPTOR_SET_RENDERER) ShaderScene::DESCRIPTOR_SET_RENDERER = {
   "RENDERER",
   {prosper::DescriptorSetInfo::Binding {"RENDERER", prosper::DescriptorType::UniformBuffer, prosper::ShaderStageFlags::FragmentBit}, prosper::DescriptorSetInfo::Binding {"SSAO_MAP", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit},
-    prosper::DescriptorSetInfo::Binding {"LIGHT_BUFFERS", LIGHT_SOURCE_BUFFER_TYPE, prosper::ShaderStageFlags::FragmentBit},
+    prosper::DescriptorSetInfo::Binding {"LIGHT_BUFFERS", pragma::LIGHT_SOURCE_BUFFER_TYPE, prosper::ShaderStageFlags::FragmentBit},
     prosper::DescriptorSetInfo::Binding {"VISIBLE_LIGHT_TILE_INDEX_BUFFER", prosper::DescriptorType::StorageBuffer, prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit},
-    prosper::DescriptorSetInfo::Binding {"SHADOW_BUFFERS", LIGHT_SOURCE_BUFFER_TYPE, prosper::ShaderStageFlags::FragmentBit},
+    prosper::DescriptorSetInfo::Binding {"SHADOW_BUFFERS", pragma::LIGHT_SOURCE_BUFFER_TYPE, prosper::ShaderStageFlags::FragmentBit},
     prosper::DescriptorSetInfo::Binding {"CSM_MAPS", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit, umath::to_integral(GameLimits::MaxCSMCascades)},
     prosper::DescriptorSetInfo::Binding {"LIGHTMAP", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}, prosper::DescriptorSetInfo::Binding {"INDIRECT_LIGHTMAP", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit},
     prosper::DescriptorSetInfo::Binding {"DIRECTIONAL_LIGHTMAP", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}},
@@ -187,7 +186,7 @@ std::shared_ptr<prosper::IRenderBuffer> ShaderEntity::CreateRenderBuffer(CModelS
 		return nullptr;
 	buffers.insert(buffers.begin(), CSceneComponent::GetEntityInstanceIndexBuffer()->GetBuffer().get()); // Instance buffer
 	offsets.insert(offsets.begin(), 0);
-	auto *dummyBuffer = c_engine->GetRenderContext().GetDummyBuffer().get();
+	auto *dummyBuffer = pragma::get_cengine()->GetRenderContext().GetDummyBuffer().get();
 	for(auto it = buffers.begin(); it != buffers.end(); ++it) {
 		auto *buf = *it;
 		*it = buf ? buf : dummyBuffer;

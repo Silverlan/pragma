@@ -8,16 +8,15 @@ module;
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <prosper_command_buffer.hpp>
 
-module pragma.client.rendering.shaders;
+module pragma.client;
 
-import :world_eye;
 
-import pragma.client.client_state;
-import pragma.client.engine;
-import pragma.client.entities.components;
+import :rendering.shaders.world_eye;
 
-extern ClientState *client;
-extern CEngine *c_engine;
+import :client_state;
+import :engine;
+import :entities.components;
+
 
 using namespace pragma;
 

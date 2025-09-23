@@ -6,10 +6,8 @@
 #include <iostream>
 #include <pragma/networking/netmessages.h>
 
-import pragma.client.client_state;
-import pragma.client.networking;
+import pragma.client;
 
-extern ClientState *client;
 
 #define DEBUG_CLIENT_VERBOSE 1
 
@@ -97,7 +95,7 @@ std::unique_ptr<pragma::networking::NWMClientConnection> pragma::networking::NWM
 #ifdef _DEBUG
 	cl->SetTimeoutDuration(0.f);
 #else
-	cl->SetTimeoutDuration(client->GetConVarFloat("sv_timeout_duration"));
+	cl->SetTimeoutDuration(pragma::get_client_state()->GetConVarFloat("sv_timeout_duration"));
 #endif
 	//cl->SetPingEnabled(false);
 	cl->Start();
@@ -109,6 +107,7 @@ void pragma::networking::NWMClientConnection::SetClient(StandardClient &client) 
 bool pragma::networking::NWMClientConnection::IsDisconnected() const { return m_bDisconnected; }
 
 REGISTER_CONVAR_CALLBACK_CL(sv_timeout_duration, [](NetworkState *, const ConVar &, float, float val) {
+	auto *client = pragma::get_client_state();
 	if(client == nullptr)
 		return;
 	auto *cl = client->GetClient();

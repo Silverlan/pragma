@@ -7,9 +7,9 @@ module;
 #include <wgui/types/wirect.h>
 #include <wgui/types/witext.h>
 
-module pragma.client.gui;
+module pragma.client;
 
-import :tree_list;
+import :gui.tree_list;
 
 import pragma.gui;
 

@@ -8,7 +8,9 @@ module;
 #include "buffers/prosper_buffer.hpp"
 #include "material.h"
 
-export module pragma.client.model:model;
+export module pragma.client:model.model_class;
+
+import :model.mesh;
 
 export class DLLCLIENT CModel : public Model {
   public:

@@ -8,9 +8,10 @@ module;
 #include <cmaterial_manager2.hpp>
 #include <cmaterial.h>
 
-module pragma.client.rendering.shaders;
+module pragma.client;
 
-import :world_loading;
+
+import :rendering.shaders.world_loading;
 
 using namespace pragma;
 

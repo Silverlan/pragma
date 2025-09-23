@@ -11,9 +11,11 @@ module;
 // --template-include-location
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
-module pragma.client.game;
+module pragma.client;
 
-import pragma.client.entities.components;
+
+import :game;
+import :entities.components;
 
 void CGame::InitializeEntityComponents(pragma::EntityComponentManager &componentManager)
 {

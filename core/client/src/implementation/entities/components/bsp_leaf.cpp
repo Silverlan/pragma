@@ -6,11 +6,12 @@ module;
 #include "stdafx_client.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
-module pragma.client.entities.components.bsp_leaf;
+module pragma.client;
 
-import pragma.client.engine;
 
-extern CEngine *c_engine;
+import :entities.components.bsp_leaf;
+import :engine;
+
 
 using namespace pragma;
 

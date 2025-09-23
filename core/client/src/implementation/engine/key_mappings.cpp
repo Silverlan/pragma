@@ -6,9 +6,11 @@ module;
 #include "stdafx_cengine.h"
 #include "pragma/input/inputhelper.h"
 
-module pragma.client.engine;
+module pragma.client;
 
-import pragma.client.client_state;
+
+import :engine;
+import :client_state;
 
 void CEngine::AddInputBindingLayer(const std::shared_ptr<InputBindingLayer> &layer)
 {
@@ -56,7 +58,6 @@ std::shared_ptr<InputBindingLayer> CEngine::GetCoreInputBindingLayer() { return 
 ////////////////////////////
 
 #include "pragma/console/c_cvar_keymappings.h"
-extern CEngine *c_engine;
 DLLCLIENT void CMD_bind_keys(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
 	for(int i = 0; i < (sizeof(BIND_KEYS) / sizeof(BIND_KEYS[0])); i++)
@@ -72,10 +73,10 @@ DLLCLIENT void CMD_bind(NetworkState *, pragma::BasePlayerComponent *, std::vect
 		Con::cout << "\"" << argv[0] << "\" isn't a valid key. Use 'bind_keys' to get a list of all available keys" << Con::endl;
 		return;
 	}
-	auto bindings = c_engine->GetCoreInputBindingLayer();
+	auto bindings = pragma::get_cengine()->GetCoreInputBindingLayer();
 	if(bindings)
 		bindings->MapKey(c, argv[1]);
-	c_engine->SetInputBindingsDirty();
+	pragma::get_cengine()->SetInputBindingsDirty();
 }
 
 DLLCLIENT void CMD_unbind(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
@@ -87,23 +88,23 @@ DLLCLIENT void CMD_unbind(NetworkState *, pragma::BasePlayerComponent *, std::ve
 		Con::cout << "\"" << argv[0] << "\" isn't a valid key. Use 'bind_keys' to get a list of all available keys" << Con::endl;
 		return;
 	}
-	auto bindings = c_engine->GetCoreInputBindingLayer();
+	auto bindings = pragma::get_cengine()->GetCoreInputBindingLayer();
 	if(bindings)
 		bindings->UnmapKey(c);
-	c_engine->SetInputBindingsDirty();
+	pragma::get_cengine()->SetInputBindingsDirty();
 }
 
 DLLCLIENT void CMD_unbindall(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
-	auto bindings = c_engine->GetCoreInputBindingLayer();
+	auto bindings = pragma::get_cengine()->GetCoreInputBindingLayer();
 	if(bindings)
 		bindings->ClearKeyMappings();
-	c_engine->SetInputBindingsDirty();
+	pragma::get_cengine()->SetInputBindingsDirty();
 }
 
 DLLCLIENT void CMD_keymappings(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
-	auto &bindings = c_engine->GetEffectiveInputBindingLayer();
+	auto &bindings = pragma::get_cengine()->GetEffectiveInputBindingLayer();
 	auto &mappings = bindings.GetKeyMappings();
 	std::string key;
 	for(auto &pair : mappings) {

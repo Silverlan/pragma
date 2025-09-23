@@ -6,10 +6,13 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <vector>
 
-export module pragma.client.rendering.entity_mesh_info;
+export module pragma.client:rendering.entity_mesh_info;
+
+import :model.mesh;
 
 #pragma warning(push)
 #pragma warning(disable : 4251)
+export class CBaseEntity;
 export class DLLCLIENT EntityMeshInfo {
   public:
 	EntityMeshInfo(CBaseEntity *ent) : entity(ent) {};

@@ -10,24 +10,21 @@ module;
 #include <pragma/engine_info.hpp>
 #include <pragma/lua/lua_error_handling.hpp>
 
-module pragma.client.gui;
+module pragma.client;
 
-import :command_line_entry;
-import :console;
-import :frame;
-import :scroll_container;
-import :snap_area;
+import :gui.command_line_entry;
+import :gui.console;
+import :gui.frame;
+import :gui.scroll_container;
+import :gui.snap_area;
 
-import pragma.client.client_state;
-import pragma.client.engine;
+import :client_state;
+import :engine;
 import pragma.gui;
 import pragma.string.unicode;
 import pragma.locale;
 
-extern CEngine *c_engine;
-extern ClientState *client;
 
-extern ClientState *client;
 
 static WIHandle s_hConsole = {};
 WIConsole *WIConsole::Open()
@@ -228,7 +225,7 @@ void WIConsole::Initialize()
 			return;
 		}
 #endif
-		c_engine->ConsoleInput(cmd.cpp_str());
+		pragma::get_cengine()->ConsoleInput(cmd.cpp_str());
 		if(hLog.IsValid()) {
 			auto &log = *static_cast<WITextEntry *>(hLog.get());
 			auto *pText = log.GetTextElement();
@@ -241,7 +238,7 @@ void WIConsole::Initialize()
 		std::vector<std::string> subStrings {};
 		ustring::explode_whitespace(cmd, subStrings);
 		if(subStrings.empty() == false) {
-			auto *cf = c_engine->GetConVar(subStrings.front());
+			auto *cf = pragma::get_cengine()->GetConVar(subStrings.front());
 			if(cf && cf->GetType() == ConType::Command) {
 				auto &c = static_cast<ConCommand &>(*cf);
 				auto &fAutoComplete = c.GetAutoCompleteCallback();
@@ -266,7 +263,8 @@ void WIConsole::Initialize()
 				it->second = percentage;
 			}
 		};
-		fProcessConVars(c_engine->GetConVars());
+		fProcessConVars(pragma::get_cengine()->GetConVars());
+		auto *client = pragma::get_client_state();
 		if(client != nullptr)
 			fProcessConVars(client->GetConVars());
 		args.reserve(bestCandidates.size());
@@ -281,7 +279,7 @@ void WIConsole::Initialize()
 	pText = pEntry->GetTextElement();
 	if(pText)
 		pText->SetFont("console");
-	c_engine->SetRecordConsoleOutput(true);
+	pragma::get_cengine()->SetRecordConsoleOutput(true);
 
 	pLog->SetColor(Color {220, 220, 220, 255});
 
@@ -315,7 +313,7 @@ void WIConsole::Initialize()
 	if(m_hCommandEntry.IsValid())
 		m_hCommandEntry->SetIgnoreParentAlpha(true);
 
-	auto *pMainMenu = client->GetMainMenu();
+	auto *pMainMenu = pragma::get_client_state()->GetMainMenu();
 	if(pMainMenu) {
 		m_cbMainMenuVisibility = pMainMenu->GetVisibilityProperty()->AddCallback([this](std::reference_wrapper<const bool> oldValue, std::reference_wrapper<const bool> visible) { UpdateConsoleMode(); });
 	}
@@ -346,14 +344,14 @@ void WIConsole::OnRemove()
 		m_cbMainMenuVisibility.Remove();
 	if(m_cbCommandEntryVisibility.IsValid())
 		m_cbCommandEntryVisibility.Remove();
-	c_engine->SetRecordConsoleOutput(false);
+	pragma::get_cengine()->SetRecordConsoleOutput(false);
 }
 void WIConsole::Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
 {
 	WIBase::Think(drawCmd);
 	if(m_hLog.IsValid() == false)
 		return;
-	auto conOutput = c_engine->PollConsoleOutput();
+	auto conOutput = pragma::get_cengine()->PollConsoleOutput();
 	if(conOutput.has_value() == false)
 		return;
 	std::string text = "";
@@ -372,7 +370,7 @@ void WIConsole::Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &dra
 			currentColor = {};
 		}
 		text += conOutput->output;
-		conOutput = c_engine->PollConsoleOutput();
+		conOutput = pragma::get_cengine()->PollConsoleOutput();
 	}
 	if(currentColor.has_value()) {
 		text += "{[/c]}";
@@ -425,7 +423,7 @@ void WIConsole::UpdateConsoleMode()
 {
 	if(m_mode == Mode::ExternalOwnership)
 		return;
-	SetSimpleConsoleMode(client->IsMainMenuOpen() == false);
+	SetSimpleConsoleMode(pragma::get_client_state()->IsMainMenuOpen() == false);
 }
 void WIConsole::InitializeSnapAreas()
 {

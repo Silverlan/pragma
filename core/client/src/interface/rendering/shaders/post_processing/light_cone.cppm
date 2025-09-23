@@ -3,8 +3,12 @@
 
 export;
 
+#include "pragma/clientdefinitions.h"
 
-export module pragma.client.rendering.shaders:pp_light_cone;
+export module pragma.client:rendering.shaders.pp_light_cone;
+
+import :model.mesh;
+import :rendering.shaders.base;
 
 export namespace pragma {
 	class DLLCLIENT ShaderPPLightCone : public ShaderPPBase {

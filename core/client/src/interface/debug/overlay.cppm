@@ -12,10 +12,9 @@ module;
 #include <mathutil/transform.hpp>
 #include <pragma/debug/debug_render_info.hpp>
 
-export module pragma.client.debug.overlay;
-
-import pragma.client.client_state;
-import pragma.client.engine;
+export module pragma.client:debug.overlay;
+import :client_state;
+import :engine;
 
 export namespace DebugRenderer {
 	enum class DLLCLIENT Type : uint32_t {

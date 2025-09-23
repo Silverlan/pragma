@@ -9,9 +9,9 @@ module;
 #include <sharedutils/functioncallback.h>
 #include <memory>
 
-export module pragma.client.ai:nav_system;
+export module pragma.client:ai.nav_system;
 
-import pragma.client.debug;
+import :debug;
 
 export namespace pragma {
 	namespace nav {

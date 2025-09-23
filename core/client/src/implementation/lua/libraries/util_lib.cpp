@@ -22,19 +22,18 @@ module;
 #include <prosper_window.hpp>
 #include <fsys/ifile.hpp>
 
-module pragma.client.scripting.lua.libraries.util;
+module pragma.client;
 
-import pragma.client.assets;
-import pragma.client.client_state;
-import pragma.client.engine;
-import pragma.client.entities.components.particle_system;
-import pragma.client.entities.components.render;
-import pragma.client.game;
-import pragma.client.util;
 
-extern CGame *c_game;
-extern ClientState *client;
-extern CEngine *c_engine;
+import :scripting.lua.libraries.util;
+import :assets;
+import :client_state;
+import :engine;
+import :entities.components.particle_system;
+import :entities.components.render;
+import :game;
+import :util;
+
 
 int Lua::util::Client::calc_world_direction_from_2d_coordinates(lua_State *l, pragma::CCameraComponent &hCam, const Vector2 &uv)
 {
@@ -58,7 +57,7 @@ int Lua::util::Client::create_particle_tracer(lua_State *l)
 	auto *mat = Lua::IsSet(l, 7) ? Lua::CheckString(l, 7) : BulletInfo::DEFAULT_TRACER_MATERIAL.c_str();
 	auto bloomScale = Lua::IsSet(l, 8) ? Lua::CheckNumber(l, 8) : BulletInfo::DEFAULT_TRACER_BLOOM;
 
-	auto *particle = c_game->CreateParticleTracer<pragma::ecs::CParticleSystemComponent>(start, end, static_cast<float>(radius), *col, static_cast<float>(length), static_cast<float>(speed), mat, static_cast<float>(bloomScale));
+	auto *particle = pragma::get_cgame()->CreateParticleTracer<pragma::ecs::CParticleSystemComponent>(start, end, static_cast<float>(radius), *col, static_cast<float>(length), static_cast<float>(speed), mat, static_cast<float>(bloomScale));
 	if(particle == nullptr)
 		return 0;
 	particle->PushLuaObject(l);
@@ -127,7 +126,7 @@ int Lua::util::Client::create_muzzle_flash(lua_State *l)
 luabind::object Lua::util::Client::create_giblet(GibletCreateInfo &createInfo)
 {
 	pragma::ecs::CParticleSystemComponent *particle = nullptr;
-	c_game->CreateGiblet(createInfo, &particle);
+	pragma::get_cgame()->CreateGiblet(createInfo, &particle);
 	if(particle == nullptr)
 		return {};
 	return particle->GetLuaObject();
@@ -189,7 +188,7 @@ int Lua::util::Client::import_model(lua_State *l)
 	if(Lua::IsSet(l, 3))
 		importAsSingleModel = Lua::CheckBool(l, 3);
 	std::string errMsg;
-	std::shared_ptr<Model> mdl = nullptr;
+	std::shared_ptr<::Model> mdl = nullptr;
 	if(f) {
 		mdl = pragma::asset::import_model(*f, errMsg, outputPath, importAsSingleModel);
 	}
@@ -274,10 +273,10 @@ int Lua::util::Client::export_texture(lua_State *l)
 
 int Lua::util::Client::export_material(lua_State *l)
 {
-	Material *mat = nullptr;
+	::Material *mat = nullptr;
 	if(Lua::IsString(l, 1)) {
 		std::string matPath = Lua::CheckString(l, 1);
-		mat = client->LoadMaterial(matPath, nullptr, true, false);
+		mat = pragma::get_client_state()->LoadMaterial(matPath, nullptr, true, false);
 	}
 	else
 		mat = Lua::CheckMaterial(l, 1);
@@ -309,8 +308,8 @@ int Lua::util::Client::export_material(lua_State *l)
 	return 2;
 }
 
-std::string Lua::util::Client::get_clipboard_string() { return c_engine->GetWindow()->GetClipboardString(); }
-void Lua::util::Client::set_clipboard_string(const std::string &str) { c_engine->GetWindow()->SetClipboardString(str); }
+std::string Lua::util::Client::get_clipboard_string() { return pragma::get_cengine()->GetWindow()->GetClipboardString(); }
+void Lua::util::Client::set_clipboard_string(const std::string &str) { pragma::get_cengine()->GetWindow()->SetClipboardString(str); }
 
 ::util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> Lua::util::Client::bake_directional_lightmap_atlas(const std::vector<pragma::CLightComponent *> &lights, const std::vector<::ModelSubMesh *> &meshes, const std::vector<BaseEntity *> &entities, uint32_t width, uint32_t height,
   ::pragma::LightmapDataCache *optLightmapDataCache)

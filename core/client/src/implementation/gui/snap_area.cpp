@@ -6,15 +6,13 @@ module;
 #include "stdafx_client.h"
 #include <wgui/types/witext.h>
 
-module pragma.client.gui;
+module pragma.client;
 
-import :snap_area;
+import :gui.snap_area;
 
-import pragma.client.client_state;
-import pragma.client.engine;
+import :client_state;
+import :engine;
 
-extern CEngine *c_engine;
-extern ClientState *client;
 
 LINK_WGUI_TO_CLASS(WISnapArea, WISnapArea);
 

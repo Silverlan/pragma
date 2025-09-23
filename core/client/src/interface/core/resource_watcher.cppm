@@ -6,8 +6,7 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <pragma/util/resource_watcher.h>
 
-export module pragma.client.util.resource_watcher;
-
+export module pragma.client:util.resource_watcher;
 export
 {
 	class DLLCLIENT ECResourceWatcherCallbackType : public EResourceWatcherCallbackType {

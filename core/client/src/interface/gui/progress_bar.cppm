@@ -8,7 +8,7 @@ module;
 #include <mathutil/umath.h>
 #include <sharedutils/property/util_property.hpp>
 
-export module pragma.client.gui:progress_bar;
+export module pragma.client:gui.progress_bar;
 
 export {
 	class DLLCLIENT WIProgressBar : public WIBase {

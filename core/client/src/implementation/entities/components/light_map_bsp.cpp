@@ -13,16 +13,15 @@ module;
 #include <image/prosper_texture.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
-module pragma.client.entities.components.light_map;
+module pragma.client;
 
-import pragma.client.client_state;
-import pragma.client.engine;
-import pragma.client.game;
+
+import :entities.components.light_map;
+import :client_state;
+import :engine;
+import :game;
 import source_engine.bsp;
 
-extern CGame *c_game;
-extern ClientState *client;
-extern CEngine *c_engine;
 
 using namespace pragma;
 
@@ -46,18 +45,18 @@ void CLightMapComponent::ConvertLightmapToBSPLuxelData() const
 	auto imgBuf = uimg::ImageBuffer::Create(extents.width, extents.height, uimg::Format::RGBA16);
 
 	// We can't read the image data directly, so we'll need a temporary buffer to copy it into
-	auto &context = c_engine->GetRenderContext();
+	auto &context = pragma::get_cengine()->GetRenderContext();
 	prosper::util::BufferCreateInfo createInfo {};
 	createInfo.size = imgBuf->GetSize();
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUToCPU;
 	createInfo.usageFlags = prosper::BufferUsageFlags::TransferDstBit;
 	auto buf = context.CreateBuffer(createInfo);
 
-	auto &setupCmd = c_engine->GetSetupCommandBuffer();
+	auto &setupCmd = pragma::get_cengine()->GetSetupCommandBuffer();
 	setupCmd->RecordImageBarrier(img, prosper::ImageLayout::ShaderReadOnlyOptimal, prosper::ImageLayout::TransferDstOptimal);
 	setupCmd->RecordCopyImageToBuffer({}, img, prosper::ImageLayout::TransferDstOptimal, *buf);
 	setupCmd->RecordImageBarrier(img, prosper::ImageLayout::TransferDstOptimal, prosper::ImageLayout::ShaderReadOnlyOptimal);
-	c_engine->FlushSetupCommandBuffer();
+	pragma::get_cengine()->FlushSetupCommandBuffer();
 
 	if(buf->Map(0, createInfo.size, prosper::IBuffer::MapFlags::ReadBit) == false)
 		return;
@@ -74,12 +73,12 @@ void CLightMapComponent::ConvertLightmapToBSPLuxelData() const
 #endif
 	// imgBuf->Clear(Color::Red);
 
-	auto mapPath = "maps/" + c_game->GetMapName() + ".bsp";
-	auto *convertLightmapDataToBspLuxelData = reinterpret_cast<bool (*)(NetworkState &, const std::string &, const uimg::ImageBuffer &, uint32_t, uint32_t, std::string &)>(::util::impl::get_module_func(client, "convert_lightmap_data_to_bsp_luxel_data"));
+	auto mapPath = "maps/" + pragma::get_cgame()->GetMapName() + ".bsp";
+	auto *convertLightmapDataToBspLuxelData = reinterpret_cast<bool (*)(NetworkState &, const std::string &, const uimg::ImageBuffer &, uint32_t, uint32_t, std::string &)>(::util::impl::get_module_func(pragma::get_client_state(), "convert_lightmap_data_to_bsp_luxel_data"));
 	if(convertLightmapDataToBspLuxelData == nullptr)
 		return;
 	std::string errMsg;
-	if(convertLightmapDataToBspLuxelData(*client, mapPath, *imgBuf, extents.width, extents.height, errMsg) == false) {
+	if(convertLightmapDataToBspLuxelData(*pragma::get_client_state(), mapPath, *imgBuf, extents.width, extents.height, errMsg) == false) {
 		Con::cwar << "Unable to convert lightmap data to BSP luxel data: " << errMsg << Con::endl;
 		return;
 	}

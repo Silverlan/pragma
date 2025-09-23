@@ -25,10 +25,11 @@ module;
 #include <pragma/model/animation/bone.hpp>
 #include <tiny_gltf.h>
 
-module pragma.client.assets;
-import pragma.client.client_state;
+module pragma.client;
 
-import :gltf_writer;
+import :assets.gltf_writer;
+
+import :client_state;
 
 // #define ENABLE_GLTF_VALIDATION
 #define GLTF_ASSERT(c, msg)                                                                                                                                                                                                                                                                      \
@@ -37,7 +38,6 @@ import :gltf_writer;
 		throw std::logic_error {"glTF assertion failed!"};                                                                                                                                                                                                                                       \
 	}
 
-extern ClientState *client;
 
 bool pragma::asset::GLTFWriter::Export(const SceneDesc &sceneDesc, const std::string &outputFileName, const pragma::asset::ModelExportInfo &exportInfo, std::string &outErrMsg, std::string *optOutPath)
 {
@@ -292,7 +292,7 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg, const std::string
 	// HACK: If the model was just ported, we need to make sure the material and textures are in order by invoking the
 	// resource watcher (in case they have been changed)
 	// TODO: This doesn't belong here!
-	client->GetResourceWatcher().Poll();
+	pragma::get_client_state()->GetResourceWatcher().Poll();
 
 	auto name = outputFileName;
 	::util::Path exportPath {name};
@@ -1335,7 +1335,7 @@ void pragma::asset::GLTFWriter::GenerateAO(::Model &mdl)
 	}
 	// Ambient occlusion generator may have applied some changes to some of the materials and/or textures.
 	// Make sure we are up-to-date
-	client->GetResourceWatcher().Poll();
+	pragma::get_client_state()->GetResourceWatcher().Poll();
 }
 
 void pragma::asset::GLTFWriter::WriteMaterials()

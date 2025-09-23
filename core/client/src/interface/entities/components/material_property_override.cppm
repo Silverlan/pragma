@@ -10,12 +10,13 @@ module;
 #include "buffers/prosper_buffer.hpp"
 #include <sharedutils/util_heterogenous_lookup.hpp>
 #include <material_manager2.hpp>
+#include "cmaterial.h"
 #include <udm.hpp>
 #include <queue>
 
-export module pragma.client.entities.components.material_property_override;
-
-import pragma.client.rendering.material_property_block;
+export module pragma.client:entities.components.material_property_override;
+import :rendering.material_property_block;
+import :rendering.shader_graph.node_shader_material;
 
 export namespace pragma {
 	class DLLCLIENT CMaterialPropertyOverrideComponent final : public BaseEntityComponent, public DynamicMemberRegister {

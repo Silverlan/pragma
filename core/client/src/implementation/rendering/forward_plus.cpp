@@ -16,35 +16,35 @@ module;
 #include <sharedutils/scope_guard.h>
 #include <pragma/entities/entity_iterator.hpp>
 
-module pragma.client.rendering.forward_plus;
+module pragma.client;
 
-import pragma.client.debug;
-import pragma.client.engine;
-import pragma.client.entities.components;
-import pragma.client.game;
-import pragma.client.gui;
-import pragma.client.rendering.shaders;
 
-extern CEngine *c_engine;
-extern CGame *c_game;
+import :rendering.forward_plus;
+import :debug;
+import :engine;
+import :entities.components;
+import :game;
+import :gui;
+import :rendering.light_data_buffer_manager;
+import :rendering.shaders;
 
 static void cmd_forwardplus_tile_size(NetworkState *, const ConVar &, int32_t, int32_t val)
 {
-	if(c_game == NULL)
+	if(pragma::get_cgame() == nullptr)
 		return;
 
 	pragma::ShaderForwardPLightCulling::TILE_SIZE = val;
-	for(auto &c : EntityCIterator<pragma::CRasterizationRendererComponent> {*c_game}) {
+	for(auto &c : EntityCIterator<pragma::CRasterizationRendererComponent> {*pragma::get_cgame()}) {
 		auto &fp = c.GetForwardPlusInstance();
 		auto &prepass = c.GetPrepass();
-		c_engine->GetRenderContext().WaitIdle();
-		fp.Initialize(c_engine->GetRenderContext(), c.GetWidth(), c.GetHeight(), *prepass.textureDepth);
+		pragma::get_cengine()->GetRenderContext().WaitIdle();
+		fp.Initialize(pragma::get_cengine()->GetRenderContext(), c.GetWidth(), c.GetHeight(), *prepass.textureDepth);
 		auto cRenderer = c.GetRendererComponent<pragma::CRendererComponent>();
 		if(cRenderer)
 			cRenderer->UpdateRenderSettings();
 	}
 
-	c_engine->ReloadShader("forwardp_light_culling");
+	pragma::get_cengine()->ReloadShader("forwardp_light_culling");
 }
 REGISTER_CONVAR_CALLBACK_CL(render_forwardplus_tile_size, cmd_forwardplus_tile_size);
 
@@ -77,9 +77,9 @@ static constexpr uint32_t get_shadow_integer_count()
 
 pragma::rendering::ForwardPlusInstance::ForwardPlusInstance(CRasterizationRendererComponent &rasterizer) : m_rasterizer {rasterizer}
 {
-	m_cmdBuffer = c_engine->GetRenderContext().AllocatePrimaryLevelCommandBuffer(prosper::QueueFamilyType::Compute, m_cmdBufferQueueFamilyIndex);
+	m_cmdBuffer = pragma::get_cengine()->GetRenderContext().AllocatePrimaryLevelCommandBuffer(prosper::QueueFamilyType::Compute, m_cmdBufferQueueFamilyIndex);
 
-	m_shaderLightCulling = c_engine->GetShader("forwardp_light_culling");
+	m_shaderLightCulling = pragma::get_cengine()->GetShader("forwardp_light_culling");
 }
 
 bool pragma::rendering::ForwardPlusInstance::Initialize(prosper::IPrContext &context, uint32_t width, uint32_t height, prosper::Texture &depthTexture)

@@ -6,8 +6,23 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <shader/prosper_shader.hpp>
 
-export module pragma.client.rendering.shaders:scene;
+export module pragma.client:rendering.shaders.scene;
 
+import :rendering.entity_instance_data;
+import :rendering.shaders.base_3d;
+import :rendering.shaders.textured_base;
+
+export class CModelSubMesh;
+export namespace pragma {
+	class CLightComponent;
+	class CRasterizationRendererComponent;
+	class CRenderComponent;
+	class CSceneComponent;
+	namespace rendering {
+		class ShaderProcessor;
+		enum class PassType : uint32_t;
+	};
+};
 export namespace pragma {
 	class DLLCLIENT ShaderScene : public Shader3DBase, public ShaderTexturedBase {
 	  public:
@@ -150,17 +165,6 @@ export namespace pragma {
 			Count
 		};
 
-#pragma pack(push, 1)
-		struct InstanceData {
-			enum class RenderFlags : uint32_t { None = 0u, Weighted = 1u };
-			Mat4 modelMatrix;
-			Vector4 color;
-			RenderFlags renderFlags;
-			uint32_t entityIndex;
-			Vector2 padding;
-		};
-#pragma pack(pop)
-
 		virtual bool GetRenderBufferTargets(CModelSubMesh &mesh, uint32_t pipelineIdx, std::vector<prosper::IBuffer *> &outBuffers, std::vector<prosper::DeviceSize> &outOffsets, std::optional<prosper::IndexBufferInfo> &outIndexBufferInfo) const;
 		virtual uint32_t GetInstanceDescriptorSetIndex() const = 0;
 		virtual void GetVertexAnimationPushConstantInfo(uint32_t &offset) const = 0;
@@ -235,7 +239,7 @@ export namespace pragma {
 	};
 };
 export {
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::ShaderEntity::InstanceData::RenderFlags);
+	REGISTER_BASIC_BITWISE_OPERATORS(pragma::rendering::InstanceData::RenderFlags);
 	REGISTER_BASIC_BITWISE_OPERATORS(pragma::ShaderScene::DebugFlags);
 	REGISTER_BASIC_BITWISE_OPERATORS(pragma::ShaderGameWorld::SceneFlags);
 };

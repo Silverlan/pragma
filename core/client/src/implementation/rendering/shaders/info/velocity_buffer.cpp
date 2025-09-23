@@ -7,17 +7,15 @@ module;
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <shader/prosper_shader_t.hpp>
 
-module pragma.client.rendering.shaders;
+module pragma.client;
 
-import :velocity_buffer;
 
-import pragma.client.client_state;
-import pragma.client.engine;
-import pragma.client.game;
+import :rendering.shaders.velocity_buffer;
 
-extern CGame *c_game;
-extern ClientState *client;
-extern CEngine *c_engine;
+import :client_state;
+import :engine;
+import :game;
+
 
 using namespace pragma;
 

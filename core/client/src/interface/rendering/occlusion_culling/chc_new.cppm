@@ -11,7 +11,10 @@ module;
 
 #define CHC_DEBUGGING_ENABLED 0
 
-export module pragma.client.rendering.occlusion_culling:chc_new;
+export module pragma.client:rendering.occlusion_culling.chc_new;
+
+import :entities.components.camera;
+import :rendering.occlusion_culling.octree;
 
 export namespace pragma {
 #pragma warning(push)

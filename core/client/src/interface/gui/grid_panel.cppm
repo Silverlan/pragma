@@ -6,9 +6,9 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/converters/gui_element_converter.hpp"
 
-export module pragma.client.gui:grid_panel;
+export module pragma.client:gui.grid_panel;
 
-import :table;
+import :gui.table;
 
 export class DLLCLIENT WIGridPanel : public WITable {
   public:

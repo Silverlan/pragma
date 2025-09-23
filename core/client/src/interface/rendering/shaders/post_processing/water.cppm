@@ -3,10 +3,13 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include <prosper_descriptor_set_group.hpp>
 #include <cmaterial.h>
 
-export module pragma.client.rendering.shaders:pp_water;
+export module pragma.client:rendering.shaders.pp_water;
+
+import :rendering.shaders.base;
 
 export namespace pragma {
 	class DLLCLIENT ShaderPPWater : public ShaderPPBase {

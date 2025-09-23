@@ -11,9 +11,9 @@ module;
 #include <pragma/lua/lua_call.hpp>
 #include <pragma/lua/handle_holder.hpp>
 
-export module pragma.client.gui:lua_base;
+export module pragma.client:gui.lua_base;
 
-import :lua_interface;
+import :gui.lua_interface;
 
 #define LUAGUI_CALL_MEMBER(name, numargs, numret, args, ret)                                                                                                                                                                                                                                     \
 	{                                                                                                                                                                                                                                                                                            \

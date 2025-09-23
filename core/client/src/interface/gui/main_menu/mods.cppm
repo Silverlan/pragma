@@ -8,12 +8,12 @@ module;
 #include <atomic>
 #include <mutex>
 
-export module pragma.client.gui:main_menu_mods;
+export module pragma.client:gui.main_menu_mods;
 
-import :chromium_page;
-import :main_menu_base;
+import :gui.chromium_page;
+import :gui.main_menu_base;
 
-import pragma.client.core;
+import :core;
 
 export {
 	class DLLCLIENT WIMainMenuMods : public WIMainMenuBase, public WIChromiumPage {

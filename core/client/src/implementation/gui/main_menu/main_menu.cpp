@@ -14,18 +14,15 @@ module;
 
 #undef PlaySound
 
-module pragma.client.gui;
+module pragma.client;
 
-import :main_menu;
+import :gui.main_menu;
 
-import pragma.client.client_state;
-import pragma.client.engine;
-import pragma.client.game;
+import :client_state;
+import :engine;
+import :game;
 import pragma.locale;
 
-extern CEngine *c_engine;
-extern ClientState *client;
-extern CGame *c_game;
 
 WIMainMenu::WIMainMenu() : WIBase(), m_menuType(0), m_tOpen(0.0)
 {
@@ -64,14 +61,14 @@ util::EventReply WIMainMenu::KeyboardCallback(pragma::platform::Key key, int sca
 void WIMainMenu::OnVisibilityChanged(bool bVisible)
 {
 	WIBase::OnVisibilityChanged(bVisible);
-	if(c_game == NULL)
+	if(pragma::get_cgame() == nullptr)
 		return;
 	if(bVisible == true) {
-		double tCur = c_game->RealTime();
+		double tCur = pragma::get_cgame()->RealTime();
 		m_tOpen = tCur;
 		// Obsolete?
-		/*m_cbBlur = c_game->AddCallback("RenderPostProcessing",FunctionCallback<void,unsigned int,unsigned int>::Create([this](unsigned int ppFBO,unsigned int) {
-			double t = c_game->RealTime();
+		/*m_cbBlur = pragma::get_cgame()->AddCallback("RenderPostProcessing",FunctionCallback<void,unsigned int,unsigned int>::Create([this](unsigned int ppFBO,unsigned int) {
+			double t = pragma::get_cgame()->RealTime();
 			double tDelta = t -m_tOpen;
 			float blurSize = (CFloat(tDelta) /0.1f) *3.f;
 			if(blurSize > 2.f)
@@ -102,6 +99,7 @@ void WIMainMenu::PlayNextMenuTrack(bool newRound)
 	auto it = m_menuTracks.begin() + next;
 	auto sound = *it;
 	m_menuTracks.erase(it);
+	auto *client = pragma::get_client_state();
 	if(client->PrecacheSound(std::string("ui/") + sound) == false || (m_menuSound = client->PlaySound(std::string("ui/") + sound, ALSoundType::GUI, ALCreateFlags::None)) == nullptr) {
 		if(newRound == false)
 			PlayNextMenuTrack(newRound);
@@ -195,7 +193,7 @@ void WIMainMenu::Initialize()
 #ifdef _DEBUG
 	menu->AddMenuItem("Loadscreen", FunctionCallback<>::Create([this]() { SetActiveMenu(m_hLoadScreen); }));
 #endif
-	menu->AddMenuItem(pragma::locale::get_text("menu_quit"), FunctionCallback<>::Create([]() { c_engine->ShutDown(); }));
+	menu->AddMenuItem(pragma::locale::get_text("menu_quit"), FunctionCallback<>::Create([]() { pragma::get_cengine()->ShutDown(); }));
 	menu->SetKeyboardInputEnabled(true);
 
 	m_hNewGame = CreateChild<WIMainMenuNewGame>();
@@ -248,6 +246,7 @@ void WIMainMenu::Initialize()
 	pVersion->SetPos(GetWidth() - pVersion->GetWidth() - 40, GetHeight() - pVersion->GetHeight() - 20);
 	pVersion->SetAnchor(1.f, 1.f, 1.f, 1.f);
 
+	auto *client = pragma::get_client_state();
 	m_cbOnSteamworksInit = client->AddCallback("OnSteamworksInitialized", FunctionCallback<void, std::reference_wrapper<struct ISteamworks>>::Create([this](std::reference_wrapper<struct ISteamworks> isteamworks) {
 		if(m_hVersion.IsValid() == false || isteamworks.get().get_build_id == nullptr)
 			return;
@@ -284,7 +283,7 @@ void WIMainMenu::Initialize()
 	auto *pAttributes = m_hRenderAPI.get<WIText>();
 	pAttributes->AddStyleClass("game_version");
 	pAttributes->SetColor(Color::Lime);
-	pAttributes->SetText("[" +c_engine->GetRenderContext().GetAPIAbbreviation() +"]");
+	pAttributes->SetText("[" +pragma::get_cengine()->GetRenderContext().GetAPIAbbreviation() +"]");
 	pAttributes->SizeToContents();*/
 
 	/*WIHandle hConsole = CreateChild<WIConsole>();
@@ -366,8 +365,8 @@ void WIMainMenu::SetContinueMenu()
 		return;
 	m_menuType = 1;
 	WIMainMenuBase *menu = static_cast<WIMainMenuBase *>(m_hMain.get());
-	menu->AddMenuItem(0, pragma::locale::get_text("menu_resumegame"), FunctionCallback<>::Create([]() { client->CloseMainMenu(); }));
-	menu->AddMenuItem(1, pragma::locale::get_text("menu_disconnect"), FunctionCallback<>::Create([]() { c_engine->EndGame(); }));
+	menu->AddMenuItem(0, pragma::locale::get_text("menu_resumegame"), FunctionCallback<>::Create([]() { pragma::get_client_state()->CloseMainMenu(); }));
+	menu->AddMenuItem(1, pragma::locale::get_text("menu_disconnect"), FunctionCallback<>::Create([]() { pragma::get_cengine()->EndGame(); }));
 }
 
 void WIMainMenu::SetNewGameMenu()

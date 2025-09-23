@@ -9,9 +9,11 @@ module;
 #include <pragma/entities/components/base_physics_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
-module pragma.client.entities.components.func_brush;
+module pragma.client;
 
-import pragma.client.entities.components.render;
+
+import :entities.components.func_brush;
+import :entities.components.render;
 
 using namespace pragma;
 

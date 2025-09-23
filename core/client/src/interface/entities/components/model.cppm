@@ -9,16 +9,21 @@ module;
 #include <vector>
 #include <optional>
 
-export module pragma.client.entities.components.model;
+export module pragma.client:entities.components.model;
 
-import pragma.client.rendering.material_property_block;
+import :entities.components.entity;
+import :model.render_mesh_group;
+import :rendering.material_property_block;
+import :rendering.model_render_buffer_data;
+import :rendering.shaders.textured_enums;
 
-namespace pragma {
-	enum class GameShaderSpecializationConstantFlag : uint32_t;
-	enum class GameShaderSpecialization : uint32_t;
+export class CModelSubMesh;
+export namespace pragma {
 	class CCameraComponent;
 	class CSceneComponent;
 	class CMaterialOverrideComponent;
+};
+export namespace pragma {
 	class DLLCLIENT CModelComponent final : public BaseModelComponent, public CBaseNetComponent {
 	  public:
 		static ComponentEventId EVENT_ON_RENDER_MESHES_UPDATED;

@@ -16,15 +16,15 @@ module;
 #include <cmaterial_manager2.hpp>
 #include <cmaterial.h>
 
-module pragma.client.util.resource_watcher;
+module pragma.client;
 
-import pragma.client.engine;
-import pragma.client.entities.components.particle_system;
-import pragma.client.game;
+
+import :util.resource_watcher;
+import :engine;
+import :entities.components.particle_system;
+import :game;
 import pragma.shadergraph;
 
-extern CEngine *c_engine;
-extern CGame *c_game;
 
 decltype(ECResourceWatcherCallbackType::Shader) ECResourceWatcherCallbackType::Shader = ECResourceWatcherCallbackType {umath::to_integral(E::Shader)};
 decltype(ECResourceWatcherCallbackType::ParticleSystem) ECResourceWatcherCallbackType::ParticleSystem = ECResourceWatcherCallbackType {umath::to_integral(E::ParticleSystem)};
@@ -104,9 +104,9 @@ void CResourceWatcherManager::ReloadTexture(const std::string &path)
 void CResourceWatcherManager::OnMaterialReloaded(const std::string &path, const std::unordered_set<Model *> &modelMap)
 {
 	ResourceWatcherManager::OnMaterialReloaded(path, modelMap);
-	if(c_game == nullptr)
+	if(pragma::get_cgame() == nullptr)
 		return;
-	EntityIterator entIt {*c_game, EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
+	EntityIterator entIt {*pragma::get_cgame(), EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CModelComponent>>();
 	for(auto *ent : entIt) {
 		auto &mdl = ent->GetModel();
@@ -155,7 +155,7 @@ void CResourceWatcherManager::OnResourceChanged(const util::Path &rootPath, cons
 		auto canonShader = FileManager::GetCanonicalizedPath(strPath);
 		ufile::remove_extension_from_filename(canonShader);
 		ustring::to_lower(canonShader);
-		auto &shaderManager = c_engine->GetShaderManager();
+		auto &shaderManager = pragma::get_cengine()->GetShaderManager();
 		std::vector<std::string> reloadShaders;
 		for(auto &pair : shaderManager.GetShaderNameToIndexTable()) {
 			auto *shader = shaderManager.GetShader(pair.second);
@@ -173,12 +173,12 @@ void CResourceWatcherManager::OnResourceChanged(const util::Path &rootPath, cons
 #if RESOURCE_WATCHER_VERBOSE > 0
 			Con::cout << "[ResourceWatcher] Reloading shader '" << name << "'..." << Con::endl;
 #endif
-			c_engine->ReloadShader(name);
+			pragma::get_cengine()->ReloadShader(name);
 		}
 		CallChangeCallbacks(ECResourceWatcherCallbackType::Shader, strPath, ext);
 	}
 	else if(ext == pragma::shadergraph::Graph::EXTENSION_ASCII || ext == pragma::shadergraph::Graph::EXTENSION_BINARY) {
-		auto &graphManager = c_engine->GetShaderGraphManager();
+		auto &graphManager = pragma::get_cengine()->GetShaderGraphManager();
 		std::string name {path.GetFileName()};
 		ufile::remove_extension_from_filename(name, std::array<std::string, 2> {pragma::shadergraph::Graph::EXTENSION_ASCII, pragma::shadergraph::Graph::EXTENSION_BINARY});
 		std::string err;

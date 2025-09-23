@@ -8,9 +8,8 @@ module;
 #include <pragma/entities/components/base_entity_component.hpp>
 #include <pragma/indexmap.h>
 
-export module pragma.client.entities.components.lights.shadow;
-
-import pragma.client.entities.components.game_shadow_manager;
+export module pragma.client:entities.components.lights.shadow;
+import :entities.components.game_shadow_manager;
 
 export namespace pragma {
 	class DLLCLIENT LightShadowRenderer {

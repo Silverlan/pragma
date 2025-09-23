@@ -3,14 +3,25 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include <sharedutils/util_shared_handle.hpp>
+#include "prosper_command_buffer.hpp"
 #include <memory>
 #include <optional>
 #include <functional>
 #include <mathutil/color.h>
 
-export module pragma.client.rendering.draw_scene_info;
+export module pragma.client:rendering.draw_scene_info;
 
+import :rendering.enums;
+import :rendering.render_stats;
+
+export {
+	class CBaseEntity;
+	namespace pragma {
+		class CSceneComponent;
+	};
+};
 export namespace util {
 	struct DLLCLIENT DrawSceneInfo {
 		enum class Flags : uint8_t {

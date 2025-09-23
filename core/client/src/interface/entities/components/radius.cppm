@@ -6,7 +6,9 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <pragma/entities/components/base_radius_component.hpp>
 
-export module pragma.client.entities.components.radius;
+export module pragma.client:entities.components.radius;
+
+import :entities.components.entity;
 
 export namespace pragma {
 	class DLLCLIENT CRadiusComponent final : public BaseRadiusComponent, public CBaseNetComponent {

@@ -7,17 +7,14 @@ module;
 #include <wgui/types/witext.h>
 #include <pragma/networking/netmessages.h>
 
-module pragma.client.gui;
+module pragma.client;
 
-import :net_graph;
-import pragma.client.client_state;
-import pragma.client.engine;
-import pragma.client.game;
+import :gui.net_graph;
+import :client_state;
+import :engine;
+import :game;
 import pragma.string.unicode;
 
-extern CEngine *c_engine;
-extern ClientState *client;
-extern CGame *c_game;
 
 static const uint32_t DATA_RECORD_BACKLOG = 30;
 
@@ -26,6 +23,7 @@ LINK_WGUI_TO_CLASS(WINetGraph, WINetGraph);
 WINetGraph::NetData::NetData() : lastUpdate(0) { Reset(); }
 void WINetGraph::NetData::Reset()
 {
+	auto *client = pragma::get_client_state();
 	if(client != nullptr)
 		lastUpdate = client->RealTime();
 	dataOutUDP = 0;
@@ -105,6 +103,7 @@ void WINetGraph::Initialize()
 	auto *pTextOutgoing = CreateText("out:");
 	m_txtOutgoing = pTextOutgoing->GetHandle();
 
+	auto *client = pragma::get_client_state();
 	std::stringstream ssUpdateRate;
 	ssUpdateRate << "update rate: " << client->GetConVarInt("cl_updaterate");
 
@@ -131,7 +130,7 @@ void WINetGraph::Initialize()
 	}
 
 	m_cbThink = client->AddCallback("Think", FunctionCallback<void>::Create([this]() {
-		auto &t = client->RealTime();
+		auto &t = pragma::get_client_state()->RealTime();
 		auto tDelta = t - m_netData.lastUpdate;
 		if(tDelta >= 1.0) {
 			m_dataSizes[m_dataSizeIdx++] = m_netData.dataIn;
@@ -155,7 +154,7 @@ void WINetGraph::Initialize()
 			}
 			if(m_hLatency.IsValid()) {
 				std::stringstream ss;
-				ss << "latency: " << +c_game->GetLatency() << "ms";
+				ss << "latency: " << +pragma::get_cgame()->GetLatency() << "ms";
 
 				auto *pText = m_hLatency.get<WIText>();
 				pText->SetText(ss.str());
@@ -163,7 +162,7 @@ void WINetGraph::Initialize()
 			}
 			if(m_hLostPackets.IsValid()) {
 				std::stringstream ss;
-				ss << "lost packets: " << c_game->GetLostPacketCount();
+				ss << "lost packets: " << pragma::get_cgame()->GetLostPacketCount();
 
 				auto *pText = m_hLostPackets.get<WIText>();
 				pText->SetText(ss.str());

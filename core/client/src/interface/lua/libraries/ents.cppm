@@ -6,8 +6,7 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <pragma/lua/ldefinitions.h>
 
-export module pragma.client.scripting.lua.libraries.ents;
-
+export module pragma.client:scripting.lua.libraries.ents;
 export namespace Lua {
 	namespace ents {
 		namespace Client {

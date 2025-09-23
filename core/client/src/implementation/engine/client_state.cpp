@@ -5,11 +5,12 @@ module;
 
 #include "stdafx_cengine.h"
 
-module pragma.client.engine;
+module pragma.client;
 
-import pragma.client.client_state;
 
-extern ClientState *client;
+import :engine;
+import :client_state;
+
 
 ClientState *CEngine::OpenClientState()
 {
@@ -31,7 +32,6 @@ void CEngine::CloseClientState()
 	m_inputBindingLayers.clear();
 
 	m_clInstance->state = nullptr;
-	client = nullptr;
 }
 
 NetworkState *CEngine::GetClientState() const

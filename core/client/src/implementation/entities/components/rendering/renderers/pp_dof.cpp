@@ -11,16 +11,15 @@ module;
 #include <image/prosper_msaa_texture.hpp>
 #include <image/prosper_render_target.hpp>
 
-module pragma.client.entities.components.pp_dof;
+module pragma.client;
 
-import pragma.client.engine;
-import pragma.client.entities.components.optical_camera;
-import pragma.client.entities.components.rasterization_renderer;
-import pragma.client.game;
-import pragma.client.rendering.shaders;
+import :entities.components.rasterization_renderer;
+import :entities.components.pp_dof;
+import :engine;
+import :entities.components.optical_camera;
+import :game;
+import :rendering.shaders;
 
-extern CGame *c_game;
-extern CEngine *c_engine;
 
 using namespace pragma;
 
@@ -29,10 +28,10 @@ void CRendererPpDoFComponent::DoRenderEffect(const util::DrawSceneInfo &drawScen
 {
 	if(drawSceneInfo.renderStats)
 		(*drawSceneInfo.renderStats)->BeginGpuTimer(RenderStats::RenderStage::PostProcessingGpuDoF, *drawSceneInfo.commandBuffer);
-	c_game->StartGPUProfilingStage("PostProcessingDoF");
+	pragma::get_cgame()->StartGPUProfilingStage("PostProcessingDoF");
 
 	util::ScopeGuard scopeGuard {[&drawSceneInfo]() {
-		c_game->StopGPUProfilingStage(); // PostProcessingDoF
+		pragma::get_cgame()->StopGPUProfilingStage(); // PostProcessingDoF
 		if(drawSceneInfo.renderStats)
 			(*drawSceneInfo.renderStats)->EndGpuTimer(RenderStats::RenderStage::PostProcessingGpuDoF, *drawSceneInfo.commandBuffer);
 	}};
@@ -43,7 +42,7 @@ void CRendererPpDoFComponent::DoRenderEffect(const util::DrawSceneInfo &drawScen
 	auto &cam = scene.GetActiveCamera();
 	auto &hdrInfo = m_renderer->GetHDRInfo();
 	auto &drawCmd = drawSceneInfo.commandBuffer;
-	auto &hShaderDof = c_game->GetGameShader(CGame::GameShader::PPDoF);
+	auto &hShaderDof = pragma::get_cgame()->GetGameShader(CGame::GameShader::PPDoF);
 	if(hShaderDof.expired() || cam.expired())
 		return;
 	auto opticalC = cam->GetEntity().GetComponent<pragma::COpticalCameraComponent>();

@@ -7,7 +7,11 @@ module;
 #include "pragma/entities/environment/env_fog_controller.h"
 #include <memory>
 
-export module pragma.client.entities.components.env_fog_controller;
+export module pragma.client:entities.components.env_fog_controller;
+
+import :entities.base_entity;
+import :entities.components.entity;
+import :rendering.world_environment;
 
 export {
 	namespace pragma {

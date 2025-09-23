@@ -7,7 +7,10 @@ module;
 #include <pragma/entities/components/base_entity_component.hpp>
 #include <unordered_set>
 
-export module pragma.client.entities.components.renderer;
+export module pragma.client:entities.components.renderer;
+
+import :entities.components.scene;
+import :rendering.draw_scene_info;
 
 export namespace pragma {
 	struct DLLCLIENT PostProcessingEffectData {

@@ -8,15 +8,12 @@ module;
 #include <sharedutils/util.h>
 #include <algorithm>
 
-module pragma.client.particle_system;
+module pragma.client;
 
-import :initializer_radius_random;
-
-REGISTER_PARTICLE_INITIALIZER(radius_random, CParticleInitializerRadiusRandom);
-REGISTER_PARTICLE_INITIALIZER(length_random, CParticleInitializerLengthRandom);
+import :particle_system.initializer_radius_random;
 
 CParticleInitializerRadiusRandomBase::CParticleInitializerRadiusRandomBase(const std::string &identifier) : m_identifier {identifier} {}
-void CParticleInitializerRadiusRandomBase::Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void CParticleInitializerRadiusRandomBase::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleInitializer::Initialize(pSystem, values);
 	for(auto it = values.begin(); it != values.end(); it++) {

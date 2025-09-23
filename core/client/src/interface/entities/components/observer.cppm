@@ -10,7 +10,9 @@ module;
 #include <pragma/math/deltaoffset.h>
 #include <pragma/math/deltatransform.h>
 
-export module pragma.client.entities.components.observer;
+export module pragma.client:entities.components.observer;
+
+import :entities.components.entity;
 
 export namespace pragma {
 	class DLLCLIENT CObserverComponent final : public BaseObserverComponent, public CBaseNetComponent {

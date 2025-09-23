@@ -8,19 +8,18 @@ module;
 #include <wgui/types/witext.h>
 #include <wgui/types/wirect.h>
 
-module pragma.client.gui;
+module pragma.client;
 
-import :main_menu_base;
-import :options_list;
+import :gui.main_menu_base;
+import :gui.options_list;
 
-import pragma.client.client_state;
+import :client_state;
 import pragma.gui;
 import pragma.locale;
 import pragma.string.unicode;
 
 LINK_WGUI_TO_CLASS(WIMainMenuElement, WIMainMenuElement);
 
-extern ClientState *client;
 WIMainMenuBase::WIMainMenuBase() : WIBase(), m_selected(-1) { AddStyleClass("main_menu"); }
 
 void WIMainMenuBase::OnGoBack(int button, int action, int)

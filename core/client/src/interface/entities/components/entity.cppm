@@ -7,8 +7,7 @@ module;
 #include "sharedutils/netpacket.hpp"
 #include <pragma/entities/entity_component_manager.hpp>
 
-export module pragma.client.entities.components.entity;
-
+export module pragma.client:entities.components.entity;
 export namespace pragma {
 	class DLLCLIENT CBaseNetComponent : public BaseNetComponent {
 	  public:

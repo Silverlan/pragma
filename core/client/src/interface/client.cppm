@@ -3,12 +3,24 @@
 
 export module pragma.client;
 
-export import pragma.client.ai;
-export import pragma.client.assets;
-export import pragma.client.core;
-export import pragma.client.debug;
-export import pragma.client.entities;
-export import pragma.client.gui;
-export import pragma.client.particle_system;
-export import pragma.client.physics;
-export import pragma.client.rendering.shaders;
+export import :ai;
+export import :assets;
+export import :client_state;
+export import :core;
+export import :debug;
+export import :engine;
+export import :entities;
+export import :entities.components;
+export import :game;
+export import :gui;
+export import :model;
+export import :networking;
+export import :particle_system;
+export import :physics;
+export import :rendering;
+export import :scripting.lua;
+export import :util;
+
+export import pragma.gui;
+export import pragma.locale;
+export import pragma.string.unicode;

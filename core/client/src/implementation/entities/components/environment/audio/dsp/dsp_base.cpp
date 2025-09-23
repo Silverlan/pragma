@@ -11,16 +11,16 @@ module;
 #include <pragma/entities/components/basetoggle.h>
 #include <pragma/entities/entity_component_system_t.hpp>
 
-module pragma.client.entities.components.audio.dsp.base;
+module pragma.client;
 
-import pragma.client.client_state;
-import pragma.client.entities.components.toggle;
-import pragma.client.game;
+
+import :entities.components.audio.dsp.base;
+import :client_state;
+import :entities.components.toggle;
+import :game;
 
 using namespace pragma;
 
-extern ClientState *client;
-extern CGame *c_game;
 
 CBaseSoundDspComponent::~CBaseSoundDspComponent() { DetachAllSoundSources(); }
 void CBaseSoundDspComponent::Initialize()
@@ -40,7 +40,7 @@ void CBaseSoundDspComponent::OnTick(double dt)
 	auto radiusInnerSqr = umath::pow2(m_kvInnerRadius);
 	auto radiusOuterSqr = umath::pow2(m_kvOuterRadius);
 	auto &pos = pTrComponent->GetPosition();
-	auto &sounds = client->GetSounds();
+	auto &sounds = pragma::get_client_state()->GetSounds();
 	for(auto &rsnd : sounds) {
 		auto &snd = rsnd.get();
 		if(snd.IsPlaying() == false)
@@ -95,7 +95,7 @@ void CBaseSoundDspComponent::OnEntitySpawn()
 {
 	BaseEnvSoundDspComponent::OnEntitySpawn();
 	if(m_kvDsp.empty() == false)
-		m_dsp = c_game->GetAuxEffect(m_kvDsp);
+		m_dsp = pragma::get_cgame()->GetAuxEffect(m_kvDsp);
 }
 util::EventReply CBaseSoundDspComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {

@@ -11,13 +11,12 @@ module;
 #include <../../../modules/pr_chromium/include/util_javascript.hpp>
 #endif
 
-module pragma.client.gui;
+module pragma.client;
 
-import :chromium_page;
+import :gui.chromium_page;
 
-import pragma.client.client_state;
+import :client_state;
 
-extern ClientState *client;
 
 WIChromiumPage::WIChromiumPage(WIBase *parent) : m_parent(parent) {}
 
@@ -99,6 +98,7 @@ void WIChromiumPage::InitializeChromium()
 	// Initialize chromium
 	std::string err;
 	const std::string chromiumPath = "chromium/wv_chromium";
+	auto *client = pragma::get_client_state();
 	if(client->InitializeLibrary(chromiumPath, &err) != nullptr) {
 		auto dllHandle = client->GetLibraryModule(chromiumPath);
 		assert(dllHandle != nullptr);

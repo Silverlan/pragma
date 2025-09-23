@@ -13,20 +13,21 @@ module;
 #include <image/prosper_sampler.hpp>
 #include <image/prosper_render_target.hpp>
 #include <prosper_command_buffer.hpp>
+#include "pragma/console/cvar_handler.h"
+#include "pragma/console/c_cvar.h"
 
-module pragma.client.entities.components.lights.shadow_csm;
+module pragma.client;
 
-import pragma.client.game;
-import pragma.client.rendering.shaders;
+
+import :entities.components.lights.shadow_csm;
+import :game;
+import :rendering.shaders;
 
 using namespace pragma;
 
-import pragma.client.client_state;
-import pragma.client.engine;
+import :client_state;
+import :engine;
 
-extern CEngine *c_engine;
-extern ClientState *client;
-extern CGame *c_game;
 
 static const uint8_t LAYER_UPDATE_FREQUENCY = 3; // Frames
 
@@ -44,9 +45,9 @@ Frustum::Frustum() : radius(0.f)
 
 static void cmd_cl_render_shadow_pssm_split_count(NetworkState *, const ConVar &, int, int val)
 {
-	if(c_game == NULL)
+	if(pragma::get_cgame() == nullptr)
 		return;
-	EntityIterator entIt {*c_game};
+	EntityIterator entIt {*pragma::get_cgame()};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CShadowCSMComponent>>();
 	for(auto *ent : entIt) {
 		auto hCsmC = ent->GetComponent<pragma::CShadowCSMComponent>();
@@ -60,9 +61,9 @@ REGISTER_CONVAR_CALLBACK_CL(cl_render_shadow_pssm_split_count, cmd_cl_render_sha
 
 static void cmd_render_csm_max_distance(NetworkState *, const ConVar &, float, float val)
 {
-	if(c_game == NULL)
+	if(pragma::get_cgame() == nullptr)
 		return;
-	EntityIterator entIt {*c_game};
+	EntityIterator entIt {*pragma::get_cgame()};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CShadowCSMComponent>>();
 	for(auto *ent : entIt) {
 		auto hCsmC = ent->GetComponent<pragma::CShadowCSMComponent>();
@@ -80,8 +81,8 @@ CShadowCSMComponent::CShadowCSMComponent(BaseEntity &ent) : BaseEntityComponent 
 	SetSplitCount(cvCascadeCount->GetInt());
 	UpdateSplitDistances(2.f, GetMaxDistance());
 
-	m_whShaderCsm = c_engine->GetShader("shadowcsm");
-	m_whShaderCsmTransparent = c_engine->GetShader("shadowcsmtransparent");
+	m_whShaderCsm = pragma::get_cengine()->GetShader("shadowcsm");
+	m_whShaderCsmTransparent = pragma::get_cengine()->GetShader("shadowcsmtransparent");
 }
 
 void CShadowCSMComponent::Initialize() { BaseEntityComponent::Initialize(); }
@@ -112,9 +113,9 @@ void CShadowCSMComponent::SetSplitCount(unsigned int numSplits)
 	m_numSplits = numSplits;
 	m_layerCount = numSplits;
 
-	auto &csmBuffer = c_game->GetGlobalRenderSettingsBufferData().csmBuffer;
+	auto &csmBuffer = pragma::get_cgame()->GetGlobalRenderSettingsBufferData().csmBuffer;
 	auto splitCount = static_cast<decltype(pragma::ShaderGameWorldLightingPass::CSMData::count)>(numSplits);
-	c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(csmBuffer, offsetof(pragma::ShaderGameWorldLightingPass::CSMData, count), splitCount);
+	pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(csmBuffer, offsetof(pragma::ShaderGameWorldLightingPass::CSMData, count), splitCount);
 
 	m_frustums.resize(m_numSplits);
 	m_fard.resize(m_numSplits);
@@ -226,17 +227,17 @@ void CShadowCSMComponent::UpdateFrustum(uint32_t splitId, pragma::CCameraCompone
 	auto &camProj = cam.GetProjectionMatrix();
 	auto &splitDistance = m_pendingInfo.prevSplitDistances;
 
-	auto &csmBuffer = c_game->GetGlobalRenderSettingsBufferData().csmBuffer;
-	c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(csmBuffer, offsetof(pragma::ShaderGameWorldLightingPass::CSMData, VP), m_pendingInfo.prevVpMatrices.size() * sizeof(Mat4), m_pendingInfo.prevVpMatrices.data());
-	c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(csmBuffer, offsetof(pragma::ShaderGameWorldLightingPass::CSMData, fard), splitDistance);
+	auto &csmBuffer = pragma::get_cgame()->GetGlobalRenderSettingsBufferData().csmBuffer;
+	pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(csmBuffer, offsetof(pragma::ShaderGameWorldLightingPass::CSMData, VP), m_pendingInfo.prevVpMatrices.size() * sizeof(Mat4), m_pendingInfo.prevVpMatrices.data());
+	pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(csmBuffer, offsetof(pragma::ShaderGameWorldLightingPass::CSMData, fard), splitDistance);
 
 	// Calculate new split distances
 	splitDistance[splitId] = 0.5f * (-frustumSplit.split.fard * camProj[2][2] + camProj[3][2]) / frustumSplit.split.fard + 0.5f;
 }
 void CShadowCSMComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
-void CShadowCSMComponent::InitializeTextureSet(TextureSet &set, pragma::CLightComponent::ShadowMapType smType)
+void CShadowCSMComponent::InitializeTextureSet(TextureSet &set, pragma::rendering::ShadowMapType smType)
 {
-	auto wpShaderShadow = c_engine->GetShader("shadowcsm");
+	auto wpShaderShadow = pragma::get_cengine()->GetShader("shadowcsm");
 	if(wpShaderShadow.expired())
 		return;
 	auto size = cvShadowmapSize->GetInt();
@@ -250,10 +251,10 @@ void CShadowCSMComponent::InitializeTextureSet(TextureSet &set, pragma::CLightCo
 	imgCreateInfo.format = pragma::ShaderShadow::RENDER_PASS_DEPTH_FORMAT;
 	imgCreateInfo.usage = prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::DepthStencilAttachmentBit | prosper::ImageUsageFlags::TransferDstBit;
 	imgCreateInfo.postCreateLayout = prosper::ImageLayout::ShaderReadOnlyOptimal;
-	if(smType == pragma::CLightComponent::ShadowMapType::Static)
+	if(smType == pragma::rendering::ShadowMapType::Static)
 		imgCreateInfo.usage |= prosper::ImageUsageFlags::TransferSrcBit;
 	imgCreateInfo.layers = layerCount;
-	auto img = c_engine->GetRenderContext().CreateImage(imgCreateInfo);
+	auto img = pragma::get_cengine()->GetRenderContext().CreateImage(imgCreateInfo);
 
 	prosper::util::SamplerCreateInfo samplerCreateInfo {};
 	//samplerCreateInfo.compareEnable = true; // When enabled, causes strange behavior on Nvidia cards when doing texture lookups
@@ -266,11 +267,11 @@ void CShadowCSMComponent::InitializeTextureSet(TextureSet &set, pragma::CLightCo
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
 	prosper::util::TextureCreateInfo texCreateInfo {};
 	texCreateInfo.flags |= prosper::util::TextureCreateInfo::Flags::CreateImageViewForEachLayer;
-	auto tex = c_engine->GetRenderContext().CreateTexture(texCreateInfo, *img, imgViewCreateInfo, samplerCreateInfo);
+	auto tex = pragma::get_cengine()->GetRenderContext().CreateTexture(texCreateInfo, *img, imgViewCreateInfo, samplerCreateInfo);
 	prosper::util::RenderTargetCreateInfo rtCreateInfo {};
 	rtCreateInfo.useLayerFramebuffers = true;
 
-	set.renderTarget = c_engine->GetRenderContext().CreateRenderTarget({tex}, static_cast<prosper::ShaderGraphics *>(wpShaderShadow.get())->GetRenderPass(), rtCreateInfo);
+	set.renderTarget = pragma::get_cengine()->GetRenderContext().CreateRenderTarget({tex}, static_cast<prosper::ShaderGraphics *>(wpShaderShadow.get())->GetRenderPass(), rtCreateInfo);
 	set.renderTarget->SetDebugName("csm_rt");
 }
 void CShadowCSMComponent::UpdateFrustum(pragma::CCameraComponent &cam, const Mat4 &matView, const Vector3 &dir)
@@ -293,7 +294,7 @@ void CShadowCSMComponent::RenderBatch(std::shared_ptr<prosper::IPrimaryCommandBu
 	auto &tex = rt->GetTexture();
 	auto &img = tex.GetImage();
 	auto &info = m_pendingInfo;
-	auto smType = pragma::CLightComponent::ShadowMapType::Static;
+	auto smType = pragma::rendering::ShadowMapType::Static;
 
 	auto &renderPass = rt->GetRenderPass();
 	auto numLayers = GetLayerCount();
@@ -425,7 +426,7 @@ void CShadowCSMComponent::RenderBatch(std::shared_ptr<prosper::IPrimaryCommandBu
 		}
 		drawCmd->RecordEndRenderPass();
 	}
-	auto *cam = c_game->GetPrimaryCamera<pragma::CCameraComponent>();
+	auto *cam = pragma::get_cgame()->GetPrimaryCamera<pragma::CCameraComponent>();
 	auto camPos = cam ? cam->GetEntity().GetPosition() : Vector3{};
 	for(auto layer=decltype(numLayers){0};layer<numLayers;++layer)
 	{
@@ -434,11 +435,11 @@ void CShadowCSMComponent::RenderBatch(std::shared_ptr<prosper::IPrimaryCommandBu
 			continue;
 		// Layer is complete, reset data for next iteration
 		auto &meshes = m_pendingInfo.meshes.at(layer);
-		meshes.entityMeshes.resize(c_game->GetBaseEntities().size());
+		meshes.entityMeshes.resize(pragma::get_cgame()->GetBaseEntities().size());
 		auto i = decltype(m_pendingInfo.meshes.size()){0};
 		std::vector<CWorld*> worldEnts;
 
-		EntityIterator entIt{*c_game};
+		EntityIterator entIt{*pragma::get_cgame()};
 		entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CRenderComponent>>();
 		for(auto *ent : entIt)
 		{

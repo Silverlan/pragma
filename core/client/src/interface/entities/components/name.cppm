@@ -6,7 +6,9 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <pragma/entities/components/base_name_component.hpp>
 
-export module pragma.client.entities.components.name;
+export module pragma.client:entities.components.name;
+
+import :entities.components.entity;
 
 export namespace pragma {
 	class DLLCLIENT CNameComponent final : public BaseNameComponent, public CBaseNetComponent {

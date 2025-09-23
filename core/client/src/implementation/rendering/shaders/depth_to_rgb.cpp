@@ -10,13 +10,11 @@ module;
 #include <prosper_util.hpp>
 #include <buffers/prosper_buffer.hpp>
 
-module pragma.client.rendering.shaders;
+module pragma.client;
 
-import :depth_to_rgb;
+import :rendering.shaders.depth_to_rgb;
 
-import pragma.client.engine;
-
-extern CEngine *c_engine;
+import :engine;
 
 using namespace pragma;
 
@@ -52,7 +50,7 @@ void ShaderDepthToRGB::InitializeShaderResources()
 template<class TPushConstants>
 bool ShaderDepthToRGB::RecordDraw(prosper::ShaderBindState &bindState, prosper::IDescriptorSet &descSetDepthTex, const TPushConstants &pushConstants) const
 {
-	return RecordBindVertexBuffers(bindState, {c_engine->GetRenderContext().GetCommonBufferCache().GetSquareVertexUvBuffer().get()}) == true && RecordBindDescriptorSet(bindState, descSetDepthTex) == true && RecordPushConstants(bindState, pushConstants) == true
+	return RecordBindVertexBuffers(bindState, {pragma::get_cengine()->GetRenderContext().GetCommonBufferCache().GetSquareVertexUvBuffer().get()}) == true && RecordBindDescriptorSet(bindState, descSetDepthTex) == true && RecordPushConstants(bindState, pushConstants) == true
 	  && prosper::ShaderGraphics::RecordDraw(bindState, prosper::CommonBufferCache::GetSquareVertexCount()) == true;
 }
 

@@ -10,12 +10,11 @@ module;
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 
-module pragma.client.entities.components.static_bvh_cache;
+module pragma.client;
 
-import pragma.client.engine;
-import pragma.client.entities.components;
+import :entities.components.static_bvh_cache;
+import :engine;
 
-extern CEngine *c_engine;
 
 using namespace pragma;
 

@@ -23,12 +23,13 @@ module;
 //#include <assimp/IOSystem.hpp>
 //#include <assimp/IOStream.hpp>
 
-module pragma.client.scripting.lua.libraries.import_lib;
+module pragma.client;
 
-import pragma.client.entities.components;
-import pragma.client.game;
 
-extern CGame *c_game;
+import :scripting.lua.libraries.import_lib;
+import :entities.components;
+import :game;
+
 
 #if 0
 static aiVector3D to_assimp_position(const Vector3 &pos)
@@ -110,7 +111,7 @@ int Lua::lib_export::export_scene(lua_State *l)
 	std::string outputPath = FileManager::GetCanonicalizedPath(Lua::CheckString(l,1));
 	if(Lua::file::validate_write_operation(l,outputPath) == false)
 		return 0;
-	auto *world = c_game->GetWorld();
+	auto *world = pragma::get_cgame()->GetWorld();
 	auto mdl = world ? world->GetEntity().GetModel() : nullptr;
 	if(mdl == nullptr)
 		return 0;
@@ -125,7 +126,7 @@ int Lua::lib_export::export_scene(lua_State *l)
 
 #if 0
 	// Export light sources
-	EntityIterator entIt {*c_game};
+	EntityIterator entIt {*pragma::get_cgame()};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CLightComponent>>();
 	auto numLights = entIt.GetCount();
 	scene->mLights = new aiLight*[numLights];
@@ -184,7 +185,7 @@ int Lua::lib_export::export_scene(lua_State *l)
 	// Export camera
 	// Note: Assimp seems to be practically unusable for importing/exporting anything other than mesh geometry or animations.
 	// We'll probably have to write our own exporter at some point instead.
-	auto *cam = c_game->GetRenderCamera<pragma::CCameraComponent>();
+	auto *cam = pragma::get_cgame()->GetRenderCamera<pragma::CCameraComponent>();
 	auto camNodeIndex = nodeIdx;
 	scene->mNumCameras = 1;
 	scene->mCameras = new aiCamera*[1];

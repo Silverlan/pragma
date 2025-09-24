@@ -4,15 +4,8 @@
 module;
 
 #include "pragma/definitions.h"
-#include <wgui/wibase.h>
-#include <wgui/wihandle.h>
+#include "pragma/clientdefinitions.h"
 #include "luasystem.h"
-#include <wgui/types/wirect.h>
-#include <wgui/types/wiroot.h>
-#include <wgui/types/witext.h>
-#include <wgui/types/witextentry.h>
-#include <wgui/types/widropdownmenu.h>
-#include "pragma/lua/classes/c_ldef_wgui.h"
 #include "pragma/lua/policies/gui_element_policy.hpp"
 #include <pragma/lua/classes/ldef_vector.h>
 #include <pragma/lua/classes/lproperty.hpp>
@@ -37,6 +30,8 @@ module;
 #include <prosper_window.hpp>
 #include <luabind/copy_policy.hpp>
 #include <pragma/debug/intel_vtune.hpp>
+
+#undef DrawState
 
 export module pragma.client:scripting.lua.classes.gui;
 import :gui;
@@ -68,10 +63,10 @@ export namespace Lua {
 		DLLCLIENT void GetChild(lua_State *l, ::WIBase &hPanel, std::string className, unsigned int idx);
 		DLLCLIENT void PosInBounds(lua_State *l, ::WIBase &hPanel, Vector2 pos);
 		DLLCLIENT void GetMousePos(lua_State *l, ::WIBase &hPanel);
-		DLLCLIENT void Draw(lua_State *l, ::WIBase &hPanel, const ::WIBase::DrawInfo &drawInfo, wgui::DrawState &drawState);
-		DLLCLIENT void Draw(lua_State *l, ::WIBase &hPanel, const ::WIBase::DrawInfo &drawInfo, wgui::DrawState &drawState, const Vector2i &scissorOffset, const Vector2i &scissorSize);
-		DLLCLIENT void Draw(lua_State *l, ::WIBase &hPanel, const ::WIBase::DrawInfo &drawInfo, wgui::DrawState &drawState, const Vector2i &scissorOffset, const Vector2i &scissorSize, const Vector2i &offsetParent);
-		DLLCLIENT void Draw(lua_State *l, ::WIBase &hPanel, const ::WIBase::DrawInfo &drawInfo, wgui::DrawState &drawState, const Vector2i &scissorOffset, const Vector2i &scissorSize, const Vector2i &offsetParent, const Vector2 &scale);
+		DLLCLIENT void Draw(lua_State *l, ::WIBase &hPanel, const ::wgui::DrawInfo &drawInfo, wgui::DrawState &drawState);
+		DLLCLIENT void Draw(lua_State *l, ::WIBase &hPanel, const ::wgui::DrawInfo &drawInfo, wgui::DrawState &drawState, const Vector2i &scissorOffset, const Vector2i &scissorSize);
+		DLLCLIENT void Draw(lua_State *l, ::WIBase &hPanel, const ::wgui::DrawInfo &drawInfo, wgui::DrawState &drawState, const Vector2i &scissorOffset, const Vector2i &scissorSize, const Vector2i &offsetParent);
+		DLLCLIENT void Draw(lua_State *l, ::WIBase &hPanel, const ::wgui::DrawInfo &drawInfo, wgui::DrawState &drawState, const Vector2i &scissorOffset, const Vector2i &scissorSize, const Vector2i &offsetParent, const Vector2 &scale);
 		DLLCLIENT void GetX(lua_State *l, ::WIBase &hPanel);
 		DLLCLIENT void GetY(lua_State *l, ::WIBase &hPanel);
 		DLLCLIENT void SetX(lua_State *l, ::WIBase &hPanel, float x); // TODO This should be int, but float-to-int conversion is currently broken with luabind
@@ -230,4 +225,9 @@ export namespace Lua {
 	namespace WIFrame {
 		DLLCLIENT void register_class(luabind::class_<::WIFrame, luabind::bases<::WITransformable, ::WIBase>> &classDef);
 	};
+};
+
+export {
+    DLLCLIENT Con::c_cout &operator<<(Con::c_cout &os, const WIHandle &handle);
+    DLLCLIENT std::ostream &operator<<(std::ostream &os, const WIHandle &handle);
 };

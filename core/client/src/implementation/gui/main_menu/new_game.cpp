@@ -5,14 +5,12 @@ module;
 
 #include "stdafx_client.h"
 #include <fsys/filesystem.h>
-#include <wgui/types/witextentry.h>
 #include "pragma/game/gamemode/gamemodemanager.h"
 #include <pragma/util/resource_watcher.h>
 #include <pragma/game/game_resources.hpp>
 #include <pragma/asset/util_asset.hpp>
 #include <sharedutils/util_library.hpp>
 #include <sharedutils/util_file.h>
-#include <wgui/types/witext.h>
 #include <fsys/ifile.hpp>
 
 module pragma.client;

@@ -41,8 +41,6 @@
 #include <prosper_prepared_command_buffer.hpp>
 #include <luabind/copy_policy.hpp>
 #include <fsys/ifile.hpp>
-#include <wgui/types/wiroot.h>
-#include <wgui/types/wicontentwrapper.hpp>
 #include "texturemanager/texture.h"
 
 import pragma.audio.util;

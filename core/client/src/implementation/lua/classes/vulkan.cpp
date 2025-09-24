@@ -35,7 +35,6 @@ module;
 #include <prosper_event.hpp>
 #include <prosper_window.hpp>
 #include <prosper_swap_command_buffer.hpp>
-#include <wgui/wgui.h>
 #include <luabind/copy_policy.hpp>
 #include <luabind/detail/meta.hpp>
 #include <shader/prosper_shader_blur.hpp>

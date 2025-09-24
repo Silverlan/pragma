@@ -4,24 +4,13 @@
 module;
 
 #include "stdafx_client.h"
-
-#ifdef _MSC_VER
-namespace pragma::string {
-	class Utf8String;
-	class Utf8StringView;
-	class Utf8StringArg;
-};
-#endif
-
 module pragma.client;
 
 
 import :scripting.lua.libraries.locale;
 import :client_state;
 import pragma.locale;
-#ifndef _MSC_VER
 import pragma.string.unicode;
-#endif
 
 
 void Lua::Locale::change_language(const std::string &lan) { pragma::locale::set_language(lan); }

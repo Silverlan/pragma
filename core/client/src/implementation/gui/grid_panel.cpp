@@ -12,8 +12,6 @@ import :gui.grid_panel;
 
 import :client_state;
 
-LINK_WGUI_TO_CLASS(WIGridPanel, WIGridPanel);
-
 WIGridPanel::WIGridPanel() : WITable(), m_resizeMode(ResizeMode::FitToChildren), m_numColumns(0) {}
 
 void WIGridPanel::SetSize(int x, int y)

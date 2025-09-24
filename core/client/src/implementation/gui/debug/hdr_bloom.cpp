@@ -19,9 +19,6 @@ import :engine;
 import :entities.components;
 import :game;
 
-
-LINK_WGUI_TO_CLASS(WIDebugHDRBloom, WIDebugHDRBloom);
-
 WIDebugHDRBloom::WIDebugHDRBloom() : WITexturedRect() {}
 
 WIDebugHDRBloom::~WIDebugHDRBloom()

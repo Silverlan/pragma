@@ -4,8 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include <wgui/types/witext.h>
-#include <wgui/types/wirect.h>
 #include "pragma/input/inputhelper.h"
 #include <mathutil/umath.h>
 

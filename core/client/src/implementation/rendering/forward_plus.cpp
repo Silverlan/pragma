@@ -7,7 +7,6 @@ module;
 #include "pragma/console/c_cvar_global_functions.h"
 #include "pragma/game/game_limits.h"
 #include "pragma/console/c_cvar.h"
-#include <wgui/types/wirect.h>
 #include <prosper_util.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_command_buffer.hpp>

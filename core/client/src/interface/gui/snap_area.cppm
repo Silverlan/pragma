@@ -4,9 +4,10 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <wgui/wibase.h>
 
 export module pragma.client:gui.snap_area;
+
+import pragma.gui;
 
 export class DLLCLIENT WISnapArea : public WIBase {
   public:

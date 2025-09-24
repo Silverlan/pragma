@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <wgui/wibase.h>
 #include <unordered_map>
 #include <functional>
 

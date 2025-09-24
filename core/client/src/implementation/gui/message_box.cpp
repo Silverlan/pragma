@@ -4,8 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include <wgui/types/wirect.h>
-#include <wgui/types/witext.h>
 
 module pragma.client;
 
@@ -14,8 +12,6 @@ import :gui.frame;
 
 import pragma.gui;
 import pragma.locale;
-
-LINK_WGUI_TO_CLASS(WIMessageBox, WIMessageBox);
 
 const Int32 MARGIN_X = 32;
 const Int32 MARGIN_Y = 50;

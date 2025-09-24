@@ -11,7 +11,6 @@ module;
 #include "alsound_effect.hpp"
 #include <cmaterial.h>
 #include "util_image_buffer.hpp"
-#include "wgui/wibase.h"
 #include "image/prosper_image.hpp"
 #include "prosper_command_buffer.hpp"
 #include "pragma/entities/baseentity.h"
@@ -21,7 +20,6 @@ module;
 #include <pragma/util/bulletinfo.h>
 #include "prosper_descriptor_set_group.hpp"
 #include <queue>
-#include <wgui/wihandle.h>
 #include <sharedutils/property/util_property.hpp>
 #include <sharedutils/util_shared_handle.hpp>
 #include <alsoundsystem.hpp>

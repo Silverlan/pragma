@@ -7,7 +7,6 @@ module;
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <buffers/prosper_dynamic_resizable_buffer.hpp>
 #include <prosper_command_buffer.hpp>
-#include <wgui/types/wirect.h>
 
 module pragma.client;
 

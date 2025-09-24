@@ -4,9 +4,11 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <wgui/types/wirect.h>
+#include "image/prosper_render_target.hpp"
 
 export module pragma.client:gui.debug_hdr_bloom;
+
+import pragma.gui;
 
 export {
 	class DLLCLIENT WIDebugHDRBloom : public WITexturedRect {

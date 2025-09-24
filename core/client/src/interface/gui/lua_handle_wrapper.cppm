@@ -5,9 +5,10 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include <luabind/luabind.hpp>
-#include <wgui/types.hpp>
 
 export module pragma.client:gui.lua_handle_wrapper;
+
+import pragma.gui;
 
 export class DLLCLIENT WILuaHandleWrapper {
   private:

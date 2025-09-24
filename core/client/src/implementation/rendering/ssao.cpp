@@ -5,8 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/console/c_cvar_global_functions.h"
-#include <wgui/types/wirect.h>
-#include <wgui/types/wiroot.h>
 #include <image/prosper_render_target.hpp>
 #include <image/prosper_sampler.hpp>
 #include <prosper_descriptor_set_group.hpp>

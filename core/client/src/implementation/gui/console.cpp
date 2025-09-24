@@ -4,9 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include <wgui/types/witext.h>
-#include <wgui/types/witextentry.h>
-#include <wgui/types/wirect.h>
 #include <pragma/engine_info.hpp>
 #include <pragma/lua/lua_error_handling.hpp>
 
@@ -103,7 +100,6 @@ WIConsole *WIConsole::GetConsole() { return static_cast<WIConsole *>(s_hConsole.
 
 /////////////
 
-LINK_WGUI_TO_CLASS(WIConsole, WIConsole);
 void WIConsole::SetSimpleConsoleMode(bool simple, bool force)
 {
 	if(m_mode == Mode::ExternalWindow)

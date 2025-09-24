@@ -4,8 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include <wgui/types/witext.h>
-#include <wgui/types/wirect.h>
 #include <prosper_window.hpp>
 
 module pragma.client;
@@ -17,11 +15,6 @@ import :client_state;
 import :engine;
 import pragma.gui;
 import pragma.string.unicode;
-
-LINK_WGUI_TO_CLASS(WITable, WITable);
-LINK_WGUI_TO_CLASS(WITableRow, WITableRow);
-LINK_WGUI_TO_CLASS(WITableCell, WITableCell);
-
 
 WITable::SortData::SortData(WITable *t, bool bAsc, unsigned int col) : table(t), ascending(bAsc), column(col) {}
 bool WITable::SortData::operator()(const WIHandle &a, const WIHandle &b)

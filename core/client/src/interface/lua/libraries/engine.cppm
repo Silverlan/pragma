@@ -6,11 +6,13 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <pragma/lua/ldefinitions.h>
 #include <pragma/util/font_set.hpp>
-#include <wgui/fontmanager.h>
 #include <image/prosper_texture.hpp>
 #include <sharedutils/asset_loader/asset_load_info.hpp>
 
 export module pragma.client:scripting.lua.libraries.engine;
+
+import pragma.gui;
+
 export namespace Lua {
 	namespace asset_client {
 		DLLCLIENT void register_library(Lua::Interface &lua, luabind::module_ &modAsset);

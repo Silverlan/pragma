@@ -4,10 +4,7 @@
 module;
 
 #include "stdafx_client.h"
-#include <wgui/wgui.h>
-#include <wgui/wibase.h>
 #include "luasystem.h"
-#include <wgui/wihandle.h>
 #include "cmaterialmanager.h"
 #include "pragma/debug/debug_performance_profiler.hpp"
 #include <cmaterial_manager2.hpp>

@@ -15,8 +15,6 @@ module;
 #include <pragma/game/damageinfo.h>
 #include "pragma/lua/libraries/ludm.hpp"
 #include <shader/prosper_pipeline_create_info.hpp>
-#include <wgui/fontmanager.h>
-#include <wgui/shaders/wishader_textured.hpp>
 #include <pragma/lua/converters/pair_converter_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/lua/converters/optional_converter_t.hpp>
@@ -38,8 +36,9 @@ module;
 #include <material_property_block_view.hpp>
 #include <cmaterialmanager.h>
 #include <cmaterial_manager2.hpp>
-#include <wgui/wgui.h>
 #include "cmaterial.h"
+
+#undef DrawState
 
 module pragma.client;
 

@@ -27,7 +27,6 @@ module;
 #include <pragma/console/command_options.hpp>
 #include <pragma/util/util_game.hpp>
 #include <fsys/ifile.hpp>
-#include <wgui/types/wiroot.h>
 #include "pragma/lua/libraries/lfile.h"
 #include <pragma/lua/converters/optional_converter_t.hpp>
 #include <pragma/lua/converters/property_converter_t.hpp>
@@ -42,7 +41,6 @@ module;
 #include <cmaterialmanager.h>
 #include <cmaterial_manager2.hpp>
 #include "cmaterialmanager.h"
-#include <wgui/types/wirect.h>
 
 module pragma.client;
 

@@ -4,13 +4,10 @@
 #include "stdafx_client.h"
 #include "pragma/console/c_cvar.h"
 #include <pragma/entities/entity_component_system_t.hpp>
-#include <wgui/types/wirect.h>
 #include <pragma/console/sh_cmd.h>
 #include <image/prosper_render_target.hpp>
-#include <wgui/types/wiroot.h>
 
 import pragma.client;
-
 
 static WIHandle hGUIShadowmap;
 static int numShadowmapTargets = 0;

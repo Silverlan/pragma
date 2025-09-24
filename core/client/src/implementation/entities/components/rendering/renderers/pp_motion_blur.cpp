@@ -16,7 +16,6 @@ module;
 #include <buffers/prosper_uniform_resizable_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #if MOTION_BLUR_DEBUG_ELEMENT_ENABLED == 1
-#include <wgui/types/wirect.h>
 #endif
 
 module pragma.client;

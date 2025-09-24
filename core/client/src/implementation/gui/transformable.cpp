@@ -4,9 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include <wgui/types/witext.h>
-#include <wgui/types/wirect.h>
-#include <wgui/types/wiroot.h>
 #include <mathutil/umath.h>
 #include <prosper_window.hpp>
 
@@ -17,9 +14,6 @@ import :gui.snap_area;
 
 import :engine;
 import pragma.gui;
-
-
-LINK_WGUI_TO_CLASS(WITransformable, WITransformable);
 
 #define WIFRAME_DRAG_OFFSET_BORDER 5
 #define WIFRAME_RESIZE_OFFSET_BORDER 5

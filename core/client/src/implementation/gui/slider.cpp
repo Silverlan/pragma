@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include <wgui/types/witext.h>
 
 module pragma.client;
 
@@ -12,8 +11,6 @@ import :gui.slider;
 import :gui.progress_bar;
 
 import pragma.gui;
-
-LINK_WGUI_TO_CLASS(WISlider, WISlider);
 
 WISlider::WISlider() : WIProgressBar(), m_bMoveSlider(false) { SetMouseInputEnabled(true); }
 

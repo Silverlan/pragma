@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/console/c_cvar.h"
-#include <wgui/wgui.h>
 #include <prosper_window.hpp>
 
 module pragma.client;

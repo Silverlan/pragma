@@ -12,7 +12,6 @@ module;
 #include <prosper_command_buffer.hpp>
 #include <prosper_render_pass.hpp>
 #include <prosper_util.hpp>
-#include <wgui/wibase.h>
 
 module pragma.client;
 

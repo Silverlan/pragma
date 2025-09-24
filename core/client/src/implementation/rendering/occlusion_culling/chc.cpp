@@ -7,7 +7,6 @@ module;
 #include "pragma/console/c_cvar.h"
 #include <pragma/console/convars.h>
 #include <pragma/math/intersection.h>
-#include <wgui/types/wirect.h>
 
 module pragma.client;
 

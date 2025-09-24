@@ -4,9 +4,10 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <wgui/wibase.h>
 
 export module pragma.client:gui.fps;
+
+import pragma.gui;
 
 export {
 	class DLLCLIENT WIFPS : public WIBase {

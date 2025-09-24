@@ -4,10 +4,12 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <wgui/wibase.h>
 #include <pragma/lua/ldefinitions.h>
 
 export module pragma.client:scripting.lua.libraries.gui_callbacks;
+
+import pragma.gui;
+
 export namespace Lua {
 	namespace gui {
 		// Note: This has to be a C-function pointer, because some callbacks may be registered

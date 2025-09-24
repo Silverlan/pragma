@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_cengine.h"
-#include <wgui/wgui.h>
 #include "cmaterialmanager.h"
 #include "pragma/console/c_cvar.h"
 #include <texturemanager/texturemanager.h>
@@ -33,9 +32,6 @@ module;
 #include <prosper_swap_command_buffer.hpp>
 #include <pragma/entities/environment/env_camera.h>
 #include <pragma/logging.hpp>
-#include <wgui/types/witext.h>
-#include <wgui/types/witext_tags.hpp>
-#include <wgui/types/wiroot.h>
 #include <util_image.hpp>
 #include <util_image_buffer.hpp>
 #include <queries/prosper_query_pool.hpp>
@@ -1025,6 +1021,7 @@ bool CEngine::Initialize(int argc, char *argv[])
 
 	auto &fontSet = GetDefaultFontSet();
 	auto &gui = WGUI::Open(GetRenderContext(), matManager);
+	RegisterUiElementTypes();
 	gui.SetMaterialLoadHandler([this](const std::string &path) -> Material * { return GetClientState()->LoadMaterial(path); });
 	auto *fontData = fontSet.FindFontFileCandidate(FontSetFlag::Sans | FontSetFlag::Bold);
 	if(!fontData) {
@@ -1237,6 +1234,46 @@ bool CEngine::Initialize(int argc, char *argv[])
 	}
 
 	return true;
+}
+
+void CEngine::RegisterUiElementTypes()
+{
+	auto &gui = WGUI::GetInstance();
+	gui.RegisterType<WICheckbox>("WICheckbox");
+	gui.RegisterType<WIChoiceList>("WIChoiceList");
+	gui.RegisterType<WICommandLineEntry>("WICommandLineEntry");
+	gui.RegisterType<WIConsole>("WIConsole");
+	gui.RegisterType<WIContainer>("WIContainer");
+	gui.RegisterType<WIDetachable>("WIDetachable");
+	gui.RegisterType<WIFPS>("WIFPS");
+	gui.RegisterType<WIFrame>("WIFrame");
+	gui.RegisterType<WIGridPanel>("WIGridPanel");
+	gui.RegisterType<WIIcon>("WIIcon");
+	gui.RegisterType<WIImageSlideShow>("WIImageSlideShow");
+	gui.RegisterType<WILineGraph>("WILineGraph");
+	gui.RegisterType<WIMessageBox>("WIMessageBox");
+	gui.RegisterType<WINetGraph>("WINetGraph");
+	gui.RegisterType<WIOptionsList>("WIOptionsList");
+	gui.RegisterType<WIProgressBar>("WIProgressBar");
+	gui.RegisterType<WIScrollContainer>("WIScrollContainer");
+	gui.RegisterType<WIServerBrowser>("WIServerBrowser");
+	gui.RegisterType<WISilkIcon>("WISilkIcon");
+	gui.RegisterType<WISlider>("WISlider");
+	gui.RegisterType<WISnapArea>("WISnapArea");
+	gui.RegisterType<WITable>("WITable");
+	gui.RegisterType<WITableRow>("WITableRow");
+	gui.RegisterType<WITableCell>("WITableCell");
+	gui.RegisterType<WITexturedCubemap>("WITexturedCubemap");
+	gui.RegisterType<WITransformable>("WITransformable");
+	gui.RegisterType<WITreeList>("WITreeList");
+	gui.RegisterType<WITreeListElement>("WITreeListElement");
+	gui.RegisterType<widebugdepthtexture>("WIDebugDepthTexture");
+	gui.RegisterType<WIDebugHDRBloom>("WIDebugHDRBloom");
+	gui.RegisterType<WIDebugMipMaps>("WIDebugMipMaps");
+	gui.RegisterType<widebugmsaatexture>("WIDebugMSAATexture");
+	gui.RegisterType<WIDebugShadowMap>("WIDebugShadowMap");
+	gui.RegisterType<WIDebugSSAO>("WIDebugSSAO");
+	gui.RegisterType<WIMainMenuElement>("WIMainMenuElement");
 }
 
 const std::string &CEngine::GetDefaultFontSetName() const { return m_defaultFontSet; }

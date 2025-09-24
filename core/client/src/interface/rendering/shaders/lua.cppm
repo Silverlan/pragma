@@ -7,10 +7,12 @@ module;
 #include <shader/prosper_shader_base_image_processing.hpp>
 #include <prosper_prepared_command_buffer.hpp>
 #include <pragma/lua/luaobjectbase.h>
-#include <wgui/shaders/wishader_textured.hpp>
+
+#undef DrawState
 
 export module pragma.client:rendering.shaders.lua;
 
+import pragma.gui;
 import :rendering.shaders.base;
 import :rendering.shaders.particle_2d_base;
 import :rendering.shaders.pbr;

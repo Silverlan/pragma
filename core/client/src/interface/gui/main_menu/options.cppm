@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <wgui/types.hpp>
 #include <sharedutils/util_clock.hpp>
 
 export module pragma.client:gui.main_menu_options;

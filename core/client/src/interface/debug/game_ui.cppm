@@ -5,11 +5,12 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include <sharedutils/functioncallback.h>
-#include <wgui/wihandle.h>
-#include <wgui/wibase.h>
 #include <unordered_map>
 
 export module pragma.client:debug.game_ui;
+
+import pragma.gui;
+
 export struct DLLCLIENT DebugGameGUI {
   private:
 	std::unordered_map<std::string, CallbackHandle> m_callbacks;

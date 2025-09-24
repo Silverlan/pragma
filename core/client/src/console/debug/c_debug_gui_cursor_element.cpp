@@ -5,14 +5,10 @@
 #include "pragma/console/c_cvar_global_functions.h"
 #include "prosper_util.hpp"
 #include <util_image.hpp>
-#include <wgui/types/witext.h>
-#include <wgui/types/wirect.h>
-#include <wgui/types/wiroot.h>
 #include <prosper_window.hpp>
 #include <fsys/ifile.hpp>
 
 import pragma.client;
-
 
 import pragma.string.unicode;
 

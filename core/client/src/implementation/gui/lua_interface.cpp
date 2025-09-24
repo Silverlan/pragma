@@ -4,15 +4,8 @@
 module;
 
 #include "stdafx_client.h"
-#include <wgui/wibase.h>
-#include <wgui/types/wiroot.h>
-#include <wgui/types/wirect.h>
-#include <wgui/types/wiline.h>
-#include <wgui/types/witext.h>
 #include <luabind/copy_policy.hpp>
-#include "pragma/lua/classes/c_ldef_wguihandles.h"
 #include <pragma/lua/raw_object.hpp>
-#include <wgui/types/witextentry.h>
 #include <pragma/lua/lua_call.hpp>
 
 module pragma.client;

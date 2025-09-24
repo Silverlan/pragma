@@ -9,8 +9,6 @@ module;
 #include "luasystem.h"
 #include "pragma/asset/util_asset.hpp"
 #include <pragma/util/font_set.hpp>
-#include <wgui/fontmanager.h>
-#include <wgui/types/witext.h>
 #include <texturemanager/texturemanager.h>
 #include "textureinfo.h"
 #include <cmaterial_manager2.hpp>

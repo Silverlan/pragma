@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include <wgui/types/witext.h>
 #include <pragma/engine_version.h>
 #include <pragma/audio/alsound_type.h>
 #include <pragma/engine_info.hpp>

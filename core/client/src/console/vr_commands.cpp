@@ -3,8 +3,6 @@
 
 #include "stdafx_client.h"
 #include "pragma/console/c_cvar.h"
-#include <wgui/types/wirect.h>
-#include <wgui/types/witext.h>
 #include <sharedutils/scope_guard.h>
 #include <sharedutils/util_library.hpp>
 #include <pragma/input/inputhelper.h>

@@ -17,8 +17,6 @@ import :client_state;
 import :engine;
 import :game;
 
-LINK_WGUI_TO_CLASS(WIDebugSSAO, WIDebugSSAO);
-
 WIDebugSSAO::WIDebugSSAO() : WITexturedRect() {}
 
 void WIDebugSSAO::SetUseBlurredSSAOImage(bool b) { m_bUseBlurVariant = b; }

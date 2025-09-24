@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/lua/classes/c_ldef_wgui.h"
 #include "pragma/lua/libraries/lsound.h"
 #include "pragma/lua/libraries/lasset.hpp"
 #include "pragma/asset/util_asset.hpp"
@@ -23,14 +22,6 @@ module;
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/lua/converters/optional_converter_t.hpp>
 #include <pragma/lua/converters/thread_pool_converter_t.hpp>
-#include <wgui/types/wiroot.h>
-#include <wgui/types/witext.h>
-#include <wgui/types/wishape.h>
-#include <wgui/types/wiline.h>
-#include <wgui/types/wirect.h>
-#include <wgui/types/widropdownmenu.h>
-#include <wgui/types/witextentry.h>
-#include <wgui/types/wicontentwrapper.hpp>
 #include <prosper_window.hpp>
 #include <prosper_command_buffer.hpp>
 #include <alsoundsystem.hpp>

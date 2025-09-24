@@ -7,13 +7,10 @@
 #include <pragma/console/sh_cmd.h>
 #include <pragma/physics/phys_water_surface_simulator.hpp>
 #include <image/prosper_render_target.hpp>
-#include <wgui/wgui.h>
-#include <wgui/types/wirect.h>
 #include <pragma/physics/raytraces.h>
 #include <pragma/entities/entity_component_system_t.hpp>
 
 import pragma.client;
-
 
 void Console::commands::debug_water(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {

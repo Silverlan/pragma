@@ -4,12 +4,13 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "wgui/wibase.h"
 #include <sharedutils/util_shared_handle.hpp>
 
 export module pragma.client:gui.debug_shadow_map;
 
 import :entities.components.lights.light;
+
+import pragma.gui;
 
 export {
 	class DLLCLIENT WIDebugShadowMap : public WIBase {

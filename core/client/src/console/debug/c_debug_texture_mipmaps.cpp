@@ -8,8 +8,6 @@
 #include <texture_type.h>
 #include <pragma/game/game_resources.hpp>
 #include <sharedutils/magic_enum.hpp>
-#include <wgui/wgui.h>
-#include <wgui/fontmanager.h>
 #include <cmaterialmanager.h>
 #include <cmaterial_manager2.hpp>
 

@@ -15,8 +15,6 @@ module;
 #include <mathutil/glmutil.h>
 #include "luasystem.h"
 #include "cmaterialmanager.h"
-#include <wgui/wgui.h>
-#include <wgui/wibase.h>
 #include "pragma/lua/libraries/lray.h"
 #include "pragma/lua/libraries/lgame.h"
 #include <sharedutils/util_string.h>
@@ -40,7 +38,6 @@ module;
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/lua/converters/vector_converter_t.hpp>
 #include <pragma/util/util_game.hpp>
-#include <wgui/fontmanager.h>
 #include <udm.hpp>
 
 #undef LEFT

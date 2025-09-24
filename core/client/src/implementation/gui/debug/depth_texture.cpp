@@ -19,9 +19,6 @@ import :engine;
 import :game;
 import :rendering.shaders;
 
-
-LINK_WGUI_TO_CLASS(widebugdepthtexture, WIDebugDepthTexture);
-
 WIDebugDepthTexture::WIDebugDepthTexture() : WIBase(), m_imageLayer(0)
 {
 	m_whDepthToRgbShader = pragma::get_cengine()->GetShader("debug_depth_to_rgb");

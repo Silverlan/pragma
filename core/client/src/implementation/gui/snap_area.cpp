@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include <wgui/types/witext.h>
 
 module pragma.client;
 
@@ -12,9 +11,6 @@ import :gui.snap_area;
 
 import :client_state;
 import :engine;
-
-
-LINK_WGUI_TO_CLASS(WISnapArea, WISnapArea);
 
 WISnapArea::WISnapArea() : WIBase() {}
 

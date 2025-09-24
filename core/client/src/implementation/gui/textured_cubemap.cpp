@@ -4,13 +4,10 @@
 module;
 
 #include "stdafx_client.h"
-#include <wgui/types/wirect.h>
 
 module pragma.client;
 
 import :gui.textured_cubemap;
-
-LINK_WGUI_TO_CLASS(WITexturedCubemap, WITexturedCubemap);
 
 WITexturedCubemap::WITexturedCubemap() : WIBase {} {}
 

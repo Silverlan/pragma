@@ -5,8 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/clientdefinitions.h"
-#include <wgui/types/witext.h>
-#include <wgui/types/wirect.h>
 #include <mathutil/umath.h>
 #include <prosper_window.hpp>
 
@@ -16,6 +14,7 @@ import :gui.transformable;
 
 import pragma.gui;
 import pragma.platform;
+import pragma.string.unicode;
 
 export
 {

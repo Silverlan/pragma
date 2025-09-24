@@ -23,7 +23,6 @@ module;
 #include <texturemanager/texture_manager2.hpp>
 #include <util_image.hpp>
 #include <fsys/ifile.hpp>
-#include <wgui/types/wirect.h>
 
 module pragma.client;
 

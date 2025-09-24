@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include <wgui/types/wirect.h>
 
 module pragma.client;
 
@@ -13,7 +12,6 @@ import :gui.silk_icon;
 
 import :client_state;
 
-LINK_WGUI_TO_CLASS(WICheckbox, WICheckbox);
 WICheckbox::WICheckbox() : WIRect(), m_bChecked(false) { RegisterCallback<void, bool>("OnChange"); }
 
 WICheckbox::~WICheckbox() {}

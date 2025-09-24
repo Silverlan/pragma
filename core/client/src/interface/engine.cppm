@@ -224,6 +224,7 @@ export {
 		void OnRenderResolutionChanged(uint32_t width, uint32_t height);
 		void LoadFontSets();
 		void UpdateDirtyInputBindings();
+		void RegisterUiElementTypes();
 		uint32_t GetPerformanceTimerIndex(uint32_t swapchainIdx, GPUTimer timer) const;
 		uint32_t GetPerformanceTimerIndex(GPUTimer timer) const;
 		virtual uint32_t DoClearUnusedAssets(pragma::asset::Type type) const override;

@@ -4,9 +4,10 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <wgui/types/wirect.h>
 
 export module pragma.client:gui.debug_ssao;
+
+import pragma.gui;
 
 export {
 	class DLLCLIENT WIDebugSSAO : public WITexturedRect {

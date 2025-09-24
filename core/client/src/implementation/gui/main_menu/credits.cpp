@@ -5,16 +5,6 @@ module;
 
 #include "stdafx_client.h"
 
-#ifdef _MSC_VER
-namespace pragma::string {
-	class Utf8String;
-	class Utf8StringView;
-	class Utf8StringArg;
-};
-#endif
-
-#include <wgui/types/witext.h>
-
 module pragma.client;
 
 import :gui.main_menu_credits;

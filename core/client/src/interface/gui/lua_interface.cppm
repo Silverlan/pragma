@@ -4,10 +4,11 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <wgui/wibase.h>
 #include "luasystem.h"
 
 export module pragma.client:gui.lua_interface;
+
+import pragma.gui;
 
 export class DLLCLIENT WGUILuaInterface {
   private:

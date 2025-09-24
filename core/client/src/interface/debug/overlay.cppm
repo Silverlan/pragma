@@ -5,7 +5,6 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include "buffers/prosper_buffer.hpp"
-#include "wgui/types/witext.h"
 #include <pragma/math/angle/wvangle.h>
 #include <mathutil/color.h>
 #include <mathutil/glmutil.h>

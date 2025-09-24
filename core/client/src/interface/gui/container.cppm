@@ -4,10 +4,11 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <wgui/wibase.h>
 #include <unordered_map>
 
 export module pragma.client:gui.container;
+
+import pragma.gui;
 
 export class DLLCLIENT WIContainer : public WIBase {
   public:

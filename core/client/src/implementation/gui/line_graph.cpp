@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include <wgui/types/wirect.h>
 
 module pragma.client;
 
@@ -12,9 +11,6 @@ import :gui.line_graph;
 
 import :client_state;
 import :engine;
-
-
-LINK_WGUI_TO_CLASS(WILineGraph, WILineGraph);
 
 WILineGraph::WILineGraph() : WIBase() {}
 

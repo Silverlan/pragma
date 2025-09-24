@@ -16,9 +16,6 @@ import :gui.debug_mipmaps;
 
 import :engine;
 
-
-LINK_WGUI_TO_CLASS(WIDebugMipMaps, WIDebugMipMaps);
-
 WIDebugMipMaps::WIDebugMipMaps() : WIBase() {}
 
 void WIDebugMipMaps::Initialize() { WIBase::Initialize(); }

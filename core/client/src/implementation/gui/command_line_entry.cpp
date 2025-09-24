@@ -4,8 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include <wgui/types/wimenuitem.hpp>
-#include <wgui/types/witext.h>
 #include <mathutil/umath_geometry.hpp>
 
 module pragma.client;
@@ -14,8 +12,6 @@ import :gui.command_line_entry;
 
 import pragma.gui;
 import pragma.string.unicode;
-
-LINK_WGUI_TO_CLASS(WICommandLineEntry, WICommandLineEntry);
 
 WICommandLineEntry::WICommandLineEntry() : WITextEntry() {}
 

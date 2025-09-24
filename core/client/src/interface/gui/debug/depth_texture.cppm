@@ -4,10 +4,11 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <wgui/types/wirect.h>
 #include <prosper_util.hpp>
 
 export module pragma.client:gui.debug_depth_texture;
+
+import pragma.gui;
 
 export {
 	class DLLCLIENT WIDebugDepthTexture : public WIBase {

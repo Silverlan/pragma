@@ -5,8 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include <pragma/string/format.h>
-#include <wgui/types/witext.h>
-#include <wgui/types/wirect.h>
 
 module pragma.client;
 
@@ -17,8 +15,6 @@ import :client_state;
 import pragma.gui;
 import pragma.locale;
 import pragma.string.unicode;
-
-LINK_WGUI_TO_CLASS(WIMainMenuElement, WIMainMenuElement);
 
 WIMainMenuBase::WIMainMenuBase() : WIBase(), m_selected(-1) { AddStyleClass("main_menu"); }
 

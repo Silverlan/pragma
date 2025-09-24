@@ -10,8 +10,6 @@ module pragma.client;
 
 import :gui.container;
 
-LINK_WGUI_TO_CLASS(WIContainer, WIContainer);
-
 WIContainer::WIContainer() : WIBase(), m_padding {0, 0, 0, 0} {}
 
 void WIContainer::OnChildAdded(WIBase *child)

@@ -4,10 +4,12 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "wgui/wibase.h"
 #include <pragma/entities/components/base_entity_component.hpp>
 
 export module pragma.client:entities.components.input;
+
+import pragma.gui;
+
 export namespace pragma {
 	class DLLCLIENT CInputComponent final : public BaseEntityComponent {
 	  public:

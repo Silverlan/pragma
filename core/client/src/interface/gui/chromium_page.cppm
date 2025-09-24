@@ -4,11 +4,12 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <wgui/wibase.h>
 #include <string>
 #include <mathutil/uvec.h>
 
 export module pragma.client:gui.chromium_page;
+
+import pragma.gui;
 
 namespace pragma {
 	class JSValue;

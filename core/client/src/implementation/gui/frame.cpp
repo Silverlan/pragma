@@ -4,8 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include <wgui/types/witext.h>
-#include <wgui/types/wirect.h>
 #include <mathutil/umath.h>
 #include <prosper_window.hpp>
 
@@ -15,8 +13,6 @@ import :gui.frame;
 
 import pragma.gui;
 import pragma.string.unicode;
-
-LINK_WGUI_TO_CLASS(WIFrame, WIFrame);
 
 #define WIFRAME_DRAG_OFFSET_BORDER 5
 #define WIFRAME_RESIZE_OFFSET_BORDER 5

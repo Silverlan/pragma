@@ -20,9 +20,6 @@ module pragma.client;
 import :gui.image_slide_show;
 import :engine;
 
-
-LINK_WGUI_TO_CLASS(WIImageSlideShow, WIImageSlideShow);
-
 WIImageSlideShow::PreloadImage::PreloadImage() : ready(false), loading(false), image(-1) {}
 
 WIImageSlideShow::WIImageSlideShow() : WIBase(), m_currentImg(-1) {}

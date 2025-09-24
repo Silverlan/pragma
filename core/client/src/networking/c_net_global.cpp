@@ -14,7 +14,6 @@
 #include <pragma/entities/components/map_component.hpp>
 #include <pragma/audio/alsound_type.h>
 #include <pragma/debug/debugbehaviortree.h>
-#include <wgui/types/witext.h>
 #include <pragma/console/sh_cmd.h>
 #include <pragma/physics/raytraces.h>
 #include "pragma/entities/environment/env_quake.h"

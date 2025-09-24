@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include <wgui/wibase.h>
 #include <memory>
 #include <sharedutils/util_library.hpp>
 #ifdef PRAGMA_CHROMIUM_ENABLED

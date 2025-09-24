@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include <wgui/wibase.h>
 #include <pragma/lua/lua_call.hpp>
 #include <queue>
 

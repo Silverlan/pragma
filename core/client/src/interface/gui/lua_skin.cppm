@@ -4,11 +4,12 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "wgui/wiskin.h"
 #include "luasystem.h"
 #include <optional>
 
 export module pragma.client:gui.lua_skin;
+
+import pragma.gui;
 
 export {
 	struct DLLCLIENT WISkinClass {

@@ -17,9 +17,6 @@ import :engine;
 import :entities.components;
 import :game;
 
-
-LINK_WGUI_TO_CLASS(WIDebugShadowMap, WIDebugShadowMap);
-
 WIDebugShadowMap::WIDebugShadowMap() : WIBase() {}
 
 void WIDebugShadowMap::SetContrastFactor(float contrastFactor)

@@ -8,7 +8,6 @@ module;
 #include "pragma/networking/netmessages.h"
 #include "cmaterialmanager.h"
 #include <cmaterial_manager2.hpp>
-#include "pragma/lua/classes/c_ldef_wgui.h"
 #include "pragma/console/convarhandle.h"
 #include "luasystem.h"
 #include "pragma/console/c_cvar.h"
@@ -38,7 +37,6 @@ module;
 #include <prosper_util.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_window.hpp>
-#include <wgui/types/wiroot.h>
 
 module pragma.client;
 

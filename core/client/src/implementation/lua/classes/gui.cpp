@@ -4,13 +4,8 @@
 module;
 
 #include "stdafx_client.h"
-#include <wgui/wibase.h>
-#include <wgui/wihandle.h>
 #include "luasystem.h"
 #include "cmaterial.h"
-#include <wgui/types/wirect.h>
-#include <wgui/types/wiroot.h>
-#include "pragma/lua/classes/c_ldef_wgui.h"
 #include "pragma/lua/policies/gui_element_policy.hpp"
 #include <pragma/lua/classes/ldef_vector.h>
 #include <pragma/lua/classes/lproperty.hpp>

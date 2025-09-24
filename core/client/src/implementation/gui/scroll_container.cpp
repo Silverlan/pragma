@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include <wgui/wguifactories.h>
 #include <mathutil/umath.h>
 #include <prosper_window.hpp>
 
@@ -14,7 +13,6 @@ import :gui.scroll_container;
 
 import pragma.gui;
 
-LINK_WGUI_TO_CLASS(WIScrollContainer, WIScrollContainer);
 WIScrollContainer::WIScrollContainer() : WIBase() { SetScrollInputEnabled(true); }
 
 WIScrollContainer::~WIScrollContainer()

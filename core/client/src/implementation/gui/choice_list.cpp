@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include <wgui/types/witext.h>
 
 module pragma.client;
 
@@ -13,8 +12,6 @@ import :gui.choice_list;
 import pragma.gui;
 import pragma.locale;
 import pragma.string.unicode;
-
-LINK_WGUI_TO_CLASS(WIChoiceList, WIChoiceList);
 
 WIChoiceList::WIChoiceList() : WIBase(), m_selected(UInt(-1)) { RegisterCallback<void, uint32_t, std::reference_wrapper<std::string>>("OnSelect"); }
 

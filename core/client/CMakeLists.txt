@@ -41,3 +41,16 @@ pr_add_compile_definitions(${PROJ_NAME} -DWMS_STATIC PUBLIC)
 pr_add_compile_definitions(${PROJ_NAME} -DDLLCLIENT_EX)
 
 pr_finalize(${PROJ_NAME})
+
+if(MSVC)
+  # produce per-compile JSON into build/scandeps
+  set(SCAN_DIR "${CMAKE_BINARY_DIR}/scandeps")
+  file(MAKE_DIRECTORY "${SCAN_DIR}")
+
+  # Add the flag to your target (replace `client` with your actual target)
+  target_compile_options(client
+    PRIVATE
+      "/sourceDependencies"
+      "${SCAN_DIR}"
+  )
+endif()

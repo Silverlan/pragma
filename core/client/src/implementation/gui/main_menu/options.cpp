@@ -4,9 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include <wgui/types/widropdownmenu.h>
-#include <wgui/types/witext.h>
-#include <wgui/types/witextentry.h>
 #include <sharedutils/util_string.h>
 #include <prosper_util.hpp>
 #include <pragma/addonsystem/addonsystem.h>

@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include <wgui/types/witext.h>
 
 module pragma.client;
 
@@ -13,8 +12,6 @@ import :gui.fps;
 import :client_state;
 import :engine;
 import pragma.string.unicode;
-
-LINK_WGUI_TO_CLASS(WIFPS, WIFPS);
 
 WIFPS::WIFPS() : WIBase(), m_text(), m_fpsLast(0), m_tLastUpdate(0.0) {}
 

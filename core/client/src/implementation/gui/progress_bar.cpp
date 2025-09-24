@@ -4,8 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include <wgui/types/witext.h>
-#include <wgui/types/wirect.h>
 #include <sharedutils/util.h>
 #include <mathutil/umath.h>
 #include <sharedutils/property/util_property_color.hpp>
@@ -15,8 +13,6 @@ module pragma.client;
 import :gui.progress_bar;
 
 import pragma.string.unicode;
-
-LINK_WGUI_TO_CLASS(WIProgressBar, WIProgressBar);
 
 WIProgressBar::WIProgressBar() : WIBase(), m_progress(std::make_shared<util::FloatProperty>(0.f)), m_min(0.f), m_max(100.f), m_stepSize(1.f), m_numDecimals(0)
 {

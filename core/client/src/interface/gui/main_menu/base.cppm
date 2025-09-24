@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <wgui/wibase.h>
 #include <sharedutils/functioncallback.h>
 
 export module pragma.client:gui.main_menu_base;

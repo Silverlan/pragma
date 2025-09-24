@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include <mathutil/uquat.h>
-#include <wgui/wgui.h>
 #include "pragma/console/c_cvar.h"
 #include "pragma/console/c_cvar_global_functions.h"
 //#include "shader_gaussianblur.h" // prosper TODO

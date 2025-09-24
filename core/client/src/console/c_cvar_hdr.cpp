@@ -2,10 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include <wgui/types/wiroot.h>
 
 import pragma.client;
-
 
 void CMD_debug_hdr_bloom(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {

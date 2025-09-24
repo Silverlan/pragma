@@ -6,7 +6,8 @@
 
 #include "pragma/networkdefinitions.h"
 #include <luabind/detail/conversion_policies/native_converter.hpp>
-#include <wgui/wibase.h>
+
+import pragma.gui;
 
 class WIBase;
 namespace luabind {

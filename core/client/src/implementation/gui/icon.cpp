@@ -13,7 +13,6 @@ import :gui.icon;
 
 import :client_state;
 
-LINK_WGUI_TO_CLASS(WIIcon, WIIcon);
 #define SILKICON_SPRITESHEET_WIDTH 1024
 #define SILKICON_SPRITESHEET_HEIGHT 512
 WIIcon::WIIcon() : WITexturedRect() {}

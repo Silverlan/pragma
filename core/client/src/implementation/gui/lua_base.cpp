@@ -5,8 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include "luasystem.h"
-#include <wgui/wihandle.h>
-#include "pragma/lua/classes/c_ldef_wgui.h"
 #include "sharedutils/util_string.h"
 #include <prosper_prepared_command_buffer.hpp>
 

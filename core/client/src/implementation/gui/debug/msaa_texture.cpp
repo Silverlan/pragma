@@ -15,9 +15,6 @@ import :gui.debug_msaa_texture;
 
 import :engine;
 
-
-LINK_WGUI_TO_CLASS(widebugmsaatexture, WIDebugMSAATexture);
-
 WIDebugMSAATexture::WIDebugMSAATexture() : WIBase() {}
 
 void WIDebugMSAATexture::Initialize()

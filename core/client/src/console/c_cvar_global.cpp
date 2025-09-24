@@ -16,7 +16,6 @@
 #include <sharedutils/util.h>
 #include <sharedutils/util_string.h>
 #include "pragma/util/util_tga.hpp"
-#include <wgui/wgui.h>
 #include <cmaterialmanager.h>
 #include <pragma/networking/netmessages.h>
 #include <pragma/console/sh_cmd.h>
@@ -46,7 +45,6 @@
 #undef PlaySound
 
 import pragma.client;
-
 
 DLLCLIENT void CMD_entities_cl(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {

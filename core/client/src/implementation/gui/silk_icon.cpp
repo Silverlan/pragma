@@ -13,8 +13,6 @@ import :gui.silk_icon;
 
 import :client_state;
 
-LINK_WGUI_TO_CLASS(WISilkIcon, WISilkIcon);
-
 WISilkIcon::WISilkIcon() : WIIcon() {}
 
 WISilkIcon::~WISilkIcon() {}

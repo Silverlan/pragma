@@ -4,12 +4,13 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <wgui/types/wirect.h>
-#include <wgui/wibase.h>
+#include "image/prosper_texture.hpp"
 
 export module pragma.client:gui.textured_cubemap;
 
 import :rendering.cube_map_side;
+
+import pragma.gui;
 
 export {
 	class DLLCLIENT WITexturedCubemap : public WIBase {

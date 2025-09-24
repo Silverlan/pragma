@@ -8,7 +8,6 @@ module;
 #include <pragma/debug/debug_render_info.hpp>
 #include <pragma/math/util_hermite.h>
 #include <pragma/math/e_frustum.h>
-#include <wgui/types/witext.h>
 #include <prosper_util.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_command_buffer.hpp>

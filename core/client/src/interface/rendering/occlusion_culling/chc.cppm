@@ -8,8 +8,6 @@ module;
 #include <pragma/types.hpp>
 #include <sharedutils/def_handle.h>
 #include <sharedutils/functioncallback.h>
-#include <wgui/wibase.h>
-#include <wgui/wihandle.h>
 #include <queue>
 
 #define CHC_DEBUGGING_ENABLED 0
@@ -18,6 +16,7 @@ export module pragma.client:rendering.occlusion_culling.chc;
 
 import :entities.base_entity;
 import :model.mesh;
+import pragma.gui;
 import :rendering.occlusion_culling.octree;
 
 export {

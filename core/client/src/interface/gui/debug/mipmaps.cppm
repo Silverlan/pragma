@@ -4,9 +4,11 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <wgui/types/wirect.h>
+#include "image/prosper_texture.hpp"
 
 export module pragma.client:gui.debug_mipmaps;
+
+import pragma.gui;
 
 export {
 	class DLLCLIENT WIDebugMipMaps : public WIBase {

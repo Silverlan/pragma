@@ -7,7 +7,6 @@ module;
 #include "pragma/console/c_cvar.h"
 #include "pragma/console/c_cvar_global_functions.h"
 #include <textureinfo.h>
-#include <wgui/wgui.h>
 #include <image/prosper_msaa_texture.hpp>
 #include <image/prosper_render_target.hpp>
 #include <prosper_util.hpp>

@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <wgui/types/witext.h>
 
 export module pragma.client:gui.tree_list;
 

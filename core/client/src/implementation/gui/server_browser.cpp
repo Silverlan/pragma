@@ -9,7 +9,6 @@ module;
 #include "wms_message.h"
 #include "pragma/networking/wv_message.h"
 #include <sharedutils/util_library.hpp>
-#include <wgui/wguifactories.h>
 #include "wmserverdata.h"
 #include <pragma/networking/game_server_data.hpp>
 #include <networkmanager/udp_handler/udp_message_dispatcher.h>
@@ -27,8 +26,6 @@ import :client_state;
 import :engine;
 import pragma.gui;
 import pragma.locale;
-
-LINK_WGUI_TO_CLASS(WIServerBrowser, WIServerBrowser);
 
 pragma::networking::DefaultMasterServerQueryDispatcher::DefaultMasterServerQueryDispatcher() : IMasterServerQueryDispatcher {}
 {

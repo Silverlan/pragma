@@ -4,16 +4,18 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <wgui/wibase.h>
 #include <pragma/lua/luaapi.h>
 #include <prosper_prepared_command_buffer.hpp>
 #include "pragma/lua/luaobjectbase.h"
 #include <pragma/lua/lua_call.hpp>
 #include <pragma/lua/handle_holder.hpp>
 
+#undef DrawState
+
 export module pragma.client:gui.lua_base;
 
 import :gui.lua_interface;
+import pragma.gui;
 
 #define LUAGUI_CALL_MEMBER(name, numargs, numret, args, ret)                                                                                                                                                                                                                                     \
 	{                                                                                                                                                                                                                                                                                            \
@@ -54,7 +56,7 @@ export
 		virtual void OnVisibilityChanged(bool bVisible) override;
 		virtual void SetColor(float r, float g, float b, float a = 1.f) override;
 		virtual void SetAlpha(float alpha) override;
-		virtual void Render(const DrawInfo &drawInfo, wgui::DrawState &drawState, const Mat4 &matDraw, const Vector2 &scale = {1.f, 1.f}, uint32_t testStencilLevel = 0u, wgui::StencilPipeline stencilPipeline = wgui::StencilPipeline::Test) override;
+		virtual void Render(const wgui::DrawInfo &drawInfo, wgui::DrawState &drawState, const Mat4 &matDraw, const Vector2 &scale = {1.f, 1.f}, uint32_t testStencilLevel = 0u, wgui::StencilPipeline stencilPipeline = wgui::StencilPipeline::Test) override;
 		virtual void OnCursorEntered() override;
 		virtual void OnCursorExited() override;
 		virtual void OnFileDragEntered() override;
@@ -106,8 +108,8 @@ export
 		bool Lua_CheckPosInBounds(const Vector2i &pos);
 		static bool default_CheckPosInBounds(lua_State *l, WILuaBase &hElement, const Vector2i &pos);
 
-		void Lua_Render(const ::WIBase::DrawInfo &drawInfo, const Mat4 &matDraw, const Vector2 &scale);
-		static void default_Render(lua_State *l, WILuaBase &hElement, const ::WIBase::DrawInfo &drawInfo, const Mat4 &matDraw, const Vector2 &scale);
+		void Lua_Render(const ::wgui::DrawInfo &drawInfo, const Mat4 &matDraw, const Vector2 &scale);
+		static void default_Render(lua_State *l, WILuaBase &hElement, const ::wgui::DrawInfo &drawInfo, const Mat4 &matDraw, const Vector2 &scale);
 
 		void Lua_OnCursorEntered();
 		static void default_OnCursorEntered(lua_State *l, WILuaBase &hElement);

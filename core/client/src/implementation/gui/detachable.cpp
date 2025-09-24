@@ -4,9 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include <wgui/types/witext.h>
-#include <wgui/types/wirect.h>
-#include <wgui/types/wiroot.h>
 #include <mathutil/umath.h>
 #include <prosper_window.hpp>
 
@@ -17,9 +14,6 @@ import :gui.detachable;
 import :engine;
 import pragma.gui;
 import pragma.locale;
-
-
-LINK_WGUI_TO_CLASS(WIDetachable, WIDetachable);
 
 WIDetachable::DetachedWindow::~DetachedWindow() { Clear(); }
 void WIDetachable::DetachedWindow::Clear()

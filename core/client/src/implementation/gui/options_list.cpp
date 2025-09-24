@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include <wgui/types/wirect.h>
 
 module pragma.client;
 
@@ -16,9 +15,6 @@ import :engine;
 import pragma.gui;
 import pragma.locale;
 import pragma.string.unicode;
-
-LINK_WGUI_TO_CLASS(WIOptionsList, WIOptionsList);
-
 
 WIOptionsList::WIOptionsList() : WIBase() {}
 

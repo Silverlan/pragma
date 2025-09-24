@@ -4,14 +4,15 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <wgui/types/wirect.h>
 #include <sharedutils/chronotime.h>
 #include <deque>
-#include <thread>
-#include <atomic>
 #include <mathutil/umath.h>
+#include "image/prosper_texture.hpp"
+#include "texturemanager/texture.h"
 
 export module pragma.client:gui.image_slide_show;
+
+import pragma.gui;
 
 export {
 	class DLLCLIENT WIImageSlideShow : public WIBase {

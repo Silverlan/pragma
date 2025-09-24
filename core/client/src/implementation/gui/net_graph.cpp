@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include <wgui/types/witext.h>
 #include <pragma/networking/netmessages.h>
 
 module pragma.client;
@@ -17,8 +16,6 @@ import pragma.string.unicode;
 
 
 static const uint32_t DATA_RECORD_BACKLOG = 30;
-
-LINK_WGUI_TO_CLASS(WINetGraph, WINetGraph);
 
 WINetGraph::NetData::NetData() : lastUpdate(0) { Reset(); }
 void WINetGraph::NetData::Reset()

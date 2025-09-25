@@ -1,0 +1,40 @@
+// SPDX-FileCopyrightText: (c) 2024 Silverlan <opensource@pragma-engine.com>
+// SPDX-License-Identifier: MIT
+
+module;
+
+#include "pragma/entities/components/base_entity_component.hpp"
+#include "pragma/entities/parentmode.h"
+#include "pragma/entities/parentinfo.h"
+#include "pragma/entities/entity_uuid_ref.hpp"
+#include <sharedutils/property/util_property.hpp>
+
+export module pragma.shared:entities.components.base_child;
+
+export namespace pragma {
+	class DLLNETWORK BaseChildComponent : public BaseEntityComponent {
+	  public:
+		static ComponentEventId EVENT_ON_PARENT_CHANGED;
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
+
+		virtual void Initialize() override;
+		virtual void OnRemove() override;
+
+		void ClearParent();
+		void SetParent(const pragma::EntityURef &parent);
+		const pragma::EntityURef &GetParent() const;
+
+		BaseEntity *GetParentEntity();
+		const BaseEntity *GetParentEntity() const { return const_cast<BaseChildComponent *>(this)->GetParentEntity(); }
+		bool HasParent() const;
+	  protected:
+		BaseChildComponent(BaseEntity &ent);
+		virtual void OnEntitySpawn() override;
+		virtual void OnParentChanged(BaseEntity *parent) {};
+
+		EntityURef m_parent;
+		bool m_parentValid = false;
+		pragma::NetEventId m_netEvSetParent = pragma::INVALID_NET_EVENT;
+	};
+};

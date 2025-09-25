@@ -6,7 +6,7 @@ module;
 #include "debug/crashdump_helper.hpp"
 #include <atomic>
 
-export module pragma.debug.crashdump;
+export module pragma.shared:debug.crashdump;
 
 export namespace pragma::debug {
 	DLLNETWORK const std::string &get_exception_message();

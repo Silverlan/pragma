@@ -3,5 +3,5 @@
 
 module;
 
-export module pragma.core;
-// export import pragma.locale;
+export module pragma.shared:core;
+export import :core.addon_system;

@@ -9,6 +9,8 @@ module;
 export module pragma.shared:game.enums;
 
 export {
+    constexpr uint32_t RESOURCE_TRANSFER_FRAGMENT_SIZE = 2'048;
+
     enum class TimerType : uint8_t { CurTime = 0, RealTime, ServerTime };
 
 	enum DAMAGETYPE : uint32_t { GENERIC = 0, EXPLOSION = 1, BULLET = 2, BASH = 32, CRUSH = 64, SLASH = 128, ELECTRICITY = 256, ENERGY = 512, FIRE = 1024, PLASMA = 2048, IGNITE = FIRE | 4096 };

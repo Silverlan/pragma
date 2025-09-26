@@ -13,7 +13,9 @@ module;
 #include "pragma/entities/entity_iterator.hpp"
 #include "pragma/entities/baseentity_events.hpp"
 
-module pragma.entities.components.filter;
+module pragma.shared;
+
+import :entities.components.point.base_path_node;
 
 using namespace pragma;
 

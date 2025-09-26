@@ -6,6 +6,8 @@ module;
 export module pragma.shared:console.enums;
 
 export {
+	enum class MESSAGE : int { PRINTCONSOLE, PRINTCHAT };
+
 	enum class DLLNETWORK ConVarFlags : uint32_t {
 		None = 0,
 		Cheat = 1,

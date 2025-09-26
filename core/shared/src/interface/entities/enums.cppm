@@ -74,4 +74,8 @@ export {
 	};
 	REGISTER_BASIC_BITWISE_OPERATORS(pragma::ComponentMemberFlags)
 	REGISTER_BASIC_BITWISE_OPERATORS(FAttachmentMode);
+
+	using ComponentId = uint32_t;
+	using ComponentEventId = uint32_t;
+	const auto INVALID_COMPONENT_ID = std::numeric_limits<ComponentId>::max();
 };

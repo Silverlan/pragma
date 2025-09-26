@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_shared.h"
 #include "pragma/entities/point/constraints/point_constraint_base.h"
 #include "pragma/physics/constraint.hpp"
@@ -15,6 +17,10 @@
 #include "pragma/entities/entity_iterator.hpp"
 #include "pragma/entities/components/base_name_component.hpp"
 #include "pragma/entities/baseentity_events.hpp"
+
+export module pragma.shared;
+
+import :entities.components.point.constraints.base;
 
 using namespace pragma;
 

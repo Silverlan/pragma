@@ -36,7 +36,7 @@ module;
 #include "pragma/physics/phys_material.hpp"
 #include "pragma/physics/controller.hpp"
 
-export module pragma.shared;
+module pragma.shared;
 
 import :entities.components.base_character;
 

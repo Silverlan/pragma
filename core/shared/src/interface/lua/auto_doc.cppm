@@ -12,7 +12,7 @@ module;
 #define ENABLE_LAD 1
 #endif
 
-export module pragma.client:scripting.lua.auto_doc
+export module pragma.client:scripting.lua.auto_doc;
 
 export namespace Lua {
 	namespace doc {

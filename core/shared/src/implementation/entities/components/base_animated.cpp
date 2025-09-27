@@ -24,7 +24,7 @@ module;
 
 #define DEBUG_VERBOSE_ANIMATION 0
 
-export module pragma.shared;
+module pragma.shared;
 
 import :entities.components.base_animated;
 

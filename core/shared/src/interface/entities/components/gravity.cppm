@@ -34,6 +34,8 @@ export namespace pragma {
 
 	class DLLNETWORK GravityComponent final : public BaseEntityComponent, public BaseGravity {
 	  public:
+		static void RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts);
+		
 		GravityComponent(BaseEntity &ent);
 		virtual void Initialize() override;
 

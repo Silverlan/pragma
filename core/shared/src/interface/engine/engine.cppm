@@ -172,8 +172,6 @@ export {
 		virtual Lua::Interface *GetLuaInterface(lua_State *l);
 
 		// Log
-		void StartLogging();
-		void EndLogging();
 		void WriteToLog(const std::string &str);
 		// Config
 		virtual void LoadConfig();

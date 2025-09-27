@@ -14,6 +14,7 @@ module;
 #include "pragma/physics/environment.hpp"
 #include "pragma/physics/controller.hpp"
 #include <pragma/physics/movetypes.h>
+#include "pragma/lua/ostream_operator_alias.hpp"
 
 export module pragma.shared;
 
@@ -254,4 +255,40 @@ bool GravityComponent::CalcBallisticVelocity(const Vector3 &origin, const Vector
 	//
 
 	return true;
+}
+
+namespace Lua {
+	namespace Gravity {
+		static void CalcBallisticVelocity(lua_State *l, pragma::GravityComponent &hEnt, const Vector3 &origin, const Vector3 &destPos, float fireAngle, float maxSpeed, float spread, float maxPitch, float maxYaw);
+	};
+};
+
+void Lua::Gravity::CalcBallisticVelocity(lua_State *l, pragma::GravityComponent &hEnt, const Vector3 &origin, const Vector3 &destPos, float fireAngle, float maxSpeed, float spread, float maxPitch, float maxYaw)
+{
+	Vector3 vel;
+	auto b = hEnt.CalcBallisticVelocity(origin, destPos, fireAngle, maxSpeed, spread, maxPitch, maxYaw, vel);
+	Lua::PushBool(l, b);
+	if(b == true)
+		Lua::Push<Vector3>(l, vel);
+}
+
+#ifdef __linux__
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, BaseEntityComponent);
+#endif
+
+void GravityComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts)
+{
+	auto def = pragma::lua::create_entity_component_class<pragma::GravityComponent, pragma::BaseEntityComponent>("GravityComponent");
+	def.def("SetGravityScale", &pragma::GravityComponent::SetGravityScale);
+	def.def("SetGravityOverride", static_cast<void (pragma::GravityComponent::*)(const Vector3 &, float)>(&pragma::GravityComponent::SetGravityOverride));
+	def.def("SetGravityOverride", static_cast<void (pragma::GravityComponent::*)(const Vector3 &)>(&pragma::GravityComponent::SetGravityOverride));
+	def.def("SetGravityOverride", static_cast<void (pragma::GravityComponent::*)(float)>(&pragma::GravityComponent::SetGravityOverride));
+	def.def("SetGravityOverride", static_cast<void (pragma::GravityComponent::*)()>(&pragma::GravityComponent::SetGravityOverride));
+	def.def("HasGravityForceOverride", &pragma::GravityComponent::HasGravityForceOverride);
+	def.def("HasGravityDirectionOverride", &pragma::GravityComponent::HasGravityDirectionOverride);
+	def.def("GetGravityDirection", &pragma::GravityComponent::GetGravityDirection);
+	def.def("GetGravity", &pragma::GravityComponent::GetGravity);
+	def.def("GetGravityForce", &pragma::GravityComponent::GetGravityForce);
+	def.def("CalcBallisticVelocity", &Lua::Gravity::CalcBallisticVelocity);
+	modEnts[def];
 }

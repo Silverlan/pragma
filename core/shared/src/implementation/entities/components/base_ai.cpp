@@ -29,7 +29,7 @@ module;
 #include "pragma/entities/components/movement_component.hpp"
 #include "pragma/model/model.h"
 
-export module pragma.shared;
+module pragma.shared;
 
 import :entities.components.base_ai;
 

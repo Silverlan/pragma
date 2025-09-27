@@ -354,7 +354,6 @@ export {
 
 		virtual bool InvokeEntityEvent(pragma::BaseEntityComponent &component, uint32_t eventId, int32_t argsIdx, bool bInject);
 		virtual void RegisterLuaEntityComponents(luabind::module_ &gameMod);
-		virtual void RegisterLuaEntityComponent(luabind::class_<pragma::BaseEntityComponent> &classDef);
 		void LoadConfig();
 		void SaveConfig();
 		void UpdateTimers();

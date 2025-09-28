@@ -3,34 +3,13 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/engine.h"
-#include "pragma/engine_init.hpp"
-#include "pragma/lua/libraries/ldebug.h"
-#include "pragma/lua/lua_error_handling.hpp"
-#include "pragma/logging.hpp"
-#include <pragma/console/convarhandle.h>
 #include "luasystem.h"
 #include <sharedutils/netpacket.hpp>
-#include <pragma/console/convars.h>
-#include "pragma/console/engine_cvar.h"
-#include "pragma/debug/intel_vtune.hpp"
-#include "pragma/model/modelmanager.h"
-#include "pragma/engine_version.h"
-#include "pragma/console/cvar.h"
-#include "pragma/debug/debug_performance_profiler.hpp"
-#include <pragma/asset/util_asset.hpp>
 #include <sharedutils/util.h>
 #include <sharedutils/util_debug.h>
 #include <sharedutils/util_clock.hpp>
 #include <sharedutils/util_parallel_job.hpp>
-#include <pragma/game/game_resources.hpp>
-#include <pragma/util/resource_watcher.h>
 #include <material_manager2.hpp>
-#include <pragma/networking/iserver.hpp>
-#include <pragma/addonsystem/addonsystem.h>
-#include <pragma/model/animation/activities.h>
-#include <pragma/model/animation/animation_event.h>
 #include <sharedutils/util_library.hpp>
 #include <sharedutils/util_path.hpp>
 #include <sharedutils/util_debug.h>
@@ -40,7 +19,6 @@ module;
 #ifdef __linux__
 #include <pthread.h>
 #include <fcntl.h>
-#include "pragma/console/linenoise.hpp"
 #endif
 
 module pragma.shared;

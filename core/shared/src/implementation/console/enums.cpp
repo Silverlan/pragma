@@ -3,8 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/console/util_console_color.hpp"
 
 module pragma.shared;
 

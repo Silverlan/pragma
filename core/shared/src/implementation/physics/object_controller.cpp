@@ -3,20 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/physics/physobj.h"
-#include "pragma/entities/baseentity.h"
-#include "pragma/networkstate/networkstate.h"
-#include "pragma/physics/environment.hpp"
-#include "pragma/physics/controller.hpp"
-#include "pragma/physics/collision_object.hpp"
-#include <pragma/game/game.h>
-#include "pragma/physics/phys_material.hpp"
-#include "pragma/physics/raytraces.h"
-#include "pragma/math/util_engine_math.hpp"
-#include "pragma/entities/components/base_character_component.hpp"
-#include "pragma/entities/components/base_transform_component.hpp"
-#include "pragma/entities/components/base_physics_component.hpp"
 
 module pragma.shared;
 

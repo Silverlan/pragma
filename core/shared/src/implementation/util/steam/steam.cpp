@@ -3,15 +3,11 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/logging.hpp"
-#include "pragma/util/steam/util_steam.hpp"
-#include "pragma/util/steam/util_vdf.hpp"
 #include <sharedutils/util.h>
 #include <sharedutils/util_string.h>
 #include <sharedutils/util_markup_file.hpp>
 
-export module pragma.shared;
+module pragma.shared;
 
 import :util.steam.steam;
 

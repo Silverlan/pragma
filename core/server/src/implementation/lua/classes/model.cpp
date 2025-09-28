@@ -5,9 +5,6 @@ module;
 
 #include "stdafx_server.h"
 #include "luasystem.h"
-#include <pragma/model/model.h>
-#include "pragma/lua/classes/ldef_model.h"
-#include <pragma/lua/classes/lmodel.h>
 
 module pragma.server.scripting.lua.classes.model;
 import pragma.server.server_state;

@@ -3,8 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/iserverstate.hpp"
 #include <sharedutils/util_library.hpp>
 #include <sharedutils/util_path.hpp>
 

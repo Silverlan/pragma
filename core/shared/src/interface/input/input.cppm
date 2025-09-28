@@ -3,4 +3,5 @@
 
 module;
 
-export module pragma.shared;
+export module pragma.shared:input;
+export import :input.enums;

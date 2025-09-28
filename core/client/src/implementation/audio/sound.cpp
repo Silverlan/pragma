@@ -4,13 +4,8 @@
 module;
 
 #include "stdafx_client.h"
-#include <pragma/networking/nwm_util.h>
-#include <pragma/logging.hpp>
-#include "pragma/console/c_cvar.h"
 #include "luasystem.h"
 #include "alsound_types.hpp";
-#include <pragma/audio/alsound_type.h>
-#include <pragma/entities/components/base_transform_component.hpp>
 
 module pragma.client;
 

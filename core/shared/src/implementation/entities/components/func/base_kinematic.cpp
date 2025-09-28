@@ -3,25 +3,8 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/networkstate/networkstate.h"
-#include <pragma/game/game.h>
-#include "pragma/entities/baseentity.h"
-#include "pragma/physics/physobj.h"
-#include "pragma/entities/func/basefunckinematic.hpp"
-#include "pragma/entities/components/basepointpathnode.h"
-#include "pragma/physics/physicstypes.h"
 #include <sharedutils/util.h>
 #include <sharedutils/util_string.h>
-#include "pragma/util/util_handled.hpp"
-#include "pragma/audio/alsound_type.h"
-#include "pragma/entities/components/base_physics_component.hpp"
-#include "pragma/entities/components/base_sound_emitter_component.hpp"
-#include "pragma/entities/components/base_transform_component.hpp"
-#include "pragma/entities/components/base_render_component.hpp"
-#include "pragma/entities/components/base_io_component.hpp"
-#include "pragma/entities/entity_iterator.hpp"
-#include "pragma/entities/baseentity_events.hpp"
 
 module pragma.shared;
 

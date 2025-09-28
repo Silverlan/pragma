@@ -3,10 +3,6 @@
 
 module;
 
-#include "pragma/entities/components/base_entity_component.hpp"
-#include "pragma/logging.hpp"
-#include "pragma/engine.h"
-#include "pragma/game/game.h"
 
 export module pragma.shared:entities.components.logging;
 

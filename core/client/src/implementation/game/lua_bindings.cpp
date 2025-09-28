@@ -4,40 +4,16 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/lua/libraries/lents.h"
-#include "pragma/lua/libraries/lengine.h"
 #include "alsound_types.hpp"
-#include <pragma/lua/handle_holder.hpp>
-#include <pragma/lua/converters/optional_converter_t.hpp>
-#include <pragma/lua/converters/pair_converter_t.hpp>
-#include <pragma/lua/classes/lentity.h>
-#include <pragma/lua/classes/ldef_entity.h>
 #include <mathutil/glmutil.h>
 #include "luasystem.h"
 #include "cmaterialmanager.h"
-#include "pragma/lua/libraries/lray.h"
-#include "pragma/lua/libraries/lgame.h"
 #include <sharedutils/util_string.h>
-#include <pragma/math/e_frustum.h>
-#include <pragma/lua/lua_util_component.hpp>
-#include <pragma/lua/classes/lproperty.hpp>
-#include <pragma/lua/lentity_component_lua.hpp>
-#include <pragma/lua/sh_lua_component.hpp>
-#include <pragma/lua/sh_lua_component_t.hpp>
-#include <pragma/networking/resources.h>
-#include <pragma/input/inputhelper.h>
-#include <pragma/lua/libraries/lnet.hpp>
 #include <luainterface.hpp>
-#include <pragma/lua/lua_component_event.hpp>
-#include <pragma/model/model.h>
 #include <prosper_descriptor_set_group.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_render_pass.hpp>
 #include <image/prosper_render_target.hpp>
-#include <pragma/lua/libraries/lfile.h>
-#include <pragma/lua/converters/game_type_converters_t.hpp>
-#include <pragma/lua/converters/vector_converter_t.hpp>
-#include <pragma/util/util_game.hpp>
 #include <udm.hpp>
 
 #undef LEFT

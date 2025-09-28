@@ -3,19 +3,9 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/environment/audio/env_sound_dsp.h"
-#include "pragma/entities/environment/audio/env_sound_dsp_chorus.h"
-#include "pragma/entities/environment/audio/env_sound_dsp_distortion.h"
-#include "pragma/entities/environment/audio/env_sound_dsp_eaxreverb.h"
-#include "pragma/entities/environment/audio/env_sound_dsp_echo.h"
-#include "pragma/entities/environment/audio/env_sound_dsp_equalizer.h"
-#include "pragma/entities/environment/audio/env_sound_dsp_flanger.h"
-#include "pragma/util/util_handled.hpp"
-#include "pragma/entities/baseentity_events.hpp"
 #include <algorithm>
 
-export module pragma.client;
+module pragma.shared;
 
 import :entities.components.audio.base_dsp;
 

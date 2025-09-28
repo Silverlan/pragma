@@ -3,12 +3,10 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
 #include "image/prosper_render_target.hpp"
 #include "sharedutils/util_pragma.hpp"
 #include "prosper_command_buffer.hpp"
 #include "prosper_descriptor_set_group.hpp"
-#include <pragma/entities/components/base_entity_component.hpp>
 
 export module pragma.client:entities.components.game_shadow_manager;
 import :rendering.shaders;

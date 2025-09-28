@@ -4,8 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/game/game_limits.h"
-#include "pragma/logging.hpp"
 #include <cmaterial_manager2.hpp>
 #include <prosper_command_buffer.hpp>
 #include <cmaterial.h>

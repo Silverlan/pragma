@@ -3,8 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/input/inputhelper.h"
 
 module pragma.shared
 

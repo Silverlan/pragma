@@ -3,14 +3,8 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/components/base_static_bvh_cache_component.hpp"
-#include "pragma/entities/components/base_static_bvh_user_component.hpp"
-#include "pragma/entities/entity_component_manager_t.hpp"
-#include "pragma/util/functional_parallel_worker.hpp"
-#include "pragma/logging.hpp"
 
-export module pragma.shared;
+module pragma.shared;
 
 import :entities.components.base_static_bvh_cache;
 

@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include <pragma/networking/nwm_util.h>
 #include <sharedutils/netpacket.hpp>
 
 export module pragma.client:networking.util;

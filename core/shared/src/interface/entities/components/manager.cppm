@@ -4,14 +4,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/entities/entity_component_info.hpp"
-#include "pragma/entities/component_member_reference.hpp"
-#include "pragma/entities/member_type.hpp"
-#include "pragma/entities/entity_component_info.hpp"
-#include "pragma/entities/entity_component_member_info.hpp"
-#include "pragma/entities/entity_component_event_info.hpp"
-#include "pragma/util/global_string_table.hpp"
-#include "pragma/types.hpp"
 #include <cinttypes>
 #include <string>
 #include <functional>
@@ -21,11 +13,23 @@ module;
 #include <typeindex>
 #include <queue>
 #include <mathutil/umath.h>
+#include "sharedutils/magic_enum.hpp"
+#include "sharedutils/util_shared_handle.hpp"
 #include <sharedutils/functioncallback.h>
+#include "udm.hpp"
 
 export module pragma.shared:entities.manager;
 
+export import :util.global_string_table;
+
+export import :entities.enums;
+export import :entities.components.events.event_info;
+export import :entities.member_info;
+export import :entities.member_type;
+import panima;
+
 export {
+	class BaseEntity;
 	namespace pragma {
 		DLLNETWORK std::string get_normalized_component_member_name(const std::string &name);
 		DLLNETWORK size_t get_component_member_name_hash(const std::string &name);

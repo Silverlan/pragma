@@ -4,16 +4,6 @@
 #ifndef __SH_LUA_COMPONENT_HPP__
 #define __SH_LUA_COMPONENT_HPP__
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/entities/components/base_entity_component.hpp"
-#include "pragma/entities/entity_component_manager_t.hpp"
-#include "pragma/entities/components/base_entity_component_member_register.hpp"
-#include "pragma/entities/member_type.hpp"
-#include "pragma/lua/luaobjectbase.h"
-#include "pragma/util/util_variable_type.hpp"
-#include "pragma/lua/types/udm.hpp"
-#include "pragma/util/global_string_table.hpp"
-#include <pragma/lua/luaapi.h>
 #include <udm.hpp>
 #include <any>
 

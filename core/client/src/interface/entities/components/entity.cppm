@@ -3,9 +3,7 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
 #include "sharedutils/netpacket.hpp"
-#include <pragma/entities/entity_component_manager.hpp>
 
 export module pragma.client:entities.components.entity;
 export namespace pragma {

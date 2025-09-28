@@ -3,10 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/point/point_rendertarget.h"
-#include "pragma/util/util_handled.hpp"
-#include "pragma/entities/baseentity_events.hpp"
 
 module pragma.shared;
 

@@ -3,9 +3,11 @@
 
 module;
 
-#include "pragma/util/util_typed_manager.hpp"
+#include "pragma/networkdefinitions.h"
 
 export module pragma.shared:physics.surface_type_manager;
+
+export import :util.type_manager;
 
 export namespace pragma::physics {
 	class DLLNETWORK SurfaceType : public BaseNamedType {

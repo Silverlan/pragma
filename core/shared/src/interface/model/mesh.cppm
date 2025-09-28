@@ -5,15 +5,13 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include <mathutil/glmutil.h>
-
 #include <iostream>
 #include <vector>
-#include <pragma/console/conout.h>
 #include "material.h"
 
 export module pragma.shared:model.mesh;
 
-module class DLLNETWORK Mesh {
+export class DLLNETWORK Mesh {
 	friend Con::c_cout &operator<<(Con::c_cout &, const Mesh &);
   public:
 	Mesh();

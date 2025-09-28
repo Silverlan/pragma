@@ -3,16 +3,20 @@
 
 module;
 
-#include "pragma/entities/components/base_entity_component.hpp"
-#include "pragma/game/gamemode/gamemodemanager.h"
-#include <pragma/networking/enums.hpp>
+#include "pragma/networkdefinitions.h"
 #include <sharedutils/util_version.h>
 
 #undef GetClassName
 
 export module pragma.shared:entities.components.base_gamemode;
 
+export import :entities.components.base;
+export import :game.damage_info;
+export import :game.game_mode_manager;
+export import :networking.enums;
+
 export namespace pragma {
+	class BasePlayerComponent;
 	class DLLNETWORK BaseGamemodeComponent : public BaseEntityComponent {
 	  public:
 		static ComponentEventId EVENT_ON_PLAYER_DEATH;

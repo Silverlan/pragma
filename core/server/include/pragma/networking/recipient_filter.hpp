@@ -4,7 +4,6 @@
 #ifndef __PRAGMA_RECIPIENT_FILTER_HPP__
 #define __PRAGMA_RECIPIENT_FILTER_HPP__
 
-#include "pragma/serverdefinitions.h"
 #include <functional>
 
 namespace pragma::networking {

@@ -2,10 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_server.h"
-#include "pragma/ai/ai_schedule.h"
 #include <mathutil/umath.h>
-#include "pragma/ai/ai_behavior.h"
-#include <pragma/entities/components/base_ai_component.hpp>
 
 import pragma.server.entities.components;
 

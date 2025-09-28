@@ -3,12 +3,13 @@
 
 module;
 
-#include "pragma/entities/components/base_bvh_component.hpp"
-#include "pragma/util/util_thread_pool.hpp"
-#include "pragma/util/functional_parallel_worker.hpp"
+#include "pragma/networkdefinitions.h"
 #include <unordered_set>
 
 export module pragma.shared:entities.components.base_static_bvh_cache;
+
+export import :entities.components.base_bvh;
+export import :entities.components.base_static_bvh_user;
 
 export namespace pragma {
 	class DLLNETWORK BaseStaticBvhCacheComponent : public BaseBvhComponent {

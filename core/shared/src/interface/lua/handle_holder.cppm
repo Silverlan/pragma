@@ -6,7 +6,7 @@ module;
 #include <sharedutils/util_shared_handle.hpp>
 #include <luabind/pointer_traits.hpp>
 
-export module pragma.client:scripting.lua.handle_holder;
+export module pragma.shared:scripting.lua.handle_holder;
 
 export {
 	namespace pragma::lua {

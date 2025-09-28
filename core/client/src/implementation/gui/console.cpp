@@ -4,8 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include <pragma/engine_info.hpp>
-#include <pragma/lua/lua_error_handling.hpp>
 
 module pragma.client;
 

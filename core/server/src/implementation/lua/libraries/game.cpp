@@ -4,14 +4,7 @@
 module;
 
 #include "stdafx_server.h"
-#include "pragma/networking/recipient_filter.hpp"
 #include "luasystem.h"
-#include <pragma/networking/enums.hpp>
-#include <pragma/lua/classes/ldef_vector.h>
-#include "pragma/lua/luaapi.h"
-#include <pragma/lua/libraries/ltimer.h>
-#include <pragma/lua/libraries/lgame.h>
-#include <pragma/model/model.h>
 #include <servermanager/interface/sv_nwm_manager.hpp>
 #include <sharedutils/scope_guard.h>
 

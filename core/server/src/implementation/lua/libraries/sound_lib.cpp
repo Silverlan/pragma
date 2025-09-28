@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_server.h"
-#include "pragma/lua/libraries/lsound.h"
 
 module pragma.server.scripting.lua.libraries.sound;
 

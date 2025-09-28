@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <buffers/prosper_dynamic_resizable_buffer.hpp>
 #include <prosper_command_buffer.hpp>
 

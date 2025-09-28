@@ -3,9 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/entity_iterator.hpp"
-#include "pragma/entities/entity_component_manager.hpp"
 
 module pragma.shared;
 

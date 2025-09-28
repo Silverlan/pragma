@@ -4,12 +4,14 @@
 module;
 
 #include "pragma/networkdefinitions.h"
+#include <cinttypes>
+#include <limits>
+#include <string>
+#include <vector>
 
 export module pragma.shared:entities.net_event_manager;
 
 export namespace pragma {
-	using NetEventId = uint32_t;
-	static const NetEventId INVALID_NET_EVENT = std::numeric_limits<decltype(pragma::INVALID_NET_EVENT)>::max();
 	class DLLNETWORK NetEventManager {
 	  public:
 		NetEventManager() = default;

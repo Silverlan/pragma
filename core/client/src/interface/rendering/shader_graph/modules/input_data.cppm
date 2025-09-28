@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
 #include "buffers/prosper_buffer.hpp"
 
 export module pragma.client:rendering.shader_graph.module_input_data;

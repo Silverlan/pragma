@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/serverdefinitions.h"
-#include <pragma/entities/components/base_game_component.hpp>
 
 export module pragma.server.entities.components.game;
 

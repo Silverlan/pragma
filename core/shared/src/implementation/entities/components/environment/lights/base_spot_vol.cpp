@@ -1,17 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "stdafx_shared.h"
-#include "pragma/entities/environment/lights/env_light_spot_vol.h"
-#include "pragma/util/util_handled.hpp"
-#include "pragma/util/util_game.hpp"
-#include "pragma/entities/components/base_render_component.hpp"
-#include "pragma/entities/components/base_radius_component.hpp"
-#include "pragma/entities/entity_component_manager_t.hpp"
-#include "pragma/entities/baseentity_events.hpp"
-#include "pragma/entities/entity_iterator.hpp"
+module;
+
 #include <algorithm>
 #include <udm.hpp>
+
+module pragma.shared;
+
+import :entities.components.environment.lights.base_spot_vol;
 
 using namespace pragma;
 

@@ -3,11 +3,13 @@
 
 module;
 
-#include "pragma/entities/components/base_entity_component.hpp"
-#include "pragma/util/util_game.hpp"
+#include "pragma/networkdefinitions.h"
 #include <mathutil/color.h>
 
 export module pragma.shared:entities.components.environment.base_fog_controller;
+
+export import :entities.components.base;
+export import :util.enums;
 
 export namespace pragma {
 	class DLLNETWORK BaseEnvFogControllerComponent : public BaseEntityComponent {

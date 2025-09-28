@@ -3,11 +3,17 @@
 
 module;
 
-#include "pragma/entities/components/base_entity_component.hpp"
+#include "pragma/networkdefinitions.h"
 
 export module pragma.shared:entities.components.constraints.base;
 
+export import :entities.components.base;
+export import :entities.universal_reference;
+export import :game.coordinate_system;
+export import :game.enums;
+
 export namespace pragma {
+	class ConstraintManagerComponent;
 	class DLLNETWORK ConstraintComponent final : public BaseEntityComponent {
 	  public:
 		struct DLLNETWORK ConstraintParticipants {

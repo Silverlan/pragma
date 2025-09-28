@@ -4,17 +4,10 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/util/util_game.hpp"
-#include "pragma/util/resource_watcher.h"
-#include "pragma/entities/environment/lights/env_light_spot.h"
-#include "pragma/asset/util_asset.hpp"
-#include "pragma/game/game_limits.h"
 #include "prosper_util.hpp"
 #include <cmaterial_manager2.hpp>
 #include <datasystem_t.hpp>
 #include <texturemanager/texture_manager2.hpp>
-#include <pragma/entities/entity_component_system_t.hpp>
-#include <pragma/model/animation/vertex_animation.hpp>
 #include <sharedutils/util_file.h>
 #include <sharedutils/alpha_mode.hpp>
 #include <sharedutils/util_path.hpp>
@@ -22,17 +15,12 @@ module;
 #include <sharedutils/util_library.hpp>
 #include <util_image_buffer.hpp>
 #include <fsys/ifile.hpp>
-#include <pragma/asset_types/world.hpp>
-#include <pragma/engine_version.h>
-#include <pragma/logging.hpp>
 #include <image/prosper_sampler.hpp>
 #include <util_image.hpp>
 #include <cmaterialmanager.h>
 #include <cmaterial.h>
 #include <udm.hpp>
 #include <tiny_gltf.h>
-#include <pragma/model/animation/skeleton.hpp>
-#include <pragma/model/animation/bone.hpp>
 #include <image/prosper_image.hpp>
 
 module pragma.client;

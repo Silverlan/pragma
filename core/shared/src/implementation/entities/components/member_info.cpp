@@ -3,13 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/entity_component_manager.hpp"
-#include "pragma/entities/entity_component_manager_t.hpp"
-#include "pragma/entities/components/base_entity_component.hpp"
-#include "pragma/entities/components/component_member_flags.hpp"
-#include "pragma/entities/attribute_specialization_type.hpp"
-#include "pragma/util/global_string_table.hpp"
 #include <udm.hpp>
 
 module pragma.shared;

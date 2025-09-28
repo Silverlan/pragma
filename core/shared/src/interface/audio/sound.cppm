@@ -3,28 +3,25 @@
 
 module;
 
-#include "pragma/networkdefinitions.h"
 #include <mathutil/umath.h>
 
-#include "pragma/networkdefinitions.h"
 #include <vector>
 
 #include <mathutil/glmutil.h>
-#include "pragma/audio/e_alstate.h"
 #include <sharedutils/functioncallback.h>
 #include <mathutil/umath.h>
-#include "pragma/entities/baseentity_handle.h"
 #include <sharedutils/callback_handler.h>
-#include "pragma/lua/lua_callback_handler.h"
 #include <sharedutils/util_virtual_shared_from_this.hpp>
-
-#define FLALSOUND_IGNORE_TIMESCALE 1
-
-#define ALSOUND_DEFAULT_MAX_DISTANCE 3.4028234663853e+038
 
 export module pragma.shared:audio.sound;
 
+export import :audio.effect_params;
+export import :audio.enums;
+export import :entities.base_entity_handle;
+export import :scripting.lua.callback_handler;
+
 export {
+	class NetworkState;
 	struct DLLNETWORK SoundFade {
 		SoundFade(bool fadein, double start, double duration, float gain)
 		{
@@ -109,13 +106,6 @@ export {
 		void UpdateOffset();
 		void InitRange();
 	public:
-		struct DLLNETWORK EffectParams {
-			EffectParams(float gain = 1.f, float gainHF = 1.f, float gainLF = 1.f);
-			float gain = 1.f;
-			float gainHF = 1.f; // For low-pass and band-pass filters
-			float gainLF = 1.f; // For high-pass and band-pass filters
-		};
-
 		ALSound(NetworkState *nw);
 		virtual ~ALSound();
 		virtual void Initialize();
@@ -200,11 +190,11 @@ export {
 		virtual float GetAirAbsorptionFactor() const = 0;
 		virtual void SetGainAuto(bool directHF, bool send, bool sendHF) = 0;
 		virtual std::tuple<bool, bool, bool> GetGainAuto() const = 0;
-		virtual void SetDirectFilter(const EffectParams &params) = 0;
-		virtual const EffectParams &GetDirectFilter() const = 0;
-		virtual bool AddEffect(const std::string &effectName, const EffectParams &params = {}) = 0;
+		virtual void SetDirectFilter(const SoundEffectParams &params) = 0;
+		virtual const SoundEffectParams &GetDirectFilter() const = 0;
+		virtual bool AddEffect(const std::string &effectName, const SoundEffectParams &params = {}) = 0;
 		virtual void RemoveEffect(const std::string &effectName) = 0;
-		virtual void SetEffectParameters(const std::string &effectName, const EffectParams &params = {}) = 0;
+		virtual void SetEffectParameters(const std::string &effectName, const SoundEffectParams &params = {}) = 0;
 
 		void SetGainRange(float minGain, float maxGain);
 		std::pair<float, float> GetGainRange() const;

@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/lua/classes/ldef_material.h"
 #include <texturemanager/texturemanager.h>
 #include "luasystem.h"
 #include <buffers/prosper_uniform_resizable_buffer.hpp>

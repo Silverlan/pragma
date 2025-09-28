@@ -7,9 +7,11 @@ module;
 #include <sharedutils/util_library.hpp>
 #include <memory>
 #include <optional>
+#include <sharedutils/netpacket.hpp>
 
 export module pragma.shared:util.server_state_interface;
 
+export class NetworkState;
 export namespace pragma {
 	struct DLLNETWORK IServerState final {
 		void Initialize(::util::Library &lib);

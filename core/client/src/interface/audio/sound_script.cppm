@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include <pragma/audio/soundscript.h>
 #include <alsound_effect.hpp>
 
 export module pragma.client:audio.sound_script;

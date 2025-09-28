@@ -3,9 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include "pragma/entities/components/base_entity_component_member_register.hpp"
-#include <pragma/entities/components/base_time_scale_component.hpp>
 #include "cmaterial.h"
 #include <material_manager2.hpp>
 #include <queue>

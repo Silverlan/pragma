@@ -3,21 +3,12 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/engine.h"
-#include "pragma/lua/libraries/lasset.hpp"
-#include "pragma/model/modelmanager.h"
-#include "pragma/asset/util_asset.hpp"
-#include "pragma/lua/libraries/lfile.h"
-#include "pragma/lua/converters/game_type_converters_t.hpp"
-#include "pragma/lua/converters/optional_converter_t.hpp"
-#include "pragma/lua/converters/pair_converter_t.hpp"
 #include <material_manager2.hpp>
 #include <luainterface.hpp>
 #include <fsys/ifile.hpp>
 #include <sharedutils/magic_enum.hpp>
 
-module pragma.client;
+module pragma.shared;
 
 import :scripting.lua.libraries.asset;
 

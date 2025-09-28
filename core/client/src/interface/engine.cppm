@@ -3,15 +3,11 @@
 
 module;
 
-#include "pragma/c_enginedefinitions.h"
-#include <pragma/engine.h>
-#include "pragma/launchparameters.h"
 #include <sharedutils/util_clock.hpp>
 #include "image/prosper_render_target.hpp"
 #include "queries/prosper_timer_query.hpp"
 #include "queries/prosper_query_pool.hpp"
 #include "prosper_command_buffer.hpp"
-#include "pragma/util/font_set.hpp"
 #include <unordered_map>
 #include "alsoundsystem.hpp"
 #include "alsound_effect.hpp"

@@ -3,11 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/prop/prop_physics.hpp"
-#include "pragma/entities/prop/prop_base.h"
-#include "pragma/entities/components/base_model_component.hpp"
-#include <pragma/physics/movetypes.h>
 
 module pragma.shared;
 

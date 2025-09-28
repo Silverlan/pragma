@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include <pragma/entities/components/liquid/base_liquid_volume_component.hpp>
 
 export module pragma.client:entities.components.liquid_volume;
 

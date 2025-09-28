@@ -3,11 +3,7 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/networkstate/networkstate.h"
-#include "pragma/scripts.h"
 #include <fsys/filesystem.h>
-#include "pragma/serverdefinitions.h"
 
 module pragma.shared;
 

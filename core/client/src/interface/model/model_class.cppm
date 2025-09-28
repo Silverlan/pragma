@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include <pragma/model/model.h>
 #include "buffers/prosper_buffer.hpp"
 #include "material.h"
 

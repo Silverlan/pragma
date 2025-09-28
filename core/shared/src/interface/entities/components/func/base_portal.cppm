@@ -3,9 +3,11 @@
 
 module;
 
-#include "pragma/entities/components/base_entity_component.hpp"
+#include "pragma/networkdefinitions.h"
 
 export module pragma.shared:entities.components.func.base_portal;
+
+export import :entities.components.base;
 
 export namespace pragma {
 	class DLLNETWORK BaseFuncPortalComponent : public BaseEntityComponent {

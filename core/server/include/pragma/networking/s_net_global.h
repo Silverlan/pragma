@@ -3,7 +3,6 @@
 
 #ifndef __S_NET_GLOBAL_H__
 #define __S_NET_GLOBAL_H__
-#include "pragma/networking/s_net_definitions.h"
 DECLARE_NETMESSAGE_SV(disconnect);
 DECLARE_NETMESSAGE_SV(userinput);
 DECLARE_NETMESSAGE_SV(clientinfo);

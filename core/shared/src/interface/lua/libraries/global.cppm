@@ -3,9 +3,7 @@
 
 module;
 
-#include "pragma/networkdefinitions.h"
-#include <pragma/lua/luaapi.h>
 
-export module pragma.client:scripting.lua.libraries.global;
+export module pragma.shared:scripting.lua.libraries.global;
 
 export DLLNETWORK int Lua_RegisterCSLuaFile(lua_State *l);

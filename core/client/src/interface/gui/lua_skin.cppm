@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
 #include "luasystem.h"
 #include <optional>
 

@@ -4,35 +4,12 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/baseworld.h"
-#include "pragma/entities/components/intersection_handler_component.hpp"
-#include "pragma/console/c_cvar_global_functions.h"
-#include <pragma/debug/intel_vtune.hpp>
-#include <pragma/lua/classes/ldef_mat4.h>
-#include <pragma/model/model.h>
-#include <pragma/entities/parentinfo.h>
 #include <prosper_descriptor_set_group.hpp>
 #include <buffers/prosper_uniform_resizable_buffer.hpp>
 #include <buffers/prosper_swap_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
-#include <pragma/entities/components/base_transform_component.hpp>
 #include <prosper_command_buffer.hpp>
-#include <pragma/entities/components/base_physics_component.hpp>
-#include <pragma/entities/components/base_player_component.hpp>
-#include <pragma/entities/components/base_child_component.hpp>
-#include <pragma/entities/components/parent_component.hpp>
-#include <pragma/math/intersection.h>
-#include <pragma/entities/entity_component_system_t.hpp>
-#include <pragma/entities/entity_component_manager_t.hpp>
-#include <pragma/entities/entity_iterator.hpp>
-#include <pragma/lua/converters/game_type_converters_t.hpp>
-#include <pragma/console/sh_cmd.h>
 #include <util_image.hpp>
-#include "pragma/entities/components/base_render_component.hpp"
-#include <pragma/lua/classes/lproperty.hpp>
-#include <pragma/lua/converters/optional_converter_t.hpp>
-#include <pragma/lua/lua_util_component.hpp>
-#include <pragma/lua/lua_util_component_stream.hpp>
 
 module pragma.client;
 

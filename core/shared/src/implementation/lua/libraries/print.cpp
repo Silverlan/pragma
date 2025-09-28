@@ -3,18 +3,10 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/lua/libraries/lprint.h"
-#include "pragma/lua/libraries/ldebug.h"
-#include "pragma/lua/libraries/lutil.hpp"
-#include <pragma/console/conout.h>
-#include "pragma/logging.hpp"
-#include "pragma/lua/ldefinitions.h"
-#include <pragma/engine.h>
 #include <mathutil/color.h>
 #include "luasystem.h"
 
-module pragma.client;
+module pragma.shared;
 
 import :scripting.lua.libraries.print;
 

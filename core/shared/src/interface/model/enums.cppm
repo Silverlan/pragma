@@ -3,13 +3,16 @@
 
 module;
 
-#include "pragma/networkdefinitions.h"
 #include <mathutil/umath.h>
 
 export module pragma.shared:model.enums;
 
 export {
-	enum class DLLNETWORK ModelUpdateFlags : uint32_t {
+	namespace pragma::model {
+	enum class IndexType : uint8_t { UInt16 = 0u, UInt32 };
+};
+
+	enum class ModelUpdateFlags : uint32_t {
 		None = 0,
 		UpdateBounds = 1,
 		UpdatePrimitiveCounts = UpdateBounds << 1,

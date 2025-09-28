@@ -3,12 +3,28 @@
 
 module;
 
+#include "pragma/networkdefinitions.h"
+#include <mathutil/umath.h>
+#include <mathutil/color.h>
+#include <optional>
+
 export module pragma.shared:console.enums;
 
 export {
 	enum class MESSAGE : int { PRINTCONSOLE, PRINTCHAT };
 
-	enum class DLLNETWORK ConVarFlags : uint32_t {
+	enum class ConType : uint32_t {
+		Var = 0,
+		Variable = 0,
+
+		Cmd = 1,
+		Command = 1,
+
+		LuaCmd = 2,
+		LuaCommand = 2
+	};
+
+	enum class ConVarFlags : uint32_t {
 		None = 0,
 		Cheat = 1,
 		Singleplayer = Cheat << 1,

@@ -4,10 +4,6 @@
 #ifndef __S_CVAR_GLOBAL_H__
 #define __S_CVAR_GLOBAL_H__
 
-#include "pragma/serverdefinitions.h"
-#include "pragma/networkdefinitions.h"
-#include <pragma/console/convars.h>
-#include "pragma/console/s_cvar_global_functions.h"
 
 REGISTER_CONCOMMAND_SV(entities, CMD_entities_sv, ConVarFlags::None, "Prints a list of all current serverside entities in the world.");
 REGISTER_CONCOMMAND_SV(list_maps, CMD_list_maps, ConVarFlags::None, "Prints a list of all available list to the console.");

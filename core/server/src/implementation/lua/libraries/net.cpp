@@ -4,16 +4,8 @@
 module;
 
 #include "stdafx_server.h"
-#include "pragma/lua/lnetmessages.h"
 #include <servermanager/sv_nwm_recipientfilter.h>
-#include "pragma/networking/nwm_util.h"
-#include "pragma/networking/recipient_filter.hpp"
-#include "pragma/lua/classes/ldef_recipientfilter.h"
 #include <sharedutils/netpacket.hpp>
-#include <pragma/networking/enums.hpp>
-#include <pragma/lua/lua_handle.hpp>
-#include <pragma/lua/luaapi.h>
-#include <pragma/lua/converters/game_type_converters_t.hpp>
 
 module pragma.server.scripting.lua.libraries.net;
 

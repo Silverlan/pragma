@@ -9,13 +9,6 @@
 #ifdef ENGINE_NETWORK
 #ifndef __S_CONVARS_H__
 #define __S_CONVARS_H__
-#include "pragma/networkdefinitions.h"
-#include <pragma/console/convars.h>
-#include "pragma/console/s_cvar_global.h"
-#include "pragma/console/s_cvar_settings.h"
-#include "pragma/console/s_cvar_server.h"
-#include <pragma/engine.h>
-#include <pragma/engine_info.hpp>
 
 #ifndef STRING
 #define STRING_HELPER(a) #a

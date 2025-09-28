@@ -3,13 +3,9 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include "pragma/entities/environment/effects/env_particle_system.h"
 #include <mathutil/umath.h>
-#include <pragma/math/vector/wvvector3.h>
 #include <sharedutils/util_string.h>
 #include <sharedutils/util.h>
-#include <pragma/math/util_noise.hpp>
 #include <algorithm>
 
 export module pragma.client:particle_system.operator_wander;

@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/serverdefinitions.h"
-#include <pragma/entities/baseworld.h>
 
 export module pragma.server.entities.components.world;
 

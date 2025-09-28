@@ -3,10 +3,11 @@
 
 module;
 
-#include "pragma/definitions.h"
+#include "pragma/networkdefinitions.h"
 #include <string>
 #include <optional>
 #include <vector>
+#include <sharedutils/util_library.hpp>
 
 export module pragma.shared:util.module;
 

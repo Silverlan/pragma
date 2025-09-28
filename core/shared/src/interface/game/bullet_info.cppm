@@ -4,12 +4,13 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/game/game_limits.h"
-#include "pragma/game/damagetype.h"
 #include <mathutil/color.h>
 #include <limits>
 
 export module pragma.shared:game.bullet_info;
+
+export import :entities.base_entity_handle;
+import :game.enums;
 
 export {
 	struct DLLNETWORK BulletInfo {
@@ -40,6 +41,5 @@ export {
 		std::string ammoType = "";
 		// TODO Additional Filter
 	};
-	lua_registercheck(BulletInfo, BulletInfo);
 	DLLNETWORK std::ostream &operator<<(std::ostream &out, const BulletInfo &o);
 };

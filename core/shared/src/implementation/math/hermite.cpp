@@ -3,8 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/math/util_hermite.h"
 
 module pragma.shared;
 

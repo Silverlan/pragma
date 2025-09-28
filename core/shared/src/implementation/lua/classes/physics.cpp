@@ -3,33 +3,8 @@
 
 module;
 
-#include "stdafx_shared.h"
 #include "luasystem.h"
-#include "pragma/lua/classes/lphysics.h"
-#include "pragma/lua/classes/lphysobj.h"
-#include "pragma/physics/environment.hpp"
 #include "material_manager2.hpp"
-#include "pragma/lua/classes/ldef_vector.h"
-#include "pragma/lua/classes/ldef_quaternion.h"
-#include "pragma/lua/classes/ldef_tracedata.h"
-#include "pragma/lua/classes/ldef_mat4.h"
-#include "pragma/lua/libraries/lray.h"
-#include "pragma/lua/converters/optional_converter_t.hpp"
-#include "pragma/lua/converters/vector_converter_t.hpp"
-#include "pragma/lua/converters/game_type_converters_t.hpp"
-#include "pragma/physics/raytraces.h"
-#include "pragma/model/modelmesh.h"
-#include "pragma/lua/classes/lphyssoftbodyinfo.hpp"
-#include "pragma/lua/policies/shared_from_this_policy.hpp"
-#include "pragma/lua/policies/default_parameter_policy.hpp"
-#include "pragma/physics/physsoftbodyinfo.hpp"
-#include "pragma/physics/phys_material.hpp"
-#include "pragma/physics/vehicle.hpp"
-#include "pragma/physics/controller.hpp"
-#include "pragma/physics/ik/util_ik.hpp"
-#include "pragma/buss_ik/Tree.h"
-#include "pragma/buss_ik/Jacobian.h"
-#include "pragma/physics/ik/ik_controller.hpp"
 #include <mathutil/color.h>
 #include <luainterface.hpp>
 #include <luabind/iterator_policy.hpp>

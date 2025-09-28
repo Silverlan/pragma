@@ -3,12 +3,38 @@
 
 module;
 
-#include "pragma/networkdefinitions.h"
 #include <mathutil/umath.h>
+#include "mathutil/uvec.h"
 
 export module pragma.shared:audio.enums;
 
 export {
+	constexpr float ALSOUND_DEFAULT_MAX_DISTANCE = std::numeric_limits<float>::max();
+
+	constexpr bool ALSOUND_DEFAULT_RELATIVE = false;
+	constexpr float ALSOUND_DEFAULT_REFERENCE_DISTANCE = 1.f;
+	constexpr float ALSOUND_DEFAULT_ROLLOFF_FACTOR = 1.f;
+	constexpr float ALSOUND_DEFAULT_ROOM_ROLLOFF_FACTOR = 0.f;
+	constexpr float ALSOUND_DEFAULT_MIN_GAIN = 0.f;
+	constexpr float ALSOUND_DEFAULT_MAX_GAIN = 1.f;
+	constexpr float ALSOUND_DEFAULT_CONE_INNER_ANGLE = 360.f;
+	constexpr float ALSOUND_DEFAULT_CONE_OUTER_ANGLE = 360.f;
+	constexpr float ALSOUND_DEFAULT_CONE_OUTER_GAIN = 0.f;
+	constexpr float ALSOUND_DEFAULT_CONE_OUTER_GAIN_HF = 1.f;
+	constexpr float ALSOUND_DEFAULT_PRIORITY = 0u;
+	constexpr float ALSOUND_DEFAULT_DOPPLER_FACTOR = 1.f;
+	constexpr float ALSOUND_DEFAULT_AIR_ABSORPTION_FACTOR = 0.f;
+	constexpr Vector3 ALSOUND_DEFAULT_ORIENTATION_AT = Vector3 {0.f,0.f,-1.f};
+	constexpr Vector3 ALSOUND_DEFAULT_ORIENTATION_UP = Vector3 {0.f,1.f,0.f};
+	constexpr float ALSOUND_DEFAULT_STEREO_ANGLE_LEFT = 0.523599;
+	constexpr float ALSOUND_DEFAULT_STEREO_ANGLE_RIGHT = -0.523599;
+	constexpr bool ALSOUND_DEFAULT_DIRECT_GAIN_HF_AUTO = true;
+	constexpr bool ALSOUND_DEFAULT_SEND_GAIN_AUTO = true;
+	constexpr bool ALSOUND_DEFAULT_SEND_GAIN_HF_AUTO = true;
+	constexpr float ALSOUND_DEFAULT_DIRECT_FILTER_GAIN = 1.f;
+	constexpr float ALSOUND_DEFAULT_DIRECT_FILTER_GAIN_HF = 1.f;
+	constexpr float ALSOUND_DEFAULT_DIRECT_FILTER_GAIN_LF = 1.f;
+
 	enum class ALState : uint32_t { NoError = 0, Initial = 0x1011, Playing = 0x1012, Paused = 0x1013, Stopped = 0x1014 };
 
 	struct DLLNETWORK SoundCacheInfo {

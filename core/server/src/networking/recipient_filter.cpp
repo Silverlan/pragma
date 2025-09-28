@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_server.h"
-#include "pragma/networking/recipient_filter.hpp"
-#include "pragma/networking/iserver_client.hpp"
 
 pragma::networking::ClientRecipientFilter::ClientRecipientFilter(const std::function<bool(const IServerClient &)> &filter) : m_filter {filter} {}
 pragma::networking::ClientRecipientFilter::ClientRecipientFilter(const IServerClient &client, FilterType filterType)

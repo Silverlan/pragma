@@ -3,10 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/components/base_character_component.hpp"
-#include "pragma/entities/components/base_weapon_component.hpp"
-#include "pragma/entities/components/base_ownable_component.hpp"
 
 module pragma.shared;
 

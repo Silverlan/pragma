@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/serverdefinitions.h"
 
 export module pragma.server.ai.tasks.npc_state;
 

@@ -4,9 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/console/c_cvar.h"
-#include <pragma/console/convars.h>
-#include <pragma/math/intersection.h>
 
 module pragma.client;
 

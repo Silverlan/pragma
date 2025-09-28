@@ -5,10 +5,12 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include <sharedutils/functioncallback.h>
-#include "pragma/entities/baseentity_handle.h"
 
 export module pragma.shared:physics.touch;
 
+export import :entities.base_entity_handle;
+
+export class BaseEntity;
 export struct DLLNETWORK PhysTouch {
 	PhysTouch(BaseEntity *ent, CallbackHandle onRemove);
 	~PhysTouch();

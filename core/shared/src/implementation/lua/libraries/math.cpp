@@ -3,22 +3,13 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include <pragma/definitions.h>
-#include "pragma/lua/libraries/lmath.h"
-#include <pragma/engine.h>
 #include <mathutil/umath.h>
 #include "luasystem.h"
-#include "pragma/lua/classes/ldef_vector.h"
-#include "pragma/math/util_hermite.h"
-#include "pragma/util/util_ballistic.h"
-#include "pragma/math/util_easing.hpp"
-#include "pragma/model/modelmesh.h"
 #include <mathutil/umath_equation_solver.h>
 #include <mathutil/umath_frustum.hpp>
 #include <mathutil/perlin_noise.hpp>
 
-module pragma.client;
+module pragma.shared;
 
 import :scripting.lua.libraries.math;
 

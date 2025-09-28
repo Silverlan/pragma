@@ -4,14 +4,9 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/physics/collisiontypes.h"
 #include <buffers/prosper_buffer.hpp>
 #include <sharedutils/BS_thread_pool.hpp>
 #include <prosper_util.hpp>
-#include <pragma/entities/entity_iterator.hpp>
-#include <pragma/entities/components/base_transform_component.hpp>
-#include <pragma/entities/entity_component_system_t.hpp>
-#include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <cmaterial.h>
 
 module pragma.client;

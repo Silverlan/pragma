@@ -3,14 +3,11 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/basefilterentity.h"
-#include "pragma/util/util_handled.hpp"
-#include "pragma/entities/components/base_name_component.hpp"
-#include "pragma/entities/baseentity_events.hpp"
 #include <algorithm>
 
-module pragma.entities.components.filter;
+module pragma.shared;
+
+import :entities.components.filter;
 
 using namespace pragma;
 

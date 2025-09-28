@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
 #include <sharedutils/util_shared_handle.hpp>
 #include "prosper_command_buffer.hpp"
 #include <memory>

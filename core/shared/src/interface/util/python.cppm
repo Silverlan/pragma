@@ -5,6 +5,8 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include <cinttypes>
+#include <optional>
+#include <string>
 
 export module pragma.shared:util.python;
 

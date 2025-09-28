@@ -3,7 +3,7 @@
 
 module;
 
-#include "pragma/definitions.h"
+#include "pragma/networkdefinitions.h"
 #include <string>
 #include <sstream>
 

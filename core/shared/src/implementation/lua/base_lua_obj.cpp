@@ -3,10 +3,8 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/lua/baseluaobj.h"
 
-module pragma.client;
+module pragma.shared;
 
 import :scripting.lua.base_lua_obj;
 

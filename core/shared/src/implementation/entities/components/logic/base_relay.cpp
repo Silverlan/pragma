@@ -3,8 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/logic/logic_relay.h"
 
 module pragma.shared;
 

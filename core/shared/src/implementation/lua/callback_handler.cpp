@@ -3,12 +3,8 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/lua/lua_callback_handler.h"
-#include "pragma/lua/luacallback.h"
-#include "pragma/lua/luafunction_call.h"
 
-module pragma.client;
+module pragma.shared;
 
 import :scripting.lua.callback_handler;
 

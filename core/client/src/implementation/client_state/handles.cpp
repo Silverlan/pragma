@@ -5,17 +5,8 @@ module;
 
 #include "stdafx_client.h"
 #include <fsys/filesystem.h>
-#include "pragma/networking/netmessages.h"
-#include <pragma/networking/nwm_util.h>
 #include <sharedutils/util_string.h>
 #include <sharedutils/util_library.hpp>
-#include <pragma/networking/enums.hpp>
-#include <pragma/networking/resources.h>
-#include <pragma/lua/lua_script_watcher.h>
-#include <pragma/util/resource_watcher.h>
-#include <pragma/game/gamemode/gamemodemanager.h>
-#include <pragma/entities/components/map_component.hpp>
-#include <pragma/entities/entity_component_system_t.hpp>
 
 module pragma.client;
 

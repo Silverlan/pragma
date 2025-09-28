@@ -1,7 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2025 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "pragma/lua/converters/utf8_string_converter.hpp"
 #include <luabind/object.hpp>
 
 #ifndef __LUA_UTF8_STRING_CONVERTER_T_HPP__

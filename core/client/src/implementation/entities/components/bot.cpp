@@ -4,13 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/components/base_character_component.hpp"
-#include "pragma/entities/components/base_ai_component.hpp"
-#include "pragma/entities/components/base_animated_component.hpp"
-#include <pragma/lua/converters/game_type_converters_t.hpp>
-#include <pragma/audio/alsound_type.h>
-#include <pragma/entities/components/velocity_component.hpp>
-#include <pragma/entities/entity_component_system_t.hpp>
 
 module pragma.client;
 

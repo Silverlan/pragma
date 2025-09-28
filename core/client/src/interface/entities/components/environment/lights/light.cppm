@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include "pragma/entities/environment/lights/env_light.h"
 #include "buffers/prosper_uniform_resizable_buffer.hpp"
 
 export module pragma.client:entities.components.lights.light;

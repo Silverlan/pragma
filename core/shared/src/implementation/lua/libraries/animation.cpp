@@ -3,27 +3,10 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/model/animation/skeletal_animation.hpp"
-#include "pragma/model/animation/play_animation_flags.hpp"
-#include "pragma/entities/entity_component_manager_t.hpp"
-#include "pragma/lua/libraries/ludm.hpp"
-#include "pragma/lua/types/udm.hpp"
-#include "pragma/lua/custom_constructor.hpp"
-#include "pragma/lua/ostream_operator_alias.hpp"
-#include "pragma/model/model.h"
-#include <pragma/lua/policies/default_parameter_policy.hpp>
-#include <pragma/lua/policies/shared_from_this_policy.hpp>
-#include <pragma/lua/converters/string_view_converter_t.hpp>
-#include <pragma/lua/converters/optional_converter_t.hpp>
-#include <pragma/lua/converters/vector_converter_t.hpp>
-#include <pragma/lua/converters/pair_converter_t.hpp>
 #include <luainterface.hpp>
-#include "pragma/model/animation/pose.hpp"
-#include "pragma/model/animation/skeleton.hpp"
 #include <luabind/copy_policy.hpp>
 
-module pragma.client;
+module pragma.shared;
 
 import :scripting.lua.libraries.animation;
 

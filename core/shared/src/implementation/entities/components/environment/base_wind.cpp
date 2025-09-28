@@ -1,10 +1,11 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "stdafx_shared.h"
-#include "pragma/entities/environment/env_wind.hpp"
-#include "pragma/util/util_handled.hpp"
-#include "pragma/entities/baseentity_events.hpp"
+module;
+
+module pragma.shared;
+
+export import :entities.components.environment.base_wind;
 
 using namespace pragma;
 

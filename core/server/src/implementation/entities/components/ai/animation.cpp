@@ -4,8 +4,6 @@
 module;
 
 #include "stdafx_server.h"
-#include "pragma/ai/ai_schedule.h"
-#include <pragma/entities/components/base_animated_component.hpp>
 
 module pragma.server.entities.components.ai;
 

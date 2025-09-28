@@ -3,11 +3,11 @@
 
 module;
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/entities/entity_component_event.hpp"
 #include <string>
 
 export module pragma.shared:entities.components.events.key_value;
+
+export import :entities.components.events.event;
 
 export namespace pragma {
 	struct DLLNETWORK CEKeyValueData : public ComponentEvent {

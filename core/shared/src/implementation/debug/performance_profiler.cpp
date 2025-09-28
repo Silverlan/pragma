@@ -3,8 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/debug/debug_performance_profiler.hpp"
 
 module pragma.shared;
 

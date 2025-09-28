@@ -4,8 +4,6 @@
 #ifndef __S_CVAR_GLOBAL_FUNCTIONS_H__
 #define __S_CVAR_GLOBAL_FUNCTIONS_H__
 
-#include "pragma/serverdefinitions.h"
-#include "pragma/networkdefinitions.h"
 #include <vector>
 #include <string>
 

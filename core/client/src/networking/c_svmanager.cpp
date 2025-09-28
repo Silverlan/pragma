@@ -2,13 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/console/c_cvar_server.h"
-#include <pragma/networking/nwm_util.h>
 #include <sharedutils/util.h>
-#include <pragma/networking/error.hpp>
-#include <pragma/networking/enums.hpp>
-#include <pragma/networking/portinfo.h>
-#include <pragma/networking/netmessages.h>
 
 import pragma.client;
 

@@ -3,15 +3,9 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/components/base_io_component.hpp"
-#include "pragma/entities/entity_iterator.hpp"
-#include "pragma/entities/components/base_name_component.hpp"
-#include "pragma/lua/libraries/ltimer.h"
-#include <pragma/game/game.h>
 #include <udm.hpp>
 
-export module pragma.shared;
+module pragma.shared;
 
 import :entities.components.base_io;
 

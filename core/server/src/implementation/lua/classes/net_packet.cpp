@@ -5,9 +5,6 @@ module;
 
 #include "stdafx_server.h"
 #include "luasystem.h"
-#include "pragma/networking/s_nwm_util.h"
-#include <pragma/lua/classes/ldef_entity.h>
-#include <pragma/lua/classes/lnetpacket.h>
 
 module pragma.server.scripting.lua.classes.net_packet;
 

@@ -3,10 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/engine.h"
-#include "pragma/debug/debug_utils.hpp"
-#include "pragma/logging.hpp"
 #include "crashdump_helper.hpp"
 #include <fsys/filesystem.h>
 #include <sharedutils/util_debug.h>
@@ -14,7 +10,6 @@ module;
 #include <sharedutils/util.h>
 #include <sharedutils/util_file.h>
 #include <exception>
-#include "pragma/engine_info.hpp"
 #ifdef _WIN32
 #include <tchar.h>
 #include <signal.h>

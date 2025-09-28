@@ -3,9 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include "pragma/entities/components/base_entity_component_member_register.hpp"
-#include <pragma/entities/components/base_entity_component.hpp>
 
 export module pragma.client:entities.components.global_shader_input;
 

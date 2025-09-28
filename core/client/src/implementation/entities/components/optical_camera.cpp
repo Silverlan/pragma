@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include <pragma/entities/entity_component_manager_t.hpp>
 
 module pragma.client;
 

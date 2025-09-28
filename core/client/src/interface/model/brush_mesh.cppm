@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include <pragma/model/brush/brushmesh.h>
 
 export module pragma.client:model.brush_mesh;
 

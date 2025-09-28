@@ -4,9 +4,6 @@
 module;
 
 #include "stdafx_cengine.h"
-#include <pragma/console/c_cvar.h>
-#include <pragma/console/convars.h>
-#include <pragma/console/c_cvar_global_functions.h>
 #include <queries/prosper_query_pool.hpp>
 #include <queries/prosper_timer_query.hpp>
 #include <prosper_command_buffer.hpp>

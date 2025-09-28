@@ -4,14 +4,14 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/physics/base.hpp"
-#include "pragma/lua/baseluaobj.h"
 #include <memory>
 #include <optional>
 #include <sharedutils/def_handle.h>
 #include <mathutil/uvec.h>
 
 export module pragma.shared:physics.controller;
+
+export import :physics.collision_object;
 
 export {
 	namespace pragma::physics {

@@ -3,13 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/physics/physobj.h"
-#include "pragma/entities/baseentity.h"
-#include "pragma/networkstate/networkstate.h"
-#include "pragma/physics/collision_object.hpp"
-#include <pragma/game/game.h>
-#include "pragma/entities/components/base_physics_component.hpp"
 
 module pragma.shared;
 

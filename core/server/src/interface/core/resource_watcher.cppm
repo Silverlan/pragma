@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/serverdefinitions.h"
-#include <pragma/util/resource_watcher.h>
 
 export module pragma.server.core.resource_watcher;
 

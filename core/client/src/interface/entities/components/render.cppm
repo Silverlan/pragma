@@ -3,15 +3,9 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
 #include "buffers/prosper_uniform_resizable_buffer.hpp"
 #include "prosper_descriptor_set_group.hpp"
 #include "buffers/prosper_buffer.hpp"
-#include "pragma/model/modelmesh.h"
-#include "pragma/math/intersection.h"
-#include <pragma/util/orientedpoint.h>
-#include <pragma/math/sphere.h>
-#include <pragma/entities/components/base_render_component.hpp>
 #include <mathutil/uvec.h>
 #include <mathutil/boundingvolume.h>
 #include <mathutil/transform.hpp>

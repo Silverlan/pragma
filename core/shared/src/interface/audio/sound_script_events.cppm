@@ -7,15 +7,17 @@ module;
 #include <vector>
 #include <string>
 #include <memory>
-#include "pragma/audio/alsound.h"
-#include "pragma/audio/alenums.hpp"
-
-#undef CreateEvent
+#include "udm.hpp"
 
 export module pragma.shared:audio.sound_script_events;
 
+export import :audio.sound;
+
+#undef CreateEvent
+
 export {
-	class DLLNETWORK SoundScriptEvent;
+	class SoundScriptEvent;
+	class SoundScriptManager;
 	class DLLNETWORK SoundScriptEventContainer {
 	protected:
 		std::vector<std::shared_ptr<SoundScriptEvent>> m_events;

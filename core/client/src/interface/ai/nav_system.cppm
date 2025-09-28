@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include <pragma/ai/navsystem.h>
 #include <mathutil/glmutil.h>
 #include <sharedutils/functioncallback.h>
 #include <memory>

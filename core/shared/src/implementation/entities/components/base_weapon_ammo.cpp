@@ -3,14 +3,8 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/components/base_weapon_component.hpp"
-#include "pragma/entities/baseentity_luaobject.h"
-#include "pragma/lua/luafunction_call.h"
-#include "pragma/entities/components/base_character_component.hpp"
-#include "pragma/entities/components/base_ownable_component.hpp"
 
-export module pragma.shared;
+module pragma.shared;
 
 import :entities.components.base_weapon;
 

@@ -3,9 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/model/animation/skeleton_util.hpp"
-#include "pragma/model/animation/frame.h"
 #include <udm.hpp>
 
 module pragma.shared;

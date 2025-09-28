@@ -3,12 +3,8 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/components/base_gamemode_component.hpp"
-#include "pragma/entities/components/base_player_component.hpp"
-#include "pragma/game/gamemode/gamemodemanager.h"
 
-export module pragma.shared;
+module pragma.shared;
 
 import :entities.components.base_gamemode;
 

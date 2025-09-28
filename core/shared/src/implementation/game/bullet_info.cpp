@@ -3,8 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/util/bulletinfo.h"
 #include <sharedutils/magic_enum.hpp>
 
 module pragma.shared;

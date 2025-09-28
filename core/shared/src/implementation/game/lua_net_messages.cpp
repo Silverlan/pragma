@@ -3,11 +3,8 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include <pragma/game/game.h>
-#include "pragma/util/ammo_type.h"
 
-export module pragma.shared;
+module pragma.shared;
 
 import :game.game;
 

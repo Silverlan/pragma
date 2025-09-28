@@ -3,10 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/model/brush/brushmesh.h"
-#include "pragma/physics/shape.hpp"
-#include "pragma/physics/environment.hpp"
 
 module pragma.shared;
 

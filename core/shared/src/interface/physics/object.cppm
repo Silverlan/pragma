@@ -10,23 +10,30 @@ module;
 #include <optional>
 #include <mathutil/uquat.h>
 #include <sharedutils/def_handle.h>
-#include "pragma/entities/components/basegravity.h"
-#include "pragma/physics/controllerhitdata.h"
+#include "sharedutils/util_shared_handle.hpp"
 #include <mathutil/transform.hpp>
-#include "pragma/physics/collision_object.hpp"
-#include "pragma/types.hpp"
 #ifdef __linux__
-#include "pragma/physics/controller.hpp"
 #endif
+
+export module pragma.shared:physics.object;
+
+export import :physics.collision_object;
+export import :physics.controller;
+export import :physics.controller_hit_data;
+export import :physics.object_handle;
+export import :scripting.lua.base_lua_handle;
+export import :entities.components.handle;
 
 // Very expensive
 #define PHYS_KEEP_SIMULATION_TRANSFORM 0
 
-export module pragma.shared:physics.object;
-
 export {
+	class BaseEntity;
+	class PhysObj;
 	using PhysObjHandle = util::TWeakSharedHandle<PhysObj>;
+	class NetworkState;
 
+	namespace pragma {class BaseEntityComponent;};
 	class DLLNETWORK PhysObj : public pragma::BaseLuaHandle {
 	public:
 		enum class StateFlags : uint32_t { None = 0u, Disabled = 1u, Spawned = Disabled << 1u };

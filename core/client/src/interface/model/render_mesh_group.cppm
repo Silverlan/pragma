@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
 
 export module pragma.client:model.render_mesh_group;
 

@@ -3,17 +3,10 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/lua/lua_doc.hpp"
-#include "pragma/console/debugconsole.h"
-#include "pragma/console/util_console_color.hpp"
-#include "pragma/console/conout.h"
-#include <pragma/util/util_game.hpp>
-#include <pragma/engine.h>
 #include <sharedutils/util_string.h>
 #include <udm.hpp>
 
-module pragma.client;
+module pragma.shared;
 
 import :scripting.lua.auto_doc;
 

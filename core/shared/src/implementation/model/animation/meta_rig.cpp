@@ -3,9 +3,6 @@
 
 module;
 
-#include "pragma/model/animation/meta_rig.hpp"
-#include "pragma/model/animation/skeleton.hpp"
-#include "pragma/model/model.h"
 #include <udm.hpp>
 #include <sharedutils/magic_enum.hpp>
 

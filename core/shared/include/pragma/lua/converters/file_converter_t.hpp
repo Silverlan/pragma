@@ -4,8 +4,6 @@
 #ifndef __LUA_FILE_CONVERTER_T_HPP__
 #define __LUA_FILE_CONVERTER_T_HPP__
 
-#include "pragma/lua/converters/file_converter.hpp"
-#include "pragma/lua/libraries/lfile.h"
 
 template<class U>
 int luabind::default_converter<std::shared_ptr<ufile::IFile>, void>::match(lua_State *L, U, int index)

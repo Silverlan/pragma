@@ -3,14 +3,17 @@
 
 module;
 
-#include "pragma/entities/components/base_entity_component.hpp"
-#include "pragma/entities/baseentity_handle.h"
-#include "pragma/physics/physicstypes.h"
+#include "pragma/networkdefinitions.h"
+#include "mathutil/umath.h"
 #include <sharedutils/util_shared_handle.hpp>
 
 export module pragma.shared:entities.components.base_physics;
 
+export import :entities.components.base;
+export import :physics;
+
 export {
+	class Model;
 	namespace pragma {
 		namespace physics {
 			struct DLLNETWORK PhysObjCreateInfo {

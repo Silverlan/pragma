@@ -3,17 +3,8 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
 #include "stdafx_client.h"
 #include "luasystem.h"
-#include <pragma/lua/classes/ldef_vector.h>
-#include <pragma/model/model.h>
-#include <pragma/lua/classes/ldef_quaternion.h>
-#include <pragma/util/transform.h>
-#include <pragma/lua/libraries/lgame.h>
-#include <pragma/lua/libraries/lfile.h>
-#include <pragma/lua/classes/ldef_color.h>
-#include <pragma/model/model.h>
 #include <prosper_command_buffer.hpp>
 #include <image/prosper_render_target.hpp>
 #include <image/prosper_texture.hpp>
@@ -21,12 +12,8 @@ module;
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <prosper_util.hpp>
-#include <pragma/entities/entity_iterator.hpp>
-#include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <cmaterial.h>
-#include <pragma/model/animation/bone.hpp>
 
-#include <pragma/physics/collisionmesh.h>
 
 // #define ENABLE_DEPRECATED_PHYSICS
 
@@ -37,15 +24,9 @@ module;
 #endif
 
 #ifdef ENABLE_DEPRECATED_PHYSICS
-#include <pragma/buss_ik/Node.h>
-#include <pragma/buss_ik/Tree.h>
-#include <pragma/buss_ik/Jacobian.h>
-#include <pragma/buss_ik/VectorRn.h>
 #include <Bullet3Common/b3AlignedObjectArray.h>
-#include <pragma/physics/shape.hpp>
 #endif
 
-#include <pragma/physics/environment.hpp>
 
 module pragma.client;
 

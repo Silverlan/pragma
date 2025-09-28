@@ -3,12 +3,6 @@
 
 module;
 
-#include "pragma/entities/components/base_actor_component.hpp"
-#include "pragma/model/animation/activities.h"
-#include "pragma/math/surfacematerial.h"
-#include "pragma/ai/navsystem.h"
-#include "pragma/entities/baseentity_handle.h"
-#include <pragma/math/orientation.h>
 #include <mathutil/uvec.h>
 #include <thread>
 #include <mutex>
@@ -16,6 +10,13 @@ module;
 #include <sharedutils/property/util_property_vector.h>
 
 export module pragma.shared:entities.components.base_character;
+
+export import :entities.components.base_actor;
+export import :entities.components.movement;
+export import :entities.components.orientation;
+export import :model.animation.animation_event;
+export import :physics.raycast;
+export import :physics.surface_material;
 
 export namespace pragma {
 	struct DLLNETWORK CEOnDeployWeapon : public ComponentEvent {

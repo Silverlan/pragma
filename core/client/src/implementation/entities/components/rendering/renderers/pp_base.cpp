@@ -4,8 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/entity_component_system_t.hpp"
-#include <pragma/entities/entity_component_manager_t.hpp>
 #include <prosper_command_buffer.hpp>
 #include <image/prosper_msaa_texture.hpp>
 #include <image/prosper_render_target.hpp>

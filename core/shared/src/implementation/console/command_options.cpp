@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/console/command_options.hpp"
 #include <sharedutils/util_string.h>
 
 module pragma.shared;

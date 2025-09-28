@@ -3,9 +3,8 @@
 
 module;
 
-#include "pragma/lua/class_manager.hpp"
 
-module pragma.client;
+module pragma.shared;
 
 import :scripting.lua.class_manager;
 

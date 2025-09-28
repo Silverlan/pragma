@@ -3,17 +3,14 @@
 
 module;
 
-#include "pragma/networkdefinitions.h"
 #include <fsys/filesystem.h>
 #include <mathutil/glmutil.h>
-#include <pragma/math/angle/wvangle.h>
 #include "luasystem.h"
-#include "pragma/lua/ldefinitions.h"
 #include <sharedutils/datastream.h>
 #include <sharedutils/util_ifile.hpp>
 #include <optional>
 
-export module pragma.client:scripting.lua.libraries.file;
+export module pragma.shared:scripting.lua.libraries.file;
 
 export {
 	enum class FileOpenMode : uint32_t { None = 0u, Read = 1u, Write = Read << 1u, Append = Write << 1u, Update = Append << 1u, Binary = Update << 1u };

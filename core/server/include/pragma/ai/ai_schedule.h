@@ -4,8 +4,6 @@
 #ifndef __AI_SCHEDULE_H__
 #define __AI_SCHEDULE_H__
 
-#include "pragma/serverdefinitions.h"
-#include "pragma/ai/ai_behavior.h"
 #include <vector>
 
 namespace pragma {

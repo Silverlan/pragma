@@ -9,7 +9,6 @@ module;
 #include <mathutil/uvec.h>
 #include <tiny_gltf.h>
 #include <mathutil/umath_lighting.hpp>
-#include "pragma/model/animation/vertex_animation.hpp"
 
 export module pragma.client:assets.gltf_writer;
 

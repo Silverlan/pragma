@@ -6,7 +6,7 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <sharedutils/netpacket.hpp>
 #include <networkmanager/nwm_message.h>
-#include <pragma/engine.h>
+#include <unordered_map>
 
 #define COMMA ,
 

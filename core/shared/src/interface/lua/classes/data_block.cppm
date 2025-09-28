@@ -3,9 +3,6 @@
 
 module;
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/networkstate/networkstate.h"
-#include "pragma/lua/ldefinitions.h"
 
 export module pragma.shared:scripting.lua.classes.data_block;
 

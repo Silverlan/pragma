@@ -3,9 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/math/angle/wvangle.h"
-#include "pragma/console/conout.h"
 
 module pragma.shared;
 

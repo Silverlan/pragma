@@ -3,8 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/baseentity_net_event_manager.hpp"
 
 module pragma.shared;
 

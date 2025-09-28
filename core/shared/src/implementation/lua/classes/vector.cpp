@@ -3,17 +3,9 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/lua/classes/lvector.h"
-#include <pragma/math/vector/wvvector3.h>
 #include "luasystem.h"
-#include "pragma/lua/classes/ldef_vector.h"
 #include <sharedutils/util.h>
 #include <mathutil/vertex.hpp>
-#include "pragma/lua/libraries/lmatrix.h"
-#include "pragma/lua/classes/ldef_mat4.h"
-#include "pragma/util/util_best_fitting_plane.hpp"
-#include "pragma/math/util_engine_math.hpp"
 #include <glm/gtx/projection.hpp>
 #include <sharedutils/scope_guard.h>
 

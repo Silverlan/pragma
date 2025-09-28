@@ -3,9 +3,6 @@
 
 module;
 
-#include "pragma/networkdefinitions.h"
-#include <pragma/math/angle/wvquaternion.h>
-#include <pragma/lua/luaapi.h>
 
 export module pragma.shared:scripting.lua.classes.quaternion;
 

@@ -3,9 +3,7 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
 #include <material_manager2.hpp>
-#include <pragma/entities/environment/lights/env_light_spot_vol.h>
 
 export module pragma.client:entities.components.lights.spot_vol;
 

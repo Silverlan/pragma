@@ -3,8 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/util/font_set.hpp"
 
 module pragma.shared;
 

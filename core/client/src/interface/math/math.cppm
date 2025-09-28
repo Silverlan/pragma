@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
 #include <mathutil/umath_lighting.hpp>
 #include <mathutil/umat.h>
 #include <array>

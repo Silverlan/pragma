@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include <pragma/model/side.h>
 #include "material.h"
 
 export module pragma.client:model.side;

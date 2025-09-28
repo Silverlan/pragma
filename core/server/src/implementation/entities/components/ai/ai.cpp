@@ -4,25 +4,7 @@
 module;
 
 #include "stdafx_server.h"
-#include "pragma/entities/components/base_ai_component.hpp"
-#include "pragma/ai/ai_schedule.h"
-#include "pragma/networking/recipient_filter.hpp"
-#include "pragma/ai/ai_memory.h"
-#include <pragma/lua/converters/game_type_converters_t.hpp>
-#include <pragma/networking/enums.hpp>
-#include <pragma/model/model.h>
-#include <pragma/entities/components/base_animated_component.hpp>
-#include <pragma/entities/components/base_health_component.hpp>
-#include <pragma/entities/components/base_character_component.hpp>
-#include <pragma/entities/components/base_player_component.hpp>
-#include <pragma/entities/components/base_transform_component.hpp>
-#include <pragma/entities/components/base_physics_component.hpp>
-#include <pragma/entities/components/base_io_component.hpp>
-#include <pragma/entities/components/damageable_component.hpp>
-#include <pragma/entities/components/movement_component.hpp>
 #include <sharedutils/netpacket.hpp>
-#include <pragma/networking/nwm_util.h>
-#include <pragma/logging.hpp>
 
 module pragma.server.entities.components.ai;
 

@@ -4,13 +4,16 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/model/animation/bone.hpp"
 #include <cinttypes>
 #include <memory>
 #include <unordered_map>
 #include <mathutil/transform.hpp>
+#include <udm.hpp>
 
 export module pragma.shared:model.animation.skeleton;
+
+export import :model.animation.bone;
+export import :model.animation.enums;
 
 export namespace pragma::animation {
 	struct Bone;

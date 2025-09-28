@@ -3,8 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/math/util_pid_controller.hpp"
 
 module pragma.shared;
 

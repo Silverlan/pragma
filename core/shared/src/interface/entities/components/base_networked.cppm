@@ -3,13 +3,14 @@
 
 module;
 
-#include "pragma/entities/components/base_entity_component.hpp"
-#include "pragma/util/util_variable_type.hpp"
+#include "pragma/networkdefinitions.h"
 #include <sharedutils/property/util_property.hpp>
 
-#define NETWORKED_VARS_ENABLED 0
-
 export module pragma.shared:entities.components.base_networked;
+
+export import :entities.components.base;
+
+#define NETWORKED_VARS_ENABLED 0
 
 export {
 	namespace pragma {

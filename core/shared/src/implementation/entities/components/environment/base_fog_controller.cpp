@@ -1,13 +1,11 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "stdafx_shared.h"
-#include "pragma/entities/environment/env_fog_controller.h"
-#include "pragma/util/util_handled.hpp"
-#include "pragma/entities/components/basetoggle.h"
-#include "pragma/entities/baseentity_events.hpp"
-#include "pragma/entities/entity_component_manager_t.hpp"
-#include "pragma/entities/components/base_io_component.hpp"
+module;
+
+module pragma.shared;
+
+import :entities.components.environment.base_fog_controller;
 
 using namespace pragma;
 

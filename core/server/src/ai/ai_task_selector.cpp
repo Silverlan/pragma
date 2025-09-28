@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_server.h"
-#include "pragma/ai/ai_behavior.h"
 #include <random>
 #include <sharedutils/util_clock.hpp>
 

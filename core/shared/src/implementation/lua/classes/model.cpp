@@ -3,41 +3,12 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/engine.h"
-#include "pragma/lua/classes/ldef_angle.h"
-#include "pragma/lua/classes/ldef_vector.h"
-#include "pragma/lua/classes/lmodel.h"
-#include "pragma/lua/classes/lanimation.h"
-#include "pragma/lua/classes/lskeleton.h"
-#include "pragma/lua/classes/lvector.h"
-#include "pragma/lua/libraries/lfile.h"
-#include "pragma/lua/converters/game_type_converters_t.hpp"
-#include "pragma/lua/converters/pair_converter_t.hpp"
-#include "pragma/lua/converters/optional_converter_t.hpp"
-#include "pragma/lua/policies/default_parameter_policy.hpp"
-#include "pragma/lua/converters/vector_converter_t.hpp"
-#include "pragma/physics/collisionmesh.h"
-#include "pragma/lua/classes/lcollisionmesh.h"
 #include "luasystem.h"
-#include "pragma/model/model.h"
-#include "pragma/asset/util_asset.hpp"
-#include "pragma/physics/collisionmesh.h"
-#include "pragma/physics/physsoftbodyinfo.hpp"
-#include "pragma/model/animation/vertex_animation.hpp"
-#include "pragma/model/animation/flex_animation.hpp"
-#include "pragma/model/modelmesh.h"
-#include "pragma/model/animation/meta_rig.hpp"
-#include "pragma/lua/ostream_operator_alias.hpp"
 #include <material_manager2.hpp>
 #include <luabind/iterator_policy.hpp>
-#include <pragma/lua/lua_call.hpp>
-#include <pragma/lua/lua_util_class.hpp>
 #include <sharedutils/util_path.hpp>
 #include <sharedutils/util_file.h>
 #include <mathutil/vertex.hpp>
-#include "pragma/model/animation/skeleton.hpp"
-#include "pragma/model/animation/bone.hpp"
 #include <fsys/ifile.hpp>
 #include <udm.hpp>
 

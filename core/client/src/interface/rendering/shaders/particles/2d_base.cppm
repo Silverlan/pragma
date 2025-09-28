@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include "pragma/entities/environment/env_camera.h"
 #include "cmaterial.h"
 
 export module pragma.client:rendering.shaders.particle_2d_base;

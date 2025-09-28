@@ -3,12 +3,10 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/util/ammo_type.h"
 
 module pragma.shared;
 
-import :game.bullet_info;
+import :game.ammo_type;
 
 AmmoType::AmmoType(UInt32 _id, const std::string &_name, DAMAGETYPE _dmgType, Int32 _dmg, Float _force) : id(_id), name(_name), damageType(_dmgType), damage(_dmg), force(_force) {}
 

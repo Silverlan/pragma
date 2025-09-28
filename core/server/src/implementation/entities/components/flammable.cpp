@@ -4,16 +4,7 @@
 module;
 
 #include "stdafx_server.h"
-#include <pragma/networking/enums.hpp>
 #include "sharedutils/netpacket.hpp"
-#include "pragma/game/damagetype.h"
-#include "pragma/networking/recipient_filter.hpp"
-#include <pragma/entities/components/base_transform_component.hpp>
-#include <pragma/entities/components/damageable_component.hpp>
-#include <pragma/entities/entity_component_system_t.hpp>
-#include <pragma/lua/libraries/ltimer.h>
-#include <pragma/lua/converters/game_type_converters_t.hpp>
-#include <pragma/networking/nwm_util.h>
 
 module pragma.server.entities.components.flammable;
 

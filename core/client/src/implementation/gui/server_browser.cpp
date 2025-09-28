@@ -7,12 +7,9 @@ module;
 #include "wms_shared.h"
 #include "wms_request_filter.h"
 #include "wms_message.h"
-#include "pragma/networking/wv_message.h"
 #include <sharedutils/util_library.hpp>
 #include "wmserverdata.h"
-#include <pragma/networking/game_server_data.hpp>
 #include <networkmanager/udp_handler/udp_message_dispatcher.h>
-#include <pragma/networking/master_server_query_dispatcher.hpp>
 
 module pragma.client;
 

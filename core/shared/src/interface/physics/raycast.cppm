@@ -3,34 +3,23 @@
 
 module;
 
+#include "pragma/networkdefinitions.h"
 #include <mathutil/glmutil.h>
 #include <mathutil/transform.hpp>
-#include "pragma/entities/baseentity_handle.h"
-#include "pragma/physics/physobj.h"
 #include <sharedutils/util_weak_handle.hpp>
 #include <memory>
+#include "material.h"
 
 export module pragma.shared:physics.raycast;
 
+export import :entities.base_entity_handle;
+export import :model.model_mesh;
+export import :physics.collision_object;
+export import :physics.object_handle;
+export import :physics.raycast_filter;
+
 export {
-	enum class RayCastFlags : uint32_t {
-		None = 0u,
-		ReportHitPosition = 1u,
-		ReportHitNormal = ReportHitPosition << 1u,
-		ReportHitUV = ReportHitNormal << 1u,
-		ReportAllResults = ReportHitUV << 1u,
-		ReportAnyResult = ReportAllResults << 1u,
-		ReportBackFaceHits = ReportAnyResult << 1u,
-		Precise = ReportBackFaceHits << 1u,
-
-		IgnoreDynamic = Precise << 1u,
-		IgnoreStatic = IgnoreDynamic << 1u,
-		InvertFilter = IgnoreStatic << 1u,
-
-		Default = ReportHitPosition | ReportHitNormal | ReportHitUV
-	};
-	REGISTER_BASIC_BITWISE_OPERATORS(RayCastFlags);
-
+	class BaseEntity;
 	class DLLNETWORK TraceData {
 	public:
 		TraceData();

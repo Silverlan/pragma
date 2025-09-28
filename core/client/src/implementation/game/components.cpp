@@ -4,12 +4,7 @@
 module;
 
 #include "stdafx_client.h"
-#include <pragma/lua/lentity_component_lua.hpp>
-#include <pragma/game/game_entity_component.hpp>
-#include <pragma/entities/entity_component_manager.hpp>
-#include <pragma/entities/entity_component_system_t.hpp>
 // --template-include-location
-#include <pragma/lua/converters/game_type_converters_t.hpp>
 
 module pragma.client;
 

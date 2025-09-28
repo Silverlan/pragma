@@ -6,16 +6,6 @@ module;
 #include "stdafx_client.h"
 #include "luasystem.h"
 #include "cmaterial.h"
-#include "pragma/lua/policies/gui_element_policy.hpp"
-#include <pragma/lua/classes/ldef_vector.h>
-#include <pragma/lua/classes/lproperty.hpp>
-#include <pragma/lua/policies/default_parameter_policy.hpp>
-#include <pragma/lua/policies/shared_from_this_policy.hpp>
-#include <pragma/lua/converters/pair_converter_t.hpp>
-#include <pragma/lua/converters/string_view_converter_t.hpp>
-#include <pragma/lua/converters/vector_converter_t.hpp>
-#include <pragma/lua/converters/optional_converter_t.hpp>
-#include <pragma/lua/lua_call.hpp>
 #include <scripting/lua/lua.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_command_buffer.hpp>
@@ -28,8 +18,6 @@ module;
 #include <util_formatted_text.hpp>
 #include <prosper_window.hpp>
 #include <luabind/copy_policy.hpp>
-#include <pragma/debug/intel_vtune.hpp>
-#include "pragma/lua/converters/property_converter_t.hpp"
 
 module pragma.client;
 

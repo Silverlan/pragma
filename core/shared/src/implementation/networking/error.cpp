@@ -3,9 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/networking/error.hpp"
-#include "pragma/networking/enums.hpp"
 
 module pragma.shared;
 

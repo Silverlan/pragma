@@ -5,11 +5,6 @@ module;
 
 #include "stdafx_server.h"
 #include "sharedutils/netpacket.hpp"
-#include "pragma/networking/recipient_filter.hpp"
-#include <pragma/networking/nwm_util.h>
-#include <pragma/networking/enums.hpp>
-#include <pragma/entities/baseentity_events.hpp>
-#include <pragma/entities/entity_component_system_t.hpp>
 
 module pragma.server.entities.components.audio.dsp.base;
 

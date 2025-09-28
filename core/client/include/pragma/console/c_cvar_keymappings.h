@@ -3,9 +3,6 @@
 
 #ifndef __C_CVAR_KEYMAPPINGS_H__
 #define __C_CVAR_KEYMAPPINGS_H__
-#include "pragma/c_enginedefinitions.h"
-#include "pragma/networkdefinitions.h"
-#include <pragma/console/convars.h>
 
 DLLCLIENT void CMD_bind_keys(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
 REGISTER_CONCOMMAND_CL(bind_keys, CMD_bind_keys, ConVarFlags::None, "Prints a list of all bindable keys to the console.");

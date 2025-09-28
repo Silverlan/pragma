@@ -3,8 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/util/datafile.h"
 #include <sharedutils/util_string.h>
 
 module pragma.shared;

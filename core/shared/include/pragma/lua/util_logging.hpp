@@ -4,9 +4,6 @@
 #ifndef __LUA_UTIL_LOGGING_HPP__
 #define __LUA_UTIL_LOGGING_HPP__
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/logging.hpp"
-#include "pragma/lua/libraries/lprint.h"
 #include <fmt/core.h>
 
 namespace Lua::logging {

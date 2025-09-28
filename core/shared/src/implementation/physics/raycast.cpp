@@ -3,24 +3,7 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include <pragma/game/game.h>
-#include "pragma/physics/raytraces.h"
-#include "pragma/physics/collisiontypes.h"
 #include <mathutil/color.h>
-#include "pragma/physics/physobj.h"
-#include "pragma/entities/baseentity.h"
-#include "pragma/physics/environment.hpp"
-#include "pragma/physics/collision_object.hpp"
-#include "pragma/physics/shape.hpp"
-#include "pragma/physics/collisionmasks.h"
-#include "pragma/physics/raycast_filter.hpp"
-#include "pragma/model/modelmesh.h"
-#include "pragma/entities/components/base_transform_component.hpp"
-#include "pragma/entities/components/base_physics_component.hpp"
-#include "pragma/entities/components/base_model_component.hpp"
-#include "pragma/model/model.h"
-#include <pragma/math/intersection.h>
 
 module pragma.shared;
 

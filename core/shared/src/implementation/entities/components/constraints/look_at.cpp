@@ -3,13 +3,8 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/components/constraints/constraint_look_at_component.hpp"
-#include "pragma/entities/components/constraints/constraint_component.hpp"
-#include "pragma/entities/entity_component_manager_t.hpp"
-#include "pragma/logging.hpp"
 
-export module pragma.shared;
+module pragma.shared;
 
 import :entities.components.constraints.look_at;
 
@@ -54,7 +49,6 @@ void ConstraintLookAtComponent::OnEntityComponentAdded(BaseEntityComponent &comp
 void ConstraintLookAtComponent::SetTrackAxis(TrackAxis axis) { m_trackAxis = axis; }
 ConstraintLookAtComponent::TrackAxis ConstraintLookAtComponent::GetTrackAxis() const { return m_trackAxis; }
 
-#include "pragma/model/model.h"
 // TODO: Use Model::GetTwistAxisRotationOffset?
 static std::array<Quat, umath::to_integral(ConstraintLookAtComponent::TrackAxis::Count)> g_axisRotations {
   Model::GetTwistAxisRotationOffset(pragma::SignedAxis::X),    // x+

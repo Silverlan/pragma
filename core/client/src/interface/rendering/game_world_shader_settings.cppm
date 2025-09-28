@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/c_enginedefinitions.h"
-#include "pragma/clientdefinitions.h"
 #include <cinttypes>
 
 export module pragma.client:rendering.game_world_shader_settings;

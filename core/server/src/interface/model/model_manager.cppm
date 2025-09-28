@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/serverdefinitions.h"
-#include <pragma/model/modelmanager.h>
 
 export module pragma.server.model_manager;
 

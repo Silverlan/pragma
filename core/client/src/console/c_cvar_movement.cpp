@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/console/c_cvar_movement.h"
-#include <pragma/networking/enums.hpp>
 
 import pragma.client;
 

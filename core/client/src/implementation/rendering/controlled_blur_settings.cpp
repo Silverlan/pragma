@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/console/c_cvar.h"
 #include <shader/prosper_shader_blur.hpp>
 
 module pragma.client;

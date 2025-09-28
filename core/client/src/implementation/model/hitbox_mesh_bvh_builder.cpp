@@ -4,13 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/logging.hpp"
-#include <pragma/model/animation/skeleton.hpp>
-#include <pragma/model/animation/bone.hpp>
-#include <pragma/entities/components/bvh_data.hpp>
-#include <pragma/entities/components/util_bvh.hpp>
-#include <pragma/model/model.h>
-#include <pragma/model/modelmesh.h>
 
 module pragma.client;
 

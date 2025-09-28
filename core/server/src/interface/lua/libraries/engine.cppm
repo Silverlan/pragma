@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/serverdefinitions.h"
-#include <pragma/lua/ldefinitions.h>
 #include "material.h"
 
 export module pragma.server.scripting.lua.libraries.engine;

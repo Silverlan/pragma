@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
 #include <ofbx.h>
 #include <sharedutils/util_path.hpp>
 #include <mathutil/vertex.hpp>

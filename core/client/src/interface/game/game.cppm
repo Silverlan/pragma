@@ -3,21 +3,13 @@
 
 module;
 
-#include "pragma/c_enginedefinitions.h"
-#include "pragma/clientdefinitions.h"
 #include "alsound_effect.hpp"
-#include "pragma/entities/baseworld.h"
-#include "pragma/entities/environment/lights/env_light_directional.h"
 #include "alsound_effect.hpp"
 #include <cmaterial.h>
 #include "util_image_buffer.hpp"
 #include "image/prosper_image.hpp"
 #include "prosper_command_buffer.hpp"
-#include "pragma/entities/baseentity.h"
-#include <pragma/game/game.h>
-#include <pragma/input/inkeys.h>
 #include <mathutil/color.h>
-#include <pragma/util/bulletinfo.h>
 #include "prosper_descriptor_set_group.hpp"
 #include <queue>
 #include <sharedutils/property/util_property.hpp>

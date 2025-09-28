@@ -3,11 +3,7 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
 #include "prosper_command_buffer.hpp"
-#include "pragma/model/modelmesh.h"
-#include "pragma/entities/environment/lights/env_light_directional.h"
-#include <pragma/entities/components/base_entity_component.hpp>
 #include <mathutil/boundingvolume.h>
 #include <mathutil/plane.hpp>
 

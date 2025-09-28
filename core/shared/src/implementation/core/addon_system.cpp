@@ -3,10 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/engine.h"
-#include "pragma/addonsystem/addonsystem.h"
-#include "pragma/logging.hpp"
 #include <fsys/filesystem.h>
 #include <sharedutils/util_file.h>
 #include <fsys/directory_watcher.h>
@@ -14,7 +10,7 @@ module;
 #include <sharedutils/util_link.hpp>
 #endif
 
-export module pragma.shared;
+module pragma.shared;
 
 import :core.addon_system;
 

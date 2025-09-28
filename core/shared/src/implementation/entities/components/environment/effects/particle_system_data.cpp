@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/entities/environment/effects/particlesystemdata.h"
-#include "pragma/asset/util_asset.hpp"
 #include <fsys/filesystem.h>
 #include <sharedutils/util_string.h>
 #include <sharedutils/util_file.h>

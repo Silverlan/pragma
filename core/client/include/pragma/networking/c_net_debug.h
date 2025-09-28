@@ -3,7 +3,6 @@
 
 #ifndef __C_NET_DEBUG_H__
 #define __C_NET_DEBUG_H__
-#include "pragma/networking/c_net_definitions.h"
 
 DECLARE_NETMESSAGE_CL(debug_drawpoint);
 DECLARE_NETMESSAGE_CL(debug_drawline);

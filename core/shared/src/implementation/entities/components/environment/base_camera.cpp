@@ -1,21 +1,19 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "stdafx_shared.h"
+module;
+
 #include <mathutil/umath.h>
 #include <glm/gtx/matrix_decompose.hpp>
-#include "pragma/entities/environment/env_camera.h"
-#include "pragma/entities/components/base_transform_component.hpp"
-#include "pragma/entities/components/base_field_angle_component.hpp"
-#include "pragma/entities/components/component_member_flags.hpp"
-#include "pragma/entities/entity_component_manager_t.hpp"
-#include "pragma/util/render_tile.hpp"
-#include "pragma/math/e_frustum.h"
 #include <algorithm>
 #include <mathutil/umath_frustum.hpp>
 #include <mathutil/umat.h>
 #include <sharedutils/datastream.h>
 #include <udm.hpp>
+
+module pragma.shared;
+
+import :entities.components.environment.base_camera;
 
 #define EPSILON 0.001f
 

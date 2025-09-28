@@ -3,22 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/engine.h"
-#include "pragma/lua/lua_doc.hpp"
-#include "pragma/lua/libraries/lutil.hpp"
-#include "pragma/console/conout.h"
-#include "pragma/game/savegame.hpp"
-#include "pragma/asset/util_asset.hpp"
-#include "pragma/logging_wrapper.hpp"
-#include "pragma/util/util_game.hpp"
-#include <pragma/console/convars.h>
-#include <pragma/lua/util.hpp>
-#include <pragma/lua/libraries/lutil.hpp>
-#include <pragma/physics/environment.hpp>
-#include <pragma/networking/networking_modules.hpp>
-#include <pragma/util/util_game.hpp>
-#include <pragma/debug/intel_vtune.hpp>
 #include <scripting/lua/lua.hpp>
 #include <sharedutils/util_file.h>
 #include <sharedutils/util_path.hpp>
@@ -476,7 +460,6 @@ void Engine::RegisterConsoleCommands()
 	  ConVarFlags::None, "Starts the Lua debugger server for the serverside lua state.");
 }
 
-#include "pragma/util/curl_query_handler.hpp"
 
 class ModuleInstallJob : public util::ParallelWorker<bool> {
   public:

@@ -3,10 +3,8 @@
 
 module;
 
-#include "pragma/networkdefinitions.h"
-#include <pragma/lua/luaapi.h>
 
-export module pragma.client:scripting.lua.base_lua_obj;
+export module pragma.shared:scripting.lua.base_lua_obj;
 
 export {
 	class DLLNETWORK BaseLuaObj {

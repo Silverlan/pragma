@@ -4,10 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/lua/base_lua_handle_method.hpp"
-#include <pragma/lua/converters/game_type_converters_t.hpp>
-#include <pragma/lua/sh_lua_component.hpp>
-#include <pragma/lua/handle_holder.hpp>
 
 module pragma.client;
 

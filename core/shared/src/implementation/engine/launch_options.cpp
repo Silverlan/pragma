@@ -3,12 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/launchparameters.h"
-#include "pragma/engine.h"
-#include "pragma/console/conout.h"
-#include "pragma/logging_wrapper.hpp"
-#include "pragma/logging.hpp"
 #include <material_manager2.hpp>
 
 module pragma.shared;

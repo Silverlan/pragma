@@ -3,19 +3,10 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/lua/libraries/lintersect.h"
 #include <mathutil/glmutil.h>
-#include "pragma/lua/ldefinitions.h"
-#include "pragma/lua/classes/ldef_vector.h"
-#include "pragma/lua/classes/ldef_quaternion.h"
-#include "pragma/lua/classes/ldef_plane.h"
-#include "pragma/lua/classes/ldef_model.h"
 #include "luasystem.h"
-#include <pragma/model/modelmesh.h>
-#include <pragma/math/intersection.h>
 
-module pragma.client;
+module pragma.shared;
 
 import :scripting.lua.libraries.intersect;
 

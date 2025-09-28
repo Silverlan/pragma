@@ -3,15 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/level/mapgeometry.h"
-#include "pragma/model/modelmesh.h"
-#include "pragma/game/game_resources.hpp"
-#include "pragma/entities/components/base_transform_component.hpp"
-#include "pragma/entities/components/base_physics_component.hpp"
-#include "pragma/entities/components/base_model_component.hpp"
-#include "pragma/model/model.h"
-#include "pragma/util/util_bsp_tree.hpp"
 
 module pragma.shared;
 

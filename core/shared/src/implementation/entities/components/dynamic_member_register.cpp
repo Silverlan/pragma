@@ -3,8 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/components/base_entity_component_member_register.hpp"
 
 module pragma.shared;
 

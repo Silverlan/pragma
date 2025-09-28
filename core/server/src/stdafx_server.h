@@ -19,7 +19,6 @@
 #include <memory.h>
 #include <stdarg.h>
 #include <stddef.h>
-#include <pragma/lua/luaapi.h>
 #include <fstream>
 #include <cinttypes>
 #include <queue>
@@ -30,22 +29,12 @@
 #include <mathutil/uquat.h>
 #include <mathutil/uvec.h>
 #ifdef _WIN32
-#include <pragma/engine.h>
-#include <pragma/networkstate/networkstate.h>
 #endif
 #ifdef _WIN32
-#include <pragma/game/game.h>
 #endif
-#include <pragma/entities/baseentity.h>
-#include <pragma/physics/physobj.h>
-#include <pragma/lua/luaapi.h>
-#include <pragma/audio/alsound.h>
-#include <pragma/console/convars.h>
 #include <sharedutils/util.h>
 #include <sharedutils/util_string.h>
 #include <mathutil/umath.h>
-#include <pragma/entities/entity_component_manager.hpp>
-#include <pragma/entities/entity_component_system.hpp>
 #include <algorithm>
 #include <vector>
 #include <string>

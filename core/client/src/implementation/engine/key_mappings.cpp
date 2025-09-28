@@ -4,8 +4,6 @@
 module;
 
 #include "stdafx_cengine.h"
-#include "pragma/input/inputhelper.h"
-#include "pragma/console/c_cvar_keymappings.h"
 
 module pragma.client;
 

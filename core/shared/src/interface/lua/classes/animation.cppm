@@ -4,8 +4,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/model/animation/animation.hpp"
-#include <pragma/lua/luaapi.h>
 
 export module pragma.shared:scripting.lua.classes.animation;
 

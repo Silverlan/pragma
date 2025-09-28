@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include "pragma/entities/point/constraints/point_constraint_fixed.h"
 
 export module pragma.client:entities.components.point_constraint_fixed;
 

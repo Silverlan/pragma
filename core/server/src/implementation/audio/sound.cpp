@@ -4,12 +4,6 @@
 module;
 
 #include "stdafx_server.h"
-#include <pragma/networking/enums.hpp>
-#include <pragma/engine.h>
-#include <pragma/networking/nwm_util.h>
-#include <pragma/lua/luafunction_call.h>
-#include <pragma/lua/luaapi.h>
-#include <pragma/entities/components/base_transform_component.hpp>
 
 module pragma.server.audio.sound;
 

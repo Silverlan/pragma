@@ -3,24 +3,9 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/components/base_actor_component.hpp"
-#include "pragma/physics/shape.hpp"
-#include "pragma/physics/collisionmasks.h"
-#include "pragma/physics/environment.hpp"
-#include "pragma/entities/components/base_transform_component.hpp"
-#include "pragma/entities/components/base_physics_component.hpp"
-#include "pragma/entities/components/base_model_component.hpp"
-#include "pragma/entities/components/base_animated_component.hpp"
-#include "pragma/entities/components/base_render_component.hpp"
-#include "pragma/entities/components/base_observable_component.hpp"
-#include "pragma/entities/components/velocity_component.hpp"
-#include "pragma/entities/entity_component_system_t.hpp"
-#include "pragma/model/model.h"
-#include <pragma/physics/movetypes.h>
 #include <udm.hpp>
 
-export module pragma.shared;
+module pragma.shared;
 
 import :entities.components.base_actor;
 

@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_server.h"
-#include "pragma/lua/s_lua_script_watcher.h"
-#include "pragma/networking/resourcemanager.h"
 
 import pragma.server.game;
 import pragma.server.server_state;

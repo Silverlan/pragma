@@ -2,10 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "pragma/networkdefinitions.h"
-#include "pragma/lua/types/udm.hpp"
-#include <pragma/lua/luaapi.h>
-#include <pragma/console/convars.h>
 
 export module pragma.shared:scripting.lua.classes.convar;
 

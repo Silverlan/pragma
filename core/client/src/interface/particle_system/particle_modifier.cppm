@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include "pragma/entities/environment/effects/env_particle_system.h"
 #include <unordered_map>
 #include <cmaterial.h>
 

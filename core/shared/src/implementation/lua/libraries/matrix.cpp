@@ -3,23 +3,15 @@
 
 module;
 
-#include "stdafx_shared.h"
 #include <mathutil/umath.h>
 #include <glm/gtx/matrix_decompose.hpp>
 #include <glm/gtx/quaternion.hpp>
-#include "pragma/lua/libraries/lmatrix.h"
-#include <pragma/engine.h>
 #include "luasystem.h"
 #include <mathutil/umat.h>
-#include "pragma/lua/classes/ldef_vector.h"
-#include <pragma/math/vector/wvvector3.h>
 #include <mathutil/glmutil.h>
-#include <pragma/math/angle/wvquaternion.h>
-#include "pragma/lua/classes/ldef_mat4.h"
-#include "pragma/lua/classes/lvector.h"
 #include <Eigen/Eigenvalues>
 
-module pragma.client;
+module pragma.shared;
 
 import :scripting.lua.libraries.matrix;
 

@@ -3,42 +3,12 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/lua/libraries/lents.h"
-#include <pragma/engine.h>
-#include <pragma/game/game.h>
-#include "pragma/entities/baseentity.h"
-#include "pragma/entities/baseworld.h"
 #include "luasystem.h"
-#include "pragma/lua/classes/ldef_vector.h"
-#include "pragma/lua/classes/ldef_angle.h"
-#include "pragma/lua/classes/lphysics.h"
-#include "pragma/lua/libraries/lutil.hpp"
-#include "pragma/physics/environment.hpp"
-#include "pragma/lua/custom_constructor.hpp"
-#include "pragma/entities/entity_iterator.hpp"
-#include "pragma/entities/entity_component_manager_t.hpp"
-#include "pragma/entities/components/base_player_component.hpp"
-#include "pragma/entities/components/base_ai_component.hpp"
-#include "pragma/entities/components/base_vehicle_component.hpp"
-#include "pragma/entities/components/base_weapon_component.hpp"
-#include "pragma/entities/components/base_transform_component.hpp"
-#include "pragma/entities/components/base_physics_component.hpp"
-#include "pragma/entities/components/component_member_flags.hpp"
-#include "pragma/entities/attribute_specialization_type.hpp"
-#include "pragma/util/global_string_table.hpp"
-#include "pragma/lua/policies/default_parameter_policy.hpp"
-#include "pragma/lua/converters/optional_converter_t.hpp"
-#include "pragma/lua/lentity_type.hpp"
-#include "pragma/lua/lua_entity_iterator.hpp"
-#include "pragma/lua/sh_lua_component.hpp"
-#include "pragma/lua/policies/core_policies.hpp"
-#include "pragma/lua/types/udm.hpp"
 #include <scripting/lua/lua.hpp>
 #include <udm.hpp>
 #include <sharedutils/magic_enum.hpp>
 
-export module pragma.client;
+module pragma.shared;
 
 import :scripting.lua.libraries.ents;
 

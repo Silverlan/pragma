@@ -4,10 +4,7 @@
 module;
 
 #include "stdafx_server.h"
-#include "pragma/entities/components/base_debug_component.hpp"
-#include <pragma/networking/enums.hpp>
 #include <sharedutils/netpacket.hpp>
-#include "pragma/networking/recipient_filter.hpp"
 
 module pragma.server.entities.components.debug;
 

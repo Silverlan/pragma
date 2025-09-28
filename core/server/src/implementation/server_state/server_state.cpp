@@ -4,29 +4,12 @@
 module;
 
 #include "stdafx_server.h"
-#include "pragma/networking/netmessages.h"
-#include "pragma/networking/resourcemanager.h"
 #include "servermanager/interface/sv_nwm_manager.hpp"
-#include "pragma/networking/iserver_client.hpp"
-#include "pragma/console/convarhandle.h"
 #include "wmserverdata.h"
-#include "pragma/networking/iserver.hpp"
-#include <pragma/audio/soundscript.h>
 #include "luasystem.h"
-#include "pragma/networking/recipient_filter.hpp"
 #include <material_manager2.hpp>
-#include <pragma/game/gamemode/gamemodemanager.h>
-#include <pragma/networking/enums.hpp>
-#include <pragma/networking/nwm_util.h>
-#include <pragma/console/convars.h>
-#include <pragma/asset/util_asset.hpp>
-#include "pragma/networking/networking_modules.hpp"
-#include <pragma/networking/game_server_data.hpp>
-#include <pragma/networking/error.hpp>
-#include <pragma/engine_version.h>
 #include <sharedutils/util_file.h>
 #include <sharedutils/util_library.hpp>
-#include <pragma/logging.hpp>
 
 module pragma.server.server_state;
 

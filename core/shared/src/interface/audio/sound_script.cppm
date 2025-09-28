@@ -4,12 +4,16 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/audio/alsound.h"
-#include "pragma/audio/alsound_base.hpp"
 #include <memory>
 
 export module pragma.shared:audio.sound_script;
 
+export import :audio.sound;
+export import :audio.sound_base;
+export import :audio.sound_script_events;
+export import :audio.sound_script_manager;
+
+export class NetworkState;
 export class DLLNETWORK ALSoundScript : virtual public ALSound, virtual public ALSoundBase {
   protected:
 	std::vector<SSEBase *> m_events;
@@ -91,11 +95,11 @@ export class DLLNETWORK ALSoundScript : virtual public ALSound, virtual public A
 	virtual float GetAirAbsorptionFactor() const override;
 	virtual void SetGainAuto(bool directHF, bool send, bool sendHF) override;
 	virtual std::tuple<bool, bool, bool> GetGainAuto() const override;
-	virtual void SetDirectFilter(const EffectParams &params) override;
-	virtual const EffectParams &GetDirectFilter() const override;
-	virtual bool AddEffect(const std::string &effectName, const EffectParams &params = {}) override;
+	virtual void SetDirectFilter(const SoundEffectParams &params) override;
+	virtual const SoundEffectParams &GetDirectFilter() const override;
+	virtual bool AddEffect(const std::string &effectName, const SoundEffectParams &params = {}) override;
 	virtual void RemoveEffect(const std::string &effectName) override;
-	virtual void SetEffectParameters(const std::string &effectName, const EffectParams &params = {}) override;
+	virtual void SetEffectParameters(const std::string &effectName, const SoundEffectParams &params = {}) override;
 	virtual std::pair<Vector3, Vector3> GetOrientation() const override;
 
 	virtual void SetTimeOffset(float sec) override;

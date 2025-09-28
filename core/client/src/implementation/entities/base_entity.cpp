@@ -5,31 +5,12 @@ module;
 
 #include "stdafx_client.h"
 #include "cmaterialmanager.h"
-#include <pragma/math/intersection.h>
-#include "pragma/entities/baseentity_luaobject.h"
-#include "pragma/entities/parentinfo.h"
 #include <materialmanager.h>
-#include <pragma/logging.hpp>
-#include <pragma/lua/luacallback.h>
-#include <pragma/networking/nwm_util.h>
 #include "luasystem.h"
-#include <pragma/lua/luafunction_call.h>
-#include "pragma/console/c_cvar_global_functions.h"
-#include <pragma/util/bulletinfo.h>
-#include <pragma/physics/raytraces.h>
-#include <pragma/physics/collisionmasks.h>
-#include <pragma/audio/alsound_type.h>
-#include <pragma/physics/environment.hpp>
 #include <sharedutils/scope_guard.h>
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <buffers/prosper_uniform_resizable_buffer.hpp>
-#include <pragma/networking/enums.hpp>
-#include <pragma/entities/components/base_transform_component.hpp>
-#include <pragma/util/util_handled.hpp>
-#include <pragma/entities/components/base_physics_component.hpp>
-#include <pragma/entities/entity_component_system_t.hpp>
-#include <pragma/lua/converters/game_type_converters_t.hpp>
 
 #undef GetClassName
 

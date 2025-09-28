@@ -2,11 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/clientdefinitions.h"
-#include "pragma/console/c_cvar_global_functions.h"
 #include <texturemanager/texture.h>
 #include <texture_type.h>
-#include <pragma/game/game_resources.hpp>
 #include <sharedutils/magic_enum.hpp>
 #include <cmaterialmanager.h>
 #include <cmaterial_manager2.hpp>

@@ -3,11 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/physics/vehicle.hpp"
-#include "pragma/physics/environment.hpp"
-#include "pragma/physics/shape.hpp"
-#include "pragma/physics/base_t.hpp"
 
 module pragma.shared;
 

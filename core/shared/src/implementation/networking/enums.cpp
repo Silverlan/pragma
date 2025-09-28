@@ -3,8 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/networking/enums.hpp"
 #include <networkmanager/interface/nwm_manager.hpp>
 
 module pragma.shared;

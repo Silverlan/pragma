@@ -3,7 +3,6 @@
 
 export;
 
-#include "pragma/clientdefinitions.h"
 
 export module pragma.client:rendering.shaders.pp_light_cone;
 

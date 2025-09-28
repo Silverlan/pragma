@@ -4,8 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include <pragma/math/intersection.h>
-#include <pragma/model/model.h>
 #include <prosper_util.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>

@@ -4,12 +4,12 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/physics/base.hpp"
 #include <mathutil/transform.hpp>
-#include "pragma/util/util_typed_manager.hpp"
 #include <optional>
 
 export module pragma.shared:physics.vehicle;
+
+export import :physics.collision_object;
 
 export {
 	namespace pragma::physics {

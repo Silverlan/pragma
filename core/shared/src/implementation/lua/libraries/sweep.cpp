@@ -3,15 +3,10 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/lua/libraries/lsweep.h"
 #include <mathutil/glmutil.h>
-#include "pragma/lua/ldefinitions.h"
-#include "pragma/lua/classes/ldef_vector.h"
-#include <pragma/math/intersection.h>
 #include "luasystem.h"
 
-export module pragma.client;
+module pragma.shared;
 
 import :scripting.lua.libraries.sweep;
 

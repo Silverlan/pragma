@@ -4,9 +4,6 @@
 #ifndef __C_CVAR_GLOBAL_H__
 #define __C_CVAR_GLOBAL_H__
 
-#include <pragma/console/convars.h>
-#include "pragma/console/c_cvar_global_functions.h"
-#include <pragma/engine_info.hpp>
 
 REGISTER_CONCOMMAND_CL(cl_entities, CMD_entities_cl, ConVarFlags::None, "Prints a list of all current clientside entities in the world.");
 REGISTER_CONCOMMAND_CL(setpos, CMD_setpos, ConVarFlags::None, "Changes the position of the local player. Requires cheats to be enabled. Usage: setpos <x> <y> <z>");

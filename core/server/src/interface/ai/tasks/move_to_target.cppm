@@ -3,9 +3,6 @@
 
 module;
 
-#include "pragma/serverdefinitions.h"
-#include <pragma/model/animation/activities.h>
-#include "pragma/ai/ai_schedule.h"
 
 export module pragma.server.ai.tasks.move_to_target;
 

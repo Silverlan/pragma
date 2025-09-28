@@ -3,25 +3,12 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/networkstate/networkstate.h"
-#include <pragma/game/game.h>
-#include "pragma/entities/baseentity.h"
-#include "pragma/entities/baseworld.h"
-#include "pragma/model/brush/brushmesh.h"
-#include "pragma/model/side.h"
-#include "pragma/ai/navsystem.h"
 #include "Recast.h"
 #include "DetourNavMesh.h"
 #include "DetourNavMeshBuilder.h"
 #include "DetourNavMeshQuery.h"
 #include <fsys/filesystem.h>
 #include <mathutil/umath.h>
-#include "pragma/model/modelmesh.h"
-#include "pragma/physics/collisionmesh.h"
-#include "pragma/entities/components/base_model_component.hpp"
-#include "pragma/model/model.h"
-#include "pragma/util/util_game.hpp"
 #include <sharedutils/scope_guard.h>
 #include <udm.hpp>
 

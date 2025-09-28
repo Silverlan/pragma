@@ -3,13 +3,9 @@
 
 module;
 
-#include "pragma/networkdefinitions.h"
 #include <memory>
 #include <sharedutils/def_handle.h>
-#include "pragma/physics/base.hpp"
 #include <mathutil/transform.hpp>
-#include "pragma/lua/baseluaobj.h"
-#include "pragma/entities/baseentity_handle.h"
 #include <vector>
 
 export module pragma.shared:physics.constraint;

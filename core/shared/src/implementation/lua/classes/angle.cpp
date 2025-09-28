@@ -3,9 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/lua/classes/langle.h"
-#include "pragma/game/game_coordinate_system.hpp"
 #include <glm/gtx/euler_angles.hpp>
 
 module pragma.shared;

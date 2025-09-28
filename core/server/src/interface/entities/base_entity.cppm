@@ -3,12 +3,7 @@
 
 module;
 
-#include "pragma/serverdefinitions.h"
-#include "pragma/engine.h"
-#include "pragma/networking/enums.hpp"
-#include "pragma/networking/recipient_filter.hpp"
 #include <sharedutils/netpacket.hpp>
-#include <pragma/entities/baseentity.h>
 
 export module pragma.server.entities.base;
 

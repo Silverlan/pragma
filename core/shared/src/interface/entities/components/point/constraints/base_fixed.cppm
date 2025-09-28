@@ -4,9 +4,10 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/entities/point/constraints/point_constraint_base.h"
 
 export module pragma.shared:entities.components.point.constraints.base_fixed;
+
+export import :entities.components.point.constraints.base;
 
 export namespace pragma {
 	class DLLNETWORK BasePointConstraintFixedComponent : public BasePointConstraintComponent {

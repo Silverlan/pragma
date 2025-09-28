@@ -3,9 +3,6 @@
 
 module;
 
-#include "pragma/lua/luaapi.h"
-#include "pragma/lua/types/udm.hpp"
-#include "pragma/entities/components/base_sound_emitter_component.hpp"
 
 export module pragma.shared:scripting.lua.classes.entity_components;
 

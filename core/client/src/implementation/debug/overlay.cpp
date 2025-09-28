@@ -4,15 +4,10 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/math/icosphere.h"
-#include <pragma/debug/debug_render_info.hpp>
-#include <pragma/math/util_hermite.h>
-#include <pragma/math/e_frustum.h>
 #include <prosper_util.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
-#include <pragma/math/intersection.h>
 
 module pragma.client;
 

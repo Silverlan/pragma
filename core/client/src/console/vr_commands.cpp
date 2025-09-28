@@ -2,10 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/console/c_cvar.h"
 #include <sharedutils/scope_guard.h>
 #include <sharedutils/util_library.hpp>
-#include <pragma/input/inputhelper.h>
 #include <prosper_util.hpp>
 #include <prosper_command_buffer.hpp>
 

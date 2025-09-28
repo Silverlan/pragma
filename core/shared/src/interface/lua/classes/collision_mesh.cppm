@@ -3,10 +3,6 @@
 
 module;
 
-#include "pragma/networkdefinitions.h"
-#include <pragma/lua/luaapi.h>
-#include "pragma/model/model.h"
-#include "pragma/physics/collisionmesh.h"
 
 export module pragma.shared:scripting.lua.classes.collision_mesh;
 

@@ -8,21 +8,12 @@ module;
 #define TINYGLTF_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
-#include <pragma/model/model.h>
-#include <pragma/model/modelmesh.h>
-#include <pragma/model/animation/vertex_animation.hpp>
-#include <pragma/model/animation/animation.hpp>
 #include <sharedutils/alpha_mode.hpp>
 #include <sharedutils/util_path.hpp>
 #include <sharedutils/util_file.h>
 #include <mathutil/umath_lighting.hpp>
-#include <pragma/engine_info.hpp>
-#include <pragma/engine_version.h>
-#include <pragma/util/resource_watcher.h>
 #include <datasystem_color.h>
 #include <datasystem_vector.h>
-#include <pragma/model/animation/skeleton.hpp>
-#include <pragma/model/animation/bone.hpp>
 #include <tiny_gltf.h>
 
 module pragma.client;

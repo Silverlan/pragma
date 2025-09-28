@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/console/c_cvar_global_functions.h"
 #include "prosper_util.hpp"
 #include <util_image.hpp>
 #include <prosper_window.hpp>

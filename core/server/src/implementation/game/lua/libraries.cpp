@@ -4,21 +4,6 @@
 module;
 
 #include "stdafx_server.h"
-#include <pragma/engine.h>
-#include <pragma/lua/libraries/lutil.hpp>
-#include "pragma/lua/libraries/lfile.h"
-#include "pragma/model/model.h"
-#include "pragma/lua/libraries/lsound.h"
-#include <pragma/asset/util_asset.hpp>
-#include <pragma/debug/debug_render_info.hpp>
-#include <pragma/util/util_splash_damage_info.hpp>
-#include <pragma/lua/converters/game_type_converters_t.hpp>
-#include <pragma/lua/converters/vector_converter_t.hpp>
-#include <pragma/util/giblet_create_info.hpp>
-#include <pragma/util/bulletinfo.h>
-#include <pragma/lua/libraries/lasset.hpp>
-#include <pragma/lua/luaapi.h>
-#include <pragma/lua/classes/lalsound.h>
 #include <sharedutils/asset_loader/file_asset_manager.hpp>
 #include <luainterface.hpp>
 #include <fsys/ifile.hpp>

@@ -3,11 +3,7 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/physics/ik/util_ik.hpp"
 #include <mathutil/transform.hpp>
-#include "pragma/physics/environment.hpp"
-#include "pragma/buss_ik/Tree.h"
 
 module pragma.shared;
 

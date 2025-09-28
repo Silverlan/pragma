@@ -3,10 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/baseentity.h"
-#include "pragma/entities/entity_component_manager.hpp"
-#include "pragma/entities/entity_uuid_ref.hpp"
 #include <sharedutils/util_uri.hpp>
 #include <sharedutils/datastream.h>
 #include <udm.hpp>

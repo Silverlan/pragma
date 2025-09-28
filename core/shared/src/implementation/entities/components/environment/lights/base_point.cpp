@@ -1,11 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "stdafx_shared.h"
-#include "pragma/entities/environment/lights/env_light_point.h"
-#include "pragma/entities/components/base_radius_component.hpp"
+module;
+
 #include <sharedutils/util_pragma.hpp>
 #include <algorithm>
+
+module pragma.shared;
+
+import :entities.components.environment.lights.base_point;
 
 using namespace pragma;
 

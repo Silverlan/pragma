@@ -3,9 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/physics/raycallback/physraycallbackfilter_luafunction.hpp"
-#include "pragma/lua/luafunction_call.h"
 
 module pragma.shared;
 

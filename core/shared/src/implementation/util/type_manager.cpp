@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/util/util_typed_manager.hpp"
 
 module pragma.shared;
 

@@ -3,13 +3,9 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/lua/libraries/lmesh.h"
-#include "pragma/lua/classes/ldef_vector.h"
 #include <mathutil/umesh.h>
-#include <pragma/lua/luaapi.h>
 
-module pragma.client;
+module pragma.shared;
 
 import :scripting.lua.libraries.mesh;
 

@@ -3,15 +3,18 @@
 
 module;
 
-#include "pragma/entities/components/base_entity_component.hpp"
+#include "pragma/networkdefinitions.h"
+#include "mathutil/umath.h"
+
+export module pragma.shared:entities.components.environment.base_quake;
+
+export import :entities.components.base;
 
 #define SF_QUAKE_GLOBAL_SHAKE 1
 #define SF_QUAKE_IN_AIR 4
 #define SF_QUAKE_AFFECT_PHYSICS 8
 #define SF_QUAKE_DONT_SHAKE_VIEW 32
 #define SF_QUAKE_REMOVE_ON_COMPLETE 4096
-
-export module pragma.shared:entities.components.environment.base_quake;
 
 export namespace pragma {
 	class DLLNETWORK BaseEnvQuakeComponent : public BaseEntityComponent {

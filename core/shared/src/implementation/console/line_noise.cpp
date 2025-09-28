@@ -3,10 +3,7 @@
 
 module;
 
-#include "stdafx_shared.h"
 #ifdef __linux__
-#include "pragma/console/linenoise.hpp"
-#include "pragma/engine.h"
 #include <linenoise.h>
 #endif
 

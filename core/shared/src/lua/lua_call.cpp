@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2025 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "stdafx_shared.h"
-#include "pragma/lua/lua_call.hpp"
 #include <scripting/lua/lua.hpp>
 
 // import pragma.scripting.lua;

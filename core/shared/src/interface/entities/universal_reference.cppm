@@ -3,16 +3,14 @@
 
 module;
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/entities/baseentity_handle.h"
-#include "pragma/types.hpp"
-#include "pragma/entities/component_member_reference.hpp"
 #include <sharedutils/util.h>
 #include <variant>
 
 export module pragma.shared:entities.universal_reference;
 
 export {
+	class BaseEntity;
+	class Game;
 	namespace pragma {
 		using EntityIdentifier = std::variant<util::Uuid, std::string>;
 		struct DLLNETWORK EntityURef {

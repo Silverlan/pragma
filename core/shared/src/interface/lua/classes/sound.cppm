@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/networkdefinitions.h"
-#include <pragma/lua/luaapi.h>
 #include <mathutil/glmutil.h>
 
 export module pragma.shared:scripting.lua.classes.sound;

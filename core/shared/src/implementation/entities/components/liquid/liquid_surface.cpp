@@ -3,11 +3,8 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/components/liquid/base_liquid_surface_component.hpp"
-#include "pragma/entities/entity_component_manager_t.hpp"
 
-export module pragma.shared;
+module pragma.shared;
 
 import :entities.components.constraints.liquid_surface;
 

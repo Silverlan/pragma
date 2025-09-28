@@ -3,17 +3,9 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/model/modelmanager.h"
-#include "pragma/model/animation/flex_animation.hpp"
-#include <pragma/model/animation/vertex_animation.hpp>
-#include "pragma/file_formats/wad.h"
-#include "pragma/physics/physsoftbodyinfo.hpp"
 #include <sharedutils/util_ifile.hpp>
-#include "pragma/model/animation/skeleton.hpp"
-#include "pragma/model/animation/bone.hpp"
 
-export module pragma.shared;
+module pragma.shared;
 
 import :model.model_manager;
 

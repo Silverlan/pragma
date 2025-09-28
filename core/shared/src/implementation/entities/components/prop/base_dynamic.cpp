@@ -3,8 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/prop/prop_dynamic.hpp"
 
 module pragma.shared;
 

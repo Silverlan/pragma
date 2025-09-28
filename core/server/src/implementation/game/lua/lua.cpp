@@ -4,31 +4,6 @@
 module;
 
 #include "stdafx_server.h"
-#include "pragma/lua/libraries/lengine.h"
-#include "pragma/lua/libraries/lglobal.h"
-#include "pragma/lua/libraries/lray.h"
-#include "pragma/lua/libraries/lgame.h"
-#include "pragma/lua/libraries/lents.h"
-#include "pragma/lua/handle_holder.hpp"
-#include "pragma/ai/ai_behavior.h"
-#include "pragma/networking/resourcemanager.h"
-#include "pragma/networking/recipient_filter.hpp"
-#include "pragma/networking/iserver.hpp"
-#include "pragma/lua/classes/ldef_recipientfilter.h"
-#include "pragma/lua/s_lentity_components.hpp"
-#include "pragma/lua/sh_lua_component_t.hpp"
-#include <pragma/lua/lua_util_component.hpp>
-#include <pragma/lua/classes/lentity.h>
-#include <pragma/lua/lua_component_event.hpp>
-#include <pragma/lua/lentity_component_lua.hpp>
-#include <pragma/lua/sh_lua_component.hpp>
-#include <pragma/lua/libraries/lnet.hpp>
-#include <pragma/lua/converters/game_type_converters_t.hpp>
-#include <pragma/lua/converters/optional_converter_t.hpp>
-#include <pragma/lua/converters/vector_converter_t.hpp>
-#include <pragma/model/model.h>
-#include <pragma/networking/nwm_util.h>
-#include <pragma/util/util_game.hpp>
 #include <luainterface.hpp>
 #include <udm.hpp>
 

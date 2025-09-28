@@ -3,10 +3,7 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
 #include "buffers/prosper_buffer.hpp"
-#include <pragma/entities/baseworld.h>
-#include <pragma/util/util_bsp_tree.hpp>
 #include <unordered_map>
 
 export module pragma.client:entities.components.world;

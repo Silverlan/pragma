@@ -3,8 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/model/model.h"
 #include <stack>
 
 module pragma.shared;

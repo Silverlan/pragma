@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_server.h"
-#include "pragma/ai/ai_behavior_parameter.h"
-#include "pragma/ai/ai_behavior.h"
 
 using namespace pragma;
 

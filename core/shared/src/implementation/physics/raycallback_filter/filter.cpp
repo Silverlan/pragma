@@ -3,10 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/physics/raycallback/physraycallbackfilter.hpp"
-#include "pragma/physics/raytraces.h"
-#include "pragma/entities/components/base_physics_component.hpp"
 
 module pragma.shared;
 

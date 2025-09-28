@@ -4,10 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/clientdefinitions.h"
-#include "pragma/lua/lnetmessages.h"
-#include "pragma/lua/classes/ldef_netpacket.h"
-#include <pragma/networking/enums.hpp>
 #include <networkmanager/interface/nwm_manager.hpp>
 
 module pragma.client;

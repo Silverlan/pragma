@@ -3,10 +3,7 @@
 
 module;
 
-#include "pragma/networkdefinitions.h"
-#include <pragma/lua/luaapi.h>
 #include <mathutil/glmutil.h>
-#include <pragma/math/angle/wvangle.h>
 
 #define LUA_MATRIX_MEMBERS_DEC(type)                                                                                                                                                                                                                                                             \
 	namespace Mat##type                                                                                                                                                                                                                                                                          \
@@ -26,7 +23,7 @@ module;
 		DLLNETWORK void GetInverse(lua_State *l, const ::Mat##type &mat);                                                                                                                                                                                                                        \
 	}
 
-export module pragma.client:scripting.lua.libraries.matrix;
+export module pragma.shared:scripting.lua.libraries.matrix;
 
 export namespace Lua {
 	LUA_MATRIX_MEMBERS_DEC_INVERSE(2);

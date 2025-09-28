@@ -3,14 +3,9 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/baseflashlight.h"
-#include "pragma/entities/environment/lights/env_light_spot.h"
-#include "pragma/entities/components/base_radius_component.hpp"
-#include "pragma/entities/components/base_color_component.hpp"
 #include <mathutil/umath_lighting.hpp>
 
-export module pragma.shared;
+module pragma.shared;
 
 import :entities.components.base_flashlight;
 

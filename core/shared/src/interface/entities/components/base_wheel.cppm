@@ -4,11 +4,15 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/physics/vehicle.hpp"
+#include "sharedutils/util_weak_handle.hpp"
 
 export module pragma.shared:entities.components.base_wheel;
 
+export import :entities.components.base;
+export import :physics.vehicle;
+
 export namespace pragma {
+	class BaseVehicleComponent;
 	class DLLNETWORK BaseWheelComponent : public BaseEntityComponent {
 	  public:
 		virtual ~BaseWheelComponent() override;

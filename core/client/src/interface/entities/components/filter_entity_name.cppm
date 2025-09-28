@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include <pragma/entities/basefilterentity.h>
 
 export module pragma.client:entities.components.filter_entity_name;
 

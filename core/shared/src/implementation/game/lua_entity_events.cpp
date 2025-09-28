@@ -3,41 +3,8 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include <pragma/game/game.h>
-#include "pragma/entities/components/basetoggle.h"
-#include "pragma/lua/classes/ldef_vector.h"
-#include "pragma/lua/classes/ldef_quaternion.h"
-#include "pragma/lua/classes/ldef_entity.h"
-#include "pragma/lua/classes/ldef_damageinfo.h"
-#include "pragma/lua/classes/ldef_physobj.h"
-#include "pragma/lua/classes/lproperty.hpp"
-#include "pragma/lua/converters/game_type_converters_t.hpp"
-#include "pragma/entities/entity_component_event.hpp"
-#include "pragma/lua/classes/ldef_surface_material.h"
-#include "pragma/lua/classes/lanimation.h"
-#include "pragma/model/animation/play_animation_flags.hpp"
-#include "pragma/entities/components/logic_component.hpp"
-#include "pragma/entities/components/usable_component.hpp"
-#include "pragma/entities/components/base_io_component.hpp"
-#include "pragma/entities/components/base_color_component.hpp"
-#include "pragma/entities/components/base_animated_component.hpp"
-#include "pragma/entities/components/base_sound_emitter_component.hpp"
-#include "pragma/entities/components/base_model_component.hpp"
-#include "pragma/entities/components/base_actor_component.hpp"
-#include "pragma/entities/components/base_physics_component.hpp"
-#include "pragma/entities/components/base_character_component.hpp"
-#include "pragma/entities/trigger/base_trigger_touch.hpp"
-#include "pragma/entities/components/damageable_component.hpp"
-#include "pragma/entities/components/base_ownable_component.hpp"
-#include "pragma/entities/components/base_weapon_component.hpp"
-#include "pragma/entities/components/base_health_component.hpp"
-#include "pragma/entities/components/base_radius_component.hpp"
-#include "pragma/entities/components/base_attachment_component.hpp"
-#include "pragma/entities/components/submergible_component.hpp"
-#include "pragma/entities/components/liquid/base_liquid_surface_simulation_component.hpp"
 
-export module pragma.shared;
+module pragma.shared;
 
 import :game.game;
 

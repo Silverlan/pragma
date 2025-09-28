@@ -4,31 +4,8 @@
 module;
 
 #include "stdafx_server.h"
-#include "pragma/lua/classes/lentity.h"
-#include "pragma/lua/classes/lmodelmesh.h"
-#include "pragma/lua/classes/lshaderinfo.h"
-#include "pragma/lua/classes/lmaterial.h"
-#include "pragma/entities/environment/lights/env_light.h"
-#include <pragma/entities/environment/lights/env_light_spot.h>
-#include "pragma/entities/environment/lights/env_light_point.h"
-#include "pragma/entities/environment/lights/env_light_directional.h"
-#include "pragma/entities/environment/effects/env_particle_system.h"
-#include "pragma/lua/classes/lmodel.h"
-#include <pragma/game/damageinfo.h>
-#include "pragma/physics/collision_object.hpp"
-#include <pragma/lua/converters/vector_converter_t.hpp>
-#include <pragma/lua/converters/pair_converter_t.hpp>
-#include <pragma/lua/converters/game_type_converters_t.hpp>
-#include <pragma/lua/converters/optional_converter_t.hpp>
-#include <pragma/lua/converters/string_view_converter_t.hpp>
-#include <pragma/lua/converters/file_converter_t.hpp>
-#include <pragma/entities/components/liquid/base_liquid_component.hpp>
-#include <pragma/model/modelmesh.h>
 #include <luainterface.hpp>
 
-#include <pragma/entities/components/velocity_component.hpp>
-#include <pragma/entities/entity_iterator.hpp>
-#include <pragma/entities/entity_component_system_t.hpp>
 
 module pragma.server.game;
 

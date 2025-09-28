@@ -3,12 +3,9 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include <pragma/game/game.h>
-#include "pragma/lua/lnetmessages.h"
 #include <sharedutils/netpacket.hpp>
 
-export module pragma.shared;
+module pragma.shared;
 
 import :game.game;
 

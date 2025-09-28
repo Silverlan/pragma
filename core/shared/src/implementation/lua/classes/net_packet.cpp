@@ -3,15 +3,10 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/lua/classes/lnetpacket.h"
-#include <pragma/engine.h>
-#include "pragma/networking/nwm_util.h"
-#include "pragma/lua/classes/ldef_entity.h"
 #include "luasystem.h"
 #include <sharedutils/util_clock.hpp>
 
-export module pragma.shared;
+module pragma.shared;
 
 import :scripting.lua.classes.net_packet;
 

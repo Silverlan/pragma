@@ -7,7 +7,7 @@ module;
 #include <luabind/detail/object_rep.hpp>
 #include <luabind/function.hpp>
 
-export module pragma.client:scripting.lua.custom_constructor;
+export module pragma.shared:scripting.lua.custom_constructor;
 
 export namespace pragma::lua {
 	template<typename T>

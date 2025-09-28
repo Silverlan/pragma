@@ -4,12 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/entity_component_system_t.hpp"
-#include "pragma/entities/components/orientation_component.hpp"
-#include "pragma/entities/components/base_character_component.hpp"
-#include "pragma/entities/components/base_transform_component.hpp"
-#include "pragma/console/c_cvar.h"
-#include <pragma/physics/raytraces.h>
 
 module pragma.client;
 

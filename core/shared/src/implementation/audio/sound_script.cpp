@@ -3,16 +3,9 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/networkstate/networkstate.h"
-#include "pragma/audio/alsoundscript.h"
 #include <fsys/filesystem.h>
 #include "datasystem.h"
-#include "pragma/audio/soundscript.h"
-#include "pragma/lua/ldefinitions.h"
-#include <pragma/math/vector/wvvector3.h>
 #include "luasystem.h"
-#include "pragma/audio/alsound_type.h"
 
 module pragma.shared;
 

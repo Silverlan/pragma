@@ -3,8 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/math/util_engine_math.hpp"
 
 module pragma.shared;
 

@@ -3,8 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/lua/classes/lerrorcode.h"
 #include "luasystem.h"
 
 module pragma.shared;

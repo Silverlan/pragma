@@ -4,18 +4,10 @@
 module;
 
 #include "stdafx_client.h"
-#include <pragma/entities/baseentity.h>
-#include <pragma/entities/baseworld.h>
 #include "Recast.h"
 #include "DetourNavMesh.h"
 #include "DetourNavMeshBuilder.h"
 #include "DetourNavMeshQuery.h"
-#include "pragma/console/c_cvar.h"
-#include <pragma/console/convars.h>
-#include <pragma/physics/raytraces.h>
-#include <pragma/entities/components/base_player_component.hpp>
-#include <pragma/entities/components/base_character_component.hpp>
-#include <pragma/entities/components/base_transform_component.hpp>
 
 module pragma.client;
 

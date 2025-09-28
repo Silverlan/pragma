@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include <pragma/lua/classes/ldef_vector.h>
 
 module pragma.client;
 

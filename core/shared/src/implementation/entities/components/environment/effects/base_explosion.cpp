@@ -3,15 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/environment/effects/env_explosion.h"
-#include "pragma/entities/entity_iterator.hpp"
-#include "pragma/entities/components/base_transform_component.hpp"
-#include "pragma/entities/components/damageable_component.hpp"
-#include "pragma/entities/components/base_physics_component.hpp"
-#include "pragma/entities/components/base_io_component.hpp"
-#include "pragma/entities/entity_component_system_t.hpp"
-#include <pragma/math/intersection.h>
 #include <algorithm>
 
 module pragma.shared;

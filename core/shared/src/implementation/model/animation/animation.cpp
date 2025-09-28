@@ -1,16 +1,10 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "stdafx_shared.h"
-#include "pragma/model/animation/animation.hpp"
-#include "pragma/model/animation/activities.h"
-#include "pragma/logging.hpp"
+module;
+
 #include <udm.hpp>
 #include <mathutil/umath.h>
-#include "pragma/model/animation/skeleton.hpp"
-#include "pragma/model/model.h"
-#include "pragma/model/animation/bone.hpp"
-#include "pragma/entities/components/panima_component.hpp"
 //#include <utility>
 
 module pragma.shared;

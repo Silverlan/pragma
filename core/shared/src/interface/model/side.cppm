@@ -6,7 +6,6 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <vector>
 #include <mathutil/glmutil.h>
-#include <pragma/console/conout.h>
 #include "material.h"
 
 export module pragma.shared:model.side;

@@ -3,8 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/baseplayer.hpp"
 
 module pragma.shared;
 

@@ -4,8 +4,6 @@
 #ifndef __LUA_ALIAS_CONVERTER_HPP__
 #define __LUA_ALIAS_CONVERTER_HPP__
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/lua/core.hpp"
 #include <luabind/object.hpp>
 
 namespace luabind {

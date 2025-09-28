@@ -4,13 +4,9 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/lua/classes/ldef_entity.h"
 #include "luasystem.h"
 #include <sharedutils/netpacket.hpp>
 #include <networkmanager/interface/nwm_manager.hpp>
-#include <pragma/networking/nwm_util.h>
-#include <pragma/networking/enums.hpp>
-#include <pragma/lua/converters/game_type_converters_t.hpp>
 
 module pragma.client;
 

@@ -4,12 +4,8 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/console/c_cvar.h"
-#include "pragma/console/c_cvar_global_functions.h"
 #include "texturemanager/texture_manager2.hpp"
 #include <shader/prosper_pipeline_create_info.hpp>
-#include <pragma/game/game_limits.h>
-#include <pragma/logging.hpp>
 #include <datasystem_color.h>
 #include <datasystem_vector.h>
 #include <prosper_util.hpp>
@@ -18,8 +14,6 @@ module;
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <prosper_command_buffer.hpp>
-#include <pragma/entities/entity_component_system_t.hpp>
-#include <pragma/asset/util_asset.hpp>
 #include <sharedutils/magic_enum.hpp>
 #include <sharedutils/util_path.hpp>
 #include <util_image.hpp>

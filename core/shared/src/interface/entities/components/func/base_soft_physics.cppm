@@ -3,10 +3,12 @@
 
 module;
 
-#include "pragma/entities/components/base_entity_component.hpp"
-#include "pragma/physics/physsoftbodyinfo.hpp"
+#include "pragma/networkdefinitions.h"
 
 export module pragma.shared:entities.components.func.base_soft_physics;
+
+export import :entities.components.base;
+export import :physics.soft_body_info;
 
 export namespace pragma {
 	class DLLNETWORK BaseFuncSoftPhysicsComponent : public BaseEntityComponent {

@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_server.h"
-#include <pragma/lua/converters/game_type_converters_t.hpp>
 
 module pragma.server.entities.components.generic;
 

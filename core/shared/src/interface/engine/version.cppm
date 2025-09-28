@@ -3,11 +3,11 @@
 
 module;
 
-#include "pragma/definitions.h"
+#include "pragma/networkdefinitions.h"
 #include <sharedutils/utildefinitions.h>
 #include <string>
 
-export module pragma.shared:version;
+export module pragma.shared:engine.version;
 
 export {
 	constexpr uint32_t ENGINE_VERSION_MAJOR = 1;

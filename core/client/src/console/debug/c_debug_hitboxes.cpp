@@ -2,13 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/entities/components/base_player_component.hpp"
-#include "pragma/console/c_cvar.h"
-#include "pragma/console/c_cvar_global_functions.h"
-#include <pragma/model/model.h>
-#include <pragma/console/sh_cmd.h>
-#include <pragma/entities/entity_iterator.hpp>
-#include <pragma/entities/entity_component_system_t.hpp>
 
 import pragma.client;
 

@@ -3,15 +3,10 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/components/base_render_component.hpp"
-#include "pragma/entities/components/render_component_flags.hpp"
-#include "pragma/entities/entity_component_manager_t.hpp"
-#include "pragma/entities/baseentity_events.hpp"
 #include <sharedutils/datastream.h>
 #include <udm.hpp>
 
-export module pragma.shared;
+module pragma.shared;
 
 import :entities.components.base_render;
 

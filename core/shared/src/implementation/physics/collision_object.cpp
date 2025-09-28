@@ -3,14 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/physics/environment.hpp"
-#include "pragma/physics/collision_object.hpp"
-#include "pragma/physics/shape.hpp"
-#include "pragma/physics/collisionmasks.h"
-#include "pragma/model/modelmesh.h"
-#include "pragma/lua/converters/game_type_converters_t.hpp"
-#include "pragma/physics/base_t.hpp"
 
 module pragma.shared;
 

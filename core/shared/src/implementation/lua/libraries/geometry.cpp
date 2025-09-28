@@ -3,23 +3,15 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/lua/libraries/lgeometry.h"
 #include <mathutil/glmutil.h>
-#include "pragma/lua/ldefinitions.h"
-#include "pragma/lua/classes/ldef_vector.h"
-#include <pragma/math/intersection.h>
 #include "luasystem.h"
-#include "pragma/math/math_seb.h"
-#include "pragma/model/modelmesh.h"
-#include "pragma/math/util_triangulate.hpp"
 #include <clip2tri/clip2tri.h>
 //#include <Pinocchio.h>
 //#include <pinocchioApi.h>
 //#include <pragma/model/mesh.h>
 //#include <triangle.h>
 
-module pragma.client;
+module pragma.shared;
 
 import :scripting.lua.libraries.geometry;
 

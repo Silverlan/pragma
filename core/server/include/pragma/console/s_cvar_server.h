@@ -3,9 +3,6 @@
 
 #ifndef __S_CVAR_SERVER__
 #define __S_CVAR_SERVER__
-#include "pragma/serverdefinitions.h"
-#include "pragma/networkdefinitions.h"
-#include <pragma/console/convars.h>
 
 DLLSERVER void CMD_sv_send(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
 REGISTER_CONCOMMAND_SV(sv_send, CMD_sv_send, ConVarFlags::None, "Sends a text message to all connected clients and displays it in the console. Usage: sv_send <message>");

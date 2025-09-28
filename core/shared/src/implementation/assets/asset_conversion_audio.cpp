@@ -3,9 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/game/game_resources.hpp"
-#include "pragma/audio/alsound_type.h"
 #include <sharedutils/util_file.h>
 #include <udm.hpp>
 

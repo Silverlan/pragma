@@ -3,20 +3,8 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/trigger/base_trigger_touch.hpp"
-#include "pragma/entities/baseentity.h"
-#include "pragma/physics/physobj.h"
-#include "pragma/physics/collisionmasks.h"
-#include "pragma/physics/shape.hpp"
-#include "pragma/entities/trigger/trigger_spawnflags.h"
-#include "pragma/lua/luafunction_call.h"
-#include "pragma/entities/components/base_physics_component.hpp"
-#include "pragma/entities/components/base_model_component.hpp"
-#include "pragma/entities/components/base_io_component.hpp"
-#include "pragma/entities/components/basetoggle.h"
 
-export module pragma.shared;
+module pragma.shared;
 
 import :entities.components.triggers.base_touch;
 

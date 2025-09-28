@@ -4,7 +4,7 @@ option(CONFIG_BUILD_WITH_VTUNE_SUPPORT "Build with VTune profiler support?" OFF)
 
 set(PROJ_NAME shared)
 pr_add_library(${PROJ_NAME} SHARED)
-pr_precompile_headers(${PROJ_NAME} "stdafx_shared.h")
+# pr_precompile_headers(${PROJ_NAME} "stdafx_shared.h")
 
 pr_add_dependency(${PROJ_NAME} panima TARGET PUBLIC)
 pr_add_dependency(${PROJ_NAME} materialsystem TARGET PUBLIC)

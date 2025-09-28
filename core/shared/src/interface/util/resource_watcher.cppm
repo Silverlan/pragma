@@ -7,13 +7,18 @@ module;
 #include <sharedutils/util_extensible_enum.hpp>
 #include <sharedutils/scope_guard.h>
 #include <fsys/directory_watcher.h>
+#include <mutex>
 #include <unordered_set>
 
 #define RESOURCE_WATCHER_VERBOSE 0
 
 export module pragma.shared:util.resource_watcher;
 
+export import :networking.util;
+
 export {
+	class Model;
+	class NetworkState;
 	class DLLNETWORK EResourceWatcherCallbackType : public util::ExtensibleEnum {
 	public:
 		using util::ExtensibleEnum::ExtensibleEnum;

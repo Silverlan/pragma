@@ -3,13 +3,7 @@
 
 module;
 
-#include "pragma/networkdefinitions.h"
-#include <pragma/definitions.h>
-#include <pragma/lua/luaapi.h>
 #include <mathutil/glmutil.h>
-#include "pragma/physics/collision_object.hpp"
-#include "pragma/physics/shape.hpp"
-#include "pragma/physics/constraint.hpp"
 
 export module pragma.shared:scripting.lua.classes.physics;
 

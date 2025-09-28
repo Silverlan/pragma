@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/model/animation/skeleton.hpp"
-#include "pragma/model/animation/bone.hpp"
 #include <functional>
 #include <udm.hpp>
 #include <sharedutils/util_string.h>

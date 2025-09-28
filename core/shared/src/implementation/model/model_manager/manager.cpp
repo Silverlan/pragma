@@ -3,18 +3,10 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/engine.h"
-#include "pragma/model/modelmanager.h"
-#include "pragma/util/util_game.hpp"
-#include "pragma/asset/util_asset.hpp"
 #include <sharedutils/util_path.hpp>
-#include "pragma/model/animation/skeleton.hpp"
-#include "pragma/model/animation/bone.hpp"
 #include <fsys/ifile.hpp>
-#include <pragma/debug/intel_vtune.hpp>
 
-export module pragma.shared;
+module pragma.shared;
 
 import :model.model_manager;
 

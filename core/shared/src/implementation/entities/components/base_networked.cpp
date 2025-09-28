@@ -3,11 +3,8 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/components/base_networked_component.hpp"
-#include "pragma/entities/baseentity_events.hpp"
 
-export module pragma.shared;
+module pragma.shared;
 
 import :entities.components.base_networked;
 

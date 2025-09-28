@@ -4,11 +4,7 @@
 module;
 
 #include "stdafx_client.h"
-#include <pragma/lua/custom_constructor.hpp>
 #include <luabind/class.hpp>
-#include "pragma/lua/policies/shared_from_this_policy.hpp"
-#include <pragma/lua/converters/vector_converter_t.hpp>
-#include <pragma/lua/converters/optional_converter_t.hpp>
 #include <prosper_framebuffer.hpp>
 #include <prosper_fence.hpp>
 #include <prosper_command_buffer.hpp>
@@ -25,7 +21,6 @@ module;
 #include <prosper_event.hpp>
 #include <sharedutils/datastream.h>
 #include <luabind/copy_policy.hpp>
-#include <pragma/lua/types/udm.hpp>
 #include <luainterface.hpp>
 #include <sharedutils/util.h>
 

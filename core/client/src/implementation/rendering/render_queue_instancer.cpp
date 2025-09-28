@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/console/c_cvar.h"
 #include "sharedutils/util_hash.hpp"
 
 module pragma.client;

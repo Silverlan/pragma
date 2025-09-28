@@ -3,10 +3,8 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/math/util_easing.hpp"
 
-export module pragma.shared;
+module pragma.shared;
 
 import :math.easing;
 

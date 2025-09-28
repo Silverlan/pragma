@@ -3,8 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/audio/alsound.h"
 
 // Sound duration for mp3 files
 #ifdef WEAVE_MP3_SUPPORT_ENABLED
@@ -12,24 +10,17 @@ module;
 #include <Windows.h>
 #include <atlstr.h>
 #include "mpafile.h"
-#include "pragma/audio/MPAVFileStream.h"
 #endif
 #endif
 //
 #include <string>
 #include <fsys/filesystem.h>
-#include "pragma/audio/sound_ogg.h"
-#include "pragma/audio/alsound_type.h"
-#include "pragma/lua/luafunction_call.h"
-#include "pragma/networkstate/networkstate.h"
-#include <pragma/game/game.h>
-#include "pragma/entities/baseentity.h"
 #include <cstring>
 #include <mathutil/uvec.h>
 
 #undef max
 
-export module pragma.shared;
+module pragma.shared;
 
 import :audio.sound;
 

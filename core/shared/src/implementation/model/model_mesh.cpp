@@ -3,14 +3,8 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/model/modelmesh.h"
-#include "pragma/model/model.h"
-#include "pragma/model/simplify.h"
 #include <mathutil/uvec.h>
-#include <pragma/math/intersection.h>
 #include <udm.hpp>
-#include "pragma/math/icosphere.h"
 #include <sharedutils/util_ifile.hpp>
 #include <sharedutils/magic_enum.hpp>
 

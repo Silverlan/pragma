@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include "pragma/lua/c_ldefinitions.h"
 #include <util_image_buffer.hpp>
 #include <sharedutils/util_parallel_job.hpp>
 #include <mathutil/uvec.h>

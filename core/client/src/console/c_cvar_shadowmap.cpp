@@ -2,9 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/console/c_cvar.h"
-#include <pragma/entities/entity_component_system_t.hpp>
-#include <pragma/console/sh_cmd.h>
 #include <image/prosper_render_target.hpp>
 
 import pragma.client;

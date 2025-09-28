@@ -3,14 +3,8 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/baseworld.h"
-#include "pragma/entities/components/base_physics_component.hpp"
-#include "pragma/entities/components/base_render_component.hpp"
-#include "pragma/entities/components/base_model_component.hpp"
-#include <pragma/physics/collisiontypes.h>
 
-export module pragma.shared;
+module pragma.shared;
 
 import :entities.components.base_world;
 

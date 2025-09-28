@@ -6,13 +6,21 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <udm_types.hpp>
 #include <mathutil/glmutil.h>
-#include "pragma/model/modelupdateflags.hpp"
+#include "udm.hpp"
 #include <vector>
 #include <memory>
 
 export module pragma.shared:physics.collision_mesh;
 
+export import :game.coordinate_system;
+export import :model.enums;
+export import :physics.shape;
+export import :physics.soft_body_info;
+
 export {
+	class Game;
+	class Model;
+	class ModelSubMesh;
 	class DLLNETWORK CollisionMesh : public std::enable_shared_from_this<CollisionMesh> {
 	public:
 		static constexpr auto PCOL_IDENTIFIER = "PCOL";

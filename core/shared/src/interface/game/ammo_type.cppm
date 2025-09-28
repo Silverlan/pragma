@@ -5,12 +5,13 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include <mathutil/umath.h>
-#include "pragma/game/damagetype.h"
-#include "pragma/game/damageinfo.h"
 #include <vector>
 #include <memory>
+#include <string>
 
-export module pragma.shared:game.bullet_info;
+export module pragma.shared:game.ammo_type;
+
+import :game.enums;
 
 export {
 	class AmmoTypeManager;

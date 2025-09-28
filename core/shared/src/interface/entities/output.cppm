@@ -6,7 +6,7 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <string>
 
-export module pragma.entities.output;
+export module pragma.shared:entities.output;
 
 export struct DLLNETWORK Output {
 	Output(std::string pentities, std::string pinput, std::string pparam, float pdelay, int ptimes) : entities(pentities), input(pinput), param(pparam), delay(pdelay), times(ptimes) {}

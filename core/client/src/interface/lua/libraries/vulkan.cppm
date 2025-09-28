@@ -3,9 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include <pragma/lua/ldefinitions.h>
-#include <pragma/lua/types/udm.hpp>
 #include <prosper_util.hpp>
 #include <prosper_prepared_command_buffer.hpp>
 #include <prosper_command_buffer.hpp>

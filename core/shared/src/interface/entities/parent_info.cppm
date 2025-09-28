@@ -5,13 +5,14 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include <mathutil/glmutil.h>
-#include <pragma/math/angle/wvquaternion.h>
-#include "pragma/entities/parentmode.h"
 #include <sharedutils/util_shared_handle.hpp>
 #include <vector>
 #include <optional>
+#include "mathutil/uquat.h"
 
-export module pragma.entities.parent_info;
+export module pragma.shared:entities.parent_info;
+
+export import :entities.enums;
 
 export {
 	struct DLLNETWORK AttachmentInfo {

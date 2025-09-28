@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include "pragma/entities/environment/audio/env_sound.h"
 
 export module pragma.client:entities.components.audio.sound;
 

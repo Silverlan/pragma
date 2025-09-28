@@ -4,17 +4,9 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/components/base_transform_component.hpp"
-#include <pragma/math/math_seb.h>
-#include <pragma/math/e_frustum.h>
-#include <pragma/entities/entity_iterator.hpp>
-#include <pragma/entities/entity_component_system_t.hpp>
-#include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <image/prosper_sampler.hpp>
 #include <image/prosper_render_target.hpp>
 #include <prosper_command_buffer.hpp>
-#include "pragma/console/cvar_handler.h"
-#include "pragma/console/c_cvar.h"
 
 module pragma.client;
 

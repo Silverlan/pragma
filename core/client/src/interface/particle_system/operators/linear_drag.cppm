@@ -3,9 +3,7 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
 #include <mathutil/umath.h>
-#include <pragma/math/vector/wvvector3.h>
 #include <sharedutils/util_string.h>
 #include <sharedutils/util.h>
 

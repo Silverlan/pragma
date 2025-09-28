@@ -3,9 +3,7 @@
 
 module;
 
-#include "pragma/serverdefinitions.h"
 #include <sharedutils/util_library.hpp>
-#include "pragma/networking/game_server_data.hpp"
 #include <memory>
 #include <vector>
 #include <string>

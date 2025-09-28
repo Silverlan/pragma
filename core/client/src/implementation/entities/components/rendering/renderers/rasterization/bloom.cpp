@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/console/c_cvar.h"
-#include <pragma/console/convars.h>
 #include <prosper_util.hpp>
 #include <prosper_command_buffer.hpp>
 #include <shader/prosper_shader_blur.hpp>

@@ -4,8 +4,6 @@
 module;
 
 #include "fsys/filesystem.h"
-#include "stdafx_shared.h"
-#include "pragma/util/util_module.hpp"
 #include <sharedutils/util_file.h>
 #include <sharedutils/util_library.hpp>
 

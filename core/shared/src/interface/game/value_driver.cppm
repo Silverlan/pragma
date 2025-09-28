@@ -4,13 +4,15 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/types.hpp"
-#include "pragma/entities/entity_uuid_ref.hpp"
 #include <luabind/object.hpp>
 #include <sharedutils/util_path.hpp>
 #include <udm.hpp>
 
 export module pragma.shared:game.value_driver;
+
+export import :entities.enums;
+export import :entities.universal_reference;
+export import :entities.member_reference;
 
 export {
 	namespace pragma {

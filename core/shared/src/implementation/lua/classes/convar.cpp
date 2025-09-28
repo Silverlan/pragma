@@ -3,14 +3,8 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include <pragma/definitions.h>
-#include "pragma/lua/classes/lconvar.h"
-#include <pragma/engine.h>
 #include "luasystem.h"
-#include <pragma/game/game.h>
 #include <mathutil/umath.h>
-#include <pragma/console/command_options.hpp>
 
 module pragma.shared;
 

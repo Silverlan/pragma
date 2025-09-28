@@ -3,42 +3,12 @@
 
 module;
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/audio/alsound.h"
-
-#define ALSOUND_DEFAULT_RELATIVE false
-#define ALSOUND_DEFAULT_REFERENCE_DISTANCE 1.f
-#define ALSOUND_DEFAULT_ROLLOFF_FACTOR 1.f
-#define ALSOUND_DEFAULT_ROOM_ROLLOFF_FACTOR 0.f
-#define ALSOUND_DEFAULT_MIN_GAIN 0.f
-#define ALSOUND_DEFAULT_MAX_GAIN 1.f
-#define ALSOUND_DEFAULT_CONE_INNER_ANGLE 360.f
-#define ALSOUND_DEFAULT_CONE_OUTER_ANGLE 360.f
-#define ALSOUND_DEFAULT_CONE_OUTER_GAIN 0.f
-#define ALSOUND_DEFAULT_CONE_OUTER_GAIN_HF 1.f
-#define ALSOUND_DEFAULT_PRIORITY 0u
-#define ALSOUND_DEFAULT_DOPPLER_FACTOR 1.f
-#define ALSOUND_DEFAULT_AIR_ABSORPTION_FACTOR 0.f
-#define ALSOUND_DEFAULT_ORIENTATION_AT                                                                                                                                                                                                                                                           \
-	Vector3                                                                                                                                                                                                                                                                                      \
-	{                                                                                                                                                                                                                                                                                            \
-		0.f, 0.f, -1.f                                                                                                                                                                                                                                                                           \
-	}
-#define ALSOUND_DEFAULT_ORIENTATION_UP                                                                                                                                                                                                                                                           \
-	Vector3                                                                                                                                                                                                                                                                                      \
-	{                                                                                                                                                                                                                                                                                            \
-		0.f, 1.f, 0.f                                                                                                                                                                                                                                                                            \
-	}
-#define ALSOUND_DEFAULT_STEREO_ANGLE_LEFT 0.523599
-#define ALSOUND_DEFAULT_STEREO_ANGLE_RIGHT -0.523599
-#define ALSOUND_DEFAULT_DIRECT_GAIN_HF_AUTO true
-#define ALSOUND_DEFAULT_SEND_GAIN_AUTO true
-#define ALSOUND_DEFAULT_SEND_GAIN_HF_AUTO true
-#define ALSOUND_DEFAULT_DIRECT_FILTER_GAIN 1.f
-#define ALSOUND_DEFAULT_DIRECT_FILTER_GAIN_HF 1.f
-#define ALSOUND_DEFAULT_DIRECT_FILTER_GAIN_LF 1.f
+#include <mathutil/uvec.h>
 
 export module pragma.shared:audio.sound_base;
+
+export import :audio.effect_params;
+export import :audio.enums;
 
 export {
 	#pragma warning(push)
@@ -125,8 +95,8 @@ export {
 		virtual void SetGainAuto(bool directHF, bool send, bool sendHF);
 		virtual std::tuple<bool, bool, bool> GetGainAuto() const;
 
-		virtual void SetDirectFilter(const ALSound::EffectParams &params);
-		const ALSound::EffectParams &GetDirectFilter() const;
+		virtual void SetDirectFilter(const SoundEffectParams &params);
+		const SoundEffectParams &GetDirectFilter() const;
 
 		virtual bool IsPlaying() const;
 		virtual bool IsPaused() const;
@@ -155,7 +125,7 @@ export {
 		std::pair<Vector3, Vector3> m_orientation = {ALSOUND_DEFAULT_ORIENTATION_AT, ALSOUND_DEFAULT_ORIENTATION_UP};
 		std::pair<float, float> m_stereoAngles = {ALSOUND_DEFAULT_STEREO_ANGLE_LEFT, ALSOUND_DEFAULT_STEREO_ANGLE_RIGHT};
 		std::tuple<bool, bool, bool> m_gainAuto = std::tuple<bool, bool, bool> {ALSOUND_DEFAULT_DIRECT_GAIN_HF_AUTO, ALSOUND_DEFAULT_SEND_GAIN_AUTO, ALSOUND_DEFAULT_SEND_GAIN_HF_AUTO};
-		ALSound::EffectParams m_directFilter = {ALSOUND_DEFAULT_DIRECT_FILTER_GAIN, ALSOUND_DEFAULT_DIRECT_FILTER_GAIN_HF, ALSOUND_DEFAULT_DIRECT_FILTER_GAIN_LF};
+		SoundEffectParams m_directFilter = {ALSOUND_DEFAULT_DIRECT_FILTER_GAIN, ALSOUND_DEFAULT_DIRECT_FILTER_GAIN_HF, ALSOUND_DEFAULT_DIRECT_FILTER_GAIN_LF};
 		float m_offset = 0.f;
 		float m_duration = 0.f;
 		double m_tLastUpdate = 0.0;

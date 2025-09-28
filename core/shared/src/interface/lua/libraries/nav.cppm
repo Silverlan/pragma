@@ -3,9 +3,8 @@
 
 module;
 
-#include "pragma/networkdefinitions.h"
 
-export module pragma.client:scripting.lua.libraries.nav;
+export module pragma.shared:scripting.lua.libraries.nav;
 
 export namespace Lua {
 	namespace nav {

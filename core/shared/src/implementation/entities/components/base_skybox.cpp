@@ -3,11 +3,8 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/baseskybox.h"
-#include "pragma/entities/components/base_physics_component.hpp"
 
-export module pragma.shared;
+module pragma.shared;
 
 import :entities.components.base_skybox;
 

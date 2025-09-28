@@ -3,5 +3,17 @@
 
 module;
 
-export module pragma.console;
-export import pragma.console.commands;
+export module pragma.shared:console;
+
+export import :console.command_options;
+export import :console.common;
+export import :console.convar;
+export import :console.convar_handle;
+export import :console.cvar_callback;
+export import :console.cvar_handler;
+export import :console.debug_console;
+export import :console.enums;
+export import :console.find_entities;
+export import :console.line_noise;
+export import :console.output;
+export import :console.spdlog_anycolor_sink;

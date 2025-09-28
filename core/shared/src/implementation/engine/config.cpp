@@ -3,12 +3,7 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/engine.h"
-#include "pragma/console/conout.h"
-#include "pragma/logging.hpp"
 #include <fsys/filesystem.h>
-#include <pragma/console/convars.h>
 #include <sharedutils/util_string.h>
 
 module pragma.shared;

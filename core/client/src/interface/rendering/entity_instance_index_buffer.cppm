@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include "pragma/types.hpp"
 #include <buffers/prosper_dynamic_resizable_buffer.hpp>
 #include <sharedutils/util_hash.hpp>
 
@@ -13,7 +11,6 @@ export module pragma.client:rendering.entity_instance_index_buffer;
 import :rendering.render_queue;
 
 export namespace pragma::rendering {
-	using RenderBufferIndex = uint32_t;
 	constexpr auto SINGLE_INSTANCE_RENDER_BUFFER_INDEX = std::numeric_limits<RenderBufferIndex>::max();
 	class DLLCLIENT EntityInstanceIndexBuffer {
 	  public:

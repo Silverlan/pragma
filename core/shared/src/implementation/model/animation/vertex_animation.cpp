@@ -3,10 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/model/animation/vertex_animation.hpp"
-#include "pragma/model/modelmesh.h"
-#include "pragma/model/model.h"
 #include <udm.hpp>
 #include <set>
 

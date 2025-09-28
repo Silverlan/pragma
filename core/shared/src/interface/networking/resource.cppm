@@ -3,9 +3,9 @@
 
 module;
 
+#include "pragma/networkdefinitions.h"
 #include <string>
 #include <vector>
-#include "pragma/networkdefinitions.h"
 
 export module pragma.shared:networking.resource;
 

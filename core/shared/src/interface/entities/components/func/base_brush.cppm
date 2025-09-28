@@ -4,10 +4,10 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/entities/func/basefuncsurfacematerial.hpp"
-#include <pragma/console/conout.h>
 
 export module pragma.shared:entities.components.func.base_brush;
+
+export import :entities.components.func.base_surface_material;
 
 export namespace pragma {
 	class DLLNETWORK BaseFuncBrushComponent : public BaseFuncSurfaceMaterialComponent {

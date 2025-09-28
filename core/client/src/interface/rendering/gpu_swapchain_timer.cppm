@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/c_enginedefinitions.h"
-#include <pragma/debug/debug_performance_profiler.hpp>
 #include <queries/prosper_timer_query.hpp>
 #include <queries/prosper_pipeline_statistics_query.hpp>
 #include <chrono>

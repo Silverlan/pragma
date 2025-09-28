@@ -3,25 +3,14 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include "pragma/c_enginedefinitions.h"
-#include "pragma/lua/c_ldefinitions.h"
-#include "pragma/model/modelmesh.h"
-#include "pragma/lua/policies/shared_from_this_policy.hpp"
-#include <pragma/lua/converters/game_type_converters_t.hpp>
 #include "luabind/copy_policy.hpp"
 #include "prosper_render_pass.hpp"
 #include "prosper_command_buffer.hpp"
 #include <image/prosper_texture.hpp>
 #include "cmaterial.h"
 #include <mathutil/glmutil.h>
-#include <pragma/lua/classes/ldef_vector.h>
-#include "pragma/lua/classes/ldef_plane.h"
-#include "pragma/lua/lua_util_component.hpp"
 #include "luasystem.h"
-#include <pragma/lua/classes/ldef_entity.h>
 #include <prosper_descriptor_set_group.hpp>
-#include <pragma/entities/entity_component_system_t.hpp>
 #include <sharedutils/util_shaderinfo.hpp>
 
 export module pragma.client:scripting.lua.bindings.scene;

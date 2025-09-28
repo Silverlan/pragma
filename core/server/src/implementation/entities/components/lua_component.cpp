@@ -4,14 +4,8 @@
 module;
 
 #include "stdafx_server.h"
-#include "pragma/networking/recipient_filter.hpp"
-#include "pragma/lua/base_lua_handle_method.hpp"
-#include "pragma/lua/sh_lua_component.hpp"
 #include "sharedutils/netpacket.hpp"
-#include "pragma/networking/recipient_filter.hpp"
 #include <servermanager/interface/sv_nwm_manager.hpp>
-#include <pragma/entities/components/base_player_component.hpp>
-#include <pragma/networking/enums.hpp>
 
 module pragma.server.entities.components.lua;
 

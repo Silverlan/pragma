@@ -3,23 +3,11 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include <pragma/definitions.h>
-#include "pragma/lua/libraries/lengine.h"
-#include "pragma/input/inputhelper.h"
-#include <pragma/engine.h>
-#include "pragma/engine_version.h"
-#include "pragma/lua/classes/ldef_vector.h"
-#include "pragma/lua/libraries/lutil.hpp"
-#include "pragma/util/util_module.hpp"
 #include "luasystem.h"
-#include "pragma/model/modelmesh.h"
-#include "pragma/addonsystem/addonsystem.h"
-#include <pragma/lua/lua_call.hpp>
 #include <sharedutils/util_path.hpp>
 #include <mathutil/color.h>
 
-module pragma.client;
+module pragma.shared;
 
 import :scripting.lua.libraries.engine;
 

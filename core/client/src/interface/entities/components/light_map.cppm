@@ -3,11 +3,8 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
 #include "buffers/prosper_dynamic_resizable_buffer.hpp"
-#include "pragma/logging.hpp"
 #include <cmaterial_manager2.hpp>
-#include <pragma/entities/components/base_entity_component.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <image/prosper_texture.hpp>
 

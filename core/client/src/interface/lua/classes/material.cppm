@@ -3,9 +3,7 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
 #include "matsysdefinitions.h"
-#include <pragma/lua/ldefinitions.h>
 #include <texturemanager/texturemanager.h>
 
 export module pragma.client:scripting.lua.classes.material;

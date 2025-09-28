@@ -4,11 +4,12 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/entities/components/basetoggle.h"
 #include <string>
 #include <mathutil/color.h>
 
 export module pragma.shared:entities.components.environment.effects.base_sprite;
+
+export import :entities.components.base;
 
 export namespace pragma {
 	class DLLNETWORK BaseEnvSpriteComponent : public BaseEntityComponent {

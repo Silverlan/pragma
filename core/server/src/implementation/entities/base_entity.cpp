@@ -4,28 +4,9 @@
 module;
 
 #include "stdafx_server.h"
-#include <pragma/lua/luacallback.h>
-#include <pragma/networking/nwm_util.h>
 #include "luasystem.h"
-#include "pragma/entities/parentinfo.h"
-#include <pragma/lua/luafunction_call.h>
-#include "pragma/networking/recipient_filter.hpp"
-#include "pragma/lua/lua_handles.hpp"
 #include <servermanager/sv_nwm_recipientfilter.h>
-#include <pragma/networking/nwm_util.h>
-#include <pragma/networking/enums.hpp>
 #include <sharedutils/scope_guard.h>
-#include <pragma/lua/libraries/ltimer.h>
-#include <pragma/lua/converters/game_type_converters_t.hpp>
-#include <pragma/physics/raytraces.h>
-#include <pragma/physics/collisionmasks.h>
-#include <pragma/util/bulletinfo.h>
-#include <pragma/audio/alsound_type.h>
-#include <pragma/entities/components/base_entity_component.hpp>
-#include <pragma/entities/components/base_actor_component.hpp>
-#include <pragma/entities/components/base_player_component.hpp>
-#include <pragma/entities/components/base_character_component.hpp>
-#include <pragma/entities/entity_component_system_t.hpp>
 
 module pragma.server.entities.base;
 

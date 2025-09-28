@@ -3,8 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/networking/nwm_velocity_correction.hpp"
 
 module pragma.shared;
 

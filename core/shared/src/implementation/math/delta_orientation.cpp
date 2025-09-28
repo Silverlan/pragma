@@ -3,8 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/math/deltaorientation.h"
 
 module pragma.shared;
 

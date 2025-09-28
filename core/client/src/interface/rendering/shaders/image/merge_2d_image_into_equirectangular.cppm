@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
 #include <shader/prosper_shader_base_image_processing.hpp>
 #include <prosper_descriptor_set_group.hpp>
 

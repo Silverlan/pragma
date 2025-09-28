@@ -3,16 +3,8 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/components/constraints/constraint_component.hpp"
-#include "pragma/entities/components/constraints/constraint_manager_component.hpp"
-#include "pragma/entities/components/panima_component.hpp"
-#include "pragma/entities/entity_component_manager_t.hpp"
-#include "pragma/entities/components/component_member_flags.hpp"
-#include "pragma/entities/entity_component_system_t.hpp"
-#include "pragma/logging.hpp"
 
-export module pragma.shared;
+module pragma.shared;
 
 import :entities.components.constraints.constraint;
 

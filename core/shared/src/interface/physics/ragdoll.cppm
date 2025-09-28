@@ -4,9 +4,10 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/physics/physobj.h"
 
 export module pragma.shared:physics.ragdoll;
+
+export import :physics.object;
 
 export class DLLNETWORK Ragdoll : public PhysObj {
   public:

@@ -4,12 +4,12 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/entities/shared_spawnflags.h"
-#include "pragma/entities/components/base_entity_component.hpp"
 #include <sharedutils/property/util_property.hpp>
 #include <string>
 
 export module pragma.shared:entities.components.base_toggle;
+
+export import :entities.components.base;
 
 export namespace pragma {
 	class DLLNETWORK BaseToggleComponent : public BaseEntityComponent {

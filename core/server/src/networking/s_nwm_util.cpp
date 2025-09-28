@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_server.h"
-#include "pragma/networking/s_nwm_util.h"
 
 void nwm::write_unique_entity(NetPacket &packet, const BaseEntity *ent)
 {

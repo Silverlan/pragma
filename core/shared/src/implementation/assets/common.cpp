@@ -3,12 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/engine.h"
-#include "pragma/asset/util_asset.hpp"
-#include "pragma/networkstate/networkstate.h"
-#include "pragma/model/modelmanager.h"
-#include "pragma/game/game_resources.hpp"
 #include <material_manager2.hpp>
 #include <sharedutils/util_path.hpp>
 #include <fsys/ifile.hpp>

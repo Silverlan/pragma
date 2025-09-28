@@ -3,17 +3,8 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/trigger/base_trigger_push.hpp"
-#include "pragma/util/util_handled.hpp"
-#include "pragma/entities/components/base_transform_component.hpp"
-#include "pragma/entities/trigger/base_trigger_touch.hpp"
-#include "pragma/entities/components/velocity_component.hpp"
-#include "pragma/entities/baseentity_events.hpp"
-#include "pragma/entities/components/basetoggle.h"
-#include "pragma/entities/entity_component_system_t.hpp"
 
-export module pragma.shared;
+module pragma.shared;
 
 import :entities.components.triggers.base_push;
 

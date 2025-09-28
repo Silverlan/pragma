@@ -3,9 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/lua/custom_constructor.hpp"
-#include "pragma/lua/classes/thread_pool.hpp"
 
 module pragma.shared;
 

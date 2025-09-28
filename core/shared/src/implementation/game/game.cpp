@@ -3,68 +3,14 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include <pragma/game/game.h>
-#include "pragma/networkstate/networkstate.h"
-#include <pragma/console/convars.h>
 #include "luasystem.h"
-#include "pragma/physics/physobj.h"
-#include "pragma/entities/baseentity.h"
-#include "pragma/model/brush/brushmesh.h"
-#include "pragma/level/mapgeometry.h"
-#include <pragma/engine.h>
-#include "pragma/ai/navsystem.h"
-#include "pragma/physics/environment.hpp"
-#include "pragma/physics/contact.hpp"
-#include "pragma/physics/constraint.hpp"
-#include "pragma/lua/libraries/ltimer.h"
-#include "pragma/game/gamemode/gamemodemanager.h"
-#include "pragma/logging.hpp"
-#include <pragma/console/convars.h>
-#include "pragma/console/engine_cvar.h"
-#include "pragma/game/game_callback.h"
-#include "pragma/game/animation_update_manager.hpp"
-#include "pragma/lua/luafunction_call.h"
-#include "pragma/addonsystem/addonsystem.h"
-#include "pragma/lua/lua_script_watcher.h"
-#include "pragma/util/resource_watcher.h"
-#include "pragma/game/game_resources.hpp"
-#include "pragma/input/inkeys.h"
-#include "pragma/entities/trigger/base_trigger_touch.hpp"
-#include "pragma/entities/components/base_player_component.hpp"
-#include "pragma/entities/components/base_gamemode_component.hpp"
-#include "pragma/entities/components/base_model_component.hpp"
-#include "pragma/entities/components/base_animated_component.hpp"
-#include "pragma/entities/components/animation_driver_component.hpp"
-#include "pragma/entities/components/base_static_bvh_cache_component.hpp"
-#include "pragma/entities/components/panima_component.hpp"
-#include "pragma/entities/entity_component_manager.hpp"
-#include "pragma/entities/prop/prop_base.h"
-#include "pragma/entities/components/base_physics_component.hpp"
-#include "pragma/entities/components/base_ai_component.hpp"
-#include "pragma/entities/baseworld.h"
-#include "pragma/entities/entity_component_system_t.hpp"
-#include "pragma/level/level_info.hpp"
-#include "pragma/entities/components/logic_component.hpp"
-#include "pragma/debug/debug_performance_profiler.hpp"
-#include "pragma/lua/sh_lua_component.hpp"
-#include "pragma/lua/class_manager.hpp"
-#include "pragma/util/util_bsp_tree.hpp"
-#include "pragma/entities/entity_iterator.hpp"
-#include "pragma/asset_types/world.hpp"
-#include "pragma/model/model.h"
-#include "pragma/model/modelmanager.h"
-#include "pragma/physics/collisionmesh.h"
-#include "pragma/asset/util_asset.hpp"
-#include "pragma/util/util_game.hpp"
-#include "pragma/debug/intel_vtune.hpp"
 #include <material_manager2.hpp>
 #include <sharedutils/util_library.hpp>
 #include <fsys/ifile.hpp>
 #include <luainterface.hpp>
 #include <udm.hpp>
 
-export module pragma.shared;
+module pragma.shared;
 
 import :game.game;
 

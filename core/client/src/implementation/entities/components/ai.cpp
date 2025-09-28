@@ -4,20 +4,7 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/baseentity_luaobject.h"
-#include <pragma/entities/components/base_character_component.hpp>
-#include <pragma/entities/components/base_ai_component.hpp>
-#include <pragma/entities/components/velocity_component.hpp>
-#include <pragma/entities/components/movement_component.hpp>
-#include <pragma/entities/entity_component_system_t.hpp>
-#include <pragma/lua/converters/game_type_converters_t.hpp>
-#include "pragma/lua/classes/ldef_entity.h"
 #include "luasystem.h"
-#include <pragma/lua/lua_util_component_stream.hpp>
-#include <pragma/lua/lua_util_component.hpp>
-#include <pragma/model/model.h>
-#include <pragma/lua/classes/lproperty.hpp>
-#include <pragma/lua/lentity_components_base_types.hpp>
 
 module pragma.client;
 

@@ -2,15 +2,17 @@
 // SPDX-License-Identifier: MIT
 
 module;
+
 #include "pragma/networkdefinitions.h"
-#include "pragma/model/animation/skeleton.hpp"
-#include "pragma/types.hpp"
 #include <mathutil/eulerangles.h>
-#include <pragma/util/orientedpoint.h>
+#include <mathutil/transform.hpp>
 #include <vector>
 #include <unordered_map>
 
 export module pragma.shared:model.animation.frame;
+
+export import :game.coordinate_system;
+export import :model.animation.skeleton;
 
 export {
 	struct DLLNETWORK FlexFrameData {
@@ -21,6 +23,8 @@ export {
 		bool operator!=(const FlexFrameData &other) const { return !operator==(other); }
 	};
 
+	class Model;
+	namespace pragma::animation {class Animation;};
 	class DLLNETWORK Frame : public std::enable_shared_from_this<Frame> {
 	public:
 		static std::shared_ptr<Frame> Create(unsigned int numBones);

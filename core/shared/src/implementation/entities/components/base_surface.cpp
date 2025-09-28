@@ -3,15 +3,8 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/components/base_surface_component.hpp"
-#include "pragma/entities/entity_component_manager_t.hpp"
-#include "pragma/model/model.h"
-#include "pragma/model/modelmesh.h"
-#include "pragma/logging.hpp"
-#include <pragma/math/intersection.h>
 
-export module pragma.shared;
+module pragma.shared;
 
 import :entities.components.base_surface;
 

@@ -3,9 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/lua/classes/lphyssoftbodyinfo.hpp"
-#include "pragma/physics/physsoftbodyinfo.hpp"
 
 module pragma.shared;
 

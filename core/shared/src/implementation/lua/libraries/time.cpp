@@ -3,12 +3,8 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/engine.h"
-#include "pragma/lua/libraries/ltime.hpp"
-#include "pragma/util/util_duration_type.hpp"
 
-export module pragma.client;
+module pragma.shared;
 
 import :scripting.lua.libraries.time;
 

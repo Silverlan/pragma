@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
 #include <mathutil/uvec.h>
 #include <mathutil/vertex.hpp>
 

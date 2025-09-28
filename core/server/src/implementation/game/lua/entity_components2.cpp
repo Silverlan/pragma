@@ -4,57 +4,9 @@
 module;
 
 #include "stdafx_server.h"
-#include "pragma/lua/s_lentity_components.hpp"
-#include "pragma/networking/recipient_filter.hpp"
 
 // --template-include-location
-#include "pragma/entities/components/base_ownable_component.hpp"
-#include "pragma/entities/components/liquid/base_liquid_control_component.hpp"
-#include "pragma/entities/components/liquid/base_liquid_surface_simulation_component.hpp"
-#include "pragma/entities/components/base_debug_component.hpp"
-#include "pragma/entities/components/base_io_component.hpp"
-#include "pragma/entities/baseworld.h"
-#include "pragma/entities/components/base_point_at_target_component.hpp"
-#include "pragma/entities/prop/prop_base.h"
-#include "pragma/entities/prop/prop_dynamic.hpp"
-#include "pragma/entities/prop/prop_physics.hpp"
-#include "pragma/entities/info/info_landmark.hpp"
-#include "pragma/entities/baseskybox.h"
-#include "pragma/entities/baseflashlight.h"
-#include "pragma/entities/basebot.h"
-#include <pragma/physics/raytraces.h>
-#include <pragma/model/model.h>
-#include <pragma/model/modelmesh.h>
-#include <pragma/lua/converters/game_type_converters_t.hpp>
-#include <pragma/lua/lua_util_component.hpp>
-#include <pragma/lua/classes/lproperty.hpp>
-#include <pragma/lua/classes/ldef_quaternion.h>
-#include <pragma/lua/classes/ldef_angle.h>
-#include <pragma/lua/classes/ldef_color.h>
-#include <pragma/lua/classes/ldef_vector.h>
-#include <pragma/lua/classes/ldef_entity.h>
-#include "pragma/entities/point/constraints/point_constraint_ballsocket.h"
-#include "pragma/entities/point/constraints/point_constraint_conetwist.h"
-#include "pragma/entities/point/constraints/point_constraint_dof.h"
-#include "pragma/entities/point/constraints/point_constraint_fixed.h"
-#include "pragma/entities/point/constraints/point_constraint_hinge.h"
-#include "pragma/entities/point/constraints/point_constraint_slider.h"
-#include "pragma/entities/point/point_rendertarget.h"
-#include "pragma/entities/point/point_target.h"
-#include "pragma/entities/components/basepointpathnode.h"
-#include "pragma/entities/components/basetriggergravity.hpp"
-#include "pragma/entities/trigger/base_trigger_hurt.hpp"
-#include "pragma/entities/trigger/base_trigger_push.hpp"
-#include "pragma/entities/trigger/base_trigger_remove.h"
-#include "pragma/entities/trigger/base_trigger_teleport.hpp"
-#include "pragma/entities/trigger/base_trigger_touch.hpp"
-#include <pragma/lua/lentity_components_base_types.hpp>
-#include <pragma/lua/lentity_components.hpp>
-#include <pragma/physics/movetypes.h>
-#include <pragma/lua/lua_call.hpp>
 #include <sharedutils/netpacket.hpp>
-#include <pragma/lua/ostream_operator_alias.hpp>
-#include <pragma/entities/components/base_attachment_component.hpp>
 
 module pragma.server.game;
 

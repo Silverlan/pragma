@@ -3,9 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/lua/util.hpp"
-#include "pragma/engine.h"
 #include <scripting/lua/lua.hpp>
 
 //import pragma.scripting.lua;

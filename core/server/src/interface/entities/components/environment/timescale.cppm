@@ -3,10 +3,7 @@
 
 module;
 
-#include "pragma/serverdefinitions.h"
 #include "sharedutils/netpacket.hpp"
-#include "pragma/networking/recipient_filter.hpp"
-#include "pragma/entities/environment/env_timescale.h"
 
 export module pragma.server.entities.components.timescale;
 

@@ -3,9 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/func/basefuncportal.h"
-#include "pragma/entities/components/base_physics_component.hpp"
 
 module pragma.shared;
 

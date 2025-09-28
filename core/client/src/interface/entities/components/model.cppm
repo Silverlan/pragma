@@ -3,9 +3,7 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
 #include "cmaterial.h"
-#include <pragma/entities/components/base_model_component.hpp>
 #include <vector>
 #include <optional>
 

@@ -8,14 +8,19 @@ module;
 #include <vector>
 #include <mathutil/glmutil.h>
 #include <mathutil/vertex.hpp>
-#include "pragma/model/modelupdateflags.hpp"
 #include <unordered_map>
 #include <mathutil/transform.hpp>
+#include "udm.hpp"
 #include <optional>
 
 export module pragma.shared:model.model_mesh;
 
+export import :game.coordinate_system;
+export import :game.enums;
+export import :model.enums;
+
 export {
+	class Game;
 	namespace umath {
 		DLLNETWORK void normalize_uv_coordinates(Vector2 &uv);
 		template<typename TIndex>

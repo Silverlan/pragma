@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include <pragma/entities/environment/effects/env_sprite.h>
 
 export module pragma.client:entities.components.effects.sprite;
 

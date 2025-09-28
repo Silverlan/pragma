@@ -4,7 +4,6 @@
 #ifndef __PRAGMA_LUA_TYPES_NIL_TYPE_HPP__
 #define __PRAGMA_LUA_TYPES_NIL_TYPE_HPP__
 
-#include "pragma/definitions.h"
 
 #include <luasystem.h>
 #include <luabind/luabind.hpp>

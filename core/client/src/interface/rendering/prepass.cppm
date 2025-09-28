@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
 #include <cinttypes>
 #include <sharedutils/util_weak_handle.hpp>
 #include <image/prosper_render_target.hpp>

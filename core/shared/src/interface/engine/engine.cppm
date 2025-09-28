@@ -3,20 +3,15 @@
 
 module;
 
-#include "pragma/definitions.h"
-#include "pragma/lua/luaapi.h"
-#include "pragma/console/cvar_handler.h"
-#include "pragma/console/debugconsole.h"
+#include "pragma/networkdefinitions.h"
 #include <sharedutils/chronotime.h>
 #include <fsys/vfileptr.h>
-#include "pragma/input/key_state.hpp"
-#include "pragma/engine_info.hpp"
-#include "pragma/iserverstate.hpp"
-#include "pragma/types.hpp"
 #include <materialmanager.h>
 #include <thread>
 #include <atomic>
 #include <mutex>
+#include "sharedutils/util_library.hpp"
+#include "sharedutils/asset_loader/file_asset_manager.hpp"
 #include <sharedutils/callback_handler.h>
 #include <sharedutils/scope_guard.h>
 #include <sharedutils/util_parallel_job.hpp>
@@ -29,7 +24,21 @@ module;
 
 export module pragma.shared:engine;
 
+export import :assets.manager;
+export import :console.convar;
+export import :console.convar_handle;
+export import :console.cvar_handler;
+export import :console.debug_console;
+export import :debug.performance_profiler;
+export import :engine.info;
+export import :engine.version;
+export import :input.enums;
+export import :util.server_state_interface;
+export import pragma.pad;
+export import util_zip;
+
 export {
+	class NetworkState;
 	enum class NwStateType : uint8_t { Client = 0, Server, Count };
 	class DLLNETWORK Engine : public CVarHandler, public CallbackHandler {
 	public:
@@ -108,7 +117,12 @@ export {
 			Sandboxed = ManagedByPackageManager << 1u,
 		};
 	public:
-		DEBUGCONSOLE;
+		virtual void OpenConsole();                                                                                                                                                                                                                                                                  \
+		virtual void CloseConsole();                                                                                                                                                                                                                                                                 \
+		void ToggleConsole();                                                                                                                                                                                                                                                                        \
+		virtual bool IsConsoleOpen() const;                                                                                                                                                                                                                                                          \
+		DebugConsole *GetConsole();
+
 		virtual bool Initialize(int argc, char *argv[]);
 		virtual void Start();
 		void AddLaunchConVar(std::string cvar, std::string val);

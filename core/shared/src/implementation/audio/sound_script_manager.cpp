@@ -3,12 +3,8 @@
 
 module;
 
-#include "stdafx_shared.h"
 #include <fsys/filesystem.h>
 #include "datasystem.h"
-#include "pragma/audio/soundscript.h"
-#include "pragma/audio/soundscript_events.h"
-#include "pragma/util/util_game.hpp"
 #include "datasystem.h"
 #include <mathutil/umath.h>
 #include <sharedutils/util_string.h>

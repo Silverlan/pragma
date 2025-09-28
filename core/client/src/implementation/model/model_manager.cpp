@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include <pragma/debug/intel_vtune.hpp>
 
 module pragma.client;
 

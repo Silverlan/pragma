@@ -4,17 +4,9 @@
 module;
 
 #include "stdafx_server.h"
-#include <pragma/engine.h>
-#include "pragma/networking/iserver.hpp"
 #include "wmserverdata.h"
-#include "pragma/game/gamemode/gamemodemanager.h"
-#include <pragma/networking/game_server_data.hpp>
-#include <pragma/networking/enums.hpp>
 #include <wms_shared.h>
-#include <pragma/engine_version.h>
-#include <pragma/networking/error.hpp>
 #include <networkmanager/nwm_error_handle.h>
-#include <pragma/logging.hpp>
 
 module pragma.server.server_state;
 

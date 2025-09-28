@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_server.h"
-#include "pragma/lua/classes/ldef_entity.h"
 #include "luasystem.h"
 
 module pragma.server.scripting.lua.classes.ai_squad;

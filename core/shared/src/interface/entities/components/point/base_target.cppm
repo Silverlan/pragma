@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/entities/components/base_entity_component.hpp"
 
 export module pragma.shared:entities.components.point.base_target;
 

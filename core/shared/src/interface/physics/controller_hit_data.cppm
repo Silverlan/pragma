@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/networkdefinitions.h"
 #include <mathutil/glmutil.h>
 
 export module pragma.shared:physics.controller_hit_data;

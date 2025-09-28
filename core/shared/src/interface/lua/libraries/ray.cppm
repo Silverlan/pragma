@@ -3,12 +3,8 @@
 
 module;
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/physics/shape.hpp"
-#include "pragma/types.hpp"
-#include <pragma/lua/luaapi.h>
 
-export module pragma.client:scripting.lua.libraries.ray;
+export module pragma.shared:scripting.lua.libraries.ray;
 
 export namespace Lua::TraceData {
 	DLLNETWORK void SetSource(lua_State *l, ::TraceData &data, const pragma::physics::IConvexShape &shape);

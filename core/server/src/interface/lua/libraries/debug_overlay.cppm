@@ -3,9 +3,6 @@
 
 module;
 
-#include "pragma/serverdefinitions.h"
-#include "pragma/debug/debug_render_info.hpp"
-#include <pragma/lua/ldefinitions.h>
 
 export module pragma.server.scripting.lua.libraries.debug_overlay;
 

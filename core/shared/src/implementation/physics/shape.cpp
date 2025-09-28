@@ -3,16 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/physics/shape.hpp"
-#include "pragma/physics/environment.hpp"
-#include "pragma/physics/phys_material.hpp"
-#include "pragma/math/surfacematerial.h"
-#include "pragma/physics/collisionmesh.h"
-#include "pragma/lua/classes/lphysics.h"
-#include "pragma/networkstate/networkstate.h"
-#include "pragma/lua/converters/game_type_converters_t.hpp"
-#include "pragma/physics/base_t.hpp"
 
 module pragma.shared;
 

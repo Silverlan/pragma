@@ -3,9 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/physics/collisionmesh.h"
-#include <pragma/math/intersection.h>
 
 module pragma.shared;
 

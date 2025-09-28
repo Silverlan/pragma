@@ -3,16 +3,25 @@
 
 module;
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/game/game.h"
-#include "pragma/entities/baseentity.h"
-#include "pragma/entities/entity_component_manager.hpp"
 #include <typeindex>
 #include <vector>
+#include <memory>
+#include <optional>
+#include "mathutil/uvec.h"
+#include "sharedutils/util.h"
+#include "sharedutils/util_weak_handle.hpp"
 
 export module pragma.shared:entities.iterator;
 
+export import :entities.enums;
+
 export {
+	class Game;
+	class BaseEntity;
+	namespace pragma {
+		class BaseEntityComponent;
+		class BaseFilterComponent;
+	};
 	struct DLLNETWORK IEntityIteratorFilter {
 		IEntityIteratorFilter() = default;
 		IEntityIteratorFilter(Game &game) {}

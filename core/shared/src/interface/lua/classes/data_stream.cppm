@@ -3,10 +3,7 @@
 
 module;
 
-#include "pragma/networkdefinitions.h"
-#include <pragma/lua/luaapi.h>
 #include "luasystem.h"
-#include "pragma/lua/luabind_int.h"
 #include <mathutil/vertex.hpp>
 #include <sharedutils/datastream.h>
 

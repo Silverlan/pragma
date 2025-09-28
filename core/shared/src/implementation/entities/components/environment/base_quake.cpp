@@ -1,13 +1,13 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "stdafx_shared.h"
-#include "pragma/entities/environment/env_quake.h"
-#include "pragma/util/util_handled.hpp"
-#include "pragma/entities/components/basetoggle.h"
-#include "pragma/entities/baseentity_events.hpp"
-#include "pragma/entities/components/base_io_component.hpp"
+module;
+
 #include <algorithm>
+
+module pragma.shared;
+
+import :entities.components.environment.base_quake;
 
 using namespace pragma;
 

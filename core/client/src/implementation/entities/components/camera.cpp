@@ -4,13 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/shared_spawnflags.h"
-#include <pragma/networking/nwm_util.h>
-#include <pragma/lua/converters/game_type_converters_t.hpp>
-#include <pragma/entities/components/basetoggle.h>
-#include <pragma/entities/components/base_transform_component.hpp>
-#include <pragma/entities/entity_component_system_t.hpp>
-#include <pragma/entities/entity_iterator.hpp>
 
 module pragma.client;
 

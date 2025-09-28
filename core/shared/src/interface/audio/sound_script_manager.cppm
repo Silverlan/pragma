@@ -4,8 +4,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/audio/alsound.h"
-#include "pragma/audio/soundscript_events.h"
 #include <sharedutils/util_string.h>
 #include <fsys/filesystem.h>
 #include <vector>
@@ -17,8 +15,10 @@ module;
 
 export module pragma.shared:audio.sound_script_manager;
 
+export import :audio.sound_script_events;
+
 export {
-	class DLLNETWORK SoundScriptManager;
+	class SoundScriptManager;
 	class DLLNETWORK SoundScript : public SoundScriptEventContainer {
 	public:
 		friend SoundScriptManager;

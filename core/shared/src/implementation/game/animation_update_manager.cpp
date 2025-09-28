@@ -3,18 +3,8 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/game/animation_update_manager.hpp"
-#include "pragma/entities/components/base_animated_component.hpp"
-#include "pragma/entities/components/animation_driver_component.hpp"
-#include "pragma/entities/components/panima_component.hpp"
-#include "pragma/entities/components/constraints/constraint_manager_component.hpp"
-#include "pragma/entities/entity_iterator.hpp"
-#include "pragma/entities/entity_component_system_t.hpp"
-#include "pragma/console/cvar.h"
-#include "pragma/debug/intel_vtune.hpp"
 
-export module pragma.shared_from_this;
+module pragma.shared;
 
 import :game.animation_update_manager;
 

@@ -3,10 +3,8 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/debug/debugbehaviortree.h"
 
-export module pragma.shared;
+module pragma.shared;
 
 import :debug.behavior_tree_node;
 

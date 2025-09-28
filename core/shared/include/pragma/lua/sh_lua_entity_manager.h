@@ -4,9 +4,6 @@
 #ifndef __SH_LUA_ENTITY_MANAGER_H__
 #define __SH_LUA_ENTITY_MANAGER_H__
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/types.hpp"
-#include <pragma/lua/luaapi.h>
 #include <unordered_map>
 
 class DLLNETWORK LuaEntityManager {

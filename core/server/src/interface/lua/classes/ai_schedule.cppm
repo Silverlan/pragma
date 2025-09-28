@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/serverdefinitions.h"
-#include <pragma/lua/ldefinitions.h>
 
 export module pragma.server.scripting.lua.classes.ai_schedule;
 

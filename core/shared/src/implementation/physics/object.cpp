@@ -3,16 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/physics/physobj.h"
-#include "pragma/entities/baseentity.h"
-#include "pragma/networkstate/networkstate.h"
-#include <pragma/game/game.h>
-#include "pragma/physics/collision_object.hpp"
-#include "pragma/physics/controller.hpp"
-#include "pragma/physics/shape.hpp"
-#include "pragma/physics/collisionmasks.h"
-#include "pragma/entities/components/base_physics_component.hpp"
 #include <sharedutils/magic_enum.hpp>
 
 module pragma.shared;

@@ -3,20 +3,8 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include <pragma/game/game.h>
-#include "pragma/level/mapgeometry.h"
-#include "pragma/entities/components/map_component.hpp"
-#include "pragma/entities/components/base_transform_component.hpp"
-#include "pragma/entities/components/base_io_component.hpp"
-#include "pragma/entities/components/base_model_component.hpp"
-#include "pragma/entities/baseworld.h"
-#include "pragma/entities/output.h"
-#include "pragma/entities/entity_component_system_t.hpp"
-#include "pragma/debug/intel_vtune.hpp"
-#include "pragma/asset_types/world.hpp"
 
-export module pragma.shared;
+module pragma.shared;
 
 import :game.game;
 

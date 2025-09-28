@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include <pragma/model/animation/vertex_animation.hpp>
 #include <alsound_buffer.hpp>
 #include <prosper_util.hpp>
 #include <buffers/prosper_buffer.hpp>
@@ -12,11 +11,6 @@ module;
 #include <buffers/prosper_dynamic_resizable_buffer.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
-#include <pragma/entities/entity_component_system_t.hpp>
-#include <pragma/lua/converters/game_type_converters_t.hpp>
-#include "pragma/entities/components/base_model_component.hpp"
-#include <pragma/lua/lua_util_component.hpp>
-#include <pragma/lua/lua_util_component_stream.hpp>
 
 module pragma.client;
 

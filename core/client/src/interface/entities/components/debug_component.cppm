@@ -3,14 +3,8 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include "pragma/debug/debug_render_info.hpp"
-#include "pragma/entities/components/base_transform_component.hpp"
-#include <pragma/entities/components/logic_component.hpp>
-#include <pragma/entities/components/base_debug_component.hpp>
 #include "mathutil/color.h"
 #include "mathutil/uvec.h"
-#include <pragma/entities/baseentity.h>
 
 export module pragma.client:entities.components.debug;
 import :debug;

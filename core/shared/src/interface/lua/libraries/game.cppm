@@ -3,13 +3,8 @@
 
 module;
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/game/damagetype.h"
-#include "pragma/ai/navsystem.h"
-#include "pragma/game/game.h"
-#include "pragma/entities/components/base_gamemode_component.hpp"
 
-export module pragma.client:scripting.lua.libraries.game;
+export module pragma.shared:scripting.lua.libraries.game;
 
 export namespace Lua {
 	namespace game {

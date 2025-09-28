@@ -3,8 +3,6 @@
 
 #ifndef __LDEFINITIONS_H__
 #define __LDEFINITIONS_H__
-#include <pragma/lua/luaapi.h>
-#include "pragma/networkdefinitions.h"
 #include <sharedutils/util_shared_handle.hpp>
 #define luaL_checkboolean(L, n) (luaL_checktype(L, (n), LUA_TBOOLEAN))
 #define luaL_checkfunction(L, n) (luaL_checktype(L, (n), LUA_TFUNCTION))

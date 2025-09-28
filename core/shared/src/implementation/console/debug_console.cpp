@@ -3,9 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/console/console.h"
-#include "pragma/logging.hpp"
 #include <iostream>
 #ifdef _WIN32
 #include <windows.h>

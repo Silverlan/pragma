@@ -3,18 +3,9 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/components/liquid/base_liquid_surface_simulation_component.hpp"
-#include "pragma/entities/components/liquid/base_liquid_control_component.hpp"
-#include "pragma/entities/components/base_surface_component.hpp"
-#include "pragma/entities/components/base_transform_component.hpp"
-#include "pragma/entities/entity_component_manager_t.hpp"
-#include "pragma/entities/baseentity_events.hpp"
-#include "pragma/physics/phys_water_surface_simulator.hpp"
-#include "pragma/model/modelmesh.h"
 #include <mathutil/umath_geometry.hpp>
 
-export module pragma.shared;
+module pragma.shared;
 
 import :entities.components.constraints.liquid_surface_simulation;
 

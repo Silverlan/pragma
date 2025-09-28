@@ -4,16 +4,12 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/console/c_cvar_global_functions.h"
-#include "pragma/game/game_limits.h"
-#include "pragma/console/c_cvar.h"
 #include <prosper_util.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <buffers/prosper_uniform_resizable_buffer.hpp>
 #include <sharedutils/scope_guard.h>
-#include <pragma/entities/entity_iterator.hpp>
 
 module pragma.client;
 

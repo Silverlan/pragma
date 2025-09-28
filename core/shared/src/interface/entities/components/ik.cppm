@@ -3,10 +3,12 @@
 
 module;
 
-#include "pragma/entities/components/base_entity_component.hpp"
+#include "pragma/networkdefinitions.h"
 #include <mathutil/uvec.h>
 
 export module pragma.shared:entities.components.ik;
+
+export import :entities.components.base;
 
 export namespace pragma {
 	class DLLNETWORK IKComponent final : public BaseEntityComponent {

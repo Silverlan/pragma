@@ -4,27 +4,57 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/lua/base_lua_handle.hpp"
-#include "pragma/entities/entity_component_system.hpp"
-#include "pragma/util/global_string_table.hpp"
-#include "pragma/util/coordinate_space.hpp"
-#include "pragma/model/animation/play_animation_flags.hpp"
-#include "pragma/types.hpp"
-#include <pragma/console/conout.h>
 #include <sharedutils/util_shared_handle.hpp>
+#include "mathutil/uvec.h"
+#include "mathutil/transform.hpp"
+#include "mathutil/color.h"
 #include <format>
+#include <udm.hpp>
 
 export module pragma.shared:entities.base_entity;
+
+export import :audio.enums;
+export import :audio.sound;
+export import :entities.base_entity_handle;
+export import :entities.components.handle;
+export import :entities.manager;
+export import :entities.net_event_manager;
+export import :entities.system;
+export import :game.enums;
+export import :model.animation.enums;
+export import :physics.enums;
+export import :scripting.lua.base_lua_handle;
+export import :util.global_string_table;
 
 export {
 	namespace pragma {
 		namespace ents {
 			DLLNETWORK const char *register_class_name(const std::string &className);
 		};
+		class BaseTransformComponent;
+		class BasePhysicsComponent;
+		class BaseModelComponent;
+		class BaseGenericComponent;
+		class BaseChildComponent;
+
+		class BaseAnimatedComponent;
+		class BaseWeaponComponent;
+		class BaseVehicleComponent;
+		class BaseAIComponent;
+		class BaseCharacterComponent;
+		class BasePlayerComponent;
+		class BaseTimeScaleComponent;
+		class BaseNameComponent;
 	};
 
 	const double ENT_EPSILON = 0.000'01;
 
+	class Engine;
+	class Game;
+	class Model;
+	class NetworkState;
+	class PhysObj;
+	class DamageInfo;
 	#pragma warning(push)
 	#pragma warning(disable : 4251)
 	class DLLNETWORK BaseEntity : public pragma::BaseLuaHandle, public pragma::BaseEntityComponentSystem {

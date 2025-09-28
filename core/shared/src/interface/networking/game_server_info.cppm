@@ -4,13 +4,14 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <pragma/engine_info.hpp>
 #include <cinttypes>
 #include <string>
 #include <optional>
 #include <sharedutils/util_version.h>
 
 export module pragma.shared:networking.game_server_info;
+
+export import :engine.info;
 
 export namespace pragma::networking {
 	struct DLLNETWORK GameServerInfo {

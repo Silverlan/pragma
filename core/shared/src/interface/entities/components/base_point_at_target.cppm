@@ -3,11 +3,12 @@
 
 module;
 
-#include "pragma/entities/components/base_entity_component.hpp"
-#include "pragma/entities/baseentity_net_event_manager.hpp"
-#include "pragma/entities/entity_property.hpp"
+#include "pragma/networkdefinitions.h"
 
 export module pragma.shared:entities.components.base_point_at_target;
+
+export import :entities.components.base;
+export import :entities.property;
 
 export namespace pragma {
 	class DLLNETWORK BasePointAtTargetComponent : public BaseEntityComponent {

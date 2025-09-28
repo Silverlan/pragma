@@ -3,13 +3,8 @@
 
 module;
 
-#include "pragma/networkdefinitions.h"
-#include <pragma/lua/luaapi.h>
 #include <sharedutils/netpacket.hpp>
-#include "pragma/entities/baseentity.h"
-#include "pragma/audio/alsound.h"
 #include "luasystem.h"
-#include "pragma/lua/classes/ldatastream.h"
 
 export module pragma.shared:scripting.lua.classes.net_packet;
 

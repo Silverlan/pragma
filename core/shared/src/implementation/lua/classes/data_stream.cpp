@@ -3,10 +3,8 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/lua/classes/ldatastream.h"
 
-export module pragma.shared;
+module pragma.shared;
 
 import :scripting.lua.classes.data_stream;
 

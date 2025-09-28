@@ -4,7 +4,6 @@
 #ifndef __LUA_PAIR_CONVERTER_T_HPP__
 #define __LUA_PAIR_CONVERTER_T_HPP__
 
-#include "pragma/lua/converters/pair_converter.hpp"
 
 template<typename T0, typename T1>
 template<typename U>

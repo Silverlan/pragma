@@ -3,9 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/lua/classes/lcolor.h"
-#include <pragma/lua/luaapi.h>
 
 module pragma.shared;
 

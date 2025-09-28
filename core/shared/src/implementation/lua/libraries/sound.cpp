@@ -3,16 +3,10 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/lua/libraries/lsound.h"
-#include <pragma/engine.h>
-#include "pragma/lua/classes/ldef_vector.h"
 #include "luasystem.h"
-#include "pragma/audio/alsound.h"
-#include "pragma/audio/alsound_type.h"
 #include <sharedutils/util_markup_file.hpp>
 
-module pragma.client;
+module pragma.shared;
 
 import :scripting.lua.libraries.sound;
 

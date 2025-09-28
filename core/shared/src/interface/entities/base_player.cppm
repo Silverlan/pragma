@@ -8,11 +8,14 @@ module;
 
 export module pragma.shared:entities.base_player;
 
-export class DLLNETWORK BasePlayer {
-  public:
-	BasePlayer() = default;
-	virtual ~BasePlayer() = default;
-	util::WeakHandle<pragma::BasePlayerComponent> GetBasePlayerComponent();
-  protected:
-	util::WeakHandle<pragma::BasePlayerComponent> m_basePlayerComponent = {};
+export {
+	namespace pragma {class BasePlayerComponent;};
+	class DLLNETWORK BasePlayer {
+	  public:
+		BasePlayer() = default;
+		virtual ~BasePlayer() = default;
+		util::WeakHandle<pragma::BasePlayerComponent> GetBasePlayerComponent();
+	  protected:
+		util::WeakHandle<pragma::BasePlayerComponent> m_basePlayerComponent = {};
+	};
 };

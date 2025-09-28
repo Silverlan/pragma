@@ -4,12 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/components/base_transform_component.hpp"
-#include "pragma/console/c_cvar.h"
-#include "pragma/console/c_cvar_global_functions.h"
-#include <pragma/lua/converters/game_type_converters_t.hpp>
-#include <pragma/entities/entity_iterator.hpp>
-#include <pragma/entities/entity_component_system_t.hpp>
 #include <sharedutils/util_shaderinfo.hpp>
 #include "mathutil/umath_geometry.hpp"
 #include <prosper_util.hpp>

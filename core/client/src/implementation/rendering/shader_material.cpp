@@ -3,7 +3,6 @@
 
 module;
 
-#include <pragma/logging.hpp>
 #include "sharedutils/util_string.h"
 #include <cmaterial.h>
 #include <util_image.hpp>

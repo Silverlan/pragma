@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include <pragma/entities/baseskybox.h>
 
 export module pragma.client:entities.components.skybox;
 

@@ -3,10 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include "pragma/model/model.h"
-#include <pragma/util/lookup_identifier.hpp>
-#include <pragma/entities/components/base_flex_component.hpp>
 
 export module pragma.client:entities.components.flex;
 import :audio;

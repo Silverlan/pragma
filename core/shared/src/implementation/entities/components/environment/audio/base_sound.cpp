@@ -3,16 +3,8 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/environment/audio/env_sound.h"
-#include "pragma/audio/alsound_type.h"
-#include "pragma/util/util_handled.hpp"
-#include "pragma/entities/baseentity_events.hpp"
-#include "pragma/entities/components/base_io_component.hpp"
-#include "pragma/entities/entity_component_manager_t.hpp"
-#include "pragma/asset/util_asset.hpp"
 
-export module pragma.client;
+module pragma.shared;
 
 import :entities.components.audio.base_sound;
 

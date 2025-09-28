@@ -4,7 +4,6 @@
 #ifndef __LUA_GAME_TYPE_CONVERTERS_T_HPP__
 #define __LUA_GAME_TYPE_CONVERTERS_T_HPP__
 
-#include "pragma/lua/converters/game_type_converters.hpp"
 
 template<typename T, T (*FUNCTION)(lua_State *)>
 template<class U>

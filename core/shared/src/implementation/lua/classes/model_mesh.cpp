@@ -3,18 +3,7 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/engine.h"
-#include "pragma/lua/classes/lmodelmesh.h"
 #include "luasystem.h"
-#include "pragma/model/model.h"
-#include "pragma/model/modelmesh.h"
-#include "pragma/lua/policies/core_policies.hpp"
-#include "pragma/lua/libraries/lutil.hpp"
-#include <pragma/lua/policies/default_parameter_policy.hpp>
-#include <pragma/lua/converters/optional_converter_t.hpp>
-#include <pragma/lua/converters/pair_converter_t.hpp>
-#include <pragma/lua/converters/vector_converter_t.hpp>
 
 module pragma.shared;
 

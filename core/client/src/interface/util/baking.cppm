@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
 #include <sharedutils/util_parallel_job.hpp>
 #include <util_image_buffer.hpp>
 #include <mathutil/umath_lighting.hpp>

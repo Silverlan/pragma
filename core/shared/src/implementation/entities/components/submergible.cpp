@@ -3,11 +3,8 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/components/submergible_component.hpp"
-#include "pragma/lua/converters/game_type_converters_t.hpp"
 
-export module pragma.shared;
+module pragma.shared;
 
 import :entities.components.submergible;
 

@@ -3,53 +3,11 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include <pragma/definitions.h>
-#include <pragma/engine.h>
-#include "pragma/entities/components/base_player_component.hpp"
-#include "pragma/entities/components/base_observer_component.hpp"
-#include "pragma/entities/components/base_gamemode_component.hpp"
-#include "pragma/entities/components/orientation_component.hpp"
-#include "pragma/entities/components/movement_component.hpp"
-#include "pragma/entities/components/action_input_controller_component.hpp"
-#include "pragma/entities/components/input_movement_controller_component.hpp"
-#include <pragma/math/angle/wvquaternion.h>
-#include <pragma/physics/movetypes.h>
-#include "pragma/physics/physobj.h"
 #include <mathutil/umat.h>
-#include "pragma/entities/baseflashlight.h"
-#include "pragma/entities/baseentity.h"
-#include <pragma/game/game.h>
-#include "pragma/physics/raytraces.h"
-#include "pragma/physics/collisionmasks.h"
 #include <sharedutils/util.h>
-#include "pragma/physics/shape.hpp"
-#include "pragma/physics/environment.hpp"
-#include "pragma/game/damageinfo.h"
-#include "pragma/util/ammo_type.h"
-#include "pragma/lua/luacallback.h"
 #include "luasystem.h"
-#include "pragma/lua/luafunction_call.h"
-#include "pragma/physics/controller.hpp"
-#include "pragma/entities/components/basetoggle.h"
-#include "pragma/util/util_game.hpp"
-#include "pragma/entities/entity_iterator.hpp"
-#include "pragma/entities/components/usable_component.hpp"
-#include "pragma/entities/components/base_character_component.hpp"
-#include "pragma/entities/components/base_observable_component.hpp"
-#include "pragma/entities/components/base_health_component.hpp"
-#include "pragma/entities/components/base_name_component.hpp"
-#include "pragma/entities/baseplayer.hpp"
-#include "pragma/entities/components/base_physics_component.hpp"
-#include "pragma/entities/components/base_transform_component.hpp"
-#include "pragma/entities/components/base_model_component.hpp"
-#include "pragma/entities/components/base_animated_component.hpp"
-#include "pragma/entities/components/velocity_component.hpp"
-#include "pragma/entities/entity_component_system_t.hpp"
-#include "pragma/model/model.h"
-#include "pragma/logging.hpp"
 
-export module pragma.shared;
+module pragma.shared;
 
 import :entities.components.base_player;
 

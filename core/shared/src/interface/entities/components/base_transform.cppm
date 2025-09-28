@@ -3,12 +3,14 @@
 
 module;
 
-#include "pragma/entities/components/base_entity_component.hpp"
-#include "pragma/util/coordinate_space.hpp"
+#include "pragma/networkdefinitions.h"
 #include <sharedutils/property/util_property_vector.h>
 #include <sharedutils/property/util_property_quat.hpp>
 
 export module pragma.shared:entities.components.base_transform;
+
+export import :entities.components.base;
+export import :game.enums;
 
 export {
 	namespace pragma {

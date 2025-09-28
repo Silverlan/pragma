@@ -3,42 +3,8 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include <pragma/game/game.h>
-#include "pragma/entities/entity_component_manager.hpp"
-#include "pragma/entities/components/logic_component.hpp"
-#include "pragma/entities/components/damageable_component.hpp"
-#include "pragma/entities/components/ik_component.hpp"
-#include "pragma/entities/components/map_component.hpp"
-#include "pragma/entities/components/submergible_component.hpp"
-#include "pragma/entities/components/velocity_component.hpp"
-#include "pragma/entities/components/usable_component.hpp"
-#include "pragma/entities/components/panima_component.hpp"
-#include "pragma/entities/components/parent_component.hpp"
-#include "pragma/entities/components/movement_component.hpp"
-#include "pragma/entities/components/orientation_component.hpp"
-#include "pragma/entities/components/action_input_controller_component.hpp"
-#include "pragma/entities/components/input_movement_controller_component.hpp"
-#include "pragma/entities/components/intersection_handler_component.hpp"
-#include "pragma/entities/components/constraints/constraint_component.hpp"
-#include "pragma/entities/components/constraints/constraint_manager_component.hpp"
-#include "pragma/entities/components/constraints/constraint_space_component.hpp"
-#include "pragma/entities/components/constraints/constraint_copy_location_component.hpp"
-#include "pragma/entities/components/constraints/constraint_copy_rotation_component.hpp"
-#include "pragma/entities/components/constraints/constraint_copy_scale_component.hpp"
-#include "pragma/entities/components/constraints/constraint_limit_distance_component.hpp"
-#include "pragma/entities/components/constraints/constraint_limit_location_component.hpp"
-#include "pragma/entities/components/constraints/constraint_limit_rotation_component.hpp"
-#include "pragma/entities/components/constraints/constraint_limit_scale_component.hpp"
-#include "pragma/entities/components/constraints/constraint_look_at_component.hpp"
-#include "pragma/entities/components/constraints/constraint_child_of_component.hpp"
-#include "pragma/entities/components/animation_driver_component.hpp"
-#include "pragma/entities/components/bone_merge_component.hpp"
-#include "pragma/entities/components/flex_merge_component.hpp"
-#include "pragma/entities/components/origin_component.hpp"
-#include "pragma/entities/components/basegravity.h"
 
-export module pragma.shared;
+module pragma.shared;
 
 import :game.game;
 

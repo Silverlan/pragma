@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
 #include <mathutil/uvec.h>
 
 export module pragma.client:rendering.shaders.world_unlit;

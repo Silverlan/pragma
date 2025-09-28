@@ -3,11 +3,7 @@
 
 module;
 
-#include "pragma/networkdefinitions.h"
-#include <pragma/lua/luaapi.h>
 #include <mathutil/glmutil.h>
-#include <pragma/math/angle/wvangle.h>
-#include <pragma/math/angle/wvquaternion.h>
 
 export module pragma.shared:scripting.lua.classes.vector;
 

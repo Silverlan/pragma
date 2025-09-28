@@ -4,6 +4,8 @@
 module;
 
 #include "pragma/networkdefinitions.h"
+#include "mathutil/umath.h"
+#include "networkmanager/interface/nwm_manager.hpp"
 #include <cinttypes>
 #include <string>
 

@@ -22,8 +22,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/math/util_noise.hpp"
 #include <random>
 
 module pragma.shared;

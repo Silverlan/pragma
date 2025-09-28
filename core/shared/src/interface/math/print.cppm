@@ -3,10 +3,10 @@
 
 module;
 
-#include "pragma/definitions.h"
+#include "pragma/networkdefinitions.h"
 #include <iostream>
 #include <mathutil/glmutil.h>
-#include "pragma/console/conout.h"
+#include "mathutil/color.h"
 
 #define MATRIX_OSTREAM_DEC(type)                                                                                                                                                                                                                                                                 \
 	DLLNETWORK Con::c_cout &operator<<(Con::c_cout &os, const Mat##type &m);                                                                                                                                                                                                                     \

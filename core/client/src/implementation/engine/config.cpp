@@ -4,11 +4,8 @@
 module;
 
 #include "stdafx_cengine.h"
-#include <pragma/console/convars.h>
 #include <sharedutils/util_debug.h>
 #include <fsys/filesystem.h>
-#include "pragma/input/inputhelper.h"
-#include <pragma/logging.hpp>
 
 module pragma.client;
 

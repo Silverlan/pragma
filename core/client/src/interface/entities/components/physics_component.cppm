@@ -3,9 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include <pragma/entities/components/base_physics_component.hpp>
-#include <pragma/networking/nwm_velocity_correction.hpp>
 
 export module pragma.client:entities.components.physics;
 

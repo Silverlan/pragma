@@ -3,14 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/components/base_animated_component.hpp"
-#include "pragma/entities/components/base_model_component.hpp"
-#include "pragma/entities/components/base_transform_component.hpp"
-#include "pragma/model/model.h"
-#include "pragma/model/animation/skeleton.hpp"
-#include "pragma/model/animation/bone.hpp"
-#include "pragma/model/animation/meta_rig.hpp"
 
 module pragma.shared;
 

@@ -3,9 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include "pragma/model/model.h"
-#include <pragma/entities/components/base_entity_component.hpp>
 #include <mathutil/transform.hpp>
 #include <mathutil/uvec.h>
 

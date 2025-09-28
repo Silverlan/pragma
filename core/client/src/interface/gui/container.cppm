@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
 #include <unordered_map>
 
 export module pragma.client:gui.container;

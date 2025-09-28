@@ -3,12 +3,7 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include <pragma/lua/luaapi.h>
 #include <prosper_prepared_command_buffer.hpp>
-#include "pragma/lua/luaobjectbase.h"
-#include <pragma/lua/lua_call.hpp>
-#include <pragma/lua/handle_holder.hpp>
 
 #undef DrawState
 

@@ -3,8 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/physics/phys_water_surface_simulator.hpp"
 
 module pragma.shared;
 

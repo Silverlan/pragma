@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include "pragma/entities/func/basefuncbutton.h"
 
 export module pragma.client:entities.components.func_button;
 

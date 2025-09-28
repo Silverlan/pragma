@@ -4,7 +4,6 @@
 #ifndef __AI_BEHAVIOR_PARAMETER_H__
 #define __AI_BEHAVIOR_PARAMETER_H__
 
-#include "pragma/serverdefinitions.h"
 #include <mathutil/glmutil.h>
 #include <memory>
 #include <vector>

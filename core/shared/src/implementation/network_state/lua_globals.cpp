@@ -3,44 +3,11 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/engine.h"
-#include "pragma/networkstate/networkstate.h"
-#include <pragma/game/game.h>
-#include <pragma/console/conout.h>
-#include "pragma/lua/libraries/lprint.h"
-#include "pragma/lua/libraries/lutil.hpp"
-#include "pragma/lua/libraries/lmath.h"
-#include "pragma/lua/libraries/ldebug.h"
-#include "pragma/lua/libraries/ludm.hpp"
-#include <pragma/console/fcvar.h>
-#include "pragma/physics/raytraces.h"
-#include "pragma/lua/ldefinitions.h"
-#include <pragma/physics/movetypes.h>
-#include "pragma/audio/e_alstate.h"
-#include "pragma/lua/classes/ldef_vector.h"
-#include "pragma/lua/classes/ldef_skeleton.hpp"
-#include "pragma/lua/classes/ldatastream.h"
 #include "luasystem.h"
-#include "pragma/entities/parentmode.h"
-#include "pragma/model/animation/activities.h"
-#include <pragma/math/intersection.h>
-#include "pragma/input/inkeys.h"
-#include "pragma/entities/observermode.h"
-#include "pragma/entities/entity_iterator.hpp"
-#include "pragma/physics/collisionmasks.h"
 #include <fsys/filesystem.h>
-#include "pragma/audio/alsound_type.h"
-#include "pragma/game/damagetype.h"
 #include "noise/noise.h"
-#include "pragma/model/animation/fanim.h"
-#include "pragma/addonsystem/addonsystem.h"
-#include "pragma/lua/libraries/lfile.h"
-#include "pragma/util/util_duration_type.hpp"
-#include "pragma/game/game_limits.h"
 #include <scripting/lua/lua.hpp>
 #include <sharedutils/util_enum.h>
-#include <pragma/emessage.h>
 #include <luainterface.hpp>
 
 // import pragma.scripting.lua;

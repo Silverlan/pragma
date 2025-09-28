@@ -7,8 +7,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/math/icosphere.h"
 #include <mathutil/uvec.h>
 
 module pragma.shared;

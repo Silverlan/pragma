@@ -3,16 +3,10 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/engine.h"
-#include "pragma/console/conout.h"
-#include "pragma/console/cvar.h"
-#include "pragma/logging.hpp"
-#include <pragma/console/convars.h>
 #include <sharedutils/util_debug.h>
 #include <mathutil/color.h>
 
-export module pragma.shared;
+module pragma.shared;
 
 import :console.output;
 

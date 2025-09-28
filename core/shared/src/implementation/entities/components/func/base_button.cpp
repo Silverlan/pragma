@@ -3,17 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/func/basefuncbutton.h"
-#include "pragma/util/util_handled.hpp"
-#include "pragma/audio/alsound_type.h"
-#include "pragma/entities/components/base_physics_component.hpp"
-#include "pragma/entities/components/base_sound_emitter_component.hpp"
-#include "pragma/entities/components/base_render_component.hpp"
-#include "pragma/entities/components/base_io_component.hpp"
-#include "pragma/entities/components/usable_component.hpp"
-#include "pragma/entities/baseentity_events.hpp"
-#include "pragma/entities/entity_component_system_t.hpp"
 
 module pragma.shared;
 

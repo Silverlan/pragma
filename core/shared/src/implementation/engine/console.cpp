@@ -3,11 +3,7 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/console/debugconsole.h"
-#include "pragma/engine.h"
 #include <sharedutils/util_string.h>
-#include <pragma/console/convars.h>
 #include <atomic>
 #ifdef __linux__
 
@@ -16,7 +12,6 @@ module;
 #include <fcntl.h>
 #include <signal.h>
 #include <poll.h>
-#include "pragma/console/linenoise.hpp"
 #endif
 
 module pragma.shared;

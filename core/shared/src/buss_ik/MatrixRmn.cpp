@@ -27,7 +27,6 @@ subject to the following restrictions:
 //    Not very sophisticated yet.  Needs more functionality
 //		To do: better handling of resizing.
 //
-#include "stdafx_shared.h"
 #include "pragma/buss_ik/MatrixRmn.h"
 MatrixRmn MatrixRmn::WorkMatrix;		// Temporary work matrix
 

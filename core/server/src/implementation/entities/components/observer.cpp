@@ -4,12 +4,7 @@
 module;
 
 #include "stdafx_server.h"
-#include <pragma/entities/components/base_observable_component.hpp>
-#include <pragma/networking/nwm_util.h>
 #include "sharedutils/netpacket.hpp"
-#include "pragma/entities/observermode.h"
-#include "pragma/networking/recipient_filter.hpp"
-#include <pragma/networking/enums.hpp>
 
 module pragma.server.entities.components.observer;
 

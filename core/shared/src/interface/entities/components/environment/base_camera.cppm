@@ -3,13 +3,18 @@
 
 module;
 
-#include "pragma/entities/components/base_entity_component.hpp"
+#include "pragma/networkdefinitions.h"
 #include <sharedutils/property/util_property.hpp>
 #include <sharedutils/property/util_property_vector.h>
 #include <sharedutils/property/util_property_matrix.hpp>
 #include <mathutil/plane.hpp>
 
 export module pragma.shared:entities.components.environment.base_camera;
+
+export import :entities.components.base;
+import :entities.components.base_field_angle;
+export import :math.frustum;
+import :util.render_tile;
 
 export {
 	namespace pragma {

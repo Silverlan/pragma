@@ -3,20 +3,21 @@
 
 module;
 
-#include "pragma/entities/components/base_entity_component.hpp"
-#include <pragma/definitions.h>
+#include "pragma/networkdefinitions.h"
 #include <mathutil/color.h>
 #include <mathutil/umath_lighting.hpp>
-#include "pragma/entities/baseentity.h"
-#include "pragma/entities/components/basetoggle.h"
-#include "pragma/entities/baseentity_handle.h"
 #include <sharedutils/util_pragma.hpp>
 #include <string>
 
 export module pragma.shared:entities.components.environment.lights.base_light;
 
+export import :entities.components.base;
+
 export {
 	namespace pragma {
+		class BaseEnvLightSpotComponent;
+		class BaseEnvLightPointComponent;
+		class BaseEnvLightDirectionalComponent;
 		class DLLNETWORK BaseEnvLightComponent : public BaseEntityComponent {
 		public:
 			static ComponentEventId EVENT_CALC_LIGHT_DIRECTION_TO_POINT;

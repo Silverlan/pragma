@@ -4,15 +4,20 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/util/global_string_table.hpp"
-#include "pragma/model/animation/bone.hpp"
-#include "pragma/types.hpp"
+#include "sharedutils/util_string.h"
+#include <mathutil/uvec.h>
 #include <unordered_map>
 #include <string>
 
 export module pragma.shared:model.animation.meta_rig;
 
+export import :game.coordinate_system;
+export import :model.animation.enums;
+export import :model.animation.flex_animation;
+export import :model.animation.skeleton;
+
 export {
+	class Model;
 	namespace pragma::animation {
 		enum class MetaRigBoneType : uint8_t {
 			// Note: Child bone types must not be defined before their parent!

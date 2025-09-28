@@ -7,7 +7,10 @@ module;
 #include <vector>
 #include <cinttypes>
 #include <mutex>
+#include <array>
 #include <atomic>
+#include <queue>
+#include "mathutil/uvec.h"
 
 export module pragma.shared:physics.water_surface_simulator;
 

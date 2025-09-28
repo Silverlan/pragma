@@ -3,8 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/string/format.h"
 #include <cmath>
 
 module pragma.shared;

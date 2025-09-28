@@ -4,8 +4,6 @@
 #ifndef __PANIMA_COMPONENT_CHANNEL_SUBMITTER_HPP__
 #define __PANIMA_COMPONENT_CHANNEL_SUBMITTER_HPP__
 
-#include "pragma/entities/entity_component_manager_t.hpp"
-#include "pragma/game/animation_channel_cache_data.hpp"
 
 import panima;
 

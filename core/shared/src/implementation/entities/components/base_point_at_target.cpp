@@ -3,14 +3,8 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/components/base_point_at_target_component.hpp"
-#include "pragma/entities/components/logic_component.hpp"
-#include "pragma/entities/entity_iterator.hpp"
-#include "pragma/entities/baseentity_events.hpp"
-#include "pragma/entities/components/base_transform_component.hpp"
 
-export module pragma.shared;
+module pragma.shared;
 
 import :entities.components.base_point_at_target;
 

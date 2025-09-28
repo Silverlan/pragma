@@ -3,15 +3,7 @@
 
 module;
 
-#include "stdafx_shared.h"
 #include "luasystem.h"
-#include "pragma/lua/classes/lphysics.h"
-#include "pragma/physics/environment.hpp"
-#include "pragma/lua/classes/ldef_vector.h"
-#include "pragma/lua/classes/ldef_quaternion.h"
-#include "pragma/physics/contact.hpp"
-#include "pragma/physics/phys_material.hpp"
-#include "pragma/physics/collision_object.hpp"
 
 module pragma.shared;
 

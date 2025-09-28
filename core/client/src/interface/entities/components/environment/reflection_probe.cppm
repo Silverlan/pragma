@@ -3,12 +3,10 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
 #include "sharedutils/util_parallel_job.hpp"
 #include <image/prosper_texture.hpp>
 #include <util_image_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
-#include <pragma/entities/components/base_entity_component.hpp>
 
 export module pragma.client:entities.components.env_reflection_probe;
 

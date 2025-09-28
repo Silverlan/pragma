@@ -3,11 +3,8 @@
 
 module;
 
-#include <pragma/definitions.h>
-#include <pragma/engine.h>
-#include "pragma/lua/ldefinitions.h"
 
-export module pragma.client:scripting.lua.libraries.debug_overlay;
+export module pragma.shared:scripting.lua.libraries.debug_overlay;
 
 export {
     DLLNETWORK int Lua_debugoverlay_DrawLine(lua_State *l);

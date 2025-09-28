@@ -3,12 +3,8 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/components/origin_component.hpp"
-#include "pragma/entities/entity_component_manager_t.hpp"
-#include "pragma/entities/components/component_member_flags.hpp"
 
-export module pragma.shared;
+module pragma.shared;
 
 import :entities.components.origin;
 

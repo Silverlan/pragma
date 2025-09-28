@@ -3,13 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/engine.h"
-#include "pragma/lua/classes/lmaterial.h"
-#include "pragma/lua/libraries/lfile.h"
-#include "pragma/lua/converters/game_type_converters_t.hpp"
-#include "pragma/lua/libraries/ludm.hpp"
-#include <pragma/lua/policies/default_parameter_policy.hpp>
 #include <material_manager2.hpp>
 #include "luasystem.h"
 #include "material.h"

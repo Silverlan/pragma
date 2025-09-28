@@ -1,13 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "stdafx_shared.h"
-#include "pragma/entities/environment/lights/env_light_directional.h"
-#include "pragma/util/util_handled.hpp"
-#include "pragma/entities/baseentity_events.hpp"
+module;
+
 #include <sharedutils/util.h>
 #include <algorithm>
 #include <udm.hpp>
+
+module pragma.shared;
+
+import :entities.components.environment.lights.base_directional;
 
 using namespace pragma;
 

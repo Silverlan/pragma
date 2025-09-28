@@ -3,11 +3,7 @@
 
 module;
 
-#include "pragma/serverdefinitions.h"
 #include "sharedutils/netpacket.hpp"
-#include "pragma/networking/recipient_filter.hpp"
-#include <pragma/entities/components/base_point_at_target_component.hpp>
-#include <pragma/lua/luaapi.h>
 
 export module pragma.server.entities.components.point_at_target;
 

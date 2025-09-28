@@ -3,22 +3,10 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/point/constraints/point_constraint_base.h"
-#include "pragma/physics/constraint.hpp"
 #include <algorithm>
-#include "pragma/networkstate/networkstate.h"
-#include <pragma/game/game.h>
-#include "pragma/entities/baseentity.h"
-#include "pragma/entities/baseworld.h"
-#include "pragma/physics/physobj.h"
 #include <sharedutils/util_string.h>
-#include "pragma/entities/components/base_physics_component.hpp"
-#include "pragma/entities/entity_iterator.hpp"
-#include "pragma/entities/components/base_name_component.hpp"
-#include "pragma/entities/baseentity_events.hpp"
 
-export module pragma.shared;
+module pragma.shared;
 
 import :entities.components.point.constraints.base;
 

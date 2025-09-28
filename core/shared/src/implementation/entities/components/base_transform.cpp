@@ -3,25 +3,10 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/components/base_transform_component.hpp"
-#include "pragma/game/game_limits.h"
-#include "pragma/entities/components/base_physics_component.hpp"
-#include "pragma/entities/components/base_model_component.hpp"
-#include "pragma/entities/components/base_observable_component.hpp"
-#include "pragma/entities/components/panima_component.hpp"
-#include "pragma/entities/components/component_member_flags.hpp"
-#include "pragma/entities/baseentity_events.hpp"
-#include "pragma/entities/entity_component_manager_t.hpp"
-#include "pragma/lua/luacallback.h"
-#include "pragma/lua/luafunction_call.h"
-#include "pragma/model/model.h"
 #include <sharedutils/datastream.h>
-#include "pragma/physics/raytraces.h"
-#include "pragma/entities/baseentity_trace.hpp"
 #include <udm.hpp>
 
-export module pragma.shared;
+module pragma.shared;
 
 import :entities.components.base_transform;
 

@@ -3,9 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include <pragma/entities/components/base_point_at_target_component.hpp>
-#include <pragma/lua/luaapi.h>
 
 export module pragma.client:entities.components.point_at_target;
 

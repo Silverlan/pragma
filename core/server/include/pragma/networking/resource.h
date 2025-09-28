@@ -4,7 +4,6 @@
 #ifndef __RESOURCE_H__
 #define __RESOURCE_H__
 
-#include "pragma/serverdefinitions.h"
 #include <string>
 #include <memory>
 

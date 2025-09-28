@@ -4,12 +4,14 @@
 module;
 
 #include "pragma/networkdefinitions.h"
+#include <unordered_map>
+#include <string>
 #include <mathutil/umath.h>
 
 export module pragma.shared:model.animation.enums;
 
 export {
-	enum class DLLNETWORK Activity : uint16_t {
+	enum class Activity : uint16_t {
 		Invalid,
 
 		Idle,
@@ -116,4 +118,11 @@ export {
 		Count = 7
 	};
 	REGISTER_BASIC_BITWISE_OPERATORS(FAnim)
+
+	namespace pragma::animation {
+		using BoneId = uint16_t;
+		using FlexControllerId = uint32_t;
+		constexpr auto INVALID_BONE_INDEX = std::numeric_limits<BoneId>::max();
+		constexpr auto INVALID_FLEX_CONTROLLER_INDEX = std::numeric_limits<FlexControllerId>::max();
+	};
 };

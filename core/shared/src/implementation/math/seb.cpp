@@ -3,8 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/math/math_seb.h"
 #include "Seb.h"
 
 module pragma.shared;

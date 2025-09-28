@@ -4,7 +4,6 @@
 #ifndef __LUA_VECTOR_CONVERTER_T_HPP__
 #define __LUA_VECTOR_CONVERTER_T_HPP__
 
-#include "pragma/lua/converters/vector_converter.hpp"
 
 namespace luabind {
 	template<class T>

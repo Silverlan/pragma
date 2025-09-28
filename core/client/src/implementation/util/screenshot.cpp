@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/console/conout.h"
 #include <util_image.hpp>
 #include <util_image_buffer.hpp>
 #include <image/prosper_sampler.hpp>

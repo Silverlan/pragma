@@ -3,15 +3,7 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include <pragma/engine.h>
-#include "pragma/game/gamemode/gamemodemanager.h"
-#include <pragma/game/game.h>
 #include "luasystem.h"
-#include "pragma/game/damageinfo.h"
-#include "pragma/lua/luafunction_call.h"
-#include "pragma/entities/components/base_player_component.hpp"
-#include "pragma/entities/components/base_ai_component.hpp"
 
 module pragma.shared;
 

@@ -4,14 +4,9 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/game/game_limits.h"
 #include <sharedutils/property/util_property_color.hpp>
-#include <pragma/entities/entity_component_system_t.hpp>
-#include <pragma/entities/entity_iterator.hpp>
-#include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <prosper_command_buffer.hpp>
 #include "buffers/prosper_buffer_create_info.hpp"
-#include "pragma/console/c_cvar.h"
 
 module pragma.client;
 

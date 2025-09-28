@@ -4,13 +4,10 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/console/c_cvar.h"
 #include <texture_load_flags.hpp>
 #include <sharedutils/util_file.h>
 #include <cmaterialmanager.h>
 #include <textureinfo.h>
-#include <pragma/entities/entity_iterator.hpp>
-#include <pragma/asset/util_asset.hpp>
 #include <prosper_glsl.hpp>
 #include <material_property_block_view.hpp>
 #include <cmaterial_manager2.hpp>

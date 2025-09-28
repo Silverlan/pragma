@@ -3,23 +3,16 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include <pragma/engine.h>
-#include "pragma/math/surfacematerial.h"
-#include "pragma/physics/environment.hpp"
-#include "pragma/physics/phys_material.hpp"
-#include "pragma/util/util_game.hpp"
 #include <fsys/filesystem.h>
 #include "datasystem.h"
 #include <datasystem_color.h>
 #include <datasystem_vector.h>
-#include "pragma/ai/navsystem.h"
 #include <algorithm>
 #include <udm.hpp>
 
 module pragma.shared;
 
-import :math.surface_material;
+import :physics.surface_material;
 
 SurfaceMaterialManager::SurfaceMaterialManager(pragma::physics::IEnvironment &env) : m_physEnv {env}
 {

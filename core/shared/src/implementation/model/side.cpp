@@ -3,12 +3,7 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include <pragma/definitions.h>
-#include "pragma/model/side.h"
-#include <pragma/engine.h>
 #include <mathutil/uvec.h>
-#include <pragma/math/intersection.h>
 
 module pragma.shared;
 

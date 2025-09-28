@@ -3,26 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/physics/environment.hpp"
-#include "pragma/physics/constraint.hpp"
-#include "pragma/physics/collision_object.hpp"
-#include "pragma/physics/shape.hpp"
-#include "pragma/physics/controller.hpp"
-#include "pragma/physics/vehicle.hpp"
-#include <pragma/console/conout.h>
-#include "pragma/entities/baseentity.h"
-#include "pragma/physics/physobj.h"
-#include "pragma/physics/raytraces.h"
-#include "pragma/physics/raycallback/physraycallbackfilter.hpp"
-#include "pragma/audio/alsound_type.h"
-#include "pragma/model/modelmesh.h"
-#include "pragma/util/util_game.hpp"
-#include "pragma/physics/visual_debugger.hpp"
-#include "pragma/physics/phys_water_buoyancy_simulator.hpp"
-#include "pragma/physics/physsoftbodyinfo.hpp"
-#include "pragma/entities/components/base_physics_component.hpp"
-#include "pragma/entities/trigger/base_trigger_touch.hpp"
 
 module pragma.shared;
 

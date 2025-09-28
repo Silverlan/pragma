@@ -4,11 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/components/bvh_data.hpp"
-#include <pragma/model/animation/skeleton.hpp>
-#include <pragma/lua/converters/vector_converter_t.hpp>
-#include <pragma/debug/intel_vtune.hpp>
-#include <pragma/entities/entity_component_system_t.hpp>
 
 module pragma.client;
 

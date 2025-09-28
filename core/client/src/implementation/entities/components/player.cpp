@@ -7,34 +7,8 @@ module;
 #include <mathutil/umath.h>
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/euler_angles.hpp>
-#include "pragma/audio/alsound_type.h"
-#include "pragma/entities/parentmode.h"
-#include "pragma/physics/collisiontypes.h"
-#include "pragma/math/deltaoffset.h"
-#include "pragma/math/deltatransform.h"
 #include <mathutil/uquat.h>
-#include "pragma/entities/baseentity_luaobject.h"
-#include "pragma/entities/components/base_character_component.hpp"
-#include "pragma/entities/components/base_observer_component.hpp"
-#include "pragma/entities/environment/audio/env_sound_dsp.h"
-#include <pragma/networking/nwm_util.h>
-#include <pragma/entities/components/submergible_component.hpp>
-#include <pragma/physics/raytraces.h>
-#include <pragma/model/model.h>
-#include <pragma/entities/components/base_physics_component.hpp>
-#include <pragma/entities/components/base_transform_component.hpp>
-#include <pragma/entities/components/base_name_component.hpp>
-#include <pragma/entities/components/orientation_component.hpp>
-#include <pragma/entities/components/basetoggle.h>
-#include <pragma/entities/entity_component_system_t.hpp>
-#include <pragma/lua/converters/game_type_converters_t.hpp>
-#include <pragma/entities/observermode.h>
-#include "pragma/lua/classes/ldef_entity.h"
 #include "luasystem.h"
-#include <pragma/lua/classes/lproperty_generic.hpp>
-#include <pragma/lua/lua_util_component.hpp>
-#include <pragma/lua/lua_util_component_stream.hpp>
-#include <pragma/lua/lentity_components_base_types.hpp>
 
 module pragma.client;
 

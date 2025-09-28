@@ -3,27 +3,8 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/components/ik_component.hpp"
-#include "pragma/physics/collisionmesh.h"
-#include "pragma/physics/environment.hpp"
-#include "pragma/physics/ik/util_ik.hpp"
-#include "pragma/buss_ik/Tree.h"
-#include "pragma/buss_ik/Jacobian.h"
-#include "pragma/entities/components/base_transform_component.hpp"
-#include "pragma/entities/components/base_physics_component.hpp"
-#include "pragma/entities/components/base_model_component.hpp"
-#include "pragma/entities/components/base_animated_component.hpp"
-#include "pragma/lua/converters/game_type_converters_t.hpp"
-#include "pragma/model/model.h"
-#include "pragma/physics/raytraces.h"
-#include "pragma/physics/jointinfo.h"
-#include "pragma/entities/baseentity_trace.hpp"
-#include <pragma/physics/environment.hpp>
-#include "pragma/model/animation/skeleton.hpp"
-#include "pragma/model/animation/bone.hpp"
 
-export module pragma.shared;
+module pragma.shared;
 
 import :entities.components.ik;
 

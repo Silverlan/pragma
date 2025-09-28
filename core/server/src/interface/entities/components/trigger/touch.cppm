@@ -3,9 +3,6 @@
 
 module;
 
-#include "pragma/serverdefinitions.h"
-#include <pragma/entities/components/basetoggle.h>
-#include <pragma/entities/trigger/base_trigger_touch.hpp>
 
 export module pragma.server.entities.components.triggers.touch;
 

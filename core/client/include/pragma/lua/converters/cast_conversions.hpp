@@ -4,7 +4,6 @@
 #ifndef __LUA_CAST_CONVERSIONS_HPP__
 #define __LUA_CAST_CONVERSIONS_HPP__
 
-#include <pragma/lua/converters/cast_converter.hpp>
 #include <type_traits>
 
 namespace luabind {

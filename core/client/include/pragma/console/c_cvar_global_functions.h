@@ -4,8 +4,6 @@
 #ifndef __C_CVAR_GLOBAL_FUNCTIONS_H__
 #define __C_CVAR_GLOBAL_FUNCTIONS_H__
 
-#include "pragma/clientdefinitions.h"
-#include "pragma/networkdefinitions.h"
 
 DLLCLIENT void CMD_entities_cl(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &);
 DLLCLIENT void CMD_setpos(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &);

@@ -4,14 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/components/base_transform_component.hpp"
-#include <pragma/lua/converters/game_type_converters_t.hpp>
-#include <pragma/audio/alsound_type.h>
-#include <pragma/audio/alsoundscript.h>
-#include <pragma/entities/entity_component_system_t.hpp>
-#include "pragma/entities/components/base_sound_emitter_component.hpp"
-#include <pragma/lua/lua_util_component.hpp>
-#include <pragma/lua/lua_util_component_stream.hpp>
 #include <prosper_command_buffer.hpp>
 
 module pragma.client;

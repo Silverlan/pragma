@@ -3,31 +3,10 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/components/base_ai_component.hpp"
-#include "pragma/entities/baseentity.h"
-#include "pragma/physics/collisionmasks.h"
-#include "pragma/physics/physicstypes.h"
-#include "pragma/model/animation/activities.h"
 #include "Recast.h"
 #include "DetourNavMesh.h"
 #include "DetourNavMeshBuilder.h"
 #include "DetourNavMeshQuery.h"
-#include "pragma/model/animation/fanim.h"
-#include "pragma/physics/raytraces.h"
-#include "pragma/physics/raycast_filter.hpp"
-#include "pragma/entities/baseworld.h"
-#include "pragma/math/util_hermite.h"
-#include "pragma/util/util_approach_rotation.hpp"
-#include "pragma/entities/components/base_character_component.hpp"
-#include "pragma/entities/components/base_transform_component.hpp"
-#include "pragma/entities/components/base_physics_component.hpp"
-#include "pragma/entities/components/base_model_component.hpp"
-#include "pragma/entities/components/base_observable_component.hpp"
-#include "pragma/entities/components/base_animated_component.hpp"
-#include "pragma/entities/components/orientation_component.hpp"
-#include "pragma/entities/components/movement_component.hpp"
-#include "pragma/model/model.h"
 
 module pragma.shared;
 

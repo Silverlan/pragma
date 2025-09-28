@@ -3,17 +3,11 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/components/base_wheel_component.hpp"
-#include "pragma/physics/environment.hpp"
-#include "pragma/entities/components/base_vehicle_component.hpp"
-#include "pragma/entities/components/base_transform_component.hpp"
-#include "pragma/entities/components/base_generic_component.hpp"
 #include <sharedutils/scope_guard.h>
 
 //#define ENABLE_DEPRECATED_PHYSICS
 
-export module pragma.shared;
+module pragma.shared;
 
 import :entities.components.base_wheel;
 

@@ -3,11 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/logging.hpp"
-#include "pragma/console/conout.h"
-#include "pragma/console/spdlog_anycolor_sink.hpp"
-#include "pragma/engine.h"
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/pattern_formatter.h>

@@ -4,10 +4,7 @@
 module;
 
 #include "stdafx_server.h"
-#include "pragma/lua/classes/ldef_entity.h"
-#include <pragma/lua/luaapi.h>
 #include <luabind/copy_policy.hpp>
-#include <pragma/lua/converters/game_type_converters_t.hpp>
 
 module pragma.server.scripting.lua.classes.faction;
 

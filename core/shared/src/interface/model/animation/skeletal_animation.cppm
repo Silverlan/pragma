@@ -4,12 +4,15 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/types.hpp"
+#include <mathutil/uvec.h>
 #include <cinttypes>
 
 export module pragma.shared:model.animation.skeletal_animation;
 
 import panima;
+
+export import :model.animation.animation;
+export import :model.animation.pose;
 
 export {
 	namespace pragma::animation::skeletal {

@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include <pragma/entities/baseentity.h>
 #include "mathutil/umath_geometry.hpp"
 #include <sharedutils/property/util_property.hpp>
 

@@ -4,9 +4,6 @@
 module;
 
 #include "stdafx_server.h"
-#include "pragma/networking/recipient_filter.hpp"
-#include <pragma/networking/error.hpp>
-#include <pragma/networking/enums.hpp>
 #include <servermanager/interface/sv_nwm_manager.hpp>
 #include <networkmanager/nwm_error_handle.h>
 

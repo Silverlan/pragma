@@ -3,16 +3,13 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/baseentity_events.hpp"
-#include "pragma/entities/entity_component_system_t.hpp"
-#include "pragma/lua/converters/game_type_converters_t.hpp"
-#include <pragma/entities/entity_iterator.hpp>
 #include <sharedutils/util_hash.hpp>
 #include <unordered_set>
 #include <udm.hpp>
 
-module pragma.entities.components.composite;
+module pragma.shared;
+
+import :entities.components.composite;
 
 using namespace pragma::ecs;
 using namespace compositeComponent;

@@ -3,42 +3,10 @@
 
 module;
 
-#include "pragma/lua/luaapi.h"
-#include "pragma/lua/types/udm.hpp"
-#include "stdafx_shared.h"
-#include <pragma/engine.h>
-#include "pragma/networkstate/networkstate.h"
-#include <pragma/game/game.h>
-#include "pragma/lua/libraries/lgame.h"
 #include <sharedutils/functioncallback.h>
-#include "pragma/lua/luacallback.h"
 #include "luasystem.h"
-#include "pragma/lua/classes/ldef_vector.h"
-#include "pragma/lua/lua_util_class.hpp"
-#include "pragma/entities/environment/lights/env_light.h"
-#include "pragma/entities/components/base_gamemode_component.hpp"
-#include "pragma/entities/baseworld.h"
-#include "pragma/model/modelmesh.h"
-#include "pragma/lua/classes/ldef_tracedata.h"
-#include "pragma/lua/libraries/lray.h"
-#include "pragma/lua/converters/vector_converter_t.hpp"
-#include "pragma/lua/converters/alias_converter_t.hpp"
-#include "pragma/physics/environment.hpp"
-#include "pragma/entities/entity_iterator.hpp"
-#include "pragma/entities/components/base_transform_component.hpp"
-#include "pragma/entities/components/base_physics_component.hpp"
-#include "pragma/entities/components/base_radius_component.hpp"
-#include "pragma/entities/components/base_color_component.hpp"
-#include "pragma/entities/components/base_model_component.hpp"
-#include "pragma/lua/policies/core_policies.hpp"
-#include "pragma/lua/converters/game_type_converters_t.hpp"
-#include "pragma/game/value_driver.hpp"
-#include "pragma/lua/lua_call.hpp"
-#include "pragma/ai/navsystem.h"
-#include "pragma/lua/ostream_operator_alias.hpp"
-#include <pragma/math/intersection.h>
 
-module pragma.client;
+module pragma.shared;
 
 import :scripting.lua.libraries.game;
 

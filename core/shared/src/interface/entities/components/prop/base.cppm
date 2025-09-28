@@ -4,12 +4,11 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/entities/components/base_entity_component.hpp"
-#include "pragma/physics/physicstypes.h"
-#include <pragma/physics/movetypes.h>
 #include <memory>
 
 export module pragma.shared:entities.components.props.base;
+
+export import :entities.components.base;
 
 export namespace pragma {
 	class DLLNETWORK BasePropComponent : public BaseEntityComponent {

@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/serverdefinitions.h"
-#include "pragma/entities/components/basepointpathnode.h"
 
 export module pragma.server.entities.components.point.path_node;
 

@@ -4,19 +4,7 @@
 module;
 
 #include "stdafx_server.h"
-#include "pragma/entities/baseentity_luaobject.h"
-#include <pragma/entities/components/base_character_component.hpp>
-#include <pragma/entities/components/base_wheel_component.hpp>
-#include <pragma/entities/components/base_player_component.hpp>
-#include <pragma/entities/components/usable_component.hpp>
-#include <pragma/entities/components/action_input_controller_component.hpp>
-#include <pragma/entities/entity_component_system_t.hpp>
-#include <pragma/lua/converters/game_type_converters_t.hpp>
-#include <pragma/physics/environment.hpp>
 #include "sharedutils/netpacket.hpp"
-#include "pragma/networking/recipient_filter.hpp"
-#include <pragma/networking/nwm_util.h>
-#include <pragma/networking/enums.hpp>
 
 module pragma.server.entities.components.vehicle;
 

@@ -3,10 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/basebot.h"
-#include "pragma/entities/baseentity.h"
-#include "pragma/entities/components/base_model_component.hpp"
 
 module pragma.shared;
 

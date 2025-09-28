@@ -3,53 +3,9 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/engine.h"
-#include "pragma/lua/classes/lentity.h"
-#include <pragma/math/angle/wvquaternion.h>
 #include "luasystem.h"
-#include "pragma/lua/classes/ldef_entity.h"
-#include "pragma/lua/classes/ldef_physobj.h"
-#include "pragma/lua/classes/ldef_model.h"
-#include "pragma/lua/classes/ldef_vector.h"
-#include "pragma/lua/classes/ldef_angle.h"
-#include "pragma/lua/classes/ldef_color.h"
-#include "pragma/lua/libraries/lutil.hpp"
-#include "pragma/lua/policies/core_policies.hpp"
-#include "pragma/lua/converters/optional_converter_t.hpp"
-#include "pragma/lua/converters/game_type_converters_t.hpp"
-#include "pragma/lua/types/nil_type.hpp"
-#include "pragma/lua/libraries/lray.h"
-#include "pragma/model/brush/brushmesh.h"
-#include "pragma/audio/alsound.h"
-#include "pragma/lua/classes/lphysics.h"
-#include "pragma/physics/raytraces.h"
-#include "pragma/audio/alsound_type.h"
-#include "pragma/entities/components/base_weapon_component.hpp"
-#include "pragma/entities/components/base_character_component.hpp"
-#include "pragma/entities/components/base_player_component.hpp"
-#include "pragma/entities/components/base_transform_component.hpp"
-#include "pragma/entities/components/base_physics_component.hpp"
-#include "pragma/entities/components/base_ai_component.hpp"
-#include "pragma/entities/components/base_vehicle_component.hpp"
-#include "pragma/entities/components/base_model_component.hpp"
-#include "pragma/entities/components/base_animated_component.hpp"
-#include "pragma/entities/components/parent_component.hpp"
-#include "pragma/entities/components/base_child_component.hpp"
-#include "pragma/entities/components/base_color_component.hpp"
-#include "pragma/entities/components/base_ownable_component.hpp"
-#include "pragma/entities/components/base_generic_component.hpp"
-#include "pragma/entities/components/base_time_scale_component.hpp"
-#include "pragma/entities/components/base_name_component.hpp"
-#include "pragma/entities/components/basetoggle.h"
-#include "pragma/entities/components/panima_component.hpp"
-#include "pragma/entities/entity_component_manager_t.hpp"
-#include "pragma/lua/classes/entity_components.hpp"
-#include "pragma/lua/lentity_type.hpp"
-#include "pragma/lua/classes/lproperty.hpp"
 #include <luabind/copy_policy.hpp>
 #include <sharedutils/datastream.h>
-#include <pragma/physics/movetypes.h>
 #include <udm.hpp>
 
 module pragma.shared;

@@ -3,40 +3,17 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/networkstate/networkstate.h"
-#include <pragma/console/convars.h>
-#include <pragma/engine.h>
 #include "materialmanager.h"
-#include "pragma/console/convarhandle.h"
 #include <sharedutils/functioncallback.h>
-#include <pragma/level/mapinfo.h>
-#include <pragma/game/game.h>
-#include "pragma/entities/baseentity.h"
-#include "pragma/addonsystem/addonsystem.h"
-#include "pragma/audio/soundscript.h"
 #include <sharedutils/util_string.h>
 #include <sharedutils/scope_guard.h>
-#include "pragma/game/gamemode/gamemodemanager.h"
-#include "pragma/game/game_resources.hpp"
-#include "pragma/util/resource_watcher.h"
-#include "pragma/entities/components/base_player_component.hpp"
-#include "pragma/model/modelmanager.h"
-#include "pragma/debug/intel_vtune.hpp"
-#include "pragma/debug/debug_performance_profiler.hpp"
 #include <material_manager2.hpp>
 #include <material_property_block_view.hpp>
-#include <pragma/console/s_cvar_global_functions.h>
-#include <pragma/lua/luaapi.h>
 #include <luainterface.hpp>
 #include <sharedutils/util_file.h>
 #include <sharedutils/util_library.hpp>
-#include <pragma/util/util_module.hpp>
-#include "pragma/asset/util_asset.hpp"
-#include "pragma/logging.hpp"
 
 #define DLLSPEC_ISTEAMWORKS DLLNETWORK
-#include "pragma/game/isteamworks.hpp"
 
 module pragma.shared;
 

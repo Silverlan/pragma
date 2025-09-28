@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include <pragma/entities/components/base_softbody_component.hpp>
 
 export module pragma.client:entities.components.soft_body;
 export namespace pragma {

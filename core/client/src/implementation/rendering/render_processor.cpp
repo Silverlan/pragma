@@ -4,8 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/clientdefinitions.h"
-#include <pragma/logging.hpp>
 #include <sharedutils/magic_enum.hpp>
 #include <prosper_framebuffer.hpp>
 #include <prosper_command_buffer.hpp>

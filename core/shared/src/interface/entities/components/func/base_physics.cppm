@@ -4,9 +4,11 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/entities/func/basefuncsurfacematerial.hpp"
 
 export module pragma.shared:entities.components.func.base_physics;
+
+export import :entities.components.func.base_surface_material;
+export import :physics;
 
 export namespace pragma {
 	class DLLNETWORK BaseFuncPhysicsComponent : public BaseFuncSurfaceMaterialComponent {

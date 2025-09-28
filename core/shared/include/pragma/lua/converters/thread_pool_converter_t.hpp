@@ -1,7 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2022 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "pragma/lua/converters/thread_pool_converter.hpp"
 #include <luabind/object.hpp>
 
 #ifndef __LUA_THREAD_POOL_CONVERTER_T_HPP__

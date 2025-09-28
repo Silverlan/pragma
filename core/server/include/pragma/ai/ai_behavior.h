@@ -4,10 +4,7 @@
 #ifndef __AI_BEHAVIOR_H__
 #define __AI_BEHAVIOR_H__
 
-#include "pragma/serverdefinitions.h"
 #include <mathutil/glmutil.h>
-#include <pragma/ai/ai_definitions.h>
-#include "pragma/ai/ai_behavior_parameter.h"
 #include <string>
 #include <vector>
 

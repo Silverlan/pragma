@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/networkdefinitions.h"
-#include <pragma/lua/luaapi.h>
 
 #define LUA_LIB_SOUND_SHARED                                                                                                                                                                                                                                                                     \
 	{"play", Lua::sound::play}, {"get_duration", Lua::sound::get_duration}, {"get_all", Lua::sound::get_all}, {"is_music_playing", Lua::sound::is_music_playing}, {"find_by_type", Lua::sound::find_by_type}, {"precache", Lua::sound::precache}, {"stop_all", Lua::sound::stop_all},            \
@@ -13,7 +11,7 @@ module;
 		"read_wav_phonemes", Lua::sound::read_wav_phonemes                                                                                                                                                                                                                                       \
 	}
 
-export module pragma.client:scripting.lua.libraries.sound;
+export module pragma.shared:scripting.lua.libraries.sound;
 
 export namespace Lua {
 	namespace sound {

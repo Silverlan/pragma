@@ -4,7 +4,6 @@
 #ifndef __LUA_ERROR_HANDLING_HPP__
 #define __LUA_ERROR_HANDLING_HPP__
 
-#include "pragma/definitions.h"
 #include <sstream>
 
 namespace Lua {

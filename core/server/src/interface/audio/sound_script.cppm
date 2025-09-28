@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/serverdefinitions.h"
-#include "pragma/audio/alsoundscript.h"
 
 export module pragma.server.audio.sound_script;
 

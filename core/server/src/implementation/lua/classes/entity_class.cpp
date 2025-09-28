@@ -5,10 +5,6 @@ module;
 
 #include "stdafx_server.h"
 #include "luasystem.h"
-#include "pragma/networking/recipient_filter.hpp"
-#include <pragma/lua/converters/game_type_converters_t.hpp>
-#include <pragma/audio/alsound_type.h>
-#include <pragma/networking/enums.hpp>
 #include <servermanager/interface/sv_nwm_manager.hpp>
 
 module pragma.server.scripting.lua.classes.entity;

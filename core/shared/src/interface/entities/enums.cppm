@@ -71,11 +71,17 @@ export {
 
 			Count
 		};
+
+		using NetEventId = uint32_t;
+		constexpr NetEventId INVALID_NET_EVENT = std::numeric_limits<decltype(pragma::INVALID_NET_EVENT)>::max();
 	};
 	REGISTER_BASIC_BITWISE_OPERATORS(pragma::ComponentMemberFlags)
 	REGISTER_BASIC_BITWISE_OPERATORS(FAttachmentMode);
 
-	using ComponentId = uint32_t;
-	using ComponentEventId = uint32_t;
-	const auto INVALID_COMPONENT_ID = std::numeric_limits<ComponentId>::max();
+	namespace pragma {
+		using ComponentId = uint32_t;
+		using ComponentEventId = uint32_t;
+		using ComponentMemberIndex = uint32_t;
+		const auto INVALID_COMPONENT_ID = std::numeric_limits<ComponentId>::max();
+	};
 };

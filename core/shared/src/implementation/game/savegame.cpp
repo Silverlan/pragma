@@ -3,9 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/game/savegame.hpp"
-#include "pragma/util/util_game.hpp"
 #include <sharedutils/datastream.h>
 #include <udm.hpp>
 

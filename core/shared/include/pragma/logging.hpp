@@ -4,7 +4,6 @@
 #ifndef __PRAGMA_LOGGING_HPP__
 #define __PRAGMA_LOGGING_HPP__
 
-#include "pragma/logging_wrapper.hpp"
 
 #ifndef SPDLOG_SHARED_LIB
 #define SPDLOG_SHARED_LIB

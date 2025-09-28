@@ -4,24 +4,13 @@
 module;
 
 #include "stdafx_cengine.h"
-#include "pragma/clientdefinitions.h"
-#include <pragma/asset/util_asset.hpp>
-#include <pragma/lua/libraries/ldebug.h>
-#include <pragma/lua/libraries/lutil.hpp>
-#include <pragma/lua/util.hpp>
-#include <pragma/lua/libraries/lutil.hpp>
-#include <pragma/logging.hpp>
-#include <pragma/console/convars.h>
 #include <sharedutils/util_file.h>
 #include <sharedutils/util_library.hpp>
 #include <cmaterialmanager.h>
 #include <cmaterial_manager2.hpp>
 #include <texturemanager/texture.h>
-#include <pragma/console/command_options.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <buffers/prosper_dynamic_resizable_buffer.hpp>
-#include <pragma/entities/entity_iterator.hpp>
-#include <pragma/entities/entity_component_system_t.hpp>
 #include <scripting/lua/lua.hpp>
 #include <image/prosper_render_target.hpp>
 #include <shader/prosper_shader_blur.hpp>

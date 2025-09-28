@@ -3,9 +3,6 @@
 
 module;
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/util/util_thread_pool.hpp"
-#include <pragma/lua/luaapi.h>
 
 export module pragma.shared:scripting.lua.classes.thread_pool;
 

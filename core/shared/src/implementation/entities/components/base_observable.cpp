@@ -3,14 +3,10 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/components/base_observable_component.hpp"
-#include "pragma/entities/components/base_observer_component.hpp"
-#include "pragma/entities/components/base_transform_component.hpp"
 #include <sharedutils/datastream.h>
 #include <udm.hpp>
 
-export module pragma.shared;
+module pragma.shared;
 
 import :entities.components.base_observable;
 

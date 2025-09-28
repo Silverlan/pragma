@@ -3,9 +3,6 @@
 
 module;
 
-#include "pragma/serverdefinitions.h"
-#include <pragma/audio/alsound.h>
-#include <pragma/audio/alsound_base.hpp>
 #include <sharedutils/netpacket.hpp>
 
 export module pragma.server.audio.sound;

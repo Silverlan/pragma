@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
 
 export module pragma.client:entities.components.pp_bloom;
 import :entities.components.pp_base;

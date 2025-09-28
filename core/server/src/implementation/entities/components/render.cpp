@@ -5,9 +5,6 @@ module;
 
 #include "stdafx_server.h"
 #include "sharedutils/netpacket.hpp"
-#include <pragma/networking/nwm_util.h>
-#include <pragma/networking/enums.hpp>
-#include "pragma/networking/recipient_filter.hpp"
 
 module pragma.server.entities.components.render;
 

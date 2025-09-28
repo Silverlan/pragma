@@ -3,16 +3,12 @@
 
 module;
 
-#include "pragma/entities/entity_component_system_t.hpp"
-#include <pragma/console/convars.h>
 #include <prosper_util.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <prosper_command_buffer.hpp>
 #include <image/prosper_render_target.hpp>
 #include <image/prosper_msaa_texture.hpp>
-#include <pragma/entities/entity_iterator.hpp>
 #include <prosper_descriptor_set_group.hpp>
-#include "pragma/console/c_cvar.h"
 
 module pragma.client;
 

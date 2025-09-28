@@ -5,11 +5,7 @@ module;
 
 #include "stdafx_client.h"
 //#include "shader.h" // prosper TODO
-#include <pragma/console/convars.h>
 //#include "shader_screen.h" // prosper TODO
-#include <pragma/console/convars.h>
-#include "pragma/console/c_cvar.h"
-#include <pragma/debug/intel_vtune.hpp>
 #include <buffers/prosper_buffer.hpp>
 
 module pragma.client;

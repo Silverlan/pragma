@@ -3,22 +3,10 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/components/base_model_component.hpp"
-#include "pragma/entities/components/base_transform_component.hpp"
-#include "pragma/entities/components/base_animated_component.hpp"
-#include "pragma/entities/components/base_physics_component.hpp"
-#include "pragma/entities/components/intersection_handler_component.hpp"
-#include "pragma/entities/entity_component_manager_t.hpp"
-#include "pragma/model/model.h"
-#include "pragma/model/modelmanager.h"
-#include "pragma/asset/util_asset.hpp"
 #include <sharedutils/datastream.h>
-#include <pragma/util/transform.h>
-#include <pragma/entities/baseentity_events.hpp>
 #include <udm.hpp>
 
-export module pragma.shared;
+module pragma.shared;
 
 import :entities.components.base_model;
 

@@ -3,12 +3,12 @@
 
 module;
 
-#include "pragma/networkdefinitions.h"
 #include <mathutil/umath.h>
 #include <udm.hpp>
-#include "pragma/entities/entity_uuid_ref.hpp"
 
-export module pragma.entities.member_type;
+export module pragma.shared:entities.member_type;
+
+export import :entities.universal_reference;
 
 export {
 	namespace pragma::ents {

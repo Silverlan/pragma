@@ -3,12 +3,9 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/lua/libraries/lnoise.h"
-#include "pragma/lua/classes/ldef_vector.h"
 #include "luasystem.h"
 
-module pragma.client;
+module pragma.shared;
 
 import :scripting.lua.libraries.noise;
 

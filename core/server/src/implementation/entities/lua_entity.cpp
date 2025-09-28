@@ -4,14 +4,7 @@
 module;
 
 #include "stdafx_server.h"
-#include "pragma/networking/recipient_filter.hpp"
-#include "pragma/networking/iserver_client.hpp"
-#include <pragma/entities/components/map_component.hpp>
 #include <servermanager/interface/sv_nwm_manager.hpp>
-#include <pragma/lua/converters/game_type_converters_t.hpp>
-#include <pragma/entities/entity_iterator.hpp>
-#include <pragma/networking/enums.hpp>
-#include <pragma/networking/nwm_util.h>
 
 module pragma.server.entities.lua;
 

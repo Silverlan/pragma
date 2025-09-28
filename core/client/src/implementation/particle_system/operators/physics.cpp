@@ -4,12 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/clientdefinitions.h"
-#include <pragma/physics/environment.hpp>
-#include <pragma/physics/shape.hpp>
-#include <pragma/physics/collisionmesh.h>
-#include <pragma/physics/collision_object.hpp>
-#include <pragma/model/model.h>
 
 module pragma.client;
 

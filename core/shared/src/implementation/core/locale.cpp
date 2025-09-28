@@ -3,8 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/logging.hpp"
 #include <fsys/directory_watcher.h>
 #include <fsys/filesystem.h>
 #include <sharedutils/util_string.h>

@@ -3,15 +3,8 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include <pragma/game/game.h>
-#include "pragma/lua/ldefinitions.h"
-#include "pragma/networkstate/networkstate.h"
-#include "pragma/lua/classes/lcallback.h"
-#include "pragma/lua/luacallback.h"
 #include "luasystem.h"
 #include <sharedutils/util_string.h>
-#include "pragma/lua/lua_call.hpp"
 
 module pragma.shared;
 

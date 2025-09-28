@@ -10,6 +10,10 @@ module;
 
 export module pragma.shared:physics.contact;
 
+export import :physics.collision_object;
+export import :physics.material;
+export import :physics.shape;
+
 export {
 	namespace pragma::physics {
 		struct DLLNETWORK ContactPoint {

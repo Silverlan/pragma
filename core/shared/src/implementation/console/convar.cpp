@@ -3,10 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/networkstate/networkstate.h"
-#include <pragma/console/convars.h>
-#include <pragma/console/conout.h>
 #include <sharedutils/magic_enum.hpp>
 
 module pragma.shared;

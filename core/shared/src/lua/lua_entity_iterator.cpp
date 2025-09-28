@@ -1,9 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "stdafx_shared.h"
-#include "pragma/engine.h"
-#include "pragma/lua/lua_entity_iterator.hpp"
 
 LuaBaseEntityIterator::LuaBaseEntityIterator(const BaseEntityIterator &iterator) : m_iterator(iterator) {}
 LuaBaseEntityIterator::LuaBaseEntityIterator(const LuaBaseEntityIterator &other) : m_iterator(other.m_iterator) {}

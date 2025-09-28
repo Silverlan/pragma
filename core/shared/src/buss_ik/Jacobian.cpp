@@ -27,7 +27,6 @@ subject to the following restrictions:
 //Alterations:
 //Remove register keyword to fix compile errors with some linux compilers (clang)
 
-#include "stdafx_shared.h"
 #include <stdlib.h>
 #include <math.h>
 #include <assert.h>

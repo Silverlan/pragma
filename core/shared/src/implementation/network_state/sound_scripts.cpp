@@ -3,14 +3,9 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/networkstate/networkstate.h"
 #include "datasystem.h"
 #include <fsys/filesystem.h>
-#include "pragma/scripts.h"
-#include "pragma/audio/soundscript.h"
 #include <mathutil/umath.h>
-#include "pragma/game/game_resources.hpp"
 
 module pragma.shared;
 

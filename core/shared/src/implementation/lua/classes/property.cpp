@@ -3,11 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/lua/classes/lproperty.hpp"
-#include "pragma/lua/classes/lproperty_generic.hpp"
-#include "pragma/lua/lua_call.hpp"
-#include <pragma/lua/luaapi.h>
 #include <luainterface.hpp>
 
 module pragma.shared;

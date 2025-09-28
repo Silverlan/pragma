@@ -4,9 +4,7 @@
 module;
 
 #include "stdafx_server.h"
-#include "pragma/ai/ai_schedule.h"
 #include "luasystem.h"
-#include <pragma/lua/converters/game_type_converters_t.hpp>
 
 module pragma.server.scripting.lua.classes.ai_schedule;
 

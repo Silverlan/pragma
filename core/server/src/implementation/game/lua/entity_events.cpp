@@ -4,10 +4,6 @@
 module;
 
 #include "stdafx_server.h"
-#include "pragma/ai/ai_behavior.h"
-#include "pragma/input/inkeys.h"
-#include "pragma/lua/s_ldef_memory_fragment.hpp"
-#include <pragma/lua/converters/game_type_converters_t.hpp>
 
 module pragma.server.game;
 

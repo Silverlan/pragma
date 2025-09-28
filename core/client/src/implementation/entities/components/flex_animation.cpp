@@ -4,8 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include <pragma/model/animation/flex_animation.hpp>
-#include <pragma/model/model.h>
 
 module pragma.client;
 

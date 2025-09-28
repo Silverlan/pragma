@@ -4,7 +4,6 @@
 #ifndef __LUA_CAST_CONVERTER_T_HPP__
 #define __LUA_CAST_CONVERTER_T_HPP__
 
-#include "pragma/lua/converters/cast_converter.hpp"
 
 template<typename TCpp, typename TLua>
 template<class U>

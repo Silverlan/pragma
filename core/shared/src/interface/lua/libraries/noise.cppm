@@ -3,12 +3,10 @@
 
 module;
 
-#include "pragma/networkdefinitions.h"
-#include <pragma/lua/luaapi.h>
 #include "noise/noise.h"
 #include "noiseutils.h"
 
-export module pragma.client:scripting.lua.libraries.noise;
+export module pragma.shared:scripting.lua.libraries.noise;
 
 export {
 	lua_registercheck(NoiseModule, noise::module::Module);

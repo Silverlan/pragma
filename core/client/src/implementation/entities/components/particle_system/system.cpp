@@ -4,22 +4,7 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/cxxmodules.hpp"
-#include "pragma/entities/components/base_io_component.hpp"
-#include "pragma/entities/components/base_animated_component.hpp"
-#include "pragma/entities/environment/effects/particlesystemdata.h"
-#include "pragma/entities/environment/effects/env_particle_system.h"
-#include <pragma/model/model.h>
-#include <pragma/model/modelmesh.h>
-#include <pragma/networking/nwm_util.h>
-#include "pragma/entities/baseentity_luaobject.h"
-#include <pragma/lua/converters/game_type_converters_t.hpp>
-#include <pragma/entities/baseentity_events.hpp>
-#include <pragma/entities/components/base_transform_component.hpp>
-#include <pragma/entities/entity_component_system_t.hpp>
 #include <udm.hpp>
-#include <pragma/lua/lua_util_component.hpp>
-#include <pragma/model/model.h>
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <buffers/prosper_buffer.hpp>

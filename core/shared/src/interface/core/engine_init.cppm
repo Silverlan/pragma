@@ -3,7 +3,6 @@
 
 module;
 
-#include "engine.h"
 #include <exception>
 
 export module pragma.shared:core.engine_init;

@@ -4,9 +4,6 @@
 #ifndef __PRAGMA_ISERVER_CLIENT_HPP__
 #define __PRAGMA_ISERVER_CLIENT_HPP__
 
-#include "pragma/serverdefinitions.h"
-#include "pragma/networking/enums.hpp"
-#include "pragma/networking/ip_address.hpp"
 #include <cinttypes>
 
 struct Resource;

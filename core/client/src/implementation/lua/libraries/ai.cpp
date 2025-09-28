@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include "luasystem.h"
-#include <pragma/lua/libraries/lai.hpp>
 #include <luainterface.hpp>
 
 module pragma.client;

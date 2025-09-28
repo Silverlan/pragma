@@ -3,9 +3,7 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
 #include "buffers/prosper_dynamic_resizable_buffer.hpp"
-#include <pragma/model/modelmesh.h>
 #include <memory>
 
 export module pragma.client:model.mesh;

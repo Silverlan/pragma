@@ -3,15 +3,15 @@
 
 module;
 
-#include "pragma/entities/components/base_entity_component.hpp"
-#include <pragma/definitions.h>
-#include "pragma/entities/baseentity.h"
-#include "pragma/entities/baseentity_handle.h"
-#include "pragma/entities/environment/lights/env_light.h"
-#include "pragma/entities/components/base_entity_component.hpp"
+#include "pragma/networkdefinitions.h"
+#include "mathutil/umath_lighting.hpp"
+#include "sharedutils/property/util_property.hpp"
 #include <string>
 
 export module pragma.shared:entities.components.environment.lights.base_spot;
+
+export import :entities.components.base;
+import :entities.components.base_field_angle;
 
 export namespace pragma {
 	class DLLNETWORK BaseEnvLightSpotComponent : public BaseEntityComponent {

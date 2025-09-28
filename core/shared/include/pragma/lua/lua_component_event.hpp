@@ -4,9 +4,6 @@
 #ifndef __LUA_COMPONENT_EVENT_HPP__
 #define __LUA_COMPONENT_EVENT_HPP__
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/entities/entity_component_event.hpp"
-#include <pragma/lua/luaapi.h>
 #include <vector>
 
 struct DLLNETWORK LuaComponentEvent : public pragma::ComponentEvent {

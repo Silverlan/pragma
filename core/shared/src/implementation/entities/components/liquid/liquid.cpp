@@ -3,28 +3,8 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/components/liquid/base_liquid_component.hpp"
-#include "pragma/entities/components/liquid/base_liquid_surface_simulation_component.hpp"
-#include "pragma/physics/environment.hpp"
-#include "pragma/physics/phys_water_buoyancy_simulator.hpp"
-#include "pragma/physics/phys_water_surface_simulator.hpp"
-#include "pragma/model/modelmesh.h"
-#include "pragma/entities/trigger/trigger_spawnflags.h"
-#include "pragma/entities/components/basetoggle.h"
-#include "pragma/physics/raytraces.h"
-#include "pragma/physics/phys_water_buoyancy_simulator.hpp"
-#include "pragma/util/util_handled.hpp"
-#include "pragma/entities/components/base_physics_component.hpp"
-#include "pragma/entities/components/base_transform_component.hpp"
-#include "pragma/entities/components/base_model_component.hpp"
-#include "pragma/entities/components/base_render_component.hpp"
-#include "pragma/entities/components/base_surface_component.hpp"
-#include "pragma/entities/components/submergible_component.hpp"
-#include "pragma/entities/baseentity_events.hpp"
-#include "pragma/model/model.h"
 
-export module pragma.shared;
+module pragma.shared;
 
 import :entities.components.constraints.liquid;
 

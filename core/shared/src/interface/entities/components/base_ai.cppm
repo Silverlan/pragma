@@ -3,16 +3,24 @@
 
 module;
 
-#include "pragma/entities/components/base_entity_component.hpp"
-#include "pragma/ai/navsystem.h"
-#include "pragma/model/animation/activities.h"
-#include <pragma/math/orientation.h>
+#include "pragma/networkdefinitions.h"
+#include "mathutil/umath.h"
+#include "sharedutils/util_weak_handle.hpp"
 #include <atomic>
 #include <mutex>
 
 export module pragma.shared:entities.components.base_ai;
 
+export import :entities.components.base;
+
+import :ai.nav_system;
+export import :model.animation.enums;
+import :entities.components.movement;
+import :physics.raycast_filter;
+
 export {
+	class BaseAIComponent;
+	class Model;
 	namespace pragma {
 		namespace ai {
 			namespace navigation {
@@ -102,7 +110,7 @@ export {
 			void UpdateMovementProperties();
 			virtual void UpdateMovementProperties(MovementComponent &movementC);
 			virtual void OnPhysicsInitialized();
-			enum class DLLNETWORK PathResult : uint32_t { Idle = 0, Updating, Success, Failed };
+			enum class PathResult : uint32_t { Idle = 0, Updating, Success, Failed };
 
 			// Navigation Path
 			struct {

@@ -4,14 +4,18 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/entities/baseentity_handle.h"
-#include "pragma/physics/physobj.h"
 #include <sharedutils/util_weak_handle.hpp>
 #include <cinttypes>
 
 export module pragma.shared:physics.raycast_filter;
 
+export import :entities.base_entity_handle;
+export import :physics.collision_object;
+export import :physics.object_handle;
+export import :physics.shape;
+
 export {
+	class BaseEntity;
 	namespace pragma::physics {
 		class DLLNETWORK IRayCastFilterCallback {
 		public:

@@ -3,9 +3,6 @@
 
 module;
 
-#include "pragma/networkdefinitions.h"
-#include <pragma/lua/luaapi.h>
-#include "pragma/math/icosphere.h"
 
 export module pragma.shared:scripting.lua.classes.model_mesh;
 

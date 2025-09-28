@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_client.h"
 
-#include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <prosper_command_buffer.hpp>
 #include <luasystem.h>
 

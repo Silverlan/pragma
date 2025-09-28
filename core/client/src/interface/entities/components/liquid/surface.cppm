@@ -3,9 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include <pragma/types.hpp>
-#include <pragma/entities/components/liquid/base_liquid_surface_component.hpp>
 #include <cmaterial.h>
 #include <image/prosper_texture.hpp>
 #include <buffers/prosper_buffer.hpp>

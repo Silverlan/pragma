@@ -3,9 +3,11 @@
 
 module;
 
-#include "pragma/entities/components/base_entity_component.hpp"
+#include "pragma/networkdefinitions.h"
 
 export module pragma.shared:entities.components.constraints.manager;
+
+export import :entities.components.constraints.base;
 
 export namespace pragma {
 	class DLLNETWORK ConstraintManagerComponent final : public BaseEntityComponent {

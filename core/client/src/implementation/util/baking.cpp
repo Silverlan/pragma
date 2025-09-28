@@ -4,12 +4,7 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/util/util_thread_pool.hpp"
-#include "pragma/entities/environment/lights/env_light_spot.h"
-#include "pragma/entities/environment/lights/env_light_point.h"
-#include "pragma/entities/environment/lights/env_light_directional.h"
 #include <mathutil/umath_geometry.hpp>
-#include <pragma/entities/entity_component_system_t.hpp>
 #include <prosper_command_buffer.hpp>
 #include <image/prosper_image.hpp>
 #include <buffers/prosper_buffer.hpp>

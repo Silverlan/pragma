@@ -4,24 +4,9 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/lua/libraries/lsound.h"
-#include "pragma/lua/libraries/lasset.hpp"
-#include "pragma/asset/util_asset.hpp"
-#include <pragma/lua/policies/core_policies.hpp>
 #include <alsound_effect.hpp>
 #include <luabind/copy_policy.hpp>
-#include <pragma/lua/policies/default_parameter_policy.hpp>
-#include <pragma/lua/util_logging.hpp>
-#include <pragma/input/inputhelper.h>
-#include <pragma/lua/handle_holder.hpp>
 #include <luainterface.hpp>
-#include <pragma/lua/custom_constructor.hpp>
-#include <pragma/lua/converters/string_view_converter_t.hpp>
-#include <pragma/lua/converters/vector_converter_t.hpp>
-#include <pragma/lua/converters/pair_converter_t.hpp>
-#include <pragma/lua/converters/game_type_converters_t.hpp>
-#include <pragma/lua/converters/optional_converter_t.hpp>
-#include <pragma/lua/converters/thread_pool_converter_t.hpp>
 #include <prosper_window.hpp>
 #include <prosper_command_buffer.hpp>
 #include <alsoundsystem.hpp>

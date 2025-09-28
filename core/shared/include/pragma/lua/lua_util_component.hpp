@@ -4,7 +4,6 @@
 #ifndef __LUA_UTIL_COMPONENT_HPP__
 #define __LUA_UTIL_COMPONENT_HPP__
 
-#include "pragma/entities/components/base_entity_component.hpp"
 #include <sstream>
 namespace pragma {
 	namespace lua {

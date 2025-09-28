@@ -3,9 +3,7 @@
 
 module;
 
-#include "pragma/model/modelmesh.h"
 #include "model/mikktspace/mikktspace.h"
-#include <pragma/console/conout.h>
 
 module pragma.shared;
 

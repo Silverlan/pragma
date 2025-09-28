@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
 #include <prosper_command_buffer.hpp>
 #include <image/prosper_texture.hpp>
 #include <shader/prosper_shader.hpp>

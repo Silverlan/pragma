@@ -4,17 +4,8 @@
 module;
 
 #include "stdafx_server.h"
-#include <pragma/physics/physobj.h>
 #include <sharedutils/util_string.h>
-#include "pragma/entities/baseentity_luaobject.h"
-#include <pragma/physics/phys_water_surface_simulator.hpp>
-#include <pragma/entities/components/base_physics_component.hpp>
-#include <pragma/entities/components/base_transform_component.hpp>
-#include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <sharedutils/netpacket.hpp>
-#include "pragma/networking/recipient_filter.hpp"
-#include <pragma/networking/enums.hpp>
-#include <pragma/entities/entity_component_system_t.hpp>
 
 module pragma.server.entities.components.liquid;
 

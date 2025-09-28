@@ -3,11 +3,9 @@
 
 module;
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/lua/ldefinitions.h"
 #include <regex>
 
-export module pragma.client:scripting.lua.libraries.regex;
+export module pragma.shared:scripting.lua.libraries.regex;
 
 export {
 	DLLNETWORK std::ostream &operator<<(std::ostream &out, const std::match_results<const char *> &match);

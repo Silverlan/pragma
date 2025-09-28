@@ -4,9 +4,10 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/entities/baseentity_handle.h"
 
-export module pragma.entities.handle_wrapper;
+export module pragma.shared:entities.handle_wrapper;
+
+export import :entities.base_entity_handle;
 
 export namespace pragma {
     // Note: Using EntityHandle can cause a LNK1169 linker error with msvc due to a compiler bug.

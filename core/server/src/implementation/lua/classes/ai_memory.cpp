@@ -4,10 +4,7 @@
 module;
 
 #include "stdafx_server.h"
-#include "pragma/lua/classes/ldef_entity.h"
 #include "luasystem.h"
-#include "pragma/ai/ai_memory.h"
-#include <pragma/lua/converters/game_type_converters_t.hpp>
 
 module pragma.server.scripting.lua.classes.ai_memory;
 

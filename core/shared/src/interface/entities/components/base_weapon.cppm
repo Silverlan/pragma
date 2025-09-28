@@ -3,10 +3,13 @@
 
 module;
 
-#include "pragma/entities/components/base_entity_component.hpp"
+#include "pragma/networkdefinitions.h"
 #include <sharedutils/property/util_property.hpp>
 
 export module pragma.shared:entities.components.base_weapon;
+
+export import :entities.components.base_ownable;
+export import :game.bullet_info;
 
 export namespace pragma {
 	struct DLLNETWORK CEOnClipSizeChanged : public ComponentEvent {

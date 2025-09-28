@@ -3,21 +3,8 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/components/liquid/base_buoyancy_component.hpp"
-#include "pragma/entities/components/liquid/base_liquid_control_component.hpp"
-#include "pragma/entities/components/liquid/base_liquid_surface_simulation_component.hpp"
-#include "pragma/physics/phys_water_surface_simulator.hpp"
-#include "pragma/entities/components/base_physics_component.hpp"
-#include "pragma/entities/components/base_render_component.hpp"
-#include "pragma/entities/components/base_surface_component.hpp"
-#include "pragma/entities/components/submergible_component.hpp"
-#include "pragma/entities/trigger/base_trigger_touch.hpp"
-#include "pragma/entities/entity_component_manager_t.hpp"
-#include "pragma/physics/environment.hpp"
-#include "pragma/physics/phys_water_buoyancy_simulator.hpp"
 
-export module pragma.shared;
+module pragma.shared;
 
 import :entities.components.constraints.buoyancy;
 

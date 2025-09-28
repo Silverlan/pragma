@@ -15,7 +15,7 @@ export {
 	#pragma warning(disable : 4251)
 	#pragma pack(push, 1)
 	struct DLLNETWORK GibletCreateInfo {
-		enum class DLLNETWORK PhysShape : uint32_t { Model = 0, None, Sphere, Box, Cylinder };
+		enum class PhysShape : uint32_t { Model = 0, None, Sphere, Box, Cylinder };
 		std::string model;
 		uint32_t skin = 0;
 		float scale = 1.f;
@@ -32,7 +32,4 @@ export {
 		float physHeight = 0.0;
 		PhysShape physShape = PhysShape::Model;
 	};
-	#pragma pack(pop)
-	lua_registercheck(GibletCreateInfo, GibletCreateInfo);
-	#pragma warning(pop)
 };

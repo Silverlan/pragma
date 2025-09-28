@@ -3,14 +3,8 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/components/bone_merge_component.hpp"
-#include "pragma/entities/entity_component_manager_t.hpp"
-#include "pragma/entities/components/base_animated_component.hpp"
-#include "pragma/entities/components/base_model_component.hpp"
-#include "pragma/model/model.h"
 
-export module pragma.shared;
+module pragma.shared;
 
 import :entities.components.bone_merge;
 

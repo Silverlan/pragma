@@ -1,18 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "stdafx_shared.h"
-#include "pragma/engine.h"
-#include "pragma/lua/lua_error_handling.hpp"
-#include "pragma/lua/luaapi.h"
-#include <pragma/console/convars.h>
-#include "pragma/console/cvar.h"
-#include "pragma/console/debugconsole.h"
-#include "pragma/lua/lua_doc.hpp"
-#include "pragma/console/util_console_color.hpp"
-#include "pragma/console/conout.h"
-#include <pragma/debug/debug_utils.hpp>
-#include <pragma/lua/luafunction_call.h>
 #include <sharedutils/util.h>
 #include <sharedutils/util_file.h>
 #include <luabind/exception_handler.hpp>

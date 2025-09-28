@@ -3,9 +3,7 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
 #include <sharedutils/util_parallel_job.hpp>
-#include <pragma/entities/components/base_entity_component.hpp>
 #include "image/prosper_texture.hpp"
 #include "util_image_buffer.hpp"
 #include <cmaterial.h>

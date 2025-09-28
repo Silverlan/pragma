@@ -6,7 +6,6 @@ module;
 #include "stdafx_client.h"
 #include <alsoundsystem.hpp>
 #include <alsoundsystem_create_effect.hpp>
-#include "pragma/console/c_cvar_global_functions.h"
 #include <alsound_effect.hpp>
 #include <udm.hpp>
 

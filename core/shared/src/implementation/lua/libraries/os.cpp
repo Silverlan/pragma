@@ -3,12 +3,8 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include <pragma/definitions.h>
-#include "pragma/lua/libraries/los.h"
-#include <pragma/lua/luaapi.h>
 
-module pragma.client;
+module pragma.shared;
 
 import :scripting.lua.libraries.os;
 

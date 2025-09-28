@@ -1,20 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2025 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "interface/scripting/lua/include.hpp"
 #include "interface/scripting/lua/error_handling.hpp"
-
-// module;
-
-#include "stdafx_shared.h"
-#include <pragma/engine.h>
 #include <sharedutils/util_path.hpp>
 #include <luainterface.hpp>
 #include <stack>
 
-// module pragma.scripting.lua;
-
-// import :error_handling;
+module pragma.scripting.lua;
 
 static pragma::scripting::lua::IncludeResult include_file(lua_State *l, const util::Path &fileName, pragma::scripting::lua::IncludeFlags flags, Lua::IncludeCache *optIncludeCache = nullptr);
 static pragma::scripting::lua::IncludeResult include_directory(lua_State *l, const util::Path &fullLuaPath, const util::Path &relLuaPath, pragma::scripting::lua::IncludeFlags flags, Lua::IncludeCache *optIncludeCache = nullptr)

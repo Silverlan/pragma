@@ -2,18 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_server.h"
-#include "pragma/lua/s_lentity_components.hpp"
-#include "pragma/entities/components/base_character_component.hpp"
-#include "pragma/entities/components/base_player_component.hpp"
-#include <pragma/entities/components/action_input_controller_component.hpp>
-#include <pragma/lua/lua_util_component.hpp>
-#include <pragma/lua/libraries/lfile.h>
-#include <pragma/lua/luaapi.h>
-#include <pragma/lua/lentity_components_base_types.hpp>
-#include <pragma/lua/custom_constructor.hpp>
-#include <pragma/lua/converters/game_type_converters_t.hpp>
 
-#include <pragma/lua/ostream_operator_alias.hpp>
 
 import pragma.server.entities;
 import pragma.server.entities.components;

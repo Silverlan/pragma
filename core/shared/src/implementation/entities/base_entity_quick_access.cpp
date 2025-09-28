@@ -3,25 +3,7 @@
 
 module;
 
-#include "pragma/entities/baseentity.h"
 #include <mathutil/transform.hpp>
-#include "pragma/physics/collisionmasks.h"
-#include "pragma/physics/collision_object.hpp"
-#include "pragma/entities/components/base_name_component.hpp"
-#include "pragma/entities/components/base_model_component.hpp"
-#include "pragma/entities/components/base_physics_component.hpp"
-#include "pragma/entities/components/base_transform_component.hpp"
-#include "pragma/entities/components/base_health_component.hpp"
-#include "pragma/entities/components/base_sound_emitter_component.hpp"
-#include "pragma/entities/components/base_attachment_component.hpp"
-#include "pragma/entities/components/base_animated_component.hpp"
-#include "pragma/entities/components/damageable_component.hpp"
-#include "pragma/entities/components/velocity_component.hpp"
-#include "pragma/entities/components/base_io_component.hpp"
-#include "pragma/entities/components/base_render_component.hpp"
-#include "pragma/entities/components/base_child_component.hpp"
-#include "pragma/entities/components/parent_component.hpp"
-#include "pragma/model/model.h"
 
 module pragma.shared;
 

@@ -3,12 +3,10 @@
 
 module;
 
-#include "pragma/networkdefinitions.h"
-#include <pragma/lua/luaapi.h>
 
 #undef LoadLibrary
 
-export module pragma.client:scripting.lua.libraries.engine;
+export module pragma.shared:scripting.lua.libraries.engine;
 
 export namespace Lua {
 	namespace engine {

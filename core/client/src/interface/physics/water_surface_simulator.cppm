@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include <pragma/physics/phys_water_surface_simulator.hpp>
 #include <prosper_command_buffer.hpp>
 
 export module pragma.client:physics.water_surface_simulator;

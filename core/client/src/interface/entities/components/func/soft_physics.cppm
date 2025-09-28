@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include <pragma/entities/func/basefuncsoftphysics.hpp>
 
 export module pragma.client:entities.components.func_soft_physics;
 

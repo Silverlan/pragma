@@ -3,14 +3,20 @@
 
 module;
 
-#include "pragma/definitions.h"
+#include "pragma/networkdefinitions.h"
 #include <mathutil/uvec.h>
 #include <mathutil/umath_geometry.hpp>
 #include <optional>
 
 export module pragma.shared:math.intersection;
 
+export import :physics.hitbox;
+
 export {
+	class ModelMeshGroup;
+	class ModelMesh;
+	class ModelSubMesh;
+	class Model;
 	namespace Intersection {
 		struct DLLNETWORK LineMeshResult {
 			struct DLLNETWORK Precise {

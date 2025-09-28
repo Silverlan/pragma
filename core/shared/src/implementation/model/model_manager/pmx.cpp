@@ -3,12 +3,8 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/model/modelmanager.h"
-#include "pragma/game/game_resources.hpp"
-#include "pragma/asset/util_asset.hpp"
 
-export module pragma.shared;
+module pragma.shared;
 
 import :model.model_manager;
 

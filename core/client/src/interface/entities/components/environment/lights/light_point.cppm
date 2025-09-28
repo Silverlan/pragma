@@ -3,10 +3,7 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include "pragma/entities/environment/lights/env_light_point.h"
 #include <mathutil/plane.hpp>
-#include <pragma/util/mvpbase.h>
 
 export module pragma.client:entities.components.lights.point;
 

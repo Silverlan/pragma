@@ -2,10 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "pragma/networkdefinitions.h"
-#include <pragma/definitions.h>
 #include <mathutil/glmutil.h>
-#include "pragma/lua/ldefinitions.h"
 
 export module pragma.shared:scripting.lua.classes.entity;
 

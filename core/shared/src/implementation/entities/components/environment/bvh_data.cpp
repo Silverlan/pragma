@@ -3,11 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/components/bvh_data.hpp"
-#include "pragma/entities/components/intersection_handler_component.hpp"
-#include "pragma/model/model.h"
-#include "pragma/model/modelmesh.h"
 #include <sharedutils/util_hash.hpp>
 #include <mathutil/umath_geometry.hpp>
 #include <bvh/v2/default_builder.h>

@@ -3,11 +3,8 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/asset_types/world.hpp"
-#include "pragma/level/level_info.hpp"
 
-export module pragma.shared;
+module pragma.shared;
 
 import :map.world_data;
 

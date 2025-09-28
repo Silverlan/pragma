@@ -3,21 +3,9 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/components/base_physics_component.hpp"
-#include "pragma/physics/collisionmesh.h"
-#include "pragma/model/modelmesh.h"
-#include "pragma/physics/environment.hpp"
-#include "pragma/entities/components/base_transform_component.hpp"
-#include "pragma/physics/shape.hpp"
-#include "pragma/physics/physobj.h"
-#include "pragma/entities/components/base_softbody_component.hpp"
-#include "pragma/entities/components/base_model_component.hpp"
-#include "pragma/model/model.h"
-#include <pragma/physics/movetypes.h>
 #include <sharedutils/scope_guard.h>
 
-export module pragma.shared;
+module pragma.shared;
 
 import :entities.components.base_physics;
 

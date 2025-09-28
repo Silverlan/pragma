@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/serverdefinitions.h"
-#include <pragma/entities/baseplayer.hpp>
 
 export module pragma.server.entities.player;
 

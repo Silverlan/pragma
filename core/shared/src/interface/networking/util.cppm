@@ -7,10 +7,15 @@ module;
 #include <mathutil/glmutil.h>
 #include <sharedutils/netpacket.hpp>
 #include <sharedutils/functioncallback.h>
+#include "mathutil/eulerangles.h"
 
 export module pragma.shared:networking.util;
 
+export import :entities.base_entity_handle;
+
 export {
+	class BaseEntity;
+	namespace pragma {class BasePlayerComponent;};
 	namespace nwm {
 		DLLNETWORK void write_vector(NetPacket &packet, const Vector3 &v);
 		DLLNETWORK void write_angles(NetPacket &packet, const EulerAngles &ang);

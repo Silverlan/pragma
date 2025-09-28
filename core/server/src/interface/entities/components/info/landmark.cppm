@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/serverdefinitions.h"
-#include <pragma/entities/info/info_landmark.hpp>
 
 export module pragma.server.entities.components.info.landmark;
 

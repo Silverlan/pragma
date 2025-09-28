@@ -3,9 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/model/model_flexes.hpp"
-#include "pragma/model/animation/vertex_animation.hpp"
 
 module pragma.shared;
 

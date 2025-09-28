@@ -4,8 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/debug/debug_render_info.hpp"
-#include "pragma/entities/components/base_model_component.hpp"
 
 module pragma.client;
 

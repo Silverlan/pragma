@@ -3,9 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include "pragma/util/global_string_table.hpp"
-#include "pragma/console/conout.h"
 #include <udm.hpp>
 
 export module pragma.client:rendering.shader_input_data;

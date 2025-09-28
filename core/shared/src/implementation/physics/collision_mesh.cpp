@@ -3,15 +3,7 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/physics/collisionmesh.h"
 #include <mathutil/uvec.h>
-#include <pragma/math/intersection.h>
-#include "pragma/physics/shape.hpp"
-#include "pragma/physics/physsoftbodyinfo.hpp"
-#include "pragma/physics/environment.hpp"
-#include "pragma/model/modelmesh.h"
-#include "pragma/model/model.h"
 #include <udm.hpp>
 
 module pragma.shared;

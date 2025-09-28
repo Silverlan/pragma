@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include <mathutil/vertex.hpp>
-#include <pragma/types.hpp>
 
 module pragma.client;
 

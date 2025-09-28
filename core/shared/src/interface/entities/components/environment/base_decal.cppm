@@ -8,6 +8,8 @@ module;
 
 export module pragma.shared:entities.components.environment.base_decal;
 
+export import :entities.components.base;
+
 export namespace pragma {
 	class DLLNETWORK BaseEnvDecalComponent : public BaseEntityComponent {
 	  public:

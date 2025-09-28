@@ -4,29 +4,8 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/components/base_transform_component.hpp"
-#include "pragma/entities/components/base_animated_component.hpp"
-#include "pragma/physics/collisiontypes.h"
-#include "pragma/math/deltaoffset.h"
-#include "pragma/math/deltatransform.h"
 #include <mathutil/uquat.h>
-#include "pragma/entities/baseentity_luaobject.h"
-#include <pragma/networking/nwm_util.h>
-#include <pragma/lua/converters/game_type_converters_t.hpp>
-#include <pragma/entities/components/submergible_component.hpp>
-#include <pragma/entities/components/movement_component.hpp>
-#include <pragma/entities/entity_component_system_t.hpp>
-#include <pragma/model/model.h>
-#include <pragma/audio/alsound_type.h>
-#include "pragma/lua/classes/ldef_entity.h"
 #include "luasystem.h"
-#include <pragma/physics/raytraces.h>
-#include <pragma/lua/lua_util_component.hpp>
-#include <pragma/lua/classes/lproperty.hpp>
-#include <pragma/lua/lentity_components_base_types.hpp>
-#include <pragma/lua/lentity_components.hpp>
-#include <pragma/lua/lua_util_component_stream.hpp>
-#include <pragma/entities/components/base_actor_component.hpp>
 
 module pragma.client;
 

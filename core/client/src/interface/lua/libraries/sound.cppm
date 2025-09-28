@@ -3,9 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include "pragma/lua/c_ldefinitions.h"
-#include "pragma/lua/libraries/lsound.h"
 
 export module pragma.client:scripting.lua.libraries.sound;
 export namespace Lua {

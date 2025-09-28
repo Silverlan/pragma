@@ -3,19 +3,9 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/components/base_bvh_component.hpp"
-#include "pragma/model/modelmesh.h"
-#include "pragma/entities/components/base_model_component.hpp"
-#include "pragma/entities/components/base_animated_component.hpp"
-#include "pragma/entities/components/base_static_bvh_cache_component.hpp"
-#include "pragma/entities/components/intersection_handler_component.hpp"
-#include "pragma/entities/entity_component_system_t.hpp"
-#include "pragma/entities/entity_component_manager_t.hpp"
-#include "pragma/debug/intel_vtune.hpp"
 #include <bvh/v2/stack.h>
 
-export module pragma.shared;
+module pragma.shared;
 
 import :entities.components.base_bvh;
 

@@ -3,9 +3,7 @@
 
 module;
 
-#include "pragma/entities/components/base_entity_component.hpp"
 #include <string>
-#include "pragma/entities/components/basetoggle.h"
 
 export module pragma.shared:entities.components.point.base_render_target;
 

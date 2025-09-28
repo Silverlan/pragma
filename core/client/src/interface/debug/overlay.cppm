@@ -3,13 +3,10 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
 #include "buffers/prosper_buffer.hpp"
-#include <pragma/math/angle/wvangle.h>
 #include <mathutil/color.h>
 #include <mathutil/glmutil.h>
 #include <mathutil/transform.hpp>
-#include <pragma/debug/debug_render_info.hpp>
 
 export module pragma.client:debug.overlay;
 import :client_state;

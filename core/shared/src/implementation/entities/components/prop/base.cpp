@@ -3,17 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/prop/prop_base.h"
-#include <pragma/physics/movetypes.h>
-#include "pragma/physics/collisionmesh.h"
-#include "pragma/util/util_handled.hpp"
-#include "pragma/entities/components/base_physics_component.hpp"
-#include "pragma/entities/components/base_transform_component.hpp"
-#include "pragma/entities/components/base_model_component.hpp"
-#include "pragma/entities/components/base_render_component.hpp"
-#include "pragma/entities/baseentity_events.hpp"
-#include "pragma/model/model.h"
 
 module pragma.shared;
 

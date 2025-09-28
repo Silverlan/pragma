@@ -3,28 +3,33 @@
 
 module;
 
-#include "pragma/entities/components/base_entity_component.hpp"
+#include "pragma/networkdefinitions.h"
 
 export module pragma.shared:entities.components.base_soft_body;
 
-export namespace pragma {
-	class DLLNETWORK BaseSoftBodyComponent : public BaseEntityComponent {
-	  public:
-		// Soft-body physics
-		struct SoftBodyData {
-			// Copies of the model's meshes
-			std::vector<std::shared_ptr<ModelMesh>> meshes = {};
+export import :entities.components.base;
+
+export {
+	class ModelMesh;
+	namespace pragma {
+		class DLLNETWORK BaseSoftBodyComponent : public BaseEntityComponent {
+		  public:
+			// Soft-body physics
+			struct SoftBodyData {
+				// Copies of the model's meshes
+				std::vector<std::shared_ptr<ModelMesh>> meshes = {};
+			};
+			using BaseEntityComponent::BaseEntityComponent;
+			virtual void Initialize() override;
+			virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
+
+			virtual bool InitializeSoftBodyData();
+			virtual void ReleaseSoftBodyData();
+
+			const SoftBodyData *GetSoftBodyData() const;
+			SoftBodyData *GetSoftBodyData();
+		  protected:
+			std::unique_ptr<SoftBodyData> m_softBodyData = nullptr;
 		};
-		using BaseEntityComponent::BaseEntityComponent;
-		virtual void Initialize() override;
-		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
-
-		virtual bool InitializeSoftBodyData();
-		virtual void ReleaseSoftBodyData();
-
-		const SoftBodyData *GetSoftBodyData() const;
-		SoftBodyData *GetSoftBodyData();
-	  protected:
-		std::unique_ptr<SoftBodyData> m_softBodyData = nullptr;
 	};
-};
+}

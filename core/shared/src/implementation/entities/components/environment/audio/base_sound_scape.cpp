@@ -3,12 +3,8 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/environment/audio/env_soundscape.h"
-#include "pragma/util/util_handled.hpp"
-#include "pragma/entities/baseentity_events.hpp"
 
-export module pragma.client;
+module pragma.shared;
 
 import :entities.components.audio.base_sound_scape;
 

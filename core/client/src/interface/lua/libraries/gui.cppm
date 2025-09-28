@@ -3,10 +3,8 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
 #include "prosper_command_buffer.hpp"
 #include <image/prosper_image.hpp>
-#include <pragma/lua/ldefinitions.h>
 
 export module pragma.client:scripting.lua.libraries.gui;
 import :game;

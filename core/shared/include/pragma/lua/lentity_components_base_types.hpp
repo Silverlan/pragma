@@ -4,9 +4,6 @@
 #ifndef __LENTITY_COMPONENTS_BASE_TYPES_HPP__
 #define __LENTITY_COMPONENTS_BASE_TYPES_HPP__
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/physics/raytraces.h"
-#include "pragma/model/animation/animation_event.h"
 
 namespace Lua::TraceData {
 	void FillTraceResultTable(lua_State *l, TraceResult &res);

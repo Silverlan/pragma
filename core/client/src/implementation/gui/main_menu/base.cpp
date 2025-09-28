@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include <pragma/string/format.h>
 
 module pragma.client;
 

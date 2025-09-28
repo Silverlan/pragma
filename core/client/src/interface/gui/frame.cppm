@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/clientdefinitions.h"
 #include <mathutil/umath.h>
 #include <prosper_window.hpp>
 

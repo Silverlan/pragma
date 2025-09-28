@@ -4,12 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/lua/classes/ldef_angle.h"
-#include "pragma/lua/classes/ldef_color.h"
-#include <pragma/lua/classes/ldef_vector.h>
-#include "pragma/lua/classes/ldef_plane.h"
-#include <pragma/model/modelmesh.h>
-#include <pragma/debug/debug_render_info.hpp>
 #include "luasystem.h"
 
 module pragma.client;

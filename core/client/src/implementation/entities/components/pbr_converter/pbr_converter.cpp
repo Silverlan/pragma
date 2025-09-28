@@ -4,13 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include <pragma/entities/entity_component_system_t.hpp>
-#include <pragma/entities/entity_iterator.hpp>
-#include <pragma/entities/entity_component_system_t.hpp>
-#include <pragma/math/intersection.h>
-#include <pragma/physics/collisionmesh.h>
-#include <pragma/asset/util_asset.hpp>
-#include <pragma/game/game_resources.hpp>
 #include <sharedutils/util_file.h>
 #include <image/prosper_image.hpp>
 #include <image/prosper_render_target.hpp>
@@ -19,10 +12,7 @@ module;
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <sharedutils/util_library.hpp>
-#include <pragma/lua/converters/game_type_converters_t.hpp>
-#include <pragma/entities/components/logic_component.hpp>
 #include <util_texture_info.hpp>
-#include <pragma/model/modelmanager.h>
 #include <datasystem_t.hpp>
 #include <cmaterialmanager.h>
 #include <cmaterial_manager2.hpp>

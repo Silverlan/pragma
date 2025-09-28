@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include <pragma/model/animation/vertex_animation.hpp>
 
 export module pragma.client:model.vertex_animation;
 

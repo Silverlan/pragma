@@ -3,13 +3,14 @@
 
 module;
 
-#include "pragma/entities/components/base_entity_component.hpp"
-#include "pragma/entities/baseentity_net_event_manager.hpp"
+#include "pragma/networkdefinitions.h"
 #include <sharedutils/property/util_property.hpp>
 #include <mathutil/uvec.h>
 #include <mathutil/color.h>
 
 export module pragma.shared:entities.components.base_debug;
+
+export import :entities.components.base;
 
 export namespace pragma {
 	class DLLNETWORK BaseDebugTextComponent : public BaseEntityComponent {

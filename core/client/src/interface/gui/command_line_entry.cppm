@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
 
 export module pragma.client:gui.command_line_entry;
 

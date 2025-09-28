@@ -7,9 +7,12 @@ module;
 #include <string>
 #include <optional>
 #include <fsys/filesystem.h>
+#include <sharedutils/util_library.hpp>
 
-export module pragma.shared:assets.asset_conversion;
+export module pragma.shared:assets.conversion;
 
+export class Model;
+export class NetworkState;
 export namespace util {
 	static const std::string IMPORT_PATH = "addons/imported/";
 	static const std::string CONVERT_PATH = "addons/converted/";

@@ -3,8 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/physics/ik/ik_controller.hpp"
 
 module pragma.shared;
 

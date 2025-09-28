@@ -5,6 +5,7 @@ module;
 
 export module pragma.shared:audio;
 
+export import :audio.effect_params;
 export import :audio.enums;
 export import :audio.sound;
 export import :audio.sound_base;

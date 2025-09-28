@@ -3,12 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/components/base_character_component.hpp"
-#include "pragma/entities/components/base_transform_component.hpp"
-#include "pragma/entities/components/base_physics_component.hpp"
-#include "pragma/entities/components/base_time_scale_component.hpp"
-#include "pragma/entities/components/orientation_component.hpp"
 
 module pragma.shared;
 

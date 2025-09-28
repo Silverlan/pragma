@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/lua/util.hpp"
 
 module pragma.client;
 

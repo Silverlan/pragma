@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include "luasystem.h"
-#include <pragma/lua/classes/lmodelmesh.h>
 #include <buffers/prosper_buffer.hpp>
 
 module pragma.client;

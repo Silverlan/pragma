@@ -3,10 +3,8 @@
 
 module;
 
-#include "pragma/networkdefinitions.h"
-#include <pragma/lua/luaapi.h>
 
-export module pragma.client:scripting.lua.libraries.intersect;
+export module pragma.shared:scripting.lua.libraries.intersect;
 
 export namespace Lua {
 	namespace intersect {

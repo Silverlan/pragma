@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/lua/classes/lproperty_generic.hpp"
-#include "pragma/entities/entity_property.hpp"
 
 export module pragma.shared:scripting.lua.classes.property_entity;
 

@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include <pragma/networking/netmessages.h>
 
 module pragma.client;
 

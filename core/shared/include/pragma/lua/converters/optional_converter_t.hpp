@@ -4,7 +4,6 @@
 #ifndef __LUA_OPTIONAL_CONVERTER_T_HPP__
 #define __LUA_OPTIONAL_CONVERTER_T_HPP__
 
-#include "pragma/lua/converters/optional_converter.hpp"
 
 template<typename T>
 template<typename U>

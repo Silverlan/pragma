@@ -4,7 +4,6 @@
 #ifndef __LUA_ALIAS_TYPES_HPP__
 #define __LUA_ALIAS_TYPES_HPP__
 
-#include "pragma/lua/converters/alias_converter.hpp"
 #include <sharedutils/util_path.hpp>
 #include <mathutil/uvec.h>
 

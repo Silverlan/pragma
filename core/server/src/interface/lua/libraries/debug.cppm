@@ -3,10 +3,6 @@
 
 module;
 
-#include "pragma/serverdefinitions.h"
-#include <pragma/lua/ldefinitions.h>
-#include "pragma/ai/ai_behavior.h"
-#include "pragma/ai/ai_memory.h"
 
 export module pragma.server.scripting.lua.libraries.debug;
 

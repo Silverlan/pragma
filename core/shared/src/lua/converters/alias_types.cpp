@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "pragma/lua/converters/alias_types.hpp"
-#include "pragma/lua/converters/alias_converter_t.hpp"
 
 void luabind::detail::AliasTypeConverter<Vector3, Vector2>::convert(const Vector2 &srcValue, Vector3 &outValue) { outValue = {srcValue.x, srcValue.y, 0.f}; }
 void luabind::detail::AliasTypeConverter<Vector3i, Vector2>::convert(const Vector2 &srcValue, Vector3i &outValue) { outValue = {srcValue.x, srcValue.y, 0.f}; }

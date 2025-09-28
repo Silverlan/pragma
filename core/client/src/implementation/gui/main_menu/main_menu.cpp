@@ -4,12 +4,8 @@
 module;
 
 #include "stdafx_client.h"
-#include <pragma/engine_version.h>
-#include <pragma/audio/alsound_type.h>
-#include <pragma/engine_info.hpp>
 
 #define DLLSPEC_ISTEAMWORKS DLLNETWORK
-#include <pragma/game/isteamworks.hpp>
 
 #undef PlaySound
 

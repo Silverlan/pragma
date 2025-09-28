@@ -3,11 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/func/basefuncbrush.h"
-#include "pragma/util/util_handled.hpp"
-#include "pragma/entities/baseentity_events.hpp"
-#include "pragma/entities/components/base_render_component.hpp"
 
 module pragma.shared;
 

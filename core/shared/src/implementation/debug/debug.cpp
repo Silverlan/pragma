@@ -3,9 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/debug/debug_utils.hpp"
-#include <pragma/debug/intel_vtune.hpp>
 #include <sharedutils/util.h>
 #include <cstdio>
 // #include <windows.h>

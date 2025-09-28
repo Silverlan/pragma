@@ -3,10 +3,8 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
 #include "buffers/prosper_dynamic_resizable_buffer.hpp"
 #include "prosper_command_buffer.hpp"
-#include <pragma/entities/components/base_entity_component.hpp>
 
 export module pragma.client:entities.components.vertex_animated;
 

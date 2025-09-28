@@ -4,11 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/baseentity_luaobject.h"
-#include <pragma/lua/converters/game_type_converters_t.hpp>
-#include <pragma/math/intersection.h>
-#include <pragma/entities/components/base_transform_component.hpp>
-#include <pragma/entities/entity_component_system_t.hpp>
 #include "prosper_includes.hpp"
 
 module pragma.client;

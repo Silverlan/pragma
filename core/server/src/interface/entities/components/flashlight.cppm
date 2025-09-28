@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/serverdefinitions.h"
-#include <pragma/entities/baseflashlight.h>
 
 export module pragma.server.entities.components.flashlight;
 

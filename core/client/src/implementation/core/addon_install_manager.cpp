@@ -4,10 +4,7 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/util/curl_query_handler.hpp"
-#include <pragma/addonsystem/addonsystem.h>
 #include <sharedutils/util_file.h>
-#include <pragma/entities/entity_component_system_t.hpp>
 
 module pragma.client;
 

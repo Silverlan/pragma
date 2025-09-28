@@ -3,12 +3,7 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/lua/classes/lmodel.h"
-#include "pragma/lua/classes/lskeleton.h"
 
-#include "pragma/lua/ostream_operator_alias.hpp"
-#include "pragma/model/animation/bone.hpp"
 
 module pragma.shared;
 

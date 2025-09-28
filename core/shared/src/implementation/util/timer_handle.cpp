@@ -3,8 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/lua/libraries/ltimer.h"
 
 module pragma.shared;
 

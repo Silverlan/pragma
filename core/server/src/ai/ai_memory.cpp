@@ -2,12 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_server.h"
-#include "pragma/ai/ai_memory.h"
-#include <pragma/entities/baseentity.h>
-#include <pragma/entities/baseentity_handle.h>
-#include <pragma/entities/components/base_transform_component.hpp>
-#include <pragma/entities/components/velocity_component.hpp>
-#include <pragma/entities/entity_component_system_t.hpp>
 #include <algorithm>
 
 import pragma.server.game;

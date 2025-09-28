@@ -3,14 +3,13 @@
 
 module;
 
-#include "pragma/entities/components/base_entity_component.hpp"
-#include <pragma/definitions.h>
-#include "pragma/entities/baseentity.h"
-#include "pragma/entities/baseentity_handle.h"
-#include "pragma/entities/environment/lights/env_light.h"
+#include "pragma/networkdefinitions.h"
+#include "mathutil/umath_lighting.hpp"
 #include <string>
 
 export module pragma.shared:entities.components.environment.lights.base_point;
+
+export import :entities.components.base;
 
 export namespace pragma {
 	class DLLNETWORK BaseEnvLightPointComponent : public BaseEntityComponent {

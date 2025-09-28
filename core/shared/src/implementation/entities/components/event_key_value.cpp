@@ -3,11 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/baseentity.h"
-#include "pragma/entities/baseentity_events.hpp"
-#include "pragma/lua/classes/lanimation.h"
-#include "pragma/model/animation/play_animation_flags.hpp"
 
 module pragma.shared;
 

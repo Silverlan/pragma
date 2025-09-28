@@ -3,9 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/entity_uuid_ref.hpp"
-#include "pragma/entities/entity_iterator.hpp"
 
 module pragma.shared;
 

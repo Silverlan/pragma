@@ -3,12 +3,13 @@
 
 module;
 
-#include "pragma/networkdefinitions.h"
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/pattern_formatter.h>
 #include <spdlog/formatter.h>
 #include <spdlog/fmt/bundled/format.h>
+
+export module pragma.shared:console.spdlog_anycolor_sink;
 
 export {
 	// Based on wincolor_sink

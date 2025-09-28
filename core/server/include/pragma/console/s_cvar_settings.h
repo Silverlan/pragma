@@ -3,9 +3,6 @@
 
 #ifndef __S_CVAR_SETTINGS_H__
 #define __S_CVAR_SETTINGS_H__
-#include "pragma/serverdefinitions.h"
-#include "pragma/networkdefinitions.h"
-#include <pragma/console/convars.h>
 
 REGISTER_CONVAR_SV(sv_password, udm::Type::String, "", ConVarFlags::Archive, "Sets a password for the server. No player will be able to join, unless they provide the correct password using the 'password' command.");
 REGISTER_CONVAR_SV(sv_maxplayers, udm::Type::UInt32, "1", ConVarFlags::Archive, "Specifies the maximum amount of players that are allowed to join the server.");

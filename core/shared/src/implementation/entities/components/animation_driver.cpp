@@ -3,16 +3,10 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/components/animation_driver_component.hpp"
-#include "pragma/entities/components/panima_component.hpp"
-#include "pragma/entities/entity_iterator.hpp"
-#include "pragma/entities/entity_component_manager_t.hpp"
-#include "pragma/logging.hpp"
 #include <sharedutils/util_hash.hpp>
 #include <udm.hpp>
 
-export module pragma.shared;
+module pragma.shared;
 
 import :entities.components.animation_driver;
 

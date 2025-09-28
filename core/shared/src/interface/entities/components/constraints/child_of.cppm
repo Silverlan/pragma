@@ -3,13 +3,15 @@
 
 module;
 
-#include "pragma/entities/components/base_entity_component.hpp"
-#include "pragma/entities/components/constraints/constraint_component.hpp"
-#include "pragma/game/game_coordinate_system.hpp"
+#include "pragma/networkdefinitions.h"
 
 export module pragma.shared:entities.components.constraints.child_of;
 
+export import :entities.components.constraints.base;
+export import :entities.universal_reference;
+
 export namespace pragma {
+	class ConstraintComponent;
 	class DLLNETWORK ConstraintChildOfComponent final : public BaseEntityComponent {
 	  public:
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);

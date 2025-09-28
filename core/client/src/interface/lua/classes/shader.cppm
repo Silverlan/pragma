@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
 #include "prosper_prepared_command_buffer.hpp"
 
 export module pragma.client:scripting.lua.classes.shader;

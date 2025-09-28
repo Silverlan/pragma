@@ -4,8 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/debug/debug_render_info.hpp"
-#include <pragma/math/intersection.h>
 
 module pragma.client;
 

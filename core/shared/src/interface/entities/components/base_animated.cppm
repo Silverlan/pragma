@@ -3,17 +3,15 @@
 
 module;
 
-#include "pragma/entities/components/base_entity_component.hpp"
-#include "pragma/entities/components/base_entity_component_member_register.hpp"
-#include "pragma/model/animation/play_animation_flags.hpp"
-#include "pragma/model/animation/activities.h"
-#include "pragma/model/animation/animation_event.h"
 #include <sharedutils/property/util_property.hpp>
-#include <pragma/math/orientation.h>
 #include <mathutil/transform.hpp>
 #include <mathutil/uvec.h>
 
 export module pragma.shared:entities.components.base_animated;
+
+export import :entities.components.base;
+
+export import :model.animation;
 
 export {
 	namespace pragma {

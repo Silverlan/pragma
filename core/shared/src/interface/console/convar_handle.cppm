@@ -8,6 +8,8 @@ module;
 
 export module pragma.shared:console.convar_handle;
 
+import :console.convar;
+
 export {
 	class DLLNETWORK PtrConVar {
 	private:

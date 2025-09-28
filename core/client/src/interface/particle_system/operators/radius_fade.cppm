@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include <pragma/math/util_random.hpp>
 #include <mathutil/umath_random.hpp>
 
 export module pragma.client:particle_system.operator_radius_fade;

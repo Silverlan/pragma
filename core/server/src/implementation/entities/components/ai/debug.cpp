@@ -4,13 +4,6 @@
 module;
 
 #include "stdafx_server.h"
-#include "pragma/ai/ai_behavior.h"
-#include "pragma/ai/ai_schedule.h"
-#include "pragma/networking/recipient_filter.hpp"
-#include <pragma/networking/enums.hpp>
-#include <pragma/entities/components/base_transform_component.hpp>
-#include <pragma/debug/debugbehaviortree.h>
-#include <pragma/networking/nwm_util.h>
 
 module pragma.server.entities.components.ai;
 

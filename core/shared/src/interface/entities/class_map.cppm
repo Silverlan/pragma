@@ -3,8 +3,9 @@
 
 module;
 
-#include "pragma/networkdefinitions.h"
-#include <pragma/engine.h>
+#include <unordered_map>
+#include <string>
+#include <typeindex>
 
 export module pragma.shared:entities.class_map;
 

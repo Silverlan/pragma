@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/lua/converters/gui_element_converter.hpp"
-#include "pragma/lua/util.hpp"
 
 export module pragma.client:gui;
 export import :gui.checkbox;

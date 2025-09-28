@@ -3,13 +3,13 @@
 
 module;
 
-#include "pragma/definitions.h"
+#include "pragma/networkdefinitions.h"
 #include <string>
 #include <vector>
 #include <optional>
 #include <sharedutils/util_path.hpp>
 
-export module pragma.shared:engine_info;
+export module pragma.shared:engine.info;
 
 export namespace engine_info {
 	DLLNETWORK std::string get_identifier();

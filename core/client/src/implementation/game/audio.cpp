@@ -4,17 +4,9 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/console/c_cvar.h"
-#include <pragma/entities/components/base_physics_component.hpp>
-#include <pragma/entities/components/base_transform_component.hpp>
-#include <pragma/physics/environment.hpp>
-#include <pragma/physics/shape.hpp>
-#include <pragma/physics/collisionmesh.h>
 #include <alsoundsystem.hpp>
 #include <steam_audio/alsound_steam_audio.hpp>
 #include <alsound_coordinate_system.hpp>
-#include <pragma/entities/entity_iterator.hpp>
-#include <pragma/entities/entity_component_system_t.hpp>
 
 module pragma.client;
 

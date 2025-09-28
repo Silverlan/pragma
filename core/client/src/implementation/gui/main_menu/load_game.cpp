@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/lua/converters/gui_element_converter.hpp"
 
 module pragma.client;
 

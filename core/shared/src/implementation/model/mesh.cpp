@@ -3,10 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/engine.h"
-#include <pragma/definitions.h>
-#include "pragma/model/mesh.h"
 #include "materialmanager.h"
 
 module pragma.shared;

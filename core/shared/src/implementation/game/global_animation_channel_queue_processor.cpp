@@ -3,13 +3,10 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/game/global_animation_channel_queue_processor.hpp"
-#include "pragma/entities/components/panima_component.hpp"
 
 #undef GetCurrentTime
 
-export module pragma.shared;
+module pragma.shared;
 
 import :game.global_animation_channel_queue_processor;
 

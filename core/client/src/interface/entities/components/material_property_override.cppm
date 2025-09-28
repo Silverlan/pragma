@@ -3,9 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include "pragma/entities/components/base_entity_component_member_register.hpp"
-#include <pragma/entities/components/base_time_scale_component.hpp>
 #include "prosper_command_buffer.hpp"
 #include "buffers/prosper_buffer.hpp"
 #include <sharedutils/util_heterogenous_lookup.hpp>

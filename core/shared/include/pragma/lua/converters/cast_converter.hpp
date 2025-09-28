@@ -4,7 +4,6 @@
 #ifndef __LUA_CAST_CONVERTER_HPP__
 #define __LUA_CAST_CONVERTER_HPP__
 
-#include "pragma/networkdefinitions.h"
 #include <luabind/detail/conversion_policies/conversion_policies.hpp>
 
 namespace luabind {

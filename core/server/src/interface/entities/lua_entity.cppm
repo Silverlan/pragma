@@ -3,9 +3,6 @@
 
 module;
 
-#include "pragma/serverdefinitions.h"
-#include <pragma/lua/luaobjectbase.h>
-#include <pragma/lua/handle_holder.hpp>
 
 export module pragma.server.entities.lua;
 

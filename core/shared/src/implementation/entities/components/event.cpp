@@ -3,9 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/components/base_entity_component.hpp"
-#include "pragma/entities/entity_component_event.hpp"
 
 module pragma.shared;
 

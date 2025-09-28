@@ -3,13 +3,14 @@
 
 module;
 
-#include "pragma/entities/components/base_entity_component.hpp"
-#include "pragma/entities/components/basetoggle.h"
+#include "pragma/networkdefinitions.h"
 #include <mathutil/color.h>
 #include <mathutil/umath.h>
 #include <string>
 
 export module pragma.shared:entities.components.environment.lights.base_spot_vol;
+
+export import :entities.components.base;
 
 export namespace pragma {
 	class DLLNETWORK BaseEnvLightSpotVolComponent : public BaseEntityComponent {

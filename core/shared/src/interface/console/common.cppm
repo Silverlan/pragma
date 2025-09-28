@@ -4,8 +4,11 @@
 module;
 
 #include "pragma/networkdefinitions.h"
+#include <string>
 
 export module pragma.shared:console.common;
+
+import :console.convar_handle;
 
 export {
 	DLLNETWORK ConVarHandle GetConVar(std::string scmd);

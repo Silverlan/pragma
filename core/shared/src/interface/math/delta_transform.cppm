@@ -5,7 +5,7 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include <mathutil/glmutil.h>
-#include <pragma/math/angle/wvquaternion.h>
+#include "mathutil/uquat.h"
 
 export module pragma.shared:math.delta_transform;
 

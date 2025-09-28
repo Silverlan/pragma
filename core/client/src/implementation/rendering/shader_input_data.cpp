@@ -3,7 +3,6 @@
 
 module;
 
-#include <pragma/logging.hpp>
 #include <mpParser.h>
 
 module pragma.client;

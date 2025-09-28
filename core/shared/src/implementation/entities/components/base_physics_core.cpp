@@ -3,33 +3,8 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include <pragma/engine.h>
-#include <pragma/game/game.h>
-#include "pragma/entities/baseentity.h"
-#include "pragma/entities/components/base_physics_component.hpp"
-#include "pragma/entities/components/base_model_component.hpp"
-#include "pragma/physics/collisionmasks.h"
-#include "pragma/physics/physobj.h"
-#include "pragma/model/brush/brushmesh.h"
-#include "pragma/physics/environment.hpp"
-#include "pragma/physics/shape.hpp"
-#include "pragma/physics/collision_object.hpp"
-#include "pragma/physics/collisionmesh.h"
-#include <pragma/physics/movetypes.h>
-#include "pragma/physics/constraint.hpp"
-#include "pragma/model/modelmesh.h"
-#include "pragma/entities/components/base_transform_component.hpp"
-#include "pragma/entities/components/base_animated_component.hpp"
-#include "pragma/entities/components/velocity_component.hpp"
-#include "pragma/entities/entity_component_system_t.hpp"
-#include "pragma/model/model.h"
-#include "pragma/entities/components/basegravity.h"
-#include "pragma/game/game_coordinate_system.hpp"
-#include "pragma/model/animation/skeleton.hpp"
-#include "pragma/model/animation/bone.hpp"
 
-export module pragma.shared;
+module pragma.shared;
 
 import :entities.components.base_physics;
 

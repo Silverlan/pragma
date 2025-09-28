@@ -4,8 +4,6 @@
 module;
 
 #include "stdafx_server.h"
-#include <pragma/entities/baseentity.h>
-#include <pragma/entities/baseentity_handle.h>
 #include <algorithm>
 
 module pragma.server.ai.factions;

@@ -4,16 +4,12 @@
 module;
 
 #include "fsys/directory_watcher.h"
-#include "stdafx_shared.h"
-#include "pragma/lua/lua_script_watcher.h"
-#include "pragma/game/gamemode/gamemodemanager.h"
-#include "pragma/lua/util.hpp"
 #include <scripting/lua/lua.hpp>
 #include <sharedutils/scope_guard.h>
 #include <sharedutils/util_file.h>
 #include <luainterface.hpp>
 
-module pragma.client;
+module pragma.shared;
 
 import :scripting.lua.script_watcher;
 

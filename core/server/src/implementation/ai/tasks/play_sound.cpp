@@ -4,10 +4,6 @@
 module;
 
 #include "stdafx_server.h"
-#include "pragma/ai/ai_schedule.h"
-#include <pragma/entities/components/base_ai_component.hpp>
-#include <pragma/entities/entity_component_system_t.hpp>
-#include <pragma/audio/alsound_type.h>
 
 module pragma.server.ai.tasks.play_sound;
 

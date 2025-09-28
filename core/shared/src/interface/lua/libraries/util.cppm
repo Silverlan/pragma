@@ -3,13 +3,10 @@
 
 module;
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/lua/classes/lproperty.hpp"
-#include <pragma/lua/luaapi.h>
 #include <mathutil/uvec.h>
 #include <sharedutils/util_parallel_job.hpp>
 
-export module pragma.client:scripting.lua.libraries.util;
+export module pragma.shared:scripting.lua.libraries.util;
 
 export namespace Lua {
 	namespace global {

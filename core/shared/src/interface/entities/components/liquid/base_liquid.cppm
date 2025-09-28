@@ -3,11 +3,14 @@
 
 module;
 
-#include "pragma/entities/components/base_entity_component.hpp"
-#include "pragma/physics/phys_liquid.hpp"
-#include "pragma/entities/trigger/base_trigger_touch.hpp"
+#include "pragma/networkdefinitions.h"
 
 export module pragma.shared:entities.components.liquid.base_liquid;
+
+export import :entities.components.base;
+export import :entities.components.base_surface;
+export import :entities.components.liquid.base_surface_simulation;
+export import :physics.enums;
 
 export namespace pragma {
 	class DLLNETWORK BaseFuncLiquidComponent : public BaseEntityComponent {

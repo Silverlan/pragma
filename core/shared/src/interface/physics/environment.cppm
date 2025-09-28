@@ -3,17 +3,12 @@
 
 module;
 
-#include "pragma/networkdefinitions.h"
 #include <mathutil/glmutil.h>
 #include <mathutil/transform.hpp>
-#include "pragma/physics/surface_type_manager.hpp"
-#include "pragma/physics/tire_type_manager.hpp"
 #include <sharedutils/functioncallback.h>
 #include <sharedutils/util_shared_handle.hpp>
-#include <pragma/math/vector/wvvector3.h>
 #include <vector>
 #include <unordered_map>
-#include <pragma/networkstate/networkstate.h>
 
 export module pragma.shared:physics.environment;
 

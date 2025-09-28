@@ -3,12 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/model/animation/frame.h"
-#include "pragma/model/modelmesh.h"
-#include "pragma/model/model.h"
-#include "pragma/model/animation/skeleton.hpp"
-#include "pragma/model/animation/bone.hpp"
 
 module pragma.shared;
 

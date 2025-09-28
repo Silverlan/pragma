@@ -3,16 +3,9 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/engine.h"
-#include "pragma/lua/libraries/lnav.hpp"
-#include "pragma/ai/navsystem.h"
-#include "pragma/lua/classes/ldef_entity.h"
-#include "pragma/lua/classes/ldef_vector.h"
-#include "pragma/lua/libraries/lfile.h"
 #include <luainterface.hpp>
 
-export module pragma.client;
+module pragma.shared;
 
 import :scripting.lua.libraries.nav;
 

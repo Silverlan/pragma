@@ -4,20 +4,10 @@
 module;
 
 #include "stdafx_client.h"
-#include <pragma/debug/intel_vtune.hpp>
 #include <shader/prosper_pipeline_loader.hpp>
-#include <pragma/entities/entity_component_system_t.hpp>
-#include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <buffers/prosper_render_buffer.hpp>
 #include <cmaterial_manager2.hpp>
 #include <cmaterial.h>
-#include <pragma/lua/converters/cast_converter_t.hpp>
-#include <pragma/lua/converters/vector_converter_t.hpp>
-#include <pragma/lua/policies/default_parameter_policy.hpp>
-#include <pragma/lua/lua_util_component.hpp>
-#include <pragma/lua/lua_util_component_stream.hpp>
-#include <pragma/lua/custom_constructor.hpp>
-#include <pragma/asset/util_asset.hpp>
 #include <prosper_command_buffer.hpp>
 #include <luabind/copy_policy.hpp>
 

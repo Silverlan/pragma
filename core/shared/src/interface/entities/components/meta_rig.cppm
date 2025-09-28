@@ -3,14 +3,11 @@
 
 module;
 
-#include "pragma/entities/components/base_entity_component.hpp"
-#include "pragma/entities/entity_component_manager_t.hpp"
-#include "pragma/entities/components/component_member_flags.hpp"
-#include "pragma/entities/components/base_animated_component.hpp"
-#include "pragma/model/animation/meta_rig.hpp"
-#include "pragma/model/model.h"
+#include "pragma/networkdefinitions.h"
 
-export module pragma.entities.components.meta_rig;
+export module pragma.shared:entities.components.meta_rig;
+
+export import :entities.components.base;
 
 export namespace pragma {
 	class DLLNETWORK MetaRigComponent final : public BaseEntityComponent {

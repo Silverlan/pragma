@@ -4,7 +4,6 @@
 #ifndef __AI_MEMORY_H__
 #define __AI_MEMORY_H__
 
-#include "pragma/serverdefinitions.h"
 #include <mathutil/glmutil.h>
 
 #define MAX_AIMEMORY_FRAGMENTS 25

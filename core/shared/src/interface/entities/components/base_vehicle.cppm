@@ -3,11 +3,13 @@
 
 module;
 
-#include "pragma/entities/components/base_entity_component.hpp"
-#include "pragma/entities/components/base_physics_component.hpp"
-#include "pragma/physics/vehicle.hpp"
+#include "pragma/networkdefinitions.h"
+#include "mathutil/umath.h"
 
 export module pragma.shared:entities.components.base_vehicle;
+
+export import :entities.components.base_physics;
+export import :entities.components.base_wheel;
 
 export {
 	namespace pragma {

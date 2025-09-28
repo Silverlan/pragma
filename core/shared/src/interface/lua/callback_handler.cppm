@@ -3,12 +3,10 @@
 
 module;
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/lua/luacallback.h"
 #include <sharedutils/scope_guard.h>
 #include <sharedutils/util_event_reply.hpp>
 
-export module pragma.client:scripting.lua.callback_handler;
+export module pragma.shared:scripting.lua.callback_handler;
 
 export {
 	class DLLNETWORK LuaCallbackHandler {

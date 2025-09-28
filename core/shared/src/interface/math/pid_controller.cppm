@@ -4,6 +4,8 @@
 module;
 
 #include "pragma/networkdefinitions.h"
+#include <limits>
+#include <iostream>
 
 export module pragma.shared:math.pid_controller;
 

@@ -3,8 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/model/animation/flex_animation.hpp"
 #include <sharedutils/util_ifile.hpp>
 #include <udm.hpp>
 

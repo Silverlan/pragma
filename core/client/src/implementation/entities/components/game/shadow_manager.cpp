@@ -4,12 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include <pragma/entities/entity_component_system_t.hpp>
-#include <pragma/entities/entity_iterator.hpp>
-#include <pragma/entities/entity_component_system_t.hpp>
-#include <pragma/lua/converters/game_type_converters_t.hpp>
-#include "pragma/game/game_limits.h"
-#include <pragma/logging.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <image/prosper_texture.hpp>
 #include <image/prosper_image_view.hpp>

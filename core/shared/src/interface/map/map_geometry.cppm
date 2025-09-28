@@ -3,15 +3,18 @@
 
 module;
 
-#include <pragma/game/game.h>
-#include <pragma/math/vector/wvvector3.h>
-#include "pragma/model/brush/brushmesh.h"
-#include "pragma/game/game_resources.hpp"
-#include "pragma/util/util_bsp_tree.hpp"
+#include "pragma/networkdefinitions.h"
+#include "mathutil/uvec.h"
+#include "fsys/vfileptr.h"
+#include "material.h"
 
 export module pragma.shared:map.map_geometry;
 
+export import :physics.surface_material;
+
 export {
+	class Game;
+	class BaseEntity;
 	DLLNETWORK void BuildDisplacementTriangles(std::vector<Vector3> &sideVerts, unsigned int start, Vector3 &nu, Vector3 &nv, float sw, float sh, float ou, float ov, float su, float sv, unsigned char power, std::vector<std::vector<Vector3>> &normals, std::vector<std::vector<Vector3>> &offsets,
 	std::vector<std::vector<float>> &distances, unsigned char numAlpha, std::vector<std::vector<glm::vec2>> &alphas, std::vector<Vector3> &outVertices, std::vector<Vector3> &outNormals, std::vector<Vector2> &outUvs, std::vector<unsigned int> &outTriangles,
 	std::vector<Vector2> *outAlphas = NULL);

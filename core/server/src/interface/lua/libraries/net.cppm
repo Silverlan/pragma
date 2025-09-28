@@ -3,12 +3,7 @@
 
 module;
 
-#include "pragma/serverdefinitions.h"
-#include "pragma/networking/iserver_client.hpp"
-#include "pragma/networking/enums.hpp"
-#include "pragma/networking/recipient_filter.hpp"
 #include <sharedutils/netpacket.hpp>
-#include <pragma/lua/ldefinitions.h>
 
 export module pragma.server.scripting.lua.libraries.net;
 

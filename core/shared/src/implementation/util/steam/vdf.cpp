@@ -3,8 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/util/steam/util_vdf.hpp"
 #include <fsys/filesystem.h>
 
 module pragma.shared;

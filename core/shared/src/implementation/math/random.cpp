@@ -3,8 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/math/util_random.hpp"
 #include <sharedutils/util.h>
 
 module pragma.shared;

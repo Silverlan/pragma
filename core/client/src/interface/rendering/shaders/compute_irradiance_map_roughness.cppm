@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
 #include "prosper_descriptor_set_group.hpp"
 
 export module pragma.client:rendering.shaders.compute_irradiance_map_roughness;

@@ -3,7 +3,7 @@
 
 module;
 
-#include "pragma/definitions.h"
+#include "pragma/networkdefinitions.h"
 #include <unordered_map>
 #include <vector>
 #include <fsys/filesystem.h>

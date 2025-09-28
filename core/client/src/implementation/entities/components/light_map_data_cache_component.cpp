@@ -4,11 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/logging.hpp"
-#include "pragma/model/model.h"
-#include <pragma/entities/components/base_model_component.hpp>
-#include <pragma/entities/entity_iterator.hpp>
-#include <pragma/entities/entity_component_manager_t.hpp>
 
 module pragma.client;
 

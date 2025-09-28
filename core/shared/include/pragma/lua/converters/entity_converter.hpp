@@ -4,7 +4,6 @@
 #ifndef __LUA_ENTITY_CONVERTER_HPP__
 #define __LUA_ENTITY_CONVERTER_HPP__
 
-#include "pragma/lua/converters/game_type_converters.hpp"
 
 namespace luabind {
 	template<typename T>

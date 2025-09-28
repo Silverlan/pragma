@@ -4,8 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/console/c_cvar.h"
-#include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <stack>
 
 module pragma.client;

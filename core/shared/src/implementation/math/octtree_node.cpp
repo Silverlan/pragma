@@ -3,8 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/math/octtreenode.h"
 
 module pragma.shared;
 

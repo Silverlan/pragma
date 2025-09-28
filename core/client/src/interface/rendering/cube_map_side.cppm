@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
 #include <cinttypes>
 
 export module pragma.client:rendering.cube_map_side;

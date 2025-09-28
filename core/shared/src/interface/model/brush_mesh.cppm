@@ -5,14 +5,14 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include <vector>
-
-#include "pragma/model/side.h"
-#include "pragma/physics/shape.hpp"
 #include <mathutil/uvec.h>
-#include <pragma/math/intersection.h>
-#include <pragma/console/conout.h>
 
 export module pragma.shared:model.brush_mesh;
+
+export import :model.side;
+
+export import :physics.shape;
+export import :physics.surface_material;
 
 export class DLLNETWORK BrushMesh {
 	friend Con::c_cout &operator<<(Con::c_cout &, const BrushMesh &);

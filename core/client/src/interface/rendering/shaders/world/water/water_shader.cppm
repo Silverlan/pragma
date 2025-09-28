@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include <pragma/types.hpp>
 
 export module pragma.client:rendering.shaders.world_water;
 

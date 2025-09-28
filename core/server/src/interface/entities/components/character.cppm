@@ -3,8 +3,6 @@
 
 module;
 
-#include <pragma/entities/components/base_character_component.hpp>
-#include "pragma/serverdefinitions.h"
 
 export module pragma.server.entities.components.character;
 

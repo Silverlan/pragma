@@ -3,8 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/util/util_ballistic.h"
 #include <mathutil/umath_equation_solver.h>
 
 module pragma.shared;

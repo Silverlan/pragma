@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/networkdefinitions.h"
 #include <sharedutils/util_markup_file.hpp>
 #include <unordered_map>
 #include <vector>

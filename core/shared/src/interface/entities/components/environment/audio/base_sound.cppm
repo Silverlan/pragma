@@ -3,10 +3,14 @@
 
 module;
 
-#include "pragma/entities/components/base_entity_component.hpp"
-#include "pragma/audio/alsound_type.h"
+#include "pragma/networkdefinitions.h"
+#include "mathutil/umath.h"
 
 export module pragma.shared:entities.components.environment.audio.base_sound;
+
+export import :audio.enums;
+export import :audio.sound;
+export import :entities.components.base;
 
 export {
 	namespace pragma {

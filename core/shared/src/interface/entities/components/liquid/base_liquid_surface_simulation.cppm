@@ -3,9 +3,13 @@
 
 module;
 
-#include "pragma/entities/components/base_entity_component.hpp"
+#include "pragma/networkdefinitions.h"
 
 export module pragma.shared:entities.components.liquid.base_surface_simulation;
+
+export import :entities.components.base;
+export import :entities.components.base_surface;
+export import :physics.water_surface_simulator;
 
 export namespace pragma {
 	class DLLNETWORK BaseLiquidSurfaceSimulationComponent : public BaseEntityComponent {

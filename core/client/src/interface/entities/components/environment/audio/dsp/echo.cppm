@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include "pragma/entities/environment/audio/env_sound_dsp_echo.h"
 
 export module pragma.client:entities.components.audio.dsp.echo;
 import :entities.components.audio.dsp.base;

@@ -4,7 +4,6 @@
 #ifndef __LUA_UTIL_COMPONENT_STREAM_HPP__
 #define __LUA_UTIL_COMPONENT_STREAM_HPP__
 
-#include "pragma/networkdefinitions.h"
 
 DLLNETWORK std::ostream &operator<<(std::ostream &stream, const pragma::BaseEntityComponent &component);
 

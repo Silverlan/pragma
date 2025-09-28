@@ -3,14 +3,9 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include <pragma/util/util_game.hpp>
-#include <pragma/asset/util_asset.hpp>
 #include "image/prosper_image.hpp"
 #include "sharedutils/alpha_mode.hpp"
 #include "prosper_enums.hpp"
-#include "pragma/model/model.h"
-#include <pragma/types.hpp>
 #include <cmaterial.h>
 #include <util_texture_info.hpp>
 #include <sharedutils/util_path.hpp>

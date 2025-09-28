@@ -3,70 +3,9 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/engine.h"
-#include <pragma/game/game.h>
-#include <pragma/debug/debugbreak.hpp>
-#include "pragma/lua/classes/lconvar.h"
-#include "pragma/lua/libraries/lfile.h"
-#include "pragma/lua/libraries/lboundingvolume.h"
-#include "pragma/lua/libraries/lintersect.h"
-#include "pragma/lua/libraries/lsweep.h"
-#include "pragma/lua/libraries/lray.h"
-#include "pragma/lua/libraries/ltimer.h"
-#include "pragma/lua/libraries/lgeometry.h"
-#include "pragma/lua/classes/lphysics.h"
-#include "pragma/lua/libraries/lmatrix.h"
-#include "pragma/lua/libraries/lasset.hpp"
-#include "pragma/lua/classes/ldef_vector.h"
-#include "pragma/lua/libraries/lfile.h"
-#include "pragma/lua/policies/default_parameter_policy.hpp"
-#include "pragma/lua/converters/vector_converter_t.hpp"
-#include "pragma/lua/converters/pair_converter_t.hpp"
-#include "pragma/lua/converters/game_type_converters_t.hpp"
-#include "pragma/logging.hpp"
-#include "pragma/logging_wrapper.hpp"
-#include "pragma/debug/debug_render_info.hpp"
-#include "pragma/debug/intel_vtune.hpp"
-#include "pragma/game/game_resources.hpp"
 #include "luasystem.h"
-#include <pragma/math/angle/wvquaternion.h>
-#include "pragma/lua/classes/lvector.h"
-#include "pragma/lua/libraries/lmath.h"
-#include "pragma/lua/libraries/lnoise.h"
-#include "pragma/lua/libraries/lregex.h"
-#include "pragma/lua/libraries/lutil.hpp"
-#include "pragma/lua/libraries/ldebug.h"
-#include "pragma/lua/libraries/lmesh.h"
-#include "pragma/lua/libraries/ltable.h"
-#include "pragma/lua/classes/lcolor.h"
-#include "pragma/lua/libraries/los.h"
-#include "pragma/lua/libraries/ltime.hpp"
-#include "pragma/lua/libraries/lprint.h"
-#include "pragma/lua/classes/lerrorcode.h"
-#include "pragma/lua/classes/lcallback.h"
-#include "pragma/lua/classes/ldatastream.h"
-#include "pragma/lua/libraries/limport.hpp"
-#include "pragma/lua/converters/optional_converter_t.hpp"
-#include "pragma/entities/components/base_player_component.hpp"
-#include "pragma/math/util_easing.hpp"
-#include "pragma/lua/libraries/lnav.hpp"
-#include "pragma/lua/lua_call.hpp"
-#include "pragma/util/util_handled.hpp"
-#include "pragma/util/util_rgbcsv.hpp"
-#include "pragma/model/animation/animation.hpp"
-#include "pragma/model/modelmesh.h"
-#include "pragma/model/model.h"
-#include "pragma/util/util_ballistic.h"
-#include "pragma/util/util_game.hpp"
-#include <pragma/math/util_engine_math.hpp>
-#include "pragma/game/game_coordinate_system.hpp"
-#include "pragma/util/util_variable_type.hpp"
-#include "pragma/lua/converters/vector_converter_t.hpp"
-#include "pragma/lua/ostream_operator_alias.hpp"
 #include <sharedutils/util_file.h>
 #include <sharedutils/util_path.hpp>
-#include <pragma/math/intersection.h>
 #include <scripting/lua/lua.hpp>
 #include <mathutil/camera.hpp>
 #include <mathutil/umath_frustum.hpp>
@@ -85,7 +24,7 @@ module;
 #include <signal.h>
 #endif
 
-module pragma.client;
+module pragma.shared;
 
 import :scripting.lua;
 

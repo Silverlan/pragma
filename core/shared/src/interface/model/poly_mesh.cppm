@@ -4,25 +4,22 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/model/poly.h"
-#include "pragma/model/brush/brushmesh.h"
-#include "pragma/model/model.h"
-#include "pragma/model/side.h"
 #include <vector>
-
 #include <mathutil/glmutil.h>
 #include <iostream>
 
-#include <pragma/math/intersection.h>
-
 export module pragma.shared:model.poly_mesh;
 
+export import :model.poly;
+
 export {
+	class Model;
 	class DLLNETWORK PolyMeshInfo {
 	public:
 		std::vector<Vector3> vertexList;
 	};
 
+	namespace pragma::physics {class IEnvironment;};
 	class DLLNETWORK PolyMesh {
 		friend Con::c_cout &operator<<(Con::c_cout &, const PolyMesh &);
 	public:

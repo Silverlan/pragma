@@ -3,11 +3,9 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
 #include <string>
 #include <unordered_map>
 #include <mathutil/umath.h>
-#include <pragma/math/util_easing.hpp>
 
 export module pragma.client:particle_system.modifier_ease;
 

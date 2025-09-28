@@ -3,22 +3,8 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/lua/classes/lphysobj.h"
 #include "luasystem.h"
-#include "pragma/lua/classes/ldef_physobj.h"
 #include <mathutil/glmutil.h>
-#include "pragma/types.hpp"
-#include "pragma/lua/classes/lphysics.h"
-#include "pragma/lua/libraries/lray.h"
-#include "pragma/lua/converters/game_type_converters_t.hpp"
-#include "pragma/entities/components/base_physics_component.hpp"
-#include "pragma/physics/environment.hpp"
-#include "pragma/physics/raytraces.h"
-#include "pragma/physics/controller.hpp"
-#include "pragma/physics/phys_material.hpp"
-#include "pragma/entities/entity_iterator.hpp"
-#include "pragma/entities/components/base_physics_component.hpp"
 #include <luabind/out_value_policy.hpp>
 
 module pragma.shared;

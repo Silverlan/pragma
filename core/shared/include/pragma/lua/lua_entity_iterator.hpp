@@ -4,8 +4,6 @@
 #ifndef __LUA_ENTITY_ITERATOR_HPP__
 #define __LUA_ENTITY_ITERATOR_HPP__
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/entities/entity_iterator.hpp"
 
 class LuaBaseEntityIterator {
   public:

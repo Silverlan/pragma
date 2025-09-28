@@ -3,12 +3,13 @@
 
 module;
 
-#include "pragma/entities/components/base_entity_component.hpp"
-#include "pragma/entities/entity_uuid_ref.hpp"
-#include "pragma/game/value_driver.hpp"
 #include <udm.hpp>
 
 export module pragma.shared:entities.components.animation_driver;
+
+export import :entities.components.base;
+export import :entities.universal_reference;
+import :game.value_driver;
 
 export namespace pragma {
 	class DLLNETWORK AnimationDriverComponent final : public BaseEntityComponent {

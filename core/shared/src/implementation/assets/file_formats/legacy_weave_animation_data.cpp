@@ -3,15 +3,11 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/file_formats/wad.h"
-#include <pragma/console/conout.h>
 #include <mathutil/uquat.h>
-#include "pragma/model/animation/fanim.h"
 #include <sharedutils/util_ifile.hpp>
 #include <fsys/ifile.hpp>
 
-export module pragma.shared;
+module pragma.shared;
 
 import :assets.file_formats.legacy_weave_animation_data;
 

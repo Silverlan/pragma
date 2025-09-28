@@ -3,22 +3,9 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/networkstate/networkstate.h"
-#include <pragma/game/game.h>
-#include "pragma/entities/point/constraints/point_constraint_dof.h"
-#include "pragma/physics/environment.hpp"
-#include "pragma/physics/constraint.hpp"
-#include "pragma/entities/baseentity.h"
-#include "pragma/physics/physobj.h"
-#include "pragma/physics/collision_object.hpp"
 #include <sharedutils/util.h>
-#include "pragma/util/util_handled.hpp"
-#include "pragma/entities/components/base_physics_component.hpp"
-#include "pragma/entities/components/base_transform_component.hpp"
-#include "pragma/entities/baseentity_events.hpp"
 
-export module pragma.shared;
+module pragma.shared;
 
 import :entities.components.point.constraints.base_dof;
 

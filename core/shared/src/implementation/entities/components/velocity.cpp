@@ -3,17 +3,10 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/components/velocity_component.hpp"
-#include "pragma/entities/components/base_transform_component.hpp"
-#include "pragma/util/util_ballistic.h"
-#include "pragma/entities/components/damageable_component.hpp"
-#include "pragma/entities/entity_component_manager_t.hpp"
-#include "pragma/lua/converters/game_type_converters_t.hpp"
 #include <sharedutils/datastream.h>
 #include <udm.hpp>
 
-export module pragma.shared;
+module pragma.shared;
 
 import :entities.components.velocity;
 

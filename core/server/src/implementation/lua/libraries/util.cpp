@@ -4,14 +4,7 @@
 module;
 
 #include "stdafx_server.h"
-#include <pragma/lua/classes/ldef_color.h>
-#include <pragma/physics/raytraces.h>
-#include <pragma/lua/libraries/lutil.hpp>
-#include <pragma/util/giblet_create_info.hpp>
-#include <pragma/util/bulletinfo.h>
-#include <pragma/util/util_splash_damage_info.hpp>
 #include <sharedutils/netpacket.hpp>
-#include <pragma/networking/enums.hpp>
 
 module pragma.server.scripting.lua.libraries.util;
 

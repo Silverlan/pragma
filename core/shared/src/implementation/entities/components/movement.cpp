@@ -3,23 +3,8 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/components/movement_component.hpp"
-#include "pragma/entities/entity_component_manager_t.hpp"
-#include "pragma/entities/components/component_member_flags.hpp"
-#include "pragma/entities/components/base_physics_component.hpp"
-#include "pragma/entities/components/base_transform_component.hpp"
-#include "pragma/entities/components/base_character_component.hpp"
-#include "pragma/entities/components/base_time_scale_component.hpp"
-#include "pragma/entities/components/velocity_component.hpp"
-#include "pragma/entities/components/submergible_component.hpp"
-#include "pragma/entities/components/orientation_component.hpp"
-#include "pragma/physics/phys_material.hpp"
-#include "pragma/physics/controller.hpp"
-#include "pragma/lua/classes/ldef_vector.h"
-#include <pragma/physics/movetypes.h>
 
-export module pragma.shared;
+module pragma.shared;
 
 import :entities.components.movement;
 

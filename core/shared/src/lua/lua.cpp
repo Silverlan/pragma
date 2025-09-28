@@ -1,20 +1,8 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "stdafx_shared.h"
-#include "pragma/engine.h"
-#include <pragma/game/game.h>
-#include <pragma/console/convars.h>
-#include "pragma/physics/raytraces.h"
-#include "pragma/lua/libraries/lmath.h"
-#include "pragma/lua/libraries/ldebug.h"
-#include <pragma/model/model.h>
 #include <fsys/filesystem.h>
 #include "luasystem_file.h"
-#include "pragma/lua/class_manager.hpp"
-#include <pragma/console/conout.h>
-#include <pragma/console/cvar.h>
-#include <pragma/lua/lua_error_handling.hpp>
 #include <scripting/lua/lua.hpp>
 #include <luainterface.hpp>
 #include <luabind/exception_handler.hpp>

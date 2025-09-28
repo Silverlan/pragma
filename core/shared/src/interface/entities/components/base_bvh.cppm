@@ -3,12 +3,17 @@
 
 module;
 
-#include "pragma/entities/components/base_entity_component.hpp"
-#include "pragma/entities/components/util_bvh.hpp"
+#include "pragma/networkdefinitions.h"
 
 export module pragma.shared:entities.components.base_bvh;
 
+export import :entities.components.base;
+export import :entities.components.bvh_data;
+export import :entities.components.intersection_handler;
+export import :model.model_mesh;
+
 export namespace pragma {
+	class BaseStaticBvhCacheComponent;
 	class DLLNETWORK BaseBvhComponent : public BaseEntityComponent {
 	  public:
 		static ComponentEventId EVENT_ON_CLEAR_BVH;

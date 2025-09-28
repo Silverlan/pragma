@@ -7,7 +7,12 @@ module;
 
 export module pragma.shared:entities.components.dynamic_member_register;
 
+export import :entities.enums;
+export import :entities.member_info;
+export import :util.global_string_table;
+
 export namespace pragma {
+	class BaseEntityComponentSystem;
 	class DLLNETWORK DynamicMemberRegister {
 	  public:
 		DynamicMemberRegister();

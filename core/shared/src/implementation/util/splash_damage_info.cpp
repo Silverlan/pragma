@@ -3,8 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/util/util_splash_damage_info.hpp"
 
 module pragma.shared;
 

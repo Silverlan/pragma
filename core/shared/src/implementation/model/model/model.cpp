@@ -3,23 +3,9 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include <pragma/definitions.h>
-#include "pragma/model/model.h"
-#include <pragma/engine.h>
 #include "materialmanager.h"
-#include "pragma/model/animation/activities.h"
-#include "pragma/model/animation/meta_rig.hpp"
 #include <mathutil/umath.h>
-#include "pragma/physics/collisionmesh.h"
-#include "pragma/model/modelmesh.h"
 #include <sharedutils/util_string.h>
-#include "pragma/physics/physsoftbodyinfo.hpp"
-#include "pragma/model/animation/vertex_animation.hpp"
-#include "pragma/model/animation/flex_animation.hpp"
-#include "pragma/asset/util_asset.hpp"
-#include "pragma/model/animation/skeleton.hpp"
-#include "pragma/model/animation/bone.hpp"
 #include <sharedutils/util_path.hpp>
 #include <sharedutils/util_file.h>
 #include <sharedutils/util_library.hpp>

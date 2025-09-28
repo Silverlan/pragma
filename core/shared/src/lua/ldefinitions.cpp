@@ -1,11 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "stdafx_shared.h"
-#include "pragma/engine.h"
-#include "pragma/lua/ldefinitions.h"
-#include "pragma/lua/baseluaobj.h"
-#include <pragma/lua/lua_error_handling.hpp>
 #include <scripting/lua/lua.hpp>
 #include <stack>
 #include <sharedutils/util_file.h>

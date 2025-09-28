@@ -2,21 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_server.h"
-#include "pragma/lua/classes/ldef_entity.h"
 #include "luasystem.h"
-#include "pragma/ai/ai_memory.h"
-#include "pragma/ai/ai_schedule.h"
-#include "pragma/lua/s_lentity_components.hpp"
-#include "pragma/lua/policies/default_parameter_policy.hpp"
-#include <pragma/lua/lua_util_component.hpp>
-#include <pragma/model/model.h>
-#include <pragma/lua/lentity_components_base_types.hpp>
-#include <pragma/lua/converters/game_type_converters_t.hpp>
-#include <pragma/entities/components/base_ai_component.hpp>
-#include <pragma/lua/converters/pair_converter_t.hpp>
 #include <luabind/copy_policy.hpp>
 
-#include <pragma/lua/ostream_operator_alias.hpp>
 
 import pragma.server.ai;
 import pragma.server.entities;

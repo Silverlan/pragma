@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include <pragma/model/modelmanager.h>
 
 export module pragma.client:model.model_manager;
 

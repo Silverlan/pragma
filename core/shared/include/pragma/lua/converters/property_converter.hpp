@@ -4,7 +4,6 @@
 #ifndef __LUA_PROPERTY_CONVERTER_HPP__
 #define __LUA_PROPERTY_CONVERTER_HPP__
 
-#include "pragma/networkdefinitions.h"
 #include <sharedutils/property/util_property.hpp>
 #include <sharedutils/property/util_property_color.hpp>
 #include <sharedutils/property/util_property_euler_angles.hpp>

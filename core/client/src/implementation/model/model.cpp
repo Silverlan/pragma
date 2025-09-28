@@ -4,8 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/model/modelupdateflags.hpp"
-#include <pragma/networking/enums.hpp>
 
 module pragma.client;
 

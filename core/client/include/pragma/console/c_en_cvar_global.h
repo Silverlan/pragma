@@ -3,10 +3,6 @@
 
 #ifndef __C_EN_CVAR_GLOBAL_H__
 #define __C_EN_CVAR_GLOBAL_H__
-#include "pragma/c_enginedefinitions.h"
-#include "pragma/clientdefinitions.h"
-#include "pragma/networkdefinitions.h"
-#include <pragma/console/convars.h>
 
 DLLCLIENT void CMD_lua_reload_entity(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
 REGISTER_CONCOMMAND_CL(lua_reload_entity, CMD_lua_reload_entity, ConVarFlags::None, "Reloads the scripts for the given entity class. Usage: lua_reload_entity <className>");

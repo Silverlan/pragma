@@ -3,11 +3,12 @@
 
 module;
 
-#include "pragma/entities/components/base_entity_component.hpp"
-#include "pragma/entities/baseentity_net_event_manager.hpp"
+#include "pragma/networkdefinitions.h"
 #include <sharedutils/property/util_property.hpp>
 
 export module pragma.shared:entities.components.base_time_scale;
+
+export import :entities.components.base;
 
 export namespace pragma {
 	class DLLNETWORK BaseTimeScaleComponent : public BaseEntityComponent {

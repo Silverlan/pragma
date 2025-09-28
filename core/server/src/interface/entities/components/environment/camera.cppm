@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/serverdefinitions.h"
-#include "pragma/entities/environment/env_camera.h"
 
 export module pragma.server.entities.components.camera;
 

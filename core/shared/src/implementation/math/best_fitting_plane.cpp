@@ -3,8 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/util/util_best_fitting_plane.hpp"
 #include <Eigen/Eigenvalues>
 
 module pragma.shared;

@@ -8,6 +8,8 @@ module;
 
 export module pragma.shared:util.steam.steam;
 
+export import :util.steam.vdf;
+
 export namespace util::steam {
 	DLLNETWORK std::optional<std::string> find_steam_installation_path();
 	DLLNETWORK std::vector<util::Path> find_steam_root_paths();

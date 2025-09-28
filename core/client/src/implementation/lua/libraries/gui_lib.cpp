@@ -5,10 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include "luasystem.h"
-#include <pragma/lua/lua_call.hpp>
-#include <pragma/lua/util.hpp>
-#include <pragma/lua/classes/ldef_vector.h>
-#include <pragma/logging.hpp>
 #include <scripting/lua/lua.hpp>
 #include <prosper_window.hpp>
 #include <prosper_render_pass.hpp>

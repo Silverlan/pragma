@@ -6,9 +6,6 @@ module;
 #include "stdafx_client.h"
 #include <sharedutils/util_string.h>
 #include <prosper_util.hpp>
-#include <pragma/addonsystem/addonsystem.h>
-#include <pragma/physics/environment.hpp>
-#include <pragma/networking/networking_modules.hpp>
 #include <rapidxml.hpp>
 #include <rapidxml_utils.hpp>
 #include <rapidxml_print.hpp>

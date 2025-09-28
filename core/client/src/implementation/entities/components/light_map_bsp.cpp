@@ -3,15 +3,11 @@
 
 module;
 
-#include "pragma/game/game_resources.hpp"
-#include <pragma/entities/entity_component_system_t.hpp>
-#include <pragma/game/game_resources.hpp>
 #include <util_image_buffer.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_util.hpp>
 #include <image/prosper_texture.hpp>
-#include <pragma/lua/converters/game_type_converters_t.hpp>
 
 module pragma.client;
 

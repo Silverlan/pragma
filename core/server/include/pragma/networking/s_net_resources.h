@@ -3,9 +3,6 @@
 
 #ifndef __S_NET_RESOURCES_H__
 #define __S_NET_RESOURCES_H__
-#include "pragma/serverdefinitions.h"
-#include "pragma/networkdefinitions.h"
-#include "pragma/networking/netmessages.h"
 DLLSERVER void NET_sv_resourceinfo_response(pragma::networking::IServerClient &session, NetPacket packet);
 DLLSERVER void NET_sv_resource_request(pragma::networking::IServerClient &session, NetPacket packet);
 DLLSERVER void NET_sv_resource_begin(pragma::networking::IServerClient &session, NetPacket packet);

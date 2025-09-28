@@ -4,14 +4,11 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/baseworld.h"
 #include <sharedutils/util_shaderinfo.hpp>
 #include <sharedutils/alpha_mode.hpp>
 #include <sharedutils/util_hash.hpp>
-#include <pragma/entities/entity_iterator.hpp>
 #include "mathutil/umath_geometry.hpp"
 #include <cmaterial.h>
-#include "pragma/console/c_cvar.h"
 
 #undef AddJob
 

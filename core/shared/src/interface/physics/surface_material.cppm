@@ -4,16 +4,21 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/physics/phys_liquid.hpp"
 #include <string>
 #include <unordered_map>
 #include <sharedutils/util_shared_handle.hpp>
 #include <mathutil/color.h>
+#include "udm.hpp"
 
-export module pragma.shared:math.surface_material;
+export module pragma.shared:physics.surface_material;
+
+export import :ai.nav_system;
+export import :physics.liquid;
+export import :physics.surface_type_manager;
 
 export {
 	class SurfaceMaterial;
+	namespace pragma::physics {class IEnvironment; class IMaterial;};
 	class DLLNETWORK SurfaceMaterialManager {
 	public:
 		SurfaceMaterialManager(pragma::physics::IEnvironment &env);

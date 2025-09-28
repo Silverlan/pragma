@@ -4,8 +4,6 @@
 module;
 
 #include "stdafx_server.h"
-#include "pragma/entities/components/base_character_component.hpp"
-#include <pragma/entities/baseentity_handle.h>
 
 module pragma.server.entities.components.ai;
 

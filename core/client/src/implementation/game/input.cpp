@@ -4,10 +4,7 @@
 module;
 
 #include "stdafx_client.h"
-#include <pragma/lua/luacallback.h>
 #include "luasystem.h"
-#include <pragma/lua/luafunction_call.h>
-#include <pragma/lua/converters/vector_converter_t.hpp>
 #include <sharedutils/util_file.h>
 #include <sharedutils/scope_guard.h>
 #include <prosper_window.hpp>

@@ -3,10 +3,8 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/trigger/base_trigger_remove.h"
 
-export module pragma.shared;
+module pragma.shared;
 
 import :entities.components.triggers.base_remove;
 

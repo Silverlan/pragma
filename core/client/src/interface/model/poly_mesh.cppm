@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include "pragma/model/polymesh.h"
 
 export module pragma.client:model.poly_mesh;
 

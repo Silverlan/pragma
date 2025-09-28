@@ -4,11 +4,6 @@
 module;
 
 #include "stdafx_server.h"
-#include "pragma/lua/classes/ldef_color.h"
-#include "pragma/lua/classes/ldef_angle.h"
-#include <pragma/lua/classes/ldef_vector.h>
-#include <pragma/debug/debug_render_info.hpp>
-#include "pragma/lua/classes/ldef_plane.h"
 #include "luasystem.h"
 
 module pragma.server.scripting.lua.libraries.debug_overlay;

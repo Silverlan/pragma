@@ -2,15 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/entities/components/liquid/base_buoyancy_component.hpp"
-#include "pragma/entities/components/base_static_bvh_user_component.hpp"
-#include "pragma/entities/components/base_bvh_component.hpp"
-#include "pragma/entities/components/intersection_handler_component.hpp"
-#include <pragma/lua/converters/game_type_converters_t.hpp>
-#include <pragma/lua/converters/optional_converter_t.hpp>
-#include <pragma/lua/lua_util_component.hpp>
-#include <pragma/lua/lua_util_component_stream.hpp>
-#include <pragma/lua/lua_util_class.hpp>
 // --template-include-location
 
 import pragma.client;

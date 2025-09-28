@@ -13,12 +13,10 @@
 
 module;
 
-#include "stdafx_shared.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include "pragma/math/util_triangulate.hpp"
 
 module pragma.shared;
 

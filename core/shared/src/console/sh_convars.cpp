@@ -1,28 +1,13 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "stdafx_shared.h"
-#include "pragma/physics/environment.hpp"
-#include "pragma/entities/components/parent_component.hpp"
-#include "pragma/entities/components/base_child_component.hpp"
-#include "pragma/entities/entity_component_system_t.hpp"
-#include "pragma/debug/debug_performance_profiler.hpp"
-#include <pragma/engine.h>
-#include <pragma/console/convars.h>
-#include <pragma/console/s_convars.h>
-#include <pragma/console/c_convars.h>
-#include <pragma/lua/luaapi.h>
-#include <pragma/game/game.h>
 #include <fsys/filesystem.h>
 #include <mathutil/uvec.h>
 #include <sharedutils/util_string.h>
 #include <sharedutils/util_file.h>
-#include <pragma/engine_version.h>
-#include <pragma/asset/util_asset.hpp>
 #include <map>
 
 #define DLLSPEC_ISTEAMWORKS DLLNETWORK
-#include "pragma/game/isteamworks.hpp"
 
 //////////////// LOGGING ////////////////
 REGISTER_ENGINE_CONCOMMAND(

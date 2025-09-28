@@ -3,9 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include <pragma/entities/prop/prop_base.h>
-#include <pragma/physics/movetypes.h>
 
 export module pragma.client:entities.components.prop_base;
 

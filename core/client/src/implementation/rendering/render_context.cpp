@@ -4,15 +4,11 @@
 module;
 
 #include "stdafx_cengine.h"
-#include "pragma/debug/debug_utils.hpp"
 #include <prosper_util.hpp>
 #include <debug/prosper_debug.hpp>
 #include <shader/prosper_shader.hpp>
 #include <sharedutils/util_library.hpp>
 #include <sharedutils/util_debug.h>
-#include <pragma/util/util_module.hpp>
-#include <pragma/lua/lua_error_handling.hpp>
-#include <pragma/logging.hpp>
 #include <prosper_window.hpp>
 #include <spdlog/pattern_formatter.h>
 #include <sharedutils/magic_enum.hpp>

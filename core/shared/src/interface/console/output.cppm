@@ -3,10 +3,9 @@
 
 module;
 
-#include "pragma/definitions.h"
-#include "pragma/console/util_console_color.hpp"
-#include "pragma/util/global_string_table.hpp"
+#include "pragma/networkdefinitions.h"
 #include <sharedutils/util_log.hpp>
+#include <mathutil/color.h>
 #include <iostream>
 #include <sstream>
 #include <atomic>
@@ -28,6 +27,8 @@ module;
 #endif
 
 export module pragma.shared:console.output;
+
+export import :console.enums;
 
 export {
 	template<class T>

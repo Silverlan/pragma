@@ -3,9 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/engine.h"
-#include "pragma/util/util_python.hpp"
 #include <sharedutils/util_library.hpp>
 
 module pragma.shared;

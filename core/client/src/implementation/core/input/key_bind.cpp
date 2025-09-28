@@ -4,10 +4,7 @@
 module;
 
 #include "stdafx_cengine.h"
-#include "pragma/c_enginedefinitions.h"
 #include <sharedutils/util_string.h>
-#include <pragma/console/convars.h>
-#include <pragma/console/c_cvar.h>
 
 module pragma.client;
 

@@ -3,10 +3,12 @@
 
 module;
 
-#include "pragma/entities/components/base_entity_component.hpp"
+#include "pragma/networkdefinitions.h"
 #include <string>
 
 export module pragma.shared:entities.components.environment.effects.base_fire;
+
+export import :entities.components.base;
 
 export namespace pragma {
 	class DLLNETWORK BaseEnvFireComponent : public BaseEntityComponent {

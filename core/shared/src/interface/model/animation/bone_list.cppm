@@ -10,8 +10,6 @@ module;
 #include <mathutil/glmutil.h>
 #include <string>
 #include <unordered_map>
-#include "pragma/math/orientation.h"
-#include "pragma/physics/jointinfo.h"
 
 export module pragma.shared:model.animation.bone_list;
 

@@ -3,9 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/model/animation/activities.h"
-#include "pragma/model/animation/animation.hpp"
 
 module pragma.shared;
 

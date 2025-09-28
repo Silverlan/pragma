@@ -3,20 +3,10 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/components/base_entity_component.hpp"
-#include "pragma/entities/entity_component_manager.hpp"
-#include "pragma/entities/components/basetoggle.h"
-#include "pragma/entities/components/base_generic_component.hpp"
-#include "pragma/entities/components/panima_component.hpp"
-#include "pragma/entities/components/origin_component.hpp"
-#include "pragma/entities/entity_component_system_t.hpp"
-#include "pragma/entities/entity_component_manager_t.hpp"
-#include "pragma/logging.hpp"
 #include <sharedutils/datastream.h>
 #include <udm.hpp>
 
-export module pragma.shared;
+module pragma.shared;
 
 import :entities.components.base_entity;
 

@@ -9,16 +9,20 @@ module;
 #include <mathutil/glmutil.h>
 #include <mathutil/uquat.h>
 #include <mathutil/transform.hpp>
-#include "pragma/physics/base.hpp"
-#include "pragma/lua/baseluaobj.h"
-#include "pragma/physics/collisionmasks.h"
-#include "pragma/networking/nwm_velocity_correction.hpp"
 #include <vector>
 
 export module pragma.shared:physics.collision_object;
 
+export import :physics.base;
+export import :physics.shape;
+
 export {
+	class ModelSubMesh;
 	namespace pragma::physics {
+		class IGhostObject;
+		class IRigidBody;
+		class ISoftBody;
+		struct ContactInfo;
 		class DLLNETWORK ICollisionObject : public IBase, public IWorldObject {
 		public:
 			enum class ActivationState : uint32_t {

@@ -6,7 +6,6 @@ module;
 #include "stdafx_client.h"
 #include <mathutil/umath.h>
 #include <buffers/prosper_dynamic_resizable_buffer.hpp>
-#include "pragma/model/modelupdateflags.hpp"
 
 module pragma.client;
 

@@ -7,6 +7,7 @@ module;
 #include <array>
 #include <mathutil/uvec.h>
 #include <mathutil/plane.hpp>
+#include <udm.hpp>
 
 export module pragma.shared:util.bsp_tree;
 

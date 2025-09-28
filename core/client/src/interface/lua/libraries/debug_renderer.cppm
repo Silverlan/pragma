@@ -3,9 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include <pragma/lua/ldefinitions.h>
-#include "pragma/debug/debug_render_info.hpp"
 
 export module pragma.client:scripting.lua.libraries.debug_renderer;
 import :debug;

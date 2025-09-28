@@ -3,13 +3,12 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/baseentity_events.hpp"
-#include "pragma/lua/converters/game_type_converters_t.hpp"
 #include <sharedutils/datastream.h>
 #include <udm.hpp>
 
-module pragma.entities.components.global_name;
+module pragma.shared;
+
+import :entities.components.global_name;
 
 using namespace pragma;
 

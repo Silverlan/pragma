@@ -2,20 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_server.h"
-#include <pragma/engine.h>
-#include "pragma/console/s_cvar_global.h"
-#include "pragma/console/cvar_global.h"
-#include "pragma/networking/iserver.hpp"
-#include "pragma/networking/iserver_client.hpp"
-#include <pragma/entities/components/base_name_component.hpp>
-#include <pragma/console/util_cmd.hpp>
-#include <pragma/entities/components/base_player_component.hpp>
-#include <pragma/entities/entity_component_system_t.hpp>
-#include <pragma/lua/util.hpp>
-#include <pragma/asset/util_asset.hpp>
 #include <sharedutils/util_file.h>
-#include <pragma/networking/netmessages.h>
-#include <pragma/entities/entity_iterator.hpp>
 
 import pragma.server.entities;
 import pragma.server.entities.components;

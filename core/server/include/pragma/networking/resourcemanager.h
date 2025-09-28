@@ -3,8 +3,6 @@
 
 #ifndef __RESOURCEMANAGER_H__
 #define __RESOURCEMANAGER_H__
-#include "pragma/serverdefinitions.h"
-#include <pragma/game/game_resources.h>
 #include <vector>
 #include <string>
 

@@ -3,10 +3,11 @@
 
 module;
 
-#include "pragma/entities/components/base_entity_component.hpp"
-#include "pragma/entities/baseentity_handle.h"
+#include "pragma/networkdefinitions.h"
 
-export module pragma.entities.components.composite;
+export module pragma.shared:entities.components.composite;
+
+export import :entities.components.base;
 
 export namespace pragma::ecs {
 	class CompositeComponent;

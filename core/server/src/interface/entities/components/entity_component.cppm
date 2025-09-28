@@ -3,9 +3,6 @@
 
 module;
 
-#include "pragma/serverdefinitions.h"
-#include "pragma/networking/recipient_filter.hpp"
-#include <pragma/entities/entity_component_manager.hpp>
 #include <sharedutils/netpacket.hpp>
 
 export module pragma.server.entities.components.entity;

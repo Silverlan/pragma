@@ -3,25 +3,11 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/engine.h"
-#include "pragma/model/model.h"
-#include "pragma/model/modelmesh.h"
-#include "pragma/physics/collisionmesh.h"
-#include "pragma/model/animation/fanim.h"
-#include "pragma/physics/physsoftbodyinfo.hpp"
-#include "pragma/model/animation/vertex_animation.hpp"
-#include "pragma/model/animation/flex_animation.hpp"
-#include "pragma/model/animation/meta_rig.hpp"
-#include "pragma/asset/util_asset.hpp"
-#include "pragma/logging.hpp"
 #include <fsys/filesystem.h>
 #include <sharedutils/util_file.h>
 #include <sharedutils/util_ifile.hpp>
 #include <udm.hpp>
 #include <set>
-#include "pragma/model/animation/skeleton.hpp"
-#include "pragma/model/animation/bone.hpp"
 
 module pragma.shared;
 

@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/util/global_string_table.hpp"
 #include <mathutil/transform.hpp>
 #include <functional>
 #include <optional>

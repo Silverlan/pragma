@@ -3,12 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/components/base_entity_component.hpp"
-#include "pragma/entities/entity_component_manager.hpp"
-#include "pragma/entities/entity_component_system.hpp"
-#include "pragma/entities/components/base_generic_component.hpp"
-#include "pragma/entities/components/base_entity_component_member_register.hpp"
 #include <unordered_set>
 
 module pragma.shared;

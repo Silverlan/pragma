@@ -10,6 +10,8 @@ module;
 
 export module pragma.shared:entities.components.triggers.base_gravity;
 
+export import :entities.components.base;
+
 export {
 	struct DLLNETWORK GravitySettings {
 		float scale = 1.f;

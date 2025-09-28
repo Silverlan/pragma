@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/serverdefinitions.h"
 #include "sharedutils/netpacket.hpp"
 
 export module pragma.server.scripting.lua.classes.net_packet;

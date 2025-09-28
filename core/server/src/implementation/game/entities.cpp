@@ -7,18 +7,6 @@ module;
 #include <servermanager/sv_nwm_recipientfilter.h>
 #include "luasystem.h"
 #include <sharedutils/util_string.h>
-#include <pragma/networking/nwm_util.h>
-#include "pragma/lua/handle_holder.hpp"
-#include "pragma/networking/iserver_client.hpp"
-#include "pragma/networking/recipient_filter.hpp"
-#include "pragma/entities/components/base_player_component.hpp"
-#include <pragma/debug/intel_vtune.hpp>
-#include <pragma/networking/enums.hpp>
-#include <pragma/lua/lua_entity_type.hpp>
-#include <pragma/lua/converters/game_type_converters_t.hpp>
-#include <pragma/entities/components/map_component.hpp>
-#include <pragma/entities/entity_component_system_t.hpp>
-#include <pragma/game/game_lua_entity.hpp>
 #include <udm.hpp>
 
 module pragma.server.game;

@@ -3,7 +3,6 @@
 
 export;
 
-#include "pragma/clientdefinitions.h"
 #include <shader/prosper_shader.hpp>
 
 export module pragma.client:rendering.shaders.calc_image_color;

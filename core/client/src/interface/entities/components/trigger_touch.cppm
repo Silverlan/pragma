@@ -3,9 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include "pragma/entities/trigger/base_trigger_touch.hpp"
-#include <pragma/entities/trigger/base_trigger_touch.hpp>
 
 export module pragma.client:entities.components.trigger_touch;
 

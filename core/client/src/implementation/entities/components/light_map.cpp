@@ -4,19 +4,8 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/console/c_cvar_global_functions.h"
-#include "pragma/entities/entity_iterator.hpp"
-#include "pragma/entities/entity_iterator.hpp"
-#include "pragma/entities/entity_component_manager_t.hpp"
-#include <pragma/util/util_tga.hpp>
-#include <pragma/logging.hpp>
-#include <pragma/level/mapgeometry.h>
-#include <pragma/entities/entity_iterator.hpp>
 #include <GuillotineBinPack.h>
 #include <texturemanager/texture.h>
-#include <pragma/entities/entity_component_system_t.hpp>
-#include <pragma/lua/converters/game_type_converters_t.hpp>
-#include <pragma/asset/util_asset.hpp>
 #include <prosper_util.hpp>
 #include <buffers/prosper_dynamic_resizable_buffer.hpp>
 #include <prosper_command_buffer.hpp>
@@ -24,18 +13,7 @@ module;
 #include <util_image_buffer.hpp>
 #include <util_image.hpp>
 #include <util_texture_info.hpp>
-#include <pragma/console/command_options.hpp>
-#include <pragma/util/util_game.hpp>
 #include <fsys/ifile.hpp>
-#include "pragma/lua/libraries/lfile.h"
-#include <pragma/lua/converters/optional_converter_t.hpp>
-#include <pragma/lua/converters/property_converter_t.hpp>
-#include <pragma/lua/converters/game_type_converters_t.hpp>
-#include <pragma/lua/converters/pair_converter_t.hpp>
-#include <pragma/lua/converters/vector_converter_t.hpp>
-#include <pragma/lua/lua_util_component.hpp>
-#include <pragma/lua/lua_util_component_stream.hpp>
-#include <pragma/lua/custom_constructor.hpp>
 #include <luabind/copy_policy.hpp>
 #include <texturemanager/texturemanager.h>
 #include <cmaterialmanager.h>

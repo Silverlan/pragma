@@ -3,9 +3,8 @@
 
 module;
 
-#include "pragma/networkdefinitions.h"
 
-export module pragma.client:scripting.lua.libraries.ai;
+export module pragma.shared:scripting.lua.libraries.ai;
 
 export namespace Lua {
 	namespace ai {

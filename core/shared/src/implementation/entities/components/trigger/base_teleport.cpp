@@ -3,15 +3,8 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/trigger/base_trigger_teleport.hpp"
-#include "pragma/util/util_handled.hpp"
-#include "pragma/entities/components/base_transform_component.hpp"
-#include "pragma/entities/trigger/base_trigger_touch.hpp"
-#include "pragma/entities/entity_iterator.hpp"
-#include "pragma/entities/baseentity_events.hpp"
 
-export module pragma.shared;
+module pragma.shared;
 
 import :entities.components.triggers.base_teleport;
 

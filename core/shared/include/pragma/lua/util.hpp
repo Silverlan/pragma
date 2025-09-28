@@ -4,8 +4,6 @@
 #ifndef __LUA_UTIL_HPP__
 #define __LUA_UTIL_HPP__
 
-#include "pragma/networkdefinitions.h"
-#include <pragma/lua/luaapi.h>
 
 namespace Lua {
 	DLLNETWORK luabind::detail::class_rep *get_crep(luabind::object o);

@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "stdafx_shared.h"
-#include "pragma/lua/classes/ldef_entity.h"
 
 void LuaEntityManager::RegisterEntity(std::string className, luabind::object &o, const std::vector<pragma::ComponentId> &components)
 {

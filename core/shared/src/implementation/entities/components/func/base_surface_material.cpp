@@ -3,10 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include <pragma/game/game.h>
-#include "pragma/entities/func/basefuncsurfacematerial.hpp"
-#include "pragma/entities/components/base_physics_component.hpp"
 
 module pragma.shared;
 

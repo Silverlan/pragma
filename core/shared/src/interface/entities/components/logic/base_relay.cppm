@@ -3,10 +3,12 @@
 
 module;
 
-#include "pragma/entities/components/base_entity_component.hpp"
+#include "pragma/networkdefinitions.h"
 #include <string>
 
 export module pragma.shared:entities.components.logic.base_relay;
+
+export import :entities.components.base;
 
 export namespace pragma {
 	class DLLNETWORK BaseLogicRelayComponent : public pragma::BaseEntityComponent {

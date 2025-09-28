@@ -3,15 +3,10 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/components/base_name_component.hpp"
-#include "pragma/entities/components/base_io_component.hpp"
-#include "pragma/entities/baseentity_events.hpp"
-#include "pragma/entities/entity_component_manager_t.hpp"
 #include <sharedutils/datastream.h>
 #include <udm.hpp>
 
-export module pragma.shared;
+module pragma.shared;
 
 import :entities.components.base_name;
 

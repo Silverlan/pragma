@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_server.h"
-#include "pragma/ai/ai_behavior.h"
-#include "pragma/ai/ai_schedule.h"
 
 import pragma.server.entities.components;
 import pragma.server.game;

@@ -3,11 +3,15 @@
 
 module;
 
-#include "pragma/util/util_typed_manager.hpp"
+#include "pragma/networkdefinitions.h"
 #include <optional>
 #include <unordered_map>
 
 export module pragma.shared:physics.tire_type_manager;
+
+export import :util.type_manager;
+
+export import :physics.surface_type_manager;
 
 export namespace pragma::physics {
 	class DLLNETWORK TireType : public BaseNamedType {

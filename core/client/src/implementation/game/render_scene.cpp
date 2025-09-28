@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/console/c_cvar.h"
 #include <shader/prosper_shader_blur.hpp>
 #include <prosper_util.hpp>
 #include <image/prosper_render_target.hpp>

@@ -4,13 +4,14 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/game/damagetype.h"
-#include "pragma/types.hpp"
 #include <mathutil/glmutil.h>
-#include "pragma/physics/hitboxes.h"
-#include "pragma/entities/baseentity_handle.h"
+#include <iostream>
 
 export module pragma.shared:game.damage_info;
+
+import :entities.base_entity_handle;
+import :game.enums;
+import :physics.hitbox;
 
 export {
 	class DLLNETWORK DamageInfo {

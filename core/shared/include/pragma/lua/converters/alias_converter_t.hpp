@@ -4,7 +4,6 @@
 #ifndef __LUA_ALIAS_CONVERTER_T_HPP__
 #define __LUA_ALIAS_CONVERTER_T_HPP__
 
-#include "pragma/lua/converters/alias_converter.hpp"
 
 template<class TBase, class... T>
 template<size_t I, typename... Tp>

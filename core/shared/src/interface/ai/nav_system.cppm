@@ -5,11 +5,17 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include <udm_types.hpp>
-#include <mathutil/glmutil.h>
+#include <mathutil/umath.h>
+#include <mathutil/uvec.h>
+#include <string>
+#include "DetourNavMeshQuery.h"
+#include "Recast.h"
 
 export module pragma.shared:ai.nav_system;
 
 export {
+	class BaseEntity;
+	class Game;
 	class RcNavMesh;
 	class DLLNETWORK RcPathResult {
 	public:

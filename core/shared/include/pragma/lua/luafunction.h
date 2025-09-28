@@ -4,7 +4,6 @@
 #ifndef __LUAFUNCTION_H__
 #define __LUAFUNCTION_H__
 
-#include "pragma/networkdefinitions.h"
 #include <memory>
 #include <string>
 

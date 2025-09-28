@@ -3,21 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/physics/phys_water_buoyancy_simulator.hpp"
-#include "pragma/physics/phys_water_surface_simulator.hpp"
-#include "pragma/physics/environment.hpp"
-#include "pragma/entities/baseentity.h"
-#include "pragma/physics/phys_liquid.hpp"
-#include "pragma/physics/shape.hpp"
-#include "pragma/physics/collisionmesh.h"
-#include "pragma/util/util_best_fitting_plane.hpp"
-#include "pragma/util/util_game.hpp"
-#include "pragma/entities/components/base_physics_component.hpp"
-#include "pragma/entities/components/base_transform_component.hpp"
-#include "pragma/entities/components/submergible_component.hpp"
-#include "pragma/entities/components/velocity_component.hpp"
-#include <pragma/physics/movetypes.h>
 
 // See http://www.randygaul.net/wp-content/uploads/2014/02/RigidBodies_WaterSurface.pdf for algorithms
 

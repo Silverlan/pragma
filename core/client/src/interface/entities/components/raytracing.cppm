@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include <pragma/entities/components/base_entity_component.hpp>
 #include <material_descriptor_array.hpp>
 #include <shader/prosper_descriptor_array_manager.hpp>
 #include <buffers/prosper_buffer.hpp>

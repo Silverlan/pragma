@@ -3,11 +3,13 @@
 
 module;
 
-#include "pragma/entities/components/base_entity_component.hpp"
+#include "pragma/networkdefinitions.h"
 #include <string>
 #include <vector>
 
 export module pragma.shared:entities.components.base_filter;
+
+export import :entities.components.base;
 
 export namespace pragma {
 	class DLLNETWORK BaseFilterComponent : public BaseEntityComponent {

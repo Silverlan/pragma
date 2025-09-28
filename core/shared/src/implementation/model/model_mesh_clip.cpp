@@ -3,10 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/model/modelmesh.h"
-#include "pragma/math/util_triangulate.hpp"
-#include <pragma/math/intersection.h>
 
 module pragma.shared;
 

@@ -3,19 +3,12 @@
 
 module;
 
-#include "pragma/entities/entity_component_system_t.hpp"
-#include "pragma/console/c_cvar.h"
 #include <image/prosper_render_target.hpp>
 #include <image/prosper_msaa_texture.hpp>
-#include <pragma/lua/luafunction_call.h>
-#include <pragma/console/convars.h>
 #include <prosper_util.hpp>
-#include <pragma/entities/entity_iterator.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_swap_command_buffer.hpp>
 #if DEBUG_RENDER_PERFORMANCE_TEST_ENABLED == 1
-#include "pragma/entities/entity_iterator.hpp"
-#include "pragma/entities/entity_component_system_t.hpp"
 #endif
 
 module pragma.client;

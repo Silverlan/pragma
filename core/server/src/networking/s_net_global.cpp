@@ -2,25 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_server.h"
-#include "pragma/networking/s_net_global.h"
-#include "pragma/networking/resourcemanager.h"
-#include "pragma/physics/movetypes.h"
-#include "pragma/game/damagetype.h"
-#include <pragma/networking/nwm_util.h>
-#include "pragma/networking/iserver.hpp"
-#include "pragma/networking/iserver_client.hpp"
-#include "pragma/networking/recipient_filter.hpp"
-#include <pragma/engine.h>
-#include "pragma/ai/ai_schedule.h"
-#include <pragma/networking/enums.hpp>
-#include <pragma/networking/error.hpp>
-#include <pragma/debug/debugbehaviortree.h>
-#include <pragma/entities/components/base_player_component.hpp>
-#include <pragma/entities/components/base_character_component.hpp>
-#include <pragma/entities/components/base_transform_component.hpp>
-#include <pragma/entities/components/base_physics_component.hpp>
-#include <pragma/entities/components/damageable_component.hpp>
-#include <pragma/entities/entity_component_system_t.hpp>
 #include <sharedutils/util_library.hpp>
 
 import pragma.server.entities;

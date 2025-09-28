@@ -32,7 +32,6 @@ documentation and/or software.
 
 #ifndef BZF_MD5_H
 #define BZF_MD5_H
-#include "pragma/definitions.h"
 #include <string>
 #include <iostream>
 

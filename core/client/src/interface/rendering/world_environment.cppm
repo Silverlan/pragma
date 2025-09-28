@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include <pragma/util/util_game.hpp>
 #include <mathutil/color.h>
 #include <mathutil/glmutil.h>
 #include <memory>

@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include "pragma/lua/c_ldefinitions.h"
 
 export module pragma.client:scripting.lua.classes.model_mesh;
 export namespace Lua {

@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
 #include <buffers/prosper_uniform_resizable_buffer.hpp>
 #include <mathutil/uvec.h>
 #include <mathutil/umath_lighting.hpp>

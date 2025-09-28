@@ -3,9 +3,6 @@
 
 #ifndef __C_CVAR_SETTINGS_H__
 #define __C_CVAR_SETTINGS_H__
-#include "pragma/clientdefinitions.h"
-#include "pragma/networkdefinitions.h"
-#include <pragma/console/convars.h>
 
 REGISTER_CONVAR_CL(cl_language, udm::Type::String, "", ConVarFlags::Archive, "Game language. If empty, the system language will be used (if available, otherwise it will default to English).");
 

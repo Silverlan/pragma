@@ -3,22 +3,8 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/components/base_attachment_component.hpp"
-#include "pragma/entities/components/base_model_component.hpp"
-#include "pragma/entities/components/base_character_component.hpp"
-#include "pragma/entities/components/base_transform_component.hpp"
-#include "pragma/entities/components/base_animated_component.hpp"
-#include "pragma/entities/components/parent_component.hpp"
-#include "pragma/entities/components/base_child_component.hpp"
-#include "pragma/entities/baseentity_events.hpp"
-#include "pragma/entities/parentinfo.h"
-#include "pragma/entities/entity_iterator.hpp"
-#include "pragma/model/model.h"
-#include "pragma/model/animation/skeleton.hpp"
-#include "pragma/model/animation/bone.hpp"
 
-export module pragma.shared;
+module pragma.shared;
 
 import :entities.components.base_attachment;
 

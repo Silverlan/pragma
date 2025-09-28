@@ -3,8 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/util/render_tile.hpp"
 
 module pragma.shared;
 

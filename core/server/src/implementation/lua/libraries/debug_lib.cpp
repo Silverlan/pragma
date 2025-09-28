@@ -5,9 +5,6 @@ module;
 
 #include "stdafx_server.h"
 #include "luasystem.h"
-#include "pragma/debug/debugbehaviortree.h"
-#include "pragma/ai/ai_behavior.h"
-#include "pragma/ai/ai_memory.h"
 
 module pragma.server.scripting.lua.libraries.debug;
 

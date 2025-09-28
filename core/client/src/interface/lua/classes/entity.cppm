@@ -3,10 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include <pragma/lua/ldefinitions.h>
-#include <pragma/networking/nwm_util.h>
-#include <pragma/networking/enums.hpp>
 #include <mathutil/glmutil.h>
 
 export module pragma.client:scripting.lua.classes.entity;

@@ -2,32 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/networking/c_net_global.h"
-#include "pragma/physics/movetypes.h"
-#include "pragma/physics/collisiontypes.h"
-#include "pragma/entities/parentmode.h"
-#include <pragma/entities/components/basetoggle.h>
-#include "pragma/entities/environment/env_fog_controller.h"
-#include <pragma/networking/nwm_util.h>
-#include <pragma/math/intersection.h>
-#include <pragma/entities/baseentity_trace.hpp>
-#include <pragma/entities/components/map_component.hpp>
-#include <pragma/audio/alsound_type.h>
-#include <pragma/debug/debugbehaviortree.h>
-#include <pragma/console/sh_cmd.h>
-#include <pragma/physics/raytraces.h>
-#include "pragma/entities/environment/env_quake.h"
-#include <pragma/entities/components/basetriggergravity.hpp>
-#include <pragma/entities/components/base_physics_component.hpp>
-#include <pragma/entities/components/base_player_component.hpp>
-#include <pragma/entities/components/base_transform_component.hpp>
-#include <pragma/entities/components/orientation_component.hpp>
-#include "pragma/entities/components/base_character_component.hpp"
-#include <pragma/entities/components/action_input_controller_component.hpp>
-#include <pragma/entities/entity_component_system_t.hpp>
-#include <pragma/entities/entity_iterator.hpp>
-#include <pragma/networking/enums.hpp>
-#include <pragma/util/giblet_create_info.hpp>
 
 import pragma.client;
 

@@ -3,16 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/entity_iterator.hpp"
-#include "pragma/entities/entity_component_manager.hpp"
-#include "pragma/entities/components/base_physics_component.hpp"
-#include "pragma/entities/components/base_transform_component.hpp"
-#include "pragma/entities/components/base_name_component.hpp"
-#include "pragma/entities/components/base_model_component.hpp"
-#include "pragma/entities/basefilterentity.h"
-#include "pragma/asset/util_asset.hpp"
-#include <pragma/math/intersection.h>
 
 module pragma.shared;
 

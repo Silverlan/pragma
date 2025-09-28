@@ -3,10 +3,6 @@
 
 #ifndef __C_CVAR_SERVER__
 #define __C_CVAR_SERVER__
-#include "pragma/clientdefinitions.h"
-#include "pragma/networkdefinitions.h"
-#include <pragma/console/convars.h>
-#include "pragma/networking/portinfo.h"
 
 REGISTER_CONVAR_CL(playername, udm::Type::String, "player", ConVarFlags::Archive | ConVarFlags::Userinfo, "Local player name.");
 REGISTER_CONVAR_CL(password, udm::Type::String, "", ConVarFlags::Password, "Password which will be used for the next connection attempt.");

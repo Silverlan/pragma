@@ -4,11 +4,13 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <pragma/console/fcvar.h>
-#include "pragma/networkstate/networkstate.h"
 #include "pragma/lua/luafunction.h"
-#include "pragma/console/cvar_callback.hpp"
 #include <udm.hpp>
+
+export module pragma.shared:console.convar;
+
+export import :console.cvar_callback;
+export import :console.enums;
 
 #define cvar_newglobal_dec(glname)                                                                                                                                                                                                                                                               \
 	namespace console_system {                                                                                                                                                                                                                                                                   \
@@ -27,19 +29,9 @@ module;
 		};                                                                                                                                                                                                                                                                                       \
 	};
 
-export module pragma.shared:console.convar;
-
 export {
-	enum class DLLNETWORK ConType : uint32_t {
-		Var = 0,
-		Variable = 0,
-
-		Cmd = 1,
-		Command = 1,
-
-		LuaCmd = 2,
-		LuaCommand = 2
-	};
+	class NetworkState;
+	class CVarHandler;
 
 	using ConVarValue = std::unique_ptr<void, void (*)(void *)>;
 	namespace console {

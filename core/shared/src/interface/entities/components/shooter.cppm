@@ -4,14 +4,10 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/entities/components/base_player_component.hpp"
-#include "pragma/entities/components/base_entity_component.hpp"
-#include "pragma/entities/baseentity_handle.h"
-#include "pragma/entities/baseentity_net_event_manager.hpp"
-#include "pragma/util/bulletinfo.h"
-#include "pragma/physics/raytraces.h"
 
-export module pragma.entities.components.shooter;
+export module pragma.shared:entities.components.shooter;
+
+export import :entities.components.base;
 
 export namespace pragma::ecs {
 	namespace events {

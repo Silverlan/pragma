@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include <pragma/lua/luaobjectbase.h>
 
 export module pragma.client:entities.lua;
 

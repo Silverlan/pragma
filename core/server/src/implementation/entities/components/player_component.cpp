@@ -4,30 +4,7 @@
 module;
 
 #include "stdafx_server.h"
-#include "pragma/physics/collisiontypes.h"
-#include "pragma/networking/s_nwm_util.h"
-#include "pragma/networking/iserver_client.hpp"
-#include "pragma/networking/recipient_filter.hpp"
-#include <pragma/networking/enums.hpp>
-#include <pragma/networking/error.hpp>
-#include <pragma/util/util_handled.hpp>
-#include <pragma/model/model.h>
 #include "sharedutils/netpacket.hpp"
-#include "pragma/input/inkeys.h"
-#include "pragma/emessage.h"
-#include "pragma/entities/observermode.h"
-#include "pragma/networking/recipient_filter.hpp"
-#include <pragma/entities/components/base_animated_component.hpp>
-#include <pragma/entities/components/base_character_component.hpp>
-#include <pragma/entities/components/base_physics_component.hpp>
-#include <pragma/entities/components/base_transform_component.hpp>
-#include <pragma/entities/components/base_observable_component.hpp>
-#include <pragma/entities/components/base_score_component.hpp>
-#include <pragma/entities/components/base_name_component.hpp>
-#include <pragma/entities/components/base_model_component.hpp>
-#include <pragma/entities/components/damageable_component.hpp>
-#include <pragma/entities/entity_component_system_t.hpp>
-#include <pragma/lua/converters/game_type_converters_t.hpp>
 
 module pragma.server.entities.components.player;
 

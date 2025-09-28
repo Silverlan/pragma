@@ -3,8 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/audio/alsound_base.hpp"
 
 module pragma.shared;
 

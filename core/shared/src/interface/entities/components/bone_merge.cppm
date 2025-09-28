@@ -3,40 +3,48 @@
 
 module;
 
-#include "pragma/entities/components/base_entity_component.hpp"
+#include "pragma/networkdefinitions.h"
 
 export module pragma.shared:entities.components.bone_merge;
 
-export namespace pragma {
-	class DLLNETWORK BoneMergeComponent final : public BaseEntityComponent {
-	  public:
-		static bool can_merge(const Model &mdl, const Model &mdlParent, bool includeRootBones = false);
-		static ComponentEventId EVENT_ON_TARGET_CHANGED;
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
-		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
+export import :entities.components.base;
+export import :entities.universal_reference;
+export import :model.animation.bone;
 
-		BoneMergeComponent(BaseEntity &ent);
-		virtual void Initialize() override;
-		virtual void OnRemove() override;
-		virtual void OnTick(double tDelta) override;
+export {
+	class Model;
+	namespace pragma {
+		class BaseAnimatedComponent;
+		class DLLNETWORK BoneMergeComponent final : public BaseEntityComponent {
+		  public:
+			static bool can_merge(const Model &mdl, const Model &mdlParent, bool includeRootBones = false);
+			static ComponentEventId EVENT_ON_TARGET_CHANGED;
+			static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+			static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 
-		void SetTarget(const pragma::EntityURef &target);
-		const pragma::EntityURef &GetTarget() const;
+			BoneMergeComponent(BaseEntity &ent);
+			virtual void Initialize() override;
+			virtual void OnRemove() override;
+			virtual void OnTick(double tDelta) override;
 
-		virtual void InitializeLuaObject(lua_State *lua) override;
-	  private:
-		struct BoneMapping {
-			animation::BoneId boneId;
-			animation::BoneId parentBoneId;
+			void SetTarget(const pragma::EntityURef &target);
+			const pragma::EntityURef &GetTarget() const;
+
+			virtual void InitializeLuaObject(lua_State *lua) override;
+		  private:
+			struct BoneMapping {
+				animation::BoneId boneId;
+				animation::BoneId parentBoneId;
+			};
+			std::vector<BoneMapping> m_boneMappings;
+			pragma::EntityURef m_target;
+			pragma::ComponentHandle<BaseAnimatedComponent> m_animC;
+			pragma::ComponentHandle<BaseAnimatedComponent> m_animCParent;
+			virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
+			virtual void OnEntityComponentRemoved(BaseEntityComponent &component) override;
+			void SetTargetDirty();
+			void UpdateBoneMappings();
+			void MergeBonePoses();
 		};
-		std::vector<BoneMapping> m_boneMappings;
-		pragma::EntityURef m_target;
-		pragma::ComponentHandle<BaseAnimatedComponent> m_animC;
-		pragma::ComponentHandle<BaseAnimatedComponent> m_animCParent;
-		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
-		virtual void OnEntityComponentRemoved(BaseEntityComponent &component) override;
-		void SetTargetDirty();
-		void UpdateBoneMappings();
-		void MergeBonePoses();
 	};
-};
+}

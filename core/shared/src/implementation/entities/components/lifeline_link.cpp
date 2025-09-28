@@ -3,11 +3,10 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/entity_component_manager_t.hpp"
-#include "pragma/entities/components/component_member_flags.hpp"
 
-module pragma.entities.components.lifeline_link;
+module pragma.shared;
+
+import :entities.components.lifeline_link;
 
 using namespace pragma;
 

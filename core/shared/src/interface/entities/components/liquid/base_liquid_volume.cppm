@@ -3,10 +3,12 @@
 
 module;
 
-#include "pragma/entities/components/base_entity_component.hpp"
+#include "pragma/networkdefinitions.h"
 #include <mathutil/plane.hpp>
 
 export module pragma.shared:entities.components.liquid.base_volume;
+
+export import :entities.components.base;
 
 export namespace pragma {
 	class DLLNETWORK BaseLiquidVolumeComponent : public BaseEntityComponent {

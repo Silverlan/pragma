@@ -3,11 +3,12 @@
 
 module;
 
-#include "pragma/definitions.h"
+#include "pragma/networkdefinitions.h"
 #include <iostream>
 #include <vector>
 #include <mathutil/glmutil.h>
-#include "pragma/math/angle/wvangle.h"
+#include "mathutil/uquat.h"
+#include "mathutil/eulerangles.h"
 
 export module pragma.shared:math.orientation;
 

@@ -3,12 +3,8 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/lua/libraries/lutil.hpp"
-#include "pragma/lua/converters/vector_converter_t.hpp"
-#include "pragma/lua/policies/core_policies.hpp"
 
-module pragma.client;
+module pragma.shared;
 
 import :scripting.lua.libraries.util;
 

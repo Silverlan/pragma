@@ -3,6 +3,8 @@
 
 module;
 
+#include <mathutil/umath.h>
+
 export module pragma.shared:assets.vtf_info;
 
 export {

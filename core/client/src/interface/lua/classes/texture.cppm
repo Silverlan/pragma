@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include <pragma/lua/ldefinitions.h>
 #include <mathutil/glmutil.h>
 #include "textureinfo.h"
 #include <texturemanager/texture.h>

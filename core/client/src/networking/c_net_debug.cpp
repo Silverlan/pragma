@@ -2,9 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/networking/c_net_debug.h"
-#include "pragma/debug/debug_render_info.hpp"
-#include <pragma/networking/nwm_util.h>
 
 import pragma.client;
 

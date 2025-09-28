@@ -4,9 +4,6 @@
 #ifndef __LUAOBJECTBASE_H__
 #define __LUAOBJECTBASE_H__
 
-#include "pragma/networkdefinitions.h"
-#include <pragma/lua/luaapi.h>
-#include "pragma/lua/ldefinitions.h"
 #include "luasystem.h"
 
 class DLLNETWORK LuaObjectBase {

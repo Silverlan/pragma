@@ -3,8 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/util/global_string_table.hpp"
 
 module pragma.shared;
 

@@ -3,10 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/util/rig_config.hpp"
-#include <pragma/logging.hpp>
-#include <pragma/console/conout.h>
 #include <fsys/filesystem.h>
 #include <udm.hpp>
 #include <sharedutils/util_path.hpp>

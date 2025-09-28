@@ -4,21 +4,9 @@
 module;
 
 #include "stdafx_server.h"
-#include <pragma/engine.h>
-#include <pragma/audio/soundscript.h>
-#include "pragma/scripts.h"
-#include <pragma/networking/enums.hpp>
 #include <fsys/filesystem.h>
-#include <pragma/lua/luacallback.h>
-#include <pragma/networking/nwm_util.h>
 #include "luasystem.h"
-#include "pragma/networking/recipient_filter.hpp"
-#include "pragma/networking/s_nwm_util.h"
-#include <pragma/lua/luafunction_call.h>
 #include <sharedutils/util_file.h>
-#include <pragma/audio/sound_util.hpp>
-#include <pragma/game/game_resources.hpp>
-#include <pragma/logging.hpp>
 
 module pragma.server.server_state;
 

@@ -3,10 +3,7 @@
 
 module;
 
-#include "pragma/serverdefinitions.h"
 #include "sharedutils/netpacket.hpp"
-#include "pragma/networking/recipient_filter.hpp"
-#include <pragma/entities/components/base_transform_component.hpp>
 
 import pragma.server.entities.components.entity;
 

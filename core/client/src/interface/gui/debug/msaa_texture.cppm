@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
 #include "image/prosper_texture.hpp"
 
 export module pragma.client:gui.debug_msaa_texture;

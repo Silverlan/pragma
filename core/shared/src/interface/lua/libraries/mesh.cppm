@@ -3,10 +3,8 @@
 
 module;
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/lua/ldefinitions.h"
 
-export module pragma.client:scripting.lua.libraries.mesh;
+export module pragma.shared:scripting.lua.libraries.mesh;
 
 export namespace Lua {
 	namespace mesh {

@@ -4,32 +4,15 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/lua/classes/lmaterial.h"
-#include "pragma/lua/classes/lentity.h"
-#include "pragma/lua/classes/lshaderinfo.h"
-#include "pragma/lua/classes/lmodel.h"
-#include "pragma/lua/classes/lmodelmesh.h"
 #include "luasystem.h"
 #include "textureinfo.h"
-#include "pragma/model/modelmesh.h"
-#include <pragma/game/damageinfo.h>
-#include "pragma/lua/libraries/ludm.hpp"
 #include <shader/prosper_pipeline_create_info.hpp>
-#include <pragma/lua/converters/pair_converter_t.hpp>
-#include <pragma/lua/converters/game_type_converters_t.hpp>
-#include <pragma/lua/converters/optional_converter_t.hpp>
-#include <pragma/lua/converters/vector_converter_t.hpp>
-#include <pragma/entities/components/liquid/base_liquid_component.hpp>
 #include <shader/prosper_shader_flip_image.hpp>
 #include <prosper_prepared_command_buffer.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <prosper_render_pass.hpp>
 #include <shader/prosper_shader_t.hpp>
-#include <pragma/lua/lua_call.hpp>
-#include <pragma/lua/policies/default_parameter_policy.hpp>
-#include <pragma/lua/converters/string_view_converter_t.hpp>
-#include <pragma/logging.hpp>
 #include <luainterface.hpp>
 #include <luabind/copy_policy.hpp>
 #include <luabind/return_reference_to_policy.hpp>

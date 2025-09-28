@@ -3,11 +3,13 @@
 
 module;
 
-#include "pragma/entities/components/base_entity_component.hpp"
-#include "pragma/entities/output.h"
+#include "pragma/networkdefinitions.h"
 #include <sharedutils/property/util_property.hpp>
 
 export module pragma.shared:entities.components.base_io;
+
+export import :entities.components.base;
+import :entities.output;
 
 export {
 	namespace pragma {

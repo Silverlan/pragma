@@ -3,22 +3,9 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/components/panima_component.hpp"
-#include "pragma/entities/components/base_model_component.hpp"
-#include "pragma/entities/components/base_time_scale_component.hpp"
-#include "pragma/entities/components/panima_component_channel_submitter.hpp"
-#include "pragma/entities/components/panima_component_channel_submitter_def.hpp"
-#include "pragma/entities/entity_component_manager_t.hpp"
-#include "pragma/game/animation_update_manager.hpp"
-#include "pragma/model/model.h"
-#include "pragma/model/animation/animation.hpp"
-#include "pragma/lua/converters/game_type_converters_t.hpp"
-#include "pragma/lua/lua_call.hpp"
-#include "pragma/debug/intel_vtune.hpp"
 #include <sharedutils/util_uri.hpp>
 
-export module pragma.shared;
+module pragma.shared;
 
 import :entities.components.panima;
 

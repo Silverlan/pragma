@@ -9,12 +9,6 @@
 #ifdef ENGINE_NETWORK
 #ifndef __C_CONVARS_H__
 #define __C_CONVARS_H__
-#include "pragma/networkdefinitions.h"
-#include <pragma/console/convars.h>
-#include "pragma/console/c_cvar_server.h"
-#include "pragma/console/c_cvar_global.h"
-#include "pragma/console/c_cvar_movement.h"
-#include "pragma/console/c_cvar_settings.h"
 REGISTER_CONVAR_CL(cl_allowdownload, udm::Type::Boolean, "1", ConVarFlags::Archive, "");
 REGISTER_CONVAR_CL(cl_allowupload, udm::Type::Boolean, "1", ConVarFlags::Archive, "");
 REGISTER_CONVAR_CL(cl_fov, udm::Type::Float, "75", ConVarFlags::Archive, "Horizontal world field of view.");

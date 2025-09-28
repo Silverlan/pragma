@@ -3,9 +3,11 @@
 
 module;
 
-#include "pragma/entities/components/base_entity_component.hpp"
+#include "pragma/networkdefinitions.h"
 
-export module pragma.entities.components.global_name;
+export module pragma.shared:entities.components.global_name;
+
+export import :entities.components.base;
 
 export namespace pragma {
 	// Note: 'GlobalComponent' cannot be used as name, otherwise there are conflicts with 'GlobalHandle' class of winbase.h

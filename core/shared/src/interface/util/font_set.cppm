@@ -9,6 +9,7 @@ module;
 #include <optional>
 #include <string_view>
 #include <vector>
+#include "mathutil/umath.h"
 
 export module pragma.shared:util.font_set;
 

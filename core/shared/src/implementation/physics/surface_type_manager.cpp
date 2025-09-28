@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/physics/surface_type_manager.hpp"
 
 module pragma.shared;
 

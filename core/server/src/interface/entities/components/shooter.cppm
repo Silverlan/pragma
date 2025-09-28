@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/serverdefinitions.h"
-#include "pragma/networking/recipient_filter.hpp"
 
 export module pragma.server.entities.components.shooter;
 

@@ -3,9 +3,6 @@
 
 #ifndef __C_CVAR_MOVEMENT_H__
 #define __C_CVAR_MOVEMENT_H__
-#include "pragma/clientdefinitions.h"
-#include "pragma/networkdefinitions.h"
-#include <pragma/console/convars.h>
 
 namespace Console {
 	namespace commands {

@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/physics/base.hpp"
 #include <mathutil/transform.hpp>
 #include <memory>
 #include <sharedutils/def_handle.h>
@@ -14,7 +13,18 @@ module;
 
 export module pragma.shared:physics.shape;
 
+export import :physics.base;
+export import :physics.material;
+
 export namespace pragma::physics {
+	class IEnvironment;
+
+	class IConvexShape;
+	class IConvexHullShape;
+	class ICompoundShape;
+	class IHeightfield;
+	class ITriangleShape;
+	class CollisionMesh;
 	class DLLNETWORK IShape : public IBase {
 	  public:
 		virtual ~IShape();

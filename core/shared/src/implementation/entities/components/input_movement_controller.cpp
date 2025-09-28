@@ -3,12 +3,8 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/components/input_movement_controller_component.hpp"
-#include "pragma/entities/components/action_input_controller_component.hpp"
-#include "pragma/entities/components/movement_component.hpp"
 
-export module pragma.shared;
+module pragma.shared;
 
 import :entities.components.input_movement_controller;
 

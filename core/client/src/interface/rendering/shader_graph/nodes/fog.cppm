@@ -4,7 +4,6 @@
 #ifndef __PRAGMA_SHADER_GRAPH_NODES_FOG_HPP__
 #define __PRAGMA_SHADER_GRAPH_NODES_FOG_HPP__
 
-#include "pragma/clientdefinitions.h"
 
 export module pragma.client:rendering.shader_graph.node_fog;
 

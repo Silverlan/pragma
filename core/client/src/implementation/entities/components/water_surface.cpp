@@ -4,13 +4,8 @@
 module;
 
 #include "stdafx_client.h"
-#include <pragma/model/model.h>
-#include <pragma/physics/phys_water_surface_simulator.hpp>
 #include <prosper_util.hpp>
 #include <buffers/prosper_buffer.hpp>
-#include <pragma/entities/components/base_transform_component.hpp>
-#include <pragma/entities/entity_component_system_t.hpp>
-#include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <cmaterial.h>
 
 module pragma.client;

@@ -4,7 +4,6 @@
 module;
 
 #include "cmaterial.h"
-#include <pragma/physics/collisionmesh.h>
 #include <mathutil/transform.hpp>
 #include <sharedutils/util_file.h>
 #include <sharedutils/util_path.hpp>

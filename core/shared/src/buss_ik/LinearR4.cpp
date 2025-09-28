@@ -24,7 +24,6 @@ subject to the following restrictions:
 //Alterations:
 //Remove register keyword to fix compile errors with some linux compilers (clang)
 
-#include "stdafx_shared.h"
 #include "pragma/buss_ik/LinearR4.h"
 
 #include <assert.h>

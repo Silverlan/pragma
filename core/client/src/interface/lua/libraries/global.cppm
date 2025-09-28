@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include <pragma/lua/ldefinitions.h>
 
 export module pragma.client:scripting.lua.libraries.global;
 export namespace Lua {

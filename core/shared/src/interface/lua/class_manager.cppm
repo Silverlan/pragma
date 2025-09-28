@@ -11,7 +11,7 @@ module;
 
 #undef RegisterClass
 
-export module pragma.client:scripting.lua.class_manager;
+export module pragma.shared:scripting.lua.class_manager;
 
 export namespace pragma::lua {
 	class DLLNETWORK ClassManager {

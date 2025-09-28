@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/physics/tire_type_manager.hpp"
 
 module pragma.shared;
 

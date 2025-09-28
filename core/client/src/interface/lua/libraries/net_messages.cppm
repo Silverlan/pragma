@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include "pragma/networking/enums.hpp"
 
 export module pragma.client:scripting.lua.libraries.net_messages;
 export {

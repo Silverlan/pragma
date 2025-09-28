@@ -10,6 +10,7 @@ module;
 export module pragma.shared:util.any;
 
 export {
+	class Game;
 	namespace util {
 		enum class VarType : uint8_t {
 			Invalid = 0,

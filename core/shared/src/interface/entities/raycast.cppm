@@ -4,11 +4,18 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/physics/raytraces.h"
 
 export module pragma.shared:entities.raycast;
 
-export namespace util {
-	DLLNETWORK TraceData get_entity_trace_data(BaseEntity &ent);
-	DLLNETWORK TraceData get_entity_trace_data(::pragma::BaseTransformComponent &component);
+export import :physics.raycast;
+
+export {
+	namespace pragma {
+		class BaseTransformComponent;
+	};
+	class BaseEntity;
+	namespace util {
+		DLLNETWORK TraceData get_entity_trace_data(BaseEntity &ent);
+		DLLNETWORK TraceData get_entity_trace_data(::pragma::BaseTransformComponent &component);
+	};
 };

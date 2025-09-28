@@ -4,6 +4,7 @@
 module;
 
 #include "pragma/networkdefinitions.h"
+#include <cinttypes>
 
 export module pragma.shared:math.easing;
 

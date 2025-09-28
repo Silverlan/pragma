@@ -4,7 +4,6 @@
 module;
 
 #include <mathutil/color.h>
-#include "pragma/physics/visual_debugger.hpp"
 
 module pragma.shared;
 

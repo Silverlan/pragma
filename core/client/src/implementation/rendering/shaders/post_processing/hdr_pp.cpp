@@ -6,7 +6,6 @@ module;
 #include "stdafx_client.h"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <shader/prosper_shader_t.hpp>
-#include <pragma/console/convars.h>
 #include <prosper_util.hpp>
 #include <shader/prosper_shader_copy_image.hpp>
 

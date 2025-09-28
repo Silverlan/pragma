@@ -3,13 +3,8 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/components/basetriggergravity.hpp"
-#include "pragma/entities/components/base_character_component.hpp"
-#include "pragma/entities/components/orientation_component.hpp"
-#include "pragma/entities/trigger/base_trigger_touch.hpp"
 
-export module pragma.shared;
+module pragma.shared;
 
 import :entities.components.triggers.base_gravity;
 

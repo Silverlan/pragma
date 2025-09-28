@@ -3,13 +3,16 @@
 
 module;
 
-#include "pragma/networkdefinitions.h"
 #include <vector>
 #include <string>
+#include "sharedutils/util_version.h"
+#include "fsys/directory_watcher.h"
 
 #define FSYS_SEARCH_ADDON 2048
 
 export module pragma.shared:core.addon_system;
+
+import pragma.pad;
 
 export {
 	class AddonSystem;

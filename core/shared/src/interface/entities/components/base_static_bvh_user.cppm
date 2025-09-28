@@ -3,10 +3,12 @@
 
 module;
 
-#include "pragma/entities/components/base_entity_component.hpp"
+#include "pragma/networkdefinitions.h"
 #include <unordered_set>
 
 export module pragma.shared:entities.components.base_static_bvh_user;
+
+export import :entities.components.base;
 
 export namespace pragma {
 	class DLLNETWORK BaseStaticBvhUserComponent : public BaseEntityComponent {

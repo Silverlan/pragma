@@ -3,9 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include "pragma/model/modelmesh.h"
-#include <pragma/types.hpp>
 #include <sharedutils/def_handle.h>
 #include <sharedutils/functioncallback.h>
 #include <queue>

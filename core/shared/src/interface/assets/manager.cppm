@@ -3,8 +3,13 @@
 
 module;
 
-export module pragma.shared:assets.asset_manager;
+#include <sharedutils/util_ifile.hpp>
 
+export module pragma.shared:assets.manager;
+
+import :assets.common;
+
+export class Game;
 export namespace pragma::asset {
 	class DLLNETWORK AssetManager {
 	  public:

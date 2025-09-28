@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include "pragma/lua/converters/gui_element_converter.hpp"
 
 export module pragma.client:gui.main_menu_new_game;
 

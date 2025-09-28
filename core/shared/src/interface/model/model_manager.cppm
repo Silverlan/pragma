@@ -6,13 +6,7 @@ module;
 #include <unordered_map>
 #include <vector>
 #include <string>
-#include "pragma/networkdefinitions.h"
-#include "pragma/model/model.h"
-#include "pragma/model/modelmesh.h"
-#include "pragma/model/brush/brushmesh.h"
-#include "pragma/physics/collisionmesh.h"
 #include <sharedutils/util_string.h>
-#include "pragma/entities/baseworld.h"
 #include <sharedutils/util_file.h>
 #include <sharedutils/asset_loader/file_asset_manager.hpp>
 #include <sharedutils/asset_loader/asset_format_loader.hpp>
@@ -20,6 +14,8 @@ module;
 #include <unordered_set>
 
 export module pragma.shared:model.model_manager;
+
+export import :model.model;
 
 export namespace pragma::asset {
 	class DLLNETWORK ModelProcessor : public util::FileAssetProcessor {

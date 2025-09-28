@@ -3,22 +3,10 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/engine.h"
-#include "pragma/lua/libraries/limport.hpp"
-#include "pragma/model/modelmesh.h"
-#include "pragma/physics/collisionmesh.h"
-#include "pragma/lua/classes/ldef_model.h"
-#include "pragma/lua/classes/ldef_skeleton.hpp"
-#include "pragma/lua/libraries/lfile.h"
-#include "pragma/game/scene_snapshot.hpp"
-#include "pragma/game/game_resources.hpp"
-#include "pragma/game/game_limits.h"
-#include <pragma/util/util_game.hpp>
 #include <unordered_set>
 #include <sharedutils/util_file.h>
 
-module pragma.client;
+module pragma.shared;
 
 import :scripting.lua.libraries.import;
 
@@ -31,8 +19,6 @@ import :scripting.lua.libraries.import;
 #include <assimp/IOStream.hpp>
 #include <assimp/DefaultLogger.hpp>
 #endif
-#include "pragma/model/animation/skeleton.hpp"
-#include "pragma/model/animation/bone.hpp"
 
 int Lua::import::import_wad(lua_State *l)
 {

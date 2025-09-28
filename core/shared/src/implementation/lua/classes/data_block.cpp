@@ -3,10 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/lua/classes/ldata.hpp"
-#include "pragma/lua/libraries/lfile.h"
-#include <pragma/lua/luaapi.h>
 #include <datasystem.h>
 #include <datasystem_color.h>
 #include <datasystem_vector.h>

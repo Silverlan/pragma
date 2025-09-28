@@ -3,9 +3,11 @@
 
 module;
 
-#include "pragma/entities/components/base_entity_component.hpp"
+#include "pragma/networkdefinitions.h"
 
 export module pragma.shared:entities.components.constraints.copy_location;
+
+export import :entities.components.constraints.space;
 
 export namespace pragma {
 	class DLLNETWORK ConstraintCopyLocationComponent final : public BaseEntityComponent {

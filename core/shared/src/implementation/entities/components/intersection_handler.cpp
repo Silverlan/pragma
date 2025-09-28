@@ -3,10 +3,8 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/components/intersection_handler_component.hpp"
 
-export module pragma.shared;
+module pragma.shared;
 
 import :entities.components.intersection_handler;
 

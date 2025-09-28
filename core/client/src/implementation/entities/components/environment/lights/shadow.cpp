@@ -4,14 +4,9 @@
 module;
 
 #include "stdafx_client.h"
-#include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <prosper_render_pass.hpp>
 #include <prosper_framebuffer.hpp>
 #include <prosper_command_buffer.hpp>
-#include <pragma/console/c_cvar.h>
-#include <pragma/entities/entity_component_system_t.hpp>
-#include <pragma/entities/entity_iterator.hpp>
-#include <pragma/math/intersection.h>
 #include <image/prosper_render_target.hpp>
 
 module pragma.client;

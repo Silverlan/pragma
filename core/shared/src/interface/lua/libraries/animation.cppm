@@ -3,10 +3,8 @@
 
 module;
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/lua/ldefinitions.h"
 
-export module pragma.client:scripting.lua.libraries.animation;
+export module pragma.shared:scripting.lua.libraries.animation;
 
 export namespace Lua {
 	namespace animation {

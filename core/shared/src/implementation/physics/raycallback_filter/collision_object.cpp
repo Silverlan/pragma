@@ -3,8 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/physics/raycallback/physraycallbackfilter_collisionobject.hpp"
 
 module pragma.shared;
 

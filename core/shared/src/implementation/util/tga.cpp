@@ -3,8 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/util/util_tga.hpp"
 
 module pragma.shared;
 

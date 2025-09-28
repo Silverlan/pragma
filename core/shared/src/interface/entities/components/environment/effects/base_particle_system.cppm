@@ -4,14 +4,14 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/entities/components/basetoggle.h"
-#include "pragma/entities/baseentity_handle.h"
 #include <string>
+
+export module pragma.shared:entities.components.environment.effects.base_particle_system;
+
+export import :entities.components.base;
 
 #define SF_PARTICLE_SYSTEM_CONTINUOUS 2048
 #define SF_PARTICLE_SYSTEM_REMOVE_ON_COMPLETE 4096
-
-export module pragma.shared:entities.components.environment.effects.base_particle_system;
 
 export namespace pragma {
 	class DLLNETWORK BaseEnvParticleSystemComponent : public BaseEntityComponent {

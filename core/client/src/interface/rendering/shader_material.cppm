@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include "pragma/util/global_string_table.hpp"
 #include <cmaterial.h>
 #include <udm.hpp>
 

@@ -3,16 +3,18 @@
 
 module;
 
-#include "pragma/definitions.h"
+#include "pragma/networkdefinitions.h"
 #include <map>
 #include <string>
 #include <vector>
 #include <memory>
-#include "pragma/console/fcvar.h"
 
 export module pragma.shared:console.cvar_handler;
 
+export import :console.convar_handle;
+
 export {
+	class NetworkState;
 	#pragma warning(push)
 	#pragma warning(disable : 4251)
 	class DLLNETWORK CVarHandler {

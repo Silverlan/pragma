@@ -4,9 +4,6 @@
 #ifndef __PRAGMA_ISERVER_HPP__
 #define __PRAGMA_ISERVER_HPP__
 
-#include "pragma/serverdefinitions.h"
-#include <pragma/networking/enums.hpp>
-#include <pragma/networking/nwm_message_tracker.hpp>
 #include <cinttypes>
 #include <optional>
 #include <functional>

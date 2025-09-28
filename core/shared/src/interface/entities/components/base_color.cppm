@@ -3,10 +3,13 @@
 
 module;
 
-#include "pragma/entities/components/base_entity_component.hpp"
+#include "pragma/networkdefinitions.h"
 #include <sharedutils/property/util_property_vector.h>
+#include "mathutil/color.h"
 
 export module pragma.shared:entities.components.base_color;
+
+export import :entities.components.base;
 
 export namespace pragma {
 	struct DLLNETWORK CEOnColorChanged : public ComponentEvent {

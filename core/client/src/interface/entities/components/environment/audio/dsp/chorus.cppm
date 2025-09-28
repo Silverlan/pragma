@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include "pragma/entities/environment/audio/env_sound_dsp_chorus.h"
 
 export module pragma.client:entities.components.audio.dsp.chorus;
 import :entities.components.audio.dsp.base;

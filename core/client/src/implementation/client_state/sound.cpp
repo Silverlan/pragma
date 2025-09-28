@@ -4,23 +4,12 @@
 module;
 
 #include "stdafx_client.h"
-#include <pragma/audio/soundscript.h>
-#include "pragma/audio/alsoundscript.h"
 #include <fsys/filesystem.h>
-#include <pragma/lua/luacallback.h>
-#include <pragma/audio/alsound_type.h>
 #include "luasystem.h"
-#include <pragma/lua/luafunction_call.h>
-#include "pragma/console/c_cvar.h"
-#include "pragma/console/c_cvar_global_functions.h"
 #include <alsoundsystem.hpp>
 #include <alsound_buffer.hpp>
-#include <pragma/game/game_resources.hpp>
-#include <pragma/audio/sound_util.hpp>
 #include <sharedutils/util_file.h>
 #include <steam_audio/alsound_steam_audio.hpp>
-#include <pragma/entities/components/base_transform_component.hpp>
-#include <pragma/logging.hpp>
 #include <sharedutils/util_markup_file.hpp>
 
 #undef PlaySound

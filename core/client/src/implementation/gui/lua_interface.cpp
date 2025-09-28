@@ -5,8 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include <luabind/copy_policy.hpp>
-#include <pragma/lua/raw_object.hpp>
-#include <pragma/lua/lua_call.hpp>
 
 module pragma.client;
 

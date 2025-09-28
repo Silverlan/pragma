@@ -1,39 +1,8 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "pragma/physics/raytraces.h"
-#include "stdafx_shared.h"
-#include "pragma/engine.h"
-#include "pragma/lua/classes/entity_components.hpp"
-#include "pragma/entities/components/base_attachment_component.hpp"
-#include "pragma/entities/components/base_game_component.hpp"
-#include "pragma/entities/components/base_entity_component_member_register.hpp"
-#include "pragma/entities/components/base_bvh_component.hpp"
-#include "pragma/entities/components/base_child_component.hpp"
-#include "pragma/entities/components/base_observer_component.hpp"
-#include "pragma/entities/components/base_static_bvh_cache_component.hpp"
-#include "pragma/entities/components/base_static_bvh_user_component.hpp"
-#include "pragma/entities/components/intersection_handler_component.hpp"
-#include "pragma/entities/entity_component_manager_t.hpp"
-#include "pragma/model/modelmesh.h"
-#include "pragma/lua/policies/default_parameter_policy.hpp"
-#include "pragma/lua/policies/shared_from_this_policy.hpp"
-#include "pragma/lua/converters/vector_converter_t.hpp"
-#include "pragma/lua/converters/optional_converter_t.hpp"
-#include "pragma/lua/converters/pair_converter_t.hpp"
-#include "pragma/lua/converters/property_converter_t.hpp"
-#include "pragma/lua/converters/game_type_converters_t.hpp"
-#include "pragma/lua/util_logging.hpp"
-#include "pragma/lua/lua_component_event.hpp"
-#include "pragma/lua/lua_call.hpp"
-#include "pragma/lua/lua_util_component.hpp"
-#include "pragma/lua/types/udm.hpp"
-#include "pragma/lua/libraries/lprint.h"
-#include "pragma/entities/components/parent_component.hpp"
-#include "pragma/entities/components/base_entity_component_logging.hpp"
-#include "pragma/physics/shape.hpp"
-#include "pragma/util/render_tile.hpp"
-#include "pragma/lua/ostream_operator_alias.hpp"
+module;
+
 #include <udm.hpp>
 #include <luabind/out_value_policy.hpp>
 #include <luabind/copy_policy.hpp>
@@ -1209,10 +1178,6 @@ void pragma::lua::base_attachable_component::register_class(luabind::module_ &mo
 	def.add_static_constant("FATTACHMENT_MODE_FORCE_IN_PLACE", umath::to_integral(FAttachmentMode::ForceInPlace));
 }
 
-#include "pragma/entities/components/base_animated_component.hpp"
-#include "pragma/model/animation/animation.hpp"
-#include "pragma/lua/classes/lproperty.hpp"
-#include "pragma/model/model.h"
 namespace pragma {
 	class BaseFuncLiquidComponent;
 };
@@ -1232,7 +1197,6 @@ namespace Lua {
 		}
 	};
 };
-#include "pragma/model/modelmesh.h"
 
 template<typename TResult, typename TBoneIdentifier, bool (pragma::BaseAnimatedComponent::*GetValue)(pragma::animation::BoneId, TResult &, umath::CoordinateSpace) const>
 std::optional<TResult> get_bone_value(const pragma::BaseAnimatedComponent &animC, TBoneIdentifier boneIdentifier, umath::CoordinateSpace space)
@@ -1629,10 +1593,6 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 	def.add_static_constant("FPLAYANIM_DEFAULT", umath::to_integral(pragma::FPlayAnim::Default));
 	def.add_static_constant("FPLAYANIM_LOOP", umath::to_integral(pragma::FPlayAnim::Loop));
 }
-#include "pragma/entities/components/liquid/base_liquid_component.hpp"
-#include "pragma/entities/components/liquid/base_liquid_surface_component.hpp"
-#include "pragma/entities/components/liquid/base_liquid_volume_component.hpp"
-#include "pragma/entities/components/liquid/base_buoyancy_component.hpp"
 namespace Lua::FuncWater {
 	void CalcLineSurfaceIntersection(lua_State *l, pragma::BaseFuncLiquidComponent &hEnt, const Vector3 &lineOrigin, const Vector3 &lineDir, bool bCull)
 	{
@@ -1665,7 +1625,6 @@ void pragma::lua::base_func_water_component::register_class(luabind::module_ &mo
 	}));
 	def.def("CalcLineSurfaceIntersection", &pragma::BaseFuncLiquidComponent::CalcLineSurfaceIntersection);
 }
-#include "pragma/entities/components/basetoggle.h"
 void pragma::lua::base_toggle_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseToggleComponent>("BaseToggleComponent");
@@ -1682,14 +1641,12 @@ void pragma::lua::base_toggle_component::register_class(luabind::module_ &mod)
 
 	def.add_static_constant("SPAWN_FLAG_START_ON_BIT", umath::to_integral(pragma::BaseToggleComponent::SpawnFlags::StartOn));
 }
-#include "pragma/entities/components/base_wheel_component.hpp"
 void pragma::lua::base_wheel_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseWheelComponent>("BaseWheelComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	// TODO
 }
-#include "pragma/entities/environment/env_decal.h"
 void pragma::lua::base_decal_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvDecalComponent>("BaseEnvDecalComponent");
@@ -1697,7 +1654,6 @@ void pragma::lua::base_decal_component::register_class(luabind::module_ &mod)
 	def.def("GetSize", &pragma::BaseEnvDecalComponent::GetSize);
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
-#include "pragma/entities/environment/lights/env_light.h"
 void pragma::lua::base_env_light_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvLightComponent>("BaseEnvLightComponent");
@@ -1733,7 +1689,6 @@ void pragma::lua::base_env_light_component::register_class(luabind::module_ &mod
 	def.add_static_constant("LIGHT_FLAG_NONE", umath::to_integral(pragma::BaseEnvLightComponent::LightFlags::None));
 	def.add_static_constant("LIGHT_FLAG_BAKED_LIGHT_SOURCE_BIT", umath::to_integral(pragma::BaseEnvLightComponent::LightFlags::BakedLightSource));
 }
-#include "pragma/entities/environment/lights/env_light_spot.h"
 void pragma::lua::base_env_light_spot_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvLightSpotComponent>("BaseEnvLightSpotComponent");
@@ -1750,14 +1705,12 @@ void pragma::lua::base_env_light_spot_component::register_class(luabind::module_
 	def.def("CalcConeFalloff", static_cast<float (pragma::BaseEnvLightSpotComponent::*)(const Vector3 &) const>(&pragma::BaseEnvLightSpotComponent::CalcConeFalloff));
 	def.def("CalcDistanceFalloff", &pragma::BaseEnvLightSpotComponent::CalcDistanceFalloff);
 }
-#include "pragma/entities/environment/lights/env_light_point.h"
 void pragma::lua::base_env_light_point_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvLightPointComponent>("BaseEnvLightPointComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	def.def("CalcDistanceFalloff", &pragma::BaseEnvLightPointComponent::CalcDistanceFalloff);
 }
-#include "pragma/entities/environment/lights/env_light_directional.h"
 void pragma::lua::base_env_light_directional_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvLightDirectionalComponent>("BaseEnvLightDirectionalComponent");
@@ -1766,13 +1719,11 @@ void pragma::lua::base_env_light_directional_component::register_class(luabind::
 	def.def("GetAmbientColorProperty", &pragma::BaseEnvLightDirectionalComponent::GetAmbientColorProperty);
 	def.def("SetAmbientColor", &pragma::BaseEnvLightDirectionalComponent::SetAmbientColor);
 }
-#include "pragma/entities/environment/effects/env_particle_system.h"
 void pragma::lua::base_env_particle_system_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvParticleSystemComponent>("BaseEnvParticleSystemComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
-#include "pragma/entities/components/base_flammable_component.hpp"
 void pragma::lua::base_flammable_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseFlammableComponent>("BaseFlammableComponent");
@@ -1792,7 +1743,6 @@ void pragma::lua::base_flammable_component::register_class(luabind::module_ &mod
 	def.add_static_constant("EVENT_ON_EXTINGUISHED", pragma::BaseFlammableComponent::EVENT_ON_EXTINGUISHED);
 }
 
-#include "pragma/entities/components/base_health_component.hpp"
 void pragma::lua::base_health_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseHealthComponent>("BaseHealthComponent");
@@ -1810,7 +1760,6 @@ void pragma::lua::base_health_component::register_class(luabind::module_ &mod)
 	def.add_static_constant("EVENT_ON_HEALTH_CHANGED", pragma::BaseHealthComponent::EVENT_ON_HEALTH_CHANGED);
 }
 
-#include "pragma/entities/components/base_name_component.hpp"
 void pragma::lua::base_name_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseNameComponent>("BaseNameComponent");
@@ -1820,7 +1769,6 @@ void pragma::lua::base_name_component::register_class(luabind::module_ &mod)
 	def.def("GetNameProperty", &pragma::BaseNameComponent::GetNameProperty);
 }
 
-#include "pragma/entities/components/base_networked_component.hpp"
 void pragma::lua::base_networked_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseNetworkedComponent>("BaseNetworkedComponent");
@@ -2060,7 +2008,6 @@ void pragma::lua::base_networked_component::register_class(luabind::module_ &mod
 #endif
 }
 
-#include "pragma/entities/components/base_observable_component.hpp"
 void pragma::lua::base_observable_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseObservableComponent>("BaseObservableComponent");
@@ -2119,7 +2066,6 @@ void pragma::lua::base_observable_component::register_class(luabind::module_ &mo
 	def.scope[defObsCamData];
 }
 
-#include "pragma/util/bulletinfo.h"
 namespace Lua::Shooter {
 	void FireBullets(lua_State *l, pragma::ecs::BaseShooterComponent &hEnt, const luabind::object &, bool bHitReport, bool bMaster)
 	{
@@ -2150,9 +2096,6 @@ void pragma::lua::base_shooter_component::register_class(luabind::module_ &mod)
 	def.add_static_constant("EVENT_ON_FIRE_BULLETS", pragma::ecs::baseShooterComponent::EVENT_ON_FIRE_BULLETS);
 }
 
-#include "pragma/entities/components/base_physics_component.hpp"
-#include "pragma/physics/constraint.hpp"
-#include "pragma/physics/movetypes.h"
 namespace Lua::Physics {
 	void InitializePhysics(lua_State *l, pragma::BasePhysicsComponent &hEnt, ::util::TSharedHandle<pragma::physics::IConvexShape> &shape, uint32_t flags)
 	{
@@ -2300,7 +2243,6 @@ void pragma::lua::base_physics_component::register_class(luabind::module_ &mod)
 	def.add_static_constant("MOVETYPE_PHYSICS", umath::to_integral(MOVETYPE::PHYSICS));
 }
 
-#include "pragma/entities/components/base_render_component.hpp"
 void pragma::lua::base_render_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseRenderComponent>("BaseRenderComponent");
@@ -2309,14 +2251,12 @@ void pragma::lua::base_render_component::register_class(luabind::module_ &mod)
 	def.def("GetCastShadows", &pragma::BaseRenderComponent::GetCastShadows);
 }
 
-#include "pragma/entities/components/base_softbody_component.hpp"
 void pragma::lua::base_soft_body_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseSoftBodyComponent>("BaseSoftBodyComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-#include "pragma/entities/components/base_sound_emitter_component.hpp"
 namespace Lua::SoundEmitter {
 	DLLNETWORK luabind::class_<pragma::BaseSoundEmitterComponent::SoundInfo> RegisterSoundInfo()
 	{
@@ -2352,7 +2292,6 @@ void pragma::lua::base_sound_emitter_component::register_class(luabind::module_ 
 	def.add_static_constant("EVENT_ON_SOUND_CREATED", pragma::BaseSoundEmitterComponent::EVENT_ON_SOUND_CREATED);
 }
 
-#include "pragma/entities/components/base_transform_component.hpp"
 namespace Lua::Transform {
 	void GetDirection(lua_State *l, pragma::BaseTransformComponent &hEnt, pragma::BaseTransformComponent &hOther, bool bIgnoreYAxis) { Lua::Push<Vector3>(l, hEnt.GetDirection(hOther.GetEntity(), bIgnoreYAxis)); }
 
@@ -2472,7 +2411,6 @@ void pragma::lua::base_transform_component::register_class(luabind::module_ &mod
 	def.def("GetDotProduct", static_cast<float (pragma::BaseTransformComponent::*)(const Vector3 &, bool) const>(&pragma::BaseTransformComponent::GetDotProduct), luabind::default_parameter_policy<3, false> {});
 }
 
-#include "pragma/entities/components/base_color_component.hpp"
 void pragma::lua::base_color_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseColorComponent>("BaseColorComponent");
@@ -2486,7 +2424,6 @@ void pragma::lua::base_color_component::register_class(luabind::module_ &mod)
 	def.add_static_constant("EVENT_ON_COLOR_CHANGED", pragma::BaseColorComponent::EVENT_ON_COLOR_CHANGED);
 }
 
-#include "pragma/entities/components/base_surface_component.hpp"
 
 static std::optional<std::tuple<std::shared_ptr<ModelMesh>, std::shared_ptr<ModelSubMesh>, Material *>> FindAndAssignSurfaceMesh(pragma::BaseSurfaceComponent &c, luabind::object oFilter)
 {
@@ -2531,7 +2468,6 @@ void pragma::lua::base_surface_component::register_class(luabind::module_ &mod)
 	def.add_static_constant("EVENT_ON_SURFACE_PLANE_CHANGED", pragma::BaseSurfaceComponent::EVENT_ON_SURFACE_PLANE_CHANGED);
 }
 
-#include "pragma/entities/components/base_score_component.hpp"
 void pragma::lua::base_score_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseScoreComponent>("BaseScoreComponent");
@@ -2544,7 +2480,6 @@ void pragma::lua::base_score_component::register_class(luabind::module_ &mod)
 	def.add_static_constant("EVENT_ON_SCORE_CHANGED", pragma::BaseScoreComponent::EVENT_ON_SCORE_CHANGED);
 }
 
-#include "pragma/entities/components/base_radius_component.hpp"
 void pragma::lua::base_radius_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseRadiusComponent>("BaseRadiusComponent");
@@ -2555,7 +2490,6 @@ void pragma::lua::base_radius_component::register_class(luabind::module_ &mod)
 	def.add_static_constant("EVENT_ON_RADIUS_CHANGED", pragma::BaseRadiusComponent::EVENT_ON_RADIUS_CHANGED);
 }
 
-#include "pragma/entities/components/base_field_angle_component.hpp"
 void pragma::lua::base_field_angle_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseFieldAngleComponent>("BaseFieldAngleComponent");
@@ -2566,14 +2500,12 @@ void pragma::lua::base_field_angle_component::register_class(luabind::module_ &m
 	def.add_static_constant("EVENT_ON_FIELD_ANGLE_CHANGED", pragma::BaseFieldAngleComponent::EVENT_ON_FIELD_ANGLE_CHANGED);
 }
 
-#include "pragma/entities/environment/audio/env_sound_dsp.h"
 void pragma::lua::base_env_sound_dsp_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvSoundDspComponent>("BaseEnvSoundDspComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-#include "pragma/entities/environment/env_camera.h"
 void pragma::lua::base_env_camera_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvCameraComponent>("BaseEnvCameraComponent");
@@ -2725,28 +2657,24 @@ void pragma::lua::base_env_camera_component::register_class(luabind::module_ &mo
 	}));
 }
 
-#include "pragma/entities/environment/effects/env_explosion.h"
 void pragma::lua::base_env_explosion_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvExplosionComponent>("BaseEnvExplosionComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-#include "pragma/entities/environment/effects/env_fire.h"
 void pragma::lua::base_env_fire_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvFireComponent>("BaseEnvFireComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-#include "pragma/entities/environment/env_fog_controller.h"
 void pragma::lua::base_env_fog_controller_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvFogControllerComponent>("BaseEnvFogControllerComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-#include "pragma/entities/environment/lights/env_light_spot_vol.h"
 void pragma::lua::base_env_light_spot_vol_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvLightSpotVolComponent>("BaseEnvLightSpotVolComponent");
@@ -2755,28 +2683,24 @@ void pragma::lua::base_env_light_spot_vol_component::register_class(luabind::mod
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-#include "pragma/entities/environment/env_microphone_base.h"
 void pragma::lua::base_env_microphone_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvMicrophoneComponent>("BaseEnvMicrophoneComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-#include "pragma/entities/environment/env_quake.h"
 void pragma::lua::base_env_quake_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvQuakeComponent>("BaseEnvQuakeComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-#include "pragma/entities/environment/effects/env_smoke_trail.h"
 void pragma::lua::base_env_smoke_trail_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvSmokeTrailComponent>("BaseEnvSmokeTrailComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-#include "pragma/entities/environment/audio/env_sound.h"
 void pragma::lua::base_env_sound_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvSoundComponent>("BaseEnvSoundComponent");
@@ -2807,42 +2731,36 @@ void pragma::lua::base_env_sound_component::register_class(luabind::module_ &mod
 	def.def("IsPaused", &pragma::BaseEnvSoundComponent::IsPaused);
 }
 
-#include "pragma/entities/environment/audio/env_soundscape.h"
 void pragma::lua::base_env_soundscape_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvSoundScapeComponent>("BaseEnvSoundScapeComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-#include "pragma/entities/environment/effects/env_sprite.h"
 void pragma::lua::base_env_sprite_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvSpriteComponent>("BaseEnvSpriteComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-#include "pragma/entities/environment/env_timescale.h"
 void pragma::lua::base_env_timescale_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvTimescaleComponent>("BaseEnvTimescaleComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-#include "pragma/entities/environment/env_weather.h"
 void pragma::lua::base_env_weather_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvWeatherComponent>("BaseEnvWeatherComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-#include "pragma/entities/environment/env_wind.hpp"
 void pragma::lua::base_env_wind_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvWindComponent>("BaseEnvWindComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-#include "pragma/entities/basefilterentity.h"
 void pragma::lua::base_env_filter_name_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseFilterNameComponent>("BaseFilterNameComponent");
@@ -2858,182 +2776,156 @@ void pragma::lua::base_env_filter_class_component::register_class(luabind::modul
 	def.def("ShouldPass", &pragma::BaseFilterClassComponent::ShouldPass);
 }
 
-#include "pragma/entities/func/basefuncbrush.h"
 void pragma::lua::base_func_brush_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseFuncBrushComponent>("BaseFuncBrushComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-#include "pragma/entities/func/basefuncbutton.h"
 void pragma::lua::base_func_button_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseFuncButtonComponent>("BaseFuncButtonComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-#include "pragma/entities/func/basefunckinematic.hpp"
 void pragma::lua::base_func_kinematic_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseFuncKinematicComponent>("BaseFuncKinematicComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-#include "pragma/entities/func/basefuncphysics.h"
 void pragma::lua::base_func_physics_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseFuncPhysicsComponent>("BaseFuncPhysicsComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-#include "pragma/entities/func/basefuncportal.h"
 void pragma::lua::base_func_portal_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseFuncPortalComponent>("BaseFuncPortalComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-#include "pragma/entities/func/basefuncsoftphysics.hpp"
 void pragma::lua::base_func_soft_physics_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseFuncSoftPhysicsComponent>("BaseFuncSoftPhysicsComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-#include "pragma/entities/func/basefuncsurfacematerial.hpp"
 void pragma::lua::base_func_surface_material_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseFuncSurfaceMaterialComponent>("BaseFuncSurfaceMaterialComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-#include "pragma/entities/logic/logic_relay.h"
 void pragma::lua::base_logic_relay_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseLogicRelayComponent>("BaseLogicRelayComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-#include "pragma/entities/basebot.h"
 void pragma::lua::base_bot_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseBotComponent>("BaseBotComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-#include "pragma/entities/components/basepointpathnode.h"
 void pragma::lua::base_point_path_node_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BasePointPathNodeComponent>("BasePointPathNodeComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-#include "pragma/entities/point/constraints/point_constraint_ballsocket.h"
 void pragma::lua::base_point_constraint_ball_socket_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BasePointConstraintBallSocketComponent>("BasePointConstraintBallSocketComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-#include "pragma/entities/point/constraints/point_constraint_conetwist.h"
 void pragma::lua::base_point_constraint_cone_twist_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BasePointConstraintConeTwistComponent>("BasePointConstraintConeTwistComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-#include "pragma/entities/point/constraints/point_constraint_dof.h"
 void pragma::lua::base_point_constraint_dof_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BasePointConstraintDoFComponent>("BasePointConstraintDoFComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-#include "pragma/entities/point/constraints/point_constraint_fixed.h"
 void pragma::lua::base_point_constraint_fixed_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BasePointConstraintFixedComponent>("BasePointConstraintFixedComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-#include "pragma/entities/point/constraints/point_constraint_hinge.h"
 void pragma::lua::base_point_constraint_hinge_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BasePointConstraintHingeComponent>("BasePointConstraintHingeComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-#include "pragma/entities/point/constraints/point_constraint_slider.h"
 void pragma::lua::base_point_constraint_slider_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BasePointConstraintSliderComponent>("BasePointConstraintSliderComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-#include "pragma/entities/point/point_rendertarget.h"
 void pragma::lua::base_point_render_target_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BasePointRenderTargetComponent>("BasePointRenderTargetComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-#include "pragma/entities/point/point_target.h"
 void pragma::lua::base_point_target_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BasePointTargetComponent>("BasePointTargetComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-#include "pragma/entities/prop/prop_base.h"
 void pragma::lua::base_prop_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BasePropComponent>("BasePropComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-#include "pragma/entities/prop/prop_dynamic.hpp"
 void pragma::lua::base_prop_dynamic_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BasePropDynamicComponent>("BasePropDynamicComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-#include "pragma/entities/prop/prop_physics.hpp"
 void pragma::lua::base_prop_physics_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BasePropPhysicsComponent>("BasePropPhysicsComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-#include "pragma/entities/trigger/base_trigger_hurt.hpp"
 void pragma::lua::base_trigger_hurt_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseTriggerHurtComponent>("BaseTriggerHurtComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-#include "pragma/entities/trigger/base_trigger_push.hpp"
 void pragma::lua::base_trigger_push_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseTriggerPushComponent>("BaseTriggerPushComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-#include "pragma/entities/trigger/base_trigger_remove.h"
 void pragma::lua::base_trigger_remove_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseTriggerRemoveComponent>("BaseTriggerRemoveComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-#include "pragma/entities/trigger/base_trigger_teleport.hpp"
 void pragma::lua::base_trigger_teleport_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseTriggerTeleportComponent>("BaseTriggerTeleportComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-#include "pragma/entities/trigger/base_trigger_touch.hpp"
 void pragma::lua::base_touch_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseTouchComponent>("BaseTouchComponent");
@@ -3068,21 +2960,18 @@ void pragma::lua::base_touch_component::register_class(luabind::module_ &mod)
 	def.add_static_constant("TRIGGER_FLAG_EVERYTHING", umath::to_integral(pragma::BaseTouchComponent::TriggerFlags::Everything));
 }
 
-#include "pragma/entities/components/basetriggergravity.hpp"
 void pragma::lua::base_trigger_gravity_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEntityTriggerGravityComponent>("BaseEntityTriggerGravityComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-#include "pragma/entities/baseflashlight.h"
 void pragma::lua::base_flashlight_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseFlashlightComponent>("BaseFlashlightComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-#include "pragma/entities/components/base_flex_component.hpp"
 void pragma::lua::base_flex_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseFlexComponent>("BaseFlexComponent");
@@ -3090,7 +2979,6 @@ void pragma::lua::base_flex_component::register_class(luabind::module_ &mod)
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-#include "pragma/entities/baseskybox.h"
 void pragma::lua::base_skybox_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseSkyboxComponent>("BaseSkyboxComponent");
@@ -3099,14 +2987,12 @@ void pragma::lua::base_skybox_component::register_class(luabind::module_ &mod)
 	def.def("GetSkyAngles", &pragma::BaseSkyboxComponent::GetSkyAngles, luabind::copy_policy<0> {});
 }
 
-#include "pragma/entities/baseworld.h"
 void pragma::lua::base_world_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseWorldComponent>("BaseWorldComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-#include "pragma/entities/components/base_ai_component.hpp"
 namespace Lua::AI {
 	void GetMoveSpeed(lua_State *l, pragma::BaseAIComponent &hNPC, uint32_t animId) { Lua::PushNumber(l, hNPC.GetMoveSpeed(animId)); }
 
@@ -3140,8 +3026,6 @@ void pragma::lua::base_ai_component::register_class(luabind::module_ &mod)
 	def.def("GetLookTarget", &pragma::BaseAIComponent::GetLookTarget);
 }
 
-#include "pragma/entities/components/base_character_component.hpp"
-#include "pragma/physics/raytraces.h"
 void pragma::lua::base_character_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseCharacterComponent>("BaseCharacterComponent");
@@ -3254,7 +3138,6 @@ void pragma::lua::base_character_component::register_class(luabind::module_ &mod
 	def.add_static_constant("FOOT_RIGHT", umath::to_integral(pragma::BaseCharacterComponent::FootType::Right));
 }
 
-#include "pragma/entities/components/base_vehicle_component.hpp"
 void pragma::lua::base_vehicle_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseVehicleComponent>("BaseVehicleComponent");
@@ -3273,7 +3156,6 @@ void pragma::lua::base_vehicle_component::register_class(luabind::module_ &mod)
 	def.add_static_constant("EVENT_ON_DRIVER_EXITED", pragma::BaseVehicleComponent::EVENT_ON_DRIVER_EXITED);
 }
 
-#include "pragma/entities/components/base_weapon_component.hpp"
 namespace Lua::Weapon {
 	void PrimaryAttack(lua_State *l, pragma::BaseWeaponComponent &hEnt, bool bOnce)
 	{
@@ -3346,7 +3228,6 @@ void pragma::lua::base_weapon_component::register_class(luabind::module_ &mod)
 	def.add_static_constant("EVENT_ON_SECONDARY_CLIP_SIZE_CHANGED", pragma::BaseWeaponComponent::EVENT_ON_SECONDARY_CLIP_SIZE_CHANGED);
 }
 
-#include "pragma/entities/components/base_player_component.hpp"
 void pragma::lua::base_player_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BasePlayerComponent>("BasePlayerComponent");
@@ -3383,7 +3264,6 @@ void pragma::lua::base_player_component::register_class(luabind::module_ &mod)
 	def.add_static_constant("MESSAGE_TYPE_CHAT", umath::to_integral(MESSAGE::PRINTCHAT));
 }
 
-#include "pragma/entities/components/base_observer_component.hpp"
 void pragma::lua::base_observer_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseObserverComponent>("BaseObserverComponent");
@@ -3405,7 +3285,6 @@ void pragma::lua::base_observer_component::register_class(luabind::module_ &mod)
 	static_assert(umath::to_integral(ObserverMode::Count) == 5, "Update this list when new modes are added!");
 }
 
-#include "pragma/entities/components/base_gamemode_component.hpp"
 void pragma::lua::base_gamemode_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseGamemodeComponent>("BaseGamemodeComponent");
@@ -3427,7 +3306,6 @@ void pragma::lua::base_gamemode_component::register_class(luabind::module_ &mod)
 	def.add_static_constant("EVENT_ON_GAME_READY", pragma::BaseGamemodeComponent::EVENT_ON_GAME_READY);
 }
 
-#include "pragma/entities/components/base_generic_component.hpp"
 void pragma::lua::base_generic_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseGenericComponent>("BaseGenericComponent");
@@ -3438,14 +3316,12 @@ void pragma::lua::base_generic_component::register_class(luabind::module_ &mod)
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-#include "pragma/entities/info/info_landmark.hpp"
 void pragma::lua::base_info_landmark_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseInfoLandmarkComponent>("BaseInfoLandmarkComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-#include "pragma/entities/components/base_io_component.hpp"
 void pragma::lua::base_io_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseIOComponent>("BaseIOComponent");
@@ -3474,7 +3350,6 @@ void pragma::lua::base_io_component::register_class(luabind::module_ &mod)
 	def.add_static_constant("IO_FLAG_BIT_FORCE_DELAYED_FIRE", umath::to_integral(pragma::BaseIOComponent::IoFlags::ForceDelayedFire));
 }
 
-#include "pragma/entities/components/base_model_component.hpp"
 void pragma::lua::base_model_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseModelComponent>("BaseModelComponent");
@@ -3548,7 +3423,6 @@ void pragma::lua::base_model_component::register_class(luabind::module_ &mod)
 	def.add_static_constant("EVENT_ON_MODEL_MATERIALS_LOADED", pragma::BaseModelComponent::EVENT_ON_MODEL_MATERIALS_LOADED);
 }
 
-#include "pragma/entities/components/base_time_scale_component.hpp"
 void pragma::lua::base_time_scale_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseTimeScaleComponent>("BaseTimeScaleComponent");
@@ -3558,7 +3432,6 @@ void pragma::lua::base_time_scale_component::register_class(luabind::module_ &mo
 	def.def("GetEffectiveTimeScale", &pragma::BaseTimeScaleComponent::GetEffectiveTimeScale);
 }
 
-#include "pragma/entities/components/base_ownable_component.hpp"
 void pragma::lua::base_ownable_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseOwnableComponent>("BaseOwnableComponent");
@@ -3575,7 +3448,6 @@ void pragma::lua::base_ownable_component::register_class(luabind::module_ &mod)
 	def.add_static_constant("EVENT_ON_OWNER_CHANGED", pragma::BaseOwnableComponent::EVENT_ON_OWNER_CHANGED);
 }
 
-#include "pragma/entities/components/base_debug_component.hpp"
 void pragma::lua::base_debug_text_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseDebugTextComponent>("BaseDebugTextComponent");
@@ -3627,7 +3499,6 @@ void pragma::lua::base_debug_plane_component::register_class(luabind::module_ &m
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-#include "pragma/entities/components/base_point_at_target_component.hpp"
 void pragma::lua::base_point_at_target_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BasePointAtTargetComponent>("BasePointAtTargetComponent");
@@ -3642,7 +3513,6 @@ void pragma::lua::base_point_at_target_component::register_class(luabind::module
 	def.def("GetPointAtTarget", &pragma::BasePointAtTargetComponent::GetPointAtTarget);
 }
 
-#include "pragma/entities/components/liquid/base_liquid_control_component.hpp"
 void pragma::lua::base_liquid_control_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseLiquidControlComponent>("BaseLiquidControlComponent");
@@ -3662,7 +3532,6 @@ void pragma::lua::base_liquid_control_component::register_class(luabind::module_
 	def.def("SetTorqueDragCoefficient", &pragma::BaseLiquidControlComponent::SetTorqueDragCoefficient);
 }
 
-#include "pragma/entities/components/liquid/base_liquid_surface_simulation_component.hpp"
 void pragma::lua::base_liquid_surface_simulation_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseLiquidSurfaceSimulationComponent>("BaseLiquidSurfaceSimulationComponent");

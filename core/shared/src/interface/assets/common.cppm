@@ -10,6 +10,8 @@ module;
 
 export module pragma.shared:assets.common;
 
+export class NetworkState;
+export class Model;
 export namespace pragma::asset {
 	static constexpr auto FORMAT_MAP_BINARY = "pmap_b";
 	static constexpr auto FORMAT_MAP_ASCII = "pmap";

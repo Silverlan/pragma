@@ -3,9 +3,7 @@
 
 module;
 
-#include "pragma/serverdefinitions.h"
 #include <mathutil/glmutil.h>
-#include "pragma/definitions.h"
 #include <mathutil/plane.hpp>
 #include <mathutil/color.h>
 #include <mathutil/eulerangles.h>

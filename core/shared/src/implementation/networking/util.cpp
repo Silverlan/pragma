@@ -3,17 +3,7 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include <pragma/engine.h>
-#include <pragma/game/game.h>
-#include "pragma/networkstate/networkstate.h"
 #include <sharedutils/netpacket.hpp>
-#include "pragma/networking/nwm_util.h"
-#include <pragma/math/angle/wvangle.h>
-#include "pragma/entities/baseentity.h"
-#include "pragma/entities/baseentity_handle.h"
-#include "pragma/entities/components/base_player_component.hpp"
-#include "pragma/entities/baseplayer.hpp"
 
 module pragma.shared;
 

@@ -3,9 +3,7 @@
 
 module;
 
-#include "pragma/c_enginedefinitions.h"
 #include <queries/prosper_pipeline_statistics_query.hpp>
-#include <pragma/debug/debug_performance_profiler.hpp>
 #include <array>
 #include <set>
 

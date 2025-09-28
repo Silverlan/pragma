@@ -4,7 +4,6 @@
 #ifndef __S_LENTITY_COMPONENTS_HPP__
 #define __S_LENTITY_COMPONENTS_HPP__
 
-#include "pragma/serverdefinitions.h"
 
 struct lua_State;
 namespace luabind {

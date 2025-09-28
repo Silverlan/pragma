@@ -4,8 +4,6 @@
 module;
 
 #include "stdafx_server.h"
-#include "pragma/serverdefinitions.h"
-#include "pragma/networking/resourcemanager.h"
 
 module pragma.server.scripting.lua.classes.resource;
 

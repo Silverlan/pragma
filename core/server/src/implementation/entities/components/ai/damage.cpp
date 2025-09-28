@@ -4,9 +4,6 @@
 module;
 
 #include "stdafx_server.h"
-#include <pragma/entities/components/base_character_component.hpp>
-#include "pragma/game/damageinfo.h"
-#include "pragma/game/game.h"
 
 module pragma.server.entities.components.ai;
 

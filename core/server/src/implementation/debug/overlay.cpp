@@ -4,9 +4,6 @@
 module;
 
 #include "stdafx_server.h"
-#include <pragma/networking/enums.hpp>
-#include <pragma/math/angle/wvangle.h>
-#include <pragma/networking/nwm_util.h>
 #include <mathutil/plane.hpp>
 
 module pragma.server.debug.overlay;

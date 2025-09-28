@@ -2,16 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #if 0
-#include "stdafx_shared.h"
-#include "pragma/lua/policies/pair_policy.hpp"
-#include "pragma/lua/policies/tuple_policy.hpp"
-#include "pragma/lua/policies/vector_policy.hpp"
-#include "pragma/lua/policies/string_view_policy.hpp"
-#include "pragma/lua/policies/shared_from_this_policy.hpp"
-#include "pragma/lua/policies/optional_policy.hpp"
-#include "pragma/lua/policies/property_policy.hpp"
-#include "pragma/lua/policies/default_parameter_policy.hpp"
-#include "pragma/lua/lua_error_handling.hpp"
 #include <sharedutils/property/util_property.hpp>
 
 static void test_pair_policy_param(const std::pair<float,std::string> &pair)

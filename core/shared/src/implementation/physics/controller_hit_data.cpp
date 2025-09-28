@@ -3,9 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/physics/controllerhitdata.h"
-#include "pragma/physics/physobj.h"
 
 module pragma.shared;
 

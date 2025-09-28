@@ -3,9 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/model/poly.h"
-#include <pragma/console/conout.h>
 #include <material_manager2.hpp>
 
 module pragma.shared;

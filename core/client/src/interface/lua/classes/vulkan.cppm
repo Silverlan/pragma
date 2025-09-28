@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
 #include <image/prosper_sampler.hpp>
 #include <image/prosper_image_view.hpp>
 #include <buffers/prosper_buffer.hpp>
@@ -20,7 +19,6 @@ module;
 #include <prosper_window.hpp>
 #include <prosper_swap_command_buffer.hpp>
 #include <buffers/prosper_buffer.hpp>
-#include "pragma/lua/types/udm.hpp"
 
 export module pragma.client:scripting.lua.classes.vulkan;
 import :rendering.shaders;

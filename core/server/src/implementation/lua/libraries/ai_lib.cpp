@@ -5,12 +5,7 @@ module;
 
 #include "stdafx_server.h"
 #include "luasystem.h"
-#include "pragma/ai/ai_schedule.h"
-#include "pragma/ai/ai_memory.h"
-#include "pragma/model/animation/animation_event.h"
 #include <luainterface.hpp>
-#include <pragma/lua/libraries/lai.hpp>
-#include <pragma/lua/converters/game_type_converters_t.hpp>
 
 module pragma.server.scripting.lua.libraries.ai;
 

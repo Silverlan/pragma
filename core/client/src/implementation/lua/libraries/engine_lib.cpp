@@ -4,19 +4,12 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/input/inputhelper.h"
 #include "cmaterialmanager.h"
 #include "luasystem.h"
-#include "pragma/asset/util_asset.hpp"
-#include <pragma/util/font_set.hpp>
 #include <texturemanager/texturemanager.h>
 #include "textureinfo.h"
 #include <cmaterial_manager2.hpp>
-#include <pragma/lua/libraries/lengine.h>
-#include <pragma/lua/libraries/lfile.h>
-#include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <image/prosper_render_target.hpp>
-#include <pragma/entities/environment/effects/particlesystemdata.h>
 #include <prosper_window.hpp>
 #include <fsys/ifile.hpp>
 

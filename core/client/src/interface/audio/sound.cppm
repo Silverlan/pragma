@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include <pragma/audio/alsound.h>
 #include <mathutil/glmutil.h>
 #include <string>
 #include <vector>

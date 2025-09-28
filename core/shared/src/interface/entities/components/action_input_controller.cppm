@@ -3,10 +3,11 @@
 
 module;
 
-#include "pragma/entities/components/base_entity_component.hpp"
-#include "pragma/input/inkeys.h"
 
 export module pragma.shared:entities.components.action_input_controller;
+
+export import :entities.components.base;
+export import :input.enums;
 
 export namespace pragma {
 	class DLLNETWORK ActionInputControllerComponent final : public BaseEntityComponent {

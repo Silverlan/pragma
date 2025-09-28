@@ -3,9 +3,6 @@
 
 module;
 
-#include "pragma/serverdefinitions.h"
-#include "pragma/model/modelmesh.h"
-#include <pragma/lua/ldefinitions.h>
 
 export module pragma.server.scripting.lua.classes.model_mesh;
 

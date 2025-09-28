@@ -3,11 +3,12 @@
 
 module;
 
-#include "pragma/entities/components/base_entity_component.hpp"
-#include "pragma/entities/baseentity_handle.h"
+#include "pragma/networkdefinitions.h"
 #include <vector>
 
 export module pragma.shared:entities.components.triggers.base_remove;
+
+export import :entities.components.base;
 
 export namespace pragma {
 	class DLLNETWORK BaseTriggerRemoveComponent : public BaseEntityComponent {

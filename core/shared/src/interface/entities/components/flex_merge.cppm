@@ -3,39 +3,48 @@
 
 module;
 
-#include "pragma/entities/components/base_entity_component.hpp"
+#include "pragma/networkdefinitions.h"
 
 export module pragma.shared:entities.components.flex_merge;
 
-export namespace pragma {
-	class DLLNETWORK FlexMergeComponent final : public BaseEntityComponent {
-	  public:
-		static bool can_merge(const Model &mdl, const Model &mdlParent);
-		static ComponentEventId EVENT_ON_TARGET_CHANGED;
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
-		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
+export import :entities.components.base;
+export import :entities.components.base_flex;
+export import :entities.universal_reference;
+export import :model.animation.enums;
+export import :model.animation.flex_animation;
 
-		FlexMergeComponent(BaseEntity &ent);
-		virtual void Initialize() override;
-		virtual void OnRemove() override;
-		virtual void OnTick(double tDelta) override;
+export {
+	class Model;
+	namespace pragma {
+		class DLLNETWORK FlexMergeComponent final : public BaseEntityComponent {
+		  public:
+			static bool can_merge(const Model &mdl, const Model &mdlParent);
+			static ComponentEventId EVENT_ON_TARGET_CHANGED;
+			static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+			static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 
-		void SetTarget(const pragma::EntityURef &target);
-		const pragma::EntityURef &GetTarget() const;
+			FlexMergeComponent(BaseEntity &ent);
+			virtual void Initialize() override;
+			virtual void OnRemove() override;
+			virtual void OnTick(double tDelta) override;
 
-		virtual void InitializeLuaObject(lua_State *lua) override;
-	  private:
-		std::unordered_map<animation::FlexControllerId, animation::FlexControllerId> m_flexControllerMap;
-		pragma::EntityURef m_target;
-		pragma::ComponentHandle<BaseFlexComponent> m_flexC;
-		pragma::ComponentHandle<BaseFlexComponent> m_flexCParent;
-		CallbackHandle m_cbOnFlexControllerChanged;
-		CallbackHandle m_cbOnFlexControllerComponentRemoved;
-		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
-		virtual void OnEntityComponentRemoved(BaseEntityComponent &component) override;
-		void SetTargetDirty(bool updateImmediately = true);
-		void UpdateFlexControllerMappings();
-		void ApplyFlexController(animation::FlexControllerId flexCId, float value);
-		void MergeFlexControllers();
+			void SetTarget(const pragma::EntityURef &target);
+			const pragma::EntityURef &GetTarget() const;
+
+			virtual void InitializeLuaObject(lua_State *lua) override;
+		  private:
+			std::unordered_map<animation::FlexControllerId, animation::FlexControllerId> m_flexControllerMap;
+			pragma::EntityURef m_target;
+			pragma::ComponentHandle<BaseFlexComponent> m_flexC;
+			pragma::ComponentHandle<BaseFlexComponent> m_flexCParent;
+			CallbackHandle m_cbOnFlexControllerChanged;
+			CallbackHandle m_cbOnFlexControllerComponentRemoved;
+			virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
+			virtual void OnEntityComponentRemoved(BaseEntityComponent &component) override;
+			void SetTargetDirty(bool updateImmediately = true);
+			void UpdateFlexControllerMappings();
+			void ApplyFlexController(animation::FlexControllerId flexCId, float value);
+			void MergeFlexControllers();
+		};
 	};
 };

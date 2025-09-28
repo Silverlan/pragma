@@ -3,38 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include <pragma/definitions.h>
-#include <pragma/engine.h>
-#include "pragma/entities/components/base_character_component.hpp"
-#include "pragma/entities/baseentity.h"
-#include <pragma/game/game.h>
-#include "pragma/physics/collisionmasks.h"
-#include "pragma/physics/physobj.h"
-#include <pragma/physics/movetypes.h>
-#include "pragma/physics/raytraces.h"
-#include "pragma/game/game_limits.h"
-#include "pragma/audio/alsound_type.h"
-#include "pragma/math/util_engine_math.hpp"
-#include "pragma/util/util_handled.hpp"
-#include "pragma/entities/components/base_physics_component.hpp"
-#include "pragma/entities/components/base_player_component.hpp"
-#include "pragma/entities/components/base_transform_component.hpp"
-#include "pragma/entities/components/base_sound_emitter_component.hpp"
-#include "pragma/entities/components/base_model_component.hpp"
-#include "pragma/entities/components/base_animated_component.hpp"
-#include "pragma/entities/components/base_time_scale_component.hpp"
-#include "pragma/entities/components/submergible_component.hpp"
-#include "pragma/entities/components/velocity_component.hpp"
-#include "pragma/entities/components/movement_component.hpp"
-#include "pragma/entities/components/orientation_component.hpp"
-#include "pragma/entities/entity_component_system_t.hpp"
-#include "pragma/lua/classes/ldef_vector.h"
-#include "pragma/model/model.h"
-#include "pragma/entities/baseentity_trace.hpp"
-#include "pragma/physics/environment.hpp"
-#include "pragma/physics/phys_material.hpp"
-#include "pragma/physics/controller.hpp"
 
 module pragma.shared;
 

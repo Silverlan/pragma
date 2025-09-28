@@ -4,9 +4,6 @@
 module;
 
 #include "stdafx_server.h"
-#include "pragma/networking/recipient_filter.hpp"
-#include "pragma/lua/classes/ldef_recipientfilter.h"
-#include "pragma/lua/classes/ldef_entity.h"
 
 module pragma.server.scripting.lua.classes.recipient_filter;
 

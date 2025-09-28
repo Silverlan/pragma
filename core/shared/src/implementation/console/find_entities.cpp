@@ -3,13 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/networkstate/networkstate.h"
-#include "pragma/entities/baseentity.h"
-#include "pragma/console/sh_cmd.h"
-#include "pragma/physics/raytraces.h"
-#include "pragma/entities/components/base_character_component.hpp"
-#include "pragma/entities/entity_iterator.hpp"
 
 module pragma.shared;
 

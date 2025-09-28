@@ -3,11 +3,12 @@
 
 module;
 
-#include <pragma/networkdefinitions.h>
+#include "pragma/networkdefinitions.h"
 #include <string>
 #include <vector>
 #include <optional>
 #include <unordered_map>
+#include <udm.hpp>
 
 export module pragma.locale;
 

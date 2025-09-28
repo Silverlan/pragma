@@ -1,7 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "pragma/lua/converters/string_view_converter.hpp"
 #include <luabind/object.hpp>
 
 #ifndef __LUA_STRING_VIEW_CONVERTER_T_HPP__

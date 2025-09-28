@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include <pragma/physics/visual_debugger.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <memory>
 

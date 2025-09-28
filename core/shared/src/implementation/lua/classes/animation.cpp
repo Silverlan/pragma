@@ -3,17 +3,7 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/lua/classes/lanimation.h"
-#include "pragma/lua/libraries/lfile.h"
-#include <pragma/math/angle/wvquaternion.h>
 #include "luasystem.h"
-#include "pragma/model/animation/vertex_animation.hpp"
-#include "pragma/model/modelmesh.h"
-#include "pragma/file_formats/wad.h"
-#include "pragma/util/util_game.hpp"
-#include "pragma/model/animation/skeleton.hpp"
-#include "pragma/model/animation/bone.hpp"
 #include <fsys/ifile.hpp>
 #include <udm.hpp>
 

@@ -3,28 +3,10 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/components/base_vehicle_component.hpp"
-#include "pragma/entities/components/base_wheel_component.hpp"
-#include "pragma/physics/environment.hpp"
-#include "pragma/input/inkeys.h"
-#include "pragma/model/model.h"
-#include "pragma/physics/collisionmesh.h"
-#include "pragma/physics/shape.hpp"
-#include "pragma/entities/components/base_player_component.hpp"
-#include "pragma/entities/components/base_physics_component.hpp"
-#include "pragma/entities/components/base_transform_component.hpp"
-#include "pragma/entities/components/base_model_component.hpp"
-#include "pragma/entities/components/base_render_component.hpp"
-#include "pragma/entities/components/base_attachment_component.hpp"
-#include "pragma/entities/components/action_input_controller_component.hpp"
-#include "pragma/physics/raytraces.h"
-#include "pragma/util/util_game.hpp"
-#include "pragma/logging.hpp"
 
 //#define ENABLE_DEPRECATED_PHYSICS
 
-export module pragma.shared;
+module pragma.shared;
 
 import :entities.components.base_vehicle;
 

@@ -4,8 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include <pragma/lua/converters/game_type_converters_t.hpp>
-#include <pragma/lua/util.hpp>
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <shader/prosper_shader_copy_image.hpp>
 #include <shader/prosper_shader_t.hpp>

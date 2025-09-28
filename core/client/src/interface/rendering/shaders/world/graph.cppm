@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
 #include <texturemanager/texture.h>
 
 export module pragma.client:rendering.shaders.world_graph;

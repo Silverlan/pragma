@@ -3,15 +3,15 @@
 
 module;
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/entities/entity_component_manager.hpp"
-#include "pragma/util/util_handled.hpp"
 #include <sharedutils/util_shared_handle.hpp>
 #include <memory>
 #include <vector>
 #include <typeindex>
+#include "sharedutils/util_event_reply.hpp"
 
 export module pragma.shared:entities.system;
+
+export import :entities.enums;
 
 export {
 	namespace pragma {

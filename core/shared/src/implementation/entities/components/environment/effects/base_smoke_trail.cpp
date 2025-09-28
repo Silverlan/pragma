@@ -1,11 +1,13 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "stdafx_shared.h"
-#include "pragma/entities/environment/effects/env_smoke_trail.h"
-#include "pragma/util/util_handled.hpp"
-#include "pragma/entities/baseentity_events.hpp"
+module;
+
 #include <algorithm>
+
+module pragma.shared;
+
+import :entities.components.environment.base_smoke_trail;
 
 using namespace pragma;
 

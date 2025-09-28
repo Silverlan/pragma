@@ -3,17 +3,13 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/engine.h"
-#include "pragma/lua/libraries/lfile.h"
 #include "luasystem.h"
-#include "pragma/game/game_resources.hpp"
 #include <sharedutils/util_file.h>
 #include <sharedutils/util_library.hpp>
 #include <sharedutils/util_path.hpp>
 #include <fsys/ifile.hpp>
 
-module pragma.client;
+module pragma.shared;
 
 import :scripting.lua.libraries.file;
 

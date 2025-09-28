@@ -3,9 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include "pragma/lua/classes/lalsound.h"
-#include "pragma/lua/c_ldefinitions.h"
 #include "alsoundsystem.hpp"
 #include "alsound_effect.hpp"
 #include "alsound_buffer.hpp"

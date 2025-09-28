@@ -3,9 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include <pragma/entities/func/basefunckinematic.hpp>
-#include <pragma/entities/entity_component_manager.hpp>
 
 export module pragma.client:entities.components.func_kinematic;
 

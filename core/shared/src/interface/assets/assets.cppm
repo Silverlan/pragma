@@ -4,6 +4,8 @@
 module;
 
 export module pragma.shared:assets;
+export import :assets.conversion;
 export import :assets.common;
-import :assets.asset_manager;
+export import :assets.file_formats.legacy_weave_animation_data;
+import :assets.manager;
 import :assets.vtf_info;

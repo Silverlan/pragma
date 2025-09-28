@@ -3,70 +3,19 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/lua/libraries/lutil.hpp"
-#include "pragma/lua/util.hpp"
-#include <pragma/engine.h>
-#include "pragma/lua/classes/ldef_entity.h"
-#include "pragma/lua/classes/ldef_vector.h"
-#include "pragma/lua/classes/ldef_quaternion.h"
-#include "pragma/lua/classes/ldef_damageinfo.h"
-#include "pragma/lua/classes/ldef_angle.h"
-#include "pragma/lua/converters/vector_converter_t.hpp"
-#include "pragma/lua/libraries/lray.h"
-#include "pragma/lua/custom_constructor.hpp"
-#include "pragma/lua/class_manager.hpp"
-#include "pragma/lua/converters/game_type_converters_t.hpp"
-#include "pragma/lua/libraries/lfile.h"
-#include "pragma/lua/policies/core_policies.hpp"
-#include "pragma/lua/converters/optional_converter_t.hpp"
-#include "pragma/lua/converters/pair_converter_t.hpp"
-#include "pragma/util/render_tile.hpp"
-#include "pragma/lua/ostream_operator_alias.hpp"
-#include "pragma/lua/policies/default_parameter_policy.hpp"
-#include "pragma/asset_types/world.hpp"
-#include "pragma/util/functional_parallel_worker.hpp"
-#include "pragma/util/rig_config.hpp"
-#include <pragma/game/game.h>
 #include "luasystem.h"
-#include "pragma/util/util_python.hpp"
-#include "pragma/game/damageinfo.h"
-#include "pragma/model/model.h"
-#include "pragma/physics/raytraces.h"
-#include "pragma/entities/environment/env_quake.h"
-#include "pragma/physics/collisionmasks.h"
-#include "pragma/util/util_game.hpp"
-#include "pragma/util/bulletinfo.h"
-#include "pragma/entities/components/base_animated_component.hpp"
-#include "pragma/entities/components/base_character_component.hpp"
-#include "pragma/entities/components/base_transform_component.hpp"
-#include "pragma/entities/components/base_physics_component.hpp"
-#include "pragma/entities/components/base_io_component.hpp"
-#include "pragma/entities/components/base_model_component.hpp"
-#include "pragma/entities/components/base_flex_component.hpp"
-#include "pragma/entities/components/damageable_component.hpp"
-#include "pragma/entities/entity_component_system_t.hpp"
-#include "pragma/lua/lua_call.hpp"
-#include "pragma/util/util_splash_damage_info.hpp"
-#include "pragma/lua/classes/lproperty.hpp"
-#include "pragma/util/util_rgbcsv.hpp"
-#include "pragma/util/util_variable_type.hpp"
-#include "pragma/lua/classes/parallel_job.hpp"
 #include <util_image_buffer.hpp>
 #include <sharedutils/netpacket.hpp>
 #include <sharedutils/util_file.h>
 #include <sharedutils/scope_guard.h>
 #include <sharedutils/util_path.hpp>
 #include <luainterface.hpp>
-#include <pragma/math/intersection.h>
-#include <pragma/model/modelmesh.h>
-#include "pragma/model/animation/skeleton.hpp"
 #include <scripting/lua/lua.hpp>
 #include <luabind/class_info.hpp>
 #include <fsys/ifile.hpp>
 #include <sharedutils/util_markup_file.hpp>
 
-module pragma.client;
+module pragma.shared;
 
 import :scripting.lua.libraries.util;
 

@@ -3,11 +3,12 @@
 
 module;
 
-#include "pragma/networkdefinitions.h"
+#include <cinttypes>
 
 export module pragma.shared:entities.components.events.event;
 
 export namespace pragma {
+	class BaseEntityComponent;
 	struct DLLNETWORK ComponentEvent {
 		virtual void PushArguments(lua_State *l) = 0;
 		virtual uint32_t GetReturnCount() { return 0u; }

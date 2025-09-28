@@ -3,19 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/lua/libraries/ludm.hpp"
-#include "pragma/lua/libraries/lfile.h"
-#include "pragma/lua/util.hpp"
-#include "pragma/lua/converters/vector_converter_t.hpp"
-#include "pragma/lua/converters/optional_converter_t.hpp"
-#include "pragma/lua/policies/default_parameter_policy.hpp"
-#include "pragma/lua/converters/string_view_converter_t.hpp"
-#include "pragma/lua/custom_constructor.hpp"
-#include "pragma/lua/types/udm.hpp"
-#include "pragma/entities/entity_component_manager_t.hpp"
-#include "pragma/util/util_game.hpp"
-#include "pragma/lua/ostream_operator_alias.hpp"
 #include <sharedutils/util_path.hpp>
 #include <luabind/iterator_policy.hpp>
 #include <luainterface.hpp>
@@ -26,7 +13,7 @@ module;
 #include <sharedutils/util_ifile.hpp>
 #include <fsys/ifile.hpp>
 
-module pragma.client;
+module pragma.shared;
 
 import :scripting.lua.libraries.udm;
 

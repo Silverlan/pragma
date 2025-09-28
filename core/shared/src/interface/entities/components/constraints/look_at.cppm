@@ -3,10 +3,11 @@
 
 module;
 
-#include "pragma/entities/components/base_entity_component.hpp"
-#include "pragma/game/game_coordinate_system.hpp"
+#include "pragma/networkdefinitions.h"
 
 export module pragma.shared:entities.components.constraints.look_at;
+
+export import :entities.components.constraints.base;
 
 export namespace pragma {
 	class DLLNETWORK ConstraintLookAtComponent final : public BaseEntityComponent {

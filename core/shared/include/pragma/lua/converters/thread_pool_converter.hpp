@@ -4,8 +4,6 @@
 #ifndef __LUA_THREAD_POOL_CONVERTER_HPP__
 #define __LUA_THREAD_POOL_CONVERTER_HPP__
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/lua/classes/thread_pool.hpp"
 #include <luabind/detail/conversion_policies/native_converter.hpp>
 
 namespace luabind {

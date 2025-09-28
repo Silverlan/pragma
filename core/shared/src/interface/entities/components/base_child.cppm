@@ -3,13 +3,12 @@
 
 module;
 
-#include "pragma/entities/components/base_entity_component.hpp"
-#include "pragma/entities/parentmode.h"
-#include "pragma/entities/parentinfo.h"
-#include "pragma/entities/entity_uuid_ref.hpp"
 #include <sharedutils/property/util_property.hpp>
 
 export module pragma.shared:entities.components.base_child;
+
+export import :entities.components.base;
+export import :entities.universal_reference;
 
 export namespace pragma {
 	class DLLNETWORK BaseChildComponent : public BaseEntityComponent {

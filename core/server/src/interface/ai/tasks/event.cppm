@@ -3,9 +3,6 @@
 
 module;
 
-#include "pragma/serverdefinitions.h"
-#include "pragma/ai/ai_behavior.h"
-#include <pragma/model/animation/animation_event.h>
 
 export module pragma.server.ai.tasks.event;
 

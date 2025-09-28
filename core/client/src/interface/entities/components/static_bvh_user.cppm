@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include <pragma/entities/components/base_static_bvh_user_component.hpp>
 #include <unordered_set>
 
 export module pragma.client:entities.components.static_bvh_user;

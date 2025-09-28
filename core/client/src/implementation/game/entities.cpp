@@ -4,13 +4,8 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/entityfactories.h"
 #include "luasystem.h"
-#include <pragma/lua/handle_holder.hpp>
 #include <sharedutils/util_string.h>
-#include <pragma/debug/intel_vtune.hpp>
-#include <pragma/game/game_lua_entity.hpp>
-#include <pragma/lua/converters/game_type_converters_t.hpp>
 
 module pragma.client;
 

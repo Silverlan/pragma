@@ -4,15 +4,11 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/console/c_cvar.h"
-#include <pragma/entities/entity_component_system_t.hpp>
-#include <pragma/entities/entity_iterator.hpp>
 #include <buffers/prosper_dynamic_resizable_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <prosper_command_buffer.hpp>
 #include <material_descriptor_array.hpp>
 #include <buffers/prosper_uniform_resizable_buffer.hpp>
-#include <pragma/lua/converters/game_type_converters_t.hpp>
 
 module pragma.client;
 

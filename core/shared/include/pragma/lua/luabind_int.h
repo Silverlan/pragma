@@ -4,7 +4,6 @@
 #ifndef __LUABIND_INT_H__
 #define __LUABIND_INT_H__
 
-#include <pragma/lua/luaapi.h>
 
 namespace luabind {
 	// uint64_t

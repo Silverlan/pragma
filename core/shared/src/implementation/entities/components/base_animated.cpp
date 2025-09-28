@@ -3,22 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/components/base_animated_component.hpp"
-#include "pragma/entities/components/base_model_component.hpp"
-#include "pragma/entities/components/base_time_scale_component.hpp"
-#include "pragma/entities/components/base_physics_component.hpp"
-#include "pragma/entities/components/base_sound_emitter_component.hpp"
-#include "pragma/entities/components/panima_component.hpp"
-#include "pragma/entities/components/component_member_flags.hpp"
-#include "pragma/entities/entity_component_system_t.hpp"
-#include "pragma/util/global_string_table.hpp"
-#include "pragma/game/animation_update_manager.hpp"
-#include "pragma/model/model.h"
-#include "pragma/audio/alsound_type.h"
-#include "pragma/lua/luafunction_call.h"
-#include "pragma/model/animation/skeleton.hpp"
-#include "pragma/model/animation/bone.hpp"
 #include <sharedutils/datastream.h>
 #include <udm.hpp>
 

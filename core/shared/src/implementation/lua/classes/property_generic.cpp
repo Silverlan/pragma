@@ -3,10 +3,7 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/lua/classes/lproperty_generic.hpp"
 #include <sharedutils/property/util_property.hpp>
-#include <pragma/lua/luaapi.h>
 #include <luainterface.hpp>
 
 module pragma.shared;

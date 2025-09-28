@@ -5,6 +5,9 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include <mathutil/umath.h>
+#include <string>
+
+export module pragma.shared:input.enums;
 
 #ifndef GLFW_DLL
 #define GLFW_KEY_MENU 348
@@ -217,8 +220,6 @@ module;
 #define GLFW_CUSTOM_KEY_VR_CONTROLLER_9_KEY_START (GLFW_CUSTOM_KEY_VR_CONTROLLER_8_KEY_START + GLFW_CUSTOM_KEY_JOYSTICK_CONTROL_COUNT)
 #define GLFW_CUSTOM_KEY_VR_CONTROLLER_9_AXIS_START (GLFW_CUSTOM_KEY_VR_CONTROLLER_9_KEY_START + GLFW_CUSTOM_KEY_JOYSTICK_AXIS_COUNT)
 
-export module pragma.shared:input.enums;
-
 export {
 	enum class Action : uint32_t {
 		None = 0,
@@ -260,5 +261,5 @@ export {
 		"mouse1", "mouse2", "mouse3", "mouse4", "mouse5", "mouse6", "mouse7", "mouse8", "mouse9", "scrlup", "scrldn"};
 
 	// These have to correspond to GLFW::KeyState!
-	enum class DLLNETWORK KeyState : uint32_t { Invalid = std::numeric_limits<std::underlying_type_t<KeyState>>::max(), Press = 1, Release = 0, Repeat = 2, Held = Repeat + 1 };
+	enum class KeyState : uint32_t { Invalid = std::numeric_limits<std::underlying_type_t<KeyState>>::max(), Press = 1, Release = 0, Repeat = 2, Held = Repeat + 1 };
 };

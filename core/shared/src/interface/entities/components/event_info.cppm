@@ -3,14 +3,14 @@
 
 module;
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/entities/entity_component_info.hpp"
 #include <typeindex>
 #include <string>
 #include <optional>
 #include <functional>
 
 export module pragma.shared:entities.components.events.event_info;
+
+export import :entities.enums;
 
 export namespace pragma {
 	struct DLLNETWORK ComponentEventInfo {

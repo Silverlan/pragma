@@ -6,8 +6,6 @@ module;
 #include "stdafx_client.h"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <shader/prosper_shader_t.hpp>
-#include <pragma/lua/util.hpp>
-#include <pragma/lua/classes/ldef_entity.h>
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_prepared_command_buffer.hpp>

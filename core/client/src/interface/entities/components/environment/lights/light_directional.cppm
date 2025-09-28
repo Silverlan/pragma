@@ -3,9 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include "pragma/entities/environment/lights/env_light_directional.h"
-#include <pragma/util/mvpbase.h>
 
 export module pragma.client:entities.components.lights.directional;
 import :entities.components.lights.shadow_csm;

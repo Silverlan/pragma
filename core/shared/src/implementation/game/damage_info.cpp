@@ -3,9 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/game/damageinfo.h"
-#include "pragma/lua/classes/ldef_entity.h"
 #include <sharedutils/magic_enum.hpp>
 
 module pragma.shared;

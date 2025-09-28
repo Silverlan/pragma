@@ -3,8 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/components/panima_component_channel_submitter_def.hpp"
 
 module pragma.shared;
 

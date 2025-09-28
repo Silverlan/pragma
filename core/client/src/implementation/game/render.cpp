@@ -5,18 +5,8 @@ module;
 
 #include "stdafx_client.h"
 #include <mathutil/uquat.h>
-#include "pragma/console/c_cvar.h"
-#include "pragma/console/c_cvar_global_functions.h"
 //#include "shader_gaussianblur.h" // prosper TODO
-#include "pragma/entities/baseentity.h"
-#include "pragma/model/modelmesh.h"
-#include "pragma/entities/components/base_player_component.hpp"
-#include <pragma/lua/luacallback.h>
 #include "luasystem.h"
-#include <pragma/lua/luafunction_call.h>
-#include <pragma/console/sh_cmd.h>
-#include <pragma/entities/entity_component_system_t.hpp>
-#include <pragma/lua/classes/entity_components.hpp>
 #include <image/prosper_msaa_texture.hpp>
 #include <image/prosper_render_target.hpp>
 #include <prosper_util.hpp>
@@ -25,12 +15,6 @@ module;
 #include <textureinfo.h>
 #include <sharedutils/scope_guard.h>
 #include <sharedutils/scope_guard.h>
-#include <pragma/entities/entity_iterator.hpp>
-#include <pragma/physics/visual_debugger.hpp>
-#include <pragma/physics/environment.hpp>
-#include <pragma/entities/attribute_specialization_type.hpp>
-#include <pragma/entities/components/component_member_flags.hpp>
-#include <pragma/entities/entity_component_manager_t.hpp>
 
 module pragma.client;
 

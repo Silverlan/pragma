@@ -3,14 +3,10 @@
 
 module;
 
-#include "pragma/networkdefinitions.h"
-#include <pragma/lua/luaapi.h>
 #include <sharedutils/util_shared_handle.hpp>
 #include <sharedutils/functioncallback.h>
-#include "pragma/lua/lua_handles.hpp"
-#include "pragma/lua/raw_object.hpp"
 
-export module pragma.client:scripting.lua.base_lua_handle;
+export module pragma.shared:scripting.lua.base_lua_handle;
 
 export {
 	namespace pragma {

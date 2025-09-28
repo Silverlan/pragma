@@ -3,10 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/model/polymesh.h"
-#include <pragma/console/conout.h>
-#include "pragma/physics/collisionmesh.h"
 
 module pragma.shared;
 

@@ -3,14 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/func/basefuncphysics.h"
-#include "pragma/entities/baseentity.h"
-#include "pragma/util/util_handled.hpp"
-#include "pragma/entities/components/base_physics_component.hpp"
-#include "pragma/entities/components/base_render_component.hpp"
-#include "pragma/entities/baseentity_events.hpp"
-#include <pragma/physics/movetypes.h>
 
 module pragma.shared;
 

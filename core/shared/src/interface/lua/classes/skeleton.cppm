@@ -3,9 +3,6 @@
 
 module;
 
-#include "pragma/networkdefinitions.h"
-#include <pragma/lua/luaapi.h>
-#include "pragma/model/animation/skeleton.hpp"
 
 export module pragma.shared:scripting.lua.classes.skeleton;
 

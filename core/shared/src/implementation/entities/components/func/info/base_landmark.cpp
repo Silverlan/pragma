@@ -3,8 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/info/info_landmark.hpp"
 
 module pragma.shared;
 

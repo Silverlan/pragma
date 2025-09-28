@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_server.h"
-#include <pragma/ai/navsystem.h>
 #include <sharedutils/util_file.h>
 
 module pragma.server.core.resource_watcher;

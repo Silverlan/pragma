@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/serverdefinitions.h"
-#include "pragma/entities/func/basefuncportal.h"
 
 export module pragma.server.entities.components.func.portal;
 

@@ -10,7 +10,12 @@ module;
 
 export module pragma.shared:model.animation.vertex_animation;
 
+export import :game.coordinate_system;
+
 export {
+	class Model;
+	class ModelMesh;
+	class ModelSubMesh;
 	class DLLNETWORK MeshVertexFrame : public std::enable_shared_from_this<MeshVertexFrame> {
 	public:
 		enum class Flags : uint8_t {

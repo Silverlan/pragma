@@ -11,10 +11,11 @@ module;
 #include <mathutil/eulerangles.h>
 #include <mathutil/transform.hpp>
 #include <udm_types.hpp>
-#include "pragma/game/game_coordinate_system.hpp"
-#include "pragma/util/global_string_table.hpp"
 
 export module pragma.shared:game.rig_config;
+
+export import :game.coordinate_system;
+export import :util.global_string_table;
 
 export {
 	namespace pragma::ik {

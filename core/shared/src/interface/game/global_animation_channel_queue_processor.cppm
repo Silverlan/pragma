@@ -4,12 +4,13 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/game/animation_channel_cache_data.hpp"
 #include <sharedutils/BS_thread_pool.hpp>
 #include <array>
 
 export module pragma.shared:game.global_animation_channel_queue_processor;
 
+export import :entities.components.panima;
+export import :game.animation_channel_cache_data;
 import panima;
 
 export namespace pragma {

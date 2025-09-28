@@ -3,15 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/engine.h"
-#include "pragma/lua/classes/lcollisionmesh.h"
-#include "pragma/physics/collisionmesh.h"
-#include "pragma/physics/shape.hpp"
-#include "pragma/lua/classes/lphysics.h"
-#include "pragma/model/modelmesh.h"
-#include "pragma/physics/physsoftbodyinfo.hpp"
-#include <pragma/lua/luaapi.h>
 #include <luabind/copy_policy.hpp>
 
 module pragma.shared;

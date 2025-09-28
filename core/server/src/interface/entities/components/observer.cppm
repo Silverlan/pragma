@@ -3,11 +3,7 @@
 
 module;
 
-#include "pragma/serverdefinitions.h"
 #include "sharedutils/netpacket.hpp"
-#include "pragma/networking/recipient_filter.hpp"
-#include "pragma/networking/iserver_client.hpp"
-#include <pragma/entities/components/base_observer_component.hpp>
 
 export module pragma.server.entities.components.observer;
 

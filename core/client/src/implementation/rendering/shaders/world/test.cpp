@@ -6,8 +6,6 @@ module;
 #include "stdafx_client.h"
 #include "cmaterialmanager.h"
 #include <shader/prosper_pipeline_create_info.hpp>
-#include <pragma/entities/entity_iterator.hpp>
-#include <pragma/entities/entity_component_system_t.hpp>
 #include <image/prosper_sampler.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <prosper_command_buffer.hpp>

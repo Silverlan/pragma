@@ -3,10 +3,7 @@
 
 module;
 
-#include "pragma/serverdefinitions.h"
 #include "sharedutils/netpacket.hpp"
-#include "pragma/networking/recipient_filter.hpp"
-#include "pragma/entities/environment/lights/env_light_directional.h"
 
 export module pragma.server.entities.components.lights.directional;
 

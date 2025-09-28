@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/console/c_cvar_global_functions.h"
 
 module pragma.client;
 

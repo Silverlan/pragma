@@ -3,14 +3,8 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/lua/classes/lquaternion.h"
-#include "pragma/lua/classes/langle.h"
-#include <pragma/math/angle/wvangle.h>
 #include <mathutil/umat.h>
 #include "luasystem.h"
-#include "pragma/util/util_approach_rotation.hpp"
-#include "pragma/game/game_coordinate_system.hpp"
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/euler_angles.hpp>
 

@@ -4,8 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/console/c_cvar.h"
-#include "pragma/console/c_cvar_global_functions.h"
 #include <textureinfo.h>
 #include <image/prosper_msaa_texture.hpp>
 #include <image/prosper_render_target.hpp>
@@ -17,8 +15,6 @@ module;
 #include <shader/prosper_shader_blur.hpp>
 #include <shader/prosper_shader_t.hpp>
 #include <image/prosper_sampler.hpp>
-#include <pragma/entities/entity_component_system_t.hpp>
-#include <pragma/entities/entity_iterator.hpp>
 
 module pragma.client;
 

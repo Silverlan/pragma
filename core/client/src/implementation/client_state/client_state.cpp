@@ -4,30 +4,12 @@
 module;
 
 #include "stdafx_client.h"
-#include <pragma/console/convars.h>
-#include "pragma/networking/netmessages.h"
 #include "cmaterialmanager.h"
 #include <cmaterial_manager2.hpp>
-#include "pragma/console/convarhandle.h"
 #include "luasystem.h"
-#include "pragma/console/c_cvar.h"
-#include <pragma/asset/util_asset.hpp>
-#include <pragma/game/game_resources.hpp>
-#include <pragma/lua/libraries/lengine.h>
 #include <texturemanager/texturemanager.h>
-#include <pragma/lua/lua_error_handling.hpp>
-#include <pragma/lua/libraries/lutil.hpp>
-#include <pragma/lua/libraries/ludm.hpp>
-#include "pragma/lua/policies/gui_element_policy.hpp"
 #include <luasystem_file.h>
-#include <pragma/debug/intel_vtune.hpp>
-#include <pragma/networking/enums.hpp>
-#include <pragma/networking/error.hpp>
-#include <pragma/networking/resources.h>
-#include <pragma/networking/networking_modules.hpp>
 #include <image/prosper_render_target.hpp>
-#include <pragma/engine_version.h>
-#include <pragma/logging.hpp>
 #include <scripting/lua/lua.hpp>
 #include <luainterface.hpp>
 #include <alsoundsystem.hpp>

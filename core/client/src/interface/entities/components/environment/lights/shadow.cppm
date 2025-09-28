@@ -3,10 +3,7 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
 #include "image/prosper_render_target.hpp"
-#include <pragma/entities/components/base_entity_component.hpp>
-#include <pragma/indexmap.h>
 
 export module pragma.client:entities.components.lights.shadow;
 import :entities.components.game_shadow_manager;

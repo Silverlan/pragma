@@ -3,8 +3,16 @@
 
 module;
 
+#include "pragma/networkdefinitions.h"
 #include "debug/crashdump_helper.hpp"
+#include <string>
 #include <atomic>
+#ifdef _WIN32
+#include <tchar.h>
+#include <signal.h>
+#include <Windows.h>
+#endif
+#include <optional>
 
 export module pragma.shared:debug.crashdump;
 

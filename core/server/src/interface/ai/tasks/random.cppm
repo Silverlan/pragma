@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/serverdefinitions.h"
-#include "pragma/ai/ai_behavior.h"
 
 export module pragma.server.ai.tasks.random;
 

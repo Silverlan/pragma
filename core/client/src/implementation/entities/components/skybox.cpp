@@ -4,21 +4,14 @@
 module;
 
 #include "stdafx_client.h"
-#include <pragma/entities/entity_component_system_t.hpp>
-#include <pragma/asset/util_asset.hpp>
-#include <pragma/game/game_resources.hpp>
 #include <sharedutils/util_file.h>
 #include <util_image_buffer.hpp>
 #include <util_texture_info.hpp>
 #include <prosper_command_buffer.hpp>
-#include <pragma/lua/converters/game_type_converters_t.hpp>
-#include "pragma/entities/components/base_model_component.hpp"
 #include <image/prosper_image.hpp>
 #include <prosper_util.hpp>
-#include <pragma/entities/entity_iterator.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <cmaterial.h>
-#include "pragma/console/c_cvar_global_functions.h"
 #include <cmaterial_manager2.hpp>
 #include <texturemanager/texture_manager2.hpp>
 #include <util_image.hpp>

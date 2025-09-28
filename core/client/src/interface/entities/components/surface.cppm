@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include <pragma/entities/components/base_surface_component.hpp>
 
 export module pragma.client:entities.components.surface;
 

@@ -3,11 +3,8 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
 #include "buffers/prosper_buffer.hpp"
 #include "prosper_descriptor_set_group.hpp"
-#include "pragma/model/model.h"
-#include <pragma/entities/components/base_animated_component.hpp>
 #include <buffers/prosper_uniform_resizable_buffer.hpp>
 
 export module pragma.client:entities.components.animated;

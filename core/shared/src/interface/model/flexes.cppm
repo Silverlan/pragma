@@ -6,8 +6,11 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <string>
 #include <vector>
+#include <mathutil/umath.h>
 
 export module pragma.shared:model.flexes;
+
+import :model.animation.vertex_animation;
 
 export {
 	#pragma pack(push, 1)

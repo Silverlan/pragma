@@ -3,15 +3,8 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/components/base_static_bvh_user_component.hpp"
-#include "pragma/entities/components/base_static_bvh_cache_component.hpp"
-#include "pragma/entities/components/base_transform_component.hpp"
-#include "pragma/entities/components/base_physics_component.hpp"
-#include "pragma/entities/components/panima_component.hpp"
-#include "pragma/entities/entity_component_manager_t.hpp"
 
-export module pragma.shared;
+module pragma.shared;
 
 import :entities.components.base_static_bvh_user;
 

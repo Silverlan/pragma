@@ -3,9 +3,7 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
 #include <prosper_enums.hpp>
-#include <pragma/util/resource_watcher.h>
 #include <image/prosper_image.hpp>
 #include <util_image_buffer.hpp>
 

@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/networkdefinitions.h"
 #include <string>
 #include <cinttypes>
 
@@ -10,7 +11,7 @@ export module pragma.shared:map.map_info;
 
 export {
 	constexpr uint32_t WLD_VERSION = 12;
-	struct MapInfo {
+	struct DLLNETWORK MapInfo {
 		std::string name;
 		std::string fileName;
 		std::string md5;

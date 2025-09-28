@@ -3,11 +3,6 @@
 
 module;
 
-#include "pragma/serverdefinitions.h"
-#include "pragma/util/bulletinfo.h"
-#include "pragma/util/giblet_create_info.hpp"
-#include "pragma/util/util_splash_damage_info.hpp"
-#include <pragma/lua/luaapi.h>
 
 export module pragma.server.scripting.lua.libraries.util;
 

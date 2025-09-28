@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include <pragma/entities/entity_iterator.hpp>
 #include <prosper_command_buffer.hpp>
 #include <image/prosper_texture.hpp>
 

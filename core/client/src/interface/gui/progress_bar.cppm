@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
 #include <mathutil/umath.h>
 #include <sharedutils/property/util_property.hpp>
 

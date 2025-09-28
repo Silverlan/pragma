@@ -4,9 +4,7 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <pragma/math/angle/wvangle.h>
-#include <pragma/math/angle/wvquaternion.h>
-#include <pragma/lua/luaapi.h>
+#include "mathutil/eulerangles.h"
 #include <mathutil/glmutil.h>
 
 export module pragma.shared:scripting.lua.classes.angle;

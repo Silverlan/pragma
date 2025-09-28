@@ -3,14 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/environment/effects/env_particle_system.h"
-#include "pragma/util/util_handled.hpp"
-#include "pragma/asset/util_asset.hpp"
-#include "pragma/networking/nwm_util.h"
-#include "pragma/entities/baseentity_events.hpp"
-#include "pragma/entities/components/base_io_component.hpp"
-#include "pragma/entities/entity_component_manager_t.hpp"
 #include <algorithm>
 
 module pragma.shared;

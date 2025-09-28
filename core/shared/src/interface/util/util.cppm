@@ -1,56 +1,33 @@
-// SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
+// SPDX-FileCopyrightText: (c) 2025 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
 module;
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/entities/baseentity_handle.h"
-#include <udm_types.hpp>
-#include <sharedutils/util_pragma.hpp>
-#include <sharedutils/util_parallel_job.hpp>
-#include <sharedutils/util_ifile.hpp>
-#include <sharedutils/util_path.hpp>
-#include <sharedutils/util_hair.hpp>
-#include <mathutil/uvec.h>
-#include <mathutil/vertex.hpp>
-#include <vector>
-#include <cinttypes>
+export module pragma.shared:util;
 
-export module pragma.shared:util.util;
-
-export namespace util {
-	DLLNETWORK util::ParallelJob<std::vector<Vector2> &> generate_lightmap_uvs(NetworkState &nwState, uint32_t atlastWidth, uint32_t atlasHeight, const std::vector<umath::Vertex> &verts, const std::vector<uint32_t> &tris);
-	DLLNETWORK std::shared_ptr<udm::Data> load_udm_asset(const std::string &fileName, std::string *optOutErr = nullptr);
-	DLLNETWORK std::shared_ptr<udm::Data> load_udm_asset(std::unique_ptr<ufile::IFile> &&f, std::string *optOutErr = nullptr);
-
-	DLLNETWORK void write_udm_entity(udm::LinkedPropertyWrapperArg udm, EntityHandle &hEnt);
-	DLLNETWORK EntityHandle read_udm_entity(Game &game, udm::LinkedPropertyWrapperArg udm);
-	DLLNETWORK EntityHandle read_udm_entity(::pragma::BaseEntityComponent &c, udm::LinkedPropertyWrapperArg udm);
-
-	struct HairConfig;
-	struct HairData;
-	class HairFile {
-	  public:
-		static constexpr uint32_t PHAIR_VERSION = 1;
-		static constexpr auto PHAIR_IDENTIFIER = "PHAIR";
-		static std::shared_ptr<HairFile> Load(const udm::AssetData &data, std::string &outErr);
-		static std::shared_ptr<HairFile> Create();
-		bool Save(udm::AssetData &outData, std::string &outErr) const;
-	  private:
-		bool LoadFromAssetData(const udm::AssetData &data, std::string &outErr);
-		util::HairConfig m_hairConfig;
-		HairData m_hairData;
-	};
-
-	enum class FogType : uint8_t { Linear = 0, Exponential = 1, Exponential2 = 2 };
-
-	DLLNETWORK std::optional<std::string> convert_udm_file_to_ascii(const std::string &fileName, std::string &outErr);
-	DLLNETWORK std::optional<std::string> convert_udm_file_to_binary(const std::string &fileName, std::string &outErr);
-
-	DLLNETWORK std::pair<std::vector<double>, std::vector<double>> generate_two_pass_gaussian_blur_coefficients(uint32_t radius, double sigma, bool linear = true, bool correction = true);
-
-	DLLNETWORK util::Path get_user_data_dir();
-	DLLNETWORK std::vector<util::Path> get_resource_dirs();
-
-	DLLNETWORK bool show_notification(const std::string &summary, const std::string &body);
-};
+export import :util.any;
+export import :util.bsp_tree;
+export import :util.core;
+export import :util.curl_query_handler;
+export import :util.data_file;
+export import :util.enums;
+export import :util.font_set;
+export import :util.functional_parallel_worker;
+export import :util.giblet_create_info;
+export import :util.global_string_table;
+export import :util.lookup_identifier;
+export import :util.module;
+export import :util.mvp_base;
+export import :util.python;
+export import :util.render_tile;
+export import :util.resource_watcher;
+export import :util.rgb_csv;
+export import :util.server_state_interface;
+export import :util.splash_damage_info;
+export import :util.steam;
+export import :util.steamworks;
+export import :util.tga;
+export import :util.thread_pool;
+export import :util.timer;
+export import :util.timer_handle;
+export import :util.type_manager;

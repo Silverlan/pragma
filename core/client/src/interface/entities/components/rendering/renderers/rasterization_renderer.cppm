@@ -3,9 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include <pragma/entities/components/base_entity_component.hpp>
-#include "pragma/entities/environment/lights/env_light_directional.h"
 
 #include <unordered_set>
 #include <prosper_swap_command_buffer.hpp>

@@ -3,14 +3,8 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/components/base_child_component.hpp"
-#include "pragma/entities/components/parent_component.hpp"
-#include "pragma/entities/entity_component_manager_t.hpp"
-#include "pragma/entities/entity_component_system_t.hpp"
-#include "pragma/entities/baseentity_events.hpp"
 
-export module pragma.shared;
+module pragma.shared;
 
 import :entities.components.base_child;
 

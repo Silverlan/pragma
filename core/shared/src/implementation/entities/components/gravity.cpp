@@ -3,20 +3,8 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/components/basegravity.h"
-#include "pragma/networkstate/networkstate.h"
-#include <pragma/game/game.h>
-#include "pragma/entities/components/base_physics_component.hpp"
-#include "pragma/entities/components/base_transform_component.hpp"
-#include "pragma/lua/converters/game_type_converters_t.hpp"
-#include "pragma/util/util_ballistic.h"
-#include "pragma/physics/environment.hpp"
-#include "pragma/physics/controller.hpp"
-#include <pragma/physics/movetypes.h>
-#include "pragma/lua/ostream_operator_alias.hpp"
 
-export module pragma.shared;
+module pragma.shared;
 
 import :entities.components.gravity;
 

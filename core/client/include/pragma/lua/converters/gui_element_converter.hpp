@@ -4,7 +4,6 @@
 #ifndef __LUA_GUI_ELEMENT_CONVERTERS_HPP__
 #define __LUA_GUI_ELEMENT_CONVERTERS_HPP__
 
-#include "pragma/networkdefinitions.h"
 #include <luabind/detail/conversion_policies/native_converter.hpp>
 
 import pragma.gui;

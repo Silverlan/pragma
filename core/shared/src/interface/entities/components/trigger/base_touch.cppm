@@ -3,14 +3,13 @@
 
 module;
 
-#include "pragma/entities/components/base_entity_component.hpp"
-#include "pragma/entities/baseentity_handle.h"
-#include "pragma/physics/phystouch.h"
-#include "pragma/physics/contact.hpp"
+#include "pragma/networkdefinitions.h"
 #include <vector>
 #include <queue>
 
 export module pragma.shared:entities.components.triggers.base_touch;
+
+export import :entities.components.base;
 
 export {
 	namespace pragma {

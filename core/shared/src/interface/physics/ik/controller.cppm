@@ -4,11 +4,13 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/physics/ik/ik_method.hpp"
 #include <string>
 #include <memory>
+#include <unordered_map>
 
 export module pragma.shared:physics.ik.controller;
+
+export import :physics.ik.method;
 
 export {
 	class DLLNETWORK IKController : public std::enable_shared_from_this<IKController> {

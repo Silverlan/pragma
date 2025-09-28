@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include "pragma/entities/environment/env_timescale.h"
 #include <memory>
 
 export module pragma.client:entities.components.env_timescale;

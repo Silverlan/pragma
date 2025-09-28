@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include "pragma/lua/lua_script_watcher.h"
 
 export module pragma.client:scripting.lua.script_watcher;
 export class DLLCLIENT CLuaDirectoryWatcherManager : public LuaDirectoryWatcherManager {

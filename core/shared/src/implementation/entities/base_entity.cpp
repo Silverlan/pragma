@@ -3,23 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/baseentity.h"
-#include "pragma/entities/baseentity_luaobject.h"
-#include "pragma/physics/physicstypes.h"
-#include "pragma/entities/components/base_physics_component.hpp"
-#include "pragma/entities/components/base_name_component.hpp"
-#include "pragma/entities/components/base_model_component.hpp"
-#include "pragma/entities/components/base_networked_component.hpp"
-#include "pragma/entities/components/base_transform_component.hpp"
-#include "pragma/entities/components/base_color_component.hpp"
-#include "pragma/entities/components/base_child_component.hpp"
-#include "pragma/entities/components/basetoggle.h"
-#include "pragma/entities/components/map_component.hpp"
-#include "pragma/model/model.h"
-#include "pragma/entities/baseentity_events.hpp"
-#include "pragma/entities/entity_component_system_t.hpp"
-#include "pragma/util/global_string_table.hpp"
 
 module pragma.shared;
 

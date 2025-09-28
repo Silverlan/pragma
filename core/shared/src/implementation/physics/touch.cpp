@@ -3,9 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/baseentity.h"
-#include "pragma/physics/phystouch.h"
 
 module pragma.shared;
 

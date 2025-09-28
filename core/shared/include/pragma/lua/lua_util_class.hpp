@@ -4,7 +4,6 @@
 #ifndef __LUA_UTIL_CLASS_HPP__
 #define __LUA_UTIL_CLASS_HPP__
 
-#include "pragma/networkdefinitions.h"
 #include <luasystem.h>
 #include <sharedutils/util_string_literal.hpp>
 

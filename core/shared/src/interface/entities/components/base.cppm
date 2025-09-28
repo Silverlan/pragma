@@ -3,14 +3,7 @@
 
 module;
 
-#include "pragma/entities/components/base_entity_component_handle_wrapper.hpp"
-#include "pragma/entities/entity_component_event.hpp"
-#include "pragma/entities/entity_component_event_info.hpp"
-#include "pragma/entities/entity_component_info.hpp"
-#include "pragma/entities/baseentity_net_event_manager.hpp"
-#include "pragma/util/util_handled.hpp"
-#include "pragma/lua/base_lua_handle.hpp"
-#include "pragma/types.hpp"
+#include "pragma/networkdefinitions.h"
 #include <luasystem.h>
 #include <unordered_map>
 #include <variant>
@@ -18,15 +11,25 @@ module;
 #include <sharedutils/util_extensible_enum.hpp>
 #include <sharedutils/util_weak_handle.hpp>
 #include <sharedutils/functioncallback.h>
+#include "mathutil/transform.hpp"
+#include "sharedutils/util_event_reply.hpp"
 #include <typeindex>
+#include <udm.hpp>
 #ifdef _WIN32
 #if __cpp_lib_format >= 202207L
 #include <format>
 #endif
 #endif
-#include "pragma/entities/entity_component_manager.hpp"
 
-export module pragma.shared:entities.components.base_entity;
+export module pragma.shared:entities.components.base;
+
+export import :entities.base_entity_handle;
+export import :entities.enums;
+export import :entities.components.dynamic_member_register;
+export import :entities.components.handle;
+export import :entities.components.events.event;
+export import :entities.components.events.event_info;
+export import :scripting.lua.base_lua_handle;
 
 namespace pragma {
 	class DLLNETWORK EEntityComponentCallbackEvent : public util::ExtensibleEnum {
@@ -41,9 +44,16 @@ namespace pragma {
 DEFINE_STD_HASH_SPECIALIZATION(pragma::EEntityComponentCallbackEvent);
 
 export {
+	class BaseEntity;
+	class Game;
+	class NetworkState;
 	namespace pragma {
+		class EntityComponentManager;
+		class BaseEntityComponentSystem;
+		struct ComponentMemberInfo;
+		struct ComponentInfo;
+		struct ComponentEvent;
 		using TRegisterComponentMember = const std::function<ComponentMemberIndex(ComponentMemberInfo &&)> &;
-		using ComponentMemberIndex = uint32_t;
 
 		enum class TickPolicy : uint8_t {
 			Never = 0u,

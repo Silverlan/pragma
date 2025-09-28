@@ -4,7 +4,6 @@
 #include "stdafx_client.h"
 #include <clientmanager/interface/cl_nwm_manager.hpp>
 #include <iostream>
-#include <pragma/networking/netmessages.h>
 
 import pragma.client;
 

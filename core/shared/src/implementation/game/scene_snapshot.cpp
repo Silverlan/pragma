@@ -3,11 +3,8 @@
 
 module;
 
-#include "pragma/game/scene_snapshot.hpp"
-#include "pragma/model/model.h"
-#include "pragma/model/modelmesh.h"
 
-export module pragma.shared;
+module pragma.shared;
 
 import :game.scene_snapshot;
 

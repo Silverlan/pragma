@@ -3,17 +3,18 @@
 
 module;
 
-#include "pragma/entities/components/base_entity_component.hpp"
+#include "pragma/networkdefinitions.h"
 #include <mathutil/glmutil.h>
-#include "pragma/entities/components/basetoggle.h"
-#include "pragma/physics/constraint.hpp"
 #include <string>
 #include <vector>
 
+export module pragma.shared:entities.components.point.constraints.base;
+
+export import :entities.components.base;
+export import :physics.constraint;
+
 #define SF_CONSTRAINT_START_INACTIVE 1024
 #define SF_CONSTRAINT_DISABLE_COLLISIONS 2048
-
-export module pragma.shared:entities.components.point.constraints.base;
 
 export namespace pragma {
 	class DLLNETWORK BasePointConstraintComponent : public BaseEntityComponent {

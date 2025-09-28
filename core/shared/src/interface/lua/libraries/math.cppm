@@ -3,11 +3,8 @@
 
 module;
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/math/util_easing.hpp"
-#include <pragma/lua/luaapi.h>
 
-export module pragma.client:scripting.lua.libraries.math;
+export module pragma.shared:scripting.lua.libraries.math;
 
 export namespace Lua {
 	namespace math {

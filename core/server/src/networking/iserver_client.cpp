@@ -2,9 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_server.h"
-#include <pragma/entities/components/base_player_component.hpp>
-#include "pragma/networking/iserver_client.hpp"
-#include <pragma/networking/resource.h>
 
 import pragma.server.entities.components;
 

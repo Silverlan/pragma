@@ -3,10 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/engine.h"
-#include "pragma/lua/libraries/ldebug.h"
-#include <pragma/console/conout.h>
 #include <scripting/lua/lua.hpp>
 #include <algorithm>
 #ifdef __linux__
@@ -17,7 +13,7 @@ module;
 //#include <ncurses.h>
 #endif
 
-module pragma.client;
+module pragma.shared;
 
 import :scripting.lua.libraries.debug;
 

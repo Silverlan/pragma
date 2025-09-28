@@ -3,10 +3,12 @@
 
 module;
 
-#include "pragma/entities/components/base_entity_component.hpp"
+#include "pragma/networkdefinitions.h"
 #include <sharedutils/property/util_property_vector.h>
 
 export module pragma.shared:entities.components.origin;
+
+export import :entities.components.base;
 
 export namespace pragma {
 	class DLLNETWORK OriginComponent final : public BaseEntityComponent {

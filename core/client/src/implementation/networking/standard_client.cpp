@@ -5,9 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include <clientmanager/interface/cl_nwm_manager.hpp>
-#include <pragma/networking/error.hpp>
-#include <pragma/networking/enums.hpp>
-#include <pragma/networking/error.hpp>
 
 module pragma.client;
 

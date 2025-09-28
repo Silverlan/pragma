@@ -4,16 +4,10 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/networking/c_net_resources.h"
-#include "pragma/entities/components/base_model_component.hpp"
-#include "pragma/networking/resources.h"
-#include <pragma/model/modelmanager.h>
 #include <fsys/filesystem.h>
-#include "pragma/physics/collisionmesh.h"
 #include <sharedutils/util_file.h>
 #include <sharedutils/scope_guard.h>
 #include <sharedutils/util_library.hpp>
-#include <pragma/game/game_resources.h>
 
 #define RESOURCE_TRANSFER_VERBOSE 0
 

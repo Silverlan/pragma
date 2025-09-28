@@ -3,20 +3,8 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/components/base_weapon_component.hpp"
-#include "pragma/input/inkeys.h"
-#include "pragma/entities/components/base_player_component.hpp"
-#include "pragma/entities/components/base_physics_component.hpp"
-#include "pragma/entities/components/base_transform_component.hpp"
-#include "pragma/entities/components/base_model_component.hpp"
-#include "pragma/entities/components/base_animated_component.hpp"
-#include "pragma/entities/components/base_render_component.hpp"
-#include "pragma/entities/components/base_ownable_component.hpp"
-#include "pragma/entities/components/action_input_controller_component.hpp"
-#include "pragma/util/bulletinfo.h"
 
-export module pragma.shared;
+module pragma.shared;
 
 import :entities.components.base_weapon;
 

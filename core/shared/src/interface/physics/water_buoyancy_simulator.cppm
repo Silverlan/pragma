@@ -4,9 +4,14 @@
 module;
 
 #include "pragma/networkdefinitions.h"
+#include "mathutil/uvec.h"
 
 export module pragma.shared:physics.water_buoyancy_simulator;
 
+export import :physics.liquid;
+export import :physics.water_surface_simulator;
+
+export class BaseEntity;
 export namespace pragma::physics {
 	class DLLNETWORK WaterBuoyancySimulator {
 	  public:

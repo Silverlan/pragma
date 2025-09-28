@@ -3,13 +3,8 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include <pragma/definitions.h>
-#include <pragma/engine.h>
-#include "pragma/entities/components/base_observer_component.hpp"
-#include "pragma/entities/components/base_observable_component.hpp"
 
-export module pragma.shared;
+module pragma.shared;
 
 import :entities.components.base_observer;
 

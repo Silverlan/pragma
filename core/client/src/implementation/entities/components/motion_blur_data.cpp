@@ -4,9 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include <pragma/entities/entity_component_system_t.hpp>
-#include <pragma/entities/entity_iterator.hpp>
-#include <pragma/entities/entity_component_manager_t.hpp>
 #include <buffers/prosper_uniform_resizable_buffer.hpp>
 
 module pragma.client;

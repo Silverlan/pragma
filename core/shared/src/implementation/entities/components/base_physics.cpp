@@ -3,30 +3,10 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/components/base_physics_component.hpp"
-#include "pragma/entities/components/base_transform_component.hpp"
-#include "pragma/entities/components/velocity_component.hpp"
-#include "pragma/game/game_limits.h"
-#include "pragma/util/bulletinfo.h"
-#include "pragma/physics/environment.hpp"
-#include "pragma/model/brush/brushmesh.h"
-#include "pragma/entities/components/velocity_component.hpp"
-#include "pragma/entities/components/base_player_component.hpp"
-#include "pragma/entities/components/base_model_component.hpp"
-#include "pragma/entities/components/base_animated_component.hpp"
-#include "pragma/entities/entity_component_system_t.hpp"
-#include "pragma/model/model.h"
-#include "pragma/physics/raytraces.h"
-#include "pragma/logging.hpp"
 #include <sharedutils/netpacket.hpp>
-#include <pragma/physics/movetypes.h>
-#include <pragma/physics/collisiontypes.h>
 #include <udm.hpp>
-#include "pragma/model/animation/bone.hpp"
-#include "pragma/model/animation/skeleton.hpp"
 
-export module pragma.shared;
+module pragma.shared;
 
 import :entities.components.base_physics;
 

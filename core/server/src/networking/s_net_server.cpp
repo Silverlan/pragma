@@ -2,9 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_server.h"
-#include "pragma/networking/iserver_client.hpp"
-#include "pragma/networking/s_net_server.h"
-#include <pragma/console/conout.h>
 
 void NET_cl_send(pragma::networking::IServerClient &session, NetPacket packet)
 {

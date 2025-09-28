@@ -3,14 +3,10 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/math/intersection.h"
 #include <mathutil/uvec.h>
 #include <algorithm>
-#include <pragma/model/modelmesh.h>
-#include <pragma/model/model.h>
 
-export module pragma.shared;
+module pragma.shared;
 
 import :math.intersection;
 

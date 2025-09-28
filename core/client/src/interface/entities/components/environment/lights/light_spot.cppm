@@ -3,9 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include <pragma/entities/environment/lights/env_light_spot.h>
-#include <pragma/util/mvpbase.h>
 
 export module pragma.client:entities.components.lights.spot;
 

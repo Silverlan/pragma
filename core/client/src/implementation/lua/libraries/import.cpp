@@ -4,17 +4,7 @@
 module;
 
 #include <image/prosper_texture.hpp>
-#include <pragma/lua/libraries/limport.hpp>
-#include <pragma/entities/baseentity_handle.h>
-#include <pragma/lua/classes/ldef_entity.h>
-#include <pragma/lua/libraries/lfile.h>
-#include <pragma/entities/entity_iterator.hpp>
-#include <pragma/entities/entity_component_system_t.hpp>
-#include <pragma/model/model.h>
-#include <pragma/model/modelmesh.h>
 #include <mathutil/transform.hpp>
-#include <pragma/util/util_game.hpp>
-#include <pragma/game/scene_snapshot.hpp>
 #include <sharedutils/util_file.h>
 //#include <assimp/Importer.hpp>
 //#include <assimp/Exporter.hpp>

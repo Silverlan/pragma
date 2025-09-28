@@ -3,9 +3,10 @@
 
 module;
 
-#include "pragma/networkdefinitions.h"
 
 export module pragma.shared:entities.components.base_bot;
+
+export import :entities.components.base;
 
 export namespace pragma {
 	class DLLNETWORK BaseBotComponent : public BaseEntityComponent {

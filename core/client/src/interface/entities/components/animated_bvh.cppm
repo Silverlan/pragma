@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include <pragma/entities/components/base_bvh_component.hpp>
 
 export module pragma.client:entities.components.animated_bvh;
 export namespace pragma {

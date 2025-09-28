@@ -3,12 +3,14 @@
 
 module;
 
-#include "pragma/entities/components/base_entity_component.hpp"
+#include "pragma/networkdefinitions.h"
+
+export module pragma.shared:entities.components.base_world;
+
+export import :entities.components.base;
 
 #define WORLD_BASE_LOD 20
 #define WORLD_LOD_OFFSET 4
-
-export module pragma.shared:entities.components.base_world;
 
 #pragma warning(push)
 #pragma warning(disable : 4251)

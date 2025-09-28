@@ -3,10 +3,6 @@
 
 module;
 
-#include "pragma/physics/phys_material.hpp"
-#include "pragma/physics/environment.hpp"
-#include "pragma/game/game.h"
-#include "pragma/physics/base_t.hpp"
 
 module pragma.shared;
 

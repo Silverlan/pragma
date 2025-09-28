@@ -3,10 +3,12 @@
 
 module;
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/physics/base.hpp"
+#include <cinttypes>
 
 export module pragma.shared:physics.material;
+
+export import :physics.base;
+export import :physics.surface_material;
 
 export namespace pragma::physics {
 	class DLLNETWORK IMaterial : public IBase {

@@ -3,8 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/networking/netmessages.h"
 
 module pragma.shared;
 

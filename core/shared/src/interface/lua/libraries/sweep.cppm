@@ -3,10 +3,8 @@
 
 module;
 
-#include "pragma/networkdefinitions.h"
-#include <pragma/lua/luaapi.h>
 
-export module pragma.client:scripting.lua.libraries.sweep;
+export module pragma.shared:scripting.lua.libraries.sweep;
 
 export namespace Lua::sweep {
 	DLLNETWORK void AABBWithAABB(const Vector3 &originA, const Vector3 &endA, const Vector3 &extentsA, const Vector3 &originB, const Vector3 &endB, const Vector3 &extentsB, bool &outResult, float &outTEntry, float &outTExit, Vector3 &outNormal);

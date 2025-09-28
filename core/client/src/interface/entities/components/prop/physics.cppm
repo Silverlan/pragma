@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include <pragma/entities/prop/prop_physics.hpp>
 
 export module pragma.client:entities.components.prop_physics;
 

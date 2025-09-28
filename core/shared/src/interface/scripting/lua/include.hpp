@@ -3,7 +3,6 @@
 
 // module;
 
-#include "pragma/networkdefinitions.h"
 
 // export module pragma.scripting.lua:include;
 

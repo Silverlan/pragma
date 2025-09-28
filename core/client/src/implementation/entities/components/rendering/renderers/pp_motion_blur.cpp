@@ -4,11 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/clientdefinitions.h"
-#include "pragma/entities/entity_iterator.hpp"
-#include "pragma/entities/entity_component_system_t.hpp"
-#include <pragma/entities/entity_component_manager_t.hpp>
-#include <pragma/entities/entity_iterator.hpp>
 #include <image/prosper_render_target.hpp>
 #include <prosper_command_buffer.hpp>
 #include <buffers/prosper_buffer_create_info.hpp>

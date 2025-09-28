@@ -3,17 +3,11 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/entities/components/base_player_component.hpp"
-#include "pragma/entities/components/base_transform_component.hpp"
-#include "pragma/entities/components/base_physics_component.hpp"
-#include "pragma/entities/components/base_model_component.hpp"
-#include "pragma/util/bulletinfo.h"
-#include "pragma/physics/raytraces.h"
-#include "pragma/lua/classes/ldef_vector.h"
 #include <sharedutils/netpacket.hpp>
 
-module pragma.entities.components.shooter;
+module pragma.shared;
+
+import :entities.components.shooter;
 
 using namespace pragma::ecs;
 

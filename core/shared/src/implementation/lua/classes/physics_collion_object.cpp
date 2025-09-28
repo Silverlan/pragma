@@ -3,15 +3,7 @@
 
 module;
 
-#include "stdafx_shared.h"
 #include "luasystem.h"
-#include "pragma/lua/classes/lphysics.h"
-#include "pragma/physics/environment.hpp"
-#include "pragma/physics/vehicle.hpp"
-#include "pragma/lua/classes/ldef_vector.h"
-#include "pragma/lua/classes/ldef_quaternion.h"
-#include "pragma/lua/converters/game_type_converters_t.hpp"
-#include "pragma/lua/ostream_operator_alias.hpp"
 
 module pragma.shared;
 

@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/networking/game_server_data.hpp"
 #include <optional>
 #include <string>
 #include <functional>
@@ -14,6 +13,8 @@ module;
 #include <mathutil/umath.h>
 
 export module pragma.shared:networking.master_server_query_dispatcher;
+
+export import :networking.game_server_info;
 
 export {
 	namespace pragma::networking {

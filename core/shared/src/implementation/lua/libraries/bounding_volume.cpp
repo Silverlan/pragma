@@ -3,16 +3,10 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/lua/libraries/lboundingvolume.h"
 #include <mathutil/glmutil.h>
-#include "pragma/lua/ldefinitions.h"
-#include "pragma/lua/classes/ldef_vector.h"
-#include "pragma/lua/classes/ldef_mat4.h"
-#include <pragma/math/intersection.h>
 #include <mathutil/boundingvolume.h>
 
-module pragma.client;
+module pragma.shared;
 
 import :scripting.lua.libraries.bounding_volume;
 

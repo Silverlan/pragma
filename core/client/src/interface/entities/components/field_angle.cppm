@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include <pragma/entities/components/base_field_angle_component.hpp>
 
 export module pragma.client:entities.components.field_angle;
 

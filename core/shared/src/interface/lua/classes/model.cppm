@@ -3,9 +3,6 @@
 
 module;
 
-#include "pragma/networkdefinitions.h"
-#include <pragma/lua/luaapi.h>
-#include "pragma/lua/classes/ldef_model.h"
 
 export module pragma.shared:scripting.lua.classes.model;
 

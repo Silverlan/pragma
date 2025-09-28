@@ -2,32 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/lua/libraries/lasset.hpp"
-#include "pragma/util/bulletinfo.h"
-#include "pragma/lua/policies/gui_element_policy.hpp"
 #include "texture_load_flags.hpp"
-#include <pragma/debug/debug_render_info.hpp>
-#include <pragma/game/game_resources.hpp>
-#include <pragma/util/giblet_create_info.hpp>
-#include <pragma/lua/classes/ldef_entity.h>
-#include <pragma/lua/classes/thread_pool.hpp>
-#include <pragma/lua/libraries/lfile.h>
-#include <pragma/lua/libraries/lutil.hpp>
-#include <pragma/lua/policies/default_parameter_policy.hpp>
-#include <pragma/lua/converters/string_view_converter_t.hpp>
-#include <pragma/lua/converters/vector_converter_t.hpp>
-#include <pragma/lua/converters/pair_converter_t.hpp>
-#include <pragma/lua/converters/game_type_converters_t.hpp>
-#include <pragma/lua/converters/optional_converter_t.hpp>
-#include <pragma/lua/converters/thread_pool_converter_t.hpp>
-#include <pragma/lua/policies/core_policies.hpp>
-#include <pragma/lua/custom_constructor.hpp>
-#include <pragma/lua/util_logging.hpp>
-#include <pragma/model/modelmanager.h>
-#include <pragma/input/inputhelper.h>
 #include <sharedutils/util_file.h>
 #include <sharedutils/util_path.hpp>
-#include "pragma/asset/util_asset.hpp"
 #include <util_image.hpp>
 #include <util_image_buffer.hpp>
 #include <util_texture_info.hpp>

@@ -4,10 +4,7 @@
 #ifndef __LUACALLBACK_H__
 #define __LUACALLBACK_H__
 
-#include "pragma/networkdefinitions.h"
 #include <sharedutils/functioncallback.h>
-#include "pragma/lua/ldefinitions.h"
-#include "pragma/lua/luafunction.h"
 
 class DLLNETWORK LuaCallback : public TCallback, public LuaFunction {
   public:

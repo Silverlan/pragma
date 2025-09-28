@@ -1,26 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "stdafx_shared.h"
-#include "pragma/lua/sh_lua_component.hpp"
-#include "pragma/lua/lua_call.hpp"
-#include "pragma/lua/classes/lproperty.hpp"
-#include "pragma/lua/libraries/ludm.hpp"
-#include "pragma/entities/baseentity_events.hpp"
-#include "pragma/entities/entity_iterator.hpp"
-#include "pragma/entities/components/base_io_component.hpp"
-#include "pragma/entities/components/base_player_component.hpp"
-#include "pragma/entities/components/panima_component.hpp"
-#include "pragma/entities/entity_component_manager_t.hpp"
-#include "pragma/lua/base_lua_handle_method.hpp"
-#include "pragma/lua/sh_lua_component_t.hpp"
-#include "pragma/lua/converters/game_type_converters_t.hpp"
-#include "pragma/lua/converters/vector_converter_t.hpp"
-#include "pragma/lua/ostream_operator_alias.hpp"
-#include "pragma/lua/lua_util_component.hpp"
-#include "pragma/lua/types/udm.hpp"
-#include "pragma/lua/types/nil_type.hpp"
-#include "pragma/logging.hpp"
 #include <sharedutils/scope_guard.h>
 #include <sharedutils/datastream.h>
 #include <sharedutils/netpacket.hpp>

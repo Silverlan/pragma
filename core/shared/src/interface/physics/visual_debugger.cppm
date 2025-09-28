@@ -3,7 +3,7 @@
 
 module;
 
-#include <pragma/networkdefinitions.h>
+#include "pragma/networkdefinitions.h"
 #include <vector>
 #include <mathutil/glmutil.h>
 #include <mathutil/color.h>

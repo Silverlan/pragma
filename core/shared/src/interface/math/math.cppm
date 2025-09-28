@@ -5,6 +5,9 @@ module;
 
 export module pragma.shared:math;
 
+export import :math.approach_rotation;
+export import :math.ballistic;
+export import :math.best_fitting_plane;
 export import :math.bounding_node;
 export import :math.delta_offset;
 export import :math.delta_orientation;
@@ -17,11 +20,14 @@ export import :math.intersection;
 export import :math.noise;
 export import :math.octtree_node;
 export import :math.orientation;
+export import :math.oriented_point;
 export import :math.pid_controller;
+export import :math.print;
 export import :math.random;
 export import :math.seb;
 export import :math.sphere;
 export import :math.surface_material;
+export import :math.transform;
 export import :math.triangulate;
 
 export namespace util {

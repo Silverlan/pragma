@@ -5,18 +5,16 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include <string>
-
 #include <mathutil/uvec.h>
-
 #include <vector>
 #include <iostream>
 #include <mathutil/glmutil.h>
 #include "material.h"
-#include <pragma/console/conout.h>
 
 export module pragma.shared:model.poly;
 
 export {
+	class NetworkState;
 	struct DLLNETWORK PolyVertex {
 		Vector3 pos = {};
 		Vector3 normal = {};

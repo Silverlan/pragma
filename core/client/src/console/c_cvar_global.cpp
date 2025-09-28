@@ -2,27 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "pragma/entities/components/base_character_component.hpp"
-#include "pragma/entities/components/base_name_component.hpp"
-#include "pragma/entities/components/base_observable_component.hpp"
-#include "pragma/entities/components/base_observer_component.hpp"
-#include "pragma/entities/components/base_player_component.hpp"
-#include "pragma/console/c_cvar_global_functions.h"
-#include "pragma/string/format.h"
-#include <pragma/console/convars.h>
-#include "pragma/console/c_cvar.h"
-#include <pragma/lua/luacallback.h>
-#include <pragma/networking/nwm_util.h>
 #include <sharedutils/util.h>
 #include <sharedutils/util_string.h>
-#include "pragma/util/util_tga.hpp"
 #include <cmaterialmanager.h>
-#include <pragma/networking/netmessages.h>
-#include <pragma/console/sh_cmd.h>
-#include <pragma/console/util_cmd.hpp>
-#include <pragma/audio/alsound_type.h>
-#include <pragma/engine_info.hpp>
-#include <pragma/networking/enums.hpp>
 #include <debug/prosper_debug.hpp>
 #include <prosper_util.hpp>
 #include <buffers/prosper_buffer.hpp>
@@ -32,10 +14,6 @@
 #include <image/prosper_image.hpp>
 #include <buffers/prosper_uniform_resizable_buffer.hpp>
 #include <buffers/prosper_dynamic_resizable_buffer.hpp>
-#include <pragma/entities/entity_component_system_t.hpp>
-#include <pragma/entities/components/base_transform_component.hpp>
-#include <pragma/entities/entity_iterator.hpp>
-#include <pragma/console/command_options.hpp>
 #include <fsys/ifile.hpp>
 #include <util_image.hpp>
 #include <util_image_buffer.hpp>

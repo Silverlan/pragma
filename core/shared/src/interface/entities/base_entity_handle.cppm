@@ -7,5 +7,7 @@ module;
 
 export module pragma.shared:entities.base_entity_handle;
 
-class BaseEntity;
-using EntityHandle = util::TWeakSharedHandle<BaseEntity>;
+export {
+    class BaseEntity;
+    using EntityHandle = util::TWeakSharedHandle<BaseEntity>;
+};

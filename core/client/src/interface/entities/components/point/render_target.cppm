@@ -3,10 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include "pragma/c_enginedefinitions.h"
-#include <pragma/entities/baseentity_handle.h>
-#include "pragma/entities/point/point_rendertarget.h"
 #include <texturemanager/texture.h>
 
 export module pragma.client:entities.components.point_render_target;

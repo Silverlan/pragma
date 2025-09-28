@@ -3,9 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/networking/resources.h"
-#include "pragma/asset/util_asset.hpp"
 #include <sharedutils/util_file.h>
 
 module pragma.shared;

@@ -15,6 +15,9 @@ module;
 
 export module pragma.shared:entities.components.bvh_data;
 
+export import :entities.components.base;
+export import :model;
+
 export namespace pragma::bvh {
 	constexpr bool should_permute = true;
 

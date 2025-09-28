@@ -3,11 +3,7 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/console/cvar_handler.h"
 #include <algorithm>
-#include <pragma/console/convars.h>
-#include <pragma/console/convarhandle.h>
 
 module pragma.shared;
 

@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "stdafx_shared.h"
-#include "pragma/debug/intel_vtune.hpp"
+module;
 
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 #include <ittnotify.h>

@@ -3,12 +3,9 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/lua/libraries/lai.hpp"
-#include "pragma/entities/components/base_ai_component.hpp"
 #include <luainterface.hpp>
 
-module pragma.client;
+module pragma.shared;
 
 import :scripting.lua.libraries.ai;
 

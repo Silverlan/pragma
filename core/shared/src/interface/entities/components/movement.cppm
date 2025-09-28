@@ -3,11 +3,16 @@
 
 module;
 
-#include "pragma/entities/components/base_entity_component.hpp"
+#include "pragma/networkdefinitions.h"
+#include "mathutil/umath.h"
 
 export module pragma.shared:entities.components.movement;
 
+export import :entities.components.base;
+
 export namespace pragma {
+	class OrientationComponent;
+	class BaseCharacterComponent;
 	class DLLNETWORK MovementComponent final : public BaseEntityComponent {
 	  public:
 		enum class MoveDirection : uint8_t {

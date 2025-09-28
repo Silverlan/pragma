@@ -4,20 +4,8 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/entities/components/base_transform_component.hpp"
-#include "pragma/util/bulletinfo.h"
-#include "pragma/entities/parentmode.h"
 #include "luasystem.h"
-#include <pragma/lua/classes/ldef_color.h>
-#include <pragma/lua/classes/ldef_vector.h>
-#include <pragma/lua/classes/ldef_quaternion.h>
-#include <pragma/lua/classes/ldef_entity.h>
-#include <pragma/lua/libraries/lfile.h>
-#include <pragma/lua/classes/ldef_material.h>
-#include <pragma/util/giblet_create_info.hpp>
-#include <pragma/asset_types/world.hpp>
 #include <util_texture_info.hpp>
-#include <pragma/model/model.h>
 #include <util_image_buffer.hpp>
 #include <prosper_window.hpp>
 #include <fsys/ifile.hpp>

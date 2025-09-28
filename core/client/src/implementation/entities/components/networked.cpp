@@ -5,8 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include <sharedutils/property/util_property_euler_angles.hpp>
-#include <pragma/lua/converters/game_type_converters_t.hpp>
-#include <pragma/entities/entity_property.hpp>
 
 module pragma.client;
 

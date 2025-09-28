@@ -3,15 +3,19 @@
 
 module;
 
+#include "pragma/networkdefinitions.h"
 #include <mathutil/transform.hpp>
 
 export module pragma.shared:model.animation.pose;
 
+export import :model.animation.bone;
+export import :model.animation.enums;
 import panima;
 
 export {
 	namespace pragma::animation {
-		class Pose {
+		class Skeleton;
+		class DLLNETWORK Pose {
 		public:
 			Pose() = default;
 			Pose(const Pose &) = default;

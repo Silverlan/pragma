@@ -3,13 +3,9 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/asset_types/world.hpp"
-#include "pragma/level/level_info.hpp"
-#include "pragma/model/model.h"
 #include <util_image_buffer.hpp>
 
-export module pragma.shared;
+module pragma.shared;
 
 import :map.world_data;
 

@@ -6,10 +6,7 @@ module;
 #include "stdafx_client.h"
 #include "alsound_effect.hpp"
 #include <alsoundsystem.hpp>
-#include <pragma/networking/nwm_util.h>
-#include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <alsoundsystem.hpp>
-#include <pragma/entities/entity_component_system_t.hpp>
 
 module pragma.client;
 

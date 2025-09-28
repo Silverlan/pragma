@@ -3,11 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include "pragma/model/animation/animation_event.h"
-#include "pragma/entities/components/base_observer_component.hpp"
-#include <pragma/entities/components/base_weapon_component.hpp>
-#include <pragma/model/animation/play_animation_flags.hpp>
 #include <optional>
 
 export module pragma.client:entities.components.weapon;

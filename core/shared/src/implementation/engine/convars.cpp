@@ -3,9 +3,6 @@
 
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/engine.h"
-#include <pragma/console/convars.h>
 
 module pragma.shared;
 

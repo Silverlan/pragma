@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include <pragma/entities/components/basetoggle.h>
 
 export module pragma.client:entities.components.toggle;
 

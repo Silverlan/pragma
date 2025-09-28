@@ -3,12 +3,15 @@
 
 module;
 
-#include "pragma/entities/components/base_entity_component.hpp"
-#include "pragma/entities/components/base_entity_component_member_register.hpp"
+#include "pragma/networkdefinitions.h"
+#include "mathutil/umath.h"
 
 export module pragma.shared:entities.components.base_flex;
 
+export import :entities.components.base;
+
 export {
+	class Model;
 	namespace pragma {
 		class DLLNETWORK BaseFlexComponent : public BaseEntityComponent, public DynamicMemberRegister {
 		public:

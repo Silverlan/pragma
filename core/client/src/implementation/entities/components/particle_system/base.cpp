@@ -4,24 +4,17 @@
 module;
 
 #include "stdafx_client.h"
-#include "pragma/cxxmodules.hpp"
 #include <mathutil/umath.h>
 #include <glm/gtx/euler_angles.hpp>
 #include <glm/gtx/norm.hpp>
 #include <algorithm>
 #include <sharedutils/util_weak_handle.hpp>
-#include "pragma/entities/components/base_transform_component.hpp"
-#include "pragma/entities/components/base_time_scale_component.hpp"
-#include <pragma/asset/util_asset.hpp>
 #include <sprite_sheet_animation.hpp>
 #include <buffers/prosper_dynamic_resizable_buffer.hpp>
 #include <buffers/prosper_uniform_resizable_buffer.hpp>
 #include <prosper_util.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <sharedutils/util_file.h>
-#include <pragma/entities/entity_component_system_t.hpp>
-#include <pragma/entities/environment/effects/particlesystemdata.h>
-#include <pragma/util/util_game.hpp>
 #include <datasystem_vector.h>
 #include <udm.hpp>
 

@@ -3,9 +3,12 @@
 
 module;
 
-#include "pragma/entities/components/base_entity_component.hpp"
+#include "pragma/networkdefinitions.h"
+#include "mathutil/umath.h"
 
-export module pragma.entities.components.lifeline_link;
+export module pragma.shared:entities.components.lifeline_link;
+
+export import :entities.components.base;
 
 export namespace pragma {
 	class DLLNETWORK LifelineLinkComponent final : public BaseEntityComponent {

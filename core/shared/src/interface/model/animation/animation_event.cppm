@@ -4,6 +4,8 @@
 module;
 
 #include "pragma/networkdefinitions.h"
+#include <string>
+#include <unordered_map>
 #include <mathutil/umath.h>
 
 export module pragma.shared:model.animation.animation_event;

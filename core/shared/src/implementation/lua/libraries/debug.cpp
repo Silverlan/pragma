@@ -3,7 +3,6 @@
 
 module;
 
-#include <scripting/lua/lua.hpp>
 #include <algorithm>
 #ifdef __linux__
 #include <sys/ioctl.h>

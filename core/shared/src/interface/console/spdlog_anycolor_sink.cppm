@@ -8,8 +8,13 @@ module;
 #include <spdlog/pattern_formatter.h>
 #include <spdlog/formatter.h>
 #include <spdlog/fmt/bundled/format.h>
+#ifdef _WIN32
+#include <Windows.h>
+#endif
 
 export module pragma.shared:console.spdlog_anycolor_sink;
+
+import :console.output;
 
 export {
 	// Based on wincolor_sink

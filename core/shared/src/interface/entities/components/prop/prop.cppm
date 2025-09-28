@@ -5,6 +5,6 @@ module;
 
 export module pragma.shared:entities.components.prop;
 
-export import :entities.components.prop.base;
-export import :entities.components.prop.base_dynamic;
-export import :entities.components.prop.base_physics;
+export import :entities.components.props.base;
+export import :entities.components.props.base_dynamic;
+export import :entities.components.props.base_physics;

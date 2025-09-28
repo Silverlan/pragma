@@ -3,11 +3,12 @@
 
 module;
 
-#include "interface/scripting/lua/error_handling.hpp"
 #include <string>
 #include <luasystem.h>
 
-module pragma.scripting.lua;
+module pragma.shared;
+
+import :scripting.lua.error_handling;
 
 static spdlog::logger &LOGGER = pragma::register_logger("lua");
 

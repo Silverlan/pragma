@@ -4,6 +4,7 @@
 #ifndef __LUA_FILE_CONVERTER_HPP__
 #define __LUA_FILE_CONVERTER_HPP__
 
+#include "pragma/networkdefinitions.h"
 #include <luabind/detail/conversion_policies/conversion_policies.hpp>
 #include <memory>
 #ifdef __linux__

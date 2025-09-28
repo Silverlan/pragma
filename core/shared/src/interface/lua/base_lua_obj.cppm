@@ -3,6 +3,9 @@
 
 module;
 
+#include "pragma/networkdefinitions.h"
+#include "pragma/lua/luaapi.h"
+#include <memory>
 
 export module pragma.shared:scripting.lua.base_lua_obj;
 

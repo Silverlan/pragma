@@ -10,6 +10,8 @@ module;
 
 export module pragma.shared:console.find_entities;
 
+export import :physics.raycast;
+
 export {
 	class Game;
 	class BaseEntity;

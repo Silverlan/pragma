@@ -3,6 +3,9 @@
 
 module;
 
+#include "pragma/networkdefinitions.h"
+#include "pragma/lua/luaapi.h"
+#include "mathutil/uvec.h"
 #include "noise/noise.h"
 #include "noiseutils.h"
 

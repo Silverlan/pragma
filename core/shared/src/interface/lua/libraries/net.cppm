@@ -3,8 +3,12 @@
 
 module;
 
+#include "pragma/networkdefinitions.h"
+#include "pragma/lua/luaapi.h"
 
 export module pragma.shared:scripting.lua.libraries.net;
+
+export import :entities.enums;
 
 export namespace Lua {
 	namespace net {

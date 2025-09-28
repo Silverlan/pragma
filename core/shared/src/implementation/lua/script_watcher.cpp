@@ -4,7 +4,6 @@
 module;
 
 #include "fsys/directory_watcher.h"
-#include <scripting/lua/lua.hpp>
 #include <sharedutils/scope_guard.h>
 #include <sharedutils/util_file.h>
 #include <luainterface.hpp>

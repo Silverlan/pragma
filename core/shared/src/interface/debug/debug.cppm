@@ -3,12 +3,15 @@
 
 module;
 
+#include "pragma/networkdefinitions.h"
+#include <string>
+
 export module pragma.shared:debug;
-export import pragma.shared:debug.behavior_tree_node;
-export import pragma.shared:debug.crashdump;
-export import pragma.shared:debug.intel_vtune;
-export import pragma.shared:debug.performance_profiler;
-export import pragma.shared:debug.render_info;
+export import :debug.behavior_tree_node;
+export import :debug.crashdump;
+export import :debug.intel_vtune;
+export import :debug.performance_profiler;
+export import :debug.render_info;
 
 export namespace pragma::debug {
 	DLLNETWORK void open_file_in_zerobrane(const std::string &fileName, uint32_t lineIdx);

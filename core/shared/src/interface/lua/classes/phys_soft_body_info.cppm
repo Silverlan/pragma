@@ -3,8 +3,12 @@
 
 module;
 
+#include "pragma/networkdefinitions.h"
+#include "pragma/lua/luaapi.h"
 
 export module pragma.shared:scripting.lua.classes.phys_soft_body_info;
+
+export import :physics.soft_body_info;
 
 export namespace Lua {
 	namespace PhysSoftBodyInfo {

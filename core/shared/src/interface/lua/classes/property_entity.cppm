@@ -6,6 +6,9 @@ module;
 
 export module pragma.shared:scripting.lua.classes.property_entity;
 
+export import :entities.property;
+export import :scripting.lua.classes.property_generic;
+
 export {
 	// Entity
 	class LEntityPropertyWrapper : public LSimplePropertyWrapper<pragma::EntityProperty, EntityHandle> {

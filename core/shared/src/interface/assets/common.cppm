@@ -13,24 +13,24 @@ export module pragma.shared:assets.common;
 export class NetworkState;
 export class Model;
 export namespace pragma::asset {
-	static constexpr auto FORMAT_MAP_BINARY = "pmap_b";
-	static constexpr auto FORMAT_MAP_ASCII = "pmap";
-	static constexpr auto FORMAT_MAP_LEGACY = "wld";
+	constexpr auto FORMAT_MAP_BINARY = "pmap_b";
+	constexpr auto FORMAT_MAP_ASCII = "pmap";
+	constexpr auto FORMAT_MAP_LEGACY = "wld";
 
-	static constexpr auto FORMAT_MODEL_BINARY = "pmdl_b";
-	static constexpr auto FORMAT_MODEL_ASCII = "pmdl";
-	static constexpr auto FORMAT_MODEL_LEGACY = "wmd";
+	constexpr auto FORMAT_MODEL_BINARY = "pmdl_b";
+	constexpr auto FORMAT_MODEL_ASCII = "pmdl";
+	constexpr auto FORMAT_MODEL_LEGACY = "wmd";
 
-	static constexpr auto FORMAT_PARTICLE_SYSTEM_BINARY = "pptsys_b";
-	static constexpr auto FORMAT_PARTICLE_SYSTEM_ASCII = "pptsys";
-	static constexpr auto FORMAT_PARTICLE_SYSTEM_LEGACY = "wpt";
+	constexpr auto FORMAT_PARTICLE_SYSTEM_BINARY = "pptsys_b";
+	constexpr auto FORMAT_PARTICLE_SYSTEM_ASCII = "pptsys";
+	constexpr auto FORMAT_PARTICLE_SYSTEM_LEGACY = "wpt";
 
-	static constexpr auto FORMAT_MATERIAL_BINARY = Material::FORMAT_MATERIAL_BINARY;
-	static constexpr auto FORMAT_MATERIAL_ASCII = Material::FORMAT_MATERIAL_ASCII;
-	static constexpr auto FORMAT_MATERIAL_LEGACY = Material::FORMAT_MATERIAL_LEGACY;
+	constexpr auto FORMAT_MATERIAL_BINARY = Material::FORMAT_MATERIAL_BINARY;
+	constexpr auto FORMAT_MATERIAL_ASCII = Material::FORMAT_MATERIAL_ASCII;
+	constexpr auto FORMAT_MATERIAL_LEGACY = Material::FORMAT_MATERIAL_LEGACY;
 
-	static constexpr auto FORMAT_SHADER_GRAPH_BINARY = "psg_b";
-	static constexpr auto FORMAT_SHADER_GRAPH_ASCII = "psg";
+	constexpr auto FORMAT_SHADER_GRAPH_BINARY = "psg_b";
+	constexpr auto FORMAT_SHADER_GRAPH_ASCII = "psg";
 
 	enum class Type : uint8_t {
 		Model = 0,

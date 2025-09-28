@@ -6,7 +6,6 @@ module;
 #include "luasystem.h"
 #include <sharedutils/util_file.h>
 #include <sharedutils/util_path.hpp>
-#include <scripting/lua/lua.hpp>
 #include <mathutil/camera.hpp>
 #include <mathutil/umath_frustum.hpp>
 #include <regex>

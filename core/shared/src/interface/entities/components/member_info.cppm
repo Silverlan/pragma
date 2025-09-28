@@ -3,12 +3,16 @@
 
 module;
 
+#include "pragma/networkdefinitions.h"
 #include <mathutil/transform.hpp>
 #include <functional>
 #include <optional>
 #include <typeindex>
+#include "udm.hpp"
 
 export module pragma.shared:entities.member_info;
+
+export import :util.global_string_table;
 
 export {
 	namespace pragma {

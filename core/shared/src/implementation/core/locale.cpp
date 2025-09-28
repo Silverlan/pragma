@@ -5,13 +5,16 @@ module;
 
 #include <fsys/directory_watcher.h>
 #include <fsys/filesystem.h>
+#include "pragma/logging.hpp"
 #include <sharedutils/util_string.h>
 #include <sharedutils/util_path.hpp>
 #include <sharedutils/magic_enum.hpp>
 
-#undef CreateFile
+module pragma.shared;
 
-module pragma.locale;
+import :core.locale;
+
+#undef CreateFile
 
 static std::vector<std::string> g_loadedFiles;
 static std::string g_language;

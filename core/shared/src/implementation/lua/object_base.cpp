@@ -1,7 +1,13 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "luasystem.h"
+
+module pragma.shared;
+
+import :scripting.lua.object_base;
 
 LuaObjectBase::LuaObjectBase() : m_baseLuaObj(nullptr), m_weakRef(nullptr) {}
 LuaObjectBase::LuaObjectBase(const luabind::object &o) { SetLuaObject(o); }

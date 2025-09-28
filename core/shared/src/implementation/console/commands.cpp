@@ -3,11 +3,9 @@
 
 module;
 
-#include <scripting/lua/lua.hpp>
+module pragma.shared;
 
-// import pragma.scripting.lua;
-
-module pragma.console.commands;
+import :commands;
 
 void pragma::console::commands::lua_run(lua_State *l, const std::string &chunkName, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float)
 {

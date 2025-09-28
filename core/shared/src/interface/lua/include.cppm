@@ -1,13 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2025 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-// module;
+module;
 
+#include "pragma/networkdefinitions.h"
+#include "pragma/lua/luaapi.h"
 
-// export module pragma.scripting.lua:include;
+export module pragma.shared:scripting.lua.include;
 
-// export
-namespace pragma::scripting::lua {
+export namespace pragma::scripting::lua {
 	struct DLLNETWORK IncludeResult {
 		Lua::StatusCode statusCode;
 		uint32_t numResults;
@@ -30,6 +31,6 @@ namespace pragma::scripting::lua {
 	DLLNETWORK Lua::StatusCode execute_file(lua_State *l, const std::string &path, std::string *optOutErrMsg = nullptr);
 };
 
-// export {
+export {
 	REGISTER_BASIC_BITWISE_OPERATORS(pragma::scripting::lua::IncludeFlags)
-// }
+}

@@ -3,10 +3,9 @@
 
 module;
 
+#include "pragma/networkdefinitions.h"
 #include <mathutil/umath.h>
-
 #include <vector>
-
 #include <mathutil/glmutil.h>
 #include <sharedutils/functioncallback.h>
 #include <mathutil/umath.h>

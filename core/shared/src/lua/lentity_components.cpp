@@ -4,7 +4,7 @@
 #include <luabind/copy_policy.hpp>
 
 import panima;
-import pragma.entities.components;
+import pragma.shared;
 
 namespace Lua {
 	bool get_bullet_master(BaseEntity &ent);

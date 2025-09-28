@@ -5,6 +5,7 @@
 #define __LUA_ALIAS_CONVERTER_HPP__
 
 #include <luabind/object.hpp>
+#include "pragma/lua/core.hpp"
 
 namespace luabind {
 	template<typename T>

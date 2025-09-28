@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/networkdefinitions.h"
 #include <string>
 
 export module pragma.shared:entities.components.events.key_value;

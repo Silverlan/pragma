@@ -1,12 +1,18 @@
 // SPDX-FileCopyrightText: (c) 2024 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __LUA_UTIL_LOGGING_HPP__
-#define __LUA_UTIL_LOGGING_HPP__
+module;
 
-#include <fmt/core.h>
+#include "pragma/networkdefinitions.h"
+#include "pragma/lua/luaapi.h"
+#include <optional>
+#include <string>
 
-namespace Lua::logging {
+export module pragma.shared:scripting.lua.logging;
+
+export import :core.logging;
+
+export namespace Lua::logging {
 	DLLNETWORK std::string to_string(lua_State *l, int i);
 
 	template<size_t N>
@@ -30,5 +36,3 @@ namespace Lua::logging {
 		Lua::Pop(l, 1);
 	}
 };
-
-#endif

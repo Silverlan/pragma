@@ -4,7 +4,6 @@
 module;
 
 #include "luasystem.h"
-#include <scripting/lua/lua.hpp>
 #include <udm.hpp>
 #include <sharedutils/magic_enum.hpp>
 

@@ -47,4 +47,6 @@ export {
             Object = umath::to_integral(umath::CoordinateSpace::Object),
         };
     };
+
+    enum class LuaEntityType : uint8_t { NetworkLocal = 0u, Shared };
 };

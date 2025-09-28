@@ -3,11 +3,14 @@
 
 module;
 
+#include "pragma/networkdefinitions.h"
 #include <exception>
+#include <memory>
 
 export module pragma.shared:core.engine_init;
 
-import pragma.debug.crashdump;
+import :debug.crashdump;
+import :engine;
 
 export {
 	template<class T>

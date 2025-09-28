@@ -6,7 +6,6 @@ module;
 #include "stdafx_client.h"
 #include "luasystem.h"
 #include "cmaterial.h"
-#include <scripting/lua/lua.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_render_pass.hpp>

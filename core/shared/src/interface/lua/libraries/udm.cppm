@@ -3,6 +3,9 @@
 
 module;
 
+#include "pragma/networkdefinitions.h"
+#include "pragma/lua/luaapi.h"
+#include "pragma/lua/types/udm.hpp"
 #include <udm_types.hpp>
 
 export module pragma.shared:scripting.lua.libraries.udm;

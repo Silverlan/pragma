@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/networkdefinitions.h"
 #include <mathutil/transform.hpp>
 #include <mathutil/color.h>
 #include <optional>

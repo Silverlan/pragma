@@ -10,7 +10,6 @@ module;
 #include <sharedutils/scope_guard.h>
 #include <sharedutils/util_path.hpp>
 #include <luainterface.hpp>
-#include <scripting/lua/lua.hpp>
 #include <luabind/class_info.hpp>
 #include <fsys/ifile.hpp>
 #include <sharedutils/util_markup_file.hpp>

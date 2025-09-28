@@ -3,9 +3,12 @@
 
 module;
 
+#include "pragma/networkdefinitions.h"
+#include "pragma/lua/luaapi.h"
 
 export module pragma.shared:scripting.lua.classes.skeleton;
 
+export import :model.animation.skeleton;
 import panima;
 
 export namespace Lua {

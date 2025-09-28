@@ -3,7 +3,14 @@
 
 module;
 
+#include "pragma/lua/luaapi.h"
+#include "pragma/lua/types/udm.hpp"
+#include "udm.hpp"
+
 export module pragma.shared:scripting.lua.classes.convar;
+
+export import :console.convar;
+export import :entities.components.base_player;
 
 export {
 	namespace Lua::console {

@@ -4,6 +4,7 @@
 module;
 
 #include "pragma/networkdefinitions.h"
+#include "pragma/lua/luaapi.h"
 #include <cinttypes>
 #include <string>
 #include <functional>
@@ -26,7 +27,6 @@ export import :entities.enums;
 export import :entities.components.events.event_info;
 export import :entities.member_info;
 export import :entities.member_type;
-import panima;
 
 export {
 	class BaseEntity;
@@ -216,20 +216,6 @@ export {
 };
 
 export namespace pragma {
-	constexpr bool is_animatable_type(udm::Type type) { return panima::is_animatable_type(type); }
-	constexpr bool is_animatable_type(pragma::ents::EntityMemberType type) { return (umath::to_integral(type) < umath::to_integral(udm::Type::Count)) ? is_animatable_type(static_cast<udm::Type>(type)) : false; }
-	constexpr bool is_valid_component_property_type(udm::Type type) { return is_animatable_type(type) || type == udm::Type::String || type == udm::Type::Transform || type == udm::Type::ScaledTransform; }
-	constexpr bool is_valid_component_property_type(pragma::ents::EntityMemberType type)
-	{
-		static_assert(umath::to_integral(pragma::ents::EntityMemberType::VersionIndex) == 0);
-		return is_valid_component_property_type(static_cast<udm::Type>(type)) || type == pragma::ents::EntityMemberType::Entity || type == pragma::ents::EntityMemberType::MultiEntity || type == pragma::ents::EntityMemberType::ComponentProperty
-		  || type == pragma::ents::EntityMemberType::Element;
-	}
-	template<typename T>
-	concept is_animatable_type_v = is_animatable_type(udm::type_to_enum<T>());
-	template<typename T>
-	concept is_valid_component_property_type_v = is_valid_component_property_type(pragma::ents::member_type_to_enum<T>());
-
 	template<typename TComponent, typename T, auto TSetter, auto TGetter, typename TSpecializationType>
 	    requires(is_valid_component_property_type_v<T> && (std::is_same_v<TSpecializationType, AttributeSpecializationType> || util::is_string<TSpecializationType>::value))
 	static ComponentMemberInfo create_component_member_info(std::string &&name, std::optional<T> defaultValue, TSpecializationType specialization)

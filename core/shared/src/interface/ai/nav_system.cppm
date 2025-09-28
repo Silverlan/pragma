@@ -44,10 +44,10 @@ export {
 
 	namespace pragma {
 		namespace nav {
-			static constexpr uint32_t PNAV_VERSION = 1;
-			static constexpr auto PNAV_IDENTIFIER = "PNAV";
-			static constexpr auto PNAV_EXTENSION_BINARY = "pnav_b";
-			static constexpr auto PNAV_EXTENSION_ASCII = "pnav";
+			constexpr uint32_t PNAV_VERSION = 1;
+			constexpr auto PNAV_IDENTIFIER = "PNAV";
+			constexpr auto PNAV_EXTENSION_BINARY = "pnav_b";
+			constexpr auto PNAV_EXTENSION_ASCII = "pnav";
 			enum class PolyFlags : uint16_t {
 				None = 0u,
 				Walk = 1u,

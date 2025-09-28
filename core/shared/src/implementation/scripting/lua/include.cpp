@@ -3,13 +3,13 @@
 
 module;
 
-#include "interface/scripting/lua/include.hpp"
-#include "interface/scripting/lua/error_handling.hpp"
 #include <sharedutils/util_path.hpp>
 #include <luainterface.hpp>
 #include <stack>
 
-module pragma.scripting.lua;
+module pragma.shared;
+
+import :scripting.lua.include;
 
 static pragma::scripting::lua::IncludeResult include_file(lua_State *l, const util::Path &fileName, pragma::scripting::lua::IncludeFlags flags, Lua::IncludeCache *optIncludeCache = nullptr);
 static pragma::scripting::lua::IncludeResult include_directory(lua_State *l, const util::Path &fullLuaPath, const util::Path &relLuaPath, pragma::scripting::lua::IncludeFlags flags, Lua::IncludeCache *optIncludeCache = nullptr)

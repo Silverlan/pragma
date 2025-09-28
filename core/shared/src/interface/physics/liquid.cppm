@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/networkdefinitions.h"
 
 export module pragma.shared:physics.liquid;
 

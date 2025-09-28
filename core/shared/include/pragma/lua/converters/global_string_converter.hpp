@@ -4,6 +4,7 @@
 #ifndef __LUA_GLOBAL_STRING_CONVERTER_HPP__
 #define __LUA_GLOBAL_STRING_CONVERTER_HPP__
 
+#include "pragma/networkdefinitions.h"
 #include <luabind/detail/conversion_policies/native_converter.hpp>
 
 namespace luabind {

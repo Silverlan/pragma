@@ -3,6 +3,8 @@
 
 module;
 
+#include "pragma/networkdefinitions.h"
+#include "mathutil/eulerangles.h"
 #include <fsys/filesystem.h>
 #include <mathutil/glmutil.h>
 #include "luasystem.h"
@@ -44,8 +46,6 @@ export {
 		bool Eof();
 		void IgnoreComments(std::string start = "//", std::string end = "\n");
 	};
-
-	lua_registercheck(File, LFile);
 
 	template<class T>
 	void LFile::Write(T t)

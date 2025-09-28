@@ -18,9 +18,9 @@ export import pragma.doc;
 
 export namespace Lua {
 	namespace doc {
-		static auto constexpr FILE_LOCATION = "doc/lua/";
-		static auto constexpr FILE_EXTENSION_ASCII = "ldoc";
-		static auto constexpr FILE_EXTENSION_BINARY = "ldoc_b";
+		auto constexpr FILE_LOCATION = "doc/lua/";
+		auto constexpr FILE_EXTENSION_ASCII = "ldoc";
+		auto constexpr FILE_EXTENSION_BINARY = "ldoc_b";
 		DLLNETWORK bool load_documentation_file(const std::string &fileName);
 		DLLNETWORK void clear();
 		DLLNETWORK void reset();

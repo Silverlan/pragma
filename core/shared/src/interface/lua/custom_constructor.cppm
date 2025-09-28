@@ -6,6 +6,7 @@ module;
 #include <luabind/lua_argument_proxy.hpp>
 #include <luabind/detail/object_rep.hpp>
 #include <luabind/function.hpp>
+#include "sharedutils/util.h"
 
 export module pragma.shared:scripting.lua.custom_constructor;
 

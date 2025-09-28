@@ -11,6 +11,8 @@ module;
 
 export module pragma.shared:entities.net_event_manager;
 
+export import :entities.enums;
+
 export namespace pragma {
 	class DLLNETWORK NetEventManager {
 	  public:

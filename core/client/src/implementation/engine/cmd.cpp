@@ -11,7 +11,6 @@ module;
 #include <texturemanager/texture.h>
 #include <buffers/prosper_buffer.hpp>
 #include <buffers/prosper_dynamic_resizable_buffer.hpp>
-#include <scripting/lua/lua.hpp>
 #include <image/prosper_render_target.hpp>
 #include <shader/prosper_shader_blur.hpp>
 #include <prosper_window.hpp>

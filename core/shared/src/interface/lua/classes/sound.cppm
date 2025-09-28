@@ -3,9 +3,12 @@
 
 module;
 
-#include <mathutil/glmutil.h>
+#include "pragma/networkdefinitions.h"
+#include "pragma/lua/luaapi.h"
 
 export module pragma.shared:scripting.lua.classes.sound;
+
+export import :audio.sound;
 
 export {
 	namespace Lua {

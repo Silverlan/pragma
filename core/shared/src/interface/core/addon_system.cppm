@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/networkdefinitions.h"
 #include <vector>
 #include <string>
 #include "sharedutils/util_version.h"

@@ -5,9 +5,9 @@ module;
 
 export module pragma.shared:entities.components.trigger;
 
-export import :entities.components.trigger.base_gravity;
-export import :entities.components.trigger.base_hurt;
-export import :entities.components.trigger.base_push;
-export import :entities.components.trigger.base_remove;
-export import :entities.components.trigger.base_teleport;
-export import :entities.components.trigger.base_touch;
+export import :entities.components.triggers.base_gravity;
+export import :entities.components.triggers.base_hurt;
+export import :entities.components.triggers.base_push;
+export import :entities.components.triggers.base_remove;
+export import :entities.components.triggers.base_teleport;
+export import :entities.components.triggers.base_touch;

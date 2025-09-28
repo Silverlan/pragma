@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 module;
+
+#include "pragma/networkdefinitions.h"
+#include "pragma/lua/luaapi.h"
 #include <sharedutils/functioncallback.h>
 
 export module pragma.shared:scripting.lua.classes.timer;

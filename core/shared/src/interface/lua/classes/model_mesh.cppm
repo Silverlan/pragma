@@ -3,9 +3,14 @@
 
 module;
 
+#include "pragma/networkdefinitions.h"
+#include "pragma/lua/luaapi.h"
 
 export module pragma.shared:scripting.lua.classes.model_mesh;
 
+export import :model.model_mesh;
+
+export class Model;
 export namespace Lua {
 	namespace ModelMesh {
 		DLLNETWORK void register_class(luabind::class_<::ModelMesh> &classDef);

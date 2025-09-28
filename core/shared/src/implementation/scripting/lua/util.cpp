@@ -3,10 +3,11 @@
 
 module;
 
-#include "interface/scripting/lua/util.hpp"
-#include "interface/scripting/lua/error_handling.hpp"
+#include "pragma/lua/luaapi.h"
 
-module pragma.scripting.lua;
+module pragma.shared;
+
+import :scripting.lua.util;
 
 static int32_t traceback(lua_State *l)
 {

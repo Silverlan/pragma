@@ -3,6 +3,8 @@
 
 module;
 
+#include "pragma/networkdefinitions.h"
+#include "pragma/lua/luaapi.h"
 #include <cinttypes>
 
 export module pragma.shared:entities.components.events.event;

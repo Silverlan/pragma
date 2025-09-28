@@ -3,8 +3,13 @@
 
 module;
 
+#include "pragma/networkdefinitions.h"
+#include "pragma/lua/luaapi.h"
+#include "mathutil/uvec.h"
 
 export module pragma.shared:scripting.lua.libraries.intersect;
+
+export import :model;
 
 export namespace Lua {
 	namespace intersect {

@@ -3,10 +3,19 @@
 
 module;
 
+#include "pragma/networkdefinitions.h"
+#include "pragma/lua/luaapi.h"
 #include <mathutil/uvec.h>
 #include <sharedutils/util_parallel_job.hpp>
 
 export module pragma.shared:scripting.lua.libraries.util;
+
+export import :game.bullet_info;
+export import :game.damage_info;
+export import :physics.raycast;
+export import :scripting.lua.classes.property;
+export import :util.any;
+export import :util.splash_damage_info;
 
 export namespace Lua {
 	namespace global {

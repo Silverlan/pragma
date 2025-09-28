@@ -1,15 +1,18 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include <fsys/filesystem.h>
 #include "luasystem_file.h"
-#include <scripting/lua/lua.hpp>
 #include <luainterface.hpp>
 #include <luabind/exception_handler.hpp>
 #include <sharedutils/util_string.h>
 #include <sharedutils/util_file.h>
 
-//import pragma.scripting.lua;
+module pragma.shared;
+
+import :game.game;
 
 Lua::Interface &Game::GetLuaInterface() { return *m_lua; }
 lua_State *Game::GetLuaState() { return (m_lua != nullptr) ? m_lua->GetState() : nullptr; }

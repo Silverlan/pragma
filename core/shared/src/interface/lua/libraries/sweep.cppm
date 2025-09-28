@@ -3,6 +3,8 @@
 
 module;
 
+#include "pragma/networkdefinitions.h"
+#include "mathutil/uvec.h"
 
 export module pragma.shared:scripting.lua.libraries.sweep;
 

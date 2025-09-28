@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/networkdefinitions.h"
 #include <spdlog/spdlog.h>
 #include <mathutil/umath.h>
 #include <sharedutils/util_clock.hpp>

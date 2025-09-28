@@ -3,7 +3,6 @@
 
 module;
 
-#include <scripting/lua/lua.hpp>
 #include <sharedutils/util_uri.hpp>
 
 module pragma.shared;

@@ -3,6 +3,8 @@
 
 module;
 
+#include "pragma/lua/luaapi.h"
+#include "pragma/lua/luafunction.h"
 #include <sharedutils/property/util_property.hpp>
 #include <sharedutils/property/util_property_color.hpp>
 #include <sharedutils/property/util_property_vector.h>
@@ -10,6 +12,11 @@ module;
 #include <sharedutils/property/util_property_matrix.hpp>
 #include <sharedutils/property/util_property_euler_angles.hpp>
 #include <sharedutils/property/util_property_transform.hpp>
+
+export module pragma.shared:scripting.lua.classes.property;
+
+import :entities.property;
+import :scripting.lua.classes.property_generic;
 
 #define DEFINE_LUA_NUMBER_PROPERTY(TYPE, UNDERLYING_TYPE)                                                                                                                                                                                                                                        \
 	using L##TYPE##Property = TLNumberPropertyWrapper<util::TYPE##Property, UNDERLYING_TYPE>;                                                                                                                                                                                                    \
@@ -45,8 +52,6 @@ module;
 	{                                                                                                                                                                                                                                                                                            \
 		return str << **v;                                                                                                                                                                                                                                                                       \
 	}
-
-export module pragma.shared:scripting.lua.classes.property;
 
 export {
 	DEFINE_LUA_NUMBER_PROPERTY(Int8, int8_t);

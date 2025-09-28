@@ -4,10 +4,11 @@
 #include <sharedutils/util.h>
 #include <sharedutils/util_file.h>
 #include <luabind/exception_handler.hpp>
-#include <scripting/lua/lua.hpp>
 #include <stack>
 
 // import pragma.scripting.lua;
+
+import pragma.shared;
 
 static void print_lua_error_message(lua_State *l, const std::string &msg) { Con::cerr << Lua::GetErrorMessagePrefix(l) << Con::prefix << Con::PREFIX_LUA << Con::prefix << msg << Con::endl; }
 

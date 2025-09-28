@@ -3,11 +3,11 @@
 
 module;
 
-#include <scripting/lua/lua.hpp>
+#include "pragma/lua/luaapi.h"
 
-//import pragma.scripting.lua;
+module pragma.shared;
 
-module pragma.console.commands;
+import :commands;
 
 // We have to access some members of luabind::detail::class_rep which are inaccessable,
 // so we'll force them to be accessable.

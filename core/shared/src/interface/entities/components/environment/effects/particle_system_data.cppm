@@ -35,9 +35,9 @@ export {
 
 	namespace pragma {
 		namespace asset {
-			static constexpr uint32_t PPTSYS_FORMAT_VERSION = 1u;
-			static constexpr auto PPTSYS_COLLECTION_IDENTIFIER = "PPTSYSCOLLECTION";
-			static constexpr auto PPTSYS_IDENTIFIER = "PPTSYS";
+			constexpr uint32_t PPTSYS_FORMAT_VERSION = 1u;
+			constexpr auto PPTSYS_COLLECTION_IDENTIFIER = "PPTSYSCOLLECTION";
+			constexpr auto PPTSYS_IDENTIFIER = "PPTSYS";
 			DLLNETWORK bool save_particle_system(const CParticleSystemData &data, udm::AssetDataArg outData, std::string &outErr);
 			DLLNETWORK bool save_particle_system(const std::string &name, const std::unordered_map<std::string, CParticleSystemData> &particles, const std::string &rootPath = "");
 			DLLNETWORK bool save_particle_system(VFilePtrReal &f, const std::unordered_map<std::string, CParticleSystemData> &particles, const std::string &rootPath = "");

@@ -2,6 +2,10 @@
 // SPDX-License-Identifier: MIT
 
 
+#include "pragma/lua/luaapi.h"
+
+import pragma.shared;
+
 LuaBaseEntityIterator::LuaBaseEntityIterator(const BaseEntityIterator &iterator) : m_iterator(iterator) {}
 LuaBaseEntityIterator::LuaBaseEntityIterator(const LuaBaseEntityIterator &other) : m_iterator(other.m_iterator) {}
 LuaBaseEntityIterator &LuaBaseEntityIterator::operator++()

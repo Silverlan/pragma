@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/networkdefinitions.h"
 #include <typeindex>
 #include <string>
 #include <optional>

@@ -1,11 +1,13 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+#include "pragma/networkdefinitions.h"
+#include "pragma/lua/luaapi.h"
 #include <luainterface.hpp>
 #include <luabind/class_info.hpp>
 #include <luabind/function_introspection.hpp>
 
-import pragma.debug.crashdump;
+import pragma.shared;
 
 static auto s_bExtendedModules = false;
 void Lua::set_extended_lua_modules_enabled(bool b) { s_bExtendedModules = b; }

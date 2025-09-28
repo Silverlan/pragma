@@ -4,6 +4,8 @@
 module;
 
 #include "pragma/networkdefinitions.h"
+#include <string>
+#include <unordered_map>
 
 export module pragma.shared:entities.components.dynamic_member_register;
 

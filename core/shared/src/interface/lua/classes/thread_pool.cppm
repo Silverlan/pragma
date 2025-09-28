@@ -3,8 +3,12 @@
 
 module;
 
+#include "pragma/networkdefinitions.h"
+#include "pragma/lua/luaapi.h"
 
 export module pragma.shared:scripting.lua.classes.thread_pool;
+
+export import :util.thread_pool;
 
 export namespace pragma::lua {
 	struct DLLNETWORK LuaThreadTask {

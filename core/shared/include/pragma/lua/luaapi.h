@@ -4,6 +4,8 @@
 #ifndef __LUAAPI_H__
 #define __LUAAPI_H__
 
+#include "pragma/networkdefinitions.h"
+
 // Has to be included before luabind!
 #include "lua_handles.hpp"
 
@@ -12,6 +14,7 @@
 #include <luabind/operator.hpp>
 #include <luabind/pseudo_traits.hpp>
 #include <luabind/make_function_signature.hpp>
+#include "pragma/lua/ldefinitions.h"
 
 namespace luabind {
 	// Additional types for overload resolution

@@ -3,18 +3,25 @@
 
 module;
 
+#include "pragma/networkdefinitions.h"
 #include <sharedutils/util_shared_handle.hpp>
+#include "mathutil/umath.h"
 #include <memory>
 #include <vector>
+#include <string>
 #include <typeindex>
 #include "sharedutils/util_event_reply.hpp"
 
 export module pragma.shared:entities.system;
 
+export import :entities.components.events.event;
+export import :entities.components.handle;
 export import :entities.enums;
 
 export {
 	namespace pragma {
+		class BaseEntity;
+		class EntityComponentManager;
 		class DLLNETWORK BaseEntityComponentSystem {
 		public:
 			enum class StateFlags : uint32_t {

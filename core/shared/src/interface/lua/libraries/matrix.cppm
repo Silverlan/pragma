@@ -3,6 +3,9 @@
 
 module;
 
+#include "pragma/networkdefinitions.h"
+#include "pragma/lua/luaapi.h"
+#include "mathutil/eulerangles.h"
 #include <mathutil/glmutil.h>
 
 #define LUA_MATRIX_MEMBERS_DEC(type)                                                                                                                                                                                                                                                             \

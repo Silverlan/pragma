@@ -3,7 +3,10 @@
 
 module;
 
+#include "pragma/networkdefinitions.h"
+#include "pragma/lua/luaapi.h"
 #include <system_error>
+#include <memory>
 
 #undef GetMessage
 

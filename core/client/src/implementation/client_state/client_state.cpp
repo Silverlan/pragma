@@ -10,7 +10,6 @@ module;
 #include <texturemanager/texturemanager.h>
 #include <luasystem_file.h>
 #include <image/prosper_render_target.hpp>
-#include <scripting/lua/lua.hpp>
 #include <luainterface.hpp>
 #include <alsoundsystem.hpp>
 #include <shader/prosper_pipeline_loader.hpp>

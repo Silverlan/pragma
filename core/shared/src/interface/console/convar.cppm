@@ -32,6 +32,7 @@ export import :console.enums;
 export {
 	class NetworkState;
 	class CVarHandler;
+	class ConVarMap;
 
 	using ConVarValue = std::unique_ptr<void, void (*)(void *)>;
 	namespace console {

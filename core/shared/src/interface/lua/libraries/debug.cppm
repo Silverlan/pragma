@@ -3,8 +3,12 @@
 
 module;
 
+#include "pragma/networkdefinitions.h"
+#include "pragma/lua/luaapi.h"
 
 export module pragma.shared:scripting.lua.libraries.debug;
+
+export import :entities.components.base_ai;
 
 export namespace Lua {
 	namespace debug {

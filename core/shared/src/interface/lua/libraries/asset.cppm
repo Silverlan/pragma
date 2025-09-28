@@ -3,9 +3,13 @@
 
 module;
 
+#include "pragma/networkdefinitions.h"
+#include "pragma/lua/luaapi.h"
 #include <string>
 
 export module pragma.shared:scripting.lua.libraries.asset;
+
+export import :assets.common;
 
 export namespace Lua {
 	namespace asset {

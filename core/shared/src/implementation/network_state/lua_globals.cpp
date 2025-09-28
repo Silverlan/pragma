@@ -6,7 +6,6 @@ module;
 #include "luasystem.h"
 #include <fsys/filesystem.h>
 #include "noise/noise.h"
-#include <scripting/lua/lua.hpp>
 #include <sharedutils/util_enum.h>
 #include <luainterface.hpp>
 

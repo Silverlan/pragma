@@ -91,4 +91,17 @@ export {
 	};
 	REGISTER_BASIC_BITWISE_OPERATORS(util::ConsoleColorFlags);
 	REGISTER_BASIC_BITWISE_OPERATORS(util::ConsoleDecoratorFlags);
+
+	namespace Con {
+		enum class MessageFlags : uint8_t {
+			None = 0u,
+			Generic = 1u,
+			Warning = Generic << 1u,
+			Error = Warning << 1u,
+			Critical = Error << 1u,
+
+			ServerSide = Critical << 1u,
+			ClientSide = ServerSide << 1u
+		};
+	};
 };

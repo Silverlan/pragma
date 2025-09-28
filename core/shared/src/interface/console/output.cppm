@@ -31,21 +31,16 @@ export module pragma.shared:console.output;
 export import :console.enums;
 
 export {
+	namespace Con {
+		class c_crit;
+	};
+	template<class T>
+	Con::c_crit &operator<<(Con::c_crit &con, const T &t);
+
 	template<class T>
 	Con::c_crit &operator<<(Con::c_crit &con, const T &t);
 
 	namespace Con {
-		enum class MessageFlags : uint8_t {
-			None = 0u,
-			Generic = 1u,
-			Warning = Generic << 1u,
-			Error = Warning << 1u,
-			Critical = Error << 1u,
-
-			ServerSide = Critical << 1u,
-			ClientSide = ServerSide << 1u
-		};
-
 		namespace detail {
 			extern DLLNETWORK std::atomic<::util::LogSeverity> currentLevel;
 			extern DLLNETWORK std::function<void(const std::string_view &, Con::MessageFlags, const Color *)> outputCallback;

@@ -3,8 +3,11 @@
 
 module;
 
+#include "pragma/networkdefinitions.h"
 
 export module pragma.shared:entities.components.point.base_target;
+
+export import :entities.components.base;
 
 export namespace pragma {
 	class DLLNETWORK BasePointTargetComponent : public BaseEntityComponent {

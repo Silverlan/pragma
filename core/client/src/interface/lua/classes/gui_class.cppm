@@ -4,7 +4,6 @@
 module;
 
 #include "luasystem.h"
-#include <scripting/lua/lua.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_render_pass.hpp>

@@ -3,8 +3,9 @@
 
 module;
 
+#include "pragma/networkdefinitions.h"
 
-module pragma.shared
+module pragma.shared;
 
 import :input.enums;
 import pragma.locale;

@@ -3,8 +3,16 @@
 
 module;
 
+#include "pragma/networkdefinitions.h"
+#include "pragma/lua/luaapi.h"
+#include "pragma/lua/lua_entity_iterator.hpp"
 
 export module pragma.shared:scripting.lua.libraries.ents;
+
+export import :console.output;
+export import :entities.base_entity;
+export import :game.enums;
+export import :physics.shape;
 
 export namespace Lua {
 	namespace ents {

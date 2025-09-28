@@ -1,15 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2025 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-// module;
+module;
 
+#include "pragma/networkdefinitions.h"
 #include <string>
 #include <luasystem.h>
 
-// export module pragma.scripting.lua:error_handling;
+export module pragma.shared:scripting.lua.error_handling;
 
-// export
-namespace pragma::scripting::lua {
+export namespace pragma::scripting::lua {
 	enum class ErrorType : uint8_t { LoadError = 0, RuntimeError };
 	// Note: In the case of a load error, optFilename will be assumed to be the file that failed to load
 	DLLNETWORK std::string format_error_message(lua_State *l, const std::string &msg, Lua::StatusCode statusCode, const std::string *optFilename = nullptr, ErrorType errType = ErrorType::RuntimeError);

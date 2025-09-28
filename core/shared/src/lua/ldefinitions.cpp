@@ -1,11 +1,11 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include <scripting/lua/lua.hpp>
 #include <stack>
+#include "pragma/lua/luaapi.h"
 #include <sharedutils/util_file.h>
 
-// import pragma.scripting.lua;
+import pragma.shared;
 
 static void Lua::TypeError(const luabind::object &o, Type type)
 {

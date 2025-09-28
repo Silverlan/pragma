@@ -4,6 +4,8 @@
 #ifndef __LUAFUNCTION_H__
 #define __LUAFUNCTION_H__
 
+#include "pragma/networkdefinitions.h"
+#include "pragma/lua/luaapi.h"
 #include <memory>
 #include <string>
 

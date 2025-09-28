@@ -3,9 +3,11 @@
 
 module;
 
+#include "pragma/networkdefinitions.h"
+#include "pragma/lua/luaapi.h"
 
 export module pragma.shared:scripting.lua.classes.bullet_info;
 
 export namespace Lua {
-	DLLNETWORK void register_bullet_info(luabind::module_ &gameMod)
+	DLLNETWORK void register_bullet_info(luabind::module_ &gameMod);
 };

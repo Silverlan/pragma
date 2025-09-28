@@ -3,6 +3,10 @@
 
 module;
 
+#include "pragma/networkdefinitions.h"
+#include "pragma/lua/luaapi.h"
+#include "mathutil/eulerangles.h"
+#include "mathutil/vertex.hpp"
 #include <mathutil/glmutil.h>
 
 export module pragma.shared:scripting.lua.classes.vector;

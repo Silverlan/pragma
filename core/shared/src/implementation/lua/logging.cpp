@@ -1,6 +1,11 @@
 // SPDX-FileCopyrightText: (c) 2024 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
+module pragma.shared;
+
+import :core.logging;
 
 std::string Lua::logging::to_string(lua_State *l, int i)
 {

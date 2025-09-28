@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/networkdefinitions.h"
 #include <mathutil/uvec.h>
 #include <limits>
 

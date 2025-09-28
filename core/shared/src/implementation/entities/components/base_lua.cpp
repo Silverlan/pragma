@@ -1,10 +1,16 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include <sharedutils/scope_guard.h>
 #include <sharedutils/datastream.h>
 #include <sharedutils/netpacket.hpp>
 #include <udm.hpp>
+
+module pragma.shared;
+
+import :entities.components.base_lua;
 
 #define ENABLE_CUSTOM_SETTER_GETTER 0
 

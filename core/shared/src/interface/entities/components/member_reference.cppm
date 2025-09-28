@@ -3,12 +3,18 @@
 
 module;
 
+#include "pragma/networkdefinitions.h"
 #include <string>
 #include <optional>
 
 export module pragma.shared:entities.member_reference;
 
+export import :entities.enums;
+export import :entities.member_info;
+
 export namespace pragma {
+    class BaseEntityComponent;
+    class EntityComponentManager;
 	struct DLLNETWORK ComponentMemberReference {
 		static std::optional<ComponentMemberReference> Create(BaseEntityComponent &component, pragma::ComponentMemberIndex index);
 		static std::optional<ComponentMemberReference> Create(const EntityComponentManager &manager, ComponentId componentId, pragma::ComponentMemberIndex index);

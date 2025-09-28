@@ -3,6 +3,9 @@
 
 module;
 
+#include "pragma/networkdefinitions.h"
+#include "pragma/lua/luaapi.h"
+#include "material.h"
 
 export module pragma.shared:scripting.lua.classes.material;
 

@@ -3,7 +3,12 @@
 
 #ifndef __LDEFINITIONS_H__
 #define __LDEFINITIONS_H__
+
 #include <sharedutils/util_shared_handle.hpp>
+#include "sharedutils/util_string.h"
+#include "sharedutils/util.h"
+#include <type_traits>
+
 #define luaL_checkboolean(L, n) (luaL_checktype(L, (n), LUA_TBOOLEAN))
 #define luaL_checkfunction(L, n) (luaL_checktype(L, (n), LUA_TFUNCTION))
 #define luaL_checklightuserdata(L, n) (luaL_checktype(L, (n), LUA_TLIGHTUSERDATA))

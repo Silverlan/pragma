@@ -3,7 +3,6 @@
 
 module;
 
-#include "crashdump_helper.hpp"
 #include <fsys/filesystem.h>
 #include <sharedutils/util_debug.h>
 #include <sharedutils/util_clock.hpp>
@@ -11,15 +10,18 @@ module;
 #include <sharedutils/util_file.h>
 #include <exception>
 #ifdef _WIN32
+#include <Windows.h>
 #include <tchar.h>
 #include <signal.h>
 #else
 #include <signal.h>
 #include <execinfo.h>
 #endif
+#include "crashdump_helper.hpp"
 
-module pragma.debug.crashdump;
+module pragma.shared;
 
+import :debug.crashdump;
 import util_zip;
 import pragma.locale;
 

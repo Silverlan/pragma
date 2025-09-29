@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include <vector>
 #include <atomic>
 

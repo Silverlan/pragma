@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include <shader/prosper_shader.hpp>
 
 export module pragma.client:rendering.shaders.world_water_surface_sum_edges;

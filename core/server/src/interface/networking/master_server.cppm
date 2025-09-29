@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/serverdefinitions.h"
 #include <sharedutils/util_library.hpp>
 #include <memory>
 #include <vector>

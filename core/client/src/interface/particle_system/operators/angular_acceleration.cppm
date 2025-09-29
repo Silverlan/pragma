@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include <mathutil/umath.h>
 
 export module pragma.client:particle_system.operator_angular_acceleration;

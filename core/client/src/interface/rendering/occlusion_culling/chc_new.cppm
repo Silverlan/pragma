@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include <sharedutils/util_weak_handle.hpp>
 #include <queue>
 #include <vector>

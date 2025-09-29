@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include <vector>
 
 export module pragma.client:rendering.entity_mesh_info;

@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include <string>
 #include <unordered_map>
 #include <mathutil/umath.h>

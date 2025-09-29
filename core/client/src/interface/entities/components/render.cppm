@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include "buffers/prosper_uniform_resizable_buffer.hpp"
 #include "prosper_descriptor_set_group.hpp"
 #include "buffers/prosper_buffer.hpp"

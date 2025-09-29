@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include <cmaterialmanager.h>
 #include <shader/prosper_shader.hpp>
 

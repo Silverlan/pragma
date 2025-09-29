@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include <string>
 
 export module pragma.client:util.smoke_trail;

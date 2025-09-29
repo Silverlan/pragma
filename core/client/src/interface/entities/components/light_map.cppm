@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include "buffers/prosper_dynamic_resizable_buffer.hpp"
 #include <cmaterial_manager2.hpp>
 #include <buffers/prosper_buffer.hpp>

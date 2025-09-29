@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include <alsound_source.hpp>
 
 export module pragma.client:entities.components.audio.dsp.base;

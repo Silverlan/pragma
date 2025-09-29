@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include "matsysdefinitions.h"
 #include <texturemanager/texturemanager.h>
 

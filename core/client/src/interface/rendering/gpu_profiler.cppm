@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include <queries/prosper_pipeline_statistics_query.hpp>
 #include <array>
 #include <set>

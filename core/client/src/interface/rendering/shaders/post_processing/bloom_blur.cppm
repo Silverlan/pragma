@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <shader/prosper_shader_blur.hpp>
 

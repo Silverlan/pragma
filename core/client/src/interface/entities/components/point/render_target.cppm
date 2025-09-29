@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include <texturemanager/texture.h>
 
 export module pragma.client:entities.components.point_render_target;

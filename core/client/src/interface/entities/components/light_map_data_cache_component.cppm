@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "pragma/clientdefinitions.h"
 
 
 export module pragma.client:entities.components.light_map_data_cache;

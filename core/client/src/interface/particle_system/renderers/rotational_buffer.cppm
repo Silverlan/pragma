@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include "buffers/prosper_buffer.hpp"
 
 export module pragma.client:particle_system.renderer_rotational_buffer;

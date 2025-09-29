@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include "luasystem.h"
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_command_buffer.hpp>

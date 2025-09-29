@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include <mathutil/plane.hpp>
 
 export module pragma.client:entities.components.lights.point;

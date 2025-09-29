@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include "buffers/prosper_dynamic_resizable_buffer.hpp"
 #include "sprite_sheet_animation.hpp"
 #include <mathutil/transform.hpp>

@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include <udm.hpp>
 
 export module pragma.client:rendering.material_property_block;

@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/serverdefinitions.h"
 #include "sharedutils/netpacket.hpp"
 #include <sharedutils/util_weak_handle.hpp>
 

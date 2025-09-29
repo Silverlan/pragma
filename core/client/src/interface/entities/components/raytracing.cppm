@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include <material_descriptor_array.hpp>
 #include <shader/prosper_descriptor_array_manager.hpp>
 #include <buffers/prosper_buffer.hpp>

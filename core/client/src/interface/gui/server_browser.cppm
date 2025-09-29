@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include "wmserverdata.h"
 #include <networkmanager/udp_handler/udp_message_dispatcher.h>
 

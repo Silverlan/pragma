@@ -11,6 +11,7 @@ export namespace Shader {
 
 // prosper TODO
 #if 0
+#include "pragma/clientdefinitions.h"
 #include "c_shader_particle_blob.h"
 #include <cmaterial.h>
 

@@ -4,6 +4,7 @@
 module;
 
 
+#include "pragma/clientdefinitions.h"
 #include <unordered_set>
 #include <prosper_swap_command_buffer.hpp>
 #include <mathutil/plane.hpp>

@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include "alsound_buffer.hpp"
 #include "image/prosper_render_target.hpp"
 

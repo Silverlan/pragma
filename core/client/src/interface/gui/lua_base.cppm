@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include <prosper_prepared_command_buffer.hpp>
 
 #undef DrawState

@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/serverdefinitions.h"
 #include <sharedutils/functioncallback.h>
 
 export module pragma.server.ai.tasks.play_animation;

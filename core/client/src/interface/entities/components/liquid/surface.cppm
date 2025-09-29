@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include <cmaterial.h>
 #include <image/prosper_texture.hpp>
 #include <buffers/prosper_buffer.hpp>

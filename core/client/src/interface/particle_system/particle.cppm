@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include <mathutil/glmutil.h>
 #include <mathutil/color.h>
 #include <random>

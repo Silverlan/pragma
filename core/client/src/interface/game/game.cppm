@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include "alsound_effect.hpp"
 #include "alsound_effect.hpp"
 #include <cmaterial.h>

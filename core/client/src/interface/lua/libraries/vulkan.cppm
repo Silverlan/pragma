@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include <prosper_util.hpp>
 #include <prosper_prepared_command_buffer.hpp>
 #include <prosper_command_buffer.hpp>

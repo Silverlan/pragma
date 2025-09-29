@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/serverdefinitions.h"
 #include "sharedutils/netpacket.hpp"
 
 import pragma.server.entities.components.entity;

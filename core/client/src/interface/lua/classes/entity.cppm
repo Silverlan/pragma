@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include <mathutil/glmutil.h>
 
 export module pragma.client:scripting.lua.classes.entity;

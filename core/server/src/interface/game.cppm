@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/serverdefinitions.h"
 #include <udm.hpp>
 #include <vector>
 #include <unordered_map>

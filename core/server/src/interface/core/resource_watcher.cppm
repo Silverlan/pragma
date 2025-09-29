@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "pragma/serverdefinitions.h"
 
 
 export module pragma.server.core.resource_watcher;

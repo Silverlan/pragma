@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include <mathutil/umath.h>
 
 export module pragma.client:gui.slider;

@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include <mathutil/vertex.hpp>
 
 export module pragma.client:entities.components.env_decal;

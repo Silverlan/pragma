@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/serverdefinitions.h"
 #include "sharedutils/netpacket.hpp"
 #include <cinttypes>
 #include <vector>

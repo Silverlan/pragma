@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include <optional>
 
 export module pragma.client:entities.components.weapon;

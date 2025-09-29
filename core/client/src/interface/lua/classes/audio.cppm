@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include "alsoundsystem.hpp"
 #include "alsound_effect.hpp"
 #include "alsound_buffer.hpp"

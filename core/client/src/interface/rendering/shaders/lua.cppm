@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include <shader/prosper_shader_base_image_processing.hpp>
 #include <prosper_prepared_command_buffer.hpp>
 

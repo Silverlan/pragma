@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/serverdefinitions.h"
 #include <servermanager/interface/sv_nwm_manager.hpp>
 #include <servermanager/interface/sv_nwm_serverclient.hpp>
 #include <networkmanager/udp_handler/udp_message_dispatcher.h>

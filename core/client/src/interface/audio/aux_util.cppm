@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include "alsound_effect.hpp"
 #include <udm.hpp>
 #include <vector>

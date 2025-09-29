@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include <prosper_util.hpp>
 
 export module pragma.client:gui.debug_depth_texture;

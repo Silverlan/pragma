@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include "prosper_descriptor_set_group.hpp"
 
 export module pragma.client:particle_system.renderer_model;

@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include <sharedutils/util_library.hpp>
 #include <prosper_context.hpp>
 #include <unordered_set>

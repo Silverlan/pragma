@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "pragma/clientdefinitions.h"
 
 
 #define ENABLE_BLOB_DEPTH_TEST 0

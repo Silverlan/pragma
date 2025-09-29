@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include <buffers/prosper_dynamic_resizable_buffer.hpp>
 #include <sharedutils/util_hash.hpp>
 

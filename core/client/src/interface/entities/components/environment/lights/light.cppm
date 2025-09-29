@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include "buffers/prosper_uniform_resizable_buffer.hpp"
 
 export module pragma.client:entities.components.lights.light;

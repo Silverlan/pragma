@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include <sharedutils/util_clock.hpp>
 #include "image/prosper_render_target.hpp"
 #include "queries/prosper_timer_query.hpp"

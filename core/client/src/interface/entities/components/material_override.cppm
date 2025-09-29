@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include "cmaterial.h"
 #include <material_manager2.hpp>
 #include <queue>

@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include <cmaterial.h>
 
 export module pragma.client:entities.components.water_surface;

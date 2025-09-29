@@ -7,6 +7,7 @@ export module pragma.client:rendering.shaders.particle_model_shadow;
 
 // prosper TODO
 #if 0
+#include "pragma/clientdefinitions.h"
 #include "c_shader_shadow.h"
 
 namespace Shader

@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include <image/prosper_texture.hpp>
 #include <sharedutils/asset_loader/asset_load_info.hpp>
 

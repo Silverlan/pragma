@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include <sharedutils/def_handle.h>
 #include <sharedutils/functioncallback.h>
 #include <queue>

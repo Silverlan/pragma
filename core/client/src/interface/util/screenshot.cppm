@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include <util_image.hpp>
 
 export module pragma.client:util.screenshot;

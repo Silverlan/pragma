@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include "prosper_command_buffer.hpp"
 #include "buffers/prosper_buffer.hpp"
 #include <sharedutils/util_heterogenous_lookup.hpp>

@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include <shader/prosper_descriptor_array_manager.hpp>
 #include <mathutil/plane.hpp>
 #include <cinttypes>

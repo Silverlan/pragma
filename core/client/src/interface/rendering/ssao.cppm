@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include <memory>
 #include <image/prosper_texture.hpp>
 

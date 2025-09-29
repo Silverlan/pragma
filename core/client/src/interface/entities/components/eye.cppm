@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include <mathutil/transform.hpp>
 #include <mathutil/uvec.h>
 

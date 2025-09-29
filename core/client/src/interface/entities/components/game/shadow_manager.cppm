@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include "image/prosper_render_target.hpp"
 #include "sharedutils/util_pragma.hpp"
 #include "prosper_command_buffer.hpp"

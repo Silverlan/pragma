@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include "image/prosper_image.hpp"
 #include "sharedutils/alpha_mode.hpp"
 #include "prosper_enums.hpp"

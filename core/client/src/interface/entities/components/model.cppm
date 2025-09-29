@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include "cmaterial.h"
 #include <vector>
 #include <optional>

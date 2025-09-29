@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include <sharedutils/BS_thread_pool.hpp>
 #include <string>
 #include <memory>

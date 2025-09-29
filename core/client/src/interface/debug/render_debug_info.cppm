@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include <mathutil/umath.h>
 #include <chrono>
 #include <memory>

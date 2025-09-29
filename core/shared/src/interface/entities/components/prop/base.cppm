@@ -4,11 +4,13 @@
 module;
 
 #include "pragma/networkdefinitions.h"
+#include "mathutil/uvec.h"
 #include <memory>
 
 export module pragma.shared:entities.components.props.base;
 
 export import :entities.components.base;
+export import :physics.enums;
 
 export namespace pragma {
 	class DLLNETWORK BasePropComponent : public BaseEntityComponent {

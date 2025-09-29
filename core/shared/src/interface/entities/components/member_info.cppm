@@ -12,13 +12,12 @@ module;
 
 export module pragma.shared:entities.member_info;
 
+export import :entities.enums;
 export import :util.global_string_table;
 
 export {
 	namespace pragma {
 		namespace ents {
-			enum class EntityMemberType : uint8_t;
-
 			struct DLLNETWORK TypeMetaData {
 				virtual ~TypeMetaData() = default;
 			};
@@ -56,8 +55,6 @@ export {
 			};
 		};
 		class BaseEntityComponent;
-		enum class AttributeSpecializationType : uint8_t;
-		enum class ComponentMemberFlags : uint32_t;
 
 		struct DLLNETWORK ComponentMemberInfo {
 			struct DLLNETWORK EnumConverter {

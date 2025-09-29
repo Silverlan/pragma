@@ -3,10 +3,27 @@
 
 module;
 
+#include "pragma/networkdefinitions.h"
+#include "pragma/lua/luaapi.h"
+#include "sharedutils/asset_loader/file_asset_manager.hpp"
 #include <sharedutils/callback_handler.h>
 #include <sharedutils/chronotime.h>
 #include <sharedutils/util_cpu_profiler.hpp>
+#include "sharedutils/util_library.hpp"
 #include <unordered_set>
+#include "material.h"
+
+export module pragma.shared:network_state;
+
+export import :assets.common;
+export import :audio.enums;
+export import :audio.sound_script_manager;
+export import :console.cvar_handler;
+export import :debug.performance_profiler;
+export import :engine.enums;
+export import :input.enums;
+export import :map.map_info;
+export import :util.resource_watcher;
 
 #define GLFW_RELEASE 0
 #define GLFW_PRESS 1
@@ -19,9 +36,14 @@ module;
 		}                                                                                                                                                                                                                                                                                        \
 	}
 
-export module pragma.shared:network_state;
-
 export {
+	class Game;
+	class ALSound;
+	class ModelMesh;
+	class ModelSubMesh;
+	namespace pragma::asset {
+		class ModelManager;
+	}
 	class DLLNETWORK NetworkState : public CallbackHandler, public CVarHandler {
 		// For internal use only! Not to be used directly!
 	protected:

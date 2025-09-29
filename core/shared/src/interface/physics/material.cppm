@@ -3,6 +3,8 @@
 
 module;
 
+#include "pragma/networkdefinitions.h"
+#include <limits>
 #include <cinttypes>
 
 export module pragma.shared:physics.material;

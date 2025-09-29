@@ -5,6 +5,7 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include <vector>
+#include <string>
 
 export module pragma.shared:entities.components.triggers.base_teleport;
 

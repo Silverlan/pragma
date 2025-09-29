@@ -3,6 +3,9 @@
 
 module;
 
+#include "pragma/networkdefinitions.h"
+#include "mathutil/uvec.h"
+
 export module pragma.shared:math;
 
 export import :math.approach_rotation;
@@ -26,7 +29,6 @@ export import :math.print;
 export import :math.random;
 export import :math.seb;
 export import :math.sphere;
-export import :math.surface_material;
 export import :math.transform;
 export import :math.triangulate;
 

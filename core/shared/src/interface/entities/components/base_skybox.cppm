@@ -4,6 +4,7 @@
 module;
 
 #include "pragma/networkdefinitions.h"
+#include "mathutil/eulerangles.h"
 
 export module pragma.shared:entities.components.base_skybox;
 

@@ -13,6 +13,7 @@ module;
 
 export module pragma.shared:model.model;
 
+import :console.output;
 export import :game.coordinate_system;
 export import :model.animation.animation;
 export import :model.animation.flex_animation;
@@ -145,7 +146,7 @@ export {
 
 	namespace pragma::model {
 		template<typename T>
-		static void validate_value(const T &v)
+		void validate_value(const T &v)
 		{
 			if constexpr(std::is_arithmetic_v<T>) {
 				if(isnan(v))

@@ -15,7 +15,6 @@ export namespace pragma {
 	  public:
 		EntityProperty();
 		EntityProperty(const EntityHandle &hEnt);
-		using util::SimpleProperty<EntityProperty, EntityHandle>::operator=;
 	};
 	using PEntityProperty = std::shared_ptr<EntityProperty>;
 };

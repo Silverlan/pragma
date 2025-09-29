@@ -12,7 +12,5 @@ export import :audio.sound_base;
 export import :audio.sound_script;
 export import :audio.sound_script_events;
 export import :audio.sound_script_manager;
-export import :audio.sound_source;
-export import :audio.sound_system;
 export import :audio.util;
 

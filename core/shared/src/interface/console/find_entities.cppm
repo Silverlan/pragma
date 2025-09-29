@@ -16,7 +16,7 @@ export {
 	class Game;
 	class BaseEntity;
 	class NetworkState;
-	namespace pragma {class BaseCharacterComponent;};
+	namespace pragma {class BaseCharacterComponent; class BasePlayerComponent;};
 	namespace command {
 		DLLNETWORK std::vector<BaseEntity *> find_target_entity(NetworkState *state, pragma::BaseCharacterComponent &pl, std::vector<std::string> &argv, const std::function<void(TraceData &)> &trCallback = nullptr);
 		DLLNETWORK std::vector<BaseEntity *> find_trace_targets(NetworkState *state, pragma::BaseCharacterComponent &pl, const std::function<void(TraceData &)> &trCallback = nullptr);

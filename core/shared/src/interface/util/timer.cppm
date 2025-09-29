@@ -4,6 +4,7 @@
 module;
 
 #include "pragma/networkdefinitions.h"
+#include "pragma/lua/ldefinitions.h"
 #include <sharedutils/functioncallback.h>
 
 export module pragma.shared:util.timer;

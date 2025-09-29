@@ -54,6 +54,9 @@ export {
 	#ifdef __linux__
 	#pragma GCC diagnostic pop
 	#endif
+
+		template<typename T>
+		concept is_managed_member_type = std::is_same_v<T, EntityURef> || std::is_same_v<T, MultiEntityURef> || std::is_same_v<T, EntityUComponentMemberRef> || std::is_same_v<T, Element>;
 	};
 
 	namespace pragma {

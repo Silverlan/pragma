@@ -11,6 +11,9 @@ export module pragma.shared:entities.components.base_static_bvh_user;
 export import :entities.components.base;
 
 export namespace pragma {
+	class BaseBvhComponent;
+	class BaseStaticBvhCacheComponent;
+	class PanimaComponent;
 	class DLLNETWORK BaseStaticBvhUserComponent : public BaseEntityComponent {
 	  public:
 		static ComponentEventId EVENT_ON_ACTIVATION_STATE_CHANGED;

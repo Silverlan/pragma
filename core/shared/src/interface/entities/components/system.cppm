@@ -14,8 +14,10 @@ module;
 
 export module pragma.shared:entities.system;
 
+export import :entities.components.base;
 export import :entities.components.events.event;
 export import :entities.components.handle;
+export import :entities.manager;
 export import :entities.enums;
 
 export {
@@ -94,7 +96,7 @@ export {
 		auto whComponent = AddComponent(componentId, bForceCreateNew);
 		if(whComponent.expired())
 			return {};
-		return whComponent->GetHandle<TComponent>();
+		return whComponent->template GetHandle<TComponent>();
 	}
 	template<class TComponent, typename>
 	void pragma::BaseEntityComponentSystem::RemoveComponent()

@@ -10,6 +10,8 @@ module;
 export module pragma.shared:entities.components.triggers.base_touch;
 
 export import :entities.components.base;
+export import :physics.object;
+export import :physics.touch;
 
 export {
 	namespace pragma {

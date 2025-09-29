@@ -4,6 +4,7 @@
 module;
 
 #include "pragma/networkdefinitions.h"
+#include "mathutil/transform.hpp"
 #include <sharedutils/property/util_property_vector.h>
 
 export module pragma.shared:entities.components.origin;

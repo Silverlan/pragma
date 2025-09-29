@@ -12,8 +12,6 @@ export module pragma.shared:scripting.lua.libraries.regex;
 export {
 	DLLNETWORK std::ostream &operator<<(std::ostream &out, const std::match_results<const char *> &match);
 
-	lua_registercheck(RegexResult, std::match_results<const char *>);
-
 	namespace Lua {
 		namespace regex {
 			DLLNETWORK int match(lua_State *l);

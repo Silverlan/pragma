@@ -11,21 +11,17 @@ module;
 
 export module pragma.shared:scripting.lua.libraries.noise;
 
-export {
-	lua_registercheck(NoiseModule, noise::module::Module);
-	lua_registercheck(NoiseMap, noise::utils::NoiseMap);
+#define DECLARE_NOISE_MODULE(name)                                                                                                                                                                                                                                                               \
+	class DLLNETWORK Noise##name : public NoiseBaseModule {                                                                                                                                                                                                                                      \
+	public:                                                                                                                                                                                                                                                                                    \
+		using NoiseBaseModule::NoiseBaseModule;                                                                                                                                                                                                                                                  \
+	};
 
+export {
 	class DLLNETWORK NoiseBaseModule : public std::shared_ptr<noise::module::Module> {
 	public:
 		NoiseBaseModule(noise::module::Module *mod);
 	};
-
-	#define DECLARE_NOISE_MODULE(name)                                                                                                                                                                                                                                                               \
-		class DLLNETWORK Noise##name : public NoiseBaseModule {                                                                                                                                                                                                                                      \
-		public:                                                                                                                                                                                                                                                                                    \
-			using NoiseBaseModule::NoiseBaseModule;                                                                                                                                                                                                                                                  \
-		};                                                                                                                                                                                                                                                                                           \
-		lua_registercheck(Noise##name, Noise##name);
 
 	DECLARE_NOISE_MODULE(Abs);
 	DECLARE_NOISE_MODULE(Billow);

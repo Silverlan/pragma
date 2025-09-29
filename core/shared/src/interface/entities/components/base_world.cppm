@@ -7,6 +7,7 @@ module;
 
 export module pragma.shared:entities.components.base_world;
 
+import :console.output;
 export import :entities.components.base;
 
 #define WORLD_BASE_LOD 20

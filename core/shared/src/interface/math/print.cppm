@@ -14,6 +14,8 @@ module;
 	
 export module pragma.shared:math.print;
 
+export import :console.output;
+
 export {
 	MATRIX_OSTREAM_DEC(2x2);
 	MATRIX_OSTREAM_DEC(2x3);

@@ -22,7 +22,7 @@ export namespace pragma::lua {
 
 	// See luabind::detail::construct_aux_helper
 	template<typename T, auto TCnstrct, typename... TArgs>
-	static void custom_constructor(luabind::argument const &self_, TArgs... args)
+	void custom_constructor(luabind::argument const &self_, TArgs... args)
 	{
 		luabind::detail::object_rep *self = luabind::touserdata<luabind::detail::object_rep>(self_);
 		using TResult = typename function_traits<decltype(TCnstrct)>::return_type;
@@ -64,7 +64,7 @@ export namespace pragma::lua {
 	}
 
 	template<typename T, auto TCnstrct, typename... TArgs>
-	static void define_custom_constructor(lua_State *l)
+	void define_custom_constructor(lua_State *l)
 	{
 		auto *registry = luabind::detail::class_registry::get_registry(l);
 		auto *crep = registry->find_class(typeid(T));

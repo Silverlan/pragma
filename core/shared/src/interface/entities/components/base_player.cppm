@@ -4,12 +4,14 @@
 module;
 
 #include "pragma/networkdefinitions.h"
+#include "mathutil/uquat.h"
 #include <sharedutils/property/util_property.hpp>
 
 export module pragma.shared:entities.components.base_player;
 
 export import :entities.components.base;
 export import :console.enums;
+import :console.output;
 export import :game.damage_info;
 export import :input.enums;
 export import :model.animation.enums;

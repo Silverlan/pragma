@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/networkdefinitions.h"
 #include <fsys/directory_watcher.h>
 
 export module pragma.shared:scripting.lua.script_watcher;

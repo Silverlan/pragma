@@ -7,6 +7,7 @@
 #include <sharedutils/util_shared_handle.hpp>
 #include "sharedutils/util_string.h"
 #include "sharedutils/util.h"
+#include "pragma/lua/luaapi.h"
 #include <type_traits>
 
 #define luaL_checkboolean(L, n) (luaL_checktype(L, (n), LUA_TBOOLEAN))

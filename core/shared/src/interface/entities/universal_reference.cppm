@@ -12,12 +12,12 @@ export module pragma.shared:entities.universal_reference;
 export import :entities.base_entity_handle;
 export import :entities.enums;
 export import :entities.components.handle;
-export import :entities.iterator;
 export import :entities.member_info;
 export import :entities.member_reference;
 
 export {
 	class BaseEntity;
+	class EntityIterator;
 	class Game;
 	namespace pragma {
 		class BaseEntityComponent;

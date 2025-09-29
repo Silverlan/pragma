@@ -5,7 +5,10 @@
 #include <mathutil/uvec.h>
 #include <sharedutils/util_string.h>
 #include <sharedutils/util_file.h>
+#include "udm.hpp"
 #include <map>
+
+import pragma.shared;
 
 #define DLLSPEC_ISTEAMWORKS DLLNETWORK
 

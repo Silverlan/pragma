@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/networkdefinitions.h"
 #include <cinttypes>
 #include <unordered_map>
 #include <string>

@@ -10,6 +10,8 @@ module;
 
 export module pragma.shared:model.side;
 
+import :console.output;
+
 export {
 	class DLLNETWORK Side {
 	public:

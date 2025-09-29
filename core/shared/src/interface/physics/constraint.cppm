@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/networkdefinitions.h"
 #include <memory>
 #include <sharedutils/def_handle.h>
 #include <mathutil/transform.hpp>
@@ -10,7 +11,13 @@ module;
 
 export module pragma.shared:physics.constraint;
 
+export import :entities.base_entity_handle;
+export import :game.coordinate_system;
+export import :game.enums;
+export import :physics.shape;
+
 export namespace pragma::physics {
+	class IRigidBody;
 	class DLLNETWORK IConstraint : public IBase, public IWorldObject {
 	  public:
 		virtual void OnRemove() override;

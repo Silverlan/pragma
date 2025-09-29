@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/networkdefinitions.h"
 #include <udm.hpp>
 
 export module pragma.shared:entities.components.animation_driver;

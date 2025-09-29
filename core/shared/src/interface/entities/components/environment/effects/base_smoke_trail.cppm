@@ -4,6 +4,7 @@
 module;
 
 #include "pragma/networkdefinitions.h"
+#include <string>
 
 export module pragma.shared:entities.components.environment.effects.base_smoke_trail;
 

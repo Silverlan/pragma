@@ -4,6 +4,7 @@
 module;
 
 #include "pragma/networkdefinitions.h"
+#include "pragma/lua/luaapi.h"
 #include <sharedutils/chronotime.h>
 #include <fsys/vfileptr.h>
 #include <materialmanager.h>
@@ -30,6 +31,7 @@ export import :console.convar_handle;
 export import :console.cvar_handler;
 export import :console.debug_console;
 export import :debug.performance_profiler;
+export import :engine.enums;
 export import :engine.info;
 export import :engine.version;
 export import :input.enums;
@@ -39,7 +41,6 @@ export import util_zip;
 
 export {
 	class NetworkState;
-	enum class NwStateType : uint8_t { Client = 0, Server, Count };
 	class DLLNETWORK Engine : public CVarHandler, public CallbackHandler {
 	public:
 		static const uint32_t DEFAULT_TICK_RATE;

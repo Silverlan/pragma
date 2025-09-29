@@ -4,6 +4,7 @@
 module;
 
 #include "pragma/networkdefinitions.h"
+#include "pragma/buss_ik/Node.h"
 #include "mathutil/transform.hpp"
 
 export module pragma.shared:physics.ik;

@@ -33,6 +33,7 @@ export {
 	class NetworkState;
 	class CVarHandler;
 	class ConVarMap;
+	namespace pragma {class BasePlayerComponent;};
 
 	using ConVarValue = std::unique_ptr<void, void (*)(void *)>;
 	namespace console {

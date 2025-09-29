@@ -35,24 +35,6 @@ export {
 		DLLNETWORK size_t get_component_member_name_hash(const std::string &name);
 		DLLNETWORK size_t get_component_member_name_hash(const char *name);
 
-		enum class AttributeSpecializationType : uint8_t;
-		enum class ComponentMemberFlags : uint32_t;
-		enum class ComponentFlags : uint8_t {
-			None = 0u,
-			Networked = 1u,
-
-			// Component isn't networked, but wants to be.
-			// (e.g. because a networked event has been registered).
-			// In this case the component will be networked the next time
-			// it is created. Note: This flag only works for
-			// Lua-based components! It also has no effect if the
-			// component has already been created at least one
-			// in the past.
-			MakeNetworked = Networked << 1u,
-
-			LuaBased = MakeNetworked << 1u,
-			HideInEditor = LuaBased << 1u,
-		};
 		class DLLNETWORK BaseNetComponent {
 		public:
 			virtual bool ShouldTransmitNetData() const = 0;
@@ -218,7 +200,7 @@ export {
 export namespace pragma {
 	template<typename TComponent, typename T, auto TSetter, auto TGetter, typename TSpecializationType>
 	    requires(is_valid_component_property_type_v<T> && (std::is_same_v<TSpecializationType, AttributeSpecializationType> || util::is_string<TSpecializationType>::value))
-	static ComponentMemberInfo create_component_member_info(std::string &&name, std::optional<T> defaultValue, TSpecializationType specialization)
+	ComponentMemberInfo create_component_member_info(std::string &&name, std::optional<T> defaultValue, TSpecializationType specialization)
 	{
 		auto memberInfo = ComponentMemberInfo::CreateDummy();
 		memberInfo.SetName(std::move(name));
@@ -261,7 +243,7 @@ export namespace pragma {
 
 	template<typename TComponent, typename T, auto TSetter, auto TGetter>
 	    requires(is_valid_component_property_type_v<T>)
-	static ComponentMemberInfo create_component_member_info(std::string &&name, std::optional<T> defaultValue = {})
+	ComponentMemberInfo create_component_member_info(std::string &&name, std::optional<T> defaultValue = {})
 	{
 		return create_component_member_info<TComponent, T, TSetter, TGetter, AttributeSpecializationType>(std::move(name), std::move(defaultValue), AttributeSpecializationType::None);
 	}

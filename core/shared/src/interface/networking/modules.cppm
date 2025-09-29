@@ -11,7 +11,7 @@ module;
 export module pragma.shared:networking.modules;
 
 export namespace pragma::networking {
-	static constexpr std::string_view NET_LIBRARY_MODULE_LOCATION = "networking";
+	constexpr std::string_view NET_LIBRARY_MODULE_LOCATION = "networking";
 	DLLNETWORK std::vector<std::string> GetAvailableNetworkingModules();
 	DLLNETWORK std::string GetNetworkingModuleLocation(const std::string &netModule, bool server);
 };

@@ -1050,3 +1050,31 @@ std::optional<std::string> BaseEntityComponent::GetMemberUri(Game *game, std::va
 	auto q = uri->find('?');
 	return uri->substr(0, q) + "/" + *memberName + uri->substr(q);
 }
+
+spdlog::logger *find_logger(Game &game, std::type_index typeIndex) {
+	auto &componentManager = game.GetEntityComponentManager();
+	pragma::ComponentId componentId;
+	if (componentManager.GetComponentId(typeIndex, componentId)) {
+		auto *info = componentManager.GetComponentInfo(componentId);
+		if (info)
+			return &pragma::register_logger("c_" + std::string {info->name.str});
+	}
+	return nullptr;
+}
+
+spdlog::logger &pragma::BaseEntityComponent::get_logger(std::type_index typeIndex) {
+	auto *engine = pragma::get_engine();
+
+	for (auto *state : {Engine::Get()->GetClientState(), Engine::Get()->GetServerNetworkState()}) {
+		if (!state)
+			continue;
+		auto *game = state->GetGameState();
+		if (!game)
+			continue;
+		auto *logger = find_logger(*game, typeIndex);
+		if (logger)
+			return *logger;
+	}
+	return pragma::register_logger("c_unknown");
+}
+

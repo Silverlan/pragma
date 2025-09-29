@@ -4,6 +4,7 @@
 module;
 
 #include "pragma/networkdefinitions.h"
+#include <string>
 
 export module pragma.shared:entities.components.global_name;
 

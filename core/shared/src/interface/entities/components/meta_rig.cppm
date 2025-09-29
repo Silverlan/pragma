@@ -4,10 +4,12 @@
 module;
 
 #include "pragma/networkdefinitions.h"
+#include <memory>
 
 export module pragma.shared:entities.components.meta_rig;
 
-export import :entities.components.base;
+export import :entities.components.base_animated;
+export import :entities.base_entity;
 
 export namespace pragma {
 	class DLLNETWORK MetaRigComponent final : public BaseEntityComponent {

@@ -14,6 +14,7 @@ module;
 
 export module pragma.shared:entities.iterator;
 
+import :entities.base_entity;
 export import :entities.enums;
 
 export {

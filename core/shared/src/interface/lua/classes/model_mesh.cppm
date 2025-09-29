@@ -4,6 +4,7 @@
 module;
 
 #include "pragma/networkdefinitions.h"
+#include "mathutil/uvec.h"
 #include "pragma/lua/luaapi.h"
 
 export module pragma.shared:scripting.lua.classes.model_mesh;

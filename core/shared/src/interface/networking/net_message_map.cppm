@@ -13,9 +13,10 @@ module;
 export module pragma.shared:networking.net_message_map;
 
 export {
+	using ServerClientHandle = void*;
 	class DLLNETWORK SVNetMessage {
 	public:
-		void (*handler)(pragma::networking::IServerClient &, NetPacket);
+		void (*handler)(ServerClientHandle &, NetPacket);
 		unsigned int ID;
 	};
 
@@ -36,8 +37,8 @@ export {
 	public:
 		virtual void RegisterNetMessage(std::string name, void (*handler)(NetPacket));
 		virtual void PreRegisterNetMessage(std::string name, void (*handler)(NetPacket));
-		virtual void RegisterNetMessage(std::string name, void (*handler)(pragma::networking::IServerClient &, NetPacket));
-		virtual void PreRegisterNetMessage(std::string name, void (*handler)(pragma::networking::IServerClient &, NetPacket));
+		virtual void RegisterNetMessage(std::string name, void (*handler)(ServerClientHandle &, NetPacket));
+		virtual void PreRegisterNetMessage(std::string name, void (*handler)(ServerClientHandle &, NetPacket));
 		void GetNetMessages(std::unordered_map<unsigned int, T> **messages);
 		void GetNetMessages(std::unordered_map<std::string, unsigned int> **messages);
 		T *GetNetMessage(unsigned int ID);
@@ -55,7 +56,7 @@ export {
 	{
 	}
 	template<class T>
-	void NetMessageMap<T>::RegisterNetMessage(std::string name, void (*)(pragma::networking::IServerClient &, NetPacket))
+	void NetMessageMap<T>::RegisterNetMessage(std::string name, void (*)(ServerClientHandle &, NetPacket))
 	{
 	}
 	template<class T>
@@ -63,7 +64,7 @@ export {
 	{
 	}
 	template<class T>
-	void NetMessageMap<T>::PreRegisterNetMessage(std::string name, void (*)(pragma::networking::IServerClient &, NetPacket))
+	void NetMessageMap<T>::PreRegisterNetMessage(std::string name, void (*)(ServerClientHandle &, NetPacket))
 	{
 	}
 
@@ -114,7 +115,7 @@ export {
 
 	class DLLNETWORK ServerMessageMap : public NetMessageMap<SVNetMessage> {
 	public:
-		void RegisterNetMessage(std::string name, void (*handler)(pragma::networking::IServerClient &, NetPacket));
-		void PreRegisterNetMessage(std::string name, void (*handler)(pragma::networking::IServerClient &, NetPacket));
+		void RegisterNetMessage(std::string name, void (*handler)(ServerClientHandle &, NetPacket));
+		void PreRegisterNetMessage(std::string name, void (*handler)(ServerClientHandle &, NetPacket));
 	};
 };

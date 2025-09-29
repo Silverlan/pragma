@@ -24,6 +24,8 @@ export {
     };
     REGISTER_BASIC_BITWISE_OPERATORS(pragma::FRenderFlags);
 
+	using EntityIndex = uint32_t;
+
 	enum class ObserverMode : int {
 		None,
 		FirstPerson,
@@ -73,6 +75,23 @@ export {
 			Custom,
 
 			Count
+		};
+
+		enum class ComponentFlags : uint8_t {
+			None = 0u,
+			Networked = 1u,
+
+			// Component isn't networked, but wants to be.
+			// (e.g. because a networked event has been registered).
+			// In this case the component will be networked the next time
+			// it is created. Note: This flag only works for
+			// Lua-based components! It also has no effect if the
+			// component has already been created at least one
+			// in the past.
+			MakeNetworked = Networked << 1u,
+
+			LuaBased = MakeNetworked << 1u,
+			HideInEditor = LuaBased << 1u,
 		};
 
 		using NetEventId = uint32_t;
@@ -151,9 +170,6 @@ export {
 			}
 			constexpr udm::Type member_type_to_udm_type(EntityMemberType type) { return (umath::to_integral(type) < umath::to_integral(udm::Type::Count)) ? static_cast<udm::Type>(type) : udm::Type::Invalid; }
 			constexpr EntityMemberType udm_type_to_member_type(udm::Type type) { return static_cast<EntityMemberType>(type); }
-
-			template<typename T>
-			concept is_managed_member_type = std::is_same_v<T, EntityURef> || std::is_same_v<T, MultiEntityURef> || std::is_same_v<T, EntityUComponentMemberRef> || std::is_same_v<T, Element>;
 		}
 
 		using ComponentId = uint32_t;

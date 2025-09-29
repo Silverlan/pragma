@@ -5,6 +5,7 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include <sharedutils/property/util_property.hpp>
+#include "sharedutils/util_path.hpp"
 #include <unordered_set>
 
 #undef GetCurrentTime
@@ -12,11 +13,15 @@ module;
 export module pragma.shared:entities.components.panima;
 
 export import :entities.components.base;
-
+export import :game.animation_channel_cache_data;
+export import :model.animation.animation_event;
+export import :model.animation.enums;
 import panima;
 
 export {
+	class Model;
 	namespace pragma {
+		class GlobalAnimationChannelQueueProcessor;
 		struct DLLNETWORK AnimationManagerData {
 			std::string name;
 			panima::PAnimationManager animationManager;

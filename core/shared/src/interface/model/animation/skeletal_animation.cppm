@@ -16,7 +16,7 @@ export import :model.animation.pose;
 
 export {
 	namespace pragma::animation::skeletal {
-		static constexpr std::string_view SK_ANIMATED_COMPONENT_NAME = "sk_animated";
+		constexpr std::string_view SK_ANIMATED_COMPONENT_NAME = "sk_animated";
 		struct DLLNETWORK AnimBoneChannelDesc {
 			static constexpr auto INVALID_CHANNEL = std::numeric_limits<uint32_t>::max();
 			uint32_t positionChannel = INVALID_CHANNEL;

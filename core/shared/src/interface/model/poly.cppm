@@ -13,6 +13,8 @@ module;
 
 export module pragma.shared:model.poly;
 
+import :console.output;
+
 export {
 	class NetworkState;
 	struct DLLNETWORK PolyVertex {

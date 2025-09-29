@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/networkdefinitions.h"
 #include <mathutil/glmutil.h>
 #include <mathutil/transform.hpp>
 #include <sharedutils/functioncallback.h>
@@ -12,8 +13,20 @@ module;
 
 export module pragma.shared:physics.environment;
 
+export import :physics.constraint;
+export import :physics.contact;
+export import :physics.controller;
+export import :physics.raycast;
+export import :physics.soft_body_info;
+export import :physics.tire_type_manager;
+export import :physics.vehicle;
+export import :physics.visual_debugger;
+export import :physics.water_buoyancy_simulator;
+
 export {
+	class NetworkState;
 	namespace pragma::physics {
+		class IConstraint;
 		class DLLNETWORK IEventCallback {
 		public:
 			virtual ~IEventCallback() = default;

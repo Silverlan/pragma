@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/networkdefinitions.h"
 
 export module pragma.shared:entities.components.action_input_controller;
 

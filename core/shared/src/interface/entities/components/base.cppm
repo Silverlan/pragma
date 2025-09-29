@@ -13,6 +13,7 @@ module;
 #include <sharedutils/functioncallback.h>
 #include "mathutil/transform.hpp"
 #include "sharedutils/util_event_reply.hpp"
+#include "pragma/logging.hpp"
 #include <typeindex>
 #include <udm.hpp>
 #ifdef _WIN32
@@ -286,6 +287,7 @@ export {
 			virtual std::optional<ComponentMemberIndex> DoGetMemberIndex(const std::string &name) const;
 			virtual void OnMembersChanged();
 			spdlog::logger &InitLogger() const;
+			spdlog::logger &get_logger(std::type_index typeIndex);
 
 			// Used for typed callback lookups. If this function doesn't change outTypeIndex, the actual component's type is used
 			// as reference. Overwrite this on the serverside or clientside version of the component,
@@ -387,33 +389,15 @@ export {
 		logger.critical(fmt, std::forward<Args>(args)...);
 	}
 
+	spdlog::logger *find_logger(Game &game, std::type_index typeIndex);
+
 	template<typename TClass>
 	spdlog::logger *find_logger(Game &game) {
-		std::type_index typeIndex = typeid(TClass);
-		auto &componentManager = game.GetEntityComponentManager();
-		pragma::ComponentId componentId;
-		if (componentManager.GetComponentId(typeIndex, componentId)) {
-			auto *info = componentManager.GetComponentInfo(componentId);
-			if (info)
-				return &pragma::register_logger("c_" + std::string {info->name.str});
-		}
-		return nullptr;
+		return find_logger(game, typeid(TClass));
 	}
 
 	template<typename TClass>
 	spdlog::logger &pragma::BaseEntityComponent::get_logger() {
-		auto *engine = pragma::get_engine();
-
-		for (auto *state : {Engine::Get()->GetClientState(), Engine::Get()->GetServerNetworkState()}) {
-			if (!state)
-				continue;
-			auto *game = state->GetGameState();
-			if (!game)
-				continue;
-			auto *logger = find_logger<TClass>(*game);
-			if (logger)
-				return *logger;
-		}
-		return pragma::register_logger("c_unknown");
+		return get_logger(typeid(TClass));
 	}
 };

@@ -15,6 +15,7 @@ export module pragma.shared:entities.base_entity;
 
 export import :audio.enums;
 export import :audio.sound;
+import :console.output;
 export import :entities.base_entity_handle;
 export import :entities.components.handle;
 export import :entities.manager;

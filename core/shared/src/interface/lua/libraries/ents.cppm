@@ -9,7 +9,7 @@ module;
 
 export module pragma.shared:scripting.lua.libraries.ents;
 
-export import :console.output;
+import :console.output;
 export import :entities.base_entity;
 export import :game.enums;
 export import :physics.shape;

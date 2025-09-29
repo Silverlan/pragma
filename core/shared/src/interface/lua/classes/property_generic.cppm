@@ -266,9 +266,6 @@ export {
 		}
 	}
 
-	namespace util {
-		class BaseProperty;
-	};
 	class LBasePropertyWrapper {
 	public:
 		template<class TProperty, typename T>

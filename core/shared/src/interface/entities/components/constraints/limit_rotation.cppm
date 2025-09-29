@@ -4,10 +4,12 @@
 module;
 
 #include "pragma/networkdefinitions.h"
+#include "mathutil/uvec.h"
 
 export module pragma.shared:entities.components.constraints.limit_rotation;
 
 export import :entities.components.constraints.base;
+export import :game.coordinate_system;
 
 export namespace pragma {
 	class DLLNETWORK ConstraintLimitRotationComponent final : public BaseEntityComponent {

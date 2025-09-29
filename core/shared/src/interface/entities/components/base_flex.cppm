@@ -5,10 +5,12 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include "mathutil/umath.h"
+#include <string>
 
 export module pragma.shared:entities.components.base_flex;
 
 export import :entities.components.base;
+export import :model.animation.enums;
 
 export {
 	class Model;

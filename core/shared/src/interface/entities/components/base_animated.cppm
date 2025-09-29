@@ -3,9 +3,11 @@
 
 module;
 
+#include "pragma/networkdefinitions.h"
 #include <sharedutils/property/util_property.hpp>
 #include <mathutil/transform.hpp>
 #include <mathutil/uvec.h>
+#include <queue>
 
 export module pragma.shared:entities.components.base_animated;
 

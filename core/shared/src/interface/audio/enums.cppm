@@ -10,6 +10,9 @@ module;
 export module pragma.shared:audio.enums;
 
 export {
+	class ALSound;
+	using ALSoundRef = std::reference_wrapper<ALSound>;
+
 	constexpr float ALSOUND_DEFAULT_MAX_DISTANCE = std::numeric_limits<float>::max();
 
 	constexpr bool ALSOUND_DEFAULT_RELATIVE = false;

@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/clientdefinitions.h"
 #include <sharedutils/functioncallback.h>
 #include "mathutil/umath_geometry.hpp"
 #include <mathutil/uvec.h>

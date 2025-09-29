@@ -6,7 +6,7 @@ module;
 #include "pragma/networkdefinitions.h"
 #include "sharedutils/util_path.hpp"
 
-export module pragma.shared:util.steam.steam;
+export module pragma.shared:util.steam;
 
 export import :util.steam.vdf;
 

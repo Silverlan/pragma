@@ -5,7 +5,8 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/lua/luaapi.h"
-#include <optional>
+#include "pragma/logging.hpp"
+#include <fmt/core.h>
 #include <string>
 
 export module pragma.shared:scripting.lua.logging;

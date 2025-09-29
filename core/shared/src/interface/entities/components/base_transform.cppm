@@ -6,6 +6,7 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <sharedutils/property/util_property_vector.h>
 #include <sharedutils/property/util_property_quat.hpp>
+#include "mathutil/transform.hpp"
 
 export module pragma.shared:entities.components.base_transform;
 

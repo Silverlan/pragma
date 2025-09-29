@@ -8,6 +8,8 @@ module;
 #include <mathutil/umath_lighting.hpp>
 #include <sharedutils/util_pragma.hpp>
 #include <string>
+#include "mathutil/uvec.h"
+
 
 export module pragma.shared:entities.components.environment.lights.base_light;
 

@@ -4,14 +4,14 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/buss_ik/Node.h"
-#include "mathutil/transform.hpp"
+#include <mathutil/transform.hpp>
 
 export module pragma.shared:physics.ik;
 
 import :physics.ik.controller;
 import :physics.ik.method;
 
+class Node;
 export namespace util {
 	namespace ik {
 		DLLNETWORK void get_local_transform(const Node &node, umath::Transform &t);

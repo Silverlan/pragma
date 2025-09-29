@@ -6,6 +6,8 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <mathutil/glmutil.h>
 #include "mathutil/uquat.h"
+#include "mathutil/uvec.h"
+
 
 export module pragma.shared:math.delta_transform;
 

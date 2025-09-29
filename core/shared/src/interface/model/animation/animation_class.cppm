@@ -9,6 +9,8 @@ module;
 #include "udm.hpp"
 #include <optional>
 #include <vector>
+#include "mathutil/uvec.h"
+#include "mathutil/uquat.h"
 
 #define PRAGMA_ANIMATION_VERSION 2
 

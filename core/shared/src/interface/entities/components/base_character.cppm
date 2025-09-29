@@ -3,11 +3,14 @@
 
 module;
 
+#include "pragma/networkdefinitions.h"
 #include <mathutil/uvec.h>
 #include <thread>
 #include <mutex>
 #include <atomic>
 #include <sharedutils/property/util_property_vector.h>
+#include "mathutil/uquat.h"
+
 
 export module pragma.shared:entities.components.base_character;
 

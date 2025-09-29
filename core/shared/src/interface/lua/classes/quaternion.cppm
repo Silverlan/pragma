@@ -6,6 +6,8 @@ module;
 #include "pragma/networkdefinitions.h"
 #include "pragma/lua/luaapi.h"
 #include "mathutil/uquat.h"
+#include "mathutil/uvec.h"
+
 
 export module pragma.shared:scripting.lua.classes.quaternion;
 

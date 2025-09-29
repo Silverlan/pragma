@@ -11,6 +11,8 @@ module;
 #include <sharedutils/datastream.h>
 #include <sharedutils/util_ifile.hpp>
 #include <optional>
+#include "mathutil/uvec.h"
+
 
 export module pragma.shared:scripting.lua.libraries.file;
 

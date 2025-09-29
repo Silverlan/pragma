@@ -9,6 +9,8 @@ module;
 #include <sharedutils/util_shared_handle.hpp>
 #include <mathutil/color.h>
 #include "udm.hpp"
+#include "mathutil/uvec.h"
+
 
 export module pragma.shared:physics.surface_material;
 

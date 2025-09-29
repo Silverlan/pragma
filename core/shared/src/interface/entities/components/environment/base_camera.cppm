@@ -8,6 +8,8 @@ module;
 #include <sharedutils/property/util_property_vector.h>
 #include <sharedutils/property/util_property_matrix.hpp>
 #include <mathutil/plane.hpp>
+#include "mathutil/uvec.h"
+
 
 export module pragma.shared:entities.components.environment.base_camera;
 

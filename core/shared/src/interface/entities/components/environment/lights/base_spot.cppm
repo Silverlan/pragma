@@ -7,6 +7,8 @@ module;
 #include "mathutil/umath_lighting.hpp"
 #include "sharedutils/property/util_property.hpp"
 #include <string>
+#include "mathutil/uvec.h"
+
 
 export module pragma.shared:entities.components.environment.lights.base_spot;
 

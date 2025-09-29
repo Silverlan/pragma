@@ -38,11 +38,11 @@ export {
         FlexAnimation(const FlexAnimation &other);
         std::vector<std::shared_ptr<FlexAnimationFrame>> &GetFrames() { return m_frames; }
         const std::vector<std::shared_ptr<FlexAnimationFrame>> &GetFrames() const { return const_cast<FlexAnimation *>(this)->GetFrames(); }
-        std::vector<FlexControllerId> &GetFlexControllerIds() { return m_flexControllerIds; }
-        const std::vector<FlexControllerId> &GetFlexControllerIds() const { return const_cast<FlexAnimation *>(this)->GetFlexControllerIds(); }
-        uint32_t AddFlexControllerId(FlexControllerId id);
+        std::vector<pragma::animation::FlexControllerId> &GetFlexControllerIds() { return m_flexControllerIds; }
+        const std::vector<pragma::animation::FlexControllerId> &GetFlexControllerIds() const { return const_cast<FlexAnimation *>(this)->GetFlexControllerIds(); }
+        uint32_t AddFlexControllerId(pragma::animation::FlexControllerId id);
         FlexAnimationFrame &AddFrame();
-        void SetFlexControllerIds(std::vector<FlexControllerId> &&ids);
+        void SetFlexControllerIds(std::vector<pragma::animation::FlexControllerId> &&ids);
         void SetFps(float fps) { m_fps = fps; }
         float GetFps() const { return m_fps; }
 
@@ -54,7 +54,7 @@ export {
     private:
         bool LoadFromAssetData(const udm::AssetData &data, std::string &outErr);
         std::vector<std::shared_ptr<FlexAnimationFrame>> m_frames;
-        std::vector<FlexControllerId> m_flexControllerIds;
+        std::vector<pragma::animation::FlexControllerId> m_flexControllerIds;
         float m_fps = 24.f;
     };
 };

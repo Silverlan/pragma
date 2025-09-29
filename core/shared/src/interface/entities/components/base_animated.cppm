@@ -8,6 +8,8 @@ module;
 #include <mathutil/transform.hpp>
 #include <mathutil/uvec.h>
 #include <queue>
+#include "mathutil/uquat.h"
+
 
 export module pragma.shared:entities.components.base_animated;
 

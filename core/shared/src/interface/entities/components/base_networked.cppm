@@ -5,6 +5,10 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include <sharedutils/property/util_property.hpp>
+#include "mathutil/uvec.h"
+#include "mathutil/uquat.h"
+
+
 
 export module pragma.shared:entities.components.base_networked;
 

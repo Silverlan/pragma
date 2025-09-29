@@ -10,6 +10,8 @@ module;
 #include "mathutil/color.h"
 #include <format>
 #include <udm.hpp>
+#include "mathutil/uquat.h"
+
 
 export module pragma.shared:entities.base_entity;
 

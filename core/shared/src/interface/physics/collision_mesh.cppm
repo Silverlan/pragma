@@ -9,6 +9,10 @@ module;
 #include "udm.hpp"
 #include <vector>
 #include <memory>
+#include "mathutil/uvec.h"
+#include "mathutil/uquat.h"
+
+
 
 export module pragma.shared:physics.collision_mesh;
 

@@ -8,6 +8,8 @@ module;
 #include <iostream>
 #include <vector>
 #include "material.h"
+#include "mathutil/uvec.h"
+
 
 export module pragma.shared:model.mesh;
 

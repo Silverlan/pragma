@@ -6,6 +6,8 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <mathutil/color.h>
 #include <limits>
+#include "mathutil/uvec.h"
+
 
 export module pragma.shared:game.bullet_info;
 

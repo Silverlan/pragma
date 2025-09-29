@@ -6,6 +6,8 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <mathutil/glmutil.h>
 #include <vector>
+#include "mathutil/uvec.h"
+
 
 export module pragma.shared:math.seb;
 

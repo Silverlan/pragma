@@ -11,6 +11,10 @@ module;
 #include <mathutil/eulerangles.h>
 #include <mathutil/transform.hpp>
 #include <udm_types.hpp>
+#include "mathutil/uvec.h"
+#include "mathutil/uquat.h"
+
+
 
 export module pragma.shared:game.rig_config;
 

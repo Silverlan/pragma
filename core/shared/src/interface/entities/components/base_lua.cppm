@@ -8,6 +8,8 @@ module;
 #include "sharedutils/netpacket.hpp"
 #include <udm.hpp>
 #include <any>
+#include "mathutil/uvec.h"
+
 
 export module pragma.shared:entities.components.base_lua;
 

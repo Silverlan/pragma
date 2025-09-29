@@ -6,6 +6,8 @@ module;
 #include "pragma/networkdefinitions.h"
 #include "mathutil/uvec.h"
 #include <sharedutils/property/util_property.hpp>
+#include "mathutil/uquat.h"
+
 
 export module pragma.shared:entities.components.base_model;
 

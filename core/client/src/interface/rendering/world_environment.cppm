@@ -4,11 +4,15 @@
 module;
 
 #include "pragma/clientdefinitions.h"
+#include "sharedutils/property/util_property_color.hpp"
 #include <mathutil/color.h>
 #include <mathutil/glmutil.h>
 #include <memory>
 
 export module pragma.client:rendering.world_environment;
+
+import pragma.shared;
+
 export class DLLCLIENT WorldEnvironment : public std::enable_shared_from_this<WorldEnvironment> {
   public:
 	static std::shared_ptr<WorldEnvironment> Create();

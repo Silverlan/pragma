@@ -7,6 +7,10 @@ module;
 #include "luasystem.h"
 #include <mathutil/vertex.hpp>
 #include <sharedutils/datastream.h>
+#include "mathutil/uvec.h"
+#include "mathutil/uquat.h"
+
+
 
 export module pragma.shared:scripting.lua.classes.data_stream;
 

@@ -10,6 +10,8 @@ module;
 #include <sharedutils/util_weak_handle.hpp>
 #include <mathutil/glmutil.h>
 #include <vector>
+#include "mathutil/uvec.h"
+
 
 export module pragma.shared:physics.shape;
 

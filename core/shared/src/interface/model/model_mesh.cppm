@@ -12,6 +12,10 @@ module;
 #include <mathutil/transform.hpp>
 #include "udm.hpp"
 #include <optional>
+#include "mathutil/uvec.h"
+#include "mathutil/uquat.h"
+
+
 
 export module pragma.shared:model.model_mesh;
 

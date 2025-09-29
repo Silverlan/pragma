@@ -4,6 +4,14 @@
 #include "stdafx_client.h"
 #include <debug/api_dump_recorder.hpp>
 
+#ifdef PR_DEBUG_API_DUMP
+#include <prosper_context.hpp>
+#include <prosper_command_buffer.hpp>
+
+import :console.output;
+import :engine;
+#endif
+
 void LPARAM_enable_gfx_api_dump(const std::vector<std::string> &argv)
 {
 #ifdef PR_DEBUG_API_DUMP
@@ -14,12 +22,6 @@ void LPARAM_enable_gfx_api_dump(const std::vector<std::string> &argv)
 }
 
 #ifdef PR_DEBUG_API_DUMP
-#include <prosper_context.hpp>
-#include <prosper_command_buffer.hpp>
-
-import :engine;
-
-
 namespace pragma::debug {
 	// These are mainly used in the VS immediate window for debugging purposes
 	DLLCLIENT void dump_api_dump_recorder_ss(std::stringstream &ss, uint64_t addr)

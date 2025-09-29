@@ -7,6 +7,7 @@ module;
 #include "pragma/lua/luaapi.h"
 #include "mathutil/eulerangles.h"
 #include <mathutil/glmutil.h>
+#include "mathutil/uvec.h"
 
 #define LUA_MATRIX_MEMBERS_DEC(type)                                                                                                                                                                                                                                                             \
 	namespace Mat##type                                                                                                                                                                                                                                                                          \

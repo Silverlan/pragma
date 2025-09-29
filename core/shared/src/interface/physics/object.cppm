@@ -12,6 +12,8 @@ module;
 #include <sharedutils/def_handle.h>
 #include "sharedutils/util_shared_handle.hpp"
 #include <mathutil/transform.hpp>
+#include "mathutil/uvec.h"
+
 #ifdef __linux__
 #endif
 

@@ -11,6 +11,8 @@ module;
 #include <mathutil/umath.h>
 #include <sharedutils/callback_handler.h>
 #include <sharedutils/util_virtual_shared_from_this.hpp>
+#include "mathutil/uvec.h"
+
 
 export module pragma.shared:audio.sound;
 

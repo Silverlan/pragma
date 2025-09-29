@@ -8,6 +8,8 @@ module;
 #include <vector>
 #include <unordered_map>
 #include <stdint.h>
+#include "mathutil/uvec.h"
+
 
 export module pragma.shared:math.ico_sphere;
 

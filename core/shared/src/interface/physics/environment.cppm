@@ -10,6 +10,10 @@ module;
 #include <sharedutils/util_shared_handle.hpp>
 #include <vector>
 #include <unordered_map>
+#include "mathutil/uvec.h"
+#include "mathutil/uquat.h"
+
+
 
 export module pragma.shared:physics.environment;
 

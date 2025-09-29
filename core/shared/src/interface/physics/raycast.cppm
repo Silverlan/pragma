@@ -9,6 +9,10 @@ module;
 #include <sharedutils/util_weak_handle.hpp>
 #include <memory>
 #include "material.h"
+#include "mathutil/uvec.h"
+#include "mathutil/uquat.h"
+
+
 
 export module pragma.shared:physics.raycast;
 

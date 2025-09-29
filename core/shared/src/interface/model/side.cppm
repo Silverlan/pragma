@@ -7,6 +7,8 @@ module;
 #include <vector>
 #include <mathutil/glmutil.h>
 #include "material.h"
+#include "mathutil/uvec.h"
+
 
 export module pragma.shared:model.side;
 

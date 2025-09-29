@@ -10,6 +10,8 @@ module;
 #include <mathutil/uquat.h>
 #include <mathutil/transform.hpp>
 #include <vector>
+#include "mathutil/uvec.h"
+
 
 export module pragma.shared:physics.collision_object;
 

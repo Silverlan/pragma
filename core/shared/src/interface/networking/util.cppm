@@ -8,6 +8,10 @@ module;
 #include <sharedutils/netpacket.hpp>
 #include <sharedutils/functioncallback.h>
 #include "mathutil/eulerangles.h"
+#include "mathutil/uvec.h"
+#include "mathutil/uquat.h"
+
+
 
 export module pragma.shared:networking.util;
 

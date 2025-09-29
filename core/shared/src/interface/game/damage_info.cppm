@@ -6,6 +6,8 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <mathutil/glmutil.h>
 #include <iostream>
+#include "mathutil/uvec.h"
+
 
 export module pragma.shared:game.damage_info;
 

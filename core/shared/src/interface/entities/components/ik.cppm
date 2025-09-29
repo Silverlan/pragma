@@ -6,6 +6,8 @@ module;
 #include "pragma/networkdefinitions.h"
 #include "pragma/buss_ik/Jacobian.h"
 #include <mathutil/uvec.h>
+#include "mathutil/uquat.h"
+
 
 export module pragma.shared:entities.components.ik;
 

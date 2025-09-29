@@ -6,6 +6,10 @@ module;
 #include "pragma/networkdefinitions.h"
 #include "material.h"
 #include <mathutil/plane.hpp>
+#include "mathutil/uvec.h"
+#include "mathutil/uquat.h"
+
+
 
 export module pragma.shared:entities.components.base_surface;
 

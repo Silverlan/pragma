@@ -12,6 +12,7 @@ export import :scripting.lua.callback_handler;
 export import :scripting.lua.class_manager;
 export import :scripting.lua.classes;
 export import :scripting.lua.custom_constructor;
+export import :scripting.lua.entity_iterator;
 export import :scripting.lua.error_handling;
 export import :scripting.lua.handle_holder;
 export import :scripting.lua.include;

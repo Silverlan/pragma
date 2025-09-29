@@ -7,6 +7,10 @@ module;
 #include <sharedutils/property/util_property_vector.h>
 #include <sharedutils/property/util_property_quat.hpp>
 #include "mathutil/transform.hpp"
+#include "mathutil/uvec.h"
+#include "mathutil/uquat.h"
+
+
 
 export module pragma.shared:entities.components.base_transform;
 

@@ -19,6 +19,9 @@ module;
 #ifdef _WIN32
 #if __cpp_lib_format >= 202207L
 #include <format>
+#include "mathutil/uvec.h"
+#include "mathutil/uquat.h"
+
 #endif
 #endif
 

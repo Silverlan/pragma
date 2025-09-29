@@ -6,6 +6,8 @@ module;
 #include <cinttypes>
 #include <mathutil/umath.h>
 #include "udm.hpp"
+#include "mathutil/uvec.h"
+
 
 export module pragma.shared:entities.enums;
 

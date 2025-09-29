@@ -9,6 +9,8 @@ module;
 #include <mathutil/glmutil.h>
 #include "mathutil/uquat.h"
 #include "mathutil/eulerangles.h"
+#include "mathutil/uvec.h"
+
 
 export module pragma.shared:math.orientation;
 

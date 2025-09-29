@@ -12,6 +12,10 @@ module;
 #include <bvh/v2/thread_pool.h>
 #include <bvh/v2/default_builder.h>
 #include <memory>
+#include "mathutil/uvec.h"
+#include "mathutil/uquat.h"
+
+
 
 export module pragma.shared:entities.components.bvh_data;
 

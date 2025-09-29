@@ -4,6 +4,8 @@
 module;
 
 #include "pragma/networkdefinitions.h"
+#include "mathutil/uvec.h"
+
 
 export module pragma.shared:entities.components.point.constraints.base_dof;
 

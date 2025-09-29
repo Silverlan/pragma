@@ -8,6 +8,10 @@ module;
 #include <sharedutils/def_handle.h>
 #include <mathutil/transform.hpp>
 #include <vector>
+#include "mathutil/uvec.h"
+#include "mathutil/uquat.h"
+
+
 
 export module pragma.shared:physics.constraint;
 

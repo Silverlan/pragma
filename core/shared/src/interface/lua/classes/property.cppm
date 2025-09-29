@@ -13,6 +13,10 @@ module;
 #include <sharedutils/property/util_property_matrix.hpp>
 #include <sharedutils/property/util_property_euler_angles.hpp>
 #include <sharedutils/property/util_property_transform.hpp>
+#include "mathutil/uvec.h"
+#include "mathutil/uquat.h"
+
+
 
 export module pragma.shared:scripting.lua.classes.property;
 

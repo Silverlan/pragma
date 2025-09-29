@@ -8,6 +8,10 @@ module;
 #include "mathutil/eulerangles.h"
 #include "mathutil/vertex.hpp"
 #include <mathutil/glmutil.h>
+#include "mathutil/uvec.h"
+#include "mathutil/uquat.h"
+
+
 
 export module pragma.shared:scripting.lua.classes.vector;
 

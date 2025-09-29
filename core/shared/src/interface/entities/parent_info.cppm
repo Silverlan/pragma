@@ -9,6 +9,8 @@ module;
 #include <vector>
 #include <optional>
 #include "mathutil/uquat.h"
+#include "mathutil/uvec.h"
+
 
 export module pragma.shared:entities.parent_info;
 

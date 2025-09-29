@@ -19,6 +19,8 @@ module;
 #include <fsys/filesystem.h>
 #include <sharedutils/util_weak_handle.hpp>
 #include <sharedutils/util_shared_handle.hpp>
+#include "mathutil/uvec.h"
+
 
 export module pragma.shared:game.game;
 

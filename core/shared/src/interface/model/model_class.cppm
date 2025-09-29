@@ -10,6 +10,8 @@ module;
 #include <udm_types.hpp>
 #include <sharedutils/def_handle.h>
 #include <memory>
+#include "mathutil/uquat.h"
+
 
 export module pragma.shared:model.model;
 

@@ -7,6 +7,8 @@ module;
 #include <mathutil/glmutil.h>
 #include <string>
 #include <vector>
+#include "mathutil/uvec.h"
+
 
 export module pragma.shared:entities.components.point.constraints.base;
 

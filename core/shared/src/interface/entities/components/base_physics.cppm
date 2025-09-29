@@ -6,6 +6,10 @@ module;
 #include "pragma/networkdefinitions.h"
 #include "mathutil/umath.h"
 #include <sharedutils/util_shared_handle.hpp>
+#include "mathutil/uvec.h"
+#include "mathutil/uquat.h"
+
+
 
 export module pragma.shared:entities.components.base_physics;
 

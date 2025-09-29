@@ -8,6 +8,8 @@ module;
 #include <mathutil/uvec.h>
 #include <unordered_map>
 #include <string>
+#include "mathutil/uquat.h"
+
 
 export module pragma.shared:model.animation.meta_rig;
 

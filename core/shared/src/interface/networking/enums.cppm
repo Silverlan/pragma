@@ -5,11 +5,12 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include "mathutil/umath.h"
-#include "networkmanager/interface/nwm_manager.hpp"
 #include <cinttypes>
 #include <string>
 
 export module pragma.shared:networking.enums;
+
+export import pragma.network_manager;
 
 export namespace pragma::networking {
 	using Port = uint16_t;

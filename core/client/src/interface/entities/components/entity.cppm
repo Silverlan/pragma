@@ -4,9 +4,9 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "sharedutils/netpacket.hpp"
 
 export module pragma.client:entities.components.entity;
+
 export namespace pragma {
 	class DLLCLIENT CBaseNetComponent : public BaseNetComponent {
 	  public:

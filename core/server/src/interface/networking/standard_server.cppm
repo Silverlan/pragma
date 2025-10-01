@@ -4,9 +4,6 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include <servermanager/interface/sv_nwm_manager.hpp>
-#include <servermanager/interface/sv_nwm_serverclient.hpp>
-#include <networkmanager/udp_handler/udp_message_dispatcher.h>
 #include <sharedutils/util_weak_handle.hpp>
 
 export module pragma.server.networking.standard_server;

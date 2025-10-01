@@ -5,13 +5,13 @@ module;
 
 #include "luasystem.h"
 #include <util_image_buffer.hpp>
-#include <sharedutils/netpacket.hpp>
 #include <sharedutils/util_file.h>
 #include <sharedutils/scope_guard.h>
 #include <sharedutils/util_path.hpp>
 #include <luainterface.hpp>
 #include <luabind/class_info.hpp>
 #include <fsys/ifile.hpp>
+#include <sharedutils/util_hair.hpp>
 #include <sharedutils/util_markup_file.hpp>
 
 module pragma.shared;
@@ -59,7 +59,6 @@ luabind::detail::class_rep *Lua::get_crep(luabind::object o)
 	return crep;
 }
 
-#include <sharedutils/util_hair.hpp>
 static Vector3 calc_hair_normal(const Vector3 &flowNormal, const Vector3 &faceNormal)
 {
 	auto hairNormal = flowNormal - uvec::project(flowNormal, faceNormal);

@@ -430,7 +430,7 @@ void CALSound::Terminate()
 	m_bTerminated = true;
 }
 
-static_assert(sizeof(al::EffectParams) == sizeof(ALSound::EffectParams));
+static_assert(sizeof(al::EffectParams) == sizeof(SoundEffectParams));
 bool CALSound::AddEffect(al::IEffect &effect, const EffectParams &params) { return (*this)->AddEffect(effect, reinterpret_cast<const al::EffectParams &>(params)); }
 bool CALSound::AddEffect(al::IEffect &effect, uint32_t &slotId, const EffectParams &params) { return (*this)->AddEffect(effect, slotId, reinterpret_cast<const al::EffectParams &>(params)); }
 bool CALSound::AddEffect(al::IEffect &effect, float gain) { return (*this)->AddEffect(effect, gain); }
@@ -972,13 +972,13 @@ void CALSound::SetDirectFilter(const EffectParams &params)
 		return;
 	(*this)->SetDirectFilter(reinterpret_cast<const al::EffectParams &>(params));
 }
-const ALSound::EffectParams &CALSound::GetDirectFilter() const
+const SoundEffectParams &CALSound::GetDirectFilter() const
 {
 	if(m_bTerminated == true) {
-		static ALSound::EffectParams params {};
+		static SoundEffectParams params {};
 		return params;
 	}
-	return reinterpret_cast<const ALSound::EffectParams &>((*this)->GetDirectFilter());
+	return reinterpret_cast<const SoundEffectParams &>((*this)->GetDirectFilter());
 }
 bool CALSound::AddEffect(const std::string &effectName, const EffectParams &params)
 {

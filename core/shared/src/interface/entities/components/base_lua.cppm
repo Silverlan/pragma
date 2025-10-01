@@ -5,10 +5,13 @@ module;
 
 #include "pragma/lua/luaapi.h"
 #include "pragma/lua/types/udm.hpp"
-#include "sharedutils/netpacket.hpp"
 #include <udm.hpp>
 #include <any>
 #include "mathutil/uvec.h"
+#include "pragma/networkdefinitions.h"
+#include "mathutil/umath.h"
+
+
 
 
 export module pragma.shared:entities.components.base_lua;

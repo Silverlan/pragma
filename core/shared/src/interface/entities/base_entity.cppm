@@ -11,6 +11,8 @@ module;
 #include <format>
 #include <udm.hpp>
 #include "mathutil/uquat.h"
+#include "mathutil/umath.h"
+
 
 
 export module pragma.shared:entities.base_entity;
@@ -312,8 +314,6 @@ export {
 
 	DLLNETWORK Con::c_cout &operator<<(Con::c_cout &os, const EntityHandle &ent);
 	DLLNETWORK std::ostream &operator<<(std::ostream &os, const EntityHandle ent);
-
-	DLLNETWORK bool operator==(const EntityHandle &a, const EntityHandle &b);
 
 	template<>
 	struct std::formatter<BaseEntity> : std::formatter<std::string> {

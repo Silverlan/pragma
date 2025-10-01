@@ -4,15 +4,13 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "sharedutils/property/util_property_vector.h"
 #include "mathutil/uvec.h"
 #include "mathutil/uquat.h"
-
-
 
 export module pragma.shared:entities.components.orientation;
 
 export import :entities.components.base;
+export import pragma.util;
 
 export namespace pragma {
 	class DLLNETWORK OrientationComponent final : public BaseEntityComponent {

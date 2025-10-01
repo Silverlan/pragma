@@ -9,7 +9,6 @@
 #include <vector>
 #include <string>
 
-class BaseEntity;
 namespace pragma {
 	namespace ai {
 		class DLLSERVER BehaviorParameter {

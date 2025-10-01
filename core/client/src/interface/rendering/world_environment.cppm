@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "sharedutils/property/util_property_color.hpp"
 #include <mathutil/color.h>
 #include <mathutil/glmutil.h>
 #include <memory>

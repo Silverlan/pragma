@@ -15,24 +15,6 @@ export import :util.timer_handle;
 export {
 	class Game;
 	class DLLNETWORK Timer {
-	private:
-		TimerType m_timeType;
-		float m_delay;
-		unsigned int m_reps;
-		LuaFunctionObject m_luaFunction {};
-		CallbackHandle m_callback;
-		double m_start;
-		bool m_bRemove;
-		bool m_bRunning;
-		bool m_bIsValid;
-		std::vector<std::shared_ptr<TimerHandle>> m_handles;
-
-		double GetCurTime(Game *game);
-		double GetDeltaTime(Game *game);
-	protected:
-		float m_next;
-		virtual void Reset();
-		Timer();
 	public:
 		Timer(float delay, unsigned int reps, LuaFunctionObject luaFunction, TimerType timetype = TimerType::CurTime);
 		Timer(float delay, unsigned int reps, const CallbackHandle &hCallback, TimerType timetype = TimerType::CurTime);
@@ -56,5 +38,23 @@ export {
 		void SetCall(Game *game, const CallbackHandle &hCallback);
 
 		void Call(Game *game);
+	private:
+		TimerType m_timeType;
+		float m_delay;
+		unsigned int m_reps;
+		LuaFunctionObject m_luaFunction {};
+		CallbackHandle m_callback;
+		double m_start;
+		bool m_bRemove;
+		bool m_bRunning;
+		bool m_bIsValid;
+		std::vector<std::shared_ptr<TimerHandle>> m_handles;
+
+		double GetCurTime(Game *game);
+		double GetDeltaTime(Game *game);
+	protected:
+		float m_next;
+		virtual void Reset();
+		Timer();
 	};
 };

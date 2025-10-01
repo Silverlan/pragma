@@ -21,8 +21,8 @@ export import :entities.manager;
 export import :entities.enums;
 
 export {
+	class BaseEntity;
 	namespace pragma {
-		class BaseEntity;
 		class EntityComponentManager;
 		class DLLNETWORK BaseEntityComponentSystem {
 		public:

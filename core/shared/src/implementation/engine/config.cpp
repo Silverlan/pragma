@@ -5,6 +5,7 @@ module;
 
 #include <fsys/filesystem.h>
 #include <sharedutils/util_string.h>
+#include "pragma/logging.hpp"
 
 module pragma.shared;
 

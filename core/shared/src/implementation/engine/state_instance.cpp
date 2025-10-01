@@ -7,7 +7,7 @@ module;
 
 module pragma.shared;
 
-import :version;
+import :engine;
 
 Engine::StateInstance::StateInstance(const std::shared_ptr<msys::MaterialManager> &matManager, Material *matErr) : materialManager {matManager}, state(nullptr)
 {

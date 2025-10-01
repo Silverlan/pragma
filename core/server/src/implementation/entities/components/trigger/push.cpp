@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_server.h"
 #include <sharedutils/util_string.h>
-#include "sharedutils/netpacket.hpp"
 #include <sharedutils/util.h>
 
 module pragma.server.entities.components.triggers.push;

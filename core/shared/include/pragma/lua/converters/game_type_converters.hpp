@@ -12,16 +12,6 @@
 #include <array>
 #include <unordered_map>
 
-class Game;
-class NetworkState;
-class Engine;
-class BaseEntity;
-namespace pragma {
-	class BaseEntityComponent;
-};
-namespace pragma::physics {
-	class IEnvironment;
-};
 namespace luabind {
 	template<typename T, T (*FUNCTION)(lua_State *)>
 	struct parameter_emplacement_converter {

@@ -4,10 +4,11 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <sharedutils/netpacket.hpp>
 #include "pragma/lua/luaapi.h"
 
 export module pragma.shared:scripting.lua.classes.net_packet;
+
+export import pragma.util;
 
 export {
 	class BaseEntity;

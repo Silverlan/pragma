@@ -6,12 +6,7 @@ module;
 #include "stdafx_server.h"
 #include "wms_shared.h"
 #include "wms_message.h"
-#include "networkmanager/udp_handler/udp_message_dispatcher.h"
 #include "wmserverdata.h"
-#include <servermanager/connection/sv_nwm_tcpconnection.h>
-#include <servermanager/connection/sv_nwm_udpconnection.h>
-#include <servermanager/interface/sv_nwm_serverclient.hpp>
-#include <servermanager/interface/sv_nwm_manager_create.hpp>
 #include <sharedutils/util_clock.hpp>
 
 module pragma.server.networking.standard_server;

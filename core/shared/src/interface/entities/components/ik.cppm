@@ -4,10 +4,12 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/buss_ik/Jacobian.h"
 #include <mathutil/uvec.h>
 #include "mathutil/uquat.h"
-
+#ifdef _WIN32
+#include <Windows.h>
+#endif
+#include "pragma/buss_ik/Jacobian.h"
 
 export module pragma.shared:entities.components.ik;
 

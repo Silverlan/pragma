@@ -11,6 +11,8 @@ module;
 #include <sharedutils/def_handle.h>
 #include <memory>
 #include "mathutil/uquat.h"
+#include "mathutil/umath.h"
+
 
 
 export module pragma.shared:model.model;

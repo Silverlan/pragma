@@ -8,7 +8,7 @@ module;
 
 module pragma.shared;
 
-import :assets.asset_conversion;
+import :assets.conversion;
 
 bool util::port_source2_map(NetworkState *nw, const std::string &path)
 {

@@ -4,8 +4,6 @@
 module;
 
 #include "stdafx_server.h"
-#include <servermanager/interface/sv_nwm_manager.hpp>
-#include <networkmanager/nwm_error_handle.h>
 
 module pragma.server.networking.standard_server;
 

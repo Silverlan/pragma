@@ -4,8 +4,6 @@
 module;
 
 #include "stdafx_server.h"
-#include <servermanager/sv_nwm_recipientfilter.h>
-#include <sharedutils/netpacket.hpp>
 
 module pragma.server.scripting.lua.libraries.net;
 

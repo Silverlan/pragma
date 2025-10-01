@@ -5,8 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include "luasystem.h"
-#include <sharedutils/netpacket.hpp>
-#include <networkmanager/interface/nwm_manager.hpp>
 
 module pragma.client;
 

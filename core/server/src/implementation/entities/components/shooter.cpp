@@ -4,9 +4,7 @@
 module;
 
 #include "stdafx_server.h"
-#include "sharedutils/netpacket.hpp"
 #include <sharedutils/scope_guard.h>
-#include <servermanager/interface/sv_nwm_manager.hpp>
 
 module pragma.server.entities.components.shooter;
 

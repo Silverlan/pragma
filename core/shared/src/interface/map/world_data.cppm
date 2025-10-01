@@ -7,6 +7,8 @@ module;
 #include <udm.hpp>
 #include "util_image_buffer.hpp"
 #include "material.h"
+#include "mathutil/umath.h"
+
 
 export module pragma.shared:map.world_data;
 

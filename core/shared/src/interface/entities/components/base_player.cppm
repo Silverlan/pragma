@@ -5,7 +5,6 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include "mathutil/uquat.h"
-#include <sharedutils/property/util_property.hpp>
 #include "mathutil/uvec.h"
 
 

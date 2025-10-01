@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include <clientmanager/interface/cl_nwm_manager.hpp>
 #include <iostream>
 
 import pragma.client;

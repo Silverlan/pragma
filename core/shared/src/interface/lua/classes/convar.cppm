@@ -6,6 +6,8 @@ module;
 #include "pragma/lua/luaapi.h"
 #include "pragma/lua/types/udm.hpp"
 #include "udm.hpp"
+#include "pragma/networkdefinitions.h"
+
 
 export module pragma.shared:scripting.lua.classes.convar;
 

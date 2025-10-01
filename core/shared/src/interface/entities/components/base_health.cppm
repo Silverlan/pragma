@@ -4,7 +4,7 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <sharedutils/property/util_property.hpp>
+#include <cinttypes>
 
 export module pragma.shared:entities.components.base_health;
 

@@ -4,13 +4,15 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <sharedutils/netpacket.hpp>
-#include <networkmanager/nwm_message.h>
+#include <unordered_map>
+#include <string>
 #include <unordered_map>
 
 #define COMMA ,
 
 export module pragma.shared:networking.net_message_map;
+
+export import pragma.network_manager;
 
 export {
 	using ServerClientHandle = void*;

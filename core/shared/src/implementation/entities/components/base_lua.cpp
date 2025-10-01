@@ -5,7 +5,6 @@ module;
 
 #include <sharedutils/scope_guard.h>
 #include <sharedutils/datastream.h>
-#include <sharedutils/netpacket.hpp>
 #include <udm.hpp>
 
 module pragma.shared;

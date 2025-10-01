@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <sharedutils/property/util_property.hpp>
 
 export module pragma.shared:entities.components.base_flammable;
 

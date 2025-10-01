@@ -3,12 +3,11 @@
 
 module;
 
+#include <iostream>
 
 module pragma.shared;
 
 import :entities.base_entity;
-
-import pragma.entities.components;
 
 Game &BaseEntity::GetGame() const { return *GetNetworkState()->GetGameState(); }
 BaseEntity *BaseEntity::CreateChild(const std::string &className)
@@ -411,8 +410,6 @@ CallbackHandle BaseEntity::CallOnRemove(const CallbackHandle &hCallback)
 }
 
 ////////////////////////////////////
-
-DLLNETWORK bool operator==(const EntityHandle &a, const EntityHandle &b) { return a.get() == b.get(); }
 
 DLLNETWORK Con::c_cout &operator<<(Con::c_cout &os, const EntityHandle &ent)
 {

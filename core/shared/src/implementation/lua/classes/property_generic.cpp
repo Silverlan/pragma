@@ -3,7 +3,6 @@
 
 module;
 
-#include <sharedutils/property/util_property.hpp>
 #include <luainterface.hpp>
 
 module pragma.shared;

@@ -13,7 +13,6 @@ module;
 #include <mathutil/color.h>
 #include "prosper_descriptor_set_group.hpp"
 #include <queue>
-#include <sharedutils/property/util_property.hpp>
 #include <sharedutils/util_shared_handle.hpp>
 #include <alsoundsystem.hpp>
 #include <alsoundsystem_create_effect.hpp>

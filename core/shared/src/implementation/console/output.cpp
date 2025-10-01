@@ -3,12 +3,18 @@
 
 module;
 
+#include "pragma/networkdefinitions.h"
 #include <sharedutils/util_debug.h>
 #include <mathutil/color.h>
+#include <thread>
 
 module pragma.shared;
 
 import :console.output;
+
+#define PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(v, type)                                                                                                                                                                                                                                    \
+    if(Con::detail::outputCallback != nullptr)                                                                                                                                                                                                                                                   \
+        Con::invoke_output_callback(v, type);
 
 DLLNETWORK Con::c_cout Con::cout;
 DLLNETWORK Con::c_cwar Con::cwar;

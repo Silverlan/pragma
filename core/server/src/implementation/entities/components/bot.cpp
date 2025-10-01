@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_server.h"
-#include "sharedutils/netpacket.hpp"
 
 module pragma.server.entities.components.bot;
 

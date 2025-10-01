@@ -5,6 +5,8 @@ module;
 
 #include <material_manager2.hpp>
 #include <sharedutils/util_path.hpp>
+#include "sharedutils/util_string.h"
+#include "materialmanager.h"
 #include <fsys/ifile.hpp>
 #include <udm.hpp>
 

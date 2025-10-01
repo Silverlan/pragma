@@ -9,9 +9,16 @@ module;
 #include <spdlog/formatter.h>
 #include <spdlog/fmt/bundled/format.h>
 #include <sharedutils/magic_enum.hpp>
+#include "sharedutils/util_file.h"
+#include "fsys/filesystem.h"
+#include <atomic>
+#include "mathutil/umath.h"
+#include "pragma/logging.hpp"
 
 module pragma.shared;
 
+import :console.enums;
+import :console.output;
 import :core.logging;
 
 const std::string PRAGMA_LOGGER_NAME = "pragma_logger";
@@ -212,8 +219,8 @@ class SpdPragmaPrefixFormatter : public spdlog::custom_flag_formatter {
 };
 
 namespace pragma::logging::detail {
-	extern DLLNETWORK std::atomic<bool> shouldLogOutput;
-	extern DLLNETWORK std::shared_ptr<spdlog::logger> consoleOutputLogger;
+	extern std::atomic<bool> shouldLogOutput;
+	extern std::shared_ptr<spdlog::logger> consoleOutputLogger;
 };
 static std::optional<std::string> g_logFileName = "log.txt";
 static bool g_loggerInitialized = false;

@@ -11,6 +11,7 @@ module;
 export module pragma.shared:model.animation.enums;
 
 export {
+    constexpr uint32_t PRAGMA_ANIMATION_VERSION = 2;
 	enum class Activity : uint16_t {
 		Invalid,
 

@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_server.h"
 #include "luasystem.h"
-#include <servermanager/interface/sv_nwm_manager.hpp>
 
 module pragma.server.scripting.lua.classes.entity;
 

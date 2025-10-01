@@ -3,6 +3,8 @@
 
 module;
 
+#include "sharedutils/def_handle.h"
+
 export module pragma.shared:util;
 
 export import :util.any;

@@ -12,6 +12,8 @@ module;
 #include <unordered_map>
 #include "mathutil/uvec.h"
 #include "mathutil/uquat.h"
+#include "mathutil/umath.h"
+
 
 
 

@@ -7,7 +7,7 @@ module;
 
 module pragma.shared;
 
-import :version;
+import :engine.version;
 
 static util::Version engine_version(ENGINE_VERSION_MAJOR, ENGINE_VERSION_MINOR, ENGINE_VERSION_REVISION);
 util::Version &get_engine_version() { return engine_version; }

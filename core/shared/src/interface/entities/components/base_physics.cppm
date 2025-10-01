@@ -17,6 +17,7 @@ export import :entities.components.base;
 export import :physics;
 
 export {
+	class Frame;
 	class Model;
 	namespace pragma {
 		namespace physics {

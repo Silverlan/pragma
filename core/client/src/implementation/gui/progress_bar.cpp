@@ -6,7 +6,6 @@ module;
 #include "stdafx_client.h"
 #include <sharedutils/util.h>
 #include <mathutil/umath.h>
-#include <sharedutils/property/util_property_color.hpp>
 
 module pragma.client;
 

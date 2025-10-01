@@ -5,7 +5,6 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include "mathutil/uvec.h"
-#include "sharedutils/netpacket.hpp"
 
 export module pragma.shared:entities.components.shooter;
 

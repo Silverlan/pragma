@@ -15,6 +15,7 @@ module;
 module pragma.shared;
 
 import :ai.nav_system;
+import :console.output;
 
 RcNavMesh::RcNavMesh(const std::shared_ptr<rcPolyMesh> &polyMesh, const std::shared_ptr<rcPolyMeshDetail> &polyMeshDetail, const std::shared_ptr<dtNavMesh> &navMesh) : m_polyMesh(polyMesh), m_polyMeshDetail(polyMeshDetail), m_navMesh(navMesh) {}
 

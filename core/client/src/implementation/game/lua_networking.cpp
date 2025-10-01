@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include <networkmanager/interface/nwm_manager.hpp>
 
 module pragma.client;
 

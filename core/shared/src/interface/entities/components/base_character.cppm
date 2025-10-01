@@ -8,7 +8,6 @@ module;
 #include <thread>
 #include <mutex>
 #include <atomic>
-#include <sharedutils/property/util_property_vector.h>
 #include "mathutil/uquat.h"
 
 

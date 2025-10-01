@@ -6,12 +6,12 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <deque>
 #include <mutex>
-#include <networkmanager/nwm_endpoint.h>
 #include <sharedutils/util_clock.hpp>
-#include <sharedutils/netpacket.hpp>
 #include <sharedutils/scope_guard.h>
 
 export module pragma.shared:networking.message_tracker;
+
+export import pragma.network_manager;
 
 export namespace pragma {
 	namespace networking {

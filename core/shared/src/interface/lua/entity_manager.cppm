@@ -1,12 +1,16 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __SH_LUA_ENTITY_MANAGER_H__
-#define __SH_LUA_ENTITY_MANAGER_H__
+module;
 
 #include <unordered_map>
+#include "pragma/lua/luaapi.h"
 
-class DLLNETWORK LuaEntityManager {
+export module pragma.shared:scripting.lua.entity_manager;
+
+export import :entities.enums;
+
+export class DLLNETWORK LuaEntityManager {
   public:
 	struct DLLNETWORK EntityInfo {
 		luabind::object classObject;
@@ -27,5 +31,3 @@ class DLLNETWORK LuaEntityManager {
 	std::unordered_map<std::string, EntityInfo> m_ents;
 	std::unordered_map < std::string, std::pair<luabind::object,pragma::ComponentId>> m_components;
 };
-
-#endif

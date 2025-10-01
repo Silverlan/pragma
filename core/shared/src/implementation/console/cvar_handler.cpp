@@ -4,9 +4,13 @@
 module;
 
 #include <algorithm>
+#include <memory>
+#include "udm.hpp"
+#include "sharedutils/util_string.h"
 
 module pragma.shared;
 
+import :console.convar;
 import :console.cvar_handler;
 
 static std::unordered_map<std::string, std::shared_ptr<PtrConVar>> *conVarPtrs = NULL;

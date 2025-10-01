@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_server.h"
-#include <servermanager/interface/sv_nwm_manager.hpp>
 
 module pragma.server.entities.lua;
 

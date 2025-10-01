@@ -12,8 +12,6 @@ module;
 #include "mathutil/uvec.h"
 #include "mathutil/uquat.h"
 
-#define PRAGMA_ANIMATION_VERSION 2
-
 export module pragma.shared:model.animation.animation;
 
 import panima;

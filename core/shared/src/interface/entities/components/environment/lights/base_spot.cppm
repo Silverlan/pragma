@@ -5,7 +5,6 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include "mathutil/umath_lighting.hpp"
-#include "sharedutils/property/util_property.hpp"
 #include <string>
 #include "mathutil/uvec.h"
 

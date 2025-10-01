@@ -4,8 +4,6 @@
 module;
 
 #include "stdafx_server.h"
-#include "sharedutils/netpacket.hpp"
-#include <servermanager/interface/sv_nwm_manager.hpp>
 
 module pragma.server.entities.components.lua;
 

@@ -4,7 +4,8 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <sharedutils/property/util_property.hpp>
+#include "mathutil/umath.h"
+#include <string>
 
 export module pragma.shared:entities.components.base_io;
 

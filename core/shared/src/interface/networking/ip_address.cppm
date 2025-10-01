@@ -4,7 +4,8 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <networkmanager/wrappers/nwm_ip_address.hpp>
+#include <string>
+#include <cinttypes>
 
 export module pragma.shared:networking.ip_address;
 

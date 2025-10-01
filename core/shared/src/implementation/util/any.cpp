@@ -3,7 +3,6 @@
 
 module;
 
-#include <sharedutils/netpacket.hpp>
 #include <sharedutils/datastream.h>
 #include <mathutil/color.h>
 

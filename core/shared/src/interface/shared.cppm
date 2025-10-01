@@ -21,6 +21,6 @@ export import :model;
 export import :network_state;
 export import :networking;
 export import :physics;
-export import :scripting;
+export import :scripting.lua;
 export import :string;
 export import :util;

@@ -9,10 +9,12 @@ module;
 #include <sharedutils/util_string.h>
 #include <sharedutils/util_path.hpp>
 #include <sharedutils/magic_enum.hpp>
+#include "udm.hpp"
 
 module pragma.shared;
 
-import :core.locale;
+import :console.output;
+import pragma.locale;
 
 #undef CreateFile
 

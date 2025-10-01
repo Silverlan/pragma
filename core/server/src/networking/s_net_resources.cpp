@@ -3,7 +3,6 @@
 
 #include "stdafx_server.h"
 #include <fsys/filesystem.h>
-#include <servermanager/sv_nwm_recipientfilter.h>
 #include <material_property_block_view.hpp>
 #include <material_manager2.hpp>
 #include <sharedutils/util_file.h>

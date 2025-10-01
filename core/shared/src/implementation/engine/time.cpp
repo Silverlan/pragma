@@ -4,6 +4,7 @@
 module;
 
 #include <sharedutils/util.h>
+#include <cassert>
 #ifdef _WIN32
 #include <Mmsystem.h>
 #endif

@@ -6,7 +6,6 @@ module;
 #include "stdafx_server.h"
 
 // --template-include-location
-#include <sharedutils/netpacket.hpp>
 
 module pragma.server.game;
 

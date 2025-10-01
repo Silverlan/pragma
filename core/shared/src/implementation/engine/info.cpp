@@ -4,10 +4,11 @@
 module;
 
 #include <sharedutils/util_string.h>
+#include "fsys/filesystem.h"
 
 module pragma.shared;
 
-import :engine_info;
+import :engine.info;
 
 #define PRAGMA_ENGINE_NAME "Pragma"
 #define PRAGMA_AUTHOR_EMAIL "mail@pragma-engine.com"
@@ -63,7 +64,7 @@ const std::vector<std::string> engine_info::get_supported_audio_formats()
 	return {"ogg", "wav", "mp3"};
 }
 
-DLLNETWORK std::optional<engine_info::GitInfo> engine_info::get_git_info()
+std::optional<engine_info::GitInfo> engine_info::get_git_info()
 {
 	auto f = filemanager::open_file("git_info.txt", filemanager::FileMode::Read, nullptr, fsys::SearchFlags::Local | fsys::SearchFlags::NoMounts);
 	if(f == nullptr)

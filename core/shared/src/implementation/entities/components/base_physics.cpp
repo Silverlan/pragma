@@ -3,7 +3,6 @@
 
 module;
 
-#include <sharedutils/netpacket.hpp>
 #include <udm.hpp>
 
 module pragma.shared;

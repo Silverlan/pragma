@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_server.h"
-#include "sharedutils/netpacket.hpp"
 #include <sharedutils/util.h>
 
 module pragma.server.entities.components.audio.dsp.equalizer;

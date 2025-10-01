@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_server.h"
-#include <servermanager/sv_nwm_recipientfilter.h>
 #include "luasystem.h"
 #include <sharedutils/util_string.h>
 #include <udm.hpp>

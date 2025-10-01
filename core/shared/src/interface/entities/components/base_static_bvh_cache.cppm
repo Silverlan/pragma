@@ -12,6 +12,7 @@ export module pragma.shared:entities.components.base_static_bvh_cache;
 
 export import :entities.components.base_bvh;
 export import :entities.components.base_static_bvh_user;
+export import :util.functional_parallel_worker;
 
 export namespace pragma {
 	class DLLNETWORK BaseStaticBvhCacheComponent : public BaseBvhComponent {

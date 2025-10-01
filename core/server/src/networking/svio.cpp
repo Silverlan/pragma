@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_server.h"
-#include <servermanager/interface/sv_nwm_manager.hpp>
 
 import pragma.server.entities;
 import pragma.server.entities.components;

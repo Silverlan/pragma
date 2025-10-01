@@ -11,7 +11,6 @@ module;
 #include <prosper_render_pass.hpp>
 #include <prosper_swap_command_buffer.hpp>
 #include <shader/prosper_shader_copy_image.hpp>
-#include <sharedutils/property/util_property_color.hpp>
 #include <sharedutils/util_hash.hpp>
 #include <luabind/out_value_policy.hpp>
 #include <util_formatted_text.hpp>

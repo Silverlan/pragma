@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_server.h"
-#include "servermanager/interface/sv_nwm_manager.hpp"
 #include "wmserverdata.h"
 #include "luasystem.h"
 #include <material_manager2.hpp>

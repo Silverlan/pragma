@@ -6,10 +6,6 @@ module;
 #include <unordered_set>
 #include <sharedutils/util_file.h>
 
-module pragma.shared;
-
-import :scripting.lua.libraries.import;
-
 #if 0
 #include <assimp/Importer.hpp>
 #include <assimp/Exporter.hpp>
@@ -19,6 +15,10 @@ import :scripting.lua.libraries.import;
 #include <assimp/IOStream.hpp>
 #include <assimp/DefaultLogger.hpp>
 #endif
+
+module pragma.shared;
+
+import :scripting.lua.libraries.import;
 
 int Lua::import::import_wad(lua_State *l)
 {

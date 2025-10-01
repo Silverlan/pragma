@@ -9,7 +9,6 @@ module;
 #include "wms_message.h"
 #include <sharedutils/util_library.hpp>
 #include "wmserverdata.h"
-#include <networkmanager/udp_handler/udp_message_dispatcher.h>
 
 module pragma.client;
 

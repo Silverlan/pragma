@@ -6,11 +6,12 @@ module;
 #include <sharedutils/util_file.h>
 #include <sharedutils/util_library.hpp>
 #include <sharedutils/util_path.hpp>
+#include "sharedutils/util_string.h"
 #include <udm.hpp>
 
 module pragma.shared;
 
-import :assets.asset_conversion;
+import :assets.conversion;
 
 static bool s_bModuleInitialized = false;
 

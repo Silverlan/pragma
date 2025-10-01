@@ -383,7 +383,7 @@ void SALSound::SetDirectFilter(const EffectParams &params)
 		p->Write<float>(params.gainLF);
 	});
 }
-const ALSound::EffectParams &SALSound::GetDirectFilter() const { return ALSoundBase::GetDirectFilter(); }
+const SoundEffectParams &SALSound::GetDirectFilter() const { return ALSoundBase::GetDirectFilter(); }
 bool SALSound::AddEffect(const std::string &effectName, const EffectParams &params)
 {
 	SendEvent(NetEvent::AddEffect, [&effectName, &params](NetPacket &p) {

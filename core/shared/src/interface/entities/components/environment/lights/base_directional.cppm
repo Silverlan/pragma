@@ -5,14 +5,14 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include "mathutil/umath_lighting.hpp"
-#include <sharedutils/property/util_property_color.hpp>
+#include "mathutil/color.h"
 #include <string>
 #include "mathutil/uvec.h"
-
 
 export module pragma.shared:entities.components.environment.lights.base_directional;
 
 export import :entities.components.base;
+export import pragma.util;
 
 export namespace pragma {
 	class DLLNETWORK BaseEnvLightDirectionalComponent : public BaseEntityComponent {

@@ -8,7 +8,6 @@ module;
 #include "luasystem.h"
 #include <mathutil/umath.h>
 #include <sharedutils/util_file.h>
-#include <servermanager/interface/sv_nwm_manager.hpp>
 #include <udm.hpp>
 
 module pragma.server.game;

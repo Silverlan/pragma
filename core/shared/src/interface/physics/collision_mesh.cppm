@@ -11,6 +11,8 @@ module;
 #include <memory>
 #include "mathutil/uvec.h"
 #include "mathutil/uquat.h"
+#include "mathutil/umath.h"
+
 
 
 

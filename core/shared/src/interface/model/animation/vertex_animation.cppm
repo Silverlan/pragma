@@ -8,6 +8,8 @@ module;
 #include <mathutil/uvec.h>
 #include <memory>
 #include "mathutil/uquat.h"
+#include "mathutil/umath.h"
+
 
 
 export module pragma.shared:model.animation.vertex_animation;

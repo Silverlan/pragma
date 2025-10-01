@@ -7,6 +7,10 @@ module;
 #include <cstdio>
 // #include <windows.h>
 // #include <tlhelp32.h>
+#ifdef _WIN32
+#include "debug/StackWalker/StackWalker.h"
+#endif
+#include "sharedutils/util_string.h"
 
 module pragma.shared;
 
@@ -69,7 +73,6 @@ void pragma::debug::open_file_in_zerobrane(const std::string &fileName, uint32_t
 }
 
 #ifdef _WIN32
-#include "debug/StackWalker/StackWalker.h"
 class StackWalkerModuleFinder : public StackWalker {
   public:
 	static bool find_module_in_callstack(PEXCEPTION_POINTERS exp, const std::string &moduleName)

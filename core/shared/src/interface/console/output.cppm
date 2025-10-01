@@ -14,6 +14,8 @@ module;
 #include <string_view>
 #ifdef _WIN32
 #include <Windows.h>
+#include "mathutil/umath.h"
+
 #else
 #define DWORD unsigned int
 #define FOREGROUND_BLUE 1

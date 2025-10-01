@@ -7,6 +7,8 @@ module;
 #include <mathutil/uvec.h>
 #include <sharedutils/util_weak_handle.hpp>
 #include <sharedutils/util_shared_handle.hpp>
+#include "mathutil/umath.h"
+
 
 export module pragma.shared:physics.contact;
 

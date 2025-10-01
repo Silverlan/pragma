@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_server.h"
 //#include "ldef_wheel.h"
-#include "sharedutils/netpacket.hpp"
 
 module pragma.server.entities.components.wheel;
 

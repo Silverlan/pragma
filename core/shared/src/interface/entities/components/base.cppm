@@ -21,6 +21,7 @@ module;
 #include <format>
 #include "mathutil/uvec.h"
 #include "mathutil/uquat.h"
+#include "mathutil/umath.h"
 
 #endif
 #endif
@@ -34,6 +35,7 @@ export import :entities.components.handle;
 export import :entities.components.events.event;
 export import :entities.components.events.event_info;
 export import :scripting.lua.base_lua_handle;
+export import pragma.util;
 
 namespace pragma {
 	class DLLNETWORK EEntityComponentCallbackEvent : public util::ExtensibleEnum {

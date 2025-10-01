@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <clientmanager/interface/cl_nwm_manager.hpp>
 
 export module pragma.client:networking.standard_client;
 

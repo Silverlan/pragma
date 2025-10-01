@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <sharedutils/property/util_property_vector.h>
 #include "mathutil/uvec.h"
 
 

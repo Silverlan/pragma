@@ -3,6 +3,7 @@
 
 module;
 
+#include "mathutil/uvec.h"
 
 module pragma.shared;
 
@@ -88,8 +89,8 @@ float ALSoundBase::GetAirAbsorptionFactor() const { return m_airAbsorptionFactor
 void ALSoundBase::SetGainAuto(bool directHF, bool send, bool sendHF) { m_gainAuto = std::tuple<bool, bool, bool> {directHF, send, sendHF}; }
 std::tuple<bool, bool, bool> ALSoundBase::GetGainAuto() const { return m_gainAuto; }
 
-void ALSoundBase::SetDirectFilter(const ALSound::EffectParams &params) { m_directFilter = params; }
-const ALSound::EffectParams &ALSoundBase::GetDirectFilter() const { return m_directFilter; }
+void ALSoundBase::SetDirectFilter(const SoundEffectParams &params) { m_directFilter = params; }
+const SoundEffectParams &ALSoundBase::GetDirectFilter() const { return m_directFilter; }
 
 bool ALSoundBase::IsPlaying() const { return (GetState() == ALState::Playing) ? true : false; }
 bool ALSoundBase::IsPaused() const { return (GetState() == ALState::Paused) ? true : false; }

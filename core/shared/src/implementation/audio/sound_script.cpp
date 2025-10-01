@@ -11,6 +11,8 @@ module pragma.shared;
 
 import :audio.sound_script;
 
+#undef CreateEvent
+
 #pragma warning(disable : 4056)
 ALSoundScript::ALSoundScript(NetworkState *nw, unsigned int idx, SoundScript *script, NetworkState *state, bool bStream) : ALSound(nw), m_script(script), m_networkState(state), m_bStream(bStream) { m_index = idx; }
 #pragma warning(default : 4056)
@@ -548,15 +550,15 @@ void ALSoundScript::SetGainAuto(bool directHF, bool send, bool sendHF)
 		(*snd)->SetGainAuto(directHF, send, sendHF);
 }
 std::tuple<bool, bool, bool> ALSoundScript::GetGainAuto() const { return ALSoundBase::GetGainAuto(); }
-void ALSoundScript::SetDirectFilter(const EffectParams &params)
+void ALSoundScript::SetDirectFilter(const SoundEffectParams &params)
 {
 	ALSoundBase::SetDirectFilter(params);
 	for(auto *snd : m_sounds)
 		(*snd)->SetDirectFilter(params);
 }
-const ALSound::EffectParams &ALSoundScript::GetDirectFilter() const { return ALSoundBase::GetDirectFilter(); }
+const SoundEffectParams &ALSoundScript::GetDirectFilter() const { return ALSoundBase::GetDirectFilter(); }
 
-bool ALSoundScript::AddEffect(const std::string &effectName, const EffectParams &params)
+bool ALSoundScript::AddEffect(const std::string &effectName, const SoundEffectParams &params)
 {
 	for(auto *snd : m_sounds)
 		(*snd)->AddEffect(effectName, params);
@@ -567,7 +569,7 @@ void ALSoundScript::RemoveEffect(const std::string &effectName)
 	for(auto *snd : m_sounds)
 		(*snd)->RemoveEffect(effectName);
 }
-void ALSoundScript::SetEffectParameters(const std::string &effectName, const EffectParams &params)
+void ALSoundScript::SetEffectParameters(const std::string &effectName, const SoundEffectParams &params)
 {
 	for(auto *snd : m_sounds)
 		(*snd)->SetEffectParameters(effectName, params);

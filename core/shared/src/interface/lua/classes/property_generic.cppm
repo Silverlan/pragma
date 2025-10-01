@@ -4,9 +4,11 @@
 module;
 
 #include <memory>
-#include <sharedutils/property/util_property.hpp>
+#include "sharedutils/functioncallback.h"
 
 export module pragma.shared:scripting.lua.classes.property_generic;
+
+export import pragma.util;
 
 export {
 	enum class ArithmeticFloatPropertyType : uint32_t { Float = 0u, Double, LongDouble };
@@ -306,9 +308,11 @@ export {
 	template<class TProperty, typename T>
 	class TLNumberPropertyWrapper : public LSimplePropertyWrapper<TProperty, T> {
 	public:
-		using LSimplePropertyWrapper<TProperty, T>::LSimplePropertyWrapper;
-		using LSimplePropertyWrapper<TProperty, T>::operator*;
-		using LSimplePropertyWrapper<TProperty, T>::operator->;
+		TProperty &operator*() { return GetProperty(); }
+		const TProperty &operator*() const { return GetProperty(); }
+		TProperty *operator->() { return &GetProperty(); }
+		const TProperty *operator->() const { return &GetProperty(); }
+
 		virtual TProperty &GetProperty() const override { return *static_cast<TProperty *>(this->prop.get()); }
 
 		// Arithmetic

@@ -20,6 +20,7 @@ module;
 export module pragma.shared:entities.components.bvh_data;
 
 export import :entities.components.base;
+export import :entities.components.intersection_handler;
 export import :model;
 
 export namespace pragma::bvh {
@@ -116,7 +117,7 @@ export namespace pragma::bvh {
 	DLLNETWORK std::unordered_map<std::string, std::shared_ptr<ModelSubMesh>> get_uuid_mesh_map(Model &mdl);
 
 	namespace debug {
-		static Color DEFAULT_NODE_COLOR = Color {0, 255, 0, 64};
+		Color DEFAULT_NODE_COLOR = Color {0, 255, 0, 64};
 		DLLNETWORK void print_bvh_tree(pragma::bvh::Bvh &bvh);
 		DLLNETWORK void draw_bvh_tree(const Game &game, pragma::bvh::Bvh &bvh, const umath::ScaledTransform &pose = {}, float duration = 20.f);
 		DLLNETWORK void draw_node(const Game &game, const pragma::bvh::Node &node, const umath::ScaledTransform &pose = {}, const Color &col = DEFAULT_NODE_COLOR, float duration = 20.f);

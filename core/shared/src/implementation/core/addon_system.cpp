@@ -9,6 +9,10 @@ module;
 #ifdef _WIN32
 #include <sharedutils/util_link.hpp>
 #endif
+#include "luasystem.h"
+#include "sharedutils/util_string.h"
+#include "sharedutils/util_version.h"
+#include "pragma/logging.hpp"
 
 module pragma.shared;
 

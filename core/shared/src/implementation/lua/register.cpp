@@ -18,6 +18,9 @@ module;
 #include <luabind/copy_policy.hpp>
 #include <luabind/discard_result_policy.hpp>
 #include <filesystem>
+#include <spdlog/common.h>
+#include <spdlog/formatter.h>
+#include <spdlog/fmt/fmt.h>
 #include <fmt/core.h>
 #ifndef _WIN32
 #include <signal.h>
@@ -1130,10 +1133,6 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 namespace Lua::doc {
 	void register_library(Lua::Interface &lua);
 };
-
-#include <spdlog/common.h>
-#include <spdlog/formatter.h>
-#include <spdlog/fmt/fmt.h>
 
 static std::string to_string(lua_State *l, int i)
 {

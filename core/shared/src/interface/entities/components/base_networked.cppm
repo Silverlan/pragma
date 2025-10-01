@@ -4,9 +4,10 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <sharedutils/property/util_property.hpp>
 #include "mathutil/uvec.h"
 #include "mathutil/uquat.h"
+#include "mathutil/umath.h"
+
 
 
 

@@ -10,11 +10,11 @@ module;
 #include <mutex>
 #include <unordered_set>
 
-#define RESOURCE_WATCHER_VERBOSE 0
-
 export module pragma.shared:util.resource_watcher;
 
 export import :networking.util;
+
+#define RESOURCE_WATCHER_VERBOSE 0
 
 export {
 	class Model;

@@ -5,7 +5,6 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include <mathutil/glmutil.h>
-#include <sharedutils/netpacket.hpp>
 #include <sharedutils/functioncallback.h>
 #include "mathutil/eulerangles.h"
 #include "mathutil/uvec.h"
@@ -16,6 +15,8 @@ module;
 export module pragma.shared:networking.util;
 
 export import :entities.base_entity_handle;
+
+export import pragma.util;
 
 export {
 	class BaseEntity;

@@ -5,7 +5,6 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include "wmserverdata.h"
-#include <networkmanager/udp_handler/udp_message_dispatcher.h>
 
 export module pragma.client:gui.server_browser;
 

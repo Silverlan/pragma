@@ -4,11 +4,12 @@
 module;
 
 #include <sharedutils/util_file.h>
+#include "sharedutils/util_string.h"
 #include <udm.hpp>
 
 module pragma.shared;
 
-import :assets.asset_conversion;
+import :assets.conversion;
 import se_script;
 
 bool util::port_sound_script(NetworkState *nw, const std::string &path)

@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include "sharedutils/netpacket.hpp"
 #include <sharedutils/util_weak_handle.hpp>
 
 export module pragma.server.entities.components.ai;

@@ -3,6 +3,7 @@
 
 module;
 
+#include <udm.hpp>
 
 module pragma.shared;
 
@@ -20,7 +21,6 @@ void pragma::asset::Output::Read(VFilePtr &f)
 
 /////////
 
-#include <udm.hpp>
 bool pragma::asset::WorldData::Read(VFilePtr &f, EntityData::Flags entMask, std::string *errMsg)
 {
 	auto header = f->Read<std::array<char, 3>>();

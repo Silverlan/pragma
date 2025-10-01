@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include <sharedutils/property/util_property_vector.h>
 
 module pragma.client;
 

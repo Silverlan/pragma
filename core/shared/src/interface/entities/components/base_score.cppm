@@ -4,11 +4,11 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <sharedutils/property/util_property.hpp>
 
 export module pragma.shared:entities.components.base_score;
 
 export import :entities.components.base;
+export import pragma.util;
 
 export namespace pragma {
 	class DLLNETWORK BaseScoreComponent : public BaseEntityComponent {

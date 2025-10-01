@@ -11,7 +11,6 @@
 #define AI_MEMORY_NEXT_CHECK_IF_HIDDEN 0.25f
 #define AI_MEMORY_NEXT_CHECK_IF_VISIBLE 0.1f
 
-class BaseEntity;
 namespace pragma {
 	namespace ai {
 		class DLLSERVER Memory {

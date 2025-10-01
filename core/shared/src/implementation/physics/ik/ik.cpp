@@ -4,6 +4,7 @@
 module;
 
 #include <mathutil/transform.hpp>
+#include "pragma/buss_ik/Node.h"
 
 module pragma.shared;
 

@@ -5,10 +5,12 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/lua/luaapi.h"
-#include <sharedutils/netpacket.hpp>
+#include "sharedutils/datastream.h"
 #include <any>
 
 export module pragma.shared:util.any;
+
+export import pragma.util;
 
 export {
 	class Game;

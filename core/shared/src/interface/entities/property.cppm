@@ -4,11 +4,11 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <sharedutils/property/util_property.hpp>
 
 export module pragma.shared:entities.property;
 
 export import :entities.base_entity_handle;
+export import pragma.util;
 
 export namespace pragma {
 	class DLLNETWORK EntityProperty : public util::SimpleProperty<EntityProperty, EntityHandle> {

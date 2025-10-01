@@ -9,6 +9,8 @@ module;
 #include <sharedutils/util_pragma.hpp>
 #include <string>
 #include "mathutil/uvec.h"
+#include "mathutil/umath.h"
+
 
 
 export module pragma.shared:entities.components.environment.lights.base_light;

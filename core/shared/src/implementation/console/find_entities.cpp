@@ -3,6 +3,9 @@
 
 module;
 
+#include "sharedutils/util.h"
+#include "sharedutils/util_string.h"
+#include "mathutil/uvec.h"
 
 module pragma.shared;
 

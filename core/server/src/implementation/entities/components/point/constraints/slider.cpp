@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_server.h"
 #include <sharedutils/util_string.h>
-#include "sharedutils/netpacket.hpp"
 
 module pragma.server.entities.components.point.constraints.slider;
 

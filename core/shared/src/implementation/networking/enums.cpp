@@ -3,7 +3,6 @@
 
 module;
 
-#include <networkmanager/interface/nwm_manager.hpp>
 
 module pragma.shared;
 

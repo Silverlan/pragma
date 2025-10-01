@@ -3,6 +3,9 @@
 
 module;
 
+#include "mathutil/umath.h"
+#include <string>
+#include <iostream>
 
 module pragma.shared;
 

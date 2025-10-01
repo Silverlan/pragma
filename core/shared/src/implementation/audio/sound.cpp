@@ -24,7 +24,7 @@ module pragma.shared;
 
 import :audio.sound;
 
-ALSound::EffectParams::EffectParams(float pgain, float pgainHF, float pgainLF) : gain(pgain), gainHF(pgainHF), gainLF(pgainLF) {}
+SoundEffectParams::SoundEffectParams(float pgain, float pgainHF, float pgainLF) : gain(pgain), gainHF(pgainHF), gainLF(pgainLF) {}
 
 ALSound::ALSound(NetworkState *nw) : util::inheritable_enable_shared_from_this<ALSound>(), CallbackHandler(), LuaCallbackHandler(), m_type(ALSoundType::Generic), m_networkState(nw)
 {

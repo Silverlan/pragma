@@ -4,8 +4,6 @@
 module;
 
 #include "stdafx_server.h"
-#include <servermanager/interface/sv_nwm_manager.hpp>
-#include "sharedutils/netpacket.hpp"
 #include <sharedutils/datastream.h>
 
 module pragma.server.entities.components.weapon;

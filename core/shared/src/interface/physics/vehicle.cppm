@@ -7,6 +7,8 @@ module;
 #include <mathutil/transform.hpp>
 #include <optional>
 #include "mathutil/uvec.h"
+#include "mathutil/umath.h"
+
 
 
 export module pragma.shared:physics.vehicle;

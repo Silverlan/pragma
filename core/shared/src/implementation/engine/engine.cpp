@@ -3,8 +3,9 @@
 
 module;
 
+#include "pragma/networkdefinitions.h"
 #include "luasystem.h"
-#include <sharedutils/netpacket.hpp>
+#include "pragma/lua/luaapi.h"
 #include <sharedutils/util.h>
 #include <sharedutils/util_debug.h>
 #include <sharedutils/util_clock.hpp>
@@ -15,6 +16,7 @@ module;
 #include <sharedutils/util_debug.h>
 #include <fsys/filesystem.h>
 #include <spdlog/pattern_formatter.h>
+#include "pragma/logging.hpp"
 
 #ifdef __linux__
 #include <pthread.h>

@@ -4,18 +4,17 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <sharedutils/property/util_property.hpp>
 #include <mathutil/transform.hpp>
 #include <mathutil/uvec.h>
 #include <queue>
 #include "mathutil/uquat.h"
-
+#include "mathutil/umath.h"
 
 export module pragma.shared:entities.components.base_animated;
 
 export import :entities.components.base;
-
 export import :model.animation;
+export import pragma.util;
 
 export {
 	namespace pragma {

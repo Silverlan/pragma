@@ -7,6 +7,8 @@ module;
 #include <luabind/object.hpp>
 #include <sharedutils/util_path.hpp>
 #include <udm.hpp>
+#include "mathutil/umath.h"
+
 
 export module pragma.shared:game.value_driver;
 

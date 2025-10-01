@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <sharedutils/property/util_property.hpp>
 #include <string>
 
 export module pragma.shared:entities.components.base_toggle;

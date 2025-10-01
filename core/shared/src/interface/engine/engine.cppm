@@ -16,12 +16,7 @@ module;
 #include <sharedutils/callback_handler.h>
 #include <sharedutils/scope_guard.h>
 #include <sharedutils/util_parallel_job.hpp>
-
-#ifdef _DEBUG
-#define ENGINE_DEFAULT_TICK_RATE 33
-#else
-#define ENGINE_DEFAULT_TICK_RATE 60
-#endif
+#include "mathutil/umath.h"
 
 export module pragma.shared:engine;
 
@@ -40,6 +35,12 @@ export import pragma.pad;
 export import util_zip;
 
 export {
+#ifdef _DEBUG
+	constexpr uint32_t ENGINE_DEFAULT_TICK_RATE = 33;
+#else
+	constexpr uint32_t ENGINE_DEFAULT_TICK_RATE = 60;
+#endif
+
 	class NetworkState;
 	class DLLNETWORK Engine : public CVarHandler, public CallbackHandler {
 	public:

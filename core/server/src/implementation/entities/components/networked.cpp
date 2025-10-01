@@ -4,8 +4,6 @@
 module;
 
 #include "stdafx_server.h"
-#include <sharedutils/property/util_property_euler_angles.hpp>
-#include "sharedutils/netpacket.hpp"
 
 module pragma.server.entities.components.networked;
 

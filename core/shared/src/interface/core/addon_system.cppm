@@ -9,13 +9,12 @@ module;
 #include "sharedutils/util_version.h"
 #include "fsys/directory_watcher.h"
 
-#define FSYS_SEARCH_ADDON 2048
-
 export module pragma.shared:core.addon_system;
 
 import pragma.pad;
 
 export {
+    uint64_t FSYS_SEARCH_ADDON = 2048;
 	class AddonSystem;
 	#pragma warning(push)
 	#pragma warning(disable : 4251)

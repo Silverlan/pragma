@@ -4,7 +4,9 @@
 module;
 
 #include <sharedutils/util_string.h>
+#include "sharedutils/util.h"
 #include <atomic>
+#include <iostream>
 #ifdef __linux__
 
 #include <pthread.h>

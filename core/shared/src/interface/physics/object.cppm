@@ -13,6 +13,7 @@ module;
 #include "sharedutils/util_shared_handle.hpp"
 #include <mathutil/transform.hpp>
 #include "mathutil/uvec.h"
+#include "mathutil/umath.h"
 
 #ifdef __linux__
 #endif

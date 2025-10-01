@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "pragma/networkdefinitions.h"
+
 
 
 export module pragma.shared:debug.intel_vtune;

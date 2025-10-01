@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include <sharedutils/property/util_property_color.hpp>
 #include <prosper_command_buffer.hpp>
 #include "buffers/prosper_buffer_create_info.hpp"
 

@@ -4,6 +4,8 @@
 module;
 
 #include <iostream>
+#include "sharedutils/util.h"
+#include "pragma/logging.hpp"
 #ifdef _WIN32
 #include <windows.h>
 #elif defined(__linux__)

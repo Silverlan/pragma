@@ -4,12 +4,6 @@
 #ifndef __LUA_PROPERTY_CONVERTER_HPP__
 #define __LUA_PROPERTY_CONVERTER_HPP__
 
-#include <sharedutils/property/util_property.hpp>
-#include <sharedutils/property/util_property_color.hpp>
-#include <sharedutils/property/util_property_euler_angles.hpp>
-#include <sharedutils/property/util_property_matrix.hpp>
-#include <sharedutils/property/util_property_quat.hpp>
-#include <sharedutils/property/util_property_vector.h>
 #include <luabind/detail/conversion_policies/conversion_policies.hpp>
 
 namespace luabind {

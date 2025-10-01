@@ -220,7 +220,7 @@ void SALSoundScript::SetGainAuto(bool directHF, bool send, bool sendHF)
 }
 std::tuple<bool, bool, bool> SALSoundScript::GetGainAuto() const { return SALSound::GetGainAuto(); }
 void SALSoundScript::SetDirectFilter(const EffectParams &params) { SALSound::SetDirectFilter(params); }
-const ALSound::EffectParams &SALSoundScript::GetDirectFilter() const { return SALSound::GetDirectFilter(); }
+const SoundEffectParams &SALSoundScript::GetDirectFilter() const { return SALSound::GetDirectFilter(); }
 bool SALSoundScript::AddEffect(const std::string &effectName, const EffectParams &params)
 {
 	ALSoundScript::AddEffect(effectName, params);

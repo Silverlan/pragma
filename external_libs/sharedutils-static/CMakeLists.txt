@@ -22,8 +22,8 @@ pr_add_compile_definitions(
 )
 
 set(BASE_DIR "${CMAKE_CURRENT_LIST_DIR}/../sharedutils/")
-pr_add_headers(${PROJ_NAME} "${CMAKE_CURRENT_LIST_DIR}/../sharedutils/include/" BASE_DIRS "${BASE_DIR}")
-pr_add_sources(${PROJ_NAME} "${CMAKE_CURRENT_LIST_DIR}/../sharedutils/src/" BASE_DIRS "${BASE_DIR}")
+pr_init_module(${PROJ_NAME} ${BASE_DIR}src)
+pr_add_headers(${PROJ_NAME} "${BASE_DIR}include/" BASE_DIRS "${BASE_DIR}")
 
 pr_add_compile_definitions(${PROJ_NAME} -DSHUTIL_DLL)
 

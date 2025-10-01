@@ -12,7 +12,8 @@ export module pragma.shared:scripting.lua.libraries.ents;
 
 import :console.output;
 export import :entities.base_entity;
-export import :game.enums;
+export import :game;
+export import :network_state;
 export import :physics.shape;
 export import :scripting.lua.entity_iterator;
 

@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/logging.hpp"
 #include <sharedutils/util_hash.hpp>
 #include <udm.hpp>
 

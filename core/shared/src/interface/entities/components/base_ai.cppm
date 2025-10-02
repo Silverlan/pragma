@@ -21,9 +21,9 @@ import :entities.components.movement;
 import :physics.raycast_filter;
 
 export {
-	class BaseAIComponent;
 	class Model;
 	namespace pragma {
+		class BaseAIComponent;
 		namespace ai {
 			namespace navigation {
 				struct PathInfo {

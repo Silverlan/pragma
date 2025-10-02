@@ -62,7 +62,9 @@ export namespace pragma::networking {
 	enum class WVQuery : unsigned int { FIRST = 1500, PING, LAST };
 };
 
-export namespace pragma {
-	enum class SnapshotFlags : uint8_t { None = 0u, PhysicsData = 1u, ComponentData = PhysicsData << 1u };
-	REGISTER_BASIC_BITWISE_OPERATORS(SnapshotFlags);
+export {
+	namespace pragma {
+		enum class SnapshotFlags : uint8_t { None = 0u, PhysicsData = 1u, ComponentData = PhysicsData << 1u };
+	};
+	REGISTER_BASIC_BITWISE_OPERATORS(pragma::SnapshotFlags);
 };

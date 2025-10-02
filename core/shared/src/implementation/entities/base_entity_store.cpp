@@ -5,6 +5,7 @@ module;
 
 #include <sharedutils/util_uri.hpp>
 #include <sharedutils/datastream.h>
+#include "sharedutils/util_string.h"
 #include <udm.hpp>
 
 module pragma.shared;

@@ -6,6 +6,8 @@ module;
 #include "pragma/networkdefinitions.h"
 #include "luasystem.h"
 #include "pragma/lua/luaapi.h"
+#include "fsys/directory_watcher.h"
+#include "pragma/lua/lua_error_handling.hpp"
 #include <sharedutils/util.h>
 #include <sharedutils/util_debug.h>
 #include <sharedutils/util_clock.hpp>
@@ -330,7 +332,6 @@ void Engine::Close()
 
 	ClearCommands();
 	CloseConsole();
-	EndLogging();
 
 	Con::set_output_callback(nullptr);
 	pragma::locale::clear();
@@ -1205,9 +1206,3 @@ Engine::~Engine()
 
 Engine *pragma::get_engine() { return g_engine; }
 NetworkState *pragma::get_server_state() { return Engine::Get()->GetServerStateInterface().get_server_state(); }
-
-REGISTER_ENGINE_CONVAR_CALLBACK(debug_profiling_enabled, [](NetworkState *, const ConVar &, bool, bool enabled) {
-	if(Engine::Get() == nullptr)
-		return;
-	Engine::Get()->SetProfilingEnabled(enabled);
-});

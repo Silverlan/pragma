@@ -3,6 +3,7 @@
 
 module;
 
+#include "sharedutils/functioncallback.h"
 
 module pragma.shared;
 

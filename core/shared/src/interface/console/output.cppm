@@ -5,6 +5,7 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include <sharedutils/util_log.hpp>
+#include "sharedutils/util_path.hpp"
 #include <mathutil/color.h>
 #include <iostream>
 #include <sstream>

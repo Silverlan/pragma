@@ -83,6 +83,7 @@ export import :entities.components.movement;
 export import :entities.components.orientation;
 export import :entities.components.origin;
 export import :entities.components.panima;
+export import :entities.components.panima_channel_submitter;
 export import :entities.components.parent;
 export import :entities.components.point;
 export import :entities.components.prop;

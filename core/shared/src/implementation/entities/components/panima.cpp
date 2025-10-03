@@ -22,6 +22,8 @@ import :entities.components.panima;
 
 import panima;
 
+#undef GetCurrentTime
+
 using namespace pragma;
 ComponentEventId PanimaComponent::EVENT_HANDLE_ANIMATION_EVENT = pragma::INVALID_COMPONENT_ID;
 ComponentEventId PanimaComponent::EVENT_ON_PLAY_ANIMATION = pragma::INVALID_COMPONENT_ID;

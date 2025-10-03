@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "pragma/entities/components/panima_component_channel_submitter_def.hpp"
 
 #include "udm.hpp"
 
@@ -13,6 +12,7 @@ module;
 module pragma.shared;
 
 import :entities.components.panima;
+import :entities.components.panima_channel_submitter;
 
 import panima;
 

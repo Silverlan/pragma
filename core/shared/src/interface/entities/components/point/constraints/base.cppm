@@ -15,10 +15,10 @@ export module pragma.shared:entities.components.point.constraints.base;
 export import :entities.components.base;
 export import :physics.constraint;
 
-#define SF_CONSTRAINT_START_INACTIVE 1024
-#define SF_CONSTRAINT_DISABLE_COLLISIONS 2048
-
 export namespace pragma {
+	constexpr uint32_t SF_CONSTRAINT_START_INACTIVE = 1024;
+	constexpr uint32_t SF_CONSTRAINT_DISABLE_COLLISIONS = 2048;
+
 	class DLLNETWORK BasePointConstraintComponent : public BaseEntityComponent {
 	  public:
 		BasePointConstraintComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}

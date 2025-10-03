@@ -2,7 +2,17 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "algorithm"
 
+#include "mathutil/umath.h"
+
+#include "mathutil/uquat.h"
+
+#include "sharedutils/util_shared_handle.hpp"
+
+#include "sharedutils/util.h"
+
+#include "mathutil/uvec.h"
 
 module pragma.shared;
 
@@ -580,7 +590,7 @@ PhysObj *BasePhysicsComponent::InitializePhysics(pragma::physics::IConvexShape &
 	auto bDynamic = umath::is_flag_set(flags, PhysFlags::Dynamic);
 	auto body = CreateRigidBody(shape, bDynamic);
 
-	if(m_physObject != NULL)
+	if(m_physObject)
 		DestroyPhysicsObject();
 	m_physObject = util::to_shared_handle<PhysObj>(PhysObj::Create<RigidPhysObj, pragma::physics::IRigidBody &>(*this, *body));
 	auto group = GetCollisionFilter();
@@ -616,7 +626,7 @@ PhysObj *BasePhysicsComponent::InitializePhysics(pragma::physics::IConvexShape &
 PhysObj *BasePhysicsComponent::InitializePhysics(PHYSICSTYPE type, PhysFlags flags)
 {
 	umath::set_flag(flags, PhysFlags::Dynamic, type != PHYSICSTYPE::STATIC);
-	if(m_physObject != NULL)
+	if(m_physObject)
 		DestroyPhysicsObject();
 	if(type != PHYSICSTYPE::STATIC) {
 		auto &ent = GetEntity();
@@ -651,7 +661,7 @@ PhysObj *BasePhysicsComponent::InitializePhysics(PHYSICSTYPE type, PhysFlags fla
 }
 void BasePhysicsComponent::DestroyPhysicsObject()
 {
-	if(m_physObject == NULL)
+	if(!m_physObject)
 		return;
 	for(auto it = m_joints.begin(); it != m_joints.end(); ++it) {
 		auto &hConstraint = it->constraint;

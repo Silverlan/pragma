@@ -2,6 +2,11 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "cassert"
+
+#include "mathutil/umath_geometry.hpp"
+
+#include "sharedutils/util.h"
 
 #include <mathutil/uvec.h>
 #include <udm.hpp>

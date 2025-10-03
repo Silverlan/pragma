@@ -10,10 +10,9 @@ export module pragma.shared:entities.components.environment.effects.base_particl
 
 export import :entities.components.base;
 
-#define SF_PARTICLE_SYSTEM_CONTINUOUS 2048
-#define SF_PARTICLE_SYSTEM_REMOVE_ON_COMPLETE 4096
-
 export namespace pragma {
+	constexpr uint32_t SF_PARTICLE_SYSTEM_CONTINUOUS = 2048;
+	constexpr uint32_t SF_PARTICLE_SYSTEM_REMOVE_ON_COMPLETE = 4096;
 	class DLLNETWORK BaseEnvParticleSystemComponent : public BaseEntityComponent {
 	  public:
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);

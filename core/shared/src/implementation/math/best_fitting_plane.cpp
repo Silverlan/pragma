@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "cassert"
+
+#include "mathutil/uvec.h"
 
 #include <Eigen/Eigenvalues>
 

@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "pragma/logging.hpp"
+
+#include "pragma/lua/luaapi.h"
 
 #include <mathutil/color.h>
 #include "luasystem.h"

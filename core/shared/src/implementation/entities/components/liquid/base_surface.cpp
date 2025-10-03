@@ -6,7 +6,7 @@ module;
 
 module pragma.shared;
 
-import :entities.components.constraints.liquid_surface;
+import :entities.components.liquid.base_surface;
 
 using namespace pragma;
 

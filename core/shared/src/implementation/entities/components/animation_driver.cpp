@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "cassert"
 
 #include "pragma/logging.hpp"
 #include <sharedutils/util_hash.hpp>
@@ -14,11 +15,12 @@ import :entities.components.animation_driver;
 using namespace pragma;
 void pragma::AnimationDriverComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) {}
 static void set_parameters(const ComponentMemberInfo &memberInfo, AnimationDriverComponent &component, const pragma::ents::Element &value) { component.UpdateParameters(); }
+
 static void get_parameters(const ComponentMemberInfo &memberInfo, AnimationDriverComponent &component, pragma::ents::Element &value) { value = component.GetParameters(); }
+
 void AnimationDriverComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
 {
 	using T = AnimationDriverComponent;
-
 	{
 		using TDrivenObject = pragma::EntityUComponentMemberRef;
 		auto memberInfo = create_component_member_info<T, TDrivenObject, static_cast<void (T::*)(const TDrivenObject &)>(&T::SetDrivenObject), static_cast<const TDrivenObject &(T::*)() const>(&T::GetDrivenObject)>("drivenObject", TDrivenObject {});

@@ -2,12 +2,15 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "sharedutils/util.h"
+
+#include "sharedutils/util_string.h"
 
 #include <algorithm>
 
 module pragma.shared;
 
-import :entities.components.filter;
+import :entities.components.base_filter;
 
 using namespace pragma;
 

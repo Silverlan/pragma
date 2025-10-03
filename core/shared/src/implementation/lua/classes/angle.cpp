@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "mathutil/uvec.h"
 
 #include <glm/gtx/euler_angles.hpp>
 

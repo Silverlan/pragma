@@ -2,11 +2,13 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "sharedutils/util.h"
 
+#include "mathutil/uvec.h"
 
 module pragma.shared;
 
-import :entities.components.constraints.liquid;
+import :entities.components.liquid.base_liquid;
 
 // #define ENABLE_DEPRECATED_PHYSICS
 

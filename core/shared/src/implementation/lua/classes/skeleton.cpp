@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "algorithm"
 
 #include "luasystem.h"
 

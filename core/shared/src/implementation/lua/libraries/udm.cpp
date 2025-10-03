@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "cassert"
+
+#include "mathutil/uvec.h"
 
 #include <sharedutils/util_path.hpp>
 #include <luabind/iterator_policy.hpp>

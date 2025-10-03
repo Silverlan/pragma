@@ -2,6 +2,11 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "mathutil/uvec.h"
+
+#include "sharedutils/util.h"
+
+#include "sharedutils/functioncallback.h"
 
 #include <algorithm>
 #include <sharedutils/util_string.h>

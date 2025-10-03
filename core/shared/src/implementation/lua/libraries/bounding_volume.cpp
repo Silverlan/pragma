@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "mathutil/uvec.h"
 
 #include <mathutil/glmutil.h>
 #include <mathutil/boundingvolume.h>

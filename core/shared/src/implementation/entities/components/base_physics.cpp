@@ -2,6 +2,17 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "mathutil/umath.h"
+
+#include "pragma/logging.hpp"
+
+#include "mathutil/umath_geometry.hpp"
+
+#include "sharedutils/util.h"
+
+#include "pragma/lua/luaapi.h"
+
+#include "mathutil/uvec.h"
 
 #include <udm.hpp>
 
@@ -791,14 +802,14 @@ void BasePhysicsComponent::OnEntityComponentAdded(BaseEntityComponent &component
 		FlagCallbackForRemoval(static_cast<pragma::VelocityComponent &>(component).GetVelocityProperty()->AddCallback([this](std::reference_wrapper<const Vector3> oldVel, std::reference_wrapper<const Vector3> vel) {
 			if(umath::is_flag_set(m_stateFlags, StateFlags::ApplyingLinearVelocity))
 				return;
-			if(m_physObject != NULL)
+			if(m_physObject)
 				m_physObject->SetLinearVelocity(vel);
 		}),
 		  CallbackType::Component, &component);
 		FlagCallbackForRemoval(static_cast<pragma::VelocityComponent &>(component).GetAngularVelocityProperty()->AddCallback([this](std::reference_wrapper<const Vector3> oldVel, std::reference_wrapper<const Vector3> vel) {
 			if(umath::is_flag_set(m_stateFlags, StateFlags::ApplyingAngularVelocity))
 				return;
-			if(m_physObject != NULL)
+			if(m_physObject)
 				m_physObject->SetAngularVelocity(vel);
 		}),
 		  CallbackType::Component, &component);

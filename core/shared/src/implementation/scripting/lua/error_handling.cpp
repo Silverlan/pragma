@@ -2,6 +2,11 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "pragma/logging.hpp"
+
+#include "sharedutils/util.h"
+
+#include "sharedutils/util_string.h"
 
 #include <string>
 #include <luasystem.h>

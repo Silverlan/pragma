@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "sharedutils/util.h"
+
+#include "mathutil/uvec.h"
 
 #include <sharedutils/util_file.h>
 #include <sharedutils/util_path.hpp>
@@ -822,9 +825,9 @@ void Engine::RegisterConsoleCommands()
 	conVarMap.RegisterConCommand("debug_profiling_print", debug_profiling_print, ConVarFlags::None, "Prints the last profiled times.");
 	conVarMap.RegisterConCommand("debug_profiling_physics_start", debug_profiling_physics_start, ConVarFlags::None, "Prints physics profiling information for the last simulation step.");
 	conVarMap.RegisterConCommand("debug_profiling_physics_end", debug_profiling_physics_end, ConVarFlags::None, "Prints physics profiling information for the last simulation step.");
-	conVarMap.RegisterConCommand("debug_dump_scene_graph", debug_dump_scene_graph, ConVarFlags::None, "Prints the game scene graph.");
+	conVarMap.RegisterConCommand("debug_dump_scene_graph", static_cast<void(*)(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)>(debug_dump_scene_graph), ConVarFlags::None, "Prints the game scene graph.");
 
-	map.RegisterConVarCallback("asset_multithreading_enabled", std::function<void(NetworkState *, const ConVar &, bool, bool)> {
+	conVarMap.RegisterConVarCallback("asset_multithreading_enabled", std::function<void(NetworkState *, const ConVar &, bool, bool)> {
 		[this](NetworkState *nw, const ConVar &cv, bool oldVal, bool newVal) -> void {
 			if(Engine::Get() == nullptr)
 				return;

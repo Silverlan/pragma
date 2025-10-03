@@ -2,12 +2,15 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "sharedutils/util.h"
+
+#include "sharedutils/util_string.h"
 
 #include <algorithm>
 
 module pragma.shared;
 
-import :entities.components.environment.base_smoke_trail;
+import :entities.components.environment.effects.base_smoke_trail;
 
 using namespace pragma;
 

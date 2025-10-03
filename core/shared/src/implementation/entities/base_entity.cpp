@@ -2,7 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "mathutil/umath.h"
 
+#include "pragma/networkdefinitions.h"
 #include <iostream>
 #include "sharedutils/util.h"
 #include "sharedutils/util_string.h"
@@ -11,6 +13,7 @@ module;
 module pragma.shared;
 
 import :entities.base_entity;
+import :util.global_string_table;
 
 Game &BaseEntity::GetGame() const { return *GetNetworkState()->GetGameState(); }
 BaseEntity *BaseEntity::CreateChild(const std::string &className)

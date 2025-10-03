@@ -2,6 +2,11 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "udm.hpp"
+
+#include "pragma/logging.hpp"
+
+#include "sharedutils/util.h"
 
 #include <sharedutils/util_uri.hpp>
 

@@ -2,13 +2,14 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "pragma/lua/luaapi.h"
 
+#include "mathutil/uvec.h"
 
 module pragma.shared;
 
 import :entities.components.base_weapon;
 
-import pragma.entities.components;
 
 using namespace pragma;
 

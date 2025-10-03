@@ -2,10 +2,15 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "sharedutils/util.h"
+
+#include "sharedutils/util_string.h"
+
+#include "mathutil/uvec.h"
 
 module pragma.shared;
 
-export import :entities.components.environment.base_wind;
+import :entities.components.environment.base_wind;
 
 using namespace pragma;
 

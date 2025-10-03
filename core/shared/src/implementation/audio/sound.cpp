@@ -2,7 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "mathutil/umath.h"
 
+#include "sharedutils/util.h"
 
 // Sound duration for mp3 files
 #ifdef WEAVE_MP3_SUPPORT_ENABLED

@@ -2,6 +2,11 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "mathutil/umath.h"
+
+#include "sharedutils/util.h"
+
+#include "mathutil/uvec.h"
 
 #include <sharedutils/scope_guard.h>
 

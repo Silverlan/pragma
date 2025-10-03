@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "mathutil/uvec.h"
 
 #include <sharedutils/magic_enum.hpp>
 

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "sharedutils/util.h"
 
 #include <fsys/filesystem.h>
 #include <sharedutils/util_string.h>
@@ -11,7 +12,7 @@ module;
 
 module pragma.shared;
 
-import :entities.components.environment.effects.particle_system_data;
+import :entities.components.environment.effects.particle_system;
 
 // See c_particlesystem_save.cpp as well
 bool pragma::asset::save_particle_system(VFilePtrReal &f, const std::unordered_map<std::string, CParticleSystemData> &particles, const std::string &rootPath)

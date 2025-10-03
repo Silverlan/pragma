@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "cassert"
+
+#include "sharedutils/util.h"
 
 #include <material_manager2.hpp>
 #include <sharedutils/util_path.hpp>

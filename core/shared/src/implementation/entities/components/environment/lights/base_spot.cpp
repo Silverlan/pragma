@@ -2,7 +2,10 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "sharedutils/util_string.h"
 
+#include "mathutil/uvec.h"
+#include "mathutil/umath_lighting.hpp"
 #include <sharedutils/util.h>
 #include <algorithm>
 #include <udm.hpp>

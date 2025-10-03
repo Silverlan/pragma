@@ -2,6 +2,11 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "cassert"
+
+#include "sharedutils/util_string.h"
+
+#include "sharedutils/functioncallback.h"
 
 #include "pragma/networkdefinitions.h"
 #include "luasystem.h"

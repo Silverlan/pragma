@@ -2,6 +2,11 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "cassert"
+
+#include "pragma/networkdefinitions.h"
+
+#include "mathutil/uvec.h"
 
 #include <sharedutils/util_ifile.hpp>
 

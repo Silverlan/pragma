@@ -16,9 +16,9 @@ export import pragma.util;
 
 export {
 	class Model;
-	class BaseBvhComponent;
-	class IntersectionHandlerComponent;
 	namespace pragma {
+		class BaseBvhComponent;
+		class IntersectionHandlerComponent;
 		struct DLLNETWORK CEOnBodyGroupChanged : public ComponentEvent {
 			CEOnBodyGroupChanged(uint32_t groupId, uint32_t typeId);
 			virtual void PushArguments(lua_State *l) override;

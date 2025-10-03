@@ -2,6 +2,13 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "cassert"
+
+#include "sharedutils/util.h"
+
+#include "pragma/networkdefinitions.h"
+
+#include "sharedutils/util_string.h"
 
 #include <sharedutils/magic_enum.hpp>
 #include "mathutil/umath.h"

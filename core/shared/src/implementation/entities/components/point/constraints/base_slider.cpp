@@ -2,6 +2,13 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "mathutil/uquat.h"
+
+#include "sharedutils/util_shared_handle.hpp"
+
+#include "sharedutils/util_string.h"
+
+#include "mathutil/uvec.h"
 
 #include <sharedutils/util.h>
 #include <glm/gtx/euler_angles.hpp>

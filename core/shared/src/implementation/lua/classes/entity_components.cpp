@@ -2,6 +2,21 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "pragma/lua/lua_call.hpp"
+
+#include "mathutil/uquat.h"
+
+#include "pragma/logging.hpp"
+
+#include "sharedutils/util.h"
+
+#include "pragma/networkdefinitions.h"
+
+#include "pragma/lua/luaapi.h"
+
+#include "pragma/lua/luacallback.h"
+
+#include "mathutil/uvec.h"
 
 #include <udm.hpp>
 #include <luabind/out_value_policy.hpp>
@@ -13,7 +28,6 @@ module pragma.shared;
 
 import :scripting.lua.classes.entity_components;
 
-import pragma.entities.components;
 
 namespace Lua {
 	template<typename... Types>

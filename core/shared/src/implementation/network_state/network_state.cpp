@@ -2,6 +2,17 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "algorithm"
+
+#include "udm.hpp"
+
+#include "pragma/logging.hpp"
+
+#include "sharedutils/util.h"
+
+#include "pragma/networkdefinitions.h"
+
+#include "pragma/lua/luaapi.h"
 
 #include "materialmanager.h"
 #include <sharedutils/functioncallback.h>

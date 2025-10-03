@@ -33,6 +33,11 @@ export module pragma.shared:console.output;
 export import :console.enums;
 
 export {
+	namespace pragma {
+		struct GString;
+	};
+	DLLNETWORK std::ostream &operator<<(std::ostream &stream, const pragma::GString &str);
+
 	namespace Con {
 		class c_crit;
 	};
@@ -132,7 +137,7 @@ export {
 
 	// c_cout
 	template<class T>
-	Con::c_cout &operator<<(Con::c_cout &con, const T &t)
+	inline Con::c_cout &operator<<(Con::c_cout &con, const T &t)
 	{
 		Con::detail::currentLevel = ::util::LogSeverity::Info;
 		std::cout << t;

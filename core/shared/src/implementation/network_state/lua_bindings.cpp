@@ -2,6 +2,19 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "cassert"
+
+#include "pragma/lua/lua_call.hpp"
+
+#include "mathutil/uquat.h"
+
+#include "sharedutils/util.h"
+
+#include "pragma/lua/luaapi.h"
+
+#include "sharedutils/util_string.h"
+
+#include "mathutil/uvec.h"
 
 #include <mathutil/umath.h>
 #include <glm/gtx/matrix_decompose.hpp>

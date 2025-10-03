@@ -22,3 +22,4 @@ export import :scripting.lua.logging;
 export import :scripting.lua.object_base;
 export import :scripting.lua.script_watcher;
 export import :scripting.lua.util;
+export import :scripting.lua.util_entity_component;

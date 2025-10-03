@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "pragma/networkdefinitions.h"
+
+#include "pragma/lua/luaapi.h"
 
 #include <fsys/filesystem.h>
 #include "luasystem_file.h"

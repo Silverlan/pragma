@@ -2,6 +2,11 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "mathutil/uquat.h"
+
+#include "sharedutils/util.h"
+
+#include "mathutil/uvec.h"
 
 #include <mathutil/umath.h>
 #include <glm/gtx/matrix_decompose.hpp>

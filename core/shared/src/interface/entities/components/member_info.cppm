@@ -15,6 +15,12 @@ export module pragma.shared:entities.member_info;
 export import :entities.enums;
 export import :util.global_string_table;
 
+#ifdef _WIN32
+// Due to a compiler bug with c++20 modules in msvc, we have to wrap the getter
+// and setter functions in lambdas to avoid compiler errors for now.
+#define USE_LAMBDA_GETTER_SETTER_WRAPPERS
+#endif
+
 export {
 	namespace pragma {
 		namespace ents {
@@ -78,43 +84,105 @@ export {
 			template<typename TComponent, typename T, void (*TApply)(const ComponentMemberInfo &, TComponent &, const T &)>
 			void SetSetterFunction()
 			{
+#ifdef USE_LAMBDA_GETTER_SETTER_WRAPPERS
+				setterFunction = [](const ComponentMemberInfo &memberInfo, BaseEntityComponent &component, const void *value) {
+					auto *setterFunc = TApply;
+					setterFunc(memberInfo, static_cast<TComponent &>(component), *static_cast<const T *>(value));
+				};
+#else
 				setterFunction = [](const ComponentMemberInfo &memberInfo, BaseEntityComponent &component, const void *value) { TApply(memberInfo, static_cast<TComponent &>(component), *static_cast<const T *>(value)); };
+#endif
 			}
 			template<typename TComponent, typename T, void (*TApply)(const ComponentMemberInfo &, TComponent &, T)>
 			void SetSetterFunction()
 			{
+#ifdef USE_LAMBDA_GETTER_SETTER_WRAPPERS
+				setterFunction = [](const ComponentMemberInfo &memberInfo, BaseEntityComponent &component, const void *value) {
+					auto *setterFunc = TApply;
+					setterFunc(memberInfo, static_cast<TComponent &>(component), *static_cast<const T *>(value));
+				};
+#else
 				setterFunction = [](const ComponentMemberInfo &memberInfo, BaseEntityComponent &component, const void *value) { TApply(memberInfo, static_cast<TComponent &>(component), *static_cast<const T *>(value)); };
+#endif
 			}
 			template<typename TComponent, typename T, void (TComponent::*TApply)(const T &)>
 			void SetSetterFunction()
 			{
+#ifdef USE_LAMBDA_GETTER_SETTER_WRAPPERS
+				setterFunction = [](const ComponentMemberInfo &memberInfo, BaseEntityComponent &component, const void *value) {
+					auto &comp = static_cast<TComponent&>(component);
+					auto setterFunc = [&comp](const T &v) {
+						(comp.*TApply)(v);
+					};
+					setterFunc(*static_cast<const T *>(value));
+				};
+#else
 				setterFunction = [](const ComponentMemberInfo &memberInfo, BaseEntityComponent &component, const void *value) { (static_cast<TComponent &>(component).*TApply)(*static_cast<const T *>(value)); };
+#endif
 			}
 			template<typename TComponent, typename T, void (TComponent::*TApply)(T)>
 			void SetSetterFunction()
 			{
+#ifdef USE_LAMBDA_GETTER_SETTER_WRAPPERS
+				setterFunction = [](const ComponentMemberInfo &memberInfo, BaseEntityComponent &component, const void *value) {
+					auto &comp = static_cast<TComponent&>(component);
+					auto setterFunc = TApply;
+					(comp.*setterFunc)(*static_cast<const T*>(value));
+				};
+#else
 				setterFunction = [](const ComponentMemberInfo &memberInfo, BaseEntityComponent &component, const void *value) { (static_cast<TComponent &>(component).*TApply)(*static_cast<const T *>(value)); };
+#endif
 			}
 
 			template<typename TComponent, typename T, void (*TGetter)(const ComponentMemberInfo &, TComponent &, T &)>
-			void SetGetterFunction()
+			inline void SetGetterFunction()
 			{
+#ifdef USE_LAMBDA_GETTER_SETTER_WRAPPERS
+				getterFunction = [](const ComponentMemberInfo &memberInfo, BaseEntityComponent &component, void *value) {
+					auto *getterFunc = TGetter;
+					getterFunc(memberInfo, static_cast<TComponent &>(component), *static_cast<T *>(value));
+				};
+#else
 				getterFunction = [](const ComponentMemberInfo &memberInfo, BaseEntityComponent &component, void *value) { TGetter(memberInfo, static_cast<TComponent &>(component), *static_cast<T *>(value)); };
+#endif
 			}
 			template<typename TComponent, typename T, auto(*TGetter)()>
-			void SetGetterFunction()
+			inline void SetGetterFunction()
 			{
+#ifdef USE_LAMBDA_GETTER_SETTER_WRAPPERS
+				getterFunction = [](const ComponentMemberInfo &memberInfo, BaseEntityComponent &component, void *value) {
+					auto *getterFunc = TGetter;
+					*static_cast<T *>(value) = getterFunc();
+				};
+#else
 				getterFunction = [](const ComponentMemberInfo &memberInfo, BaseEntityComponent &component, void *value) { *static_cast<T *>(value) = TGetter(); };
+#endif
 			}
 			template<typename TComponent, typename T, auto(TComponent::*TGetter)()>
-			void SetGetterFunction()
+			inline void SetGetterFunction()
 			{
+#ifdef USE_LAMBDA_GETTER_SETTER_WRAPPERS
+				getterFunction = [](const ComponentMemberInfo &memberInfo, BaseEntityComponent &component, void *value) {
+					auto &comp = static_cast<TComponent&>(component);
+					auto getterFunc = TGetter;
+					*static_cast<T*>(value) = (comp.*getterFunc)();
+				};
+#else
 				getterFunction = [](const ComponentMemberInfo &memberInfo, BaseEntityComponent &component, void *value) { *static_cast<T *>(value) = (static_cast<TComponent &>(component).*TGetter)(); };
+#endif
 			}
 			template<typename TComponent, typename T, auto(TComponent::*TGetter)() const>
-			void SetGetterFunction()
+			inline void SetGetterFunction()
 			{
+#ifdef USE_LAMBDA_GETTER_SETTER_WRAPPERS
+				getterFunction = [](const ComponentMemberInfo &memberInfo, BaseEntityComponent &component, void *value) {
+					auto &comp = static_cast<const TComponent&>(component); // call const getter
+					auto getterFunc = TGetter;
+					*static_cast<T*>(value) = (comp.*getterFunc)();
+				};
+#else
 				getterFunction = [](const ComponentMemberInfo &memberInfo, BaseEntityComponent &component, void *value) { *static_cast<T *>(value) = (static_cast<TComponent &>(component).*TGetter)(); };
+#endif
 			}
 
 	#if defined(__GNUC__) && !defined(__clang__)
@@ -128,7 +196,14 @@ export {
 			template<typename TComponent, typename T, void (*TInterp)(const T &, const T &, double, T &)>
 			void SetInterpolationFunction()
 			{
+#ifdef USE_LAMBDA_GETTER_SETTER_WRAPPERS
+				interpolationFunction = [](const void *v0, const void *v1, double t, void *out) {
+					auto *lerpFunc = TInterp;
+					lerpFunc(*static_cast<const T *>(v0), *static_cast<const T *>(v1), t, *static_cast<T *>(out));
+				};
+#else
 				interpolationFunction = [](const void *v0, const void *v1, double t, void *out) { TInterp(*static_cast<const T *>(v0), *static_cast<const T *>(v1), t, *static_cast<T *>(out)); };
+#endif
 			}
 
 			void SetName(const pragma::GString &name);

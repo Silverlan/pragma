@@ -2,6 +2,17 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "sharedutils/util.h"
+
+#include "pragma/lua/luaapi.h"
+
+#include "pragma/lua/luacallback.h"
+
+#include "sharedutils/util_string.h"
+
+#include "sharedutils/functioncallback.h"
+
+#include "mathutil/uvec.h"
 
 #include <sharedutils/datastream.h>
 #include <udm.hpp>
@@ -1484,8 +1495,8 @@ void CETranslateActivity::HandleReturnValues(lua_State *l)
 
 /////////////////
 
-CEOnBoneTransformChanged::CEOnBoneTransformChanged(UInt32 boneId, const Vector3 *pos, const Quat *rot, const Vector3 *scale) : boneId {boneId}, pos {pos}, rot {rot}, scale {scale} {}
-void CEOnBoneTransformChanged::CEOnBoneTransformChanged::PushArguments(lua_State *l)
+pragma::CEOnBoneTransformChanged::CEOnBoneTransformChanged(UInt32 boneId, const Vector3 *pos, const Quat *rot, const Vector3 *scale) : boneId {boneId}, pos {pos}, rot {rot}, scale {scale} {}
+void pragma::CEOnBoneTransformChanged::PushArguments(lua_State *l)
 {
 	Lua::PushInt(l, boneId);
 	if(pos != nullptr)
@@ -1506,8 +1517,8 @@ void CEOnBoneTransformChanged::CEOnBoneTransformChanged::PushArguments(lua_State
 
 /////////////////
 
-CEOnPlayActivity::CEOnPlayActivity(Activity activity, FPlayAnim flags) : activity {activity}, flags {flags} {}
-void CEOnPlayActivity::PushArguments(lua_State *l)
+pragma::CEOnPlayActivity::CEOnPlayActivity(Activity activity, FPlayAnim flags) : activity {activity}, flags {flags} {}
+void pragma::CEOnPlayActivity::PushArguments(lua_State *l)
 {
 	Lua::PushInt(l, umath::to_integral(activity));
 	Lua::PushInt(l, umath::to_integral(flags));
@@ -1515,8 +1526,8 @@ void CEOnPlayActivity::PushArguments(lua_State *l)
 
 /////////////////
 
-CEOnPlayLayeredActivity::CEOnPlayLayeredActivity(int slot, Activity activity, FPlayAnim flags) : slot {slot}, activity {activity}, flags {flags} {}
-void CEOnPlayLayeredActivity::PushArguments(lua_State *l)
+pragma::CEOnPlayLayeredActivity::CEOnPlayLayeredActivity(int slot, Activity activity, FPlayAnim flags) : slot {slot}, activity {activity}, flags {flags} {}
+void pragma::CEOnPlayLayeredActivity::PushArguments(lua_State *l)
 {
 	Lua::PushInt(l, slot);
 	Lua::PushInt(l, umath::to_integral(activity));
@@ -1525,8 +1536,8 @@ void CEOnPlayLayeredActivity::PushArguments(lua_State *l)
 
 /////////////////
 
-CEOnStopLayeredAnimation::CEOnStopLayeredAnimation(int32_t slot, BaseAnimatedComponent::AnimationSlotInfo &slotInfo) : slot {slot}, slotInfo {slotInfo} {}
-void CEOnStopLayeredAnimation::PushArguments(lua_State *l)
+pragma::CEOnStopLayeredAnimation::CEOnStopLayeredAnimation(int32_t slot, BaseAnimatedComponent::AnimationSlotInfo &slotInfo) : slot {slot}, slotInfo {slotInfo} {}
+void pragma::CEOnStopLayeredAnimation::PushArguments(lua_State *l)
 {
 	Lua::PushInt(l, slot);
 	Lua::PushInt(l, slotInfo.animation);
@@ -1535,8 +1546,8 @@ void CEOnStopLayeredAnimation::PushArguments(lua_State *l)
 
 /////////////////
 
-CEOnBlendAnimation::CEOnBlendAnimation(BaseAnimatedComponent::AnimationSlotInfo &slotInfo, Activity activity, std::vector<umath::Transform> &bonePoses, std::vector<Vector3> *boneScales) : slotInfo {slotInfo}, activity {activity}, bonePoses {bonePoses}, boneScales {boneScales} {}
-void CEOnBlendAnimation::PushArguments(lua_State *l)
+pragma::CEOnBlendAnimation::CEOnBlendAnimation(BaseAnimatedComponent::AnimationSlotInfo &slotInfo, Activity activity, std::vector<umath::Transform> &bonePoses, std::vector<Vector3> *boneScales) : slotInfo {slotInfo}, activity {activity}, bonePoses {bonePoses}, boneScales {boneScales} {}
+void pragma::CEOnBlendAnimation::PushArguments(lua_State *l)
 {
 	Lua::PushInt(l, slotInfo.animation);
 	Lua::PushInt(l, umath::to_integral(activity));
@@ -1544,13 +1555,13 @@ void CEOnBlendAnimation::PushArguments(lua_State *l)
 
 /////////////////
 
-CEMaintainAnimations::CEMaintainAnimations(double deltaTime) : deltaTime {deltaTime} {}
-void CEMaintainAnimations::PushArguments(lua_State *l) { Lua::PushNumber(l, deltaTime); }
+pragma::CEMaintainAnimations::CEMaintainAnimations(double deltaTime) : deltaTime {deltaTime} {}
+void pragma::CEMaintainAnimations::PushArguments(lua_State *l) { Lua::PushNumber(l, deltaTime); }
 
 /////////////////
 
-CEMaintainAnimation::CEMaintainAnimation(BaseAnimatedComponent::AnimationSlotInfo &slotInfo, double deltaTime) : slotInfo {slotInfo}, deltaTime {deltaTime} {}
-void CEMaintainAnimation::PushArguments(lua_State *l)
+pragma::CEMaintainAnimation::CEMaintainAnimation(BaseAnimatedComponent::AnimationSlotInfo &slotInfo, double deltaTime) : slotInfo {slotInfo}, deltaTime {deltaTime} {}
+void pragma::CEMaintainAnimation::PushArguments(lua_State *l)
 {
 	Lua::PushInt(l, slotInfo.animation);
 	Lua::PushInt(l, umath::to_integral(slotInfo.activity));
@@ -1559,20 +1570,20 @@ void CEMaintainAnimation::PushArguments(lua_State *l)
 
 /////////////////
 
-CEMaintainAnimationMovement::CEMaintainAnimationMovement(const Vector3 &displacement) : displacement {displacement} {}
-void CEMaintainAnimationMovement::PushArguments(lua_State *l) { Lua::Push<Vector3>(l, displacement); }
+pragma::CEMaintainAnimationMovement::CEMaintainAnimationMovement(const Vector3 &displacement) : displacement {displacement} {}
+void pragma::CEMaintainAnimationMovement::PushArguments(lua_State *l) { Lua::Push<Vector3>(l, displacement); }
 
 /////////////////
 
-CEShouldUpdateBones::CEShouldUpdateBones() {}
-void CEShouldUpdateBones::PushArguments(lua_State *l) {}
+pragma::CEShouldUpdateBones::CEShouldUpdateBones() {}
+void pragma::CEShouldUpdateBones::PushArguments(lua_State *l) {}
 
 /////////////////
 
-CEOnUpdateSkeleton::CEOnUpdateSkeleton() {}
-void CEOnUpdateSkeleton::PushArguments(lua_State *l) { Lua::PushBool(l, bonePosesHaveChanged); }
-uint32_t CEOnUpdateSkeleton::GetReturnCount() { return 1; }
-void CEOnUpdateSkeleton::HandleReturnValues(lua_State *l)
+pragma::CEOnUpdateSkeleton::CEOnUpdateSkeleton() {}
+void pragma::CEOnUpdateSkeleton::PushArguments(lua_State *l) { Lua::PushBool(l, bonePosesHaveChanged); }
+uint32_t pragma::CEOnUpdateSkeleton::GetReturnCount() { return 1; }
+void pragma::CEOnUpdateSkeleton::HandleReturnValues(lua_State *l)
 {
 	if(Lua::IsSet(l, -1))
 		bonePosesHaveChanged = Lua::CheckBool(l, -1);

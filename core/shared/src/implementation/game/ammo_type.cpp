@@ -2,7 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "algorithm"
 
+#include "mathutil/umath.h"
 
 module pragma.shared;
 

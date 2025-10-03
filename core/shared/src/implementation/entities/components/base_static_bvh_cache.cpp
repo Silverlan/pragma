@@ -2,7 +2,13 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "algorithm"
 
+#include "pragma/logging.hpp"
+
+#include "sharedutils/functioncallback.h"
+
+#include "mathutil/uvec.h"
 
 module pragma.shared;
 

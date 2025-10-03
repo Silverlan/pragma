@@ -2,7 +2,10 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "sharedutils/util.h"
 
+#include "sharedutils/util_string.h"
+#include "pragma/lua/luaapi.h"
 #include <udm_types.hpp>
 
 module pragma.shared;

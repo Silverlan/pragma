@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "cassert"
 
 #include <sharedutils/util_ifile.hpp>
 #include <udm.hpp>

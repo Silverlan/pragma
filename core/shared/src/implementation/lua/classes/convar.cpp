@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "udm.hpp"
+
+#include "pragma/lua/luaapi.h"
 
 #include "luasystem.h"
 #include <mathutil/umath.h>

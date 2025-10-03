@@ -2,7 +2,13 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "cassert"
 
+#include "mathutil/uquat.h"
+
+#include "pragma/logging.hpp"
+
+#include "mathutil/uvec.h"
 
 module pragma.shared;
 

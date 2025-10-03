@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "cassert"
+
+#include "sharedutils/util.h"
 
 #include <fsys/directory_watcher.h>
 #include <fsys/filesystem.h>

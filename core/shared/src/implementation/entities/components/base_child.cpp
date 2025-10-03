@@ -3,6 +3,8 @@
 
 module;
 
+#include <utility>
+#include <stdexcept>
 
 module pragma.shared;
 

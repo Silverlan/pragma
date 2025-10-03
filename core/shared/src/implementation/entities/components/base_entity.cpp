@@ -2,13 +2,26 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "cassert"
+
+#include "pragma/logging.hpp"
+
+#include "sharedutils/util.h"
+
+#include "pragma/networkdefinitions.h"
+
+#include "sharedutils/util_string.h"
+
+#include "sharedutils/functioncallback.h"
+
+#include "mathutil/uvec.h"
 
 #include <sharedutils/datastream.h>
 #include <udm.hpp>
 
 module pragma.shared;
 
-import :entities.components.base_entity;
+import :entities.components.base;
 
 import panima;
 

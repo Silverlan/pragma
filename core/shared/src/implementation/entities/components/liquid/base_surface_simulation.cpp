@@ -2,12 +2,19 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "cassert"
+
+#include "sharedutils/util.h"
+
+#include "sharedutils/util_string.h"
+
+#include "mathutil/uvec.h"
 
 #include <mathutil/umath_geometry.hpp>
 
 module pragma.shared;
 
-import :entities.components.constraints.liquid_surface_simulation;
+import :entities.components.liquid.base_surface_simulation;
 
 using namespace pragma;
 

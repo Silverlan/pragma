@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "algorithm"
+
+#include "cassert"
 
 #include <sharedutils/util_library.hpp>
 

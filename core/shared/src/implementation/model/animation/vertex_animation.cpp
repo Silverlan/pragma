@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "algorithm"
+
+#include "mathutil/uvec.h"
 
 #include <udm.hpp>
 #include <set>

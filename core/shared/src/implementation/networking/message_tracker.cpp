@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "algorithm"
+
+#include "sharedutils/util.h"
 
 #include <sharedutils/scope_guard.h>
 #include <sharedutils/util_date.hpp>

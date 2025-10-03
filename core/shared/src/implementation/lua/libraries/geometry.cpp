@@ -2,6 +2,11 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "mathutil/umath_geometry.hpp"
+
+#include "pragma/lua/luaapi.h"
+
+#include "mathutil/uvec.h"
 
 #include <mathutil/glmutil.h>
 #include "luasystem.h"

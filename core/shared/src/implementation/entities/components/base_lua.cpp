@@ -2,6 +2,24 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "algorithm"
+
+#include "cassert"
+
+#include "pragma/lua/lua_call.hpp"
+
+#include "pragma/logging.hpp"
+#include "pragma/lua/types/nil_type.hpp"
+#include "sharedutils/util.h"
+#include "pragma/lua/types/udm.hpp"
+#include "sharedutils/util_version.h"
+#include "pragma/lua/luaapi.h"
+
+#include "sharedutils/util_string.h"
+#include <any>
+#include "sharedutils/functioncallback.h"
+
+#include "mathutil/uvec.h"
 
 #include <sharedutils/scope_guard.h>
 #include <sharedutils/datastream.h>
@@ -10,6 +28,7 @@ module;
 module pragma.shared;
 
 import :entities.components.base_lua;
+import :scripting.lua.util_entity_component;
 
 #define ENABLE_CUSTOM_SETTER_GETTER 0
 

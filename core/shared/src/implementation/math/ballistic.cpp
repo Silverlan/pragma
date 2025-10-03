@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "cassert"
+
+#include "mathutil/uvec.h"
 
 #include <mathutil/umath_equation_solver.h>
 

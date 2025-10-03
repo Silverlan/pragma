@@ -2,6 +2,13 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "algorithm"
+
+#include "pragma/logging.hpp"
+
+#include "sharedutils/util.h"
+
+#include "mathutil/uvec.h"
 
 #include <fsys/filesystem.h>
 #include <udm.hpp>

@@ -6,7 +6,7 @@ module;
 
 module pragma.shared;
 
-import :entities.components.info.base_bot;
+import :entities.components.base_bot;
 
 using namespace pragma;
 

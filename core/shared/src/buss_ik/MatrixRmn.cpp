@@ -1,3 +1,6 @@
+
+#include "cassert"
+
 /*
 *
 * Mathematics Subpackage (VrMath)

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "sharedutils/util.h"
 
 #include <sharedutils/util_uri.hpp>
 #include <sharedutils/datastream.h>

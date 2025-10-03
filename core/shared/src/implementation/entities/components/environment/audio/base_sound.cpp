@@ -2,11 +2,17 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "sharedutils/util.h"
 
+#include "sharedutils/util_string.h"
+
+#include "sharedutils/functioncallback.h"
+
+#include "mathutil/uvec.h"
 
 module pragma.shared;
 
-import :entities.components.audio.base_sound;
+import :entities.components.environment.audio.base_sound;
 
 using namespace pragma;
 

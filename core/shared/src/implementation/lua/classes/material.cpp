@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "pragma/lua/luaapi.h"
 
 #include <material_manager2.hpp>
 #include "luasystem.h"

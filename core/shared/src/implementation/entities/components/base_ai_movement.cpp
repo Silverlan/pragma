@@ -2,6 +2,11 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "cassert"
+
+#include "sharedutils/util.h"
+
+#include "mathutil/uvec.h"
 
 #include <mathutil/umath.h>
 #include <glm/gtx/projection.hpp>
@@ -12,7 +17,7 @@ module;
 
 module pragma.shared;
 
-import :entities.components.ai;
+import :entities.components.base_ai;
 
 using namespace pragma;
 

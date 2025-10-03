@@ -1,3 +1,6 @@
+
+#include "cassert"
+
 /*
 *
 * Inverse Kinematics software, with several solvers including

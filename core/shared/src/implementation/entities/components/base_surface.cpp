@@ -2,7 +2,19 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "cassert"
 
+#include "mathutil/uquat.h"
+
+#include "pragma/logging.hpp"
+
+#include "mathutil/umath_geometry.hpp"
+
+#include "pragma/lua/luaapi.h"
+
+#include "sharedutils/util_string.h"
+
+#include "mathutil/uvec.h"
 
 module pragma.shared;
 

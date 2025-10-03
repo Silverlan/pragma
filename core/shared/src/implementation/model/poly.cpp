@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "mathutil/umath.h"
+
+#include "mathutil/uvec.h"
 
 #include <material_manager2.hpp>
 

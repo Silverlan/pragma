@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "cassert"
 
 #include <fsys/filesystem.h>
 #include <sharedutils/util_string.h>

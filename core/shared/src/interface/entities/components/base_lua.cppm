@@ -413,4 +413,8 @@ export {
 			return false;
 		});
 	}
+
+	namespace Lua {
+		void register_base_entity_component(luabind::module_ &modEnts);
+	}
 };

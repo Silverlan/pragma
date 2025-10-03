@@ -5,6 +5,7 @@ module;
 
 #include <sharedutils/util_parallel_job.hpp>
 #include <functional>
+#include <cassert>
 
 export module pragma.shared:util.functional_parallel_worker;
 

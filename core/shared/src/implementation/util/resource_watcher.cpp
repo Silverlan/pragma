@@ -2,6 +2,15 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "algorithm"
+
+#include "cassert"
+
+#include "sharedutils/util.h"
+
+#include "sharedutils/util_string.h"
+
+#include "sharedutils/functioncallback.h"
 
 #include <material_manager2.hpp>
 #include <material_property_block_view.hpp>

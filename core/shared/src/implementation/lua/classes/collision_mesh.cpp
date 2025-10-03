@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "pragma/lua/luaapi.h"
+
+#include "mathutil/uvec.h"
 
 #include <luabind/copy_policy.hpp>
 

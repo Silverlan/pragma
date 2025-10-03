@@ -8,7 +8,6 @@ module pragma.shared;
 
 import :game.game;
 
-import pragma.entities.components;
 
 void Game::InitializeEntityComponents(pragma::EntityComponentManager &componentManager)
 {

@@ -10,13 +10,13 @@ export module pragma.shared:entities.components.environment.base_quake;
 
 export import :entities.components.base;
 
-#define SF_QUAKE_GLOBAL_SHAKE 1
-#define SF_QUAKE_IN_AIR 4
-#define SF_QUAKE_AFFECT_PHYSICS 8
-#define SF_QUAKE_DONT_SHAKE_VIEW 32
-#define SF_QUAKE_REMOVE_ON_COMPLETE 4096
-
 export namespace pragma {
+	constexpr uint32_t SF_QUAKE_GLOBAL_SHAKE = 1;
+	constexpr uint32_t SF_QUAKE_IN_AIR = 4;
+	constexpr uint32_t SF_QUAKE_AFFECT_PHYSICS = 8;
+	constexpr uint32_t SF_QUAKE_DONT_SHAKE_VIEW = 32;
+	constexpr uint32_t SF_QUAKE_REMOVE_ON_COMPLETE = 4096;
+
 	class DLLNETWORK BaseEnvQuakeComponent : public BaseEntityComponent {
 	  public:
 		using BaseEntityComponent::BaseEntityComponent;

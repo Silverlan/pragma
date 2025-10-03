@@ -6,7 +6,7 @@ module;
 
 module pragma.shared;
 
-import :entities.components.constraints.liquid_volume;
+import :entities.components.liquid.base_volume;
 
 using namespace pragma;
 

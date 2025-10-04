@@ -4,6 +4,10 @@
 module;
 
 #include <sharedutils/magic_enum.hpp>
+#include "mathutil/eulerangles.h"
+#include "mathutil/uvec.h"
+#include "mathutil/color.h"
+#include <iostream>
 
 module pragma.shared;
 

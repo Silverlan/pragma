@@ -2,12 +2,14 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "mathutil/umath.h"
+
 #include "algorithm"
 
 #include "cassert"
 
 #include "sharedutils/util_shared_handle.hpp"
-
+#include "pragma/lua/raw_object.hpp"
 #include "sharedutils/util.h"
 
 #include "mathutil/uvec.h"

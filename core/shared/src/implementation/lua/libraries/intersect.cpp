@@ -2,6 +2,12 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "mathutil/umath_geometry.hpp"
+
+#include "pragma/lua/luaapi.h"
+
+#include "mathutil/umath.h"
+
 #include "mathutil/uvec.h"
 
 #include <mathutil/glmutil.h>
@@ -41,7 +47,7 @@ static bool get_line_mesh_result(lua_State *l, const Intersection::LineMeshResul
 	return true;
 }
 
-void Lua::intersect::line_mesh(lua_State *l, const Vector3 &rayStart, const Vector3 &rayDir, ModelSubMesh &mesh, luabind::object &r0, luabind::object &r1, bool precise, const umath::Transform &meshPose)
+void Lua::intersect::line_mesh(lua_State *l, const Vector3 &rayStart, const Vector3 &rayDir, ::ModelSubMesh &mesh, luabind::object &r0, luabind::object &r1, bool precise, const umath::Transform &meshPose)
 {
 	auto &origin = meshPose.GetOrigin();
 	auto &rot = meshPose.GetRotation();
@@ -50,7 +56,7 @@ void Lua::intersect::line_mesh(lua_State *l, const Vector3 &rayStart, const Vect
 	get_line_mesh_result(l, res, precise, r0, r1);
 }
 
-void Lua::intersect::line_mesh(lua_State *l, const Vector3 &rayStart, const Vector3 &rayDir, ModelMesh &mesh, luabind::object &r0, luabind::object &r1, bool precise, const umath::Transform &meshPose)
+void Lua::intersect::line_mesh(lua_State *l, const Vector3 &rayStart, const Vector3 &rayDir, ::ModelMesh &mesh, luabind::object &r0, luabind::object &r1, bool precise, const umath::Transform &meshPose)
 {
 	auto &origin = meshPose.GetOrigin();
 	auto &rot = meshPose.GetRotation();
@@ -62,7 +68,7 @@ void Lua::intersect::line_mesh(lua_State *l, const Vector3 &rayStart, const Vect
 		r1["subMeshIdx"] = res.precise->subMeshIdx;
 }
 
-void Lua::intersect::line_mesh(lua_State *l, const Vector3 &rayStart, const Vector3 &rayDir, Model &mdl, uint32_t lod, luabind::object &r0, luabind::object &r1, bool precise, const umath::Transform &meshPose)
+void Lua::intersect::line_mesh(lua_State *l, const Vector3 &rayStart, const Vector3 &rayDir, ::Model &mdl, uint32_t lod, luabind::object &r0, luabind::object &r1, bool precise, const umath::Transform &meshPose)
 {
 	Intersection::LineMeshResult res {};
 	Intersection::LineMesh(rayStart, rayDir, mdl, res, precise, nullptr, lod, meshPose.GetOrigin(), meshPose.GetRotation());
@@ -75,7 +81,7 @@ void Lua::intersect::line_mesh(lua_State *l, const Vector3 &rayStart, const Vect
 	}
 }
 
-void Lua::intersect::line_mesh(lua_State *l, const Vector3 &rayStart, const Vector3 &rayDir, Model &mdl, luabind::table<> tBodyGroups, luabind::object &r0, luabind::object &r1, bool precise, const umath::Transform &meshPose)
+void Lua::intersect::line_mesh(lua_State *l, const Vector3 &rayStart, const Vector3 &rayDir, ::Model &mdl, luabind::table<> tBodyGroups, luabind::object &r0, luabind::object &r1, bool precise, const umath::Transform &meshPose)
 {
 	auto bodyGroups = Lua::table_to_vector<uint32_t>(l, tBodyGroups, 4);
 	Intersection::LineMeshResult res {};
@@ -137,10 +143,10 @@ void Lua::intersect::line_triangle(lua_State *l, const Vector3 &lineOrigin, cons
 		return;
 	}
 	outT = luabind::object {l, t};
-	outUv = luabind::object {l, Vector2 {u, v}};
+	outUv = luabind::object {l, ::Vector2 {u, v}};
 }
 
-luabind::object Lua::intersect::line_line(lua_State *l, const Vector2 &start0, const Vector2 &end0, const Vector2 &start1, const Vector2 &end1)
+luabind::object Lua::intersect::line_line(lua_State *l, const ::Vector2 &start0, const ::Vector2 &end0, const ::Vector2 &start1, const ::Vector2 &end1)
 {
 	auto result = umath::intersection::line_line(start0, end0, start1, end1);
 	if(result.has_value() == false)

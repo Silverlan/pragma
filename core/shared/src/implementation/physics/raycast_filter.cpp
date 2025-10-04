@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "sharedutils/util_shared_handle.hpp"
+
 #include "algorithm"
 
 module pragma.shared;

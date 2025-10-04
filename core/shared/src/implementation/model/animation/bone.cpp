@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 module;
-
+#include "memory"
 
 module pragma.shared;
 

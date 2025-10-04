@@ -2,6 +2,12 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "fsys/filesystem.h"
+
+#include "sharedutils/util_clock.hpp"
+
+#include "memory"
+
 #include "algorithm"
 
 #include "sharedutils/util.h"
@@ -11,6 +17,7 @@ module;
 
 module pragma.shared;
 
+import :console.output;
 import :networking.message_tracker;
 
 pragma::networking::MessageTracker::MessageTracker() { SetMemoryCount(10); }

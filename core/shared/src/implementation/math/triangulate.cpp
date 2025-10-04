@@ -17,6 +17,7 @@ module;
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include "mathutil/uvec.h"
 
 module pragma.shared;
 
@@ -24,7 +25,7 @@ import :math.triangulate;
 
 static const auto EPSILON = 0.0000000001f;
 
-float Geometry::calc_area(const std::vector<Vector2> &contour)
+float Geometry::calc_area(const std::vector<::Vector2> &contour)
 {
 	auto n = contour.size();
 	auto A = 0.0f;
@@ -62,7 +63,7 @@ bool Geometry::inside_triangle(float Ax, float Ay, float Bx, float By, float Cx,
 	return ((aCROSSbp >= 0.0f) && (bCROSScp >= 0.0f) && (cCROSSap >= 0.0f));
 };
 
-static bool snip(const std::vector<Vector2> &contour, int u, int v, int w, int n, const std::vector<int32_t> &V)
+static bool snip(const std::vector<::Vector2> &contour, int u, int v, int w, int n, const std::vector<int32_t> &V)
 {
 	int32_t p;
 	float Ax, Ay, Bx, By, Cx, Cy, Px, Py;
@@ -90,11 +91,11 @@ static bool snip(const std::vector<Vector2> &contour, int u, int v, int w, int n
 	return true;
 }
 
-bool Geometry::triangulate(const std::vector<Vector2> &contour, std::vector<uint16_t> &result)
+bool Geometry::triangulate(const std::vector<::Vector2> &contour, std::vector<uint16_t> &result)
 {
 	//Con::cout<<"local contour = {"<<Con::endl;
 	//for(auto &p : contour)
-	//	Con::cout<<"Vector2("<<p.x<<","<<p.y<<"),"<<Con::endl;
+	//	Con::cout<<"::Vector2("<<p.x<<","<<p.y<<"),"<<Con::endl;
 	//Con::cout<<"}"<<Con::endl;
 	/* allocate and initialize list of Vertices in polygon */
 	auto n = contour.size();

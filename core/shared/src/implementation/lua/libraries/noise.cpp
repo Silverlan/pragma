@@ -2,11 +2,15 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "memory"
+
 #include "pragma/lua/luaapi.h"
 
 #include "mathutil/uvec.h"
-
+#include "mathutil/perlin_noise.hpp"
 #include "luasystem.h"
+#include "noise/noise.h"
+#include "noiseutils.h"
 
 module pragma.shared;
 
@@ -46,16 +50,16 @@ int Lua::noise::billow(lua_State *l)
 
 int Lua::noise::generate_height_map(lua_State *l)
 {
-	auto *noiseModule = Lua::CheckNoiseModule(l, 1);
-	auto *destSize = Lua::CheckVector2(l, 2);
-	auto *bottomLeft = Lua::CheckVector2(l, 3);
-	auto *upperRight = Lua::CheckVector2(l, 4);
+	auto &noiseModule = Lua::Check<::noise::module::Module>(l, 1);
+	auto &destSize = Lua::Check<::Vector2>(l, 2);
+	auto &bottomLeft = Lua::Check<::Vector2>(l, 3);
+	auto &upperRight = Lua::Check<::Vector2>(l, 4);
 	auto heightMap = std::make_shared<::noise::utils::NoiseMap>();
 	::noise::utils::NoiseMapBuilderPlane heightMapBuilder;
-	heightMapBuilder.SetSourceModule(*noiseModule);
+	heightMapBuilder.SetSourceModule(noiseModule);
 	heightMapBuilder.SetDestNoiseMap(*heightMap.get());
-	heightMapBuilder.SetDestSize(CInt32(destSize->x), CInt32(destSize->y));
-	heightMapBuilder.SetBounds(bottomLeft->x, upperRight->x, bottomLeft->y, upperRight->y);
+	heightMapBuilder.SetDestSize(CInt32(destSize.x), CInt32(destSize.y));
+	heightMapBuilder.SetBounds(bottomLeft.x, upperRight.x, bottomLeft.y, upperRight.y);
 	heightMapBuilder.Build();
 	Lua::Push<std::shared_ptr<::noise::utils::NoiseMap>>(l, heightMap);
 	return 1;

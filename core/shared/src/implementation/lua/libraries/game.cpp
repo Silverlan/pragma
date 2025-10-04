@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "pragma/lua/policies/core_policies.hpp"
+
 #include "udm.hpp"
 
 #include "cassert"
@@ -9,11 +11,11 @@ module;
 #include "mathutil/umath.h"
 
 #include "pragma/lua/lua_call.hpp"
-
+#include "pragma/lua/lua_util_class.hpp"
 #include "pragma/lua/luaapi.h"
 
 #include "pragma/lua/luacallback.h"
-
+#include "pragma/lua/ostream_operator_alias.hpp"
 #include "mathutil/uvec.h"
 
 #include <sharedutils/functioncallback.h>
@@ -160,7 +162,7 @@ Lua::opt<Vector3> Lua::game::get_light_color(lua_State *l, const Vector3 &pos)
 		if(dist >= lightDist)
 			continue;
 		auto pColComponent = static_cast<pragma::BaseColorComponent *>(ent->FindComponent("color").get());
-		auto &lightCol = (pColComponent != nullptr) ? pColComponent->GetColor() : Color::White;
+		auto &lightCol = (pColComponent != nullptr) ? pColComponent->GetColor() : ::Color::White;
 		auto brightness = lightCol.a / 255.f;
 		brightness *= dist / lightDist;
 		col += Vector3(lightCol.r / 255.f, lightCol.g / 255.f, lightCol.b / 255.f) * brightness;
@@ -204,7 +206,7 @@ std::pair<bool, int> Lua::game::load_map(lua_State *l, std::string &mapName, Bas
 
 	origin = {};
 	if(Lua::IsSet(l, 2))
-		origin = *Lua::CheckVector(l, 2);
+		origin = Lua::Check<Vector3>(l, 2);
 	auto bNewWorld = false;
 	if(Lua::IsSet(l, 3))
 		bNewWorld = true;
@@ -344,9 +346,7 @@ bool Lua::game::raycast(lua_State *l, const ::TraceData &data)
 	return false;
 }
 
-#ifdef __linux__
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, ValueDriverDescriptor);
-#endif
 void Lua::game::register_shared_functions(lua_State *l, luabind::module_ &modGame)
 {
 	modGame[luabind::def("add_callback", Lua::game::add_callback),
@@ -385,16 +385,16 @@ void Lua::game::register_shared_functions(lua_State *l, luabind::module_ &modGam
 	  luabind::def("is_map_initialized", &Game::IsMapInitialized), luabind::def("get_game_state_flags", Lua::game::get_game_state_flags), luabind::def("update_animations", +[](Game &game, float dt) { game.UpdateAnimations(dt); })];
 
 	auto classDefDescriptor = pragma::lua::register_class<pragma::ValueDriverDescriptor>(l, "ValueDriverDescriptor");
-	classDefDescriptor->def(luabind::constructor<lua_State *, std::string, std::unordered_map<std::string, std::string>, std::unordered_map<std::string, udm::PProperty>>());
+	classDefDescriptor->def(luabind::constructor<lua_State *, std::string, std::unordered_map<std::string, std::string>, std::unordered_map<std::string, ::udm::PProperty>>());
 	classDefDescriptor->def(luabind::constructor<lua_State *, std::string, std::unordered_map<std::string, std::string>>());
 	classDefDescriptor->def(luabind::constructor<lua_State *, std::string>());
 	classDefDescriptor->property("expression", static_cast<std::string (*)(lua_State *, pragma::ValueDriverDescriptor &)>([](lua_State *l, pragma::ValueDriverDescriptor &descriptor) -> std::string { return descriptor.GetExpression(); }),
 	  static_cast<void (*)(lua_State *, pragma::ValueDriverDescriptor &, const std::string &)>([](lua_State *l, pragma::ValueDriverDescriptor &descriptor, const std::string &expr) { descriptor.SetExpression(expr); }));
 	classDefDescriptor->def("AddReference", &pragma::ValueDriverDescriptor::AddReference);
-	classDefDescriptor->def("AddConstant", static_cast<void (*)(pragma::ValueDriverDescriptor &, const std::string &, udm::PProperty)>([](pragma::ValueDriverDescriptor &descriptor, const std::string &name, udm::PProperty prop) { descriptor.AddConstant(name, prop); }));
+	classDefDescriptor->def("AddConstant", static_cast<void (*)(pragma::ValueDriverDescriptor &, const std::string &, ::udm::PProperty)>([](pragma::ValueDriverDescriptor &descriptor, const std::string &name, ::udm::PProperty prop) { descriptor.AddConstant(name, prop); }));
 	classDefDescriptor->def("AddConstant", static_cast<void (*)(pragma::ValueDriverDescriptor &, const std::string &, const Lua::classObject &)>([](pragma::ValueDriverDescriptor &descriptor, const std::string &name, const Lua::classObject &udmType) {
-		for(auto type : udm::GENERIC_TYPES) {
-			auto r = udm::visit<false, true, false>(type, [&udmType, &descriptor, &name](auto tag) mutable -> bool {
+		for(auto type : ::udm::GENERIC_TYPES) {
+			auto r = ::udm::visit<false, true, false>(type, [&udmType, &descriptor, &name](auto tag) mutable -> bool {
 				using T = typename decltype(tag)::type;
 				auto *o = luabind::object_cast_nothrow<T *>(udmType, luabind::pointer_policy<0> {}, static_cast<T *>(nullptr));
 				if(o) {

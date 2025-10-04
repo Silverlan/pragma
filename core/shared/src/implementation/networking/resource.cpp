@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "mathutil/umath.h"
+#include "pragma/lua/luaapi.h"
 #include "pragma/networkdefinitions.h"
 
 #include <sharedutils/util_file.h>

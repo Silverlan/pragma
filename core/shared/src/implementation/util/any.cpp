@@ -2,6 +2,12 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "any"
+
+#include "mathutil/umath.h"
+
+#include "variant"
+
 #include "cassert"
 
 #include "sharedutils/util.h"
@@ -349,12 +355,12 @@ static constexpr const IAnyHandler &get_any_handler(util::VarType varType)
 	return s_nilHandler;
 }
 
-std::any Lua::GetAnyValue(lua_State *l, util::VarType varType, int32_t idx) { return get_any_handler(varType).GetValue(l, idx); }
+std::any Lua::GetAnyValue(lua_State *l, ::util::VarType varType, int32_t idx) { return get_any_handler(varType).GetValue(l, idx); }
 std::any Lua::GetAnyPropertyValue(lua_State *l, int32_t indexProperty, ::util::VarType varType) { return get_any_handler(varType).GetPropertyValue(l, indexProperty); }
 void Lua::SetAnyPropertyValue(lua_State *l, int32_t indexProperty, ::util::VarType varType, const std::any &value) { get_any_handler(varType).SetPropertyValue(l, indexProperty, value); }
-void Lua::PushAny(lua_State *l, util::VarType varType, const std::any &value) { get_any_handler(varType).Push(l, value); }
+void Lua::PushAny(lua_State *l, ::util::VarType varType, const std::any &value) { get_any_handler(varType).Push(l, value); }
 void Lua::PushNewAnyProperty(lua_State *l, ::util::VarType varType, const std::any &value) { get_any_handler(varType).PushNewProperty(l, value); }
-void Lua::WriteAny(DataStream &ds, ::util::VarType varType, const std::any &value, uint32_t *pos) { get_any_handler(varType).Write(ds, value, pos); }
-void Lua::WriteAny(NetPacket &ds, ::util::VarType varType, const std::any &value, uint32_t *pos) { get_any_handler(varType).Write(ds, value, pos); }
-void Lua::ReadAny(Game &game, DataStream &ds, ::util::VarType varType, std::any &outValue) { get_any_handler(varType).Read(game, ds, outValue); }
-void Lua::ReadAny(NetPacket &ds, ::util::VarType varType, std::any &outValue) { get_any_handler(varType).Read(ds, outValue); }
+void Lua::WriteAny(::DataStream &ds, ::util::VarType varType, const std::any &value, uint32_t *pos) { get_any_handler(varType).Write(ds, value, pos); }
+void Lua::WriteAny(::NetPacket &ds, ::util::VarType varType, const std::any &value, uint32_t *pos) { get_any_handler(varType).Write(ds, value, pos); }
+void Lua::ReadAny(Game &game, ::DataStream &ds, ::util::VarType varType, std::any &outValue) { get_any_handler(varType).Read(game, ds, outValue); }
+void Lua::ReadAny(::NetPacket &ds, ::util::VarType varType, std::any &outValue) { get_any_handler(varType).Read(ds, outValue); }

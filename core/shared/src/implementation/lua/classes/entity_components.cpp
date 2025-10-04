@@ -2,8 +2,16 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "pragma/lua/lua_call.hpp"
+#include "sharedutils/magic_enum.hpp"
 
+#include "pragma/lua/policies/shared_from_this_policy.hpp"
+
+#include "pragma/lua/policies/default_parameter_policy.hpp"
+
+#include "mathutil/umath.h"
+
+#include "pragma/lua/lua_call.hpp"
+#include "pragma/lua/types/udm.hpp"
 #include "mathutil/uquat.h"
 
 #include "pragma/logging.hpp"
@@ -27,7 +35,7 @@ module;
 module pragma.shared;
 
 import :scripting.lua.classes.entity_components;
-
+import :scripting.lua.entity_component_event;
 
 namespace Lua {
 	template<typename... Types>
@@ -1895,19 +1903,19 @@ void pragma::lua::base_networked_component::register_class(luabind::module_ &mod
 			}
 		case pragma::BaseNetworkedComponent::NetworkedVariable::Type::Vector:
 			{
-				auto &v = *Lua::CheckVector(l, 3);
+				auto &v = Lua::Check<Vector3>(l, 3);
 				hEnt.SetNetworkedVariable<Vector3>(id, v);
 				return;
 			}
 		case pragma::BaseNetworkedComponent::NetworkedVariable::Type::Vector2:
 			{
-				auto &v = *Lua::CheckVector2(l, 3);
+				auto &v = Lua::Check<Vector2>(l, 3);
 				hEnt.SetNetworkedVariable<Vector2>(id, v);
 				return;
 			}
 		case pragma::BaseNetworkedComponent::NetworkedVariable::Type::Vector4:
 			{
-				auto &v = *Lua::CheckVector4(l, 3);
+				auto &v = Lua::Check<Vector3>(l, 3);
 				hEnt.SetNetworkedVariable<Vector4>(id, v);
 				return;
 			}
@@ -1920,7 +1928,7 @@ void pragma::lua::base_networked_component::register_class(luabind::module_ &mod
 			}
 		case pragma::BaseNetworkedComponent::NetworkedVariable::Type::Quaternion:
 			{
-				auto &v = *Lua::CheckQuaternion(l, 3);
+				auto &v = *Lua::Check<Quat>(l, 3);
 				hEnt.SetNetworkedVariable<Quat>(id, v);
 				return;
 			}
@@ -2083,10 +2091,10 @@ void pragma::lua::base_observable_component::register_class(luabind::module_ &mo
 namespace Lua::Shooter {
 	void FireBullets(lua_State *l, pragma::ecs::BaseShooterComponent &hEnt, const luabind::object &, bool bHitReport, bool bMaster)
 	{
-		auto *bulletInfo = Lua::CheckBulletInfo(l, 2);
+		auto &bulletInfo = Lua::Check<BulletInfo>(l, 2);
 
 		std::vector<TraceResult> results;
-		hEnt.FireBullets(*bulletInfo, results, bMaster);
+		hEnt.FireBullets(bulletInfo, results, bMaster);
 		if(bHitReport == false)
 			return;
 		auto t = luabind::newtable(l);

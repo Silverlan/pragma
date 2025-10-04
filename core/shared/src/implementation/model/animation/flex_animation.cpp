@@ -2,6 +2,14 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "sharedutils/util_file.h"
+
+#include "fsys/filesystem.h"
+
+#include "mathutil/umath.h"
+
+#include "memory"
+
 #include "cassert"
 
 #include <sharedutils/util_ifile.hpp>
@@ -9,6 +17,7 @@ module;
 
 module pragma.shared;
 
+import :model.animation.enums;
 import :model.animation.flex_animation;
 
 FlexAnimationFrame::FlexAnimationFrame(const FlexAnimationFrame &frame) : m_flexControllerValues {frame.m_flexControllerValues} { static_assert(sizeof(FlexAnimationFrame) == 40, "Update this function when making changes to this class!"); }
@@ -145,7 +154,7 @@ bool FlexAnimation::SaveLegacy(std::shared_ptr<VFilePtrInternalReal> &f)
 	auto &flexControllerIds = GetFlexControllerIds();
 	f->Write<uint32_t>(flexControllerIds.size());
 	for(auto id : flexControllerIds)
-		f->Write<FlexControllerId>(id);
+		f->Write<pragma::animation::FlexControllerId>(id);
 
 	auto &frames = GetFrames();
 	f->Write<uint32_t>(frames.size());
@@ -162,7 +171,7 @@ FlexAnimation::FlexAnimation(const FlexAnimation &other) : m_flexControllerIds {
 		frame = std::make_shared<FlexAnimationFrame>(*frame);
 	static_assert(sizeof(FlexAnimation) == 72, "Update this function when making changes to this class!");
 }
-uint32_t FlexAnimation::AddFlexControllerId(FlexControllerId id)
+uint32_t FlexAnimation::AddFlexControllerId(pragma::animation::FlexControllerId id)
 {
 	auto &ids = GetFlexControllerIds();
 	auto it = std::find(ids.begin(), ids.end(), id);
@@ -193,7 +202,7 @@ bool FlexAnimation::operator==(const FlexAnimation &other) const
 	}
 	return true;
 }
-void FlexAnimation::SetFlexControllerIds(std::vector<FlexControllerId> &&ids)
+void FlexAnimation::SetFlexControllerIds(std::vector<pragma::animation::FlexControllerId> &&ids)
 {
 	m_flexControllerIds = std::move(ids);
 	for(auto &frame : m_frames)

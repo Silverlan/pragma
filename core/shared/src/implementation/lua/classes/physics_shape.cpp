@@ -2,6 +2,12 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "mathutil/umath.h"
+
+#include "pragma/lua/policies/shared_from_this_policy.hpp"
+
+#include "pragma/lua/luaapi.h"
+
 #include "mathutil/uvec.h"
 
 #include "luasystem.h"
@@ -32,7 +38,7 @@ void Lua::PhysShape::register_class(lua_State *l, luabind::module_ &mod)
 	mod[classDef];
 
 	auto convexClassDef = luabind::class_<pragma::physics::IConvexShape, luabind::bases<pragma::physics::IShape, pragma::physics::IBase>>("ConvexShape");
-	convexClassDef.def("GetCollisionMesh", static_cast<CollisionMesh *(pragma::physics::IConvexShape::*)()>(&pragma::physics::IConvexShape::GetCollisionMesh), luabind::shared_from_this_policy<0> {});
+	convexClassDef.def("GetCollisionMesh", static_cast<::CollisionMesh *(pragma::physics::IConvexShape::*)()>(&pragma::physics::IConvexShape::GetCollisionMesh), luabind::shared_from_this_policy<0> {});
 	mod[convexClassDef];
 
 	auto capsuleShapeDef = luabind::class_<pragma::physics::ICapsuleShape, luabind::bases<pragma::physics::IConvexShape, pragma::physics::IShape, pragma::physics::IBase>>("CapsuleShape");

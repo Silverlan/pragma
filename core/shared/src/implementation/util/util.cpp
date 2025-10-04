@@ -2,6 +2,12 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "sharedutils/util_file.h"
+
+#include "fsys/filesystem.h"
+
+#include "mathutil/umath.h"
+
 #include "sharedutils/util.h"
 
 #include <sharedutils/util_library.hpp>
@@ -11,7 +17,7 @@ module;
 
 module pragma.shared;
 
-import :util.util;
+import :util.core;
 
 import pragma.oskit;
 

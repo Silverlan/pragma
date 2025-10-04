@@ -1,9 +1,8 @@
-
-#include "pragma/logging.hpp"
-
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+#include "pragma/logging.hpp"
+#include "pragma/lua/lua_error_handling.hpp"
 #include "pragma/networkdefinitions.h"
 #include "pragma/lua/luaapi.h"
 #include <luainterface.hpp>

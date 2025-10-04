@@ -2,6 +2,10 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "fsys/filesystem.h"
+
+#include "memory"
+
 #include "algorithm"
 
 #include "cassert"

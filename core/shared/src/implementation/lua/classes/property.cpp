@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "pragma/lua/luaapi.h"
+
 #include "mathutil/umath.h"
 
 #include "mathutil/uquat.h"
@@ -48,7 +50,7 @@ static std::ostream &operator<<(std::ostream &str, const LBoolProperty &v) { ret
 static Color operator+(Color v, const LColorPropertyWrapper &prop) { return v + prop->GetValue(); }
 static Color operator-(Color v, const LColorPropertyWrapper &prop) { return v - prop->GetValue(); }
 static Color operator*(float v, const LColorPropertyWrapper &prop) { return v * prop->GetValue(); }
-static bool operator==(Color v, const LColorPropertyWrapper &prop) { return **prop == v; }
+static bool operator==(Color v, const LColorPropertyWrapper &prop) { return static_cast<const Color&>(**prop) == const_cast<const Color&>(v); }
 static std::ostream &operator<<(std::ostream &str, const LColorPropertyWrapper &v) { return str << **v; }
 
 //////////
@@ -267,7 +269,7 @@ void Lua::Property::register_classes(Lua::Interface &l)
 	add_generic_methods<LBoolPropertyWrapper, bool, luabind::class_<LBoolPropertyWrapper, LBasePropertyWrapper>>(boolDef);
 	boolDef.def("Link", static_cast<void (*)(lua_State *, LBoolPropertyWrapper &, LBoolPropertyWrapper &)>([](lua_State *l, LBoolPropertyWrapper &prop, LBoolPropertyWrapper &propOther) { prop->Link(*propOther); }));
 	boolDef.def("Link",
-	  static_cast<void (*)(lua_State *, LBoolPropertyWrapper &, LStringProperty &)>([](lua_State *l, LBoolPropertyWrapper &prop, LStringProperty &propOther) { prop->Link<util::StringProperty, std::string>(*propOther, [](const std::string &v) -> bool { return util::to_boolean(v); }); }));
+	  static_cast<void (*)(lua_State *, LBoolPropertyWrapper &, LStringProperty &)>([](lua_State *l, LBoolPropertyWrapper &prop, LStringProperty &propOther) { prop->Link<::util::StringProperty, std::string>(*propOther, [](const std::string &v) -> bool { return ::util::to_boolean(v); }); }));
 	boolDef.def("Link", static_cast<void (*)(lua_State *, LBoolPropertyWrapper &, LGenericFloatPropertyWrapper &)>([](lua_State *l, LBoolPropertyWrapper &prop, LGenericFloatPropertyWrapper &propOther) { propOther->LinkOther(*prop); }));
 	boolDef.def("Link", static_cast<void (*)(lua_State *, LBoolPropertyWrapper &, LGenericIntPropertyWrapper &)>([](lua_State *l, LBoolPropertyWrapper &prop, LGenericIntPropertyWrapper &propOther) { propOther->LinkOther(*prop); }));
 	modUtil[boolDef];
@@ -275,20 +277,20 @@ void Lua::Property::register_classes(Lua::Interface &l)
 	// Color
 	auto colDef = luabind::class_<LColorProperty, LBasePropertyWrapper>("ColorProperty");
 	colDef.def(luabind::constructor<>());
-	colDef.def(luabind::constructor<Color>());
+	colDef.def(luabind::constructor<::Color>());
 	colDef.def(luabind::constructor<int16_t, int16_t, int16_t, int16_t>());
 	colDef.def(luabind::constructor<std::string>());
 	colDef.def(luabind::constructor<Vector3>());
-	colDef.def(luabind::constructor<Vector4>());
+	colDef.def(luabind::constructor<::Vector4>());
 
 	colDef.def(luabind::tostring(luabind::const_self));
-	colDef.def(luabind::self + Color());
+	colDef.def(luabind::self + ::Color());
 	colDef.def(luabind::self + luabind::self);
-	colDef.def(Color() + luabind::self);
+	colDef.def(::Color() + luabind::self);
 
-	colDef.def(luabind::self - Color());
+	colDef.def(luabind::self - ::Color());
 	colDef.def(luabind::self - luabind::self);
-	colDef.def(Color() - luabind::self);
+	colDef.def(::Color() - luabind::self);
 
 	colDef.def(luabind::self * float());
 	colDef.def(float() * luabind::self);
@@ -296,16 +298,16 @@ void Lua::Property::register_classes(Lua::Interface &l)
 	colDef.def(luabind::self / float());
 
 	colDef.def(luabind::self == luabind::self);
-	colDef.def(luabind::self == Color());
-	colDef.def(Color() == luabind::self);
+	colDef.def(luabind::self == ::Color());
+	colDef.def(::Color() == luabind::self);
 
-	add_generic_methods<LColorProperty, Color, luabind::class_<LColorProperty, LBasePropertyWrapper>>(colDef);
-	colDef.def("Link", static_cast<void (*)(lua_State *, LColorProperty &, LColorProperty &)>(link<LColorProperty, Color>));
+	add_generic_methods<LColorProperty, ::Color, luabind::class_<LColorProperty, LBasePropertyWrapper>>(colDef);
+	colDef.def("Link", static_cast<void (*)(lua_State *, LColorProperty &, LColorProperty &)>(link<LColorProperty, ::Color>));
 	colDef.def("Link", static_cast<void (*)(lua_State *, LColorProperty &, LStringProperty &)>([](lua_State *l, LColorProperty &prop, LStringProperty &propOther) { prop->Link(*propOther); }));
-	colDef.def("Link", static_cast<void (*)(lua_State *, LColorProperty &, LVector3Property &)>([](lua_State *l, LColorProperty &prop, LVector3Property &propOther) { prop->Link<util::Vector3Property, Vector3>(*propOther, [](const Vector3 &v) -> Color { return Color {v}; }); }));
-	colDef.def("Link", static_cast<void (*)(lua_State *, LColorProperty &, LVector4Property &)>([](lua_State *l, LColorProperty &prop, LVector4Property &propOther) { prop->Link<util::Vector4Property, Vector4>(*propOther, [](const Vector4 &v) -> Color { return Color {v}; }); }));
+	colDef.def("Link", static_cast<void (*)(lua_State *, LColorProperty &, LVector3Property &)>([](lua_State *l, LColorProperty &prop, LVector3Property &propOther) { prop->Link<::util::Vector3Property, Vector3>(*propOther, [](const Vector3 &v) -> ::Color { return ::Color {v}; }); }));
+	colDef.def("Link", static_cast<void (*)(lua_State *, LColorProperty &, LVector4Property &)>([](lua_State *l, LColorProperty &prop, LVector4Property &propOther) { prop->Link<::util::Vector4Property, ::Vector4>(*propOther, [](const ::Vector4 &v) -> ::Color { return ::Color {v}; }); }));
 	/*colDef.def("Link",static_cast<void(*)(lua_State*,LColorProperty&,LStringProperty&)>([](lua_State *l,LColorProperty &prop,LStringProperty &propOther) {
-		prop->Link<util::StringProperty,std::string>(*propOther,[](const std::string &v) -> Color {
+		prop->Link<::util::StringProperty,std::string>(*propOther,[](const std::string &v) -> Color {
 			return Color{v};
 		});
 	}));*/
@@ -340,7 +342,7 @@ void Lua::Property::register_classes(Lua::Interface &l)
 	angDef.def("Link", static_cast<void (*)(lua_State *, LEulerAnglesProperty &, LEulerAnglesProperty &)>(link<LEulerAnglesProperty, EulerAngles>));
 	angDef.def("Link", static_cast<void (*)(lua_State *, LEulerAnglesProperty &, LStringProperty &)>([](lua_State *l, LEulerAnglesProperty &prop, LStringProperty &propOther) { prop->Link(*propOther); }));
 	/*angDef.def("Link",static_cast<void(*)(lua_State*,LEulerAnglesProperty&,LStringProperty&)>([](lua_State *l,LEulerAnglesProperty &prop,LStringProperty &propOther) {
-		prop->Link<util::StringProperty,std::string>(*propOther,[](const std::string &v) -> EulerAngles {
+		prop->Link<::util::StringProperty,std::string>(*propOther,[](const std::string &v) -> EulerAngles {
 			return EulerAngles{v};
 		});
 	}));*/
@@ -351,11 +353,11 @@ void Lua::Property::register_classes(Lua::Interface &l)
 	add_generic_vector_methods<LVector3Property, Vector3, luabind::class_<LVector3Property, LBasePropertyWrapper>>(vec3Def);
 	vec3Def.def(luabind::constructor<float, float, float>());
 	vec3Def.def("Link", static_cast<void (*)(lua_State *, LVector3Property &, LVector3Property &)>(link<LVector3Property, Vector3>));
-	vec3Def.def("Link", static_cast<void (*)(lua_State *, LVector3Property &, LColorProperty &)>([](lua_State *l, LVector3Property &prop, LColorProperty &propOther) { prop->Link<util::ColorProperty, Color>(*propOther, [](const Color &v) -> Vector3 { return v.ToVector3(); }); }));
+	vec3Def.def("Link", static_cast<void (*)(lua_State *, LVector3Property &, LColorProperty &)>([](lua_State *l, LVector3Property &prop, LColorProperty &propOther) { prop->Link<::util::ColorProperty, ::Color>(*propOther, [](const ::Color &v) -> ::Vector3 { return v.ToVector3(); }); }));
 	vec3Def.def("Link",
-	  static_cast<void (*)(lua_State *, LVector3Property &, LVector3iProperty &)>([](lua_State *l, LVector3Property &prop, LVector3iProperty &propOther) { prop->Link<util::Vector3iProperty, Vector3i>(*propOther, [](const Vector3i &v) -> Vector3 { return Vector3(v.x, v.y, v.z); }); }));
+	  static_cast<void (*)(lua_State *, LVector3Property &, LVector3iProperty &)>([](lua_State *l, LVector3Property &prop, LVector3iProperty &propOther) { prop->Link<::util::Vector3iProperty, Vector3i>(*propOther, [](const Vector3i &v) -> Vector3 { return Vector3(v.x, v.y, v.z); }); }));
 	vec3Def.def("Link",
-	  static_cast<void (*)(lua_State *, LVector3Property &, LStringProperty &)>([](lua_State *l, LVector3Property &prop, LStringProperty &propOther) { prop->Link<util::StringProperty, std::string>(*propOther, [](const std::string &v) -> Vector3 { return uvec::create(v); }); }));
+	  static_cast<void (*)(lua_State *, LVector3Property &, LStringProperty &)>([](lua_State *l, LVector3Property &prop, LStringProperty &propOther) { prop->Link<::util::StringProperty, std::string>(*propOther, [](const std::string &v) -> Vector3 { return uvec::create(v); }); }));
 	modUtil[vec3Def];
 
 	auto vec3iDef = luabind::class_<LVector3iProperty, LBasePropertyWrapper>("VectoriProperty");
@@ -363,9 +365,9 @@ void Lua::Property::register_classes(Lua::Interface &l)
 	vec3iDef.def(luabind::constructor<int32_t, int32_t, int32_t>());
 	vec3iDef.def("Link", static_cast<void (*)(lua_State *, LVector3iProperty &, LVector3iProperty &)>(link<LVector3iProperty, Vector3i>));
 	vec3iDef.def("Link",
-	  static_cast<void (*)(lua_State *, LVector3iProperty &, LVector3Property &)>([](lua_State *l, LVector3iProperty &prop, LVector3Property &propOther) { prop->Link<util::Vector3Property, Vector3>(*propOther, [](const Vector3 &v) -> Vector3i { return Vector3i(v.x, v.y, v.z); }); }));
+	  static_cast<void (*)(lua_State *, LVector3iProperty &, LVector3Property &)>([](lua_State *l, LVector3iProperty &prop, LVector3Property &propOther) { prop->Link<::util::Vector3Property, Vector3>(*propOther, [](const Vector3 &v) -> Vector3i { return Vector3i(v.x, v.y, v.z); }); }));
 	vec3iDef.def("Link", static_cast<void (*)(lua_State *, LVector3iProperty &, LStringProperty &)>([](lua_State *l, LVector3iProperty &prop, LStringProperty &propOther) {
-		prop->Link<util::StringProperty, std::string>(*propOther, [](const std::string &v) -> Vector3i {
+		prop->Link<::util::StringProperty, std::string>(*propOther, [](const std::string &v) -> Vector3i {
 			Vector3i r;
 			ustring::string_to_array<decltype(r)::value_type, int32_t>(v, &r[0], atoi, 3);
 			return r;
@@ -374,14 +376,14 @@ void Lua::Property::register_classes(Lua::Interface &l)
 	modUtil[vec3iDef];
 
 	auto vec2Def = luabind::class_<LVector2Property, LBasePropertyWrapper>("Vector2Property");
-	add_generic_vector_methods<LVector2Property, Vector2, luabind::class_<LVector2Property, LBasePropertyWrapper>>(vec2Def);
+	add_generic_vector_methods<LVector2Property, ::Vector2, luabind::class_<LVector2Property, LBasePropertyWrapper>>(vec2Def);
 	vec2Def.def(luabind::constructor<float, float>());
-	vec2Def.def("Link", static_cast<void (*)(lua_State *, LVector2Property &, LVector2Property &)>(link<LVector2Property, Vector2>));
+	vec2Def.def("Link", static_cast<void (*)(lua_State *, LVector2Property &, LVector2Property &)>(link<LVector2Property, ::Vector2>));
 	vec2Def.def("Link",
-	  static_cast<void (*)(lua_State *, LVector2Property &, LVector2iProperty &)>([](lua_State *l, LVector2Property &prop, LVector2iProperty &propOther) { prop->Link<util::Vector2iProperty, Vector2i>(*propOther, [](const Vector2i &v) -> Vector2 { return Vector2(v.x, v.y); }); }));
+	  static_cast<void (*)(lua_State *, LVector2Property &, LVector2iProperty &)>([](lua_State *l, LVector2Property &prop, LVector2iProperty &propOther) { prop->Link<::util::Vector2iProperty, ::Vector2i>(*propOther, [](const ::Vector2i &v) -> ::Vector2 { return ::Vector2(v.x, v.y); }); }));
 	vec2Def.def("Link", static_cast<void (*)(lua_State *, LVector2Property &, LStringProperty &)>([](lua_State *l, LVector2Property &prop, LStringProperty &propOther) {
-		prop->Link<util::StringProperty, std::string>(*propOther, [](const std::string &v) -> Vector2 {
-			Vector2 r;
+		prop->Link<::util::StringProperty, std::string>(*propOther, [](const std::string &v) -> ::Vector2 {
+			::Vector2 r;
 			ustring::string_to_array<decltype(r)::value_type, Double>(v, &r[0], atof, 2);
 			return r;
 		});
@@ -389,14 +391,14 @@ void Lua::Property::register_classes(Lua::Interface &l)
 	modUtil[vec2Def];
 
 	auto vec2iDef = luabind::class_<LVector2iProperty, LBasePropertyWrapper>("Vector2iProperty");
-	add_generic_vector_methods<LVector2iProperty, Vector2i, luabind::class_<LVector2iProperty, LBasePropertyWrapper>>(vec2iDef);
+	add_generic_vector_methods<LVector2iProperty, ::Vector2i, luabind::class_<LVector2iProperty, LBasePropertyWrapper>>(vec2iDef);
 	vec2iDef.def(luabind::constructor<int32_t, int32_t>());
-	vec2iDef.def("Link", static_cast<void (*)(lua_State *, LVector2iProperty &, LVector2iProperty &)>(link<LVector2iProperty, Vector2i>));
+	vec2iDef.def("Link", static_cast<void (*)(lua_State *, LVector2iProperty &, LVector2iProperty &)>(link<LVector2iProperty, ::Vector2i>));
 	vec2iDef.def("Link",
-	  static_cast<void (*)(lua_State *, LVector2iProperty &, LVector2Property &)>([](lua_State *l, LVector2iProperty &prop, LVector2Property &propOther) { prop->Link<util::Vector2Property, Vector2>(*propOther, [](const Vector2 &v) -> Vector2i { return Vector2i(v.x, v.y); }); }));
+	  static_cast<void (*)(lua_State *, LVector2iProperty &, LVector2Property &)>([](lua_State *l, LVector2iProperty &prop, LVector2Property &propOther) { prop->Link<::util::Vector2Property, ::Vector2>(*propOther, [](const ::Vector2 &v) -> ::Vector2i { return ::Vector2i(v.x, v.y); }); }));
 	vec2iDef.def("Link", static_cast<void (*)(lua_State *, LVector2iProperty &, LStringProperty &)>([](lua_State *l, LVector2iProperty &prop, LStringProperty &propOther) {
-		prop->Link<util::StringProperty, std::string>(*propOther, [](const std::string &v) -> Vector2i {
-			Vector2i r;
+		prop->Link<::util::StringProperty, std::string>(*propOther, [](const std::string &v) -> ::Vector2i {
+			::Vector2i r;
 			ustring::string_to_array<decltype(r)::value_type, int32_t>(v, &r[0], atoi, 2);
 			return r;
 		});
@@ -404,15 +406,15 @@ void Lua::Property::register_classes(Lua::Interface &l)
 	modUtil[vec2iDef];
 
 	auto vec4Def = luabind::class_<LVector4Property, LBasePropertyWrapper>("Vector4Property");
-	add_generic_vector_methods<LVector4Property, Vector4, luabind::class_<LVector4Property, LBasePropertyWrapper>>(vec4Def);
+	add_generic_vector_methods<LVector4Property, ::Vector4, luabind::class_<LVector4Property, LBasePropertyWrapper>>(vec4Def);
 	vec4Def.def(luabind::constructor<float, float, float, float>());
-	vec4Def.def("Link", static_cast<void (*)(lua_State *, LVector4Property &, LVector4Property &)>(link<LVector4Property, Vector4>));
+	vec4Def.def("Link", static_cast<void (*)(lua_State *, LVector4Property &, LVector4Property &)>(link<LVector4Property, ::Vector4>));
 	vec4Def.def("Link", static_cast<void (*)(lua_State *, LVector4Property &, LVector4iProperty &)>([](lua_State *l, LVector4Property &prop, LVector4iProperty &propOther) {
-		prop->Link<util::Vector4iProperty, Vector4i>(*propOther, [](const Vector4i &v) -> Vector4 { return Vector4(v.x, v.y, v.z, v.w); });
+		prop->Link<::util::Vector4iProperty, ::Vector4i>(*propOther, [](const ::Vector4i &v) -> ::Vector4 { return ::Vector4(v.x, v.y, v.z, v.w); });
 	}));
 	vec4Def.def("Link", static_cast<void (*)(lua_State *, LVector4Property &, LStringProperty &)>([](lua_State *l, LVector4Property &prop, LStringProperty &propOther) {
-		prop->Link<util::StringProperty, std::string>(*propOther, [](const std::string &v) -> Vector4 {
-			Vector4 r;
+		prop->Link<::util::StringProperty, std::string>(*propOther, [](const std::string &v) -> ::Vector4 {
+			::Vector4 r;
 			ustring::string_to_array<decltype(r)::value_type, Double>(v, &r[0], atof, 4);
 			return r;
 		});
@@ -420,14 +422,14 @@ void Lua::Property::register_classes(Lua::Interface &l)
 	modUtil[vec4Def];
 
 	auto vec4iDef = luabind::class_<LVector4iProperty, LBasePropertyWrapper>("Vector4iProperty");
-	add_generic_vector_methods<LVector4iProperty, Vector4i, luabind::class_<LVector4iProperty, LBasePropertyWrapper>>(vec4iDef);
+	add_generic_vector_methods<LVector4iProperty, ::Vector4i, luabind::class_<LVector4iProperty, LBasePropertyWrapper>>(vec4iDef);
 	vec4iDef.def(luabind::constructor<int32_t, int32_t, int32_t, int32_t>());
-	vec4iDef.def("Link", static_cast<void (*)(lua_State *, LVector4iProperty &, LVector4iProperty &)>(link<LVector4iProperty, Vector4i>));
+	vec4iDef.def("Link", static_cast<void (*)(lua_State *, LVector4iProperty &, LVector4iProperty &)>(link<LVector4iProperty, ::Vector4i>));
 	vec4iDef.def("Link",
-	  static_cast<void (*)(lua_State *, LVector4iProperty &, LVector4Property &)>([](lua_State *l, LVector4iProperty &prop, LVector4Property &propOther) { prop->Link<util::Vector4Property, Vector4>(*propOther, [](const Vector4 &v) -> Vector4i { return Vector4i(v.x, v.y, v.z, v.w); }); }));
+	  static_cast<void (*)(lua_State *, LVector4iProperty &, LVector4Property &)>([](lua_State *l, LVector4iProperty &prop, LVector4Property &propOther) { prop->Link<::util::Vector4Property, ::Vector4>(*propOther, [](const ::Vector4 &v) -> ::Vector4i { return ::Vector4i(v.x, v.y, v.z, v.w); }); }));
 	vec4iDef.def("Link", static_cast<void (*)(lua_State *, LVector4iProperty &, LStringProperty &)>([](lua_State *l, LVector4iProperty &prop, LStringProperty &propOther) {
-		prop->Link<util::StringProperty, std::string>(*propOther, [](const std::string &v) -> Vector4i {
-			Vector4i r;
+		prop->Link<::util::StringProperty, std::string>(*propOther, [](const std::string &v) -> ::Vector4i {
+			::Vector4i r;
 			ustring::string_to_array<decltype(r)::value_type, int32_t>(v, &r[0], atoi, 4);
 			return r;
 		});
@@ -441,7 +443,7 @@ void Lua::Property::register_classes(Lua::Interface &l)
 	quatDef.def(luabind::constructor<float, float, float, float>());
 	quatDef.def(luabind::tostring(luabind::const_self));
 	quatDef.def("Link", static_cast<void (*)(lua_State *, LQuatProperty &, LQuatProperty &)>(link<LQuatProperty, Quat>));
-	quatDef.def("Link", static_cast<void (*)(lua_State *, LQuatProperty &, LStringProperty &)>([](lua_State *l, LQuatProperty &prop, LStringProperty &propOther) { prop->Link<util::StringProperty, std::string>(*propOther, [](const std::string &v) -> Quat { return uquat::create(v); }); }));
+	quatDef.def("Link", static_cast<void (*)(lua_State *, LQuatProperty &, LStringProperty &)>([](lua_State *l, LQuatProperty &prop, LStringProperty &propOther) { prop->Link<::util::StringProperty, std::string>(*propOther, [](const std::string &v) -> Quat { return uquat::create(v); }); }));
 	modUtil[quatDef];
 
 	// String
@@ -451,125 +453,125 @@ void Lua::Property::register_classes(Lua::Interface &l)
 	strDef.def(luabind::constructor<std::string>());
 	strDef.def(luabind::tostring(luabind::const_self));
 	strDef.def("Link", static_cast<void (*)(lua_State *, LStringProperty &, LStringProperty &)>(link<LStringProperty, std::string>));
-	strDef.def("Link", static_cast<void (*)(lua_State *, LStringProperty &, LBoolProperty &)>([](lua_State *l, LStringProperty &prop, LBoolProperty &propOther) { prop->Link<util::BoolProperty, bool>(*propOther, [](const bool &v) -> std::string { return v ? "true" : "false"; }); }));
+	strDef.def("Link", static_cast<void (*)(lua_State *, LStringProperty &, LBoolProperty &)>([](lua_State *l, LStringProperty &prop, LBoolProperty &propOther) { prop->Link<::util::BoolProperty, bool>(*propOther, [](const bool &v) -> std::string { return v ? "true" : "false"; }); }));
 	strDef.def("Link", static_cast<void (*)(lua_State *, LStringProperty &, LColorPropertyWrapper &)>([](lua_State *l, LStringProperty &prop, LColorPropertyWrapper &propOther) {
-		prop->Link<util::ColorProperty, Color>(*propOther, [](const Color &v) -> std::string { return std::to_string(v.r) + " " + std::to_string(v.g) + " " + std::to_string(v.b) + " " + std::to_string(v.a); });
+		prop->Link<::util::ColorProperty, ::Color>(*propOther, [](const ::Color &v) -> std::string { return std::to_string(v.r) + " " + std::to_string(v.g) + " " + std::to_string(v.b) + " " + std::to_string(v.a); });
 	}));
 	strDef.def("Link", static_cast<void (*)(lua_State *, LStringProperty &, LGenericFloatPropertyWrapper &)>([](lua_State *l, LStringProperty &prop, LGenericFloatPropertyWrapper &propOther) { propOther->LinkOther(*prop); }));
 	strDef.def("Link", static_cast<void (*)(lua_State *, LStringProperty &, LGenericIntPropertyWrapper &)>([](lua_State *l, LStringProperty &prop, LGenericIntPropertyWrapper &propOther) { propOther->LinkOther(*prop); }));
 	strDef.def("Link", static_cast<void (*)(lua_State *, LStringProperty &, LVector2Property &)>([](lua_State *l, LStringProperty &prop, LVector2Property &propOther) {
-		prop->Link<util::Vector2Property, Vector2>(*propOther, [](const Vector2 &v) -> std::string { return std::to_string(v.x) + " " + std::to_string(v.y); });
+		prop->Link<::util::Vector2Property, ::Vector2>(*propOther, [](const ::Vector2 &v) -> std::string { return std::to_string(v.x) + " " + std::to_string(v.y); });
 	}));
 	strDef.def("Link", static_cast<void (*)(lua_State *, LStringProperty &, LVector2iProperty &)>([](lua_State *l, LStringProperty &prop, LVector2iProperty &propOther) {
-		prop->Link<util::Vector2iProperty, Vector2i>(*propOther, [](const Vector2i &v) -> std::string { return std::to_string(v.x) + " " + std::to_string(v.y); });
+		prop->Link<::util::Vector2iProperty, ::Vector2i>(*propOther, [](const ::Vector2i &v) -> std::string { return std::to_string(v.x) + " " + std::to_string(v.y); });
 	}));
 	strDef.def("Link", static_cast<void (*)(lua_State *, LStringProperty &, LVector3Property &)>([](lua_State *l, LStringProperty &prop, LVector3Property &propOther) {
-		prop->Link<util::Vector3Property, Vector3>(*propOther, [](const Vector3 &v) -> std::string { return std::to_string(v.x) + " " + std::to_string(v.y) + " " + std::to_string(v.z); });
+		prop->Link<::util::Vector3Property, Vector3>(*propOther, [](const Vector3 &v) -> std::string { return std::to_string(v.x) + " " + std::to_string(v.y) + " " + std::to_string(v.z); });
 	}));
 	strDef.def("Link", static_cast<void (*)(lua_State *, LStringProperty &, LVector3iProperty &)>([](lua_State *l, LStringProperty &prop, LVector3iProperty &propOther) {
-		prop->Link<util::Vector3iProperty, Vector3i>(*propOther, [](const Vector3i &v) -> std::string { return std::to_string(v.x) + " " + std::to_string(v.y) + " " + std::to_string(v.z); });
+		prop->Link<::util::Vector3iProperty, Vector3i>(*propOther, [](const Vector3i &v) -> std::string { return std::to_string(v.x) + " " + std::to_string(v.y) + " " + std::to_string(v.z); });
 	}));
 	strDef.def("Link", static_cast<void (*)(lua_State *, LStringProperty &, LVector4Property &)>([](lua_State *l, LStringProperty &prop, LVector4Property &propOther) {
-		prop->Link<util::Vector4Property, Vector4>(*propOther, [](const Vector4 &v) -> std::string { return std::to_string(v.x) + " " + std::to_string(v.y) + " " + std::to_string(v.z) + " " + std::to_string(v.w); });
+		prop->Link<::util::Vector4Property, ::Vector4>(*propOther, [](const ::Vector4 &v) -> std::string { return std::to_string(v.x) + " " + std::to_string(v.y) + " " + std::to_string(v.z) + " " + std::to_string(v.w); });
 	}));
 	strDef.def("Link", static_cast<void (*)(lua_State *, LStringProperty &, LVector4iProperty &)>([](lua_State *l, LStringProperty &prop, LVector4iProperty &propOther) {
-		prop->Link<util::Vector4iProperty, Vector4i>(*propOther, [](const Vector4i &v) -> std::string { return std::to_string(v.x) + " " + std::to_string(v.y) + " " + std::to_string(v.z) + " " + std::to_string(v.w); });
+		prop->Link<::util::Vector4iProperty, ::Vector4i>(*propOther, [](const ::Vector4i &v) -> std::string { return std::to_string(v.x) + " " + std::to_string(v.y) + " " + std::to_string(v.z) + " " + std::to_string(v.w); });
 	}));
 	strDef.def("Link", static_cast<void (*)(lua_State *, LStringProperty &, LQuatProperty &)>([](lua_State *l, LStringProperty &prop, LQuatProperty &propOther) {
-		prop->Link<util::QuatProperty, Quat>(*propOther, [](const Quat &v) -> std::string { return std::to_string(v.w) + " " + std::to_string(v.x) + " " + std::to_string(v.y) + " " + std::to_string(v.z); });
+		prop->Link<::util::QuatProperty, Quat>(*propOther, [](const Quat &v) -> std::string { return std::to_string(v.w) + " " + std::to_string(v.x) + " " + std::to_string(v.y) + " " + std::to_string(v.z); });
 	}));
 	strDef.def("Link", static_cast<void (*)(lua_State *, LStringProperty &, LEulerAnglesProperty &)>([](lua_State *l, LStringProperty &prop, LEulerAnglesProperty &propOther) {
-		prop->Link<util::EulerAnglesProperty, EulerAngles>(*propOther, [](const EulerAngles &v) -> std::string { return std::to_string(v.p) + " " + std::to_string(v.y) + " " + std::to_string(v.r); });
+		prop->Link<::util::EulerAnglesProperty, EulerAngles>(*propOther, [](const EulerAngles &v) -> std::string { return std::to_string(v.p) + " " + std::to_string(v.y) + " " + std::to_string(v.r); });
 	}));
 	modUtil[strDef];
 
 	// Matrix
 	auto mat2Def = luabind::class_<LMatrix2Property, LBasePropertyWrapper>("Mat2Property");
-	add_generic_methods<LMatrix2Property, Mat2, luabind::class_<LMatrix2Property, LBasePropertyWrapper>>(mat2Def);
+	add_generic_methods<LMatrix2Property, ::Mat2, luabind::class_<LMatrix2Property, LBasePropertyWrapper>>(mat2Def);
 	mat2Def.def(luabind::constructor<>());
-	mat2Def.def(luabind::constructor<Mat2>());
+	mat2Def.def(luabind::constructor<::Mat2>());
 	mat2Def.def(luabind::tostring(luabind::const_self));
-	mat2Def.def("Link", static_cast<void (*)(lua_State *, LMatrix2Property &, LMatrix2Property &)>(link<LMatrix2Property, Mat2>));
+	mat2Def.def("Link", static_cast<void (*)(lua_State *, LMatrix2Property &, LMatrix2Property &)>(link<LMatrix2Property, ::Mat2>));
 	modUtil[mat2Def];
 
 	auto mat2x3Def = luabind::class_<LMatrix2x3Property, LBasePropertyWrapper>("Mat2x3Property");
-	add_generic_methods<LMatrix2x3Property, Mat2x3, luabind::class_<LMatrix2x3Property, LBasePropertyWrapper>>(mat2x3Def);
+	add_generic_methods<LMatrix2x3Property, ::Mat2x3, luabind::class_<LMatrix2x3Property, LBasePropertyWrapper>>(mat2x3Def);
 	mat2x3Def.def(luabind::constructor<>());
-	mat2x3Def.def(luabind::constructor<Mat2x3>());
+	mat2x3Def.def(luabind::constructor<::Mat2x3>());
 	mat2x3Def.def(luabind::tostring(luabind::const_self));
-	mat2x3Def.def("Link", static_cast<void (*)(lua_State *, LMatrix2x3Property &, LMatrix2x3Property &)>(link<LMatrix2x3Property, Mat2x3>));
+	mat2x3Def.def("Link", static_cast<void (*)(lua_State *, LMatrix2x3Property &, LMatrix2x3Property &)>(link<LMatrix2x3Property, ::Mat2x3>));
 	modUtil[mat2x3Def];
 
 	auto mat3x2Def = luabind::class_<LMatrix3x2Property, LBasePropertyWrapper>("Mat3x2Property");
-	add_generic_methods<LMatrix3x2Property, Mat3x2, luabind::class_<LMatrix3x2Property, LBasePropertyWrapper>>(mat3x2Def);
+	add_generic_methods<LMatrix3x2Property, ::Mat3x2, luabind::class_<LMatrix3x2Property, LBasePropertyWrapper>>(mat3x2Def);
 	mat3x2Def.def(luabind::constructor<>());
-	mat3x2Def.def(luabind::constructor<Mat3x2>());
+	mat3x2Def.def(luabind::constructor<::Mat3x2>());
 	mat3x2Def.def(luabind::tostring(luabind::const_self));
-	mat3x2Def.def("Link", static_cast<void (*)(lua_State *, LMatrix3x2Property &, LMatrix3x2Property &)>(link<LMatrix3x2Property, Mat3x2>));
+	mat3x2Def.def("Link", static_cast<void (*)(lua_State *, LMatrix3x2Property &, LMatrix3x2Property &)>(link<LMatrix3x2Property, ::Mat3x2>));
 	modUtil[mat3x2Def];
 
 	auto mat3Def = luabind::class_<LMatrix3Property, LBasePropertyWrapper>("Mat3Property");
-	add_generic_methods<LMatrix3Property, Mat3, luabind::class_<LMatrix3Property, LBasePropertyWrapper>>(mat3Def);
+	add_generic_methods<LMatrix3Property, ::Mat3, luabind::class_<LMatrix3Property, LBasePropertyWrapper>>(mat3Def);
 	mat3Def.def(luabind::constructor<>());
-	mat3Def.def(luabind::constructor<Mat3>());
+	mat3Def.def(luabind::constructor<::Mat3>());
 	mat3Def.def(luabind::tostring(luabind::const_self));
-	mat3Def.def("Link", static_cast<void (*)(lua_State *, LMatrix3Property &, LMatrix3Property &)>(link<LMatrix3Property, Mat3>));
+	mat3Def.def("Link", static_cast<void (*)(lua_State *, LMatrix3Property &, LMatrix3Property &)>(link<LMatrix3Property, ::Mat3>));
 	modUtil[mat3Def];
 
 	auto mat3x4Def = luabind::class_<LMatrix3x4Property, LBasePropertyWrapper>("Mat3x4Property");
-	add_generic_methods<LMatrix3x4Property, Mat3x4, luabind::class_<LMatrix3x4Property, LBasePropertyWrapper>>(mat3x4Def);
+	add_generic_methods<LMatrix3x4Property, ::Mat3x4, luabind::class_<LMatrix3x4Property, LBasePropertyWrapper>>(mat3x4Def);
 	mat3x4Def.def(luabind::constructor<>());
-	mat3x4Def.def(luabind::constructor<Mat3x4>());
+	mat3x4Def.def(luabind::constructor<::Mat3x4>());
 	mat3x4Def.def(luabind::tostring(luabind::const_self));
-	mat3x4Def.def("Link", static_cast<void (*)(lua_State *, LMatrix3x4Property &, LMatrix3x4Property &)>(link<LMatrix3x4Property, Mat3x4>));
+	mat3x4Def.def("Link", static_cast<void (*)(lua_State *, LMatrix3x4Property &, LMatrix3x4Property &)>(link<LMatrix3x4Property, ::Mat3x4>));
 	modUtil[mat3x4Def];
 
 	auto mat4x3Def = luabind::class_<LMatrix4x3Property, LBasePropertyWrapper>("Mat4x3Property");
-	add_generic_methods<LMatrix4x3Property, Mat4x3, luabind::class_<LMatrix4x3Property, LBasePropertyWrapper>>(mat4x3Def);
+	add_generic_methods<LMatrix4x3Property, ::Mat4x3, luabind::class_<LMatrix4x3Property, LBasePropertyWrapper>>(mat4x3Def);
 	mat4x3Def.def(luabind::constructor<>());
-	mat4x3Def.def(luabind::constructor<Mat4x3>());
+	mat4x3Def.def(luabind::constructor<::Mat4x3>());
 	mat4x3Def.def(luabind::tostring(luabind::const_self));
-	mat4x3Def.def("Link", static_cast<void (*)(lua_State *, LMatrix4x3Property &, LMatrix4x3Property &)>(link<LMatrix4x3Property, Mat4x3>));
+	mat4x3Def.def("Link", static_cast<void (*)(lua_State *, LMatrix4x3Property &, LMatrix4x3Property &)>(link<LMatrix4x3Property, ::Mat4x3>));
 	modUtil[mat4x3Def];
 
 	auto mat4Def = luabind::class_<LMatrix4Property, LBasePropertyWrapper>("Mat4Property");
-	add_generic_methods<LMatrix4Property, Mat4, luabind::class_<LMatrix4Property, LBasePropertyWrapper>>(mat4Def);
+	add_generic_methods<LMatrix4Property, ::Mat4, luabind::class_<LMatrix4Property, LBasePropertyWrapper>>(mat4Def);
 	mat4Def.def(luabind::constructor<>());
-	mat4Def.def(luabind::constructor<Mat4>());
+	mat4Def.def(luabind::constructor<::Mat4>());
 	mat4Def.def(luabind::tostring(luabind::const_self));
-	mat4Def.def("Link", static_cast<void (*)(lua_State *, LMatrix4Property &, LMatrix4Property &)>(link<LMatrix4Property, Mat4>));
+	mat4Def.def("Link", static_cast<void (*)(lua_State *, LMatrix4Property &, LMatrix4Property &)>(link<LMatrix4Property, ::Mat4>));
 	modUtil[mat4Def];
 }
 
-void Lua::Property::push(lua_State *l, util::Int8Property &prop) { push_property<LGenericIntPropertyWrapper>(l, prop); }
-void Lua::Property::push(lua_State *l, util::UInt8Property &prop) { push_property<LGenericIntPropertyWrapper>(l, prop); }
-void Lua::Property::push(lua_State *l, util::Int16Property &prop) { push_property<LGenericIntPropertyWrapper>(l, prop); }
-void Lua::Property::push(lua_State *l, util::UInt16Property &prop) { push_property<LGenericIntPropertyWrapper>(l, prop); }
-void Lua::Property::push(lua_State *l, util::Int32Property &prop) { push_property<LGenericIntPropertyWrapper>(l, prop); }
-void Lua::Property::push(lua_State *l, util::UInt32Property &prop) { push_property<LGenericIntPropertyWrapper>(l, prop); }
-void Lua::Property::push(lua_State *l, util::Int64Property &prop) { push_property<LGenericIntPropertyWrapper>(l, prop); }
-void Lua::Property::push(lua_State *l, util::UInt64Property &prop) { push_property<LGenericIntPropertyWrapper>(l, prop); }
-void Lua::Property::push(lua_State *l, util::FloatProperty &prop) { push_property<LGenericFloatPropertyWrapper>(l, prop); }
-void Lua::Property::push(lua_State *l, util::DoubleProperty &prop) { push_property<LGenericFloatPropertyWrapper>(l, prop); }
-void Lua::Property::push(lua_State *l, util::LongDoubleProperty &prop) { push_property<LGenericFloatPropertyWrapper>(l, prop); }
-void Lua::Property::push(lua_State *l, util::BoolProperty &prop) { push_property<LBoolPropertyWrapper>(l, prop); }
-void Lua::Property::push(lua_State *l, util::ColorProperty &prop) { push_property<LColorPropertyWrapper>(l, prop); }
+void Lua::Property::push(lua_State *l, ::util::Int8Property &prop) { push_property<LGenericIntPropertyWrapper>(l, prop); }
+void Lua::Property::push(lua_State *l, ::util::UInt8Property &prop) { push_property<LGenericIntPropertyWrapper>(l, prop); }
+void Lua::Property::push(lua_State *l, ::util::Int16Property &prop) { push_property<LGenericIntPropertyWrapper>(l, prop); }
+void Lua::Property::push(lua_State *l, ::util::UInt16Property &prop) { push_property<LGenericIntPropertyWrapper>(l, prop); }
+void Lua::Property::push(lua_State *l, ::util::Int32Property &prop) { push_property<LGenericIntPropertyWrapper>(l, prop); }
+void Lua::Property::push(lua_State *l, ::util::UInt32Property &prop) { push_property<LGenericIntPropertyWrapper>(l, prop); }
+void Lua::Property::push(lua_State *l, ::util::Int64Property &prop) { push_property<LGenericIntPropertyWrapper>(l, prop); }
+void Lua::Property::push(lua_State *l, ::util::UInt64Property &prop) { push_property<LGenericIntPropertyWrapper>(l, prop); }
+void Lua::Property::push(lua_State *l, ::util::FloatProperty &prop) { push_property<LGenericFloatPropertyWrapper>(l, prop); }
+void Lua::Property::push(lua_State *l, ::util::DoubleProperty &prop) { push_property<LGenericFloatPropertyWrapper>(l, prop); }
+void Lua::Property::push(lua_State *l, ::util::LongDoubleProperty &prop) { push_property<LGenericFloatPropertyWrapper>(l, prop); }
+void Lua::Property::push(lua_State *l, ::util::BoolProperty &prop) { push_property<LBoolPropertyWrapper>(l, prop); }
+void Lua::Property::push(lua_State *l, ::util::ColorProperty &prop) { push_property<LColorPropertyWrapper>(l, prop); }
 void Lua::Property::push(lua_State *l, ::util::EulerAnglesProperty &prop) { push_property<LEulerAnglesPropertyWrapper>(l, prop); }
-void Lua::Property::push(lua_State *l, util::Vector2Property &prop) { push_property<LVector2PropertyWrapper>(l, prop); }
-void Lua::Property::push(lua_State *l, util::Vector2iProperty &prop) { push_property<LVector2iPropertyWrapper>(l, prop); }
-void Lua::Property::push(lua_State *l, util::Vector3Property &prop) { push_property<LVector3PropertyWrapper>(l, prop); }
-void Lua::Property::push(lua_State *l, util::Vector3iProperty &prop) { push_property<LVector3iPropertyWrapper>(l, prop); }
-void Lua::Property::push(lua_State *l, util::Vector4Property &prop) { push_property<LVector4PropertyWrapper>(l, prop); }
-void Lua::Property::push(lua_State *l, util::Vector4iProperty &prop) { push_property<LVector4iPropertyWrapper>(l, prop); }
-void Lua::Property::push(lua_State *l, util::QuatProperty &prop) { push_property<LQuatPropertyWrapper>(l, prop); }
-void Lua::Property::push(lua_State *l, util::StringProperty &prop) { push_property<LStringPropertyWrapper>(l, prop); }
-void Lua::Property::push(lua_State *l, util::Matrix2Property &prop) { push_property<LMatrix2PropertyWrapper>(l, prop); }
-void Lua::Property::push(lua_State *l, util::Matrix2x3Property &prop) { push_property<LMatrix2x3PropertyWrapper>(l, prop); }
-void Lua::Property::push(lua_State *l, util::Matrix3x2Property &prop) { push_property<LMatrix3x2PropertyWrapper>(l, prop); }
-void Lua::Property::push(lua_State *l, util::Matrix3Property &prop) { push_property<LMatrix3PropertyWrapper>(l, prop); }
-void Lua::Property::push(lua_State *l, util::Matrix3x4Property &prop) { push_property<LMatrix3x4PropertyWrapper>(l, prop); }
-void Lua::Property::push(lua_State *l, util::Matrix4x3Property &prop) { push_property<LMatrix4x3PropertyWrapper>(l, prop); }
-void Lua::Property::push(lua_State *l, util::Matrix4Property &prop) { push_property<LMatrix4PropertyWrapper>(l, prop); }
+void Lua::Property::push(lua_State *l, ::util::Vector2Property &prop) { push_property<LVector2PropertyWrapper>(l, prop); }
+void Lua::Property::push(lua_State *l, ::util::Vector2iProperty &prop) { push_property<LVector2iPropertyWrapper>(l, prop); }
+void Lua::Property::push(lua_State *l, ::util::Vector3Property &prop) { push_property<LVector3PropertyWrapper>(l, prop); }
+void Lua::Property::push(lua_State *l, ::util::Vector3iProperty &prop) { push_property<LVector3iPropertyWrapper>(l, prop); }
+void Lua::Property::push(lua_State *l, ::util::Vector4Property &prop) { push_property<LVector4PropertyWrapper>(l, prop); }
+void Lua::Property::push(lua_State *l, ::util::Vector4iProperty &prop) { push_property<LVector4iPropertyWrapper>(l, prop); }
+void Lua::Property::push(lua_State *l, ::util::QuatProperty &prop) { push_property<LQuatPropertyWrapper>(l, prop); }
+void Lua::Property::push(lua_State *l, ::util::StringProperty &prop) { push_property<LStringPropertyWrapper>(l, prop); }
+void Lua::Property::push(lua_State *l, ::util::Matrix2Property &prop) { push_property<LMatrix2PropertyWrapper>(l, prop); }
+void Lua::Property::push(lua_State *l, ::util::Matrix2x3Property &prop) { push_property<LMatrix2x3PropertyWrapper>(l, prop); }
+void Lua::Property::push(lua_State *l, ::util::Matrix3x2Property &prop) { push_property<LMatrix3x2PropertyWrapper>(l, prop); }
+void Lua::Property::push(lua_State *l, ::util::Matrix3Property &prop) { push_property<LMatrix3PropertyWrapper>(l, prop); }
+void Lua::Property::push(lua_State *l, ::util::Matrix3x4Property &prop) { push_property<LMatrix3x4PropertyWrapper>(l, prop); }
+void Lua::Property::push(lua_State *l, ::util::Matrix4x3Property &prop) { push_property<LMatrix4x3PropertyWrapper>(l, prop); }
+void Lua::Property::push(lua_State *l, ::util::Matrix4Property &prop) { push_property<LMatrix4PropertyWrapper>(l, prop); }
 
 void Lua::Property::push(lua_State *l, ::util::BaseProperty &prop)
 {

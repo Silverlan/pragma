@@ -2,10 +2,12 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "mathutil/umath.h"
+
 #include "mathutil/uquat.h"
 
 #include "pragma/lua/luaapi.h"
-
+#include "pragma/lua/ostream_operator_alias.hpp"
 #include "mathutil/uvec.h"
 
 #include "luasystem.h"
@@ -188,9 +190,7 @@ namespace Lua {
 	};
 };
 
-#ifdef __linux__
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::physics, ICollisionObject);
-#endif
 
 void Lua::PhysCollisionObj::register_class(lua_State *l, luabind::module_ &mod)
 {
@@ -654,7 +654,7 @@ void Lua::PhysRigidBody::GetInvInertiaTensorWorld(lua_State *l, pragma::physics:
 {
 	if(Lua::CheckHandle<pragma::physics::IRigidBody>(l, hPhys) == false)
 		return;
-	Lua::Push<Mat3>(l, hPhys->GetInvInertiaTensorWorld());
+	Lua::Push<::Mat3>(l, hPhys->GetInvInertiaTensorWorld());
 }
 void Lua::PhysRigidBody::ApplyForce(lua_State *l, pragma::physics::IRigidBody *hPhys, Vector3 &force)
 {

@@ -21,7 +21,6 @@ export import :physics.material;
 export import :physics.object;
 export import :physics.object_handle;
 export import :physics.ragdoll;
-export import :physics.raycallback.filter;
 export import :physics.raycast;
 export import :physics.raycast_filter;
 export import :physics.shape;

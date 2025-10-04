@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "mathutil/umath.h"
+
 #include "algorithm"
 
 #include "sharedutils/util.h"
@@ -25,7 +27,7 @@ void Lua::sound::register_enums(lua_State *l)
 	  {{"FCREATE_NONE", umath::to_integral(ALCreateFlags::None)}, {"FCREATE_MONO", umath::to_integral(ALCreateFlags::Mono)}, {"FCREATE_STREAM", umath::to_integral(ALCreateFlags::Stream)}, {"FCREATE_DONT_TRANSMIT", umath::to_integral(ALCreateFlags::DontTransmit)}});
 }
 
-int Lua::sound::create(lua_State *l, const std::function<std::shared_ptr<ALSound>(NetworkState *, const std::string &, ALSoundType, ALCreateFlags)> &f)
+int Lua::sound::create(lua_State *l, const std::function<std::shared_ptr<::ALSound>(NetworkState *, const std::string &, ALSoundType, ALCreateFlags)> &f)
 {
 	auto *state = Engine::Get()->GetNetworkState(l);
 	int32_t argId = 1;
@@ -44,7 +46,7 @@ int Lua::sound::create(lua_State *l, const std::function<std::shared_ptr<ALSound
 
 int Lua::sound::create(lua_State *l)
 {
-	return create(l, [](NetworkState *nw, const std::string &name, ALSoundType type, ALCreateFlags flags) -> std::shared_ptr<ALSound> { return nw->CreateSound(name, type, flags); });
+	return create(l, [](NetworkState *nw, const std::string &name, ALSoundType type, ALCreateFlags flags) -> std::shared_ptr<::ALSound> { return nw->CreateSound(name, type, flags); });
 }
 
 int Lua::sound::play(lua_State *l)
@@ -59,15 +61,15 @@ int Lua::sound::play(lua_State *l)
 	auto gain = 1.f;
 	auto pitch = 1.f;
 	Vector3 *origin = nullptr;
-	if(Lua::IsVector(l, argId))
-		origin = Lua::CheckVector(l, argId++);
+	if(Lua::IsType<Vector3>(l, argId))
+		origin = &Lua::Check<Vector3>(l, argId++);
 	else {
 		if(Lua::IsSet(l, argId))
 			gain = Lua::CheckNumber(l, argId++);
 		if(Lua::IsSet(l, argId))
 			pitch = Lua::CheckNumber(l, argId++);
 		if(Lua::IsSet(l, argId))
-			origin = Lua::CheckVector(l, argId++);
+			origin = &Lua::Check<Vector3>(l, argId++);
 	}
 
 	auto snd = state->CreateSound(sndName, type, flags);
@@ -82,7 +84,7 @@ int Lua::sound::play(lua_State *l)
 	snd->SetGain(gain);
 	snd->SetPitch(pitch);
 	snd->Play();
-	Lua::Push<std::shared_ptr<ALSound>>(l, snd);
+	Lua::Push<std::shared_ptr<::ALSound>>(l, snd);
 	return 1;
 }
 
@@ -139,7 +141,7 @@ int Lua::sound::find_by_type(lua_State *l)
 		auto &snd = rsnd.get();
 		if((bExactMatch == false && (snd.GetType() & type) != ALSoundType::Generic) || (bExactMatch == true && snd.GetType() == type)) {
 			Lua::PushInt(l, n);
-			Lua::Push<std::shared_ptr<ALSound>>(l, snd.shared_from_this());
+			Lua::Push<std::shared_ptr<::ALSound>>(l, snd.shared_from_this());
 			Lua::SetTableValue(l, t);
 			n++;
 		}
@@ -180,7 +182,7 @@ int Lua::sound::read_wav_phonemes(lua_State *l)
 	if(f == nullptr)
 		return 0;
 	source_engine::script::SoundPhonemeData sp {};
-	if(source_engine::script::read_wav_phonemes(f, sp) != util::MarkupFile::ResultCode::Ok)
+	if(source_engine::script::read_wav_phonemes(f, sp) != ::util::MarkupFile::ResultCode::Ok)
 		return 0;
 
 	auto t = Lua::CreateTable(l);

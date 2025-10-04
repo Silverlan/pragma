@@ -2,8 +2,10 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "mathutil/uvec.h"
+#include "pragma/lua/luaapi.h"
 
+#include "mathutil/uvec.h"
+#include "mathutil/umat.h"
 #include <mathutil/glmutil.h>
 #include <mathutil/boundingvolume.h>
 
@@ -64,7 +66,7 @@ static void Transform_Box(const Mat3 &M, const Vector3 &min, const Vector3 &max,
 	outNewMax.z = Bmax[2];
 }
 
-luabind::mult<Vector3, Vector3> Lua::boundingvolume::GetRotatedAABB(lua_State *l, const Vector3 &min, const Vector3 &max, const Mat3 &rot)
+luabind::mult<Vector3, Vector3> Lua::boundingvolume::GetRotatedAABB(lua_State *l, const Vector3 &min, const Vector3 &max, const ::Mat3 &rot)
 {
 	Vector3 rmin;
 	Vector3 rmax;

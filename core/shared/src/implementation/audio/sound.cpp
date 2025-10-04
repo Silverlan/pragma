@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "memory"
+
 #include "mathutil/umath.h"
 
 #include "sharedutils/util.h"

@@ -5,7 +5,7 @@ module;
 #include "udm.hpp"
 
 #include "pragma/lua/luaapi.h"
-
+#include "pragma/lua/types/udm.hpp"
 #include "luasystem.h"
 #include <mathutil/umath.h>
 
@@ -18,10 +18,10 @@ ConVar *Lua::console::CreateConVar(lua_State *l, const std::string &cmd, ::udm::
 	auto *state = Engine::Get()->GetNetworkState(l);
 	if(state == nullptr)
 		return 0;
-	auto cvar = udm::visit(type, [&def, flags, &help](auto tag) {
+	auto cvar = ::udm::visit(type, [&def, flags, &help](auto tag) {
 		using T = typename decltype(tag)::type;
-		constexpr auto type = udm::type_to_enum<T>();
-		if constexpr(type == udm::Type::Element || udm::is_array_type(type))
+		constexpr auto type = ::udm::type_to_enum<T>();
+		if constexpr(type == ::udm::Type::Element || ::udm::is_array_type(type))
 			return std::shared_ptr<ConVar> {nullptr};
 		else {
 			auto v = luabind::object_cast<T>(def);

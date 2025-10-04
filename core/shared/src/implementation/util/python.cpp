@@ -2,15 +2,19 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "memory"
+
 #include "sharedutils/util.h"
 
 #include "sharedutils/functioncallback.h"
-
+#include "fsys/filesystem.h"
 #include <sharedutils/util_library.hpp>
 
 module pragma.shared;
 
 import :util.python;
+
+#undef CreateFile
 
 struct IPythonWrapper final {
 	IPythonWrapper(util::Library &lib);

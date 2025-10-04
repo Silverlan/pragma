@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "mathutil/umath.h"
+
 #include "mathutil/uvec.h"
 
 #include <fsys/filesystem.h>

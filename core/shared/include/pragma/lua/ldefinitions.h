@@ -18,74 +18,6 @@
 #define luaL_checkthread(L, n) (luaL_checktype(L, (n), LUA_TTHREAD))
 #define luaL_checkuserdata(L, n) (luaL_checktype(L, (n), LUA_TUSERDATA))
 
-namespace Lua {
-	static void TypeError(const luabind::object &o, Type type);
-	DLLNETWORK Lua::Type GetType(const luabind::object &o);
-	DLLNETWORK void CheckType(const luabind::object &o, Type type);
-};
-
-using LuaTableObject = luabind::object;
-using LuaClassObject = luabind::object;
-using LuaFunctionObject = luabind::object;
-
-class BaseLuaObj;
-namespace Lua {
-	DLLNETWORK void PushObject(lua_State *l, BaseLuaObj *o);
-
-	template<class TType>
-	bool CheckHandle(lua_State *l, const util::TSharedHandle<TType> &handle);
-	template<class TType>
-	bool CheckHandle(lua_State *l, const util::TWeakSharedHandle<TType> &handle);
-	template<class TType>
-	bool CheckHandle(lua_State *l, const TType *value);
-	template<class TType>
-	TType &CheckHandle(lua_State *l, const int32_t idx);
-};
-
-template<class TType>
-bool Lua::CheckHandle(lua_State *l, const util::TSharedHandle<TType> &handle)
-{
-	if(handle.IsExpired()) {
-		Lua::PushString(l, "Attempted to use a NULL handle");
-		lua_error(l);
-		return false;
-	}
-	return true;
-}
-
-template<class TType>
-bool Lua::CheckHandle(lua_State *l, const util::TWeakSharedHandle<TType> &handle)
-{
-	if(handle.IsExpired()) {
-		Lua::PushString(l, "Attempted to use a NULL handle");
-		lua_error(l);
-		return false;
-	}
-	return true;
-}
-template<class TType>
-TType &Lua::CheckHandle(lua_State *l, const int32_t idx)
-{
-	auto *handle = CheckPtr<TType>(l, idx);
-	if(handle == nullptr) {
-		Lua::PushString(l, "Attempted to use a NULL handle");
-		lua_error(l);
-		// Unreachable
-	}
-	return *handle;
-}
-
-template<class TType>
-bool Lua::CheckHandle(lua_State *l, const TType *value)
-{
-	if(value == nullptr) {
-		Lua::PushString(l, "Attempted to use a NULL handle");
-		lua_error(l);
-		// Unreachable
-	}
-	return true;
-}
-
 inline int lua_createreference(lua_State *l, int index)
 {
 	lua_pushvalue(l, index);
@@ -94,159 +26,81 @@ inline int lua_createreference(lua_State *l, int index)
 
 inline void lua_removereference(lua_State *l, int index) { luaL_unref(l, LUA_REGISTRYINDEX, index); }
 
-namespace Lua {
-	enum class StatusCode : decltype(LUA_OK);
-	DLLNETWORK Lua::StatusCode Execute(lua_State *l, const std::function<Lua::StatusCode(int (*traceback)(lua_State *))> &target);
-	DLLNETWORK void Execute(lua_State *l, const std::function<void(int (*traceback)(lua_State *), void (*syntaxHandle)(lua_State *, Lua::StatusCode))> &target);
-	DLLNETWORK void HandleLuaError(lua_State *l);
-	DLLNETWORK void HandleLuaError(lua_State *l, Lua::StatusCode s);
-	DLLNETWORK std::string GetErrorMessagePrefix(lua_State *l);
-	template<typename T>
-	void table_to_vector(lua_State *l, const luabind::object &t, int32_t tableStackIndex, std::vector<T> &outData);
-	template<typename T>
-	std::vector<T> table_to_vector(lua_State *l, const luabind::object &t, int32_t tableStackIndex);
-	template<typename T>
-	luabind::object vector_to_table(lua_State *l, const std::vector<T> &data);
-
-	template<typename T0, typename T1>
-	void table_to_map(lua_State *l, const luabind::object &t, int32_t tableStackIndex, std::unordered_map<T0, T1> &outData);
-	template<typename T0, typename T1>
-	std::unordered_map<T0, T1> table_to_map(lua_State *l, const luabind::object &t, int32_t tableStackIndex);
-	template<typename T0, typename T1>
-	luabind::object map_to_table(lua_State *l, const std::unordered_map<T0, T1> &data);
-};
-
-template<typename T>
-void Lua::table_to_vector(lua_State *l, const luabind::object &t, int32_t tableStackIndex, std::vector<T> &outData)
-{
-	auto n = Lua::GetObjectLength(l, tableStackIndex);
-	outData.reserve(outData.size() + n);
-	for(auto it = luabind::iterator {t}, end = luabind::iterator {}; it != end; ++it) {
-		auto val = luabind::object_cast_nothrow<T>(*it, T {});
-		outData.push_back(val);
-	}
-}
-
-template<typename T>
-std::vector<T> Lua::table_to_vector(lua_State *l, const luabind::object &t, int32_t tableStackIndex)
-{
-	std::vector<T> result {};
-	table_to_vector(l, t, tableStackIndex, result);
-	return result;
-}
-
-template<typename T>
-luabind::object Lua::vector_to_table(lua_State *l, const std::vector<T> &data)
-{
-	auto t = luabind::newtable(l);
-	uint32_t idx = 1;
-	for(auto &v : data)
-		t[idx++] = v;
-	return t;
-}
-
-template<typename T0, typename T1>
-void Lua::table_to_map(lua_State *l, const luabind::object &t, int32_t tableStackIndex, std::unordered_map<T0, T1> &outData)
-{
-	for(auto it = luabind::iterator {t}, end = luabind::iterator {}; it != end; ++it) {
-		auto key = luabind::object_cast_nothrow<T0>(it.key(), T0 {});
-		auto val = luabind::object_cast_nothrow<T1>(*it, T1 {});
-		outData[key] = val;
-	}
-}
-
-template<typename T0, typename T1>
-std::unordered_map<T0, T1> Lua::table_to_map(lua_State *l, const luabind::object &t, int32_t tableStackIndex)
-{
-	std::unordered_map<T0, T1> result {};
-	table_to_map(l, t, tableStackIndex, result);
-	return result;
-}
-
-template<typename T0, typename T1>
-luabind::object Lua::map_to_table(lua_State *l, const std::unordered_map<T0, T1> &data)
-{
-	auto t = luabind::newtable(l);
-	for(auto &pair : data)
-		t[pair.first] = pair.second;
-	return t;
-}
-
 #define lua_registerglobalint(global)                                                                                                                                                                                                                                                            \
-	lua_pushinteger(m_lua, global);                                                                                                                                                                                                                                                              \
-	lua_setglobal(m_lua, #global);
+    lua_pushinteger(m_lua, global);                                                                                                                                                                                                                                                              \
+    lua_setglobal(m_lua, #global);
 
 #define STR(arg) #arg
 #define lua_registerglobalenum(en, name)                                                                                                                                                                                                                                                         \
-	lua_pushinteger(m_lua, int(en::name));                                                                                                                                                                                                                                                       \
-	lua_setglobal(m_lua, STR(en##_##name));
+    lua_pushinteger(m_lua, int(en::name));                                                                                                                                                                                                                                                       \
+    lua_setglobal(m_lua, STR(en##_##name));
 
 #define lua_checkentityret(l, hEnt, ret)                                                                                                                                                                                                                                                         \
-	if(!hEnt->IsValid()) {                                                                                                                                                                                                                                                                       \
-		lua_pushstring(l, "Attempted to use a NULL entity");                                                                                                                                                                                                                                     \
-		lua_error(l);                                                                                                                                                                                                                                                                            \
-		return ret;                                                                                                                                                                                                                                                                              \
-	}
+    if(!hEnt->IsValid()) {                                                                                                                                                                                                                                                                       \
+        lua_pushstring(l, "Attempted to use a NULL entity");                                                                                                                                                                                                                                     \
+        lua_error(l);                                                                                                                                                                                                                                                                            \
+        return ret;                                                                                                                                                                                                                                                                              \
+    }
 
 #define lua_checkentity(l, hEnt)                                                                                                                                                                                                                                                                 \
-	if(!hEnt->IsValid()) {                                                                                                                                                                                                                                                                       \
-		lua_pushstring(l, "Attempted to use a NULL entity");                                                                                                                                                                                                                                     \
-		lua_error(l);                                                                                                                                                                                                                                                                            \
-		return;                                                                                                                                                                                                                                                                                  \
-	}
+    if(!hEnt->IsValid()) {                                                                                                                                                                                                                                                                       \
+        lua_pushstring(l, "Attempted to use a NULL entity");                                                                                                                                                                                                                                     \
+        lua_error(l);                                                                                                                                                                                                                                                                            \
+        return;                                                                                                                                                                                                                                                                                  \
+    }
 
 #define lua_checktimer(l, hTimer)                                                                                                                                                                                                                                                                \
-	{                                                                                                                                                                                                                                                                                            \
-		if(hTimer.IsValid() == false) {                                                                                                                                                                                                                                                          \
-			lua_pushstring(l, "Attempted to use a NULL timer");                                                                                                                                                                                                                                  \
-			lua_error(l);                                                                                                                                                                                                                                                                        \
-			return;                                                                                                                                                                                                                                                                              \
-		}                                                                                                                                                                                                                                                                                        \
-	}
+    {                                                                                                                                                                                                                                                                                            \
+        if(hTimer.IsValid() == false) {                                                                                                                                                                                                                                                          \
+            lua_pushstring(l, "Attempted to use a NULL timer");                                                                                                                                                                                                                                  \
+            lua_error(l);                                                                                                                                                                                                                                                                        \
+            return;                                                                                                                                                                                                                                                                              \
+        }                                                                                                                                                                                                                                                                                        \
+    }
 
 #define lua_pushentity(luastate, ent)                                                                                                                                                                                                                                                            \
-	{                                                                                                                                                                                                                                                                                            \
-		ent->GetLuaObject().push(luastate);                                                                                                                                                                                                                                                      \
-	}
+    {                                                                                                                                                                                                                                                                                            \
+        ent->GetLuaObject().push(luastate);                                                                                                                                                                                                                                                      \
+    }
 
 #define lua_pushtablecfunction(l, tablename, funcname, cfuncref)                                                                                                                                                                                                                                 \
-	lua_getglobal(l, tablename);                                                                                                                                                                                                                                                                 \
-	if(lua_istable(l, -1)) {                                                                                                                                                                                                                                                                     \
-		int top = lua_gettop(l);                                                                                                                                                                                                                                                                 \
-		lua_pushstring(l, funcname);                                                                                                                                                                                                                                                             \
-		lua_pushcfunction(l, cfuncref);                                                                                                                                                                                                                                                          \
-		lua_settable(l, top);                                                                                                                                                                                                                                                                    \
-	}                                                                                                                                                                                                                                                                                            \
-	lua_pop(l, 1);
+    lua_getglobal(l, tablename);                                                                                                                                                                                                                                                                 \
+    if(lua_istable(l, -1)) {                                                                                                                                                                                                                                                                     \
+        int top = lua_gettop(l);                                                                                                                                                                                                                                                                 \
+        lua_pushstring(l, funcname);                                                                                                                                                                                                                                                             \
+        lua_pushcfunction(l, cfuncref);                                                                                                                                                                                                                                                          \
+        lua_settable(l, top);                                                                                                                                                                                                                                                                    \
+    }                                                                                                                                                                                                                                                                                            \
+    lua_pop(l, 1);
 
 #define lua_gettablefunction(lstate, tablename, funcname, oncall)                                                                                                                                                                                                                                \
-	lua_getglobal(lstate, tablename);                                                                                                                                                                                                                                                            \
-	if(lua_istable(lstate, -1)) {                                                                                                                                                                                                                                                                \
-		lua_getfield(lstate, -1, funcname);                                                                                                                                                                                                                                                      \
-		if(lua_isfunction(lstate, -1)) {                                                                                                                                                                                                                                                         \
-			oncall                                                                                                                                                                                                                                                                               \
-		}                                                                                                                                                                                                                                                                                        \
-	}                                                                                                                                                                                                                                                                                            \
-	lua_pop(l, 1);
+    lua_getglobal(lstate, tablename);                                                                                                                                                                                                                                                            \
+    if(lua_istable(lstate, -1)) {                                                                                                                                                                                                                                                                \
+        lua_getfield(lstate, -1, funcname);                                                                                                                                                                                                                                                      \
+        if(lua_isfunction(lstate, -1)) {                                                                                                                                                                                                                                                         \
+            oncall                                                                                                                                                                                                                                                                               \
+        }                                                                                                                                                                                                                                                                                        \
+    }                                                                                                                                                                                                                                                                                            \
+    lua_pop(l, 1);
 
 #define lua_callfunction(nwstate, func)                                                                                                                                                                                                                                                          \
-	{                                                                                                                                                                                                                                                                                            \
-		lua_State *l = nwstate->GetLuaState();                                                                                                                                                                                                                                                   \
-		lua_rawgeti(l, LUA_REGISTRYINDEX, func);                                                                                                                                                                                                                                                 \
-		luaerror(nwstate, lua_pcall(l, 0, 0, 0));                                                                                                                                                                                                                                                \
-	}
+    {                                                                                                                                                                                                                                                                                            \
+        lua_State *l = nwstate->GetLuaState();                                                                                                                                                                                                                                                   \
+        lua_rawgeti(l, LUA_REGISTRYINDEX, func);                                                                                                                                                                                                                                                 \
+        luaerror(nwstate, lua_pcall(l, 0, 0, 0));                                                                                                                                                                                                                                                \
+    }
 
 #define lua_calltablefunction(lstate, tablename, funcname, numreturn, oncall)                                                                                                                                                                                                                    \
-	lua_getglobal(lstate, tablename);                                                                                                                                                                                                                                                            \
-	if(lua_istable(lstate, -1)) {                                                                                                                                                                                                                                                                \
-		lua_getfield(lstate, -1, funcname);                                                                                                                                                                                                                                                      \
-		if(lua_isfunction(lstate, -1)) {                                                                                                                                                                                                                                                         \
-			if(lua_pcall((lstate), (0), (numreturn), (0)) == 0) {                                                                                                                                                                                                                                \
-				oncall                                                                                                                                                                                                                                                                           \
-			}                                                                                                                                                                                                                                                                                    \
-		}                                                                                                                                                                                                                                                                                        \
-	}                                                                                                                                                                                                                                                                                            \
-	lua_pop(l, 1);
+    lua_getglobal(lstate, tablename);                                                                                                                                                                                                                                                            \
+    if(lua_istable(lstate, -1)) {                                                                                                                                                                                                                                                                \
+        lua_getfield(lstate, -1, funcname);                                                                                                                                                                                                                                                      \
+        if(lua_isfunction(lstate, -1)) {                                                                                                                                                                                                                                                         \
+            if(lua_pcall((lstate), (0), (numreturn), (0)) == 0) {                                                                                                                                                                                                                                \
+                oncall                                                                                                                                                                                                                                                                           \
+            }                                                                                                                                                                                                                                                                                    \
+        }                                                                                                                                                                                                                                                                                        \
+    }                                                                                                                                                                                                                                                                                            \
+    lua_pop(l, 1);
 
 #define COMMA ,
 #define lua_bind(data) luabind::module(m_lua)[data];
@@ -308,62 +162,6 @@ inline const char *lua_gettype(lua_State *l, int n)
 		}
 	}
 	return arg;
-}
-
-namespace Lua {
-	template<typename T>
-	concept is_trivial_type = std::is_same_v<T, bool> || std::is_arithmetic_v<T> || util::is_string<T>::value;
-	template<typename T, typename = std::enable_if_t<is_trivial_type<T>>>
-	T Check(lua_State *l, int32_t n)
-	{
-		if constexpr(std::is_same_v<T, bool>)
-			return Lua::CheckBool(l, n);
-		else if constexpr(std::is_integral_v<T>)
-			return Lua::CheckInt(l, n);
-		else if constexpr(std::is_arithmetic_v<T>)
-			return Lua::CheckNumber(l, n);
-		else // if constexpr(util::is_string<T>::value)
-			return Lua::CheckString(l, n);
-	}
-	template<typename T, typename = std::enable_if_t<!is_trivial_type<T>>>
-	T &Check(lua_State *l, int32_t n)
-	{
-		Lua::CheckUserData(l, n);
-		luabind::object o(luabind::from_stack(l, n));
-		auto *pValue = luabind::object_cast_nothrow<T *>(o, static_cast<T *>(nullptr));
-		if(pValue == nullptr) {
-			std::string err = std::string(typeid(T).name()) + " expected, got ";
-			err += lua_gettype(l, n);
-			luaL_argerror(l, n, err.c_str());
-		}
-		return *pValue;
-	}
-
-	template<typename T, typename = std::enable_if_t<!std::is_arithmetic<T>::value>>
-	T *CheckPtr(lua_State *l, int32_t n)
-	{
-		Lua::CheckUserData(l, n);
-		luabind::object o(luabind::from_stack(l, n));
-		return luabind::object_cast_nothrow<T *>(o, static_cast<T *>(nullptr));
-	}
-
-	template<typename T>
-	bool IsType(lua_State *l, int32_t n)
-	{
-		if constexpr(std::is_same_v<T, bool>)
-			return Lua::IsBool(l, n);
-		else if constexpr(std::is_arithmetic_v<T>)
-			return Lua::IsNumber(l, n);
-		else if constexpr(util::is_string<T>::value)
-			return Lua::IsString(l, n);
-		else {
-			if(!lua_isuserdata(l, n))
-				return false;
-			luabind::object o(luabind::from_stack(l, n));
-			auto *pValue = luabind::object_cast_nothrow<T *>(o, static_cast<T *>(nullptr));
-			return (pValue != nullptr) ? true : false;
-		}
-	}
 };
 
 #define lua_registercheck(type, cls)                                                                                                                                                                                                                                                             \

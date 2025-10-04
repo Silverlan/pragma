@@ -3,6 +3,7 @@
 
 module;
 
+#include "mathutil/uquat.h"
 
 module pragma.shared;
 

@@ -1,9 +1,13 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "pragma/lua/luaapi.h"
 
-import pragma.shared;
+module pragma.shared;
+
+import :scripting.lua.entity_component_event;
 
 void LuaComponentEvent::PushArguments(lua_State *l)
 {

@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "sharedutils/util_file.h"
+
 #include "sharedutils/util.h"
 
 #include "mathutil/uvec.h"

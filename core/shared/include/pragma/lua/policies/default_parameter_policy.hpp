@@ -6,6 +6,8 @@
 
 #include <luabind/config.hpp>
 #include <luabind/detail/policy.hpp>
+#include "luabind/nil.hpp"
+#include "pragma/lua/luaapi.h"
 
 namespace luabind {
 	namespace detail {

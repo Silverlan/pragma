@@ -13,7 +13,7 @@ get_submodule("bvh","https://github.com/madmann91/bvh.git","ac41ab8")
 get_submodule("bzip2","https://github.com/Silverlan/bzip2.git","6f08ffc2409d34a8f0f06ab3b0291bced4e9d08c")
 get_submodule("clip2tri","https://github.com/raptor/clip2tri.git","f62a734d22733814b8a970ed8a68a4d94c24fa5f")
 get_submodule("efsw","https://github.com/SpartanJ/efsw.git","1bb814c")
-get_submodule("eigen","https://gitlab.com/libeigen/eigen.git","c487a4fe9eab5836330246b992fe7c17c06d6726")
+get_submodule("eigen","https://gitlab.com/libeigen/eigen.git","b66188b5") # v3.4.1
 get_submodule("exprtk","https://github.com/ArashPartow/exprtk.git","f46bffcd6966d38a09023fb37ba9335214c9b959")
 get_submodule("fmt","https://github.com/fmtlib/fmt.git","40626af") # v11.2.0
 get_submodule("freetype","https://github.com/aseprite/freetype2.git","9a2d6d97b2d8a5d22d02948b783df12b764afa2d")

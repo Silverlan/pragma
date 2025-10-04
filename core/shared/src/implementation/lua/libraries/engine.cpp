@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "pragma/lua/luaapi.h"
 
 #include "luasystem.h"
 #include <sharedutils/util_path.hpp>
@@ -10,6 +11,8 @@ module;
 module pragma.shared;
 
 import :scripting.lua.libraries.engine;
+
+#undef LoadLibrary
 
 void Lua::engine::exit() { ::Engine::Get()->ShutDown(); }
 
@@ -107,7 +110,7 @@ Lua::opt<Lua::mult<std::string, Con::MessageFlags, Lua::opt<Color>>> Lua::engine
 	luabind::object color {};
 	if(output->color)
 		color = {l, *output->color};
-	return Lua::mult<std::string, Con::MessageFlags, Lua::opt<Color>> {l, output->output, output->messageFlags, opt<Color> {color}};
+	return Lua::mult<std::string, Con::MessageFlags, Lua::opt<::Color>> {l, output->output, output->messageFlags, opt<::Color> {color}};
 }
 
 void Lua::engine::register_shared_functions(lua_State *l, luabind::module_ &modEn)

@@ -2,6 +2,12 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "sstream"
+
+#include "mathutil/umath_geometry.hpp"
+
+#include "memory"
+
 #include "algorithm"
 
 #include "udm.hpp"

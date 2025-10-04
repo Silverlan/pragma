@@ -10,6 +10,7 @@ module;
 export module pragma.shared:util.timer;
 
 export import :game.enums;
+export import :scripting.lua.core;
 export import :util.timer_handle;
 
 export {

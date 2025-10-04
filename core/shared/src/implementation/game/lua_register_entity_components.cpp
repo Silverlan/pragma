@@ -1,3 +1,15 @@
+// SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
+// SPDX-License-Identifier: MIT
+
+module;
+
+#include "string_view"
+
+#include "pragma/lua/policies/default_parameter_policy.hpp"
+#include "pragma/lua/policies/generic_policy.hpp"
+#include "pragma/lua/lentity_components.hpp"
+#include "pragma/lua/types/udm.hpp"
+#include "mathutil/umath.h"
 
 #include "udm.hpp"
 
@@ -7,16 +19,15 @@
 
 #include "mathutil/uvec.h"
 
-// SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
-// SPDX-License-Identifier: MIT
-
 #include <luabind/copy_policy.hpp>
 
-import panima;
-import pragma.shared;
+module pragma.shared;
+
+import :game.game;
 
 namespace Lua {
 	bool get_bullet_master(BaseEntity &ent);
+	AnimationEvent get_animation_event(lua_State *l, int32_t tArgs, uint32_t eventId);
 };
 bool Lua::get_bullet_master(BaseEntity &ent)
 {

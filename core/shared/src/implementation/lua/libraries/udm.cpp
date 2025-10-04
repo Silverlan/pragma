@@ -2,6 +2,21 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "sharedutils/magic_enum.hpp"
+
+#include "fsys/filesystem.h"
+
+#include "sstream"
+
+#include "pragma/lua/policies/default_parameter_policy.hpp"
+
+#include "pragma/lua/luaapi.h"
+#include "pragma/lua/util.hpp"
+#include "pragma/lua/types/udm.hpp"
+#include "mathutil/umath.h"
+
+#include "memory"
+
 #include "cassert"
 
 #include "mathutil/uvec.h"
@@ -537,7 +552,7 @@ void Lua::udm::register_library(Lua::Interface &lua)
 		luabind::def("create_element",+[](lua_State *l) -> ::udm::PProperty {
 			return ::udm::Property::Create(::udm::Type::Element);
 		}),
-		luabind::def("compress_lz4",+[](lua_State *l,DataStream ds) -> DataStream {
+		luabind::def("compress_lz4",+[](lua_State *l,::DataStream ds) -> ::DataStream {
 			auto offset = ds->GetOffset();
 			ds->SetOffset(0);
 			auto lz4Blob = ::udm::compress_lz4_blob(ds->GetData(),ds->GetInternalSize());
@@ -545,21 +560,21 @@ void Lua::udm::register_library(Lua::Interface &lua)
 
 			auto t = luabind::newtable(l);
 			t[1] = lz4Blob.uncompressedSize;
-			DataStream dsCompressed {static_cast<uint32_t>(lz4Blob.compressedData.size())};
+			::DataStream dsCompressed {static_cast<uint32_t>(lz4Blob.compressedData.size())};
 			dsCompressed->Write(lz4Blob.compressedData.data(),lz4Blob.compressedData.size());
 			t[2] = dsCompressed;
 			return dsCompressed;
 		}),
-		luabind::def("decompress_lz4",+[](Lua::tb<void> t) -> DataStream {
+		luabind::def("decompress_lz4",+[](Lua::tb<void> t) -> ::DataStream {
 			uint64_t uncompressedSize = luabind::object_cast_nothrow<uint64_t>(t[1],uint64_t{});
-			DataStream ds = luabind::object_cast_nothrow<DataStream>(t[2],DataStream{});
+			::DataStream ds = luabind::object_cast_nothrow<::DataStream>(t[2],::DataStream{});
 
 			auto offset = ds->GetOffset();
 			ds->SetOffset(0);
 			auto blob = ::udm::decompress_lz4_blob(ds->GetData(),ds->GetInternalSize(),uncompressedSize);
 			ds->SetOffset(offset);
 
-			DataStream dsDecompressed {static_cast<uint32_t>(blob.data.size())};
+			::DataStream dsDecompressed {static_cast<uint32_t>(blob.data.size())};
 			dsDecompressed->Write(blob.data.data(),blob.data.size());
 			return dsDecompressed;
 		}),

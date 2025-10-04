@@ -3,6 +3,7 @@
 
 module;
 #include "pragma/lua/luaapi.h"
+#include "mathutil/uvec.h"
 
 module pragma.shared;
 
@@ -250,17 +251,17 @@ bool Game::InvokeEntityEvent(pragma::BaseEntityComponent &component, uint32_t ev
 
 		Lua::PushInt(l, 2);
 		Lua::GetTableValue(l, argsIdx);
-		auto *pos = Lua::IsSet(l, -1) ? Lua::CheckVector(l, -1) : nullptr;
+		auto *pos = Lua::IsSet(l, -1) ? &Lua::Check<Vector3>(l, -1) : nullptr;
 		Lua::Pop(l, 1);
 
 		Lua::PushInt(l, 3);
 		Lua::GetTableValue(l, argsIdx);
-		auto *rot = Lua::IsSet(l, -1) ? Lua::CheckQuaternion(l, -1) : nullptr;
+		auto *rot = Lua::IsSet(l, -1) ? &Lua::Check<Quat>(l, -1) : nullptr;
 		Lua::Pop(l, 1);
 
 		Lua::PushInt(l, 4);
 		Lua::GetTableValue(l, argsIdx);
-		auto *scale = Lua::IsSet(l, -1) ? Lua::CheckVector(l, -1) : nullptr;
+		auto *scale = Lua::IsSet(l, -1) ? &Lua::Check<Vector3>(l, -1) : nullptr;
 		Lua::Pop(l, 1);
 
 		pragma::CEOnBoneTransformChanged evData {static_cast<uint32_t>(boneId), pos, rot, scale};
@@ -417,7 +418,7 @@ bool Game::InvokeEntityEvent(pragma::BaseEntityComponent &component, uint32_t ev
 	else if(eventId == pragma::BaseActorComponent::EVENT_ON_KILLED) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
-		auto &pDamageInfo = *Lua::CheckDamageInfo(l, -1);
+		auto &pDamageInfo = Lua::Check<DamageInfo>(l, -1);
 		Lua::Pop(l, 1);
 		pragma::CEOnCharacterKilled evData {&pDamageInfo};
 		if(bInject)
@@ -450,7 +451,7 @@ bool Game::InvokeEntityEvent(pragma::BaseEntityComponent &component, uint32_t ev
 	else if(eventId == pragma::BaseCharacterComponent::EVENT_ON_JUMP) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
-		auto &velocity = *Lua::CheckVector(l, -1);
+		auto &velocity = Lua::Check<Vector3>(l, -1);
 		Lua::Pop(l, 1);
 		pragma::CEOnJump evData {velocity};
 		if(bInject)
@@ -466,7 +467,7 @@ bool Game::InvokeEntityEvent(pragma::BaseEntityComponent &component, uint32_t ev
 
 		Lua::PushInt(l, 2);
 		Lua::GetTableValue(l, argsIdx);
-		auto *surfMat = Lua::CheckSurfaceMaterial(l, -1);
+		auto &surfMat = Lua::Check<SurfaceMaterial>(l, -1);
 		Lua::Pop(l, 1);
 
 		Lua::PushInt(l, 3);
@@ -474,7 +475,7 @@ bool Game::InvokeEntityEvent(pragma::BaseEntityComponent &component, uint32_t ev
 		auto scale = Lua::CheckNumber(l, -1);
 		Lua::Pop(l, 1);
 
-		pragma::CEPlayFootstepSound evData {static_cast<pragma::BaseCharacterComponent::FootType>(footType), *surfMat, static_cast<float>(scale)};
+		pragma::CEPlayFootstepSound evData {static_cast<pragma::BaseCharacterComponent::FootType>(footType), surfMat, static_cast<float>(scale)};
 		if(bInject)
 			component.InjectEvent(eventId, evData);
 		else
@@ -505,7 +506,7 @@ bool Game::InvokeEntityEvent(pragma::BaseEntityComponent &component, uint32_t ev
 	else if(eventId == pragma::BaseCharacterComponent::EVENT_ON_CHARACTER_ORIENTATION_CHANGED) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
-		auto &vUp = *Lua::CheckVector(l, -1);
+		auto &vUp = Lua::Check<Vector3>(l, -1);
 		Lua::Pop(l, 1);
 		pragma::CEOnSetCharacterOrientation evData {vUp};
 		if(bInject)
@@ -523,7 +524,7 @@ bool Game::InvokeEntityEvent(pragma::BaseEntityComponent &component, uint32_t ev
 	else if(eventId == pragma::BaseCharacterComponent::EVENT_HANDLE_VIEW_ROTATION) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
-		auto &rot = *Lua::CheckQuaternion(l, -1);
+		auto &rot = Lua::Check<Quat>(l, -1);
 		Lua::Pop(l, 1);
 
 		pragma::CEViewRotation evData {rot};
@@ -547,7 +548,7 @@ bool Game::InvokeEntityEvent(pragma::BaseEntityComponent &component, uint32_t ev
 	else if(eventId == pragma::DamageableComponent::EVENT_ON_TAKE_DAMAGE) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
-		auto &damageInfo = *Lua::CheckDamageInfo(l, -1);
+		auto &damageInfo = Lua::Check<DamageInfo>(l, -1);
 		Lua::Pop(l, 1);
 		pragma::CEOnTakeDamage evData {damageInfo};
 		if(bInject)
@@ -603,7 +604,7 @@ bool Game::InvokeEntityEvent(pragma::BaseEntityComponent &component, uint32_t ev
 	else if(eventId == pragma::BaseHealthComponent::EVENT_ON_TAKEN_DAMAGE) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
-		auto &damageInfo = *Lua::CheckDamageInfo(l, -1);
+		auto &damageInfo = Lua::Check<DamageInfo>(l, -1);
 		Lua::Pop(l, 1);
 
 		Lua::PushInt(l, 2);

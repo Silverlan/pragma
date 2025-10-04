@@ -2,6 +2,10 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "sharedutils/asset_loader/file_asset_manager.hpp"
+
+#include "fsys/filesystem.h"
+
 #include "sharedutils/util.h"
 
 module pragma.shared;

@@ -17,7 +17,6 @@ export namespace Lua {
 	DLLNETWORK void TableDump(lua_State *lua, int n = -1);
 	DLLNETWORK void VarDump(lua_State *lua, int n = -1);
 	DLLNETWORK std::optional<std::string> VarToString(lua_State *lua, int n = -1);
-	class Interface;
 }
 
 export namespace pragma::scripting::lua {

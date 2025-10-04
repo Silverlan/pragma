@@ -4,7 +4,9 @@
 #ifndef __LUA_ERROR_HANDLING_HPP__
 #define __LUA_ERROR_HANDLING_HPP__
 
+#include "pragma/networkdefinitions.h"
 #include <sstream>
+#include "pragma/lua/luaapi.h"
 
 namespace Lua {
 	DLLNETWORK void initialize_error_handler();

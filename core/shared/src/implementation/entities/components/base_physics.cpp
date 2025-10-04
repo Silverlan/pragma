@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "sstream"
+
 #include "mathutil/umath.h"
 
 #include "pragma/logging.hpp"

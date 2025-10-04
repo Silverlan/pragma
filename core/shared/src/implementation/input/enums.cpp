@@ -12,7 +12,6 @@ module pragma.shared;
 
 import :input.enums;
 import pragma.locale;
-import pragma.platform;
 
 DLLNETWORK bool KeyToString(short c, std::string *key)
 {

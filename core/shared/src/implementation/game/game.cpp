@@ -2,6 +2,18 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "sharedutils/asset_loader/file_asset_manager.hpp"
+
+#include "fsys/filesystem.h"
+
+#include "string_view"
+
+#include "mathutil/umath.h"
+
+#include "memory"
+
+#include "cstring"
+
 #include "cassert"
 
 #include "pragma/logging.hpp"

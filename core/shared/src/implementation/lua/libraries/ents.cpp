@@ -2,6 +2,18 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "sharedutils/util_file.h"
+
+#include "fsys/filesystem.h"
+
+#include "sstream"
+
+#include "pragma/lua/policies/default_parameter_policy.hpp"
+#include "pragma/lua/types/udm.hpp"
+#include "mathutil/umath.h"
+
+#include "memory"
+
 #include "algorithm"
 
 #include "mathutil/uquat.h"
@@ -442,12 +454,12 @@ void Lua::ents::register_library(lua_State *l)
 			  ss << "(" << *c << ")";
 		  ss << "]";
 		  if(pragma::ents::is_udm_member_type(memberInfo.type)) {
-			  udm::visit_ng(pragma::ents::member_type_to_udm_type(memberInfo.type), [&memberInfo, &ss](auto tag) {
+			  ::udm::visit_ng(pragma::ents::member_type_to_udm_type(memberInfo.type), [&memberInfo, &ss](auto tag) {
 				  using T = typename decltype(tag)::type;
-				  if constexpr(udm::is_convertible<T, std::string>()) {
+				  if constexpr(::udm::is_convertible<T, std::string>()) {
 					  T def;
 					  if(memberInfo.GetDefault<T>(def)) {
-						  auto defStr = udm::convert<T, std::string>(def);
+						  auto defStr = ::udm::convert<T, std::string>(def);
 						  ss << "[Def:" << defStr << "]";
 					  }
 				  }
@@ -495,16 +507,16 @@ void Lua::ents::register_library(lua_State *l)
 	memberInfoDef.property("minValue", +[](lua_State *l, const pragma::ComponentMemberInfo &memInfo) { return memInfo.GetMin(); });
 	memberInfoDef.property("maxValue", +[](lua_State *l, const pragma::ComponentMemberInfo &memInfo) { return memInfo.GetMax(); });
 	memberInfoDef.property("stepSize", +[](lua_State *l, const pragma::ComponentMemberInfo &memInfo) { return memInfo.GetStepSize(); });
-	memberInfoDef.property("metaData", +[](lua_State *l, const pragma::ComponentMemberInfo &memInfo) -> udm::PProperty { return memInfo.GetMetaData(); });
+	memberInfoDef.property("metaData", +[](lua_State *l, const pragma::ComponentMemberInfo &memInfo) -> ::udm::PProperty { return memInfo.GetMetaData(); });
 	memberInfoDef.property(
 	  "default", +[](lua_State *l, const pragma::ComponentMemberInfo &memInfo) -> udm_type {
 		  // Default value is currently only allowed for UDM types. Tag: component-member-udm-default
 		  if(!pragma::ents::is_udm_member_type(memInfo.type))
 			  return nil;
-		  return udm::visit(pragma::ents::member_type_to_udm_type(memInfo.type), [&memInfo, l](auto tag) {
+		  return ::udm::visit(pragma::ents::member_type_to_udm_type(memInfo.type), [&memInfo, l](auto tag) {
 			  using T = typename decltype(tag)::type;
-			  constexpr auto type = udm::type_to_enum<T>();
-			  if constexpr(type != udm::Type::Element && !udm::is_array_type(type)) {
+			  constexpr auto type = ::udm::type_to_enum<T>();
+			  if constexpr(type != ::udm::Type::Element && !::udm::is_array_type(type)) {
 				  T val;
 				  if(!memInfo.GetDefault(val))
 					  return nil;

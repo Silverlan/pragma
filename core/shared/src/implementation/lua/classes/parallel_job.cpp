@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "sstream"
+
 #include "pragma/lua/lua_call.hpp"
 
 #include "sharedutils/util.h"

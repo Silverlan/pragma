@@ -2,6 +2,12 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "sstream"
+
+#include "mathutil/umath.h"
+
+#include "memory"
+
 #include "sharedutils/util.h"
 
 #include "mathutil/uvec.h"

@@ -46,6 +46,6 @@ unsigned int Game::GetNetMessageID(std::string name)
 std::string *Game::GetNetMessageIdentifier(unsigned int ID)
 {
 	if(ID >= m_luaNetMessageIndex.size())
-		return NULL;
+		return nullptr;
 	return &m_luaNetMessageIndex[ID];
 }

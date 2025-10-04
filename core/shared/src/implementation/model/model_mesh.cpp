@@ -2,6 +2,16 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "sharedutils/util_file.h"
+
+#include "sstream"
+
+#include "mathutil/umath.h"
+
+#include "memory"
+
+#include "cstring"
+#include "pragma/model/simplify.h"
 #include "mathutil/uquat.h"
 
 #include "mathutil/umath_geometry.hpp"

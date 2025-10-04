@@ -2,6 +2,14 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "fsys/filesystem.h"
+
+#include "sstream"
+
+#include "mathutil/umath.h"
+
+#include "cstring"
+
 #include "sharedutils/util.h"
 
 #include <sharedutils/util_string.h>
@@ -94,7 +102,7 @@ bool Lua::doc::load_documentation_file(const std::string &fileName)
 	initialize_pragma_documentation();
 
 	std::string err;
-	auto udmData = util::load_udm_asset(fileName, &err);
+	auto udmData = ::util::load_udm_asset(fileName, &err);
 	if(udmData == nullptr) {
 		Con::cwar << "Unable to load Lua documentation '" << fileName << "': " << err << Con::endl;
 		return false;
@@ -225,7 +233,7 @@ void Lua::doc::print_documentation(const std::string &name, std::stringstream &s
 	Lua::doc::find_candidates(name, similarCandidates, MAX_SIMILAR_CANDIDATES);
 	if(similarCandidates.empty() == false) {
 		ss << "\n";
-		ss << util::get_ansi_color_code(util::ConsoleColorFlags::Yellow | util::ConsoleColorFlags::Intensity);
+		ss << ::util::get_ansi_color_code(::util::ConsoleColorFlags::Yellow | ::util::ConsoleColorFlags::Intensity);
 		ss << "Were you looking for the following";
 		auto *pFunction = dynamic_cast<const pragma::doc::Function *>(similarCandidates.front());
 		auto *pMember = dynamic_cast<const pragma::doc::Member *>(similarCandidates.front());
@@ -259,9 +267,9 @@ void Lua::doc::print_documentation(const std::string &name, std::stringstream &s
 			print_collection(*pCollection, ss);
 
 		if(similarCandidates.size() > 1u) {
-			ss << util::get_ansi_color_code(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
+			ss << ::util::get_ansi_color_code(::util::ConsoleColorFlags::White | ::util::ConsoleColorFlags::Intensity);
 			ss << "Other similar items:\n";
-			ss << util::get_ansi_color_code(util::ConsoleColorFlags::Reset);
+			ss << ::util::get_ansi_color_code(::util::ConsoleColorFlags::Reset);
 			for(auto it = similarCandidates.begin() + 1u; it < similarCandidates.end(); ++it)
 				ss << " - " << wrap_link((*it)->GetFullName()) << "\n";
 		}

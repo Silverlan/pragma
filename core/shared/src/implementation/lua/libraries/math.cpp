@@ -38,11 +38,11 @@ float Lua::math::round(float f, float multiple) { return round_by_multiple(f, mu
 luabind::tableT<Vector3> Lua::math::calc_hermite_spline(lua_State *l, const Vector3 &p0, const Vector3 &p1, const Vector3 &p2, const Vector3 &p3, uint32_t segmentCount, float curvature)
 {
 	std::vector<Vector3> curvePoints {};
-	util::calc_hermite_spline(p0, p1, p2, p3, static_cast<uint32_t>(segmentCount), curvePoints, curvature);
+	::util::calc_hermite_spline(p0, p1, p2, p3, static_cast<uint32_t>(segmentCount), curvePoints, curvature);
 	return Lua::vector_to_table(l, curvePoints);
 }
 
-Vector3 Lua::math::calc_hermite_spline_position(lua_State *l, const Vector3 &p0, const Vector3 &p1, const Vector3 &p2, const Vector3 &p3, float s, float curvature) { return util::calc_hermite_spline_position(p0, p1, p2, p3, static_cast<float>(s), curvature); }
+Vector3 Lua::math::calc_hermite_spline_position(lua_State *l, const Vector3 &p0, const Vector3 &p1, const Vector3 &p2, const Vector3 &p3, float s, float curvature) { return ::util::calc_hermite_spline_position(p0, p1, p2, p3, static_cast<float>(s), curvature); }
 
 bool Lua::math::is_in_range(double v, double min, double max) { return v >= min && v <= max; }
 

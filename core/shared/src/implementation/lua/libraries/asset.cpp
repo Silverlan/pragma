@@ -2,6 +2,15 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "sharedutils/asset_loader/file_asset_manager.hpp"
+
+#include "sharedutils/util_file.h"
+
+#include "fsys/filesystem.h"
+
+#include "pragma/lua/luaapi.h"
+
+#include "mathutil/umath.h"
 
 #include <material_manager2.hpp>
 #include <luainterface.hpp>
@@ -84,7 +93,7 @@ void Lua::asset::register_library(Lua::Interface &lua, bool extended)
 			auto *nw = Engine::Get()->GetNetworkState(l);
 			return nw->GetModelManager().ClearFlagged();
 		})),
-		luabind::def("flag_model_for_cache_removal",static_cast<void(*)(lua_State*,Model&)>([](lua_State *l,Model &mdl) {
+		luabind::def("flag_model_for_cache_removal",static_cast<void(*)(lua_State*,::Model&)>([](lua_State *l,::Model &mdl) {
 			auto *nw = Engine::Get()->GetNetworkState(l);
 			nw->GetModelManager().FlagForRemoval(mdl);
 		})),
@@ -184,20 +193,20 @@ void Lua::asset::register_library(Lua::Interface &lua, bool extended)
 			manager->WaitForAllPendingCompleted();
 		}),
 		luabind::def("precache",+[](lua_State *l,const std::string &name,pragma::asset::Type type)
-			-> Lua::var<bool,std::pair<util::FileAssetManager::PreloadResult::Result,std::optional<util::AssetLoadJobId>>> {
+			-> Lua::var<bool,std::pair<::util::FileAssetManager::PreloadResult::Result,std::optional<::util::AssetLoadJobId>>> {
 			auto *manager = Engine::Get()->GetNetworkState(l)->GetAssetManager(type);
 			if(!manager)
 				return luabind::object{l,false};
 			auto result = manager->PreloadAsset(name);
 			return luabind::object{
 				l,
-				std::pair<util::FileAssetManager::PreloadResult::Result,std::optional<util::AssetLoadJobId>>{
+				std::pair<::util::FileAssetManager::PreloadResult::Result,std::optional<::util::AssetLoadJobId>>{
 					result.result,result.jobId
 				}
 			};
 		}),
 		luabind::def("get_asset_state",+[](lua_State *l,const std::string &name,pragma::asset::Type type)
-			-> Lua::opt<util::AssetState> {
+			-> Lua::opt<::util::AssetState> {
 			auto *manager = Engine::Get()->GetNetworkState(l)->GetAssetManager(type);
 			if(!manager)
 				return luabind::object{};
@@ -271,15 +280,15 @@ void Lua::asset::register_library(Lua::Interface &lua, bool extended)
 	    {"FORMAT_TYPE_IMPORT", umath::to_integral(pragma::asset::FormatType::Import)},
 	    {"FORMAT_TYPE_ALL", umath::to_integral(pragma::asset::FormatType::All)},
 
-	    {"ASSET_LOAD_FLAG_NONE", umath::to_integral(util::AssetLoadFlags::None)},
-	    {"ASSET_LOAD_FLAG_ABSOLUTE_PATH_BIT", umath::to_integral(util::AssetLoadFlags::AbsolutePath)},
-	    {"ASSET_LOAD_FLAG_DONT_CACHE_BIT", umath::to_integral(util::AssetLoadFlags::DontCache)},
-	    {"ASSET_LOAD_FLAG_IGNORE_CACHE_BIT", umath::to_integral(util::AssetLoadFlags::IgnoreCache)},
+	    {"ASSET_LOAD_FLAG_NONE", umath::to_integral(::util::AssetLoadFlags::None)},
+	    {"ASSET_LOAD_FLAG_ABSOLUTE_PATH_BIT", umath::to_integral(::util::AssetLoadFlags::AbsolutePath)},
+	    {"ASSET_LOAD_FLAG_DONT_CACHE_BIT", umath::to_integral(::util::AssetLoadFlags::DontCache)},
+	    {"ASSET_LOAD_FLAG_IGNORE_CACHE_BIT", umath::to_integral(::util::AssetLoadFlags::IgnoreCache)},
 
-	    {"ASSET_STATE_NOT_LOADED", umath::to_integral(util::AssetState::NotLoaded)},
-	    {"ASSET_STATE_LOADED", umath::to_integral(util::AssetState::Loaded)},
-	    {"ASSET_STATE_FAILED_TO_LOAD", umath::to_integral(util::AssetState::FailedToLoad)},
-	    {"ASSET_STATE_LOADING", umath::to_integral(util::AssetState::Loading)},
+	    {"ASSET_STATE_NOT_LOADED", umath::to_integral(::util::AssetState::NotLoaded)},
+	    {"ASSET_STATE_LOADED", umath::to_integral(::util::AssetState::Loaded)},
+	    {"ASSET_STATE_FAILED_TO_LOAD", umath::to_integral(::util::AssetState::FailedToLoad)},
+	    {"ASSET_STATE_LOADING", umath::to_integral(::util::AssetState::Loading)},
 	  });
 	static_assert(umath::to_integral(pragma::asset::Type::Count) == 7, "Update this list!");
 

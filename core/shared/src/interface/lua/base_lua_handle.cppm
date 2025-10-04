@@ -11,6 +11,8 @@ module;
 
 export module pragma.shared:scripting.lua.base_lua_handle;
 
+import :scripting.lua.core;
+
 export {
 	namespace pragma {
 		class DLLNETWORK BaseLuaHandle {

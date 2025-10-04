@@ -67,8 +67,8 @@ export {
 		private:
 			void OnRefreshComplete();
 		};
-		REGISTER_BASIC_BITWISE_OPERATORS(IMasterServerQueryDispatcher::Filter::Flags)
-	};
+	}
+	REGISTER_BASIC_BITWISE_OPERATORS(pragma::networking::IMasterServerQueryDispatcher::Filter::Flags);
 
 	template<class TMasterServerQueryDispatcher>
 	std::unique_ptr<pragma::networking::IMasterServerQueryDispatcher, void (*)(pragma::networking::IMasterServerQueryDispatcher *)> pragma::networking::IMasterServerQueryDispatcher::Create()

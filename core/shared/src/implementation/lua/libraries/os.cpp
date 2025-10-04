@@ -3,6 +3,7 @@
 
 module;
 
+#include <chrono>
 
 module pragma.shared;
 

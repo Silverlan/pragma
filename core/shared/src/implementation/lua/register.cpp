@@ -2,12 +2,20 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "sstream"
+
+#include "pragma/lua/policies/default_parameter_policy.hpp"
+
+#include "mathutil/umath.h"
+
+#include "memory"
+#include "sharedutils/util_ifile.hpp"
 #include "pragma/lua/lua_call.hpp"
-
+#include "pragma/debug/debugbreak.hpp"
 #include "sharedutils/util_pragma.hpp"
-
+#include "fsys/filesystem.h"
 #include "pragma/logging.hpp"
-
+#include "mathutil/color.h"
 #include "mathutil/umath_geometry.hpp"
 
 #include "sharedutils/util.h"
@@ -17,7 +25,7 @@ module;
 #include "sharedutils/functioncallback.h"
 
 #include "mathutil/uvec.h"
-
+#include <chrono>
 #include "luasystem.h"
 #include <sharedutils/util_file.h>
 #include <sharedutils/util_path.hpp>
@@ -37,6 +45,7 @@ module;
 #include <spdlog/formatter.h>
 #include <spdlog/fmt/fmt.h>
 #include <fmt/core.h>
+#include "noise/noise.h"
 #ifndef _WIN32
 #include <signal.h>
 #endif
@@ -48,6 +57,8 @@ import :scripting.lua;
 import bezierfit;
 import panima;
 //import pragma.scripting.lua;
+
+#undef GetFileAttributes
 
 static std::ostream &operator<<(std::ostream &out, const CallbackHandle &hCallback)
 {

@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "mathutil/umath.h"
+
 #include "pragma/lua/lua_call.hpp"
 
 #include "pragma/lua/luaapi.h"
@@ -33,8 +35,8 @@ void Lua::TraceData::SetFilter(lua_State *l, ::TraceData &data, luabind::object)
 		data.SetFilter(ent);
 		return;
 	}
-	else if(Lua::IsPhysObj(l, 2)) {
-		auto &phys = Lua::Check<PhysObj>(l, 2);
+	else if(Lua::IsType<::PhysObj>(l, 2)) {
+		auto &phys = Lua::Check<::PhysObj>(l, 2);
 		data.SetFilter(phys);
 		return;
 	}

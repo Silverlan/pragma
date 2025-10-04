@@ -2,6 +2,10 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "sharedutils/asset_loader/file_asset_manager.hpp"
+
+#include "memory"
+
 #include "algorithm"
 
 #include "udm.hpp"
@@ -426,6 +430,14 @@ void NetworkState::ClearConsoleCommandOverride(const std::string &src)
 }
 void NetworkState::ClearConsoleCommandOverrides() { m_conOverrides.clear(); }
 
+bool check_cheats(const std::string &scmd, NetworkState *state) {
+	if(state->CheatsEnabled() == false) {
+		Con::cout << "Can't use cheat cvar " << scmd << " in multiplayer, unless the server has sv_cheats set to 1." << Con::endl;
+		return false;
+	}
+	return true;
+}
+
 bool NetworkState::RunConsoleCommand(std::string scmd, std::vector<std::string> &argv, pragma::BasePlayerComponent *pl, KeyState pressState, float magnitude, const std::function<bool(ConConf *, float &)> &callback)
 {
 	TranslateConsoleCommand(scmd);
@@ -453,8 +465,8 @@ bool NetworkState::RunConsoleCommand(std::string scmd, std::vector<std::string> 
 				return true;
 			}
 		}
-		if((flags & ConVarFlags::Cheat) == ConVarFlags::Cheat)
-			CHECK_CHEATS(scmd, this, true);
+		if((flags & ConVarFlags::Cheat) == ConVarFlags::Cheat && !check_cheats(scmd, this))
+			return true;
 		if(bEngine)
 			Engine::Get()->CVarHandler::SetConVar(scmd, argv[0]);
 		else

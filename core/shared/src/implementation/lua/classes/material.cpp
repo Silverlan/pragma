@@ -2,6 +2,14 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "string_view"
+
+#include "pragma/lua/policies/default_parameter_policy.hpp"
+
+#include "pragma/lua/types/udm.hpp"
+
+#include "mathutil/umath.h"
+
 #include "pragma/lua/luaapi.h"
 
 #include <material_manager2.hpp>

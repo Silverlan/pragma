@@ -2,6 +2,10 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "mathutil/umath.h"
+
+#include "memory"
+
 #include "pragma/lua/luaapi.h"
 
 #include "mathutil/uvec.h"
@@ -144,7 +148,7 @@ void Lua::CollisionMesh::GetSoftBodyInfo(lua_State *l, ::CollisionMesh &mesh)
 	auto *sbInfo = mesh.GetSoftBodyInfo();
 	if(sbInfo == nullptr)
 		return;
-	Lua::Push<PhysSoftBodyInfo *>(l, sbInfo);
+	Lua::Push<::PhysSoftBodyInfo *>(l, sbInfo);
 }
 luabind::optional<luabind::tableT<uint32_t>> Lua::CollisionMesh::GetSoftBodyTriangles(lua_State *l, ::CollisionMesh &mesh)
 {

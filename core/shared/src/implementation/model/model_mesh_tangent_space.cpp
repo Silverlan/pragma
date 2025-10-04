@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "mathutil/umath.h"
+
 #include "pragma/networkdefinitions.h"
 
 #include "model/mikktspace/mikktspace.h"

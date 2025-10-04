@@ -5,7 +5,7 @@
 #define __PRAGMA_LUA_TYPES_UDM_HPP__
 
 #include <udm.hpp>
-
+#include "pragma/lua/ldefinitions.h"
 #include <luasystem.h>
 #include <luabind/luabind.hpp>
 #include <luabind/operator.hpp>
@@ -43,7 +43,8 @@ namespace luabind {
 			for(auto type : types) {
 				auto r = udm::visit<LENABLE_NUMERIC, LENABLE_GENERIC, LENABLE_NON_TRIVIAL>(type, [L, idx](auto tag) {
 					using T = typename decltype(tag)::type;
-					return Lua::IsType<T>(L, idx);
+					luabind::object o(luabind::from_stack(L, idx));
+					return luabind::object_cast_nothrow<T *>(o, static_cast<T *>(nullptr)) != nullptr;
 				});
 				if(r)
 					return true;

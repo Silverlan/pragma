@@ -21,6 +21,8 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 module;
+#include "mathutil/umath.h"
+
 #include "sharedutils/util.h"
 
 #include <random>

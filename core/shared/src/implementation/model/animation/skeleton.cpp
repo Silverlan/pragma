@@ -2,6 +2,12 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "string_view"
+
+#include "mathutil/umath.h"
+
+#include "memory"
+
 #include "algorithm"
 
 #include <functional>

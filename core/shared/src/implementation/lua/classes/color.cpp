@@ -25,8 +25,8 @@ void Lua::Color::Lerp(lua_State *l, ::Color &col, ::Color &other, float factor)
 }
 void Lua::Color::ToVector4(lua_State *l, ::Color &col)
 {
-	Vector4 v {col.r / 255.f, col.g / 255.f, col.b / 255.f, col.a / 255.f};
-	Lua::Push<Vector4>(l, v);
+	::Vector4 v {col.r / 255.f, col.g / 255.f, col.b / 255.f, col.a / 255.f};
+	Lua::Push<::Vector4>(l, v);
 }
 void Lua::Color::ToVector(lua_State *l, ::Color &col)
 {

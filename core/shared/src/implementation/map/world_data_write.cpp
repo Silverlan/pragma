@@ -2,6 +2,12 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "string_view"
+
+#include "fsys/filesystem.h"
+
+#include "mathutil/umath.h"
+
 #include "algorithm"
 
 #include "cassert"

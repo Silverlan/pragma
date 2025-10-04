@@ -16,6 +16,7 @@ export module pragma.shared:scripting.lua.classes.property;
 
 import :entities.property;
 import :scripting.lua.classes.property_generic;
+import :scripting.lua.core;
 
 #define DEFINE_LUA_NUMBER_PROPERTY(TYPE, UNDERLYING_TYPE)                                                                                                                                                                                                                                        \
 	using L##TYPE##Property = TLNumberPropertyWrapper<util::TYPE##Property, UNDERLYING_TYPE>;                                                                                                                                                                                                    \

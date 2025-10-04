@@ -10,6 +10,8 @@ module;
 
 export module pragma.shared:scripting.lua.object_base;
 
+import :scripting.lua.core;
+
 export {
 	class DLLNETWORK LuaObjectBase {
 	protected:

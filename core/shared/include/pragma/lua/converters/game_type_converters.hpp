@@ -12,6 +12,8 @@
 #include <array>
 #include <unordered_map>
 
+import pragma.shared;
+
 namespace luabind {
 	template<typename T, T (*FUNCTION)(lua_State *)>
 	struct parameter_emplacement_converter {

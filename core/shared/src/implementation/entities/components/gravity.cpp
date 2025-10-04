@@ -2,6 +2,10 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "mathutil/umath.h"
+
+#include "memory"
+
 #include "pragma/lua/luaapi.h"
 
 #include "mathutil/uvec.h"

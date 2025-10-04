@@ -2,12 +2,20 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "mathutil/umath.h"
+#include "sharedutils/magic_enum.hpp"
 
+#include "pragma/networkdefinitions.h"
+#include "pragma/lua/types/udm.hpp"
+
+#include "pragma/lua/luaapi.h"
+
+#include "mathutil/umath.h"
+#include "pragma/lua/types/nil_type.hpp"
 #include "pragma/lua/lua_call.hpp"
 
 #include "sharedutils/functioncallback.h"
-
+#include "pragma/lua/policies/core_policies.hpp"
+#include "pragma/lua/lentity_type.hpp"
 #include "mathutil/uvec.h"
 
 #include "luasystem.h"
@@ -20,6 +28,10 @@ module pragma.shared;
 import :scripting.lua.classes.entity;
 
 import panima;
+
+namespace Lua {
+	DLLNETWORK bool is_entity(const luabind::object &o);
+};
 
 bool Lua::is_entity(const luabind::object &o) { return luabind::object_cast_nothrow<EntityHandle *>(o, static_cast<EntityHandle *>(nullptr)); }
 
@@ -316,13 +328,13 @@ void Lua::Entity::register_class(luabind::class_<BaseEntity> &classDef)
 	// Quick-access methods
 	classDef.def("CreateSound", &BaseEntity::CreateSound);
 	classDef.def("EmitSound", &BaseEntity::EmitSound);
-	classDef.def("EmitSound", static_cast<std::shared_ptr<ALSound> (*)(BaseEntity &, const std::string &, ALSoundType, float)>([](BaseEntity &ent, const std::string &sndname, ALSoundType soundType, float gain) { return ent.EmitSound(sndname, soundType, gain); }));
-	classDef.def("EmitSound", static_cast<std::shared_ptr<ALSound> (*)(BaseEntity &, const std::string &, ALSoundType)>([](BaseEntity &ent, const std::string &sndname, ALSoundType soundType) { return ent.EmitSound(sndname, soundType); }));
+	classDef.def("EmitSound", static_cast<std::shared_ptr<::ALSound> (*)(BaseEntity &, const std::string &, ALSoundType, float)>([](BaseEntity &ent, const std::string &sndname, ALSoundType soundType, float gain) { return ent.EmitSound(sndname, soundType, gain); }));
+	classDef.def("EmitSound", static_cast<std::shared_ptr<::ALSound> (*)(BaseEntity &, const std::string &, ALSoundType)>([](BaseEntity &ent, const std::string &sndname, ALSoundType soundType) { return ent.EmitSound(sndname, soundType); }));
 	classDef.def("GetName", &BaseEntity::GetName);
 	classDef.def("SetName", &BaseEntity::SetName);
 	classDef.def("SetModel", static_cast<void (BaseEntity::*)(const std::string &)>(&BaseEntity::SetModel));
-	classDef.def("SetModel", static_cast<void (BaseEntity::*)(const std::shared_ptr<Model> &)>(&BaseEntity::SetModel));
-	classDef.def("ClearModel", static_cast<void (*)(BaseEntity &)>([](BaseEntity &ent) { ent.SetModel(std::shared_ptr<Model> {nullptr}); }));
+	classDef.def("SetModel", static_cast<void (BaseEntity::*)(const std::shared_ptr<::Model> &)>(&BaseEntity::SetModel));
+	classDef.def("ClearModel", static_cast<void (*)(BaseEntity &)>([](BaseEntity &ent) { ent.SetModel(std::shared_ptr<::Model> {nullptr}); }));
 	classDef.def("GetModel", &BaseEntity::GetModel);
 	classDef.def("GetModelName", &BaseEntity::GetModelName);
 	classDef.def("GetAttachmentPose", &BaseEntity::GetAttachmentPose);
@@ -387,7 +399,7 @@ void Lua::Entity::register_class(luabind::class_<BaseEntity> &classDef)
 	  "GetColor", +[](BaseEntity &ent) {
 		  auto col = ent.GetColor();
 		  if(!col.has_value())
-			  return Color::White;
+			  return ::Color::White;
 		  return *col;
 	  });
 	classDef.def("GetPhysicsObject", &BaseEntity::GetPhysicsObject);
@@ -464,12 +476,12 @@ void Lua::Entity::register_class(luabind::class_<BaseEntity> &classDef)
 				  Con::cout << magic_enum::enum_name(info->type) << "): ";
 				  pragma::ents::visit_member(info->type, [info, &c](auto tag) {
 					  using T = typename decltype(tag)::type;
-					  if constexpr(!udm::is_convertible<T, udm::String>())
+					  if constexpr(!::udm::is_convertible<T, ::udm::String>())
 						  Con::cout << "Unknown value";
 					  else {
 						  T value;
 						  info->getterFunction(*info, *c, &value);
-						  auto str = udm::convert<T, udm::String>(value);
+						  auto str = ::udm::convert<T, ::udm::String>(value);
 						  Con::cout << str;
 					  }
 				  });

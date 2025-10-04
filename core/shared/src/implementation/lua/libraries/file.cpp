@@ -2,6 +2,12 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "string_view"
+
+#include "fsys/filesystem.h"
+
+#include "memory"
+
 #include "sharedutils/util.h"
 
 #include "pragma/networkdefinitions.h"
@@ -283,7 +289,7 @@ void Lua_LFile_GetPath(lua_State *l, LFile &f)
 
 std::string Lua::file::to_relative_path(const std::string &path)
 {
-	auto opath = util::Path::CreateFile(path);
+	auto opath = ::util::Path::CreateFile(path);
 	opath.Canonicalize();
 	if(ustring::compare<std::string_view>(opath.GetFront(), "addons", false)) {
 		opath.PopFront();
@@ -364,7 +370,7 @@ bool Lua::file::validate_write_operation(lua_State *l, std::string &path, std::s
 	std::string ext;
 	if(ufile::get_extension(path, &ext) && is_extension_blacklisted(ext))
 		return false;
-	auto opath = util::Path::CreateFile(path);
+	auto opath = ::util::Path::CreateFile(path);
 	opath.Canonicalize();
 	for(auto &item : pathBlacklist) {
 		if(ustring::find(opath.GetString(), item, false) != std::string::npos)
@@ -384,7 +390,7 @@ bool Lua::file::validate_write_operation(lua_State *l, std::string &path, std::s
 			return true;
 		}
 	}
-	auto fpath = util::FilePath(FileManager::GetCanonicalizedPath(Lua::get_current_file(l)));
+	auto fpath = ::util::FilePath(FileManager::GetCanonicalizedPath(Lua::get_current_file(l)));
 	auto fname = fpath.GetString();
 	if(fname.length() < 8 || ustring::compare(fname.c_str(), "addons/", false, 7) == false) {
 		if(Lua::get_extended_lua_modules_enabled()) {
@@ -398,7 +404,7 @@ bool Lua::file::validate_write_operation(lua_State *l, std::string &path, std::s
 	auto prefix = ustring::substr(fname, 0, br + 1);
 	outRootPath = prefix;
 	path = FileManager::GetCanonicalizedPath(path);
-	if(is_permitted_root_dir(util::Path {path}.GetFront()))
+	if(is_permitted_root_dir(::util::Path {path}.GetFront()))
 		outRootPath = ""; // Special case; We'll allow file writes in the cache directory
 	return true;
 }
@@ -476,7 +482,7 @@ bool Lua::file::DeleteDir(lua_State *l, std::string ppath)
 
 std::shared_ptr<LFile> Lua::file::open_external_asset_file(lua_State *l, const std::string &path, const std::optional<std::string> &game)
 {
-	auto dllHandle = util::initialize_external_archive_manager(Engine::Get()->GetNetworkState(l));
+	auto dllHandle = ::util::initialize_external_archive_manager(Engine::Get()->GetNetworkState(l));
 	if(dllHandle == nullptr)
 		return nullptr;
 	auto *fOpenFile = dllHandle->FindSymbolAddress<void (*)(const std::string &, VFilePtr &, const std::optional<std::string> &)>("open_archive_file");
@@ -495,7 +501,7 @@ void Lua::file::find_external_game_resource_files(lua_State *l, const std::strin
 {
 	outFiles = luabind::newtable(l);
 	outDirs = luabind::newtable(l);
-	auto dllHandle = util::initialize_external_archive_manager(Engine::Get()->GetNetworkState(l));
+	auto dllHandle = ::util::initialize_external_archive_manager(Engine::Get()->GetNetworkState(l));
 	if(dllHandle == nullptr)
 		return;
 	auto *fFindFiles = dllHandle->FindSymbolAddress<void (*)(const std::string &, std::vector<std::string> *, std::vector<std::string> *)>("find_files");
@@ -561,7 +567,7 @@ bool Lua::file::Write(lua_State *l, std::string strPath, const std::string &cont
 	strPath = FileManager::GetCanonicalizedPath(strPath);
 	if(validate_write_operation(l, strPath) == false)
 		return false;
-	auto fullPath = util::Path::CreateFile(strPath);
+	auto fullPath = ::util::Path::CreateFile(strPath);
 
 	auto path = std::string {fullPath.GetPath()};
 	FileManager::CreatePath(path.data());

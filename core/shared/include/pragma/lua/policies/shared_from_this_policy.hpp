@@ -4,6 +4,7 @@
 #ifndef __SHARED_FROM_THIS_POLICY_HPP__
 #define __SHARED_FROM_THIS_POLICY_HPP__
 
+#include "pragma/lua/luaapi.h"
 #include <luabind/detail/policy.hpp>
 #include <memory>
 

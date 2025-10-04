@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "mathutil/umath.h"
+
 #include "mathutil/umath_geometry.hpp"
 
 #include "pragma/lua/luaapi.h"
@@ -112,29 +114,29 @@ void Lua::geometry::calc_center_of_mass(lua_State *l, luabind::table<> tVerts, l
 	  },
 	  &outCom);
 }
-Vector2 Lua::geometry::calc_barycentric_coordinates(const Vector3 &p0, const Vector3 &p1, const Vector3 &p2, const Vector3 &hitPoint)
+::Vector2 Lua::geometry::calc_barycentric_coordinates(const Vector3 &p0, const Vector3 &p1, const Vector3 &p2, const Vector3 &hitPoint)
 {
 	float b1, b2;
 	auto r = ::umath::geometry::calc_barycentric_coordinates(p0, p1, p2, hitPoint, b1, b2);
-	return Vector2 {b1, b2};
+	return ::Vector2 {b1, b2};
 }
-Vector2 Lua::geometry::calc_barycentric_coordinates(const Vector3 &p0, const Vector2 &uv0, const Vector3 &p1, const Vector2 &uv1, const Vector3 &p2, const Vector2 &uv2, const Vector3 &hitPoint)
+::Vector2 Lua::geometry::calc_barycentric_coordinates(const Vector3 &p0, const ::Vector2 &uv0, const Vector3 &p1, const ::Vector2 &uv1, const Vector3 &p2, const ::Vector2 &uv2, const Vector3 &hitPoint)
 {
 	float b1, b2;
 	auto r = ::umath::geometry::calc_barycentric_coordinates(p0, uv0, p1, uv1, p2, uv2, hitPoint, b1, b2);
-	return Vector2 {b1, b2};
+	return ::Vector2 {b1, b2};
 }
 
 int Lua::geometry::get_outline_vertices(lua_State *l)
 {
-	std::vector<Vector2> vertices {};
+	std::vector<::Vector2> vertices {};
 	Lua::CheckTable(l, 1);
 	auto numVerts = Lua::GetObjectLength(l, 1);
 	vertices.reserve(numVerts);
 	for(auto i = decltype(numVerts) {0u}; i < numVerts; ++i) {
 		Lua::PushInt(l, i + 1u);
 		Lua::GetTableValue(l, 1);
-		vertices.push_back(*Lua::CheckVector2(l, -1));
+		vertices.push_back(Lua::Check<::Vector2>(l, -1));
 	}
 	auto indices = ::umath::geometry::get_outline_vertices(vertices);
 	if(indices.has_value() == false)
@@ -171,7 +173,7 @@ int Lua::geometry::triangulate_point_cloud(lua_State *l)
 	for(auto i = decltype(outputTriangles.size()) {0}; i < outputTriangles.size(); ++i) {
 		auto &p = outputTriangles.at(i);
 		Lua::PushInt(l, i + 1);
-		Lua::Push<Vector2>(l, Vector2(p.x, p.y));
+		Lua::Push<::Vector2>(l, ::Vector2(p.x, p.y));
 		Lua::SetTableValue(l, t);
 	}
 	/*
@@ -186,14 +188,14 @@ int Lua::geometry::triangulate_point_cloud(lua_State *l)
 	return 1;
 	/*int32_t tIdx = 1;
 	Lua::CheckTable(l,tIdx);
-	std::vector<Vector2> pointCloud;
+	std::vector<::Vector2> pointCloud;
 	auto numPoints = Lua::GetObjectLength(l,tIdx);
 	pointCloud.reserve(numPoints);
 	for(auto i=decltype(numPoints){0};i<numPoints;++i)
 	{
 		Lua::PushInt(l,i +1);
 		Lua::GetTableValue(l,tIdx);
-		auto &v = *Lua::CheckVector2(l,-1);
+		auto &v = Lua::Check<::Vector2>(l,-1);
 		pointCloud.push_back(v);
 
 		Lua::Pop(l,1);
@@ -277,7 +279,7 @@ class MyListener : public SmartBody::SBSceneListener
 */
 luabind::object Lua::geometry::triangulate(lua_State *l, luabind::table<> tContour)
 {
-	auto contour = Lua::table_to_vector<Vector2>(l, tContour, 1);
+	auto contour = Lua::table_to_vector<::Vector2>(l, tContour, 1);
 	std::vector<uint16_t> result {};
 	auto r = ::Geometry::triangulate(contour, result);
 	if(r == false)

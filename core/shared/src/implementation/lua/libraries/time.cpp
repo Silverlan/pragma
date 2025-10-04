@@ -3,6 +3,7 @@
 
 module;
 #include "sharedutils/util.h"
+#include <chrono>
 
 module pragma.shared;
 
@@ -56,25 +57,25 @@ int64_t convert_duration(TDurationTypeSrc duration, util::DurationType durationT
 	return 0;
 }
 
-int64_t Lua::time::convert_duration(int64_t duration, util::DurationType srcType, util::DurationType dstType)
+int64_t Lua::time::convert_duration(int64_t duration, ::util::DurationType srcType, ::util::DurationType dstType)
 {
 	switch(srcType) {
-	case util::DurationType::NanoSeconds:
+	case ::util::DurationType::NanoSeconds:
 		::convert_duration<std::chrono::nanoseconds>(std::chrono::nanoseconds {duration}, dstType);
 		break;
-	case util::DurationType::MicroSeconds:
+	case ::util::DurationType::MicroSeconds:
 		::convert_duration<std::chrono::microseconds>(std::chrono::microseconds {duration}, dstType);
 		break;
-	case util::DurationType::MilliSeconds:
+	case ::util::DurationType::MilliSeconds:
 		::convert_duration<std::chrono::milliseconds>(std::chrono::milliseconds {duration}, dstType);
 		break;
-	case util::DurationType::Seconds:
+	case ::util::DurationType::Seconds:
 		::convert_duration<std::chrono::seconds>(std::chrono::seconds {duration}, dstType);
 		break;
-	case util::DurationType::Minutes:
+	case ::util::DurationType::Minutes:
 		::convert_duration<std::chrono::minutes>(std::chrono::minutes {duration}, dstType);
 		break;
-	case util::DurationType::Hours:
+	case ::util::DurationType::Hours:
 		::convert_duration<std::chrono::hours>(std::chrono::hours {duration}, dstType);
 		break;
 	default:

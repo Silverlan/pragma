@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "mathutil/umath.h"
+
 #include "pragma/lua/luaapi.h"
 
 #include "mathutil/uvec.h"
@@ -46,7 +48,7 @@ void Lua::nav::register_library(Lua::Interface &lua)
 				for(auto i = decltype(numVerts) {0u}; i < numVerts; ++i) {
 					Lua::PushInt(l, i + 1u);
 					Lua::GetTableValue(l, tVerts);
-					auto &v = *Lua::CheckVector(l, -1);
+					auto &v = Lua::Check<Vector3>(l, -1);
 					verts.push_back(v);
 					Lua::Pop(l, 1);
 				}
@@ -85,7 +87,7 @@ void Lua::nav::register_library(Lua::Interface &lua)
 						for(auto j = decltype(numVerts) {0u}; j < numVerts; ++j) {
 							Lua::PushInt(l, j + 1u);
 							Lua::GetTableValue(l, tVerts);
-							area.verts.push_back(*Lua::CheckVector(l, -1));
+							area.verts.push_back(Lua::Check<Vector3>(l, -1));
 							Lua::Pop(l, 1);
 						}
 						Lua::Pop(l, 1);

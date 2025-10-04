@@ -2,11 +2,17 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "pragma/lua/luaapi.h"
+
+#include "cstring"
+
 #include "algorithm"
 
 module pragma.shared;
 
 import :scripting.lua.class_manager;
+
+#undef RegisterClass
 
 pragma::lua::ClassManager::ClassManager(lua_State &l) : m_luaState {l} {}
 pragma::lua::ClassManager::ClassInfo *pragma::lua::ClassManager::FindClassInfo(const ClassRef &classRef)

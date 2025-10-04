@@ -16,8 +16,8 @@ export import :physics.enums;
 
 export {
 	class PhysObj;
-	class IEnvironment;
 	namespace pragma::physics {
+		class IEnvironment;
 		class DLLNETWORK IBase : public std::enable_shared_from_this<IBase> {
 		  public:
 			IBase(const IBase &) = delete;

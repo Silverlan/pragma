@@ -2,6 +2,14 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "sstream"
+
+#include "pragma/lua/policies/default_parameter_policy.hpp"
+
+#include "mathutil/umath.h"
+
+#include "memory"
+
 #include "pragma/lua/lua_call.hpp"
 
 #include "pragma/lua/luaapi.h"
@@ -19,6 +27,7 @@ module;
 
 module pragma.shared;
 
+import :model.animation.enums;
 import :scripting.lua.classes.model;
 
 import panima;
@@ -63,12 +72,12 @@ void Lua::ModelMeshGroup::GetMeshes(lua_State *l, ::ModelMeshGroup &meshGroup)
 	int32_t i = 1;
 	for(auto &mesh : meshes) {
 		Lua::PushInt(l, i);
-		Lua::Push<std::shared_ptr<ModelMesh>>(l, mesh);
+		Lua::Push<std::shared_ptr<::ModelMesh>>(l, mesh);
 		Lua::SetTableValue(l, t);
 		++i;
 	}
 }
-void Lua::ModelMeshGroup::AddMesh(lua_State *, ::ModelMeshGroup &meshGroup, ModelMesh &mesh) { meshGroup.AddMesh(mesh.shared_from_this()); }
+void Lua::ModelMeshGroup::AddMesh(lua_State *, ::ModelMeshGroup &meshGroup, ::ModelMesh &mesh) { meshGroup.AddMesh(mesh.shared_from_this()); }
 
 //////////////////////////
 
@@ -293,7 +302,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 		auto *mat = mdl.GetMaterial(idx);
 		if(mat == nullptr)
 			return;
-		Lua::Push<Material *>(l, mat);
+		Lua::Push<::Material *>(l, mat);
 	}));
 	classDef.def("GetMaterialIndex", static_cast<void (*)(lua_State *, ::Model &, ::ModelSubMesh &, uint32_t)>([](lua_State *l, ::Model &mdl, ::ModelSubMesh &mesh, uint32_t skinId) {
 		auto idx = mdl.GetMaterialIndex(mesh, skinId);
@@ -302,14 +311,14 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 		Lua::PushInt(l, *idx);
 	}));
 	classDef.def(
-	  "GetSubMesh", +[](lua_State *l, ::Model &mdl, uint32_t mgId, uint32_t mId, uint32_t smId) -> std::shared_ptr<ModelSubMesh> {
+	  "GetSubMesh", +[](lua_State *l, ::Model &mdl, uint32_t mgId, uint32_t mId, uint32_t smId) -> std::shared_ptr<::ModelSubMesh> {
 		  auto *sm = mdl.GetSubMesh(mgId, mId, smId);
 		  if(!sm)
 			  return nullptr;
 		  return sm->shared_from_this();
 	  });
 	classDef.def(
-	  "FindSubMeshId", +[](lua_State *l, ::Model &mdl, ModelSubMesh &smTgt) -> std::optional<std::tuple<uint32_t, uint32_t, uint32_t>> {
+	  "FindSubMeshId", +[](lua_State *l, ::Model &mdl, ::ModelSubMesh &smTgt) -> std::optional<std::tuple<uint32_t, uint32_t, uint32_t>> {
 		  auto &meshGroups = mdl.GetMeshGroups();
 		  for(uint32_t mgId = 0; auto &mg : meshGroups) {
 			  for(uint32_t mId = 0; auto &m : mg->GetMeshes()) {
@@ -363,7 +372,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	classDef.def("GetTextureGroups", &Lua::Model::GetTextureGroups);
 	classDef.def("GetTextureGroup", &Lua::Model::GetTextureGroup);
 	classDef.def("SaveLegacy", &Lua::Model::Save);
-	classDef.def("Save", static_cast<void (*)(lua_State *, ::Model &, udm::AssetData &)>([](lua_State *l, ::Model &mdl, udm::AssetData &assetData) {
+	classDef.def("Save", static_cast<void (*)(lua_State *, ::Model &, ::udm::AssetData &)>([](lua_State *l, ::Model &mdl, ::udm::AssetData &assetData) {
 		auto *nw = Engine::Get()->GetNetworkState(l);
 		auto *game = nw ? nw->GetGameState() : nullptr;
 		if(game == nullptr)
@@ -661,7 +670,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	classDef.add_static_constant("OBJECT_ATTACHMENT_TYPE_PARTICLE_SYSTEM", umath::to_integral(ObjectAttachment::Type::ParticleSystem));
 
 	classDef.scope[luabind::def(
-	  "Load", +[](lua_State *l, ::Game &game, udm::AssetData &assetData) -> Lua::var<::ModelSubMesh, std::pair<bool, std::string>> {
+	  "Load", +[](lua_State *l, ::Game &game, ::udm::AssetData &assetData) -> Lua::var<::ModelSubMesh, std::pair<bool, std::string>> {
 		  auto mdl = game.CreateModel(false);
 		  std::string err;
 		  auto result = ::Model::Load(*mdl, *game.GetNetworkState(), assetData, err);
@@ -922,7 +931,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 				return;
 			Lua::PushInt(l,boneList[idx]);
 		}))*/
-	                           .def("Save", static_cast<void (*)(lua_State *, pragma::animation::Animation &, udm::AssetData &)>([](lua_State *l, pragma::animation::Animation &anim, udm::AssetData &assetData) {
+	                           .def("Save", static_cast<void (*)(lua_State *, pragma::animation::Animation &, ::udm::AssetData &)>([](lua_State *l, pragma::animation::Animation &anim, ::udm::AssetData &assetData) {
 		                           std::string err;
 		                           auto result = anim.Save(assetData, err);
 		                           if(result == false)
@@ -938,7 +947,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	classDefAnimation.scope[luabind::def("Load", &Lua::Animation::Load), luabind::def("RegisterActivity", &Lua::Animation::RegisterActivityEnum), luabind::def("RegisterEvent", &Lua::Animation::RegisterEventEnum), luabind::def("GetActivityEnums", &Lua::Animation::GetActivityEnums),
 	  luabind::def("GetEventEnums", &Lua::Animation::GetEventEnums), luabind::def("GetActivityEnumName", &Lua::Animation::GetActivityEnumName), luabind::def("GetEventEnumName", &Lua::Animation::GetEventEnumName), luabind::def("FindActivityId", &Lua::Animation::FindActivityId),
 	  luabind::def("FindEventId", &Lua::Animation::FindEventId), classDefFrame];
-	classDefAnimation.scope[luabind::def("Load", static_cast<void (*)(lua_State *, udm::AssetData &)>([](lua_State *l, udm::AssetData &assetData) {
+	classDefAnimation.scope[luabind::def("Load", static_cast<void (*)(lua_State *, ::udm::AssetData &)>([](lua_State *l, ::udm::AssetData &assetData) {
 		std::string err;
 		auto anim = pragma::animation::Animation::Load(assetData, err);
 		if(anim == nullptr) {
@@ -979,7 +988,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	auto defRig = luabind::class_<pragma::animation::MetaRig>("MetaRig");
 	defRig.scope[luabind::def(
 	  "load", +[](lua_State *l, const std::string &fileName, const pragma::animation::Skeleton &skeleton) -> Lua::variadic<std::shared_ptr<pragma::animation::MetaRig>, std::pair<bool, std::string>> {
-		  auto udmData = udm::Data::Load(fileName);
+		  auto udmData = ::udm::Data::Load(fileName);
 		  if(!udmData)
 			  return luabind::object {l, std::pair<bool, std::string> {false, "Failed to load file '" + fileName + "'!"}};
 		  auto metaRig = std::make_shared<pragma::animation::MetaRig>();
@@ -1023,7 +1032,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	defRig.def(
 	  "Save", +[](lua_State *l, const pragma::animation::MetaRig &metaRig, const pragma::animation::Skeleton &skeleton, const std::string &fileName) -> std::pair<bool, std::optional<std::string>> {
 		  std::string err;
-		  auto udmData = udm::Data::Create();
+		  auto udmData = ::udm::Data::Create();
 		  auto res = metaRig.Save(skeleton, udmData->GetAssetData(), err);
 		  if(!res)
 			  return {false, err};
@@ -1035,7 +1044,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 			  if(!udmData->SaveAscii(writeFileName))
 				  return {false, "Failed to save as file '" + writeFileName + "'!"};
 		  }
-		  catch(const udm::Exception &err) {
+		  catch(const ::udm::Exception &err) {
 			  return {false, err.what()};
 		  }
 		  return {true, {}};
@@ -1160,9 +1169,9 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	}));
 	classDefFlexAnim.def("GetFrameCount", static_cast<uint32_t (*)(lua_State *, FlexAnimation &)>([](lua_State *l, FlexAnimation &flexAnim) -> uint32_t { return flexAnim.GetFrames().size(); }));
 	classDefFlexAnim.def("GetFlexControllerIds", static_cast<luabind::object (*)(lua_State *, FlexAnimation &)>([](lua_State *l, FlexAnimation &flexAnim) -> luabind::object { return Lua::vector_to_table(l, flexAnim.GetFlexControllerIds()); }));
-	classDefFlexAnim.def("SetFlexControllerIds", static_cast<void (*)(lua_State *, FlexAnimation &, luabind::table<>)>([](lua_State *l, FlexAnimation &flexAnim, luabind::table<> tIds) { flexAnim.SetFlexControllerIds(Lua::table_to_vector<FlexControllerId>(l, tIds, 2)); }));
-	classDefFlexAnim.def("AddFlexControllerId", static_cast<uint32_t (*)(lua_State *, FlexAnimation &, FlexControllerId)>([](lua_State *l, FlexAnimation &flexAnim, FlexControllerId id) -> uint32_t { return flexAnim.AddFlexControllerId(id); }));
-	classDefFlexAnim.def("SetFlexControllerValue", static_cast<void (*)(lua_State *, FlexAnimation &, uint32_t, FlexControllerId, float)>([](lua_State *l, FlexAnimation &flexAnim, uint32_t frameId, FlexControllerId id, float val) {
+	classDefFlexAnim.def("SetFlexControllerIds", static_cast<void (*)(lua_State *, FlexAnimation &, luabind::table<>)>([](lua_State *l, FlexAnimation &flexAnim, luabind::table<> tIds) { flexAnim.SetFlexControllerIds(Lua::table_to_vector<pragma::animation::FlexControllerId>(l, tIds, 2)); }));
+	classDefFlexAnim.def("AddFlexControllerId", static_cast<uint32_t (*)(lua_State *, FlexAnimation &, pragma::animation::FlexControllerId)>([](lua_State *l, FlexAnimation &flexAnim, pragma::animation::FlexControllerId id) -> uint32_t { return flexAnim.AddFlexControllerId(id); }));
+	classDefFlexAnim.def("SetFlexControllerValue", static_cast<void (*)(lua_State *, FlexAnimation &, uint32_t, pragma::animation::FlexControllerId, float)>([](lua_State *l, FlexAnimation &flexAnim, uint32_t frameId, pragma::animation::FlexControllerId id, float val) {
 		auto &frames = flexAnim.GetFrames();
 		frames.reserve(frameId + 1);
 		while(frames.size() <= frameId)
@@ -1176,7 +1185,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 		auto &flexControllerIds = flexAnim.GetFlexControllerIds();
 		return flexControllerIds.size();
 	}));
-	classDefFlexAnim.def("LookupLocalFlexControllerIndex", static_cast<luabind::object (*)(lua_State *, FlexAnimation &, FlexControllerId)>([](lua_State *l, FlexAnimation &flexAnim, FlexControllerId id) -> luabind::object {
+	classDefFlexAnim.def("LookupLocalFlexControllerIndex", static_cast<luabind::object (*)(lua_State *, FlexAnimation &, pragma::animation::FlexControllerId)>([](lua_State *l, FlexAnimation &flexAnim, pragma::animation::FlexControllerId id) -> luabind::object {
 		auto &ids = flexAnim.GetFlexControllerIds();
 		auto it = std::find(ids.begin(), ids.end(), id);
 		if(it == ids.end())
@@ -1191,7 +1200,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 			return;
 		frames.erase(frames.begin() + idx);
 	}));
-	classDefFlexAnim.def("Save", static_cast<void (*)(lua_State *, FlexAnimation &, udm::AssetData &)>([](lua_State *l, FlexAnimation &flexAnim, udm::AssetData &assetData) {
+	classDefFlexAnim.def("Save", static_cast<void (*)(lua_State *, FlexAnimation &, ::udm::AssetData &)>([](lua_State *l, FlexAnimation &flexAnim, ::udm::AssetData &assetData) {
 		std::string err;
 		auto result = flexAnim.Save(assetData, err);
 		if(result == false)
@@ -1205,7 +1214,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 			return {};
 		return luabind::object {l, FlexAnimation::Load(*fptr)};
 	}))];
-	classDefFlexAnim.scope[luabind::def("Load", static_cast<void (*)(lua_State *, udm::AssetData &)>([](lua_State *l, udm::AssetData &assetData) {
+	classDefFlexAnim.scope[luabind::def("Load", static_cast<void (*)(lua_State *, ::udm::AssetData &)>([](lua_State *l, ::udm::AssetData &assetData) {
 		std::string err;
 		auto anim = FlexAnimation::Load(assetData, err);
 		if(anim == nullptr) {
@@ -1592,7 +1601,7 @@ static void get_attachment(lua_State *l, LuaAttachmentData &att, int32_t t)
 	Lua::PushString(l, "angles");
 	Lua::GetTableValue(l, t);
 	if(Lua::IsNil(l, -1) == false)
-		att.angles = Lua::CheckEulerAngles(l, -1);
+		att.angles = &Lua::Check<::EulerAngles>(l, -1);
 	Lua::Pop(l, 1);
 
 	Lua::PushString(l, "bone");
@@ -1610,7 +1619,7 @@ static void get_attachment(lua_State *l, LuaAttachmentData &att, int32_t t)
 	Lua::PushString(l, "offset");
 	Lua::GetTableValue(l, t);
 	if(Lua::IsNil(l, -1) == false)
-		att.offset = Lua::CheckVector(l, -1);
+		att.offset = &Lua::Check<Vector3>(l, -1);
 	Lua::Pop(l, 1);
 }
 void Lua::Model::SetAttachmentData(lua_State *l, ::Model &mdl, const std::string &name, luabind::object data)
@@ -1887,7 +1896,7 @@ void Lua::Model::GetMeshes(lua_State *l, ::Model &mdl, const std::string &meshGr
 		int32_t n = 1;
 		for(auto &mesh : *meshes) {
 			Lua::PushInt(l, n);
-			Lua::Push<std::shared_ptr<ModelMesh>>(l, mesh);
+			Lua::Push<std::shared_ptr<::ModelMesh>>(l, mesh);
 			Lua::SetTableValue(l, t);
 			++n;
 		}
@@ -1913,7 +1922,7 @@ void Lua::Model::GetMeshes(lua_State *l, ::Model &mdl, luabind::object o)
 	int32_t n = 1;
 	for(auto &mesh : meshes) {
 		Lua::PushInt(l, n);
-		Lua::Push<std::shared_ptr<ModelMesh>>(l, mesh);
+		Lua::Push<std::shared_ptr<::ModelMesh>>(l, mesh);
 		Lua::SetTableValue(l, t);
 		++n;
 	}
@@ -2018,7 +2027,7 @@ void Lua::Model::AddCollisionMesh(lua_State *, ::Model &mdl, ::CollisionMesh &co
 	//Lua::CheckModel(l,1);
 	mdl.AddCollisionMesh(colMesh.shared_from_this());
 }
-void Lua::Model::AddMaterial(lua_State *l, ::Model &mdl, uint32_t textureGroup, Material *mat)
+void Lua::Model::AddMaterial(lua_State *l, ::Model &mdl, uint32_t textureGroup, ::Material *mat)
 {
 	if(!mat)
 		return;
@@ -2047,7 +2056,7 @@ void Lua::Model::GetMaterials(lua_State *l, ::Model &mdl)
 		if(pmat == nullptr)
 			pmat = matManager.GetErrorMaterial();
 		Lua::PushInt(l, idx++);
-		Lua::Push<Material *>(l, pmat);
+		Lua::Push<::Material *>(l, pmat);
 		Lua::SetTableValue(l, t);
 	}
 }
@@ -2714,12 +2723,12 @@ void Lua::Model::LookupIKController(lua_State *l, ::Model &mdl, const std::strin
 }
 void Lua::Model::AddIKController(lua_State *l, ::Model &mdl, const std::string &name, uint32_t chainLength, const std::string &type, uint32_t method)
 {
-	auto *ikController = mdl.AddIKController(name, chainLength, type, static_cast<util::ik::Method>(method));
+	auto *ikController = mdl.AddIKController(name, chainLength, type, static_cast<::util::ik::Method>(method));
 	if(ikController == nullptr)
 		return;
 	Lua::Push<std::shared_ptr<IKController>>(l, ikController->shared_from_this());
 }
-void Lua::Model::AddIKController(lua_State *l, ::Model &mdl, const std::string &name, uint32_t chainLength, const std::string &type) { AddIKController(l, mdl, name, chainLength, type, umath::to_integral(util::ik::Method::Default)); }
+void Lua::Model::AddIKController(lua_State *l, ::Model &mdl, const std::string &name, uint32_t chainLength, const std::string &type) { AddIKController(l, mdl, name, chainLength, type, umath::to_integral(::util::ik::Method::Default)); }
 void Lua::Model::RemoveIKController(lua_State *l, ::Model &mdl, uint32_t id) { mdl.RemoveIKController(id); }
 void Lua::Model::RemoveIKController(lua_State *l, ::Model &mdl, const std::string &name) { mdl.RemoveIKController(name); }
 void Lua::Model::AddIncludeModel(lua_State *l, ::Model &mdl, const std::string &modelName) { mdl.GetMetaInfo().includes.push_back(modelName); }

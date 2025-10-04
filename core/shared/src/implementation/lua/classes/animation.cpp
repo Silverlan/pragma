@@ -2,6 +2,12 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "sharedutils/util_file.h"
+
+#include "mathutil/umath.h"
+
+#include "memory"
+
 #include "cassert"
 
 #include "sharedutils/util.h"
@@ -22,17 +28,17 @@ void Lua::Animation::Load(lua_State *l, LFile &f)
 {
 	auto fptr = f.GetHandle();
 	auto offset = fptr->Tell();
-	auto len = strlen(udm::HEADER_IDENTIFIER);
+	auto len = strlen(::udm::HEADER_IDENTIFIER);
 	auto isUdmFormat = true;
 	for(auto i = decltype(len) {0u}; i < len; ++i) {
-		if(fptr->ReadChar() != udm::HEADER_IDENTIFIER[i]) {
+		if(fptr->ReadChar() != ::udm::HEADER_IDENTIFIER[i]) {
 			isUdmFormat = false;
 			break;
 		}
 	}
 	fptr->Seek(offset);
 	if(isUdmFormat) {
-		auto udmData = util::load_udm_asset(std::make_unique<ufile::FileWrapper>(fptr));
+		auto udmData = ::util::load_udm_asset(std::make_unique<ufile::FileWrapper>(fptr));
 		if(udmData == nullptr)
 			return;
 		std::string err;
@@ -417,33 +423,33 @@ void Lua::Frame::Translate(lua_State *, ::Frame &frame, pragma::animation::Anima
 void Lua::Frame::Scale(lua_State *l, ::Frame &frame, const Vector3 &scale) { frame.Scale(scale); }
 void Lua::Frame::GetMoveTranslation(lua_State *l, ::Frame &frame)
 {
-	Vector2 translation;
+	::Vector2 translation;
 	frame.GetMoveOffset(&translation.x, &translation.y);
 	Lua::PushNumber(l, translation.x);
 	Lua::PushNumber(l, translation.y);
 }
 void Lua::Frame::GetMoveTranslationX(lua_State *l, ::Frame &frame)
 {
-	Vector2 translation;
+	::Vector2 translation;
 	frame.GetMoveOffset(&translation.x, &translation.y);
 	Lua::PushNumber(l, translation.x);
 }
 void Lua::Frame::GetMoveTranslationZ(lua_State *l, ::Frame &frame)
 {
-	Vector2 translation;
+	::Vector2 translation;
 	frame.GetMoveOffset(&translation.x, &translation.y);
 	Lua::PushNumber(l, translation.y);
 }
 void Lua::Frame::SetMoveTranslation(lua_State *l, ::Frame &frame, float x, float z) { frame.SetMoveOffset(x, z); }
 void Lua::Frame::SetMoveTranslationX(lua_State *l, ::Frame &frame, float x)
 {
-	Vector2 translation;
+	::Vector2 translation;
 	frame.GetMoveOffset(&translation.x, &translation.y);
 	frame.SetMoveOffset(x, translation.y);
 }
 void Lua::Frame::SetMoveTranslationZ(lua_State *l, ::Frame &frame, float z)
 {
-	Vector2 translation;
+	::Vector2 translation;
 	frame.GetMoveOffset(&translation.x, &translation.y);
 	frame.SetMoveOffset(translation.x, z);
 }
@@ -554,8 +560,8 @@ void Lua::MeshVertexAnimation::GetMesh(lua_State *l, ::MeshVertexAnimation &anim
 	auto *subMesh = anim.GetSubMesh();
 	if(mesh == nullptr || subMesh == nullptr)
 		return;
-	Lua::Push<std::shared_ptr<ModelMesh>>(l, mesh->shared_from_this());
-	Lua::Push<std::shared_ptr<ModelSubMesh>>(l, subMesh->shared_from_this());
+	Lua::Push<std::shared_ptr<::ModelMesh>>(l, mesh->shared_from_this());
+	Lua::Push<std::shared_ptr<::ModelSubMesh>>(l, subMesh->shared_from_this());
 }
 ///////////////////////////////////////
 void Lua::MeshVertexFrame::GetVertices(lua_State *l, ::MeshVertexFrame &frame)

@@ -33,8 +33,6 @@ export {
         DLLNETWORK EntityHandle read_udm_entity(Game &game, udm::LinkedPropertyWrapperArg udm);
         DLLNETWORK EntityHandle read_udm_entity(::pragma::BaseEntityComponent &c, udm::LinkedPropertyWrapperArg udm);
 
-        struct HairConfig;
-        struct HairData;
         class HairFile {
           public:
             static constexpr uint32_t PHAIR_VERSION = 1;

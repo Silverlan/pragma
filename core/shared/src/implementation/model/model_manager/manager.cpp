@@ -2,6 +2,12 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "sharedutils/util_file.h"
+
+#include "fsys/filesystem.h"
+
+#include "memory"
+
 #include "algorithm"
 
 #include "cassert"
@@ -9,7 +15,7 @@ module;
 #include "sharedutils/util.h"
 
 #include "sharedutils/util_string.h"
-
+#include "sharedutils/asset_loader/asset_manager.hpp"
 #include "mathutil/uvec.h"
 
 #include <sharedutils/util_path.hpp>

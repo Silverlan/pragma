@@ -2,6 +2,12 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "pragma/lua/policies/core_policies.hpp"
+
+#include "pragma/lua/policies/default_parameter_policy.hpp"
+
+#include "mathutil/umath.h"
+#include "mathutil/vertex.hpp"
 #include "algorithm"
 
 #include "udm.hpp"
@@ -212,7 +218,7 @@ void Lua::ModelSubMesh::register_class(luabind::class_<::ModelSubMesh> &classDef
 	  });
 	classDef.def("Copy", static_cast<std::shared_ptr<::ModelSubMesh> (*)(lua_State *, ::ModelSubMesh &, bool)>([](lua_State *l, ::ModelSubMesh &mesh, bool fullCopy) -> std::shared_ptr<::ModelSubMesh> { return mesh.Copy(fullCopy); }));
 	classDef.def("Copy", static_cast<std::shared_ptr<::ModelSubMesh> (*)(lua_State *, ::ModelSubMesh &)>([](lua_State *l, ::ModelSubMesh &mesh) -> std::shared_ptr<::ModelSubMesh> { return mesh.Copy(); }));
-	classDef.def("SetVertexTangent", static_cast<void (*)(lua_State *, ::ModelSubMesh &, uint32_t, const Vector4 &)>([](lua_State *l, ::ModelSubMesh &mesh, uint32_t idx, const Vector4 &t) {
+	classDef.def("SetVertexTangent", static_cast<void (*)(lua_State *, ::ModelSubMesh &, uint32_t, const ::Vector4 &)>([](lua_State *l, ::ModelSubMesh &mesh, uint32_t idx, const ::Vector4 &t) {
 		if(idx >= mesh.GetVertexCount())
 			return;
 		auto &verts = mesh.GetVertices();
@@ -293,7 +299,7 @@ void Lua::ModelSubMesh::register_class(luabind::class_<::ModelSubMesh> &classDef
 		  return std::tuple<std::shared_ptr<::ModelSubMesh>, std::vector<uint64_t>> {simplifiedMesh, std::move(vertexMapping)};
 	  });
 	classDef.def(
-	  "Save", +[](lua_State *l, ::ModelSubMesh &mesh, udm::AssetData &assetData) {
+	  "Save", +[](lua_State *l, ::ModelSubMesh &mesh, ::udm::AssetData &assetData) {
 		  auto *nw = Engine::Get()->GetNetworkState(l);
 		  auto *game = nw ? nw->GetGameState() : nullptr;
 		  if(game == nullptr)
@@ -306,7 +312,7 @@ void Lua::ModelSubMesh::register_class(luabind::class_<::ModelSubMesh> &classDef
 			  Lua::PushBool(l, result);
 	  });
 	classDef.scope[luabind::def(
-	  "Load", +[](lua_State *l, ::Game &game, udm::AssetData &assetData) -> Lua::var<::ModelSubMesh, std::pair<bool, std::string>> {
+	  "Load", +[](lua_State *l, ::Game &game, ::udm::AssetData &assetData) -> Lua::var<::ModelSubMesh, std::pair<bool, std::string>> {
 		  std::string err;
 		  auto mesh = ::ModelSubMesh::Load(game, assetData, err);
 		  if(mesh)
@@ -366,7 +372,7 @@ void Lua::ModelSubMesh::GetUVMapping(lua_State *l, ::ModelSubMesh &mesh)
 	lua_newtable(l);
 	int top = lua_gettop(l);
 	for(int i = 0; i < verts.size(); i++) {
-		Lua::Push<Vector2>(l, verts[i].uv);
+		Lua::Push<::Vector2>(l, verts[i].uv);
 		lua_rawseti(l, top, i + 1);
 	}
 }
@@ -432,8 +438,8 @@ void Lua::ModelSubMesh::SetVertexUV(lua_State *l, ::ModelSubMesh &mdl, const std
 		return;
 	uvSet->at(idx) = uv;
 }
-void Lua::ModelSubMesh::SetVertexUV(lua_State *, ::ModelSubMesh &mdl, uint32_t idx, const Vector2 &uv) { mdl.SetVertexUV(idx, uv); }
-void Lua::ModelSubMesh::SetVertexAlpha(lua_State *, ::ModelSubMesh &mdl, uint32_t idx, const Vector2 &alpha) { mdl.SetVertexAlpha(idx, alpha); }
+void Lua::ModelSubMesh::SetVertexUV(lua_State *, ::ModelSubMesh &mdl, uint32_t idx, const ::Vector2 &uv) { mdl.SetVertexUV(idx, uv); }
+void Lua::ModelSubMesh::SetVertexAlpha(lua_State *, ::ModelSubMesh &mdl, uint32_t idx, const ::Vector2 &alpha) { mdl.SetVertexAlpha(idx, alpha); }
 void Lua::ModelSubMesh::SetVertexWeight(lua_State *, ::ModelSubMesh &mdl, uint32_t idx, const umath::VertexWeight &weight) { mdl.SetVertexWeight(idx, weight); }
 void Lua::ModelSubMesh::GetVertex(lua_State *l, ::ModelSubMesh &mdl, uint32_t idx)
 {
@@ -458,20 +464,20 @@ void Lua::ModelSubMesh::GetVertexUV(lua_State *l, ::ModelSubMesh &mdl, const std
 	auto *uvSet = mdl.GetUVSet(uvSetName);
 	if(uvSet == nullptr || idx >= uvSet->size())
 		return;
-	Lua::Push<Vector2>(l, uvSet->at(idx));
+	Lua::Push<::Vector2>(l, uvSet->at(idx));
 }
 void Lua::ModelSubMesh::GetVertexUV(lua_State *l, ::ModelSubMesh &mdl, uint32_t idx)
 {
 	if(idx >= mdl.GetVertexCount())
 		return;
-	Lua::Push<Vector2>(l, mdl.GetVertexUV(idx));
+	Lua::Push<::Vector2>(l, mdl.GetVertexUV(idx));
 }
 void Lua::ModelSubMesh::GetVertexAlpha(lua_State *l, ::ModelSubMesh &mdl, uint32_t idx)
 {
 	auto &alphas = mdl.GetAlphas();
 	if(idx >= alphas.size())
 		return;
-	Lua::Push<Vector2>(l, alphas[idx]);
+	Lua::Push<::Vector2>(l, alphas[idx]);
 }
 void Lua::ModelSubMesh::GetVertexWeight(lua_State *l, ::ModelSubMesh &mdl, uint32_t idx)
 {
@@ -504,12 +510,12 @@ void Lua::ModelSubMesh::ClipAgainstPlane(lua_State *l, ::ModelSubMesh &mdl, cons
 {
 	const auto tMatrices = 5;
 	Lua::CheckTable(l, tMatrices);
-	std::vector<Mat4> boneMatrices {};
+	std::vector<::Mat4> boneMatrices {};
 	auto numMatrices = Lua::GetObjectLength(l, tMatrices);
 	for(auto i = decltype(numMatrices) {0u}; i < numMatrices; ++i) {
 		Lua::PushInt(l, i + 1);
 		Lua::GetTableValue(l, tMatrices);
-		auto &m = Lua::Check<Mat4>(l, -1);
+		auto &m = Lua::Check<::Mat4>(l, -1);
 		boneMatrices.push_back(m);
 		Lua::Pop(l, 1);
 	}

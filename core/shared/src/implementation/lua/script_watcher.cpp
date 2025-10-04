@@ -2,10 +2,13 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "fsys/filesystem.h"
+
+#include "pragma/lua/luaapi.h"
 #include "sharedutils/util.h"
-
 #include "sharedutils/util_string.h"
-
+#include "luasystem.h"
+#include "pragma/lua/util.hpp"
 #include "fsys/directory_watcher.h"
 #include <sharedutils/scope_guard.h>
 #include <sharedutils/util_file.h>

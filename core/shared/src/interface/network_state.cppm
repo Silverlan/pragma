@@ -28,14 +28,6 @@ export import :util.resource_watcher;
 #define GLFW_RELEASE 0
 #define GLFW_PRESS 1
 
-#define CHECK_CHEATS(scmd, state, ret)                                                                                                                                                                                                                                                           \
-	{                                                                                                                                                                                                                                                                                            \
-		if(state->CheatsEnabled() == false) {                                                                                                                                                                                                                                                    \
-			Con::cout << "Can't use cheat cvar " << scmd << " in multiplayer, unless the server has sv_cheats set to 1." << Con::endl;                                                                                                                                                           \
-			return ret;                                                                                                                                                                                                                                                                          \
-		}                                                                                                                                                                                                                                                                                        \
-	}
-
 export {
 	class Game;
 	class ALSound;
@@ -44,6 +36,7 @@ export {
 	namespace pragma::asset {
 		class ModelManager;
 	}
+
 	class DLLNETWORK NetworkState : public CallbackHandler, public CVarHandler {
 		// For internal use only! Not to be used directly!
 	protected:
@@ -208,4 +201,6 @@ export {
 		void ClearGameConVars();
 		virtual void implFindSimilarConVars(const std::string &input, std::vector<SimilarCmdInfo> &similarCmds) const override;
 	};
+
+	DLLNETWORK bool check_cheats(const std::string &scmd, NetworkState *state);
 };

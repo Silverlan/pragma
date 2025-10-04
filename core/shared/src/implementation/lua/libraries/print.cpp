@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "sstream"
+
 #include "pragma/logging.hpp"
 
 #include "pragma/lua/luaapi.h"
@@ -159,8 +161,8 @@ int Lua::console::msgn(lua_State *l)
 
 int Lua::console::msgc(lua_State *l)
 {
-	if(Lua::IsType<Color>(l, 1)) {
-		auto &col = Lua::Check<Color>(l, 1);
+	if(Lua::IsType<::Color>(l, 1)) {
+		auto &col = Lua::Check<::Color>(l, 1);
 
 		auto argc = lua_gettop(l);
 		std::stringstream ss {};

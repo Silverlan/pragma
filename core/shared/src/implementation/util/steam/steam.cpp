@@ -2,6 +2,10 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "fsys/filesystem.h"
+
+#include "memory"
+
 #include "pragma/logging.hpp"
 
 #include <sharedutils/util.h>
@@ -10,7 +14,7 @@ module;
 
 module pragma.shared;
 
-import :util.steam.steam;
+import :util.steam;
 
 std::vector<util::Path> util::steam::find_steam_root_paths()
 {

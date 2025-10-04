@@ -8,13 +8,13 @@ module pragma.shared;
 
 import :physics.controller_hit_data;
 
-ControllerHitData::ControllerHitData() : physObj(NULL) { Clear(); }
+ControllerHitData::ControllerHitData() : physObj(nullptr) { Clear(); }
 
 void ControllerHitData::Clear()
 {
-	if(physObj != NULL) {
+	if(physObj != nullptr) {
 		delete physObj;
-		physObj = NULL;
+		physObj = nullptr;
 	}
 }
 

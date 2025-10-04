@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "mathutil/umath.h"
+
 #include "pragma/lua/luaapi.h"
 
 #include "mathutil/uvec.h"
@@ -113,11 +115,11 @@ uint32_t events::CEOnFireBullets::GetReturnCount() { return 3; }
 void events::CEOnFireBullets::HandleReturnValues(lua_State *l)
 {
 	if(Lua::IsSet(l, -3))
-		bulletOrigin = *Lua::CheckVector(l, -3);
+		bulletOrigin = Lua::Check<Vector3>(l, -3);
 	if(Lua::IsSet(l, -2))
-		bulletDir = *Lua::CheckVector(l, -2);
+		bulletDir = Lua::Check<Vector3>(l, -2);
 	if(Lua::IsSet(l, -1) && effectsOrigin != nullptr)
-		*effectsOrigin = *Lua::CheckVector(l, -1);
+		*effectsOrigin = Lua::Check<Vector3>(l, -1);
 }
 
 //////////////

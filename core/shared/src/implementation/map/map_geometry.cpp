@@ -30,7 +30,6 @@ static void get_vertex_quad(uint32_t vertId, uint32_t power, uint8_t decimateAmo
 
 bool decimate_displacement_geometry(const std::vector<uint16_t> &indices, uint32_t power, std::vector<uint16_t> &outIndices, uint8_t decimateAmount)
 {
-	UNUSED(indices);
 	assert(decimateAmount > 1 && (indices.size() % decimateAmount) == 0);
 	if(decimateAmount <= 1)
 		return false;

@@ -2,6 +2,10 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "string_view"
+
+#include "memory"
+
 #include "sharedutils/util.h"
 
 #include <spdlog/sinks/stdout_color_sinks.h>

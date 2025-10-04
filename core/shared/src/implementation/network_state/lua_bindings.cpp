@@ -2,16 +2,25 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "string_view"
+
+#include "sstream"
+
+#include "sharedutils/util_version.h"
+
+#include "memory"
+
+#include "cstring"
+
 #include "cassert"
 
 #include "pragma/lua/lua_call.hpp"
-
+#include "pragma/lua/lua_util_class.hpp"
 #include "mathutil/uquat.h"
-
+#include "sharedutils/util_parallel_job.hpp"
 #include "sharedutils/util.h"
-
 #include "pragma/lua/luaapi.h"
-
+#include "pragma/lua/types/nil_type.hpp"
 #include "sharedutils/util_string.h"
 
 #include "mathutil/uvec.h"
@@ -35,6 +44,7 @@ module;
 module pragma.shared;
 
 import :network_state;
+import pragma.string.unicode;
 
 std::ostream &operator<<(std::ostream &out, const ALSound &snd)
 {
@@ -761,7 +771,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	modUtil[defDataBlock];
 
 	// Version
-	auto defVersion = pragma::lua::register_class<util::Version>(lua.GetState(), "Version");
+	auto defVersion = pragma::lua::register_class<::util::Version>(lua.GetState(), "Version");
 	defVersion->def(luabind::constructor<>());
 	defVersion->def(luabind::constructor<uint32_t, uint32_t>());
 	defVersion->def(luabind::constructor<uint32_t, uint32_t, uint32_t>());
@@ -769,11 +779,11 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defVersion->def(luabind::const_self == luabind::const_self);
 	defVersion->def(luabind::const_self < luabind::const_self);
 	defVersion->def(luabind::const_self <= luabind::const_self);
-	defVersion->def_readwrite("major", &util::Version::major);
-	defVersion->def_readwrite("minor", &util::Version::minor);
-	defVersion->def_readwrite("revision", &util::Version::revision);
-	defVersion->def("Reset", &util::Version::Reset);
-	defVersion->def("ToString", &util::Version::ToString);
+	defVersion->def_readwrite("major", &::util::Version::major);
+	defVersion->def_readwrite("minor", &::util::Version::minor);
+	defVersion->def_readwrite("revision", &::util::Version::revision);
+	defVersion->def("Reset", &::util::Version::Reset);
+	defVersion->def("ToString", &::util::Version::ToString);
 	modUtil[*defVersion];
 	//
 
@@ -1587,8 +1597,8 @@ LuaEntityIterator Lua::ents::create_lua_entity_iterator(lua_State *l, const tb<L
 			Lua::PushInt(l, i + 1u);
 			Lua::GetTableValue(l, t);
 
-			auto *filter = Lua::CheckEntityIteratorFilter(l, -1);
-			r.AttachFilter(*filter);
+			auto &filter = Lua::Check<LuaEntityIteratorFilterBase>(l, -1);
+			r.AttachFilter(filter);
 
 			Lua::Pop(l, 1);
 		}
@@ -1610,8 +1620,8 @@ LuaEntityComponentIterator Lua::ents::create_lua_entity_component_iterator(lua_S
 			Lua::PushInt(l, i + 1u);
 			Lua::GetTableValue(l, t);
 
-			auto *filter = Lua::CheckEntityIteratorFilter(l, -1);
-			r.AttachFilter(*filter);
+			auto &filter = Lua::Check<LuaEntityIteratorFilterBase>(l, -1);
+			r.AttachFilter(filter);
 
 			Lua::Pop(l, 1);
 		}

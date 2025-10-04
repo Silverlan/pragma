@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "string_view"
+
+#include "memory"
 
 #include <sharedutils/util_string.h>
 #include "sharedutils/util.h"

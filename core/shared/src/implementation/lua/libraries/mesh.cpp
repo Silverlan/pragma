@@ -21,8 +21,8 @@ int Lua::mesh::generate_convex_hull(lua_State *l)
 	auto numVerts = Lua::GetObjectLength(l, t);
 	verts.reserve(numVerts);
 	while(Lua::GetNextPair(l, t) != 0) {
-		auto *v = Lua::CheckVector(l, -1);
-		verts.push_back(*v);
+		auto &v = Lua::Check<Vector3>(l, -1);
+		verts.push_back(v);
 		Lua::Pop(l, 1);
 	}
 
@@ -46,8 +46,8 @@ int Lua::mesh::calc_smallest_enclosing_bbox(lua_State *l)
 	auto numVerts = Lua::GetObjectLength(l, t);
 	verts.reserve(numVerts);
 	while(Lua::GetNextPair(l, t) != 0) {
-		auto *v = Lua::CheckVector(l, -1);
-		verts.push_back(*v);
+		auto &v = Lua::Check<Vector3>(l, -1);
+		verts.push_back(v);
 		Lua::Pop(l, 1);
 	}
 

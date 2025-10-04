@@ -9,15 +9,15 @@ module pragma.shared;
 import :networking.net_message_map;
 
 #define net_createmap(suffix, glname)                                                                                                                                                                                                                                                            \
-	if(g_NetMessages##suffix == NULL)                                                                                                                                                                                                                                                            \
+	if(g_NetMessages##suffix == nullptr)                                                                                                                                                                                                                                                            \
 		g_NetMessages##suffix = new glname##MessageMap;
 
 #define net_newglobal(suffix, glname, args)                                                                                                                                                                                                                                                      \
-	DLLNETWORK glname##MessageMap *g_NetMessages##suffix = NULL;                                                                                                                                                                                                                                 \
+	DLLNETWORK glname##MessageMap *g_NetMessages##suffix = nullptr;                                                                                                                                                                                                                                 \
 	DLLNETWORK void Register##glname##NetMessage(std::string name, void (*handler)(args))                                                                                                                                                                                                        \
 	{                                                                                                                                                                                                                                                                                            \
 		net_createmap(suffix, glname);                                                                                                                                                                                                                                                           \
-		if(handler == NULL)                                                                                                                                                                                                                                                                      \
+		if(handler == nullptr)                                                                                                                                                                                                                                                                      \
 			g_NetMessages##suffix->PreRegisterNetMessage(name, handler);                                                                                                                                                                                                                         \
 		else                                                                                                                                                                                                                                                                                     \
 			g_NetMessages##suffix->RegisterNetMessage(name, handler);                                                                                                                                                                                                                            \
@@ -33,7 +33,7 @@ void ClientMessageMap::PreRegisterNetMessage(std::string name, void (*)(NetPacke
 		return;
 	CLNetMessage msg;
 	msg.ID = m_messageID;
-	msg.handler = NULL;
+	msg.handler = nullptr;
 	m_netMessageIDs.insert(std::unordered_map<std::string, unsigned int>::value_type(name, msg.ID));
 	m_netMessages.insert(std::unordered_map<unsigned int, CLNetMessage>::value_type(msg.ID, msg));
 	m_messageID++;
@@ -63,7 +63,7 @@ void ServerMessageMap::PreRegisterNetMessage(std::string name, void (*)(pragma::
 		return;
 	SVNetMessage msg;
 	msg.ID = m_messageID;
-	msg.handler = NULL;
+	msg.handler = nullptr;
 	m_netMessageIDs.insert(std::unordered_map<std::string, unsigned int>::value_type(name, msg.ID));
 	m_netMessages.insert(std::unordered_map<unsigned int, SVNetMessage>::value_type(msg.ID, msg));
 	m_messageID++;

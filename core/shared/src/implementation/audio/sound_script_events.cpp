@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "mathutil/umath.h"
 
 #include <sharedutils/util_string.h>
 #include <udm.hpp>

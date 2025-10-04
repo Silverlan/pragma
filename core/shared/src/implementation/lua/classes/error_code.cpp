@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "memory"
 
 #include "luasystem.h"
 

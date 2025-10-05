@@ -204,11 +204,6 @@ static luabind::object copy_table(lua_State *l, const luabind::object &t, bool d
 	return tCpy;
 }
 
-namespace umath {
-	uint32_t find_bezier_roots(float x, float v0, float v1, float v2, float v3, std::array<float, 3> &roots);
-	float calc_bezier_point(float f1, float f2, float f3, float f4, float t);
-};
-
 bool Lua::util::start_debugger_server(lua_State *l)
 {
 	std::string fileName = "start_debugger_server.lua";

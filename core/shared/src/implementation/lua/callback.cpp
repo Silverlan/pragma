@@ -1,9 +1,13 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "pragma/lua/luacallback.h"
-#include "pragma/lua/luafunction.h"
+module;
+
 #include "pragma/lua/luaapi.h"
+
+module pragma.shared;
+
+import :scripting.lua.callback;
 
 LuaCallback::LuaCallback(const luabind::object &o)
     :

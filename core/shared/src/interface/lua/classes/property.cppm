@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/lua/luaapi.h"
-#include "pragma/lua/luafunction.h"
 #include "pragma/lua/lua_call.hpp"
 #include "mathutil/uvec.h"
 #include "mathutil/uquat.h"
@@ -96,6 +95,7 @@ export {
 		virtual util::ColorProperty &GetProperty() const override { return *static_cast<util::ColorProperty *>(prop.get()); }
 
 		LColorPropertyWrapper() : LSimplePropertyWrapper() {}
+		LColorPropertyWrapper(const std::shared_ptr<util::ColorProperty> &v) : LSimplePropertyWrapper(v) {}
 		LColorPropertyWrapper(const Color &col) : LSimplePropertyWrapper(col) {}
 		LColorPropertyWrapper(Int16 r, Int16 g, Int16 b, Int16 a) : LSimplePropertyWrapper(Color {r, g, b, a}) {}
 		LColorPropertyWrapper(const std::string &str) : LSimplePropertyWrapper(Color {str}) {}
@@ -145,6 +145,7 @@ export {
 		virtual util::EulerAnglesProperty &GetProperty() const override { return *static_cast<util::EulerAnglesProperty *>(prop.get()); }
 
 		LEulerAnglesPropertyWrapper() : LSimplePropertyWrapper() {}
+		LEulerAnglesPropertyWrapper(const std::shared_ptr<util::EulerAnglesProperty> &v) : LSimplePropertyWrapper(v) {}
 		LEulerAnglesPropertyWrapper(const EulerAngles &col) : LSimplePropertyWrapper(col) {}
 		LEulerAnglesPropertyWrapper(float p, float y, float r) : LSimplePropertyWrapper(EulerAngles {p, y, r}) {}
 		LEulerAnglesPropertyWrapper(const std::string &str) : LSimplePropertyWrapper(EulerAngles {str}) {}
@@ -192,6 +193,7 @@ export {
 		virtual util::TransformProperty &GetProperty() const override { return *static_cast<util::TransformProperty *>(prop.get()); }
 
 		LTransformPropertyWrapper() : LSimplePropertyWrapper() {}
+		LTransformPropertyWrapper(const std::shared_ptr<util::TransformProperty> &v) : LSimplePropertyWrapper(v) {}
 		LTransformPropertyWrapper(const umath::Transform &col) : LSimplePropertyWrapper(col) {}
 		LTransformPropertyWrapper(const Vector3 &pos, const Quat &rot) : LSimplePropertyWrapper(umath::Transform {pos, rot}) {}
 		LTransformPropertyWrapper operator*(const umath::Transform &other)
@@ -217,6 +219,7 @@ export {
 		virtual util::ScaledTransformProperty &GetProperty() const override { return *static_cast<util::ScaledTransformProperty *>(prop.get()); }
 
 		LScaledTransformPropertyWrapper() : LSimplePropertyWrapper() {}
+		LScaledTransformPropertyWrapper(const std::shared_ptr<util::ScaledTransformProperty> &v) : LSimplePropertyWrapper(v) {}
 		LScaledTransformPropertyWrapper(const umath::ScaledTransform &col) : LSimplePropertyWrapper(col) {}
 		LScaledTransformPropertyWrapper(const Vector3 &pos, const Quat &rot, const Vector3 &scale) : LSimplePropertyWrapper(umath::ScaledTransform {pos, rot, scale}) {}
 		LScaledTransformPropertyWrapper operator*(const umath::ScaledTransform &other)
@@ -237,6 +240,7 @@ export {
 	public:
 		TLVectorPropertyWrapper() : LSimplePropertyWrapper<TProperty, T>() {}
 		TLVectorPropertyWrapper(const T &v) : LSimplePropertyWrapper<TProperty, T>(v) {}
+		TLVectorPropertyWrapper(const std::shared_ptr<TProperty> &v) : LSimplePropertyWrapper<TProperty, T>(v) {}
 
 		TProperty &operator*() { return GetProperty(); }
 		const TProperty &operator*() const { return const_cast<TLVectorPropertyWrapper *>(this)->operator*(); }
@@ -281,6 +285,7 @@ export {
 		LVector2PropertyWrapper() : TLVectorPropertyWrapper<util::Vector2Property, Vector2>() {}
 		LVector2PropertyWrapper(const Vector2 &v) : TLVectorPropertyWrapper<util::Vector2Property, Vector2>(v) {}
 		LVector2PropertyWrapper(float x, float y) : TLVectorPropertyWrapper<util::Vector2Property, Vector2>(Vector2 {x, y}) {}
+		LVector2PropertyWrapper(const std::shared_ptr<util::Vector2Property> &v) : TLVectorPropertyWrapper(v) {}
 	};
 
 	class LVector2iPropertyWrapper : public TLVectorPropertyWrapper<util::Vector2iProperty, Vector2i> {
@@ -288,6 +293,7 @@ export {
 		LVector2iPropertyWrapper() : TLVectorPropertyWrapper<util::Vector2iProperty, Vector2i>() {}
 		LVector2iPropertyWrapper(const Vector2i &v) : TLVectorPropertyWrapper<util::Vector2iProperty, Vector2i>(v) {}
 		LVector2iPropertyWrapper(int32_t x, int32_t y) : TLVectorPropertyWrapper<util::Vector2iProperty, Vector2i>(Vector2i {x, y}) {}
+		LVector2iPropertyWrapper(const std::shared_ptr<util::Vector2iProperty> &v) : TLVectorPropertyWrapper(v) {}
 	};
 
 	class LVector3PropertyWrapper : public TLVectorPropertyWrapper<util::Vector3Property, Vector3> {
@@ -295,6 +301,7 @@ export {
 		LVector3PropertyWrapper() : TLVectorPropertyWrapper<util::Vector3Property, Vector3>() {}
 		LVector3PropertyWrapper(const Vector3 &v) : TLVectorPropertyWrapper<util::Vector3Property, Vector3>(v) {}
 		LVector3PropertyWrapper(float x, float y, float z) : TLVectorPropertyWrapper<util::Vector3Property, Vector3>(Vector3 {x, y, z}) {}
+		LVector3PropertyWrapper(const std::shared_ptr<util::Vector3Property> &v) : TLVectorPropertyWrapper(v) {}
 	};
 
 	class LVector3iPropertyWrapper : public TLVectorPropertyWrapper<util::Vector3iProperty, Vector3i> {
@@ -302,6 +309,7 @@ export {
 		LVector3iPropertyWrapper() : TLVectorPropertyWrapper<util::Vector3iProperty, Vector3i>() {}
 		LVector3iPropertyWrapper(const Vector3i &v) : TLVectorPropertyWrapper<util::Vector3iProperty, Vector3i>(v) {}
 		LVector3iPropertyWrapper(int32_t x, int32_t y, int32_t z) : TLVectorPropertyWrapper<util::Vector3iProperty, Vector3i>(Vector3i {x, y, z}) {}
+		LVector3iPropertyWrapper(const std::shared_ptr<util::Vector3iProperty> &v) : TLVectorPropertyWrapper(v) {}
 	};
 
 	class LVector4PropertyWrapper : public TLVectorPropertyWrapper<util::Vector4Property, Vector4> {
@@ -309,6 +317,7 @@ export {
 		LVector4PropertyWrapper() : TLVectorPropertyWrapper<util::Vector4Property, Vector4>() {}
 		LVector4PropertyWrapper(const Vector4 &v) : TLVectorPropertyWrapper<util::Vector4Property, Vector4>(v) {}
 		LVector4PropertyWrapper(float x, float y, float z, float w) : TLVectorPropertyWrapper<util::Vector4Property, Vector4>(Vector4 {x, y, z, w}) {}
+		LVector4PropertyWrapper(const std::shared_ptr<util::Vector4Property> &v) : TLVectorPropertyWrapper(v) {}
 	};
 
 	class LVector4iPropertyWrapper : public TLVectorPropertyWrapper<util::Vector4iProperty, Vector4i> {
@@ -316,6 +325,7 @@ export {
 		LVector4iPropertyWrapper() : TLVectorPropertyWrapper<util::Vector4iProperty, Vector4i>() {}
 		LVector4iPropertyWrapper(const Vector4i &v) : TLVectorPropertyWrapper<util::Vector4iProperty, Vector4i>(v) {}
 		LVector4iPropertyWrapper(int32_t x, int32_t y, int32_t z, int32_t w) : TLVectorPropertyWrapper<util::Vector4iProperty, Vector4i>(Vector4i {x, y, z, w}) {}
+		LVector4iPropertyWrapper(const std::shared_ptr<util::Vector4iProperty> &v) : TLVectorPropertyWrapper(v) {}
 	};
 
 	#define DEFINE_LUA_VECTOR_PROPERTY(TYPE, UNDERLYING_PROP_TYPE, UNDERLYING_TYPE)                                                                                                                                                                                                                  \
@@ -370,6 +380,7 @@ export {
 		LQuatPropertyWrapper(const Quat &v) : LSimplePropertyWrapper<util::QuatProperty, Quat>(v) {}
 		LQuatPropertyWrapper(float w, float x, float y, float z) : LSimplePropertyWrapper<util::QuatProperty, Quat>(Quat {w, x, y, z}) {}
 		LQuatPropertyWrapper(const std::string &str) : LSimplePropertyWrapper<util::QuatProperty, Quat>(uquat::create(str)) {}
+		LQuatPropertyWrapper(const std::shared_ptr<util::QuatProperty> &v) : LSimplePropertyWrapper(v) {}
 		LQuatPropertyWrapper operator/(float f)
 		{
 			GetProperty() /= f;
@@ -405,6 +416,7 @@ export {
 
 		LStringPropertyWrapper() : LSimplePropertyWrapper<util::StringProperty, std::string>() {}
 		LStringPropertyWrapper(const std::string &v) : LSimplePropertyWrapper<util::StringProperty, std::string>(v) {}
+		LStringPropertyWrapper(const std::shared_ptr<util::StringProperty> &v) : LSimplePropertyWrapper<util::StringProperty, std::string>(v) {}
 	};
 	using LStringProperty = LStringPropertyWrapper;
 
@@ -421,6 +433,7 @@ export {
 
 		TLMatrixPropertyWrapper() : LSimplePropertyWrapper<TProperty, T>() {}
 		TLMatrixPropertyWrapper(const T &v) : LSimplePropertyWrapper<TProperty, T>(v) {}
+		TLMatrixPropertyWrapper(const std::shared_ptr<TProperty> &v) : LSimplePropertyWrapper<TProperty, T>(v) {}
 	};
 	using LMatrix2PropertyWrapper = TLMatrixPropertyWrapper<util::Matrix2Property, Mat2>;
 	using LMatrix2x3PropertyWrapper = TLMatrixPropertyWrapper<util::Matrix2x3Property, Mat2x3>;

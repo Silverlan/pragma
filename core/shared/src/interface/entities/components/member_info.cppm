@@ -13,6 +13,7 @@ module;
 export module pragma.shared:entities.member_info;
 
 export import :entities.enums;
+import :entities.member_type;
 export import :util.global_string_table;
 
 #ifdef _WIN32
@@ -296,5 +297,22 @@ export {
 		if(!data)
 			return nullptr;
 		return static_cast<const T *>(data);
+	}
+
+	template<typename T>
+	void pragma::ComponentMemberInfo::SetDefault(T value)
+	{
+		if(ents::member_type_to_enum<T>() != type)
+			throw std::runtime_error {"Unable to set default member value: Value type " + std::string {magic_enum::enum_name(ents::member_type_to_enum<T>())} + " does not match member type " + std::string {magic_enum::enum_name(type)} + "!"};
+		m_default = std::unique_ptr<void, void (*)(void *)> {new T {std::move(value)}, [](void *ptr) { delete static_cast<T *>(ptr); }};
+	}
+
+	template<typename T>
+	bool pragma::ComponentMemberInfo::GetDefault(T &outValue) const
+	{
+		if(!m_default || ents::member_type_to_enum<T>() != type)
+			return false;
+		outValue = *static_cast<T *>(m_default.get());
+		return true;
 	}
 };

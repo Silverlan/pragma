@@ -10,9 +10,8 @@ module;
 export module pragma.shared:entities.universal_reference;
 
 export import :entities.base_entity_handle;
-export import :entities.enums;
 export import :entities.components.handle;
-export import :entities.member_info;
+export import :entities.enums;
 export import :entities.member_reference;
 
 export {
@@ -20,6 +19,7 @@ export {
 	class EntityIterator;
 	class Game;
 	namespace pragma {
+		struct ComponentMemberInfo;
 		class BaseEntityComponent;
 		using EntityIdentifier = std::variant<util::Uuid, std::string>;
 		struct DLLNETWORK EntityURef {

@@ -5,7 +5,6 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include <memory>
-#include <sharedutils/def_handle.h>
 #include <mathutil/transform.hpp>
 #include <vector>
 #include "mathutil/uvec.h"

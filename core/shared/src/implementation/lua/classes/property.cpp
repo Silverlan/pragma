@@ -7,7 +7,7 @@ module;
 #include "mathutil/umath.h"
 
 #include "mathutil/uquat.h"
-
+#include "mathutil/color.h"
 #include "sharedutils/util.h"
 
 #include "sharedutils/util_string.h"
@@ -50,7 +50,7 @@ static std::ostream &operator<<(std::ostream &str, const LBoolProperty &v) { ret
 static Color operator+(Color v, const LColorPropertyWrapper &prop) { return v + prop->GetValue(); }
 static Color operator-(Color v, const LColorPropertyWrapper &prop) { return v - prop->GetValue(); }
 static Color operator*(float v, const LColorPropertyWrapper &prop) { return v * prop->GetValue(); }
-static bool operator==(Color v, const LColorPropertyWrapper &prop) { return static_cast<const Color&>(**prop) == const_cast<const Color&>(v); }
+static bool operator==(Color v, const LColorPropertyWrapper &prop) { return **prop == v; }
 static std::ostream &operator<<(std::ostream &str, const LColorPropertyWrapper &v) { return str << **v; }
 
 //////////

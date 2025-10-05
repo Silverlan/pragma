@@ -22,8 +22,6 @@ module;
 
 #include "pragma/lua/luaapi.h"
 
-#include "pragma/lua/luacallback.h"
-
 #include "mathutil/uvec.h"
 
 #include <udm.hpp>

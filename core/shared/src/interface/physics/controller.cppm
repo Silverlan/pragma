@@ -6,7 +6,6 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <memory>
 #include <optional>
-#include <sharedutils/def_handle.h>
 #include <mathutil/uvec.h>
 #include "mathutil/umath.h"
 

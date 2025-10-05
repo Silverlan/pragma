@@ -1,10 +1,13 @@
-
-#include "pragma/lua/luaapi.h"
-
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "pragma/lua/luafunction.h"
+module;
+
+#include "pragma/lua/luaapi.h"
+
+module pragma.shared;
+
+import :scripting.lua.function;
 
 LuaFunction::LuaFunction(const luabind::object &o) : m_luaFunction(new luabind::object(o)) {}
 LuaFunction::LuaFunction(const LuaFunction &other) : m_luaFunction(other.m_luaFunction) {}

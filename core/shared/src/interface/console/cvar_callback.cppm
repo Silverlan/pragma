@@ -5,10 +5,11 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include <functional>
-#include "pragma/lua/luafunction.h"
 #include <sharedutils/functioncallback.h>
 
 export module pragma.shared:console.cvar_callback;
+
+import :scripting.lua.function;
 
 export {
 	class ConVar;

@@ -1,17 +1,18 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __LUACALLBACK_H__
-#define __LUACALLBACK_H__
+module;
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/lua/luafunction.h"
+#include "pragma/lua/luaapi.h"
 #include <sharedutils/functioncallback.h>
 
-class DLLNETWORK LuaCallback : public TCallback, public LuaFunction {
+export module pragma.shared:scripting.lua.callback;
+
+export import :scripting.lua.function;
+
+export class DLLNETWORK LuaCallback : public TCallback, public LuaFunction {
   public:
 	LuaCallback(const luabind::object &o);
 	virtual ~LuaCallback() override;
 };
-
-#endif

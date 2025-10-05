@@ -7,11 +7,12 @@ module;
 #include <sharedutils/scope_guard.h>
 #include <sharedutils/util_event_reply.hpp>
 #include "sharedutils/functioncallback.h"
-#include "pragma/lua/luacallback.h"
 #include "pragma/lua/luaapi.h"
 #include <queue>
 
 export module pragma.shared:scripting.lua.callback_handler;
+
+import :scripting.lua.callback;
 
 export {
 	class DLLNETWORK LuaCallbackHandler {

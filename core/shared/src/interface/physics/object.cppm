@@ -9,7 +9,6 @@ module;
 #include <vector>
 #include <optional>
 #include <mathutil/uquat.h>
-#include <sharedutils/def_handle.h>
 #include "sharedutils/util_shared_handle.hpp"
 #include <mathutil/transform.hpp>
 #include "mathutil/uvec.h"

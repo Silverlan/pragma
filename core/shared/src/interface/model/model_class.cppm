@@ -8,7 +8,6 @@ module;
 #include <mathutil/uvec.h>
 #include "material.h"
 #include <udm_types.hpp>
-#include <sharedutils/def_handle.h>
 #include <memory>
 #include "mathutil/uquat.h"
 #include "mathutil/umath.h"

@@ -32,6 +32,13 @@ export import :math.sphere;
 export import :math.transform;
 export import :math.triangulate;
 
-export namespace util {
-	DLLNETWORK Vector3 angular_velocity_to_linear(const Vector3 &refPos, const Vector3 &angVel, const Vector3 &tgtPos);
-};
+export {
+	namespace util {
+		DLLNETWORK Vector3 angular_velocity_to_linear(const Vector3 &refPos, const Vector3 &angVel, const Vector3 &tgtPos);
+	};
+	
+	namespace umath {
+		uint32_t find_bezier_roots(float x, float v0, float v1, float v2, float v3, std::array<float, 3> &roots);
+		float calc_bezier_point(float f1, float f2, float f3, float f4, float t);
+	};
+}

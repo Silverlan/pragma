@@ -6,7 +6,6 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <mathutil/transform.hpp>
 #include <memory>
-#include <sharedutils/def_handle.h>
 #include <sharedutils/util_weak_handle.hpp>
 #include <mathutil/glmutil.h>
 #include <vector>

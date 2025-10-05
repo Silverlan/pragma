@@ -247,21 +247,4 @@ export namespace pragma {
 	{
 		return create_component_member_info<TComponent, T, TSetter, TGetter, AttributeSpecializationType>(std::move(name), std::move(defaultValue), AttributeSpecializationType::None);
 	}
-
-	template<typename T>
-	void ComponentMemberInfo::SetDefault(T value)
-	{
-		if(ents::member_type_to_enum<T>() != type)
-			throw std::runtime_error {"Unable to set default member value: Value type " + std::string {magic_enum::enum_name(ents::member_type_to_enum<T>())} + " does not match member type " + std::string {magic_enum::enum_name(type)} + "!"};
-		m_default = std::unique_ptr<void, void (*)(void *)> {new T {std::move(value)}, [](void *ptr) { delete static_cast<T *>(ptr); }};
-	}
-
-	template<typename T>
-	bool ComponentMemberInfo::GetDefault(T &outValue) const
-	{
-		if(!m_default || ents::member_type_to_enum<T>() != type)
-			return false;
-		outValue = *static_cast<T *>(m_default.get());
-		return true;
-	}
 };

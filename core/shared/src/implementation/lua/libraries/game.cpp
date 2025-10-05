@@ -14,7 +14,6 @@ module;
 #include "pragma/lua/lua_util_class.hpp"
 #include "pragma/lua/luaapi.h"
 
-#include "pragma/lua/luacallback.h"
 #include "pragma/lua/ostream_operator_alias.hpp"
 #include "mathutil/uvec.h"
 
@@ -24,6 +23,7 @@ module;
 module pragma.shared;
 
 import :scripting.lua.libraries.game;
+import :game.value_driver;
 
 Lua::opt<Lua::type<CallbackHandle>> Lua::game::add_callback(lua_State *l, const std::string &identifier, const func<void> &function)
 {
@@ -346,7 +346,7 @@ bool Lua::game::raycast(lua_State *l, const ::TraceData &data)
 	return false;
 }
 
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, ValueDriverDescriptor);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, pragma::ValueDriverDescriptor);
 void Lua::game::register_shared_functions(lua_State *l, luabind::module_ &modGame)
 {
 	modGame[luabind::def("add_callback", Lua::game::add_callback),

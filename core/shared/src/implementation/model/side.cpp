@@ -12,7 +12,7 @@ module pragma.shared;
 
 import :model.side;
 
-const double EPSILON = 4.9406564584125e-2;
+static const double EPSILON = 4.9406564584125e-2;
 
 Side::Side() { m_triangles.push_back({}); }
 void Side::Update()

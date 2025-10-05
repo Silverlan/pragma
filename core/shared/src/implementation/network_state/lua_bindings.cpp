@@ -7,7 +7,7 @@ module;
 #include "sstream"
 
 #include "sharedutils/util_version.h"
-
+#include "pragma/lua/ostream_operator_alias.hpp"
 #include "memory"
 
 #include "cstring"
@@ -197,16 +197,18 @@ static void register_string_to_vector_type_constructor(lua_State *l)
 	  const std::string &>(l);
 }
 
-#ifdef __linux__
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::string, Utf8String);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(umath, Transform);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(umath, ScaledTransform);
+
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(util, BaseParallelJob);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(util, Path);
+#ifdef __linux__
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(util, Version);
+#endif
 
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(uimg, ImageBuffer);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(uimg, ImageLayerSet);
-
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(umath, Transform);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(umath, ScaledTransform);
 
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(glm, Vector3i);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(glm, Vector4i);
@@ -215,7 +217,6 @@ DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(glm, Vector3);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(glm, Vector4);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(glm, Quat);
 
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::string, Utf8String);
 /* namespace panima
 {
 std::ostream &operator<<(std::ostream &out,const pragma::animation::Bone &o)
@@ -223,6 +224,7 @@ std::ostream &operator<<(std::ostream &out,const pragma::animation::Bone &o)
     return ::operator<<(out,o);
 }
 }; */
+
 
 #undef DEFINE_OSTEAM_OPERATOR_NAMESPACE_ALIAS
 
@@ -244,7 +246,6 @@ namespace glm {
 	DEFINE_OSTREAM_MATRIX_OPERATOR_INTERNAL(4x4)
 
 };
-#endif
 
 std::string pragma::lua::detail::tostring(const luabind::object &o)
 {

@@ -12,7 +12,7 @@ module pragma.shared;
 
 import :physics.collision_object;
 
-const double EPSILON = 4.9406564584125e-2;
+static const double EPSILON = 4.9406564584125e-2;
 
 pragma::physics::ICollisionObject::ICollisionObject(IEnvironment &env, pragma::physics::IShape &shape) : IBase {env}, m_shape {std::static_pointer_cast<pragma::physics::IShape>(shape.shared_from_this())} {}
 

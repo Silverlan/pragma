@@ -1,14 +1,17 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __RESOURCEMANAGER_H__
-#define __RESOURCEMANAGER_H__
+module;
+
+#include "pragma/serverdefinitions.h"
 #include <vector>
 #include <string>
 
+export module pragma.server.networking.resource_manager;
+
 #undef FindResource
 
-class DLLSERVER ResourceManager {
+export class DLLSERVER ResourceManager {
   private:
 	struct ResourceInfo {
 		ResourceInfo(const std::string &fileName, bool stream);
@@ -24,5 +27,3 @@ class DLLSERVER ResourceManager {
 	static void ClearResources();
 	static const ResourceInfo *FindResource(const std::string &fileName);
 };
-
-#endif

@@ -431,8 +431,8 @@ void CALSound::Terminate()
 }
 
 static_assert(sizeof(al::EffectParams) == sizeof(SoundEffectParams));
-bool CALSound::AddEffect(al::IEffect &effect, const EffectParams &params) { return (*this)->AddEffect(effect, reinterpret_cast<const al::EffectParams &>(params)); }
-bool CALSound::AddEffect(al::IEffect &effect, uint32_t &slotId, const EffectParams &params) { return (*this)->AddEffect(effect, slotId, reinterpret_cast<const al::EffectParams &>(params)); }
+bool CALSound::AddEffect(al::IEffect &effect, const SoundEffectParams &params) { return (*this)->AddEffect(effect, reinterpret_cast<const al::EffectParams &>(params)); }
+bool CALSound::AddEffect(al::IEffect &effect, uint32_t &slotId, const SoundEffectParams &params) { return (*this)->AddEffect(effect, slotId, reinterpret_cast<const al::EffectParams &>(params)); }
 bool CALSound::AddEffect(al::IEffect &effect, float gain) { return (*this)->AddEffect(effect, gain); }
 bool CALSound::AddEffect(al::IEffect &effect, uint32_t &slotId, float gain) { return (*this)->AddEffect(effect, slotId, gain); }
 void CALSound::RemoveEffect(al::IEffect &effect) { (*this)->RemoveEffect(effect); }
@@ -966,7 +966,7 @@ std::tuple<bool, bool, bool> CALSound::GetGainAuto() const
 		return {false, false, false};
 	return (*this)->GetGainAuto();
 }
-void CALSound::SetDirectFilter(const EffectParams &params)
+void CALSound::SetDirectFilter(const SoundEffectParams &params)
 {
 	if(m_bTerminated == true)
 		return;
@@ -980,7 +980,7 @@ const SoundEffectParams &CALSound::GetDirectFilter() const
 	}
 	return reinterpret_cast<const SoundEffectParams &>((*this)->GetDirectFilter());
 }
-bool CALSound::AddEffect(const std::string &effectName, const EffectParams &params)
+bool CALSound::AddEffect(const std::string &effectName, const SoundEffectParams &params)
 {
 	auto effect = pragma::get_cengine()->GetAuxEffect(effectName);
 	if(effect == nullptr)
@@ -994,7 +994,7 @@ void CALSound::RemoveEffect(const std::string &effectName)
 		return;
 	(*this)->RemoveEffect(*effect);
 }
-void CALSound::SetEffectParameters(const std::string &effectName, const EffectParams &params)
+void CALSound::SetEffectParameters(const std::string &effectName, const SoundEffectParams &params)
 {
 	auto effect = pragma::get_cengine()->GetAuxEffect(effectName);
 	if(effect == nullptr)

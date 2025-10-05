@@ -10,6 +10,7 @@ module;
 export module pragma.server.ai.factions;
 
 import pragma.server.ai.disposition;
+export import pragma.shared;
 
 export {
 	class FactionManager;

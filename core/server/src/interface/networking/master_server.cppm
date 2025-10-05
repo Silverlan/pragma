@@ -13,6 +13,8 @@ module;
 
 export module pragma.server.networking.master_server;
 
+export import pragma.shared;
+
 export namespace pragma::networking {
 	class DLLSERVER MasterServerRegistration {
 	  public:

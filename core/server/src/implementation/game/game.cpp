@@ -12,7 +12,6 @@ module;
 
 module pragma.server.game;
 
-import pragma.entities.components;
 import pragma.server.ai;
 import pragma.server.audio;
 import pragma.server.core.cache_info;
@@ -23,6 +22,7 @@ import pragma.server.entities.registration;
 import pragma.server.model_manager;
 import pragma.server.scripting.lua;
 import pragma.server.server_state;
+import pragma.shared;
 
 DLLSERVER pragma::physics::IEnvironment *s_physEnv = nullptr;
 

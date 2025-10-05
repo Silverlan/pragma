@@ -1,10 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
 #include <fsys/filesystem.h>
 #include <mathutil/umath.h>
 #include <sharedutils/util_file.h>
+
+module pragma.server.networking.resource_manager;
 
 import pragma.server.entities;
 import pragma.server.game;

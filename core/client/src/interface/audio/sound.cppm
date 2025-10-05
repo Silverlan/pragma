@@ -89,11 +89,11 @@ export class DLLCLIENT CALSound : public al::SoundSource, public ALSound {
 	virtual float GetAirAbsorptionFactor() const override;
 	virtual void SetGainAuto(bool directHF, bool send, bool sendHF) override;
 	virtual std::tuple<bool, bool, bool> GetGainAuto() const override;
-	virtual void SetDirectFilter(const EffectParams &params) override;
-	virtual const EffectParams &GetDirectFilter() const override;
-	virtual bool AddEffect(const std::string &effectName, const EffectParams &params = {}) override;
+	virtual void SetDirectFilter(const SoundEffectParams &params) override;
+	virtual const SoundEffectParams &GetDirectFilter() const override;
+	virtual bool AddEffect(const std::string &effectName, const SoundEffectParams &params = {}) override;
 	virtual void RemoveEffect(const std::string &effectName) override;
-	virtual void SetEffectParameters(const std::string &effectName, const EffectParams &params = {}) override;
+	virtual void SetEffectParameters(const std::string &effectName, const SoundEffectParams &params = {}) override;
 
 	virtual void Update() override;
 	virtual void PostUpdate() override;
@@ -101,8 +101,8 @@ export class DLLCLIENT CALSound : public al::SoundSource, public ALSound {
 	virtual bool IsIdle() const override;
 	void Terminate();
 
-	bool AddEffect(al::IEffect &effect, const EffectParams &params = EffectParams());
-	bool AddEffect(al::IEffect &effect, uint32_t &slotId, const EffectParams &params = EffectParams());
+	bool AddEffect(al::IEffect &effect, const SoundEffectParams &params = SoundEffectParams());
+	bool AddEffect(al::IEffect &effect, uint32_t &slotId, const SoundEffectParams &params = SoundEffectParams());
 	bool AddEffect(al::IEffect &effect, float gain);
 	bool AddEffect(al::IEffect &effect, uint32_t &slotId, float gain);
 	void RemoveEffect(al::IEffect &effect);

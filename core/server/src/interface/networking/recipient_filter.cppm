@@ -1,12 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __PRAGMA_RECIPIENT_FILTER_HPP__
-#define __PRAGMA_RECIPIENT_FILTER_HPP__
+module;
 
+#include "pragma/serverdefinitions.h"
+#include "sharedutils/util_weak_handle.hpp"
 #include <functional>
 
-namespace pragma::networking {
+export module pragma.server.networking.recipient_filter;
+
+export namespace pragma::networking {
 	class IServerClient;
 	class DLLSERVER ClientRecipientFilter {
 	  public:
@@ -37,5 +40,3 @@ namespace pragma::networking {
 		ClientRecipientFilter::FilterType m_filterType = ClientRecipientFilter::FilterType::Include;
 	};
 };
-
-#endif

@@ -8,9 +8,9 @@ module;
 
 module pragma.server.game;
 
-import pragma.entities.components;
 import pragma.server.entities;
 import pragma.server.entities.components;
+import pragma.shared;
 
 void SGame::RegisterLuaEntityComponent(luabind::class_<pragma::BaseEntityComponent> &def)
 {

@@ -23,8 +23,8 @@ import :engine;
 import :entities.components;
 import :model;
 import :game;
-import pragma.entities.components;
 import :util;
+import pragma.shared;
 
 
 void CBaseEntity::OnComponentAdded(pragma::BaseEntityComponent &component)

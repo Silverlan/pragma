@@ -10,12 +10,12 @@ module;
 
 module pragma.server.game;
 
-import pragma.entities.components;
 import pragma.server.entities;
 import pragma.server.entities.components;
 import pragma.server.entities.registration;
 import pragma.server.scripting.lua;
 import pragma.server.server_state;
+import pragma.shared;
 
 pragma::SPlayerComponent *SGame::GetPlayer(pragma::networking::IServerClient &session) { return ServerState::Get()->GetPlayer(session); }
 

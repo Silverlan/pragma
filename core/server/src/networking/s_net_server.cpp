@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_server.h"
+#include "pragma/serverdefinitions.h"
+
+import pragma.shared;
 
 void NET_cl_send(pragma::networking::IServerClient &session, NetPacket packet)
 {

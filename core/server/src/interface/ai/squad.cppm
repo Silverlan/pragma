@@ -10,6 +10,8 @@ module;
 
 export module pragma.server.ai.squad;
 
+export import pragma.shared;
+
 export class DLLSERVER AISquad : public std::enable_shared_from_this<AISquad> {
   private:
 	static std::vector<std::shared_ptr<AISquad>> s_squads;

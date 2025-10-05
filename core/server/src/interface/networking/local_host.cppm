@@ -4,8 +4,10 @@
 module;
 #include "pragma/serverdefinitions.h"
 
-
 export module pragma.server.networking.local_host;
+
+export import pragma.server.networking.iserver;
+export import pragma.server.networking.iserver_client;
 
 export namespace pragma::networking {
 	class DLLSERVER LocalServer : public IServer {

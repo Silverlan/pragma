@@ -7,8 +7,8 @@ module;
 
 export module pragma.server.entities.components.shooter;
 
-import pragma.entities.components;
 import pragma.server.entities.components.entity;
+import pragma.shared;
 
 export namespace pragma::ecs {
 	class DLLSERVER SShooterComponent final : public BaseShooterComponent, public SBaseNetComponent {

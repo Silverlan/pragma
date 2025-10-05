@@ -1,8 +1,12 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
 #include <mathutil/umath.h>
+
+module pragma.server.ai.schedule;
 
 import pragma.server.entities.components;
 

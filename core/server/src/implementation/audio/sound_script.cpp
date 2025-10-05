@@ -219,9 +219,9 @@ void SALSoundScript::SetGainAuto(bool directHF, bool send, bool sendHF)
 	SALSound::SetGainAuto(directHF, send, sendHF);
 }
 std::tuple<bool, bool, bool> SALSoundScript::GetGainAuto() const { return SALSound::GetGainAuto(); }
-void SALSoundScript::SetDirectFilter(const EffectParams &params) { SALSound::SetDirectFilter(params); }
+void SALSoundScript::SetDirectFilter(const SoundEffectParams &params) { SALSound::SetDirectFilter(params); }
 const SoundEffectParams &SALSoundScript::GetDirectFilter() const { return SALSound::GetDirectFilter(); }
-bool SALSoundScript::AddEffect(const std::string &effectName, const EffectParams &params)
+bool SALSoundScript::AddEffect(const std::string &effectName, const SoundEffectParams &params)
 {
 	ALSoundScript::AddEffect(effectName, params);
 	return SALSound::AddEffect(effectName, params);
@@ -231,7 +231,7 @@ void SALSoundScript::RemoveEffect(const std::string &effectName)
 	ALSoundScript::RemoveEffect(effectName);
 	SALSound::RemoveEffect(effectName);
 }
-void SALSoundScript::SetEffectParameters(const std::string &effectName, const EffectParams &params)
+void SALSoundScript::SetEffectParameters(const std::string &effectName, const SoundEffectParams &params)
 {
 	ALSoundScript::SetEffectParameters(effectName, params);
 	SALSound::SetEffectParameters(effectName, params);

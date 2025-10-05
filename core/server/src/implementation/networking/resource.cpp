@@ -1,8 +1,12 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
 #include <fsys/filesystem.h>
+
+module pragma.server.networking.resource;
 
 Resource::Resource(std::string name, bool bStream) : offset(0), stream(bStream)
 {

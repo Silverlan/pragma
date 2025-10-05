@@ -374,7 +374,7 @@ void SALSound::SetGainAuto(bool directHF, bool send, bool sendHF)
 	});
 }
 std::tuple<bool, bool, bool> SALSound::GetGainAuto() const { return ALSoundBase::GetGainAuto(); }
-void SALSound::SetDirectFilter(const EffectParams &params)
+void SALSound::SetDirectFilter(const SoundEffectParams &params)
 {
 	ALSoundBase::SetDirectFilter(params);
 	SendEvent(NetEvent::SetAirAbsorptionFactor, [&params](NetPacket &p) {
@@ -384,7 +384,7 @@ void SALSound::SetDirectFilter(const EffectParams &params)
 	});
 }
 const SoundEffectParams &SALSound::GetDirectFilter() const { return ALSoundBase::GetDirectFilter(); }
-bool SALSound::AddEffect(const std::string &effectName, const EffectParams &params)
+bool SALSound::AddEffect(const std::string &effectName, const SoundEffectParams &params)
 {
 	SendEvent(NetEvent::AddEffect, [&effectName, &params](NetPacket &p) {
 		p->WriteString(effectName);
@@ -398,7 +398,7 @@ void SALSound::RemoveEffect(const std::string &effectName)
 {
 	SendEvent(NetEvent::RemoveEffect, [&effectName](NetPacket &p) { p->WriteString(effectName); });
 }
-void SALSound::SetEffectParameters(const std::string &effectName, const EffectParams &params)
+void SALSound::SetEffectParameters(const std::string &effectName, const SoundEffectParams &params)
 {
 	SendEvent(NetEvent::SetEffectParameters, [&effectName, &params](NetPacket &p) {
 		p->WriteString(effectName);

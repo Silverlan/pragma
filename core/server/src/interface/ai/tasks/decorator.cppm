@@ -3,9 +3,10 @@
 
 module;
 #include "pragma/serverdefinitions.h"
-#include "pragma/ai/ai_behavior.h"
 
 export module pragma.server.ai.tasks.decorator;
+
+export import pragma.server.ai.schedule;
 
 export namespace pragma {
 	namespace ai {

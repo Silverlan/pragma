@@ -1,9 +1,13 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
 #include <random>
 #include <sharedutils/util_clock.hpp>
+
+module pragma.server.ai.tasks.selector;
 
 using namespace pragma;
 

@@ -1,19 +1,23 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __AI_BEHAVIOR_PARAMETER_H__
-#define __AI_BEHAVIOR_PARAMETER_H__
+module;
 
+#include "pragma/serverdefinitions.h"
 #include <mathutil/glmutil.h>
 #include <memory>
 #include <vector>
 #include <string>
 
-namespace pragma {
+export module pragma.server.ai.schedule:behavior_parameter;
+
+export import pragma.shared;
+
+export namespace pragma {
 	namespace ai {
 		class DLLSERVER BehaviorParameter {
 		  public:
-			enum class DLLSERVER Type : uint32_t { None = 0, Bool, Int, Float, String, Vector, Quaternion, EulerAngles, Entity };
+			enum class Type : uint32_t { None = 0, Bool, Int, Float, String, Vector, Quaternion, EulerAngles, Entity };
 		  protected:
 			std::shared_ptr<void> m_data;
 			Type m_type;
@@ -72,5 +76,3 @@ namespace pragma {
 		};
 	};
 };
-
-#endif

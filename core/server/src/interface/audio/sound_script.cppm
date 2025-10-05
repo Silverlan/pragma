@@ -77,11 +77,11 @@ export {
 		virtual float GetAirAbsorptionFactor() const override;
 		virtual void SetGainAuto(bool directHF, bool send, bool sendHF) override;
 		virtual std::tuple<bool, bool, bool> GetGainAuto() const override;
-		virtual void SetDirectFilter(const EffectParams &params) override;
-		virtual const EffectParams &GetDirectFilter() const override;
-		virtual bool AddEffect(const std::string &effectName, const EffectParams &params = {}) override;
+		virtual void SetDirectFilter(const SoundEffectParams &params) override;
+		virtual const SoundEffectParams &GetDirectFilter() const override;
+		virtual bool AddEffect(const std::string &effectName, const SoundEffectParams &params = {}) override;
 		virtual void RemoveEffect(const std::string &effectName) override;
-		virtual void SetEffectParameters(const std::string &effectName, const EffectParams &params = {}) override;
+		virtual void SetEffectParameters(const std::string &effectName, const SoundEffectParams &params = {}) override;
 
 		virtual void SetType(ALSoundType type) override;
 		virtual void SetFlags(unsigned int flags) override;

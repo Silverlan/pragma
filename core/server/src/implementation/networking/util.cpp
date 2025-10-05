@@ -1,7 +1,11 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
+
+module pragma.server.networking.util;
 
 void nwm::write_unique_entity(NetPacket &packet, const BaseEntity *ent)
 {

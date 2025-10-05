@@ -14,9 +14,11 @@ module;
 
 export module pragma.server.game;
 
+export import pragma.server.ai.schedule;
 import pragma.server.core.cache_info;
 import pragma.server.entities;
 import pragma.server.entities.components;
+export import pragma.shared;
 
 #pragma warning(push)
 #pragma warning(disable : 4251)

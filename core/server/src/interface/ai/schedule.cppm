@@ -1,10 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __AI_SCHEDULE_H__
-#define __AI_SCHEDULE_H__
+module;
 
+#include "pragma/serverdefinitions.h"
 #include <vector>
+
+export module pragma.server.ai.schedule;
+
+export import :behavior;
 
 namespace pragma {
 	namespace ai {
@@ -32,5 +36,3 @@ namespace pragma {
 		};
 	};
 };
-
-#endif

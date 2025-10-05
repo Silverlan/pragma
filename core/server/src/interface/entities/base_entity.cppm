@@ -4,8 +4,12 @@
 module;
 
 #include "pragma/serverdefinitions.h"
+#include <format>
 
 export module pragma.server.entities.base;
+
+export import pragma.server.networking.recipient_filter;
+export import pragma.shared;
 
 export class DLLSERVER SBaseEntity : public BaseEntity {
   public:

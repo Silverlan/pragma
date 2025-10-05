@@ -1,8 +1,12 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
 #include <algorithm>
+
+module pragma.server.ai.memory;
 
 import pragma.server.game;
 

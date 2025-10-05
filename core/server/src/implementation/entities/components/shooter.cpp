@@ -8,11 +8,11 @@ module;
 
 module pragma.server.entities.components.shooter;
 
-import pragma.entities.components;
 import pragma.server.entities.base;
 import pragma.server.entities.components;
 import pragma.server.game;
 import pragma.server.server_state;
+import pragma.shared;
 
 using namespace pragma;
 

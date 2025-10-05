@@ -7,7 +7,6 @@ module;
 
 #include "pragma/lua/policies/default_parameter_policy.hpp"
 #include "pragma/lua/policies/generic_policy.hpp"
-#include "pragma/lua/lentity_components.hpp"
 #include "pragma/lua/types/udm.hpp"
 #include "mathutil/umath.h"
 
@@ -130,7 +129,6 @@ std::optional<TResult> get_meta_bone_value_ls(const pragma::MetaRigComponent &me
 void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 {
 	pragma::lua::register_entity_component_classes(GetLuaState(), entsMod);
-	Lua::register_gravity_component(entsMod);
 
 	auto classDefEntRef = luabind::class_<pragma::EntityURef>("UniversalEntityReference");
 	classDefEntRef.def(luabind::constructor<const BaseEntity &>());

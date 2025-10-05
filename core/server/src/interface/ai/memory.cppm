@@ -1,17 +1,21 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __AI_MEMORY_H__
-#define __AI_MEMORY_H__
+module;
 
+#include "pragma/serverdefinitions.h"
 #include <mathutil/glmutil.h>
 
-#define MAX_AIMEMORY_FRAGMENTS 25
+export module pragma.server.ai.memory;
 
-#define AI_MEMORY_NEXT_CHECK_IF_HIDDEN 0.25f
-#define AI_MEMORY_NEXT_CHECK_IF_VISIBLE 0.1f
+export import pragma.shared;
 
-namespace pragma {
+export namespace pragma {
+	constexpr uint32_t MAX_AIMEMORY_FRAGMENTS = 25;
+
+	constexpr float AI_MEMORY_NEXT_CHECK_IF_HIDDEN = 0.25f;
+	constexpr float AI_MEMORY_NEXT_CHECK_IF_VISIBLE = 0.1f;
+
 	namespace ai {
 		class DLLSERVER Memory {
 		  public:
@@ -60,5 +64,3 @@ namespace pragma {
 		};
 	};
 };
-
-#endif

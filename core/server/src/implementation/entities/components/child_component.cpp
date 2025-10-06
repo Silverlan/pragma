@@ -2,12 +2,14 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "pragma/lua/luaapi.h"
 
 #include "stdafx_server.h"
 
 module pragma.server.entities.components.child;
 
 import pragma.server.entities;
+import pragma.server.networking.util;
 
 using namespace pragma;
 

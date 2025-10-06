@@ -4,6 +4,8 @@
 module;
 
 #include "pragma/serverdefinitions.h"
+#include "pragma/lua/luaapi.h"
+
 
 export module pragma.server.scripting.lua.libraries.net;
 

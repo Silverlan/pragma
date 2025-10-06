@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "pragma/logging.hpp"
+
+#include "pragma/lua/luaapi.h"
 
 #include "stdafx_server.h"
 
@@ -214,34 +217,33 @@ void SAIComponent::OnEntitySpawn()
 
 bool SAIComponent::OnInput(std::string input, BaseEntity *activator, BaseEntity *caller, const std::string &data)
 {
-#if DEBUG_AI_MOVEMENT == 1
-	if(ustring::compare<std::string>(input, "dbg_move", false)) {
-		auto pTrComponentActivator = (activator != nullptr) ? activator->GetTransformComponent() : nullptr;
-		if(pTrComponentActivator) {
-			pragma::SAIComponent::AIAnimationInfo info {};
-			info.SetPlayAsSchedule(false);
-			PlayActivity(m_moveInfo.moveActivity, info);
+	if constexpr(DEBUG_AI_MOVEMENT) {
+		if(ustring::compare<std::string>(input, "dbg_move", false)) {
+			auto pTrComponentActivator = (activator != nullptr) ? activator->GetTransformComponent() : nullptr;
+			if(pTrComponentActivator) {
+				pragma::SAIComponent::AIAnimationInfo info {};
+				info.SetPlayAsSchedule(false);
+				PlayActivity(m_moveInfo.moveActivity, info);
 
-			auto &ent = GetEntity();
-			BaseAIComponent::MoveInfo mvInfo {};
-			if(data == "1") {
-				auto pTrComponent = ent.GetTransformComponent();
-				if(pTrComponent != nullptr)
-					mvInfo.faceTarget = pTrComponent->GetPosition() + pTrComponent->GetForward() * 10'000.f;
+				auto &ent = GetEntity();
+				BaseAIComponent::MoveInfo mvInfo {};
+				if(data == "1") {
+					auto pTrComponent = ent.GetTransformComponent();
+					if(pTrComponent != nullptr)
+						mvInfo.faceTarget = pTrComponent->GetPosition() + pTrComponent->GetForward() * 10'000.f;
+				}
+				auto r = MoveTo(pTrComponentActivator->GetPosition(), mvInfo);
+				if(r == BaseAIComponent::MoveResult::TargetUnreachable) {
+					spdlog::info("Unable to move on path; Attempting to move by LoS...");
+					mvInfo.moveOnPath = false;
+					r = MoveTo(pTrComponentActivator->GetPosition(), mvInfo);
+				}
+				spdlog::info("MoveTo result: {}", BaseAIComponent::MoveResultToString(r));
 			}
-			auto r = MoveTo(pTrComponentActivator->GetPosition(), mvInfo);
-			if(r == BaseAIComponent::MoveResult::TargetUnreachable) {
-				spdlog::info("Unable to move on path; Attempting to move by LoS...");
-				mvInfo.moveOnPath = false;
-				r = MoveTo(pTrComponentActivator->GetPosition(), mvInfo);
-			}
-			spdlog::info("MoveTo result: {}", BaseAIComponent::MoveResultToString(r));
+			return true;
 		}
 	}
-#endif
-	else
-		return false;
-	return true;
+	return false;
 }
 void SAIComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) {}
 void SAIComponent::SendSnapshotData(NetPacket &packet, pragma::BasePlayerComponent &pl)

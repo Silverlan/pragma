@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "sharedutils/util_clock.hpp"
 
 #include "stdafx_server.h"
 #include <fsys/filesystem.h>

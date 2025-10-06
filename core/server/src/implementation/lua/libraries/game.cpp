@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "sharedutils/functioncallback.h"
+
+#include "pragma/lua/luaapi.h"
 
 #include "stdafx_server.h"
 #include "luasystem.h"
@@ -32,7 +35,7 @@ luabind::object Lua::game::Server::load_model(lua_State *l, const std::string &n
 }
 int Lua::game::Server::create_model(lua_State *l)
 {
-	std::shared_ptr<Model> mdl = nullptr;
+	std::shared_ptr<::Model> mdl = nullptr;
 	if(!Lua::IsSet(l, 1))
 		mdl = SGame::Get()->CreateModel();
 	else {
@@ -57,7 +60,7 @@ int Lua::game::Server::load_map(lua_State *l)
 {
 	std::vector<EntityHandle> ents;
 	auto hCb = std::make_shared<CallbackHandle>(SGame::Get()->AddCallback("OnEntityCreated", FunctionCallback<void, BaseEntity *>::Create([&ents](BaseEntity *ent) { ents.push_back(ent->GetHandle()); })));
-	util::ScopeGuard sg([hCb]() {
+	::util::ScopeGuard sg([hCb]() {
 		if(hCb->IsValid() == true)
 			hCb->Remove();
 	});

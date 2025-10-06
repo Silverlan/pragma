@@ -2,11 +2,14 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "pragma/lua/luaapi.h"
 
 #include "stdafx_server.h"
 #include "luasystem.h"
 
 module pragma.server.scripting.lua.classes.net_packet;
+
+import pragma.server.networking.util;
 
 void Lua::NetPacket::Server::register_class(luabind::class_<::NetPacket> &classDef)
 {
@@ -16,7 +19,7 @@ void Lua::NetPacket::Server::register_class(luabind::class_<::NetPacket> &classD
 	classDef.def("WriteUniqueEntity", static_cast<void (*)(lua_State *, ::NetPacket &)>(&WriteUniqueEntity));
 }
 
-void Lua::NetPacket::Server::WriteALSound(lua_State *, ::NetPacket &packet, std::shared_ptr<ALSound> snd)
+void Lua::NetPacket::Server::WriteALSound(lua_State *, ::NetPacket &packet, std::shared_ptr<::ALSound> snd)
 {
 	unsigned int idx = snd->GetIndex();
 	packet->Write<unsigned int>(idx);

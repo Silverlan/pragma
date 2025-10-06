@@ -7,6 +7,8 @@ module;
 
 export module pragma.server.model_manager;
 
+export import pragma.shared;
+
 export namespace pragma::asset {
 	class DLLSERVER SModelManager : public ModelManager {
 	  public:

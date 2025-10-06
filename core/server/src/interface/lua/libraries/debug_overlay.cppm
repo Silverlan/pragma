@@ -3,9 +3,15 @@
 
 module;
 #include "pragma/serverdefinitions.h"
+#include "pragma/lua/luaapi.h"
+
 
 
 export module pragma.server.scripting.lua.libraries.debug_overlay;
+
+export import pragma.shared;
+
+#undef DrawText
 
 export namespace Lua {
 	namespace DebugRenderer {
@@ -19,7 +25,7 @@ export namespace Lua {
 			DLLSERVER void DrawTruncatedCone(float startRadius, float dist, float endRadius, const DebugRenderInfo &renderInfo);
 			DLLSERVER void DrawCylinder(float dist, float radius, const DebugRenderInfo &renderInfo);
 			DLLSERVER void DrawAxis(const DebugRenderInfo &renderInfo);
-			DLLSERVER void DrawText(const std::string &text, const Vector2 &size, const DebugRenderInfo &renderInfo);
+			DLLSERVER void DrawText(const std::string &text, const ::Vector2 &size, const DebugRenderInfo &renderInfo);
 			DLLSERVER void DrawText(const std::string &text, float size, const DebugRenderInfo &renderInfo);
 			DLLSERVER void DrawPath(lua_State *l, luabind::table<> points, const DebugRenderInfo &renderInfo);
 			DLLSERVER void DrawSpline(lua_State *l, luabind::table<> points, uint32_t segmentCount, float curvature, const DebugRenderInfo &renderInfo);

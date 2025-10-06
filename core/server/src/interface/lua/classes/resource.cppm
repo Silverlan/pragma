@@ -3,9 +3,13 @@
 
 module;
 #include "pragma/serverdefinitions.h"
+#include "pragma/lua/luaapi.h"
+#include <string>
 
 
 export module pragma.server.scripting.lua.classes.resource;
+
+export import pragma.shared;
 
 export namespace Lua {
 	namespace resource {

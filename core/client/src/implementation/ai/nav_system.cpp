@@ -220,7 +220,8 @@ REGISTER_CONVAR_CALLBACK_CL(debug_nav_show_meshes, [](NetworkState *, const ConV
 
 void CMD_debug_nav_path_start(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &)
 {
-	CHECK_CHEATS("debug_nav_path_start", state, );
+	if(!check_cheats("debug_nav_path_start", state))
+		return;
 	if(pragma::get_cgame() == nullptr || pragma::get_cgame()->LoadNavMesh() == false || pl == nullptr)
 		return;
 	auto &navMesh = pragma::get_cgame()->GetNavMesh();
@@ -247,7 +248,8 @@ void CMD_debug_nav_path_start(NetworkState *state, pragma::BasePlayerComponent *
 
 void CMD_debug_nav_path_end(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &)
 {
-	CHECK_CHEATS("debug_nav_path_end", state, );
+	if(!check_cheats("debug_nav_path_end", state))
+		return;
 	if(pragma::get_cgame() == nullptr || pragma::get_cgame()->LoadNavMesh() == false || pl == nullptr)
 		return;
 	auto &navMesh = pragma::get_cgame()->GetNavMesh();

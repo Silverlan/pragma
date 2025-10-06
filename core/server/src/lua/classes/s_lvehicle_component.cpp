@@ -1,3 +1,8 @@
+
+#include "pragma/lua/ostream_operator_alias.hpp"
+#include "pragma/lua/s_lentity_components.hpp"
+#include "pragma/lua/luaapi.h"
+
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
@@ -6,14 +11,6 @@
 
 
 import pragma.server.entities.components;
-
-namespace Lua {
-	namespace Vehicle {
-		namespace Server {
-
-		};
-	};
-};
 
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, BaseVehicleComponent);
 

@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 module;
-
+#include "pragma/lua/luaapi.h"
+#include "pragma/lua/ostream_operator_alias.hpp"
 #include "stdafx_server.h"
 #include "luasystem.h"
 
@@ -189,9 +190,7 @@ inline std::ostream &operator<<(std::ostream &s, const Lua::ai::TaskWrapper &tas
 	return s << ss.str();
 }
 
-#ifdef __linux__
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(Lua::ai, TaskWrapper);
-#endif
 
 void Lua::AIBehaviorNode::register_class(lua_State *l, luabind::module_ &mod)
 {

@@ -2,12 +2,14 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "pragma/lua/luaapi.h"
 
 #include "stdafx_server.h"
 #include "luasystem.h"
 
 module pragma.server.scripting.lua.classes.ai_schedule;
 
+import pragma.server.ai.schedule;
 import pragma.server.scripting.lua.classes.ai_behavior;
 import pragma.server.scripting.lua.classes.entity;
 

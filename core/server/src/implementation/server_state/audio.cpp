@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "pragma/logging.hpp"
+
+#include "sharedutils/functioncallback.h"
 
 #include "stdafx_server.h"
 #include <fsys/filesystem.h>

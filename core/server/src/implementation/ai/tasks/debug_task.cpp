@@ -10,6 +10,8 @@ module pragma.server.ai.tasks.debug;
 import pragma.server.debug;
 import pragma.server.entities.components;
 
+#undef DrawText
+
 using namespace pragma;
 
 ai::BehaviorNode::Result ai::TaskDebugPrint::Start(const Schedule *sched, pragma::BaseAIComponent &ent)

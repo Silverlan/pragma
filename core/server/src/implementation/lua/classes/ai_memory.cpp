@@ -2,11 +2,15 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "pragma/lua/luaapi.h"
 
 #include "stdafx_server.h"
 #include "luasystem.h"
 
 module pragma.server.scripting.lua.classes.ai_memory;
+
+import pragma.server.ai.memory;
+import pragma.shared;
 
 namespace Lua {
 	namespace AIMemoryFragment {

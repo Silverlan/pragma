@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "pragma/lua/luaapi.h"
 
 #include "stdafx_server.h"
 #include "luasystem.h"
@@ -9,6 +10,8 @@ module;
 module pragma.server.scripting.lua.libraries.debug_overlay;
 
 import pragma.server.debug;
+
+#undef DrawText
 
 void Lua::DebugRenderer::Server::DrawPoint(const DebugRenderInfo &renderInfo) { SDebugRenderer::DrawPoint(renderInfo.pose.GetOrigin(), renderInfo.color, renderInfo.duration); }
 void Lua::DebugRenderer::Server::DrawLine(const Vector3 &start, const Vector3 &end, const DebugRenderInfo &renderInfo) { SDebugRenderer::DrawLine(renderInfo.pose.GetOrigin() + start, renderInfo.pose.GetOrigin() + end, renderInfo.color, renderInfo.duration); }
@@ -54,7 +57,7 @@ void Lua::DebugRenderer::Server::DrawCylinder(float dist, float radius, const De
 		SDebugRenderer::DrawCylinder(renderInfo.pose.GetOrigin(), uquat::forward(renderInfo.pose.GetRotation()), dist, radius, renderInfo.color, renderInfo.duration, segmentCount);
 }
 void Lua::DebugRenderer::Server::DrawAxis(const DebugRenderInfo &renderInfo) { SDebugRenderer::DrawAxis(renderInfo.pose.GetOrigin(), EulerAngles {renderInfo.pose.GetRotation()}, renderInfo.duration); }
-void Lua::DebugRenderer::Server::DrawText(const std::string &text, const Vector2 &size, const DebugRenderInfo &renderInfo) { ::SDebugRenderer::DrawText(text, renderInfo.pose.GetOrigin(), size, renderInfo.color, renderInfo.duration); }
+void Lua::DebugRenderer::Server::DrawText(const std::string &text, const ::Vector2 &size, const DebugRenderInfo &renderInfo) { ::SDebugRenderer::DrawText(text, renderInfo.pose.GetOrigin(), size, renderInfo.color, renderInfo.duration); }
 void Lua::DebugRenderer::Server::DrawText(const std::string &text, float size, const DebugRenderInfo &renderInfo) { ::SDebugRenderer::DrawText(text, renderInfo.pose.GetOrigin(), size, renderInfo.color, renderInfo.duration); }
 void Lua::DebugRenderer::Server::DrawPath(lua_State *l, luabind::table<> points, const DebugRenderInfo &renderInfo)
 {

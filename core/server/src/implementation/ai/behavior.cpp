@@ -5,8 +5,9 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.ai.behavior;
+module pragma.server.ai.schedule;
 
+import :behavior;
 import pragma.server.entities.components;
 import pragma.server.game;
 
@@ -58,7 +59,7 @@ void ai::BehaviorNode::Stop()
 void ai::BehaviorNode::OnStopped() {}
 void ai::BehaviorNode::OnTaskComplete(const Schedule *sched, uint32_t taskId, Result result) {}
 void ai::BehaviorNode::AddNode(const std::shared_ptr<BehaviorNode> &node) { m_childNodes.push_back(node); }
-ai::BehaviorNode::BehaviorNode::BehaviorNode(const BehaviorNode &other) : ParameterBase(other)
+ai::BehaviorNode::BehaviorNode(const BehaviorNode &other) : ParameterBase(other)
 {
 	m_selector = std::shared_ptr<ai::TaskSelector>(other.m_selector->Copy());
 	m_childNodes.reserve(other.m_childNodes.size());
@@ -68,20 +69,20 @@ ai::BehaviorNode::BehaviorNode::BehaviorNode(const BehaviorNode &other) : Parame
 	m_bActive = false;
 	m_type = other.m_type;
 }
-const ai::Schedule::Parameter *ai::BehaviorNode::BehaviorNode::GetParameter(const Schedule *sched, uint8_t taskParamId) const
+const ai::Schedule::Parameter *ai::BehaviorNode::GetParameter(const Schedule *sched, uint8_t taskParamId) const
 {
 	auto *param = GetParameter(taskParamId);
 	if(param != nullptr)
 		return param;
 	return sched->GetParameter((taskParamId < m_paramIds.size()) ? m_paramIds[taskParamId] : -1);
 }
-void ai::BehaviorNode::BehaviorNode::SetScheduleParameter(uint8_t taskParamId, uint8_t scheduleParamId)
+void ai::BehaviorNode::SetScheduleParameter(uint8_t taskParamId, uint8_t scheduleParamId)
 {
 	if(taskParamId >= m_paramIds.size())
 		m_paramIds.resize(taskParamId + 1, std::numeric_limits<uint8_t>::max());
 	m_paramIds[taskParamId] = scheduleParamId;
 }
-ai::BehaviorNode::Result ai::BehaviorNode::BehaviorNode::StartTask(uint32_t taskId, const Schedule *sched, pragma::BaseAIComponent &ent)
+ai::BehaviorNode::Result ai::BehaviorNode::StartTask(uint32_t taskId, const Schedule *sched, pragma::BaseAIComponent &ent)
 {
 	if(taskId >= m_childNodes.size())
 		return ai::BehaviorNode::Result::Succeeded;
@@ -90,7 +91,7 @@ ai::BehaviorNode::Result ai::BehaviorNode::BehaviorNode::StartTask(uint32_t task
 	taskChild->m_debugInfo.lastResult = r;
 	return r;
 }
-ai::BehaviorNode::Result ai::BehaviorNode::BehaviorNode::ThinkTask(uint32_t taskId, const Schedule *sched, pragma::BaseAIComponent &ent)
+ai::BehaviorNode::Result ai::BehaviorNode::ThinkTask(uint32_t taskId, const Schedule *sched, pragma::BaseAIComponent &ent)
 {
 	if(taskId >= m_childNodes.size())
 		return ai::BehaviorNode::Result::Succeeded;

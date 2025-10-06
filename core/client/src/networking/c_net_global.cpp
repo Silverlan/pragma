@@ -1108,7 +1108,8 @@ static std::unique_ptr<DebugGameGUI> dbgAiSchedule = nullptr;
 void CMD_debug_ai_schedule(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	dbgAiSchedule = nullptr;
-	CHECK_CHEATS("debug_ai_schedule", state, );
+	if(!check_cheats("debug_ai_schedule", state))
+		return;
 	if(pragma::get_cgame() == nullptr || pl == nullptr)
 		return;
 	auto &ent = pl->GetEntity();
@@ -1564,7 +1565,8 @@ void NET_cl_add_shared_component(NetPacket packet)
 }
 
 REGISTER_CONVAR_CALLBACK_CL(debug_ai_navigation, [](NetworkState *state, const ConVar &, bool, bool val) {
-	CHECK_CHEATS("debug_ai_navigation", state, );
+	if(!check_cheats("debug_ai_navigation", state))
+		return;
 	if(pragma::get_cgame() == nullptr)
 		return;
 	if(val == false)

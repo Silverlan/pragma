@@ -4,6 +4,7 @@
 module;
 
 #include "pragma/serverdefinitions.h"
+#include "pragma/lua/luaapi.h"
 
 import pragma.server.entities.components.entity;
 

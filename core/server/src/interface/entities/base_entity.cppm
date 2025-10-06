@@ -5,6 +5,8 @@ module;
 
 #include "pragma/serverdefinitions.h"
 #include <format>
+#include "pragma/lua/luaapi.h"
+
 
 export module pragma.server.entities.base;
 

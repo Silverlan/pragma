@@ -25,9 +25,6 @@ export import :input.enums;
 export import :map.map_info;
 export import :util.resource_watcher;
 
-#define GLFW_RELEASE 0
-#define GLFW_PRESS 1
-
 export {
 	class Game;
 	class ALSound;

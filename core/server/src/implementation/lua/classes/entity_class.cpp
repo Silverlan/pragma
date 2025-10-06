@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "pragma/lua/luaapi.h"
 
 #include "stdafx_server.h"
 #include "luasystem.h"
@@ -9,6 +10,7 @@ module;
 module pragma.server.scripting.lua.classes.entity;
 
 import pragma.server.entities;
+import pragma.util;
 
 void Lua::Entity::Server::register_class(luabind::class_<SBaseEntity, BaseEntity> &classDef)
 {
@@ -35,7 +37,7 @@ void Lua::Entity::Server::SendNetEvent(lua_State *l, SBaseEntity &ent, nwm::Prot
 		break;
 	}
 }
-void Lua::Entity::Server::SendNetEvent(lua_State *l, SBaseEntity &ent, nwm::Protocol protocol, unsigned int eventId, NetPacket packet)
+void Lua::Entity::Server::SendNetEvent(lua_State *l, SBaseEntity &ent, nwm::Protocol protocol, unsigned int eventId, ::NetPacket packet)
 {
 	switch(static_cast<nwm::Protocol>(protocol)) {
 	case nwm::Protocol::TCP:

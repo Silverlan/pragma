@@ -9,6 +9,8 @@ module pragma.server.server_state;
 
 import pragma.server.entities.components;
 
+#undef GetMessage
+
 bool ServerState::HandlePacket(pragma::networking::IServerClient &session, NetPacket &packet)
 {
 	unsigned int ID = packet.GetMessageID();

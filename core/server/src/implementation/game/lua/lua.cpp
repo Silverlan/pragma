@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "fsys/filesystem.h"
+
+#include "pragma/lua/luaapi.h"
 
 #include "stdafx_server.h"
 #include <luainterface.hpp>
@@ -14,6 +17,8 @@ import pragma.server.entities;
 import pragma.server.entities.components;
 import pragma.server.server_state;
 import pragma.server.scripting.lua;
+
+#undef LoadLibrary
 
 namespace pragma {
 	// Has to be in same namespace as class, otherwise luabind can't locate it

@@ -1,3 +1,6 @@
+
+#include "sharedutils/functioncallback.h"
+
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
@@ -10,7 +13,7 @@ import pragma.server.game;
 import pragma.server.networking;
 import pragma.server.server_state;
 
-DLLSERVER void NET_sv_disconnect(pragma::networking::IServerClient &session, NetPacket packet)
+void NET_sv_disconnect(pragma::networking::IServerClient &session, NetPacket packet)
 {
 #ifdef DEBUG_SOCKET
 	Con::csv << "Client '" << session.GetIdentifier() << "' has disconnected." << Con::endl;
@@ -18,9 +21,9 @@ DLLSERVER void NET_sv_disconnect(pragma::networking::IServerClient &session, Net
 	ServerState::Get()->DropClient(session);
 }
 
-DLLSERVER void NET_sv_userinput(pragma::networking::IServerClient &session, NetPacket packet) { ServerState::Get()->ReceiveUserInput(session, packet); }
+void NET_sv_userinput(pragma::networking::IServerClient &session, NetPacket packet) { ServerState::Get()->ReceiveUserInput(session, packet); }
 
-DLLSERVER void NET_sv_ent_event(pragma::networking::IServerClient &session, NetPacket packet)
+void NET_sv_ent_event(pragma::networking::IServerClient &session, NetPacket packet)
 {
 	if(!ServerState::Get()->IsGameActive())
 		return;
@@ -36,7 +39,7 @@ DLLSERVER void NET_sv_ent_event(pragma::networking::IServerClient &session, NetP
 	ent->ReceiveNetEvent(*pl, eventId, packet);
 }
 
-DLLSERVER void NET_sv_clientinfo(pragma::networking::IServerClient &session, NetPacket packet)
+void NET_sv_clientinfo(pragma::networking::IServerClient &session, NetPacket packet)
 {
 	if(!ServerState::Get()->IsGameActive())
 		return;
@@ -52,7 +55,7 @@ void NET_sv_game_ready(pragma::networking::IServerClient &session, NetPacket pac
 	game->ReceiveGameReady(session, packet);
 }
 
-DLLSERVER void NET_sv_cmd_setpos(pragma::networking::IServerClient &session, NetPacket packet)
+void NET_sv_cmd_setpos(pragma::networking::IServerClient &session, NetPacket packet)
 {
 	if(ServerState::Get()->CheatsEnabled() == false)
 		return;
@@ -68,7 +71,7 @@ DLLSERVER void NET_sv_cmd_setpos(pragma::networking::IServerClient &session, Net
 	pTrComponent->SetPosition(pos);
 }
 
-DLLSERVER void NET_sv_cmd_call(pragma::networking::IServerClient &session, NetPacket packet)
+void NET_sv_cmd_call(pragma::networking::IServerClient &session, NetPacket packet)
 {
 	auto *pl = SGame::Get()->GetPlayer(session);
 	std::string cmd = packet->ReadString();
@@ -108,7 +111,7 @@ DLLSERVER void NET_sv_cmd_call(pragma::networking::IServerClient &session, NetPa
 	ServerState::Get()->SendPacket("cmd_call_response", p, pragma::networking::Protocol::SlowReliable, session);
 }
 
-DLLSERVER void NET_sv_rcon(pragma::networking::IServerClient &session, NetPacket packet)
+void NET_sv_rcon(pragma::networking::IServerClient &session, NetPacket packet)
 {
 	if(!ServerState::Get()->IsGameActive())
 		return;
@@ -128,7 +131,7 @@ DLLSERVER void NET_sv_rcon(pragma::networking::IServerClient &session, NetPacket
 	Engine::Get()->ConsoleInput(cvar.c_str());
 }
 
-DLLSERVER void NET_sv_serverinfo_request(pragma::networking::IServerClient &session, NetPacket packet)
+void NET_sv_serverinfo_request(pragma::networking::IServerClient &session, NetPacket packet)
 {
 	std::string password = packet->ReadString();
 	std::string passSv = ServerState::Get()->GetConVarString("sv_password").c_str();
@@ -152,7 +155,7 @@ DLLSERVER void NET_sv_serverinfo_request(pragma::networking::IServerClient &sess
 	ServerState::Get()->SendPacket("serverinfo", p, pragma::networking::Protocol::SlowReliable, session);
 }
 
-DLLSERVER void NET_sv_authenticate(pragma::networking::IServerClient &session, NetPacket packet)
+void NET_sv_authenticate(pragma::networking::IServerClient &session, NetPacket packet)
 {
 	auto hasAuth = packet->Read<bool>();
 	if(ServerState::Get()->IsClientAuthenticationRequired()) {
@@ -191,7 +194,7 @@ DLLSERVER void NET_sv_authenticate(pragma::networking::IServerClient &session, N
 	ServerState::Get()->OnClientAuthenticated(session, {});
 }
 
-DLLSERVER void NET_sv_cvar_set(pragma::networking::IServerClient &session, NetPacket packet)
+void NET_sv_cvar_set(pragma::networking::IServerClient &session, NetPacket packet)
 {
 	if(!ServerState::Get()->IsGameActive())
 		return;
@@ -207,7 +210,7 @@ DLLSERVER void NET_sv_cvar_set(pragma::networking::IServerClient &session, NetPa
 	game->OnClientConVarChanged(*pl, cvar, val);
 }
 
-DLLSERVER void NET_sv_noclip(pragma::networking::IServerClient &session, NetPacket packet)
+void NET_sv_noclip(pragma::networking::IServerClient &session, NetPacket packet)
 {
 	if(!ServerState::Get()->CheatsEnabled())
 		return;
@@ -233,7 +236,7 @@ DLLSERVER void NET_sv_noclip(pragma::networking::IServerClient &session, NetPack
 	ServerState::Get()->SendPacket("pl_toggle_noclip", p, pragma::networking::Protocol::SlowReliable);
 }
 
-DLLSERVER void NET_sv_luanet(pragma::networking::IServerClient &session, ::NetPacket packet) { ServerState::Get()->HandleLuaNetPacket(session, packet); }
+void NET_sv_luanet(pragma::networking::IServerClient &session, ::NetPacket packet) { ServerState::Get()->HandleLuaNetPacket(session, packet); }
 
 void NET_sv_notarget(pragma::networking::IServerClient &session, NetPacket packet)
 {

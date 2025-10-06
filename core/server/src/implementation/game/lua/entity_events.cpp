@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "pragma/lua/luaapi.h"
 
 #include "stdafx_server.h"
 
@@ -19,10 +20,10 @@ bool SGame::InvokeEntityEvent(pragma::BaseEntityComponent &component, uint32_t e
 	  || eventId == pragma::SAIComponent::EVENT_ON_MEMORY_LOST) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
-		auto *memoryFragment = Lua::CheckAIMemoryFragment(l, -1);
+		auto &memoryFragment = Lua::Check<pragma::ai::Memory::Fragment>(l, -1);
 		Lua::Pop(l, 1);
 
-		pragma::CEMemoryData evData {memoryFragment};
+		pragma::CEMemoryData evData {&memoryFragment};
 		if(bInject)
 			component.InjectEvent(eventId, evData);
 		else

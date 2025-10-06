@@ -10,7 +10,7 @@ export module pragma.server.ai.schedule;
 
 export import :behavior;
 
-namespace pragma {
+export namespace pragma {
 	namespace ai {
 		class DLLSERVER Schedule : public std::enable_shared_from_this<Schedule>, public ParameterBase {
 		  public:

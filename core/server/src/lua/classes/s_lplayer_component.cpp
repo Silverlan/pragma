@@ -1,8 +1,13 @@
+
+#include "pragma/lua/ostream_operator_alias.hpp"
+
+#include "pragma/lua/luaapi.h"
+
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_server.h"
-
+#include "pragma/lua/s_lentity_components.hpp"
 
 import pragma.server.entities;
 import pragma.server.entities.components;

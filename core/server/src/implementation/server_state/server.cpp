@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "pragma/logging.hpp"
 
 #include "stdafx_server.h"
 #include "wmserverdata.h"
@@ -12,6 +13,8 @@ module pragma.server.server_state;
 import pragma.server.entities;
 import pragma.server.game;
 import pragma.server.networking;
+
+#undef GetMessage
 
 void ServerState::OnMasterServerRegistered(bool b, std::string reason)
 {

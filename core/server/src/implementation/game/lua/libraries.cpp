@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "pragma/lua/luaapi.h"
 
 #include "stdafx_server.h"
 #include <sharedutils/asset_loader/file_asset_manager.hpp>
@@ -11,6 +12,8 @@ module;
 module pragma.server.game;
 
 import pragma.server.scripting.lua;
+
+#undef DrawText
 
 void SGame::RegisterLuaLibraries()
 {

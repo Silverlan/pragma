@@ -9,10 +9,11 @@ module;
 
 export module pragma.server.server_state;
 
-import pragma.server.audio;
-import pragma.server.entities.components;
-import pragma.server.networking;
-import pragma.server.game;
+export import pragma.server.audio;
+export import pragma.server.entities.components;
+export import pragma.server.networking;
+export import pragma.server.game;
+export import pragma.shared;
 
 #pragma warning(push)
 #pragma warning(disable : 4251)

@@ -11,13 +11,15 @@ module;
 #include <optional>
 #include <mathutil/color.h>
 #include <sharedutils/datastream.h>
+#include "pragma/lua/luaapi.h"
+
 
 export module pragma.server.game;
 
 export import pragma.server.ai.schedule;
-import pragma.server.core.cache_info;
-import pragma.server.entities;
-import pragma.server.entities.components;
+export import pragma.server.core.cache_info;
+export import pragma.server.entities;
+export import pragma.server.entities.components;
 export import pragma.shared;
 
 #pragma warning(push)
@@ -54,7 +56,6 @@ export class DLLSERVER SGame : public Game {
 	virtual std::shared_ptr<pragma::EntityComponentManager> InitializeEntityComponentManager() override;
 	virtual void InitializeEntityComponents(pragma::EntityComponentManager &componentManager) override;
 	virtual void RegisterLuaEntityComponents(luabind::module_ &gameMod) override;
-	virtual void RegisterLuaEntityComponent(luabind::class_<pragma::BaseEntityComponent> &classDef) override;
 	virtual bool InitializeGameMode() override;
 
 	const pragma::NetEventManager &GetEntityNetEventManager() const;

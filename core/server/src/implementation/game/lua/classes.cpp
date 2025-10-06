@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 module;
-
+#include "pragma/lua/luaapi.h"
+#include "material.h"
 #include "stdafx_server.h"
 #include <luainterface.hpp>
 
@@ -203,7 +204,7 @@ void SGame::RegisterLuaClasses()
 	];
 #endif
 
-	auto materialClassDef = luabind::class_<Material>("Material");
+	auto materialClassDef = luabind::class_<::Material>("Material");
 	Lua::Material::register_class(materialClassDef);
 	materialClassDef.def("SetShader", static_cast<void (*)(lua_State *, ::Material &, const std::string &)>([](lua_State *l, ::Material &mat, const std::string &shader) {
 		auto db = mat.GetPropertyDataBlock();
@@ -214,15 +215,15 @@ void SGame::RegisterLuaClasses()
 	}));
 	modGame[materialClassDef];
 
-	auto modelMeshClassDef = luabind::class_<ModelMesh>("Mesh");
+	auto modelMeshClassDef = luabind::class_<::ModelMesh>("Mesh");
 	Lua::ModelMesh::register_class(modelMeshClassDef);
 	modelMeshClassDef.scope[luabind::def("Create", &Lua::ModelMesh::Server::Create)];
 
-	auto subModelMeshClassDef = luabind::class_<ModelSubMesh>("Sub");
+	auto subModelMeshClassDef = luabind::class_<::ModelSubMesh>("Sub");
 	Lua::ModelSubMesh::register_class(subModelMeshClassDef);
 	subModelMeshClassDef.scope[luabind::def("create", &Lua::ModelSubMesh::Server::Create)];
 
-	auto modelClassDef = luabind::class_<Model>("Model");
+	auto modelClassDef = luabind::class_<::Model>("Model");
 	Lua::Model::register_class(GetLuaState(), modelClassDef, modelMeshClassDef, subModelMeshClassDef);
 	modelClassDef.def("AddMaterial", &Lua::Model::Server::AddMaterial);
 	modelClassDef.def("SetMaterial", &Lua::Model::Server::SetMaterial);

@@ -5,6 +5,8 @@ module;
 
 #include "pragma/serverdefinitions.h"
 #include <sharedutils/util_weak_handle.hpp>
+#include "pragma/lua/luaapi.h"
+
 
 export module pragma.server.entities.components.ai;
 

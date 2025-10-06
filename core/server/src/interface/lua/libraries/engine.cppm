@@ -5,6 +5,8 @@ module;
 
 #include "pragma/serverdefinitions.h"
 #include "material.h"
+#include "pragma/lua/luaapi.h"
+
 
 export module pragma.server.scripting.lua.libraries.engine;
 

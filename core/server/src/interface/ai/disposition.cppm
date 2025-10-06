@@ -8,5 +8,5 @@ module;
 export module pragma.server.ai.disposition;
 
 export {
-    enum class DLLSERVER DISPOSITION : uint32_t { HATE, FEAR, NEUTRAL, LIKE, COUNT };
+    enum class DISPOSITION : uint32_t { HATE, FEAR, NEUTRAL, LIKE, COUNT };
 };

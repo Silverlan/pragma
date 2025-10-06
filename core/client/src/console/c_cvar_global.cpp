@@ -55,7 +55,8 @@ void CMD_thirdperson(NetworkState *state, pragma::BasePlayerComponent *pl, std::
 	if(!observer)
 		return;
 	auto *cstate = static_cast<ClientState *>(state);
-	CHECK_CHEATS("thirdperson", cstate, );
+	if(!check_cheats("thirdperson", cstate))
+		return;
 	auto bThirdPerson = false;
 	if(!argv.empty())
 		bThirdPerson = (atoi(argv.front().c_str()) != 0) ? true : false;
@@ -74,7 +75,8 @@ DLLCLIENT void CMD_setpos(NetworkState *state, pragma::BasePlayerComponent *, st
 	if(argv.size() < 3)
 		return;
 	ClientState *cstate = static_cast<ClientState *>(state);
-	CHECK_CHEATS("setpos", cstate, );
+	if(!check_cheats("setpos", cstate))
+		return;
 	Vector3 pos(atof(argv[0].c_str()), atof(argv[1].c_str()), atof(argv[2].c_str()));
 	NetPacket p;
 	nwm::write_vector(p, pos);
@@ -107,7 +109,8 @@ DLLCLIENT void CMD_setcampos(NetworkState *state, pragma::BasePlayerComponent *p
 	if(argv.size() < 3)
 		return;
 	ClientState *cstate = static_cast<ClientState *>(state);
-	CHECK_CHEATS("setpos", cstate, );
+	if(!check_cheats("setpos", cstate))
+		return;
 	Vector3 pos(atof(argv[0].c_str()), atof(argv[1].c_str()), atof(argv[2].c_str()));
 	auto *game = static_cast<CGame *>(state->GetGameState());
 	auto *pCam = game->GetRenderCamera<pragma::CCameraComponent>();
@@ -137,7 +140,8 @@ DLLCLIENT void CMD_setang(NetworkState *state, pragma::BasePlayerComponent *pl, 
 		return;
 	if(pl == NULL)
 		return;
-	CHECK_CHEATS("setang", cstate, );
+	if(!check_cheats("setang", cstate))
+		return;
 	auto charComponent = pl->GetEntity().GetCharacterComponent();
 	if(charComponent.expired())
 		return;
@@ -167,7 +171,8 @@ DLLCLIENT void CMD_setcamang(NetworkState *state, pragma::BasePlayerComponent *p
 	if(argv.size() < 3)
 		return;
 	ClientState *cstate = static_cast<ClientState *>(state);
-	CHECK_CHEATS("setpos", cstate, );
+	if(!check_cheats("setpos", cstate))
+		return;
 	EulerAngles ang(util::to_float(argv[0]), util::to_float(argv[1]), util::to_float(argv[2]));
 	auto *game = static_cast<CGame *>(state->GetGameState());
 	auto *pCam = game->GetRenderCamera<pragma::CCameraComponent>();
@@ -490,7 +495,8 @@ DLLCLIENT void CMD_flashlight_toggle(NetworkState *, pragma::BasePlayerComponent
 
 void CMD_debug_ai_schedule_print(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
-	CHECK_CHEATS("debug_ai_schedule_print", state, );
+	if(!check_cheats("debug_ai_schedule_print", state))
+		return;
 	if(pragma::get_cgame() == nullptr || pl == nullptr)
 		return;
 	auto charComponent = pl->GetEntity().GetCharacterComponent();
@@ -516,14 +522,18 @@ void CMD_debug_ai_schedule_print(NetworkState *state, pragma::BasePlayerComponen
 
 DLLCLIENT void CMD_reloadmaterial(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
-	CHECK_CHEATS("reloadmaterial", state, );
+	if(!check_cheats("reloadmaterial", state))
+		return;
 	if(argv.empty())
 		return;
 	Con::cout << "Reloading '" << argv[0] << "'..." << Con::endl;
 	pragma::get_client_state()->LoadMaterial(argv[0].c_str(), nullptr, true);
 }
 
-DLLCLIENT void CMD_reloadmaterials(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &) { CHECK_CHEATS("reloadmaterials", state, ); }
+DLLCLIENT void CMD_reloadmaterials(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &) {
+	if(!check_cheats("reloadmaterials", state))
+		return;
+}
 
 void Console::commands::cl_list(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {

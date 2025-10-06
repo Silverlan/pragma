@@ -2,7 +2,10 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "pragma/lua/ostream_operator_alias.hpp"
 
+#include "pragma/lua/luaapi.h"
+#include "pragma/lua/s_lentity_components.hpp"
 #include "stdafx_server.h"
 
 
@@ -12,11 +15,6 @@ import pragma.server.entities;
 import pragma.server.entities.components;
 import pragma.shared;
 
-void SGame::RegisterLuaEntityComponent(luabind::class_<pragma::BaseEntityComponent> &def)
-{
-	Game::RegisterLuaEntityComponent(def);
-	// TODO: Remove this function
-}
 void RegisterLuaEntityComponents2_sv(lua_State *l, luabind::module_ &entsMod);
 
 #ifdef __linux__

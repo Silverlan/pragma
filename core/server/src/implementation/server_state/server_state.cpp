@@ -2,8 +2,12 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "fsys/filesystem.h"
+
+#include "pragma/logging.hpp"
 
 #include "stdafx_server.h"
+#include "pragma/serverdefinitions.h"
 #include "wmserverdata.h"
 #include "luasystem.h"
 #include <material_manager2.hpp>
@@ -17,6 +21,8 @@ import pragma.server.entities;
 import pragma.server.game;
 import pragma.server.model_manager;
 import pragma.server.networking;
+
+#undef GetMessage
 
 static std::unordered_map<std::string, std::shared_ptr<PtrConVar>> *conVarPtrs = NULL;
 std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &ServerState::GetConVarPtrs() { return *conVarPtrs; }

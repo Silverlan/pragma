@@ -232,35 +232,40 @@ void Console::commands::use_out(NetworkState *state, pragma::BasePlayerComponent
 
 void Console::commands::noclip(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
-	CHECK_CHEATS("noclip", state, );
+	if(!check_cheats("noclip", state))
+		return;
 	ClientState *client = static_cast<ClientState *>(state);
 	client->SendPacket("noclip", pragma::networking::Protocol::SlowReliable);
 }
 
 void Console::commands::notarget(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
-	CHECK_CHEATS("notarget", state, );
+	if(!check_cheats("notarget", state))
+		return;
 	ClientState *client = static_cast<ClientState *>(state);
 	client->SendPacket("notarget", pragma::networking::Protocol::SlowReliable);
 }
 
 void Console::commands::godmode(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
-	CHECK_CHEATS("godmode", state, );
+	if(!check_cheats("godmode", state))
+		return;
 	auto *client = static_cast<ClientState *>(state);
 	client->SendPacket("godmode", pragma::networking::Protocol::SlowReliable);
 }
 
 void Console::commands::suicide(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
-	CHECK_CHEATS("suicide", state, );
+	if(!check_cheats("suicide", state))
+		return;
 	auto *client = static_cast<ClientState *>(state);
 	client->SendPacket("suicide", pragma::networking::Protocol::SlowReliable);
 }
 
 void Console::commands::hurtme(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &args)
 {
-	CHECK_CHEATS("hurtme", state, );
+	if(!check_cheats("hurtme", state))
+		return;
 	auto dmg = !args.empty() ? atoi(args.front().c_str()) : 1;
 	NetPacket p;
 	p->Write<uint16_t>(static_cast<uint16_t>(dmg));
@@ -273,7 +278,8 @@ void Console::commands::give_weapon(NetworkState *state, pragma::BasePlayerCompo
 	auto *client = pragma::get_client_state();
 	if(argv.empty() || !client->IsGameActive())
 		return;
-	CHECK_CHEATS("give_weapon", state, );
+	if(!check_cheats("give_weapon", state))
+		return;
 	NetPacket p;
 	p->WriteString(argv.front());
 	client->SendPacket("give_weapon", p, pragma::networking::Protocol::SlowReliable);
@@ -284,7 +290,8 @@ void Console::commands::strip_weapons(NetworkState *state, pragma::BasePlayerCom
 	auto *client = pragma::get_client_state();
 	if(!client->IsGameActive())
 		return;
-	CHECK_CHEATS("strip_weapons", state, );
+	if(!check_cheats("strip_weapons", state))
+		return;
 	NetPacket p;
 	client->SendPacket("strip_weapons", p, pragma::networking::Protocol::SlowReliable);
 }
@@ -307,7 +314,8 @@ void Console::commands::give_ammo(NetworkState *state, pragma::BasePlayerCompone
 	if(argv.empty() || !client->IsGameActive())
 		return;
 	uint32_t amount = (argv.size() > 1) ? util::to_int(argv[1]) : 50;
-	CHECK_CHEATS("give_ammo", state, );
+	if(!check_cheats("give_ammo", state))
+		return;
 	NetPacket p;
 	p->WriteString(argv.front());
 	p->Write<uint32_t>(amount);

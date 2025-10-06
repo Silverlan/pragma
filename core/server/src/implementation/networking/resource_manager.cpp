@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "pragma/lua/luaapi.h"
 
 #include "stdafx_server.h"
 #include <fsys/filesystem.h>
@@ -13,6 +14,8 @@ module pragma.server.networking.resource_manager;
 import pragma.server.entities;
 import pragma.server.game;
 import pragma.server.server_state;
+
+#undef FindResource
 
 ResourceManager::ResourceInfo::ResourceInfo(const std::string &_fileName, bool _stream) : fileName(_fileName), stream(_stream) {}
 

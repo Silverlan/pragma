@@ -217,7 +217,7 @@ bool Engine::RunEngineConsoleCommand(std::string scmd, std::vector<std::string> 
 		}
 		auto flags = cvar->GetFlags();
 		//if((flags &ConVarFlags::Cheat) == ConVarFlags::Cheat)
-		//	CHECK_CHEATS(scmd,this,true);
+		//	if(!check_cheats(scmd,this)) return true;
 		SetConVar(scmd, argv[0]);
 		return true;
 	}

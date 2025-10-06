@@ -4,7 +4,7 @@
 #include "stdafx_server.h"
 #include "pragma/serverdefinitions.h"
 
-import pragma.shared;
+import pragma.server;
 
 void NET_cl_send(pragma::networking::IServerClient &session, NetPacket packet)
 {

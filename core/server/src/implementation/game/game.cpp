@@ -3,6 +3,10 @@
 
 module;
 
+#include "pragma/serverdefinitions.h"
+#include "pragma/lua/luaapi.h"
+#include "pragma/console/s_cvar.h"
+
 #include "stdafx_server.h"
 #include <fsys/filesystem.h>
 #include "luasystem.h"

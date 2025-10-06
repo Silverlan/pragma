@@ -2,11 +2,14 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "pragma/lua/luaapi.h"
 
 #include "stdafx_server.h"
 #include "luasystem.h"
 
 module pragma.server.scripting.lua.classes.model_mesh;
+
+import pragma.shared;
 
 void Lua::ModelMesh::Server::Create(lua_State *l) { Lua::Push<std::shared_ptr<::ModelMesh>>(l, std::make_shared<::ModelMesh>()); }
 

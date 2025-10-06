@@ -10,6 +10,10 @@ module;
 export module pragma.shared:game.enums;
 
 export {
+    // These have to match GLFW_RELEASE and GLFW_PRESS
+	uint32_t KEY_RELEASE = 0;
+	uint32_t KEY_PRESS = 1;
+
     constexpr uint32_t RESOURCE_TRANSFER_FRAGMENT_SIZE = 2'048;
 
     enum class TimerType : uint8_t { CurTime = 0, RealTime, ServerTime };

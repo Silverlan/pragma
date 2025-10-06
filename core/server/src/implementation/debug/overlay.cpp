@@ -10,6 +10,8 @@ module pragma.server.debug.overlay;
 
 import pragma.server.server_state;
 
+#undef DrawText
+
 void SDebugRenderer::DrawPoint(const Vector3 &pos, const Color &color, float duration)
 {
 	NetPacket p;

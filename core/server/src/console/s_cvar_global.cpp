@@ -1,3 +1,6 @@
+
+#include "fsys/filesystem.h"
+
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
@@ -73,7 +76,7 @@ void CMD_sv_dump_netmessages(NetworkState *, pragma::BasePlayerComponent *, std:
 }
 #endif
 
-DLLSERVER void CMD_entities_sv(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+void CMD_entities_sv(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	if(!state->IsGameActive())
 		return;
@@ -110,7 +113,7 @@ void CMD_list_maps(NetworkState *state, pragma::BasePlayerComponent *pl, std::ve
 	Con::cout << Con::endl;
 }
 
-DLLSERVER void CMD_status_sv(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
+void CMD_status_sv(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
 	auto &players = pragma::SPlayerComponent::GetAll();
 	std::string ip;

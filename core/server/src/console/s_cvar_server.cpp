@@ -8,7 +8,7 @@ import pragma.server.entities.components;
 import pragma.server.game;
 import pragma.server.server_state;
 
-DLLSERVER void CMD_sv_send(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
+void CMD_sv_send(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
 	if(argv.empty())
 		return;
@@ -28,7 +28,7 @@ DLLSERVER void CMD_sv_send(NetworkState *, pragma::BasePlayerComponent *, std::v
 	}
 }
 
-DLLSERVER void CMD_sv_send_udp(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
+void CMD_sv_send_udp(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
 	if(argv.empty())
 		return;
@@ -47,9 +47,10 @@ DLLSERVER void CMD_sv_send_udp(NetworkState *, pragma::BasePlayerComponent *, st
 	}
 }
 
-DLLSERVER void CMD_ent_input(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+void CMD_ent_input(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
-	CHECK_CHEATS("ent_input", state, );
+	if(!check_cheats("ent_input", state))
+		return;
 	if(SGame::Get() == NULL)
 		return;
 	auto *activator = (pl != nullptr) ? &pl->GetEntity() : nullptr;
@@ -91,7 +92,8 @@ DLLSERVER void CMD_ent_input(NetworkState *state, pragma::BasePlayerComponent *p
 
 void CMD_ent_scale(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
-	CHECK_CHEATS("ent_scale", state, );
+	if(!check_cheats("ent_scale", state))
+		return;
 	if(SGame::Get() == nullptr)
 		return;
 	if(argv.size() >= 2) {
@@ -119,9 +121,10 @@ void CMD_ent_scale(NetworkState *state, pragma::BasePlayerComponent *pl, std::ve
 	}
 }
 
-DLLSERVER void CMD_ent_remove(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+void CMD_ent_remove(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
-	CHECK_CHEATS("ent_remove", state, );
+	if(!check_cheats("ent_remove", state))
+		return;
 	if(SGame::Get() == NULL || pl == NULL)
 		return;
 	auto &ent = pl->GetEntity();
@@ -137,9 +140,10 @@ DLLSERVER void CMD_ent_remove(NetworkState *state, pragma::BasePlayerComponent *
 		ent->Remove();
 }
 
-DLLSERVER void CMD_ent_create(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+void CMD_ent_create(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
-	CHECK_CHEATS("ent_create", state, );
+	if(!check_cheats("ent_create", state))
+		return;
 	if(SGame::Get() == NULL)
 		return;
 	if(argv.empty() || pl == NULL)
@@ -190,7 +194,7 @@ void CMD_nav_reload(NetworkState *state, pragma::BasePlayerComponent *pl, std::v
 	SGame::Get()->LoadNavMesh(true);
 }
 
-DLLSERVER void CMD_nav_generate(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
+void CMD_nav_generate(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
 	if(SGame::Get() == NULL)
 		return;

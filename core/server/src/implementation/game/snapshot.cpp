@@ -149,7 +149,7 @@ void SGame::SendSnapshot(pragma::SPlayerComponent *pl)
 				{
 					InputAction &ka = keyStack[k];
 					packet->Write<unsigned short>(CUInt16(ka.action));
-					packet->Write<char>(ka.task == GLFW_PRESS);
+					packet->Write<char>(ka.task == KEY_PRESS);
 				}
 			}
 		}

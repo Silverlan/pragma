@@ -246,11 +246,11 @@ void CMD_sv_debug_netmessages(NetworkState *state, pragma::BasePlayerComponent *
 		return;
 	}
 	auto *svMap = GetServerMessageMap();
-	std::unordered_map<std::string, uint32_t> *svMsgs;
+	util::StringMap<uint32_t> *svMsgs;
 	svMap->GetNetMessages(&svMsgs);
 
 	auto *clMap = GetClientMessageMap();
-	std::unordered_map<std::string, uint32_t> *clMsgs;
+	util::StringMap<uint32_t> *clMsgs;
 	clMap->GetNetMessages(&clMsgs);
 
 	sv->DebugPrint(*svMsgs, *clMsgs);

@@ -152,6 +152,7 @@ Engine::Engine(int argc, char *argv[]) : CVarHandler(), m_logFile(nullptr), m_ti
 		return {};
 	});
 
+	register_net_messages();
 	pragma::locale::init();
 	// OpenConsole();
 

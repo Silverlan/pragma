@@ -51,6 +51,8 @@ ClientState *pragma::get_client_state() { return g_client; }
 std::vector<std::string> &get_required_game_textures();
 ClientState::ClientState() : NetworkState(), m_client(nullptr), m_svInfo(nullptr), m_resDownload(nullptr), m_volMaster(1.f), m_hMainMenu(), m_luaGUI(NULL)
 {
+	register_client_net_messages();
+
 	g_client = this;
 	m_soundScriptManager = std::make_unique<CSoundScriptManager>();
 

@@ -39,6 +39,8 @@ static ServerState *g_server = nullptr;
 ServerState *ServerState::Get() { return g_server; }
 ServerState::ServerState() : NetworkState(), m_server(nullptr)
 {
+	register_server_net_messages();
+
 	m_alsoundID = 1;
 	g_server = this;
 	m_soundScriptManager = std::make_unique<SoundScriptManager>();

@@ -7,6 +7,8 @@ module;
 
 module pragma.server.networking.iserver;
 
+import pragma.server.networking.iserver_client;
+
 bool pragma::networking::IServer::Shutdown(Error &outErr)
 {
 	for(auto &cl : m_clients)

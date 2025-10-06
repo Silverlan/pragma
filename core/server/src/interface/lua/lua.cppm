@@ -24,3 +24,5 @@ export import pragma.server.scripting.lua.libraries.game;
 export import pragma.server.scripting.lua.libraries.net;
 export import pragma.server.scripting.lua.libraries.sound;
 export import pragma.server.scripting.lua.libraries.util;
+
+export import pragma.server.scripting.lua.script_watcher;

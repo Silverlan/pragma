@@ -1,19 +1,202 @@
-
-#include "sharedutils/functioncallback.h"
-
-// SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
+// SPDX-FileCopyrightText: (c) 2025 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
-#include <sharedutils/util_library.hpp>
+
+module pragma.server.networking.net_messages;
 
 import pragma.server.entities;
 import pragma.server.entities.components;
 import pragma.server.game;
-import pragma.server.networking;
+import pragma.server.model_manager;
+import pragma.server.networking.iserver_client;
 import pragma.server.server_state;
 
-void NET_sv_disconnect(pragma::networking::IServerClient &session, NetPacket packet)
+static void NET_sv_RESOURCEINFO_RESPONSE(pragma::networking::IServerClient &session, NetPacket packet);
+static void NET_sv_RESOURCE_REQUEST(pragma::networking::IServerClient &session, NetPacket packet);
+static void NET_sv_RESOURCE_BEGIN(pragma::networking::IServerClient &session, NetPacket packet);
+static void NET_sv_QUERY_RESOURCE(pragma::networking::IServerClient &session, NetPacket packet);
+static void NET_sv_QUERY_MODEL_TEXTURE(pragma::networking::IServerClient &session, NetPacket packet);
+
+static void NET_sv_DISCONNECT(pragma::networking::IServerClient &session, NetPacket packet);
+static void NET_sv_USERINPUT(pragma::networking::IServerClient &session, NetPacket packet);
+static void NET_sv_CLIENTINFO(pragma::networking::IServerClient &session, NetPacket packet);
+static void NET_sv_GAME_READY(pragma::networking::IServerClient &session, NetPacket packet);
+static void NET_sv_CMD_CALL(pragma::networking::IServerClient &session, NetPacket packet);
+static void NET_sv_RCON(pragma::networking::IServerClient &session, NetPacket packet);
+static void NET_sv_SERVERINFO_REQUEST(pragma::networking::IServerClient &session, NetPacket packet);
+static void NET_sv_AUTHENTICATE(pragma::networking::IServerClient &session, NetPacket packet);
+static void NET_sv_LUANET(pragma::networking::IServerClient &session, NetPacket packet);
+static void NET_sv_CMD_SETPOS(pragma::networking::IServerClient &session, NetPacket packet);
+static void NET_sv_CVAR_SET(pragma::networking::IServerClient &session, NetPacket packet);
+static void NET_sv_NOCLIP(pragma::networking::IServerClient &session, NetPacket packet);
+static void NET_sv_NOTARGET(pragma::networking::IServerClient &session, NetPacket packet);
+static void NET_sv_GODMODE(pragma::networking::IServerClient &session, NetPacket packet);
+static void NET_sv_SUICIDE(pragma::networking::IServerClient &session, NetPacket packet);
+static void NET_sv_HURTME(pragma::networking::IServerClient &session, NetPacket packet);
+static void NET_sv_WEAPON_NEXT(pragma::networking::IServerClient &session, NetPacket packet);
+static void NET_sv_WEAPON_PREVIOUS(pragma::networking::IServerClient &session, NetPacket packet);
+static void NET_sv_ENT_EVENT(pragma::networking::IServerClient &session, NetPacket packet);
+static void NET_sv_GIVE_WEAPON(pragma::networking::IServerClient &session, NetPacket packet);
+static void NET_sv_STRIP_WEAPONS(pragma::networking::IServerClient &session, NetPacket packet);
+static void NET_sv_GIVE_AMMO(pragma::networking::IServerClient &session, NetPacket packet);
+static void NET_sv_DEBUG_AI_NAVIGATION(pragma::networking::IServerClient &session, NetPacket packet);
+static void NET_sv_DEBUG_AI_SCHEDULE_PRINT(pragma::networking::IServerClient &session, NetPacket packet);
+static void NET_sv_DEBUG_AI_SCHEDULE_TREE(pragma::networking::IServerClient &session, NetPacket packet);
+
+static void NET_sv_SEND(pragma::networking::IServerClient &session, NetPacket packet);
+
+#define REGISTER_NET_MSG(NAME) \
+    netMessageMap.RegisterNetMessage(server::NAME, &NET_sv_##NAME)
+
+static void register_net_messages(ServerMessageMap &netMessageMap)
+{
+    using namespace pragma::networking::net_messages;
+    REGISTER_NET_MSG(RESOURCEINFO_RESPONSE);
+    REGISTER_NET_MSG(RESOURCE_REQUEST);
+    REGISTER_NET_MSG(RESOURCE_BEGIN);
+    REGISTER_NET_MSG(QUERY_RESOURCE);
+    REGISTER_NET_MSG(QUERY_MODEL_TEXTURE);
+
+    REGISTER_NET_MSG(DISCONNECT);
+    REGISTER_NET_MSG(USERINPUT);
+    REGISTER_NET_MSG(CLIENTINFO);
+    REGISTER_NET_MSG(GAME_READY);
+    REGISTER_NET_MSG(CMD_CALL);
+    REGISTER_NET_MSG(RCON);
+    REGISTER_NET_MSG(SERVERINFO_REQUEST);
+    REGISTER_NET_MSG(AUTHENTICATE);
+    REGISTER_NET_MSG(LUANET);
+    REGISTER_NET_MSG(CMD_SETPOS);
+    REGISTER_NET_MSG(CVAR_SET);
+    REGISTER_NET_MSG(NOCLIP);
+    REGISTER_NET_MSG(NOTARGET);
+    REGISTER_NET_MSG(GODMODE);
+    REGISTER_NET_MSG(SUICIDE);
+    REGISTER_NET_MSG(HURTME);
+    REGISTER_NET_MSG(WEAPON_NEXT);
+    REGISTER_NET_MSG(WEAPON_PREVIOUS);
+    REGISTER_NET_MSG(ENT_EVENT);
+    REGISTER_NET_MSG(GIVE_WEAPON);
+    REGISTER_NET_MSG(STRIP_WEAPONS);
+    REGISTER_NET_MSG(GIVE_AMMO);
+    REGISTER_NET_MSG(DEBUG_AI_NAVIGATION);
+    REGISTER_NET_MSG(DEBUG_AI_SCHEDULE_PRINT);
+    REGISTER_NET_MSG(DEBUG_AI_SCHEDULE_TREE);
+    
+    REGISTER_NET_MSG(CL_SEND);
+}
+
+void register_server_net_messages()
+{
+	static auto netMessagesRegistered = false;
+	if(netMessagesRegistered)
+		return;
+	netMessagesRegistered = true;
+    
+    register_net_messages(GetServerMessageMap());
+}
+
+#define RESOURCE_TRANSFER_VERBOSE 0
+
+void NET_sv_RESOURCEINFO_RESPONSE(pragma::networking::IServerClient &session, NetPacket packet) { ServerState::Get()->HandleServerResourceStart(session, packet); }
+
+void NET_sv_RESOURCE_REQUEST(pragma::networking::IServerClient &session, NetPacket packet)
+{
+	bool b = packet->Read<bool>();
+#if RESOURCE_TRANSFER_VERBOSE == 1
+	Con::csv << "[ResourceManager] Got resource request from client: " << session->GetIdentifier() << " (" << b << ")" << Con::endl;
+#endif
+	if(b)
+		ServerState::Get()->HandleServerNextResource(session);
+	else
+		ServerState::Get()->HandleServerResourceFragment(session);
+}
+
+void NET_sv_RESOURCE_BEGIN(pragma::networking::IServerClient &session, NetPacket packet)
+{
+	session.SetInitialResourceTransferState(pragma::networking::IServerClient::TransferState::Started);
+	bool bSend = packet->Read<bool>() && ServerState::Get()->GetConVarBool("sv_allowdownload");
+	if(bSend) {
+#if RESOURCE_TRANSFER_VERBOSE == 1
+		Con::csv << "[ResourceManager] Sending next resource to client: " << session->GetIdentifier() << Con::endl;
+#endif
+		ServerState::Get()->HandleServerNextResource(session);
+	}
+	else {
+#if RESOURCE_TRANSFER_VERBOSE == 1
+		Con::csv << "[ResourceManager] All resources have been sent to: " << session->GetIdentifier() << Con::endl;
+#endif
+		NetPacket p;
+		ServerState::Get()->SendPacket("resourcecomplete", p, pragma::networking::Protocol::SlowReliable, session);
+	}
+}
+
+void NET_sv_QUERY_RESOURCE(pragma::networking::IServerClient &session, NetPacket packet)
+{
+	if(SGame::Get() == nullptr)
+		return;
+	auto fileName = packet->ReadString();
+	//#if RESOURCE_TRANSFER_VERBOSE == 1
+	Con::csv << "[ResourceManager] Query Resource: " << fileName << Con::endl;
+	//#endif
+	if(SGame::Get()->IsValidGameResource(fileName) == false) // Client isn't allowed to download this resource
+	{
+		session.ScheduleResource(fileName); // Might be allowed to download the resource in the future, remember it!
+		return;
+	}
+	ServerState::Get()->SendResourceFile(fileName, {&session});
+}
+
+void NET_sv_QUERY_MODEL_TEXTURE(pragma::networking::IServerClient &session, NetPacket packet)
+{
+	auto mdlName = packet->ReadString();
+	auto matName = packet->ReadString();
+	auto *asset = ServerState::Get()->GetModelManager().FindCachedAsset(mdlName);
+	if(asset == nullptr)
+		return;
+	auto mdl = pragma::asset::ModelManager::GetAssetObject(*asset);
+	std::string dstName;
+	if(mdl->FindMaterial(matName, dstName) == false)
+		return;
+	auto &matManager = ServerState::Get()->GetMaterialManager();
+	auto normalizedName = matManager.ToCacheIdentifier(dstName);
+	auto *matAsset = matManager.FindCachedAsset(dstName);
+	auto mat = matAsset ? msys::MaterialManager::GetAssetObject(*matAsset) : nullptr;
+	if(mat == nullptr)
+		return;
+	std::vector<std::string> textures;
+	std::function<void(const util::Path &path)> fFindTextures = nullptr;
+	fFindTextures = [mat, &fFindTextures, &textures](const util::Path &path) {
+		for(auto &name : msys::MaterialPropertyBlockView {*mat, path}) {
+			auto propType = mat->GetPropertyType(name);
+			switch(propType) {
+			case msys::PropertyType::Block:
+				fFindTextures(util::FilePath(path, name));
+				break;
+			case msys::PropertyType::Texture:
+				{
+					std::string texName;
+					if(mat->GetProperty(util::FilePath(path, name).GetString(), &texName)) {
+						auto path = util::FilePath(pragma::asset::get_asset_root_directory(pragma::asset::Type::Material), texName).GetString();
+						textures.push_back(path);
+					}
+					break;
+				}
+			}
+		}
+	};
+	fFindTextures({});
+
+	std::vector<pragma::networking::IServerClient *> vSession = {&session};
+	for(auto &tex : textures)
+		ServerState::Get()->SendResourceFile(tex, vSession);
+	ServerState::Get()->SendResourceFile("materials\\" + normalizedName, vSession);
+}
+
+void NET_sv_DISCONNECT(pragma::networking::IServerClient &session, NetPacket packet)
 {
 #ifdef DEBUG_SOCKET
 	Con::csv << "Client '" << session.GetIdentifier() << "' has disconnected." << Con::endl;
@@ -21,9 +204,9 @@ void NET_sv_disconnect(pragma::networking::IServerClient &session, NetPacket pac
 	ServerState::Get()->DropClient(session);
 }
 
-void NET_sv_userinput(pragma::networking::IServerClient &session, NetPacket packet) { ServerState::Get()->ReceiveUserInput(session, packet); }
+void NET_sv_USERINPUT(pragma::networking::IServerClient &session, NetPacket packet) { ServerState::Get()->ReceiveUserInput(session, packet); }
 
-void NET_sv_ent_event(pragma::networking::IServerClient &session, NetPacket packet)
+void NET_sv_ENT_EVENT(pragma::networking::IServerClient &session, NetPacket packet)
 {
 	if(!ServerState::Get()->IsGameActive())
 		return;
@@ -39,7 +222,7 @@ void NET_sv_ent_event(pragma::networking::IServerClient &session, NetPacket pack
 	ent->ReceiveNetEvent(*pl, eventId, packet);
 }
 
-void NET_sv_clientinfo(pragma::networking::IServerClient &session, NetPacket packet)
+void NET_sv_CLIENTINFO(pragma::networking::IServerClient &session, NetPacket packet)
 {
 	if(!ServerState::Get()->IsGameActive())
 		return;
@@ -47,7 +230,7 @@ void NET_sv_clientinfo(pragma::networking::IServerClient &session, NetPacket pac
 	game->ReceiveUserInfo(session, packet);
 }
 
-void NET_sv_game_ready(pragma::networking::IServerClient &session, NetPacket packet)
+void NET_sv_GAME_READY(pragma::networking::IServerClient &session, NetPacket packet)
 {
 	if(!ServerState::Get()->IsGameActive())
 		return;
@@ -55,7 +238,7 @@ void NET_sv_game_ready(pragma::networking::IServerClient &session, NetPacket pac
 	game->ReceiveGameReady(session, packet);
 }
 
-void NET_sv_cmd_setpos(pragma::networking::IServerClient &session, NetPacket packet)
+void NET_sv_CMD_SETPOS(pragma::networking::IServerClient &session, NetPacket packet)
 {
 	if(ServerState::Get()->CheatsEnabled() == false)
 		return;
@@ -71,7 +254,7 @@ void NET_sv_cmd_setpos(pragma::networking::IServerClient &session, NetPacket pac
 	pTrComponent->SetPosition(pos);
 }
 
-void NET_sv_cmd_call(pragma::networking::IServerClient &session, NetPacket packet)
+void NET_sv_CMD_CALL(pragma::networking::IServerClient &session, NetPacket packet)
 {
 	auto *pl = SGame::Get()->GetPlayer(session);
 	std::string cmd = packet->ReadString();
@@ -111,7 +294,7 @@ void NET_sv_cmd_call(pragma::networking::IServerClient &session, NetPacket packe
 	ServerState::Get()->SendPacket("cmd_call_response", p, pragma::networking::Protocol::SlowReliable, session);
 }
 
-void NET_sv_rcon(pragma::networking::IServerClient &session, NetPacket packet)
+void NET_sv_RCON(pragma::networking::IServerClient &session, NetPacket packet)
 {
 	if(!ServerState::Get()->IsGameActive())
 		return;
@@ -131,7 +314,7 @@ void NET_sv_rcon(pragma::networking::IServerClient &session, NetPacket packet)
 	Engine::Get()->ConsoleInput(cvar.c_str());
 }
 
-void NET_sv_serverinfo_request(pragma::networking::IServerClient &session, NetPacket packet)
+void NET_sv_SERVERINFO_REQUEST(pragma::networking::IServerClient &session, NetPacket packet)
 {
 	std::string password = packet->ReadString();
 	std::string passSv = ServerState::Get()->GetConVarString("sv_password").c_str();
@@ -155,7 +338,7 @@ void NET_sv_serverinfo_request(pragma::networking::IServerClient &session, NetPa
 	ServerState::Get()->SendPacket("serverinfo", p, pragma::networking::Protocol::SlowReliable, session);
 }
 
-void NET_sv_authenticate(pragma::networking::IServerClient &session, NetPacket packet)
+void NET_sv_AUTHENTICATE(pragma::networking::IServerClient &session, NetPacket packet)
 {
 	auto hasAuth = packet->Read<bool>();
 	if(ServerState::Get()->IsClientAuthenticationRequired()) {
@@ -194,7 +377,7 @@ void NET_sv_authenticate(pragma::networking::IServerClient &session, NetPacket p
 	ServerState::Get()->OnClientAuthenticated(session, {});
 }
 
-void NET_sv_cvar_set(pragma::networking::IServerClient &session, NetPacket packet)
+void NET_sv_CVAR_SET(pragma::networking::IServerClient &session, NetPacket packet)
 {
 	if(!ServerState::Get()->IsGameActive())
 		return;
@@ -210,7 +393,7 @@ void NET_sv_cvar_set(pragma::networking::IServerClient &session, NetPacket packe
 	game->OnClientConVarChanged(*pl, cvar, val);
 }
 
-void NET_sv_noclip(pragma::networking::IServerClient &session, NetPacket packet)
+void NET_sv_NOCLIP(pragma::networking::IServerClient &session, NetPacket packet)
 {
 	if(!ServerState::Get()->CheatsEnabled())
 		return;
@@ -236,9 +419,9 @@ void NET_sv_noclip(pragma::networking::IServerClient &session, NetPacket packet)
 	ServerState::Get()->SendPacket("pl_toggle_noclip", p, pragma::networking::Protocol::SlowReliable);
 }
 
-void NET_sv_luanet(pragma::networking::IServerClient &session, ::NetPacket packet) { ServerState::Get()->HandleLuaNetPacket(session, packet); }
+void NET_sv_LUANET(pragma::networking::IServerClient &session, ::NetPacket packet) { ServerState::Get()->HandleLuaNetPacket(session, packet); }
 
-void NET_sv_notarget(pragma::networking::IServerClient &session, NetPacket packet)
+void NET_sv_NOTARGET(pragma::networking::IServerClient &session, NetPacket packet)
 {
 	if(!ServerState::Get()->CheatsEnabled())
 		return;
@@ -252,7 +435,7 @@ void NET_sv_notarget(pragma::networking::IServerClient &session, NetPacket packe
 	pl->PrintMessage(std::string("Notarget turned ") + ((charComponent->GetNoTarget() == true) ? "ON" : "OFF"), MESSAGE::PRINTCONSOLE);
 }
 
-void NET_sv_godmode(pragma::networking::IServerClient &session, NetPacket packet)
+void NET_sv_GODMODE(pragma::networking::IServerClient &session, NetPacket packet)
 {
 	if(!ServerState::Get()->CheatsEnabled())
 		return;
@@ -266,7 +449,7 @@ void NET_sv_godmode(pragma::networking::IServerClient &session, NetPacket packet
 	pl->PrintMessage(std::string("God mode turned ") + ((charComponent->GetGodMode() == true) ? "ON" : "OFF"), MESSAGE::PRINTCONSOLE);
 }
 
-void NET_sv_suicide(pragma::networking::IServerClient &session, NetPacket packet)
+void NET_sv_SUICIDE(pragma::networking::IServerClient &session, NetPacket packet)
 {
 	if(!ServerState::Get()->CheatsEnabled())
 		return;
@@ -279,7 +462,7 @@ void NET_sv_suicide(pragma::networking::IServerClient &session, NetPacket packet
 	charComponent->Kill();
 }
 
-void NET_sv_hurtme(pragma::networking::IServerClient &session, NetPacket packet)
+void NET_sv_HURTME(pragma::networking::IServerClient &session, NetPacket packet)
 {
 	if(!ServerState::Get()->CheatsEnabled())
 		return;
@@ -299,7 +482,7 @@ void NET_sv_hurtme(pragma::networking::IServerClient &session, NetPacket packet)
 	pDamageableComponent->TakeDamage(dmgInfo);
 }
 
-void NET_sv_weapon_next(pragma::networking::IServerClient &session, NetPacket packet)
+void NET_sv_WEAPON_NEXT(pragma::networking::IServerClient &session, NetPacket packet)
 {
 	auto *pl = ServerState::Get()->GetPlayer(session);
 	if(pl == nullptr)
@@ -310,7 +493,7 @@ void NET_sv_weapon_next(pragma::networking::IServerClient &session, NetPacket pa
 	sCharComponent->SelectNextWeapon();
 }
 
-void NET_sv_weapon_previous(pragma::networking::IServerClient &session, NetPacket packet)
+void NET_sv_WEAPON_PREVIOUS(pragma::networking::IServerClient &session, NetPacket packet)
 {
 	auto *pl = ServerState::Get()->GetPlayer(session);
 	if(pl == nullptr)
@@ -321,7 +504,7 @@ void NET_sv_weapon_previous(pragma::networking::IServerClient &session, NetPacke
 	sCharComponent->SelectPreviousWeapon();
 }
 
-void NET_sv_give_weapon(pragma::networking::IServerClient &session, NetPacket packet)
+void NET_sv_GIVE_WEAPON(pragma::networking::IServerClient &session, NetPacket packet)
 {
 	if(!ServerState::Get()->CheatsEnabled() || SGame::Get() == nullptr)
 		return;
@@ -338,7 +521,7 @@ void NET_sv_give_weapon(pragma::networking::IServerClient &session, NetPacket pa
 	sCharComponent->DeployWeapon(*wep);
 }
 
-void NET_sv_strip_weapons(pragma::networking::IServerClient &session, NetPacket packet)
+void NET_sv_STRIP_WEAPONS(pragma::networking::IServerClient &session, NetPacket packet)
 {
 	if(!ServerState::Get()->CheatsEnabled() || SGame::Get() == nullptr)
 		return;
@@ -351,7 +534,7 @@ void NET_sv_strip_weapons(pragma::networking::IServerClient &session, NetPacket 
 	sCharComponent->RemoveWeapons();
 }
 
-void NET_sv_give_ammo(pragma::networking::IServerClient &session, NetPacket packet)
+void NET_sv_GIVE_AMMO(pragma::networking::IServerClient &session, NetPacket packet)
 {
 	if(!ServerState::Get()->CheatsEnabled() || SGame::Get() == nullptr)
 		return;
@@ -370,7 +553,7 @@ void NET_sv_give_ammo(pragma::networking::IServerClient &session, NetPacket pack
 	sCharComponent->SetAmmoCount(ammoTypeId, static_cast<uint16_t>(am));
 }
 
-void NET_sv_debug_ai_schedule_print(pragma::networking::IServerClient &session, NetPacket packet)
+void NET_sv_DEBUG_AI_SCHEDULE_PRINT(pragma::networking::IServerClient &session, NetPacket packet)
 {
 	if(!ServerState::Get()->CheatsEnabled() || SGame::Get() == nullptr)
 		return;
@@ -394,7 +577,7 @@ void NET_sv_debug_ai_schedule_print(pragma::networking::IServerClient &session, 
 	ServerState::Get()->SendPacket("debug_ai_schedule_print", response, pragma::networking::Protocol::SlowReliable, session);
 }
 
-void NET_sv_debug_ai_schedule_tree(pragma::networking::IServerClient &session, NetPacket packet)
+void NET_sv_DEBUG_AI_SCHEDULE_TREE(pragma::networking::IServerClient &session, NetPacket packet)
 {
 	if(!ServerState::Get()->CheatsEnabled() || SGame::Get() == nullptr)
 		return;
@@ -430,7 +613,7 @@ void NET_sv_debug_ai_schedule_tree(pragma::networking::IServerClient &session, N
 	SGame::Get()->AddCallback("OnGameEnd", hCbOnGameEnd);
 }
 
-void NET_sv_debug_ai_navigation(pragma::networking::IServerClient &session, NetPacket packet)
+void NET_sv_DEBUG_AI_NAVIGATION(pragma::networking::IServerClient &session, NetPacket packet)
 {
 	if(!ServerState::Get()->CheatsEnabled() || SGame::Get() == nullptr)
 		return;
@@ -448,4 +631,10 @@ void NET_sv_debug_ai_navigation(pragma::networking::IServerClient &session, NetP
 	auto &npcs = pragma::SAIComponent::GetAll();
 	for(auto *npc : npcs)
 		npc->_debugSendNavInfo(*pl);
+}
+
+void NET_sv_SEND(pragma::networking::IServerClient &session, NetPacket packet)
+{
+	std::string msg = packet->ReadString();
+	Con::csv << "Received cl_send message from client '" << session.GetIdentifier() << "': " << msg << Con::endl;
 }

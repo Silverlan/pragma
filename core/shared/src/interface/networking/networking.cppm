@@ -13,6 +13,7 @@ export import :networking.master_server_query_dispatcher;
 export import :networking.message_tracker;
 export import :networking.modules;
 export import :networking.net_message_map;
+export import :networking.net_messages;
 export import :networking.ports;
 export import :networking.resource;
 export import :networking.util;

@@ -12,7 +12,7 @@ module pragma.shared;
 import :engine.info;
 
 #define PRAGMA_ENGINE_NAME "Pragma"
-#define PRAGMA_AUTHOR_EMAIL "mail@pragma-engine.com"
+#define PRAGMA_AUTHOR_EMAIL "opensource@pragma-engine.com"
 #define PRAGMA_WEBSITE_URL "https://pragma-engine.com"
 #define PRAGMA_WIKI_URL "https://wiki.pragma-engine.com/"
 #define PRAGMA_GITHUB_URL "https://github.com/Silverlan/pragma"

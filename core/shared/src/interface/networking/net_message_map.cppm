@@ -4,6 +4,7 @@
 module;
 
 #include "pragma/networkdefinitions.h"
+#include "sharedutils/util_string_hash.hpp"
 #include <unordered_map>
 #include <string>
 #include <unordered_map>
@@ -18,55 +19,44 @@ export {
 	using ServerClientHandle = void*;
 	class DLLNETWORK SVNetMessage {
 	public:
-		void (*handler)(ServerClientHandle &, NetPacket);
+		using Handler = void(*)(ServerClientHandle &, NetPacket);
+		Handler *handler;
 		unsigned int ID;
 	};
 
 	class DLLNETWORK CLNetMessage {
 	public:
-		void (*handler)(NetPacket);
+		using Handler = void(*)(NetPacket);
+		Handler *handler;
 		unsigned int ID;
 	};
 
+	class IBaseNetMessageMap {
+	public:
+		virtual void RegisterNetMessage(const std::string_view &name);
+	};
+
 	template<class T>
-	class NetMessageMap {
+	class NetMessageMap : public IBaseNetMessageMap {
 	public:
 		NetMessageMap();
-	protected:
-		std::unordered_map<unsigned int, T> m_netMessages;
-		std::unordered_map<std::string, unsigned int> m_netMessageIDs;
-		unsigned int m_messageID;
 	public:
-		virtual void RegisterNetMessage(std::string name, void (*handler)(NetPacket));
-		virtual void PreRegisterNetMessage(std::string name, void (*handler)(NetPacket));
-		virtual void RegisterNetMessage(std::string name, void (*handler)(ServerClientHandle &, NetPacket));
-		virtual void PreRegisterNetMessage(std::string name, void (*handler)(ServerClientHandle &, NetPacket));
 		void GetNetMessages(std::unordered_map<unsigned int, T> **messages);
-		void GetNetMessages(std::unordered_map<std::string, unsigned int> **messages);
+		void GetNetMessages(util::StringMap<unsigned int> **messages);
 		T *GetNetMessage(unsigned int ID);
 		T *GetNetMessage(std::string identifier);
 		unsigned int GetNetMessageID(std::string identifier);
+
+		void RegisterNetMessage(const std::string_view &name) override;
+		void RegisterNetMessage(const std::string_view &name, const T::Handler &handler);
+	protected:
+		std::unordered_map<unsigned int, T> m_netMessages;
+		util::StringMap<unsigned int> m_netMessageIDs;
+		unsigned int m_messageID;
 	};
 
 	template<class T>
 	NetMessageMap<T>::NetMessageMap() : m_messageID(NWM_MESSAGE_RESERVED + 1)
-	{
-	}
-
-	template<class T>
-	void NetMessageMap<T>::RegisterNetMessage(std::string name, void (*)(NetPacket))
-	{
-	}
-	template<class T>
-	void NetMessageMap<T>::RegisterNetMessage(std::string name, void (*)(ServerClientHandle &, NetPacket))
-	{
-	}
-	template<class T>
-	void NetMessageMap<T>::PreRegisterNetMessage(std::string name, void (*)(NetPacket))
-	{
-	}
-	template<class T>
-	void NetMessageMap<T>::PreRegisterNetMessage(std::string name, void (*)(ServerClientHandle &, NetPacket))
 	{
 	}
 
@@ -77,7 +67,7 @@ export {
 	}
 
 	template<class T>
-	void NetMessageMap<T>::GetNetMessages(std::unordered_map<std::string, unsigned int> **messages)
+	void NetMessageMap<T>::GetNetMessages(util::StringMap<unsigned int> **messages)
 	{
 		*messages = &m_netMessageIDs;
 	}
@@ -103,21 +93,48 @@ export {
 	template<class T>
 	unsigned int NetMessageMap<T>::GetNetMessageID(std::string identifier)
 	{
-		typename std::unordered_map<std::string, unsigned int>::iterator i = m_netMessageIDs.find(identifier);
+		typename util::StringMap<unsigned int>::iterator i = m_netMessageIDs.find(identifier);
 		if(i == m_netMessageIDs.end())
 			return 0;
 		return i->second;
 	}
 
-	class DLLNETWORK ClientMessageMap : public NetMessageMap<CLNetMessage> {
-	public:
-		void RegisterNetMessage(std::string name, void (*handler)(NetPacket));
-		void PreRegisterNetMessage(std::string name, void (*handler)(NetPacket));
-	};
+	template<class T>
+	void NetMessageMap<T>::RegisterNetMessage(const std::string_view &name)
+	{
+		if(m_netMessageIDs.find(name) != m_netMessageIDs.end())
+			return;
+		T msg;
+		msg.ID = m_messageID;
+		msg.handler = nullptr;
+		m_netMessageIDs.insert(std::make_pair(name, msg.ID));
+		m_netMessages.insert(std::make_pair(msg.ID, msg));
+		m_messageID++;
+	}
 
-	class DLLNETWORK ServerMessageMap : public NetMessageMap<SVNetMessage> {
-	public:
-		void RegisterNetMessage(std::string name, void (*handler)(ServerClientHandle &, NetPacket));
-		void PreRegisterNetMessage(std::string name, void (*handler)(ServerClientHandle &, NetPacket));
-	};
+	template<class T>
+	void NetMessageMap<T>::RegisterNetMessage(const std::string_view &name, const T::Handler &handler)
+	{
+		util::StringMap<unsigned int>::iterator i = m_netMessageIDs.find(name);
+		if(i != m_netMessageIDs.end()) {
+			unsigned int ID = i->second;
+			auto j = m_netMessages.find(ID);
+			if(j != m_netMessages.end())
+				j->second.handler = handler;
+			return;
+		}
+		T msg;
+		msg.ID = m_messageID;
+		msg.handler = handler;
+		m_netMessageIDs.insert(std::make_pair(name, msg.ID));
+		m_netMessages.insert(std::make_pair(msg.ID, msg));
+		m_messageID++;
+	}
+
+	using ClientMessageMap = NetMessageMap<CLNetMessage>;
+	using ServerMessageMap = NetMessageMap<SVNetMessage>;
+
+	DLLNETWORK ClientMessageMap *GetClientMessageMap();
+	DLLNETWORK ServerMessageMap *GetServerMessageMap();
+	void register_net_messages();
 };

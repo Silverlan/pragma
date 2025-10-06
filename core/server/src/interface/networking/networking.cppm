@@ -8,6 +8,7 @@ export import pragma.server.networking.iserver;
 export import pragma.server.networking.iserver_client;
 export import pragma.server.networking.local_host;
 export import pragma.server.networking.master_server;
+export import pragma.server.networking.net_messages;
 export import pragma.server.networking.recipient_filter;
 export import pragma.server.networking.resource;
 export import pragma.server.networking.resource_manager;

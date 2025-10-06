@@ -112,23 +112,6 @@ void ClientState::HandleClientResourceFragment(NetPacket &packet)
 
 ////////////////////
 
-
-DLLCLIENT void NET_cl_resourceinfo(NetPacket packet) { pragma::get_client_state()->HandleClientResource(packet); }
-DLLCLIENT void NET_cl_resourcecomplete(NetPacket packet)
-{
-	Con::ccl << "All resources have been received!" << Con::endl;
-
-	auto *client = pragma::get_client_state();
-	auto *cl = client->GetClient();
-	if(cl != nullptr)
-		cl->SetTimeoutDuration(client->GetConVarFloat("sv_timeout_duration")); // Resource transfer complete; Reset timeout
-
-	Con::ccl << "Requesting Game Info..." << Con::endl;
-	client->SendUserInfo();
-}
-
-DLLCLIENT void NET_cl_resource_fragment(NetPacket packet) { pragma::get_client_state()->HandleClientResourceFragment(packet); }
-
 class ModelLoadManager {
   private:
 	static std::shared_ptr<ModelLoadManager> s_manager;
@@ -412,22 +395,4 @@ void ModelLoadManager::Update()
 		m_completeQueries.push(query);
 		m_completeMutex.unlock();
 	}
-}
-
-void NET_cl_resource_mdl_rough(NetPacket packet)
-{
-	if(pragma::get_client_state() == nullptr)
-		return;
-	auto fileName = packet->ReadString();
-	auto *client = pragma::get_client_state();
-	auto mdl = client->GetModelManager().CreateModel(fileName);
-	if(mdl == nullptr)
-		return;
-	mdl->AddMaterial(0, client->LoadMaterial("loading"));
-
-	auto &manager = ModelLoadManager::Initialize();
-#if RESOURCE_TRANSFER_VERBOSE == 1
-	Con::ccl << "[ResourceManager] Adding query: " << fileName << Con::endl;
-#endif
-	manager.AddQuery(packet, mdl, fileName);
 }

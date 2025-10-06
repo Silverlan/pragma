@@ -1,14 +1,13 @@
-
-#include "pragma/lua/luaapi.h"
-
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_server.h"
+#include "pragma/lua/luaapi.h"
 #include "pragma/lua/s_lua_script_watcher.h"
 
-import pragma.server.game;
-import pragma.server.server_state;
+module pragma.server.scripting.lua.script_watcher;
 
 void SLuaDirectoryWatcherManager::OnLuaFileChanged(const std::string &path)
 {

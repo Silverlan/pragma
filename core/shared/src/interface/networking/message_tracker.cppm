@@ -4,6 +4,7 @@
 module;
 
 #include "pragma/networkdefinitions.h"
+#include "sharedutils/util_string_hash.hpp"
 #include <deque>
 #include <mutex>
 #include <sharedutils/util_clock.hpp>
@@ -29,8 +30,8 @@ export namespace pragma {
 			std::pair<const std::deque<MessageInfo> &, std::unique_ptr<const util::ScopeGuard>> GetTrackedMessages(MessageType mt) const;
 			void SetMemoryCount(uint32_t count);
 
-			void DebugPrint(const std::unordered_map<std::string, uint32_t> &inMsgs, const std::unordered_map<std::string, uint32_t> &outMsgs);
-			void DebugDump(const std::string &dumpFileName, const std::unordered_map<std::string, uint32_t> &inMsgs, const std::unordered_map<std::string, uint32_t> &outMsgs);
+			void DebugPrint(const util::StringMap<uint32_t> &inMsgs, const util::StringMap<uint32_t> &outMsgs);
+			void DebugDump(const std::string &dumpFileName, const util::StringMap<uint32_t> &inMsgs, const util::StringMap<uint32_t> &outMsgs);
 
 			void MemorizeNetMessage(MessageType mt, uint32_t id, const NWMEndpoint &ep, const NetPacket &packet);
 		  protected:

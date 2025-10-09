@@ -1,3 +1,7 @@
+
+
+#include "fsys/filesystem.h"
+
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
@@ -42,7 +46,7 @@ static void debug_steam_audio_probe_boxes(NetworkState *state, ConVar *, bool, b
 	}
 	dbgSoundProbeBoxes->CallOnRemove([dbgSpheres]() mutable { dbgSpheres = {}; });
 }
-REGISTER_CONVAR_CALLBACK_CL(debug_steam_audio_probe_boxes, debug_steam_audio_probe_boxes);
+namespace { auto _ = pragma::console::client::register_variable_listener<bool>("debug_steam_audio_probe_boxes", &debug_steam_audio_probe_boxes); }
 
 void Console::commands::debug_steam_audio_dump_scene(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {

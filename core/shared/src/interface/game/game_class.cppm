@@ -485,4 +485,6 @@ export {
 		}
 		return el;
 	}
+
+	DLLNETWORK bool NetIncludePacketID(NetworkState *state, std::string identifier, NetPacket &packet, NetPacket &packetNew);
 };

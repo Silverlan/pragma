@@ -3,6 +3,8 @@
 
 module;
 #include "pragma/clientdefinitions.h"
+#include "mathutil/color.h"
+
 
 
 export module pragma.client:particle_system.operator_color_fade;

@@ -10,6 +10,22 @@ module;
 #include <udm.hpp>
 #include <fsys/vfileptr.h>
 #include <optional>
+#include "mathutil/umath.h"
+#include "pragma/lua/luaapi.h"
+#include "fsys/filesystem.h"
+#include "sharedutils/util_weak_handle.hpp"
+#include "material.h"
+#include "sharedutils/functioncallback.h"
+#include "mathutil/color.h"
+#include "sharedutils/util_event_reply.hpp"
+
+
+
+
+
+
+
+
 
 export module pragma.client:entities.components.particle_system;
 

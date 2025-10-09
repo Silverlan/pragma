@@ -2,11 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "pragma/clientdefinitions.h"
 
 #include "stdafx_client.h"
 
 module pragma.client;
-
-
-import :game;
-DEFINE_STATIC_GAME_CALLBACKS(DLLCLIENT, client);

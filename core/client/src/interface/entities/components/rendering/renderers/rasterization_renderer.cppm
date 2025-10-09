@@ -18,6 +18,8 @@ module;
 #include <sharedutils/util_weak_handle.hpp>
 #include <sharedutils/functioncallback.h>
 #include <mathutil/uvec.h>
+#include "mathutil/umath.h"
+#include "pragma/lua/luaapi.h"
 
 #define DEBUG_RENDER_PERFORMANCE_TEST_ENABLED 0
 

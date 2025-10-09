@@ -14,6 +14,7 @@ module pragma.client;
 
 import :ai;
 import :client_state;
+import :console.register_commands;
 import :debug;
 import :game;
 
@@ -207,14 +208,16 @@ void pragma::nav::CMesh::Clear()
 }
 
 static auto cvShowNavMeshes = GetClientConVar("debug_nav_show_meshes");
-REGISTER_CONVAR_CALLBACK_CL(debug_nav_show_meshes, [](NetworkState *, const ConVar &, bool, bool val) {
-	if(pragma::get_cgame() == NULL || pragma::get_cgame()->LoadNavMesh() == false)
-		return;
-	auto &navMesh = pragma::get_cgame()->GetNavMesh();
-	if(navMesh == nullptr)
-		return;
-	static_cast<pragma::nav::CMesh &>(*navMesh).ShowNavMeshes(val);
-});
+namespace {
+	auto _ = pragma::console::client::register_variable_listener<bool>("debug_nav_show_meshes", +[](NetworkState *, const ConVar &, bool, bool val) {
+		if(pragma::get_cgame() == NULL || pragma::get_cgame()->LoadNavMesh() == false)
+			return;
+		auto &navMesh = pragma::get_cgame()->GetNavMesh();
+		if(navMesh == nullptr)
+			return;
+		static_cast<pragma::nav::CMesh &>(*navMesh).ShowNavMeshes(val);
+	});
+}
 
 ////////////////////////////////////
 

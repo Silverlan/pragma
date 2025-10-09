@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "sharedutils/functioncallback.h"
+
+#include "pragma/lua/luaapi.h"
 
 #include "stdafx_client.h"
 

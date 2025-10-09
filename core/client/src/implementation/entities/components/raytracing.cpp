@@ -3,6 +3,10 @@
 
 module;
 
+#include "pragma/lua/luaapi.h"
+
+#include "mathutil/umath.h"
+
 #include "stdafx_client.h"
 #include <buffers/prosper_dynamic_resizable_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
@@ -242,4 +246,4 @@ static void cmd_render_technique(NetworkState *, const ConVar &, int32_t, int32_
 		}
 	}
 }
-REGISTER_CONVAR_CALLBACK_CL(render_technique, cmd_render_technique);
+namespace { auto _ = pragma::console::client::register_variable_listener<int32_t>("render_technique", &cmd_render_technique); }

@@ -3,6 +3,14 @@
 
 module;
 
+#include "sharedutils/util_path.hpp"
+
+#include "pragma/lua/luaapi.h"
+
+#include "fsys/filesystem.h"
+
+#include "mathutil/umath.h"
+
 #include "stdafx_client.h"
 #include <sharedutils/util_file.h>
 #include <util_image_buffer.hpp>
@@ -324,7 +332,7 @@ static void sky_override(NetworkState *, const ConVar &, std::string, std::strin
 	for(auto *ent : entIt)
 		ent->GetComponent<CSkyboxComponent>()->SetSkyMaterial(matSky);
 }
-REGISTER_CONVAR_CALLBACK_CL(sky_override, sky_override);
+namespace { auto _ = pragma::console::client::register_variable_listener<std::string>("sky_override", &sky_override); }
 
 enum class ConversionMode : uint8_t { CubemapToEquirectangular = 0, EquirectangularToCubemap };
 

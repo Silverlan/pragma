@@ -8,6 +8,8 @@ module;
 #include <mathutil/umath_lighting.hpp>
 #include <cinttypes>
 #include <array>
+#include "mathutil/umath.h"
+
 
 export module pragma.client:rendering.light_data;
 export namespace pragma {

@@ -6,6 +6,10 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <mathutil/transform.hpp>
 #include <mathutil/uvec.h>
+#include "mathutil/umath.h"
+#include "pragma/lua/luaapi.h"
+
+
 
 export module pragma.client:entities.components.eye;
 import :entities.components.animated;

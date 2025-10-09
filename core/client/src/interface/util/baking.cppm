@@ -8,6 +8,8 @@ module;
 #include <util_image_buffer.hpp>
 #include <mathutil/umath_lighting.hpp>
 #include <vector>
+#include "mathutil/umath.h"
+
 
 export module pragma.client:util.baking;
 

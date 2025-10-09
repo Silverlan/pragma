@@ -3,7 +3,13 @@
 
 module;
 
+
+#include "sharedutils/functioncallback.h"
+
+#include "mathutil/umath.h"
+
 #include "stdafx_client.h"
+#include "pragma/console/helper.hpp"
 #include <textureinfo.h>
 #include <image/prosper_msaa_texture.hpp>
 #include <image/prosper_render_target.hpp>
@@ -38,7 +44,7 @@ static void CVAR_CALLBACK_render_hdr_max_exposure(NetworkState *, const ConVar &
 		return;
 	pragma::get_cgame()->SetMaxHDRExposure(val);
 }
-REGISTER_CONVAR_CALLBACK_CL(render_hdr_max_exposure, CVAR_CALLBACK_render_hdr_max_exposure);
+namespace { auto UVN = pragma::console::client::register_variable_listener<float>("render_hdr_max_exposure", &CVAR_CALLBACK_render_hdr_max_exposure); }
 
 HDRData::Exposure::Exposure() : lastExposureUpdate(0), averageColor(0.f, 0.f, 0.f) { m_shaderCalcColor = pragma::get_cengine()->GetShader("calcimagecolor"); }
 
@@ -486,8 +492,8 @@ static void CVAR_CALLBACK_render_msaa_enabled(NetworkState *, const ConVar &, in
 		sceneC->ReloadRenderTarget(sceneC->GetWidth(), sceneC->GetHeight());
 	}
 }
-REGISTER_CONVAR_CALLBACK_CL(cl_render_anti_aliasing, CVAR_CALLBACK_render_msaa_enabled);
-REGISTER_CONVAR_CALLBACK_CL(cl_render_msaa_samples, CVAR_CALLBACK_render_msaa_enabled);
+namespace { auto UVN = pragma::console::client::register_variable_listener<int>("cl_render_anti_aliasing", &CVAR_CALLBACK_render_msaa_enabled); }
+namespace { auto UVN = pragma::console::client::register_variable_listener<int>("cl_render_msaa_samples", &CVAR_CALLBACK_render_msaa_enabled); }
 
 static void CVAR_CALLBACK_render_bloom_resolution(NetworkState *, const ConVar &, int, int width)
 {
@@ -496,7 +502,7 @@ static void CVAR_CALLBACK_render_bloom_resolution(NetworkState *, const ConVar &
 	for(auto &c : EntityCIterator<pragma::CRendererComponent> {*pragma::get_cgame()})
 		c.ReloadBloomRenderTarget(width);
 }
-REGISTER_CONVAR_CALLBACK_CL(render_bloom_resolution, CVAR_CALLBACK_render_bloom_resolution);
+namespace { auto UVN = pragma::console::client::register_variable_listener<int>("render_bloom_resolution", &CVAR_CALLBACK_render_bloom_resolution); }
 
 void Console::commands::debug_render_scene(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {

@@ -2,6 +2,15 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "pragma/clientdefinitions.h"
+
+#include "sharedutils/util_event_reply.hpp"
+
+#include "pragma/lua/luaapi.h"
+#include "pragma/console/helper.hpp"
+#include "sharedutils/functioncallback.h"
+
+#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
 
@@ -256,7 +265,7 @@ static void CVAR_CALLBACK_debug_render_octree_static_draw(NetworkState *, const 
 	return;
 	chc->SetDrawDebugTexture(val);*/
 }
-REGISTER_CONVAR_CALLBACK_CL(debug_render_octree_static_draw, CVAR_CALLBACK_debug_render_octree_static_draw);
+namespace { auto UVN = pragma::console::client::register_variable_listener<bool>("debug_render_octree_static_draw", &CVAR_CALLBACK_debug_render_octree_static_draw); }
 
 static void CVAR_CALLBACK_debug_render_octree_dynamic_draw(NetworkState *, const ConVar &, bool, bool val)
 {
@@ -269,4 +278,4 @@ static void CVAR_CALLBACK_debug_render_octree_dynamic_draw(NetworkState *, const
 	auto &octree = culler->GetOcclusionOctree();
 	octree.SetDebugModeEnabled(val);
 }
-REGISTER_CONVAR_CALLBACK_CL(debug_render_octree_dynamic_draw, CVAR_CALLBACK_debug_render_octree_dynamic_draw);
+namespace { auto UVN = pragma::console::client::register_variable_listener<bool>("debug_render_octree_dynamic_draw", &CVAR_CALLBACK_debug_render_octree_dynamic_draw); }

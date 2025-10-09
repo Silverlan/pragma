@@ -7,6 +7,8 @@ module;
 
 export module pragma.client:model.model_manager;
 
+export import pragma.shared;
+
 export namespace pragma::asset {
 	class DLLCLIENT CModelManager : public ModelManager {
 	  public:

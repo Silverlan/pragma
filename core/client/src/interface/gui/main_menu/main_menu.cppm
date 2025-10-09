@@ -5,10 +5,13 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include <sharedutils/functioncallback.h>
+#include "sharedutils/util_event_reply.hpp"
+
 
 export module pragma.client:gui.main_menu;
 
 import :gui.chromium_page;
+import pragma.shared;
 
 export {
 	class DLLCLIENT WIMainMenu : public WIBase {

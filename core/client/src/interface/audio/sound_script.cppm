@@ -5,8 +5,14 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include <alsound_effect.hpp>
+#include "udm.hpp"
+
 
 export module pragma.client:audio.sound_script;
+
+export import pragma.shared;
+
+#undef CreateEvent
 
 export {
 	class DLLCLIENT CSSEPlaySound : public SSEPlaySound {

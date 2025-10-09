@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "sharedutils/functioncallback.h"
 
 #include "stdafx_client.h"
 
@@ -166,7 +167,7 @@ void WINetGraph::Initialize()
 			}
 			std::sort(m_netData.messages.begin(), m_netData.messages.end(), [](const std::pair<uint32_t, NetData::MessageInfo> &a, const std::pair<uint32_t, NetData::MessageInfo> &b) { return a.second.size > b.second.size; });
 			auto *map = GetClientMessageMap();
-			std::unordered_map<std::string, unsigned int> *netmessages;
+			util::StringMap<unsigned int> *netmessages;
 			map->GetNetMessages(&netmessages);
 			uint32_t idx = 0;
 			for(auto &p : m_netData.messages) {

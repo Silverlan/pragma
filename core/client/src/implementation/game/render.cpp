@@ -2,7 +2,17 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "sharedutils/magic_enum.hpp"
 
+#include "sharedutils/magic_enum.hpp"
+
+
+#include "sharedutils/functioncallback.h"
+
+#include "udm.hpp"
+
+#include "mathutil/umath.h"
+#include "pragma/console/helper.hpp"
 #include "stdafx_client.h"
 #include <mathutil/uquat.h>
 //#include "shader_gaussianblur.h" // prosper TODO
@@ -32,7 +42,7 @@ import :scripting.lua;
 
 
 static void CVAR_CALLBACK_render_vsync_enabled(NetworkState *, const ConVar &, int, int val) { pragma::platform::set_swap_interval((val == 0) ? 0 : 1); }
-REGISTER_CONVAR_CALLBACK_CL(render_vsync_enabled, CVAR_CALLBACK_render_vsync_enabled);
+namespace { auto UVN = pragma::console::client::register_variable_listener<int>("render_vsync_enabled", &CVAR_CALLBACK_render_vsync_enabled); }
 
 static CallbackHandle cbDrawPhysics;
 static CallbackHandle cbDrawPhysicsEnd;
@@ -112,8 +122,12 @@ static void CVAR_CALLBACK_debug_physics_draw(NetworkState *, const ConVar &, int
 		mode = pragma::physics::IVisualDebugger::DebugMode::Normals;
 	visDebugger->SetDebugMode(mode);
 }
-REGISTER_CONVAR_CALLBACK_CL(debug_physics_draw, [](NetworkState *nw, const ConVar &cv, int oldVal, int val) { CVAR_CALLBACK_debug_physics_draw(nw, cv, oldVal, val, false); });
-REGISTER_CONVAR_CALLBACK_CL(sv_debug_physics_draw, [](NetworkState *nw, const ConVar &cv, int oldVal, int val) { CVAR_CALLBACK_debug_physics_draw(nw, cv, oldVal, val, true); });
+namespace {
+	auto UVN = pragma::console::client::register_variable_listener<int>("debug_physics_draw", +[](NetworkState *nw, const ConVar &cv, int oldVal, int val) { CVAR_CALLBACK_debug_physics_draw(nw, cv, oldVal, val, false); });
+}
+namespace {
+	auto UVN = pragma::console::client::register_variable_listener<int>("sv_debug_physics_draw", +[](NetworkState *nw, const ConVar &cv, int oldVal, int val) { CVAR_CALLBACK_debug_physics_draw(nw, cv, oldVal, val, true); });
+}
 
 void Console::commands::debug_render_validation_error_enabled(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {

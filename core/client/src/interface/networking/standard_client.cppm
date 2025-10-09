@@ -8,6 +8,7 @@ module;
 export module pragma.client:networking.standard_client;
 
 import :networking.iclient;
+export import pragma.client_manager;
 
 export namespace pragma::networking {
 	class StandardClient;

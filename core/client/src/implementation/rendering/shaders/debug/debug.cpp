@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "pragma/logging.hpp"
+
+#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
 #include <shader/prosper_pipeline_create_info.hpp>

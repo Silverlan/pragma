@@ -3,11 +3,14 @@
 
 module;
 #include "pragma/clientdefinitions.h"
+#include "pragma/lua/luaapi.h"
+
 
 
 export module pragma.client:entities.components.input;
 
 import pragma.gui;
+export import pragma.shared;
 
 export namespace pragma {
 	class DLLCLIENT CInputComponent final : public BaseEntityComponent {

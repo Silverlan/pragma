@@ -5,6 +5,10 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include "buffers/prosper_uniform_resizable_buffer.hpp"
+#include "pragma/lua/luaapi.h"
+#include "sharedutils/util_event_reply.hpp"
+
+
 
 export module pragma.client:entities.components.lights.light;
 

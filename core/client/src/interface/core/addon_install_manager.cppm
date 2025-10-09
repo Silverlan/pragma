@@ -6,8 +6,13 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <vector>
 #include <atomic>
+#include "fsys/filesystem.h"
+
 
 export module pragma.client:core.addon_install_manager;
+
+export import pragma.shared;
+
 export namespace pragma {
 	class CurlQueryHandler;
 	class DLLCLIENT AddonInstallManager {

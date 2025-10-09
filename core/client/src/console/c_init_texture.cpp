@@ -1,8 +1,13 @@
+
+
+#include "mathutil/umath.h"
+
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
 #include "textureinfo.h"
+#include "pragma/console/helper.hpp"
 #include <texturemanager/texturemanager.h>
 #include <texturemanager/load/texture_loader.hpp>
 #include <cmaterialmanager.h>
@@ -88,5 +93,5 @@ static void CVAR_CALLBACK_cl_render_texture_quality(NetworkState *, const ConVar
 	materialManager.ReloadMaterialShaders(); // Make sure to reload descriptor sets (So samplers are updated)
 }
 
-REGISTER_CONVAR_CALLBACK_CL(cl_render_texture_filtering, CVAR_CALLBACK_cl_render_texture_quality);
-REGISTER_CONVAR_CALLBACK_CL(cl_render_texture_quality, CVAR_CALLBACK_cl_render_texture_quality);
+namespace { auto UVN = pragma::console::client::register_variable_listener<int>("cl_render_texture_filtering",&CVAR_CALLBACK_cl_render_texture_quality); }
+namespace { auto UVN = pragma::console::client::register_variable_listener<int>("cl_render_texture_quality",&CVAR_CALLBACK_cl_render_texture_quality); }

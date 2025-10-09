@@ -3,6 +3,16 @@
 
 module;
 
+#include "mathutil/umath_geometry.hpp"
+
+#include "sharedutils/util_event_reply.hpp"
+
+#include "sharedutils/util_pragma.hpp"
+
+#include "pragma/lua/luaapi.h"
+
+#include "mathutil/umath.h"
+
 #include "stdafx_client.h"
 #include <image/prosper_render_target.hpp>
 #include <buffers/prosper_buffer.hpp>
@@ -19,6 +29,7 @@ import :entities.components.render;
 import :entities.components.surface;
 import :game;
 import :rendering.shaders;
+import :scripting.lua.entity_component_event;
 
 
 using namespace pragma;

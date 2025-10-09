@@ -2,6 +2,11 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "sharedutils/functioncallback.h"
+
+#include "sharedutils/util_event_reply.hpp"
+
+#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
 #include <mathutil/umath_geometry.hpp>

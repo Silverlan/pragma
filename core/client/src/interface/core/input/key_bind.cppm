@@ -7,6 +7,8 @@ module;
 #include <string>
 #include <memory>
 #include <vector>
+#include "pragma/lua/luaapi.h"
+
 
 export module pragma.client:core.key_bind;
 import pragma.platform;

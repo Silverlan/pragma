@@ -5,6 +5,8 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include <unordered_set>
+#include "pragma/lua/luaapi.h"
+
 
 export module pragma.client:entities.components.raytracing_renderer;
 

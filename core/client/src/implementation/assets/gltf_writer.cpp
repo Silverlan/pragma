@@ -2,6 +2,13 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "mathutil/transform.hpp"
+
+#include "sharedutils/util_pragma.hpp"
+
+#include "fsys/filesystem.h"
+
+#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
 

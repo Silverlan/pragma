@@ -3,10 +3,14 @@
 
 module;
 #include "pragma/clientdefinitions.h"
+#include "pragma/lua/luaapi.h"
+
 
 
 export module pragma.client:entities.components.light_map_data_cache;
+
 import :rendering.lightmap_data_cache;
+export import pragma.shared;
 
 export namespace pragma {
 	class DLLCLIENT CLightMapDataCacheComponent final : public BaseEntityComponent {

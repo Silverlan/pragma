@@ -3,9 +3,16 @@
 
 module;
 #include "pragma/clientdefinitions.h"
+#include "mathutil/umath.h"
+#include "sharedutils/util_path.hpp"
+
+
 
 
 export module pragma.client:util.resource_watcher;
+
+export import pragma.shared;
+
 export
 {
 	class DLLCLIENT ECResourceWatcherCallbackType : public EResourceWatcherCallbackType {

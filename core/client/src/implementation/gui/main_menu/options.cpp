@@ -2,6 +2,19 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "sharedutils/util_clock.hpp"
+
+#include "sharedutils/util_clock.hpp"
+
+#include "sharedutils/functioncallback.h"
+
+#include "sharedutils/util_event_reply.hpp"
+
+#include "pragma/lua/luaapi.h"
+
+#include "fsys/filesystem.h"
+
+#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
 #include <sharedutils/util_string.h>

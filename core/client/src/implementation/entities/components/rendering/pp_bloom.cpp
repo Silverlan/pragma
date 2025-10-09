@@ -3,6 +3,8 @@
 
 module;
 
+#include "pragma/lua/luaapi.h"
+
 #include "stdafx_client.h"
 #include <prosper_command_buffer.hpp>
 #include <image/prosper_msaa_texture.hpp>

@@ -3,6 +3,11 @@
 
 module;
 
+
+#include "pragma/logging.hpp"
+
+#include "mathutil/umath.h"
+
 #include "stdafx_client.h"
 #include "texturemanager/texture_manager2.hpp"
 #include <shader/prosper_pipeline_create_info.hpp>

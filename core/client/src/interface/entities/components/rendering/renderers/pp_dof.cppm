@@ -3,6 +3,10 @@
 
 module;
 #include "pragma/clientdefinitions.h"
+#include "mathutil/umath.h"
+#include "pragma/lua/luaapi.h"
+
+
 
 
 export module pragma.client:entities.components.pp_dof;

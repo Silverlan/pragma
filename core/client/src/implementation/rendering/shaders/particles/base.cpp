@@ -3,6 +3,9 @@
 
 module;
 
+
+#include "mathutil/umath.h"
+
 #include "stdafx_client.h"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <shader/prosper_shader_t.hpp>

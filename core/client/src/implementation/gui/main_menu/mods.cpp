@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "sharedutils/functioncallback.h"
+
+#include "fsys/filesystem.h"
 
 #include "stdafx_client.h"
 #ifdef PRAGMA_CHROMIUM_ENABLED

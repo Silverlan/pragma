@@ -13,10 +13,12 @@ import pragma.server.entities;
 using namespace pragma;
 
 static std::vector<SLiquidSurfaceSimulationComponent *> s_waterEntities = {};
-REGISTER_CONVAR_CALLBACK_CL(sv_water_surface_simulation_shared, [](NetworkState *, const ConVar &, int, int val) {
-	for(auto *entWater : s_waterEntities)
-		entWater->UpdateSurfaceSimulator();
-});
+namespace {
+	auto _ = pragma::console::client::register_variable_listener<int>("sv_water_surface_simulation_shared", +[](NetworkState *, const ConVar &, float, float val) {
+		for(auto *entWater : s_waterEntities)
+			entWater->UpdateSurfaceSimulator();
+	}
+};
 
 SLiquidSurfaceSimulationComponent::SLiquidSurfaceSimulationComponent(BaseEntity &ent) : BaseLiquidSurfaceSimulationComponent(ent) { s_waterEntities.push_back(this); }
 SLiquidSurfaceSimulationComponent::~SLiquidSurfaceSimulationComponent()

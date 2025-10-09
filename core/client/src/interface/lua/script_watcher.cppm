@@ -6,6 +6,9 @@ module;
 
 
 export module pragma.client:scripting.lua.script_watcher;
+
+export import pragma.shared;
+
 export class DLLCLIENT CLuaDirectoryWatcherManager : public LuaDirectoryWatcherManager {
   protected:
 	virtual void OnLuaFileChanged(const std::string &path) override;

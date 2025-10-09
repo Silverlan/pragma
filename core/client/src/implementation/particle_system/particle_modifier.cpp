@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "pragma/clientdefinitions.h"
+
+#include "mathutil/color.h"
 
 #include "stdafx_client.h"
 #include <algorithm>

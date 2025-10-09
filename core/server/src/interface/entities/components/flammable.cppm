@@ -5,6 +5,8 @@ module;
 
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/luaapi.h"
+#include "sharedutils/util_event_reply.hpp"
+
 
 
 export module pragma.server.entities.components.flammable;

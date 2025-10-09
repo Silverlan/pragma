@@ -6,6 +6,8 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "prosper_command_buffer.hpp"
 #include <image/prosper_image.hpp>
+#include "pragma/lua/luaapi.h"
+
 
 export module pragma.client:scripting.lua.libraries.gui;
 import :game;
@@ -17,7 +19,7 @@ export namespace Lua {
 			bool useStencil = false;
 			std::optional<uint32_t> width {};
 			std::optional<uint32_t> height {};
-			std::optional<Color> clearColor {};
+			std::optional<::Color> clearColor {};
 			std::shared_ptr<prosper::IImage> resolvedImage = nullptr;
 			std::shared_ptr<prosper::ICommandBuffer> commandBuffer = nullptr;
 		};
@@ -66,12 +68,12 @@ export namespace Lua {
 		DLLCLIENT pragma::platform::CursorMode get_cursor_input_mode();
 		DLLCLIENT void set_cursor_input_mode(pragma::platform::CursorMode mode);
 		DLLCLIENT ::Vector2i get_window_size(lua_State *l);
-		DLLCLIENT bool inject_mouse_input(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods, const Vector2i &pCursorPos);
+		DLLCLIENT bool inject_mouse_input(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods, const ::Vector2i &pCursorPos);
 		DLLCLIENT bool inject_mouse_input(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods);
 		DLLCLIENT bool inject_keyboard_input(pragma::platform::Key key, pragma::platform::KeyState state, pragma::platform::Modifier mods);
 		DLLCLIENT bool inject_char_input(const std::string &c);
-		DLLCLIENT bool inject_scroll_input(lua_State *l, const Vector2 &offset, const ::Vector2i &pCursorPos);
-		DLLCLIENT bool inject_scroll_input(lua_State *l, const Vector2 &offset);
+		DLLCLIENT bool inject_scroll_input(lua_State *l, const ::Vector2 &offset, const ::Vector2i &pCursorPos);
+		DLLCLIENT bool inject_scroll_input(lua_State *l, const ::Vector2 &offset);
 		DLLCLIENT std::shared_ptr<prosper::IImage> create_color_image(uint32_t w, uint32_t h, prosper::ImageUsageFlags usageFlags, prosper::ImageLayout initialLayout, bool msaa);
 		DLLCLIENT std::shared_ptr<prosper::RenderTarget> create_render_target(uint32_t w, uint32_t h, bool enableMsaa, bool enableSampling);
 

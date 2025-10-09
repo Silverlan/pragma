@@ -3,6 +3,10 @@
 
 module;
 #include "pragma/clientdefinitions.h"
+#include "sharedutils/functioncallback.h"
+#include "pragma/lua/luaapi.h"
+
+
 
 
 export module pragma.client:scripting.lua.libraries.gui_callbacks;

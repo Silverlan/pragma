@@ -8,6 +8,14 @@ module;
 #include <cmaterial_manager2.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <image/prosper_texture.hpp>
+#include "mathutil/umath.h"
+#include "pragma/lua/luaapi.h"
+#include "fsys/filesystem.h"
+#include "pragma/logging.hpp"
+
+
+
+
 
 export module pragma.client:entities.components.light_map;
 import :rendering.cycles;

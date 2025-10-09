@@ -3,6 +3,10 @@
 
 module;
 
+#include "sharedutils/util_weak_handle.hpp"
+
+#include "mathutil/umath.h"
+
 #include "stdafx_client.h"
 #include <shader/prosper_shader_blur.hpp>
 
@@ -10,6 +14,7 @@ module pragma.client;
 
 import :rendering.controlled_blur_settings;
 
+import :console.util;
 import :engine;
 
 static util::WeakHandle<prosper::Shader> g_bloomBlurH {};

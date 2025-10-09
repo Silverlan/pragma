@@ -7,6 +7,7 @@ module;
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <udm_enums.hpp>
+#include "udm.hpp"
 
 // #define PRAGMA_ENABLE_SHADER_DEBUG_PRINT
 

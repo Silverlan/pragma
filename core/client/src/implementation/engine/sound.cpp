@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "pragma/logging.hpp"
 
 #include "stdafx_cengine.h"
 #include <sharedutils/util_pragma.hpp>

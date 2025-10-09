@@ -5,11 +5,14 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include "cmaterial.h"
+#include "material.h"
+
 
 export module pragma.client:rendering.shaders.particle_2d_base;
 
 import :rendering.shaders.particle_base;
 import :rendering.shaders.scene;
+import pragma.shared;
 
 export namespace pragma {
 	class CRasterizationRendererComponent;

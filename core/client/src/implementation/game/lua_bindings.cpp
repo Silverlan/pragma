@@ -2,6 +2,17 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "pragma/lua/lua_call.hpp"
+
+#include "sharedutils/functioncallback.h"
+
+#include "sharedutils/util_weak_handle.hpp"
+
+#include "fsys/filesystem.h"
+
+#include "pragma/lua/luaapi.h"
+
+#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
 #include "alsound_types.hpp"
@@ -27,8 +38,10 @@ module pragma.client;
 
 import :scripting.lua.libraries.net_messages;
 import pragma.locale;
+import pragma.shared;
 import pragma.string.unicode;
 
+#undef LoadLibrary
 
 namespace pragma {
 	// Has to be in same namespace as class, otherwise luabind can't locate it

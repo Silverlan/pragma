@@ -2,6 +2,11 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "sharedutils/util_path.hpp"
+
+#include "pragma/lua/luaapi.h"
+
+#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
 #include "luasystem.h"
@@ -36,8 +41,8 @@ int Lua::util::Client::calc_world_direction_from_2d_coordinates(lua_State *l, pr
 
 int Lua::util::Client::create_particle_tracer(lua_State *l)
 {
-	auto &start = *Lua::CheckVector(l, 1);
-	auto &end = *Lua::CheckVector(l, 2);
+	auto &start = Lua::Check<Vector3>(l, 1);
+	auto &end = Lua::Check<Vector3>(l, 2);
 	auto radius = Lua::IsSet(l, 3) ? Lua::CheckNumber(l, 3) : BulletInfo::DEFAULT_TRACER_RADIUS;
 	const auto *col = Lua::IsSet(l, 4) ? Lua::CheckColor(l, 4) : &BulletInfo::DEFAULT_TRACER_COLOR;
 	auto length = Lua::IsSet(l, 5) ? Lua::CheckNumber(l, 5) : BulletInfo::DEFAULT_TRACER_LENGTH;
@@ -65,9 +70,9 @@ int Lua::util::Client::create_muzzle_flash(lua_State *l)
 		Vector3 relOffset {};
 		auto relRot = uquat::identity();
 		if(Lua::IsSet(l, 3)) {
-			relOffset = *Lua::CheckVector(l, 3);
+			relOffset = Lua::Check<Vector3>(l, 3);
 			if(Lua::IsSet(l, 4))
-				relRot = *Lua::CheckQuaternion(l, 4);
+				relRot = Lua::Check<Quat>(l, 4);
 		}
 		std::string particleName = "muzzleflash0" + std::to_string(umath::random(1, 6));
 		auto *pt = pragma::ecs::CParticleSystemComponent::Create(particleName);
@@ -94,8 +99,8 @@ int Lua::util::Client::create_muzzle_flash(lua_State *l)
 		pt->PushLuaObject(l);
 		return 1;
 	}
-	auto &pos = *Lua::CheckVector(l, 1);
-	auto &rot = *Lua::CheckQuaternion(l, 2);
+	auto &pos = Lua::Check<Vector3>(l, 1);
+	auto &rot = Lua::Check<Quat>(l, 2);
 	std::string particleName = "muzzleflash0" + std::to_string(umath::random(1, 6));
 	auto *pt = pragma::ecs::CParticleSystemComponent::Create(particleName);
 	if(pt == nullptr)

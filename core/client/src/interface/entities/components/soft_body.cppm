@@ -3,9 +3,14 @@
 
 module;
 #include "pragma/clientdefinitions.h"
+#include "pragma/lua/luaapi.h"
+
 
 
 export module pragma.client:entities.components.soft_body;
+
+export import pragma.shared;
+
 export namespace pragma {
 	class DLLCLIENT CSoftBodyComponent final : public BaseSoftBodyComponent {
 	  public:

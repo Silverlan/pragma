@@ -6,6 +6,8 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <shader/prosper_shader_base_image_processing.hpp>
 #include "prosper_descriptor_set_group.hpp"
+#include "mathutil/umath.h"
+
 
 export module pragma.client:rendering.shaders.cubemap_to_equirectangular;
 

@@ -5,6 +5,8 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include <unordered_map>
+#include "sharedutils/functioncallback.h"
+
 
 export module pragma.client:gui.container;
 

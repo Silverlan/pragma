@@ -3,6 +3,8 @@
 
 module;
 #include "pragma/clientdefinitions.h"
+#include "pragma/lua/luaapi.h"
+
 
 
 export module pragma.client:entities.components.filter_entity_name;

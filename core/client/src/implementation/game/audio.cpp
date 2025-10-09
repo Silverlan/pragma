@@ -3,6 +3,10 @@
 
 module;
 
+#include "fsys/filesystem.h"
+
+#include "mathutil/umath.h"
+
 #include "stdafx_client.h"
 #include <alsoundsystem.hpp>
 #include <steam_audio/alsound_steam_audio.hpp>

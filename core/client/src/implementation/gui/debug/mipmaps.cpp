@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "sharedutils/functioncallback.h"
 
 #include "stdafx_client.h"
 #include <prosper_util.hpp>

@@ -3,6 +3,7 @@
 
 module;
 
+
 #include "stdafx_cengine.h"
 #include <queries/prosper_query_pool.hpp>
 #include <queries/prosper_timer_query.hpp>
@@ -12,7 +13,7 @@ module;
 
 module pragma.client;
 
-
+import :console.input;
 import :rendering.gpu_profiler;
 import :engine;
 

@@ -6,6 +6,7 @@ export module pragma.client;
 export import :ai;
 export import :assets;
 export import :client_state;
+export import :console;
 export import :core;
 export import :debug;
 export import :engine;

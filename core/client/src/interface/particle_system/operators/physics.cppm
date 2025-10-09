@@ -3,6 +3,8 @@
 
 module;
 #include "pragma/clientdefinitions.h"
+#include "sharedutils/util_shared_handle.hpp"
+
 
 
 export module pragma.client:particle_system.operator_physics;

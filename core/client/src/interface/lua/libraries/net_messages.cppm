@@ -3,9 +3,14 @@
 
 module;
 #include "pragma/clientdefinitions.h"
+#include "pragma/lua/luaapi.h"
+
 
 
 export module pragma.client:scripting.lua.libraries.net_messages;
+
+export import pragma.network_manager;
+
 export {
 	namespace Lua::net::client {
 		DLLCLIENT void send(nwm::Protocol protocol, const std::string &identifier, ::NetPacket &packet);

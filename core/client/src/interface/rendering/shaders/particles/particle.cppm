@@ -3,6 +3,10 @@
 
 module;
 #include "pragma/clientdefinitions.h"
+#include "mathutil/umath.h"
+#include "material.h"
+
+
 
 
 export module pragma.client:rendering.shaders.particle;

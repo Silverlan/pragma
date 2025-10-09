@@ -6,6 +6,8 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <memory>
 #include <image/prosper_texture.hpp>
+#include "sharedutils/util_weak_handle.hpp"
+
 
 export module pragma.client:rendering.ssao;
 #pragma warning(push)

@@ -5,6 +5,8 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include "alsound_listener.hpp"
+#include "pragma/lua/luaapi.h"
+
 
 export module pragma.client:entities.components.listener;
 

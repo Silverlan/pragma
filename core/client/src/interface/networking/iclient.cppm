@@ -9,6 +9,8 @@ module;
 
 export module pragma.client:networking.iclient;
 
+export import pragma.shared;
+
 export namespace pragma::networking {
 	class DLLCLIENT ClientEventInterface {
 	  public:

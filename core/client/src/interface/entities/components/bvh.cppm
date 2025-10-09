@@ -5,8 +5,13 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include <unordered_set>
+#include "pragma/lua/luaapi.h"
+
 
 export module pragma.client:entities.components.bvh;
+
+export import pragma.shared;
+
 export namespace pragma {
 	namespace rendering {
 		struct RenderBufferData;

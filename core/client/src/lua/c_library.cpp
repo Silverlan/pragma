@@ -1,3 +1,14 @@
+
+#include "pragma/lua/policies/default_parameter_policy.hpp"
+
+#include "sharedutils/util_parallel_job.hpp"
+
+#include "fsys/filesystem.h"
+
+#include "pragma/lua/luaapi.h"
+
+#include "mathutil/umath.h"
+
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
@@ -481,9 +492,9 @@ void CGame::RegisterLuaLibraries()
 			     std::string name = Lua::CheckString(l, 1);
 			     result = pragma::asset::import_texture(name, texImportInfo, outputPath, errMsg);
 		     }
-		     else if(Lua::IsFile(l, 1)) {
-			     auto f = Lua::CheckFile(l, 1);
-			     auto fp = std::make_unique<ufile::FileWrapper>(f->GetHandle());
+		     else if(Lua::IsType<LFile>(l, 1)) {
+			     auto &f = Lua::Check<LFile>(l, 1);
+			     auto fp = std::make_unique<ufile::FileWrapper>(f.GetHandle());
 			     result = pragma::asset::import_texture(std::move(fp), texImportInfo, outputPath, errMsg);
 		     }
 		     else {

@@ -3,6 +3,18 @@
 
 module;
 
+#include "pragma/logging.hpp"
+
+#include "material.h"
+
+#include "sharedutils/util_weak_handle.hpp"
+
+#include "fsys/filesystem.h"
+
+#include "udm.hpp"
+
+#include "pragma/lua/luaapi.h"
+#include "pragma/console/helper.hpp"
 #include "stdafx_client.h"
 #include "cmaterialmanager.h"
 #include <cmaterial_manager2.hpp>
@@ -23,6 +35,7 @@ module pragma.client;
 
 import :client_state;
 import :audio;
+import :console.register_commands;
 import :engine;
 import :entities.components;
 import :gui;
@@ -32,6 +45,7 @@ import :scripting.lua;
 import :util;
 // import pragma.scripting.lua;
 
+#undef GetMessage
 
 static std::unordered_map<std::string, std::shared_ptr<PtrConVar>> *conVarPtrs = NULL;
 std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &ClientState::GetConVarPtrs() { return *conVarPtrs; }
@@ -64,7 +78,7 @@ ClientState::ClientState() : NetworkState(), m_client(nullptr), m_svInfo(nullptr
 	auto &gui = WGUI::GetInstance();
 	// gui.SetCreateCallback(WGUILuaInterface::InitializeGUIElement);
 	//CVarHandler::Initialize();
-	FileManager::AddCustomMountDirectory("downloads", static_cast<fsys::SearchFlags>(FSYS_SEARCH_RESOURCES));
+	FileManager::AddCustomMountDirectory("downloads", static_cast<fsys::SearchFlags>(pragma::networking::FSYS_SEARCH_RESOURCES));
 
 	RegisterCallback<void, CGame *>("OnGameStart");
 	RegisterCallback<void, CGame *>("EndGame");
@@ -203,12 +217,14 @@ void ClientState::ShowFPSCounter(bool b)
 	m_hFps->Remove();
 }
 
-REGISTER_CONVAR_CALLBACK_CL(cl_show_fps, [](NetworkState *, const ConVar &, bool, bool val) {
-	auto *client = pragma::get_client_state();
-	if(client == nullptr)
-		return;
-	client->ShowFPSCounter(val);
-});
+namespace {
+	auto UVN = pragma::console::client::register_variable_listener<bool>("cl_show_fps", +[](NetworkState *, const ConVar &, bool, bool val) {
+		auto *client = pragma::get_client_state();
+		if(client == nullptr)
+			return;
+		client->ShowFPSCounter(val);
+	});
+}
 
 lua_State *ClientState::GetGUILuaState() { return (m_luaGUI != nullptr) ? m_luaGUI->GetState() : nullptr; }
 Lua::Interface &ClientState::GetGUILuaInterface() { return *m_luaGUI; }
@@ -841,8 +857,10 @@ bool ClientState::GetServerConVarIdentifier(uint32_t id, std::string &cvar)
 	return r;
 }
 
-REGISTER_CONVAR_CALLBACK_CL(sv_tickrate, [](NetworkState *, const ConVar &, int, int val) {
-	if(val < 0)
-		val = 0;
-	pragma::get_cengine()->SetTickRate(val);
-});
+namespace {
+	auto UVN = pragma::console::client::register_variable_listener<int>("sv_tickrate", +[](NetworkState *, const ConVar &, int, int val) {
+		if(val < 0)
+			val = 0;
+		pragma::get_cengine()->SetTickRate(val);
+	});
+}

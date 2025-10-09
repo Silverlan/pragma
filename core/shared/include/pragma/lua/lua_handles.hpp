@@ -11,16 +11,8 @@
 #include <luabind/handle.hpp>                                     // for handle
 #include <luabind/detail/decorate_type.hpp>                       // for decorated_type
 #include <sharedutils/util_shared_handle.hpp>
+#include "sharedutils/util_weak_handle.hpp"
 #include <memory>
-
-namespace util {
-	template<typename T>
-	class TWeakSharedHandle;
-	template<typename T>
-	class TSharedHandle;
-	template<typename T>
-	class WeakHandle;
-};
 
 // Note: get_const_holder and get_pointer have to be defined
 // in the same namespace as the type!! (luabind namespace will *not* work

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "mathutil/color.h"
 
 #include "stdafx_client.h"
 #include <prosper_command_buffer.hpp>
@@ -17,6 +18,7 @@ import :engine;
 import :game;
 import :rendering.shaders;
 
+#undef DrawText
 
 CPhysVisualDebugger::CPhysVisualDebugger() { InitializeBuffers(); }
 

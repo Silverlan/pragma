@@ -7,6 +7,8 @@ module;
 #include "alsoundsystem.hpp"
 #include "alsound_effect.hpp"
 #include "alsound_buffer.hpp"
+#include "pragma/lua/luaapi.h"
+
 
 export module pragma.client:scripting.lua.bindings.audio;
 import :audio;

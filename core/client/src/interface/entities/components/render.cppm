@@ -10,12 +10,16 @@ module;
 #include <mathutil/uvec.h>
 #include <mathutil/boundingvolume.h>
 #include <mathutil/transform.hpp>
+#include "mathutil/umath.h"
+#include "pragma/lua/luaapi.h"
+#include "sharedutils/util_event_reply.hpp"
 
 #define ENTITY_RENDER_BUFFER_USE_STORAGE_BUFFER 1
 
 export module pragma.client:entities.components.render;
 
 import :entities.components.entity;
+export import :entities.components.enums;
 import :model.render_mesh_group;
 import :rendering.enums;
 import :rendering.entity_instance_data;
@@ -32,8 +36,6 @@ export namespace pragma {
 	class CWorldComponent;
 };
 export namespace pragma {
-	using RenderMeshIndex = uint32_t;
-	using RenderBufferIndex = uint32_t;
 	class DLLCLIENT CRenderComponent final : public BaseRenderComponent, public CBaseNetComponent {
 	  public:
 		enum class StateFlags : uint16_t {

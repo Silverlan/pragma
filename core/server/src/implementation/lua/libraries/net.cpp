@@ -3,7 +3,6 @@
 
 module;
 #include "pragma/lua/luaapi.h"
-#include "pragma/lua/lnetmessages.h"
 #include "stdafx_server.h"
 
 module pragma.server.scripting.lua.libraries.net;

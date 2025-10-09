@@ -12,8 +12,6 @@ import :networking.local_client;
 
 import :engine;
 
-extern DLLNETWORK Engine *engine;
-
 std::string pragma::networking::LocalClient::GetIdentifier() const { return "localhost"; }
 bool pragma::networking::LocalClient::Connect(const std::string &ip, Port port, Error &outErr)
 {

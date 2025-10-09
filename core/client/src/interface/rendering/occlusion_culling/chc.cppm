@@ -5,7 +5,9 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include <sharedutils/functioncallback.h>
+#include "sharedutils/util_shared_handle.hpp"
 #include <queue>
+#include "mathutil/umath.h"
 
 #define CHC_DEBUGGING_ENABLED 0
 
@@ -19,7 +21,7 @@ import :rendering.occlusion_culling.octree;
 export {
 	class CHC;
 	class CHCNode;
-	DECLARE_BASE_HANDLE(DLLCLIENT, CHCNode, CHCNode);
+	using CHCNodeHandle = util::TSharedHandle<CHCNode>;
 };
 
 struct DLLCLIENT CHCMeshInfo {

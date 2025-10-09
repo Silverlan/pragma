@@ -7,10 +7,17 @@ module;
 #include <material_descriptor_array.hpp>
 #include <shader/prosper_descriptor_array_manager.hpp>
 #include <buffers/prosper_buffer.hpp>
+#include "mathutil/umath.h"
+#include "sharedutils/functioncallback.h"
+#include "pragma/lua/luaapi.h"
+
+
+
 
 export module pragma.client:entities.components.raytracing;
 
 import :rendering.enums;
+export import pragma.shared;
 
 export namespace pragma {
 	class DLLCLIENT CRaytracingComponent final : public BaseEntityComponent {

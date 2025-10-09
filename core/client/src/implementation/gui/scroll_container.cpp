@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "sharedutils/util_event_reply.hpp"
+
+#include "sharedutils/functioncallback.h"
 
 #include "stdafx_client.h"
 #include <mathutil/umath.h>

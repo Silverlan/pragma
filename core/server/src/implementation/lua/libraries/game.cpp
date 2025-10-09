@@ -72,7 +72,7 @@ int Lua::game::Server::load_map(lua_State *l)
 	auto pair = Lua::game::load_map(l, mapName, &entWorld, origin);
 	if(pair.first == false)
 		return pair.second;
-	NetPacket packet {};
+	::NetPacket packet {};
 	packet->WriteString(mapName);
 	packet->Write<Vector3>(origin);
 	//packet->Write<uint32_t>(startIdx);

@@ -1,3 +1,10 @@
+
+
+#include "sharedutils/functioncallback.h"
+
+#include "mathutil/umath.h"
+#include "mathutil/color.h"
+
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
@@ -103,7 +110,7 @@ static void cl_render_vr_enabled(bool b)
 		lastColor = Color::White;
 	}
 }
-REGISTER_CONVAR_CALLBACK_CL(cl_render_vr_enabled, [](NetworkState *, const ConVar &, bool, bool b) { cl_render_vr_enabled(b); })
+namespace { auto _ = pragma::console::client::register_variable_listener<bool>("cl_render_vr_enabled", +[](NetworkState *, const ConVar &, bool, bool b) { cl_render_vr_enabled(b); }); }
 
 /*REGISTER_CONVAR_CALLBACK_CL(cl_render_vr_resolution,[](NetworkState*,ConVar*,std::string,std::string val) {
 	

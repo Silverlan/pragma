@@ -3,12 +3,13 @@
 
 module;
 #include "pragma/clientdefinitions.h"
+#include "pragma/lua/luaapi.h"
+
 
 
 export module pragma.client:entities.components.shooter;
 
 import :entities.components.entity;
-import pragma.entities.components.shooter;
 
 export namespace pragma::ecs {
 	class DLLCLIENT CShooterComponent final : public BaseShooterComponent, public CBaseNetComponent {

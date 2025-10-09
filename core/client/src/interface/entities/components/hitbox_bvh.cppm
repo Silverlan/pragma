@@ -3,6 +3,12 @@
 
 module;
 #include "pragma/clientdefinitions.h"
+#include "mathutil/umath.h"
+#include "pragma/lua/luaapi.h"
+#include "mathutil/transform.hpp"
+
+
+
 
 
 export module pragma.client:entities.components.hitbox_bvh;

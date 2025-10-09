@@ -11,6 +11,8 @@ module;
 
 export module pragma.client:audio.sound;
 
+export import pragma.shared;
+
 #pragma warning(push)
 #pragma warning(disable : 4251)
 export class DLLCLIENT CALSound : public al::SoundSource, public ALSound {

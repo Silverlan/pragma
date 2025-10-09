@@ -5,6 +5,10 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include "luasystem.h"
+#include "pragma/lua/luaapi.h"
+#include "sharedutils/functioncallback.h"
+
+
 
 export module pragma.client:gui.lua_interface;
 

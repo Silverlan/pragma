@@ -9,8 +9,18 @@ module;
 #include <prosper_command_buffer.hpp>
 #include <image/prosper_render_target.hpp>
 #include <image/prosper_sampler.hpp>
+#include "pragma/lua/luaapi.h"
+#include "pragma/lua/types/udm.hpp"
+#include "udm.hpp"
+#include "mathutil/color.h"
+
+
+
 
 export module pragma.client:scripting.lua.libraries.vulkan;
+
+export import pragma.shared;
+
 export namespace Lua {
 	namespace Vulkan {
 		struct DLLCLIENT PreparedCommandLuaArg {
@@ -27,18 +37,18 @@ export namespace Lua {
 			PreparedCommandLuaDynamicArg(std::string argName) : argName {std::move(argName)} {}
 			std::string argName;
 		};
-		DLLCLIENT prosper::util::PreparedCommand::Argument make_pcb_arg(const Lua::Vulkan::PreparedCommandLuaArg &larg, udm::Type type);
+		DLLCLIENT prosper::util::PreparedCommand::Argument make_pcb_arg(const Lua::Vulkan::PreparedCommandLuaArg &larg, ::udm::Type type);
 		template<typename T>
 		prosper::util::PreparedCommand::Argument make_pcb_arg(const Lua::Vulkan::PreparedCommandLuaArg &larg)
 		{
 			if constexpr(std::is_enum_v<T>)
-				return make_pcb_arg(larg, udm::type_to_enum<std::underlying_type_t<T>>());
+				return make_pcb_arg(larg, ::udm::type_to_enum<std::underlying_type_t<T>>());
 			else
-				return make_pcb_arg(larg, udm::type_to_enum<T>());
+				return make_pcb_arg(larg, ::udm::type_to_enum<T>());
 		}
 		struct DLLCLIENT ClearValue {
 		  public:
-			ClearValue(const Color &color) : clearValue {prosper::ClearColorValue {std::array<float, 4> {color.r / 255.f, color.g / 255.f, color.b / 255.f, color.a / 255.f}}} {}
+			ClearValue(const ::Color &color) : clearValue {prosper::ClearColorValue {std::array<float, 4> {color.r / 255.f, color.g / 255.f, color.b / 255.f, color.a / 255.f}}} {}
 			ClearValue(float depth, uint32_t stencil) : clearValue {prosper::ClearDepthStencilValue {depth, stencil}} {}
 			ClearValue(float depth) : clearValue {prosper::ClearDepthStencilValue {depth}} {}
 			ClearValue() : ClearValue(0.f) {}

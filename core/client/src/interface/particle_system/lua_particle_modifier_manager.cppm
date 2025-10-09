@@ -3,6 +3,8 @@
 
 module;
 #include "pragma/clientdefinitions.h"
+#include "pragma/lua/luaapi.h"
+
 
 
 export module pragma.client:particle_system.lua_particle_modifier_manager;

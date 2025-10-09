@@ -1,3 +1,6 @@
+
+#include "pragma/clientdefinitions.h"
+
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
@@ -5,6 +8,8 @@
 #include <sharedutils/util.h>
 
 import pragma.client;
+
+#undef GetMessage
 
 struct LastConnectionInfo {
 	std::optional<std::pair<std::string, uint16_t>> address = {};
@@ -167,11 +172,11 @@ void CMD_cl_debug_netmessages(NetworkState *state, pragma::BasePlayerComponent *
 		return;
 	}
 	auto *svMap = GetServerMessageMap();
-	std::unordered_map<std::string, uint32_t> *svMsgs;
+	util::StringMap<uint32_t> *svMsgs;
 	svMap->GetNetMessages(&svMsgs);
 
 	auto *clMap = GetClientMessageMap();
-	std::unordered_map<std::string, uint32_t> *clMsgs;
+	util::StringMap<uint32_t> *clMsgs;
 	clMap->GetNetMessages(&clMsgs);
 
 	cl->DebugPrint(*clMsgs, *svMsgs);

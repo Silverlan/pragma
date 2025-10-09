@@ -11,6 +11,7 @@ export module pragma.client:particle_system.modifier;
 
 import :particle_system.enums;
 import :particle_system.particle;
+export import pragma.shared;
 
 #pragma warning(push)
 #pragma warning(disable : 4251)

@@ -5,8 +5,13 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include <unordered_set>
+#include "pragma/lua/luaapi.h"
+
 
 export module pragma.client:entities.components.static_bvh_user;
+
+export import pragma.shared;
+
 export namespace pragma {
 	class DLLCLIENT CStaticBvhUserComponent final : public BaseStaticBvhUserComponent {
 	  public:

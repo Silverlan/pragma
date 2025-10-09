@@ -4,6 +4,7 @@
 module;
 
 #include "stdafx_client.h"
+#include "sharedutils/util_path.hpp"
 
 module pragma.client;
 

@@ -5,6 +5,8 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include <luabind/luabind.hpp>
+#include "pragma/lua/luaapi.h"
+
 
 export module pragma.client:gui.lua_handle_wrapper;
 

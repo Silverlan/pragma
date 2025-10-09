@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "pragma/clientdefinitions.h"
+
+#include "pragma/lua/luaapi.h"
 
 #include "stdafx_cengine.h"
 #include <sharedutils/util_string.h>

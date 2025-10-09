@@ -14,7 +14,7 @@ export import :game.animation_channel_cache_data;
 export import panima;
 
 export {
-	constexpr auto g_debugPrint = false;
+	constexpr auto g_debugPrintPanima = false;
 
 	constexpr uint8_t get_component_count(udm::Type type)
 	{
@@ -67,7 +67,7 @@ export {
 				auto value = channel.GetInterpolatedValue<TChannel>(t, inOutPivotTimeIndex, memberInfo->interpolationFunction);
 
 				channel.ApplyValueExpression<TChannel>(t, inOutPivotTimeIndex, value);
-				if constexpr(g_debugPrint) {
+				if constexpr(g_debugPrintPanima) {
 					TMember curVal;
 					memberInfo->getterFunction(*memberInfo, component, &curVal);
 					Con::cout << "Changing channel value '" << channel.targetPath.ToUri() << " from " << to_string(curVal) << " to " << to_string(value) << " (t: " << t << ")..." << Con::endl;
@@ -106,7 +106,7 @@ export {
 							curVal[TMapArray[3]] = value[3];
 					}
 				}
-				if constexpr(g_debugPrint) {
+				if constexpr(g_debugPrintPanima) {
 					TMember curVal;
 					memberInfo->getterFunction(*memberInfo, component, &curVal);
 					Con::cout << "Changing " << TMapArray.size() << " components of channel value '" << channel.targetPath.ToUri() << " from " << to_string(curVal) << " to " << to_string(value) << " (t: " << t << ")..." << Con::endl;

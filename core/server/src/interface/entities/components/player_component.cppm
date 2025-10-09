@@ -5,6 +5,8 @@ module;
 #include "pragma/serverdefinitions.h"
 #include "sharedutils/util_weak_handle.hpp"
 #include "pragma/lua/luaapi.h"
+#include "sharedutils/util_event_reply.hpp"
+
 
 
 export module pragma.server.entities.components.player;

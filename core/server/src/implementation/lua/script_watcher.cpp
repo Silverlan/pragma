@@ -5,9 +5,14 @@ module;
 
 #include "stdafx_server.h"
 #include "pragma/lua/luaapi.h"
-#include "pragma/lua/s_lua_script_watcher.h"
 
 module pragma.server.scripting.lua.script_watcher;
+
+import pragma.server.game;
+import pragma.server.networking.resource_manager;
+export pragma.server.server_state;
+
+#undef FindResource
 
 void SLuaDirectoryWatcherManager::OnLuaFileChanged(const std::string &path)
 {

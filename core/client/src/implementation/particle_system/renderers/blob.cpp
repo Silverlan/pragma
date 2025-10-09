@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "sharedutils/functioncallback.h"
+
+#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
 #include <buffers/prosper_dynamic_resizable_buffer.hpp>
@@ -254,13 +257,13 @@ void CParticleRendererBlob::OnParticleSystemStarted()
 #endif
 }
 
-REGISTER_CONVAR_CALLBACK_CL(debug_particle_blob_show_neighbor_links, [](NetworkState *state, const ConVar &, bool, bool val) {
+namespace { auto _ = pragma::console::client::register_variable_listener<bool>("debug_particle_blob_show_neighbor_links", +[](NetworkState *state, const ConVar &, bool, bool val) {
 	if(!check_cheats("debug_particle_blob_show_neighbor_links", state))
 		return;
 	if(pragma::get_cgame() == nullptr)
 		return;
 	CParticleRendererBlob::SetShowNeighborLinks(val);
-});
+}) };
 
 void CParticleRendererBlob::OnParticleSystemStopped()
 {

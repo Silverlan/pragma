@@ -3,9 +3,19 @@
 
 module;
 #include "pragma/clientdefinitions.h"
+#include "mathutil/umath.h"
+#include <condition_variable>
+#include "sharedutils/functioncallback.h"
+#include "pragma/lua/luaapi.h"
+#include "mathutil/transform.hpp"
+
+
 
 
 export module pragma.client:entities.components.animated_bvh;
+
+export import pragma.shared;
+
 export namespace pragma {
 	struct DLLCLIENT AnimatedBvhData {
 		struct DLLCLIENT AnimationBvhData {

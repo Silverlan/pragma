@@ -5,7 +5,6 @@ module;
 
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/luaapi.h"
-#include "pragma/console/s_cvar.h"
 
 #include "stdafx_server.h"
 #include <fsys/filesystem.h>
@@ -18,6 +17,7 @@ module pragma.server.game;
 
 import pragma.server.ai;
 import pragma.server.audio;
+import pragma.server.console.util;
 import pragma.server.core.cache_info;
 import pragma.server.debug;
 import pragma.server.entities;

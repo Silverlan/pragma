@@ -3,6 +3,8 @@
 
 module;
 #include "pragma/clientdefinitions.h"
+#include "mathutil/umath.h"
+
 
 
 export module pragma.client:scripting.lua.libraries.debug_renderer;
@@ -24,7 +26,7 @@ export namespace Lua {
 			DLLCLIENT std::shared_ptr<::DebugRenderer::BaseObject> DrawCylinder(float radius, const Vector3 &dir, float dist, const DebugRenderInfo &renderInfo, uint32_t segmentCount = 12);
 			DLLCLIENT std::shared_ptr<::DebugRenderer::BaseObject> DrawCone(const Vector3 &dir, float dist, float angle, const DebugRenderInfo &renderInfo, uint32_t segmentCount = 12);
 			DLLCLIENT std::array<std::shared_ptr<::DebugRenderer::BaseObject>, 3> DrawAxis(const DebugRenderInfo &renderInfo);
-			DLLCLIENT std::shared_ptr<::DebugRenderer::BaseObject> DrawText(const std::string &text, const Vector2 &size, const DebugRenderInfo &renderInfo);
+			DLLCLIENT std::shared_ptr<::DebugRenderer::BaseObject> DrawText(const std::string &text, const ::Vector2 &size, const DebugRenderInfo &renderInfo);
 			DLLCLIENT std::shared_ptr<::DebugRenderer::BaseObject> DrawText(const std::string &text, float scale, const DebugRenderInfo &renderInfo);
 			DLLCLIENT std::shared_ptr<::DebugRenderer::BaseObject> DrawText(const std::string &text, const DebugRenderInfo &renderInfo);
 			DLLCLIENT std::shared_ptr<::DebugRenderer::BaseObject> DrawPath(const std::vector<Vector3> &path, const DebugRenderInfo &renderInfo);

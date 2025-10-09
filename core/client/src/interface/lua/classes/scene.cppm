@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/lua/luaapi.h"
 #include "luabind/copy_policy.hpp"
 #include "prosper_render_pass.hpp"
 #include "prosper_command_buffer.hpp"
@@ -12,6 +13,9 @@ module;
 #include "luasystem.h"
 #include <prosper_descriptor_set_group.hpp>
 #include <sharedutils/util_shaderinfo.hpp>
+#include "mathutil/umath.h"
+#include "pragma/lua/policies/shared_from_this_policy.hpp"
+
 
 export module pragma.client:scripting.lua.bindings.scene;
 import :entities.components;

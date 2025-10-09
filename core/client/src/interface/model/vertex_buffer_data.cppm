@@ -6,6 +6,7 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <mathutil/uvec.h>
 #include <mathutil/vertex.hpp>
+#include "mathutil/umath.h"
 
 #define ENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER
 

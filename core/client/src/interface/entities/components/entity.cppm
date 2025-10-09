@@ -7,6 +7,8 @@ module;
 
 export module pragma.client:entities.components.entity;
 
+export import pragma.shared;
+
 export namespace pragma {
 	class DLLCLIENT CBaseNetComponent : public BaseNetComponent {
 	  public:

@@ -15,6 +15,8 @@ import :engine;
 import pragma.gui;
 import pragma.locale;
 
+#undef CreateWindow
+
 WIDetachable::DetachedWindow::~DetachedWindow() { Clear(); }
 void WIDetachable::DetachedWindow::Clear()
 {

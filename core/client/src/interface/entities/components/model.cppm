@@ -7,6 +7,8 @@ module;
 #include "cmaterial.h"
 #include <vector>
 #include <optional>
+#include "pragma/lua/luaapi.h"
+
 
 export module pragma.client:entities.components.model;
 

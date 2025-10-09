@@ -2,6 +2,23 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "pragma/lua/util.hpp"
+
+#include "pragma/clientdefinitions.h"
+#include "pragma/console/helper.hpp"
+#include "mathutil/color.h"
+
+#include "sharedutils/functioncallback.h"
+
+#include "material.h"
+
+#include "sharedutils/util_weak_handle.hpp"
+
+#include "fsys/filesystem.h"
+
+#include "pragma/lua/luaapi.h"
+
+#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
 #include "luasystem.h"
@@ -124,13 +141,6 @@ CGame::CGame(NetworkState *state)
 	RegisterCallback<void, std::reference_wrapper<const util::DrawSceneInfo>, std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>>>("PostRender");
 	RegisterCallback<void, CBaseEntity *>("UpdateEntityModel");
 	RegisterCallback<void, WIBase *, WIBase *>("OnGUIFocusChanged");
-
-	auto &staticCallbacks = get_static_client_callbacks();
-	for(auto it = staticCallbacks.begin(); it != staticCallbacks.end(); ++it) {
-		auto &name = it->first;
-		auto &hCallback = it->second;
-		AddCallback(name, hCallback);
-	}
 
 	LoadAuxEffects("fx_generic.udm");
 	for(auto &rsnd : pragma::get_client_state()->GetSounds()) {
@@ -325,9 +335,9 @@ static void cmd_render_ibl_enabled(NetworkState *, const ConVar &, bool, bool en
 		return;
 	client->UpdateGameWorldShaderSettings();
 }
-REGISTER_CONVAR_CALLBACK_CL(render_ibl_enabled, cmd_render_ibl_enabled);
-REGISTER_CONVAR_CALLBACK_CL(render_dynamic_lighting_enabled, cmd_render_ibl_enabled);
-REGISTER_CONVAR_CALLBACK_CL(render_dynamic_shadows_enabled, cmd_render_ibl_enabled);
+namespace { auto UVN = pragma::console::client::register_variable_listener<bool>("renderender_ibl_enabledr_bloom_enabled", &cmd_render_ibl_enabled); }
+namespace { auto UVN = pragma::console::client::register_variable_listener<bool>("render_dynamic_lighting_enabled", &cmd_render_ibl_enabled); }
+namespace { auto UVN = pragma::console::client::register_variable_listener<bool>("render_dynamic_shadows_enabled", &cmd_render_ibl_enabled); }
 
 static void cmd_render_queue_worker_thread_count(NetworkState *, const ConVar &, int, int val)
 {
@@ -336,7 +346,7 @@ static void cmd_render_queue_worker_thread_count(NetworkState *, const ConVar &,
 	val = umath::clamp(val, 1, 20);
 	pragma::get_cgame()->GetRenderQueueWorkerManager().SetWorkerCount(val);
 }
-REGISTER_CONVAR_CALLBACK_CL(render_queue_worker_thread_count, cmd_render_queue_worker_thread_count);
+namespace { auto UVN = pragma::console::client::register_variable_listener<int>("render_queue_worker_thread_count", &cmd_render_queue_worker_thread_count); }
 
 static void cmd_render_queue_worker_jobs_per_batch(NetworkState *, const ConVar &, int, int val)
 {
@@ -345,7 +355,7 @@ static void cmd_render_queue_worker_jobs_per_batch(NetworkState *, const ConVar 
 	val = umath::max(val, 1);
 	pragma::get_cgame()->GetRenderQueueWorkerManager().SetJobsPerBatchCount(val);
 }
-REGISTER_CONVAR_CALLBACK_CL(render_queue_worker_jobs_per_batch, cmd_render_queue_worker_jobs_per_batch);
+namespace { auto UVN = pragma::console::client::register_variable_listener<int>("render_queue_worker_jobs_per_batch", &cmd_render_queue_worker_jobs_per_batch); }
 
 pragma::rendering::RenderQueueBuilder &CGame::GetRenderQueueBuilder() { return *m_renderQueueBuilder; }
 pragma::rendering::RenderQueueWorkerManager &CGame::GetRenderQueueWorkerManager() { return *m_renderQueueWorkerManager; }
@@ -584,10 +594,10 @@ static void render_debug_mode(NetworkState *, const ConVar &, int32_t, int32_t d
 		sceneC->SetDebugMode(static_cast<pragma::SceneDebugMode>(debugMode));
 	}
 }
-REGISTER_CONVAR_CALLBACK_CL(render_debug_mode, render_debug_mode);
+namespace { auto UVN = pragma::console::client::register_variable_listener<int32_t>("render_debug_mode", &render_debug_mode); }
 
 static void CVAR_CALLBACK_render_unlit(NetworkState *nw, const ConVar &cv, bool prev, bool val) { render_debug_mode(nw, cv, prev, umath::to_integral(pragma::SceneDebugMode::Unlit)); }
-REGISTER_CONVAR_CALLBACK_CL(render_unlit, CVAR_CALLBACK_render_unlit);
+namespace { auto UVN = pragma::console::client::register_variable_listener<bool>("render_unlit", &CVAR_CALLBACK_render_unlit); }
 
 void CGame::SetViewModelFOV(float fov) { *m_viewFov = fov; }
 const util::PFloatProperty &CGame::GetViewModelFOVProperty() const { return m_viewFov; }

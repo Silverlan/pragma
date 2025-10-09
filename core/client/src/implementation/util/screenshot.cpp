@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "fsys/filesystem.h"
 
 #include "stdafx_client.h"
 #include <util_image.hpp>

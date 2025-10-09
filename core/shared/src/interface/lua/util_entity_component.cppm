@@ -4,6 +4,7 @@
 module;
 
 #include "pragma/lua/luaapi.h"
+#include <sstream>
 
 export module pragma.shared:scripting.lua.util_entity_component;
 

@@ -2,6 +2,17 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "pragma/logging.hpp"
+
+#include "mathutil/transform.hpp"
+
+#include "material.h"
+
+#include "sharedutils/util_pragma.hpp"
+
+#include "fsys/filesystem.h"
+
+#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
 #include "prosper_util.hpp"

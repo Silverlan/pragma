@@ -2,6 +2,19 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "pragma/cxxmodules.hpp"
+
+#include "sharedutils/util_event_reply.hpp"
+
+#include "mathutil/color.h"
+
+#include "mathutil/transform.hpp"
+
+#include "sharedutils/functioncallback.h"
+
+#include "material.h"
+
+#include "fsys/filesystem.h"
 
 #include "stdafx_client.h"
 #include <mathutil/umath.h>

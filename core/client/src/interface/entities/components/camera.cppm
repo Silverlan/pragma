@@ -3,6 +3,12 @@
 
 module;
 #include "pragma/clientdefinitions.h"
+#include "udm.hpp"
+#include "pragma/lua/luaapi.h"
+#include "sharedutils/util_event_reply.hpp"
+
+
+
 
 
 export module pragma.client:entities.components.camera;

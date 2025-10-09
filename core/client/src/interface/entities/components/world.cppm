@@ -6,6 +6,8 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "buffers/prosper_buffer.hpp"
 #include <unordered_map>
+#include "pragma/lua/luaapi.h"
+
 
 export module pragma.client:entities.components.world;
 

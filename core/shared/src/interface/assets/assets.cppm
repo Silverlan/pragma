@@ -8,4 +8,4 @@ export import :assets.conversion;
 export import :assets.common;
 export import :assets.file_formats.legacy_weave_animation_data;
 import :assets.manager;
-import :assets.vtf_info;
+export import :assets.vtf_info;

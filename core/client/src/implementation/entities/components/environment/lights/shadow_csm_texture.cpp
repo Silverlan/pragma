@@ -3,6 +3,8 @@
 
 module;
 
+#include "mathutil/umath.h"
+
 #include "stdafx_client.h"
 #include <image/prosper_render_target.hpp>
 #include <prosper_render_pass.hpp>

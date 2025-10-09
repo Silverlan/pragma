@@ -2,8 +2,10 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
+#include "pragma/console/helper.hpp"
 //#include "shader.h" // prosper TODO
 //#include "shader_screen.h" // prosper TODO
 #include <buffers/prosper_buffer.hpp>
@@ -15,12 +17,13 @@ import :game;
 import :engine;
 import :rendering.shaders;
 
-
-REGISTER_CONVAR_CALLBACK_CL(cl_render_shader_quality, [](NetworkState *, const ConVar &, int, int val) {
-	if(pragma::get_cgame() == nullptr)
-		return;
-	pragma::get_cgame()->GetWorldEnvironment().SetShaderQuality(val);
-});
+namespace {
+	auto UVN = pragma::console::client::register_variable_listener<int>("cl_render_shader_quality", +[](NetworkState *, const ConVar &, int, int val) {
+		if(pragma::get_cgame() == nullptr)
+			return;
+		pragma::get_cgame()->GetWorldEnvironment().SetShaderQuality(val);
+	});
+}
 
 static void CVAR_CALLBACK_cl_render_shadow_resolution(NetworkState *, const ConVar &, int, int val)
 {
@@ -28,7 +31,7 @@ static void CVAR_CALLBACK_cl_render_shadow_resolution(NetworkState *, const ConV
 		return;
 	pragma::get_cgame()->GetWorldEnvironment().SetShadowResolution(val);
 }
-REGISTER_CONVAR_CALLBACK_CL(cl_render_shadow_resolution, CVAR_CALLBACK_cl_render_shadow_resolution);
+namespace { auto UVN = pragma::console::client::register_variable_listener<int>("cl_render_shadow_resolution", &CVAR_CALLBACK_cl_render_shadow_resolution); }
 
 void register_game_shaders()
 {

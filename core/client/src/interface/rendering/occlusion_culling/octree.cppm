@@ -13,10 +13,14 @@ module;
 #include <memory>
 #include <queue>
 #include <functional>
+#include <iostream>
+#include "mathutil/umath.h"
 
 #define ENABLE_OCCLUSION_DEBUG_MODE 0
 
 export module pragma.client:rendering.occlusion_culling.octree;
+
+export import pragma.shared;
 
 #pragma warning(push)
 #pragma warning(disable : 4251)
@@ -253,6 +257,7 @@ export {
     template<class T>
     void OcclusionOctree<T>::Node::DebugPrintObjects(const std::string &t) const
     {
+        using ::operator<<; // Workaround for msvc compiler being unable to resolve Con::ccl<< operator (compiler bug?)
         for(auto &o : m_objects) {
             Con::ccl << t;
             auto *tree = GetTree();

@@ -15,6 +15,14 @@ module;
 #include <atomic>
 #include <mutex>
 #include <unordered_set>
+#include "sharedutils/util_weak_handle.hpp"
+#include "material.h"
+#include "sharedutils/functioncallback.h"
+#include "pragma/lua/luaapi.h"
+
+
+
+
 
 export module pragma.client:entities.components.util_pbr_converter;
 

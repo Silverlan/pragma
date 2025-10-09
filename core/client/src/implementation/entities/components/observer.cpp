@@ -3,6 +3,12 @@
 
 module;
 
+#include "mathutil/transform.hpp"
+
+#include "pragma/lua/luaapi.h"
+
+#include "mathutil/umath.h"
+
 #include "stdafx_client.h"
 
 module pragma.client;

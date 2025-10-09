@@ -1,3 +1,7 @@
+
+
+#include "sharedutils/functioncallback.h"
+
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
@@ -77,4 +81,4 @@ static void CVAR_CALLBACK_cl_render_shadow_pssm_split_count(NetworkState *state,
 	std::vector<std::string> argv = {std::to_string(shadowmapTargetIdx), std::to_string(shadowmapWidth), std::to_string(shadowmapHeight)};
 	CMD_debug_light_shadowmap(state, nullptr, argv);
 }
-REGISTER_CONVAR_CALLBACK_CL(cl_render_shadow_pssm_split_count, CVAR_CALLBACK_cl_render_shadow_pssm_split_count);
+namespace { auto _ = pragma::console::client::register_variable_listener<int>("cl_render_shadow_pssm_split_count",&CVAR_CALLBACK_cl_render_shadow_pssm_split_count); }

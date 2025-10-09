@@ -7,6 +7,8 @@ module;
 
 export module pragma.client:model.vertex_animation;
 
+export import pragma.shared;
+
 export class DLLCLIENT CVertexAnimation : public VertexAnimation {
   public:
 	static std::shared_ptr<CVertexAnimation> Create();

@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "sharedutils/util_parallel_job.hpp"
+
 #include "fsys/filesystem.h"
 
 #include "sstream"

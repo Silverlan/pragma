@@ -6,10 +6,14 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <buffers/prosper_buffer.hpp>
 #include <memory>
+#include "mathutil/color.h"
+
 
 export module pragma.client:physics.visual_debugger;
 
 import :entities.components.camera;
+
+#undef DrawText
 
 export {
 	class DLLCLIENT CPhysVisualDebugger : public pragma::physics::IVisualDebugger {

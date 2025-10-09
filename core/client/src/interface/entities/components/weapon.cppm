@@ -5,6 +5,12 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include <optional>
+#include "mathutil/umath.h"
+#include "pragma/lua/luaapi.h"
+#include "sharedutils/functioncallback.h"
+
+
+
 
 export module pragma.client:entities.components.weapon;
 

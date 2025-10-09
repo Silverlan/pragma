@@ -3,6 +3,8 @@
 
 module;
 
+#include "mathutil/umath.h"
+
 #include "stdafx_client.h"
 #include <prosper_util.hpp>
 #include <buffers/prosper_buffer.hpp> // prosper TODO: Remove
@@ -11,6 +13,7 @@ module;
 
 module pragma.client;
 
+import :console.util;
 import :physics.water_surface_simulator;
 import :client_state;
 import :debug;

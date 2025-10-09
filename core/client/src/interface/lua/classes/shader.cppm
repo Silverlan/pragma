@@ -5,6 +5,12 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include "prosper_prepared_command_buffer.hpp"
+#include "pragma/lua/luaapi.h"
+#include "udm.hpp"
+#include "sharedutils/datastream.h"
+
+
+
 
 export module pragma.client:scripting.lua.classes.shader;
 
@@ -67,7 +73,7 @@ export {
 
 	namespace Lua {
 		namespace GraphicsPipelineCreateInfo {
-			DLLCLIENT void SetBlendingProperties(lua_State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo, const Vector4 &blendingProperties);
+			DLLCLIENT void SetBlendingProperties(lua_State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo, const ::Vector4 &blendingProperties);
 			DLLCLIENT void SetCommonAlphaBlendProperties(lua_State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo);
 			DLLCLIENT void SetColorBlendAttachmentProperties(lua_State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t attId, bool blendingEnabled, uint32_t blendOpColor, uint32_t blendOpAlpha, uint32_t srcColorBlendFactor, uint32_t dstColorBlendFactor,
 			uint32_t srcAlphaBlendFactor, uint32_t dstAlphaBlendFactor, uint32_t channelWriteMask);
@@ -183,7 +189,7 @@ export {
 			DLLCLIENT void GetSourceFilePath(lua_State *l, prosper::Shader &shader, uint32_t shaderStage);
 			DLLCLIENT void GetSourceFilePaths(lua_State *l, prosper::Shader &shader);
 			DLLCLIENT void RecordPushConstants(lua_State *l, prosper::Shader &shader, const LuaShaderRecordTarget &recordTarget, ::DataStream &ds, uint32_t offset);
-			DLLCLIENT void RecordPushConstants(lua_State *l, prosper::Shader &shader, prosper::util::PreparedCommandBuffer &pcb, udm::Type type, const Lua::Vulkan::PreparedCommandLuaArg &value, uint32_t offset);
+			DLLCLIENT void RecordPushConstants(lua_State *l, prosper::Shader &shader, prosper::util::PreparedCommandBuffer &pcb, ::udm::Type type, const Lua::Vulkan::PreparedCommandLuaArg &value, uint32_t offset);
 			DLLCLIENT void RecordBindDescriptorSet(lua_State *l, prosper::Shader &shader, prosper::util::PreparedCommandBuffer &pcb, Lua::Vulkan::DescriptorSet &ds, uint32_t firstSet, luabind::object dynamicOffsets, std::optional<uint32_t> dynamicOffsetIndex = {});
 			DLLCLIENT void RecordBindDescriptorSet(lua_State *l, prosper::Shader &shader, prosper::ShaderBindState &bindState, Lua::Vulkan::DescriptorSet &ds, uint32_t firstSet, luabind::object dynamicOffsets, std::optional<uint32_t> dynamicOffsetIndex = {});
 			DLLCLIENT void RecordBindDescriptorSets(lua_State *l, prosper::Shader &shader, prosper::ShaderBindState &bindState, luabind::object descSets, uint32_t firstSet, luabind::object dynamicOffsets);

@@ -1,9 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "stdafx_cengine.h"
+module;
 
-import pragma.client;
+#include "stdafx_cengine.h"
+#include "pragma/clientdefinitions.h"
+#include "mathutil/umath.h"
+
+module pragma.client;
+
+import :engine;
 
 std::optional<bool> g_launchParamWindowedMode {};
 std::optional<int> g_launchParamRefreshRate {};
@@ -130,32 +136,34 @@ static void LPARAM_wayland_libdecor_plugin(const std::vector<std::string> &argv)
 	g_waylandLibdecorPlugin = argv.front();
 }
 
-REGISTER_LAUNCH_PARAMETER_HELP(-windowed, LPARAM_windowed, "-window -startwindowed -sw", "start in windowed mode");
-REGISTER_LAUNCH_PARAMETER(-window, LPARAM_windowed);
-REGISTER_LAUNCH_PARAMETER(-startwindowed, LPARAM_windowed);
-REGISTER_LAUNCH_PARAMETER(-sw, LPARAM_windowed);
+void register_client_launch_parameters(LaunchParaMap &map) {
+	map.RegisterParameterHelp("-windowed", &LPARAM_windowed, "-window -startwindowed -sw", "start in windowed mode");
+	map.RegisterParameter("-window", &LPARAM_windowed);
+	map.RegisterParameter("-startwindowed", &LPARAM_windowed);
+	map.RegisterParameter("-sw", &LPARAM_windowed);
 
-REGISTER_LAUNCH_PARAMETER_HELP(-refresh, LPARAM_refresh, "-refreshrate -freq", "monitor refresh rate in Hz. Only available in fullscreen mode");
-REGISTER_LAUNCH_PARAMETER(-refreshrate, LPARAM_refresh);
-REGISTER_LAUNCH_PARAMETER(-freq, LPARAM_refresh);
+	map.RegisterParameterHelp("-refresh", &LPARAM_refresh, "-refreshrate -freq", "monitor refresh rate in Hz. Only available in fullscreen mode");
+	map.RegisterParameter("-refreshrate", &LPARAM_refresh);
+	map.RegisterParameter("-freq", &LPARAM_refresh);
 
-REGISTER_LAUNCH_PARAMETER_HELP(-noborder, LPARAM_noborder, "", "When used with the game set to windowed mode, will make the game act as if in fullscreen mode (no window border).");
+	map.RegisterParameterHelp("-noborder", &LPARAM_noborder, "", "When used with the game set to windowed mode, will make the game act as if in fullscreen mode (no window border).");
 
-REGISTER_LAUNCH_PARAMETER_HELP(-w, LPARAM_w, "<width>", "set the screen width");
-REGISTER_LAUNCH_PARAMETER_HELP(-h, LPARAM_h, "<height>", "set the screen height");
+	map.RegisterParameterHelp("-w", &LPARAM_w, "<width>", "set the screen width");
+	map.RegisterParameterHelp("-h", &LPARAM_h, "<height>", "set the screen height");
 
-REGISTER_LAUNCH_PARAMETER_HELP(-fullbright, LPARAM_fullbright, "", "start in fullbright mode");
+	map.RegisterParameterHelp("-fullbright", &LPARAM_fullbright, "", "start in fullbright mode");
 
-REGISTER_LAUNCH_PARAMETER_HELP(-enable_gfx_api_dump, LPARAM_enable_gfx_api_dump, "<1/0>", "Enables or disables graphics API dump.");
-REGISTER_LAUNCH_PARAMETER_HELP(-enable_gfx_validation, LPARAM_vk_enable_validation, "<1/0>", "Enables or disables graphics API validation.");
-REGISTER_LAUNCH_PARAMETER_HELP(-enable_gfx_diagnostics, LPARAM_vk_enable_gfx_diagnostics, "<1/0>", "Enables or disables GPU diagnostics mode.");
-REGISTER_LAUNCH_PARAMETER_HELP(-graphics_api, LPARAM_render_api, "<moduleName>", "Changes the graphics API to use for rendering.");
-REGISTER_LAUNCH_PARAMETER_HELP(-audio_api, LPARAM_audio_api, "<moduleName>", "Changes the audio API to use for audio playback.");
-REGISTER_LAUNCH_PARAMETER_HELP(-auto_exec, LPARAM_auto_exec, "<script>", "Auto-execute this Lua-script on launch.");
-REGISTER_LAUNCH_PARAMETER_HELP(-icon, LPARAM_icon, "<iconPath>", "Path to custom window icon location.");
-REGISTER_LAUNCH_PARAMETER_HELP(-windowless, LPARAM_windowless, "<1/0>", "If enabled, Pragma will be launched without a visible window.");
-REGISTER_LAUNCH_PARAMETER_HELP(-title_bar_color, LPARAM_title_bar_color, "<hexColor>", "Hex color for the window title bar.");
-REGISTER_LAUNCH_PARAMETER_HELP(-border_color, LPARAM_border_bar_color, "<hexColor>", "Hex color for the window border.");
-REGISTER_LAUNCH_PARAMETER_HELP(-cpu_rendering, LPARAM_cpu_rendering, "<1/0>", "If enabled, the CPU will be used for rendering instead of GPU.");
-REGISTER_LAUNCH_PARAMETER_HELP(-cli, LPARAM_cli, "<1/0>", "If enabled, will automatically enable the options needed to run Pragma in a command-line-interface-only environment.");
-REGISTER_LAUNCH_PARAMETER_HELP(-wayland_libdecor_plugin, LPARAM_wayland_libdecor_plugin, "", "If specified, this libdecor plugin will be used for window decoration drawing on Linux with wayland.");
+	map.RegisterParameterHelp("-enable_gfx_api_dump", &LPARAM_enable_gfx_api_dump, "<1/0>", "Enables or disables graphics API dump.");
+	map.RegisterParameterHelp("-enable_gfx_validation", &LPARAM_vk_enable_validation, "<1/0>", "Enables or disables graphics API validation.");
+	map.RegisterParameterHelp("-enable_gfx_diagnostics", &LPARAM_vk_enable_gfx_diagnostics, "<1/0>", "Enables or disables GPU diagnostics mode.");
+	map.RegisterParameterHelp("-graphics_api", &LPARAM_render_api, "<moduleName>", "Changes the graphics API to use for rendering.");
+	map.RegisterParameterHelp("-audio_api", &LPARAM_audio_api, "<moduleName>", "Changes the audio API to use for audio playback.");
+	map.RegisterParameterHelp("-auto_exec", &LPARAM_auto_exec, "<script>", "Auto-execute this Lua-script on launch.");
+	map.RegisterParameterHelp("-icon", &LPARAM_icon, "<iconPath>", "Path to custom window icon location.");
+	map.RegisterParameterHelp("-windowless", &LPARAM_windowless, "<1/0>", "If enabled, Pragma will be launched without a visible window.");
+	map.RegisterParameterHelp("-title_bar_color", &LPARAM_title_bar_color, "<hexColor>", "Hex color for the window title bar.");
+	map.RegisterParameterHelp("-border_color", &LPARAM_border_bar_color, "<hexColor>", "Hex color for the window border.");
+	map.RegisterParameterHelp("-cpu_rendering", &LPARAM_cpu_rendering, "<1/0>", "If enabled, the CPU will be used for rendering instead of GPU.");
+	map.RegisterParameterHelp("-cli", &LPARAM_cli, "<1/0>", "If enabled, will automatically enable the options needed to run Pragma in a command-line-interface-only environment.");
+	map.RegisterParameterHelp("-wayland_libdecor_plugin", &LPARAM_wayland_libdecor_plugin, "", "If specified, this libdecor plugin will be used for window decoration drawing on Linux with wayland.");
+}

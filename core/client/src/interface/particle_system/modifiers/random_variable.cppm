@@ -7,10 +7,13 @@ module;
 #include <string>
 #include <unordered_map>
 #include <mathutil/umath_random.hpp>
+#include "mathutil/umath.h"
+
 
 export module pragma.client:particle_system.modifier_random_variable;
 
 import :particle_system.particle;
+import pragma.shared;
 
 export {
 	template<class TUniformDis, typename T>

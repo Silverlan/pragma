@@ -9,7 +9,8 @@ module pragma.client;
 
 import :client_state;
 
-extern DLLNETWORK Engine *engine;
+#undef GetMessage
+
 void ClientState::SendPacket(const std::string &name, NetPacket &packet, pragma::networking::Protocol protocol)
 {
 	auto ID = GetServerMessageID(name);

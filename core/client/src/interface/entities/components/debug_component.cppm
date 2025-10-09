@@ -6,6 +6,14 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "mathutil/color.h"
 #include "mathutil/uvec.h"
+#include "mathutil/umath.h"
+#include "sharedutils/functioncallback.h"
+#include "pragma/lua/luaapi.h"
+#include "sharedutils/util_event_reply.hpp"
+
+
+
+
 
 export module pragma.client:entities.components.debug;
 import :debug;

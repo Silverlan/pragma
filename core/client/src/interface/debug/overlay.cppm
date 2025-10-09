@@ -8,6 +8,10 @@ module;
 #include <mathutil/color.h>
 #include <mathutil/glmutil.h>
 #include <mathutil/transform.hpp>
+#include "mathutil/umath.h"
+#include "sharedutils/functioncallback.h"
+
+
 
 export module pragma.client:debug.overlay;
 import :client_state;

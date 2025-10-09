@@ -6,6 +6,8 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "luasystem.h"
 #include <optional>
+#include "pragma/lua/luaapi.h"
+
 
 export module pragma.client:gui.lua_skin;
 

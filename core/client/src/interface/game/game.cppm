@@ -16,6 +16,16 @@ module;
 #include <sharedutils/util_shared_handle.hpp>
 #include <alsoundsystem.hpp>
 #include <alsoundsystem_create_effect.hpp>
+#include "mathutil/umath.h"
+#include "pragma/lua/luaapi.h"
+#include "sharedutils/util_weak_handle.hpp"
+#include "material.h"
+#include "sharedutils/functioncallback.h"
+
+
+
+
+
 
 export module pragma.client:game;
 import :core.lua_input_binding_layer_register;

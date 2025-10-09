@@ -32,6 +32,7 @@ export import :entities.components.effects.explosion;
 export import :entities.components.effects.fire;
 export import :entities.components.effects.smoke_trail;
 export import :entities.components.effects.sprite;
+export import :entities.components.enums;
 export import :entities.components.env_decal;
 export import :entities.components.env_fog_controller;
 export import :entities.components.env_microphone;

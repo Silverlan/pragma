@@ -6,12 +6,15 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "buffers/prosper_dynamic_resizable_buffer.hpp"
 #include <memory>
+#include "mathutil/umath.h"
+
 
 export module pragma.client:model.mesh;
 
 import :model.render_mesh;
 import :model.vertex_buffer_data;
 import :rendering.shaders.scene;
+export import pragma.shared;
 
 export class DLLCLIENT CModelSubMesh : public ModelSubMesh {
   public:

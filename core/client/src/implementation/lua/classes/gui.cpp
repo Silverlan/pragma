@@ -2,6 +2,25 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "pragma/lua/lua_call.hpp"
+
+#include "pragma/lua/policies/default_parameter_policy.hpp"
+
+#include "sharedutils/util_path.hpp"
+
+#include "pragma/clientdefinitions.h"
+
+#include "sharedutils/util_event_reply.hpp"
+
+#include "mathutil/color.h"
+
+#include "mathutil/transform.hpp"
+
+#include "sharedutils/functioncallback.h"
+
+#include "pragma/lua/luaapi.h"
+
+#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
 #include "luasystem.h"
@@ -1768,7 +1787,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l, ::WIBase &panel, std::stri
 			  1);
 			if(r == Lua::StatusCode::Ok) {
 				if(Lua::IsVector2i(l, -1))
-					pos.get() = *Lua::CheckVector2i(l, -1);
+					pos.get() = Lua::Check<Vector2i>(l, -1);
 				Lua::Pop(l, 1);
 			}
 		});

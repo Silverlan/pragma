@@ -7,9 +7,13 @@ module;
 #include "cmaterial.h"
 #include <material_manager2.hpp>
 #include <queue>
+#include "pragma/lua/luaapi.h"
+
 
 export module pragma.client:entities.components.material_override;
+
 import :rendering.material_property_block;
+export import pragma.shared;
 
 export namespace pragma {
 	class DLLCLIENT CMaterialOverrideComponent final : public BaseEntityComponent, public DynamicMemberRegister {

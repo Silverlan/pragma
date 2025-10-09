@@ -10,6 +10,10 @@ module;
 #include <memory>
 #include <vector>
 #include <cinttypes>
+#include "mathutil/umath.h"
+#include "mathutil/transform.hpp"
+
+
 
 export module pragma.client:assets.fbx_loader;
 

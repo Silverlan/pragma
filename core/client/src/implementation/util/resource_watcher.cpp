@@ -3,6 +3,12 @@
 
 module;
 
+#include "sharedutils/util_path.hpp"
+
+#include "fsys/filesystem.h"
+
+#include "mathutil/umath.h"
+
 #include "stdafx_client.h"
 #include <texture_load_flags.hpp>
 #include <sharedutils/util_file.h>

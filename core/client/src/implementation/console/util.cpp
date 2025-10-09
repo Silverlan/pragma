@@ -1,8 +1,10 @@
-// SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
+// SPDX-FileCopyrightText: (c) 2025 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "stdafx_client.h"
+module;
 
-import pragma.client;
+module pragma.client;
+
+import :console.util;
 
 ConVarHandle GetClientConVar(std::string scmd) { return pragma::get_client_state()->GetConVarHandle(scmd); }

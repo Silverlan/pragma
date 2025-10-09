@@ -2,6 +2,13 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "pragma/clientdefinitions.h"
+
+#include "fsys/filesystem.h"
+
+#include "pragma/lua/luaapi.h"
+
+#include "mathutil/umath.h"
 
 #include "stdafx_cengine.h"
 #include <sharedutils/util_file.h>
@@ -21,13 +28,13 @@ module pragma.client;
 import :engine;
 import :audio;
 import :client_state;
+import :console.register_commands;
 import :engine;
 import :entities.components;
 import :game;
 import :rendering.render_apis;
 import pragma.locale;
 // import pragma.scripting.lua;
-import pragma.console.commands;
 #ifndef _MSC_VER
 import pragma.string.unicode;
 #endif

@@ -9,6 +9,7 @@ module;
 
 export module pragma.client:rendering.entity_instance_index_buffer;
 
+export import :entities.components.enums;
 import :rendering.render_queue;
 
 export namespace pragma::rendering {

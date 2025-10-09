@@ -33,7 +33,7 @@ export {
 
 	class IBaseNetMessageMap {
 	public:
-		virtual void RegisterNetMessage(const std::string_view &name);
+		virtual void RegisterNetMessage(const std::string_view &name) = 0;
 	};
 
 	template<class T>

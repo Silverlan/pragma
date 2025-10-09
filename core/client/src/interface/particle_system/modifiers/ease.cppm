@@ -10,6 +10,8 @@ module;
 
 export module pragma.client:particle_system.modifier_ease;
 
+export import pragma.shared;
+
 export class DLLCLIENT CParticleModifierComponentEase {
   protected:
 	CParticleModifierComponentEase();

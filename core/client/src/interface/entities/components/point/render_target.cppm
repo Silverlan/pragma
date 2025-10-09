@@ -5,6 +5,12 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include <texturemanager/texture.h>
+#include "sharedutils/util_weak_handle.hpp"
+#include "material.h"
+#include "pragma/lua/luaapi.h"
+
+
+
 
 export module pragma.client:entities.components.point_render_target;
 

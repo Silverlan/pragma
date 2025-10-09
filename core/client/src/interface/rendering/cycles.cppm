@@ -8,8 +8,14 @@ module;
 #include <sharedutils/util_parallel_job.hpp>
 #include "util_image_buffer.hpp"
 #include <functional>
+#include "mathutil/umath.h"
+#include "mathutil/color.h"
+
+
 
 export module pragma.client:rendering.cycles;
+
+export import pragma.shared;
 
 export class ClientState;
 export namespace pragma::rendering::cycles {

@@ -5,8 +5,13 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include "mathutil/umath_geometry.hpp"
+#include <format>
+#include "pragma/lua/luaapi.h"
+
 
 export module pragma.client:entities.base_entity;
+
+export import pragma.shared;
 
 export namespace pragma {class CRenderComponent; class CSceneComponent;};
 export class DLLCLIENT CBaseEntity : public BaseEntity {

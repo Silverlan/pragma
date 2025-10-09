@@ -8,6 +8,12 @@ module;
 #include "sharedutils/util_pragma.hpp"
 #include "prosper_command_buffer.hpp"
 #include "prosper_descriptor_set_group.hpp"
+#include "sharedutils/util_weak_handle.hpp"
+#include "material.h"
+#include "pragma/lua/luaapi.h"
+
+
+
 
 export module pragma.client:entities.components.game_shadow_manager;
 import :rendering.shaders;

@@ -2,6 +2,13 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "pragma/lua/policies/default_parameter_policy.hpp"
+
+#include "mathutil/transform.hpp"
+
+#include "pragma/lua/luaapi.h"
+
+#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
 #include <prosper_command_buffer.hpp>
@@ -16,7 +23,6 @@ module pragma.client;
 
 import :game;
 import :scripting.lua.bindings.scene;
-import pragma.entities.components.shooter;
 
 namespace Lua {
 	namespace PBRConverter {

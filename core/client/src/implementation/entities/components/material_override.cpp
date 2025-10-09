@@ -2,6 +2,11 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "sharedutils/util_path.hpp"
+
+#include "udm.hpp"
+
+#include "pragma/lua/luaapi.h"
 
 #include "stdafx_client.h"
 #include <prosper_command_buffer.hpp>

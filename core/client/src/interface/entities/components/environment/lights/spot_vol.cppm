@@ -5,6 +5,10 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include <material_manager2.hpp>
+#include "pragma/lua/luaapi.h"
+#include "sharedutils/util_event_reply.hpp"
+
+
 
 export module pragma.client:entities.components.lights.spot_vol;
 

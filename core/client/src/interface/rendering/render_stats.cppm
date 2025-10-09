@@ -10,6 +10,8 @@ module;
 #include <vector>
 #include <chrono>
 #include <unordered_set>
+#include "mathutil/umath.h"
+
 
 export module pragma.client:rendering.render_stats;
 

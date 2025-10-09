@@ -15,7 +15,7 @@ void pragma::networking::NWMClientConnection::OnPacketSent(const NWMEndpoint &ep
 #if DEBUG_CLIENT_VERBOSE == 1
 	auto id = packet.GetMessageID();
 	auto *svMap = GetServerMessageMap();
-	std::unordered_map<std::string, uint32_t> *svMsgs;
+	util::StringMap<uint32_t> *svMsgs;
 	svMap->GetNetMessages(&svMsgs);
 	auto it = std::find_if(svMsgs->begin(), svMsgs->end(), [id](const std::pair<std::string, uint32_t> &pair) { return (pair.second == id) ? true : false; });
 	std::string msgName = (it != svMsgs->end()) ? it->first : "Unknown";
@@ -28,7 +28,7 @@ void pragma::networking::NWMClientConnection::OnPacketReceived(const NWMEndpoint
 	nwm::Client::OnPacketReceived(ep, id, packet);
 #if DEBUG_CLIENT_VERBOSE == 1
 	auto *clMap = GetClientMessageMap();
-	std::unordered_map<std::string, uint32_t> *clMsgs;
+	util::StringMap<uint32_t> *clMsgs;
 	clMap->GetNetMessages(&clMsgs);
 	auto it = std::find_if(clMsgs->begin(), clMsgs->end(), [id](const std::pair<std::string, uint32_t> &pair) { return (pair.second == id) ? true : false; });
 	std::string msgName = (it != clMsgs->end()) ? it->first : "Unknown";
@@ -104,12 +104,14 @@ void pragma::networking::NWMClientConnection::SetClient(StandardClient &client) 
 
 bool pragma::networking::NWMClientConnection::IsDisconnected() const { return m_bDisconnected; }
 
-REGISTER_CONVAR_CALLBACK_CL(sv_timeout_duration, [](NetworkState *, const ConVar &, float, float val) {
-	auto *client = pragma::get_client_state();
-	if(client == nullptr)
-		return;
-	auto *cl = client->GetClient();
-	if(cl == nullptr)
-		return;
-	cl->SetTimeoutDuration(val);
-});
+namespace {
+	auto _ = pragma::console::client::register_variable_listener<float>("sv_timeout_duration", +[](NetworkState *, const ConVar &, float, float val) {
+		auto *client = pragma::get_client_state();
+		if(client == nullptr)
+			return;
+		auto *cl = client->GetClient();
+		if(cl == nullptr)
+			return;
+		cl->SetTimeoutDuration(val);
+	}
+};

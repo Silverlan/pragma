@@ -2,6 +2,13 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "sharedutils/util_path.hpp"
+
+#include "mathutil/transform.hpp"
+
+#include "fsys/filesystem.h"
+
+#include "udm.hpp"
 
 #include <mathutil/umath.h>
 #include <glm/gtx/euler_angles.hpp>

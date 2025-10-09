@@ -8,6 +8,7 @@ module;
 #include <queue>
 #include <vector>
 #include <memory>
+#include "mathutil/umath.h"
 
 #define CHC_DEBUGGING_ENABLED 0
 

@@ -5,6 +5,8 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include <sharedutils/functioncallback.h>
+#include "sharedutils/util_event_reply.hpp"
+
 
 export module pragma.client:gui.main_menu_base;
 

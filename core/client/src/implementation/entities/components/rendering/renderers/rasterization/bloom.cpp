@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "mathutil/umath.h"
 
 #include <prosper_util.hpp>
 #include <prosper_command_buffer.hpp>
@@ -110,5 +111,4 @@ static void cmd_render_bloom_enabled(NetworkState *, const ConVar &, bool, bool 
 		return;
 	client->UpdateGameWorldShaderSettings();
 }
-
-REGISTER_CONVAR_CALLBACK_CL(render_bloom_enabled, cmd_render_bloom_enabled);
+namespace { auto _ = pragma::console::client::register_variable_listener<bool>("render_bloom_enabled", &cmd_render_bloom_enabled); }

@@ -5,6 +5,10 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include <prosper_prepared_command_buffer.hpp>
+#include "pragma/lua/luaapi.h"
+#include <mutex>
+#include "sharedutils/util_event_reply.hpp"
+#include "pragma/lua/lua_call.hpp"
 
 #undef DrawState
 
@@ -12,6 +16,7 @@ export module pragma.client:gui.lua_base;
 
 import :gui.lua_interface;
 import pragma.gui;
+export import pragma.shared;
 
 #define LUAGUI_CALL_MEMBER(name, numargs, numret, args, ret)                                                                                                                                                                                                                                     \
 	{                                                                                                                                                                                                                                                                                            \

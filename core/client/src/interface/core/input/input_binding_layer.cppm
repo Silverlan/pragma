@@ -6,6 +6,10 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <string>
 #include <unordered_map>
+#include "pragma/lua/luaapi.h"
+#include "udm.hpp"
+
+
 
 export module pragma.client:core.input_binding_layer;
 

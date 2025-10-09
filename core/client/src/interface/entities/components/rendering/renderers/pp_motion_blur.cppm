@@ -6,6 +6,8 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <image/prosper_render_target.hpp>
 #include <mathutil/transform.hpp>
+#include "mathutil/umath.h"
+#include "pragma/lua/luaapi.h"
 
 #define MOTION_BLUR_DEBUG_ELEMENT_ENABLED 0
 

@@ -3,9 +3,13 @@
 
 module;
 #include "pragma/clientdefinitions.h"
+#include "pragma/lua/luaapi.h"
+
 
 
 export module pragma.client:entities.components.bsp;
+
+export import pragma.shared;
 import source_engine.bsp;
 
 export {

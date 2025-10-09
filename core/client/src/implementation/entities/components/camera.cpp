@@ -2,6 +2,11 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "sharedutils/util_event_reply.hpp"
+
+#include "pragma/lua/luaapi.h"
+
+#include "udm.hpp"
 
 #include "stdafx_client.h"
 

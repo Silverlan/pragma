@@ -3,6 +3,11 @@
 
 module;
 
+#include "pragma/lua/luaapi.h"
+#include "udm.hpp"
+#include "mathutil/color.h"
+#include "sharedutils/datastream.h"
+#include "pragma/lua/types/udm.hpp"
 #include <image/prosper_sampler.hpp>
 #include <image/prosper_image_view.hpp>
 #include <buffers/prosper_buffer.hpp>
@@ -19,6 +24,10 @@ module;
 #include <prosper_window.hpp>
 #include <prosper_swap_command_buffer.hpp>
 #include <buffers/prosper_buffer.hpp>
+
+
+
+
 
 export module pragma.client:scripting.lua.classes.vulkan;
 import :rendering.shaders;
@@ -51,9 +60,9 @@ export namespace Lua {
 		};
 		namespace VKCommandBuffer {
 			bool IsValid(lua_State *l, CommandBuffer &hCommandBuffer);
-			bool RecordClearImage(lua_State *l, CommandBuffer &hCommandBuffer, Image &img, const Color &col, const prosper::util::ClearImageInfo &clearImageInfo = {});
+			bool RecordClearImage(lua_State *l, CommandBuffer &hCommandBuffer, Image &img, const ::Color &col, const prosper::util::ClearImageInfo &clearImageInfo = {});
 			bool RecordClearImage(lua_State *l, CommandBuffer &hCommandBuffer, Image &img, std::optional<float> clearDepth, std::optional<uint32_t> clearStencil, const prosper::util::ClearImageInfo &clearImageInfo = {});
-			bool RecordClearAttachment(lua_State *l, CommandBuffer &hCommandBuffer, Image &img, const Color &col, uint32_t attId = 0u);
+			bool RecordClearAttachment(lua_State *l, CommandBuffer &hCommandBuffer, Image &img, const ::Color &col, uint32_t attId = 0u);
 			bool RecordClearAttachment(lua_State *l, CommandBuffer &hCommandBuffer, Image &img, std::optional<float> clearDepth, std::optional<uint32_t> clearStencil);
 			bool RecordCopyImage(lua_State *l, CommandBuffer &hCommandBuffer, Image &imgSrc, Image &imgDst, const prosper::util::CopyInfo &copyInfo);
 			bool RecordCopyBufferToImage(lua_State *l, CommandBuffer &hCommandBuffer, Buffer &bufSrc, Image &imgDst, const prosper::util::BufferImageCopyInfo &copyInfo);
@@ -86,7 +95,7 @@ export namespace Lua {
 			bool RecordDrawIndirect(lua_State *l, CommandBuffer &hCommandBuffer, Buffer &buffer, uint32_t offset, uint32_t drawCount, uint32_t stride);
 			bool RecordFillBuffer(lua_State *l, CommandBuffer &hCommandBuffer, Buffer &buffer, uint32_t offset, uint32_t size, uint32_t data);
 			//void RecordResetEvent(lua_State *l,CommandBuffer &hCommandBuffer,Event &ev,uint32_t stageMask);
-			bool RecordSetBlendConstants(lua_State *l, CommandBuffer &hCommandBuffer, const Vector4 &blendConstants);
+			bool RecordSetBlendConstants(lua_State *l, CommandBuffer &hCommandBuffer, const ::Vector4 &blendConstants);
 			bool RecordSetDepthBias(lua_State *l, CommandBuffer &hCommandBuffer, float depthBiasConstantFactor, float depthBiasClamp, float slopeScaledDepthBias);
 			bool RecordSetDepthBounds(lua_State *l, CommandBuffer &hCommandBuffer, float minDepthBounds, float maxDepthBounds);
 			//void RecordSetEvent(lua_State *l,CommandBuffer &hCommandBuffer,Event &ev,uint32_t stageMask);
@@ -98,7 +107,7 @@ export namespace Lua {
 			//void RecordWriteTimestamp(lua_State *l,CommandBuffer &hCommandBuffer); // TODO
 			//void RecordBeginQuery(lua_State *l,CommandBuffer &hCommandBuffer); // TODO
 			//void RecordEndQuery(lua_State *l,CommandBuffer &hCommandBuffer); // TODO
-			bool RecordDrawGradient(lua_State *l, CommandBuffer &hCommandBuffer, RenderTarget &rt, const Vector2 &dir, luabind::object lnodes);
+			bool RecordDrawGradient(lua_State *l, CommandBuffer &hCommandBuffer, RenderTarget &rt, const ::Vector2 &dir, luabind::object lnodes);
 			bool StartRecording(lua_State *l, CommandBuffer &hCommandBuffer, bool oneTimeSubmit, bool simultaneousUseAllowed);
 		};
 		namespace VKContextObject {

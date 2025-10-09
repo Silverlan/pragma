@@ -7,6 +7,8 @@ module;
 #include <util_image_buffer.hpp>
 #include <sharedutils/util_parallel_job.hpp>
 #include <mathutil/uvec.h>
+#include "pragma/lua/luaapi.h"
+
 
 export module pragma.client:scripting.lua.libraries.util;
 

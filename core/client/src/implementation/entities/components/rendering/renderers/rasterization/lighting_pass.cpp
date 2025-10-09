@@ -3,6 +3,8 @@
 
 module;
 
+#include "mathutil/umath.h"
+
 #include <image/prosper_render_target.hpp>
 #include <image/prosper_msaa_texture.hpp>
 #include <prosper_util.hpp>

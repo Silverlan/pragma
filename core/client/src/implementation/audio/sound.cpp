@@ -3,6 +3,12 @@
 
 module;
 
+#include "pragma/logging.hpp"
+
+#include "pragma/clientdefinitions.h"
+
+#include "mathutil/umath.h"
+
 #include "stdafx_client.h"
 #include "luasystem.h"
 #include "alsound_types.hpp";
@@ -11,6 +17,7 @@ module pragma.client;
 
 import :audio.sound;
 import :client_state;
+import :console.register_commands;
 import :engine;
 import :networking.util;
 
@@ -1009,5 +1016,4 @@ void CALSound::SetType(ALSoundType type)
 	ALSound::SetType(type);
 	UpdateVolume();
 }
-
-REGISTER_CONVAR_CALLBACK_CL(cl_audio_always_play, [](NetworkState *, const ConVar &, bool, bool) { pragma::get_client_state()->UpdateSoundVolume(); })
+namespace { auto _ = pragma::console::client::register_variable_listener<bool>("cl_audio_always_play", +[](NetworkState *, const ConVar &, bool, bool) { pragma::get_client_state()->UpdateSoundVolume(); }); }

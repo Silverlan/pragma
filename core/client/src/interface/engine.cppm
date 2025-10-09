@@ -12,12 +12,25 @@ module;
 #include <unordered_map>
 #include "alsoundsystem.hpp"
 #include "alsound_effect.hpp"
+#include "pragma/lua/luaapi.h"
+#include "fsys/filesystem.h"
+#include "sharedutils/util_weak_handle.hpp"
+#include "sharedutils/functioncallback.h"
+#include "sharedutils/util_clock.hpp"
+#include "sharedutils/util_clock.hpp"
+
+
+
+
+
+
 
 export module pragma.client:engine;
 import :client_state;
 import :rendering.render_context;
 import :rendering.shader_graph.manager;
 import pragma.string.unicode;
+export import pragma.shared;
 
 #pragma warning(push)
 #pragma warning(disable : 4251)
@@ -316,3 +329,5 @@ export {
 	};
 };
 #pragma warning(pop)
+
+void register_client_launch_parameters(LaunchParaMap &map);

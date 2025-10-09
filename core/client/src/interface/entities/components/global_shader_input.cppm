@@ -3,6 +3,10 @@
 
 module;
 #include "pragma/clientdefinitions.h"
+#include "pragma/lua/luaapi.h"
+#include "udm.hpp"
+
+
 
 
 export module pragma.client:entities.components.global_shader_input;

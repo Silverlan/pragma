@@ -3,6 +3,12 @@
 
 module;
 #include "pragma/clientdefinitions.h"
+#include "sharedutils/util_weak_handle.hpp"
+#include "pragma/lua/luaapi.h"
+#include "sharedutils/util_event_reply.hpp"
+
+
+
 
 
 export module pragma.client:entities.components.flammable;

@@ -2,6 +2,22 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "sharedutils/magic_enum.hpp"
+
+#include "sharedutils/magic_enum.hpp"
+
+
+#include "pragma/logging.hpp"
+
+#include "sharedutils/util_path.hpp"
+
+#include "mathutil/transform.hpp"
+
+#include "fsys/filesystem.h"
+
+#include "pragma/lua/luaapi.h"
+
+#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
 #include <GuillotineBinPack.h>

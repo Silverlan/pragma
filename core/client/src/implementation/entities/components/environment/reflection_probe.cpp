@@ -3,6 +3,20 @@
 
 module;
 
+#include "pragma/logging.hpp"
+
+#include "sharedutils/functioncallback.h"
+
+#include "sharedutils/util_event_reply.hpp"
+
+#include "pragma/lua/luaapi.h"
+
+#include "material.h"
+
+#include "fsys/filesystem.h"
+
+#include "mathutil/umath.h"
+
 #include "stdafx_client.h"
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>

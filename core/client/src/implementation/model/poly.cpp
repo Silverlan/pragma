@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "material.h"
 
 #include "stdafx_client.h"
 

@@ -1,3 +1,8 @@
+
+#include "pragma/clientdefinitions.h"
+
+#include "fsys/filesystem.h"
+
 // SPDX-FileCopyrightText: (c) 2025 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
@@ -11,6 +16,7 @@
 import :console.output;
 import :engine;
 #endif
+import pragma.shared;
 
 void LPARAM_enable_gfx_api_dump(const std::vector<std::string> &argv)
 {

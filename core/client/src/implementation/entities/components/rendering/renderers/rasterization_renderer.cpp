@@ -2,6 +2,11 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "sharedutils/util_event_reply.hpp"
+
+#include "pragma/lua/luaapi.h"
+
+#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
 #include <image/prosper_msaa_texture.hpp>
@@ -552,4 +557,4 @@ static void cl_render_ssao_callback(NetworkState *, const ConVar &, bool, bool e
 	for(auto &c : EntityCIterator<CRasterizationRendererComponent> {*pragma::get_cgame()})
 		c.SetSSAOEnabled(enabled);
 }
-REGISTER_CONVAR_CALLBACK_CL(cl_render_ssao, cl_render_ssao_callback);
+namespace { auto _ = pragma::console::client::register_variable_listener<bool>("cl_render_ssao", &cl_render_ssao_callback); }

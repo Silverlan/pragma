@@ -3,6 +3,8 @@
 
 module;
 #include "pragma/clientdefinitions.h"
+#include "sharedutils/util_weak_handle.hpp"
+
 
 
 export module pragma.client:entities.player;

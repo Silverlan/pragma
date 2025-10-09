@@ -8,6 +8,8 @@ module;
 
 export module pragma.client:model.poly;
 
+export import pragma.shared;
+
 export class DLLCLIENT CPoly : public Poly {
   private:
 	void CalculateTextureAxes();

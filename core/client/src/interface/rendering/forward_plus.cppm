@@ -9,6 +9,8 @@ module;
 #include <shader/prosper_shader.hpp>
 #include <cinttypes>
 #include <memory>
+#include "sharedutils/util_weak_handle.hpp"
+
 
 export module pragma.client:rendering.forward_plus;
 

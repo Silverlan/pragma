@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "sharedutils/util_path.hpp"
+
+#include "fsys/filesystem.h"
 
 #include "stdafx_client.h"
 

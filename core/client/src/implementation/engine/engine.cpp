@@ -2,6 +2,35 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "pragma/lua/lua_error_handling.hpp"
+
+#include "sharedutils/util_clock.hpp"
+
+#include "sharedutils/magic_enum.hpp"
+
+#include "sharedutils/magic_enum.hpp"
+#include "pragma/console/helper.hpp"
+#include "pragma/logging.hpp"
+
+#include "sharedutils/util_path.hpp"
+
+#include "pragma/clientdefinitions.h"
+
+#include "mathutil/color.h"
+
+#include "sharedutils/functioncallback.h"
+
+#include "material.h"
+
+#include "sharedutils/util_weak_handle.hpp"
+
+#include "fsys/filesystem.h"
+
+#include "udm.hpp"
+
+#include "pragma/lua/luaapi.h"
+
+#include "mathutil/umath.h"
 
 #include "stdafx_cengine.h"
 #include "cmaterialmanager.h"
@@ -76,6 +105,9 @@ CEngine::CEngine(int argc, char *argv[])
       m_farZ(pragma::BaseEnvCameraComponent::DEFAULT_FAR_Z), m_fps(0), m_tFPSTime(0.f), m_tLastFrame(util::Clock::now()), m_tDeltaFrameTime(0), m_audioAPI {"fmod"}
 {
 	g_engine = this;
+
+	register_client_launch_parameters(*GetLaunchParaMap());
+
 	RegisterCallback<void, std::reference_wrapper<const pragma::platform::Joystick>, bool>("OnJoystickStateChanged");
 	RegisterCallback<void, std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>>("DrawFrame");
 	RegisterCallback<void>("PreDrawGUI");
@@ -1251,10 +1283,10 @@ void CEngine::RegisterUiElementTypes()
 	gui.RegisterType<WITransformable>("WITransformable");
 	gui.RegisterType<WITreeList>("WITreeList");
 	gui.RegisterType<WITreeListElement>("WITreeListElement");
-	gui.RegisterType<widebugdepthtexture>("WIDebugDepthTexture");
+	gui.RegisterType<WIDebugDepthTexture>("WIDebugDepthTexture");
 	gui.RegisterType<WIDebugHDRBloom>("WIDebugHDRBloom");
 	gui.RegisterType<WIDebugMipMaps>("WIDebugMipMaps");
-	gui.RegisterType<widebugmsaatexture>("WIDebugMSAATexture");
+	gui.RegisterType<WIDebugMSAATexture>("WIDebugMSAATexture");
 	gui.RegisterType<WIDebugShadowMap>("WIDebugShadowMap");
 	gui.RegisterType<WIDebugSSAO>("WIDebugSSAO");
 	gui.RegisterType<WIMainMenuElement>("WIMainMenuElement");
@@ -1550,7 +1582,11 @@ void CEngine::SetControllersEnabled(bool b)
 	});
 	pragma::platform::set_joystick_state_callback([this](const pragma::platform::Joystick &joystick, bool bConnected) { pragma::get_cengine()->CallCallbacks<void, std::reference_wrapper<const pragma::platform::Joystick>, bool>("OnJoystickStateChanged", std::ref(joystick), bConnected); });
 }
-REGISTER_CONVAR_CALLBACK_CL(cl_controller_enabled, [](NetworkState *state, const ConVar &cv, bool oldVal, bool newVal) { pragma::get_cengine()->SetControllersEnabled(newVal); });
+namespace {
+	auto UVN = pragma::console::client::register_variable_listener<bool>("cl_controller_enabled", +[](NetworkState *, const ConVar &, bool, bool newVal) {
+		pragma::get_cengine()->SetControllersEnabled(newVal);
+	});
+}
 
 float CEngine::GetRawJoystickAxisMagnitude() const { return m_rawInputJoystickMagnitude; }
 
@@ -2195,58 +2231,64 @@ CEngine::DroppedFile::DroppedFile(const std::string &rootPath, const std::string
 	fileName = path.GetString();
 }
 
-REGISTER_CONVAR_CALLBACK_CL(cl_render_monitor, [](NetworkState *, const ConVar &, int32_t, int32_t monitor) {
-	auto monitors = pragma::platform::get_monitors();
-	if(monitor < monitors.size() && monitor >= 0)
-		pragma::get_cengine()->GetWindow().SetMonitor(monitors[monitor]);
-})
-
-REGISTER_CONVAR_CALLBACK_CL(cl_render_window_mode, [](NetworkState *, const ConVar &, int32_t, int32_t val) {
-	pragma::get_cengine()->GetWindow().SetWindowedMode(val != 0);
-	pragma::get_cengine()->GetWindow().SetNoBorder(val == 2);
-})
-
-REGISTER_CONVAR_CALLBACK_CL(cl_window_resolution, [](NetworkState *, const ConVar &, std::string, std::string val) {
-	std::vector<std::string> vals;
-	ustring::explode(val, "x", vals);
-	if(vals.size() < 2)
-		return;
-	auto x = util::to_int(vals[0]);
-	auto y = util::to_int(vals[1]);
-	Vector2i resolution(x, y);
-	pragma::get_cengine()->GetWindow().SetResolution(resolution);
-	auto *client = static_cast<ClientState *>(pragma::get_cengine()->GetClientState());
-	if(client != nullptr)
-		return;
-	auto &wgui = WGUI::GetInstance();
-	auto *el = wgui.GetBaseElement();
-	if(el == nullptr)
-		return;
-	el->SetSize(resolution);
-	auto *menu = client->GetMainMenu();
-	if(menu == nullptr)
-		return;
-	menu->SetSize(x, y);
-})
-
-REGISTER_CONVAR_CALLBACK_CL(cl_render_resolution, [](NetworkState *, const ConVar &, std::string, std::string val) {
-	std::vector<std::string> vals;
-	ustring::explode(val, "x", vals);
-	if(vals.size() < 2) {
-		pragma::get_cengine()->SetRenderResolution({});
-		return;
-	}
-	auto x = util::to_int(vals[0]);
-	auto y = util::to_int(vals[1]);
-	Vector2i resolution(x, y);
-	pragma::get_cengine()->SetRenderResolution(resolution);
-})
-
-REGISTER_CONVAR_CALLBACK_CL(cl_gpu_timer_queries_enabled, [](NetworkState *, const ConVar &, bool, bool enabled) {
-	if(pragma::get_cengine() == nullptr)
-		return;
-	pragma::get_cengine()->SetGPUProfilingEnabled(enabled);
-})
+namespace {
+	auto UVN = pragma::console::client::register_variable_listener<int32_t>("cl_render_monitor", +[](NetworkState *, const ConVar &, int32_t, int32_t monitor) {
+		auto monitors = pragma::platform::get_monitors();
+		if(monitor < monitors.size() && monitor >= 0)
+			pragma::get_cengine()->GetWindow().SetMonitor(monitors[monitor]);
+	});
+}
+namespace {
+	auto UVN = pragma::console::client::register_variable_listener<int32_t>("cl_render_window_mode", +[](NetworkState *, const ConVar &, int32_t, int32_t val) {
+		pragma::get_cengine()->GetWindow().SetWindowedMode(val != 0);
+		pragma::get_cengine()->GetWindow().SetNoBorder(val == 2);
+	});
+}
+namespace {
+	auto UVN = pragma::console::client::register_variable_listener<std::string>("cl_window_resolution", +[](NetworkState *, const ConVar &, std::string, std::string val) {
+		std::vector<std::string> vals;
+		ustring::explode(val, "x", vals);
+		if(vals.size() < 2)
+			return;
+		auto x = util::to_int(vals[0]);
+		auto y = util::to_int(vals[1]);
+		Vector2i resolution(x, y);
+		pragma::get_cengine()->GetWindow().SetResolution(resolution);
+		auto *client = static_cast<ClientState *>(pragma::get_cengine()->GetClientState());
+		if(client != nullptr)
+			return;
+		auto &wgui = WGUI::GetInstance();
+		auto *el = wgui.GetBaseElement();
+		if(el == nullptr)
+			return;
+		el->SetSize(resolution);
+		auto *menu = client->GetMainMenu();
+		if(menu == nullptr)
+			return;
+		menu->SetSize(x, y);
+	});
+}
+namespace {
+	auto UVN = pragma::console::client::register_variable_listener<std::string>("cl_render_resolution", +[](NetworkState *, const ConVar &, std::string, std::string val) {
+		std::vector<std::string> vals;
+		ustring::explode(val, "x", vals);
+		if(vals.size() < 2) {
+			pragma::get_cengine()->SetRenderResolution({});
+			return;
+		}
+		auto x = util::to_int(vals[0]);
+		auto y = util::to_int(vals[1]);
+		Vector2i resolution(x, y);
+		pragma::get_cengine()->SetRenderResolution(resolution);
+	});
+}
+namespace {
+	auto UVN = pragma::console::client::register_variable_listener<bool>("cl_gpu_timer_queries_enabled", +[](NetworkState *, const ConVar &, bool, bool enabled) {
+		if(pragma::get_cengine() == nullptr)
+			return;
+		pragma::get_cengine()->SetGPUProfilingEnabled(enabled);
+	});
+}
 
 static void dump_traceback_gui()
 {

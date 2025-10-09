@@ -3,6 +3,18 @@
 
 module;
 
+#include "sharedutils/functioncallback.h"
+
+#include "mathutil/umath_geometry.hpp"
+
+#include "sharedutils/util_event_reply.hpp"
+
+#include "sharedutils/datastream.h"
+
+#include "pragma/lua/luaapi.h"
+#include "pragma/console/helper.hpp"
+#include "mathutil/umath.h"
+
 #include "stdafx_client.h"
 #include <prosper_render_pass.hpp>
 #include <prosper_framebuffer.hpp>
@@ -51,9 +63,11 @@ static void cmd_render_shadow_quality(NetworkState *, const ConVar &, int, int q
 		return;
 	client->UpdateGameWorldShaderSettings();
 }
-REGISTER_CONVAR_CALLBACK_CL(render_shadow_quality, cmd_render_shadow_quality);
+namespace { auto UVN = pragma::console::client::register_variable_listener<int>("render_shadow_quality", &cmd_render_shadow_quality); }
 
-REGISTER_CONVAR_CALLBACK_CL(cl_render_shadow_dynamic, [](NetworkState *, const ConVar &, bool, bool) { reload_all_shadow_maps(); });
+namespace {
+	auto UVN = pragma::console::client::register_variable_listener<int>("cl_render_shadow_dynamic", +[](NetworkState *, const ConVar &, bool, bool) { reload_all_shadow_maps(); });
+}
 
 prosper::IDescriptorSet *CShadowComponent::GetDescriptorSet()
 {

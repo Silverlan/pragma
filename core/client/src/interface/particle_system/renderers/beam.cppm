@@ -5,6 +5,10 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include "buffers/prosper_buffer.hpp"
+#include "sharedutils/util_weak_handle.hpp"
+#include "mathutil/color.h"
+
+
 
 export module pragma.client:particle_system.renderer_beam;
 

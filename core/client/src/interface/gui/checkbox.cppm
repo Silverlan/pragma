@@ -3,6 +3,8 @@
 
 module;
 #include "pragma/clientdefinitions.h"
+#include "sharedutils/util_event_reply.hpp"
+
 
 
 export module pragma.client:gui.checkbox;

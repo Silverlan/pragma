@@ -28,6 +28,7 @@ export import :console.debug_console;
 export import :debug.performance_profiler;
 export import :engine.enums;
 export import :engine.info;
+export import :engine.launch_para_map;
 export import :engine.version;
 export import :input.enums;
 export import :util.server_state_interface;
@@ -372,3 +373,6 @@ export {
 		return static_cast<T *>(cv);
 	}
 };
+
+export class LaunchParaMap;
+void register_launch_parameters(LaunchParaMap &map);

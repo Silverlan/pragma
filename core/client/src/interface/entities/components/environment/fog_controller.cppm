@@ -5,6 +5,8 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include <memory>
+#include "pragma/lua/luaapi.h"
+
 
 export module pragma.client:entities.components.env_fog_controller;
 

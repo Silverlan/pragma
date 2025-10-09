@@ -3,6 +3,10 @@
 
 module;
 
+#include "sharedutils/util_event_reply.hpp"
+
+#include "pragma/lua/luaapi.h"
+
 #include "stdafx_client.h"
 
 module pragma.client;

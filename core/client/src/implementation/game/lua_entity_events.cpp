@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "pragma/lua/luaapi.h"
 
 #include "stdafx_client.h"
 
@@ -19,17 +20,17 @@ bool CGame::InvokeEntityEvent(pragma::BaseEntityComponent &component, uint32_t e
 	if(eventId == pragma::CRenderComponent::EVENT_ON_RENDER_BOUNDS_CHANGED) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
-		auto &min = *Lua::CheckVector(l, -1);
+		auto &min = Lua::Check<Vector3>(l, -1);
 		Lua::Pop(l, 1);
 
 		Lua::PushInt(l, 2);
 		Lua::GetTableValue(l, argsIdx);
-		auto &max = *Lua::CheckVector(l, -1);
+		auto &max = Lua::Check<Vector3>(l, -1);
 		Lua::Pop(l, 1);
 
 		Lua::PushInt(l, 3);
 		Lua::GetTableValue(l, argsIdx);
-		auto &sphereOrigin = *Lua::CheckVector(l, -1);
+		auto &sphereOrigin = Lua::Check<Vector3>(l, -1);
 		Lua::Pop(l, 1);
 
 		Lua::PushInt(l, 4);

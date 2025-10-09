@@ -2,6 +2,15 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "sharedutils/functioncallback.h"
+
+#include "sharedutils/util_path.hpp"
+
+#include "pragma/clientdefinitions.h"
+
+#include "fsys/filesystem.h"
+
+#include "pragma/lua/luaapi.h"
 
 #include "stdafx_client.h"
 #include "luasystem.h"
@@ -834,8 +843,8 @@ int Lua::game::Client::open_dropped_file(lua_State *l)
 }
 int Lua::game::Client::set_gravity(lua_State *l)
 {
-	Vector3 *gravity = Lua::CheckVector(l, 1);
-	pragma::get_cgame()->SetGravity(*gravity);
+	Vector3 &gravity = Lua::Check<Vector3>(l, 1);
+	pragma::get_cgame()->SetGravity(gravity);
 	return 0;
 }
 int Lua::game::Client::get_gravity(lua_State *l)
@@ -1099,8 +1108,8 @@ int Lua::game::Client::get_render_clip_plane(lua_State *l)
 }
 int Lua::game::Client::set_render_clip_plane(lua_State *l)
 {
-	auto *clipPlane = Lua::CheckVector4(l, 1);
-	pragma::get_cgame()->SetRenderClipPlane(*clipPlane);
+	auto &clipPlane = Lua::Check<Vector4>(l, 1);
+	pragma::get_cgame()->SetRenderClipPlane(clipPlane);
 	return 0;
 }
 int Lua::game::Client::get_debug_buffer(lua_State *l)

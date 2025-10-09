@@ -9,6 +9,9 @@ module;
 #include <chrono>
 
 export module pragma.client:rendering.gpu_swapchain_timer;
+
+export import pragma.shared;
+
 export namespace pragma {
 	namespace debug {
 		class DLLCLIENT GPUSwapchainTimer : public Timer {

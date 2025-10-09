@@ -3,6 +3,8 @@
 
 module;
 
+#include "mathutil/umath.h"
+
 #include "stdafx_client.h"
 #include "sharedutils/util_hash.hpp"
 

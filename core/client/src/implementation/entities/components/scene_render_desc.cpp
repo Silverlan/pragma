@@ -2,6 +2,11 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "sharedutils/magic_enum.hpp"
+
+#include "sharedutils/magic_enum.hpp"
+
+#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
 #include <sharedutils/util_shaderinfo.hpp>
@@ -311,7 +316,7 @@ static void cmd_debug_occlusion_culling_freeze_camera(NetworkState *, const ConV
 	g_debugFreezeCamData->pos = cam->GetEntity().GetPosition();
 	g_debugFreezeCamData->frustumPlanes = cam->GetFrustumPlanes();
 }
-REGISTER_CONVAR_CALLBACK_CL(debug_occlusion_culling_freeze_camera, cmd_debug_occlusion_culling_freeze_camera);
+namespace { auto _ = pragma::console::client::register_variable_listener<bool>("debug_occlusion_culling_freeze_camera", &cmd_debug_occlusion_culling_freeze_camera); }
 
 bool SceneRenderDesc::IsWorldMeshVisible(uint32_t worldRenderQueueIndex, pragma::RenderMeshIndex meshIdx) const
 {

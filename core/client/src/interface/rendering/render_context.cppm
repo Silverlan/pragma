@@ -9,6 +9,8 @@ module;
 #include <unordered_set>
 #include <memory>
 #include <optional>
+#include "sharedutils/util_weak_handle.hpp"
+
 
 export module pragma.client:rendering.render_context;
 import pragma.platform;

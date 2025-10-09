@@ -3,6 +3,14 @@
 
 module;
 
+#include "sharedutils/util_event_reply.hpp"
+
+#include "mathutil/color.h"
+
+#include "pragma/lua/luaapi.h"
+
+#include "mathutil/umath.h"
+
 #include "stdafx_client.h"
 #include <prosper_command_buffer.hpp>
 #include "buffers/prosper_buffer_create_info.hpp"

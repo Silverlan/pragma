@@ -2,6 +2,33 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "sharedutils/magic_enum.hpp"
+
+#include "sharedutils/magic_enum.hpp"
+
+#include "pragma/lua/lua_call.hpp"
+
+#include "pragma/lua/types/udm.hpp"
+
+#include "pragma/logging.hpp"
+
+#include "pragma/lua/policies/default_parameter_policy.hpp"
+
+#include "mathutil/color.h"
+
+#include "sharedutils/datastream.h"
+#include "sharedutils/util_shaderinfo.hpp"
+#include "mathutil/transform.hpp"
+
+#include "material.h"
+
+#include "fsys/filesystem.h"
+
+#include "udm.hpp"
+
+#include "pragma/lua/luaapi.h"
+
+#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
 #include "luasystem.h"

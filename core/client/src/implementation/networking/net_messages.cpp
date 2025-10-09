@@ -2,12 +2,22 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "mathutil/umath_geometry.hpp"
+
+#include "mathutil/color.h"
+
+#include "sharedutils/functioncallback.h"
+
+#include "pragma/lua/luaapi.h"
+
+#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
 
 module pragma.client;
 
 import :networking.net_messages;
+import :networking.model_load_manager;
 
 static void NET_cl_RESOURCEINFO(NetPacket packet);
 static void NET_cl_RESOURCECOMPLETE(NetPacket packet);
@@ -282,7 +292,7 @@ void register_client_net_messages()
 		return;
 	netMessagesRegistered = true;
 
-	register_net_messages(GetClientMessageMap());
+	register_net_messages(*GetClientMessageMap());
 }
 
 void NET_cl_RESOURCEINFO(NetPacket packet) { pragma::get_client_state()->HandleClientResource(packet); }
@@ -1876,17 +1886,19 @@ void NET_cl_ADD_SHARED_COMPONENT(NetPacket packet)
 	ent->AddComponent(svComponentToClComponentTable.at(componentId));
 }
 
-REGISTER_CONVAR_CALLBACK_CL(debug_ai_navigation, [](NetworkState *state, const ConVar &, bool, bool val) {
-	if(!check_cheats("debug_ai_navigation", state))
-		return;
-	if(pragma::get_cgame() == nullptr)
-		return;
-	if(val == false)
-		s_aiNavDebugObjects.clear();
-	NetPacket p {};
-	p->Write<bool>(val);
-	pragma::get_client_state()->SendPacket("debug_ai_navigation", p, pragma::networking::Protocol::SlowReliable);
-});
+namespace {
+	auto _ = pragma::console::client::register_variable_listener<bool>("debug_ai_navigation", +[](NetworkState *state, const ConVar &, bool, bool val) {
+		if(!check_cheats("debug_ai_navigation", state))
+			return;
+		if(pragma::get_cgame() == nullptr)
+			return;
+		if(val == false)
+			s_aiNavDebugObjects.clear();
+		NetPacket p {};
+		p->Write<bool>(val);
+		pragma::get_client_state()->SendPacket("debug_ai_navigation", p, pragma::networking::Protocol::SlowReliable);
+	});
+}
 
 void NET_cl_DEBUG_DRAWPOINT(NetPacket packet)
 {

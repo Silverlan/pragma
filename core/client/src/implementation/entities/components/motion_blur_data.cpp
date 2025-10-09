@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "pragma/lua/luaapi.h"
 
 #include "stdafx_client.h"
 #include <buffers/prosper_uniform_resizable_buffer.hpp>

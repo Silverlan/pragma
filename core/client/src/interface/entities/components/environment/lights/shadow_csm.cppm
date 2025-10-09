@@ -7,6 +7,12 @@ module;
 #include "prosper_command_buffer.hpp"
 #include <mathutil/boundingvolume.h>
 #include <mathutil/plane.hpp>
+#include "mathutil/umath.h"
+#include "sharedutils/util_weak_handle.hpp"
+#include "pragma/lua/luaapi.h"
+
+
+
 
 export module pragma.client:entities.components.lights.shadow_csm;
 

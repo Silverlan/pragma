@@ -5,6 +5,12 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include <mathutil/vertex.hpp>
+#include "mathutil/umath.h"
+#include "pragma/lua/luaapi.h"
+#include "mathutil/transform.hpp"
+
+
+
 
 export module pragma.client:entities.components.env_decal;
 

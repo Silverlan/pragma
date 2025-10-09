@@ -3,6 +3,12 @@
 
 module;
 
+#include "mathutil/umath_geometry.hpp"
+
+#include "material.h"
+
+#include "mathutil/umath.h"
+
 #include "stdafx_client.h"
 #include <image/prosper_render_target.hpp>
 #include <prosper_command_buffer.hpp>

@@ -9,8 +9,8 @@ export module pragma.shared:model.enums;
 
 export {
 	namespace pragma::model {
-	enum class IndexType : uint8_t { UInt16 = 0u, UInt32 };
-};
+		enum class IndexType : uint8_t { UInt16 = 0u, UInt32 };
+	};
 
 	enum class ModelUpdateFlags : uint32_t {
 		None = 0,

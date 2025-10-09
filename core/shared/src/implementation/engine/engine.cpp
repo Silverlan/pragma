@@ -113,6 +113,8 @@ extern bool g_lpSandboxed;
 Engine::Engine(int argc, char *argv[]) : CVarHandler(), m_logFile(nullptr), m_tickRate(Engine::DEFAULT_TICK_RATE), m_stateFlags {StateFlags::Running | StateFlags::MultiThreadedAssetLoadingEnabled}
 {
 	g_engine = this;
+	
+	register_launch_parameters(*GetLaunchParaMap());
 
 #ifdef __linux__
 	// Enable linenoise by default

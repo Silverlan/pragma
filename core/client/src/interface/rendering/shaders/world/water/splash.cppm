@@ -8,6 +8,8 @@ module;
 
 export module pragma.client:rendering.shaders.world_water_splash;
 
+export import pragma.shared;
+
 export namespace pragma {
 	class DLLCLIENT ShaderWaterSplash : public prosper::ShaderCompute {
 	  public:

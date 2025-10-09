@@ -5,6 +5,8 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include <unordered_map>
+#include "pragma/lua/luaapi.h"
+
 
 export module pragma.client:scripting.lua.gui_manager;
 export {

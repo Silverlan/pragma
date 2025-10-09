@@ -3,6 +3,8 @@
 
 module;
 
+#include "mathutil/umath.h"
+
 #include "stdafx_client.h"
 #include <image/prosper_render_target.hpp>
 #include <image/prosper_sampler.hpp>
@@ -145,4 +147,4 @@ static void cl_render_ssao_callback(NetworkState *, const ConVar &, bool, bool v
 		return;
 	client->UpdateGameWorldShaderSettings();
 }
-REGISTER_CONVAR_CALLBACK_CL(cl_render_ssao, cl_render_ssao_callback);
+namespace { auto _ = pragma::console::client::register_variable_listener<bool>("cl_render_ssao",&cl_render_ssao_callback); }

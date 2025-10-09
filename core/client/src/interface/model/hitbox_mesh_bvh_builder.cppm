@@ -12,6 +12,8 @@ module;
 
 export module pragma.client:model.hitbox_mesh_bvh_builder;
 
+export import pragma.shared;
+
 export namespace pragma::bvh {
 	class DLLCLIENT HitboxMeshBvhBuildTask {
 	  public:

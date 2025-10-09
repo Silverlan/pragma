@@ -1,7 +1,11 @@
+
+#include "sharedutils/functioncallback.h"
+
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
+#include "pragma/console/helper.hpp"
 #include <alsoundsystem.hpp>
 #include <steam_audio/alsound_steam_audio.hpp>
 
@@ -24,11 +28,11 @@ static void reload_sound_cache()
 }
 
 #if ALSYS_STEAM_AUDIO_SUPPORT_ENABLED == 1
-REGISTER_CONVAR_CALLBACK_CL(cl_steam_audio_number_of_rays, [](NetworkState *state, ConVar *, int32_t, int32_t val) { reload_sound_cache(); });
-REGISTER_CONVAR_CALLBACK_CL(cl_steam_audio_number_of_diffuse_samples, [](NetworkState *state, ConVar *, int32_t, int32_t val) { reload_sound_cache(); });
-REGISTER_CONVAR_CALLBACK_CL(cl_steam_audio_number_of_bounces, [](NetworkState *state, ConVar *, int32_t, int32_t val) { reload_sound_cache(); });
-REGISTER_CONVAR_CALLBACK_CL(cl_steam_audio_ir_duration, [](NetworkState *state, ConVar *, float, float val) { reload_sound_cache(); });
-REGISTER_CONVAR_CALLBACK_CL(cl_steam_audio_ambisonics_order, [](NetworkState *state, ConVar *, int32_t, int32_t val) { reload_sound_cache(); });
+namespace { auto UVN = pragma::console::client::register_variable_listener<int32_t>("cl_steam_audio_number_of_rays", +[](NetworkState *state, ConVar *, int32_t, int32_t val) { reload_sound_cache(); }); }
+namespace { auto UVN = pragma::console::client::register_variable_listener<int32_t>("cl_steam_audio_number_of_diffuse_samples", +[](NetworkState *state, ConVar *, int32_t, int32_t val) { reload_sound_cache(); }); }
+namespace { auto UVN = pragma::console::client::register_variable_listener<int32_t>("cl_steam_audio_number_of_bounces", [](NetworkState *state, ConVar *, int32_t, int32_t val) { reload_sound_cache(); }); }
+namespace { auto UVN = pragma::console::client::register_variable_listener<int32_t>("cl_steam_audio_ir_duration", +[](NetworkState *state, ConVar *, int32_t, int32_t val) { reload_sound_cache(); }); }
+namespace { auto UVN = pragma::console::client::register_variable_listener<int32_t>("cl_steam_audio_ambisonics_order", +[](NetworkState *state, ConVar *, int32_t, int32_t val) { reload_sound_cache(); }); }
 
 static void cl_steam_audio_enabled(NetworkState *state, ConVar *, bool, bool val)
 {
@@ -64,128 +68,128 @@ static void cl_steam_audio_enabled(NetworkState *state, ConVar *, bool, bool val
 	if(val == true)
 		reload_sound_cache();
 }
-REGISTER_CONVAR_CALLBACK_CL(cl_steam_audio_enabled, cl_steam_audio_enabled);
+namespace { auto UVN = pragma::console::client::register_variable_listener<bool>("cl_steam_audio_enabled", &cl_steam_audio_enabled); }
 
-REGISTER_CONVAR_CALLBACK_CL(cl_steam_audio_spatialize_enabled, [](NetworkState *state, ConVar *, bool, bool val) {
+namespace { auto UVN = pragma::console::client::register_variable_listener<bool>("cl_steam_audio_spatialize_enabled", +[](NetworkState *state, ConVar *, bool, bool val) {
 	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
 	if(soundSys == nullptr)
 		return;
 	//soundSys->SetSteamAudioSpatializerDSPEnabled(val);
-});
+}) };
 
-REGISTER_CONVAR_CALLBACK_CL(cl_steam_audio_reverb_enabled, [](NetworkState *state, ConVar *, bool, bool val) {
+namespace { auto UVN = pragma::console::client::register_variable_listener<bool>("cl_steam_audio_reverb_enabled", +[](NetworkState *state, ConVar *, bool, bool val) {
 	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
 	if(soundSys == nullptr)
 		return;
 	//soundSys->SetSteamAudioReverbDSPEnabled(val);
-});
+}); };
 
-REGISTER_CONVAR_CALLBACK_CL(cl_steam_audio_propagation_delay_enabled, [](NetworkState *state, ConVar *, bool, bool val) {
+namespace { auto UVN = pragma::console::client::register_variable_listener<bool>("cl_steam_audio_propagation_delay_enabled", +[](NetworkState *state, ConVar *, bool, bool val) {
 	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
 	if(soundSys == nullptr)
 		return;
 	auto *iplScene = soundSys->GetSteamAudioScene();
 	iplScene->SetPropagationDelayEnabled(val);
-});
+}); };
 
-REGISTER_CONVAR_CALLBACK_CL(cl_steam_audio_spatialize_direct_binaural, [](NetworkState *state, ConVar *, bool oldVal, bool val) {
+namespace { auto UVN = pragma::console::client::register_variable_listener<bool>("cl_steam_audio_spatialize_direct_binaural", +[](NetworkState *state, ConVar *, bool oldVal, bool val) {
 	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
 	if(soundSys == nullptr)
 		return;
 	auto &props = soundSys->GetSteamAudioProperties();
 	props.spatializer.directBinaural = val;
-});
-REGISTER_CONVAR_CALLBACK_CL(cl_steam_audio_spatialize_hrtf_interpolation, [](NetworkState *state, ConVar *, int32_t oldVal, int32_t val) {
+}); };
+namespace { auto UVN = pragma::console::client::register_variable_listener<int32_t>("cl_steam_audio_spatialize_hrtf_interpolation", +[](NetworkState *state, ConVar *, int32_t oldVal, int32_t val) {
 	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
 	if(soundSys == nullptr)
 		return;
 	auto &props = soundSys->GetSteamAudioProperties();
 	props.spatializer.HRTFInterpolation = static_cast<al::steam_audio::SpatializerInterpolation>(val);
-});
-REGISTER_CONVAR_CALLBACK_CL(cl_steam_audio_spatialize_distance_attenuation, [](NetworkState *state, ConVar *, bool oldVal, bool val) {
+}); };
+namespace { auto UVN = pragma::console::client::register_variable_listener<bool>("cl_steam_audio_spatialize_distance_attenuation", +[](NetworkState *state, ConVar *, bool oldVal, bool val) {
 	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
 	if(soundSys == nullptr)
 		return;
 	auto &props = soundSys->GetSteamAudioProperties();
 	props.spatializer.distanceAttenuation = val;
-});
-REGISTER_CONVAR_CALLBACK_CL(cl_steam_audio_spatialize_air_absorption, [](NetworkState *state, ConVar *, bool oldVal, bool val) {
+}); };
+namespace { auto UVN = pragma::console::client::register_variable_listener<bool>("cl_steam_audio_spatialize_air_absorption", +[](NetworkState *state, ConVar *, bool oldVal, bool val) {
 	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
 	if(soundSys == nullptr)
 		return;
 	auto &props = soundSys->GetSteamAudioProperties();
 	props.spatializer.airAbsorption = val;
-});
-REGISTER_CONVAR_CALLBACK_CL(cl_steam_audio_spatialize_occlusion_mode, [](NetworkState *state, ConVar *, int32_t oldVal, int32_t val) {
+}); };
+namespace { auto UVN = pragma::console::client::register_variable_listener<int32_t>("cl_steam_audio_spatialize_occlusion_mode", +[](NetworkState *state, ConVar *, int32_t oldVal, int32_t val) {
 	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
 	if(soundSys == nullptr)
 		return;
 	auto &props = soundSys->GetSteamAudioProperties();
 	props.spatializer.occlusionMode = static_cast<al::steam_audio::SpatializerOcclusionMode>(val);
-});
-REGISTER_CONVAR_CALLBACK_CL(cl_steam_audio_spatialize_occlusion_method, [](NetworkState *state, ConVar *, int32_t oldVal, int32_t val) {
+}); };
+namespace { auto UVN = pragma::console::client::register_variable_listener<int32_t>("cl_steam_audio_spatialize_occlusion_method", +[](NetworkState *state, ConVar *, int32_t oldVal, int32_t val) {
 	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
 	if(soundSys == nullptr)
 		return;
 	auto &props = soundSys->GetSteamAudioProperties();
 	props.spatializer.occlusionMethod = static_cast<al::steam_audio::OcclusionMethod>(val);
-});
-REGISTER_CONVAR_CALLBACK_CL(cl_steam_audio_spatialize_direct_level, [](NetworkState *state, ConVar *, float oldVal, float val) {
+}); };
+namespace { auto UVN = pragma::console::client::register_variable_listener<float>("cl_steam_audio_spatialize_direct_level", +[](NetworkState *state, ConVar *, float oldVal, float val) {
 	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
 	if(soundSys == nullptr)
 		return;
 	auto &props = soundSys->GetSteamAudioProperties();
 	props.spatializer.directLevel = val;
-});
-REGISTER_CONVAR_CALLBACK_CL(cl_steam_audio_spatialize_indirect, [](NetworkState *state, ConVar *, bool oldVal, bool val) {
+}); };
+namespace { auto UVN = pragma::console::client::register_variable_listener<bool>("cl_steam_audio_spatialize_indirect", +[](NetworkState *state, ConVar *, bool oldVal, bool val) {
 	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
 	if(soundSys == nullptr)
 		return;
 	auto &props = soundSys->GetSteamAudioProperties();
 	props.spatializer.indirect = val;
-});
-REGISTER_CONVAR_CALLBACK_CL(cl_steam_audio_spatialize_indirect_binaural, [](NetworkState *state, ConVar *, bool oldVal, bool val) {
+}); };
+namespace { auto UVN = pragma::console::client::register_variable_listener<bool>("cl_steam_audio_spatialize_indirect_binaural", +[](NetworkState *state, ConVar *, bool oldVal, bool val) {
 	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
 	if(soundSys == nullptr)
 		return;
 	auto &props = soundSys->GetSteamAudioProperties();
 	props.spatializer.indirectBinaural = val;
-});
-REGISTER_CONVAR_CALLBACK_CL(cl_steam_audio_spatialize_indirect_level, [](NetworkState *state, ConVar *, float oldVal, float val) {
+}); };
+namespace { auto UVN = pragma::console::client::register_variable_listener<float>("cl_steam_audio_spatialize_indirect_level", +[](NetworkState *state, ConVar *, float oldVal, float val) {
 	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
 	if(soundSys == nullptr)
 		return;
 	auto &props = soundSys->GetSteamAudioProperties();
 	props.spatializer.indirectLevel = val;
-});
-REGISTER_CONVAR_CALLBACK_CL(cl_steam_audio_spatialize_simulation_type, [](NetworkState *state, ConVar *, int32_t oldVal, int32_t val) {
+}); };
+namespace { auto UVN = pragma::console::client::register_variable_listener<int32_t>("cl_steam_audio_spatialize_simulation_type", +[](NetworkState *state, ConVar *, int32_t oldVal, int32_t val) {
 	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
 	if(soundSys == nullptr)
 		return;
 	auto &props = soundSys->GetSteamAudioProperties();
 	props.spatializer.simulationType = static_cast<al::steam_audio::SimulationType>(val);
-});
-REGISTER_CONVAR_CALLBACK_CL(cl_steam_audio_spatialize_static_listener, [](NetworkState *state, ConVar *, bool oldVal, bool val) {
+}); };
+namespace { auto UVN = pragma::console::client::register_variable_listener<bool>("cl_steam_audio_spatialize_static_listener", +[](NetworkState *state, ConVar *, bool oldVal, bool val) {
 	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
 	if(soundSys == nullptr)
 		return;
 	auto &props = soundSys->GetSteamAudioProperties();
 	props.spatializer.staticListener = val;
-});
+}); };
 
-REGISTER_CONVAR_CALLBACK_CL(cl_steam_audio_reverb_indirect_binaural, [](NetworkState *state, ConVar *, bool oldVal, bool val) {
+namespace { auto UVN = pragma::console::client::register_variable_listener<bool>("cl_steam_audio_reverb_indirect_binaural", +[](NetworkState *state, ConVar *, bool oldVal, bool val) {
 	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
 	if(soundSys == nullptr)
 		return;
 	auto &props = soundSys->GetSteamAudioProperties();
 	props.reverb.indirectBinaural = val;
-});
-REGISTER_CONVAR_CALLBACK_CL(cl_steam_audio_reverb_simulation_type, [](NetworkState *state, ConVar *, int32_t oldVal, int32_t val) {
+}); };
+namespace { auto UVN = pragma::console::client::register_variable_listener<int32_t>("cl_steam_audio_reverb_simulation_type", +[](NetworkState *state, ConVar *, int32_t oldVal, int32_t val) {
 	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
 	if(soundSys == nullptr)
 		return;
 	auto &props = soundSys->GetSteamAudioProperties();
 	props.reverb.simulationType = static_cast<al::steam_audio::SimulationType>(val);
-});
+}); };
 
 #endif

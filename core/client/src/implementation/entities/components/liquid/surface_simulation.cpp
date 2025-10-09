@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 module;
-
+#include "pragma/lua/luaapi.h"
+#include "pragma/console/helper.hpp"
 #include "stdafx_client.h"
 
 module pragma.client;
@@ -19,15 +20,19 @@ import :physics;
 using namespace pragma;
 
 static std::vector<CLiquidSurfaceSimulationComponent *> s_waterEntities = {};
-REGISTER_CONVAR_CALLBACK_CL(cl_water_surface_simulation_spacing, [](NetworkState *, const ConVar &, int, int val) {
-	for(auto *entWater : s_waterEntities)
-		entWater->ReloadSurfaceSimulator();
-});
+namespace {
+	auto UVN = pragma::console::client::register_variable_listener<int>("cl_water_surface_simulation_spacing", +[](NetworkState *, const ConVar &, int, int val) {
+		for(auto *entWater : s_waterEntities)
+			entWater->ReloadSurfaceSimulator();
+	});
+}
 
-REGISTER_CONVAR_CALLBACK_CL(cl_water_surface_simulation_enable_gpu_acceleration, [](NetworkState *, const ConVar &, bool, bool val) {
-	for(auto *entWater : s_waterEntities)
-		entWater->ReloadSurfaceSimulator();
-});
+namespace {
+	auto UVN = pragma::console::client::register_variable_listener<bool>("cl_water_surface_simulation_enable_gpu_acceleration", +[](NetworkState *, const ConVar &, bool, bool val) {
+		for(auto *entWater : s_waterEntities)
+			entWater->ReloadSurfaceSimulator();
+	});
+}
 
 CLiquidSurfaceSimulationComponent::CLiquidSurfaceSimulationComponent(BaseEntity &ent) : BaseLiquidSurfaceSimulationComponent(ent) { s_waterEntities.push_back(this); }
 CLiquidSurfaceSimulationComponent::~CLiquidSurfaceSimulationComponent()

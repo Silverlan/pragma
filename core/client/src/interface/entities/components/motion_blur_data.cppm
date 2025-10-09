@@ -7,6 +7,10 @@ module;
 #include <image/prosper_render_target.hpp>
 #include <mathutil/transform.hpp>
 #include <unordered_set>
+#include "mathutil/umath.h"
+#include "pragma/lua/luaapi.h"
+
+
 
 export module pragma.client:entities.components.motion_blur_data;
 import :rendering.shaders;

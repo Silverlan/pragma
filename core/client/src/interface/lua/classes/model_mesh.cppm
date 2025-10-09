@@ -3,9 +3,14 @@
 
 module;
 #include "pragma/clientdefinitions.h"
+#include "pragma/lua/luaapi.h"
+
 
 
 export module pragma.client:scripting.lua.classes.model_mesh;
+
+export import pragma.shared;
+
 export namespace Lua {
 	namespace ModelMesh {
 		namespace Client {

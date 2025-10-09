@@ -2,6 +2,20 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "sharedutils/magic_enum.hpp"
+
+#include "sharedutils/magic_enum.hpp"
+
+
+#include "mathutil/umath_geometry.hpp"
+
+#include "sharedutils/util_event_reply.hpp"
+
+#include "mathutil/transform.hpp"
+
+#include "pragma/lua/luaapi.h"
+
+#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
 #include <prosper_descriptor_set_group.hpp>

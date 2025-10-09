@@ -3,6 +3,8 @@
 
 module;
 #include "pragma/clientdefinitions.h"
+#include "mathutil/umath.h"
+
 
 
 export module pragma.client:particle_system.modifier_gradual_fade;

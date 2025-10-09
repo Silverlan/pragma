@@ -3,6 +3,10 @@
 
 module;
 
+#include "pragma/lua/luaapi.h"
+
+#include "mathutil/umath.h"
+
 #include "stdafx_client.h"
 #include <prosper_window.hpp>
 

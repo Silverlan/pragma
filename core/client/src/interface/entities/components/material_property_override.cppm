@@ -11,6 +11,10 @@ module;
 #include "cmaterial.h"
 #include <udm.hpp>
 #include <queue>
+#include "pragma/lua/luaapi.h"
+#include "material.h"
+
+
 
 export module pragma.client:entities.components.material_property_override;
 import :rendering.material_property_block;

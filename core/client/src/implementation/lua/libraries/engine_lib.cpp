@@ -2,6 +2,17 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "material.h"
+
+#include "sharedutils/util_weak_handle.hpp"
+
+#include "fsys/filesystem.h"
+
+#include "udm.hpp"
+
+#include "pragma/lua/luaapi.h"
+
+#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
 #include "cmaterialmanager.h"

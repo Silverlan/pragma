@@ -5,6 +5,8 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include <image/prosper_texture.hpp>
+#include "fsys/filesystem.h"
+
 
 export module pragma.client:rendering.shaders.equirectangular_to_cubemap;
 

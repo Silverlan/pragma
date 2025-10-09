@@ -5,6 +5,8 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include <shader/prosper_shader.hpp>
+#include "mathutil/umath.h"
+
 
 export module pragma.client:rendering.shaders.world_raytracing;
 

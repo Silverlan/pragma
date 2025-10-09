@@ -8,6 +8,8 @@ module;
 
 export module pragma.client:particle_system.renderer_rotational_buffer;
 
+export import pragma.shared;
+
 export namespace pragma::ecs {class CParticleSystemComponent;}
 export class DLLCLIENT CParticleRendererRotationalBuffer {
   public:

@@ -7,6 +7,8 @@ module;
 
 export module pragma.client:model.brush_mesh;
 
+export import pragma.shared;
+
 export class DLLCLIENT CBrushMesh : public BrushMesh {
   public:
 };

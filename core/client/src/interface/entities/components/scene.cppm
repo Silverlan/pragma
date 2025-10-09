@@ -7,6 +7,12 @@ module;
 #include <shader/prosper_descriptor_array_manager.hpp>
 #include <mathutil/plane.hpp>
 #include <cinttypes>
+#include "mathutil/umath.h"
+#include "sharedutils/functioncallback.h"
+#include "pragma/lua/luaapi.h"
+
+
+
 
 export module pragma.client:entities.components.scene;
 

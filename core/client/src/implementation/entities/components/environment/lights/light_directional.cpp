@@ -2,6 +2,15 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "mathutil/umath_geometry.hpp"
+
+#include "sharedutils/util_event_reply.hpp"
+
+#include "mathutil/color.h"
+
+#include "pragma/lua/luaapi.h"
+
+#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
 

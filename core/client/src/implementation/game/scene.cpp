@@ -4,7 +4,7 @@
 module;
 
 #include "stdafx_client.h"
-
+#include "pragma/console/helper.hpp"
 module pragma.client;
 
 
@@ -28,8 +28,8 @@ static void cl_fov_callback(NetworkState *, const ConVar &, float, float val)
 	cam->SetFOV(CFloat(val));
 	cam->UpdateMatrices();
 }
-REGISTER_CONVAR_CALLBACK_CL(cl_fov, cl_fov_callback)
-REGISTER_CONVAR_CALLBACK_CL(cl_render_fov, cl_fov_callback)
+namespace { auto UVN = pragma::console::client::register_variable_listener<float>("cl_fov",&cl_fov_callback); }
+namespace { auto UVN = pragma::console::client::register_variable_listener<float>("cl_render_fov",&cl_fov_callback); }
 
 static void cl_fov_viewmodel_callback(NetworkState *, const ConVar &, int, int val)
 {
@@ -37,4 +37,5 @@ static void cl_fov_viewmodel_callback(NetworkState *, const ConVar &, int, int v
 		return;
 	pragma::get_cgame()->SetViewModelFOV(CFloat(val));
 }
-REGISTER_CONVAR_CALLBACK_CL(cl_fov_viewmodel, cl_fov_viewmodel_callback)
+
+namespace { auto UVN = pragma::console::client::register_variable_listener<int>("cl_fov_viewmodel", &cl_fov_viewmodel_callback); }

@@ -8,6 +8,8 @@ module;
 #include "buffers/prosper_buffer.hpp"
 #include "prosper_structs.hpp"
 #include <sharedutils/alpha_mode.hpp>
+#include "mathutil/umath.h"
+
 
 export module pragma.client:rendering.shaders.textured;
 

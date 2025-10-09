@@ -3,9 +3,14 @@
 
 module;
 #include "pragma/clientdefinitions.h"
+#include "pragma/lua/luaapi.h"
+
 
 
 export module pragma.client:entities.components.io;
+
+export import pragma.shared;
+
 export namespace pragma {
 	class DLLCLIENT CIOComponent final : public BaseIOComponent {
 	  public:

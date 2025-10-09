@@ -5,6 +5,8 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include <mathutil/umath.h>
+#include "sharedutils/util_event_reply.hpp"
+
 
 export module pragma.client:gui.slider;
 

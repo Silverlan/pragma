@@ -8,6 +8,8 @@ module;
 
 export module pragma.client:model.side;
 
+export import pragma.shared;
+
 export {
   class DLLCLIENT CSide : public Side {
     public:

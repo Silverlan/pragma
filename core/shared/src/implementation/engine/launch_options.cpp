@@ -16,81 +16,13 @@ module pragma.shared;
 
 import :engine;
 
-#pragma warning(push)
-#pragma warning(disable : 4251)
-using LaunchParameterFunc = void (*)(const std::vector<std::string> &);
-class DLLNETWORK LaunchParaMap {
-public:
-private:
-	std::unordered_map<std::string, LaunchParameterFunc> m_parameters;
-public:
-	static std::stringstream LAUNCHPARAMETERS_HELP;
-	~LaunchParaMap();
-	const std::unordered_map<std::string, LaunchParameterFunc> &GetParameters() const;
-	void RegisterParameter(const std::string &name, const LaunchParameterFunc &f);
-	void RegisterParameterHelp(std::string name, const LaunchParameterFunc &function, std::string descCmd, std::string descHelp)
-	{
-		RegisterParameter(name, function);
-		std::stringstream pre;
-		pre << "\t" << name << " " << descCmd;
-		std::string sp = "";
-		int l = 22 - static_cast<int>(pre.str().length());
-		if(l < 3) {
-			pre << "\n\t";
-			l = 21;
-		}
-		for(int j = 0; j < l; j++)
-			sp += " ";
-		LAUNCHPARAMETERS_HELP << pre.str() << sp << descHelp << "\n";
-	}
-};
-#pragma warning(pop)
-
-static void register_launch_parameters(LaunchParaMap &map);
+void register_launch_parameters(LaunchParaMap &map);
 
 Engine::LaunchCommand::LaunchCommand(const std::string &cmd, const std::vector<std::string> &_args) : command(cmd), args(_args) {}
 
-std::stringstream LaunchParaMap::LAUNCHPARAMETERS_HELP;
-
-LaunchParaMap::~LaunchParaMap() { m_parameters.clear(); }
-
-const std::unordered_map<std::string, LaunchParameterFunc> &LaunchParaMap::GetParameters() const { return m_parameters; }
-void LaunchParaMap::RegisterParameter(const std::string &name, const LaunchParameterFunc &f) { m_parameters.insert(std::make_pair(name, f)); }
-
-DLLNETWORK LaunchParaMap *g_LaunchParameters = NULL;
-
-DLLNETWORK LaunchParaMap *GetLaunchParaMap() { return g_LaunchParameters; }
-
-DLLNETWORK void RegisterLaunchParameter(std::string name, const LaunchParameterFunc &function)
-{
-	if(g_LaunchParameters == NULL) {
-		static LaunchParaMap map;
-		g_LaunchParameters = &map;
-	}
-	g_LaunchParameters->RegisterParameter(name, function);
-}
-
-DLLNETWORK void RegisterLaunchParameterHelp(std::string name, const LaunchParameterFunc &function, std::string descCmd, std::string descHelp)
-{
-	RegisterLaunchParameter(name, function);
-	std::stringstream pre;
-	pre << "\t" << name << " " << descCmd;
-	std::string sp = "";
-	int l = 22 - static_cast<int>(pre.str().length());
-	if(l < 3) {
-		pre << "\n\t";
-		l = 21;
-	}
-	for(int j = 0; j < l; j++)
-		sp += " ";
-	g_LaunchParameters->LAUNCHPARAMETERS_HELP << pre.str() << sp << descHelp << "\n";
-}
-
 void Engine::InitLaunchOptions(int argc, char *argv[])
 {
-	register_launch_parameters(*g_LaunchParameters);
-
-	auto &parameters = g_LaunchParameters->GetParameters();
+	auto &parameters = GetLaunchParaMap()->GetParameters();
 	std::vector<std::string> launchCmdArgs {};
 	struct LaunchOption {
 		std::string cmd;

@@ -5,6 +5,10 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include "image/prosper_render_target.hpp"
+#include "sharedutils/functioncallback.h"
+#include "pragma/lua/luaapi.h"
+
+
 
 export module pragma.client:entities.components.lights.shadow;
 import :entities.components.game_shadow_manager;

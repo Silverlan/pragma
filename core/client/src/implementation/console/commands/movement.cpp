@@ -1,8 +1,13 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __C_CVAR_MOVEMENT_H__
-#define __C_CVAR_MOVEMENT_H__
+module;
+
+#include "pragma/console/helper.hpp"
+
+module pragma.client;
+
+import :console.commands;
 
 namespace Console {
 	namespace commands {
@@ -72,33 +77,37 @@ namespace Console {
 		DLLCLIENT void turn_down_out(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
 	};
 };
-REGISTER_CONCOMMAND_TOGGLE_CL(sprint, Console::commands::sprint_in, Console::commands::sprint_out, ConVarFlags::None, "Enables sprinting while moving forward.");
-REGISTER_CONCOMMAND_TOGGLE_CL(walk, Console::commands::walk_in, Console::commands::walk_out, ConVarFlags::None, "Enables walking while moving forward.");
-REGISTER_CONCOMMAND_TOGGLE_CL(jump, Console::commands::jump_in, Console::commands::jump_out, ConVarFlags::None, "Prompts the player character to jump.");
-REGISTER_CONCOMMAND_TOGGLE_CL(crouch, Console::commands::crouch_in, Console::commands::crouch_out, ConVarFlags::None, "Prompts the player character to crouch.");
-REGISTER_CONCOMMAND_TOGGLE_CL(attack, Console::commands::attack_in, Console::commands::attack_out, ConVarFlags::None, "Triggers the primary fire for the player character's equipped weapon.");
-REGISTER_CONCOMMAND_TOGGLE_CL(attack2, Console::commands::attack2_in, Console::commands::attack2_out, ConVarFlags::None, "Triggers the secondary fire for the player character's equipped weapon.");
-REGISTER_CONCOMMAND_TOGGLE_CL(attack3, Console::commands::attack3_in, Console::commands::attack3_out, ConVarFlags::None, "Triggers the tertiary fire for the player character's equipped weapon.");
-REGISTER_CONCOMMAND_TOGGLE_CL(attack4, Console::commands::attack4_in, Console::commands::attack4_out, ConVarFlags::None, "Triggers the quaternary fire for the player character's equipped weapon.");
-REGISTER_CONCOMMAND_TOGGLE_CL(reload, Console::commands::reload_in, Console::commands::reload_out, ConVarFlags::None, "Triggers the reload for the player character's equipped weapon.");
-REGISTER_CONCOMMAND_TOGGLE_CL(use, Console::commands::use_in, Console::commands::use_out, ConVarFlags::None, "Prompts the player character to use whatever is in front of him.");
-REGISTER_CONCOMMAND_CL(noclip, Console::commands::noclip, ConVarFlags::None, "Toggles noclip mode. Requires cheats to be enabled (Or single player mode running).");
-REGISTER_CONCOMMAND_CL(notarget, Console::commands::notarget, ConVarFlags::None, "Toggles notarget mode. Requires cheats to be enabled (Or single player mode running).");
-REGISTER_CONCOMMAND_CL(godmode, Console::commands::godmode, ConVarFlags::None, "Toggles god mode. Requires cheats to be enabled (Or single player mode running).");
-REGISTER_CONCOMMAND_CL(give_weapon, Console::commands::give_weapon, ConVarFlags::None, "Gives the local player the specified weapon and deploys it.");
-REGISTER_CONCOMMAND_CL(strip_weapons, Console::commands::strip_weapons, ConVarFlags::None, "Strips all weapons from the local player.");
-REGISTER_CONCOMMAND_CL(next_weapon, Console::commands::next_weapon, ConVarFlags::None, "Switches to the next weapon in the player's inventory.");
-REGISTER_CONCOMMAND_CL(previous_weapon, Console::commands::previous_weapon, ConVarFlags::None, "Switches to the previous weapon in the player's inventory.");
-REGISTER_CONCOMMAND_CL(give_ammo, Console::commands::give_ammo, ConVarFlags::None, "Gives the local player the specified ammunition.");
-REGISTER_CONCOMMAND_CL(suicide, Console::commands::suicide, ConVarFlags::None, "Commit suicide.");
-REGISTER_CONCOMMAND_CL(hurtme, Console::commands::hurtme, ConVarFlags::None, "Applies the specified amount of damage to self.");
-REGISTER_CONCOMMAND_TOGGLE_CL(forward, Console::commands::forward_in, Console::commands::forward_out, ConVarFlags::JoystickAxisContinuous, "Moves the player character forward while active.");
-REGISTER_CONCOMMAND_TOGGLE_CL(backward, Console::commands::backward_in, Console::commands::backward_out, ConVarFlags::JoystickAxisContinuous, "Moves the player character backward while active.");
-REGISTER_CONCOMMAND_TOGGLE_CL(left, Console::commands::left_in, Console::commands::left_out, ConVarFlags::JoystickAxisContinuous, "Moves the player character left while active.");
-REGISTER_CONCOMMAND_TOGGLE_CL(right, Console::commands::right_in, Console::commands::right_out, ConVarFlags::JoystickAxisContinuous, "Moves the player character right while active.");
-REGISTER_CONCOMMAND_TOGGLE_CL(turn_left, Console::commands::turn_left_in, Console::commands::turn_left_out, ConVarFlags::JoystickAxisContinuous, "Continuously turns the player character leftwards.");
-REGISTER_CONCOMMAND_TOGGLE_CL(turn_right, Console::commands::turn_right_in, Console::commands::turn_right_out, ConVarFlags::JoystickAxisContinuous, "Continuously turns the player character leftwards.");
-REGISTER_CONCOMMAND_TOGGLE_CL(turn_up, Console::commands::turn_up_in, Console::commands::turn_up_out, ConVarFlags::JoystickAxisContinuous, "Continuously turns the player character leftwards.");
-REGISTER_CONCOMMAND_TOGGLE_CL(turn_down, Console::commands::turn_down_in, Console::commands::turn_down_out, ConVarFlags::JoystickAxisContinuous, "Continuously turns the player character leftwards.");
 
-#endif
+namespace {
+	using namespace pragma::console::client;
+
+	auto UVN = register_command("noclip", &Console::commands::noclip, ConVarFlags::None, "Toggles noclip mode. Requires cheats to be enabled (Or single player mode running).");
+	auto UVN = register_command("notarget", &Console::commands::notarget, ConVarFlags::None, "Toggles notarget mode. Requires cheats to be enabled (Or single player mode running).");
+	auto UVN = register_command("godmode", &Console::commands::godmode, ConVarFlags::None, "Toggles god mode. Requires cheats to be enabled (Or single player mode running).");
+	auto UVN = register_command("give_weapon", &Console::commands::give_weapon, ConVarFlags::None, "Gives the local player the specified weapon and deploys it.");
+	auto UVN = register_command("strip_weapons", &Console::commands::strip_weapons, ConVarFlags::None, "Strips all weapons from the local player.");
+	auto UVN = register_command("next_weapon", &Console::commands::next_weapon, ConVarFlags::None, "Switches to the next weapon in the player's inventory.");
+	auto UVN = register_command("previous_weapon", &Console::commands::previous_weapon, ConVarFlags::None, "Switches to the previous weapon in the player's inventory.");
+	auto UVN = register_command("give_ammo", &Console::commands::give_ammo, ConVarFlags::None, "Gives the local player the specified ammunition.");
+	auto UVN = register_command("suicide", &Console::commands::suicide, ConVarFlags::None, "Commit suicide.");
+	auto UVN = register_command("hurtme", &Console::commands::hurtme, ConVarFlags::None, "Applies the specified amount of damage to self.");
+
+	auto UVN = register_toggle_command("sprint", &Console::commands::sprint_in, &Console::commands::sprint_out, ConVarFlags::None, "Enables sprinting while moving forward.");
+	auto UVN = register_toggle_command("walk", &Console::commands::walk_in, &Console::commands::walk_out, ConVarFlags::None, "Enables walking while moving forward.");
+	auto UVN = register_toggle_command("jump", &Console::commands::jump_in, &Console::commands::jump_out, ConVarFlags::None, "Prompts the player character to jump.");
+	auto UVN = register_toggle_command("crouch", &Console::commands::crouch_in, &Console::commands::crouch_out, ConVarFlags::None, "Prompts the player character to crouch.");
+	auto UVN = register_toggle_command("attack", &Console::commands::attack_in, &Console::commands::attack_out, ConVarFlags::None, "Triggers the primary fire for the player character's equipped weapon.");
+	auto UVN = register_toggle_command("attack2", &Console::commands::attack2_in, &Console::commands::attack2_out, ConVarFlags::None, "Triggers the secondary fire for the player character's equipped weapon.");
+	auto UVN = register_toggle_command("attack3", &Console::commands::attack3_in, &Console::commands::attack3_out, ConVarFlags::None, "Triggers the tertiary fire for the player character's equipped weapon.");
+	auto UVN = register_toggle_command("attack4", &Console::commands::attack4_in, &Console::commands::attack4_out, ConVarFlags::None, "Triggers the quaternary fire for the player character's equipped weapon.");
+	auto UVN = register_toggle_command("reload", &Console::commands::reload_in, &Console::commands::reload_out, ConVarFlags::None, "Triggers the reload for the player character's equipped weapon.");
+	auto UVN = register_toggle_command("use", &Console::commands::use_in, &Console::commands::use_out, ConVarFlags::None, "Prompts the player character to use whatever is in front of him.");
+	auto UVN = register_toggle_command("forward", &Console::commands::forward_in, &Console::commands::forward_out, ConVarFlags::JoystickAxisContinuous, "Moves the player character forward while active.");
+	auto UVN = register_toggle_command("backward", &Console::commands::backward_in, &Console::commands::backward_out, ConVarFlags::JoystickAxisContinuous, "Moves the player character backward while active.");
+	auto UVN = register_toggle_command("left", &Console::commands::left_in, &Console::commands::left_out, ConVarFlags::JoystickAxisContinuous, "Moves the player character left while active.");
+	auto UVN = register_toggle_command("right", &Console::commands::right_in, &Console::commands::right_out, ConVarFlags::JoystickAxisContinuous, "Moves the player character right while active.");
+	auto UVN = register_toggle_command("turn_left", &Console::commands::turn_left_in, &Console::commands::turn_left_out, ConVarFlags::JoystickAxisContinuous, "Continuously turns the player character leftwards.");
+	auto UVN = register_toggle_command("turn_right", &Console::commands::turn_right_in, &Console::commands::turn_right_out, ConVarFlags::JoystickAxisContinuous, "Continuously turns the player character leftwards.");
+	auto UVN = register_toggle_command("turn_up", &Console::commands::turn_up_in, &Console::commands::turn_up_out, ConVarFlags::JoystickAxisContinuous, "Continuously turns the player character leftwards.");
+	auto UVN = register_toggle_command("turn_down", &Console::commands::turn_down_in, &Console::commands::turn_down_out, ConVarFlags::JoystickAxisContinuous, "Continuously turns the player character leftwards.");
+}

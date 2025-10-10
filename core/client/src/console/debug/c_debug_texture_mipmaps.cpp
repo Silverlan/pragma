@@ -2,7 +2,7 @@
 #include "sharedutils/magic_enum.hpp"
 
 #include "sharedutils/magic_enum.hpp"
-
+#include "pragma/console/helper.hpp"
 
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT

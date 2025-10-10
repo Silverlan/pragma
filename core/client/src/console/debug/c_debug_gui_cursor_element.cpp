@@ -3,7 +3,7 @@
 #include "sharedutils/functioncallback.h"
 
 #include "pragma/lua/luaapi.h"
-
+#include "pragma/console/helper.hpp"
 #include "mathutil/umath.h"
 
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>

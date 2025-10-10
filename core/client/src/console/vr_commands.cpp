@@ -201,9 +201,9 @@ static void cl_vr_hmd_view_enabled(bool val)
 			fSetControllerStateCallback(nullptr);
 	}
 }
-REGISTER_CONVAR_CALLBACK_CL(cl_vr_hmd_view_enabled,[](NetworkState*,ConVar*,bool,bool val) {
-	cl_vr_hmd_view_enabled(val);
-})
+namespace {
+	auto _ = pragma::console::client::register_variable_listener<bool>("cl_vr_hmd_view_enabled", +[](NetworkState *, const ConVar &, bool, bool val) { cl_vr_hmd_view_enabled(val); });
+}
 #endif
 
 static void cl_vr_mirror_window_enabled(bool val)
@@ -216,4 +216,6 @@ static void cl_vr_mirror_window_enabled(bool val)
 		return;
 	fSetMirrorWindowEnabled(val);
 }
-REGISTER_CONVAR_CALLBACK_CL(cl_vr_mirror_window_enabled, [](NetworkState *, const ConVar &, bool, bool val) { cl_vr_mirror_window_enabled(val); })
+namespace {
+	auto _ = pragma::console::client::register_variable_listener<bool>("cl_vr_mirror_window_enabled", +[](NetworkState *, const ConVar &, bool, bool val) { cl_vr_mirror_window_enabled(val); });
+}

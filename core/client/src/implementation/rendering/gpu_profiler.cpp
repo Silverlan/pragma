@@ -13,7 +13,6 @@ module;
 
 module pragma.client;
 
-import :console.input;
 import :rendering.gpu_profiler;
 import :engine;
 
@@ -73,7 +72,7 @@ void GPUProfiler::InitializeQueries()
 
 /////////////////////////
 
-void Console::commands::cl_gpu_timer_queries_dump(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+static void cl_gpu_timer_queries_dump(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	auto extended = false;
 	if(argv.empty() == false)
@@ -122,4 +121,7 @@ void Console::commands::cl_gpu_timer_queries_dump(NetworkState *state, pragma::B
 	auto &profiler = pragma::get_cengine()->GetGPUProfiler();
 	fPrintResults(profiler.GetRootStage(), "", true);
 	Con::cout << "--------------------------------------------" << Con::endl;
+}
+namespace {
+	auto UVN = pragma::console::client::register_command("cl_gpu_timer_queries_dump", &cl_gpu_timer_queries_dump, ConVarFlags::None, "Prints all timer query results to the console.");
 }

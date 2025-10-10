@@ -44,7 +44,7 @@ static void cmd_forwardplus_tile_size(NetworkState *, const ConVar &, int32_t, i
 
 	pragma::get_cengine()->ReloadShader("forwardp_light_culling");
 }
-namespace { auto _ = pragma::console::client::register_variable_listener<int32_t>("render_forwardplus_tile_size", &cmd_forwardplus_tile_size) };
+namespace { auto _ = pragma::console::client::register_variable_listener<int32_t>("render_forwardplus_tile_size", &cmd_forwardplus_tile_size); };
 
 static auto cvTileSize = GetClientConVar("render_forwardplus_tile_size");
 std::pair<uint32_t, uint32_t> pragma::rendering::ForwardPlusInstance::CalcWorkGroupCount(uint32_t w, uint32_t h)

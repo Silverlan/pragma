@@ -566,7 +566,7 @@ bool CLightMapComponent::BakeLightmaps(const LightmapBakeSettings &bakeSettings)
 	return true;
 }
 
-void Console::commands::map_rebuild_lightmaps(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+static void map_rebuild_lightmaps(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	std::unordered_map<std::string, pragma::console::CommandOption> commandOptions {};
 	pragma::console::parse_command_options(argv, commandOptions);
@@ -590,6 +590,9 @@ void Console::commands::map_rebuild_lightmaps(NetworkState *state, pragma::BaseP
 	bakeSettings.colorTransform->config = "filmic-blender";
 	bakeSettings.colorTransform->look = "Medium Contrast";
 	CLightMapComponent::BakeLightmaps(bakeSettings);
+}
+namespace {
+	auto UVN = pragma::console::client::register_command("map_rebuild_lightmaps", &map_rebuild_lightmaps, ConVarFlags::None, "Rebuilds the lightmaps for the current map. Note that this will only work if the map was compiled with lightmap uvs.");
 }
 
 static void set_lightmap_texture(lua_State *l, pragma::CLightMapComponent &hLightMapC, const std::string &path, bool directional)

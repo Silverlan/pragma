@@ -25,7 +25,7 @@ void RenderDebugInfo::Reset()
 
 RenderDebugInfo &get_render_debug_info() { return render_debug_info; }
 
-void Console::commands::debug_render_info(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
+static void debug_render_info(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
 	auto &info = get_render_debug_info();
 	std::cout << "-------------- Render Info --------------" << std::endl;
@@ -41,4 +41,7 @@ void Console::commands::debug_render_info(NetworkState *, pragma::BasePlayerComp
 	std::cout << "Shadow Entity changes: " << info.shadowEntityCount << std::endl;
 	std::cout << "Shadow Meshes: " << info.shadowMeshCount << std::endl;
 	std::cout << "-----------------------------------------" << std::endl;
+}
+namespace {
+	auto UVN = pragma::console::client::register_command("debug_render_info", &debug_render_info, ConVarFlags::None, "Prints some timing information to the console.");
 }

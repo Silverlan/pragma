@@ -18,7 +18,7 @@ module pragma.client;
 import :scripting.lua.classes.world_environment;
 namespace Lua {
 	namespace WorldEnvironment {
-		static void SetAmbientColor(lua_State *l, ::WorldEnvironment &worldEnv, const Vector4 &ambientColor);
+		static void SetAmbientColor(lua_State *l, ::WorldEnvironment &worldEnv, const ::Vector4 &ambientColor);
 		static void GetAmbientColor(lua_State *l, ::WorldEnvironment &worldEnv);
 
 		static void SetShaderQuality(lua_State *l, ::WorldEnvironment &worldEnv, int32_t shaderQuality);
@@ -35,7 +35,7 @@ namespace Lua {
 		static void SetFogEnd(lua_State *l, ::WorldEnvironment &worldEnv, float end);
 		static void GetFogStart(lua_State *l, ::WorldEnvironment &worldEnv);
 		static void GetFogEnd(lua_State *l, ::WorldEnvironment &worldEnv);
-		static void SetFogColor(lua_State *l, ::WorldEnvironment &worldEnv, const Color &color);
+		static void SetFogColor(lua_State *l, ::WorldEnvironment &worldEnv, const ::Color &color);
 		static void GetFogColor(lua_State *l, ::WorldEnvironment &worldEnv);
 		static void SetFogEnabled(lua_State *l, ::WorldEnvironment &worldEnv, bool bEnabled);
 		static void IsFogEnabled(lua_State *l, ::WorldEnvironment &worldEnv);

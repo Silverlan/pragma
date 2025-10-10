@@ -10,6 +10,8 @@ module;
 export module pragma.client:scripting.lua.libraries.debug_renderer;
 import :debug;
 
+#undef DrawText
+
 export namespace Lua {
 	namespace DebugRenderer {
 		namespace Client {

@@ -7,7 +7,7 @@ module;
 #include "udm.hpp"
 
 #include "pragma/lua/luaapi.h"
-
+#include "pragma/lua/types/udm.hpp"
 #include "stdafx_client.h"
 #include <luabind/class.hpp>
 #include <prosper_framebuffer.hpp>
@@ -138,7 +138,7 @@ void Lua::Vulkan::VKMemory::Unmap(lua_State *l,Memory &hMemory)
 /////////////////////////////////
 
 bool Lua::Vulkan::VKCommandBuffer::IsValid(lua_State *l, CommandBuffer &hCommandBuffer) { return true; }
-bool Lua::Vulkan::VKCommandBuffer::RecordClearImage(lua_State *l, CommandBuffer &hCommandBuffer, Image &img, const Color &col, const prosper::util::ClearImageInfo &clearImageInfo)
+bool Lua::Vulkan::VKCommandBuffer::RecordClearImage(lua_State *l, CommandBuffer &hCommandBuffer, Image &img, const ::Color &col, const prosper::util::ClearImageInfo &clearImageInfo)
 {
 	auto vcol = col.ToVector4();
 	return hCommandBuffer.RecordClearImage(img, prosper::ImageLayout::TransferDstOptimal, {vcol.r, vcol.g, vcol.b, vcol.a}, clearImageInfo);
@@ -147,7 +147,7 @@ bool Lua::Vulkan::VKCommandBuffer::RecordClearImage(lua_State *l, CommandBuffer 
 {
 	return hCommandBuffer.RecordClearImage(img, prosper::ImageLayout::TransferDstOptimal, clearDepth, clearStencil, clearImageInfo);
 }
-bool Lua::Vulkan::VKCommandBuffer::RecordClearAttachment(lua_State *l, CommandBuffer &hCommandBuffer, Image &img, const Color &col, uint32_t attId)
+bool Lua::Vulkan::VKCommandBuffer::RecordClearAttachment(lua_State *l, CommandBuffer &hCommandBuffer, Image &img, const ::Color &col, uint32_t attId)
 {
 	auto vcol = col.ToVector4();
 	return hCommandBuffer.RecordClearAttachment(img, {vcol.r, vcol.g, vcol.b, vcol.a}, attId);

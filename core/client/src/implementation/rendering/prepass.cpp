@@ -137,7 +137,7 @@ prosper::RenderTarget &pragma::rendering::Prepass::BeginRenderPass(const util::D
 }
 void pragma::rendering::Prepass::EndRenderPass(const util::DrawSceneInfo &drawSceneInfo) { drawSceneInfo.commandBuffer->RecordEndRenderPass(); }
 
-void Console::commands::debug_prepass(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+static void debug_prepass(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	auto &wgui = WGUI::GetInstance();
 	auto *pRoot = wgui.GetBaseElement();
@@ -188,4 +188,7 @@ void Console::commands::debug_prepass(NetworkState *state, pragma::BasePlayerCom
 	}
 
 	pEl->SizeToContents();
+}
+namespace {
+	auto UVN = pragma::console::client::register_command("debug_prepass", &Console::commands::debug_prepass, ConVarFlags::None, "Displays prepass buffers to screen.");
 }

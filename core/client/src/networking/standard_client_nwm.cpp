@@ -113,5 +113,5 @@ namespace {
 		if(cl == nullptr)
 			return;
 		cl->SetTimeoutDuration(val);
-	}
+	});
 };

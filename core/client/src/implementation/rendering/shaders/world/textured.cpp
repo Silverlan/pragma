@@ -600,7 +600,7 @@ static void print_shader_material_data(CMaterial &mat)
 	shaderMatData.DebugPrint();
 }
 
-void Console::commands::debug_print_shader_material_data(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+static void debug_print_shader_material_data(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	if(argv.empty()) {
 		Con::cwar << "No material specified!" << Con::endl;
@@ -613,4 +613,7 @@ void Console::commands::debug_print_shader_material_data(NetworkState *state, pr
 		return;
 	}
 	print_shader_material_data(static_cast<CMaterial &>(*mat));
+}
+namespace {
+	auto UVN = pragma::console::client::register_command("debug_print_shader_material_data", &debug_print_shader_material_data, ConVarFlags::None, "Prints the shader material data for the specified material.");
 }

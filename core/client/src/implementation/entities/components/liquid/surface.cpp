@@ -29,7 +29,6 @@ import :entities.components.render;
 import :entities.components.surface;
 import :game;
 import :rendering.shaders;
-import :scripting.lua.entity_component_event;
 
 
 using namespace pragma;

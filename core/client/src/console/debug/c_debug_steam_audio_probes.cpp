@@ -48,7 +48,7 @@ static void debug_steam_audio_probe_boxes(NetworkState *state, ConVar *, bool, b
 }
 namespace { auto _ = pragma::console::client::register_variable_listener<bool>("debug_steam_audio_probe_boxes", &debug_steam_audio_probe_boxes); }
 
-void Console::commands::debug_steam_audio_dump_scene(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+static void debug_steam_audio_dump_scene(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	auto *sndSys = pragma::get_cengine()->GetSoundSystem();
 	if(sndSys == nullptr) {
@@ -78,5 +78,9 @@ void Console::commands::debug_steam_audio_dump_scene(NetworkState *state, pragma
 }
 
 #else
-void Console::commands::debug_steam_audio_dump_scene(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv) { Con::cwar << "Steam audio is disabled! Scene cannot be dumped." << Con::endl; }
+static void debug_steam_audio_dump_scene(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv) { Con::cwar << "Steam audio is disabled! Scene cannot be dumped." << Con::endl; }
 #endif
+
+namespace {
+	auto UVN = pragma::console::client::register_command("debug_steam_audio_dump_scene", &debug_steam_audio_dump_scene, ConVarFlags::None, "Saves the steam audio scene as OBJ file.");
+}

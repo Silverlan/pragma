@@ -7,7 +7,7 @@ module;
 #include "udm.hpp"
 
 #include "pragma/lua/luaapi.h"
-
+#include "pragma/lua/util.hpp"
 #include "mathutil/umath.h"
 
 #include "stdafx_client.h"
@@ -155,11 +155,11 @@ void Lua::Shader::GetSourceFilePaths(lua_State *l, prosper::Shader &shader)
 		Lua::SetTableValue(l, t);
 	}
 }
-void Lua::Shader::RecordPushConstants(lua_State *l, prosper::Shader &shader, prosper::util::PreparedCommandBuffer &pcb, udm::Type type, const Lua::Vulkan::PreparedCommandLuaArg &value, uint32_t offset)
+void Lua::Shader::RecordPushConstants(lua_State *l, prosper::Shader &shader, prosper::util::PreparedCommandBuffer &pcb, ::udm::Type type, const Lua::Vulkan::PreparedCommandLuaArg &value, uint32_t offset)
 {
 	pcb.PushCommand(
 	  [&shader, offset, type](const prosper::util::PreparedCommandBufferRecordState &recordState) mutable -> bool {
-		  return udm::visit_ng(type, [&recordState, &shader, offset](auto tag) {
+		  return ::udm::visit_ng(type, [&recordState, &shader, offset](auto tag) {
 			  using T = typename decltype(tag)::type;
 			  auto value = recordState.GetArgument<T>(0);
 			  return shader.RecordPushConstants(*recordState.shaderBindState, sizeof(value), &value, offset);

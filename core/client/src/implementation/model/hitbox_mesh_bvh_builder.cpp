@@ -13,6 +13,7 @@ module;
 #include "mathutil/umath.h"
 
 #include "stdafx_client.h"
+#include <bvh/v2/stream.h>
 
 module pragma.client;
 

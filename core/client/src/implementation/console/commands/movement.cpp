@@ -9,105 +9,455 @@ module pragma.client;
 
 import :console.commands;
 
-namespace Console {
-	namespace commands {
-		DLLCLIENT void sprint_in(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &args);
-		DLLCLIENT void sprint_out(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &args);
+static void forward_in(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &, float magnitude)
+{
+	if(!state->IsGameActive())
+		return;
+	CGame *game = static_cast<CGame *>(state->GetGameState());
+	game->SetActionInput(Action::MoveForward, true, magnitude);
+}
 
-		DLLCLIENT void walk_in(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &args);
-		DLLCLIENT void walk_out(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &args);
+static void forward_out(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
+{
+	if(!state->IsGameActive())
+		return;
+	CGame *game = static_cast<CGame *>(state->GetGameState());
+	game->SetActionInput(Action::MoveForward, false);
+}
 
-		DLLCLIENT void jump_in(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &args);
-		DLLCLIENT void jump_out(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &args);
+static void backward_in(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &, float magnitude)
+{
+	if(!state->IsGameActive())
+		return;
+	CGame *game = static_cast<CGame *>(state->GetGameState());
+	game->SetActionInput(Action::MoveBackward, true, magnitude);
+}
 
-		DLLCLIENT void crouch_in(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &args);
-		DLLCLIENT void crouch_out(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &args);
+static void backward_out(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
+{
+	if(!state->IsGameActive())
+		return;
+	CGame *game = static_cast<CGame *>(state->GetGameState());
+	game->SetActionInput(Action::MoveBackward, false);
+}
 
-		DLLCLIENT void attack_in(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &args);
-		DLLCLIENT void attack_out(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &args);
+static void left_in(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &, float magnitude)
+{
+	if(!state->IsGameActive())
+		return;
+	CGame *game = static_cast<CGame *>(state->GetGameState());
+	game->SetActionInput(Action::MoveLeft, true, magnitude);
+}
 
-		DLLCLIENT void attack2_in(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &args);
-		DLLCLIENT void attack2_out(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &args);
+static void left_out(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
+{
+	if(!state->IsGameActive())
+		return;
+	CGame *game = static_cast<CGame *>(state->GetGameState());
+	game->SetActionInput(Action::MoveLeft, false);
+}
 
-		DLLCLIENT void attack3_in(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &args);
-		DLLCLIENT void attack3_out(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &args);
+static void right_in(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &, float magnitude)
+{
+	if(!state->IsGameActive())
+		return;
+	CGame *game = static_cast<CGame *>(state->GetGameState());
+	game->SetActionInput(Action::MoveRight, true, magnitude);
+}
 
-		DLLCLIENT void attack4_in(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &args);
-		DLLCLIENT void attack4_out(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &args);
+static void right_out(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
+{
+	if(!state->IsGameActive())
+		return;
+	CGame *game = static_cast<CGame *>(state->GetGameState());
+	game->SetActionInput(Action::MoveRight, false);
+}
 
-		DLLCLIENT void reload_in(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &args);
-		DLLCLIENT void reload_out(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &args);
+static void sprint_in(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
+{
+	if(!state->IsGameActive())
+		return;
+	CGame *game = static_cast<CGame *>(state->GetGameState());
+	game->SetActionInput(Action::Sprint, true);
+}
 
-		DLLCLIENT void use_in(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &args);
-		DLLCLIENT void use_out(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &args);
+static void sprint_out(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
+{
+	if(!state->IsGameActive())
+		return;
+	CGame *game = static_cast<CGame *>(state->GetGameState());
+	game->SetActionInput(Action::Sprint, false);
+}
 
-		DLLCLIENT void noclip(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &args);
-		DLLCLIENT void notarget(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &args);
-		DLLCLIENT void godmode(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &args);
-		DLLCLIENT void next_weapon(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &args);
-		DLLCLIENT void give_weapon(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &args);
-		DLLCLIENT void strip_weapons(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &args);
-		DLLCLIENT void previous_weapon(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &args);
-		DLLCLIENT void give_ammo(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &args);
-		DLLCLIENT void suicide(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &args);
-		DLLCLIENT void hurtme(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &args);
+static void walk_in(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
+{
+	if(!state->IsGameActive())
+		return;
+	CGame *game = static_cast<CGame *>(state->GetGameState());
+	game->SetActionInput(Action::Walk, true);
+}
 
-		DLLCLIENT void forward_in(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &args, float magnitude);
-		DLLCLIENT void forward_out(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &args);
+static void walk_out(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
+{
+	if(!state->IsGameActive())
+		return;
+	CGame *game = static_cast<CGame *>(state->GetGameState());
+	game->SetActionInput(Action::Walk, false);
+}
 
-		DLLCLIENT void backward_in(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &args, float magnitude);
-		DLLCLIENT void backward_out(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &args);
+static void jump_in(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
+{
+	if(!state->IsGameActive())
+		return;
+	CGame *game = static_cast<CGame *>(state->GetGameState());
+	game->SetActionInput(Action::Jump, true);
+}
 
-		DLLCLIENT void left_in(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &args, float magnitude);
-		DLLCLIENT void left_out(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &args);
+static void jump_out(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
+{
+	if(!state->IsGameActive())
+		return;
+	CGame *game = static_cast<CGame *>(state->GetGameState());
+	game->SetActionInput(Action::Jump, false);
+}
 
-		DLLCLIENT void right_in(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &args, float magnitude);
-		DLLCLIENT void right_out(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &args);
+static void crouch_in(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
+{
+	if(!state->IsGameActive())
+		return;
+	CGame *game = static_cast<CGame *>(state->GetGameState());
+	game->SetActionInput(Action::Crouch, true);
+}
 
-		DLLCLIENT void turn_left_in(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv, float magnitude);
-		DLLCLIENT void turn_left_out(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+static void crouch_out(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
+{
+	if(!state->IsGameActive())
+		return;
+	CGame *game = static_cast<CGame *>(state->GetGameState());
+	game->SetActionInput(Action::Crouch, false);
+}
 
-		DLLCLIENT void turn_right_in(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv, float magnitude);
-		DLLCLIENT void turn_right_out(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+static void attack_in(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
+{
+	if(!state->IsGameActive())
+		return;
+	CGame *game = static_cast<CGame *>(state->GetGameState());
+	game->SetActionInput(Action::Attack, true);
+}
 
-		DLLCLIENT void turn_up_in(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv, float magnitude);
-		DLLCLIENT void turn_up_out(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+static void attack_out(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
+{
+	if(!state->IsGameActive())
+		return;
+	CGame *game = static_cast<CGame *>(state->GetGameState());
+	game->SetActionInput(Action::Attack, false);
+}
 
-		DLLCLIENT void turn_down_in(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv, float magnitude);
-		DLLCLIENT void turn_down_out(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
-	};
-};
+static void attack2_in(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
+{
+	if(!state->IsGameActive())
+		return;
+	CGame *game = static_cast<CGame *>(state->GetGameState());
+	game->SetActionInput(Action::Attack2, true);
+}
+
+static void attack2_out(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
+{
+	if(!state->IsGameActive())
+		return;
+	CGame *game = static_cast<CGame *>(state->GetGameState());
+	game->SetActionInput(Action::Attack2, false);
+}
+
+static void attack3_in(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
+{
+	if(!state->IsGameActive())
+		return;
+	CGame *game = static_cast<CGame *>(state->GetGameState());
+	game->SetActionInput(Action::Attack3, true);
+}
+
+static void attack3_out(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
+{
+	if(!state->IsGameActive())
+		return;
+	CGame *game = static_cast<CGame *>(state->GetGameState());
+	game->SetActionInput(Action::Attack3, false);
+}
+
+static void attack4_in(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
+{
+	if(!state->IsGameActive())
+		return;
+	CGame *game = static_cast<CGame *>(state->GetGameState());
+	game->SetActionInput(Action::Attack4, true);
+}
+
+static void attack4_out(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
+{
+	if(!state->IsGameActive())
+		return;
+	CGame *game = static_cast<CGame *>(state->GetGameState());
+	game->SetActionInput(Action::Attack4, false);
+}
+
+static void reload_in(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
+{
+	if(!state->IsGameActive())
+		return;
+	CGame *game = static_cast<CGame *>(state->GetGameState());
+	game->SetActionInput(Action::Reload, true);
+}
+
+static void reload_out(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
+{
+	if(!state->IsGameActive())
+		return;
+	CGame *game = static_cast<CGame *>(state->GetGameState());
+	game->SetActionInput(Action::Reload, false);
+}
+
+static void use_in(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
+{
+	if(!state->IsGameActive())
+		return;
+	CGame *game = static_cast<CGame *>(state->GetGameState());
+	game->SetActionInput(Action::Use, true);
+}
+
+static void use_out(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
+{
+	if(!state->IsGameActive())
+		return;
+	CGame *game = static_cast<CGame *>(state->GetGameState());
+	game->SetActionInput(Action::Use, false);
+}
+
+static void noclip(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
+{
+	if(!check_cheats("noclip", state))
+		return;
+	ClientState *client = static_cast<ClientState *>(state);
+	client->SendPacket("noclip", pragma::networking::Protocol::SlowReliable);
+}
+
+static void notarget(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
+{
+	if(!check_cheats("notarget", state))
+		return;
+	ClientState *client = static_cast<ClientState *>(state);
+	client->SendPacket("notarget", pragma::networking::Protocol::SlowReliable);
+}
+
+static void godmode(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
+{
+	if(!check_cheats("godmode", state))
+		return;
+	auto *client = static_cast<ClientState *>(state);
+	client->SendPacket("godmode", pragma::networking::Protocol::SlowReliable);
+}
+
+static void suicide(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
+{
+	if(!check_cheats("suicide", state))
+		return;
+	auto *client = static_cast<ClientState *>(state);
+	client->SendPacket("suicide", pragma::networking::Protocol::SlowReliable);
+}
+
+static void hurtme(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &args)
+{
+	if(!check_cheats("hurtme", state))
+		return;
+	auto dmg = !args.empty() ? atoi(args.front().c_str()) : 1;
+	NetPacket p;
+	p->Write<uint16_t>(static_cast<uint16_t>(dmg));
+	auto *client = static_cast<ClientState *>(state);
+	client->SendPacket("hurtme", p, pragma::networking::Protocol::SlowReliable);
+}
+
+static void give_weapon(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
+{
+	auto *client = pragma::get_client_state();
+	if(argv.empty() || !client->IsGameActive())
+		return;
+	if(!check_cheats("give_weapon", state))
+		return;
+	NetPacket p;
+	p->WriteString(argv.front());
+	client->SendPacket("give_weapon", p, pragma::networking::Protocol::SlowReliable);
+}
+
+static void strip_weapons(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
+{
+	auto *client = pragma::get_client_state();
+	if(!client->IsGameActive())
+		return;
+	if(!check_cheats("strip_weapons", state))
+		return;
+	NetPacket p;
+	client->SendPacket("strip_weapons", p, pragma::networking::Protocol::SlowReliable);
+}
+
+static void next_weapon(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &args)
+{
+	auto *client = static_cast<ClientState *>(state);
+	client->SendPacket("weapon_next", pragma::networking::Protocol::FastUnreliable);
+}
+
+static void previous_weapon(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &args)
+{
+	auto *client = static_cast<ClientState *>(state);
+	client->SendPacket("weapon_previous", pragma::networking::Protocol::FastUnreliable);
+}
+
+static void give_ammo(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
+{
+	auto *client = pragma::get_client_state();
+	if(argv.empty() || !client->IsGameActive())
+		return;
+	uint32_t amount = (argv.size() > 1) ? util::to_int(argv[1]) : 50;
+	if(!check_cheats("give_ammo", state))
+		return;
+	NetPacket p;
+	p->WriteString(argv.front());
+	p->Write<uint32_t>(amount);
+	client->SendPacket("give_ammo", p, pragma::networking::Protocol::SlowReliable);
+}
+
+const float defaultTurnSpeed = 3.f;
+static struct {
+	float left = 0.f;
+	float right = 0.f;
+	float up = 0.f;
+	float down = 0.f;
+} turn_speeds;
+static CallbackHandle cbCalcView = {};
+static CallbackHandle cbGameEnd = {};
+static void update_turn_callbacks()
+{
+	if(turn_speeds.left == 0.f && turn_speeds.right == 0.f && turn_speeds.up == 0.f && turn_speeds.down == 0.f) {
+		if(cbCalcView.IsValid())
+			cbCalcView.Remove();
+		if(cbGameEnd.IsValid())
+			cbGameEnd.Remove();
+		return;
+	}
+	if(!cbCalcView.IsValid()) {
+		cbCalcView = pragma::get_cgame()->AddCallback("CalcView", FunctionCallback<void, std::reference_wrapper<Vector3>, std::reference_wrapper<Quat>, std::reference_wrapper<Quat>>::Create([](std::reference_wrapper<Vector3>, std::reference_wrapper<Quat> rot, std::reference_wrapper<Quat> rotMod) {
+			const auto tFactor = 0.016f; // 60 FPS as reference
+			auto t = pragma::get_cgame()->DeltaRealTime() / tFactor;
+			EulerAngles angVertical(-turn_speeds.up + turn_speeds.down, 0.f, 0.f);
+			EulerAngles angHorizontal(0.f, -turn_speeds.right + turn_speeds.left, 0.f);
+			rot.get() = uquat::create(angHorizontal * t) * rot.get() * uquat::create(angVertical * t);
+		}));
+	}
+	if(!cbGameEnd.IsValid()) {
+		cbGameEnd = pragma::get_cgame()->AddCallback("OnGameEnd", FunctionCallback<void, CGame *>::Create([](CGame *) {
+			turn_speeds.left = 0.f;
+			turn_speeds.right = 0.f;
+			turn_speeds.up = 0.f;
+			turn_speeds.down = 0.f;
+			update_turn_callbacks();
+		}));
+	}
+}
+
+static void turn_left_in(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float magnitude)
+{
+	auto *client = pragma::get_client_state();
+	if(!client->IsGameActive())
+		return;
+	turn_speeds.left = (!argv.empty() ? ustring::to_float(argv.front()) : defaultTurnSpeed) * magnitude;
+	update_turn_callbacks();
+}
+static void turn_left_out(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
+{
+	auto *client = pragma::get_client_state();
+	if(!client->IsGameActive())
+		return;
+	turn_speeds.left = 0.f;
+	update_turn_callbacks();
+}
+static void turn_right_in(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float magnitude)
+{
+	auto *client = pragma::get_client_state();
+	if(!client->IsGameActive())
+		return;
+	turn_speeds.right = (!argv.empty() ? ustring::to_float(argv.front()) : defaultTurnSpeed) * magnitude;
+	update_turn_callbacks();
+}
+static void turn_right_out(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
+{
+	auto *client = pragma::get_client_state();
+	if(!client->IsGameActive())
+		return;
+	turn_speeds.right = 0.f;
+	update_turn_callbacks();
+}
+static void turn_up_in(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float magnitude)
+{
+	auto *client = pragma::get_client_state();
+	if(!client->IsGameActive())
+		return;
+	turn_speeds.up = (!argv.empty() ? ustring::to_float(argv.front()) : defaultTurnSpeed) * magnitude;
+	update_turn_callbacks();
+}
+static void turn_up_out(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
+{
+	auto *client = pragma::get_client_state();
+	if(!client->IsGameActive())
+		return;
+	turn_speeds.up = 0.f;
+	update_turn_callbacks();
+}
+static void turn_down_in(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float magnitude)
+{
+	auto *client = pragma::get_client_state();
+	if(!client->IsGameActive())
+		return;
+	turn_speeds.down = (!argv.empty() ? ustring::to_float(argv.front()) : defaultTurnSpeed) * magnitude;
+	update_turn_callbacks();
+}
+static void turn_down_out(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
+{
+	auto *client = pragma::get_client_state();
+	if(!client->IsGameActive())
+		return;
+	turn_speeds.down = 0.f;
+	update_turn_callbacks();
+}
 
 namespace {
 	using namespace pragma::console::client;
 
-	auto UVN = register_command("noclip", &Console::commands::noclip, ConVarFlags::None, "Toggles noclip mode. Requires cheats to be enabled (Or single player mode running).");
-	auto UVN = register_command("notarget", &Console::commands::notarget, ConVarFlags::None, "Toggles notarget mode. Requires cheats to be enabled (Or single player mode running).");
-	auto UVN = register_command("godmode", &Console::commands::godmode, ConVarFlags::None, "Toggles god mode. Requires cheats to be enabled (Or single player mode running).");
-	auto UVN = register_command("give_weapon", &Console::commands::give_weapon, ConVarFlags::None, "Gives the local player the specified weapon and deploys it.");
-	auto UVN = register_command("strip_weapons", &Console::commands::strip_weapons, ConVarFlags::None, "Strips all weapons from the local player.");
-	auto UVN = register_command("next_weapon", &Console::commands::next_weapon, ConVarFlags::None, "Switches to the next weapon in the player's inventory.");
-	auto UVN = register_command("previous_weapon", &Console::commands::previous_weapon, ConVarFlags::None, "Switches to the previous weapon in the player's inventory.");
-	auto UVN = register_command("give_ammo", &Console::commands::give_ammo, ConVarFlags::None, "Gives the local player the specified ammunition.");
-	auto UVN = register_command("suicide", &Console::commands::suicide, ConVarFlags::None, "Commit suicide.");
-	auto UVN = register_command("hurtme", &Console::commands::hurtme, ConVarFlags::None, "Applies the specified amount of damage to self.");
+	auto UVN = register_command("noclip", &noclip, ConVarFlags::None, "Toggles noclip mode. Requires cheats to be enabled (Or single player mode running).");
+	auto UVN = register_command("notarget", &notarget, ConVarFlags::None, "Toggles notarget mode. Requires cheats to be enabled (Or single player mode running).");
+	auto UVN = register_command("godmode", &godmode, ConVarFlags::None, "Toggles god mode. Requires cheats to be enabled (Or single player mode running).");
+	auto UVN = register_command("give_weapon", &give_weapon, ConVarFlags::None, "Gives the local player the specified weapon and deploys it.");
+	auto UVN = register_command("strip_weapons", &strip_weapons, ConVarFlags::None, "Strips all weapons from the local player.");
+	auto UVN = register_command("next_weapon", &next_weapon, ConVarFlags::None, "Switches to the next weapon in the player's inventory.");
+	auto UVN = register_command("previous_weapon", &previous_weapon, ConVarFlags::None, "Switches to the previous weapon in the player's inventory.");
+	auto UVN = register_command("give_ammo", &give_ammo, ConVarFlags::None, "Gives the local player the specified ammunition.");
+	auto UVN = register_command("suicide", &suicide, ConVarFlags::None, "Commit suicide.");
+	auto UVN = register_command("hurtme", &hurtme, ConVarFlags::None, "Applies the specified amount of damage to self.");
 
-	auto UVN = register_toggle_command("sprint", &Console::commands::sprint_in, &Console::commands::sprint_out, ConVarFlags::None, "Enables sprinting while moving forward.");
-	auto UVN = register_toggle_command("walk", &Console::commands::walk_in, &Console::commands::walk_out, ConVarFlags::None, "Enables walking while moving forward.");
-	auto UVN = register_toggle_command("jump", &Console::commands::jump_in, &Console::commands::jump_out, ConVarFlags::None, "Prompts the player character to jump.");
-	auto UVN = register_toggle_command("crouch", &Console::commands::crouch_in, &Console::commands::crouch_out, ConVarFlags::None, "Prompts the player character to crouch.");
-	auto UVN = register_toggle_command("attack", &Console::commands::attack_in, &Console::commands::attack_out, ConVarFlags::None, "Triggers the primary fire for the player character's equipped weapon.");
-	auto UVN = register_toggle_command("attack2", &Console::commands::attack2_in, &Console::commands::attack2_out, ConVarFlags::None, "Triggers the secondary fire for the player character's equipped weapon.");
-	auto UVN = register_toggle_command("attack3", &Console::commands::attack3_in, &Console::commands::attack3_out, ConVarFlags::None, "Triggers the tertiary fire for the player character's equipped weapon.");
-	auto UVN = register_toggle_command("attack4", &Console::commands::attack4_in, &Console::commands::attack4_out, ConVarFlags::None, "Triggers the quaternary fire for the player character's equipped weapon.");
-	auto UVN = register_toggle_command("reload", &Console::commands::reload_in, &Console::commands::reload_out, ConVarFlags::None, "Triggers the reload for the player character's equipped weapon.");
-	auto UVN = register_toggle_command("use", &Console::commands::use_in, &Console::commands::use_out, ConVarFlags::None, "Prompts the player character to use whatever is in front of him.");
-	auto UVN = register_toggle_command("forward", &Console::commands::forward_in, &Console::commands::forward_out, ConVarFlags::JoystickAxisContinuous, "Moves the player character forward while active.");
-	auto UVN = register_toggle_command("backward", &Console::commands::backward_in, &Console::commands::backward_out, ConVarFlags::JoystickAxisContinuous, "Moves the player character backward while active.");
-	auto UVN = register_toggle_command("left", &Console::commands::left_in, &Console::commands::left_out, ConVarFlags::JoystickAxisContinuous, "Moves the player character left while active.");
-	auto UVN = register_toggle_command("right", &Console::commands::right_in, &Console::commands::right_out, ConVarFlags::JoystickAxisContinuous, "Moves the player character right while active.");
-	auto UVN = register_toggle_command("turn_left", &Console::commands::turn_left_in, &Console::commands::turn_left_out, ConVarFlags::JoystickAxisContinuous, "Continuously turns the player character leftwards.");
-	auto UVN = register_toggle_command("turn_right", &Console::commands::turn_right_in, &Console::commands::turn_right_out, ConVarFlags::JoystickAxisContinuous, "Continuously turns the player character leftwards.");
-	auto UVN = register_toggle_command("turn_up", &Console::commands::turn_up_in, &Console::commands::turn_up_out, ConVarFlags::JoystickAxisContinuous, "Continuously turns the player character leftwards.");
-	auto UVN = register_toggle_command("turn_down", &Console::commands::turn_down_in, &Console::commands::turn_down_out, ConVarFlags::JoystickAxisContinuous, "Continuously turns the player character leftwards.");
+	auto UVN = register_toggle_command("sprint", &sprint_in, &sprint_out, ConVarFlags::None, "Enables sprinting while moving forward.");
+	auto UVN = register_toggle_command("walk", &walk_in, &walk_out, ConVarFlags::None, "Enables walking while moving forward.");
+	auto UVN = register_toggle_command("jump", &jump_in, &jump_out, ConVarFlags::None, "Prompts the player character to jump.");
+	auto UVN = register_toggle_command("crouch", &crouch_in, &crouch_out, ConVarFlags::None, "Prompts the player character to crouch.");
+	auto UVN = register_toggle_command("attack", &attack_in, &attack_out, ConVarFlags::None, "Triggers the primary fire for the player character's equipped weapon.");
+	auto UVN = register_toggle_command("attack2", &attack2_in, &attack2_out, ConVarFlags::None, "Triggers the secondary fire for the player character's equipped weapon.");
+	auto UVN = register_toggle_command("attack3", &attack3_in, &attack3_out, ConVarFlags::None, "Triggers the tertiary fire for the player character's equipped weapon.");
+	auto UVN = register_toggle_command("attack4", &attack4_in, &attack4_out, ConVarFlags::None, "Triggers the quaternary fire for the player character's equipped weapon.");
+	auto UVN = register_toggle_command("reload", &reload_in, &reload_out, ConVarFlags::None, "Triggers the reload for the player character's equipped weapon.");
+	auto UVN = register_toggle_command("use", &use_in, &use_out, ConVarFlags::None, "Prompts the player character to use whatever is in front of him.");
+	auto UVN = register_toggle_command("forward", &forward_in, &forward_out, ConVarFlags::JoystickAxisContinuous, "Moves the player character forward while active.");
+	auto UVN = register_toggle_command("backward", &backward_in, &backward_out, ConVarFlags::JoystickAxisContinuous, "Moves the player character backward while active.");
+	auto UVN = register_toggle_command("left", &left_in, &left_out, ConVarFlags::JoystickAxisContinuous, "Moves the player character left while active.");
+	auto UVN = register_toggle_command("right", &right_in, &right_out, ConVarFlags::JoystickAxisContinuous, "Moves the player character right while active.");
+	auto UVN = register_toggle_command("turn_left", &turn_left_in, &turn_left_out, ConVarFlags::JoystickAxisContinuous, "Continuously turns the player character leftwards.");
+	auto UVN = register_toggle_command("turn_right", &turn_right_in, &turn_right_out, ConVarFlags::JoystickAxisContinuous, "Continuously turns the player character leftwards.");
+	auto UVN = register_toggle_command("turn_up", &turn_up_in, &turn_up_out, ConVarFlags::JoystickAxisContinuous, "Continuously turns the player character leftwards.");
+	auto UVN = register_toggle_command("turn_down", &turn_down_in, &turn_down_out, ConVarFlags::JoystickAxisContinuous, "Continuously turns the player character leftwards.");
 }

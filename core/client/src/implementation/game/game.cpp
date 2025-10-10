@@ -19,7 +19,7 @@ module;
 #include "pragma/lua/luaapi.h"
 
 #include "mathutil/umath.h"
-
+#include "sharedutils/util_clock.hpp"
 #include "stdafx_client.h"
 #include "luasystem.h"
 #include "cmaterialmanager.h"
@@ -1561,7 +1561,7 @@ void CGame::ReceiveSnapshot(NetPacket &packet)
 			unsigned short key = packet->Read<unsigned short>();
 			UNUSED(key);
 			char pressed = packet->Read<char>();
-			int action = (pressed == 1) ? GLFW_PRESS : GLFW_RELEASE;
+			int action = (pressed == 1) ? KEY_PRESS : KEY_RELEASE;
 			UNUSED(action);
 		}
 		/*if(ent != nullptr)

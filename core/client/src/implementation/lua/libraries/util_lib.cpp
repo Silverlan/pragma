@@ -28,7 +28,7 @@ import :game;
 import :util;
 
 
-int Lua::util::Client::calc_world_direction_from_2d_coordinates(lua_State *l, pragma::CCameraComponent &hCam, const Vector2 &uv)
+int Lua::util::Client::calc_world_direction_from_2d_coordinates(lua_State *l, pragma::CCameraComponent &hCam, const ::Vector2 &uv)
 {
 	auto trComponent = hCam.GetEntity().GetTransformComponent();
 	auto forward = trComponent ? trComponent->GetForward() : uvec::FORWARD;
@@ -44,13 +44,13 @@ int Lua::util::Client::create_particle_tracer(lua_State *l)
 	auto &start = Lua::Check<Vector3>(l, 1);
 	auto &end = Lua::Check<Vector3>(l, 2);
 	auto radius = Lua::IsSet(l, 3) ? Lua::CheckNumber(l, 3) : BulletInfo::DEFAULT_TRACER_RADIUS;
-	const auto *col = Lua::IsSet(l, 4) ? Lua::CheckColor(l, 4) : &BulletInfo::DEFAULT_TRACER_COLOR;
+	const auto &col = Lua::IsSet(l, 4) ? Lua::Check<::Color>(l, 4) : BulletInfo::DEFAULT_TRACER_COLOR;
 	auto length = Lua::IsSet(l, 5) ? Lua::CheckNumber(l, 5) : BulletInfo::DEFAULT_TRACER_LENGTH;
 	auto speed = Lua::IsSet(l, 6) ? Lua::CheckNumber(l, 6) : BulletInfo::DEFAULT_TRACER_SPEED;
 	auto *mat = Lua::IsSet(l, 7) ? Lua::CheckString(l, 7) : BulletInfo::DEFAULT_TRACER_MATERIAL.c_str();
 	auto bloomScale = Lua::IsSet(l, 8) ? Lua::CheckNumber(l, 8) : BulletInfo::DEFAULT_TRACER_BLOOM;
 
-	auto *particle = pragma::get_cgame()->CreateParticleTracer<pragma::ecs::CParticleSystemComponent>(start, end, static_cast<float>(radius), *col, static_cast<float>(length), static_cast<float>(speed), mat, static_cast<float>(bloomScale));
+	auto *particle = pragma::get_cgame()->CreateParticleTracer<pragma::ecs::CParticleSystemComponent>(start, end, static_cast<float>(radius), col, static_cast<float>(length), static_cast<float>(speed), mat, static_cast<float>(bloomScale));
 	if(particle == nullptr)
 		return 0;
 	particle->PushLuaObject(l);
@@ -132,10 +132,8 @@ int Lua::util::Client::import_gltf(lua_State *l)
 	if(Lua::IsString(l, 1))
 		fileName = Lua::CheckString(l, 1);
 	else {
-		auto *lf = Lua::CheckFile(l, 1);
-		if(lf == nullptr)
-			return 0;
-		f = lf->GetHandle();
+		auto &lf = Lua::Check<LFile>(l, 1);
+		f = lf.GetHandle();
 	}
 	::util::Path outputPath {};
 	if(Lua::IsSet(l, 2))
@@ -169,10 +167,8 @@ int Lua::util::Client::import_model(lua_State *l)
 	if(Lua::IsString(l, 1))
 		fileName = Lua::CheckString(l, 1);
 	else {
-		auto *lf = Lua::CheckFile(l, 1);
-		if(lf == nullptr)
-			return 0;
-		f = lf->GetHandle();
+		auto &lf = Lua::Check<LFile>(l, 1);
+		f = lf.GetHandle();
 	}
 	::util::Path outputPath {};
 	if(Lua::IsSet(l, 2))
@@ -272,7 +268,7 @@ int Lua::util::Client::export_material(lua_State *l)
 		mat = pragma::get_client_state()->LoadMaterial(matPath, nullptr, true, false);
 	}
 	else
-		mat = Lua::CheckMaterial(l, 1);
+		mat = &Lua::Check<::Material>(l, 1);
 
 	if(mat == nullptr) {
 		Lua::PushBool(l, false);

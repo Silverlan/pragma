@@ -263,7 +263,7 @@ namespace { auto _ = pragma::console::client::register_variable_listener<bool>("
 	if(pragma::get_cgame() == nullptr)
 		return;
 	CParticleRendererBlob::SetShowNeighborLinks(val);
-}) };
+}); };
 
 void CParticleRendererBlob::OnParticleSystemStopped()
 {

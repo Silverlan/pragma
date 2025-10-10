@@ -15,6 +15,8 @@ module pragma.client;
 import :scripting.lua.libraries.debug_renderer;
 import :debug;
 
+#undef DrawText
+
 static std::shared_ptr<DebugRenderer::BaseObject> get_dbg_object(const std::shared_ptr<DebugRenderer::BaseObject> &obj, float duration) { return (duration > 0.f) ? nullptr : obj; }
 std::shared_ptr<DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawPoints(const std::vector<Vector3> &points, const DebugRenderInfo &renderInfo) { return get_dbg_object(::DebugRenderer::DrawPoints(points, {renderInfo.color, renderInfo.duration}), renderInfo.duration); }
 
@@ -26,7 +28,7 @@ std::shared_ptr<::DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawLin
 {
 	DebugRenderInfo debugRenderInfo {};
 	debugRenderInfo.duration = 12.f;
-	debugRenderInfo.color = Color::Red;
+	debugRenderInfo.color = ::Color::Red;
 	return DrawLine(start, end, debugRenderInfo);
 }
 std::shared_ptr<DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawLine(const Vector3 &start, const Vector3 &end, const DebugRenderInfo &renderInfo)

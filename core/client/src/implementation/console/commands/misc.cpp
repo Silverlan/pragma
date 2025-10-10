@@ -44,32 +44,17 @@ namespace {
 	auto UVN = register_command("debug_ai_schedule", &CMD_debug_ai_schedule, ConVarFlags::None, "Prints the current schedule behavior tree for the specified NPC on screen.");
 	auto UVN = register_command("debug_aim_info", &CMD_debug_aim_info, ConVarFlags::None, "Prints information about whatever the local player is looking at.");
 	auto UVN = register_command("debug_draw_line", &CMD_debug_draw_line, ConVarFlags::None, "Draws a line from the current camera position to the specified target position");
-	auto UVN = register_command("debug_light_sources", &Console::commands::debug_light_sources, ConVarFlags::None, "Prints debug information about all light sources in the scene.");
-	auto UVN = register_command("debug_gui_cursor", &Console::commands::debug_gui_cursor, ConVarFlags::None, "Prints information about the GUI element currently hovered over by the cursor.");
-	auto UVN = register_command("debug_entity_render_buffer", &Console::commands::debug_entity_render_buffer, ConVarFlags::None, "Prints debug information about an entity's render buffer.");
-	auto UVN = register_command("debug_font_glyph_map", &Console::commands::debug_font_glyph_map, ConVarFlags::None, "Displays the glyph map for the specified font.");
-	auto UVN = register_command("debug_dump_font_glyph_map", &Console::commands::debug_dump_font_glyph_map, ConVarFlags::None, "Dumps the glyph map for the specified font to an image file.");
 	auto UVN = register_command("debug_render_depth_buffer", &Console::commands::debug_render_depth_buffer, ConVarFlags::None, "Draws the scene depth buffer to screen.");
 	auto UVN = register_command("debug_render_validation_error_enabled", &Console::commands::debug_render_validation_error_enabled, ConVarFlags::None, "Enables or disables the specified validation error.");
-
-	auto UVN = register_command("debug_render_info", &Console::commands::debug_render_info, ConVarFlags::None, "Prints some timing information to the console.");
-
-	auto UVN = register_command("debug_steam_audio_dump_scene", &Console::commands::debug_steam_audio_dump_scene, ConVarFlags::None, "Saves the steam audio scene as OBJ file.");
 
 	auto UVN = register_command("flashlight", &CMD_flashlight_toggle, ConVarFlags::None, "Toggles the flashlight.");
 	auto UVN = register_command("reloadmaterial", &CMD_reloadmaterial, ConVarFlags::None, "Reloads the given material (and textures associated with it). Usage: reloadmaterial <materialFile>");
 	auto UVN = register_command("reloadmaterials", &CMD_reloadmaterials, ConVarFlags::None, "Reloads all loaded materials and textures.");
 	auto UVN = register_command("debug_nav_path_start", &CMD_debug_nav_path_start, ConVarFlags::None, "Sets a start point for a navigation path. Use debug_nav_path_end to set the end point.");
 	auto UVN = register_command("debug_nav_path_end", &CMD_debug_nav_path_end, ConVarFlags::None, "Sets an end point for a navigation path. Use debug_nav_path_start to set the start point. The path will be drawn in the scene once both points have been set.");
-	auto UVN = register_command("debug_water", &Console::commands::debug_water, ConVarFlags::None, "Displays the reflection, refraction and refraction depth map for the given water-entity on screen. Call without arguments to turn the display off. Usage: debug_light_water <waterEntityIndex>");
-	auto UVN = register_command("debug_ssao", &Console::commands::debug_ssao, ConVarFlags::None, "Displays the ssao buffers to screen.");
-	auto UVN = register_command("debug_prepass", &Console::commands::debug_prepass, ConVarFlags::None, "Displays prepass buffers to screen.");
-	auto UVN = register_command("debug_render_scene", &Console::commands::debug_render_scene, ConVarFlags::None, "Displays scene to screen.");
 	auto UVN = register_command("cl_list", &Console::commands::cl_list, ConVarFlags::None, "Prints a list of all clientside console commands to the console.");
 	auto UVN = register_command("cl_find", &Console::commands::cl_find, ConVarFlags::None, "Finds similar console commands to whatever was given as argument.");
 	auto UVN = register_command("fps", &CMD_fps, ConVarFlags::None, "Prints the current fps to the console.");
-	auto UVN = register_command("debug_audio_aux_effect", &Console::commands::debug_audio_aux_effect, ConVarFlags::None, "Applies a global DSP effect. Usage: debug_audio_aux_effect <dspName> <gain>");
-	auto UVN = register_command("debug_audio_sounds", &Console::commands::debug_audio_sounds, ConVarFlags::None, "Prints information about all active server- and clientside sounds to the console.");
 
 	auto UVN = register_command("vk_dump_limits", &Console::commands::vk_dump_limits, ConVarFlags::None, "Dumps all vulkan limitations to 'vk_limits.txt'.");
 	auto UVN = register_command("vk_dump_features", &Console::commands::vk_dump_features, ConVarFlags::None, "Dumps all vulkan features to 'vk_features.txt'.");
@@ -80,35 +65,15 @@ namespace {
 	auto UVN = register_command("vk_dump_memory_stats", &Console::commands::vk_dump_memory_stats, ConVarFlags::None, "Dumps information about currently allocated GPU memory.");
 	auto UVN = register_command("vk_print_memory_stats", &Console::commands::vk_print_memory_stats, ConVarFlags::None, "Prints information about currently allocated GPU memory to the console.");
 
-	auto UVN = register_command("debug_font", &Console::commands::debug_font, ConVarFlags::None, "Displays the glyph map for the specified font. If no arguments are specified, all available fonts will be listed. Usage: debug_font <fontName>");
-	auto UVN = register_command("debug_texture_mipmaps", &Console::commands::debug_texture_mipmaps, ConVarFlags::None, "Displays the mipmaps of the given texture. Usage: debug_texture_mipmaps <texturePath>");
-	auto UVN = register_command("debug_hitboxes", &Console::commands::debug_hitboxes, ConVarFlags::None, "Displays the hitboxes for the entity under the crosshair, or the entity with the given name (If it was specified.).");
 	auto UVN = register_command("debug_dump_component_properties", &Console::commands::debug_dump_component_properties, ConVarFlags::None, "Dumps entity component property values to the console.");
 
 	auto UVN = register_command("debug_pbr_ibl", &Console::commands::debug_pbr_ibl, ConVarFlags::None, "Displays the irradiance, prefilter and brdf map for the closest cubemap.");
-	auto UVN = register_command("debug_particle_alpha_mode", &Console::commands::debug_particle_alpha_mode, ConVarFlags::None, "Specifies the blend mode arguments for particle systems that use the \
-	'custom' alpha mode. Argument order: <srcColorBlendFactor> <dstColorBlendFactor> <srcAlphaBlendFactor> <dstAlphaBlendFactor> <opColor> <opAlpha>.\n\
-	Blend factor options: zero, one, src_color, one_minus_src_color, dst_color, one_minus_dst_color, src_alpha, one_minus_src_alpha, dst_alpha, one_minus_dst_alpha, constant_color, \
-	one_minus_constant_color, constant_alpha, one_minus_constant_alpha, src_alpha_saturate, src1_color, one_minus_src1_color, src1_alpha, one_minus_src1_alpha\n\
-	Operation options: add, subtract, reverse_subtract, min, max");
-	auto UVN = register_command("debug_print_shader_material_data", &Console::commands::debug_print_shader_material_data, ConVarFlags::None, "Prints the shader material data for the specified material.");
 
 	#ifdef _DEBUG
 	auto UVN = register_command("cl_dump_sounds", &CMD_cl_dump_sounds, ConVarFlags::None, "Prints information about all active sounds to the console.");
 	auto UVN = register_command("cl_dump_netmessages", &CMD_cl_dump_netmessages, ConVarFlags::None, "Prints all registered netmessages to the console.");
 	#endif
-
-	auto UVN = register_command("cl_gpu_timer_queries_dump", &Console::commands::cl_gpu_timer_queries_dump, ConVarFlags::None, "Prints all timer query results to the console.");
-
-	auto UVN = register_command("cl_steam_audio_reload_scene", &Console::commands::cl_steam_audio_reload_scene, ConVarFlags::None, "Reloads the steam audio scene cache.");
-
-	auto UVN = register_command("map_build_reflection_probes", &Console::commands::map_build_reflection_probes, ConVarFlags::None,
-	"Build all reflection probes in the map. Use the '-rebuild' argument to clear all current IBL textures first. Use 'debug_pbr_ibl' to check the probes after they have been built.");
-	auto UVN = register_command("map_rebuild_lightmaps", &Console::commands::map_rebuild_lightmaps, ConVarFlags::None, "Rebuilds the lightmaps for the current map. Note that this will only work if the map was compiled with lightmap uvs.");
-
-	auto UVN = register_command("util_convert_cubemap_to_equirectangular_image", &Console::commands::util_convert_cubemap_to_equirectangular_image, ConVarFlags::None, "Converts a cubemap to a equirectangular image.");
-	auto UVN = register_command("util_convert_equirectangular_image_to_cubemap", &Console::commands::util_convert_equirectangular_image_to_cubemap, ConVarFlags::None, "Converts a equirectangular image to a cubemap.");
-
+	
 	auto UVN = register_command("lua_reload_entity", &CMD_lua_reload_entity, ConVarFlags::None, "Reloads the scripts for the given entity class. Usage: lua_reload_entity <className>");
 	auto UVN = register_command("lua_reload_weapon", &CMD_lua_reload_weapon, ConVarFlags::None, "Reloads the scripts for the given weapon class. Usage: lua_reload_weapon <className>");
 	auto UVN = register_command("lua_reload_entities", &CMD_lua_reload_entities, ConVarFlags::None, "Reloads the scripts for all registered lua entity classes.");

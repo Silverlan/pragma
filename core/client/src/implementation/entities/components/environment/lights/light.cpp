@@ -623,7 +623,7 @@ void CLightComponent::SetShadowBuffer(const std::shared_ptr<prosper::IBuffer> &r
 
 ///////////////////
 
-void Console::commands::debug_light_sources(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+static void debug_light_sources(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	auto &context = pragma::get_cengine()->GetRenderContext();
 	context.WaitIdle();
@@ -748,6 +748,9 @@ void Console::commands::debug_light_sources(NetworkState *state, pragma::BasePla
 		for(auto idx : discrepancies)
 			Con::cout << "\t" << idx << Con::endl;
 	}
+}
+namespace {
+	auto UVN = pragma::console::client::register_command("debug_light_sources", &debug_light_sources, ConVarFlags::None, "Prints debug information about all light sources in the scene.");
 }
 
 /////////////////

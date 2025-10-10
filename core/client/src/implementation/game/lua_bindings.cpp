@@ -294,7 +294,7 @@ void CGame::RegisterLua()
 
 	Lua::RegisterLibraryEnums(GetLuaState(), "time", {{"TIMER_TYPE_SERVERTIME", umath::to_integral(TimerType::ServerTime)}});
 
-	Lua::RegisterLibraryEnums(GetLuaState(), "file", {{"SEARCH_RESOURCES", FSYS_SEARCH_RESOURCES}});
+	Lua::RegisterLibraryEnums(GetLuaState(), "file", {{"SEARCH_RESOURCES", pragma::networking::FSYS_SEARCH_RESOURCES}});
 
 	Lua::RegisterLibraryEnums(GetLuaState(), "geometry",
 	  {{"FrustumPlane_LEFT", umath::to_integral(FrustumPlane::Left)}, {"FrustumPlane_RIGHT", umath::to_integral(FrustumPlane::Right)}, {"FrustumPlane_TOP", umath::to_integral(FrustumPlane::Top)}, {"FrustumPlane_BOTTOM", umath::to_integral(FrustumPlane::Bottom)},

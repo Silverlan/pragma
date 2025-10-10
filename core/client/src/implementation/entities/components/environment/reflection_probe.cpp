@@ -59,7 +59,7 @@ struct RenderSettings {
 	float skyStrength = 0.3f;
 	float exposure = 50.f;
 } static g_renderSettings;
-void Console::commands::map_build_reflection_probes(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+static void map_build_reflection_probes(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	if(pragma::get_cgame() == nullptr)
 		return;
@@ -97,6 +97,10 @@ void Console::commands::map_build_reflection_probes(NetworkState *state, pragma:
 		return;
 	}
 	CReflectionProbeComponent::BuildAllReflectionProbes(*pragma::get_cgame(), rebuild);
+}
+namespace {
+	auto UVN = register_command("map_build_reflection_probes", &map_build_reflection_probes, ConVarFlags::None,
+	"Build all reflection probes in the map. Use the '-rebuild' argument to clear all current IBL textures first. Use 'debug_pbr_ibl' to check the probes after they have been built.");
 }
 static void print_status(const uint32_t i, const uint32_t count)
 {

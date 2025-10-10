@@ -1895,7 +1895,7 @@ void pragma::lua::base_networked_component::register_class(luabind::module_ &mod
 			}
 		case pragma::BaseNetworkedComponent::NetworkedVariable::Type::Color:
 			{
-				auto &v = *Lua::CheckColor(l, 3);
+				auto &v = Lua::Check<::Color>(l, 3);
 				hEnt.SetNetworkedVariable<Color>(id, v);
 				return;
 			}

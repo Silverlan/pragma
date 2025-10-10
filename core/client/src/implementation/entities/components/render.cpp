@@ -983,7 +983,7 @@ void CEOnUpdateRenderMatrices::HandleReturnValues(lua_State *l)
 	if(Lua::IsSet(l, -2))
 		pose = Lua::Check<umath::ScaledTransform>(l, -2);
 	if(Lua::IsSet(l, -1))
-		transformation = *Lua::CheckMat4(l, -1);
+		transformation = Lua::Check<::Mat4>(l, -1);
 }
 
 /////////////////
@@ -1015,7 +1015,7 @@ bool pragma::rendering::RenderBufferData::IsDepthPrepassEnabled() const { return
 void pragma::rendering::RenderBufferData::SetGlowPassEnabled(bool enabled) { umath::set_flag(stateFlags, StateFlags::EnableGlowPass, enabled); }
 bool pragma::rendering::RenderBufferData::IsGlowPassEnabled() const { return umath::is_flag_set(stateFlags, StateFlags::EnableGlowPass); }
 
-void Console::commands::debug_entity_render_buffer(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+static void debug_entity_render_buffer(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	auto charComponent = pl->GetEntity().GetCharacterComponent();
 	if(charComponent.expired())
@@ -1080,7 +1080,9 @@ void Console::commands::debug_entity_render_buffer(NetworkState *state, pragma::
 		Con::cout << Con::endl;
 	}
 }
-
+namespace {
+	auto UVN = pragma::console::client::register_command("debug_entity_render_buffer", &debug_entity_render_buffer, ConVarFlags::None, "Prints debug information about an entity's render buffer.");
+}
 namespace Lua::Render {
     void CalcRayIntersection(lua_State *l, pragma::CRenderComponent &hComponent, const Vector3 &start, const Vector3 &dir, bool precise)
     {
@@ -1104,7 +1106,7 @@ namespace Lua::Render {
 
         if(precise && result->precise) {
             Lua::PushString(l, "uv");                                                /* 1 */
-            Lua::Push<Vector2>(l, Vector2 {result->precise->u, result->precise->v}); /* 2 */
+            Lua::Push<::Vector2>(l, ::Vector2 {result->precise->u, result->precise->v}); /* 2 */
             Lua::SetTableValue(l, t);                                                /* 0 */
             return;
         }
@@ -1117,7 +1119,7 @@ namespace Lua::Render {
     void GetTransformationMatrix(lua_State *l, pragma::CRenderComponent &hEnt)
     {
 
-        Mat4 mat = hEnt.GetTransformationMatrix();
+        ::Mat4 mat = hEnt.GetTransformationMatrix();
         luabind::object(l, mat).push(l);
     }
 

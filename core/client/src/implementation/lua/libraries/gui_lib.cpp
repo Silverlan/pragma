@@ -400,9 +400,9 @@ std::shared_ptr<prosper::RenderTarget> Lua::gui::create_render_target(uint32_t w
 	return context.CreateRenderTarget({tex, depthStencilTex}, rp.shared_from_this());
 }
 
-bool Lua::gui::inject_mouse_input(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods, const Vector2i &pCursorPos)
+bool Lua::gui::inject_mouse_input(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods, const ::Vector2i &pCursorPos)
 {
-	Vector2i cursorPos = {};
+	::Vector2i cursorPos = {};
 	auto &gui = WGUI::GetInstance();
 
 	gui.GetMousePos(cursorPos.x, cursorPos.y);
@@ -415,7 +415,7 @@ bool Lua::gui::inject_mouse_input(pragma::platform::MouseButton button, pragma::
 }
 bool Lua::gui::inject_mouse_input(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods)
 {
-	Vector2i cursorPos = {};
+	::Vector2i cursorPos = {};
 	auto &gui = WGUI::GetInstance();
 	auto &window = pragma::get_cengine()->GetWindow();
 	return gui.HandleMouseInput(window, static_cast<pragma::platform::MouseButton>(button), static_cast<pragma::platform::KeyState>(state), static_cast<pragma::platform::Modifier>(mods));
@@ -433,9 +433,9 @@ bool Lua::gui::inject_char_input(const std::string &c)
 		b = WGUI::GetInstance().HandleCharInput(window, c.front());
 	return b;
 }
-bool Lua::gui::inject_scroll_input(lua_State *l, const Vector2 &offset, const ::Vector2i &pCursorPos)
+bool Lua::gui::inject_scroll_input(lua_State *l, const ::Vector2 &offset, const ::Vector2i &pCursorPos)
 {
-	Vector2i cursorPos = {};
+	::Vector2i cursorPos = {};
 	auto &gui = WGUI::GetInstance();
 
 	gui.GetMousePos(cursorPos.x, cursorPos.y);
@@ -446,9 +446,9 @@ bool Lua::gui::inject_scroll_input(lua_State *l, const Vector2 &offset, const ::
 	window->SetCursorPos(cursorPos);
 	return b;
 }
-bool Lua::gui::inject_scroll_input(lua_State *l, const Vector2 &offset)
+bool Lua::gui::inject_scroll_input(lua_State *l, const ::Vector2 &offset)
 {
-	Vector2i cursorPos = {};
+	::Vector2i cursorPos = {};
 	auto &gui = WGUI::GetInstance();
 	auto &window = pragma::get_cengine()->GetWindow();
 	return gui.HandleScrollInput(window, offset);

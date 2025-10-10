@@ -96,7 +96,7 @@ Vector2i Lua::engine::get_text_size(lua_State *l, const std::string &text, const
 	int w = 0;
 	int h = 0;
 	FontManager::GetTextSize(text, 0u, info.get(), &w, &h);
-	return Vector2i {w, h};
+	return ::Vector2i {w, h};
 }
 
 Vector2i Lua::engine::get_text_size(lua_State *l, const std::string &text, const FontInfo &font)
@@ -104,7 +104,7 @@ Vector2i Lua::engine::get_text_size(lua_State *l, const std::string &text, const
 	int w = 0;
 	int h = 0;
 	FontManager::GetTextSize(text, 0u, &font, &w, &h);
-	return Vector2i {w, h};
+	return ::Vector2i {w, h};
 }
 
 std::pair<size_t, size_t> Lua::engine::get_truncated_text_length(lua_State *l, const std::string &text, const std::string &font, uint32_t maxWidth)
@@ -164,9 +164,7 @@ static std::optional<std::string> get_extension(const LFile &file)
 }
 std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua_State *l, const LFile &file, const std::string &cacheName, ::util::AssetLoadFlags loadFlags)
 {
-	auto *lf = Lua::CheckFile(l, 1);
-	if(lf == nullptr)
-		return nullptr;
+	auto &lf = Lua::Check<LFile>(l, 1);
 	auto ext = get_extension(file);
 	if(!ext.has_value())
 		return nullptr;
@@ -180,9 +178,7 @@ std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua_State *l, const 
 std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua_State *l, const LFile &file, const std::string &cacheName) { return load_texture(l, file, cacheName, ::util::AssetLoadFlags::None); }
 std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua_State *l, const LFile &file, ::util::AssetLoadFlags loadFlags)
 {
-	auto *lf = Lua::CheckFile(l, 1);
-	if(lf == nullptr)
-		return nullptr;
+	auto &lf = Lua::Check<LFile>(l, 1);
 	auto ext = get_extension(file);
 	if(!ext.has_value())
 		return nullptr;
@@ -204,14 +200,14 @@ Material *Lua::asset_client::get_error_material() { return pragma::get_client_st
 void Lua::asset_client::register_library(Lua::Interface &lua, luabind::module_ &modAsset)
 {
 	modAsset[luabind::def("create_material", static_cast<std::shared_ptr<::Material> (*)(const std::string &, const std::string &)>(Lua::asset_client::create_material)),
-	  luabind::def("create_material", static_cast<std::shared_ptr<::Material> (*)(const std::string &)>(Lua::asset_client::create_material)), luabind::def("create_material", static_cast<std::shared_ptr<::Material> (*)(const udm::AssetData &)>(Lua::asset_client::create_material)),
+	  luabind::def("create_material", static_cast<std::shared_ptr<::Material> (*)(const std::string &)>(Lua::asset_client::create_material)), luabind::def("create_material", static_cast<std::shared_ptr<::Material> (*)(const ::udm::AssetData &)>(Lua::asset_client::create_material)),
 	  luabind::def("get_material", static_cast<::Material *(*)(const std::string &)>(Lua::asset_client::get_material)), luabind::def("precache_model", static_cast<void (*)(lua_State *, const std::string &)>(Lua::engine::precache_model)),
 	  luabind::def("precache_material", static_cast<void (*)(lua_State *, const std::string &)>(Lua::engine::precache_material)), luabind::def("get_error_material", Lua::asset_client::get_error_material)];
 }
 
 std::shared_ptr<Material> Lua::asset_client::create_material(const std::string &identifier, const std::string &shader) { return pragma::get_client_state()->CreateMaterial(identifier, shader); }
 std::shared_ptr<Material> Lua::asset_client::create_material(const std::string &shader) { return pragma::get_client_state()->CreateMaterial(shader); }
-std::shared_ptr<Material> Lua::asset_client::create_material(const udm::AssetData &data)
+std::shared_ptr<Material> Lua::asset_client::create_material(const ::udm::AssetData &data)
 {
 	std::string err;
 	return pragma::get_client_state()->GetMaterialManager().CreateMaterial(data, err);
@@ -562,7 +558,7 @@ void Lua::engine::set_tick_delta_time_tied_to_frame_rate(bool tieToFrameRate) { 
 Vector2i Lua::engine::get_window_resolution()
 {
 	auto &window = pragma::get_cengine()->GetRenderContext().GetWindow();
-	return window.IsValid() ? window->GetSize() : Vector2i {};
+	return window.IsValid() ? window->GetSize() : ::Vector2i {};
 }
 Vector2i Lua::engine::get_render_resolution() { return pragma::get_cengine()->GetRenderResolution(); }
 uint32_t Lua::engine::get_current_frame_index() { return pragma::get_cengine()->GetRenderContext().GetLastFrameId(); }

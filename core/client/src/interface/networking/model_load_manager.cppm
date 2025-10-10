@@ -7,6 +7,9 @@ module;
 
 export module pragma.client:networking.model_load_manager;
 
+export import pragma.util;
+export import pragma.shared;
+
 export {
 	class ModelLoadManager {
 	private:

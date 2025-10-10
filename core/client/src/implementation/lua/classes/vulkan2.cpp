@@ -7,7 +7,7 @@ module;
 #include "udm.hpp"
 
 #include "pragma/lua/luaapi.h"
-
+#include "pragma/lua/types/udm.hpp"
 #include "mathutil/umath.h"
 
 #include "stdafx_client.h"
@@ -140,7 +140,7 @@ namespace pragma {
 	}
 };
 
-prosper::util::PreparedCommand::Argument Lua::Vulkan::make_pcb_arg(const Lua::Vulkan::PreparedCommandLuaArg &larg, udm::Type type)
+prosper::util::PreparedCommand::Argument Lua::Vulkan::make_pcb_arg(const Lua::Vulkan::PreparedCommandLuaArg &larg, ::udm::Type type)
 {
 	auto &o = larg.o;
 	prosper::util::PreparedCommand::Argument arg {};
@@ -149,10 +149,10 @@ prosper::util::PreparedCommand::Argument Lua::Vulkan::make_pcb_arg(const Lua::Vu
 		arg.SetDynamicValue(dynArg->argName);
 		return arg;
 	}
-	udm::visit(type, [&o, &arg](auto tag) {
+	::udm::visit(type, [&o, &arg](auto tag) {
 		using T = typename decltype(tag)::type;
-		constexpr auto type = udm::type_to_enum<T>();
-		if constexpr(udm::is_trivial_type(type))
+		constexpr auto type = ::udm::type_to_enum<T>();
+		if constexpr(::udm::is_trivial_type(type))
 			arg.SetStaticValue<T>(luabind::object_cast<T>(o));
 		else
 			throw std::runtime_error {"Expected non-trivial UDM type!"};

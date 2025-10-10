@@ -50,8 +50,7 @@ import pragma.gui;
 import pragma.string.unicode;
 // import pragma.scripting.lua;
 
-
-
+#undef DrawState
 
 template<class TStream>
 static TStream &print_ui_element(TStream &os, const ::WIBase &handle)
@@ -100,15 +99,15 @@ static void record_render_ui(WIBase &el, prosper::IImage &img, const Lua::gui::D
 		drawCmd->RecordClearAttachment(img, std::array<float, 4> {clearCol[0], clearCol[1], clearCol[2], clearCol[3]});
 	}
 
-	WIBase::DrawInfo drawInfo {drawCmd};
+	wgui::DrawInfo drawInfo {drawCmd};
 	drawInfo.size = {el.GetWidth(), el.GetHeight()};
-	umath::set_flag(drawInfo.flags, WIBase::DrawInfo::Flags::UseScissor, false);
-	umath::set_flag(drawInfo.flags, WIBase::DrawInfo::Flags::UseStencil, info.useStencil);
-	umath::set_flag(drawInfo.flags, WIBase::DrawInfo::Flags::Msaa, useMsaa);
+	umath::set_flag(drawInfo.flags, wgui::DrawInfo::Flags::UseScissor, false);
+	umath::set_flag(drawInfo.flags, wgui::DrawInfo::Flags::UseStencil, info.useStencil);
+	umath::set_flag(drawInfo.flags, wgui::DrawInfo::Flags::Msaa, useMsaa);
 	std::optional<Mat4> rotMat = el.GetRotationMatrix() ? *el.GetRotationMatrix() : std::optional<Mat4> {};
 	if(rotMat.has_value()) {
 		el.ResetRotation(); // We'll temporarily disable the rotation for this element
-		umath::set_flag(drawInfo.flags, WIBase::DrawInfo::Flags::UseStencil, true);
+		umath::set_flag(drawInfo.flags, wgui::DrawInfo::Flags::UseStencil, true);
 	}
 	wgui::DrawState drawState {};
 	drawState.SetScissor(0, 0, drawInfo.size.x, drawInfo.size.y);
@@ -344,9 +343,9 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	classDef.def("IsPosInBounds", &PosInBounds);
 	classDef.def("IsCursorInBounds", &::WIBase::MouseInBounds);
 	classDef.def("GetCursorPos", &GetMousePos);
-	classDef.def("Draw", static_cast<void (*)(lua_State *, ::WIBase &, const ::WIBase::DrawInfo &, wgui::DrawState &, const Vector2i &, const Vector2i &, const Vector2i &)>(&Draw));
-	classDef.def("Draw", static_cast<void (*)(lua_State *, ::WIBase &, const ::WIBase::DrawInfo &, wgui::DrawState &, const Vector2i &, const Vector2i &)>(&Draw));
-	classDef.def("Draw", static_cast<void (*)(lua_State *, ::WIBase &, const ::WIBase::DrawInfo &, wgui::DrawState &)>(&Draw));
+	classDef.def("Draw", static_cast<void (*)(lua_State *, ::WIBase &, const ::wgui::DrawInfo &, wgui::DrawState &, const Vector2i &, const Vector2i &, const Vector2i &)>(&Draw));
+	classDef.def("Draw", static_cast<void (*)(lua_State *, ::WIBase &, const ::wgui::DrawInfo &, wgui::DrawState &, const Vector2i &, const Vector2i &)>(&Draw));
+	classDef.def("Draw", static_cast<void (*)(lua_State *, ::WIBase &, const ::wgui::DrawInfo &, wgui::DrawState &)>(&Draw));
 	classDef.def("DrawToTexture", &render_ui);
 	classDef.def("DrawToTexture", +[](::WIBase &el, prosper::RenderTarget &rt) { return render_ui(el, rt, {}); });
 	classDef.def("DrawToTexture", &draw_to_texture);
@@ -551,27 +550,27 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	classDef.def("GetFileDropInputEnabled", &::WIBase::GetFileDropInputEnabled);
 	classDef.def("SetFileDropInputEnabled", &::WIBase::SetFileDropInputEnabled);
 
-	auto defDrawInfo = luabind::class_<::WIBase::DrawInfo>("DrawInfo");
-	defDrawInfo.add_static_constant("FLAG_NONE", umath::to_integral(::WIBase::DrawInfo::Flags::None));
-	defDrawInfo.add_static_constant("FLAG_USE_SCISSOR_BIT", umath::to_integral(::WIBase::DrawInfo::Flags::UseScissor));
-	defDrawInfo.add_static_constant("FLAG_USE_STENCIL_BIT", umath::to_integral(::WIBase::DrawInfo::Flags::UseStencil));
-	defDrawInfo.add_static_constant("FLAG_MSAA_BIT", umath::to_integral(::WIBase::DrawInfo::Flags::Msaa));
-	defDrawInfo.add_static_constant("FLAG_DONT_SKIP_IF_OUT_OF_BOUNDS_BIT", umath::to_integral(::WIBase::DrawInfo::Flags::DontSkipIfOutOfBounds));
+	auto defDrawInfo = luabind::class_<::wgui::DrawInfo>("DrawInfo");
+	defDrawInfo.add_static_constant("FLAG_NONE", umath::to_integral(::wgui::DrawInfo::Flags::None));
+	defDrawInfo.add_static_constant("FLAG_USE_SCISSOR_BIT", umath::to_integral(::wgui::DrawInfo::Flags::UseScissor));
+	defDrawInfo.add_static_constant("FLAG_USE_STENCIL_BIT", umath::to_integral(::wgui::DrawInfo::Flags::UseStencil));
+	defDrawInfo.add_static_constant("FLAG_MSAA_BIT", umath::to_integral(::wgui::DrawInfo::Flags::Msaa));
+	defDrawInfo.add_static_constant("FLAG_DONT_SKIP_IF_OUT_OF_BOUNDS_BIT", umath::to_integral(::wgui::DrawInfo::Flags::DontSkipIfOutOfBounds));
 	defDrawInfo.def(luabind::constructor<const std::shared_ptr<prosper::ICommandBuffer> &>());
-	defDrawInfo.def_readwrite("offset", &::WIBase::DrawInfo::offset);
-	defDrawInfo.def_readwrite("size", &::WIBase::DrawInfo::size);
-	defDrawInfo.def_readwrite("transform", &::WIBase::DrawInfo::transform);
-	defDrawInfo.def_readwrite("flags", &::WIBase::DrawInfo::flags);
-	defDrawInfo.property("commandBuffer", static_cast<luabind::object (*)(lua_State *, ::WIBase::DrawInfo &)>([](lua_State *l, ::WIBase::DrawInfo &drawInfo) -> luabind::object { return drawInfo.commandBuffer ? luabind::object {l, drawInfo.commandBuffer} : luabind::object {}; }),
-	  static_cast<void (*)(lua_State *, ::WIBase::DrawInfo &, luabind::object)>([](lua_State *l, ::WIBase::DrawInfo &drawInfo, luabind::object o) {
+	defDrawInfo.def_readwrite("offset", &::wgui::DrawInfo::offset);
+	defDrawInfo.def_readwrite("size", &::wgui::DrawInfo::size);
+	defDrawInfo.def_readwrite("transform", &::wgui::DrawInfo::transform);
+	defDrawInfo.def_readwrite("flags", &::wgui::DrawInfo::flags);
+	defDrawInfo.property("commandBuffer", static_cast<luabind::object (*)(lua_State *, ::wgui::DrawInfo &)>([](lua_State *l, ::wgui::DrawInfo &drawInfo) -> luabind::object { return drawInfo.commandBuffer ? luabind::object {l, drawInfo.commandBuffer} : luabind::object {}; }),
+	  static_cast<void (*)(lua_State *, ::wgui::DrawInfo &, luabind::object)>([](lua_State *l, ::wgui::DrawInfo &drawInfo, luabind::object o) {
 		  if(Lua::IsSet(l, 2) == false) {
 			  drawInfo.commandBuffer = nullptr;
 			  return;
 		  }
 		  drawInfo.commandBuffer = Lua::Check<Lua::Vulkan::CommandBuffer>(l, 2).shared_from_this();
 	  }));
-	defDrawInfo.def("SetColor", static_cast<void (*)(lua_State *, ::WIBase::DrawInfo &, const Color &)>([](lua_State *l, ::WIBase::DrawInfo &drawInfo, const Color &color) { drawInfo.color = color.ToVector4(); }));
-	defDrawInfo.def("SetPostTransform", static_cast<void (*)(lua_State *, ::WIBase::DrawInfo &, const Mat4 &)>([](lua_State *l, ::WIBase::DrawInfo &drawInfo, const Mat4 &t) { drawInfo.postTransform = t; }));
+	defDrawInfo.def("SetColor", static_cast<void (*)(lua_State *, ::wgui::DrawInfo &, const Color &)>([](lua_State *l, ::wgui::DrawInfo &drawInfo, const Color &color) { drawInfo.color = color.ToVector4(); }));
+	defDrawInfo.def("SetPostTransform", static_cast<void (*)(lua_State *, ::wgui::DrawInfo &, const Mat4 &)>([](lua_State *l, ::wgui::DrawInfo &drawInfo, const Mat4 &t) { drawInfo.postTransform = t; }));
 	classDef.scope[defDrawInfo];
 }
 
@@ -1131,13 +1130,13 @@ void Lua::WIBase::GetMousePos(lua_State *l, ::WIBase &hPanel)
 	hPanel.GetMousePos(&x, &y);
 	luabind::object(l, Vector2(x, y)).push(l);
 }
-void Lua::WIBase::Draw(lua_State *l, ::WIBase &hPanel, const ::WIBase::DrawInfo &drawInfo, wgui::DrawState &drawState) { hPanel.Draw(drawInfo, drawState); }
-void Lua::WIBase::Draw(lua_State *l, ::WIBase &hPanel, const ::WIBase::DrawInfo &drawInfo, wgui::DrawState &drawState, const Vector2i &scissorOffset, const Vector2i &scissorSize) { hPanel.Draw(drawInfo, drawState, Vector2i {}, scissorOffset, scissorSize, hPanel.GetScale()); }
-void Lua::WIBase::Draw(lua_State *l, ::WIBase &hPanel, const ::WIBase::DrawInfo &drawInfo, wgui::DrawState &drawState, const Vector2i &scissorOffset, const Vector2i &scissorSize, const Vector2i &offsetParent)
+void Lua::WIBase::Draw(lua_State *l, ::WIBase &hPanel, const ::wgui::DrawInfo &drawInfo, wgui::DrawState &drawState) { hPanel.Draw(drawInfo, drawState); }
+void Lua::WIBase::Draw(lua_State *l, ::WIBase &hPanel, const ::wgui::DrawInfo &drawInfo, wgui::DrawState &drawState, const Vector2i &scissorOffset, const Vector2i &scissorSize) { hPanel.Draw(drawInfo, drawState, Vector2i {}, scissorOffset, scissorSize, hPanel.GetScale()); }
+void Lua::WIBase::Draw(lua_State *l, ::WIBase &hPanel, const ::wgui::DrawInfo &drawInfo, wgui::DrawState &drawState, const Vector2i &scissorOffset, const Vector2i &scissorSize, const Vector2i &offsetParent)
 {
 	hPanel.Draw(drawInfo, drawState, offsetParent, scissorOffset, scissorSize, hPanel.GetScale());
 }
-void Lua::WIBase::Draw(lua_State *l, ::WIBase &hPanel, const ::WIBase::DrawInfo &drawInfo, wgui::DrawState &drawState, const Vector2i &scissorOffset, const Vector2i &scissorSize, const Vector2i &offsetParent, const Vector2 &scale)
+void Lua::WIBase::Draw(lua_State *l, ::WIBase &hPanel, const ::wgui::DrawInfo &drawInfo, wgui::DrawState &drawState, const Vector2i &scissorOffset, const Vector2i &scissorSize, const Vector2i &offsetParent, const Vector2 &scale)
 {
 	hPanel.Draw(drawInfo, drawState, offsetParent, scissorOffset, scissorSize, scale);
 }

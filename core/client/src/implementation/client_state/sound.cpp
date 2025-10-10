@@ -30,7 +30,7 @@ import :game;
 
 #pragma message("TODO: See DDSLoader; MAKE SURE TO RELEASE BUFFER ON ENGINE REMOVE")
 
-void Console::commands::cl_steam_audio_reload_scene(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+static void cl_steam_audio_reload_scene(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 #if ALSYS_STEAM_AUDIO_SUPPORT_ENABLED == 1
 	if(pragma::get_cgame() == nullptr)
@@ -56,7 +56,10 @@ void Console::commands::cl_steam_audio_reload_scene(NetworkState *state, pragma:
 	pragma::get_cgame()->ReloadSoundCache(true, cacheFlags, spacing);
 #endif
 }
-void Console::commands::debug_audio_sounds(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+namespace {
+	auto UVN = pragma::console::client::register_command("cl_steam_audio_reload_scene", &cl_steam_audio_reload_scene, ConVarFlags::None, "Reloads the steam audio scene cache.");
+}
+static void debug_audio_sounds(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	const auto fPrint = [](NetworkState *state) {
 		auto &sounds = state->GetSounds();
@@ -94,6 +97,9 @@ void Console::commands::debug_audio_sounds(NetworkState *state, pragma::BasePlay
 		Con::cout << "Clientside sounds:" << Con::endl;
 		fPrint(client);
 	}
+}
+namespace {
+	auto UVN = pragma::console::client::register_command("debug_audio_sounds", &debug_audio_sounds, ConVarFlags::None, "Prints information about all active server- and clientside sounds to the console.");
 }
 
 static auto cvAudioStreaming = GetClientConVar("cl_audio_streaming_enabled");

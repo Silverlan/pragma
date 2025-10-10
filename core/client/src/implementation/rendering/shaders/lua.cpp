@@ -7,7 +7,7 @@ module;
 #include "sharedutils/datastream.h"
 
 #include "pragma/lua/luaapi.h"
-
+#include "pragma/lua/util.hpp"
 #include "mathutil/umath.h"
 
 #include "stdafx_client.h"
@@ -25,6 +25,8 @@ import :rendering.shaders.lua;
 import :engine;
 import :entities.components;
 import :scripting.lua;
+
+#undef DrawState
 
 prosper::DescriptorSetInfo pragma::to_prosper_descriptor_set_info(const LuaDescriptorSetInfo &descSetInfo)
 {

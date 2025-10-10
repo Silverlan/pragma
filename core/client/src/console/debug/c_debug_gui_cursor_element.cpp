@@ -347,7 +347,7 @@ void GUIDebugCursorManager::OnThink()
 	}
 }
 
-void Console::commands::debug_gui_cursor(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+static void debug_gui_cursor(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	static std::unique_ptr<GUIDebugCursorManager> s_dbgManager = nullptr;
 	if(s_dbgManager != nullptr && argv.empty()) {
@@ -369,8 +369,11 @@ void Console::commands::debug_gui_cursor(NetworkState *state, pragma::BasePlayer
 		s_dbgManager->SetTargetGUIElementOverride(el);
 	}
 }
+namespace {
+	auto UVN = pragma::console::client::register_command("debug_gui_cursor", &debug_gui_cursor, ConVarFlags::None, "Prints information about the GUI element currently hovered over by the cursor.");
+}
 
-void Console::commands::debug_dump_font_glyph_map(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+static void debug_dump_font_glyph_map(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	auto &wgui = WGUI::GetInstance();
 	if(argv.empty()) {
@@ -398,8 +401,11 @@ void Console::commands::debug_dump_font_glyph_map(NetworkState *state, pragma::B
 		return;
 	}
 }
+namespace {
+	auto UVN = pragma::console::client::register_command("debug_dump_font_glyph_map", &debug_dump_font_glyph_map, ConVarFlags::None, "Dumps the glyph map for the specified font to an image file.");
+}
 
-void Console::commands::debug_font_glyph_map(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+static void debug_font_glyph_map(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	auto &wgui = WGUI::GetInstance();
 	auto *el = static_cast<WITexturedRect *>(wgui.GetBaseElement()->FindDescendantByName("dbg_glyph_map"));
@@ -434,4 +440,7 @@ void Console::commands::debug_font_glyph_map(NetworkState *state, pragma::BasePl
 	el->SetName("dbg_glyph_map");
 	el->SetTexture(*glyphMap);
 	el->SetSize(w, h);
+}
+namespace {
+	auto UVN = pragma::console::client::register_command("debug_font_glyph_map", &debug_font_glyph_map, ConVarFlags::None, "Displays the glyph map for the specified font.");
 }

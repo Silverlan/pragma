@@ -110,7 +110,7 @@ static prosper::BlendOp name_to_blend_op(const std::string &name)
 	return prosper::BlendOp::Add;
 }
 
-void Console::commands::debug_particle_alpha_mode(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+static void debug_particle_alpha_mode(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	g_customAlphaBlendMode = {};
 	if(argv.size() > 0)
@@ -132,6 +132,13 @@ void Console::commands::debug_particle_alpha_mode(NetworkState *state, pragma::B
 			continue;
 		hShader->ReloadPipelines();
 	}
+}
+namespace {
+	auto UVN = pragma::console::client::register_command("debug_particle_alpha_mode", &debug_particle_alpha_mode, ConVarFlags::None, "Specifies the blend mode arguments for particle systems that use the \
+	'custom' alpha mode. Argument order: <srcColorBlendFactor> <dstColorBlendFactor> <srcAlphaBlendFactor> <dstAlphaBlendFactor> <opColor> <opAlpha>.\n\
+	Blend factor options: zero, one, src_color, one_minus_src_color, dst_color, one_minus_dst_color, src_alpha, one_minus_src_alpha, dst_alpha, one_minus_dst_alpha, constant_color, \
+	one_minus_constant_color, constant_alpha, one_minus_constant_alpha, src_alpha_saturate, src1_color, one_minus_src1_color, src1_alpha, one_minus_src1_alpha\n\
+	Operation options: add, subtract, reverse_subtract, min, max");
 }
 
 void ShaderParticleBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)

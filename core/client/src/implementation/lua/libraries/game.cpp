@@ -1103,12 +1103,12 @@ int Lua::game::Client::get_camera_position(lua_State *l)
 }
 int Lua::game::Client::get_render_clip_plane(lua_State *l)
 {
-	Lua::Push<Vector4>(l, pragma::get_cgame()->GetRenderClipPlane());
+	Lua::Push<::Vector4>(l, pragma::get_cgame()->GetRenderClipPlane());
 	return 1;
 }
 int Lua::game::Client::set_render_clip_plane(lua_State *l)
 {
-	auto &clipPlane = Lua::Check<Vector4>(l, 1);
+	auto &clipPlane = Lua::Check<::Vector4>(l, 1);
 	pragma::get_cgame()->SetRenderClipPlane(clipPlane);
 	return 0;
 }

@@ -17,7 +17,7 @@ import :audio.aux_util;
 import :engine;
 
 static uint32_t s_globalEffectId = std::numeric_limits<uint32_t>::max();
-void Console::commands::debug_audio_aux_effect(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+static void debug_audio_aux_effect(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
 	if(soundSys == nullptr) {
@@ -43,6 +43,9 @@ void Console::commands::debug_audio_aux_effect(NetworkState *state, pragma::Base
 		Con::cwar << "Unable to apply auxiliary effect '" << dspName << "'!" << Con::endl;
 	else
 		Con::cout << "Auxiliary effect '" << dspName << "' has been applied!" << Con::endl;
+}
+namespace {
+	auto UVN = pragma::console::client::register_command("debug_audio_aux_effect", &debug_audio_aux_effect, ConVarFlags::None, "Applies a global DSP effect. Usage: debug_audio_aux_effect <dspName> <gain>");
 }
 
 const std::vector<std::string> &al::get_aux_types()

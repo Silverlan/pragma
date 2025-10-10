@@ -504,7 +504,7 @@ static void CVAR_CALLBACK_render_bloom_resolution(NetworkState *, const ConVar &
 }
 namespace { auto UVN = pragma::console::client::register_variable_listener<int>("render_bloom_resolution", &CVAR_CALLBACK_render_bloom_resolution); }
 
-void Console::commands::debug_render_scene(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+static void debug_render_scene(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	static std::unique_ptr<DebugGameGUI> dbg = nullptr;
 	if(dbg != nullptr) {
@@ -559,4 +559,7 @@ void Console::commands::debug_render_scene(NetworkState *state, pragma::BasePlay
 		if(hBloomTexture.IsValid() == true)
 			static_cast<WIDebugMSAATexture *>(hBloomTexture.get())->Update();
 	}));
+}
+namespace {
+	auto UVN = pragma::console::client::register_command("debug_render_scene", &debug_render_scene, ConVarFlags::None, "Displays scene to screen.");
 }

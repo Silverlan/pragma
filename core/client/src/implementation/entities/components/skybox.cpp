@@ -6,7 +6,7 @@ module;
 #include "sharedutils/util_path.hpp"
 
 #include "pragma/lua/luaapi.h"
-
+#include "pragma/console/helper.hpp"
 #include "fsys/filesystem.h"
 
 #include "mathutil/umath.h"
@@ -438,5 +438,11 @@ static void util_convert_cubemap_equirect(std::vector<std::string> &argv, Conver
 	}
 	Con::cout << "Successfully saved output file '" << outputFileName.GetString() << "'!" << Con::endl;
 }
-void Console::commands::util_convert_cubemap_to_equirectangular_image(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv) { util_convert_cubemap_equirect(argv, ConversionMode::CubemapToEquirectangular); }
-void Console::commands::util_convert_equirectangular_image_to_cubemap(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv) { util_convert_cubemap_equirect(argv, ConversionMode::EquirectangularToCubemap); }
+static void util_convert_cubemap_to_equirectangular_image(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv) { util_convert_cubemap_equirect(argv, ConversionMode::CubemapToEquirectangular); }
+static void util_convert_equirectangular_image_to_cubemap(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv) { util_convert_cubemap_equirect(argv, ConversionMode::EquirectangularToCubemap); }
+
+namespace {
+	auto UVN = pragma::console::client::register_command("util_convert_cubemap_to_equirectangular_image", &util_convert_cubemap_to_equirectangular_image, ConVarFlags::None, "Converts a cubemap to a equirectangular image.");
+	auto UVN = pragma::console::client::register_command("util_convert_equirectangular_image_to_cubemap", &util_convert_equirectangular_image_to_cubemap, ConVarFlags::None, "Converts a equirectangular image to a cubemap.");
+}
+

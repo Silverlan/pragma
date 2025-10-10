@@ -11,7 +11,7 @@ export module pragma.shared:scripting.lua.entity_component_event;
 
 export import :entities.components.events.event;
 
-struct DLLNETWORK LuaComponentEvent : public pragma::ComponentEvent {
+export struct DLLNETWORK LuaComponentEvent : public pragma::ComponentEvent {
 	std::vector<luabind::object> arguments;
 	virtual void PushArguments(lua_State *l) override;
 };

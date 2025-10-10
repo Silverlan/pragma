@@ -8,7 +8,7 @@
 import pragma.client;
 
 
-void Console::commands::debug_hitboxes(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+static void debug_hitboxes(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	static auto g_debugOverlayEnabled = false;
 	if(g_debugOverlayEnabled) {
@@ -35,4 +35,7 @@ void Console::commands::debug_hitboxes(NetworkState *state, pragma::BasePlayerCo
 	g_debugOverlayEnabled = true;
 	for(auto *ent : ents)
 		ent->AddComponent<pragma::CDebugHitboxComponent>();
+}
+namespace {
+	auto UVN = pragma::console::client::register_command("debug_hitboxes", &debug_hitboxes, ConVarFlags::None, "Displays the hitboxes for the entity under the crosshair, or the entity with the given name (If it was specified.).");
 }

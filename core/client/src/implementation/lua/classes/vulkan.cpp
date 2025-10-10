@@ -98,7 +98,7 @@ namespace Lua {
 		static std::shared_ptr<prosper::IImageView> create_image_view(prosper::IPrContext &context, const prosper::util::ImageViewCreateInfo &imgViewCreateInfo, prosper::IImage &img);
 		static prosper::util::ImageCreateInfo create_image_create_info(const uimg::ImageBuffer &imgBuf, bool cubemap);
 		static prosper::util::ImageCreateInfo create_image_create_info(const uimg::ImageBuffer &imgBuf);
-		static std::shared_ptr<prosper::Texture> create_gradient_texture(lua_State *l, uint32_t width, uint32_t height, prosper::Format format, const Vector2 &dir, const luabind::tableT<void> &tNodes);
+		static std::shared_ptr<prosper::Texture> create_gradient_texture(lua_State *l, uint32_t width, uint32_t height, prosper::Format format, const ::Vector2 &dir, const luabind::tableT<void> &tNodes);
 		static Lua::var<prosper::Texture, Lua::mult<bool, std::string>> blur_texture(lua_State *l, prosper::Texture &srcTex, uint32_t blurStrength);
 		static std::shared_ptr<prosper::IFence> create_fence(bool createSignalled);
 		static std::shared_ptr<prosper::IFence> create_fence();
@@ -111,7 +111,7 @@ namespace Lua {
 		static std::shared_ptr<prosper::RenderTarget> create_render_target(const prosper::util::RenderTargetCreateInfo &rtCreateInfo, const std::vector<std::shared_ptr<Texture>> &textures, Lua::Vulkan::RenderPass &renderPass);
 		static std::shared_ptr<prosper::RenderTarget> create_render_target(const prosper::util::RenderTargetCreateInfo &rtCreateInfo, const std::vector<std::shared_ptr<Texture>> &textures);
 
-		static Vector2i calculate_mipmap_size(uint32_t w, uint32_t h, uint32_t level);
+		static ::Vector2i calculate_mipmap_size(uint32_t w, uint32_t h, uint32_t level);
 		static uint32_t calculate_mipmap_size(uint32_t v, uint32_t level);
 		static std::shared_ptr<prosper::IBuffer> get_square_vertex_uv_buffer(lua_State *l);
 		static std::shared_ptr<prosper::IBuffer> get_square_vertex_buffer(lua_State *l);
@@ -548,7 +548,7 @@ std::vector<pragma::ShaderGradient::Node> Lua::Vulkan::get_gradient_nodes(lua_St
 	for(luabind::iterator i {tNodes}, end; i != end; ++i) {
 		luabind::object o = *i;
 		auto offset = luabind::object_cast<float>(o["offset"]);
-		auto color = luabind::object_cast<Color>(o["color"]);
+		auto color = luabind::object_cast<::Color>(o["color"]);
 		nodes.push_back(pragma::ShaderGradient::Node(Vector4(color.r / 255.f, color.g / 255.f, color.b / 255.f, color.a / 255.f), offset));
 	}
 	return nodes;
@@ -594,7 +594,7 @@ Lua::var<prosper::Texture, Lua::mult<bool, std::string>> Lua::Vulkan::blur_textu
 	context.FlushSetupCommandBuffer();
 	return luabind::object {l, blurSet->GetFinalRenderTarget()->GetTexture().shared_from_this()};
 }
-std::shared_ptr<prosper::Texture> Lua::Vulkan::create_gradient_texture(lua_State *l, uint32_t width, uint32_t height, prosper::Format format, const Vector2 &dir, const luabind::tableT<void> &tNodes)
+std::shared_ptr<prosper::Texture> Lua::Vulkan::create_gradient_texture(lua_State *l, uint32_t width, uint32_t height, prosper::Format format, const ::Vector2 &dir, const luabind::tableT<void> &tNodes)
 {
 	auto whShader = pragma::get_cengine()->GetShader("gradient");
 	if(whShader.expired())

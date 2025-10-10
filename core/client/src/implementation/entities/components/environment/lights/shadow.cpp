@@ -66,7 +66,7 @@ static void cmd_render_shadow_quality(NetworkState *, const ConVar &, int, int q
 namespace { auto UVN = pragma::console::client::register_variable_listener<int>("render_shadow_quality", &cmd_render_shadow_quality); }
 
 namespace {
-	auto UVN = pragma::console::client::register_variable_listener<int>("cl_render_shadow_dynamic", +[](NetworkState *, const ConVar &, bool, bool) { reload_all_shadow_maps(); });
+	auto UVN = pragma::console::client::register_variable_listener<bool>("cl_render_shadow_dynamic", +[](NetworkState *, const ConVar &, bool, bool) { reload_all_shadow_maps(); });
 }
 
 prosper::IDescriptorSet *CShadowComponent::GetDescriptorSet()

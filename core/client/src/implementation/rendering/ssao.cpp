@@ -72,7 +72,7 @@ void SSAOInfo::Clear()
 prosper::Shader *SSAOInfo::GetSSAOShader() const { return shader.get(); }
 prosper::Shader *SSAOInfo::GetSSAOBlurShader() const { return shaderBlur.get(); }
 
-void Console::commands::debug_ssao(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+static void debug_ssao(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	auto &wgui = WGUI::GetInstance();
 	auto *pRoot = wgui.GetBaseElement();
@@ -138,6 +138,9 @@ void Console::commands::debug_ssao(NetworkState *state, pragma::BasePlayerCompon
 	}
 
 	pEl->SizeToContents();
+}
+namespace {
+	auto UVN = pragma::console::client::register_command("debug_ssao", &debug_ssao, ConVarFlags::None, "Displays the ssao buffers to screen.");
 }
 
 static void cl_render_ssao_callback(NetworkState *, const ConVar &, bool, bool val)

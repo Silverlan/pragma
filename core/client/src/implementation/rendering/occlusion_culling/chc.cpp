@@ -20,8 +20,6 @@ import :rendering.occlusion_culling.chc;
 import :engine;
 import :game;
 
-DEFINE_BASE_HANDLE(DLLCLIENT, CHCNode, CHCNode);
-
 static const uint32_t maxPrevInvisNodeBatchSize = 50;
 
 #ifdef CHC_DEBUGGING_ENABLED
@@ -680,7 +678,7 @@ std::vector<CHCMeshInfo> &CHC::PerformCulling()
 
 ///////////////////////////////////////////
 
-CHCNode::CHCNode(CHC *chc, const BaseOcclusionOctree::Node &node) : m_chc(chc), m_node(node.shared_from_this()), m_handle(new PtrCHCNode(this)) {}
+CHCNode::CHCNode(CHC *chc, const BaseOcclusionOctree::Node &node) : m_chc(chc), m_node(node.shared_from_this()), m_handle(util::to_shared_handle<CHCNode>(shared_from_this())) {}
 
 CHCNode::~CHCNode() { m_handle.Invalidate(); }
 

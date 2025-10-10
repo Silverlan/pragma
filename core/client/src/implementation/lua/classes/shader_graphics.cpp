@@ -5,7 +5,7 @@ module;
 #include "sharedutils/datastream.h"
 
 #include "pragma/lua/luaapi.h"
-
+#include "pragma/lua/util.hpp"
 #include "mathutil/umath.h"
 
 #include "stdafx_client.h"
@@ -20,11 +20,12 @@ module;
 module pragma.client;
 
 
+import :rendering.shaders.lua;
 import :scripting.lua.classes.shader;
 import :engine;
 
 
-void Lua::GraphicsPipelineCreateInfo::SetBlendingProperties(lua_State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo, const Vector4 &blendingProperties) { pipelineInfo.SetBlendingProperties(reinterpret_cast<const float *>(&blendingProperties)); }
+void Lua::GraphicsPipelineCreateInfo::SetBlendingProperties(lua_State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo, const ::Vector4 &blendingProperties) { pipelineInfo.SetBlendingProperties(reinterpret_cast<const float *>(&blendingProperties)); }
 void Lua::GraphicsPipelineCreateInfo::SetCommonAlphaBlendProperties(lua_State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo) { prosper::util::set_generic_alpha_color_blend_attachment_properties(pipelineInfo); }
 void Lua::GraphicsPipelineCreateInfo::SetColorBlendAttachmentProperties(lua_State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t attId, bool blendingEnabled, uint32_t blendOpColor, uint32_t blendOpAlpha, uint32_t srcColorBlendFactor, uint32_t dstColorBlendFactor,
   uint32_t srcAlphaBlendFactor, uint32_t dstAlphaBlendFactor, uint32_t channelWriteMask)
@@ -114,7 +115,7 @@ void Lua::GraphicsPipelineCreateInfo::GetBlendingProperties(lua_State *l, prospe
 {
 	const float *blendingProperties;
 	pipelineInfo.GetBlendingProperties(&blendingProperties, nullptr);
-	Lua::Push<Vector4>(l, Vector4 {blendingProperties[0], blendingProperties[1], blendingProperties[2], blendingProperties[3]});
+	Lua::Push<::Vector4>(l, ::Vector4 {blendingProperties[0], blendingProperties[1], blendingProperties[2], blendingProperties[3]});
 }
 void Lua::GraphicsPipelineCreateInfo::GetColorBlendAttachmentProperties(lua_State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t attId)
 {

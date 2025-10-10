@@ -284,8 +284,8 @@ void WILuaBase::default_OnSetColor(lua_State *, WILuaBase &, float, float, float
 void WILuaBase::Lua_OnSetAlpha(float) {}
 void WILuaBase::default_OnSetAlpha(lua_State *, WILuaBase &, float) {}
 
-void WILuaBase::Lua_Render(const ::WIBase::DrawInfo &drawInfo, const Mat4 &matDraw, const Vector2 &scale) {}
-void WILuaBase::default_Render(lua_State *, WILuaBase &, const ::WIBase::DrawInfo &drawInfo, const Mat4 &matDraw, const Vector2 &scale) {}
+void WILuaBase::Lua_Render(const ::wgui::DrawInfo &drawInfo, const Mat4 &matDraw, const Vector2 &scale) {}
+void WILuaBase::default_Render(lua_State *, WILuaBase &, const ::wgui::DrawInfo &drawInfo, const Mat4 &matDraw, const Vector2 &scale) {}
 
 void WILuaBase::Lua_OnCursorEntered() {}
 void WILuaBase::default_OnCursorEntered(lua_State *, WILuaBase &) {}

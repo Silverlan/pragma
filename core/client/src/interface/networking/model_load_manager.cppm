@@ -4,6 +4,10 @@
 module;
 
 #include "pragma/clientdefinitions.h"
+#include "sharedutils/functioncallback.h"
+#include <mutex>
+#include <queue>
+#include <thread>
 
 export module pragma.client:networking.model_load_manager;
 

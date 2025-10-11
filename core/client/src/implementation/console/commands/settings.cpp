@@ -4,6 +4,7 @@
 module;
 
 #include "pragma/console/helper.hpp"
+#include "udm.hpp"
 
 module pragma.client;
 
@@ -41,9 +42,9 @@ namespace {
 	auto UVN = register_variable<udm::Boolean>("cl_render_frustum_culling_enabled", true, ConVarFlags::None, "Enables or disables frustum culling.");
 	auto UVN = register_variable<udm::Float>("cl_render_depth_of_field", 0, ConVarFlags::Archive, "Depth of field scale.");
 	auto UVN = register_variable<udm::UInt8>("cl_render_reflection_quality", 2, ConVarFlags::Archive, "Changes the quality of reflections. 0 = Only static reflections, 1 = Dynamic reflections, 2 = Reflections with particle effects.");
-	auto UVN = register_variable<udm::Int8>("cl_render_tone_mapping, udm::Type::Int8, "-1", ConVarFlags::Archive, "Changes the tone-mapping algorithm to use. -1 = Use the default, 0 = Gamma correction only, 1 = Reinhard, 2 = Hejil-Richard, 3 = Uncharted, 4 = Aces, 5 = Gran Turismo");
+	auto UVN = register_variable<udm::Int8>("cl_render_tone_mapping", -1, ConVarFlags::Archive, "Changes the tone-mapping algorithm to use. -1 = Use the default, 0 = Gamma correction only, 1 = Reinhard, 2 = Hejil-Richard, 3 = Uncharted, 4 = Aces, 5 = Gran Turismo");
 
-	auto UVN = register_variable<udm::Int8>("cl_render_preset, udm::Type::Int8, "-1", ConVarFlags::Archive, "Selected preset in display options.");
+	auto UVN = register_variable<udm::Int8>("cl_render_preset", -1, ConVarFlags::Archive, "Selected preset in display options.");
 	auto UVN = register_variable<udm::UInt32>("cl_render_shadow_resolution", 1024, ConVarFlags::Archive, "Shadowmap Resolution. Higher resolution equals higher quality shadows, but is also more expensive to render.");
 	auto UVN = register_variable<udm::UInt8>("render_shadow_quality", 1, ConVarFlags::Archive, "Shadowmap Quality. This affects the detail of the object shadows that are being rendered");
 	auto UVN = register_variable<udm::Boolean>("cl_render_shadow_dynamic", true, ConVarFlags::Archive, "Turns dynamic shadows on or off.");
@@ -54,7 +55,7 @@ namespace {
 	auto UVN = register_variable<udm::UInt8>("cl_render_shader_quality", 8, ConVarFlags::Archive, "Shader quality. The actual effect depends on the shader. 1 = Lowest Quality, 10 = Highest Quality");
 	auto UVN = register_variable<udm::UInt8>("cl_render_particle_quality", 3, ConVarFlags::Archive, "Quality of particle systems. 0 = No particles will be rendered, 1 = Particles will be unlit, 2 = Particles will receive lighting, 3 = Particles will cast shadows.");
 	auto UVN = register_variable<udm::UInt8>("cl_render_present_mode", 1, ConVarFlags::Archive, "0 = Immediate, 1 = FIFO, 2 = Mailbox");
-	auto UVN = register_variable<udm::Boolean>("cl_material_streaming_enabled", false, ConVarFlags::Archive, "0 = All materials and textures will be loaded immediately (= Slower load times), 1 = All materials and textures will be loaded over time. (= Black textures until loaded)")
+	auto UVN = register_variable<udm::Boolean>("cl_material_streaming_enabled", false, ConVarFlags::Archive, "0 = All materials and textures will be loaded immediately (= Slower load times), 1 = All materials and textures will be loaded over time. (= Black textures until loaded)");
 
 	auto UVN = register_variable<udm::Float>("cl_flex_phoneme_drag", 0.02, ConVarFlags::Archive, "Changes the time required for facial phoneme flexes to adapt to new phonemes.");
 

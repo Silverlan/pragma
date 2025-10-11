@@ -113,7 +113,9 @@ void SGame::SetTimeScale(float t)
 }
 
 static void CVAR_CALLBACK_host_timescale(NetworkState *, const ConVar &, float, float val) { SGame::Get()->SetTimeScale(val); }
-REGISTER_CONVAR_CALLBACK_SV(host_timescale, CVAR_CALLBACK_host_timescale);
+namespace {
+	auto _ = pragma::console::server::register_variable_listener<float>("host_timescale",&CVAR_CALLBACK_host_timescale);
+}
 
 void SGame::Initialize()
 {

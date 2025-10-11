@@ -11,7 +11,7 @@ module;
 
 module pragma.shared;
 
-import :commands;
+import :console.commands;
 
 // We have to access some members of luabind::detail::class_rep which are inaccessable,
 // so we'll force them to be accessable.

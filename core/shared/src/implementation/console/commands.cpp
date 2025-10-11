@@ -9,7 +9,7 @@ module;
 
 module pragma.shared;
 
-import :commands;
+import :console.commands;
 import :console.output;
 
 void pragma::console::commands::lua_run(lua_State *l, const std::string &chunkName, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float)

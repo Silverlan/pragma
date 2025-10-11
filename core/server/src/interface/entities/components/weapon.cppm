@@ -16,6 +16,8 @@ import pragma.server.entities.components.entity;
 export namespace pragma {
 	class DLLSERVER SWeaponComponent final : public BaseWeaponComponent, public SBaseNetComponent {
 	  public:
+		static void RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts);
+		
 		static uint32_t GetWeaponCount();
 		static const std::vector<SWeaponComponent *> &GetAll();
 

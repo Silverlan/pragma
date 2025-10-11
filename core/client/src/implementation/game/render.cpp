@@ -3,8 +3,7 @@
 
 module;
 #include "sharedutils/magic_enum.hpp"
-
-#include "sharedutils/magic_enum.hpp"
+#include "mathutil/color.h"
 
 
 #include "sharedutils/functioncallback.h"
@@ -129,7 +128,7 @@ namespace {
 	auto UVN = pragma::console::client::register_variable_listener<int>("sv_debug_physics_draw", +[](NetworkState *nw, const ConVar &cv, int oldVal, int val) { CVAR_CALLBACK_debug_physics_draw(nw, cv, oldVal, val, true); });
 }
 
-void Console::commands::debug_render_validation_error_enabled(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+static void debug_render_validation_error_enabled(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	if(argv.empty()) {
 		Con::cwar << "No validation error id specified!" << Con::endl;
@@ -140,6 +139,9 @@ void Console::commands::debug_render_validation_error_enabled(NetworkState *stat
 	if(argv.size() > 1)
 		enabled = util::to_boolean(argv[1]);
 	pragma::get_cengine()->SetValidationErrorDisabled(id, !enabled);
+}
+namespace {
+	auto UVN = pragma::console::client::register_command("debug_render_validation_error_enabled", &debug_render_validation_error_enabled, ConVarFlags::None, "Enables or disables the specified validation error.");
 }
 
 static void print_component_properties(const pragma::ComponentMemberInfo &memberInfo, pragma::BaseEntityComponent &component)
@@ -219,7 +221,7 @@ static void print_component_properties(const pragma::ComponentMemberInfo &member
 	});
 	Con::cout << Con::endl << Con::endl;
 }
-void Console::commands::debug_dump_component_properties(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+static void debug_dump_component_properties(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	auto &ent = pl->GetEntity();
 	if(ent.IsCharacter() == false)
@@ -255,8 +257,11 @@ void Console::commands::debug_dump_component_properties(NetworkState *state, pra
 		Con::cout << Con::endl << Con::endl << Con::endl;
 	};
 }
+namespace {
+	auto UVN = pragma::console::client::register_command("debug_dump_component_properties", &debug_dump_component_properties, ConVarFlags::None, "Dumps entity component property values to the console.");
+}
 
-void Console::commands::debug_render_depth_buffer(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+static void debug_render_depth_buffer(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	pragma::get_cengine()->GetRenderContext().WaitIdle();
 	static std::unique_ptr<DebugGameGUI> dbg = nullptr;
@@ -305,6 +310,9 @@ void Console::commands::debug_render_depth_buffer(NetworkState *state, pragma::B
 			return;
 		static_cast<WIDebugDepthTexture *>(el)->Update();
 	}));
+}
+namespace {
+	auto UVN = pragma::console::client::register_command("debug_render_depth_buffer", &debug_render_depth_buffer, ConVarFlags::None, "Draws the scene depth buffer to screen.");
 }
 
 static CVar cvDrawScene = GetClientConVar("render_draw_scene");

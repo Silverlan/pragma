@@ -445,11 +445,13 @@ msys::MaterialManager &ServerState::GetMaterialManager() { return *Engine::Get()
 ModelSubMesh *ServerState::CreateSubMesh() const { return new ModelSubMesh; }
 ModelMesh *ServerState::CreateMesh() const { return new ModelMesh; }
 
-REGISTER_CONVAR_CALLBACK_SV(sv_tickrate, [](NetworkState *, const ConVar &, int, int val) {
-	if(val < 0)
-		val = 0;
-	Engine::Get()->SetTickRate(val);
-});
+namespace {
+	auto _ = pragma::console::server::register_variable_listener<int>("sv_tickrate",+[](NetworkState *, const ConVar &, int, int val) {
+		if(val < 0)
+			val = 0;
+		Engine::Get()->SetTickRate(val);
+	});
+}
 
 ////////////////
 

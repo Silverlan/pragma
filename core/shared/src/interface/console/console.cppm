@@ -6,6 +6,7 @@ module;
 export module pragma.shared:console;
 
 export import :console.command_options;
+export import :console.commands;
 export import :console.common;
 export import :console.convar;
 export import :console.convar_handle;

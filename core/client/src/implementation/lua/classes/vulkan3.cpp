@@ -159,7 +159,7 @@ bool Lua::Vulkan::VKCommandBuffer::RecordCopyBuffer(lua_State *l, CommandBuffer 
 bool Lua::Vulkan::VKCommandBuffer::RecordUpdateBuffer(lua_State *l, CommandBuffer &hCommandBuffer, Buffer &buf, uint32_t offset, ::DataStream &ds) { return hCommandBuffer.RecordUpdateBuffer(buf, offset, ds->GetSize(), ds->GetData()); }
 bool Lua::Vulkan::VKCommandBuffer::RecordUpdateBuffer(lua_State *l, CommandBuffer &hCommandBuffer, Buffer &buf, uint32_t offset, ::udm::Type type, Lua::udm_ng value)
 {
-	return udm::visit_ng(type, [&buf, &value, &hCommandBuffer, offset](auto tag) {
+	return ::udm::visit_ng(type, [&buf, &value, &hCommandBuffer, offset](auto tag) {
 		using T = typename decltype(tag)::type;
 		auto val = luabind::object_cast<T>(value);
 		return hCommandBuffer.RecordUpdateBuffer(buf, offset, sizeof(val), &val);
@@ -256,7 +256,7 @@ bool Lua::Vulkan::VKCommandBuffer::RecordDrawIndexed(lua_State *l, CommandBuffer
 bool Lua::Vulkan::VKCommandBuffer::RecordDrawIndexedIndirect(lua_State *l, CommandBuffer &hCommandBuffer, Buffer &buffer, uint32_t offset, uint32_t drawCount, uint32_t stride) { return hCommandBuffer.RecordDrawIndexedIndirect(buffer, offset, drawCount, stride); }
 bool Lua::Vulkan::VKCommandBuffer::RecordDrawIndirect(lua_State *l, CommandBuffer &hCommandBuffer, Buffer &buffer, uint32_t offset, uint32_t drawCount, uint32_t stride) { return hCommandBuffer.RecordDrawIndirect(buffer, offset, drawCount, stride); }
 bool Lua::Vulkan::VKCommandBuffer::RecordFillBuffer(lua_State *l, CommandBuffer &hCommandBuffer, Buffer &buffer, uint32_t offset, uint32_t size, uint32_t data) { return hCommandBuffer.RecordFillBuffer(buffer, offset, size, data); }
-bool Lua::Vulkan::VKCommandBuffer::RecordSetBlendConstants(lua_State *l, CommandBuffer &hCommandBuffer, const Vector4 &blendConstants) { return hCommandBuffer.RecordSetBlendConstants(std::array<float, 4> {blendConstants[0], blendConstants[1], blendConstants[2], blendConstants[3]}); }
+bool Lua::Vulkan::VKCommandBuffer::RecordSetBlendConstants(lua_State *l, CommandBuffer &hCommandBuffer, const ::Vector4 &blendConstants) { return hCommandBuffer.RecordSetBlendConstants(std::array<float, 4> {blendConstants[0], blendConstants[1], blendConstants[2], blendConstants[3]}); }
 bool Lua::Vulkan::VKCommandBuffer::RecordSetDepthBias(lua_State *l, CommandBuffer &hCommandBuffer, float depthBiasConstantFactor, float depthBiasClamp, float slopeScaledDepthBias) { return hCommandBuffer.RecordSetDepthBias(depthBiasConstantFactor, depthBiasClamp, slopeScaledDepthBias); }
 bool Lua::Vulkan::VKCommandBuffer::RecordSetDepthBounds(lua_State *l, CommandBuffer &hCommandBuffer, float minDepthBounds, float maxDepthBounds) { return hCommandBuffer.RecordSetDepthBounds(minDepthBounds, maxDepthBounds); }
 bool Lua::Vulkan::VKCommandBuffer::RecordSetLineWidth(lua_State *l, CommandBuffer &hCommandBuffer, float lineWidth) { return hCommandBuffer.RecordSetLineWidth(lineWidth); }
@@ -279,7 +279,7 @@ void Lua::Vulkan::VKCommandBuffer::RecordEndQuery(lua_State *l,CommandBuffer &hC
 {
 	Lua::PushBool(l,hCommandBuffer.record_end_query(queryPool,queryIndex));
 }*/ // TODO
-bool Lua::Vulkan::VKCommandBuffer::RecordDrawGradient(lua_State *l, CommandBuffer &hCommandBuffer, RenderTarget &rt, const Vector2 &dir, luabind::object lnodes)
+bool Lua::Vulkan::VKCommandBuffer::RecordDrawGradient(lua_State *l, CommandBuffer &hCommandBuffer, RenderTarget &rt, const ::Vector2 &dir, luabind::object lnodes)
 {
 	if(hCommandBuffer.IsPrimary() == false)
 		return false;
@@ -305,7 +305,7 @@ bool Lua::Vulkan::VKBuffer::IsValid(lua_State *l, Buffer &hBuffer) { return true
 bool Lua::Vulkan::VKBuffer::Write(lua_State *l, Buffer &hBuffer, uint32_t offset, ::DataStream &ds, uint32_t dsOffset, uint32_t dsSize) { return hBuffer.Write(offset, dsSize, ds->GetData() + dsOffset); }
 bool Lua::Vulkan::VKBuffer::Write(lua_State *l, Buffer &hBuffer, uint32_t offset, ::udm::Type type, Lua::udm_ng value)
 {
-	return udm::visit_ng(type, [&hBuffer, &value, offset](auto tag) {
+	return ::udm::visit_ng(type, [&hBuffer, &value, offset](auto tag) {
 		using T = typename decltype(tag)::type;
 		return hBuffer.Write(offset, luabind::object_cast<T>(value));
 	});
@@ -320,7 +320,7 @@ Lua::opt<::DataStream> Lua::Vulkan::VKBuffer::Read(lua_State *l, Buffer &hBuffer
 }
 bool Lua::Vulkan::VKBuffer::Read(lua_State *l, Buffer &hBuffer, uint32_t offset, ::udm::Type type, Lua::udm_ng value)
 {
-	return udm::visit_ng(type, [&hBuffer, &value, offset](auto tag) {
+	return ::udm::visit_ng(type, [&hBuffer, &value, offset](auto tag) {
 		using T = typename decltype(tag)::type;
 		auto val = luabind::object_cast<T>(value);
 		return hBuffer.Read(offset, sizeof(val), &val);

@@ -152,3 +152,83 @@ void SCharacterComponent::SetFaction(Faction &faction)
 	m_faction = &faction;
 	// Apply relationships
 }
+
+namespace Lua {
+	namespace Character {
+		namespace Server {
+			static void DropWeapon(lua_State *l, pragma::SCharacterComponent &hEnt, pragma::SWeaponComponent &hWep);
+			static void RemoveWeapon(lua_State *l, pragma::SCharacterComponent &hEnt, pragma::SWeaponComponent &hWep);
+			static void DeployWeapon(lua_State *l, pragma::SCharacterComponent &hEnt, pragma::SWeaponComponent &hWep);
+		};
+	};
+	namespace Actor {
+		namespace Server {
+			static void SetFaction(lua_State *l, pragma::SCharacterComponent &hEnt, const std::string &factionName);
+		};
+	};
+};
+
+void SCharacterComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts)
+{
+	BaseCharacterComponent::RegisterLuaBindings(l, modEnts);
+
+	auto def = pragma::lua::create_entity_component_class<pragma::SCharacterComponent, pragma::BaseCharacterComponent>("CharacterComponent");
+	def.def("GiveWeapon", static_cast<BaseEntity *(pragma::SCharacterComponent::*)(std::string)>(&pragma::SCharacterComponent::GiveWeapon));
+	def.def("DropActiveWeapon", &pragma::SCharacterComponent::DropActiveWeapon);
+	def.def("DropWeapon", static_cast<void (pragma::SCharacterComponent::*)(std::string)>(&pragma::SCharacterComponent::DropWeapon));
+	def.def("DropWeapon", &Lua::Character::Server::DropWeapon);
+	def.def("RemoveWeapon", static_cast<void (pragma::SCharacterComponent::*)(std::string)>(&pragma::SCharacterComponent::RemoveWeapon));
+	def.def("RemoveWeapon", &Lua::Character::Server::RemoveWeapon);
+	def.def("RemoveWeapons", &pragma::SCharacterComponent::RemoveWeapons);
+	def.def("DeployWeapon", static_cast<void (pragma::SCharacterComponent::*)(const std::string &)>(&pragma::SCharacterComponent::DeployWeapon));
+	def.def("DeployWeapon", &Lua::Character::Server::DeployWeapon);
+	def.def("HolsterWeapon", &pragma::SCharacterComponent::HolsterWeapon);
+	def.def("SelectNextWeapon", &pragma::SCharacterComponent::SelectNextWeapon);
+	def.def("SelectPreviousWeapon", &pragma::SCharacterComponent::SelectPreviousWeapon);
+	def.def("PrimaryAttack", &pragma::SCharacterComponent::PrimaryAttack);
+	def.def("SecondaryAttack", &pragma::SCharacterComponent::SecondaryAttack);
+	def.def("TertiaryAttack", &pragma::SCharacterComponent::TertiaryAttack);
+	def.def("Attack4", &pragma::SCharacterComponent::Attack4);
+	def.def("ReloadWeapon", &pragma::SCharacterComponent::ReloadWeapon);
+
+	def.def("SetNoTarget", &pragma::SCharacterComponent::SetNoTarget);
+	def.def("GetNoTarget", &pragma::SCharacterComponent::GetNoTarget);
+	def.def("SetGodMode", &pragma::SCharacterComponent::SetGodMode);
+	def.def("GetGodMode", &pragma::SCharacterComponent::GetGodMode);
+	def.def("GetFaction", &pragma::SCharacterComponent::GetFaction);
+	def.def("SetFaction", static_cast<void (*)(lua_State *, pragma::SCharacterComponent &, const std::string &)>(&Lua::Actor::Server::SetFaction));
+	def.def("SetFaction", &pragma::SCharacterComponent::SetFaction);
+
+	// This is a bit of a hack: Usually the client controls the view angles of the player, which means changing it serverside would
+	// have no effect, however that would make these Lua-bindings useless. Instead, when changing the angles of a player through Lua,
+	// we'll redirect it to another function which will forcibly overwrite the client angles.
+	def.def(
+	  "SetViewAngles", +[](pragma::SCharacterComponent &c, const EulerAngles &ang) {
+		  auto hPl = c.GetEntity().GetPlayerComponent();
+		  if(hPl.valid())
+			  static_cast<pragma::SPlayerComponent *>(hPl.get())->SetViewRotation(uquat::create(ang));
+	  });
+	def.def(
+	  "SetViewRotation", +[](pragma::SCharacterComponent &c, const Quat &rot) {
+		  auto hPl = c.GetEntity().GetPlayerComponent();
+		  if(hPl.valid())
+			  static_cast<pragma::SPlayerComponent *>(hPl.get())->SetViewRotation(rot);
+	  });
+
+	modEnts[def];
+}
+
+void Lua::Character::Server::DropWeapon(lua_State *l, pragma::SCharacterComponent &hEnt, pragma::SWeaponComponent &hWep) { hEnt.DropWeapon(&hWep.GetEntity()); }
+void Lua::Character::Server::RemoveWeapon(lua_State *l, pragma::SCharacterComponent &hEnt, pragma::SWeaponComponent &hWep) { hEnt.RemoveWeapon(hWep.GetEntity()); }
+void Lua::Character::Server::DeployWeapon(lua_State *l, pragma::SCharacterComponent &hEnt, pragma::SWeaponComponent &hWep) { hEnt.DeployWeapon(hWep.GetEntity()); }
+
+/////////////
+
+void Lua::Actor::Server::SetFaction(lua_State *l, pragma::SCharacterComponent &hEnt, const std::string &factionName)
+{
+	auto &factionManager = pragma::SAIComponent::GetFactionManager();
+	auto faction = factionManager.FindFactionByName(factionName);
+	if(faction == nullptr)
+		return;
+	hEnt.SetFaction(*faction);
+}

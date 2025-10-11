@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "pragma/lua/policies/shared_from_this_policy.hpp"
+
 #include "pragma/lua/policies/default_parameter_policy.hpp"
 
 #include "sharedutils/datastream.h"
@@ -549,7 +551,7 @@ std::vector<pragma::ShaderGradient::Node> Lua::Vulkan::get_gradient_nodes(lua_St
 		luabind::object o = *i;
 		auto offset = luabind::object_cast<float>(o["offset"]);
 		auto color = luabind::object_cast<::Color>(o["color"]);
-		nodes.push_back(pragma::ShaderGradient::Node(Vector4(color.r / 255.f, color.g / 255.f, color.b / 255.f, color.a / 255.f), offset));
+		nodes.push_back(pragma::ShaderGradient::Node(::Vector4(color.r / 255.f, color.g / 255.f, color.b / 255.f, color.a / 255.f), offset));
 	}
 	return nodes;
 }
@@ -586,7 +588,7 @@ Lua::var<prosper::Texture, Lua::mult<bool, std::string>> Lua::Vulkan::blur_textu
 	setupCmd->RecordImageBarrier(rt->GetTexture().GetImage(), prosper::ImageLayout::TransferDstOptimal, prosper::ImageLayout::ShaderReadOnlyOptimal);
 
 	try {
-		prosper::util::record_blur_image(context, setupCmd, *blurSet, {Vector4(1.f, 1.f, 1.f, 1.f), 1.75f, 9}, blurStrength);
+		prosper::util::record_blur_image(context, setupCmd, *blurSet, {::Vector4(1.f, 1.f, 1.f, 1.f), 1.75f, 9}, blurStrength);
 	}
 	catch(const std::logic_error &e) {
 		return Lua::mult<bool, std::string> {l, false, e.what()};

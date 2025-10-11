@@ -32,7 +32,7 @@ struct DLLCLIENT CHCMeshInfo {
 
 #pragma warning(push)
 #pragma warning(disable : 4251)
-export class DLLCLIENT CHCNode {
+export class DLLCLIENT CHCNode : public std::enable_shared_from_this<CHCNode> {
   public:
 	friend CHC;
   protected:

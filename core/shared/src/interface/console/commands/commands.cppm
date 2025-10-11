@@ -7,7 +7,7 @@ module;
 #include <string>
 #include <vector>
 
-export module pragma.shared:commands;
+export module pragma.shared:console.commands;
 
 export import :entities.components.base_player;
 

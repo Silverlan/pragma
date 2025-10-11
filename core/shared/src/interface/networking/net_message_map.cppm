@@ -20,14 +20,14 @@ export {
 	class DLLNETWORK SVNetMessage {
 	public:
 		using Handler = void(*)(ServerClientHandle &, NetPacket);
-		Handler *handler;
+		Handler handler;
 		unsigned int ID;
 	};
 
 	class DLLNETWORK CLNetMessage {
 	public:
 		using Handler = void(*)(NetPacket);
-		Handler *handler;
+		Handler handler;
 		unsigned int ID;
 	};
 

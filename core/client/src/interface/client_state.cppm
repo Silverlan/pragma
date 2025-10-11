@@ -56,6 +56,11 @@ export {
 		unsigned int size;
 	};
 
+	struct DLLCLIENT LastConnectionInfo {
+		std::optional<std::pair<std::string, uint16_t>> address = {};
+		std::optional<uint64_t> steamId = {};
+	};
+
 	class DLLCLIENT ClientState : public NetworkState {
 		// For internal use only! Not to be used directly!
 	  public:
@@ -80,6 +85,7 @@ export {
 		WIHandle m_hMainMenu;
 		WIHandle m_hFps;
 		pragma::rendering::GameWorldShaderSettings m_worldShaderSettings {};
+		LastConnectionInfo m_lastConnection {};
 	  protected:
 		std::shared_ptr<Lua::Interface> m_luaGUI = nullptr;
 		void InitializeGUILua();
@@ -196,6 +202,8 @@ export {
 		void SendPacket(const std::string &name, NetPacket &packet);
 		void SendPacket(const std::string &name, pragma::networking::Protocol protocol);
 
+		LastConnectionInfo &GetLastConnectionInfo() { return m_lastConnection; }
+		
 		void Disconnect();
 		// Game
 		virtual bool IsMultiPlayer() const override;

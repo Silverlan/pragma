@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "sharedutils/functioncallback.h"
 
 #include "pragma/console/helper.hpp"
 
@@ -17,7 +18,7 @@ static void forward_in(NetworkState *state, pragma::BasePlayerComponent *, std::
 	game->SetActionInput(Action::MoveForward, true, magnitude);
 }
 
-static void forward_out(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
+static void forward_out(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &, float)
 {
 	if(!state->IsGameActive())
 		return;
@@ -33,7 +34,7 @@ static void backward_in(NetworkState *state, pragma::BasePlayerComponent *, std:
 	game->SetActionInput(Action::MoveBackward, true, magnitude);
 }
 
-static void backward_out(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
+static void backward_out(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &, float)
 {
 	if(!state->IsGameActive())
 		return;
@@ -49,7 +50,7 @@ static void left_in(NetworkState *state, pragma::BasePlayerComponent *, std::vec
 	game->SetActionInput(Action::MoveLeft, true, magnitude);
 }
 
-static void left_out(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
+static void left_out(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &, float)
 {
 	if(!state->IsGameActive())
 		return;
@@ -65,7 +66,7 @@ static void right_in(NetworkState *state, pragma::BasePlayerComponent *, std::ve
 	game->SetActionInput(Action::MoveRight, true, magnitude);
 }
 
-static void right_out(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
+static void right_out(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &, float)
 {
 	if(!state->IsGameActive())
 		return;
@@ -371,7 +372,7 @@ static void turn_left_in(NetworkState *, pragma::BasePlayerComponent *, std::vec
 	turn_speeds.left = (!argv.empty() ? ustring::to_float(argv.front()) : defaultTurnSpeed) * magnitude;
 	update_turn_callbacks();
 }
-static void turn_left_out(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
+static void turn_left_out(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)
 {
 	auto *client = pragma::get_client_state();
 	if(!client->IsGameActive())
@@ -387,7 +388,7 @@ static void turn_right_in(NetworkState *, pragma::BasePlayerComponent *, std::ve
 	turn_speeds.right = (!argv.empty() ? ustring::to_float(argv.front()) : defaultTurnSpeed) * magnitude;
 	update_turn_callbacks();
 }
-static void turn_right_out(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
+static void turn_right_out(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)
 {
 	auto *client = pragma::get_client_state();
 	if(!client->IsGameActive())
@@ -403,7 +404,7 @@ static void turn_up_in(NetworkState *, pragma::BasePlayerComponent *, std::vecto
 	turn_speeds.up = (!argv.empty() ? ustring::to_float(argv.front()) : defaultTurnSpeed) * magnitude;
 	update_turn_callbacks();
 }
-static void turn_up_out(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
+static void turn_up_out(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)
 {
 	auto *client = pragma::get_client_state();
 	if(!client->IsGameActive())
@@ -419,7 +420,7 @@ static void turn_down_in(NetworkState *, pragma::BasePlayerComponent *, std::vec
 	turn_speeds.down = (!argv.empty() ? ustring::to_float(argv.front()) : defaultTurnSpeed) * magnitude;
 	update_turn_callbacks();
 }
-static void turn_down_out(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
+static void turn_down_out(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)
 {
 	auto *client = pragma::get_client_state();
 	if(!client->IsGameActive())

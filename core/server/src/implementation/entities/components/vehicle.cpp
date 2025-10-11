@@ -184,3 +184,11 @@ void SVehicleComponent::OnPostSpawn()
 		m_steeringWheelMdl.clear();
 	}
 }
+
+void SVehicleComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts)
+{
+	BaseVehicleComponent::RegisterLuaBindings(l, modEnts);
+
+	auto def = pragma::lua::create_entity_component_class<pragma::SVehicleComponent, pragma::BaseVehicleComponent>("VehicleComponent");
+	module[def];
+}

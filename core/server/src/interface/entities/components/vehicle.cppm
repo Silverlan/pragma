@@ -14,6 +14,8 @@ import pragma.server.entities.components.entity;
 export namespace pragma {
 	class DLLSERVER SVehicleComponent final : public BaseVehicleComponent, public SBaseSnapshotComponent {
 	  public:
+		static void RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts);
+		
 		static unsigned int GetVehicleCount();
 		static const std::vector<SVehicleComponent *> &GetAll();
 		SVehicleComponent(BaseEntity &ent);

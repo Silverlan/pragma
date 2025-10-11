@@ -27,68 +27,68 @@ void Lua::sound::register_enums(lua_State *l)
 	  {{"FCREATE_NONE", umath::to_integral(ALCreateFlags::None)}, {"FCREATE_MONO", umath::to_integral(ALCreateFlags::Mono)}, {"FCREATE_STREAM", umath::to_integral(ALCreateFlags::Stream)}, {"FCREATE_DONT_TRANSMIT", umath::to_integral(ALCreateFlags::DontTransmit)}});
 }
 
-int Lua::sound::create(lua_State *l, const std::function<std::shared_ptr<::ALSound>(NetworkState *, const std::string &, ALSoundType, ALCreateFlags)> &f)
+void Lua::sound::register_library(luabind::module_ &soundMod)
+{
+	auto defPlayInfo = luabind::class_<SoundPlayInfo>("PlayInfo");
+	defPlayInfo.def(luabind::constructor<>());
+	defPlayInfo.def_readwrite("gain", &SoundPlayInfo::gain);
+	defPlayInfo.def_readwrite("pitch", &SoundPlayInfo::pitch);
+	defPlayInfo.def_readwrite("origin", &SoundPlayInfo::origin);
+	defPlayInfo.def_readwrite("flags", &SoundPlayInfo::flags);
+	soundMod[defPlayInfo];
+
+	soundMod[luabind::def("create", static_cast<std::shared_ptr<::ALSound>(*)(lua_State *, const std::string &, ALSoundType, ALCreateFlags)>(&Lua::sound::create))];
+	soundMod[luabind::def("create", static_cast<std::shared_ptr<::ALSound>(*)(lua_State *, const std::string &, ALSoundType)>(&Lua::sound::create))];
+	soundMod[luabind::def("play", static_cast<std::shared_ptr<::ALSound>(*)(lua_State *, const std::string &, ALSoundType, const SoundPlayInfo &)>(&Lua::sound::play))];
+	soundMod[luabind::def("play", static_cast<std::shared_ptr<::ALSound>(*)(lua_State *, const std::string &, ALSoundType)>(&Lua::sound::play))];
+	soundMod[luabind::def("get_duration", &Lua::sound::get_duration)];
+	soundMod[luabind::def("get_all", &Lua::sound::get_all)];
+	soundMod[luabind::def("is_music_playing", &Lua::sound::is_music_playing)];
+	soundMod[luabind::def("find_by_type", static_cast<std::vector<std::shared_ptr<::ALSound>>(*)(lua_State *, ALSoundType, bool)>(&Lua::sound::find_by_type))];
+	soundMod[luabind::def("find_by_type", static_cast<std::vector<std::shared_ptr<::ALSound>>(*)(lua_State *, ALSoundType)>(&Lua::sound::find_by_type))];
+	soundMod[luabind::def("precache", static_cast<bool(*)(lua_State *, const std::string &, ALChannel)>(&Lua::sound::precache))];
+	soundMod[luabind::def("precache", static_cast<bool(*)(lua_State *, const std::string &)>(&Lua::sound::precache))];
+	soundMod[luabind::def("stop_all", &Lua::sound::stop_all)];
+	soundMod[luabind::def("load_scripts", &Lua::sound::load_scripts)];
+	soundMod[luabind::def("read_wav_phonemes", &Lua::sound::read_wav_phonemes)];
+}
+
+std::shared_ptr<::ALSound> Lua::sound::create(lua_State *l, const std::string &snd, ALSoundType type, ALCreateFlags flags)
 {
 	auto *state = Engine::Get()->GetNetworkState(l);
-	int32_t argId = 1;
-	auto *snd = Lua::CheckString(l, argId++);
-	auto type = static_cast<ALSoundType>(Lua::CheckInt(l, argId++));
-	auto flags = ALCreateFlags::None;
-	if(Lua::IsSet(l, argId))
-		flags = static_cast<ALCreateFlags>(Lua::CheckInt(l, argId++));
-	auto pAl = f(state, snd, type, flags);
+	auto pAl = state->CreateSound(snd, type, flags);
 	if(pAl == nullptr)
-		return 0;
+		return nullptr;
 	pAl->SetType(type);
-	luabind::object(l, pAl).push(l);
-	return 1;
+	return pAl;
 }
 
-int Lua::sound::create(lua_State *l)
+std::shared_ptr<::ALSound> Lua::sound::create(lua_State *l, const std::string &snd, ALSoundType type)
 {
-	return create(l, [](NetworkState *nw, const std::string &name, ALSoundType type, ALCreateFlags flags) -> std::shared_ptr<::ALSound> { return nw->CreateSound(name, type, flags); });
+	return create(l, snd, type, ALCreateFlags::None);
 }
 
-int Lua::sound::play(lua_State *l)
+std::shared_ptr<::ALSound> Lua::sound::play(lua_State *l, const std::string &sndName, ALSoundType type, const SoundPlayInfo &playInfo)
 {
 	auto *state = Engine::Get()->GetNetworkState(l);
-	int32_t argId = 1;
-	auto *sndName = Lua::CheckString(l, argId++);
-	auto type = static_cast<ALSoundType>(Lua::CheckInt(l, argId++));
-	auto flags = ALCreateFlags::None;
-	if(Lua::IsSet(l, argId))
-		flags = static_cast<ALCreateFlags>(Lua::CheckInt(l, argId++));
-	auto gain = 1.f;
-	auto pitch = 1.f;
-	Vector3 *origin = nullptr;
-	if(Lua::IsType<Vector3>(l, argId))
-		origin = &Lua::Check<Vector3>(l, argId++);
-	else {
-		if(Lua::IsSet(l, argId))
-			gain = Lua::CheckNumber(l, argId++);
-		if(Lua::IsSet(l, argId))
-			pitch = Lua::CheckNumber(l, argId++);
-		if(Lua::IsSet(l, argId))
-			origin = &Lua::Check<Vector3>(l, argId++);
-	}
-
-	auto snd = state->CreateSound(sndName, type, flags);
+	auto snd = state->CreateSound(sndName, type, playInfo.flags);
 	if(snd == nullptr)
-		return 0;
-	if(origin != nullptr) {
-		snd->SetPosition(*origin);
+		return nullptr;
+	if(playInfo.origin) {
+		snd->SetPosition(*playInfo.origin);
 		snd->SetRelative(false);
 	}
 	else
 		snd->SetRelative(true);
-	snd->SetGain(gain);
-	snd->SetPitch(pitch);
+	snd->SetGain(playInfo.gain);
+	snd->SetPitch(playInfo.pitch);
 	snd->Play();
-	Lua::Push<std::shared_ptr<::ALSound>>(l, snd);
-	return 1;
+	return snd;
 }
 
-int Lua::sound::is_music_playing(lua_State *l)
+std::shared_ptr<::ALSound> Lua::sound::play(lua_State *l, const std::string &sndName, ALSoundType type) { return play(l, sndName, type, {}); }
+
+bool Lua::sound::is_music_playing(lua_State *l)
 {
 	auto *state = Engine::Get()->GetNetworkState(l);
 	auto &sounds = state->GetSounds();
@@ -96,148 +96,107 @@ int Lua::sound::is_music_playing(lua_State *l)
 		auto &snd = rsnd.get();
 		return (snd.IsPlaying() == true && (snd.GetType() & ALSoundType::Music) != ALSoundType::Generic) ? true : false;
 	});
-	Lua::PushBool(l, (it != sounds.end()) ? true : false);
-	return 1;
+	return it != sounds.end();
 }
 
-int Lua::sound::get_duration(lua_State *l)
+float Lua::sound::get_duration(lua_State *l, const std::string &snd)
 {
 	NetworkState *state = Engine::Get()->GetNetworkState(l);
-	std::string snd = luaL_checkstring(l, 1);
-	float dur = state->GetSoundDuration(snd);
-	Lua::PushNumber(l, dur);
-	return 1;
+	return state->GetSoundDuration(snd);
 }
 
-int Lua::sound::get_all(lua_State *l)
+std::vector<std::shared_ptr<::ALSound>> Lua::sound::get_all(lua_State *l)
 {
 	NetworkState *state = Engine::Get()->GetNetworkState(l);
 	auto &sounds = state->GetSounds();
-	lua_newtable(l);
-	int top = lua_gettop(l);
-	int n = 1;
+	std::vector<std::shared_ptr<::ALSound>> rsounds;
+	rsounds.reserve(sounds.size());
 	for(auto &rsnd : sounds) {
 		auto &snd = rsnd.get();
-		luabind::object(l, snd.shared_from_this()).push(l);
-		lua_rawseti(l, top, n);
-		n++;
+		rsounds.push_back(snd.shared_from_this());
 	}
-	return 1;
+	return rsounds;
 }
 
-int Lua::sound::find_by_type(lua_State *l)
+std::vector<std::shared_ptr<::ALSound>> Lua::sound::find_by_type(lua_State *l, ALSoundType type, bool bExactMatch)
 {
-	auto type = static_cast<ALSoundType>(Lua::CheckInt(l, 1));
 	if(type == ALSoundType::Generic)
 		return get_all(l);
-	auto bExactMatch = false;
-	if(Lua::IsSet(l, 2))
-		bExactMatch = Lua::CheckBool(l, 2);
 	auto *state = Engine::Get()->GetNetworkState(l);
 	auto &sounds = state->GetSounds();
+	std::vector<std::shared_ptr<::ALSound>> rsounds;
 	auto t = Lua::CreateTable(l);
 	int32_t n = 1;
 	for(auto &rsnd : sounds) {
 		auto &snd = rsnd.get();
-		if((bExactMatch == false && (snd.GetType() & type) != ALSoundType::Generic) || (bExactMatch == true && snd.GetType() == type)) {
-			Lua::PushInt(l, n);
-			Lua::Push<std::shared_ptr<::ALSound>>(l, snd.shared_from_this());
-			Lua::SetTableValue(l, t);
-			n++;
-		}
+		if((bExactMatch == false && (snd.GetType() & type) != ALSoundType::Generic) || (bExactMatch == true && snd.GetType() == type))
+			rsounds.push_back(snd.shared_from_this());
 	}
-	return 1;
+	return rsounds;
+}
+std::vector<std::shared_ptr<::ALSound>> Lua::sound::find_by_type(lua_State *l, ALSoundType type)
+{
+	return find_by_type(l, type, false);
 }
 
-int Lua::sound::precache(lua_State *l)
+bool Lua::sound::precache(lua_State *l, const std::string &snd, ALChannel mode)
 {
 	NetworkState *state = Engine::Get()->GetNetworkState(l);
-	std::string snd = luaL_checkstring(l, 1);
-	auto mode = ALChannel::Auto;
-	if(Lua::IsSet(l, 2))
-		mode = static_cast<ALChannel>(Lua::CheckInt<int>(l, 2));
-	Lua::PushBool(l, state->PrecacheSound(snd.c_str(), mode));
-	return 1;
+	return state->PrecacheSound(snd.c_str(), mode);
+}
+bool Lua::sound::precache(lua_State *l, const std::string &snd)
+{
+	return precache(l, snd, ALChannel::Auto);
 }
 
-int Lua::sound::stop_all(lua_State *l)
+void Lua::sound::stop_all(lua_State *l)
 {
 	NetworkState *state = Engine::Get()->GetNetworkState(l);
 	state->StopSounds();
-	return 0;
 }
 
-int Lua::sound::load_scripts(lua_State *l)
+void Lua::sound::load_scripts(lua_State *l, const std::string &file)
 {
 	NetworkState *state = Engine::Get()->GetNetworkState(l);
-	std::string file = luaL_checkstring(l, 1);
 	state->LoadSoundScripts(file.c_str());
-	return 0;
 }
 
-int Lua::sound::read_wav_phonemes(lua_State *l)
+luabind::object Lua::sound::read_wav_phonemes(lua_State *l, const std::string &fileName)
 {
-	auto fname = "sounds\\" + FileManager::GetCanonicalizedPath(Lua::CheckString(l, 1));
+	auto fname = "sounds\\" + FileManager::GetCanonicalizedPath(fileName);
 	auto f = FileManager::OpenFile(fname.c_str(), "rb");
 	if(f == nullptr)
-		return 0;
+		return Lua::nil;
 	source_engine::script::SoundPhonemeData sp {};
 	if(source_engine::script::read_wav_phonemes(f, sp) != ::util::MarkupFile::ResultCode::Ok)
-		return 0;
+		return Lua::nil;
 
-	auto t = Lua::CreateTable(l);
+	auto t = luabind::newtable(l);
 
-	Lua::PushString(l, "plainText");
-	Lua::PushString(l, sp.plainText);
-	Lua::SetTableValue(l, t);
-
-	Lua::PushString(l, "words");
-	auto tWords = Lua::CreateTable(l);
+	auto tWords = luabind::newtable(l);
+	t["words"] = tWords;
 
 	auto wordId = 1u;
 	for(auto &word : sp.words) {
-		Lua::PushInt(l, wordId++);
-		auto tWord = Lua::CreateTable(l);
+		auto tWord = luabind::newtable(l);
+		tWords[wordId++] = tWord;
 
-		Lua::PushString(l, "startTime");
-		Lua::PushNumber(l, word.tStart);
-		Lua::SetTableValue(l, tWord);
+		tWord["startTime"] = word.tStart;
+		tWord["endTime"] = word.tEnd;
+		tWord["word"] = word.word;
 
-		Lua::PushString(l, "endTime");
-		Lua::PushNumber(l, word.tEnd);
-		Lua::SetTableValue(l, tWord);
-
-		Lua::PushString(l, "word");
-		Lua::PushString(l, word.word);
-		Lua::SetTableValue(l, tWord);
-
-		Lua::PushString(l, "phonemes");
-		auto tPhonemes = Lua::CreateTable(l);
+		auto tPhonemes = luabind::newtable(l);
+		tWord["phonemes"] = tPhonemes;
 
 		auto phonemeId = 1u;
 		for(auto &phoneme : word.phonemes) {
-			Lua::PushInt(l, phonemeId++);
-			auto tPhoneme = Lua::CreateTable(l);
+			auto tPhoneme = luabind::newtable(l);
+			tPhonemes[phonemeId++] = tPhoneme;
 
-			Lua::PushString(l, "phoneme");
-			Lua::PushString(l, phoneme.phoneme);
-			Lua::SetTableValue(l, tPhoneme);
-
-			Lua::PushString(l, "startTime");
-			Lua::PushNumber(l, phoneme.tStart);
-			Lua::SetTableValue(l, tPhoneme);
-
-			Lua::PushString(l, "endTime");
-			Lua::PushNumber(l, phoneme.tEnd);
-			Lua::SetTableValue(l, tPhoneme);
-
-			Lua::SetTableValue(l, tPhonemes);
+			tPhoneme["phoneme"] = phoneme.phoneme;
+			tPhoneme["startTime"] = phoneme.tStart;
+			tPhoneme["endTime"] = phoneme.tEnd;
 		}
-
-		Lua::SetTableValue(l, tWord);
-		Lua::SetTableValue(l, tWords);
 	}
-
-	Lua::SetTableValue(l, t);
-	return 1;
+	return t;
 }

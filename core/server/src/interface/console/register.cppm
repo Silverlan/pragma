@@ -8,17 +8,17 @@ module;
 #include "udm.hpp"
 #include <string>
 
-export module pragma.client:console.register_commands;
+export module pragma.server:console.register_commands;
 
 export import pragma.shared;
 
 export namespace pragma::console {
-	namespace client {
+	namespace server {
 		using DummyReturnValue = bool;
 		template<typename T>
 			std::shared_ptr<ConVar> register_variable(const std::string &scmd, const T &value, ConVarFlags flags, const std::string &help = "", const std::optional<std::string> &usageHelp = {})
 		{
-			console_system::client::register_convar(scmd, udm::type_to_enum<T>(), udm::convert<T, udm::String>(value), flags, help);
+			console_system::server::register_convar(scmd, udm::type_to_enum<T>(), udm::convert<T, udm::String>(value), flags, help);
 			return {};
 		}
 		
@@ -30,7 +30,7 @@ export namespace pragma::console {
 		template<typename T> requires(util::is_of_type<T, int, float, bool, std::string>)
 			DummyReturnValue register_variable_listener(const std::string &scvar, void(*function)(NetworkState *, const ConVar &, T, T))
 		{
-			console_system::client::register_convar_callback(scvar, function);
+			console_system::server::register_convar_callback(scvar, function);
 			return {};
 		}
 	}

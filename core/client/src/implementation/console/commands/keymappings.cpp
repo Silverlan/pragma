@@ -9,11 +9,11 @@ module pragma.client;
 
 import :console.commands;
 
-DLLCLIENT void CMD_bind_keys(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
-DLLCLIENT void CMD_bind(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
-DLLCLIENT void CMD_unbind(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
-DLLCLIENT void CMD_unbindall(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
-DLLCLIENT void CMD_keymappings(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+static void CMD_bind_keys(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+static void CMD_bind(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+static void CMD_unbind(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+static void CMD_unbindall(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+static void CMD_keymappings(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
 namespace {
 	using namespace pragma::console::client;
 	auto UVN = register_command("bind_keys", &CMD_bind_keys, ConVarFlags::None, "Prints a list of all bindable keys to the console.");
@@ -21,4 +21,67 @@ namespace {
 	auto UVN = register_command("unbind", &CMD_unbind, ConVarFlags::None, "Unbinds the given key.");
 	auto UVN = register_command("unbindall", &CMD_unbindall, ConVarFlags::None, "Unbinds all keys.");
 	auto UVN = register_command("keymappings", &CMD_keymappings, ConVarFlags::None, "Prints a list of all active key bindings to the console.");
+}
+
+////////////////////////////
+
+void CMD_bind_keys(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
+{
+	for(int i = 0; i < (sizeof(BIND_KEYS) / sizeof(BIND_KEYS[0])); i++)
+		Con::cout << BIND_KEYS[i] << Con::endl;
+}
+
+void CMD_bind(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
+{
+	if(argv.size() <= 1)
+		return;
+	short c;
+	if(!StringToKey(argv[0], &c)) {
+		Con::cout << "\"" << argv[0] << "\" isn't a valid key. Use 'bind_keys' to get a list of all available keys" << Con::endl;
+		return;
+	}
+	auto bindings = pragma::get_cengine()->GetCoreInputBindingLayer();
+	if(bindings)
+		bindings->MapKey(c, argv[1]);
+	pragma::get_cengine()->SetInputBindingsDirty();
+}
+
+void CMD_unbind(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
+{
+	if(argv.empty())
+		return;
+	short c;
+	if(!StringToKey(argv[0], &c)) {
+		Con::cout << "\"" << argv[0] << "\" isn't a valid key. Use 'bind_keys' to get a list of all available keys" << Con::endl;
+		return;
+	}
+	auto bindings = pragma::get_cengine()->GetCoreInputBindingLayer();
+	if(bindings)
+		bindings->UnmapKey(c);
+	pragma::get_cengine()->SetInputBindingsDirty();
+}
+
+void CMD_unbindall(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
+{
+	auto bindings = pragma::get_cengine()->GetCoreInputBindingLayer();
+	if(bindings)
+		bindings->ClearKeyMappings();
+	pragma::get_cengine()->SetInputBindingsDirty();
+}
+
+void CMD_keymappings(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
+{
+	auto &bindings = pragma::get_cengine()->GetEffectiveInputBindingLayer();
+	auto &mappings = bindings.GetKeyMappings();
+	std::string key;
+	for(auto &pair : mappings) {
+		if(KeyToString(pair.first, &key)) {
+			Con::cout << key << ": ";
+			if(pair.second.GetType() == KeyBind::Type::Regular)
+				Con::cout << "\"" << pair.second.GetBind() << "\"";
+			else
+				Con::cout << "function";
+			Con::cout << Con::endl;
+		}
+	}
 }

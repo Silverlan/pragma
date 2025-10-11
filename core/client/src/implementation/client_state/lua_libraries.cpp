@@ -656,40 +656,44 @@ void ClientState::RegisterSharedLuaLibraries(Lua::Interface &lua, bool bGUI)
 		    return layer->enabled;
 	    })];
 
-	Lua::RegisterLibrary(lua.GetState(), "sound",
-	  {
-	    {"create", Lua::sound::create},
-	    LUA_LIB_SOUND_SHARED,
-	    {"create_dsp_effect", Lua::sound::register_aux_effect},
-	    {"get_dsp_effect", Lua::sound::get_aux_effect},
-	    {"set_distance_model", &Lua::sound::set_distance_model},
-	    {"get_distance_model", &Lua::sound::get_distance_model},
-	    {"is_supported", &Lua::sound::is_supported},
-	    {"get_doppler_factor", &Lua::sound::get_doppler_factor},
-	    {"set_doppler_factor", &Lua::sound::set_doppler_factor},
-	    {"get_speed_of_sound", &Lua::sound::get_speed_of_sound},
-	    {"set_speed_of_sound", &Lua::sound::set_speed_of_sound},
-	    {"get_device_name", &Lua::sound::get_device_name},
-	    {"add_global_effect", &Lua::sound::add_global_effect},
-	    {"remove_global_effect", &Lua::sound::remove_global_effect},
-	    {"set_global_effect_parameters", &Lua::sound::set_global_effect_parameters},
-	    {"get_duration",
-	      +[](lua_State *l) -> int32_t {
-		      std::string path = Lua::CheckString(l, 1);
-		      auto absPath = pragma::asset::find_file(path, pragma::asset::Type::Sound);
-		      if(absPath.has_value() == false) {
-			      Lua::PushNil(l);
-			      return 1;
-		      }
-		      float duration;
-		      auto success = pragma::audio::util::get_duration(std::string {pragma::asset::get_asset_root_directory(pragma::asset::Type::Sound)} + "/" + *absPath, duration);
-		      if(success)
-			      Lua::PushNumber(l, duration);
-		      else
-			      Lua::PushNil(l);
-		      return 1;
-	      }},
-	  });
+	auto soundMod = luabind::module(lua.GetState(), "sound");
+	Lua::sound::register_library(soundMod);
+	soundMod[luabind::def("register_aux_effect", static_cast<al::PEffect(*)(const std::string &, const al::EfxEaxReverbProperties &)>(&Lua::sound::register_aux_effect))];
+	soundMod[luabind::def("register_aux_effect", static_cast<al::PEffect(*)(const std::string &, const al::EfxChorusProperties &)>(&Lua::sound::register_aux_effect))];
+	soundMod[luabind::def("register_aux_effect", static_cast<al::PEffect(*)(const std::string &, const al::EfxDistortionProperties &)>(&Lua::sound::register_aux_effect))];
+	soundMod[luabind::def("register_aux_effect", static_cast<al::PEffect(*)(const std::string &, const al::EfxEchoProperties &)>(&Lua::sound::register_aux_effect))];
+	soundMod[luabind::def("register_aux_effect", static_cast<al::PEffect(*)(const std::string &, const al::EfxFlangerProperties &)>(&Lua::sound::register_aux_effect))];
+	soundMod[luabind::def("register_aux_effect", static_cast<al::PEffect(*)(const std::string &, const al::EfxFrequencyShifterProperties &)>(&Lua::sound::register_aux_effect))];
+	soundMod[luabind::def("register_aux_effect", static_cast<al::PEffect(*)(const std::string &, const al::EfxVocalMorpherProperties &)>(&Lua::sound::register_aux_effect))];
+	soundMod[luabind::def("register_aux_effect", static_cast<al::PEffect(*)(const std::string &, const al::EfxPitchShifterProperties &)>(&Lua::sound::register_aux_effect))];
+	soundMod[luabind::def("register_aux_effect", static_cast<al::PEffect(*)(const std::string &, const al::EfxRingModulatorProperties &)>(&Lua::sound::register_aux_effect))];
+	soundMod[luabind::def("register_aux_effect", static_cast<al::PEffect(*)(const std::string &, const al::EfxAutoWahProperties &)>(&Lua::sound::register_aux_effect))];
+	soundMod[luabind::def("register_aux_effect", static_cast<al::PEffect(*)(const std::string &, const al::EfxCompressor &)>(&Lua::sound::register_aux_effect))];
+	soundMod[luabind::def("register_aux_effect", static_cast<al::PEffect(*)(const std::string &, const al::EfxEqualizer &)>(&Lua::sound::register_aux_effect))];
+	soundMod[luabind::def("get_aux_effect", &Lua::sound::get_aux_effect)];
+	soundMod[luabind::def("set_distance_model", &Lua::sound::set_distance_model)];
+	soundMod[luabind::def("get_distance_model", &Lua::sound::get_distance_model)];
+	soundMod[luabind::def("is_supported", &Lua::sound::is_supported)];
+	soundMod[luabind::def("get_doppler_factor", &Lua::sound::get_doppler_factor)];
+	soundMod[luabind::def("set_doppler_factor", &Lua::sound::set_doppler_factor)];
+	soundMod[luabind::def("get_speed_of_sound", &Lua::sound::get_speed_of_sound)];
+	soundMod[luabind::def("set_speed_of_sound", &Lua::sound::set_speed_of_sound)];
+	soundMod[luabind::def("get_device_name", &Lua::sound::get_device_name)];
+	soundMod[luabind::def("add_global_effect", static_cast<bool(*)(const std::string &)>(&Lua::sound::add_global_effect))];
+	soundMod[luabind::def("add_global_effect", static_cast<bool(*)(const std::string &, al::ISoundSystem::GlobalEffectFlag, const al::EffectParams &)>(&Lua::sound::add_global_effect))];
+	soundMod[luabind::def("remove_global_effect", &Lua::sound::remove_global_effect)];
+	soundMod[luabind::def("set_global_effect_parameters", &Lua::sound::set_global_effect_parameters)];
+	soundMod[luabind::def("get_duration", +[](const std::string &path) -> std::optional<float> {
+			auto absPath = pragma::asset::find_file(path, pragma::asset::Type::Sound);
+			if(absPath.has_value() == false)
+				return {};
+			float duration;
+			auto success = pragma::audio::util::get_duration(std::string {pragma::asset::get_asset_root_directory(pragma::asset::Type::Sound)} + "/" + *absPath, duration);
+			if(!success)
+				return {};
+			return duration;
+	})];
+
 	Lua::RegisterLibraryEnums(lua.GetState(), "sound",
 	  {{"GLOBAL_EFFECT_FLAG_NONE", umath::to_integral(al::ISoundSystem::GlobalEffectFlag::None)}, {"GLOBAL_EFFECT_FLAG_BIT_RELATIVE", umath::to_integral(al::ISoundSystem::GlobalEffectFlag::RelativeSounds)},
 	    {"GLOBAL_EFFECT_FLAG_BIT_WORLD", umath::to_integral(al::ISoundSystem::GlobalEffectFlag::WorldSounds)}, {"GLOBAL_EFFECT_FLAG_ALL", umath::to_integral(al::ISoundSystem::GlobalEffectFlag::All)},

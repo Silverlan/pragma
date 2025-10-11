@@ -7,34 +7,25 @@ module pragma.client;
 
 import :console.register_commands;
 
-std::shared_ptr<ConCommand> pragma::console::client::register_command(const std::string &scmd, void(*fc)(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float), ConVarFlags flags, const std::string &help,
-    void(*autoCompleteCallback)(const std::string &, std::vector<std::string> &))
+pragma::console::client::DummyReturnValue pragma::console::client::register_command(const std::string &scmd, void(*fc)(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float), ConVarFlags flags, const std::string &help)
 {
-
+	console_system::client::register_concommand(scmd, fc, flags, help);
+	return {};
 }
-std::shared_ptr<ConCommand> pragma::console::client::register_command(const std::string &scmd, void(*fc)(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float), ConVarFlags flags, const std::string &help,
-    void(*autoCompleteCallback)(const std::string &, std::vector<std::string> &, bool))
+pragma::console::client::DummyReturnValue pragma::console::client::register_command(const std::string &scmd, void(*fc)(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &), ConVarFlags flags, const std::string &help)
 {
-    
+	console_system::client::register_concommand(scmd, fc, flags, help);
+	return {};
 }
-std::shared_ptr<ConCommand> pragma::console::client::register_command(const ConCommandCreateInfo &createInfo)
+pragma::console::client::DummyReturnValue pragma::console::client::register_toggle_command(const std::string &scmd, void(*fcIn)(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float), void(*fcOut)(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float), ConVarFlags flags, const std::string &help)
 {
-    
+	console_system::client::register_concommand("+" +scmd, fcIn, flags, help);
+	console_system::client::register_concommand("-" +scmd, fcOut, flags, help);
+	return {};
 }
-
-CallbackHandle pragma::console::client::register_variable_listener(const std::string &scvar, void(*function)(NetworkState *, const ConVar &, int, int))
+pragma::console::client::DummyReturnValue pragma::console::client::register_toggle_command(const std::string &scmd, void(*fcIn)(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &), void(*fcOut)(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &), ConVarFlags flags, const std::string &help)
 {
-    
-}
-CallbackHandle pragma::console::client::register_variable_listener(const std::string &scvar, void(*function)(NetworkState *, const ConVar &, std::string, std::string))
-{
-    
-}
-CallbackHandle pragma::console::client::register_variable_listener(const std::string &scvar, void(*function)(NetworkState *, const ConVar &, float, float))
-{
-    
-}
-CallbackHandle pragma::console::client::register_variable_listener(const std::string &scvar, void(*function)(NetworkState *, const ConVar &, bool, bool))
-{
-    
+	console_system::client::register_concommand("+" +scmd, fcIn, flags, help);
+	console_system::client::register_concommand("-" +scmd, fcOut, flags, help);
+	return {};
 }

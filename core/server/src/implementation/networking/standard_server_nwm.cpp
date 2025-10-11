@@ -35,7 +35,7 @@ void pragma::networking::NWMActiveServer::OnPacketSent(const NWMEndpoint &ep, co
 #if DEBUG_SERVER_VERBOSE == 1
 	auto id = packet.GetMessageID();
 	auto *clMap = GetClientMessageMap();
-	ustring::StringMap<uint32_t> *clMsgs;
+	util::StringMap<uint32_t> *clMsgs;
 	clMap->GetNetMessages(&clMsgs);
 	auto it = std::find_if(clMsgs->begin(), clMsgs->end(), [id](const std::pair<std::string, uint32_t> &pair) { return (pair.second == id) ? true : false; });
 	std::string msgName = (it != clMsgs->end()) ? it->first : "Unknown";
@@ -231,4 +231,6 @@ static void sv_timeout_duration_callback(NetworkState *, const ConVar &, float, 
 		return;
 	sv->SetTimeoutDuration(GET_TIMEOUT_DURATION(val));
 }
-REGISTER_CONVAR_CALLBACK_SV(sv_timeout_duration, sv_timeout_duration_callback);
+namespace {
+	auto _ = pragma::console::server::register_variable_listener<float>("sv_timeout_duration",&sv_timeout_duration_callback);
+}

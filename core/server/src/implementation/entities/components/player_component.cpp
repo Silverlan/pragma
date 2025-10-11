@@ -419,3 +419,45 @@ void SPlayerComponent::OnTakeDamage(DamageInfo &info)
 	if(charComponent != nullptr && charComponent->GetGodMode() == true)
 		info.SetDamage(0);
 }
+
+namespace Lua {
+	namespace Player {
+		namespace Server {
+			static void Respawn(lua_State *l, pragma::SPlayerComponent &hEnt);
+			static void SetActionInput(lua_State *l, pragma::SPlayerComponent &hPl, UInt32 input, Bool pressed);
+			static bool SendResource(lua_State *l, pragma::SPlayerComponent &hPl, const std::string &name);
+		};
+	};
+};
+
+void SPlayerComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts)
+{
+	BasePlayerComponent::RegisterLuaBindings(l, modEnts);
+
+	auto def = pragma::lua::create_entity_component_class<pragma::SPlayerComponent, pragma::BasePlayerComponent>("PlayerComponent");
+	def.def("Respawn", &Lua::Player::Server::Respawn);
+	def.def("SetActionInput", &Lua::Player::Server::SetActionInput);
+	def.def("Kick", &pragma::SPlayerComponent::Kick);
+	def.def("SendResource", &Lua::Player::Server::SendResource);
+	modEnts[def];
+}
+
+void Lua::register_sv_player_component(lua_State *l, luabind::module_ &module)
+{
+
+}
+void Lua::Player::Server::Respawn(lua_State *l, pragma::SPlayerComponent &hEnt)
+{
+	auto charComponent = hEnt.GetEntity().GetCharacterComponent();
+	if(charComponent.valid())
+		charComponent->Respawn();
+}
+
+void Lua::Player::Server::SetActionInput(lua_State *l, pragma::SPlayerComponent &hPl, UInt32 input, Bool pressed)
+{
+	auto *actionInputC = hPl.GetActionInputController();
+	if(actionInputC)
+		actionInputC->SetActionInput(static_cast<Action>(input), pressed);
+}
+
+bool Lua::Player::Server::SendResource(lua_State *l, pragma::SPlayerComponent &hPl, const std::string &name) { return hPl.SendResource(name); }

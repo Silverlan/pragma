@@ -4,6 +4,7 @@
 
 #include "mathutil/umath.h"
 #include "mathutil/color.h"
+#include "pragma/console/helper.hpp"
 
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
@@ -110,7 +111,7 @@ static void cl_render_vr_enabled(bool b)
 		lastColor = Color::White;
 	}
 }
-namespace { auto _ = pragma::console::client::register_variable_listener<bool>("cl_render_vr_enabled", +[](NetworkState *, const ConVar &, bool, bool b) { cl_render_vr_enabled(b); }); }
+namespace { auto UVN = pragma::console::client::register_variable_listener<bool>("cl_render_vr_enabled", +[](NetworkState *, const ConVar &, bool, bool b) { cl_render_vr_enabled(b); }); }
 
 /*REGISTER_CONVAR_CALLBACK_CL(cl_render_vr_resolution,[](NetworkState*,ConVar*,std::string,std::string val) {
 	
@@ -202,7 +203,7 @@ static void cl_vr_hmd_view_enabled(bool val)
 	}
 }
 namespace {
-	auto _ = pragma::console::client::register_variable_listener<bool>("cl_vr_hmd_view_enabled", +[](NetworkState *, const ConVar &, bool, bool val) { cl_vr_hmd_view_enabled(val); });
+	auto UVN = pragma::console::client::register_variable_listener<bool>("cl_vr_hmd_view_enabled", +[](NetworkState *, const ConVar &, bool, bool val) { cl_vr_hmd_view_enabled(val); });
 }
 #endif
 
@@ -217,5 +218,5 @@ static void cl_vr_mirror_window_enabled(bool val)
 	fSetMirrorWindowEnabled(val);
 }
 namespace {
-	auto _ = pragma::console::client::register_variable_listener<bool>("cl_vr_mirror_window_enabled", +[](NetworkState *, const ConVar &, bool, bool val) { cl_vr_mirror_window_enabled(val); });
+	auto UVN = pragma::console::client::register_variable_listener<bool>("cl_vr_mirror_window_enabled", +[](NetworkState *, const ConVar &, bool, bool val) { cl_vr_mirror_window_enabled(val); });
 }

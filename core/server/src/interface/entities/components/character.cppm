@@ -15,6 +15,8 @@ export namespace pragma {
 	class DLLSERVER SCharacterComponent final : public BaseCharacterComponent {
 	  public:
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+		static void RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts);
+
 		SCharacterComponent(BaseEntity &ent);
 		virtual void Initialize() override;
 		virtual void SetActiveWeapon(BaseEntity *ent) override;

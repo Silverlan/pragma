@@ -292,7 +292,7 @@ export {
 			virtual std::optional<ComponentMemberIndex> DoGetMemberIndex(const std::string &name) const;
 			virtual void OnMembersChanged();
 			spdlog::logger &InitLogger() const;
-			spdlog::logger &get_logger(std::type_index typeIndex);
+			static spdlog::logger &get_logger(std::type_index typeIndex);
 
 			// Used for typed callback lookups. If this function doesn't change outTypeIndex, the actual component's type is used
 			// as reference. Overwrite this on the serverside or clientside version of the component,

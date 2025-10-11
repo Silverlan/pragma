@@ -31,7 +31,7 @@ module;
 
 module pragma.shared;
 
-import :commands;
+import :console.commands;
 import :engine;
 import :network_state;
 

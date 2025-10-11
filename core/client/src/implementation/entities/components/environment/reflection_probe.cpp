@@ -6,7 +6,7 @@ module;
 #include "pragma/logging.hpp"
 
 #include "sharedutils/functioncallback.h"
-
+#include "pragma/console/helper.hpp"
 #include "sharedutils/util_event_reply.hpp"
 
 #include "pragma/lua/luaapi.h"
@@ -99,7 +99,7 @@ static void map_build_reflection_probes(NetworkState *state, pragma::BasePlayerC
 	CReflectionProbeComponent::BuildAllReflectionProbes(*pragma::get_cgame(), rebuild);
 }
 namespace {
-	auto UVN = register_command("map_build_reflection_probes", &map_build_reflection_probes, ConVarFlags::None,
+	auto UVN = pragma::console::client::register_command("map_build_reflection_probes", &map_build_reflection_probes, ConVarFlags::None,
 	"Build all reflection probes in the map. Use the '-rebuild' argument to clear all current IBL textures first. Use 'debug_pbr_ibl' to check the probes after they have been built.");
 }
 static void print_status(const uint32_t i, const uint32_t count)
@@ -940,7 +940,7 @@ void CEnvReflectionProbe::Initialize()
 
 ////////
 
-void Console::commands::debug_pbr_ibl(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+static void debug_pbr_ibl(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	if(pragma::get_cgame() == nullptr)
 		return;
@@ -1075,4 +1075,7 @@ void Console::commands::debug_pbr_ibl(NetworkState *state, pragma::BasePlayerCom
 		}));
 		pSlider->SetAnchor(0.f, 0.f, 1.f, 0.f);
 	}
+}
+namespace {
+	auto UVN = pragma::console::client::register_command("debug_pbr_ibl", &debug_pbr_ibl, ConVarFlags::None, "Displays the irradiance, prefilter and brdf map for the closest cubemap.");
 }

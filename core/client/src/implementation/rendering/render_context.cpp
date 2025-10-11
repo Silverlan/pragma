@@ -36,7 +36,7 @@ static spdlog::logger &LOGGER_VALIDATION = pragma::register_logger("prosper_vali
 
 RenderContext::RenderContext() : m_monitor(nullptr), m_renderAPI {"vulkan"} {}
 RenderContext::~RenderContext() {}
-DLLNETWORK std::optional<std::string> g_customTitle;
+std::optional<std::string> g_customTitle;
 extern bool g_cpuRendering;
 void RenderContext::InitializeRenderAPI()
 {

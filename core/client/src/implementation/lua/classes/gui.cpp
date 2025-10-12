@@ -57,6 +57,7 @@ import pragma.string.unicode;
 template<class TStream>
 static TStream &print_ui_element(TStream &os, const ::WIBase &handle)
 {
+	using ::operator<<; // Workaround for msvc compiler bug
 	const WIBase *p = &handle;
 	auto pos = p->GetAbsolutePos();
 	auto &size = p->GetSize();
@@ -1070,7 +1071,7 @@ void Lua::WIBase::SetPos(lua_State *l, ::WIBase &hPanel, ::Vector2 pos) { hPanel
 void Lua::WIBase::SetPos(lua_State *l, ::WIBase &hPanel, float x, float y) { hPanel.SetPos(CInt32(x), CInt32(y)); }
 void Lua::WIBase::SetAbsolutePos(lua_State *l, ::WIBase &hPanel, ::Vector2 pos) { hPanel.SetAbsolutePos(::Vector2i(pos.x, pos.y)); }
 void Lua::WIBase::SetAbsolutePos(lua_State *l, ::WIBase &hPanel, float x, float y) { hPanel.SetAbsolutePos(::Vector2i(x, y)); }
-void Lua::WIBase::SetColor(lua_State *l, ::WIBase &hPanel, Color col) { hPanel.SetColor(col.r / 255.f, col.g / 255.f, col.b / 255.f, col.a / 255.f); }
+void Lua::WIBase::SetColor(lua_State *l, ::WIBase &hPanel, ::Color col) { hPanel.SetColor(col.r / 255.f, col.g / 255.f, col.b / 255.f, col.a / 255.f); }
 void Lua::WIBase::GetAlpha(lua_State *l, ::WIBase &hPanel) { Lua::PushNumber(l, hPanel.GetAlpha() * 255); }
 void Lua::WIBase::SetAlpha(lua_State *l, ::WIBase &hPanel, float alpha) { hPanel.SetAlpha(alpha / 255.f); }
 void Lua::WIBase::SetSize(lua_State *l, ::WIBase &hPanel, ::Vector2 size) { hPanel.SetSize(CInt32(size.x), CInt32(size.y)); }
@@ -1787,7 +1788,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l, ::WIBase &panel, std::stri
 			  },
 			  1);
 			if(r == Lua::StatusCode::Ok) {
-				if(Lua::IsVector2i(l, -1))
+				if(Lua::IsType<::Vector2i>(l, -1))
 					pos.get() = Lua::Check<::Vector2i>(l, -1);
 				Lua::Pop(l, 1);
 			}
@@ -1924,8 +1925,8 @@ void Lua::WIBase::InjectMouseMoveInput(lua_State *l, ::WIBase &hPanel, const ::V
 ::util::EventReply Lua::WIBase::InjectMouseInput(lua_State *l, ::WIBase &hPanel, const ::Vector2 &mousePos, int button, int action) { return InjectMouseInput(l, hPanel, mousePos, button, action, 0); }
 ::util::EventReply Lua::WIBase::InjectMouseClick(lua_State *l, ::WIBase &hPanel, const ::Vector2 &mousePos, int button, int mods)
 {
-	auto handled0 = InjectMouseInput(l, hPanel, mousePos, button, GLFW_PRESS, mods);
-	auto handled1 = InjectMouseInput(l, hPanel, mousePos, button, GLFW_RELEASE, mods);
+	auto handled0 = InjectMouseInput(l, hPanel, mousePos, button, KEY_PRESS, mods);
+	auto handled1 = InjectMouseInput(l, hPanel, mousePos, button, KEY_RELEASE, mods);
 	if(handled1 == ::util::EventReply::Handled)
 		handled0 = handled1;
 	return handled0;
@@ -1939,8 +1940,8 @@ void Lua::WIBase::InjectMouseMoveInput(lua_State *l, ::WIBase &hPanel, const ::V
 ::util::EventReply Lua::WIBase::InjectKeyboardInput(lua_State *l, ::WIBase &hPanel, int key, int action) { return InjectKeyboardInput(l, hPanel, key, action, 0); }
 ::util::EventReply Lua::WIBase::InjectKeyPress(lua_State *l, ::WIBase &hPanel, int key, int mods)
 {
-	auto handled0 = InjectKeyboardInput(l, hPanel, key, GLFW_PRESS, mods);
-	auto handled1 = InjectKeyboardInput(l, hPanel, key, GLFW_RELEASE, mods);
+	auto handled0 = InjectKeyboardInput(l, hPanel, key, KEY_PRESS, mods);
+	auto handled1 = InjectKeyboardInput(l, hPanel, key, KEY_RELEASE, mods);
 	if(handled1 == ::util::EventReply::Handled)
 		handled0 = handled1;
 	return handled0;

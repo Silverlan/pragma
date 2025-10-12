@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
+#include "pragma/console/helper.hpp"
 
 import pragma.client;
 
@@ -28,4 +29,7 @@ void CMD_debug_hdr_bloom(NetworkState *, pragma::BasePlayerComponent *, std::vec
 	pEl->SetSize(256, 256);
 	pEl->SetZPos(std::numeric_limits<int>::max());
 	pEl->Update();
+}
+namespace {
+	auto UVN = pragma::console::client::register_command("debug_hdr_bloom", &CMD_debug_hdr_bloom, ConVarFlags::None, "Displays the scene bloom texture on screen. Usage: debug_hdr_bloom <1/0>");
 }

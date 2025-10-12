@@ -107,7 +107,7 @@ void Lua::WorldEnvironment::GetFogEnd(lua_State *l, ::WorldEnvironment &worldEnv
 	auto &fog = worldEnv.GetFogSettings();
 	Lua::PushNumber(l, fog.GetEnd());
 }
-void Lua::WorldEnvironment::SetFogColor(lua_State *l, ::WorldEnvironment &worldEnv, const Color &color)
+void Lua::WorldEnvironment::SetFogColor(lua_State *l, ::WorldEnvironment &worldEnv, const ::Color &color)
 {
 	auto &fog = worldEnv.GetFogSettings();
 	fog.SetColor(color);
@@ -115,7 +115,7 @@ void Lua::WorldEnvironment::SetFogColor(lua_State *l, ::WorldEnvironment &worldE
 void Lua::WorldEnvironment::GetFogColor(lua_State *l, ::WorldEnvironment &worldEnv)
 {
 	auto &fog = worldEnv.GetFogSettings();
-	Lua::Push<Color>(l, fog.GetColor());
+	Lua::Push<::Color>(l, fog.GetColor());
 }
 void Lua::WorldEnvironment::SetFogEnabled(lua_State *l, ::WorldEnvironment &worldEnv, bool bEnabled)
 {

@@ -5,7 +5,6 @@ module;
 #include "pragma/lua/ostream_operator_alias.hpp"
 
 #include "pragma/lua/luaapi.h"
-#include "pragma/lua/s_lentity_components.hpp"
 #include "stdafx_server.h"
 
 

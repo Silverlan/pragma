@@ -7,7 +7,7 @@ module;
 #include "pragma/lua/luaapi.h"
 
 #include "mathutil/umath.h"
-
+#include "mathutil/uvec.h"
 #include "stdafx_client.h"
 #include "luasystem.h"
 #include "sharedutils/util_string.h"
@@ -174,7 +174,7 @@ void WILuaBase::SetRenderCommandBuffer(const std::shared_ptr<prosper::util::Prep
 	m_renderData->renderCommandBuffer = cmd;
 }
 
-void WILuaBase::Render(const DrawInfo &drawInfo, wgui::DrawState &drawState, const Mat4 &matDraw, const Vector2 &scale, uint32_t testStencilLevel, wgui::StencilPipeline stencilPipeline)
+void WILuaBase::Render(const wgui::DrawInfo &drawInfo, wgui::DrawState &drawState, const Mat4 &matDraw, const Vector2 &scale, uint32_t testStencilLevel, wgui::StencilPipeline stencilPipeline)
 {
 	WIBase::Render(drawInfo, drawState, matDraw, scale, testStencilLevel, stencilPipeline);
 	if(!m_renderData)
@@ -195,7 +195,7 @@ void WILuaBase::Render(const DrawInfo &drawInfo, wgui::DrawState &drawState, con
 		drawArgs.SetArgumentValue(ustring::string_switch::hash("h"), drawInfo.size.y);
 		drawArgs.SetArgumentValue(ustring::string_switch::hash("stencilPipeline"), umath::to_integral(stencilPipeline));
 		drawArgs.SetArgumentValue(ustring::string_switch::hash("testStencilLevel"), testStencilLevel);
-		drawArgs.SetArgumentValue(ustring::string_switch::hash("msaa"), umath::is_flag_set(drawInfo.flags, DrawInfo::Flags::Msaa));
+		drawArgs.SetArgumentValue(ustring::string_switch::hash("msaa"), umath::is_flag_set(drawInfo.flags, wgui::DrawInfo::Flags::Msaa));
 		drawArgs.SetArgumentValue(ustring::string_switch::hash("matDraw"), matDraw);
 		drawArgs.SetArgumentValue(ustring::string_switch::hash("scale"), scale);
 		drawArgs.SetArgumentValue(ustring::string_switch::hash("viewportSize"), wgui::ElementData::ToViewportSize(drawInfo.size));

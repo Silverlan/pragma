@@ -8,6 +8,7 @@ module;
 #include "DetourNavMesh.h"
 #include "DetourNavMeshBuilder.h"
 #include "DetourNavMeshQuery.h"
+#include "pragma/console/helper.hpp"
 
 module pragma.client;
 
@@ -275,4 +276,8 @@ void CMD_debug_nav_path_end(NetworkState *state, pragma::BasePlayerComponent *pl
 	if(r.hitType == RayCastHitType::None)
 		return;
 	static_cast<pragma::nav::CMesh &>(*navMesh).SetDebugPathEnd(r.position);
+}
+namespace {
+	auto UVN = pragma::console::client::register_command("debug_nav_path_start", &CMD_debug_nav_path_start, ConVarFlags::None, "Sets a start point for a navigation path. Use debug_nav_path_end to set the end point.");
+	auto UVN = pragma::console::client::register_command("debug_nav_path_end", &CMD_debug_nav_path_end, ConVarFlags::None, "Sets an end point for a navigation path. Use debug_nav_path_start to set the start point. The path will be drawn in the scene once both points have been set.");
 }

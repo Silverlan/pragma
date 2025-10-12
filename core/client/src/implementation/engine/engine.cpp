@@ -106,6 +106,7 @@ CEngine::CEngine(int argc, char *argv[])
 {
 	g_engine = this;
 
+	register_shared_convars(*console_system::client::get_convar_map());
 	register_client_launch_parameters(*GetLaunchParaMap());
 
 	RegisterCallback<void, std::reference_wrapper<const pragma::platform::Joystick>, bool>("OnJoystickStateChanged");

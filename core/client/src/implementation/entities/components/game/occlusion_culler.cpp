@@ -232,6 +232,11 @@ DLLCLIENT void CMD_debug_render_octree_dynamic_find(NetworkState *state, pragma:
 	Con::cout << "Found in:" << Con::endl;
 	node->DebugPrint();
 }
+namespace {
+	auto UVN = pragma::console::client::register_command("debug_render_octree_static_print", &CMD_debug_render_octree_static_print, ConVarFlags::None, "Prints the octree for static world geometry to the console, or a file if a file name is specified.");
+	auto UVN = pragma::console::client::register_command("debug_render_octree_dynamic_print", &CMD_debug_render_octree_dynamic_print, ConVarFlags::None, "Prints the octree for dynamic objects to the console, or a file if a file name is specified.");
+	auto UVN = pragma::console::client::register_command("debug_render_octree_dynamic_find", &CMD_debug_render_octree_dynamic_find, ConVarFlags::None, "Finds the specified entity in the octree for dynamic objects.");
+}
 
 static void CVAR_CALLBACK_debug_render_octree_static_draw(NetworkState *, const ConVar &, bool, bool val)
 {

@@ -8,7 +8,9 @@ module;
 
 #include "sharedutils/functioncallback.h"
 
+#include "pragma/console/helper.hpp"
 #include "pragma/lua/luaapi.h"
+#include "pragma/logging.hpp"
 
 #include "mathutil/umath.h"
 
@@ -18,6 +20,8 @@ module pragma.client;
 
 import :networking.net_messages;
 import :networking.model_load_manager;
+
+#undef DrawText
 
 static void NET_cl_RESOURCEINFO(NetPacket packet);
 static void NET_cl_RESOURCECOMPLETE(NetPacket packet);
@@ -331,6 +335,402 @@ void NET_cl_RESOURCE_MDL_ROUGH(NetPacket packet)
 
 void NET_cl_SERVERINFO(NetPacket packet) { pragma::get_client_state()->HandleClientReceiveServerInfo(packet); }
 void NET_cl_START_RESOURCE_TRANSFER(NetPacket packet) { pragma::get_client_state()->HandleClientStartResourceTransfer(packet); }
+
+void NET_cl_LUANET(NetPacket packet) { pragma::get_client_state()->HandleLuaNetPacket(packet); }
+
+void NET_cl_LUANET_REG(NetPacket packet)
+{
+	auto *client = pragma::get_client_state();
+	if(!client->IsGameActive())
+		return;
+	std::string name = packet->ReadString();
+	Game *game = client->GetGameState();
+	game->RegisterNetMessage(name);
+}
+
+void NET_cl_REGISTER_NET_EVENT(NetPacket packet)
+{
+	auto *client = pragma::get_client_state();
+	if(!client->IsGameActive())
+		return;
+	static_cast<CGame *>(client->GetGameState())->OnReceivedRegisterNetEvent(packet);
+}
+
+void NET_cl_SND_PRECACHE(NetPacket packet)
+{
+	std::string snd = packet->ReadString();
+	auto mode = packet->Read<uint8_t>();
+	pragma::get_client_state()->PrecacheSound(snd, static_cast<ALChannel>(mode));
+}
+
+void NET_cl_SND_CREATE(NetPacket packet)
+{
+	std::string snd = packet->ReadString();
+	auto type = packet->Read<ALSoundType>();
+	unsigned int idx = packet->Read<unsigned int>();
+	auto createFlags = packet->Read<ALCreateFlags>();
+	auto *client = pragma::get_client_state();
+	auto as = client->CreateSound(snd, ALSoundType::Generic, createFlags);
+	if(as == nullptr)
+		return;
+	client->IndexSound(as, idx);
+
+	auto fullUpdate = packet->Read<bool>();
+	if(fullUpdate == false)
+		return;
+	auto state = packet->Read<ALState>();
+
+	as->SetOffset(packet->Read<float>());
+	as->SetPitch(packet->Read<float>());
+	as->SetLooping(packet->Read<bool>());
+	as->SetGain(packet->Read<float>());
+	as->SetPosition(packet->Read<Vector3>());
+	as->SetVelocity(packet->Read<Vector3>());
+	as->SetDirection(packet->Read<Vector3>());
+	as->SetRelative(packet->Read<bool>());
+	as->SetReferenceDistance(packet->Read<float>());
+	as->SetRolloffFactor(packet->Read<float>());
+	as->SetRoomRolloffFactor(packet->Read<float>());
+	as->SetMaxDistance(packet->Read<float>());
+	as->SetMinGain(packet->Read<float>());
+	as->SetMaxGain(packet->Read<float>());
+	as->SetInnerConeAngle(packet->Read<float>());
+	as->SetOuterConeAngle(packet->Read<float>());
+	as->SetOuterConeGain(packet->Read<float>());
+	as->SetOuterConeGainHF(packet->Read<float>());
+	as->SetFlags(packet->Read<uint32_t>());
+
+	auto hasRange = packet->Read<bool>();
+	if(hasRange) {
+		auto start = packet->Read<float>();
+		auto end = packet->Read<float>();
+		as->SetRange(start, end);
+	}
+
+	as->SetFadeInDuration(packet->Read<float>());
+	as->SetFadeOutDuration(packet->Read<float>());
+	as->SetPriority(packet->Read<uint32_t>());
+
+	auto at = packet->Read<Vector3>();
+	auto up = packet->Read<Vector3>();
+	as->SetOrientation(at, up);
+
+	as->SetDopplerFactor(packet->Read<float>());
+	as->SetLeftStereoAngle(packet->Read<float>());
+	as->SetRightStereoAngle(packet->Read<float>());
+
+	as->SetAirAbsorptionFactor(packet->Read<float>());
+
+	auto directHF = packet->Read<bool>();
+	auto send = packet->Read<bool>();
+	auto sendHF = packet->Read<bool>();
+	as->SetGainAuto(directHF, send, sendHF);
+
+	auto gain = packet->Read<float>();
+	auto gainHF = packet->Read<float>();
+	auto gainLF = packet->Read<float>();
+	as->SetDirectFilter({gain, gainHF, gainLF});
+
+	std::weak_ptr<ALSound> wpSnd = as;
+	nwm::read_unique_entity(packet, [wpSnd](BaseEntity *ent) {
+		if(ent == nullptr || wpSnd.expired())
+			return;
+		wpSnd.lock()->SetSource(ent);
+	});
+
+	switch(state) {
+	case ALState::Paused:
+		as->Pause();
+		break;
+	case ALState::Playing:
+		as->Play();
+		break;
+	case ALState::Stopped:
+		as->Stop();
+		break;
+	case ALState::Initial:
+		break;
+	}
+}
+
+void NET_cl_SND_EV(NetPacket packet)
+{
+	unsigned char ev = packet->Read<unsigned char>();
+	unsigned int idx = packet->Read<unsigned int>();
+	std::shared_ptr<ALSound> as = pragma::get_client_state()->GetSoundByIndex(idx);
+	if(as == NULL)
+		return;
+	switch(static_cast<ALSound::NetEvent>(ev)) {
+	case ALSound::NetEvent::Play:
+		as->Play();
+		break;
+	case ALSound::NetEvent::Stop:
+		as->Stop();
+		break;
+	case ALSound::NetEvent::Pause:
+		as->Pause();
+		break;
+	case ALSound::NetEvent::Rewind:
+		as->Rewind();
+		break;
+	case ALSound::NetEvent::SetOffset:
+		{
+			float offset = packet->Read<float>();
+			as->SetOffset(offset);
+			break;
+		}
+	case ALSound::NetEvent::SetPitch:
+		{
+			float pitch = packet->Read<float>();
+			as->SetPitch(pitch);
+			break;
+		}
+	case ALSound::NetEvent::SetLooping:
+		{
+			bool loop = packet->Read<bool>();
+			as->SetLooping(loop);
+			break;
+		}
+	case ALSound::NetEvent::SetGain:
+		{
+			float gain = packet->Read<float>();
+			as->SetGain(gain);
+			break;
+		}
+	case ALSound::NetEvent::SetPos:
+		{
+			Vector3 pos = nwm::read_vector(packet);
+			as->SetPosition(pos);
+			break;
+		}
+	case ALSound::NetEvent::SetVelocity:
+		{
+			Vector3 vel = nwm::read_vector(packet);
+			as->SetVelocity(vel);
+			break;
+		}
+	case ALSound::NetEvent::SetDirection:
+		{
+			Vector3 dir = nwm::read_vector(packet);
+			as->SetDirection(dir);
+			break;
+		}
+	case ALSound::NetEvent::SetRelative:
+		{
+			bool relative = packet->Read<bool>();
+			as->SetRelative(relative);
+			break;
+		}
+	case ALSound::NetEvent::SetReferenceDistance:
+		{
+			float distRef = packet->Read<float>();
+			as->SetReferenceDistance(distRef);
+			break;
+		}
+	case ALSound::NetEvent::SetRolloffFactor:
+		{
+			float rolloff = packet->Read<float>();
+			as->SetRolloffFactor(rolloff);
+			break;
+		}
+	case ALSound::NetEvent::SetRoomRolloffFactor:
+		{
+			auto roomRolloff = packet->Read<float>();
+			as->SetRoomRolloffFactor(roomRolloff);
+			break;
+		}
+	case ALSound::NetEvent::SetMaxDistance:
+		{
+			float dist = packet->Read<float>();
+			as->SetMaxDistance(dist);
+			break;
+		}
+	case ALSound::NetEvent::SetMinGain:
+		{
+			float gain = packet->Read<float>();
+			as->SetMinGain(gain);
+			break;
+		}
+	case ALSound::NetEvent::SetMaxGain:
+		{
+			float gain = packet->Read<float>();
+			as->SetMaxGain(gain);
+			break;
+		}
+	case ALSound::NetEvent::SetConeInnerAngle:
+		{
+			float coneInnerAngle = packet->Read<float>();
+			as->SetInnerConeAngle(coneInnerAngle);
+			break;
+		}
+	case ALSound::NetEvent::SetConeOuterAngle:
+		{
+			float coneOuterAngle = packet->Read<float>();
+			as->SetOuterConeAngle(coneOuterAngle);
+			break;
+		}
+	case ALSound::NetEvent::SetConeOuterGain:
+		{
+			float coneOuterGain = packet->Read<float>();
+			as->SetOuterConeGain(coneOuterGain);
+			break;
+		}
+	case ALSound::NetEvent::SetConeOuterGainHF:
+		{
+			float coneOuterGainHF = packet->Read<float>();
+			as->SetOuterConeGainHF(coneOuterGainHF);
+			break;
+		}
+	case ALSound::NetEvent::SetFlags:
+		{
+			unsigned int flags = packet->Read<unsigned int>();
+			as->SetFlags(flags);
+			break;
+		}
+	case ALSound::NetEvent::SetType:
+		{
+			auto type = packet->Read<ALSoundType>();
+			as->SetType(type);
+			break;
+		}
+	case ALSound::NetEvent::SetSource:
+		{
+			auto *ent = nwm::read_entity(packet);
+			as->SetSource(ent);
+			break;
+		}
+	case ALSound::NetEvent::SetRange:
+		{
+			auto start = packet->Read<float>();
+			auto end = packet->Read<float>();
+			as->SetRange(start, end);
+			break;
+		}
+	case ALSound::NetEvent::ClearRange:
+		{
+			as->ClearRange();
+			break;
+		}
+	case ALSound::NetEvent::SetFadeInDuration:
+		{
+			auto t = packet->Read<float>();
+			as->SetFadeInDuration(t);
+			break;
+		}
+	case ALSound::NetEvent::SetFadeOutDuration:
+		{
+			auto t = packet->Read<float>();
+			as->SetFadeOutDuration(t);
+			break;
+		}
+	case ALSound::NetEvent::FadeIn:
+		{
+			auto t = packet->Read<float>();
+			as->FadeIn(t);
+			break;
+		}
+	case ALSound::NetEvent::FadeOut:
+		{
+			auto t = packet->Read<float>();
+			as->FadeOut(t);
+			break;
+		}
+	case ALSound::NetEvent::SetIndex:
+		{
+			auto idx = packet->Read<uint32_t>();
+			CALSound::SetIndex(as.get(), idx);
+			break;
+		}
+	case ALSound::NetEvent::SetPriority:
+		{
+			auto priority = packet->Read<uint32_t>();
+			as->SetPriority(priority);
+			break;
+		}
+	case ALSound::NetEvent::SetOrientation:
+		{
+			auto at = packet->Read<Vector3>();
+			auto up = packet->Read<Vector3>();
+			as->SetOrientation(at, up);
+			break;
+		}
+	case ALSound::NetEvent::SetDopplerFactor:
+		{
+			auto factor = packet->Read<float>();
+			as->SetDopplerFactor(factor);
+			break;
+		}
+	case ALSound::NetEvent::SetLeftStereoAngle:
+		{
+			auto ang = packet->Read<float>();
+			as->SetLeftStereoAngle(ang);
+			break;
+		}
+	case ALSound::NetEvent::SetRightStereoAngle:
+		{
+			auto ang = packet->Read<float>();
+			as->SetRightStereoAngle(ang);
+			break;
+		}
+	case ALSound::NetEvent::SetAirAbsorptionFactor:
+		{
+			auto factor = packet->Read<float>();
+			as->SetAirAbsorptionFactor(factor);
+			break;
+		}
+	case ALSound::NetEvent::SetGainAuto:
+		{
+			auto directHF = packet->Read<float>();
+			auto send = packet->Read<float>();
+			auto sendHF = packet->Read<float>();
+			as->SetGainAuto(directHF, send, sendHF);
+			break;
+		}
+	case ALSound::NetEvent::SetDirectFilter:
+		{
+			auto gain = packet->Read<float>();
+			auto gainHF = packet->Read<float>();
+			auto gainLF = packet->Read<float>();
+			as->SetDirectFilter({gain, gainHF, gainLF});
+			break;
+		}
+	case ALSound::NetEvent::AddEffect:
+		{
+			auto effectName = packet->ReadString();
+			auto gain = packet->Read<float>();
+			auto gainHF = packet->Read<float>();
+			auto gainLF = packet->Read<float>();
+			as->AddEffect(effectName, {gain, gainHF, gainLF});
+			break;
+		}
+	case ALSound::NetEvent::RemoveEffect:
+		{
+			auto effectName = packet->ReadString();
+			as->RemoveEffect(effectName);
+			break;
+		}
+	case ALSound::NetEvent::SetEffectParameters:
+		{
+			auto effectName = packet->ReadString();
+			auto gain = packet->Read<float>();
+			auto gainHF = packet->Read<float>();
+			auto gainLF = packet->Read<float>();
+			as->SetEffectParameters(effectName, {gain, gainHF, gainLF});
+			break;
+		}
+	case ALSound::NetEvent::SetEntityMapIndex:
+		{
+			auto idx = packet->Read<uint32_t>();
+			//as->SetIdentifier("world_sound" +std::to_string(idx)); // Has to correspond to identifier in c_game_audio.cpp
+			break;
+		}
+	default:
+		{
+			spdlog::warn("Unhandled sound net event {}!", ev);
+			break;
+		}
+	}
+}
 
 CBaseEntity *NET_cl_ENT_CREATE(NetPacket &packet, bool bSpawn, bool bIgnoreMapInit = false)
 {
@@ -1558,6 +1958,11 @@ void CMD_debug_aim_info(NetworkState *state, pragma::BasePlayerComponent *pl, st
 	std::string mat;
 	auto b = res.GetMaterial(mat);
 	Con::cout << "Hit Material: " << (b ? mat : "Nothing") << Con::endl;
+}
+namespace {
+	auto UVN = pragma::console::client::register_command("debug_ai_schedule", &CMD_debug_ai_schedule, ConVarFlags::None, "Prints the current schedule behavior tree for the specified NPC on screen.");
+	auto UVN = pragma::console::client::register_command("debug_draw_line", &CMD_debug_draw_line, ConVarFlags::None, "Draws a line from the current camera position to the specified target position");
+	auto UVN = pragma::console::client::register_command("debug_aim_info", &CMD_debug_aim_info, ConVarFlags::None, "Prints information about whatever the local player is looking at.");
 }
 
 void NET_cl_DEBUG_AI_SCHEDULE_TREE(NetPacket packet)

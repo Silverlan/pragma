@@ -23,7 +23,7 @@ export namespace Lua {
 		DLLCLIENT al::PEffect register_aux_effect(const std::string &name, const al::EfxCompressor &props);
 		DLLCLIENT al::PEffect register_aux_effect(const std::string &name, const al::EfxEqualizer &props);
 
-		DLLCLIENT al::DistanceModel get_aux_effect();
+		DLLCLIENT al::PEffect get_aux_effect(const std::string &name);
 		DLLCLIENT void set_distance_model(al::DistanceModel distanceModel);
 		DLLCLIENT al::DistanceModel get_distance_model();
 		DLLCLIENT bool is_supported(al::ChannelConfig channels, al::SampleType type);

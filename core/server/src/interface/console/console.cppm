@@ -5,3 +5,4 @@ module;
 
 export module pragma.server.console;
 export import pragma.server.console.util;
+export import pragma.server.register_commands;

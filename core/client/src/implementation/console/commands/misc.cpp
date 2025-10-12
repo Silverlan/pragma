@@ -33,22 +33,12 @@ static void CMD_screenshot(NetworkState *state, pragma::BasePlayerComponent *pl,
 static void CMD_shader_reload(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
 static void CMD_shader_list(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
 static void CMD_shader_optimize(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
-static void CMD_debug_light_shadowmap(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
-static void CMD_debug_hdr_bloom(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
-static void CMD_debug_render_octree_dynamic_print(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
-static void CMD_debug_render_octree_dynamic_find(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
-static void CMD_debug_render_octree_static_print(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
 static void CMD_debug_ai_schedule_print(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
-static void CMD_debug_ai_schedule(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
-static void CMD_debug_aim_info(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
-static void CMD_debug_draw_line(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
 
 static void CMD_thirdperson(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
 static void CMD_flashlight_toggle(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
 static void CMD_reloadmaterial(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
 static void CMD_reloadmaterials(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
-static void CMD_debug_nav_path_start(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
-static void CMD_debug_nav_path_end(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
 static void CMD_fps(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
 #ifdef _DEBUG
 static void CMD_cl_dump_sounds(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
@@ -98,21 +88,11 @@ namespace {
 	auto UVN = register_command("shader_reload", &CMD_shader_reload, ConVarFlags::None, "Reloads a specific shader, or all registered shaders if no arguments are given. Usage: shader_reload <shaderName>");
 	auto UVN = register_command("shader_list", &CMD_shader_list, ConVarFlags::None, "Prints a list of all currently loaded shaders");
 	auto UVN = register_command("shader_optimize", &CMD_shader_optimize, ConVarFlags::None, "Uses LunarGLASS to optimize the specified shader.");
-	auto UVN = register_command("debug_light_shadowmap", &CMD_debug_light_shadowmap, ConVarFlags::None, "Displays the depth map for the given light on screen. Call without arguments to turn the display off. Usage: debug_light_shadowmap <lightEntityIndex>");
-	auto UVN = register_command("debug_hdr_bloom", &CMD_debug_hdr_bloom, ConVarFlags::None, "Displays the scene bloom texture on screen. Usage: debug_hdr_bloom <1/0>");
-	auto UVN = register_command("debug_render_octree_dynamic_print", &CMD_debug_render_octree_dynamic_print, ConVarFlags::None, "Prints the octree for dynamic objects to the console, or a file if a file name is specified.");
-	auto UVN = register_command("debug_render_octree_dynamic_find", &CMD_debug_render_octree_dynamic_find, ConVarFlags::None, "Finds the specified entity in the octree for dynamic objects.");
-	auto UVN = register_command("debug_render_octree_static_print", &CMD_debug_render_octree_static_print, ConVarFlags::None, "Prints the octree for static world geometry to the console, or a file if a file name is specified.");
 	auto UVN = register_command("debug_ai_schedule_print", &CMD_debug_ai_schedule_print, ConVarFlags::None, "Prints the current schedule behavior tree for the specified NPC.");
-	auto UVN = register_command("debug_ai_schedule", &CMD_debug_ai_schedule, ConVarFlags::None, "Prints the current schedule behavior tree for the specified NPC on screen.");
-	auto UVN = register_command("debug_aim_info", &CMD_debug_aim_info, ConVarFlags::None, "Prints information about whatever the local player is looking at.");
-	auto UVN = register_command("debug_draw_line", &CMD_debug_draw_line, ConVarFlags::None, "Draws a line from the current camera position to the specified target position");
 
 	auto UVN = register_command("flashlight", &CMD_flashlight_toggle, ConVarFlags::None, "Toggles the flashlight.");
 	auto UVN = register_command("reloadmaterial", &CMD_reloadmaterial, ConVarFlags::None, "Reloads the given material (and textures associated with it). Usage: reloadmaterial <materialFile>");
 	auto UVN = register_command("reloadmaterials", &CMD_reloadmaterials, ConVarFlags::None, "Reloads all loaded materials and textures.");
-	auto UVN = register_command("debug_nav_path_start", &CMD_debug_nav_path_start, ConVarFlags::None, "Sets a start point for a navigation path. Use debug_nav_path_end to set the end point.");
-	auto UVN = register_command("debug_nav_path_end", &CMD_debug_nav_path_end, ConVarFlags::None, "Sets an end point for a navigation path. Use debug_nav_path_start to set the start point. The path will be drawn in the scene once both points have been set.");
 	auto UVN = register_command("cl_list", &Console::commands::cl_list, ConVarFlags::None, "Prints a list of all clientside console commands to the console.");
 	auto UVN = register_command("cl_find", &Console::commands::cl_find, ConVarFlags::None, "Finds similar console commands to whatever was given as argument.");
 	auto UVN = register_command("fps", &CMD_fps, ConVarFlags::None, "Prints the current fps to the console.");

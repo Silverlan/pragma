@@ -17,6 +17,8 @@ export module pragma.client:debug.overlay;
 import :client_state;
 import :engine;
 
+#undef DrawText
+
 export namespace DebugRenderer {
 	enum class DLLCLIENT Type : uint32_t {
 		Triangles = 0,

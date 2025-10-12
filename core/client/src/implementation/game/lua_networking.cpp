@@ -70,22 +70,3 @@ void Lua::net::client::receive(lua_State *l, const std::string &name, const Lua:
 	game->RegisterLuaNetMessage(name, fc);
 }
 
-DLLCLIENT void NET_cl_luanet(NetPacket packet) { pragma::get_client_state()->HandleLuaNetPacket(packet); }
-
-DLLCLIENT void NET_cl_luanet_reg(NetPacket packet)
-{
-	auto *client = pragma::get_client_state();
-	if(!client->IsGameActive())
-		return;
-	std::string name = packet->ReadString();
-	Game *game = client->GetGameState();
-	game->RegisterNetMessage(name);
-}
-
-DLLCLIENT void NET_cl_register_net_event(NetPacket packet)
-{
-	auto *client = pragma::get_client_state();
-	if(!client->IsGameActive())
-		return;
-	static_cast<CGame *>(client->GetGameState())->OnReceivedRegisterNetEvent(packet);
-}

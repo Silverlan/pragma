@@ -6,6 +6,7 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
+#include "pragma/console/helper.hpp"
 #include <image/prosper_render_target.hpp>
 
 import pragma.client;
@@ -73,6 +74,9 @@ void CMD_debug_light_shadowmap(NetworkState *nw, pragma::BasePlayerComponent *, 
 	pElSm->SetShadowMapType(smType);
 	pElSm->SetName(name);
 	pElSm->Update();
+}
+namespace {
+	auto UVN = pragma::console::client::register_command("debug_light_shadowmap", &CMD_debug_light_shadowmap, ConVarFlags::None, "Displays the depth map for the given light on screen. Call without arguments to turn the display off. Usage: debug_light_shadowmap <lightEntityIndex>");
 }
 static void CVAR_CALLBACK_cl_render_shadow_pssm_split_count(NetworkState *state, const ConVar &, int, int)
 {

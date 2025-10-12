@@ -11,6 +11,7 @@ module;
 #include "fsys/filesystem.h"
 
 #include "mathutil/umath.h"
+#include "mathutil/color.h"
 
 #include "stdafx_cengine.h"
 #include <prosper_util.hpp>

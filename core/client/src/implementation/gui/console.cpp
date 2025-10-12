@@ -9,7 +9,7 @@ module;
 #include "sharedutils/util_event_reply.hpp"
 
 #include "pragma/lua/luaapi.h"
-
+#include "pragma/lua/lua_error_handling.hpp"
 #include "stdafx_client.h"
 
 module pragma.client;

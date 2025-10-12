@@ -114,6 +114,7 @@ Engine::Engine(int argc, char *argv[]) : CVarHandler(), m_logFile(nullptr), m_ti
 {
 	g_engine = this;
 	
+	register_shared_convars(*console_system::server::get_convar_map());
 	register_launch_parameters(*GetLaunchParaMap());
 
 #ifdef __linux__

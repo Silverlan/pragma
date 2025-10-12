@@ -16,6 +16,7 @@ module;
 
 module pragma.server.server_state;
 
+import pragma.server.console.register_commands;
 import pragma.server.core;
 import pragma.server.entities;
 import pragma.server.game;

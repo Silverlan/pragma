@@ -10,7 +10,7 @@ module pragma.server.scripting.lua.script_watcher;
 
 import pragma.server.game;
 import pragma.server.networking.resource_manager;
-export pragma.server.server_state;
+import pragma.server.server_state;
 
 #undef FindResource
 

@@ -17,6 +17,7 @@ module pragma.server.game;
 
 import pragma.server.ai;
 import pragma.server.audio;
+import pragma.server.console.register_commands;
 import pragma.server.console.util;
 import pragma.server.core.cache_info;
 import pragma.server.debug;

@@ -3,7 +3,7 @@
 
 module;
 #include "pragma/lua/luaapi.h"
-
+#include "mathutil/color.h"
 #include "stdafx_server.h"
 
 module pragma.server.scripting.lua.libraries.util;
@@ -33,13 +33,13 @@ luabind::object Lua::util::Server::fire_bullets(lua_State *l, const BulletInfo &
 	if(bulletInfo.tracerBloom != BulletInfo::DEFAULT_TRACER_BLOOM)
 		tracerSettings |= 32;
 
-	NetPacket packet;
+	::NetPacket packet;
 	std::vector<Vector3> hitPositions;
 	std::vector<Vector3> hitNormals;
 	std::vector<int32_t> hitSurfaceMaterials;
 	Vector3 start;
 	uint32_t numTracer = 0;
-	auto r = Lua::util::fire_bullets(l, const_cast<BulletInfo &>(bulletInfo), hitReport, [&hitPositions, &hitNormals, &hitSurfaceMaterials, &start, &numTracer](DamageInfo &dmg, TraceData &, TraceResult &result, uint32_t &tracerCount) {
+	auto r = Lua::util::fire_bullets(l, const_cast<BulletInfo &>(bulletInfo), hitReport, [&hitPositions, &hitNormals, &hitSurfaceMaterials, &start, &numTracer](DamageInfo &dmg, ::TraceData &, TraceResult &result, uint32_t &tracerCount) {
 		if(result.hitType != RayCastHitType::None) {
 			hitPositions.push_back(result.position);
 			hitNormals.push_back(result.normal);

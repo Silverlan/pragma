@@ -8,16 +8,18 @@ module;
 
 module pragma.server.entities.components.liquid_surface_simulation;
 
+import pragma.server.console.register_commands;
+import pragma.server.console.util;
 import pragma.server.entities;
 
 using namespace pragma;
 
 static std::vector<SLiquidSurfaceSimulationComponent *> s_waterEntities = {};
 namespace {
-	auto _ = pragma::console::client::register_variable_listener<int>("sv_water_surface_simulation_shared", +[](NetworkState *, const ConVar &, float, float val) {
+	auto _ = pragma::console::server::register_variable_listener<float>("sv_water_surface_simulation_shared", +[](NetworkState *, const ConVar &, float, float val) {
 		for(auto *entWater : s_waterEntities)
 			entWater->UpdateSurfaceSimulator();
-	}
+	});
 };
 
 SLiquidSurfaceSimulationComponent::SLiquidSurfaceSimulationComponent(BaseEntity &ent) : BaseLiquidSurfaceSimulationComponent(ent) { s_waterEntities.push_back(this); }

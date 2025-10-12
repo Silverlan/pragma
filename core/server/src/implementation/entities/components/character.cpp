@@ -10,6 +10,8 @@ module pragma.server.entities.components.character;
 
 import pragma.server.ai;
 import pragma.server.entities;
+import pragma.server.entities.components.ai;
+import pragma.server.entities.components.player;
 import pragma.server.entities.components.weapon;
 
 using namespace pragma;

@@ -8,6 +8,7 @@ module;
 module pragma.server.server_state;
 
 import pragma.server.entities.components;
+import pragma.shared;
 
 #undef GetMessage
 
@@ -17,7 +18,7 @@ bool ServerState::HandlePacket(pragma::networking::IServerClient &session, NetPa
 	SVNetMessage *msg = GetNetMessage(ID);
 	if(msg == nullptr)
 		return false;
-	msg->handler(session, packet);
+	msg->handler(static_cast<ServerClientHandle>(&session), packet);
 	return true;
 }
 

@@ -25,13 +25,6 @@ void SGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 {
 	Game::RegisterLuaEntityComponents(entsMod);
 
-	auto *l = GetLuaState();
-	Lua::register_sv_ai_component(l, entsMod);
-	Lua::register_sv_character_component(l, entsMod);
-	Lua::register_sv_player_component(l, entsMod);
-	Lua::register_sv_vehicle_component(l, entsMod);
-	Lua::register_sv_weapon_component(l, entsMod);
-
 	auto defSGamemode = pragma::lua::create_entity_component_class<pragma::SGamemodeComponent, pragma::BaseGamemodeComponent>("GamemodeComponent");
 	entsMod[defSGamemode];
 
@@ -219,5 +212,6 @@ void SGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	auto defSBot = pragma::lua::create_entity_component_class<pragma::SBotComponent, pragma::BaseBotComponent>("BotComponent");
 	entsMod[defSBot];
 
+	auto *l = GetLuaState();
 	RegisterLuaEntityComponents2_sv(l, entsMod); // Split up to prevent compiler errors
 }

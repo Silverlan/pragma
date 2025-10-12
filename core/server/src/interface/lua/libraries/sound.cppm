@@ -9,10 +9,12 @@ module;
 
 export module pragma.server.scripting.lua.libraries.sound;
 
+export import pragma.shared;
+
 export namespace Lua {
 	namespace sound {
 		namespace Server {
-			DLLSERVER int create(lua_State *l);
+			std::shared_ptr<::ALSound> create(lua_State *l, const std::string &snd, ALSoundType type, ALCreateFlags flags);
 		};
 	};
 };

@@ -19,7 +19,7 @@ export {
 	using ServerClientHandle = void*;
 	class DLLNETWORK SVNetMessage {
 	public:
-		using Handler = void(*)(ServerClientHandle &, NetPacket);
+		using Handler = void(*)(ServerClientHandle, NetPacket);
 		Handler handler;
 		unsigned int ID;
 	};

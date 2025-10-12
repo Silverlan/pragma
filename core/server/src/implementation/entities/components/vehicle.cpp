@@ -190,5 +190,5 @@ void SVehicleComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &modE
 	BaseVehicleComponent::RegisterLuaBindings(l, modEnts);
 
 	auto def = pragma::lua::create_entity_component_class<pragma::SVehicleComponent, pragma::BaseVehicleComponent>("VehicleComponent");
-	module[def];
+	modEnts[def];
 }

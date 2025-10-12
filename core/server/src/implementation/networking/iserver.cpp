@@ -8,6 +8,7 @@ module;
 module pragma.server.networking.iserver;
 
 import pragma.server.networking.iserver_client;
+import pragma.server.networking.recipient_filter;
 
 bool pragma::networking::IServer::Shutdown(Error &outErr)
 {

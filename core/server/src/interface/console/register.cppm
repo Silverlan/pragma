@@ -8,11 +8,12 @@ module;
 #include "udm.hpp"
 #include <string>
 
-export module pragma.server:console.register_commands;
+export module pragma.server.console.register_commands;
 
 export import pragma.shared;
 
 export namespace pragma::console {
+	using DummyReturnValue = bool;
 	namespace server {
 		template<typename T>
 			std::shared_ptr<ConVar> register_variable(const std::string &scmd, const T &value, ConVarFlags flags, const std::string &help = "", const std::optional<std::string> &usageHelp = {})

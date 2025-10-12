@@ -7,11 +7,13 @@ module;
 #include "wms_shared.h"
 #include "wms_message.h"
 #include "wmserverdata.h"
+#include "pragma/console/helper.hpp"
 #include "sharedutils/util_string_hash.hpp"
 #include <sharedutils/util_clock.hpp>
 
 module pragma.server.networking.standard_server;
 
+import pragma.server.console.register_commands;
 import pragma.server.entities;
 import pragma.server.entities.components;
 import pragma.server.server_state;
@@ -49,7 +51,7 @@ void pragma::networking::NWMActiveServer::OnPacketReceived(const NWMEndpoint &ep
 	nwm::Server::OnPacketReceived(ep, cl, id, packet);
 #if DEBUG_SERVER_VERBOSE == 1
 	auto *svMap = GetServerMessageMap();
-	ustring::StringMap<uint32_t> *svMsgs;
+	util::StringMap<uint32_t> *svMsgs;
 	svMap->GetNetMessages(&svMsgs);
 	auto it = std::find_if(svMsgs->begin(), svMsgs->end(), [id](const std::pair<std::string, uint32_t> &pair) { return (pair.second == id) ? true : false; });
 	std::string msgName = (it != svMsgs->end()) ? it->first : "Unknown";
@@ -232,5 +234,5 @@ static void sv_timeout_duration_callback(NetworkState *, const ConVar &, float, 
 	sv->SetTimeoutDuration(GET_TIMEOUT_DURATION(val));
 }
 namespace {
-	auto _ = pragma::console::server::register_variable_listener<float>("sv_timeout_duration",&sv_timeout_duration_callback);
+	auto UVN = pragma::console::server::register_variable_listener<float>("sv_timeout_duration",&sv_timeout_duration_callback);
 }

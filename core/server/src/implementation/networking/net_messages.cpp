@@ -4,6 +4,8 @@
 module;
 
 #include "stdafx_server.h"
+#include "material_manager2.hpp"
+#include <material_property_block_view.hpp>
 
 module pragma.server.networking.net_messages;
 
@@ -13,6 +15,7 @@ import pragma.server.game;
 import pragma.server.model_manager;
 import pragma.server.networking.iserver_client;
 import pragma.server.server_state;
+import pragma.shared;
 
 static void NET_sv_RESOURCEINFO_RESPONSE(pragma::networking::IServerClient &session, NetPacket packet);
 static void NET_sv_RESOURCE_REQUEST(pragma::networking::IServerClient &session, NetPacket packet);
@@ -46,10 +49,10 @@ static void NET_sv_DEBUG_AI_NAVIGATION(pragma::networking::IServerClient &sessio
 static void NET_sv_DEBUG_AI_SCHEDULE_PRINT(pragma::networking::IServerClient &session, NetPacket packet);
 static void NET_sv_DEBUG_AI_SCHEDULE_TREE(pragma::networking::IServerClient &session, NetPacket packet);
 
-static void NET_sv_SEND(pragma::networking::IServerClient &session, NetPacket packet);
+static void NET_sv_CL_SEND(pragma::networking::IServerClient &session, NetPacket packet);
 
 #define REGISTER_NET_MSG(NAME) \
-    netMessageMap.RegisterNetMessage(server::NAME, &NET_sv_##NAME)
+    netMessageMap.RegisterNetMessage(server::NAME, +[](ServerClientHandle session, NetPacket packet) {NET_sv_##NAME(*static_cast<pragma::networking::IServerClient*>(session), packet);})
 
 static void register_net_messages(ServerMessageMap &netMessageMap)
 {
@@ -96,7 +99,7 @@ void register_server_net_messages()
 		return;
 	netMessagesRegistered = true;
     
-    register_net_messages(GetServerMessageMap());
+    register_net_messages(*GetServerMessageMap());
 }
 
 #define RESOURCE_TRANSFER_VERBOSE 0
@@ -633,7 +636,7 @@ void NET_sv_DEBUG_AI_NAVIGATION(pragma::networking::IServerClient &session, NetP
 		npc->_debugSendNavInfo(*pl);
 }
 
-void NET_sv_SEND(pragma::networking::IServerClient &session, NetPacket packet)
+void NET_sv_CL_SEND(pragma::networking::IServerClient &session, NetPacket packet)
 {
 	std::string msg = packet->ReadString();
 	Con::csv << "Received cl_send message from client '" << session.GetIdentifier() << "': " << msg << Con::endl;

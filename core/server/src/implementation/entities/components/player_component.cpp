@@ -442,10 +442,6 @@ void SPlayerComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &modEn
 	modEnts[def];
 }
 
-void Lua::register_sv_player_component(lua_State *l, luabind::module_ &module)
-{
-
-}
 void Lua::Player::Server::Respawn(lua_State *l, pragma::SPlayerComponent &hEnt)
 {
 	auto charComponent = hEnt.GetEntity().GetCharacterComponent();

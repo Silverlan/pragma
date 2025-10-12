@@ -106,13 +106,13 @@ void SGame::RegisterLuaLibraries()
 
 	Lua::ai::server::register_library(GetLuaInterface());
 
-	Lua::RegisterLibrary(GetLuaState(), "sound", {{"create", Lua::sound::Server::create}, LUA_LIB_SOUND_SHARED});
+	auto soundMod = luabind::module(GetLuaState(), "sound");
+	soundMod[luabind::def("create", &Lua::sound::Server::create)];
+	Lua::sound::register_library(soundMod);
 	Lua::sound::register_enums(GetLuaState());
 
 	auto alSoundClassDef = luabind::class_<ALSound>("Source");
 	Lua::ALSound::register_class(alSoundClassDef);
-
-	auto soundMod = luabind::module(GetLuaState(), "sound");
 	soundMod[alSoundClassDef];
 
 	utilDebug[luabind::def("behavior_selector_type_to_string", Lua::debug::Server::behavior_selector_type_to_string), luabind::def("behavior_task_decorator_type_to_string", Lua::debug::Server::behavior_task_decorator_type_to_string),

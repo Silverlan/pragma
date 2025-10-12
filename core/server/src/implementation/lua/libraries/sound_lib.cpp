@@ -10,10 +10,12 @@ module pragma.server.scripting.lua.libraries.sound;
 
 import pragma.server.server_state;
 
-int Lua::sound::Server::create(lua_State *l)
+std::shared_ptr<::ALSound> Lua::sound::Server::create(lua_State *l, const std::string &snd, ALSoundType type, ALCreateFlags flags)
 {
-	auto bShared = true;
-	if(Lua::IsSet(l, 4))
-		bShared = Lua::CheckBool(l, 4);
-	return Lua::sound::create(l, [bShared](NetworkState *nw, const std::string &name, ALSoundType type, ALCreateFlags flags) -> std::shared_ptr<::ALSound> { return static_cast<ServerState *>(nw)->CreateSound(name, type, flags); });
+	auto *state = Engine::Get()->GetNetworkState(l);
+	auto pAl = state->CreateSound(snd, type, flags);
+	if(pAl == nullptr)
+		return nullptr;
+	pAl->SetType(type);
+	return pAl;
 }

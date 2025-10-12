@@ -7,7 +7,8 @@ module;
 #include "pragma/logging.hpp"
 
 #include "pragma/lua/luaapi.h"
-
+#include "pragma/lua/policies/default_parameter_policy.hpp"
+#include <luabind/copy_policy.hpp>
 #include "stdafx_server.h"
 
 module pragma.server.entities.components.ai;

@@ -6,9 +6,7 @@ module;
 #include "pragma/console/helper.hpp"
 #include "udm.hpp"
 
-module pragma.server;
-
-import :console.commands;
+module pragma.server.console.register_commands;
 
 namespace {
 	using namespace pragma::console::server;

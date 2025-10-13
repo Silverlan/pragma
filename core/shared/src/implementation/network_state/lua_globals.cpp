@@ -375,13 +375,13 @@ void Game::RegisterLuaGlobals()
 
 	Lua::RegisterLibraryEnums(GetLuaState(), "file",
 	  {
-	    {"FLAG_INVALID", FVFILE_INVALID},
-	    {"FLAG_PACKAGE", FVFILE_PACKAGE},
-	    {"FLAG_COMPRESSED", FVFILE_COMPRESSED},
-	    {"FLAG_DIRECTORY", FVFILE_DIRECTORY},
-	    {"FLAG_ENCRYPTED", FVFILE_ENCRYPTED},
-	    {"FLAG_VIRTUAL", FVFILE_VIRTUAL},
-	    {"FLAG_READONLY", FVFILE_READONLY},
+	    {"FLAG_INVALID", FVFile::Invalid},
+	    {"FLAG_PACKAGE", FVFile::Package},
+	    {"FLAG_COMPRESSED", FVFile::Compressed},
+	    {"FLAG_DIRECTORY", FVFile::Directory},
+	    {"FLAG_ENCRYPTED", FVFile::Encrypted},
+	    {"FLAG_VIRTUAL", FVFile::Virtual},
+	    {"FLAG_READONLY", FVFile::ReadOnly},
 
 	    {"OPEN_MODE_READ", umath::to_integral(FileOpenMode::Read)},
 	    {"OPEN_MODE_WRITE", umath::to_integral(FileOpenMode::Write)},
@@ -392,9 +392,9 @@ void Game::RegisterLuaGlobals()
 
 	Lua::RegisterLibraryEnums(GetLuaState(), "file",
 	  {
-	    {"TYPE_VIRTUAL", VFILE_VIRTUAL},
-	    {"TYPE_LOCAL", VFILE_LOCAL},
-	    {"TYPE_PACKAGE", VFILE_PACKAGE},
+	    {"TYPE_VIRTUAL", EVFile::Virtual},
+	    {"TYPE_LOCAL", EVFile::Local},
+	    {"TYPE_PACKAGE", EVFile::Package},
 	  });
 
 	Lua::RegisterLibraryEnums(GetLuaState(), "file",

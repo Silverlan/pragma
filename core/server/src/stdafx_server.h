@@ -24,17 +24,10 @@
 #include <queue>
 #include <any>
 
-#include <mathutil/glmutil.h>
-#include <mathutil/eulerangles.h>
-#include <mathutil/uquat.h>
-#include <mathutil/uvec.h>
 #ifdef _WIN32
 #endif
 #ifdef _WIN32
 #endif
-#include <sharedutils/util.h>
-#include <sharedutils/util_string.h>
-#include <mathutil/umath.h>
 #include <algorithm>
 #include <vector>
 #include <string>

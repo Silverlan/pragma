@@ -573,7 +573,7 @@ bool Lua::file::Write(lua_State *l, std::string strPath, const std::string &cont
 	FileManager::CreatePath(path.data());
 
 	auto f = FileManager::OpenFile(fullPath.GetString().c_str(), "w");
-	if(f == NULL || f->GetType() != VFILE_LOCAL)
+	if(f == NULL || f->GetType() != EVFile::Local)
 		return false;
 	auto freal = std::static_pointer_cast<VFilePtrInternalReal>(f);
 	freal->Write(content.c_str(), content.length());

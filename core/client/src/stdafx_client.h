@@ -7,15 +7,8 @@
 #define NOMINMAX
 #include <Windows.h>
 #endif
-#include <mathutil/umath.h>
-#include <mathutil/glmutil.h>
-#include <mathutil/eulerangles.h>
-#include <mathutil/uquat.h>
-#include <mathutil/uvec.h>
 #ifdef _WIN32
 #endif
-#include <sharedutils/util.h>
-#include <sharedutils/util_string.h>
 #include <algorithm>
 #include <vector>
 #include <string>

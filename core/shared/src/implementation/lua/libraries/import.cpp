@@ -344,7 +344,7 @@ int Lua::import::import_model_asset(lua_State *l)
 #if 0
 	auto &f = Lua::Check<LFile>(l,1);
 	auto hFile = f.GetHandle();
-	if(hFile->GetType() != VFILE_LOCAL)
+	if(hFile->GetType() != EVFile::Local)
 		return 0;
 	auto t = Lua::CreateTable(l);
 	auto idx = 1;

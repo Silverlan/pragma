@@ -729,7 +729,7 @@ if with_pfm:
 		)
 		add_pragma_module(
 			name="pr_opencv",
-			commitSha="fdd1b1ec230b0cca6c822fe4dfa204415550a014",
+			commitSha="9997713c9afb755f53f739b39769fcf153730fbf",
 			repositoryUrl="https://github.com/Silverlan/pr_opencv.git",
 			"feat/cxx_module"
 		)

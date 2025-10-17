@@ -4,20 +4,15 @@
 module;
 #include "any"
 
-#include "mathutil/umath.h"
 
 #include "variant"
 
 #include "cassert"
 
-#include "sharedutils/util.h"
 
 #include "pragma/lua/luaapi.h"
 
-#include "mathutil/uvec.h"
 
-#include <sharedutils/datastream.h>
-#include <mathutil/color.h>
 
 module pragma.shared;
 

@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <fsys/vfileptr.h>
 #include <string>
 #include <functional>
 #include <memory>

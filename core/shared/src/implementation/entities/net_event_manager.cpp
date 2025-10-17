@@ -4,7 +4,6 @@
 module;
 #include "algorithm"
 
-#include "sharedutils/util_string.h"
 
 module pragma.shared;
 

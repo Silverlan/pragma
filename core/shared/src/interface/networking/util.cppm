@@ -4,11 +4,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <mathutil/glmutil.h>
-#include <sharedutils/functioncallback.h>
-#include "mathutil/eulerangles.h"
-#include "mathutil/uvec.h"
-#include "mathutil/uquat.h"
 
 
 

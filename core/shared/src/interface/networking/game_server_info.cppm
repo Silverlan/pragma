@@ -7,7 +7,6 @@ module;
 #include <cinttypes>
 #include <string>
 #include <optional>
-#include <sharedutils/util_version.h>
 
 export module pragma.shared:networking.game_server_info;
 

@@ -5,8 +5,6 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/lua/luaapi.h"
-#include "sharedutils/callback_handler.h"
-#include <sharedutils/functioncallback.h>
 
 export module pragma.shared:scripting.lua.classes.callback;
 

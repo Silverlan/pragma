@@ -6,11 +6,8 @@ module;
 
 #include "cassert"
 
-#include "sharedutils/util.h"
 
-#include "mathutil/uvec.h"
 
-#include <udm.hpp>
 
 module pragma.shared;
 

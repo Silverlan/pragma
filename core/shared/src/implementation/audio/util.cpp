@@ -3,7 +3,6 @@
 
 module;
 
-#include <sharedutils/util_file.h>
 
 module pragma.shared;
 

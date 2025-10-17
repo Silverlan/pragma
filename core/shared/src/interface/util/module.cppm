@@ -7,7 +7,6 @@ module;
 #include <string>
 #include <optional>
 #include <vector>
-#include <sharedutils/util_library.hpp>
 
 export module pragma.shared:util.module;
 

@@ -13,11 +13,6 @@ module;
 #include <unordered_map>
 #include <typeindex>
 #include <queue>
-#include <mathutil/umath.h>
-#include "sharedutils/magic_enum.hpp"
-#include "sharedutils/util_shared_handle.hpp"
-#include <sharedutils/functioncallback.h>
-#include "udm.hpp"
 
 export module pragma.shared:entities.manager;
 

@@ -6,12 +6,7 @@ module;
 
 #include "pragma/lua/luaapi.h"
 
-#include "mathutil/uvec.h"
 
-#include <datasystem.h>
-#include <datasystem_color.h>
-#include <datasystem_vector.h>
-#include <fsys/ifile.hpp>
 
 module pragma.shared;
 

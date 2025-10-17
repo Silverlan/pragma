@@ -4,7 +4,8 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <sharedutils/util_ifile.hpp>
+#include <string>
+#include <functional>
 
 export module pragma.shared:assets.manager;
 

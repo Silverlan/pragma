@@ -4,11 +4,8 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "sharedutils/util_string.h"
-#include <mathutil/uvec.h>
 #include <unordered_map>
 #include <string>
-#include "mathutil/uquat.h"
 
 
 export module pragma.shared:model.animation.meta_rig;

@@ -4,12 +4,8 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <mathutil/glmutil.h>
-#include <sharedutils/util_shared_handle.hpp>
 #include <vector>
 #include <optional>
-#include "mathutil/uquat.h"
-#include "mathutil/uvec.h"
 
 
 export module pragma.shared:entities.parent_info;

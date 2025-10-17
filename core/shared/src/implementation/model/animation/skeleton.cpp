@@ -4,15 +4,12 @@
 module;
 #include "string_view"
 
-#include "mathutil/umath.h"
 
 #include "memory"
 
 #include "algorithm"
 
 #include <functional>
-#include <udm.hpp>
-#include <sharedutils/util_string.h>
 
 module pragma.shared;
 

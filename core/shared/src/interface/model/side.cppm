@@ -5,9 +5,6 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include <vector>
-#include <mathutil/glmutil.h>
-#include "material.h"
-#include "mathutil/uvec.h"
 
 
 export module pragma.shared:model.side;
@@ -21,8 +18,8 @@ export {
 	public:
 		void Update();
 		void Merge(Side *other);
-		Material *GetMaterial();
-		void SetMaterial(Material *mat);
+		msys::Material *GetMaterial();
+		void SetMaterial(msys::Material *mat);
 		void SetConvex(bool bConvex);
 		bool IsConvex() const;
 		unsigned int GetVertexCount() const;
@@ -51,7 +48,7 @@ export {
 		std::vector<Vector3> m_vertices = {};
 		std::vector<Vector2> m_uvs = {};
 		std::vector<Vector3> m_normals = {};
-		Material *m_material = nullptr;
+		msys::Material *m_material = nullptr;
 		Vector3 m_min = {};
 		Vector3 m_max = {};
 		Vector3 m_normal = {};

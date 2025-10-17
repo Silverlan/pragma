@@ -2,15 +2,11 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "mathutil/umath_geometry.hpp"
 
-#include "mathutil/umath.h"
 
 #include "memory"
 
-#include "mathutil/uvec.h"
 
-#include <mathutil/color.h>
 
 module pragma.shared;
 
@@ -70,7 +66,7 @@ void TraceResult::GetMeshes(ModelMesh **outMesh, ModelSubMesh **outSubMesh)
 	*outMesh = meshInfo->mesh;
 	*outSubMesh = meshInfo->subMesh;
 }
-Material *TraceResult::GetMaterial()
+msys::Material *TraceResult::GetMaterial()
 {
 	if(entity.valid() == false)
 		return nullptr;

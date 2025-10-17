@@ -5,18 +5,9 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/lua/luaapi.h"
-#include <sharedutils/chronotime.h>
-#include <fsys/vfileptr.h>
-#include <materialmanager.h>
 #include <thread>
 #include <atomic>
 #include <mutex>
-#include "sharedutils/util_library.hpp"
-#include "sharedutils/asset_loader/file_asset_manager.hpp"
-#include <sharedutils/callback_handler.h>
-#include <sharedutils/scope_guard.h>
-#include <sharedutils/util_parallel_job.hpp>
-#include "mathutil/umath.h"
 
 export module pragma.shared:engine;
 
@@ -74,7 +65,7 @@ export {
 		class DLLNETWORK StateInstance {
 		public:
 			~StateInstance();
-			StateInstance(const std::shared_ptr<msys::MaterialManager> &matManager, Material *matErr);
+			StateInstance(const std::shared_ptr<msys::MaterialManager> &matManager, msys::Material *matErr);
 			std::shared_ptr<msys::MaterialManager> materialManager;
 			std::unique_ptr<NetworkState> state;
 		};

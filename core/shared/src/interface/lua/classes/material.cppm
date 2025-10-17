@@ -5,12 +5,11 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/lua/luaapi.h"
-#include "material.h"
 
 export module pragma.shared:scripting.lua.classes.material;
 
 export namespace Lua {
-	namespace Material {
-		DLLNETWORK void register_class(luabind::class_<::Material> &classDef);
+	namespace msys::Material {
+		DLLNETWORK void register_class(luabind::class_<msys::Material> &classDef);
 	};
 };

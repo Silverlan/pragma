@@ -6,18 +6,12 @@ module;
 
 #include "cassert"
 
-#include "sharedutils/util.h"
 
-#include "mathutil/uvec.h"
 
 #include "Recast.h"
 #include "DetourNavMesh.h"
 #include "DetourNavMeshBuilder.h"
 #include "DetourNavMeshQuery.h"
-#include <fsys/filesystem.h>
-#include <mathutil/umath.h>
-#include <sharedutils/scope_guard.h>
-#include <udm.hpp>
 
 module pragma.shared;
 

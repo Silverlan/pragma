@@ -6,21 +6,11 @@ module;
 
 #include "memory"
 
-#include "mathutil/umath.h"
 
 #include "pragma/lua/luaapi.h"
 
-#include "mathutil/uvec.h"
 
-#include <sharedutils/util_path.hpp>
 #include <luabind/iterator_policy.hpp>
-#include <luainterface.hpp>
-#include <udm.hpp>
-#include <datasystem_vector.h>
-#include <datasystem_color.h>
-#include <sharedutils/util_file.h>
-#include <sharedutils/util_ifile.hpp>
-#include <fsys/ifile.hpp>
 
 module pragma.shared;
 

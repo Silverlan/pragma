@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "sharedutils/magic_enum.hpp"
 
 #include "string_view"
 
@@ -10,7 +9,6 @@ module;
 
 #include "variant"
 
-#include "mathutil/umath.h"
 
 #include "memory"
 
@@ -22,20 +20,12 @@ module;
 
 #include "pragma/logging.hpp"
 #include "pragma/lua/types/nil_type.hpp"
-#include "sharedutils/util.h"
 #include "pragma/lua/types/udm.hpp"
-#include "sharedutils/util_version.h"
 #include "pragma/lua/luaapi.h"
 
-#include "sharedutils/util_string.h"
 #include <any>
-#include "sharedutils/functioncallback.h"
 
-#include "mathutil/uvec.h"
 
-#include <sharedutils/scope_guard.h>
-#include <sharedutils/datastream.h>
-#include <udm.hpp>
 
 module pragma.shared;
 

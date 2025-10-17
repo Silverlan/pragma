@@ -3,7 +3,6 @@
 
 module;
 
-#include <mathutil/umath_lighting.hpp>
 
 module pragma.shared;
 

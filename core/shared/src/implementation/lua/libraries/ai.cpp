@@ -4,7 +4,6 @@
 module;
 #include "pragma/lua/luaapi.h"
 
-#include <luainterface.hpp>
 
 module pragma.shared;
 

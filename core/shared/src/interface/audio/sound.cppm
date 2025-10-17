@@ -4,14 +4,7 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <mathutil/umath.h>
 #include <vector>
-#include <mathutil/glmutil.h>
-#include <sharedutils/functioncallback.h>
-#include <mathutil/umath.h>
-#include <sharedutils/callback_handler.h>
-#include <sharedutils/util_virtual_shared_from_this.hpp>
-#include "mathutil/uvec.h"
 
 
 export module pragma.shared:audio.sound;
@@ -97,7 +90,7 @@ export {
 		float m_tFadeIn = 0.f;
 		std::unique_ptr<std::pair<float, float>> m_range = nullptr;
 		EntityHandle m_hSourceEntity;
-		ALSoundType m_type;
+		pragma::audio::ALSoundType m_type;
 		unsigned int m_flags = 0;
 		mutable NetworkState *m_networkState = nullptr;
 		std::unique_ptr<SoundFade> m_fade = nullptr;
@@ -217,9 +210,9 @@ export {
 		std::pair<float, float> GetRolloffFactors() const;
 		void SetRolloffFactors(float factor, float roomFactor = 0.f);
 
-		virtual ALSoundType GetType() const;
-		virtual void SetType(ALSoundType type);
-		void AddType(ALSoundType type);
+		virtual pragma::audio::ALSoundType GetType() const;
+		virtual void SetType(pragma::audio::ALSoundType type);
+		void AddType(pragma::audio::ALSoundType type);
 		unsigned int GetFlags() const;
 		virtual void SetFlags(unsigned int flags);
 		void AddFlags(unsigned int flags);

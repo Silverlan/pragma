@@ -4,8 +4,6 @@
 module;
 
 #include <cinttypes>
-#include "mathutil/transform.hpp"
-#include <mathutil/umath.h>
 
 export module pragma.shared:game.enums;
 

@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <sharedutils/functioncallback.h>
 
 export module pragma.shared:physics.touch;
 

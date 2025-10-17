@@ -2,10 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "mathutil/uvec.h"
 
-#include <sharedutils/util.h>
-#include <sharedutils/util_string.h>
 
 module pragma.shared;
 
@@ -78,7 +75,7 @@ void BaseFuncKinematicComponent::OnEntitySpawn()
 		m_startSound = nullptr;
 		auto pSoundEmitterComponent = static_cast<pragma::BaseSoundEmitterComponent *>(ent.FindComponent("sound_emitter").get());
 		if(pSoundEmitterComponent != nullptr)
-			m_startSound = pSoundEmitterComponent->CreateSound(m_kvStartSound, ALSoundType::Effect);
+			m_startSound = pSoundEmitterComponent->CreateSound(m_kvStartSound, pragma::audio::ALSoundType::Effect);
 	}
 }
 

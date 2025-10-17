@@ -9,15 +9,12 @@
 
 #include "memory"
 
-#include "sharedutils/util.h"
 
-#include "mathutil/uvec.h"
 
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
 #if 0
-#include <sharedutils/property/util_property.hpp>
 
 static void test_pair_policy_param(const std::pair<float,std::string> &pair)
 {

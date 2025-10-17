@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <mathutil/uvec.h>
 #include <limits>
 
 export module pragma.shared:physics.hitbox;

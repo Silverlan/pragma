@@ -2,24 +2,17 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "fsys/filesystem.h"
 
-#include "mathutil/umath.h"
 
 #include "memory"
 
-#include "mathutil/uquat.h"
 
-#include "sharedutils/util_pragma.hpp"
 
 #include "pragma/lua/luaapi.h"
 
-#include "sharedutils/util_string.h"
 
-#include "mathutil/uvec.h"
 
 #include <unordered_set>
-#include <sharedutils/util_file.h>
 
 #if 0
 #include <assimp/Importer.hpp>

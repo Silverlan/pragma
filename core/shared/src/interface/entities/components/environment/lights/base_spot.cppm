@@ -4,9 +4,7 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "mathutil/umath_lighting.hpp"
 #include <string>
-#include "mathutil/uvec.h"
 
 
 export module pragma.shared:entities.components.environment.lights.base_spot;

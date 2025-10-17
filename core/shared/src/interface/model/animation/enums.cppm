@@ -6,7 +6,6 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <unordered_map>
 #include <string>
-#include <mathutil/umath.h>
 
 export module pragma.shared:model.animation.enums;
 

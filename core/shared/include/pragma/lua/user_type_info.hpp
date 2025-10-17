@@ -5,7 +5,6 @@
 #define __LUA_USER_TYPE_INFO_HPP__
 
 #include <luabind/detail/signature_types.hpp>
-#include <sharedutils/util.h>
 
 #define LUA_DEFINE_TEMPLATE_TYPE_IDENTIFIER_C(TYPE, IDENTIFIER, CUSTOM)                                                                                                                                                                                                                          \
 	namespace luabind::detail {                                                                                                                                                                                                                                                                  \

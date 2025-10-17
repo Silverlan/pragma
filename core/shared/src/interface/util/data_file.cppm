@@ -6,7 +6,6 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <unordered_map>
 #include <vector>
-#include <fsys/filesystem.h>
 
 export module pragma.shared:util.data_file;
 

@@ -4,7 +4,6 @@
 module;
 #include "pragma/lua/luaapi.h"
 
-#include "mathutil/umath.h"
 
 #include "memory"
 
@@ -12,13 +11,9 @@ module;
 
 #include "algorithm"
 
-#include "sharedutils/util.h"
 
-#include "sharedutils/util_string.h"
 
-#include "sharedutils/functioncallback.h"
 
-#include <udm.hpp>
 
 module pragma.shared;
 

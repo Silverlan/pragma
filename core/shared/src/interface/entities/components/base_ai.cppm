@@ -4,9 +4,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "mathutil/umath.h"
-#include "mathutil/uvec.h"
-#include "sharedutils/util_weak_handle.hpp"
 #include <atomic>
 #include <mutex>
 #include <queue>

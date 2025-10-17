@@ -6,8 +6,6 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <vector>
 #include <string>
-#include "sharedutils/util_version.h"
-#include "fsys/directory_watcher.h"
 
 export module pragma.shared:core.addon_system;
 

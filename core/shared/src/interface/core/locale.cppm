@@ -8,7 +8,6 @@ module;
 #include <vector>
 #include <optional>
 #include <unordered_map>
-#include <udm.hpp>
 
 export module pragma.locale;
 

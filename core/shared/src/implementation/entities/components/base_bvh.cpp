@@ -2,14 +2,11 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "mathutil/umath.h"
 
 #include "memory"
 
 #include "cassert"
 
-#include "mathutil/uvec.h"
-#include "sharedutils/util.h"
 #include <bvh/v2/stack.h>
 
 module pragma.shared;

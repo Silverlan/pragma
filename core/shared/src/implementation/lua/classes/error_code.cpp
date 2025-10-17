@@ -4,7 +4,6 @@
 module;
 #include "memory"
 
-#include "luasystem.h"
 
 module pragma.shared;
 

@@ -6,9 +6,7 @@ module;
 
 #include "cassert"
 
-#include "mathutil/umath.h"
 
-#include "mathutil/uvec.h"
 
 module pragma.shared;
 

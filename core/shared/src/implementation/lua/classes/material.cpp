@@ -8,25 +8,16 @@ module;
 
 #include "pragma/lua/types/udm.hpp"
 
-#include "mathutil/umath.h"
 
 #include "pragma/lua/luaapi.h"
 
-#include <material_manager2.hpp>
-#include "luasystem.h"
-#include "material.h"
-#include <detail_mode.hpp>
-#include <datasystem_t.hpp>
 #include <luabind/copy_policy.hpp>
-#include <sharedutils/alpha_mode.hpp>
-#include <sharedutils/util_shaderinfo.hpp>
-#include <udm.hpp>
 
 module pragma.shared;
 
 import :scripting.lua.classes.material;
 
-void Lua::Material::register_class(luabind::class_<::Material> &classDef)
+void Lua::Material::register_class(luabind::class_<msys::Material> &classDef)
 {
 	classDef.def(luabind::tostring(luabind::self));
 	classDef.add_static_constant("ALPHA_MODE_OPAQUE", umath::to_integral(::AlphaMode::Opaque));
@@ -47,29 +38,29 @@ void Lua::Material::register_class(luabind::class_<::Material> &classDef)
 	classDef.add_static_constant("DETAIL_BLEND_MODE_COUNT", umath::to_integral(msys::DetailMode::Count));
 	classDef.add_static_constant("DETAIL_BLEND_MODE_INVALID", umath::to_integral(msys::DetailMode::Invalid));
 	classDef.scope[luabind::def("detail_blend_mode_to_enum", static_cast<void (*)(lua_State *, const std::string &)>([](lua_State *l, const std::string &name) { Lua::PushInt(l, umath::to_integral(msys::to_detail_mode(name))); }))];
-	classDef.def("IsValid", &::Material::IsValid);
-	classDef.def("GetShaderName", &::Material::GetShaderIdentifier);
-	classDef.def("GetName", &::Material::GetName);
-	classDef.def("GetIndex", &::Material::GetIndex);
-	classDef.def("GetPropertyDataBlock", &::Material::GetPropertyDataBlock);
-	classDef.def("SetLoaded", &::Material::SetLoaded);
-	classDef.def("MergePropertyDataBlock", +[](lua_State *l, ::Material &mat, ::udm::LinkedPropertyWrapper &data) -> bool { return msys::udm_to_data_block(data, *mat.GetPropertyDataBlock()); });
-	classDef.def("Copy", static_cast<void (*)(lua_State *, ::Material &)>([](lua_State *l, ::Material &mat) {
+	classDef.def("IsValid", &msys::Material::IsValid);
+	classDef.def("GetShaderName", &msys::Material::GetShaderIdentifier);
+	classDef.def("GetName", &msys::Material::GetName);
+	classDef.def("GetIndex", &msys::Material::GetIndex);
+	classDef.def("GetPropertyDataBlock", &msys::Material::GetPropertyDataBlock);
+	classDef.def("SetLoaded", &msys::Material::SetLoaded);
+	classDef.def("MergePropertyDataBlock", +[](lua_State *l, msys::Material &mat, ::udm::LinkedPropertyWrapper &data) -> bool { return msys::udm_to_data_block(data, *mat.GetPropertyDataBlock()); });
+	classDef.def("Copy", static_cast<void (*)(lua_State *, msys::Material &)>([](lua_State *l, msys::Material &mat) {
 		auto matCopy = mat.Copy();
 		if(matCopy == nullptr)
 			return;
 		Lua::Push<msys::MaterialHandle>(l, matCopy);
 	}));
-	classDef.def("UpdateTextures", &::Material::UpdateTextures);
-	classDef.def("UpdateTextures", &::Material::UpdateTextures, luabind::default_parameter_policy<2, bool {false}> {});
-	classDef.def("Save", static_cast<luabind::variant<std::string, bool> (*)(lua_State *, ::Material &, ::udm::AssetData &)>([](lua_State *l, ::Material &mat, ::udm::AssetData &assetData) -> luabind::variant<std::string, bool> {
+	classDef.def("UpdateTextures", &msys::Material::UpdateTextures);
+	classDef.def("UpdateTextures", &msys::Material::UpdateTextures, luabind::default_parameter_policy<2, bool {false}> {});
+	classDef.def("Save", static_cast<luabind::variant<std::string, bool> (*)(lua_State *, msys::Material &, ::udm::AssetData &)>([](lua_State *l, msys::Material &mat, ::udm::AssetData &assetData) -> luabind::variant<std::string, bool> {
 		std::string err;
 		auto result = mat.Save(assetData, err);
 		if(result == false)
 			return luabind::object {l, err};
 		return luabind::object {l, result};
 	}));
-	classDef.def("Save", static_cast<luabind::variant<std::string, bool> (*)(lua_State *, ::Material &)>([](lua_State *l, ::Material &mat) -> luabind::variant<std::string, bool> {
+	classDef.def("Save", static_cast<luabind::variant<std::string, bool> (*)(lua_State *, msys::Material &)>([](lua_State *l, msys::Material &mat) -> luabind::variant<std::string, bool> {
 		std::string err;
 		auto result = mat.Save(err);
 		if(result == false)
@@ -77,7 +68,7 @@ void Lua::Material::register_class(luabind::class_<::Material> &classDef)
 		return luabind::object {l, result};
 	}));
 	classDef.def(
-	  "Save", +[](lua_State *l, ::Engine *engine, ::Material &mat, const std::string &fname) -> luabind::variant<std::string, bool> {
+	  "Save", +[](lua_State *l, ::Engine *engine, msys::Material &mat, const std::string &fname) -> luabind::variant<std::string, bool> {
 		  std::string err;
 		  auto result = mat.Save(fname, err);
 		  if(result == false)
@@ -85,17 +76,17 @@ void Lua::Material::register_class(luabind::class_<::Material> &classDef)
 		  Engine::Get()->PollResourceWatchers();
 		  return luabind::object {l, result};
 	  });
-	classDef.def("IsError", &::Material::IsError);
-	classDef.def("IsLoaded", &::Material::IsLoaded);
-	classDef.def("IsTranslucent", &::Material::IsTranslucent);
-	classDef.def("GetAlphaMode", &::Material::GetAlphaMode);
-	classDef.def("GetAlphaCutoff", &::Material::GetAlphaCutoff);
-	classDef.def("Reset", &::Material::Reset);
-	classDef.def("SetTextureProperty", &::Material::SetTextureProperty);
-	classDef.def("ClearProperty", static_cast<void (::Material::*)(const std::string_view &, bool)>(&::Material::ClearProperty));
-	classDef.def("ClearProperty", static_cast<void (::Material::*)(const std::string_view &, bool)>(&::Material::ClearProperty), luabind::default_parameter_policy<3, bool {true}> {});
+	classDef.def("IsError", &msys::Material::IsError);
+	classDef.def("IsLoaded", &msys::Material::IsLoaded);
+	classDef.def("IsTranslucent", &msys::Material::IsTranslucent);
+	classDef.def("GetAlphaMode", &msys::Material::GetAlphaMode);
+	classDef.def("GetAlphaCutoff", &msys::Material::GetAlphaCutoff);
+	classDef.def("Reset", &msys::Material::Reset);
+	classDef.def("SetTextureProperty", &msys::Material::SetTextureProperty);
+	classDef.def("ClearProperty", static_cast<void (msys::Material::*)(const std::string_view &, bool)>(&msys::Material::ClearProperty));
+	classDef.def("ClearProperty", static_cast<void (msys::Material::*)(const std::string_view &, bool)>(&msys::Material::ClearProperty), luabind::default_parameter_policy<3, bool {true}> {});
 	classDef.def(
-	  "SetProperty", +[](::Material &mat, const std::string_view &key, ::udm::Type type, Lua::udm_type value) {
+	  "SetProperty", +[](msys::Material &mat, const std::string_view &key, ::udm::Type type, Lua::udm_type value) {
 		  ::udm::visit(type, [&mat, &key, &value](auto tag) {
 			  using T = typename decltype(tag)::type;
 			  if constexpr(msys::is_property_type<T>)
@@ -103,7 +94,7 @@ void Lua::Material::register_class(luabind::class_<::Material> &classDef)
 		  });
 	  });
 	classDef.def(
-	  "SetProperty", +[](::Material &mat, const std::string_view &key, Lua::udm_type value) {
+	  "SetProperty", +[](msys::Material &mat, const std::string_view &key, Lua::udm_type value) {
 		  auto type = Lua::udm::determine_udm_type(value);
 		  if(type == ::udm::Type::Invalid)
 			  return;
@@ -114,7 +105,7 @@ void Lua::Material::register_class(luabind::class_<::Material> &classDef)
 		  });
 	  });
 	classDef.def(
-	  "GetProperty", +[](lua_State *l, ::Material &mat, const std::string_view &key, ::udm::Type type) -> luabind::object {
+	  "GetProperty", +[](lua_State *l, msys::Material &mat, const std::string_view &key, ::udm::Type type) -> luabind::object {
 		  return ::udm::visit(type, [l, &mat, &key](auto tag) -> luabind::object {
 			  using T = typename decltype(tag)::type;
 			  if constexpr(msys::is_property_type<T>) {
@@ -126,7 +117,7 @@ void Lua::Material::register_class(luabind::class_<::Material> &classDef)
 		  });
 	  });
 	classDef.def(
-	  "GetProperty", +[](lua_State *l, ::Material &mat, const std::string_view &key, ::udm::Type type, Lua::udm_type defVal) -> luabind::object {
+	  "GetProperty", +[](lua_State *l, msys::Material &mat, const std::string_view &key, ::udm::Type type, Lua::udm_type defVal) -> luabind::object {
 		  return ::udm::visit(type, [l, &mat, &key, &defVal](auto tag) -> luabind::object {
 			  using T = typename decltype(tag)::type;
 			  if constexpr(msys::is_property_type<T>) {
@@ -137,5 +128,5 @@ void Lua::Material::register_class(luabind::class_<::Material> &classDef)
 			  return Lua::nil;
 		  });
 	  });
-	classDef.def("GetPropertyValueType", &::Material::GetPropertyValueType);
+	classDef.def("GetPropertyValueType", &msys::Material::GetPropertyValueType);
 }

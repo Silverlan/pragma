@@ -5,12 +5,7 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include <memory>
-#include <mathutil/glmutil.h>
-#include <mathutil/uquat.h>
-#include <mathutil/transform.hpp>
 #include <vector>
-#include "mathutil/uvec.h"
-#include "mathutil/umath.h"
 
 
 

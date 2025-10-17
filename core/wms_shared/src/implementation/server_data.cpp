@@ -1,10 +1,13 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "wmserverdata.h"
-#include "mathutil/umath.h"
-#include "sharedutils/datastream.h"
+module;
+
 #include <iostream>
+
+module pragma.wms;
+
+import :server_data;
 
 WMServerData::WMServerData() : engineVersion {0, 0, 0}, tcpPort(0), udpPort(0), players(0), maxPlayers(0), bots(0), password(false) {}
 

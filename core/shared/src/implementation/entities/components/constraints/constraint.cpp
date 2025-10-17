@@ -6,7 +6,6 @@ module;
 
 #include "pragma/logging.hpp"
 
-#include "sharedutils/util.h"
 
 #include "pragma/lua/luaapi.h"
 

@@ -4,12 +4,8 @@
 module;
 #include "pragma/lua/luaapi.h"
 
-#include "mathutil/umath.h"
 
-#include "mathutil/uvec.h"
 
-#include <mathutil/umat.h>
-#include "luasystem.h"
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/euler_angles.hpp>
 

@@ -8,7 +8,6 @@ module;
 
 #include "cassert"
 
-#include "luasystem.h"
 
 module pragma.shared;
 

@@ -2,13 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "mathutil/umath.h"
 
-#include "sharedutils/util_pragma.hpp"
-#include "mathutil/uquat.h"
 #include "pragma/logging.hpp"
-#include "sharedutils/util_shared_handle.hpp"
-#include "sharedutils/util.h"
 
 //#define ENABLE_DEPRECATED_PHYSICS
 

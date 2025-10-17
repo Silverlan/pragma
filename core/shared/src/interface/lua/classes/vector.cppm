@@ -5,11 +5,6 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/lua/luaapi.h"
-#include "mathutil/eulerangles.h"
-#include "mathutil/vertex.hpp"
-#include <mathutil/glmutil.h>
-#include "mathutil/uvec.h"
-#include "mathutil/uquat.h"
 
 
 

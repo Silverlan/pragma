@@ -4,13 +4,8 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <sharedutils/util_enum_register.hpp>
-#include "mathutil/umath.h"
-#include "udm.hpp"
 #include <optional>
 #include <vector>
-#include "mathutil/uvec.h"
-#include "mathutil/uquat.h"
 
 export module pragma.shared:model.animation.animation;
 

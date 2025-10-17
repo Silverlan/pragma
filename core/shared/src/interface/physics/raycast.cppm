@@ -4,13 +4,7 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <mathutil/glmutil.h>
-#include <mathutil/transform.hpp>
-#include <sharedutils/util_weak_handle.hpp>
 #include <memory>
-#include "material.h"
-#include "mathutil/uvec.h"
-#include "mathutil/uquat.h"
 
 
 
@@ -98,7 +92,7 @@ export {
 		std::shared_ptr<MeshInfo> meshInfo = nullptr;
 
 		void GetMeshes(ModelMesh **mesh, ModelSubMesh **subMesh);
-		Material *GetMaterial();
+		msys::Material *GetMaterial();
 		bool GetMaterial(std::string &mat);
 	private:
 		void InitializeMeshes();

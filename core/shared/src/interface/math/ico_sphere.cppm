@@ -4,11 +4,9 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <mathutil/glmutil.h>
 #include <vector>
 #include <unordered_map>
 #include <stdint.h>
-#include "mathutil/uvec.h"
 
 
 export module pragma.shared:math.ico_sphere;

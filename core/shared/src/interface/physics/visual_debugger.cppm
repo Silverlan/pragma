@@ -5,12 +5,7 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include <vector>
-#include <mathutil/glmutil.h>
-#include <mathutil/color.h>
 #include <memory>
-#include <sharedutils/functioncallback.h>
-#include <sharedutils/util_shared_handle.hpp>
-#include "mathutil/uvec.h"
 
 #undef DrawText
 

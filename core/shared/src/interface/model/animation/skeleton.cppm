@@ -7,8 +7,6 @@ module;
 #include <cinttypes>
 #include <memory>
 #include <unordered_map>
-#include <mathutil/transform.hpp>
-#include <udm.hpp>
 
 export module pragma.shared:model.animation.skeleton;
 

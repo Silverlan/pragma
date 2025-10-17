@@ -4,13 +4,10 @@
 module;
 #include "sstream"
 
-#include "mathutil/umath.h"
 
 #include "algorithm"
 
-#include "mathutil/umath_geometry.hpp"
 
-#include "mathutil/uvec.h"
 
 module pragma.shared;
 

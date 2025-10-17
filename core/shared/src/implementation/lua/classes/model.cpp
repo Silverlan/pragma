@@ -6,7 +6,6 @@ module;
 
 #include "pragma/lua/policies/default_parameter_policy.hpp"
 
-#include "mathutil/umath.h"
 
 #include "memory"
 
@@ -14,16 +13,8 @@ module;
 
 #include "pragma/lua/luaapi.h"
 
-#include "mathutil/uvec.h"
 
-#include "luasystem.h"
-#include <material_manager2.hpp>
 #include <luabind/iterator_policy.hpp>
-#include <sharedutils/util_path.hpp>
-#include <sharedutils/util_file.h>
-#include <mathutil/vertex.hpp>
-#include <fsys/ifile.hpp>
-#include <udm.hpp>
 
 module pragma.shared;
 
@@ -302,7 +293,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 		auto *mat = mdl.GetMaterial(idx);
 		if(mat == nullptr)
 			return;
-		Lua::Push<::Material *>(l, mat);
+		Lua::Push<msys::Material *>(l, mat);
 	}));
 	classDef.def("GetMaterialIndex", static_cast<void (*)(lua_State *, ::Model &, ::ModelSubMesh &, uint32_t)>([](lua_State *l, ::Model &mdl, ::ModelSubMesh &mesh, uint32_t skinId) {
 		auto idx = mdl.GetMaterialIndex(mesh, skinId);
@@ -2027,7 +2018,7 @@ void Lua::Model::AddCollisionMesh(lua_State *, ::Model &mdl, ::CollisionMesh &co
 	//Lua::CheckModel(l,1);
 	mdl.AddCollisionMesh(colMesh.shared_from_this());
 }
-void Lua::Model::AddMaterial(lua_State *l, ::Model &mdl, uint32_t textureGroup, ::Material *mat)
+void Lua::Model::AddMaterial(lua_State *l, ::Model &mdl, uint32_t textureGroup, msys::Material *mat)
 {
 	if(!mat)
 		return;
@@ -2038,7 +2029,7 @@ void Lua::Model::AddMaterial(lua_State *l, ::Model &mdl, uint32_t textureGroup, 
 	if(skinTexIdx.has_value())
 		Lua::PushInt(l, *skinTexIdx);
 }
-void Lua::Model::SetMaterial(lua_State *l, ::Model &mdl, uint32_t matId, ::Material *mat)
+void Lua::Model::SetMaterial(lua_State *l, ::Model &mdl, uint32_t matId, msys::Material *mat)
 {
 	//Lua::CheckModel(l,1);
 	mdl.SetMaterial(matId, mat);
@@ -2056,7 +2047,7 @@ void Lua::Model::GetMaterials(lua_State *l, ::Model &mdl)
 		if(pmat == nullptr)
 			pmat = matManager.GetErrorMaterial();
 		Lua::PushInt(l, idx++);
-		Lua::Push<::Material *>(l, pmat);
+		Lua::Push<msys::Material *>(l, pmat);
 		Lua::SetTableValue(l, t);
 	}
 }

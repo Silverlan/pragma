@@ -3,13 +3,12 @@
 
 module;
 
-#include <material_manager2.hpp>
 
 module pragma.shared;
 
 import :engine;
 
-Engine::StateInstance::StateInstance(const std::shared_ptr<msys::MaterialManager> &matManager, Material *matErr) : materialManager {matManager}, state(nullptr)
+Engine::StateInstance::StateInstance(const std::shared_ptr<msys::MaterialManager> &matManager, msys::Material *matErr) : materialManager {matManager}, state(nullptr)
 {
 	if(matErr == nullptr) {
 		Con::cout << "Unable to load error material! Validate or reinstall the game files!" << Con::endl;

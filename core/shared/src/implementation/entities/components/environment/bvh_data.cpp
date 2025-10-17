@@ -4,16 +4,11 @@
 module;
 #include "sstream"
 
-#include "mathutil/umath.h"
 
 #include "memory"
 
-#include "sharedutils/util.h"
 
-#include "mathutil/uvec.h"
 
-#include <sharedutils/util_hash.hpp>
-#include <mathutil/umath_geometry.hpp>
 #include <bvh/v2/default_builder.h>
 #include <bvh/v2/stack.h>
 #include <bvh/v2/reinsertion_optimizer.h>

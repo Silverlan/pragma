@@ -4,9 +4,7 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <mathutil/uvec.h>
 #include <cinttypes>
-#include "mathutil/uquat.h"
 
 
 export module pragma.shared:model.animation.skeletal_animation;

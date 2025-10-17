@@ -4,11 +4,8 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <mathutil/glmutil.h>
 #include <iostream>
 #include <vector>
-#include "material.h"
-#include "mathutil/uvec.h"
 
 
 export module pragma.shared:model.mesh;
@@ -23,7 +20,7 @@ export class DLLNETWORK Mesh {
   protected:
 	std::vector<float> m_points;
 	unsigned int m_numVerts;
-	Material *m_material;
+	msys::Material *m_material;
 	unsigned int m_bufUV;
 	unsigned int m_bufVertex;
   public:
@@ -33,8 +30,8 @@ export class DLLNETWORK Mesh {
 	std::vector<float> *GetPoints();
 	static Mesh *GenerateCubeMesh();
 	void debug_print();
-	Material *GetMaterial();
-	void SetMaterial(Material *material);
+	msys::Material *GetMaterial();
+	void SetMaterial(msys::Material *material);
 	virtual void SetMaterial(const char *texture);
 	unsigned int GetUVBuffer();
 	unsigned int GetVertexBuffer();

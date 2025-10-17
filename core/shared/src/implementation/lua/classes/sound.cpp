@@ -4,8 +4,6 @@
 module;
 #include "pragma/lua/luaapi.h"
 
-#include "luasystem.h"
-#include <mathutil/umath.h>
 
 module pragma.shared;
 

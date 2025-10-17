@@ -4,11 +4,8 @@
 module;
 #include "memory"
 
-#include "mathutil/umath.h"
 
-#include "mathutil/uvec.h"
 
-#include <material_manager2.hpp>
 
 module pragma.shared;
 
@@ -38,8 +35,8 @@ void Poly::SetTextureData(std::string texture, Vector3 nu, Vector3 nv, float ou,
 	m_texData->rot = rot;
 }
 PolyInfo &Poly::GetCompiledData() { return m_compiledData; }
-Material *Poly::GetMaterial() { return m_material; }
-void Poly::SetMaterial(Material *mat) { m_material = mat; }
+msys::Material *Poly::GetMaterial() { return m_material; }
+void Poly::SetMaterial(msys::Material *mat) { m_material = mat; }
 
 void Poly::SetDistance(double d) { m_distance = d; }
 void Poly::SetNormal(Vector3 n)

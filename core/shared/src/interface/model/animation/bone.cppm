@@ -4,12 +4,10 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <sharedutils/util_string.h>
 #include <memory>
 #include <string>
 #include <unordered_map>
 #include <optional>
-#include <sharedutils/util_path.hpp>
 
 export module pragma.shared:model.animation.bone;
 

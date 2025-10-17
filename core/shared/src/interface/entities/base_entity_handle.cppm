@@ -3,7 +3,6 @@
 
 module;
 
-#include <sharedutils/util_shared_handle.hpp>
 
 export module pragma.shared:entities.base_entity_handle;
 

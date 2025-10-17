@@ -4,14 +4,8 @@
 module;
 #include "memory"
 
-#include "sharedutils/util.h"
 
-#include <fsys/filesystem.h>
-#include "datasystem.h"
-#include <datasystem_color.h>
-#include <datasystem_vector.h>
 #include <algorithm>
-#include <udm.hpp>
 
 module pragma.shared;
 

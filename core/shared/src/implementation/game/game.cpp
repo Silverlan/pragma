@@ -2,13 +2,10 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "sharedutils/asset_loader/file_asset_manager.hpp"
 
-#include "fsys/filesystem.h"
 
 #include "string_view"
 
-#include "mathutil/umath.h"
 
 #include "memory"
 
@@ -18,20 +15,11 @@ module;
 
 #include "pragma/logging.hpp"
 
-#include "sharedutils/util.h"
 
 #include "pragma/lua/luaapi.h"
 
-#include "sharedutils/util_string.h"
 
-#include "mathutil/uvec.h"
 
-#include "luasystem.h"
-#include <material_manager2.hpp>
-#include <sharedutils/util_library.hpp>
-#include <fsys/ifile.hpp>
-#include <luainterface.hpp>
-#include <udm.hpp>
 
 module pragma.shared;
 

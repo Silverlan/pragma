@@ -2,21 +2,16 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "mathutil/umath.h"
 
 #include "cassert"
 
-#include "mathutil/uquat.h"
 
 #include "pragma/logging.hpp"
 
-#include "mathutil/umath_geometry.hpp"
 
 #include "pragma/lua/luaapi.h"
 
-#include "sharedutils/util_string.h"
 
-#include "mathutil/uvec.h"
 
 module pragma.shared;
 
@@ -140,13 +135,13 @@ Vector3 BaseSurfaceComponent::ProjectToSurface(const Vector3 &pos) const
 	GetPlaneWs(n, d);
 	return uvec::project_to_plane(pos, n, d);
 }
-std::optional<BaseSurfaceComponent::MeshInfo> BaseSurfaceComponent::FindAndAssignMesh(const std::function<int32_t(ModelMesh &, ModelSubMesh &, Material &, const std::string &)> &filter)
+std::optional<BaseSurfaceComponent::MeshInfo> BaseSurfaceComponent::FindAndAssignMesh(const std::function<int32_t(ModelMesh &, ModelSubMesh &, msys::Material &, const std::string &)> &filter)
 {
 	auto &ent = GetEntity();
 	auto &hMdl = ent.GetModel();
 	if(hMdl == nullptr)
 		return {};
-	Material *mat = nullptr;
+	msys::Material *mat = nullptr;
 	auto dir = Vector3(0.f, 1.f, 0.f); // TODO
 	auto &mats = hMdl->GetMaterials();
 	std::vector<std::shared_ptr<ModelMesh>> meshes;

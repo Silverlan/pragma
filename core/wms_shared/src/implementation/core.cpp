@@ -1,7 +1,13 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "wms_shared.h"
+module;
+
+#include <string>
+
+module pragma.wms;
+
+import :core;
 
 std::string GetMasterServerIP()
 {

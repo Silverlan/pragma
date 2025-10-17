@@ -8,15 +8,11 @@ module;
 #include "pragma/lua/policies/default_parameter_policy.hpp"
 #include "pragma/lua/policies/generic_policy.hpp"
 #include "pragma/lua/types/udm.hpp"
-#include "mathutil/umath.h"
 
-#include "udm.hpp"
 
-#include "sharedutils/util.h"
 
 #include "pragma/lua/luaapi.h"
 
-#include "mathutil/uvec.h"
 
 #include <luabind/copy_policy.hpp>
 

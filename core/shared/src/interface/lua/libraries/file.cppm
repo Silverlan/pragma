@@ -4,15 +4,7 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "mathutil/eulerangles.h"
-#include <fsys/filesystem.h>
-#include <mathutil/glmutil.h>
-#include "luasystem.h"
-#include <sharedutils/datastream.h>
-#include <sharedutils/util_ifile.hpp>
 #include <optional>
-#include "mathutil/uvec.h"
-#include "mathutil/umath.h"
 
 
 

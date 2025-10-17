@@ -4,11 +4,7 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <udm_types.hpp>
-#include <mathutil/uvec.h>
 #include <memory>
-#include "mathutil/uquat.h"
-#include "mathutil/umath.h"
 
 
 

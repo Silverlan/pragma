@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <mathutil/color.h>
 
 export module pragma.shared:util.rgb_csv;
 

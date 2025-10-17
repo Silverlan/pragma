@@ -6,10 +6,12 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <string>
 #include <optional>
-#include <fsys/filesystem.h>
-#include <sharedutils/util_library.hpp>
+#include <memory>
+#include <vector>
 
 export module pragma.shared:assets.conversion;
+
+export import pragma.filesystem;
 
 export class Model;
 export class NetworkState;

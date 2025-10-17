@@ -4,10 +4,8 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <udm_types.hpp>
 #include <iostream>
 #include <vector>
-#include <mathutil/glmutil.h>
 #include <string>
 #include <unordered_map>
 

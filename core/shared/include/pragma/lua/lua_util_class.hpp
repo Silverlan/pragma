@@ -4,8 +4,6 @@
 #ifndef __LUA_UTIL_CLASS_HPP__
 #define __LUA_UTIL_CLASS_HPP__
 
-#include <luasystem.h>
-#include <sharedutils/util_string_literal.hpp>
 
 namespace pragma {
 	namespace lua {

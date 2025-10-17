@@ -4,20 +4,13 @@
 module;
 #include "sstream"
 
-#include "mathutil/umath.h"
 
 #include "algorithm"
 
 #include "pragma/logging.hpp"
 
-#include "sharedutils/util.h"
 
-#include "mathutil/uvec.h"
 
-#include <fsys/filesystem.h>
-#include <udm.hpp>
-#include <sharedutils/util_path.hpp>
-#include <sharedutils/magic_enum.hpp>
 
 module pragma.shared;
 

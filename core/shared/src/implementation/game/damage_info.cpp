@@ -2,11 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "mathutil/umath.h"
 
-#include "mathutil/uvec.h"
 
-#include <sharedutils/magic_enum.hpp>
 
 module pragma.shared;
 

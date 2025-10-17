@@ -4,11 +4,8 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <udm_types.hpp>
 #include <vector>
 #include <string>
-#include "sharedutils/util_ifile.hpp"
-#include "fsys/vfileptr.h"
 
 export module pragma.shared:model.animation.flex_animation;
 

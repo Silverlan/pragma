@@ -8,10 +8,6 @@ module;
 #include <vector>
 #include <memory>
 #include <optional>
-#include "mathutil/uvec.h"
-#include "sharedutils/util.h"
-#include "sharedutils/util_weak_handle.hpp"
-#include "mathutil/umath.h"
 
 
 export module pragma.shared:entities.iterator;

@@ -4,8 +4,6 @@
 module;
 
 #include "pragma/console/helper.hpp"
-#include "mathutil/uvec.h"
-#include "udm.hpp"
 
 module pragma.shared;
 

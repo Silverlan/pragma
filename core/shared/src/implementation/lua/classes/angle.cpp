@@ -4,9 +4,7 @@
 module;
 #include "pragma/lua/luaapi.h"
 
-#include "mathutil/umath.h"
 
-#include "mathutil/uvec.h"
 
 #include <glm/gtx/euler_angles.hpp>
 

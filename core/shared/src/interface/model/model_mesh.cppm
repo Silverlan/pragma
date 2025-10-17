@@ -4,16 +4,9 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <udm_types.hpp>
 #include <vector>
-#include <mathutil/glmutil.h>
-#include <mathutil/vertex.hpp>
 #include <unordered_map>
-#include <mathutil/transform.hpp>
-#include "udm.hpp"
 #include <optional>
-#include "mathutil/uvec.h"
-#include "mathutil/uquat.h"
 
 
 

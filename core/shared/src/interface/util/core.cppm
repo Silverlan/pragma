@@ -4,15 +4,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <udm_types.hpp>
-#include <sharedutils/util_pragma.hpp>
-#include <sharedutils/util_parallel_job.hpp>
-#include <sharedutils/util_ifile.hpp>
-#include <sharedutils/util_path.hpp>
-#include <sharedutils/util_hair.hpp>
-#include <mathutil/uvec.h>
-#include <mathutil/vertex.hpp>
-#include "udm.hpp"
 #include <vector>
 #include <cinttypes>
 

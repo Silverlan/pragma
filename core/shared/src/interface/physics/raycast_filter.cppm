@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <sharedutils/util_weak_handle.hpp>
 #include <cinttypes>
 
 export module pragma.shared:physics.raycast_filter;

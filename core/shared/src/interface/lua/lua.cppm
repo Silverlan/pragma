@@ -20,6 +20,7 @@ export import :scripting.lua.entity_manager;
 export import :scripting.lua.error_handling;
 export import :scripting.lua.function;
 export import :scripting.lua.handle_holder;
+export import :scripting.lua.handles;
 export import :scripting.lua.include;
 export import :scripting.lua.libraries;
 export import :scripting.lua.logging;

@@ -2,15 +2,12 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "mathutil/umath.h"
 
 #include "cassert"
 
 #include "pragma/networkdefinitions.h"
 
-#include "mathutil/uvec.h"
 
-#include <sharedutils/util_ifile.hpp>
 
 module pragma.shared;
 

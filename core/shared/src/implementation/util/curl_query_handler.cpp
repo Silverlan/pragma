@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "fsys/filesystem.h"
 
 #include "memory"
 
@@ -10,7 +9,6 @@ module;
 
 #include "cassert"
 
-#include <sharedutils/util_library.hpp>
 
 module pragma.shared;
 

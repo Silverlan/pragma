@@ -2,24 +2,16 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "sharedutils/magic_enum.hpp"
 
-#include "mathutil/umath.h"
 
 #include "memory"
 
-#include "sharedutils/util.h"
 
 #include "pragma/lua/luaapi.h"
 
-#include "sharedutils/util_string.h"
 
-#include "sharedutils/functioncallback.h"
 
-#include "mathutil/uvec.h"
 
-#include <sharedutils/datastream.h>
-#include <udm.hpp>
 
 #define DEBUG_VERBOSE_ANIMATION 0
 
@@ -1103,7 +1095,7 @@ void BaseAnimatedComponent::HandleAnimationEvent(const AnimationEvent &ev)
 				if(pSoundEmitterComponent != nullptr) {
 					pragma::BaseSoundEmitterComponent::SoundInfo sndInfo {};
 					sndInfo.transmit = false;
-					pSoundEmitterComponent->EmitSound(ev.arguments.front(), ALSoundType::Generic, sndInfo);
+					pSoundEmitterComponent->EmitSound(ev.arguments.front(), pragma::audio::ALSoundType::Generic, sndInfo);
 				}
 			}
 			break;

@@ -3,8 +3,6 @@
 
 module;
 
-#include <mathutil/glmutil.h>
-#include <mathutil/umat.h>
 
 export module pragma.shared:util.mvp_base;
 

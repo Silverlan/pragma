@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "mathutil/uvec.h"
 #include <memory>
 
 export module pragma.shared:audio.sound_script;
@@ -24,7 +23,7 @@ export class DLLNETWORK ALSoundScript : virtual public ALSound, virtual public A
 	virtual void SetState(ALState state) override;
 	std::unordered_map<unsigned int, Vector3> m_positions;
 	bool m_bStream = false;
-	virtual std::shared_ptr<ALSound> CreateSound(const std::string &name, ALChannel channel, ALCreateFlags createFlags);
+	virtual std::shared_ptr<ALSound> CreateSound(const std::string &name, ALChannel channel, pragma::audio::ALCreateFlags createFlags);
   protected:
 	bool HandleEvents(SoundScriptEvent *ev, float eventOffset, float lastOffset, float newOffset);
 	void InitializeEvent(SoundScriptEvent *ev);

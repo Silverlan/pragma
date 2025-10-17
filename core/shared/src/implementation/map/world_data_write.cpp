@@ -4,25 +4,15 @@
 module;
 #include "string_view"
 
-#include "fsys/filesystem.h"
 
-#include "mathutil/umath.h"
 
 #include "algorithm"
 
 #include "cassert"
 
-#include "sharedutils/util.h"
 
-#include "sharedutils/util_string.h"
 
-#include "mathutil/uvec.h"
 
-#include <util_image.hpp>
-#include <util_texture_info.hpp>
-#include <sharedutils/util_file.h>
-#include <sharedutils/datastream.h>
-#include <udm.hpp>
 
 module pragma.shared;
 

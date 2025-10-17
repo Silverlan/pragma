@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "sharedutils/util_weak_handle.hpp"
 
 export module pragma.shared:entities.components.base_wheel;
 

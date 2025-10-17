@@ -4,10 +4,7 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <mathutil/uvec.h>
-#include <mathutil/umath_geometry.hpp>
 #include <optional>
-#include "mathutil/uquat.h"
 
 
 export module pragma.shared:math.intersection;

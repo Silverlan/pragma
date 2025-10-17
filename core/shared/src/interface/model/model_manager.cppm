@@ -7,11 +7,6 @@ module;
 #include <unordered_map>
 #include <vector>
 #include <string>
-#include <sharedutils/util_string.h>
-#include <sharedutils/util_file.h>
-#include <sharedutils/asset_loader/file_asset_manager.hpp>
-#include <sharedutils/asset_loader/asset_format_loader.hpp>
-#include <sharedutils/asset_loader/file_asset_processor.hpp>
 #include <unordered_set>
 
 export module pragma.shared:model.model_manager;

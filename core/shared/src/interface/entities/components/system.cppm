@@ -4,13 +4,10 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <sharedutils/util_shared_handle.hpp>
-#include "mathutil/umath.h"
 #include <memory>
 #include <vector>
 #include <string>
 #include <typeindex>
-#include "sharedutils/util_event_reply.hpp"
 
 export module pragma.shared:entities.system;
 

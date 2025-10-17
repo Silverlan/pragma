@@ -4,11 +4,8 @@
 module;
 #include "sstream"
 
-#include "mathutil/umath.h"
 
-#include "sharedutils/util_pragma.hpp"
 
-#include "mathutil/uvec.h"
 
 // See http://www.randygaul.net/wp-content/uploads/2014/02/RigidBodies_WaterSurface.pdf for algorithms
 

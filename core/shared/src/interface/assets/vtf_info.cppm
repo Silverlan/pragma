@@ -4,9 +4,12 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <mathutil/umath.h>
+#include <cinttypes>
+#include <type_traits>
 
 export module pragma.shared:assets.vtf_info;
+
+export import pragma.math;
 
 export {
 	namespace pragma::asset {
@@ -30,6 +33,10 @@ export {
 			Format outputFormat = Format::Bc1;
 			Flags flags = Flags::None;
 		};
+		using namespace umath::scoped_enum::bitwise;
 	};
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::asset::VtfInfo::Flags);
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::asset::VtfInfo::Flags> : std::true_type {};
+	}
 };

@@ -6,37 +6,22 @@ module;
 
 #include "pragma/lua/policies/default_parameter_policy.hpp"
 
-#include "mathutil/umath.h"
 
 #include "memory"
-#include "sharedutils/util_ifile.hpp"
 #include "pragma/lua/lua_call.hpp"
 #include "pragma/debug/debugbreak.hpp"
-#include "sharedutils/util_pragma.hpp"
-#include "fsys/filesystem.h"
 #include "pragma/logging.hpp"
-#include "mathutil/color.h"
-#include "mathutil/umath_geometry.hpp"
 
-#include "sharedutils/util.h"
 
 #include "pragma/lua/luaapi.h"
 
-#include "sharedutils/functioncallback.h"
 
-#include "mathutil/uvec.h"
 #include <chrono>
-#include "luasystem.h"
-#include <sharedutils/util_file.h>
-#include <sharedutils/util_path.hpp>
-#include <mathutil/camera.hpp>
-#include <mathutil/umath_frustum.hpp>
 #include <regex>
 #include <complex>
 #include <random>
 #include <algorithm>
 #include <mpParser.h>
-#include <luainterface.hpp>
 #include <luabind/out_value_policy.hpp>
 #include <luabind/copy_policy.hpp>
 #include <luabind/discard_result_policy.hpp>

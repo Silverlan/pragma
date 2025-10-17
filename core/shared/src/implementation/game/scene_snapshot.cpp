@@ -3,7 +3,6 @@
 
 module;
 #include "memory"
-#include "material.h"
 #include "algorithm"
 
 module pragma.shared;
@@ -14,7 +13,7 @@ using namespace pragma;
 
 std::shared_ptr<SceneSnapshot> SceneSnapshot::Create() { return std::shared_ptr<SceneSnapshot> {new SceneSnapshot {}}; }
 
-void SceneSnapshot::AddMaterial(Material &mat)
+void SceneSnapshot::AddMaterial(msys::Material &mat)
 {
 	auto it = std::find_if(m_materials.begin(), m_materials.end(), [&mat](const msys::MaterialHandle &hMat) { return hMat.get() == &mat; });
 	if(it != m_materials.end())
@@ -63,7 +62,7 @@ void SceneSnapshot::AddModel(Model &mdl, uint32_t skin)
 void SceneSnapshot::MergeMeshesByMaterial()
 {
 	// Group meshes by material
-	std::unordered_map<Material *, std::vector<Mesh *>> matMeshes {};
+	std::unordered_map<msys::Material *, std::vector<Mesh *>> matMeshes {};
 	for(auto &mesh : m_meshes) {
 		auto *mat = mesh->material.get();
 		auto it = matMeshes.find(mat);

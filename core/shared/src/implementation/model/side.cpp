@@ -2,11 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "mathutil/umath.h"
 
 #include "pragma/networkdefinitions.h"
-#include "mathutil/umath_geometry.hpp"
-#include <mathutil/uvec.h>
 
 module pragma.shared;
 
@@ -112,8 +109,8 @@ unsigned int Side::GetVertexCount() const { return static_cast<unsigned int>(m_v
 
 unsigned int Side::GetTriangleVertexCount() const { return static_cast<unsigned int>(m_triangles.front().size()); }
 
-Material *Side::GetMaterial() { return m_material; }
-void Side::SetMaterial(Material *mat) { m_material = mat; }
+msys::Material *Side::GetMaterial() { return m_material; }
+void Side::SetMaterial(msys::Material *mat) { m_material = mat; }
 
 const std::vector<Vector3> &Side::GetVertices() const { return const_cast<Side *>(this)->GetVertices(); }
 std::vector<Vector3> &Side::GetVertices() { return m_vertices; }

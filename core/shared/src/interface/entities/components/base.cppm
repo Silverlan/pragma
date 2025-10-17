@@ -4,24 +4,13 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <luasystem.h>
 #include <unordered_map>
 #include <variant>
-#include <sharedutils/callback_handler.h>
-#include <sharedutils/util_extensible_enum.hpp>
-#include <sharedutils/util_weak_handle.hpp>
-#include <sharedutils/functioncallback.h>
-#include "mathutil/transform.hpp"
-#include "sharedutils/util_event_reply.hpp"
 #include "pragma/logging.hpp"
 #include <typeindex>
-#include <udm.hpp>
 #ifdef _WIN32
 #if __cpp_lib_format >= 202207L
 #include <format>
-#include "mathutil/uvec.h"
-#include "mathutil/uquat.h"
-#include "mathutil/umath.h"
 
 #endif
 #endif

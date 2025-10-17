@@ -4,9 +4,7 @@
 #ifndef __PRAGMA_LUA_TYPES_UDM_HPP__
 #define __PRAGMA_LUA_TYPES_UDM_HPP__
 
-#include <udm.hpp>
 #include "pragma/lua/ldefinitions.h"
-#include <luasystem.h>
 #include <luabind/luabind.hpp>
 #include <luabind/operator.hpp>
 #include <luabind/pseudo_traits.hpp>

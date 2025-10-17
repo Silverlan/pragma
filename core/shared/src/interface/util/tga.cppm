@@ -7,7 +7,6 @@ module;
 #include <cinttypes>
 #include <vector>
 #include <string>
-#include <fsys/filesystem.h>
 
 export module pragma.shared:util.tga;
 

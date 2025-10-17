@@ -5,7 +5,6 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include <string>
-#include <luasystem.h>
 
 export module pragma.shared:scripting.lua.error_handling;
 

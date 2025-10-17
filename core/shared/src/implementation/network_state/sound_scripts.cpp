@@ -3,9 +3,6 @@
 
 module;
 
-#include "datasystem.h"
-#include <fsys/filesystem.h>
-#include <mathutil/umath.h>
 
 module pragma.shared;
 

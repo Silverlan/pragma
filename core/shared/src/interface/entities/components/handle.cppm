@@ -3,8 +3,6 @@
 
 module;
 
-#include "sharedutils/util_shared_handle.hpp"
-#include <sharedutils/util_weak_handle.hpp>
 
 export module pragma.shared:entities.components.handle;
 

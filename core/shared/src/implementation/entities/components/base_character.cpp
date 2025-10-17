@@ -2,17 +2,13 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "mathutil/umath.h"
 
 #include "memory"
 
-#include "mathutil/uquat.h"
 
-#include "sharedutils/util.h"
 
 #include "pragma/lua/luaapi.h"
 
-#include "mathutil/uvec.h"
 
 module pragma.shared;
 
@@ -391,8 +387,8 @@ void BaseCharacterComponent::PlayFootStepSound(FootType foot, const SurfaceMater
 		return;
 	const auto maxGain = 0.5f;
 	auto &ent = GetEntity();
-	auto soundType = ALSoundType::Effect;
-	soundType |= (ent.IsPlayer() == true) ? ALSoundType::Player : ALSoundType::NPC;
+	auto soundType = pragma::audio::ALSoundType::Effect;
+	soundType |= (ent.IsPlayer() == true) ? pragma::audio::ALSoundType::Player : pragma::audio::ALSoundType::NPC;
 	auto pSubmergibleComponent = ent.GetComponent<SubmergibleComponent>();
 	if(pSubmergibleComponent.valid() && pSubmergibleComponent->IsSubmerged() == true)
 		return; // Don't play footsteps when underwater

@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <mathutil/uvec.h>
 
 export module pragma.shared:audio.sound_base;
 

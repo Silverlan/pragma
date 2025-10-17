@@ -3,10 +3,7 @@
 
 module;
 
-#include "mathutil/uvec.h"
-#include "mathutil/uquat.h"
 #include "pragma/networkdefinitions.h"
-#include "mathutil/umath.h"
 
 
 

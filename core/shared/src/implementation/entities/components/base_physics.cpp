@@ -4,19 +4,14 @@
 module;
 #include "sstream"
 
-#include "mathutil/umath.h"
 
 #include "pragma/logging.hpp"
 
-#include "mathutil/umath_geometry.hpp"
 
-#include "sharedutils/util.h"
 
 #include "pragma/lua/luaapi.h"
 
-#include "mathutil/uvec.h"
 
-#include <udm.hpp>
 
 module pragma.shared;
 

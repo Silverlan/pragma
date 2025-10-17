@@ -5,7 +5,6 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include <array>
-#include <mathutil/umath.h>
 
 export module pragma.shared:game.animation_channel_cache_data;
 

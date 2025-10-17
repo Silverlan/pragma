@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __LUA_HANDLES_HPP__
-#define __LUA_HANDLES_HPP__
+module;
 
 #include <luabind/pointer_traits.hpp>
 #include <luabind/detail/policy.hpp>
@@ -10,9 +9,9 @@
 #include <luabind/get_main_thread.hpp>                            // for get_main_thread
 #include <luabind/handle.hpp>                                     // for handle
 #include <luabind/detail/decorate_type.hpp>                       // for decorated_type
-#include <sharedutils/util_shared_handle.hpp>
-#include "sharedutils/util_weak_handle.hpp"
 #include <memory>
+
+export module pragma.shared:scripting.lua.handles;
 
 // Note: get_const_holder and get_pointer have to be defined
 // in the same namespace as the type!! (luabind namespace will *not* work
@@ -84,5 +83,3 @@ LUA_DEFINE_PTR_TYPE(util, util::WeakHandle, weak_handle);
 
 LUA_DEFINE_PTR_TYPE_CONVERTER(util::TWeakSharedHandle, weak_shared_handle_cast, true);
 LUA_DEFINE_PTR_TYPE_CONVERTER(util::TSharedHandle, shared_handle_cast, false);
-
-#endif

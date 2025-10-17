@@ -4,9 +4,7 @@
 module;
 #include "pragma/lua/luaapi.h"
 
-#include "mathutil/uvec.h"
 
-#include <mathutil/umesh.h>
 
 module pragma.shared;
 

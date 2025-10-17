@@ -8,8 +8,6 @@ module;
 
 #include "pragma/lua/luaapi.h"
 
-#include "luasystem.h"
-#include <sharedutils/util_string.h>
 
 module pragma.shared;
 

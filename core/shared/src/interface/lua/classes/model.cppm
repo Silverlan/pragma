@@ -5,8 +5,6 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/lua/luaapi.h"
-#include "mathutil/uvec.h"
-#include "mathutil/uquat.h"
 
 
 
@@ -110,8 +108,8 @@ export namespace Lua {
 		DLLNETWORK void SetCollisionBounds(lua_State *l, ::Model &mdl, const Vector3 &min, const Vector3 &max);
 		DLLNETWORK void SetRenderBounds(lua_State *l, ::Model &mdl, const Vector3 &min, const Vector3 &max);
 		DLLNETWORK void AddCollisionMesh(lua_State *l, ::Model &mdl, ::CollisionMesh &colMesh);
-		DLLNETWORK void AddMaterial(lua_State *l, ::Model &mdl, uint32_t textureGroup, ::Material *mat);
-		DLLNETWORK void SetMaterial(lua_State *l, ::Model &mdl, uint32_t matId, ::Material *mat);
+		DLLNETWORK void AddMaterial(lua_State *l, ::Model &mdl, uint32_t textureGroup, msys::Material *mat);
+		DLLNETWORK void SetMaterial(lua_State *l, ::Model &mdl, uint32_t matId, msys::Material *mat);
 		DLLNETWORK void GetMaterials(lua_State *l, ::Model &mdl);
 		DLLNETWORK void GetMaterialCount(lua_State *l, ::Model &mdl);
 		DLLNETWORK void GetMeshGroupCount(lua_State *l, ::Model &mdl);

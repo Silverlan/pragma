@@ -4,11 +4,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "luasystem.h"
-#include <mathutil/vertex.hpp>
-#include <sharedutils/datastream.h>
-#include "mathutil/uvec.h"
-#include "mathutil/uquat.h"
 
 
 

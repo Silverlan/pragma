@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <sharedutils/util_shared_handle.hpp>
 #include <cinttypes>
 #include <type_traits>
 #include <string>

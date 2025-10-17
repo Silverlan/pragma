@@ -2,11 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "mathutil/umath.h"
 
 #include "memory"
-#include "mathutil/umath_geometry.hpp"
-#include <mathutil/uvec.h>
 #include <algorithm>
 
 module pragma.shared;

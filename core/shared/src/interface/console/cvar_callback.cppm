@@ -5,7 +5,6 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include <functional>
-#include <sharedutils/functioncallback.h>
 
 export module pragma.shared:console.cvar_callback;
 

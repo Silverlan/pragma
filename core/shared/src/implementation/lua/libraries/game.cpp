@@ -4,21 +4,16 @@
 module;
 #include "pragma/lua/policies/core_policies.hpp"
 
-#include "udm.hpp"
 
 #include "cassert"
 
-#include "mathutil/umath.h"
 
 #include "pragma/lua/lua_call.hpp"
 #include "pragma/lua/lua_util_class.hpp"
 #include "pragma/lua/luaapi.h"
 
 #include "pragma/lua/ostream_operator_alias.hpp"
-#include "mathutil/uvec.h"
 
-#include <sharedutils/functioncallback.h>
-#include "luasystem.h"
 
 module pragma.shared;
 

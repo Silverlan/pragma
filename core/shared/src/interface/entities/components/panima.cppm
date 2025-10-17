@@ -4,9 +4,7 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "sharedutils/util_path.hpp"
 #include <unordered_set>
-#include "mathutil/umath.h"
 
 #undef GetCurrentTime
 

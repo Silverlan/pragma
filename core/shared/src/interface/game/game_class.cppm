@@ -4,22 +4,11 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <mathutil/glmutil.h>
 #include <vector>
 #include <deque>
 #include "pragma/lua/ldefinitions.h"
-#include "luainterface.hpp"
 #include "pragma/encryption/md5.h"
 #include "pragma/lua/luaapi.h"
-#include <sharedutils/callback_handler.h>
-#include <sharedutils/chronotime.h>
-#include "sharedutils/util_string.h"
-#include <fsys/vfileptr.h>
-#include <fsys/filesystem.h>
-#include <sharedutils/util_weak_handle.hpp>
-#include <sharedutils/util_shared_handle.hpp>
-#include "mathutil/uvec.h"
-#include "mathutil/umath.h"
 
 
 

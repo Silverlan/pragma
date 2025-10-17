@@ -6,11 +6,8 @@ module;
 
 #include "sstream"
 
-#include "sharedutils/util.h"
 
 #include "pragma/networkdefinitions.h"
-#include <sharedutils/util_debug.h>
-#include <mathutil/color.h>
 #include <thread>
 
 module pragma.shared;

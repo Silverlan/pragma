@@ -8,7 +8,6 @@ module;
 
 #include "memory"
 
-#include "sharedutils/util.h"
 
 module pragma.shared;
 

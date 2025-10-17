@@ -6,17 +6,9 @@ module;
 
 #include "algorithm"
 
-#include "sharedutils/util.h"
 
-#include <fsys/filesystem.h>
-#include <sharedutils/util_file.h>
-#include <fsys/directory_watcher.h>
 #ifdef _WIN32
-#include <sharedutils/util_link.hpp>
 #endif
-#include "luasystem.h"
-#include "sharedutils/util_string.h"
-#include "sharedutils/util_version.h"
 #include "pragma/logging.hpp"
 
 module pragma.shared;

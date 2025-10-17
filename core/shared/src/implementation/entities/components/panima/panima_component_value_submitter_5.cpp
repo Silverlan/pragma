@@ -3,11 +3,9 @@
 
 module;
 
-#include "udm.hpp"
 
 #include "pragma/networkdefinitions.h"
 
-#include "mathutil/uvec.h"
 
 module pragma.shared;
 

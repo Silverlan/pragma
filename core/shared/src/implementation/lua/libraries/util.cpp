@@ -2,46 +2,25 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "sharedutils/util_parallel_job.hpp"
 
-#include "fsys/filesystem.h"
 
 #include "sstream"
 
 #include "pragma/lua/policies/default_parameter_policy.hpp"
 #include "pragma/lua/ostream_operator_alias.hpp"
-#include "mathutil/umath.h"
 
 #include "memory"
 
-#include "udm.hpp"
 
-#include "sharedutils/util_pragma.hpp"
-#include <sharedutils/util_hair.hpp>
-#include "mathutil/umath_geometry.hpp"
 
-#include "sharedutils/util.h"
 
 #include "pragma/lua/luaapi.h"
 
-#include "sharedutils/util_string.h"
 
-#include "sharedutils/functioncallback.h"
 
-#include "mathutil/uvec.h"
 
-#include "luasystem.h"
-#include <util_image_buffer.hpp>
-#include <sharedutils/util_file.h>
-#include <sharedutils/scope_guard.h>
-#include <sharedutils/util_path.hpp>
 #include "pragma/lua/util.hpp"
-#include <luainterface.hpp>
 #include <luabind/class_info.hpp>
-#include <fsys/ifile.hpp>
-#include <sharedutils/util_hair.hpp>
-#include <sharedutils/util_markup_file.hpp>
-#include "udm.hpp"
 
 module pragma.shared;
 

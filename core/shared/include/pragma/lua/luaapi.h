@@ -5,11 +5,6 @@
 #define __LUAAPI_H__
 
 #include "pragma/networkdefinitions.h"
-
-// Has to be included before luabind!
-#include "lua_handles.hpp"
-
-#include <luasystem.h>
 #include <luabind/luabind.hpp>
 #include <luabind/operator.hpp>
 #include <luabind/pseudo_traits.hpp>

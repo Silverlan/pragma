@@ -7,7 +7,6 @@ module;
 #include <string>
 #include <vector>
 #include <optional>
-#include <sharedutils/util_path.hpp>
 
 export module pragma.shared:engine.info;
 

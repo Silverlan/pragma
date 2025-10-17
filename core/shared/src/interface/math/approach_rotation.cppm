@@ -4,9 +4,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <mathutil/umath.h>
-#include <mathutil/uvec.h>
-#include "mathutil/uquat.h"
 
 
 export module pragma.shared:math.approach_rotation;

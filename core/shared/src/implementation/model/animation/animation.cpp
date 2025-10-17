@@ -2,9 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "sharedutils/magic_enum.hpp"
 
-#include "fsys/filesystem.h"
 
 #include "memory"
 
@@ -12,16 +10,11 @@ module;
 
 #include "cassert"
 
-#include "mathutil/uquat.h"
 
 #include "pragma/logging.hpp"
 
-#include "sharedutils/util.h"
 
-#include "mathutil/uvec.h"
 
-#include <udm.hpp>
-#include <mathutil/umath.h>
 //#include <utility>
 
 module pragma.shared;

@@ -5,11 +5,8 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include <string>
-#include <mathutil/uvec.h>
 #include <vector>
 #include <iostream>
-#include <mathutil/glmutil.h>
-#include "material.h"
 
 export module pragma.shared:model.poly;
 
@@ -102,7 +99,7 @@ export {
 		PolyInfo m_compiledData;
 		std::shared_ptr<DispInfo> m_displacement;
 		std::unique_ptr<TextureData> m_texData = nullptr;
-		Material *m_material = nullptr;
+		msys::Material *m_material = nullptr;
 		double m_distance = 0.0;
 		bool CalculatePlane();
 		void CalculateBounds();
@@ -129,8 +126,8 @@ export {
 		bool GenerateTriangleMesh(std::vector<uint16_t> *triangles, std::vector<glm::vec2> *uvs, std::vector<Vector3> *normals);
 		virtual void SetTextureData(std::string texture, Vector3 nu, Vector3 nv, float ou, float ov, float su, float sv, float rot = 0);
 		TextureData *GetTextureData();
-		virtual Material *GetMaterial();
-		virtual void SetMaterial(Material *material);
+		virtual msys::Material *GetMaterial();
+		virtual void SetMaterial(msys::Material *material);
 		Vector3 *GetWorldPosition();
 		const short ClassifyPoint(Vector3 *point);
 		Vector3 GetCalculatedNormal();

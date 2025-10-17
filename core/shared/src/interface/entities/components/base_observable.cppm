@@ -5,7 +5,6 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include <optional>
-#include "mathutil/uvec.h"
 
 export module pragma.shared:entities.components.base_observable;
 

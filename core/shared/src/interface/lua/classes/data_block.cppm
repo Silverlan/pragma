@@ -5,8 +5,6 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/lua/luaapi.h"
-#include "datasystem.h"
-#include "mathutil/uvec.h"
 
 
 export module pragma.shared:scripting.lua.classes.data_block;

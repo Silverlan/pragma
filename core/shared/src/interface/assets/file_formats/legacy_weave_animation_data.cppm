@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <sharedutils/util_ifile.hpp>
 
 export module pragma.shared:assets.file_formats.legacy_weave_animation_data;
 

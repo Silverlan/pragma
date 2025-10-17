@@ -17,7 +17,6 @@ module;
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include "mathutil/uvec.h"
 
 module pragma.shared;
 

@@ -2,9 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "sharedutils/util.h"
 
-#include "sharedutils/util_string.h"
 
 module pragma.shared;
 
@@ -67,6 +65,6 @@ void BaseFuncButtonComponent::OnEntitySpawn()
 		m_useSound = nullptr;
 		auto pSoundEmitterComponent = static_cast<pragma::BaseSoundEmitterComponent *>(ent.FindComponent("sound_emitter").get());
 		if(pSoundEmitterComponent != nullptr)
-			m_useSound = pSoundEmitterComponent->CreateSound(m_kvUseSound, ALSoundType::Effect);
+			m_useSound = pSoundEmitterComponent->CreateSound(m_kvUseSound, pragma::audio::ALSoundType::Effect);
 	}
 }

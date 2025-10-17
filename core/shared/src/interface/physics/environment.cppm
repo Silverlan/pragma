@@ -4,15 +4,8 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <mathutil/glmutil.h>
-#include <mathutil/transform.hpp>
-#include <sharedutils/functioncallback.h>
-#include <sharedutils/util_shared_handle.hpp>
 #include <vector>
 #include <unordered_map>
-#include "mathutil/uvec.h"
-#include "mathutil/uquat.h"
-#include "mathutil/umath.h"
 
 
 

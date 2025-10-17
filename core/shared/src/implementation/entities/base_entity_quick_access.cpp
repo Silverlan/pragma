@@ -2,13 +2,10 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "mathutil/umath.h"
 
 #include "cassert"
 
-#include "mathutil/uvec.h"
 
-#include <mathutil/transform.hpp>
 
 module pragma.shared;
 
@@ -21,14 +18,14 @@ pragma::ComponentHandle<pragma::BaseEntityComponent> BaseEntity::AddNetworkedCom
 		return c;
 	return AddComponent(name);
 }
-std::shared_ptr<ALSound> BaseEntity::CreateSound(const std::string &snd, ALSoundType type)
+std::shared_ptr<ALSound> BaseEntity::CreateSound(const std::string &snd, pragma::audio::ALSoundType type)
 {
 	auto *sndC = static_cast<pragma::BaseSoundEmitterComponent *>(AddNetworkedComponent("sound_emitter").get());
 	if(sndC == nullptr)
 		return nullptr;
 	return sndC->CreateSound(snd, type);
 }
-std::shared_ptr<ALSound> BaseEntity::EmitSound(const std::string &snd, ALSoundType type, float gain, float pitch)
+std::shared_ptr<ALSound> BaseEntity::EmitSound(const std::string &snd, pragma::audio::ALSoundType type, float gain, float pitch)
 {
 	auto *sndC = static_cast<pragma::BaseSoundEmitterComponent *>(AddNetworkedComponent("sound_emitter").get());
 	if(sndC == nullptr)

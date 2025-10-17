@@ -4,25 +4,16 @@
 module;
 #include "string_view"
 
-#include "fsys/filesystem.h"
 
 #include "memory"
 
-#include "sharedutils/util.h"
 
 #include "pragma/networkdefinitions.h"
 
 #include "pragma/lua/luaapi.h"
 
-#include "sharedutils/util_string.h"
 
-#include "mathutil/uvec.h"
 
-#include "luasystem.h"
-#include <sharedutils/util_file.h>
-#include <sharedutils/util_library.hpp>
-#include <sharedutils/util_path.hpp>
-#include <fsys/ifile.hpp>
 
 module pragma.shared;
 

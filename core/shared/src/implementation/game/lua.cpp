@@ -10,12 +10,7 @@ module;
 #include "pragma/lua/lua_error_handling.hpp"
 #include "pragma/lua/luaapi.h"
 
-#include <fsys/filesystem.h>
-#include "luasystem_file.h"
-#include <luainterface.hpp>
 #include <luabind/exception_handler.hpp>
-#include <sharedutils/util_string.h>
-#include <sharedutils/util_file.h>
 
 module pragma.shared;
 

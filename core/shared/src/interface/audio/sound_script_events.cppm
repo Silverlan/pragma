@@ -7,7 +7,6 @@ module;
 #include <vector>
 #include <string>
 #include <memory>
-#include "udm.hpp"
 
 export module pragma.shared:audio.sound_script_events;
 
@@ -123,7 +122,7 @@ export {
 		int position = 0;
 		ALChannel mode = ALChannel::Mono;
 		virtual void Initialize(udm::LinkedPropertyWrapper &prop) override;
-		virtual SSESound *CreateSound(double tStart, const std::function<std::shared_ptr<ALSound>(const std::string &, ALChannel, ALCreateFlags)> &createSound);
+		virtual SSESound *CreateSound(double tStart, const std::function<std::shared_ptr<ALSound>(const std::string &, ALChannel, pragma::audio::ALCreateFlags)> &createSound);
 		virtual void Precache() override;
 	};
 };

@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <sharedutils/ctpl_stl.h>
 
 export module pragma.shared:util.thread_pool;
 

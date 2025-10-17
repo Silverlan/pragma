@@ -5,7 +5,6 @@
 #define __PRAGMA_LUA_TYPES_NIL_TYPE_HPP__
 
 
-#include <luasystem.h>
 #include <luabind/luabind.hpp>
 #include <luabind/operator.hpp>
 #include <luabind/pseudo_traits.hpp>

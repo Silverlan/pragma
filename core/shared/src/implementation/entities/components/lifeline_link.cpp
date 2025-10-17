@@ -4,7 +4,6 @@
 module;
 #include "algorithm"
 
-#include "mathutil/umath.h"
 
 module pragma.shared;
 

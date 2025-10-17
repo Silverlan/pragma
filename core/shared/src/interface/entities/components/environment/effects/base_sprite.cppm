@@ -5,7 +5,6 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include <string>
-#include <mathutil/color.h>
 
 export module pragma.shared:entities.components.environment.effects.base_sprite;
 

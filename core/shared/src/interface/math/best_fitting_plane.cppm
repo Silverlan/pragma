@@ -4,8 +4,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <mathutil/umat.h>
-#include "mathutil/uvec.h"
 
 
 export module pragma.shared:math.best_fitting_plane;

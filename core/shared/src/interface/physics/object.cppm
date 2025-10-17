@@ -4,15 +4,9 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <mathutil/glmutil.h>
 #include <memory>
 #include <vector>
 #include <optional>
-#include <mathutil/uquat.h>
-#include "sharedutils/util_shared_handle.hpp"
-#include <mathutil/transform.hpp>
-#include "mathutil/uvec.h"
-#include "mathutil/umath.h"
 
 #ifdef __linux__
 #endif

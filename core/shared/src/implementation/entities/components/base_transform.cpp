@@ -4,20 +4,13 @@
 module;
 #include "memory"
 
-#include "mathutil/umath.h"
 
-#include "mathutil/uquat.h"
 
-#include "sharedutils/util.h"
 
 #include "pragma/lua/luaapi.h"
 
-#include "sharedutils/util_string.h"
 
-#include "mathutil/uvec.h"
 
-#include <sharedutils/datastream.h>
-#include <udm.hpp>
 
 module pragma.shared;
 

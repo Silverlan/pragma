@@ -5,10 +5,6 @@ module;
 
 #include "pragma/lua/luaapi.h"
 #include "pragma/lua/lua_call.hpp"
-#include "mathutil/uvec.h"
-#include "mathutil/uquat.h"
-#include "mathutil/color.h"
-#include "mathutil/transform.hpp"
 #include "pragma/networkdefinitions.h"
 
 export module pragma.shared:scripting.lua.classes.property;

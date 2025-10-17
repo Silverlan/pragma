@@ -4,9 +4,7 @@
 module;
 #include "memory"
 
-#include "mathutil/umath.h"
 
-#include "sharedutils/util.h"
 
 // Sound duration for mp3 files
 #ifdef WEAVE_MP3_SUPPORT_ENABLED
@@ -18,9 +16,7 @@ module;
 #endif
 //
 #include <string>
-#include <fsys/filesystem.h>
 #include <cstring>
-#include <mathutil/uvec.h>
 
 #undef max
 
@@ -30,7 +26,7 @@ import :audio.sound;
 
 SoundEffectParams::SoundEffectParams(float pgain, float pgainHF, float pgainLF) : gain(pgain), gainHF(pgainHF), gainLF(pgainLF) {}
 
-ALSound::ALSound(NetworkState *nw) : util::inheritable_enable_shared_from_this<ALSound>(), CallbackHandler(), LuaCallbackHandler(), m_type(ALSoundType::Generic), m_networkState(nw)
+ALSound::ALSound(NetworkState *nw) : util::inheritable_enable_shared_from_this<ALSound>(), CallbackHandler(), LuaCallbackHandler(), m_type(pragma::audio::ALSoundType::Generic), m_networkState(nw)
 {
 	RegisterCallback<void>("OnDestroyed");
 	RegisterCallback<void, ALState, ALState>("OnStateChanged");
@@ -184,13 +180,13 @@ void ALSound::CancelFade()
 		Pause();
 }
 
-void ALSound::SetType(ALSoundType type) { m_type = type; }
-void ALSound::AddType(ALSoundType type)
+void ALSound::SetType(pragma::audio::ALSoundType type) { m_type = type; }
+void ALSound::AddType(pragma::audio::ALSoundType type)
 {
-	type = static_cast<ALSoundType>(CUInt32(m_type) | CUInt32(type));
+	type = static_cast<pragma::audio::ALSoundType>(CUInt32(m_type) | CUInt32(type));
 	SetType(type);
 }
-ALSoundType ALSound::GetType() const { return m_type; }
+pragma::audio::ALSoundType ALSound::GetType() const { return m_type; }
 ALState ALSound::GetState() const { return ALState::Initial; }
 
 void ALSound::UpdateState() {}

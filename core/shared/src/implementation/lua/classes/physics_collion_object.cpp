@@ -2,15 +2,11 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "mathutil/umath.h"
 
-#include "mathutil/uquat.h"
 
 #include "pragma/lua/luaapi.h"
 #include "pragma/lua/ostream_operator_alias.hpp"
-#include "mathutil/uvec.h"
 
-#include "luasystem.h"
 
 module pragma.shared;
 

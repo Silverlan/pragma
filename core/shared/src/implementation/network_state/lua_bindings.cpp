@@ -6,7 +6,6 @@ module;
 
 #include "sstream"
 
-#include "sharedutils/util_version.h"
 #include "pragma/lua/ostream_operator_alias.hpp"
 #include "memory"
 
@@ -16,30 +15,14 @@ module;
 
 #include "pragma/lua/lua_call.hpp"
 #include "pragma/lua/lua_util_class.hpp"
-#include "mathutil/uquat.h"
-#include "sharedutils/util_parallel_job.hpp"
-#include "sharedutils/util.h"
 #include "pragma/lua/luaapi.h"
 #include "pragma/lua/types/nil_type.hpp"
-#include "sharedutils/util_string.h"
 
-#include "mathutil/uvec.h"
 
-#include <mathutil/umath.h>
 #include <glm/gtx/matrix_decompose.hpp>
-#include "luasystem.h"
-#include <sharedutils/datastream.h>
-#include <sharedutils/util_path.hpp>
-#include <util_image_buffer.hpp>
-#include <mathutil/umath_lighting.hpp>
-#include <luainterface.hpp>
 #include <luabind/iterator_policy.hpp>
 #include <luabind/out_value_policy.hpp>
 #include <luabind/copy_policy.hpp>
-#include <mathutil/inverse_kinematics/ik.hpp>
-#include <mathutil/inverse_kinematics/constraints.hpp>
-#include <sharedutils/magic_enum.hpp>
-#include <fsys/directory_watcher.h>
 
 module pragma.shared;
 
@@ -73,23 +56,23 @@ std::ostream &operator<<(std::ostream &out, const ALSound &snd)
 			out << " | ";
 		else
 			bStart = true;
-		if(v == static_cast<uint64_t>(ALSoundType::Effect))
+		if(v == static_cast<uint64_t>(pragma::audio::ALSoundType::Effect))
 			out << "Effect";
-		else if(v == static_cast<uint64_t>(ALSoundType::Music))
+		else if(v == static_cast<uint64_t>(pragma::audio::ALSoundType::Music))
 			out << "Music";
-		else if(v == static_cast<uint64_t>(ALSoundType::Voice))
+		else if(v == static_cast<uint64_t>(pragma::audio::ALSoundType::Voice))
 			out << "Voice";
-		else if(v == static_cast<uint64_t>(ALSoundType::Weapon))
+		else if(v == static_cast<uint64_t>(pragma::audio::ALSoundType::Weapon))
 			out << "Weapon";
-		else if(v == static_cast<uint64_t>(ALSoundType::NPC))
+		else if(v == static_cast<uint64_t>(pragma::audio::ALSoundType::NPC))
 			out << "NPC";
-		else if(v == static_cast<uint64_t>(ALSoundType::Player))
+		else if(v == static_cast<uint64_t>(pragma::audio::ALSoundType::Player))
 			out << "Player";
-		else if(v == static_cast<uint64_t>(ALSoundType::Vehicle))
+		else if(v == static_cast<uint64_t>(pragma::audio::ALSoundType::Vehicle))
 			out << "Vehicle";
-		else if(v == static_cast<uint64_t>(ALSoundType::Physics))
+		else if(v == static_cast<uint64_t>(pragma::audio::ALSoundType::Physics))
 			out << "Physics";
-		else if(v == static_cast<uint64_t>(ALSoundType::Environment))
+		else if(v == static_cast<uint64_t>(pragma::audio::ALSoundType::Environment))
 			out << "Environment";
 	}
 	out << "]";

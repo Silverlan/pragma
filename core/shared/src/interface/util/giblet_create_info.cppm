@@ -6,8 +6,6 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <cinttypes>
 #include <string>
-#include <mathutil/uvec.h>
-#include "mathutil/uquat.h"
 
 
 export module pragma.shared:util.giblet_create_info;

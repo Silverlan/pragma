@@ -2,31 +2,19 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "sharedutils/asset_loader/file_asset_manager.hpp"
 
 #include "memory"
 
 #include "algorithm"
 
-#include "udm.hpp"
 
 #include "pragma/logging.hpp"
 
-#include "sharedutils/util.h"
 
 #include "pragma/networkdefinitions.h"
 
 #include "pragma/lua/luaapi.h"
 
-#include "materialmanager.h"
-#include <sharedutils/functioncallback.h>
-#include <sharedutils/util_string.h>
-#include <sharedutils/scope_guard.h>
-#include <material_manager2.hpp>
-#include <material_property_block_view.hpp>
-#include <luainterface.hpp>
-#include <sharedutils/util_file.h>
-#include <sharedutils/util_library.hpp>
 
 #define DLLSPEC_ISTEAMWORKS DLLNETWORK
 
@@ -210,15 +198,15 @@ bool NetworkState::CheatsEnabled() const
 	return Engine::Get()->GetConVarBool("sv_cheats");
 }
 
-Material *NetworkState::PrecacheMaterial(const std::string &path) { return LoadMaterial(path, true, false); }
-Material *NetworkState::LoadMaterial(const std::string &path, bool bReload) { return LoadMaterial(path, false, bReload); }
+msys::Material *NetworkState::PrecacheMaterial(const std::string &path) { return LoadMaterial(path, true, false); }
+msys::Material *NetworkState::LoadMaterial(const std::string &path, bool bReload) { return LoadMaterial(path, false, bReload); }
 
-Material *NetworkState::LoadMaterial(const std::string &path, bool precache, bool bReload)
+msys::Material *NetworkState::LoadMaterial(const std::string &path, bool precache, bool bReload)
 {
 	static auto bSkipPort = false;
 	auto &matManager = GetMaterialManager();
 	auto success = true;
-	Material *mat = nullptr;
+	msys::Material *mat = nullptr;
 	if(precache) {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 		debug::get_domain().BeginTask("preload_material");

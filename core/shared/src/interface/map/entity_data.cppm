@@ -4,8 +4,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "mathutil/umath.h"
-#include "mathutil/transform.hpp"
 #include <string>
 #include <optional>
 #include <memory>

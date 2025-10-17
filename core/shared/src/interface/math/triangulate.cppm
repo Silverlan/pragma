@@ -22,7 +22,6 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <vector>
 #include <cinttypes>
-#include <mathutil/glmutil.h>
 
 export module pragma.shared:math.triangulate;
 

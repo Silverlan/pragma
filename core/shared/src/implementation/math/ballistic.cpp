@@ -2,13 +2,10 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "mathutil/umath.h"
 
 #include "cassert"
 
-#include "mathutil/uvec.h"
 #include <algorithm>
-#include <mathutil/umath_equation_solver.h>
 
 module pragma.shared;
 

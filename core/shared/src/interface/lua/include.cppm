@@ -5,7 +5,6 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/lua/luaapi.h"
-#include "mathutil/umath.h"
 
 
 export module pragma.shared:scripting.lua.include;

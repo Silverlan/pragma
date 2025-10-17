@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <udm.hpp>
 
 export module pragma.shared:console.convar;
 

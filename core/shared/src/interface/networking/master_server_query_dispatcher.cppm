@@ -10,7 +10,6 @@ module;
 #include <memory>
 #include <queue>
 #include <cinttypes>
-#include <mathutil/umath.h>
 
 export module pragma.shared:networking.master_server_query_dispatcher;
 

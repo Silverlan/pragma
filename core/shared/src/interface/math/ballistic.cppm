@@ -5,7 +5,6 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include <cinttypes>
-#include <mathutil/uvec.h>
 
 export module pragma.shared:math.ballistic;
 

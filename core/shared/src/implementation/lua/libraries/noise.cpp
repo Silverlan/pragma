@@ -6,9 +6,6 @@ module;
 
 #include "pragma/lua/luaapi.h"
 
-#include "mathutil/uvec.h"
-#include "mathutil/perlin_noise.hpp"
-#include "luasystem.h"
 #include "noise/noise.h"
 #include "noiseutils.h"
 

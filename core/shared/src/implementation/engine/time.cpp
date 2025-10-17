@@ -2,9 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "mathutil/umath.h"
 
-#include <sharedutils/util.h>
 #include <cassert>
 #ifdef _WIN32
 #include <Mmsystem.h>

@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "mathutil/umath.h"
 
 export module pragma.shared:entities.components.base_field_angle;
 

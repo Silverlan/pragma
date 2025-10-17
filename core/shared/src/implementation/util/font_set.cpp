@@ -4,7 +4,6 @@
 module;
 #include "string_view"
 
-#include "mathutil/umath.h"
 
 module pragma.shared;
 

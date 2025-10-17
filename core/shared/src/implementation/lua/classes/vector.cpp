@@ -4,15 +4,9 @@
 module;
 #include "pragma/lua/luaapi.h"
 
-#include "mathutil/umath.h"
 
-#include "mathutil/uvec.h"
 
-#include "luasystem.h"
-#include <sharedutils/util.h>
-#include <mathutil/vertex.hpp>
 #include <glm/gtx/projection.hpp>
-#include <sharedutils/scope_guard.h>
 
 module pragma.shared;
 

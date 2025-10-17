@@ -8,25 +8,16 @@ module;
 
 #include "pragma/lua/policies/default_parameter_policy.hpp"
 
-#include "mathutil/umath.h"
-#include "mathutil/umat.h"
 #include "memory"
 
 #include "algorithm"
 
-#include "sharedutils/util.h"
 
 #include "pragma/lua/luaapi.h"
 
-#include "mathutil/uvec.h"
 
-#include "luasystem.h"
-#include "material_manager2.hpp"
-#include <mathutil/color.h>
-#include <luainterface.hpp>
 #include <luabind/iterator_policy.hpp>
 #include <luabind/copy_policy.hpp>
-#include <sharedutils/magic_enum.hpp>
 #include <luabind/detail/type_traits.hpp>
 
 module pragma.shared;
@@ -378,7 +369,7 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 			return nullptr;
 		return subMesh->shared_from_this();
 	}));
-	classDefRayCastResult.property("material", static_cast<::Material *(TraceResult::*)()>(&TraceResult::GetMaterial));
+	classDefRayCastResult.property("material", static_cast<msys::Material *(TraceResult::*)()>(&TraceResult::GetMaterial));
 	classDefRayCastResult.property("materialName", static_cast<std::optional<std::string> (*)(lua_State *, TraceResult &)>([](lua_State *l, TraceResult &tr) -> std::optional<std::string> {
 		std::string mat;
 		if(tr.GetMaterial(mat) == false)

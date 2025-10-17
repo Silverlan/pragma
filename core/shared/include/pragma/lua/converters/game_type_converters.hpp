@@ -5,7 +5,6 @@
 #define __LUA_GAME_TYPE_CONVERTERS_HPP__
 
 #include "pragma/networkdefinitions.h"
-#include <fsys/filesystem.h>
 #include <luabind/detail/conversion_policies/native_converter.hpp>
 #include "pragma/lua/core.hpp"
 #include <vector>

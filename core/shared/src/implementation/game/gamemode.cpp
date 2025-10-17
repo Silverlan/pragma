@@ -3,7 +3,6 @@
 
 module;
 
-#include "luasystem.h"
 
 module pragma.shared;
 

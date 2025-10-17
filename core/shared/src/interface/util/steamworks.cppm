@@ -3,7 +3,6 @@
 
 module;
 
-#include <sharedutils/util_library.hpp>
 
 #ifndef DLLSPEC_ISTEAMWORKS
 #define DLLSPEC_ISTEAMWORKS

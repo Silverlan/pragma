@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "mathutil/umath.h"
 #include <string>
 
 export module pragma.shared:entities.components.environment.audio.base_sound;
@@ -73,7 +72,7 @@ export {
 			void SetRelativeToListener(bool bRelative);
 			void SetPlayOnSpawn(bool bPlayOnSpawn);
 			void SetLooping(bool bLoop);
-			void SetSoundType(ALSoundType types);
+			void SetSoundType(pragma::audio::ALSoundType types);
 
 			void Play();
 			void Stop();
@@ -96,7 +95,7 @@ export {
 			float m_kvOffset = 0.f;
 			float m_kvReferenceDist = 1.f;
 			float m_kvMaxDist = 1024.f;
-			ALSoundType m_soundTypes = ALSoundType::Generic;
+			pragma::audio::ALSoundType m_soundTypes = pragma::audio::ALSoundType::Generic;
 			std::shared_ptr<ALSound> m_sound;
 		};
 	};

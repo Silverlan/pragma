@@ -4,12 +4,9 @@
 module;
 #include "sstream"
 
-#include "mathutil/umath.h"
 
 #include "memory"
 
-#include <udm.hpp>
-#include <sharedutils/magic_enum.hpp>
 
 module pragma.shared;
 

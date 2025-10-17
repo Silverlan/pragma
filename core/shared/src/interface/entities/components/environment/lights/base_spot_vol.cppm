@@ -4,8 +4,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <mathutil/color.h>
-#include <mathutil/umath.h>
 #include <string>
 
 export module pragma.shared:entities.components.environment.lights.base_spot_vol;

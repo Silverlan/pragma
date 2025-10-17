@@ -5,12 +5,7 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include <vector>
-#include <mathutil/uvec.h>
-#include "material.h"
-#include <udm_types.hpp>
 #include <memory>
-#include "mathutil/uquat.h"
-#include "mathutil/umath.h"
 
 
 
@@ -485,10 +480,10 @@ export {
 		uint32_t GetVertexCount() const;
 		uint32_t GetTriangleCount() const;
 		// Textures
-		uint32_t AddTexture(const std::string &tex, Material *mat);
-		bool SetTexture(uint32_t texIdx, const std::string &tex, Material *mat);
-		uint32_t AddMaterial(uint32_t skin, Material *mat, const std::optional<std::string> &matName = {}, std::optional<uint32_t> *optOutSkinTexIdx = nullptr);
-		bool SetMaterial(uint32_t texIdx, Material *mat);
+		uint32_t AddTexture(const std::string &tex, msys::Material *mat);
+		bool SetTexture(uint32_t texIdx, const std::string &tex, msys::Material *mat);
+		uint32_t AddMaterial(uint32_t skin, msys::Material *mat, const std::optional<std::string> &matName = {}, std::optional<uint32_t> *optOutSkinTexIdx = nullptr);
+		bool SetMaterial(uint32_t texIdx, msys::Material *mat);
 		void RemoveTexture(uint32_t idx);
 		void ClearTextures();
 		void LoadMaterials(bool bReload = false);
@@ -497,8 +492,8 @@ export {
 		std::vector<std::string> &GetTextures();
 		std::vector<msys::MaterialHandle> &GetMaterials();
 		const std::vector<msys::MaterialHandle> &GetMaterials() const;
-		Material *GetMaterial(uint32_t texID);
-		Material *GetMaterial(uint32_t texGroup, uint32_t texID);
+		msys::Material *GetMaterial(uint32_t texID);
+		msys::Material *GetMaterial(uint32_t texGroup, uint32_t texID);
 		virtual void PrecacheTexture(uint32_t texId, bool bReload = false);
 		std::vector<TextureGroup> &GetTextureGroups();
 		TextureGroup *GetTextureGroup(uint32_t i);
@@ -571,7 +566,7 @@ export {
 		Model(const Model &other);
 		bool LoadFromAssetData(Game &game, const udm::AssetData &data, std::string &outErr);
 		virtual void OnMaterialMissing(const std::string &matName);
-		void AddLoadingMaterial(Material &mat, std::optional<uint32_t> index = {});
+		void AddLoadingMaterial(msys::Material &mat, std::optional<uint32_t> index = {});
 		void LoadMaterials(const std::vector<uint32_t> &textureGroups, bool precache, bool bReload);
 		void LoadMaterials(bool precache, bool bReload);
 		bool FindMaterial(const std::string &texture, std::string &matPath, bool importIfNotFound) const;

@@ -2,38 +2,22 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "sharedutils/asset_loader/file_asset_manager.hpp"
 
-#include "sharedutils/util_file.h"
 
 #include "string_view"
 
 #include "sstream"
 
-#include "mathutil/umath.h"
 
 #include "memory"
 
 #include "cassert"
 
-#include "sharedutils/util_string.h"
 
-#include "sharedutils/functioncallback.h"
 
 #include "pragma/networkdefinitions.h"
-#include "luasystem.h"
 #include "pragma/lua/luaapi.h"
-#include "fsys/directory_watcher.h"
 #include "pragma/lua/lua_error_handling.hpp"
-#include <sharedutils/util.h>
-#include <sharedutils/util_debug.h>
-#include <sharedutils/util_clock.hpp>
-#include <sharedutils/util_parallel_job.hpp>
-#include <material_manager2.hpp>
-#include <sharedutils/util_library.hpp>
-#include <sharedutils/util_path.hpp>
-#include <sharedutils/util_debug.h>
-#include <fsys/filesystem.h>
 #include <spdlog/pattern_formatter.h>
 #include "pragma/logging.hpp"
 
@@ -418,7 +402,7 @@ static uint32_t clear_assets(NetworkState *state, pragma::asset::Type type, bool
 			else {
 				auto &cache = matManager.GetCache();
 
-				std::unordered_map<Material *, std::string> oldCache;
+				std::unordered_map<msys::Material *, std::string> oldCache;
 				for(auto &pair : cache) {
 					auto asset = matManager.GetAsset(pair.second);
 					if(!asset)
@@ -428,7 +412,7 @@ static uint32_t clear_assets(NetworkState *state, pragma::asset::Type type, bool
 
 				n = matManager.ClearUnused();
 
-				std::unordered_map<Material *, std::string> newCache;
+				std::unordered_map<msys::Material *, std::string> newCache;
 				for(auto &pair : cache) {
 					auto asset = matManager.GetAsset(pair.second);
 					if(!asset)

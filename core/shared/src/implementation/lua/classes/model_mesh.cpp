@@ -6,17 +6,12 @@ module;
 
 #include "pragma/lua/policies/default_parameter_policy.hpp"
 
-#include "mathutil/umath.h"
-#include "mathutil/vertex.hpp"
 #include "algorithm"
 
-#include "udm.hpp"
 
 #include "pragma/lua/luaapi.h"
 
-#include "mathutil/uvec.h"
 
-#include "luasystem.h"
 
 module pragma.shared;
 

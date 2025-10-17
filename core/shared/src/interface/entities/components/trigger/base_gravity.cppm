@@ -5,9 +5,7 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include <cinttypes>
-#include <mathutil/uvec.h>
 #include <memory>
-#include "mathutil/umath.h"
 
 
 export module pragma.shared:entities.components.triggers.base_gravity;

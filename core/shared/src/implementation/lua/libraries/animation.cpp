@@ -12,15 +12,11 @@ module;
 
 #include "pragma/lua/luaapi.h"
 
-#include "mathutil/umath.h"
 
 #include "memory"
 
-#include "udm.hpp"
 
-#include "mathutil/uquat.h"
 
-#include <luainterface.hpp>
 #include <luabind/copy_policy.hpp>
 
 module pragma.shared;

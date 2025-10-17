@@ -4,10 +4,6 @@
 module;
 #include "pragma/lua/luaapi.h"
 
-#include "mathutil/uvec.h"
-#include "mathutil/umat.h"
-#include <mathutil/glmutil.h>
-#include <mathutil/boundingvolume.h>
 
 module pragma.shared;
 

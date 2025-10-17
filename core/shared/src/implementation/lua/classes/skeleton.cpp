@@ -6,7 +6,6 @@ module;
 
 #include "algorithm"
 
-#include "luasystem.h"
 
 module pragma.shared;
 

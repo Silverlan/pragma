@@ -1,9 +1,6 @@
 
-#include "mathutil/uquat.h"
 
-#include "sharedutils/util.h"
 
-#include "mathutil/uvec.h"
 
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT

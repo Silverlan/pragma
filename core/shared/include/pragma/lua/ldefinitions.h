@@ -4,9 +4,6 @@
 #ifndef __LDEFINITIONS_H__
 #define __LDEFINITIONS_H__
 
-#include <sharedutils/util_shared_handle.hpp>
-#include "sharedutils/util_string.h"
-#include "sharedutils/util.h"
 #include "pragma/lua/luaapi.h"
 #include <type_traits>
 

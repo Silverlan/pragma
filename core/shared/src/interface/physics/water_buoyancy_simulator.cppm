@@ -4,8 +4,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "mathutil/uvec.h"
-#include "mathutil/uquat.h"
 
 
 export module pragma.shared:physics.water_buoyancy_simulator;

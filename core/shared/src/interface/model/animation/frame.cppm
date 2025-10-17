@@ -4,12 +4,8 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <mathutil/eulerangles.h>
-#include <mathutil/transform.hpp>
 #include <vector>
 #include <unordered_map>
-#include "mathutil/uvec.h"
-#include "mathutil/uquat.h"
 
 
 

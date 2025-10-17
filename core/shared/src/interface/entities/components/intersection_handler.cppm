@@ -4,8 +4,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "mathutil/plane.hpp"
-#include "mathutil/uvec.h"
 
 
 export module pragma.shared:entities.components.intersection_handler;

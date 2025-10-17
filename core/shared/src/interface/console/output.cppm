@@ -4,9 +4,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <sharedutils/util_log.hpp>
-#include "sharedutils/util_path.hpp"
-#include <mathutil/color.h>
 #include <iostream>
 #include <sstream>
 #include <atomic>
@@ -15,7 +12,6 @@ module;
 #include <string_view>
 #ifdef _WIN32
 #include <Windows.h>
-#include "mathutil/umath.h"
 
 #else
 #define DWORD unsigned int

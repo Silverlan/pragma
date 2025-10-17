@@ -4,8 +4,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <mathutil/uvec.h>
-#include <mathutil/color.h>
 
 export module pragma.shared:entities.components.base_debug;
 

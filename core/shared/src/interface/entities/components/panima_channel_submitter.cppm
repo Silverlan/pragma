@@ -4,7 +4,6 @@
 module;
 
 #include <cinttypes>
-#include "udm.hpp"
 
 export module pragma.shared:entities.components.panima_channel_submitter;
 

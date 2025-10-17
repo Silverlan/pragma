@@ -4,9 +4,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "mathutil/uvec.h"
-#include "mathutil/uquat.h"
-#include "mathutil/umath.h"
 
 
 

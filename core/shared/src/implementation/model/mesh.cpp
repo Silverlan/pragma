@@ -2,9 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "mathutil/uvec.h"
 
-#include "materialmanager.h"
 
 module pragma.shared;
 
@@ -29,8 +27,8 @@ Mesh::~Mesh() {}
 unsigned int Mesh::GetUVBuffer() { return m_bufUV; }
 unsigned int Mesh::GetVertexBuffer() { return m_bufVertex; }
 
-Material *Mesh::GetMaterial() { return m_material; }
-void Mesh::SetMaterial(Material *material) { m_material = material; }
+msys::Material *Mesh::GetMaterial() { return m_material; }
+void Mesh::SetMaterial(msys::Material *material) { m_material = material; }
 void Mesh::SetMaterial(const char *texture) { m_material = Engine::Get()->GetServerNetworkState()->LoadMaterial(texture); }
 
 unsigned int Mesh::GetVertexCount() { return m_numVerts; }

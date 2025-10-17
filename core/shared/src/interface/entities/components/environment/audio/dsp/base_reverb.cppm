@@ -5,7 +5,6 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include <string>
-#include <mathutil/glmutil.h>
 
 export module pragma.shared:entities.components.environment.audio.dsp.base_reverb;
 

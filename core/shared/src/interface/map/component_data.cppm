@@ -5,7 +5,6 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include <memory>
-#include <udm.hpp>
 
 export module pragma.shared:map.component_data;
 

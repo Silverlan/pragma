@@ -2,13 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "mathutil/umath.h"
 
-#include "mathutil/uvec.h"
 
-#include <fsys/filesystem.h>
-#include "datasystem.h"
-#include "luasystem.h"
 
 module pragma.shared;
 
@@ -71,13 +66,13 @@ void ALSoundScript::Initialize()
 	//ALSound::Initialize();
 }
 
-std::shared_ptr<ALSound> ALSoundScript::CreateSound(const std::string &name, ALChannel channel, ALCreateFlags createFlags)
+std::shared_ptr<ALSound> ALSoundScript::CreateSound(const std::string &name, ALChannel channel, pragma::audio::ALCreateFlags createFlags)
 {
-	auto flags = ALCreateFlags::None;
+	auto flags = pragma::audio::ALCreateFlags::None;
 	if(channel == ALChannel::Mono)
-		flags |= ALCreateFlags::Mono;
+		flags |= pragma::audio::ALCreateFlags::Mono;
 	if(m_bStream == true)
-		flags |= ALCreateFlags::Stream;
+		flags |= pragma::audio::ALCreateFlags::Stream;
 	flags |= createFlags;
 	return m_networkState->CreateSound(name, GetType(), flags);
 }
@@ -86,7 +81,7 @@ void ALSoundScript::InitializeEvent(SoundScriptEvent *ev)
 {
 	SSEPlaySound *ps = dynamic_cast<SSEPlaySound *>(ev);
 	if(ps != NULL) {
-		SSESound *snd = ps->CreateSound(m_tPassed, [this](const std::string &name, ALChannel channel, ALCreateFlags createFlags) { return CreateSound(name, channel, createFlags); });
+		SSESound *snd = ps->CreateSound(m_tPassed, [this](const std::string &name, ALChannel channel, pragma::audio::ALCreateFlags createFlags) { return CreateSound(name, channel, createFlags); });
 		if(snd != NULL) {
 			ALSound *als = snd->sound.get();
 			auto bSetPos = false;

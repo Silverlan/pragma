@@ -4,9 +4,6 @@
 module;
 #include "pragma/lua/luaapi.h"
 
-#include "luasystem.h"
-#include <sharedutils/util_path.hpp>
-#include <mathutil/color.h>
 
 module pragma.shared;
 

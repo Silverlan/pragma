@@ -6,18 +6,13 @@ module;
 
 #include "memory"
 
-#include "sharedutils/util.h"
 
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/pattern_formatter.h>
 #include <spdlog/formatter.h>
 #include <spdlog/fmt/bundled/format.h>
-#include <sharedutils/magic_enum.hpp>
-#include "sharedutils/util_file.h"
-#include "fsys/filesystem.h"
 #include <atomic>
-#include "mathutil/umath.h"
 #include "pragma/logging.hpp"
 
 module pragma.shared;

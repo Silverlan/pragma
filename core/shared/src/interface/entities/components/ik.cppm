@@ -4,8 +4,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <mathutil/uvec.h>
-#include "mathutil/uquat.h"
 #ifdef _WIN32
 #include <Windows.h>
 #endif

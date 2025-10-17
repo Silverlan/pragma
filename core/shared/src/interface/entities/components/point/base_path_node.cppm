@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "sharedutils/util_weak_handle.hpp"
 #include <string>
 
 export module pragma.shared:entities.components.point.base_path_node;

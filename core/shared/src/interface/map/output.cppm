@@ -5,7 +5,6 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include <string>
-#include "fsys/vfileptr.h"
 
 export module pragma.shared:map.output;
 

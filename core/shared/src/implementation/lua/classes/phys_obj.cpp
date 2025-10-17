@@ -4,10 +4,7 @@
 module;
 #include "pragma/lua/luaapi.h"
 
-#include "mathutil/uvec.h"
 
-#include "luasystem.h"
-#include <mathutil/glmutil.h>
 #include <luabind/out_value_policy.hpp>
 
 module pragma.shared;

@@ -4,14 +4,15 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <udm_types.hpp>
-#include <mathutil/umath.h>
-#include <mathutil/uvec.h>
 #include <string>
 #include "DetourNavMeshQuery.h"
 #include "Recast.h"
+#include <vector>
+#include <memory>
 
 export module pragma.shared:ai.nav_system;
+
+export import pragma.udm;
 
 export {
 	class BaseEntity;
@@ -116,8 +117,12 @@ export {
 				Config m_config = {};
 			};
 		};
+		using namespace umath::scoped_enum::bitwise;
 	};
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::nav::PolyFlags);
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::nav::PolyFlags> : std::true_type {};
+	}
 
 	template<class TMesh>
 	std::shared_ptr<TMesh> pragma::nav::Mesh::Create(const std::shared_ptr<RcNavMesh> &rcMesh, const Config &config)

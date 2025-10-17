@@ -4,13 +4,9 @@
 module;
 #include "sstream"
 
-#include "mathutil/umath.h"
 
 #include "pragma/networkdefinitions.h"
 #include <iostream>
-#include "sharedutils/util.h"
-#include "sharedutils/util_string.h"
-#include "mathutil/uvec.h"
 
 module pragma.shared;
 

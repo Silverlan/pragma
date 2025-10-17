@@ -6,13 +6,10 @@ module;
 
 #include "pragma/lua/lua_call.hpp"
 
-#include "sharedutils/util.h"
 
 #include "pragma/lua/luaapi.h"
 
-#include "sharedutils/functioncallback.h"
 
-#include <sharedutils/magic_enum.hpp>
 
 module pragma.shared;
 

@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <mathutil/transform.hpp>
 
 export module pragma.shared:model.animation.pose;
 

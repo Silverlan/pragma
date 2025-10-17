@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <mathutil/plane.hpp>
 
 export module pragma.shared:entities.components.liquid.base_surface;
 

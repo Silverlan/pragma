@@ -4,11 +4,8 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <mathutil/transform.hpp>
 #include <memory>
 #include <functional>
-#include <mathutil/uvec.h>
-#include <material.h>
 
 export module pragma.shared:game.scene_snapshot;
 
@@ -48,7 +45,7 @@ export {
 			const std::vector<msys::MaterialHandle> &GetMaterials() const;
 			std::vector<msys::MaterialHandle> &GetMaterials();
 		  private:
-			void AddMaterial(Material &mat);
+			void AddMaterial(msys::Material &mat);
 			SceneSnapshot() = default;
 			std::vector<std::shared_ptr<Mesh>> m_meshes = {};
 			std::vector<std::shared_ptr<Object>> m_objects = {};

@@ -5,7 +5,6 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/lua/luaapi.h"
-#include <mathutil/color.h>
 
 export module pragma.shared:scripting.lua.classes.color;
 

@@ -4,9 +4,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "mathutil/uvec.h"
-#include "fsys/vfileptr.h"
-#include "material.h"
 
 export module pragma.shared:map.map_geometry;
 
@@ -24,8 +21,8 @@ export {
 
 	namespace pragma {
 		namespace level {
-			DLLNETWORK void load_map_brushes(Game &game, uint32_t version, VFilePtr f, BaseEntity *ent, std::vector<Material *> &materials, std::vector<SurfaceMaterial> &surfaceMaterials, const Vector3 &origin);
-			DLLNETWORK void load_optimized_map_geometry(Game &game, uint32_t version, VFilePtr f, BaseEntity *ent, std::vector<Material *> &materials, std::vector<SurfaceMaterial> &surfaceMaterials);
+			DLLNETWORK void load_map_brushes(Game &game, uint32_t version, VFilePtr f, BaseEntity *ent, std::vector<msys::Material *> &materials, std::vector<SurfaceMaterial> &surfaceMaterials, const Vector3 &origin);
+			DLLNETWORK void load_optimized_map_geometry(Game &game, uint32_t version, VFilePtr f, BaseEntity *ent, std::vector<msys::Material *> &materials, std::vector<SurfaceMaterial> &surfaceMaterials);
 		};
 	};
 };

@@ -3,7 +3,6 @@
 
 module;
 
-#include <mathutil/umath.h>
 
 export module pragma.shared:model.enums;
 

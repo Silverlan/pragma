@@ -3,7 +3,6 @@
 
 module;
 
-#include "mathutil/uvec.h"
 
 module pragma.shared;
 

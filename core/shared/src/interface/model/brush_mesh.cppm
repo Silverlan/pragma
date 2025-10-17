@@ -5,7 +5,6 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include <vector>
-#include <mathutil/uvec.h>
 
 export module pragma.shared:model.brush_mesh;
 

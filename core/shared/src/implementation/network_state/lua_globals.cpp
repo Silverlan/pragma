@@ -2,21 +2,13 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "mathutil/umath_geometry.hpp"
 
-#include "mathutil/umath.h"
 
-#include "sharedutils/util.h"
 
 #include "pragma/lua/luaapi.h"
 
-#include "sharedutils/util_string.h"
 
-#include "luasystem.h"
-#include <fsys/filesystem.h>
 #include "noise/noise.h"
-#include <sharedutils/util_enum.h>
-#include <luainterface.hpp>
 
 // import pragma.scripting.lua;
 
@@ -165,17 +157,17 @@ void NetworkState::RegisterSharedLuaGlobals(Lua::Interface &lua)
 
 	Lua::RegisterLibraryEnums(lua.GetState(), "sound",
 	  {
-	    {"TYPE_GENERIC", umath::to_integral(ALSoundType::Generic)},
-	    {"TYPE_EFFECT", umath::to_integral(ALSoundType::Effect)},
-	    {"TYPE_MUSIC", umath::to_integral(ALSoundType::Music)},
-	    {"TYPE_VOICE", umath::to_integral(ALSoundType::Voice)},
-	    {"TYPE_WEAPON", umath::to_integral(ALSoundType::Weapon)},
-	    {"TYPE_NPC", umath::to_integral(ALSoundType::NPC)},
-	    {"TYPE_PLAYER", umath::to_integral(ALSoundType::Player)},
-	    {"TYPE_VEHICLE", umath::to_integral(ALSoundType::Vehicle)},
-	    {"TYPE_PHYSICS", umath::to_integral(ALSoundType::Physics)},
-	    {"TYPE_ENVIRONMENT", umath::to_integral(ALSoundType::Environment)},
-	    {"TYPE_GUI", umath::to_integral(ALSoundType::GUI)},
+	    {"TYPE_GENERIC", umath::to_integral(pragma::audio::ALSoundType::Generic)},
+	    {"TYPE_EFFECT", umath::to_integral(pragma::audio::ALSoundType::Effect)},
+	    {"TYPE_MUSIC", umath::to_integral(pragma::audio::ALSoundType::Music)},
+	    {"TYPE_VOICE", umath::to_integral(pragma::audio::ALSoundType::Voice)},
+	    {"TYPE_WEAPON", umath::to_integral(pragma::audio::ALSoundType::Weapon)},
+	    {"TYPE_NPC", umath::to_integral(pragma::audio::ALSoundType::NPC)},
+	    {"TYPE_PLAYER", umath::to_integral(pragma::audio::ALSoundType::Player)},
+	    {"TYPE_VEHICLE", umath::to_integral(pragma::audio::ALSoundType::Vehicle)},
+	    {"TYPE_PHYSICS", umath::to_integral(pragma::audio::ALSoundType::Physics)},
+	    {"TYPE_ENVIRONMENT", umath::to_integral(pragma::audio::ALSoundType::Environment)},
+	    {"TYPE_GUI", umath::to_integral(pragma::audio::ALSoundType::GUI)},
 
 	    {"STATE_NO_ERROR", umath::to_integral(ALState::NoError)},
 	    {"STATE_INITIAL", umath::to_integral(ALState::Initial)},

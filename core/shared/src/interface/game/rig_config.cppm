@@ -7,12 +7,6 @@ module;
 #include <string>
 #include <cinttypes>
 #include <optional>
-#include <mathutil/umath.h>
-#include <mathutil/eulerangles.h>
-#include <mathutil/transform.hpp>
-#include <udm_types.hpp>
-#include "mathutil/uvec.h"
-#include "mathutil/uquat.h"
 
 
 

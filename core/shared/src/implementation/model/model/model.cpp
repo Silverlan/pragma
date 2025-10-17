@@ -4,31 +4,18 @@
 module;
 #include "sstream"
 
-#include "mathutil/umath_geometry.hpp"
 
 #include "memory"
 
 #include "algorithm"
 
-#include "udm.hpp"
 
 #include "cassert"
 
-#include "mathutil/uquat.h"
 
-#include "sharedutils/util.h"
 
-#include "sharedutils/functioncallback.h"
 
-#include "mathutil/uvec.h"
 
-#include "materialmanager.h"
-#include <mathutil/umath.h>
-#include <sharedutils/util_string.h>
-#include <sharedutils/util_path.hpp>
-#include <sharedutils/util_file.h>
-#include <sharedutils/util_library.hpp>
-#include <sharedutils/util_ifile.hpp>
 #include <stack>
 
 module pragma.shared;
@@ -674,7 +661,7 @@ CallbackHandle Model::CallOnMaterialsLoaded(const std::function<void(void)> &f)
 	m_onAllMatsLoadedCallbacks.push_back(FunctionCallback<>::Create(f));
 	return m_onAllMatsLoadedCallbacks.back();
 }
-void Model::AddLoadingMaterial(Material &mat, std::optional<uint32_t> index)
+void Model::AddLoadingMaterial(msys::Material &mat, std::optional<uint32_t> index)
 {
 	umath::set_flag(m_stateFlags, StateFlags::AllMaterialsLoaded, false);
 	if(index.has_value())
@@ -685,7 +672,7 @@ void Model::AddLoadingMaterial(Material &mat, std::optional<uint32_t> index)
 	if(cb.IsValid() == true)
 		m_matLoadCallbacks.push_back(cb);
 }
-uint32_t Model::AddTexture(const std::string &tex, Material *mat)
+uint32_t Model::AddTexture(const std::string &tex, msys::Material *mat)
 {
 	auto &meta = GetMetaInfo();
 	auto ntex = pragma::asset::get_normalized_path(tex, pragma::asset::Type::Material);
@@ -699,7 +686,7 @@ uint32_t Model::AddTexture(const std::string &tex, Material *mat)
 		AddLoadingMaterial(*mat);
 	return static_cast<uint32_t>(meta.textures.size() - 1);
 }
-bool Model::SetTexture(uint32_t texIdx, const std::string &tex, Material *mat)
+bool Model::SetTexture(uint32_t texIdx, const std::string &tex, msys::Material *mat)
 {
 	auto &meta = GetMetaInfo();
 	if(texIdx < meta.textures.size()) {
@@ -715,7 +702,7 @@ bool Model::SetTexture(uint32_t texIdx, const std::string &tex, Material *mat)
 		return false;
 	return true;
 }
-uint32_t Model::AddMaterial(uint32_t skin, Material *mat, const std::optional<std::string> &matName, std::optional<uint32_t> *optOutSkinTexIdx)
+uint32_t Model::AddMaterial(uint32_t skin, msys::Material *mat, const std::optional<std::string> &matName, std::optional<uint32_t> *optOutSkinTexIdx)
 {
 	auto texName = matName.has_value() ? *matName : mat->GetName();
 	texName = pragma::asset::get_normalized_path(texName, pragma::asset::Type::Material);
@@ -734,7 +721,7 @@ uint32_t Model::AddMaterial(uint32_t skin, Material *mat, const std::optional<st
 	}
 	return r;
 }
-bool Model::SetMaterial(uint32_t texIdx, Material *mat)
+bool Model::SetMaterial(uint32_t texIdx, msys::Material *mat)
 {
 	auto texName = mat->GetName();
 	AddTexturePath(ufile::get_path_from_filename(texName)); // TODO: Remove previous texture path if it is not in use anymore
@@ -1136,14 +1123,14 @@ std::vector<msys::MaterialHandle> &Model::GetMaterials()
 const std::vector<msys::MaterialHandle> &Model::GetMaterials() const { return const_cast<Model *>(this)->GetMaterials(); }
 std::vector<std::string> &Model::GetTextures() { return m_metaInfo.textures; }
 std::vector<TextureGroup> &Model::GetTextureGroups() { return m_textureGroups; }
-Material *Model::GetMaterial(uint32_t texID)
+msys::Material *Model::GetMaterial(uint32_t texID)
 {
 	auto &materials = GetMaterials();
 	if(texID >= materials.size())
 		return nullptr;
 	return materials[texID].get();
 }
-Material *Model::GetMaterial(uint32_t texGroup, uint32_t texID)
+msys::Material *Model::GetMaterial(uint32_t texGroup, uint32_t texID)
 {
 	if(m_textureGroups.empty())
 		return nullptr;

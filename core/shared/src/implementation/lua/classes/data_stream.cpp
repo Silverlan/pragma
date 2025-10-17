@@ -3,7 +3,6 @@
 
 module;
 #include "pragma/lua/luaapi.h"
-#include "sharedutils/datastream.h"
 
 module pragma.shared;
 

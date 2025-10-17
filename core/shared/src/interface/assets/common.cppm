@@ -4,11 +4,14 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <sharedutils/util_path.hpp>
-#include <material.h>
 #include <memory>
+#include <string>
+#include <optional>
+#include <vector>
 
 export module pragma.shared:assets.common;
+
+export import pragma.materialsystem;
 
 export class NetworkState;
 export class Model;
@@ -25,9 +28,9 @@ export namespace pragma::asset {
 	constexpr auto FORMAT_PARTICLE_SYSTEM_ASCII = "pptsys";
 	constexpr auto FORMAT_PARTICLE_SYSTEM_LEGACY = "wpt";
 
-	constexpr auto FORMAT_MATERIAL_BINARY = Material::FORMAT_MATERIAL_BINARY;
-	constexpr auto FORMAT_MATERIAL_ASCII = Material::FORMAT_MATERIAL_ASCII;
-	constexpr auto FORMAT_MATERIAL_LEGACY = Material::FORMAT_MATERIAL_LEGACY;
+	constexpr auto FORMAT_MATERIAL_BINARY = msys::Material::FORMAT_MATERIAL_BINARY;
+	constexpr auto FORMAT_MATERIAL_ASCII = msys::Material::FORMAT_MATERIAL_ASCII;
+	constexpr auto FORMAT_MATERIAL_LEGACY = msys::Material::FORMAT_MATERIAL_LEGACY;
 
 	constexpr auto FORMAT_SHADER_GRAPH_BINARY = "psg_b";
 	constexpr auto FORMAT_SHADER_GRAPH_ASCII = "psg";
@@ -100,8 +103,8 @@ export namespace pragma::asset {
 
 	struct DLLNETWORK MaterialAssetWrapper : public IAssetWrapper {
 		virtual Type GetType() const override { return Type::Material; }
-		void SetMaterial(Material &mat);
-		Material *GetMaterial() const;
+		void SetMaterial(msys::Material &mat);
+		msys::Material *GetMaterial() const;
 	  private:
 		msys::MaterialHandle m_material = nullptr;
 	};

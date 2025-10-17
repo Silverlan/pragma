@@ -4,9 +4,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <sharedutils/util_extensible_enum.hpp>
-#include <sharedutils/scope_guard.h>
-#include <fsys/directory_watcher.h>
 #include <mutex>
 #include <unordered_set>
 
@@ -24,14 +21,14 @@ export {
 		using util::ExtensibleEnum::ExtensibleEnum;
 
 		static const EResourceWatcherCallbackType Model;
-		static const EResourceWatcherCallbackType Material;
+		static const EResourceWatcherCallbackType msys::Material;
 		static const EResourceWatcherCallbackType Texture;
 		static const EResourceWatcherCallbackType Map;
 		static const EResourceWatcherCallbackType SoundScript;
 		static const EResourceWatcherCallbackType Sound;
 		static const EResourceWatcherCallbackType Count;
 	protected:
-		enum class E : uint32_t { Model = 0u, Material, Texture, Map, SoundScript, Sound, Count };
+		enum class E : uint32_t { Model = 0u, msys::Material, Texture, Map, SoundScript, Sound, Count };
 	};
 	DEFINE_STD_HASH_SPECIALIZATION(EResourceWatcherCallbackType);
 

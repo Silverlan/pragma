@@ -4,7 +4,6 @@
 module;
 
 #include <memory>
-#include "sharedutils/functioncallback.h"
 
 export module pragma.shared:scripting.lua.classes.property_generic;
 

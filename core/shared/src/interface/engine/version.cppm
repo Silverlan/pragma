@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <sharedutils/utildefinitions.h>
 #include <string>
 
 export module pragma.shared:engine.version;

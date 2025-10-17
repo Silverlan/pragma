@@ -5,9 +5,6 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/lua/luaapi.h"
-#include <mathutil/uvec.h>
-#include <sharedutils/util_parallel_job.hpp>
-#include "mathutil/uquat.h"
 
 
 export module pragma.shared:scripting.lua.libraries.util;

@@ -4,13 +4,10 @@
 module;
 #include "sstream"
 
-#include "sharedutils/util.h"
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/lua/luaapi.h"
-#include "sharedutils/util_string.h"
 #include "pragma/logging.hpp"
-#include <material_manager2.hpp>
 
 module pragma.shared;
 

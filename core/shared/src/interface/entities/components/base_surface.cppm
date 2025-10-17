@@ -4,10 +4,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "material.h"
-#include <mathutil/plane.hpp>
-#include "mathutil/uvec.h"
-#include "mathutil/uquat.h"
 
 
 
@@ -50,9 +46,9 @@ export {
 			struct DLLNETWORK MeshInfo {
 				ModelMesh *mesh;
 				ModelSubMesh *subMesh;
-				Material *material;
+				msys::Material *material;
 			};
-			std::optional<MeshInfo> FindAndAssignMesh(const std::function<int32_t(ModelMesh &, ModelSubMesh &, Material &, const std::string &)> &filter = nullptr);
+			std::optional<MeshInfo> FindAndAssignMesh(const std::function<int32_t(ModelMesh &, ModelSubMesh &, msys::Material &, const std::string &)> &filter = nullptr);
 			bool CalcLineSurfaceIntersection(const Vector3 &lineOrigin, const Vector3 &lineDir, double *outT = nullptr) const;
 
 			bool IsPointBelowSurface(const Vector3 &p) const;

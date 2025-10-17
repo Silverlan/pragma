@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "mathutil/uvec.h"
 #include <memory>
 
 export module pragma.shared:entities.components.props.base;

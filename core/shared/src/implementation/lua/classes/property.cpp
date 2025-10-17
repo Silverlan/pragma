@@ -4,17 +4,10 @@
 module;
 #include "pragma/lua/luaapi.h"
 
-#include "mathutil/umath.h"
 
-#include "mathutil/uquat.h"
-#include "mathutil/color.h"
-#include "sharedutils/util.h"
 
-#include "sharedutils/util_string.h"
 
-#include "mathutil/uvec.h"
 
-#include <luainterface.hpp>
 
 module pragma.shared;
 

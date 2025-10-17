@@ -6,12 +6,8 @@
 
 #include "algorithm"
 #include "pragma/lua/luaapi.h"
-#include "sharedutils/util_string.h"
-#include <sharedutils/util.h>
-#include <sharedutils/util_file.h>
 #include <luabind/exception_handler.hpp>
 #include "pragma/lua/lua_error_handling.hpp"
-#include "fsys/filesystem.h"
 #include <stack>
 
 // import pragma.scripting.lua;

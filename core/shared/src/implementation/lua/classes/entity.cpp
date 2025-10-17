@@ -2,26 +2,19 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "sharedutils/magic_enum.hpp"
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/lua/types/udm.hpp"
 
 #include "pragma/lua/luaapi.h"
 
-#include "mathutil/umath.h"
 #include "pragma/lua/types/nil_type.hpp"
 #include "pragma/lua/lua_call.hpp"
 
-#include "sharedutils/functioncallback.h"
 #include "pragma/lua/policies/core_policies.hpp"
 #include "pragma/lua/lentity_type.hpp"
-#include "mathutil/uvec.h"
 
-#include "luasystem.h"
 #include <luabind/copy_policy.hpp>
-#include <sharedutils/datastream.h>
-#include <udm.hpp>
 
 module pragma.shared;
 
@@ -328,8 +321,8 @@ void Lua::Entity::register_class(luabind::class_<BaseEntity> &classDef)
 	// Quick-access methods
 	classDef.def("CreateSound", &BaseEntity::CreateSound);
 	classDef.def("EmitSound", &BaseEntity::EmitSound);
-	classDef.def("EmitSound", static_cast<std::shared_ptr<::ALSound> (*)(BaseEntity &, const std::string &, ALSoundType, float)>([](BaseEntity &ent, const std::string &sndname, ALSoundType soundType, float gain) { return ent.EmitSound(sndname, soundType, gain); }));
-	classDef.def("EmitSound", static_cast<std::shared_ptr<::ALSound> (*)(BaseEntity &, const std::string &, ALSoundType)>([](BaseEntity &ent, const std::string &sndname, ALSoundType soundType) { return ent.EmitSound(sndname, soundType); }));
+	classDef.def("EmitSound", static_cast<std::shared_ptr<::ALSound> (*)(BaseEntity &, const std::string &, pragma::audio::ALSoundType, float)>([](BaseEntity &ent, const std::string &sndname, pragma::audio::ALSoundType soundType, float gain) { return ent.EmitSound(sndname, soundType, gain); }));
+	classDef.def("EmitSound", static_cast<std::shared_ptr<::ALSound> (*)(BaseEntity &, const std::string &, pragma::audio::ALSoundType)>([](BaseEntity &ent, const std::string &sndname, pragma::audio::ALSoundType soundType) { return ent.EmitSound(sndname, soundType); }));
 	classDef.def("GetName", &BaseEntity::GetName);
 	classDef.def("SetName", &BaseEntity::SetName);
 	classDef.def("SetModel", static_cast<void (BaseEntity::*)(const std::string &)>(&BaseEntity::SetModel));

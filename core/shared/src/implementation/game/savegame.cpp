@@ -2,12 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "fsys/filesystem.h"
 
-#include "sharedutils/util.h"
 
-#include <sharedutils/datastream.h>
-#include <udm.hpp>
 
 module pragma.shared;
 

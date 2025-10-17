@@ -2,19 +2,14 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "mathutil/umath.h"
 
 #include "memory"
 
 #include "algorithm"
 
-#include "mathutil/uquat.h"
 
-#include "sharedutils/util.h"
 
-#include "sharedutils/functioncallback.h"
 
-#include "mathutil/uvec.h"
 #include <thread>
 
 #include "Recast.h"

@@ -2,22 +2,13 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "sharedutils/util_file.h"
 
 #include "string_view"
 
-#include "mathutil/umath.h"
 
 #include "cassert"
 
-#include "sharedutils/util.h"
 
-#include <material_manager2.hpp>
-#include <sharedutils/util_path.hpp>
-#include "sharedutils/util_string.h"
-#include "materialmanager.h"
-#include <fsys/ifile.hpp>
-#include <udm.hpp>
 
 module pragma.shared;
 
@@ -355,8 +346,8 @@ bool pragma::asset::is_loaded(NetworkState &nw, const std::string &name, Type ty
 void pragma::asset::ModelAssetWrapper::SetModel(Model &model) { m_model = model.shared_from_this(); }
 Model *pragma::asset::ModelAssetWrapper::GetModel() const { return m_model.get(); }
 
-void pragma::asset::MaterialAssetWrapper::SetMaterial(Material &mat) { m_material = mat.GetHandle(); }
-Material *pragma::asset::MaterialAssetWrapper::GetMaterial() const { return m_material.get(); }
+void pragma::asset::MaterialAssetWrapper::SetMaterial(msys::Material &mat) { m_material = mat.GetHandle(); }
+msys::Material *pragma::asset::MaterialAssetWrapper::GetMaterial() const { return m_material.get(); }
 
 void pragma::asset::AssetManager::RegisterImporter(const ImporterInfo &importerInfo, Type type, const ImportHandler &importHandler)
 {

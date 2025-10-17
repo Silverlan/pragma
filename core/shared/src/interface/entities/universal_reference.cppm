@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <sharedutils/util.h>
 #include <variant>
 
 export module pragma.shared:entities.universal_reference;

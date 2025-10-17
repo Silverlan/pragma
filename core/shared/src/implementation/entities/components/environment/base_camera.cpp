@@ -2,19 +2,11 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "mathutil/uquat.h"
 
-#include "sharedutils/util.h"
 
-#include "mathutil/uvec.h"
 
-#include <mathutil/umath.h>
 #include <glm/gtx/matrix_decompose.hpp>
 #include <algorithm>
-#include <mathutil/umath_frustum.hpp>
-#include <mathutil/umat.h>
-#include <sharedutils/datastream.h>
-#include <udm.hpp>
 
 module pragma.shared;
 

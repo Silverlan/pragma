@@ -3,7 +3,6 @@
 
 module;
 
-#include <sharedutils/util_shared_handle.hpp>
 #include <luabind/pointer_traits.hpp>
 
 export module pragma.shared:scripting.lua.handle_holder;

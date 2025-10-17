@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <mathutil/color.h>
 
 export module pragma.shared:entities.components.environment.base_fog_controller;
 

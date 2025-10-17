@@ -3,8 +3,6 @@
 
 module;
 
-#include <mathutil/umath.h>
-#include <udm.hpp>
 
 export module pragma.shared:entities.member_type;
 

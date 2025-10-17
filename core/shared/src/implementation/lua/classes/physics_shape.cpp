@@ -2,15 +2,12 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "mathutil/umath.h"
 
 #include "pragma/lua/policies/shared_from_this_policy.hpp"
 
 #include "pragma/lua/luaapi.h"
 
-#include "mathutil/uvec.h"
 
-#include "luasystem.h"
 #include <luabind/out_value_policy.hpp>
 
 module pragma.shared;

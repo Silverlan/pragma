@@ -7,7 +7,6 @@ module;
 #include "pragma/lua/luaapi.h"
 #include "pragma/lua/raw_object.hpp"
 #include <memory>
-#include <sharedutils/util_shared_handle.hpp>
 #include <vector>
 
 export module pragma.shared:physics.base;

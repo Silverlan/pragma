@@ -6,10 +6,6 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <string>
 #include <unordered_map>
-#include <sharedutils/util_shared_handle.hpp>
-#include <mathutil/color.h>
-#include "udm.hpp"
-#include "mathutil/uvec.h"
 
 
 export module pragma.shared:physics.surface_material;

@@ -2,24 +2,14 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "fsys/filesystem.h"
 
-#include "mathutil/umath.h"
 
 #include "algorithm"
 
 #include "cassert"
-#include "fsys/directory_watcher.h"
-#include "sharedutils/util.h"
 
-#include "sharedutils/util_string.h"
 
-#include "sharedutils/functioncallback.h"
 
-#include <material_manager2.hpp>
-#include <material_property_block_view.hpp>
-#include <materialmanager.h>
-#include <sharedutils/util_file.h>
 
 module pragma.shared;
 

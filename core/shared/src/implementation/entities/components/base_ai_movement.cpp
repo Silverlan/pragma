@@ -6,11 +6,8 @@ module;
 
 #include "cassert"
 
-#include "sharedutils/util.h"
 
-#include "mathutil/uvec.h"
 
-#include <mathutil/umath.h>
 #include <glm/gtx/projection.hpp>
 
 #define AI_OBSTRUCTION_CHECK_RAYCAST_TYPE_RAY 0

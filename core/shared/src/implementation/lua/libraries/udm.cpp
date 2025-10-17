@@ -2,9 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "sharedutils/magic_enum.hpp"
 
-#include "fsys/filesystem.h"
 
 #include "sstream"
 
@@ -13,24 +11,13 @@ module;
 #include "pragma/lua/luaapi.h"
 #include "pragma/lua/util.hpp"
 #include "pragma/lua/types/udm.hpp"
-#include "mathutil/umath.h"
 
 #include "memory"
 
 #include "cassert"
 
-#include "mathutil/uvec.h"
 
-#include <sharedutils/util_path.hpp>
 #include <luabind/iterator_policy.hpp>
-#include <luainterface.hpp>
-#include <udm.hpp>
-#include <datasystem_vector.h>
-#include <datasystem_color.h>
-#include <sharedutils/util_file.h>
-#include <sharedutils/util_ifile.hpp>
-#include <fsys/ifile.hpp>
-#include <textureinfo.h>
 
 module pragma.shared;
 

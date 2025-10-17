@@ -5,11 +5,8 @@ module;
 
 #include "pragma/lua/luaapi.h"
 #include "pragma/lua/types/udm.hpp"
-#include <udm.hpp>
 #include <any>
-#include "mathutil/uvec.h"
 #include "pragma/networkdefinitions.h"
-#include "mathutil/umath.h"
 
 
 

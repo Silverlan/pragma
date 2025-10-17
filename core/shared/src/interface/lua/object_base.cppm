@@ -5,8 +5,6 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/lua/luaapi.h"
-#include "sharedutils/functioncallback.h"
-#include "luasystem.h"
 
 export module pragma.shared:scripting.lua.object_base;
 

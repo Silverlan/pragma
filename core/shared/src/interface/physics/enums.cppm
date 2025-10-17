@@ -4,7 +4,6 @@
 module;
 
 #include <cinttypes>
-#include "mathutil/umath.h"
 
 export module pragma.shared:physics.enums;
 

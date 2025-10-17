@@ -4,7 +4,6 @@
 module;
 #include "sstream"
 
-#include "mathutil/umath.h"
 
 #include "memory"
 
@@ -12,18 +11,11 @@ module;
 
 #include "cassert"
 
-#include "mathutil/uquat.h"
 
 #include "pragma/logging.hpp"
 
-#include "sharedutils/util.h"
 
-#include "mathutil/uvec.h"
 
-#include <fsys/filesystem.h>
-#include <sharedutils/util_file.h>
-#include <sharedutils/util_ifile.hpp>
-#include <udm.hpp>
 #include <set>
 
 module pragma.shared;

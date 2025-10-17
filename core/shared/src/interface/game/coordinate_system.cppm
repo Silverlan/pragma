@@ -4,7 +4,6 @@
 module;
 
 #include <cinttypes>
-#include <mathutil/uvec.h>
 
 export module pragma.shared:game.coordinate_system;
 

@@ -4,11 +4,12 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/lua/luaapi.h"
 #include "noise/noise.h"
 #include "noiseutils.h"
 
 export module pragma.shared:scripting.lua.libraries.noise;
+
+export import pragma.math;
 
 #define DECLARE_NOISE_MODULE(name)                                                                                                                                                                                                                                                               \
 	class DLLNETWORK Noise##name : public NoiseBaseModule {                                                                                                                                                                                                                                      \

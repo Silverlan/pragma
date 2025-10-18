@@ -3,7 +3,7 @@
 
 module;
 
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 export module pragma.shared:scripting.lua.entity_iterator;
 

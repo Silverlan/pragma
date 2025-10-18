@@ -5,7 +5,6 @@ module;
 #include "algorithm"
 
 
-#include "pragma/lua/luaapi.h"
 
 
 module pragma.shared;
@@ -66,20 +65,20 @@ void BaseTouchComponent::OnPhysicsInitialized()
 {
 	auto &ent = GetEntity();
 	auto physComponent = ent.GetPhysicsComponent();
-	CollisionMask masks = CollisionMask::None;
+	pragma::physics::CollisionMask masks = pragma::physics::CollisionMask::None;
 	if((m_triggerFlags & TriggerFlags::Everything) != TriggerFlags::None)
-		masks = CollisionMask::Dynamic | CollisionMask::Generic;
+		masks = pragma::physics::CollisionMask::Dynamic | pragma::physics::CollisionMask::Generic;
 	else {
 		if((m_triggerFlags & TriggerFlags::Everything) != TriggerFlags::Players)
-			masks |= CollisionMask::Player;
+			masks |= pragma::physics::CollisionMask::Player;
 		if((m_triggerFlags & TriggerFlags::Everything) != TriggerFlags::NPCs)
-			masks |= CollisionMask::NPC;
+			masks |= pragma::physics::CollisionMask::NPC;
 		if((m_triggerFlags & TriggerFlags::Everything) != TriggerFlags::Physics)
-			masks |= CollisionMask::Dynamic;
+			masks |= pragma::physics::CollisionMask::Dynamic;
 	}
 	if(physComponent) {
 		physComponent->SetCollisionFilterMask(masks);
-		physComponent->SetCollisionFilterGroup(CollisionMask::Trigger);
+		physComponent->SetCollisionFilterGroup(pragma::physics::CollisionMask::Trigger);
 		physComponent->SetCollisionContactReportEnabled(true);
 		auto *physObj = physComponent->GetPhysicsObject();
 		if(physObj) {

@@ -8,7 +8,6 @@ module;
 
 
 
-#include "pragma/lua/luaapi.h"
 
 
 
@@ -121,7 +120,7 @@ int Lua::import::import_wrci(lua_State *l)
 			tris.push_back(idx2);
 		}
 		mdl.AddCollisionMesh(colMesh);
-		colMesh->Update(ModelUpdateFlags::All);
+		colMesh->Update(pragma::model::ModelUpdateFlags::All);
 	}
 	mdl.Update();
 	Lua::PushBool(l, true);
@@ -270,7 +269,7 @@ int Lua::import::import_wrmi(lua_State *l)
 			mesh->AddSubMesh(subMesh);
 		}
 	}
-	mdl.Update(ModelUpdateFlags::All);
+	mdl.Update(pragma::model::ModelUpdateFlags::All);
 	mdl.GenerateBindPoseMatrices();
 	Lua::PushBool(l, true);
 	return 1;

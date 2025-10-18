@@ -4,8 +4,11 @@
 module;
 
 #include "pragma/networkdefinitions.h"
+#include <iostream>
 
 export module pragma.shared:util.render_tile;
+
+export import pragma.math;
 
 export {
 	namespace pragma::rendering {

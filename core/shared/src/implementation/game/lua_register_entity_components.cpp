@@ -11,7 +11,6 @@ module;
 
 
 
-#include "pragma/lua/luaapi.h"
 
 
 #include <luabind/copy_policy.hpp>
@@ -22,7 +21,7 @@ import :game.game;
 
 namespace Lua {
 	bool get_bullet_master(BaseEntity &ent);
-	AnimationEvent get_animation_event(lua_State *l, int32_t tArgs, uint32_t eventId);
+	pragma::AnimationEvent get_animation_event(lua_State *l, int32_t tArgs, uint32_t eventId);
 };
 bool Lua::get_bullet_master(BaseEntity &ent)
 {
@@ -39,11 +38,11 @@ bool Lua::get_bullet_master(BaseEntity &ent)
 	}
 	return bMaster;
 }
-AnimationEvent Lua::get_animation_event(lua_State *l, int32_t tArgs, uint32_t eventId)
+pragma::AnimationEvent Lua::get_animation_event(lua_State *l, int32_t tArgs, uint32_t eventId)
 {
 	Lua::CheckTable(l, tArgs);
-	AnimationEvent ev {};
-	ev.eventID = static_cast<AnimationEvent::Type>(eventId);
+	pragma::AnimationEvent ev {};
+	ev.eventID = static_cast<pragma::AnimationEvent::Type>(eventId);
 	auto numArgs = Lua::GetObjectLength(l, tArgs);
 	for(auto i = decltype(numArgs) {0}; i < numArgs; ++i) {
 		Lua::PushInt(l, i + 1); /* 1 */
@@ -241,9 +240,9 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defActionC.def("GetActionInputs", &pragma::ActionInputControllerComponent::GetActionInputs);
 	defActionC.def("GetActionInputAxisMagnitude", &pragma::ActionInputControllerComponent::GetActionInputAxisMagnitude);
 	defActionC.def("SetActionInputAxisMagnitude", &pragma::ActionInputControllerComponent::SetActionInputAxisMagnitude);
-	defActionC.def("SetActionInput", static_cast<void (pragma::ActionInputControllerComponent ::*)(Action, bool, bool)>(&pragma::ActionInputControllerComponent::SetActionInput));
-	defActionC.def("SetActionInput", static_cast<void (pragma::ActionInputControllerComponent ::*)(Action, bool, float)>(&pragma::ActionInputControllerComponent::SetActionInput));
-	defActionC.def("SetActionInput", static_cast<void (pragma::ActionInputControllerComponent ::*)(Action, bool, float)>(&pragma::ActionInputControllerComponent::SetActionInput), luabind::default_parameter_policy<4, 1.f> {});
+	defActionC.def("SetActionInput", static_cast<void (pragma::ActionInputControllerComponent ::*)(pragma::Action, bool, bool)>(&pragma::ActionInputControllerComponent::SetActionInput));
+	defActionC.def("SetActionInput", static_cast<void (pragma::ActionInputControllerComponent ::*)(pragma::Action, bool, float)>(&pragma::ActionInputControllerComponent::SetActionInput));
+	defActionC.def("SetActionInput", static_cast<void (pragma::ActionInputControllerComponent ::*)(pragma::Action, bool, float)>(&pragma::ActionInputControllerComponent::SetActionInput), luabind::default_parameter_policy<4, 1.f> {});
 	defActionC.add_static_constant("EVENT_HANDLE_ACTION_INPUT", pragma::ActionInputControllerComponent::EVENT_HANDLE_ACTION_INPUT);
 	entsMod[defActionC];
 

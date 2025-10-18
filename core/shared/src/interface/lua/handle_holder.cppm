@@ -7,6 +7,8 @@ module;
 
 export module pragma.shared:scripting.lua.handle_holder;
 
+export import pragma.util;
+
 export {
 	namespace pragma::lua {
 		template<typename T>

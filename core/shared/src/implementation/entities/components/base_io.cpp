@@ -6,7 +6,6 @@ module;
 #include "cstring"
 
 
-#include "pragma/lua/luaapi.h"
 
 
 

@@ -7,8 +7,11 @@ module;
 #ifndef DLLSPEC_ISTEAMWORKS
 #define DLLSPEC_ISTEAMWORKS
 #endif
+#include <cinttypes>
 
 export module pragma.shared:util.steamworks;
+
+export import pragma.util;
 
 export struct DLLSPEC_ISTEAMWORKS ISteamworks final {
 	ISteamworks(util::Library &lib)

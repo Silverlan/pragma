@@ -25,9 +25,9 @@ DLLNETWORK Con::c_crit Con::crit;
 DLLNETWORK Con::c_csv Con::csv;
 DLLNETWORK Con::c_ccl Con::ccl;
 
-const std::string Con::COLOR_WARNING = util::get_true_color_code(Color {254, 228, 64}, {}, util::ConsoleDecoratorFlags::Bold);
-const std::string Con::COLOR_ERROR = util::get_true_color_code(Color {233, 25, 15}, {}, util::ConsoleDecoratorFlags::Bold);
-const std::string Con::COLOR_CRITICAL = util::get_true_color_code(Color {233, 25, 15}, Color {254, 250, 224}, util::ConsoleDecoratorFlags::Bold);
+const std::string Con::COLOR_WARNING = util::get_true_color_code(Color {254, 228, 64}, {}, pragma::console::ConsoleDecoratorFlags::Bold);
+const std::string Con::COLOR_ERROR = util::get_true_color_code(Color {233, 25, 15}, {}, pragma::console::ConsoleDecoratorFlags::Bold);
+const std::string Con::COLOR_CRITICAL = util::get_true_color_code(Color {233, 25, 15}, Color {254, 250, 224}, pragma::console::ConsoleDecoratorFlags::Bold);
 const std::string Con::COLOR_SERVER = util::get_true_color_code(Color {0, 245, 212});
 const std::string Con::COLOR_CLIENT = util::get_true_color_code(Color {255, 73, 158});
 const std::string Con::COLOR_LUA = util::get_true_color_code(Color {73, 182, 255});

@@ -48,6 +48,10 @@ export {
 			float m_kvOuterRadius = 0.f;
 			float m_kvDspGain = 1.f;
 		};
+		using namespace umath::scoped_enum::bitwise;
 	};
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::BaseEnvSoundDspComponent::SpawnFlags)
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::BaseEnvSoundDspComponent::SpawnFlags> : std::true_type {};
+	};
 };

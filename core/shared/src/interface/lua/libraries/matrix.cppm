@@ -4,7 +4,10 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/lua/luaapi.h"
+
+export module pragma.shared:scripting.lua.libraries.matrix;
+
+export import pragma.math;
 
 #define LUA_MATRIX_MEMBERS_DEC(type)                                                                                                                                                                                                                                                             \
 	namespace Mat##type                                                                                                                                                                                                                                                                          \
@@ -23,8 +26,6 @@ module;
 		DLLNETWORK void Inverse(lua_State *l, ::Mat##type &mat);                                                                                                                                                                                                                                 \
 		DLLNETWORK void GetInverse(lua_State *l, const ::Mat##type &mat);                                                                                                                                                                                                                        \
 	}
-
-export module pragma.shared:scripting.lua.libraries.matrix;
 
 export namespace Lua {
 	LUA_MATRIX_MEMBERS_DEC_INVERSE(2);

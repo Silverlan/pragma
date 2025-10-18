@@ -2,11 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "pragma/lua/lua_call.hpp"
 
 #include "pragma/networkdefinitions.h"
 
-#include "pragma/lua/luaapi.h"
 
 
 module pragma.shared;

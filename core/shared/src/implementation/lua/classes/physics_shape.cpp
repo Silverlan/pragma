@@ -5,7 +5,6 @@ module;
 
 #include "pragma/lua/policies/shared_from_this_policy.hpp"
 
-#include "pragma/lua/luaapi.h"
 
 
 #include <luabind/out_value_policy.hpp>
@@ -150,7 +149,7 @@ void Lua::PhysShape::register_class(lua_State *l, luabind::module_ &mod)
 				v.position.y += (power *(1.f -(d /radius)));
 			}
 		}
-		subMesh->Update(ModelUpdateFlags::UpdateVertexBuffer);
+		subMesh->Update(pragma::model::ModelUpdateFlags::UpdateVertexBuffer);
 	}));
 #endif
 	mod[triangleShapeClassDef];

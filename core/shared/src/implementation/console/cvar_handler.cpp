@@ -64,7 +64,7 @@ void CVarHandler::Initialize()
 	}
 }
 
-std::shared_ptr<ConVar> CVarHandler::RegisterConVar(const std::string &scmd, udm::Type type, const std::string &value, ConVarFlags flags, const std::string &help)
+std::shared_ptr<ConVar> CVarHandler::RegisterConVar(const std::string &scmd, udm::Type type, const std::string &value, pragma::console::ConVarFlags flags, const std::string &help)
 {
 	auto it = m_conVars.find(scmd);
 	if(it != m_conVars.end()) {
@@ -81,7 +81,7 @@ std::shared_ptr<ConVar> CVarHandler::RegisterConVar(const std::string &scmd, udm
 		return nullptr;
 	return std::static_pointer_cast<ConVar>(it->second);
 }
-std::shared_ptr<ConCommand> CVarHandler::RegisterConCommand(const std::string &scmd, const std::function<void(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)> &fc, ConVarFlags flags, const std::string &help)
+std::shared_ptr<ConCommand> CVarHandler::RegisterConCommand(const std::string &scmd, const std::function<void(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)> &fc, pragma::console::ConVarFlags flags, const std::string &help)
 {
 	auto it = m_conVars.find(scmd);
 	if(it != m_conVars.end()) {
@@ -216,7 +216,7 @@ bool CVarHandler::GetConVarBool(std::string scmd, bool &outVal)
 	outVal = cvar->GetBool();
 	return true;
 }
-bool CVarHandler::GetConVarFlags(std::string scmd, ConVarFlags &outVal)
+bool CVarHandler::GetConVarFlags(std::string scmd, pragma::console::ConVarFlags &outVal)
 {
 	ConConf *cv = GetConVar(scmd);
 	if(cv == NULL || cv->GetType() != ConType::Var)
@@ -250,9 +250,9 @@ bool CVarHandler::GetConVarBool(std::string scmd)
 	GetConVarBool(scmd, val);
 	return val;
 }
-ConVarFlags CVarHandler::GetConVarFlags(std::string scmd)
+pragma::console::ConVarFlags CVarHandler::GetConVarFlags(std::string scmd)
 {
-	auto val = ConVarFlags::None;
+	auto val = pragma::console::ConVarFlags::None;
 	GetConVarFlags(scmd, val);
 	return val;
 }

@@ -4,7 +4,9 @@
 module;
 
 #include "pragma/networkdefinitions.h"
+#include "sharedutils/BS_thread_pool.hpp"
 #include <array>
+#include <queue>
 
 export module pragma.shared:game.global_animation_channel_queue_processor;
 

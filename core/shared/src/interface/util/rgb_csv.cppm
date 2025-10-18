@@ -7,6 +7,8 @@ module;
 
 export module pragma.shared:util.rgb_csv;
 
+export import pragma.math;
+
 export namespace util {
 	struct DLLNETWORK HSV {
 		HSV(double h, double s, double v) : h {h}, s {s}, v {v} {}

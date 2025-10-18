@@ -4,9 +4,11 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 export module pragma.shared:scripting.lua.classes.material;
+
+export import pragma.materialsystem;
 
 export namespace Lua {
 	namespace msys::Material {

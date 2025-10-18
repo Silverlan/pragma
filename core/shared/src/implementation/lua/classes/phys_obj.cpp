@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "pragma/lua/luaapi.h"
 
 
 #include <luabind/out_value_policy.hpp>
@@ -54,8 +53,8 @@ void Lua::PhysObj::register_class(lua_State *l, luabind::module_ &mod)
 	classDef.def("SetCollisionFilterMask", &::PhysObj::SetCollisionFilterMask);
 	classDef.def("GetCollisionFilterMask", &::PhysObj::GetCollisionFilterMask);
 	classDef.def("SetCollisionFilterGroup", &SetCollisionFilterGroup);
-	classDef.def("GetCollisionFilterGroup", static_cast<CollisionMask (::PhysObj::*)() const>(&::PhysObj::GetCollisionFilter));
-	classDef.def("SetCollisionFilter", static_cast<void (::PhysObj::*)(CollisionMask, CollisionMask)>(&::PhysObj::SetCollisionFilter));
+	classDef.def("GetCollisionFilterGroup", static_cast<pragma::physics::CollisionMask (::PhysObj::*)() const>(&::PhysObj::GetCollisionFilter));
+	classDef.def("SetCollisionFilter", static_cast<void (::PhysObj::*)(pragma::physics::CollisionMask, pragma::physics::CollisionMask)>(&::PhysObj::SetCollisionFilter));
 	classDef.def("SetDamping", &::PhysObj::SetDamping);
 	classDef.def("SetLinearDamping", &::PhysObj::SetLinearDamping);
 	classDef.def("SetAngularDamping", &::PhysObj::SetAngularDamping);
@@ -136,7 +135,7 @@ luabind::tableT<pragma::physics::ICollisionObject> Lua::PhysObj::GetCollisionObj
 	}
 	return t;
 }
-void Lua::PhysObj::SetCollisionFilterGroup(lua_State *l, ::PhysObj &physObj, int group) { physObj.SetCollisionFilter(physObj.GetCollisionFilter(), static_cast<CollisionMask>(group)); }
+void Lua::PhysObj::SetCollisionFilterGroup(lua_State *l, ::PhysObj &physObj, int group) { physObj.SetCollisionFilter(physObj.GetCollisionFilter(), static_cast<pragma::physics::CollisionMask>(group)); }
 bool Lua::PhysObj::IsOnGround(lua_State *l, ::PhysObj &physObj)
 {
 

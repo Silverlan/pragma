@@ -1,7 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2025 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "pragma/lua/luaapi.h"
 
 #include "pragma/lua/converters/utf8_string_converter.hpp"
 #include "pragma/lua/converters/utf8_string_converter_t.hpp"

@@ -9,7 +9,6 @@ module;
 #include "algorithm"
 
 
-#include "pragma/lua/luaapi.h"
 
 
 
@@ -107,7 +106,7 @@ void Lua::ModelMesh::GetSubMeshes(lua_State *l, ::ModelMesh &mdl)
 }
 void Lua::ModelMesh::AddSubMesh(lua_State *, ::ModelMesh &mdl, ::ModelSubMesh &mesh) { mdl.AddSubMesh(mesh.shared_from_this()); }
 void Lua::ModelMesh::Update(lua_State *, ::ModelMesh &mdl) { mdl.Update(); }
-void Lua::ModelMesh::Update(lua_State *, ::ModelMesh &mdl, uint32_t flags) { mdl.Update(static_cast<ModelUpdateFlags>(flags)); }
+void Lua::ModelMesh::Update(lua_State *, ::ModelMesh &mdl, uint32_t flags) { mdl.Update(static_cast<pragma::model::ModelUpdateFlags>(flags)); }
 void Lua::ModelMesh::GetBounds(lua_State *l, ::ModelMesh &mdl)
 {
 	Vector3 min, max;
@@ -409,7 +408,7 @@ void Lua::ModelSubMesh::AddTriangle(lua_State *, ::ModelSubMesh &mdl, const umat
 void Lua::ModelSubMesh::AddTriangle(lua_State *, ::ModelSubMesh &mdl, uint32_t a, uint32_t b, uint32_t c) { mdl.AddTriangle(a, b, c); }
 void Lua::ModelSubMesh::SetSkinTextureIndex(lua_State *, ::ModelSubMesh &mdl, uint32_t texture) { mdl.SetSkinTextureIndex(texture); }
 void Lua::ModelSubMesh::Update(lua_State *, ::ModelSubMesh &mdl) { mdl.Update(); }
-void Lua::ModelSubMesh::Update(lua_State *, ::ModelSubMesh &mdl, uint32_t flags) { mdl.Update(static_cast<ModelUpdateFlags>(flags)); }
+void Lua::ModelSubMesh::Update(lua_State *, ::ModelSubMesh &mdl, uint32_t flags) { mdl.Update(static_cast<pragma::model::ModelUpdateFlags>(flags)); }
 void Lua::ModelSubMesh::AddVertex(lua_State *l, ::ModelSubMesh &mdl, const umath::Vertex &v)
 {
 	auto idx = mdl.AddVertex(v);

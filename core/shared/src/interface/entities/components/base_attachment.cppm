@@ -33,11 +33,11 @@ export {
 			AttachmentData *AttachToBone(BaseEntity *ent, std::string bone, const AttachmentInfo &attInfo = {});
 			AttachmentData *AttachToAttachment(BaseEntity *ent, uint32_t attachmentID, const AttachmentInfo &attInfo = {});
 			AttachmentData *AttachToAttachment(BaseEntity *ent, std::string attachment, const AttachmentInfo &attInfo = {});
-			virtual void SetAttachmentFlags(FAttachmentMode flags);
-			void AddAttachmentFlags(FAttachmentMode flags);
-			void RemoveAttachmentFlags(FAttachmentMode flags);
-			FAttachmentMode GetAttachmentFlags() const;
-			bool HasAttachmentFlag(FAttachmentMode flag) const;
+			virtual void SetAttachmentFlags(pragma::FAttachmentMode flags);
+			void AddAttachmentFlags(pragma::FAttachmentMode flags);
+			void RemoveAttachmentFlags(pragma::FAttachmentMode flags);
+			pragma::FAttachmentMode GetAttachmentFlags() const;
+			bool HasAttachmentFlag(pragma::FAttachmentMode flag) const;
 			BaseEntity *GetParent() const;
 			AttachmentData *GetAttachmentData() const;
 			void UpdateAttachmentData(bool bForceReload = false);

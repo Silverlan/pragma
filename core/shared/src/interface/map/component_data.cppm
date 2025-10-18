@@ -8,6 +8,8 @@ module;
 
 export module pragma.shared:map.component_data;
 
+export import pragma.udm;
+
 export {
 	namespace pragma::asset {
 		class DLLNETWORK ComponentData : public std::enable_shared_from_this<ComponentData> {

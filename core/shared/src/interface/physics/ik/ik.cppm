@@ -8,6 +8,8 @@ module;
 
 export module pragma.shared:physics.ik;
 
+export import pragma.math;
+
 export namespace util {
 	namespace ik {
 		DLLNETWORK void get_local_transform(const Node &node, umath::Transform &t);

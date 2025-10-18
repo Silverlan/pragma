@@ -4,10 +4,12 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/lua/luaapi.h"
-
+#include "pragma/lua/core.hpp"
 
 export module pragma.shared:scripting.lua.classes.angle;
+
+export import :scripting.lua.api;
+export import pragma.math;
 
 export namespace Lua {
 	namespace Angle {

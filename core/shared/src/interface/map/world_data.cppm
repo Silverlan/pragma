@@ -4,12 +4,14 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-
+#include <functional>
 
 export module pragma.shared:map.world_data;
 
 export import :map.entity_data;
 export import :util.bsp_tree;
+export import pragma.image;
+import pragma.materialsystem;
 
 export {
 	class NetworkState;
@@ -96,7 +98,11 @@ export {
 
 			bool m_useLegacyLightmapDefinition = false;
 		};
+		using namespace umath::scoped_enum::bitwise;
 	};
 	DLLNETWORK std::ostream &operator<<(std::ostream &out, const pragma::asset::WorldData &worldData);
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::asset::WorldData::DataFlags)
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::asset::WorldData::DataFlags> : std::true_type {};
+	}
 };

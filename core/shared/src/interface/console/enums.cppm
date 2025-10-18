@@ -5,8 +5,11 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include <optional>
+#include <string>
 
 export module pragma.shared:console.enums;
+
+export import pragma.math;
 
 export {
 	enum class MESSAGE : int { PRINTCONSOLE, PRINTCHAT };
@@ -22,24 +25,22 @@ export {
 		LuaCommand = 2
 	};
 
-	enum class ConVarFlags : uint32_t {
-		None = 0,
-		Cheat = 1,
-		Singleplayer = Cheat << 1,
-		Userinfo = Singleplayer << 1,
-		Replicated = Userinfo << 1,
-		Archive = Replicated << 1,
-		Notify = Archive << 1,
-		JoystickAxisContinuous = Notify << 1,
-		JoystickAxisSingle = JoystickAxisContinuous << 1,
-		Hidden = JoystickAxisSingle << 1,
-		Password = Hidden << 1u,
+	namespace pragma::console {
+		enum class ConVarFlags : uint32_t {
+			None = 0,
+			Cheat = 1,
+			Singleplayer = Cheat << 1,
+			Userinfo = Singleplayer << 1,
+			Replicated = Userinfo << 1,
+			Archive = Replicated << 1,
+			Notify = Archive << 1,
+			JoystickAxisContinuous = Notify << 1,
+			JoystickAxisSingle = JoystickAxisContinuous << 1,
+			Hidden = JoystickAxisSingle << 1,
+			Password = Hidden << 1u,
 
-		Last = Hidden
-	};
-	REGISTER_BASIC_ARITHMETIC_OPERATORS(ConVarFlags);
-
-	namespace util {
+			Last = Hidden
+		};
 		enum class ConsoleColorFlags : uint32_t {
 			None = 0u,
 			Red = 1u,
@@ -66,13 +67,6 @@ export {
 			BackgroundWhite = BackgroundRed | BackgroundGreen | BackgroundBlue,
 			BackgroundBlack = None
 		};
-		DLLNETWORK bool set_console_color(ConsoleColorFlags flags);
-		DLLNETWORK bool reset_console_color();
-		DLLNETWORK ConsoleColorFlags get_active_console_color_flags();
-		DLLNETWORK std::optional<Color> console_color_flags_to_color(ConsoleColorFlags flags);
-		DLLNETWORK ConsoleColorFlags color_to_console_color_flags(const Color &color);
-		DLLNETWORK std::string get_ansi_color_code(ConsoleColorFlags flags);
-
 		enum class ConsoleDecoratorFlags : uint32_t {
 			None = 0,
 			Bold = 1,
@@ -83,12 +77,30 @@ export {
 			Overlined = Encircled << 1,
 			Reset = Overlined << 1,
 		};
+		using namespace umath::scoped_enum::bitwise;
+	}
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::console::ConVarFlags> : std::true_type {};
 
-		DLLNETWORK std::string get_true_color_code(std::optional<Color> foregroundColor, std::optional<Color> backgroundColor = {}, ConsoleDecoratorFlags flags = ConsoleDecoratorFlags::None);
+		template<>
+		struct enable_bitwise_operators<pragma::console::ConsoleColorFlags> : std::true_type {};
+
+		template<>
+		struct enable_bitwise_operators<pragma::console::ConsoleDecoratorFlags> : std::true_type {};
+	}
+
+	namespace util {
+		DLLNETWORK bool set_console_color(pragma::console::ConsoleColorFlags flags);
+		DLLNETWORK bool reset_console_color();
+		DLLNETWORK pragma::console::ConsoleColorFlags get_active_console_color_flags();
+		DLLNETWORK std::optional<Color> console_color_flags_to_color(pragma::console::ConsoleColorFlags flags);
+		DLLNETWORK pragma::console::ConsoleColorFlags color_to_console_color_flags(const Color &color);
+		DLLNETWORK std::string get_ansi_color_code(pragma::console::ConsoleColorFlags flags);
+
+		DLLNETWORK std::string get_true_color_code(std::optional<Color> foregroundColor, std::optional<Color> backgroundColor = {}, pragma::console::ConsoleDecoratorFlags flags = pragma::console::ConsoleDecoratorFlags::None);
 		DLLNETWORK std::string get_reset_color_code();
 	};
-	REGISTER_BASIC_BITWISE_OPERATORS(util::ConsoleColorFlags);
-	REGISTER_BASIC_BITWISE_OPERATORS(util::ConsoleDecoratorFlags);
 
 	namespace Con {
 		enum class MessageFlags : uint8_t {

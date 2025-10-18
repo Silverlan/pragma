@@ -4,11 +4,11 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/lua/luaapi.h"
 
 export module pragma.shared:scripting.lua.libraries.math;
 
 export import :math.easing;
+export import pragma.math;
 
 export namespace Lua {
 	namespace math {

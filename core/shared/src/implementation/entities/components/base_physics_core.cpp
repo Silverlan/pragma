@@ -62,10 +62,10 @@ util::TSharedHandle<pragma::physics::IRigidBody> BasePhysicsComponent::CreateRig
 	auto contactProcessingThreshold = 1e30;
 
 	auto group = GetCollisionFilter();
-	if(group != CollisionMask::Default)
+	if(group != pragma::physics::CollisionMask::Default)
 		body->SetCollisionFilterGroup(group);
 	auto mask = GetCollisionFilterMask();
-	if(mask != CollisionMask::Default)
+	if(mask != pragma::physics::CollisionMask::Default)
 		body->SetCollisionFilterMask(mask);
 	body->SetWorldTransform(startTransform);
 	body->SetContactProcessingThreshold(CFloat(contactProcessingThreshold));
@@ -361,12 +361,12 @@ PhysObjHandle BasePhysicsComponent::InitializePhysics(const physics::PhysObjCrea
 	// there may be incorrect collisions directly after spawn.
 	if(umath::is_flag_set(flags, PhysFlags::Dynamic) == true) {
 		m_physicsType = PHYSICSTYPE::DYNAMIC;
-		SetCollisionFilter(CollisionMask::Dynamic | CollisionMask::Generic, CollisionMask::All);
+		SetCollisionFilter(pragma::physics::CollisionMask::Dynamic | pragma::physics::CollisionMask::Generic, pragma::physics::CollisionMask::All);
 		SetMoveType(MOVETYPE::PHYSICS);
 	}
 	else {
 		m_physicsType = PHYSICSTYPE::STATIC;
-		SetCollisionFilter(CollisionMask::Static | CollisionMask::Generic, CollisionMask::All);
+		SetCollisionFilter(pragma::physics::CollisionMask::Static | pragma::physics::CollisionMask::Generic, pragma::physics::CollisionMask::All);
 		SetMoveType(MOVETYPE::NONE);
 	}
 	m_physObject->Spawn();
@@ -502,7 +502,7 @@ util::TSharedHandle<PhysObj> BasePhysicsComponent::InitializeBoxControllerPhysic
 	m_physObject->GetCollisionObject()->SetOrigin(-origin);
 	static_cast<BoxControllerPhysObj *>(m_physObject.get())->SetCollisionBounds(min, max);
 	m_physicsType = PHYSICSTYPE::BOXCONTROLLER;
-	SetCollisionFilter(CollisionMask::Dynamic | CollisionMask::Generic | CollisionMask::Player, CollisionMask::All & ~CollisionMask::Particle & ~CollisionMask::Item);
+	SetCollisionFilter(pragma::physics::CollisionMask::Dynamic | pragma::physics::CollisionMask::Generic | pragma::physics::CollisionMask::Player, pragma::physics::CollisionMask::All & ~pragma::physics::CollisionMask::Particle & ~pragma::physics::CollisionMask::Item);
 	m_physObject->Spawn();
 	InitializePhysObj();
 	OnPhysicsInitialized();
@@ -517,7 +517,7 @@ util::TSharedHandle<PhysObj> BasePhysicsComponent::InitializeCapsuleControllerPh
 	if(m_physObject == nullptr)
 		return {};
 	m_physicsType = PHYSICSTYPE::CAPSULECONTROLLER;
-	SetCollisionFilter(CollisionMask::Dynamic | CollisionMask::Generic | CollisionMask::Player, CollisionMask::All & ~CollisionMask::Particle & ~CollisionMask::Item);
+	SetCollisionFilter(pragma::physics::CollisionMask::Dynamic | pragma::physics::CollisionMask::Generic | pragma::physics::CollisionMask::Player, pragma::physics::CollisionMask::All & ~pragma::physics::CollisionMask::Particle & ~pragma::physics::CollisionMask::Item);
 	m_physObject->Spawn();
 	InitializePhysObj();
 	OnPhysicsInitialized();
@@ -563,9 +563,9 @@ PhysObj *BasePhysicsComponent::GetPhysicsObject() const { return const_cast<Phys
 void BasePhysicsComponent::InitializePhysObj()
 {
 	auto &phys = m_physObject;
-	if(m_collisionFilterGroup != CollisionMask::Default)
+	if(m_collisionFilterGroup != pragma::physics::CollisionMask::Default)
 		phys->SetCollisionFilter(m_collisionFilterGroup);
-	if(m_collisionFilterMask != CollisionMask::Default)
+	if(m_collisionFilterMask != pragma::physics::CollisionMask::Default)
 		phys->SetCollisionFilterMask(m_collisionFilterMask);
 	if(IsKinematic())
 		SetKinematic(true);
@@ -592,23 +592,23 @@ PhysObj *BasePhysicsComponent::InitializePhysics(pragma::physics::IConvexShape &
 	auto mask = GetCollisionFilterMask();
 	if(bDynamic) {
 		m_physicsType = PHYSICSTYPE::STATIC;
-		if(group == CollisionMask::Default)
-			group = CollisionMask::Static | CollisionMask::Generic;
-		if(mask == CollisionMask::Default)
-			mask = CollisionMask::All & ~CollisionMask::Particle & ~CollisionMask::Item;
+		if(group == pragma::physics::CollisionMask::Default)
+			group = pragma::physics::CollisionMask::Static | pragma::physics::CollisionMask::Generic;
+		if(mask == pragma::physics::CollisionMask::Default)
+			mask = pragma::physics::CollisionMask::All & ~pragma::physics::CollisionMask::Particle & ~pragma::physics::CollisionMask::Item;
 		SetMoveType(MOVETYPE::NONE);
 	}
 	else {
 		m_physicsType = PHYSICSTYPE::DYNAMIC;
-		if(group == CollisionMask::Default)
-			group = CollisionMask::Dynamic | CollisionMask::Generic;
-		if(mask == CollisionMask::Default)
-			mask = CollisionMask::All & ~CollisionMask::Particle & ~CollisionMask::Item;
+		if(group == pragma::physics::CollisionMask::Default)
+			group = pragma::physics::CollisionMask::Dynamic | pragma::physics::CollisionMask::Generic;
+		if(mask == pragma::physics::CollisionMask::Default)
+			mask = pragma::physics::CollisionMask::All & ~pragma::physics::CollisionMask::Particle & ~pragma::physics::CollisionMask::Item;
 		SetMoveType(MOVETYPE::PHYSICS);
 	}
-	if(group != CollisionMask::Default)
+	if(group != pragma::physics::CollisionMask::Default)
 		SetCollisionFilterGroup(group);
-	if(mask != CollisionMask::Default)
+	if(mask != pragma::physics::CollisionMask::Default)
 		SetCollisionFilterMask(mask);
 	auto &ent = GetEntity();
 	ent.AddComponent<pragma::VelocityComponent>();

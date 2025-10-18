@@ -5,7 +5,6 @@ module;
 #include "string_view"
 
 
-#include "pragma/lua/luaapi.h"
 #include "pragma/lua/util.hpp"
 
 module pragma.shared;

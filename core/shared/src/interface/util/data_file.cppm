@@ -6,8 +6,11 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <unordered_map>
 #include <vector>
+#include <string>
 
 export module pragma.shared:util.data_file;
+
+export import pragma.filesystem;
 
 export {
 	struct DLLNETWORK DataFileBlock {

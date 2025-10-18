@@ -11,6 +11,8 @@ module;
 
 export module pragma.shared:math.ico_sphere;
 
+export import pragma.math;
+
 export class DLLNETWORK IcoSphere {
   private:
 	IcoSphere() = delete;

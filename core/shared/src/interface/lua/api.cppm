@@ -1,17 +1,21 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __LUAAPI_H__
-#define __LUAAPI_H__
+module;
 
 #include "pragma/networkdefinitions.h"
+#include "pragma/lua/core.hpp"
 #include <luabind/luabind.hpp>
 #include <luabind/operator.hpp>
 #include <luabind/pseudo_traits.hpp>
 #include <luabind/make_function_signature.hpp>
 #include "pragma/lua/ldefinitions.h"
 
-namespace luabind {
+export module pragma.shared:scripting.lua.api;
+
+export import pragma.lua;
+
+export namespace luabind {
 	// Additional types for overload resolution
 	namespace adl {
 		template<typename T>
@@ -253,12 +257,7 @@ namespace Lua {
 		Exception(const std::string &err) : std::runtime_error {err} {}
 	};
 
-	class Interface;
 	DLLNETWORK void initialize_lua_state(Lua::Interface &lua);
 	DLLNETWORK void set_extended_lua_modules_enabled(bool b);
 	DLLNETWORK bool get_extended_lua_modules_enabled();
 };
-
-// #include "pragma/lua/converters/utf8_string_converter.hpp"
-
-#endif

@@ -6,10 +6,12 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <vector>
 #include <string>
+#include <memory>
 
 export module pragma.shared:model.animation.flex_animation;
 
 export import :model.animation.enums;
+export import pragma.udm;
 
 export {
     class DLLNETWORK FlexAnimationFrame : public std::enable_shared_from_this<FlexAnimationFrame> {

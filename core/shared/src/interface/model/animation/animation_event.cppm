@@ -9,15 +9,23 @@ module;
 
 export module pragma.shared:model.animation.animation_event;
 
+import pragma.math;
+
 export {
-	struct DLLNETWORK AnimationEvent {
-	public:
-		enum class DLLNETWORK Type : uint32_t { EmitSound, FootstepLeft, FootstepRight, Count, Invalid = std::numeric_limits<std::underlying_type_t<Type>>::max() };
-	public:
-		Type eventID;
-		std::vector<std::string> arguments;
-	};
-	REGISTER_BASIC_ARITHMETIC_OPERATORS(AnimationEvent::Type)
+	namespace pragma {
+		struct DLLNETWORK AnimationEvent {
+		public:
+			enum class DLLNETWORK Type : uint32_t { EmitSound, FootstepLeft, FootstepRight, Count, Invalid = std::numeric_limits<std::underlying_type_t<Type>>::max() };
+		public:
+			Type eventID;
+			std::vector<std::string> arguments;
+		};
+		using namespace umath::scoped_enum::bitwise;
+	}
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::AnimationEvent::Type> : std::true_type {};
+	}
 
 	extern DLLNETWORK std::unordered_map<int32_t, std::string> ANIMATION_EVENT_NAMES;
 

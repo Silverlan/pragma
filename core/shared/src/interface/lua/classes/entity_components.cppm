@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/lua/luaapi.h"
 #include "pragma/lua/types/udm.hpp"
 
 export module pragma.shared:scripting.lua.classes.entity_components;

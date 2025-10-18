@@ -4,8 +4,14 @@
 module;
 
 #include "pragma/networkdefinitions.h"
+#include <string>
+#include <memory>
+#include <unordered_map>
+#include <functional>
 
 export module pragma.shared:scripting.lua.script_watcher;
+
+import pragma.filesystem;
 
 export {
 	class Game;

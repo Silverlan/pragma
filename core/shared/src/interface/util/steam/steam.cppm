@@ -4,6 +4,7 @@
 module;
 
 #include "pragma/networkdefinitions.h"
+#include <optional>
 
 export module pragma.shared:util.steam;
 

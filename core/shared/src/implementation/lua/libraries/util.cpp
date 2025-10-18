@@ -14,7 +14,6 @@ module;
 
 
 
-#include "pragma/lua/luaapi.h"
 
 
 
@@ -886,7 +885,7 @@ luabind::object Lua::util::fire_bullets(lua_State *l, BulletInfo &bulletInfo, bo
 		::TraceData data;
 		data.SetSource(src);
 		data.SetTarget(src + bulletDir * bulletInfo.distance);
-		data.SetCollisionFilterMask(CollisionMask::AllHitbox & ~CollisionMask::Trigger); // Let everything pass (Except specific filters below)
+		data.SetCollisionFilterMask(pragma::physics::CollisionMask::AllHitbox & ~pragma::physics::CollisionMask::Trigger); // Let everything pass (Except specific filters below)
 		auto *attacker = dmg.GetAttacker();
 		data.SetFilter([attacker](pragma::physics::IShape &shape, pragma::physics::IRigidBody &body) -> RayCastHitType {
 			auto *phys = body.GetPhysObj();
@@ -895,19 +894,19 @@ luabind::object Lua::util::fire_bullets(lua_State *l, BulletInfo &bulletInfo, bo
 				return RayCastHitType::None;
 			auto filterGroup = phys->GetCollisionFilter();
 			auto mdlComponent = ent->GetEntity().GetModelComponent();
-			if(mdlComponent && mdlComponent->GetHitboxCount() > 0 && (filterGroup & CollisionMask::NPC) != CollisionMask::None || (filterGroup & CollisionMask::Player) != CollisionMask::None) // Filter out player and NPC collision objects, since we only want to check their hitboxes
+			if(mdlComponent && mdlComponent->GetHitboxCount() > 0 && (filterGroup & pragma::physics::CollisionMask::NPC) != pragma::physics::CollisionMask::None || (filterGroup & pragma::physics::CollisionMask::Player) != pragma::physics::CollisionMask::None) // Filter out player and NPC collision objects, since we only want to check their hitboxes
 				return RayCastHitType::None;
 			return RayCastHitType::Block;
 		});
-		auto filterGroup = CollisionMask::None;
+		auto filterGroup = pragma::physics::CollisionMask::None;
 		if(attacker != nullptr) {
 			auto pPhysComponent = attacker->GetPhysicsComponent();
 			if(pPhysComponent != nullptr)
 				filterGroup = pPhysComponent->GetCollisionFilter();
-			filterGroup |= CollisionMask::Water | CollisionMask::WaterSurface | CollisionMask::PlayerHitbox | CollisionMask::NPCHitbox;
+			filterGroup |= pragma::physics::CollisionMask::Water | pragma::physics::CollisionMask::WaterSurface | pragma::physics::CollisionMask::PlayerHitbox | pragma::physics::CollisionMask::NPCHitbox;
 		}
 		else
-			filterGroup = CollisionMask::AllHitbox;
+			filterGroup = pragma::physics::CollisionMask::AllHitbox;
 		data.SetCollisionFilterGroup(filterGroup);
 		std::vector<TraceResult> results {};
 		if(game->RayCast(data, &results) && results.front().entity.valid()) {

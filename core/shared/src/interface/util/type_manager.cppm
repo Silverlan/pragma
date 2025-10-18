@@ -7,8 +7,12 @@ module;
 #include <cinttypes>
 #include <type_traits>
 #include <string>
+#include <vector>
+#include <unordered_map>
 
 export module pragma.shared:util.type_manager;
+
+export import pragma.util;
 
 export {
 	namespace pragma {

@@ -8,6 +8,8 @@ module;
 
 export module pragma.shared:map.output;
 
+export import pragma.filesystem;
+
 export {
 	namespace pragma::asset {
 		struct DLLNETWORK Output {

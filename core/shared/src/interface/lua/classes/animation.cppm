@@ -4,17 +4,17 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/lua/luaapi.h"
-
+#include "pragma/lua/core.hpp"
 
 export module pragma.shared:scripting.lua.classes.animation;
 
 export import :model.animation;
+export import :scripting.lua.api;
 import :scripting.lua.libraries.file;
 
 export namespace Lua {
 	namespace Animation {
-		DLLNETWORK void PushAnimationEvent(lua_State *l, const AnimationEvent &ev);
+		DLLNETWORK void PushAnimationEvent(lua_State *l, const pragma::AnimationEvent &ev);
 		DLLNETWORK void GetAnimationEventArguments(lua_State *l, int32_t tArgs, std::vector<std::string> &args);
 
 		DLLNETWORK void Load(lua_State *l, LFile &f);

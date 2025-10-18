@@ -6,7 +6,7 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <string>
 #include <unordered_map>
-
+#include <optional>
 
 export module pragma.shared:physics.surface_material;
 

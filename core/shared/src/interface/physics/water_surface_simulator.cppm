@@ -13,6 +13,8 @@ module;
 
 export module pragma.shared:physics.water_surface_simulator;
 
+export import pragma.math;
+
 export class DLLNETWORK PhysWaterSurfaceSimulator : public std::enable_shared_from_this<PhysWaterSurfaceSimulator> {
   public:
 #pragma pack(push, 1)

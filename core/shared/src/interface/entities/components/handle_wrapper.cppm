@@ -7,6 +7,8 @@ module;
 
 export module pragma.shared:entities.components.handle_wrapper;
 
+export import pragma.util;
+
 export {
 	namespace pragma {class BaseEntityComponent;};
 	struct DLLNETWORK BaseEntityComponentHandleWrapper {

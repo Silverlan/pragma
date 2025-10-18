@@ -98,6 +98,10 @@ export {
 			pragma::audio::ALSoundType m_soundTypes = pragma::audio::ALSoundType::Generic;
 			std::shared_ptr<ALSound> m_sound;
 		};
+		using namespace umath::scoped_enum::bitwise;
 	};
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::BaseEnvSoundComponent::SpawnFlags);
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::BaseEnvSoundComponent::SpawnFlags> : std::true_type {};
+	};
 };

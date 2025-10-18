@@ -4,7 +4,12 @@
 #ifndef __LDEFINITIONS_H__
 #define __LDEFINITIONS_H__
 
-#include "pragma/lua/luaapi.h"
+#include "pragma/networkdefinitions.h"
+#include <luabind/luabind.hpp>
+#include <luabind/operator.hpp>
+#include <luabind/pseudo_traits.hpp>
+#include <luabind/make_function_signature.hpp>
+#include "pragma/lua/ldefinitions.h"
 #include <type_traits>
 
 #define luaL_checkboolean(L, n) (luaL_checktype(L, (n), LUA_TBOOLEAN))

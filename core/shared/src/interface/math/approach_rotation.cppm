@@ -8,6 +8,8 @@ module;
 
 export module pragma.shared:math.approach_rotation;
 
+export import pragma.math;
+
 export namespace uquat {
 	DLLNETWORK Quat approach_direction(const Quat &rot, const Vector3 &up, const Vector3 &targetDir, const Vector2 &rotAmount, Vector2 *resRotAm = nullptr, const Vector2 *pitchLimit = nullptr, const Vector2 *yawLimit = nullptr, const Quat *rotPivot = nullptr,
 	  const EulerAngles *angOffset = nullptr);

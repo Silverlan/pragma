@@ -13,9 +13,7 @@ module;
 
 #include "cassert"
 
-#include "pragma/lua/lua_call.hpp"
 #include "pragma/lua/lua_util_class.hpp"
-#include "pragma/lua/luaapi.h"
 #include "pragma/lua/types/nil_type.hpp"
 
 

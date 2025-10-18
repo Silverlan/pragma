@@ -100,10 +100,10 @@ util::TSharedHandle<PhysObj> BasePhysicsComponent::InitializeSoftBodyPhysics()
 		auto contactProcessingThreshold = 1e30;
 
 		auto group = GetCollisionFilter();
-		if(group != CollisionMask::Default)
+		if(group != pragma::physics::CollisionMask::Default)
 			softBody->SetCollisionFilterGroup(group);
 		auto mask = GetCollisionFilterMask();
-		if(mask != CollisionMask::Default)
+		if(mask != pragma::physics::CollisionMask::Default)
 			softBody->SetCollisionFilterMask(mask);
 		softBody->SetWorldTransform(startTransform);
 		softBody->SetContactProcessingThreshold(CFloat(contactProcessingThreshold));
@@ -137,7 +137,7 @@ util::TSharedHandle<PhysObj> BasePhysicsComponent::InitializeSoftBodyPhysics()
 	m_physObject->Spawn();
 
 	m_physicsType = PHYSICSTYPE::SOFTBODY;
-	SetCollisionFilter(CollisionMask::Dynamic | CollisionMask::Generic, CollisionMask::All);
+	SetCollisionFilter(pragma::physics::CollisionMask::Dynamic | pragma::physics::CollisionMask::Generic, pragma::physics::CollisionMask::All);
 	SetMoveType(MOVETYPE::PHYSICS);
 
 	InitializePhysObj();

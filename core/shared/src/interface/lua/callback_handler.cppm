@@ -4,8 +4,9 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 #include <queue>
+#include <string>
 
 export module pragma.shared:scripting.lua.callback_handler;
 

@@ -4,7 +4,7 @@
 module;
 
 #include <cinttypes>
-
+#include <limits>
 
 export module pragma.shared:entities.enums;
 
@@ -20,8 +20,12 @@ export {
 
     namespace pragma {
         enum class FRenderFlags : uint32_t { None = 0u, CastShadows = 1u, Unlit = CastShadows << 1u };
+    	using namespace umath::scoped_enum::bitwise;
+    }
+	namespace umath::scoped_enum::bitwise {
+    	template<>
+		struct enable_bitwise_operators<pragma::FRenderFlags> : std::true_type {};
     };
-    REGISTER_BASIC_BITWISE_OPERATORS(pragma::FRenderFlags);
 
 	using EntityIndex = uint32_t;
 
@@ -34,21 +38,21 @@ export {
 		Count,
 	};
 
-	enum class FAttachmentMode : uint8_t {
-		None = 0u,
-		PositionOnly = 1u,
-		BoneMerge = PositionOnly << 1u,
-		UpdateEachFrame = BoneMerge << 1u,
-		PlayerView = UpdateEachFrame << 1u,
-		PlayerViewYaw = PlayerView << 1u,
-		SnapToOrigin = PlayerViewYaw << 1u,
-
-		ForceTranslationInPlace = SnapToOrigin << 1u,
-		ForceRotationInPlace = ForceTranslationInPlace << 1u,
-		ForceInPlace = ForceTranslationInPlace | ForceRotationInPlace
-	};
-
 	namespace pragma {
+		enum class FAttachmentMode : uint8_t {
+			None = 0u,
+			PositionOnly = 1u,
+			BoneMerge = PositionOnly << 1u,
+			UpdateEachFrame = BoneMerge << 1u,
+			PlayerView = UpdateEachFrame << 1u,
+			PlayerViewYaw = PlayerView << 1u,
+			SnapToOrigin = PlayerViewYaw << 1u,
+
+			ForceTranslationInPlace = SnapToOrigin << 1u,
+			ForceRotationInPlace = ForceTranslationInPlace << 1u,
+			ForceInPlace = ForceTranslationInPlace | ForceRotationInPlace
+		};
+
 		enum class ComponentMemberFlags : uint32_t {
 			None = 0,
 			HideInInterface = 1,
@@ -95,9 +99,16 @@ export {
 
 		using NetEventId = uint32_t;
 		constexpr NetEventId INVALID_NET_EVENT = std::numeric_limits<decltype(pragma::INVALID_NET_EVENT)>::max();
+
+		using namespace umath::scoped_enum::bitwise;
 	};
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::ComponentMemberFlags)
-	REGISTER_BASIC_BITWISE_OPERATORS(FAttachmentMode);
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::ComponentMemberFlags> : std::true_type {};
+
+		template<>
+		struct enable_bitwise_operators<pragma::FAttachmentMode> : std::true_type {};
+	};
 
 	namespace pragma {
 		namespace ents {

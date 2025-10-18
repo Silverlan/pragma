@@ -365,7 +365,7 @@ bool pragma::animation::Animation::LoadFromAssetData(const udm::AssetData &data,
 			auto frameIndex = umath::round(udmTime.ToValue<float>(0.f) * m_fps);
 			auto it = m_events.find(frameIndex);
 			if(it == m_events.end())
-				it = m_events.insert(std::make_pair(frameIndex, std::vector<std::shared_ptr<AnimationEvent>> {})).first;
+				it = m_events.insert(std::make_pair(frameIndex, std::vector<std::shared_ptr<pragma::AnimationEvent>> {})).first;
 
 			auto &frameEvents = it->second;
 			if(frameEvents.size() == frameEvents.capacity())
@@ -377,8 +377,8 @@ bool pragma::animation::Animation::LoadFromAssetData(const udm::AssetData &data,
 			auto id = pragma::animation::Animation::GetEventEnumRegister().RegisterEnum(name);
 			if(id == util::EnumRegister::InvalidEnum)
 				continue;
-			auto ev = std::make_shared<AnimationEvent>();
-			ev->eventID = static_cast<AnimationEvent::Type>(id);
+			auto ev = std::make_shared<pragma::AnimationEvent>();
+			ev->eventID = static_cast<pragma::AnimationEvent::Type>(id);
 			udmEvent["args"](ev->arguments);
 			frameEvents.push_back(ev);
 		}
@@ -885,11 +885,11 @@ pragma::animation::Animation::Animation(const Animation &other, ShareMode share)
 		m_events = other.m_events;
 	else {
 		for(auto &pair : other.m_events) {
-			m_events[pair.first] = std::vector<std::shared_ptr<AnimationEvent>> {};
+			m_events[pair.first] = std::vector<std::shared_ptr<pragma::AnimationEvent>> {};
 			auto &events = m_events[pair.first];
 			events.reserve(pair.second.size());
 			for(auto &ev : pair.second)
-				events.push_back(std::make_unique<AnimationEvent>(*ev));
+				events.push_back(std::make_unique<pragma::AnimationEvent>(*ev));
 		}
 	}
 #ifdef _MSC_VER
@@ -1089,15 +1089,15 @@ unsigned int pragma::animation::Animation::GetFrameCount() { return CUInt32(m_fr
 
 unsigned int pragma::animation::Animation::GetBoneCount() { return CUInt32(m_boneIds.size()); }
 
-void pragma::animation::Animation::AddEvent(unsigned int frame, AnimationEvent *ev)
+void pragma::animation::Animation::AddEvent(unsigned int frame, pragma::AnimationEvent *ev)
 {
 	auto it = m_events.find(frame);
 	if(it == m_events.end())
-		m_events[frame] = std::vector<std::shared_ptr<AnimationEvent>> {};
-	m_events[frame].push_back(std::shared_ptr<AnimationEvent>(ev));
+		m_events[frame] = std::vector<std::shared_ptr<pragma::AnimationEvent>> {};
+	m_events[frame].push_back(std::shared_ptr<pragma::AnimationEvent>(ev));
 }
 
-std::vector<std::shared_ptr<AnimationEvent>> *pragma::animation::Animation::GetEvents(unsigned int frame)
+std::vector<std::shared_ptr<pragma::AnimationEvent>> *pragma::animation::Animation::GetEvents(unsigned int frame)
 {
 	auto it = m_events.find(frame);
 	if(it == m_events.end())

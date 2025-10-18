@@ -8,6 +8,8 @@ module;
 
 export module pragma.shared:math.oriented_point;
 
+export import pragma.math;
+
 export class DLLNETWORK OrientedPoint {
   public:
 	OrientedPoint();

@@ -7,8 +7,11 @@ module;
 #include <cinttypes>
 #include <vector>
 #include <string>
+#include <memory>
 
 export module pragma.shared:util.tga;
+
+export import pragma.filesystem;
 
 export namespace util {
 	namespace tga {

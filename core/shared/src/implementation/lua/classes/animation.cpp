@@ -9,7 +9,6 @@ module;
 #include "cassert"
 
 
-#include "pragma/lua/luaapi.h"
 
 
 
@@ -149,8 +148,8 @@ void Lua::Animation::AddEvent(lua_State *l, pragma::animation::Animation &anim, 
 {
 	int32_t tArgs = 4;
 	Lua::CheckTable(l, tArgs);
-	auto ev = std::make_unique<AnimationEvent>();
-	ev->eventID = static_cast<AnimationEvent::Type>(eventId);
+	auto ev = std::make_unique<pragma::AnimationEvent>();
+	ev->eventID = static_cast<pragma::AnimationEvent::Type>(eventId);
 
 	GetAnimationEventArguments(l, tArgs, ev->arguments);
 
@@ -158,7 +157,7 @@ void Lua::Animation::AddEvent(lua_State *l, pragma::animation::Animation &anim, 
 	ev.release();
 	anim.AddEvent(frameId, pEv);
 }
-void Lua::Animation::PushAnimationEvent(lua_State *l, const AnimationEvent &ev)
+void Lua::Animation::PushAnimationEvent(lua_State *l, const pragma::AnimationEvent &ev)
 {
 	auto tEvent = Lua::CreateTable(l);
 
@@ -299,7 +298,7 @@ void Lua::Animation::SetEventData(lua_State *l, pragma::animation::Animation &an
 	int32_t tArgs = 5;
 	Lua::CheckTable(l, tArgs);
 
-	ev->eventID = static_cast<AnimationEvent::Type>(type);
+	ev->eventID = static_cast<pragma::AnimationEvent::Type>(type);
 	ev->arguments.clear();
 	GetAnimationEventArguments(l, tArgs, ev->arguments);
 }
@@ -310,7 +309,7 @@ void Lua::Animation::SetEventType(lua_State *l, pragma::animation::Animation &an
 		return;
 	auto &ev = events->at(idx);
 
-	ev->eventID = static_cast<AnimationEvent::Type>(type);
+	ev->eventID = static_cast<pragma::AnimationEvent::Type>(type);
 }
 void Lua::Animation::SetEventArgs(lua_State *l, pragma::animation::Animation &anim, uint32_t frameId, uint32_t idx, luabind::object oArgs)
 {

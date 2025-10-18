@@ -5,7 +5,7 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include <limits>
-
+#include <string>
 
 export module pragma.shared:game.bullet_info;
 
@@ -23,7 +23,7 @@ export {
 
 		EulerAngles spread = EulerAngles(0, 0, 0);
 		float force = std::numeric_limits<float>::signaling_NaN(); // Overwrite for ammo type?
-		float distance = static_cast<float>(umath::to_integral(GameLimits::MaxWorldDistance));
+		float distance = static_cast<float>(umath::to_integral(pragma::GameLimits::MaxWorldDistance));
 		Vector3 direction = {}; // Not used for Entity::FireBullets
 		Vector3 effectOrigin = {std::numeric_limits<float>::signaling_NaN(), std::numeric_limits<float>::signaling_NaN(), std::numeric_limits<float>::signaling_NaN()};
 		uint32_t damage = std::numeric_limits<uint32_t>::max();

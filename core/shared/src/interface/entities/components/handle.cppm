@@ -6,6 +6,8 @@ module;
 
 export module pragma.shared:entities.components.handle;
 
+export import pragma.util;
+
 export namespace pragma {
 	template<class T>
 	using ComponentHandle = util::TWeakSharedHandle<T>;

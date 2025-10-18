@@ -4,9 +4,12 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-
+#include <cinttypes>
+#include <vector>
 
 export module pragma.shared:math.hermite;
+
+export import pragma.math;
 
 export namespace util {
 	DLLNETWORK Vector3 calc_hermite_spline_position(const Vector3 &p0, const Vector3 &p1, const Vector3 &p2, const Vector3 &p3, float s, float curvature = 1.f);

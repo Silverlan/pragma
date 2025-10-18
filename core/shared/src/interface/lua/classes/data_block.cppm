@@ -4,12 +4,12 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/lua/luaapi.h"
-
+#include "pragma/lua/core.hpp"
 
 export module pragma.shared:scripting.lua.classes.data_block;
 
 import :scripting.lua.libraries.file;
+export import pragma.datasystem;
 
 export namespace Lua {
 	namespace DataBlock {

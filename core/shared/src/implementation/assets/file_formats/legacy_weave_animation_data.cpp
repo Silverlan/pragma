@@ -134,14 +134,14 @@ std::shared_ptr<pragma::animation::Animation> FWAD::ReadData(unsigned short mdlV
 
 		unsigned short numEvents = f.Read<unsigned short>();
 		for(unsigned short j = 0; j < numEvents; j++) {
-			AnimationEvent *ev = new AnimationEvent;
+			pragma::AnimationEvent *ev = new pragma::AnimationEvent;
 			if(mdlVersion >= 0x0013) {
 				auto name = f.ReadString();
 				auto id = pragma::animation::Animation::GetEventEnumRegister().RegisterEnum(name);
-				ev->eventID = (id != util::EnumRegister::InvalidEnum) ? static_cast<AnimationEvent::Type>(id) : AnimationEvent::Type::Invalid;
+				ev->eventID = (id != util::EnumRegister::InvalidEnum) ? static_cast<pragma::AnimationEvent::Type>(id) : pragma::AnimationEvent::Type::Invalid;
 			}
 			else
-				ev->eventID = static_cast<AnimationEvent::Type>(f.Read<unsigned short>());
+				ev->eventID = static_cast<pragma::AnimationEvent::Type>(f.Read<unsigned short>());
 			unsigned char numParams = f.Read<unsigned char>();
 			for(unsigned char k = 0; k < numParams; k++) {
 				std::string param = f.ReadString();

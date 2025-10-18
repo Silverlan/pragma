@@ -8,7 +8,6 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/lua/lua_error_handling.hpp"
-#include "pragma/lua/luaapi.h"
 
 #include <luabind/exception_handler.hpp>
 

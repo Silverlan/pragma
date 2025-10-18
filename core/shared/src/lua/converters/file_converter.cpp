@@ -5,7 +5,6 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "pragma/lua/luaapi.h"
 #include "pragma/lua/converters/file_converter.hpp"
 
 import pragma.shared;

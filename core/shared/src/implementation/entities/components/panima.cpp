@@ -12,7 +12,6 @@ module;
 
 
 
-#include "pragma/lua/luaapi.h"
 
 
 
@@ -836,7 +835,7 @@ void CEAnim2OnAnimationComplete::PushArguments(lua_State *l)
 
 /////////////////
 
-CEAnim2HandleAnimationEvent::CEAnim2HandleAnimationEvent(const AnimationEvent &animationEvent) : animationEvent(animationEvent) {}
+CEAnim2HandleAnimationEvent::CEAnim2HandleAnimationEvent(const pragma::AnimationEvent &animationEvent) : animationEvent(animationEvent) {}
 void CEAnim2HandleAnimationEvent::PushArguments(lua_State *l)
 {
 	Lua::PushInt(l, static_cast<int32_t>(animationEvent.eventID));

@@ -7,6 +7,8 @@ module;
 
 export module pragma.shared:math.delta_orientation;
 
+export import pragma.math;
+
 export struct DLLNETWORK DeltaOrientation {
 	DeltaOrientation(Quat porientation, double ptime, double pdelta = 0.f);
 	double time = 0.0;

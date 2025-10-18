@@ -9,6 +9,8 @@ module;
 
 export module pragma.shared:model.animation.phoneme_map;
 
+export import pragma.math;
+
 export {
 	struct DLLNETWORK PhonemeInfo {
 		std::unordered_map<std::string, float> flexControllers;

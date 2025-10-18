@@ -8,6 +8,8 @@ module;
 
 export module pragma.shared:input.enums;
 
+import pragma.math;
+
 export {
 	constexpr uint32_t GLFW_KEY_MENU = 348;
 	constexpr uint32_t GLFW_KEY_LAST = GLFW_KEY_MENU;
@@ -214,30 +216,35 @@ export {
 	constexpr uint32_t GLFW_CUSTOM_KEY_VR_CONTROLLER_9_KEY_START = (GLFW_CUSTOM_KEY_VR_CONTROLLER_8_KEY_START + GLFW_CUSTOM_KEY_JOYSTICK_CONTROL_COUNT);
 	constexpr uint32_t GLFW_CUSTOM_KEY_VR_CONTROLLER_9_AXIS_START = (GLFW_CUSTOM_KEY_VR_CONTROLLER_9_KEY_START + GLFW_CUSTOM_KEY_JOYSTICK_AXIS_COUNT);
 
-	enum class Action : uint32_t {
-		None = 0,
-		MoveForward = 1,
-		MoveBackward = MoveForward << 1,
-		MoveLeft = MoveBackward << 1,
-		MoveRight = MoveLeft << 1,
-		Sprint = MoveRight << 1,
-		Walk = Sprint << 1,
-		Jump = Walk << 1,
-		Crouch = Jump << 1,
-		Attack = Crouch << 1,
-		Attack2 = Attack << 1,
-		Attack3 = Attack2 << 1,
-		Attack4 = Attack3 << 1,
-		Reload = Attack4 << 1,
-		Use = Reload << 1,
+	namespace pragma {
+		enum class Action : uint32_t {
+			None = 0,
+			MoveForward = 1,
+			MoveBackward = MoveForward << 1,
+			MoveLeft = MoveBackward << 1,
+			MoveRight = MoveLeft << 1,
+			Sprint = MoveRight << 1,
+			Walk = Sprint << 1,
+			Jump = Walk << 1,
+			Crouch = Jump << 1,
+			Attack = Crouch << 1,
+			Attack2 = Attack << 1,
+			Attack3 = Attack2 << 1,
+			Attack4 = Attack3 << 1,
+			Reload = Attack4 << 1,
+			Use = Reload << 1,
 
-		Last = Use,
+			Last = Use,
+		};
+		using namespace umath::scoped_enum::bitwise;
+	}
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::Action> : std::true_type {};
 	};
 
-	REGISTER_BASIC_BITWISE_OPERATORS(Action);
-
 	struct DLLNETWORK InputAction {
-		Action action;
+		pragma::Action action;
 		unsigned char task;
 	};
 

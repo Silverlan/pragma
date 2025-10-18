@@ -4,9 +4,13 @@
 module;
 
 #include "pragma/networkdefinitions.h"
+#include "pragma/lua/core.hpp"
 #include <string>
+#include <optional>
 
 export module pragma.shared:scripting.lua.error_handling;
+
+export import pragma.lua;
 
 export namespace pragma::scripting::lua {
 	enum class ErrorType : uint8_t { LoadError = 0, RuntimeError };

@@ -469,7 +469,7 @@ void BaseAIComponent::ResolvePathObstruction(Vector3 &dir)
 #if AI_OBSTRUCTION_CHECK_RAYCAST_TYPE == AI_OBSTRUCTION_CHECK_RAYCAST_TYPE_RAY
 	TraceData data {};
 	data.SetFilter(m_obstruction.sweepFilter);
-	data.SetFlags(RayCastFlags::Default | RayCastFlags::InvertFilter);
+	data.SetFlags(pragma::physics::RayCastFlags::Default | pragma::physics::RayCastFlags::InvertFilter);
 	if(pPhysComponent != nullptr) {
 		data.SetCollisionFilterGroup(pPhysComponent->GetCollisionFilter());
 		data.SetCollisionFilterMask(pPhysComponent->GetCollisionFilterMask());
@@ -522,7 +522,7 @@ void BaseAIComponent::ResolvePathObstruction(Vector3 &dir)
 	data.SetShape(*shape);
 	data.SetTarget(dstPos);
 	data.SetFilter(m_obstruction.sweepFilter);
-	data.SetFlags(RayCastFlags::Default | RayCastFlags::InvertFilter);
+	data.SetFlags(pragma::physics::RayCastFlags::Default | pragma::physics::RayCastFlags::InvertFilter);
 	if(pPhysComponent) {
 		data.SetCollisionFilterGroup(pPhysComponent->GetCollisionFilter());
 		data.SetCollisionFilterMask(pPhysComponent->GetCollisionFilterMask());

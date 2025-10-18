@@ -6,6 +6,7 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <string>
 #include <functional>
+#include <array>
 
 export module pragma.shared:assets.manager;
 

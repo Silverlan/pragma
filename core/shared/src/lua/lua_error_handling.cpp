@@ -5,7 +5,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "algorithm"
-#include "pragma/lua/luaapi.h"
 #include <luabind/exception_handler.hpp>
 #include "pragma/lua/lua_error_handling.hpp"
 #include <stack>

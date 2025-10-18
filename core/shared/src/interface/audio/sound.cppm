@@ -5,7 +5,7 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include <vector>
-
+#include <string>
 
 export module pragma.shared:audio.sound;
 

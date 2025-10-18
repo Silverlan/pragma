@@ -4,10 +4,11 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-
-
+#include "pragma/lua/core.hpp"
 
 export module pragma.shared:scripting.lua.classes.data_stream;
+
+export import pragma.lua;
 
 export namespace Lua {
 	namespace DataStream {

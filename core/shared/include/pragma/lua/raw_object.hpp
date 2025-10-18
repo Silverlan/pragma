@@ -4,7 +4,6 @@
 #ifndef __LUA_RAW_OBJECT_HPP__
 #define __LUA_RAW_OBJECT_HPP__
 
-#include "pragma/lua/luaapi.h"
 #include <luabind/object.hpp>
 
 namespace pragma::lua {

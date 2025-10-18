@@ -7,6 +7,8 @@ module;
 
 export module pragma.shared:networking.velocity_correction;
 
+export import pragma.math;
+
 export namespace nwm {
 	class DLLNETWORK VelocityCorrection {
 	  public:

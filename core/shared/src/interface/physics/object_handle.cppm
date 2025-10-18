@@ -6,6 +6,8 @@ module;
 
 export module pragma.shared:physics.object_handle;
 
+export import pragma.util;
+
 export {
 	class PhysObj;
 	using PhysObjHandle = util::TWeakSharedHandle<PhysObj>;

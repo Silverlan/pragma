@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/lua/luaapi.h"
 
 module pragma.shared;
 
@@ -24,38 +23,38 @@ void ActionInputControllerComponent::Initialize() { BaseEntityComponent::Initial
 void ActionInputControllerComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void ActionInputControllerComponent::OnRemove() { BaseEntityComponent::OnRemove(); }
 
-bool ActionInputControllerComponent::GetActionInput(Action action) const { return ((m_actionInputs & action) != Action::None) ? true : false; }
-bool ActionInputControllerComponent::GetRawActionInput(Action action) const { return ((m_rawInputs & action) != Action::None) ? true : false; }
-const std::unordered_map<Action, float> &ActionInputControllerComponent::GetActionInputAxisMagnitudes() const { return m_inputAxes; }
-float ActionInputControllerComponent::GetActionInputAxisMagnitude(Action action) const
+bool ActionInputControllerComponent::GetActionInput(pragma::Action action) const { return ((m_actionInputs & action) != pragma::Action::None) ? true : false; }
+bool ActionInputControllerComponent::GetRawActionInput(pragma::Action action) const { return ((m_rawInputs & action) != pragma::Action::None) ? true : false; }
+const std::unordered_map<pragma::Action, float> &ActionInputControllerComponent::GetActionInputAxisMagnitudes() const { return m_inputAxes; }
+float ActionInputControllerComponent::GetActionInputAxisMagnitude(pragma::Action action) const
 {
 	auto it = m_inputAxes.find(action);
 	if(it == m_inputAxes.end())
 		return 0.f;
 	return it->second;
 }
-void ActionInputControllerComponent::SetActionInputAxisMagnitude(Action action, float magnitude) { m_inputAxes[action] = magnitude; }
+void ActionInputControllerComponent::SetActionInputAxisMagnitude(pragma::Action action, float magnitude) { m_inputAxes[action] = magnitude; }
 
-Action ActionInputControllerComponent::GetActionInputs() const { return m_actionInputs; }
-Action ActionInputControllerComponent::GetRawActionInputs() const { return m_rawInputs; }
-void ActionInputControllerComponent::SetActionInputs(Action actions, bool bKeepMagnitudes)
+pragma::Action ActionInputControllerComponent::GetActionInputs() const { return m_actionInputs; }
+pragma::Action ActionInputControllerComponent::GetRawActionInputs() const { return m_rawInputs; }
+void ActionInputControllerComponent::SetActionInputs(pragma::Action actions, bool bKeepMagnitudes)
 {
 	auto rawInputs = m_rawInputs;
 	auto valuesOld = umath::get_power_of_2_values(umath::to_integral(rawInputs));
 	for(auto v : valuesOld) {
-		if((actions & static_cast<Action>(v)) == Action::None) // Action has been unpressed
-			SetActionInput(static_cast<Action>(v), false);
+		if((actions & static_cast<pragma::Action>(v)) == pragma::Action::None) // Action has been unpressed
+			SetActionInput(static_cast<pragma::Action>(v), false);
 	}
 	actions &= ~rawInputs;
 	auto values = umath::get_power_of_2_values(umath::to_integral(actions));
 	for(auto v : values)
-		SetActionInput(static_cast<Action>(v), true, bKeepMagnitudes);
+		SetActionInput(static_cast<pragma::Action>(v), true, bKeepMagnitudes);
 }
-void ActionInputControllerComponent::SetActionInput(Action action, bool b, bool bKeepMagnitude) { SetActionInput(action, b, (bKeepMagnitude == true) ? GetActionInputAxisMagnitude(action) : ((b == true) ? 1.f : 0.f)); }
-void ActionInputControllerComponent::SetActionInput(Action action, bool b, float magnitude)
+void ActionInputControllerComponent::SetActionInput(pragma::Action action, bool b, bool bKeepMagnitude) { SetActionInput(action, b, (bKeepMagnitude == true) ? GetActionInputAxisMagnitude(action) : ((b == true) ? 1.f : 0.f)); }
+void ActionInputControllerComponent::SetActionInput(pragma::Action action, bool b, float magnitude)
 {
 	SetActionInputAxisMagnitude(action, (b == true) ? magnitude : 0.f);
-	if(((m_rawInputs & action) != Action::None) == b)
+	if(((m_rawInputs & action) != pragma::Action::None) == b)
 		return;
 	if(b == false)
 		m_rawInputs &= ~action;
@@ -69,7 +68,7 @@ void ActionInputControllerComponent::SetActionInput(Action action, bool b, float
 	auto *nw = ent.GetNetworkState();
 	auto *game = nw->GetGameState();
 	auto r = false;
-	if(GetGame().CallCallbacks<bool, ActionInputControllerComponent *, Action, bool>("OnActionInput", &r, this, action, b) == CallbackReturnType::HasReturnValue) {
+	if(GetGame().CallCallbacks<bool, ActionInputControllerComponent *, pragma::Action, bool>("OnActionInput", &r, this, action, b) == CallbackReturnType::HasReturnValue) {
 		if(r == false)
 			return;
 	}
@@ -88,7 +87,7 @@ void ActionInputControllerComponent::SetActionInput(Action action, bool b, float
 
 //////////////////
 
-CEHandleActionInput::CEHandleActionInput(Action action, bool pressed, float magnitude) : action {action}, pressed {pressed}, magnitude {magnitude} {}
+CEHandleActionInput::CEHandleActionInput(pragma::Action action, bool pressed, float magnitude) : action {action}, pressed {pressed}, magnitude {magnitude} {}
 void CEHandleActionInput::PushArguments(lua_State *l)
 {
 	Lua::PushInt(l, umath::to_integral(action));
@@ -98,7 +97,7 @@ void CEHandleActionInput::PushArguments(lua_State *l)
 
 //////////////////
 
-CEOnActionInputChanged::CEOnActionInputChanged(Action action, bool b) : action {action}, pressed {b} {}
+CEOnActionInputChanged::CEOnActionInputChanged(pragma::Action action, bool b) : action {action}, pressed {b} {}
 void CEOnActionInputChanged::PushArguments(lua_State *l)
 {
 	Lua::PushInt(l, umath::to_integral(action));

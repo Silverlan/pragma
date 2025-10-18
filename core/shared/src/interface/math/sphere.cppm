@@ -8,6 +8,8 @@ module;
 
 export module pragma.shared:math.sphere;
 
+export import pragma.math;
+
 export struct DLLNETWORK Sphere {
 	Sphere() : pos(0, 0, 0), radius(0.f) {}
 	Sphere(Vector3 &position, float r) : pos(position), radius(r) {}

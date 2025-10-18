@@ -5,8 +5,13 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include <array>
+#include <memory>
+#include <string>
+#include <vector>
 
 export module pragma.shared:util.bsp_tree;
+
+export import pragma.udm;
 
 export namespace util {
 #pragma pack(push, 1)

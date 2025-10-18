@@ -7,6 +7,8 @@ module;
 
 export module pragma.shared:game.coordinate_system;
 
+export import pragma.math;
+
 export {
 	namespace pragma {
 		enum class Axis : uint8_t { X = 0u, Y, Z, Count };

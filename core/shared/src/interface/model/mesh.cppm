@@ -11,6 +11,7 @@ module;
 export module pragma.shared:model.mesh;
 
 import :console.output;
+export import pragma.materialsystem;
 
 export class DLLNETWORK Mesh {
 	friend Con::c_cout &operator<<(Con::c_cout &, const Mesh &);

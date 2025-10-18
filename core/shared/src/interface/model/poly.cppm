@@ -11,6 +11,7 @@ module;
 export module pragma.shared:model.poly;
 
 import :console.output;
+export import pragma.materialsystem;
 
 export {
 	class NetworkState;
@@ -123,7 +124,7 @@ export {
 		void GetBounds(Vector3 *min, Vector3 *max);
 		void Localize(const Vector3 &center);
 		void debug_print();
-		bool GenerateTriangleMesh(std::vector<uint16_t> *triangles, std::vector<glm::vec2> *uvs, std::vector<Vector3> *normals);
+		bool GenerateTriangleMesh(std::vector<uint16_t> *triangles, std::vector<Vector2> *uvs, std::vector<Vector3> *normals);
 		virtual void SetTextureData(std::string texture, Vector3 nu, Vector3 nv, float ou, float ov, float su, float sv, float rot = 0);
 		TextureData *GetTextureData();
 		virtual msys::Material *GetMaterial();
@@ -137,7 +138,7 @@ export {
 		std::shared_ptr<DispInfo> GetDisplacement();
 		bool IsDisplacement();
 		void RemoveDisplacement();
-		void BuildDisplacement(std::vector<Vector3> &verts, Vector3 &nu, Vector3 &nv, unsigned int w, unsigned int h, std::vector<Vector3> &outVertices, std::vector<glm::vec2> &outUvs, std::vector<unsigned int> &outTriangles, std::vector<Vector3> &faceNormals, unsigned char &numAlpha,
-		std::vector<glm::vec2> *outAlphas);
+		void BuildDisplacement(std::vector<Vector3> &verts, Vector3 &nu, Vector3 &nv, unsigned int w, unsigned int h, std::vector<Vector3> &outVertices, std::vector<Vector2> &outUvs, std::vector<unsigned int> &outTriangles, std::vector<Vector3> &faceNormals, unsigned char &numAlpha,
+		std::vector<Vector2> *outAlphas);
 	};
 };

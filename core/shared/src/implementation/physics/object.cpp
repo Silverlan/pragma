@@ -15,7 +15,7 @@ module pragma.shared;
 
 import :physics.object;
 
-PhysObj::PhysObj(pragma::BaseEntityComponent *owner) : pragma::BaseLuaHandle {}, m_collisionFilterGroup(CollisionMask::None), m_collisionFilterMask(CollisionMask::None)
+PhysObj::PhysObj(pragma::BaseEntityComponent *owner) : pragma::BaseLuaHandle {}, m_collisionFilterGroup(pragma::physics::CollisionMask::None), m_collisionFilterMask(pragma::physics::CollisionMask::None)
 {
 	m_owner = owner->GetHandle<pragma::BaseEntityComponent>();
 	m_networkState = owner->GetEntity().GetNetworkState();
@@ -261,7 +261,7 @@ Vector3 PhysObj::GetOrigin() const
 	return r;
 }
 uint32_t PhysObj::GetNumberOfCollisionObjectsAwake() const { return m_colObjAwakeCount; }
-void PhysObj::SetCollisionFilter(CollisionMask filterGroup, CollisionMask filterMask)
+void PhysObj::SetCollisionFilter(pragma::physics::CollisionMask filterGroup, pragma::physics::CollisionMask filterMask)
 {
 	m_collisionFilterGroup = filterGroup;
 	m_collisionFilterMask = filterMask;
@@ -272,25 +272,25 @@ void PhysObj::SetCollisionFilter(CollisionMask filterGroup, CollisionMask filter
 		}
 	}
 }
-void PhysObj::SetCollisionFilterMask(CollisionMask filterMask) { SetCollisionFilter(m_collisionFilterGroup, filterMask); }
-void PhysObj::AddCollisionFilter(CollisionMask filter)
+void PhysObj::SetCollisionFilterMask(pragma::physics::CollisionMask filterMask) { SetCollisionFilter(m_collisionFilterGroup, filterMask); }
+void PhysObj::AddCollisionFilter(pragma::physics::CollisionMask filter)
 {
-	CollisionMask filterGroup;
-	CollisionMask filterMask;
+	pragma::physics::CollisionMask filterGroup;
+	pragma::physics::CollisionMask filterMask;
 	GetCollisionFilter(&filterGroup, &filterMask);
 	SetCollisionFilter(filterGroup | filter, filterMask | filter);
 }
-void PhysObj::RemoveCollisionFilter(CollisionMask filter)
+void PhysObj::RemoveCollisionFilter(pragma::physics::CollisionMask filter)
 {
-	CollisionMask filterGroup;
-	CollisionMask filterMask;
+	pragma::physics::CollisionMask filterGroup;
+	pragma::physics::CollisionMask filterMask;
 	GetCollisionFilter(&filterGroup, &filterMask);
 	SetCollisionFilter(filterGroup & ~filter, filterMask & ~filter);
 }
-void PhysObj::SetCollisionFilter(CollisionMask filterGroup) { SetCollisionFilter(filterGroup, filterGroup); }
-CollisionMask PhysObj::GetCollisionFilter() const { return m_collisionFilterGroup; }
-CollisionMask PhysObj::GetCollisionFilterMask() const { return m_collisionFilterMask; }
-void PhysObj::GetCollisionFilter(CollisionMask *filterGroup, CollisionMask *filterMask) const
+void PhysObj::SetCollisionFilter(pragma::physics::CollisionMask filterGroup) { SetCollisionFilter(filterGroup, filterGroup); }
+pragma::physics::CollisionMask PhysObj::GetCollisionFilter() const { return m_collisionFilterGroup; }
+pragma::physics::CollisionMask PhysObj::GetCollisionFilterMask() const { return m_collisionFilterMask; }
+void PhysObj::GetCollisionFilter(pragma::physics::CollisionMask *filterGroup, pragma::physics::CollisionMask *filterMask) const
 {
 	*filterGroup = m_collisionFilterGroup;
 	*filterMask = m_collisionFilterMask;

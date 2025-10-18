@@ -11,6 +11,8 @@ module;
 
 export module pragma.shared:entities.components.environment.effects.particle_system;
 
+export import pragma.udm;
+
 export {
 	struct DLLNETWORK CParticleModifierData {
 		CParticleModifierData(std::string pName) : name(pName) {}

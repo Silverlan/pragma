@@ -5,10 +5,13 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include <optional>
-
+#include <memory>
+#include <string>
 
 
 export module pragma.shared:scripting.lua.libraries.file;
+
+export import pragma.lua;
 
 export {
 	enum class FileOpenMode : uint32_t { None = 0u, Read = 1u, Write = Read << 1u, Append = Write << 1u, Update = Append << 1u, Binary = Update << 1u };

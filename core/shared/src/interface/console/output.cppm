@@ -28,6 +28,7 @@ module;
 export module pragma.shared:console.output;
 
 export import :console.enums;
+export import pragma.util;
 
 export {
 	namespace pragma {
@@ -109,8 +110,12 @@ export {
 		DLLNETWORK extern std::string PREFIX_CLIENT;
 		DLLNETWORK extern std::string PREFIX_LUA;
 		DLLNETWORK extern std::string PREFIX_GUI;
+		using namespace umath::scoped_enum::bitwise;
 	};
-	REGISTER_BASIC_BITWISE_OPERATORS(Con::MessageFlags)
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<Con::MessageFlags> : std::true_type {};
+	}
 
 	namespace pragma::logging::detail {
 		enum class Type : uint8_t { None = 0, Info, Warn, Err, Crit };

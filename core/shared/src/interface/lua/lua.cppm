@@ -5,9 +5,11 @@ module;
 
 export module pragma.shared:scripting.lua;
 
+export import :scripting.lua.api;
 export import :scripting.lua.auto_doc;
 export import :scripting.lua.base_lua_handle;
 export import :scripting.lua.base_lua_obj;
+export import :scripting.lua.call;
 export import :scripting.lua.callback;
 export import :scripting.lua.callback_handler;
 export import :scripting.lua.class_manager;

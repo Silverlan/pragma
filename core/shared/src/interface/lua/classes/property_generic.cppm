@@ -4,6 +4,7 @@
 module;
 
 #include <memory>
+#include <functional>
 
 export module pragma.shared:scripting.lua.classes.property_generic;
 

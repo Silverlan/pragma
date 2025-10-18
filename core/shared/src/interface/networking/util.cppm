@@ -4,8 +4,7 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-
-
+#include <functional>
 
 export module pragma.shared:networking.util;
 

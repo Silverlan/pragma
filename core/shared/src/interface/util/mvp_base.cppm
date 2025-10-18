@@ -6,6 +6,8 @@ module;
 
 export module pragma.shared:util.mvp_base;
 
+export import pragma.math;
+
 export {
 	template<int i>
 	class MVPBase {

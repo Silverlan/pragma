@@ -4,10 +4,11 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/lua/luaapi.h"
-
+#include "pragma/lua/core.hpp"
 
 export module pragma.shared:scripting.lua.include;
+
+export import pragma.lua;
 
 export namespace pragma::scripting::lua {
 	struct DLLNETWORK IncludeResult {
@@ -26,12 +27,13 @@ export namespace pragma::scripting::lua {
 
 		Default = AddToCache | SkipIfCached,
 	};
+	using namespace umath::scoped_enum::bitwise;
 
 	DLLNETWORK IncludeResult include(lua_State *l, const std::string &path, IncludeFlags flags = IncludeFlags::None);
 	DLLNETWORK void execute_files_in_directory(lua_State *l, const std::string &path);
 	DLLNETWORK Lua::StatusCode execute_file(lua_State *l, const std::string &path, std::string *optOutErrMsg = nullptr);
 };
-
-export {
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::scripting::lua::IncludeFlags)
+namespace umath::scoped_enum::bitwise {
+	template<>
+	struct enable_bitwise_operators<pragma::scripting::lua::IncludeFlags> : std::true_type {};
 }

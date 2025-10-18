@@ -187,7 +187,7 @@ export namespace pragma {
 		virtual void InitializeController();
 		virtual void InitializePhysObj(PhysObj *phys);
 
-		bool HandleAnimationEvent(const AnimationEvent &ev);
+		bool HandleAnimationEvent(const pragma::AnimationEvent &ev);
 		virtual void PlayFootStepSound(FootType foot, const SurfaceMaterial &surfMat, float scale);
 
 		void UpdateNeckControllers();

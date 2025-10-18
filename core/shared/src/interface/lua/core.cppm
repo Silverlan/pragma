@@ -3,9 +3,11 @@
 
 module;
 
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 export module pragma.shared:scripting.lua.core;
+
+export import pragma.lua;
 
 export {
     namespace Lua {

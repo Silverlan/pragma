@@ -6,7 +6,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/lua/luaapi.h"
 #include "pragma/lua/converters/alias_converter.hpp"
 #include "pragma/lua/converters/alias_types.hpp"
 

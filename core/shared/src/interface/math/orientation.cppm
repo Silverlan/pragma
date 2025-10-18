@@ -10,6 +10,8 @@ module;
 
 export module pragma.shared:math.orientation;
 
+export import pragma.math;
+
 export {
 	struct DLLNETWORK AngleOrientation {
 		AngleOrientation() { AngleOrientation(Vector3(0, 0, 0), EulerAngles(0, 0, 0)); }

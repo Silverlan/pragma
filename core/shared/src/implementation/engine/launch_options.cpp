@@ -6,7 +6,6 @@ module;
 
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/lua/luaapi.h"
 #include "pragma/logging.hpp"
 
 module pragma.shared;

@@ -7,9 +7,6 @@ module;
 #include <vector>
 #include <memory>
 
-
-
-
 export module pragma.shared:physics.collision_mesh;
 
 export import :game.coordinate_system;
@@ -100,7 +97,7 @@ export {
 		int GetSurfaceMaterial() const;
 		void SetMass(float mass);
 		float GetMass() const;
-		void Update(ModelUpdateFlags flags = ModelUpdateFlags::AllData);
+		void Update(pragma::model::ModelUpdateFlags flags = pragma::model::ModelUpdateFlags::AllData);
 		void AddVertex(const Vector3 &v);
 		void Rotate(const Quat &rot);
 		void Translate(const Vector3 &t);

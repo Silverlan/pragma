@@ -7,6 +7,8 @@ module;
 #include <string>
 #include <optional>
 #include <memory>
+#include <vector>
+#include <unordered_map>
 
 export module pragma.shared:map.entity_data;
 
@@ -66,7 +68,11 @@ export {
 			uint32_t m_firstLeaf = 0u;
 			uint32_t m_numLeaves = 0u;
 		};
+		using namespace umath::scoped_enum::bitwise;
 	};
 	DLLNETWORK std::ostream &operator<<(std::ostream &out, const pragma::asset::EntityData &entityData);
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::asset::EntityData::Flags)
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::asset::EntityData::Flags> : std::true_type {};
+	}
 };

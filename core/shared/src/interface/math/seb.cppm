@@ -9,6 +9,8 @@ module;
 
 export module pragma.shared:math.seb;
 
+export import pragma.math;
+
 export namespace Seb {
 	void DLLNETWORK Calculate(std::vector<Vector3> &verts, Vector3 &center, float &radius);
 };

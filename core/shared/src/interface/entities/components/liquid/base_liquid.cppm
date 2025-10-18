@@ -26,7 +26,7 @@ export namespace pragma {
 		virtual void Initialize() override;
 
 		bool CalcLineSurfaceIntersection(const Vector3 &lineOrigin, const Vector3 &lineDir, double *outT = nullptr, double *outU = nullptr, double *outV = nullptr, bool bCull = false) const;
-		virtual bool OnRayResultCallback(CollisionMask rayCollisionGroup, CollisionMask rayCollisionMask);
+		virtual bool OnRayResultCallback(pragma::physics::CollisionMask rayCollisionGroup, pragma::physics::CollisionMask rayCollisionMask);
 		virtual void OnEntitySpawn() override;
 	  protected:
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;

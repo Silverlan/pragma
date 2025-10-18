@@ -9,6 +9,8 @@ module;
 
 export module pragma.shared:scripting.lua.custom_constructor;
 
+export import pragma.util;
+
 export namespace pragma::lua {
 	template<typename T>
 	struct function_traits;

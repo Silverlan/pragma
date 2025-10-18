@@ -9,7 +9,6 @@ module;
 #include "pragma/lua/types/udm.hpp"
 
 
-#include "pragma/lua/luaapi.h"
 
 #include <luabind/copy_policy.hpp>
 

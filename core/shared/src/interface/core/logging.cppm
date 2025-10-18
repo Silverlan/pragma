@@ -9,6 +9,8 @@ module;
 
 export module pragma.shared:core.logging;
 
+export import pragma.util;
+
 export namespace pragma {
 	constexpr auto DEFAULT_CONSOLE_LOG_LEVEL = ::util::LogSeverity::Warning;
 	constexpr auto DEFAULT_FILE_LOG_LEVEL = ::util::LogSeverity::Info;

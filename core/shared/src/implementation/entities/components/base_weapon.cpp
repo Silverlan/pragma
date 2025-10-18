@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "pragma/lua/luaapi.h"
 
 
 module pragma.shared;
@@ -59,8 +58,8 @@ void BaseWeaponComponent::OnPhysicsInitialized()
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	if(!pPhysComponent)
 		return;
-	pPhysComponent->AddCollisionFilter(CollisionMask::Item);
-	pPhysComponent->SetCollisionFilterGroup(pPhysComponent->GetCollisionFilter() | CollisionMask::Item);
+	pPhysComponent->AddCollisionFilter(pragma::physics::CollisionMask::Item);
+	pPhysComponent->SetCollisionFilterGroup(pPhysComponent->GetCollisionFilter() | pragma::physics::CollisionMask::Item);
 }
 
 void BaseWeaponComponent::OnFireBullets(const BulletInfo &bulletInfo, Vector3 &bulletOrigin, Vector3 &bulletDir, Vector3 *effectsOrigin)
@@ -109,7 +108,7 @@ void BaseWeaponComponent::OnTick(double)
 			auto plComponent = owner->GetPlayerComponent();
 			auto *inputC = plComponent->GetActionInputController();
 			if(m_bInAttack1 == true) {
-				if(inputC && inputC->GetActionInput(Action::Attack) == true) {
+				if(inputC && inputC->GetActionInput(pragma::Action::Attack) == true) {
 					if(CanPrimaryAttack())
 						PrimaryAttack();
 				}
@@ -120,7 +119,7 @@ void BaseWeaponComponent::OnTick(double)
 				}
 			}
 			if(m_bInAttack2 == true) {
-				if(inputC && inputC->GetActionInput(Action::Attack2) == true) {
+				if(inputC && inputC->GetActionInput(pragma::Action::Attack2) == true) {
 					if(CanSecondaryAttack())
 						SecondaryAttack();
 				}

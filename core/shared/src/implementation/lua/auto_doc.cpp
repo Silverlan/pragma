@@ -228,7 +228,7 @@ void Lua::doc::print_documentation(const std::string &name, std::stringstream &s
 	Lua::doc::find_candidates(name, similarCandidates, MAX_SIMILAR_CANDIDATES);
 	if(similarCandidates.empty() == false) {
 		ss << "\n";
-		ss << ::util::get_ansi_color_code(::util::ConsoleColorFlags::Yellow | ::util::ConsoleColorFlags::Intensity);
+		ss << ::util::get_ansi_color_code(::pragma::console::ConsoleColorFlags::Yellow | ::pragma::console::ConsoleColorFlags::Intensity);
 		ss << "Were you looking for the following";
 		auto *pFunction = dynamic_cast<const pragma::doc::Function *>(similarCandidates.front());
 		auto *pMember = dynamic_cast<const pragma::doc::Member *>(similarCandidates.front());
@@ -262,9 +262,9 @@ void Lua::doc::print_documentation(const std::string &name, std::stringstream &s
 			print_collection(*pCollection, ss);
 
 		if(similarCandidates.size() > 1u) {
-			ss << ::util::get_ansi_color_code(::util::ConsoleColorFlags::White | ::util::ConsoleColorFlags::Intensity);
+			ss << ::util::get_ansi_color_code(::pragma::console::ConsoleColorFlags::White | ::pragma::console::ConsoleColorFlags::Intensity);
 			ss << "Other similar items:\n";
-			ss << ::util::get_ansi_color_code(::util::ConsoleColorFlags::Reset);
+			ss << ::util::get_ansi_color_code(::pragma::console::ConsoleColorFlags::Reset);
 			for(auto it = similarCandidates.begin() + 1u; it < similarCandidates.end(); ++it)
 				ss << " - " << wrap_link((*it)->GetFullName()) << "\n";
 		}
@@ -273,9 +273,9 @@ void Lua::doc::print_documentation(const std::string &name, std::stringstream &s
 
 static void print_game_state_flags(pragma::doc::GameStateFlags gameStateFlags, std::stringstream &ss)
 {
-	ss << util::get_ansi_color_code(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
+	ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::White | pragma::console::ConsoleColorFlags::Intensity);
 	ss << "State: ";
-	ss << util::get_ansi_color_code(util::ConsoleColorFlags::Reset);
+	ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::Reset);
 	if(gameStateFlags == pragma::doc::GameStateFlags::None)
 		ss << "None" << "\n";
 	else {
@@ -296,51 +296,51 @@ static void print_game_state_flags(pragma::doc::GameStateFlags gameStateFlags, s
 
 void print_member_documentation(const pragma::doc::Member &member, std::stringstream &ss)
 {
-	ss << util::get_ansi_color_code(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
+	ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::White | pragma::console::ConsoleColorFlags::Intensity);
 	ss << "Name: ";
-	ss << util::get_ansi_color_code(util::ConsoleColorFlags::Reset);
+	ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::Reset);
 	ss << member.GetFullName() << "\n";
 
-	ss << util::get_ansi_color_code(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
+	ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::White | pragma::console::ConsoleColorFlags::Intensity);
 	ss << "Wiki URL: ";
-	ss << util::get_ansi_color_code(util::ConsoleColorFlags::Reset);
+	ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::Reset);
 	ss << wrap_web_link(member.GetWikiURL()) << "\n";
 
-	ss << util::get_ansi_color_code(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
+	ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::White | pragma::console::ConsoleColorFlags::Intensity);
 	ss << "Type: ";
-	ss << util::get_ansi_color_code(util::ConsoleColorFlags::Green | util::ConsoleColorFlags::Intensity);
+	ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::Green | pragma::console::ConsoleColorFlags::Intensity);
 	auto typeName = member.GetType().GetFormattedType(pragma::doc::ParameterFormatType::Generic, [](const pragma::doc::Variant &var, std::string &inOutName) { inOutName = wrap_link(inOutName); });
 	ss << typeName << "\n";
 
 	auto &def = member.GetDefault();
 	if(def.has_value()) {
-		ss << util::get_ansi_color_code(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
+		ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::White | pragma::console::ConsoleColorFlags::Intensity);
 		ss << "Default: " << *def << "\n";
 	}
 	print_game_state_flags(member.GetGameStateFlags(), ss);
 
-	ss << util::get_ansi_color_code(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
+	ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::White | pragma::console::ConsoleColorFlags::Intensity);
 	ss << "Description:" << "\n";
-	ss << util::get_ansi_color_code(util::ConsoleColorFlags::Reset);
+	ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::Reset);
 	ss << member.GetDescription() << "\n";
 	ss << "\n";
 }
 
 void print_collection(const pragma::doc::Collection &collection, std::stringstream &ss)
 {
-	ss << util::get_ansi_color_code(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
+	ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::White | pragma::console::ConsoleColorFlags::Intensity);
 	ss << "Name: ";
-	ss << util::get_ansi_color_code(util::ConsoleColorFlags::Reset);
+	ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::Reset);
 	ss << collection.GetFullName() << "\n";
 
-	ss << util::get_ansi_color_code(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
+	ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::White | pragma::console::ConsoleColorFlags::Intensity);
 	ss << "Wiki URL: ";
-	ss << util::get_ansi_color_code(util::ConsoleColorFlags::Reset);
+	ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::Reset);
 	ss << wrap_web_link(collection.GetWikiURL()) << "\n";
 
-	ss << util::get_ansi_color_code(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
+	ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::White | pragma::console::ConsoleColorFlags::Intensity);
 	ss << "Type: ";
-	ss << util::get_ansi_color_code(util::ConsoleColorFlags::Reset);
+	ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::Reset);
 	auto flags = collection.GetFlags();
 	if((flags & pragma::doc::Collection::Flags::Library) != pragma::doc::Collection::Flags::None)
 		ss << "Library";
@@ -352,7 +352,7 @@ void print_collection(const pragma::doc::Collection &collection, std::stringstre
 
 	auto &derivedFrom = collection.GetDerivedFrom();
 	if(derivedFrom.empty() == false) {
-		ss << util::get_ansi_color_code(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
+		ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::White | pragma::console::ConsoleColorFlags::Intensity);
 		ss << "Derived from:" << "\n";
 		auto bFirst = true;
 		for(auto &df : derivedFrom) {
@@ -367,31 +367,31 @@ void print_collection(const pragma::doc::Collection &collection, std::stringstre
 		ss << "\n" << "\n";
 	}
 
-	ss << util::get_ansi_color_code(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
+	ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::White | pragma::console::ConsoleColorFlags::Intensity);
 	ss << "Description:" << "\n";
-	ss << util::get_ansi_color_code(util::ConsoleColorFlags::Reset);
+	ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::Reset);
 	ss << collection.GetDescription() << "\n";
 	ss << "\n";
 
 	auto &members = collection.GetMembers();
 	if(members.empty() == false) {
-		ss << util::get_ansi_color_code(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
+		ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::White | pragma::console::ConsoleColorFlags::Intensity);
 		ss << "Members:" << "\n";
 		std::vector<std::size_t> sortedIndices;
 		sortedIndices.reserve(members.size());
 		for(auto i = decltype(members.size()) {0u}; i < members.size(); ++i)
 			sortedIndices.push_back(i);
 		std::sort(sortedIndices.begin(), sortedIndices.end(), [&members](std::size_t idx0, std::size_t idx1) { return members.at(idx0).GetName() < members.at(idx1).GetName(); });
-		ss << util::get_ansi_color_code(util::ConsoleColorFlags::Reset);
+		ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::Reset);
 		for(auto idx : sortedIndices) {
 			auto &member = members.at(idx);
 			ss << "- ";
-			ss << util::get_ansi_color_code(util::ConsoleColorFlags::Green | util::ConsoleColorFlags::Intensity);
+			ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::Green | pragma::console::ConsoleColorFlags::Intensity);
 
 			auto typeName = member.GetType().GetFormattedType(pragma::doc::ParameterFormatType::Generic, [](const pragma::doc::Variant &var, std::string &inOutName) { inOutName = wrap_link(inOutName); });
 
 			ss << "[" << wrap_link(typeName) << "] ";
-			ss << util::get_ansi_color_code(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
+			ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::White | pragma::console::ConsoleColorFlags::Intensity);
 			ss << member.GetFullName() << "\n";
 		}
 		ss << "\n";
@@ -399,14 +399,14 @@ void print_collection(const pragma::doc::Collection &collection, std::stringstre
 
 	auto &enumSets = collection.GetEnumSets();
 	if(enumSets.empty() == false) {
-		ss << util::get_ansi_color_code(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
+		ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::White | pragma::console::ConsoleColorFlags::Intensity);
 		ss << "Enum Sets:" << "\n";
-		ss << util::get_ansi_color_code(util::ConsoleColorFlags::Reset);
+		ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::Reset);
 		for(auto &enumSet : enumSets) {
 			ss << "- ";
-			ss << util::get_ansi_color_code(util::ConsoleColorFlags::Green | util::ConsoleColorFlags::Intensity);
+			ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::Green | pragma::console::ConsoleColorFlags::Intensity);
 			ss << "[" << wrap_link(enumSet->GetUnderlyingType()) << "] ";
-			ss << util::get_ansi_color_code(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
+			ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::White | pragma::console::ConsoleColorFlags::Intensity);
 			ss << enumSet->GetFullName() << "\n";
 		}
 		ss << "\n";
@@ -422,14 +422,14 @@ void print_collection(const pragma::doc::Collection &collection, std::stringstre
 		}
 		if(typeFunctions.empty())
 			return;
-		ss << util::get_ansi_color_code(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
+		ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::White | pragma::console::ConsoleColorFlags::Intensity);
 		ss << label << ":" << "\n";
 		std::vector<std::size_t> sortedIndices;
 		sortedIndices.reserve(typeFunctions.size());
 		for(auto i = decltype(typeFunctions.size()) {0u}; i < typeFunctions.size(); ++i)
 			sortedIndices.push_back(i);
 		std::sort(sortedIndices.begin(), sortedIndices.end(), [&typeFunctions](std::size_t idx0, std::size_t idx1) { return typeFunctions.at(idx0)->GetName() < typeFunctions.at(idx1)->GetName(); });
-		ss << util::get_ansi_color_code(util::ConsoleColorFlags::Reset);
+		ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::Reset);
 		for(auto idx : sortedIndices) {
 			auto &fc = typeFunctions.at(idx);
 			ss << "- ";
@@ -444,14 +444,14 @@ void print_collection(const pragma::doc::Collection &collection, std::stringstre
 
 	auto &children = collection.GetChildren();
 	if(children.empty() == false) {
-		ss << util::get_ansi_color_code(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
+		ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::White | pragma::console::ConsoleColorFlags::Intensity);
 		ss << "Children:" << "\n";
 		std::vector<std::size_t> sortedIndices;
 		sortedIndices.reserve(children.size());
 		for(auto i = decltype(children.size()) {0u}; i < children.size(); ++i)
 			sortedIndices.push_back(i);
 		std::sort(sortedIndices.begin(), sortedIndices.end(), [&children](std::size_t idx0, std::size_t idx1) { return children.at(idx0)->GetName() < children.at(idx1)->GetName(); });
-		ss << util::get_ansi_color_code(util::ConsoleColorFlags::Reset);
+		ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::Reset);
 		for(auto idx : sortedIndices) {
 			auto &child = children.at(idx);
 			ss << "- ";
@@ -463,22 +463,22 @@ void print_collection(const pragma::doc::Collection &collection, std::stringstre
 
 void print_enum_set_documentation(const pragma::doc::EnumSet &enumSet, std::stringstream &ss)
 {
-	ss << util::get_ansi_color_code(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
+	ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::White | pragma::console::ConsoleColorFlags::Intensity);
 	ss << "Name: ";
-	ss << util::get_ansi_color_code(util::ConsoleColorFlags::Reset);
+	ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::Reset);
 	ss << enumSet.GetFullName() << "\n";
 
-	ss << util::get_ansi_color_code(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
+	ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::White | pragma::console::ConsoleColorFlags::Intensity);
 	ss << "Underlying Type: ";
-	ss << util::get_ansi_color_code(util::ConsoleColorFlags::Reset);
+	ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::Reset);
 	ss << enumSet.GetUnderlyingType() << "\n";
 
-	ss << util::get_ansi_color_code(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
+	ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::White | pragma::console::ConsoleColorFlags::Intensity);
 	ss << "Wiki URL: ";
-	ss << util::get_ansi_color_code(util::ConsoleColorFlags::Reset);
+	ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::Reset);
 	ss << wrap_web_link(enumSet.GetWikiURL()) << "\n";
 
-	ss << util::get_ansi_color_code(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
+	ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::White | pragma::console::ConsoleColorFlags::Intensity);
 	ss << "Values:" << "\n";
 	auto &enums = enumSet.GetEnums();
 	std::vector<std::size_t> sortedIndices;
@@ -486,7 +486,7 @@ void print_enum_set_documentation(const pragma::doc::EnumSet &enumSet, std::stri
 	for(auto i = decltype(enums.size()) {0u}; i < enums.size(); ++i)
 		sortedIndices.push_back(i);
 	std::sort(sortedIndices.begin(), sortedIndices.end(), [&enums](std::size_t idx0, std::size_t idx1) { return enums.at(idx0).GetName() < enums.at(idx1).GetName(); });
-	ss << util::get_ansi_color_code(util::ConsoleColorFlags::Reset);
+	ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::Reset);
 	for(auto idx : sortedIndices) {
 		auto &en = enums.at(idx);
 		auto &desc = en.GetDescription();
@@ -503,24 +503,24 @@ void print_enum_set_documentation(const pragma::doc::EnumSet &enumSet, std::stri
 
 void print_enum_documentation(const pragma::doc::Enum &e, std::stringstream &ss)
 {
-	ss << util::get_ansi_color_code(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
+	ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::White | pragma::console::ConsoleColorFlags::Intensity);
 	ss << "Name: ";
-	ss << util::get_ansi_color_code(util::ConsoleColorFlags::Reset);
+	ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::Reset);
 	ss << e.GetFullName() << "\n";
 
-	ss << util::get_ansi_color_code(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
+	ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::White | pragma::console::ConsoleColorFlags::Intensity);
 	ss << "Enum Set: ";
-	ss << util::get_ansi_color_code(util::ConsoleColorFlags::Reset);
+	ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::Reset);
 	ss << e.GetEnumSet()->GetName() << "\n";
 
-	ss << util::get_ansi_color_code(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
+	ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::White | pragma::console::ConsoleColorFlags::Intensity);
 	ss << "Wiki URL: ";
-	ss << util::get_ansi_color_code(util::ConsoleColorFlags::Reset);
+	ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::Reset);
 	ss << wrap_web_link(e.GetWikiURL()) << "\n";
 
-	ss << util::get_ansi_color_code(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
+	ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::White | pragma::console::ConsoleColorFlags::Intensity);
 	ss << "Type: ";
-	ss << util::get_ansi_color_code(util::ConsoleColorFlags::Green | util::ConsoleColorFlags::Intensity);
+	ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::Green | pragma::console::ConsoleColorFlags::Intensity);
 	switch(e.GetType()) {
 	case pragma::doc::Enum::Type::Bit:
 		ss << "Bit";
@@ -533,16 +533,16 @@ void print_enum_documentation(const pragma::doc::Enum &e, std::stringstream &ss)
 
 	auto &value = e.GetValue();
 	if(value.empty() == false) {
-		ss << util::get_ansi_color_code(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
+		ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::White | pragma::console::ConsoleColorFlags::Intensity);
 		ss << "Value: ";
-		ss << util::get_ansi_color_code(util::ConsoleColorFlags::Reset);
+		ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::Reset);
 		ss << value << "\n";
 	}
 	print_game_state_flags(e.GetGameStateFlags(), ss);
 
-	ss << util::get_ansi_color_code(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
+	ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::White | pragma::console::ConsoleColorFlags::Intensity);
 	ss << "Description:" << "\n";
-	ss << util::get_ansi_color_code(util::ConsoleColorFlags::Reset);
+	ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::Reset);
 	ss << e.GetDescription() << "\n";
 	ss << "\n";
 }
@@ -550,20 +550,20 @@ void print_enum_documentation(const pragma::doc::Enum &e, std::stringstream &ss)
 void print_function_documentation(const pragma::doc::Function &function, std::stringstream &ss)
 {
 	// TODO: Check game state; Compare with state of called lua state -> If not same, print warning!
-	ss << util::get_ansi_color_code(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
+	ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::White | pragma::console::ConsoleColorFlags::Intensity);
 	ss << "Name: ";
-	ss << util::get_ansi_color_code(util::ConsoleColorFlags::Reset);
+	ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::Reset);
 	ss << function.GetFullName() << "\n";
 
-	ss << util::get_ansi_color_code(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
+	ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::White | pragma::console::ConsoleColorFlags::Intensity);
 	ss << "Wiki URL: ";
-	ss << util::get_ansi_color_code(util::ConsoleColorFlags::Reset);
+	ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::Reset);
 	ss << wrap_web_link(function.GetWikiURL()) << "\n";
 
 	auto type = function.GetType();
-	ss << util::get_ansi_color_code(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
+	ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::White | pragma::console::ConsoleColorFlags::Intensity);
 	ss << "Type: ";
-	ss << util::get_ansi_color_code(util::ConsoleColorFlags::Reset);
+	ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::Reset);
 	switch(type) {
 	case pragma::doc::Function::Type::Function:
 		ss << "Function";
@@ -580,9 +580,9 @@ void print_function_documentation(const pragma::doc::Function &function, std::st
 	ss << "\n";
 
 	auto flags = function.GetFlags();
-	ss << util::get_ansi_color_code(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
+	ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::White | pragma::console::ConsoleColorFlags::Intensity);
 	ss << "Flags: ";
-	ss << util::get_ansi_color_code(util::ConsoleColorFlags::Reset);
+	ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::Reset);
 	if(flags == pragma::doc::Function::Flags::None)
 		ss << "None" << "\n";
 	else {
@@ -601,13 +601,13 @@ void print_function_documentation(const pragma::doc::Function &function, std::st
 	}
 
 	print_game_state_flags(function.GetGameStateFlags(), ss);
-	ss << util::get_ansi_color_code(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
+	ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::White | pragma::console::ConsoleColorFlags::Intensity);
 	ss << "Overloads:" << "\n";
-	ss << util::get_ansi_color_code(util::ConsoleColorFlags::Reset);
+	ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::Reset);
 	for(auto &overload : function.GetOverloads()) {
 		auto &returnValues = overload.GetReturnValues();
 		auto bFirst = true;
-		ss << util::get_ansi_color_code(util::ConsoleColorFlags::Green | util::ConsoleColorFlags::Intensity);
+		ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::Green | pragma::console::ConsoleColorFlags::Intensity);
 		if(returnValues.empty() == false) {
 			auto retStr = pragma::doc::Parameter::GetFormattedParameterString(returnValues, pragma::doc::ParameterFormatType::Generic, false, [](const pragma::doc::Variant &var, std::string &inOutName) { inOutName = wrap_link(inOutName); });
 			ss << retStr;
@@ -626,7 +626,7 @@ void print_function_documentation(const pragma::doc::Function &function, std::st
 		}
 		else
 			ss << "[void]";
-		ss << util::get_ansi_color_code(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
+		ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::White | pragma::console::ConsoleColorFlags::Intensity);
 		ss << " " << function.GetName() << "(";
 
 		auto &parameters = overload.GetParameters();
@@ -650,21 +650,21 @@ void print_function_documentation(const pragma::doc::Function &function, std::st
 		//	param.GetGameStateFlags // TODO
 		}*/
 		ss << ")" << "\n";
-		ss << util::get_ansi_color_code(util::ConsoleColorFlags::Reset);
+		ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::Reset);
 	}
 	ss << "\n";
 
-	ss << util::get_ansi_color_code(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
+	ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::White | pragma::console::ConsoleColorFlags::Intensity);
 	ss << "Description:" << "\n";
-	ss << util::get_ansi_color_code(util::ConsoleColorFlags::Reset);
+	ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::Reset);
 	ss << function.GetDescription() << "\n";
 	ss << "\n";
 
 	auto &codeExample = function.GetExampleCode();
 	if(codeExample.has_value()) {
-		ss << util::get_ansi_color_code(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
+		ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::White | pragma::console::ConsoleColorFlags::Intensity);
 		ss << "Code Example:" << "\n";
-		ss << util::get_ansi_color_code(util::ConsoleColorFlags::Reset);
+		ss << util::get_ansi_color_code(pragma::console::ConsoleColorFlags::Reset);
 		if(codeExample->description.empty() == false)
 			ss << "-- " << codeExample->description << "\n";
 		ss << codeExample->code << "\n";

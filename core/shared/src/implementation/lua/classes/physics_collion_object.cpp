@@ -4,7 +4,6 @@
 module;
 
 
-#include "pragma/lua/luaapi.h"
 #include "pragma/lua/ostream_operator_alias.hpp"
 
 
@@ -535,7 +534,7 @@ void Lua::PhysCollisionObj::SetCollisionFilterGroup(lua_State *l, pragma::physic
 {
 	if(Lua::CheckHandle<pragma::physics::ICollisionObject>(l, hPhys) == false)
 		return;
-	hPhys->SetCollisionFilterGroup(static_cast<CollisionMask>(group));
+	hPhys->SetCollisionFilterGroup(static_cast<pragma::physics::CollisionMask>(group));
 }
 void Lua::PhysCollisionObj::GetCollisionFilterGroup(lua_State *l, pragma::physics::ICollisionObject *hPhys)
 {
@@ -547,7 +546,7 @@ void Lua::PhysCollisionObj::SetCollisionFilterMask(lua_State *l, pragma::physics
 {
 	if(Lua::CheckHandle<pragma::physics::ICollisionObject>(l, hPhys) == false)
 		return;
-	hPhys->SetCollisionFilterMask(static_cast<CollisionMask>(mask));
+	hPhys->SetCollisionFilterMask(static_cast<pragma::physics::CollisionMask>(mask));
 }
 void Lua::PhysCollisionObj::GetCollisionFilterMask(lua_State *l, pragma::physics::ICollisionObject *hPhys)
 {

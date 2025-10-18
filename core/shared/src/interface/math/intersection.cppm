@@ -5,11 +5,13 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include <optional>
-
+#include <memory>
+#include <vector>
 
 export module pragma.shared:math.intersection;
 
 export import :physics.hitbox;
+export import pragma.math;
 
 export {
 	class ModelMeshGroup;

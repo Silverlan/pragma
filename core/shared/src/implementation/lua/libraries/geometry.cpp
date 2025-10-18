@@ -4,7 +4,6 @@
 module;
 
 
-#include "pragma/lua/luaapi.h"
 
 
 #include <clip2tri/clip2tri.h>

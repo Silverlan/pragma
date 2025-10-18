@@ -265,11 +265,11 @@ void CollisionMesh::CalculateBounds()
 		uvec::max(&m_max, m_vertices[i]);
 	}
 }
-void CollisionMesh::Update(ModelUpdateFlags flags)
+void CollisionMesh::Update(pragma::model::ModelUpdateFlags flags)
 {
-	if((flags & ModelUpdateFlags::UpdateBounds) != ModelUpdateFlags::None)
+	if((flags & pragma::model::ModelUpdateFlags::UpdateBounds) != pragma::model::ModelUpdateFlags::None)
 		CalculateBounds();
-	if((flags & ModelUpdateFlags::InitializeCollisionShapes) != ModelUpdateFlags::None)
+	if((flags & pragma::model::ModelUpdateFlags::InitializeCollisionShapes) != pragma::model::ModelUpdateFlags::None)
 		UpdateShape(); // TODO: Surface materials?
 }
 void CollisionMesh::Centralize()

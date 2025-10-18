@@ -10,6 +10,8 @@ module;
 
 export module pragma.shared:util.giblet_create_info;
 
+export import pragma.math;
+
 export {
 	#pragma warning(push)
 	#pragma warning(disable : 4251)

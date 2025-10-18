@@ -6,10 +6,15 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <vector>
 #include <cinttypes>
+#include <memory>
+#include <string>
+#include <optional>
 
 export module pragma.shared:util.core;
 
 export import :entities.base_entity_handle;
+
+export import pragma.udm;
 
 export {
     class Game;

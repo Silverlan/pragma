@@ -4,7 +4,7 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 #include <condition_variable>
 #include <queue>
 #include <mutex>

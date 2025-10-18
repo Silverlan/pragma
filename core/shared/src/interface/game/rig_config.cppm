@@ -7,13 +7,13 @@ module;
 #include <string>
 #include <cinttypes>
 #include <optional>
-
-
+#include <vector>
 
 export module pragma.shared:game.rig_config;
 
 export import :game.coordinate_system;
 export import :util.global_string_table;
+export import pragma.udm;
 
 export {
 	namespace pragma::ik {

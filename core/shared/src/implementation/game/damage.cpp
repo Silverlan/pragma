@@ -85,7 +85,7 @@ void Game::SplashDamage(const Vector3 &origin, Float radius, DamageInfo &dmg, co
 			data.SetSource(origin);
 			data.SetTarget(pos);
 			data.SetFilter(traceFilter);
-			data.SetFlags(RayCastFlags::Default | RayCastFlags::InvertFilter);
+			data.SetFlags(pragma::physics::RayCastFlags::Default | pragma::physics::RayCastFlags::InvertFilter);
 			if(entOrigin != nullptr && pPhysComponent != nullptr) {
 				data.SetCollisionFilterGroup(pPhysComponent->GetCollisionFilter());
 				data.SetCollisionFilterMask(pPhysComponent->GetCollisionFilterMask());

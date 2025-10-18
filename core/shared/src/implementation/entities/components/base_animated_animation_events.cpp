@@ -10,7 +10,7 @@ import :entities.components.base_animated;
 
 using namespace pragma;
 
-BaseAnimatedComponent::CustomAnimationEvent::CustomAnimationEvent(const AnimationEvent &ev) : AnimationEvent(ev) {}
+BaseAnimatedComponent::CustomAnimationEvent::CustomAnimationEvent(const pragma::AnimationEvent &ev) : pragma::AnimationEvent(ev) {}
 BaseAnimatedComponent::CustomAnimationEvent::CustomAnimationEvent(const std::function<void(void)> &f) { callback = {true, FunctionCallback<void>::Create(f)}; }
 BaseAnimatedComponent::CustomAnimationEvent::CustomAnimationEvent(const CallbackHandle &cb) { callback = {true, cb}; }
 
@@ -46,7 +46,7 @@ void BaseAnimatedComponent::ApplyAnimationEventTemplates()
 	for(auto &t : m_animEventTemplates)
 		ApplyAnimationEventTemplate(t);
 }
-void BaseAnimatedComponent::AddAnimationEvent(uint32_t animId, uint32_t frameId, const AnimationEvent &ev)
+void BaseAnimatedComponent::AddAnimationEvent(uint32_t animId, uint32_t frameId, const pragma::AnimationEvent &ev)
 {
 	m_animEventTemplates.push_back({});
 	auto &t = m_animEventTemplates.back();
@@ -55,7 +55,7 @@ void BaseAnimatedComponent::AddAnimationEvent(uint32_t animId, uint32_t frameId,
 	t.ev = ev;
 	ApplyAnimationEventTemplate(t);
 }
-void BaseAnimatedComponent::AddAnimationEvent(const std::string &name, uint32_t frameId, const AnimationEvent &ev)
+void BaseAnimatedComponent::AddAnimationEvent(const std::string &name, uint32_t frameId, const pragma::AnimationEvent &ev)
 {
 	m_animEventTemplates.push_back({});
 	auto &t = m_animEventTemplates.back();
@@ -199,4 +199,4 @@ std::vector<BaseAnimatedComponent::CustomAnimationEvent> *BaseAnimatedComponent:
 		return nullptr;
 	return &it1->second;
 }
-void BaseAnimatedComponent::InjectAnimationEvent(const AnimationEvent &ev) { HandleAnimationEvent(ev); }
+void BaseAnimatedComponent::InjectAnimationEvent(const pragma::AnimationEvent &ev) { HandleAnimationEvent(ev); }

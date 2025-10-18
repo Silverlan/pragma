@@ -12,6 +12,7 @@ export module pragma.shared:model.animation.skeleton;
 
 export import :model.animation.bone;
 export import :model.animation.enums;
+export import pragma.udm;
 
 export namespace pragma::animation {
 	struct Bone;

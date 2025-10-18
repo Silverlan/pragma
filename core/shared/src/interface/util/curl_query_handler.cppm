@@ -10,6 +10,8 @@ module;
 
 export module pragma.shared:util.curl_query_handler;
 
+import pragma.filesystem;
+
 export namespace pragma {
 	class DLLNETWORK CurlQueryHandler {
 	  public:

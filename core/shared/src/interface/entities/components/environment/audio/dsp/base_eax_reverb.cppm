@@ -9,6 +9,8 @@ module;
 
 export module pragma.shared:entities.components.environment.audio.dsp.base_eax_reverb;
 
+export import pragma.math;
+
 export class DLLNETWORK BaseEnvSoundDspEAXReverb {
   protected:
 	float m_kvDensity = 1.f;

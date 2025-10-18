@@ -6,10 +6,12 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <mutex>
 #include <unordered_set>
+#include <unordered_map>
 
 export module pragma.shared:util.resource_watcher;
 
 export import :networking.util;
+export import pragma.materialsystem;
 
 #define RESOURCE_WATCHER_VERBOSE 0
 
@@ -21,16 +23,25 @@ export {
 		using util::ExtensibleEnum::ExtensibleEnum;
 
 		static const EResourceWatcherCallbackType Model;
-		static const EResourceWatcherCallbackType msys::Material;
+		static const EResourceWatcherCallbackType Material;
 		static const EResourceWatcherCallbackType Texture;
 		static const EResourceWatcherCallbackType Map;
 		static const EResourceWatcherCallbackType SoundScript;
 		static const EResourceWatcherCallbackType Sound;
 		static const EResourceWatcherCallbackType Count;
 	protected:
-		enum class E : uint32_t { Model = 0u, msys::Material, Texture, Map, SoundScript, Sound, Count };
+		enum class E : uint32_t { Model = 0u, Material, Texture, Map, SoundScript, Sound, Count };
 	};
-	DEFINE_STD_HASH_SPECIALIZATION(EResourceWatcherCallbackType);
+
+	namespace std {                                                                                                                                                                                                                                                                              \
+		template<>                                                                                                                                                                                                                                                                               \
+		struct hash<EResourceWatcherCallbackType> {                                                                                                                                                                                                                                                                  \
+			std::size_t operator()(const EResourceWatcherCallbackType &object) const                                                                                                                                                                                                                                 \
+			{                                                                                                                                                                                                                                                                                    \
+				return object.Hash();                                                                                                                                                                                                                                                            \
+			}                                                                                                                                                                                                                                                                                    \
+		};                                                                                                                                                                                                                                                                                       \
+	}
 
 	class DLLNETWORK ResourceWatcherManager {
 	public:

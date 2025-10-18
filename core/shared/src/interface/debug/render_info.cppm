@@ -6,9 +6,9 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <optional>
 
-
-
 export module pragma.shared:debug.render_info;
+
+export import pragma.util;
 
 export struct DLLNETWORK DebugRenderInfo {
 	DebugRenderInfo() = default;

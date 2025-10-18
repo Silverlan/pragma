@@ -6,6 +6,7 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <vector>
 #include <string>
+#include <memory>
 
 export module pragma.shared:core.addon_system;
 

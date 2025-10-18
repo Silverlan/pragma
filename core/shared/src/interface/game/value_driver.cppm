@@ -6,7 +6,6 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <luabind/object.hpp>
 
-
 export module pragma.shared:game.value_driver;
 
 export import :entities.enums;
@@ -76,8 +75,12 @@ export {
 			ComponentMemberReference m_memberReference;
 			StateFlags m_stateFlags = StateFlags::None;
 		};
+        using namespace umath::scoped_enum::bitwise;
 	};
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::ValueDriver::StateFlags)
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::ValueDriver::StateFlags> : std::true_type {};
+	}
 
 	std::ostream &operator<<(std::ostream &out, const pragma::ValueDriverDescriptor &descriptor);
 	std::ostream &operator<<(std::ostream &out, const pragma::ValueDriver &driver);

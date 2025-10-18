@@ -117,7 +117,7 @@ export {
 			virtual void OnPhysicsInitialized();
 			virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 			virtual void OnEntityComponentRemoved(BaseEntityComponent &component) override;
-			void HandleActionInput(Action action, bool pressed);
+			void HandleActionInput(pragma::Action action, bool pressed);
 			void OnRespawn();
 			bool m_bFlashlightOn;
 			EntityHandle m_entFlashlight = {};

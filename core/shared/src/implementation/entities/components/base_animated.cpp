@@ -7,7 +7,6 @@ module;
 #include "memory"
 
 
-#include "pragma/lua/luaapi.h"
 
 
 
@@ -1076,7 +1075,7 @@ void BaseAnimatedComponent::SetPlaybackRate(float rate) { *m_playbackRate = rate
 float BaseAnimatedComponent::GetPlaybackRate() const { return *m_playbackRate; }
 const util::PFloatProperty &BaseAnimatedComponent::GetPlaybackRateProperty() const { return m_playbackRate; }
 
-void BaseAnimatedComponent::HandleAnimationEvent(const AnimationEvent &ev)
+void BaseAnimatedComponent::HandleAnimationEvent(const pragma::AnimationEvent &ev)
 {
 	auto bHandled = false;
 	CEHandleAnimationEvent evData {ev};
@@ -1084,11 +1083,11 @@ void BaseAnimatedComponent::HandleAnimationEvent(const AnimationEvent &ev)
 		return;
 	auto it = m_boundAnimEvents.find(ev.eventID);
 	if(it != m_boundAnimEvents.end()) {
-		it->second.Call<void, std::reference_wrapper<const AnimationEvent>>(ev);
+		it->second.Call<void, std::reference_wrapper<const pragma::AnimationEvent>>(ev);
 		return;
 	}
 	switch(ev.eventID) {
-	case AnimationEvent::Type::EmitSound:
+	case pragma::AnimationEvent::Type::EmitSound:
 		{
 			if(ev.arguments.size() > 0) {
 				auto pSoundEmitterComponent = static_cast<pragma::BaseSoundEmitterComponent *>(GetEntity().FindComponent("sound_emitter").get());
@@ -1353,7 +1352,7 @@ void BaseAnimatedComponent::Load(udm::LinkedPropertyWrapperArg udm, uint32_t ver
 
 /////////////////
 
-CEHandleAnimationEvent::CEHandleAnimationEvent(const AnimationEvent &animationEvent) : animationEvent(animationEvent) {}
+CEHandleAnimationEvent::CEHandleAnimationEvent(const pragma::AnimationEvent &animationEvent) : animationEvent(animationEvent) {}
 void CEHandleAnimationEvent::PushArguments(lua_State *l)
 {
 	Lua::PushInt(l, static_cast<int32_t>(animationEvent.eventID));

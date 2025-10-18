@@ -7,8 +7,11 @@ module;
 #include <string>
 #include <optional>
 #include <vector>
+#include <memory>
 
 export module pragma.shared:util.module;
+
+export import pragma.util;
 
 export namespace util {
 	DLLNETWORK std::string get_normalized_module_path(const std::string &lib, std::optional<bool> checkForClientSide = {});

@@ -183,7 +183,7 @@ void Engine::ProcessConsoleInput(KeyState pressState)
 	while(consoleInput.empty() == false) {
 		auto &inputInfo = consoleInput.front();
 
-		util::set_console_color(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
+		util::set_console_color(pragma::console::ConsoleColorFlags::White | pragma::console::ConsoleColorFlags::Intensity);
 		if(inputInfo.printLine)
 			Con::cout << "> " << inputInfo.line << Con::endl;
 		util::reset_console_color();

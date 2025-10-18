@@ -4,11 +4,13 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 #include <optional>
 #include <string>
 
 export module pragma.shared:scripting.lua.util;
+
+export import pragma.lua;
 
 export namespace Lua {
 	DLLNETWORK void StackDump(lua_State *lua);

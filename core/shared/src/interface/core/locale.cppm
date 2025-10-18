@@ -11,7 +11,8 @@ module;
 
 export module pragma.locale;
 
-import pragma.string.unicode;
+export import pragma.string.unicode;
+export import pragma.udm;
 
 export namespace pragma::locale {
 	struct DLLNETWORK LanguageInfo {

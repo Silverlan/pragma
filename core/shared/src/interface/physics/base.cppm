@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/lua/luaapi.h"
 #include "pragma/lua/raw_object.hpp"
 #include <memory>
 #include <vector>
@@ -12,6 +11,7 @@ module;
 export module pragma.shared:physics.base;
 
 export import :physics.enums;
+export import pragma.util;
 
 export {
 	class PhysObj;

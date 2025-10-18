@@ -8,9 +8,7 @@ module;
 #include "cassert"
 
 
-#include "pragma/lua/lua_call.hpp"
 #include "pragma/lua/lua_util_class.hpp"
-#include "pragma/lua/luaapi.h"
 
 #include "pragma/lua/ostream_operator_alias.hpp"
 
@@ -274,7 +272,7 @@ bool Lua::game::raycast(lua_State *l, const ::TraceData &data)
 	game->GetEntities(&ents);
 
 	//std::vector<TraceResult> res; // TODO
-	auto bAllHits = data.HasFlag(RayCastFlags::ReportAllResults);
+	auto bAllHits = data.HasFlag(pragma::physics::RayCastFlags::ReportAllResults);
 	BaseEntity *entClosest = nullptr;
 	auto tClosest = 1.f;
 

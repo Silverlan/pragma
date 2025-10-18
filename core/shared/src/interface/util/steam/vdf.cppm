@@ -10,6 +10,8 @@ module;
 
 export module pragma.shared:util.steam.vdf;
 
+export import pragma.util;
+
 export namespace util::steam::vdf {
 	class DataBlock {
 	  public:

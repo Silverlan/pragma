@@ -13,6 +13,8 @@ module;
 
 export module pragma.shared:scripting.lua.handles;
 
+export import pragma.util;
+
 // Note: get_const_holder and get_pointer have to be defined
 // in the same namespace as the type!! (luabind namespace will *not* work
 // unless they're defined before *any* luabind includes)

@@ -8,6 +8,8 @@ module;
 
 export module pragma.shared:math.bounding_node;
 
+export import pragma.math;
+
 export class DLLNETWORK BoundingNode {
   protected:
 	Vector3 m_min = {};

@@ -8,7 +8,6 @@ module;
 #include <deque>
 #include "pragma/lua/ldefinitions.h"
 #include "pragma/encryption/md5.h"
-#include "pragma/lua/luaapi.h"
 
 
 
@@ -277,7 +276,7 @@ export {
 		std::string GetConVarString(const std::string &scmd);
 		float GetConVarFloat(const std::string &scmd);
 		bool GetConVarBool(const std::string &scmd);
-		ConVarFlags GetConVarFlags(const std::string &scmd);
+		pragma::console::ConVarFlags GetConVarFlags(const std::string &scmd);
 		const std::unordered_map<std::string, std::vector<CvarCallback>> &GetConVarCallbacks() const;
 
 		virtual Float GetFrictionScale() const = 0;

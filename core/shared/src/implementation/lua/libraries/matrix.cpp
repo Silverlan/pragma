@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/lua/luaapi.h"
 
 
 #include <glm/gtx/matrix_decompose.hpp>

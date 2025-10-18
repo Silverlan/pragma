@@ -3,15 +3,16 @@
 
 module;
 
-#include "pragma/lua/luaapi.h"
-#include "pragma/lua/lua_call.hpp"
 #include "pragma/networkdefinitions.h"
+#include "pragma/lua/core.hpp"
 
 export module pragma.shared:scripting.lua.classes.property;
 
 import :entities.property;
+import :scripting.lua.call;
 import :scripting.lua.classes.property_generic;
 import :scripting.lua.core;
+export import pragma.lua;
 
 #define DEFINE_LUA_NUMBER_PROPERTY(TYPE, UNDERLYING_TYPE)                                                                                                                                                                                                                                        \
 	using L##TYPE##Property = TLNumberPropertyWrapper<util::TYPE##Property, UNDERLYING_TYPE>;                                                                                                                                                                                                    \

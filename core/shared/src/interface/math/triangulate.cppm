@@ -25,6 +25,8 @@ module;
 
 export module pragma.shared:math.triangulate;
 
+export import pragma.math;
+
 export namespace Geometry {
 	DLLNETWORK bool triangulate(const std::vector<Vector2> &contour, std::vector<uint16_t> &result);
 	DLLNETWORK float calc_area(const std::vector<Vector2> &contour);

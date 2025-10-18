@@ -68,13 +68,13 @@ void ModelMesh::Centralize()
 	m_max -= center;
 	m_center -= center;
 }
-void ModelMesh::Update(ModelUpdateFlags flags)
+void ModelMesh::Update(pragma::model::ModelUpdateFlags flags)
 {
-	if((flags & ModelUpdateFlags::UpdatePrimitiveCounts) != ModelUpdateFlags::None) {
+	if((flags & pragma::model::ModelUpdateFlags::UpdatePrimitiveCounts) != pragma::model::ModelUpdateFlags::None) {
 		m_numVerts = 0;
 		m_numIndices = 0;
 	}
-	if((flags & ModelUpdateFlags::UpdateBounds) != ModelUpdateFlags::None) {
+	if((flags & pragma::model::ModelUpdateFlags::UpdateBounds) != pragma::model::ModelUpdateFlags::None) {
 		if(m_subMeshes.empty()) {
 			m_min = {};
 			m_max = {};
@@ -88,9 +88,9 @@ void ModelMesh::Update(ModelUpdateFlags flags)
 	uint32_t vertCount = 0;
 	for(auto i = decltype(m_subMeshes.size()) {0}; i < m_subMeshes.size(); ++i) {
 		auto &subMesh = m_subMeshes[i];
-		if((flags & ModelUpdateFlags::UpdateChildren) != ModelUpdateFlags::None)
+		if((flags & pragma::model::ModelUpdateFlags::UpdateChildren) != pragma::model::ModelUpdateFlags::None)
 			subMesh->Update(flags);
-		if((flags & ModelUpdateFlags::UpdateBounds) != ModelUpdateFlags::None) {
+		if((flags & pragma::model::ModelUpdateFlags::UpdateBounds) != pragma::model::ModelUpdateFlags::None) {
 			Vector3 min;
 			Vector3 max;
 			subMesh->GetBounds(min, max);
@@ -103,12 +103,12 @@ void ModelMesh::Update(ModelUpdateFlags flags)
 				m_center += v.position;
 		}
 
-		if((flags & ModelUpdateFlags::UpdatePrimitiveCounts) != ModelUpdateFlags::None) {
+		if((flags & pragma::model::ModelUpdateFlags::UpdatePrimitiveCounts) != pragma::model::ModelUpdateFlags::None) {
 			m_numVerts += subMesh->GetVertexCount();
 			m_numIndices += subMesh->GetIndexCount();
 		}
 	}
-	if((flags & ModelUpdateFlags::UpdateBounds) != ModelUpdateFlags::None && vertCount > 0)
+	if((flags & pragma::model::ModelUpdateFlags::UpdateBounds) != pragma::model::ModelUpdateFlags::None && vertCount > 0)
 		m_center /= static_cast<float>(vertCount);
 }
 void ModelMesh::Merge(const ModelMesh &other)
@@ -682,9 +682,9 @@ void ModelSubMesh::Validate()
 		pragma::model::validate_value(v.tangent);
 	}
 }
-void ModelSubMesh::Update(ModelUpdateFlags flags)
+void ModelSubMesh::Update(pragma::model::ModelUpdateFlags flags)
 {
-	if((flags & ModelUpdateFlags::UpdateBounds) == ModelUpdateFlags::None)
+	if((flags & pragma::model::ModelUpdateFlags::UpdateBounds) == pragma::model::ModelUpdateFlags::None)
 		return;
 	m_min = Vector3(std::numeric_limits<Vector3::value_type>::max(), std::numeric_limits<Vector3::value_type>::max(), std::numeric_limits<Vector3::value_type>::max());
 	m_max = Vector3(std::numeric_limits<Vector3::value_type>::lowest(), std::numeric_limits<Vector3::value_type>::lowest(), std::numeric_limits<Vector3::value_type>::lowest());

@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/lua/luaapi.h"
 #include "pragma/lua/types/udm.hpp"
 #include "pragma/networkdefinitions.h"
 
@@ -12,19 +11,20 @@ export module pragma.shared:scripting.lua.classes.convar;
 
 export import :console.convar;
 export import :entities.components.base_player;
+export import :scripting.lua.api;
 
 export {
 	namespace Lua::console {
-		ConVar *CreateConVar(lua_State *l, const std::string &cmd, ::udm::Type type, Lua::udm_type def, ConVarFlags flags = ConVarFlags::None, const std::string &help = "");
-		void CreateConCommand(lua_State *l, const std::string &name, const Lua::func<void, pragma::BasePlayerComponent, float, Lua::variadic<std::string>> &function, ConVarFlags flags, const std::string &help);
-		void CreateConCommand(lua_State *l, const std::string &name, const Lua::func<void, pragma::BasePlayerComponent, float, Lua::variadic<std::string>> &function, ConVarFlags flags);
+		ConVar *CreateConVar(lua_State *l, const std::string &cmd, ::udm::Type type, Lua::udm_type def, pragma::console::ConVarFlags flags = pragma::console::ConVarFlags::None, const std::string &help = "");
+		void CreateConCommand(lua_State *l, const std::string &name, const Lua::func<void, pragma::BasePlayerComponent, float, Lua::variadic<std::string>> &function, pragma::console::ConVarFlags flags, const std::string &help);
+		void CreateConCommand(lua_State *l, const std::string &name, const Lua::func<void, pragma::BasePlayerComponent, float, Lua::variadic<std::string>> &function, pragma::console::ConVarFlags flags);
 		void CreateConCommand(lua_State *l, const std::string &name, const Lua::func<void, pragma::BasePlayerComponent, float, Lua::variadic<std::string>> &function, const std::string &help);
 		ConVar *GetConVar(lua_State *l, const std::string &name);
 		int32_t GetConVarInt(lua_State *l, const std::string &conVar);
 		float GetConVarFloat(lua_State *l, const std::string &conVar);
 		std::string GetConVarString(lua_State *l, const std::string &conVar);
 		bool GetConVarBool(lua_State *l, const std::string &conVar);
-		ConVarFlags GetConVarFlags(lua_State *l, const std::string &conVar);
+		pragma::console::ConVarFlags GetConVarFlags(lua_State *l, const std::string &conVar);
 		DLLNETWORK int Run(lua_State *l);
 		DLLNETWORK int AddChangeCallback(lua_State *l);
 	};

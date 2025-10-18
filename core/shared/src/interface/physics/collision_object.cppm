@@ -97,10 +97,10 @@ export {
 			virtual bool IsSimulationEnabled() const = 0;
 			virtual void SetCollisionsEnabled(bool enabled) = 0;
 
-			void SetCollisionFilterGroup(CollisionMask group);
-			CollisionMask GetCollisionFilterGroup() const;
-			void SetCollisionFilterMask(CollisionMask mask);
-			CollisionMask GetCollisionFilterMask() const;
+			void SetCollisionFilterGroup(pragma::physics::CollisionMask group);
+			pragma::physics::CollisionMask GetCollisionFilterGroup() const;
+			void SetCollisionFilterMask(pragma::physics::CollisionMask mask);
+			pragma::physics::CollisionMask GetCollisionFilterMask() const;
 			virtual void SetSleepReportEnabled(bool reportEnabled) = 0;
 			virtual bool IsSleepReportEnabled() const = 0;
 
@@ -133,8 +133,8 @@ export {
 		protected:
 			ICollisionObject(pragma::physics::IEnvironment &env, pragma::physics::IShape &shape);
 			virtual void ApplyCollisionShape(pragma::physics::IShape *optShape) = 0;
-			virtual void DoSetCollisionFilterGroup(CollisionMask group) = 0;
-			virtual void DoSetCollisionFilterMask(CollisionMask mask) = 0;
+			virtual void DoSetCollisionFilterGroup(pragma::physics::CollisionMask group) = 0;
+			virtual void DoSetCollisionFilterMask(pragma::physics::CollisionMask mask) = 0;
 			virtual void DoSpawn() override;
 
 			std::shared_ptr<pragma::physics::IShape> m_shape;
@@ -142,8 +142,8 @@ export {
 			Vector3 m_origin = {};
 			StateFlags m_stateFlags = StateFlags::CCDEnabled;
 			int m_surfaceMaterial = 0u;
-			CollisionMask m_collisionFilterGroup = CollisionMask::Default;
-			CollisionMask m_collisionFilterMask = CollisionMask::Default;
+			pragma::physics::CollisionMask m_collisionFilterGroup = pragma::physics::CollisionMask::Default;
+			pragma::physics::CollisionMask m_collisionFilterMask = pragma::physics::CollisionMask::Default;
 
 			void UpdateSurfaceMaterial();
 		};

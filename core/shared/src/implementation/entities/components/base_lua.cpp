@@ -16,12 +16,10 @@ module;
 
 #include "cassert"
 
-#include "pragma/lua/lua_call.hpp"
 
 #include "pragma/logging.hpp"
 #include "pragma/lua/types/nil_type.hpp"
 #include "pragma/lua/types/udm.hpp"
-#include "pragma/lua/luaapi.h"
 
 #include <any>
 

@@ -5,8 +5,12 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include <limits>
+#include <cinttypes>
+#include <type_traits>
 
 export module pragma.shared:physics.hitbox;
+
+export import pragma.math;
 
 export {
 	enum class HitGroup : uint32_t { Generic = 0, Head = 1, Chest = 2, Stomach = 3, LeftArm = 4, RightArm = 5, LeftLeg = 6, RightLeg = 7, Gear = 8, Tail = 9, Invalid = std::numeric_limits<std::underlying_type_t<HitGroup>>::max() };

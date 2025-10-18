@@ -17,6 +17,8 @@ module;
 
 export module pragma.shared:debug.performance_profiler;
 
+import pragma.util;
+
 export {
 	namespace pragma {
 		namespace debug {

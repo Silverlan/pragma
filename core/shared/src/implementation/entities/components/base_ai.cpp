@@ -302,7 +302,7 @@ void BaseAIComponent::OnPhysicsInitialized()
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	if(pPhysComponent)
-		pPhysComponent->AddCollisionFilter(CollisionMask::NPC);
+		pPhysComponent->AddCollisionFilter(pragma::physics::CollisionMask::NPC);
 }
 
 void BaseAIComponent::Spawn() {}

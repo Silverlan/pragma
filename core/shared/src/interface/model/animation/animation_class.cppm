@@ -83,8 +83,8 @@ export {
 			unsigned int GetBoneCount();
 			unsigned int GetFrameCount();
 			std::vector<std::shared_ptr<Frame>> &GetFrames();
-			void AddEvent(unsigned int frame, AnimationEvent *ev);
-			std::vector<std::shared_ptr<AnimationEvent>> *GetEvents(unsigned int frame);
+			void AddEvent(unsigned int frame, pragma::AnimationEvent *ev);
+			std::vector<std::shared_ptr<pragma::AnimationEvent>> *GetEvents(unsigned int frame);
 			float GetFadeInTime();
 			float GetFadeOutTime();
 			bool HasFadeInTime();
@@ -133,7 +133,7 @@ export {
 			std::vector<float> m_boneWeights;
 			// Maps a model bone id to a local bone id (m_boneIds index)
 			std::unordered_map<uint32_t, uint32_t> m_boneIdMap;
-			std::unordered_map<unsigned int, std::vector<std::shared_ptr<AnimationEvent>>> m_events;
+			std::unordered_map<unsigned int, std::vector<std::shared_ptr<pragma::AnimationEvent>>> m_events;
 			FAnim m_flags;
 			Activity m_activity;
 			unsigned char m_activityWeight;

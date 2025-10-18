@@ -6,7 +6,6 @@ module;
 
 #include "pragma/logging.hpp"
 
-#include "pragma/lua/luaapi.h"
 
 
 module pragma.shared;
@@ -108,11 +107,11 @@ int Lua::console::msg(lua_State *l, int st)
 	if(argc > 0) {
 		NetworkState *state = Engine::Get()->GetNetworkState(l);
 		if(state == NULL)
-			::util::set_console_color(::util::ConsoleColorFlags::White | ::util::ConsoleColorFlags::Intensity);
+			::util::set_console_color(::pragma::console::ConsoleColorFlags::White | ::pragma::console::ConsoleColorFlags::Intensity);
 		else if(state->IsServer())
-			::util::set_console_color(::util::ConsoleColorFlags::Cyan | ::util::ConsoleColorFlags::Intensity);
+			::util::set_console_color(::pragma::console::ConsoleColorFlags::Cyan | ::pragma::console::ConsoleColorFlags::Intensity);
 		else
-			::util::set_console_color(::util::ConsoleColorFlags::Magenta | ::util::ConsoleColorFlags::Intensity);
+			::util::set_console_color(::pragma::console::ConsoleColorFlags::Magenta | ::pragma::console::ConsoleColorFlags::Intensity);
 	}
 	for(int i = st; i <= argc; i++) {
 		auto status = -1;
@@ -126,12 +125,12 @@ int Lua::console::msg(lua_State *l, int st)
 
 int Lua::debug::print(lua_State *l)
 {
-	auto flags = ::util::ConsoleColorFlags::None;
+	auto flags = ::pragma::console::ConsoleColorFlags::None;
 	if(Engine::Get()->GetNetworkState(l)->IsClient())
-		flags |= ::util::ConsoleColorFlags::BackgroundMagenta;
+		flags |= ::pragma::console::ConsoleColorFlags::BackgroundMagenta;
 	else
-		flags |= ::util::ConsoleColorFlags::BackgroundCyan;
-	::util::set_console_color(flags | ::util::ConsoleColorFlags::BackgroundIntensity | ::util::ConsoleColorFlags::Black);
+		flags |= ::pragma::console::ConsoleColorFlags::BackgroundCyan;
+	::util::set_console_color(flags | ::pragma::console::ConsoleColorFlags::BackgroundIntensity | ::pragma::console::ConsoleColorFlags::Black);
 	int n = lua_gettop(l); /* number of arguments */
 	int i;
 	for(i = 1; i <= n; i++) {

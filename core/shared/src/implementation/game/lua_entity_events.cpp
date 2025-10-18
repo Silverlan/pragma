@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "pragma/lua/luaapi.h"
 
 module pragma.shared;
 
@@ -113,17 +112,17 @@ bool Game::InvokeEntityEvent(pragma::BaseEntityComponent &component, uint32_t ev
 			component.BroadcastEvent(eventId, evData);
 	}
 	else if(eventId == pragma::BaseAnimatedComponent::EVENT_HANDLE_ANIMATION_EVENT) {
-		AnimationEvent ev {};
+		pragma::AnimationEvent ev {};
 
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
-		ev.eventID = static_cast<AnimationEvent::Type>(Lua::CheckInt(l, -1));
+		ev.eventID = static_cast<pragma::AnimationEvent::Type>(Lua::CheckInt(l, -1));
 		Lua::Pop(l, 1);
 
 		Lua::PushInt(l, 2);
 		Lua::GetTableValue(l, argsIdx);
 		Lua::Animation::GetAnimationEventArguments(l, -1, ev.arguments);
-		ev.eventID = static_cast<AnimationEvent::Type>(Lua::CheckInt(l, -1));
+		ev.eventID = static_cast<pragma::AnimationEvent::Type>(Lua::CheckInt(l, -1));
 		Lua::Pop(l, 1);
 
 		pragma::CEHandleAnimationEvent evData {ev};

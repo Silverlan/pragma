@@ -8,6 +8,8 @@ module;
 
 export module pragma.shared:math.delta_offset;
 
+export import pragma.math;
+
 export struct DLLNETWORK DeltaOffset {
 	DeltaOffset(Vector3 poffset, double ptime, double pdelta = 0.f);
 	double time = 0.0;

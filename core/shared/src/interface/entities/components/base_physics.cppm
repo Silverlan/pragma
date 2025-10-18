@@ -43,10 +43,10 @@ export {
 			double deltaTime;
 		};
 		struct DLLNETWORK CEHandleRaycast : public ComponentEvent {
-			CEHandleRaycast(CollisionMask rayCollisionGroup, CollisionMask rayCollisionMask);
+			CEHandleRaycast(pragma::physics::CollisionMask rayCollisionGroup, pragma::physics::CollisionMask rayCollisionMask);
 			virtual void PushArguments(lua_State *l) override;
-			CollisionMask rayCollisionGroup;
-			CollisionMask rayCollisionMask;
+			pragma::physics::CollisionMask rayCollisionGroup;
+			pragma::physics::CollisionMask rayCollisionMask;
 			bool hit = false;
 		};
 		class DLLNETWORK BasePhysicsComponent : public BaseEntityComponent {
@@ -139,23 +139,23 @@ export {
 			PHYSICSTYPE GetPhysicsType() const;
 			void DropToFloor();
 			bool IsTrigger() const;
-			virtual void SetCollisionFilter(CollisionMask filterGroup, CollisionMask filterMask);
-			void AddCollisionFilter(CollisionMask filter);
-			void RemoveCollisionFilter(CollisionMask filter);
+			virtual void SetCollisionFilter(pragma::physics::CollisionMask filterGroup, pragma::physics::CollisionMask filterMask);
+			void AddCollisionFilter(pragma::physics::CollisionMask filter);
+			void RemoveCollisionFilter(pragma::physics::CollisionMask filter);
 			// Sets both the filterGroup AND filterMask to the specified value
-			void SetCollisionFilter(CollisionMask filterGroup);
-			void SetCollisionFilterMask(CollisionMask filterMask);
-			void SetCollisionFilterGroup(CollisionMask filterGroup);
-			CollisionMask GetCollisionFilter() const;
-			CollisionMask GetCollisionFilterMask() const;
-			void GetCollisionFilter(CollisionMask *filterGroup, CollisionMask *filterMask) const;
+			void SetCollisionFilter(pragma::physics::CollisionMask filterGroup);
+			void SetCollisionFilterMask(pragma::physics::CollisionMask filterMask);
+			void SetCollisionFilterGroup(pragma::physics::CollisionMask filterGroup);
+			pragma::physics::CollisionMask GetCollisionFilter() const;
+			pragma::physics::CollisionMask GetCollisionFilterMask() const;
+			void GetCollisionFilter(pragma::physics::CollisionMask *filterGroup, pragma::physics::CollisionMask *filterMask) const;
 			virtual void PhysicsUpdate(double tDelta);
 			void RayCast(const Vector3 &dir, float distance) const;
 			void Sweep(const Vector3 &dir, float distance) const;
 			// Is called after the world physics have been simulated
 			virtual void UpdatePhysicsData();
 			// Return false to discard result
-			virtual bool RayResultCallback(CollisionMask rayCollisionGroup, CollisionMask rayCollisionMask);
+			virtual bool RayResultCallback(pragma::physics::CollisionMask rayCollisionGroup, pragma::physics::CollisionMask rayCollisionMask);
 			bool IsRayResultCallbackEnabled() const;
 			void SetRayResultCallbackEnabled(bool b);
 
@@ -229,8 +229,8 @@ export {
 			util::TSharedHandle<PhysObj> InitializeCapsuleControllerPhysics();
 			virtual void OnPhysicsInitialized();
 			virtual void OnPhysicsDestroyed();
-			CollisionMask m_collisionFilterGroup = CollisionMask::Default;
-			CollisionMask m_collisionFilterMask = CollisionMask::Default;
+			pragma::physics::CollisionMask m_collisionFilterGroup = pragma::physics::CollisionMask::Default;
+			pragma::physics::CollisionMask m_collisionFilterMask = pragma::physics::CollisionMask::Default;
 			bool m_bColCallbacksEnabled = false;
 			bool m_bColContactReportEnabled = false;
 			virtual void InitializePhysObj();

@@ -37,8 +37,8 @@ void BaseBuoyancyComponent::OnPhysicsInitialized()
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	if(pPhysComponent == nullptr)
 		return;
-	pPhysComponent->SetCollisionFilterMask(CollisionMask::Dynamic | CollisionMask::Generic);
-	pPhysComponent->SetCollisionFilterGroup(CollisionMask::Water | CollisionMask::WaterSurface);
+	pPhysComponent->SetCollisionFilterMask(pragma::physics::CollisionMask::Dynamic | pragma::physics::CollisionMask::Generic);
+	pPhysComponent->SetCollisionFilterGroup(pragma::physics::CollisionMask::Water | pragma::physics::CollisionMask::WaterSurface);
 	pPhysComponent->SetForcePhysicsAwakeCallbacksEnabled(true);
 }
 
@@ -64,7 +64,7 @@ util::EventReply BaseBuoyancyComponent::HandleEvent(ComponentEventId eventId, Co
 		auto &triggerData = static_cast<CECanTriggerData &>(evData);
 		if(triggerData.entity != nullptr) {
 			auto pPhysComponent = triggerData.entity->GetPhysicsComponent();
-			if(pPhysComponent != nullptr && (pPhysComponent->GetCollisionFilterMask() & CollisionMask::Water) == CollisionMask::None)
+			if(pPhysComponent != nullptr && (pPhysComponent->GetCollisionFilterMask() & pragma::physics::CollisionMask::Water) == pragma::physics::CollisionMask::None)
 				triggerData.canTrigger = false;
 		}
 		return util::EventReply::Handled;

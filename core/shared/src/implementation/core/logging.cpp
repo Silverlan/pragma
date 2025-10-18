@@ -279,11 +279,11 @@ class short_level_formatter_c : public spdlog::custom_flag_formatter {
 			case spdlog::level::trace:
 				break;
 			case spdlog::level::debug:
-				v = util::get_ansi_color_code(util::ConsoleColorFlags::Cyan);
+				v = util::get_ansi_color_code(pragma::console::ConsoleColorFlags::Cyan);
 				break;
 			case spdlog::level::info:
 			default:
-				v = util::get_ansi_color_code(util::ConsoleColorFlags::Green);
+				v = util::get_ansi_color_code(pragma::console::ConsoleColorFlags::Green);
 				break;
 			case spdlog::level::warn:
 				v = Con::COLOR_WARNING;
@@ -298,7 +298,7 @@ class short_level_formatter_c : public spdlog::custom_flag_formatter {
 		}
 		v += spdlog::level::to_short_c_str(msg.level);
 		if(g_ansiColorCodesEnabled)
-			util::get_ansi_color_code(util::ConsoleColorFlags::Reset);
+			util::get_ansi_color_code(pragma::console::ConsoleColorFlags::Reset);
 		dest.append(v.data(), v.data() + v.length());
 	}
 
@@ -403,8 +403,8 @@ void pragma::detail::initialize_logger(::util::LogSeverity conLogLevel, ::util::
 	g_logFileName = logFile;
 	auto consoleSink = std::make_shared<anycolor_color_sink_mt>();
 	if(g_ansiColorCodesEnabled) {
-		consoleSink->set_color(spdlog::level::trace, util::get_ansi_color_code(util::ConsoleColorFlags::Red | util::ConsoleColorFlags::Green | util::ConsoleColorFlags::Blue));
-		consoleSink->set_color(spdlog::level::debug, util::get_ansi_color_code(util::ConsoleColorFlags::Green | util::ConsoleColorFlags::Blue));
+		consoleSink->set_color(spdlog::level::trace, util::get_ansi_color_code(pragma::console::ConsoleColorFlags::Red | pragma::console::ConsoleColorFlags::Green | pragma::console::ConsoleColorFlags::Blue));
+		consoleSink->set_color(spdlog::level::debug, util::get_ansi_color_code(pragma::console::ConsoleColorFlags::Green | pragma::console::ConsoleColorFlags::Blue));
 		consoleSink->set_color(spdlog::level::info, util::get_true_color_code(Color {138, 201, 38})); // Green
 		consoleSink->set_color(spdlog::level::warn, Con::COLOR_WARNING);
 		consoleSink->set_color(spdlog::level::err, Con::COLOR_ERROR);

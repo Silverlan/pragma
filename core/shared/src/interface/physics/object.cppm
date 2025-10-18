@@ -60,14 +60,14 @@ export {
 
 		PhysObjHandle GetHandle() const;
 
-		void SetCollisionFilter(CollisionMask filterGroup, CollisionMask filterMask);
-		void SetCollisionFilterMask(CollisionMask filterMask);
-		void AddCollisionFilter(CollisionMask filter);
-		void RemoveCollisionFilter(CollisionMask filter);
-		void SetCollisionFilter(CollisionMask filterGroup);
-		CollisionMask GetCollisionFilter() const;
-		CollisionMask GetCollisionFilterMask() const;
-		void GetCollisionFilter(CollisionMask *filterGroup, CollisionMask *filterMask) const;
+		void SetCollisionFilter(pragma::physics::CollisionMask filterGroup, pragma::physics::CollisionMask filterMask);
+		void SetCollisionFilterMask(pragma::physics::CollisionMask filterMask);
+		void AddCollisionFilter(pragma::physics::CollisionMask filter);
+		void RemoveCollisionFilter(pragma::physics::CollisionMask filter);
+		void SetCollisionFilter(pragma::physics::CollisionMask filterGroup);
+		pragma::physics::CollisionMask GetCollisionFilter() const;
+		pragma::physics::CollisionMask GetCollisionFilterMask() const;
+		void GetCollisionFilter(pragma::physics::CollisionMask *filterGroup, pragma::physics::CollisionMask *filterMask) const;
 
 		virtual void AddCollisionObject(pragma::physics::ICollisionObject &o);
 		const pragma::physics::ICollisionObject *GetCollisionObject() const;
@@ -138,8 +138,8 @@ export {
 
 		pragma::ComponentHandle<pragma::BaseEntityComponent> m_owner = {};
 		NetworkState *m_networkState;
-		CollisionMask m_collisionFilterGroup = {};
-		CollisionMask m_collisionFilterMask = {};
+		pragma::physics::CollisionMask m_collisionFilterGroup = {};
+		pragma::physics::CollisionMask m_collisionFilterMask = {};
 		StateFlags m_stateFlags = StateFlags::None;
 		uint32_t m_colObjAwakeCount = 0u;
 	};

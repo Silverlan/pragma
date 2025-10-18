@@ -4,11 +4,11 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/lua/luaapi.h"
-
-
+#include "pragma/lua/core.hpp"
 
 export module pragma.shared:scripting.lua.classes.vector;
+
+export import pragma.math;
 
 export namespace Lua {
 	namespace Vertex {

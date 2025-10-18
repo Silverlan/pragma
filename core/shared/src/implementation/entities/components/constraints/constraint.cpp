@@ -7,7 +7,6 @@ module;
 #include "pragma/logging.hpp"
 
 
-#include "pragma/lua/luaapi.h"
 
 module pragma.shared;
 

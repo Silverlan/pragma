@@ -8,6 +8,8 @@ module;
 
 export module pragma.shared:math.best_fitting_plane;
 
+export import pragma.math;
+
 export namespace umath {
 	DLLNETWORK void calc_best_fitting_plane(const Mat3 &covarianceMatrix, const Vector3 &average, Vector3 &n, double &d);
 };

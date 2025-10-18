@@ -5,12 +5,14 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include <memory>
-
+#include <vector>
+#include <string>
 
 
 export module pragma.shared:model.animation.vertex_animation;
 
 export import :game.coordinate_system;
+export import pragma.udm;
 
 export {
 	class Model;

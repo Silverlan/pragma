@@ -12,7 +12,6 @@ module;
 #include <Windows.h>
 #endif
 #include <optional>
-#include "debug/crashdump_helper.hpp"
 
 export module pragma.shared:debug.crashdump;
 

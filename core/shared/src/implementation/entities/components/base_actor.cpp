@@ -7,7 +7,6 @@ module;
 
 
 
-#include "pragma/lua/luaapi.h"
 
 module pragma.shared;
 
@@ -281,7 +280,7 @@ void BaseActorComponent::OnPhysicsInitialized()
 		m_hitboxData.push_back({it.first, offset});
 	}
 	m_physHitboxes = PhysObj::Create<PhysObj>(*this, physHitboxes);
-	auto collisionMask = ent.IsPlayer() ? CollisionMask::PlayerHitbox : CollisionMask::NPCHitbox;
+	auto collisionMask = ent.IsPlayer() ? pragma::physics::CollisionMask::PlayerHitbox : pragma::physics::CollisionMask::NPCHitbox;
 	m_physHitboxes->SetCollisionFilter(collisionMask, collisionMask); // Required for raytraces
 	m_physHitboxes->Spawn();
 }

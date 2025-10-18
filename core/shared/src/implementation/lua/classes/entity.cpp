@@ -6,10 +6,8 @@ module;
 #include "pragma/networkdefinitions.h"
 #include "pragma/lua/types/udm.hpp"
 
-#include "pragma/lua/luaapi.h"
 
 #include "pragma/lua/types/nil_type.hpp"
-#include "pragma/lua/lua_call.hpp"
 
 #include "pragma/lua/policies/core_policies.hpp"
 #include "pragma/lua/lentity_type.hpp"

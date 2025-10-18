@@ -4,9 +4,11 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-
+#include <iostream>
 
 export module pragma.shared:math.transform;
+
+export import pragma.math;
 
 export {
 	// Deprecated, replaced by umath::Transform

@@ -109,18 +109,18 @@ pragma::physics::IShape *pragma::physics::ICollisionObject::GetCollisionShape() 
 
 void pragma::physics::ICollisionObject::DisableSimulation() { SetSimulationEnabled(false); }
 void pragma::physics::ICollisionObject::EnableSimulation() { SetSimulationEnabled(true); }
-void pragma::physics::ICollisionObject::SetCollisionFilterGroup(CollisionMask group)
+void pragma::physics::ICollisionObject::SetCollisionFilterGroup(pragma::physics::CollisionMask group)
 {
 	m_collisionFilterGroup = group;
 	DoSetCollisionFilterGroup(group);
 }
-CollisionMask pragma::physics::ICollisionObject::GetCollisionFilterGroup() const { return m_collisionFilterGroup; }
-void pragma::physics::ICollisionObject::SetCollisionFilterMask(CollisionMask mask)
+pragma::physics::CollisionMask pragma::physics::ICollisionObject::GetCollisionFilterGroup() const { return m_collisionFilterGroup; }
+void pragma::physics::ICollisionObject::SetCollisionFilterMask(pragma::physics::CollisionMask mask)
 {
 	m_collisionFilterMask = mask;
 	DoSetCollisionFilterMask(mask);
 }
-CollisionMask pragma::physics::ICollisionObject::GetCollisionFilterMask() const { return m_collisionFilterMask; }
+pragma::physics::CollisionMask pragma::physics::ICollisionObject::GetCollisionFilterMask() const { return m_collisionFilterMask; }
 
 void pragma::physics::ICollisionObject::SetContactReportEnabled(bool reportEnabled) { return umath::set_flag(m_stateFlags, StateFlags::ContactReportEnabled, reportEnabled); }
 bool pragma::physics::ICollisionObject::IsContactReportEnabled() const { return umath::is_flag_set(m_stateFlags, StateFlags::ContactReportEnabled); }

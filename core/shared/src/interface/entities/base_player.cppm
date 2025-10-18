@@ -7,6 +7,8 @@ module;
 
 export module pragma.shared:entities.base_player;
 
+export import pragma.util;
+
 export {
 	namespace pragma {class BasePlayerComponent;};
 	class DLLNETWORK BasePlayer {

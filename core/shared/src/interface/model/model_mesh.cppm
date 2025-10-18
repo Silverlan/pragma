@@ -7,7 +7,8 @@ module;
 #include <vector>
 #include <unordered_map>
 #include <optional>
-
+#include <string>
+#include <memory>
 
 
 export module pragma.shared:model.model_mesh;
@@ -15,6 +16,7 @@ export module pragma.shared:model.model_mesh;
 export import :game.coordinate_system;
 export import :game.enums;
 export import :model.enums;
+export import pragma.udm;
 
 export {
 	class Game;
@@ -93,7 +95,7 @@ export {
 		void ReserveIndices(size_t num);
 		void ReserveVertices(size_t num);
 		void Validate();
-		virtual void Update(ModelUpdateFlags flags = ModelUpdateFlags::AllData);
+		virtual void Update(pragma::model::ModelUpdateFlags flags = pragma::model::ModelUpdateFlags::AllData);
 
 		GeometryType GetGeometryType() const;
 		void SetGeometryType(GeometryType type);
@@ -222,7 +224,7 @@ export {
 		uint32_t GetIndexCount() const;
 		uint32_t GetTriangleCount() const;
 		uint32_t GetSubMeshCount() const;
-		virtual void Update(ModelUpdateFlags flags = ModelUpdateFlags::AllData);
+		virtual void Update(pragma::model::ModelUpdateFlags flags = pragma::model::ModelUpdateFlags::AllData);
 		void GetBounds(Vector3 &min, Vector3 &max) const;
 		void Rotate(const Quat &rot);
 		void Translate(const Vector3 &t);

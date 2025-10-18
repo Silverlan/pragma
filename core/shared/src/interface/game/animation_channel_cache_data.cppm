@@ -8,6 +8,8 @@ module;
 
 export module pragma.shared:game.animation_channel_cache_data;
 
+import pragma.math;
+
 export {
 	namespace pragma {
 		class BaseEntityComponent;
@@ -23,6 +25,10 @@ export {
 			State changed = State::Dirty;
 			std::array<float, 16> data;
 		};
+		using namespace umath::scoped_enum::bitwise;
 	};
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::AnimationChannelCacheData::State);
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::AnimationChannelCacheData::State> : std::true_type {};
+	};
 };

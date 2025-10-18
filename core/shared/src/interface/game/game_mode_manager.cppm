@@ -5,8 +5,11 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include <unordered_map>
+#include <string>
 
 export module pragma.shared:game.game_mode_manager;
+
+export import pragma.util;
 
 export {
 	struct DLLNETWORK GameModeInfo {

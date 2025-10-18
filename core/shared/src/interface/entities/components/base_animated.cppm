@@ -166,17 +166,17 @@ export {
 			const std::unordered_map<unsigned int, float> &GetBlendControllers() const;
 
 			void HandleAnimationEvents();
-			void AddAnimationEvent(const std::string &name, uint32_t frameId, const AnimationEvent &ev);
+			void AddAnimationEvent(const std::string &name, uint32_t frameId, const pragma::AnimationEvent &ev);
 			CallbackHandle AddAnimationEvent(const std::string &name, uint32_t frameId, const std::function<void(void)> &f);
 			CallbackHandle AddAnimationEvent(const std::string &name, uint32_t frameId, const CallbackHandle &cb);
 
-			void AddAnimationEvent(uint32_t animId, uint32_t frameId, const AnimationEvent &ev);
+			void AddAnimationEvent(uint32_t animId, uint32_t frameId, const pragma::AnimationEvent &ev);
 			CallbackHandle AddAnimationEvent(uint32_t animId, uint32_t frameId, const std::function<void(void)> &f);
 			CallbackHandle AddAnimationEvent(uint32_t animId, uint32_t frameId, const CallbackHandle &cb);
 			void ClearAnimationEvents();
 			void ClearAnimationEvents(uint32_t animId);
 			void ClearAnimationEvents(uint32_t animId, uint32_t frameId);
-			void InjectAnimationEvent(const AnimationEvent &ev);
+			void InjectAnimationEvent(const pragma::AnimationEvent &ev);
 
 			void ClearAnimationEvents(const std::string &anim);
 			void ClearAnimationEvents(const std::string &anim, uint32_t frameId);
@@ -229,7 +229,7 @@ export {
 			void SetBindPose(const Frame &frame);
 			const Frame *GetBindPose() const;
 
-			CallbackHandle BindAnimationEvent(AnimationEvent::Type eventId, const std::function<void(std::reference_wrapper<const AnimationEvent>)> &fCallback);
+			CallbackHandle BindAnimationEvent(pragma::AnimationEvent::Type eventId, const std::function<void(std::reference_wrapper<const pragma::AnimationEvent>)> &fCallback);
 			virtual const ComponentMemberInfo *GetMemberInfo(ComponentMemberIndex idx) const override;
 
 			virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
@@ -256,9 +256,9 @@ export {
 			};
 
 			// Custom animation events
-			struct CustomAnimationEvent : public AnimationEvent {
+			struct CustomAnimationEvent : public pragma::AnimationEvent {
 				std::pair<bool, CallbackHandle> callback = {false, {}};
-				CustomAnimationEvent(const AnimationEvent &ev);
+				CustomAnimationEvent(const pragma::AnimationEvent &ev);
 				CustomAnimationEvent(const std::function<void(void)> &f);
 				CustomAnimationEvent(const CallbackHandle &cb);
 				CustomAnimationEvent() = default;
@@ -275,7 +275,7 @@ export {
 
 			bool MaintainAnimation(AnimationSlotInfo &animInfo, double dt, int32_t layeredSlot = -1);
 			virtual void ApplyAnimationBlending(AnimationSlotInfo &animInfo, double tDelta);
-			void HandleAnimationEvent(const AnimationEvent &ev);
+			void HandleAnimationEvent(const pragma::AnimationEvent &ev);
 			void PlayLayeredAnimation(int slot, int animation, FPlayAnim flags, AnimationSlotInfo **animInfo);
 			void GetAnimationBlendController(pragma::animation::Animation *anim, float cycle, std::array<AnimationBlendInfo, 2> &bcFrames, float *blendScale) const;
 			Frame *GetPreviousAnimationBlendFrame(AnimationSlotInfo &animInfo, double tDelta, float &blendScale);
@@ -316,7 +316,7 @@ export {
 			std::unordered_map<unsigned int, float> m_blendControllers = {};
 			util::PFloatProperty m_playbackRate = nullptr;
 
-			std::unordered_map<AnimationEvent::Type, CallbackHandle> m_boundAnimEvents;
+			std::unordered_map<pragma::AnimationEvent::Type, CallbackHandle> m_boundAnimEvents;
 		};
 
 		// Events
@@ -343,10 +343,10 @@ export {
 			Activity activity;
 		};
 		struct DLLNETWORK CEHandleAnimationEvent : public ComponentEvent {
-			CEHandleAnimationEvent(const AnimationEvent &animationEvent);
+			CEHandleAnimationEvent(const pragma::AnimationEvent &animationEvent);
 			virtual void PushArguments(lua_State *l) override;
 			void PushArgumentVariadic(lua_State *l);
-			const AnimationEvent &animationEvent;
+			const pragma::AnimationEvent &animationEvent;
 		};
 		struct DLLNETWORK CEOnPlayAnimation : public ComponentEvent {
 			CEOnPlayAnimation(int32_t previousAnimation, int32_t animation, pragma::FPlayAnim flags);

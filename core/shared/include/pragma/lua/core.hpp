@@ -4,12 +4,17 @@
 #ifndef __LUA_CORE_HPP__
 #define __LUA_CORE_HPP__
 
-#include <type_traits>
-#include <concepts>
+
+#include "pragma/networkdefinitions.h"
+#include <luabind/luabind.hpp>
+#include <luabind/operator.hpp>
+#include <luabind/pseudo_traits.hpp>
+#include <luabind/make_function_signature.hpp>
 #include "luabind/detail/decorate_type.hpp"
 #include "luabind/detail/conversion_policies/pointer_converter.hpp"
 #include "luabind/detail/conversion_policies/reference_converter.hpp"
 #include "luabind/detail/conversion_policies/value_converter.hpp"
+#include "pragma/lua/ldefinitions.h"
 
 namespace luabind {
 	template<typename T, typename U>

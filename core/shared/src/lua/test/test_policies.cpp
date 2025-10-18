@@ -5,7 +5,6 @@
 
 #include "pragma/lua/policies/default_parameter_policy.hpp"
 
-#include "pragma/lua/luaapi.h"
 
 #include "memory"
 

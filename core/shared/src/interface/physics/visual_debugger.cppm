@@ -6,10 +6,13 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <vector>
 #include <memory>
+#include <string>
 
 #undef DrawText
 
 export module pragma.shared:physics.visual_debugger;
+
+export import pragma.math;
 
 export namespace pragma::physics {
 	class DLLNETWORK IVisualDebugger {

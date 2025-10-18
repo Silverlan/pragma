@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include <stack>
-#include "pragma/lua/luaapi.h"
 #include "pragma/lua/lua_error_handling.hpp"
 
 import pragma.shared;

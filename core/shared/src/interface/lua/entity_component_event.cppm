@@ -4,7 +4,7 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 #include <vector>
 
 export module pragma.shared:scripting.lua.entity_component_event;

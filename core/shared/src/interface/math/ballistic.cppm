@@ -5,8 +5,11 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include <cinttypes>
+#include <array>
 
 export module pragma.shared:math.ballistic;
+
+export import pragma.math;
 
 namespace umath {
 	DLLNETWORK Vector3 calc_ballistic_position(const Vector3 &start, const Vector3 &vel, float gravity, float t);

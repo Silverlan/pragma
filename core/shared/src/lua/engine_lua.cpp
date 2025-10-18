@@ -4,7 +4,6 @@
 #include "pragma/logging.hpp"
 #include "pragma/lua/lua_error_handling.hpp"
 #include "pragma/networkdefinitions.h"
-#include "pragma/lua/luaapi.h"
 #include <luabind/class_info.hpp>
 #include <luabind/function_introspection.hpp>
 

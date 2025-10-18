@@ -8,7 +8,6 @@ module;
 
 #include "pragma/lua/policies/default_parameter_policy.hpp"
 
-#include "pragma/lua/luaapi.h"
 #include "pragma/lua/util.hpp"
 #include "pragma/lua/types/udm.hpp"
 

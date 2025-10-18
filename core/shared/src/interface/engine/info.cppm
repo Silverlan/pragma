@@ -10,6 +10,8 @@ module;
 
 export module pragma.shared:engine.info;
 
+export import pragma.util;
+
 export namespace engine_info {
 	DLLNETWORK std::string get_identifier();
 	DLLNETWORK std::string get_name();

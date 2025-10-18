@@ -8,6 +8,8 @@ module;
 
 export module pragma.shared:math.delta_transform;
 
+export import pragma.math;
+
 export struct DLLNETWORK DeltaTransform {
 	DeltaTransform(Vector3 poffset, Quat porientation, double ptime, double pdelta = 0.f);
 	double time = 0.0;

@@ -78,7 +78,7 @@ bool pragma::asset::ModelProcessor::Load()
 	if(!r)
 		return false;
 	model = mdlHandler.model;
-	model->Update(ModelUpdateFlags::Initialize | ModelUpdateFlags::UpdateChildren);
+	model->Update(pragma::model::ModelUpdateFlags::Initialize | pragma::model::ModelUpdateFlags::UpdateChildren);
 	return true;
 }
 bool pragma::asset::ModelProcessor::Finalize()
@@ -104,7 +104,7 @@ bool pragma::asset::ModelProcessor::Finalize()
 		model->Update(); // Need to update again
 	}
 
-	model->Update(ModelUpdateFlags::UpdateBuffers | ModelUpdateFlags::UpdateChildren);
+	model->Update(pragma::model::ModelUpdateFlags::UpdateBuffers | pragma::model::ModelUpdateFlags::UpdateChildren);
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	::debug::get_domain().EndTask();
 #endif

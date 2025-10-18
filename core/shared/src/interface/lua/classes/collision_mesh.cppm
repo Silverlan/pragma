@@ -4,11 +4,12 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 export module pragma.shared:scripting.lua.classes.collision_mesh;
 
 export import :physics.collision_mesh;
+export import :scripting.lua.api;
 
 export namespace Lua {
 	namespace CollisionMesh {

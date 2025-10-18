@@ -118,10 +118,10 @@ export {
 			Activity activity;
 		};
 		struct DLLNETWORK CEAnim2HandleAnimationEvent : public ComponentEvent {
-			CEAnim2HandleAnimationEvent(const AnimationEvent &animationEvent);
+			CEAnim2HandleAnimationEvent(const pragma::AnimationEvent &animationEvent);
 			virtual void PushArguments(lua_State *l) override;
 			void PushArgumentVariadic(lua_State *l);
-			const AnimationEvent &animationEvent;
+			const pragma::AnimationEvent &animationEvent;
 		};
 		struct DLLNETWORK CEAnim2OnPlayAnimation : public ComponentEvent {
 			CEAnim2OnPlayAnimation(const panima::AnimationSet &set, panima::AnimationId animation, panima::PlaybackFlags flags);

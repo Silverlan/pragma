@@ -4,7 +4,7 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 #include "pragma/logging.hpp"
 #include <fmt/core.h>
 #include <string>

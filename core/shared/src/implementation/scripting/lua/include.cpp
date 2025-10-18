@@ -7,7 +7,6 @@ module;
 #include "cassert"
 
 
-#include "pragma/lua/luaapi.h"
 
 
 #include <stack>

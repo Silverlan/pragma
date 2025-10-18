@@ -5,8 +5,12 @@ module;
 
 #include <functional>
 #include <cassert>
+#include <mutex>
+#include <optional>
 
 export module pragma.shared:util.functional_parallel_worker;
+
+export import pragma.util;
 
 export {
 	namespace util {

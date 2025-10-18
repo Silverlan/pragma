@@ -9,6 +9,8 @@ module;
 
 export module pragma.shared:game.scene_snapshot;
 
+export import pragma.materialsystem;
+
 export {
 	class Model;
 	namespace pragma {

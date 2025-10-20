@@ -4,6 +4,8 @@
 module;
 
 
+#include <algorithm>
+
 module pragma.shared;
 
 import :network_state;

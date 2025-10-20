@@ -3,10 +3,12 @@
 
 module;
 
+#include "pragma/lua/core.hpp"
+#include <iostream>
+#include <chrono>
+
 #include "string_view"
 
-#include "pragma/lua/policies/default_parameter_policy.hpp"
-#include "pragma/lua/policies/generic_policy.hpp"
 
 
 

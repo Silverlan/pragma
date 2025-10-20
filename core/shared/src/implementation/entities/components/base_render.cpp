@@ -6,6 +6,8 @@ module;
 
 
 
+#include <sharedutils/magic_enum.hpp>
+
 module pragma.shared;
 
 import :entities.components.base_render;

@@ -3,7 +3,11 @@
 
 module;
 
+#include "pragma/lua/core.hpp"
+
 export module pragma.shared:scripting.lua.class_wrapper;
+
+import pragma.util;
 
 export namespace pragma {
 	namespace lua {

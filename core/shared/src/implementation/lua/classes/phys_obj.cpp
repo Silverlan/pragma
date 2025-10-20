@@ -4,6 +4,8 @@
 module;
 
 
+#include "pragma/lua/core.hpp"
+
 #include <luabind/out_value_policy.hpp>
 
 module pragma.shared;

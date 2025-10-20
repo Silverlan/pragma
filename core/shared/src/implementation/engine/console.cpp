@@ -2,9 +2,12 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "string_view"
+#include <algorithm>
 
+#include "string_view"
+#include <string>
 #include "memory"
+#include <functional>
 
 #include <atomic>
 #include <iostream>
@@ -15,6 +18,8 @@ module;
 #include <fcntl.h>
 #include <signal.h>
 #include <poll.h>
+#elif _WIN32
+#include <Windows.h>
 #endif
 
 module pragma.shared;

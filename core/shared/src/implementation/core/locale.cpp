@@ -3,6 +3,8 @@
 
 module;
 
+#include <sharedutils/magic_enum.hpp>
+#include <algorithm>
 #include "string_view"
 
 #include "sstream"

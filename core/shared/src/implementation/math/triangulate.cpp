@@ -17,6 +17,7 @@ module;
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <string>
 
 module pragma.shared;
 

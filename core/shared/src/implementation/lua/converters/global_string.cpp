@@ -1,13 +1,13 @@
-
-
 // SPDX-FileCopyrightText: (c) 2024 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include <luabind/object.hpp>
 
-import pragma.shared;
+module pragma.shared;
 
-#include "pragma/lua/converters/global_string_converter.hpp"
+import :scripting.lua.converters.global_string;
 
 void luabind::default_converter<pragma::GString>::to_lua(lua_State *L, pragma::GString const &x)
 {

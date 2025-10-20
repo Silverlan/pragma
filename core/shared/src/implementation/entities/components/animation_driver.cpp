@@ -3,6 +3,8 @@
 
 module;
 
+#include <sharedutils/magic_enum.hpp>
+
 #include "memory"
 
 #include "cassert"

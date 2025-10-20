@@ -33,7 +33,7 @@ TraceResult pragma::Game::Overlap(const TraceData &data) const
 	std::vector<TraceResult> results {};
 	if(Overlap(data, &results) == false) {
 		TraceResult result {};
-		result.hitType = RayCastHitType::None;
+		result.hitType = pragma::physics::RayCastHitType::None;
 		return result;
 	}
 	return results.front();
@@ -43,7 +43,7 @@ TraceResult pragma::Game::RayCast(const TraceData &data) const
 	std::vector<TraceResult> results {};
 	if(RayCast(data, &results) == false) {
 		TraceResult result {};
-		result.hitType = RayCastHitType::None;
+		result.hitType = pragma::physics::RayCastHitType::None;
 		return result;
 	}
 	return results.front();
@@ -53,7 +53,7 @@ TraceResult pragma::Game::Sweep(const TraceData &data) const
 	std::vector<TraceResult> results {};
 	if(Sweep(data, &results) == false) {
 		TraceResult result {};
-		result.hitType = RayCastHitType::None;
+		result.hitType = pragma::physics::RayCastHitType::None;
 		return result;
 	}
 	return results.front();

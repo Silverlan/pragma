@@ -8,6 +8,10 @@ module;
 
 
 
+#include "pragma/lua/core.hpp"
+
+#include <iostream>
+
 module pragma.shared;
 
 import :scripting.lua.classes.property;

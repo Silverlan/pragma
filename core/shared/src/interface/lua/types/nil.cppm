@@ -3,12 +3,15 @@
 
 module;
 
+#include "pragma/lua/core.hpp"
 #include <luabind/luabind.hpp>
 #include <luabind/operator.hpp>
 #include <luabind/pseudo_traits.hpp>
 #include <luabind/make_function_signature.hpp>
 
 export module pragma.shared:scripting.lua.types.nil;
+
+export import :scripting.lua.core;
 
 export namespace luabind {
 	// Additional types for overload resolution

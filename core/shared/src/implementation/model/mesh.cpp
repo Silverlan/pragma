@@ -19,7 +19,7 @@ Mesh::Mesh()
 	m_numVerts = 0;
 	m_bufUV = 0;
 	m_bufVertex = 0;
-	m_material = NULL;
+	m_material = nullptr;
 }
 
 Mesh::~Mesh() {}

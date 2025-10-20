@@ -3,6 +3,8 @@
 
 module;
 
+#include <tuple>
+
 module pragma.shared;
 
 import :entities.components.dynamic_member_register;

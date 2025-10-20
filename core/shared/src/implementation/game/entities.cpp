@@ -5,6 +5,8 @@ module;
 
 
 
+#include <tuple>
+
 module pragma.shared;
 
 import :game.game;
@@ -13,8 +15,8 @@ pragma::BaseWorldComponent *pragma::Game::GetWorld() { return !m_worldComponents
 const std::vector<util::TWeakSharedHandle<pragma::BaseWorldComponent>> &pragma::Game::GetWorldComponents() const { return m_worldComponents; }
 unsigned int pragma::Game::GetEntityCount() { return 0; }
 void pragma::Game::RemoveEntity(pragma::ecs::BaseEntity *) {}
-pragma::ecs::BaseEntity *pragma::Game::CreateEntity() { return NULL; }
-pragma::ecs::BaseEntity *pragma::Game::CreateEntity(std::string classname) { return NULL; }
+pragma::ecs::BaseEntity *pragma::Game::CreateEntity() { return nullptr; }
+pragma::ecs::BaseEntity *pragma::Game::CreateEntity(std::string classname) { return nullptr; }
 void pragma::Game::SpawnEntity(pragma::ecs::BaseEntity *ent)
 {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
@@ -23,7 +25,7 @@ void pragma::Game::SpawnEntity(pragma::ecs::BaseEntity *ent)
 #endif
 	ent->OnSpawn();
 }
-pragma::ecs::BaseEntity *pragma::Game::GetEntity(unsigned int) { return NULL; }
+pragma::ecs::BaseEntity *pragma::Game::GetEntity(unsigned int) { return nullptr; }
 pragma::ecs::BaseEntity *pragma::Game::GetEntityByLocalIndex(uint32_t idx) { return GetEntity(idx); }
 pragma::ecs::BaseEntity *pragma::Game::FindEntityByUniqueId(const util::Uuid &uuid)
 {

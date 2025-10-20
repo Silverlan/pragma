@@ -5,6 +5,8 @@ module;
 
 
 
+#include <iostream>
+
 module pragma.shared;
 
 import :physics.collision_object;

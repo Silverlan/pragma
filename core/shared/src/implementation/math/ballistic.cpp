@@ -4,7 +4,7 @@
 module;
 
 #include "cassert"
-
+#include <string>
 #include <algorithm>
 
 module pragma.shared;

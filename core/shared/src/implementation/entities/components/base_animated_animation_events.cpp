@@ -4,6 +4,9 @@
 module;
 
 
+#include <memory>
+#include <string>
+
 module pragma.shared;
 
 import :entities.components.base_animated;

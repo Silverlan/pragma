@@ -13,7 +13,9 @@ module;
 
 export module pragma.shared:scripting.lua.converters.game_types;
 
-import pragma.shared;
+export import :physics.base;
+export import :scripting.lua.base_lua_handle;
+export import :types;
 
 export namespace luabind {
 	template<typename T, T (*FUNCTION)(lua_State *)>
@@ -34,7 +36,7 @@ export namespace luabind {
 
 	// Game
 	namespace detail {
-		DLLNETWORK Game *get_game(lua_State *l);
+		DLLNETWORK pragma::Game *get_game(lua_State *l);
 		template<typename T>
 		T get_game(lua_State *l)
 		{
@@ -45,7 +47,7 @@ export namespace luabind {
 		}
 	};
 	template<typename T>
-	    requires(is_type_or_derived<T, Game>)
+	    requires(is_type_or_derived<T, pragma::Game>)
 	struct default_converter<T> : parameter_emplacement_converter<T, &detail::get_game<T>> {};
 
 	// NetworkState
@@ -66,7 +68,7 @@ export namespace luabind {
 
 	// Engine
 	namespace detail {
-		DLLNETWORK Engine *get_engine(lua_State *l);
+		DLLNETWORK pragma::Engine *get_engine(lua_State *l);
 		template<typename T>
 		T get_engine(lua_State *l)
 		{
@@ -77,7 +79,7 @@ export namespace luabind {
 		}
 	};
 	template<typename T>
-	    requires(is_type_or_derived<T, Engine>)
+	    requires(is_type_or_derived<T, pragma::Engine>)
 	struct default_converter<T> : parameter_emplacement_converter<T, detail::get_engine<T>> {};
 
 	// Physics Environment
@@ -128,7 +130,7 @@ export namespace luabind {
 
 	template<class T> // Note: BaseEntity and derived types are already handled by entity_converter.hpp, so we exclude them here
 	concept IsGenericGameObjectType = IsGameObjectType<T> && !
-	is_type_or_derived<base_type<T>, BaseEntity>; // && !is_type_or_derived<base_type<T>,pragma::BaseEntityComponent>;
+	is_type_or_derived<base_type<T>, pragma::ecs::BaseEntity>; // && !is_type_or_derived<base_type<T>,pragma::BaseEntityComponent>;
 
 	template<typename T>
 	    requires(IsGenericGameObjectType<base_type<T>> && std::is_pointer_v<T> && !std::is_const_v<std::remove_pointer_t<T>>)

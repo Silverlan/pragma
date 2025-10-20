@@ -10,9 +10,6 @@ export module pragma.shared:scripting.lua.converters.alias;
 
 export namespace luabind {
 	template<typename T>
-	using base_type = typename std::remove_cv_t<std::remove_pointer_t<std::remove_reference_t<T>>>;
-
-	template<typename T>
 	concept is_const_reference = std::is_reference_v<T> && std::is_const_v<std::remove_reference_t<T>>;
 
 	template<class TBase, class... T>

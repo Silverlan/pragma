@@ -10,7 +10,6 @@ module;
 
 
 
-#include "pragma/lua/policies/default_parameter_policy.hpp"
 
 
 
@@ -19,6 +18,7 @@ module;
 #include "memory"
 
 
+#include "pragma/lua/core.hpp"
 #include "pragma/debug/debugbreak.hpp"
 
 #include "pragma/logging.hpp"

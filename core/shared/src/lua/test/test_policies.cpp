@@ -1,19 +1,10 @@
-
-#include "string_view"
-
-#include "pragma/lua/policies/shared_from_this_policy.hpp"
-
-#include "pragma/lua/policies/default_parameter_policy.hpp"
-
-
-#include "memory"
-
-
-
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
 #if 0
+
+#include "string_view"
+#include "memory"
 
 static void test_pair_policy_param(const std::pair<float,std::string> &pair)
 {

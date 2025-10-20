@@ -8,6 +8,8 @@ module;
 
 export module pragma.shared:scripting.lua.util_entity_component;
 
+export import :entities.components.base;
+
 export namespace pragma {
 	namespace lua {
 		template<typename... Types>

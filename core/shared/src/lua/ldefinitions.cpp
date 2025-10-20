@@ -1,8 +1,10 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+#include "pragma/lua/core.hpp"
 #include <stack>
-#include "pragma/lua/lua_error_handling.hpp"
+#include <string>
+
 
 import pragma.shared;
 

@@ -3,6 +3,8 @@
 
 module;
 
+#include "pragma/lua/core.hpp"
+
 #include "memory"
 
 

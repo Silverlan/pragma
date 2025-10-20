@@ -3,11 +3,15 @@
 
 module;
 
+#include "pragma/lua/core.hpp"
+
 export module pragma.shared:scripting.lua.converters.entity;
+
+export import :types;
 
 export namespace luabind {
 	template<typename T>
-	    requires(is_type_or_derived<base_type<T>, BaseEntity>)
+	    requires(is_type_or_derived<base_type<T>, pragma::ecs::BaseEntity>)
 	struct default_converter<T> : type_converter<T> {
 		using TComponent = copy_qualifiers_t<T, pragma::BaseEntityComponent>;
 		using is_native = std::false_type;

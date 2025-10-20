@@ -5,6 +5,10 @@ module;
 
 
 
+#include <sharedutils/magic_enum.hpp>
+
+#include <iostream>
+
 module pragma.shared;
 
 import :game.damage_info;

@@ -11,7 +11,6 @@ module;
 #include "pragma/logging.hpp"
 
 
-#include "pragma/lua/lua_error_handling.hpp"
 
 #include <string>
 

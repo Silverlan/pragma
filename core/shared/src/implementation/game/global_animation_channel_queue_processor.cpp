@@ -3,13 +3,15 @@
 
 module;
 
-#undef GetCurrentTime
+#include <string>
 
 module pragma.shared;
 
 import :game.global_animation_channel_queue_processor;
 
 import panima;
+
+#undef GetCurrentTime
 
 using namespace pragma;
 

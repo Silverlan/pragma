@@ -2,13 +2,13 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "pragma/lua/policies/core_policies.hpp"
 
+
+#include "pragma/lua/core.hpp"
 
 #include "cassert"
 
 
-#include "pragma/lua/lua_util_class.hpp"
 
 #include "pragma/lua/ostream_operator_alias.hpp"
 

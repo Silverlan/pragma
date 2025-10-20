@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "pragma/lua/policies/core_policies.hpp"
 
-#include "pragma/lua/policies/default_parameter_policy.hpp"
+
+#include "pragma/lua/core.hpp"
 
 #include "algorithm"
 

@@ -13,8 +13,6 @@ module;
 
 #include "cassert"
 
-#include "pragma/lua/lua_util_class.hpp"
-#include "pragma/lua/types/nil_type.hpp"
 
 
 #include <luabind/iterator_policy.hpp>

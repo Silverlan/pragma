@@ -2,12 +2,13 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "pragma/lua/core.hpp"
+
 #include "sstream"
 
 #include "memory"
-
+#include <chrono>
 #include "pragma/networkdefinitions.h"
-#include "pragma/lua/lua_error_handling.hpp"
 
 #include <luabind/exception_handler.hpp>
 

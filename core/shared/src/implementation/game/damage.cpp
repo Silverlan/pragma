@@ -3,6 +3,8 @@
 
 module;
 
+#include <memory>
+
 #include "memory"
 
 
@@ -91,7 +93,7 @@ void pragma::Game::SplashDamage(const Vector3 &origin, Float radius, DamageInfo 
 				data.SetCollisionFilterMask(pPhysComponent->GetCollisionFilterMask());
 			}
 			auto r = RayCast(data);
-			if(r.hitType != RayCastHitType::None && r.entity.get() != ent) {
+			if(r.hitType != pragma::physics::RayCastHitType::None && r.entity.get() != ent) {
 				auto pPhysComponent = ent->GetPhysicsComponent();
 				auto &pos = pTrComponent->GetPosition();
 				auto center = (pPhysComponent != nullptr) ? pPhysComponent->GetCollisionCenter() : Vector3 {};
@@ -102,13 +104,13 @@ void pragma::Game::SplashDamage(const Vector3 &origin, Float radius, DamageInfo 
 				min = pos + center + (min - center) * 0.5f;
 				data.SetTarget(min);
 				r = RayCast(data);
-				if(r.hitType != RayCastHitType::None && r.entity.get() != ent) {
+				if(r.hitType != pragma::physics::RayCastHitType::None && r.entity.get() != ent) {
 					max = pos + center + (max - center) * 0.5f;
 					data.SetTarget(max);
 					r = RayCast(data);
 				}
 			}
-			if(r.hitType == RayCastHitType::None || r.entity.get() == ent) {
+			if(r.hitType == pragma::physics::RayCastHitType::None || r.entity.get() == ent) {
 				auto pDamageableComponent = ent->GetComponent<pragma::DamageableComponent>();
 				if(pDamageableComponent.valid()) {
 					auto scale = (radius - c.distance) / radius;

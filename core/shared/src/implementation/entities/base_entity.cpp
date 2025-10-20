@@ -7,6 +7,7 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include <iostream>
+#include <memory>
 
 module pragma.shared;
 
@@ -70,8 +71,8 @@ bool pragma::ecs::BaseEntity::IsStatic() const
 	if(GetAnimatedComponent().valid())
 		return false;
 	auto *physComponent = GetPhysicsComponent();
-	auto type = physComponent ? physComponent->GetPhysicsType() : PHYSICSTYPE::NONE;
-	return (type == PHYSICSTYPE::NONE || type == PHYSICSTYPE::STATIC) ? true : false;
+	auto type = physComponent ? physComponent->GetPhysicsType() : pragma::physics::PHYSICSTYPE::NONE;
+	return (type == pragma::physics::PHYSICSTYPE::NONE || type == pragma::physics::PHYSICSTYPE::STATIC) ? true : false;
 }
 bool pragma::ecs::BaseEntity::IsDynamic() const { return !IsStatic(); }
 

@@ -6,6 +6,8 @@ module;
 
 
 
+#include "pragma/lua/core.hpp"
+
 #include <clip2tri/clip2tri.h>
 //#include <Pinocchio.h>
 //#include <pinocchioApi.h>

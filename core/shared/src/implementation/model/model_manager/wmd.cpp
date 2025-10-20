@@ -3,6 +3,8 @@
 
 module;
 
+#include <memory>
+
 #include "cassert"
 
 #include "pragma/networkdefinitions.h"

@@ -7,6 +7,8 @@ module;
 
 
 
+#include <memory>
+
 module pragma.shared;
 
 import :entities.components.base_physics;

@@ -3,6 +3,10 @@
 
 module;
 
+#include <sharedutils/magic_enum.hpp>
+
+#include "pragma/lua/core.hpp"
+
 #include "string_view"
 
 #include "sstream"
@@ -18,7 +22,6 @@ module;
 
 
 #include "pragma/logging.hpp"
-#include "pragma/lua/types/nil_type.hpp"
 
 #include <any>
 

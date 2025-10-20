@@ -4,6 +4,8 @@
 module;
 
 
+#include <iostream>
+
 module pragma.shared;
 
 import :math.pid_controller;

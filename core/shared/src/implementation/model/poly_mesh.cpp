@@ -4,7 +4,7 @@
 module;
 
 #include "memory"
-
+#include <functional>
 
 module pragma.shared;
 

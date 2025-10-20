@@ -3,6 +3,8 @@
 
 module;
 
+#include <iostream>
+
 module pragma.shared;
 
 import :util.render_tile;

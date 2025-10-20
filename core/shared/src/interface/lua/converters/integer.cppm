@@ -3,6 +3,8 @@
 
 module;
 
+#include "pragma/lua/core.hpp"
+
 export module pragma.shared:scripting.lua.converters.integer;
 
 export namespace luabind {

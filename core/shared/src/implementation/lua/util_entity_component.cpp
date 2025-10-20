@@ -1,9 +1,13 @@
-// SPDX-FileCopyrightText: (c) 2025 Silverlan <opensource@pragma-engine.com>
+// SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
+
+module;
 
 #include <iostream>
 
-import pragma.shared;
+module pragma.shared;
+
+import :scripting.lua.util_entity_component;
 
 std::ostream &operator<<(std::ostream &out, const pragma::BaseEntityComponent *hComponent)
 {

@@ -3,12 +3,16 @@
 
 module;
 #include "string_view"
-
+#include <iostream>
 #include "sstream"
+#include <functional>
 
 
 #include "pragma/networkdefinitions.h"
 #include <thread>
+#ifdef _WIN32
+#include <Windows.h>
+#endif
 
 module pragma.shared;
 

@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include <iostream>
+
 #include "pragma/logging.hpp"
 
 #include <exception>
@@ -20,6 +22,8 @@ module pragma.shared;
 import :debug.crashdump;
 import util_zip;
 import pragma.locale;
+
+#undef CreateDirectory
 
 using namespace pragma::debug;
 

@@ -3,12 +3,12 @@
 
 module;
 
+#include "pragma/lua/core.hpp"
+
 #include "pragma/networkdefinitions.h"
 
 
-#include "pragma/lua/types/nil_type.hpp"
 
-#include "pragma/lua/policies/core_policies.hpp"
 
 #include <luabind/copy_policy.hpp>
 

@@ -4,6 +4,7 @@
 module;
 
 #include <unordered_set>
+#include <string>
 
 module pragma.shared;
 

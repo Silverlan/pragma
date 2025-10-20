@@ -4,6 +4,8 @@
 module;
 
 
+#include <tuple>
+
 module pragma.shared;
 
 import :physics.hitbox;

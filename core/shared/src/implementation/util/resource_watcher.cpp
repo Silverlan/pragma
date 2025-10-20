@@ -4,6 +4,9 @@
 module;
 
 
+#include <memory>
+#include <string>
+
 #include "algorithm"
 
 #include "cassert"

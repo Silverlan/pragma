@@ -5,9 +5,12 @@ module;
 
 
 
+#include <memory>
+
 module pragma.shared;
 
 import :game.savegame;
+import pragma.filesystem;
 
 using namespace pragma;
 

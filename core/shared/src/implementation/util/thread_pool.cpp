@@ -4,6 +4,8 @@
 module;
 
 
+#include <memory>
+
 module pragma.shared;
 
 import :util.thread_pool;

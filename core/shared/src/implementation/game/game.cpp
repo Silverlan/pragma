@@ -10,6 +10,8 @@ module;
 
 
 
+#include "pragma/lua/core.hpp"
+
 #include "string_view"
 
 
@@ -389,7 +391,7 @@ pragma::Game::Game(NetworkState *state)
 
 
 
-pragma::Game::~pragma::Game() {}
+pragma::Game::~Game() {}
 
 
 

@@ -5,6 +5,7 @@ module;
 
 #include "memory"
 #include <algorithm>
+#include <string>
 
 module pragma.shared;
 

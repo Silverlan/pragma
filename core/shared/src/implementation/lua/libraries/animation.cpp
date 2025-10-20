@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include "pragma/lua/core.hpp"
+
 #include "string_view"
 
 #include "sstream"
 
-#include "pragma/lua/policies/shared_from_this_policy.hpp"
-#include "pragma/lua/policies/default_parameter_policy.hpp"
 
 
 

@@ -3,6 +3,7 @@
 
 module;
 
+#include "pragma/lua/core.hpp"
 #include <luabind/detail/conversion_policies/native_converter.hpp>
 #include <vector>
 #include <map>
@@ -10,6 +11,8 @@ module;
 #include <unordered_map>
 
 export module pragma.shared:scripting.lua.converters.vector;
+
+export import pragma.lua;
 
 export namespace luabind {
 	template<typename T>

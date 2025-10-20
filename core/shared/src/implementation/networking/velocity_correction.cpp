@@ -3,6 +3,8 @@
 
 module;
 
+#include <string>
+
 module pragma.shared;
 
 import :networking.velocity_correction;

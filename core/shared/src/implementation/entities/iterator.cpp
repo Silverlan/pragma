@@ -4,7 +4,7 @@
 module;
 
 #include "memory"
-
+#include <string>
 #include "cstring"
 
 module pragma.shared;

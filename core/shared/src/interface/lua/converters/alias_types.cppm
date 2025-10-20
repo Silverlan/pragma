@@ -3,7 +3,12 @@
 
 module;
 
+#include <string>
+
 export module pragma.shared:scripting.lua.converters.alias_types;
+
+export import pragma.util;
+export import :scripting.lua.converters.alias;
 
 export namespace luabind {
 	// Vector

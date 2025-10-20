@@ -35,7 +35,6 @@ module;
 #include "pragma/networkdefinitions.h"
 
 
-#include "pragma/lua/lua_error_handling.hpp"
 
 #include <spdlog/pattern_formatter.h>
 
@@ -2219,7 +2218,7 @@ void pragma::Engine::DumpDebugInformation(uzip::ZIPFile &zip) const
 
 			auto *cv = static_cast<ConVar *>(pair.second.get());
 
-			if(umath::is_flag_set(cv->GetFlags(), ConVarFlags::Password))
+			if(umath::is_flag_set(cv->GetFlags(), pragma::console::ConVarFlags::Password))
 
 				continue; // Don't store potentially personal passwords in the crashdump
 
@@ -2389,7 +2388,7 @@ void pragma::Engine::WriteToLog(const std::string &str) { pragma::log(str); }
 
 
 
-pragma::Engine::~pragma::Engine()
+pragma::Engine::~Engine()
 
 {
 

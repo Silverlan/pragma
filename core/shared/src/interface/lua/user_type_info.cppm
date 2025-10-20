@@ -3,9 +3,12 @@
 
 module;
 
+#include "pragma/lua/core.hpp"
 #include <luabind/detail/signature_types.hpp>
 
 export module pragma.shared:scripting.lua.user_type_info;
+
+export import :scripting.lua.core;
 
 export {
 	#define LUA_DEFINE_TEMPLATE_TYPE_IDENTIFIER_C(TYPE, IDENTIFIER, CUSTOM)                                                                                                                                                                                                                          \

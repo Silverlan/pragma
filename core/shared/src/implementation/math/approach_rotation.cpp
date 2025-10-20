@@ -3,7 +3,7 @@
 
 module;
 
-
+#include <string>
 
 module pragma.shared;
 

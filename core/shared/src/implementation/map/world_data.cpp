@@ -5,6 +5,10 @@ module;
 
 
 
+#include <sharedutils/magic_enum.hpp>
+
+#include <iostream>
+
 #include "algorithm"
 
 

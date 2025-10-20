@@ -3,6 +3,8 @@
 
 module;
 
+#include <memory>
+
 #include "algorithm"
 
 
@@ -195,10 +197,10 @@ void BaseActorComponent::Ragdolize()
 	if(!pPhysComponent)
 		return;
 	auto *phys = pPhysComponent->GetPhysicsObject();
-	if(phys != nullptr && pPhysComponent->GetPhysicsType() == PHYSICSTYPE::DYNAMIC)
+	if(phys != nullptr && pPhysComponent->GetPhysicsType() == pragma::physics::PHYSICSTYPE::DYNAMIC)
 		return;
-	pPhysComponent->SetMoveType(MOVETYPE::PHYSICS);
-	phys = pPhysComponent->InitializePhysics(PHYSICSTYPE::DYNAMIC);
+	pPhysComponent->SetMoveType(pragma::physics::MOVETYPE::PHYSICS);
+	phys = pPhysComponent->InitializePhysics(pragma::physics::PHYSICSTYPE::DYNAMIC);
 	if(phys == nullptr)
 		return;
 }
@@ -229,7 +231,7 @@ void BaseActorComponent::Respawn()
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	if(pPhysComponent)
-		pPhysComponent->SetMoveType(MOVETYPE::WALK);
+		pPhysComponent->SetMoveType(pragma::physics::MOVETYPE::WALK);
 	auto pTrComponent = ent.GetTransformComponent();
 	if(pTrComponent)
 		pTrComponent->SetRotation(uquat::identity());

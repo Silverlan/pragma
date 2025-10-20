@@ -1,17 +1,19 @@
-
-#include "sstream"
-
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
+#include "pragma/lua/core.hpp"
+
 #include "algorithm"
 #include <luabind/exception_handler.hpp>
-#include "pragma/lua/lua_error_handling.hpp"
 #include <stack>
+#include <sstream>
+#include <chrono>
 
-// import pragma.scripting.lua;
+module pragma.shared;
 
-import pragma.shared;
+import :scripting.lua.error_handling;
 
 static void print_lua_error_message(lua_State *l, const std::string &msg) { Con::cerr << Lua::GetErrorMessagePrefix(l) << Con::prefix << Con::PREFIX_LUA << Con::prefix << msg << Con::endl; }
 

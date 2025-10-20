@@ -4,6 +4,8 @@
 module;
 
 
+#include <memory>
+
 module pragma.shared;
 
 import :entities.components.point.base_path_node;

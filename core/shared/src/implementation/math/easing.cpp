@@ -3,6 +3,8 @@
 
 module;
 
+#include <cmath>
+
 module pragma.shared;
 
 import :math.easing;

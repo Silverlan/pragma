@@ -47,6 +47,8 @@ module;
 
 
 
+#include "pragma/lua/core.hpp"
+
 #include "noise/noise.h"
 
 

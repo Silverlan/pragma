@@ -3,6 +3,8 @@
 
 module;
 
+#include "pragma/lua/core.hpp"
+
 module pragma.shared;
 
 import :scripting.lua.classes.convar;

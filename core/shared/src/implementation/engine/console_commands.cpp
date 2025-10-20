@@ -4,6 +4,12 @@
 module;
 
 
+#include <thread>
+
+#include <iomanip>
+
+#include <sharedutils/magic_enum.hpp>
+#include <algorithm>
 #include "string_view"
 
 #include "sstream"
@@ -14,6 +20,7 @@ module;
 
 
 #include <unordered_set>
+#include <chrono>
 
 #undef CreateFile
 
@@ -219,7 +226,7 @@ void pragma::Engine::RegisterSharedConsoleCommands(ConVarMap &map)
 
 static void compile_lua_file(lua_State *l, pragma::Game &game, std::string f)
 {
-	StringToLower(f);
+	ustring::to_lower(f);
 	std::string subPath = ufile::get_path_from_filename(f);
 	std::string cur = "";
 	std::string path = cur + f;

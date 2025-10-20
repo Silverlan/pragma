@@ -4,6 +4,8 @@
 module;
 
 
+#include <memory>
+
 module pragma.shared;
 
 import :game.game_mode_manager;

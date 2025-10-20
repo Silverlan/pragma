@@ -8,6 +8,8 @@ module;
 
 export module pragma.shared:scripting.lua.converters.global_string;
 
+export import :util.global_string_table;
+
 export namespace luabind {
 	template<>
 	struct DLLNETWORK default_converter<pragma::GString> : native_converter_base<pragma::GString> {

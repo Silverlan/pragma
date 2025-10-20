@@ -2,8 +2,10 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "cassert"
+#include <algorithm>
 
+#include "cassert"
+#include <string>
 
 #include "pragma/networkdefinitions.h"
 

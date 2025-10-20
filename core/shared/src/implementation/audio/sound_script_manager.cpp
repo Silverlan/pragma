@@ -3,12 +3,14 @@
 
 module;
 
-
-#undef CreateEvent
+#include <string>
+#include <memory>
 
 module pragma.shared;
 
 import :audio.sound_script_manager;
+
+#undef CreateEvent
 
 SoundScript::SoundScript(SoundScriptManager *manager, const std::string &identifier) : SoundScriptEventContainer(manager), m_identifier(identifier) {}
 
@@ -38,7 +40,7 @@ bool SoundScriptManager::Load(const char *fname, std::vector<std::shared_ptr<Sou
 SoundScript *SoundScriptManager::FindScript(const char *name)
 {
 	std::string sname = name;
-	StringToLower(sname);
+	ustring::to_lower(sname);
 	auto it = m_soundScripts.find(sname);
 	if(it != m_soundScripts.end())
 		return it->second.get();
@@ -55,7 +57,7 @@ bool SoundScriptManager::Load(const char *fname, const std::function<std::shared
 	auto udm = data.GetAssetData().GetData();
 	for(auto pair : udm.ElIt()) {
 		std::string name {pair.key};
-		StringToLower(name);
+		ustring::to_lower(name);
 		// Note: std::shared_ptr<TSoundScript>(new TSoundScript{this,it->first}); causes weird compiler errors for CSoundScript (clientside), but this works
 		// auto script = std::static_pointer_cast<TSoundScript>(std::shared_ptr<void>(static_cast<void*>(new TSoundScript{this,it->first}))); // Does not work with gcc
 		auto script = fCreateSoundScript(name);

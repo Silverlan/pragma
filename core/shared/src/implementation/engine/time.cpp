@@ -5,6 +5,7 @@ module;
 
 #include <cassert>
 #ifdef _WIN32
+#include <Windows.h>
 #include <Mmsystem.h>
 #endif
 

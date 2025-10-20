@@ -1,12 +1,13 @@
-
-#include "string_view"
-
-
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "pragma/lua/converters/string_view_converter.hpp"
+module;
+
 #include <luabind/object.hpp>
+
+module pragma.shared;
+
+import :scripting.lua.converters.string_view;
 
 void luabind::default_converter<std::string_view>::to_lua(lua_State *L, std::string_view const &x) { luabind::object {L, std::string {x}}.push(L); }
 

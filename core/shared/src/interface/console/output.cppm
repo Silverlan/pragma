@@ -25,6 +25,8 @@ module;
 #define BACKGROUND_INTENSITY 128
 #endif
 
+#include <memory>
+
 export module pragma.shared:console.output;
 
 export import :console.enums;

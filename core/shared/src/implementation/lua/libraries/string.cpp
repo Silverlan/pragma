@@ -4,6 +4,8 @@
 module;
 
 
+#include "pragma/lua/core.hpp"
+
 module pragma.shared;
 
 import :scripting.lua.libraries.string;

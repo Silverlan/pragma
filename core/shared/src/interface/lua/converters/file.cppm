@@ -9,6 +9,10 @@ module;
 
 export module pragma.shared:scripting.lua.converters.file;
 
+export import :scripting.lua.core;
+export import :scripting.lua.libraries.file;
+export import pragma.filesystem;
+
 export namespace luabind {
 	template<>
 	struct DLLNETWORK default_converter<std::shared_ptr<ufile::IFile>> : default_converter<ufile::IFile *> {
@@ -33,7 +37,7 @@ export {
 	template<class U>
 	int luabind::default_converter<std::shared_ptr<ufile::IFile>, void>::match(lua_State *L, U, int index)
 	{
-		return Lua::IsFile(L, index) ? 0 : no_match;
+		return Lua::IsType<LFile>(L, index) ? 0 : no_match;
 	}
 
 	template<class U>

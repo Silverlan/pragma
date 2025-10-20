@@ -4,11 +4,13 @@
 module;
 
 
+#include <sharedutils/magic_enum.hpp>
+
+#include "pragma/lua/core.hpp"
+
 #include "sstream"
 
-#include "pragma/lua/policies/default_parameter_policy.hpp"
 
-#include "pragma/lua/util.hpp"
 
 #include "memory"
 

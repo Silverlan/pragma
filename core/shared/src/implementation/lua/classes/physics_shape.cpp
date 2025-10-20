@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/lua/policies/shared_from_this_policy.hpp"
 
 
 

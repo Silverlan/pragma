@@ -3,7 +3,11 @@
 
 module;
 
+#include <memory>
 
+#include <tuple>
+#include <cmath>
+#include <string>
 
 module pragma.shared;
 
@@ -80,9 +84,9 @@ std::shared_ptr<ALSound> ALSoundScript::CreateSound(const std::string &name, ALC
 void ALSoundScript::InitializeEvent(SoundScriptEvent *ev)
 {
 	SSEPlaySound *ps = dynamic_cast<SSEPlaySound *>(ev);
-	if(ps != NULL) {
+	if(ps != nullptr) {
 		SSESound *snd = ps->CreateSound(m_tPassed, [this](const std::string &name, ALChannel channel, pragma::audio::ALCreateFlags createFlags) { return CreateSound(name, channel, createFlags); });
-		if(snd != NULL) {
+		if(snd != nullptr) {
 			ALSound *als = snd->sound.get();
 			auto bSetPos = false;
 			if(ps->position != -1) {
@@ -170,7 +174,7 @@ void ALSoundScript::InitializeEvent(SoundScriptEvent *ev)
 	}
 	else {
 		//SSELua *lua = dynamic_cast<SSELua*>(ev); // Currently not implemented
-		//if(lua != NULL)
+		//if(lua != nullptr)
 		//	;
 		//else
 		m_events.push_back(ev->CreateEvent(m_tPassed));

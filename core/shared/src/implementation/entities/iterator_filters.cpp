@@ -3,9 +3,11 @@
 
 module;
 
+#include <memory>
+
 #include "cstring"
-
-
+#include <string>
+#include <array>
 
 
 

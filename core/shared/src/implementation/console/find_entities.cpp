@@ -3,6 +3,10 @@
 
 module;
 
+#include <algorithm>
+
+#include <functional>
+#include <array>
 
 module pragma.shared;
 
@@ -18,7 +22,7 @@ std::vector<pragma::ecs::BaseEntity *> command::find_trace_targets(NetworkState 
 	if(trCallback != nullptr)
 		trCallback(trData);
 	auto r = game->RayCast(trData);
-	if(r.hitType == RayCastHitType::None)
+	if(r.hitType == pragma::physics::RayCastHitType::None)
 		return ents;
 	if(!r.entity.valid() || r.entity->IsWorld())
 		return ents;
